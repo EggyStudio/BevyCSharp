@@ -1,0 +1,17 @@
+<Project>
+
+    <!--
+      Imported into every project that references the BevyCSharp package, before the project's
+      own properties. Only sets defaults the consumer can still override.
+    -->
+
+    <PropertyGroup>
+        <!--
+          The native bridge is loaded by an explicit resolver, so nothing here is required for
+          correctness. This just makes the RID-specific asset land next to the output for a
+          plain `dotnet run`, which is what most people expect.
+        -->
+        <AppendRuntimeIdentifierToOutputPath Condition="'$(AppendRuntimeIdentifierToOutputPath)' == ''">false</AppendRuntimeIdentifierToOutputPath>
+    </PropertyGroup>
+
+</Project>
