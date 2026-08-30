@@ -13,7 +13,7 @@
 #
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NATIVE_DIR="$ROOT/native"
 ARTIFACT_DIR="$NATIVE_DIR/artifacts"
 

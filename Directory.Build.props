@@ -5,7 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <!-- Generated behaviour runners are internal plumbing; they need no XML docs. -->
+        <!-- Generated behavior runners are internal plumbing; they need no XML docs. -->
         <NoWarn>$(NoWarn);CS1591</NoWarn>
     </PropertyGroup>
 
