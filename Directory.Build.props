@@ -10,17 +10,17 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <Authors>CanTalat-Yakan</Authors>
-        <Company>CanTalat-Yakan</Company>
+        <Authors>EggyStudio</Authors>
+        <Company>EggyStudio</Company>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <RepositoryUrl>https://github.com/CanTalat-Yakan/BevyCSharp</RepositoryUrl>
+        <RepositoryUrl>https://github.com/EggyStudio/BevyCSharp</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageProjectUrl>https://github.com/CanTalat-Yakan/BevyCSharp</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/EggyStudio/BevyCSharp</PackageProjectUrl>
         <VersionPrefix>0.1.0</VersionPrefix>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
-    <!-- Where the Rust workspace lives, for the native build and packaging targets. -->
+    <!--  Where the Rust workspace lives, for the native build and packaging targets. -->
     <PropertyGroup>
         <BevyCSharpRoot>$(MSBuildThisFileDirectory)</BevyCSharpRoot>
         <BevyCSharpNativeDir>$(BevyCSharpRoot)native/</BevyCSharpNativeDir>

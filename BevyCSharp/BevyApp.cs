@@ -12,7 +12,6 @@ namespace Bevy;
 /// <code>
 /// // Program.cs
 /// using Bevy;
-///
 /// BevyApp.Run();
 /// </code>
 /// </example>
