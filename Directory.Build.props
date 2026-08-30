@@ -19,6 +19,7 @@
         <VersionPrefix>0.1.0</VersionPrefix>
         <IsPackable>false</IsPackable>
         <PackageIcon>icon.png</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <!--
@@ -35,10 +36,24 @@
         <BevyCSharpArtifactDir>$(BevyCSharpBuildDir)artifacts/</BevyCSharpArtifactDir>
         <BevyCSharpNativeOutDir>$(BevyCSharpBuildDir)target/release/</BevyCSharpNativeOutDir>
         <BevyCSharpIcon>$(BevyCSharpRoot).github/assets/icon.png</BevyCSharpIcon>
+        <BevyCSharpReadme>$(BevyCSharpRoot)README.md</BevyCSharpReadme>
     </PropertyGroup>
 
-    <ItemGroup Condition="Exists('$(BevyCSharpIcon)')">
-        <None Include="$(BevyCSharpIcon)" Pack="true" PackagePath="" Visible="false"/>
+    <!--
+      The icon and readme shown on the package page, taken from where the repository already
+      keeps them rather than duplicated next to the project.
+
+      This has to come after the property group above, because MSBuild evaluates a file top to
+      bottom and the paths would otherwise still be empty. A blank PackagePath means the package
+      root, so each file lands under the bare name that PackageIcon and PackageReadmeFile expect.
+      The Exists guards stop a missing asset from breaking every build in the tree; the pack
+      itself still fails loudly, because NuGet rejects metadata naming a file it cannot find.
+    -->
+    <ItemGroup>
+        <None Include="$(BevyCSharpIcon)" Pack="true" PackagePath="" Visible="false"
+              Condition="Exists('$(BevyCSharpIcon)')"/>
+        <None Include="$(BevyCSharpReadme)" Pack="true" PackagePath="" Visible="false"
+              Condition="Exists('$(BevyCSharpReadme)')"/>
     </ItemGroup>
 
     <!--

@@ -394,6 +394,34 @@ a stale one produces an `EntryPointNotFoundException` far from its cause.
 To ship more than one platform, run `build-native.sh --target <triple>` for each; every staged RID
 slot is picked up at pack time and missing ones are skipped.
 
+### Publishing
+
+An ordinary push is cheap: Linux only, tested, nothing published. Two things change that.
+
+**Changed the readme, the icon or the project metadata.** None of that affects the binaries, so
+pushing to the default branch republishes on its own. It reuses the native binaries from the last
+full build and only repacks around them, which takes a couple of minutes instead of an hour.
+
+**Changed the code.** Put `[publish]` anywhere in a commit message. That builds all six platforms,
+tests on all three operating systems, and publishes:
+
+```bash
+git commit -m "add the thing [publish]"
+```
+
+The marker is a plain substring, so it works alongside any other text and in any commit of the
+push, not only the last one. Either route can also be started by hand from the Actions tab.
+
+Versions are `MAJOR.MINOR.<commit count>`: the first two from `VersionPrefix` in
+`Directory.Build.props`, the last from `git rev-list --count HEAD`. One counter that only grows,
+shared by both routes so they can never disagree, and nothing stored anywhere. To move to
+`0.2.x`, change `VersionPrefix` and push.
+
+Republishing needs artifacts from a full build to still exist, and they expire after two weeks.
+If none survive, the run fails and says to push a `[publish]` commit first. An ordinary push
+uploads artifacts too, but they cover `linux-x64` alone, so the reuse step checks that a
+candidate run really did build every platform before taking anything from it.
+
 ---
 
 ## Status and limitations

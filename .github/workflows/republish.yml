@@ -1,0 +1,130 @@
+name: republish
+
+# Republishes after a change that affects only the packaging: the readme, the icon, the project
+# metadata, or the MSBuild files shipped to consumers.
+#
+# None of that alters the native bridge, and rebuilding six platforms to change a paragraph of
+# prose would cost an hour for nothing. This reuses the binaries from the last full build and
+# repacks around them.
+#
+# Anything touching the Rust sources or the managed library needs a real build instead. Put
+# [publish] in the commit message for that.
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'README.md'
+      - '.github/assets/**'
+      - 'Directory.Build.props'
+      - 'BevyCSharp/BevyCSharp.csproj'
+      - 'BevyCSharp/build/**'
+  workflow_dispatch:
+
+concurrency:
+  group: republish-${{ github.ref }}
+  cancel-in-progress: true
+
+# actions:read is what allows downloading artifacts from a different workflow run.
+permissions:
+  contents: read
+  packages: write
+  actions: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  republish:
+    name: republish
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # The version counts commits, which needs the whole history.
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # An ordinary push builds only linux-x64 and uploads artifacts too, so simply taking the
+      # newest successful run would produce a package missing five of its six platforms. Walk
+      # back until a run is found that really did build them all. An expired artifact still
+      # appears in the listing, hence the filter.
+      - name: Find a complete build to reuse
+        id: source
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          platforms='linux-x64 linux-arm64 win-x64 win-arm64 osx-arm64 osx-x64'
+
+          run_id=""
+          for candidate in $(gh run list --workflow build.yml --branch "$GITHUB_REF_NAME" \
+                               --status success --limit 30 --json databaseId --jq '.[].databaseId'); do
+            names=$(gh api "repos/$REPO/actions/runs/$candidate/artifacts" --paginate \
+                      --jq '.artifacts[] | select(.expired == false) | .name' 2>/dev/null || true)
+            complete=true
+            for rid in $platforms; do
+              grep -qx "native-$rid" <<<"$names" || { complete=false; break; }
+            done
+            if [ "$complete" = true ]; then run_id="$candidate"; break; fi
+            echo "run $candidate is not a full build, skipping"
+          done
+
+          if [ -z "$run_id" ]; then
+            echo "::error::No recent build has all six native artifacts, and they expire after two weeks. Push a commit with [publish] to make a full build first."
+            exit 1
+          fi
+
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+          echo "reusing native binaries from run $run_id"
+
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: native-*
+          path: staging
+          run-id: ${{ steps.source.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+
+      - name: Collect and version
+        id: prepare
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p build/artifacts
+          for dir in staging/native-*; do
+            rid="${dir#staging/native-}"
+            mkdir -p "build/artifacts/$rid"
+            cp "$dir"/* "build/artifacts/$rid/"
+          done
+          find build/artifacts -type f | sort
+
+          # The same scheme build.yml uses, so the two never disagree about a version.
+          base=$(grep -oP '(?<=<VersionPrefix>)[^<]+' Directory.Build.props)
+          version="${base%.*}.$(git rev-list --count HEAD)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "publishing version $version"
+
+      - name: Pack
+        run: >-
+          dotnet pack BevyCSharp/BevyCSharp.csproj -c Release
+          -p:Version=${{ steps.prepare.outputs.version }}
+          -p:BevyCSharpSkipNativeFreshnessCheck=true
+
+      - name: Push to GitHub Packages
+        run: |
+          unzip -l build/package/*.nupkg
+          dotnet nuget push "build/package/*.nupkg" \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --api-key "${{ secrets.GITHUB_TOKEN }}" \
+            --skip-duplicate

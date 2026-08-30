@@ -1,19 +1,17 @@
 name: build
 
-# Continuous integration, and opt-in publishing from the default branch.
+# Continuous integration, and publishing when you ask for it.
 #
 # An ordinary push builds and tests on Linux only. That catches essentially every regression and
 # runs at the cheapest billing rate.
 #
-# Put [publish] in the commit message to get the expensive run instead: all six runtime
-# identifiers, tests on all three operating systems, and a package pushed to GitHub Packages
-# with a version that counts up on its own.
+# Put [publish] in the commit message to get the expensive run instead: all six platforms, tests
+# on all three operating systems, and a package pushed to GitHub Packages.
 #
 #     git commit -m "add the thing [publish]"
 #
 # macOS runners bill at ten times the Linux rate and Windows at twice, so a full run costs
-# roughly ten times an ordinary one. Marking the commits worth that keeps the decision yours
-# rather than the branch's.
+# roughly ten times an ordinary one. Marking the commits worth that keeps the decision yours.
 
 on:
   push:
@@ -29,10 +27,21 @@ on:
         required: false
         default: false
 
+# A quick run is disposable, so a newer push supersedes it. A publishing run has to finish, and
+# its own group is what guarantees that: cancellation is decided by the arriving run, so sharing
+# one group would let an ordinary push kill a publish already halfway through.
 concurrency:
-  group: build-${{ github.ref }}
-  # A cheap run is disposable, so a newer push supersedes it. A publishing run has to finish.
-  cancel-in-progress: ${{ !contains(github.event.head_commit.message, '[publish]') }}
+  group: build-${{ github.ref }}-${{ contains(join(github.event.commits.*.message, ' '), '[publish]') && 'publish' || 'quick' }}
+  cancel-in-progress: ${{ !contains(join(github.event.commits.*.message, ' '), '[publish]') }}
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   gate:
@@ -46,44 +55,46 @@ jobs:
       version: ${{ steps.decide.outputs.version }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          # The version counts commits, which needs the whole history rather than the single
+          # commit a default checkout fetches.
+          fetch-depth: 0
 
       - name: Decide how much to build
         id: decide
         shell: bash
         env:
-          # Only a push carries a commit message. Other events leave this empty and fall through
-          # to the cheap path unless the dispatch input asked otherwise.
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          # Every commit in the push, not just the last. Pushing a marked commit and then a
+          # tidy-up on top is normal, and it would be a nasty surprise if that skipped the
+          # publish. Other event types leave this empty and take the quick path.
+          COMMIT_MESSAGES: ${{ join(github.event.commits.*.message, ' ~~ ') }}
           DISPATCH_FULL: ${{ inputs.full }}
         run: |
           set -euo pipefail
 
+          # A plain substring test, so the marker works anywhere in a message and alongside any
+          # other text, including messages that are only invisible characters.
           full=false
-          case "$COMMIT_MESSAGE" in
+          case "$COMMIT_MESSAGES" in
             *'[publish]'*) full=true ;;
           esac
           [ "$DISPATCH_FULL" = "true" ] && full=true
 
-          # Both branches emit a complete list, so the caller never has to substitute a default.
-          # Compact JSON on one line, because a step output cannot span lines without ceremony.
-          all_targets='[{"os":"ubuntu-latest","rid":"linux-x64","target":"x86_64-unknown-linux-gnu"},{"os":"ubuntu-24.04-arm","rid":"linux-arm64","target":"aarch64-unknown-linux-gnu"},{"os":"windows-latest","rid":"win-x64","target":"x86_64-pc-windows-msvc"},{"os":"windows-11-arm","rid":"win-arm64","target":"aarch64-pc-windows-msvc"},{"os":"macos-latest","rid":"osx-arm64","target":"aarch64-apple-darwin"},{"os":"macos-latest","rid":"osx-x64","target":"x86_64-apple-darwin"}]'
-          one_target='[{"os":"ubuntu-latest","rid":"linux-x64","target":"x86_64-unknown-linux-gnu"}]'
+          all='[{"os":"ubuntu-latest","rid":"linux-x64","target":"x86_64-unknown-linux-gnu"},{"os":"ubuntu-24.04-arm","rid":"linux-arm64","target":"aarch64-unknown-linux-gnu"},{"os":"windows-latest","rid":"win-x64","target":"x86_64-pc-windows-msvc"},{"os":"windows-11-arm","rid":"win-arm64","target":"aarch64-pc-windows-msvc"},{"os":"macos-latest","rid":"osx-arm64","target":"aarch64-apple-darwin"},{"os":"macos-latest","rid":"osx-x64","target":"x86_64-apple-darwin"}]'
+          one='[{"os":"ubuntu-latest","rid":"linux-x64","target":"x86_64-unknown-linux-gnu"}]'
 
           if [ "$full" = "true" ]; then
-            targets="$all_targets"
-            test_os='["ubuntu-latest","windows-latest","macos-latest"]'
+            targets="$all"; test_os='["ubuntu-latest","windows-latest","macos-latest"]'
           else
-            targets="$one_target"
-            test_os='["ubuntu-latest"]'
+            targets="$one"; test_os='["ubuntu-latest"]'
           fi
 
-          # Major and minor come from the repository; the patch is the run number. That keeps
-          # versions strictly increasing with no state to store and no chance of two runs picking
-          # the same number, and it stays ordered across a minor bump because the run number
-          # never restarts. To move to 0.2.x, edit VersionPrefix and push.
+          # Major and minor come from the repository; the patch counts commits. One counter that
+          # only grows, shared with republish.yml, and nothing stored anywhere. To move to 0.2.x,
+          # edit VersionPrefix and push.
           base=$(grep -oP '(?<=<VersionPrefix>)[^<]+' Directory.Build.props)
-          version="${base%.*}.${GITHUB_RUN_NUMBER}"
+          version="${base%.*}.$(git rev-list --count HEAD)"
 
           {
             echo "full=$full"
@@ -92,15 +103,10 @@ jobs:
             echo "version=$version"
           } >> "$GITHUB_OUTPUT"
 
-          if [ "$full" = "true" ]; then
-            echo "### Full run: every platform, publishing $version" >> "$GITHUB_STEP_SUMMARY"
-          else
-            {
-              echo "### Quick run: Linux only, nothing published"
-              echo
-              echo 'Put [publish] in the commit message for all six platforms and a published package.'
-            } >> "$GITHUB_STEP_SUMMARY"
-          fi
+          # Printed quoted, so a run that did not publish can be diagnosed without guessing.
+          echo "commit messages seen: '$COMMIT_MESSAGES'"
+          echo "publish marker found: $full"
+          echo "version: $version"
 
   package:
     name: package
@@ -118,11 +124,26 @@ jobs:
     # would otherwise publish a version for code that was never merged.
     if: >-
       needs.gate.outputs.full == 'true' &&
-      github.event_name != 'pull_request' &&
+      github.event_name == 'push' &&
       (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-    uses: ./.github/workflows/publish.yml
-    with:
-      version: ${{ needs.gate.outputs.version }}
-    permissions:
-      contents: read
-      packages: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v5
+        with:
+          name: nupkg
+          path: package
+
+      # GITHUB_TOKEN covers GitHub Packages, so there is no API key to store. --skip-duplicate
+      # makes a re-run harmless, since a published version cannot be overwritten.
+      - name: Push to GitHub Packages
+        run: |
+          dotnet nuget push "package/*.nupkg" \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --api-key "${{ secrets.GITHUB_TOKEN }}" \
+            --skip-duplicate
