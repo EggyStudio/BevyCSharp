@@ -582,6 +582,83 @@ pub unsafe extern "C" fn bcs_app_run(handle: *mut BcsApp) -> i32 {
         }
         app.running = true;
 
+        #[cfg(feature = "render")]
+        {
+            use bevy::prelude::*;
+            fn dump(
+                world: &World,
+                mut done: Local<u32>,
+                meshes: Query<(Entity, &GlobalTransform), With<bevy::mesh::Mesh3d>>,
+                cams: Query<(Entity, &GlobalTransform), With<bevy::camera::Camera3d>>,
+                lights: Query<(Entity, &GlobalTransform), With<bevy::light::DirectionalLight>>,
+            ) {
+                *done += 1;
+                if *done != 3 { return; }
+                let _ = &world;
+                for (e, g) in &cams {
+                    eprintln!("[dbg] camera {e:?} affine={:?}", g.affine());
+                    eprintln!("[dbg] camera fwd={:?} up={:?} pos={:?}", g.forward(), g.up(), g.translation());
+                }
+                for (e, g) in &lights {
+                    eprintln!("[dbg] light {e:?} fwd={:?} pos={:?}", g.forward(), g.translation());
+                }
+                for (e, g) in &meshes {
+                    let (s, r, t) = g.to_scale_rotation_translation();
+                    eprintln!("[dbg] mesh {e:?} scale={s:?} rot={r:?} pos={t:?}");
+                }
+                for (e, _) in &cams {
+                    let names: Vec<String> = world.inspect_entity(e).unwrap()
+                        .map(|i| i.name().shortname().to_string()).collect();
+                    eprintln!("[dbg] camera components: {names:?}");
+                    eprintln!("[dbg] exposure ev100={:?}",
+                        world.get::<bevy::camera::Exposure>(e).map(|x| x.exposure()));
+                }
+            }
+            app.app.add_systems(bevy::app::Last, dump);
+
+            fn snap(mut c: Commands, mut n: Local<u32>) {
+                *n += 1;
+                if *n != 45 { return; }
+                c.spawn(bevy::render::view::screenshot::Screenshot::primary_window())
+                    .observe(bevy::render::view::screenshot::save_to_disk(
+                        std::env::var("BCS_SHOT").unwrap_or_else(|_| "/tmp/bcs.png".into())));
+            }
+            app.app.add_systems(bevy::app::Update, snap);
+
+            fn native_cube(
+                mut c: Commands,
+                mut meshes: ResMut<Assets<bevy::mesh::Mesh>>,
+                mut mats: ResMut<Assets<bevy::pbr::StandardMaterial>>,
+                ambient: Option<Res<bevy::light::GlobalAmbientLight>>,
+            ) {
+                eprintln!("[dbg] global ambient={:?}", ambient.map(|a| a.brightness));
+                c.spawn((
+                    bevy::mesh::Mesh3d(meshes.add(bevy::math::primitives::Cuboid::new(1.6, 1.6, 1.6))),
+                    bevy::pbr::MeshMaterial3d(mats.add(bevy::color::Color::srgb(0.9, 0.2, 0.2))),
+                    Transform::from_xyz(2.6, 0.0, 0.0),
+                ));
+            }
+            app.app.add_systems(bevy::app::Startup, native_cube);
+
+            fn tm(mut c: Commands, q: Query<Entity, With<bevy::camera::Camera3d>>, mut n: Local<u32>) {
+                *n += 1;
+                if *n != 10 { return; }
+                if let Ok(e) = q.single() {
+                    let mode = std::env::var("BCS_TM").unwrap_or_default();
+                    use bevy::core_pipeline::tonemapping::Tonemapping as T;
+                    let t = match mode.as_str() {
+                        "none" => T::None,
+                        "reinhard" => T::Reinhard,
+                        "aces" => T::AcesFitted,
+                        _ => return,
+                    };
+                    eprintln!("[dbg] forcing tonemapping {t:?}");
+                    c.entity(e).insert(t);
+                }
+            }
+            app.app.add_systems(bevy::app::Update, tm);
+        }
+
         // `App::run` moves the app out of `app.app`, leaving an empty one behind. Everything
         // that needs the real world (the `Cleanup` stage included) has to happen inside the
         // loop, which is why cleanup is a system rather than something done here.

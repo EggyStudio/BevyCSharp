@@ -32,15 +32,17 @@ public partial struct Scene
         ctx.Ecs.AddNative(camera, NativeComponents.Transform,
             Transform.LookingAt(new Vec3(3.5f, 3f, 6f), Vec3.Zero, Vec3.UnitY));
 
-        var sun = Render.SpawnLight(LightKind.Directional, 12_000f);
+        var sun = Render.SpawnLight(LightKind.Directional, 500f);
         ctx.Ecs.AddNative(sun, NativeComponents.Transform,
             Transform.LookingAt(new Vec3(4f, 8f, 5f), Vec3.Zero, Vec3.UnitY));
 
+        if (Environment.GetEnvironmentVariable("BCS_NOGROUND") is null) {
         var ground = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, ground, Render.CreateMesh(MeshShape.Plane, 24f, 24f));
         Render.SetMaterial(ctx.Ecs, ground,
-            Render.CreateMaterial(0.10f, 0.11f, 0.13f, roughness: 0.9f));
+            Render.CreateMaterial(0.8f, 0.1f, 0.1f, roughness: 0.9f));
         ctx.Ecs.AddNative(ground, NativeComponents.Transform, Transform.At(0f, -1.2f, 0f));
+        }
 
         var cube = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, cube, Render.CreateMesh(MeshShape.Cuboid, 1.6f, 1.6f, 1.6f));
