@@ -20,16 +20,23 @@ jobs:
   native:
     name: native (${{ matrix.rid }})
     runs-on: ${{ matrix.os }}
+    # A cold render build compiles the whole of Bevy, wgpu and winit, which is roughly a quarter
+    # of an hour. The cap is here so a label no runner answers fails in minutes instead of
+    # queueing for the six-hour default.
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { os: ubuntu-latest,  rid: linux-x64,   target: x86_64-unknown-linux-gnu }
+          - { os: ubuntu-latest,    rid: linux-x64,   target: x86_64-unknown-linux-gnu }
           - { os: ubuntu-24.04-arm, rid: linux-arm64, target: aarch64-unknown-linux-gnu }
-          - { os: windows-latest, rid: win-x64,     target: x86_64-pc-windows-msvc }
-          - { os: windows-11-arm, rid: win-arm64,   target: aarch64-pc-windows-msvc }
-          - { os: macos-13,       rid: osx-x64,     target: x86_64-apple-darwin }
-          - { os: macos-latest,   rid: osx-arm64,   target: aarch64-apple-darwin }
+          - { os: windows-latest,   rid: win-x64,     target: x86_64-pc-windows-msvc }
+          - { os: windows-11-arm,   rid: win-arm64,   target: aarch64-pc-windows-msvc }
+          # Both macOS slices are built on the same Apple Silicon runner. Apple's toolchain is
+          # multi-arch, so an x86_64 binary cross-compiles cleanly from arm64, and there is no
+          # Intel runner image left to target natively anyway.
+          - { os: macos-latest,     rid: osx-arm64,   target: aarch64-apple-darwin }
+          - { os: macos-latest,     rid: osx-x64,     target: x86_64-apple-darwin }
 
     steps:
       - uses: actions/checkout@v4
@@ -63,6 +70,7 @@ jobs:
   test:
     name: test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -93,6 +101,7 @@ jobs:
   pack:
     name: pack
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [native, test]
 
     steps:
