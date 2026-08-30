@@ -1,5 +1,5 @@
-using Bevy;
 using BevyCSharp.Sample.Behaviors;
+using Bevy;
 
 // Flip this to open a real window with Bevy's renderer running behind it.
 //
