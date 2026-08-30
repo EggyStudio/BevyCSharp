@@ -50,10 +50,25 @@ render = [
     "bevy/zstd_rust",
     "bevy/tonemapping_luts",
     "bevy/reflect_auto_register",
+    # Windowing backends. Both are harmless off-platform: winit gates its X11 and Wayland
+    # dependencies to Linux and the BSDs, so on Windows and macOS these resolve to nothing and
+    # the native window system is used instead.
     "bevy/x11",
+    "bevy/wayland",
+    "winit/wayland-dlopen",
 ]
 
 [dependencies]
 bevy = { version = "0.19.1", default-features = false }
 # Same version Bevy itself pins; needed to build a `TableRow` for raw column access.
 nonmax = { version = "0.5", default-features = false }
+
+# Linux and the BSDs only.
+#
+# Bevy's `wayland` feature switches on winit's Wayland backend, which by default links
+# libwayland at build time and so needs the Wayland development headers present. Naming winit
+# directly lets us add `wayland-dlopen`, which loads the library at runtime instead. The
+# practical effect is that the bridge builds on any machine with just a C compiler, and the one
+# binary still works on both X11 and Wayland sessions.
+[target.'cfg(all(unix, not(any(target_os = "macos", target_os = "ios", target_os = "android"))))'.dependencies]
+winit = { version = "0.30", default-features = false, optional = true }

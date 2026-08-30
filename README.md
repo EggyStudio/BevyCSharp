@@ -318,7 +318,8 @@ BevyCSharp.Generator/  Roslyn source generator
 BevyCSharp.Sample/     runnable example behaviors
 BevyCSharp.Tests/      test suite, run against a real Bevy app
 native/                Rust sources for the bridge
-build/                 build-native.sh, and everything it generates
+build/                 the native build scripts, and everything they generate
+.github/workflows/     CI: builds every runtime identifier, then packs them together
 ```
 
 ### Native profiles
@@ -331,17 +332,52 @@ The bridge builds in two profiles:
 | `render`   | Bevy's `DefaultPlugins`: windowing, renderer, input backend.      |
 
 ```bash
-build/build-native.sh --render
+build/build-native.sh --render          # bash
+build/build-native.ps1 -Render          # PowerShell, same output
 ```
 
 The `render` profile is assembled feature by feature rather than taking Bevy's
-`default_platform`, which drags in gamepad support and Wayland. Both of those need C
-development packages present at build time. As built here it needs nothing but a C compiler:
-X11 arrives through `x11-dl`, which dlopens at runtime. It does take several minutes to compile
-and produces a much larger library.
+`default_platform`, which drags in gamepad support and links Wayland at build time. As
+assembled here it needs nothing but a C compiler on any platform: X11 comes through `x11-dl`,
+Wayland through `wayland-dlopen`, and Vulkan through the loader, all resolved at runtime. It
+does take several minutes to compile and produces a much larger library.
 
 `Config.Headless` forces the windowless path even on a render build, which is how the tests and
 a dedicated server run the same behavior code without a display.
+
+### Platforms
+
+The managed assembly is portable. The bridge is a cdylib, so it has to be compiled once per
+runtime identifier, and a package can only contain the platforms someone actually built.
+
+| Runtime identifier                   | Windowing      | Graphics          |
+|--------------------------------------|----------------|-------------------|
+| `linux-x64`, `linux-arm64`           | X11 or Wayland | Vulkan            |
+| `linux-musl-x64`, `linux-musl-arm64` | X11 or Wayland | Vulkan            |
+| `win-x64`, `win-arm64`               | Win32          | Vulkan or DX12    |
+| `osx-x64`, `osx-arm64`               | Cocoa          | Metal             |
+
+Each is built by the same command, on a machine that can target it:
+
+```bash
+build/build-native.sh --render --target aarch64-apple-darwin
+```
+
+`.github/workflows/build.yml` does this across a runner matrix and packs every RID into one
+package. Locally you get whichever platform you built; `dotnet pack` skips the slots you have
+no binary for rather than failing.
+
+Two platform notes worth knowing:
+
+- **macOS requires the window event loop to own the main thread.** `App.Run` checks this and
+  throws a clear error rather than letting it crash inside AppKit, so calling it from a task or
+  a background thread fails in a way that names the problem.
+- **The one Linux binary serves both X11 and Wayland.** Which is used is decided at runtime, so
+  there is no separate build for each.
+
+Beyond the desktop, Bevy also targets Android, iOS and the web. Those need a different .NET
+story entirely (a different app model and, for the web, a different runtime), so they are out of
+scope here rather than merely unbuilt.
 
 ### Packing
 
@@ -363,8 +399,8 @@ slot is picked up at pack time and missing ones are skipped.
 Early. The behavior system, the ECS bridge and the schedule work and are covered by tests that
 run against a real Bevy app. Known gaps:
 
-- Only the `linux-x64` native bridge is built here. Other RIDs need a run of `build-native.sh` on
-  (or cross-compiled for) that platform.
+- A locally built package contains only the platform you built it on. Use the CI workflow, or
+  run `build-native.sh` on each target platform, to produce a package covering all of them.
 - A `render` build opens a real window and initialises the GPU (verified on Vulkan), but Bevy's
   rendering, asset and UI components are not yet surfaced to C#, so nothing can be drawn from a
   behavior script.

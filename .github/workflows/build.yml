@@ -1,0 +1,132 @@
+name: build
+
+# The managed half of BevyCSharp is portable, but the native bridge is not: it is a cdylib that
+# has to be compiled once per runtime identifier. A package built on one machine can therefore
+# only ever contain that machine's platform. This workflow builds each RID on a runner that can
+# actually target it, then packs all of them into a single NuGet package.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  CARGO_TERM_COLOR: always
+
+jobs:
+  native:
+    name: native (${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,  rid: linux-x64,   target: x86_64-unknown-linux-gnu }
+          - { os: ubuntu-24.04-arm, rid: linux-arm64, target: aarch64-unknown-linux-gnu }
+          - { os: windows-latest, rid: win-x64,     target: x86_64-pc-windows-msvc }
+          - { os: windows-11-arm, rid: win-arm64,   target: aarch64-pc-windows-msvc }
+          - { os: macos-13,       rid: osx-x64,     target: x86_64-apple-darwin }
+          - { os: macos-latest,   rid: osx-arm64,   target: aarch64-apple-darwin }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      # Cargo's own cache. The render profile compiles the whole of Bevy, wgpu and winit, so a
+      # cold build is minutes rather than seconds.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native
+          key: ${{ matrix.target }}
+
+      # The bridge itself needs no development packages: winit reaches X11 and Wayland through
+      # dlopen, and wgpu loads Vulkan the same way. ALSA and udev are only pulled in by Bevy
+      # features this build deliberately leaves out.
+      - name: Build native bridge
+        shell: bash
+        run: build/build-native.sh --render --target ${{ matrix.target }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.rid }}
+          path: build/artifacts/${{ matrix.rid }}/*
+          if-no-files-found: error
+          retention-days: 7
+
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native
+          key: test-${{ matrix.os }}
+
+      # The suite runs headless everywhere, so the smaller profile is enough and much faster.
+      - name: Build native bridge
+        shell: bash
+        run: build/build-native.sh
+
+      - name: Test
+        run: dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj -c Release
+
+  pack:
+    name: pack
+    runs-on: ubuntu-latest
+    needs: [native, test]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # Every RID's bridge, laid back out the way the csproj expects to find it.
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: native-*
+          path: staging
+
+      - name: Collect native artifacts
+        shell: bash
+        run: |
+          mkdir -p build/artifacts
+          for dir in staging/native-*; do
+            rid="${dir#staging/native-}"
+            mkdir -p "build/artifacts/$rid"
+            cp "$dir"/* "build/artifacts/$rid/"
+          done
+          find build/artifacts -type f | sort
+
+      # The staleness guard in the csproj compares timestamps against the Rust sources, and a
+      # fresh checkout writes those after the downloaded artifacts. The binaries came from this
+      # very commit, so the check has nothing useful to say here.
+      - name: Pack
+        run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:BevyCSharpSkipNativeFreshnessCheck=true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nupkg
+          path: build/package/*.nupkg
+          if-no-files-found: error

@@ -42,6 +42,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_has_render();
 
+    /// <summary>Reports whether the caller is on the process main thread.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_is_main_thread();
+
     // -- App lifecycle
 
     /// <summary>Creates the Bevy app. Returns <see cref="IntPtr.Zero"/> on failure.</summary>

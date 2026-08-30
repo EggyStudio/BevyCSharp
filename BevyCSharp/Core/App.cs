@@ -250,6 +250,16 @@ public sealed unsafe class App : IDisposable
         if (IsRunning)
             throw new InvalidOperationException("This app has already been run.");
 
+        // macOS insists the window event loop owns the main thread, and breaking that rule
+        // crashes inside AppKit rather than anywhere that points back here. The bridge answers
+        // yes on every other platform, so this costs one call and only ever fires where it
+        // genuinely matters.
+        if (Native.bcs_is_main_thread() == 0)
+            throw new InvalidOperationException(
+                "App.Run must be called from the process main thread. macOS requires the window "
+                + "event loop to own the main thread, so starting the engine from a task or a "
+                + "background thread will crash inside the platform layer.");
+
         IsRunning = true;
         ComponentRegistry.EnterRunning();
         try

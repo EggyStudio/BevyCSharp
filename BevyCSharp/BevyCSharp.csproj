@@ -60,18 +60,24 @@
         <None Include="$(BevyCSharpArtifactDir)linux-arm64/libbevy_csharp.so"
               Pack="true" PackagePath="runtimes/linux-arm64/native/" Visible="false"
               Condition="Exists('$(BevyCSharpArtifactDir)linux-arm64/libbevy_csharp.so')"/>
+        <None Include="$(BevyCSharpArtifactDir)linux-musl-x64/libbevy_csharp.so"
+              Pack="true" PackagePath="runtimes/linux-musl-x64/native/" Visible="false"
+              Condition="Exists('$(BevyCSharpArtifactDir)linux-musl-x64/libbevy_csharp.so')"/>
+        <None Include="$(BevyCSharpArtifactDir)linux-musl-arm64/libbevy_csharp.so"
+              Pack="true" PackagePath="runtimes/linux-musl-arm64/native/" Visible="false"
+              Condition="Exists('$(BevyCSharpArtifactDir)linux-musl-arm64/libbevy_csharp.so')"/>
         <None Include="$(BevyCSharpArtifactDir)win-x64/bevy_csharp.dll"
               Pack="true" PackagePath="runtimes/win-x64/native/" Visible="false"
               Condition="Exists('$(BevyCSharpArtifactDir)win-x64/bevy_csharp.dll')"/>
         <None Include="$(BevyCSharpArtifactDir)win-arm64/bevy_csharp.dll"
               Pack="true" PackagePath="runtimes/win-arm64/native/" Visible="false"
               Condition="Exists('$(BevyCSharpArtifactDir)win-arm64/bevy_csharp.dll')"/>
-        <None Include="$(BevyCSharpArtifactDir)osx-arm64/libbevy_csharp.dylib"
-              Pack="true" PackagePath="runtimes/osx-arm64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)osx-arm64/libbevy_csharp.dylib')"/>
         <None Include="$(BevyCSharpArtifactDir)osx-x64/libbevy_csharp.dylib"
               Pack="true" PackagePath="runtimes/osx-x64/native/" Visible="false"
               Condition="Exists('$(BevyCSharpArtifactDir)osx-x64/libbevy_csharp.dylib')"/>
+        <None Include="$(BevyCSharpArtifactDir)osx-arm64/libbevy_csharp.dylib"
+              Pack="true" PackagePath="runtimes/osx-arm64/native/" Visible="false"
+              Condition="Exists('$(BevyCSharpArtifactDir)osx-arm64/libbevy_csharp.dylib')"/>
     </ItemGroup>
 
     <!--
@@ -98,6 +104,9 @@
 
       Inputs/Outputs give this for free. MSBuild skips a target whose outputs are all newer
       than its inputs, so the body below runs only when the staged bridge is actually stale.
+
+      Set BevyCSharpSkipNativeFreshnessCheck=true where timestamps carry no meaning, such as CI
+      collecting binaries that were built from this very commit on other machines.
     -->
     <ItemGroup>
         <BevyCSharpRustSource Include="$(BevyCSharpNativeDir)bevy_csharp/src/**/*.rs"/>
@@ -109,6 +118,7 @@
 
     <Target Name="BevyCSharpVerifyNativeIsCurrent"
             BeforeTargets="GenerateNuspec"
+            Condition="'$(BevyCSharpSkipNativeFreshnessCheck)' != 'true'"
             Inputs="@(BevyCSharpRustSource)"
             Outputs="@(BevyCSharpStagedNative)">
 

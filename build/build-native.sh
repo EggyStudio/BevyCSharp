@@ -66,12 +66,15 @@ fi
 # NuGet runtimes/ layout keys off.
 rid_for_target() {
     case "$1" in
-        x86_64-unknown-linux-gnu)  echo "linux-x64   libbevy_csharp.so" ;;
-        aarch64-unknown-linux-gnu) echo "linux-arm64 libbevy_csharp.so" ;;
-        x86_64-pc-windows-msvc)    echo "win-x64     bevy_csharp.dll" ;;
-        aarch64-pc-windows-msvc)   echo "win-arm64   bevy_csharp.dll" ;;
-        x86_64-apple-darwin)       echo "osx-x64     libbevy_csharp.dylib" ;;
-        aarch64-apple-darwin)      echo "osx-arm64   libbevy_csharp.dylib" ;;
+        x86_64-unknown-linux-gnu)   echo "linux-x64        libbevy_csharp.so" ;;
+        aarch64-unknown-linux-gnu)  echo "linux-arm64      libbevy_csharp.so" ;;
+        x86_64-unknown-linux-musl)  echo "linux-musl-x64   libbevy_csharp.so" ;;
+        aarch64-unknown-linux-musl) echo "linux-musl-arm64 libbevy_csharp.so" ;;
+        x86_64-pc-windows-msvc)     echo "win-x64          bevy_csharp.dll" ;;
+        aarch64-pc-windows-msvc)    echo "win-arm64        bevy_csharp.dll" ;;
+        x86_64-pc-windows-gnu)      echo "win-x64          bevy_csharp.dll" ;;
+        x86_64-apple-darwin)        echo "osx-x64          libbevy_csharp.dylib" ;;
+        aarch64-apple-darwin)       echo "osx-arm64        libbevy_csharp.dylib" ;;
         *) echo "" ;;
     esac
 }
