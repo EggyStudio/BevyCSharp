@@ -97,9 +97,10 @@ public sealed class ScaleTests
     }
 
     [Fact]
-    public void LargeIterationsAreActuallySplitAcrossThreads()
+    public void LargeIterationsTakeTheParallelPath()
     {
         ParticleProbe.Threads.Clear();
+        Interlocked.Exchange(ref BehaviorRunners.ParallelChunkCount, 0);
 
         using var harness = new EngineHarness(frames: 3, discoverBehaviors: true);
 
@@ -111,12 +112,14 @@ public sealed class ScaleTests
 
         harness.Run();
 
-        // On a single-core machine the pool may legitimately use one thread, so this asserts
-        // the weaker fact that the parallel path ran at all rather than a specific thread count.
+        // An iteration this size must be handed to the thread pool rather than looped inline.
+        // How many threads the pool then uses is its decision: with few cores and a body this
+        // cheap it may finish every partition on the calling thread, which is correct and not
+        // something to assert on.
+        Assert.True(
+            Interlocked.Read(ref BehaviorRunners.ParallelChunkCount) > 0,
+            $"{ParticleCount} entities should have been parallelised, but the sequential path ran");
         Assert.NotEmpty(ParticleProbe.Threads);
-        if (Environment.ProcessorCount > 2)
-            Assert.True(ParticleProbe.Threads.Count > 1,
-                $"expected the work to be split, saw {ParticleProbe.Threads.Count} thread(s)");
     }
 
     [Fact]

@@ -32,18 +32,23 @@ public sealed class EngineHarness : IDisposable
     public World World => _app.World;
 
     /// <summary>Builds a headless engine that will run <paramref name="frames"/> ticks.</summary>
-    /// <param name="frames">Number of frames to run.</param>
+    /// <param name="frames">Number of frames to run, or 0 to run until a system asks to exit.</param>
     /// <param name="discoverBehaviors">
     /// Whether to run the generated behavior registration. Off by default so a test that adds
     /// its own systems is not perturbed by every <c>[Behavior]</c> struct in the test assembly.
     /// </param>
-    public EngineHarness(uint frames = 4, bool discoverBehaviors = false)
+    /// <param name="fps">
+    /// Frames per second, or 0 to run them back to back. A test waiting on work the engine does
+    /// off the main thread should pace itself, because an unpaced loop competes with that work
+    /// for the core it needs.
+    /// </param>
+    public EngineHarness(uint frames = 4, bool discoverBehaviors = false, uint fps = 0)
     {
         _app = new App(new Config
         {
             Headless = true,
             HeadlessFrames = frames,
-            HeadlessFps = 0,
+            HeadlessFps = fps,
         });
 
         _app.AddPlugin(new EnginePlugin());

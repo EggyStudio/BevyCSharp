@@ -40,6 +40,17 @@ public static class BehaviorRunners
     public const int DefaultParallelThreshold = 4096;
 
     /// <summary>
+    /// Counts how many chunks have been handed to the parallel path.
+    /// </summary>
+    /// <remarks>
+    /// Whether the thread pool then runs those partitions on one thread or many is its own
+    /// decision, and on a machine with few cores and a cheap body it may legitimately use one.
+    /// That makes an observed thread count useless for asserting that a large iteration was
+    /// parallelised, so the choice itself is recorded here instead.
+    /// </remarks>
+    internal static long ParallelChunkCount;
+
+    /// <summary>
     /// Runs <paramref name="body"/> for every entity carrying <typeparamref name="T"/>.
     /// </summary>
     /// <typeparam name="T">The behavior struct.</typeparam>
@@ -136,6 +147,8 @@ public static class BehaviorRunners
         Interop.NativeChunk chunk,
         BehaviorRunner<T> body) where T : unmanaged
     {
+        Interlocked.Increment(ref ParallelChunkCount);
+
         var data = chunk.DataPointer;
         var entityData = chunk.EntityPointer;
         var length = chunk.Length;

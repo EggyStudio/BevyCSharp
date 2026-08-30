@@ -37,21 +37,30 @@ public sealed class AssetTests
     {
         // Nothing here loads a real asset, so this is the state transition that can be observed
         // without shipping a fixture: queued, attempted, given up on.
-        using var harness = new EngineHarness(frames: 30);
+        //
+        // The attempt happens on an IO thread while the app spins frames as fast as it can, so
+        // how many frames pass before the failure lands is a property of the machine. A fixed
+        // budget is therefore a race, and one a slower runner loses. Run until the state settles
+        // and stop on a wall clock instead, so a genuine hang still fails the test.
+        using var harness = new EngineHarness(frames: 0, fps: 1000);
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(30);
         var handle = AssetHandle.None;
+        var lastSeen = AssetLoadState.Unknown;
         var reachedFailed = false;
 
         harness.OnContext(Stage.Startup, _ =>
             handle = AssetServer.Load(AssetKind.Image, "textures/does-not-exist.png"));
 
-        harness.OnContext(Stage.Last, _ =>
+        harness.OnContext(Stage.Last, ctx =>
         {
-            if (handle.State == AssetLoadState.Failed) reachedFailed = true;
+            lastSeen = handle.State;
+            if (lastSeen == AssetLoadState.Failed) reachedFailed = true;
+            if (reachedFailed || DateTime.UtcNow > deadline) ctx.Exit();
         });
 
         harness.Run();
 
-        Assert.True(reachedFailed, $"expected the load to fail, ended at {handle.State}");
+        Assert.True(reachedFailed, $"expected the load to fail, gave up at {lastSeen}");
     }
 
     [Fact]
