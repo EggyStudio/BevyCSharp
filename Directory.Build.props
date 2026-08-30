@@ -12,7 +12,13 @@
     <PropertyGroup>
         <Authors>EggyStudio</Authors>
         <Company>EggyStudio</Company>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <!--
+          The expression is what NuGet clients read and render as a link, and what licence
+          scanners understand, so it stays. The LICENSE file is shipped alongside it by the
+          ItemGroup below, as a plain file rather than as PackageLicenseFile: NuGet rejects a
+          package that declares both, and the expression is the more useful of the two.
+        -->
+        <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/EggyStudio/BevyCSharp</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageProjectUrl>https://github.com/EggyStudio/BevyCSharp</PackageProjectUrl>
@@ -37,11 +43,12 @@
         <BevyCSharpNativeOutDir>$(BevyCSharpBuildDir)target/release/</BevyCSharpNativeOutDir>
         <BevyCSharpIcon>$(BevyCSharpRoot).github/assets/icon.png</BevyCSharpIcon>
         <BevyCSharpReadme>$(BevyCSharpRoot)README.md</BevyCSharpReadme>
+        <BevyCSharpLicense>$(BevyCSharpRoot)LICENSE</BevyCSharpLicense>
     </PropertyGroup>
 
     <!--
-      The icon and readme shown on the package page, taken from where the repository already
-      keeps them rather than duplicated next to the project.
+      The icon, readme and licence carried in the package, taken from where the repository
+      already keeps them rather than duplicated next to the project.
 
       This has to come after the property group above, because MSBuild evaluates a file top to
       bottom and the paths would otherwise still be empty. A blank PackagePath means the package
@@ -54,6 +61,8 @@
               Condition="Exists('$(BevyCSharpIcon)')"/>
         <None Include="$(BevyCSharpReadme)" Pack="true" PackagePath="" Visible="false"
               Condition="Exists('$(BevyCSharpReadme)')"/>
+        <None Include="$(BevyCSharpLicense)" Pack="true" PackagePath="" Visible="false"
+              Condition="Exists('$(BevyCSharpLicense)')"/>
     </ItemGroup>
 
     <!--

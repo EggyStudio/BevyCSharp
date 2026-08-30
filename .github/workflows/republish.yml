@@ -15,6 +15,7 @@ on:
     branches: [main, master]
     paths:
       - 'README.md'
+      - 'LICENSE'
       - '.github/assets/**'
       - 'Directory.Build.props'
       - 'BevyCSharp/BevyCSharp.csproj'
