@@ -2,6 +2,11 @@
 
 Write [Bevy](https://bevy.org) games in C#.
 
+![A lit cube turning above a ground plane, drawn by Bevy's renderer](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/screenshot.png)
+
+<sup>`BevyCSharp.Sample`, running on Bevy's PBR renderer through the bridge:
+`dotnet run --project BevyCSharp.Sample`</sup>
+
 Mark a struct `[Behavior]`, give it methods with stage attributes, and a Roslyn source generator
 wires it into Bevy's schedule, as a component and a system at the same time. Bevy is the engine
 underneath: its ECS, its scheduler, its timing, its input, and its renderer.
@@ -328,7 +333,7 @@ dotnet run --project BevyCSharp.Sample -- --headless --frames 120
 
 The sample opens a window by default and draws a lit cube turning in place. Escape closes it.
 
-Both modes run the identical behavior scripts. Nothing branches on whether a renderer exists -
+Both modes run the identical behavior scripts. Nothing branches on whether a renderer exists;
 the engine decides that, from `Config`.
 
 `Config.Backend` pins the graphics API. `Automatic` already prefers Vulkan on Linux and Windows,
@@ -343,12 +348,8 @@ silently. `App.DescribeAdapter()` reports what you actually got, which is how yo
 Ask for a backend the machine has no driver for and startup fails with a message saying so,
 rather than quietly picking something else.
 
-**What you will not see yet:** geometry. Bevy's own render components (`Camera`, `Mesh3d`,
-`MeshMaterial3d`, …) are not bridged to C# (only components C# declares are), so managed code
-cannot spawn anything drawable. `App.SpawnRenderCamera()` is a stopgap that puts a 2D camera in
-the world so the window shows a cleared frame instead of undefined contents. The window opens,
-the renderer initialises on the GPU, input flows, and the behaviors tick; the drawing half is
-still to come.
+Cameras, lights, meshes and materials are reachable from C# through `Render`, which is what
+draws the scene in the screenshot above. See [Drawing](#drawing) for the calls.
 
 ---
 
