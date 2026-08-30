@@ -1,0 +1,120 @@
+name: release
+
+# Publishes a tagged version to GitHub Packages.
+#
+#     git tag v0.2.0
+#     git push origin v0.2.0
+#
+# The tag drives the package version, so nothing has to be edited in the repository to cut a
+# release, and the binaries are built from exactly the tagged commit rather than reused from an
+# older run.
+#
+# This lives apart from build.yml because tag pushes and path filters interact badly: a tag on a
+# documentation-only commit can be filtered out and the release would silently never happen.
+# Keeping the triggers separate removes that trap entirely.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish, without the leading v (for example 0.2.0).'
+        type: string
+        required: true
+
+# A release must never be half-published, so runs are queued rather than cancelled.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: version
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      value: ${{ steps.pick.outputs.value }}
+
+    steps:
+      - name: Resolve the version
+        id: pick
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            version="${{ inputs.version }}"
+          else
+            # refs/tags/v0.2.0 arrives as v0.2.0; NuGet wants it without the v.
+            version="${GITHUB_REF_NAME#v}"
+          fi
+
+          # Fail here rather than after an hour of building, with a package NuGet would reject.
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::'$version' is not a valid NuGet version. Tag as v1.2.3 or v1.2.3-beta.1."
+            exit 1
+          fi
+
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+          echo "publishing version $version"
+
+  package:
+    name: package
+    needs: version
+    uses: ./.github/workflows/package.yml
+    with:
+      version: ${{ needs.version.outputs.value }}
+
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [version, package]
+
+    # GITHUB_TOKEN covers GitHub Packages, so there is no API key to store anywhere.
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: nupkg
+          path: package
+
+      - name: Publish to GitHub Packages
+        shell: bash
+        env:
+          # The feed is per account, and GitHub matches the package to this repository through
+          # the RepositoryUrl that Directory.Build.props stamps into it. If that URL stops
+          # pointing at this repository, the push is rejected.
+          FEED: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        run: |
+          ls -la package
+
+          # --skip-duplicate makes a re-run harmless. GitHub Packages does not allow overwriting
+          # a published version, so without it, retrying a partly failed release would fail.
+          dotnet nuget push "package/*.nupkg" \
+            --source "$FEED" \
+            --api-key "${{ secrets.GITHUB_TOKEN }}" \
+            --skip-duplicate
+
+      - name: Summarise
+        shell: bash
+        run: |
+          {
+            echo "### Published \`BevyCSharp\` ${{ needs.version.outputs.value }}"
+            echo
+            echo "Add the feed once, then reference the package as usual:"
+            echo
+            echo '```bash'
+            echo "dotnet nuget add source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json \\"
+            echo "  --name github --username YOUR_GITHUB_USERNAME --password YOUR_PAT --store-password-in-clear-text"
+            echo "dotnet add package BevyCSharp --version ${{ needs.version.outputs.value }}"
+            echo '```'
+            echo
+            echo "The personal access token needs the \`read:packages\` scope."
+          } >> "$GITHUB_STEP_SUMMARY"
