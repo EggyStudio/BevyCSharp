@@ -147,6 +147,35 @@ public sealed class RenderTests
     }
 
     [Fact]
+    public void CombiningRotationsStaysAUnitQuaternion()
+    {
+        // What the sample's cube does: a turn about each of two axes, composed. Pure arithmetic,
+        // so it holds on any build.
+        var yaw = Quat.FromRotationY(0.9f);
+        var pitch = Quat.FromRotationX(0.35f);
+        var combined = yaw * pitch;
+
+        var length = MathF.Sqrt(
+            combined.X * combined.X + combined.Y * combined.Y +
+            combined.Z * combined.Z + combined.W * combined.W);
+        Assert.Equal(1f, length, 4);
+
+        // The identity leaves a rotation alone from either side.
+        var leftIdentity = Quat.Identity * yaw;
+        var rightIdentity = yaw * Quat.Identity;
+        Assert.Equal(yaw, leftIdentity);
+        Assert.Equal(yaw, rightIdentity);
+
+        // Two half turns about one axis make a full turn, which is the identity up to sign.
+        var half = Quat.FromRotationY(MathF.PI);
+        var full = half * half;
+        Assert.Equal(0f, full.X, 4);
+        Assert.Equal(0f, full.Y, 4);
+        Assert.Equal(0f, full.Z, 4);
+        Assert.Equal(1f, MathF.Abs(full.W), 4);
+    }
+
+    [Fact]
     public void LookingAtProducesAUnitRotationAimedAtTheTarget()
     {
         // Pure arithmetic, so it holds on any build. Forward is negative Z in Bevy, so a

@@ -26,6 +26,7 @@ msbuild.log
 # happened to carry one of those names - and `artifacts/` in particular is the
 # .NET SDK's own output convention.
 /build/target/
+/build/target-portable/
 /build/artifacts/
 /build/package/
 

@@ -136,6 +136,15 @@ public struct Quat : IEquatable<Quat>
     /// <summary>A rotation about the Z axis.</summary>
     public static Quat FromRotationZ(float radians) => FromAxisAngle(Vec3.UnitZ, radians);
 
+    /// <summary>
+    /// Combines two rotations, applying <paramref name="b"/> first and then <paramref name="a"/>.
+    /// </summary>
+    public static Quat operator *(Quat a, Quat b) => new(
+        a.W * b.X + a.X * b.W + a.Y * b.Z - a.Z * b.Y,
+        a.W * b.Y - a.X * b.Z + a.Y * b.W + a.Z * b.X,
+        a.W * b.Z + a.X * b.Y - a.Y * b.X + a.Z * b.W,
+        a.W * b.W - a.X * b.X - a.Y * b.Y - a.Z * b.Z);
+
     /// <inheritdoc/>
     public readonly bool Equals(Quat other) =>
         X == other.X && Y == other.Y && Z == other.Z && W == other.W;

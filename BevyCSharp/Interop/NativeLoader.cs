@@ -15,6 +15,17 @@ namespace Bevy.Interop;
 internal static class NativeLoader
 {
     private static readonly object Gate = new();
+
+    /// <summary>
+    /// Bridges that were found on disk but would not load, with the reason each gave.
+    /// </summary>
+    /// <remarks>
+    /// Kept because "found it, could not load it" and "did not find it" call for opposite fixes,
+    /// and the platform loader reports both as the same missing-library exception. The usual
+    /// cause of the first is a bridge built against a newer glibc than the machine running it.
+    /// </remarks>
+    private static readonly List<string> RejectedCandidates = [];
+
     private static bool _initialized;
 
     /// <summary>
@@ -44,11 +55,17 @@ internal static class NativeLoader
         }
         catch (DllNotFoundException ex)
         {
+            throw new BevyNativeException(NativeStatus.InvalidState, DescribeLoadFailure(), ex);
+        }
+        catch (EntryPointNotFoundException ex)
+        {
+            // The bridge loaded but does not export the version function, so it predates the
+            // version check itself. The ABI comparison below cannot run to say so.
             throw new BevyNativeException(
                 NativeStatus.InvalidState,
-                $"Could not load the native Bevy bridge ('{Native.Library}'). Probed: "
-                + string.Join(", ", CandidateDirectories()) + ". "
-                + "If you are working in the BevyCSharp repo, run build/build-native.sh first.",
+                $"The native Bevy bridge loaded but exports no '{nameof(Native.bcs_abi_version)}',"
+                + " so it is older than this build of BevyCSharp expects. Rebuild it with"
+                + " build/build-native.sh, or reinstall the package.",
                 ex);
         }
 
@@ -60,6 +77,33 @@ internal static class NativeLoader
                 + $"expects {Native.ExpectedAbiVersion}. The managed and native halves of the "
                 + "package are out of sync. Reinstall the package, or rebuild the native crate.");
         }
+    }
+
+    /// <summary>
+    /// Explains why the bridge could not be loaded, in terms of what was actually wrong.
+    /// </summary>
+    private static string DescribeLoadFailure()
+    {
+        if (RejectedCandidates.Count == 0)
+            return $"Could not find the native Bevy bridge ('{Native.Library}'). Looked in: "
+                   + string.Join(", ", CandidateDirectories())
+                   + ". If you are working in the BevyCSharp repo, run build/build-native.sh.";
+
+        var reasons = string.Join(Environment.NewLine + "  ", RejectedCandidates);
+        var message =
+            $"Found the native Bevy bridge but could not load it:{Environment.NewLine}  {reasons}";
+
+        // The common case by a wide margin, and the platform message for it is easy to miss
+        // among the paths the loader also prints.
+        if (reasons.Contains("GLIBC", StringComparison.Ordinal))
+            message +=
+                Environment.NewLine + Environment.NewLine
+                + "The bridge was built against a newer C library than this machine has. A "
+                + "native binary only runs on a glibc at least as new as the one it was built "
+                + "on. Rebuild it here with build/build-native.sh, or use a package built on an "
+                + "older distribution.";
+
+        return message;
     }
 
     /// <summary>Platform-specific file names to try for the bridge.</summary>
@@ -115,8 +159,18 @@ internal static class NativeLoader
             foreach (var fileName in FileNames())
             {
                 var path = Path.Combine(directory, fileName);
-                if (File.Exists(path) && NativeLibrary.TryLoad(path, out var handle))
-                    return handle;
+                if (!File.Exists(path)) continue;
+
+                // Load rather than TryLoad, because the reason a present file will not load is
+                // the whole diagnosis and TryLoad discards it.
+                try
+                {
+                    return NativeLibrary.Load(path);
+                }
+                catch (Exception ex)
+                {
+                    RejectedCandidates.Add($"{path}: {ex.Message}");
+                }
             }
         }
 

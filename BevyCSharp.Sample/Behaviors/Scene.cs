@@ -3,26 +3,25 @@ using Bevy;
 namespace BevyCSharp.Sample.Behaviors;
 
 /// <summary>
-/// Builds a visible scene: a camera, a light, and cubes orbiting a sphere.
+/// The default scene: a cube turning in place, lit, above a ground plane.
 /// </summary>
 /// <remarks>
-/// Everything here is skipped on a headless build, so the sample runs unchanged either way. The
-/// rest of the sample's behaviors do not know or care whether this ran.
+/// Skipped on a build without a renderer, so the rest of the sample runs unchanged either way.
 /// </remarks>
 [Behavior]
 public partial struct Scene
 {
-    /// <summary>Radians per second about the world origin.</summary>
-    public float Speed;
+    /// <summary>Radians per second about the vertical axis.</summary>
+    public float YawSpeed;
 
-    /// <summary>Distance from the origin.</summary>
-    public float Radius;
+    /// <summary>Radians per second about the horizontal axis.</summary>
+    public float PitchSpeed;
 
-    /// <summary>Current angle in radians.</summary>
-    public float Angle;
+    /// <summary>Current yaw in radians.</summary>
+    public float Yaw;
 
-    /// <summary>Height above the ground plane.</summary>
-    public float Height;
+    /// <summary>Current pitch in radians.</summary>
+    public float Pitch;
 
     [OnStartup]
     public static void Build(BehaviorContext ctx)
@@ -31,67 +30,40 @@ public partial struct Scene
 
         var camera = Render.SpawnCamera3d();
         ctx.Ecs.AddNative(camera, NativeComponents.Transform,
-            Transform.LookingAt(new Vec3(0f, 6f, 12f), Vec3.Zero, Vec3.UnitY));
+            Transform.LookingAt(new Vec3(3.5f, 3f, 6f), Vec3.Zero, Vec3.UnitY));
 
-        var sun = Render.SpawnLight(LightKind.Directional, 10_000f);
+        var sun = Render.SpawnLight(LightKind.Directional, 12_000f);
         ctx.Ecs.AddNative(sun, NativeComponents.Transform,
-            Transform.LookingAt(new Vec3(4f, 8f, 4f), Vec3.Zero, Vec3.UnitY));
+            Transform.LookingAt(new Vec3(4f, 8f, 5f), Vec3.Zero, Vec3.UnitY));
 
-        var ground = Render.CreateMesh(MeshShape.Plane, 40f, 40f);
-        var groundMaterial = Render.CreateMaterial(0.10f, 0.11f, 0.13f, roughness: 0.9f);
-        Spawn(ctx, ground, groundMaterial, Transform.At(0f, -1.5f, 0f));
+        var ground = ctx.Ecs.Spawn();
+        Render.SetMesh(ctx.Ecs, ground, Render.CreateMesh(MeshShape.Plane, 24f, 24f));
+        Render.SetMaterial(ctx.Ecs, ground,
+            Render.CreateMaterial(0.10f, 0.11f, 0.13f, roughness: 0.9f));
+        ctx.Ecs.AddNative(ground, NativeComponents.Transform, Transform.At(0f, -1.2f, 0f));
 
-        var core = Render.CreateMesh(MeshShape.Sphere, 1.6f);
-        var coreMaterial = Render.CreateMaterial(0.85f, 0.35f, 0.15f, metallic: 0.9f,
-            roughness: 0.25f);
-        Spawn(ctx, core, coreMaterial, Transform.Identity);
+        var cube = ctx.Ecs.Spawn();
+        Render.SetMesh(ctx.Ecs, cube, Render.CreateMesh(MeshShape.Cuboid, 1.6f, 1.6f, 1.6f));
+        Render.SetMaterial(ctx.Ecs, cube,
+            Render.CreateMaterial(0.25f, 0.55f, 0.85f, metallic: 0.1f, roughness: 0.35f));
+        ctx.Ecs.AddNative(cube, NativeComponents.Transform, Transform.Identity);
 
-        // One mesh and one material, shared by every cube. Handles are references, so this is
-        // eight entities drawing the same two assets rather than eight copies of each.
-        var cube = Render.CreateMesh(MeshShape.Cuboid, 0.7f, 0.7f, 0.7f);
-        var cubeMaterial = Render.CreateMaterial(0.25f, 0.55f, 0.85f, roughness: 0.35f);
+        // Turning about two axes rather than one, so the cube reads as a solid rather than a
+        // flat outline.
+        ctx.Ecs.Add(cube, new Scene { YawSpeed = 0.9f, PitchSpeed = 0.35f });
 
-        for (var i = 0; i < 8; i++)
-        {
-            var entity = Spawn(ctx, cube, cubeMaterial, Transform.Identity);
-            ctx.Ecs.Add(entity, new Scene
-            {
-                Speed = 0.6f,
-                Radius = 5f,
-                Angle = MathF.Tau * i / 8f,
-                Height = MathF.Sin(i) * 0.8f,
-            });
-        }
-
-        Console.WriteLine("[Scene] camera, light and 10 drawable entities");
+        Console.WriteLine("[Scene] a rotating cube. Escape closes the window.");
     }
 
     [OnUpdate]
     public void Tick(BehaviorContext ctx)
     {
-        Angle += Speed * ctx.Time.Delta;
+        Yaw += YawSpeed * ctx.Time.Delta;
+        Pitch += PitchSpeed * ctx.Time.Delta;
 
         ref var transform = ref ctx.Ecs.GetNativeRef<Transform>(
             ctx.Entity, NativeComponents.Transform);
 
-        transform.Translation = new Vec3(
-            MathF.Cos(Angle) * Radius,
-            Height,
-            MathF.Sin(Angle) * Radius);
-        transform.Rotation = Quat.FromRotationY(Angle * 2f);
-    }
-
-    /// <summary>Creates an entity that draws <paramref name="mesh"/> with a material.</summary>
-    private static Entity Spawn(
-        BehaviorContext ctx,
-        AssetHandle mesh,
-        AssetHandle material,
-        Transform placement)
-    {
-        var entity = ctx.Ecs.Spawn();
-        Render.SetMesh(ctx.Ecs, entity, mesh);
-        Render.SetMaterial(ctx.Ecs, entity, material);
-        ctx.Ecs.AddNative(entity, NativeComponents.Transform, placement);
-        return entity;
+        transform.Rotation = Quat.FromRotationY(Yaw) * Quat.FromRotationX(Pitch);
     }
 }

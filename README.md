@@ -319,10 +319,12 @@ or from the command line, which wins over the constants:
 ```bash
 build/build-native.sh --render                  # once: build a bridge with the renderer
 
-dotnet run --project BevyCSharp.Sample -- --window
-dotnet run --project BevyCSharp.Sample -- --window --backend vulkan
+dotnet run --project BevyCSharp.Sample                        # a rotating cube
+dotnet run --project BevyCSharp.Sample -- --backend vulkan
 dotnet run --project BevyCSharp.Sample -- --headless --frames 120
 ```
+
+The sample opens a window by default and draws a lit cube turning in place. Escape closes it.
 
 Both modes run the identical behavior scripts. Nothing branches on whether a renderer exists -
 the engine decides that, from `Config`.
@@ -458,7 +460,20 @@ build/build-native.sh --render --target aarch64-apple-darwin
 package. Locally you get whichever platform you built; `dotnet pack` skips the slots you have
 no binary for rather than failing.
 
-Two platform notes worth knowing:
+Three platform notes worth knowing:
+
+- **A Linux build only runs on a glibc at least as new as the one it was built on.** Building on
+  a current Fedora and running on an Ubuntu LTS fails at load with a `GLIBC_x.yz not found`
+  error, and so does building in one container and running in another. Pass `--portable` to
+  build inside a Debian container instead, which lowers the floor to glibc 2.35 and covers every
+  supported distribution:
+
+  ```bash
+  build/build-native.sh --render --portable
+  ```
+
+  It needs podman or docker, and prints the resulting floor either way. The workflow builds on
+  `ubuntu-latest`, so packaged binaries are already portable; this is for local builds.
 
 - **macOS requires the window event loop to own the main thread.** `App.Run` checks this and
   throws a clear error rather than letting it crash inside AppKit. The check applies only when

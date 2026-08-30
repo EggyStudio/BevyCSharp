@@ -1,15 +1,16 @@
 using BevyCSharp.Sample.Behaviors;
 using Bevy;
 
-// Flip this to open a real window with Bevy's renderer running behind it.
+// Opens a window showing a rotating cube. Set this to false, or pass --headless, to run the
+// same behavior scripts with no window and no GPU.
 //
-// Windowed mode needs a native bridge built with the render feature:
+// A window needs a native bridge built with the render feature:
 //     build/build-native.sh --render
 //
-// A headless bridge has no renderer compiled in at all, and the run below says so and stops
-// rather than opening an empty window. Both modes run the exact same behavior scripts.
+// A headless bridge has no renderer compiled in, and the run below says so and stops rather
+// than opening an empty window.
 
-const bool RunInWindow = false;
+const bool RunInWindow = true;
 
 // Which graphics API to ask for. Automatic already prefers Vulkan on Linux and Windows; naming
 // it pins the choice, so startup fails loudly instead of quietly falling back to something else.
