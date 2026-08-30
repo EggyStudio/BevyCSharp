@@ -466,6 +466,39 @@ pub unsafe extern "C" fn bcs_component_layout(
     })
 }
 
+/// Reports where Bevy places each field of `Transform`.
+///
+/// A size check alone is not enough to trust a mirrored struct. `Transform` uses Rust's default
+/// representation, which allows the compiler to reorder fields, and it does: the sixteen-byte
+/// aligned `Quat` is moved ahead of the two vectors. The reordered and source-order layouts
+/// happen to be the same total size, so only the offsets tell the two apart.
+///
+/// # Safety
+/// Each pointer must be writable, or null to skip that output.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_transform_layout(
+    size: *mut u32,
+    rotation: *mut u32,
+    translation: *mut u32,
+    scale: *mut u32,
+) -> i32 {
+    crate::interop::guard(|| {
+        use bevy::transform::components::Transform;
+
+        let write = |target: *mut u32, value: usize| {
+            if !target.is_null() {
+                unsafe { target.write(value as u32) };
+            }
+        };
+
+        write(size, core::mem::size_of::<Transform>());
+        write(rotation, core::mem::offset_of!(Transform, rotation));
+        write(translation, core::mem::offset_of!(Transform, translation));
+        write(scale, core::mem::offset_of!(Transform, scale));
+        status::OK
+    })
+}
+
 /// Registers a C# system in `stage`.
 ///
 /// # Safety

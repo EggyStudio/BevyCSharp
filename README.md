@@ -128,10 +128,12 @@ chunked iteration, filters and change detection like any other component:
 using var chunks = ctx.Ecs.Chunks<Transform>(NativeComponents.Transform);
 ```
 
-Only components C# can mirror byte for byte are exposed. The mirrors are checked against the
-engine the first time an id is resolved, because they are easy to get subtly wrong: `Quat` is
-SIMD-backed and sixteen-byte aligned on most targets, which pads `Transform` to 48 bytes rather
-than the 40 its three fields suggest. A mismatch fails at startup rather than corrupting memory.
+Only components C# can mirror byte for byte are exposed, and the mirrors are checked against the
+engine the first time an id is resolved. They are easy to get subtly wrong in a way nothing else
+catches. `Transform` uses Rust's default representation, so the compiler reorders its fields to
+save padding: `Quat` is sixteen-byte aligned and moves ahead of the two vectors, giving offsets
+of 0, 16 and 28 rather than the source order. Both layouts are 48 bytes, so a size check passes
+either way and the mistake shows up as stretched geometry. The check compares every offset.
 
 ### Assets
 

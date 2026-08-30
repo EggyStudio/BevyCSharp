@@ -175,49 +175,64 @@ public struct Quat : IEquatable<Quat>
 /// anything else built on it all see the change.
 /// </para>
 /// <para>
-/// The two padding fields are not decoration. Bevy's <c>Quat</c> is SIMD-backed and sixteen-byte
-/// aligned, so the real struct places rotation at offset 16 and runs to 48 bytes rather than the
-/// 40 its fields add up to. <see cref="NativeComponents"/> checks that against the engine at
-/// startup, so a layout that drifts fails loudly instead of corrupting memory.
+/// The field order and padding here reproduce Bevy's memory layout exactly, which is not the
+/// order its source declares. <see cref="NativeComponents"/> checks every offset against the
+/// engine the first time the component is resolved, so a layout that drifts fails loudly rather
+/// than reading each value from the wrong place.
 /// </para>
 /// </remarks>
 [StructLayout(LayoutKind.Sequential)]
 public struct Transform
 {
-    /// <summary>Position relative to the parent.</summary>
-    public Vec3 Translation;
-
-    private readonly float _paddingAfterTranslation;
-
     /// <summary>Rotation relative to the parent.</summary>
     public Quat Rotation;
+
+    /// <summary>Position relative to the parent.</summary>
+    public Vec3 Translation;
 
     /// <summary>Scale relative to the parent.</summary>
     public Vec3 Scale;
 
-    private readonly float _paddingAfterScale;
+    private readonly float _tailPaddingA;
+    private readonly float _tailPaddingB;
 
-    /// <summary>The size Bevy gives this struct, which the padding above accounts for.</summary>
+    /// <summary>The layout Bevy gives this struct, which the field order above reproduces.</summary>
+    /// <remarks>
+    /// Rotation first is not a stylistic choice. Bevy's <c>Transform</c> uses Rust's default
+    /// representation, which permits the compiler to reorder fields, and it does: the
+    /// sixteen-byte-aligned <c>Quat</c> is moved ahead of the two vectors to save padding.
+    /// Declaring the fields in source order here would compile, pass a size check, and read
+    /// every value from the wrong place.
+    /// </remarks>
     internal const int NativeSize = 48;
+
+    /// <summary>Offset Bevy places the rotation at.</summary>
+    internal const int RotationOffset = 0;
+
+    /// <summary>Offset Bevy places the translation at.</summary>
+    internal const int TranslationOffset = 16;
+
+    /// <summary>Offset Bevy places the scale at.</summary>
+    internal const int ScaleOffset = 28;
 
     /// <summary>Creates a transform at <paramref name="translation"/> with no rotation.</summary>
     public Transform(Vec3 translation)
     {
-        Translation = translation;
         Rotation = Quat.Identity;
+        Translation = translation;
         Scale = Vec3.One;
-        _paddingAfterTranslation = 0f;
-        _paddingAfterScale = 0f;
+        _tailPaddingA = 0f;
+        _tailPaddingB = 0f;
     }
 
     /// <summary>Creates a transform from all three parts.</summary>
     public Transform(Vec3 translation, Quat rotation, Vec3 scale)
     {
-        Translation = translation;
         Rotation = rotation;
+        Translation = translation;
         Scale = scale;
-        _paddingAfterTranslation = 0f;
-        _paddingAfterScale = 0f;
+        _tailPaddingA = 0f;
+        _tailPaddingB = 0f;
     }
 
     /// <summary>The identity transform: at the origin, unrotated, unscaled.</summary>

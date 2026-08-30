@@ -16,7 +16,7 @@ namespace Bevy.Tests;
 public sealed class NativeComponentTests
 {
     [Fact]
-    public void MirroredLayoutsMatchTheEngine()
+    public unsafe void MirroredLayoutsMatchTheEngine()
     {
         // The whole reason NativeComponents verifies layouts. Quat is SIMD-backed and sixteen
         // byte aligned on most targets, which pads Transform to 48 rather than the 40 its three
@@ -25,6 +25,16 @@ public sealed class NativeComponentTests
         Assert.Equal(12, Unsafe.SizeOf<Vec3>());
         Assert.Equal(16, Unsafe.SizeOf<Quat>());
         Assert.Equal(48, Unsafe.SizeOf<Transform>());
+
+        // Size is not enough. Bevy's Transform uses Rust's default representation, so the
+        // compiler reorders its fields to save padding, and the reordered layout is the same
+        // total size as the source order. Only the offsets tell them apart, and getting them
+        // wrong renders as stretched geometry rather than as any kind of error.
+        var probe = default(Transform);
+        var origin = (nint)Unsafe.AsPointer(ref probe);
+        Assert.Equal(0, (int)((nint)Unsafe.AsPointer(ref probe.Rotation) - origin));
+        Assert.Equal(16, (int)((nint)Unsafe.AsPointer(ref probe.Translation) - origin));
+        Assert.Equal(28, (int)((nint)Unsafe.AsPointer(ref probe.Scale) - origin));
 
         using var harness = new EngineHarness(frames: 2);
 

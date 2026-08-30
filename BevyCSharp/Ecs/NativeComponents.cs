@@ -28,7 +28,7 @@ public static class NativeComponents
     private static int _generation = -1;
 
     /// <summary>Bevy's <c>Transform</c>: local position, rotation and scale.</summary>
-    public static int Transform => Lookup("Transform", Unsafe.SizeOf<Transform>());
+    public static int Transform => Lookup("Transform", Unsafe.SizeOf<Transform>(), VerifyTransform);
 
     /// <summary>
     /// Bevy's <c>GlobalTransform</c>: the world-space result of propagation.
@@ -58,10 +58,13 @@ public static class NativeComponents
     /// <param name="expectedSize">
     /// The size C#'s mirror occupies, or 0 when there is no mirror to check.
     /// </param>
+    /// <param name="extraCheck">
+    /// A further check for a mirror whose size alone does not pin its layout down.
+    /// </param>
     /// <exception cref="BevyNativeException">
     /// The component is unknown to this build, or its layout does not match the mirror.
     /// </exception>
-    private static int Lookup(string name, int expectedSize)
+    private static int Lookup(string name, int expectedSize, Action? extraCheck = null)
     {
         lock (Gate)
         {
@@ -82,9 +85,47 @@ public static class NativeComponents
                     + "to a feature this build was compiled without, such as the renderer.");
 
             if (expectedSize > 0) VerifyLayout(name, id, expectedSize);
+            extraCheck?.Invoke();
 
             Cache[name] = id;
             return id;
+        }
+    }
+
+    /// <summary>
+    /// Fails loudly if C#'s mirror of <see cref="Bevy.Transform"/> puts a field in the wrong place.
+    /// </summary>
+    /// <remarks>
+    /// The size check below is necessary but not sufficient. Bevy's <c>Transform</c> uses Rust's
+    /// default representation, so the compiler reorders its fields to save padding, and the
+    /// reordered layout happens to be the same total size as the source order. Only the offsets
+    /// distinguish them, and getting them wrong reads every value from the wrong place while
+    /// looking entirely healthy.
+    /// </remarks>
+    private static unsafe void VerifyTransform()
+    {
+        uint size;
+        uint rotation;
+        uint translation;
+        uint scale;
+        Native.Check(
+            Native.bcs_transform_layout(&size, &rotation, &translation, &scale),
+            "reading the layout of 'Transform'");
+
+        Expect("size", size, Bevy.Transform.NativeSize);
+        Expect("rotation", rotation, Bevy.Transform.RotationOffset);
+        Expect("translation", translation, Bevy.Transform.TranslationOffset);
+        Expect("scale", scale, Bevy.Transform.ScaleOffset);
+
+        static void Expect(string part, uint actual, int expected)
+        {
+            if (actual == (uint)expected) return;
+
+            throw new BevyNativeException(
+                NativeStatus.InvalidState,
+                $"Bevy places Transform's {part} at {actual}, but this build of BevyCSharp "
+                + $"mirrors it at {expected}. Using the mirror would read every field from the "
+                + "wrong place, so it is refused. The engine's field layout has changed.");
         }
     }
 
