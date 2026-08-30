@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 4;
+    internal const int ExpectedAbiVersion = 5;
 
     static Native() => NativeLoader.Initialize();
 
@@ -188,17 +188,41 @@ internal static unsafe partial class Native
     internal static partial int bcs_ecs_children(ulong entity, ulong* output, int capacity);
 
 
+    // -- Renderable assets
+
+    /// <summary>Builds a mesh primitive and returns an asset key.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_mesh_create(string kind, float a, float b, float c);
+
+    /// <summary>Builds a material and returns an asset key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_material_create(
+        float red, float green, float blue, float alpha, float metallic, float roughness);
+
+    /// <summary>Attaches an asset through a component that carries a handle.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ecs_insert_asset(ulong entity, string component, int handle);
+
+    /// <summary>Spawns a 3D camera and returns its entity.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial ulong bcs_render_spawn_camera_3d();
+
+    /// <summary>Spawns a light and returns its entity.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial ulong bcs_render_spawn_light(int kind, float intensity);
+
+
     // -- Renderer (render builds only)
 
     /// <summary>Describes the graphics adapter the renderer chose, as UTF-8.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_adapter(byte* buffer, int capacity);
-
-    /// <summary>Spawns a 2D camera so the window has something clearing it.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_render_spawn_camera();
 
     // -- Assets
 

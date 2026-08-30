@@ -11,12 +11,6 @@ namespace BevyCSharp.Sample.Behaviors;
 /// in both modes, which is the point. The engine decides whether there is a renderer; the
 /// scripts do not branch on it.
 /// </para>
-/// <para>
-/// The camera is a stopgap: Bevy draws nothing without one, and Bevy's own render components are
-/// not bridged to C# yet, so managed code cannot spawn a camera itself. Until they are, a
-/// windowed run shows a cleared frame rather than geometry, while the behaviors below tick away
-/// exactly as they do headless.
-/// </para>
 /// </remarks>
 [Behavior]
 public partial struct Renderer
@@ -26,8 +20,6 @@ public partial struct Renderer
     public static void Describe(BehaviorContext ctx)
     {
         if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
-
-        App.SpawnRenderCamera();
 
         var adapter = App.DescribeAdapter();
         Console.WriteLine(adapter is null

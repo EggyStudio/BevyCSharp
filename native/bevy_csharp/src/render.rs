@@ -12,8 +12,6 @@ use crate::interop::status;
 
 #[cfg(feature = "render")]
 use crate::state::{with_world, with_world_opt};
-#[cfg(not(feature = "render"))]
-use crate::state::with_world;
 
 /// Builds a mesh primitive and returns an asset handle for it.
 ///

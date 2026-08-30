@@ -123,7 +123,9 @@ impl AssetHandles {
 
 /// Takes ownership of a handle and returns the value C# will refer to it by.
 ///
-/// Used by assets built in memory rather than loaded from a file.
+/// Used by assets built in memory rather than loaded from a file, which only a render build can
+/// do, hence the attribute.
+#[cfg_attr(not(feature = "render"), expect(dead_code, reason = "render builds only"))]
 pub(crate) fn insert_handle(world: &mut World, handle: UntypedHandle) -> i32 {
     world.get_resource_or_init::<AssetHandles>().insert(handle)
 }
@@ -131,6 +133,7 @@ pub(crate) fn insert_handle(world: &mut World, handle: UntypedHandle) -> i32 {
 /// Clones the handle behind a key, or returns `None` if the key names nothing.
 ///
 /// A clone rather than a borrow, because the caller needs the world back to insert it.
+#[cfg_attr(not(feature = "render"), expect(dead_code, reason = "render builds only"))]
 pub(crate) fn clone_handle(world: &World, key: i32) -> Option<UntypedHandle> {
     world.get_resource::<AssetHandles>()?.get(key).cloned()
 }
@@ -209,7 +212,10 @@ pub extern "C" fn bcs_asset_load_state(handle: i32) -> i32 {
                 Some(LoadState::Loading) => load_state::LOADING,
                 Some(LoadState::Loaded) => load_state::LOADED,
                 Some(LoadState::Failed(_)) => load_state::FAILED,
-                None => load_state::UNKNOWN,
+                // The server only tracks what it loaded from a path. An asset built in memory
+                // has no record, and reaching here means the table still holds a strong handle
+                // to it, so it exists and is ready.
+                None => load_state::LOADED,
             }
         })
         .unwrap_or(load_state::UNKNOWN)

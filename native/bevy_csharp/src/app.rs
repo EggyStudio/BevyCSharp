@@ -176,6 +176,11 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         use bevy::asset::AssetApp;
         app.init_asset::<bevy::mesh::Mesh>();
         app.init_asset::<bevy::image::Image>();
+        // Materials are data as much as meshes are, so a render build initialises them even
+        // when the app is configured headless. Otherwise building one would fail on a bridge
+        // that plainly has the renderer, which reads as a bug rather than a configuration.
+        #[cfg(feature = "render")]
+        app.init_asset::<bevy::pbr::StandardMaterial>();
     }
 
     // Pin the orderings that matter between exclusive C# systems.
@@ -646,27 +651,3 @@ pub unsafe extern "C" fn bcs_render_adapter(out: *mut u8, capacity: i32) -> i32 
     })
 }
 
-/// Spawns a 2D camera so the window has something clearing it.
-///
-/// A Bevy app with no camera renders nothing at all, leaving the window's contents undefined.
-/// Managed code cannot spawn one itself yet, because Bevy's own render components are not
-/// bridged to C# (only C#-declared components are). This is the stopgap that makes a windowed
-/// run show a clean frame, and it goes away once those components are reachable from managed
-/// code. Returns [`status::UNSUPPORTED`] in a headless build.
-#[unsafe(no_mangle)]
-pub extern "C" fn bcs_render_spawn_camera() -> i32 {
-    crate::interop::guard(|| {
-        #[cfg(not(feature = "render"))]
-        {
-            status::UNSUPPORTED
-        }
-
-        #[cfg(feature = "render")]
-        {
-            with_world(|world| {
-                world.spawn(bevy::prelude::Camera2d);
-                status::OK
-            })
-        }
-    })
-}

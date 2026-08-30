@@ -155,8 +155,33 @@ as a slot index, so a released handle does not start naming whatever later took 
 asking for one without it reports which build would support it. Scene loading is not wired up:
 in 0.19 `Scene` became a trait rather than a loadable asset.
 
-Assets cannot be attached to entities yet, which is the remaining gap before anything can be
-drawn from a behavior script.
+### Drawing
+
+Meshes and materials can be built without an asset file, and attached to an entity to make it
+drawable. This needs a render build.
+
+```csharp
+var camera = Render.SpawnCamera3d();
+ctx.Ecs.AddNative(camera, NativeComponents.Transform,
+    Transform.LookingAt(new Vec3(0f, 6f, 12f), Vec3.Zero, Vec3.UnitY));
+
+Render.SpawnLight(LightKind.Directional, 10_000f);
+
+var mesh = Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f);
+var material = Render.CreateMaterial(0.25f, 0.55f, 0.85f);
+
+var entity = ctx.Ecs.Spawn();
+Render.SetMesh(ctx.Ecs, entity, mesh);
+Render.SetMaterial(ctx.Ecs, entity, material);
+```
+
+Handles are references, so one mesh and one material can be shared by any number of entities.
+Attaching a mesh goes through Bevy's own insert rather than a byte copy, which is what pulls in
+the components Bevy requires alongside it, so an entity needs nothing further to be drawn.
+
+On a headless build these refuse and say which build would support them, rather than silently
+doing nothing. Guard with `App.HasRenderer` to write one behavior that runs either way, as
+`BevyCSharp.Sample/Behaviors/Scene.cs` does.
 
 ### Hierarchy
 
@@ -497,12 +522,10 @@ run against a real Bevy app. Known gaps:
 
 - A locally built package contains only the platform you built it on. Use the CI workflow, or
   run `build-native.sh` on each target platform, to produce a package covering all of them.
-- Bevy's blittable components are reachable (`Transform`, `GlobalTransform`, hierarchy, and
-  `Visibility` on a render build), and assets can be loaded and held. What is missing is the step
-  between them: the components that carry an asset handle, such as `Mesh3d` and
-  `MeshMaterial3d`. A `render` build opens a real window and initialises the GPU (verified on
-  Vulkan), and entities can be positioned and parented, but nothing can be drawn from a behavior
-  script until those components are bridged.
+- A render build draws: mesh primitives, physically based materials, cameras and lights are all
+  reachable from a behavior script, verified on Vulkan. What is not reachable is everything past
+  that first layer. Loading a mesh from a glTF file needs `bevy_gltf`, textures are not bound to
+  materials, and UI, text, audio, animation and scenes have no bridge at all.
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does
   nothing yet.
 - Component filters must be table-stored components, which is everything C# registers. A filter

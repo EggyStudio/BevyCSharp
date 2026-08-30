@@ -312,18 +312,6 @@ public sealed unsafe class App : IDisposable
         return Encoding.UTF8.GetString(buffer);
     }
 
-    /// <summary>
-    /// Spawns a 2D camera, so a windowed run has something clearing the frame.
-    /// </summary>
-    /// <remarks>
-    /// A stopgap. Bevy renders nothing without a camera, and Bevy's own render components are
-    /// not bridged to C# yet (only components C# declares are), so managed code cannot spawn
-    /// one itself. Does nothing in a headless run.
-    /// </remarks>
-    /// <returns><see langword="true"/> if a camera was spawned.</returns>
-    public static bool SpawnRenderCamera() =>
-        Native.bcs_render_spawn_camera() == NativeStatus.Ok;
-
     /// <summary>Handles an exception that escaped a system, per <see cref="Config"/>.</summary>
     internal void OnSystemException(SystemDescriptor descriptor, Exception exception)
     {

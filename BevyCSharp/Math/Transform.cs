@@ -217,6 +217,72 @@ public struct Transform
     /// <summary>A transform at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>.</summary>
     public static Transform At(float x, float y, float z) => new(new Vec3(x, y, z));
 
+    /// <summary>
+    /// A transform at <paramref name="eye"/> oriented so that its forward axis points at
+    /// <paramref name="target"/>.
+    /// </summary>
+    /// <remarks>
+    /// Forward is negative Z, matching Bevy's convention, so this is what aims a camera or a
+    /// directional light. The maths is done here rather than in the engine because it needs no
+    /// world state, and a call across the boundary for arithmetic would be waste.
+    /// </remarks>
+    /// <param name="eye">Where the transform sits.</param>
+    /// <param name="target">What it points at.</param>
+    /// <param name="up">Which way is up, used to settle the roll.</param>
+    public static Transform LookingAt(Vec3 eye, Vec3 target, Vec3 up)
+    {
+        var back = Normalise(eye - target);           // negative Z, so back rather than forward
+        var right = Normalise(Cross(up, back));
+        var trueUp = Cross(back, right);
+
+        // The rotation part of a look-at matrix, converted to a quaternion by the branch that
+        // avoids cancellation for the trace at hand.
+        var trace = right.X + trueUp.Y + back.Z;
+        Quat rotation;
+
+        if (trace > 0f)
+        {
+            var s = MathF.Sqrt(trace + 1f) * 2f;
+            rotation = new Quat(
+                (trueUp.Z - back.Y) / s, (back.X - right.Z) / s, (right.Y - trueUp.X) / s,
+                0.25f * s);
+        }
+        else if (right.X > trueUp.Y && right.X > back.Z)
+        {
+            var s = MathF.Sqrt(1f + right.X - trueUp.Y - back.Z) * 2f;
+            rotation = new Quat(
+                0.25f * s, (trueUp.X + right.Y) / s, (back.X + right.Z) / s,
+                (trueUp.Z - back.Y) / s);
+        }
+        else if (trueUp.Y > back.Z)
+        {
+            var s = MathF.Sqrt(1f + trueUp.Y - right.X - back.Z) * 2f;
+            rotation = new Quat(
+                (trueUp.X + right.Y) / s, 0.25f * s, (back.Y + trueUp.Z) / s,
+                (back.X - right.Z) / s);
+        }
+        else
+        {
+            var s = MathF.Sqrt(1f + back.Z - right.X - trueUp.Y) * 2f;
+            rotation = new Quat(
+                (back.X + right.Z) / s, (back.Y + trueUp.Z) / s, 0.25f * s,
+                (right.Y - trueUp.X) / s);
+        }
+
+        return new Transform(eye, rotation, Vec3.One);
+    }
+
+    private static Vec3 Normalise(Vec3 v)
+    {
+        var length = v.Length;
+        return length > 0f ? v * (1f / length) : Vec3.UnitZ;
+    }
+
+    private static Vec3 Cross(Vec3 a, Vec3 b) => new(
+        a.Y * b.Z - a.Z * b.Y,
+        a.Z * b.X - a.X * b.Z,
+        a.X * b.Y - a.Y * b.X);
+
     /// <inheritdoc/>
     public readonly override string ToString() =>
         $"Transform(at {Translation}, scale {Scale})";
