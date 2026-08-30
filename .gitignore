@@ -1,16 +1,82 @@
+# ---------------------------------------------------------------------------
+# .NET build output
+# ---------------------------------------------------------------------------
+# Unanchored on purpose: every project directory has its own pair.
 bin/
 obj/
+
+# ---------------------------------------------------------------------------
+# NuGet
+# ---------------------------------------------------------------------------
 /packages/
-riderModule.iml
-/_ReSharper.Caches/
-.fingerprint/
-target/
-.ref/
-artifacts/
+*.nupkg
+*.snupkg
+# A local nuget.config usually carries machine-specific feed paths.
+NuGet.config.user
+
+# ---------------------------------------------------------------------------
+# Tests, coverage and build logs
+# ---------------------------------------------------------------------------
+TestResults/
+*.trx
+*.coverage
+coverage*.xml
+coverage*.json
+BenchmarkDotNet.Artifacts/
+*.binlog
+msbuild.log
+
+# ---------------------------------------------------------------------------
+# Native bridge (Rust)
+# ---------------------------------------------------------------------------
+# build/build-native.sh writes everything here. These are anchored rather than a
+# bare `target/` or `artifacts/`, which would also swallow any C# directory that
+# happened to carry one of those names - and `artifacts/` in particular is the
+# .NET SDK's own output convention.
+/build/target/
+/build/artifacts/
+/build/package/
+
+# A bare `cargo build` in native/ bypasses the script and defaults to here.
+/native/target/
+
+# Cargo.lock is deliberately NOT ignored. This crate builds a cdylib that ships
+# inside the NuGet package, so the exact dependency graph is part of the release
+# and has to stay pinned.
+
+*.rs.bk
+
+# ---------------------------------------------------------------------------
+# IDEs
+# ---------------------------------------------------------------------------
+# JetBrains (Rider)
 .idea/
 *.DotSettings.user
+*.iml
+_ReSharper.Caches/
+_ReSharper.*/
 
-# Native bridge and package output (all under build/)
-build/target/
-build/artifacts/
-build/package/
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userprefs
+
+# Visual Studio Code - keep the shared definitions, drop everything else.
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
+
+# ---------------------------------------------------------------------------
+# Operating system
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------------------------------------------------------------------------
+# Local-only material
+# ---------------------------------------------------------------------------
+# Reference checkouts kept beside the repo for comparison, never committed.
+.ref/

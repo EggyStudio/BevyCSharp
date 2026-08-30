@@ -30,7 +30,7 @@ internal static unsafe partial class Native
 
     static Native() => NativeLoader.Initialize();
 
-    // -- Diagnostics -------------------------------------------------------------------
+    // -- Diagnostics
 
     /// <summary>Returns the ABI revision the loaded native library implements.</summary>
     [LibraryImport(Library)]
@@ -42,7 +42,7 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_has_render();
 
-    // -- App lifecycle -----------------------------------------------------------------
+    // -- App lifecycle
 
     /// <summary>Creates the Bevy app. Returns <see cref="IntPtr.Zero"/> on failure.</summary>
     [LibraryImport(Library)]
@@ -73,7 +73,7 @@ internal static unsafe partial class Native
         delegate* unmanaged[Cdecl]<IntPtr, void> callback,
         IntPtr user);
 
-    // -- Component registration --------------------------------------------------------
+    // -- Component registration
 
     /// <summary>Registers a component layout before the app starts running.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
@@ -85,7 +85,7 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_component_register_live(string name, uint size, uint align);
 
-    // -- ECS (ambient: requires an active world loan) -----------------------------------
+    // -- ECS (ambient: requires an active world loan)
 
     /// <summary>Splits an entity handle into its logical index and generation.</summary>
     [LibraryImport(Library)]
@@ -150,7 +150,7 @@ internal static unsafe partial class Native
         NativeChunk* output,
         int capacity);
 
-    // -- Frame state -------------------------------------------------------------------
+    // -- Frame state
 
     /// <summary>Copies this frame's time and input snapshot out of Bevy.</summary>
     [LibraryImport(Library)]

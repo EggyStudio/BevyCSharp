@@ -119,7 +119,7 @@ public sealed unsafe class App : IDisposable
         }, "Engine.CommandFlush"));
     }
 
-    // -- System registration ---------------------------------------------------------------
+    // -- System registration-------
 
     /// <summary>Registers a system function in <paramref name="stage"/>.</summary>
     public App AddSystem(Stage stage, SystemFn system) =>
@@ -186,7 +186,7 @@ public sealed unsafe class App : IDisposable
             .Select(s => s.Descriptor)
             .ToArray();
 
-    // -- Plugins ---------------------------------------------------------------------------
+    // -- Plugins--------
 
     /// <summary>Adds a plugin, building it immediately. Adding the same type twice is a no-op.</summary>
     /// <exception cref="PluginOrderException">A declared dependency is not yet registered.</exception>
@@ -220,7 +220,7 @@ public sealed unsafe class App : IDisposable
     /// <summary>True when a plugin of type <typeparamref name="T"/> is registered.</summary>
     public bool HasPlugin<T>() where T : IPlugin => _plugins.ContainsKey(typeof(T));
 
-    // -- Execution -------------------------------------------------------------------------
+    // -- Execution------
 
     /// <summary>
     /// Runs the engine. Blocks until the window closes or <see cref="RequestExit"/> is called,

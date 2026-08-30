@@ -166,7 +166,7 @@ public sealed unsafe class EcsWorld
     /// <summary>The Bevy component id for <typeparamref name="T"/>, registering it if needed.</summary>
     public static int ComponentId<T>() where T : unmanaged => ComponentType<T>.Id;
 
-    // -- Iteration -------------------------------------------------------------------------
+    // -- Iteration------
 
     /// <summary>
     /// Collects the storage runs holding <typeparamref name="T"/>, optionally filtered.
