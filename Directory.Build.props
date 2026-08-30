@@ -1,0 +1,29 @@
+<Project>
+
+    <PropertyGroup>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <!-- Generated behaviour runners are internal plumbing; they need no XML docs. -->
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Authors>CanTalat-Yakan</Authors>
+        <Company>CanTalat-Yakan</Company>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/CanTalat-Yakan/BevyCSharp</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageProjectUrl>https://github.com/CanTalat-Yakan/BevyCSharp</PackageProjectUrl>
+        <VersionPrefix>0.1.0</VersionPrefix>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <!-- Where the Rust workspace lives, for the native build and packaging targets. -->
+    <PropertyGroup>
+        <BevyCSharpRoot>$(MSBuildThisFileDirectory)</BevyCSharpRoot>
+        <BevyCSharpNativeDir>$(BevyCSharpRoot)native/</BevyCSharpNativeDir>
+    </PropertyGroup>
+
+</Project>
