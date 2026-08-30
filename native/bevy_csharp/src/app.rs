@@ -170,14 +170,20 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     let _ = title;
 
     // Bevy refuses to allocate a handle for an asset type it has not been told about, and says
-    // so by panicking rather than failing the load. A render build gets these from the plugins
-    // that own them; a headless one has to ask. Both calls are idempotent.
-    {
+    // so by panicking rather than failing the load. `DefaultPlugins` registers these three, so
+    // only the minimal profile has to ask.
+    //
+    // Asking twice is destructive rather than harmless: `init_asset` inserts a fresh, empty
+    // `Assets<A>` over the plugin's, registers a second handle provider on the asset server and
+    // adds a second copy of the per-frame asset systems. The handles the managed side then
+    // creates come from a different id space than the render world extracts from, so meshes and
+    // materials never reach the GPU and everything draws with the fallback material.
+    if !windowed {
         use bevy::asset::AssetApp;
         app.init_asset::<bevy::mesh::Mesh>();
         app.init_asset::<bevy::image::Image>();
-        // Materials are data as much as meshes are, so a render build initialises them even
-        // when the app is configured headless. Otherwise building one would fail on a bridge
+        // Materials are data as much as meshes are, so a render build that was asked for a
+        // headless app still initialises them. Otherwise building one would fail on a bridge
         // that plainly has the renderer, which reads as a bug rather than a configuration.
         #[cfg(feature = "render")]
         app.init_asset::<bevy::pbr::StandardMaterial>();
@@ -618,54 +624,14 @@ pub unsafe extern "C" fn bcs_app_run(handle: *mut BcsApp) -> i32 {
 
             fn snap(mut c: Commands, mut n: Local<u32>) {
                 *n += 1;
-                if *n != 45 { return; }
+                if *n != 300 { return; }
                 c.spawn(bevy::render::view::screenshot::Screenshot::primary_window())
                     .observe(bevy::render::view::screenshot::save_to_disk(
                         std::env::var("BCS_SHOT").unwrap_or_else(|_| "/tmp/bcs.png".into())));
             }
             app.app.add_systems(bevy::app::Update, snap);
 
-            fn native_cube(
-                mut c: Commands,
-                mut meshes: ResMut<Assets<bevy::mesh::Mesh>>,
-                mut mats: ResMut<Assets<bevy::pbr::StandardMaterial>>,
-                ambient: Option<Res<bevy::light::GlobalAmbientLight>>,
-            ) {
-                eprintln!("[dbg] global ambient={:?}", ambient.map(|a| a.brightness));
-                let cube = meshes.add(bevy::math::primitives::Cuboid::new(1.6, 1.6, 1.6));
-                let unlit = mats.add(bevy::pbr::StandardMaterial {
-                    base_color: bevy::color::Color::srgb(0.9, 0.2, 0.2),
-                    unlit: true,
-                    ..Default::default()
-                });
-                let lit = mats.add(bevy::pbr::StandardMaterial {
-                    base_color: bevy::color::Color::srgb(0.2, 0.9, 0.2),
-                    ..Default::default()
-                });
-                c.spawn((bevy::mesh::Mesh3d(cube.clone()),
-                    bevy::pbr::MeshMaterial3d(unlit), Transform::from_xyz(2.6, 0.0, 0.0)));
-                c.spawn((bevy::mesh::Mesh3d(cube),
-                    bevy::pbr::MeshMaterial3d(lit), Transform::from_xyz(-2.6, 0.0, 0.0)));
-            }
-            app.app.add_systems(bevy::app::Startup, native_cube);
 
-            fn tm(mut c: Commands, q: Query<Entity, With<bevy::camera::Camera3d>>, mut n: Local<u32>) {
-                *n += 1;
-                if *n != 10 { return; }
-                if let Ok(e) = q.single() {
-                    let mode = std::env::var("BCS_TM").unwrap_or_default();
-                    use bevy::core_pipeline::tonemapping::Tonemapping as T;
-                    let t = match mode.as_str() {
-                        "none" => T::None,
-                        "reinhard" => T::Reinhard,
-                        "aces" => T::AcesFitted,
-                        _ => return,
-                    };
-                    eprintln!("[dbg] forcing tonemapping {t:?}");
-                    c.entity(e).insert(t);
-                }
-            }
-            app.app.add_systems(bevy::app::Update, tm);
         }
 
         // `App::run` moves the app out of `app.app`, leaving an empty one behind. Everything

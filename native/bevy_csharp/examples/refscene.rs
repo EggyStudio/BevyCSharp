@@ -2,7 +2,27 @@ use bevy::prelude::*;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins(
+            DefaultPlugins
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        title: "ref".into(),
+                        resolution: (1280u32, 720u32).into(),
+                        present_mode: bevy::window::PresentMode::AutoVsync,
+                        ..default()
+                    }),
+                    ..default()
+                })
+                .set(bevy::render::RenderPlugin {
+                    render_creation: bevy::render::settings::RenderCreation::Automatic(Box::new(
+                        bevy::render::settings::WgpuSettings {
+                            backends: Some(bevy::render::settings::Backends::VULKAN),
+                            ..default()
+                        },
+                    )),
+                    ..default()
+                }),
+        )
         .add_systems(Startup, setup)
         .add_systems(Update, snap)
         .run();
@@ -35,10 +55,10 @@ fn setup(
 
 fn snap(mut c: Commands, mut n: Local<u32>) {
     *n += 1;
-    if *n == 45 {
+    if *n == 300 {
         c.spawn(bevy::render::view::screenshot::Screenshot::primary_window())
             .observe(bevy::render::view::screenshot::save_to_disk(
                 std::env::var("BCS_SHOT").unwrap_or_else(|_| "/tmp/ref.png".into())));
     }
-    if *n == 90 { c.write_message(AppExit::Success); }
+    if *n == 360 { c.write_message(AppExit::Success); }
 }
