@@ -1,5 +1,5 @@
-using BevyCSharp.Sample.Behaviors;
 using Bevy;
+using BevyCSharp.Sample.Behaviors;
 
 // Opens a window showing a rotating cube. Set this to false, or pass --headless, to run the
 // same behavior scripts with no window and no GPU.
