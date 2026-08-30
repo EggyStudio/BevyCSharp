@@ -588,52 +588,6 @@ pub unsafe extern "C" fn bcs_app_run(handle: *mut BcsApp) -> i32 {
         }
         app.running = true;
 
-        #[cfg(feature = "render")]
-        {
-            use bevy::prelude::*;
-            fn dump(
-                world: &World,
-                mut done: Local<u32>,
-                meshes: Query<(Entity, &GlobalTransform), With<bevy::mesh::Mesh3d>>,
-                cams: Query<(Entity, &GlobalTransform), With<bevy::camera::Camera3d>>,
-                lights: Query<(Entity, &GlobalTransform), With<bevy::light::DirectionalLight>>,
-            ) {
-                *done += 1;
-                if *done != 3 { return; }
-                let _ = &world;
-                for (e, g) in &cams {
-                    eprintln!("[dbg] camera {e:?} affine={:?}", g.affine());
-                    eprintln!("[dbg] camera fwd={:?} up={:?} pos={:?}", g.forward(), g.up(), g.translation());
-                }
-                for (e, g) in &lights {
-                    eprintln!("[dbg] light {e:?} fwd={:?} pos={:?}", g.forward(), g.translation());
-                }
-                for (e, g) in &meshes {
-                    let (s, r, t) = g.to_scale_rotation_translation();
-                    eprintln!("[dbg] mesh {e:?} scale={s:?} rot={r:?} pos={t:?}");
-                }
-                for (e, _) in &cams {
-                    let names: Vec<String> = world.inspect_entity(e).unwrap()
-                        .map(|i| i.name().shortname().to_string()).collect();
-                    eprintln!("[dbg] camera components: {names:?}");
-                    eprintln!("[dbg] exposure ev100={:?}",
-                        world.get::<bevy::camera::Exposure>(e).map(|x| x.exposure()));
-                }
-            }
-            app.app.add_systems(bevy::app::Last, dump);
-
-            fn snap(mut c: Commands, mut n: Local<u32>) {
-                *n += 1;
-                if *n != 300 { return; }
-                c.spawn(bevy::render::view::screenshot::Screenshot::primary_window())
-                    .observe(bevy::render::view::screenshot::save_to_disk(
-                        std::env::var("BCS_SHOT").unwrap_or_else(|_| "/tmp/bcs.png".into())));
-            }
-            app.app.add_systems(bevy::app::Update, snap);
-
-
-        }
-
         // `App::run` moves the app out of `app.app`, leaving an empty one behind. Everything
         // that needs the real world (the `Cleanup` stage included) has to happen inside the
         // loop, which is why cleanup is a system rather than something done here.

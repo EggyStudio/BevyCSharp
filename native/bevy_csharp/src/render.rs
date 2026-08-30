@@ -112,7 +112,6 @@ pub extern "C" fn bcs_material_create(
                     return status::UNSUPPORTED;
                 };
                 let handle = materials.add(material).untyped();
-                eprintln!("[dbg] material rgba=({red},{green},{blue},{alpha}) m={metallic} r={roughness} count={}", materials.len());
 
                 crate::assets::insert_handle(world, handle)
             })
@@ -167,7 +166,6 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
                 match component.as_str() {
                     "Mesh3d" => match untyped.try_typed::<Mesh>() {
                         Ok(handle) => {
-                            eprintln!("[dbg] attach mesh {:?} to {:?}", handle.id(), entity);
                             entity_mut.insert(Mesh3d(handle));
                             status::OK
                         }
@@ -175,7 +173,6 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
                     },
                     "MeshMaterial3d" => match untyped.try_typed::<StandardMaterial>() {
                         Ok(handle) => {
-                            eprintln!("[dbg] attach material {:?} to {:?}", handle.id(), entity);
                             entity_mut.insert(MeshMaterial3d(handle));
                             status::OK
                         }
