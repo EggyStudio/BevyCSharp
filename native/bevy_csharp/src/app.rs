@@ -162,9 +162,21 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         app.add_plugins(MinimalPlugins.set(runner));
         app.add_plugins(bevy::input::InputPlugin);
         app.add_plugins(bevy::transform::TransformPlugin);
+        // Assets are file loading and storage, with no GPU involvement, so a headless app can
+        // serve them too. DefaultPlugins already includes this on a render build.
+        app.add_plugins(bevy::asset::AssetPlugin::default());
     }
 
     let _ = title;
+
+    // Bevy refuses to allocate a handle for an asset type it has not been told about, and says
+    // so by panicking rather than failing the load. A render build gets these from the plugins
+    // that own them; a headless one has to ask. Both calls are idempotent.
+    {
+        use bevy::asset::AssetApp;
+        app.init_asset::<bevy::mesh::Mesh>();
+        app.init_asset::<bevy::image::Image>();
+    }
 
     // Pin the orderings that matter between exclusive C# systems.
     app.configure_sets(First, (BcsSet::Sync, BcsSet::First).chain());

@@ -22,6 +22,11 @@ headless = [
     "bevy/bevy_log",
     "bevy/keyboard",
     "bevy/mouse",
+    # Assets are data, not graphics. Including them headless keeps loading testable without a
+    # GPU, and means one asset bridge serves both profiles.
+    "bevy/bevy_asset",
+    "bevy/bevy_mesh",
+    "bevy/bevy_image",
 ]
 
 # Full desktop profile: a real window, Bevy's renderer and the winit input backend.

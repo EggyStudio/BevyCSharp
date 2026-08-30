@@ -133,6 +133,31 @@ engine the first time an id is resolved, because they are easy to get subtly wro
 SIMD-backed and sixteen-byte aligned on most targets, which pads `Transform` to 48 bytes rather
 than the 40 its three fields suggest. A mismatch fails at startup rather than corrupting memory.
 
+### Assets
+
+```csharp
+var mesh = AssetServer.Load(AssetKind.Mesh, "models/ship.gltf");
+
+if (mesh.IsLoaded) { }
+AssetServer.Release(mesh);
+```
+
+Loading is asynchronous, so `Load` returns as soon as the request is queued and the handle
+reports `Loading` until the file has been read. Paths resolve relative to the `assets` directory
+beside the executable.
+
+Bevy's own handle is generic and reference counted, and neither property survives a trip through
+a C ABI, so C# holds a key into a table on the engine side that owns the real handle. Holding one
+keeps the asset loaded; `Release` gives up that reference. The key carries a generation as well
+as a slot index, so a released handle does not start naming whatever later took its slot.
+
+`Mesh` and `Image` load in any build. `StandardMaterial` and `Shader` need a render build, and
+asking for one without it reports which build would support it. Scene loading is not wired up:
+in 0.19 `Scene` became a trait rather than a loadable asset.
+
+Assets cannot be attached to entities yet, which is the remaining gap before anything can be
+drawn from a behavior script.
+
 ### Hierarchy
 
 ```csharp
@@ -473,10 +498,11 @@ run against a real Bevy app. Known gaps:
 - A locally built package contains only the platform you built it on. Use the CI workflow, or
   run `build-native.sh` on each target platform, to produce a package covering all of them.
 - Bevy's blittable components are reachable (`Transform`, `GlobalTransform`, hierarchy, and
-  `Visibility` on a render build), but anything wrapping an asset handle is not. That means a
-  `render` build opens a real window and initialises the GPU (verified on Vulkan), and you can
-  position and parent entities, but meshes and materials cannot be created from a behavior
-  script yet, so there is nothing to draw.
+  `Visibility` on a render build), and assets can be loaded and held. What is missing is the step
+  between them: the components that carry an asset handle, such as `Mesh3d` and
+  `MeshMaterial3d`. A `render` build opens a real window and initialises the GPU (verified on
+  Vulkan), and entities can be positioned and parented, but nothing can be drawn from a behavior
+  script until those components are bridged.
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does
   nothing yet.
 - Component filters must be table-stored components, which is everything C# registers. A filter
