@@ -1,0 +1,69 @@
+name: publish
+
+# Pushes an already-built package to GitHub Packages.
+#
+# Reusable, because both continuous integration and tagged releases publish, and the only thing
+# that differs between them is the version they built.
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version being published, used only for the run summary.'
+        type: string
+        required: true
+
+jobs:
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # GITHUB_TOKEN covers GitHub Packages, so there is no API key to store anywhere.
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: nupkg
+          path: package
+
+      - name: Push to GitHub Packages
+        shell: bash
+        env:
+          # The feed is per account, and GitHub matches the package to this repository through
+          # the RepositoryUrl that Directory.Build.props stamps into it. If that URL stops
+          # pointing at this repository, the push is rejected.
+          FEED: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        run: |
+          ls -la package
+
+          # --skip-duplicate makes a re-run harmless. GitHub Packages does not allow overwriting
+          # a published version, so without it, retrying a partly failed publish would fail.
+          dotnet nuget push "package/*.nupkg" \
+            --source "$FEED" \
+            --api-key "${{ secrets.GITHUB_TOKEN }}" \
+            --skip-duplicate
+
+      - name: Summarise
+        shell: bash
+        run: |
+          {
+            echo "### Published \`BevyCSharp\` ${{ inputs.version }}"
+            echo
+            echo "Add the feed once, then reference the package as usual:"
+            echo
+            echo '```bash'
+            echo "dotnet nuget add source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json \\"
+            echo "  --name github --username YOUR_GITHUB_USERNAME --password YOUR_PAT --store-password-in-clear-text"
+            echo "dotnet add package BevyCSharp --version ${{ inputs.version }}"
+            echo '```'
+            echo
+            echo "The personal access token needs the \`read:packages\` scope."
+          } >> "$GITHUB_STEP_SUMMARY"

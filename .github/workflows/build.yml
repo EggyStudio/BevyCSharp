@@ -1,28 +1,128 @@
 name: build
 
-# Continuous integration. The work itself lives in package.yml, which releases call too, so the
-# runtime identifier matrix cannot drift between the two.
+# Continuous integration, and opt-in publishing from the default branch.
+#
+# An ordinary push builds and tests on Linux only. That catches essentially every regression and
+# runs at the cheapest billing rate.
+#
+# Put [publish] in the commit message to get the expensive run instead: all six runtime
+# identifiers, tests on all three operating systems, and a package pushed to GitHub Packages
+# with a version that counts up on its own.
+#
+#     git commit -m "add the thing [publish]"
+#
+# macOS runners bill at ten times the Linux rate and Windows at twice, so a full run costs
+# roughly ten times an ordinary one. Marking the commits worth that keeps the decision yours
+# rather than the branch's.
 
 on:
   push:
     branches: [main, master]
-    # A full run is around an hour of runner time, so changes that cannot affect the binaries do
-    # not start one. Note that a skipped workflow reports no status at all, so do not mark this
-    # one as a required check while these filters are here.
     paths-ignore: ['**.md', '.gitignore', 'LICENSE', '.idea/**']
   pull_request:
     paths-ignore: ['**.md', '.gitignore', 'LICENSE', '.idea/**']
   workflow_dispatch:
+    inputs:
+      full:
+        description: 'Build every platform and publish, as though the commit said [publish].'
+        type: boolean
+        required: false
+        default: false
 
-# Pushing twice in quick succession would otherwise leave two hour-long runs racing when only
-# the newer one matters. In-flight runs for the same ref are cancelled, except on the default
-# branch where the finished artifacts are worth keeping.
 concurrency:
   group: build-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
+  # A cheap run is disposable, so a newer push supersedes it. A publishing run has to finish.
+  cancel-in-progress: ${{ !contains(github.event.head_commit.message, '[publish]') }}
 
 jobs:
+  gate:
+    name: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      full: ${{ steps.decide.outputs.full }}
+      targets: ${{ steps.decide.outputs.targets }}
+      test_os: ${{ steps.decide.outputs.test_os }}
+      version: ${{ steps.decide.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Decide how much to build
+        id: decide
+        shell: bash
+        env:
+          # Only a push carries a commit message. Other events leave this empty and fall through
+          # to the cheap path unless the dispatch input asked otherwise.
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          DISPATCH_FULL: ${{ inputs.full }}
+        run: |
+          set -euo pipefail
+
+          full=false
+          case "$COMMIT_MESSAGE" in
+            *'[publish]'*) full=true ;;
+          esac
+          [ "$DISPATCH_FULL" = "true" ] && full=true
+
+          # Both branches emit a complete list, so the caller never has to substitute a default.
+          # Compact JSON on one line, because a step output cannot span lines without ceremony.
+          all_targets='[{"os":"ubuntu-latest","rid":"linux-x64","target":"x86_64-unknown-linux-gnu"},{"os":"ubuntu-24.04-arm","rid":"linux-arm64","target":"aarch64-unknown-linux-gnu"},{"os":"windows-latest","rid":"win-x64","target":"x86_64-pc-windows-msvc"},{"os":"windows-11-arm","rid":"win-arm64","target":"aarch64-pc-windows-msvc"},{"os":"macos-latest","rid":"osx-arm64","target":"aarch64-apple-darwin"},{"os":"macos-latest","rid":"osx-x64","target":"x86_64-apple-darwin"}]'
+          one_target='[{"os":"ubuntu-latest","rid":"linux-x64","target":"x86_64-unknown-linux-gnu"}]'
+
+          if [ "$full" = "true" ]; then
+            targets="$all_targets"
+            test_os='["ubuntu-latest","windows-latest","macos-latest"]'
+          else
+            targets="$one_target"
+            test_os='["ubuntu-latest"]'
+          fi
+
+          # Major and minor come from the repository; the patch is the run number. That keeps
+          # versions strictly increasing with no state to store and no chance of two runs picking
+          # the same number, and it stays ordered across a minor bump because the run number
+          # never restarts. To move to 0.2.x, edit VersionPrefix and push.
+          base=$(grep -oP '(?<=<VersionPrefix>)[^<]+' Directory.Build.props)
+          version="${base%.*}.${GITHUB_RUN_NUMBER}"
+
+          {
+            echo "full=$full"
+            echo "targets=$targets"
+            echo "test_os=$test_os"
+            echo "version=$version"
+          } >> "$GITHUB_OUTPUT"
+
+          if [ "$full" = "true" ]; then
+            echo "### Full run: every platform, publishing $version" >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "### Quick run: Linux only, nothing published"
+              echo
+              echo 'Put [publish] in the commit message for all six platforms and a published package.'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
   package:
-    # No version is passed, so the package keeps the one in Directory.Build.props. Continuous
-    # integration packages are for downloading and inspecting, not for publishing.
+    name: package
+    needs: gate
     uses: ./.github/workflows/package.yml
+    with:
+      version: ${{ needs.gate.outputs.version }}
+      targets: ${{ needs.gate.outputs.targets }}
+      test_os: ${{ needs.gate.outputs.test_os }}
+
+  publish:
+    name: publish
+    needs: [gate, package]
+    # Only a marked commit, only a real push, and only from the default branch. A pull request
+    # would otherwise publish a version for code that was never merged.
+    if: >-
+      needs.gate.outputs.full == 'true' &&
+      github.event_name != 'pull_request' &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    uses: ./.github/workflows/publish.yml
+    with:
+      version: ${{ needs.gate.outputs.version }}
+    permissions:
+      contents: read
+      packages: write

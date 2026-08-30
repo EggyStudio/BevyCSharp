@@ -17,6 +17,27 @@ on:
         type: string
         required: false
         default: ''
+      targets:
+        description: >-
+          JSON array of {os, rid, target} objects to build. Defaults to every desktop runtime
+          identifier. Callers pass a shorter list to keep an ordinary push cheap, since macOS
+          runners bill at ten times the Linux rate and Windows at twice.
+        type: string
+        required: false
+        default: >-
+          [
+            {"os": "ubuntu-latest",    "rid": "linux-x64",   "target": "x86_64-unknown-linux-gnu"},
+            {"os": "ubuntu-24.04-arm", "rid": "linux-arm64", "target": "aarch64-unknown-linux-gnu"},
+            {"os": "windows-latest",   "rid": "win-x64",     "target": "x86_64-pc-windows-msvc"},
+            {"os": "windows-11-arm",   "rid": "win-arm64",   "target": "aarch64-pc-windows-msvc"},
+            {"os": "macos-latest",     "rid": "osx-arm64",   "target": "aarch64-apple-darwin"},
+            {"os": "macos-latest",     "rid": "osx-x64",     "target": "x86_64-apple-darwin"}
+          ]
+      test_os:
+        description: 'JSON array of runner labels to run the test suite on.'
+        type: string
+        required: false
+        default: '["ubuntu-latest", "windows-latest", "macos-latest"]'
 
 env:
   DOTNET_NOLOGO: true
@@ -34,16 +55,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - { os: ubuntu-latest,    rid: linux-x64,   target: x86_64-unknown-linux-gnu }
-          - { os: ubuntu-24.04-arm, rid: linux-arm64, target: aarch64-unknown-linux-gnu }
-          - { os: windows-latest,   rid: win-x64,     target: x86_64-pc-windows-msvc }
-          - { os: windows-11-arm,   rid: win-arm64,   target: aarch64-pc-windows-msvc }
-          # Both macOS slices are built on the same Apple Silicon runner. Apple's toolchain is
-          # multi-arch, so an x86_64 binary cross-compiles cleanly from arm64, and there is no
-          # Intel runner image left to target natively anyway.
-          - { os: macos-latest,     rid: osx-arm64,   target: aarch64-apple-darwin }
-          - { os: macos-latest,     rid: osx-x64,     target: x86_64-apple-darwin }
+        # Both macOS slices build on the same Apple Silicon runner. Apple's toolchain is
+        # multi-arch, so an x86_64 binary cross-compiles cleanly from arm64, and there is no
+        # Intel runner image left to target natively anyway. See the `targets` input for the
+        # full default list.
+        include: ${{ fromJSON(inputs.targets) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -79,7 +95,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: ${{ fromJSON(inputs.test_os) }}
 
     steps:
       - uses: actions/checkout@v4

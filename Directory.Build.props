@@ -18,6 +18,7 @@
         <PackageProjectUrl>https://github.com/EggyStudio/BevyCSharp</PackageProjectUrl>
         <VersionPrefix>0.1.0</VersionPrefix>
         <IsPackable>false</IsPackable>
+        <PackageIcon>icon.png</PackageIcon>
     </PropertyGroup>
 
     <!--
@@ -33,7 +34,12 @@
         <BevyCSharpBuildDir>$(BevyCSharpRoot)build/</BevyCSharpBuildDir>
         <BevyCSharpArtifactDir>$(BevyCSharpBuildDir)artifacts/</BevyCSharpArtifactDir>
         <BevyCSharpNativeOutDir>$(BevyCSharpBuildDir)target/release/</BevyCSharpNativeOutDir>
+        <BevyCSharpIcon>$(BevyCSharpRoot).github/assets/icon.png</BevyCSharpIcon>
     </PropertyGroup>
+
+    <ItemGroup Condition="Exists('$(BevyCSharpIcon)')">
+        <None Include="$(BevyCSharpIcon)" Pack="true" PackagePath="" Visible="false"/>
+    </ItemGroup>
 
     <!--
       Send packages to build/package too, so a bare `dotnet pack` does not drop a folder in the

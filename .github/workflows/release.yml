@@ -5,9 +5,10 @@ name: release
 #     git tag v0.2.0
 #     git push origin v0.2.0
 #
-# The tag drives the package version, so nothing has to be edited in the repository to cut a
-# release, and the binaries are built from exactly the tagged commit rather than reused from an
-# older run.
+# Pushes to the default branch already publish automatically, with a version that counts up on
+# its own. This is for the other case: pinning an exact, meaningful version number. The tag
+# drives it, so nothing has to be edited in the repository to cut a release, and the binaries
+# are built from exactly the tagged commit rather than reused from an older run.
 #
 # This lives apart from build.yml because tag pushes and path filters interact badly: a tag on a
 # documentation-only commit can be filtered out and the release would silently never happen.
@@ -66,55 +67,10 @@ jobs:
 
   publish:
     name: publish
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
     needs: [version, package]
-
-    # GITHUB_TOKEN covers GitHub Packages, so there is no API key to store anywhere.
+    uses: ./.github/workflows/publish.yml
+    with:
+      version: ${{ needs.version.outputs.value }}
     permissions:
       contents: read
       packages: write
-
-    steps:
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: nupkg
-          path: package
-
-      - name: Publish to GitHub Packages
-        shell: bash
-        env:
-          # The feed is per account, and GitHub matches the package to this repository through
-          # the RepositoryUrl that Directory.Build.props stamps into it. If that URL stops
-          # pointing at this repository, the push is rejected.
-          FEED: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
-        run: |
-          ls -la package
-
-          # --skip-duplicate makes a re-run harmless. GitHub Packages does not allow overwriting
-          # a published version, so without it, retrying a partly failed release would fail.
-          dotnet nuget push "package/*.nupkg" \
-            --source "$FEED" \
-            --api-key "${{ secrets.GITHUB_TOKEN }}" \
-            --skip-duplicate
-
-      - name: Summarise
-        shell: bash
-        run: |
-          {
-            echo "### Published \`BevyCSharp\` ${{ needs.version.outputs.value }}"
-            echo
-            echo "Add the feed once, then reference the package as usual:"
-            echo
-            echo '```bash'
-            echo "dotnet nuget add source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json \\"
-            echo "  --name github --username YOUR_GITHUB_USERNAME --password YOUR_PAT --store-password-in-clear-text"
-            echo "dotnet add package BevyCSharp --version ${{ needs.version.outputs.value }}"
-            echo '```'
-            echo
-            echo "The personal access token needs the \`read:packages\` scope."
-          } >> "$GITHUB_STEP_SUMMARY"
