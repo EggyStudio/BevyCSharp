@@ -1,22 +1,16 @@
-# ---------------------------------------------------------------------------
 # .NET build output
-# ---------------------------------------------------------------------------
 # Unanchored on purpose: every project directory has its own pair.
 bin/
 obj/
 
-# ---------------------------------------------------------------------------
 # NuGet
-# ---------------------------------------------------------------------------
 /packages/
 *.nupkg
 *.snupkg
 # A local nuget.config usually carries machine-specific feed paths.
 NuGet.config.user
 
-# ---------------------------------------------------------------------------
 # Tests, coverage and build logs
-# ---------------------------------------------------------------------------
 TestResults/
 *.trx
 *.coverage
@@ -26,9 +20,7 @@ BenchmarkDotNet.Artifacts/
 *.binlog
 msbuild.log
 
-# ---------------------------------------------------------------------------
 # Native bridge (Rust)
-# ---------------------------------------------------------------------------
 # build/build-native.sh writes everything here. These are anchored rather than a
 # bare `target/` or `artifacts/`, which would also swallow any C# directory that
 # happened to carry one of those names - and `artifacts/` in particular is the
@@ -46,9 +38,7 @@ msbuild.log
 
 *.rs.bk
 
-# ---------------------------------------------------------------------------
 # IDEs
-# ---------------------------------------------------------------------------
 # JetBrains (Rider)
 .idea/
 *.DotSettings.user
@@ -62,21 +52,16 @@ _ReSharper.*/
 *.suo
 *.userprefs
 
-# Visual Studio Code - keep the shared definitions, drop everything else.
+# Visual Studio Code
 .vscode/*
 !.vscode/launch.json
 !.vscode/tasks.json
 !.vscode/extensions.json
 
-# ---------------------------------------------------------------------------
 # Operating system
-# ---------------------------------------------------------------------------
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# ---------------------------------------------------------------------------
-# Local-only material
-# ---------------------------------------------------------------------------
-# Reference checkouts kept beside the repo for comparison, never committed.
+# Local-only
 .ref/
