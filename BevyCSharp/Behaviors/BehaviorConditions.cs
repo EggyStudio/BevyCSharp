@@ -62,20 +62,28 @@ public static class BehaviorConditions
     /// <summary>
     /// A keyboard toggle keyed by <typeparamref name="TTag"/>, usually the behavior struct.
     /// </summary>
+    /// <param name="key">The key whose press flips the system.</param>
+    /// <param name="modifiers">Modifiers that must be held; combine them with <c>|</c>.</param>
+    /// <param name="defaultEnabled">Whether the system starts enabled.</param>
     public static Func<World, bool> KeyToggle<TTag>(
         Key key,
-        KeyModifier modifier = KeyModifier.None,
+        KeyModifier modifiers = KeyModifier.None,
         bool defaultEnabled = true) where TTag : notnull =>
-        KeyToggle(typeof(TTag).FullName!, key, modifier, defaultEnabled);
+        KeyToggle(typeof(TTag).FullName!, key, modifiers, defaultEnabled);
 
     /// <summary>
     /// A keyboard toggle keyed by an explicit id. Generated code uses this overload; prefer the
     /// generic one in hand-written code.
     /// </summary>
+    /// <remarks>
+    /// The flip happens on the frame <paramref name="key"/> goes down while the modifiers are
+    /// already held - the same shape as Bevy's own <c>input_toggle_active</c>, extended with the
+    /// modifier check Bevy does not offer.
+    /// </remarks>
     public static Func<World, bool> KeyToggle(
         string systemId,
         Key key,
-        KeyModifier modifier = KeyModifier.None,
+        KeyModifier modifiers = KeyModifier.None,
         bool defaultEnabled = true)
     {
         return world =>
@@ -84,7 +92,7 @@ public static class BehaviorConditions
 
             if (world.TryGetResource<Input>(out var input)
                 && input.KeyPressed(key)
-                && ModifiersHeld(input, modifier))
+                && ModifiersHeld(input, modifiers))
             {
                 registry.Flip(systemId, defaultEnabled);
             }
@@ -93,23 +101,34 @@ public static class BehaviorConditions
         };
     }
 
-    /// <summary>True when every modifier in <paramref name="modifier"/> is currently held.</summary>
-    public static bool ModifiersHeld(Input input, KeyModifier modifier)
+    /// <summary>
+    /// True when every modifier set in <paramref name="modifiers"/> is currently held.
+    /// </summary>
+    /// <remarks>
+    /// Flags are ANDed, so <c>Ctrl | Shift</c> requires both. Each flag is satisfied by either
+    /// side of the keyboard, which is what a shortcut normally means; to pin one side, name that
+    /// key directly instead.
+    /// </remarks>
+    public static bool ModifiersHeld(Input input, KeyModifier modifiers)
     {
         ArgumentNullException.ThrowIfNull(input);
-        if (modifier == KeyModifier.None) return true;
+        if (modifiers == KeyModifier.None) return true;
 
-        if (modifier.HasFlag(KeyModifier.Ctrl)
-            && !input.KeyDown(Key.ControlLeft) && !input.KeyDown(Key.ControlRight)) return false;
-        if (modifier.HasFlag(KeyModifier.Shift)
-            && !input.KeyDown(Key.ShiftLeft) && !input.KeyDown(Key.ShiftRight)) return false;
-        if (modifier.HasFlag(KeyModifier.Alt)
-            && !input.KeyDown(Key.AltLeft) && !input.KeyDown(Key.AltRight)) return false;
-        if (modifier.HasFlag(KeyModifier.Super)
-            && !input.KeyDown(Key.SuperLeft) && !input.KeyDown(Key.SuperRight)) return false;
+        foreach (var (flag, keys) in ModifierKeys)
+            if ((modifiers & flag) != 0 && !input.AnyKeyDown(keys))
+                return false;
 
         return true;
     }
+
+    /// <summary>The keys that satisfy each modifier flag, either side counting.</summary>
+    private static readonly (KeyModifier Flag, Key[] Keys)[] ModifierKeys =
+    [
+        (KeyModifier.Ctrl, [Key.ControlLeft, Key.ControlRight]),
+        (KeyModifier.Shift, [Key.ShiftLeft, Key.ShiftRight]),
+        (KeyModifier.Alt, [Key.AltLeft, Key.AltRight]),
+        (KeyModifier.Super, [Key.SuperLeft, Key.SuperRight]),
+    ];
 }
 
 /// <summary>

@@ -417,6 +417,8 @@ public sealed class UnitTests
         Assert.Null(SystemRegistrationSourceScope.Current);
     }
 
+    // These exist only so their layouts can be measured; the fields are never read.
+#pragma warning disable CS0649
     private struct AlignedEight
     {
         public double Value;
@@ -429,4 +431,5 @@ public sealed class UnitTests
         public int B;
         public int C;
     }
+#pragma warning restore CS0649
 }

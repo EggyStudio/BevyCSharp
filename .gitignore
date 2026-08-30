@@ -8,3 +8,9 @@ target/
 .ref/
 artifacts/
 .idea/
+*.DotSettings.user
+
+# Native bridge and package output (all under build/)
+build/target/
+build/artifacts/
+build/package/

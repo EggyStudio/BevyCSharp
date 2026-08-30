@@ -2,6 +2,7 @@
   <Project Path="BevyCSharp/BevyCSharp.csproj" />
   <Folder Name="/Common/">
     <File Path="Directory.Build.props" />
+    <File Path="README.md" />
   </Folder>
   <Project Path="BevyCSharp.Generator/BevyCSharp.Generator.csproj" />
   <Project Path="BevyCSharp.Sample/BevyCSharp.Sample.csproj" />

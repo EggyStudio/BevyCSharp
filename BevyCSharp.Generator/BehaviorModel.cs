@@ -63,10 +63,13 @@ internal sealed record BehaviorFilters(
 }
 
 /// <summary>A keyboard toggle declared with <c>[ToggleKey]</c>.</summary>
-/// <param name="Key">The key's enum value.</param>
-/// <param name="Modifier">The modifier flags.</param>
+/// <param name="Key">The toggling key's enum value.</param>
+/// <param name="Modifiers">
+/// The combined <c>KeyModifier</c> flags. A combination such as <c>Ctrl | Shift</c> reaches the
+/// generator already folded into one constant, so several modifiers need no special handling.
+/// </param>
 /// <param name="DefaultEnabled">Whether the system starts enabled.</param>
-internal sealed record ToggleKeyInfo(int Key, int Modifier, bool DefaultEnabled);
+internal sealed record ToggleKeyInfo(int Key, int Modifiers, bool DefaultEnabled);
 
 /// <summary>A <c>[RunIf]</c> condition.</summary>
 /// <param name="MemberName">Name of the member on the behavior struct.</param>

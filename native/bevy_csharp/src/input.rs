@@ -4,7 +4,7 @@
 //! internal detail. Rather than leak them, this module pins an explicit, ordered key
 //! table. Each key owns a bit index, and `BcsInput`'s bitsets are indexed by it.
 //! `Bevy.Key` on the C# side declares the identical list in the identical order, so the
-//! two stay in lockstep — if you add a key here, add it there at the same position.
+//! two stay in lockstep, if you add a key here, add it there at the same position.
 
 use bevy::input::keyboard::KeyCode;
 

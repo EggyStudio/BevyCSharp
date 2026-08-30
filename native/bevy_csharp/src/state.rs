@@ -5,7 +5,7 @@
 //! from it for the duration of that one call and drops it again before returning, so no
 //! two mutable borrows are ever live at once.
 //!
-//! The pointer is deliberately *thread-local*: behaviour methods that the generator runs
+//! The pointer is deliberately *thread-local*: behavior methods that the generator runs
 //! on worker threads see a null world and get [`status::NO_WORLD`] back, which is what
 //! pushes users toward the thread-safe command buffer instead of racing on the world.
 

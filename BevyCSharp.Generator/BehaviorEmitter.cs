@@ -61,9 +61,11 @@ internal static class BehaviorEmitter
             // the toggle wins because it is the more specific declaration.
             if (method.Toggle is { } toggle)
             {
+                // The modifier argument is already a folded flags constant, so a combination such
+                // as Ctrl | Shift emits as one cast and needs no special handling.
                 source.Append("\n            .RunIf(global::Bevy.BehaviorConditions.KeyToggle(\"")
                     .Append(systemId).Append("\", (global::Bevy.Key)").Append(toggle.Key)
-                    .Append(", (global::Bevy.KeyModifier)").Append(toggle.Modifier)
+                    .Append(", (global::Bevy.KeyModifier)").Append(toggle.Modifiers)
                     .Append(", ").Append(toggle.DefaultEnabled ? "true" : "false").Append("))");
             }
             else if (method.Condition is { } condition)

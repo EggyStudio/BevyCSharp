@@ -2,7 +2,7 @@
 //!
 //! Every `extern "C"` entry point in this crate funnels through [`guard`] so a Rust
 //! panic can never unwind across the FFI boundary into the .NET runtime (which is
-//! undefined behaviour). Failures surface to C# as a negative [`BcsStatus`].
+//! undefined behavior). Failures surface to C# as a negative [`BcsStatus`].
 
 use core::ffi::c_char;
 use core::panic::AssertUnwindSafe;

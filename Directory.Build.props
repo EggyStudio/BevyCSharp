@@ -20,10 +20,27 @@
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
-    <!--  Where the Rust workspace lives, for the native build and packaging targets. -->
+    <!--
+      Where the Rust workspace lives, and where its output goes.
+
+      Sources are in native/; everything generated - cargo's target directory and the staged
+      per-RID artifacts - goes under build/, so the repository root stays clean. Both must agree
+      with build/build-native.sh, which is what actually writes them.
+    -->
     <PropertyGroup>
         <BevyCSharpRoot>$(MSBuildThisFileDirectory)</BevyCSharpRoot>
         <BevyCSharpNativeDir>$(BevyCSharpRoot)native/</BevyCSharpNativeDir>
+        <BevyCSharpBuildDir>$(BevyCSharpRoot)build/</BevyCSharpBuildDir>
+        <BevyCSharpArtifactDir>$(BevyCSharpBuildDir)artifacts/</BevyCSharpArtifactDir>
+        <BevyCSharpNativeOutDir>$(BevyCSharpBuildDir)target/release/</BevyCSharpNativeOutDir>
+    </PropertyGroup>
+
+    <!--
+      Send packages to build/package too, so a bare `dotnet pack` does not drop a folder in the
+      repository root. An explicit `-o` on the command line still wins.
+    -->
+    <PropertyGroup>
+        <PackageOutputPath Condition="'$(PackageOutputPath)' == ''">$(BevyCSharpBuildDir)package/</PackageOutputPath>
     </PropertyGroup>
 
 </Project>

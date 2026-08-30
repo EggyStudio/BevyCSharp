@@ -63,11 +63,58 @@ public sealed class Input
     /// <summary>True on the single frame <paramref name="key"/> went up.</summary>
     public bool KeyReleased(Key key) => TestBit(_released, key);
 
-    /// <summary>True while any key is held.</summary>
+    /// <summary>True while any key at all is held.</summary>
     public bool AnyKeyDown() => AnyBit(_down);
 
-    /// <summary>True when any key went down this frame.</summary>
+    /// <summary>True when any key at all went down this frame.</summary>
     public bool AnyKeyPressed() => AnyBit(_pressed);
+
+    /// <summary>True while at least one of <paramref name="keys"/> is held.</summary>
+    /// <remarks>
+    /// Mirrors Bevy's <c>ButtonInput::any_pressed</c>. This is how you express a side-agnostic
+    /// modifier by hand: <c>AnyKeyDown([Key.ControlLeft, Key.ControlRight])</c>.
+    /// </remarks>
+    public bool AnyKeyDown(ReadOnlySpan<Key> keys)
+    {
+        foreach (var key in keys)
+            if (TestBit(_down, key))
+                return true;
+
+        return false;
+    }
+
+    /// <summary>True while every one of <paramref name="keys"/> is held.</summary>
+    /// <remarks>Mirrors Bevy's <c>ButtonInput::all_pressed</c>. An empty span is true.</remarks>
+    public bool AllKeysDown(ReadOnlySpan<Key> keys)
+    {
+        foreach (var key in keys)
+            if (!TestBit(_down, key))
+                return false;
+
+        return true;
+    }
+
+    /// <summary>True when at least one of <paramref name="keys"/> went down this frame.</summary>
+    /// <remarks>Mirrors Bevy's <c>ButtonInput::any_just_pressed</c>.</remarks>
+    public bool AnyKeyPressed(ReadOnlySpan<Key> keys)
+    {
+        foreach (var key in keys)
+            if (TestBit(_pressed, key))
+                return true;
+
+        return false;
+    }
+
+    /// <summary>True when at least one of <paramref name="keys"/> went up this frame.</summary>
+    /// <remarks>Mirrors Bevy's <c>ButtonInput::any_just_released</c>.</remarks>
+    public bool AnyKeyReleased(ReadOnlySpan<Key> keys)
+    {
+        foreach (var key in keys)
+            if (TestBit(_released, key))
+                return true;
+
+        return false;
+    }
 
     /// <summary>True while <paramref name="button"/> is held down.</summary>
     public bool MouseDown(MouseButton button) => (_mouseDown & Bit(button)) != 0;

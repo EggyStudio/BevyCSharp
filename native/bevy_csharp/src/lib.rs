@@ -1,4 +1,4 @@
-//! `bevy_csharp` — a C ABI over the [Bevy] engine, consumed by the BevyCSharp NuGet package.
+//! `bevy_csharp` a C ABI over the [Bevy] engine, consumed by the BevyCSharp NuGet package.
 //!
 //! # What this is
 //!
@@ -11,13 +11,13 @@
 //!   component with a real `ComponentId`.
 //! - **Systems** are C# function pointers added to Bevy's `Startup`/`First`/`PreUpdate`/
 //!   `Update`/`PostUpdate`/`Last` schedules as exclusive systems.
-//! - **Iteration** hands C# raw pointers into Bevy's table storage, so a behaviour's
+//! - **Iteration** hands C# raw pointers into Bevy's table storage, so a behavior's
 //!   per-entity method writes straight into the component column with no marshalling.
 //!
 //! # Threading
 //!
 //! A system callback runs on Bevy's main thread with the world loaned to it (see
-//! [`state`]). Managed code may fan the per-entity loop out across worker threads — those
+//! [`state`]). Managed code may fan the per-entity loop out across worker threads, those
 //! threads can safely write through the chunk pointers they were handed, but any call
 //! that needs the world itself returns [`interop::status::NO_WORLD`], steering structural
 //! changes onto the managed command buffer that is applied on the main thread.

@@ -7,6 +7,8 @@
         <IsTestProject>true</IsTestProject>
         <!-- Test behaviors are documented inline; XML docs are not required here. -->
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <!-- The input tests write the native snapshot struct directly, which has fixed buffers. -->
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>

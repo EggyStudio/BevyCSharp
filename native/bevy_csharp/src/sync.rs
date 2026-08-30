@@ -2,7 +2,7 @@
 //!
 //! Bevy stays the single source of truth. C# calls [`bcs_frame_state`] once at the top
 //! of each frame (from its `First`-stage system) and refreshes its `Time` and `Input`
-//! objects from the snapshot, so behaviour scripts read plain managed properties in the
+//! objects from the snapshot, so behavior scripts read plain managed properties in the
 //! hot path instead of crossing the FFI boundary per query.
 
 use bevy::input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll, MouseButton};

@@ -416,7 +416,23 @@ public enum MouseButton
     Forward = 4,
 }
 
-/// <summary>Modifier keys that must be held for a shortcut to fire.</summary>
+/// <summary>
+/// Modifier keys that must be held for a shortcut to fire. Combine them with <c>|</c>.
+/// </summary>
+/// <remarks>
+/// <para>
+/// This is a flags enum, so a shortcut can require any number of modifiers at once:
+/// <c>KeyModifier.Ctrl | KeyModifier.Shift</c>.
+/// </para>
+/// <para>
+/// Each flag is side-agnostic - <see cref="Ctrl"/> is satisfied by either Ctrl key - which is
+/// almost always what a shortcut means. That matches winit's <c>ModifiersState</c>, the layer
+/// Bevy's own windowing sits on. Bevy itself has no modifier type: it exposes only the
+/// individual <c>KeyCode</c>s, so requiring one specific side means naming the key directly.
+/// <see cref="ToggleKeyAttribute"/> takes extra exact keys for that case, and
+/// <see cref="Input.AllKeysDown"/> is the manual equivalent.
+/// </para>
+/// </remarks>
 [Flags]
 public enum KeyModifier
 {
@@ -432,6 +448,6 @@ public enum KeyModifier
     /// <summary>Either Alt key must be held.</summary>
     Alt = 1 << 2,
 
-    /// <summary>Either Super/Windows/Command key must be held.</summary>
+    /// <summary>Either Super, Windows or Command key must be held.</summary>
     Super = 1 << 3,
 }

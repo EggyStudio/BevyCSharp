@@ -249,7 +249,7 @@ pub unsafe extern "C" fn bcs_app_destroy(handle: *mut BcsApp) {
 /// Registers a component layout with the Bevy world, returning its `ComponentId`.
 ///
 /// The layout is padded to its alignment, which Bevy requires. `size` must therefore
-/// already be a multiple of `align` for the round-trip to be lossless — which is what
+/// already be a multiple of `align` for the round-trip to be lossless, which is what
 /// `Unsafe.SizeOf<T>()` guarantees for a blittable C# struct.
 ///
 /// # Safety

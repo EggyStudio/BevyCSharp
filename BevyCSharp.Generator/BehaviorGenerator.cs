@@ -267,6 +267,11 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     }
 
     /// <summary>Reads a <c>[ToggleKey]</c> attribute off a method.</summary>
+    /// <remarks>
+    /// The modifier argument is a flags enum, so a combination such as
+    /// <c>KeyModifier.Ctrl | KeyModifier.Shift</c> arrives as a single folded constant. There is
+    /// nothing extra to do here to support several modifiers at once.
+    /// </remarks>
     private static ToggleKeyInfo? GetToggle(IMethodSymbol method)
     {
         foreach (var attribute in method.GetAttributes())
@@ -274,21 +279,16 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
             if (attribute.AttributeClass?.ToDisplayString() != $"{AttributeNamespace}.ToggleKeyAttribute")
                 continue;
 
-            var key = attribute.ConstructorArguments.Length > 0
-                      && attribute.ConstructorArguments[0].Value is int k
-                ? k
-                : 0;
-            var modifier = attribute.ConstructorArguments.Length > 1
-                           && attribute.ConstructorArguments[1].Value is int m
-                ? m
-                : 0;
+            var arguments = attribute.ConstructorArguments;
+            var key = arguments.Length > 0 && arguments[0].Value is int k ? k : 0;
+            var modifiers = arguments.Length > 1 && arguments[1].Value is int m ? m : 0;
 
             var defaultEnabled = true;
             foreach (var named in attribute.NamedArguments)
                 if (named.Key == "DefaultEnabled" && named.Value.Value is bool enabled)
                     defaultEnabled = enabled;
 
-            return new ToggleKeyInfo(key, modifier, defaultEnabled);
+            return new ToggleKeyInfo(key, modifiers, defaultEnabled);
         }
 
         return null;

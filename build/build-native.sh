@@ -6,35 +6,60 @@
 # once per runtime identifier and shipped under runtimes/<rid>/native/. This script builds the
 # host RID by default; pass a target triple to cross-compile one of the others.
 #
+# Everything this script generates lives under build/ - cargo's target directory and the staged
+# per-RID artifacts both. The repository root stays clean; only native/ (the Rust sources) and
+# the project folders live there.
+#
 # Usage:
 #   build/build-native.sh                      # host, headless profile
 #   build/build-native.sh --render             # host, with Bevy's renderer
 #   build/build-native.sh --target x86_64-pc-windows-msvc --render
+#   build/build-native.sh --clean              # remove build/target and build/artifacts first
 #
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NATIVE_DIR="$ROOT/native"
-ARTIFACT_DIR="$NATIVE_DIR/artifacts"
+# This script's own directory. All build output is written here.
+BUILD_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# One level up, purely to locate the Rust sources - nothing is ever written there.
+REPO_ROOT="$(cd "$BUILD_DIR/.." && pwd)"
+
+NATIVE_DIR="$REPO_ROOT/native"
+TARGET_DIR="$BUILD_DIR/target"
+ARTIFACT_DIR="$BUILD_DIR/artifacts"
 
 FEATURES="headless"
 TARGET=""
+CLEAN=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --render)  FEATURES="render"; shift ;;
+        --render)   FEATURES="render"; shift ;;
         --headless) FEATURES="headless"; shift ;;
-        --target)  TARGET="$2"; shift 2 ;;
+        --target)   TARGET="$2"; shift 2 ;;
+        --clean)    CLEAN=1; shift ;;
         -h|--help)
-            sed -n '2,14p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+            sed -n '2,18p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
             exit 0 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
 done
 
+if [[ ! -f "$NATIVE_DIR/Cargo.toml" ]]; then
+    echo "error: no Rust workspace at '$NATIVE_DIR'." >&2
+    echo "       This script expects to live in <repo>/build/ with the sources in <repo>/native/." >&2
+    exit 1
+fi
+
 if ! command -v cargo >/dev/null 2>&1; then
     echo "error: cargo not found. Install Rust from https://rustup.rs and re-run." >&2
+    echo "       If it is installed, add it to PATH: export PATH=\"\$HOME/.cargo/bin:\$PATH\"" >&2
     exit 1
+fi
+
+if [[ $CLEAN -eq 1 ]]; then
+    echo "==> cleaning $TARGET_DIR and $ARTIFACT_DIR"
+    rm -rf "$TARGET_DIR" "$ARTIFACT_DIR"
 fi
 
 # Map a Rust target triple onto the .NET runtime identifier and library file name that the
@@ -65,6 +90,8 @@ fi
 read -r RID LIBNAME <<<"$MAPPING"
 
 echo "==> building bevy_csharp"
+echo "    sources  : $NATIVE_DIR"
+echo "    output   : $TARGET_DIR"
 echo "    target   : $TARGET"
 echo "    rid      : $RID"
 echo "    features : $FEATURES"
@@ -77,22 +104,25 @@ fi
 cargo build \
     --release \
     --manifest-path "$NATIVE_DIR/Cargo.toml" \
+    --target-dir "$TARGET_DIR" \
     --target "$TARGET" \
     --no-default-features \
     --features "$FEATURES"
 
-BUILT="$NATIVE_DIR/target/$TARGET/release/$LIBNAME"
+BUILT="$TARGET_DIR/$TARGET/release/$LIBNAME"
 if [[ ! -f "$BUILT" ]]; then
     echo "error: cargo reported success but '$BUILT' is missing." >&2
     exit 1
 fi
 
+# The per-RID slot the NuGet package picks up at pack time.
 mkdir -p "$ARTIFACT_DIR/$RID"
 cp "$BUILT" "$ARTIFACT_DIR/$RID/$LIBNAME"
 
-# Also stage it where a plain `cargo build` would have put it, so running straight out of the
-# repo picks it up without a pack step.
-mkdir -p "$NATIVE_DIR/target/release"
-cp "$BUILT" "$NATIVE_DIR/target/release/$LIBNAME"
+# A flat copy for repo-local development: the projects copy this next to their own output, so
+# running the sample or the tests works without packing first.
+mkdir -p "$TARGET_DIR/release"
+cp "$BUILT" "$TARGET_DIR/release/$LIBNAME"
 
 echo "==> staged $ARTIFACT_DIR/$RID/$LIBNAME"
+echo "==> staged $TARGET_DIR/release/$LIBNAME (for local runs)"

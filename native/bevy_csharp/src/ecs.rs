@@ -226,7 +226,7 @@ fn table_storage(world: &World, component: ComponentId) -> Option<StorageType> {
 ///
 /// Writes at most `capacity` chunks into `out` and returns the number of chunks that
 /// exist. A return value greater than `capacity` means the buffer was too small and
-/// nothing usable was written past the end — the caller should grow and call again.
+/// nothing usable was written past the end, the caller should grow and call again.
 ///
 /// `mark_changed` mirrors what Bevy's `Query<&mut T>` does: it stamps every returned row
 /// with the current change tick, because C# writes straight through `data` and Bevy has
