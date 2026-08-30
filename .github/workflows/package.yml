@@ -85,7 +85,7 @@ jobs:
         shell: bash
         run: build/build-native.sh --render --target ${{ matrix.target }}
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         with:
           name: native-${{ matrix.rid }}
           path: build/artifacts/${{ matrix.rid }}/*
@@ -106,7 +106,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -134,12 +134,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
       # Every runtime identifier's bridge, laid back out the way the csproj expects to find it.
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           pattern: native-*
           path: staging
@@ -171,7 +171,7 @@ jobs:
         shell: bash
         run: unzip -l build/package/*.nupkg
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         with:
           name: nupkg
           path: build/package/*.nupkg
