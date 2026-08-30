@@ -14,8 +14,8 @@ namespace Bevy;
 /// <para>
 /// It gets there two ways. The generator emits a module initializer per assembly, so most
 /// registrations have already announced themselves in <see cref="BehaviorRegistry"/> by the
-/// time this runs - fast, and safe under trimming. For an assembly that is loaded but has not
-/// been touched yet, its initializer has not fired, so the plugin also scans for methods
+/// time this runs, which is both fast and safe under trimming. For an assembly that is loaded
+/// but not touched yet, its initializer has not fired, so the plugin also scans for methods
 /// tagged <see cref="GeneratedBehaviorRegistrationAttribute"/> and picks up whatever the
 /// registry is missing.
 /// </para>
@@ -116,8 +116,8 @@ public sealed class BehaviorsPlugin : IPlugin
     /// <remarks>
     /// Defensive because this walks every assembly in the process, including ones this package
     /// knows nothing about. Reading attributes on an unrelated method can throw when one of
-    /// them names a type the process cannot load - a test host or plugin loader produces
-    /// exactly that - and it must not stop behavior discovery for everything else.
+    /// them names a type the process cannot load (a test host or plugin loader produces exactly
+    /// that), and it must not stop behavior discovery for everything else.
     /// </remarks>
     private static bool IsRegistration(MethodInfo method)
     {

@@ -21,7 +21,7 @@ namespace Bevy.Generator;
 /// <para>
 /// The emitted code stays deliberately thin. Iteration, filtering and parallel partitioning
 /// all live in <c>BehaviorRunners</c> in the runtime library, so the generated file is a
-/// handful of readable, verifiable lines that a consumer can step through - and so fixing the
+/// handful of readable, verifiable lines that a consumer can step through, and so fixing the
 /// iteration strategy does not mean regenerating anyone's code.
 /// </para>
 /// </remarks>

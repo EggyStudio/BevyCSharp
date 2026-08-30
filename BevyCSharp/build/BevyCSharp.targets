@@ -31,8 +31,8 @@
 
     <!--
       A behavior struct that is not partial, or whose fields are not blittable, is a compile
-      error from the generator rather than a runtime surprise. Nothing to configure here - the
-      generator ships in the package's analyzer slot and is picked up automatically.
+      error from the generator rather than a runtime surprise. Nothing to configure here.
+      The generator ships in the package's analyzer slot and is picked up automatically.
     -->
 
 </Project>

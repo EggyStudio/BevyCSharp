@@ -162,6 +162,9 @@ pub struct BcsConfig {
     /// Number of frames to run before exiting; `0` runs until an exit is requested.
     /// Used by tests to drive a deterministic number of ticks.
     pub headless_frames: u32,
+    /// Graphics API to pin the renderer to. `0` leaves the choice to wgpu; see
+    /// `GraphicsBackend` on the managed side for the rest. Ignored when headless.
+    pub backend: u32,
 }
 
 /// Runs `f`, converting any panic into [`status::PANIC`] instead of unwinding into .NET.

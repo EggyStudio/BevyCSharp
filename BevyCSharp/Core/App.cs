@@ -15,7 +15,7 @@ namespace Bevy;
 /// active system instead, and <see cref="App"/> switches routes automatically.
 /// </para>
 /// <para>
-/// In the common case you never touch this directly - <see cref="BevyApp.Run(Config?)"/> wires
+/// In the common case you never touch this directly <see cref="BevyApp.Run(Config?)"/> wires
 /// up the defaults and discovers every <c>[Behavior]</c> struct in your assemblies.
 /// </para>
 /// </remarks>
@@ -76,18 +76,12 @@ public sealed unsafe class App : IDisposable
                 Headless = Config.Headless ? 1u : 0u,
                 HeadlessFps = Config.HeadlessFps,
                 HeadlessFrames = Config.HeadlessFrames,
+                Backend = (uint)Config.Backend,
             };
             _handle = Native.bcs_app_create(&native);
         }
 
-        if (_handle == IntPtr.Zero)
-            throw new BevyNativeException(
-                NativeStatus.InvalidState,
-                "The native Bevy bridge failed to create an app. "
-                + (Config.Headless || HasRenderer
-                    ? "See stderr for the Bevy startup error."
-                    : "This native build has no renderer compiled in - set Config.Headless, "
-                      + "or install a native package built with the 'render' feature."));
+        if (_handle == IntPtr.Zero) throw CreationFailed();
 
         ComponentRegistry.BeginApp(_handle);
 
@@ -98,6 +92,29 @@ public sealed unsafe class App : IDisposable
         World.InsertResource(new EcsCommands());
 
         RegisterEngineSystems();
+    }
+
+    /// <summary>Explains, as specifically as possible, why the engine would not start.</summary>
+    private BevyNativeException CreationFailed()
+    {
+        if (!Config.Headless && !HasRenderer)
+            return new BevyNativeException(
+                NativeStatus.InvalidState,
+                "The native Bevy bridge has no renderer compiled in, so it cannot open a window. "
+                + "Set Config.Headless, or rebuild the bridge with build/build-native.sh --render.");
+
+        if (Config.Backend != GraphicsBackend.Automatic)
+            return new BevyNativeException(
+                NativeStatus.InvalidState,
+                $"The renderer could not start on {Config.Backend}. That backend was requested "
+                + "explicitly, so nothing else was tried. This machine may have no driver for "
+                + "it. Set Config.Backend to GraphicsBackend.Automatic to let wgpu choose, or "
+                + "see stderr for the error the renderer reported.");
+
+        return new BevyNativeException(
+            NativeStatus.InvalidState,
+            "The native Bevy bridge failed to create an app. See stderr for the error it "
+            + "reported during startup.");
     }
 
     /// <summary>Wires the two internal systems that bracket every frame.</summary>
@@ -119,7 +136,7 @@ public sealed unsafe class App : IDisposable
         }, "Engine.CommandFlush"));
     }
 
-    // -- System registration-------
+    // -- System registration
 
     /// <summary>Registers a system function in <paramref name="stage"/>.</summary>
     public App AddSystem(Stage stage, SystemFn system) =>
@@ -186,7 +203,7 @@ public sealed unsafe class App : IDisposable
             .Select(s => s.Descriptor)
             .ToArray();
 
-    // -- Plugins--------
+    // -- Plugins
 
     /// <summary>Adds a plugin, building it immediately. Adding the same type twice is a no-op.</summary>
     /// <exception cref="PluginOrderException">A declared dependency is not yet registered.</exception>
@@ -220,7 +237,7 @@ public sealed unsafe class App : IDisposable
     /// <summary>True when a plugin of type <typeparamref name="T"/> is registered.</summary>
     public bool HasPlugin<T>() where T : IPlugin => _plugins.ContainsKey(typeof(T));
 
-    // -- Execution------
+    // -- Execution
 
     /// <summary>
     /// Runs the engine. Blocks until the window closes or <see cref="RequestExit"/> is called,
@@ -248,6 +265,42 @@ public sealed unsafe class App : IDisposable
     /// <summary>Asks the engine to shut down after the current frame.</summary>
     public static void RequestExit() =>
         Native.Check(Native.bcs_app_request_exit(), "bcs_app_request_exit");
+
+    /// <summary>
+    /// Describes the graphics adapter the renderer actually chose, or <see langword="null"/> in
+    /// a headless run.
+    /// </summary>
+    /// <remarks>
+    /// This is how you confirm which backend you really got. Asking for
+    /// <see cref="GraphicsBackend.Vulkan"/> and reading "Vulkan | ..." back is the difference
+    /// between believing and knowing. Only valid from inside a system, once the renderer has
+    /// initialised, so <see cref="Stage.Startup"/> at the earliest.
+    /// </remarks>
+    public static string? DescribeAdapter()
+    {
+        var needed = Native.bcs_render_adapter(null, 0);
+        if (needed <= 0) return null;
+
+        var buffer = new byte[needed];
+        fixed (byte* target = buffer)
+        {
+            if (Native.bcs_render_adapter(target, needed) != needed) return null;
+        }
+
+        return Encoding.UTF8.GetString(buffer);
+    }
+
+    /// <summary>
+    /// Spawns a 2D camera, so a windowed run has something clearing the frame.
+    /// </summary>
+    /// <remarks>
+    /// A stopgap. Bevy renders nothing without a camera, and Bevy's own render components are
+    /// not bridged to C# yet (only components C# declares are), so managed code cannot spawn
+    /// one itself. Does nothing in a headless run.
+    /// </remarks>
+    /// <returns><see langword="true"/> if a camera was spawned.</returns>
+    public static bool SpawnRenderCamera() =>
+        Native.bcs_render_spawn_camera() == NativeStatus.Ok;
 
     /// <summary>Handles an exception that escaped a system, per <see cref="Config"/>.</summary>
     internal void OnSystemException(SystemDescriptor descriptor, Exception exception)

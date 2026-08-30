@@ -15,8 +15,8 @@ namespace Bevy;
 /// <see cref="Bevy.Entity.None"/>.
 /// </para>
 /// <para>
-/// <b>On worker threads,</b> <see cref="Ecs"/> is unusable - the world is only loaned to the
-/// main thread. <see cref="Cmd"/>, <see cref="Time"/> and <see cref="Input"/> are all safe to
+/// <b>On worker threads,</b> <see cref="Ecs"/> is unusable, because the world is only loaned
+/// to the main thread. <see cref="Cmd"/>, <see cref="Time"/> and <see cref="Input"/> are safe to
 /// read from anywhere.
 /// </para>
 /// </remarks>

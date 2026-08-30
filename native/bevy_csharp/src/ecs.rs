@@ -38,7 +38,7 @@ fn component_from(index: i32) -> Option<ComponentId> {
 
 /// Splits an entity handle into its logical index and generation.
 ///
-/// The handle's own bits are deliberately opaque - Bevy documents them as "not meaningful" -
+/// The handle's own bits are deliberately opaque, Bevy documents them as "not meaningful",
 /// so this is the only correct way to read an index out of one. It touches no world state, so
 /// it is safe to call from any thread at any time. Intended for diagnostics and display, not
 /// for hot loops.

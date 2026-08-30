@@ -6,12 +6,12 @@
 //! renderer. This crate adds no engine of its own. It exposes just enough of Bevy through
 //! a stable, flat C interface for .NET to drive it:
 //!
-//! - **Components** are registered at runtime from C# struct layouts, using Bevy's
+//! **Components** are registered at runtime from C# struct layouts, using Bevy's
 //!   dynamic [`ComponentDescriptor`] support. A `[Behavior]` struct becomes a real Bevy
 //!   component with a real `ComponentId`.
-//! - **Systems** are C# function pointers added to Bevy's `Startup`/`First`/`PreUpdate`/
+//! **Systems** are C# function pointers added to Bevy's `Startup`/`First`/`PreUpdate`/
 //!   `Update`/`PostUpdate`/`Last` schedules as exclusive systems.
-//! - **Iteration** hands C# raw pointers into Bevy's table storage, so a behavior's
+//! **Iteration** hands C# raw pointers into Bevy's table storage, so a behavior's
 //!   per-entity method writes straight into the component column with no marshalling.
 //!
 //! # Threading
@@ -34,4 +34,4 @@ pub mod sync;
 
 /// Version of the C ABI. C# checks this at load time and refuses a mismatch, so a stale
 /// native library next to a newer managed assembly fails loudly instead of corrupting memory.
-pub const ABI_VERSION: i32 = 1;
+pub const ABI_VERSION: i32 = 2;

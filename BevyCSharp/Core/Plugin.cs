@@ -58,8 +58,8 @@ public sealed class PluginOrderException : Exception
 /// The plugins every BevyCSharp app needs: engine resource wiring plus behavior discovery.
 /// </summary>
 /// <remarks>
-/// Unlike Bevy's own <c>DefaultPlugins</c>, this group is small - windowing, rendering, assets
-/// and input backends are all Bevy's job and are installed inside the native bridge according
+/// Unlike Bevy's own <c>DefaultPlugins</c>, this group is small. Windowing, rendering, assets
+/// and input backends are all Bevy's job, and are installed inside the native bridge according
 /// to the <see cref="Config"/> you pass to <see cref="App"/>.
 /// </remarks>
 public sealed class DefaultPlugins : IPluginGroup

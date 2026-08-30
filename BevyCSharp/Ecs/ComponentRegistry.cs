@@ -11,7 +11,7 @@ namespace Bevy;
 /// Bevy normally learns component layouts at compile time from Rust types. C# types are not
 /// available to it, so each blittable struct is registered at runtime with its size and
 /// alignment, and Bevy hands back a real <c>ComponentId</c>. From that point the struct is an
-/// ordinary Bevy component - it lives in tables, participates in archetypes, and is visible to
+/// ordinary Bevy component. It lives in tables, participates in archetypes, and is visible to
 /// Bevy's own change detection.
 /// </para>
 /// <para>
@@ -128,7 +128,7 @@ public static class ComponentType<T> where T : unmanaged
     /// <summary>Layout probe: the offset of <c>Value</c> is the alignment of <typeparamref name="T"/>.</summary>
     private struct AlignmentProbe
     {
-#pragma warning disable CS0169 // Field is never used - it exists purely to create padding.
+#pragma warning disable CS0169 // Fields are never used; they exist purely to create padding.
         private readonly byte _pad;
         private readonly T _value;
 #pragma warning restore CS0169

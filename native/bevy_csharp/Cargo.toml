@@ -24,12 +24,16 @@ headless = [
     "bevy/mouse",
 ]
 
-# Full desktop profile: DefaultPlugins with windowing, renderer and input backend.
-# Requires the platform development packages (X11/Wayland, alsa, udev, vulkan loader).
+# Full desktop profile: a real window, Bevy's renderer and the winit input backend.
+#
+# Deliberately assembled feature by feature rather than taking bevy/default_platform, which
+# drags in bevy_gilrs and wayland. Both need C development packages present at build time
+# (libudev, wayland), and neither is needed to open a window and draw. X11 gets in through
+# x11-dl, which dlopens at runtime, so this profile builds with nothing but a C compiler.
 render = [
     "headless",
-    "bevy/default_app",
-    "bevy/default_platform",
+    "bevy/bevy_asset",
+    "bevy/bevy_state",
     "bevy/bevy_winit",
     "bevy/bevy_window",
     "bevy/bevy_render",
@@ -39,12 +43,13 @@ render = [
     "bevy/bevy_text",
     "bevy/bevy_ui",
     "bevy/bevy_gizmos",
-    "bevy/bevy_asset",
     "bevy/bevy_scene",
+    "bevy/default_font",
     "bevy/png",
     "bevy/ktx2",
     "bevy/zstd_rust",
     "bevy/tonemapping_luts",
+    "bevy/reflect_auto_register",
     "bevy/x11",
 ]
 

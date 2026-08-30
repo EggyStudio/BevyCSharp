@@ -7,8 +7,8 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// Refreshed once per frame during <see cref="Stage.FrameSync"/>, before any user system runs,
-/// so every system in a frame observes the same input. Reads are plain managed field accesses
-/// - no call crosses into the engine.
+/// so every system in a frame observes the same input. Reads are plain managed field accesses,
+/// no call crosses into the engine.
 /// </remarks>
 /// <example>
 /// <code>

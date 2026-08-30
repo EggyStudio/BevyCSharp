@@ -9,12 +9,12 @@ namespace Bevy;
 /// <para>
 /// The generator emits a module initializer per assembly that calls <see cref="Add"/>. The CLR
 /// runs it the first time anything in that assembly is touched, so by the time an
-/// <see cref="App"/> is built the registrations are simply sitting here - no assembly scan, no
-/// reflection, nothing for a trimmer to remove by accident.
+/// <see cref="App"/> is built the registrations are simply sitting here, with no assembly
+/// scan, no reflection, and nothing for a trimmer to remove by accident.
 /// </para>
 /// <para>
 /// <see cref="BehaviorsPlugin"/> still falls back to scanning for assemblies that are loaded
-/// but whose module initializer has not run - which is what happens when a behavior library is
+/// but whose module initializer has not run, which is what happens when a behavior library is
 /// referenced but no code in it has been executed yet. The registry is what makes the common
 /// case fast and trim-safe; the scan is what makes the uncommon case still work.
 /// </para>

@@ -16,9 +16,9 @@ namespace Bevy;
 /// <para>
 /// <b>Threading.</b> These methods are only valid on the main thread while a system is
 /// running, because that is when Bevy loans its world out. A behavior method running on a
-/// worker thread (the generator parallelises large iterations) must not call them - it should
-/// write through the component reference it was handed and queue structural changes on
-/// <see cref="EcsCommands"/>. Calling anyway throws
+/// worker thread (the generator parallelises large iterations) must not call them, and should
+/// instead write through the component reference it was handed, queueing structural changes
+/// on <see cref="EcsCommands"/>. Calling anyway throws
 /// <see cref="BevyNativeException"/> with <see cref="NativeStatus.NoWorld"/> rather than
 /// corrupting the world.
 /// </para>
@@ -166,7 +166,7 @@ public sealed unsafe class EcsWorld
     /// <summary>The Bevy component id for <typeparamref name="T"/>, registering it if needed.</summary>
     public static int ComponentId<T>() where T : unmanaged => ComponentType<T>.Id;
 
-    // -- Iteration------
+    // -- Iteration
 
     /// <summary>
     /// Collects the storage runs holding <typeparamref name="T"/>, optionally filtered.

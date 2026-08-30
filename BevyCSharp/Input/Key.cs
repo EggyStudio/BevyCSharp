@@ -247,7 +247,7 @@ public enum Key
 
 
     // Punctuation
-    /// <summary>The - key.</summary>
+    /// <summary>The minus key.</summary>
     Minus = 72,
 
     /// <summary>The = key.</summary>
@@ -315,7 +315,7 @@ public enum Key
     /// <summary>The numpad + key.</summary>
     NumpadAdd = 93,
 
-    /// <summary>The numpad - key.</summary>
+    /// <summary>The numpad minus key.</summary>
     NumpadSubtract = 94,
 
     /// <summary>The numpad * key.</summary>
@@ -425,12 +425,11 @@ public enum MouseButton
 /// <c>KeyModifier.Ctrl | KeyModifier.Shift</c>.
 /// </para>
 /// <para>
-/// Each flag is side-agnostic - <see cref="Ctrl"/> is satisfied by either Ctrl key - which is
-/// almost always what a shortcut means. That matches winit's <c>ModifiersState</c>, the layer
-/// Bevy's own windowing sits on. Bevy itself has no modifier type: it exposes only the
-/// individual <c>KeyCode</c>s, so requiring one specific side means naming the key directly.
-/// <see cref="ToggleKeyAttribute"/> takes extra exact keys for that case, and
-/// <see cref="Input.AllKeysDown"/> is the manual equivalent.
+/// Each flag is side-agnostic, so <see cref="Ctrl"/> is satisfied by either Ctrl key, which
+/// is almost always what a shortcut means. That matches winit's <c>ModifiersState</c>, the
+/// layer Bevy's own windowing sits on. Bevy itself has no modifier type at all, exposing
+/// only the individual <c>KeyCode</c>s, so requiring one specific side means naming that key
+/// directly with <see cref="Input.AllKeysDown"/>.
 /// </para>
 /// </remarks>
 [Flags]

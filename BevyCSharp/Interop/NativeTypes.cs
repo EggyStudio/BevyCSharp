@@ -8,7 +8,7 @@ namespace Bevy.Interop;
 /// <remarks>
 /// The pointers reference Bevy's own memory, so writing through <see cref="Components{T}"/>
 /// updates the component in place with no copy. They stay valid only until the next
-/// structural change to the world (a spawn, despawn, insert or remove) - which is exactly why
+/// structural change to the world (a spawn, despawn, insert or remove), which is exactly why
 /// behavior methods queue structural work on <see cref="EcsCommands"/> instead of applying it
 /// mid-iteration.
 /// </remarks>
@@ -151,4 +151,7 @@ public unsafe struct NativeConfig
 
     /// <summary>Frames to run before exiting; 0 to run until exit is requested.</summary>
     public uint HeadlessFrames;
+
+    /// <summary>Graphics API to pin the renderer to; 0 leaves the choice to wgpu.</summary>
+    public uint Backend;
 }

@@ -23,8 +23,8 @@
     <!--
       Where the Rust workspace lives, and where its output goes.
 
-      Sources are in native/; everything generated - cargo's target directory and the staged
-      per-RID artifacts - goes under build/, so the repository root stays clean. Both must agree
+      Sources are in native/; everything generated (cargo's target directory and the staged
+      per-RID artifacts) goes under build/, so the repository root stays clean. Both must agree
       with build/build-native.sh, which is what actually writes them.
     -->
     <PropertyGroup>

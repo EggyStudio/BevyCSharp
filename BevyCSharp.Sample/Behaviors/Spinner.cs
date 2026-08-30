@@ -8,7 +8,7 @@ namespace BevyCSharp.Sample.Behaviors;
 /// <remarks>
 /// This is the shape the whole package exists for. <see cref="Angle"/> and <see cref="Speed"/>
 /// live in Bevy's tables, one copy per entity. <see cref="Tick"/> is an instance method, so it
-/// runs once per entity with <c>this</c> bound by reference to that entity's row - no lookup,
+/// runs once per entity with <c>this</c> bound by reference to that entity's row, no lookup,
 /// no copy, no separate system class to keep in sync with the component.
 /// </remarks>
 [Behavior]

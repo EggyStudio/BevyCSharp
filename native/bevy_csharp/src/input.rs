@@ -28,29 +28,29 @@ macro_rules! key_table {
 }
 
 key_table![
-    // 0..=25 - letters
+    // 0..=25: letters
     KeyA, KeyB, KeyC, KeyD, KeyE, KeyF, KeyG, KeyH, KeyI, KeyJ, KeyK, KeyL, KeyM,
     KeyN, KeyO, KeyP, KeyQ, KeyR, KeyS, KeyT, KeyU, KeyV, KeyW, KeyX, KeyY, KeyZ,
-    // 26..=35 - top-row digits
+    // 26..=35: top-row digits
     Digit0, Digit1, Digit2, Digit3, Digit4, Digit5, Digit6, Digit7, Digit8, Digit9,
-    // 36..=47 - function keys
+    // 36..=47: function keys
     F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
-    // 48..=59 - editing and whitespace
+    // 48..=59: editing and whitespace
     Escape, Enter, Tab, Space, Backspace, Delete, Insert,
     Home, End, PageUp, PageDown, CapsLock,
-    // 60..=63 - arrows
+    // 60..=63: arrows
     ArrowLeft, ArrowRight, ArrowUp, ArrowDown,
-    // 64..=71 - modifiers
+    // 64..=71: modifiers
     ShiftLeft, ShiftRight, ControlLeft, ControlRight,
     AltLeft, AltRight, SuperLeft, SuperRight,
-    // 72..=82 - punctuation
+    // 72..=82: punctuation
     Minus, Equal, BracketLeft, BracketRight, Backslash, Semicolon,
     Quote, Backquote, Comma, Period, Slash,
-    // 83..=99 - numpad
+    // 83..=99: numpad
     Numpad0, Numpad1, Numpad2, Numpad3, Numpad4, Numpad5, Numpad6, Numpad7,
     Numpad8, Numpad9, NumpadAdd, NumpadSubtract, NumpadMultiply, NumpadDivide,
     NumpadDecimal, NumpadEnter, NumLock,
-    // 100..=103 - misc
+    // 100..=103: misc
     PrintScreen, ScrollLock, Pause, ContextMenu,
 ];
 

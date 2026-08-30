@@ -189,7 +189,7 @@ internal static class BehaviorEmitter
             .Append("{\n")
             .Append("    /// <summary>\n")
             .Append("    /// Announces this assembly's behaviors as soon as the CLR touches it, so an app\n")
-            .Append("    /// can find them without scanning - which also keeps them safe from trimming.\n")
+            .Append("    /// can find them without scanning, which also keeps them safe from trimming.\n")
             .Append("    /// </summary>\n")
             .Append("    [global::System.Runtime.CompilerServices.ModuleInitializer]\n")
             .Append("    internal static void Initialize()\n")

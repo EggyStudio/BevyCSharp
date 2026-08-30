@@ -44,7 +44,7 @@ public static class NativeStatus
         NullArgument => "a required pointer argument was null",
         NoWorld =>
             "no Bevy world is available on this thread. ECS calls are only valid on the main "
-            + "thread while a system is running - from a parallel behavior method, queue the "
+            + "thread while a system is running. From a parallel behavior method, queue the "
             + "change on ctx.Cmd instead of calling ctx.Ecs",
         NoEntity => "the entity does not exist or has been despawned",
         NoComponent => "the component type was never registered with the Bevy world",

@@ -258,7 +258,7 @@ public sealed class BehaviorTests
     /// </summary>
     /// <remarks>
     /// A headless run has no keyboard, so this writes the same native snapshot struct the engine
-    /// fills each frame - keeping the test on the real code path rather than a parallel fake.
+    /// fills each frame, keeping the test on the real code path rather than a parallel fake.
     /// </remarks>
     private static unsafe Input KeysHeld(Key pressed, params Key[] held)
     {

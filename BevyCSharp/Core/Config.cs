@@ -15,6 +15,17 @@ public sealed class Config
     /// <summary>Window title.</summary>
     public string Title { get; set; } = "BevyCSharp";
 
+    /// <summary>
+    /// Which graphics API the renderer should use.
+    /// </summary>
+    /// <remarks>
+    /// Ignored in a headless run. <see cref="GraphicsBackend.Automatic"/> lets wgpu pick, which
+    /// on Linux and Windows already prefers Vulkan; naming one explicitly is for pinning the
+    /// choice rather than improving it. Ask for a backend the machine cannot provide and startup
+    /// fails rather than silently falling back.
+    /// </remarks>
+    public GraphicsBackend Backend { get; set; } = GraphicsBackend.Automatic;
+
     /// <summary>Requested window width in logical pixels.</summary>
     public uint Width { get; set; } = 1280;
 
@@ -57,8 +68,47 @@ public sealed class Config
         FailFastOnSystemException = true,
     };
 
+    /// <summary>A window of the given size, drawn with <paramref name="backend"/>.</summary>
+    public static Config Windowed(
+        string title,
+        uint width = 1280,
+        uint height = 720,
+        GraphicsBackend backend = GraphicsBackend.Automatic) => new()
+    {
+        Title = title,
+        Width = width,
+        Height = height,
+        Backend = backend,
+    };
+
     /// <inheritdoc/>
     public override string ToString() => Headless
         ? $"Config(headless, fps={HeadlessFps}, frames={HeadlessFrames})"
-        : $"Config('{Title}', {Width}x{Height}, vsync={Vsync})";
+        : $"Config('{Title}', {Width}x{Height}, vsync={Vsync}, backend={Backend})";
+}
+
+/// <summary>
+/// A graphics API the renderer can be pinned to.
+/// </summary>
+/// <remarks>
+/// These map onto wgpu's <c>Backends</c> flags, which is what Bevy's renderer is built on.
+/// Only backends the host platform supports are meaningful: Direct3D 12 is Windows-only and
+/// Metal is Apple-only.
+/// </remarks>
+public enum GraphicsBackend
+{
+    /// <summary>Let wgpu choose. Prefers Vulkan on Linux and Windows, Metal on Apple.</summary>
+    Automatic = 0,
+
+    /// <summary>Vulkan. Available on Linux, Windows and Android.</summary>
+    Vulkan = 1,
+
+    /// <summary>Direct3D 12. Windows only.</summary>
+    Direct3D12 = 2,
+
+    /// <summary>Metal. macOS and iOS only.</summary>
+    Metal = 3,
+
+    /// <summary>OpenGL or OpenGL ES. A fallback for machines with no modern driver.</summary>
+    OpenGL = 4,
 }

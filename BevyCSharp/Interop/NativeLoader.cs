@@ -58,7 +58,7 @@ internal static class NativeLoader
                 NativeStatus.InvalidState,
                 $"Native Bevy bridge reports ABI version {actual}, but this build of BevyCSharp "
                 + $"expects {Native.ExpectedAbiVersion}. The managed and native halves of the "
-                + "package are out of sync - reinstall the package or rebuild the native crate.");
+                + "package are out of sync. Reinstall the package, or rebuild the native crate.");
         }
     }
 

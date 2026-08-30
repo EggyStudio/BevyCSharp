@@ -11,7 +11,7 @@ namespace Bevy;
 /// <list type="bullet">
 ///   <item>
 ///     <description>
-///     A <b>static</b> stage method is a plain system - it runs once per frame, and is the
+///     A <b>static</b> stage method is a plain system, it runs once per frame, and is the
 ///     right shape for global logic that queries other components.
 ///     </description>
 ///   </item>
@@ -24,7 +24,7 @@ namespace Bevy;
 ///   </item>
 /// </list>
 /// <para>
-/// The struct must be <c>partial</c> - the generator adds the runner alongside it. All fields
+/// The struct must be <c>partial</c>, so the generator can add the runner alongside it. Fields
 /// must be blittable, since the layout is handed to Bevy verbatim.
 /// </para>
 /// </remarks>

@@ -170,7 +170,7 @@ public static void DrawHud(BehaviorContext ctx) { }
 [ToggleKey(Key.F3, KeyModifier.Ctrl | KeyModifier.Shift)] // Ctrl + Shift + F3
 ```
 
-Each flag is side-agnostic — `Ctrl` is satisfied by either Ctrl key — which is what a shortcut
+Each flag is side-agnostic, so `Ctrl` is satisfied by either Ctrl key, which is what a shortcut
 normally means, and matches winit's `ModifiersState`, the layer Bevy's own windowing sits on.
 Bevy itself has no modifier type; it exposes only the individual `KeyCode`s. To pin one side, or
 to build a chord out of an ordinary key, write the check yourself:
@@ -211,6 +211,49 @@ public void Tick(BehaviorContext ctx)
     if (Fuse <= 0f) ctx.Cmd.Despawn(ctx.Entity);   // not ctx.Ecs.Despawn
 }
 ```
+
+---
+
+## Running in a window
+
+The sample has a switch at the top of `Program.cs`:
+
+```csharp
+const bool RunInWindow = false;
+const GraphicsBackend Backend = GraphicsBackend.Vulkan;
+```
+
+or from the command line, which wins over the constants:
+
+```bash
+build/build-native.sh --render                  # once: build a bridge with the renderer
+
+dotnet run --project BevyCSharp.Sample -- --window
+dotnet run --project BevyCSharp.Sample -- --window --backend vulkan
+dotnet run --project BevyCSharp.Sample -- --headless --frames 120
+```
+
+Both modes run the identical behavior scripts. Nothing branches on whether a renderer exists -
+the engine decides that, from `Config`.
+
+`Config.Backend` pins the graphics API. `Automatic` already prefers Vulkan on Linux and Windows,
+so naming it is about making the choice explicit and failing loudly rather than falling back
+silently. `App.DescribeAdapter()` reports what you actually got, which is how you check:
+
+```
+[Renderer] adapter: Vulkan | NVIDIA GeForce RTX 4070 Laptop GPU | DiscreteGpu | NVIDIA
+[Renderer]  245.7 fps   frame    840   spinners 3
+```
+
+Ask for a backend the machine has no driver for and startup fails with a message saying so,
+rather than quietly picking something else.
+
+**What you will not see yet:** geometry. Bevy's own render components (`Camera`, `Mesh3d`,
+`MeshMaterial3d`, …) are not bridged to C# (only components C# declares are), so managed code
+cannot spawn anything drawable. `App.SpawnRenderCamera()` is a stopgap that puts a 2D camera in
+the world so the window shows a cleared frame instead of undefined contents. The window opens,
+the renderer initialises on the GPU, input flows, and the behaviors tick; the drawing half is
+still to come.
 
 ---
 
@@ -291,10 +334,14 @@ The bridge builds in two profiles:
 build/build-native.sh --render
 ```
 
-The `render` profile needs the platform development packages, on Linux that means X11 or
-Wayland, alsa, udev and a Vulkan loader. `Config.Headless` forces the windowless path even on a
-render build, which is how the tests and a dedicated server run the same behavior code without a
-display.
+The `render` profile is assembled feature by feature rather than taking Bevy's
+`default_platform`, which drags in gamepad support and Wayland. Both of those need C
+development packages present at build time. As built here it needs nothing but a C compiler:
+X11 arrives through `x11-dl`, which dlopens at runtime. It does take several minutes to compile
+and produces a much larger library.
+
+`Config.Headless` forces the windowless path even on a render build, which is how the tests and
+a dedicated server run the same behavior code without a display.
 
 ### Packing
 
@@ -318,8 +365,9 @@ run against a real Bevy app. Known gaps:
 
 - Only the `linux-x64` native bridge is built here. Other RIDs need a run of `build-native.sh` on
   (or cross-compiled for) that platform.
-- Bevy's rendering, assets and UI are reachable from Rust but are not yet surfaced to C#. A
-  `render` build opens a window; drawing into it still needs bridge work.
+- A `render` build opens a real window and initialises the GPU (verified on Vulkan), but Bevy's
+  rendering, asset and UI components are not yet surfaced to C#, so nothing can be drawn from a
+  behavior script.
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does
   nothing yet.
 - Component filters must be table-stored components, which is everything C# registers. A filter

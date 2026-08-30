@@ -5,7 +5,7 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// Stored as a world resource so the state survives across frames and can be inspected or
-/// driven from elsewhere - a debug menu, a save file, a test.
+/// driven from elsewhere: a debug menu, a save file, or a test.
 /// </remarks>
 public sealed class SystemToggleRegistry
 {
@@ -77,7 +77,7 @@ public static class BehaviorConditions
     /// </summary>
     /// <remarks>
     /// The flip happens on the frame <paramref name="key"/> goes down while the modifiers are
-    /// already held - the same shape as Bevy's own <c>input_toggle_active</c>, extended with the
+    /// already held. That is the same shape as Bevy's own <c>input_toggle_active</c>, plus the
     /// modifier check Bevy does not offer.
     /// </remarks>
     public static Func<World, bool> KeyToggle(

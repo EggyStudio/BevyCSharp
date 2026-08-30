@@ -236,7 +236,7 @@ public sealed class EcsWorldTests
 
             // Index must be a small slot number, not the handle's raw bits. Bevy packs the
             // index through a niche-optimised type, so masking the handle yields something near
-            // uint.MaxValue - which is exactly the bug this guards against.
+            // uint.MaxValue, which is exactly the bug this guards against.
             Assert.True(first.Index < 1024, $"index looks like raw bits: {first.Index}");
             Assert.NotEqual((uint)(first.Bits & 0xFFFF_FFFF), first.Index);
 

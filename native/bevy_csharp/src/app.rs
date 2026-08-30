@@ -102,6 +102,8 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         #[cfg(feature = "render")]
         {
             use bevy::prelude::*;
+            use bevy::render::settings::{Backends, RenderCreation, WgpuSettings};
+            use bevy::render::RenderPlugin;
             use bevy::window::{PresentMode, Window, WindowPlugin};
 
             let present_mode = if config.vsync != 0 {
@@ -110,15 +112,41 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 PresentMode::AutoNoVsync
             };
 
-            app.add_plugins(DefaultPlugins.set(WindowPlugin {
-                primary_window: Some(Window {
-                    title: title.clone().unwrap_or_else(|| "BevyCSharp".to_string()),
-                    resolution: (config.width as f32, config.height as f32).into(),
-                    present_mode,
+            // `None` leaves wgpu's own preference order alone, which already puts Vulkan first
+            // on Linux and Windows. Naming a backend pins the choice instead, and startup then
+            // fails loudly if the machine cannot provide it, which is the point of asking.
+            let backends = match config.backend {
+                1 => Some(Backends::VULKAN),
+                2 => Some(Backends::DX12),
+                3 => Some(Backends::METAL),
+                4 => Some(Backends::GL),
+                _ => None,
+            };
+
+            let wgpu = match backends {
+                Some(backends) => WgpuSettings {
+                    backends: Some(backends),
                     ..default()
-                }),
-                ..default()
-            }));
+                },
+                None => WgpuSettings::default(),
+            };
+
+            app.add_plugins(
+                DefaultPlugins
+                    .set(WindowPlugin {
+                        primary_window: Some(Window {
+                            title: title.clone().unwrap_or_else(|| "BevyCSharp".to_string()),
+                            resolution: (config.width, config.height).into(),
+                            present_mode,
+                            ..default()
+                        }),
+                        ..default()
+                    })
+                    .set(RenderPlugin {
+                        render_creation: RenderCreation::Automatic(Box::new(wgpu)),
+                        ..default()
+                    }),
+            );
         }
     } else {
         use bevy::MinimalPlugins;
@@ -141,7 +169,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     app.configure_sets(First, (BcsSet::Sync, BcsSet::First).chain());
     app.configure_sets(PostUpdate, (BcsSet::PostUpdate, BcsSet::Flush).chain());
     // `Cleanup` must come after `ExitCheck`, or on the final frame it would look for a pending
-    // `AppExit` that has not been written yet and skip - with no later frame to catch it.
+    // `AppExit` that has not been written yet and skip, with no later frame to catch it.
     app.configure_sets(
         Last,
         (
@@ -155,7 +183,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
 
     // The `Cleanup` stage has to run *inside* the loop, on the final frame, because
     // `App::run` swaps the app out of the handle for an empty one before handing it to the
-    // runner - so once `run` returns there is no world left to clean up. This system watches
+    // runner, so once `run` returns there is no world left to clean up. This system watches
     // for a pending `AppExit` and drains the callbacks on the frame the exit is decided.
     app.add_systems(
         Last,
@@ -422,7 +450,7 @@ pub unsafe extern "C" fn bcs_app_run(handle: *mut BcsApp) -> i32 {
         app.running = true;
 
         // `App::run` moves the app out of `app.app`, leaving an empty one behind. Everything
-        // that needs the real world - the `Cleanup` stage included - has to happen inside the
+        // that needs the real world (the `Cleanup` stage included) has to happen inside the
         // loop, which is why cleanup is a system rather than something done here.
         let exit = app.app.run();
 
@@ -455,4 +483,72 @@ pub extern "C" fn bcs_has_render() -> i32 {
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_abi_version() -> i32 {
     crate::ABI_VERSION
+}
+
+/// Describes the graphics adapter the renderer actually chose, as UTF-8.
+///
+/// Writes at most `capacity` bytes into `out` (not NUL-terminated) and returns the number of
+/// bytes the description needs. A return value greater than `capacity` means nothing usable was
+/// written; grow the buffer and call again. Returns [`status::UNSUPPORTED`] in a headless build
+/// or before the renderer has initialised.
+///
+/// # Safety
+/// `out` must be valid for `capacity` writes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_adapter(out: *mut u8, capacity: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (out, capacity);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_world(|world| {
+                let Some(info) = world.get_resource::<bevy::render::renderer::RenderAdapterInfo>()
+                else {
+                    return status::UNSUPPORTED;
+                };
+
+                let text = format!(
+                    "{:?} | {} | {:?} | {}",
+                    info.backend, info.name, info.device_type, info.driver
+                );
+                let bytes = text.as_bytes();
+
+                if capacity > 0 && !out.is_null() && bytes.len() <= capacity as usize {
+                    // SAFETY: length checked against the caller's stated capacity.
+                    unsafe { core::ptr::copy_nonoverlapping(bytes.as_ptr(), out, bytes.len()) };
+                }
+
+                bytes.len() as i32
+            })
+        }
+    })
+}
+
+/// Spawns a 2D camera so the window has something clearing it.
+///
+/// A Bevy app with no camera renders nothing at all, leaving the window's contents undefined.
+/// Managed code cannot spawn one itself yet, because Bevy's own render components are not
+/// bridged to C# (only C#-declared components are). This is the stopgap that makes a windowed
+/// run show a clean frame, and it goes away once those components are reachable from managed
+/// code. Returns [`status::UNSUPPORTED`] in a headless build.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_spawn_camera() -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_world(|world| {
+                world.spawn(bevy::prelude::Camera2d);
+                status::OK
+            })
+        }
+    })
 }

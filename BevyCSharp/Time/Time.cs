@@ -31,7 +31,7 @@ public sealed class Time
 
     /// <summary>
     /// Frames per second smoothed with an exponential moving average, which is what you want
-    /// on a HUD - the raw value is far too jittery to read.
+    /// on a HUD, because the raw value is far too jittery to read.
     /// </summary>
     public double SmoothedFps { get; private set; }
 

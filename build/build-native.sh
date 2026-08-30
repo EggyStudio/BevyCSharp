@@ -6,9 +6,9 @@
 # once per runtime identifier and shipped under runtimes/<rid>/native/. This script builds the
 # host RID by default; pass a target triple to cross-compile one of the others.
 #
-# Everything this script generates lives under build/ - cargo's target directory and the staged
-# per-RID artifacts both. The repository root stays clean; only native/ (the Rust sources) and
-# the project folders live there.
+# Everything this script generates lives under build/, both cargo's target directory and the
+# staged per-RID artifacts. The repository root stays clean; only native/ (the Rust sources)
+# and the project folders live there.
 #
 # Usage:
 #   build/build-native.sh                      # host, headless profile
@@ -21,7 +21,7 @@ set -euo pipefail
 # This script's own directory. All build output is written here.
 BUILD_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# One level up, purely to locate the Rust sources - nothing is ever written there.
+# One level up, purely to locate the Rust sources. Nothing is ever written there.
 REPO_ROOT="$(cd "$BUILD_DIR/.." && pwd)"
 
 NATIVE_DIR="$REPO_ROOT/native"
@@ -97,8 +97,8 @@ echo "    rid      : $RID"
 echo "    features : $FEATURES"
 
 if [[ "$FEATURES" == "render" ]]; then
-    echo "    note     : the render profile needs the platform development packages"
-    echo "               (X11/Wayland, alsa, udev and a Vulkan loader on Linux)."
+    echo "    note     : builds Bevy's renderer, winit and wgpu. This takes several minutes"
+    echo "               the first time and produces a much larger library."
 fi
 
 cargo build \

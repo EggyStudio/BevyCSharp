@@ -9,7 +9,7 @@ public delegate void SystemFn(World world);
 /// </summary>
 /// <remarks>
 /// <para>
-/// Every C# system reaches Bevy as an <em>exclusive</em> system - one that takes the whole
+/// Every C# system reaches Bevy as an <em>exclusive</em> system, one that takes the whole
 /// world. That is the only sound option while managed code can spawn, despawn and insert at
 /// any moment, so Bevy serialises C# systems against each other rather than running them in
 /// parallel. The parallelism that matters is still there: a behavior's per-entity loop is

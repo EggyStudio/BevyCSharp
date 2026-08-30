@@ -8,7 +8,7 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// This is Bevy's own <c>Entity</c>, bit for bit: an index paired with a generation counter.
-/// The generation is what makes a stale handle detectable - once an entity is despawned its
+/// The generation is what makes a stale handle detectable. Once an entity is despawned its
 /// index is reused with a higher generation, so an old handle no longer matches and
 /// <see cref="EcsWorld.IsAlive"/> reports false instead of silently addressing a new entity.
 /// </remarks>
@@ -20,9 +20,9 @@ public readonly unsafe struct Entity : IEquatable<Entity>
     /// </summary>
     /// <remarks>
     /// Treat this as opaque. Bevy documents the bit layout as not meaningful, and it packs the
-    /// index in a form that is not the number you would expect - use <see cref="Index"/> and
-    /// <see cref="Generation"/> to read the parts. Comparing, hashing and round-tripping this
-    /// value is fine and is how handles travel across the boundary.
+    /// index in a form that is not the number you would expect, so read the parts with
+    /// <see cref="Index"/> and <see cref="Generation"/>. Comparing, hashing and round-tripping
+    /// this value is fine, and is how handles travel across the boundary.
     /// </remarks>
     public readonly ulong Bits;
 
@@ -37,7 +37,7 @@ public readonly unsafe struct Entity : IEquatable<Entity>
     /// </summary>
     /// <remarks>
     /// Intended for logging and debugging. It costs a call into the bridge, so do not read it
-    /// per entity in a hot loop - compare <see cref="Bits"/> instead.
+    /// per entity in a hot loop, compare <see cref="Bits"/> instead.
     /// </remarks>
     public uint Index
     {
