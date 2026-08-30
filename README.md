@@ -370,8 +370,10 @@ no binary for rather than failing.
 Two platform notes worth knowing:
 
 - **macOS requires the window event loop to own the main thread.** `App.Run` checks this and
-  throws a clear error rather than letting it crash inside AppKit, so calling it from a task or
-  a background thread fails in a way that names the problem.
+  throws a clear error rather than letting it crash inside AppKit. The check applies only when
+  a window is actually going to be opened (`App.WillOpenWindow`), because the constraint belongs
+  to windowing rather than to the engine: a headless run has no event loop and works from any
+  thread, which is what lets a test runner drive it from its own worker threads.
 - **The one Linux binary serves both X11 and Wayland.** Which is used is decided at runtime, so
   there is no separate build for each.
 

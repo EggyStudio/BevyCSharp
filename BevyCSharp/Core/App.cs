@@ -57,6 +57,15 @@ public sealed unsafe class App : IDisposable
     /// <summary>True when the loaded native bridge has Bevy's renderer compiled in.</summary>
     public static bool HasRenderer => Native.bcs_has_render() != 0;
 
+    /// <summary>
+    /// True when running this app will actually create a window.
+    /// </summary>
+    /// <remarks>
+    /// Both halves matter. Asking for a window on a bridge with no renderer compiled in gets a
+    /// headless run instead, so the config alone does not settle it.
+    /// </remarks>
+    public bool WillOpenWindow => !Config.Headless && HasRenderer;
+
     /// <summary>Creates the engine and its native Bevy app.</summary>
     /// <param name="config">Startup configuration; <see cref="Config.Default"/> when omitted.</param>
     /// <exception cref="BevyNativeException">The native app could not be created.</exception>
@@ -250,15 +259,18 @@ public sealed unsafe class App : IDisposable
         if (IsRunning)
             throw new InvalidOperationException("This app has already been run.");
 
-        // macOS insists the window event loop owns the main thread, and breaking that rule
-        // crashes inside AppKit rather than anywhere that points back here. The bridge answers
-        // yes on every other platform, so this costs one call and only ever fires where it
-        // genuinely matters.
-        if (Native.bcs_is_main_thread() == 0)
+        // macOS insists the *window* event loop owns the main thread, and breaking that rule
+        // crashes inside AppKit rather than anywhere that points back here. The constraint
+        // belongs to windowing, not to the engine: a headless run creates no window and no
+        // event loop, so it is free to run anywhere, which is what lets a test runner drive it
+        // from its own worker threads. The bridge answers yes on every platform but Apple, so
+        // this costs one call and only ever fires where it genuinely matters.
+        if (WillOpenWindow && Native.bcs_is_main_thread() == 0)
             throw new InvalidOperationException(
-                "App.Run must be called from the process main thread. macOS requires the window "
-                + "event loop to own the main thread, so starting the engine from a task or a "
-                + "background thread will crash inside the platform layer.");
+                "App.Run must be called from the process main thread when it opens a window. "
+                + "macOS requires the window event loop to own the main thread, so starting a "
+                + "windowed app from a task or a background thread crashes inside the platform "
+                + "layer. Set Config.Headless to run the same behaviors without a window.");
 
         IsRunning = true;
         ComponentRegistry.EnterRunning();

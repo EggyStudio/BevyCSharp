@@ -197,6 +197,39 @@ public sealed class EngineTests
     }
 
     [Fact]
+    public void HeadlessRunsAreNotTiedToTheMainThread()
+    {
+        // macOS requires the window event loop to own the main thread, but that constraint
+        // belongs to windowing, not to the engine. A headless run has neither, so it must work
+        // from any thread. Every other test in this suite depends on that, because the test
+        // runner does not use the process main thread.
+        Exception? failure = null;
+        var frames = 0;
+
+        var worker = new Thread(() =>
+        {
+            try
+            {
+                using var app = new App(Config.HeadlessFor(3));
+                Assert.False(app.WillOpenWindow);
+
+                app.AddSystem(Stage.Update, _ => frames++);
+                app.Run();
+            }
+            catch (Exception ex)
+            {
+                failure = ex;
+            }
+        });
+
+        worker.Start();
+        worker.Join();
+
+        Assert.Null(failure);
+        Assert.True(frames >= 3, $"expected the loop to run, saw {frames} frames");
+    }
+
+    [Fact]
     public void PluginDependenciesAreValidatedBeforeBuild()
     {
         using var app = new App(Config.HeadlessFor(1));
