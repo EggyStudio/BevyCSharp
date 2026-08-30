@@ -35,7 +35,6 @@ permissions:
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   republish:
@@ -53,10 +52,9 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      # An ordinary push builds only linux-x64 and uploads artifacts too, so simply taking the
-      # newest successful run would produce a package missing five of its six platforms. Walk
-      # back until a run is found that really did build them all. An expired artifact still
-      # appears in the listing, hence the filter.
+      # Only a [publish] run uploads native artifacts, but the newest successful run is usually
+      # an ordinary push that uploaded none. Walk back until a run is found that built all six.
+      # An expired artifact still appears in the listing, hence the filter.
       - name: Find a complete build to reuse
         id: source
         shell: bash

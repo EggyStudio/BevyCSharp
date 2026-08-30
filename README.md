@@ -505,7 +505,9 @@ slot is picked up at pack time and missing ones are skipped.
 
 ### Publishing
 
-An ordinary push is cheap: Linux only, tested, nothing published. Two things change that.
+An ordinary push is cheap: it runs the test suite on Linux and stops there. It does not build the
+per-platform bridges and does not pack, since neither is used unless a package is published. Two
+things change that.
 
 **Changed the readme, the icon or the project metadata.** None of that affects the binaries, so
 pushing to the default branch republishes on its own. It reuses the native binaries from the last
@@ -527,9 +529,9 @@ shared by both routes so they can never disagree, and nothing stored anywhere. T
 `0.2.x`, change `VersionPrefix` and push.
 
 Republishing needs artifacts from a full build to still exist, and they expire after two weeks.
-If none survive, the run fails and says to push a `[publish]` commit first. An ordinary push
-uploads artifacts too, but they cover `linux-x64` alone, so the reuse step checks that a
-candidate run really did build every platform before taking anything from it.
+If none survive, the run fails and says to push a `[publish]` commit first. Only a `[publish]`
+run uploads any, so the reuse step walks back past the ordinary pushes to find one that built
+every platform.
 
 ---
 

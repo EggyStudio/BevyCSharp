@@ -1,7 +1,7 @@
 name: package
 
 # Builds the native bridge for every runtime identifier, runs the test suite, and packs the lot
-# into one NuGet package.
+# into one NuGet package. With `pack: false` it runs the test suite and stops there.
 #
 # This is a reusable workflow rather than a standalone one, because continuous integration and
 # releases need exactly the same work done. Keeping it in one place means the runtime identifier
@@ -17,11 +17,18 @@ on:
         type: string
         required: false
         default: ''
+      pack:
+        description: >-
+          Whether to build the per-platform native bridges and pack them. False runs the test
+          suite alone, which is what an ordinary push needs, since the bridges are only used to
+          assemble a package.
+        type: boolean
+        required: false
+        default: true
       targets:
         description: >-
           JSON array of {os, rid, target} objects to build. Defaults to every desktop runtime
-          identifier. Callers pass a shorter list to keep an ordinary push cheap, since macOS
-          runners bill at ten times the Linux rate and Windows at twice.
+          identifier, since a package is only worth making when it covers all of them.
         type: string
         required: false
         default: >-
@@ -43,14 +50,12 @@ env:
   DOTNET_NOLOGO: true
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   CARGO_TERM_COLOR: always
-  # actions/upload-artifact and download-artifact still declare Node 20 in their action.yml.
-  # Opting the runner into Node 24 avoids the deprecation warning ahead of GitHub's switchover.
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 
 jobs:
   native:
     name: native (${{ matrix.rid }})
+    if: ${{ inputs.pack }}
     runs-on: ${{ matrix.os }}
     # A cold render build compiles the whole of Bevy, wgpu and winit, which is roughly a quarter
     # of an hour. The cap is here so a label no runner answers fails in minutes instead of
@@ -127,6 +132,7 @@ jobs:
 
   pack:
     name: pack
+    if: ${{ inputs.pack }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [native, test]

@@ -45,7 +45,7 @@ shapes in flat colors.
 ### Widen material parameters
 
 Emissive, alpha blending mode, double-sided and unlit are all `StandardMaterial` fields that no
-call reaches. Transparency in particular is not expressible at all today.
+call reaches. Transparency is therefore not expressible.
 
 ## Presentation
 
@@ -73,12 +73,12 @@ is not possible today even though the crate is linked.
 
 ### Gizmos
 
-Useful for debugging long before it is useful in a game, and cheap once `bevy_gizmos_render` is
-on: a line, a sphere and an axis marker cover most of it.
+Debug drawing rather than a game feature. Once `bevy_gizmos_render` is on, a line, a sphere and
+an axis marker cover most uses.
 
 ## Audio
 
-`bevy_audio` is not compiled in. There is no sound of any kind.
+`bevy_audio` is not compiled in, so there is no audio support.
 
 - features: `bevy/bevy_audio`, plus formats from `vorbis`, `wav`, `mp3` and `flac`
 - exports: load an audio source, play it, stop it, set volume and looping
@@ -120,8 +120,8 @@ existing call rather than new machinery.
 - **Lights**: `bcs_render_spawn_light` takes a kind and an intensity. No color, no spot lights, no
   range or falloff, and no way to turn shadows off per light.
 - **Window at runtime**: title, size, fullscreen, and cursor grab and visibility are fixed at
-  startup through `Config`. Cursor lock alone is what a first-person camera needs, so this blocks
-  a whole genre despite being small.
+  startup through `Config`. Cursor lock is a requirement for a first-person camera, so the work
+  is small but blocks that camera entirely.
 
 ## Input
 
@@ -141,9 +141,10 @@ affine matrix with no C# equivalent. World-space position cannot be read, which 
 as anything is parented.
 
 Mirror it the way `Transform` is mirrored, and verify every field offset against
-`bcs_transform_layout`'s equivalent. Rust reorders fields under the default representation, and a
-size check alone does not catch it. That mistake rendered garbage for a full session before it
-was found.
+`bcs_transform_layout`'s equivalent. Rust reorders fields under the default representation, so
+the declared order is not the memory order. A size check does not catch this: the reordered
+`Transform` is 48 bytes either way, and reading it with the fields transposed produces distorted
+geometry rather than an error.
 
 ### Components Bevy owns
 
@@ -175,9 +176,9 @@ separate project rather than an item here.
 
 - **Regression test for asset double-registration.** `init_asset` is not idempotent: it replaces
   `Assets<A>`, registers a second handle provider and duplicates the per-frame asset systems.
-  Calling it on a windowed build silently broke all rendering, and no test caught it because the
-  failure only appears with a real GPU. A test that asserts the render world receives what the
-  bridge creates would have.
+  Calling it on a windowed build broke all rendering with no error reported. No test caught this,
+  because the failure needs a real GPU to appear. The missing check is that the render world
+  receives the meshes and materials the bridge creates.
 - **Packing on one machine produces a package for one platform.** Use the CI workflow, or run
   `build-native.sh` on each target, to produce a package covering all six runtime identifiers.
 - **Publishing is manual by choice.** The workflow builds and uploads; the upload to nuget.org is

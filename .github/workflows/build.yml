@@ -2,11 +2,12 @@ name: build
 
 # Continuous integration, and publishing when you ask for it.
 #
-# An ordinary push builds and tests on Linux only. That catches essentially every regression and
-# runs at the cheapest billing rate.
+# An ordinary push runs the test suite on Linux and stops there. That catches essentially every
+# regression at the cheapest billing rate. The per-platform bridges and the package are not built,
+# since neither is used unless a package is published.
 #
-# Put [publish] in the commit message to get the expensive run instead: all six platforms, tests
-# on all three operating systems, and a package pushed to GitHub Packages.
+# Put [publish] in the commit message to get the expensive run instead: bridges for all six
+# platforms, tests on all three operating systems, and a package pushed to GitHub Packages.
 #
 #     git commit -m "add the thing [publish]"
 #
@@ -41,7 +42,6 @@ permissions:
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   gate:
@@ -50,7 +50,6 @@ jobs:
     timeout-minutes: 5
     outputs:
       full: ${{ steps.decide.outputs.full }}
-      targets: ${{ steps.decide.outputs.targets }}
       test_os: ${{ steps.decide.outputs.test_os }}
       version: ${{ steps.decide.outputs.version }}
 
@@ -81,13 +80,12 @@ jobs:
           esac
           [ "$DISPATCH_FULL" = "true" ] && full=true
 
-          all='[{"os":"ubuntu-latest","rid":"linux-x64","target":"x86_64-unknown-linux-gnu"},{"os":"ubuntu-24.04-arm","rid":"linux-arm64","target":"aarch64-unknown-linux-gnu"},{"os":"windows-latest","rid":"win-x64","target":"x86_64-pc-windows-msvc"},{"os":"windows-11-arm","rid":"win-arm64","target":"aarch64-pc-windows-msvc"},{"os":"macos-latest","rid":"osx-arm64","target":"aarch64-apple-darwin"},{"os":"macos-latest","rid":"osx-x64","target":"x86_64-apple-darwin"}]'
-          one='[{"os":"ubuntu-latest","rid":"linux-x64","target":"x86_64-unknown-linux-gnu"}]'
-
+          # Which platforms a full run covers lives in package.yml, so the list cannot drift
+          # between the two files. Here the only decision is how widely to test.
           if [ "$full" = "true" ]; then
-            targets="$all"; test_os='["ubuntu-latest","windows-latest","macos-latest"]'
+            test_os='["ubuntu-latest","windows-latest","macos-latest"]'
           else
-            targets="$one"; test_os='["ubuntu-latest"]'
+            test_os='["ubuntu-latest"]'
           fi
 
           # Major and minor come from the repository; the patch counts commits. One counter that
@@ -98,7 +96,6 @@ jobs:
 
           {
             echo "full=$full"
-            echo "targets=$targets"
             echo "test_os=$test_os"
             echo "version=$version"
           } >> "$GITHUB_OUTPUT"
@@ -114,7 +111,7 @@ jobs:
     uses: ./.github/workflows/package.yml
     with:
       version: ${{ needs.gate.outputs.version }}
-      targets: ${{ needs.gate.outputs.targets }}
+      pack: ${{ needs.gate.outputs.full == 'true' }}
       test_os: ${{ needs.gate.outputs.test_os }}
 
   publish:
