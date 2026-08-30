@@ -632,11 +632,20 @@ pub unsafe extern "C" fn bcs_app_run(handle: *mut BcsApp) -> i32 {
                 ambient: Option<Res<bevy::light::GlobalAmbientLight>>,
             ) {
                 eprintln!("[dbg] global ambient={:?}", ambient.map(|a| a.brightness));
-                c.spawn((
-                    bevy::mesh::Mesh3d(meshes.add(bevy::math::primitives::Cuboid::new(1.6, 1.6, 1.6))),
-                    bevy::pbr::MeshMaterial3d(mats.add(bevy::color::Color::srgb(0.9, 0.2, 0.2))),
-                    Transform::from_xyz(2.6, 0.0, 0.0),
-                ));
+                let cube = meshes.add(bevy::math::primitives::Cuboid::new(1.6, 1.6, 1.6));
+                let unlit = mats.add(bevy::pbr::StandardMaterial {
+                    base_color: bevy::color::Color::srgb(0.9, 0.2, 0.2),
+                    unlit: true,
+                    ..Default::default()
+                });
+                let lit = mats.add(bevy::pbr::StandardMaterial {
+                    base_color: bevy::color::Color::srgb(0.2, 0.9, 0.2),
+                    ..Default::default()
+                });
+                c.spawn((bevy::mesh::Mesh3d(cube.clone()),
+                    bevy::pbr::MeshMaterial3d(unlit), Transform::from_xyz(2.6, 0.0, 0.0)));
+                c.spawn((bevy::mesh::Mesh3d(cube),
+                    bevy::pbr::MeshMaterial3d(lit), Transform::from_xyz(-2.6, 0.0, 0.0)));
             }
             app.app.add_systems(bevy::app::Startup, native_cube);
 
