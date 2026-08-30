@@ -21,8 +21,8 @@ public partial struct Bouncer
     public float Velocity;
 
     [OnStartup]
-    public static void Spawn(BehaviorContext ctx)
-        => ctx.Ecs.Add(ctx.Ecs.Spawn(), new Bouncer { Height = 5f });
+    public static void Spawn(BehaviorContext ctx) => 
+        ctx.Ecs.Add(ctx.Ecs.Spawn(), new Bouncer { Height = 5f });
 
     [OnUpdate]
     public void Tick(BehaviorContext ctx)
