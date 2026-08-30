@@ -35,7 +35,7 @@ public partial struct Renderer
             : $"[Renderer] adapter: {adapter}");
     }
 
-    /// <summary>Closes the window on Escape, so the sample is easy to get out of.</summary>
+    /// <summary>Closes the window on Escape.</summary>
     [OnUpdate]
     public static void QuitOnEscape(BehaviorContext ctx)
     {
