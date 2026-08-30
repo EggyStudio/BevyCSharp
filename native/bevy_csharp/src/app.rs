@@ -161,6 +161,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         };
         app.add_plugins(MinimalPlugins.set(runner));
         app.add_plugins(bevy::input::InputPlugin);
+        app.add_plugins(bevy::transform::TransformPlugin);
     }
 
     let _ = title;
@@ -362,6 +363,88 @@ pub unsafe extern "C" fn bcs_component_register_live(
                 )
             };
             world.register_component_with_descriptor(descriptor).index() as i32
+        })
+    })
+}
+
+/// Resolves one of Bevy's own components to the id the ECS entry points take.
+///
+/// C# components are registered from a layout because Bevy has never heard of them. Bevy's own
+/// components are the opposite problem: they are Rust types the managed side has no handle on,
+/// so it asks for them by name and gets back the same kind of id. Everything downstream, the
+/// inserts, the queries, the chunked iteration, is already keyed on ids rather than types, so
+/// nothing else has to change to make these usable.
+///
+/// Registration is idempotent, and doing it here rather than looking the id up means a component
+/// works even if no plugin has touched it yet.
+///
+/// # Safety
+/// `name` must be a NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_component_id_of(name: *const core::ffi::c_char) -> i32 {
+    crate::interop::guard(|| {
+        let Some(name) = (unsafe { crate::interop::cstr_to_string(name) }) else {
+            return status::NULL_ARG;
+        };
+
+        with_world(|world| {
+            let id = match name.as_str() {
+                "Transform" => world.register_component::<bevy::transform::components::Transform>(),
+                "GlobalTransform" => {
+                    world.register_component::<bevy::transform::components::GlobalTransform>()
+                }
+                "ChildOf" => world.register_component::<bevy::ecs::hierarchy::ChildOf>(),
+                "Children" => world.register_component::<bevy::ecs::hierarchy::Children>(),
+                // Reached through the prelude rather than its defining crate: Visibility moved
+                // from bevy_render to bevy_camera in 0.19, and the prelude survives such moves.
+                #[cfg(feature = "render")]
+                "Visibility" => world.register_component::<bevy::prelude::Visibility>(),
+                #[cfg(feature = "render")]
+                "InheritedVisibility" => {
+                    world.register_component::<bevy::prelude::InheritedVisibility>()
+                }
+                _ => return status::NO_COMPONENT,
+            };
+            id.index() as i32
+        })
+    })
+}
+
+/// Reports the size and alignment Bevy uses for a component.
+///
+/// The managed side mirrors a handful of Bevy's structs so it can read and write them in place,
+/// and those mirrors have to match byte for byte. They are easy to get subtly wrong: `Quat` is
+/// SIMD-backed and sixteen-byte aligned on most targets, which pads `Transform` out to 48 bytes
+/// rather than the 40 its fields suggest. Checking the real numbers turns that class of mistake
+/// into an error at startup instead of memory corruption later.
+///
+/// # Safety
+/// `size` and `align` must be writable, or null to skip that output.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_component_layout(
+    component: i32,
+    size: *mut u32,
+    align: *mut u32,
+) -> i32 {
+    crate::interop::guard(|| {
+        if component < 0 {
+            return status::NO_COMPONENT;
+        }
+
+        with_world(|world| {
+            let id = bevy::ecs::component::ComponentId::new(component as usize);
+            let Some(info) = world.components().get_info(id) else {
+                return status::NO_COMPONENT;
+            };
+
+            let layout = info.layout();
+            if !size.is_null() {
+                unsafe { size.write(layout.size() as u32) };
+            }
+            if !align.is_null() {
+                unsafe { align.write(layout.align() as u32) };
+            }
+            status::OK
         })
     })
 }

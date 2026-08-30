@@ -37,8 +37,7 @@ In Program.cs
 BevyApp.Run();
 ```
 
-No registration call, no partial-class list, no startup boilerplate. Add the package, write
-behavior scripts, compile, run.
+Behaviors are discovered automatically, so a consuming project needs no registration code.
 
 ---
 
@@ -107,6 +106,48 @@ with a real `ComponentId`.
 public struct Position { public float X, Y; }
 public struct Falls;   // a zero-field tag costs nothing to store
 ```
+
+### Bevy's own components
+
+A struct you declare is registered with Bevy from its layout. Bevy's own components are the
+opposite problem: they are Rust types C# has no handle on, so they are asked for by name.
+
+```csharp
+var entity = ctx.Ecs.Spawn();
+ctx.Ecs.AddNative(entity, NativeComponents.Transform, Transform.At(0f, 5f, 0f));
+
+ref var transform = ref ctx.Ecs.GetNativeRef<Transform>(entity, NativeComponents.Transform);
+transform.Translation.Y -= 9.81f * ctx.Time.Delta;
+```
+
+That is Bevy's real `Transform`, not a copy kept in sync, so propagation and rendering see the
+write. Everything downstream is keyed on component ids rather than types, so these work with
+chunked iteration, filters and change detection like any other component:
+
+```csharp
+using var chunks = ctx.Ecs.Chunks<Transform>(NativeComponents.Transform);
+```
+
+Only components C# can mirror byte for byte are exposed. The mirrors are checked against the
+engine the first time an id is resolved, because they are easy to get subtly wrong: `Quat` is
+SIMD-backed and sixteen-byte aligned on most targets, which pads `Transform` to 48 bytes rather
+than the 40 its three fields suggest. A mismatch fails at startup rather than corrupting memory.
+
+### Hierarchy
+
+```csharp
+ctx.Ecs.SetParent(moon, planet);
+
+var parent = ctx.Ecs.ParentOf(moon);       // planet
+var children = ctx.Ecs.ChildrenOf(planet); // [moon]
+ctx.Ecs.ClearParent(moon);
+```
+
+A child's `Transform` is relative to its parent, and Bevy combines them during propagation, so a
+parented entity only has to describe its own motion. Parenting goes through Bevy's relationship
+API rather than a raw component write, which is what keeps the reverse child list correct.
+
+Parenting is a structural change, so queue it on `ctx.Cmd` when calling from inside a loop.
 
 ---
 
@@ -431,13 +472,21 @@ run against a real Bevy app. Known gaps:
 
 - A locally built package contains only the platform you built it on. Use the CI workflow, or
   run `build-native.sh` on each target platform, to produce a package covering all of them.
-- A `render` build opens a real window and initialises the GPU (verified on Vulkan), but Bevy's
-  rendering, asset and UI components are not yet surfaced to C#, so nothing can be drawn from a
-  behavior script.
+- Bevy's blittable components are reachable (`Transform`, `GlobalTransform`, hierarchy, and
+  `Visibility` on a render build), but anything wrapping an asset handle is not. That means a
+  `render` build opens a real window and initialises the GPU (verified on Vulkan), and you can
+  position and parent entities, but meshes and materials cannot be created from a behavior
+  script yet, so there is nothing to draw.
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does
   nothing yet.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
+
+## Contributing
+
+Prose in this repository follows [.github/STYLE.md](.github/STYLE.md): no em dashes, no spaced
+hyphens as punctuation, no padded section banners, and comments that explain why rather than
+restate the code.
 
 ## License
 

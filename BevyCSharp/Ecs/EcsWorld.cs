@@ -166,6 +166,122 @@ public sealed unsafe class EcsWorld
     /// <summary>The Bevy component id for <typeparamref name="T"/>, registering it if needed.</summary>
     public static int ComponentId<T>() where T : unmanaged => ComponentType<T>.Id;
 
+    // -- Bevy's own components
+
+    /// <summary>Adds or replaces one of Bevy's own components, by id.</summary>
+    /// <remarks>
+    /// Take the id from <see cref="NativeComponents"/>. <typeparamref name="T"/> must mirror the
+    /// engine's struct byte for byte, which <see cref="NativeComponents"/> verifies when it hands
+    /// the id out.
+    /// </remarks>
+    public void AddNative<T>(Entity entity, int componentId, T component) where T : unmanaged =>
+        Native.Check(
+            Native.bcs_ecs_insert(entity.Bits, componentId, &component),
+            $"AddNative<{typeof(T).Name}>");
+
+    /// <summary>Reads one of Bevy's own components, reporting whether it was present.</summary>
+    public bool TryGetNative<T>(Entity entity, int componentId, out T component) where T : unmanaged
+    {
+        var pointer = Native.bcs_ecs_get_ptr(entity.Bits, componentId);
+        if (pointer is null)
+        {
+            component = default;
+            return false;
+        }
+
+        component = Unsafe.ReadUnaligned<T>(pointer);
+        return true;
+    }
+
+    /// <summary>
+    /// Returns a reference into one of Bevy's own components, so writes land in place.
+    /// </summary>
+    /// <remarks>
+    /// Writing through this updates the component Bevy's own systems read, so a change to a
+    /// <see cref="Bevy.Transform"/> is picked up by propagation and rendering like any other. The
+    /// reference is invalidated by the next structural change.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The entity does not carry the component.</exception>
+    public ref T GetNativeRef<T>(Entity entity, int componentId) where T : unmanaged
+    {
+        var pointer = Native.bcs_ecs_get_ptr(entity.Bits, componentId);
+        if (pointer is null)
+            throw new BevyNativeException(
+                NativeStatus.NotPresent,
+                $"GetNativeRef<{typeof(T).Name}> failed: {entity} does not carry that component.");
+
+        return ref Unsafe.AsRef<T>(pointer);
+    }
+
+    /// <summary>Removes one of Bevy's own components, by id.</summary>
+    public bool RemoveNative(Entity entity, int componentId)
+    {
+        var status = Native.bcs_ecs_remove(entity.Bits, componentId);
+        if (status == NativeStatus.NoEntity) return false;
+        Native.Check(status, "RemoveNative");
+        return true;
+    }
+
+    /// <summary>True when an entity carries the component with this id.</summary>
+    public bool HasById(Entity entity, int componentId) =>
+        Native.bcs_ecs_has(entity.Bits, componentId) > 0;
+
+    /// <summary>Counts entities carrying the component with this id.</summary>
+    public int CountById(int componentId) =>
+        Native.Check(Native.bcs_ecs_count(componentId), "CountById");
+
+    // -- Hierarchy
+
+    /// <summary>
+    /// Makes <paramref name="child"/> a child of <paramref name="parent"/>.
+    /// </summary>
+    /// <remarks>
+    /// Goes through Bevy's own relationship API, so the matching child list is maintained and
+    /// transforms propagate. Any previous parent is replaced. This is a structural change, so it
+    /// invalidates outstanding component references; queue it on <see cref="EcsCommands"/> when
+    /// calling from inside a loop.
+    /// </remarks>
+    /// <returns><see langword="false"/> if either entity is no longer alive.</returns>
+    public bool SetParent(Entity child, Entity parent)
+    {
+        var status = Native.bcs_ecs_set_parent(child.Bits, parent.Bits);
+        if (status == NativeStatus.NoEntity) return false;
+        Native.Check(status, "SetParent");
+        return true;
+    }
+
+    /// <summary>Detaches an entity from its parent. Succeeds whether or not it had one.</summary>
+    public bool ClearParent(Entity child)
+    {
+        var status = Native.bcs_ecs_clear_parent(child.Bits);
+        if (status == NativeStatus.NoEntity) return false;
+        Native.Check(status, "ClearParent");
+        return true;
+    }
+
+    /// <summary>An entity's parent, or <see cref="Entity.None"/> if it has none.</summary>
+    public Entity ParentOf(Entity entity) => new(Native.bcs_ecs_parent_of(entity.Bits));
+
+    /// <summary>An entity's direct children, in order.</summary>
+    /// <remarks>Only the immediate children; walk the result to go deeper.</remarks>
+    public Entity[] ChildrenOf(Entity entity)
+    {
+        var count = Native.bcs_ecs_children(entity.Bits, null, 0);
+        if (count == NativeStatus.NoEntity) return [];
+        Native.Check(count, "ChildrenOf");
+        if (count == 0) return [];
+
+        var children = new Entity[count];
+        fixed (Entity* target = children)
+        {
+            var written = Native.bcs_ecs_children(entity.Bits, (ulong*)target, count);
+            Native.Check(written, "ChildrenOf");
+            if (written != count) return ChildrenOf(entity);
+        }
+
+        return children;
+    }
+
     // -- Iteration
 
     /// <summary>
@@ -187,9 +303,29 @@ public sealed unsafe class EcsWorld
     public ChunkSet<T> Chunks<T>(
         ReadOnlySpan<int> with = default,
         ReadOnlySpan<int> without = default,
+        bool markChanged = true) where T : unmanaged =>
+        Chunks<T>(ComponentType<T>.Id, with, without, markChanged);
+
+    /// <summary>
+    /// Collects the storage runs for an explicitly named component.
+    /// </summary>
+    /// <remarks>
+    /// The same thing, for a component whose id did not come from <typeparamref name="T"/>.
+    /// Bevy's own components are resolved by name through <see cref="NativeComponents"/>, so
+    /// iterating a <see cref="Bevy.Transform"/> means passing that id here rather than letting
+    /// the type resolve it, which would register a second, unrelated C# component that merely
+    /// shares the name.
+    /// </remarks>
+    /// <param name="componentId">The component to iterate.</param>
+    /// <param name="with">Component ids the entity must also carry.</param>
+    /// <param name="without">Component ids the entity must not carry.</param>
+    /// <param name="markChanged">Stamp every returned row with the current change tick.</param>
+    public ChunkSet<T> Chunks<T>(
+        int componentId,
+        ReadOnlySpan<int> with = default,
+        ReadOnlySpan<int> without = default,
         bool markChanged = true) where T : unmanaged
     {
-        var componentId = ComponentType<T>.Id;
         var capacity = 8;
 
         while (true)

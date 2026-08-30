@@ -11,7 +11,7 @@ namespace Bevy;
 /// live here, as ordinary C# objects. That split is deliberate: components are hot, blittable
 /// and iterated by the million, so they belong in Bevy's tables; resources are singletons your
 /// gameplay code reads by type, so keeping them managed avoids marshalling on every access and
-/// lets them be any C# type at all, not just a blittable struct.
+/// lets them be any C# type at all, rather than only a blittable struct.
 /// </para>
 /// <para>
 /// <see cref="Time"/> and <see cref="Input"/> are resources like any other, refreshed from

@@ -9,7 +9,7 @@ namespace Bevy;
 /// <para>
 /// The generator emits a module initializer per assembly that calls <see cref="Add"/>. The CLR
 /// runs it the first time anything in that assembly is touched, so by the time an
-/// <see cref="App"/> is built the registrations are simply sitting here, with no assembly
+/// <see cref="App"/> is built the registrations are already here, with no assembly
 /// scan, no reflection, and nothing for a trimmer to remove by accident.
 /// </para>
 /// <para>

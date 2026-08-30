@@ -6,9 +6,8 @@ namespace BevyCSharp.Sample.Behaviors;
 /// Spawns a handful of moving entities and integrates their positions each frame.
 /// </summary>
 /// <remarks>
-/// Every method here is static, so this behavior is never stored on an entity, it is just a
-/// place to hang two systems that operate on other components. That is the right shape for
-/// global logic.
+/// Every method here is static, so this behavior is never stored on an entity. It holds two
+/// systems that operate on other components, which is the right shape for global logic.
 /// </remarks>
 [Behavior]
 public partial struct Movement

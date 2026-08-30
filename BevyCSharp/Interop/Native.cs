@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 2;
+    internal const int ExpectedAbiVersion = 3;
 
     static Native() => NativeLoader.Initialize();
 
@@ -89,6 +89,16 @@ internal static unsafe partial class Native
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_component_register_live(string name, uint size, uint align);
+
+    /// <summary>Resolves one of Bevy's own components to an id, by name.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_component_id_of(string name);
+
+    /// <summary>Reports the size and alignment Bevy uses for a component.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_component_layout(int component, uint* size, uint* align);
 
     // -- ECS (ambient: requires an active world loan)
 
@@ -154,6 +164,29 @@ internal static unsafe partial class Native
         int markChanged,
         NativeChunk* output,
         int capacity);
+
+    // -- Hierarchy
+
+    /// <summary>Makes one entity a child of another.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ecs_set_parent(ulong child, ulong parent);
+
+    /// <summary>Detaches an entity from its parent.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ecs_clear_parent(ulong child);
+
+    /// <summary>Returns an entity's parent, or 0.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial ulong bcs_ecs_parent_of(ulong entity);
+
+    /// <summary>Writes an entity's children out and returns how many it has.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ecs_children(ulong entity, ulong* output, int capacity);
+
 
     // -- Renderer (render builds only)
 
