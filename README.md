@@ -441,4 +441,10 @@ run against a real Bevy app. Known gaps:
 
 ## License
 
-MIT.
+Mozilla Public License 2.0. The full text is in [LICENSE](LICENSE), and it ships inside the
+package.
+
+MPL-2.0 is file-level copyleft: changes to files that are part of this project have to stay under
+it and be made available in source form, while anything you build *around* it, including a game
+that references the package, is yours under whatever terms you like. Bevy itself is MIT and
+Apache-2.0, which this can incorporate freely.
