@@ -168,8 +168,11 @@ Cameras, lights and the window take their common parameters. What is left is nar
   instead of the window, which is what a security monitor, a portal or a reflection needs, and
   what an editor viewport is built on. It needs an image created empty at a given size, which
   `Render.CreateMaterial` and the asset surface have no way to ask for.
-- **Lights**: no light probes, no per-light shadow bias, and the spot light has no cookie
-  texture. Shadow map resolution is Bevy's default and unreachable.
+- **Lights**: shadow bias is per light and shadow map size is settable. What is left is optical
+  rather than structural: a spot light has no cookie texture to shape its beam, cascade
+  configuration for a directional light's shadow distance is Bevy's default, and light probes,
+  which is how a room gets ambient light that matches it, need cubemap assets the asset surface
+  cannot load.
 - **Window**: position, decorations, resizability, always-on-top and exclusive fullscreen are
   bridged, and the monitors are readable. What is left is naming things and choosing modes: a
   monitor's name and its list of video modes are both text or a list of structs, so exclusive

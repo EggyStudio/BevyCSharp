@@ -503,6 +503,23 @@ It is measured in physical pixels rather than logical ones, because that is what
 divided into. `Layers` decides what a camera can see at all: a camera draws an entity only where
 their layers overlap, so a minimap shows different things from the main view.
 
+Shadows are tuned per light and sized globally:
+
+```csharp
+Render.SpawnLight(new LightSettings
+{
+    Kind = LightKind.Directional,
+    ShadowDepthBias = 0.05f,     // against shadow acne
+    ShadowNormalBias = 1.2f,     // against acne on glancing surfaces
+});
+
+Render.SetShadowMapSize(directional: 4096);
+```
+
+Bias is per light because one light's acne is another's floating shadow. Size is one number for
+every directional light and one for every point and spot light, because that is how Bevy keeps
+it, and raising it costs memory and fill rate on every shadow-casting light at once.
+
 ```csharp
 const uint Minimap = 1u << 1;
 

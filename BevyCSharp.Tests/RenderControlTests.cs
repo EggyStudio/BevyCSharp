@@ -189,6 +189,33 @@ public sealed class RenderControlTests
     }
 
     [Fact]
+    public void ShadowsCanBeTuned()
+    {
+        using var harness = new EngineHarness(frames: 2);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            // Bias is per light, because one light's acne is another's floating shadow.
+            var sun = Render.SpawnLight(new LightSettings
+            {
+                Kind = LightKind.Directional,
+                ShadowDepthBias = 0.05f,
+                ShadowNormalBias = 1.2f,
+            });
+
+            Assert.NotEqual(Entity.None, sun);
+
+            // Size is global, and each kind can be set without knowing the other.
+            Render.SetShadowMapSize(directional: 4096);
+            Render.SetShadowMapSize(point: 2048);
+            Render.SetShadowMapSize(directional: 2048, point: 1024);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void TheShortLightOverloadStillWorks()
     {
         using var harness = new EngineHarness(frames: 2);

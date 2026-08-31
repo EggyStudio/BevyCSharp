@@ -461,6 +461,11 @@ pub struct BcsLightConfig {
     pub inner_angle: f32,
     /// Radians from the axis at which a spot light has fallen to nothing.
     pub outer_angle: f32,
+    /// How far along its own normal a surface is pushed before it is tested against the shadow
+    /// map. Trades shadow acne for a shadow that starts slightly late.
+    pub shadow_depth_bias: f32,
+    /// The same, along the surface normal, which handles a surface lit at a glancing angle.
+    pub shadow_normal_bias: f32,
 }
 
 // The frame snapshot is written straight into memory C# owns, so both sides have to agree on its

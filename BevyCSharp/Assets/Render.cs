@@ -293,6 +293,26 @@ public sealed class LightSettings
     /// <summary>Radians from the axis at which a spot light has fallen to nothing.</summary>
     /// <remarks>Must be under a quarter turn, and at least <see cref="InnerAngle"/>.</remarks>
     public float OuterAngle { get; set; } = MathF.PI / 8f;
+
+    /// <summary>
+    /// How far a surface is pushed away before it is tested against this light's shadow map.
+    /// </summary>
+    /// <remarks>
+    /// The fix for shadow acne, the stippled self-shadowing a surface shows when the shadow map
+    /// is too coarse to tell it apart from itself. Raising it trades that for a shadow that
+    /// starts slightly away from what casts it. Bevy's default is 0.02.
+    /// </remarks>
+    public float ShadowDepthBias { get; set; } = 0.02f;
+
+    /// <summary>
+    /// The same, measured along the surface normal.
+    /// </summary>
+    /// <remarks>
+    /// Handles the case depth bias alone does not: a surface lit at a glancing angle, where a
+    /// small depth error covers a long distance. Bevy's default is 0.6 for a directional light
+    /// and 0.6 for the others.
+    /// </remarks>
+    public float ShadowNormalBias { get; set; } = 0.6f;
 }
 
 /// <summary>
@@ -487,9 +507,31 @@ public static unsafe class Render
             Shadows = settings.Shadows ? 1 : 0,
             InnerAngle = settings.InnerAngle,
             OuterAngle = settings.OuterAngle,
+            ShadowDepthBias = settings.ShadowDepthBias,
+            ShadowNormalBias = settings.ShadowNormalBias,
         };
 
         return new Entity(Native.bcs_render_spawn_light(&native));
+    }
+
+    /// <summary>
+    /// Sets how large a shadow map each kind of light gets, in pixels on a side.
+    /// </summary>
+    /// <remarks>
+    /// One size for every directional light and one for every point and spot light, because Bevy
+    /// keeps these globally rather than per light. Larger is sharper and costs memory and fill
+    /// rate on every shadow-casting light at once. Bevy's defaults are 2048 and 1024. Zero leaves
+    /// that kind as it is, so one can be changed without knowing the other.
+    /// </remarks>
+    /// <param name="directional">Size for directional lights, or 0 to leave it.</param>
+    /// <param name="point">Size for point and spot lights, or 0 to leave it.</param>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static void SetShadowMapSize(uint directional = 0, uint point = 0)
+    {
+        var status = Native.bcs_render_set_shadow_maps(directional, point);
+        if (status == NativeStatus.Unsupported) throw NoRenderer("Setting the shadow map size");
+
+        Native.Check(status, "setting the shadow map size");
     }
 
     /// <summary>

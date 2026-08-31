@@ -613,6 +613,12 @@ public struct NativeLightConfig
 
     /// <summary>Radians at which a spot light has fallen to nothing.</summary>
     public float OuterAngle;
+
+    /// <summary>Depth bias applied before the shadow test.</summary>
+    public float ShadowDepthBias;
+
+    /// <summary>Bias along the surface normal.</summary>
+    public float ShadowNormalBias;
 }
 
 /// <summary>App configuration handed to the native bridge at construction.</summary>

@@ -448,6 +448,8 @@ pub unsafe extern "C" fn bcs_render_spawn_light(config: *const BcsLightConfig) -
                             color,
                             illuminance: config.intensity,
                             shadow_maps_enabled: shadows,
+                            shadow_depth_bias: config.shadow_depth_bias,
+                            shadow_normal_bias: config.shadow_normal_bias,
                             ..Default::default()
                         },
                         Transform::default(),
@@ -462,6 +464,8 @@ pub unsafe extern "C" fn bcs_render_spawn_light(config: *const BcsLightConfig) -
                             range: config.range,
                             radius: config.radius,
                             shadow_maps_enabled: shadows,
+                            shadow_depth_bias: config.shadow_depth_bias,
+                            shadow_normal_bias: config.shadow_normal_bias,
                             inner_angle: config.inner_angle,
                             outer_angle: config.outer_angle,
                             ..Default::default()
@@ -478,6 +482,8 @@ pub unsafe extern "C" fn bcs_render_spawn_light(config: *const BcsLightConfig) -
                             range: config.range,
                             radius: config.radius,
                             shadow_maps_enabled: shadows,
+                            shadow_depth_bias: config.shadow_depth_bias,
+                            shadow_normal_bias: config.shadow_normal_bias,
                             ..Default::default()
                         },
                         Transform::default(),
@@ -591,6 +597,43 @@ pub unsafe extern "C" fn bcs_render_set_sprite(entity: u64, config: *const BcsSp
 
                 // Bevy's own insert, so the components a sprite requires arrive with it.
                 entity_mut.insert(sprite);
+                status::OK
+            })
+        }
+    })
+}
+
+/// Sets how large a shadow map each kind of light gets, in pixels on a side.
+///
+/// One number for every directional light and one for every point and spot light, because Bevy
+/// keeps these as global settings rather than per light. Larger is sharper and costs memory and
+/// fill rate on every shadow-casting light at once; Bevy's defaults are 2048 and 1024.
+///
+/// A size of `0` leaves that kind alone, so one can be changed without knowing the other.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_shadow_maps(directional: u32, point: u32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (directional, point);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::light::{DirectionalLightShadowMap, PointLightShadowMap};
+
+            with_world(|world| {
+                if directional > 0 {
+                    world.insert_resource(DirectionalLightShadowMap {
+                        size: directional as usize,
+                    });
+                }
+                if point > 0 {
+                    world.insert_resource(PointLightShadowMap {
+                        size: point as usize,
+                    });
+                }
                 status::OK
             })
         }
