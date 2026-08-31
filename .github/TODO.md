@@ -114,16 +114,19 @@ Rust plugin sends.
 
 ## Rendering control
 
-The renderer is reachable but barely configurable. Each of these is a small widening of an
-existing call rather than new machinery.
+Cameras, lights and the window take their common parameters now. What is left is narrower.
 
-- **Camera**: `bcs_render_spawn_camera_3d` takes no arguments. No field of view, no orthographic
-  projection, no clear color, no render layers, no viewport.
-- **Lights**: `bcs_render_spawn_light` takes a kind and an intensity. No color, no spot lights, no
-  range or falloff, and no way to turn shadows off per light.
-- **Window at runtime**: title, size, fullscreen, and cursor grab and visibility are fixed at
-  startup through `Config`. Cursor lock is a requirement for a first-person camera, so the work
-  is small but blocks that camera entirely.
+- **Camera**: no render layers and no viewport, so splitscreen and render-to-texture are out of
+  reach. Both are a component and a rectangle rather than new machinery.
+- **Lights**: no light probes, no per-light shadow bias, and the spot light has no cookie
+  texture. Shadow map resolution is Bevy's default and unreachable.
+- **Window**: exclusive fullscreen is not offered, because it needs a video mode to be chosen
+  from the monitor's list, which needs the monitor list bridged first. Borderless covers what a
+  desktop game wants. Window position, decorations and always-on-top are unbridged.
+- **Verification**: none of this is checked by eye. The tests assert that settings are accepted
+  and that a windowless run refuses, which is what can go wrong silently; whether the picture is
+  right is confirmed by running the sample, which uses a custom clear colour, a tinted sun and a
+  spot light, and binds F11 to fullscreen and Tab to cursor lock.
 
 ## Input
 

@@ -28,11 +28,34 @@ public partial struct Scene
     {
         if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
 
-        var camera = Render.SpawnCamera3d();
+        var camera = Render.SpawnCamera3d(new CameraSettings
+        {
+            FieldOfView = 55f,
+            Clear = ClearMode.Custom,
+            ClearColor = (0.02f, 0.03f, 0.05f, 1f),
+        });
         ctx.Ecs.Add(camera, Transform.LookingAt(new Vec3(3.5f, 3f, 6f), Vec3.Zero, Vec3.UnitY));
 
-        var sun = Render.SpawnLight(LightKind.Directional, 12_000f);
+        var sun = Render.SpawnLight(new LightSettings
+        {
+            Kind = LightKind.Directional,
+            Intensity = 12_000f,
+            Color = (1f, 0.95f, 0.85f),
+        });
         ctx.Ecs.Add(sun, Transform.LookingAt(new Vec3(4f, 8f, 5f), Vec3.Zero, Vec3.UnitY));
+
+        // A cool rim from the other side, so the cube reads as a solid rather than a silhouette
+        // against the dark clear colour.
+        var rim = Render.SpawnLight(new LightSettings
+        {
+            Kind = LightKind.Spot,
+            Intensity = 40_000f,
+            Color = (0.4f, 0.6f, 1f),
+            Range = 24f,
+            InnerAngle = 0.15f,
+            OuterAngle = 0.5f,
+        });
+        ctx.Ecs.Add(rim, Transform.LookingAt(new Vec3(-4f, 3f, -5f), Vec3.Zero, Vec3.UnitY));
 
         var ground = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, ground, Render.CreateMesh(MeshShape.Plane, 24f, 24f));
@@ -50,7 +73,9 @@ public partial struct Scene
         // flat outline.
         ctx.Ecs.Add(cube, new Scene { YawSpeed = 0.9f, PitchSpeed = 0.35f });
 
-        Console.WriteLine("[Scene] a rotating cube. Escape closes the window.");
+        Console.WriteLine(
+            "[Scene] a rotating cube. Escape closes the window, F11 toggles fullscreen, "
+            + "Tab locks the cursor.");
     }
 
     [OnUpdate]

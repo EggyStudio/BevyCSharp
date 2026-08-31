@@ -173,6 +173,53 @@ pub struct BcsConfig {
     pub fixed_hz: f64,
 }
 
+/// How a camera should see, passed from C# when one is spawned.
+///
+/// A struct rather than an argument list because the list was already going to be ten long, and a
+/// camera gains parameters as the renderer is bridged further.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsCameraConfig {
+    /// `0` for perspective, `1` for orthographic.
+    pub projection: i32,
+    /// Vertical field of view in degrees. Perspective only.
+    pub fov_degrees: f32,
+    /// How much of the world fits vertically, in world units. Orthographic only.
+    pub ortho_height: f32,
+    /// Nearest visible distance.
+    pub near: f32,
+    /// Furthest visible distance. Ignored by an orthographic camera, which has no horizon.
+    pub far: f32,
+    /// `0` uses the world's clear colour, `1` the one below, `2` draws over what is already there.
+    pub clear_mode: i32,
+    /// Clear colour, used when `clear_mode` is `1`.
+    pub clear: [f32; 4],
+    /// Draw order. A camera with a higher order draws over one with a lower.
+    pub order: i32,
+}
+
+/// What kind of light to spawn and how it behaves.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsLightConfig {
+    /// `0` directional, `1` point, `2` spot.
+    pub kind: i32,
+    /// Illuminance in lux for a directional light, luminous power in lumens for the other two.
+    pub intensity: f32,
+    /// Linear RGB.
+    pub color: [f32; 3],
+    /// How far the light reaches. Point and spot only.
+    pub range: f32,
+    /// Radius of the emitting sphere, which softens the shadow edge. Point and spot only.
+    pub radius: f32,
+    /// Non-zero to cast shadows.
+    pub shadows: i32,
+    /// Radians from the axis within which a spot light is at full brightness.
+    pub inner_angle: f32,
+    /// Radians from the axis at which a spot light has fallen to nothing.
+    pub outer_angle: f32,
+}
+
 /// Runs `f`, converting any panic into [`status::PANIC`] instead of unwinding into .NET.
 pub fn guard<F: FnOnce() -> i32>(f: F) -> i32 {
     match std::panic::catch_unwind(AssertUnwindSafe(f)) {

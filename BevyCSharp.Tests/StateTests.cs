@@ -27,6 +27,16 @@ public enum Connection
     Online = 1,
 }
 
+/// <summary>A state over a narrow signed enum, with a member below zero.</summary>
+public enum Countdown : sbyte
+{
+    /// <summary>Overrun, which is what makes this signed.</summary>
+    Late = -1,
+
+    /// <summary>On time.</summary>
+    OnTime = 0,
+}
+
 /// <summary>A behavior whose tick only runs while a run is in progress.</summary>
 [Behavior]
 public partial struct PlayingOnly
@@ -218,5 +228,33 @@ public sealed class StateTests
         }
 
         Assert.True(PlayingAndEnabled.Ticks > 0, "both gates were open and it still did not run");
+    }
+
+    [Fact]
+    public void ANegativeMemberOfANarrowEnumSurvivesTheRoundTrip()
+    {
+        // A slot holds an int, and a byte-backed -1 has to arrive as -1 rather than as 255,
+        // which is what reinterpreting the bytes rather than converting them would produce.
+        using var harness = new EngineHarness(frames: 4);
+        harness.App.AddState(Countdown.OnTime);
+
+        var seen = Countdown.OnTime;
+        var moved = false;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (!moved)
+            {
+                ctx.SetState(Countdown.Late);
+                moved = true;
+                return;
+            }
+
+            seen = ctx.State<Countdown>();
+        });
+
+        harness.Run();
+
+        Assert.Equal(Countdown.Late, seen);
     }
 }

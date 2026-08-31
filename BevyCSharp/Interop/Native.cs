@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 10;
+    internal const int ExpectedAbiVersion = 11;
 
     static Native() => NativeLoader.Initialize();
 
@@ -119,6 +119,33 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_visibility_layout(
         uint* size, uint* inherited, uint* hidden, uint* visible);
+
+    // -- Window (render builds only)
+
+    /// <summary>Sets the primary window's title.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_title(string title);
+
+    /// <summary>Resizes the primary window, in logical pixels.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_size(uint width, uint height);
+
+    /// <summary>Reads the primary window's size, in logical pixels.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_size(uint* width, uint* height);
+
+    /// <summary>Switches between windowed and borderless fullscreen.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_mode(int mode);
+
+    /// <summary>Sets whether the cursor is confined or hidden.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_cursor(int grab, int visible);
 
     // -- App states
 
@@ -251,12 +278,12 @@ internal static unsafe partial class Native
     /// <summary>Spawns a 3D camera and returns its entity.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial ulong bcs_render_spawn_camera_3d();
+    internal static partial ulong bcs_render_spawn_camera_3d(NativeCameraConfig* config);
 
     /// <summary>Spawns a light and returns its entity.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial ulong bcs_render_spawn_light(int kind, float intensity);
+    internal static partial ulong bcs_render_spawn_light(NativeLightConfig* config);
 
 
     // -- Renderer (render builds only)

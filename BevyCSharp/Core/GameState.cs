@@ -93,6 +93,21 @@ public static unsafe class StateRegistry
         return Unsafe.As<int, TState>(ref value);
     }
 
+    /// <summary>The current value of <typeparamref name="TState"/>, left as the raw number.</summary>
+    /// <remarks>
+    /// What a run condition compares against. Converting to the enum and back again would be two
+    /// conversions per system per frame to answer a question about two integers.
+    /// </remarks>
+    internal static int CurrentRaw<TState>() where TState : struct, Enum
+    {
+        int value;
+        Native.Check(
+            Native.bcs_state_get(SlotOf<TState>(), &value),
+            $"reading state {typeof(TState).Name}");
+
+        return value;
+    }
+
     /// <summary>
     /// Asks Bevy to move <typeparamref name="TState"/> to <paramref name="value"/>.
     /// </summary>
@@ -109,7 +124,8 @@ public static unsafe class StateRegistry
     /// <summary>The enum's underlying value, which is what the bridge stores.</summary>
     /// <remarks>
     /// Every slot holds an <see cref="int"/>, so an enum with a wider underlying type would be
-    /// truncated. Refused rather than truncated, because the values would silently collide.
+    /// truncated. Refused rather than truncated, because the values would silently collide. A
+    /// narrower one is widened by <see cref="Convert"/>, which keeps the sign.
     /// </remarks>
     internal static int ToInt<TState>(TState value) where TState : struct, Enum
     {
@@ -118,8 +134,8 @@ public static unsafe class StateRegistry
                 $"{typeof(TState).Name} is backed by a type wider than int, which a state slot "
                 + "cannot hold. Declare it over int or a narrower type.");
 
-        var result = 0;
-        Unsafe.CopyBlock(&result, &value, (uint)Unsafe.SizeOf<TState>());
-        return result;
+        // Goes through Convert rather than reinterpreting the bytes, which would widen a signed
+        // narrow enum wrongly: a byte-backed member of -1 would arrive as 255.
+        return Convert.ToInt32(value);
     }
 }

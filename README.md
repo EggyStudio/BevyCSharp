@@ -248,6 +248,44 @@ Render.SetMesh(ctx.Ecs, entity, mesh);
 Render.SetMaterial(ctx.Ecs, entity, material);
 ```
 
+A camera and a light take settings, and every value has a usable default:
+
+```csharp
+var camera = Render.SpawnCamera3d(new CameraSettings
+{
+    FieldOfView = 55f,
+    Clear = ClearMode.Custom,
+    ClearColor = (0.02f, 0.03f, 0.05f, 1f),
+});
+
+Render.SpawnLight(new LightSettings
+{
+    Kind = LightKind.Spot,
+    Intensity = 40_000f,
+    Color = (0.4f, 0.6f, 1f),
+    OuterAngle = 0.5f,
+});
+```
+
+`CameraProjection.Orthographic` swaps perspective for a fixed vertical `Height`, which is what an
+isometric or top-down view is built on. `Order` decides which camera draws over which, and
+`ClearMode.Keep` layers one on another. A light is aimed by its `Transform`: a directional or
+spot light shines down its own negative Z, which is what `Transform.LookingAt` produces.
+
+The window can be driven while the app runs:
+
+```csharp
+Window.SetTitle("Level 2");
+Window.SetMode(WindowMode.BorderlessFullscreen);
+Window.SetCursor(CursorGrab.Locked, visible: false);
+var (width, height) = Window.Size();
+```
+
+`CursorGrab.Locked` is what a first-person camera needs, since it reads how far the mouse moved
+rather than where it is. Platforms differ in which grab they support — Windows confines, macOS
+locks, and each emulates the other — so hide the cursor while it is grabbed either way. A
+headless run has no window and every call says so rather than doing nothing.
+
 Handles are references, so one mesh and one material can be shared by any number of entities.
 Attaching a mesh goes through Bevy's own insert rather than a byte copy, which is what pulls in
 the components Bevy requires alongside it, so an entity needs nothing further to be drawn.

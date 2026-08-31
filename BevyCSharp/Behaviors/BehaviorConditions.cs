@@ -57,7 +57,7 @@ public static class BehaviorConditions
     public static Func<World, bool> InState<TState>(TState value) where TState : struct, Enum
     {
         var wanted = StateRegistry.ToInt(value);
-        return _ => StateRegistry.ToInt(StateRegistry.Current<TState>()) == wanted;
+        return _ => StateRegistry.CurrentRaw<TState>() == wanted;
     }
 
     /// <summary>Passes only on the first frame.</summary>

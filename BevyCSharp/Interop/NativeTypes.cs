@@ -130,6 +130,79 @@ public struct NativeFrameState
     public NativeInput Input;
 }
 
+/// <summary>How a camera should see, handed to the bridge when one is spawned.</summary>
+[StructLayout(LayoutKind.Sequential)]
+public struct NativeCameraConfig
+{
+    /// <summary>0 perspective, 1 orthographic.</summary>
+    public int Projection;
+
+    /// <summary>Vertical field of view in degrees. Perspective only.</summary>
+    public float FovDegrees;
+
+    /// <summary>World units visible vertically. Orthographic only.</summary>
+    public float OrthoHeight;
+
+    /// <summary>Nearest visible distance.</summary>
+    public float Near;
+
+    /// <summary>Furthest visible distance.</summary>
+    public float Far;
+
+    /// <summary>0 world clear colour, 1 the one below, 2 no clear.</summary>
+    public int ClearMode;
+
+    /// <summary>Clear colour red.</summary>
+    public float ClearR;
+
+    /// <summary>Clear colour green.</summary>
+    public float ClearG;
+
+    /// <summary>Clear colour blue.</summary>
+    public float ClearB;
+
+    /// <summary>Clear colour alpha.</summary>
+    public float ClearA;
+
+    /// <summary>Draw order; higher draws over lower.</summary>
+    public int Order;
+}
+
+/// <summary>What kind of light to spawn and how it behaves.</summary>
+[StructLayout(LayoutKind.Sequential)]
+public struct NativeLightConfig
+{
+    /// <summary>0 directional, 1 point, 2 spot.</summary>
+    public int Kind;
+
+    /// <summary>Lux for a directional light, lumens for the other two.</summary>
+    public float Intensity;
+
+    /// <summary>Linear red.</summary>
+    public float ColorR;
+
+    /// <summary>Linear green.</summary>
+    public float ColorG;
+
+    /// <summary>Linear blue.</summary>
+    public float ColorB;
+
+    /// <summary>How far the light reaches. Point and spot only.</summary>
+    public float Range;
+
+    /// <summary>Radius of the emitting sphere. Point and spot only.</summary>
+    public float Radius;
+
+    /// <summary>Non-zero to cast shadows.</summary>
+    public int Shadows;
+
+    /// <summary>Radians of full brightness about the axis. Spot only.</summary>
+    public float InnerAngle;
+
+    /// <summary>Radians at which a spot light has fallen to nothing.</summary>
+    public float OuterAngle;
+}
+
 /// <summary>App configuration handed to the native bridge at construction.</summary>
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct NativeConfig

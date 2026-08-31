@@ -26,6 +26,131 @@ public enum LightKind
 
     /// <summary>Rays from a point. Intensity is luminous power in lumens.</summary>
     Point = 1,
+
+    /// <summary>
+    /// A cone of rays, aimed down the entity's negative Z. Intensity is luminous power in lumens.
+    /// </summary>
+    Spot = 2,
+}
+
+/// <summary>How a camera turns the world into a picture.</summary>
+public enum CameraProjection
+{
+    /// <summary>Things shrink with distance, as an eye sees them.</summary>
+    Perspective = 0,
+
+    /// <summary>
+    /// Parallel lines stay parallel and distance does not shrink anything, which is what an
+    /// isometric or a top-down view is built on.
+    /// </summary>
+    Orthographic = 1,
+}
+
+/// <summary>What a camera does with the pixels it is about to draw over.</summary>
+public enum ClearMode
+{
+    /// <summary>Clear to the world's clear colour.</summary>
+    World = 0,
+
+    /// <summary>Clear to this camera's own colour.</summary>
+    Custom = 1,
+
+    /// <summary>
+    /// Clear nothing and draw over what is already there, for a camera layered on another.
+    /// </summary>
+    Keep = 2,
+}
+
+/// <summary>
+/// How a camera should see.
+/// </summary>
+/// <remarks>
+/// Every value has a usable default, so setting one property and leaving the rest is the normal
+/// way to use this. Position and aim the camera by writing its <see cref="Transform"/>.
+/// </remarks>
+/// <example>
+/// <code>
+/// var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 60f });
+/// ctx.Ecs.Add(camera, Transform.LookingAt(eye, Vec3.Zero, Vec3.UnitY));
+/// </code>
+/// </example>
+public sealed class CameraSettings
+{
+    /// <summary>Perspective or orthographic.</summary>
+    public CameraProjection Projection { get; set; } = CameraProjection.Perspective;
+
+    /// <summary>Vertical field of view in degrees. Perspective only.</summary>
+    /// <remarks>
+    /// Bevy's default is 45. Larger sees more and exaggerates depth; much larger distorts at the
+    /// edges of the picture.
+    /// </remarks>
+    public float FieldOfView { get; set; } = 45f;
+
+    /// <summary>How many world units fit vertically. Orthographic only.</summary>
+    /// <remarks>The width follows from the window, so the picture does not stretch when resized.</remarks>
+    public float Height { get; set; } = 10f;
+
+    /// <summary>Nearest visible distance.</summary>
+    /// <remarks>
+    /// Depth precision is spent between here and <see cref="Far"/>, and mostly near this end, so
+    /// a very small value is what makes distant surfaces flicker against each other.
+    /// </remarks>
+    public float Near { get; set; } = 0.1f;
+
+    /// <summary>Furthest visible distance. Ignored by an orthographic camera.</summary>
+    public float Far { get; set; } = 1000f;
+
+    /// <summary>What to do with the pixels already there.</summary>
+    public ClearMode Clear { get; set; } = ClearMode.World;
+
+    /// <summary>The colour used when <see cref="Clear"/> is <see cref="ClearMode.Custom"/>.</summary>
+    /// <remarks>Linear RGBA, not sRGB, so these are the numbers a shader works in.</remarks>
+    public (float R, float G, float B, float A) ClearColor { get; set; } = (0f, 0f, 0f, 1f);
+
+    /// <summary>Draw order. A camera with a higher order draws over one with a lower.</summary>
+    public int Order { get; set; }
+}
+
+/// <summary>
+/// What kind of light to spawn and how it behaves.
+/// </summary>
+/// <remarks>
+/// A directional light is aimed by its <see cref="Transform"/> and ignores position; a point
+/// light is positioned and ignores aim; a spot light uses both.
+/// </remarks>
+public sealed class LightSettings
+{
+    /// <summary>Which light to spawn.</summary>
+    public LightKind Kind { get; set; } = LightKind.Directional;
+
+    /// <summary>Illuminance in lux for a directional light, luminous power in lumens otherwise.</summary>
+    public float Intensity { get; set; } = 10_000f;
+
+    /// <summary>Linear RGB. White by default.</summary>
+    public (float R, float G, float B) Color { get; set; } = (1f, 1f, 1f);
+
+    /// <summary>How far the light reaches, in world units. Point and spot only.</summary>
+    public float Range { get; set; } = 20f;
+
+    /// <summary>
+    /// Radius of the emitting sphere. Point and spot only.
+    /// </summary>
+    /// <remarks>
+    /// A light with no size casts a shadow with a hard edge, which reads as artificial. Giving it
+    /// a radius softens the edge.
+    /// </remarks>
+    public float Radius { get; set; }
+
+    /// <summary>Whether the light casts shadows.</summary>
+    /// <remarks>Shadows cost a render pass per light, so this is the first thing to turn off.</remarks>
+    public bool Shadows { get; set; } = true;
+
+    /// <summary>Radians from the axis within which a spot light is at full brightness.</summary>
+    public float InnerAngle { get; set; }
+
+    /// <summary>Radians from the axis at which a spot light has fallen to nothing.</summary>
+    /// <remarks>Must be under a quarter turn, and at least <see cref="InnerAngle"/>.</remarks>
+    public float OuterAngle { get; set; } = MathF.PI / 8f;
 }
 
 /// <summary>
@@ -44,7 +169,7 @@ public enum LightKind
 /// <see cref="EcsWorld.Add{T}"/>, the way <see cref="Transform"/> is.
 /// </para>
 /// </remarks>
-public static class Render
+public static unsafe class Render
 {
     /// <summary>
     /// Builds a mesh primitive and returns a handle to it.
@@ -116,7 +241,31 @@ public static class Render
     /// Z; position it by writing its <see cref="Transform"/> like any other entity.
     /// </remarks>
     /// <returns><see cref="Entity.None"/> on a build with no renderer.</returns>
-    public static Entity SpawnCamera3d() => new(Native.bcs_render_spawn_camera_3d());
+    public static Entity SpawnCamera3d() => new(Native.bcs_render_spawn_camera_3d(null));
+
+    /// <summary>Spawns a 3D camera set up by <paramref name="settings"/>.</summary>
+    /// <returns><see cref="Entity.None"/> on a build with no renderer.</returns>
+    public static Entity SpawnCamera3d(CameraSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var native = new NativeCameraConfig
+        {
+            Projection = (int)settings.Projection,
+            FovDegrees = settings.FieldOfView,
+            OrthoHeight = settings.Height,
+            Near = settings.Near,
+            Far = settings.Far,
+            ClearMode = (int)settings.Clear,
+            ClearR = settings.ClearColor.R,
+            ClearG = settings.ClearColor.G,
+            ClearB = settings.ClearColor.B,
+            ClearA = settings.ClearColor.A,
+            Order = settings.Order,
+        };
+
+        return new Entity(Native.bcs_render_spawn_camera_3d(&native));
+    }
 
     /// <summary>
     /// Spawns a light and returns it.
@@ -127,7 +276,30 @@ public static class Render
     /// </param>
     /// <returns><see cref="Entity.None"/> on a build with no renderer.</returns>
     public static Entity SpawnLight(LightKind kind, float intensity) =>
-        new(Native.bcs_render_spawn_light((int)kind, intensity));
+        SpawnLight(new LightSettings { Kind = kind, Intensity = intensity });
+
+    /// <summary>Spawns a light set up by <paramref name="settings"/>.</summary>
+    /// <returns><see cref="Entity.None"/> on a build with no renderer.</returns>
+    public static Entity SpawnLight(LightSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var native = new NativeLightConfig
+        {
+            Kind = (int)settings.Kind,
+            Intensity = settings.Intensity,
+            ColorR = settings.Color.R,
+            ColorG = settings.Color.G,
+            ColorB = settings.Color.B,
+            Range = settings.Range,
+            Radius = settings.Radius,
+            Shadows = settings.Shadows ? 1 : 0,
+            InnerAngle = settings.InnerAngle,
+            OuterAngle = settings.OuterAngle,
+        };
+
+        return new Entity(Native.bcs_render_spawn_light(&native));
+    }
 
     /// <summary>Attaches a handle through one of the components that carry one.</summary>
     private static void Attach(

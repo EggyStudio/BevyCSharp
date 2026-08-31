@@ -34,6 +34,36 @@ public partial struct Renderer
         if (ctx.Input.KeyPressed(Key.Escape)) ctx.Exit();
     }
 
+    /// <summary>Whether the window is currently borderless fullscreen.</summary>
+    private static bool _fullscreen;
+
+    /// <summary>Whether the cursor is currently locked to the window.</summary>
+    private static bool _cursorLocked;
+
+    /// <summary>Drives the window from the keyboard: F11 fullscreen, Tab cursor lock.</summary>
+    /// <remarks>
+    /// Cursor lock is the one a first-person camera cannot do without, because it reads how far
+    /// the mouse moved rather than where it is.
+    /// </remarks>
+    [OnUpdate]
+    public static void ControlWindow(BehaviorContext ctx)
+    {
+        if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
+
+        if (ctx.Input.KeyPressed(Key.F11))
+        {
+            _fullscreen = !_fullscreen;
+            Window.SetMode(_fullscreen ? WindowMode.BorderlessFullscreen : WindowMode.Windowed);
+        }
+
+        if (ctx.Input.KeyPressed(Key.Tab))
+        {
+            _cursorLocked = !_cursorLocked;
+            Window.SetCursor(_cursorLocked ? CursorGrab.Locked : CursorGrab.None, !_cursorLocked);
+            Console.WriteLine($"[Renderer] cursor {(_cursorLocked ? "locked" : "free")}");
+        }
+    }
+
     /// <summary>Prints the frame rate every second while the window is open.</summary>
     [OnLast]
     [ToggleKey(Key.F1)]
