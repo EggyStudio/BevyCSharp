@@ -249,17 +249,26 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         app.add_plugins(bevy::gltf::GltfPlugin::default());
     }
 
-    // A rate of zero means "leave Bevy's own", which is 64 Hz. A negative or non-finite one is
-    // meaningless rather than merely unusual, so it is ignored the same way.
     // Where the typed-text reader keeps its place between frames.
     app.init_resource::<crate::sync::TextCursor>();
 
+    // A rate of zero means "leave Bevy's own", which is 64 Hz. A negative or non-finite one is
+    // meaningless rather than merely unusual, so it is ignored the same way.
     if config.fixed_hz.is_finite() && config.fixed_hz > 0.0 {
         app.insert_resource(bevy::time::Time::<bevy::time::Fixed>::from_hz(config.fixed_hz));
     }
 
     // Pin the orderings that matter between exclusive C# systems.
-    app.configure_sets(First, (BcsSet::Sync, BcsSet::First).chain());
+    //
+    // The frame snapshot runs after Bevy has advanced its clocks, or it would report the previous
+    // frame's time: nothing else in `First` orders the two, so without this the schedule is free
+    // to run the snapshot first and `ctx.Time` lags by a frame.
+    app.configure_sets(
+        First,
+        (BcsSet::Sync, BcsSet::First)
+            .chain()
+            .after(bevy::time::TimeSystems),
+    );
     app.configure_sets(PostUpdate, (BcsSet::PostUpdate, BcsSet::Flush).chain());
     // `Cleanup` must come after `ExitCheck`, or on the final frame it would look for a pending
     // `AppExit` that has not been written yet and skip, with no later frame to catch it.

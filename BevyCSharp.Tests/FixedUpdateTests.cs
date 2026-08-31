@@ -85,28 +85,31 @@ public sealed class FixedUpdateTests
         // given, which is the invariant a physics step depends on.
         using var harness = new EngineHarness(frames: 8, fps: 60, fixedHz: 120);
         var steps = 0;
+        var spent = 0;
         var fixedDelta = 0.0;
         var elapsed = 0.0;
-        var frameDelta = 0.0;
 
         harness.On(Stage.FixedUpdate, _ => steps++);
-        harness.OnContext(Stage.Last, ctx =>
+
+        // Both readings are taken at the top of the frame, before that frame's fixed steps have
+        // run, so the steps counted are exactly those driven by time the snapshot already
+        // includes. Reading them from different points in the frame would compare a step count
+        // against a clock that does not cover it, which on a machine with uneven frame times is
+        // a different answer every run.
+        harness.OnContext(Stage.First, ctx =>
         {
+            spent = steps;
             fixedDelta = ctx.Time.FixedDeltaSeconds;
             elapsed = ctx.Time.ElapsedSeconds;
-            frameDelta = ctx.Time.DeltaSeconds;
         });
         harness.Run();
 
         Assert.True(steps > 0, "the fixed schedule never ran");
 
-        // Two slices of slack, for two different reasons. The loop is allowed to be up to one
-        // fixed step behind, since it only spends whole slices. And the reading is a frame
-        // behind: the snapshot is taken at the top of the frame, before that frame's fixed steps
-        // have run, so `elapsed` does not yet include the frame those steps belong to.
+        // One slice of slack, because the loop spends whole slices and keeps the remainder.
         Assert.True(
-            steps * fixedDelta <= elapsed + frameDelta + fixedDelta,
-            $"{steps} steps of {fixedDelta}s exceeds the {elapsed}s the run had to spend");
+            spent * fixedDelta <= elapsed + fixedDelta,
+            $"{spent} steps of {fixedDelta}s exceeds the {elapsed}s the run had to spend");
     }
 
     [Fact]
