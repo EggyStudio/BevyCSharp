@@ -80,9 +80,38 @@ public partial struct Scene
         // flat outline.
         ctx.Ecs.Add(cube, new Scene { YawSpeed = 0.9f, PitchSpeed = 0.35f });
 
+        // A HUD: a panel pinned to a corner with a line of text inside it. Nesting is ordinary
+        // parenting, so the text moves with the panel.
+        var panel = Ui.SpawnNode(new UiSettings
+        {
+            Absolute = true,
+            Left = Length.Px(16f),
+            Top = Length.Px(16f),
+            Padding = Length.Px(10f),
+            Color = (0f, 0f, 0f, 0.45f),
+        });
+
+        var readout = Ui.SpawnText("frame 0", new UiSettings { Color = (0.9f, 0.95f, 1f, 1f) }, 18f);
+        ctx.Ecs.SetParent(readout, panel);
+        ctx.Ecs.Add(readout, new Hud());
+
         Console.WriteLine(
             "[Scene] a rotating cube. Escape closes the window, F11 toggles fullscreen, "
             + "Tab locks the cursor.");
+    }
+
+    /// <summary>Keeps the HUD's readout current.</summary>
+    /// <remarks>
+    /// The text is rewritten in place. Respawning it every frame would work and would churn an
+    /// entity sixty times a second for a string that changes.
+    /// </remarks>
+    [OnUpdate]
+    public static void UpdateHud(BehaviorContext ctx)
+    {
+        if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
+
+        foreach (var row in ctx.Ecs.Query<Hud>(markChanged: false))
+            Ui.SetText(row.Entity, $"frame {ctx.Time.FrameCount}   {ctx.Time.SmoothedFps:F0} fps");
     }
 
     [OnUpdate]

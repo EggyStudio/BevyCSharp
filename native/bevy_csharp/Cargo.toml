@@ -55,6 +55,7 @@ render = [
     "bevy/bevy_sprite",
     "bevy/bevy_text",
     "bevy/bevy_ui",
+    "bevy/bevy_ui_render",
     "bevy/bevy_gizmos",
     "bevy/bevy_scene",
     "bevy/default_font",

@@ -34,3 +34,6 @@ public struct Falls;
 
 /// <summary>Marks an entity that has come to rest.</summary>
 public struct Grounded;
+
+/// <summary>Marks the text entity the HUD writes into.</summary>
+public struct Hud;

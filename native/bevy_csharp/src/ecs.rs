@@ -21,9 +21,14 @@ use crate::state::{with_world, with_world_opt};
 const _: () = assert!(size_of::<Entity>() == size_of::<u64>());
 
 /// Rebuilds an `Entity` from the handle C# is holding.
+///
+/// `Entity.None` is zero, which is not a valid encoding, and it is a value C# hands out: it is
+/// what `ParentOf` returns for an entity with no parent. Bevy's placeholder is a well-formed
+/// handle that no world ever contains, so passing one on reports "no such entity" through the
+/// ordinary path rather than panicking at the boundary.
 #[inline]
-fn entity_from(bits: u64) -> Entity {
-    Entity::from_bits(bits)
+pub(crate) fn entity_from(bits: u64) -> Entity {
+    Entity::try_from_bits(bits).unwrap_or(Entity::PLACEHOLDER)
 }
 
 /// Rebuilds a `ComponentId` from the index C# is holding.

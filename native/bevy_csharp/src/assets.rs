@@ -133,7 +133,6 @@ pub(crate) fn insert_handle(world: &mut World, handle: UntypedHandle) -> i32 {
 /// Clones the handle behind a key, or returns `None` if the key names nothing.
 ///
 /// A clone rather than a borrow, because the caller needs the world back to insert it.
-#[cfg_attr(not(feature = "render"), expect(dead_code, reason = "render builds only"))]
 pub(crate) fn clone_handle(world: &World, key: i32) -> Option<UntypedHandle> {
     world.get_resource::<AssetHandles>()?.get(key).cloned()
 }
@@ -274,13 +273,12 @@ pub unsafe extern "C" fn bcs_asset_load_image(
             };
 
             let handle = server
-                .load_with_settings::<bevy::image::Image, ImageLoaderSettings>(
-                    path.to_string(),
-                    move |settings: &mut ImageLoaderSettings| {
-                        settings.sampler = ImageSampler::Descriptor(descriptor.clone());
-                        settings.is_srgb = srgb;
-                    },
-                )
+                .load_builder()
+                .with_settings(move |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::Descriptor(descriptor.clone());
+                    settings.is_srgb = srgb;
+                })
+                .load::<bevy::image::Image>(path.to_string())
                 .untyped();
 
             world.get_resource_or_init::<AssetHandles>().insert(handle)

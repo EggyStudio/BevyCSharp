@@ -85,18 +85,20 @@ Nothing here blocks a game; it is a matter of size on disk and upload cost.
 
 ## Presentation
 
-### Text and UI
+### UI beyond a HUD
 
-`bevy_ui`, `bevy_text` and `default_font` are compiled in, so the types are linked, but the
-render halves are not: Bevy 0.19 splits `bevy_ui_render`, `bevy_sprite_render` and
-`bevy_gizmos_render` into separate features and the current profile omits all three. Nothing
-draws even after a bridge exists.
+`bevy_ui_render` is compiled in and `Ui` spawns nodes and text, sets a node's position, size and
+padding, and rewrites text in place. That covers a HUD. A menu needs more:
 
-- features: `bevy/bevy_ui_render`, and `bevy/bevy_ui_widgets` for the built-in widgets
-- exports: spawn a UI node, set its layout and style, spawn and update a text node
-- managed: enough to build a HUD and a menu
-- note: this is the largest single gap for a finished game. Score, health, menus and settings all
-  need it.
+- **Interaction.** Nothing reports a click or a hover. Bevy's `Interaction` component changes as
+  the pointer moves over a node, and is mirrorable as a name-only handle plus a byte, which would
+  make a button possible without bridging `bevy_ui_widgets`.
+- **Layout.** `Node` carries two dozen fields and six are bridged. Flex direction, justify and
+  align, gaps, margins and borders are what turn a stack of nodes into a laid-out screen.
+- **Images.** A node can hold a texture through `ImageNode`, which is how an icon or a nine-slice
+  panel is drawn. The handle plumbing for it already exists.
+- **Text layout.** Justification, line breaking and bounds are `TextLayout`, unbridged, so a long
+  string runs off the edge.
 
 ### 2D rendering
 

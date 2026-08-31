@@ -235,6 +235,47 @@ pub struct BcsCameraConfig {
     pub order: i32,
 }
 
+/// Where a UI node sits and how large it is.
+///
+/// Each length is a value and a unit, because Bevy's `Val` is an enum and a bare float cannot say
+/// whether it means pixels, a percentage, or "work it out". `0` is auto, `1` pixels, `2` percent.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsUiNodeConfig {
+    /// Non-zero to place the node against its parent's edges rather than in its flow.
+    pub absolute: i32,
+    /// Distance from the parent's left edge.
+    pub left: f32,
+    /// Unit of `left`.
+    pub left_unit: i32,
+    /// Distance from the parent's top edge.
+    pub top: f32,
+    /// Unit of `top`.
+    pub top_unit: i32,
+    /// Distance from the parent's right edge.
+    pub right: f32,
+    /// Unit of `right`.
+    pub right_unit: i32,
+    /// Distance from the parent's bottom edge.
+    pub bottom: f32,
+    /// Unit of `bottom`.
+    pub bottom_unit: i32,
+    /// How wide the node is.
+    pub width: f32,
+    /// Unit of `width`.
+    pub width_unit: i32,
+    /// How tall the node is.
+    pub height: f32,
+    /// Unit of `height`.
+    pub height_unit: i32,
+    /// Space between the node's edge and its contents, on every side.
+    pub padding: f32,
+    /// Unit of `padding`.
+    pub padding_unit: i32,
+    /// Background colour for a node, or the text colour for a run of text. Linear RGBA.
+    pub color: [f32; 4],
+}
+
 /// How an image should be sampled, and how its bytes should be read.
 #[repr(C)]
 #[derive(Clone, Copy)]

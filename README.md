@@ -2,7 +2,7 @@
 
 Write [Bevy](https://bevy.org) games in C#.
 
-![A lit cube turning above a ground plane, drawn by Bevy's renderer](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/screenshot-2.png)
+![A lit cube turning above a ground plane, drawn by Bevy's renderer](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/screenshot-3.png)
 
 <sup>`BevyCSharp.Sample`, running on Bevy's PBR renderer through the bridge:
 `dotnet run --project BevyCSharp.Sample`</sup>
@@ -206,6 +206,35 @@ doing work that only matters on screen.
 
 Set `Visibility` on an entity that is already drawable. Adding it writes the component but does
 not pull in the two Bevy computes from it, which arrive with the mesh.
+
+### UI
+
+Panels and text, on a render build:
+
+```csharp
+var panel = Ui.SpawnNode(new UiSettings
+{
+    Absolute = true,
+    Left = Length.Px(16f),
+    Top = Length.Px(16f),
+    Padding = Length.Px(10f),
+    Color = (0f, 0f, 0f, 0.45f),
+});
+
+var label = Ui.SpawnText("Score: 0", new UiSettings { Color = (1f, 1f, 1f, 1f) }, 18f);
+ctx.Ecs.SetParent(label, panel);
+
+Ui.SetText(label, $"Score: {score}");
+```
+
+A length carries its unit, because a bare number cannot say whether it means pixels, a share of
+the parent, or "work it out": `Length.Px`, `Length.Percent`, `Length.Auto`. `Absolute` pins a node
+to its parent's edges rather than laying it out beside its siblings, which is what a HUD wants.
+
+Nodes are entities, so nesting is `SetParent` and removal is `Despawn`, and a node can carry your
+own components like anything else. The font is Bevy's own, compiled into the engine, so text needs
+no asset. `SetText` rewrites in place rather than respawning, because a score changes every frame
+and the entity behind it should not.
 
 ### Assets
 

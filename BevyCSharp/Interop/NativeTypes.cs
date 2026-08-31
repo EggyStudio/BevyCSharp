@@ -240,6 +240,68 @@ public struct NativeCameraConfig
     public int Order;
 }
 
+/// <summary>Where a UI node sits and how large it is.</summary>
+[StructLayout(LayoutKind.Sequential)]
+public struct NativeUiNodeConfig
+{
+    /// <summary>Non-zero to position against the parent's edges.</summary>
+    public int Absolute;
+
+    /// <summary>Distance from the left edge.</summary>
+    public float Left;
+
+    /// <summary>Unit of <see cref="Left"/>.</summary>
+    public int LeftUnit;
+
+    /// <summary>Distance from the top edge.</summary>
+    public float Top;
+
+    /// <summary>Unit of <see cref="Top"/>.</summary>
+    public int TopUnit;
+
+    /// <summary>Distance from the right edge.</summary>
+    public float Right;
+
+    /// <summary>Unit of <see cref="Right"/>.</summary>
+    public int RightUnit;
+
+    /// <summary>Distance from the bottom edge.</summary>
+    public float Bottom;
+
+    /// <summary>Unit of <see cref="Bottom"/>.</summary>
+    public int BottomUnit;
+
+    /// <summary>Node width.</summary>
+    public float Width;
+
+    /// <summary>Unit of <see cref="Width"/>.</summary>
+    public int WidthUnit;
+
+    /// <summary>Node height.</summary>
+    public float Height;
+
+    /// <summary>Unit of <see cref="Height"/>.</summary>
+    public int HeightUnit;
+
+    /// <summary>Padding on every side.</summary>
+    public float Padding;
+
+    /// <summary>Unit of <see cref="Padding"/>.</summary>
+    public int PaddingUnit;
+
+    /// <summary>Background or text colour, red.</summary>
+    public float ColorR;
+
+    /// <summary>Background or text colour, green.</summary>
+    public float ColorG;
+
+    /// <summary>Background or text colour, blue.</summary>
+    public float ColorB;
+
+    /// <summary>Background or text colour, alpha.</summary>
+    public float ColorA;
+}
+
 /// <summary>How an image should be sampled, and how its bytes should be read.</summary>
 [StructLayout(LayoutKind.Sequential)]
 public struct NativeImageConfig
