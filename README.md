@@ -289,6 +289,32 @@ chain of arbitrary transforms cannot always be expressed as one, so `Scale`, `Ro
 
 Parenting is a structural change, so queue it on `ctx.Cmd` when calling from inside a loop.
 
+### Messages
+
+Components say what an entity is and resources what the world has. Neither says what just
+happened, which is why a collision or a button press otherwise becomes a component invented to
+carry it. A message is sent by one system and read by any number of others, none of which need
+know about each other.
+
+```csharp
+public readonly record struct Collided(Entity A, Entity B);
+
+ctx.Send(new Collided(a, b));
+
+foreach (var hit in ctx.Read<Collided>())
+    Console.WriteLine($"{hit.A} hit {hit.B}");
+```
+
+A reader sees the previous frame's messages. The queue is swapped once at the top of each frame,
+so every reader sees the same complete set, exactly once, whatever stage it runs in and whatever
+order the systems happen to run in. The cost is a frame of latency: a message is not readable in
+the frame it was sent, including by the sender.
+
+Bevy's own messages instead give each reader a cursor, which lets it catch up within the frame. A
+cursor needs a stable identity per reader, and a C# system has none the engine can see, so the
+swap is what makes "exactly once" true here. `ctx.Send` is safe from a parallel behavior method,
+like `ctx.Cmd`; reading is main-thread only.
+
 ---
 
 ## Attributes

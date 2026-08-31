@@ -33,6 +33,9 @@ public sealed class BehaviorContext
     /// <summary>Deferred structural changes, applied at the end of <see cref="Stage.PostUpdate"/>.</summary>
     public EcsCommands Cmd { get; }
 
+    /// <summary>Messages broadcast between systems.</summary>
+    public MessageBus Messages { get; }
+
     /// <summary>This frame's timing.</summary>
     public Time Time { get; }
 
@@ -55,6 +58,7 @@ public sealed class BehaviorContext
         Cmd = world.Resource<EcsCommands>();
         Time = world.Resource<Time>();
         Input = world.Resource<Input>();
+        Messages = world.Resource<MessageBus>();
     }
 
     /// <summary>
@@ -71,6 +75,7 @@ public sealed class BehaviorContext
         Cmd = cmd;
         Time = time;
         Input = input;
+        Messages = world.Resource<MessageBus>();
     }
 
     /// <summary>Gets a required resource.</summary>
@@ -97,6 +102,15 @@ public sealed class BehaviorContext
     /// </remarks>
     public void SetState<TState>(TState value) where TState : struct, Enum =>
         StateRegistry.Set(value);
+
+    /// <summary>Broadcasts a message for every reader to see next frame.</summary>
+    /// <remarks>Safe from a parallel behavior method, like <see cref="Cmd"/>.</remarks>
+    public void Send<TMessage>(TMessage message) where TMessage : notnull =>
+        Messages.Send(message);
+
+    /// <summary>The messages of type <typeparamref name="TMessage"/> sent during the previous frame.</summary>
+    public ReadOnlySpan<TMessage> Read<TMessage>() where TMessage : notnull =>
+        Messages.Read<TMessage>();
 
     /// <summary>Asks the engine to shut down after this frame.</summary>
     public void Exit() => App.RequestExit();

@@ -100,6 +100,7 @@ public sealed unsafe class App : IDisposable
         World.InsertResource(new Input());
         World.InsertResource(new EcsWorld());
         World.InsertResource(new EcsCommands());
+        World.InsertResource(new MessageBus());
 
         RegisterEngineSystems();
     }
@@ -137,6 +138,9 @@ public sealed unsafe class App : IDisposable
             Native.Check(Native.bcs_frame_state(&state), "bcs_frame_state");
             world.Resource<Time>().Update(state.Time);
             world.Resource<Input>().Update(state.Input);
+
+            // Swapped here so the whole frame reads one complete, unchanging set.
+            world.Resource<MessageBus>().Swap();
         }, "Engine.FrameSync"));
 
         // Apply everything queued during the frame, after all user PostUpdate work.

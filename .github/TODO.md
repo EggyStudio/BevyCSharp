@@ -97,11 +97,20 @@ system to a value. What is missing is the other half, the schedules Bevy runs on
 - note: today the same thing is expressed by watching for the change in a system scoped with
   `[InState]`, which works but runs every frame rather than once on the edge.
 
-### Messages between systems
+### Reading Bevy's own messages
 
-Systems communicate only through components and resources. Bevy's message API is not bridged, so
-there is no way to broadcast something like a collision or a button press to several readers
-without inventing a component to carry it.
+C#-to-C# broadcast is covered: `ctx.Send` and `ctx.Read` carry a message from one system to any
+number of others. What is not bridged is Bevy's own message stream, so nothing the engine reports
+is reachable: window resizes, files dropped on the window, asset load failures, and whatever a
+Rust plugin sends.
+
+- exports: drain a named message type into a byte buffer, the way `bcs_component_id_of` resolves
+  a curated list of names rather than anything the type registry holds
+- managed: mirrors for the payloads worth reading, and a way to feed them into the same
+  `ctx.Read` the managed bus uses, so a reader does not care which side sent it
+- note: the managed bus swaps once a frame rather than giving each reader a cursor, so a message
+  is readable the frame after it was sent. Matching Bevy's cursor semantics would need a stable
+  identity per reader, which a C# system does not have today.
 
 ## Rendering control
 
