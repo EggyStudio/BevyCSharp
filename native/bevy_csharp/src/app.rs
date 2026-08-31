@@ -505,6 +505,54 @@ pub unsafe extern "C" fn bcs_transform_layout(
     })
 }
 
+/// Reports where Bevy places each part of `GlobalTransform`.
+///
+/// The world-space result of propagation, and the one component a parented entity cannot compute
+/// for itself. `GlobalTransform` wraps a private `Affine3A`, so its offsets cannot be taken the
+/// way `Transform`'s are. They come from the affine instead, and the wrapper is confirmed to be
+/// nothing but that affine by comparing the two sizes: a single-field struct that is exactly the
+/// size of its field has nowhere else to put it.
+///
+/// The offsets matter as much as they do for `Transform`, and for the same reason. `Vec3A` is
+/// SIMD-backed and sixteen-byte aligned, so each of the four vectors occupies sixteen bytes
+/// rather than the twelve its components need, and a mirror packing them tightly would read
+/// every axis but the first from the wrong place while passing a size check on the total.
+///
+/// # Safety
+/// Every output pointer must be writable, or null to skip that output.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_global_transform_layout(
+    size: *mut u32,
+    x_axis: *mut u32,
+    y_axis: *mut u32,
+    z_axis: *mut u32,
+    translation: *mut u32,
+) -> i32 {
+    crate::interop::guard(|| {
+        use bevy::math::{Affine3A, Mat3A};
+        use bevy::transform::components::GlobalTransform;
+
+        if core::mem::size_of::<GlobalTransform>() != core::mem::size_of::<Affine3A>() {
+            return status::INVALID_STATE;
+        }
+
+        let write = |target: *mut u32, value: usize| {
+            if !target.is_null() {
+                unsafe { target.write(value as u32) };
+            }
+        };
+
+        let matrix3 = core::mem::offset_of!(Affine3A, matrix3);
+
+        write(size, core::mem::size_of::<GlobalTransform>());
+        write(x_axis, matrix3 + core::mem::offset_of!(Mat3A, x_axis));
+        write(y_axis, matrix3 + core::mem::offset_of!(Mat3A, y_axis));
+        write(z_axis, matrix3 + core::mem::offset_of!(Mat3A, z_axis));
+        write(translation, core::mem::offset_of!(Affine3A, translation));
+        status::OK
+    })
+}
+
 /// Registers a C# system in `stage`.
 ///
 /// # Safety

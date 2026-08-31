@@ -35,10 +35,8 @@ public static class NativeComponents
     /// Bevy's <c>GlobalTransform</c>: the world-space result of propagation.
     /// </summary>
     /// <remarks>
-    /// Returned for filtering and counting only. It is a 3x4 affine matrix rather than the
-    /// position/rotation/scale triple <see cref="Bevy.Transform"/> uses, and C# has no mirror for
-    /// it, so reading it as a <see cref="Bevy.Transform"/> would be wrong. Write to
-    /// <see cref="Bevy.Transform"/> and let Bevy propagate.
+    /// The id behind <see cref="Bevy.GlobalTransform"/>. Read it and write
+    /// <see cref="Bevy.Transform"/>: propagation overwrites this one every frame.
     /// </remarks>
     public static int GlobalTransform => ComponentType<Bevy.GlobalTransform>.Id;
 
@@ -110,7 +108,15 @@ public static class NativeComponents
     /// </remarks>
     private static void ExtraCheck(string name)
     {
-        if (name == "Transform") VerifyTransform();
+        switch (name)
+        {
+            case "Transform":
+                VerifyTransform();
+                break;
+            case "GlobalTransform":
+                VerifyGlobalTransform();
+                break;
+        }
     }
 
     /// <summary>
@@ -151,6 +157,45 @@ public static class NativeComponents
     }
 
     /// <summary>
+    /// Fails loudly if C#'s mirror of <see cref="Bevy.GlobalTransform"/> is packed wrongly.
+    /// </summary>
+    /// <remarks>
+    /// The same class of mistake as <see cref="VerifyTransform"/>, from a different cause. Each of
+    /// the four vectors is a sixteen-byte-aligned <c>Vec3A</c>, so it occupies four floats and
+    /// uses three. A mirror packing them tightly is 48 bytes rather than 64, which the size check
+    /// would catch; one that pads them but pads them differently would not.
+    /// </remarks>
+    private static unsafe void VerifyGlobalTransform()
+    {
+        uint size;
+        uint xAxis;
+        uint yAxis;
+        uint zAxis;
+        uint translation;
+        Native.Check(
+            Native.bcs_global_transform_layout(&size, &xAxis, &yAxis, &zAxis, &translation),
+            "reading the layout of 'GlobalTransform'");
+
+        Expect("size", size, Bevy.GlobalTransform.NativeSize);
+        Expect("x axis", xAxis, Bevy.GlobalTransform.XAxisOffset);
+        Expect("y axis", yAxis, Bevy.GlobalTransform.YAxisOffset);
+        Expect("z axis", zAxis, Bevy.GlobalTransform.ZAxisOffset);
+        Expect("translation", translation, Bevy.GlobalTransform.TranslationOffset);
+
+        static void Expect(string part, uint actual, int expected)
+        {
+            if (actual == (uint)expected) return;
+
+            throw new BevyNativeException(
+                NativeStatus.InvalidState,
+                $"Bevy places GlobalTransform's {part} at {actual}, but this build of BevyCSharp "
+                + $"mirrors it at {expected}. Using the mirror would read the world-space "
+                + "position from the wrong place, so it is refused. The engine's field layout "
+                + "has changed.");
+        }
+    }
+
+    /// <summary>
     /// Fails loudly if C#'s mirror of a Bevy struct is the wrong size.
     /// </summary>
     /// <remarks>
@@ -177,22 +222,6 @@ public static class NativeComponents
                 + "corrupt memory, so it is refused. This usually means the engine changed the "
                 + "struct, or the target aligns its fields differently.");
     }
-}
-
-/// <summary>
-/// Bevy's <c>GlobalTransform</c>: the world-space result of transform propagation.
-/// </summary>
-/// <remarks>
-/// A name-only handle, for <c>[With]</c> filters, <see cref="EcsWorld.Has{T}"/> and
-/// <see cref="EcsWorld.Count{T}"/>. It is a 3x4 affine matrix rather than the
-/// position/rotation/scale triple <see cref="Transform"/> uses, and C# has no mirror for it, so
-/// reading or writing its bytes is refused. Write to <see cref="Transform"/> and let Bevy
-/// propagate.
-/// </remarks>
-public readonly struct GlobalTransform : INativeComponent
-{
-    readonly string INativeComponent.NativeName => "GlobalTransform";
-    readonly bool INativeComponent.MirrorsLayout => false;
 }
 
 /// <summary>

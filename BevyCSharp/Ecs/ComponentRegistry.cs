@@ -160,10 +160,10 @@ public static class ComponentType<T> where T : unmanaged
     /// </summary>
     /// <remarks>
     /// Identical to <see cref="Id"/> except that it refuses a name-only handle. Bevy's
-    /// <c>Children</c> owns a <c>Vec</c> and its <c>GlobalTransform</c> is an affine matrix; a C#
-    /// struct that merely names one is an empty struct occupying a single byte, so an insert
-    /// through it would write one byte of nothing over a live component. Filtering, counting and
-    /// removal never touch the value and go through <see cref="Id"/>.
+    /// <c>Children</c> owns a <c>Vec</c> and its <c>ChildOf</c> a relationship; a C# struct that
+    /// merely names one is an empty struct occupying a single byte, so an insert through it would
+    /// write one byte of nothing over a live component. Filtering, counting and removal never
+    /// touch the value and go through <see cref="Id"/>.
     /// </remarks>
     /// <exception cref="BevyNativeException"><typeparamref name="T"/> mirrors no layout.</exception>
     internal static int ValueId => IsOpaque ? throw OpaqueValue() : Id;

@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 6;
+    internal const int ExpectedAbiVersion = 7;
 
     static Native() => NativeLoader.Initialize();
 
@@ -105,6 +105,12 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_transform_layout(
         uint* size, uint* rotation, uint* translation, uint* scale);
+
+    /// <summary>Reports where Bevy places each part of GlobalTransform.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_global_transform_layout(
+        uint* size, uint* xAxis, uint* yAxis, uint* zAxis, uint* translation);
 
     // -- ECS (ambient: requires an active world loan)
 

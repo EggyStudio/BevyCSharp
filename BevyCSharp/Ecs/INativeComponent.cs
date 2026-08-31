@@ -47,10 +47,10 @@ public interface INativeComponent
     /// <remarks>
     /// Override to <see langword="false"/> for a type that exists only to name a component in a
     /// filter, a <see cref="EcsWorld.Has{T}"/> or a <see cref="EcsWorld.Count{T}"/>. Bevy's
-    /// <c>Children</c> owns a <c>Vec</c> and its <c>GlobalTransform</c> is an affine matrix with
-    /// no C# mirror, so reading either as raw bytes would be wrong and writing one would corrupt
-    /// the world. Those operations are refused for such a type; the id-shaped ones still work,
-    /// because they never touch the value.
+    /// <c>Children</c> owns a <c>Vec</c> and its <c>ChildOf</c> is a relationship the engine
+    /// maintains from both ends, so reading either as raw bytes would be wrong and writing one
+    /// would corrupt the world. Those operations are refused for such a type; the id-shaped ones
+    /// still work, because they never touch the value.
     /// </remarks>
     bool MirrorsLayout => true;
 }

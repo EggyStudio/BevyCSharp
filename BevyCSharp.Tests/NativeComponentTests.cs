@@ -213,9 +213,8 @@ public sealed class NativeComponentTests
 
         harness.OnContext(Stage.Last, ctx =>
         {
-            // GlobalTransform is a 3x4 affine rather than the translation/rotation/scale triple,
-            // and C# has no mirror for it, so this checks that propagation ran at all rather
-            // than reading the matrix out.
+            // Only that propagation ran and the relationship survived; what the matrix holds is
+            // checked in GlobalTransformReadsAChildsWorldPosition.
             parentHasGlobal = ctx.Ecs.Count<GlobalTransform>() >= 2;
             childHasGlobal = ctx.Ecs.Count<ChildOf>() == 1;
         });
@@ -252,9 +251,9 @@ public sealed class NativeComponentTests
     [Fact]
     public void NameOnlyHandlesFilterButRefuseTheirBytes()
     {
-        // ChildOf, Children and GlobalTransform have no C# mirror: an empty struct naming one is
-        // a single byte, so an insert through it would write nonsense over a live component.
-        // Everything that only needs the id still works.
+        // ChildOf and Children have no C# mirror: an empty struct naming one is a single byte,
+        // so an insert through it would write nonsense over a live component. Everything that
+        // only needs the id still works.
         using var harness = new EngineHarness(frames: 2);
 
         harness.OnContext(Stage.Startup, ctx =>
@@ -281,6 +280,121 @@ public sealed class NativeComponentTests
     }
 
     [Fact]
+    public unsafe void GlobalTransformMirrorsTheEnginesAffine()
+    {
+        // Four sixteen-byte-aligned Vec3As, each using three floats of the four it occupies.
+        // A mirror packing them tightly is 48 bytes and reads three of the four columns from the
+        // wrong place; the size check catches that one, but not a mirror padded differently.
+        Assert.Equal(64, Unsafe.SizeOf<GlobalTransform>());
+
+        var probe = default(GlobalTransform);
+        var origin = (nint)Unsafe.AsPointer(ref probe);
+        Assert.Equal(0, (int)((nint)Unsafe.AsPointer(ref probe.XAxis) - origin));
+        Assert.Equal(16, (int)((nint)Unsafe.AsPointer(ref probe.YAxis) - origin));
+        Assert.Equal(32, (int)((nint)Unsafe.AsPointer(ref probe.ZAxis) - origin));
+        Assert.Equal(48, (int)((nint)Unsafe.AsPointer(ref probe.Translation) - origin));
+
+        using var harness = new EngineHarness(frames: 2);
+
+        // Resolving the id compares all five numbers against the engine, so getting an id back
+        // is the assertion.
+        harness.OnContext(Stage.Startup, _ => Assert.True(NativeComponents.GlobalTransform >= 0));
+        harness.Run();
+    }
+
+    [Fact]
+    public void GlobalTransformReadsAChildsWorldPosition()
+    {
+        // The gap this closes: a child's Transform is relative to its parent, so it cannot answer
+        // "where is this actually" on its own. Propagation runs in PostUpdate, so Last is the
+        // first stage that can read the result.
+        using var harness = new EngineHarness(frames: 4);
+        var childLocal = Vec3.Zero;
+        var childWorld = Vec3.Zero;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var parent = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(parent, Transform.At(10f, 0f, 0f));
+
+            var child = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(child, Transform.At(1f, 2f, 0f));
+            ctx.Ecs.SetParent(child, parent);
+            ctx.Ecs.Add(child, new Marker());
+        });
+
+        harness.OnContext(Stage.Last, ctx =>
+        {
+            foreach (var row in ctx.Ecs.Query<Marker>(markChanged: false))
+            {
+                childLocal = ctx.Ecs.GetRef<Transform>(row.Entity).Translation;
+                childWorld = ctx.Ecs.GetRef<GlobalTransform>(row.Entity).Translation;
+            }
+        });
+
+        harness.Run();
+
+        Assert.Equal(new Vec3(1f, 2f, 0f), childLocal);
+        Assert.Equal(new Vec3(11f, 2f, 0f), childWorld);
+    }
+
+    [Fact]
+    public void GlobalTransformDecomposesBackIntoATransform()
+    {
+        // The affine is the general form, so reading a rotation or a scale back out of it means
+        // undoing the multiplication. This checks the decomposition against the values that went
+        // in, for an unparented entity where the two must agree exactly.
+        using var harness = new EngineHarness(frames: 4);
+        var written = new Transform(new Vec3(3f, -1f, 2f), Quat.FromRotationY(0.75f), new Vec3(2f));
+        var decomposed = Transform.Identity;
+        var muzzle = Vec3.Zero;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(entity, written);
+            ctx.Ecs.Add(entity, new Marker());
+        });
+
+        harness.OnContext(Stage.Last, ctx =>
+        {
+            foreach (var row in ctx.Ecs.Query<Marker>(markChanged: false))
+            {
+                ref var global = ref ctx.Ecs.GetRef<GlobalTransform>(row.Entity);
+                decomposed = global.ToTransform();
+
+                // A point one unit down the entity's local -Z, which is where its forward is.
+                muzzle = global.TransformPoint(new Vec3(0f, 0f, -1f));
+            }
+        });
+
+        harness.Run();
+
+        Assert.Equal(written.Translation.X, decomposed.Translation.X, 4);
+        Assert.Equal(written.Translation.Y, decomposed.Translation.Y, 4);
+        Assert.Equal(written.Translation.Z, decomposed.Translation.Z, 4);
+
+        Assert.Equal(2f, decomposed.Scale.X, 4);
+        Assert.Equal(2f, decomposed.Scale.Y, 4);
+        Assert.Equal(2f, decomposed.Scale.Z, 4);
+
+        // Quaternions double-cover rotations, so q and -q are the same rotation. Compare the
+        // angle between them rather than the components.
+        var dot = written.Rotation.X * decomposed.Rotation.X
+            + written.Rotation.Y * decomposed.Rotation.Y
+            + written.Rotation.Z * decomposed.Rotation.Z
+            + written.Rotation.W * decomposed.Rotation.W;
+        Assert.Equal(1f, MathF.Abs(dot), 4);
+
+        // Scaled by two and turned 0.75 radians about Y, so the local -Z sits two units along the
+        // world forward the rotation produced, offset by the translation.
+        var forward = new Vec3(-MathF.Sin(0.75f), 0f, -MathF.Cos(0.75f));
+        Assert.Equal(3f + forward.X * 2f, muzzle.X, 3);
+        Assert.Equal(-1f, muzzle.Y, 3);
+        Assert.Equal(2f + forward.Z * 2f, muzzle.Z, 3);
+    }
+
+    [Fact]
     public void UnknownNativeComponentsFailWithAUsefulMessage()
     {
         using var harness = new EngineHarness(frames: 2);
@@ -295,4 +409,7 @@ public sealed class NativeComponentTests
 
         harness.Run();
     }
+
+    /// <summary>Tags the one entity a test wants to read back.</summary>
+    private struct Marker;
 }

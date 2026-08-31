@@ -49,6 +49,31 @@ public struct Vec3 : IEquatable<Vec3>
     /// <summary>The squared length, which avoids the square root.</summary>
     public readonly float LengthSquared => X * X + Y * Y + Z * Z;
 
+    /// <summary>
+    /// The vector scaled to unit length, or <see cref="UnitZ"/> if it has no length to scale.
+    /// </summary>
+    /// <remarks>
+    /// The fallback keeps a degenerate basis from producing NaNs that then spread through a
+    /// rotation and out into the world, which is far harder to trace back than a wrong axis.
+    /// </remarks>
+    public readonly Vec3 Normalized
+    {
+        get
+        {
+            var length = Length;
+            return length > 0f ? this * (1f / length) : UnitZ;
+        }
+    }
+
+    /// <summary>The dot product.</summary>
+    public static float Dot(Vec3 a, Vec3 b) => a.X * b.X + a.Y * b.Y + a.Z * b.Z;
+
+    /// <summary>The cross product, perpendicular to both operands.</summary>
+    public static Vec3 Cross(Vec3 a, Vec3 b) => new(
+        a.Y * b.Z - a.Z * b.Y,
+        a.Z * b.X - a.X * b.Z,
+        a.X * b.Y - a.Y * b.X);
+
     /// <summary>Adds two vectors.</summary>
     public static Vec3 operator +(Vec3 a, Vec3 b) => new(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
 
@@ -135,6 +160,51 @@ public struct Quat : IEquatable<Quat>
 
     /// <summary>A rotation about the Z axis.</summary>
     public static Quat FromRotationZ(float radians) => FromAxisAngle(Vec3.UnitZ, radians);
+
+    /// <summary>
+    /// The rotation whose local axes are <paramref name="x"/>, <paramref name="y"/> and
+    /// <paramref name="z"/>.
+    /// </summary>
+    /// <remarks>
+    /// The three vectors are the columns of a rotation matrix, so they must be unit length and
+    /// mutually perpendicular; scale and shear are not representable as a quaternion and are not
+    /// removed here. Which of the four branches runs is decided by the largest diagonal term,
+    /// because the others divide by something near zero for that matrix and lose most of their
+    /// precision to cancellation.
+    /// </remarks>
+    public static Quat FromBasis(Vec3 x, Vec3 y, Vec3 z)
+    {
+        var trace = x.X + y.Y + z.Z;
+
+        if (trace > 0f)
+        {
+            var s = MathF.Sqrt(trace + 1f) * 2f;
+            return new Quat(
+                (y.Z - z.Y) / s, (z.X - x.Z) / s, (x.Y - y.X) / s,
+                0.25f * s);
+        }
+
+        if (x.X > y.Y && x.X > z.Z)
+        {
+            var s = MathF.Sqrt(1f + x.X - y.Y - z.Z) * 2f;
+            return new Quat(
+                0.25f * s, (y.X + x.Y) / s, (z.X + x.Z) / s,
+                (y.Z - z.Y) / s);
+        }
+
+        if (y.Y > z.Z)
+        {
+            var s = MathF.Sqrt(1f + y.Y - x.X - z.Z) * 2f;
+            return new Quat(
+                (y.X + x.Y) / s, 0.25f * s, (z.Y + y.Z) / s,
+                (z.X - x.Z) / s);
+        }
+
+        var t = MathF.Sqrt(1f + z.Z - x.X - y.Y) * 2f;
+        return new Quat(
+            (z.X + x.Z) / t, (z.Y + y.Z) / t, 0.25f * t,
+            (x.Y - y.X) / t);
+    }
 
     /// <summary>
     /// Combines two rotations, applying <paramref name="b"/> first and then <paramref name="a"/>.
@@ -265,57 +335,12 @@ public struct Transform : INativeComponent
     /// <param name="up">Which way is up, used to settle the roll.</param>
     public static Transform LookingAt(Vec3 eye, Vec3 target, Vec3 up)
     {
-        var back = Normalise(eye - target);           // negative Z, so back rather than forward
-        var right = Normalise(Cross(up, back));
-        var trueUp = Cross(back, right);
+        var back = (eye - target).Normalized;         // negative Z, so back rather than forward
+        var right = Vec3.Cross(up, back).Normalized;
+        var trueUp = Vec3.Cross(back, right);
 
-        // The rotation part of a look-at matrix, converted to a quaternion by the branch that
-        // avoids cancellation for the trace at hand.
-        var trace = right.X + trueUp.Y + back.Z;
-        Quat rotation;
-
-        if (trace > 0f)
-        {
-            var s = MathF.Sqrt(trace + 1f) * 2f;
-            rotation = new Quat(
-                (trueUp.Z - back.Y) / s, (back.X - right.Z) / s, (right.Y - trueUp.X) / s,
-                0.25f * s);
-        }
-        else if (right.X > trueUp.Y && right.X > back.Z)
-        {
-            var s = MathF.Sqrt(1f + right.X - trueUp.Y - back.Z) * 2f;
-            rotation = new Quat(
-                0.25f * s, (trueUp.X + right.Y) / s, (back.X + right.Z) / s,
-                (trueUp.Z - back.Y) / s);
-        }
-        else if (trueUp.Y > back.Z)
-        {
-            var s = MathF.Sqrt(1f + trueUp.Y - right.X - back.Z) * 2f;
-            rotation = new Quat(
-                (trueUp.X + right.Y) / s, 0.25f * s, (back.Y + trueUp.Z) / s,
-                (back.X - right.Z) / s);
-        }
-        else
-        {
-            var s = MathF.Sqrt(1f + back.Z - right.X - trueUp.Y) * 2f;
-            rotation = new Quat(
-                (back.X + right.Z) / s, (back.Y + trueUp.Z) / s, 0.25f * s,
-                (right.Y - trueUp.X) / s);
-        }
-
-        return new Transform(eye, rotation, Vec3.One);
+        return new Transform(eye, Quat.FromBasis(right, trueUp, back), Vec3.One);
     }
-
-    private static Vec3 Normalise(Vec3 v)
-    {
-        var length = v.Length;
-        return length > 0f ? v * (1f / length) : Vec3.UnitZ;
-    }
-
-    private static Vec3 Cross(Vec3 a, Vec3 b) => new(
-        a.Y * b.Z - a.Z * b.Y,
-        a.Z * b.X - a.X * b.Z,
-        a.X * b.Y - a.Y * b.X);
 
     /// <inheritdoc/>
     public readonly override string ToString() =>

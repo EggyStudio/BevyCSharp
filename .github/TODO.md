@@ -134,18 +134,6 @@ existing call rather than new machinery.
 
 ## ECS gaps
 
-### A mirror for GlobalTransform
-
-`NativeComponents.GlobalTransform` resolves for filtering and counting only, because it is a 3x4
-affine matrix with no C# equivalent. World-space position cannot be read, which matters as soon
-as anything is parented.
-
-Mirror it the way `Transform` is mirrored, and verify every field offset against
-`bcs_transform_layout`'s equivalent. Rust reorders fields under the default representation, so
-the declared order is not the memory order. A size check does not catch this: the reordered
-`Transform` is 48 bytes either way, and reading it with the fields transposed produces distorted
-geometry rather than an error.
-
 ### Components Bevy owns
 
 `bcs_component_id_of` resolves six names by hand. Anything else, `Visibility` variants and render

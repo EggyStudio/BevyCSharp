@@ -134,8 +134,10 @@ That is Bevy's real `Transform`, not a copy kept in sync, so propagation and ren
 write. A struct becomes one of these by implementing `INativeComponent`, which names the engine
 type. `ComponentType<T>` then resolves that name instead of registering a fresh component, and
 everything downstream already works in ids, so queries, `[With]` filters, change detection and
-`ctx.Cmd` need no separate API. `NativeComponents` still exposes the raw ids for the `*ById`
-entry points and for iterating a component through a type that is not its own.
+`ctx.Cmd` reach it with no separate API: there is one `Add`, and it does not care which kind of
+component it was handed. `NativeComponents` exposes the raw ids for the handful of entry points
+that take one rather than a type (`HasById`, `CountById`, `RemoveById`, `ChangedById`, and the
+`Chunks` overload that iterates a named component).
 
 ```csharp
 public struct Transform : INativeComponent
@@ -152,10 +154,10 @@ fields to save padding: `Quat` is sixteen-byte aligned and moves ahead of the tw
 offsets of 0, 16 and 28 rather than the source order. Both layouts are 48 bytes, so a size check
 passes either way and the mistake shows up as stretched geometry. The check compares every offset.
 
-`GlobalTransform`, `ChildOf` and `Children` hold an affine matrix, a relationship and a `Vec`,
-none of which raw bytes can represent, so they are name-only handles: `Has<ChildOf>()`,
-`Count<Children>()` and `[With]` filters work, while reading or writing one is refused rather than
-corrupting the world. Use `SetParent`, `ParentOf` and `ChildrenOf` for the hierarchy itself.
+`ChildOf` and `Children` hold a relationship and a `Vec`, neither of which raw bytes can
+represent, so they are name-only handles: `Has<ChildOf>()`, `Count<Children>()` and `[With]`
+filters work, while reading or writing one is refused rather than corrupting the world. Use
+`SetParent`, `ParentOf` and `ChildrenOf` for the hierarchy itself.
 
 ### Assets
 
@@ -219,6 +221,23 @@ ctx.Ecs.ClearParent(moon);
 A child's `Transform` is relative to its parent, and Bevy combines them during propagation, so a
 parented entity only has to describe its own motion. Parenting goes through Bevy's relationship
 API rather than a raw component write, which is what keeps the reverse child list correct.
+
+`GlobalTransform` is the result of that propagation: where the entity sits in world space.
+
+```csharp
+ref var world = ref ctx.Ecs.GetRef<GlobalTransform>(moon);
+
+world.Translation;                           // world-space position
+world.Forward;                               // the direction it faces
+world.TransformPoint(new Vec3(0f, 0f, -1f)); // a local point, in world space
+world.ToTransform();                         // position, rotation and scale
+```
+
+Read it and write `Transform`: propagation overwrites `GlobalTransform` every frame, and it is a
+frame behind a `Transform` written during `PostUpdate` or later, which is when propagation has
+already run. It stores an affine matrix rather than a position/rotation/scale triple, because a
+chain of arbitrary transforms cannot always be expressed as one, so `Scale`, `Rotation` and
+`ToTransform()` decompose it the way Bevy's own accessors do.
 
 Parenting is a structural change, so queue it on `ctx.Cmd` when calling from inside a loop.
 
