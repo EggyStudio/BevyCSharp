@@ -363,7 +363,6 @@ public sealed class NativeComponentTests
                 ref var global = ref ctx.Ecs.GetRef<GlobalTransform>(row.Entity);
                 decomposed = global.ToTransform();
 
-                // A point one unit down the entity's local -Z, which is where its forward is.
                 muzzle = global.TransformPoint(new Vec3(0f, 0f, -1f));
             }
         });

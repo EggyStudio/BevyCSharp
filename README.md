@@ -348,6 +348,37 @@ public void Tick(BehaviorContext ctx) { }
 `[Changed]` skips entities whose listed components did not change this frame. It is a per-entity
 test against Bevy's change ticks, so a method carrying it runs sequentially.
 
+### States
+
+A game is usually in one of a few modes, and most systems belong to one of them. `AddState` sets
+one up over any enum, and `[InState]` scopes a method to a value of it:
+
+```csharp
+public enum Screen { Menu, Playing, Paused }
+
+app.AddState(Screen.Menu);
+
+[OnUpdate]
+[InState(Screen.Playing)]
+public void Tick(BehaviorContext ctx) { }
+```
+
+Read and change it from a system:
+
+```csharp
+var screen = ctx.State<Screen>();
+ctx.SetState(Screen.Paused);
+```
+
+A transition is queued, not immediate: it lands at Bevy's next transition point, so every system
+in the frame agrees on which state it is in rather than some seeing the change halfway through.
+
+A Bevy state is a Rust type and C# cannot define one, so the bridge provides four state slots
+that hold an integer, and each enum claims one the first time it is added. Four is past what a
+game normally needs, and running out reports it. `[InState]` is a run condition, so it composes
+with `[RunIf]` and `[ToggleKey]` rather than replacing them: a method carrying two of them has to
+satisfy both.
+
 ### Conditions
 
 `[RunIf]` gates a system on a static `bool` member of the same struct, a field, a property, or a

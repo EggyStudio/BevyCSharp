@@ -119,6 +119,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
                 Filters = GetFilters(member, diagnostics),
                 Condition = GetCondition(member, type, diagnostics),
                 Toggle = GetToggle(member),
+                InState = GetInState(member),
             });
         }
 
@@ -225,6 +226,34 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         return with.Count == 0 && without.Count == 0 && changed.Count == 0
             ? BehaviorFilters.None
             : new BehaviorFilters(with, without, changed);
+    }
+
+    /// <summary>Reads an <c>[InState]</c> attribute into the enum type and value it names.</summary>
+    /// <remarks>
+    /// The argument is typed as <c>object</c> so any enum can be passed, which means the enum
+    /// type arrives on the constant rather than on the parameter. Emitting a cast back to that
+    /// type is what lets the condition infer its type parameter.
+    /// </remarks>
+    private static InStateInfo? GetInState(IMethodSymbol method)
+    {
+        foreach (var attribute in method.GetAttributes())
+        {
+            if (attribute.AttributeClass?.ToDisplayString() != $"{AttributeNamespace}.InStateAttribute")
+                continue;
+
+            if (attribute.ConstructorArguments.Length == 0) continue;
+
+            var argument = attribute.ConstructorArguments[0];
+            if (argument.Type is not INamedTypeSymbol { EnumUnderlyingType: not null } enumType)
+                continue;
+            if (argument.Value is null) continue;
+
+            return new InStateInfo(
+                enumType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                argument.Value.ToString());
+        }
+
+        return null;
     }
 
     /// <summary>Resolves a <c>[RunIf]</c> attribute against the behavior's own members.</summary>

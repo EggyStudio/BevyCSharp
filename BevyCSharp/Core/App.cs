@@ -213,6 +213,44 @@ public sealed unsafe class App : IDisposable
             .Select(s => s.Descriptor)
             .ToArray();
 
+    // -- States
+
+    /// <summary>
+    /// Adds a state machine over <typeparamref name="TState"/>, starting at
+    /// <paramref name="initial"/>.
+    /// </summary>
+    /// <remarks>
+    /// Before the run, because adding a state also adds the systems that apply its transitions,
+    /// and a schedule cannot be added to once the loop owns it. Adding the same enum twice keeps
+    /// the first slot and re-inserts the initial value.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">
+    /// The app is already running, or every state slot is taken.
+    /// </exception>
+    public App AddState<TState>(TState initial) where TState : struct, Enum
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (IsRunning)
+            throw new InvalidOperationException(
+                $"Cannot add state {typeof(TState).Name}: the app is already running. Add states "
+                + "from a plugin's Build method or before calling Run.");
+
+        Native.Check(
+            Native.bcs_state_add(_handle, StateRegistry.Claim<TState>(), StateRegistry.ToInt(initial)),
+            $"adding state {typeof(TState).Name}");
+
+        return this;
+    }
+
+    /// <summary>The current value of <typeparamref name="TState"/>. Only valid inside a system.</summary>
+    public static TState State<TState>() where TState : struct, Enum =>
+        StateRegistry.Current<TState>();
+
+    /// <summary>Queues a transition of <typeparamref name="TState"/>. Only valid inside a system.</summary>
+    public static void SetState<TState>(TState value) where TState : struct, Enum =>
+        StateRegistry.Set(value);
+
     // -- Plugins
 
     /// <summary>Adds a plugin, building it immediately. Adding the same type twice is a no-op.</summary>

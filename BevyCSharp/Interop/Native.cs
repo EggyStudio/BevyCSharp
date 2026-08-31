@@ -120,6 +120,28 @@ internal static unsafe partial class Native
     internal static partial int bcs_visibility_layout(
         uint* size, uint* inherited, uint* hidden, uint* visible);
 
+    // -- App states
+
+    /// <summary>Reports how many independent state slots the bridge provides.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_state_slots();
+
+    /// <summary>Creates a state machine in a slot, before the app runs.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_state_add(IntPtr app, int slot, int initial);
+
+    /// <summary>Reads a slot's current value.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_state_get(int slot, int* value);
+
+    /// <summary>Queues a transition of a slot.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_state_set(int slot, int value);
+
     // -- ECS (ambient: requires an active world loan)
 
     /// <summary>Splits an entity handle into its logical index and generation.</summary>

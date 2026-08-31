@@ -50,8 +50,6 @@ public sealed class FixedUpdateTests
     [Fact]
     public void FixedUpdateRunsMoreOftenThanTheFrameWhenTheRateIsHigh()
     {
-        // 500 Hz against a 60 fps loop: several steps per frame, which a per-frame stage could
-        // never produce.
         using var harness = new EngineHarness(frames: 6, fps: 60, fixedHz: 500);
         var steps = 0;
         var frames = 0;
@@ -66,8 +64,8 @@ public sealed class FixedUpdateTests
     [Fact]
     public void FixedUpdateRunsLessOftenThanTheFrameWhenTheRateIsLow()
     {
-        // 2 Hz against the same loop: most frames produce no step at all. Together with the test
-        // above this is the whole claim, that the two are independent in both directions.
+        // With the test above, this is the whole claim: the two are independent in both
+        // directions, not merely at different rates.
         using var harness = new EngineHarness(frames: 6, fps: 60, fixedHz: 2);
         var steps = 0;
         var frames = 0;
@@ -114,8 +112,6 @@ public sealed class FixedUpdateTests
     [Fact]
     public void TheAttributeRoutesABehaviorOntoTheFixedSchedule()
     {
-        // The route a game takes: an [OnFixedUpdate] method on a behavior, with the generator
-        // wiring it to the schedule.
         using var harness = new EngineHarness(frames: 6, discoverBehaviors: true, fps: 60, fixedHz: 500);
         var steps = 0;
         var simulated = 0f;
@@ -135,7 +131,6 @@ public sealed class FixedUpdateTests
 
         Assert.True(steps > 0, "the behavior's fixed method never ran");
 
-        // Each step added the same slice, so the total is the step count times the timestep.
         Assert.Equal(steps * (1f / 500f), simulated, 4);
     }
 }

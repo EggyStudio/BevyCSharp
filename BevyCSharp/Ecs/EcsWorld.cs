@@ -181,10 +181,6 @@ public sealed unsafe class EcsWorld
     public static int ComponentId<T>() where T : unmanaged => ComponentType<T>.Id;
 
     // -- By raw component id
-    //
-    // What is left when a caller holds an id rather than a type: the id-shaped questions, which
-    // never touch the component's value. Reading or writing one goes through its C# type, which
-    // implements INativeComponent and so works with Add, GetRef, Query and the rest.
 
     /// <summary>True when an entity carries the component with this id.</summary>
     public bool HasById(Entity entity, int componentId) =>

@@ -27,6 +27,7 @@ headless = [
     "bevy/bevy_asset",
     "bevy/bevy_mesh",
     "bevy/bevy_image",
+    "bevy/bevy_state",
 ]
 
 # Full desktop profile: a real window, Bevy's renderer and the winit input backend.

@@ -68,7 +68,16 @@ public sealed class SystemDescriptor
     /// <summary>Attaches a run condition.</summary>
     public SystemDescriptor RunIf(Func<World, bool> condition)
     {
-        RunCondition = condition;
+        ArgumentNullException.ThrowIfNull(condition);
+
+        // Conditions accumulate rather than replace, so a system carrying both an [InState] and
+        // a [RunIf] has to satisfy the two of them. Replacing would let whichever was applied
+        // last silently discard the other.
+        var existing = RunCondition;
+        RunCondition = existing is null
+            ? condition
+            : world => existing(world) && condition(world);
+
         return this;
     }
 

@@ -86,14 +86,16 @@ an axis marker cover most uses.
 
 ## Simulation structure
 
-### States
+### State transitions
 
-`bevy_state` is compiled in and unbridged. There is no way to express menu, playing and paused,
-which means no way to scope a system to one of them.
+States themselves are bridged: `App.AddState`, `ctx.State`/`ctx.SetState` and `[InState]` scope a
+system to a value. What is missing is the other half, the schedules Bevy runs on the edges.
 
-- exports: define a state type, read it, request a transition, and register a system to run only
-  in a given state
-- managed: a state surface plus a run condition, alongside the existing `[RunIf]`
+- exports: register a system into `OnEnter(state)` and `OnExit(state)`
+- managed: `[OnEnter(Screen.Playing)]` and `[OnExit(...)]`, which need a dimension beside `Stage`
+  in the generator's method model, since an edge is not a stage
+- note: today the same thing is expressed by watching for the change in a system scoped with
+  `[InState]`, which works but runs every frame rather than once on the edge.
 
 ### Messages between systems
 

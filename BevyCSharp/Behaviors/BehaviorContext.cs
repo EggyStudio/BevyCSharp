@@ -80,6 +80,24 @@ public sealed class BehaviorContext
     /// <summary>Gets a resource, reporting whether it was found.</summary>
     public bool TryRes<T>(out T value) where T : notnull => World.TryGetResource(out value);
 
+    /// <summary>
+    /// The current value of <typeparamref name="TState"/>.
+    /// </summary>
+    /// <remarks>
+    /// Main thread only, like <see cref="Ecs"/>: it reads the live value out of the world.
+    /// </remarks>
+    public TState State<TState>() where TState : struct, Enum => StateRegistry.Current<TState>();
+
+    /// <summary>
+    /// Asks Bevy to move <typeparamref name="TState"/> to <paramref name="value"/>.
+    /// </summary>
+    /// <remarks>
+    /// Queued rather than immediate, so every system in this frame still sees the old state.
+    /// The change lands at Bevy's next transition point.
+    /// </remarks>
+    public void SetState<TState>(TState value) where TState : struct, Enum =>
+        StateRegistry.Set(value);
+
     /// <summary>Asks the engine to shut down after this frame.</summary>
     public void Exit() => App.RequestExit();
 }

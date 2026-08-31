@@ -57,6 +57,14 @@ internal static class BehaviorEmitter
                 .Append(SystemMethodName(model, method))
                 .Append(", \"").Append(systemId).Append("\")");
 
+            // Composes with whichever of the two below is present, because a system scoped to a
+            // state may still be toggled or gated on something else.
+            if (method.InState is { } inState)
+            {
+                source.Append("\n            .RunIf(global::Bevy.BehaviorConditions.InState((")
+                    .Append(inState.EnumType).Append(')').Append(inState.Value).Append("))");
+            }
+
             // A [ToggleKey] is itself a run condition, so the two are mutually exclusive;
             // the toggle wins because it is the more specific declaration.
             if (method.Toggle is { } toggle)

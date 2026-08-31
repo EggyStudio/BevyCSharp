@@ -168,8 +168,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         app.add_plugins(MinimalPlugins.set(runner));
         app.add_plugins(bevy::input::InputPlugin);
         app.add_plugins(bevy::transform::TransformPlugin);
-        // Assets are file loading and storage, with no GPU involvement, so a headless app can
-        // serve them too. DefaultPlugins already includes this on a render build.
+        app.add_plugins(bevy::state::app::StatesPlugin);
         app.add_plugins(bevy::asset::AssetPlugin::default());
     }
 
@@ -672,10 +671,8 @@ pub unsafe extern "C" fn bcs_app_add_system(
             Stage::Update => {
                 app.app.add_systems(Update, run);
             }
-            // Bevy runs this schedule from inside the main loop, as many times as the time
-            // accumulated since the last frame allows: twice after a slow frame, not at all
-            // after a fast one. That is the whole point, and it is why nothing here orders it
-            // against the once-a-frame stages.
+            // Deliberately unordered against the once-a-frame stages: it runs a variable
+            // number of times between them.
             Stage::FixedUpdate => {
                 app.app.add_systems(FixedUpdate, run);
             }

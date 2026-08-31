@@ -47,6 +47,19 @@ public static class BehaviorConditions
     public static Func<World, bool> AnyWithComponent<T>() where T : unmanaged =>
         static world => world.Resource<EcsWorld>().Count<T>() > 0;
 
+    /// <summary>
+    /// Passes while <typeparamref name="TState"/> holds <paramref name="value"/>.
+    /// </summary>
+    /// <remarks>
+    /// What <c>[InState]</c> emits. The state is read per system run rather than cached, because
+    /// a transition applied this frame has to take effect this frame.
+    /// </remarks>
+    public static Func<World, bool> InState<TState>(TState value) where TState : struct, Enum
+    {
+        var wanted = StateRegistry.ToInt(value);
+        return _ => StateRegistry.ToInt(StateRegistry.Current<TState>()) == wanted;
+    }
+
     /// <summary>Passes only on the first frame.</summary>
     public static Func<World, bool> RunOnce()
     {

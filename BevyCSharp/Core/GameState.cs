@@ -1,0 +1,125 @@
+using System.Runtime.CompilerServices;
+using Bevy.Interop;
+
+namespace Bevy;
+
+/// <summary>
+/// Maps C# enums onto Bevy's app states.
+/// </summary>
+/// <remarks>
+/// <para>
+/// A Bevy state is a Rust type, and C# cannot define one, so the bridge provides a fixed number
+/// of state slots that each hold an integer and let the managed side decide what the numbers
+/// mean. An enum claims a slot the first time it is added, which is what keeps two unrelated
+/// state machines apart: Bevy keys its state resource and its transitions on the type, so two
+/// slots really are two independent state machines.
+/// </para>
+/// <para>
+/// Slots are per app, so a second <see cref="App"/> starts the assignment over.
+/// </para>
+/// </remarks>
+public static unsafe class StateRegistry
+{
+    private static readonly object Gate = new();
+    private static readonly Dictionary<Type, int> Slots = [];
+    private static int _generation = -1;
+    private static int _next;
+
+    /// <summary>How many independent state machines this bridge supports.</summary>
+    public static int SlotCount => Native.bcs_state_slots();
+
+    /// <summary>The slot <typeparamref name="TState"/> was added under.</summary>
+    /// <exception cref="InvalidOperationException">It was never added.</exception>
+    internal static int SlotOf<TState>() where TState : struct, Enum
+    {
+        lock (Gate)
+        {
+            Reset();
+            if (Slots.TryGetValue(typeof(TState), out var slot)) return slot;
+
+            throw new InvalidOperationException(
+                $"No state of type {typeof(TState).Name} has been added. Call "
+                + $"app.AddState({typeof(TState).Name}.<initial>) before the app runs, so Bevy "
+                + "has somewhere to keep it and something to transition from.");
+        }
+    }
+
+    /// <summary>Claims a slot for <typeparamref name="TState"/>, or returns the one it holds.</summary>
+    /// <exception cref="InvalidOperationException">Every slot is taken.</exception>
+    internal static int Claim<TState>() where TState : struct, Enum
+    {
+        lock (Gate)
+        {
+            Reset();
+            if (Slots.TryGetValue(typeof(TState), out var existing)) return existing;
+
+            var count = SlotCount;
+            if (_next >= count)
+                throw new InvalidOperationException(
+                    $"All {count} state slots are in use, so {typeof(TState).Name} cannot have "
+                    + "one. Independent state machines are rarer than they look: a pause that "
+                    + "only matters while playing is a value of the state it belongs to, not a "
+                    + "second machine beside it.");
+
+            var slot = _next++;
+            Slots[typeof(TState)] = slot;
+            return slot;
+        }
+    }
+
+    /// <summary>Drops every assignment when a new app is created.</summary>
+    private static void Reset()
+    {
+        if (_generation == ComponentRegistry.Generation) return;
+
+        Slots.Clear();
+        _next = 0;
+        _generation = ComponentRegistry.Generation;
+    }
+
+    /// <summary>The current value of <typeparamref name="TState"/>.</summary>
+    /// <remarks>
+    /// Reads the live value, so it reflects a transition only once Bevy has applied it, not the
+    /// moment it was requested. Needs a world loan, so it is only valid inside a system.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">No world is loaned, or the state is missing.</exception>
+    public static TState Current<TState>() where TState : struct, Enum
+    {
+        int value;
+        Native.Check(
+            Native.bcs_state_get(SlotOf<TState>(), &value),
+            $"reading state {typeof(TState).Name}");
+
+        return Unsafe.As<int, TState>(ref value);
+    }
+
+    /// <summary>
+    /// Asks Bevy to move <typeparamref name="TState"/> to <paramref name="value"/>.
+    /// </summary>
+    /// <remarks>
+    /// Queued rather than immediate. Bevy applies it at the next transition point, which is what
+    /// lets every system in a frame agree on which state it is in rather than seeing the change
+    /// halfway through.
+    /// </remarks>
+    public static void Set<TState>(TState value) where TState : struct, Enum =>
+        Native.Check(
+            Native.bcs_state_set(SlotOf<TState>(), ToInt(value)),
+            $"setting state {typeof(TState).Name}");
+
+    /// <summary>The enum's underlying value, which is what the bridge stores.</summary>
+    /// <remarks>
+    /// Every slot holds an <see cref="int"/>, so an enum with a wider underlying type would be
+    /// truncated. Refused rather than truncated, because the values would silently collide.
+    /// </remarks>
+    internal static int ToInt<TState>(TState value) where TState : struct, Enum
+    {
+        if (Unsafe.SizeOf<TState>() > sizeof(int))
+            throw new InvalidOperationException(
+                $"{typeof(TState).Name} is backed by a type wider than int, which a state slot "
+                + "cannot hold. Declare it over int or a narrower type.");
+
+        var result = 0;
+        Unsafe.CopyBlock(&result, &value, (uint)Unsafe.SizeOf<TState>());
+        return result;
+    }
+}

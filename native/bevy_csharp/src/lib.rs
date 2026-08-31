@@ -32,6 +32,7 @@ pub mod input;
 pub mod interop;
 pub mod render;
 pub mod state;
+pub mod states;
 pub mod sync;
 
 /// Version of the C ABI. C# checks this at load time and refuses a mismatch, so a stale

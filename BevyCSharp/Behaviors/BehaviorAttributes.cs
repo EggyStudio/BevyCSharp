@@ -110,6 +110,33 @@ public sealed class OnUpdateAttribute : Attribute;
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class OnFixedUpdateAttribute : Attribute;
 
+/// <summary>
+/// Restricts a method to frames where a state machine holds a given value.
+/// </summary>
+/// <remarks>
+/// The state must have been added with <see cref="App.AddState{TState}"/>. This is a run
+/// condition like <see cref="RunIfAttribute"/>, so it composes with the stage attributes rather
+/// than replacing them, and the method simply does not run while the state is something else.
+/// </remarks>
+/// <example>
+/// <code>
+/// public enum Screen { Menu, Playing, Paused }
+///
+/// [OnUpdate]
+/// [InState(Screen.Playing)]
+/// public void Tick(BehaviorContext ctx) { }
+/// </code>
+/// </example>
+[AttributeUsage(AttributeTargets.Method)]
+public sealed class InStateAttribute : Attribute
+{
+    /// <summary>The value the state must hold, as an enum member.</summary>
+    public object State { get; }
+
+    /// <summary>Restricts the method to <paramref name="state"/>.</summary>
+    public InStateAttribute(object state) => State = state;
+}
+
 /// <summary>Runs after <see cref="OnUpdateAttribute"/>, before queued commands are applied.</summary>
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 public sealed class OnPostUpdateAttribute : Attribute;

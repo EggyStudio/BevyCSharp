@@ -72,6 +72,11 @@ internal sealed record BehaviorFilters(
 /// <param name="DefaultEnabled">Whether the system starts enabled.</param>
 internal sealed record ToggleKeyInfo(int Key, int Modifiers, bool DefaultEnabled);
 
+/// <summary>An <c>[InState]</c> restriction.</summary>
+/// <param name="EnumType">The state enum, fully qualified.</param>
+/// <param name="Value">The member's underlying constant.</param>
+internal sealed record InStateInfo(string EnumType, string Value);
+
 /// <summary>A <c>[RunIf]</c> condition.</summary>
 /// <param name="MemberName">Name of the member on the behavior struct.</param>
 /// <param name="Kind">How to reach it.</param>
@@ -100,6 +105,9 @@ internal sealed record StageMethod
 
     /// <summary>An optional keyboard toggle.</summary>
     public ToggleKeyInfo? Toggle { get; init; }
+
+    /// <summary>An optional state restriction, which composes with the two above.</summary>
+    public InStateInfo? InState { get; init; }
 }
 
 /// <summary>A <c>[Behavior]</c> struct and everything the generator needs to emit for it.</summary>
