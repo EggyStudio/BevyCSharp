@@ -224,6 +224,55 @@ public sealed class RenderControlTests
     }
 
     [Fact]
+    public void MonitorsAreCountedWithoutThrowing()
+    {
+        // A windowless run reports none rather than failing, so a settings screen can ask without
+        // guarding first. With a window this is however many the platform sees.
+        using var harness = new EngineHarness(frames: 2);
+        var count = -1;
+
+        harness.OnContext(Stage.Update, _ => count = Window.MonitorCount());
+        harness.Run();
+
+        Assert.True(count >= 0, "monitor count came back negative");
+
+        if (count == 0) return;
+
+        // Anything reported has to be describable, and past the end has to be refused.
+        using var second = new EngineHarness(frames: 2);
+        second.OnContext(Stage.Update, _ =>
+        {
+            var first = Window.Monitor(0);
+            Assert.True(first.Width > 0 && first.Height > 0);
+            Assert.Throws<BevyNativeException>(() => Window.Monitor(Window.MonitorCount()));
+        });
+
+        second.Run();
+    }
+
+    [Fact]
+    public void WindowStyleAndPositionReportTheirAbsence()
+    {
+        // Same contract as the rest of the window surface: a windowless run says so rather than
+        // pretending, so a behavior that arranges the window fails visibly in a test.
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Update, _ =>
+        {
+            var position = Assert.Throws<BevyNativeException>(() => Window.SetPosition(100, 100));
+            var style = Assert.Throws<BevyNativeException>(
+                () => Window.SetStyle(decorations: false, alwaysOnTop: true));
+
+            foreach (var status in new[] { position.Status, style.Status })
+                Assert.True(
+                    status is NativeStatus.Unsupported or NativeStatus.NotPresent,
+                    $"unexpected status {status}");
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void CursorAndModeRejectValuesTheyDoNotUnderstand()
     {
         using var harness = new EngineHarness(frames: 2);
@@ -231,7 +280,7 @@ public sealed class RenderControlTests
         harness.OnContext(Stage.Update, _ =>
         {
             // Straight at the bridge, because the managed enums cannot express these.
-            Assert.Equal(NativeStatus.NullArgument, WorstCase(Native.bcs_window_set_mode(7)));
+            Assert.Equal(NativeStatus.NullArgument, WorstCase(Native.bcs_window_set_mode(9)));
             Assert.Equal(NativeStatus.NullArgument, WorstCase(Native.bcs_window_set_cursor(9, 1)));
         });
 

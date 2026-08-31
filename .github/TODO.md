@@ -170,9 +170,12 @@ Cameras, lights and the window take their common parameters. What is left is nar
   `Render.CreateMaterial` and the asset surface have no way to ask for.
 - **Lights**: no light probes, no per-light shadow bias, and the spot light has no cookie
   texture. Shadow map resolution is Bevy's default and unreachable.
-- **Window**: exclusive fullscreen is not offered, because it needs a video mode to be chosen
-  from the monitor's list, which needs the monitor list bridged first. Borderless covers what a
-  desktop game wants. Window position, decorations and always-on-top are unbridged.
+- **Window**: position, decorations, resizability, always-on-top and exclusive fullscreen are
+  bridged, and the monitors are readable. What is left is naming things and choosing modes: a
+  monitor's name and its list of video modes are both text or a list of structs, so exclusive
+  fullscreen takes the monitor's current mode rather than offering a resolution to pick from, and
+  a settings screen can list monitors only by size. Multiple windows are also unbridged: every
+  entry point here addresses the primary one.
 - **Verification**: none of this is checked by eye. The tests assert that settings are accepted
   and that a windowless run refuses, which is what can go wrong silently; whether the picture is
   right is confirmed by running the sample, which uses a custom clear colour, a tinted sun and a

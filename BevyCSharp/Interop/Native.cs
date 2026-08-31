@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 23;
+    internal const int ExpectedAbiVersion = 24;
 
     static Native() => NativeLoader.Initialize();
 
@@ -159,6 +159,26 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_window_set_mode(int mode);
+
+    /// <summary>Moves the window, in physical pixels.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_position(int x, int y);
+
+    /// <summary>Sets decorations, resizability and always-on-top together.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_style(int decorations, int resizable, int alwaysOnTop);
+
+    /// <summary>Counts the monitors the platform reports.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_monitor_count();
+
+    /// <summary>Describes one monitor by index.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_monitor_info(int index, NativeMonitor* monitor);
 
     /// <summary>Sets whether the cursor is confined or hidden.</summary>
     [LibraryImport(Library)]

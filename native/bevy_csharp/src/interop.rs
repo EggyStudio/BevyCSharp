@@ -241,6 +241,27 @@ pub struct BcsCameraConfig {
     pub layers: u32,
 }
 
+/// What a monitor is and where it sits.
+///
+/// The name is left out: it is the one field that is text, and nothing else in the bridge hands
+/// a string back. A monitor is identified by its index here.
+#[repr(C)]
+#[derive(Clone, Copy, Default)]
+pub struct BcsMonitor {
+    /// Width in physical pixels.
+    pub width: u32,
+    /// Height in physical pixels.
+    pub height: u32,
+    /// Where its top-left corner sits in the desktop's coordinate space.
+    pub x: i32,
+    /// The same, vertically.
+    pub y: i32,
+    /// Refresh rate in millihertz, or `0` when the platform does not report one.
+    pub refresh_millihertz: u32,
+    /// Physical pixels per logical pixel.
+    pub scale_factor: f32,
+}
+
 /// One thing the window reported.
 ///
 /// A tagged triple rather than six structs, because they cross the boundary as one array and the

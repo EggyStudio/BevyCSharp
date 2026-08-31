@@ -115,11 +115,12 @@ pub unsafe extern "C" fn bcs_window_size(width: *mut u32, height: *mut u32) -> i
     })
 }
 
-/// Switches between windowed and borderless fullscreen.
+/// Sets how the window fills the screen.
 ///
-/// `mode` is `0` for windowed and `1` for borderless fullscreen on whichever monitor the window
-/// is currently on. Exclusive fullscreen is not offered: it needs a video mode to be chosen, and
-/// borderless is what a game wants on a desktop anyway.
+/// `0` windowed, `1` borderless fullscreen, `2` exclusive fullscreen. Both fullscreen modes take
+/// the monitor the window is on. Exclusive takes that monitor's current video mode rather than
+/// asking for a different resolution, which is what avoids a mode switch the compositor has to
+/// undo on every alt-tab.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_window_set_mode(mode: i32) -> i32 {
     crate::interop::guard(|| {
@@ -134,6 +135,10 @@ pub extern "C" fn bcs_window_set_mode(mode: i32) -> i32 {
             let requested = match mode {
                 0 => WindowMode::Windowed,
                 1 => WindowMode::BorderlessFullscreen(MonitorSelection::Current),
+                2 => WindowMode::Fullscreen(
+                    MonitorSelection::Current,
+                    bevy::window::VideoModeSelection::Current,
+                ),
                 _ => return status::NULL_ARG,
             };
 
@@ -175,6 +180,127 @@ pub extern "C" fn bcs_window_set_cursor(grab: i32, visible: i32) -> i32 {
             with_window(|_, cursor| {
                 cursor.grab_mode = requested;
                 cursor.visible = visible != 0;
+                status::OK
+            })
+        }
+    })
+}
+
+/// Moves the window, in physical pixels from the desktop's top-left corner.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_window_set_position(x: i32, y: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (x, y);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::window::WindowPosition;
+
+            with_window(|window, _| {
+                window.position = WindowPosition::At(bevy::math::IVec2::new(x, y));
+                status::OK
+            })
+        }
+    })
+}
+
+/// Sets whether the window has a title bar and border, whether it can be resized by dragging, and
+/// whether it stays above other windows.
+///
+/// The three travel together because each is one flag, and a call that set only one would have to
+/// read the other two back first to leave them alone.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_window_set_style(decorations: i32, resizable: i32, always_on_top: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (decorations, resizable, always_on_top);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::window::WindowLevel;
+
+            with_window(|window, _| {
+                window.decorations = decorations != 0;
+                window.resizable = resizable != 0;
+                window.window_level = if always_on_top != 0 {
+                    WindowLevel::AlwaysOnTop
+                } else {
+                    WindowLevel::Normal
+                };
+                status::OK
+            })
+        }
+    })
+}
+
+/// Reports how many monitors the platform knows about.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_monitor_count() -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::window::Monitor;
+
+            with_world(|world| {
+                let mut monitors = world.query::<&Monitor>();
+                monitors.iter(world).count() as i32
+            })
+        }
+    })
+}
+
+/// Describes one monitor, by the index [`bcs_monitor_count`] counts up to.
+///
+/// # Safety
+/// `out` must be writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_monitor_info(index: i32, out: *mut crate::interop::BcsMonitor) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (index, out);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::window::Monitor;
+
+            if out.is_null() {
+                return status::NULL_ARG;
+            }
+            let Ok(index) = usize::try_from(index) else {
+                return status::NULL_ARG;
+            };
+
+            with_world(|world| {
+                let mut monitors = world.query::<&Monitor>();
+                let Some(monitor) = monitors.iter(world).nth(index) else {
+                    return status::NO_ENTITY;
+                };
+
+                let info = crate::interop::BcsMonitor {
+                    width: monitor.physical_width,
+                    height: monitor.physical_height,
+                    x: monitor.physical_position.x,
+                    y: monitor.physical_position.y,
+                    refresh_millihertz: monitor.refresh_rate_millihertz.unwrap_or(0),
+                    scale_factor: monitor.scale_factor as f32,
+                };
+
+                unsafe { out.write(info) };
                 status::OK
             })
         }

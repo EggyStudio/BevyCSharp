@@ -518,7 +518,22 @@ The window can be driven while the app runs:
 Window.SetTitle("Level 2");
 Window.SetMode(WindowMode.BorderlessFullscreen);
 Window.SetCursor(CursorGrab.Locked, visible: false);
+Window.SetPosition(100, 100);
+Window.SetStyle(decorations: false, resizable: false, alwaysOnTop: true);
 var (width, height) = Window.Size();
+```
+
+`WindowMode.Fullscreen` takes the monitor exclusively at its current video mode, which can be
+worth a frame of latency and makes alt-tabbing heavier; `BorderlessFullscreen` is what most
+desktop games want. The monitors are readable, which is what a settings screen offers a choice
+from:
+
+```csharp
+for (var i = 0; i < Window.MonitorCount(); i++)
+{
+    var m = Window.Monitor(i);
+    Console.WriteLine($"{m.Width}x{m.Height} at {m.RefreshHz:F0} Hz");
+}
 ```
 
 `CursorGrab.Locked` is what a first-person camera needs, since it reads how far the mouse moved
