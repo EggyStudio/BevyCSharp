@@ -83,9 +83,14 @@ jobs:
           workspaces: native
           key: ${{ matrix.target }}
 
-      # The bridge itself needs no development packages: winit reaches X11 and Wayland through
-      # dlopen, and wgpu loads Vulkan the same way. ALSA and udev are only pulled in by Bevy
-      # features this build deliberately leaves out.
+      # The only development package a render build needs. Everything else graphical resolves at
+      # runtime: winit reaches X11 and Wayland through dlopen, and wgpu loads Vulkan the same way.
+      # Audio is the exception, because cpal links against ALSA. Windows and macOS reach their
+      # audio APIs through the system SDK, so this is Linux only.
+      - name: Install ALSA headers
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libasound2-dev
+
       - name: Build native bridge
         shell: bash
         run: build/build-native.sh --render --target ${{ matrix.target }}
