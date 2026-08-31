@@ -268,10 +268,16 @@ foreach (var child in ctx.Ecs.ChildrenOf(root))
 `.scn` and `.scn.ron` worlds load as the same asset through `AssetKind.Scene`, so `SpawnScene`
 takes either.
 
-Materials are the gap. In Bevy 0.19 a glTF material loads as a `GltfMaterial`, which describes a
-material rather than being one the renderer draws with, and the translation into a
-`StandardMaterial` lives in a private module of `bevy_pbr`. Give entities a material from
-`CreateMaterial` until that is bridged.
+A file's own materials load too, though only in a windowed run:
+
+```csharp
+Render.SetMaterial(ctx.Ecs, entity, AssetServer.LoadGltfMaterial("models/ship.gltf"));
+```
+
+A glTF material loads as a `GltfMaterial`, which describes a material rather than being one the
+renderer draws with. Bevy's PBR plugin translates it and publishes the result under a second
+label, and that plugin comes with the window, so a windowless run has no such asset and the load
+fails. Use `CreateMaterial` there.
 
 Bevy's own handle is generic and reference counted, and neither property survives a trip through
 a C ABI, so C# holds a key into a table on the engine side that owns the real handle. Holding one

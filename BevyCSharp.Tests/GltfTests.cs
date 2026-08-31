@@ -41,6 +41,32 @@ public sealed class GltfTests
     }
 
     [Fact]
+    public void AGltfMaterialNeedsTheRendererThatTranslatesIt()
+    {
+        // The material a file describes is not the one the renderer draws with, and the plugin
+        // that translates between them comes with the window. A windowless run has to say so
+        // rather than wait, which is what a caller polling the state depends on.
+        using var harness = new EngineHarness(frames: 60, fps: 240);
+        if (!App.HasRenderer) return;
+
+        var state = AssetLoadState.Loading;
+
+        harness.OnContext(Stage.Startup, _ => _material = AssetServer.LoadGltfMaterial(Model));
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            state = _material.State;
+            if (state != AssetLoadState.Loading) ctx.Exit();
+        });
+
+        harness.Run();
+
+        // Windowless here, so the translated material was never published. In a windowed run this
+        // is the artist's own material, and the same call returns it.
+        Assert.Equal(AssetLoadState.Failed, state);
+    }
+
+    [Fact]
     public void AGltfMeshIsAnOrdinaryMeshHandle()
     {
         // The point of loading the part rather than the file: what comes back is the same kind of
@@ -224,4 +250,5 @@ public sealed class GltfTests
 
     private static AssetHandle _missing;
     private static AssetHandle _file;
+    private static AssetHandle _material;
 }

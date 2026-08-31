@@ -140,11 +140,8 @@ public static class AssetServer
     /// <see cref="Render.CreateMesh"/> built, so <see cref="Render.SetMesh"/> takes it as it is.
     /// </para>
     /// <para>
-    /// <b>Geometry only.</b> The file's materials are not reachable: in Bevy 0.19 a glTF material
-    /// loads as a <c>GltfMaterial</c>, which describes a material rather than being one the
-    /// renderer can draw with, and the translation into a <c>StandardMaterial</c> lives in a
-    /// private module of <c>bevy_pbr</c>. Give the entity a material from
-    /// <see cref="Render.CreateMaterial(MaterialSettings)"/> instead.
+    /// The file's own material comes from <see cref="LoadGltfMaterial"/>, which needs a window.
+    /// Give the entity one from <see cref="Render.CreateMaterial(MaterialSettings)"/> otherwise.
     /// </para>
     /// </remarks>
     /// <param name="path">Path to the glTF file, relative to the assets directory.</param>
@@ -163,6 +160,39 @@ public static class AssetServer
         ArgumentOutOfRangeException.ThrowIfNegative(primitive);
 
         return Load(AssetKind.Mesh, $"{path}#Mesh{mesh}/Primitive{primitive}");
+    }
+
+    /// <summary>
+    /// Starts loading one material out of a glTF file, as the renderer's own material type.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Needs a window.</b> A glTF material loads as a <c>GltfMaterial</c>, which describes a
+    /// material rather than being one the renderer draws with. Bevy's PBR plugin translates it
+    /// and publishes the result under a second label, which is what this asks for, and that
+    /// plugin comes with the window. A windowless run has no such asset and the load fails.
+    /// </para>
+    /// <para>
+    /// Materials are numbered per file rather than per mesh, so this index is not the one passed
+    /// to <see cref="LoadGltfMesh"/>. A file with one material has only index 0.
+    /// </para>
+    /// </remarks>
+    /// <param name="path">Path to the glTF file, relative to the assets directory.</param>
+    /// <param name="material">Which of the file's materials.</param>
+    /// <example>
+    /// <code>
+    /// Render.SetMesh(ctx.Ecs, entity, AssetServer.LoadGltfMesh("models/ship.gltf"));
+    /// Render.SetMaterial(ctx.Ecs, entity, AssetServer.LoadGltfMaterial("models/ship.gltf"));
+    /// </code>
+    /// </example>
+    public static AssetHandle LoadGltfMaterial(string path, int material = 0)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+        ArgumentOutOfRangeException.ThrowIfNegative(material);
+
+        // The `/std` half is Bevy's label for the translated material, beside the raw
+        // GltfMaterial the loader produces at `Material{n}`.
+        return Load(AssetKind.StandardMaterial, $"{path}#Material{material}/std");
     }
 
     /// <summary>

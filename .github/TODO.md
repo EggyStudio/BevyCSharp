@@ -17,22 +17,29 @@ code.
 Nothing here can be worked around from C#. Without it a project is limited to four primitive
 shapes in flat colors.
 
-### Materials from glTF
+### glTF materials in a windowless app
 
-Geometry and scenes are covered. `AssetServer.LoadGltfMesh(path, mesh, primitive)` returns an
-ordinary mesh handle, addressing a part by the label Bevy's own asset paths understand
-(`ship.gltf#Mesh0/Primitive0`), and `ctx.Ecs.SpawnScene(handle)` spawns a whole file's
-arrangement. Materials are the one part of a glTF file still out of reach.
+A glTF file's geometry, scenes and materials are all reachable. `LoadGltfMaterial` asks for
+`ship.gltf#Material0/std`, the label `PbrPlugin` publishes its translated `StandardMaterial`
+under, so it works wherever that plugin is installed, which means a windowed run.
 
-`ship.gltf#Material0` loads as a `GltfMaterial`, which describes a material rather than being one
-the renderer draws with. `standard_material_from_gltf_material` does the translation, but it lives
-in `bevy_pbr`'s private `gltf` module and is registered as an extension handler by `PbrPlugin`,
-which a headless-configured app does not install. Either add `PbrPlugin` to that path and check
-the handler produces a labelled `StandardMaterial`, or copy the conversion field by field on this
-side.
+A windowless app does not install it, so the same call fails there. Two routes were considered
+and rejected:
 
-It matters because `MaterialSettings` binds five texture maps: a model arrives with its own maps
-and none of them can be used, so every glTF entity has to be given a material built in code.
+- **Add `PbrPlugin` to the windowless path.** It builds, and then breaks the app: 108 of 129 tests
+  fail against a bridge that does this. It pulls in the render plugin chain, and the pieces that
+  need a render sub-app do not tolerate its absence.
+- **Copy the conversion.** `standard_material_from_gltf_material` is private to `bevy_pbr`, and
+  reproducing it means 60 field assignments behind 16 feature gates that would have to track
+  upstream. The divergence would be invisible until a material looked wrong.
+
+What is left is a narrower version of the first: register a `GltfExtensionHandler` of our own on
+the windowless path only. The trait and the `GltfExtensionHandlers` resource are both public, and
+the handler would publish the same `/std` label, so nothing above it would change. It still needs
+the conversion, so it is worth doing only alongside a way to keep that honest.
+
+This only matters for a windowless run, which draws nothing. It is a gap in testability rather
+than in what a game can do.
 
 The division of labour this is aiming at: glTF carries the geometry, materials and animations,
 because that is what Blender and every other tool exports. Composition on top of it, adding
