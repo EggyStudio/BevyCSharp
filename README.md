@@ -159,6 +159,31 @@ represent, so they are name-only handles: `Has<ChildOf>()`, `Count<Children>()` 
 filters work, while reading or writing one is refused rather than corrupting the world. Use
 `SetParent`, `ParentOf` and `ChildrenOf` for the hierarchy itself.
 
+The list is curated rather than general, because each entry needs a mirror written by hand as
+well as a name the bridge resolves. It currently holds `Transform`, `GlobalTransform`, `ChildOf`,
+`Children`, `Visibility`, `InheritedVisibility` and `ViewVisibility`.
+
+### Visibility
+
+Whether an entity is drawn. Render builds only: a headless bridge has no such component and says
+so when the id is resolved.
+
+```csharp
+ctx.Ecs.Add(entity, Visibility.Hidden);                 // and everything below it
+ctx.Ecs.GetRef<Visibility>(entity).Mode = VisibilityMode.Inherited;
+
+ctx.Ecs.GetRef<InheritedVisibility>(entity).IsVisible;  // after the hierarchy is walked
+ctx.Ecs.GetRef<ViewVisibility>(entity).IsVisible;       // after culling: did a camera see it
+```
+
+`Visibility` is the request and the other two are Bevy's answers, computed during `PostUpdate`
+and overwritten every frame. `InheritedVisibility` reports whether an ancestor hides the entity;
+`ViewVisibility` reports whether a camera actually rendered it, which is the one to check before
+doing work that only matters on screen.
+
+Set `Visibility` on an entity that is already drawable. Adding it writes the component but does
+not pull in the two Bevy computes from it, which arrive with the mesh.
+
 ### Assets
 
 ```csharp
@@ -361,7 +386,7 @@ or from the command line, which wins over the constants:
 ```bash
 build/build-native.sh --render                  # once: build a bridge with the renderer
 
-dotnet run --project BevyCSharp.Sample                        # a rotating cube
+dotnet run --project BevyCSharp.Sample          # a rotating cube
 dotnet run --project BevyCSharp.Sample -- --backend vulkan
 dotnet run --project BevyCSharp.Sample -- --headless --frames 120
 ```

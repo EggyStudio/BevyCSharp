@@ -50,6 +50,18 @@ public static class NativeComponents
     /// <summary>Bevy's <c>Children</c> list, for filtering on "has children".</summary>
     public static int Children => ComponentType<Bevy.Children>.Id;
 
+    /// <summary>Bevy's <c>Visibility</c>: whether an entity asks to be drawn.</summary>
+    /// <remarks>Render builds only. The id behind <see cref="Bevy.Visibility"/>.</remarks>
+    public static int Visibility => ComponentType<Bevy.Visibility>.Id;
+
+    /// <summary>Bevy's <c>InheritedVisibility</c>: the propagated answer.</summary>
+    /// <remarks>Render builds only. The id behind <see cref="Bevy.InheritedVisibility"/>.</remarks>
+    public static int InheritedVisibility => ComponentType<Bevy.InheritedVisibility>.Id;
+
+    /// <summary>Bevy's <c>ViewVisibility</c>: whether a camera actually saw the entity.</summary>
+    /// <remarks>Render builds only. The id behind <see cref="Bevy.ViewVisibility"/>.</remarks>
+    public static int ViewVisibility => ComponentType<Bevy.ViewVisibility>.Id;
+
     /// <summary>
     /// Resolves a component by name, verifying the layout when C# mirrors it.
     /// </summary>
@@ -115,6 +127,9 @@ public static class NativeComponents
                 break;
             case "GlobalTransform":
                 VerifyGlobalTransform();
+                break;
+            case "Visibility":
+                VerifyVisibility();
                 break;
         }
     }
@@ -192,6 +207,43 @@ public static class NativeComponents
                 + $"mirrors it at {expected}. Using the mirror would read the world-space "
                 + "position from the wrong place, so it is refused. The engine's field layout "
                 + "has changed.");
+        }
+    }
+
+    /// <summary>
+    /// Fails loudly if C# has <see cref="Bevy.VisibilityMode"/>'s numbers wrong.
+    /// </summary>
+    /// <remarks>
+    /// The struct mirrors are checked by size and offset. This one is a fieldless enum, where what
+    /// has to match is which number stands for which variant, and a one-byte mirror looks equally
+    /// healthy whichever way they are numbered. Rust promises no particular order for a
+    /// default-representation enum, so getting it wrong would leave <c>Hidden</c> quietly meaning
+    /// something else.
+    /// </remarks>
+    private static unsafe void VerifyVisibility()
+    {
+        uint size;
+        uint inherited;
+        uint hidden;
+        uint visible;
+        Native.Check(
+            Native.bcs_visibility_layout(&size, &inherited, &hidden, &visible),
+            "reading the layout of 'Visibility'");
+
+        Expect("sizes Visibility at", size, sizeof(Bevy.VisibilityMode));
+        Expect("numbers Inherited", inherited, (int)Bevy.VisibilityMode.Inherited);
+        Expect("numbers Hidden", hidden, (int)Bevy.VisibilityMode.Hidden);
+        Expect("numbers Visible", visible, (int)Bevy.VisibilityMode.Visible);
+
+        static void Expect(string part, uint actual, int expected)
+        {
+            if (actual == (uint)expected) return;
+
+            throw new BevyNativeException(
+                NativeStatus.InvalidState,
+                $"Bevy {part} {actual}, but this build of BevyCSharp mirrors it as {expected}. "
+                + "Using the mirror would ask for the wrong visibility, so it is refused. The "
+                + "engine's definition has changed.");
         }
     }
 

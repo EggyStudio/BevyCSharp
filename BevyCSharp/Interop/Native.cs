@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 7;
+    internal const int ExpectedAbiVersion = 8;
 
     static Native() => NativeLoader.Initialize();
 
@@ -111,6 +111,12 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_global_transform_layout(
         uint* size, uint* xAxis, uint* yAxis, uint* zAxis, uint* translation);
+
+    /// <summary>Reports the size and variant numbering of Visibility. Render builds only.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_visibility_layout(
+        uint* size, uint* inherited, uint* hidden, uint* visible);
 
     // -- ECS (ambient: requires an active world loan)
 

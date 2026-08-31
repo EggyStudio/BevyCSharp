@@ -395,6 +395,77 @@ public sealed class NativeComponentTests
     }
 
     [Fact]
+    public void VisibilityMirrorsAreSingleBytes()
+    {
+        // Bevy stores all three in a byte: an enum with three variants, a bool, and a bool pair
+        // packed into two bits. A mirror that widened any of them would read the neighbouring
+        // component. This needs no world, so it holds on a headless build too.
+        Assert.Equal(1, Unsafe.SizeOf<Visibility>());
+        Assert.Equal(1, Unsafe.SizeOf<InheritedVisibility>());
+        Assert.Equal(1, Unsafe.SizeOf<ViewVisibility>());
+
+        // Bit 0 is this frame and bit 1 the frame before, which is how Bevy tells "no longer
+        // seen" from "never seen" without tripping change detection every frame.
+        Assert.True(new ViewVisibility { Bits = 0b01 }.IsVisible);
+        Assert.False(new ViewVisibility { Bits = 0b01 }.WasVisible);
+        Assert.False(new ViewVisibility { Bits = 0b10 }.IsVisible);
+        Assert.True(new ViewVisibility { Bits = 0b10 }.WasVisible);
+    }
+
+    [Fact]
+    public void VisibilityRoundTripsOnARenderBuild()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        var read = Visibility.Inherited;
+        var companions = false;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            if (!App.HasRenderer)
+            {
+                // The component belongs to a crate a headless build does not compile, so the
+                // failure names that rather than pretending the component is merely absent.
+                var ex = Assert.Throws<BevyNativeException>(() => NativeComponents.Visibility);
+                Assert.Equal(NativeStatus.NoComponent, ex.Status);
+                Assert.Contains("compiled without", ex.Message);
+                return;
+            }
+
+            // Spawned through Render so Bevy's own insert brings the components it computes
+            // visibility from; a byte copy of Visibility alone would leave them missing.
+            var entity = ctx.Ecs.Spawn();
+            Render.SetMesh(ctx.Ecs, entity, Render.CreateMesh(MeshShape.Sphere, 0.5f));
+            ctx.Ecs.Add(entity, Visibility.Hidden);
+            ctx.Ecs.Add(entity, new Marker());
+        });
+
+        harness.OnContext(Stage.Last, ctx =>
+        {
+            if (!App.HasRenderer) return;
+
+            foreach (var row in ctx.Ecs.Query<Marker>(markChanged: false))
+            {
+                read = ctx.Ecs.GetRef<Visibility>(row.Entity);
+                companions = ctx.Ecs.Has<InheritedVisibility>(row.Entity)
+                    && ctx.Ecs.Has<ViewVisibility>(row.Entity);
+            }
+        });
+
+        harness.Run();
+
+        if (!App.HasRenderer) return;
+
+        // Resolving the id ran the variant check, and the value came back out of Bevy's own
+        // component rather than one that merely shares its name.
+        Assert.Equal(VisibilityMode.Hidden, read.Mode);
+
+        // What Bevy computes from it arrived with the mesh, because that insert goes through the
+        // engine's own path. Whether propagation then updates them is not asserted here: it needs
+        // VisibilityPlugin, which only a windowed run installs.
+        Assert.True(companions);
+    }
+
+    [Fact]
     public void UnknownNativeComponentsFailWithAUsefulMessage()
     {
         using var harness = new EngineHarness(frames: 2);

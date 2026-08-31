@@ -426,6 +426,8 @@ pub unsafe extern "C" fn bcs_component_id_of(name: *const core::ffi::c_char) -> 
                 "InheritedVisibility" => {
                     world.register_component::<bevy::prelude::InheritedVisibility>()
                 }
+                #[cfg(feature = "render")]
+                "ViewVisibility" => world.register_component::<bevy::prelude::ViewVisibility>(),
                 _ => return status::NO_COMPONENT,
             };
             id.index() as i32
@@ -550,6 +552,49 @@ pub unsafe extern "C" fn bcs_global_transform_layout(
         write(z_axis, matrix3 + core::mem::offset_of!(Mat3A, z_axis));
         write(translation, core::mem::offset_of!(Affine3A, translation));
         status::OK
+    })
+}
+
+/// Reports the size of `Visibility` and the discriminant behind each of its variants.
+///
+/// The other mirrors are structs, where a size and a set of offsets pin the layout down. This one
+/// is a fieldless enum, and what has to match is which number stands for which variant. Rust does
+/// not promise a discriminant order for a default-representation enum, and nothing about a
+/// one-byte mirror would look wrong if the engine renumbered them: hiding an entity would quietly
+/// start meaning something else.
+///
+/// # Safety
+/// Every output pointer must be writable, or null to skip that output.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_visibility_layout(
+    size: *mut u32,
+    inherited: *mut u32,
+    hidden: *mut u32,
+    visible: *mut u32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (size, inherited, hidden, visible);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::prelude::Visibility;
+
+            let write = |target: *mut u32, value: usize| {
+                if !target.is_null() {
+                    unsafe { target.write(value as u32) };
+                }
+            };
+
+            write(size, core::mem::size_of::<Visibility>());
+            write(inherited, Visibility::Inherited as usize);
+            write(hidden, Visibility::Hidden as usize);
+            write(visible, Visibility::Visible as usize);
+            status::OK
+        }
     })
 }
 

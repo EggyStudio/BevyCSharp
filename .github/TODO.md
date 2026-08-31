@@ -136,10 +136,17 @@ existing call rather than new machinery.
 
 ### Components Bevy owns
 
-`bcs_component_id_of` resolves six names by hand. Anything else, `Visibility` variants and render
-components included, is unreachable. A general lookup is not possible through the type registry
-alone, since the managed side also needs a byte-compatible mirror, so this stays a curated list
-that grows as mirrors are written.
+`bcs_component_id_of` resolves seven names by hand: `Transform`, `GlobalTransform`, `ChildOf`,
+`Children`, `Visibility`, `InheritedVisibility` and `ViewVisibility`. Anything else is
+unreachable. A general lookup is not possible through the type registry alone, since the managed
+side also needs a byte-compatible mirror, so this stays a curated list that grows as mirrors are
+written.
+
+Candidates, each blocked on being mirrorable rather than on the lookup: `Name` holds a `String`,
+and the render components (`Camera`, `PointLight`, `DirectionalLight`, `Mesh3d`,
+`MeshMaterial3d`) hold typed asset handles or projection data that raw bytes cannot represent.
+Those need named operations of the kind `Render` already provides, or name-only handles if
+filtering on them is enough.
 
 ### Sparse-set components
 
