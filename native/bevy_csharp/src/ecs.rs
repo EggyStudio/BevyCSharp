@@ -206,6 +206,12 @@ pub extern "C" fn bcs_ecs_count(component: i32) -> i32 {
             return status::NO_COMPONENT;
         };
         with_world(|world| {
+            // A sparse-stored component is in no table at all; its dense set knows its own
+            // length, which is the whole count in one lookup.
+            if let Some(set) = world.storages().sparse_sets.get(component) {
+                return set.len() as i32;
+            }
+
             let mut total = 0i32;
             for table in world.storages().tables.iter() {
                 if table.has_column(component) {
@@ -261,45 +267,60 @@ pub unsafe extern "C" fn bcs_ecs_chunks(
             let Some(info) = world.components().get_info(component) else {
                 return status::NO_COMPONENT;
             };
+            // Chunks hand C# a pointer into contiguous storage. A sparse set keeps its values
+            // in a dense column too, but Bevy exposes no way to reach that column or the entity
+            // list beside it, only a per-entity lookup, so there is nothing to point at. Such a
+            // component can still be filtered on below; it just cannot be the one iterated.
             if info.storage_type() != StorageType::Table {
                 return status::UNSUPPORTED;
             }
             let stride = info.layout().size() as u32;
 
-            // Filters are resolved at the table level, which is only sound for
-            // table-stored components. Everything C# registers is table-stored.
+            // A table-stored filter is answered once for the whole table, because every entity
+            // in one carries exactly the same set of them. A sparse-stored filter cannot be:
+            // two entities in the same table may differ, so it is asked per entity instead,
+            // which is what splits a table into runs below.
             let mut with_ids = Vec::with_capacity(with.len());
+            let mut with_sparse = Vec::new();
             for raw in with {
                 let Some(id) = component_from(*raw) else {
                     return status::NO_COMPONENT;
                 };
                 match table_storage(world, id) {
                     Some(StorageType::Table) => with_ids.push(id),
-                    Some(_) => return status::UNSUPPORTED,
+                    Some(StorageType::SparseSet) => with_sparse.push(id),
                     // An unregistered required component can never be present, so the
                     // result set is empty.
                     None => return 0,
                 }
             }
             let mut without_ids = Vec::with_capacity(without.len());
+            let mut without_sparse = Vec::new();
             for raw in without {
                 let Some(id) = component_from(*raw) else {
                     return status::NO_COMPONENT;
                 };
                 match table_storage(world, id) {
                     Some(StorageType::Table) => without_ids.push(id),
-                    Some(_) => return status::UNSUPPORTED,
+                    Some(StorageType::SparseSet) => without_sparse.push(id),
                     // Never present, so it excludes nothing.
                     None => {}
                 }
             }
+            let per_entity = !with_sparse.is_empty() || !without_sparse.is_empty();
 
             let this_run = world.change_tick();
             let capacity = capacity.max(0) as usize;
             let mut written = 0usize;
             let mut total = 0usize;
 
-            for table in world.storages().tables.iter() {
+            let storages = world.storages();
+            let sparse_sets = &storages.sparse_sets;
+
+            // Reused across tables, so the common case allocates nothing per table.
+            let mut runs: Vec<(usize, usize)> = Vec::new();
+
+            for table in storages.tables.iter() {
                 let len = table.entity_count() as usize;
                 if len == 0 {
                     continue;
@@ -314,21 +335,59 @@ pub unsafe extern "C" fn bcs_ecs_chunks(
                     continue;
                 }
 
-                total += 1;
-                if written < capacity {
-                    // SAFETY: `len > 0`, so row 0 is in bounds; the returned pointer is the
-                    // base of `len` tightly packed components.
+                runs.clear();
+                if per_entity {
+                    // Keep the maximal stretches of consecutive rows that satisfy every sparse
+                    // filter. A run has to be contiguous because what C# receives is a pointer
+                    // and a length into the column, so an entity that fails the filter ends the
+                    // run rather than being skipped over inside it.
+                    let entities = table.entities();
+                    let mut from: Option<usize> = None;
+
+                    for row in 0..len {
+                        let entity = entities[row];
+                        let keep = with_sparse.iter().all(|id| {
+                            sparse_sets.get(*id).is_some_and(|set| set.contains(entity))
+                        }) && without_sparse.iter().all(|id| {
+                            !sparse_sets.get(*id).is_some_and(|set| set.contains(entity))
+                        });
+
+                        match (keep, from) {
+                            (true, None) => from = Some(row),
+                            (false, Some(begin)) => {
+                                runs.push((begin, row));
+                                from = None;
+                            }
+                            _ => {}
+                        }
+                    }
+                    if let Some(begin) = from {
+                        runs.push((begin, len));
+                    }
+                } else {
+                    runs.push((0, len));
+                }
+
+                for &(begin, end) in &runs {
+                    total += 1;
+                    if written >= capacity {
+                        continue;
+                    }
+
+                    // SAFETY: `begin < end <= len`, so the row is in bounds, and the pointer it
+                    // returns is the base of `end - begin` tightly packed components.
                     let data = unsafe {
                         column
                             .get_data_unchecked(bevy::ecs::storage::TableRow::new(
-                                nonmax::NonMaxU32::ZERO,
+                                nonmax::NonMaxU32::new(begin as u32).unwrap_or_default(),
                             ))
                             .as_ptr()
                     };
                     let chunk = BcsChunk {
-                        entities: table.entities().as_ptr() as *const u64,
+                        // SAFETY: `begin < len`, so this stays inside the entity slice.
+                        entities: unsafe { table.entities().as_ptr().add(begin) } as *const u64,
                         data,
-                        len: len as u32,
+                        len: (end - begin) as u32,
                         stride,
                     };
                     // SAFETY: `written < capacity` and `out` is valid for `capacity` writes.
@@ -338,7 +397,7 @@ pub unsafe extern "C" fn bcs_ecs_chunks(
                     if mark_changed != 0
                         && let Some(ticks) = table.get_changed_ticks_slice_for(component)
                     {
-                        for cell in ticks {
+                        for cell in &ticks[begin..end] {
                             // SAFETY: we hold the world exclusively for this call, so no
                             // other reader or writer of these ticks is live.
                             unsafe { *cell.get() = this_run };

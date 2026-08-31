@@ -273,11 +273,16 @@ public sealed unsafe class EcsWorld
     /// <c>Query&lt;&amp;mut T&gt;</c> does. Pass <see langword="false"/> for a read-only pass so
     /// <c>[Changed]</c> filters elsewhere stay meaningful.
     /// </param>
+    /// <remarks>
+    /// A filter may name a sparse-stored component (see <see cref="ISparseComponent"/>). That one
+    /// cannot be answered per table, so it is answered per entity, which splits a table into the
+    /// runs that satisfy it: the same rows come back, in more chunks.
+    /// </remarks>
     public ChunkSet<T> Chunks<T>(
         ReadOnlySpan<int> with = default,
         ReadOnlySpan<int> without = default,
         bool markChanged = true) where T : unmanaged =>
-        Chunks<T>(ComponentType<T>.ValueId, with, without, markChanged);
+        Chunks<T>(ComponentType<T>.ChunkId, with, without, markChanged);
 
     /// <summary>
     /// Collects the storage runs for an explicitly named component.
@@ -352,7 +357,7 @@ public sealed unsafe class EcsWorld
     /// </remarks>
     public Entity[] EntitiesWith<T>() where T : unmanaged
     {
-        using var chunks = Chunks<byte>(ComponentType<T>.Id, markChanged: false);
+        using var chunks = Chunks<byte>(ComponentType<T>.EntityId, markChanged: false);
         var result = new Entity[chunks.TotalLength];
         var offset = 0;
         for (var i = 0; i < chunks.Count; i++)

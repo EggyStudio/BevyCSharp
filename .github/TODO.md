@@ -148,11 +148,6 @@ and the render components (`Camera`, `PointLight`, `DirectionalLight`, `Mesh3d`,
 Those need named operations of the kind `Render` already provides, or name-only handles if
 filtering on them is enough.
 
-### Sparse-set components
-
-Filters must name table-stored components. A filter naming a Bevy-side sparse-set component is
-rejected rather than silently wrong, which is the correct failure, but it is still a gap.
-
 ## Physics
 
 Bevy ships no physics engine, so this means bridging Avian or Rapier. It is comparable in size to

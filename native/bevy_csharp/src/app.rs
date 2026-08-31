@@ -298,11 +298,27 @@ pub unsafe extern "C" fn bcs_app_destroy(handle: *mut BcsApp) {
     });
 }
 
+/// Translates the storage selector the managed side sends into Bevy's own.
+///
+/// `0` is table storage, which is what almost everything wants: components sit in contiguous
+/// columns that a query can walk without indirection. `1` is sparse-set storage, which trades
+/// that for cheap insertion and removal, because adding or removing one does not move the entity
+/// between archetypes. It suits a tag that is toggled far more often than it is iterated.
+fn storage_from(storage: i32) -> Option<bevy::ecs::component::StorageType> {
+    match storage {
+        0 => Some(bevy::ecs::component::StorageType::Table),
+        1 => Some(bevy::ecs::component::StorageType::SparseSet),
+        _ => None,
+    }
+}
+
 /// Registers a component layout with the Bevy world, returning its `ComponentId`.
 ///
 /// The layout is padded to its alignment, which Bevy requires. `size` must therefore
 /// already be a multiple of `align` for the round-trip to be lossless, which is what
 /// `Unsafe.SizeOf<T>()` guarantees for a blittable C# struct.
+///
+/// `storage` selects table or sparse-set storage; see [`storage_from`].
 ///
 /// # Safety
 /// `name` must be a NUL-terminated UTF-8 string; `handle` must be a live app.
@@ -312,6 +328,7 @@ pub unsafe extern "C" fn bcs_component_register(
     name: *const core::ffi::c_char,
     size: u32,
     align: u32,
+    storage: i32,
 ) -> i32 {
     crate::interop::guard(|| {
         let Some(app) = (unsafe { app_mut(handle) }) else {
@@ -320,6 +337,9 @@ pub unsafe extern "C" fn bcs_component_register(
         if align == 0 || !align.is_power_of_two() {
             return status::NULL_ARG;
         }
+        let Some(storage) = storage_from(storage) else {
+            return status::NULL_ARG;
+        };
         let Some(name) = (unsafe { crate::interop::cstr_to_string(name) }) else {
             return status::NULL_ARG;
         };
@@ -333,7 +353,7 @@ pub unsafe extern "C" fn bcs_component_register(
         let descriptor = unsafe {
             bevy::ecs::component::ComponentDescriptor::new_with_layout(
                 name,
-                bevy::ecs::component::StorageType::Table,
+                storage,
                 layout.pad_to_align(),
                 None,
                 true,
@@ -360,11 +380,15 @@ pub unsafe extern "C" fn bcs_component_register_live(
     name: *const core::ffi::c_char,
     size: u32,
     align: u32,
+    storage: i32,
 ) -> i32 {
     crate::interop::guard(|| {
         if align == 0 || !align.is_power_of_two() {
             return status::NULL_ARG;
         }
+        let Some(storage) = storage_from(storage) else {
+            return status::NULL_ARG;
+        };
         let Some(name) = (unsafe { crate::interop::cstr_to_string(name) }) else {
             return status::NULL_ARG;
         };
@@ -377,7 +401,7 @@ pub unsafe extern "C" fn bcs_component_register_live(
             let descriptor = unsafe {
                 bevy::ecs::component::ComponentDescriptor::new_with_layout(
                     name.clone(),
-                    bevy::ecs::component::StorageType::Table,
+                    storage,
                     layout.pad_to_align(),
                     None,
                     true,

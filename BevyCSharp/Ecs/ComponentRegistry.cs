@@ -70,7 +70,7 @@ internal static class ComponentRegistry
     /// whole run, and touching it again would alias; registration then has to go through the
     /// world Bevy loaned to the running system instead.
     /// </remarks>
-    internal static int Register(string name, uint size, uint align)
+    internal static int Register(string name, uint size, uint align, bool sparse)
     {
         lock (Gate)
         {
@@ -79,13 +79,20 @@ internal static class ComponentRegistry
                     $"Cannot register component '{name}': no App exists. Create an App before "
                     + "touching component types.");
 
+            var storage = sparse ? SparseStorage : TableStorage;
             var id = _running
-                ? Native.bcs_component_register_live(name, size, align)
-                : Native.bcs_component_register(_appHandle, name, size, align);
+                ? Native.bcs_component_register_live(name, size, align, storage)
+                : Native.bcs_component_register(_appHandle, name, size, align, storage);
 
             return Native.Check(id, $"registering component '{name}'");
         }
     }
+
+    /// <summary>Contiguous columns, which is what almost every component wants.</summary>
+    private const int TableStorage = 0;
+
+    /// <summary>Cheap to add and remove, at the cost of not being iterable. See <see cref="ISparseComponent"/>.</summary>
+    private const int SparseStorage = 1;
 }
 
 /// <summary>
@@ -116,6 +123,13 @@ public static class ComponentType<T> where T : unmanaged
     private static readonly INativeComponent? NativeHandle = (object)default(T) as INativeComponent;
 
     /// <summary>
+    /// True when <typeparamref name="T"/> asked for sparse-set storage, which fixes how Bevy
+    /// stores it and rules it out as the component a query iterates.
+    /// </summary>
+    internal static bool IsSparse { get; } =
+        NativeHandle is null && default(T) is ISparseComponent;
+
+    /// <summary>
     /// True when <typeparamref name="T"/> names one of Bevy's components without mirroring its
     /// bytes, and so may be filtered and counted but never read or written.
     /// </summary>
@@ -144,7 +158,8 @@ public static class ComponentType<T> where T : unmanaged
                 ? ComponentRegistry.Register(
                     typeof(T).FullName ?? typeof(T).Name,
                     (uint)Size,
-                    (uint)Alignment)
+                    (uint)Alignment,
+                    IsSparse)
                 : NativeComponents.Resolve(
                     NativeHandle.NativeName,
                     // A handle that mirrors nothing has no layout worth checking: its size is
@@ -167,6 +182,36 @@ public static class ComponentType<T> where T : unmanaged
     /// </remarks>
     /// <exception cref="BevyNativeException"><typeparamref name="T"/> mirrors no layout.</exception>
     internal static int ValueId => IsOpaque ? throw OpaqueValue() : Id;
+
+    /// <summary>
+    /// The id, for chunked iteration, which needs storage it can hand out a pointer into.
+    /// </summary>
+    /// <remarks>
+    /// Refuses a sparse-stored component on top of what <see cref="ValueId"/> refuses. Bevy keeps
+    /// a sparse set's values in a dense column, but exposes no way to reach it or the entity list
+    /// beside it, so there is nothing for a chunk to point at.
+    /// </remarks>
+    /// <exception cref="BevyNativeException"><typeparamref name="T"/> is sparse-stored.</exception>
+    internal static int ChunkId => IsSparse ? throw SparseIteration() : ValueId;
+
+    /// <summary>
+    /// The id, for walking the entities carrying <typeparamref name="T"/> without reading it.
+    /// </summary>
+    /// <remarks>
+    /// Looser than <see cref="ChunkId"/>: a name-only handle such as <see cref="Bevy.ChildOf"/>
+    /// is fine here, because the value is never touched. A sparse-stored component is still
+    /// refused, since the entity list beside its dense storage is not reachable either.
+    /// </remarks>
+    /// <exception cref="BevyNativeException"><typeparamref name="T"/> is sparse-stored.</exception>
+    internal static int EntityId => IsSparse ? throw SparseIteration() : Id;
+
+    private static BevyNativeException SparseIteration() =>
+        new(NativeStatus.Unsupported,
+            $"{typeof(T).Name} is stored in a sparse set, so it cannot be the component a query "
+            + "iterates: Bevy exposes no way to reach that storage in bulk. Iterate a "
+            + "table-stored component and name this one in a With or Without filter, or drop "
+            + $"ISparseComponent from {typeof(T).Name} if it is iterated more often than it is "
+            + "added and removed.");
 
     private static BevyNativeException OpaqueValue() =>
         new(NativeStatus.Unsupported,

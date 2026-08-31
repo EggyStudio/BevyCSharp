@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 8;
+    internal const int ExpectedAbiVersion = 9;
 
     static Native() => NativeLoader.Initialize();
 
@@ -83,12 +83,14 @@ internal static unsafe partial class Native
     /// <summary>Registers a component layout before the app starts running.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_component_register(IntPtr app, string name, uint size, uint align);
+    internal static partial int bcs_component_register(
+        IntPtr app, string name, uint size, uint align, int storage);
 
     /// <summary>Registers a component layout from inside a running system.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_component_register_live(string name, uint size, uint align);
+    internal static partial int bcs_component_register_live(
+        string name, uint size, uint align, int storage);
 
     /// <summary>Resolves one of Bevy's own components to an id, by name.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]

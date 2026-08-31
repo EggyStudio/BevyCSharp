@@ -112,6 +112,29 @@ public struct Position { public float X, Y; }
 public struct Falls;   // a zero-field tag costs nothing to store
 ```
 
+Components sit in contiguous columns, which is what makes iteration fast. The cost is paid on
+insertion and removal: both move the entity to another archetype and copy its other components
+along with it. A tag that is added and removed far more often than it is read can opt out of that
+trade by implementing `ISparseComponent`:
+
+```csharp
+public struct Colliding : ISparseComponent;   // toggled every frame, only ever filtered on
+```
+
+Adding or removing one costs an index write and moves nothing else. In exchange it cannot be the
+component a query iterates: Bevy exposes no way to reach a sparse set's storage in bulk, so
+`Query<Colliding>()` is refused rather than quietly returning nothing. Everything else works,
+including the thing it is for:
+
+```csharp
+[OnUpdate]
+[Without(typeof(Colliding))]
+public void Fall(BehaviorContext ctx) { }
+```
+
+A sparse filter cannot be answered once per table, because two entities in one may differ, so it
+is answered per entity. The same rows come back, split into the contiguous runs that satisfy it.
+
 ### Bevy's own components
 
 A struct you declare is registered with Bevy from its layout. Bevy's own components are the
