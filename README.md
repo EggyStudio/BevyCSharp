@@ -115,30 +115,47 @@ public struct Falls;   // a zero-field tag costs nothing to store
 ### Bevy's own components
 
 A struct you declare is registered with Bevy from its layout. Bevy's own components are the
-opposite problem: they are Rust types C# has no handle on, so they are asked for by name.
+opposite problem: they are Rust types C# has no handle on, so they are asked for by name. That
+name is the only difference, and the type carries it, so they are used exactly like any other
+component:
 
 ```csharp
 var entity = ctx.Ecs.Spawn();
-ctx.Ecs.AddNative(entity, NativeComponents.Transform, Transform.At(0f, 5f, 0f));
+ctx.Ecs.Add(entity, Transform.At(0f, 5f, 0f));
 
-ref var transform = ref ctx.Ecs.GetNativeRef<Transform>(entity, NativeComponents.Transform);
+ref var transform = ref ctx.Ecs.GetRef<Transform>(entity);
 transform.Translation.Y -= 9.81f * ctx.Time.Delta;
+
+foreach (var row in ctx.Ecs.Query<Transform>())
+    row.Component.Translation.X += 1f;
 ```
 
 That is Bevy's real `Transform`, not a copy kept in sync, so propagation and rendering see the
-write. Everything downstream is keyed on component ids rather than types, so these work with
-chunked iteration, filters and change detection like any other component:
+write. A struct becomes one of these by implementing `INativeComponent`, which names the engine
+type. `ComponentType<T>` then resolves that name instead of registering a fresh component, and
+everything downstream already works in ids, so queries, `[With]` filters, change detection and
+`ctx.Cmd` need no separate API. `NativeComponents` still exposes the raw ids for the `*ById`
+entry points and for iterating a component through a type that is not its own.
 
 ```csharp
-using var chunks = ctx.Ecs.Chunks<Transform>(NativeComponents.Transform);
+public struct Transform : INativeComponent
+{
+    readonly string INativeComponent.NativeName => "Transform";
+    // ... fields laid out exactly as Bevy's
+}
 ```
 
-Only components C# can mirror byte for byte are exposed, and the mirrors are checked against the
-engine the first time an id is resolved. They are easy to get subtly wrong in a way nothing else
-catches. `Transform` uses Rust's default representation, so the compiler reorders its fields to
-save padding: `Quat` is sixteen-byte aligned and moves ahead of the two vectors, giving offsets
-of 0, 16 and 28 rather than the source order. Both layouts are 48 bytes, so a size check passes
-either way and the mistake shows up as stretched geometry. The check compares every offset.
+Only a component C# can mirror byte for byte can be read or written, and the mirrors are checked
+against the engine the first time an id is resolved. They are easy to get subtly wrong in a way
+nothing else catches. `Transform` uses Rust's default representation, so the compiler reorders its
+fields to save padding: `Quat` is sixteen-byte aligned and moves ahead of the two vectors, giving
+offsets of 0, 16 and 28 rather than the source order. Both layouts are 48 bytes, so a size check
+passes either way and the mistake shows up as stretched geometry. The check compares every offset.
+
+`GlobalTransform`, `ChildOf` and `Children` hold an affine matrix, a relationship and a `Vec`,
+none of which raw bytes can represent, so they are name-only handles: `Has<ChildOf>()`,
+`Count<Children>()` and `[With]` filters work, while reading or writing one is refused rather than
+corrupting the world. Use `SetParent`, `ParentOf` and `ChildrenOf` for the hierarchy itself.
 
 ### Assets
 
@@ -169,8 +186,7 @@ drawable. This needs a render build.
 
 ```csharp
 var camera = Render.SpawnCamera3d();
-ctx.Ecs.AddNative(camera, NativeComponents.Transform,
-    Transform.LookingAt(new Vec3(0f, 6f, 12f), Vec3.Zero, Vec3.UnitY));
+ctx.Ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 6f, 12f), Vec3.Zero, Vec3.UnitY));
 
 Render.SpawnLight(LightKind.Directional, 10_000f);
 

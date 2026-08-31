@@ -34,11 +34,11 @@ public partial struct Orbit
     public static void Spawn(BehaviorContext ctx)
     {
         var planet = ctx.Ecs.Spawn();
-        ctx.Ecs.AddNative(planet, NativeComponents.Transform, Transform.Identity);
+        ctx.Ecs.Add(planet, Transform.Identity);
         ctx.Ecs.Add(planet, new Orbit { Radius = 8f, Speed = 0.5f });
 
         var moon = ctx.Ecs.Spawn();
-        ctx.Ecs.AddNative(moon, NativeComponents.Transform, Transform.Identity);
+        ctx.Ecs.Add(moon, Transform.Identity);
         ctx.Ecs.Add(moon, new Orbit { Radius = 2f, Speed = 2f });
         ctx.Ecs.SetParent(moon, planet);
 
@@ -53,8 +53,7 @@ public partial struct Orbit
 
         // The moon's transform is relative to the planet, so this is its own orbit only. Bevy
         // combines the two into a GlobalTransform during propagation.
-        ref var transform = ref ctx.Ecs.GetNativeRef<Transform>(
-            ctx.Entity, NativeComponents.Transform);
+        ref var transform = ref ctx.Ecs.GetRef<Transform>(ctx.Entity);
 
         transform.Translation = new Vec3(
             MathF.Cos(Angle) * Radius,
@@ -72,8 +71,7 @@ public partial struct Orbit
 
         foreach (var row in ctx.Ecs.Query<Orbit>(markChanged: false))
         {
-            if (!ctx.Ecs.TryGetNative<Transform>(
-                    row.Entity, NativeComponents.Transform, out var transform))
+            if (!ctx.Ecs.TryGet<Transform>(row.Entity, out var transform))
                 continue;
 
             var parent = ctx.Ecs.ParentOf(row.Entity);

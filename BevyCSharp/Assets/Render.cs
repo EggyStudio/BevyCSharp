@@ -40,8 +40,8 @@ public enum LightKind
 /// <para>
 /// Meshes and materials are Rust values that have to be constructed rather than described by a
 /// layout, and the components carrying them hold a typed handle that raw bytes cannot represent.
-/// That is why these are named operations rather than something written through
-/// <see cref="EcsWorld.AddNative{T}"/>.
+/// That is why these are named operations rather than a component written through
+/// <see cref="EcsWorld.Add{T}"/>, the way <see cref="Transform"/> is.
 /// </para>
 /// </remarks>
 public static class Render

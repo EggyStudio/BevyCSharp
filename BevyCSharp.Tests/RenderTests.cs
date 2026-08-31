@@ -135,11 +135,9 @@ public sealed class RenderTests
             Assert.NotEqual(Entity.None, camera);
             Assert.NotEqual(Entity.None, light);
 
-            ctx.Ecs.AddNative(camera, NativeComponents.Transform,
-                Transform.LookingAt(new Vec3(0f, 5f, 10f), Vec3.Zero, Vec3.UnitY));
+            ctx.Ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 5f, 10f), Vec3.Zero, Vec3.UnitY));
 
-            Assert.True(ctx.Ecs.TryGetNative<Transform>(
-                camera, NativeComponents.Transform, out var placed));
+            Assert.True(ctx.Ecs.TryGet<Transform>(camera, out var placed));
             Assert.Equal(new Vec3(0f, 5f, 10f), placed.Translation);
         });
 

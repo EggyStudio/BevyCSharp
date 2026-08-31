@@ -53,11 +53,10 @@ public sealed class NativeComponentTests
         harness.OnContext(Stage.Startup, ctx =>
         {
             var entity = ctx.Ecs.Spawn();
-            ctx.Ecs.AddNative(entity, NativeComponents.Transform,
-                new Transform(new Vec3(1f, 2f, 3f), Quat.FromRotationY(0.5f), new Vec3(2f)));
+            ctx.Ecs.Add(entity, new Transform(
+                new Vec3(1f, 2f, 3f), Quat.FromRotationY(0.5f), new Vec3(2f)));
 
-            Assert.True(ctx.Ecs.TryGetNative<Transform>(
-                entity, NativeComponents.Transform, out read));
+            Assert.True(ctx.Ecs.TryGet<Transform>(entity, out read));
         });
 
         harness.Run();
@@ -77,19 +76,18 @@ public sealed class NativeComponentTests
         harness.OnContext(Stage.Startup, ctx =>
         {
             entity = ctx.Ecs.Spawn();
-            ctx.Ecs.AddNative(entity, NativeComponents.Transform, Transform.Identity);
+            ctx.Ecs.Add(entity, Transform.Identity);
         });
 
         harness.OnContext(Stage.Update, ctx =>
         {
-            ref var transform = ref ctx.Ecs.GetNativeRef<Transform>(
-                entity, NativeComponents.Transform);
+            ref var transform = ref ctx.Ecs.GetRef<Transform>(entity);
             transform.Translation.X += 1f;
         });
 
         harness.OnContext(Stage.Last, ctx =>
         {
-            if (ctx.Ecs.TryGetNative<Transform>(entity, NativeComponents.Transform, out var t))
+            if (ctx.Ecs.TryGet<Transform>(entity, out var t))
                 final = t.Translation;
         });
 
@@ -109,8 +107,7 @@ public sealed class NativeComponentTests
         harness.OnContext(Stage.Startup, ctx =>
         {
             for (var i = 0; i < 16; i++)
-                ctx.Ecs.AddNative(ctx.Ecs.Spawn(), NativeComponents.Transform,
-                    Transform.At(i, 0f, 0f));
+                ctx.Ecs.Add(ctx.Ecs.Spawn(), Transform.At(i, 0f, 0f));
         });
 
         harness.OnContext(Stage.Update, ctx =>
@@ -207,10 +204,10 @@ public sealed class NativeComponentTests
         harness.OnContext(Stage.Startup, ctx =>
         {
             var parent = ctx.Ecs.Spawn();
-            ctx.Ecs.AddNative(parent, NativeComponents.Transform, Transform.At(10f, 0f, 0f));
+            ctx.Ecs.Add(parent, Transform.At(10f, 0f, 0f));
 
             var child = ctx.Ecs.Spawn();
-            ctx.Ecs.AddNative(child, NativeComponents.Transform, Transform.At(1f, 0f, 0f));
+            ctx.Ecs.Add(child, Transform.At(1f, 0f, 0f));
             ctx.Ecs.SetParent(child, parent);
         });
 
@@ -219,15 +216,68 @@ public sealed class NativeComponentTests
             // GlobalTransform is a 3x4 affine rather than the translation/rotation/scale triple,
             // and C# has no mirror for it, so this checks that propagation ran at all rather
             // than reading the matrix out.
-            var global = NativeComponents.GlobalTransform;
-            parentHasGlobal = ctx.Ecs.CountById(global) >= 2;
-            childHasGlobal = ctx.Ecs.CountById(NativeComponents.ChildOf) == 1;
+            parentHasGlobal = ctx.Ecs.Count<GlobalTransform>() >= 2;
+            childHasGlobal = ctx.Ecs.Count<ChildOf>() == 1;
         });
 
         harness.Run();
 
         Assert.True(parentHasGlobal, "TransformPlugin did not add GlobalTransform");
         Assert.True(childHasGlobal, "the child lost its ChildOf relationship");
+    }
+
+    [Fact]
+    public void MirrorTypesResolveToTheEnginesOwnComponent()
+    {
+        // The whole point of INativeComponent. Left to its layout, Transform would register a
+        // second component that merely shares the name, and writes through it would reach
+        // nothing Bevy's own systems read.
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            Assert.Equal(NativeComponents.Transform, EcsWorld.ComponentId<Transform>());
+            Assert.Equal(NativeComponents.ChildOf, EcsWorld.ComponentId<ChildOf>());
+
+            // And the id is the engine's, not one registered from a C# layout: a spawn carrying
+            // the mirror comes back through the id NativeComponents resolved by name.
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(entity, Transform.At(4f, 0f, 0f));
+            Assert.True(ctx.Ecs.HasById(entity, NativeComponents.Transform));
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void NameOnlyHandlesFilterButRefuseTheirBytes()
+    {
+        // ChildOf, Children and GlobalTransform have no C# mirror: an empty struct naming one is
+        // a single byte, so an insert through it would write nonsense over a live component.
+        // Everything that only needs the id still works.
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var parent = ctx.Ecs.Spawn();
+            var child = ctx.Ecs.Spawn();
+            ctx.Ecs.SetParent(child, parent);
+
+            Assert.True(ctx.Ecs.Has<ChildOf>(child));
+            Assert.False(ctx.Ecs.Has<ChildOf>(parent));
+            Assert.Equal([child], ctx.Ecs.EntitiesWith<ChildOf>());
+            Assert.Equal(1, ctx.Ecs.Count<Children>());
+
+            var write = Assert.Throws<BevyNativeException>(
+                () => ctx.Ecs.Add(child, default(ChildOf)));
+            Assert.Equal(NativeStatus.Unsupported, write.Status);
+
+            var read = Assert.Throws<BevyNativeException>(
+                () => ctx.Ecs.TryGet<Children>(parent, out _));
+            Assert.Equal(NativeStatus.Unsupported, read.Status);
+        });
+
+        harness.Run();
     }
 
     [Fact]

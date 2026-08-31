@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Bevy.Interop;
 
 namespace Bevy;
@@ -8,17 +7,18 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A struct C# declares is registered with Bevy from its layout, because Bevy has never heard of
-/// it. Bevy's own components are the opposite problem: they are Rust types the managed side has
-/// no handle on, so they are asked for by name and come back as the same kind of id. Everything
-/// downstream is keyed on ids rather than types, so once you have one, all the usual operations
-/// work on it: <see cref="EcsWorld.AddNative{T}"/>, <see cref="EcsWorld.GetNativeRef{T}"/>,
-/// chunked iteration, change detection.
+/// These are the raw ids. Reaching for one is rarely necessary: every component listed here has
+/// a C# type implementing <see cref="INativeComponent"/>, and those resolve to the same ids
+/// through the ordinary generic API, so <c>ctx.Ecs.Add(entity, Transform.Identity)</c> writes
+/// Bevy's own <c>Transform</c>. The ids are still here for the id-shaped entry points such as
+/// <see cref="EcsWorld.HasById"/>, and for passing an explicit component to
+/// <see cref="EcsWorld.Chunks{T}(int, ReadOnlySpan{int}, ReadOnlySpan{int}, bool)"/>.
 /// </para>
 /// <para>
-/// Only components whose layout C# can mirror byte for byte are here. Anything holding a
-/// <c>String</c>, a <c>Vec</c> or an asset handle is not safe to read as raw bytes and needs a
-/// purpose-built bridge instead.
+/// Only a component whose layout C# can mirror byte for byte can be read or written. Anything
+/// holding a <c>String</c>, a <c>Vec</c> or an asset handle is exposed as a name-only handle,
+/// good for filtering and counting, and its C# type says so by reporting
+/// <see cref="INativeComponent.MirrorsLayout"/> as <see langword="false"/>.
 /// </para>
 /// </remarks>
 public static class NativeComponents
@@ -28,7 +28,8 @@ public static class NativeComponents
     private static int _generation = -1;
 
     /// <summary>Bevy's <c>Transform</c>: local position, rotation and scale.</summary>
-    public static int Transform => Lookup("Transform", Unsafe.SizeOf<Transform>(), VerifyTransform);
+    /// <remarks>The id behind <see cref="Bevy.Transform"/>, which the generic API resolves for you.</remarks>
+    public static int Transform => ComponentType<Bevy.Transform>.Id;
 
     /// <summary>
     /// Bevy's <c>GlobalTransform</c>: the world-space result of propagation.
@@ -39,32 +40,33 @@ public static class NativeComponents
     /// it, so reading it as a <see cref="Bevy.Transform"/> would be wrong. Write to
     /// <see cref="Bevy.Transform"/> and let Bevy propagate.
     /// </remarks>
-    public static int GlobalTransform => Lookup("GlobalTransform", expectedSize: 0);
+    public static int GlobalTransform => ComponentType<Bevy.GlobalTransform>.Id;
 
     /// <summary>Bevy's <c>ChildOf</c> relationship, for filtering on "has a parent".</summary>
     /// <remarks>
     /// Use <see cref="EcsWorld.SetParent"/> to change it. Writing the bytes directly would set
     /// the field without maintaining the matching <c>Children</c> list.
     /// </remarks>
-    public static int ChildOf => Lookup("ChildOf", expectedSize: 0);
+    public static int ChildOf => ComponentType<Bevy.ChildOf>.Id;
 
     /// <summary>Bevy's <c>Children</c> list, for filtering on "has children".</summary>
-    public static int Children => Lookup("Children", expectedSize: 0);
+    public static int Children => ComponentType<Bevy.Children>.Id;
 
     /// <summary>
     /// Resolves a component by name, verifying the layout when C# mirrors it.
     /// </summary>
+    /// <remarks>
+    /// This is what <see cref="ComponentType{T}"/> calls for a type implementing
+    /// <see cref="INativeComponent"/>, in place of registering a fresh component from its layout.
+    /// </remarks>
     /// <param name="name">The Bevy type's name, as the bridge knows it.</param>
     /// <param name="expectedSize">
     /// The size C#'s mirror occupies, or 0 when there is no mirror to check.
     /// </param>
-    /// <param name="extraCheck">
-    /// A further check for a mirror whose size alone does not pin its layout down.
-    /// </param>
     /// <exception cref="BevyNativeException">
     /// The component is unknown to this build, or its layout does not match the mirror.
     /// </exception>
-    private static int Lookup(string name, int expectedSize, Action? extraCheck = null)
+    internal static int Resolve(string name, int expectedSize)
     {
         lock (Gate)
         {
@@ -78,6 +80,12 @@ public static class NativeComponents
             if (Cache.TryGetValue(name, out var cached)) return cached;
 
             var id = Native.bcs_component_id_of(name);
+            if (id == NativeStatus.NoWorld)
+                throw new BevyNativeException(
+                    NativeStatus.NoWorld,
+                    $"Resolving Bevy's '{name}' component failed: "
+                    + NativeStatus.Describe(NativeStatus.NoWorld) + ".");
+
             if (id < 0)
                 throw new BevyNativeException(
                     NativeStatus.NoComponent,
@@ -85,11 +93,24 @@ public static class NativeComponents
                     + "to a feature this build was compiled without, such as the renderer.");
 
             if (expectedSize > 0) VerifyLayout(name, id, expectedSize);
-            extraCheck?.Invoke();
+            ExtraCheck(name);
 
             Cache[name] = id;
             return id;
         }
+    }
+
+    /// <summary>
+    /// Runs the further check a mirror needs when its size alone does not pin its layout down.
+    /// </summary>
+    /// <remarks>
+    /// Keyed on the engine's name rather than passed in by the caller, so the check runs whichever
+    /// route asked for the id: the property below, or <see cref="ComponentType{T}"/> resolving a
+    /// type that implements <see cref="INativeComponent"/>.
+    /// </remarks>
+    private static void ExtraCheck(string name)
+    {
+        if (name == "Transform") VerifyTransform();
     }
 
     /// <summary>
@@ -156,4 +177,48 @@ public static class NativeComponents
                 + "corrupt memory, so it is refused. This usually means the engine changed the "
                 + "struct, or the target aligns its fields differently.");
     }
+}
+
+/// <summary>
+/// Bevy's <c>GlobalTransform</c>: the world-space result of transform propagation.
+/// </summary>
+/// <remarks>
+/// A name-only handle, for <c>[With]</c> filters, <see cref="EcsWorld.Has{T}"/> and
+/// <see cref="EcsWorld.Count{T}"/>. It is a 3x4 affine matrix rather than the
+/// position/rotation/scale triple <see cref="Transform"/> uses, and C# has no mirror for it, so
+/// reading or writing its bytes is refused. Write to <see cref="Transform"/> and let Bevy
+/// propagate.
+/// </remarks>
+public readonly struct GlobalTransform : INativeComponent
+{
+    readonly string INativeComponent.NativeName => "GlobalTransform";
+    readonly bool INativeComponent.MirrorsLayout => false;
+}
+
+/// <summary>
+/// Bevy's <c>ChildOf</c> relationship, naming an entity's parent.
+/// </summary>
+/// <remarks>
+/// A name-only handle, for filtering on "has a parent". Use
+/// <see cref="EcsWorld.SetParent"/> to change it and <see cref="EcsWorld.ParentOf"/> to read it:
+/// writing the bytes directly would set the field without maintaining the matching
+/// <see cref="Children"/> list.
+/// </remarks>
+public readonly struct ChildOf : INativeComponent
+{
+    readonly string INativeComponent.NativeName => "ChildOf";
+    readonly bool INativeComponent.MirrorsLayout => false;
+}
+
+/// <summary>
+/// Bevy's <c>Children</c> list.
+/// </summary>
+/// <remarks>
+/// A name-only handle, for filtering on "has children". The component owns a <c>Vec</c>, which
+/// is not safe to read as raw bytes; use <see cref="EcsWorld.ChildrenOf"/> for the contents.
+/// </remarks>
+public readonly struct Children : INativeComponent
+{
+    readonly string INativeComponent.NativeName => "Children";
+    readonly bool INativeComponent.MirrorsLayout => false;
 }

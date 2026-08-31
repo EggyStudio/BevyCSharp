@@ -91,12 +91,36 @@ internal static class ComponentRegistry
 /// <summary>
 /// The cached Bevy component id for <typeparamref name="T"/>.
 /// </summary>
+/// <remarks>
+/// Two kinds of type end up with an id here. An ordinary struct is registered from its layout,
+/// because Bevy has never heard of it. A struct implementing <see cref="INativeComponent"/>
+/// names one of Bevy's own components instead, and is resolved by that name through
+/// <see cref="NativeComponents"/>, so it lands on the engine's existing component rather than a
+/// second, unrelated one that merely shares a name. Everything downstream works in ids, so that
+/// single fork is all it takes for the whole generic API to reach Bevy's components.
+/// </remarks>
 /// <typeparam name="T">
 /// A blittable struct. The <c>unmanaged</c> constraint is what makes the layout safe to hand
 /// to Bevy verbatim: no references, no GC involvement, no marshalling on the hot path.
 /// </typeparam>
 public static class ComponentType<T> where T : unmanaged
 {
+    /// <summary>
+    /// <typeparamref name="T"/>'s engine-side identity, or <see langword="null"/> when it is an
+    /// ordinary C# component.
+    /// </summary>
+    /// <remarks>
+    /// Boxed once, when the class initialiser for this closed type runs, so the interface call
+    /// costs nothing per operation. The members are read at most once per world after that.
+    /// </remarks>
+    private static readonly INativeComponent? NativeHandle = (object)default(T) as INativeComponent;
+
+    /// <summary>
+    /// True when <typeparamref name="T"/> names one of Bevy's components without mirroring its
+    /// bytes, and so may be filtered and counted but never read or written.
+    /// </summary>
+    internal static bool IsOpaque { get; } = NativeHandle is { MirrorsLayout: false };
+
     private static int _generation = -1;
     private static int _id;
 
@@ -109,21 +133,47 @@ public static class ComponentType<T> where T : unmanaged
     /// </summary>
     public static int Alignment => Unsafe.SizeOf<AlignmentProbe>() - Unsafe.SizeOf<T>();
 
-    /// <summary>The Bevy component id, registering the type on first use.</summary>
+    /// <summary>The Bevy component id, resolved or registered on first use.</summary>
     public static int Id
     {
         get
         {
             if (_generation == ComponentRegistry.Generation) return _id;
 
-            _id = ComponentRegistry.Register(
-                typeof(T).FullName ?? typeof(T).Name,
-                (uint)Size,
-                (uint)Alignment);
+            _id = NativeHandle is null
+                ? ComponentRegistry.Register(
+                    typeof(T).FullName ?? typeof(T).Name,
+                    (uint)Size,
+                    (uint)Alignment)
+                : NativeComponents.Resolve(
+                    NativeHandle.NativeName,
+                    // A handle that mirrors nothing has no layout worth checking: its size is
+                    // whatever an empty C# struct happens to be, not the engine type's.
+                    NativeHandle.MirrorsLayout ? Size : 0);
             _generation = ComponentRegistry.Generation;
             return _id;
         }
     }
+
+    /// <summary>
+    /// The id, for an operation that reads or writes the component's bytes.
+    /// </summary>
+    /// <remarks>
+    /// Identical to <see cref="Id"/> except that it refuses a name-only handle. Bevy's
+    /// <c>Children</c> owns a <c>Vec</c> and its <c>GlobalTransform</c> is an affine matrix; a C#
+    /// struct that merely names one is an empty struct occupying a single byte, so an insert
+    /// through it would write one byte of nothing over a live component. Filtering, counting and
+    /// removal never touch the value and go through <see cref="Id"/>.
+    /// </remarks>
+    /// <exception cref="BevyNativeException"><typeparamref name="T"/> mirrors no layout.</exception>
+    internal static int ValueId => IsOpaque ? throw OpaqueValue() : Id;
+
+    private static BevyNativeException OpaqueValue() =>
+        new(NativeStatus.Unsupported,
+            $"Bevy's '{NativeHandle!.NativeName}' has no C# mirror, so {typeof(T).Name} is a "
+            + "handle for filtering, counting and removal only. Reading it would return the "
+            + "wrong bytes and writing it would corrupt the world, so the value operations are "
+            + "refused.");
 
     /// <summary>Layout probe: the offset of <c>Value</c> is the alignment of <typeparamref name="T"/>.</summary>
     private struct AlignmentProbe

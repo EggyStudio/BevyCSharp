@@ -29,24 +29,22 @@ public partial struct Scene
         if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
 
         var camera = Render.SpawnCamera3d();
-        ctx.Ecs.AddNative(camera, NativeComponents.Transform,
-            Transform.LookingAt(new Vec3(3.5f, 3f, 6f), Vec3.Zero, Vec3.UnitY));
+        ctx.Ecs.Add(camera, Transform.LookingAt(new Vec3(3.5f, 3f, 6f), Vec3.Zero, Vec3.UnitY));
 
         var sun = Render.SpawnLight(LightKind.Directional, 12_000f);
-        ctx.Ecs.AddNative(sun, NativeComponents.Transform,
-            Transform.LookingAt(new Vec3(4f, 8f, 5f), Vec3.Zero, Vec3.UnitY));
+        ctx.Ecs.Add(sun, Transform.LookingAt(new Vec3(4f, 8f, 5f), Vec3.Zero, Vec3.UnitY));
 
         var ground = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, ground, Render.CreateMesh(MeshShape.Plane, 24f, 24f));
         Render.SetMaterial(ctx.Ecs, ground,
             Render.CreateMaterial(0.10f, 0.11f, 0.13f, roughness: 0.9f));
-        ctx.Ecs.AddNative(ground, NativeComponents.Transform, Transform.At(0f, -1.2f, 0f));
+        ctx.Ecs.Add(ground, Transform.At(0f, -1.2f, 0f));
 
         var cube = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, cube, Render.CreateMesh(MeshShape.Cuboid, 1.6f, 1.6f, 1.6f));
         Render.SetMaterial(ctx.Ecs, cube,
             Render.CreateMaterial(0.25f, 0.55f, 0.85f, metallic: 0.1f, roughness: 0.35f));
-        ctx.Ecs.AddNative(cube, NativeComponents.Transform, Transform.Identity);
+        ctx.Ecs.Add(cube, Transform.Identity);
 
         // Turning about two axes rather than one, so the cube reads as a solid rather than a
         // flat outline.
@@ -61,8 +59,7 @@ public partial struct Scene
         Yaw += YawSpeed * ctx.Time.Delta;
         Pitch += PitchSpeed * ctx.Time.Delta;
 
-        ref var transform = ref ctx.Ecs.GetNativeRef<Transform>(
-            ctx.Entity, NativeComponents.Transform);
+        ref var transform = ref ctx.Ecs.GetRef<Transform>(ctx.Entity);
 
         transform.Rotation = Quat.FromRotationY(Yaw) * Quat.FromRotationX(Pitch);
     }

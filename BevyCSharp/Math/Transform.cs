@@ -182,7 +182,7 @@ public struct Quat : IEquatable<Quat>
 /// </para>
 /// </remarks>
 [StructLayout(LayoutKind.Sequential)]
-public struct Transform
+public struct Transform : INativeComponent
 {
     /// <summary>Rotation relative to the parent.</summary>
     public Quat Rotation;
@@ -192,6 +192,16 @@ public struct Transform
 
     /// <summary>Scale relative to the parent.</summary>
     public Vec3 Scale;
+
+    /// <summary>
+    /// The engine's name for this component, which is what makes the ordinary generic API land on
+    /// Bevy's own <c>Transform</c> rather than register a second one that merely shares the name.
+    /// </summary>
+    /// <remarks>
+    /// Implemented explicitly: it answers a question about the type, and nothing holding a
+    /// transform wants it on the value's surface.
+    /// </remarks>
+    readonly string INativeComponent.NativeName => "Transform";
 
     private readonly float _tailPaddingA;
     private readonly float _tailPaddingB;
