@@ -298,11 +298,12 @@ the default white shows unchanged and tinting it is a matter of setting a colour
 not have finished loading, because the material holds a handle rather than pixels. Five maps are
 bound this way: base colour, normal, metallic-roughness, emissive and occlusion.
 
-`AlphaMode` decides what happens where a material is not opaque. `Mask` cuts pixels out at
-`AlphaCutoff`, which keeps the depth buffer honest and is what foliage wants; `Blend` is real
-transparency, drawn after everything else and sorted back to front; `Add` never darkens what is
-behind it. `DoubleSided` draws back faces, for anything modelled as a single sheet, and `Unlit`
-shows the base colour flat. `CreateMaterial(r, g, b)` still exists for the simple case.
+`AlphaMode` decides what happens where a material is not opaque. `Mask` draws a pixel or skips
+it, deciding at `AlphaCutoff`, so the surface still writes depth and nothing has to be sorted,
+which is what foliage and fences are drawn with. `Blend` is real transparency, drawn after
+everything else and sorted back to front. `Add` adds to what is behind, so it never darkens it.
+`DoubleSided` draws back faces, for anything modelled as a single sheet, and `Unlit` shows the
+base colour flat. `CreateMaterial(r, g, b)` still exists for the simple case.
 
 PNG and JPEG decode in every build, headless included, because that is work on data rather than
 on a GPU.
@@ -341,9 +342,9 @@ var (width, height) = Window.Size();
 ```
 
 `CursorGrab.Locked` is what a first-person camera needs, since it reads how far the mouse moved
-rather than where it is. Platforms differ in which grab they support — Windows confines, macOS
-locks, and each emulates the other — so hide the cursor while it is grabbed either way. A
-headless run has no window and every call says so rather than doing nothing.
+rather than where it is. Platforms differ in which grab they support: Windows confines and macOS
+locks, and each emulates the other, so hide the cursor while it is grabbed either way. A headless
+run has no window and every call says so rather than doing nothing.
 
 Handles are references, so one mesh and one material can be shared by any number of entities.
 Attaching a mesh goes through Bevy's own insert rather than a byte copy, which is what pulls in

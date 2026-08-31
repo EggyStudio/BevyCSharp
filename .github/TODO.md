@@ -33,9 +33,45 @@ What is still missing from a glTF file:
   extension handler by `PbrPlugin`, which a headless-configured app does not install. Either add
   `PbrPlugin` to that path and check the handler produces a labelled `StandardMaterial`, or copy
   the conversion field by field on this side.
-- **Scenes.** A glTF scene is a `WorldAsset` in 0.19 rather than the old `Scene` asset, so
-  spawning a file's whole hierarchy is its own mechanism and its own bridge.
+- **Scenes.** A glTF scene is a `WorldAsset`, and `bevy_world_serialization` spawns one by
+  component: adding `WorldAssetRoot(handle)` to an entity spawns the world beneath it. That is
+  the same shape as `Render.SetMesh`, so it is one export attaching a handle through a component,
+  not a mechanism of its own. It also covers `.scn` and `.scn.ron` files, which load into the
+  same `WorldAsset` through `WorldAssetLoader`. Needs `bevy/bevy_world_serialization`.
 - **Textures** are the next entry below, and are the reason materials matter.
+
+The intended division of labour, once scenes spawn: glTF carries the geometry, materials and
+animations, because that is what Blender and every other tool exports. Composition on top of it,
+adding components to what a file defines, attaching child entities, overriding what an artist set,
+happens after the scene is spawned.
+
+Bevy's own answer to that composition is Bevy Scene Notation, new in 0.19, and it is **not**
+reachable from C#. `bsn!` is a compile-time Rust macro: it expands into types implementing the
+`Scene` trait, so there is nothing to call at runtime, and Bevy ships no `.bsn` asset format or
+loader yet, which its own documentation states is intended for a later release. Scenes written in
+BSN exist only in Rust source.
+
+What C# has instead is spawn-then-patch, through the ECS surface that already exists: spawn the
+scene, walk it with `ChildrenOf`, `Add` components to the entities it produced, overwrite the
+`Transform` an artist set. That reaches the same result as BSN's patching, expressed at runtime
+rather than in the type system, and with the same last-write-wins rule, because both end as
+component inserts.
+
+Two things BSN has that spawn-then-patch does not, worth knowing before anyone tries to close the
+gap:
+
+- **Templates.** A BSN field takes a value that is turned into a component when the scene spawns,
+  which is what lets `image: "player.png"` stand for an `AssetServer::load` and `asset_value(mesh)`
+  for an `AssetServer::add`. On this side those are separate calls that already exist, so the
+  convenience is missing rather than the capability.
+- **Field-level patching.** Two BSN scenes naming the same component merge field by field. Adding
+  a component from C# replaces the whole thing, so overriding one field means reading it, changing
+  it and writing it back. A `Patch<T>` helper on the managed side would cover this, and needs no
+  bridge.
+
+Revisit when `.bsn` ships as a loadable asset: it would load and spawn through the same
+`WorldAssetRoot` export a glTF scene needs, and would then be authorable without recompiling the
+bridge, which is the part of BSN actually worth having on this side.
 
 ### More texture formats
 
@@ -199,8 +235,10 @@ What differs here:
 
 ## Assets and scenes
 
-- **Scene loading** is blocked upstream. In Bevy 0.19 `Scene` became a trait rather than a
-  loadable asset, so there is nothing to load. Revisit when Bevy settles the replacement.
+- **Scene loading** is not blocked, contrary to what this file said before 0.19 was examined
+  properly. `Scene` did become a trait, but the loadable asset it was replaced by is `WorldAsset`:
+  `.scn` and `.scn.ron` load into one through `WorldAssetLoader`, and a glTF file's scenes are
+  handles to the same type. See the glTF entry above for the one export all of it needs.
 - **Shaders**: `AssetKind.Shader` loads and returns a handle that nothing consumes. Either give
   it a custom material path or remove the kind.
 - **Hot reload**: `BehaviorsPlugin.ScriptsDirectory` is reserved and does nothing.
