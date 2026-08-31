@@ -40,6 +40,17 @@ public enum Stage
 
     /// <summary>Engine-internal: applies the queued <see cref="EcsCommands"/>.</summary>
     CommandFlush = 9,
+
+    /// <summary>
+    /// Bevy's fixed timestep: zero or more times a frame, each covering the same slice of time.
+    /// </summary>
+    /// <remarks>
+    /// Runs between <see cref="PreUpdate"/> and <see cref="Update"/>, as many times as the time
+    /// since the last frame allows: twice after a slow frame, not at all after a fast one. That
+    /// is what makes it frame-rate independent, and it is why the number to integrate with is
+    /// <see cref="Time.FixedDelta"/> rather than <see cref="Time.Delta"/>.
+    /// </remarks>
+    FixedUpdate = 10,
 }
 
 /// <summary>Canonical stage orderings.</summary>
@@ -50,6 +61,7 @@ public static class StageOrder
         Stage.Startup,
         Stage.First,
         Stage.PreUpdate,
+        Stage.FixedUpdate,
         Stage.Update,
         Stage.PostUpdate,
         Stage.Render,
@@ -70,7 +82,11 @@ public static class StageOrder
     /// <summary>Every user-facing stage, in execution order.</summary>
     public static ReadOnlySpan<Stage> AllInOrder() => All;
 
-    /// <summary>The stages that run every frame, in execution order.</summary>
+    /// <summary>The stages that run exactly once every frame, in execution order.</summary>
+    /// <remarks>
+    /// <see cref="Stage.FixedUpdate"/> is not among them: it runs zero or more times a frame
+    /// rather than once, which is the whole reason it exists.
+    /// </remarks>
     public static ReadOnlySpan<Stage> FrameStages() => Frame;
 
     /// <summary>True for the two stages reserved for the engine itself.</summary>

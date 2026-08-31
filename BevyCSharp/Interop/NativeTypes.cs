@@ -61,6 +61,9 @@ public struct NativeTime
 
     /// <summary>Frames completed since app start.</summary>
     public ulong FrameCount;
+
+    /// <summary>Seconds one <see cref="Stage.FixedUpdate"/> step covers.</summary>
+    public double FixedDeltaSeconds;
 }
 
 /// <summary>
@@ -154,4 +157,7 @@ public unsafe struct NativeConfig
 
     /// <summary>Graphics API to pin the renderer to; 0 leaves the choice to wgpu.</summary>
     public uint Backend;
+
+    /// <summary>Fixed timestep rate in Hz; 0 keeps Bevy's default of 64.</summary>
+    public double FixedHz;
 }

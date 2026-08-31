@@ -86,15 +86,6 @@ an axis marker cover most uses.
 
 ## Simulation structure
 
-### Fixed timestep
-
-`Stage` has no `FixedUpdate`, so every behavior is frame-rate coupled. Anything with physical
-behavior gives different results on different machines, and this has to land before physics is
-worth bridging.
-
-- exports: register a system into Bevy's `FixedUpdate` schedule, and expose the fixed delta
-- managed: `[OnFixedUpdate]`, and `ctx.Time.FixedDelta`
-
 ### States
 
 `bevy_state` is compiled in and unbridged. There is no way to express menu, playing and paused,
@@ -151,8 +142,8 @@ filtering on them is enough.
 ## Physics
 
 Bevy ships no physics engine, so this means bridging Avian or Rapier. It is comparable in size to
-everything built so far, and it depends on a fixed timestep existing first. Worth treating as a
-separate project rather than an item here.
+everything built so far. The fixed timestep it depends on now exists, so the prerequisite is met,
+but this is still worth treating as a separate project rather than an item here.
 
 ## Assets and scenes
 

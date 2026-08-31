@@ -9,6 +9,7 @@ internal enum BehaviorStage
     Startup,
     First,
     PreUpdate,
+    FixedUpdate,
     Update,
     PostUpdate,
     Render,

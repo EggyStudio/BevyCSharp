@@ -86,6 +86,7 @@ public sealed unsafe class App : IDisposable
                 HeadlessFps = Config.HeadlessFps,
                 HeadlessFrames = Config.HeadlessFrames,
                 Backend = (uint)Config.Backend,
+                FixedHz = Config.FixedHz,
             };
             _handle = Native.bcs_app_create(&native);
         }

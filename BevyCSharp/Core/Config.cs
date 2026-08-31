@@ -48,6 +48,17 @@ public sealed class Config
     public uint HeadlessFrames { get; set; }
 
     /// <summary>
+    /// How many times a second <see cref="Stage.FixedUpdate"/> runs. Zero keeps Bevy's own
+    /// default of 64.
+    /// </summary>
+    /// <remarks>
+    /// The rate is a simulation decision rather than a performance one: it fixes the slice of
+    /// time each step covers, and so fixes the results. Change it and a replay of the same
+    /// inputs diverges, which is why it belongs here rather than being tuned at runtime.
+    /// </remarks>
+    public double FixedHz { get; set; }
+
+    /// <summary>
     /// Rethrow exceptions escaping a system instead of logging them and continuing.
     /// </summary>
     /// <remarks>

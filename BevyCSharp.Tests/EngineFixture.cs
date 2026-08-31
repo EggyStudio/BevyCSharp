@@ -42,13 +42,23 @@ public sealed class EngineHarness : IDisposable
     /// off the main thread should pace itself, because an unpaced loop competes with that work
     /// for the core it needs.
     /// </param>
-    public EngineHarness(uint frames = 4, bool discoverBehaviors = false, uint fps = 0)
+    /// <param name="fixedHz">
+    /// Rate for <see cref="Stage.FixedUpdate"/>, or 0 for Bevy's default of 64. A test about the
+    /// fixed timestep sets this far above or below the frame rate, because that is what makes
+    /// the two visibly independent.
+    /// </param>
+    public EngineHarness(
+        uint frames = 4,
+        bool discoverBehaviors = false,
+        uint fps = 0,
+        double fixedHz = 0)
     {
         _app = new App(new Config
         {
             Headless = true,
             HeadlessFrames = frames,
             HeadlessFps = fps,
+            FixedHz = fixedHz,
         });
 
         _app.AddPlugin(new EnginePlugin());

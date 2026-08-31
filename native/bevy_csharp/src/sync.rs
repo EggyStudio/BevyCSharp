@@ -57,6 +57,13 @@ pub unsafe extern "C" fn bcs_frame_state(out: *mut BcsFrameState) -> i32 {
             if let Some(frames) = world.get_resource::<bevy::diagnostic::FrameCount>() {
                 state.time.frame_count = frames.0 as u64;
             }
+            // The timestep, not the delta. `Time<Fixed>`'s delta reports the step that last ran
+            // and is zero until one has, which would hand a fixed system nothing to integrate
+            // with on the first frame. The timestep is the constant those steps are made of, so
+            // it is correct from the start and does not go stale between them.
+            if let Some(fixed) = world.get_resource::<bevy::time::Time<bevy::time::Fixed>>() {
+                state.time.fixed_delta_seconds = fixed.timestep().as_secs_f64();
+            }
 
             if let Some(keys) = world.get_resource::<ButtonInput<KeyCode>>() {
                 for key in keys.get_pressed() {

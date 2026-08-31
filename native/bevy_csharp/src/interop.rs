@@ -76,6 +76,9 @@ pub struct BcsTime {
     pub raw_delta_seconds: f64,
     /// Frames rendered since app start.
     pub frame_count: u64,
+    /// Seconds one `FixedUpdate` step covers. Constant unless the rate is changed, so it is
+    /// meaningful whenever it is read, including from a system outside that schedule.
+    pub fixed_delta_seconds: f64,
 }
 
 /// Frame-scoped snapshot of Bevy's input state mirrored into C#.
@@ -165,6 +168,9 @@ pub struct BcsConfig {
     /// Graphics API to pin the renderer to. `0` leaves the choice to wgpu; see
     /// `GraphicsBackend` on the managed side for the rest. Ignored when headless.
     pub backend: u32,
+    /// How many times a second the `FixedUpdate` schedule should run. `0` keeps Bevy's own
+    /// default, which is 64 Hz.
+    pub fixed_hz: f64,
 }
 
 /// Runs `f`, converting any panic into [`status::PANIC`] instead of unwinding into .NET.

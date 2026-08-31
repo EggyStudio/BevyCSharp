@@ -3,7 +3,10 @@
 use core::ffi::c_void;
 use core::time::Duration;
 
-use bevy::app::{App, AppExit, First, Last, PostUpdate, PreUpdate, ScheduleRunnerPlugin, Startup, Update};
+use bevy::app::{
+    App, AppExit, First, FixedUpdate, Last, PostUpdate, PreUpdate, ScheduleRunnerPlugin, Startup,
+    Update,
+};
 use bevy::ecs::schedule::{IntoScheduleConfigs, SystemSet};
 use bevy::ecs::world::World;
 use bevy::prelude::Resource;
@@ -31,6 +34,8 @@ pub enum Stage {
     Last = 6,
     /// Once, after the loop exits.
     Cleanup = 7,
+    /// Bevy's fixed timestep: zero or more times a frame, each covering the same slice of time.
+    FixedUpdate = 10,
     /// Internal: mirrors Bevy's time and input into C#, ahead of every user system.
     FrameSync = 8,
     /// Internal: applies the managed command buffer, after every user `PostUpdate` system.
@@ -51,6 +56,7 @@ impl Stage {
             7 => Stage::Cleanup,
             8 => Stage::FrameSync,
             9 => Stage::CommandFlush,
+            10 => Stage::FixedUpdate,
             _ => return None,
         })
     }
@@ -187,6 +193,12 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         // that plainly has the renderer, which reads as a bug rather than a configuration.
         #[cfg(feature = "render")]
         app.init_asset::<bevy::pbr::StandardMaterial>();
+    }
+
+    // A rate of zero means "leave Bevy's own", which is 64 Hz. A negative or non-finite one is
+    // meaningless rather than merely unusual, so it is ignored the same way.
+    if config.fixed_hz.is_finite() && config.fixed_hz > 0.0 {
+        app.insert_resource(bevy::time::Time::<bevy::time::Fixed>::from_hz(config.fixed_hz));
     }
 
     // Pin the orderings that matter between exclusive C# systems.
@@ -659,6 +671,13 @@ pub unsafe extern "C" fn bcs_app_add_system(
             }
             Stage::Update => {
                 app.app.add_systems(Update, run);
+            }
+            // Bevy runs this schedule from inside the main loop, as many times as the time
+            // accumulated since the last frame allows: twice after a slow frame, not at all
+            // after a fast one. That is the whole point, and it is why nothing here orders it
+            // against the once-a-frame stages.
+            Stage::FixedUpdate => {
+                app.app.add_systems(FixedUpdate, run);
             }
             Stage::PostUpdate => {
                 app.app.add_systems(PostUpdate, run.in_set(BcsSet::PostUpdate));

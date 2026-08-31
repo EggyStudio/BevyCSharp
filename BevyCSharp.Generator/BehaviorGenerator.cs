@@ -163,6 +163,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
                 $"{AttributeNamespace}.OnStartupAttribute" => BehaviorStage.Startup,
                 $"{AttributeNamespace}.OnFirstAttribute" => BehaviorStage.First,
                 $"{AttributeNamespace}.OnPreUpdateAttribute" => BehaviorStage.PreUpdate,
+                $"{AttributeNamespace}.OnFixedUpdateAttribute" => BehaviorStage.FixedUpdate,
                 $"{AttributeNamespace}.OnUpdateAttribute" => BehaviorStage.Update,
                 $"{AttributeNamespace}.OnPostUpdateAttribute" => BehaviorStage.PostUpdate,
                 $"{AttributeNamespace}.OnRenderAttribute" => BehaviorStage.Render,

@@ -32,13 +32,20 @@ public partial struct Movement
 
     /// <summary>Integrates position from velocity.</summary>
     /// <remarks>
+    /// <para>
     /// <c>Query</c> yields references into Bevy's storage, so assigning to
     /// <c>row.Component</c> writes the real component rather than a copy.
+    /// </para>
+    /// <para>
+    /// On the fixed timestep rather than the frame, so where these entities end up does not
+    /// depend on how fast the machine drew. It has to match <see cref="Gravity"/>: integrating
+    /// position per frame while accelerating per step would be half a simulation.
+    /// </para>
     /// </remarks>
-    [OnUpdate]
+    [OnFixedUpdate]
     public static void Integrate(BehaviorContext ctx)
     {
-        var dt = ctx.Time.Delta;
+        var dt = ctx.Time.FixedDelta;
 
         foreach (var row in ctx.Ecs.Query<Position>())
         {
@@ -64,14 +71,21 @@ public partial struct Gravity
 
     /// <summary>Accelerates everything that falls and has not landed yet.</summary>
     /// <remarks>
+    /// <para>
     /// The queued <c>Add</c> matters: adding a component moves the entity to a different
     /// archetype, which would invalidate the references this loop is holding. Queuing it means
     /// it lands after every system has finished reading.
+    /// </para>
+    /// <para>
+    /// Acceleration is where a per-frame step shows up worst: integrating gravity with a delta
+    /// that varies gives a different fall on every machine, and a slow frame overshoots the
+    /// floor. The fixed timestep is what makes the answer the same everywhere.
+    /// </para>
     /// </remarks>
-    [OnUpdate]
+    [OnFixedUpdate]
     public static void Apply(BehaviorContext ctx)
     {
-        var dt = ctx.Time.Delta;
+        var dt = ctx.Time.FixedDelta;
 
         foreach (var row in ctx.Ecs.Query<Velocity>())
         {

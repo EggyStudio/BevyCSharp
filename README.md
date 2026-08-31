@@ -295,16 +295,43 @@ Parenting is a structural change, so queue it on `ctx.Cmd` when calling from ins
 
 ### Stages
 
-| Attribute       | When                                              |
-|-----------------|---------------------------------------------------|
-| `[OnStartup]`   | Once, before the first frame                      |
-| `[OnFirst]`     | Top of every frame                                |
-| `[OnPreUpdate]` | Before `Update`                                   |
-| `[OnUpdate]`    | Main gameplay stage                               |
-| `[OnPostUpdate]`| After `Update`, before queued commands are applied |
-| `[OnRender]`    | Drawing and overlays, ordered before `Last`       |
-| `[OnLast]`      | End of every frame                                |
-| `[OnCleanup]`   | Once, on the way out                              |
+| Attribute        | When                                               |
+|------------------|----------------------------------------------------|
+| `[OnStartup]`    | Once, before the first frame                       |
+| `[OnFirst]`      | Top of every frame                                 |
+| `[OnPreUpdate]`  | Before `Update`                                    |
+| `[OnFixedUpdate]`| Fixed timestep: zero or more times a frame         |
+| `[OnUpdate]`     | Main gameplay stage                                |
+| `[OnPostUpdate]` | After `Update`, before queued commands are applied |
+| `[OnRender]`     | Drawing and overlays, ordered before `Last`        |
+| `[OnLast]`       | End of every frame                                 |
+| `[OnCleanup]`    | Once, on the way out                               |
+
+### Fixed timestep
+
+Every stage above except one runs exactly once a frame, so anything integrated in them advances
+by however long the frame happened to take. That ties the result to the machine: the same inputs
+give a different fall on a slow frame, and a long enough one steps straight through the floor.
+
+`[OnFixedUpdate]` runs on Bevy's fixed timestep instead, as many times per frame as the elapsed
+time allows: twice after a slow frame, not at all after a fast one. Each run covers the same
+slice of time, so the simulation is reproducible.
+
+```csharp
+[OnFixedUpdate]
+public void Step(BehaviorContext ctx)
+{
+    Velocity.Y -= 9.81f * ctx.Time.FixedDelta;
+}
+```
+
+Integrate with `ctx.Time.FixedDelta`, not `ctx.Time.Delta`. It is the constant each step covers
+rather than a per-frame reading, so it is correct from the first frame and identical in every
+step. The rate is `Config.FixedHz` and defaults to Bevy's 64.
+
+Keep a simulation on one clock or the other. Accelerating on the fixed step while integrating
+position per frame is half a simulation, and inherits the frame-rate dependence you moved the
+other half away from.
 
 ### Filters
 
