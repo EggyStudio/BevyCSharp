@@ -1,3 +1,4 @@
+using System.Text;
 using Bevy.Interop;
 
 namespace Bevy;
@@ -28,6 +29,9 @@ public sealed class Input
 
     private uint _mouseDown;
     private uint _mousePressed;
+    private string _text = string.Empty;
+    private readonly Touch[] _touches = new Touch[NativeInput.TouchCapacity];
+    private int _touchCount;
     private uint _mouseReleased;
 
     /// <summary>Cursor X in physical window pixels. Always 0 in a headless run.</summary>
@@ -168,9 +172,90 @@ public sealed class Input
             _pressed[word] = snapshot.KeysPressed[word];
             _released[word] = snapshot.KeysReleased[word];
         }
+
+        UpdateTextAndTouches(snapshot);
     }
 
     /// <inheritdoc/>
     public override string ToString() =>
         $"Input(mouse=({MouseX:F0},{MouseY:F0}), keysDown={(AnyKeyDown() ? "yes" : "no")})";
+
+    /// <summary>
+    /// What the keyboard produced this frame, as text.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The characters a text field should insert, in the order they were typed. This is not the
+    /// same question as which keys are down: it is the layout's answer rather than the hardware's,
+    /// so a French keyboard gives what its user expects, and a dead key followed by a vowel gives
+    /// one accented character.
+    /// </para>
+    /// <para>
+    /// Control characters are left out. Backspace and Enter arrive as text on some platforms, and
+    /// a field that inserted them as characters would be wrong on all of them; read those with
+    /// <see cref="KeyPressed"/> instead.
+    /// </para>
+    /// <para>
+    /// Empty on most frames, and never null. A frame carrying more than 32 bytes of text loses
+    /// the rest, which typing cannot reach but a paste could.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// name += ctx.Input.Text;
+    /// if (ctx.Input.KeyPressed(Key.Backspace) &amp;&amp; name.Length > 0)
+    ///     name = name[..^1];
+    /// </code>
+    /// </example>
+    public string Text => _text;
+
+    /// <summary>The touches in progress this frame.</summary>
+    /// <remarks>
+    /// A touch that ended is reported once, on the frame it ends, with
+    /// <see cref="TouchPhase.Ended"/>. Nothing else reports it, so a release is missed by a
+    /// system that skips a frame.
+    /// </remarks>
+    public ReadOnlySpan<Touch> Touches => _touches.AsSpan(0, _touchCount);
+
+    /// <summary>Copies the typed text and touches out of a native snapshot.</summary>
+    private unsafe void UpdateTextAndTouches(in NativeInput snapshot)
+    {
+        var length = (int)Math.Min(snapshot.TextLength, NativeInput.TextCapacity);
+        if (length == 0)
+        {
+            // The common case by far, and the one worth not allocating for.
+            _text = string.Empty;
+        }
+        else
+        {
+            fixed (byte* text = snapshot.Text) _text = Encoding.UTF8.GetString(text, length);
+        }
+
+        _touchCount = (int)Math.Min(snapshot.TouchCount, NativeInput.TouchCapacity);
+        for (var i = 0; i < _touchCount; i++)
+        {
+            var touch = snapshot.Touches[i];
+            _touches[i] = new Touch(touch.Id, touch.X, touch.Y, (TouchPhase)touch.Phase);
+        }
+    }
 }
+
+/// <summary>Where a touch is in its life.</summary>
+public enum TouchPhase
+{
+    /// <summary>Still down, and not new this frame.</summary>
+    Held = 0,
+
+    /// <summary>Went down this frame.</summary>
+    Started = 1,
+
+    /// <summary>Came up this frame. Reported once, then gone.</summary>
+    Ended = 2,
+}
+
+/// <summary>One finger on a touchscreen.</summary>
+/// <param name="Id">Identifies this finger while it stays down.</param>
+/// <param name="X">Position in physical window pixels.</param>
+/// <param name="Y">Position in physical window pixels.</param>
+/// <param name="Phase">Where the touch is in its life.</param>
+public readonly record struct Touch(ulong Id, float X, float Y, TouchPhase Phase);

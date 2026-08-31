@@ -196,6 +196,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
 
     // A rate of zero means "leave Bevy's own", which is 64 Hz. A negative or non-finite one is
     // meaningless rather than merely unusual, so it is ignored the same way.
+    // Where the typed-text reader keeps its place between frames.
+    app.init_resource::<crate::sync::TextCursor>();
+
     if config.fixed_hz.is_finite() && config.fixed_hz > 0.0 {
         app.insert_resource(bevy::time::Time::<bevy::time::Fixed>::from_hz(config.fixed_hz));
     }

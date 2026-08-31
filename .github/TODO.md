@@ -134,8 +134,13 @@ Cameras, lights and the window take their common parameters now. What is left is
   time on Linux, which the current profile avoids so the bridge builds with nothing but a C
   compiler. Adding it means either accepting that build dependency or gating the feature per
   platform.
-- **Text input**: no character or IME events, so a name entry field is not possible.
-- **Touch**: not bridged.
+- **IME**: `Input.Text` covers typing, including dead keys, so a name field works. What is not
+  bridged is composition: Bevy's `Ime` messages report a candidate string being assembled, which
+  is what a Japanese or Chinese input method needs to show underlined text before it is
+  committed. It also needs the window's `ime_enabled` and `ime_position` set.
+- **Touch**: bridged as this frame's list, up to eight at once. Untested: this machine has no
+  touchscreen, so only the empty case is covered. Gestures are not derived, and a touch that
+  ends is reported once rather than lingering for a frame.
 
 ## ECS gaps
 
@@ -155,9 +160,36 @@ filtering on them is enough.
 
 ## Physics
 
-Bevy ships no physics engine, so this means bridging Avian or Rapier. It is comparable in size to
-everything built so far. The fixed timestep it depends on now exists, so the prerequisite is met,
-but this is still worth treating as a separate project rather than an item here.
+Not a priority. Recorded here so the approach is settled when it does come up.
+
+Bevy ships no physics engine, and the answer is **not** to bridge Avian or Rapier. Use
+[BepuPhysics v2](https://github.com/bepu/bepuphysics2), which is C#, so the simulation lives on
+the managed side and needs no bridge surface at all: nothing new crosses the ABI, no Cargo feature
+is added, and the only thing that has to reach Bevy is the pose each body ends up with, which is
+one `Transform` write through the API that already exists.
+
+`.ref/3DEngine` has a working version of this to follow. Its shape:
+
+- an engine-agnostic façade, `Engine.Physics`: `PhysicsSettings` (gravity, timestep, substeps,
+  solver iterations, worker threads), a `PhysicsBody` handle struct that forwards every operation
+  to the world that owns it, and `BodyKind` for dynamic, kinematic and static. User code never
+  sees a Bepu type.
+- the backend, `Engine.Physics.Bepu`: a `PhysicsWorld` owning the `Simulation`, `BufferPool` and
+  `ThreadDispatcher`, split across partial files for creation, per-body operations, queries and
+  stepping, plus the `INarrowPhaseCallbacks` and `IPoseIntegratorCallbacks` structs Bepu needs.
+
+What differs here:
+
+- **Stepping is already solved.** The reference runs its own accumulator with a
+  spiral-of-death guard. This project has `[OnFixedUpdate]`, so a step is one call per fixed step
+  and Bevy owns the accumulation. That was the prerequisite, and it now exists.
+- **Write-back is a `Transform` write.** Poses go into Bevy's own `Transform`, and propagation
+  carries them to `GlobalTransform` and the renderer for free.
+- **It belongs in its own package**, so the core does not take the dependency. `BepuPhysics` and
+  `BepuUtilities` are separate NuGet packages, on 2.5.0-beta at the time the reference was
+  written.
+- **Teardown matters.** Bepu is pool-based and its `BufferPool` and `ThreadDispatcher` are
+  disposable, so they have to be torn down with the app rather than left to the GC.
 
 ## Assets and scenes
 

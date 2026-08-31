@@ -397,6 +397,33 @@ Keep a simulation on one clock or the other. Accelerating on the fixed step whil
 position per frame is half a simulation, and inherits the frame-rate dependence you moved the
 other half away from.
 
+### Text and touch
+
+Keys tell you what the hardware did; `Input.Text` tells you what the user meant. It is this
+frame's typed characters, after the keyboard layout and any dead keys have been applied, which is
+what a name field needs:
+
+```csharp
+name += ctx.Input.Text;
+if (ctx.Input.KeyPressed(Key.Backspace) && name.Length > 0)
+    name = name[..^1];
+```
+
+Control characters are left out, because Backspace and Enter arrive as text on some platforms and
+a field that inserted them would be wrong on all of them. Read those as keys, as above. `Text` is
+empty on most frames and never null.
+
+Touches arrive the same way, as this frame's list:
+
+```csharp
+foreach (var touch in ctx.Input.Touches)
+    if (touch.Phase == TouchPhase.Started) Aim(touch.X, touch.Y);
+```
+
+A touch that ends is reported once, on the frame it ends, and is gone after that. Gamepads are
+deliberately excluded: `bevy_gilrs` needs libudev headers at build time on Linux, which the
+bridge avoids so it builds with nothing but a C compiler.
+
 ### Filters
 
 `[With]` and `[Without]` restrict an instance method to a subset of entities. They are resolved

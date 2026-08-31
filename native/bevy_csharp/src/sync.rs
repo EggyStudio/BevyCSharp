@@ -77,6 +77,9 @@ pub unsafe extern "C" fn bcs_frame_state(out: *mut BcsFrameState) -> i32 {
                 }
             }
 
+            collect_text(world, &mut state.input);
+            collect_touches(world, &mut state.input);
+
             if let Some(buttons) = world.get_resource::<ButtonInput<MouseButton>>() {
                 for button in buttons.get_pressed() {
                     if let Some(bit) = mouse_bit(*button) {
@@ -123,3 +126,90 @@ pub unsafe extern "C" fn bcs_frame_state(out: *mut BcsFrameState) -> i32 {
         })
     })
 }
+
+/// Copies this frame's typed text into `input`.
+///
+/// Read through a cursor rather than by draining, so the messages stay available to anything else
+/// that reads them, and so nothing is seen twice. Control characters are left out: Backspace and
+/// Enter arrive here as text on some platforms, and a field that inserted them as characters
+/// would be wrong on all of them. Read those as keys instead.
+fn collect_text(world: &mut bevy::ecs::world::World, input: &mut crate::interop::BcsInput) {
+    use bevy::ecs::message::Messages;
+    use bevy::input::keyboard::KeyboardInput;
+    use bevy::input::ButtonState;
+
+    if !world.contains_resource::<TextCursor>() {
+        return;
+    }
+
+    world.resource_scope(|world, mut cursor: bevy::ecs::world::Mut<TextCursor>| {
+        let Some(messages) = world.get_resource::<Messages<KeyboardInput>>() else {
+            return;
+        };
+
+        let mut written = 0usize;
+        for message in cursor.0.read(messages) {
+            if message.state != ButtonState::Pressed {
+                continue;
+            }
+            let Some(text) = message.text.as_ref() else {
+                continue;
+            };
+
+            for character in text.chars().filter(|c| !c.is_control()) {
+                let len = character.len_utf8();
+                if written + len > crate::interop::TEXT_CAPACITY {
+                    break;
+                }
+                character.encode_utf8(&mut input.text[written..]);
+                written += len;
+            }
+        }
+
+        input.text_len = written as u32;
+    });
+}
+
+/// Copies the touches in progress into `input`.
+fn collect_touches(world: &bevy::ecs::world::World, input: &mut crate::interop::BcsInput) {
+    use bevy::input::touch::Touches;
+
+    let Some(touches) = world.get_resource::<Touches>() else {
+        return;
+    };
+
+    let mut count = 0usize;
+    let mut push = |touch: &bevy::input::touch::Touch, phase: i32| {
+        if count >= crate::interop::TOUCH_CAPACITY {
+            return;
+        }
+        input.touches[count] = crate::interop::BcsTouch {
+            id: touch.id(),
+            x: touch.position().x,
+            y: touch.position().y,
+            phase,
+            _pad: 0,
+        };
+        count += 1;
+    };
+
+    for touch in touches.iter_just_pressed() {
+        push(touch, 1);
+    }
+    for touch in touches.iter() {
+        if touches.just_pressed(touch.id()) {
+            continue;
+        }
+        push(touch, 0);
+    }
+    // Released touches are gone from `iter`, so they are reported once, on the frame they end.
+    for touch in touches.iter_just_released() {
+        push(touch, 2);
+    }
+
+    input.touch_count = count as u32;
+}
+
+/// Where the text reader's place in the keyboard message queue is kept between frames.
+#[derive(bevy::ecs::resource::Resource, Default)]
+pub struct TextCursor(pub bevy::ecs::message::MessageCursor<bevy::input::keyboard::KeyboardInput>);

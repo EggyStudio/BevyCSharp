@@ -34,6 +34,9 @@ public partial struct Renderer
         if (ctx.Input.KeyPressed(Key.Escape)) ctx.Exit();
     }
 
+    /// <summary>What has been typed so far, to show that text arrives as characters.</summary>
+    private static string _typed = string.Empty;
+
     /// <summary>Whether the window is currently borderless fullscreen.</summary>
     private static bool _fullscreen;
 
@@ -45,6 +48,27 @@ public partial struct Renderer
     /// Cursor lock is the one a first-person camera cannot do without, because it reads how far
     /// the mouse moved rather than where it is.
     /// </remarks>
+    /// <summary>Echoes typed text, which is the layout's answer rather than the hardware's.</summary>
+    /// <remarks>
+    /// Type with a non-US layout or use a dead key and this shows the character the user meant,
+    /// which is what a name field needs and what a key bitset cannot give.
+    /// </remarks>
+    [OnUpdate]
+    public static void EchoTyping(BehaviorContext ctx)
+    {
+        if (ctx.Input.Text.Length > 0)
+        {
+            _typed += ctx.Input.Text;
+            Console.WriteLine($"[Renderer] typed: {_typed}");
+        }
+
+        if (ctx.Input.KeyPressed(Key.Backspace) && _typed.Length > 0)
+        {
+            _typed = _typed[..^1];
+            Console.WriteLine($"[Renderer] typed: {_typed}");
+        }
+    }
+
     [OnUpdate]
     public static void ControlWindow(BehaviorContext ctx)
     {

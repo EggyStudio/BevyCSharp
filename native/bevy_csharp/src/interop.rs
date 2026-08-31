@@ -112,8 +112,39 @@ pub struct BcsInput {
     pub mouse_pressed: u32,
     /// Bit `n` set on the frame mouse button `n` went up.
     pub mouse_released: u32,
-    /// Padding to keep the struct 8-byte aligned on every target.
-    pub _pad: u32,
+    /// Bytes of `text` that are in use.
+    pub text_len: u32,
+    /// Number of entries of `touches` that are in use.
+    pub touch_count: u32,
+    /// What the keyboard produced this frame, as UTF-8. See [`TEXT_CAPACITY`].
+    pub text: [u8; TEXT_CAPACITY],
+    /// Touches in progress, however many of them fit.
+    pub touches: [BcsTouch; TOUCH_CAPACITY],
+}
+
+/// How many bytes of typed text one frame can carry.
+///
+/// A frame holds at most a few keystrokes, so this is generous. Text past it is dropped rather
+/// than split, because half a UTF-8 sequence is worse than a missing character.
+pub const TEXT_CAPACITY: usize = 32;
+
+/// How many simultaneous touches one frame can carry.
+pub const TOUCH_CAPACITY: usize = 8;
+
+/// One finger on a touchscreen.
+#[repr(C)]
+#[derive(Clone, Copy, Default)]
+pub struct BcsTouch {
+    /// Identifies this finger for as long as it stays down.
+    pub id: u64,
+    /// Position in physical window pixels.
+    pub x: f32,
+    /// Position in physical window pixels.
+    pub y: f32,
+    /// `0` held, `1` started this frame, `2` ended this frame.
+    pub phase: i32,
+    /// Padding, so the array strides evenly on every target.
+    pub _pad: i32,
 }
 
 impl Default for BcsInput {
@@ -131,7 +162,10 @@ impl Default for BcsInput {
             mouse_down: 0,
             mouse_pressed: 0,
             mouse_released: 0,
-            _pad: 0,
+            text_len: 0,
+            touch_count: 0,
+            text: [0; TEXT_CAPACITY],
+            touches: [BcsTouch::default(); TOUCH_CAPACITY],
         }
     }
 }
@@ -219,6 +253,15 @@ pub struct BcsLightConfig {
     /// Radians from the axis at which a spot light has fallen to nothing.
     pub outer_angle: f32,
 }
+
+// The frame snapshot is written straight into memory C# owns, so both sides have to agree on its
+// shape exactly. These pin the sizes down here; `InputTests` asserts the same numbers on the
+// managed side, so changing either half without the other stops the build or fails a test rather
+// than quietly reading input from the wrong bytes.
+const _: () = assert!(core::mem::size_of::<BcsTime>() == 40);
+const _: () = assert!(core::mem::size_of::<BcsTouch>() == 24);
+const _: () = assert!(core::mem::size_of::<BcsInput>() == 320);
+const _: () = assert!(core::mem::size_of::<BcsFrameState>() == 360);
 
 /// Runs `f`, converting any panic into [`status::PANIC`] instead of unwinding into .NET.
 pub fn guard<F: FnOnce() -> i32>(f: F) -> i32 {
