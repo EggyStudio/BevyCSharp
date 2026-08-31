@@ -319,21 +319,95 @@ pub unsafe extern "C" fn bcs_render_spawn_camera_3d(config: *const BcsCameraConf
                     _ => ClearColorConfig::Default,
                 };
 
-                world
+                let camera = world
                     .spawn((
                         Camera3d::default(),
                         Camera {
                             order: config.order as isize,
                             clear_color,
+                            viewport: viewport_from(&config),
                             ..Default::default()
                         },
                         projection,
                         Transform::default(),
                     ))
-                    .id()
-                    .to_bits()
+                    .id();
+
+                if let Some(layers) = layers_from(config.layers) {
+                    world.entity_mut(camera).insert(layers);
+                }
+
+                camera.to_bits()
             })
             .unwrap_or(0)
+        }
+    })
+}
+
+/// Builds the viewport a camera config asks for, if it asks for one.
+///
+/// Measured in physical pixels rather than logical ones, because that is what a framebuffer is
+/// divided into: half of a window is half its physical width whatever the display scaling.
+#[cfg(feature = "render")]
+fn viewport_from(config: &BcsCameraConfig) -> Option<bevy::camera::Viewport> {
+    if config.has_viewport == 0 {
+        return None;
+    }
+
+    Some(bevy::camera::Viewport {
+        physical_position: bevy::math::UVec2::new(config.viewport[0], config.viewport[1]),
+        physical_size: bevy::math::UVec2::new(config.viewport[2], config.viewport[3]),
+        ..Default::default()
+    })
+}
+
+/// Turns a bit per layer into Bevy's own set, or `None` for the default layer.
+///
+/// A mask of zero means "say nothing", so the entity or camera keeps Bevy's default of layer 0.
+/// Asking for layer 0 explicitly is bit 0, which is the same thing said out loud.
+#[cfg(feature = "render")]
+fn layers_from(mask: u32) -> Option<bevy::camera::visibility::RenderLayers> {
+    if mask == 0 {
+        return None;
+    }
+
+    let layers: Vec<usize> = (0..32).filter(|bit| mask & (1 << bit) != 0).collect();
+    Some(bevy::camera::visibility::RenderLayers::from_layers(&layers))
+}
+
+/// Puts an entity on a set of render layers, or takes it back to the default.
+///
+/// A camera draws an entity only when their layers overlap, which is what separates a minimap's
+/// contents from the world's, or one player's view from another's in splitscreen.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_layers(entity: u64, mask: u32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, mask);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::camera::visibility::RenderLayers;
+
+            with_world(|world| {
+                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity))
+                else {
+                    return status::NO_ENTITY;
+                };
+
+                match layers_from(mask) {
+                    Some(layers) => {
+                        entity_mut.insert(layers);
+                    }
+                    None => {
+                        entity_mut.remove::<RenderLayers>();
+                    }
+                }
+                status::OK
+            })
         }
     })
 }

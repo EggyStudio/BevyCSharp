@@ -163,8 +163,11 @@ What is left needs a way to hand text across, which nothing else in the bridge d
 
 Cameras, lights and the window take their common parameters. What is left is narrower.
 
-- **Camera**: no render layers and no viewport, so splitscreen and render-to-texture are out of
-  reach. Both are a component and a rectangle rather than new machinery.
+- **Camera**: render layers and viewports are bridged, so splitscreen and a minimap are
+  expressible. Render-to-texture is not: `RenderTarget::Image` points a camera at a texture
+  instead of the window, which is what a security monitor, a portal or a reflection needs, and
+  what an editor viewport is built on. It needs an image created empty at a given size, which
+  `Render.CreateMaterial` and the asset surface have no way to ask for.
 - **Lights**: no light probes, no per-light shadow bias, and the spot light has no cookie
   texture. Shadow map resolution is Bevy's default and unreachable.
 - **Window**: exclusive fullscreen is not offered, because it needs a video mode to be chosen

@@ -238,6 +238,24 @@ public struct NativeCameraConfig
 
     /// <summary>Draw order; higher draws over lower.</summary>
     public int Order;
+
+    /// <summary>Non-zero to draw into part of the window.</summary>
+    public int HasViewport;
+
+    /// <summary>Viewport left, in physical pixels.</summary>
+    public uint ViewportX;
+
+    /// <summary>Viewport top, in physical pixels.</summary>
+    public uint ViewportY;
+
+    /// <summary>Viewport width, in physical pixels.</summary>
+    public uint ViewportWidth;
+
+    /// <summary>Viewport height, in physical pixels.</summary>
+    public uint ViewportHeight;
+
+    /// <summary>A bit per render layer; 0 for the default layer.</summary>
+    public uint Layers;
 }
 
 /// <summary>One thing the window reported.</summary>

@@ -231,6 +231,26 @@ public sealed class CameraSettings
 
     /// <summary>Draw order. A camera with a higher order draws over one with a lower.</summary>
     public int Order { get; set; }
+
+    /// <summary>
+    /// The part of the window to draw into, in physical pixels, or null for all of it.
+    /// </summary>
+    /// <remarks>
+    /// What splitscreen is made of: two cameras, each given half the window. Physical pixels
+    /// rather than logical ones, because that is what a framebuffer is divided into, so half a
+    /// window is half its physical width whatever the display scaling.
+    /// </remarks>
+    public (uint X, uint Y, uint Width, uint Height)? Viewport { get; set; }
+
+    /// <summary>
+    /// Which render layers this camera sees, as a bit per layer. Zero means the default layer.
+    /// </summary>
+    /// <remarks>
+    /// A camera draws an entity only where their layers overlap, which is how a minimap shows
+    /// different things from the main view. Put entities on layers with
+    /// <see cref="Render.SetLayers"/>.
+    /// </remarks>
+    public uint Layers { get; set; }
 }
 
 /// <summary>
@@ -427,6 +447,12 @@ public static unsafe class Render
             ClearB = settings.ClearColor.B,
             ClearA = settings.ClearColor.A,
             Order = settings.Order,
+            HasViewport = settings.Viewport is null ? 0 : 1,
+            ViewportX = settings.Viewport?.X ?? 0,
+            ViewportY = settings.Viewport?.Y ?? 0,
+            ViewportWidth = settings.Viewport?.Width ?? 0,
+            ViewportHeight = settings.Viewport?.Height ?? 0,
+            Layers = settings.Layers,
         };
 
         return new Entity(Native.bcs_render_spawn_camera_3d(&native));
@@ -464,6 +490,32 @@ public static unsafe class Render
         };
 
         return new Entity(Native.bcs_render_spawn_light(&native));
+    }
+
+    /// <summary>
+    /// Puts an entity on a set of render layers, as a bit per layer.
+    /// </summary>
+    /// <remarks>
+    /// A camera draws an entity only where their layers overlap. Zero takes the entity back to
+    /// Bevy's default layer, which is what every camera sees unless it says otherwise.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// const uint Minimap = 1u &lt;&lt; 1;
+    ///
+    /// Render.SetLayers(ctx.Ecs, marker, Minimap);          // only the minimap camera sees it
+    /// Render.SetLayers(ctx.Ecs, player, 1u | Minimap);     // both cameras do
+    /// </code>
+    /// </example>
+    /// <exception cref="BevyNativeException">The entity is gone, or this build has no renderer.</exception>
+    public static void SetLayers(EcsWorld world, Entity entity, uint layers)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+
+        var status = Native.bcs_render_set_layers(entity.Bits, layers);
+        if (status == NativeStatus.Unsupported) throw NoRenderer("Setting render layers");
+
+        Native.Check(status, $"setting the render layers of {entity}");
     }
 
     /// <summary>Attaches a handle through one of the components that carry one.</summary>

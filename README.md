@@ -484,7 +484,32 @@ Render.SpawnLight(new LightSettings
 
 `CameraProjection.Orthographic` swaps perspective for a fixed vertical `Height`, which is what an
 isometric or top-down view is built on. `Order` decides which camera draws over which, and
-`ClearMode.Keep` layers one on another. A light is aimed by its `Transform`: a directional or
+`ClearMode.Keep` layers one on another.
+
+`Viewport` gives a camera part of the window instead of all of it, which is what splitscreen is
+made of:
+
+```csharp
+Render.SpawnCamera3d(new CameraSettings { Viewport = (0, 0, 640, 720) });
+Render.SpawnCamera3d(new CameraSettings
+{
+    Viewport = (640, 0, 640, 720),
+    Order = 1,
+    Clear = ClearMode.Keep,     // or it would wipe out the first camera's half
+});
+```
+
+It is measured in physical pixels rather than logical ones, because that is what a framebuffer is
+divided into. `Layers` decides what a camera can see at all: a camera draws an entity only where
+their layers overlap, so a minimap shows different things from the main view.
+
+```csharp
+const uint Minimap = 1u << 1;
+
+Render.SpawnCamera3d(new CameraSettings { Layers = Minimap, Order = 1, Clear = ClearMode.Keep });
+Render.SetLayers(ctx.Ecs, marker, Minimap);        // only the minimap draws it
+Render.SetLayers(ctx.Ecs, player, 1u | Minimap);   // both do
+``` A light is aimed by its `Transform`: a directional or
 spot light shines down its own negative Z, which is what `Transform.LookingAt` produces.
 
 The window can be driven while the app runs:

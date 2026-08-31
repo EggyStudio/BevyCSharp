@@ -63,6 +63,91 @@ public sealed class RenderControlTests
     }
 
     [Fact]
+    public void TwoCamerasCanSplitTheWindow()
+    {
+        // Splitscreen: the same scene drawn twice, each into half the framebuffer. The second
+        // camera must not clear, or it would wipe out the first one's half.
+        using var harness = new EngineHarness(frames: 2);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            var left = Render.SpawnCamera3d(new CameraSettings
+            {
+                Viewport = (0, 0, 640, 720),
+            });
+
+            var right = Render.SpawnCamera3d(new CameraSettings
+            {
+                Viewport = (640, 0, 640, 720),
+                Order = 1,
+                Clear = ClearMode.Keep,
+            });
+
+            Assert.NotEqual(Entity.None, left);
+            Assert.NotEqual(Entity.None, right);
+            Assert.NotEqual(left, right);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void RenderLayersSeparateWhatEachCameraSees()
+    {
+        const uint Minimap = 1u << 1;
+
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            // One camera for the world, one for the minimap, each on its own layer.
+            var world = Render.SpawnCamera3d(new CameraSettings { Layers = 1u });
+            var minimap = Render.SpawnCamera3d(new CameraSettings
+            {
+                Layers = Minimap,
+                Order = 1,
+                Clear = ClearMode.Keep,
+                Viewport = (0, 0, 200, 200),
+            });
+
+            Assert.NotEqual(world, minimap);
+
+            // A marker only the minimap draws, and a player both do.
+            var marker = ctx.Ecs.Spawn();
+            Render.SetMesh(ctx.Ecs, marker, Render.CreateMesh(MeshShape.Sphere, 0.2f));
+            Render.SetLayers(ctx.Ecs, marker, Minimap);
+
+            var player = ctx.Ecs.Spawn();
+            Render.SetMesh(ctx.Ecs, player, Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f));
+            Render.SetLayers(ctx.Ecs, player, 1u | Minimap);
+
+            // Zero puts an entity back on the default layer rather than on none at all.
+            Render.SetLayers(ctx.Ecs, player, 0u);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void SettingLayersOnSomethingThatIsGoneIsRefused()
+    {
+        using var harness = new EngineHarness(frames: 2);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var ex = Assert.Throws<BevyNativeException>(
+                () => Render.SetLayers(ctx.Ecs, Entity.None, 1u));
+
+            Assert.Equal(NativeStatus.NoEntity, ex.Status);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void EveryLightKindSpawns()
     {
         using var harness = new EngineHarness(frames: 2);

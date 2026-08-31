@@ -233,6 +233,12 @@ pub struct BcsCameraConfig {
     pub clear: [f32; 4],
     /// Draw order. A camera with a higher order draws over one with a lower.
     pub order: i32,
+    /// Non-zero to draw into part of the window rather than all of it.
+    pub has_viewport: i32,
+    /// Left, top, width and height of that part, in physical pixels.
+    pub viewport: [u32; 4],
+    /// Which render layers this camera sees, as a bit per layer. `0` means the default layer.
+    pub layers: u32,
 }
 
 /// One thing the window reported.
