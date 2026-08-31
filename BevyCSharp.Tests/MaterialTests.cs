@@ -157,6 +157,82 @@ public sealed class MaterialTests
     }
 
     [Fact]
+    public void AnImageLoadsWithAnExplicitSampler()
+    {
+        // Sampler settings ride along with the load rather than being set afterwards, so a wrong
+        // one is a wrong asset rather than a wrong draw call. Any build: this is decoding.
+        using var harness = new EngineHarness(frames: 40, fps: 240);
+        var tiling = AssetLoadState.Loading;
+        var data = AssetLoadState.Loading;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            _tiling = AssetServer.LoadImage(Texture, TextureSettings.Tiling);
+            _data = AssetServer.LoadImage(Texture, TextureSettings.Data);
+        });
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            tiling = _tiling.State;
+            data = _data.State;
+            if (tiling != AssetLoadState.Loading && data != AssetLoadState.Loading) ctx.Exit();
+        });
+
+        harness.Run();
+
+        Assert.Equal(AssetLoadState.Loaded, tiling);
+        Assert.Equal(AssetLoadState.Loaded, data);
+
+        // The same file at two samplers is two assets, because the settings are part of what was
+        // asked for. A floor and its normal map can share a path and still be read differently.
+        Assert.NotEqual(_tiling, _data);
+    }
+
+    [Fact]
+    public void AMaterialCanTileItsTexture()
+    {
+        using var harness = new EngineHarness(frames: 2);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            var floor = Render.CreateMaterial(new MaterialSettings
+            {
+                BaseColorTexture = AssetServer.LoadImage(Texture, TextureSettings.Tiling),
+                UvScale = (8f, 8f),
+                UvRotation = 0.25f,
+                UvOffset = (0.5f, 0f),
+            });
+
+            Assert.True(floor.IsValid);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void AnisotropyIsIgnoredRatherThanRefusedWhenFilteringIsNearest()
+    {
+        // The graphics API treats the combination as a validation failure rather than something
+        // to overlook, so the bridge drops the anisotropy instead of letting it reach a draw.
+        using var harness = new EngineHarness(frames: 40, fps: 240);
+        var state = AssetLoadState.Loading;
+
+        harness.OnContext(Stage.Startup, _ => _rough = AssetServer.LoadImage(Texture,
+            new TextureSettings { Anisotropy = 16, MagFilter = TextureFilter.Nearest }));
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            state = _rough.State;
+            if (state != AssetLoadState.Loading) ctx.Exit();
+        });
+
+        harness.Run();
+
+        Assert.Equal(AssetLoadState.Loaded, state);
+    }
+
+    [Fact]
     public void TheShortColourOverloadStillWorks()
     {
         // The old argument list, kept so existing code and the simple case stay one line.
@@ -181,4 +257,8 @@ public sealed class MaterialTests
 
         harness.Run();
     }
+
+    private static AssetHandle _tiling;
+    private static AssetHandle _data;
+    private static AssetHandle _rough;
 }

@@ -155,6 +155,13 @@ pub unsafe extern "C" fn bcs_material_create(config: *const BcsMaterialConfig) -
                         Some(bevy::render::render_resource::Face::Back)
                     },
                     unlit: config.unlit != 0,
+                    // Scale first, then rotate, then shift, which is the order that makes a
+                    // scale of eight mean "eight tiles" whatever the other two are set to.
+                    uv_transform: bevy::math::Affine2::from_scale_angle_translation(
+                        bevy::math::Vec2::new(config.uv_scale[0], config.uv_scale[1]),
+                        config.uv_rotation,
+                        bevy::math::Vec2::new(config.uv_offset[0], config.uv_offset[1]),
+                    ),
                     base_color_texture,
                     normal_map_texture,
                     metallic_roughness_texture,

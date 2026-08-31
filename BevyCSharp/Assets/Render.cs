@@ -136,6 +136,23 @@ public sealed class MaterialSettings
 
     /// <summary>Where ambient light fails to reach, as a single channel.</summary>
     public AssetHandle OcclusionTexture { get; set; } = AssetHandle.None;
+
+    /// <summary>
+    /// How many times the texture repeats across the surface.
+    /// </summary>
+    /// <remarks>
+    /// The other half of tiling. A mesh's UVs run from zero to one however large it is, so a
+    /// floor drawn with a repeating texture still shows one stretched copy until this is raised.
+    /// The texture must also have been loaded with <see cref="TextureWrap.Repeat"/>, or the
+    /// values past one are clamped to the edge pixel.
+    /// </remarks>
+    public (float U, float V) UvScale { get; set; } = (1f, 1f);
+
+    /// <summary>Radians the texture is turned by.</summary>
+    public float UvRotation { get; set; }
+
+    /// <summary>How far the texture is shifted, in UV units.</summary>
+    public (float U, float V) UvOffset { get; set; }
 }
 
 /// <summary>How a camera turns the world into a picture.</summary>
@@ -349,6 +366,11 @@ public static unsafe class Render
             MetallicRoughnessTexture = Key(settings.MetallicRoughnessTexture),
             EmissiveTexture = Key(settings.EmissiveTexture),
             OcclusionTexture = Key(settings.OcclusionTexture),
+            UvScaleX = settings.UvScale.U,
+            UvScaleY = settings.UvScale.V,
+            UvRotation = settings.UvRotation,
+            UvOffsetX = settings.UvOffset.U,
+            UvOffsetY = settings.UvOffset.V,
         };
 
         var key = Native.bcs_material_create(&native);

@@ -29,6 +29,9 @@ headless = [
     "bevy/bevy_image",
     "bevy/png",
     "bevy/jpeg",
+    "bevy/webp",
+    "bevy/bmp",
+    "bevy/tga",
     "bevy/bevy_state",
     "bevy/bevy_world_serialization",
 ]

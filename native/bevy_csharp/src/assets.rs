@@ -203,6 +203,91 @@ pub unsafe extern "C" fn bcs_asset_load(
     })
 }
 
+/// Starts loading an image with the sampler it should be drawn with.
+///
+/// The plain [`bcs_asset_load`] takes Bevy's default sampler, which clamps at the edges. A
+/// texture meant to tile has to say so, and so does one whose bytes are data rather than colour:
+/// a normal map read as sRGB has every direction in it bent.
+///
+/// # Safety
+/// `path` must be a NUL-terminated UTF-8 string; `config` must point to a readable
+/// [`BcsImageConfig`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_asset_load_image(
+    path: *const core::ffi::c_char,
+    config: *const crate::interop::BcsImageConfig,
+) -> i32 {
+    crate::interop::guard(|| {
+        use bevy::image::{
+            ImageAddressMode, ImageFilterMode, ImageLoaderSettings, ImageSampler,
+            ImageSamplerDescriptor,
+        };
+
+        let Some(path) = (unsafe { crate::interop::cstr_to_string(path) }) else {
+            return status::NULL_ARG;
+        };
+        if config.is_null() {
+            return status::NULL_ARG;
+        }
+        let config = unsafe { *config };
+
+        let address = |mode: i32| match mode {
+            1 => ImageAddressMode::Repeat,
+            2 => ImageAddressMode::MirrorRepeat,
+            _ => ImageAddressMode::ClampToEdge,
+        };
+        let filter = |mode: i32| match mode {
+            1 => ImageFilterMode::Linear,
+            _ => ImageFilterMode::Nearest,
+        };
+
+        let mag_filter = filter(config.mag_filter);
+        let min_filter = filter(config.min_filter);
+        let mipmap_filter = filter(config.mipmap_filter);
+
+        // wgpu rejects anisotropy above one unless all three filters are linear, and rejects it
+        // as a validation failure rather than by ignoring it. Asking for both is a mistake worth
+        // absorbing here rather than turning into a crash at draw time.
+        let anisotropy = if mag_filter == ImageFilterMode::Linear
+            && min_filter == ImageFilterMode::Linear
+            && mipmap_filter == ImageFilterMode::Linear
+        {
+            config.anisotropy.max(1)
+        } else {
+            1
+        };
+
+        let descriptor = ImageSamplerDescriptor {
+            address_mode_u: address(config.address_u),
+            address_mode_v: address(config.address_v),
+            mag_filter,
+            min_filter,
+            mipmap_filter,
+            anisotropy_clamp: anisotropy as u16,
+            ..Default::default()
+        };
+        let srgb = config.srgb != 0;
+
+        with_world(|world| {
+            let Some(server) = world.get_resource::<AssetServer>() else {
+                return status::UNSUPPORTED;
+            };
+
+            let handle = server
+                .load_with_settings::<bevy::image::Image, ImageLoaderSettings>(
+                    path.to_string(),
+                    move |settings: &mut ImageLoaderSettings| {
+                        settings.sampler = ImageSampler::Descriptor(descriptor.clone());
+                        settings.is_srgb = srgb;
+                    },
+                )
+                .untyped();
+
+            world.get_resource_or_init::<AssetHandles>().insert(handle)
+        })
+    })
+}
+
 /// Reports how far along a load is. See the `load_state` module for the values.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_asset_load_state(handle: i32) -> i32 {

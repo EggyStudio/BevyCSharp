@@ -115,6 +115,87 @@ public static class AssetKind
     public const string Scene = "Scene";
 }
 
+/// <summary>What happens outside a texture's zero-to-one range.</summary>
+public enum TextureWrap
+{
+    /// <summary>Hold the edge pixel. Bevy's default, and what a decal or a skybox wants.</summary>
+    Clamp = 0,
+
+    /// <summary>Start over, so the texture tiles.</summary>
+    Repeat = 1,
+
+    /// <summary>Tile, flipping every other repeat so the seams line up.</summary>
+    Mirror = 2,
+}
+
+/// <summary>How a texture is filtered when it does not land on pixel boundaries.</summary>
+public enum TextureFilter
+{
+    /// <summary>Take the nearest pixel. Bevy's default, and what pixel art wants.</summary>
+    Nearest = 0,
+
+    /// <summary>Blend between pixels, which is what everything else wants.</summary>
+    Linear = 1,
+}
+
+/// <summary>
+/// How an image should be sampled, and how its bytes should be read.
+/// </summary>
+/// <remarks>
+/// The defaults match Bevy's: clamped and nearest-filtered, read as sRGB. Both are worth changing
+/// for most textures, which is why this exists.
+/// </remarks>
+public sealed class TextureSettings
+{
+    /// <summary>What happens past the edge, in both directions.</summary>
+    public TextureWrap Wrap { get; set; } = TextureWrap.Clamp;
+
+    /// <summary>Filtering when the texture is drawn larger than it is.</summary>
+    public TextureFilter MagFilter { get; set; } = TextureFilter.Nearest;
+
+    /// <summary>Filtering when it is drawn smaller.</summary>
+    public TextureFilter MinFilter { get; set; } = TextureFilter.Nearest;
+
+    /// <summary>Filtering between mip levels.</summary>
+    public TextureFilter MipmapFilter { get; set; } = TextureFilter.Nearest;
+
+    /// <summary>
+    /// Maximum anisotropic samples, which keeps a surface seen edge-on from smearing.
+    /// </summary>
+    /// <remarks>
+    /// Ignored unless all three filters are <see cref="TextureFilter.Linear"/>, because asking
+    /// for both is a validation failure in the graphics API rather than something it overlooks.
+    /// </remarks>
+    public uint Anisotropy { get; set; } = 1;
+
+    /// <summary>
+    /// Whether the file holds colour, in which case it is read as sRGB.
+    /// </summary>
+    /// <remarks>
+    /// Set false for a texture whose bytes are data rather than colour: a normal map, a
+    /// metallic-roughness map, an occlusion map. Reading one as sRGB bends every value in it.
+    /// </remarks>
+    public bool Srgb { get; set; } = true;
+
+    /// <summary>Repeat filtering, for a texture meant to tile across a large surface.</summary>
+    public static TextureSettings Tiling => new()
+    {
+        Wrap = TextureWrap.Repeat,
+        MagFilter = TextureFilter.Linear,
+        MinFilter = TextureFilter.Linear,
+        MipmapFilter = TextureFilter.Linear,
+    };
+
+    /// <summary>Linear filtering with no colour conversion, for a normal or roughness map.</summary>
+    public static TextureSettings Data => new()
+    {
+        MagFilter = TextureFilter.Linear,
+        MinFilter = TextureFilter.Linear,
+        MipmapFilter = TextureFilter.Linear,
+        Srgb = false,
+    };
+}
+
 /// <summary>
 /// Loads assets and tracks what has been loaded.
 /// </summary>
@@ -123,7 +204,7 @@ public static class AssetKind
 /// Loading is asynchronous: <see cref="Load"/> returns as soon as the request is queued, and the
 /// handle reports <see cref="AssetLoadState.Loading"/> until the file has been read and parsed.
 /// </remarks>
-public static class AssetServer
+public static unsafe class AssetServer
 {
     /// <summary>
     /// Starts loading one drawable piece of geometry out of a glTF file.
@@ -160,6 +241,41 @@ public static class AssetServer
         ArgumentOutOfRangeException.ThrowIfNegative(primitive);
 
         return Load(AssetKind.Mesh, $"{path}#Mesh{mesh}/Primitive{primitive}");
+    }
+
+    /// <summary>
+    /// Starts loading an image with the sampler it should be drawn with.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Load"/> takes Bevy's default sampler, which clamps at the edges and filters to
+    /// the nearest pixel. A texture meant to tile has to say so, and so does one whose bytes are
+    /// data rather than colour.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var floor = AssetServer.LoadImage("textures/tiles.png", TextureSettings.Tiling);
+    /// var bumps = AssetServer.LoadImage("textures/tiles-normal.png", TextureSettings.Data);
+    /// </code>
+    /// </example>
+    public static AssetHandle LoadImage(string path, TextureSettings settings)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var native = new NativeImageConfig
+        {
+            AddressU = (int)settings.Wrap,
+            AddressV = (int)settings.Wrap,
+            MagFilter = (int)settings.MagFilter,
+            MinFilter = (int)settings.MinFilter,
+            MipmapFilter = (int)settings.MipmapFilter,
+            Anisotropy = settings.Anisotropy,
+            Srgb = settings.Srgb ? 1 : 0,
+        };
+
+        var key = Native.bcs_asset_load_image(path, &native);
+        Native.Check(key, $"loading image '{path}'");
+        return new AssetHandle(key);
     }
 
     /// <summary>

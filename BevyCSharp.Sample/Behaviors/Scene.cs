@@ -59,9 +59,13 @@ public partial struct Scene
 
         var ground = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, ground, Render.CreateMesh(MeshShape.Plane, 24f, 24f));
+        // Tiling takes both halves: a repeating sampler, and UVs that run past one. The plane's
+        // own UVs stop at one however large it is, so without the scale this shows a single
+        // stretched copy.
         Render.SetMaterial(ctx.Ecs, ground, Render.CreateMaterial(new MaterialSettings
         {
-            BaseColorTexture = AssetServer.Load(AssetKind.Image, "textures/checker.png"),
+            BaseColorTexture = AssetServer.LoadImage("textures/checker.png", TextureSettings.Tiling),
+            UvScale = (12f, 12f),
             Roughness = 0.9f,
         }));
         ctx.Ecs.Add(ground, Transform.At(0f, -1.2f, 0f));

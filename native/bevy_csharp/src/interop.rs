@@ -235,6 +235,26 @@ pub struct BcsCameraConfig {
     pub order: i32,
 }
 
+/// How an image should be sampled, and how its bytes should be read.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsImageConfig {
+    /// `0` clamp to edge, `1` repeat, `2` mirror. Applied to U.
+    pub address_u: i32,
+    /// The same, for V.
+    pub address_v: i32,
+    /// `0` nearest, `1` linear. Used when the texture is drawn larger than it is.
+    pub mag_filter: i32,
+    /// The same, for when it is drawn smaller.
+    pub min_filter: i32,
+    /// The same, for blending between mip levels.
+    pub mipmap_filter: i32,
+    /// Maximum anisotropic samples. `1` disables it.
+    pub anisotropy: u32,
+    /// Non-zero to read the file as sRGB, which is right for colour and wrong for data.
+    pub srgb: i32,
+}
+
 /// Everything a physically based material is made of.
 ///
 /// Texture fields are asset keys, or `-1` for none. An image bound here is used as-is; combining
@@ -269,6 +289,12 @@ pub struct BcsMaterialConfig {
     pub emissive_texture: i32,
     /// Asset key of the ambient occlusion map, or `-1`.
     pub occlusion_texture: i32,
+    /// How many times the texture repeats across the surface, in U and V.
+    pub uv_scale: [f32; 2],
+    /// Radians the texture is turned by.
+    pub uv_rotation: f32,
+    /// How far the texture is shifted, in UV units.
+    pub uv_offset: [f32; 2],
 }
 
 /// What kind of light to spawn and how it behaves.

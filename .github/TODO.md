@@ -74,21 +74,14 @@ Revisit when `.bsn` ships as a loadable asset: it would load and spawn through t
 `WorldAssetRoot` export a glTF scene needs, and would then be authorable without recompiling the
 bridge, which is the part of BSN actually worth having on this side.
 
-### More texture formats
+### GPU-compressed textures
 
-`MaterialSettings` binds five maps and PNG and JPEG decode in every build. What is not compiled
-in: WebP, and the GPU-compressed formats beyond `ktx2`. Compressed textures also need
-`CompressedImageFormatSupport` to carry what the adapter can actually decode, which a windowless
-app currently reports as nothing.
+PNG, JPEG, WebP, BMP and TGA decode in every build. What is missing is the compressed formats a
+GPU can hold without expanding: `ktx2` is compiled in but its payload formats, BCn and ASTC and
+ETC2, are not, and `CompressedImageFormatSupport` has to carry what the adapter can decode, which
+a windowless app reports as nothing.
 
 Nothing here blocks a game; it is a matter of size on disk and upload cost.
-
-### Texture sampling
-
-A texture is bound and drawn with Bevy's default sampler. Repeat and clamp, filtering, and
-anisotropy are not reachable, so a tiling floor cannot be told to tile from C#: the texture is
-stretched over whatever UVs the mesh carries. This is `ImagePlugin`'s default sampler and a
-per-image override, rather than a material setting.
 
 ## Presentation
 

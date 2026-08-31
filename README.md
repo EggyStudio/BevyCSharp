@@ -2,7 +2,7 @@
 
 Write [Bevy](https://bevy.org) games in C#.
 
-![A lit cube turning above a ground plane, drawn by Bevy's renderer](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/screenshot.png)
+![A lit cube turning above a ground plane, drawn by Bevy's renderer](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/screenshot-2.png)
 
 <sup>`BevyCSharp.Sample`, running on Bevy's PBR renderer through the bridge:
 `dotnet run --project BevyCSharp.Sample`</sup>
@@ -329,6 +329,30 @@ the default white shows unchanged and tinting it is a matter of setting a colour
 not have finished loading, because the material holds a handle rather than pixels. Five maps are
 bound this way: base colour, normal, metallic-roughness, emissive and occlusion.
 
+How a texture is sampled is decided when it loads:
+
+```csharp
+var floor = AssetServer.LoadImage("textures/tiles.png", TextureSettings.Tiling);
+var bumps = AssetServer.LoadImage("textures/tiles-normal.png", TextureSettings.Data);
+```
+
+`Tiling` repeats and filters linearly; `Data` filters linearly and reads the file as raw values
+rather than as sRGB, which is what a normal, roughness or occlusion map needs. Individual
+settings are there for anything else, including anisotropy, which is dropped rather than refused
+if the filters are not all linear, because the graphics API treats that pair as a validation
+failure.
+
+Tiling takes both halves. A mesh's UVs run from zero to one however large it is, so a repeating
+texture still shows one stretched copy until the material scales them:
+
+```csharp
+Render.CreateMaterial(new MaterialSettings
+{
+    BaseColorTexture = floor,
+    UvScale = (12f, 12f),
+});
+```
+
 `AlphaMode` decides what happens where a material is not opaque. `Mask` draws a pixel or skips
 it, deciding at `AlphaCutoff`, so the surface still writes depth and nothing has to be sorted,
 which is what foliage and fences are drawn with. `Blend` is real transparency, drawn after
@@ -336,8 +360,8 @@ everything else and sorted back to front. `Add` adds to what is behind, so it ne
 `DoubleSided` draws back faces, for anything modelled as a single sheet, and `Unlit` shows the
 base colour flat. `CreateMaterial(r, g, b)` still exists for the simple case.
 
-PNG and JPEG decode in every build, headless included, because that is work on data rather than
-on a GPU.
+PNG, JPEG, WebP, BMP and TGA decode in every build, headless included, because that is work on
+data rather than on a GPU.
 
 A camera and a light take settings, and every value has a usable default:
 
