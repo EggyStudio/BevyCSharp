@@ -117,6 +117,111 @@ public sealed class GltfTests
         Assert.Equal(AssetLoadState.Loaded, state);
     }
 
+    [Fact]
+    public void AGltfSceneSpawnsTheEntitiesTheFileDescribes()
+    {
+        // The other half of a glTF file: not one mesh, but the arrangement an artist laid out.
+        // The scene entity comes back at once and fills in when the asset has loaded, so the
+        // test waits on WorldInstance rather than on a frame count.
+        using var harness = new EngineHarness(frames: 300, fps: 240);
+        if (!App.HasRenderer) return;
+
+        var root = Entity.None;
+        var ready = false;
+        var children = 0;
+        var readyBeforeChildren = false;
+
+        harness.OnContext(Stage.Startup, ctx =>
+            root = ctx.Ecs.SpawnScene(AssetServer.LoadGltfScene(Model)));
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (!ctx.Ecs.Has<WorldInstance>(root)) return;
+
+            ready = true;
+            children = ctx.Ecs.ChildrenOf(root).Length;
+
+            // WorldInstance marks the spawn as done, but the children it produced are not
+            // always visible in the same frame, so waiting on the component alone is a race.
+            if (children == 0)
+            {
+                readyBeforeChildren = true;
+                return;
+            }
+
+            ctx.Exit();
+        });
+
+        harness.Run();
+
+        Assert.NotEqual(Entity.None, root);
+        Assert.True(ready, "the scene never finished spawning");
+        Assert.True(children > 0, $"the scene spawned nothing beneath its root (raced: {readyBeforeChildren})");
+    }
+
+    [Fact]
+    public void ASpawnedSceneCanBeComposedOnTopOf()
+    {
+        // What replaces bsn! on this side: spawn what the file describes, then patch it through
+        // the ordinary ECS surface. Here the artist's placement is overwritten and a component
+        // the file knows nothing about is added.
+        using var harness = new EngineHarness(frames: 300, fps: 240);
+        if (!App.HasRenderer) return;
+
+        var root = Entity.None;
+        var patched = 0;
+        var moved = Vec3.Zero;
+
+        harness.OnContext(Stage.Startup, ctx =>
+            root = ctx.Ecs.SpawnScene(AssetServer.LoadGltfScene(Model)));
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (patched > 0) return;
+
+            foreach (var child in ctx.Ecs.ChildrenOf(root))
+            {
+                ctx.Ecs.Add(child, Transform.At(3f, 0f, 0f));
+                ctx.Ecs.Add(child, new SceneTag());
+                patched++;
+            }
+        });
+
+        harness.OnContext(Stage.Last, ctx =>
+        {
+            if (patched == 0) return;
+
+            foreach (var row in ctx.Ecs.Query<SceneTag>(markChanged: false))
+                moved = ctx.Ecs.GetRef<Transform>(row.Entity).Translation;
+
+            ctx.Exit();
+        });
+
+        harness.Run();
+
+        Assert.True(patched > 0, "nothing was there to patch");
+        Assert.Equal(new Vec3(3f, 0f, 0f), moved);
+    }
+
+    [Fact]
+    public void SpawningAHandleThatIsNotASceneIsRefused()
+    {
+        using var harness = new EngineHarness(frames: 4);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var ex = Assert.Throws<BevyNativeException>(
+                () => ctx.Ecs.SpawnScene(AssetHandle.None));
+
+            Assert.Equal(NativeStatus.NoComponent, ex.Status);
+        });
+
+        harness.Run();
+    }
+
+    /// <summary>Added to a scene's entities, to show composition reached them.</summary>
+    private struct SceneTag;
+
     private static AssetHandle _missing;
     private static AssetHandle _file;
 }

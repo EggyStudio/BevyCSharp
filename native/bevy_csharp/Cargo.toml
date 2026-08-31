@@ -30,6 +30,7 @@ headless = [
     "bevy/png",
     "bevy/jpeg",
     "bevy/bevy_state",
+    "bevy/bevy_world_serialization",
 ]
 
 # Full desktop profile: a real window, Bevy's renderer and the winit input backend.

@@ -130,7 +130,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         }
 
         // Only instance methods force the struct into Bevy's storage, so only they require it
-        // to be blittable. A behavior with static methods alone is just a system holder.
+        // to be blittable. A behavior with static methods alone is a system holder.
         if (hasInstanceMethod && !type.IsUnmanagedType)
         {
             diagnostics.Add(Diagnostic.Create(

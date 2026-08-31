@@ -60,6 +60,41 @@ public sealed unsafe class EcsWorld
         for (var i = 0; i < count; i++) Add(Spawn(), factory(i));
     }
 
+    /// <summary>
+    /// Spawns a scene asset under a new entity, and returns that entity.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The entity comes back at once; the scene under it does not. Bevy spawns the world as its
+    /// children when the asset has loaded, so no children on the first frame is the normal
+    /// answer rather than a failure.
+    /// </para>
+    /// <para>
+    /// <b>Wait for the children, not for <see cref="Bevy.WorldInstance"/>.</b> That component
+    /// marks the spawn as done, but it can appear a frame before the entities it produced are
+    /// visible, so treating it as "the scene is ready" is a race that fails about one run in
+    /// three. Poll <see cref="ChildrenOf"/> until it returns something.
+    /// </para>
+    /// <para>
+    /// Takes a glTF scene from <see cref="AssetServer.LoadGltfScene"/> or a <c>.scn.ron</c> world
+    /// from <see cref="AssetKind.Scene"/>; both load as the same asset, so one call spawns
+    /// either. Compose on top of what it produced the ordinary way, by walking
+    /// <see cref="ChildrenOf"/> and adding components to the entities you find.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The handle names no scene, or no world is loaned.</exception>
+    public Entity SpawnScene(AssetHandle scene)
+    {
+        var bits = Native.bcs_scene_spawn(scene.Key);
+        if (bits == 0)
+            throw new BevyNativeException(
+                NativeStatus.NoComponent,
+                $"SpawnScene failed: {scene} does not name a loaded scene asset, or no world is "
+                + "loaned to this thread.");
+
+        return new Entity(bits);
+    }
+
     /// <summary>Destroys an entity and everything on it.</summary>
     /// <returns><see langword="false"/> if the handle was already stale.</returns>
     public bool Despawn(Entity entity)

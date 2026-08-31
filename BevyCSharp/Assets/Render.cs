@@ -265,7 +265,7 @@ public sealed class LightSettings
 /// <para>
 /// Everything here needs a native build with the renderer compiled in. On a headless build the
 /// calls report that rather than failing obscurely, so the same behavior code runs either way and
-/// simply draws nothing.
+/// draws nothing.
 /// </para>
 /// <para>
 /// Meshes and materials are Rust values that have to be constructed rather than described by a

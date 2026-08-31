@@ -116,7 +116,7 @@ public sealed class OnFixedUpdateAttribute : Attribute;
 /// <remarks>
 /// The state must have been added with <see cref="App.AddState{TState}"/>. This is a run
 /// condition like <see cref="RunIfAttribute"/>, so it composes with the stage attributes rather
-/// than replacing them, and the method simply does not run while the state is something else.
+/// than replacing them, and the method does not run while the state is something else.
 /// </remarks>
 /// <example>
 /// <code>

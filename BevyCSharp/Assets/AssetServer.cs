@@ -104,6 +104,15 @@ public static class AssetKind
     /// part directly with <see cref="AssetServer.LoadGltfMesh"/>.
     /// </remarks>
     public const string Gltf = "Gltf";
+
+    /// <summary>
+    /// A saved world: the entities and components of a `.scn` or `.scn.ron` file.
+    /// </summary>
+    /// <remarks>
+    /// The same asset a glTF file's scenes are, which is why one call spawns either. Available in
+    /// every build, since a world is data.
+    /// </remarks>
+    public const string Scene = "Scene";
 }
 
 /// <summary>
@@ -154,6 +163,24 @@ public static class AssetServer
         ArgumentOutOfRangeException.ThrowIfNegative(primitive);
 
         return Load(AssetKind.Mesh, $"{path}#Mesh{mesh}/Primitive{primitive}");
+    }
+
+    /// <summary>
+    /// Starts loading one scene out of a glTF file.
+    /// </summary>
+    /// <remarks>
+    /// A scene is the file's own arrangement of its meshes: what an artist laid out, with the
+    /// nodes and the parenting they gave it. Spawn it with
+    /// <see cref="EcsWorld.SpawnScene"/>, which produces those entities under one of yours.
+    /// </remarks>
+    /// <param name="path">Path to the glTF file, relative to the assets directory.</param>
+    /// <param name="scene">Which of the file's scenes. Most files define one.</param>
+    public static AssetHandle LoadGltfScene(string path, int scene = 0)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+        ArgumentOutOfRangeException.ThrowIfNegative(scene);
+
+        return Load(AssetKind.Scene, $"{path}#Scene{scene}");
     }
 
     /// <summary>

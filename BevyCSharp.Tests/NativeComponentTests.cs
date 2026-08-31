@@ -39,7 +39,7 @@ public sealed class NativeComponentTests
         using var harness = new EngineHarness(frames: 2);
 
         // Resolving the id runs the check against the engine's own layout and throws on a
-        // mismatch, so simply getting an id back is the assertion.
+        // mismatch, so getting an id back is the assertion.
         harness.OnContext(Stage.Startup, _ => Assert.True(NativeComponents.Transform >= 0));
         harness.Run();
     }

@@ -17,32 +17,26 @@ code.
 Nothing here can be worked around from C#. Without it a project is limited to four primitive
 shapes in flat colors.
 
-### Materials and scenes from glTF
+### Materials from glTF
 
-Geometry is done: `bevy_gltf` is compiled into the render profile and
-`AssetServer.LoadGltfMesh(path, mesh, primitive)` returns an ordinary mesh handle. The API
-question the old entry raised is settled, and 0.19 settled it: parts are addressed individually,
-by the label Bevy's own asset paths already understand (`ship.gltf#Mesh0/Primitive0`), so no
-export was needed at all.
+Geometry and scenes are covered. `AssetServer.LoadGltfMesh(path, mesh, primitive)` returns an
+ordinary mesh handle, addressing a part by the label Bevy's own asset paths understand
+(`ship.gltf#Mesh0/Primitive0`), and `ctx.Ecs.SpawnScene(handle)` spawns a whole file's
+arrangement. Materials are the one part of a glTF file still out of reach.
 
-What is still missing from a glTF file:
+`ship.gltf#Material0` loads as a `GltfMaterial`, which describes a material rather than being one
+the renderer draws with. `standard_material_from_gltf_material` does the translation, but it lives
+in `bevy_pbr`'s private `gltf` module and is registered as an extension handler by `PbrPlugin`,
+which a headless-configured app does not install. Either add `PbrPlugin` to that path and check
+the handler produces a labelled `StandardMaterial`, or copy the conversion field by field on this
+side.
 
-- **Materials.** `ship.gltf#Material0` loads as a `GltfMaterial`, which describes a material
-  rather than being one the renderer draws with. `standard_material_from_gltf_material` does the
-  translation, but it lives in `bevy_pbr`'s private `gltf` module and is registered as an
-  extension handler by `PbrPlugin`, which a headless-configured app does not install. Either add
-  `PbrPlugin` to that path and check the handler produces a labelled `StandardMaterial`, or copy
-  the conversion field by field on this side.
-- **Scenes.** A glTF scene is a `WorldAsset`, and `bevy_world_serialization` spawns one by
-  component: adding `WorldAssetRoot(handle)` to an entity spawns the world beneath it. That is
-  the same shape as `Render.SetMesh`, so it is one export attaching a handle through a component,
-  not a mechanism of its own. It also covers `.scn` and `.scn.ron` files, which load into the
-  same `WorldAsset` through `WorldAssetLoader`. Needs `bevy/bevy_world_serialization`.
-- **Textures** are the next entry below, and are the reason materials matter.
+It matters because `MaterialSettings` binds five texture maps: a model arrives with its own maps
+and none of them can be used, so every glTF entity has to be given a material built in code.
 
-The intended division of labour, once scenes spawn: glTF carries the geometry, materials and
-animations, because that is what Blender and every other tool exports. Composition on top of it,
-adding components to what a file defines, attaching child entities, overriding what an artist set,
+The division of labour this is aiming at: glTF carries the geometry, materials and animations,
+because that is what Blender and every other tool exports. Composition on top of it, adding
+components to what a file defines, attaching child entities, overriding what an artist set,
 happens after the scene is spawned.
 
 Bevy's own answer to that composition is Bevy Scene Notation, new in 0.19, and it is **not**
@@ -156,7 +150,7 @@ Rust plugin sends.
 
 ## Rendering control
 
-Cameras, lights and the window take their common parameters now. What is left is narrower.
+Cameras, lights and the window take their common parameters. What is left is narrower.
 
 - **Camera**: no render layers and no viewport, so splitscreen and render-to-texture are out of
   reach. Both are a component and a rectangle rather than new machinery.
@@ -188,9 +182,9 @@ Cameras, lights and the window take their common parameters now. What is left is
 
 ### Components Bevy owns
 
-`bcs_component_id_of` resolves seven names by hand: `Transform`, `GlobalTransform`, `ChildOf`,
-`Children`, `Visibility`, `InheritedVisibility` and `ViewVisibility`. Anything else is
-unreachable. A general lookup is not possible through the type registry alone, since the managed
+`bcs_component_id_of` resolves eight names by hand: `Transform`, `GlobalTransform`, `ChildOf`,
+`Children`, `Visibility`, `InheritedVisibility`, `ViewVisibility` and `WorldInstance`. Anything
+else is unreachable. A general lookup is not possible through the type registry alone, since the managed
 side also needs a byte-compatible mirror, so this stays a curated list that grows as mirrors are
 written.
 
@@ -202,7 +196,7 @@ filtering on them is enough.
 
 ## Physics
 
-Not a priority. Recorded here so the approach is settled when it does come up.
+Not a priority.
 
 Bevy ships no physics engine, and the answer is **not** to bridge Avian or Rapier. Use
 [BepuPhysics v2](https://github.com/bepu/bepuphysics2), which is C#, so the simulation lives on
@@ -210,35 +204,34 @@ the managed side and needs no bridge surface at all: nothing new crosses the ABI
 is added, and the only thing that has to reach Bevy is the pose each body ends up with, which is
 one `Transform` write through the API that already exists.
 
-`.ref/3DEngine` has a working version of this to follow. Its shape:
+Two layers, so that no Bepu type reaches user code and the backend can be replaced:
 
-- an engine-agnostic façade, `Engine.Physics`: `PhysicsSettings` (gravity, timestep, substeps,
-  solver iterations, worker threads), a `PhysicsBody` handle struct that forwards every operation
-  to the world that owns it, and `BodyKind` for dynamic, kinematic and static. User code never
-  sees a Bepu type.
-- the backend, `Engine.Physics.Bepu`: a `PhysicsWorld` owning the `Simulation`, `BufferPool` and
-  `ThreadDispatcher`, split across partial files for creation, per-body operations, queries and
-  stepping, plus the `INarrowPhaseCallbacks` and `IPoseIntegratorCallbacks` structs Bepu needs.
+- a façade: settings (gravity, timestep, substeps, solver iterations, worker threads), a body
+  handle struct that forwards every operation to the world owning it, and a body kind for
+  dynamic, kinematic and static.
+- the backend: a physics world owning Bepu's `Simulation`, `BufferPool` and `ThreadDispatcher`,
+  plus the `INarrowPhaseCallbacks` and `IPoseIntegratorCallbacks` structs Bepu requires. Worth
+  splitting across partial files, one each for creation, per-body operations, queries and
+  stepping, because it grows large.
 
-What differs here:
+Points to get right:
 
-- **Stepping is already solved.** The reference runs its own accumulator with a
-  spiral-of-death guard. This project has `[OnFixedUpdate]`, so a step is one call per fixed step
-  and Bevy owns the accumulation. That was the prerequisite, and it now exists.
+- **Stepping.** A physics integration usually carries its own accumulator and a guard against the
+  spiral of death, where a slow frame asks for more steps than the next frame has time for.
+  Neither is needed here: `[OnFixedUpdate]` means one step per fixed step, with Bevy owning the
+  accumulation.
 - **Write-back is a `Transform` write.** Poses go into Bevy's own `Transform`, and propagation
   carries them to `GlobalTransform` and the renderer for free.
 - **It belongs in its own package**, so the core does not take the dependency. `BepuPhysics` and
-  `BepuUtilities` are separate NuGet packages, on 2.5.0-beta at the time the reference was
-  written.
+  `BepuUtilities` are separate NuGet packages, published on a 2.5.0-beta line.
 - **Teardown matters.** Bepu is pool-based and its `BufferPool` and `ThreadDispatcher` are
   disposable, so they have to be torn down with the app rather than left to the GC.
 
 ## Assets and scenes
 
-- **Scene loading** is not blocked, contrary to what this file said before 0.19 was examined
-  properly. `Scene` did become a trait, but the loadable asset it was replaced by is `WorldAsset`:
+- **Scene loading** works. `Scene` is a trait in 0.19 and the loadable asset is `WorldAsset`:
   `.scn` and `.scn.ron` load into one through `WorldAssetLoader`, and a glTF file's scenes are
-  handles to the same type. See the glTF entry above for the one export all of it needs.
+  handles to the same type. `ctx.Ecs.SpawnScene` spawns either.
 - **Shaders**: `AssetKind.Shader` loads and returns a handle that nothing consumes. Either give
   it a custom material path or remove the kind.
 - **Hot reload**: `BehaviorsPlugin.ScriptsDirectory` is reserved and does nothing.

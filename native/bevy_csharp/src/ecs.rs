@@ -270,7 +270,7 @@ pub unsafe extern "C" fn bcs_ecs_chunks(
             // Chunks hand C# a pointer into contiguous storage. A sparse set keeps its values
             // in a dense column too, but Bevy exposes no way to reach that column or the entity
             // list beside it, only a per-entity lookup, so there is nothing to point at. Such a
-            // component can still be filtered on below; it just cannot be the one iterated.
+            // component can still be filtered on below; it cannot be the one iterated.
             if info.storage_type() != StorageType::Table {
                 return status::UNSUPPORTED;
             }

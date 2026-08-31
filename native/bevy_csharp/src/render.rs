@@ -81,7 +81,7 @@ pub unsafe extern "C" fn bcs_mesh_create(
 /// A texture is named by the asset key of an already-loaded image, which is how the two halves of
 /// the asset surface meet: `bcs_asset_load` produces the key, this consumes it. The image does
 /// not have to have finished loading; the material picks it up when it arrives, which is the
-/// behaviour a Bevy handle has anyway.
+/// behavior a Bevy handle has anyway.
 ///
 /// # Safety
 /// `config` must point to a readable [`BcsMaterialConfig`].

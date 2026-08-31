@@ -243,10 +243,35 @@ A glTF mesh is a named group and it is the primitive inside it that carries geom
 why both indices exist; a file exported as one object is mesh 0, primitive 0. Needs a render
 build, since the loader comes with the renderer.
 
-Geometry only, for now. In Bevy 0.19 a glTF material loads as a `GltfMaterial`, which describes a
+A file's own arrangement of its meshes is a scene, and spawning one produces the entities the
+artist laid out:
+
+```csharp
+var root = ctx.Ecs.SpawnScene(AssetServer.LoadGltfScene("models/ship.gltf"));
+```
+
+The root comes back at once and fills in when the asset has loaded, so no children on the first
+frame is normal rather than a failure. Wait by polling `ChildrenOf`, not on the `WorldInstance`
+component: that marks the spawn as done but can appear a frame before the entities are visible.
+
+Compose on top of what a file describes by patching it after it spawns, which is what Bevy's own
+`bsn!` does at compile time in Rust and what the ECS surface here does at runtime:
+
+```csharp
+foreach (var child in ctx.Ecs.ChildrenOf(root))
+{
+    ctx.Ecs.Add(child, Transform.At(3f, 0f, 0f));   // override what the artist set
+    ctx.Ecs.Add(child, new Selectable());           // add what the file knows nothing about
+}
+```
+
+`.scn` and `.scn.ron` worlds load as the same asset through `AssetKind.Scene`, so `SpawnScene`
+takes either.
+
+Materials are the gap. In Bevy 0.19 a glTF material loads as a `GltfMaterial`, which describes a
 material rather than being one the renderer draws with, and the translation into a
-`StandardMaterial` lives in a private module of `bevy_pbr`. Whole scenes are also out: a glTF
-scene is a `WorldAsset` in 0.19, a different mechanism from every other asset here.
+`StandardMaterial` lives in a private module of `bevy_pbr`. Give entities a material from
+`CreateMaterial` until that is bridged.
 
 Bevy's own handle is generic and reference counted, and neither property survives a trip through
 a C ABI, so C# holds a key into a table on the engine side that owns the real handle. Holding one

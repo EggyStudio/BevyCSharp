@@ -82,6 +82,46 @@ The words `simply`, `just`, `powerful` and `blazing` are not used, nor are excla
 
 Limitations are stated directly. "Not implemented yet" is preferable to "coming soon".
 
+## Self-reference
+
+Prose states what is true. It does not describe its own history, and it does not narrate the work
+that produced it.
+
+| instead of | write |
+|---|---|
+| `Scene loading is not blocked, contrary to what this file said before` | `Scene loading works` |
+| `The question the old entry raised is settled: parts are addressed individually` | `Parts are addressed individually` |
+| `Recorded here so the approach is settled when it comes up` | delete the sentence |
+| `Cameras take their common parameters now` | `Cameras take their common parameters` |
+| `The bug this was written to explain is fixed now` | delete the sentence |
+
+A reader has no access to the previous version of a file, so a correction phrased against it says
+nothing. Rewrite the passage as a plain statement and let the diff carry the change.
+
+The words `now`, `already` and `no longer` are the usual signals. Each is fine where it
+distinguishes two states the reader can see, as in "the handle reports `Loading` until the file
+has been read", and wrong where it only means "since the last edit".
+
+The same applies to `TODO.md`. An item is a description of outstanding work, so completed work is
+removed from it or the entry is rewritten around what remains. It is not annotated as done, struck
+through, or kept for the record.
+
+## References
+
+Prose refers only to what a reader of the repository can open. An ignored directory, a path that
+exists on one machine, a private branch or an internal ticket tells them nothing.
+
+`.ref/` is ignored by git, so it is not cited. Where something in it informed a decision, state
+the decision and the reasoning, which is the part worth keeping:
+
+| instead of | write |
+|---|---|
+| `.ref/3DEngine has a working version to follow. Its shape:` | `Two layers, so that no backend type reaches user code:` |
+| `as the reference engine does it` | describe the approach |
+
+Public sources are citable: a crate on docs.rs, a type in a dependency, an upstream issue. So is
+anything checked in, by repository-relative path.
+
 ## Spelling
 
 `behavior` rather than `behaviour`, in prose as well as in code, matching the public API.
@@ -95,7 +135,7 @@ internally consistent.
 - exception messages, log output and `GITHUB_STEP_SUMMARY` content
 - MSBuild `<!-- -->` comments and analyzer `messageFormat` strings
 - YAML comments under `.github/workflows`
-- `README.md` and this file
+- `README.md`, `.github/TODO.md` and this file
 
 ## Checks
 
@@ -108,6 +148,12 @@ grep -rn "^\s*\(///\|//\|//!\) .* - \|\"[^\"]* - [^\"]*\"" --include=*.cs --incl
 
 # Padded section banners.
 grep -rn "// -- .*--" --include=*.cs --include=*.rs .
+
+# Prose about earlier revisions.
+grep -rniE "contrary to what|this (file|document|entry) (said|used to)|the (old|previous) (entry|version)|at the time .* was written" --include=*.md .
+
+# References to paths that are not checked in.
+grep -rn "\.ref/" --include=*.cs --include=*.rs --include=*.md . | grep -v "^\./\.ref/"
 ```
 
 Arithmetic such as `counts[i - 1]` is the expected false positive in the second command.

@@ -168,6 +168,9 @@ fn load(world: &mut World, kind: &str, path: &str) -> i32 {
         "Shader" => server.load::<bevy::shader::Shader>(path.to_string()).untyped(),
         #[cfg(feature = "render")]
         "Gltf" => server.load::<bevy::gltf::Gltf>(path.to_string()).untyped(),
+        "Scene" => server
+            .load::<bevy::world_serialization::WorldAsset>(path.to_string())
+            .untyped(),
         _ => return status::NO_COMPONENT,
     };
 
@@ -266,5 +269,33 @@ pub extern "C" fn bcs_asset_live_count() -> i32 {
                 .get_resource::<AssetHandles>()
                 .map_or(0, AssetHandles::live)
         })
+    })
+}
+
+/// Spawns a scene asset and returns the entity it was spawned under, or `0` on failure.
+///
+/// The entity comes back immediately; the scene beneath it does not. Bevy spawns the world as
+/// children of this entity once the asset has loaded, so an entity with no children yet is the
+/// normal answer on the first frame. `WorldInstance` appears on it when the spawn has happened,
+/// which is what makes the wait observable.
+///
+/// This is what a glTF scene and a `.scn.ron` file have in common: both load as a `WorldAsset`,
+/// and both spawn by pointing an entity at one.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_scene_spawn(asset: i32) -> u64 {
+    crate::interop::guard_with(0u64, || {
+        use bevy::world_serialization::{WorldAsset, WorldAssetRoot};
+
+        with_world_opt(|world| {
+            let Some(handle) = clone_handle(world, asset) else {
+                return 0;
+            };
+
+            world
+                .spawn(WorldAssetRoot(handle.typed::<WorldAsset>()))
+                .id()
+                .to_bits()
+        })
+        .unwrap_or(0)
     })
 }

@@ -221,6 +221,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         #[cfg(feature = "render")]
         app.init_asset::<bevy::pbr::StandardMaterial>();
 
+        // Loads `.scn` and `.scn.ron`, and spawns any `WorldAsset` an entity points at, which is
+        // what a glTF scene is too. Unlike the two above, this registers its loader in `build`.
+        app.add_plugins(bevy::world_serialization::WorldSerializationPlugin);
+
         // Registers the glTF loader and the asset types it produces. `DefaultPlugins` carries it
         // on the windowed path, so adding it there as well would hit the double-registration
         // described above.
@@ -490,6 +494,9 @@ pub unsafe extern "C" fn bcs_component_id_of(name: *const core::ffi::c_char) -> 
                 }
                 "ChildOf" => world.register_component::<bevy::ecs::hierarchy::ChildOf>(),
                 "Children" => world.register_component::<bevy::ecs::hierarchy::Children>(),
+                "WorldInstance" => {
+                    world.register_component::<bevy::world_serialization::WorldInstance>()
+                }
                 // Reached through the prelude rather than its defining crate: Visibility moved
                 // from bevy_render to bevy_camera in 0.19, and the prelude survives such moves.
                 #[cfg(feature = "render")]

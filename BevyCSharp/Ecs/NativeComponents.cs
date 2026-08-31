@@ -62,6 +62,10 @@ public static class NativeComponents
     /// <remarks>Render builds only. The id behind <see cref="Bevy.ViewVisibility"/>.</remarks>
     public static int ViewVisibility => ComponentType<Bevy.ViewVisibility>.Id;
 
+    /// <summary>Bevy's <c>WorldInstance</c>: present once a scene has been spawned.</summary>
+    /// <remarks>The id behind <see cref="Bevy.WorldInstance"/>.</remarks>
+    public static int WorldInstance => ComponentType<Bevy.WorldInstance>.Id;
+
     /// <summary>
     /// Resolves a component by name, verifying the layout when C# mirrors it.
     /// </summary>
@@ -301,5 +305,20 @@ public readonly struct ChildOf : INativeComponent
 public readonly struct Children : INativeComponent
 {
     readonly string INativeComponent.NativeName => "Children";
+    readonly bool INativeComponent.MirrorsLayout => false;
+}
+
+/// <summary>
+/// Marks an entity whose scene has finished spawning.
+/// </summary>
+/// <remarks>
+/// A name-only handle, and a weaker signal than it looks: it can appear a frame before the
+/// entities the scene produced are visible, so it says "the spawn has been done" rather than
+/// "the scene is there". Wait on <see cref="EcsWorld.ChildrenOf"/> instead. Its contents are an
+/// internal instance id with no C# equivalent.
+/// </remarks>
+public readonly struct WorldInstance : INativeComponent
+{
+    readonly string INativeComponent.NativeName => "WorldInstance";
     readonly bool INativeComponent.MirrorsLayout => false;
 }
