@@ -33,6 +33,111 @@ public enum LightKind
     Spot = 2,
 }
 
+/// <summary>What a material does where it is not fully opaque.</summary>
+public enum AlphaMode
+{
+    /// <summary>Ignore alpha entirely. The cheapest, and the right default.</summary>
+    Opaque = 0,
+
+    /// <summary>
+    /// Draw a pixel or skip it, deciding at <see cref="MaterialSettings.AlphaCutoff"/>.
+    /// </summary>
+    /// <remarks>
+    /// What foliage and chain-link fences want: it keeps the depth buffer honest, so nothing has
+    /// to be sorted, at the cost of a hard edge.
+    /// </remarks>
+    Mask = 1,
+
+    /// <summary>Blend with what is behind.</summary>
+    /// <remarks>
+    /// Real transparency, and the expensive one: blended surfaces are drawn after everything
+    /// else and sorted back to front, so two of them overlapping can still be drawn in the wrong
+    /// order.
+    /// </remarks>
+    Blend = 2,
+
+    /// <summary>Add to what is behind, which never darkens it. For fire, glows and holograms.</summary>
+    Add = 3,
+}
+
+/// <summary>
+/// Everything a physically based material is made of.
+/// </summary>
+/// <remarks>
+/// <para>
+/// Every value has a usable default, so setting one property and leaving the rest is the normal
+/// way to use this.
+/// </para>
+/// <para>
+/// A texture is an image handle from <see cref="AssetServer.Load"/>, and is combined with the
+/// matching factor rather than replacing it: a base colour map on a white base colour shows the
+/// map unchanged, and tinting it is a matter of setting a colour. The image need not have
+/// finished loading, because the material holds a handle rather than pixels.
+/// </para>
+/// </remarks>
+/// <example>
+/// <code>
+/// var crate = Render.CreateMaterial(new MaterialSettings
+/// {
+///     BaseColorTexture = AssetServer.Load(AssetKind.Image, "textures/crate.png"),
+///     Roughness = 0.8f,
+/// });
+/// </code>
+/// </example>
+public sealed class MaterialSettings
+{
+    /// <summary>Base colour, linear RGBA. White by default, so a texture shows unchanged.</summary>
+    public (float R, float G, float B, float A) BaseColor { get; set; } = (1f, 1f, 1f, 1f);
+
+    /// <summary>Zero for a dielectric, one for a metal. Values between are rarely physical.</summary>
+    public float Metallic { get; set; }
+
+    /// <summary>Near zero for a mirror, one for a matte surface.</summary>
+    public float Roughness { get; set; } = 0.5f;
+
+    /// <summary>Light the surface gives off, which no lamp affects. Black by default.</summary>
+    public (float R, float G, float B, float A) Emissive { get; set; } = (0f, 0f, 0f, 1f);
+
+    /// <summary>What to do where the material is not fully opaque.</summary>
+    public AlphaMode AlphaMode { get; set; } = AlphaMode.Opaque;
+
+    /// <summary>Where a masked material stops drawing.</summary>
+    public float AlphaCutoff { get; set; } = 0.5f;
+
+    /// <summary>
+    /// Draw back faces as well as front ones.
+    /// </summary>
+    /// <remarks>
+    /// For anything modelled as a single sheet: a leaf, a flag, a curtain. It doubles the work
+    /// for that surface, and lighting on the back face uses the front face's normal.
+    /// </remarks>
+    public bool DoubleSided { get; set; }
+
+    /// <summary>Show the base colour flat, with no lighting at all.</summary>
+    /// <remarks>For a skybox, a UI panel in the world, or anything meant to read as its own colour.</remarks>
+    public bool Unlit { get; set; }
+
+    /// <summary>The base colour map, which is the texture people mean by "the texture".</summary>
+    public AssetHandle BaseColorTexture { get; set; } = AssetHandle.None;
+
+    /// <summary>
+    /// A tangent-space normal map, which fakes detail the geometry does not have.
+    /// </summary>
+    /// <remarks>Must not be loaded as sRGB; a normal map holds directions rather than colours.</remarks>
+    public AssetHandle NormalMap { get; set; } = AssetHandle.None;
+
+    /// <summary>
+    /// Metallic in the blue channel and roughness in the green, as glTF packs them.
+    /// </summary>
+    public AssetHandle MetallicRoughnessTexture { get; set; } = AssetHandle.None;
+
+    /// <summary>Where the surface glows, multiplied by <see cref="Emissive"/>.</summary>
+    public AssetHandle EmissiveTexture { get; set; } = AssetHandle.None;
+
+    /// <summary>Where ambient light fails to reach, as a single channel.</summary>
+    public AssetHandle OcclusionTexture { get; set; } = AssetHandle.None;
+}
+
 /// <summary>How a camera turns the world into a picture.</summary>
 public enum CameraProjection
 {
@@ -209,13 +314,51 @@ public static unsafe class Render
         float blue,
         float alpha = 1f,
         float metallic = 0f,
-        float roughness = 0.5f)
+        float roughness = 0.5f) =>
+        CreateMaterial(new MaterialSettings
+        {
+            BaseColor = (red, green, blue, alpha),
+            Metallic = metallic,
+            Roughness = roughness,
+        });
+
+    /// <summary>Builds a material from <paramref name="settings"/> and returns a handle to it.</summary>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static AssetHandle CreateMaterial(MaterialSettings settings)
     {
-        var key = Native.bcs_material_create(red, green, blue, alpha, metallic, roughness);
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var native = new NativeMaterialConfig
+        {
+            BaseR = settings.BaseColor.R,
+            BaseG = settings.BaseColor.G,
+            BaseB = settings.BaseColor.B,
+            BaseA = settings.BaseColor.A,
+            Metallic = settings.Metallic,
+            Roughness = settings.Roughness,
+            EmissiveR = settings.Emissive.R,
+            EmissiveG = settings.Emissive.G,
+            EmissiveB = settings.Emissive.B,
+            EmissiveA = settings.Emissive.A,
+            AlphaMode = (int)settings.AlphaMode,
+            AlphaCutoff = settings.AlphaCutoff,
+            DoubleSided = settings.DoubleSided ? 1 : 0,
+            Unlit = settings.Unlit ? 1 : 0,
+            BaseColorTexture = Key(settings.BaseColorTexture),
+            NormalMap = Key(settings.NormalMap),
+            MetallicRoughnessTexture = Key(settings.MetallicRoughnessTexture),
+            EmissiveTexture = Key(settings.EmissiveTexture),
+            OcclusionTexture = Key(settings.OcclusionTexture),
+        };
+
+        var key = Native.bcs_material_create(&native);
         if (key == NativeStatus.Unsupported) throw NoRenderer("Building a material");
 
         Native.Check(key, "building a material");
         return new AssetHandle(key);
+
+        // An unset handle is -1, which is what the bridge reads as "no texture here".
+        static int Key(AssetHandle handle) => handle.IsValid ? handle.Key : -1;
     }
 
     /// <summary>

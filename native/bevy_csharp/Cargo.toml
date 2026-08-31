@@ -27,6 +27,8 @@ headless = [
     "bevy/bevy_asset",
     "bevy/bevy_mesh",
     "bevy/bevy_image",
+    "bevy/png",
+    "bevy/jpeg",
     "bevy/bevy_state",
 ]
 
@@ -52,7 +54,6 @@ render = [
     "bevy/bevy_gizmos",
     "bevy/bevy_scene",
     "bevy/default_font",
-    "bevy/png",
     "bevy/ktx2",
     "bevy/zstd_rust",
     "bevy/tonemapping_luts",

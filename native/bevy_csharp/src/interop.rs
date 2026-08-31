@@ -235,6 +235,42 @@ pub struct BcsCameraConfig {
     pub order: i32,
 }
 
+/// Everything a physically based material is made of.
+///
+/// Texture fields are asset keys, or `-1` for none. An image bound here is used as-is; combining
+/// one with the matching factor is what the renderer already does, so a white base colour with a
+/// base colour map shows the map unchanged.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsMaterialConfig {
+    /// Base colour, as linear sRGB with alpha.
+    pub base_color: [f32; 4],
+    /// How metallic the surface is, from dielectric at zero to metal at one.
+    pub metallic: f32,
+    /// How rough, from a mirror near zero to fully diffuse at one.
+    pub roughness: f32,
+    /// Light the surface gives off, which is not affected by any lamp.
+    pub emissive: [f32; 4],
+    /// `0` opaque, `1` cut out at `alpha_cutoff`, `2` blended, `3` added to what is behind.
+    pub alpha_mode: i32,
+    /// Where a cut-out material stops drawing, used when `alpha_mode` is `1`.
+    pub alpha_cutoff: f32,
+    /// Non-zero to draw back faces as well as front ones.
+    pub double_sided: i32,
+    /// Non-zero to show the base colour flat, with no lighting at all.
+    pub unlit: i32,
+    /// Asset key of the base colour map, or `-1`.
+    pub base_color_texture: i32,
+    /// Asset key of the tangent-space normal map, or `-1`.
+    pub normal_map: i32,
+    /// Asset key of the combined metallic and roughness map, or `-1`.
+    pub metallic_roughness_texture: i32,
+    /// Asset key of the emissive map, or `-1`.
+    pub emissive_texture: i32,
+    /// Asset key of the ambient occlusion map, or `-1`.
+    pub occlusion_texture: i32,
+}
+
 /// What kind of light to spawn and how it behaves.
 #[repr(C)]
 #[derive(Clone, Copy)]

@@ -8,7 +8,7 @@
 //! carry them hold a typed `Handle<T>`, which raw bytes cannot represent. Both are therefore
 //! named operations rather than data the managed side writes directly.
 
-use crate::interop::{status, BcsCameraConfig, BcsLightConfig};
+use crate::interop::{status, BcsCameraConfig, BcsLightConfig, BcsMaterialConfig};
 
 #[cfg(feature = "render")]
 use crate::state::{with_world, with_world_opt};
@@ -77,33 +77,89 @@ pub unsafe extern "C" fn bcs_mesh_create(
 ///
 /// Colour components are linear sRGB in the range zero to one. `metallic` and `roughness` follow
 /// the usual convention: zero metallic for a dielectric, roughness near zero for a mirror.
+///
+/// A texture is named by the asset key of an already-loaded image, which is how the two halves of
+/// the asset surface meet: `bcs_asset_load` produces the key, this consumes it. The image does
+/// not have to have finished loading; the material picks it up when it arrives, which is the
+/// behaviour a Bevy handle has anyway.
+///
+/// # Safety
+/// `config` must point to a readable [`BcsMaterialConfig`].
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_material_create(
-    red: f32,
-    green: f32,
-    blue: f32,
-    alpha: f32,
-    metallic: f32,
-    roughness: f32,
-) -> i32 {
+pub unsafe extern "C" fn bcs_material_create(config: *const BcsMaterialConfig) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (red, green, blue, alpha, metallic, roughness);
+            let _ = config;
             status::UNSUPPORTED
         }
 
         #[cfg(feature = "render")]
         {
-            use bevy::asset::Assets;
-            use bevy::color::Color;
+            use bevy::asset::{Assets, Handle};
+            use bevy::color::{Color, LinearRgba};
+            use bevy::image::Image;
+            use bevy::material::AlphaMode;
             use bevy::pbr::StandardMaterial;
 
+            if config.is_null() {
+                return status::NULL_ARG;
+            }
+            let config = unsafe { *config };
+
             with_world(|world| {
+                // Resolved before the material is built, because each one needs the world and
+                // building it needs the world back to insert the result.
+                let texture = |key: i32| -> Option<Handle<Image>> {
+                    if key < 0 {
+                        return None;
+                    }
+                    crate::assets::clone_handle(world, key).map(|handle| handle.typed::<Image>())
+                };
+
+                let base_color_texture = texture(config.base_color_texture);
+                let normal_map_texture = texture(config.normal_map);
+                let metallic_roughness_texture = texture(config.metallic_roughness_texture);
+                let emissive_texture = texture(config.emissive_texture);
+                let occlusion_texture = texture(config.occlusion_texture);
+
+                let alpha_mode = match config.alpha_mode {
+                    1 => AlphaMode::Mask(config.alpha_cutoff),
+                    2 => AlphaMode::Blend,
+                    3 => AlphaMode::Add,
+                    _ => AlphaMode::Opaque,
+                };
+
                 let material = StandardMaterial {
-                    base_color: Color::srgba(red, green, blue, alpha),
-                    metallic,
-                    perceptual_roughness: roughness,
+                    base_color: Color::linear_rgba(
+                        config.base_color[0],
+                        config.base_color[1],
+                        config.base_color[2],
+                        config.base_color[3],
+                    ),
+                    metallic: config.metallic,
+                    perceptual_roughness: config.roughness,
+                    emissive: LinearRgba::new(
+                        config.emissive[0],
+                        config.emissive[1],
+                        config.emissive[2],
+                        config.emissive[3],
+                    ),
+                    alpha_mode,
+                    double_sided: config.double_sided != 0,
+                    // A double-sided material still culls unless the back faces are kept, which
+                    // is a separate field and the one people actually mean.
+                    cull_mode: if config.double_sided != 0 {
+                        None
+                    } else {
+                        Some(bevy::render::render_resource::Face::Back)
+                    },
+                    unlit: config.unlit != 0,
+                    base_color_texture,
+                    normal_map_texture,
+                    metallic_roughness_texture,
+                    emissive_texture,
+                    occlusion_texture,
                     ..Default::default()
                 };
 

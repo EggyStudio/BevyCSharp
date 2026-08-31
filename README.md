@@ -276,6 +276,37 @@ Render.SetMesh(ctx.Ecs, entity, mesh);
 Render.SetMaterial(ctx.Ecs, entity, material);
 ```
 
+A material takes settings too, and its textures are image handles:
+
+```csharp
+var crate = Render.CreateMaterial(new MaterialSettings
+{
+    BaseColorTexture = AssetServer.Load(AssetKind.Image, "textures/crate.png"),
+    NormalMap = AssetServer.Load(AssetKind.Image, "textures/crate-normal.png"),
+    Roughness = 0.8f,
+});
+
+var glass = Render.CreateMaterial(new MaterialSettings
+{
+    BaseColor = (0.8f, 0.9f, 1f, 0.25f),
+    AlphaMode = AlphaMode.Blend,
+});
+```
+
+A texture is combined with its matching factor rather than replacing it, so a base colour map on
+the default white shows unchanged and tinting it is a matter of setting a colour. The image need
+not have finished loading, because the material holds a handle rather than pixels. Five maps are
+bound this way: base colour, normal, metallic-roughness, emissive and occlusion.
+
+`AlphaMode` decides what happens where a material is not opaque. `Mask` cuts pixels out at
+`AlphaCutoff`, which keeps the depth buffer honest and is what foliage wants; `Blend` is real
+transparency, drawn after everything else and sorted back to front; `Add` never darkens what is
+behind it. `DoubleSided` draws back faces, for anything modelled as a single sheet, and `Unlit`
+shows the base colour flat. `CreateMaterial(r, g, b)` still exists for the simple case.
+
+PNG and JPEG decode in every build, headless included, because that is work on data rather than
+on a GPU.
+
 A camera and a light take settings, and every value has a usable default:
 
 ```csharp

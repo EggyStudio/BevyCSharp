@@ -240,6 +240,68 @@ public struct NativeCameraConfig
     public int Order;
 }
 
+/// <summary>Everything a physically based material is made of.</summary>
+[StructLayout(LayoutKind.Sequential)]
+public struct NativeMaterialConfig
+{
+    /// <summary>Base colour red, linear.</summary>
+    public float BaseR;
+
+    /// <summary>Base colour green, linear.</summary>
+    public float BaseG;
+
+    /// <summary>Base colour blue, linear.</summary>
+    public float BaseB;
+
+    /// <summary>Opacity.</summary>
+    public float BaseA;
+
+    /// <summary>Zero for a dielectric, one for a metal.</summary>
+    public float Metallic;
+
+    /// <summary>Near zero for a mirror, one for matte.</summary>
+    public float Roughness;
+
+    /// <summary>Emissive red, linear.</summary>
+    public float EmissiveR;
+
+    /// <summary>Emissive green, linear.</summary>
+    public float EmissiveG;
+
+    /// <summary>Emissive blue, linear.</summary>
+    public float EmissiveB;
+
+    /// <summary>Emissive alpha, unused by the renderer but part of the colour.</summary>
+    public float EmissiveA;
+
+    /// <summary>0 opaque, 1 masked, 2 blended, 3 additive.</summary>
+    public int AlphaMode;
+
+    /// <summary>Cut-off for a masked material.</summary>
+    public float AlphaCutoff;
+
+    /// <summary>Non-zero to draw back faces too.</summary>
+    public int DoubleSided;
+
+    /// <summary>Non-zero to skip lighting.</summary>
+    public int Unlit;
+
+    /// <summary>Asset key of the base colour map, or -1.</summary>
+    public int BaseColorTexture;
+
+    /// <summary>Asset key of the normal map, or -1.</summary>
+    public int NormalMap;
+
+    /// <summary>Asset key of the metallic-roughness map, or -1.</summary>
+    public int MetallicRoughnessTexture;
+
+    /// <summary>Asset key of the emissive map, or -1.</summary>
+    public int EmissiveTexture;
+
+    /// <summary>Asset key of the ambient occlusion map, or -1.</summary>
+    public int OcclusionTexture;
+}
+
 /// <summary>What kind of light to spawn and how it behaves.</summary>
 [StructLayout(LayoutKind.Sequential)]
 public struct NativeLightConfig

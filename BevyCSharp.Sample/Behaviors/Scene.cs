@@ -59,8 +59,11 @@ public partial struct Scene
 
         var ground = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, ground, Render.CreateMesh(MeshShape.Plane, 24f, 24f));
-        Render.SetMaterial(ctx.Ecs, ground,
-            Render.CreateMaterial(0.10f, 0.11f, 0.13f, roughness: 0.9f));
+        Render.SetMaterial(ctx.Ecs, ground, Render.CreateMaterial(new MaterialSettings
+        {
+            BaseColorTexture = AssetServer.Load(AssetKind.Image, "textures/checker.png"),
+            Roughness = 0.9f,
+        }));
         ctx.Ecs.Add(ground, Transform.At(0f, -1.2f, 0f));
 
         var cube = ctx.Ecs.Spawn();

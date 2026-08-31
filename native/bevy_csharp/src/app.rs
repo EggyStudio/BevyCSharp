@@ -200,7 +200,21 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     if !windowed {
         use bevy::asset::AssetApp;
         app.init_asset::<bevy::mesh::Mesh>();
-        app.init_asset::<bevy::image::Image>();
+
+        // `ImagePlugin` registers the asset type itself, and adds the default and transparent
+        // images the renderer's fallbacks rely on.
+        app.add_plugins(bevy::image::ImagePlugin::default());
+
+        // Both plugins above only *pre-register* their loaders; the real registration happens in
+        // `RenderPlugin::finish`, which a windowless app never runs. Without this an image load
+        // waits for a loader that is never added, and the material bound to it draws untextured.
+        app.register_asset_loader(bevy::image::ImageLoader::new(
+            bevy::image::CompressedImageFormats::empty(),
+        ));
+        app.insert_resource(bevy::image::CompressedImageFormatSupport(
+            bevy::image::CompressedImageFormats::empty(),
+        ));
+
         // Materials are data as much as meshes are, so a render build that was asked for a
         // headless app still initialises them. Otherwise building one would fail on a bridge
         // that plainly has the renderer, which reads as a bug rather than a configuration.

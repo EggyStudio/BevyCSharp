@@ -30,6 +30,10 @@ var config = windowed
     ? Config.Windowed("BevyCSharp Sample", 1280, 720, ParseBackend(args, Backend))
     : new Config { Headless = true, HeadlessFrames = ParseFrames(args), HeadlessFps = 60 };
 
+// Bevy looks beside the running executable otherwise, which for a .NET app is whichever host
+// launched it rather than the directory the assets were copied to.
+config.AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets");
+
 if (windowed && !App.HasRenderer)
 {
     Console.Error.WriteLine(

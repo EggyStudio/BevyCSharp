@@ -135,7 +135,7 @@ public static class AssetServer
     /// loads as a <c>GltfMaterial</c>, which describes a material rather than being one the
     /// renderer can draw with, and the translation into a <c>StandardMaterial</c> lives in a
     /// private module of <c>bevy_pbr</c>. Give the entity a material from
-    /// <see cref="Render.CreateMaterial"/> instead.
+    /// <see cref="Render.CreateMaterial(MaterialSettings)"/> instead.
     /// </para>
     /// </remarks>
     /// <param name="path">Path to the glTF file, relative to the assets directory.</param>

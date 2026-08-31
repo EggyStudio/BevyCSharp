@@ -37,22 +37,21 @@ What is still missing from a glTF file:
   spawning a file's whole hierarchy is its own mechanism and its own bridge.
 - **Textures** are the next entry below, and are the reason materials matter.
 
-### Bind textures to materials
+### More texture formats
 
-`AssetKind.Image` already loads and returns a valid handle, and nothing consumes it.
-`bcs_material_create` takes six floats and has no parameter for a texture.
+`MaterialSettings` binds five maps and PNG and JPEG decode in every build. What is not compiled
+in: WebP, and the GPU-compressed formats beyond `ktx2`. Compressed textures also need
+`CompressedImageFormatSupport` to carry what the adapter can actually decode, which a windowless
+app currently reports as nothing.
 
-- features: `bevy/jpeg` and the other formats worth supporting alongside the current `png` and
-  `ktx2`
-- exports: a material builder that accepts image handles for base color, normal, metallic and
-  roughness, and emissive
-- managed: replace the flat `Render.CreateMaterial` argument list with a description type, since
-  the parameter count is already at six and every map adds one
+Nothing here blocks a game; it is a matter of size on disk and upload cost.
 
-### Widen material parameters
+### Texture sampling
 
-Emissive, alpha blending mode, double-sided and unlit are all `StandardMaterial` fields that no
-call reaches. Transparency is therefore not expressible.
+A texture is bound and drawn with Bevy's default sampler. Repeat and clamp, filtering, and
+anisotropy are not reachable, so a tiling floor cannot be told to tile from C#: the texture is
+stretched over whatever UVs the mesh carries. This is `ImagePlugin`'s default sampler and a
+per-image override, rather than a material setting.
 
 ## Presentation
 
