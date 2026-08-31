@@ -58,6 +58,7 @@ render = [
     "bevy/bevy_ui",
     "bevy/bevy_ui_render",
     "bevy/bevy_gizmos",
+    "bevy/bevy_gizmos_render",
     "bevy/bevy_scene",
     "bevy/default_font",
     "bevy/ktx2",

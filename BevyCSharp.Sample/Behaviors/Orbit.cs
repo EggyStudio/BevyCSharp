@@ -62,6 +62,33 @@ public partial struct Orbit
         transform.Rotation = Quat.FromRotationY(Angle);
     }
 
+    /// <summary>Draws each orbiting body's position and facing, on F2.</summary>
+    /// <remarks>
+    /// What gizmos are for: the numbers printed at the end say where things finished, and this
+    /// shows where they are while they move. Re-issued every frame, because a gizmo lasts one.
+    /// </remarks>
+    [OnUpdate]
+    [ToggleKey(Key.F2, DefaultEnabled = false)]
+    public static void ShowOrbits(BehaviorContext ctx)
+    {
+        if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
+
+        foreach (var row in ctx.Ecs.Query<Orbit>(markChanged: false))
+        {
+            var world = ctx.Ecs.GetOrDefault<GlobalTransform>(row.Entity);
+
+            // A line back to whatever it orbits, so the hierarchy is visible rather than implied.
+            var parent = ctx.Ecs.ParentOf(row.Entity);
+            var anchor = parent.IsNone
+                ? Vec3.Zero
+                : ctx.Ecs.GetOrDefault<GlobalTransform>(parent).Translation;
+
+            Gizmos.Line(anchor, world.Translation, (0.3f, 0.8f, 1f, 1f));
+            Gizmos.Sphere(world.Translation, 0.35f, (1f, 0.85f, 0.2f, 1f));
+            Gizmos.Axes(world.ToTransform(), 1.5f);
+        }
+    }
+
     /// <summary>Reports where everything ended up.</summary>
     [OnCleanup]
     public static void Report(BehaviorContext ctx)

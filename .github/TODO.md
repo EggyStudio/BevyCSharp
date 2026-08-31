@@ -95,10 +95,20 @@ needs on top of that:
 - **Nine-slice and tiling.** `SpriteImageMode` stretches the middle of an image and leaves its
   borders alone, for panels and bars that resize.
 
-### Gizmos
+### Gizmos beyond three shapes
 
-Debug drawing rather than a game feature. Once `bevy_gizmos_render` is on, a line, a sphere and
-an axis marker cover most uses.
+`bevy_gizmos_render` is compiled in and `Gizmos` draws lines, spheres and axis markers. Calls are
+queued and drained by one Bevy system each frame, because a `Gizmos` parameter cannot be held by
+an exclusive system, which is what every C# system is.
+
+What is not bridged:
+
+- **The other shapes.** Bevy draws rectangles, circles, arcs, arrows, grids and any 2D or 3D
+  primitive through `primitive_3d`. Each is another arm on the same queue.
+- **Configuration.** `GizmoConfig` sets line width, whether gizmos draw on top of the scene or
+  are occluded by it, and which render layers they appear on. All of it is Bevy's default.
+- **Gizmo groups.** A second `GizmoConfigGroup` lets one category be toggled or styled apart from
+  another, which is what a project with several kinds of debug drawing wants.
 
 ## Audio
 

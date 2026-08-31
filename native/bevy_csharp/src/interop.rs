@@ -235,6 +235,27 @@ pub struct BcsCameraConfig {
     pub order: i32,
 }
 
+/// One debug shape to draw this frame.
+///
+/// Which fields matter depends on `kind`, because the three shapes take different arguments and
+/// one struct crossing the boundary is simpler than three exports.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsGizmoConfig {
+    /// `0` line, `1` sphere, `2` axes.
+    pub kind: i32,
+    /// Line start, sphere centre, or where the axes are drawn.
+    pub start: [f32; 3],
+    /// Line end, and nothing for the other two.
+    pub end: [f32; 3],
+    /// Orientation of a sphere or a set of axes, as a quaternion.
+    pub rotation: [f32; 4],
+    /// Sphere radius, or the length of each axis.
+    pub radius: f32,
+    /// Linear RGBA. Axes colour themselves red, green and blue.
+    pub color: [f32; 4],
+}
+
 /// How a sprite is drawn.
 ///
 /// A sprite is a picture in the world rather than on the screen: it has a `Transform` like any

@@ -167,6 +167,12 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                     })
                     .set(asset_plugin(&asset_root)),
             );
+
+            // Debug drawing goes through a queue, because a `Gizmos` parameter cannot be held by
+            // an exclusive system. Only registered here: the plugin that draws them comes with
+            // `DefaultPlugins`, so a windowless app has nothing to drain into.
+            app.init_resource::<crate::gizmos::GizmoQueue>();
+            app.add_systems(Update, crate::gizmos::drain);
         }
     } else {
         use bevy::MinimalPlugins;

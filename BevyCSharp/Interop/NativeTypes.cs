@@ -240,6 +240,59 @@ public struct NativeCameraConfig
     public int Order;
 }
 
+/// <summary>One debug shape to draw this frame.</summary>
+[StructLayout(LayoutKind.Sequential)]
+public struct NativeGizmoConfig
+{
+    /// <summary>0 line, 1 sphere, 2 axes.</summary>
+    public int Kind;
+
+    /// <summary>Start, centre or position, X.</summary>
+    public float StartX;
+
+    /// <summary>Start, centre or position, Y.</summary>
+    public float StartY;
+
+    /// <summary>Start, centre or position, Z.</summary>
+    public float StartZ;
+
+    /// <summary>Line end, X.</summary>
+    public float EndX;
+
+    /// <summary>Line end, Y.</summary>
+    public float EndY;
+
+    /// <summary>Line end, Z.</summary>
+    public float EndZ;
+
+    /// <summary>Orientation, X.</summary>
+    public float RotationX;
+
+    /// <summary>Orientation, Y.</summary>
+    public float RotationY;
+
+    /// <summary>Orientation, Z.</summary>
+    public float RotationZ;
+
+    /// <summary>Orientation, W.</summary>
+    public float RotationW;
+
+    /// <summary>Sphere radius or axis length.</summary>
+    public float Radius;
+
+    /// <summary>Colour red.</summary>
+    public float ColorR;
+
+    /// <summary>Colour green.</summary>
+    public float ColorG;
+
+    /// <summary>Colour blue.</summary>
+    public float ColorB;
+
+    /// <summary>Colour alpha.</summary>
+    public float ColorA;
+}
+
 /// <summary>How a sprite is drawn.</summary>
 [StructLayout(LayoutKind.Sequential)]
 public struct NativeSpriteConfig

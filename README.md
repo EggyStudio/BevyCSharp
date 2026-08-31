@@ -207,6 +207,24 @@ doing work that only matters on screen.
 Set `Visibility` on an entity that is already drawable. Adding it writes the component but does
 not pull in the two Bevy computes from it, which arrive with the mesh.
 
+### Gizmos
+
+Debug drawing, for watching what a program is doing:
+
+```csharp
+Gizmos.Line(from, to, (0.3f, 0.8f, 1f, 1f));
+Gizmos.Sphere(position, 0.35f, (1f, 0.85f, 0.2f, 1f));
+Gizmos.Axes(transform, 1.5f);
+```
+
+A gizmo lasts one frame, so anything that should stay on screen is asked for again every frame.
+That is what makes them right for a value that changes and wrong for anything permanent, which
+wants an entity. `Axes` colours itself red, green and blue for X, Y and Z, which is the quickest
+way to see whether something faces where it should.
+
+Gizmos are drawn by a plugin that comes with the window, so a windowless run refuses rather than
+collecting shapes nothing will draw. Guard with `App.HasRenderer`.
+
 ### 2D
 
 A 2D camera measures in pixels from the middle of the window, and sprites are entities under it:
