@@ -261,6 +261,52 @@ public sealed unsafe class App : IDisposable
     public static void SetState<TState>(TState value) where TState : struct, Enum =>
         StateRegistry.Set(value);
 
+    /// <summary>
+    /// Registers a system to run once when <typeparamref name="TState"/> enters or leaves
+    /// <paramref name="value"/>.
+    /// </summary>
+    /// <remarks>
+    /// What <c>[OnEnter]</c> and <c>[OnExit]</c> emit. Unlike <see cref="AddSystem(Stage,
+    /// SystemDescriptor)"/> this runs once per transition rather than once per frame, which is
+    /// what makes it the place to build a screen or take one away.
+    /// </remarks>
+    /// <param name="value">The state value whose edge to run on.</param>
+    /// <param name="entering">True for the enter edge, false for the exit edge.</param>
+    /// <param name="descriptor">The system to run.</param>
+    /// <exception cref="InvalidOperationException">
+    /// The app is already running, or the state was never added.
+    /// </exception>
+    public App AddStateSystem<TState>(TState value, bool entering, SystemDescriptor descriptor)
+        where TState : struct, Enum
+    {
+        ArgumentNullException.ThrowIfNull(descriptor);
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (IsRunning)
+            throw new InvalidOperationException(
+                $"Cannot register system '{descriptor.Name}': the app is already running. "
+                + "Register systems from a plugin's Build method or before calling Run.");
+
+        descriptor.Source ??= SystemRegistrationSourceScope.Current;
+
+        // The stage is only a label here: a transition system belongs to no frame stage, and
+        // Startup is the closest thing to "runs outside the ordinary loop".
+        var registration = new RegisteredSystem(this, descriptor, Stage.Startup);
+        _systems.Add(registration);
+
+        Native.Check(
+            Native.bcs_state_add_system(
+                _handle,
+                StateRegistry.SlotForRegistration<TState>(),
+                StateRegistry.ToInt(value),
+                entering ? 0 : 1,
+                &RegisteredSystem.Trampoline,
+                registration.UserData),
+            $"registering system '{descriptor.Name}' on a {typeof(TState).Name} transition");
+
+        return this;
+    }
+
     // -- Plugins
 
     /// <summary>Adds a plugin, building it immediately. Adding the same type twice is a no-op.</summary>

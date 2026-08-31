@@ -49,6 +49,30 @@ public partial struct PlayingOnly
     public static void Tick(BehaviorContext ctx) => Ticks++;
 }
 
+/// <summary>A behavior that builds and tears down as a state is entered and left.</summary>
+[Behavior]
+public partial struct ScreenLifecycle
+{
+    /// <summary>How many times the screen has been built.</summary>
+    public static int Entered;
+
+    /// <summary>How many times it has been taken away.</summary>
+    public static int Exited;
+
+    /// <summary>Frames the tick ran, to show a transition is not a stage.</summary>
+    public static int Ticks;
+
+    [OnEnter(Screen.Playing)]
+    public static void Build(BehaviorContext ctx) => Entered++;
+
+    [OnExit(Screen.Playing)]
+    public static void TearDown(BehaviorContext ctx) => Exited++;
+
+    [OnUpdate]
+    [InState(Screen.Playing)]
+    public static void Tick(BehaviorContext ctx) => Ticks++;
+}
+
 /// <summary>A behavior carrying both an <c>[InState]</c> and a <c>[RunIf]</c>.</summary>
 [Behavior]
 public partial struct PlayingAndEnabled
@@ -269,5 +293,77 @@ public sealed class StateTests
         harness.Run();
 
         Assert.Equal(0, PlayingOnly.Ticks);
+    }
+
+    [Fact]
+    public void ATransitionRunsOnceRatherThanEveryFrame()
+    {
+        // The distinction that makes these worth having: a stage runs every frame the state is
+        // held, an edge runs once as it changes. A screen is built by one and driven by the
+        // other.
+        ScreenLifecycle.Entered = 0;
+        ScreenLifecycle.Exited = 0;
+        ScreenLifecycle.Ticks = 0;
+
+        using var harness = new EngineHarness(frames: 8, discoverBehaviors: true);
+        harness.App.AddState(Screen.Menu);
+
+        var frame = 0;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            frame++;
+
+            // Into the screen, then back out of it.
+            if (frame == 2) ctx.SetState(Screen.Playing);
+            if (frame == 5) ctx.SetState(Screen.Menu);
+        });
+
+        harness.Run();
+
+        Assert.Equal(1, ScreenLifecycle.Entered);
+        Assert.Equal(1, ScreenLifecycle.Exited);
+
+        // The tick ran while the screen was held, which is more than once and fewer than every
+        // frame of the run.
+        Assert.True(ScreenLifecycle.Ticks > 1, $"the tick ran {ScreenLifecycle.Ticks} times");
+        Assert.True(ScreenLifecycle.Ticks < 8, $"the tick ran {ScreenLifecycle.Ticks} times");
+    }
+
+    [Fact]
+    public void ATransitionThatNeverHappensNeverRuns()
+    {
+        ScreenLifecycle.Entered = 0;
+        ScreenLifecycle.Exited = 0;
+
+        using var harness = new EngineHarness(frames: 5, discoverBehaviors: true);
+        harness.App.AddState(Screen.Menu);
+        harness.Run();
+
+        Assert.Equal(0, ScreenLifecycle.Entered);
+        Assert.Equal(0, ScreenLifecycle.Exited);
+    }
+
+    [Fact]
+    public void ATransitionSystemCanBeRegisteredByHand()
+    {
+        // The route the attributes lower to, usable directly for a system that is not a behavior.
+        using var harness = new EngineHarness(frames: 6);
+        harness.App.AddState(Screen.Menu);
+
+        var entered = 0;
+
+        harness.App.AddStateSystem(Screen.Paused, entering: true, new SystemDescriptor(
+            _ => entered++, "Test.OnEnterPaused"));
+
+        var frame = 0;
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (++frame == 2) ctx.SetState(Screen.Paused);
+        });
+
+        harness.Run();
+
+        Assert.Equal(1, entered);
     }
 }

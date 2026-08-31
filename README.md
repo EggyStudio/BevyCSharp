@@ -676,6 +676,21 @@ var screen = ctx.State<Screen>();
 ctx.SetState(Screen.Paused);
 ```
 
+`[InState]` runs a method every frame the state is held. To run one *as* the state changes, on
+the edge rather than throughout, use `[OnEnter]` and `[OnExit]`:
+
+```csharp
+[OnEnter(Screen.Playing)]
+public static void BuildLevel(BehaviorContext ctx) { }
+
+[OnExit(Screen.Playing)]
+public static void TearDown(BehaviorContext ctx) { }
+```
+
+That is where a screen is built and taken away: once per transition, not once per frame. A
+transition attribute replaces the stage attribute rather than joining it, because the two say
+different things about when a method runs, and asking for both is reported as an error.
+
 A transition is queued, not immediate: it lands at Bevy's next transition point, so every system
 in the frame agrees on which state it is in rather than some seeing the change halfway through.
 

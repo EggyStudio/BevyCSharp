@@ -131,16 +131,18 @@ What is not bridged:
 
 ## Simulation structure
 
-### State transitions
+### Sub-states and scoped entities
 
-States themselves are bridged: `App.AddState`, `ctx.State`/`ctx.SetState` and `[InState]` scope a
-system to a value. What is missing is the other half, the schedules Bevy runs on the edges.
+States carry their edges: `[OnEnter]` and `[OnExit]` run once per transition, beside `[InState]`
+for every frame a state is held. Two pieces of Bevy's state machinery are still unbridged, and
+both are about what a state owns rather than when it changes:
 
-- exports: register a system into `OnEnter(state)` and `OnExit(state)`
-- managed: `[OnEnter(Screen.Playing)]` and `[OnExit(...)]`, which need a dimension beside `Stage`
-  in the generator's method model, since an edge is not a stage
-- note: today the same thing is expressed by watching for the change in a system scoped with
-  `[InState]`, which works but runs every frame rather than once on the edge.
+- **Sub-states.** `SubStates` exists only while a parent state holds a value, so a pause menu's
+  own state disappears with the run it belongs to. Bridging it means a slot knowing its parent,
+  which the fixed slot table does not express.
+- **State-scoped entities.** `DespawnOnExit` despawns an entity when a state is left, which is
+  what removes a level without a teardown system listing everything it spawned. It is a component
+  holding a state value, so it needs the same slot plumbing rather than a new export.
 
 ### Reading Bevy's own messages
 

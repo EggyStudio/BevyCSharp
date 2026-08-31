@@ -54,6 +54,19 @@ public static unsafe class StateRegistry
         }
     }
 
+    /// <summary>
+    /// The slot <typeparamref name="TState"/> holds, claiming one if it has none yet.
+    /// </summary>
+    /// <remarks>
+    /// Registration cannot demand that the state already exists. A behavior's transition systems
+    /// are registered when behaviors are discovered, which is before an app has had the chance to
+    /// add its states, and requiring one order over the other would be a trap. Claiming here
+    /// means a later <see cref="App.AddState{TState}"/> finds the same slot whichever came first.
+    /// If it never comes, the transition simply never fires.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Every slot is taken.</exception>
+    internal static int SlotForRegistration<TState>() where TState : struct, Enum => Claim<TState>();
+
     /// <summary>Claims a slot for <typeparamref name="TState"/>, or returns the one it holds.</summary>
     /// <exception cref="InvalidOperationException">Every slot is taken.</exception>
     internal static int Claim<TState>() where TState : struct, Enum

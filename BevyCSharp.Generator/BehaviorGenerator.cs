@@ -93,9 +93,13 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
             token.ThrowIfCancellationRequested();
 
             var stages = GetStages(member);
-            if (stages.Count == 0) continue;
+            var edge = GetStateEdge(member);
 
-            if (stages.Count > 1)
+            if (stages.Count == 0 && edge is null) continue;
+
+            // A transition is not a stage, so asking for both says two different things about
+            // when the method runs.
+            if (stages.Count > 1 || (stages.Count > 0 && edge is not null))
             {
                 diagnostics.Add(Diagnostic.Create(
                     BehaviorDiagnostics.MultipleStages, member.Locations.FirstOrDefault(), member.Name));
@@ -113,7 +117,8 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 
             methods.Add(new StageMethod
             {
-                Stage = stages[0],
+                Stage = stages.Count > 0 ? stages[0] : BehaviorStage.Startup,
+                Edge = edge,
                 Name = member.Name,
                 IsStatic = member.IsStatic,
                 Filters = GetFilters(member, diagnostics),
@@ -226,6 +231,34 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         return with.Count == 0 && without.Count == 0 && changed.Count == 0
             ? BehaviorFilters.None
             : new BehaviorFilters(with, without, changed);
+    }
+
+    /// <summary>Reads an <c>[OnEnter]</c> or <c>[OnExit]</c> attribute.</summary>
+    private static StateEdgeInfo? GetStateEdge(IMethodSymbol method)
+    {
+        foreach (var attribute in method.GetAttributes())
+        {
+            var entering = attribute.AttributeClass?.ToDisplayString() switch
+            {
+                $"{AttributeNamespace}.OnEnterAttribute" => true,
+                $"{AttributeNamespace}.OnExitAttribute" => false,
+                _ => (bool?)null,
+            };
+
+            if (entering is not { } edge || attribute.ConstructorArguments.Length == 0) continue;
+
+            var argument = attribute.ConstructorArguments[0];
+            if (argument.Type is not INamedTypeSymbol { EnumUnderlyingType: not null } enumType)
+                continue;
+            if (argument.Value is null) continue;
+
+            return new StateEdgeInfo(
+                enumType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                argument.Value.ToString(),
+                edge);
+        }
+
+        return null;
     }
 
     /// <summary>Reads an <c>[InState]</c> attribute into the enum type and value it names.</summary>

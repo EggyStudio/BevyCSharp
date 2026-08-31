@@ -52,10 +52,21 @@ internal static class BehaviorEmitter
         {
             var systemId = SystemId(model, method);
 
-            source.Append("        app.AddSystem(global::Bevy.Stage.")
-                .Append(method.Stage).Append(", new global::Bevy.SystemDescriptor(")
-                .Append(SystemMethodName(model, method))
-                .Append(", \"").Append(systemId).Append("\")");
+            if (method.Edge is { } edge)
+            {
+                source.Append("        app.AddStateSystem((").Append(edge.EnumType).Append(')')
+                    .Append(edge.Value).Append(", ").Append(edge.Entering ? "true" : "false")
+                    .Append(", new global::Bevy.SystemDescriptor(")
+                    .Append(SystemMethodName(model, method))
+                    .Append(", \"").Append(systemId).Append("\")");
+            }
+            else
+            {
+                source.Append("        app.AddSystem(global::Bevy.Stage.")
+                    .Append(method.Stage).Append(", new global::Bevy.SystemDescriptor(")
+                    .Append(SystemMethodName(model, method))
+                    .Append(", \"").Append(systemId).Append("\")");
+            }
 
             // Composes with whichever of the two below is present, because a system scoped to a
             // state may still be toggled or gated on something else.

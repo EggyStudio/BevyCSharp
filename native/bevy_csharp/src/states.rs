@@ -14,10 +14,10 @@
 use bevy::app::App;
 use bevy::ecs::world::World;
 use bevy::state::app::AppExtStates;
-use bevy::state::state::{NextState, State, States};
+use bevy::state::state::{NextState, OnEnter, OnExit, State, States};
 
 use crate::interop::status;
-use crate::state::{app_mut, with_world, BcsApp};
+use crate::state::{app_mut, loan_world, with_world, BcsApp, SystemReg};
 
 /// Declares the state slots and the dispatch that reaches them by index.
 ///
@@ -49,6 +49,26 @@ macro_rules! define_slots {
             match slot {
                 $($slot => world.get_resource::<State<$ty>>().map(|s| s.get().0),)+
                 _ => None,
+            }
+        }
+
+        /// Registers a system in the schedule Bevy runs when a slot enters or leaves a value.
+        ///
+        /// The two schedules are keyed by the state value as well as the type, so a system added
+        /// here runs on that one transition and nothing else.
+        fn add_edge(app: &mut App, slot: i32, value: i32, entering: bool, reg: SystemReg) -> i32 {
+            let run = move |world: &mut World| loan_world(world, || reg.invoke());
+
+            match slot {
+                $($slot => {
+                    if entering {
+                        app.add_systems(OnEnter($ty(value)), run);
+                    } else {
+                        app.add_systems(OnExit($ty(value)), run);
+                    }
+                    status::OK
+                })+
+                _ => status::NULL_ARG,
             }
         }
 
@@ -128,4 +148,37 @@ pub unsafe extern "C" fn bcs_state_get(slot: i32, out: *mut i32) -> i32 {
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_state_set(slot: i32, value: i32) -> i32 {
     crate::interop::guard(|| with_world(|world| queue(world, slot, value)))
+}
+
+/// Registers a C# system to run when `slot` enters or leaves `value`.
+///
+/// `edge` is `0` for entering and `1` for leaving. Unlike a stage, this runs once per transition
+/// rather than once per frame, which is what makes it the place to build a level or tear one down.
+///
+/// # Safety
+/// `handle` must be a live app; `func` must remain callable until the app is destroyed.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_state_add_system(
+    handle: *mut BcsApp,
+    slot: i32,
+    value: i32,
+    edge: i32,
+    func: extern "C" fn(*mut core::ffi::c_void),
+    user: *mut core::ffi::c_void,
+) -> i32 {
+    crate::interop::guard(|| {
+        let Some(app) = (unsafe { app_mut(handle) }) else {
+            return status::NULL_ARG;
+        };
+        if app.running {
+            return status::ALREADY_RUNNING;
+        }
+        let entering = match edge {
+            0 => true,
+            1 => false,
+            _ => return status::NULL_ARG,
+        };
+
+        add_edge(&mut app.app, slot, value, entering, SystemReg { func, user })
+    })
 }

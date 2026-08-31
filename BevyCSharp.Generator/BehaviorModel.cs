@@ -72,6 +72,12 @@ internal sealed record BehaviorFilters(
 /// <param name="DefaultEnabled">Whether the system starts enabled.</param>
 internal sealed record ToggleKeyInfo(int Key, int Modifiers, bool DefaultEnabled);
 
+/// <summary>An <c>[OnEnter]</c> or <c>[OnExit]</c> transition.</summary>
+/// <param name="EnumType">The state enum, fully qualified.</param>
+/// <param name="Value">The member's underlying constant.</param>
+/// <param name="Entering">True for the enter edge, false for the exit edge.</param>
+internal sealed record StateEdgeInfo(string EnumType, string Value, bool Entering);
+
 /// <summary>An <c>[InState]</c> restriction.</summary>
 /// <param name="EnumType">The state enum, fully qualified.</param>
 /// <param name="Value">The member's underlying constant.</param>
@@ -85,8 +91,14 @@ internal sealed record ConditionInfo(string MemberName, ConditionKind Kind);
 /// <summary>One stage-annotated method on a behavior struct.</summary>
 internal sealed record StageMethod
 {
-    /// <summary>The stage the method runs in.</summary>
+    /// <summary>
+    /// The stage the method runs in. Ignored when <see cref="Edge"/> is set, because a
+    /// transition system belongs to no frame stage.
+    /// </summary>
     public BehaviorStage Stage { get; init; }
+
+    /// <summary>A state transition to run on, instead of a stage.</summary>
+    public StateEdgeInfo? Edge { get; init; }
 
     /// <summary>The method's name.</summary>
     public string Name { get; init; } = string.Empty;
