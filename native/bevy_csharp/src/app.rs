@@ -176,6 +176,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
 
             // Where the readers of Bevy's window messages keep their place between frames.
             app.init_resource::<crate::events::WindowEventCursors>();
+            app.init_resource::<crate::events::FileDrops>();
         }
     } else {
         use bevy::MinimalPlugins;

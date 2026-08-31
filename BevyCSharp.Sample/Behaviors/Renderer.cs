@@ -25,6 +25,16 @@ public partial struct Renderer
         Console.WriteLine(adapter is null
             ? "[Renderer] the renderer has not reported an adapter"
             : $"[Renderer] adapter: {adapter}");
+
+        for (var i = 0; i < Window.MonitorCount(); i++)
+        {
+            var monitor = Window.Monitor(i);
+            var name = Window.MonitorName(i);
+
+            Console.WriteLine(
+                $"[Renderer] monitor {i}: {(name.Length > 0 ? name : "unnamed")} "
+                + $"{monitor.Width}x{monitor.Height} at {monitor.RefreshHz:F0} Hz");
+        }
     }
 
     /// <summary>Closes the window on Escape.</summary>
@@ -43,11 +53,6 @@ public partial struct Renderer
     /// <summary>Whether the cursor is currently locked to the window.</summary>
     private static bool _cursorLocked;
 
-    /// <summary>Drives the window from the keyboard: F11 fullscreen, Tab cursor lock.</summary>
-    /// <remarks>
-    /// Cursor lock is the one a first-person camera cannot do without, because it reads how far
-    /// the mouse moved rather than where it is.
-    /// </remarks>
     /// <summary>Reports what the window says about itself.</summary>
     /// <remarks>
     /// These come from Bevy rather than from another script, and arrive on the same bus, so this
@@ -63,7 +68,16 @@ public partial struct Renderer
             Console.WriteLine($"[Renderer] {(focus.Focused ? "focused" : "unfocused")}");
 
         foreach (var scale in ctx.Read<WindowScaleFactorChanged>())
-            Console.WriteLine($"[Renderer] display scale is now {scale.ScaleFactor:F2}");
+            Console.WriteLine($"[Renderer] display scale is {scale.ScaleFactor:F2}");
+
+        foreach (var hovered in ctx.Read<FileHovered>())
+            Console.WriteLine($"[Renderer] hovering {hovered.Path}");
+
+        foreach (var _ in ctx.Read<FileHoverCancelled>())
+            Console.WriteLine("[Renderer] the drag left without dropping");
+
+        foreach (var dropped in ctx.Read<FileDropped>())
+            Console.WriteLine($"[Renderer] dropped {dropped.Path}");
     }
 
     /// <summary>Echoes typed text, which is the layout's answer rather than the hardware's.</summary>
@@ -87,6 +101,11 @@ public partial struct Renderer
         }
     }
 
+    /// <summary>Drives the window from the keyboard: F11 fullscreen, Tab cursor lock.</summary>
+    /// <remarks>
+    /// Cursor lock is the one a first-person camera cannot do without, because it reads how far
+    /// the mouse moved rather than where it is.
+    /// </remarks>
     [OnUpdate]
     public static void ControlWindow(BehaviorContext ctx)
     {

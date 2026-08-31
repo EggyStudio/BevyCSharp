@@ -477,6 +477,28 @@ const _: () = assert!(core::mem::size_of::<BcsTouch>() == 24);
 const _: () = assert!(core::mem::size_of::<BcsInput>() == 320);
 const _: () = assert!(core::mem::size_of::<BcsFrameState>() == 360);
 
+/// Copies a string out to a caller's buffer, and reports how long it is.
+///
+/// The convention every text-returning entry point follows, because C# cannot know how long a
+/// string is before asking for it. The return value is the length in bytes, whether or not it
+/// fitted, so a caller that guessed too small learns the right size and asks again rather than
+/// receiving a truncated answer. Nothing is written when the buffer is too small, and the bytes
+/// written are never NUL-terminated: the length is the answer.
+///
+/// # Safety
+/// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.
+pub unsafe fn write_text(text: &str, out: *mut u8, capacity: i32) -> i32 {
+    let bytes = text.as_bytes();
+    let needed = bytes.len() as i32;
+
+    if capacity < needed || out.is_null() {
+        return needed;
+    }
+
+    unsafe { core::ptr::copy_nonoverlapping(bytes.as_ptr(), out, bytes.len()) };
+    needed
+}
+
 /// Runs `f`, converting any panic into [`status::PANIC`] instead of unwinding into .NET.
 pub fn guard<F: FnOnce() -> i32>(f: F) -> i32 {
     match std::panic::catch_unwind(AssertUnwindSafe(f)) {

@@ -255,4 +255,53 @@ public sealed class MessageTests
 
         Assert.Equal([1280f], widths);
     }
+
+    [Fact]
+    public void DroppedFilesArriveAsMessages()
+    {
+        // A drop cannot be synthesised without a desktop, so what is checked here is that the
+        // drain runs every frame without failing and reports nothing when nothing was dropped,
+        // and that a reader written against the messages compiles and runs against the bus.
+        using var harness = new EngineHarness(frames: 5);
+        var paths = new List<string>();
+        var cancellations = 0;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            foreach (var dropped in ctx.Read<FileDropped>()) paths.Add(dropped.Path);
+            foreach (var hovered in ctx.Read<FileHovered>()) paths.Add(hovered.Path);
+            foreach (var _ in ctx.Read<FileHoverCancelled>()) cancellations++;
+        });
+
+        harness.Run();
+
+        Assert.Empty(paths);
+        Assert.Equal(0, cancellations);
+    }
+
+    [Fact]
+    public void ADroppedFileCarriesItsPathThroughTheBus()
+    {
+        // The window is what sends these in a real run, so a test sends one itself to cover the
+        // shape a reader sees.
+        using var harness = new EngineHarness(frames: 5);
+        var paths = new List<string>();
+        var sent = false;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (!sent)
+            {
+                ctx.Send(new FileDropped("/home/player/levels/arena.gltf"));
+                sent = true;
+                return;
+            }
+
+            foreach (var dropped in ctx.Read<FileDropped>()) paths.Add(dropped.Path);
+        });
+
+        harness.Run();
+
+        Assert.Equal(["/home/player/levels/arena.gltf"], paths);
+    }
 }

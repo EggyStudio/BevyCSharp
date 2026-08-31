@@ -147,17 +147,19 @@ both are about what a state owns rather than when it changes:
 ### Engine messages that carry text
 
 The window's messages are drained onto the managed bus each frame, so `ctx.Read<WindowResized>()`
-reads an engine message the same way it reads one another system sent. Six are bridged, and they
-are the ones whose payload is numbers.
+reads an engine message the same way it reads one another system sent. Nine are bridged: six
+whose payload is numbers, and the three file drag-and-drop messages.
 
-What is left needs a way to hand text across, which nothing else in the bridge does yet:
+Text crosses the boundary by the caller owning the buffer: the entry point writes into it and
+returns the length in bytes, so a caller probes with a small buffer and calls again only when the
+answer did not fit. Anything else carrying text follows that convention.
 
-- **Files dropped on the window.** `FileDragAndDrop` carries a path, and is how an editor or a
-  tool takes input.
+What is left:
+
 - **Asset load failures.** `AssetEvent` reports which asset failed and why, where the handle only
   says that it did. The message is generic over the asset type, so it needs the curated-name
   treatment as well.
-- **Text and IME**, which the Input section covers.
+- **IME**, which the Input section covers.
 
 ## Rendering control
 
@@ -174,11 +176,10 @@ Cameras, lights and the window take their common parameters. What is left is nar
   which is how a room gets ambient light that matches it, need cubemap assets the asset surface
   cannot load.
 - **Window**: position, decorations, resizability, always-on-top and exclusive fullscreen are
-  bridged, and the monitors are readable. What is left is naming things and choosing modes: a
-  monitor's name and its list of video modes are both text or a list of structs, so exclusive
-  fullscreen takes the monitor's current mode rather than offering a resolution to pick from, and
-  a settings screen can list monitors only by size. Multiple windows are also unbridged: every
-  entry point here addresses the primary one.
+  bridged, and the monitors are readable by size and by name. What is left is choosing a mode: a
+  monitor's list of video modes is a list of structs, so exclusive fullscreen takes the monitor's
+  current mode rather than offering a resolution to pick from. Multiple windows are also
+  unbridged: every entry point here addresses the primary one.
 - **Verification**: none of this is checked by eye. The tests assert that settings are accepted
   and that a windowless run refuses, which is what can go wrong silently; whether the picture is
   right is confirmed by running the sample, which uses a custom clear colour, a tinted sun and a
@@ -193,7 +194,8 @@ Cameras, lights and the window take their common parameters. What is left is nar
 - **IME**: `Input.Text` covers typing, including dead keys, so a name field works. What is not
   bridged is composition: Bevy's `Ime` messages report a candidate string being assembled, which
   is what a Japanese or Chinese input method needs to show underlined text before it is
-  committed. It also needs the window's `ime_enabled` and `ime_position` set.
+  committed. The text convention the file drop messages use is what carries the candidate string;
+  what is left is the messages themselves and the window's `ime_enabled` and `ime_position`.
 - **Touch**: bridged as this frame's list, up to eight at once. Untested: this machine has no
   touchscreen, so only the empty case is covered. Gestures are not derived, and a touch that
   ends is reported once rather than lingering for a frame.

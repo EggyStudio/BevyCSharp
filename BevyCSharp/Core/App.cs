@@ -148,6 +148,7 @@ public sealed unsafe class App : IDisposable
             // Posted before the swap, so what the window reported at the top of this frame is
             // readable during it rather than during the next one.
             PostWindowMessages(world.Resource<MessageBus>());
+            PostFileDrops(world.Resource<MessageBus>());
 
             // Swapped here so the whole frame reads one complete, unchanging set.
             world.Resource<MessageBus>().Swap();
@@ -200,6 +201,47 @@ public sealed unsafe class App : IDisposable
                     break;
                 case 5:
                     bus.Send(new CursorLeft());
+                    break;
+            }
+        }
+    }
+
+    /// <summary>Moves what was dropped on the window onto the message bus.</summary>
+    /// <remarks>
+    /// Separate from the other window messages because each path is text, which crosses the
+    /// boundary one call at a time: the drain reports how many there are, then each is read by
+    /// index.
+    /// </remarks>
+    private static void PostFileDrops(MessageBus bus)
+    {
+        var count = Native.bcs_file_drops_drain();
+        if (count <= 0) return;
+
+        for (var i = 0; i < count; i++)
+        {
+            var index = i;
+
+            // A one-element array rather than a local, because a lambda cannot take the address
+            // of a local but can pin an array inside itself.
+            var kind = new int[1];
+            var path = Native.ReadText(
+                (buffer, capacity) =>
+                {
+                    fixed (int* target = kind)
+                        return Native.bcs_file_drop_path(index, target, buffer, capacity);
+                },
+                "reading a dropped file's path");
+
+            switch (kind[0])
+            {
+                case 0:
+                    bus.Send(new FileDropped(path));
+                    break;
+                case 1:
+                    bus.Send(new FileHovered(path));
+                    break;
+                case 2:
+                    bus.Send(new FileHoverCancelled());
                     break;
             }
         }

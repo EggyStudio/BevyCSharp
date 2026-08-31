@@ -549,9 +549,13 @@ from:
 for (var i = 0; i < Window.MonitorCount(); i++)
 {
     var m = Window.Monitor(i);
-    Console.WriteLine($"{m.Width}x{m.Height} at {m.RefreshHz:F0} Hz");
+    var name = Window.MonitorName(i);
+    Console.WriteLine($"{(name.Length > 0 ? name : $"Display {i + 1}")}: {m.Width}x{m.Height} at {m.RefreshHz:F0} Hz");
 }
 ```
+
+A monitor's name is read separately from the rest of it, because it is text. Platforms name a
+monitor nothing often enough that a settings screen wants the fallback shown above.
 
 `CursorGrab.Locked` is what a first-person camera needs, since it reads how far the mouse moved
 rather than where it is. Platforms differ in which grab they support: Windows confines and macOS
@@ -640,6 +644,23 @@ foreach (var focus in ctx.Read<WindowFocusChanged>())
 `CursorEntered` and `CursorLeft`. `WindowCloseRequested` is a request rather than a fact: the
 window is still open, which is the chance to save or to ask whether the player meant it, and
 `App.RequestExit` is what actually goes.
+
+Files dragged onto the window arrive the same way:
+
+```csharp
+foreach (var hovered in ctx.Read<FileHovered>())
+    ShowDropTarget(hovered.Path);
+
+foreach (var _ in ctx.Read<FileHoverCancelled>())
+    HideDropTarget();
+
+foreach (var dropped in ctx.Read<FileDropped>())
+    LoadLevel(dropped.Path);
+```
+
+One message per file, so dropping three sends three. The path is absolute and outside the asset
+directory, so it is read with ordinary file APIs rather than through the asset server. Every
+hover ends in either a drop or a cancellation.
 
 ---
 

@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 25;
+    internal const int ExpectedAbiVersion = 26;
 
     static Native() => NativeLoader.Initialize();
 
@@ -343,6 +343,21 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_window_events(NativeWindowEvent* events, int capacity);
 
+    /// <summary>Writes a monitor's name, returning its length in bytes.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_monitor_name(int index, byte* buffer, int capacity);
+
+    /// <summary>Collects the files dropped since the last call, returning how many.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_file_drops_drain();
+
+    /// <summary>Writes one drained drop's path, returning its length in bytes.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_file_drop_path(int index, int* kind, byte* buffer, int capacity);
+
     /// <summary>Plays a sound, returning the entity playing it or 0.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -430,6 +445,39 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_frame_state(NativeFrameState* state);
+
+    /// <summary>Writes text into a caller-owned buffer, returning its length in bytes.</summary>
+    /// <returns>
+    /// The length the text needs, whether or not it fitted, or a negative status code.
+    /// </returns>
+    internal delegate int TextWriter(byte* buffer, int capacity);
+
+    /// <summary>
+    /// Reads a string out of an entry point that follows the text convention.
+    /// </summary>
+    /// <remarks>
+    /// Text cannot be handed back in a fixed struct field the way a number can, and returning a
+    /// pointer would leave the question of who frees it. So the caller owns the buffer and the
+    /// bridge reports the length: one call covers anything short, and only longer text pays for a
+    /// second call against a buffer sized from the first answer.
+    /// </remarks>
+    internal static string ReadText(TextWriter write, string operation)
+    {
+        const int Probe = 256;
+
+        byte* probe = stackalloc byte[Probe];
+        var length = Check(write(probe, Probe), operation);
+
+        if (length == 0) return string.Empty;
+        if (length <= Probe) return System.Text.Encoding.UTF8.GetString(probe, length);
+
+        var buffer = new byte[length];
+        fixed (byte* target = buffer)
+        {
+            var written = Check(write(target, length), operation);
+            return System.Text.Encoding.UTF8.GetString(target, Math.Min(written, length));
+        }
+    }
 
     /// <summary>Throws if <paramref name="status"/> is a failure code.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

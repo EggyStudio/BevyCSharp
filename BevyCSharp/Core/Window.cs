@@ -24,8 +24,8 @@ public enum WindowMode
 
 /// <summary>One of the monitors the platform reports.</summary>
 /// <remarks>
-/// The name is not here: it is the one field that is text, and nothing else in the bridge hands a
-/// string back. Monitors are identified by index.
+/// The name is read separately, with <see cref="Window.MonitorName"/>, because it is text and the
+/// rest is not.
 /// </remarks>
 /// <param name="Width">Width in physical pixels.</param>
 /// <param name="Height">Height in physical pixels.</param>
@@ -150,6 +150,24 @@ public static unsafe class Window
             monitor.Y,
             monitor.RefreshMillihertz / 1000f,
             monitor.ScaleFactor);
+    }
+
+    /// <summary>
+    /// The name the platform gives a monitor, by an index below <see cref="MonitorCount"/>.
+    /// </summary>
+    /// <remarks>
+    /// What a settings menu shows next to each screen. Empty when the platform names the monitor
+    /// nothing, which happens often enough that a menu wants a fallback such as the index and the
+    /// resolution.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">There is no monitor at that index.</exception>
+    public static string MonitorName(int index)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(index);
+
+        return Native.ReadText(
+            (buffer, capacity) => Native.bcs_monitor_name(index, buffer, capacity),
+            $"reading the name of monitor {index}");
     }
 
     /// <summary>

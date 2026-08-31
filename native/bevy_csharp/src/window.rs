@@ -306,3 +306,43 @@ pub unsafe extern "C" fn bcs_monitor_info(index: i32, out: *mut crate::interop::
         }
     })
 }
+
+/// Writes a monitor's name into `out`, and returns its length in bytes.
+///
+/// Follows the text convention: the return value is the length whether or not it fitted, so a
+/// caller that guessed too small can ask again. A monitor the platform does not name reports a
+/// length of zero rather than failing, because an unnamed monitor is ordinary.
+///
+/// # Safety
+/// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_monitor_name(index: i32, out: *mut u8, capacity: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (index, out, capacity);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::window::Monitor;
+
+            let Ok(index) = usize::try_from(index) else {
+                return status::NULL_ARG;
+            };
+
+            with_world(|world| {
+                let mut monitors = world.query::<&Monitor>();
+                let Some(monitor) = monitors.iter(world).nth(index) else {
+                    return status::NO_ENTITY;
+                };
+
+                match monitor.name.as_deref() {
+                    Some(name) => unsafe { crate::interop::write_text(name, out, capacity) },
+                    None => 0,
+                }
+            })
+        }
+    })
+}

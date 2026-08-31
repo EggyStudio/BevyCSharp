@@ -272,9 +272,30 @@ public sealed class RenderControlTests
             var first = Window.Monitor(0);
             Assert.True(first.Width > 0 && first.Height > 0);
             Assert.Throws<BevyNativeException>(() => Window.Monitor(Window.MonitorCount()));
+
+            // A name is optional, so the only thing guaranteed is that asking is safe and that
+            // past the end is refused the same way the rest of the monitor surface refuses it.
+            Assert.NotNull(Window.MonitorName(0));
+            Assert.Throws<BevyNativeException>(() => Window.MonitorName(Window.MonitorCount()));
         });
 
         second.Run();
+    }
+
+    [Fact]
+    public void MonitorNamesAreRefusedWithoutAWindow()
+    {
+        // Windowless has no monitors, so every index is past the end.
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Update, _ =>
+        {
+            if (Window.MonitorCount() > 0) return;
+
+            Assert.Throws<BevyNativeException>(() => Window.MonitorName(0));
+        });
+
+        harness.Run();
     }
 
     [Fact]

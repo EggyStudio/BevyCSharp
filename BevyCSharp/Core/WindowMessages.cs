@@ -44,3 +44,27 @@ public readonly record struct CursorEntered;
 /// last position it saw.
 /// </remarks>
 public readonly record struct CursorLeft;
+
+/// <summary>
+/// A file was dropped on the window.
+/// </summary>
+/// <remarks>
+/// One message per file, so dropping a selection of three sends three. The path is what the
+/// platform reported, which is absolute and outside the asset directory, so it is read with
+/// ordinary file APIs rather than through the asset server.
+/// </remarks>
+/// <param name="Path">The absolute path of the dropped file.</param>
+public readonly record struct FileDropped(string Path);
+
+/// <summary>
+/// A file is being dragged over the window, and has not been let go.
+/// </summary>
+/// <remarks>
+/// The chance to show what the drop would do, before it happens. Every hover ends in either a
+/// <see cref="FileDropped"/> or a <see cref="FileHoverCancelled"/>.
+/// </remarks>
+/// <param name="Path">The absolute path of the file being dragged.</param>
+public readonly record struct FileHovered(string Path);
+
+/// <summary>The drag left the window without dropping, so any hover feedback should be cleared.</summary>
+public readonly record struct FileHoverCancelled;
