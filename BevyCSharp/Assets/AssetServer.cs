@@ -95,6 +95,15 @@ public static class AssetKind
 
     /// <summary>A shader. Render builds only.</summary>
     public const string Shader = "Shader";
+
+    /// <summary>
+    /// A whole glTF file: its meshes, materials and nodes. Render builds only.
+    /// </summary>
+    /// <remarks>
+    /// The description of a model rather than anything drawable. To draw part of one, load that
+    /// part directly with <see cref="AssetServer.LoadGltfMesh"/>.
+    /// </remarks>
+    public const string Gltf = "Gltf";
 }
 
 /// <summary>
@@ -107,6 +116,46 @@ public static class AssetKind
 /// </remarks>
 public static class AssetServer
 {
+    /// <summary>
+    /// Starts loading one drawable piece of geometry out of a glTF file.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A glTF file is a scene graph, and nothing in it maps one-to-one onto "a thing to draw".
+    /// Its meshes are named groups, and it is the primitive inside one that carries geometry and
+    /// a material, which is why both indices are here. A file exported as a single object is
+    /// mesh 0, primitive 0, and that is the default.
+    /// </para>
+    /// <para>
+    /// What comes back is an ordinary mesh handle, indistinguishable from one
+    /// <see cref="Render.CreateMesh"/> built, so <see cref="Render.SetMesh"/> takes it as it is.
+    /// </para>
+    /// <para>
+    /// <b>Geometry only.</b> The file's materials are not reachable: in Bevy 0.19 a glTF material
+    /// loads as a <c>GltfMaterial</c>, which describes a material rather than being one the
+    /// renderer can draw with, and the translation into a <c>StandardMaterial</c> lives in a
+    /// private module of <c>bevy_pbr</c>. Give the entity a material from
+    /// <see cref="Render.CreateMaterial"/> instead.
+    /// </para>
+    /// </remarks>
+    /// <param name="path">Path to the glTF file, relative to the assets directory.</param>
+    /// <param name="mesh">Which of the file's meshes, in the order the file declares them.</param>
+    /// <param name="primitive">Which primitive within that mesh.</param>
+    /// <example>
+    /// <code>
+    /// Render.SetMesh(ctx.Ecs, entity, AssetServer.LoadGltfMesh("models/ship.gltf"));
+    /// Render.SetMaterial(ctx.Ecs, entity, Render.CreateMaterial(0.6f, 0.6f, 0.62f));
+    /// </code>
+    /// </example>
+    public static AssetHandle LoadGltfMesh(string path, int mesh = 0, int primitive = 0)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+        ArgumentOutOfRangeException.ThrowIfNegative(mesh);
+        ArgumentOutOfRangeException.ThrowIfNegative(primitive);
+
+        return Load(AssetKind.Mesh, $"{path}#Mesh{mesh}/Primitive{primitive}");
+    }
+
     /// <summary>
     /// Starts loading an asset and returns a handle to it.
     /// </summary>

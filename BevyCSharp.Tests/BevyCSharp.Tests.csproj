@@ -24,4 +24,13 @@
                           ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
+
+    <!--
+      Test assets, copied beside the test binary because the asset server resolves paths relative
+      to an `assets` directory next to the executable.
+    -->
+    <ItemGroup>
+        <None Include="assets/**" CopyToOutputDirectory="PreserveNewest" LinkBase="assets"/>
+    </ItemGroup>
+
 </Project>

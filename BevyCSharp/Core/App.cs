@@ -74,7 +74,12 @@ public sealed unsafe class App : IDisposable
         Config = config ?? Config.Default;
 
         var titleBytes = Encoding.UTF8.GetBytes(Config.Title + "\0");
+        var assetRootBytes = Config.AssetRoot is null
+            ? null
+            : Encoding.UTF8.GetBytes(Config.AssetRoot + "\0");
+
         fixed (byte* title = titleBytes)
+        fixed (byte* assetRoot = assetRootBytes)
         {
             var native = new NativeConfig
             {
@@ -87,6 +92,7 @@ public sealed unsafe class App : IDisposable
                 HeadlessFrames = Config.HeadlessFrames,
                 Backend = (uint)Config.Backend,
                 FixedHz = Config.FixedHz,
+                AssetRoot = assetRoot,
             };
             _handle = Native.bcs_app_create(&native);
         }

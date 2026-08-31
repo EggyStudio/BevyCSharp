@@ -305,4 +305,7 @@ public unsafe struct NativeConfig
 
     /// <summary>Fixed timestep rate in Hz; 0 keeps Bevy's default of 64.</summary>
     public double FixedHz;
+
+    /// <summary>UTF-8 assets directory, or null for Bevy's default.</summary>
+    public byte* AssetRoot;
 }

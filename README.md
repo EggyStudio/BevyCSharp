@@ -217,8 +217,36 @@ AssetServer.Release(mesh);
 ```
 
 Loading is asynchronous, so `Load` returns as soon as the request is queued and the handle
-reports `Loading` until the file has been read. Paths resolve relative to the `assets` directory
-beside the executable.
+reports `Loading` until the file has been read.
+
+Paths resolve against `Config.AssetRoot`, and it is worth setting. Left unset, Bevy looks for an
+`assets` directory beside the running executable, which for a .NET app is whichever host launched
+it: under `dotnet test` or `dotnet exec` that is the host rather than the assembly, so assets
+copied next to the DLL are not found. Naming the directory outright is the only way to be sure:
+
+```csharp
+AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets")
+```
+
+### Models
+
+A glTF file holds many assets, so one is named with a label after the path. `LoadGltfMesh` builds
+that label, and what comes back is an ordinary mesh handle:
+
+```csharp
+var hull = AssetServer.LoadGltfMesh("models/ship.gltf");        // mesh 0, primitive 0
+Render.SetMesh(ctx.Ecs, entity, hull);
+Render.SetMaterial(ctx.Ecs, entity, Render.CreateMaterial(0.6f, 0.6f, 0.62f));
+```
+
+A glTF mesh is a named group and it is the primitive inside it that carries geometry, which is
+why both indices exist; a file exported as one object is mesh 0, primitive 0. Needs a render
+build, since the loader comes with the renderer.
+
+Geometry only, for now. In Bevy 0.19 a glTF material loads as a `GltfMaterial`, which describes a
+material rather than being one the renderer draws with, and the translation into a
+`StandardMaterial` lives in a private module of `bevy_pbr`. Whole scenes are also out: a glTF
+scene is a `WorldAsset` in 0.19, a different mechanism from every other asset here.
 
 Bevy's own handle is generic and reference counted, and neither property survives a trip through
 a C ABI, so C# holds a key into a table on the engine side that owns the real handle. Holding one

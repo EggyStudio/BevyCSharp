@@ -99,6 +99,19 @@ struct HeadlessFrameLimit {
 fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) -> App {
     let mut app = App::new();
 
+    // Bevy resolves a relative asset directory against the executable, which for a .NET host is
+    // whatever launched the process: `dotnet` itself under `dotnet test`, not the directory the
+    // assembly and its assets are in. Naming the directory outright is the only way to be sure,
+    // so the managed side passes one whenever it knows where its assets are.
+    let asset_plugin = |root: &Option<String>| match root {
+        Some(path) if !path.is_empty() => bevy::asset::AssetPlugin {
+            file_path: path.clone(),
+            ..Default::default()
+        },
+        _ => bevy::asset::AssetPlugin::default(),
+    };
+    let asset_root = unsafe { crate::interop::cstr_to_string(config.asset_root) };
+
     #[cfg(feature = "render")]
     let windowed = config.headless == 0;
     #[cfg(not(feature = "render"))]
@@ -151,7 +164,8 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                     .set(RenderPlugin {
                         render_creation: RenderCreation::Automatic(Box::new(wgpu)),
                         ..default()
-                    }),
+                    })
+                    .set(asset_plugin(&asset_root)),
             );
         }
     } else {
@@ -169,7 +183,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         app.add_plugins(bevy::input::InputPlugin);
         app.add_plugins(bevy::transform::TransformPlugin);
         app.add_plugins(bevy::state::app::StatesPlugin);
-        app.add_plugins(bevy::asset::AssetPlugin::default());
+        app.add_plugins(asset_plugin(&asset_root));
     }
 
     let _ = title;
@@ -192,6 +206,12 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         // that plainly has the renderer, which reads as a bug rather than a configuration.
         #[cfg(feature = "render")]
         app.init_asset::<bevy::pbr::StandardMaterial>();
+
+        // Registers the glTF loader and the asset types it produces. `DefaultPlugins` carries it
+        // on the windowed path, so adding it there as well would hit the double-registration
+        // described above.
+        #[cfg(feature = "render")]
+        app.add_plugins(bevy::gltf::GltfPlugin::default());
     }
 
     // A rate of zero means "leave Bevy's own", which is 64 Hz. A negative or non-finite one is

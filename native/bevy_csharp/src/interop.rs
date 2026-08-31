@@ -205,6 +205,9 @@ pub struct BcsConfig {
     /// How many times a second the `FixedUpdate` schedule should run. `0` keeps Bevy's own
     /// default, which is 64 Hz.
     pub fixed_hz: f64,
+    /// Directory assets are loaded from, or null for Bevy's default of `assets` beside the
+    /// executable. May be null in any build.
+    pub asset_root: *const c_char,
 }
 
 /// How a camera should see, passed from C# when one is spawned.

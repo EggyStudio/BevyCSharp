@@ -48,6 +48,22 @@ public sealed class Config
     public uint HeadlessFrames { get; set; }
 
     /// <summary>
+    /// Where assets are loaded from. Null uses Bevy's default of <c>assets</c> beside the
+    /// executable.
+    /// </summary>
+    /// <remarks>
+    /// Worth setting, because "beside the executable" is rarely where a .NET app's assets are.
+    /// Bevy resolves a relative path against the running executable, which under <c>dotnet
+    /// test</c> or <c>dotnet exec</c> is the host rather than the assembly, so an
+    /// <c>assets</c> directory copied next to the DLL is not found. Naming it outright is the
+    /// only way to be sure:
+    /// <code>
+    /// AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets")
+    /// </code>
+    /// </remarks>
+    public string? AssetRoot { get; set; }
+
+    /// <summary>
     /// How many times a second <see cref="Stage.FixedUpdate"/> runs. Zero keeps Bevy's own
     /// default of 64.
     /// </summary>

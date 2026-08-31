@@ -59,6 +59,10 @@ public sealed class EngineHarness : IDisposable
             HeadlessFrames = frames,
             HeadlessFps = fps,
             FixedHz = fixedHz,
+
+            // The test host is `dotnet`, so Bevy's default of "assets beside the executable"
+            // would look beside that rather than beside this assembly.
+            AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets"),
         });
 
         _app.AddPlugin(new EnginePlugin());

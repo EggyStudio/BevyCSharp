@@ -144,8 +144,14 @@ pub(crate) fn clone_handle(world: &World, key: i32) -> Option<UntypedHandle> {
 /// are accepted depends on what this build was compiled with: a headless build has the data-only
 /// asset types, a render build adds the ones that need the GPU pipeline.
 ///
-/// Scenes are absent. In 0.19 `Scene` became a trait rather than a loadable asset, and glTF
-/// scenes come from `bevy_gltf`, which this crate does not depend on yet.
+/// A path may name a sub-asset, which is how one glTF file yields many assets: everything after a
+/// `#` is a label Bevy resolves against the file. `ship.gltf#Mesh0/Primitive0` is a `Mesh` and
+/// `ship.gltf#Material0` a `StandardMaterial`, so a glTF part arrives as an ordinary handle of the
+/// kind it already is, and needs no bridge of its own. `Gltf` itself loads the whole file, which
+/// is the description rather than anything drawable.
+///
+/// Whole scenes are absent. In 0.19 a glTF scene is a `WorldAsset` rather than the old `Scene`
+/// asset, which is a different mechanism from anything else here and needs its own bridge.
 fn load(world: &mut World, kind: &str, path: &str) -> i32 {
     let Some(server) = world.get_resource::<AssetServer>() else {
         return status::UNSUPPORTED;
@@ -160,6 +166,8 @@ fn load(world: &mut World, kind: &str, path: &str) -> i32 {
             .untyped(),
         #[cfg(feature = "render")]
         "Shader" => server.load::<bevy::shader::Shader>(path.to_string()).untyped(),
+        #[cfg(feature = "render")]
+        "Gltf" => server.load::<bevy::gltf::Gltf>(path.to_string()).untyped(),
         _ => return status::NO_COMPONENT,
     };
 

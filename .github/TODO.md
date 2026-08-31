@@ -17,18 +17,25 @@ code.
 Nothing here can be worked around from C#. Without it a project is limited to four primitive
 shapes in flat colors.
 
-### Load meshes from glTF
+### Materials and scenes from glTF
 
-`bevy_gltf` is not compiled in at all, so a scene can only use `Cuboid`, `Sphere`, `Plane` and
-`Capsule`.
+Geometry is done: `bevy_gltf` is compiled into the render profile and
+`AssetServer.LoadGltfMesh(path, mesh, primitive)` returns an ordinary mesh handle. The API
+question the old entry raised is settled, and 0.19 settled it: parts are addressed individually,
+by the label Bevy's own asset paths already understand (`ship.gltf#Mesh0/Primitive0`), so no
+export was needed at all.
 
-- features: `bevy/bevy_gltf`
-- exports: extend `bcs_asset_load` to accept a glTF kind, plus a way to name a sub-asset, since
-  one file holds many meshes, materials and nodes
-- managed: `AssetKind.Gltf`, and a call that attaches a loaded mesh to an entity the way
-  `Render.SetMesh` attaches a built one
-- note: a glTF file produces a hierarchy rather than a single mesh. Decide whether the bridge
-  spawns that hierarchy or exposes the parts individually, because it changes the API shape.
+What is still missing from a glTF file:
+
+- **Materials.** `ship.gltf#Material0` loads as a `GltfMaterial`, which describes a material
+  rather than being one the renderer draws with. `standard_material_from_gltf_material` does the
+  translation, but it lives in `bevy_pbr`'s private `gltf` module and is registered as an
+  extension handler by `PbrPlugin`, which a headless-configured app does not install. Either add
+  `PbrPlugin` to that path and check the handler produces a labelled `StandardMaterial`, or copy
+  the conversion field by field on this side.
+- **Scenes.** A glTF scene is a `WorldAsset` in 0.19 rather than the old `Scene` asset, so
+  spawning a file's whole hierarchy is its own mechanism and its own bridge.
+- **Textures** are the next entry below, and are the reason materials matter.
 
 ### Bind textures to materials
 
