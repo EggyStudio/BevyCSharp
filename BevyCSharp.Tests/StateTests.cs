@@ -257,4 +257,17 @@ public sealed class StateTests
 
         Assert.Equal(Countdown.Late, seen);
     }
+
+    [Fact]
+    public void AScopedBehaviorInAnAppWithoutThatStateDoesNotRun()
+    {
+        // A state that was never added reads as "not in it". The alternative, throwing, happens
+        // once per system per frame and buries the run in identical stack traces.
+        PlayingOnly.Ticks = 0;
+
+        using var harness = new EngineHarness(frames: 5, discoverBehaviors: true);
+        harness.Run();
+
+        Assert.Equal(0, PlayingOnly.Ticks);
+    }
 }

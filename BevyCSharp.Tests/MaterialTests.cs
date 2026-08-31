@@ -18,6 +18,21 @@ public sealed class MaterialTests
     private const string Texture = "textures/checker.png";
 
     [Fact]
+    public void TheHarnessLooksForAssetsWhereTheyWereCopied()
+    {
+        // Every asset test fails obscurely if this is wrong, and it is wrong under any host that
+        // is not the assembly's own directory, which is what a test runner usually is. Asserting
+        // the path directly turns that into one clear failure instead of five confusing ones.
+        Assert.True(
+            Directory.Exists(EngineHarness.AssetDirectory),
+            $"no assets directory at {EngineHarness.AssetDirectory}");
+
+        Assert.True(
+            File.Exists(Path.Combine(EngineHarness.AssetDirectory, "textures", "checker.png")),
+            $"the texture fixture is missing from {EngineHarness.AssetDirectory}");
+    }
+
+    [Fact]
     public void AnImageLoadsOnAnyBuild()
     {
         // No renderer guard: decoding a PNG is work on data, not on a GPU, which is why the

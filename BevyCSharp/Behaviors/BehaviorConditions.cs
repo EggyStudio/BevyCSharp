@@ -51,13 +51,37 @@ public static class BehaviorConditions
     /// Passes while <typeparamref name="TState"/> holds <paramref name="value"/>.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// What <c>[InState]</c> emits. The state is read per system run rather than cached, because
     /// a transition applied this frame has to take effect this frame.
+    /// </para>
+    /// <para>
+    /// A state that was never added reads as "not in it", so the system does not run. Throwing
+    /// would be the louder answer, but this is evaluated once per system per frame, and the
+    /// report would repeat for as long as the app ran. It is written to standard error once
+    /// instead.
+    /// </para>
     /// </remarks>
     public static Func<World, bool> InState<TState>(TState value) where TState : struct, Enum
     {
         var wanted = StateRegistry.ToInt(value);
-        return _ => StateRegistry.CurrentRaw<TState>() == wanted;
+        var reported = false;
+
+        return _ =>
+        {
+            if (StateRegistry.TryCurrentRaw<TState>(out var current)) return current == wanted;
+
+            if (!reported)
+            {
+                reported = true;
+                Console.Error.WriteLine(
+                    $"[BevyCSharp] A system is scoped to {typeof(TState).Name}.{value}, but no "
+                    + $"state of type {typeof(TState).Name} was added, so it will never run. Call "
+                    + $"app.AddState({typeof(TState).Name}.<initial>) before running the app.");
+            }
+
+            return false;
+        };
     }
 
     /// <summary>Passes only on the first frame.</summary>

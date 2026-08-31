@@ -20,8 +20,13 @@
     </ItemGroup>
 
 
+    <!--
+      The destination is spelled out rather than left to LinkBase, which not every build host
+      applies the same way. See the same item in BevyCSharp.Tests.
+    -->
     <ItemGroup>
-        <None Include="assets/**" CopyToOutputDirectory="PreserveNewest" LinkBase="assets"/>
+        <None Include="assets/**" CopyToOutputDirectory="PreserveNewest"
+              Link="assets/%(RecursiveDir)%(Filename)%(Extension)"/>
     </ItemGroup>
 
 </Project>

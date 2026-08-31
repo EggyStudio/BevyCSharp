@@ -44,6 +44,16 @@ public static unsafe class StateRegistry
         }
     }
 
+    /// <summary>The slot <typeparamref name="TState"/> holds, if it was ever added.</summary>
+    internal static bool TryGetSlot<TState>(out int slot) where TState : struct, Enum
+    {
+        lock (Gate)
+        {
+            Reset();
+            return Slots.TryGetValue(typeof(TState), out slot);
+        }
+    }
+
     /// <summary>Claims a slot for <typeparamref name="TState"/>, or returns the one it holds.</summary>
     /// <exception cref="InvalidOperationException">Every slot is taken.</exception>
     internal static int Claim<TState>() where TState : struct, Enum
@@ -106,6 +116,27 @@ public static unsafe class StateRegistry
             $"reading state {typeof(TState).Name}");
 
         return value;
+    }
+
+    /// <summary>
+    /// The raw current value, reporting whether <typeparamref name="TState"/> exists at all.
+    /// </summary>
+    /// <remarks>
+    /// For a caller that runs every frame and cannot afford to throw once per frame if the state
+    /// was never added.
+    /// </remarks>
+    internal static bool TryCurrentRaw<TState>(out int value) where TState : struct, Enum
+    {
+        value = 0;
+        if (!TryGetSlot<TState>(out var slot)) return false;
+
+        int read;
+        Native.Check(
+            Native.bcs_state_get(slot, &read),
+            $"reading state {typeof(TState).Name}");
+
+        value = read;
+        return true;
     }
 
     /// <summary>

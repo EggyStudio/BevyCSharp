@@ -52,14 +52,23 @@ public sealed class Config
     /// executable.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Worth setting, because "beside the executable" is rarely where a .NET app's assets are.
     /// Bevy resolves a relative path against the running executable, which under <c>dotnet
-    /// test</c> or <c>dotnet exec</c> is the host rather than the assembly, so an
-    /// <c>assets</c> directory copied next to the DLL is not found. Naming it outright is the
-    /// only way to be sure:
+    /// test</c> or <c>dotnet exec</c> is the host rather than the assembly, so an <c>assets</c>
+    /// directory copied next to the DLL is not found.
+    /// </para>
+    /// <para>
+    /// For an application, <see cref="AppContext.BaseDirectory"/> is the right anchor:
     /// <code>
     /// AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets")
     /// </code>
+    /// Under a test runner or any other custom host it is not, because it names the directory of
+    /// whatever started the process. Anchor on the assembly that owns the assets instead:
+    /// <code>
+    /// Path.GetDirectoryName(typeof(MyGame).Assembly.Location)
+    /// </code>
+    /// </para>
     /// </remarks>
     public string? AssetRoot { get; set; }
 

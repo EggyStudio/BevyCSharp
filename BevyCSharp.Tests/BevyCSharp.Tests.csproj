@@ -26,11 +26,15 @@
 
 
     <!--
-      Test assets, copied beside the test binary because the asset server resolves paths relative
-      to an `assets` directory next to the executable.
+      Test assets, copied beside the test binary under the directory the harness points Bevy at.
+
+      The destination is spelled out rather than left to LinkBase, which not every build host
+      applies the same way: some flatten the tree into the output root, leaving the subdirectories
+      empty and every asset load failing on a path that looks correct.
     -->
     <ItemGroup>
-        <None Include="assets/**" CopyToOutputDirectory="PreserveNewest" LinkBase="assets"/>
+        <None Include="assets/**" CopyToOutputDirectory="PreserveNewest"
+              Link="assets/%(RecursiveDir)%(Filename)%(Extension)"/>
     </ItemGroup>
 
 </Project>

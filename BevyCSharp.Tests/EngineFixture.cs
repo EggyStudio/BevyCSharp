@@ -28,6 +28,19 @@ public sealed class EngineHarness : IDisposable
     /// <summary>The app under test.</summary>
     public App App => _app;
 
+    /// <summary>
+    /// Where the test assets are, anchored on this assembly.
+    /// </summary>
+    /// <remarks>
+    /// Not <see cref="AppContext.BaseDirectory"/>, which is the directory of whatever launched
+    /// the process: `dotnet` under `dotnet test`, and the IDE's own runner under a Rider or
+    /// Visual Studio run. Neither is where these assets were copied. The assembly knows where it
+    /// is regardless of who started it.
+    /// </remarks>
+    public static string AssetDirectory { get; } = Path.Combine(
+        Path.GetDirectoryName(typeof(EngineHarness).Assembly.Location) ?? AppContext.BaseDirectory,
+        "assets");
+
     /// <summary>The managed resource world.</summary>
     public World World => _app.World;
 
@@ -60,9 +73,7 @@ public sealed class EngineHarness : IDisposable
             HeadlessFps = fps,
             FixedHz = fixedHz,
 
-            // The test host is `dotnet`, so Bevy's default of "assets beside the executable"
-            // would look beside that rather than beside this assembly.
-            AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets"),
+            AssetRoot = AssetDirectory,
         });
 
         _app.AddPlugin(new EnginePlugin());
