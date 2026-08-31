@@ -59,6 +59,14 @@ render = [
     "bevy/bevy_ui_render",
     "bevy/bevy_gizmos",
     "bevy/bevy_gizmos_render",
+    # Sound. Unlike everything else here this needs a system library at build time: cpal, which
+    # Bevy's audio sits on, links against ALSA on Linux. That is why it is in this profile and
+    # not the minimal one, which stays buildable with nothing but a C compiler.
+    "bevy/bevy_audio",
+    "bevy/vorbis",
+    "bevy/wav",
+    "bevy/flac",
+    "bevy/mp3",
     "bevy/bevy_scene",
     "bevy/default_font",
     "bevy/ktx2",

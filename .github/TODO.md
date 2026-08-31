@@ -112,11 +112,22 @@ What is not bridged:
 
 ## Audio
 
-`bevy_audio` is not compiled in, so there is no audio support.
+`bevy_audio` is compiled into the render profile with Ogg Vorbis, WAV, FLAC and MP3, and `Audio`
+plays, stops, pauses and sets volume. A playing sound is an entity.
 
-- features: `bevy/bevy_audio`, plus formats from `vorbis`, `wav`, `mp3` and `flac`
-- exports: load an audio source, play it, stop it, set volume and looping
-- managed: `AssetKind.Audio` and an `Audio` surface
+It is the one part of the bridge that takes a system library: cpal links against ALSA on Linux,
+so a render build needs `libasound2-dev` or the equivalent. `build-native.sh` installs it into the
+container on the `--portable` path and checks for it before a local build, naming the package per
+distribution. The minimal profile is untouched and still builds with nothing but a C compiler.
+
+What is not bridged:
+
+- **Spatial audio.** `PlaybackSettings.spatial` positions a sound at its entity's transform and
+  attenuates it with distance, which needs an `AudioListener` on the camera as well.
+- **Playback position.** The sink knows where it is in a clip and can be seeked; neither is
+  reachable, so a pause and resume across a scene change starts the clip again.
+- **Global volume.** `GlobalVolume` scales everything at once, which is what a settings screen
+  changes.
 
 ## Simulation structure
 

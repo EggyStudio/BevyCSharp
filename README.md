@@ -207,6 +207,29 @@ doing work that only matters on screen.
 Set `Visibility` on an entity that is already drawable. Adding it writes the component but does
 not pull in the two Bevy computes from it, which arrive with the mesh.
 
+### Audio
+
+```csharp
+var clip = AssetServer.Load(AssetKind.Audio, "sounds/hit.ogg");
+
+Audio.Play(clip, AudioSettings.Effect);          // plays once, then despawns itself
+var music = Audio.Play(theme, AudioSettings.Music);
+Audio.SetVolume(music, 0.2f);
+Audio.Stop(music);
+```
+
+Ogg Vorbis, WAV, FLAC and MP3. A sound that is playing is an entity, so it can be despawned,
+parented, tagged with your own components and found by a query, and `Play` hands that entity
+back. `PlaybackMode.Despawn` is what a one-shot effect wants: nothing has to remember to clean it
+up.
+
+`SetVolume`, `Pause` and `Resume` reach the sink Bevy attaches once playback has started, so they
+report `NotPresent` if called in the same frame the sound was started in.
+
+Sound is in the render profile rather than the minimal one, and not because it draws: it is the
+one part of the engine that needs a system library at build time. See
+[Native profiles](#native-profiles).
+
 ### Gizmos
 
 Debug drawing, for watching what a program is doing:
@@ -846,10 +869,10 @@ build/                 the native build scripts, and everything they generate
 
 The bridge builds in two profiles:
 
-| Profile    | What it includes                                                  |
-|------------|-------------------------------------------------------------------|
-| `headless` | App, ECS, time, input, transform. No window, no GPU. The default. |
-| `render`   | Bevy's `DefaultPlugins`: windowing, renderer, input backend.      |
+| Profile    | What it includes                                                       |
+|------------|------------------------------------------------------------------------|
+| `headless` | App, ECS, time, input, transform, assets. No window, no GPU. The default. |
+| `render`   | The above plus windowing, the renderer, UI, 2D, gizmos and audio.      |
 
 ```bash
 build/build-native.sh --render          # bash
@@ -857,10 +880,16 @@ build/build-native.ps1 -Render          # PowerShell, same output
 ```
 
 The `render` profile is assembled feature by feature rather than taking Bevy's
-`default_platform`, which drags in gamepad support and links Wayland at build time. As
-assembled here it needs nothing but a C compiler on any platform: X11 comes through `x11-dl`,
-Wayland through `wayland-dlopen`, and Vulkan through the loader, all resolved at runtime. It
-does take several minutes to compile and produces a much larger library.
+`default_platform`, which drags in gamepad support and links Wayland at build time. Everything
+graphical resolves at runtime: X11 comes through `x11-dl`, Wayland through `wayland-dlopen`, and
+Vulkan through the loader. It takes several minutes to compile and produces a much larger library.
+
+Audio is the exception, and the only system dependency in the tree: Bevy's audio sits on cpal,
+which links against ALSA on Linux, so a `render` build there needs `libasound2-dev` or the
+equivalent for the distribution. `build-native.sh` checks for it and names the package if it is
+missing, and installs it into the container on the `--portable` path. The `headless` profile has
+no such dependency and builds with nothing but a C compiler. Neither affects anyone consuming the
+NuGet package, which ships the native prebuilt for each runtime identifier.
 
 `Config.Headless` forces the windowless path even on a render build, which is how the tests and
 a dedicated server run the same behavior code without a display.

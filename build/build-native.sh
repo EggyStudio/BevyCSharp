@@ -108,6 +108,20 @@ if [[ -z "$TARGET" ]]; then
     fi
 fi
 
+# A render build links against ALSA, and alsa-sys reports a missing header as a compiler error
+# from a crate the caller never asked for. Saying so here, by name, is worth the four lines.
+if [[ $PORTABLE -eq 0 && "$FEATURES" == *render* && "$(uname -s)" == "Linux" ]]; then
+    if ! pkg-config --exists alsa 2>/dev/null; then
+        echo "error: a render build needs ALSA's development headers, which are not installed." >&2
+        echo "       Bevy's audio links against them through cpal." >&2
+        echo "         Fedora, RHEL  : sudo dnf install alsa-lib-devel" >&2
+        echo "         Debian, Ubuntu: sudo apt install libasound2-dev" >&2
+        echo "         Arch          : sudo pacman -S alsa-lib" >&2
+        echo "       Or build with --portable, which installs them into a container instead." >&2
+        exit 1
+    fi
+fi
+
 if [[ $PORTABLE -eq 1 && "$TARGET" != *linux-gnu ]]; then
     echo "error: --portable only applies to Linux targets, not '$TARGET'." >&2
     exit 1
@@ -142,17 +156,25 @@ if [[ $PORTABLE -eq 1 ]]; then
     TARGET_DIR="$BUILD_DIR/target-portable"
     mkdir -p "$TARGET_DIR" "${CARGO_HOME:-$HOME/.cargo}/registry"
 
+    # A render build needs ALSA's development headers, because Bevy's audio links against it.
+    # The image does not carry them, so they are installed into the container that is about to be
+    # thrown away rather than onto the machine.
+    SETUP=""
+    if [[ "$FEATURES" == *render* ]]; then
+        SETUP="apt-get update -qq && apt-get install -y -qq --no-install-recommends libasound2-dev >/dev/null && "
+    fi
+
     "$CONTAINER" run --rm \
         -v "$REPO_ROOT:/src:z" \
         -v "${CARGO_HOME:-$HOME/.cargo}/registry:/usr/local/cargo/registry:z" \
         -w /src \
         "$PORTABLE_IMAGE" \
-        cargo build \
+        sh -c "${SETUP}cargo build \
             --release \
-            --manifest-path "native/Cargo.toml" \
-            --target-dir "build/$(basename "$TARGET_DIR")" \
+            --manifest-path native/Cargo.toml \
+            --target-dir build/$(basename "$TARGET_DIR") \
             --no-default-features \
-            --features "$FEATURES"
+            --features $FEATURES"
 
     # No --target inside the container, so cargo writes to the plain release directory.
     BUILT="$TARGET_DIR/release/$LIBNAME"

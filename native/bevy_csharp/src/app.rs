@@ -231,6 +231,13 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         // what a glTF scene is too. Unlike the two above, this registers its loader in `build`.
         app.add_plugins(bevy::world_serialization::WorldSerializationPlugin);
 
+        // Registers `AudioSource`, its decoders, and the output device if there is one. Bevy
+        // tolerates having none: it logs and plays nothing, which is what a windowless run wants
+        // anyway. Without this a sound load panics rather than failing, because Bevy refuses to
+        // hand out a handle for an asset type it was never told about.
+        #[cfg(feature = "render")]
+        app.add_plugins(bevy::audio::AudioPlugin::default());
+
         // Registers the glTF loader and the asset types it produces. `DefaultPlugins` carries it
         // on the windowed path, so adding it there as well would hit the double-registration
         // described above.

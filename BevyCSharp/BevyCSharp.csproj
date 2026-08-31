@@ -115,7 +115,6 @@
         <BevyCSharpStagedNative Include="$(BevyCSharpArtifactDir)**/bevy_csharp.dll"/>
         <BevyCSharpStagedNative Include="$(BevyCSharpArtifactDir)**/libbevy_csharp.dylib"/>
     </ItemGroup>
-
     <Target Name="BevyCSharpVerifyNativeIsCurrent"
             BeforeTargets="GenerateNuspec"
             Condition="'$(BevyCSharpSkipNativeFreshnessCheck)' != 'true'"

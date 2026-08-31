@@ -235,6 +235,20 @@ pub struct BcsCameraConfig {
     pub order: i32,
 }
 
+/// How a sound should be played.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsAudioConfig {
+    /// `0` play once, `1` loop, `2` play once and despawn the entity afterwards.
+    pub mode: i32,
+    /// Loudness, where `1` is the sound as recorded and `0` is silence.
+    pub volume: f32,
+    /// Playback rate, which changes pitch with it. `1` is as recorded.
+    pub speed: f32,
+    /// Non-zero to start paused.
+    pub paused: i32,
+}
+
 /// One debug shape to draw this frame.
 ///
 /// Which fields matter depends on `kind`, because the three shapes take different arguments and

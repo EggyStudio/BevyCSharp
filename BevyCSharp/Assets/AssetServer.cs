@@ -106,6 +106,15 @@ public static class AssetKind
     public const string Gltf = "Gltf";
 
     /// <summary>
+    /// A sound: Ogg Vorbis, WAV, FLAC or MP3. Render builds only.
+    /// </summary>
+    /// <remarks>
+    /// Play it with <see cref="Audio.Play(AssetHandle, AudioSettings)"/>. Sound belongs to the
+    /// render profile because that is the one that takes a system library, not because it draws.
+    /// </remarks>
+    public const string Audio = "Audio";
+
+    /// <summary>
     /// A saved world: the entities and components of a `.scn` or `.scn.ron` file.
     /// </summary>
     /// <remarks>
