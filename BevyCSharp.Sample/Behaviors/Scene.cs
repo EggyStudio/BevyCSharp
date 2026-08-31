@@ -32,7 +32,7 @@ public partial struct Scene
         {
             FieldOfView = 55f,
             Clear = ClearMode.Custom,
-            ClearColor = (0.02f, 0.03f, 0.05f, 1f),
+            ClearColor = (0, 0, 0, 1f),
         });
         ctx.Ecs.Add(camera, Transform.LookingAt(new Vec3(3.5f, 3f, 6f), Vec3.Zero, Vec3.UnitY));
 

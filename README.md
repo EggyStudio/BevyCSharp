@@ -2,7 +2,7 @@
 
 Write [Bevy](https://bevy.org) games in C#.
 
-![A lit cube turning above a ground plane, drawn by Bevy's renderer](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/screenshot-3.png)
+![A lit cube turning above a ground plane, drawn by Bevy's renderer](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/screenshot-4.png)
 
 <sup>`BevyCSharp.Sample`, running on Bevy's PBR renderer through the bridge:
 `dotnet run --project BevyCSharp.Sample`</sup>
