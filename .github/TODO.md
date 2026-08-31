@@ -144,20 +144,20 @@ both are about what a state owns rather than when it changes:
   what removes a level without a teardown system listing everything it spawned. It is a component
   holding a state value, so it needs the same slot plumbing rather than a new export.
 
-### Reading Bevy's own messages
+### Engine messages that carry text
 
-C#-to-C# broadcast is covered: `ctx.Send` and `ctx.Read` carry a message from one system to any
-number of others. What is not bridged is Bevy's own message stream, so nothing the engine reports
-is reachable: window resizes, files dropped on the window, asset load failures, and whatever a
-Rust plugin sends.
+The window's messages are drained onto the managed bus each frame, so `ctx.Read<WindowResized>()`
+reads an engine message the same way it reads one another system sent. Six are bridged, and they
+are the ones whose payload is numbers.
 
-- exports: drain a named message type into a byte buffer, the way `bcs_component_id_of` resolves
-  a curated list of names rather than anything the type registry holds
-- managed: mirrors for the payloads worth reading, and a way to feed them into the same
-  `ctx.Read` the managed bus uses, so a reader does not care which side sent it
-- note: the managed bus swaps once a frame rather than giving each reader a cursor, so a message
-  is readable the frame after it was sent. Matching Bevy's cursor semantics would need a stable
-  identity per reader, which a C# system does not have today.
+What is left needs a way to hand text across, which nothing else in the bridge does yet:
+
+- **Files dropped on the window.** `FileDragAndDrop` carries a path, and is how an editor or a
+  tool takes input.
+- **Asset load failures.** `AssetEvent` reports which asset failed and why, where the handle only
+  says that it did. The message is generic over the asset type, so it needs the curated-name
+  treatment as well.
+- **Text and IME**, which the Input section covers.
 
 ## Rendering control
 

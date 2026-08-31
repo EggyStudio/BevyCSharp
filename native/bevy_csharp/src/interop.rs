@@ -235,6 +235,22 @@ pub struct BcsCameraConfig {
     pub order: i32,
 }
 
+/// One thing the window reported.
+///
+/// A tagged triple rather than six structs, because they cross the boundary as one array and the
+/// payloads are at most two numbers each.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsWindowEvent {
+    /// `0` resized, `1` focus changed, `2` close requested, `3` scale changed, `4` cursor
+    /// entered, `5` cursor left.
+    pub kind: i32,
+    /// Width for a resize, `1` or `0` for focus, the scale factor for a scale change.
+    pub a: f32,
+    /// Height for a resize, and nothing for the rest.
+    pub b: f32,
+}
+
 /// How a sound should be played.
 #[repr(C)]
 #[derive(Clone, Copy)]

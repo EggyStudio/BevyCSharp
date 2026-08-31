@@ -568,6 +568,22 @@ cursor needs a stable identity per reader, and a C# system has none the engine c
 swap is what makes "exactly once" true here. `ctx.Send` is safe from a parallel behavior method,
 like `ctx.Cmd`; reading is main-thread only.
 
+What the window reports arrives on the same bus, so an engine message is read exactly like one
+another system sent:
+
+```csharp
+foreach (var resized in ctx.Read<WindowResized>())
+    Layout(resized.Width, resized.Height);
+
+foreach (var focus in ctx.Read<WindowFocusChanged>())
+    if (!focus.Focused) Pause();
+```
+
+`WindowResized`, `WindowFocusChanged`, `WindowCloseRequested`, `WindowScaleFactorChanged`,
+`CursorEntered` and `CursorLeft`. `WindowCloseRequested` is a request rather than a fact: the
+window is still open, which is the chance to save or to ask whether the player meant it, and
+`App.RequestExit` is what actually goes.
+
 ---
 
 ## Attributes

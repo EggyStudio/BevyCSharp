@@ -173,6 +173,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // `DefaultPlugins`, so a windowless app has nothing to drain into.
             app.init_resource::<crate::gizmos::GizmoQueue>();
             app.add_systems(Update, crate::gizmos::drain);
+
+            // Where the readers of Bevy's window messages keep their place between frames.
+            app.init_resource::<crate::events::WindowEventCursors>();
         }
     } else {
         use bevy::MinimalPlugins;

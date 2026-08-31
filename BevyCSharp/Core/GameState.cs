@@ -62,7 +62,7 @@ public static unsafe class StateRegistry
     /// are registered when behaviors are discovered, which is before an app has had the chance to
     /// add its states, and requiring one order over the other would be a trap. Claiming here
     /// means a later <see cref="App.AddState{TState}"/> finds the same slot whichever came first.
-    /// If it never comes, the transition simply never fires.
+    /// If it never comes, the transition never fires.
     /// </remarks>
     /// <exception cref="InvalidOperationException">Every slot is taken.</exception>
     internal static int SlotForRegistration<TState>() where TState : struct, Enum => Claim<TState>();

@@ -203,4 +203,56 @@ public sealed class MessageTests
 
         Assert.Equal(500, read);
     }
+
+    [Fact]
+    public void EngineMessagesArriveOnTheSameBus()
+    {
+        // The point of draining Bevy's own messages onto this bus: a reader uses one API and does
+        // not care which side sent what it is reading. A windowless run reports nothing, so what
+        // is asserted here is that reading is safe and empty rather than broken.
+        using var harness = new EngineHarness(frames: 4);
+        var reads = 0;
+        var resizes = 0;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            reads++;
+            resizes += ctx.Read<WindowResized>().Length;
+
+            // The engine's messages read exactly like anything else, including being empty.
+            Assert.True(ctx.Read<WindowFocusChanged>().IsEmpty);
+            Assert.True(ctx.Read<CursorEntered>().IsEmpty);
+        });
+
+        harness.Run();
+
+        Assert.True(reads > 1);
+        Assert.Equal(0, resizes);
+    }
+
+    [Fact]
+    public void AnEngineMessageAndAUserMessageShareAQueue()
+    {
+        // Same type, two senders. Nothing distinguishes them once they are on the bus, which is
+        // what lets a test stand in for the window.
+        using var harness = new EngineHarness(frames: 5);
+        var widths = new List<float>();
+        var sent = false;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (!sent)
+            {
+                ctx.Send(new WindowResized(1280f, 720f));
+                sent = true;
+                return;
+            }
+
+            foreach (var resized in ctx.Read<WindowResized>()) widths.Add(resized.Width);
+        });
+
+        harness.Run();
+
+        Assert.Equal([1280f], widths);
+    }
 }

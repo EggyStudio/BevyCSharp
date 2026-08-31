@@ -48,6 +48,24 @@ public partial struct Renderer
     /// Cursor lock is the one a first-person camera cannot do without, because it reads how far
     /// the mouse moved rather than where it is.
     /// </remarks>
+    /// <summary>Reports what the window says about itself.</summary>
+    /// <remarks>
+    /// These come from Bevy rather than from another script, and arrive on the same bus, so this
+    /// reads them exactly as it would read a message the sample sent itself.
+    /// </remarks>
+    [OnUpdate]
+    public static void ReportWindow(BehaviorContext ctx)
+    {
+        foreach (var resized in ctx.Read<WindowResized>())
+            Console.WriteLine($"[Renderer] resized to {resized.Width:F0}x{resized.Height:F0}");
+
+        foreach (var focus in ctx.Read<WindowFocusChanged>())
+            Console.WriteLine($"[Renderer] {(focus.Focused ? "focused" : "unfocused")}");
+
+        foreach (var scale in ctx.Read<WindowScaleFactorChanged>())
+            Console.WriteLine($"[Renderer] display scale is now {scale.ScaleFactor:F2}");
+    }
+
     /// <summary>Echoes typed text, which is the layout's answer rather than the hardware's.</summary>
     /// <remarks>
     /// Type with a non-US layout or use a dead key and this shows the character the user meant,

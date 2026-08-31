@@ -145,6 +145,10 @@ public sealed unsafe class App : IDisposable
             world.Resource<Time>().Update(state.Time);
             world.Resource<Input>().Update(state.Input);
 
+            // Posted before the swap, so what the window reported at the top of this frame is
+            // readable during it rather than during the next one.
+            PostWindowMessages(world.Resource<MessageBus>());
+
             // Swapped here so the whole frame reads one complete, unchanging set.
             world.Resource<MessageBus>().Swap();
         }, "Engine.FrameSync"));
@@ -154,6 +158,51 @@ public sealed unsafe class App : IDisposable
         {
             world.Resource<EcsCommands>().Apply(world.Resource<EcsWorld>());
         }, "Engine.CommandFlush"));
+    }
+
+    /// <summary>
+    /// Moves what the window reported onto the message bus, as ordinary messages.
+    /// </summary>
+    /// <remarks>
+    /// Bevy reports these as buffered messages read through a cursor, which a C# system cannot
+    /// hold. Draining them here and posting them to the bus means a reader uses the same
+    /// <c>ctx.Read</c> for an engine message as for one another system sent.
+    /// </remarks>
+    private static void PostWindowMessages(MessageBus bus)
+    {
+        // Sized for a frame's worth. A burst larger than this is not lost: the bridge leaves the
+        // rest queued and hands them over on the next call.
+        const int Capacity = 16;
+
+        NativeWindowEvent* buffer = stackalloc NativeWindowEvent[Capacity];
+        var count = Native.bcs_window_events(buffer, Capacity);
+        if (count <= 0) return;
+
+        for (var i = 0; i < count; i++)
+        {
+            var e = buffer[i];
+            switch (e.Kind)
+            {
+                case 0:
+                    bus.Send(new WindowResized(e.A, e.B));
+                    break;
+                case 1:
+                    bus.Send(new WindowFocusChanged(e.A != 0f));
+                    break;
+                case 2:
+                    bus.Send(new WindowCloseRequested());
+                    break;
+                case 3:
+                    bus.Send(new WindowScaleFactorChanged(e.A));
+                    break;
+                case 4:
+                    bus.Send(new CursorEntered());
+                    break;
+                case 5:
+                    bus.Send(new CursorLeft());
+                    break;
+            }
+        }
     }
 
     // -- System registration
