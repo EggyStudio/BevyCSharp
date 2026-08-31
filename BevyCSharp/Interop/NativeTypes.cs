@@ -240,6 +240,56 @@ public struct NativeCameraConfig
     public int Order;
 }
 
+/// <summary>How a sprite is drawn.</summary>
+[StructLayout(LayoutKind.Sequential)]
+public struct NativeSpriteConfig
+{
+    /// <summary>Asset key of the image.</summary>
+    public int Image;
+
+    /// <summary>Tint red.</summary>
+    public float ColorR;
+
+    /// <summary>Tint green.</summary>
+    public float ColorG;
+
+    /// <summary>Tint blue.</summary>
+    public float ColorB;
+
+    /// <summary>Tint alpha.</summary>
+    public float ColorA;
+
+    /// <summary>Non-zero to use <see cref="SizeX"/> and <see cref="SizeY"/>.</summary>
+    public int HasSize;
+
+    /// <summary>Width in world units.</summary>
+    public float SizeX;
+
+    /// <summary>Height in world units.</summary>
+    public float SizeY;
+
+    /// <summary>Non-zero to draw only part of the image.</summary>
+    public int HasRect;
+
+    /// <summary>Left of that part, in pixels.</summary>
+    public float RectLeft;
+
+    /// <summary>Top of that part, in pixels.</summary>
+    public float RectTop;
+
+    /// <summary>Right of that part, in pixels.</summary>
+    public float RectRight;
+
+    /// <summary>Bottom of that part, in pixels.</summary>
+    public float RectBottom;
+
+    /// <summary>Non-zero to mirror horizontally.</summary>
+    public int FlipX;
+
+    /// <summary>Non-zero to mirror vertically.</summary>
+    public int FlipY;
+}
+
 /// <summary>Where a UI node sits and how large it is.</summary>
 [StructLayout(LayoutKind.Sequential)]
 public struct NativeUiNodeConfig

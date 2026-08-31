@@ -53,6 +53,7 @@ render = [
     "bevy/bevy_pbr",
     "bevy/bevy_gltf",
     "bevy/bevy_sprite",
+    "bevy/bevy_sprite_render",
     "bevy/bevy_text",
     "bevy/bevy_ui",
     "bevy/bevy_ui_render",

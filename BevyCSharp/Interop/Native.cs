@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 17;
+    internal const int ExpectedAbiVersion = 18;
 
     static Native() => NativeLoader.Initialize();
 
@@ -306,6 +306,16 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial ulong bcs_render_spawn_light(NativeLightConfig* config);
+
+    /// <summary>Spawns a 2D camera and returns its entity, or 0.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial ulong bcs_render_spawn_camera_2d(int order);
+
+    /// <summary>Attaches a sprite to an entity.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_sprite(ulong entity, NativeSpriteConfig* config);
 
 
     // -- Renderer (render builds only)

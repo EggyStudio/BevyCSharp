@@ -235,6 +235,31 @@ pub struct BcsCameraConfig {
     pub order: i32,
 }
 
+/// How a sprite is drawn.
+///
+/// A sprite is a picture in the world rather than on the screen: it has a `Transform` like any
+/// other entity, and a 2D camera decides what a world unit is worth in pixels.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsSpriteConfig {
+    /// Asset key of the image to draw.
+    pub image: i32,
+    /// Tint, multiplied with the image. Linear RGBA, white for the image unchanged.
+    pub color: [f32; 4],
+    /// Non-zero to draw at `size` rather than at the image's own dimensions.
+    pub has_size: i32,
+    /// Width and height in world units, used when `has_size` is set.
+    pub size: [f32; 2],
+    /// Non-zero to draw only the part of the image `rect` names.
+    pub has_rect: i32,
+    /// Left, top, right and bottom of that part, in pixels.
+    pub rect: [f32; 4],
+    /// Non-zero to mirror horizontally.
+    pub flip_x: i32,
+    /// Non-zero to mirror vertically.
+    pub flip_y: i32,
+}
+
 /// Where a UI node sits and how large it is.
 ///
 /// Each length is a value and a unit, because Bevy's `Val` is an enum and a bare float cannot say

@@ -498,3 +498,117 @@ public static unsafe class Render
             $"{attempted} needs a native build with the renderer compiled in. Rebuild the bridge "
             + "with build/build-native.sh --render, or guard the call with App.HasRenderer.");
 }
+
+/// <summary>
+/// How a sprite is drawn.
+/// </summary>
+/// <remarks>
+/// A sprite is a picture in the world rather than on the screen: it carries a
+/// <see cref="Transform"/> like anything else, and a 2D camera decides what a world unit is worth
+/// in pixels. For something pinned to the screen, use <see cref="Ui"/>.
+/// </remarks>
+public sealed class SpriteSettings
+{
+    /// <summary>Tint, multiplied with the image. White leaves it unchanged.</summary>
+    public (float R, float G, float B, float A) Color { get; set; } = (1f, 1f, 1f, 1f);
+
+    /// <summary>
+    /// Width and height in world units, or null to use the image's own dimensions.
+    /// </summary>
+    public (float Width, float Height)? Size { get; set; }
+
+    /// <summary>
+    /// The part of the image to draw, in pixels, or null for all of it.
+    /// </summary>
+    /// <remarks>
+    /// What a sprite sheet needs: one image holding many frames, each drawn by naming its
+    /// rectangle rather than by loading a separate file.
+    /// </remarks>
+    public (float Left, float Top, float Right, float Bottom)? Rect { get; set; }
+
+    /// <summary>Mirror horizontally, which is how one walk cycle faces both ways.</summary>
+    public bool FlipX { get; set; }
+
+    /// <summary>Mirror vertically.</summary>
+    public bool FlipY { get; set; }
+}
+
+/// <summary>
+/// Draws in two dimensions: a camera that measures in pixels, and sprites to put under it.
+/// </summary>
+/// <remarks>
+/// Separate from <see cref="Render"/> because the two are different ways of looking at the world
+/// rather than different things to draw. Entities, transforms and parenting are the same
+/// underneath, so a sprite can carry any component and be parented to anything.
+/// </remarks>
+/// <example>
+/// <code>
+/// Render2d.SpawnCamera2d();
+///
+/// var badge = ctx.Ecs.Spawn();
+/// Render2d.SetSprite(ctx.Ecs, badge, AssetServer.Load(AssetKind.Image, "ui/badge.png"));
+/// ctx.Ecs.Add(badge, Transform.At(120f, -80f, 0f));
+/// </code>
+/// </example>
+public static unsafe class Render2d
+{
+    /// <summary>
+    /// Spawns a 2D camera and returns it.
+    /// </summary>
+    /// <remarks>
+    /// One world unit is one pixel, and the origin is the middle of the window, so a sprite at
+    /// <c>(100, 50)</c> sits a hundred pixels right and fifty up from the centre.
+    /// </remarks>
+    /// <param name="order">
+    /// Draw order. Leave at zero for a 2D-only game. Above a 3D camera's order it draws over the
+    /// scene without clearing it, which is how a 2D overlay is layered on a 3D one.
+    /// </param>
+    /// <returns><see cref="Entity.None"/> on a build with no renderer.</returns>
+    public static Entity SpawnCamera2d(int order = 0) =>
+        new(Native.bcs_render_spawn_camera_2d(order));
+
+    /// <summary>Attaches a sprite to an entity, or replaces the one it has.</summary>
+    /// <exception cref="BevyNativeException">The handle names no image, or the entity is gone.</exception>
+    public static void SetSprite(EcsWorld world, Entity entity, AssetHandle image) =>
+        SetSprite(world, entity, image, new SpriteSettings());
+
+    /// <summary>Attaches a sprite drawn as <paramref name="settings"/> describes.</summary>
+    /// <exception cref="BevyNativeException">The handle names no image, or the entity is gone.</exception>
+    public static void SetSprite(
+        EcsWorld world,
+        Entity entity,
+        AssetHandle image,
+        SpriteSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var native = new NativeSpriteConfig
+        {
+            Image = image.Key,
+            ColorR = settings.Color.R,
+            ColorG = settings.Color.G,
+            ColorB = settings.Color.B,
+            ColorA = settings.Color.A,
+            HasSize = settings.Size is null ? 0 : 1,
+            SizeX = settings.Size?.Width ?? 0f,
+            SizeY = settings.Size?.Height ?? 0f,
+            HasRect = settings.Rect is null ? 0 : 1,
+            RectLeft = settings.Rect?.Left ?? 0f,
+            RectTop = settings.Rect?.Top ?? 0f,
+            RectRight = settings.Rect?.Right ?? 0f,
+            RectBottom = settings.Rect?.Bottom ?? 0f,
+            FlipX = settings.FlipX ? 1 : 0,
+            FlipY = settings.FlipY ? 1 : 0,
+        };
+
+        var status = Native.bcs_render_set_sprite(entity.Bits, &native);
+        if (status == NativeStatus.Unsupported)
+            throw new BevyNativeException(
+                NativeStatus.Unsupported,
+                "Attaching a sprite failed: this native build has no renderer. Rebuild the "
+                + "bridge with build/build-native.sh --render.");
+
+        Native.Check(status, $"attaching a sprite to {entity}");
+    }
+}

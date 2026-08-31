@@ -207,6 +207,36 @@ doing work that only matters on screen.
 Set `Visibility` on an entity that is already drawable. Adding it writes the component but does
 not pull in the two Bevy computes from it, which arrive with the mesh.
 
+### 2D
+
+A 2D camera measures in pixels from the middle of the window, and sprites are entities under it:
+
+```csharp
+Render2d.SpawnCamera2d();
+
+var badge = ctx.Ecs.Spawn();
+Render2d.SetSprite(ctx.Ecs, badge, AssetServer.Load(AssetKind.Image, "ui/badge.png"));
+ctx.Ecs.Add(badge, Transform.At(120f, -80f, 0f));
+```
+
+A sprite is a picture in the world rather than on the screen: it carries a `Transform` like
+anything else, so parenting, hierarchy and every other component work on it. For something pinned
+to the screen regardless of the camera, use `Ui` instead.
+
+`SpriteSettings` tints, resizes, mirrors, and picks one rectangle out of a sheet, which is how a
+single image holds many frames:
+
+```csharp
+Render2d.SetSprite(ctx.Ecs, badge, sheet, new SpriteSettings
+{
+    Rect = (0f, 0f, 32f, 32f),
+    FlipX = facingLeft,
+});
+```
+
+Ordering a 2D camera above a 3D one draws it over the scene without clearing, which is how a 2D
+overlay sits on a 3D game.
+
 ### UI
 
 Panels and text, on a render build:

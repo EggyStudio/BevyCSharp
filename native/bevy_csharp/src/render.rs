@@ -8,7 +8,9 @@
 //! carry them hold a typed `Handle<T>`, which raw bytes cannot represent. Both are therefore
 //! named operations rather than data the managed side writes directly.
 
-use crate::interop::{status, BcsCameraConfig, BcsLightConfig, BcsMaterialConfig};
+use crate::interop::{
+    status, BcsCameraConfig, BcsLightConfig, BcsMaterialConfig, BcsSpriteConfig,
+};
 
 #[cfg(feature = "render")]
 use crate::state::{with_world, with_world_opt};
@@ -410,6 +412,113 @@ pub unsafe extern "C" fn bcs_render_spawn_light(config: *const BcsLightConfig) -
                     .to_bits(),
             })
             .unwrap_or(0)
+        }
+    })
+}
+
+/// Spawns a 2D camera and returns its entity, or `0` on a headless build.
+///
+/// A 2D camera looks down negative Z with one world unit to a pixel, which is what makes a sprite
+/// placed at `(100, 50)` land a hundred pixels right and fifty up from the middle of the window.
+/// Give it an `order` above a 3D camera's to draw over the top of one.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_spawn_camera_2d(order: i32) -> u64 {
+    crate::interop::guard_with(0u64, || {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = order;
+            0
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::camera::{Camera, Camera2d, ClearColorConfig};
+            use bevy::transform::components::Transform;
+
+            with_world_opt(|world| {
+                world
+                    .spawn((
+                        Camera2d,
+                        Camera {
+                            order: order as isize,
+                            // A second camera that cleared would wipe out whatever drew before
+                            // it, so one layered over a scene keeps what is already there.
+                            clear_color: if order == 0 {
+                                ClearColorConfig::Default
+                            } else {
+                                ClearColorConfig::None
+                            },
+                            ..Default::default()
+                        },
+                        Transform::default(),
+                    ))
+                    .id()
+                    .to_bits()
+            })
+            .unwrap_or(0)
+        }
+    })
+}
+
+/// Attaches a sprite to an entity, or replaces the one it has.
+///
+/// Position it by writing its `Transform`, like anything else in the world.
+///
+/// # Safety
+/// `config` must point to a readable [`BcsSpriteConfig`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_set_sprite(entity: u64, config: *const BcsSpriteConfig) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, config);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::color::Color;
+            use bevy::image::Image;
+            use bevy::math::{Rect, Vec2};
+            use bevy::sprite::Sprite;
+
+            if config.is_null() {
+                return status::NULL_ARG;
+            }
+            let config = unsafe { *config };
+
+            with_world(|world| {
+                let Some(image) = crate::assets::clone_handle(world, config.image) else {
+                    return status::NO_COMPONENT;
+                };
+
+                let sprite = Sprite {
+                    image: image.typed::<Image>(),
+                    color: Color::linear_rgba(
+                        config.color[0],
+                        config.color[1],
+                        config.color[2],
+                        config.color[3],
+                    ),
+                    flip_x: config.flip_x != 0,
+                    flip_y: config.flip_y != 0,
+                    custom_size: (config.has_size != 0)
+                        .then(|| Vec2::new(config.size[0], config.size[1])),
+                    rect: (config.has_rect != 0).then(|| {
+                        Rect::new(config.rect[0], config.rect[1], config.rect[2], config.rect[3])
+                    }),
+                    ..Default::default()
+                };
+
+                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity))
+                else {
+                    return status::NO_ENTITY;
+                };
+
+                // Bevy's own insert, so the components a sprite requires arrive with it.
+                entity_mut.insert(sprite);
+                status::OK
+            })
         }
     })
 }

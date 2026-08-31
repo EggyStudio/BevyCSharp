@@ -80,14 +80,20 @@ padding, and rewrites text in place. That covers a HUD. A menu needs more:
 - **Text layout.** Justification, line breaking and bounds are `TextLayout`, unbridged, so a long
   string runs off the edge.
 
-### 2D rendering
+### 2D beyond a sprite
 
-`bevy_sprite` is compiled without `bevy_sprite_render`, so there is no 2D path at all. A 2D game
-is not possible today even though the crate is linked.
+`bevy_sprite_render` is compiled in, `Render2d` spawns a 2D camera and attaches sprites, and a
+sprite can be tinted, resized, mirrored and cut down to one rectangle of a sheet. What a 2D game
+needs on top of that:
 
-- features: `bevy/bevy_sprite_render`
-- exports: spawn a 2D camera, attach a sprite to an entity, set its atlas rectangle
-- managed: a `Render2d` surface alongside `Render`
+- **Texture atlases.** `Sprite.texture_atlas` pairs a layout asset with an index, so a frame is
+  named by number rather than by pixel rectangle. `Rect` covers the same ground by hand.
+- **Animation.** Nothing steps a sprite through frames. It is a component holding a frame list
+  and a timer, and could be written entirely in C# on top of `Rect`.
+- **Anchors.** A sprite is centred on its transform. `Anchor` moves that to a corner or an
+  arbitrary point, which matters for anything standing on the ground.
+- **Nine-slice and tiling.** `SpriteImageMode` stretches the middle of an image and leaves its
+  borders alone, for panels and bars that resize.
 
 ### Gizmos
 
