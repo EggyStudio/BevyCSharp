@@ -791,8 +791,8 @@ in the frame agrees on which state it is in rather than some seeing the change h
 A Bevy state is a Rust type and C# cannot define one, so the bridge provides four state slots
 that hold an integer, and each enum claims one the first time it is added. Four is past what a
 game normally needs, and running out reports it. `[InState]` is a run condition, so it composes
-with `[RunIf]` and `[ToggleKey]` rather than replacing them: a method carrying two of them has to
-satisfy both.
+with `[RunIf]` and `[ToggleKey]` rather than replacing them, and a method carrying more than one
+runs only when all of them pass.
 
 ### Conditions
 
@@ -943,9 +943,9 @@ that is the only sound option, so Bevy serialises C# systems against each other.
 that matters is still there: it is inside the per-entity loop, which is where the entity counts
 are.
 
-**Discovery is generated, not scanned.** The generator emits a module initializer per assembly, so
-registrations have announced themselves before the app is built. A reflection scan remains as a
-fallback for assemblies that are loaded but untouched.
+**Registration happens at assembly load.** The generator emits a module initializer per assembly,
+so every registration has announced itself before the app is built. A reflection scan covers
+assemblies that are loaded but untouched.
 
 ---
 
@@ -1104,10 +1104,12 @@ run against a real Bevy app. Known gaps:
 
 - A locally built package contains only the platform you built it on. Use the CI workflow, or
   run `build-native.sh` on each target platform, to produce a package covering all of them.
-- A render build draws: mesh primitives, physically based materials, cameras and lights are all
-  reachable from a behavior script, verified on Vulkan. What is not reachable is everything past
-  that first layer. Loading a mesh from a glTF file needs `bevy_gltf`, textures are not bound to
-  materials, and UI, text, audio, animation and scenes have no bridge at all.
+- A render build draws: mesh primitives, textured physically based materials, cameras, lights,
+  sprites, gizmos, UI nodes and text are reachable from a behavior script, verified on Vulkan.
+  glTF files and `.scn` scenes load and spawn, and audio plays. What is thin is the layer above
+  that. Animation has no bridge, a UI node reports neither clicks nor hovers and carries six of
+  its two dozen layout fields, and the GPU-compressed texture formats are not decoded.
+  [.github/TODO.md](.github/TODO.md) lists what each gap needs.
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does
   nothing yet.
 - Component filters must be table-stored components, which is everything C# registers. A filter
