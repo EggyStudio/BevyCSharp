@@ -213,6 +213,40 @@ public sealed class UiTests
     }
 
     [Fact]
+    public void TextIsSetInBevysOwnFontUntilAnotherIsNamed()
+    {
+        using var harness = new EngineHarness(frames: 30, fps: 240);
+        if (!App.HasRenderer) return;
+
+        var font = AssetHandle.None;
+        var state = AssetLoadState.Loading;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            // No font named, which is the font Bevy carries and needs no asset.
+            var run = Ui.SpawnText(
+                "words", new UiSettings { Color = (1f, 1f, 1f, 1f) }, new UiTextSettings());
+
+            Assert.True(ctx.Ecs.IsAlive(run));
+
+            // A font is loaded like any other asset, and a windowless run gets that far: the
+            // asset is a file, and only drawing with it needs a window.
+            font = AssetServer.Load(AssetKind.Font, "fonts/missing.ttf");
+        });
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            state = font.State;
+            if (state != AssetLoadState.Loading) ctx.Exit();
+        });
+
+        harness.Run();
+
+        Assert.True(font.IsValid, "the font kind was not accepted");
+        Assert.Equal(AssetLoadState.Failed, state);
+    }
+
+    [Fact]
     public void AnUnknownLayoutCodeFallsBackRatherThanFailing()
     {
         // The managed side names the enums, so a bridge older than the assembly calling it can be

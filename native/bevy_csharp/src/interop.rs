@@ -366,6 +366,8 @@ pub struct BcsSpriteConfig {
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct BcsUiTextConfig {
+    /// Asset key of the font to set the text in, or a negative for the one built into Bevy.
+    pub font: i32,
     /// Height of the glyphs in logical pixels.
     pub font_size: f32,
     /// How the lines sit against each other: `0` left, `1` centred, `2` right, `3` justified,

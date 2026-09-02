@@ -310,7 +310,7 @@ pub unsafe extern "C" fn bcs_ui_spawn_text(
         #[cfg(feature = "render")]
         {
             use bevy::color::Color;
-            use bevy::text::{FontSize, TextColor, TextFont, TextLayout};
+            use bevy::text::{Font, FontSize, FontSource, TextColor, TextFont, TextLayout};
             use bevy::ui::widget::Text;
 
             let Some(text) = (unsafe { crate::interop::cstr_to_string(text) }) else {
@@ -323,9 +323,27 @@ pub unsafe extern "C" fn bcs_ui_spawn_text(
             let text_config = unsafe { *text_config };
 
             with_world_opt(|world| {
+                // A negative key is the font compiled into Bevy, which is what keeps text
+                // working with no asset at all. A key that names nothing is a mistake rather
+                // than a reason to fall back quietly, so it refuses.
+                //
+                // `FontSource` can also name a generic family, which is not offered here: that
+                // path needs Bevy's `system_font_discovery`, and on Linux the crate behind it
+                // links against fontconfig at build time. Text renders nothing at all without
+                // the feature, so the choice is a font of your own or Bevy's.
+                let font = if text_config.font >= 0 {
+                    match crate::assets::clone_handle(world, text_config.font) {
+                        Some(handle) => FontSource::Handle(handle.typed::<Font>()),
+                        None => return 0,
+                    }
+                } else {
+                    FontSource::default()
+                };
+
                 let mut entity = world.spawn((
                     Text(text.clone()),
                     TextFont {
+                        font,
                         font_size: FontSize::Px(text_config.font_size),
                         ..Default::default()
                     },

@@ -221,6 +221,9 @@ public struct NativeUiNodeConfig
 [StructLayout(LayoutKind.Sequential)]
 public struct NativeUiTextConfig
 {
+    /// <summary>Asset key of the font, or negative for the one built into Bevy.</summary>
+    public int Font;
+
     /// <summary>Glyph height in logical pixels.</summary>
     public float FontSize;
 

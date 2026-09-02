@@ -115,6 +115,15 @@ public static class AssetKind
     public const string Audio = "Audio";
 
     /// <summary>
+    /// A font, as TrueType or OpenType. Render builds only.
+    /// </summary>
+    /// <remarks>
+    /// Text is set in the font Bevy compiles in unless one of these is named, so a game only
+    /// loads a font when it wants its own. See <see cref="UiTextSettings.Font"/>.
+    /// </remarks>
+    public const string Font = "Font";
+
+    /// <summary>
     /// A saved world: the entities and components of a `.scn` or `.scn.ron` file.
     /// </summary>
     /// <remarks>

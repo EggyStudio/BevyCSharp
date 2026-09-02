@@ -392,6 +392,22 @@ own components like anything else. The font is Bevy's own, compiled into the eng
 no asset. `SetText` rewrites in place rather than respawning, because a score changes every frame
 and the entity behind it should not.
 
+Text is set in the font Bevy compiles in, so words reach the screen with no asset loaded at all.
+A game that wants its own loads it like anything else:
+
+```csharp
+var font = AssetServer.Load(AssetKind.Font, "fonts/inter.ttf");
+
+Ui.SpawnText("Score: 0", new UiSettings { Color = (1f, 1f, 1f, 1f) },
+    new UiTextSettings { Font = font, FontSize = 18f });
+```
+
+TrueType and OpenType. A handle that names nothing is refused rather than falling back quietly,
+because a game that ships a font and silently does not use it looks exactly like a font that
+failed to load. Asking for a font by family name, the way a web page asks for `sans-serif`, is not
+offered: Bevy resolves those through `system_font_discovery`, which links against fontconfig on
+Linux, and the bridge builds with nothing but a C compiler.
+
 A label fits on one line; a paragraph has to be told how to break:
 
 ```csharp

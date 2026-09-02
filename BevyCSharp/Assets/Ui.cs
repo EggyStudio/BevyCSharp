@@ -504,10 +504,22 @@ public enum TextWrap
 }
 
 /// <summary>
-/// How a run of text is set: its size, and what happens to it at the edges of its node.
+/// How a run of text is set: its font and size, and what happens to it at the edges of its node.
 /// </summary>
 public sealed class UiTextSettings
 {
+    /// <summary>
+    /// The font to set the text in, or none for the one built into Bevy.
+    /// </summary>
+    /// <remarks>
+    /// Loaded with <see cref="AssetKind.Font"/> from a TrueType or OpenType file. A handle that
+    /// names nothing is refused rather than quietly falling back, since a game that ships a font
+    /// and then does not use it looks like a font that failed to load, which it is. Asking for a
+    /// font by family name instead is not offered: that needs a Bevy feature which links against
+    /// fontconfig on Linux, and this bridge builds with nothing but a C compiler.
+    /// </remarks>
+    public AssetHandle Font { get; set; } = AssetHandle.None;
+
     /// <summary>Glyph height in logical pixels.</summary>
     public float FontSize { get; set; } = 20f;
 
@@ -644,7 +656,8 @@ public static unsafe class Ui
     /// </summary>
     /// <remarks>
     /// The font is Bevy's own, compiled into the engine, so nothing has to be loaded to put words
-    /// on the screen. <see cref="UiSettings.Color"/> is the colour of the text itself.
+    /// on the screen. <see cref="UiSettings.Color"/> is the colour of the text itself, and
+    /// <see cref="UiTextSettings"/> is where another font goes.
     /// </remarks>
     /// <param name="text">What it says.</param>
     /// <param name="settings">Where it sits.</param>
@@ -684,6 +697,7 @@ public static unsafe class Ui
         var native = ToNative(settings);
         var nativeText = new NativeUiTextConfig
         {
+            Font = style.Font.Key,
             FontSize = style.FontSize,
             Justify = (int)style.Justify,
             LineBreak = (int)style.Wrap,

@@ -251,6 +251,16 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         // described above.
         #[cfg(feature = "render")]
         app.add_plugins(bevy::gltf::GltfPlugin::default());
+
+        // A font is a file like any other, and loading one without a window has to work or the
+        // load would panic rather than fail. The asset and its loader are all that is registered
+        // here: the rest of `TextPlugin` is layout and glyph atlases, which belong to drawing.
+        #[cfg(feature = "render")]
+        {
+            use bevy::asset::AssetApp;
+            app.init_asset::<bevy::text::Font>();
+            app.init_asset_loader::<bevy::text::FontLoader>();
+        }
     }
 
     // Where the typed-text reader keeps its place between frames.

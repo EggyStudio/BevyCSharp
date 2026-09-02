@@ -170,6 +170,8 @@ fn load(world: &mut World, kind: &str, path: &str) -> i32 {
         "Audio" => server
             .load::<bevy::audio::AudioSource>(path.to_string())
             .untyped(),
+        #[cfg(feature = "render")]
+        "Font" => server.load::<bevy::text::Font>(path.to_string()).untyped(),
         "Scene" => server
             .load::<bevy::world_serialization::WorldAsset>(path.to_string())
             .untyped(),
