@@ -320,8 +320,20 @@ var menu = Ui.SpawnNode(new UiSettings
 `Direction` is that axis, `Justify` spreads the children along it and `Align` places them across
 it: a column centred with `Align` is a menu, a row spread with `UiJustify.SpaceBetween` is a
 toolbar. `RowGap` and `ColumnGap` space the children apart from the parent's side, which is
-steadier than a margin on each of them. `Padding`, `Margin` and `Border` are one length for all
-four sides, and a border draws only where `BorderColor` is not transparent.
+steadier than a margin on each of them.
+
+`Padding`, `Margin` and `Border` are four lengths each, and a single `Length` assigned to one of
+them means the same distance on every side:
+
+```csharp
+Padding = Length.Px(16f),                                   // all four
+Border = Sides.Vertical(Length.Px(2f)),                     // a rule above and below
+Margin = new Sides(Length.Px(8f), Length.Zero, Length.Auto, Length.Zero),
+```
+
+A border draws only where `BorderColor` is not transparent. `Length.Auto` in a margin is not zero:
+it swallows whatever room the parent has left over, which is how the third line above pushes a
+node to the right without the parent arranging it.
 
 Nodes are entities, so nesting is `SetParent` and removal is `Despawn`, and a node can carry your
 own components like anything else. The font is Bevy's own, compiled into the engine, so text needs

@@ -68,13 +68,10 @@ Nothing here blocks a game; it is a matter of size on disk and upload cost.
 ### UI beyond a HUD
 
 `bevy_ui_render` is compiled in and `Ui` spawns nodes and text, sets a node's position, size,
-padding, margin, border, direction, justification, alignment and gaps, draws an image inside one,
-rewrites text in place, and reports the pointer over a node asked to be interactive. That covers a
-HUD, a button, a menu that lays itself out and a panel that resizes. What is left:
+per-side padding, margin and border, direction, justification, alignment and gaps, draws an image
+inside one, rewrites text in place, and reports the pointer over a node asked to be interactive.
+That covers a HUD, a button, a menu that lays itself out and a panel that resizes. What is left:
 
-- **Per-side rects.** `Padding`, `Margin` and `Border` are one length for all four sides, because
-  a field per side is twelve more numbers on the wire. A tab strip with no border where it meets
-  its page, and a row with room only under it, both want them separately.
 - **The rest of flexbox.** `flex_grow` and `flex_basis` for a child that takes the leftover space,
   `flex_wrap` for a grid of items that reflows, `align_self` for the odd child out, `min_width`
   and its family, and `Overflow` for a list that scrolls rather than spilling. `Display::None`
