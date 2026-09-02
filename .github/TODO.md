@@ -69,9 +69,10 @@ Nothing here blocks a game; it is a matter of size on disk and upload cost.
 
 `bevy_ui_render` is compiled in and `Ui` spawns nodes and text, sets a node's position, size,
 per-side padding, margin and border, direction, justification, alignment, gaps, growth, wrapping,
-bounds and overflow, draws an image inside one, scrolls what it clips, rewrites text in place, and
-reports the pointer over a node asked to be interactive. That covers a HUD, a button, a menu that
-lays itself out, a panel that resizes and a list that scrolls. What is left:
+bounds and overflow, draws an image inside one, scrolls what it clips, breaks and aligns a run of
+text, rewrites it in place, and reports the pointer over a node asked to be interactive. That
+covers a HUD, a button, a menu that lays itself out, a panel that resizes, a list that scrolls and
+a paragraph that fits its box. What is left:
 
 - **Odds and ends of flexbox.** `align_content` spreads the lines a wrapped node produces, the
   way `justify_content` spreads the children within one. `aspect_ratio` sizes the other axis from
@@ -83,8 +84,15 @@ lays itself out, a panel that resizes and a list that scrolls. What is left:
   rectangle. The layout asset a sprite uses is the same one, so this is two fields on the image
   config rather than new machinery. A sliced image's centre and sides are stretched, since
   `SliceScaleMode::Tile` is a payload the flat config has no room for.
-- **Text layout.** Justification, line breaking and bounds are `TextLayout`, unbridged, so a long
-  string runs off the edge.
+- **A font of your own.** Text is set in the font compiled into Bevy, because `AssetKind` has no
+  font to load and `TextFont.font` takes a handle. One kind and one field, and the asset surface
+  already carries everything else it needs.
+- **Rich text.** One run of text is one style. Bevy builds a mixed paragraph out of `TextSpan`
+  children under the `Text` entity, so a bold word inside a sentence is a second entity rather
+  than markup. That wants a spawn entry point of its own.
+- **Text trimmings.** `LineHeight` for the spacing between lines, `FontSmoothing` for pixel fonts
+  that should not be antialiased, and `TextShadow`, which is a component beside the text rather
+  than part of it.
 
 ### 2D beyond a sprite
 

@@ -217,6 +217,20 @@ public struct NativeUiNodeConfig
     public float BorderColorA;
 }
 
+/// <summary>How a run of UI text is set.</summary>
+[StructLayout(LayoutKind.Sequential)]
+public struct NativeUiTextConfig
+{
+    /// <summary>Glyph height in logical pixels.</summary>
+    public float FontSize;
+
+    /// <summary>0 left, 1 centred, 2 right, 3 justified, 4 start, 5 end.</summary>
+    public int Justify;
+
+    /// <summary>0 word boundaries, 1 any character, 2 word then character, 3 never.</summary>
+    public int LineBreak;
+}
+
 /// <summary>The picture a UI node draws inside itself.</summary>
 [StructLayout(LayoutKind.Sequential)]
 public struct NativeUiImageConfig

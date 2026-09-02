@@ -392,6 +392,27 @@ own components like anything else. The font is Bevy's own, compiled into the eng
 no asset. `SetText` rewrites in place rather than respawning, because a score changes every frame
 and the entity behind it should not.
 
+A label fits on one line; a paragraph has to be told how to break:
+
+```csharp
+Ui.SpawnText(paragraph, new UiSettings { Color = (1f, 1f, 1f, 1f) }, new UiTextSettings
+{
+    FontSize = 14f,
+    Justify = TextJustify.Center,
+    Wrap = TextWrap.WordBoundary,
+});
+```
+
+The width it breaks against comes from the layout, so the text or something above it needs a
+`Width` or a `MaxWidth`; a node free to grow sideways never wraps however `Wrap` is set.
+`TextWrap.NoWrap` is the opposite choice, for a line that should run past the edge and be clipped
+rather than folded. `Justify` aligns the lines against each other inside the text's own box, which
+is a different question from where that box sits in its parent.
+
+`UiSettings.Color` is the text's colour rather than a background for a run of text, and it is
+transparent by default like any other node, so a `SpawnText` that passes plain `new UiSettings()`
+lays out correctly and draws nothing.
+
 The children answer back. `Grow` takes a share of whatever room the parent has left over, `Shrink`
 gives up a share of the overflow, `Basis` is the size to start from, and `AlignSelf` overrides the
 parent's alignment for one child. `MinWidth` and its three companions bound the result, `Wrap` runs

@@ -8,7 +8,7 @@
 //! Everything here needs a render build. A windowless one reports that rather than spawning
 //! entities that would never draw.
 
-use crate::interop::{status, BcsUiImageConfig, BcsUiNodeConfig};
+use crate::interop::{status, BcsUiImageConfig, BcsUiNodeConfig, BcsUiTextConfig};
 #[cfg(feature = "render")]
 use crate::state::with_world;
 #[cfg(feature = "render")]
@@ -185,6 +185,34 @@ fn node_from(config: &BcsUiNodeConfig) -> bevy::ui::Node {
     }
 }
 
+/// Translates how the lines of a run of text sit against each other.
+#[cfg(feature = "render")]
+fn justify(value: i32) -> bevy::text::Justify {
+    use bevy::text::Justify;
+
+    match value {
+        1 => Justify::Center,
+        2 => Justify::Right,
+        3 => Justify::Justified,
+        4 => Justify::Start,
+        5 => Justify::End,
+        _ => Justify::Left,
+    }
+}
+
+/// Translates where a line of text may be broken.
+#[cfg(feature = "render")]
+fn linebreak(value: i32) -> bevy::text::LineBreak {
+    use bevy::text::LineBreak;
+
+    match value {
+        1 => LineBreak::AnyCharacter,
+        2 => LineBreak::WordOrCharacter,
+        3 => LineBreak::NoWrap,
+        _ => LineBreak::WordBoundary,
+    }
+}
+
 /// Builds the border colour a config describes.
 ///
 /// Always inserted, because transparent is what a node with no border draws and the component is
@@ -260,45 +288,53 @@ pub unsafe extern "C" fn bcs_ui_spawn_node(config: *const BcsUiNodeConfig) -> u6
 /// Spawns a run of text, and returns its entity or `0`.
 ///
 /// The font is Bevy's own, compiled into the library, so no asset has to be loaded to put words
-/// on the screen. `font_size` is in logical pixels.
+/// on the screen. The text config carries the size in logical pixels, and how the run is broken
+/// and aligned when it does not fit on one line.
 ///
 /// # Safety
 /// `text` must be a NUL-terminated UTF-8 string; `config` must point to a readable
-/// [`BcsUiNodeConfig`].
+/// [`BcsUiNodeConfig`] and `text_config` to a readable [`BcsUiTextConfig`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn bcs_ui_spawn_text(
     text: *const core::ffi::c_char,
     config: *const BcsUiNodeConfig,
-    font_size: f32,
+    text_config: *const BcsUiTextConfig,
 ) -> u64 {
     crate::interop::guard_with(0u64, || {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (text, config, font_size);
+            let _ = (text, config, text_config);
             0
         }
 
         #[cfg(feature = "render")]
         {
             use bevy::color::Color;
-            use bevy::text::{FontSize, TextColor, TextFont};
+            use bevy::text::{FontSize, TextColor, TextFont, TextLayout};
             use bevy::ui::widget::Text;
 
             let Some(text) = (unsafe { crate::interop::cstr_to_string(text) }) else {
                 return 0;
             };
-            if config.is_null() {
+            if config.is_null() || text_config.is_null() {
                 return 0;
             }
             let config = unsafe { *config };
+            let text_config = unsafe { *text_config };
 
             with_world_opt(|world| {
                 let mut entity = world.spawn((
                     Text(text.clone()),
                     TextFont {
-                        font_size: FontSize::Px(font_size),
+                        font_size: FontSize::Px(text_config.font_size),
                         ..Default::default()
                     },
+                    // What keeps a long string inside its node. The width it breaks against is
+                    // the layout's, so a node free to grow never wraps however this is set.
+                    TextLayout::new(
+                        justify(text_config.justify),
+                        linebreak(text_config.linebreak),
+                    ),
                     // The node's colour is the text's here: a run of text has no background
                     // of its own, and giving it one would need a second entity behind it.
                     TextColor(Color::linear_rgba(

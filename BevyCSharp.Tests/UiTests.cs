@@ -158,6 +158,61 @@ public sealed class UiTests
     }
 
     [Fact]
+    public void ALongStringIsBrokenToTheWidthItIsGiven()
+    {
+        // Whether the lines land where they should needs an eye; the sample is where that is
+        // confirmed. What is checked here is that a text node takes every way of being set and
+        // stays an ordinary entity, and that rewriting it in place still works afterwards.
+        using var harness = new EngineHarness(frames: 4);
+        if (!App.HasRenderer) return;
+
+        const string Paragraph =
+            "A sentence long enough that it cannot sit on one line inside a narrow panel.";
+
+        var wrapped = Entity.None;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var panel = Ui.SpawnNode(new UiSettings { Width = Length.Px(180f) });
+
+            wrapped = Ui.SpawnText(Paragraph, new UiSettings(), new UiTextSettings
+            {
+                FontSize = 14f,
+                Justify = TextJustify.Center,
+                Wrap = TextWrap.WordBoundary,
+            });
+            ctx.Ecs.SetParent(wrapped, panel);
+
+            // The other three ways of breaking, and a run that refuses to wrap at all.
+            foreach (var wrap in new[] { TextWrap.AnyCharacter, TextWrap.WordOrCharacter, TextWrap.NoWrap })
+            {
+                var line = Ui.SpawnText(
+                    Paragraph, new UiSettings(), new UiTextSettings { Wrap = wrap });
+                ctx.Ecs.SetParent(line, panel);
+            }
+
+            foreach (var justify in new[]
+                     {
+                         TextJustify.Left, TextJustify.Right, TextJustify.Justified,
+                         TextJustify.Start, TextJustify.End,
+                     })
+            {
+                Ui.SpawnText(Paragraph, new UiSettings(), new UiTextSettings { Justify = justify });
+            }
+
+            // The size-only overload is the same call underneath.
+            var label = Ui.SpawnText("plain", new UiSettings(), 18f);
+            Assert.True(ctx.Ecs.IsAlive(label));
+        });
+
+        harness.OnContext(Stage.Update, _ => Ui.SetText(wrapped, "shorter"));
+
+        harness.Run();
+
+        Assert.NotEqual(Entity.None, wrapped);
+    }
+
+    [Fact]
     public void AnUnknownLayoutCodeFallsBackRatherThanFailing()
     {
         // The managed side names the enums, so a bridge older than the assembly calling it can be
@@ -174,7 +229,14 @@ public sealed class UiTests
                 Align = (UiAlign)99,
             });
 
+            var text = Ui.SpawnText("fallback", new UiSettings(), new UiTextSettings
+            {
+                Justify = (TextJustify)99,
+                Wrap = (TextWrap)99,
+            });
+
             Assert.True(ctx.Ecs.IsAlive(node));
+            Assert.True(ctx.Ecs.IsAlive(text));
         });
 
         harness.Run();

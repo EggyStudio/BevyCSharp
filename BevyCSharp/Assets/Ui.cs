@@ -446,6 +446,79 @@ public sealed class UiSettings
 }
 
 /// <summary>
+/// How the lines of a run of text sit against each other.
+/// </summary>
+/// <remarks>
+/// Alignment inside the text's own box, not where that box sits in its parent, which is
+/// <see cref="UiSettings.Align"/> and <see cref="UiSettings.Justify"/>. It shows only once there
+/// is more than one line, or the box is wider than the text.
+/// </remarks>
+public enum TextJustify
+{
+    /// <summary>Lines start at the left edge.</summary>
+    Left = 0,
+
+    /// <summary>Lines are centred on each other.</summary>
+    Center = 1,
+
+    /// <summary>Lines end at the right edge.</summary>
+    Right = 2,
+
+    /// <summary>Words are spaced so both edges line up, except on the last line.</summary>
+    Justified = 3,
+
+    /// <summary>The left in left-to-right text, the right in right-to-left.</summary>
+    Start = 4,
+
+    /// <summary>The right in left-to-right text, the left in right-to-left.</summary>
+    End = 5,
+}
+
+/// <summary>
+/// Where a run of text may be broken when it does not fit on one line.
+/// </summary>
+/// <remarks>
+/// The width it is broken against comes from the layout, so a node free to grow sideways never
+/// wraps whatever this says. Give the text or an ancestor a <see cref="UiSettings.Width"/> or
+/// <see cref="UiSettings.MaxWidth"/> and the wrapping has something to happen at.
+/// </remarks>
+public enum TextWrap
+{
+    /// <summary>At spaces and the like, keeping words whole. What prose wants.</summary>
+    WordBoundary = 0,
+
+    /// <summary>Anywhere at all, which is how a terminal breaks lines.</summary>
+    AnyCharacter = 1,
+
+    /// <summary>At words, falling back to characters for a word too long to fit alone.</summary>
+    WordOrCharacter = 2,
+
+    /// <summary>
+    /// Never, so a long line runs past the edge unless something clips it.
+    /// </summary>
+    /// <remarks>
+    /// An explicit newline in the string still breaks. Pair with
+    /// <see cref="UiOverflow.Clip"/> for a single line that is cut off rather than wrapped.
+    /// </remarks>
+    NoWrap = 3,
+}
+
+/// <summary>
+/// How a run of text is set: its size, and what happens to it at the edges of its node.
+/// </summary>
+public sealed class UiTextSettings
+{
+    /// <summary>Glyph height in logical pixels.</summary>
+    public float FontSize { get; set; } = 20f;
+
+    /// <summary>How the lines sit against each other.</summary>
+    public TextJustify Justify { get; set; } = TextJustify.Left;
+
+    /// <summary>Where a line may be broken.</summary>
+    public TextWrap Wrap { get; set; } = TextWrap.WordBoundary;
+}
+
+/// <summary>
 /// How a picture meets the size of the node holding it.
 /// </summary>
 public enum UiImageMode
@@ -577,13 +650,46 @@ public static unsafe class Ui
     /// <param name="settings">Where it sits.</param>
     /// <param name="fontSize">Height in logical pixels.</param>
     /// <exception cref="BevyNativeException">This build has no renderer.</exception>
-    public static Entity SpawnText(string text, UiSettings settings, float fontSize = 20f)
+    public static Entity SpawnText(string text, UiSettings settings, float fontSize = 20f) =>
+        SpawnText(text, settings, new UiTextSettings { FontSize = fontSize });
+
+    /// <summary>
+    /// Spawns a run of text, set as <paramref name="style"/> describes.
+    /// </summary>
+    /// <remarks>
+    /// Where a paragraph rather than a label is wanted: the text is broken to the width the
+    /// layout gives it, so a node with a <see cref="UiSettings.Width"/> or
+    /// <see cref="UiSettings.MaxWidth"/> holds it and a node free to grow does not.
+    /// </remarks>
+    /// <param name="text">What it says.</param>
+    /// <param name="settings">Where it sits.</param>
+    /// <param name="style">How it is set.</param>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    /// <example>
+    /// <code>
+    /// Ui.SpawnText(paragraph, new UiSettings { Width = Length.Px(280f) }, new UiTextSettings
+    /// {
+    ///     FontSize = 16f,
+    ///     Justify = TextJustify.Center,
+    ///     Wrap = TextWrap.WordBoundary,
+    /// });
+    /// </code>
+    /// </example>
+    public static Entity SpawnText(string text, UiSettings settings, UiTextSettings style)
     {
         ArgumentNullException.ThrowIfNull(text);
         ArgumentNullException.ThrowIfNull(settings);
+        ArgumentNullException.ThrowIfNull(style);
 
         var native = ToNative(settings);
-        var bits = Native.bcs_ui_spawn_text(text, &native, fontSize);
+        var nativeText = new NativeUiTextConfig
+        {
+            FontSize = style.FontSize,
+            Justify = (int)style.Justify,
+            LineBreak = (int)style.Wrap,
+        };
+
+        var bits = Native.bcs_ui_spawn_text(text, &native, &nativeText);
         if (bits == 0) throw NoUi("Spawning UI text");
 
         return new Entity(bits);

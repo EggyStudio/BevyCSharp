@@ -362,6 +362,20 @@ pub struct BcsSpriteConfig {
     pub tile_stretch: f32,
 }
 
+/// How a run of UI text is set: its size, and what happens to it at the edges of its node.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsUiTextConfig {
+    /// Height of the glyphs in logical pixels.
+    pub font_size: f32,
+    /// How the lines sit against each other: `0` left, `1` centred, `2` right, `3` justified,
+    /// `4` and `5` follow the writing direction.
+    pub justify: i32,
+    /// Where a line may be broken: `0` at word boundaries, `1` at any character, `2` at words
+    /// falling back to characters, `3` never.
+    pub linebreak: i32,
+}
+
 /// The picture a UI node draws inside itself.
 ///
 /// Separate from the node's own config because an image is attached to a node that already
