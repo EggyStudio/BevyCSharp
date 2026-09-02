@@ -46,6 +46,19 @@ fn node_from(config: &BcsUiNodeConfig) -> bevy::ui::Node {
     }
 }
 
+/// Gives a node the components the pointer is tracked with, when its config asks for them.
+///
+/// `Button` rather than `Interaction` alone: it is the marker that requires both, and it brings
+/// `FocusPolicy::Block` with it, so an interactive node captures the pointer instead of letting
+/// it reach whatever sits behind it. A node left plain carries neither, which keeps the focus
+/// system's work proportional to the number of things that react rather than to the whole screen.
+#[cfg(feature = "render")]
+fn make_interactive(entity: &mut bevy::ecs::world::EntityWorldMut, config: &BcsUiNodeConfig) {
+    if config.interactive != 0 {
+        entity.insert(bevy::ui::widget::Button);
+    }
+}
+
 /// Spawns a rectangle, and returns its entity or `0`.
 ///
 /// The building block everything else sits in or on: a panel, a bar, a backdrop. Parent one to
@@ -73,18 +86,17 @@ pub unsafe extern "C" fn bcs_ui_spawn_node(config: *const BcsUiNodeConfig) -> u6
             let config = unsafe { *config };
 
             with_world_opt(|world| {
-                world
-                    .spawn((
-                        node_from(&config),
-                        BackgroundColor(Color::linear_rgba(
-                            config.color[0],
-                            config.color[1],
-                            config.color[2],
-                            config.color[3],
-                        )),
-                    ))
-                    .id()
-                    .to_bits()
+                let mut entity = world.spawn((
+                    node_from(&config),
+                    BackgroundColor(Color::linear_rgba(
+                        config.color[0],
+                        config.color[1],
+                        config.color[2],
+                        config.color[3],
+                    )),
+                ));
+                make_interactive(&mut entity, &config);
+                entity.id().to_bits()
             })
             .unwrap_or(0)
         }
@@ -127,25 +139,24 @@ pub unsafe extern "C" fn bcs_ui_spawn_text(
             let config = unsafe { *config };
 
             with_world_opt(|world| {
-                world
-                    .spawn((
-                        Text(text.clone()),
-                        TextFont {
-                            font_size: FontSize::Px(font_size),
-                            ..Default::default()
-                        },
-                        // The node's colour is the text's here: a run of text has no background
-                        // of its own, and giving it one would need a second entity behind it.
-                        TextColor(Color::linear_rgba(
-                            config.color[0],
-                            config.color[1],
-                            config.color[2],
-                            config.color[3],
-                        )),
-                        node_from(&config),
-                    ))
-                    .id()
-                    .to_bits()
+                let mut entity = world.spawn((
+                    Text(text.clone()),
+                    TextFont {
+                        font_size: FontSize::Px(font_size),
+                        ..Default::default()
+                    },
+                    // The node's colour is the text's here: a run of text has no background
+                    // of its own, and giving it one would need a second entity behind it.
+                    TextColor(Color::linear_rgba(
+                        config.color[0],
+                        config.color[1],
+                        config.color[2],
+                        config.color[3],
+                    )),
+                    node_from(&config),
+                ));
+                make_interactive(&mut entity, &config);
+                entity.id().to_bits()
             })
             .unwrap_or(0)
         }
@@ -187,6 +198,49 @@ pub unsafe extern "C" fn bcs_ui_set_text(entity: u64, text: *const core::ffi::c_
 
                 value.0 = text.clone();
                 status::OK
+            })
+        }
+    })
+}
+
+/// Reports how the pointer stands on a node: `0` none, `1` hovered, `2` pressed.
+///
+/// `Interaction` is a Rust enum, so the managed side holds it as a name-only handle and reads its
+/// value here instead of mirroring the bytes. The three codes are the bridge's own, and stay put
+/// whatever Bevy's discriminants do.
+///
+/// A node spawned without `interactive` carries no `Interaction` at all, which is reported as
+/// `NOT_PRESENT` rather than as `0`: "nothing is touching it" and "it was never set up to notice"
+/// are different answers, and a button that silently never fires is the harder one to find.
+///
+/// Pressed lasts from the frame the pointer goes down until it is released, so a click is the
+/// edge into it rather than a state of its own.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_ui_interaction(entity: u64) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = entity;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::ui::Interaction;
+
+            with_world(|world| {
+                let Ok(entity_ref) = world.get_entity(crate::ecs::entity_from(entity)) else {
+                    return status::NO_ENTITY;
+                };
+                let Some(interaction) = entity_ref.get::<Interaction>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                match *interaction {
+                    Interaction::None => 0,
+                    Interaction::Hovered => 1,
+                    Interaction::Pressed => 2,
+                }
             })
         }
     })

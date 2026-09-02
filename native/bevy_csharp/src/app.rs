@@ -533,6 +533,8 @@ pub unsafe extern "C" fn bcs_component_id_of(name: *const core::ffi::c_char) -> 
                 }
                 #[cfg(feature = "render")]
                 "ViewVisibility" => world.register_component::<bevy::prelude::ViewVisibility>(),
+                #[cfg(feature = "render")]
+                "Interaction" => world.register_component::<bevy::ui::Interaction>(),
                 _ => return status::NO_COMPONENT,
             };
             id.index() as i32

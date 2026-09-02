@@ -95,6 +95,23 @@ public partial struct Scene
         ctx.Ecs.SetParent(readout, panel);
         ctx.Ecs.Add(readout, new Hud());
 
+        // A button: the same kind of node, asked to report the pointer. The caption is a child,
+        // so the pointer is tracked on the box the eye sees rather than on the glyphs.
+        var button = Ui.SpawnNode(new UiSettings
+        {
+            Absolute = true,
+            Left = Length.Px(16f),
+            Top = Length.Px(60f),
+            Padding = Length.Px(10f),
+            Interactive = true,
+            Color = (0.12f, 0.24f, 0.4f, 0.85f),
+        });
+
+        var caption = Ui.SpawnText(
+            "clicks: 0", new UiSettings { Color = (0.9f, 0.95f, 1f, 1f) }, 18f);
+        ctx.Ecs.SetParent(caption, button);
+        ctx.Ecs.Add(button, new Clickable());
+
         Console.WriteLine(
             "[Scene] a rotating cube. Escape closes the window, F11 toggles fullscreen, "
             + "Tab locks the cursor, F2 draws the orbits, F3 plays a chime.");
@@ -123,5 +140,46 @@ public partial struct Scene
         ref var transform = ref ctx.Ecs.GetRef<Transform>(ctx.Entity);
 
         transform.Rotation = Quat.FromRotationY(Yaw) * Quat.FromRotationX(Pitch);
+    }
+}
+
+/// <summary>
+/// A UI button that counts what it has been clicked.
+/// </summary>
+/// <remarks>
+/// The idiom for reading a click: <see cref="UiInteraction.Pressed"/> holds for as long as the
+/// pointer is down, so the click is the edge into it and the previous answer has to be kept. A
+/// behavior field is where it goes, since the behavior is a component on the button itself.
+/// </remarks>
+[Behavior]
+public partial struct Clickable
+{
+    /// <summary>How the pointer stood on the node last frame.</summary>
+    public UiInteraction Previous;
+
+    /// <summary>How often the edge into a press has been seen.</summary>
+    public int Clicks;
+
+    [OnUpdate]
+    public void Watch(BehaviorContext ctx)
+    {
+        var state = Ui.InteractionOf(ctx.Entity);
+        if (state == UiInteraction.Pressed && Previous != UiInteraction.Pressed)
+        {
+            Clicks++;
+            Console.WriteLine($"[Ui] the button was clicked ({Clicks})");
+        }
+
+        Previous = state;
+
+        var caption = ctx.Ecs.ChildrenOf(ctx.Entity);
+        if (caption.Length == 0) return;
+
+        Ui.SetText(caption[0], state switch
+        {
+            UiInteraction.Pressed => $"clicks: {Clicks}  (down)",
+            UiInteraction.Hovered => $"clicks: {Clicks}  (hover)",
+            _ => $"clicks: {Clicks}",
+        });
     }
 }

@@ -347,6 +347,8 @@ pub struct BcsSpriteConfig {
 pub struct BcsUiNodeConfig {
     /// Non-zero to place the node against its parent's edges rather than in its flow.
     pub absolute: i32,
+    /// Non-zero to give the node an `Interaction`, so the pointer is reported over it.
+    pub interactive: i32,
     /// Distance from the parent's left edge.
     pub left: f32,
     /// Unit of `left`.

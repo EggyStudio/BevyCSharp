@@ -103,6 +103,71 @@ public sealed class UiTests
     }
 
     [Fact]
+    public void AnInteractiveNodeCarriesTheComponentThePointerUpdates()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        var button = Entity.None;
+        var plain = Entity.None;
+        var carried = false;
+        var plainCarried = true;
+        var state = UiInteraction.Pressed;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            button = Ui.SpawnNode(new UiSettings
+            {
+                Interactive = true,
+                Width = Length.Px(120f),
+                Height = Length.Px(40f),
+            });
+
+            plain = Ui.SpawnNode(new UiSettings { Width = Length.Px(120f) });
+
+            carried = ctx.Ecs.HasById(button, NativeComponents.Interaction);
+            plainCarried = ctx.Ecs.HasById(plain, NativeComponents.Interaction);
+        });
+
+        // Nothing moves a pointer here, and the system that would notice comes with the window,
+        // so None is the whole range this can report. What is being checked is that the node is
+        // set up to be asked at all.
+        harness.OnContext(Stage.Last, _ => state = Ui.InteractionOf(button));
+
+        harness.Run();
+
+        Assert.True(carried, "an interactive node did not get Bevy's Interaction");
+        Assert.False(plainCarried, "a plain node was given Interaction it never asked for");
+        Assert.Equal(UiInteraction.None, state);
+    }
+
+    [Fact]
+    public void AskingANodeThatDoesNotReactIsRefused()
+    {
+        // A button that quietly never fires is the harder mistake to find, so "it was never set
+        // up to notice" is a different answer from "nothing is touching it".
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var plain = Ui.SpawnNode(new UiSettings());
+
+            var ex = Assert.Throws<BevyNativeException>(() => Ui.InteractionOf(plain));
+            Assert.Equal(NativeStatus.NotPresent, ex.Status);
+
+            var gone = Assert.Throws<BevyNativeException>(() => Ui.InteractionOf(Entity.None));
+            Assert.Equal(NativeStatus.NoEntity, gone.Status);
+
+            var bare = ctx.Ecs.Spawn();
+            var notANode = Assert.Throws<BevyNativeException>(() => Ui.InteractionOf(bare));
+            Assert.Equal(NativeStatus.NotPresent, notANode.Status);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void ABuildWithoutARendererSaysSoRatherThanReturningNothing()
     {
         using var harness = new EngineHarness(frames: 3);
@@ -113,6 +178,10 @@ public sealed class UiTests
             var ex = Assert.Throws<BevyNativeException>(() => Ui.SpawnNode(new UiSettings()));
             Assert.Equal(NativeStatus.Unsupported, ex.Status);
             Assert.Contains("--render", ex.Message);
+
+            var interaction = Assert.Throws<BevyNativeException>(
+                () => Ui.InteractionOf(Entity.None));
+            Assert.Equal(NativeStatus.Unsupported, interaction.Status);
         });
 
         harness.Run();

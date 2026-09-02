@@ -422,6 +422,9 @@ public struct NativeUiNodeConfig
     /// <summary>Non-zero to position against the parent's edges.</summary>
     public int Absolute;
 
+    /// <summary>Non-zero to give the node an interaction the pointer updates.</summary>
+    public int Interactive;
+
     /// <summary>Distance from the left edge.</summary>
     public float Left;
 

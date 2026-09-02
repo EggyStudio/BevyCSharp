@@ -66,6 +66,14 @@ public static class NativeComponents
     /// <remarks>The id behind <see cref="Bevy.WorldInstance"/>.</remarks>
     public static int WorldInstance => ComponentType<Bevy.WorldInstance>.Id;
 
+    /// <summary>Bevy's <c>Interaction</c>: how the pointer stands on a UI node.</summary>
+    /// <remarks>
+    /// Render builds only. The id behind <see cref="Bevy.Interaction"/>, which is what a
+    /// <c>[With]</c> filter needs to find the nodes that react. Its value comes from
+    /// <see cref="Ui.InteractionOf"/>.
+    /// </remarks>
+    public static int Interaction => ComponentType<Bevy.Interaction>.Id;
+
     /// <summary>
     /// Resolves a component by name, verifying the layout when C# mirrors it.
     /// </summary>
@@ -320,5 +328,20 @@ public readonly struct Children : INativeComponent
 public readonly struct WorldInstance : INativeComponent
 {
     readonly string INativeComponent.NativeName => "WorldInstance";
+    readonly bool INativeComponent.MirrorsLayout => false;
+}
+
+/// <summary>
+/// Marks a UI node the pointer is reported over.
+/// </summary>
+/// <remarks>
+/// A name-only handle, so <c>Has&lt;Interaction&gt;()</c> and <c>[With]</c> filters pick out the
+/// nodes that react to the pointer. The component is a Rust enum, whose discriminants C# has no
+/// way to mirror, so its value is read through <see cref="Ui.InteractionOf"/> instead. Spawn a
+/// node with <see cref="UiSettings.Interactive"/> to give it one.
+/// </remarks>
+public readonly struct Interaction : INativeComponent
+{
+    readonly string INativeComponent.NativeName => "Interaction";
     readonly bool INativeComponent.MirrorsLayout => false;
 }

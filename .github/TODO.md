@@ -68,11 +68,9 @@ Nothing here blocks a game; it is a matter of size on disk and upload cost.
 ### UI beyond a HUD
 
 `bevy_ui_render` is compiled in and `Ui` spawns nodes and text, sets a node's position, size and
-padding, and rewrites text in place. That covers a HUD. A menu needs more:
+padding, rewrites text in place, and reports the pointer over a node asked to be interactive. That
+covers a HUD and a button. A menu needs more:
 
-- **Interaction.** Nothing reports a click or a hover. Bevy's `Interaction` component changes as
-  the pointer moves over a node, and is mirrorable as a name-only handle plus a byte, which would
-  make a button possible without bridging `bevy_ui_widgets`.
 - **Layout.** `Node` carries two dozen fields and six are bridged. Flex direction, justify and
   align, gaps, margins and borders are what turn a stack of nodes into a laid-out screen.
 - **Images.** A node can hold a texture through `ImageNode`, which is how an icon or a nine-slice
@@ -204,9 +202,9 @@ Cameras, lights and the window take their common parameters. What is left is nar
 
 ### Components Bevy owns
 
-`bcs_component_id_of` resolves eight names by hand: `Transform`, `GlobalTransform`, `ChildOf`,
-`Children`, `Visibility`, `InheritedVisibility`, `ViewVisibility` and `WorldInstance`. Anything
-else is unreachable. A general lookup is not possible through the type registry alone, since the managed
+`bcs_component_id_of` resolves nine names by hand: `Transform`, `GlobalTransform`, `ChildOf`,
+`Children`, `Visibility`, `InheritedVisibility`, `ViewVisibility`, `WorldInstance` and
+`Interaction`. Anything else is unreachable. A general lookup is not possible through the type registry alone, since the managed
 side also needs a byte-compatible mirror, so this stays a curated list that grows as mirrors are
 written.
 

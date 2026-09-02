@@ -45,6 +45,26 @@ public readonly record struct Length(float Value, LengthUnit Unit)
 }
 
 /// <summary>
+/// How the pointer stands on a node.
+/// </summary>
+/// <remarks>
+/// Only a node spawned with <see cref="UiSettings.Interactive"/> reports one. Asking a node that
+/// was not is refused rather than answered <see cref="None"/>, because a button that quietly
+/// never fires is the harder mistake to find.
+/// </remarks>
+public enum UiInteraction
+{
+    /// <summary>The pointer is elsewhere.</summary>
+    None = 0,
+
+    /// <summary>The pointer is over the node.</summary>
+    Hovered = 1,
+
+    /// <summary>The pointer is over the node and its primary button is down.</summary>
+    Pressed = 2,
+}
+
+/// <summary>
 /// Where a UI node sits and how large it is.
 /// </summary>
 /// <remarks>
@@ -61,6 +81,17 @@ public sealed class UiSettings
     /// relative is laid out beside its siblings instead.
     /// </remarks>
     public bool Absolute { get; set; }
+
+    /// <summary>
+    /// Report the pointer over this node, which is what makes it a button.
+    /// </summary>
+    /// <remarks>
+    /// An interactive node also captures the pointer, so nothing behind it is hovered through it.
+    /// A node left plain carries nothing to update, which is why this is off by default: a HUD is
+    /// mostly nodes that never react, and every one of them would otherwise be tested against the
+    /// pointer each frame. Read the result with <see cref="Ui.InteractionOf"/>.
+    /// </remarks>
+    public bool Interactive { get; set; }
 
     /// <summary>Distance from the parent's left edge.</summary>
     public Length Left { get; set; } = Length.Auto;
@@ -169,9 +200,43 @@ public static unsafe class Ui
         Native.Check(Native.bcs_ui_set_text(entity.Bits, text), $"setting the text of {entity}");
     }
 
+    /// <summary>
+    /// Reports how the pointer stands on an interactive node.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <see cref="UiInteraction.Pressed"/> lasts from the frame the pointer goes down until it is
+    /// released, so a click is the edge into it: keep the previous answer and compare. A release
+    /// over the node reads as <see cref="UiInteraction.Hovered"/> again in the same frame.
+    /// </para>
+    /// <para>
+    /// The pointer is tracked by a system that comes with the window, so a windowless run leaves
+    /// every node at <see cref="UiInteraction.None"/> rather than failing.
+    /// </para>
+    /// </remarks>
+    /// <param name="entity">A node spawned with <see cref="UiSettings.Interactive"/>.</param>
+    /// <exception cref="BevyNativeException">
+    /// The entity is gone, or is not a node that reports interaction.
+    /// </exception>
+    /// <example>
+    /// <code>
+    /// var state = Ui.InteractionOf(button);
+    /// if (state == UiInteraction.Pressed &amp;&amp; Previous != UiInteraction.Pressed) Fire();
+    /// Previous = state;
+    /// </code>
+    /// </example>
+    public static UiInteraction InteractionOf(Entity entity)
+    {
+        var value = Native.bcs_ui_interaction(entity.Bits);
+        Native.Check(value, $"reading the interaction of {entity}");
+
+        return (UiInteraction)value;
+    }
+
     private static NativeUiNodeConfig ToNative(UiSettings settings) => new()
     {
         Absolute = settings.Absolute ? 1 : 0,
+        Interactive = settings.Interactive ? 1 : 0,
         Left = settings.Left.Value,
         LeftUnit = (int)settings.Left.Unit,
         Top = settings.Top.Value,

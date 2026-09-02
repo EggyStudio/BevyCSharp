@@ -183,8 +183,9 @@ filters work, while reading or writing one is refused rather than corrupting the
 `SetParent`, `ParentOf` and `ChildrenOf` for the hierarchy itself.
 
 The list is curated rather than general, because each entry needs a mirror written by hand as
-well as a name the bridge resolves. It currently holds `Transform`, `GlobalTransform`, `ChildOf`,
-`Children`, `Visibility`, `InheritedVisibility` and `ViewVisibility`.
+well as a name the bridge resolves. It holds `Transform`, `GlobalTransform`, `ChildOf`,
+`Children`, `Visibility`, `InheritedVisibility`, `ViewVisibility`, `WorldInstance` and
+`Interaction`.
 
 ### Visibility
 
@@ -306,6 +307,26 @@ Nodes are entities, so nesting is `SetParent` and removal is `Despawn`, and a no
 own components like anything else. The font is Bevy's own, compiled into the engine, so text needs
 no asset. `SetText` rewrites in place rather than respawning, because a score changes every frame
 and the entity behind it should not.
+
+A node can be asked to report the pointer, which is what makes it a button:
+
+```csharp
+var button = Ui.SpawnNode(new UiSettings
+{
+    Interactive = true,
+    Width = Length.Px(140f),
+    Height = Length.Px(40f),
+    Color = (0.15f, 0.35f, 0.6f, 1f),
+});
+
+var state = Ui.InteractionOf(button);       // None, Hovered or Pressed
+```
+
+`Pressed` lasts from the frame the pointer goes down until it is released, so a click is the edge
+into it: keep the previous answer in a behavior field and compare. An interactive node captures
+the pointer, so nothing behind it is hovered through it, and a plain node carries nothing to
+update, which is why it is not the default. Asking a plain node is refused rather than answered
+`None`, since a button that quietly never fires is the harder mistake to find.
 
 ### Assets
 
@@ -1107,8 +1128,8 @@ run against a real Bevy app. Known gaps:
 - A render build draws: mesh primitives, textured physically based materials, cameras, lights,
   sprites, gizmos, UI nodes and text are reachable from a behavior script, verified on Vulkan.
   glTF files and `.scn` scenes load and spawn, and audio plays. What is thin is the layer above
-  that. Animation has no bridge, a UI node reports neither clicks nor hovers and carries six of
-  its two dozen layout fields, and the GPU-compressed texture formats are not decoded.
+  that. Animation has no bridge, a UI node carries six of its two dozen layout fields and cannot
+  hold an image, and the GPU-compressed texture formats are not decoded.
   [.github/TODO.md](.github/TODO.md) lists what each gap needs.
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does
   nothing yet.
