@@ -67,12 +67,21 @@ Nothing here blocks a game; it is a matter of size on disk and upload cost.
 
 ### UI beyond a HUD
 
-`bevy_ui_render` is compiled in and `Ui` spawns nodes and text, sets a node's position, size and
-padding, rewrites text in place, and reports the pointer over a node asked to be interactive. That
-covers a HUD and a button. A menu needs more:
+`bevy_ui_render` is compiled in and `Ui` spawns nodes and text, sets a node's position, size,
+padding, margin, border, direction, justification, alignment and gaps, rewrites text in place, and
+reports the pointer over a node asked to be interactive. That covers a HUD, a button and a menu
+that lays itself out. What is left:
 
-- **Layout.** `Node` carries two dozen fields and six are bridged. Flex direction, justify and
-  align, gaps, margins and borders are what turn a stack of nodes into a laid-out screen.
+- **Per-side rects.** `Padding`, `Margin` and `Border` are one length for all four sides, because
+  a field per side is twelve more numbers on the wire. A nine-slice panel and a tab strip both
+  want them separately.
+- **The rest of flexbox.** `flex_grow` and `flex_basis` for a child that takes the leftover space,
+  `flex_wrap` for a grid of items that reflows, `align_self` for the odd child out, `min_width`
+  and its family, and `Overflow` for a list that scrolls rather than spilling. `Display::None`
+  collapses a subtree out of the layout, which `Visibility::Hidden` does not: it hides the node
+  and keeps its space.
+- **Grid.** `GridPlacement` and the row and column tracks are a second layout algorithm rather
+  than more fields on this one, and an inventory is what wants it.
 - **Images.** A node can hold a texture through `ImageNode`, which is how an icon or a nine-slice
   panel is drawn. The handle plumbing for it already exists.
 - **Text layout.** Justification, line breaking and bounds are `TextLayout`, unbridged, so a long

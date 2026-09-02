@@ -467,6 +467,39 @@ public struct NativeUiNodeConfig
     /// <summary>Unit of <see cref="Padding"/>.</summary>
     public int PaddingUnit;
 
+    /// <summary>Margin on every side.</summary>
+    public float Margin;
+
+    /// <summary>Unit of <see cref="Margin"/>.</summary>
+    public int MarginUnit;
+
+    /// <summary>Border thickness on every side.</summary>
+    public float Border;
+
+    /// <summary>Unit of <see cref="Border"/>.</summary>
+    public int BorderUnit;
+
+    /// <summary>Which way children are stacked.</summary>
+    public int Direction;
+
+    /// <summary>How children are spread along that axis.</summary>
+    public int Justify;
+
+    /// <summary>How children sit across it.</summary>
+    public int Align;
+
+    /// <summary>Space between rows of children.</summary>
+    public float RowGap;
+
+    /// <summary>Unit of <see cref="RowGap"/>.</summary>
+    public int RowGapUnit;
+
+    /// <summary>Space between columns of children.</summary>
+    public float ColumnGap;
+
+    /// <summary>Unit of <see cref="ColumnGap"/>.</summary>
+    public int ColumnGapUnit;
+
     /// <summary>Background or text colour, red.</summary>
     public float ColorR;
 
@@ -478,6 +511,18 @@ public struct NativeUiNodeConfig
 
     /// <summary>Background or text colour, alpha.</summary>
     public float ColorA;
+
+    /// <summary>Border colour, red.</summary>
+    public float BorderColorR;
+
+    /// <summary>Border colour, green.</summary>
+    public float BorderColorG;
+
+    /// <summary>Border colour, blue.</summary>
+    public float BorderColorB;
+
+    /// <summary>Border colour, alpha.</summary>
+    public float BorderColorA;
 }
 
 /// <summary>How an image should be sampled, and how its bytes should be read.</summary>

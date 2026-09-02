@@ -24,7 +24,60 @@ fn length(value: f32, unit: i32) -> bevy::ui::Val {
     }
 }
 
+/// Translates the axis children are stacked along.
+#[cfg(feature = "render")]
+fn flex_direction(value: i32) -> bevy::ui::FlexDirection {
+    use bevy::ui::FlexDirection;
+
+    match value {
+        1 => FlexDirection::Column,
+        2 => FlexDirection::RowReverse,
+        3 => FlexDirection::ColumnReverse,
+        _ => FlexDirection::Row,
+    }
+}
+
+/// Translates how children are spread along the main axis.
+#[cfg(feature = "render")]
+fn justify_content(value: i32) -> bevy::ui::JustifyContent {
+    use bevy::ui::JustifyContent;
+
+    match value {
+        1 => JustifyContent::Start,
+        2 => JustifyContent::End,
+        3 => JustifyContent::FlexStart,
+        4 => JustifyContent::FlexEnd,
+        5 => JustifyContent::Center,
+        6 => JustifyContent::Stretch,
+        7 => JustifyContent::SpaceBetween,
+        8 => JustifyContent::SpaceEvenly,
+        9 => JustifyContent::SpaceAround,
+        _ => JustifyContent::Default,
+    }
+}
+
+/// Translates how children sit across the main axis.
+#[cfg(feature = "render")]
+fn align_items(value: i32) -> bevy::ui::AlignItems {
+    use bevy::ui::AlignItems;
+
+    match value {
+        1 => AlignItems::Start,
+        2 => AlignItems::End,
+        3 => AlignItems::FlexStart,
+        4 => AlignItems::FlexEnd,
+        5 => AlignItems::Center,
+        6 => AlignItems::Baseline,
+        7 => AlignItems::Stretch,
+        _ => AlignItems::Default,
+    }
+}
+
 /// Builds the `Node` a config describes.
+///
+/// An unknown code for one of the three enums takes Bevy's default rather than being refused: the
+/// managed side is what names them, and a bridge older than the assembly calling it should lay a
+/// screen out plainly rather than not at all.
 #[cfg(feature = "render")]
 fn node_from(config: &BcsUiNodeConfig) -> bevy::ui::Node {
     use bevy::ui::{PositionType, UiRect};
@@ -42,8 +95,29 @@ fn node_from(config: &BcsUiNodeConfig) -> bevy::ui::Node {
         width: length(config.width, config.width_unit),
         height: length(config.height, config.height_unit),
         padding: UiRect::all(length(config.padding, config.padding_unit)),
+        margin: UiRect::all(length(config.margin, config.margin_unit)),
+        border: UiRect::all(length(config.border, config.border_unit)),
+        flex_direction: flex_direction(config.direction),
+        justify_content: justify_content(config.justify),
+        align_items: align_items(config.align),
+        row_gap: length(config.row_gap, config.row_gap_unit),
+        column_gap: length(config.column_gap, config.column_gap_unit),
         ..Default::default()
     }
+}
+
+/// Builds the border colour a config describes.
+///
+/// Always inserted, because transparent is what a node with no border draws and the component is
+/// four floats either way. Leaving it off would make a border that is set later invisible.
+#[cfg(feature = "render")]
+fn border_color_from(config: &BcsUiNodeConfig) -> bevy::ui::BorderColor {
+    bevy::ui::BorderColor::all(bevy::color::Color::linear_rgba(
+        config.border_color[0],
+        config.border_color[1],
+        config.border_color[2],
+        config.border_color[3],
+    ))
 }
 
 /// Gives a node the components the pointer is tracked with, when its config asks for them.
@@ -94,6 +168,7 @@ pub unsafe extern "C" fn bcs_ui_spawn_node(config: *const BcsUiNodeConfig) -> u6
                         config.color[2],
                         config.color[3],
                     )),
+                    border_color_from(&config),
                 ));
                 make_interactive(&mut entity, &config);
                 entity.id().to_bits()
@@ -154,6 +229,7 @@ pub unsafe extern "C" fn bcs_ui_spawn_text(
                         config.color[3],
                     )),
                     node_from(&config),
+                    border_color_from(&config),
                 ));
                 make_interactive(&mut entity, &config);
                 entity.id().to_bits()

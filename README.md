@@ -303,6 +303,26 @@ A length carries its unit, because a bare number cannot say whether it means pix
 the parent, or "work it out": `Length.Px`, `Length.Percent`, `Length.Auto`. `Absolute` pins a node
 to its parent's edges rather than laying it out beside its siblings, which is what a HUD wants.
 
+A node stacks its children along one axis, which is what turns a pile of them into a screen:
+
+```csharp
+var menu = Ui.SpawnNode(new UiSettings
+{
+    Direction = UiDirection.Column,
+    Align = UiAlign.Center,
+    RowGap = Length.Px(12f),
+    Padding = Length.Px(16f),
+    Border = Length.Px(2f),
+    BorderColor = (0.4f, 0.7f, 1f, 1f),
+});
+```
+
+`Direction` is that axis, `Justify` spreads the children along it and `Align` places them across
+it: a column centred with `Align` is a menu, a row spread with `UiJustify.SpaceBetween` is a
+toolbar. `RowGap` and `ColumnGap` space the children apart from the parent's side, which is
+steadier than a margin on each of them. `Padding`, `Margin` and `Border` are one length for all
+four sides, and a border draws only where `BorderColor` is not transparent.
+
 Nodes are entities, so nesting is `SetParent` and removal is `Despawn`, and a node can carry your
 own components like anything else. The font is Bevy's own, compiled into the engine, so text needs
 no asset. `SetText` rewrites in place rather than respawning, because a score changes every frame
@@ -1128,8 +1148,8 @@ run against a real Bevy app. Known gaps:
 - A render build draws: mesh primitives, textured physically based materials, cameras, lights,
   sprites, gizmos, UI nodes and text are reachable from a behavior script, verified on Vulkan.
   glTF files and `.scn` scenes load and spawn, and audio plays. What is thin is the layer above
-  that. Animation has no bridge, a UI node carries six of its two dozen layout fields and cannot
-  hold an image, and the GPU-compressed texture formats are not decoded.
+  that. Animation has no bridge, a UI node lays a column out but cannot hold an image, and the
+  GPU-compressed texture formats are not decoded.
   [.github/TODO.md](.github/TODO.md) lists what each gap needs.
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does
   nothing yet.

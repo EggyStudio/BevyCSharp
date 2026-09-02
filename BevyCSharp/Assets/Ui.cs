@@ -45,6 +45,103 @@ public readonly record struct Length(float Value, LengthUnit Unit)
 }
 
 /// <summary>
+/// Which way a node stacks its children.
+/// </summary>
+/// <remarks>
+/// A node lays its children out along one axis. This is the axis, and everything else in the
+/// layout is described relative to it: <see cref="UiSettings.Justify"/> spreads them along it,
+/// <see cref="UiSettings.Align"/> places them across it.
+/// </remarks>
+public enum UiDirection
+{
+    /// <summary>Left to right, which is the default.</summary>
+    Row = 0,
+
+    /// <summary>Top to bottom, which is what a menu or a list wants.</summary>
+    Column = 1,
+
+    /// <summary>Right to left.</summary>
+    RowReverse = 2,
+
+    /// <summary>Bottom to top.</summary>
+    ColumnReverse = 3,
+}
+
+/// <summary>
+/// How a node spreads its children along its own axis.
+/// </summary>
+/// <remarks>
+/// The main axis is <see cref="UiSettings.Direction"/>. `Start` and `End` are the edges of the
+/// node itself; the `Flex` pair follows the direction instead, so they swap when it is reversed.
+/// </remarks>
+public enum UiJustify
+{
+    /// <summary>Whatever the layout would do unasked.</summary>
+    Default = 0,
+
+    /// <summary>Packed against the start of the axis.</summary>
+    Start = 1,
+
+    /// <summary>Packed against the end of the axis.</summary>
+    End = 2,
+
+    /// <summary>The start of the axis, or its end when the direction is reversed.</summary>
+    FlexStart = 3,
+
+    /// <summary>The end of the axis, or its start when the direction is reversed.</summary>
+    FlexEnd = 4,
+
+    /// <summary>Packed around the middle.</summary>
+    Center = 5,
+
+    /// <summary>Stretched to fill the axis.</summary>
+    Stretch = 6,
+
+    /// <summary>Spread out, with the leftover space between the children.</summary>
+    SpaceBetween = 7,
+
+    /// <summary>Spread out, with equal space between and around the children.</summary>
+    SpaceEvenly = 8,
+
+    /// <summary>Spread out, with half-size space at the two ends.</summary>
+    SpaceAround = 9,
+}
+
+/// <summary>
+/// How a node places its children across its axis.
+/// </summary>
+/// <remarks>
+/// The cross axis: for a <see cref="UiDirection.Row"/> this is the vertical, for a
+/// <see cref="UiDirection.Column"/> the horizontal.
+/// </remarks>
+public enum UiAlign
+{
+    /// <summary>Whatever the layout would do unasked.</summary>
+    Default = 0,
+
+    /// <summary>Against the start of the cross axis.</summary>
+    Start = 1,
+
+    /// <summary>Against the end of the cross axis.</summary>
+    End = 2,
+
+    /// <summary>The start of the cross axis, or its end when the direction is reversed.</summary>
+    FlexStart = 3,
+
+    /// <summary>The end of the cross axis, or its start when the direction is reversed.</summary>
+    FlexEnd = 4,
+
+    /// <summary>Centred across the axis, which is what a row of buttons wants.</summary>
+    Center = 5,
+
+    /// <summary>Lined up on the baselines of the text inside them.</summary>
+    Baseline = 6,
+
+    /// <summary>Stretched to fill the cross axis.</summary>
+    Stretch = 7,
+}
+
+/// <summary>
 /// How the pointer stands on a node.
 /// </summary>
 /// <remarks>
@@ -114,11 +211,46 @@ public sealed class UiSettings
     /// <summary>Space between the node's edge and its contents, on every side.</summary>
     public Length Padding { get; set; } = Length.Auto;
 
+    /// <summary>Space outside the node's edge, on every side.</summary>
+    /// <remarks>
+    /// What separates a node from its siblings. <see cref="RowGap"/> and <see cref="ColumnGap"/>
+    /// say the same thing from the parent's side, and are the better place for even spacing.
+    /// </remarks>
+    public Length Margin { get; set; } = Length.Auto;
+
+    /// <summary>How thick the node's border is, on every side.</summary>
+    /// <remarks>Drawn in <see cref="BorderColor"/>, which is transparent until it is set.</remarks>
+    public Length Border { get; set; } = Length.Auto;
+
+    /// <summary>Which way the node stacks its children.</summary>
+    public UiDirection Direction { get; set; } = UiDirection.Row;
+
+    /// <summary>How the children are spread along that axis.</summary>
+    public UiJustify Justify { get; set; } = UiJustify.Default;
+
+    /// <summary>How the children sit across it.</summary>
+    public UiAlign Align { get; set; } = UiAlign.Default;
+
+    /// <summary>Space between the rows of children.</summary>
+    public Length RowGap { get; set; } = Length.Auto;
+
+    /// <summary>Space between the columns of children.</summary>
+    public Length ColumnGap { get; set; } = Length.Auto;
+
     /// <summary>
     /// The node's background, or the text's colour for a run of text. Linear RGBA.
     /// </summary>
     /// <remarks>Transparent by default, so a plain node is a layout box that draws nothing.</remarks>
     public (float R, float G, float B, float A) Color { get; set; } = (1f, 1f, 1f, 0f);
+
+    /// <summary>
+    /// The border's colour, on every side. Linear RGBA.
+    /// </summary>
+    /// <remarks>
+    /// Transparent by default, so a border takes both this and a <see cref="Border"/> thickness
+    /// to appear.
+    /// </remarks>
+    public (float R, float G, float B, float A) BorderColor { get; set; } = (1f, 1f, 1f, 0f);
 }
 
 /// <summary>
@@ -251,10 +383,25 @@ public static unsafe class Ui
         HeightUnit = (int)settings.Height.Unit,
         Padding = settings.Padding.Value,
         PaddingUnit = (int)settings.Padding.Unit,
+        Margin = settings.Margin.Value,
+        MarginUnit = (int)settings.Margin.Unit,
+        Border = settings.Border.Value,
+        BorderUnit = (int)settings.Border.Unit,
+        Direction = (int)settings.Direction,
+        Justify = (int)settings.Justify,
+        Align = (int)settings.Align,
+        RowGap = settings.RowGap.Value,
+        RowGapUnit = (int)settings.RowGap.Unit,
+        ColumnGap = settings.ColumnGap.Value,
+        ColumnGapUnit = (int)settings.ColumnGap.Unit,
         ColorR = settings.Color.R,
         ColorG = settings.Color.G,
         ColorB = settings.Color.B,
         ColorA = settings.Color.A,
+        BorderColorR = settings.BorderColor.R,
+        BorderColorG = settings.BorderColor.G,
+        BorderColorB = settings.BorderColor.B,
+        BorderColorA = settings.BorderColor.A,
     };
 
     private static BevyNativeException NoUi(string operation) =>

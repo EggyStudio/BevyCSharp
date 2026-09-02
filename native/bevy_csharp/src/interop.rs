@@ -377,8 +377,32 @@ pub struct BcsUiNodeConfig {
     pub padding: f32,
     /// Unit of `padding`.
     pub padding_unit: i32,
+    /// Space outside the node's edge, on every side.
+    pub margin: f32,
+    /// Unit of `margin`.
+    pub margin_unit: i32,
+    /// Thickness of the node's border, on every side.
+    pub border: f32,
+    /// Unit of `border`.
+    pub border_unit: i32,
+    /// Which way the node's children are stacked: `0` row, `1` column, `2` and `3` reversed.
+    pub direction: i32,
+    /// How the children are spread along that axis, in the order `JustifyContent` declares.
+    pub justify: i32,
+    /// How the children sit across it, in the order `AlignItems` declares.
+    pub align: i32,
+    /// Space between rows of children.
+    pub row_gap: f32,
+    /// Unit of `row_gap`.
+    pub row_gap_unit: i32,
+    /// Space between columns of children.
+    pub column_gap: f32,
+    /// Unit of `column_gap`.
+    pub column_gap_unit: i32,
     /// Background colour for a node, or the text colour for a run of text. Linear RGBA.
     pub color: [f32; 4],
+    /// Colour of the border, on every side. Linear RGBA, and transparent draws nothing.
+    pub border_color: [f32; 4],
 }
 
 /// How an image should be sampled, and how its bytes should be read.

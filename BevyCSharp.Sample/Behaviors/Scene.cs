@@ -80,14 +80,20 @@ public partial struct Scene
         // flat outline.
         ctx.Ecs.Add(cube, new Scene { YawSpeed = 0.9f, PitchSpeed = 0.35f });
 
-        // A HUD: a panel pinned to a corner with a line of text inside it. Nesting is ordinary
-        // parenting, so the text moves with the panel.
+        // A HUD: a panel pinned to a corner, stacking what it holds in a column. Only the panel
+        // is placed by hand; everything inside is put where the layout says, which is what the
+        // direction, the gap and the padding are for.
         var panel = Ui.SpawnNode(new UiSettings
         {
             Absolute = true,
             Left = Length.Px(16f),
             Top = Length.Px(16f),
+            Direction = UiDirection.Column,
+            Align = UiAlign.Start,
+            RowGap = Length.Px(8f),
             Padding = Length.Px(10f),
+            Border = Length.Px(1f),
+            BorderColor = (0.45f, 0.65f, 0.95f, 0.7f),
             Color = (0f, 0f, 0f, 0.45f),
         });
 
@@ -95,17 +101,18 @@ public partial struct Scene
         ctx.Ecs.SetParent(readout, panel);
         ctx.Ecs.Add(readout, new Hud());
 
-        // A button: the same kind of node, asked to report the pointer. The caption is a child,
-        // so the pointer is tracked on the box the eye sees rather than on the glyphs.
+        // A button: the same kind of node, asked to report the pointer. It sits under the readout
+        // because the panel stacks its children, not because it was told where to go. The caption
+        // is a child, so the pointer is tracked on the box the eye sees rather than on the glyphs.
         var button = Ui.SpawnNode(new UiSettings
         {
-            Absolute = true,
-            Left = Length.Px(16f),
-            Top = Length.Px(60f),
             Padding = Length.Px(10f),
+            Border = Length.Px(1f),
+            BorderColor = (0.6f, 0.8f, 1f, 0.9f),
             Interactive = true,
             Color = (0.12f, 0.24f, 0.4f, 0.85f),
         });
+        ctx.Ecs.SetParent(button, panel);
 
         var caption = Ui.SpawnText(
             "clicks: 0", new UiSettings { Color = (0.9f, 0.95f, 1f, 1f) }, 18f);

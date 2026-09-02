@@ -103,6 +103,82 @@ public sealed class UiTests
     }
 
     [Fact]
+    public void ALaidOutNodeTakesEveryFieldTheLayoutHas()
+    {
+        // Whether the screen looks right needs a window and an eye; the sample is where that is
+        // confirmed. What is checked here is that a fully described node is accepted and comes
+        // back as an ordinary parented entity, which is what would break silently.
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        var menu = Entity.None;
+        var children = 0;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            menu = Ui.SpawnNode(new UiSettings
+            {
+                Absolute = true,
+                Left = Length.Percent(30f),
+                Top = Length.Percent(25f),
+                Width = Length.Px(280f),
+                Direction = UiDirection.Column,
+                Justify = UiJustify.SpaceBetween,
+                Align = UiAlign.Center,
+                RowGap = Length.Px(12f),
+                ColumnGap = Length.Px(4f),
+                Padding = Length.Px(16f),
+                Margin = Length.Px(8f),
+                Border = Length.Px(2f),
+                Color = (0f, 0f, 0f, 0.6f),
+                BorderColor = (0.4f, 0.7f, 1f, 1f),
+            });
+
+            foreach (var caption in new[] { "Play", "Options", "Quit" })
+            {
+                var row = Ui.SpawnText(caption, new UiSettings
+                {
+                    Interactive = true,
+                    Padding = Length.Px(6f),
+                    Color = (1f, 1f, 1f, 1f),
+                }, 20f);
+
+                ctx.Ecs.SetParent(row, menu);
+            }
+        });
+
+        harness.OnContext(Stage.Last, ctx => children = ctx.Ecs.ChildrenOf(menu).Length);
+
+        harness.Run();
+
+        Assert.NotEqual(Entity.None, menu);
+        Assert.Equal(3, children);
+    }
+
+    [Fact]
+    public void AnUnknownLayoutCodeFallsBackRatherThanFailing()
+    {
+        // The managed side names the enums, so a bridge older than the assembly calling it can be
+        // handed a code it has never heard of. A plainly laid out screen beats no screen.
+        using var harness = new EngineHarness(frames: 2);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var node = Ui.SpawnNode(new UiSettings
+            {
+                Direction = (UiDirection)99,
+                Justify = (UiJustify)99,
+                Align = (UiAlign)99,
+            });
+
+            Assert.True(ctx.Ecs.IsAlive(node));
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void AnInteractiveNodeCarriesTheComponentThePointerUpdates()
     {
         using var harness = new EngineHarness(frames: 3);
