@@ -143,18 +143,32 @@ What is not bridged:
 
 ## Simulation structure
 
-### Sub-states and scoped entities
+### Sub-states
 
-States carry their edges: `[OnEnter]` and `[OnExit]` run once per transition, beside `[InState]`
-for every frame a state is held. Two pieces of Bevy's state machinery are still unbridged, and
-both are about what a state owns rather than when it changes:
+States carry their edges and their entities: `[OnEnter]` and `[OnExit]` run once per transition,
+`[InState]` every frame a state is held, and `DespawnOnExit` ties an entity's life to a value so
+that leaving it clears the level.
 
-- **Sub-states.** `SubStates` exists only while a parent state holds a value, so a pause menu's
-  own state disappears with the run it belongs to. Bridging it means a slot knowing its parent,
-  which the fixed slot table does not express.
-- **State-scoped entities.** `DespawnOnExit` despawns an entity when a state is left, which is
-  what removes a level without a teardown system listing everything it spawned. It is a component
-  holding a state value, so it needs the same slot plumbing rather than a new export.
+What is left is `SubStates`, a state that exists only while a parent holds a value, so a pause
+menu's own state disappears with the run it belongs to. The obstacle is that `SubStates` names its
+parent as an associated type, while the bridge's slots are chosen at runtime. A way through, in
+the order the work falls:
+
+- **Pair a sub slot to each parent slot.** `BcsSub0` implements `SubStates` with
+  `SourceStates = BcsState0`, and so on, so the parent type is fixed at compile time and only the
+  parent *value* has to be configured. `should_exist` reads that value from an atomic the
+  registration wrote, which puts one sub-state under each state axis: a pause state under the app
+  state, which is the shape a game wants anyway.
+- **`app.AddSubState(Pause.Off, whileIn: Screen.Playing)`.** States are added by hand rather than
+  by the generator, so the managed surface is one more method on `App` and no attribute work. It
+  can refuse a parent whose slot already carries a sub-state, which is where the pairing shows.
+- **The edges and conditions need sub arms.** `bcs_state_get`, `_set` and `_add_system` dispatch
+  on the slot index, and a sub-state is a different type in the same position, so each grows a
+  second table. `[InState(Pause.On)]` and `[OnEnter(Pause.On)]` should work exactly as they do for
+  a plain state, which is most of the work in this item.
+- **Reading a sub-state that does not exist.** While the parent is elsewhere there is no
+  `State<BcsSub0>` resource at all, so the read reports `NOT_PRESENT` rather than a value. That is
+  the honest answer and the managed side should surface it as one, not as a default.
 
 ### Engine messages that carry text
 

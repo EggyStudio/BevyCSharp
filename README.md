@@ -923,6 +923,21 @@ That is where a screen is built and taken away: once per transition, not once pe
 transition attribute replaces the stage attribute rather than joining it, because the two say
 different things about when a method runs, and asking for both is reported as an error.
 
+A teardown method that lists everything the screen spawned goes stale the first time something
+new is added to the screen. Tie the entity to the state instead and leaving takes it with you:
+
+```csharp
+[OnEnter(Screen.Playing)]
+public static void BuildLevel(BehaviorContext ctx)
+{
+    var enemy = ctx.Ecs.Spawn();
+    ctx.Ecs.DespawnOnExit(enemy, Screen.Playing);
+}
+```
+
+The despawn is Bevy's own, so it reaches the entity's children as well, and it happens at the
+transition rather than inside `[OnExit]`, which means it covers every way out of the value.
+
 A transition is queued, not immediate: it lands at Bevy's next transition point, so every system
 in the frame agrees on which state it is in rather than some seeing the change halfway through.
 

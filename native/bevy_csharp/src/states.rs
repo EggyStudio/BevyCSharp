@@ -15,6 +15,7 @@ use bevy::app::App;
 use bevy::ecs::world::World;
 use bevy::state::app::AppExtStates;
 use bevy::state::state::{NextState, OnEnter, OnExit, State, States};
+use bevy::state::state_scoped::DespawnOnExit;
 
 use crate::interop::status;
 use crate::state::{app_mut, loan_world, with_world, BcsApp, SystemReg};
@@ -66,6 +67,27 @@ macro_rules! define_slots {
                     } else {
                         app.add_systems(OnExit($ty(value)), run);
                     }
+                    status::OK
+                })+
+                _ => status::NULL_ARG,
+            }
+        }
+
+        /// Marks an entity to be despawned when a slot leaves a value.
+        ///
+        /// The component is generic over the state type, so the slot decides which one is
+        /// inserted. `insert_state` registers the systems that act on it, so a slot the managed
+        /// side added is already watched.
+        fn scope(world: &mut World, entity: bevy::ecs::entity::Entity, slot: i32, value: i32)
+            -> i32
+        {
+            let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
+                return status::NO_ENTITY;
+            };
+
+            match slot {
+                $($slot => {
+                    entity_mut.insert(DespawnOnExit($ty(value)));
                     status::OK
                 })+
                 _ => status::NULL_ARG,
@@ -180,5 +202,17 @@ pub unsafe extern "C" fn bcs_state_add_system(
         };
 
         add_edge(&mut app.app, slot, value, entering, SystemReg { func, user })
+    })
+}
+
+/// Marks an entity to be despawned when `slot` leaves `value`.
+///
+/// What removes a level without a teardown system listing everything it spawned: the entities a
+/// screen produced say which screen they belong to, and leaving it takes them with it. Bevy acts
+/// on this at the transition rather than in `OnExit`, so it covers every way out of the value.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_state_despawn_on_exit(entity: u64, slot: i32, value: i32) -> i32 {
+    crate::interop::guard(|| {
+        with_world(|world| scope(world, crate::ecs::entity_from(entity), slot, value))
     })
 }

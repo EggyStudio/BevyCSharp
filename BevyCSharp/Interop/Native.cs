@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 33;
+    internal const int ExpectedAbiVersion = 34;
 
     static Native() => NativeLoader.Initialize();
 
@@ -211,6 +211,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_state_add(IntPtr app, int slot, int initial);
+
+    /// <summary>Marks an entity to be despawned when a slot leaves a value.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_state_despawn_on_exit(ulong entity, int slot, int value);
 
     /// <summary>Registers a system on a state's enter or exit edge.</summary>
     [LibraryImport(Library)]

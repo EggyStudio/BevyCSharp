@@ -105,6 +105,42 @@ public sealed unsafe class EcsWorld
         return true;
     }
 
+    /// <summary>
+    /// Despawns an entity when a state leaves the value it belongs to.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What takes a level away without a teardown system listing everything in it: each entity a
+    /// screen spawns says which screen it belongs to, and leaving that screen takes it with it.
+    /// The despawn is Bevy's own and reaches the entity's children like any other.
+    /// </para>
+    /// <para>
+    /// It happens at the transition rather than in an <c>[OnExit]</c> method, so it covers every
+    /// way out of the value, including one queued from somewhere that knows nothing about the
+    /// entity.
+    /// </para>
+    /// </remarks>
+    /// <param name="entity">The entity to tie to the state.</param>
+    /// <param name="state">The value it belongs to.</param>
+    /// <exception cref="BevyNativeException">
+    /// The entity is gone, or the state was never added with <see cref="App.AddState{TState}"/>.
+    /// </exception>
+    /// <example>
+    /// <code>
+    /// [OnEnter(Screen.Playing)]
+    /// public static void Build(BehaviorContext ctx)
+    /// {
+    ///     var enemy = ctx.Ecs.Spawn();
+    ///     ctx.Ecs.DespawnOnExit(enemy, Screen.Playing);
+    /// }
+    /// </code>
+    /// </example>
+    public void DespawnOnExit<TState>(Entity entity, TState state) where TState : struct, Enum =>
+        Native.Check(
+            Native.bcs_state_despawn_on_exit(
+                entity.Bits, StateRegistry.SlotOf<TState>(), StateRegistry.ToInt(state)),
+            $"scoping {entity} to {typeof(TState).Name}");
+
     /// <summary>True when the handle still refers to a live entity.</summary>
     public bool IsAlive(Entity entity) =>
         Native.Check(Native.bcs_ecs_alive(entity.Bits), "IsAlive") != 0;

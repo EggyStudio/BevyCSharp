@@ -143,6 +143,79 @@ public sealed class StateTests
     }
 
     [Fact]
+    public void EntitiesScopedToAStateGoWhenItDoes()
+    {
+        // What removes a level without a teardown system listing everything in it.
+        using var harness = new EngineHarness(frames: 8);
+        harness.App.AddState(Screen.Menu);
+
+        var scoped = Entity.None;
+        var child = Entity.None;
+        var unscoped = Entity.None;
+        var aliveInPlaying = false;
+        var aliveAfterLeaving = true;
+        var childAfterLeaving = true;
+        var unscopedSurvived = false;
+        var moved = false;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            switch (ctx.Time.FrameCount)
+            {
+                case 1:
+                    ctx.SetState(Screen.Playing);
+                    return;
+
+                case 2:
+                    scoped = ctx.Ecs.Spawn();
+                    ctx.Ecs.DespawnOnExit(scoped, Screen.Playing);
+
+                    // The despawn is Bevy's own, so it reaches children as well.
+                    child = ctx.Ecs.Spawn();
+                    ctx.Ecs.SetParent(child, scoped);
+
+                    unscoped = ctx.Ecs.Spawn();
+                    aliveInPlaying = ctx.Ecs.IsAlive(scoped);
+                    return;
+
+                case 3:
+                    ctx.SetState(Screen.Menu);
+                    moved = true;
+                    return;
+            }
+
+            if (!moved) return;
+
+            aliveAfterLeaving = ctx.Ecs.IsAlive(scoped);
+            childAfterLeaving = ctx.Ecs.IsAlive(child);
+            unscopedSurvived = ctx.Ecs.IsAlive(unscoped);
+        });
+
+        harness.Run();
+
+        Assert.True(aliveInPlaying, "the entity did not survive the state it belongs to");
+        Assert.False(aliveAfterLeaving, "leaving the state left the entity behind");
+        Assert.False(childAfterLeaving, "the child outlived the parent it hung from");
+        Assert.True(unscopedSurvived, "an entity that belongs to no state was taken as well");
+    }
+
+    [Fact]
+    public void ScopingNeedsAnEntityAndAStateThatExist()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        harness.App.AddState(Screen.Menu);
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            var gone = Assert.Throws<BevyNativeException>(
+                () => ctx.Ecs.DespawnOnExit(Entity.None, Screen.Playing));
+            Assert.Equal(NativeStatus.NoEntity, gone.Status);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void TwoStateMachinesAreIndependent()
     {
         // Each enum claims its own slot, and Bevy keys everything on the slot's type, so moving
