@@ -941,9 +941,12 @@ transition rather than inside `[OnExit]`, which means it covers every way out of
 A transition is queued, not immediate: it lands at Bevy's next transition point, so every system
 in the frame agrees on which state it is in rather than some seeing the change halfway through.
 
-A Bevy state is a Rust type and C# cannot define one, so the bridge provides four state slots
-that hold an integer, and each enum claims one the first time it is added. Four is past what a
-game normally needs, and running out reports it. `[InState]` is a run condition, so it composes
+A Bevy state is a Rust type and C# cannot define one, so the bridge provides eight state slots
+that hold an integer, and each enum claims one the first time it is added. A slot is one
+independent state machine rather than one value: the integer it holds gives an enum as many
+members as it likes, and eight is the number of *unrelated* machines a game can run at once, which
+is past what most need. Running out reports it, and raising the count is a list in
+`native/bevy_csharp/src/states.rs` and a rebuild, at about four seconds of build time per slot. `[InState]` is a run condition, so it composes
 with `[RunIf]` and `[ToggleKey]` rather than replacing them, and a method carrying more than one
 runs only when all of them pass.
 

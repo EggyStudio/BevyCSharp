@@ -8,8 +8,12 @@
 //! decide what the numbers mean. Each C# enum claims one of these slots on registration, which is
 //! what keeps two unrelated state machines from treading on each other.
 //!
-//! The slot count is fixed because the types have to exist at compile time. Four is past what a
-//! game normally needs: an app state, a pause state, and room to spare.
+//! The slot count is fixed because the types have to exist at compile time, and each one costs
+//! compile time rather than runtime: `insert_state` is generic, so a slot brings its own copy of
+//! the state resources, the transition schedules and the systems that despawn what a state owns,
+//! whether or not a game ever adds it. Eight covers an app state, a pause, a menu page, a phase
+//! and room to spare, at about four seconds of build time each. Raising it is this list and a
+//! rebuild; nothing else, because the managed side asks how many there are.
 
 use bevy::app::App;
 use bevy::ecs::world::World;
@@ -109,7 +113,10 @@ macro_rules! define_slots {
     };
 }
 
-define_slots!(BcsState0 = 0, BcsState1 = 1, BcsState2 = 2, BcsState3 = 3);
+define_slots!(
+    BcsState0 = 0, BcsState1 = 1, BcsState2 = 2, BcsState3 = 3, BcsState4 = 4, BcsState5 = 5,
+    BcsState6 = 6, BcsState7 = 7
+);
 
 /// Reports how many state slots this bridge provides.
 #[unsafe(no_mangle)]

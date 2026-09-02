@@ -295,8 +295,9 @@ public sealed class StateTests
     public void StatesAreReportedAsAFiniteResource()
     {
         // The slots exist as Rust types, so there is a fixed number of them, and running out has
-        // to say so rather than silently reusing one.
-        Assert.True(StateRegistry.SlotCount >= 4);
+        // to say so rather than silently reusing one. Eight is what the bridge declares and what
+        // the readme promises, so a bridge offering fewer is a mismatch worth failing on.
+        Assert.True(StateRegistry.SlotCount >= 8, $"only {StateRegistry.SlotCount} state slots");
     }
 
     [Fact]
