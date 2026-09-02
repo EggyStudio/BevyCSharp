@@ -82,8 +82,8 @@ public sealed class GltfTests
             entity = ctx.Ecs.Spawn();
             Render.SetMesh(ctx.Ecs, entity, AssetServer.LoadGltfMesh(Model));
 
-            // The file's own material is not reachable, so the entity gets a built one. See the
-            // remarks on LoadGltfMesh.
+            // Windowless here, so the file's own material cannot be translated and the entity
+            // gets a built one. See the remarks on LoadGltfMesh.
             Render.SetMaterial(ctx.Ecs, entity, Render.CreateMaterial(0.6f, 0.6f, 0.62f));
         });
 

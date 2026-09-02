@@ -80,6 +80,19 @@ The words `simply`, `just`, `powerful` and `blazing` are not used, nor are excla
 `easy` is not used to describe working with the software. It is acceptable in a warning, as in
 "easy to get subtly wrong", where it tells the reader something they need.
 
+Antithesis is not used for emphasis. A claim paired with the negation of something nobody
+proposed reads as a slogan, and the negated half carries nothing:
+
+> Discovery is generated, not scanned.
+
+State the claim on its own:
+
+> Registration happens at assembly load.
+
+The construction is warranted where the negated alternative is what a reader would otherwise
+assume, and correcting that assumption is the point of the sentence, as in "that is Bevy's real
+`Transform`, not a copy kept in sync".
+
 Limitations are stated directly. "Not implemented yet" is preferable to "coming soon".
 
 ## Self-reference
@@ -105,6 +118,10 @@ has been read", and wrong where it only means "since the last edit".
 The same applies to `TODO.md`. An item is a description of outstanding work, so completed work is
 removed from it or the entry is rewritten around what remains. It is not annotated as done, struck
 through, or kept for the record.
+
+A list of gaps is a claim about the software in the same way the rest of the prose is, so closing
+a gap means rewriting the entry around what is left of it. `TODO.md` and the README's status
+section describe the same software and are kept consistent with each other.
 
 ## References
 
