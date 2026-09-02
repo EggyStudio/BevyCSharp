@@ -28,17 +28,16 @@ public partial struct Scene
     {
         if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
 
-        var camera = Render.SpawnCamera3d(new CameraSettings
-        {
-            FieldOfView = 55f,
-            Clear = ClearMode.Custom,
-            ClearColor = (0, 0, 0, 1f),
-        });
+        var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 55f });
         ctx.Ecs.Add(camera, Transform.LookingAt(new Vec3(3.5f, 3f, 6f), Vec3.Zero, Vec3.UnitY));
 
         // What the camera does with the picture once the scene is drawn. The high dynamic range
         // target is what makes the rest worth having: without it nothing is brighter than white,
         // so the tonemapper has nothing to bring down and bloom has nothing to scatter.
+        // The sky, scattered from the sun below rather than painted: it is what the camera sees
+        // where the scene does not cover, and what tints everything in the distance.
+        Render.SetAtmosphere(camera, new AtmosphereSettings());
+
         Render.SetPostProcessing(camera, new PostSettings
         {
             Hdr = true,
@@ -55,7 +54,7 @@ public partial struct Scene
             Intensity = 12_000f,
             Color = (1f, 0.95f, 0.85f),
         });
-        ctx.Ecs.Add(sun, Transform.LookingAt(new Vec3(4f, 8f, 5f), Vec3.Zero, Vec3.UnitY));
+        ctx.Ecs.Add(sun, Transform.LookingAt(new Vec3(6f, 2.5f, 4f), Vec3.Zero, Vec3.UnitY));
 
         // A cool rim from the other side, so the cube reads as a solid rather than a silhouette
         // against the dark clear colour.

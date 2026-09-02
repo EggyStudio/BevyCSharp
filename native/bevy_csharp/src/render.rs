@@ -9,7 +9,8 @@
 //! named operations rather than data the managed side writes directly.
 
 use crate::interop::{
-    status, BcsCameraConfig, BcsLightConfig, BcsMaterialConfig, BcsPostConfig, BcsSpriteConfig,
+    status, BcsAtmosphereConfig, BcsCameraConfig, BcsLightConfig, BcsMaterialConfig, BcsPostConfig,
+    BcsSpriteConfig,
 };
 
 #[cfg(feature = "render")]
@@ -835,6 +836,124 @@ pub unsafe extern "C" fn bcs_render_set_post(entity: u64, config: *const BcsPost
                     entity_mut.remove::<ContrastAdaptiveSharpening>();
                 }
 
+                status::OK
+            })
+        }
+    })
+}
+
+/// Draws the sky earth's air scatters, seen from `camera`.
+///
+/// Two things make a sky: a planet, which is an entity the size of a world with the air described
+/// on it, and a camera told to sample it. This call keeps at most one planet in the world and
+/// points the camera at it, because a scene has one sky and a second planet would be picked
+/// between by distance rather than by intent.
+///
+/// The sun is whichever directional light is in the scene: the sky is scattered from its
+/// direction and colour, so moving that light moves the sun and a scene without one gets a
+/// night sky.
+///
+/// The planet is metres across, and Bevy places it so the ground sits at the origin. A scene
+/// measured in something other than metres says so with `scale` rather than by moving anything.
+///
+/// # Safety
+/// `config` must point to a readable [`BcsAtmosphereConfig`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_set_atmosphere(
+    camera: u64,
+    config: *const BcsAtmosphereConfig,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, config);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::asset::Assets;
+            use bevy::camera::Hdr;
+            use bevy::light::atmosphere::{Atmosphere, ScatteringMedium};
+            use bevy::pbr::AtmosphereSettings;
+            use bevy::transform::components::Transform;
+
+            if config.is_null() {
+                return status::NULL_ARG;
+            }
+            let config = unsafe { *config };
+            let entity = crate::ecs::entity_from(camera);
+
+            with_world(|world| {
+                {
+                    let Ok(entity_ref) = world.get_entity(entity) else {
+                        return status::NO_ENTITY;
+                    };
+                    if !entity_ref.contains::<bevy::camera::Camera>() {
+                        return status::NOT_PRESENT;
+                    }
+                }
+
+                if config.enabled == 0 {
+                    // The planet is left where it is. Nothing computes an atmosphere until a
+                    // camera asks for one, so an unused planet costs a component and no work.
+                    world.entity_mut(entity).remove::<AtmosphereSettings>();
+                    return status::OK;
+                }
+
+                // Earth's air. Mars is the other medium Bevy ships and it is not offered here:
+                // its dust phase comes from a texture the caller would have to supply, and one
+                // that is not supplied leaves a sky that cannot be built at all.
+                let density = if config.density > 0.0 { config.density } else { 1.0 };
+                let medium = ScatteringMedium::earth(256, 256).with_density_multiplier(density);
+
+                let Some(mut media) = world.get_resource_mut::<Assets<ScatteringMedium>>() else {
+                    return status::INVALID_STATE;
+                };
+
+                let atmosphere = Atmosphere::earth(media.add(medium));
+
+                let scale = if config.scale > 0.0 { config.scale } else { 1.0 };
+
+                // One planet: the existing one is rewritten rather than joined by another, since
+                // Bevy renders whichever is nearest and two would be a coin toss.
+                let existing = world
+                    .query_filtered::<bevy::ecs::entity::Entity, bevy::ecs::query::With<Atmosphere>>()
+                    .iter(world)
+                    .next();
+
+                match existing {
+                    Some(planet) => {
+                        world.entity_mut(planet).insert(atmosphere);
+                    }
+                    None => {
+                        // Spawned without a transform of its own, so Bevy's own hook drops the
+                        // planet below the origin and the ground ends up where the scene is.
+                        world.spawn(atmosphere);
+                    }
+                }
+
+                if scale != 1.0 {
+                    let planet = world
+                        .query_filtered::<bevy::ecs::entity::Entity, bevy::ecs::query::With<Atmosphere>>()
+                        .iter(world)
+                        .next();
+
+                    if let Some(planet) = planet {
+                        world
+                            .entity_mut(planet)
+                            .insert(Transform::from_scale(bevy::math::Vec3::splat(scale)));
+                    }
+                }
+
+                let mut settings = AtmosphereSettings::default();
+                if config.haze_distance > 0.0 {
+                    settings.aerial_view_lut_max_distance = config.haze_distance;
+                }
+
+                // `AtmosphereSettings` requires `Hdr`, and Bevy's insert brings it, but a camera
+                // that had it removed would otherwise keep drawing without one.
+                world.entity_mut(entity).insert((Hdr, settings));
                 status::OK
             })
         }

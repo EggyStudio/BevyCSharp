@@ -317,6 +317,25 @@ pub struct BcsPostConfig {
     pub bloom_mode: i32,
 }
 
+/// A sky computed from the light scattering through a planet's air.
+///
+/// The atmosphere itself is a planet-sized entity that the camera looks out from, so this config
+/// describes both: which planet, and how the camera should sample it.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsAtmosphereConfig {
+    /// Non-zero to draw the sky, zero to stop this camera drawing it.
+    pub enabled: i32,
+    /// Multiplies the density of the air, thickening or thinning the haze. `0` takes earth's.
+    pub density: f32,
+    /// Scales the planet against the scene, for a world that is not measured in metres. `0`
+    /// takes one.
+    pub scale: f32,
+    /// How far the scattering in front of the scene is computed for, in metres. `0` takes Bevy's
+    /// own distance.
+    pub haze_distance: f32,
+}
+
 /// How a sound should be played.
 #[repr(C)]
 #[derive(Clone, Copy)]

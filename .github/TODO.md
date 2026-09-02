@@ -201,7 +201,7 @@ What is left:
 ## Rendering control
 
 Cameras, lights and the window take their common parameters, and a camera tonemaps, dithers,
-multisamples, antialiases, sharpens and blooms what it draws. `bevy_post_process` and
+multisamples, antialiases, sharpens, blooms and scatters a sky over what it draws. `bevy_post_process` and
 `bevy_anti_alias` are compiled into the render profile, so what is left in this area is bridge
 work over code already in the binary rather than a feature to add. What is left:
 
@@ -211,6 +211,13 @@ work over code already in the binary rather than a feature to add. What is left:
   curve. Each is another block on `BcsPostConfig`, which is already wide enough that the next few
   should probably go in a second config rather than widening it further. `TemporalAntiAliasing`
   is in the same crate but needs the motion vector prepass, so it is a step up from the others.
+- **The rest of the sky.** Earth's air is bridged; Mars is the other medium Bevy ships and its
+  dust phase comes from a texture, so it needs an image handle on the config and a texture worth
+  shipping. `ScatteringMedium::new` takes arbitrary scattering terms, which is what an alien
+  planet would want and what a flat config cannot describe. `AtmosphereEnvironmentMap` lights the
+  scene *from* the sky rather than only drawing it, which is the difference between a lit scene
+  and one that merely has a sky behind it. The LUT sizes and sample counts on `AtmosphereSettings`
+  are Bevy's defaults, and they are the quality knob.
 - **Colour grading.** `ColorGrading` sits on the camera and carries exposure, gamma, saturation
   and lift/gamma/gain per tonal range. That is a nested struct of three sections, and it is the
   knob a game gives an artist rather than a player.

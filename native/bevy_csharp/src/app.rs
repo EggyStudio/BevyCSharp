@@ -235,6 +235,12 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         #[cfg(feature = "render")]
         app.init_asset::<bevy::pbr::StandardMaterial>();
 
+        // The same for the air a sky is scattered through: the medium is a description rather
+        // than a picture, so it is buildable without a window even though nothing draws it.
+        // `LightPlugin` registers it on the windowed path.
+        #[cfg(feature = "render")]
+        app.init_asset::<bevy::light::atmosphere::ScatteringMedium>();
+
         // Loads `.scn` and `.scn.ron`, and spawns any `WorldAsset` an entity points at, which is
         // what a glTF scene is too. Unlike the two above, this registers its loader in `build`.
         app.add_plugins(bevy::world_serialization::WorldSerializationPlugin);
@@ -549,6 +555,10 @@ pub unsafe extern "C" fn bcs_component_id_of(name: *const core::ffi::c_char) -> 
                 "ViewVisibility" => world.register_component::<bevy::prelude::ViewVisibility>(),
                 #[cfg(feature = "render")]
                 "Interaction" => world.register_component::<bevy::ui::Interaction>(),
+                #[cfg(feature = "render")]
+                "Atmosphere" => {
+                    world.register_component::<bevy::light::atmosphere::Atmosphere>()
+                }
                 _ => return status::NO_COMPONENT,
             };
             id.index() as i32

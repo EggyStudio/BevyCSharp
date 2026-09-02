@@ -184,8 +184,8 @@ filters work, while reading or writing one is refused rather than corrupting the
 
 The list is curated rather than general, because each entry needs a mirror written by hand as
 well as a name the bridge resolves. It holds `Transform`, `GlobalTransform`, `ChildOf`,
-`Children`, `Visibility`, `InheritedVisibility`, `ViewVisibility`, `WorldInstance` and
-`Interaction`.
+`Children`, `Visibility`, `InheritedVisibility`, `ViewVisibility`, `WorldInstance`, `Interaction`
+and `Atmosphere`.
 
 ### Visibility
 
@@ -732,6 +732,27 @@ most with `Hdr` on. `Msaa` smooths the edges of geometry while the scene is rast
 texture or a shader. Bloom scatters light out of whatever is brighter than white, so it needs
 `Hdr` and something emissive to work on: to make one object glow harder, raise its material's
 emissive colour rather than the bloom.
+
+The sky can be scattered rather than painted:
+
+```csharp
+Render.SetAtmosphere(camera, new AtmosphereSettings());
+Render.SetPostProcessing(camera, new PostSettings { Hdr = true });
+```
+
+Bevy computes the colour of every direction from how far sunlight travels through the air to
+reach it, so the horizon reddens, the zenith stays pale, and the whole sky turns over as the sun
+moves. Distant geometry picks up the same haze. The sun is whichever directional light is in the
+scene: point that light differently and the sky follows, and a scene with no directional light
+gets a night sky.
+
+The sky is a planet-sized entity that the camera looks out from, and `SetAtmosphere` keeps at most
+one of them, so calling it for a second camera adds a viewer rather than a second sky. The planet
+is measured in metres with its ground at the origin, which is why a scene measured in something
+else sets `Scale` rather than moving anything. `Density` thickens or thins the air, `HazeDistance`
+decides how far ahead the haze is computed, and `ClearAtmosphere` takes the sky off a camera
+again. The camera is given a high dynamic range target either way, because a sun scattered through
+air is far brighter than white.
 
 The window can be driven while the app runs:
 
@@ -1329,7 +1350,7 @@ run against a real Bevy app. Known gaps:
 - A render build draws: mesh primitives, textured physically based materials, cameras, lights,
   sprites, gizmos, UI nodes and text are reachable from a behavior script, verified on Vulkan.
   glTF files and `.scn` scenes load and spawn, audio plays, and a camera tonemaps, blooms,
-  multisamples and antialiases what it draws. What is thin is the layer above that. Animation has no bridge, sprites step through no frames of their own, and the
+  multisamples, antialiases and scatters a sky over what it draws. What is thin is the layer above that. Animation has no bridge, sprites step through no frames of their own, and the
   GPU-compressed texture formats are not decoded.
   [.github/TODO.md](.github/TODO.md) lists what each gap needs.
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does

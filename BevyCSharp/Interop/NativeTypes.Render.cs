@@ -387,3 +387,20 @@ public struct NativePostConfig
     /// <summary>0 energy conserving, 1 additive.</summary>
     public int BloomMode;
 }
+
+/// <summary>A sky computed from light scattering through the air.</summary>
+[StructLayout(LayoutKind.Sequential)]
+public struct NativeAtmosphereConfig
+{
+    /// <summary>Non-zero to draw the sky from this camera.</summary>
+    public int Enabled;
+
+    /// <summary>Density multiplier for the air; 0 for earth's own.</summary>
+    public float Density;
+
+    /// <summary>Planet scale against the scene; 0 for one.</summary>
+    public float Scale;
+
+    /// <summary>How far the haze in front of the scene is computed, in metres; 0 for Bevy's.</summary>
+    public float HazeDistance;
+}

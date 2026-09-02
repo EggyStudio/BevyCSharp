@@ -362,6 +362,51 @@ public sealed class PostSettings
     public static PostSettings Glow => new() { Hdr = true, Bloom = true };
 }
 
+/// <summary>
+/// A sky computed from sunlight scattering through the air.
+/// </summary>
+/// <remarks>
+/// <para>
+/// Not a picture of a sky but a simulation of one: the colour of every direction is worked out
+/// from how far light travels through the air to reach it, so the horizon reddens, the zenith
+/// stays blue, and the whole thing turns over as the sun moves. Distant geometry picks up the
+/// same haze.
+/// </para>
+/// <para>
+/// The sun is whichever directional light is in the scene, so its direction and colour are what
+/// move the sky. A scene with no directional light gets a night sky.
+/// </para>
+/// </remarks>
+public sealed class AtmosphereSettings
+{
+    /// <summary>
+    /// How thick the air is, as a multiple of earth's.
+    /// </summary>
+    /// <remarks>
+    /// Above one for a hazier world, below one for a thinner and darker sky. One is earth.
+    /// </remarks>
+    public float Density { get; set; } = 1f;
+
+    /// <summary>
+    /// How large the planet is against the scene, for a world not measured in metres.
+    /// </summary>
+    /// <remarks>
+    /// The planet is the size of a real one and its ground sits at the origin, so a scene in
+    /// metres needs nothing here. A scene in kilometres wants a smaller number, since what
+    /// matters is how far the camera moves through the air.
+    /// </remarks>
+    public float Scale { get; set; } = 1f;
+
+    /// <summary>
+    /// How far in front of the camera the haze is computed, in metres.
+    /// </summary>
+    /// <remarks>
+    /// What decides where distant geometry fades into the sky. Zero leaves Bevy's own distance,
+    /// which suits a scene measured in metres.
+    /// </remarks>
+    public float HazeDistance { get; set; }
+}
+
 public sealed class CameraSettings
 {
     /// <summary>Perspective or orthographic.</summary>
@@ -732,6 +777,72 @@ public static unsafe class Render
         Native.Check(
             Native.bcs_render_set_post(camera.Bits, &native),
             $"setting the post processing on {camera}");
+    }
+
+    /// <summary>
+    /// Draws the sky the air scatters, seen from a camera.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Two things make a sky: a planet, which is an entity the size of a world, and a camera told
+    /// to sample it. This call keeps at most one planet in the world and points the camera at it,
+    /// so calling it for a second camera adds a viewer rather than a second sky.
+    /// </para>
+    /// <para>
+    /// The camera is given a high dynamic range target, which the sky needs: a sun scattered
+    /// through air is far brighter than white. Pair it with
+    /// <see cref="SetPostProcessing"/> for a tonemapper to bring that range back down.
+    /// </para>
+    /// </remarks>
+    /// <param name="camera">The camera that should see the sky.</param>
+    /// <param name="settings">How thick the air is, and at what scale.</param>
+    /// <exception cref="BevyNativeException">
+    /// The entity is gone or is not a camera, or this build has no renderer.
+    /// </exception>
+    /// <example>
+    /// <code>
+    /// var camera = Render.SpawnCamera3d();
+    /// var sun = Render.SpawnLight(LightKind.Directional, 10_000f);
+    /// ctx.Ecs.Add(sun, Transform.LookingAt(new Vec3(1f, 0.6f, 0f), Vec3.Zero, Vec3.UnitY));
+    ///
+    /// Render.SetAtmosphere(camera, new AtmosphereSettings());
+    /// Render.SetPostProcessing(camera, new PostSettings { Hdr = true });
+    /// </code>
+    /// </example>
+    public static void SetAtmosphere(Entity camera, AtmosphereSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var native = new NativeAtmosphereConfig
+        {
+            Enabled = 1,
+            Density = settings.Density,
+            Scale = settings.Scale,
+            HazeDistance = settings.HazeDistance,
+        };
+
+        Native.Check(
+            Native.bcs_render_set_atmosphere(camera.Bits, &native),
+            $"setting the atmosphere on {camera}");
+    }
+
+    /// <summary>
+    /// Stops a camera drawing the sky.
+    /// </summary>
+    /// <remarks>
+    /// The planet stays where it is. Nothing is computed for it until a camera asks again, so
+    /// leaving it costs a component and no work.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// The entity is gone or is not a camera, or this build has no renderer.
+    /// </exception>
+    public static void ClearAtmosphere(Entity camera)
+    {
+        var native = new NativeAtmosphereConfig();
+
+        Native.Check(
+            Native.bcs_render_set_atmosphere(camera.Bits, &native),
+            $"clearing the atmosphere on {camera}");
     }
 
     /// <summary>

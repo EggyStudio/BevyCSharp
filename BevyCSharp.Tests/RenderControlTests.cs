@@ -67,6 +67,60 @@ public sealed class RenderControlTests
     }
 
     [Fact]
+    public void TheSkyIsOnePlanetHoweverManyCamerasLookAtIt()
+    {
+        using var harness = new EngineHarness(frames: 4);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var first = Render.SpawnCamera3d();
+            var second = Render.SpawnCamera3d(new CameraSettings { Order = 1 });
+
+            Render.SetAtmosphere(first, new AtmosphereSettings());
+            Render.SetAtmosphere(second, new AtmosphereSettings
+            {
+                Density = 1.4f,
+                Scale = 0.5f,
+                HazeDistance = 20_000f,
+            });
+
+            // Asking twice rewrites the planet rather than adding another, which matters because
+            // Bevy renders whichever is nearest and two would be a coin toss.
+            Assert.Equal(1, ctx.Ecs.Count<Atmosphere>());
+
+            Render.ClearAtmosphere(second);
+            Render.ClearAtmosphere(first);
+
+            // The planet outlives the cameras that looked at it, and costs nothing unwatched.
+            Assert.Equal(1, ctx.Ecs.Count<Atmosphere>());
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void TheSkyBelongsToACameraAndNothingElse()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var plain = ctx.Ecs.Spawn();
+            var notACamera = Assert.Throws<BevyNativeException>(
+                () => Render.SetAtmosphere(plain, new AtmosphereSettings()));
+            Assert.Equal(NativeStatus.NotPresent, notACamera.Status);
+
+            var gone = Assert.Throws<BevyNativeException>(
+                () => Render.SetAtmosphere(Entity.None, new AtmosphereSettings()));
+            Assert.Equal(NativeStatus.NoEntity, gone.Status);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void PostProcessingBelongsToACameraAndNothingElse()
     {
         using var harness = new EngineHarness(frames: 3);

@@ -66,6 +66,13 @@ public static class NativeComponents
     /// <remarks>The id behind <see cref="Bevy.WorldInstance"/>.</remarks>
     public static int WorldInstance => ComponentType<Bevy.WorldInstance>.Id;
 
+    /// <summary>Bevy's <c>Atmosphere</c>: the planet whose air a sky is scattered through.</summary>
+    /// <remarks>
+    /// Render builds only. The id behind <see cref="Bevy.Atmosphere"/>, which is how the planet
+    /// <see cref="Render.SetAtmosphere"/> keeps is found or counted.
+    /// </remarks>
+    public static int Atmosphere => ComponentType<Bevy.Atmosphere>.Id;
+
     /// <summary>Bevy's <c>Interaction</c>: how the pointer stands on a UI node.</summary>
     /// <remarks>
     /// Render builds only. The id behind <see cref="Bevy.Interaction"/>, which is what a
@@ -343,5 +350,20 @@ public readonly struct WorldInstance : INativeComponent
 public readonly struct Interaction : INativeComponent
 {
     readonly string INativeComponent.NativeName => "Interaction";
+    readonly bool INativeComponent.MirrorsLayout => false;
+}
+
+/// <summary>
+/// Marks the planet whose air a sky is scattered through.
+/// </summary>
+/// <remarks>
+/// A name-only handle, so <c>Count&lt;Atmosphere&gt;()</c> and <c>[With]</c> filters can find the
+/// planet <see cref="Render.SetAtmosphere"/> keeps. The component holds radii and an asset
+/// handle, which raw bytes cannot represent, so its settings go through that call rather than
+/// through a component write.
+/// </remarks>
+public readonly struct Atmosphere : INativeComponent
+{
+    readonly string INativeComponent.NativeName => "Atmosphere";
     readonly bool INativeComponent.MirrorsLayout => false;
 }
