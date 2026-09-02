@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 31;
+    internal const int ExpectedAbiVersion = 32;
 
     static Native() => NativeLoader.Initialize();
 
@@ -432,6 +432,13 @@ internal static unsafe partial class Native
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_asset_load_image(string path, NativeImageConfig* config);
+
+    /// <summary>Builds an atlas layout over a grid of tiles and returns an asset key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_atlas_create(
+        uint tileWidth, uint tileHeight, uint columns, uint rows,
+        uint paddingX, uint paddingY, uint offsetX, uint offsetY);
 
     /// <summary>Reports how far along a load is.</summary>
     [LibraryImport(Library)]

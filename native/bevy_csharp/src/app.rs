@@ -215,6 +215,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         // images the renderer's fallbacks rely on.
         app.add_plugins(bevy::image::ImagePlugin::default());
 
+        // An atlas layout is a list of rectangles, so it is data rather than graphics and a
+        // windowless run can build one. `SpritePlugin` adds this on the windowed path.
+        app.add_plugins(bevy::image::TextureAtlasPlugin);
+
         // Both plugins above only *pre-register* their loaders; the real registration happens in
         // `RenderPlugin::finish`, which a windowless app never runs. Without this an image load
         // waits for a loader that is never added, and the material bound to it draws untextured.

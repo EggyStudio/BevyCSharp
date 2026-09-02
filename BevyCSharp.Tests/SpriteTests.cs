@@ -50,6 +50,104 @@ public sealed class SpriteTests
     }
 
     [Fact]
+    public void AFrameIsNamedByNumberOnceThereIsAnAtlas()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        var frames = AssetHandle.None;
+        var walker = Entity.None;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var sheet = AssetServer.Load(AssetKind.Image, Texture);
+
+            // Four frames across, two down, cut flush to the edges.
+            frames = Render2d.CreateAtlas(8, 8, columns: 4, rows: 2);
+
+            walker = ctx.Ecs.Spawn();
+            Render2d.SetSprite(ctx.Ecs, walker, sheet, new SpriteSettings
+            {
+                Atlas = frames,
+                Frame = 5,
+                // Feet on the ground rather than the middle of the sprite there.
+                Anchor = SpriteAnchor.BottomCenter,
+            });
+
+            // Stepping the animation is the same call with the next number.
+            Render2d.SetSprite(ctx.Ecs, walker, sheet, new SpriteSettings
+            {
+                Atlas = frames,
+                Frame = 6,
+                Anchor = SpriteAnchor.BottomCenter,
+            });
+        });
+
+        harness.Run();
+
+        Assert.True(frames.IsValid);
+        Assert.NotEqual(Entity.None, walker);
+    }
+
+    [Fact]
+    public void APanelIsDrawnAtAnySizeFromOneSmallImage()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var image = AssetServer.Load(AssetKind.Image, Texture);
+            var panel = ctx.Ecs.Spawn();
+
+            Render2d.SetSprite(ctx.Ecs, panel, image, new SpriteSettings
+            {
+                Size = (240f, 80f),
+                Mode = SpriteImageMode.Sliced,
+                SliceBorder = (3f, 3f, 3f, 3f),
+                CornerScale = 1f,
+            });
+
+            var floor = ctx.Ecs.Spawn();
+            Render2d.SetSprite(ctx.Ecs, floor, image, new SpriteSettings
+            {
+                Size = (400f, 32f),
+                Mode = SpriteImageMode.Tiled,
+                TileX = true,
+                TileY = false,
+                TileStretch = 0.5f,
+            });
+
+            Assert.True(ctx.Ecs.IsAlive(panel));
+            Assert.True(ctx.Ecs.IsAlive(floor));
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void AnAtlasWithNoTilesIsRefused()
+    {
+        using var harness = new EngineHarness(frames: 2);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            // A grid with no rows names no frames at all, which is a mistake rather than an
+            // empty layout worth handing back.
+            var empty = Assert.Throws<BevyNativeException>(
+                () => Render2d.CreateAtlas(8, 8, columns: 4, rows: 0));
+            Assert.Equal(NativeStatus.NullArgument, empty.Status);
+
+            var flat = Assert.Throws<BevyNativeException>(
+                () => Render2d.CreateAtlas(0, 8, columns: 4, rows: 2));
+            Assert.Equal(NativeStatus.NullArgument, flat.Status);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void EverySpriteSettingIsAccepted()
     {
         using var harness = new EngineHarness(frames: 3);

@@ -250,6 +250,48 @@ public struct NativeSpriteConfig
 
     /// <summary>Non-zero to mirror vertically.</summary>
     public int FlipY;
+
+    /// <summary>Asset key of the atlas layout, or negative for the whole image.</summary>
+    public int Atlas;
+
+    /// <summary>Which frame of that layout to draw.</summary>
+    public uint AtlasIndex;
+
+    /// <summary>Non-zero to move the sprite's origin off centre.</summary>
+    public int HasAnchor;
+
+    /// <summary>Where the transform sits on the sprite, horizontally.</summary>
+    public float AnchorX;
+
+    /// <summary>Where the transform sits on the sprite, vertically.</summary>
+    public float AnchorY;
+
+    /// <summary>0 the image's own size, 1 sliced, 2 tiled.</summary>
+    public int Mode;
+
+    /// <summary>Left inset of the nine-slice border, in pixels.</summary>
+    public float SliceLeft;
+
+    /// <summary>Top inset of the nine-slice border, in pixels.</summary>
+    public float SliceTop;
+
+    /// <summary>Right inset of the nine-slice border, in pixels.</summary>
+    public float SliceRight;
+
+    /// <summary>Bottom inset of the nine-slice border, in pixels.</summary>
+    public float SliceBottom;
+
+    /// <summary>How far a sliced corner may be scaled up; 0 for Bevy's default.</summary>
+    public float CornerScale;
+
+    /// <summary>Non-zero to repeat horizontally when tiled.</summary>
+    public int TileX;
+
+    /// <summary>Non-zero to repeat vertically when tiled.</summary>
+    public int TileY;
+
+    /// <summary>How far the picture stretches before a tile repeats; 0 for Bevy's default.</summary>
+    public float TileStretch;
 }
 
 /// <summary>One debug shape to draw this frame.</summary>

@@ -123,9 +123,8 @@ impl AssetHandles {
 
 /// Takes ownership of a handle and returns the value C# will refer to it by.
 ///
-/// Used by assets built in memory rather than loaded from a file, which only a render build can
-/// do, hence the attribute.
-#[cfg_attr(not(feature = "render"), expect(dead_code, reason = "render builds only"))]
+/// Used by assets built in memory rather than loaded from a file: a mesh, a material, an atlas
+/// layout.
 pub(crate) fn insert_handle(world: &mut World, handle: UntypedHandle) -> i32 {
     world.get_resource_or_init::<AssetHandles>().insert(handle)
 }
@@ -384,5 +383,52 @@ pub extern "C" fn bcs_scene_spawn(asset: i32) -> u64 {
                 .to_bits()
         })
         .unwrap_or(0)
+    })
+}
+
+/// Builds an atlas layout over a grid of equal tiles, and returns its key or a negative status.
+///
+/// The layout is a list of rectangles and nothing else: it names where each frame sits, while the
+/// image it describes stays a separate asset. That is why no image is passed here, and why one
+/// layout serves every sheet cut the same way.
+///
+/// `padding` is the gap between neighbouring tiles and `offset` the margin before the first one,
+/// both in pixels, both zero for a sheet cut flush to its edges.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_atlas_create(
+    tile_width: u32,
+    tile_height: u32,
+    columns: u32,
+    rows: u32,
+    padding_x: u32,
+    padding_y: u32,
+    offset_x: u32,
+    offset_y: u32,
+) -> i32 {
+    crate::interop::guard(|| {
+        use bevy::asset::Assets;
+        use bevy::image::TextureAtlasLayout;
+        use bevy::math::UVec2;
+
+        if tile_width == 0 || tile_height == 0 || columns == 0 || rows == 0 {
+            return status::NULL_ARG;
+        }
+
+        with_world(|world| {
+            let layout = TextureAtlasLayout::from_grid(
+                UVec2::new(tile_width, tile_height),
+                columns,
+                rows,
+                Some(UVec2::new(padding_x, padding_y)),
+                Some(UVec2::new(offset_x, offset_y)),
+            );
+
+            let Some(mut layouts) = world.get_resource_mut::<Assets<TextureAtlasLayout>>() else {
+                return status::INVALID_STATE;
+            };
+
+            let handle = layouts.add(layout).untyped();
+            insert_handle(world, handle)
+        })
     })
 }

@@ -80,26 +80,26 @@ lays itself out, a panel that resizes and a list that scrolls. What is left:
 - **Grid.** `GridPlacement` and the row and column tracks are a second layout algorithm rather
   than more fields on this one, and an inventory is what wants it.
 - **Image detail.** `ImageNode.texture_atlas` names a frame by index instead of by pixel
-  rectangle, and needs the same atlas layout asset the 2D section wants. A sliced image's centre
-  and sides are stretched, since `SliceScaleMode::Tile` is a payload the flat config has no room
-  for.
+  rectangle. The layout asset a sprite uses is the same one, so this is two fields on the image
+  config rather than new machinery. A sliced image's centre and sides are stretched, since
+  `SliceScaleMode::Tile` is a payload the flat config has no room for.
 - **Text layout.** Justification, line breaking and bounds are `TextLayout`, unbridged, so a long
   string runs off the edge.
 
 ### 2D beyond a sprite
 
 `bevy_sprite_render` is compiled in, `Render2d` spawns a 2D camera and attaches sprites, and a
-sprite can be tinted, resized, mirrored and cut down to one rectangle of a sheet. What a 2D game
-needs on top of that:
+sprite can be tinted, resized, mirrored, anchored off its centre, cut down to one rectangle of a
+sheet or to one frame of an atlas layout, and drawn sliced or tiled. What a 2D game needs on top
+of that:
 
-- **Texture atlases.** `Sprite.texture_atlas` pairs a layout asset with an index, so a frame is
-  named by number rather than by pixel rectangle. `Rect` covers the same ground by hand.
-- **Animation.** Nothing steps a sprite through frames. It is a component holding a frame list
-  and a timer, and could be written entirely in C# on top of `Rect`.
-- **Anchors.** A sprite is centred on its transform. `Anchor` moves that to a corner or an
-  arbitrary point, which matters for anything standing on the ground.
-- **Nine-slice and tiling.** `SpriteImageMode` stretches the middle of an image and leaves its
-  borders alone, for panels and bars that resize.
+- **Animation.** Nothing steps a sprite through its frames. That is a component holding a frame
+  range and a timer, and it needs no bridge: `Frame` names a frame by number, so a behavior that
+  counts and calls `SetSprite` is the whole of it. Worth writing once in the sample rather than
+  in every game built on top of it.
+- **Scaled fitting.** `SpriteImageMode::Scale` fits a picture inside `Size` the way a video
+  player letterboxes, keeping its proportions. Its payload is another enum, which the flat config
+  has no room for, the same limit the sliced modes hit.
 
 ### Gizmos beyond three shapes
 

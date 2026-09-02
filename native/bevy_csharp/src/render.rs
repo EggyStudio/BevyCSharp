@@ -558,9 +558,11 @@ pub unsafe extern "C" fn bcs_render_set_sprite(entity: u64, config: *const BcsSp
         #[cfg(feature = "render")]
         {
             use bevy::color::Color;
-            use bevy::image::Image;
+            use bevy::image::{Image, TextureAtlas, TextureAtlasLayout};
             use bevy::math::{Rect, Vec2};
-            use bevy::sprite::Sprite;
+            use bevy::sprite::{
+                Anchor, BorderRect, SliceScaleMode, Sprite, SpriteImageMode, TextureSlicer,
+            };
 
             if config.is_null() {
                 return status::NULL_ARG;
@@ -572,7 +574,52 @@ pub unsafe extern "C" fn bcs_render_set_sprite(entity: u64, config: *const BcsSp
                     return status::NO_COMPONENT;
                 };
 
+                // A negative key is "no atlas", which is the whole image. A key that names
+                // nothing is a mistake rather than a default, so it is refused.
+                let atlas = if config.atlas < 0 {
+                    None
+                } else {
+                    let Some(layout) = crate::assets::clone_handle(world, config.atlas) else {
+                        return status::NO_COMPONENT;
+                    };
+
+                    Some(TextureAtlas {
+                        layout: layout.typed::<TextureAtlasLayout>(),
+                        index: config.atlas_index as usize,
+                    })
+                };
+
+                let slicer = TextureSlicer {
+                    border: BorderRect {
+                        min_inset: Vec2::new(config.slice_border[0], config.slice_border[1]),
+                        max_inset: Vec2::new(config.slice_border[2], config.slice_border[3]),
+                    },
+                    center_scale_mode: SliceScaleMode::Stretch,
+                    sides_scale_mode: SliceScaleMode::Stretch,
+                    max_corner_scale: if config.corner_scale > 0.0 {
+                        config.corner_scale
+                    } else {
+                        1.0
+                    },
+                };
+
+                let image_mode = match config.mode {
+                    1 => SpriteImageMode::Sliced(slicer),
+                    2 => SpriteImageMode::Tiled {
+                        tile_x: config.tile_x != 0,
+                        tile_y: config.tile_y != 0,
+                        stretch_value: if config.tile_stretch > 0.0 {
+                            config.tile_stretch
+                        } else {
+                            1.0
+                        },
+                    },
+                    _ => SpriteImageMode::Auto,
+                };
+
                 let sprite = Sprite {
+                    texture_atlas: atlas,
+                    image_mode,
                     image: image.typed::<Image>(),
                     color: Color::linear_rgba(
                         config.color[0],
@@ -597,6 +644,13 @@ pub unsafe extern "C" fn bcs_render_set_sprite(entity: u64, config: *const BcsSp
 
                 // Bevy's own insert, so the components a sprite requires arrive with it.
                 entity_mut.insert(sprite);
+
+                // The anchor is its own component rather than a field on the sprite, so an
+                // entity that was never given one keeps Bevy's centred default.
+                if config.has_anchor != 0 {
+                    entity_mut.insert(Anchor(Vec2::new(config.anchor[0], config.anchor[1])));
+                }
+
                 status::OK
             })
         }

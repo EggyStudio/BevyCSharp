@@ -336,6 +336,26 @@ pub struct BcsSpriteConfig {
     pub flip_x: i32,
     /// Non-zero to mirror vertically.
     pub flip_y: i32,
+    /// Asset key of the atlas layout naming the frames, or a negative for a whole image.
+    pub atlas: i32,
+    /// Which frame of that layout to draw.
+    pub atlas_index: u32,
+    /// Non-zero to move the sprite's origin to `anchor` rather than leaving it centred.
+    pub has_anchor: i32,
+    /// Where the transform sits on the sprite, from `-0.5` to `0.5` on each axis.
+    pub anchor: [f32; 2],
+    /// How the picture meets `size`: `0` its own, `1` sliced, `2` tiled.
+    pub mode: i32,
+    /// Left, top, right and bottom insets of the nine-slice border, in pixels.
+    pub slice_border: [f32; 4],
+    /// How far a sliced corner may be scaled up. `0` takes Bevy's default of one.
+    pub corner_scale: f32,
+    /// Non-zero to repeat horizontally when tiled.
+    pub tile_x: i32,
+    /// Non-zero to repeat vertically when tiled.
+    pub tile_y: i32,
+    /// How far the picture stretches before a tile repeats. `0` takes Bevy's default of one.
+    pub tile_stretch: f32,
 }
 
 /// The picture a UI node draws inside itself.

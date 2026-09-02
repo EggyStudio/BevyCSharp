@@ -276,6 +276,27 @@ Render2d.SetSprite(ctx.Ecs, badge, sheet, new SpriteSettings
 });
 ```
 
+An atlas layout does the same counting for you. It is a list of rectangles over a grid of equal
+tiles, so a frame is named by number rather than by arithmetic, and stepping an animation is
+adding one:
+
+```csharp
+var frames = Render2d.CreateAtlas(32, 32, columns: 8, rows: 1);
+
+Render2d.SetSprite(ctx.Ecs, walker, sheet, new SpriteSettings
+{
+    Atlas = frames,
+    Frame = step % 8,
+    Anchor = SpriteAnchor.BottomCenter,
+});
+```
+
+The layout takes no image, because it describes a cut rather than a picture: one layout serves
+every sheet cut the same way. `Anchor` moves the transform off the middle of the sprite, which is
+what anything standing on the ground wants, and `SpriteAnchor` names the nine usual points.
+`Mode` decides how the picture meets `Size`: `Sliced` keeps the corners and stretches the middle,
+so one small image draws a panel at any size, and `Tiled` repeats it instead.
+
 Ordering a 2D camera above a 3D one draws it over the scene without clearing, which is how a 2D
 overlay sits on a 3D game.
 
