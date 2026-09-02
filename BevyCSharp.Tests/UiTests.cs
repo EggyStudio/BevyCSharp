@@ -340,6 +340,10 @@ public sealed class UiTests
             var image = Assert.Throws<BevyNativeException>(
                 () => Ui.SetImage(Entity.None, AssetHandle.None));
             Assert.Equal(NativeStatus.Unsupported, image.Status);
+
+            var scroll = Assert.Throws<BevyNativeException>(
+                () => Ui.SetScroll(Entity.None, 0f, 0f));
+            Assert.Equal(NativeStatus.Unsupported, scroll.Status);
         });
 
         harness.Run();
@@ -363,6 +367,70 @@ public sealed class UiTests
             });
 
             Assert.True(ctx.Ecs.IsAlive(node));
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void AChildCanAnswerBackToTheLayoutItIsIn()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        var list = Entity.None;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            // A list that clips what does not fit, and is scrolled by hand.
+            list = Ui.SpawnNode(new UiSettings
+            {
+                Direction = UiDirection.Column,
+                Width = Length.Px(200f),
+                Height = Length.Px(120f),
+                MinWidth = Length.Px(80f),
+                MaxWidth = Length.Percent(50f),
+                MinHeight = Length.Px(40f),
+                MaxHeight = Length.Px(400f),
+                Wrap = UiWrap.Wrap,
+                OverflowY = UiOverflow.Scroll,
+            });
+
+            Ui.SetScroll(list, 0f, 24f);
+
+            // A row where one child takes whatever room the others leave, and the last one
+            // ignores the row's own alignment.
+            var row = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f) });
+
+            var filler = Ui.SpawnNode(new UiSettings { Grow = 1f, Basis = Length.Px(0f) });
+            var fixedWidth = Ui.SpawnNode(new UiSettings { Shrink = 0f, Width = Length.Px(64f) });
+            var odd = Ui.SpawnNode(new UiSettings { AlignSelf = UiAlignSelf.End });
+
+            foreach (var child in new[] { filler, fixedWidth, odd })
+                ctx.Ecs.SetParent(child, row);
+
+            // A screen put away without despawning it: no layout, no drawing, no space taken.
+            var hidden = Ui.SpawnNode(new UiSettings { Display = UiDisplay.None });
+
+            Assert.True(ctx.Ecs.IsAlive(row));
+            Assert.True(ctx.Ecs.IsAlive(hidden));
+        });
+
+        harness.Run();
+
+        Assert.NotEqual(Entity.None, list);
+    }
+
+    [Fact]
+    public void ScrollingSomethingThatIsGoneIsRefused()
+    {
+        using var harness = new EngineHarness(frames: 2);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            var gone = Assert.Throws<BevyNativeException>(() => Ui.SetScroll(Entity.None, 0f, 8f));
+            Assert.Equal(NativeStatus.NoEntity, gone.Status);
         });
 
         harness.Run();

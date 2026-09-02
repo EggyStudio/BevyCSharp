@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 30;
+    internal const int ExpectedAbiVersion = 31;
 
     static Native() => NativeLoader.Initialize();
 
@@ -147,6 +147,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ui_set_image(ulong entity, NativeUiImageConfig* config);
+
+    /// <summary>Moves a scrolling node's contents inside it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ui_set_scroll(ulong entity, float x, float y);
 
     // -- Window (render builds only)
 

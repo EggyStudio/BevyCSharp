@@ -419,8 +419,43 @@ pub struct BcsUiNodeConfig {
     pub border: [f32; 4],
     /// Units of `border`, in the same order.
     pub border_units: [i32; 4],
+    /// How the node lays its children out at all: `0` flex, `1` block, `2` not at all.
+    pub display: i32,
     /// Which way the node's children are stacked: `0` row, `1` column, `2` and `3` reversed.
     pub direction: i32,
+    /// Whether children run onto more lines: `0` one line, `1` wrap, `2` wrap backwards.
+    pub wrap: i32,
+    /// How this node sits across its parent's axis, overriding the parent's own alignment.
+    pub align_self: i32,
+    /// Share of the parent's leftover space this node takes.
+    pub grow: f32,
+    /// Share of the parent's overflow this node gives up.
+    pub shrink: f32,
+    /// Size along the parent's axis before growing or shrinking.
+    pub basis: f32,
+    /// Unit of `basis`.
+    pub basis_unit: i32,
+    /// Smallest the node may be.
+    pub min_width: f32,
+    /// Unit of `min_width`.
+    pub min_width_unit: i32,
+    /// Smallest the node may be.
+    pub min_height: f32,
+    /// Unit of `min_height`.
+    pub min_height_unit: i32,
+    /// Largest the node may be.
+    pub max_width: f32,
+    /// Unit of `max_width`.
+    pub max_width_unit: i32,
+    /// Largest the node may be.
+    pub max_height: f32,
+    /// Unit of `max_height`.
+    pub max_height_unit: i32,
+    /// What happens to contents past the left and right edges: `0` shown, `1` clipped, `2` hidden,
+    /// `3` scrolled.
+    pub overflow_x: i32,
+    /// The same for the top and bottom edges.
+    pub overflow_y: i32,
     /// How the children are spread along that axis, in the order `JustifyContent` declares.
     pub justify: i32,
     /// How the children sit across it, in the order `AlignItems` declares.

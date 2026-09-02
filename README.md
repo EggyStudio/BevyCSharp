@@ -340,6 +340,26 @@ own components like anything else. The font is Bevy's own, compiled into the eng
 no asset. `SetText` rewrites in place rather than respawning, because a score changes every frame
 and the entity behind it should not.
 
+The children answer back. `Grow` takes a share of whatever room the parent has left over, `Shrink`
+gives up a share of the overflow, `Basis` is the size to start from, and `AlignSelf` overrides the
+parent's alignment for one child. `MinWidth` and its three companions bound the result, `Wrap` runs
+the children onto more lines, and `Display` takes a node out of the layout altogether:
+
+```csharp
+var filler = Ui.SpawnNode(new UiSettings { Grow = 1f, Basis = Length.Px(0f) });
+var fixedWidth = Ui.SpawnNode(new UiSettings { Shrink = 0f, Width = Length.Px(64f) });
+
+var menu = Ui.SpawnNode(new UiSettings { Display = UiDisplay.None });   // put away, not despawned
+```
+
+`UiDisplay.None` is not `Visibility.Hidden`: the first takes the node's space back and moves its
+siblings up, the second stops it drawing and leaves the hole. A screen that is toggled wants the
+first, a health bar that blinks the second.
+
+`OverflowX` and `OverflowY` say what happens to contents past an edge: drawn anyway, clipped, or
+clipped and scrollable. Bevy has no scrolling of its own, so a list is moved by reading the wheel
+like any other input and calling `Ui.SetScroll(list, 0f, offset)`.
+
 A node can hold a picture as well as a colour:
 
 ```csharp

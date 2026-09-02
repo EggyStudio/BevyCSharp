@@ -120,8 +120,59 @@ public struct NativeUiNodeConfig
     /// <summary>Unit of <see cref="BorderBottom"/>.</summary>
     public int BorderBottomUnit;
 
+    /// <summary>0 flex, 1 block, 2 not laid out at all.</summary>
+    public int Display;
+
     /// <summary>Which way children are stacked.</summary>
     public int Direction;
+
+    /// <summary>0 one line, 1 wrap, 2 wrap backwards.</summary>
+    public int Wrap;
+
+    /// <summary>How this node sits across its parent's axis.</summary>
+    public int AlignSelf;
+
+    /// <summary>Share of the parent's leftover space this node takes.</summary>
+    public float Grow;
+
+    /// <summary>Share of the parent's overflow this node gives up.</summary>
+    public float Shrink;
+
+    /// <summary>Size along the parent's axis before growing or shrinking.</summary>
+    public float Basis;
+
+    /// <summary>Unit of <see cref="Basis"/>.</summary>
+    public int BasisUnit;
+
+    /// <summary>Smallest width.</summary>
+    public float MinWidth;
+
+    /// <summary>Unit of <see cref="MinWidth"/>.</summary>
+    public int MinWidthUnit;
+
+    /// <summary>Smallest height.</summary>
+    public float MinHeight;
+
+    /// <summary>Unit of <see cref="MinHeight"/>.</summary>
+    public int MinHeightUnit;
+
+    /// <summary>Largest width.</summary>
+    public float MaxWidth;
+
+    /// <summary>Unit of <see cref="MaxWidth"/>.</summary>
+    public int MaxWidthUnit;
+
+    /// <summary>Largest height.</summary>
+    public float MaxHeight;
+
+    /// <summary>Unit of <see cref="MaxHeight"/>.</summary>
+    public int MaxHeightUnit;
+
+    /// <summary>0 shown, 1 clipped, 2 hidden, 3 scrolled, left and right.</summary>
+    public int OverflowX;
+
+    /// <summary>The same for top and bottom.</summary>
+    public int OverflowY;
 
     /// <summary>How children are spread along that axis.</summary>
     public int Justify;

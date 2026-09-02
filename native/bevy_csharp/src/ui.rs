@@ -35,6 +35,60 @@ fn rect(values: &[f32; 4], units: &[i32; 4]) -> bevy::ui::UiRect {
     }
 }
 
+/// Translates whether the node lays out at all, and by which model.
+#[cfg(feature = "render")]
+fn display(value: i32) -> bevy::ui::Display {
+    use bevy::ui::Display;
+
+    match value {
+        1 => Display::Block,
+        2 => Display::None,
+        _ => Display::Flex,
+    }
+}
+
+/// Translates whether children run onto more lines.
+#[cfg(feature = "render")]
+fn flex_wrap(value: i32) -> bevy::ui::FlexWrap {
+    use bevy::ui::FlexWrap;
+
+    match value {
+        1 => FlexWrap::Wrap,
+        2 => FlexWrap::WrapReverse,
+        _ => FlexWrap::NoWrap,
+    }
+}
+
+/// Translates one node's own answer to its parent's alignment.
+#[cfg(feature = "render")]
+fn align_self(value: i32) -> bevy::ui::AlignSelf {
+    use bevy::ui::AlignSelf;
+
+    match value {
+        1 => AlignSelf::Start,
+        2 => AlignSelf::End,
+        3 => AlignSelf::FlexStart,
+        4 => AlignSelf::FlexEnd,
+        5 => AlignSelf::Center,
+        6 => AlignSelf::Baseline,
+        7 => AlignSelf::Stretch,
+        _ => AlignSelf::Auto,
+    }
+}
+
+/// Translates what happens to contents past one edge of the node.
+#[cfg(feature = "render")]
+fn overflow_axis(value: i32) -> bevy::ui::OverflowAxis {
+    use bevy::ui::OverflowAxis;
+
+    match value {
+        1 => OverflowAxis::Clip,
+        2 => OverflowAxis::Hidden,
+        3 => OverflowAxis::Scroll,
+        _ => OverflowAxis::Visible,
+    }
+}
+
 /// Translates the axis children are stacked along.
 #[cfg(feature = "render")]
 fn flex_direction(value: i32) -> bevy::ui::FlexDirection {
@@ -108,9 +162,23 @@ fn node_from(config: &BcsUiNodeConfig) -> bevy::ui::Node {
         padding: rect(&config.padding, &config.padding_units),
         margin: rect(&config.margin, &config.margin_units),
         border: rect(&config.border, &config.border_units),
+        display: display(config.display),
         flex_direction: flex_direction(config.direction),
+        flex_wrap: flex_wrap(config.wrap),
         justify_content: justify_content(config.justify),
         align_items: align_items(config.align),
+        align_self: align_self(config.align_self),
+        flex_grow: config.grow,
+        flex_shrink: config.shrink,
+        flex_basis: length(config.basis, config.basis_unit),
+        min_width: length(config.min_width, config.min_width_unit),
+        min_height: length(config.min_height, config.min_height_unit),
+        max_width: length(config.max_width, config.max_width_unit),
+        max_height: length(config.max_height, config.max_height_unit),
+        overflow: bevy::ui::Overflow {
+            x: overflow_axis(config.overflow_x),
+            y: overflow_axis(config.overflow_y),
+        },
         row_gap: length(config.row_gap, config.row_gap_unit),
         column_gap: length(config.column_gap, config.column_gap_unit),
         ..Default::default()
@@ -421,6 +489,39 @@ pub unsafe extern "C" fn bcs_ui_set_image(entity: u64, config: *const BcsUiImage
 
                 // Bevy's own insert, so the components an image node requires arrive with it.
                 entity_mut.insert(node_image);
+                status::OK
+            })
+        }
+    })
+}
+
+/// Moves a node's contents inside it, for a list that scrolls.
+///
+/// Only means anything on a node whose overflow is set to scroll: that is what clips the contents
+/// to the node, and this is how far they have been pushed, in logical pixels from the top left.
+/// Bevy has no scrolling input of its own, so a wheel or a drag is read like any other input and
+/// turned into a call here.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_ui_set_scroll(entity: u64, x: f32, y: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, x, y);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::math::Vec2;
+            use bevy::ui::ScrollPosition;
+
+            with_world(|world| {
+                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity))
+                else {
+                    return status::NO_ENTITY;
+                };
+
+                entity_mut.insert(ScrollPosition(Vec2::new(x, y)));
                 status::OK
             })
         }

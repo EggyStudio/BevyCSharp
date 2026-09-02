@@ -87,6 +87,97 @@ public readonly record struct Sides(Length Left, Length Top, Length Right, Lengt
 }
 
 /// <summary>
+/// Whether a node lays out at all, and by which model.
+/// </summary>
+public enum UiDisplay
+{
+    /// <summary>Flexbox, which is what every other layout field here describes.</summary>
+    Flex = 0,
+
+    /// <summary>Children stacked as blocks, each on its own line.</summary>
+    Block = 1,
+
+    /// <summary>
+    /// Not laid out, drawn or measured, and neither are its children.
+    /// </summary>
+    /// <remarks>
+    /// How a screen is put away and brought back without despawning it. Different from
+    /// <see cref="Visibility.Hidden"/>, which stops the node drawing but keeps the space it
+    /// occupies, so its siblings do not move.
+    /// </remarks>
+    None = 2,
+}
+
+/// <summary>
+/// Whether a node's children run onto more than one line.
+/// </summary>
+public enum UiWrap
+{
+    /// <summary>One line, however far past the edge it runs.</summary>
+    NoWrap = 0,
+
+    /// <summary>As many lines as the children need.</summary>
+    Wrap = 1,
+
+    /// <summary>The same, with each new line before the last rather than after it.</summary>
+    WrapReverse = 2,
+}
+
+/// <summary>
+/// One node's own answer to how its parent aligns things.
+/// </summary>
+/// <remarks>
+/// The same choices as <see cref="UiAlign"/>, set on the child instead of the parent, plus
+/// <see cref="Auto"/> for leaving the parent to decide. What the odd item out uses.
+/// </remarks>
+public enum UiAlignSelf
+{
+    /// <summary>Whatever the parent's alignment says.</summary>
+    Auto = 0,
+
+    /// <summary>Against the start of the cross axis.</summary>
+    Start = 1,
+
+    /// <summary>Against the end of the cross axis.</summary>
+    End = 2,
+
+    /// <summary>The start of the cross axis, or its end when the direction is reversed.</summary>
+    FlexStart = 3,
+
+    /// <summary>The end of the cross axis, or its start when the direction is reversed.</summary>
+    FlexEnd = 4,
+
+    /// <summary>Centred across the axis.</summary>
+    Center = 5,
+
+    /// <summary>Lined up on the baseline of the text inside it.</summary>
+    Baseline = 6,
+
+    /// <summary>Stretched to fill the cross axis.</summary>
+    Stretch = 7,
+}
+
+/// <summary>
+/// What happens to contents that run past a node's edge.
+/// </summary>
+public enum UiOverflow
+{
+    /// <summary>They are drawn anyway, outside the node.</summary>
+    Visible = 0,
+
+    /// <summary>They are cut off at the edge.</summary>
+    Clip = 1,
+
+    /// <summary>Cut off at the edge, and the layout is told they do not fit.</summary>
+    Hidden = 2,
+
+    /// <summary>
+    /// Cut off at the edge, and movable inside it with <see cref="Ui.SetScroll"/>.
+    /// </summary>
+    Scroll = 3,
+}
+
+/// <summary>
 /// Which way a node stacks its children.
 /// </summary>
 /// <remarks>
@@ -279,6 +370,58 @@ public sealed class UiSettings
 
     /// <summary>How the children sit across it.</summary>
     public UiAlign Align { get; set; } = UiAlign.Default;
+
+    /// <summary>Whether the node lays out at all, and by which model.</summary>
+    /// <remarks>
+    /// <see cref="UiDisplay.None"/> takes a whole screen out of the layout without despawning it,
+    /// which is how a menu is put away and brought back.
+    /// </remarks>
+    public UiDisplay Display { get; set; } = UiDisplay.Flex;
+
+    /// <summary>Whether the children run onto more than one line.</summary>
+    public UiWrap Wrap { get; set; } = UiWrap.NoWrap;
+
+    /// <summary>This node's own answer to how its parent aligns things.</summary>
+    public UiAlignSelf AlignSelf { get; set; } = UiAlignSelf.Auto;
+
+    /// <summary>
+    /// Share of the parent's leftover space this node takes.
+    /// </summary>
+    /// <remarks>
+    /// Zero leaves the node at its own size. Otherwise the leftover space is split between the
+    /// children in proportion to this, so one child with a <c>1</c> fills the row and two with a
+    /// <c>1</c> each take half of it.
+    /// </remarks>
+    public float Grow { get; set; }
+
+    /// <summary>
+    /// Share of the overflow this node gives up when the children do not fit.
+    /// </summary>
+    /// <remarks>One is Bevy's own, so a node shrinks with its siblings unless told not to.</remarks>
+    public float Shrink { get; set; } = 1f;
+
+    /// <summary>
+    /// The size this node starts at along the parent's axis, before growing or shrinking.
+    /// </summary>
+    public Length Basis { get; set; } = Length.Auto;
+
+    /// <summary>The smallest the node may be laid out.</summary>
+    public Length MinWidth { get; set; } = Length.Auto;
+
+    /// <summary>The smallest the node may be laid out.</summary>
+    public Length MinHeight { get; set; } = Length.Auto;
+
+    /// <summary>The largest the node may be laid out.</summary>
+    public Length MaxWidth { get; set; } = Length.Auto;
+
+    /// <summary>The largest the node may be laid out.</summary>
+    public Length MaxHeight { get; set; } = Length.Auto;
+
+    /// <summary>What happens to contents past the left and right edges.</summary>
+    public UiOverflow OverflowX { get; set; } = UiOverflow.Visible;
+
+    /// <summary>What happens to contents past the top and bottom edges.</summary>
+    public UiOverflow OverflowY { get; set; } = UiOverflow.Visible;
 
     /// <summary>Space between the rows of children.</summary>
     public Length RowGap { get; set; } = Length.Zero;
@@ -561,6 +704,21 @@ public static unsafe class Ui
             Native.bcs_ui_set_image(entity.Bits, &native), $"drawing an image in {entity}");
     }
 
+    /// <summary>
+    /// Moves a scrolling node's contents inside it.
+    /// </summary>
+    /// <remarks>
+    /// Only means anything on a node whose <see cref="UiSettings.OverflowX"/> or
+    /// <see cref="UiSettings.OverflowY"/> is <see cref="UiOverflow.Scroll"/>: that is what clips
+    /// the contents to the node, and this is how far they have been pushed, in logical pixels
+    /// from the top left. Bevy has no scrolling of its own, so a wheel or a drag is read like any
+    /// other input and turned into a call here.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The entity is gone, or this build has no renderer.</exception>
+    public static void SetScroll(Entity entity, float x, float y) =>
+        Native.Check(
+            Native.bcs_ui_set_scroll(entity.Bits, x, y), $"scrolling the contents of {entity}");
+
     private static NativeUiNodeConfig ToNative(UiSettings settings) => new()
     {
         Absolute = settings.Absolute ? 1 : 0,
@@ -601,7 +759,24 @@ public static unsafe class Ui
         BorderTopUnit = (int)settings.Border.Top.Unit,
         BorderRightUnit = (int)settings.Border.Right.Unit,
         BorderBottomUnit = (int)settings.Border.Bottom.Unit,
+        Display = (int)settings.Display,
         Direction = (int)settings.Direction,
+        Wrap = (int)settings.Wrap,
+        AlignSelf = (int)settings.AlignSelf,
+        Grow = settings.Grow,
+        Shrink = settings.Shrink,
+        Basis = settings.Basis.Value,
+        BasisUnit = (int)settings.Basis.Unit,
+        MinWidth = settings.MinWidth.Value,
+        MinWidthUnit = (int)settings.MinWidth.Unit,
+        MinHeight = settings.MinHeight.Value,
+        MinHeightUnit = (int)settings.MinHeight.Unit,
+        MaxWidth = settings.MaxWidth.Value,
+        MaxWidthUnit = (int)settings.MaxWidth.Unit,
+        MaxHeight = settings.MaxHeight.Value,
+        MaxHeightUnit = (int)settings.MaxHeight.Unit,
+        OverflowX = (int)settings.OverflowX,
+        OverflowY = (int)settings.OverflowY,
         Justify = (int)settings.Justify,
         Align = (int)settings.Align,
         RowGap = settings.RowGap.Value,

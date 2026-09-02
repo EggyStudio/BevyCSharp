@@ -68,15 +68,15 @@ Nothing here blocks a game; it is a matter of size on disk and upload cost.
 ### UI beyond a HUD
 
 `bevy_ui_render` is compiled in and `Ui` spawns nodes and text, sets a node's position, size,
-per-side padding, margin and border, direction, justification, alignment and gaps, draws an image
-inside one, rewrites text in place, and reports the pointer over a node asked to be interactive.
-That covers a HUD, a button, a menu that lays itself out and a panel that resizes. What is left:
+per-side padding, margin and border, direction, justification, alignment, gaps, growth, wrapping,
+bounds and overflow, draws an image inside one, scrolls what it clips, rewrites text in place, and
+reports the pointer over a node asked to be interactive. That covers a HUD, a button, a menu that
+lays itself out, a panel that resizes and a list that scrolls. What is left:
 
-- **The rest of flexbox.** `flex_grow` and `flex_basis` for a child that takes the leftover space,
-  `flex_wrap` for a grid of items that reflows, `align_self` for the odd child out, `min_width`
-  and its family, and `Overflow` for a list that scrolls rather than spilling. `Display::None`
-  collapses a subtree out of the layout, which `Visibility::Hidden` does not: it hides the node
-  and keeps its space.
+- **Odds and ends of flexbox.** `align_content` spreads the lines a wrapped node produces, the
+  way `justify_content` spreads the children within one. `aspect_ratio` sizes the other axis from
+  the one that is known. `OverflowClipMargin` clips at the padding or border box rather than at
+  the content box, which matters for a scrolling list with a border.
 - **Grid.** `GridPlacement` and the row and column tracks are a second layout algorithm rather
   than more fields on this one, and an inventory is what wants it.
 - **Image detail.** `ImageNode.texture_atlas` names a frame by index instead of by pixel
