@@ -24,6 +24,17 @@ fn length(value: f32, unit: i32) -> bevy::ui::Val {
     }
 }
 
+/// Translates one of the four-sided measurements, in the order left, top, right, bottom.
+#[cfg(feature = "render")]
+fn rect(values: &[f32; 4], units: &[i32; 4]) -> bevy::ui::UiRect {
+    bevy::ui::UiRect {
+        left: length(values[0], units[0]),
+        top: length(values[1], units[1]),
+        right: length(values[2], units[2]),
+        bottom: length(values[3], units[3]),
+    }
+}
+
 /// Translates the axis children are stacked along.
 #[cfg(feature = "render")]
 fn flex_direction(value: i32) -> bevy::ui::FlexDirection {
@@ -80,7 +91,7 @@ fn align_items(value: i32) -> bevy::ui::AlignItems {
 /// screen out plainly rather than not at all.
 #[cfg(feature = "render")]
 fn node_from(config: &BcsUiNodeConfig) -> bevy::ui::Node {
-    use bevy::ui::{PositionType, UiRect};
+    use bevy::ui::PositionType;
 
     bevy::ui::Node {
         position_type: if config.absolute != 0 {
@@ -94,9 +105,9 @@ fn node_from(config: &BcsUiNodeConfig) -> bevy::ui::Node {
         bottom: length(config.bottom, config.bottom_unit),
         width: length(config.width, config.width_unit),
         height: length(config.height, config.height_unit),
-        padding: UiRect::all(length(config.padding, config.padding_unit)),
-        margin: UiRect::all(length(config.margin, config.margin_unit)),
-        border: UiRect::all(length(config.border, config.border_unit)),
+        padding: rect(&config.padding, &config.padding_units),
+        margin: rect(&config.margin, &config.margin_units),
+        border: rect(&config.border, &config.border_units),
         flex_direction: flex_direction(config.direction),
         justify_content: justify_content(config.justify),
         align_items: align_items(config.align),

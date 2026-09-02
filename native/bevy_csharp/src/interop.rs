@@ -407,18 +407,18 @@ pub struct BcsUiNodeConfig {
     pub height: f32,
     /// Unit of `height`.
     pub height_unit: i32,
-    /// Space between the node's edge and its contents, on every side.
-    pub padding: f32,
-    /// Unit of `padding`.
-    pub padding_unit: i32,
-    /// Space outside the node's edge, on every side.
-    pub margin: f32,
-    /// Unit of `margin`.
-    pub margin_unit: i32,
-    /// Thickness of the node's border, on every side.
-    pub border: f32,
-    /// Unit of `border`.
-    pub border_unit: i32,
+    /// Space between the node's edge and its contents: left, top, right, bottom.
+    pub padding: [f32; 4],
+    /// Units of `padding`, in the same order.
+    pub padding_units: [i32; 4],
+    /// Space outside the node's edge: left, top, right, bottom.
+    pub margin: [f32; 4],
+    /// Units of `margin`, in the same order.
+    pub margin_units: [i32; 4],
+    /// Thickness of the node's border: left, top, right, bottom.
+    pub border: [f32; 4],
+    /// Units of `border`, in the same order.
+    pub border_units: [i32; 4],
     /// Which way the node's children are stacked: `0` row, `1` column, `2` and `3` reversed.
     pub direction: i32,
     /// How the children are spread along that axis, in the order `JustifyContent` declares.

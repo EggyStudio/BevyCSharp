@@ -91,7 +91,9 @@ public partial struct Scene
             Direction = UiDirection.Column,
             Align = UiAlign.Start,
             RowGap = Length.Px(8f),
-            Padding = Length.Px(10f),
+            Padding = new Sides(Length.Px(4f), Length.Px(10f), Length.Px(24f), Length.Px(10f)),
+            Border = Sides.Vertical(Length.Px(2f)),
+            BorderColor = (1f, 1f, 1f, 1f),
             Color = (0f, 0f, 0f, 0.45f),
         });
 

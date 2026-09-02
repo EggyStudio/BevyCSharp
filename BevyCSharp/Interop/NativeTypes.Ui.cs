@@ -48,23 +48,77 @@ public struct NativeUiNodeConfig
     /// <summary>Unit of <see cref="Height"/>.</summary>
     public int HeightUnit;
 
-    /// <summary>Padding on every side.</summary>
-    public float Padding;
+    /// <summary>Padding, left.</summary>
+    public float PaddingLeft;
 
-    /// <summary>Unit of <see cref="Padding"/>.</summary>
-    public int PaddingUnit;
+    /// <summary>Padding, top.</summary>
+    public float PaddingTop;
 
-    /// <summary>Margin on every side.</summary>
-    public float Margin;
+    /// <summary>Padding, right.</summary>
+    public float PaddingRight;
 
-    /// <summary>Unit of <see cref="Margin"/>.</summary>
-    public int MarginUnit;
+    /// <summary>Padding, bottom.</summary>
+    public float PaddingBottom;
 
-    /// <summary>Border thickness on every side.</summary>
-    public float Border;
+    /// <summary>Unit of <see cref="PaddingLeft"/>.</summary>
+    public int PaddingLeftUnit;
 
-    /// <summary>Unit of <see cref="Border"/>.</summary>
-    public int BorderUnit;
+    /// <summary>Unit of <see cref="PaddingTop"/>.</summary>
+    public int PaddingTopUnit;
+
+    /// <summary>Unit of <see cref="PaddingRight"/>.</summary>
+    public int PaddingRightUnit;
+
+    /// <summary>Unit of <see cref="PaddingBottom"/>.</summary>
+    public int PaddingBottomUnit;
+
+    /// <summary>Margin, left.</summary>
+    public float MarginLeft;
+
+    /// <summary>Margin, top.</summary>
+    public float MarginTop;
+
+    /// <summary>Margin, right.</summary>
+    public float MarginRight;
+
+    /// <summary>Margin, bottom.</summary>
+    public float MarginBottom;
+
+    /// <summary>Unit of <see cref="MarginLeft"/>.</summary>
+    public int MarginLeftUnit;
+
+    /// <summary>Unit of <see cref="MarginTop"/>.</summary>
+    public int MarginTopUnit;
+
+    /// <summary>Unit of <see cref="MarginRight"/>.</summary>
+    public int MarginRightUnit;
+
+    /// <summary>Unit of <see cref="MarginBottom"/>.</summary>
+    public int MarginBottomUnit;
+
+    /// <summary>Border thickness, left.</summary>
+    public float BorderLeft;
+
+    /// <summary>Border thickness, top.</summary>
+    public float BorderTop;
+
+    /// <summary>Border thickness, right.</summary>
+    public float BorderRight;
+
+    /// <summary>Border thickness, bottom.</summary>
+    public float BorderBottom;
+
+    /// <summary>Unit of <see cref="BorderLeft"/>.</summary>
+    public int BorderLeftUnit;
+
+    /// <summary>Unit of <see cref="BorderTop"/>.</summary>
+    public int BorderTopUnit;
+
+    /// <summary>Unit of <see cref="BorderRight"/>.</summary>
+    public int BorderRightUnit;
+
+    /// <summary>Unit of <see cref="BorderBottom"/>.</summary>
+    public int BorderBottomUnit;
 
     /// <summary>Which way children are stacked.</summary>
     public int Direction;

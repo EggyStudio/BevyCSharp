@@ -29,6 +29,13 @@ public readonly record struct Length(float Value, LengthUnit Unit)
     /// <summary>Left to the layout.</summary>
     public static Length Auto => new(0f, LengthUnit.Auto);
 
+    /// <summary>No distance at all.</summary>
+    /// <remarks>
+    /// Different from <see cref="Auto"/> where the layout has room to spare: an automatic margin
+    /// takes that room, a zero one does not.
+    /// </remarks>
+    public static Length Zero => new(0f, LengthUnit.Px);
+
     /// <summary>A distance in logical pixels.</summary>
     public static Length Px(float value) => new(value, LengthUnit.Px);
 
@@ -42,6 +49,41 @@ public readonly record struct Length(float Value, LengthUnit Unit)
         LengthUnit.Percent => $"{Value}%",
         _ => "auto",
     };
+}
+
+/// <summary>
+/// A measurement taken on all four sides of a node.
+/// </summary>
+/// <remarks>
+/// Padding, margin and border are each four lengths. One value is the common case, so a
+/// <see cref="Length"/> converts to the same distance on every side and only a node that wants
+/// its sides to differ has to name them.
+/// </remarks>
+/// <param name="Left">The left side.</param>
+/// <param name="Top">The top side.</param>
+/// <param name="Right">The right side.</param>
+/// <param name="Bottom">The bottom side.</param>
+public readonly record struct Sides(Length Left, Length Top, Length Right, Length Bottom)
+{
+    /// <summary>Nothing on any side.</summary>
+    public static Sides None => All(Length.Zero);
+
+    /// <summary>The same length on every side.</summary>
+    public static Sides All(Length value) => new(value, value, value, value);
+
+    /// <summary>Left and right, with nothing at the top and bottom.</summary>
+    public static Sides Horizontal(Length value) =>
+        new(value, Length.Zero, value, Length.Zero);
+
+    /// <summary>Top and bottom, with nothing at the left and right.</summary>
+    public static Sides Vertical(Length value) =>
+        new(Length.Zero, value, Length.Zero, value);
+
+    /// <summary>Reads a single length as the same distance on every side.</summary>
+    public static implicit operator Sides(Length value) => All(value);
+
+    /// <inheritdoc/>
+    public override string ToString() => $"({Left}, {Top}, {Right}, {Bottom})";
 }
 
 /// <summary>
@@ -208,19 +250,26 @@ public sealed class UiSettings
     /// <summary>How tall the node is.</summary>
     public Length Height { get; set; } = Length.Auto;
 
-    /// <summary>Space between the node's edge and its contents, on every side.</summary>
-    public Length Padding { get; set; } = Length.Auto;
+    /// <summary>Space between the node's edge and its contents.</summary>
+    /// <remarks>A <see cref="Length"/> assigned here is the same distance on every side.</remarks>
+    public Sides Padding { get; set; } = Sides.None;
 
-    /// <summary>Space outside the node's edge, on every side.</summary>
+    /// <summary>Space outside the node's edge.</summary>
     /// <remarks>
     /// What separates a node from its siblings. <see cref="RowGap"/> and <see cref="ColumnGap"/>
     /// say the same thing from the parent's side, and are the better place for even spacing.
+    /// A side left at <see cref="Length.Auto"/> swallows the space the parent has left over,
+    /// which is how a node is pushed to one end or centred without the parent knowing.
     /// </remarks>
-    public Length Margin { get; set; } = Length.Auto;
+    public Sides Margin { get; set; } = Sides.None;
 
-    /// <summary>How thick the node's border is, on every side.</summary>
-    /// <remarks>Drawn in <see cref="BorderColor"/>, which is transparent until it is set.</remarks>
-    public Length Border { get; set; } = Length.Auto;
+    /// <summary>How thick the node's border is.</summary>
+    /// <remarks>
+    /// Drawn in <see cref="BorderColor"/>, which is transparent until it is set. A side left at
+    /// zero is no border, so <see cref="Sides.Vertical"/> draws a rule above and below and
+    /// nothing at the ends.
+    /// </remarks>
+    public Sides Border { get; set; } = Sides.None;
 
     /// <summary>Which way the node stacks its children.</summary>
     public UiDirection Direction { get; set; } = UiDirection.Row;
@@ -232,10 +281,10 @@ public sealed class UiSettings
     public UiAlign Align { get; set; } = UiAlign.Default;
 
     /// <summary>Space between the rows of children.</summary>
-    public Length RowGap { get; set; } = Length.Auto;
+    public Length RowGap { get; set; } = Length.Zero;
 
     /// <summary>Space between the columns of children.</summary>
-    public Length ColumnGap { get; set; } = Length.Auto;
+    public Length ColumnGap { get; set; } = Length.Zero;
 
     /// <summary>
     /// The node's background, or the text's colour for a run of text. Linear RGBA.
@@ -528,12 +577,30 @@ public static unsafe class Ui
         WidthUnit = (int)settings.Width.Unit,
         Height = settings.Height.Value,
         HeightUnit = (int)settings.Height.Unit,
-        Padding = settings.Padding.Value,
-        PaddingUnit = (int)settings.Padding.Unit,
-        Margin = settings.Margin.Value,
-        MarginUnit = (int)settings.Margin.Unit,
-        Border = settings.Border.Value,
-        BorderUnit = (int)settings.Border.Unit,
+        PaddingLeft = settings.Padding.Left.Value,
+        PaddingTop = settings.Padding.Top.Value,
+        PaddingRight = settings.Padding.Right.Value,
+        PaddingBottom = settings.Padding.Bottom.Value,
+        PaddingLeftUnit = (int)settings.Padding.Left.Unit,
+        PaddingTopUnit = (int)settings.Padding.Top.Unit,
+        PaddingRightUnit = (int)settings.Padding.Right.Unit,
+        PaddingBottomUnit = (int)settings.Padding.Bottom.Unit,
+        MarginLeft = settings.Margin.Left.Value,
+        MarginTop = settings.Margin.Top.Value,
+        MarginRight = settings.Margin.Right.Value,
+        MarginBottom = settings.Margin.Bottom.Value,
+        MarginLeftUnit = (int)settings.Margin.Left.Unit,
+        MarginTopUnit = (int)settings.Margin.Top.Unit,
+        MarginRightUnit = (int)settings.Margin.Right.Unit,
+        MarginBottomUnit = (int)settings.Margin.Bottom.Unit,
+        BorderLeft = settings.Border.Left.Value,
+        BorderTop = settings.Border.Top.Value,
+        BorderRight = settings.Border.Right.Value,
+        BorderBottom = settings.Border.Bottom.Value,
+        BorderLeftUnit = (int)settings.Border.Left.Unit,
+        BorderTopUnit = (int)settings.Border.Top.Unit,
+        BorderRightUnit = (int)settings.Border.Right.Unit,
+        BorderBottomUnit = (int)settings.Border.Bottom.Unit,
         Direction = (int)settings.Direction,
         Justify = (int)settings.Justify,
         Align = (int)settings.Align,

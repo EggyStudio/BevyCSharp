@@ -346,6 +346,52 @@ public sealed class UiTests
     }
 
     [Fact]
+    public void EachSideOfANodeCanDifferFromTheOthers()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var node = Ui.SpawnNode(new UiSettings
+            {
+                Padding = new Sides(Length.Px(4f), Length.Px(8f), Length.Px(12f), Length.Px(16f)),
+                Margin = Sides.Horizontal(Length.Px(6f)),
+                // A rule above and below, and nothing at the ends.
+                Border = Sides.Vertical(Length.Px(2f)),
+                BorderColor = (1f, 1f, 1f, 1f),
+            });
+
+            Assert.True(ctx.Ecs.IsAlive(node));
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void OneLengthMeansTheSameOnEverySide()
+    {
+        // No engine needed: the point is that the common case stays a single value.
+        Sides all = Length.Px(8f);
+
+        Assert.Equal(Length.Px(8f), all.Left);
+        Assert.Equal(Length.Px(8f), all.Top);
+        Assert.Equal(Length.Px(8f), all.Right);
+        Assert.Equal(Length.Px(8f), all.Bottom);
+        Assert.Equal(all, Sides.All(Length.Px(8f)));
+
+        var sides = Sides.Horizontal(Length.Percent(10f));
+        Assert.Equal(Length.Percent(10f), sides.Left);
+        Assert.Equal(Length.Zero, sides.Top);
+
+        Assert.Equal("(8px, 0px, 8px, 0px)", Sides.Horizontal(Length.Px(8f)).ToString());
+
+        // Zero and Auto are not the same distance: an automatic margin takes the space the
+        // parent has left over, which is what centres a child, and a zero one leaves it.
+        Assert.NotEqual(Length.Auto, Length.Zero);
+    }
+
+    [Fact]
     public void ALengthCarriesItsUnit()
     {
         // No engine needed: the point is that a bare number cannot say what it means.
