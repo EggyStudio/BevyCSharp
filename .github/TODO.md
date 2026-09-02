@@ -119,7 +119,9 @@ What is not bridged:
 ## Audio
 
 `bevy_audio` is compiled into the render profile with Ogg Vorbis, WAV, FLAC and MP3, and `Audio`
-plays, stops, pauses and sets volume. A playing sound is an entity.
+plays, stops, pauses, sets volume per sound and over everything at once, places a sound in the
+world for a nominated listener, and reads and moves the point a clip has reached. A playing sound
+is an entity.
 
 It is the one part of the bridge that takes a system library: cpal links against ALSA on Linux,
 so a render build needs `libasound2-dev` or the equivalent. `build-native.sh` installs it into the
@@ -128,12 +130,16 @@ distribution. The minimal profile is untouched and still builds with nothing but
 
 What is not bridged:
 
-- **Spatial audio.** `PlaybackSettings.spatial` positions a sound at its entity's transform and
-  attenuates it with distance, which needs an `AudioListener` on the camera as well.
-- **Playback position.** The sink knows where it is in a clip and can be seeked; neither is
-  reachable, so a pause and resume across a scene change starts the clip again.
-- **Global volume.** `GlobalVolume` scales everything at once, which is what a settings screen
-  changes.
+- **Seeking a looping sound.** Looping is rodio's `Repeat` over a `Buffered` source, which keeps
+  the decoded samples so the clip can start again and refuses to move within them, so a seek
+  reports `INVALID_STATE`. Nothing on this side can work around it: music that has to resume
+  where it left off is played once and restarted. Revisit if rodio makes a buffered source
+  seekable.
+- **Where the sound goes.** `PlaybackSettings.start_position` and `duration` play part of a clip
+  without seeking afterwards, which is how one file holds several effects. `SpatialScale` is per
+  sound, while `AudioPlugin::default_spatial_scale` sets it once for the whole app.
+- **Ear geometry.** `SpatialListener` takes the two ear offsets separately; the bridge takes one
+  gap and places them on the x axis, which is what Bevy's own constructor does.
 
 ## Simulation structure
 

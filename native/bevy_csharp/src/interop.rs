@@ -290,6 +290,10 @@ pub struct BcsAudioConfig {
     pub speed: f32,
     /// Non-zero to start paused.
     pub paused: i32,
+    /// Non-zero to place the sound at its entity's transform and attenuate it with distance.
+    pub spatial: i32,
+    /// Scale applied to the distance between the sound and the listener. `0` takes Bevy's own.
+    pub spatial_scale: f32,
 }
 
 /// One debug shape to draw this frame.

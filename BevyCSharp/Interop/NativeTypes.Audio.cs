@@ -17,4 +17,10 @@ public struct NativeAudioConfig
 
     /// <summary>Non-zero to start paused.</summary>
     public int Paused;
+
+    /// <summary>Non-zero to place the sound at its entity's transform.</summary>
+    public int Spatial;
+
+    /// <summary>Scale applied to the distance to the listener; 0 for Bevy's own.</summary>
+    public float SpatialScale;
 }

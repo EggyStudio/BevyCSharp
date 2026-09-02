@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 32;
+    internal const int ExpectedAbiVersion = 33;
 
     static Native() => NativeLoader.Initialize();
 
@@ -387,6 +387,26 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_audio_stop(ulong entity);
+
+    /// <summary>Makes an entity the ear spatial sound is heard from.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_audio_listener(ulong entity, float gap);
+
+    /// <summary>Writes how far into its clip a sound has played, in seconds.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_audio_position(ulong entity, float* seconds);
+
+    /// <summary>Moves playback to a point in the clip.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_audio_seek(ulong entity, float seconds);
+
+    /// <summary>Scales every sound at once.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_audio_global_volume(float volume);
 
     /// <summary>Records a debug shape to draw this frame.</summary>
     [LibraryImport(Library)]

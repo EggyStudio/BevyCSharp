@@ -42,6 +42,26 @@ public sealed class AudioSettings
     /// <summary>Start paused, to be released later with <see cref="Audio.Resume"/>.</summary>
     public bool Paused { get; set; }
 
+    /// <summary>
+    /// Place the sound in the world rather than in both ears equally.
+    /// </summary>
+    /// <remarks>
+    /// A spatial sound is heard from where its entity's <see cref="Transform"/> is, quieter with
+    /// distance and further to one side as it moves across. It takes two things: this, and an
+    /// entity to hear from, which <see cref="Audio.SetListener"/> nominates.
+    /// </remarks>
+    public bool Spatial { get; set; }
+
+    /// <summary>
+    /// Scale applied to the distance between the sound and the listener.
+    /// </summary>
+    /// <remarks>
+    /// A world measured in metres needs nothing here. One measured in pixels does: a sound a
+    /// hundred units away would otherwise be inaudible, and a scale of <c>0.01</c> makes that a
+    /// metre. Zero leaves Bevy's own scale in place.
+    /// </remarks>
+    public float SpatialScale { get; set; }
+
     /// <summary>Plays once and cleans up after itself.</summary>
     public static AudioSettings Effect => new() { Mode = PlaybackMode.Despawn };
 
@@ -94,6 +114,8 @@ public static unsafe class Audio
             Volume = settings.Volume,
             Speed = settings.Speed,
             Paused = settings.Paused ? 1 : 0,
+            Spatial = settings.Spatial ? 1 : 0,
+            SpatialScale = settings.SpatialScale,
         };
 
         var bits = Native.bcs_audio_play(clip.Key, &native);
@@ -131,4 +153,85 @@ public static unsafe class Audio
     /// <summary>Stops a sound and despawns the entity playing it.</summary>
     public static void Stop(Entity playing) =>
         Native.Check(Native.bcs_audio_stop(playing.Bits), $"stopping {playing}");
+
+    /// <summary>
+    /// Makes an entity the ear spatial sound is heard from.
+    /// </summary>
+    /// <remarks>
+    /// Usually the camera, so that what is heard follows what is seen. One entity at a time:
+    /// with several, Bevy hears from whichever it finds first.
+    /// </remarks>
+    /// <param name="entity">The entity to listen from. It is given a transform if it has none.</param>
+    /// <param name="earGap">
+    /// Distance between the two ears in world units, which is how pronounced the stereo is. Zero
+    /// leaves Bevy's own.
+    /// </param>
+    /// <exception cref="BevyNativeException">The entity is gone, or this build has no audio.</exception>
+    /// <example>
+    /// <code>
+    /// var camera = Render.SpawnCamera3d();
+    /// Audio.SetListener(camera);
+    ///
+    /// var engine = Audio.Play(hum, new AudioSettings { Mode = PlaybackMode.Loop, Spatial = true });
+    /// ctx.Ecs.Add(engine, Transform.At(4f, 0f, -2f));
+    /// </code>
+    /// </example>
+    public static void SetListener(Entity entity, float earGap = 0f) =>
+        Native.Check(
+            Native.bcs_audio_listener(entity.Bits, earGap), $"listening from {entity}");
+
+    /// <summary>
+    /// How far into its clip a sound has played, in seconds.
+    /// </summary>
+    /// <remarks>
+    /// Reaches the sink Bevy attaches once playback has started, so a sound asked in the frame it
+    /// was started in reports that it carries none yet.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// The entity is gone, is not playing yet, or this build has no audio.
+    /// </exception>
+    public static float PositionOf(Entity playing)
+    {
+        float seconds;
+        Native.Check(
+            Native.bcs_audio_position(playing.Bits, &seconds), $"reading the position of {playing}");
+
+        return seconds;
+    }
+
+    /// <summary>
+    /// Moves playback to a point in the clip, in seconds from its start.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// With <see cref="PositionOf"/> this is what survives a pause across a scene change: read
+    /// the position, stop the sound, and seek the new one back to it.
+    /// </para>
+    /// <para>
+    /// A sound playing on <see cref="PlaybackMode.Loop"/> refuses to be sought. Looping keeps the
+    /// decoded samples around so the clip can start again, and what holds them has no way to move
+    /// within them. Music that has to resume where it left off is played once and restarted, not
+    /// looped.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// The entity is gone, is not playing yet, the sound is looping, or this build has no audio.
+    /// </exception>
+    public static void Seek(Entity playing, float seconds) =>
+        Native.Check(
+            Native.bcs_audio_seek(playing.Bits, seconds), $"seeking {playing} to {seconds}s");
+
+    /// <summary>
+    /// Scales every sound at once, which is what a settings screen changes.
+    /// </summary>
+    /// <remarks>
+    /// Multiplied with each sound's own volume rather than replacing it, so the mix a game set up
+    /// survives the master slider being moved.
+    /// </remarks>
+    /// <param name="volume">1 leaves everything as mixed, 0 is silence.</param>
+    /// <exception cref="BevyNativeException">
+    /// The volume is negative, or this build has no audio.
+    /// </exception>
+    public static void SetGlobalVolume(float volume) =>
+        Native.Check(Native.bcs_audio_global_volume(volume), "setting the global volume");
 }

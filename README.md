@@ -225,7 +225,38 @@ back. `PlaybackMode.Despawn` is what a one-shot effect wants: nothing has to rem
 up.
 
 `SetVolume`, `Pause` and `Resume` reach the sink Bevy attaches once playback has started, so they
-report `NotPresent` if called in the same frame the sound was started in.
+report `NotPresent` if called in the same frame the sound was started in. So do `PositionOf` and
+`Seek`, which read and move the point a clip has reached:
+
+```csharp
+var at = Audio.PositionOf(music);       // seconds into the clip
+Audio.Seek(music, at - 5f);             // back five seconds
+Audio.SetGlobalVolume(0.4f);            // the master slider, over everything at once
+```
+
+A looping sound refuses to be sought: looping keeps the decoded samples so the clip can start
+again, and what holds them has no way to move within them. Music that has to resume where it left
+off is played once and restarted rather than looped.
+
+A sound can be placed in the world instead of played into both ears equally. That takes two
+things: the sound saying so, and an entity to hear from.
+
+```csharp
+Audio.SetListener(Render.SpawnCamera3d());      // usually the camera
+
+var engine = Audio.Play(hum, new AudioSettings
+{
+    Mode = PlaybackMode.Loop,
+    Spatial = true,
+    SpatialScale = 0.01f,               // a world measured in pixels rather than metres
+});
+
+ctx.Ecs.Add(engine, Transform.At(4f, 0f, -2f));
+```
+
+A spatial sound is given a `Transform` to be moved by, and is heard quieter with distance and
+further to one side as it crosses the listener. `SpatialScale` is what makes that work in a world
+whose units are not metres.
 
 Sound is in the render profile rather than the minimal one, and not because it draws: it is the
 one part of the engine that needs a system library at build time. See
