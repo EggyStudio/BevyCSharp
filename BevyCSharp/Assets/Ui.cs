@@ -254,6 +254,85 @@ public sealed class UiSettings
 }
 
 /// <summary>
+/// How a picture meets the size of the node holding it.
+/// </summary>
+public enum UiImageMode
+{
+    /// <summary>
+    /// The picture keeps its own size, and a node with no size of its own takes it.
+    /// </summary>
+    Auto = 0,
+
+    /// <summary>Stretched to the node, ignoring the picture's proportions.</summary>
+    Stretch = 1,
+
+    /// <summary>
+    /// Cut into nine, so the corners keep their size while the middle stretches.
+    /// </summary>
+    /// <remarks>What a panel or a bar that resizes is drawn with. The corners are
+    /// <see cref="UiImageSettings.SliceBorder"/> pixels of the source image.</remarks>
+    Sliced = 2,
+
+    /// <summary>Repeated across the node rather than stretched.</summary>
+    Tiled = 3,
+}
+
+/// <summary>
+/// The picture a UI node draws inside itself.
+/// </summary>
+/// <remarks>
+/// The node's own settings say where it is and how large; this says what fills it. The two are
+/// separate calls because the layout is one decision and its contents another.
+/// </remarks>
+public sealed class UiImageSettings
+{
+    /// <summary>The image to draw.</summary>
+    public AssetHandle Image { get; set; } = AssetHandle.None;
+
+    /// <summary>Tint, multiplied with the image. White leaves it unchanged.</summary>
+    public (float R, float G, float B, float A) Color { get; set; } = (1f, 1f, 1f, 1f);
+
+    /// <summary>
+    /// The part of the image to draw, in pixels, or null for all of it.
+    /// </summary>
+    /// <remarks>
+    /// What an icon sheet needs: one image holding many icons, each drawn by naming its
+    /// rectangle rather than by loading a separate file.
+    /// </remarks>
+    public (float Left, float Top, float Right, float Bottom)? Rect { get; set; }
+
+    /// <summary>Mirror horizontally.</summary>
+    public bool FlipX { get; set; }
+
+    /// <summary>Mirror vertically.</summary>
+    public bool FlipY { get; set; }
+
+    /// <summary>How the picture meets the node's size.</summary>
+    public UiImageMode Mode { get; set; } = UiImageMode.Auto;
+
+    /// <summary>
+    /// How far in from each edge the nine-slice cuts are, in pixels of the source image.
+    /// </summary>
+    /// <remarks>Read only when <see cref="Mode"/> is <see cref="UiImageMode.Sliced"/>.</remarks>
+    public (float Left, float Top, float Right, float Bottom) SliceBorder { get; set; }
+
+    /// <summary>How far a sliced corner may be scaled up.</summary>
+    /// <remarks>One keeps the corners at their own size, which is usually what a panel wants.</remarks>
+    public float CornerScale { get; set; } = 1f;
+
+    /// <summary>Repeat horizontally when tiled.</summary>
+    public bool TileX { get; set; } = true;
+
+    /// <summary>Repeat vertically when tiled.</summary>
+    public bool TileY { get; set; } = true;
+
+    /// <summary>
+    /// How far the picture is drawn before a tile repeats, as a multiple of its own size.
+    /// </summary>
+    public float TileStretch { get; set; } = 1f;
+}
+
+/// <summary>
 /// Builds Bevy's UI: panels, and the text on them.
 /// </summary>
 /// <remarks>
@@ -363,6 +442,74 @@ public static unsafe class Ui
         Native.Check(value, $"reading the interaction of {entity}");
 
         return (UiInteraction)value;
+    }
+
+    /// <summary>
+    /// Draws an image inside a node, or replaces the one it draws.
+    /// </summary>
+    /// <remarks>
+    /// The node keeps its layout and the picture fills what the layout gave it. A node with no
+    /// width or height of its own takes the image's, which is what an icon wants.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// The entity is gone, the handle is not one this app is holding, or this build has no
+    /// renderer.
+    /// </exception>
+    public static void SetImage(Entity entity, AssetHandle image) =>
+        SetImage(entity, new UiImageSettings { Image = image });
+
+    /// <summary>
+    /// Draws an image inside a node, tinted, cut down or sliced.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="UiImageMode.Sliced"/> is what a panel that resizes is drawn with: the corners
+    /// keep their size while the middle stretches, so one small image covers every size of box.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// The entity is gone, the handle is not one this app is holding, or this build has no
+    /// renderer.
+    /// </exception>
+    /// <example>
+    /// <code>
+    /// Ui.SetImage(panel, new UiImageSettings
+    /// {
+    ///     Image = AssetServer.Load(AssetKind.Image, "ui/panel.png"),
+    ///     Mode = UiImageMode.Sliced,
+    ///     SliceBorder = (8f, 8f, 8f, 8f),
+    /// });
+    /// </code>
+    /// </example>
+    public static void SetImage(Entity entity, UiImageSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var native = new NativeUiImageConfig
+        {
+            Image = settings.Image.Key,
+            ColorR = settings.Color.R,
+            ColorG = settings.Color.G,
+            ColorB = settings.Color.B,
+            ColorA = settings.Color.A,
+            HasRect = settings.Rect.HasValue ? 1 : 0,
+            RectLeft = settings.Rect?.Left ?? 0f,
+            RectTop = settings.Rect?.Top ?? 0f,
+            RectRight = settings.Rect?.Right ?? 0f,
+            RectBottom = settings.Rect?.Bottom ?? 0f,
+            FlipX = settings.FlipX ? 1 : 0,
+            FlipY = settings.FlipY ? 1 : 0,
+            Mode = (int)settings.Mode,
+            SliceLeft = settings.SliceBorder.Left,
+            SliceTop = settings.SliceBorder.Top,
+            SliceRight = settings.SliceBorder.Right,
+            SliceBottom = settings.SliceBorder.Bottom,
+            CornerScale = settings.CornerScale,
+            TileX = settings.TileX ? 1 : 0,
+            TileY = settings.TileY ? 1 : 0,
+            TileStretch = settings.TileStretch,
+        };
+
+        Native.Check(
+            Native.bcs_ui_set_image(entity.Bits, &native), $"drawing an image in {entity}");
     }
 
     private static NativeUiNodeConfig ToNative(UiSettings settings) => new()

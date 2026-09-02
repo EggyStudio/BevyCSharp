@@ -328,6 +328,19 @@ own components like anything else. The font is Bevy's own, compiled into the eng
 no asset. `SetText` rewrites in place rather than respawning, because a score changes every frame
 and the entity behind it should not.
 
+A node can hold a picture as well as a colour:
+
+```csharp
+var icon = Ui.SpawnNode(new UiSettings { Width = Length.Px(32f), Height = Length.Px(32f) });
+Ui.SetImage(icon, AssetServer.Load(AssetKind.Image, "ui/icon.png"));
+```
+
+`UiImageSettings` tints it, mirrors it, cuts one icon out of a sheet with `Rect`, and chooses how
+it meets the node's size. `UiImageMode.Sliced` is the one worth knowing: the image is cut into
+nine, the corners keep their size and the middle stretches, so one small picture draws a panel at
+any size. `Auto` keeps the picture's own size, which is what a node with no width or height of
+its own then takes.
+
 A node can be asked to report the pointer, which is what makes it a button:
 
 ```csharp
@@ -1148,7 +1161,7 @@ run against a real Bevy app. Known gaps:
 - A render build draws: mesh primitives, textured physically based materials, cameras, lights,
   sprites, gizmos, UI nodes and text are reachable from a behavior script, verified on Vulkan.
   glTF files and `.scn` scenes load and spawn, and audio plays. What is thin is the layer above
-  that. Animation has no bridge, a UI node lays a column out but cannot hold an image, and the
+  that. Animation has no bridge, sprites step through no frames of their own, and the
   GPU-compressed texture formats are not decoded.
   [.github/TODO.md](.github/TODO.md) lists what each gap needs.
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does

@@ -68,13 +68,13 @@ Nothing here blocks a game; it is a matter of size on disk and upload cost.
 ### UI beyond a HUD
 
 `bevy_ui_render` is compiled in and `Ui` spawns nodes and text, sets a node's position, size,
-padding, margin, border, direction, justification, alignment and gaps, rewrites text in place, and
-reports the pointer over a node asked to be interactive. That covers a HUD, a button and a menu
-that lays itself out. What is left:
+padding, margin, border, direction, justification, alignment and gaps, draws an image inside one,
+rewrites text in place, and reports the pointer over a node asked to be interactive. That covers a
+HUD, a button, a menu that lays itself out and a panel that resizes. What is left:
 
 - **Per-side rects.** `Padding`, `Margin` and `Border` are one length for all four sides, because
-  a field per side is twelve more numbers on the wire. A nine-slice panel and a tab strip both
-  want them separately.
+  a field per side is twelve more numbers on the wire. A tab strip with no border where it meets
+  its page, and a row with room only under it, both want them separately.
 - **The rest of flexbox.** `flex_grow` and `flex_basis` for a child that takes the leftover space,
   `flex_wrap` for a grid of items that reflows, `align_self` for the odd child out, `min_width`
   and its family, and `Overflow` for a list that scrolls rather than spilling. `Display::None`
@@ -82,8 +82,10 @@ that lays itself out. What is left:
   and keeps its space.
 - **Grid.** `GridPlacement` and the row and column tracks are a second layout algorithm rather
   than more fields on this one, and an inventory is what wants it.
-- **Images.** A node can hold a texture through `ImageNode`, which is how an icon or a nine-slice
-  panel is drawn. The handle plumbing for it already exists.
+- **Image detail.** `ImageNode.texture_atlas` names a frame by index instead of by pixel
+  rectangle, and needs the same atlas layout asset the 2D section wants. A sliced image's centre
+  and sides are stretched, since `SliceScaleMode::Tile` is a payload the flat config has no room
+  for.
 - **Text layout.** Justification, line breaking and bounds are `TextLayout`, unbridged, so a long
   string runs off the edge.
 

@@ -338,6 +338,40 @@ pub struct BcsSpriteConfig {
     pub flip_y: i32,
 }
 
+/// The picture a UI node draws inside itself.
+///
+/// Separate from the node's own config because an image is attached to a node that already
+/// exists, the way a sprite is attached to an entity: the layout is one decision and what fills
+/// it is another.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsUiImageConfig {
+    /// Asset key of the image to draw.
+    pub image: i32,
+    /// Tint, multiplied with the image. Linear RGBA, white for the image unchanged.
+    pub color: [f32; 4],
+    /// Non-zero to draw only the part of the image `rect` names.
+    pub has_rect: i32,
+    /// Left, top, right and bottom of that part, in pixels.
+    pub rect: [f32; 4],
+    /// Non-zero to mirror horizontally.
+    pub flip_x: i32,
+    /// Non-zero to mirror vertically.
+    pub flip_y: i32,
+    /// How the picture meets the node's size: `0` its own, `1` stretched, `2` sliced, `3` tiled.
+    pub mode: i32,
+    /// Left, top, right and bottom insets of the nine-slice border, in pixels.
+    pub slice_border: [f32; 4],
+    /// How far a sliced corner may be scaled up. `0` takes Bevy's default of one.
+    pub corner_scale: f32,
+    /// Non-zero to repeat horizontally when tiled.
+    pub tile_x: i32,
+    /// Non-zero to repeat vertically when tiled.
+    pub tile_y: i32,
+    /// How far the picture stretches before a tile repeats. `0` takes Bevy's default of one.
+    pub tile_stretch: f32,
+}
+
 /// Where a UI node sits and how large it is.
 ///
 /// Each length is a value and a unit, because Bevy's `Val` is an enum and a bare float cannot say

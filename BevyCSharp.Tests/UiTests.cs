@@ -15,6 +15,8 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class UiTests
 {
+    private const string Texture = "textures/checker.png";
+
     [Fact]
     public void ANodeAndSomeTextAreOrdinaryEntities()
     {
@@ -244,6 +246,82 @@ public sealed class UiTests
     }
 
     [Fact]
+    public void ANodeDrawsAnImageInWhicheverModeItIsGiven()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        var icon = Entity.None;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var image = AssetServer.Load(AssetKind.Image, Texture);
+
+            icon = Ui.SpawnNode(new UiSettings { Width = Length.Px(32f), Height = Length.Px(32f) });
+            Ui.SetImage(icon, image);
+
+            // A panel that resizes: the corners keep their size and the middle stretches.
+            var panel = Ui.SpawnNode(new UiSettings
+            {
+                Width = Length.Px(200f),
+                Height = Length.Px(120f),
+            });
+
+            Ui.SetImage(panel, new UiImageSettings
+            {
+                Image = image,
+                Mode = UiImageMode.Sliced,
+                SliceBorder = (4f, 4f, 4f, 4f),
+                CornerScale = 1f,
+                Color = (1f, 0.9f, 0.9f, 1f),
+                Rect = (0f, 0f, 8f, 8f),
+                FlipX = true,
+                FlipY = true,
+            });
+
+            Ui.SetImage(panel, new UiImageSettings
+            {
+                Image = image,
+                Mode = UiImageMode.Tiled,
+                TileX = true,
+                TileY = false,
+                TileStretch = 0.5f,
+            });
+
+            // Replacing the image on a node that has one is the same call.
+            Ui.SetImage(panel, new UiImageSettings { Image = image, Mode = UiImageMode.Stretch });
+
+            Assert.True(ctx.Ecs.IsAlive(panel));
+        });
+
+        harness.Run();
+
+        Assert.NotEqual(Entity.None, icon);
+    }
+
+    [Fact]
+    public void AnImageThatNamesNothingIsRefused()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            var node = Ui.SpawnNode(new UiSettings());
+
+            var noImage = Assert.Throws<BevyNativeException>(
+                () => Ui.SetImage(node, AssetHandle.None));
+            Assert.Equal(NativeStatus.NoComponent, noImage.Status);
+
+            var image = AssetServer.Load(AssetKind.Image, Texture);
+            var gone = Assert.Throws<BevyNativeException>(() => Ui.SetImage(Entity.None, image));
+            Assert.Equal(NativeStatus.NoEntity, gone.Status);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void ABuildWithoutARendererSaysSoRatherThanReturningNothing()
     {
         using var harness = new EngineHarness(frames: 3);
@@ -258,6 +336,10 @@ public sealed class UiTests
             var interaction = Assert.Throws<BevyNativeException>(
                 () => Ui.InteractionOf(Entity.None));
             Assert.Equal(NativeStatus.Unsupported, interaction.Status);
+
+            var image = Assert.Throws<BevyNativeException>(
+                () => Ui.SetImage(Entity.None, AssetHandle.None));
+            Assert.Equal(NativeStatus.Unsupported, image.Status);
         });
 
         harness.Run();

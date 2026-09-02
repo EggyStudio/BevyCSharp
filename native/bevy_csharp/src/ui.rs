@@ -8,7 +8,7 @@
 //! Everything here needs a render build. A windowless one reports that rather than spawning
 //! entities that would never draw.
 
-use crate::interop::{status, BcsUiNodeConfig};
+use crate::interop::{status, BcsUiImageConfig, BcsUiNodeConfig};
 #[cfg(feature = "render")]
 use crate::state::with_world;
 #[cfg(feature = "render")]
@@ -317,6 +317,100 @@ pub unsafe extern "C" fn bcs_ui_interaction(entity: u64) -> i32 {
                     Interaction::Hovered => 1,
                     Interaction::Pressed => 2,
                 }
+            })
+        }
+    })
+}
+
+/// Draws a picture inside a node, or replaces the one it draws.
+///
+/// The node keeps its layout: the image fills what the layout gave it, which is what `mode` is
+/// about. `Auto` takes the picture's own size, so a node with no width or height of its own ends
+/// up the size of the image; the other three fit it to the node instead.
+///
+/// # Safety
+/// `config` must point to a readable [`BcsUiImageConfig`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_ui_set_image(entity: u64, config: *const BcsUiImageConfig) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, config);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::color::Color;
+            use bevy::image::Image;
+            use bevy::math::{Rect, Vec2};
+            use bevy::sprite::{BorderRect, SliceScaleMode, TextureSlicer};
+            use bevy::ui::widget::{ImageNode, NodeImageMode};
+
+            if config.is_null() {
+                return status::NULL_ARG;
+            }
+            let config = unsafe { *config };
+
+            with_world(|world| {
+                let Some(image) = crate::assets::clone_handle(world, config.image) else {
+                    return status::NO_COMPONENT;
+                };
+
+                let slicer = TextureSlicer {
+                    border: BorderRect {
+                        min_inset: Vec2::new(config.slice_border[0], config.slice_border[1]),
+                        max_inset: Vec2::new(config.slice_border[2], config.slice_border[3]),
+                    },
+                    center_scale_mode: SliceScaleMode::Stretch,
+                    sides_scale_mode: SliceScaleMode::Stretch,
+                    max_corner_scale: if config.corner_scale > 0.0 {
+                        config.corner_scale
+                    } else {
+                        1.0
+                    },
+                };
+
+                let image_mode = match config.mode {
+                    1 => NodeImageMode::Stretch,
+                    2 => NodeImageMode::Sliced(slicer),
+                    3 => NodeImageMode::Tiled {
+                        tile_x: config.tile_x != 0,
+                        tile_y: config.tile_y != 0,
+                        stretch_value: if config.tile_stretch > 0.0 {
+                            config.tile_stretch
+                        } else {
+                            1.0
+                        },
+                    },
+                    _ => NodeImageMode::Auto,
+                };
+
+                let node_image = ImageNode {
+                    image: image.typed::<Image>(),
+                    color: Color::linear_rgba(
+                        config.color[0],
+                        config.color[1],
+                        config.color[2],
+                        config.color[3],
+                    ),
+                    flip_x: config.flip_x != 0,
+                    flip_y: config.flip_y != 0,
+                    rect: (config.has_rect != 0).then(|| {
+                        Rect::new(config.rect[0], config.rect[1], config.rect[2], config.rect[3])
+                    }),
+                    image_mode,
+                    ..Default::default()
+                };
+
+                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity))
+                else {
+                    return status::NO_ENTITY;
+                };
+
+                // Bevy's own insert, so the components an image node requires arrive with it.
+                entity_mut.insert(node_image);
+                status::OK
             })
         }
     })
