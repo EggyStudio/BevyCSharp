@@ -36,6 +36,19 @@ public partial struct Scene
         });
         ctx.Ecs.Add(camera, Transform.LookingAt(new Vec3(3.5f, 3f, 6f), Vec3.Zero, Vec3.UnitY));
 
+        // What the camera does with the picture once the scene is drawn. The high dynamic range
+        // target is what makes the rest worth having: without it nothing is brighter than white,
+        // so the tonemapper has nothing to bring down and bloom has nothing to scatter.
+        Render.SetPostProcessing(camera, new PostSettings
+        {
+            Hdr = true,
+            Tonemapper = Tonemapper.AgX,
+            Bloom = true,
+            BloomIntensity = 0.3f,
+            AntiAlias = AntiAliasPass.Fxaa,
+            Msaa = 1,
+        });
+
         var sun = Render.SpawnLight(new LightSettings
         {
             Kind = LightKind.Directional,
@@ -56,6 +69,18 @@ public partial struct Scene
             OuterAngle = 0.5f,
         });
         ctx.Ecs.Add(rim, Transform.LookingAt(new Vec3(-4f, 3f, -5f), Vec3.Zero, Vec3.UnitY));
+
+        // A lamp, emissive well past white so there is something for the bloom to scatter. Unlit
+        // because it is the light source rather than a thing the lights fall on.
+        var lamp = ctx.Ecs.Spawn();
+        Render.SetMesh(ctx.Ecs, lamp, Render.CreateMesh(MeshShape.Sphere, 0.6f));
+        Render.SetMaterial(ctx.Ecs, lamp, Render.CreateMaterial(new MaterialSettings
+        {
+            BaseColor = (1f, 0.6f, 0.2f, 1f),
+            Emissive = (12f, 5f, 1f, 1f),
+            Unlit = true,
+        }));
+        ctx.Ecs.Add(lamp, Transform.At(-2.5f, 1.2f, 1.5f));
 
         var ground = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, ground, Render.CreateMesh(MeshShape.Plane, 24f, 24f));
@@ -80,17 +105,13 @@ public partial struct Scene
         // flat outline.
         ctx.Ecs.Add(cube, new Scene { YawSpeed = 0.9f, PitchSpeed = 0.35f });
 
-        // A HUD: a panel pinned to a corner, stacking what it holds in a column. Only the panel
-        // is placed by hand; everything inside is put where the layout says, which is what the
-        // direction, the gap and the padding are for.
+        // A HUD: a panel pinned to a corner with a line of text inside it. Nesting is ordinary
+        // parenting, so the text moves with the panel.
         var panel = Ui.SpawnNode(new UiSettings
         {
             Absolute = true,
             Left = Length.Px(16f),
             Top = Length.Px(16f),
-            Direction = UiDirection.Column,
-            Align = UiAlign.Start,
-            RowGap = Length.Px(8f),
             Padding = Length.Px(10f),
             Color = (0f, 0f, 0f, 0.45f),
         });
@@ -98,22 +119,6 @@ public partial struct Scene
         var readout = Ui.SpawnText("frame 0", new UiSettings { Color = (0.9f, 0.95f, 1f, 1f) }, 18f);
         ctx.Ecs.SetParent(readout, panel);
         ctx.Ecs.Add(readout, new Hud());
-
-        // A button: the same kind of node, asked to report the pointer. It sits under the readout
-        // because the panel stacks its children, not because it was told where to go. The caption
-        // is a child, so the pointer is tracked on the box the eye sees rather than on the glyphs.
-        var button = Ui.SpawnNode(new UiSettings
-        {
-            Padding = Length.Px(8f),
-            Interactive = true,
-            Color = (1f, 1f, 1f, 0.1f),
-        });
-        ctx.Ecs.SetParent(button, panel);
-
-        var caption = Ui.SpawnText(
-            "clicks: 0", new UiSettings { Color = (0.9f, 0.95f, 1f, 1f) }, 18f);
-        ctx.Ecs.SetParent(caption, button);
-        ctx.Ecs.Add(button, new Clickable());
 
         Console.WriteLine(
             "[Scene] a rotating cube. Escape closes the window, F11 toggles fullscreen, "
@@ -143,45 +148,5 @@ public partial struct Scene
         ref var transform = ref ctx.Ecs.GetRef<Transform>(ctx.Entity);
 
         transform.Rotation = Quat.FromRotationY(Yaw) * Quat.FromRotationX(Pitch);
-    }
-}
-
-/// <summary>
-/// A UI button that counts what it has been clicked.
-/// </summary>
-/// <remarks>
-/// The idiom for reading a click: <see cref="UiInteraction.Pressed"/> holds for as long as the
-/// pointer is down, so the click is the edge into it and the previous answer has to be kept. A
-/// behavior field is where it goes, since the behavior is a component on the button itself.
-/// </remarks>
-[Behavior]
-public partial struct Clickable
-{
-    /// <summary>How the pointer stood on the node last frame.</summary>
-    public UiInteraction Previous;
-
-    /// <summary>How often the edge into a press has been seen.</summary>
-    public int Clicks;
-
-    [OnUpdate]
-    public void Watch(BehaviorContext ctx)
-    {
-        var state = Ui.InteractionOf(ctx.Entity);
-        if (state == UiInteraction.Pressed && Previous != UiInteraction.Pressed)
-        {
-            Clicks++;
-            Console.WriteLine($"[Ui] the button was clicked ({Clicks})");
-        }
-
-        Previous = state;
-
-        var caption = ctx.Ecs.ChildrenOf(ctx.Entity);
-        if (caption.Length == 0) return;
-
-        // The only feedback a button has here is its own caption: a node's colour is set when it
-        // is spawned and there is no entry point to change it afterwards.
-        Ui.SetText(caption[0], state == UiInteraction.None
-            ? $"clicks: {Clicks}"
-            : $"clicks: {Clicks}  (hover)");
     }
 }

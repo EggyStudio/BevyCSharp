@@ -704,6 +704,35 @@ Render.SetLayers(ctx.Ecs, player, 1u | Minimap);   // both do
 ``` A light is aimed by its `Transform`: a directional or
 spot light shines down its own negative Z, which is what `Transform.LookingAt` produces.
 
+What the camera does to the picture once the scene is drawn is one call, describing the whole
+pipeline rather than one change to it:
+
+```csharp
+Render.SetPostProcessing(camera, new PostSettings
+{
+    Hdr = true,                          // highlights brighter than white, which bloom reads
+    Bloom = true,
+    BloomIntensity = 0.3f,
+    Tonemapper = Tonemapper.AgX,
+    AntiAlias = AntiAliasPass.Fxaa,
+    Msaa = 1,
+    Sharpen = 0.4f,
+});
+```
+
+Every effect is applied on every call, so an effect the settings leave off is taken off the
+camera: turning bloom off is the same call as turning it on, which is what a settings screen
+wants. Only a camera takes these, since it is the camera's render graph that reads them.
+
+A tonemapper is the curve from what was rendered, which has no upper bound, to what a display can
+show, which does. All eight of Bevy's are there, from `None` through `Reinhard` to `AgX` and
+Bevy's own `TonyMcMapface`; the choice is a look rather than a correctness question, and it shows
+most with `Hdr` on. `Msaa` smooths the edges of geometry while the scene is rasterised, while
+`AntiAlias` runs a pass over the finished picture and so also catches edges that come from a
+texture or a shader. Bloom scatters light out of whatever is brighter than white, so it needs
+`Hdr` and something emissive to work on: to make one object glow harder, raise its material's
+emissive colour rather than the bloom.
+
 The window can be driven while the app runs:
 
 ```csharp
@@ -1174,7 +1203,7 @@ The bridge builds in two profiles:
 | Profile    | What it includes                                                       |
 |------------|------------------------------------------------------------------------|
 | `headless` | App, ECS, time, input, transform, assets. No window, no GPU. The default. |
-| `render`   | The above plus windowing, the renderer, UI, 2D, gizmos and audio.      |
+| `render`   | The above plus windowing, the renderer, post processing, UI, 2D, gizmos and audio. |
 
 ```bash
 build/build-native.sh --render          # bash
@@ -1299,8 +1328,8 @@ run against a real Bevy app. Known gaps:
   run `build-native.sh` on each target platform, to produce a package covering all of them.
 - A render build draws: mesh primitives, textured physically based materials, cameras, lights,
   sprites, gizmos, UI nodes and text are reachable from a behavior script, verified on Vulkan.
-  glTF files and `.scn` scenes load and spawn, and audio plays. What is thin is the layer above
-  that. Animation has no bridge, sprites step through no frames of their own, and the
+  glTF files and `.scn` scenes load and spawn, audio plays, and a camera tonemaps, blooms,
+  multisamples and antialiases what it draws. What is thin is the layer above that. Animation has no bridge, sprites step through no frames of their own, and the
   GPU-compressed texture formats are not decoded.
   [.github/TODO.md](.github/TODO.md) lists what each gap needs.
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does

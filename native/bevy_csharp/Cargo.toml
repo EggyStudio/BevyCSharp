@@ -50,6 +50,12 @@ render = [
     "bevy/bevy_window",
     "bevy/bevy_render",
     "bevy/bevy_core_pipeline",
+    # Everything the camera does to the picture after the scene is drawn: bloom, depth of field,
+    # motion blur, and the antialiasing that runs as a pass rather than in the rasteriser. Both
+    # are pure Rust and shaders, so neither adds a build dependency.
+    "bevy/bevy_post_process",
+    "bevy/bevy_anti_alias",
+    "bevy/smaa_luts",
     "bevy/bevy_pbr",
     "bevy/bevy_gltf",
     "bevy/bevy_sprite",

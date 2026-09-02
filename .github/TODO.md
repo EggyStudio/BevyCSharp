@@ -200,8 +200,23 @@ What is left:
 
 ## Rendering control
 
-Cameras, lights and the window take their common parameters. What is left is narrower.
+Cameras, lights and the window take their common parameters, and a camera tonemaps, dithers,
+multisamples, antialiases, sharpens and blooms what it draws. `bevy_post_process` and
+`bevy_anti_alias` are compiled into the render profile, so what is left in this area is bridge
+work over code already in the binary rather than a feature to add. What is left:
 
+- **The rest of the post-processing stack.** `DepthOfField` needs an aperture, a focal distance
+  and a bokeh mode; `MotionBlur` a shutter angle and a sample count; `ChromaticAberration` a
+  strength and an optional lookup texture; `AutoExposure` a metering range and a compensation
+  curve. Each is another block on `BcsPostConfig`, which is already wide enough that the next few
+  should probably go in a second config rather than widening it further. `TemporalAntiAliasing`
+  is in the same crate but needs the motion vector prepass, so it is a step up from the others.
+- **Colour grading.** `ColorGrading` sits on the camera and carries exposure, gamma, saturation
+  and lift/gamma/gain per tonal range. That is a nested struct of three sections, and it is the
+  knob a game gives an artist rather than a player.
+- **Order-independent transparency** and `Skybox` are both camera components as well.  A skybox
+  needs a cubemap, which the asset surface cannot load, and that same gap blocks light probes
+  below.
 - **Camera**: render layers and viewports are bridged, so splitscreen and a minimap are
   expressible. Render-to-texture is not: `RenderTarget::Image` points a camera at a texture
   instead of the window, which is what a security monitor, a portal or a reflection needs, and
@@ -217,10 +232,12 @@ Cameras, lights and the window take their common parameters. What is left is nar
   monitor's list of video modes is a list of structs, so exclusive fullscreen takes the monitor's
   current mode rather than offering a resolution to pick from. Multiple windows are also
   unbridged: every entry point here addresses the primary one.
-- **Verification**: none of this is checked by eye. The tests assert that settings are accepted
-  and that a windowless run refuses, which is what can go wrong silently; whether the picture is
-  right is confirmed by running the sample, which uses a custom clear colour, a tinted sun and a
-  spot light, and binds F11 to fullscreen and Tab to cursor lock.
+- **Verification**: the tests assert that settings are accepted and that a windowless run
+  refuses, which is what can go wrong silently. Whether the picture is right is confirmed by
+  running the sample, which uses a custom clear colour, a tinted sun and a spot light, and binds
+  F11 to fullscreen and Tab to cursor lock. An effect is worth checking against a second run with
+  it turned off: bloom was confirmed that way, since a halo is obvious beside the same frame
+  without one and easy to imagine without the comparison.
 
 ## Input
 

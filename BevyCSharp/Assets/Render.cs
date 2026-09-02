@@ -196,6 +196,172 @@ public enum ClearMode
 /// ctx.Ecs.Add(camera, Transform.LookingAt(eye, Vec3.Zero, Vec3.UnitY));
 /// </code>
 /// </example>
+/// <summary>
+/// The curve that maps what was rendered onto what a screen can show.
+/// </summary>
+/// <remarks>
+/// A renderer works in light, which has no upper bound; a display has one. A tonemapper decides
+/// what happens to the parts brighter than the screen can be, and the choice is a look rather
+/// than a correctness question. It shows most on a camera drawing in high dynamic range, which is
+/// <see cref="PostSettings.Hdr"/>.
+/// </remarks>
+public enum Tonemapper
+{
+    /// <summary>Clip anything brighter than white, which is what no tonemapping means.</summary>
+    None = 0,
+
+    /// <summary>The classic curve. Colours shift hue as they brighten.</summary>
+    Reinhard = 1,
+
+    /// <summary>The same on luminance only, so bright colours keep their hue better.</summary>
+    ReinhardLuminance = 2,
+
+    /// <summary>Film-like and high contrast, with deliberate hue shifts. Dramatic.</summary>
+    AcesFitted = 3,
+
+    /// <summary>Neutral and slightly desaturated, with almost no hue shift.</summary>
+    AgX = 4,
+
+    /// <summary>A plain transform, useful as a reference to judge the others against.</summary>
+    SomewhatBoring = 5,
+
+    /// <summary>Bevy's own: neutral, and keeps saturation in the highlights.</summary>
+    TonyMcMapface = 6,
+
+    /// <summary>Blender's filmic curve, for matching a render done there.</summary>
+    BlenderFilmic = 7,
+}
+
+/// <summary>
+/// The antialiasing that runs as a pass over the finished picture.
+/// </summary>
+/// <remarks>
+/// Separate from <see cref="PostSettings.Msaa"/>, which works while the scene is rasterised and
+/// smooths the edges of geometry only. A pass sees the picture instead, so it also catches edges
+/// that come from a texture or a shader, at the cost of some sharpness.
+/// </remarks>
+public enum AntiAliasPass
+{
+    /// <summary>No pass. Multisampling alone, or nothing at all.</summary>
+    None = 0,
+
+    /// <summary>Cheap and slightly soft. What a game reaches for first.</summary>
+    Fxaa = 1,
+
+    /// <summary>Costlier and sharper, and better on near-horizontal edges.</summary>
+    Smaa = 2,
+}
+
+/// <summary>How hard an antialiasing pass looks for an edge.</summary>
+public enum AntiAliasQuality
+{
+    /// <summary>Fastest, and misses edges.</summary>
+    Low = 0,
+
+    /// <summary>The usual compromise.</summary>
+    Medium = 1,
+
+    /// <summary>Catches more, costs more.</summary>
+    High = 2,
+
+    /// <summary>As much as the pass can do.</summary>
+    Ultra = 3,
+}
+
+/// <summary>How bloom is mixed back into the picture.</summary>
+public enum BloomMode
+{
+    /// <summary>
+    /// The scattered light is taken out of the source, so the picture keeps its brightness.
+    /// </summary>
+    EnergyConserving = 0,
+
+    /// <summary>The scattered light is added on top, which is brighter and more obvious.</summary>
+    Additive = 1,
+}
+
+/// <summary>
+/// What a camera does to the picture after the scene has been drawn.
+/// </summary>
+/// <remarks>
+/// One settings object for the whole pipeline rather than a call per effect, because these are
+/// decided together: bloom wants a high dynamic range target, and multisampling and an
+/// antialiasing pass are two answers to the same question. Every field is applied on every call,
+/// so an effect this object leaves off is taken off the camera. Turning bloom off is the same
+/// call as turning it on, which is what a settings screen wants.
+/// </remarks>
+public sealed class PostSettings
+{
+    /// <summary>Which curve maps the rendered range onto the display.</summary>
+    public Tonemapper Tonemapper { get; set; } = Tonemapper.TonyMcMapface;
+
+    /// <summary>
+    /// Dither before quantising to the display's bit depth.
+    /// </summary>
+    /// <remarks>
+    /// Hides the banding a smooth gradient shows otherwise, at the cost of a little noise. Bevy
+    /// leaves this on, and so does this.
+    /// </remarks>
+    public bool Dither { get; set; } = true;
+
+    /// <summary>
+    /// Draw into a high dynamic range target.
+    /// </summary>
+    /// <remarks>
+    /// What lets a highlight be brighter than white instead of clipping there, and what bloom
+    /// reads to decide where to scatter. Costs memory and bandwidth, so it is off unless asked
+    /// for.
+    /// </remarks>
+    public bool Hdr { get; set; }
+
+    /// <summary>
+    /// Samples per pixel taken while the scene is rasterised: 1, 2, 4 or 8.
+    /// </summary>
+    /// <remarks>
+    /// Smooths the edges of geometry and nothing else. Four is Bevy's own; one turns it off,
+    /// which is what a game leaning on <see cref="AntiAlias"/> does.
+    /// </remarks>
+    public int Msaa { get; set; } = 4;
+
+    /// <summary>An antialiasing pass over the finished picture.</summary>
+    public AntiAliasPass AntiAlias { get; set; } = AntiAliasPass.None;
+
+    /// <summary>How hard that pass looks for an edge.</summary>
+    public AntiAliasQuality Quality { get; set; } = AntiAliasQuality.Medium;
+
+    /// <summary>
+    /// Contrast adaptive sharpening, from 0 for none to 1 for as much as it does.
+    /// </summary>
+    /// <remarks>Puts back some of the crispness an antialiasing pass takes away.</remarks>
+    public float Sharpen { get; set; }
+
+    /// <summary>
+    /// Scatter light out of the brightest parts of the picture.
+    /// </summary>
+    /// <remarks>
+    /// Needs <see cref="Hdr"/> to have anything to work with: without it nothing is brighter than
+    /// white, so nothing is bright enough to glow. To make one object glow harder, raise its
+    /// material's emissive colour rather than this.
+    /// </remarks>
+    public bool Bloom { get; set; }
+
+    /// <summary>How much light is scattered.</summary>
+    public float BloomIntensity { get; set; } = 0.15f;
+
+    /// <summary>Brightness a pixel has to reach before it blooms at all.</summary>
+    /// <remarks>Zero blooms everything a little, which is the physically-minded choice.</remarks>
+    public float BloomThreshold { get; set; }
+
+    /// <summary>How gradually that threshold takes effect.</summary>
+    public float BloomThresholdSoftness { get; set; }
+
+    /// <summary>How the scattered light is mixed back in.</summary>
+    public BloomMode BloomMode { get; set; } = BloomMode.EnergyConserving;
+
+    /// <summary>High dynamic range with a gentle bloom over it.</summary>
+    public static PostSettings Glow => new() { Hdr = true, Bloom = true };
+}
+
 public sealed class CameraSettings
 {
     /// <summary>Perspective or orthographic.</summary>
@@ -512,6 +678,60 @@ public static unsafe class Render
         };
 
         return new Entity(Native.bcs_render_spawn_light(&native));
+    }
+
+    /// <summary>
+    /// Sets what a camera does to the picture after the scene has been drawn.
+    /// </summary>
+    /// <remarks>
+    /// The whole pipeline in one call: an effect the settings leave off is removed from the
+    /// camera, so the same call turns something on and off again. Only a camera can be given
+    /// these, since it is the camera's render graph that reads them.
+    /// </remarks>
+    /// <param name="camera">A camera entity from <see cref="SpawnCamera3d()"/> or
+    /// <see cref="Render2d.SpawnCamera2d"/>.</param>
+    /// <param name="settings">What the camera should do.</param>
+    /// <exception cref="BevyNativeException">
+    /// The entity is gone or is not a camera, or this build has no renderer.
+    /// </exception>
+    /// <example>
+    /// <code>
+    /// var camera = Render.SpawnCamera3d();
+    ///
+    /// Render.SetPostProcessing(camera, new PostSettings
+    /// {
+    ///     Hdr = true,
+    ///     Bloom = true,
+    ///     BloomIntensity = 0.2f,
+    ///     Tonemapper = Tonemapper.AgX,
+    ///     AntiAlias = AntiAliasPass.Fxaa,
+    ///     Msaa = 1,
+    /// });
+    /// </code>
+    /// </example>
+    public static void SetPostProcessing(Entity camera, PostSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var native = new NativePostConfig
+        {
+            Tonemapping = (int)settings.Tonemapper,
+            Dither = settings.Dither ? 1 : 0,
+            Hdr = settings.Hdr ? 1 : 0,
+            Msaa = settings.Msaa,
+            AntiAlias = (int)settings.AntiAlias,
+            AntiAliasQuality = (int)settings.Quality,
+            Sharpen = settings.Sharpen,
+            Bloom = settings.Bloom ? 1 : 0,
+            BloomIntensity = settings.BloomIntensity,
+            BloomThreshold = settings.BloomThreshold,
+            BloomThresholdSoftness = settings.BloomThresholdSoftness,
+            BloomMode = (int)settings.BloomMode,
+        };
+
+        Native.Check(
+            Native.bcs_render_set_post(camera.Bits, &native),
+            $"setting the post processing on {camera}");
     }
 
     /// <summary>

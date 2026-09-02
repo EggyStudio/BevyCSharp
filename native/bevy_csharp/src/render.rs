@@ -9,7 +9,7 @@
 //! named operations rather than data the managed side writes directly.
 
 use crate::interop::{
-    status, BcsCameraConfig, BcsLightConfig, BcsMaterialConfig, BcsSpriteConfig,
+    status, BcsCameraConfig, BcsLightConfig, BcsMaterialConfig, BcsPostConfig, BcsSpriteConfig,
 };
 
 #[cfg(feature = "render")]
@@ -688,6 +688,153 @@ pub extern "C" fn bcs_render_set_shadow_maps(directional: u32, point: u32) -> i3
                         size: point as usize,
                     });
                 }
+                status::OK
+            })
+        }
+    })
+}
+
+/// Sets what a camera does to the picture after the scene has been drawn.
+///
+/// Every effect is applied on every call, so a config describes the whole pipeline rather than
+/// one change to it: an effect the config leaves off is removed from the camera if it was there.
+/// That keeps a settings screen honest, since turning bloom off is the same call as turning it on.
+///
+/// Bloom reads a high dynamic range target, so asking for it without `hdr` gets a picture where
+/// nothing is bright enough to scatter. The two are left to the caller rather than forced
+/// together, because a game may want the range without the glow.
+///
+/// # Safety
+/// `config` must point to a readable [`BcsPostConfig`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_set_post(entity: u64, config: *const BcsPostConfig) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, config);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::anti_alias::contrast_adaptive_sharpening::ContrastAdaptiveSharpening;
+            use bevy::anti_alias::fxaa::{Fxaa, Sensitivity};
+            use bevy::anti_alias::smaa::{Smaa, SmaaPreset};
+            use bevy::camera::Hdr;
+            use bevy::core_pipeline::tonemapping::{DebandDither, Tonemapping};
+            use bevy::post_process::bloom::{Bloom, BloomCompositeMode, BloomPrefilter};
+            use bevy::render::view::Msaa;
+
+            if config.is_null() {
+                return status::NULL_ARG;
+            }
+            let config = unsafe { *config };
+
+            let tonemapping = match config.tonemapping {
+                0 => Tonemapping::None,
+                1 => Tonemapping::Reinhard,
+                2 => Tonemapping::ReinhardLuminance,
+                3 => Tonemapping::AcesFitted,
+                4 => Tonemapping::AgX,
+                5 => Tonemapping::SomewhatBoringDisplayTransform,
+                7 => Tonemapping::BlenderFilmic,
+                _ => Tonemapping::TonyMcMapface,
+            };
+
+            let msaa = match config.msaa {
+                2 => Msaa::Sample2,
+                4 => Msaa::Sample4,
+                8 => Msaa::Sample8,
+                _ => Msaa::Off,
+            };
+
+            let sensitivity = match config.antialias_quality {
+                0 => Sensitivity::Low,
+                2 => Sensitivity::High,
+                3 => Sensitivity::Ultra,
+                _ => Sensitivity::Medium,
+            };
+
+            let preset = match config.antialias_quality {
+                0 => SmaaPreset::Low,
+                2 => SmaaPreset::High,
+                3 => SmaaPreset::Ultra,
+                _ => SmaaPreset::Medium,
+            };
+
+            with_world(|world| {
+                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity))
+                else {
+                    return status::NO_ENTITY;
+                };
+
+                // A camera and nothing else: these components are read by the render graph the
+                // camera drives, and on any other entity they would sit there doing nothing.
+                if !entity_mut.contains::<bevy::camera::Camera>() {
+                    return status::NOT_PRESENT;
+                }
+
+                entity_mut.insert(tonemapping);
+                entity_mut.insert(if config.dither != 0 {
+                    DebandDither::Enabled
+                } else {
+                    DebandDither::Disabled
+                });
+                entity_mut.insert(msaa);
+
+                if config.hdr != 0 {
+                    entity_mut.insert(Hdr);
+                } else {
+                    entity_mut.remove::<Hdr>();
+                }
+
+                if config.bloom != 0 {
+                    entity_mut.insert(Bloom {
+                        intensity: config.bloom_intensity,
+                        prefilter: BloomPrefilter {
+                            threshold: config.bloom_threshold,
+                            threshold_softness: config.bloom_threshold_softness,
+                        },
+                        composite_mode: if config.bloom_mode == 1 {
+                            BloomCompositeMode::Additive
+                        } else {
+                            BloomCompositeMode::EnergyConserving
+                        },
+                        ..Bloom::NATURAL
+                    });
+                } else {
+                    entity_mut.remove::<Bloom>();
+                }
+
+                match config.antialias {
+                    1 => {
+                        entity_mut.remove::<Smaa>();
+                        entity_mut.insert(Fxaa {
+                            enabled: true,
+                            edge_threshold: sensitivity,
+                            edge_threshold_min: sensitivity,
+                        });
+                    }
+                    2 => {
+                        entity_mut.remove::<Fxaa>();
+                        entity_mut.insert(Smaa { preset });
+                    }
+                    _ => {
+                        entity_mut.remove::<Fxaa>();
+                        entity_mut.remove::<Smaa>();
+                    }
+                }
+
+                if config.sharpen > 0.0 {
+                    entity_mut.insert(ContrastAdaptiveSharpening {
+                        enabled: true,
+                        sharpening_strength: config.sharpen,
+                        denoise: false,
+                    });
+                } else {
+                    entity_mut.remove::<ContrastAdaptiveSharpening>();
+                }
+
                 status::OK
             })
         }

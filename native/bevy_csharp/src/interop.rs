@@ -278,6 +278,45 @@ pub struct BcsWindowEvent {
     pub b: f32,
 }
 
+/// What a camera does to the picture after the scene has been drawn.
+///
+/// One config rather than a component per effect, because these are decided together: bloom wants
+/// a high dynamic range target, and an antialiasing pass and multisampling are two answers to the
+/// same question. Every field is applied on every call, so a setting left alone is a setting
+/// turned off, and one call describes the whole pipeline.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsPostConfig {
+    /// Which curve maps the rendered range onto the display: `0` none, `1` Reinhard,
+    /// `2` Reinhard luminance, `3` ACES fitted, `4` AgX, `5` somewhat boring, `6` TonyMcMapface,
+    /// `7` Blender filmic.
+    pub tonemapping: i32,
+    /// Non-zero to dither before quantising, which hides banding across a gradient.
+    pub dither: i32,
+    /// Non-zero to draw into a high dynamic range target, which is what lets a highlight be
+    /// brighter than white and what bloom reads.
+    pub hdr: i32,
+    /// Samples per pixel taken while rasterising: `1` off, or `2`, `4`, `8`.
+    pub msaa: i32,
+    /// The antialiasing that runs as a pass over the finished picture: `0` none, `1` FXAA,
+    /// `2` SMAA.
+    pub antialias: i32,
+    /// How hard FXAA or SMAA looks for an edge: `0` low, `1` medium, `2` high, `3` ultra.
+    pub antialias_quality: i32,
+    /// Strength of contrast adaptive sharpening, `0` to leave the picture unsharpened.
+    pub sharpen: f32,
+    /// Non-zero to scatter light from the brightest parts of the picture.
+    pub bloom: i32,
+    /// How much is scattered.
+    pub bloom_intensity: f32,
+    /// Brightness a pixel has to reach before it blooms at all.
+    pub bloom_threshold: f32,
+    /// How gradually that threshold takes effect.
+    pub bloom_threshold_softness: f32,
+    /// `0` energy conserving, `1` additive, which is the older and brighter look.
+    pub bloom_mode: i32,
+}
+
 /// How a sound should be played.
 #[repr(C)]
 #[derive(Clone, Copy)]

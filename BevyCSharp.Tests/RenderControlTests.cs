@@ -16,6 +16,80 @@ namespace Bevy.Tests;
 public sealed class RenderControlTests
 {
     [Fact]
+    public void ACameraTakesAWholePostProcessingPipeline()
+    {
+        // Whether the picture looks right needs a GPU and an eye; the sample is where that is
+        // judged. What is checked here is that every effect is accepted and that turning one off
+        // is the same call as turning it on, which is the part a settings screen depends on.
+        using var harness = new EngineHarness(frames: 4);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var camera = Render.SpawnCamera3d();
+
+            Render.SetPostProcessing(camera, new PostSettings
+            {
+                Tonemapper = Tonemapper.AgX,
+                Hdr = true,
+                Dither = true,
+                Msaa = 1,
+                AntiAlias = AntiAliasPass.Fxaa,
+                Quality = AntiAliasQuality.Ultra,
+                Sharpen = 0.6f,
+                Bloom = true,
+                BloomIntensity = 0.3f,
+                BloomThreshold = 1f,
+                BloomThresholdSoftness = 0.5f,
+                BloomMode = BloomMode.Additive,
+            });
+
+            // Every tonemapper, since each one is a separate branch on the far side.
+            foreach (var mapper in Enum.GetValues<Tonemapper>())
+                Render.SetPostProcessing(camera, new PostSettings { Tonemapper = mapper });
+
+            foreach (var samples in new[] { 1, 2, 4, 8 })
+                Render.SetPostProcessing(camera, new PostSettings { Msaa = samples });
+
+            Render.SetPostProcessing(camera, new PostSettings
+            {
+                AntiAlias = AntiAliasPass.Smaa,
+                Quality = AntiAliasQuality.Low,
+            });
+
+            // Back to nothing, which has to take the effects off again rather than leave them.
+            Render.SetPostProcessing(camera, new PostSettings());
+
+            Assert.True(ctx.Ecs.IsAlive(camera));
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void PostProcessingBelongsToACameraAndNothingElse()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            // The components are read by the camera's own render graph, so anywhere else they
+            // would sit there doing nothing at all.
+            var plain = ctx.Ecs.Spawn();
+            var notACamera = Assert.Throws<BevyNativeException>(
+                () => Render.SetPostProcessing(plain, new PostSettings()));
+            Assert.Equal(NativeStatus.NotPresent, notACamera.Status);
+
+            var gone = Assert.Throws<BevyNativeException>(
+                () => Render.SetPostProcessing(Entity.None, new PostSettings()));
+            Assert.Equal(NativeStatus.NoEntity, gone.Status);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void ACameraAcceptsEveryProjection()
     {
         using var harness = new EngineHarness(frames: 2);
