@@ -92,8 +92,6 @@ public partial struct Scene
             Align = UiAlign.Start,
             RowGap = Length.Px(8f),
             Padding = Length.Px(10f),
-            Border = Length.Px(1f),
-            BorderColor = (0.45f, 0.65f, 0.95f, 0.7f),
             Color = (0f, 0f, 0f, 0.45f),
         });
 
@@ -106,11 +104,9 @@ public partial struct Scene
         // is a child, so the pointer is tracked on the box the eye sees rather than on the glyphs.
         var button = Ui.SpawnNode(new UiSettings
         {
-            Padding = Length.Px(10f),
-            Border = Length.Px(1f),
-            BorderColor = (0.6f, 0.8f, 1f, 0.9f),
+            Padding = Length.Px(8f),
             Interactive = true,
-            Color = (0.12f, 0.24f, 0.4f, 0.85f),
+            Color = (1f, 1f, 1f, 0.1f),
         });
         ctx.Ecs.SetParent(button, panel);
 
@@ -182,11 +178,10 @@ public partial struct Clickable
         var caption = ctx.Ecs.ChildrenOf(ctx.Entity);
         if (caption.Length == 0) return;
 
-        Ui.SetText(caption[0], state switch
-        {
-            UiInteraction.Pressed => $"clicks: {Clicks}  (down)",
-            UiInteraction.Hovered => $"clicks: {Clicks}  (hover)",
-            _ => $"clicks: {Clicks}",
-        });
+        // The only feedback a button has here is its own caption: a node's colour is set when it
+        // is spawned and there is no entry point to change it afterwards.
+        Ui.SetText(caption[0], state == UiInteraction.None
+            ? $"clicks: {Clicks}"
+            : $"clicks: {Clicks}  (hover)");
     }
 }
