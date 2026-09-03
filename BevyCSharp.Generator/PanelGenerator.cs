@@ -29,6 +29,7 @@ public sealed class PanelGenerator : IIncrementalGenerator
     private const string PanelAttribute = "BevyCSharp.Editor.Framework.EditorPanelAttribute";
     private const string BindAttribute = "BevyCSharp.Editor.Framework.BindAttribute";
     private const string CommandAttribute = "BevyCSharp.Editor.Framework.CommandAttribute";
+    private const string ChangeAttribute = "BevyCSharp.Editor.Framework.OnChangeAttribute";
 
     /// <inheritdoc/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -91,6 +92,7 @@ public sealed class PanelGenerator : IIncrementalGenerator
 
         var bindings = new List<PanelBindingModel>();
         var commands = new List<PanelCommandModel>();
+        var changed = new List<string>();
         var claimed = new Dictionary<string, string>();
 
         foreach (var member in type.GetMembers())
@@ -105,6 +107,17 @@ public sealed class PanelGenerator : IIncrementalGenerator
 
                 case IPropertySymbol property when Element(property, BindAttribute) is { } element:
                     AddBinding(property, property.Type, property.SetMethod is null, element);
+                    break;
+
+                case IMethodSymbol method when Marked(method, ChangeAttribute):
+                    if (method.Parameters.Length > 0)
+                    {
+                        diagnostics.Add(Diagnostic.Create(
+                            PanelDiagnostics.UnsupportedCommand, Where(method), method.Name));
+                        break;
+                    }
+
+                    changed.Add(method.Name);
                     break;
 
                 case IMethodSymbol method when Element(method, CommandAttribute) is { } element:
@@ -133,7 +146,8 @@ public sealed class PanelGenerator : IIncrementalGenerator
             type.Name,
             document!,
             bindings,
-            commands);
+            commands,
+            changed);
 
         return new ExtractResult(model, diagnostics.ToImmutable());
 
@@ -164,6 +178,10 @@ public sealed class PanelGenerator : IIncrementalGenerator
                 kind == BindKind.Number ? memberType.ToDisplayString() : null));
         }
     }
+
+    /// <summary>Whether a member carries an attribute that takes no arguments.</summary>
+    private static bool Marked(ISymbol member, string attribute) => member.GetAttributes()
+        .Any(a => a.AttributeClass?.ToDisplayString() == attribute);
 
     /// <summary>The element a member is bound to, without its leading hash, or null.</summary>
     private static string? Element(ISymbol member, string attribute)

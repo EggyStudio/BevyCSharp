@@ -47,6 +47,7 @@ internal static class PanelEmitter
         EmitPull(source, model);
         EmitPush(source, model);
         EmitInvoke(source, model);
+        EmitChanged(source, model);
 
         source.Append("}\n");
         return source.ToString();
@@ -121,6 +122,18 @@ internal static class PanelEmitter
         }
 
         source.Append("\n        return false;\n    }\n");
+    }
+
+    /// <summary>Runs whatever should happen once a frame's edits have landed.</summary>
+    private static void EmitChanged(StringBuilder source, PanelModel model)
+    {
+        source.Append("\n    /// <summary>Runs after a frame's edits have been read back in.</summary>\n")
+            .Append("    public void Changed()\n    {\n");
+
+        foreach (var method in model.Changed)
+            source.Append("        ").Append(method).Append("();\n");
+
+        source.Append("    }\n");
     }
 
     /// <summary>

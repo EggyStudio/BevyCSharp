@@ -40,7 +40,8 @@ internal sealed record PanelModel(
     string Name,
     string Document,
     IReadOnlyList<PanelBindingModel> Bindings,
-    IReadOnlyList<PanelCommandModel> Commands)
+    IReadOnlyList<PanelCommandModel> Commands,
+    IReadOnlyList<string> Changed)
 {
     /// <summary>The panel's fully qualified name.</summary>
     internal string QualifiedName => Namespace is null ? Name : $"{Namespace}.{Name}";

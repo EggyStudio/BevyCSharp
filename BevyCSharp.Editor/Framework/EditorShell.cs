@@ -70,13 +70,24 @@ public static class EditorShell
     {
         if (!App.HasEditor) return;
 
+        // Which panels took an edit this frame. A drag reports every frame it moves, and a panel
+        // that applies its values to the engine should do that once a frame rather than once per
+        // binding that happened to change in it.
+        var edited = new HashSet<IEditorPanel>();
+
         foreach (var report in Xui.Drain())
         {
             switch (report.Kind)
             {
                 case UiEventKind.Change:
                     foreach (var panel in Panels)
-                        if (panel.Push(report.Element)) break;
+                    {
+                        if (!panel.Push(report.Element)) continue;
+
+                        edited.Add(panel);
+                        break;
+                    }
+
                     break;
 
                 case UiEventKind.Click:
@@ -97,6 +108,8 @@ public static class EditorShell
                     break;
             }
         }
+
+        foreach (var panel in edited) panel.Changed();
 
         foreach (var panel in Panels) panel.Pull();
     }

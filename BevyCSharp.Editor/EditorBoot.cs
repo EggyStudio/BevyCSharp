@@ -101,6 +101,26 @@ public partial struct EditorBoot
     [OnUpdate]
     public static void Drive(BehaviorContext ctx) => EditorShell.Tick();
 
+    /// <summary>
+    /// Writes the window to a PNG when <c>BCS_SHOT</c> names one, then keeps running.
+    /// </summary>
+    /// <remarks>
+    /// For checking that the editor draws what it should without a person watching it. Whether a
+    /// panel is laid out correctly, or whether the scene behind it is there at all, is not
+    /// something a test can assert and not something a log line shows.
+    /// </remarks>
+    [OnUpdate]
+    public static void Capture(BehaviorContext ctx)
+    {
+        if (ctx.Time.FrameCount != 180) return;
+
+        var path = Environment.GetEnvironmentVariable("BCS_SHOT");
+        if (string.IsNullOrEmpty(path)) return;
+
+        Render.Screenshot(path);
+        Console.WriteLine($"[editor] captured the window to {path}");
+    }
+
     /// <summary>Closes on Escape.</summary>
     [OnUpdate]
     public static void QuitOnEscape(BehaviorContext ctx)

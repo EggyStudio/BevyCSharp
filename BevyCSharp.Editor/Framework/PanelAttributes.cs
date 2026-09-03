@@ -66,6 +66,23 @@ public sealed class BindAttribute(string element) : Attribute
 }
 
 /// <summary>
+/// Runs a method after anything the person edited has been read back into the panel.
+/// </summary>
+/// <remarks>
+/// <para>
+/// What makes a panel apply as it is used rather than when a button is pressed. The method takes
+/// no arguments: every bound member already holds the new value by the time it runs.
+/// </para>
+/// <para>
+/// Called once per frame however many elements changed in it, so dragging a slider does the work
+/// once a frame rather than once per binding. A frame in which nothing was edited does not call
+/// it at all, which is what stops a panel writing engine state sixty times a second for nothing.
+/// </para>
+/// </remarks>
+[AttributeUsage(AttributeTargets.Method)]
+public sealed class OnChangeAttribute : Attribute;
+
+/// <summary>
 /// Runs a method when the element carrying a CSS id is clicked.
 /// </summary>
 /// <remarks>

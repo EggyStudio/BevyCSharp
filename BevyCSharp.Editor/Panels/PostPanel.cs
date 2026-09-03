@@ -16,7 +16,6 @@ namespace BevyCSharp.Editor.Panels;
 public sealed partial class PostPanel(Entity camera)
 {
     private readonly PostSettings _settings = new() { Hdr = true, Msaa = 1 };
-    private int _applied;
 
     /// <summary>Whether the camera scatters light out of its highlights.</summary>
     [Bind("#bloom")]
@@ -35,17 +34,25 @@ public sealed partial class PostPanel(Entity camera)
     public string Note = string.Empty;
 
     /// <summary>
-    /// What the panel has done so far.
+    /// What the camera is currently set to.
     /// </summary>
     /// <remarks>
     /// One way, so that the element follows this and an edit on screen is overwritten. A readout
     /// is the case the mode exists for.
     /// </remarks>
     [Bind("#readout", Mode = BindMode.OneWay)]
-    public string Readout => $"applied {_applied} times";
+    public string Readout =>
+        Bloom ? $"bloom {Intensity:F2}, sharpen {Sharpen:F2}" : $"off, sharpen {Sharpen:F2}";
 
-    /// <summary>Puts what the panel holds onto the camera.</summary>
-    [Command("#apply")]
+    /// <summary>
+    /// Puts what the panel holds onto the camera.
+    /// </summary>
+    /// <remarks>
+    /// Runs whenever a value is edited rather than when a button is pressed, which is what makes
+    /// dragging a slider show its result while it is being dragged. Once a frame however many
+    /// values moved in it.
+    /// </remarks>
+    [OnChange]
     public void Apply()
     {
         _settings.Bloom = Bloom;
@@ -53,10 +60,16 @@ public sealed partial class PostPanel(Entity camera)
         _settings.Sharpen = Sharpen;
 
         Render.SetPostProcessing(camera, _settings);
-        _applied++;
+    }
 
-        Console.WriteLine(
-            $"[editor] applied bloom={Bloom} intensity={Intensity:F2} "
-            + $"sharpen={Sharpen:F2} note='{Note}'");
+    /// <summary>Puts the camera back to what it was before anything was touched.</summary>
+    [Command("#reset")]
+    public void Reset()
+    {
+        Bloom = false;
+        Intensity = 0.3f;
+        Sharpen = 0f;
+
+        Apply();
     }
 }

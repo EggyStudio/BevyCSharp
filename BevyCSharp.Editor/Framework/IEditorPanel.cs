@@ -42,4 +42,14 @@ public interface IEditorPanel
     /// </summary>
     /// <returns>Whether anything was bound to it.</returns>
     bool Invoke(Entity element);
+
+    /// <summary>
+    /// Tells the panel that a frame's edits have all been read back into it.
+    /// </summary>
+    /// <remarks>
+    /// Called once per frame in which <see cref="Push"/> accepted something, so a panel acts on
+    /// the whole frame's edits rather than once per element. A panel with no
+    /// <c>[OnChange]</c> method does nothing here.
+    /// </remarks>
+    void Changed();
 }
