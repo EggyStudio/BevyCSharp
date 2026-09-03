@@ -835,9 +835,10 @@ public static unsafe class Ui
     /// other input and turned into a call here.
     /// </remarks>
     /// <remarks>
-    /// The entity has to be a node. Unlike <see cref="SetImage"/>, which turns whatever it is
-    /// given into an image node, the scroll position is a bare component that no layout would
-    /// read, so anything else is refused rather than quietly accepted.
+    /// The entity has to be a node. Unlike <see cref="SetImage(Entity, UiImageSettings)"/>,
+    /// which turns whatever it is given into an image node, the scroll position is a bare
+    /// component that no layout would read, so anything else is refused rather than quietly
+    /// accepted.
     /// </remarks>
     /// <exception cref="BevyNativeException">
     /// The entity is gone or is not a node, or this build has no renderer.

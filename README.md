@@ -1167,6 +1167,21 @@ dotnet run --project BevyCSharp.Sample -- --headless --frames 120
 
 The sample opens a window by default and draws a lit cube turning in place. Escape closes it.
 
+The camera is steered the way an editor's scene view is, so the scene can be looked at from
+anywhere while trying something out:
+
+| held | does |
+|---|---|
+| right button | look around, with W, A, S, D to fly, Q and E for down and up, Shift for faster and Control for slower, and the wheel to set the speed |
+| middle button | slide the view sideways and up |
+| wheel | move along the view direction |
+| Alt and left button | swing around a point in front of the camera |
+| F | frame the origin from wherever the camera is looking |
+
+`BevyCSharp.Sample/Behaviors/FlyCamera.cs` is the whole of it, and it is an ordinary behavior:
+it keeps its own yaw, pitch and speed as component fields, reads `ctx.Input`, and writes Bevy's
+`Transform`.
+
 Both modes run the identical behavior scripts. Nothing branches on whether a renderer exists;
 the engine decides that, from `Config`.
 

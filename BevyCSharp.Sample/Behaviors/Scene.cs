@@ -28,8 +28,17 @@ public partial struct Scene
     {
         if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
 
+        var eye = new Vec3(3.5f, 3f, 6f);
         var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 55f });
-        ctx.Ecs.Add(camera, Transform.LookingAt(new Vec3(3.5f, 3f, 6f), Vec3.Zero, Vec3.UnitY));
+        ctx.Ecs.Add(camera, Transform.LookingAt(eye, Vec3.Zero, Vec3.UnitY));
+
+        // Steerable from the mouse and keyboard, starting from the direction set above.
+        ctx.Ecs.Add(camera, FlyCamera.LookingAt(eye, Vec3.Zero));
+
+        Console.WriteLine(
+            "[Scene] camera: hold the right button to look and fly with WASD, Q and E; "
+            + "middle button to slide; wheel to move along the view; Alt and the left button to "
+            + "orbit; F to frame the origin");
 
         // The sky, scattered from the sun below rather than painted: it is what the camera sees
         // where the scene does not cover, and what tints everything in the distance.
