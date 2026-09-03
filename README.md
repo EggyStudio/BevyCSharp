@@ -557,11 +557,14 @@ has no renderer and nothing to draw, so it has no translated material either; us
 Bevy's own handle is generic and reference counted, and neither property survives a trip through
 a C ABI, so C# holds a key into a table on the engine side that owns the real handle. Holding one
 keeps the asset loaded; `Release` gives up that reference. The key carries a generation as well
-as a slot index, so a released handle does not start naming whatever later took its slot.
+as a slot index, so a released handle does not start naming whatever later took its slot. It
+names nothing instead, and every call that takes one refuses it rather than carrying on without
+whatever it pointed at.
 
 `Mesh` and `Image` load in any build. `StandardMaterial` and `Shader` need a render build, and
-asking for one without it reports which build would support it. Scene loading is not wired up:
-in 0.19 `Scene` became a trait rather than a loadable asset.
+asking for one without it reports which build would support it. Scenes load too: `Scene` is a
+trait in 0.19 and the loadable asset behind `.scn`, `.scn.ron` and a glTF file's scenes is
+`WorldAsset`, which `ctx.Ecs.SpawnScene` spawns.
 
 ### Drawing
 

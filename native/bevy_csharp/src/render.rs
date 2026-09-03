@@ -16,6 +16,48 @@ use crate::interop::{
 #[cfg(feature = "render")]
 use crate::state::{with_world, with_world_opt};
 
+/// Resolves an asset key to the image it names.
+///
+/// A negative key is the caller saying "no image", which every image on a config is allowed to
+/// be. A key that names nothing is a mistake rather than a default: that is what a released or
+/// fabricated handle looks like from this side, and quietly drawing without the texture that was
+/// asked for is a wrong picture nothing reports.
+#[cfg(feature = "render")]
+fn image_handle(
+    world: &mut bevy::ecs::world::World,
+    key: i32,
+) -> Result<Option<bevy::asset::Handle<bevy::image::Image>>, i32> {
+    if key < 0 {
+        return Ok(None);
+    }
+
+    match crate::assets::clone_handle(world, key) {
+        Some(handle) => Ok(Some(handle.typed::<bevy::image::Image>())),
+        None => Err(status::NO_COMPONENT),
+    }
+}
+
+/// Reports why `entity` cannot be given what a camera is given, or `None` if it can.
+///
+/// Everything these calls attach is read by the render graph the camera drives, so on any other
+/// entity it would sit there doing nothing. Answered through a shared reference, so a call can be
+/// refused before it has built anything it would have to throw away.
+#[cfg(feature = "render")]
+fn refuse_unless_camera(
+    world: &bevy::ecs::world::World,
+    entity: bevy::ecs::entity::Entity,
+) -> Option<i32> {
+    let Ok(entity_ref) = world.get_entity(entity) else {
+        return Some(status::NO_ENTITY);
+    };
+
+    if !entity_ref.contains::<bevy::camera::Camera>() {
+        return Some(status::NOT_PRESENT);
+    }
+
+    None
+}
+
 /// Builds a mesh primitive and returns an asset handle for it.
 ///
 /// `kind` selects the shape and decides what the three dimensions mean:
@@ -113,18 +155,29 @@ pub unsafe extern "C" fn bcs_material_create(config: *const BcsMaterialConfig) -
             with_world(|world| {
                 // Resolved before the material is built, because each one needs the world and
                 // building it needs the world back to insert the result.
-                let texture = |key: i32| -> Option<Handle<Image>> {
-                    if key < 0 {
-                        return None;
-                    }
-                    crate::assets::clone_handle(world, key).map(|handle| handle.typed::<Image>())
-                };
+                let mut textures: [Option<Handle<Image>>; 5] = Default::default();
+                let keys = [
+                    config.base_color_texture,
+                    config.normal_map,
+                    config.metallic_roughness_texture,
+                    config.emissive_texture,
+                    config.occlusion_texture,
+                ];
 
-                let base_color_texture = texture(config.base_color_texture);
-                let normal_map_texture = texture(config.normal_map);
-                let metallic_roughness_texture = texture(config.metallic_roughness_texture);
-                let emissive_texture = texture(config.emissive_texture);
-                let occlusion_texture = texture(config.occlusion_texture);
+                for (slot, key) in keys.iter().enumerate() {
+                    match image_handle(world, *key) {
+                        Ok(handle) => textures[slot] = handle,
+                        Err(status) => return status,
+                    }
+                }
+
+                let [
+                    base_color_texture,
+                    normal_map_texture,
+                    metallic_roughness_texture,
+                    emissive_texture,
+                    occlusion_texture,
+                ] = textures;
 
                 let alpha_mode = match config.alpha_mode {
                     1 => AlphaMode::Mask(config.alpha_cutoff),
@@ -805,16 +858,15 @@ pub unsafe extern "C" fn bcs_render_set_post(entity: u64, config: *const BcsPost
             };
 
             with_world(|world| {
-                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity))
-                else {
+                let entity = crate::ecs::entity_from(entity);
+
+                if let Some(status) = refuse_unless_camera(world, entity) {
+                    return status;
+                }
+
+                let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
                     return status::NO_ENTITY;
                 };
-
-                // A camera and nothing else: these components are read by the render graph the
-                // camera drives, and on any other entity they would sit there doing nothing.
-                if !entity_mut.contains::<bevy::camera::Camera>() {
-                    return status::NOT_PRESENT;
-                }
 
                 entity_mut.insert(tonemapping);
                 entity_mut.insert(if config.dither != 0 {
@@ -931,7 +983,6 @@ pub unsafe extern "C" fn bcs_render_set_effects(
             use bevy::asset::{Assets, Handle};
             use bevy::color::Color;
             use bevy::core_pipeline::prepass::MotionVectorPrepass;
-            use bevy::image::Image;
             use bevy::math::Vec2;
             use bevy::post_process::auto_exposure::{AutoExposure, AutoExposureCompensationCurve};
             use bevy::post_process::dof::{DepthOfField, DepthOfFieldMode};
@@ -948,39 +999,22 @@ pub unsafe extern "C" fn bcs_render_set_effects(
 
                 // Checked before anything is built, so a call that is going to be refused does
                 // not leave a compensation curve behind in the asset store.
-                {
-                    let Ok(entity_ref) = world.get_entity(entity) else {
-                        return status::NO_ENTITY;
-                    };
-
-                    // A camera and nothing else: these components are read by the render graph
-                    // the camera drives, and anywhere else they would sit there doing nothing.
-                    if !entity_ref.contains::<bevy::camera::Camera>() {
-                        return status::NOT_PRESENT;
-                    }
+                if let Some(status) = refuse_unless_camera(world, entity) {
+                    return status;
                 }
 
                 // The images and the curve are resolved next, because each needs the world and
                 // the inserts need it back afterwards.
-                let image = |key: i32| -> Option<Handle<Image>> {
-                    if key < 0 {
-                        return None;
-                    }
-                    crate::assets::clone_handle(world, key).map(|handle| handle.typed::<Image>())
+                let aberration_lut = match image_handle(world, config.aberration_lut) {
+                    Ok(handle) => handle,
+                    Err(status) => return status,
                 };
 
-                // A negative key asks for the effect's own default. A key that names nothing is
-                // a mistake rather than a default, so it is refused.
-                let aberration_lut = image(config.aberration_lut);
-                if config.aberration_lut >= 0 && aberration_lut.is_none() {
-                    return status::NO_COMPONENT;
-                }
-
-                let metering_mask = image(config.metering_mask);
-                if config.metering_mask >= 0 && metering_mask.is_none() {
-                    return status::NO_COMPONENT;
-                }
-                let metering_mask = metering_mask.unwrap_or_default();
+                // Bevy's own default is a white image, which weights the whole frame alike.
+                let metering_mask = match image_handle(world, config.metering_mask) {
+                    Ok(handle) => handle.unwrap_or_default(),
+                    Err(status) => return status,
+                };
 
                 let points = (config.compensation_points as usize).min(8);
                 let compensation = if config.auto_exposure != 0 && points >= 2 {
@@ -1193,13 +1227,8 @@ pub unsafe extern "C" fn bcs_render_set_atmosphere(
             let entity = crate::ecs::entity_from(camera);
 
             with_world(|world| {
-                {
-                    let Ok(entity_ref) = world.get_entity(entity) else {
-                        return status::NO_ENTITY;
-                    };
-                    if !entity_ref.contains::<bevy::camera::Camera>() {
-                        return status::NOT_PRESENT;
-                    }
+                if let Some(status) = refuse_unless_camera(world, entity) {
+                    return status;
                 }
 
                 if config.enabled == 0 {

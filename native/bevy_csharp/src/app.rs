@@ -924,14 +924,11 @@ pub unsafe extern "C" fn bcs_render_adapter(out: *mut u8, capacity: i32) -> i32 
                     "{:?} | {} | {:?} | {}",
                     info.backend, info.name, info.device_type, info.driver
                 );
-                let bytes = text.as_bytes();
 
-                if capacity > 0 && !out.is_null() && bytes.len() <= capacity as usize {
-                    // SAFETY: length checked against the caller's stated capacity.
-                    unsafe { core::ptr::copy_nonoverlapping(bytes.as_ptr(), out, bytes.len()) };
-                }
-
-                bytes.len() as i32
+                // SAFETY: the caller's contract for `out` and `capacity` is the one
+                // `write_text` documents, which is the convention every entry point here
+                // returning text follows.
+                unsafe { crate::interop::write_text(&text, out, capacity) }
             })
         }
     })

@@ -33,6 +33,35 @@ public sealed class MaterialTests
     }
 
     [Fact]
+    public void AMaterialRefusesATextureHandleThatNamesNothing()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            var image = AssetServer.Load(AssetKind.Image, Texture);
+            AssetServer.Release(image);
+
+            // A released handle keeps its key, so this is what a use-after-release looks like
+            // from the bridge's side. Drawing untextured and reporting success would leave the
+            // caller with a wrong picture and nothing to go on, which is why every other call
+            // taking an asset key refuses one that names nothing.
+            var stale = Assert.Throws<BevyNativeException>(() => Render.CreateMaterial(
+                new MaterialSettings { BaseColorTexture = image }));
+
+            Assert.Equal(NativeStatus.NoComponent, stale.Status);
+
+            // Naming no texture at all stays the ordinary case, and builds an untextured
+            // material rather than failing.
+            var plain = Render.CreateMaterial(new MaterialSettings());
+            Assert.True(plain.IsValid);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void AnImageLoadsOnAnyBuild()
     {
         // No renderer guard: decoding a PNG is work on data, not on a GPU, which is why the

@@ -847,7 +847,15 @@ public static unsafe class Render
         });
 
     /// <summary>Builds a material from <paramref name="settings"/> and returns a handle to it.</summary>
-    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    /// <remarks>
+    /// A texture the settings leave at <see cref="AssetHandle.None"/> is one the material does
+    /// without. A handle that names nothing, which is what a released one becomes, is refused
+    /// instead: drawing the surface untextured and reporting success would leave the caller with
+    /// a wrong picture and nothing pointing at why.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// A texture handle names nothing, or this build has no renderer.
+    /// </exception>
     public static AssetHandle CreateMaterial(MaterialSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
