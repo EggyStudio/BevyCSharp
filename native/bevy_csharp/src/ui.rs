@@ -555,6 +555,11 @@ pub unsafe extern "C" fn bcs_ui_set_image(entity: u64, config: *const BcsUiImage
 /// to the node, and this is how far they have been pushed, in logical pixels from the top left.
 /// Bevy has no scrolling input of its own, so a wheel or a drag is read like any other input and
 /// turned into a call here.
+///
+/// A node is required, and anything else is refused. `ScrollPosition` is a bare component, unlike
+/// `ImageNode`, which brings a `Node` with it: nothing would make the entity a node, so the
+/// component would sit there being read by no layout while the call reported success. The overflow
+/// is not checked, because the two are set independently and either order has to work.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_ui_set_scroll(entity: u64, x: f32, y: f32) -> i32 {
     crate::interop::guard(|| {
@@ -567,13 +572,17 @@ pub extern "C" fn bcs_ui_set_scroll(entity: u64, x: f32, y: f32) -> i32 {
         #[cfg(feature = "render")]
         {
             use bevy::math::Vec2;
-            use bevy::ui::ScrollPosition;
+            use bevy::ui::{Node, ScrollPosition};
 
             with_world(|world| {
                 let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity))
                 else {
                     return status::NO_ENTITY;
                 };
+
+                if !entity_mut.contains::<Node>() {
+                    return status::NOT_PRESENT;
+                }
 
                 entity_mut.insert(ScrollPosition(Vec2::new(x, y)));
                 status::OK

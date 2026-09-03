@@ -834,7 +834,14 @@ public static unsafe class Ui
     /// from the top left. Bevy has no scrolling of its own, so a wheel or a drag is read like any
     /// other input and turned into a call here.
     /// </remarks>
-    /// <exception cref="BevyNativeException">The entity is gone, or this build has no renderer.</exception>
+    /// <remarks>
+    /// The entity has to be a node. Unlike <see cref="SetImage"/>, which turns whatever it is
+    /// given into an image node, the scroll position is a bare component that no layout would
+    /// read, so anything else is refused rather than quietly accepted.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// The entity is gone or is not a node, or this build has no renderer.
+    /// </exception>
     public static void SetScroll(Entity entity, float x, float y) =>
         Native.Check(
             Native.bcs_ui_set_scroll(entity.Bits, x, y), $"scrolling the contents of {entity}");

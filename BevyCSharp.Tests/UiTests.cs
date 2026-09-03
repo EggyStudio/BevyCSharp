@@ -446,6 +446,30 @@ public sealed class UiTests
     }
 
     [Fact]
+    public void ScrollingBelongsToANodeAndNothingElse()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            // `ScrollPosition` is a bare component: unlike an image node it brings no `Node`
+            // along with it, so on anything that is not already one it would sit there doing
+            // nothing while the call reported success.
+            var plain = ctx.Ecs.Spawn();
+            var notANode = Assert.Throws<BevyNativeException>(() => Ui.SetScroll(plain, 0f, 24f));
+            Assert.Equal(NativeStatus.NotPresent, notANode.Status);
+
+            // A node takes it whether or not its overflow is set to scroll, because the two are
+            // set independently and either order has to work.
+            var node = Ui.SpawnNode(new UiSettings());
+            Ui.SetScroll(node, 0f, 24f);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void EachSideOfANodeCanDifferFromTheOthers()
     {
         using var harness = new EngineHarness(frames: 3);
