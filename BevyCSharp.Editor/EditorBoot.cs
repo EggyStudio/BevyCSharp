@@ -97,8 +97,17 @@ public partial struct EditorBoot
         Build(first: false);
     }
 
-    /// <summary>Hands the interface's reports to the panels, once a frame.</summary>
-    [OnUpdate]
+    /// <summary>
+    /// Hands the interface's reports to the panels, once a frame.
+    /// </summary>
+    /// <remarks>
+    /// After the update rather than during it, because the bridge notices a widget's value
+    /// changing from a system in the update and the two would otherwise have no order between
+    /// them. Draining first and writing back second only works if what the person did this frame
+    /// has already been reported: the other way round, a panel writes its own value over the edit
+    /// before anything has read it, and the control appears to ignore the press.
+    /// </remarks>
+    [OnPostUpdate]
     public static void Drive(BehaviorContext ctx) => EditorShell.Tick();
 
     /// <summary>
