@@ -120,13 +120,41 @@ public partial struct EditorBoot
     [OnUpdate]
     public static void Capture(BehaviorContext ctx)
     {
-        if (ctx.Time.FrameCount != 180) return;
+        if (ctx.Time.FrameCount is not (100 or 300)) return;
 
         var path = Environment.GetEnvironmentVariable("BCS_SHOT");
         if (string.IsNullOrEmpty(path)) return;
 
-        Render.Screenshot(path);
-        Console.WriteLine($"[diag] capturing to {path}");
+        var when = ctx.Time.FrameCount == 100 ? "before" : "after";
+        var target = path.Replace(".png", $"-{when}.png");
+
+        Render.Screenshot(target);
+        Console.WriteLine($"[diag] capturing {when} to {target}");
+    }
+
+    // TEMPORARY DIAGNOSTIC: drive Apply without a click, and report whether frames keep coming.
+    [OnUpdate]
+    public static void ApplyProbe(BehaviorContext ctx)
+    {
+        var frame = ctx.Time.FrameCount;
+
+        if (frame % 30 == 0)
+            Console.WriteLine($"[probe] frame {frame} at {ctx.Time.SmoothedFps:F0} fps");
+
+        if (frame != 120) return;
+
+        if (EditorShell.Open.Count == 0) return;
+
+        var panel = (Panels.PostPanel)EditorShell.Open[0];
+        panel.Bloom = true;
+        panel.Intensity = 0.6f;
+        panel.Sharpen = 0.4f;
+
+        Console.WriteLine($"[probe] readout element {Xui.Element("readout")} "
+            + $"holds '{(Xui.Element("readout").IsNone ? "?" : Xui.GetText(Xui.Element("readout")))}'");
+        Console.WriteLine("[probe] invoking Apply");
+        panel.Apply();
+        Console.WriteLine("[probe] Apply returned");
     }
 
     /// <summary>Closes on Escape.</summary>

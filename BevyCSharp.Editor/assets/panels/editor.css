@@ -2,69 +2,95 @@
  * The editor's appearance, in one place.
  *
  * Every panel links this, so the chrome of a window is described here rather than in any panel's
- * own file or in C#. Restyling the whole editor is editing this file, and a panel that wants to
- * look different says so with a class of its own.
+ * own file or in C#. Restyling the whole editor is editing this file.
+ *
+ * Monochrome by intent. Colour is the loudest thing an interface has, so it is spent on the one
+ * control that acts rather than spread over everything that merely sits there.
  */
 
 :root {
-    --surface: #191c22ee;
-    --surface-raised: #22262e;
-    --border: #ffffff1f;
-    --text: #e9edf4;
-    --muted: #8b95a7;
-    --accent: #5b8cff;
-    --radius: 14px;
+    --surface: #14161ae6;
+    --line: #ffffff14;
+    --text: #d6dae2;
+    --dim: #7d8590;
+    --accent: #4d7cff;
+    --radius: 10px;
 }
 
 body {
     display: flex;
     flex-direction: row;
+    /* Panels sit at the top rather than stretching: a panel is as tall as its contents. */
+    align-items: flex-start;
     width: 100%;
     height: 100%;
-    padding: 20px;
-    column-gap: 20px;
+    padding: 12px;
+    column-gap: 12px;
     background-color: rgba(0, 0, 0, 0);
 }
 
-/*
- * A floating panel, inset from the edge with the scene showing behind it. Not docked and not
- * part of a fixed frame: where it sits is this rule, and moving it is editing this rule.
- */
-.window {
+.panel {
     display: flex;
     flex-direction: column;
-    width: 320px;
-    padding: 16px;
-    row-gap: 10px;
+    width: 232px;
+    padding: 10px;
+    row-gap: 6px;
     background-color: var(--surface);
-    border: 1px solid var(--border);
+    border: 1px solid var(--line);
     border-radius: var(--radius);
     color: var(--text);
 }
 
-.window h2 {
-    font-size: 15px;
+.panel h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 2px;
+}
+
+/*
+ * A caption above its control rather than beside it. Side by side, the control gets whatever
+ * width the caption leaves, which is what pushed the text field past the panel's edge.
+ */
+.field {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    row-gap: 3px;
+}
+
+label,
+p {
+    font-size: 11px;
     color: var(--text);
 }
 
-.row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    column-gap: 12px;
-    height: 28px;
+.dim {
+    color: var(--dim);
 }
 
-.muted {
-    color: var(--muted);
-    font-size: 12px;
+input {
+    width: 100%;
+    height: 22px;
+    padding: 4px;
+    background-color: #ffffff0a;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 11px;
+}
+
+slider {
+    width: 100%;
+    height: 16px;
 }
 
 button {
-    height: 32px;
-    padding: 8px;
+    width: 100%;
+    height: 24px;
+    margin-top: 4px;
     background-color: var(--accent);
-    border-radius: 8px;
-    color: var(--text);
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 11px;
 }
