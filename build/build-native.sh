@@ -225,4 +225,16 @@ echo "==> staged $BUILD_DIR/target/release/$LIBNAME (for local runs)"
 if [[ "$TARGET" == *linux-gnu ]] && command -v objdump >/dev/null 2>&1; then
     floor=$(objdump -T "$BUILT" | grep -oP 'GLIBC_\K[0-9]+\.[0-9]+' | sort -uV | tail -1)
     echo "==> needs glibc $floor or newer"
+
+    # A machine that defaulted to the container path did so because what it builds otherwise does
+    # not load where it has to run. Overriding that stages a library that fails at load with a
+    # GLIBC version error, and the staged copy is what every project here picks up, so the next
+    # run of anything hits it. Worth saying loudly rather than leaving to be discovered.
+    if [[ $PORTABLE -eq 0 && -f "$BUILD_DIR/build-native.local" ]] \
+        && grep -q '^PORTABLE=1' "$BUILD_DIR/build-native.local"; then
+        echo
+        echo "!!  This checkout defaults to --portable and you passed --local."
+        echo "!!  What is staged now needs glibc $floor, which is this machine's, not the one it"
+        echo "!!  has to run on. Rebuild without --local before running anything."
+    fi
 fi
