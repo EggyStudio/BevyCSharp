@@ -16,23 +16,24 @@
      * follow from here. Setting our own names alone would restyle the panel and leave every
      * control the blue it was born with.
      */
-    --primary: #6f7684;
-    --primary-hover: #838b9a;
-    --primary-disabled: #3a3f49;
-    --primary-transparent-layer: rgba(111, 118, 132, 0.3);
-    --headline: #d6dae2;
-    --headline-sec: #aeb4c0;
-    --text-color: #d6dae2;
-    --text-color-dark: #8b929e;
-    --disabled-text: #4a4f58;
-    --disabled-text-darker: #3a3f47;
-    --gray-background: #1b1e24;
-    --gray-background-disabled: #23262d;
+    --primary: #6e6e6e;
+    --primary-hover: #8a8a8a;
+    --primary-disabled: #3a3a3a;
+    --primary-transparent-layer: rgba(110, 110, 110, 0.3);
+    --headline: #e8e8e8;
+    --headline-sec: #b4b4b4;
+    --text-color: #e8e8e8;
+    --text-color-dark: #8a8a8a;
+    --disabled-text: #4a4a4a;
+    --disabled-text-darker: #3a3a3a;
+    --gray-background: #141414;
+    --gray-background-disabled: #202020;
 
-    --surface: #14161ae6;
-    --line: #ffffff14;
-    --text: #d6dae2;
-    --dim: #7d8590;
+    /* Black, with enough left through to see what is behind the panel. */
+    --surface: rgba(0, 0, 0, 0.72);
+    --line: #ffffff1a;
+    --text: #e8e8e8;
+    --dim: #8a8a8a;
 
     /* The one colour in the editor. Anything that is not the action stays grey. */
     --accent: #4d7cff;
@@ -96,7 +97,7 @@ input {
     height: 22px;
     min-width: 0;
     padding: 4px;
-    background-color: #ffffff0a;
+    background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--line);
     border-radius: 6px;
     color: var(--text);
