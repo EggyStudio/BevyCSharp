@@ -102,6 +102,7 @@ public sealed unsafe class App : IDisposable
                 FixedHz = Config.FixedHz,
                 AssetRoot = assetRoot,
                 WatchAssets = Config.WatchAssets ? 1u : 0u,
+                HtmlUi = Config.HtmlUi ? 1u : 0u,
             };
             _handle = Native.bcs_app_create(&native);
         }

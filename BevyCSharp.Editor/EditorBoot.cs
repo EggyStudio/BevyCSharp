@@ -116,6 +116,19 @@ public partial struct EditorBoot
         _lastApply = apply.Bits;
     }
 
+    // TEMPORARY DIAGNOSTIC: capture the window so the picture can be checked without an eye.
+    [OnUpdate]
+    public static void Capture(BehaviorContext ctx)
+    {
+        if (ctx.Time.FrameCount != 180) return;
+
+        var path = Environment.GetEnvironmentVariable("BCS_SHOT");
+        if (string.IsNullOrEmpty(path)) return;
+
+        Render.Screenshot(path);
+        Console.WriteLine($"[diag] capturing to {path}");
+    }
+
     /// <summary>Closes on Escape.</summary>
     [OnUpdate]
     public static void QuitOnEscape(BehaviorContext ctx)

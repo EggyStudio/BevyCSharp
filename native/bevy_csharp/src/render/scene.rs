@@ -5,6 +5,45 @@ use crate::interop::{status, BcsCameraConfig, BcsLightConfig, BcsSpriteConfig};
 #[cfg(feature = "render")]
 use crate::state::{with_world, with_world_opt};
 
+/// Writes what the window is showing to a PNG file.
+///
+/// The capture happens on the frame after this call, because the picture has to come back off the
+/// GPU, and the file appears once it has. A caller that wants to know it arrived watches for the
+/// file rather than for this returning.
+///
+/// This is how a change to the picture is checked without a person looking at it, which is
+/// otherwise the only way: the tests can assert that settings are accepted, and nothing else can
+/// tell whether the scene is drawn at all.
+///
+/// # Safety
+/// `path` must be a NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_screenshot(path: *const core::ffi::c_char) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = path;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::render::view::screenshot::{save_to_disk, Screenshot};
+
+            let Some(path) = (unsafe { crate::interop::cstr_to_string(path) }) else {
+                return status::NULL_ARG;
+            };
+
+            with_world(|world| {
+                world
+                    .spawn(Screenshot::primary_window())
+                    .observe(save_to_disk(path));
+                status::OK
+            })
+        }
+    })
+}
+
 /// Spawns a 3D camera and returns its entity, or `0` on a headless build.
 ///
 /// `config` may be null, which spawns Bevy's default perspective camera.

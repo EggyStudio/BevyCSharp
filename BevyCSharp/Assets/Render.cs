@@ -1257,6 +1257,29 @@ public static unsafe class Render
     }
 
     /// <summary>
+    /// Writes what the window is showing to a PNG file.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The capture happens on the frame after this call, because the picture has to come back off
+    /// the GPU, and the file appears once it has. Watch for the file rather than assuming it is
+    /// there when this returns.
+    /// </para>
+    /// <para>
+    /// What this is for is checking the picture without a person looking at it. A test can assert
+    /// that a setting was accepted; only the picture says whether anything was drawn.
+    /// </para>
+    /// </remarks>
+    /// <param name="path">Where to write the PNG. Relative paths are resolved by the process.</param>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static void Screenshot(string path)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+
+        Native.Check(Native.bcs_render_screenshot(path), $"capturing the window to {path}");
+    }
+
+    /// <summary>
     /// Sets how large a shadow map each kind of light gets, in pixels on a side.
     /// </summary>
     /// <remarks>

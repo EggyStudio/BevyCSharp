@@ -211,6 +211,9 @@ pub struct BcsConfig {
     /// Non-zero to reload an asset when its file changes on disk. Needs a build whose profile
     /// carries the watcher, and costs a thread watching the asset directory.
     pub watch_assets: u32,
+    /// Non-zero to build in the HTML and CSS interface. Needs the editor profile, and brings a
+    /// camera and a set of systems that an app not using it has no reason to carry.
+    pub html_ui: u32,
 }
 
 /// How a camera should see, passed from C# when one is spawned.

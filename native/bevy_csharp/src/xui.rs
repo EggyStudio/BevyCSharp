@@ -121,6 +121,50 @@ pub fn install(app: &mut bevy::app::App) {
         },
     );
 
+    // The crate draws its interface through a camera of its own, and two cameras on one window
+    // have to agree about what they are drawing into. A camera's high dynamic range setting and
+    // its multisampling both decide that, so a disagreement about either is not a compositing
+    // question with a wrong answer: they are two different targets, and whichever writes the
+    // window last wins. The interface camera is ordered last, so the scene disappears behind it.
+    //
+    // The crate asks for high dynamic range through its config, which rebuilds the camera, and
+    // fixes multisampling once when it spawns and never looks again. So one is set there and the
+    // other here, and the config is only written when it differs, or the camera would be rebuilt
+    // every frame.
+    //
+    // Kept in step here rather than left to the caller. Nobody putting a panel over a scene
+    // should have to know any of this to find out why the scene went black.
+    app.add_systems(
+        Update,
+        |scene: Query<
+            (bevy::ecs::query::Has<bevy::camera::Hdr>, &Msaa),
+            (
+                bevy::ecs::query::With<bevy::camera::Camera3d>,
+                bevy::ecs::query::Without<bevy_extended_ui::UiCamera>,
+            ),
+        >,
+         interface: Query<
+            (bevy::ecs::entity::Entity, &Msaa),
+            bevy::ecs::query::With<bevy_extended_ui::UiCamera>,
+        >,
+         mut config: ResMut<bevy_extended_ui::ExtendedUiConfiguration>,
+         mut commands: Commands| {
+            let Some((hdr, msaa)) = scene.iter().next() else {
+                return;
+            };
+
+            if config.hdr_support != hdr {
+                config.hdr_support = hdr;
+            }
+
+            for (entity, theirs) in interface.iter() {
+                if theirs != msaa {
+                    commands.entity(entity).insert(*msaa);
+                }
+            }
+        },
+    );
+
     // Bevy reloads a document whose file changed, but nothing rebuilds the widgets from it: the
     // crate watches its stylesheets and not its documents, so a CSS edit reaches the screen and
     // an HTML edit does not. Asking the registry for a rebuild is what closes that.

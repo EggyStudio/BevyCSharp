@@ -38,4 +38,7 @@ public unsafe struct NativeConfig
 
     /// <summary>Non-zero to reload an asset when its file changes on disk.</summary>
     public uint WatchAssets;
+
+    /// <summary>Non-zero to build in the HTML and CSS interface.</summary>
+    public uint HtmlUi;
 }

@@ -91,6 +91,23 @@ public sealed class Config
     public bool WatchAssets { get; set; }
 
     /// <summary>
+    /// Build in the interface described in HTML and CSS.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What <see cref="Xui"/> needs. Off unless asked for, because it is not free to an app that
+    /// never opens a document: it brings a camera of its own and the systems that build and draw
+    /// widgets. The editor profile is a superset of the render one, so a game and the editor run
+    /// against the same library and this is what tells them apart.
+    /// </para>
+    /// <para>
+    /// Needs a bridge built with that profile, which <see cref="App.HasEditor"/> reports. On a
+    /// build without it this does nothing.
+    /// </para>
+    /// </remarks>
+    public bool HtmlUi { get; set; }
+
+    /// <summary>
     /// How many times a second <see cref="Stage.FixedUpdate"/> runs. Zero keeps Bevy's own
     /// default of 64.
     /// </summary>

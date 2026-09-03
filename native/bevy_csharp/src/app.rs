@@ -182,10 +182,16 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // backend the bridge builds for has them.
             app.add_plugins(bevy::post_process::auto_exposure::AutoExposurePlugin);
 
-            // HTML and CSS driven UI, when the profile carries it. Registered here rather than
-            // in the module so that a build without the feature adds no plugin at all.
+            // HTML and CSS driven UI, when the profile carries it and the app asked for it.
+            //
+            // Asked for rather than assumed, because the plugin is not free to an app that never
+            // opens a document: it spawns a camera of its own, registers its widget systems and
+            // watches for documents to build. The editor profile is a superset of the render
+            // one, so the sample and a game are built against exactly this library.
             #[cfg(feature = "editor")]
-            crate::xui::install(&mut app);
+            if config.html_ui != 0 {
+                crate::xui::install(&mut app);
+            }
 
             // Debug drawing goes through a queue, because a `Gizmos` parameter cannot be held by
             // an exclusive system. Only registered here: the plugin that draws them comes with
