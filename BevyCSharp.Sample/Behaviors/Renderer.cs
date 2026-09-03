@@ -127,7 +127,7 @@ public partial struct Renderer
 
     /// <summary>Prints the frame rate every second while the window is open.</summary>
     [OnLast]
-    [ToggleKey(Key.F1)]
+    [ToggleKey(Key.F1, DefaultEnabled = false)]
     public static void PrintFps(BehaviorContext ctx)
     {
         if (ctx.Res<Config>().Headless) return;

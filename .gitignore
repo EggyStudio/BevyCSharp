@@ -66,3 +66,6 @@ desktop.ini
 
 # Local-only
 .ref/
+
+# Per-machine build defaults, set by whoever works on this checkout.
+/build/build-native.local

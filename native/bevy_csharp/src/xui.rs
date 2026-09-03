@@ -22,7 +22,7 @@ pub mod event_kind {
     pub const CLICK: i32 = 0;
     /// A widget's value changed.
     pub const CHANGE: i32 = 1;
-    /// A form was submitted.
+    /// A form was submitted. Not reported yet, and reserved so the numbering does not move.
     pub const SUBMIT: i32 = 2;
     /// A widget took focus.
     pub const FOCUS: i32 = 3;
@@ -52,12 +52,36 @@ mod live {
     pub struct UiEvents(pub Vec<crate::interop::BcsUiEvent>);
 }
 
-/// Installs the UI plugin and the queue its observers fill.
+/// What an element was last seen holding, so a real change can be told from a repaint.
+#[cfg(feature = "editor")]
+#[derive(Default, PartialEq)]
+struct Snapshot {
+    number: f32,
+    text: String,
+    checked: bool,
+    focused: bool,
+}
+
+/// Installs the UI plugin and the reporting the managed side drains.
+///
+/// The crate has an event layer of its own, and this deliberately does not use it. Its events
+/// only fire for elements that named a handler in an HTML attribute, `onclick="something"`, and
+/// that handler is resolved through a Rust macro registry that C# cannot join. Going that way
+/// would mean every element had to declare a name in the markup that then had to agree with a
+/// name on the managed side, for no gain.
+///
+/// So clicks come from Bevy's own picking, which is what the crate builds its own layer on top
+/// of, and value changes come from watching what the widgets hold. An element reports only if it
+/// has a CSS id, because an id is how the managed side addresses it and an element it cannot
+/// name is one it cannot have asked about.
 #[cfg(feature = "editor")]
 pub fn install(app: &mut bevy::app::App) {
+    use bevy::picking::events::{Click, Pointer};
     use bevy::prelude::*;
-    use bevy_extended_ui::html::{HtmlChange, HtmlClick, HtmlFocus, HtmlSubmit};
+    use bevy_extended_ui::styles::CssID;
+    use bevy_extended_ui::widgets::{InputField, Slider, UIWidgetState};
     use bevy_extended_ui::ExtendedUiPlugin;
+    use std::collections::HashMap;
 
     use crate::interop::BcsUiEvent;
     use live::UiEvents;
@@ -66,25 +90,89 @@ pub fn install(app: &mut bevy::app::App) {
     app.init_resource::<live::Documents>();
     app.init_resource::<UiEvents>();
 
-    fn push(events: &mut UiEvents, kind: i32, entity: bevy::ecs::entity::Entity) {
-        events.0.push(BcsUiEvent {
-            kind,
-            entity: entity.to_bits(),
-        });
-    }
+    app.add_observer(
+        |click: On<Pointer<Click>>,
+         addressable: Query<(), With<CssID>>,
+         parents: Query<&ChildOf>,
+         mut events: ResMut<UiEvents>| {
+            // Picking reports the deepest thing under the pointer, which for a button is the
+            // text inside it rather than the button. Walk up until something is addressable.
+            let mut entity = click.entity;
+            loop {
+                if addressable.get(entity).is_ok() {
+                    events.0.push(BcsUiEvent {
+                        kind: event_kind::CLICK,
+                        entity: entity.to_bits(),
+                    });
+                    return;
+                }
 
-    app.add_observer(|e: On<HtmlClick>, mut q: ResMut<UiEvents>| {
-        push(&mut q, event_kind::CLICK, e.entity);
-    });
-    app.add_observer(|e: On<HtmlChange>, mut q: ResMut<UiEvents>| {
-        push(&mut q, event_kind::CHANGE, e.entity);
-    });
-    app.add_observer(|e: On<HtmlSubmit>, mut q: ResMut<UiEvents>| {
-        push(&mut q, event_kind::SUBMIT, e.entity);
-    });
-    app.add_observer(|e: On<HtmlFocus>, mut q: ResMut<UiEvents>| {
-        push(&mut q, event_kind::FOCUS, e.entity);
-    });
+                let Ok(parent) = parents.get(entity) else {
+                    return;
+                };
+                entity = parent.parent();
+            }
+        },
+    );
+
+    // Compared against what was there last frame rather than driven by change detection, because
+    // hovering an element rewrites its state without changing anything the caller asked about.
+    app.add_systems(
+        Update,
+        move |elements: Query<(
+            Entity,
+            Option<&Slider>,
+            Option<&InputField>,
+            Option<&UIWidgetState>,
+        ), With<CssID>>,
+              mut seen: Local<HashMap<Entity, Snapshot>>,
+              mut events: ResMut<UiEvents>| {
+            let mut alive = Vec::with_capacity(seen.len());
+
+            for (entity, slider, field, state) in elements.iter() {
+                alive.push(entity);
+
+                let now = Snapshot {
+                    number: slider.map(|s| s.value).unwrap_or_default(),
+                    text: field.map(|f| f.text.clone()).unwrap_or_default(),
+                    checked: state.is_some_and(|s| s.checked),
+                    focused: state.is_some_and(|s| s.focused),
+                };
+
+                let Some(before) = seen.get(&entity) else {
+                    // First sight is not a change. Recording it without reporting is what stops
+                    // every element announcing itself on the frame its document finishes loading.
+                    seen.insert(entity, now);
+                    continue;
+                };
+
+                if now.number != before.number
+                    || now.text != before.text
+                    || now.checked != before.checked
+                {
+                    events.0.push(BcsUiEvent {
+                        kind: event_kind::CHANGE,
+                        entity: entity.to_bits(),
+                    });
+                }
+
+                if now.focused && !before.focused {
+                    events.0.push(BcsUiEvent {
+                        kind: event_kind::FOCUS,
+                        entity: entity.to_bits(),
+                    });
+                }
+
+                seen.insert(entity, now);
+            }
+
+            // A document that closed takes its elements with it, and a stale snapshot would
+            // report a change against whatever later reused the slot.
+            if seen.len() > alive.len() {
+                seen.retain(|entity, _| alive.contains(entity));
+            }
+        },
+    );
 }
 
 /// Opens an HTML document and returns the id C# holds it by, or a negative status.

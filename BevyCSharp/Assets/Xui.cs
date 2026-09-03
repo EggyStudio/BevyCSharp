@@ -11,14 +11,21 @@ public enum UiEventKind
     /// <summary>The element's value changed.</summary>
     Change = 1,
 
-    /// <summary>A form was submitted.</summary>
+    /// <summary>A form was submitted. Not reported yet.</summary>
     Submit = 2,
 
     /// <summary>The element took focus.</summary>
     Focus = 3,
 }
 
-/// <summary>One thing a widget reported, and which element it happened to.</summary>
+/// <summary>
+/// One thing a widget reported, and which element it happened to.
+/// </summary>
+/// <remarks>
+/// Only an element with a CSS id reports, since an id is how it is addressed and an element that
+/// cannot be named is one nothing asked about. A click on something inside an element, the text
+/// of a button rather than the button, is reported against the nearest element that has one.
+/// </remarks>
 public readonly record struct UiEvent(UiEventKind Kind, Entity Element);
 
 /// <summary>

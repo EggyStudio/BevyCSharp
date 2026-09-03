@@ -15,6 +15,7 @@
 #   build/build-native.sh --render             # host, with Bevy's renderer
 #   build/build-native.sh --editor             # the above plus the HTML and CSS UI
 #   build/build-native.sh --render --portable  # build in a container, for older machines
+#   build/build-native.sh --local              # override a PORTABLE=1 in build-native.local
 #   build/build-native.sh --clean              # remove build/target and build/artifacts first
 #
 # On Linux a binary runs only where glibc is at least as new as the one it was built against, so
@@ -39,6 +40,17 @@ TARGET=""
 CLEAN=0
 PORTABLE=0
 
+# Per-machine defaults, not checked in.
+#
+# A binary only runs on a glibc at least as new as the one it was built against, so on a machine
+# whose glibc is newer than the machines its output has to run on, every ordinary build produces
+# something unloadable there. Setting `PORTABLE=1` in this file makes the container path the
+# default for that machine and leaves every other machine, and CI, building as before.
+if [[ -f "$BUILD_DIR/build-native.local" ]]; then
+    # shellcheck source=/dev/null
+    source "$BUILD_DIR/build-native.local"
+fi
+
 # Old enough that its glibc floor covers every supported distribution, new enough to carry a
 # Rust that understands the crate's edition.
 PORTABLE_IMAGE="docker.io/library/rust:1-bookworm"
@@ -51,6 +63,7 @@ while [[ $# -gt 0 ]]; do
         --target)   TARGET="$2"; shift 2 ;;
         --clean)    CLEAN=1; shift ;;
         --portable) PORTABLE=1; shift ;;
+        --local)    PORTABLE=0; shift ;;
         -h|--help)
             sed -n '2,18p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
             exit 0 ;;

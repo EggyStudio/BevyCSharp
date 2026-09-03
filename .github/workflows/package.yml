@@ -138,6 +138,12 @@ jobs:
         working-directory: native
         run: cargo test
 
+      # The suite covers the library; this covers everything else in the solution. Neither the
+      # sample nor the editor is reached by `dotnet test`, so without it a runnable project can
+      # stop compiling without CI noticing.
+      - name: Build the solution
+        run: dotnet build BevyCSharp.slnx -c Release
+
       - name: Test
         run: dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj -c Release
 
