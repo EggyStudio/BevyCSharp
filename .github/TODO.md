@@ -201,16 +201,21 @@ What is left:
 ## Rendering control
 
 Cameras, lights and the window take their common parameters, and a camera tonemaps, dithers,
-multisamples, antialiases, sharpens, blooms and scatters a sky over what it draws. `bevy_post_process` and
-`bevy_anti_alias` are compiled into the render profile, so what is left in this area is bridge
-work over code already in the binary rather than a feature to add. What is left:
+multisamples, antialiases, sharpens, blooms and scatters a sky over what it draws, pulls focus,
+smears what moves, fringes and warps its lens, darkens its corners and finds its own exposure.
+`bevy_post_process` and `bevy_anti_alias` are compiled into the render profile, so what is left
+in this area is bridge work over code already in the binary rather than a feature to add. What is
+left:
 
-- **The rest of the post-processing stack.** `DepthOfField` needs an aperture, a focal distance
-  and a bokeh mode; `MotionBlur` a shutter angle and a sample count; `ChromaticAberration` a
-  strength and an optional lookup texture; `AutoExposure` a metering range and a compensation
-  curve. Each is another block on `BcsPostConfig`, which is already wide enough that the next few
-  should probably go in a second config rather than widening it further. `TemporalAntiAliasing`
-  is in the same crate but needs the motion vector prepass, so it is a step up from the others.
+- **Temporal antialiasing.** The one pass over the finished picture that is still unbridged.
+  `TemporalAntiAliasing` brings the depth and motion vector prepasses with it the way
+  `MotionBlur` does, so the obstacle is not the prepass: it needs multisampling turned off, and
+  it ghosts behind anything whose motion vectors are wrong. That makes it a third arm on
+  `AntiAlias` that has to refuse a config asking for it and for multisampling at once, rather
+  than one more flag.
+- **Exposure the camera does not choose.** `Exposure` sits on the camera and sets aperture,
+  shutter speed and sensitivity by hand, which is the alternative to `AutoExposure` rather than a
+  companion to it, and the same `PhysicalCameraParameters` that fix a lens's depth of field.
 - **The rest of the sky.** Earth's air is bridged; Mars is the other medium Bevy ships and its
   dust phase comes from a texture, so it needs an image handle on the config and a texture worth
   shipping. `ScatteringMedium::new` takes arbitrary scattering terms, which is what an alien
@@ -241,10 +246,11 @@ work over code already in the binary rather than a feature to add. What is left:
   unbridged: every entry point here addresses the primary one.
 - **Verification**: the tests assert that settings are accepted and that a windowless run
   refuses, which is what can go wrong silently. Whether the picture is right is confirmed by
-  running the sample, which uses a custom clear colour, a tinted sun and a spot light, and binds
-  F11 to fullscreen and Tab to cursor lock. An effect is worth checking against a second run with
-  it turned off: bloom was confirmed that way, since a halo is obvious beside the same frame
-  without one and easy to imagine without the comparison.
+  running the sample, which uses a custom clear colour, a tinted sun, a spot light, a bokeh
+  focus on the cube and a vignette, and binds F11 to fullscreen and Tab to cursor lock. An effect
+  is worth checking against a second run with it turned off: bloom was confirmed that way, since
+  a halo is obvious beside the same frame without one and easy to imagine without the
+  comparison. The lens effects have not been through that comparison.
 
 ## Input
 

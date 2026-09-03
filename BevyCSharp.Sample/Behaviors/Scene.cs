@@ -31,13 +31,13 @@ public partial struct Scene
         var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 55f });
         ctx.Ecs.Add(camera, Transform.LookingAt(new Vec3(3.5f, 3f, 6f), Vec3.Zero, Vec3.UnitY));
 
-        // What the camera does with the picture once the scene is drawn. The high dynamic range
-        // target is what makes the rest worth having: without it nothing is brighter than white,
-        // so the tonemapper has nothing to bring down and bloom has nothing to scatter.
         // The sky, scattered from the sun below rather than painted: it is what the camera sees
         // where the scene does not cover, and what tints everything in the distance.
         Render.SetAtmosphere(camera, new AtmosphereSettings());
 
+        // What the camera does with the picture once the scene is drawn. The high dynamic range
+        // target is what makes the rest worth having: without it nothing is brighter than white,
+        // so the tonemapper has nothing to bring down and bloom has nothing to scatter.
         Render.SetPostProcessing(camera, new PostSettings
         {
             Hdr = true,
@@ -46,6 +46,19 @@ public partial struct Scene
             BloomIntensity = 0.3f,
             AntiAlias = AntiAliasPass.Fxaa,
             Msaa = 1,
+        });
+
+        // The lens it is drawn through. Focus is on the cube at the origin, so the checker runs
+        // soft towards the horizon, and the vignette pulls the eye in from the corners. Judge
+        // either against a run with this call removed, which is the only way to tell an effect
+        // from an imagined one.
+        Render.SetEffects(camera, new EffectSettings
+        {
+            DepthOfField = DepthOfFieldMode.Bokeh,
+            FocalDistance = 7.4f,
+            MaxDepth = 60f,
+            Vignette = 0.45f,
+            VignetteRadius = 0.7f,
         });
 
         var sun = Render.SpawnLight(new LightSettings

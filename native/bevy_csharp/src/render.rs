@@ -9,8 +9,8 @@
 //! named operations rather than data the managed side writes directly.
 
 use crate::interop::{
-    status, BcsAtmosphereConfig, BcsCameraConfig, BcsLightConfig, BcsMaterialConfig, BcsPostConfig,
-    BcsSpriteConfig,
+    status, BcsAtmosphereConfig, BcsCameraConfig, BcsEffectsConfig, BcsLightConfig,
+    BcsMaterialConfig, BcsPostConfig, BcsSpriteConfig,
 };
 
 #[cfg(feature = "render")]
@@ -834,6 +834,252 @@ pub unsafe extern "C" fn bcs_render_set_post(entity: u64, config: *const BcsPost
                     });
                 } else {
                     entity_mut.remove::<ContrastAdaptiveSharpening>();
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Sets the lens effects a camera draws through.
+///
+/// Beside [`bcs_render_set_post`] rather than part of it: that call is the pipeline a settings
+/// screen owns, and these are what a scene does for a moment. The same rule holds, so a config is
+/// the whole set rather than one change to it and an effect left off is taken off the camera.
+///
+/// Depth of field needs a perspective camera, because focus has no meaning without one, and Bevy
+/// drops the effect rather than reporting it. Auto exposure needs compute shaders, which every
+/// desktop backend has and WebGL2 does not, and a high dynamic range target, which it brings with
+/// it. That target belongs to [`bcs_render_set_post`], so a later call there without `hdr` takes
+/// it away again.
+///
+/// # Safety
+/// `config` must point to a readable [`BcsEffectsConfig`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_set_effects(
+    entity: u64,
+    config: *const BcsEffectsConfig,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, config);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::asset::{Assets, Handle};
+            use bevy::color::Color;
+            use bevy::core_pipeline::prepass::MotionVectorPrepass;
+            use bevy::image::Image;
+            use bevy::math::Vec2;
+            use bevy::post_process::auto_exposure::{AutoExposure, AutoExposureCompensationCurve};
+            use bevy::post_process::dof::{DepthOfField, DepthOfFieldMode};
+            use bevy::post_process::effect_stack::{ChromaticAberration, LensDistortion, Vignette};
+            use bevy::post_process::motion_blur::MotionBlur;
+
+            if config.is_null() {
+                return status::NULL_ARG;
+            }
+            let config = unsafe { *config };
+
+            with_world(|world| {
+                let entity = crate::ecs::entity_from(entity);
+
+                // Checked before anything is built, so a call that is going to be refused does
+                // not leave a compensation curve behind in the asset store.
+                {
+                    let Ok(entity_ref) = world.get_entity(entity) else {
+                        return status::NO_ENTITY;
+                    };
+
+                    // A camera and nothing else: these components are read by the render graph
+                    // the camera drives, and anywhere else they would sit there doing nothing.
+                    if !entity_ref.contains::<bevy::camera::Camera>() {
+                        return status::NOT_PRESENT;
+                    }
+                }
+
+                // The images and the curve are resolved next, because each needs the world and
+                // the inserts need it back afterwards.
+                let image = |key: i32| -> Option<Handle<Image>> {
+                    if key < 0 {
+                        return None;
+                    }
+                    crate::assets::clone_handle(world, key).map(|handle| handle.typed::<Image>())
+                };
+
+                // A negative key asks for the effect's own default. A key that names nothing is
+                // a mistake rather than a default, so it is refused.
+                let aberration_lut = image(config.aberration_lut);
+                if config.aberration_lut >= 0 && aberration_lut.is_none() {
+                    return status::NO_COMPONENT;
+                }
+
+                let metering_mask = image(config.metering_mask);
+                if config.metering_mask >= 0 && metering_mask.is_none() {
+                    return status::NO_COMPONENT;
+                }
+                let metering_mask = metering_mask.unwrap_or_default();
+
+                let points = (config.compensation_points as usize).min(8);
+                let compensation = if config.auto_exposure != 0 && points >= 2 {
+                    let curve =
+                        bevy::math::cubic_splines::LinearSpline::new((0..points).map(|i| {
+                            Vec2::new(
+                                config.compensation_curve[i * 2],
+                                config.compensation_curve[i * 2 + 1],
+                            )
+                        }));
+
+                    // The curve has to rise in luminance, since it is read by looking a measured
+                    // brightness up in it. Bevy reports that as an error rather than sorting the
+                    // points, and so does this.
+                    let Ok(built) = AutoExposureCompensationCurve::from_curve(curve) else {
+                        return status::INVALID_STATE;
+                    };
+
+                    let Some(mut curves) =
+                        world.get_resource_mut::<Assets<AutoExposureCompensationCurve>>()
+                    else {
+                        return status::INVALID_STATE;
+                    };
+
+                    curves.add(built)
+                } else {
+                    Handle::default()
+                };
+
+                let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
+                    return status::NO_ENTITY;
+                };
+
+                match config.dof_mode {
+                    0 => {
+                        entity_mut.remove::<DepthOfField>();
+                    }
+                    mode => {
+                        let default = DepthOfField::default();
+                        entity_mut.insert(DepthOfField {
+                            mode: if mode == 2 {
+                                DepthOfFieldMode::Bokeh
+                            } else {
+                                DepthOfFieldMode::Gaussian
+                            },
+                            focal_distance: config.focal_distance,
+                            // The aperture divides the scale of the blur, so a zero left in the
+                            // config would make every circle of confusion infinite.
+                            aperture_f_stops: if config.aperture_f_stops > 0.0 {
+                                config.aperture_f_stops
+                            } else {
+                                default.aperture_f_stops
+                            },
+                            sensor_height: if config.sensor_height > 0.0 {
+                                config.sensor_height
+                            } else {
+                                default.sensor_height
+                            },
+                            max_circle_of_confusion_diameter: if config.max_blur_diameter > 0.0 {
+                                config.max_blur_diameter
+                            } else {
+                                default.max_circle_of_confusion_diameter
+                            },
+                            max_depth: if config.max_depth > 0.0 {
+                                config.max_depth
+                            } else {
+                                f32::INFINITY
+                            },
+                        });
+                    }
+                }
+
+                if config.shutter_angle > 0.0 && config.motion_blur_samples > 0 {
+                    entity_mut.insert(MotionBlur {
+                        shutter_angle: config.shutter_angle,
+                        samples: config.motion_blur_samples,
+                    });
+                } else {
+                    // The prepass goes with it. Bevy brings it in as a required component and
+                    // leaves it behind on removal, and it draws the scene a second time every
+                    // frame, so a camera that stopped blurring would go on paying for it.
+                    entity_mut.remove::<MotionBlur>();
+                    entity_mut.remove::<MotionVectorPrepass>();
+                }
+
+                if config.aberration > 0.0 {
+                    let default = ChromaticAberration::default();
+                    entity_mut.insert(ChromaticAberration {
+                        color_lut: aberration_lut,
+                        intensity: config.aberration,
+                        max_samples: if config.aberration_samples > 0 {
+                            config.aberration_samples
+                        } else {
+                            default.max_samples
+                        },
+                    });
+                } else {
+                    entity_mut.remove::<ChromaticAberration>();
+                }
+
+                if config.distortion != 0.0 {
+                    entity_mut.insert(LensDistortion {
+                        intensity: config.distortion,
+                        scale: if config.distortion_scale > 0.0 {
+                            config.distortion_scale
+                        } else {
+                            1.0
+                        },
+                        multiplier: Vec2::new(config.distortion_axes[0], config.distortion_axes[1]),
+                        center: Vec2::new(config.distortion_center[0], config.distortion_center[1]),
+                        edge_curvature: config.distortion_edge_curvature,
+                    });
+                } else {
+                    entity_mut.remove::<LensDistortion>();
+                }
+
+                if config.vignette > 0.0 {
+                    let default = Vignette::default();
+                    entity_mut.insert(Vignette {
+                        intensity: config.vignette,
+                        radius: config.vignette_radius,
+                        smoothness: if config.vignette_smoothness > 0.0 {
+                            config.vignette_smoothness
+                        } else {
+                            default.smoothness
+                        },
+                        roundness: config.vignette_roundness,
+                        center: Vec2::new(config.vignette_center[0], config.vignette_center[1]),
+                        edge_compensation: config.vignette_edge_compensation,
+                        color: Color::linear_rgba(
+                            config.vignette_color[0],
+                            config.vignette_color[1],
+                            config.vignette_color[2],
+                            config.vignette_color[3],
+                        ),
+                    });
+                } else {
+                    entity_mut.remove::<Vignette>();
+                }
+
+                if config.auto_exposure != 0 {
+                    let default = AutoExposure::default();
+                    entity_mut.insert(AutoExposure {
+                        range: config.metering_min..=config.metering_max,
+                        filter: config.metering_low..=config.metering_high,
+                        speed_brighten: config.speed_brighten,
+                        speed_darken: config.speed_darken,
+                        exponential_transition_distance: if config.exposure_transition > 0.0 {
+                            config.exposure_transition
+                        } else {
+                            default.exponential_transition_distance
+                        },
+                        metering_mask,
+                        compensation_curve: compensation,
+                    });
+                } else {
+                    entity_mut.remove::<AutoExposure>();
                 }
 
                 status::OK

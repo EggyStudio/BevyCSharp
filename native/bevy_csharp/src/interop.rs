@@ -317,6 +317,96 @@ pub struct BcsPostConfig {
     pub bloom_mode: i32,
 }
 
+/// The lens effects a camera can be given, beside the ones on [`BcsPostConfig`].
+///
+/// A second config rather than more fields on the first, because the two are decided at
+/// different times: the pipeline is a settings screen, while these are what a scene does for a
+/// moment, a hit, a dream, a shot pulling focus. Both share the rule that every field is applied
+/// on every call, so an effect a config leaves off is taken off the camera.
+///
+/// Depth of field, lens distortion and the vignette are switched by a mode or an intensity
+/// rather than by a flag of their own, since each carries a value that means nothing happens.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsEffectsConfig {
+    /// How out-of-focus depths are blurred: `0` not at all, `1` gaussian, `2` bokeh.
+    pub dof_mode: i32,
+    /// Distance in metres to what is in focus.
+    pub focal_distance: f32,
+    /// Aperture in f-stops. Smaller opens the lens, which is a shallower depth of field.
+    pub aperture_f_stops: f32,
+    /// Height of the imaginary sensor, in metres. With the field of view this fixes the focal
+    /// length. `0` takes Bevy's own, which is the Super 35 cinema format.
+    pub sensor_height: f32,
+    /// Widest a blur may be, in pixels. `0` takes Bevy's own.
+    pub max_blur_diameter: f32,
+    /// Distance past which nothing is blurred any further, in metres. `0` leaves it unbounded,
+    /// which blurs a sky as hard as the cap allows.
+    pub max_depth: f32,
+    /// Fraction of a frame the shutter is open, `0` for no motion blur. `0.5` is a film camera's
+    /// 180 degree shutter; above `1` smears further than anything moved.
+    pub shutter_angle: f32,
+    /// Samples taken either side of a pixel along its motion. `0` also turns motion blur off.
+    pub motion_blur_samples: u32,
+    /// Width of the coloured fringe, as a fraction of the window. `0` for none.
+    pub aberration: f32,
+    /// Cap on the samples the fringe is built from. `0` takes Bevy's own.
+    pub aberration_samples: u32,
+    /// Asset key of the image the fringe takes its colours from, or `-1` for red, green, blue.
+    pub aberration_lut: i32,
+    /// Strength of the lens warp: positive bulges outwards, negative pinches inwards, `0` for a
+    /// straight picture.
+    pub distortion: f32,
+    /// Zoom applied after warping, to crop the edges a strong warp leaves uncovered.
+    pub distortion_scale: f32,
+    /// How much of the warp lands on each axis, `[1, 1]` for a round one.
+    pub distortion_axes: [f32; 2],
+    /// Point the warp radiates from, in fractions of the window.
+    pub distortion_center: [f32; 2],
+    /// How sharply the warp bends at the edges of the picture.
+    pub distortion_edge_curvature: f32,
+    /// How dark the corners go, `0` for no vignette and `1` for black.
+    pub vignette: f32,
+    /// How much of the picture is left untouched, as a fraction of the window.
+    pub vignette_radius: f32,
+    /// Width of the edge between the clear centre and the dark corners.
+    pub vignette_smoothness: f32,
+    /// Shape of that edge, `1` for a circle.
+    pub vignette_roundness: f32,
+    /// Point the vignette is centred on, in fractions of the window.
+    pub vignette_center: [f32; 2],
+    /// How far the vignette is stretched to fit a window that is not square, `0` not at all and
+    /// `1` exactly.
+    pub vignette_edge_compensation: f32,
+    /// Linear colour the corners are taken towards, usually black.
+    pub vignette_color: [f32; 4],
+    /// Non-zero to let the camera find its own exposure from what it can see.
+    pub auto_exposure: i32,
+    /// Darkest luminance the metering counts, in EV-100.
+    pub metering_min: f32,
+    /// Brightest luminance the metering counts, in EV-100.
+    pub metering_max: f32,
+    /// Fraction of the darkest samples thrown away before averaging.
+    pub metering_low: f32,
+    /// Fraction below which the brightest samples are kept, so `0.9` throws away the top tenth.
+    pub metering_high: f32,
+    /// How fast the exposure opens when a scene darkens, in f-stops per second.
+    pub speed_brighten: f32,
+    /// How fast it closes when a scene brightens, in f-stops per second.
+    pub speed_darken: f32,
+    /// How near the target the adaptation stops being linear, in f-stops.
+    pub exposure_transition: f32,
+    /// Asset key of an image weighting where in the frame the metering looks, or `-1` to weight
+    /// the whole frame alike. Only the red channel is read.
+    pub metering_mask: i32,
+    /// How many of [`Self::compensation_curve`] are used, `0` for no compensation. Two or more
+    /// points make a curve.
+    pub compensation_points: u32,
+    /// Pairs of measured luminance in EV-100 and the compensation to apply there in f-stops,
+    /// rising in luminance. Eight points is what the flat config carries.
+    pub compensation_curve: [f32; 16],
+}
+
 /// A sky computed from the light scattering through a planet's air.
 ///
 /// The atmosphere itself is a planet-sized entity that the camera looks out from, so this config

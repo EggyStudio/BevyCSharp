@@ -168,6 +168,11 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                     .set(asset_plugin(&asset_root)),
             );
 
+            // Auto exposure is the one post-processing effect `DefaultPlugins` leaves out, since
+            // it needs compute shaders and so cannot run everywhere the rest can. Every desktop
+            // backend the bridge builds for has them.
+            app.add_plugins(bevy::post_process::auto_exposure::AutoExposurePlugin);
+
             // Debug drawing goes through a queue, because a `Gizmos` parameter cannot be held by
             // an exclusive system. Only registered here: the plugin that draws them comes with
             // `DefaultPlugins`, so a windowless app has nothing to drain into.
@@ -240,6 +245,12 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         // `LightPlugin` registers it on the windowed path.
         #[cfg(feature = "render")]
         app.init_asset::<bevy::light::atmosphere::ScatteringMedium>();
+
+        // The same again for an exposure compensation curve, which is a lookup table built from
+        // points rather than anything drawn. `AutoExposurePlugin` registers it on the windowed
+        // path.
+        #[cfg(feature = "render")]
+        app.init_asset::<bevy::post_process::auto_exposure::AutoExposureCompensationCurve>();
 
         // Loads `.scn` and `.scn.ron`, and spawns any `WorldAsset` an entity points at, which is
         // what a glTF scene is too. Unlike the two above, this registers its loader in `build`.

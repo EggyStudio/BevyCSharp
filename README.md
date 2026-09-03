@@ -733,6 +733,34 @@ texture or a shader. Bloom scatters light out of whatever is brighter than white
 `Hdr` and something emissive to work on: to make one object glow harder, raise its material's
 emissive colour rather than the bloom.
 
+The lens the picture is drawn through is a second call, because it is decided at a different
+time: the pipeline above is what a settings screen owns, and these are what a scene does for a
+moment.
+
+```csharp
+Render.SetEffects(camera, new EffectSettings
+{
+    DepthOfField = DepthOfFieldMode.Bokeh,   // focus, and a disc around every highlight past it
+    FocalDistance = 8f,
+    Aperture = 1.4f,
+    ShutterAngle = 0.5f,                     // a film camera's 180 degree shutter
+    Aberration = 0.02f,                      // coloured fringes on the edges
+    Distortion = 0.3f,                       // a wide lens bulging the picture outwards
+    Vignette = 0.4f,                         // corners going dark
+    AutoExposure = true,                     // the camera metering the frame for itself
+});
+```
+
+The same rule as the pipeline: the whole lens in one call, so an effect the settings leave off is
+taken off the camera. Depth of field needs a perspective camera, since focus has no meaning
+without one, and `Aperture` is in f-stops, so a smaller number is a wider lens and less of the
+scene in focus. Motion blur reads where each pixel moved, which costs a second pass over the
+scene, and that pass goes away again when the shutter angle does. `AberrationColors` swaps the
+red, green, blue fringe for any image, read across its width. Auto exposure builds a histogram of
+the frame and moves the exposure so the average lands on middle grey, which is what an eye does
+walking out of a cave; `MeteringMask` weights where in the frame it looks, and
+`ExposureCompensation` bends the result so a night scene can stay dark.
+
 The sky can be scattered rather than painted:
 
 ```csharp
@@ -1350,8 +1378,9 @@ run against a real Bevy app. Known gaps:
 - A render build draws: mesh primitives, textured physically based materials, cameras, lights,
   sprites, gizmos, UI nodes and text are reachable from a behavior script, verified on Vulkan.
   glTF files and `.scn` scenes load and spawn, audio plays, and a camera tonemaps, blooms,
-  multisamples, antialiases and scatters a sky over what it draws. What is thin is the layer above that. Animation has no bridge, sprites step through no frames of their own, and the
-  GPU-compressed texture formats are not decoded.
+  multisamples, antialiases, scatters a sky over what it draws, pulls focus and finds its own
+  exposure. What is thin is the layer above that. Animation has no bridge, sprites step through
+  no frames of their own, and the GPU-compressed texture formats are not decoded.
   [.github/TODO.md](.github/TODO.md) lists what each gap needs.
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does
   nothing yet.

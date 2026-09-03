@@ -67,6 +67,143 @@ public sealed class RenderControlTests
     }
 
     [Fact]
+    public void ACameraTakesAWholeLens()
+    {
+        // The same shape as the pipeline above: every effect is accepted, and a settings object
+        // that asks for none of them has to take off the ones a previous call put on.
+        using var harness = new EngineHarness(frames: 4);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var camera = Render.SpawnCamera3d();
+
+            Render.SetEffects(camera, new EffectSettings
+            {
+                DepthOfField = DepthOfFieldMode.Bokeh,
+                FocalDistance = 8f,
+                Aperture = 1.4f,
+                SensorHeight = 0.024f,
+                MaxBlurDiameter = 32f,
+                MaxDepth = 300f,
+                ShutterAngle = 0.5f,
+                MotionBlurSamples = 3,
+                Aberration = 0.03f,
+                AberrationSamples = 12,
+                Distortion = 0.4f,
+                DistortionScale = 1.1f,
+                DistortionAxes = (1f, 0.8f),
+                DistortionCenter = (0.5f, 0.45f),
+                DistortionEdgeCurvature = 0.2f,
+                Vignette = 0.6f,
+                VignetteRadius = 0.6f,
+                VignetteSmoothness = 3f,
+                VignetteRoundness = 0.8f,
+                VignetteCenter = (0.5f, 0.55f),
+                VignetteEdgeCompensation = 0.5f,
+                VignetteColor = (0.1f, 0f, 0f, 1f),
+                AutoExposure = true,
+                MeteringRange = (-6f, 10f),
+                MeteringFilter = (0.2f, 0.8f),
+                SpeedBrighten = 2f,
+                SpeedDarken = 0.5f,
+                ExposureTransition = 2f,
+                ExposureCompensation = [(-4f, -2f), (0f, 0f), (2f, 0f), (4f, 2f)],
+            });
+
+            foreach (var mode in Enum.GetValues<DepthOfFieldMode>())
+                Render.SetEffects(camera, new EffectSettings { DepthOfField = mode });
+
+            // Back to a plain lens, which has to remove what the calls above added rather than
+            // leave the camera wearing it.
+            Render.SetEffects(camera, new EffectSettings());
+
+            Assert.True(ctx.Ecs.IsAlive(camera));
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void AnExposureCurveIsReadByLookingBrightnessUpInIt()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            var camera = Render.SpawnCamera3d();
+
+            // A curve that doubles back cannot be looked up, so it is refused here rather than
+            // reaching the bridge, where the only answer available is a status code.
+            var doublesBack = Assert.Throws<ArgumentException>(() => Render.SetEffects(
+                camera,
+                new EffectSettings
+                {
+                    AutoExposure = true,
+                    ExposureCompensation = [(0f, 0f), (-1f, 1f)],
+                }));
+
+            Assert.Contains("luminance", doublesBack.Message, StringComparison.Ordinal);
+
+            // One point is no curve at all, which is allowed and means no compensation.
+            Render.SetEffects(camera, new EffectSettings
+            {
+                AutoExposure = true,
+                ExposureCompensation = [(0f, 1f)],
+            });
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void AnEffectDrawsWithTheImageItWasGiven()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            // Bound before the image has finished loading, as a material's texture is: the
+            // effect holds a handle rather than pixels.
+            var image = AssetServer.Load(AssetKind.Image, "textures/checker.png");
+            var camera = Render.SpawnCamera3d();
+
+            Render.SetEffects(camera, new EffectSettings
+            {
+                Aberration = 0.02f,
+                AberrationColors = image,
+                AutoExposure = true,
+                MeteringMask = image,
+            });
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void EffectsBelongToACameraAndNothingElse()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var plain = ctx.Ecs.Spawn();
+            var notACamera = Assert.Throws<BevyNativeException>(
+                () => Render.SetEffects(plain, new EffectSettings()));
+            Assert.Equal(NativeStatus.NotPresent, notACamera.Status);
+
+            var gone = Assert.Throws<BevyNativeException>(
+                () => Render.SetEffects(Entity.None, new EffectSettings()));
+            Assert.Equal(NativeStatus.NoEntity, gone.Status);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void TheSkyIsOnePlanetHoweverManyCamerasLookAtIt()
     {
         using var harness = new EngineHarness(frames: 4);
