@@ -50,7 +50,7 @@ public partial struct Scene
         Render.SetPostProcessing(camera, new PostSettings
         {
             Hdr = true,
-            Tonemapper = Tonemapper.AgX,
+            Tonemapper = Tonemapper.TonyMcMapface,
             Bloom = true,
             BloomIntensity = 0.3f,
             AntiAlias = AntiAliasPass.Fxaa,
