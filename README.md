@@ -95,7 +95,8 @@ public partial struct Spinner
     public float Speed;
 
     [OnUpdate]
-    public void Tick(BehaviorContext ctx) => Angle += Speed * ctx.Time.Delta;
+    public void Tick(BehaviorContext ctx) => 
+        Angle += Speed * ctx.Time.Delta;
 }
 ```
 
@@ -165,7 +166,8 @@ that take one rather than a type (`HasById`, `CountById`, `RemoveById`, `Changed
 ```csharp
 public struct Transform : INativeComponent
 {
-    readonly string INativeComponent.NativeName => "Transform";
+    readonly string INativeComponent.NativeName => 
+        "Transform";
     // ... fields laid out exactly as Bevy's
 }
 ```
@@ -1083,8 +1085,8 @@ cannot silently disable your system.
 [RunIf(nameof(IsPlaying))]
 public static void Tick(BehaviorContext ctx) { }
 
-public static bool IsPlaying(World world)
-    => world.TryGetResource<GameState>(out var s) && s.Playing;
+public static bool IsPlaying(World world) => 
+    world.TryGetResource<GameState>(out var s) && s.Playing;
 ```
 
 `[ToggleKey]` is the entire implementation of "press F3 to show the overlay":
@@ -1112,8 +1114,8 @@ to build a chord out of an ordinary key, write the check yourself:
 [RunIf(nameof(ChordHeld))]
 public static void DrawHud(BehaviorContext ctx) { }
 
-public static bool ChordHeld(World world)
-    => world.Resource<Input>().AllKeysDown([Key.ControlLeft, Key.F3]);
+public static bool ChordHeld(World world) => 
+    world.Resource<Input>().AllKeysDown([Key.ControlLeft, Key.F3]);
 ```
 
 `Input` mirrors Bevy's `ButtonInput` here: `AnyKeyDown`, `AllKeysDown`, `AnyKeyPressed` and

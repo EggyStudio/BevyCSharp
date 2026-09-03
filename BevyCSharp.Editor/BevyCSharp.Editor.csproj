@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <RootNamespace>BevyCSharp.Editor</RootNamespace>
+    </PropertyGroup>
+
+    <!--
+      The same wiring BevyCSharp.Sample uses: the library as a reference and the generator as an
+      analyzer. The analyzer line is required rather than tidy, because analyzers are per
+      compilation: without it the panels in this project generate nothing and bind to nothing.
+    -->
+    <ItemGroup>
+        <ProjectReference Include="../BevyCSharp/BevyCSharp.csproj"/>
+        <ProjectReference Include="../BevyCSharp.Generator/BevyCSharp.Generator.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <!--
+      Panels are three files: structure in HTML, appearance in CSS, behavior in C#. The first two
+      are assets so they can be edited without rebuilding, which is what makes the shipped editor
+      a starting point rather than a fixed one. The destination is spelled out rather than left to
+      LinkBase, which not every build host applies the same way.
+    -->
+    <ItemGroup>
+        <None Include="assets/**" CopyToOutputDirectory="PreserveNewest"
+              Link="assets/%(RecursiveDir)%(Filename)%(Extension)"/>
+    </ItemGroup>
+
+</Project>
