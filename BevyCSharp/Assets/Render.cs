@@ -250,6 +250,25 @@ public enum AntiAliasPass
 
     /// <summary>Costlier and sharper, and better on near-horizontal edges.</summary>
     Smaa = 2,
+
+    /// <summary>
+    /// Resolved from the frames before it, which catches what the other two cannot.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Every frame is drawn from a slightly different point and averaged with its predecessors,
+    /// so an edge is sampled many times over rather than guessed at from one. That catches the
+    /// aliasing a texture or a specular highlight produces, which a pass looking at a single
+    /// finished frame has no way to tell from detail.
+    /// </para>
+    /// <para>
+    /// The cost is a trail behind anything whose motion the renderer reports wrongly, and a
+    /// picture that is softer than the other two. It needs a 3D camera and
+    /// <see cref="PostSettings.Msaa"/> set to 1, since there is no history to resolve from a
+    /// multisampled target.
+    /// </para>
+    /// </remarks>
+    Temporal = 3,
 }
 
 /// <summary>How hard an antialiasing pass looks for an edge.</summary>
@@ -319,14 +338,22 @@ public sealed class PostSettings
     /// </summary>
     /// <remarks>
     /// Smooths the edges of geometry and nothing else. Four is Bevy's own; one turns it off,
-    /// which is what a game leaning on <see cref="AntiAlias"/> does.
+    /// which is what a game leaning on <see cref="AntiAlias"/> does, and what
+    /// <see cref="AntiAliasPass.Temporal"/> requires.
     /// </remarks>
     public int Msaa { get; set; } = 4;
 
     /// <summary>An antialiasing pass over the finished picture.</summary>
     public AntiAliasPass AntiAlias { get; set; } = AntiAliasPass.None;
 
-    /// <summary>How hard that pass looks for an edge.</summary>
+    /// <summary>
+    /// How hard that pass looks for an edge.
+    /// </summary>
+    /// <remarks>
+    /// Read by <see cref="AntiAliasPass.Fxaa"/> and <see cref="AntiAliasPass.Smaa"/>. Temporal
+    /// antialiasing has no such setting: how much it catches is decided by how many frames it
+    /// has to work from.
+    /// </remarks>
     public AntiAliasQuality Quality { get; set; } = AntiAliasQuality.Medium;
 
     /// <summary>
@@ -965,6 +992,9 @@ public static unsafe class Render
     /// <param name="camera">A camera entity from <see cref="SpawnCamera3d()"/> or
     /// <see cref="Render2d.SpawnCamera2d"/>.</param>
     /// <param name="settings">What the camera should do.</param>
+    /// <exception cref="ArgumentException">
+    /// <see cref="AntiAliasPass.Temporal"/> is asked for together with multisampling.
+    /// </exception>
     /// <exception cref="BevyNativeException">
     /// The entity is gone or is not a camera, or this build has no renderer.
     /// </exception>
@@ -986,6 +1016,17 @@ public static unsafe class Render
     public static void SetPostProcessing(Entity camera, PostSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
+
+        // Temporal antialiasing resolves the picture from the frames before it, and a
+        // multisampled target has no such history. Bevy answers the pair by warning once a frame
+        // and drawing nothing, which is the kind of quiet failure worth refusing outright.
+        if (settings.AntiAlias == AntiAliasPass.Temporal && settings.Msaa is 2 or 4 or 8)
+        {
+            throw new ArgumentException(
+                "temporal antialiasing cannot run on a multisampled target, and Msaa is "
+                    + $"{settings.Msaa}; set Msaa to 1 to use it",
+                nameof(settings));
+        }
 
         var native = new NativePostConfig
         {

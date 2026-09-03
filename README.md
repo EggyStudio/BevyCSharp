@@ -729,7 +729,11 @@ show, which does. All eight of Bevy's are there, from `None` through `Reinhard` 
 Bevy's own `TonyMcMapface`; the choice is a look rather than a correctness question, and it shows
 most with `Hdr` on. `Msaa` smooths the edges of geometry while the scene is rasterised, while
 `AntiAlias` runs a pass over the finished picture and so also catches edges that come from a
-texture or a shader. Bloom scatters light out of whatever is brighter than white, so it needs
+texture or a shader. `Fxaa` is the cheap one and `Smaa` the sharper one; `Temporal` resolves each
+frame from the ones before it, so it sees an edge sampled many times over and catches the
+aliasing a single finished frame gives a pass no way to see, at the cost of a trail behind
+anything whose motion the renderer reports wrongly. It needs a 3D camera and `Msaa = 1`, and
+asking for it alongside multisampling throws rather than quietly drawing nothing. Bloom scatters light out of whatever is brighter than white, so it needs
 `Hdr` and something emissive to work on: to make one object glow harder, raise its material's
 emissive colour rather than the bloom.
 

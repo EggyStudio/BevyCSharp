@@ -67,6 +67,89 @@ public sealed class RenderControlTests
     }
 
     [Fact]
+    public void TemporalAntialiasingResolvesFromFramesRatherThanSamples()
+    {
+        using var harness = new EngineHarness(frames: 6);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var camera = Render.SpawnCamera3d();
+
+            Render.SetPostProcessing(camera, new PostSettings
+            {
+                AntiAlias = AntiAliasPass.Temporal,
+                Msaa = 1,
+                Hdr = true,
+            });
+
+            // Asking again keeps the frames it has accumulated rather than throwing them away,
+            // which is what a settings screen writing the whole pipeline back would otherwise do
+            // every time the player changed something else.
+            Render.SetPostProcessing(camera, new PostSettings
+            {
+                AntiAlias = AntiAliasPass.Temporal,
+                Msaa = 1,
+                Hdr = true,
+                Tonemapper = Tonemapper.AgX,
+            });
+
+            // Off again, which has to take the jitter and the prepasses with it: a camera left
+            // jittering with nothing resolving it shimmers, and the prepasses draw the scene a
+            // second time for nobody.
+            Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
+
+            // And on to another pass, which is the other way out of temporal.
+            Render.SetPostProcessing(camera, new PostSettings
+            {
+                AntiAlias = AntiAliasPass.Fxaa,
+                Msaa = 1,
+            });
+
+            Assert.True(ctx.Ecs.IsAlive(camera));
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void TemporalAntialiasingAndMultisamplingAreRefusedTogether()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            var camera = Render.SpawnCamera3d();
+
+            var both = Assert.Throws<ArgumentException>(() => Render.SetPostProcessing(
+                camera,
+                new PostSettings { AntiAlias = AntiAliasPass.Temporal, Msaa = 4 }));
+
+            Assert.Contains("Msaa", both.Message, StringComparison.Ordinal);
+
+            // Straight at the bridge as well, since the managed guard is the friendlier of two
+            // and the C ABI is a boundary of its own. The camera keeps the pipeline it had,
+            // which is why the pair is caught before anything is written.
+            var config = new NativePostConfig
+            {
+                Tonemapping = (int)Tonemapper.TonyMcMapface,
+                Msaa = 4,
+                AntiAlias = (int)AntiAliasPass.Temporal,
+            };
+
+            unsafe
+            {
+                Assert.Equal(
+                    NativeStatus.InvalidState,
+                    Native.bcs_render_set_post(camera.Bits, &config));
+            }
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void ACameraTakesAWholeLens()
     {
         // The same shape as the pipeline above: every effect is accepted, and a settings object

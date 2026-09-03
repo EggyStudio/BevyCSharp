@@ -695,6 +695,33 @@ pub extern "C" fn bcs_render_set_shadow_maps(directional: u32, point: u32) -> i3
     })
 }
 
+/// Takes temporal antialiasing off a camera, along with what it brought with it.
+///
+/// Bevy adds the jitter, the mip bias and the two prepasses as required components and leaves
+/// them behind when the component that asked for them goes. Left alone the jitter keeps nudging
+/// the projection every frame with nothing to resolve it, which reads as a shimmer, and the
+/// prepasses keep drawing the scene again for nobody.
+///
+/// The motion vector prepass is the one piece that is not exclusively temporal antialiasing's:
+/// motion blur asks for it too, so it stays while a camera is still smearing.
+#[cfg(feature = "render")]
+fn drop_temporal(entity: &mut bevy::ecs::world::EntityWorldMut) {
+    use bevy::anti_alias::taa::TemporalAntiAliasing;
+    use bevy::core_pipeline::prepass::{DepthPrepass, MotionVectorPrepass};
+    use bevy::post_process::motion_blur::MotionBlur;
+    use bevy::render::camera::{MipBias, TemporalJitter};
+
+    if !entity.contains::<TemporalAntiAliasing>() {
+        return;
+    }
+
+    entity.remove::<(TemporalAntiAliasing, TemporalJitter, MipBias, DepthPrepass)>();
+
+    if !entity.contains::<MotionBlur>() {
+        entity.remove::<MotionVectorPrepass>();
+    }
+}
+
 /// Sets what a camera does to the picture after the scene has been drawn.
 ///
 /// Every effect is applied on every call, so a config describes the whole pipeline rather than
@@ -704,6 +731,13 @@ pub extern "C" fn bcs_render_set_shadow_maps(directional: u32, point: u32) -> i3
 /// Bloom reads a high dynamic range target, so asking for it without `hdr` gets a picture where
 /// nothing is bright enough to scatter. The two are left to the caller rather than forced
 /// together, because a game may want the range without the glow.
+///
+/// Temporal antialiasing is the one arm that can be refused. It resolves the whole picture from
+/// past frames, which a multisampled target has not got, and Bevy answers the pair by warning
+/// once a frame and drawing nothing, so a config asking for both is reported as
+/// [`status::INVALID_STATE`] and the camera is left as it was. It also wants a 3D camera: the
+/// jitter it reads back is only applied to one, and on a 2D camera the pass finds nothing to
+/// resolve.
 ///
 /// # Safety
 /// `config` must point to a readable [`BcsPostConfig`].
@@ -721,6 +755,7 @@ pub unsafe extern "C" fn bcs_render_set_post(entity: u64, config: *const BcsPost
             use bevy::anti_alias::contrast_adaptive_sharpening::ContrastAdaptiveSharpening;
             use bevy::anti_alias::fxaa::{Fxaa, Sensitivity};
             use bevy::anti_alias::smaa::{Smaa, SmaaPreset};
+            use bevy::anti_alias::taa::TemporalAntiAliasing;
             use bevy::camera::Hdr;
             use bevy::core_pipeline::tonemapping::{DebandDither, Tonemapping};
             use bevy::post_process::bloom::{Bloom, BloomCompositeMode, BloomPrefilter};
@@ -748,6 +783,12 @@ pub unsafe extern "C" fn bcs_render_set_post(entity: u64, config: *const BcsPost
                 8 => Msaa::Sample8,
                 _ => Msaa::Off,
             };
+
+            // Refused before anything is written, so a camera that asked for the impossible pair
+            // keeps the pipeline it had rather than half of the new one.
+            if config.antialias == 3 && msaa != Msaa::Off {
+                return status::INVALID_STATE;
+            }
 
             let sensitivity = match config.antialias_quality {
                 0 => Sensitivity::Low,
@@ -810,6 +851,7 @@ pub unsafe extern "C" fn bcs_render_set_post(entity: u64, config: *const BcsPost
                 match config.antialias {
                     1 => {
                         entity_mut.remove::<Smaa>();
+                        drop_temporal(&mut entity_mut);
                         entity_mut.insert(Fxaa {
                             enabled: true,
                             edge_threshold: sensitivity,
@@ -818,11 +860,26 @@ pub unsafe extern "C" fn bcs_render_set_post(entity: u64, config: *const BcsPost
                     }
                     2 => {
                         entity_mut.remove::<Fxaa>();
+                        drop_temporal(&mut entity_mut);
                         entity_mut.insert(Smaa { preset });
+                    }
+                    3 => {
+                        entity_mut.remove::<Fxaa>();
+                        entity_mut.remove::<Smaa>();
+
+                        // Inserted only if it is not there, unlike every other effect here. The
+                        // component's one field asks Bevy to throw away the frames it has
+                        // accumulated, and the config has nothing to say about it, so writing a
+                        // fresh one on every call would keep clearing the history the pass
+                        // exists to build.
+                        if !entity_mut.contains::<TemporalAntiAliasing>() {
+                            entity_mut.insert(TemporalAntiAliasing::default());
+                        }
                     }
                     _ => {
                         entity_mut.remove::<Fxaa>();
                         entity_mut.remove::<Smaa>();
+                        drop_temporal(&mut entity_mut);
                     }
                 }
 
@@ -870,6 +927,7 @@ pub unsafe extern "C" fn bcs_render_set_effects(
 
         #[cfg(feature = "render")]
         {
+            use bevy::anti_alias::taa::TemporalAntiAliasing;
             use bevy::asset::{Assets, Handle};
             use bevy::color::Color;
             use bevy::core_pipeline::prepass::MotionVectorPrepass;
@@ -1003,9 +1061,13 @@ pub unsafe extern "C" fn bcs_render_set_effects(
                 } else {
                     // The prepass goes with it. Bevy brings it in as a required component and
                     // leaves it behind on removal, and it draws the scene a second time every
-                    // frame, so a camera that stopped blurring would go on paying for it.
+                    // frame, so a camera that stopped blurring would go on paying for it. Unless
+                    // temporal antialiasing is reading it too, which is the other thing that
+                    // asks for motion vectors.
                     entity_mut.remove::<MotionBlur>();
-                    entity_mut.remove::<MotionVectorPrepass>();
+                    if !entity_mut.contains::<TemporalAntiAliasing>() {
+                        entity_mut.remove::<MotionVectorPrepass>();
+                    }
                 }
 
                 if config.aberration > 0.0 {

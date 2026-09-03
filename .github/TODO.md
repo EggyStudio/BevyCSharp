@@ -203,19 +203,21 @@ What is left:
 Cameras, lights and the window take their common parameters, and a camera tonemaps, dithers,
 multisamples, antialiases, sharpens, blooms and scatters a sky over what it draws, pulls focus,
 smears what moves, fringes and warps its lens, darkens its corners and finds its own exposure.
-`bevy_post_process` and `bevy_anti_alias` are compiled into the render profile, so what is left
-in this area is bridge work over code already in the binary rather than a feature to add. What is
-left:
+`bevy_post_process` and `bevy_anti_alias` are compiled into the render profile, so most of what
+is left in this area is bridge work over code already in the binary rather than a feature to add.
+What is left:
 
-- **Temporal antialiasing.** The one pass over the finished picture that is still unbridged.
-  `TemporalAntiAliasing` brings the depth and motion vector prepasses with it the way
-  `MotionBlur` does, so the obstacle is not the prepass: it needs multisampling turned off, and
-  it ghosts behind anything whose motion vectors are wrong. That makes it a third arm on
-  `AntiAlias` that has to refuse a config asking for it and for multisampling at once, rather
-  than one more flag.
-- **Exposure the camera does not choose.** `Exposure` sits on the camera and sets aperture,
-  shutter speed and sensitivity by hand, which is the alternative to `AutoExposure` rather than a
-  companion to it, and the same `PhysicalCameraParameters` that fix a lens's depth of field.
+- **Exposure the camera does not choose.** `Exposure` is one number on the camera, the EV-100 a
+  scene is metered at, and it is the base `AutoExposure` corrects rather than an alternative to
+  it: the compute pass adds its own answer to `ColorGrading.exposure` and leaves this alone.
+  `PhysicalCameraParameters::ev100` derives it from aperture, shutter speed and sensitivity,
+  which is the same struct that fixes a lens's depth of field, so the two can be given matching
+  numbers.
+- **DLSS.** `bevy_anti_alias` carries it behind a `dlss` feature that pulls in `dlss_wgpu`, which
+  has licensing terms of its own, and it runs only on an NVIDIA RTX card through Vulkan on
+  Windows or Linux. It also wants a `DlssProjectId` inserted before `DefaultPlugins` and a
+  runtime check of whether the machine supports it at all, so it is a fourth arm on `AntiAlias`
+  that most machines have to be told they cannot have, rather than one more value.
 - **The rest of the sky.** Earth's air is bridged; Mars is the other medium Bevy ships and its
   dust phase comes from a texture, so it needs an image handle on the config and a texture worth
   shipping. `ScatteringMedium::new` takes arbitrary scattering terms, which is what an alien

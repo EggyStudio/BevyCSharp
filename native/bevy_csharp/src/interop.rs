@@ -299,7 +299,7 @@ pub struct BcsPostConfig {
     /// Samples per pixel taken while rasterising: `1` off, or `2`, `4`, `8`.
     pub msaa: i32,
     /// The antialiasing that runs as a pass over the finished picture: `0` none, `1` FXAA,
-    /// `2` SMAA.
+    /// `2` SMAA, `3` temporal, which needs `msaa` off and a 3D camera.
     pub antialias: i32,
     /// How hard FXAA or SMAA looks for an edge: `0` low, `1` medium, `2` high, `3` ultra.
     pub antialias_quality: i32,
