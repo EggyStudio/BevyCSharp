@@ -98,7 +98,6 @@ pub fn install(app: &mut bevy::app::App) {
             // Picking reports the deepest thing under the pointer, which for a button is the
             // text inside it rather than the button. Walk up until something is addressable.
             let mut entity = click.entity;
-            bevy::log::info!("[diag] raw click target {:?}", entity);
             loop {
                 if addressable.get(entity).is_ok() {
                     events.0.push(BcsUiEvent {

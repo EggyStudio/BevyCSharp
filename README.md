@@ -1268,6 +1268,7 @@ and the packed `.nupkg`. The repository root stays clean.
 ```
 BevyCSharp/            managed runtime library
 BevyCSharp.Generator/  Roslyn source generator
+BevyCSharp.Editor/     the editor, and the framework its panels are built on
 BevyCSharp.Sample/     runnable example behaviors
 BevyCSharp.Tests/      test suite, run against a real Bevy app
 native/                Rust sources for the bridge
