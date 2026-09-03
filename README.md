@@ -166,8 +166,7 @@ that take one rather than a type (`HasById`, `CountById`, `RemoveById`, `Changed
 ```csharp
 public struct Transform : INativeComponent
 {
-    readonly string INativeComponent.NativeName => 
-        "Transform";
+    readonly string INativeComponent.NativeName => "Transform";
     // ... fields laid out exactly as Bevy's
 }
 ```

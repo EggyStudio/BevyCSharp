@@ -1,0 +1,69 @@
+/*
+ * The editor's appearance, in one place.
+ *
+ * Every panel links this, so the chrome of a window is described here rather than in any panel's
+ * own file or in C#. Restyling the whole editor is editing this file, and a panel that wants to
+ * look different says so with a class of its own.
+ */
+
+:root {
+    --surface: #191c22ee;
+    --surface-raised: #22262e;
+    --border: #ffffff1f;
+    --text: #e9edf4;
+    --muted: #8b95a7;
+    --accent: #5b8cff;
+    --radius: 14px;
+}
+
+body {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    column-gap: 20px;
+}
+
+/*
+ * A floating panel, inset from the edge with the scene showing behind it. Not docked and not
+ * part of a fixed frame: where it sits is this rule, and moving it is editing this rule.
+ */
+.window {
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+    padding: 16px;
+    row-gap: 10px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+}
+
+.window h2 {
+    font-size: 15px;
+    color: var(--text);
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    column-gap: 12px;
+    height: 28px;
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+button {
+    height: 32px;
+    padding: 8px;
+    background-color: var(--accent);
+    border-radius: 8px;
+    color: var(--text);
+}
