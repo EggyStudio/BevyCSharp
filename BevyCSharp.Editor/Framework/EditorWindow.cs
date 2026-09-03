@@ -22,6 +22,7 @@ namespace BevyCSharp.Editor.Framework;
 public sealed class EditorWindow
 {
     private readonly Dictionary<string, Entity> _elements = [];
+    private bool _suspended;
 
     private EditorWindow(string path, UiDocument document)
     {
@@ -52,6 +53,10 @@ public sealed class EditorWindow
     /// </remarks>
     public Entity Element(string cssId)
     {
+        // Nothing is worth resolving while the widgets are being replaced: the old ones are dead
+        // or dying, and a lookup now would cache one of them for good.
+        if (_suspended) return Entity.None;
+
         if (_elements.TryGetValue(cssId, out var known)) return known;
 
         var found = Xui.Element(cssId);
@@ -64,14 +69,31 @@ public sealed class EditorWindow
     public bool Owns(Entity element) => _elements.ContainsValue(element);
 
     /// <summary>
-    /// Forgets which entities the elements were.
+    /// Stops the window reading its elements, because they are about to be replaced.
     /// </summary>
     /// <remarks>
-    /// Called when the documents are rebuilt, which happens when one of their files changes on
-    /// disk. Every widget is respawned, so a kept entity names nothing and the next lookup has
-    /// to go back to the engine.
+    /// Every lookup answers <see cref="Entity.None"/> until <see cref="Resume"/>, and every
+    /// binding does nothing with that, so the frames between a document changing on disk and its
+    /// new widgets standing up pass without anything reading a despawned entity.
     /// </remarks>
-    public void Invalidate() => _elements.Clear();
+    public void Suspend()
+    {
+        _suspended = true;
+        _elements.Clear();
+    }
+
+    /// <summary>
+    /// Starts reading again, against whatever the rebuild produced.
+    /// </summary>
+    /// <remarks>
+    /// The elements are looked up afresh, since every widget is a new entity. What the panel
+    /// holds is untouched, so the values go straight back onto the new elements.
+    /// </remarks>
+    public void Resume()
+    {
+        _suspended = false;
+        _elements.Clear();
+    }
 
     /// <summary>Takes the window off the screen.</summary>
     public void Close()

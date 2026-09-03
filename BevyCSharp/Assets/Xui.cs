@@ -26,6 +26,16 @@ public enum UiEventKind
     /// element has to look it up again.
     /// </remarks>
     Reloaded = 4,
+
+    /// <summary>
+    /// A document changed on disk and a rebuild is coming.
+    /// </summary>
+    /// <remarks>
+    /// The widgets are about to be despawned, so anything holding an element should stop reading
+    /// it until <see cref="Reloaded"/> says the new ones are up. The two are several frames
+    /// apart, and reading in between is reading the dead.
+    /// </remarks>
+    Reloading = 5,
 }
 
 /// <summary>

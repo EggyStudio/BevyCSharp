@@ -1,4 +1,5 @@
 using Bevy;
+using BevyCSharp.Editor;
 
 // Opens the editor: a scene filling the window, with panels floating over it.
 //
@@ -34,4 +35,12 @@ if (!App.HasEditor)
 Console.WriteLine($"BevyCSharp editor: {config}");
 Console.WriteLine($"adapter: {App.DescribeAdapter() ?? "not reported yet"}");
 
-return BevyApp.Run(config);
+return BevyApp.Run(
+    app =>
+    {
+        // Behavior scripts are compiled while the app runs, so their systems arrive after the
+        // schedule is Bevy's. The dispatchers have to be in place before that.
+        app.EnableDynamicSystems();
+        EditorBoot.Host = app;
+    },
+    config);

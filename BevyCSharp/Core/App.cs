@@ -267,16 +267,22 @@ public sealed unsafe class App : IDisposable
         AddSystem(stage, new SystemDescriptor(system).RunIf(runCondition));
 
     /// <summary>Registers a described system in <paramref name="stage"/>.</summary>
-    /// <exception cref="InvalidOperationException">The app is already running.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// The app is already running and <see cref="EnableDynamicSystems"/> was not called before it
+    /// started.
+    /// </exception>
     public App AddSystem(Stage stage, SystemDescriptor descriptor)
     {
         ArgumentNullException.ThrowIfNull(descriptor);
         ObjectDisposedException.ThrowIf(_disposed, this);
 
+        if (IsRunning && _dynamicStages is not null) return AddDynamicSystem(stage, descriptor);
+
         if (IsRunning)
             throw new InvalidOperationException(
                 $"Cannot register system '{descriptor.Name}': the app is already running. "
-                + "Register systems from a plugin's Build method or before calling Run.");
+                + "Register systems from a plugin's Build method or before calling Run. To add "
+                + "one while it runs, call EnableDynamicSystems before Run.");
 
         descriptor.Source ??= SystemRegistrationSourceScope.Current;
 
@@ -290,6 +296,107 @@ public sealed unsafe class App : IDisposable
                 &RegisteredSystem.Trampoline,
                 registration.UserData),
             $"registering system '{descriptor.Name}'");
+
+        return this;
+    }
+
+    /// <summary>The stages a dynamically added system can be put in.</summary>
+    /// <remarks>
+    /// The ones a behavior can name. The two internal stages are left out: what they do is fixed,
+    /// and nothing loaded at runtime has business in either.
+    /// </remarks>
+    private static readonly Stage[] DispatchStages =
+    [
+        Stage.First, Stage.PreUpdate, Stage.Update, Stage.FixedUpdate,
+        Stage.PostUpdate, Stage.Render, Stage.Last,
+    ];
+
+    /// <summary>Where a dynamically added system waits to be run, or null when none may be.</summary>
+    private Dictionary<Stage, List<RegisteredSystem>>? _dynamicStages;
+
+    /// <summary>
+    /// Allows systems to be added after the loop has started.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A schedule cannot be added to once Bevy owns it, so this puts one dispatcher in each stage
+    /// beforehand and runs whatever has arrived since. That is what makes a behavior compiled at
+    /// runtime, from a script file that was edited while the app ran, reach the schedule at all.
+    /// </para>
+    /// <para>
+    /// Off unless asked for, because it costs a call across the boundary per stage per frame
+    /// whether or not anything was ever added. Retiring a generation is
+    /// <see cref="RemoveSystemsBySource"/>, which is why a reloaded script registers under a tag
+    /// of its own.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">The app is already running.</exception>
+    public App EnableDynamicSystems()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (_dynamicStages is not null) return this;
+
+        if (IsRunning)
+            throw new InvalidOperationException(
+                "Cannot enable dynamic systems: the app is already running, and the dispatchers "
+                + "have to be in the schedule before the loop takes it. Call this before Run.");
+
+        _dynamicStages = [];
+
+        foreach (var stage in DispatchStages)
+        {
+            var waiting = new List<RegisteredSystem>();
+            _dynamicStages[stage] = waiting;
+
+            AddSystem(stage, new SystemDescriptor(world =>
+            {
+                // Indexed rather than enumerated, because a system that runs may register
+                // another, and a removed one is dropped here rather than left to be skipped
+                // forever.
+                for (var i = waiting.Count - 1; i >= 0; i--)
+                {
+                    if (waiting[i].IsRemoved) waiting.RemoveAt(i);
+                }
+
+                for (var i = 0; i < waiting.Count; i++)
+                {
+                    if (!waiting[i].IsRemoved) waiting[i].Descriptor.Invoke(world);
+                }
+            }, $"DynamicSystems.{stage}")
+            {
+                Source = "Core.DynamicSystems",
+            });
+        }
+
+        return this;
+    }
+
+    /// <summary>Adds a system to the dispatcher for its stage.</summary>
+    /// <remarks>
+    /// A startup system is the exception: it is run once, here, rather than queued. The stage
+    /// already happened, so queueing it would mean it never ran at all, and what it means for
+    /// something loaded at runtime is "when this arrives" rather than "when the app began". That
+    /// is what lets a reloaded script spawn what it needs.
+    /// </remarks>
+    private App AddDynamicSystem(Stage stage, SystemDescriptor descriptor)
+    {
+        descriptor.Source ??= SystemRegistrationSourceScope.Current;
+
+        if (stage == Stage.Startup)
+        {
+            descriptor.Invoke(World);
+            return this;
+        }
+
+        if (_dynamicStages is null || !_dynamicStages.TryGetValue(stage, out var waiting))
+            throw new InvalidOperationException(
+                $"Cannot register system '{descriptor.Name}' in {stage} while running: only "
+                + string.Join(", ", DispatchStages) + " and Startup accept one.");
+
+        var registration = new RegisteredSystem(this, descriptor, stage);
+        _systems.Add(registration);
+        waiting.Add(registration);
 
         return this;
     }

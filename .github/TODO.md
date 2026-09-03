@@ -325,7 +325,11 @@ Points to get right:
   handles to the same type. `ctx.Ecs.SpawnScene` spawns either.
 - **Shaders**: `AssetKind.Shader` loads and returns a handle that nothing consumes. Either give
   it a custom material path or remove the kind.
-- **Hot reload**: `BehaviorsPlugin.ScriptsDirectory` is reserved and does nothing.
+- **Hot reload**: `BehaviorsPlugin.ScriptsDirectory` is reserved and does nothing. The engine
+  half is there, `App.EnableDynamicSystems` and `App.RemoveSystemsBySource`, and
+  `BevyCSharp.Editor` drives Roslyn through them. What is left is deciding whether the core
+  should carry a compiler at all, which is what it would take for a game to load a script without
+  the editor.
 
 ## Maintenance
 

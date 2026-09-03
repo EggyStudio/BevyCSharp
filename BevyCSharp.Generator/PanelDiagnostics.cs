@@ -33,7 +33,7 @@ internal static class PanelDiagnostics
         title: "Panel binds nothing",
         messageFormat:
         "'{0}' is marked [EditorPanel] but has no [Bind] or [Command] members, so it will open "
-        + "its document and do nothing else.",
+        + "its document and do nothing else. Add a [Bind] member or a [Command] method.",
         category: Category,
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);

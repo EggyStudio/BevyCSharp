@@ -11,11 +11,27 @@
       analyzer. The analyzer line is required rather than tidy, because analyzers are per
       compilation: without it the panels in this project generate nothing and bind to nothing.
     -->
+    <!--
+      Roslyn, for compiling behavior scripts while the editor runs. It lives here rather than in
+      the runtime library on purpose: a game does not compile C# at runtime and should not carry
+      a compiler to do it, while an editor is the one place that has to.
+    -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
+    </ItemGroup>
+
     <ItemGroup>
         <ProjectReference Include="../BevyCSharp/BevyCSharp.csproj"/>
+        <!--
+          Referenced as well as loaded as an analyzer, which the sample does not do. The editor
+          needs both: the analyzer half generates this project's own panels and behaviors, and
+          the reference half lets the script host run the same generator over a script it
+          compiles while the editor is running. A script has to become a behavior the same way
+          everything else does, not a second way that drifts.
+        -->
         <ProjectReference Include="../BevyCSharp.Generator/BevyCSharp.Generator.csproj"
                           OutputItemType="Analyzer"
-                          ReferenceOutputAssembly="false"/>
+                          ReferenceOutputAssembly="true"/>
     </ItemGroup>
 
     <!--
@@ -27,6 +43,16 @@
     <ItemGroup>
         <None Include="assets/**" CopyToOutputDirectory="PreserveNewest"
               Link="assets/%(RecursiveDir)%(Filename)%(Extension)"/>
+    </ItemGroup>
+
+    <!--
+      Scripts are compiled while the editor runs, not while it is built. Without this the SDK's
+      default glob picks them up as ordinary source and every script exists twice: once baked into
+      this assembly and registered at startup, and once loaded by the script host. Both run, and
+      editing the file only changes one of them.
+    -->
+    <ItemGroup>
+        <Compile Remove="assets/**/*.cs"/>
     </ItemGroup>
 
 </Project>

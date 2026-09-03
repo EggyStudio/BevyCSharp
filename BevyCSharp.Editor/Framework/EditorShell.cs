@@ -84,12 +84,16 @@ public static class EditorShell
                         if (panel.Invoke(report.Element)) break;
                     break;
 
+                case UiEventKind.Reloading:
+                    foreach (var panel in Panels) panel.Window?.Suspend();
+                    break;
+
                 case UiEventKind.Reloaded:
                     // Everything was respawned, so every kept entity is stale. The values the
                     // panels hold are not: the pull below puts them straight back onto the new
                     // elements, which is what makes editing a document while it is open feel
                     // like editing the document rather than restarting the editor.
-                    foreach (var panel in Panels) panel.Window?.Invalidate();
+                    foreach (var panel in Panels) panel.Window?.Resume();
                     break;
             }
         }

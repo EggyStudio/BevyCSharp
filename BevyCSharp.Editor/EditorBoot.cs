@@ -45,6 +45,56 @@ public partial struct EditorBoot
 
         EditorShell.Show(new PostPanel(camera));
         Console.WriteLine($"[editor] {EditorShell.Open.Count} panel open");
+
+        StartScripts();
+    }
+
+    /// <summary>The running app, so the script host can register into it.</summary>
+    public static App? Host { get; set; }
+
+    private static ScriptHost? _scripts;
+    private static ScriptWatcher? _watcher;
+
+    /// <summary>Compiles the scripts directory and starts watching it.</summary>
+    private static void StartScripts()
+    {
+        if (Host is null) return;
+
+        var directory = Path.Combine(AppContext.BaseDirectory, "assets", "scripts");
+
+        _scripts = new ScriptHost(Host, directory);
+        _watcher = new ScriptWatcher(directory);
+
+        Build(first: true);
+    }
+
+    /// <summary>Compiles the scripts and swaps the result in.</summary>
+    private static void Build(bool first)
+    {
+        if (_scripts is null) return;
+
+        if (!_scripts.Reload())
+        {
+            Console.WriteLine($"[editor] scripts not loaded: {_scripts.LastError}");
+            return;
+        }
+
+        Console.WriteLine(
+            $"[editor] scripts {(first ? "loaded" : "reloaded")}: "
+            + $"{_scripts.Registered} registration(s)");
+    }
+
+    /// <summary>Rebuilds when a script file has changed and settled.</summary>
+    /// <remarks>
+    /// A generation's startup runs as it is registered, which is inside this system, so a script
+    /// spawns what it needs and cleans up what the last one left.
+    /// </remarks>
+    [OnUpdate]
+    public static void ReloadScripts(BehaviorContext ctx)
+    {
+        if (_watcher?.TakeChange() != true) return;
+
+        Build(first: false);
     }
 
     /// <summary>Hands the interface's reports to the panels, once a frame.</summary>

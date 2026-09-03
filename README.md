@@ -1404,6 +1404,49 @@ every platform.
 
 ---
 
+## Hot reload
+
+The editor profile watches the asset directory, so a running app picks up what changed on disk.
+`Config.WatchAssets` turns it on.
+
+A panel is three files, and two of them reload. A stylesheet is restyled in place. A document is
+rebuilt, which respawns every widget, so the bridge says so twice: once when the rebuild is asked
+for, so nothing reads an element that is about to be despawned, and once when the new widgets are
+up. What a panel holds is untouched either way, so the values go straight back onto the new
+elements.
+
+Behavior scripts reload too. A script is an ordinary `[Behavior]` struct in a `.cs` file that is
+compiled while the app runs, with the same source generator the compiled projects use, so what it
+gets is the same runner and the same scheduling:
+
+```csharp
+[Behavior]
+public partial struct Spin
+{
+    public float Speed;
+    public float Angle;
+
+    [OnUpdate]
+    public void Tick(BehaviorContext ctx)
+    {
+        Angle += Speed * ctx.Time.Delta;
+        ctx.Ecs.GetRef<Transform>(ctx.Entity).Rotation = Quat.FromRotationY(Angle);
+    }
+}
+```
+
+Two pieces in this library make that possible, and neither involves a compiler.
+`App.EnableDynamicSystems` puts a dispatcher in each stage before the loop starts, because a
+schedule cannot be added to once Bevy owns it, and that is where a system compiled later goes.
+`App.RemoveSystemsBySource` retires the generation being replaced, which is why each one
+registers under a tag of its own. A generation's `[OnStartup]` runs when it arrives rather than
+when the app began, so a reloaded script spawns what it needs and clears out what the last one
+left.
+
+A script that does not compile changes nothing: the errors are reported and the running
+generation stays. The compiler itself lives in `BevyCSharp.Editor`, because a game should not
+carry one in order to run.
+
 ## Status and limitations
 
 Early. The behavior system, the ECS bridge and the schedule work and are covered by tests that

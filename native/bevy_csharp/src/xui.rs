@@ -29,6 +29,9 @@ pub mod event_kind {
     /// The documents were rebuilt after one changed on disk. Reported against no element,
     /// because every element is a new one.
     pub const RELOADED: i32 = 4;
+    /// A document changed on disk and a rebuild has been asked for. Reported against no element,
+    /// and followed by [`RELOADED`] once the new widgets are up.
+    pub const RELOADING: i32 = 5;
 }
 
 #[cfg(feature = "editor")]
@@ -121,23 +124,42 @@ pub fn install(app: &mut bevy::app::App) {
     // Bevy reloads a document whose file changed, but nothing rebuilds the widgets from it: the
     // crate watches its stylesheets and not its documents, so a CSS edit reaches the screen and
     // an HTML edit does not. Asking the registry for a rebuild is what closes that.
-    //
-    // The rebuild respawns every widget, so the entities the managed side is holding all become
-    // stale at once. That is what the report is for.
     app.add_systems(
         Update,
         |mut changes: MessageReader<bevy::asset::AssetEvent<bevy_extended_ui::io::HtmlAsset>>,
          mut registry: ResMut<bevy_extended_ui::old::registry::UiRegistry>,
          mut events: ResMut<UiEvents>| {
-            let rebuilt = changes
+            let changed = changes
                 .read()
                 .any(|change| matches!(change, bevy::asset::AssetEvent::Modified { .. }));
 
-            if !rebuilt {
+            if !changed {
                 return;
             }
 
             registry.ui_update = true;
+
+            // Said as soon as the rebuild is asked for, because the widgets are about to be
+            // despawned and anything still reading them would be reading the dead.
+            events.0.push(BcsUiEvent {
+                kind: event_kind::RELOADING,
+                entity: 0,
+            });
+        },
+    );
+
+    // A rebuild respawns every widget, so everything the managed side is holding goes stale at
+    // once. Reported when the widgets are up rather than when the rebuild was asked for: the two
+    // are several frames apart, and a caller that dropped its entities in between would look them
+    // up again, find the ones still standing, and cache those instead.
+    app.add_systems(
+        Update,
+        |mut spawned: MessageReader<bevy_extended_ui::html::HtmlAllWidgetsSpawned>,
+         mut events: ResMut<UiEvents>| {
+            if spawned.read().next().is_none() {
+                return;
+            }
+
             events.0.push(BcsUiEvent {
                 kind: event_kind::RELOADED,
                 entity: 0,

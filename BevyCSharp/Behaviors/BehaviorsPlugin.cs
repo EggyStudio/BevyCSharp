@@ -23,9 +23,15 @@ namespace Bevy;
 public sealed class BehaviorsPlugin : IPlugin
 {
     /// <summary>
-    /// Directory watched for hot-reloadable behavior scripts. Not yet implemented; leave
-    /// <see langword="null"/> to use only compiled behaviors.
+    /// Directory of behavior scripts to compile at runtime.
     /// </summary>
+    /// <remarks>
+    /// Reserved. Compiling C# needs a compiler, and a game should not carry one to run, so this
+    /// library provides the two halves that are engine business and leaves the compiling to
+    /// whoever wants it: <see cref="App.EnableDynamicSystems"/> for a system that arrives after
+    /// the loop started, and <see cref="App.RemoveSystemsBySource"/> for retiring the generation
+    /// it replaces. <c>BevyCSharp.Editor</c> has a host built on those two.
+    /// </remarks>
     public string? ScriptsDirectory { get; init; }
 
     /// <summary>Provenance tag applied to statically compiled behaviors.</summary>
@@ -69,8 +75,10 @@ public sealed class BehaviorsPlugin : IPlugin
         if (ScriptsDirectory is not null)
         {
             Console.Error.WriteLine(
-                "[BevyCSharp] BehaviorsPlugin.ScriptsDirectory is set, but runtime script "
-                + "compilation is not implemented yet; only compiled behaviors were registered.");
+                "[BevyCSharp] BehaviorsPlugin.ScriptsDirectory is set, but this library does not "
+                + "compile scripts; only compiled behaviors were registered. Drive a compiler "
+                + "through App.EnableDynamicSystems and App.RemoveSystemsBySource, as "
+                + "BevyCSharp.Editor does.");
         }
     }
 
