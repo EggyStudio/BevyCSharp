@@ -16,6 +16,16 @@ public enum UiEventKind
 
     /// <summary>The element took focus.</summary>
     Focus = 3,
+
+    /// <summary>
+    /// The documents were rebuilt after one changed on disk.
+    /// </summary>
+    /// <remarks>
+    /// Reported against no element, because every element is a new one: the rebuild respawns
+    /// them, so any entity held from before this point names nothing. Anything caching an
+    /// element has to look it up again.
+    /// </remarks>
+    Reloaded = 4,
 }
 
 /// <summary>

@@ -17,7 +17,10 @@ default = ["headless"]
 # Its own profile rather than part of `render`, because `render` is what CI builds for six
 # runtime identifiers and what the test suite links against, and this adds a hundred crates and
 # several minutes to a cold build. An editor needs a window regardless, so it starts from render.
-editor = ["render", "dep:bevy_extended_ui"]
+#
+# It also turns on Bevy's asset watcher, which is what lets a document or a stylesheet be edited
+# while the editor runs. That is the whole point of describing an interface in files.
+editor = ["render", "dep:bevy_extended_ui", "bevy/file_watcher"]
 
 # Minimal profile: app + ECS + time + input + transform + math.
 # No window, no GPU, no audio. Drives the loop with ScheduleRunnerPlugin.

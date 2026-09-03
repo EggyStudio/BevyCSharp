@@ -26,6 +26,9 @@ pub mod event_kind {
     pub const SUBMIT: i32 = 2;
     /// A widget took focus.
     pub const FOCUS: i32 = 3;
+    /// The documents were rebuilt after one changed on disk. Reported against no element,
+    /// because every element is a new one.
+    pub const RELOADED: i32 = 4;
 }
 
 #[cfg(feature = "editor")]
@@ -112,6 +115,33 @@ pub fn install(app: &mut bevy::app::App) {
                 };
                 entity = parent.parent();
             }
+        },
+    );
+
+    // Bevy reloads a document whose file changed, but nothing rebuilds the widgets from it: the
+    // crate watches its stylesheets and not its documents, so a CSS edit reaches the screen and
+    // an HTML edit does not. Asking the registry for a rebuild is what closes that.
+    //
+    // The rebuild respawns every widget, so the entities the managed side is holding all become
+    // stale at once. That is what the report is for.
+    app.add_systems(
+        Update,
+        |mut changes: MessageReader<bevy::asset::AssetEvent<bevy_extended_ui::io::HtmlAsset>>,
+         mut registry: ResMut<bevy_extended_ui::old::registry::UiRegistry>,
+         mut events: ResMut<UiEvents>| {
+            let rebuilt = changes
+                .read()
+                .any(|change| matches!(change, bevy::asset::AssetEvent::Modified { .. }));
+
+            if !rebuilt {
+                return;
+            }
+
+            registry.ui_update = true;
+            events.0.push(BcsUiEvent {
+                kind: event_kind::RELOADED,
+                entity: 0,
+            });
         },
     );
 

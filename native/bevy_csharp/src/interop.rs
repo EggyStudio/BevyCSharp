@@ -208,6 +208,9 @@ pub struct BcsConfig {
     /// Directory assets are loaded from, or null for Bevy's default of `assets` beside the
     /// executable. May be null in any build.
     pub asset_root: *const c_char,
+    /// Non-zero to reload an asset when its file changes on disk. Needs a build whose profile
+    /// carries the watcher, and costs a thread watching the asset directory.
+    pub watch_assets: u32,
 }
 
 /// How a camera should see, passed from C# when one is spawned.

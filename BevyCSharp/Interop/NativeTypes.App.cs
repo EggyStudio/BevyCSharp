@@ -35,4 +35,7 @@ public unsafe struct NativeConfig
 
     /// <summary>UTF-8 assets directory, or null for Bevy's default.</summary>
     public byte* AssetRoot;
+
+    /// <summary>Non-zero to reload an asset when its file changes on disk.</summary>
+    public uint WatchAssets;
 }

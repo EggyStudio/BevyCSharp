@@ -73,6 +73,24 @@ public sealed class Config
     public string? AssetRoot { get; set; }
 
     /// <summary>
+    /// Reload an asset when its file changes on disk.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What lets a texture, a document or a stylesheet be edited while the app runs. A handle
+    /// keeps pointing at the same asset, so anything holding one picks the new version up without
+    /// being told.
+    /// </para>
+    /// <para>
+    /// Needs a bridge whose profile carries the watcher, which today means the editor one. On a
+    /// build without it this does nothing rather than failing, because whether a file changed is
+    /// not a question the app can answer for itself. It costs a thread watching the asset
+    /// directory, which is why it is off unless asked for.
+    /// </para>
+    /// </remarks>
+    public bool WatchAssets { get; set; }
+
+    /// <summary>
     /// How many times a second <see cref="Stage.FixedUpdate"/> runs. Zero keeps Bevy's own
     /// default of 64.
     /// </summary>

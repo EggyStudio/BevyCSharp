@@ -12,6 +12,9 @@ var config = Config.Windowed("BevyCSharp Editor", 1600, 900);
 // launched it rather than the directory the assets were copied to.
 config.AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets");
 
+// The point of describing panels in files is being able to change them without a rebuild.
+config.WatchAssets = true;
+
 if (!App.HasRenderer)
 {
     Console.Error.WriteLine("This native bridge has no renderer, so there is no window to open.");

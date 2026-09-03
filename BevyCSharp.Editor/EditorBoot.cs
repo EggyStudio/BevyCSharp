@@ -51,6 +51,21 @@ public partial struct EditorBoot
     [OnUpdate]
     public static void Drive(BehaviorContext ctx) => EditorShell.Tick();
 
+    // TEMPORARY PROBE: a reload respawns the widgets, so the entity behind an id changes.
+    private static ulong _lastApply;
+
+    [OnUpdate]
+    public static void WatchReload(BehaviorContext ctx)
+    {
+        if (ctx.Time.FrameCount % 30 != 0) return;
+
+        var apply = Xui.Element("apply");
+        if (apply.Bits == _lastApply) return;
+
+        Console.WriteLine($"[probe] frame {ctx.Time.FrameCount}: 'apply' is now {apply}");
+        _lastApply = apply.Bits;
+    }
+
     /// <summary>Closes on Escape.</summary>
     [OnUpdate]
     public static void QuitOnEscape(BehaviorContext ctx)

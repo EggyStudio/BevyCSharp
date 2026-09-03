@@ -63,6 +63,16 @@ public sealed class EditorWindow
     /// <summary>Whether an element of this window is the one an event happened to.</summary>
     public bool Owns(Entity element) => _elements.ContainsValue(element);
 
+    /// <summary>
+    /// Forgets which entities the elements were.
+    /// </summary>
+    /// <remarks>
+    /// Called when the documents are rebuilt, which happens when one of their files changes on
+    /// disk. Every widget is respawned, so a kept entity names nothing and the next lookup has
+    /// to go back to the engine.
+    /// </remarks>
+    public void Invalidate() => _elements.Clear();
+
     /// <summary>Takes the window off the screen.</summary>
     public void Close()
     {

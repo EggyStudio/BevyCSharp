@@ -103,12 +103,21 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     // whatever launched the process: `dotnet` itself under `dotnet test`, not the directory the
     // assembly and its assets are in. Naming the directory outright is the only way to be sure,
     // so the managed side passes one whenever it knows where its assets are.
-    let asset_plugin = |root: &Option<String>| match root {
+    // `None` leaves the decision to Bevy, which watches only when the build carries a watcher
+    // and something asked for one. Saying `false` outright would stop a profile that has the
+    // watcher from ever using it.
+    let watch = if config.watch_assets != 0 { Some(true) } else { None };
+
+    let asset_plugin = move |root: &Option<String>| match root {
         Some(path) if !path.is_empty() => bevy::asset::AssetPlugin {
             file_path: path.clone(),
+            watch_for_changes_override: watch,
             ..Default::default()
         },
-        _ => bevy::asset::AssetPlugin::default(),
+        _ => bevy::asset::AssetPlugin {
+            watch_for_changes_override: watch,
+            ..Default::default()
+        },
     };
     let asset_root = unsafe { crate::interop::cstr_to_string(config.asset_root) };
 
