@@ -19,7 +19,7 @@ public sealed partial class PostPanel(Entity camera)
 
     /// <summary>Whether the camera scatters light out of its highlights.</summary>
     [Bind("#bloom")]
-    public bool Bloom;
+    public bool Bloom = true;
 
     /// <summary>How much is scattered.</summary>
     [Bind("#intensity")]
@@ -62,11 +62,14 @@ public sealed partial class PostPanel(Entity camera)
         Render.SetPostProcessing(camera, _settings);
     }
 
-    /// <summary>Puts the camera back to what it was before anything was touched.</summary>
+    /// <summary>Puts the panel back to the values it starts with.</summary>
+    /// <remarks>
+    /// The same values the fields are declared with, so that resetting and restarting agree.
+    /// </remarks>
     [Command("#reset")]
     public void Reset()
     {
-        Bloom = false;
+        Bloom = true;
         Intensity = 0.3f;
         Sharpen = 0f;
 

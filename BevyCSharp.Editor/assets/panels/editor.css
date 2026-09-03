@@ -109,9 +109,22 @@ slider {
     height: 14px;
 }
 
+/*
+ * The container is what takes the click, and the box inside it is what is drawn. The crate sizes
+ * the container for a checkbox that carries its own caption, 150 by 40, so shrinking only the
+ * container leaves a graphic larger than the area that responds to it. Both are set here, to the
+ * same size, because the captions in this editor are separate elements above each control.
+ */
 checkbox {
-    width: 16px;
-    height: 16px;
+    width: 22px;
+    height: 22px;
+    gap: 0;
+}
+
+checkbox > .mark-box {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
 }
 
 /* The one thing that acts, and so the one thing that is not grey. */

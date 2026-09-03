@@ -631,18 +631,69 @@ pub extern "C" fn bcs_xui_set_flag(entity: u64, value: i32) -> i32 {
 
         #[cfg(feature = "editor")]
         {
+            use bevy::picking::backend::HitData;
+            use bevy::picking::events::{Click, Pointer};
+            use bevy::picking::pointer::{Location, PointerButton, PointerId};
+            use bevy::camera::NormalizedRenderTarget;
             use bevy_extended_ui::widgets::UIWidgetState;
 
             crate::state::with_world(|world| {
                 let entity = crate::ecs::entity_from(entity);
-                let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
+
+                let Ok(entity_ref) = world.get_entity(entity) else {
                     return status::NO_ENTITY;
                 };
-                let Some(mut state) = entity_mut.get_mut::<UIWidgetState>() else {
+                let Some(state) = entity_ref.get::<UIWidgetState>() else {
                     return status::NOT_PRESENT;
                 };
 
-                state.checked = value != 0;
+                let wanted = value != 0;
+                if state.checked == wanted {
+                    return status::OK;
+                }
+
+                // Ticked by asking the widget to toggle rather than by writing the flag, because
+                // the flag is not what is drawn. The tick is a child entity the crate spawns
+                // when its own click handler runs, and writing the state behind that handler
+                // leaves the mark where it was and the widget's own copy of the flag disagreeing
+                // with this one. The next real click then toggles from the wrong value and
+                // spawns a second mark beside the first.
+                //
+                // A widget that has no such handler is left to the plain write below, which is
+                // all a switch or a toggle needs.
+                //
+                // The crate's handler also takes focus, so setting a checkbox from code focuses
+                // it as a click would. That is a side effect of borrowing its logic rather than
+                // imitating it, and the better trade: imitating it means spawning the mark here,
+                // which needs the widget's image, its laid-out size and its stylesheet, and would
+                // be wrong again the moment any of those changed upstream.
+                let Some(window) = world
+                    .query_filtered::<bevy::ecs::entity::Entity, bevy::ecs::query::With<bevy::window::PrimaryWindow>>()
+                    .iter(world)
+                    .next()
+                else {
+                    return status::INVALID_STATE;
+                };
+
+                world.trigger(Pointer::new(
+                    PointerId::Mouse,
+                    Location {
+                        target: NormalizedRenderTarget::Window(
+                            bevy::window::WindowRef::Primary
+                                .normalize(Some(window))
+                                .unwrap(),
+                        ),
+                        position: bevy::math::Vec2::ZERO,
+                    },
+                    Click {
+                        button: PointerButton::Primary,
+                        hit: HitData::new(entity, 0.0, None, None),
+                        duration: core::time::Duration::ZERO,
+                        count: 1,
+                    },
+                    entity,
+                ));
+
                 status::OK
             })
         }
