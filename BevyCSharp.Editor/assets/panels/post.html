@@ -2,7 +2,7 @@
   <head>
     <meta name="post" />
     <title>Post processing</title>
-    <link rel="stylesheet" href="../themes/editor.css" />
+    <link rel="stylesheet" href="editor.css" />
   </head>
   <body>
     <div class="window">
@@ -28,9 +28,15 @@
         <input id="note" type="text" placeholder="what this looks like" />
       </div>
 
+      <!--
+        A readout is a <p>, not a <span> and not a <label>. The parser turns a fixed set of tags
+        into elements: <span> is not in it at all, and a <label> is consumed to caption the widget
+        beside it rather than becoming an element of its own. Either way there is no entity, and
+        nothing can bind to what has no entity.
+      -->
       <div class="row">
-        <span class="muted">Readout</span>
-        <span id="readout" class="muted">idle</span>
+        <p class="muted">Readout</p>
+        <p id="readout" class="muted">idle</p>
       </div>
 
       <button id="apply">Apply to camera</button>

@@ -65,7 +65,9 @@ public static unsafe class Xui
     /// The path is relative to the asset root. A stylesheet the document links is resolved
     /// relative to the document rather than to the asset root, so
     /// <c>&lt;link href="theme.css"&gt;</c> beside <c>panels/thing.html</c> is
-    /// <c>panels/theme.css</c> on disk.
+    /// <c>panels/theme.css</c> on disk. It cannot climb out of that directory either: Bevy
+    /// refuses an asset path containing <c>..</c>, so a shared stylesheet lives beside the
+    /// documents that link it rather than above them.
     /// </para>
     /// <para>
     /// The document needs a <c>&lt;meta name="..."&gt;</c> tag in its head. A document without
