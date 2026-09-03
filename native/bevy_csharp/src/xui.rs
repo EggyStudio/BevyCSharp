@@ -422,7 +422,7 @@ pub unsafe extern "C" fn bcs_xui_get_text(entity: u64, out: *mut u8, capacity: i
         #[cfg(feature = "editor")]
         {
             use bevy_extended_ui::html::HtmlInnerContent;
-            use bevy_extended_ui::widgets::InputField;
+            use bevy_extended_ui::widgets::{Button, Headline, InputField, Paragraph};
 
             crate::state::with_world(|world| {
                 let entity = crate::ecs::entity_from(entity);
@@ -430,8 +430,17 @@ pub unsafe extern "C" fn bcs_xui_get_text(entity: u64, out: *mut u8, capacity: i
                     return status::NO_ENTITY;
                 };
 
+                // Each widget keeps the text it draws in a field of its own, and the parsed
+                // content is a separate thing that is only read when the widget is built. Asking
+                // the widget first is what makes a read agree with what is on the screen.
                 let text = if let Some(field) = entity_ref.get::<InputField>() {
                     field.text.clone()
+                } else if let Some(paragraph) = entity_ref.get::<Paragraph>() {
+                    paragraph.text.clone()
+                } else if let Some(headline) = entity_ref.get::<Headline>() {
+                    headline.text.clone()
+                } else if let Some(button) = entity_ref.get::<Button>() {
+                    button.text.clone()
                 } else if let Some(content) = entity_ref.get::<HtmlInnerContent>() {
                     content.inner_text().to_string()
                 } else {
@@ -460,7 +469,7 @@ pub unsafe extern "C" fn bcs_xui_set_text(entity: u64, text: *const core::ffi::c
         #[cfg(feature = "editor")]
         {
             use bevy_extended_ui::html::HtmlInnerContent;
-            use bevy_extended_ui::widgets::InputField;
+            use bevy_extended_ui::widgets::{Button, Headline, InputField, Paragraph};
 
             let Some(text) = (unsafe { crate::interop::cstr_to_string(text) }) else {
                 return status::NULL_ARG;
@@ -472,8 +481,26 @@ pub unsafe extern "C" fn bcs_xui_set_text(entity: u64, text: *const core::ffi::c
                     return status::NO_ENTITY;
                 };
 
+                // The widget's own field, for the same reason as the read: writing the parsed
+                // content changes what the document said rather than what is being drawn, so it
+                // is the last resort rather than the first.
                 if let Some(mut field) = entity_mut.get_mut::<InputField>() {
                     field.text = text;
+                    return status::OK;
+                }
+
+                if let Some(mut paragraph) = entity_mut.get_mut::<Paragraph>() {
+                    paragraph.text = text;
+                    return status::OK;
+                }
+
+                if let Some(mut headline) = entity_mut.get_mut::<Headline>() {
+                    headline.text = text;
+                    return status::OK;
+                }
+
+                if let Some(mut button) = entity_mut.get_mut::<Button>() {
+                    button.text = text;
                     return status::OK;
                 }
 

@@ -4,15 +4,37 @@
  * Every panel links this, so the chrome of a window is described here rather than in any panel's
  * own file or in C#. Restyling the whole editor is editing this file.
  *
- * Monochrome by intent. Colour is the loudest thing an interface has, so it is spent on the one
- * control that acts rather than spread over everything that merely sits there.
+ * Monochrome by intent. Colour is the loudest thing an interface has, and an editor is looked at
+ * all day beside the thing being edited, so it is spent on the one control that acts and on
+ * nothing that merely sits there.
  */
 
 :root {
+    /*
+     * The first block is the crate's own, not ours. Its widgets are styled by a stylesheet that
+     * ships inside it, written against these names, so a slider's track and a checkbox's tick
+     * follow from here. Setting our own names alone would restyle the panel and leave every
+     * control the blue it was born with.
+     */
+    --primary: #6f7684;
+    --primary-hover: #838b9a;
+    --primary-disabled: #3a3f49;
+    --primary-transparent-layer: rgba(111, 118, 132, 0.3);
+    --headline: #d6dae2;
+    --headline-sec: #aeb4c0;
+    --text-color: #d6dae2;
+    --text-color-dark: #8b929e;
+    --disabled-text: #4a4f58;
+    --disabled-text-darker: #3a3f47;
+    --gray-background: #1b1e24;
+    --gray-background-disabled: #23262d;
+
     --surface: #14161ae6;
     --line: #ffffff14;
     --text: #d6dae2;
     --dim: #7d8590;
+
+    /* The one colour in the editor. Anything that is not the action stays grey. */
     --accent: #4d7cff;
     --radius: 10px;
 }
@@ -72,6 +94,7 @@ p {
 input {
     width: 100%;
     height: 22px;
+    min-width: 0;
     padding: 4px;
     background-color: #ffffff0a;
     border: 1px solid var(--line);
@@ -82,14 +105,22 @@ input {
 
 slider {
     width: 100%;
+    height: 14px;
+}
+
+checkbox {
+    width: 16px;
     height: 16px;
 }
 
+/* The one thing that acts, and so the one thing that is not grey. */
 button {
     width: 100%;
+    min-width: 0;
     height: 24px;
     margin-top: 4px;
-    background-color: var(--accent);
+    padding: 0;
+    background: var(--accent);
     border-radius: 6px;
     color: #ffffff;
     font-size: 11px;
