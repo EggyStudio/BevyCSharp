@@ -130,7 +130,7 @@ public struct NativeMaterialConfig
     /// <summary>Emissive blue, linear.</summary>
     public float EmissiveB;
 
-    /// <summary>Emissive alpha, unused by the renderer but part of the colour.</summary>
+    /// <summary>1 to scale the emission by the camera's exposure, 0 to leave it alone.</summary>
     public float EmissiveA;
 
     /// <summary>0 opaque, 1 masked, 2 blended, 3 additive.</summary>

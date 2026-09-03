@@ -95,7 +95,27 @@ public sealed class MaterialSettings
     /// <summary>Near zero for a mirror, one for a matte surface.</summary>
     public float Roughness { get; set; } = 0.5f;
 
-    /// <summary>Light the surface gives off, which no lamp affects. Black by default.</summary>
+    /// <summary>
+    /// Light the surface gives off, which no lamp affects. Black by default.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The three colour channels are a luminance in nits, not a fraction of white, so the
+    /// numbers that read as bright are far larger than one. The alpha decides whether the
+    /// camera's exposure is applied to them, and at 1 it is: a camera left at Bevy's own
+    /// exposure divides by about a thousand, so 12 nits arrives as a hundredth of white and 12000
+    /// arrives as twelve times it. That is what it takes to blow out to white and to give bloom
+    /// something to scatter.
+    /// </para>
+    /// <para>
+    /// Set the alpha to 0 to opt out of that scaling and have the numbers mean multiples of white
+    /// directly, which suits an effect tuned by eye rather than in physical units.
+    /// </para>
+    /// <para>
+    /// Nothing here is drawn on a material that is also <see cref="Unlit"/>, because Bevy adds
+    /// the emission as part of the lighting that flag skips.
+    /// </para>
+    /// </remarks>
     public (float R, float G, float B, float A) Emissive { get; set; } = (0f, 0f, 0f, 1f);
 
     /// <summary>What to do where the material is not fully opaque.</summary>
@@ -114,7 +134,13 @@ public sealed class MaterialSettings
     public bool DoubleSided { get; set; }
 
     /// <summary>Show the base colour flat, with no lighting at all.</summary>
-    /// <remarks>For a skybox, a UI panel in the world, or anything meant to read as its own colour.</remarks>
+    /// <remarks>
+    /// For a skybox, a UI panel in the world, or anything meant to read as its own colour. It
+    /// takes <see cref="Emissive"/> with it: Bevy adds the emission inside the lighting, so an
+    /// unlit material shows its base colour and nothing else. A surface that should glow wants
+    /// an emissive colour and no unlit flag, and <see cref="BaseColor"/> can exceed one if what
+    /// is wanted is a flat colour brighter than white.
+    /// </remarks>
     public bool Unlit { get; set; }
 
     /// <summary>The base colour map, which is the texture people mean by "the texture".</summary>

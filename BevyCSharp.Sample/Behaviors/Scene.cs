@@ -91,15 +91,19 @@ public partial struct Scene
         });
         ctx.Ecs.Add(rim, Transform.LookingAt(new Vec3(-4f, 3f, -5f), Vec3.Zero, Vec3.UnitY));
 
-        // A lamp, emissive well past white so there is something for the bloom to scatter. Unlit
-        // because it is the light source rather than a thing the lights fall on.
+        // A lamp, emissive well past white so there is something for the bloom to scatter.
+        //
+        // The numbers are luminance in nits, and the camera divides them by its exposure, which
+        // at Bevy's own setting is about a thousand. Thousands here are what arrive as the
+        // handful of multiples of white that blow the sphere out and feed the bloom. It is lit
+        // rather than unlit because Bevy adds the emission as part of the lighting, so an unlit
+        // sphere would show its base colour and nothing else.
         var lamp = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, lamp, Render.CreateMesh(MeshShape.Sphere, 0.6f));
         Render.SetMaterial(ctx.Ecs, lamp, Render.CreateMaterial(new MaterialSettings
         {
             BaseColor = (1f, 0.6f, 0.2f, 1f),
-            Emissive = (12f, 5f, 1f, 1f),
-            Unlit = true,
+            Emissive = (12_000f, 5_000f, 1_000f, 1f),
         }));
         ctx.Ecs.Add(lamp, Transform.At(-2.5f, 1.2f, 1.5f));
 

@@ -696,7 +696,11 @@ pub struct BcsMaterialConfig {
     pub metallic: f32,
     /// How rough, from a mirror near zero to fully diffuse at one.
     pub roughness: f32,
-    /// Light the surface gives off, which is not affected by any lamp.
+    /// Light the surface gives off, which is not affected by any lamp. The first three are
+    /// luminance in nits, and the fourth decides whether the camera's exposure is applied to
+    /// them: `1` scales them the way it scales everything else, `0` leaves them as written.
+    /// Nothing here is drawn at all when `unlit` is set, because Bevy adds the emission inside
+    /// the lighting it is skipping.
     pub emissive: [f32; 4],
     /// `0` opaque, `1` cut out at `alpha_cutoff`, `2` blended, `3` added to what is behind.
     pub alpha_mode: i32,
