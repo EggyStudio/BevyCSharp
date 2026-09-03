@@ -207,14 +207,14 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     // so by panicking rather than failing the load. `DefaultPlugins` registers these three, so
     // only the minimal profile has to ask.
     //
-    // Asking twice is destructive rather than harmless: `init_asset` inserts a fresh, empty
-    // `Assets<A>` over the plugin's, registers a second handle provider on the asset server and
-    // adds a second copy of the per-frame asset systems. The handles the managed side then
-    // creates come from a different id space than the render world extracts from, so meshes and
-    // materials never reach the GPU and everything draws with the fallback material.
+    // Asking twice is destructive rather than harmless, which is why every bare registration
+    // below goes through `init_asset_once` rather than `init_asset`. What that guards against,
+    // and what it cost the one time it was not guarded, is written up on the helper.
     if !windowed {
         use bevy::asset::AssetApp;
-        app.init_asset::<bevy::mesh::Mesh>();
+        use crate::assets::init_asset_once;
+
+        init_asset_once::<bevy::mesh::Mesh>(&mut app);
 
         // `ImagePlugin` registers the asset type itself, and adds the default and transparent
         // images the renderer's fallbacks rely on.
@@ -238,19 +238,22 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         // headless app still initialises them. Otherwise building one would fail on a bridge
         // that plainly has the renderer, which reads as a bug rather than a configuration.
         #[cfg(feature = "render")]
-        app.init_asset::<bevy::pbr::StandardMaterial>();
+        init_asset_once::<bevy::pbr::StandardMaterial>(&mut app);
 
         // The same for the air a sky is scattered through: the medium is a description rather
         // than a picture, so it is buildable without a window even though nothing draws it.
         // `LightPlugin` registers it on the windowed path.
         #[cfg(feature = "render")]
-        app.init_asset::<bevy::light::atmosphere::ScatteringMedium>();
+        init_asset_once::<bevy::light::atmosphere::ScatteringMedium>(&mut app);
 
         // The same again for an exposure compensation curve, which is a lookup table built from
         // points rather than anything drawn. `AutoExposurePlugin` registers it on the windowed
         // path.
         #[cfg(feature = "render")]
-        app.init_asset::<bevy::post_process::auto_exposure::AutoExposureCompensationCurve>();
+        {
+            use bevy::post_process::auto_exposure::AutoExposureCompensationCurve;
+            init_asset_once::<AutoExposureCompensationCurve>(&mut app);
+        }
 
         // Loads `.scn` and `.scn.ron`, and spawns any `WorldAsset` an entity points at, which is
         // what a glTF scene is too. Unlike the two above, this registers its loader in `build`.
@@ -275,8 +278,12 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         #[cfg(feature = "render")]
         {
             use bevy::asset::AssetApp;
-            app.init_asset::<bevy::text::Font>();
-            app.init_asset_loader::<bevy::text::FontLoader>();
+            if init_asset_once::<bevy::text::Font>(&mut app) {
+                // Paired with the type deliberately. Loaders are appended to a list that is
+                // searched from the back, so a second copy would answer for the first, and Bevy
+                // would warn that the extensions are claimed twice.
+                app.init_asset_loader::<bevy::text::FontLoader>();
+            }
         }
     }
 

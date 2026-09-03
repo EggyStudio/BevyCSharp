@@ -10,12 +10,33 @@
 //! without knowing what it points at. Retyping it is only needed at the point an asset is
 //! attached to an entity.
 
-use bevy::asset::{AssetServer, LoadState, UntypedHandle};
+use bevy::app::App;
+use bevy::asset::{Asset, AssetApp, AssetServer, Assets, LoadState, UntypedHandle};
 use bevy::ecs::resource::Resource;
 use bevy::ecs::world::World;
 
 use crate::interop::status;
 use crate::state::{with_world, with_world_opt};
+
+/// Registers an asset type unless the app already has one, and reports whether it did.
+///
+/// `App::init_asset` is destructive rather than idempotent. It builds a fresh `Assets<A>`, gives
+/// the asset server a second handle provider for the type, inserts the new store over whatever
+/// was there and adds another copy of the per-frame asset systems. Handles minted before that
+/// point come from a different id space than the one anything reads afterwards, so they resolve
+/// to nothing while every call still reports success: on a windowed build this showed up as
+/// every mesh and material drawing with the fallback and no error anywhere.
+///
+/// Which types a profile has to register is a question about plugins, and it is answered in
+/// [`crate::app`]. This is the guard that keeps a wrong answer inert.
+pub fn init_asset_once<A: Asset>(app: &mut App) -> bool {
+    if app.world().contains_resource::<Assets<A>>() {
+        return false;
+    }
+
+    app.init_asset::<A>();
+    true
+}
 
 /// Load states as C# sees them. Mirrors `Bevy.AssetLoadState`.
 pub mod load_state {
@@ -433,4 +454,71 @@ pub extern "C" fn bcs_atlas_create(
             insert_handle(world, handle)
         })
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bevy::mesh::{Mesh, MeshBuilder, Meshable};
+    use bevy::math::primitives::Cuboid;
+
+    /// An app with assets and nothing else, which is all these tests need.
+    fn asset_app() -> App {
+        let mut app = App::new();
+        app.add_plugins(bevy::app::TaskPoolPlugin::default());
+        app.add_plugins(bevy::asset::AssetPlugin::default());
+        app
+    }
+
+    fn a_mesh() -> Mesh {
+        Cuboid::new(1.0, 1.0, 1.0).mesh().build()
+    }
+
+    #[test]
+    fn a_slot_survives_the_round_trip_through_one_integer() {
+        for index in [0u32, 1, 0xF_FFFF] {
+            for generation in [0u32, 1, 0x7FF] {
+                let packed = pack(index, generation);
+                assert!(packed >= 0, "{index}/{generation} packed to a status code");
+                assert_eq!(Some((index as usize, generation)), unpack(packed));
+            }
+        }
+    }
+
+    #[test]
+    fn a_negative_handle_names_nothing() {
+        // Every failure the C ABI reports is a negative integer, so one arriving back as a
+        // handle is a caller that did not check rather than a slot to look up.
+        assert_eq!(None, unpack(-1));
+        assert_eq!(None, unpack(status::NO_COMPONENT));
+    }
+
+    #[test]
+    fn registering_an_asset_type_twice_keeps_the_handles_from_the_first_time() {
+        let mut app = asset_app();
+
+        assert!(init_asset_once::<Mesh>(&mut app), "the first call registers");
+
+        let handle = app.world_mut().resource_mut::<Assets<Mesh>>().add(a_mesh());
+
+        assert!(!init_asset_once::<Mesh>(&mut app), "the second call declines");
+        assert!(
+            app.world().resource::<Assets<Mesh>>().get(&handle).is_some(),
+            "the mesh went missing, so the store was replaced");
+    }
+
+    #[test]
+    fn registering_an_asset_type_twice_through_bevy_loses_them() {
+        // Pins the behaviour `init_asset_once` exists to guard, so that if Bevy ever makes
+        // `init_asset` idempotent this fails and says the guard can go. Nothing reports an
+        // error here, which is what made the original failure so hard to place: the handle is
+        // valid, the call succeeded, and the mesh is gone.
+        let mut app = asset_app();
+        app.init_asset::<Mesh>();
+
+        let handle = app.world_mut().resource_mut::<Assets<Mesh>>().add(a_mesh());
+        app.init_asset::<Mesh>();
+
+        assert!(app.world().resource::<Assets<Mesh>>().get(&handle).is_none());
+    }
 }

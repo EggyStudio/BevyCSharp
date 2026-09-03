@@ -132,6 +132,12 @@ jobs:
         shell: bash
         run: build/build-native.sh
 
+      # The bridge's own tests, which cover the pieces no managed test can reach: the text
+      # protocol, the panic guard, and that registering an asset type twice is inert.
+      - name: Test the bridge
+        working-directory: native
+        run: cargo test
+
       - name: Test
         run: dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj -c Release
 

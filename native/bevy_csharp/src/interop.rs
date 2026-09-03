@@ -821,3 +821,91 @@ pub unsafe fn cstr_to_string(ptr: *const c_char) -> Option<String> {
     let c = unsafe { core::ffi::CStr::from_ptr(ptr) };
     Some(c.to_string_lossy().into_owned())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Calls [`write_text`] with a buffer of `capacity`, reporting what it needed and wrote.
+    fn probe(text: &str, capacity: usize) -> (i32, Vec<u8>) {
+        let mut buffer = vec![0xAAu8; capacity];
+        let needed = unsafe { write_text(text, buffer.as_mut_ptr(), capacity as i32) };
+        (needed, buffer)
+    }
+
+    #[test]
+    fn text_reports_what_it_needs_before_it_writes_anything() {
+        // The convention every entry point carrying text follows: call with nothing, learn the
+        // length, call again with a buffer that size.
+        let needed = unsafe { write_text("hello", core::ptr::null_mut(), 0) };
+        assert_eq!(5, needed);
+
+        let (needed, buffer) = probe("hello", 5);
+        assert_eq!(5, needed);
+        assert_eq!(b"hello", &buffer[..]);
+    }
+
+    #[test]
+    fn a_buffer_that_is_too_small_is_left_alone() {
+        // Reporting the length and writing a truncated answer would both be defensible, but a
+        // caller that ignored the length would then be holding half a string with no way to
+        // tell. Nothing is written instead.
+        let (needed, buffer) = probe("hello", 4);
+        assert_eq!(5, needed);
+        assert_eq!(vec![0xAA; 4], buffer);
+    }
+
+    #[test]
+    fn text_is_measured_in_bytes_rather_than_characters() {
+        // A caller sizing its buffer by counting characters would come back one call short on
+        // anything outside ASCII, so the length reported is the one `memcpy` needs.
+        let text = "café";
+        assert_eq!(4, text.chars().count());
+
+        let (needed, buffer) = probe(text, 5);
+        assert_eq!(5, needed);
+        assert_eq!(text.as_bytes(), &buffer[..]);
+    }
+
+    #[test]
+    fn empty_text_needs_no_buffer() {
+        assert_eq!(0, unsafe { write_text("", core::ptr::null_mut(), 0) });
+    }
+
+    #[test]
+    fn an_absent_array_reads_as_an_empty_one() {
+        // Both are how C# spells "nothing to pass", and neither should reach a `from_raw_parts`.
+        let empty: &[u32] = unsafe { opt_slice(core::ptr::null::<u32>(), 7) };
+        assert!(empty.is_empty());
+
+        let values = [1u32, 2, 3];
+        assert!(unsafe { opt_slice(values.as_ptr(), 0) }.is_empty());
+        assert!(unsafe { opt_slice(values.as_ptr(), -1) }.is_empty());
+        assert_eq!(&values[..], unsafe { opt_slice(values.as_ptr(), 3) });
+    }
+
+    #[test]
+    fn an_absent_string_reads_as_none() {
+        assert_eq!(None, unsafe { cstr_to_string(core::ptr::null()) });
+
+        let text = c"scenes";
+        assert_eq!(
+            Some("scenes".to_string()),
+            unsafe { cstr_to_string(text.as_ptr()) });
+    }
+
+    #[test]
+    fn a_panic_becomes_a_status_rather_than_an_unwind() {
+        // Unwinding into the .NET runtime is undefined behaviour, so the guard is what stands
+        // between a bug on this side and a process that dies without saying why.
+        assert_eq!(status::OK, guard(|| status::OK));
+        assert_eq!(-42, guard_with(-42, || panic!("a bug on this side")));
+
+        let previous = std::panic::take_hook();
+        std::panic::set_hook(Box::new(|_| {}));
+        let caught = guard(|| panic!("a bug on this side"));
+        std::panic::set_hook(previous);
+
+        assert_eq!(status::PANIC, caught);
+    }
+}

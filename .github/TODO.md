@@ -329,11 +329,18 @@ Points to get right:
 
 ## Maintenance
 
-- **Regression test for asset double-registration.** `init_asset` is not idempotent: it replaces
-  `Assets<A>`, registers a second handle provider and duplicates the per-frame asset systems.
-  Calling it on a windowed build broke all rendering with no error reported. No test caught this,
-  because the failure needs a real GPU to appear. The missing check is that the render world
-  receives the meshes and materials the bridge creates.
+- **What reaches the render world is still unchecked.** Every registration goes through
+  `assets::init_asset_once`, so calling `init_asset` twice is inert, and the crate's own tests
+  cover both halves of that: a handle minted between two guarded registrations survives, and one
+  minted between two unguarded ones does not, which is what pins the behaviour the guard exists
+  for. What no test covers is the step after, that the meshes and materials the bridge creates
+  are extracted into the render world and drawn with. That needs a real GPU, so it belongs in a
+  windowed run rather than in the suite.
+- **The Rust build is not cached in CI.** `Swatinem/rust-cache` is configured with
+  `workspaces: native`, so it caches `native/target`, while `build-native.sh` writes to
+  `build/target`. The bridge is therefore rebuilt from nothing on every run. The crate's own
+  tests do use `native/target` and are cached. Either point the script at the cached directory or
+  point the cache at the script's.
 - **Packing on one machine produces a package for one platform.** Use the CI workflow, or run
   `build-native.sh` on each target, to produce a package covering all six runtime identifiers.
 - **Publishing is manual by choice.** The workflow builds and uploads; the upload to nuget.org is

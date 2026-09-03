@@ -1233,8 +1233,15 @@ You need the [.NET 10 SDK](https://dotnet.microsoft.com/download) and
 build/build-native.sh          # build the native bridge (headless profile)
 dotnet build                   # build the managed side
 dotnet test                    # run the suite
+cargo test --manifest-path native/Cargo.toml    # and the bridge's own
 dotnet run --project BevyCSharp.Sample -- --frames 120 --verbose
 ```
+
+Most of what the bridge does is only observable from managed code, so `dotnet test` is where
+nearly all of the coverage is. The Rust tests cover what it cannot reach from there: the
+convention for returning text through a caller's buffer, the guard that turns a panic into a
+status code rather than an unwind into .NET, and the asset registration that has to stay inert
+when it is asked twice.
 
 Everything generated lands in `build/`, cargo's target directory, the staged per-RID artifacts,
 and the packed `.nupkg`. The repository root stays clean.
