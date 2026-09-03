@@ -12,6 +12,13 @@ crate-type = ["cdylib", "rlib"]
 [features]
 default = ["headless"]
 
+# Editor profile: the render profile plus HTML and CSS driven UI.
+#
+# Its own profile rather than part of `render`, because `render` is what CI builds for six
+# runtime identifiers and what the test suite links against, and this adds a hundred crates and
+# several minutes to a cold build. An editor needs a window regardless, so it starts from render.
+editor = ["render", "dep:bevy_extended_ui"]
+
 # Minimal profile: app + ECS + time + input + transform + math.
 # No window, no GPU, no audio. Drives the loop with ScheduleRunnerPlugin.
 # This is what CI, unit tests and dedicated servers build.
@@ -89,6 +96,10 @@ render = [
 
 [dependencies]
 bevy = { version = "0.19.1", default-features = false }
+# Default features pull libsqlite3-sys with `bundled`, which compiles SQLite from C source at
+# build time for an i18n stack the bridge does not use, so they are off and only the breakpoint
+# support is turned back on.
+bevy_extended_ui = { version = "1.7", default-features = false, features = ["css-breakpoints"], optional = true }
 # Same version Bevy itself pins; needed to build a `TableRow` for raw column access.
 nonmax = { version = "0.5", default-features = false }
 

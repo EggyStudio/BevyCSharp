@@ -173,6 +173,11 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // backend the bridge builds for has them.
             app.add_plugins(bevy::post_process::auto_exposure::AutoExposurePlugin);
 
+            // HTML and CSS driven UI, when the profile carries it. Registered here rather than
+            // in the module so that a build without the feature adds no plugin at all.
+            #[cfg(feature = "editor")]
+            crate::xui::install(&mut app);
+
             // Debug drawing goes through a queue, because a `Gizmos` parameter cannot be held by
             // an exclusive system. Only registered here: the plugin that draws them comes with
             // `DefaultPlugins`, so a windowless app has nothing to drain into.
@@ -863,6 +868,17 @@ pub extern "C" fn bcs_app_request_exit() -> i32 {
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_has_render() -> i32 {
     if cfg!(feature = "render") { 1 } else { 0 }
+}
+
+/// Reports which UI profile this library was built with: `1` if the HTML and CSS surface is
+/// compiled in, `0` otherwise.
+///
+/// Separate from [`bcs_has_render`] because the editor profile is a superset of the render one:
+/// a build can draw without carrying the document surface, and the managed side has to be able
+/// to tell those apart before it opens a panel.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_has_editor() -> i32 {
+    if cfg!(feature = "editor") { 1 } else { 0 }
 }
 
 /// Reports whether the caller is on the process main thread.

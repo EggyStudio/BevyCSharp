@@ -1,0 +1,25 @@
+<html lang="en">
+  <head>
+    <meta name="spike" />
+    <title>Spike</title>
+    <link rel="stylesheet" href="spike.css" />
+  </head>
+  <body>
+    <div id="window" class="window">
+      <h2 id="title">Post processing</h2>
+      <div class="row">
+        <label>Bloom</label>
+        <checkbox id="bloom"></checkbox>
+      </div>
+      <div class="row">
+        <label>Intensity</label>
+        <slider id="intensity" min="0" max="1" step="0.05"></slider>
+      </div>
+      <div class="row">
+        <label>Name</label>
+        <input id="name" type="text" placeholder="camera" />
+      </div>
+      <button id="apply">Apply</button>
+    </div>
+  </body>
+</html>

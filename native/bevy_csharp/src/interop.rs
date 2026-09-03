@@ -262,6 +262,19 @@ pub struct BcsMonitor {
     pub scale_factor: f32,
 }
 
+/// One thing a UI widget reported.
+///
+/// A tagged pair rather than an event per kind, because they cross the boundary as one array and
+/// none of them carries a payload beyond which element it happened to.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsUiEvent {
+    /// `0` click, `1` value changed, `2` submit, `3` focus.
+    pub kind: i32,
+    /// The element it happened to.
+    pub entity: u64,
+}
+
 /// One thing the window reported.
 ///
 /// A tagged triple rather than six structs, because they cross the boundary as one array and the

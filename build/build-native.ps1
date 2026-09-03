@@ -14,6 +14,10 @@
     Build with Bevy's renderer and windowing instead of the headless profile. Takes several
     minutes the first time and produces a much larger library.
 
+.PARAMETER Editor
+    Build the render profile plus the HTML and CSS user interface, which is what
+    BevyCSharp.Editor needs. Costs about a hundred crates over -Render.
+
 .PARAMETER Target
     Rust target triple to build for. Defaults to the host.
 
@@ -23,11 +27,13 @@
 .EXAMPLE
     build/build-native.ps1
     build/build-native.ps1 -Render
+    build/build-native.ps1 -Editor
     build/build-native.ps1 -Target aarch64-pc-windows-msvc -Render
 #>
 [CmdletBinding()]
 param(
     [switch] $Render,
+    [switch] $Editor,
     [string] $Target = '',
     [switch] $Clean
 )
@@ -43,7 +49,8 @@ $RepoRoot = Split-Path -Parent $BuildDir
 $NativeDir = Join-Path $RepoRoot 'native'
 $TargetDir = Join-Path $BuildDir 'target'
 $ArtifactDir = Join-Path $BuildDir 'artifacts'
-$Features = if ($Render) { 'render' } else { 'headless' }
+# -Editor implies the renderer, so it wins when both are given rather than being refused.
+$Features = if ($Editor) { 'editor' } elseif ($Render) { 'render' } else { 'headless' }
 
 if (-not (Test-Path (Join-Path $NativeDir 'Cargo.toml'))) {
     throw "No Rust workspace at '$NativeDir'. This script expects to live in <repo>/build/ with the sources in <repo>/native/."
@@ -89,7 +96,7 @@ Write-Host "    target   : $Target"
 Write-Host "    rid      : $Rid"
 Write-Host "    features : $Features"
 
-if ($Render) {
+if ($Render -or $Editor) {
     Write-Host "    note     : builds Bevy's renderer, winit and wgpu. This takes several minutes"
     Write-Host '               the first time and produces a much larger library.'
 }

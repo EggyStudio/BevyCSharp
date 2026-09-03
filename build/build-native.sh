@@ -13,8 +13,8 @@
 # Usage:
 #   build/build-native.sh                      # host, headless profile
 #   build/build-native.sh --render             # host, with Bevy's renderer
+#   build/build-native.sh --editor             # the above plus the HTML and CSS UI
 #   build/build-native.sh --render --portable  # build in a container, for older machines
-#   build/build-native.sh --target x86_64-pc-windows-msvc --render
 #   build/build-native.sh --clean              # remove build/target and build/artifacts first
 #
 # On Linux a binary runs only where glibc is at least as new as the one it was built against, so
@@ -46,6 +46,7 @@ PORTABLE_IMAGE="docker.io/library/rust:1-bookworm"
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --render)   FEATURES="render"; shift ;;
+        --editor)   FEATURES="editor"; shift ;;
         --headless) FEATURES="headless"; shift ;;
         --target)   TARGET="$2"; shift 2 ;;
         --clean)    CLEAN=1; shift ;;
@@ -110,7 +111,7 @@ fi
 
 # A render build links against ALSA, and alsa-sys reports a missing header as a compiler error
 # from a crate the caller never asked for. Saying so here, by name, is worth the four lines.
-if [[ $PORTABLE -eq 0 && "$FEATURES" == *render* && "$(uname -s)" == "Linux" ]]; then
+if [[ $PORTABLE -eq 0 && ( "$FEATURES" == "render" || "$FEATURES" == "editor" ) && "$(uname -s)" == "Linux" ]]; then
     if ! pkg-config --exists alsa 2>/dev/null; then
         echo "error: a render build needs ALSA's development headers, which are not installed." >&2
         echo "       Bevy's audio links against them through cpal." >&2
@@ -143,7 +144,7 @@ echo "    target   : $TARGET"
 echo "    rid      : $RID"
 echo "    features : $FEATURES"
 
-if [[ "$FEATURES" == "render" ]]; then
+if [[ "$FEATURES" == "render" || "$FEATURES" == "editor" ]]; then
     echo "    note     : builds Bevy's renderer, winit and wgpu. This takes several minutes"
     echo "               the first time and produces a much larger library."
 fi
@@ -160,7 +161,7 @@ if [[ $PORTABLE -eq 1 ]]; then
     # The image does not carry them, so they are installed into the container that is about to be
     # thrown away rather than onto the machine.
     SETUP=""
-    if [[ "$FEATURES" == *render* ]]; then
+    if [[ "$FEATURES" == "render" || "$FEATURES" == "editor" ]]; then
         SETUP="apt-get update -qq && apt-get install -y -qq --no-install-recommends libasound2-dev >/dev/null && "
     fi
 

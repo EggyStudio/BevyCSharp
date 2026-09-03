@@ -1282,6 +1282,11 @@ The bridge builds in two profiles:
 |------------|------------------------------------------------------------------------|
 | `headless` | App, ECS, time, input, transform, assets. No window, no GPU. The default. |
 | `render`   | The above plus windowing, the renderer, post processing, UI, 2D, gizmos and audio. |
+| `editor`   | The above plus user interface described in HTML and CSS, for `BevyCSharp.Editor`. |
+
+The editor profile costs about a hundred crates and several minutes of build time over the render
+one, which is why it is a profile of its own rather than part of it: the test suite and the
+per-platform package builds have no use for it.
 
 ```bash
 build/build-native.sh --render          # bash

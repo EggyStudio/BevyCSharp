@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 40;
+    internal const int ExpectedAbiVersion = 41;
 
     static Native() => NativeLoader.Initialize();
 
@@ -427,6 +427,63 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_post(ulong entity, NativePostConfig* config);
+
+    // -- HTML and CSS UI (editor builds only)
+
+    /// <summary>Reports whether the HTML and CSS surface is compiled in.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_has_editor();
+
+    /// <summary>Opens an HTML document and returns the id it is held by.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_open(string path);
+
+    /// <summary>Takes a document back off the screen.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_close(int document);
+
+    /// <summary>Resolves a CSS id to the entity carrying that element, or 0.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial ulong bcs_xui_element(string cssId);
+
+    /// <summary>Writes an element's text into a buffer, returning the bytes it needs.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_get_text(ulong entity, byte* buffer, int capacity);
+
+    /// <summary>Replaces an element's text.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_set_text(ulong entity, string text);
+
+    /// <summary>Reads the number an element carries.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_get_number(ulong entity, float* value);
+
+    /// <summary>Moves a slider to a value.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_set_number(ulong entity, float value);
+
+    /// <summary>Reads whether an element is ticked.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_get_flag(ulong entity, int* value);
+
+    /// <summary>Ticks or unticks an element.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_set_flag(ulong entity, int value);
+
+    /// <summary>Copies what the widgets reported since the last call.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_events(NativeUiEvent* buffer, int capacity);
 
     /// <summary>Sets the lens effects a camera draws through.</summary>
     [LibraryImport(Library)]
