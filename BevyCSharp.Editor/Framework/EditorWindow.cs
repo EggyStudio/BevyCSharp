@@ -39,7 +39,7 @@ public sealed class EditorWindow
     public bool IsOpen { get; private set; } = true;
 
     /// <summary>Opens a document as a window.</summary>
-    /// <exception cref="BevyNativeException">This build has no editor profile.</exception>
+    /// <exception cref="Bevy.Interop.BevyNativeException">This build has no editor profile.</exception>
     public static EditorWindow Open(string path) => new(path, Xui.Open(path));
 
     /// <summary>

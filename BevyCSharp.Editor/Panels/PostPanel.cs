@@ -7,98 +7,56 @@ namespace BevyCSharp.Editor.Panels;
 /// The camera's post processing, bound to a panel.
 /// </summary>
 /// <remarks>
-/// Written out by hand for now. Every member below the fields is what the generator will emit
-/// from the attributes, and this file is what says whether the emitted shape is the right one.
+/// The three files this is one of: <c>assets/panels/post.html</c> is the structure,
+/// <c>assets/panels/editor.css</c> is the appearance, and this is the behavior. Nothing here
+/// looks an element up or dispatches a click; the attributes say what is tied to what and the
+/// generator writes the rest.
 /// </remarks>
-public sealed class PostPanel(Entity camera) : IEditorPanel
+[EditorPanel("panels/post.html")]
+public sealed partial class PostPanel(Entity camera)
 {
     private readonly PostSettings _settings = new() { Hdr = true, Msaa = 1 };
-
-    private bool _bloom;
-    private float _intensity = 0.3f;
-    private float _sharpen;
-    private string _note = string.Empty;
     private int _applied;
 
-    /// <inheritdoc/>
-    public EditorWindow? Window { get; private set; }
+    /// <summary>Whether the camera scatters light out of its highlights.</summary>
+    [Bind("#bloom")]
+    public bool Bloom;
 
-    /// <inheritdoc/>
-    public void Open() => Window = EditorWindow.Open("panels/post.html");
+    /// <summary>How much is scattered.</summary>
+    [Bind("#intensity")]
+    public float Intensity = 0.3f;
 
-    /// <inheritdoc/>
-    public void Close()
-    {
-        Window?.Close();
-        Window = null;
-    }
+    /// <summary>How much crispness is put back after antialiasing.</summary>
+    [Bind("#sharpen")]
+    public float Sharpen;
 
-    /// <inheritdoc/>
-    public void Pull()
-    {
-        if (Window is not { IsOpen: true } window) return;
+    /// <summary>A note to whoever is looking, which the engine never reads.</summary>
+    [Bind("#note")]
+    public string Note = string.Empty;
 
-        PanelBinding.PullFlag(window.Element("bloom"), _bloom);
-        PanelBinding.PullNumber(window.Element("intensity"), _intensity);
-        PanelBinding.PullNumber(window.Element("sharpen"), _sharpen);
-        PanelBinding.PullText(window.Element("note"), _note);
-        PanelBinding.PullText(window.Element("readout"), $"applied {_applied} times");
-    }
-
-    /// <inheritdoc/>
-    public bool Push(Entity element)
-    {
-        if (Window is not { IsOpen: true } window) return false;
-
-        if (element == window.Element("bloom"))
-        {
-            _bloom = PanelBinding.PushFlag(element, _bloom);
-            return true;
-        }
-
-        if (element == window.Element("intensity"))
-        {
-            _intensity = PanelBinding.PushNumber(element, _intensity);
-            return true;
-        }
-
-        if (element == window.Element("sharpen"))
-        {
-            _sharpen = PanelBinding.PushNumber(element, _sharpen);
-            return true;
-        }
-
-        if (element == window.Element("note"))
-        {
-            _note = PanelBinding.PushText(element, _note);
-            return true;
-        }
-
-        return false;
-    }
-
-    /// <inheritdoc/>
-    public bool Invoke(Entity element)
-    {
-        if (Window is not { IsOpen: true } window) return false;
-        if (element != window.Element("apply")) return false;
-
-        Apply();
-        return true;
-    }
+    /// <summary>
+    /// What the panel has done so far.
+    /// </summary>
+    /// <remarks>
+    /// One way, so that the element follows this and an edit on screen is overwritten. A readout
+    /// is the case the mode exists for.
+    /// </remarks>
+    [Bind("#readout", Mode = BindMode.OneWay)]
+    public string Readout => $"applied {_applied} times";
 
     /// <summary>Puts what the panel holds onto the camera.</summary>
-    private void Apply()
+    [Command("#apply")]
+    public void Apply()
     {
-        _settings.Bloom = _bloom;
-        _settings.BloomIntensity = _intensity;
-        _settings.Sharpen = _sharpen;
+        _settings.Bloom = Bloom;
+        _settings.BloomIntensity = Intensity;
+        _settings.Sharpen = Sharpen;
 
         Render.SetPostProcessing(camera, _settings);
         _applied++;
 
         Console.WriteLine(
-            $"[editor] applied bloom={_bloom} intensity={_intensity:F2} "
-            + $"sharpen={_sharpen:F2} note='{_note}'");
+            $"[editor] applied bloom={Bloom} intensity={Intensity:F2} "
+            + $"sharpen={Sharpen:F2} note='{Note}'");
     }
 }
