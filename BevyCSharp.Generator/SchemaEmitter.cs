@@ -86,7 +86,48 @@ internal static class SchemaEmitter
         foreach (var field in model.Fields)
             EmitField(source, model, field);
 
-        source.Append("            ]);\n");
+        source.Append("            ],\n");
+
+        EmitMethods(source, model);
+
+        // Adding writes a default value, which for a blittable struct is its zeroed bytes, and
+        // that is what a component the person just asked for should start as.
+        source.Append("            add: static (world, entity) =>\n")
+            .Append("                world.Add(entity, default(").Append(model.QualifiedName)
+            .Append(")),\n")
+            .Append("            remove: static (world, entity) =>\n")
+            .Append("                world.Remove<").Append(model.QualifiedName).Append(">(entity));\n");
+    }
+
+    /// <summary>Emits the list of methods a tool can offer as buttons.</summary>
+    /// <remarks>
+    /// Read, call, write back. The method may change the component, and going through the ordinary
+    /// value API rather than a reference into storage is what makes Bevy see that it did.
+    /// </remarks>
+    private static void EmitMethods(StringBuilder source, BehaviorModel model)
+    {
+        if (model.Invokables.Count == 0)
+        {
+            source.Append("            [],\n");
+            return;
+        }
+
+        source.Append("            [\n");
+
+        foreach (var method in model.Invokables)
+        {
+            source.Append("                new(\n")
+                .Append("                    \"").Append(method.Name).Append("\",\n")
+                .Append("                    static (world, entity) =>\n")
+                .Append("                    {\n")
+                .Append("                        if (!world.TryGet<").Append(model.QualifiedName)
+                .Append(">(entity, out var component)) return;\n\n")
+                .Append("                        component.").Append(method.Name).Append("();\n")
+                .Append("                        world.Set(entity, component);\n")
+                .Append("                    }),\n");
+        }
+
+        source.Append("            ],\n");
     }
 
     /// <summary>Emits one field, with the pair of closures that reach the live component.</summary>

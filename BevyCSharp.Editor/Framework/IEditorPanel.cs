@@ -65,6 +65,16 @@ public interface IEditorPanel
     bool Invoke(Entity element);
 
     /// <summary>
+    /// Offers whatever a secondary click on <paramref name="element"/> is bound to.
+    /// </summary>
+    /// <returns>Whether anything was bound to it.</returns>
+    /// <remarks>
+    /// Separate from <see cref="Invoke"/> so that a row can be selected by a left click and
+    /// offer a menu on a right one, which is the gesture every editor uses for the same thing.
+    /// </remarks>
+    bool Context(Entity element);
+
+    /// <summary>
     /// Tells the panel that a frame's edits have all been read back into it.
     /// </summary>
     /// <remarks>

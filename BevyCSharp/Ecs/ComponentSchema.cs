@@ -125,6 +125,18 @@ public sealed class ComponentField
 }
 
 /// <summary>
+/// One thing a component can be told to do.
+/// </summary>
+/// <param name="Name">The method's name, which is what the button says.</param>
+/// <param name="Run">Calls it on an entity's copy of the component and writes the result back.</param>
+/// <remarks>
+/// A method with no arguments on a component struct. Anything else has no obvious button: a
+/// method that needs values needs a form, and a method that needs the world is a system rather
+/// than something a person presses once.
+/// </remarks>
+public sealed record ComponentMethod(string Name, Action<EcsWorld, Entity> Run);
+
+/// <summary>
 /// The fields of one component type, and the id the engine knows it by.
 /// </summary>
 /// <remarks>
@@ -137,16 +149,25 @@ public sealed class ComponentSchema
 {
     private readonly Func<int> _id;
 
+    private readonly Action<EcsWorld, Entity>? _add;
+    private readonly Action<EcsWorld, Entity>? _remove;
+
     /// <summary>Describes one component type.</summary>
     /// <param name="name">The short name, which is what a tool puts on the header.</param>
     /// <param name="qualifiedName">The full name, which is what the engine reports for it.</param>
     /// <param name="id">Resolves the engine's component id, registering the type if needed.</param>
     /// <param name="fields">The fields, in declaration order.</param>
+    /// <param name="methods">What the component can be told to do, if anything.</param>
+    /// <param name="add">Puts a default one on an entity, if that makes sense for this type.</param>
+    /// <param name="remove">Takes it off again.</param>
     public ComponentSchema(
         string name,
         string qualifiedName,
         Func<int> id,
-        IReadOnlyList<ComponentField> fields)
+        IReadOnlyList<ComponentField> fields,
+        IReadOnlyList<ComponentMethod>? methods = null,
+        Action<EcsWorld, Entity>? add = null,
+        Action<EcsWorld, Entity>? remove = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(name);
         ArgumentNullException.ThrowIfNull(id);
@@ -156,6 +177,37 @@ public sealed class ComponentSchema
         QualifiedName = qualifiedName ?? name;
         _id = id;
         Fields = fields;
+        Methods = methods ?? [];
+        _add = add;
+        _remove = remove;
+    }
+
+    /// <summary>What the component can be told to do.</summary>
+    public IReadOnlyList<ComponentMethod> Methods { get; }
+
+    /// <summary>Whether this type can be put on an entity that has none.</summary>
+    public bool CanAdd => _add is not null;
+
+    /// <summary>Puts a default one on an entity.</summary>
+    /// <returns>Whether this type can be added at all.</returns>
+    public bool Add(EcsWorld world, Entity entity)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        if (_add is null) return false;
+
+        _add(world, entity);
+        return true;
+    }
+
+    /// <summary>Takes it off again.</summary>
+    /// <returns>Whether this type can be removed at all.</returns>
+    public bool Remove(EcsWorld world, Entity entity)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        if (_remove is null) return false;
+
+        _remove(world, entity);
+        return true;
     }
 
     /// <summary>The short name.</summary>
@@ -308,7 +360,9 @@ public static class ComponentSchemas
                     "Scale", FieldKind.Vec3, "Vec3",
                     static (in Transform t) => t.Scale,
                     static (ref Transform t, Vec3 v) => t.Scale = v),
-            ]));
+            ],
+            add: static (world, entity) => world.Add(entity, Transform.Identity),
+            remove: static (world, entity) => world.Remove<Transform>(entity)));
 
         Registered.Add(new ComponentSchema(
             "Visibility",
@@ -320,7 +374,9 @@ public static class ComponentSchemas
                     static (in Visibility v) => v.Mode,
                     static (ref Visibility v, VisibilityMode mode) => v.Mode = mode,
                     Enum.GetNames<VisibilityMode>()),
-            ]));
+            ],
+            add: static (world, entity) => world.Add(entity, Visibility.Inherited),
+            remove: static (world, entity) => world.Remove<Visibility>(entity)));
     }
 
     /// <summary>Reads a field out of a component value.</summary>

@@ -1415,14 +1415,17 @@ build/build-native.sh --editor
 dotnet run --project BevyCSharp.Editor
 ```
 
+It opens with the **world** on the left, the **tools** along the top, and nothing else. Selecting
+something opens the panel that describes it; everything else is behind the hamburger.
+
 A **panel is three files**. The structure is HTML, the appearance is CSS, and a C# class says what
 is bound to what. Nothing looks an element up or dispatches a click; the attributes say what is
 tied to what, and the generator writes the rest:
 
 ```csharp
-[EditorPanel("panels/post.html", Root = "#post", Handle = "#post-title",
-             Region = EditorRegion.TopRight)]
-public sealed partial class PostPanel(Entity camera)
+[EditorPanel("panels/rendering.html", Root = "#rendering", Handle = "#rendering-title",
+             Dock = EditorDock.Right)]
+public sealed partial class RenderingPanel(Entity camera)
 {
     [Bind("#bloom")]     public bool Bloom = true;
     [Bind("#intensity")] public float Intensity = 0.3f;
@@ -1433,9 +1436,24 @@ public sealed partial class PostPanel(Entity camera)
 ```
 
 `[Bind]` ties a member to an element, two way by default and one way for a readout. `[Show]` ties
-a `bool` to whether an element is drawn. `[Command]` ties a method to a click. `[OnChange]` runs
-once a frame in which anything was edited, and `[OnRefresh]` runs once a frame before the panel's
-values are written out, which is where a panel that shows the world reads it.
+a `bool` to whether an element is drawn, and may be written more than once on one member.
+`[Command]` ties a method to a click and `[Context]` to a right click. `[OnChange]` runs once a
+frame in which anything was edited, and `[OnRefresh]` runs once a frame before the panel's values
+are written out, which is where a panel that shows the world reads it.
+
+**The menu is a table of paths.** Everything the editor can be told to do is a slash separated
+path in `EditorMenu`, and the hamburger, the plus button, a right click on the world and a right
+click on an entity are four views of the same table:
+
+```csharp
+EditorMenu.Command("Spawn/Enemy", world => SpawnEnemy(world));
+EditorMenu.Toggle("View/Every entity",
+    _ => WorldPanel.ShowAll = !WorldPanel.ShowAll, () => WorldPanel.ShowAll);
+```
+
+A game adds its own commands the same way, and they appear wherever that part of the table is
+shown. Panels that belong along the bottom are registered as tabs, which are minimised until
+their name is clicked.
 
 **A list is a pool of elements.** A document is a file, so it cannot grow a row per entity. Both
 `[Bind]` and `[Command]` take a `Count`, which makes the id a prefix over numbered elements and
@@ -1450,12 +1468,14 @@ public void Choose(int row) => EditorSelection.Select(_entities[row]);
 ```
 
 **Where a panel sits is data, not CSS.** A stylesheet says what a panel looks like; `EditorLayout`
-holds a placement per panel and arranges them into nine regions plus free coordinates. Because
-that table is data, a layout writes to text and reads back, dragging a window by its handle is
-nothing more than writing one entry, and a flyout is a panel whose declaration says a press
-outside dismisses it.
+holds a placement per panel and arranges them into docks: a left column, a right column, a top
+bar, a bottom band and a strip, plus free coordinates for anything floating. The docks reflow
+around each other, so opening the asset browser along the bottom shortens the columns rather than
+covering them. Because that table is data, a layout writes to text and reads back, dragging a
+window by its handle is nothing more than writing one entry, and a flyout is a panel whose
+declaration says a press outside dismisses it.
 
-**The inspector needs no reflection.** The generator emits a `ComponentSchema` for every
+**Showing a component needs no reflection.** The generator emits a `ComponentSchema` for every
 `[Behavior]` struct, holding each field's name, its kind, and a pair of closures that read and
 write it, and `ComponentSchemas` maps a live component id to it. So an entity's components can be listed and
 edited without naming a single type:
@@ -1473,14 +1493,20 @@ foreach (var id in ctx.Ecs.ComponentsOf(entity))
 Bevy's own components are a curated list, `Transform` and `Visibility` today, because each needs a
 byte-compatible mirror written by hand.
 
+The entity panel draws each field as what it is: three rows for a vector, one per axis; a checkbox
+for a flag; a button that opens the list for a choice; a box for a number. A schema also carries
+how to add the component, how to remove it, and any method the struct has that takes nothing, so
+the panel offers those as buttons without naming a single type.
+
 **What the editor changes can be taken back.** `EditorHistory` is a pair of stacks over closures,
 and an operation is recorded only when it can be reversed exactly: a field edit, a rename, a new
 entity. Despawning is not, because an entity's mesh and material have no mirror on this side and
 what came back would be a name with nothing to draw.
 
-The shipped panels are a starting point rather than the product: a toolbar, a hierarchy, an
-inspector, a status strip, a key list and the post-processing panel above are six uses of one
-mechanism, and every one of them can be edited, replaced or deleted without touching the shell.
+The shipped panels are a starting point rather than the product: the world, the entity, the assets,
+the asset, the console, the rendering settings, the information, the toolbar, the tabs, the key
+strip and the menu are eleven uses of one mechanism, and every one of them can be edited, replaced
+or deleted without touching the shell.
 [.github/EDITOR.md](.github/EDITOR.md) has the design language and what each stage delivered.
 
 ---

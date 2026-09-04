@@ -143,7 +143,11 @@ internal enum FieldKind
     Enum,
 }
 
-/// <summary>One field of a behavior, and where to find it in the component's bytes.</summary>
+/// <summary>A method on a behavior that something can simply be told to call.</summary>
+/// <param name="Name">The method's name.</param>
+internal sealed record BehaviorInvokable(string Name);
+
+/// <summary>One field of a behavior, and how a tool should draw it.</summary>
 /// <param name="Name">The field's name, which is what a tool labels the row with.</param>
 /// <param name="Kind">How to read and draw it.</param>
 /// <param name="Type">The declared type, for a row that cannot be edited.</param>
@@ -220,6 +224,16 @@ internal sealed record BehaviorModel
     /// </remarks>
     public IReadOnlyList<BehaviorField> Fields { get; init; } = [];
 
+    /// <summary>
+    /// The struct's own methods that take nothing and return nothing.
+    /// </summary>
+    /// <remarks>
+    /// What a tool can offer as a button. A stage method takes a context and is a system rather
+    /// than something a person presses; a method that needs arguments needs a form. What is left
+    /// is the useful case: a thing the component knows how to do to itself.
+    /// </remarks>
+    public IReadOnlyList<BehaviorInvokable> Invokables { get; init; } = [];
+
     /// <summary>Value equality over the contents, so incremental caching works.</summary>
     public bool Equals(BehaviorModel? other) =>
         other is not null
@@ -227,7 +241,8 @@ internal sealed record BehaviorModel
         && Name == other.Name
         && QualifiedName == other.QualifiedName
         && Methods.SequenceEqual(other.Methods)
-        && Fields.SequenceEqual(other.Fields);
+        && Fields.SequenceEqual(other.Fields)
+        && Invokables.SequenceEqual(other.Invokables);
 
     /// <inheritdoc/>
     public override int GetHashCode()

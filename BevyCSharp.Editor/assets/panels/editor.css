@@ -6,12 +6,12 @@
  *
  * The values follow Unity's Editor Foundations, which is the interface most people coming to this
  * already have in their hands and which publishes its numbers rather than leaving them to be
- * guessed at: 12px body text, 11px in dense controls, 10px for the smallest labels, rows of 18
- * to 20px, and accent only on what is hovered, focused, pressed or selected. See .github/EDITOR.md.
+ * guessed at: 12px body text, 11px in dense controls, 10px for the smallest labels, rows of 18 to
+ * 20px, and accent only on what is hovered, focused, pressed or selected. See .github/EDITOR.md.
  *
  * Two departures, both deliberate. Panels are black with transparency rather than opaque grey,
- * because the viewport is behind them full screen rather than a pane between them. And corners
- * are rounded, where Unity's are square.
+ * because the viewport is behind them full screen rather than a pane between them. And corners are
+ * rounded, where Unity's are square.
  */
 
 :root {
@@ -35,7 +35,7 @@
     --gray-background-disabled: #202020;
 
     /* Black, with enough left through to see the scene the panels float over. */
-    --surface: rgba(0, 0, 0, 0.76);
+    --surface: rgba(0, 0, 0, 0.78);
     --surface-raised: rgba(255, 255, 255, 0.05);
     --surface-sunken: rgba(0, 0, 0, 0.35);
     --line: rgba(255, 255, 255, 0.10);
@@ -70,7 +70,8 @@ body {
 
 .panel,
 .bar,
-.strip {
+.strip,
+.menu {
     display: flex;
     background-color: var(--surface);
     border: 1px solid var(--line);
@@ -81,9 +82,14 @@ body {
 
 .panel {
     flex-direction: column;
-    width: 236px;
+    width: 238px;
     padding: 8px;
     row-gap: 5px;
+    overflow: hidden;
+}
+
+.panel.wide {
+    width: 100%;
 }
 
 /* A toolbar is a panel whose contents are buttons. Nothing else about it is different. */
@@ -94,12 +100,20 @@ body {
     column-gap: 4px;
 }
 
-/* A status strip: one line of text, and nothing to act on. */
-.strip {
-    flex-direction: row;
-    align-items: center;
-    padding: 4px 10px;
-    column-gap: 14px;
+/*
+ * A row of buttons inside a panel, which is not a panel of its own: no background, no border, and
+ * no padding to hold it away from edges it does not have.
+ */
+.bar.flush {
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border: 0;
+    border-radius: 0;
+}
+
+.tabs {
+    padding: 3px;
+    column-gap: 3px;
 }
 
 /* -- Title bars, which are also what a window is dragged by */
@@ -125,6 +139,7 @@ body {
 .dim {
     font-size: 10px;
     color: var(--dim);
+    text-wrap: nowrap;
 }
 
 /* -- Text */
@@ -132,13 +147,6 @@ body {
 p {
     font-size: 11px;
     color: var(--text);
-}
-
-h2 {
-    font-size: 11px;
-    color: var(--label);
-    text-transform: uppercase;
-    margin-bottom: 2px;
 }
 
 /* -- Rows: what a list is made of */
@@ -151,13 +159,22 @@ h2 {
 }
 
 /*
+ * The list inside a panel that fills its column. It takes what is left after the header and the
+ * footer, and clips rather than pushing them off the bottom, because the panel's height is the
+ * layout's decision and not the contents'.
+ */
+.rows.grow {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+/*
  * 18px, which is Unity's height for a standard single-line control, and the reason a list of
  * thirty entities is readable at a glance rather than a wall.
  */
 .row {
     width: 100%;
     height: 18px;
-    text-wrap: nowrap;
     min-width: 0;
     padding: 0 6px;
     background-color: rgba(0, 0, 0, 0);
@@ -165,20 +182,17 @@ h2 {
     border-radius: var(--radius-small);
     color: var(--text);
     font-size: 11px;
-    /* A button centres its text, and a row of a list reads from the left like every other row. */
     justify-content: flex-start;
     text-align: left;
+    text-wrap: nowrap;
 }
 
 .row:hover {
     background-color: var(--surface-raised);
 }
 
-/*
- * 22px, not 20. The input inside a field row draws a border and a little padding of its own, so a
- * row exactly as tall as the control leaves the two fighting for the same pixels and every row
- * overlapping the one under it.
- */
+/* -- Fields: a label and whatever editor the value deserves */
+
 .field-row {
     display: flex;
     flex-direction: row;
@@ -186,20 +200,15 @@ h2 {
     width: 100%;
     height: 22px;
     margin: 0;
-    column-gap: 6px;
+    column-gap: 5px;
 }
 
 /*
- * A name column wide enough for the field names an inspector actually shows, and a value that
- * takes what is left. Unity's rule is that the inspector must not scroll sideways at its
- * narrowest, and a fixed name column is what keeps that true.
- */
-/*
- * The two columns add up to less than the panel is wide: 236 less its padding and border leaves
- * 218, and 84 + 6 + 112 leaves a little in hand. Unity's rule is that an inspector must not
- * scroll sideways at its narrowest, and a value column that overflows is exactly that.
+ * A name column wide enough for the field names an inspector actually shows, and editors that fit
+ * beside it. Unity's rule is that an inspector must not scroll sideways at its narrowest, and a
+ * value column that overflows is exactly that.
  *
- * `text-wrap: nowrap` matters more than it looks. A name that wraps makes its paragraph three
+ * `text-wrap: nowrap` matters more than it looks: a name that wraps makes its paragraph three
  * lines tall inside a row 22 pixels high, and every row below it is then drawn through it.
  */
 .field-name {
@@ -210,12 +219,60 @@ h2 {
     text-wrap: nowrap;
 }
 
+.field-text {
+    width: 118px;
+    min-width: 0;
+    font-size: 11px;
+    color: var(--text);
+    text-wrap: nowrap;
+}
+
 .field-value {
-    width: 112px;
+    width: 118px;
     min-width: 0;
     height: 18px;
     margin: 0;
     padding: 1px 5px;
+}
+
+/*
+ * Each editor sits in a box of its own inside the row.
+ *
+ * Not for the look: three inputs as direct children of one row draw only the first one's text,
+ * whatever is written to the others. A wrapper each is what the interface needs to keep them
+ * apart, and the wrapper costs nothing since it takes exactly the size of what is in it.
+ */
+.cell {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+/* Three of these are what a vector is: narrow enough that all three fit beside the name. */
+.field-num {
+    width: 36px;
+    min-width: 0;
+    height: 18px;
+    margin: 0;
+    padding: 1px 3px;
+    font-size: 10px;
+}
+
+.field-btn {
+    height: 18px;
+    min-width: 0;
+    padding: 0 6px;
+    background-color: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-small);
+    color: var(--text);
+    font-size: 10px;
+    text-wrap: nowrap;
+}
+
+.field-btn:hover {
+    background-color: var(--accent-soft);
+    border-color: var(--accent);
 }
 
 /* -- Controls */
@@ -257,7 +314,7 @@ slider {
  * The container is what takes the click, and the box inside it is what is drawn. The crate sizes
  * the container for a checkbox that carries its own caption, 150 by 40, so shrinking only the
  * container leaves a graphic larger than the area that responds to it. Both are set here, to the
- * same size, because the captions in this editor are separate elements above each control.
+ * same size, because the captions in this editor are separate elements.
  */
 checkbox {
     width: 18px;
@@ -272,9 +329,9 @@ checkbox > .mark-box {
 }
 
 /*
- * Buttons are grey until they are under the pointer. Unity spends its accent on state rather
- * than on every control that could be pressed, which is what keeps a toolbar of eight buttons
- * from reading as eight things demanding attention.
+ * Buttons are grey until they are under the pointer. Unity spends its accent on state rather than
+ * on every control that could be pressed, which is what keeps a toolbar of eight buttons from
+ * reading as eight things demanding attention.
  */
 button {
     height: 20px;
@@ -290,4 +347,152 @@ button {
 button:hover {
     background-color: var(--accent-soft);
     border-color: var(--accent);
+}
+
+/* A square button carrying one glyph: the hamburger, undo, the pin. */
+.icon {
+    width: 22px;
+    height: 20px;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border: 0;
+    color: var(--label);
+    font-size: 12px;
+}
+
+.icon:hover {
+    background-color: var(--accent-soft);
+    color: var(--bright);
+}
+
+/* A tool is wider than an icon and narrower than a sentence. */
+.tool {
+    height: 22px;
+    padding: 0 8px;
+    font-size: 11px;
+    text-wrap: nowrap;
+}
+
+/* A tab says the name of a panel that is usually not on screen. */
+.tab {
+    height: 20px;
+    padding: 0 8px;
+    background-color: rgba(0, 0, 0, 0);
+    border: 0;
+    color: var(--label);
+    font-size: 11px;
+    text-wrap: nowrap;
+}
+
+.tab:hover {
+    background-color: var(--accent-soft);
+    color: var(--bright);
+}
+
+/* A line of the log: smaller, dimmer, and never wrapped, so a burst of them stays readable. */
+.log {
+    height: 13px;
+    margin: 0;
+    padding: 0 4px;
+    font-size: 10px;
+    line-height: 13px;
+    color: var(--dim);
+}
+
+/* An asset row keeps its file name on one line however long the name is. */
+.asset {
+    width: 210px;
+}
+
+/*
+ * The asset listing runs down and then across, so a wide panel along the bottom is used as a wide
+ * panel rather than as a tall one lying on its side.
+ */
+.columns {
+    flex-direction: column;
+    flex-wrap: wrap;
+    height: 108px;
+    column-gap: 10px;
+}
+
+/* -- Menus */
+
+/*
+ * Nearly opaque, unlike a panel. A menu opens over whatever asked for it, and two lots of text
+ * showing through each other is unreadable in a way a panel over a scene is not.
+ */
+.menu {
+    flex-direction: column;
+    width: 214px;
+    padding: 5px;
+    row-gap: 1px;
+    background-color: rgba(10, 10, 12, 0.97);
+}
+
+/*
+ * The title is a button because it is also the way back out of a submenu. A menu that shows one
+ * level at a time needs somewhere to put that, and the place a person looks is the top.
+ */
+.menu-title {
+    width: 100%;
+    height: 20px;
+    margin-bottom: 3px;
+    padding: 0 6px;
+    background-color: rgba(0, 0, 0, 0);
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    color: var(--dim);
+    font-size: 10px;
+    justify-content: flex-start;
+    text-align: left;
+    text-transform: uppercase;
+    text-wrap: nowrap;
+}
+
+.menu-title:hover {
+    color: var(--bright);
+}
+
+.menu-row {
+    width: 100%;
+    height: 20px;
+    padding: 0 6px;
+    background-color: rgba(0, 0, 0, 0);
+    border: 0;
+    border-radius: var(--radius-small);
+    color: var(--text);
+    font-size: 11px;
+    justify-content: flex-start;
+    text-align: left;
+    text-wrap: nowrap;
+}
+
+.menu-row:hover {
+    background-color: var(--accent-soft);
+    color: var(--bright);
+}
+
+/* -- The key strip, which is text over the scene rather than a panel */
+
+/*
+ * No box: a key list is read at a glance and then ignored, and a panel with a border would keep
+ * asking to be noticed long after it had been read. The shadow is what keeps it legible over a
+ * bright part of the scene, since there is no background to sit on.
+ */
+.keys {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    column-gap: 16px;
+    padding: 2px 4px;
+    background-color: rgba(0, 0, 0, 0);
+    pointer-events: none;
+}
+
+.key {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.72);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
+    text-wrap: nowrap;
 }

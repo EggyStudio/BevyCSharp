@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 50;
+    internal const int ExpectedAbiVersion = 54;
 
     static Native() => NativeLoader.Initialize();
 
@@ -518,6 +518,11 @@ internal static unsafe partial class Native
     internal static partial int bcs_xui_set_rect(
         ulong entity, float left, float top, float width, float height);
 
+    /// <summary>Reads whether an element is on screen.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_get_visible(ulong entity, int* visible);
+
     /// <summary>Shows or hides an element and everything under it.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -542,6 +547,18 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_pick_events(ulong* buffer, int capacity);
+
+    /// <summary>Projects a world point onto a camera's viewport, in logical pixels.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_world_to_viewport(
+        ulong camera, float x, float y, float z, float* point);
+
+    /// <summary>Turns a viewport point into a ray: origin then direction.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_viewport_to_world(
+        ulong camera, float x, float y, float* ray);
 
     /// <summary>Writes an entity's world-space bounds: min x, y, z then max x, y, z.</summary>
     [LibraryImport(Library)]

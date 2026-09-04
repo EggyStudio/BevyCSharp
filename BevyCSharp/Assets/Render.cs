@@ -1280,6 +1280,54 @@ public static unsafe class Render
     }
 
     /// <summary>
+    /// Where a world point lands on a camera's viewport, in logical pixels.
+    /// </summary>
+    /// <remarks>
+    /// The same coordinates the cursor is reported in, which is what lets something drawn in the
+    /// world be hit-tested against the pointer. A point behind the camera answers
+    /// <see langword="false"/> rather than a number that would be off the screen in the wrong
+    /// direction.
+    /// </remarks>
+    public static bool TryProject(Entity camera, Vec3 point, out float x, out float y)
+    {
+        var screen = stackalloc float[2];
+
+        if (Native.bcs_render_world_to_viewport(camera.Bits, point.X, point.Y, point.Z, screen) < 0)
+        {
+            x = 0f;
+            y = 0f;
+            return false;
+        }
+
+        x = screen[0];
+        y = screen[1];
+        return true;
+    }
+
+    /// <summary>
+    /// The ray through a point on a camera's viewport.
+    /// </summary>
+    /// <remarks>
+    /// The other half of <see cref="TryProject"/>. Where a drag is taking something is a question
+    /// about this ray and the axis being dragged along, rather than about pixels.
+    /// </remarks>
+    public static bool TryRay(Entity camera, float x, float y, out Vec3 origin, out Vec3 direction)
+    {
+        var ray = stackalloc float[6];
+
+        if (Native.bcs_render_viewport_to_world(camera.Bits, x, y, ray) < 0)
+        {
+            origin = default;
+            direction = default;
+            return false;
+        }
+
+        origin = new Vec3(ray[0], ray[1], ray[2]);
+        direction = new Vec3(ray[3], ray[4], ray[5]);
+        return true;
+    }
+
+    /// <summary>
     /// The box an entity occupies in the world, or <see langword="false"/> when it has none.
     /// </summary>
     /// <remarks>

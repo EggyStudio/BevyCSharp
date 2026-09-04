@@ -7,13 +7,43 @@ top of it.
 ## What it is for
 
 An editor made of panels that a person can rearrange, replace or write their own version of. The
-shipped set is a starting point rather than the product: a hierarchy, an inspector, a toolbar and
-a shortcut list are four panels using one mechanism four ways, and an enum flyout or an asset
-browser is a fifth use of the same thing.
+shipped set is a starting point rather than the product: the world, the entity, the assets, the
+tools and the key strip are five panels using one mechanism five ways, and a menu, an enum
+dropdown and a right-click are a sixth use of the same thing.
 
 That is the reason the framework came first. A fixed arrangement of menubar, hierarchy, viewport
 and inspector is one arrangement, and the moment it is baked into the shell it stops being a
 choice.
+
+## The shape of it
+
+Bevy's own words where there is one: the left column is the **world**, because that is what Bevy
+calls the thing being listed, and the right column answers what is **selected**, whether that is
+an entity, an asset or a setting. Nothing is called a hierarchy or an inspector.
+
+| where | what | opens |
+|---|---|---|
+| top, centred | the tools, and the information button | always |
+| left column | the world: a tree, a search, and the editor's own commands | always |
+| right column | the entity, the asset, the rendering settings, the information | when something is selected or asked for |
+| bottom band | the asset browser and the console, and whatever else is given a tab | from its tab |
+| bottom strip | the tabs, and what the keys do | always |
+| over everything | menus, dropdowns, context menus | while they are being read |
+
+The bottom band pushes the columns up rather than covering them, which is what `EditorDock` and
+the layout are for: a dock is a place panels share and reflow within, not a container that owns
+them. A panel can be dragged out of its dock by its title bar and becomes floating, which is one
+entry in a table that can be saved.
+
+**The menu is the editor.** Everything that is not a tool lives behind the hamburger, as a table
+of slash separated paths: `Panels/Rendering`, `Spawn/Light/Point`, `View/Every entity`. The same
+table serves the hamburger, the plus button (which opens at `Spawn`), a right click on the world
+(the same), a right click on an entity (`Entity`), and any key bound to a path. Adding a command
+is one line, and it appears in all of them.
+
+**The tools are the toolbar.** Select, move, rotate and scale, on Q, W, E and R, with snapping on
+Control. A toolbar of buttons that open panels is a menu that escaped its menu; what belongs on
+screen at all times is the handful of things that change what a drag does.
 
 ## Design language
 
@@ -133,18 +163,30 @@ Ordered so that each one is worth having before the next exists.
    through, and all of those are already known to the compiler that emitted the table, so each
    field carries a closure that reads and writes the real struct. Bevy's `Transform` and
    `Visibility` are described by hand, which is the curated list the plan asked for.
-3. **Framework: regions, toolbars, flyouts.** Done. Placement moved out of the stylesheet:
-   `bcs_xui_set_rect`, `set_visible`, `set_layer` and `bcs_xui_rect` write and read
-   the ordinary `bevy_ui` node the crate spawned, and `EditorLayout` holds a table of placements
-   it arranges from. Because that table is data, a layout writes to text and reads back, a drag is
-   nothing more than writing one entry, and a flyout is a panel whose declaration says a press
-   outside dismisses it. A toolbar turned out to need nothing at all: it is a panel in the top
-   region whose contents are buttons.
-4. **The panels.** Done. Toolbar, hierarchy, inspector, status strip, key list, post processing.
-   The test of the framework was whether they needed anything it did not have, and they needed two
-   things, both general rather than panel-specific: **repeated bindings**, where one id stands for
-   a numbered pool of elements and the member is an array, and **`[OnRefresh]`**, which is where a
-   panel reads the world before its values are written out.
+3. **Framework: docks, toolbars, flyouts.** Done. Placement moved out of the stylesheet:
+   `bcs_xui_set_rect`, `set_visible`, `set_layer`, `bcs_xui_get_visible` and `bcs_xui_rect` write
+   and read the ordinary `bevy_ui` node the crate spawned, and `EditorLayout` holds a table of
+   placements it arranges from. Because that table is data, a layout writes to text and reads
+   back, a drag is nothing more than writing one entry, and a flyout is a panel whose declaration
+   says a press outside dismisses it. A toolbar turned out to need nothing at all: it is a panel in
+   the top dock whose contents are buttons.
+
+   Docks rather than a grid of nine regions, because the bottom band has to push the columns up
+   rather than cover them. `set_layer` writes a **global** z index: a panel is the root of its own
+   document, and an order that counts only within one document cannot put a menu over a panel.
+4. **The panels.** Done. World, entity, assets, asset, rendering, information, toolbar, tabs, key
+   strip and the menu. The test of the framework was whether they needed anything it did not have,
+   and they needed four things, all general rather than panel-specific: **repeated bindings**,
+   where one id stands for a numbered pool of elements and the member is an array; **`[Show]`**,
+   which ties a bool to whether an element is drawn and can be written more than once on one
+   member; **`[OnRefresh]`**, where a panel reads the world before its values are written out; and
+   **`[Context]`**, which is a right click rather than a click and needed the bridge to tell the
+   two apart.
+
+   Two pieces of the framework came out of the panels and belong to anything built on it.
+   `EditorMenu` is a table of slash separated paths that the hamburger, the plus button and both
+   right-click menus all read, so a command is added once and appears in all of them. `EditorTabs`
+   is a list of panels that live minimised along the bottom, which is where a browser belongs.
 5. **Selection and saving.** Done, with two caveats. `bcs_pick_events` reports a click on a mesh,
    so the viewport selects, and `bcs_render_bounds` gives the box drawn around what is selected.
    The world's edits and the arrangement of the panels save to `assets/world.json` and
@@ -164,7 +206,23 @@ Ordered so that each one is worth having before the next exists.
 
 ## What the documents cannot do
 
-Three constraints shaped the panels, and all three are the crate's rather than ours:
+These constraints shaped the panels, and all of them are the crate's rather than ours:
+
+- **One input per row draws.** Three number boxes side by side show the first one's text and leave
+  the other two empty, whatever is written to them, however often. So a vector is three rows, one
+  per axis, each with a box that draws. This is the single largest thing a fork of the crate would
+  buy back.
+- **Text written to a widget before its own text child exists is held and never drawn**, and
+  writing the same value again is not a change, so nothing redraws it. Every text binding therefore
+  writes the value with a trailing space twice a second and without one the rest of the time: a
+  change the eye cannot see, and everything that reads a value back trims it.
+- **An element's display is put back by the stylesheet** whenever the interface restyles the
+  widget, so what a panel last wrote is not what is in force. Visibility is read before it is
+  written rather than remembered.
+- **The font has no arrows, chevrons or hamburger.** A glyph it lacks draws as a box and says
+  nothing about why, so every icon in the editor is ASCII and lives in one table, `EditorIcons`,
+  for whoever ships a font with the better ones.
+
 
 - **CSS ids are global**, not per document. Every open document is one document as far as the
   crate is concerned, so `#row-0` in one panel and `#row-0` in another are the same element. Every

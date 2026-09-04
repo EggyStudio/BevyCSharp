@@ -4,21 +4,21 @@ using BevyCSharp.Editor.Framework;
 namespace BevyCSharp.Editor.Panels;
 
 /// <summary>
-/// The camera's post processing, bound to a panel.
+/// What the camera does to the picture after the scene is drawn.
 /// </summary>
 /// <remarks>
-/// The three files this is one of: <c>assets/panels/post.html</c> is the structure,
-/// <c>assets/panels/editor.css</c> is the appearance, and this is the behavior. Nothing here
-/// looks an element up or dispatches a click; the attributes say what is tied to what and the
-/// generator writes the rest.
+/// Closed unless it is asked for, from the menu, because it is a setting rather than a thing to
+/// work in. The three files this is one of: <c>assets/panels/rendering.html</c> is the structure,
+/// <c>assets/panels/editor.css</c> is the appearance, and this is the behavior. Nothing here looks
+/// an element up or dispatches a click.
 /// </remarks>
 [EditorPanel(
-    "panels/post.html",
-    Root = "#post",
-    Handle = "#post-title",
-    Region = EditorRegion.TopRight,
-    Y = 34f)]
-public sealed partial class PostPanel(Entity camera)
+    "panels/rendering.html",
+    Root = "#rendering",
+    Handle = "#rendering-title",
+    Dock = EditorDock.Right,
+    Order = 30)]
+public sealed partial class RenderingPanel(Entity camera)
 {
     private readonly PostSettings _settings = new() { Hdr = true, Msaa = 1 };
 
@@ -33,10 +33,6 @@ public sealed partial class PostPanel(Entity camera)
     /// <summary>How much crispness is put back after antialiasing.</summary>
     [Bind("#sharpen")]
     public float Sharpen;
-
-    /// <summary>A note to whoever is looking, which the engine never reads.</summary>
-    [Bind("#note")]
-    public string Note = string.Empty;
 
     /// <summary>
     /// What the camera is currently set to.
@@ -54,8 +50,7 @@ public sealed partial class PostPanel(Entity camera)
     /// </summary>
     /// <remarks>
     /// Runs whenever a value is edited rather than when a button is pressed, which is what makes
-    /// dragging a slider show its result while it is being dragged. Once a frame however many
-    /// values moved in it.
+    /// dragging a slider show its result while it is being dragged.
     /// </remarks>
     [OnChange]
     public void Apply()
@@ -68,9 +63,6 @@ public sealed partial class PostPanel(Entity camera)
     }
 
     /// <summary>Puts the panel back to the values it starts with.</summary>
-    /// <remarks>
-    /// The same values the fields are declared with, so that resetting and restarting agree.
-    /// </remarks>
     [Command("#reset")]
     public void Reset()
     {

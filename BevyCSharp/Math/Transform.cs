@@ -215,6 +215,66 @@ public struct Quat : IEquatable<Quat>
         a.W * b.Z + a.X * b.Y - a.Y * b.X + a.Z * b.W,
         a.W * b.W - a.X * b.X - a.Y * b.Y - a.Z * b.Z);
 
+    /// <summary>Turns a point by this rotation.</summary>
+    /// <remarks>
+    /// The usual expansion of <c>q v q*</c>, which is a handful of multiplications rather than
+    /// building a matrix for one point. Rotating a direction and rotating a position are the same
+    /// operation here, because a rotation has no translation to add.
+    /// </remarks>
+    public static Vec3 operator *(Quat rotation, Vec3 point)
+    {
+        var axis = new Vec3(rotation.X, rotation.Y, rotation.Z);
+        var scaled = Vec3.Cross(axis, point) + (point * rotation.W);
+
+        return point + (Vec3.Cross(axis, scaled) * 2f);
+    }
+
+    /// <summary>
+    /// The rotation that turns about X, then Y, then Z, in radians.
+    /// </summary>
+    /// <remarks>
+    /// Applied in that order about the axes as they were before any of it, which is the order an
+    /// inspector's three boxes read in. <see cref="ToEuler"/> is its inverse for any rotation whose
+    /// pitch is short of straight up, where the other two angles stop being separable.
+    /// </remarks>
+    public static Quat FromEuler(float x, float y, float z) =>
+        FromRotationZ(z) * FromRotationY(y) * FromRotationX(x);
+
+    /// <summary>
+    /// The turns about X, Y and Z this rotation is made of, in radians.
+    /// </summary>
+    /// <remarks>
+    /// The inverse of <see cref="FromEuler"/>. A rotation has more than one decomposition, so what
+    /// comes back is the one with the pitch between straight down and straight up; at either pole
+    /// the roll and the yaw describe the same turn and the roll is given all of it.
+    /// </remarks>
+    public readonly Vec3 ToEuler()
+    {
+        // The middle term is the sine of the pitch, and it is the one that saturates: outside
+        // the range the two other angles are no longer separable, so it is clamped and the yaw
+        // is taken from the remaining terms alone.
+        var sinPitch = 2f * ((W * Y) - (Z * X));
+
+        if (MathF.Abs(sinPitch) >= 0.999999f)
+        {
+            var pole = MathF.CopySign(MathF.PI / 2f, sinPitch);
+            var roll = 2f * MathF.Atan2(X, W);
+
+            return new Vec3(0f, pole, roll);
+        }
+
+        var sinRollCos = 2f * ((W * X) + (Y * Z));
+        var cosRollCos = 1f - (2f * ((X * X) + (Y * Y)));
+
+        var sinYawCos = 2f * ((W * Z) + (X * Y));
+        var cosYawCos = 1f - (2f * ((Y * Y) + (Z * Z)));
+
+        return new Vec3(
+            MathF.Atan2(sinRollCos, cosRollCos),
+            MathF.Asin(sinPitch),
+            MathF.Atan2(sinYawCos, cosYawCos));
+    }
+
     /// <inheritdoc/>
     public readonly bool Equals(Quat other) =>
         X == other.X && Y == other.Y && Z == other.Z && W == other.W;

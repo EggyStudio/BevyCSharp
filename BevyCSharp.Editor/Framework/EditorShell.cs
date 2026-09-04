@@ -1,4 +1,5 @@
 using Bevy;
+using BevyCSharp.Editor.Panels;
 
 namespace BevyCSharp.Editor.Framework;
 
@@ -63,7 +64,6 @@ public static class EditorShell
         ArgumentNullException.ThrowIfNull(panel);
 
         panel.Open();
-        panel.Window?.Layer(panel.Chrome.Layer);
         Panels.Add(panel);
         Fresh.Add(panel);
         Rebuilding();
@@ -85,6 +85,97 @@ public static class EditorShell
         Show(panel);
         Layout.Place(panel, panel.Chrome.Placement.MovedTo(x, y));
         return panel;
+    }
+
+    /// <summary>
+    /// Opens a menu at a point, closing whichever was open.
+    /// </summary>
+    /// <remarks>
+    /// One menu at a time, because a menu is a question and two of them at once is two questions
+    /// with one pointer to answer them.
+    /// </remarks>
+    public static MenuPanel ShowMenu(string path, float x, float y, string? title = null)
+    {
+        CloseMenus();
+
+        var (clearX, clearY) = Clear(x, y);
+        return ShowAt(new MenuPanel(path, title), clearX, clearY);
+    }
+
+    /// <summary>Opens a menu over a list built for the occasion, such as an enum's values.</summary>
+    public static MenuPanel ShowMenu(string title, IReadOnlyList<MenuItem> items, float x, float y)
+    {
+        CloseMenus();
+
+        var (clearX, clearY) = Clear(x, y);
+        return ShowAt(new MenuPanel(title, items), clearX, clearY);
+    }
+
+    /// <summary>
+    /// The nearest point to <paramref name="x"/> that is not over a panel.
+    /// </summary>
+    /// <remarks>
+    /// A menu opened over a panel is unreadable: the panel's text draws through it whatever it is
+    /// told about layering, which is the interface's doing and not something this side can fix. So
+    /// a menu steps out from under the panel it was opened from, to its right where there is room
+    /// and to its left where there is not, which is where a menu belongs anyway.
+    /// </remarks>
+    private static (float X, float Y) Clear(float x, float y)
+    {
+        const float MenuWidth = 216f;
+        const float Gap = 8f;
+
+        var (windowWidth, _) = Window.Size();
+
+        // A handful of steps, since a point can be over two panels stacked in a column and a menu
+        // stepping out of one may land on another.
+        for (var step = 0; step < 4; step++)
+        {
+            var moved = false;
+
+            foreach (var panel in Panels)
+            {
+                if (panel is MenuPanel) continue;
+                if (panel.Window?.Measure() is not { } rect) continue;
+                if (!rect.Contains(x + 4f, y + 4f) && !rect.Contains(x + MenuWidth - 4f, y + 4f))
+                    continue;
+
+                x = rect.Right + Gap;
+                if (x + MenuWidth > windowWidth) x = MathF.Max(Gap, rect.X - MenuWidth - Gap);
+
+                moved = true;
+                break;
+            }
+
+            if (!moved) break;
+        }
+
+        return (x, y);
+    }
+
+    /// <summary>
+    /// Keeps a panel that would otherwise dismiss itself, or lets it go again.
+    /// </summary>
+    /// <remarks>
+    /// What pinning is. A panel declares how it dismisses before it opens, and this is the one
+    /// thing about that which a person changes while it is open, so it is a set the shell holds
+    /// rather than a property of the declaration.
+    /// </remarks>
+    public static void Pin(IEditorPanel panel, bool pinned)
+    {
+        ArgumentNullException.ThrowIfNull(panel);
+
+        if (pinned) Pinned.Add(panel);
+        else Pinned.Remove(panel);
+    }
+
+    /// <summary>Panels that have been pinned, and so no longer dismiss on an outside press.</summary>
+    private static readonly HashSet<IEditorPanel> Pinned = [];
+
+    /// <summary>Closes any menu that is open.</summary>
+    public static void CloseMenus()
+    {
+        foreach (var panel in Panels.OfType<MenuPanel>().ToArray()) Hide(panel);
     }
 
     /// <summary>
@@ -132,6 +223,8 @@ public static class EditorShell
         panel.Close();
         Panels.Remove(panel);
         Fresh.Remove(panel);
+        Pinned.Remove(panel);
+        EditorTabs.Closed(panel);
         Rebuilding();
 
         if (_drag?.Panel == panel) _drag = null;
@@ -194,8 +287,24 @@ public static class EditorShell
                     break;
 
                 case UiEventKind.Click:
-                    foreach (var panel in Panels)
+                    foreach (var panel in Panels.ToArray())
                         if (panel.Invoke(report.Element)) break;
+                    break;
+
+                case UiEventKind.Context:
+                    // Offered to the panels first: a row with a menu of its own answers, and an
+                    // element with none falls through to the viewport's, which is what a right
+                    // click on the background should get.
+                    var claimed = false;
+                    foreach (var panel in Panels.ToArray())
+                    {
+                        if (!panel.Context(report.Element)) continue;
+
+                        claimed = true;
+                        break;
+                    }
+
+                    if (!claimed) _contextWanted = true;
                     break;
 
                 case UiEventKind.Reloading:
@@ -219,6 +328,7 @@ public static class EditorShell
         // same press that opened it.
         Drag(input);
         Dismiss(input);
+        Menus(input);
 
         // A click on a mesh selects it, which is the other half of what the hierarchy does. The
         // shell does this rather than a panel, because selection belongs to the editor and not
@@ -232,6 +342,7 @@ public static class EditorShell
         // Asked once a frame, and used by every text binding: whatever is being typed in is left
         // alone rather than overwritten with what the program still says.
         PanelBinding.Focused = Xui.Focused();
+        PanelBinding.Frame = ctx.Time.FrameCount;
 
         // Read the world first, arrange second, write the screen third. A panel that filled its
         // rows during this tick is one whose height changed, and the arrangement has to see that
@@ -303,6 +414,50 @@ public static class EditorShell
         Layout.Place(drag.Panel, placement.MovedTo(x - drag.OffsetX, y - drag.OffsetY));
     }
 
+    /// <summary>
+    /// Opens the viewport's own menu when a right click landed on nothing.
+    /// </summary>
+    /// <remarks>
+    /// A right click is also how the camera is steered, so the gesture has to be told apart from
+    /// a look: a press and a release in nearly the same place is a click, and anything further is
+    /// the camera having been turned. The interface reports its own right clicks through the
+    /// event queue, and this is only what is left over.
+    /// </remarks>
+    private static void Menus(Input input)
+    {
+        var (x, y) = input.MousePosition;
+
+        if (input.MousePressed(MouseButton.Right)) _rightPress = (x, y);
+
+        var wanted = _contextWanted;
+        _contextWanted = false;
+
+        if (input.MouseReleased(MouseButton.Right) && _rightPress is { } press)
+        {
+            _rightPress = null;
+
+            var moved = MathF.Abs(x - press.X) + MathF.Abs(y - press.Y);
+            if (moved < 4f && !PointerOverPanel(x, y)) wanted = true;
+        }
+
+        if (!wanted) return;
+
+        ViewportMenu?.Invoke(x, y);
+    }
+
+    /// <summary>What a right click on the scene offers, when nothing else claimed it.</summary>
+    /// <remarks>
+    /// A hook rather than a menu, because what the world's menu contains is the world panel's
+    /// business and the shell should not know the name of a single command.
+    /// </remarks>
+    public static Action<float, float>? ViewportMenu { get; set; }
+
+    /// <summary>Where the right button went down, so a click can be told from a look.</summary>
+    private static (float X, float Y)? _rightPress;
+
+    /// <summary>Whether an element reported a right click that nothing claimed.</summary>
+    private static bool _contextWanted;
+
     /// <summary>Closes any flyout the person pressed outside of.</summary>
     /// <remarks>
     /// A panel that has never been measured cannot be dismissed, which is what keeps the press
@@ -317,6 +472,7 @@ public static class EditorShell
         foreach (var panel in Panels.ToArray())
         {
             if (panel.Chrome.Dismiss != PanelDismiss.OnOutsideClick) continue;
+            if (Pinned.Contains(panel)) continue;
             if (Fresh.Contains(panel)) continue;
             if (panel.Window?.Measure() is not { } rect) continue;
             if (rect.Contains(x, y)) continue;

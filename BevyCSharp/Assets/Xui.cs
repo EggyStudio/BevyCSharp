@@ -36,6 +36,16 @@ public enum UiEventKind
     /// apart, and reading in between is reading the dead.
     /// </remarks>
     Reloading = 5,
+
+    /// <summary>
+    /// The element was clicked with the secondary button.
+    /// </summary>
+    /// <remarks>
+    /// Kept apart from <see cref="Click"/> because asking what can be done to a thing is not the
+    /// same gesture as doing the thing, and a tool that treats them alike has no way to offer a
+    /// context menu.
+    /// </remarks>
+    Context = 6,
 }
 
 /// <summary>
@@ -216,6 +226,20 @@ public static unsafe class Xui
     /// <exception cref="BevyNativeException">The element is gone or is not laid out.</exception>
     public static void SetVisible(Entity element, bool visible) => Native.Check(
         Native.bcs_xui_set_visible(element.Bits, visible ? 1 : 0), $"showing {element}");
+
+    /// <summary>
+    /// Whether an element is on screen.
+    /// </summary>
+    /// <remarks>
+    /// Worth asking rather than remembering: the interface reapplies a widget's stylesheet
+    /// whenever it restyles one, which puts its display back to what the CSS says, so what was
+    /// last written is not what is necessarily in force.
+    /// </remarks>
+    public static bool IsVisible(Entity element)
+    {
+        int visible;
+        return Native.bcs_xui_get_visible(element.Bits, &visible) >= 0 && visible != 0;
+    }
 
     /// <summary>Puts an element in front of or behind its siblings.</summary>
     /// <exception cref="BevyNativeException">The element is gone.</exception>

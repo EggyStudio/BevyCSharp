@@ -563,3 +563,127 @@ pub unsafe extern "C" fn bcs_render_bounds(entity: u64, out: *mut f32) -> i32 {
         }
     })
 }
+
+/// Projects a world point onto the camera's viewport, writing `x` and `y` in logical pixels.
+///
+/// What a tool needs to hit-test something it drew in the world against the cursor, which is
+/// reported in the same coordinates. A gizmo is three lines in the scene and a handle under the
+/// pointer, and only this turns one into the other.
+///
+/// Reports [`status::NOT_PRESENT`] when the point is behind the camera or otherwise off the
+/// viewport, which is an ordinary answer rather than a failure.
+///
+/// # Safety
+/// `out` must be writable for two floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_world_to_viewport(
+    camera: u64,
+    x: f32,
+    y: f32,
+    z: f32,
+    out: *mut f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, x, y, z, out);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::camera::Camera;
+            use bevy::math::Vec3;
+            use bevy::transform::components::GlobalTransform;
+
+            if out.is_null() {
+                return status::NULL_ARG;
+            }
+
+            with_world(|world| {
+                let Ok(entity_ref) = world.get_entity(crate::ecs::entity_from(camera)) else {
+                    return status::NO_ENTITY;
+                };
+                let (Some(camera), Some(transform)) = (
+                    entity_ref.get::<Camera>(),
+                    entity_ref.get::<GlobalTransform>(),
+                ) else {
+                    return status::NOT_PRESENT;
+                };
+
+                let Ok(point) = camera.world_to_viewport(transform, Vec3::new(x, y, z)) else {
+                    return status::NOT_PRESENT;
+                };
+
+                unsafe {
+                    out.write(point.x);
+                    out.add(1).write(point.y);
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Turns a point on the viewport into a ray: origin `x, y, z` then direction `x, y, z`.
+///
+/// The other half of [`bcs_render_world_to_viewport`], and what makes dragging a gizmo handle
+/// exact rather than approximate: the point being dragged to is where the cursor's ray comes
+/// closest to the axis being dragged along, which is a question about two lines in the world.
+///
+/// # Safety
+/// `out` must be writable for six floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_viewport_to_world(
+    camera: u64,
+    x: f32,
+    y: f32,
+    out: *mut f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, x, y, out);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::camera::Camera;
+            use bevy::math::Vec2;
+            use bevy::transform::components::GlobalTransform;
+
+            if out.is_null() {
+                return status::NULL_ARG;
+            }
+
+            with_world(|world| {
+                let Ok(entity_ref) = world.get_entity(crate::ecs::entity_from(camera)) else {
+                    return status::NO_ENTITY;
+                };
+                let (Some(camera), Some(transform)) = (
+                    entity_ref.get::<Camera>(),
+                    entity_ref.get::<GlobalTransform>(),
+                ) else {
+                    return status::NOT_PRESENT;
+                };
+
+                let Ok(ray) = camera.viewport_to_world(transform, Vec2::new(x, y)) else {
+                    return status::NOT_PRESENT;
+                };
+
+                unsafe {
+                    out.write(ray.origin.x);
+                    out.add(1).write(ray.origin.y);
+                    out.add(2).write(ray.origin.z);
+                    out.add(3).write(ray.direction.x);
+                    out.add(4).write(ray.direction.y);
+                    out.add(5).write(ray.direction.z);
+                }
+
+                status::OK
+            })
+        }
+    })
+}

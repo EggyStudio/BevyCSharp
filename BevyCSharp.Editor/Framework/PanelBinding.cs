@@ -28,6 +28,25 @@ public static class PanelBinding
     /// </remarks>
     public static Entity Focused { get; internal set; } = Entity.None;
 
+    /// <summary>
+    /// The frame being drawn, so a widget that is not drawing what it holds can be nudged.
+    /// </summary>
+    /// <remarks>
+    /// The interface rebuilds an input from its template shortly after it is built, and that
+    /// leaves what is drawn behind what the widget holds: the box is empty and the widget agrees
+    /// with the panel, so nothing ever writes again and the box stays empty. Writing the same
+    /// value is not a change and redraws nothing. Twice a second, a value that already matches is
+    /// therefore written with a space after it, which is a change the eye cannot see, and the
+    /// next one writes it back without. Everything that reads a value back trims it.
+    /// </remarks>
+    internal static ulong Frame { get; set; }
+
+    /// <summary>How often a value is written again whether or not it changed.</summary>
+    private const ulong Heartbeat = 30;
+
+    /// <summary>Whether this frame is one of the ones that writes regardless.</summary>
+    private static bool Repaint => Frame % Heartbeat == 0;
+
     /// <summary>Writes a flag out to a checkbox, a switch or a toggle.</summary>
     public static void PullFlag(Entity element, bool value)
     {
@@ -41,7 +60,7 @@ public static class PanelBinding
     public static void PullNumber(Entity element, float value)
     {
         if (element.IsNone) return;
-        if (Nearly(Xui.GetNumber(element), value)) return;
+        if (!Repaint && Nearly(Xui.GetNumber(element), value)) return;
 
         Xui.SetNumber(element, value);
     }
@@ -61,20 +80,40 @@ public static class PanelBinding
         if (element == Focused) return;
 
         var text = value ?? string.Empty;
-        if (Xui.GetText(element) == text) return;
+        var current = Xui.GetText(element);
+
+        if (current == text)
+        {
+            if (!Repaint) return;
+
+            Xui.SetText(element, text + " ");
+            return;
+        }
 
         Xui.SetText(element, text);
     }
 
-    /// <summary>Shows or hides an element.</summary>
+    /// <summary>
+    /// Shows or hides an element.
+    /// </summary>
     /// <remarks>
-    /// What makes a document with a fixed set of elements show a list of a length nobody knew
-    /// when the document was written: the rows past the end of the data are taken off screen
-    /// rather than drawn empty.
+    /// <para>
+    /// What makes a document with a fixed set of elements show a list of a length nobody knew when
+    /// the document was written: the rows past the end of the data are taken off screen rather
+    /// than drawn empty.
+    /// </para>
+    /// <para>
+    /// Asked before it is written, like every other binding. Writing it regardless would touch
+    /// every node of every panel sixty times a second, and a widget restyled that often draws
+    /// nothing while holding the right value. Remembering what was written instead would be
+    /// wrong: the interface reapplies the stylesheet when it restyles a widget, which puts the
+    /// display back to what the CSS says, and only asking notices that.
+    /// </para>
     /// </remarks>
     public static void PullVisible(Entity element, bool value)
     {
         if (element.IsNone) return;
+        if (!Repaint && Xui.IsVisible(element) == value) return;
 
         Xui.SetVisible(element, value);
     }
@@ -87,9 +126,15 @@ public static class PanelBinding
     public static float PushNumber(Entity element, float current) =>
         element.IsNone ? current : Xui.GetNumber(element);
 
-    /// <summary>Reads text back from an element.</summary>
+    /// <summary>
+    /// Reads text back from an element.
+    /// </summary>
+    /// <remarks>
+    /// Trimmed at the end, because a repaint may have left a space there. Leading spaces are kept:
+    /// a person typing one meant it, and nothing this side puts one in.
+    /// </remarks>
     public static string PushText(Entity element, string current) =>
-        element.IsNone ? current : Xui.GetText(element);
+        element.IsNone ? current : Xui.GetText(element).TrimEnd();
 
     /// <summary>
     /// Whether two slider values are the same as far as a person is concerned.

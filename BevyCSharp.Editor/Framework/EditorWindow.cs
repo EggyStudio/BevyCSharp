@@ -176,12 +176,19 @@ public sealed class EditorWindow
         _shown = visible;
     }
 
-    /// <summary>Puts the window in front of or behind the others.</summary>
+    /// <summary>
+    /// Puts the window in front of or behind the others.
+    /// </summary>
+    /// <remarks>
+    /// Written every time the panels are arranged rather than once, because the interface writes
+    /// this component too: a widget restyled after we set it goes back to the stylesheet's answer,
+    /// and a menu that was on top ends up under the panel it opened from. One call per panel per
+    /// frame is nothing beside being drawn in the wrong order.
+    /// </remarks>
     public void Layer(int layer)
     {
         var root = Root;
         if (root.IsNone) return;
-        if (_layered == layer) return;
 
         Xui.SetLayer(root, layer);
         _layered = layer;

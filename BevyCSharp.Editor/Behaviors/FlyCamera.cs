@@ -152,6 +152,15 @@ public partial struct FlyCamera
     /// <summary>How far to stand off something with no size of its own.</summary>
     private const float PivotDefault = 8f;
 
+    /// <summary>
+    /// Set by anything that wants the camera to frame the selection.
+    /// </summary>
+    /// <remarks>
+    /// A request rather than a move, because where the camera is is this behavior's business and
+    /// two things writing one transform is how a camera ends up fighting itself.
+    /// </remarks>
+    public static bool FrameWanted { get; set; }
+
     /// <summary>Reads the mouse and keyboard and moves the camera.</summary>
     [OnUpdate]
     public void Steer(BehaviorContext ctx)
@@ -222,8 +231,10 @@ public partial struct FlyCamera
             moved = true;
         }
 
-        if (input.KeyPressed(Key.F))
+        if (input.KeyPressed(Key.F) || FrameWanted)
         {
+            FrameWanted = false;
+
             // What F does in an editor: keep looking the way the camera already is, and back off
             // far enough to see what is selected. The distance comes from the thing's own size,
             // so framing a cube and framing a landscape both end up with it filling the view.

@@ -22,6 +22,16 @@ public static class EditorSelection
     /// <summary>The selected entity, or <see cref="Entity.None"/>.</summary>
     public static Entity Current { get; private set; } = Entity.None;
 
+    /// <summary>
+    /// The camera the viewport is looking through.
+    /// </summary>
+    /// <remarks>
+    /// Held beside the selection because everything that draws into the viewport needs it: a
+    /// handle is projected through this camera, a click is turned into a ray through it, and the
+    /// orientation cross is drawn in front of it.
+    /// </remarks>
+    public static Entity Camera { get; set; } = Entity.None;
+
     /// <summary>Which frame the selection last changed on, so a panel can notice.</summary>
     public static ulong ChangedOn { get; private set; }
 

@@ -1,0 +1,36 @@
+<html lang="en">
+  <head>
+    <meta name="rendering" />
+    <title>Rendering</title>
+    <link rel="stylesheet" href="editor.css" />
+  </head>
+  <body>
+    <div class="panel" id="rendering">
+      <div class="titlebar" id="rendering-title">
+        <p class="title">Rendering</p>
+      </div>
+
+      <div class="field">
+        <p>Bloom</p>
+        <checkbox id="bloom"></checkbox>
+      </div>
+
+      <div class="field">
+        <p>Intensity</p>
+        <slider id="intensity" min="0" max="1" step="0.01"></slider>
+      </div>
+
+      <div class="field">
+        <p>Sharpen</p>
+        <slider id="sharpen" min="0" max="1" step="0.01"></slider>
+      </div>
+
+      <div class="field">
+        <p class="dim">Camera</p>
+        <p id="readout" class="dim"></p>
+      </div>
+
+      <button id="reset">Reset</button>
+    </div>
+  </body>
+</html>

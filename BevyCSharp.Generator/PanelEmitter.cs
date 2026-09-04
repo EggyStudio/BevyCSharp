@@ -50,6 +50,7 @@ internal static class PanelEmitter
         EmitPull(source, model);
         EmitPush(source, model);
         EmitInvoke(source, model);
+        EmitContext(source, model);
         EmitChanged(source, model);
 
         source.Append("}\n");
@@ -71,12 +72,14 @@ internal static class PanelEmitter
             .Append("        ").Append(Text(chrome.Root)).Append(",\n")
             .Append("        ").Append(Text(chrome.Handle)).Append(",\n")
             .Append("        new global::BevyCSharp.Editor.Framework.PanelPlacement(\n")
-            .Append("            (global::BevyCSharp.Editor.Framework.EditorRegion)")
-            .Append(chrome.Region).Append(",\n")
+            .Append("            (global::BevyCSharp.Editor.Framework.EditorDock)")
+            .Append(chrome.Dock).Append(",\n")
             .Append("            ").Append(Number(chrome.X)).Append(",\n")
             .Append("            ").Append(Number(chrome.Y)).Append(",\n")
             .Append("            ").Append(Number(chrome.Width)).Append(",\n")
-            .Append("            ").Append(Number(chrome.Height)).Append("),\n")
+            .Append("            ").Append(Number(chrome.Height)).Append(",\n")
+            .Append("            ").Append(chrome.Order).Append(",\n")
+            .Append("            ").Append(chrome.Fill ? "true" : "false").Append("),\n")
             .Append("        (global::BevyCSharp.Editor.Framework.PanelDismiss)")
             .Append(chrome.Dismiss).Append(",\n")
             .Append("        ").Append(chrome.Layer).Append(");\n\n")
@@ -229,6 +232,36 @@ internal static class PanelEmitter
             .Append("        if (Window is not { IsOpen: true } window) return false;\n");
 
         foreach (var command in model.Commands)
+        {
+            if (command.Count > 0)
+            {
+                source.Append("\n        for (var __i = 0; __i < ").Append(command.Count)
+                    .Append("; __i++)\n        {\n")
+                    .Append("            if (element != window.Element($\"").Append(command.Element)
+                    .Append("-{__i}\")) continue;\n\n")
+                    .Append("            ").Append(command.Method).Append("(__i);\n")
+                    .Append("            return true;\n        }\n");
+
+                continue;
+            }
+
+            source.Append("\n        if (element == window.Element(\"").Append(command.Element)
+                .Append("\"))\n        {\n")
+                .Append("            ").Append(command.Method).Append("();\n")
+                .Append("            return true;\n        }\n");
+        }
+
+        source.Append("\n        return false;\n    }\n");
+    }
+
+    /// <summary>Offers whatever a secondary click is bound to.</summary>
+    private static void EmitContext(StringBuilder source, PanelModel model)
+    {
+        source.Append("\n    /// <summary>Offers whatever a right click on an element is bound to.</summary>\n")
+            .Append("    public bool Context(global::Bevy.Entity element)\n    {\n")
+            .Append("        if (Window is not { IsOpen: true } window) return false;\n");
+
+        foreach (var command in model.ContextCommands)
         {
             if (command.Count > 0)
             {

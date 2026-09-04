@@ -54,24 +54,38 @@ internal sealed record PanelBindingModel(
 /// </param>
 internal sealed record PanelCommandModel(string Element, string Method, int Count = 0);
 
+/// <summary>Which button a bound method answers.</summary>
+internal enum ClickButton
+{
+    /// <summary>The ordinary one: doing the thing.</summary>
+    Primary,
+
+    /// <summary>The secondary one: asking what can be done.</summary>
+    Secondary,
+}
+
 /// <summary>What a panel declared about where it sits and what dismisses it.</summary>
 /// <param name="Root">The CSS id of the panel's outermost element, or null.</param>
 /// <param name="Handle">The CSS id of the element it is dragged by, or null.</param>
-/// <param name="Region">The <c>EditorRegion</c> it belongs to, as its enum value.</param>
-/// <param name="X">Its offset within that region, or its left edge when free.</param>
+/// <param name="Dock">The <c>EditorDock</c> it belongs to, as its enum value.</param>
+/// <param name="X">Its offset within that dock, or its left edge when floating.</param>
 /// <param name="Y">The same, vertically.</param>
-/// <param name="Width">How wide, or <c>NaN</c> for as wide as its contents.</param>
+/// <param name="Width">How wide, or <c>NaN</c> for whatever the stylesheet says.</param>
 /// <param name="Height">How tall, or <c>NaN</c> for as tall as its contents.</param>
+/// <param name="Order">Where it sits among its dock's other panels.</param>
+/// <param name="Fill">Whether it takes what its dock has left over.</param>
 /// <param name="Dismiss">The <c>PanelDismiss</c> value it asked for.</param>
 /// <param name="Layer">Which panels it draws in front of.</param>
 internal sealed record PanelChromeModel(
     string? Root,
     string? Handle,
-    int Region,
+    int Dock,
     float X,
     float Y,
     float Width,
     float Height,
+    int Order,
+    bool Fill,
     int Dismiss,
     int Layer);
 
@@ -83,6 +97,7 @@ internal sealed record PanelModel(
     PanelChromeModel Chrome,
     IReadOnlyList<PanelBindingModel> Bindings,
     IReadOnlyList<PanelCommandModel> Commands,
+    IReadOnlyList<PanelCommandModel> ContextCommands,
     IReadOnlyList<string> Changed,
     IReadOnlyList<string> Refreshed)
 {

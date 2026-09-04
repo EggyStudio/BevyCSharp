@@ -32,6 +32,7 @@ public sealed class PanelGenerator : IIncrementalGenerator
     private const string ChangeAttribute = "BevyCSharp.Editor.Framework.OnChangeAttribute";
     private const string ShowAttribute = "BevyCSharp.Editor.Framework.ShowAttribute";
     private const string RefreshAttribute = "BevyCSharp.Editor.Framework.OnRefreshAttribute";
+    private const string ContextAttribute = "BevyCSharp.Editor.Framework.ContextAttribute";
 
     /// <inheritdoc/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -97,6 +98,7 @@ public sealed class PanelGenerator : IIncrementalGenerator
 
         var bindings = new List<PanelBindingModel>();
         var commands = new List<PanelCommandModel>();
+        var contexts = new List<PanelCommandModel>();
         var changed = new List<string>();
         var refreshed = new List<string>();
         var claimed = new Dictionary<string, string>();
@@ -115,12 +117,15 @@ public sealed class PanelGenerator : IIncrementalGenerator
                     AddBinding(property, property.Type, property.SetMethod is null, element, BindAttribute);
                     break;
 
-                case IFieldSymbol field when Element(field, ShowAttribute) is { } element:
-                    AddBinding(field, field.Type, true, element, ShowAttribute);
+                case IFieldSymbol field when Elements(field, ShowAttribute) is { Count: > 0 } shown:
+                    foreach (var element in shown)
+                        AddBinding(field, field.Type, true, element, ShowAttribute);
                     break;
 
-                case IPropertySymbol property when Element(property, ShowAttribute) is { } element:
-                    AddBinding(property, property.Type, true, element, ShowAttribute);
+                case IPropertySymbol property
+                    when Elements(property, ShowAttribute) is { Count: > 0 } shown:
+                    foreach (var element in shown)
+                        AddBinding(property, property.Type, true, element, ShowAttribute);
                     break;
 
                 case IMethodSymbol method when Marked(method, RefreshAttribute):
@@ -145,6 +150,24 @@ public sealed class PanelGenerator : IIncrementalGenerator
                     changed.Add(method.Name);
                     break;
 
+                case IMethodSymbol method when Element(method, ContextAttribute) is { } element:
+                {
+                    var repeat = CountOf(method, ContextAttribute);
+
+                    var wanted = repeat > 0 ? 1 : 0;
+                    if (method.Parameters.Length != wanted
+                        || (wanted == 1
+                            && method.Parameters[0].Type.SpecialType != SpecialType.System_Int32))
+                    {
+                        diagnostics.Add(Diagnostic.Create(
+                            PanelDiagnostics.UnsupportedCommand, Where(method), method.Name));
+                        break;
+                    }
+
+                    contexts.Add(new PanelCommandModel(element, method.Name, repeat));
+                    break;
+                }
+
                 case IMethodSymbol method when Element(method, CommandAttribute) is { } element:
                 {
                     var repeat = CountOf(method, CommandAttribute);
@@ -167,7 +190,7 @@ public sealed class PanelGenerator : IIncrementalGenerator
             }
         }
 
-        if (bindings.Count == 0 && commands.Count == 0 && refreshed.Count == 0)
+        if (bindings.Count == 0 && commands.Count == 0 && contexts.Count == 0 && refreshed.Count == 0)
         {
             diagnostics.Add(Diagnostic.Create(
                 PanelDiagnostics.NothingBound, declaration.Identifier.GetLocation(), type.Name));
@@ -182,6 +205,7 @@ public sealed class PanelGenerator : IIncrementalGenerator
             chrome,
             bindings,
             commands,
+            contexts,
             changed,
             refreshed);
 
@@ -260,11 +284,13 @@ public sealed class PanelGenerator : IIncrementalGenerator
         return new PanelChromeModel(
             Id("Root"),
             Id("Handle"),
-            Number("Region") is { } region ? (int)region : 0,
+            Number("Dock") is { } dock ? (int)dock : 0,
             Number("X") is { } x ? (float)x : 0f,
             Number("Y") is { } y ? (float)y : 0f,
             Number("Width") is { } width ? (float)width : float.NaN,
             Number("Height") is { } height ? (float)height : float.NaN,
+            Number("Order") is { } order ? (int)order : 0,
+            Flag("Fill"),
             Number("Dismiss") is { } dismiss ? (int)dismiss : 0,
             Number("Layer") is { } layer ? (int)layer : 0);
 
@@ -279,6 +305,9 @@ public sealed class PanelGenerator : IIncrementalGenerator
             named.TryGetValue(key, out var value) && value is not null
                 ? System.Convert.ToDouble(value)
                 : null;
+
+        bool Flag(string key) =>
+            named.TryGetValue(key, out var value) && value is bool flag && flag;
     }
 
     /// <summary>Whether a member carries an attribute that takes no arguments.</summary>
@@ -296,6 +325,26 @@ public sealed class PanelGenerator : IIncrementalGenerator
         // Written either way. A hash is how the id reads in a stylesheet, and leaving it out is
         // how it reads in the document, so both arrive here.
         return element.TrimStart('#');
+    }
+
+    /// <summary>Every element a member is bound to through one kind of attribute.</summary>
+    /// <remarks>
+    /// A member may carry several of the same attribute, which is how one array shows and hides
+    /// three elements at once.
+    /// </remarks>
+    private static List<string> Elements(ISymbol member, string attribute)
+    {
+        var elements = new List<string>();
+
+        foreach (var data in member.GetAttributes())
+        {
+            if (data.AttributeClass?.ToDisplayString() != attribute) continue;
+            if (data.ConstructorArguments.FirstOrDefault().Value is not string element) continue;
+
+            elements.Add(element.TrimStart('#'));
+        }
+
+        return elements;
     }
 
     /// <summary>How many elements an attribute's id stands for, or 0 for one.</summary>

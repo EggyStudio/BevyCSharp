@@ -12,7 +12,7 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 /// <example>
 /// <code>
-/// [EditorPanel("panels/settings.html", Root = "#settings", Region = EditorRegion.TopRight)]
+/// [EditorPanel("panels/settings.html", Root = "#settings", Dock = EditorDock.Right)]
 /// public sealed partial class SettingsPanel
 /// {
 ///     [Bind("#bloom")]     public bool Bloom;
@@ -48,9 +48,21 @@ public sealed class EditorPanelAttribute(string document) : Attribute
     public string? Handle { get; init; }
 
     /// <summary>Which part of the window the panel belongs to.</summary>
-    public EditorRegion Region { get; init; } = EditorRegion.Free;
+    public EditorDock Dock { get; init; } = EditorDock.Floating;
 
-    /// <summary>Its offset inside that region, or its left edge when the region is free.</summary>
+    /// <summary>Where it sits among the other panels of its dock. Lower is first.</summary>
+    public int Order { get; init; }
+
+    /// <summary>
+    /// Whether it takes whatever height its dock has left over.
+    /// </summary>
+    /// <remarks>
+    /// What a list wants: as long as the screen allows, without the panel knowing how tall the
+    /// screen is or what else is open. Two panels that both fill share what is left equally.
+    /// </remarks>
+    public bool Fill { get; init; }
+
+    /// <summary>Its offset inside that dock, or its left edge when the panel floats.</summary>
     public float X { get; init; }
 
     /// <summary>The same, vertically.</summary>
@@ -130,11 +142,14 @@ public sealed class BindAttribute(string element) : Attribute
 /// </summary>
 /// <remarks>
 /// Its own attribute rather than a binding mode, because visibility is done to an element rather
-/// than held by it: an element can have its value bound and its visibility bound at the same
-/// time, and neither is the other's business. Always one way, since an element that is not drawn
-/// has nothing to say back.
+/// than held by it: an element can have its value bound and its visibility bound at the same time,
+/// and neither is the other's business. Always one way, since an element that is not drawn has
+/// nothing to say back.
+///
+/// It may be written more than once on one member, which is how the three boxes of a vector row
+/// appear and disappear together without three fields saying the same thing.
 /// </remarks>
-[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
 public sealed class ShowAttribute(string element) : Attribute
 {
     /// <summary>The element's CSS id, with or without the leading hash.</summary>
@@ -160,6 +175,24 @@ public sealed class ShowAttribute(string element) : Attribute
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class OnChangeAttribute : Attribute;
+
+/// <summary>
+/// Runs a method when the element carrying a CSS id is clicked with the secondary button.
+/// </summary>
+/// <remarks>
+/// What offers a context menu. Kept apart from <see cref="CommandAttribute"/> because asking what
+/// can be done to a thing is a different gesture from doing it, and a row usually wants both: a
+/// left click selects, a right click offers the list.
+/// </remarks>
+[AttributeUsage(AttributeTargets.Method)]
+public sealed class ContextAttribute(string element) : Attribute
+{
+    /// <summary>The element's CSS id, with or without the leading hash.</summary>
+    public string Element { get; } = element;
+
+    /// <summary>How many elements the id stands for, exactly as on <see cref="BindAttribute"/>.</summary>
+    public int Count { get; init; }
+}
 
 /// <summary>
 /// Runs a method once a frame, before the panel's values are written to its elements.

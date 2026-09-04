@@ -53,6 +53,7 @@ public sealed unsafe class XuiTests
                 Native.bcs_xui_set_flag(0, 1),
                 Native.bcs_xui_events(&events, 1),
                 Native.bcs_xui_set_rect(0, 0f, 0f, 1f, 1f),
+                Native.bcs_xui_get_visible(0, &flag),
                 Native.bcs_xui_set_visible(0, 1),
                 Native.bcs_xui_set_layer(0, 1),
                 Native.bcs_xui_rect(0, &rect),
@@ -60,6 +61,12 @@ public sealed unsafe class XuiTests
                 // Picking is part of the same profile: a build with no interface has no viewport
                 // to click in either.
                 Native.bcs_pick_events(&picked, 1),
+
+                // The two projections belong to the renderer rather than the interface, so on a
+                // headless build they refuse for the other reason: there is no camera to project
+                // through. Either way the symbol has to be there.
+                Native.bcs_render_world_to_viewport(0, 0f, 0f, 0f, &rect),
+                Native.bcs_render_viewport_to_world(0, 0f, 0f, &rect),
             };
 
             foreach (var status in results)

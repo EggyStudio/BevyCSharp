@@ -32,6 +32,8 @@ pub mod event_kind {
     /// A document changed on disk and a rebuild has been asked for. Reported against no element,
     /// and followed by [`RELOADED`] once the new widgets are up.
     pub const RELOADING: i32 = 5;
+    /// A widget was clicked with the secondary button, which is what asks for a context menu.
+    pub const CONTEXT: i32 = 6;
 }
 
 #[cfg(feature = "editor")]
@@ -47,6 +49,8 @@ mod live {
     pub struct Documents {
         pub open: Vec<(i32, String)>,
         pub next: i32,
+        /// Whether the list changed since the registry was last told about it.
+        pub dirty: bool,
     }
 
     /// What the widgets reported since the managed side last looked.
@@ -121,13 +125,22 @@ pub fn install(app: &mut bevy::app::App) {
          addressable: Query<(), With<CssID>>,
          parents: Query<&ChildOf>,
          mut events: ResMut<UiEvents>| {
+            // Which button, because asking for a context menu is a different thing from pressing
+            // a button and the two arrive through the same event.
+            let kind = if click.event().button == bevy::picking::pointer::PointerButton::Secondary
+            {
+                event_kind::CONTEXT
+            } else {
+                event_kind::CLICK
+            };
+
             // Picking reports the deepest thing under the pointer, which for a button is the
             // text inside it rather than the button. Walk up until something is addressable.
             let mut entity = click.entity;
             loop {
                 if addressable.get(entity).is_ok() {
                     events.0.push(BcsUiEvent {
-                        kind: event_kind::CLICK,
+                        kind,
                         entity: entity.to_bits(),
                     });
                     return;
@@ -138,6 +151,33 @@ pub fn install(app: &mut bevy::app::App) {
                 };
                 entity = parent.parent();
             }
+        },
+    );
+
+    // What is showing, applied once a frame. Every open and close marks the list dirty rather
+    // than telling the registry, because telling it rebuilds every widget of every document, and
+    // doing that once for four panels opening together is both faster and steadier: each rebuild
+    // releases every live widget's id back to a pool, and the fewer of those there are the fewer
+    // chances there are for two widgets to end up sharing one.
+    app.add_systems(
+        bevy::app::PreUpdate,
+        |mut documents: ResMut<live::Documents>,
+         mut registry: ResMut<bevy_extended_ui::old::registry::UiRegistry>| {
+            if !documents.dirty {
+                return;
+            }
+
+            documents.dirty = false;
+
+            let mut names: Vec<String> = Vec::with_capacity(documents.open.len());
+            for (_, path) in &documents.open {
+                if !names.iter().any(|seen| seen == path) {
+                    names.push(path.clone());
+                }
+            }
+
+            #[allow(deprecated)]
+            registry.use_uis(names);
         },
     );
 
@@ -338,20 +378,19 @@ pub unsafe extern "C" fn bcs_xui_open(path: *const core::ffi::c_char) -> i32 {
                     id
                 };
 
-                let showing = open_documents(world);
-
                 let Some(mut registry) = world.get_resource_mut::<UiRegistry>() else {
                     return status::INVALID_STATE;
                 };
 
                 #[allow(deprecated)]
-                {
-                    registry.add(path, HtmlSource::from_handle(handle));
+                registry.add(path, HtmlSource::from_handle(handle));
 
-                    // Every open document, not just this one. The registry keeps a list of what
-                    // is showing and `add_and_use` replaces that list with a single name, so
-                    // opening a second panel would take the first one off the screen.
-                    registry.use_uis(showing);
+                // Which documents are showing is applied once a frame rather than here. Telling
+                // the registry rebuilds every widget on screen, so opening four panels in one
+                // breath would do that four times, and each rebuild is a chance for the crate to
+                // hand two live widgets the same id.
+                if let Some(mut documents) = world.get_resource_mut::<live::Documents>() {
+                    documents.dirty = true;
                 }
 
                 id
@@ -399,8 +438,10 @@ pub extern "C" fn bcs_xui_close(document: i32) -> i32 {
                     if !showing.iter().any(|open| open == &name) {
                         registry.remove(&name);
                     }
+                }
 
-                    registry.use_uis(showing);
+                if let Some(mut documents) = world.get_resource_mut::<live::Documents>() {
+                    documents.dirty = true;
                 }
 
                 status::OK
@@ -846,6 +887,47 @@ pub extern "C" fn bcs_xui_set_rect(entity: u64, left: f32, top: f32, width: f32,
     })
 }
 
+/// Reads whether an element is on screen, writing `1` or `0`.
+///
+/// The stylesheet is reapplied to a widget whenever the interface restyles it, which puts its
+/// display back to whatever the CSS says. A tool that hides a row has to be able to notice that
+/// and hide it again, and it cannot notice what it cannot read.
+///
+/// # Safety
+/// `out` must be writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_xui_get_visible(entity: u64, out: *mut i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (entity, out);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bevy::ui::{Display, Node};
+
+            if out.is_null() {
+                return status::NULL_ARG;
+            }
+
+            crate::state::with_world(|world| {
+                let entity = crate::ecs::entity_from(entity);
+                let Ok(entity_ref) = world.get_entity(entity) else {
+                    return status::NO_ENTITY;
+                };
+                let Some(node) = entity_ref.get::<Node>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                unsafe { out.write(i32::from(node.display != Display::None)) };
+                status::OK
+            })
+        }
+    })
+}
+
 /// Shows or hides an element, and everything under it.
 ///
 /// Hidden by `Display::None` rather than by visibility, so a hidden panel takes no space and its
@@ -884,7 +966,11 @@ pub extern "C" fn bcs_xui_set_visible(entity: u64, visible: i32) -> i32 {
     })
 }
 
-/// Puts an element in front of or behind its siblings.
+/// Puts an element in front of or behind everything else on screen.
+///
+/// Global rather than among its siblings, because a panel is the root of its own document and an
+/// order that only counts within one document cannot put a menu over a panel. What is drawn on
+/// top of what is a question about the whole screen.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_xui_set_layer(entity: u64, layer: i32) -> i32 {
     crate::interop::guard(|| {
@@ -896,7 +982,7 @@ pub extern "C" fn bcs_xui_set_layer(entity: u64, layer: i32) -> i32 {
 
         #[cfg(feature = "editor")]
         {
-            use bevy::ui::ZIndex;
+            use bevy::ui::GlobalZIndex;
 
             crate::state::with_world(|world| {
                 let entity = crate::ecs::entity_from(entity);
@@ -904,7 +990,7 @@ pub extern "C" fn bcs_xui_set_layer(entity: u64, layer: i32) -> i32 {
                     return status::NO_ENTITY;
                 };
 
-                entity_mut.insert(ZIndex(layer));
+                entity_mut.insert(GlobalZIndex(layer));
                 status::OK
             })
         }

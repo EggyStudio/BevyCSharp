@@ -100,6 +100,29 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
                 OptionsOf(field.Type))),
     ];
 
+    /// <summary>
+    /// The behavior's own methods that take nothing and return nothing.
+    /// </summary>
+    /// <remarks>
+    /// Instance methods only, and only the ordinary ones: a property's getter is a method too, and
+    /// a static method is not a thing an entity can be told to do. Anything carrying a stage
+    /// attribute is a system, which runs on its own schedule rather than when somebody asks.
+    /// </remarks>
+    private static IReadOnlyList<BehaviorInvokable> ReadInvokables(INamedTypeSymbol type) =>
+    [
+        .. type.GetMembers()
+            .OfType<IMethodSymbol>()
+            .Where(method =>
+                !method.IsStatic
+                && method.MethodKind == MethodKind.Ordinary
+                && method.DeclaredAccessibility == Accessibility.Public
+                && method.Parameters.Length == 0
+                && method.ReturnsVoid
+                && GetStages(method).Count == 0
+                && GetStateEdge(method) is null)
+            .Select(method => new BehaviorInvokable(method.Name)),
+    ];
+
     /// <summary>The names an enum field can take, in declaration order, or nothing.</summary>
     private static EquatableArray<string> OptionsOf(ITypeSymbol type) =>
         type.TypeKind == TypeKind.Enum
@@ -223,6 +246,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
             QualifiedName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             Methods = methods,
             Fields = fields,
+            Invokables = ReadInvokables(type),
         };
 
         return new ExtractResult(model, diagnostics.ToImmutable());

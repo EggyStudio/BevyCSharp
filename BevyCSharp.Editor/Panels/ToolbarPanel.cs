@@ -4,91 +4,95 @@ using BevyCSharp.Editor.Framework;
 namespace BevyCSharp.Editor.Panels;
 
 /// <summary>
-/// The strip of buttons along the top.
+/// The tools, along the top.
 /// </summary>
 /// <remarks>
 /// <para>
-/// A toolbar is a panel whose contents are buttons. There is no toolbar type, no toolbar region
-/// and no toolbar mechanism: it is three files like every other panel, and what makes it a
-/// toolbar is that its document holds buttons and its placement is the top of the window.
+/// Tools and nothing else. A toolbar full of buttons that open panels is a menu that has escaped
+/// its menu: what opens a panel belongs in the hamburger, where it can be grouped and searched for
+/// and where adding one costs a line rather than a button. What belongs here is the handful of
+/// things that change what a drag in the viewport does, because those are switched constantly and
+/// have to be visible while working.
 /// </para>
 /// <para>
-/// Each button opens a panel or closes it again, which is the whole reason the shell registers
-/// panels by instance: the toolbar constructs one when it is wanted and drops it when it is not.
+/// The information button is the exception, and it is Unity's exception too: what the editor is
+/// doing is glanced at rather than opened, so it is one button that shows a panel which can then
+/// be pinned.
 /// </para>
 /// </remarks>
-[EditorPanel("panels/toolbar.html", Root = "#toolbar", Region = EditorRegion.Top, Layer = 10)]
-public sealed partial class ToolbarPanel(Entity camera)
+[EditorPanel("panels/toolbar.html", Root = "#toolbar", Dock = EditorDock.Top, Layer = 10)]
+public sealed partial class ToolbarPanel
 {
-    /// <summary>Shows or hides the hierarchy.</summary>
-    [Command("#tb-hierarchy")]
-    public void Hierarchy() => EditorShell.Toggle(() => new HierarchyPanel());
+    /// <summary>Picks what is under the pointer.</summary>
+    [Bind("#t-select", Mode = BindMode.OneWay)]
+    public string SelectLabel => Mark(EditorTool.Select, "Select");
 
-    /// <summary>Shows or hides the inspector.</summary>
-    [Command("#tb-inspector")]
-    public void Inspector() => EditorShell.Toggle(() => new InspectorPanel());
+    /// <summary>Drags the selection along an axis.</summary>
+    [Bind("#t-move", Mode = BindMode.OneWay)]
+    public string MoveLabel => Mark(EditorTool.Move, "Move");
 
-    /// <summary>Shows or hides the camera's post processing.</summary>
-    [Command("#tb-post")]
-    public void Post() => EditorShell.Toggle(() => new PostPanel(camera));
+    /// <summary>Turns it about one.</summary>
+    [Bind("#t-rotate", Mode = BindMode.OneWay)]
+    public string RotateLabel => Mark(EditorTool.Rotate, "Rotate");
 
-    /// <summary>Shows or hides the status strip.</summary>
-    [Command("#tb-stats")]
-    public void Stats() => EditorShell.Toggle(() => new StatsPanel());
+    /// <summary>Stretches it along one.</summary>
+    [Bind("#t-scale", Mode = BindMode.OneWay)]
+    public string ScaleLabel => Mark(EditorTool.Scale, "Scale");
 
-    /// <summary>
-    /// Shows the key list as a flyout.
-    /// </summary>
+    /// <summary>Whether a drag lands on round numbers.</summary>
+    [Bind("#t-snap", Mode = BindMode.OneWay)]
+    public string SnapLabel => EditorTools.Snap ? EditorIcons.Selected + " Snap" : "  Snap";
+
+    /// <summary>What the editor is doing.</summary>
+    [Bind("#t-info", Mode = BindMode.OneWay)]
+    public string InfoLabel => EditorIcons.Info;
+
+    /// <summary>Chooses the selection tool.</summary>
+    [Command("#t-select")]
+    public void Select() => EditorTools.Current = EditorTool.Select;
+
+    /// <summary>Chooses the move tool.</summary>
+    [Command("#t-move")]
+    public void Move() => EditorTools.Current = EditorTool.Move;
+
+    /// <summary>Chooses the rotate tool.</summary>
+    [Command("#t-rotate")]
+    public void Rotate() => EditorTools.Current = EditorTool.Rotate;
+
+    /// <summary>Chooses the scale tool.</summary>
+    [Command("#t-scale")]
+    public void Scale() => EditorTools.Current = EditorTool.Scale;
+
+    /// <summary>Turns snapping on and off.</summary>
     /// <remarks>
-    /// Opened at a point rather than in a region, because that is what a flyout is: a panel
-    /// placed where the thing that opened it is, dismissed by a press anywhere else.
+    /// Locked on, as opposed to the Control key which turns it on while it is held. Without the
+    /// distinction, letting go of Control would quietly undo the button.
     /// </remarks>
-    [Command("#tb-keys")]
-    public void Keys()
+    [Command("#t-snap")]
+    public void Snap()
     {
-        if (EditorShell.Find<KeysPanel>() is { } open)
+        EditorKeys.SnapLocked = !EditorKeys.SnapLocked;
+        EditorTools.Snap = EditorKeys.SnapLocked;
+    }
+
+    /// <summary>Shows what the editor is doing, under the button that asks.</summary>
+    [Command("#t-info")]
+    public void Info()
+    {
+        if (EditorShell.Find<InfoPanel>() is { } open)
         {
             EditorShell.Hide(open);
             return;
         }
 
-        // Under the button that opened it, which is what makes a flyout read as belonging to the
-        // thing it came from rather than as another panel that happened to appear.
-        var under = Window is { } window && Xui.TryRect(window.Element("tb-keys"), out var button)
-            ? (button.X, button.Bottom + 6f)
+        var below = Window is { } window && Xui.TryRect(window.Element("t-info"), out var button)
+            ? (button.X - 180f, button.Bottom + 8f)
             : (12f, 44f);
 
-        EditorShell.ShowAt(new KeysPanel(), under.Item1, under.Item2);
+        EditorShell.ShowAt(new InfoPanel(), below.Item1, below.Item2);
     }
 
-    /// <summary>Writes the edits to the world file.</summary>
-    /// <remarks>
-    /// Beside the panels rather than beside the program: the file lives in the asset directory,
-    /// so it is edited, diffed and shipped like any other asset.
-    /// </remarks>
-    [Command("#tb-save")]
-    public void Save()
-    {
-        var written = EditorWorld.Save(EditorShell.Ecs, EditorPaths.World);
-        File.WriteAllText(EditorPaths.Layout, EditorShell.Layout.Describe());
-
-        Console.WriteLine($"[editor] saved {written} entities and the layout to {EditorPaths.Assets}");
-    }
-
-    /// <summary>Puts the saved edits and the saved arrangement back.</summary>
-    [Command("#tb-load")]
-    public void Load()
-    {
-        var applied = EditorWorld.Load(EditorShell.Ecs, EditorPaths.World);
-
-        if (File.Exists(EditorPaths.Layout))
-            EditorShell.Layout.Restore(File.ReadAllText(EditorPaths.Layout));
-
-        Console.WriteLine($"[editor] applied {applied} entities and the layout");
-    }
-
-    /// <summary>Puts every panel back where its own declaration says.</summary>
-    [Command("#tb-layout")]
-    public void ResetLayout() => EditorShell.Layout.ResetAll();
-
+    /// <summary>A tool's label, marked when it is the one in force.</summary>
+    private static string Mark(EditorTool tool, string label) =>
+        EditorTools.Current == tool ? EditorIcons.Selected + " " + label : "  " + label;
 }
