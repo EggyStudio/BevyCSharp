@@ -27,6 +27,9 @@ editor = ["render", "dep:bevy_extended_ui", "bevy/file_watcher"]
 # This is what CI, unit tests and dedicated servers build.
 headless = [
     "bevy/std",
+    # Type names, which Bevy discards otherwise: without this a component can be found by name
+    # but never reports one, and an editor showing an entity has nothing to label its rows with.
+    "bevy/debug",
     "bevy/async_executor",
     "bevy/multi_threaded",
     "bevy/bevy_log",

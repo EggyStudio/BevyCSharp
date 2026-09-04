@@ -30,6 +30,8 @@ public sealed class PanelGenerator : IIncrementalGenerator
     private const string BindAttribute = "BevyCSharp.Editor.Framework.BindAttribute";
     private const string CommandAttribute = "BevyCSharp.Editor.Framework.CommandAttribute";
     private const string ChangeAttribute = "BevyCSharp.Editor.Framework.OnChangeAttribute";
+    private const string ShowAttribute = "BevyCSharp.Editor.Framework.ShowAttribute";
+    private const string RefreshAttribute = "BevyCSharp.Editor.Framework.OnRefreshAttribute";
 
     /// <inheritdoc/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -84,15 +86,19 @@ public sealed class PanelGenerator : IIncrementalGenerator
                 PanelDiagnostics.NotPartial, declaration.Identifier.GetLocation(), type.Name));
         }
 
-        var document = context.Attributes
-            .FirstOrDefault(a => a.AttributeClass?.ToDisplayString() == PanelAttribute)
-            ?.ConstructorArguments.FirstOrDefault().Value as string;
+        var panelAttribute = context.Attributes
+            .FirstOrDefault(a => a.AttributeClass?.ToDisplayString() == PanelAttribute);
+
+        var document = panelAttribute?.ConstructorArguments.FirstOrDefault().Value as string;
 
         if (string.IsNullOrEmpty(document)) return null;
+
+        var chrome = ChromeOf(panelAttribute!);
 
         var bindings = new List<PanelBindingModel>();
         var commands = new List<PanelCommandModel>();
         var changed = new List<string>();
+        var refreshed = new List<string>();
         var claimed = new Dictionary<string, string>();
 
         foreach (var member in type.GetMembers())
@@ -102,11 +108,30 @@ public sealed class PanelGenerator : IIncrementalGenerator
             switch (member)
             {
                 case IFieldSymbol field when Element(field, BindAttribute) is { } element:
-                    AddBinding(field, field.Type, field.IsReadOnly, element);
+                    AddBinding(field, field.Type, field.IsReadOnly, element, BindAttribute);
                     break;
 
                 case IPropertySymbol property when Element(property, BindAttribute) is { } element:
-                    AddBinding(property, property.Type, property.SetMethod is null, element);
+                    AddBinding(property, property.Type, property.SetMethod is null, element, BindAttribute);
+                    break;
+
+                case IFieldSymbol field when Element(field, ShowAttribute) is { } element:
+                    AddBinding(field, field.Type, true, element, ShowAttribute);
+                    break;
+
+                case IPropertySymbol property when Element(property, ShowAttribute) is { } element:
+                    AddBinding(property, property.Type, true, element, ShowAttribute);
+                    break;
+
+                case IMethodSymbol method when Marked(method, RefreshAttribute):
+                    if (method.Parameters.Length > 0)
+                    {
+                        diagnostics.Add(Diagnostic.Create(
+                            PanelDiagnostics.UnsupportedCommand, Where(method), method.Name));
+                        break;
+                    }
+
+                    refreshed.Add(method.Name);
                     break;
 
                 case IMethodSymbol method when Marked(method, ChangeAttribute):
@@ -121,19 +146,28 @@ public sealed class PanelGenerator : IIncrementalGenerator
                     break;
 
                 case IMethodSymbol method when Element(method, CommandAttribute) is { } element:
-                    if (method.Parameters.Length > 0)
+                {
+                    var repeat = CountOf(method, CommandAttribute);
+
+                    // A repeated command is told which of its elements was clicked, and an
+                    // ordinary one is told nothing, because the attribute already named it.
+                    var wanted = repeat > 0 ? 1 : 0;
+                    if (method.Parameters.Length != wanted
+                        || (wanted == 1
+                            && method.Parameters[0].Type.SpecialType != SpecialType.System_Int32))
                     {
                         diagnostics.Add(Diagnostic.Create(
                             PanelDiagnostics.UnsupportedCommand, Where(method), method.Name));
                         break;
                     }
 
-                    commands.Add(new PanelCommandModel(element, method.Name));
+                    commands.Add(new PanelCommandModel(element, method.Name, repeat));
                     break;
+                }
             }
         }
 
-        if (bindings.Count == 0 && commands.Count == 0)
+        if (bindings.Count == 0 && commands.Count == 0 && refreshed.Count == 0)
         {
             diagnostics.Add(Diagnostic.Create(
                 PanelDiagnostics.NothingBound, declaration.Identifier.GetLocation(), type.Name));
@@ -145,15 +179,40 @@ public sealed class PanelGenerator : IIncrementalGenerator
                 : type.ContainingNamespace.ToDisplayString(),
             type.Name,
             document!,
+            chrome,
             bindings,
             commands,
-            changed);
+            changed,
+            refreshed);
 
         return new ExtractResult(model, diagnostics.ToImmutable());
 
-        void AddBinding(ISymbol member, ITypeSymbol memberType, bool readOnly, string element)
+        void AddBinding(
+            ISymbol member, ITypeSymbol memberType, bool readOnly, string element, string attribute)
         {
-            if (KindOf(memberType) is not { } kind)
+            var count = CountOf(member, attribute);
+
+            // A repeated binding stands for many elements, so it needs a value for each. The
+            // element type is then what has to be one a widget carries, not the array itself.
+            if (count > 0)
+            {
+                if (memberType is not IArrayTypeSymbol array)
+                {
+                    diagnostics.Add(Diagnostic.Create(
+                        PanelDiagnostics.RepeatedNeedsArray, Where(member),
+                        member.Name, element, count));
+                    return;
+                }
+
+                memberType = array.ElementType;
+                readOnly = false;
+            }
+
+            var kind = attribute == ShowAttribute
+                ? (memberType.SpecialType == SpecialType.System_Boolean ? BindKind.Visible : null)
+                : KindOf(memberType);
+
+            if (kind is not { } bound)
             {
                 diagnostics.Add(Diagnostic.Create(
                     PanelDiagnostics.UnsupportedBindType, Where(member),
@@ -161,22 +220,65 @@ public sealed class PanelGenerator : IIncrementalGenerator
                 return;
             }
 
-            if (claimed.TryGetValue(element, out var first))
+            // Whether an element is on screen is a different channel from what it holds, so a
+            // row can have its text bound and its visibility bound without those being a clash.
+            var channel = bound == BindKind.Visible ? "visible:" + element : element;
+
+            if (claimed.TryGetValue(channel, out var first))
             {
                 diagnostics.Add(Diagnostic.Create(
                     PanelDiagnostics.DuplicateElement, Where(member), first, member.Name, element));
                 return;
             }
 
-            claimed[element] = member.Name;
+            claimed[channel] = member.Name;
 
-            // A member with nowhere to put an edit is one way whatever the attribute asked for.
-            var twoWay = !readOnly && ModeOf(member) != 1;
+            // A member with nowhere to put an edit is one way whatever the attribute asked for,
+            // and so is anything bound to whether an element is on screen at all.
+            var twoWay = !readOnly && bound != BindKind.Visible && ModeOf(member) != 1;
 
             bindings.Add(new PanelBindingModel(
-                element, member.Name, kind, twoWay,
-                kind == BindKind.Number ? memberType.ToDisplayString() : null));
+                element, member.Name, bound, twoWay,
+                bound == BindKind.Number ? memberType.ToDisplayString() : null,
+                count));
         }
+    }
+
+    /// <summary>
+    /// Reads what the panel attribute says about where the panel sits.
+    /// </summary>
+    /// <remarks>
+    /// Every one of these is optional, and a panel that names none of them is placed by its own
+    /// stylesheet exactly as before, which is what keeps a panel that does not care about layout
+    /// from having to say so.
+    /// </remarks>
+    private static PanelChromeModel ChromeOf(AttributeData attribute)
+    {
+        var named = attribute.NamedArguments
+            .ToDictionary(pair => pair.Key, pair => pair.Value.Value);
+
+        return new PanelChromeModel(
+            Id("Root"),
+            Id("Handle"),
+            Number("Region") is { } region ? (int)region : 0,
+            Number("X") is { } x ? (float)x : 0f,
+            Number("Y") is { } y ? (float)y : 0f,
+            Number("Width") is { } width ? (float)width : float.NaN,
+            Number("Height") is { } height ? (float)height : float.NaN,
+            Number("Dismiss") is { } dismiss ? (int)dismiss : 0,
+            Number("Layer") is { } layer ? (int)layer : 0);
+
+        // Written either way, the same as a binding's element: a hash is how the id reads in a
+        // stylesheet, and leaving it out is how it reads in the document.
+        string? Id(string key) =>
+            named.TryGetValue(key, out var value) && value is string text && text.Length > 0
+                ? text.TrimStart('#')
+                : null;
+
+        double? Number(string key) =>
+            named.TryGetValue(key, out var value) && value is not null
+                ? System.Convert.ToDouble(value)
+                : null;
     }
 
     /// <summary>Whether a member carries an attribute that takes no arguments.</summary>
@@ -195,6 +297,11 @@ public sealed class PanelGenerator : IIncrementalGenerator
         // how it reads in the document, so both arrive here.
         return element.TrimStart('#');
     }
+
+    /// <summary>How many elements an attribute's id stands for, or 0 for one.</summary>
+    private static int CountOf(ISymbol member, string attribute) => member.GetAttributes()
+        .FirstOrDefault(a => a.AttributeClass?.ToDisplayString() == attribute)
+        ?.NamedArguments.FirstOrDefault(n => n.Key == "Count").Value.Value as int? ?? 0;
 
     /// <summary>The <c>Mode</c> a binding asked for, or 0 for the default.</summary>
     private static int ModeOf(ISymbol member) => member.GetAttributes()

@@ -19,6 +19,15 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 public static class PanelBinding
 {
+    /// <summary>
+    /// The element the keyboard is going to, read once a frame by the shell.
+    /// </summary>
+    /// <remarks>
+    /// Held here rather than asked for per binding: a panel of two dozen rows would otherwise
+    /// ask the same question two dozen times a frame, and the answer cannot change in between.
+    /// </remarks>
+    public static Entity Focused { get; internal set; } = Entity.None;
+
     /// <summary>Writes a flag out to a checkbox, a switch or a toggle.</summary>
     public static void PullFlag(Entity element, bool value)
     {
@@ -37,15 +46,37 @@ public static class PanelBinding
         Xui.SetNumber(element, value);
     }
 
-    /// <summary>Writes text out to an input or an element's inner text.</summary>
+    /// <summary>
+    /// Writes text out to an input or an element's inner text.
+    /// </summary>
+    /// <remarks>
+    /// Never to the field somebody is typing in. A panel showing a live value writes it every
+    /// frame, and doing that to a focused field puts the program's answer back over what is being
+    /// typed, one keystroke at a time. A half-typed number is not a value yet, and the field keeps
+    /// what it holds until it is.
+    /// </remarks>
     public static void PullText(Entity element, string? value)
     {
         if (element.IsNone) return;
+        if (element == Focused) return;
 
         var text = value ?? string.Empty;
         if (Xui.GetText(element) == text) return;
 
         Xui.SetText(element, text);
+    }
+
+    /// <summary>Shows or hides an element.</summary>
+    /// <remarks>
+    /// What makes a document with a fixed set of elements show a list of a length nobody knew
+    /// when the document was written: the rows past the end of the data are taken off screen
+    /// rather than drawn empty.
+    /// </remarks>
+    public static void PullVisible(Entity element, bool value)
+    {
+        if (element.IsNone) return;
+
+        Xui.SetVisible(element, value);
     }
 
     /// <summary>Reads a flag back from an element.</summary>

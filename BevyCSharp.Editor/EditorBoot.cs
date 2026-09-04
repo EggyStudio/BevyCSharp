@@ -1,4 +1,5 @@
 using Bevy;
+using BevyCSharp.Editor.Behaviors;
 using BevyCSharp.Editor.Framework;
 using BevyCSharp.Editor.Panels;
 
@@ -23,12 +24,18 @@ public partial struct EditorBoot
         ctx.Ecs.Add(camera, Transform.LookingAt(new Vec3(4f, 3f, 7f), Vec3.Zero, Vec3.UnitY));
         Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
 
+        // The camera is steered the way a scene view is, so what the editor shows is something a
+        // person can move around in rather than a fixed picture with panels over it.
+        ctx.Ecs.Add(camera, FlyCamera.LookingAt(new Vec3(4f, 3f, 7f), Vec3.Zero));
+        ctx.Ecs.SetName(camera, "Scene camera");
+
         var sun = Render.SpawnLight(new LightSettings
         {
             Kind = LightKind.Directional,
             Intensity = 11_000f,
         });
         ctx.Ecs.Add(sun, Transform.LookingAt(new Vec3(5f, 4f, 3f), Vec3.Zero, Vec3.UnitY));
+        ctx.Ecs.SetName(sun, "Sun");
 
         // Something to look at behind the panels, so the viewport reads as a scene rather than a
         // background colour. The scene fills the window; the panels sit over it.
@@ -37,14 +44,34 @@ public partial struct EditorBoot
         Render.SetMaterial(ctx.Ecs, cube,
             Render.CreateMaterial(0.3f, 0.5f, 0.9f, metallic: 0.1f, roughness: 0.4f));
         ctx.Ecs.Add(cube, Transform.Identity);
+        ctx.Ecs.SetName(cube, "Cube");
 
         var ground = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, ground, Render.CreateMesh(MeshShape.Plane, 30f, 30f));
         Render.SetMaterial(ctx.Ecs, ground, Render.CreateMaterial(0.12f, 0.13f, 0.16f));
         ctx.Ecs.Add(ground, Transform.At(0f, -1.2f, 0f));
+        ctx.Ecs.SetName(ground, "Ground");
 
+        // What the editor opens with. Every one of these is closed and reopened from the toolbar,
+        // and the arrangement of them is the layout rather than anything built into the shell.
+        EditorKeys.Camera = camera;
+
+        EditorShell.Show(new ToolbarPanel(camera));
+        EditorShell.Show(new HierarchyPanel());
+        EditorShell.Show(new InspectorPanel());
+        EditorShell.Show(new StatsPanel());
         EditorShell.Show(new PostPanel(camera));
-        Console.WriteLine($"[editor] {EditorShell.Open.Count} panel open");
+
+        // A saved arrangement, if there is one. Restored after the panels are shown rather than
+        // before, because a placement is looked up by panel and a panel that is not open has
+        // nowhere for one to land.
+        if (File.Exists(EditorPaths.Layout))
+        {
+            EditorShell.Layout.Restore(File.ReadAllText(EditorPaths.Layout));
+            Console.WriteLine($"[editor] layout restored from {EditorPaths.Layout}");
+        }
+
+        Console.WriteLine($"[editor] {EditorShell.Open.Count} panels open");
 
         StartScripts();
     }
@@ -108,7 +135,7 @@ public partial struct EditorBoot
     /// before anything has read it, and the control appears to ignore the press.
     /// </remarks>
     [OnPostUpdate]
-    public static void Drive(BehaviorContext ctx) => EditorShell.Tick();
+    public static void Drive(BehaviorContext ctx) => EditorShell.Tick(ctx);
 
     /// <summary>
     /// Writes the window to a PNG when <c>BCS_SHOT</c> names one, then keeps running.
@@ -121,19 +148,33 @@ public partial struct EditorBoot
     [OnUpdate]
     public static void Capture(BehaviorContext ctx)
     {
-        if (ctx.Time.FrameCount != 180) return;
-
         var path = Environment.GetEnvironmentVariable("BCS_SHOT");
         if (string.IsNullOrEmpty(path)) return;
+
+        // Which frame, so a capture can be taken after something was changed on disk rather than
+        // only at the start. Hot reload is the one thing no still picture of frame 180 can show.
+        var chosen = Environment.GetEnvironmentVariable("BCS_SHOT_FRAME");
+        var wanted = int.TryParse(chosen, out var frame) ? frame : 180;
+
+        if (ctx.Time.FrameCount != (ulong)wanted) return;
 
         Render.Screenshot(path);
         Console.WriteLine($"[editor] captured the window to {path}");
     }
 
-    /// <summary>Closes on Escape.</summary>
+    /// <summary>
+    /// Closes on Escape, unless something is being typed into.
+    /// </summary>
+    /// <remarks>
+    /// A person clearing a value field and changing their mind reaches for Escape, and an editor
+    /// that quits at that point has thrown away more than the edit.
+    /// </remarks>
     [OnUpdate]
     public static void QuitOnEscape(BehaviorContext ctx)
     {
-        if (ctx.Input.KeyPressed(Key.Escape)) ctx.Exit();
+        if (!ctx.Input.KeyPressed(Key.Escape)) return;
+        if (!PanelBinding.Focused.IsNone) return;
+
+        ctx.Exit();
     }
 }

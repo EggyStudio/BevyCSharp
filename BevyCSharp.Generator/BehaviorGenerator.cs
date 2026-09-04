@@ -45,6 +45,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(behaviors, static (spc, results) =>
         {
             var models = new List<BehaviorModel>();
+            var described = new List<BehaviorModel>();
 
             foreach (var result in results)
             {
@@ -53,8 +54,14 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
                 foreach (var diagnostic in result.Diagnostics)
                     spc.ReportDiagnostic(diagnostic);
 
-                if (result.Model is { } model && model.Methods.Count > 0)
-                    models.Add(model);
+                if (result.Model is not { } model) continue;
+
+                if (model.Methods.Count > 0) models.Add(model);
+
+                // A behavior with fields and no methods is a plain data component, and a tool
+                // showing one has exactly as much to say about it as about any other, so the
+                // field table is collected independently of whether there are systems to run.
+                described.Add(model);
             }
 
             foreach (var model in models)
@@ -62,8 +69,66 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 
             if (models.Count > 0)
                 spc.AddSource("BehaviorRegistration.g.cs", BehaviorEmitter.EmitRegistration(models));
+
+            if (SchemaEmitter.Emit(described) is { } schemas)
+                spc.AddSource("ComponentSchemaRegistration.g.cs", schemas);
         });
     }
+
+    /// <summary>
+    /// Reads a behavior's instance fields, in declaration order.
+    /// </summary>
+    /// <remarks>
+    /// Declaration order matters: it is the order the runtime lays the struct out in, and the
+    /// order a tool shows the fields in. Static and constant members are left out, since they
+    /// belong to the type rather than to any entity carrying it, and so are private ones, which
+    /// are the behavior's own working state and not reachable from the generated schema anyway.
+    /// </remarks>
+    private static IReadOnlyList<BehaviorField> ReadFields(INamedTypeSymbol type) =>
+    [
+        .. type.GetMembers()
+            .OfType<IFieldSymbol>()
+            .Where(field =>
+                !field.IsStatic
+                && !field.IsConst
+                && !field.IsImplicitlyDeclared
+                && field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal)
+            .Select(field => new BehaviorField(
+                field.Name,
+                KindOf(field.Type),
+                field.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                OptionsOf(field.Type))),
+    ];
+
+    /// <summary>The names an enum field can take, in declaration order, or nothing.</summary>
+    private static EquatableArray<string> OptionsOf(ITypeSymbol type) =>
+        type.TypeKind == TypeKind.Enum
+            ? new EquatableArray<string>([
+                .. type.GetMembers().OfType<IFieldSymbol>()
+                    .Where(member => member.IsConst)
+                    .Select(member => member.Name),
+            ])
+            : EquatableArray<string>.Empty;
+
+    /// <summary>How a tool should read and draw a field of this type.</summary>
+    private static FieldKind KindOf(ITypeSymbol type) => type.TypeKind == TypeKind.Enum
+        ? FieldKind.Enum
+        : type.SpecialType switch
+    {
+        SpecialType.System_Boolean => FieldKind.Bool,
+        SpecialType.System_Single => FieldKind.Float,
+        SpecialType.System_Double => FieldKind.Double,
+        SpecialType.System_Int32 or SpecialType.System_Int16 or SpecialType.System_SByte
+            or SpecialType.System_UInt32 or SpecialType.System_UInt16 or SpecialType.System_Byte
+            => FieldKind.Int,
+        _ => type.ToDisplayString() switch
+        {
+            "Bevy.Vec3" => FieldKind.Vec3,
+            "Bevy.Quat" => FieldKind.Quat,
+            "Bevy.Entity" => FieldKind.Entity,
+            _ => FieldKind.Opaque,
+        },
+    };
 
     /// <summary>The model for one struct, plus anything wrong with it.</summary>
     private sealed record ExtractResult(BehaviorModel? Model, ImmutableArray<Diagnostic> Diagnostics);
@@ -128,7 +193,12 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
             });
         }
 
-        if (methods.Count == 0)
+        var fields = ReadFields(type);
+
+        // A behavior with fields and no methods is a plain data component: it carries state that
+        // other behaviors read and that a tool can show, which is a reason to exist. One with
+        // neither is the mistake this warns about.
+        if (methods.Count == 0 && fields.Count == 0)
         {
             diagnostics.Add(Diagnostic.Create(
                 BehaviorDiagnostics.NoStageMethods, declaration.Identifier.GetLocation(), type.Name));
@@ -152,6 +222,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
             Name = type.Name,
             QualifiedName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             Methods = methods,
+            Fields = fields,
         };
 
         return new ExtractResult(model, diagnostics.ToImmutable());

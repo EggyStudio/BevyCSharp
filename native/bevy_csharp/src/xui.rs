@@ -58,6 +58,26 @@ mod live {
     pub struct UiEvents(pub Vec<crate::interop::BcsUiEvent>);
 }
 
+/// The distinct paths of every document C# currently has open, in the order they were opened.
+///
+/// What the registry has to be told each time one opens or closes: it keeps a list of the
+/// documents showing, and setting that list is the only way to have more than one.
+#[cfg(feature = "editor")]
+fn open_documents(world: &mut bevy::ecs::world::World) -> Vec<String> {
+    let Some(documents) = world.get_resource::<live::Documents>() else {
+        return Vec::new();
+    };
+
+    let mut names: Vec<String> = Vec::with_capacity(documents.open.len());
+    for (_, path) in &documents.open {
+        if !names.iter().any(|seen| seen == path) {
+            names.push(path.clone());
+        }
+    }
+
+    names
+}
+
 /// What an element was last seen holding, so a real change can be told from a repaint.
 #[cfg(feature = "editor")]
 #[derive(Default, PartialEq)]
@@ -318,12 +338,22 @@ pub unsafe extern "C" fn bcs_xui_open(path: *const core::ffi::c_char) -> i32 {
                     id
                 };
 
+                let showing = open_documents(world);
+
                 let Some(mut registry) = world.get_resource_mut::<UiRegistry>() else {
                     return status::INVALID_STATE;
                 };
 
                 #[allow(deprecated)]
-                registry.add_and_use(path, HtmlSource::from_handle(handle));
+                {
+                    registry.add(path, HtmlSource::from_handle(handle));
+
+                    // Every open document, not just this one. The registry keeps a list of what
+                    // is showing and `add_and_use` replaces that list with a single name, so
+                    // opening a second panel would take the first one off the screen.
+                    registry.use_uis(showing);
+                }
+
                 id
             })
         }
@@ -356,12 +386,23 @@ pub extern "C" fn bcs_xui_close(document: i32) -> i32 {
                     documents.open.remove(index).1
                 };
 
+                let showing = open_documents(world);
+
                 let Some(mut registry) = world.get_resource_mut::<UiRegistry>() else {
                     return status::INVALID_STATE;
                 };
 
                 #[allow(deprecated)]
-                registry.remove(&name);
+                {
+                    // Removed from the registry only when nothing else has it open, since two
+                    // panels may share a document.
+                    if !showing.iter().any(|open| open == &name) {
+                        registry.remove(&name);
+                    }
+
+                    registry.use_uis(showing);
+                }
+
                 status::OK
             })
         }
@@ -740,3 +781,225 @@ pub unsafe extern "C" fn bcs_xui_events(out: *mut BcsUiEvent, capacity: i32) -> 
         }
     })
 }
+
+// -- Placement
+//
+// Where a panel sits, as something the panel decides rather than something its stylesheet does.
+//
+// A stylesheet is the right place for what a window looks like and the wrong place for where it
+// is: a layout that can be described, saved and rearranged has to be data the editor holds, and
+// a rule inside a CSS file is neither readable nor writable from the side doing the arranging.
+// So the chrome stays in CSS and the rectangle comes from here.
+//
+// These write the ordinary `bevy_ui` components on the element the crate spawned, which is what
+// makes them work at all: an extended-ui widget is a `Node` like any other once it is up.
+
+/// Places an element at an absolute rectangle, in logical pixels.
+///
+/// Any of the four may be `NaN`, which leaves that one exactly as it was. That is what makes the
+/// division of labour work: the stylesheet says how wide a panel is and this says where it goes,
+/// and a rectangle with two of its numbers missing does not quietly throw the stylesheet's
+/// answer away.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_xui_set_rect(entity: u64, left: f32, top: f32, width: f32, height: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (entity, left, top, width, height);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bevy::ui::{Node, PositionType, Val};
+
+            crate::state::with_world(|world| {
+                let entity = crate::ecs::entity_from(entity);
+                let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
+                    return status::NO_ENTITY;
+                };
+                let Some(mut node) = entity_mut.get_mut::<Node>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                // Absolute regardless, because a rectangle means nothing to a node the flex
+                // layout is still placing. Saying so here rather than in the stylesheet is what
+                // lets one document be a docked panel in one layout and a flyout in another.
+                node.position_type = PositionType::Absolute;
+
+                if !left.is_nan() {
+                    node.left = Val::Px(left);
+                }
+                if !top.is_nan() {
+                    node.top = Val::Px(top);
+                }
+                if !width.is_nan() {
+                    node.width = Val::Px(width);
+                }
+                if !height.is_nan() {
+                    node.height = Val::Px(height);
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Shows or hides an element, and everything under it.
+///
+/// Hidden by `Display::None` rather than by visibility, so a hidden panel takes no space and its
+/// neighbours close up, which is what a flyout being dismissed should look like.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_xui_set_visible(entity: u64, visible: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (entity, visible);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bevy::ui::{Display, Node};
+
+            crate::state::with_world(|world| {
+                let entity = crate::ecs::entity_from(entity);
+                let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
+                    return status::NO_ENTITY;
+                };
+                let Some(mut node) = entity_mut.get_mut::<Node>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                node.display = if visible != 0 {
+                    Display::Flex
+                } else {
+                    Display::None
+                };
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Puts an element in front of or behind its siblings.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_xui_set_layer(entity: u64, layer: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (entity, layer);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bevy::ui::ZIndex;
+
+            crate::state::with_world(|world| {
+                let entity = crate::ecs::entity_from(entity);
+                let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
+                    return status::NO_ENTITY;
+                };
+
+                entity_mut.insert(ZIndex(layer));
+                status::OK
+            })
+        }
+    })
+}
+
+/// The element the keyboard is going to, or `0` when nothing has focus.
+///
+/// What a tool needs to know before writing to a text field: a panel that shows the world writes
+/// its values out every frame, and doing that to the field somebody is typing in replaces what
+/// they have typed so far with what the world still says.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_xui_focused() -> u64 {
+    crate::interop::guard_with(0u64, || {
+        #[cfg(not(feature = "editor"))]
+        {
+            0u64
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bevy::ecs::entity::Entity;
+            use bevy_extended_ui::styles::CssID;
+            use bevy_extended_ui::widgets::UIWidgetState;
+
+            crate::state::with_world_opt(|world| {
+                let mut query = world.query::<(Entity, &UIWidgetState, &CssID)>();
+
+                for (entity, state, _) in query.iter(world) {
+                    if state.focused {
+                        return entity.to_bits();
+                    }
+                }
+
+                0u64
+            })
+            .unwrap_or(0)
+        }
+    })
+}
+
+/// Reads where an element ended up: `x`, `y`, `width`, `height` in logical pixels.
+///
+/// The rectangle the layout produced rather than the one that was asked for, which is the only
+/// one worth testing a cursor against. A window that sized itself to its contents, or that a
+/// stylesheet placed, answers here exactly as one this side positioned.
+///
+/// # Safety
+/// `out` must be writable for four floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_xui_rect(entity: u64, out: *mut f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (entity, out);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bevy::ui::{ComputedNode, UiGlobalTransform};
+
+            if out.is_null() {
+                return status::NULL_ARG;
+            }
+
+            crate::state::with_world(|world| {
+                let entity = crate::ecs::entity_from(entity);
+                let Ok(entity_ref) = world.get_entity(entity) else {
+                    return status::NO_ENTITY;
+                };
+                let (Some(computed), Some(transform)) = (
+                    entity_ref.get::<ComputedNode>(),
+                    entity_ref.get::<UiGlobalTransform>(),
+                ) else {
+                    return status::NOT_PRESENT;
+                };
+
+                // Both are in physical pixels, and everything on the managed side works in the
+                // logical ones the cursor is reported in, so the scale comes off here rather
+                // than in four places over there.
+                let scale = computed.inverse_scale_factor();
+                let size = computed.size * scale;
+                let centre = transform.translation * scale;
+
+                unsafe {
+                    out.write(centre.x - size.x * 0.5);
+                    out.add(1).write(centre.y - size.y * 0.5);
+                    out.add(2).write(size.x);
+                    out.add(3).write(size.y);
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+

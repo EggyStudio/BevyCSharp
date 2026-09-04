@@ -576,6 +576,28 @@ public sealed class RenderControlTests
     }
 
     [Fact]
+    public void AnEntityWithNothingDrawnHasNoBounds()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            // True on either build, and for a different reason on each: a headless bridge has no
+            // renderer to have computed bounds, and a render build has computed none for an
+            // entity carrying nothing. What matters is that neither answers with a box.
+            Assert.False(Render.TryGetBounds(ctx.Ecs.Spawn(), out var min, out var max));
+            Assert.Equal(default, min);
+            Assert.Equal(default, max);
+
+            // And an entity that is not there at all is the same answer rather than a throw,
+            // because a tool asks about whatever was selected a frame ago.
+            Assert.False(Render.TryGetBounds(Entity.None, out _, out _));
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void WindowCallsReportThatAHeadlessRunHasNoWindow()
     {
         // The whole point of failing loudly: a behavior that locks the cursor should say why it

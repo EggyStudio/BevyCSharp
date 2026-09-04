@@ -322,6 +322,108 @@ public sealed unsafe class EcsWorld
         return children;
     }
 
+    // -- Introspection
+    //
+    // What an editor needs and a game does not. Everything above answers a question about a
+    // component the caller already knows about; these answer what is there at all.
+
+    /// <summary>
+    /// Every live entity in the world.
+    /// </summary>
+    /// <remarks>
+    /// Every one, including the entities the engine spawned for itself: the window, the monitors,
+    /// the cameras and the observers hung off them. Which of those are worth showing is a
+    /// question about the tool rather than about the world, so nothing is filtered here.
+    /// </remarks>
+    public Entity[] All()
+    {
+        var count = Native.Check(Native.bcs_ecs_entities(null, 0), "counting the entities");
+        if (count == 0) return [];
+
+        var entities = new Entity[count];
+        fixed (Entity* target = entities)
+        {
+            var written = Native.Check(
+                Native.bcs_ecs_entities((ulong*)target, count), "reading the entities");
+
+            // The world can gain one between the two calls, and the answer would then be a
+            // buffer's worth of a longer list. Asking again is cheaper than locking the world.
+            if (written != count) return All();
+        }
+
+        return entities;
+    }
+
+    /// <summary>
+    /// The ids of the components an entity carries.
+    /// </summary>
+    /// <remarks>
+    /// Ids rather than types, because most of them name a type this side has never heard of.
+    /// <see cref="ComponentName"/> turns one into something to show.
+    /// </remarks>
+    public int[] ComponentsOf(Entity entity)
+    {
+        var count = Native.bcs_ecs_components_of(entity.Bits, null, 0);
+        if (count == NativeStatus.NoEntity) return [];
+        Native.Check(count, $"counting the components on {entity}");
+        if (count == 0) return [];
+
+        var components = new int[count];
+        fixed (int* target = components)
+        {
+            var written = Native.Check(
+                Native.bcs_ecs_components_of(entity.Bits, target, count),
+                $"reading the components on {entity}");
+
+            if (written != count) return ComponentsOf(entity);
+        }
+
+        return components;
+    }
+
+    /// <summary>
+    /// What a component is called.
+    /// </summary>
+    /// <remarks>
+    /// The other direction of resolving a component by name, and the one a tool showing an
+    /// entity needs: it is handed ids and has to label them. A C# component answers with the
+    /// managed type's full name, one of the engine's own with its Rust path.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">No component has that id.</exception>
+    public string ComponentName(int component) => Native.ReadText(
+        (buffer, capacity) => Native.bcs_component_name(component, buffer, capacity),
+        $"reading the name of component {component}");
+
+    /// <summary>
+    /// What an entity is called, or null when it is called nothing.
+    /// </summary>
+    /// <remarks>
+    /// Most entities have no name. A name is something a scene or a caller gave it rather than
+    /// something every entity carries, so null here is the ordinary answer and not a failure.
+    /// </remarks>
+    public string? NameOf(Entity entity)
+    {
+        var needed = Native.bcs_ecs_entity_name(entity.Bits, null, 0);
+        if (needed == NativeStatus.NotPresent || needed == NativeStatus.NoEntity) return null;
+
+        return Native.ReadText(
+            (buffer, capacity) => Native.bcs_ecs_entity_name(entity.Bits, buffer, capacity),
+            $"reading the name of {entity}");
+    }
+
+    /// <summary>
+    /// Names an entity, or takes its name away when given nothing.
+    /// </summary>
+    /// <remarks>
+    /// The one thing about an entity that is for people rather than for the program, which is
+    /// why it is also the one an editor has to be able to write: a list of "Entity 42" is a list
+    /// nobody can work in. Bevy's <c>Name</c> holds a string, so it is set through here rather
+    /// than through the generic component API, which carries blittable structs only.
+    /// </remarks>
+    public void SetName(Entity entity, string? name) => Native.Check(
+        Native.bcs_ecs_set_entity_name(entity.Bits, name ?? string.Empty),
+        $"naming {entity}");
+
     // -- Iteration
 
     /// <summary>

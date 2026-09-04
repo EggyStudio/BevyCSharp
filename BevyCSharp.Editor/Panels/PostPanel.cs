@@ -12,7 +12,12 @@ namespace BevyCSharp.Editor.Panels;
 /// looks an element up or dispatches a click; the attributes say what is tied to what and the
 /// generator writes the rest.
 /// </remarks>
-[EditorPanel("panels/post.html")]
+[EditorPanel(
+    "panels/post.html",
+    Root = "#post",
+    Handle = "#post-title",
+    Region = EditorRegion.TopRight,
+    Y = 34f)]
 public sealed partial class PostPanel(Entity camera)
 {
     private readonly PostSettings _settings = new() { Hdr = true, Msaa = 1 };

@@ -13,6 +13,14 @@ internal enum BindKind
 
     /// <summary>Text: an input's value, or an element's inner text.</summary>
     Text,
+
+    /// <summary>Whether the element is on screen at all.</summary>
+    /// <remarks>
+    /// Not a value the widget carries but something done to it, which is why it has its own
+    /// attribute. It is what makes a document with a fixed set of elements show a list of a
+    /// length nobody knew when the document was written.
+    /// </remarks>
+    Visible,
 }
 
 /// <summary>One member tied to one element.</summary>
@@ -24,24 +32,59 @@ internal enum BindKind
 /// The member's type when <paramref name="Kind"/> is <see cref="BindKind.Number"/>, so the
 /// emitted code can convert back to it. An element's number is always a float.
 /// </param>
+/// <param name="Count">
+/// How many elements the id stands for. Zero is the ordinary case, one member and one element.
+/// Anything higher means the id is a prefix: <c>row</c> with a count of eight is <c>row-0</c>
+/// through <c>row-7</c>, and the member is an array with a value for each.
+/// </param>
 internal sealed record PanelBindingModel(
     string Element,
     string Member,
     BindKind Kind,
     bool TwoWay,
-    string? NumericType);
+    string? NumericType,
+    int Count = 0);
 
 /// <summary>One method tied to a click on one element.</summary>
-internal sealed record PanelCommandModel(string Element, string Method);
+/// <param name="Element">The CSS id, without its leading hash.</param>
+/// <param name="Method">The method to call.</param>
+/// <param name="Count">
+/// How many elements the id stands for, as on a binding. When it is not zero the method is
+/// handed the index of the one that was clicked.
+/// </param>
+internal sealed record PanelCommandModel(string Element, string Method, int Count = 0);
+
+/// <summary>What a panel declared about where it sits and what dismisses it.</summary>
+/// <param name="Root">The CSS id of the panel's outermost element, or null.</param>
+/// <param name="Handle">The CSS id of the element it is dragged by, or null.</param>
+/// <param name="Region">The <c>EditorRegion</c> it belongs to, as its enum value.</param>
+/// <param name="X">Its offset within that region, or its left edge when free.</param>
+/// <param name="Y">The same, vertically.</param>
+/// <param name="Width">How wide, or <c>NaN</c> for as wide as its contents.</param>
+/// <param name="Height">How tall, or <c>NaN</c> for as tall as its contents.</param>
+/// <param name="Dismiss">The <c>PanelDismiss</c> value it asked for.</param>
+/// <param name="Layer">Which panels it draws in front of.</param>
+internal sealed record PanelChromeModel(
+    string? Root,
+    string? Handle,
+    int Region,
+    float X,
+    float Y,
+    float Width,
+    float Height,
+    int Dismiss,
+    int Layer);
 
 /// <summary>Everything the emitter needs about one panel.</summary>
 internal sealed record PanelModel(
     string? Namespace,
     string Name,
     string Document,
+    PanelChromeModel Chrome,
     IReadOnlyList<PanelBindingModel> Bindings,
     IReadOnlyList<PanelCommandModel> Commands,
-    IReadOnlyList<string> Changed)
+    IReadOnlyList<string> Changed,
+    IReadOnlyList<string> Refreshed)
 {
     /// <summary>The panel's fully qualified name.</summary>
     internal string QualifiedName => Namespace is null ? Name : $"{Namespace}.{Name}";

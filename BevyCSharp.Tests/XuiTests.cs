@@ -35,6 +35,8 @@ public sealed unsafe class XuiTests
         {
             float number = 0f;
             var flag = 0;
+            float rect = 0f;
+            ulong picked = 0;
             NativeUiEvent events;
 
             // Called straight at the bridge. Reaching them through a managed wrapper would prove
@@ -50,6 +52,14 @@ public sealed unsafe class XuiTests
                 Native.bcs_xui_get_flag(0, &flag),
                 Native.bcs_xui_set_flag(0, 1),
                 Native.bcs_xui_events(&events, 1),
+                Native.bcs_xui_set_rect(0, 0f, 0f, 1f, 1f),
+                Native.bcs_xui_set_visible(0, 1),
+                Native.bcs_xui_set_layer(0, 1),
+                Native.bcs_xui_rect(0, &rect),
+
+                // Picking is part of the same profile: a build with no interface has no viewport
+                // to click in either.
+                Native.bcs_pick_events(&picked, 1),
             };
 
             foreach (var status in results)

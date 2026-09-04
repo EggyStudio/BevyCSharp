@@ -26,13 +26,14 @@ internal static class BehaviorDiagnostics
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
-    /// <summary>BCS002: no stage methods, so the behavior does nothing.</summary>
+    /// <summary>BCS002: neither stage methods nor fields, so the behavior does nothing.</summary>
     internal static readonly DiagnosticDescriptor NoStageMethods = new(
         id: "BCS002",
-        title: "Behavior has no stage methods",
+        title: "Behavior has no stage methods and no fields",
         messageFormat:
-        "'{0}' is marked [Behavior] but has no methods with a stage attribute, so nothing will "
-        + "be scheduled. Add [OnUpdate] (or another stage attribute) to a method.",
+        "'{0}' is marked [Behavior] but has neither a method with a stage attribute nor a field, "
+        + "so nothing will be scheduled and there is nothing to carry. Add [OnUpdate] (or another "
+        + "stage attribute) to a method, or give it a field to hold.",
         category: Category,
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);

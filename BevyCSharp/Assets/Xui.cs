@@ -61,6 +61,25 @@ public readonly record struct UiDocument(int Id)
 }
 
 /// <summary>
+/// A rectangle on screen, in logical pixels, measured from the top left of the window.
+/// </summary>
+/// <param name="X">The left edge.</param>
+/// <param name="Y">The top edge.</param>
+/// <param name="Width">How wide.</param>
+/// <param name="Height">How tall.</param>
+public readonly record struct UiRect(float X, float Y, float Width, float Height)
+{
+    /// <summary>The right edge.</summary>
+    public float Right => X + Width;
+
+    /// <summary>The bottom edge.</summary>
+    public float Bottom => Y + Height;
+
+    /// <summary>Whether a point is inside, edges included.</summary>
+    public bool Contains(float x, float y) => x >= X && x <= Right && y >= Y && y <= Bottom;
+}
+
+/// <summary>
 /// User interface described in HTML and CSS.
 /// </summary>
 /// <remarks>
@@ -166,6 +185,89 @@ public static unsafe class Xui
     /// <exception cref="BevyNativeException">The element is gone or cannot be ticked.</exception>
     public static void SetFlag(Entity element, bool value) => Native.Check(
         Native.bcs_xui_set_flag(element.Bits, value ? 1 : 0), $"setting the state of {element}");
+
+    // -- Placement
+    //
+    // Where an element sits, as something a tool decides rather than something its stylesheet
+    // does. A stylesheet is the right place for what a panel looks like and the wrong place for
+    // where it is: a layout that can be described, saved and rearranged has to be data the
+    // editor holds. The chrome stays in CSS; the rectangle comes from here.
+
+    /// <summary>
+    /// Places an element at an absolute rectangle, in logical pixels.
+    /// </summary>
+    /// <remarks>
+    /// Any of the four may be <see cref="float.NaN"/>, which leaves that edge to the layout: a
+    /// width of <c>NaN</c> is a panel as wide as its contents.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The element is gone or is not laid out.</exception>
+    public static void SetRect(Entity element, float left, float top, float width, float height) =>
+        Native.Check(
+            Native.bcs_xui_set_rect(element.Bits, left, top, width, height),
+            $"placing {element}");
+
+    /// <summary>
+    /// Shows or hides an element and everything under it.
+    /// </summary>
+    /// <remarks>
+    /// A hidden element takes no space, so its neighbours close up, which is what a dismissed
+    /// flyout should look like rather than a hole where it was.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The element is gone or is not laid out.</exception>
+    public static void SetVisible(Entity element, bool visible) => Native.Check(
+        Native.bcs_xui_set_visible(element.Bits, visible ? 1 : 0), $"showing {element}");
+
+    /// <summary>Puts an element in front of or behind its siblings.</summary>
+    /// <exception cref="BevyNativeException">The element is gone.</exception>
+    public static void SetLayer(Entity element, int layer) => Native.Check(
+        Native.bcs_xui_set_layer(element.Bits, layer), $"layering {element}");
+
+    /// <summary>
+    /// Where an element ended up, in logical pixels.
+    /// </summary>
+    /// <remarks>
+    /// The rectangle the layout produced rather than the one that was asked for, which is the
+    /// only one worth testing a cursor against, and in the same units the cursor is reported in.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The element is gone or has not been laid out yet.</exception>
+    public static UiRect Rect(Entity element)
+    {
+        var rect = stackalloc float[4];
+        Native.Check(Native.bcs_xui_rect(element.Bits, rect), $"measuring {element}");
+        return new UiRect(rect[0], rect[1], rect[2], rect[3]);
+    }
+
+    /// <summary>
+    /// Where an element ended up, or <see langword="false"/> when it has no rectangle yet.
+    /// </summary>
+    /// <remarks>
+    /// The frames between a document being asked for and its widgets being laid out are ordinary
+    /// rather than exceptional, and a tool arranging its panels asks every frame, so this is the
+    /// form that arranging uses.
+    /// </remarks>
+    public static bool TryRect(Entity element, out UiRect rect)
+    {
+        var values = stackalloc float[4];
+        if (Native.bcs_xui_rect(element.Bits, values) < 0)
+        {
+            rect = default;
+            return false;
+        }
+
+        rect = new UiRect(values[0], values[1], values[2], values[3]);
+        return true;
+    }
+
+    /// <summary>
+    /// The element the keyboard is going to, or <see cref="Entity.None"/>.
+    /// </summary>
+    /// <remarks>
+    /// What a panel showing live values has to ask before writing text out: a panel that writes
+    /// its values every frame and does it to the field somebody is typing in replaces what they
+    /// have typed with what the program still says.
+    /// </remarks>
+    public static Entity Focused() =>
+        App.HasEditor ? new Entity(Native.bcs_xui_focused()) : Entity.None;
 
     /// <summary>How many events one call carries at most.</summary>
     /// <remarks>

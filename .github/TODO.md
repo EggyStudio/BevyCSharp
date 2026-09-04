@@ -318,6 +318,42 @@ Points to get right:
 - **Teardown matters.** Bepu is pool-based and its `BufferPool` and `ThreadDispatcher` are
   disposable, so they have to be torn down with the app rather than left to the GC.
 
+## The editor
+
+`BevyCSharp.Editor` runs: a toolbar, a hierarchy, an inspector, a status strip, a post-processing
+panel and a key list, arranged by a layout that can be described, saved and dragged. Underneath is
+the framework each of them is three files on top of: documents in HTML and CSS, bindings to fields
+and commands to methods through the generator, and hot reload of the documents, the stylesheets
+and behavior scripts alike. [EDITOR.md](EDITOR.md) has the design language and what each stage
+delivered.
+
+What is left:
+
+- **Clicking a mesh to select it is unverified.** `bcs_pick_events` and the shell that drains it
+  are in place, and no pointer has been put through them: the editor runs on Wayland here and
+  nothing available can synthesise a click into it. If it turns out not to fire, suspect the
+  interface camera, which is ordered last and may be the camera the raycast starts from.
+- **Half of the world is saved.** `assets/world.json` keeps every named entity's name and every
+  component with a schema, which is what the editor can change. What it cannot write is the
+  engine's own components: a mesh handle, a material, a camera's projection.
+  `bevy_world_serialization` is compiled in and would write exactly those, and can see no C#
+  component at all, because those are bytes registered at runtime with no Rust type behind them.
+  A world asset worth the name is both files or one format that holds both halves.
+- **Selection that survives a rebuild.** A selected entity is an id, and a hot reload that
+  respawns what a script made hands back different ids. Selecting by name would survive it, at the
+  cost of being wrong for the entities that share one.
+- **Rows that can be styled while they run.** A row says it is selected by putting a mark in its
+  own text, because nothing can give an element a class after the document is parsed. An entry
+  point that set a CSS class would replace that, and would also give hover and pressed states to
+  anything built on the framework rather than only to what the stylesheet can reach.
+- **A list longer than its pool.** The hierarchy and the inspector both hold a fixed pool of rows
+  and decide what each stands for, which is what a virtualised list does anyway. What they lack is
+  a wheel: paging is two buttons, because the scroll wheel belongs to the camera.
+- **Undo covers what can be reversed exactly**: a field edited in the inspector, a rename, a new
+  entity. Despawning is deliberately not recorded, because an entity's mesh and material are
+  engine-side components with no mirror on this side and what came back would be a name with
+  nothing to draw. That is the same gap as the world file's, and closing one closes both.
+
 ## Assets and scenes
 
 - **Scene loading** works. `Scene` is a trait in 0.19 and the loadable asset is `WorldAsset`:

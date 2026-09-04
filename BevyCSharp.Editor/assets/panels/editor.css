@@ -2,11 +2,16 @@
  * The editor's appearance, in one place.
  *
  * Every panel links this, so the chrome of a window is described here rather than in any panel's
- * own file or in C#. Restyling the whole editor is editing this file.
+ * own file or in C#. Restyling the whole editor is editing this file, while it runs.
  *
- * Monochrome by intent. Colour is the loudest thing an interface has, and an editor is looked at
- * all day beside the thing being edited, so it is spent on the one control that acts and on
- * nothing that merely sits there.
+ * The values follow Unity's Editor Foundations, which is the interface most people coming to this
+ * already have in their hands and which publishes its numbers rather than leaving them to be
+ * guessed at: 12px body text, 11px in dense controls, 10px for the smallest labels, rows of 18
+ * to 20px, and accent only on what is hovered, focused, pressed or selected. See .github/EDITOR.md.
+ *
+ * Two departures, both deliberate. Panels are black with transparency rather than opaque grey,
+ * because the viewport is behind them full screen rather than a pane between them. And corners
+ * are rounded, where Unity's are square.
  */
 
 :root {
@@ -22,59 +27,199 @@
     --primary-transparent-layer: rgba(110, 110, 110, 0.3);
     --headline: #e8e8e8;
     --headline-sec: #b4b4b4;
-    --text-color: #e8e8e8;
+    --text-color: #d2d2d2;
     --text-color-dark: #8a8a8a;
     --disabled-text: #4a4a4a;
     --disabled-text-darker: #3a3a3a;
     --gray-background: #141414;
     --gray-background-disabled: #202020;
 
-    /* Black, with enough left through to see what is behind the panel. */
-    --surface: rgba(0, 0, 0, 0.72);
-    --line: #ffffff1a;
-    --text: #e8e8e8;
+    /* Black, with enough left through to see the scene the panels float over. */
+    --surface: rgba(0, 0, 0, 0.76);
+    --surface-raised: rgba(255, 255, 255, 0.05);
+    --surface-sunken: rgba(0, 0, 0, 0.35);
+    --line: rgba(255, 255, 255, 0.10);
+    --line-strong: rgba(255, 255, 255, 0.18);
+
+    /* Unity's text ramp, which is three greys and no more. */
+    --text: #d2d2d2;
+    --label: #c4c4c4;
+    --bright: #eeeeee;
     --dim: #8a8a8a;
 
-    /* The one colour in the editor. Anything that is not the action stays grey. */
+    /* The one colour in the editor. Anything that is not acting stays grey. */
     --accent: #4d7cff;
-    --radius: 10px;
+    --accent-soft: rgba(77, 124, 255, 0.22);
+
+    --radius: 9px;
+    --radius-small: 5px;
 }
 
+/*
+ * Every open document lays a body over the whole window, so a body that took the pointer would
+ * swallow every click meant for the panels of every document under it. The panels take it back.
+ */
 body {
-    display: flex;
-    flex-direction: row;
-    /* Panels sit at the top rather than stretching: a panel is as tall as its contents. */
-    align-items: flex-start;
     width: 100%;
     height: 100%;
-    padding: 12px;
-    column-gap: 12px;
     background-color: rgba(0, 0, 0, 0);
+    pointer-events: none;
 }
 
-.panel {
+/* -- Panels */
+
+.panel,
+.bar,
+.strip {
     display: flex;
-    flex-direction: column;
-    width: 232px;
-    padding: 10px;
-    row-gap: 6px;
     background-color: var(--surface);
     border: 1px solid var(--line);
     border-radius: var(--radius);
     color: var(--text);
+    pointer-events: auto;
 }
 
-.panel h2 {
+.panel {
+    flex-direction: column;
+    width: 236px;
+    padding: 8px;
+    row-gap: 5px;
+}
+
+/* A toolbar is a panel whose contents are buttons. Nothing else about it is different. */
+.bar {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px;
+    column-gap: 4px;
+}
+
+/* A status strip: one line of text, and nothing to act on. */
+.strip {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 10px;
+    column-gap: 14px;
+}
+
+/* -- Title bars, which are also what a window is dragged by */
+
+.titlebar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 20px;
+    padding: 0 2px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid var(--line);
+}
+
+.title {
     font-size: 11px;
+    color: var(--label);
     text-transform: uppercase;
+}
+
+.dim {
+    font-size: 10px;
     color: var(--dim);
+}
+
+/* -- Text */
+
+p {
+    font-size: 11px;
+    color: var(--text);
+}
+
+h2 {
+    font-size: 11px;
+    color: var(--label);
+    text-transform: uppercase;
     margin-bottom: 2px;
 }
 
+/* -- Rows: what a list is made of */
+
+.rows {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    row-gap: 2px;
+}
+
 /*
- * A caption above its control rather than beside it. Side by side, the control gets whatever
- * width the caption leaves, which is what pushed the text field past the panel's edge.
+ * 18px, which is Unity's height for a standard single-line control, and the reason a list of
+ * thirty entities is readable at a glance rather than a wall.
  */
+.row {
+    width: 100%;
+    height: 18px;
+    text-wrap: nowrap;
+    min-width: 0;
+    padding: 0 6px;
+    background-color: rgba(0, 0, 0, 0);
+    border: 0;
+    border-radius: var(--radius-small);
+    color: var(--text);
+    font-size: 11px;
+    /* A button centres its text, and a row of a list reads from the left like every other row. */
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.row:hover {
+    background-color: var(--surface-raised);
+}
+
+/*
+ * 22px, not 20. The input inside a field row draws a border and a little padding of its own, so a
+ * row exactly as tall as the control leaves the two fighting for the same pixels and every row
+ * overlapping the one under it.
+ */
+.field-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: 22px;
+    margin: 0;
+    column-gap: 6px;
+}
+
+/*
+ * A name column wide enough for the field names an inspector actually shows, and a value that
+ * takes what is left. Unity's rule is that the inspector must not scroll sideways at its
+ * narrowest, and a fixed name column is what keeps that true.
+ */
+/*
+ * The two columns add up to less than the panel is wide: 236 less its padding and border leaves
+ * 218, and 84 + 6 + 112 leaves a little in hand. Unity's rule is that an inspector must not
+ * scroll sideways at its narrowest, and a value column that overflows is exactly that.
+ *
+ * `text-wrap: nowrap` matters more than it looks. A name that wraps makes its paragraph three
+ * lines tall inside a row 22 pixels high, and every row below it is then drawn through it.
+ */
+.field-name {
+    width: 84px;
+    min-width: 0;
+    font-size: 11px;
+    color: var(--label);
+    text-wrap: nowrap;
+}
+
+.field-value {
+    width: 112px;
+    min-width: 0;
+    height: 18px;
+    margin: 0;
+    padding: 1px 5px;
+}
+
+/* -- Controls */
+
 .field {
     display: flex;
     flex-direction: column;
@@ -82,26 +227,25 @@ body {
     row-gap: 3px;
 }
 
-label,
-p {
-    font-size: 11px;
-    color: var(--text);
-}
-
-.dim {
-    color: var(--dim);
-}
-
 input {
     width: 100%;
-    height: 22px;
+    height: 20px;
     min-width: 0;
-    padding: 4px;
-    background-color: rgba(255, 255, 255, 0.05);
+    padding: 3px 6px;
+    background-color: var(--surface-sunken);
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: var(--radius-small);
     color: var(--text);
     font-size: 11px;
+}
+
+input:hover {
+    border-color: var(--line-strong);
+}
+
+/* Accent on what is focused, which is Unity's rule and the only place blue appears on an input. */
+input:focus {
+    border-color: var(--accent);
 }
 
 slider {
@@ -116,26 +260,34 @@ slider {
  * same size, because the captions in this editor are separate elements above each control.
  */
 checkbox {
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
     gap: 0;
 }
 
 checkbox > .mark-box {
-    width: 22px;
-    height: 22px;
-    border-radius: 5px;
+    width: 18px;
+    height: 18px;
+    border-radius: var(--radius-small);
 }
 
-/* The one thing that acts, and so the one thing that is not grey. */
+/*
+ * Buttons are grey until they are under the pointer. Unity spends its accent on state rather
+ * than on every control that could be pressed, which is what keeps a toolbar of eight buttons
+ * from reading as eight things demanding attention.
+ */
 button {
-    width: 100%;
+    height: 20px;
     min-width: 0;
-    height: 24px;
-    margin-top: 4px;
-    padding: 0;
-    background: var(--accent);
-    border-radius: 6px;
-    color: #ffffff;
+    padding: 0 10px;
+    background-color: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-small);
+    color: var(--bright);
     font-size: 11px;
+}
+
+button:hover {
+    background-color: var(--accent-soft);
+    border-color: var(--accent);
 }

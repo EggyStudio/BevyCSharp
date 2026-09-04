@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -123,6 +124,70 @@ internal sealed record StageMethod
 }
 
 /// <summary>A <c>[Behavior]</c> struct and everything the generator needs to emit for it.</summary>
+/// <summary>What kind of value a behavior's field holds, as far as a tool showing it cares.</summary>
+/// <remarks>
+/// Deliberately short. A tool needs to know how to draw and edit a value, and every blittable
+/// field a behavior can carry falls into one of these. Anything that does not is reported as
+/// <see cref="Opaque"/>, which shows a row and no editor rather than pretending.
+/// </remarks>
+internal enum FieldKind
+{
+    Opaque,
+    Bool,
+    Int,
+    Float,
+    Double,
+    Vec3,
+    Quat,
+    Entity,
+    Enum,
+}
+
+/// <summary>One field of a behavior, and where to find it in the component's bytes.</summary>
+/// <param name="Name">The field's name, which is what a tool labels the row with.</param>
+/// <param name="Kind">How to read and draw it.</param>
+/// <param name="Type">The declared type, for a row that cannot be edited.</param>
+/// <param name="Options">The names an enum field can take, empty for anything else.</param>
+internal sealed record BehaviorField(
+    string Name,
+    FieldKind Kind,
+    string Type,
+    EquatableArray<string> Options)
+{
+    /// <summary>A field of a type with no fixed set of values.</summary>
+    internal BehaviorField(string name, FieldKind kind, string type)
+        : this(name, kind, type, EquatableArray<string>.Empty)
+    {
+    }
+}
+
+/// <summary>A list that compares by contents, so an incremental model can cache on it.</summary>
+internal readonly struct EquatableArray<T>(T[] items) : IEquatable<EquatableArray<T>>
+    where T : IEquatable<T>
+{
+    private readonly T[] _items = items;
+
+    /// <summary>The empty list.</summary>
+    internal static EquatableArray<T> Empty { get; } = new([]);
+
+    /// <summary>The items.</summary>
+    internal IReadOnlyList<T> Items => _items ?? [];
+
+    /// <inheritdoc/>
+    public bool Equals(EquatableArray<T> other) => Items.SequenceEqual(other.Items);
+
+    /// <inheritdoc/>
+    public override bool Equals(object? obj) => obj is EquatableArray<T> other && Equals(other);
+
+    /// <inheritdoc/>
+    public override int GetHashCode()
+    {
+        var hash = 17;
+        foreach (var item in Items) hash = (hash * 31) + (item?.GetHashCode() ?? 0);
+        return hash;
+    }
+}
+
 internal sealed record BehaviorModel
 {
     /// <summary>The struct's namespace, or <c>null</c> for the global namespace.</summary>
@@ -144,13 +209,25 @@ internal sealed record BehaviorModel
     /// <summary>The stage methods found on the struct.</summary>
     public IReadOnlyList<StageMethod> Methods { get; init; } = [];
 
+    /// <summary>
+    /// The struct's instance fields, in declaration order.
+    /// </summary>
+    /// <remarks>
+    /// What makes a component inspectable. The bridge already hands over a component id and a
+    /// pointer into the engine's own storage; this is the other half, and it does not have to
+    /// cross the boundary to get here because the type is a C# type the compiler is already
+    /// looking at.
+    /// </remarks>
+    public IReadOnlyList<BehaviorField> Fields { get; init; } = [];
+
     /// <summary>Value equality over the contents, so incremental caching works.</summary>
     public bool Equals(BehaviorModel? other) =>
         other is not null
         && Namespace == other.Namespace
         && Name == other.Name
         && QualifiedName == other.QualifiedName
-        && Methods.SequenceEqual(other.Methods);
+        && Methods.SequenceEqual(other.Methods)
+        && Fields.SequenceEqual(other.Fields);
 
     /// <inheritdoc/>
     public override int GetHashCode()

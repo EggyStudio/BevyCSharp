@@ -1404,6 +1404,87 @@ every platform.
 
 ---
 
+## The editor
+
+`BevyCSharp.Editor` runs the same way the sample does and is built on the same library, with no
+privileged path into the engine: the editor is a BevyCSharp app whose behaviors happen to draw an
+editor.
+
+```bash
+build/build-native.sh --editor
+dotnet run --project BevyCSharp.Editor
+```
+
+A **panel is three files**. The structure is HTML, the appearance is CSS, and a C# class says what
+is bound to what. Nothing looks an element up or dispatches a click; the attributes say what is
+tied to what, and the generator writes the rest:
+
+```csharp
+[EditorPanel("panels/post.html", Root = "#post", Handle = "#post-title",
+             Region = EditorRegion.TopRight)]
+public sealed partial class PostPanel(Entity camera)
+{
+    [Bind("#bloom")]     public bool Bloom = true;
+    [Bind("#intensity")] public float Intensity = 0.3f;
+
+    [OnChange]           public void Apply() { /* runs when a value is edited */ }
+    [Command("#reset")]  public void Reset() { /* runs when the button is clicked */ }
+}
+```
+
+`[Bind]` ties a member to an element, two way by default and one way for a readout. `[Show]` ties
+a `bool` to whether an element is drawn. `[Command]` ties a method to a click. `[OnChange]` runs
+once a frame in which anything was edited, and `[OnRefresh]` runs once a frame before the panel's
+values are written out, which is where a panel that shows the world reads it.
+
+**A list is a pool of elements.** A document is a file, so it cannot grow a row per entity. Both
+`[Bind]` and `[Command]` take a `Count`, which makes the id a prefix over numbered elements and
+the member an array, and the panel decides what each row stands for:
+
+```csharp
+[Bind("#hrow", Count = 18)] public string[] Labels = new string[18];
+[Show("#hrow", Count = 18)] public bool[] Shown = new bool[18];
+
+[Command("#hrow", Count = 18)]
+public void Choose(int row) => EditorSelection.Select(_entities[row]);
+```
+
+**Where a panel sits is data, not CSS.** A stylesheet says what a panel looks like; `EditorLayout`
+holds a placement per panel and arranges them into nine regions plus free coordinates. Because
+that table is data, a layout writes to text and reads back, dragging a window by its handle is
+nothing more than writing one entry, and a flyout is a panel whose declaration says a press
+outside dismisses it.
+
+**The inspector needs no reflection.** The generator emits a `ComponentSchema` for every
+`[Behavior]` struct, holding each field's name, its kind, and a pair of closures that read and
+write it, and `ComponentSchemas` maps a live component id to it. So an entity's components can be listed and
+edited without naming a single type:
+
+```csharp
+foreach (var id in ctx.Ecs.ComponentsOf(entity))
+{
+    if (ComponentSchemas.For(id) is not { } schema) continue;
+
+    foreach (var field in schema.Fields)
+        Console.WriteLine($"{schema.Name}.{field.Name} = {field.Read(ctx.Ecs, entity)}");
+}
+```
+
+Bevy's own components are a curated list, `Transform` and `Visibility` today, because each needs a
+byte-compatible mirror written by hand.
+
+**What the editor changes can be taken back.** `EditorHistory` is a pair of stacks over closures,
+and an operation is recorded only when it can be reversed exactly: a field edit, a rename, a new
+entity. Despawning is not, because an entity's mesh and material have no mirror on this side and
+what came back would be a name with nothing to draw.
+
+The shipped panels are a starting point rather than the product: a toolbar, a hierarchy, an
+inspector, a status strip, a key list and the post-processing panel above are six uses of one
+mechanism, and every one of them can be edited, replaced or deleted without touching the shell.
+[.github/EDITOR.md](.github/EDITOR.md) has the design language and what each stage delivered.
+
+---
+
 ## Hot reload
 
 The editor profile watches the asset directory, so a running app picks up what changed on disk.
@@ -1462,7 +1543,13 @@ run against a real Bevy app. Known gaps:
   no frames of their own, and the GPU-compressed texture formats are not decoded.
   [.github/TODO.md](.github/TODO.md) lists what each gap needs.
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does
-  nothing yet.
+  nothing yet. The editor reloads scripts through `App.EnableDynamicSystems` instead, because
+  the compiler lives there.
+- The editor's world file keeps what this side can describe: an entity's name and every component
+  with a schema. A component the engine owns and C# has no mirror for, a mesh handle or a
+  material, is not written, so the file is a set of edits over a scene rather than the scene.
+- An element cannot be given a CSS class while the editor runs, so a selected row in the hierarchy
+  says so with a mark in its own text rather than by being styled.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
 

@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 44;
+    internal const int ExpectedAbiVersion = 50;
 
     static Native() => NativeLoader.Initialize();
 
@@ -428,6 +428,33 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_post(ulong entity, NativePostConfig* config);
 
+    // -- Introspection
+
+    /// <summary>Copies every live entity into a buffer, returning how many exist.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ecs_entities(ulong* buffer, int capacity);
+
+    /// <summary>Copies the components an entity carries, returning how many it has.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ecs_components_of(ulong entity, int* buffer, int capacity);
+
+    /// <summary>Writes a component's name into a buffer, returning the bytes it needs.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_component_name(int component, byte* buffer, int capacity);
+
+    /// <summary>Writes an entity's name into a buffer, returning the bytes it needs.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ecs_entity_name(ulong entity, byte* buffer, int capacity);
+
+    /// <summary>Gives an entity a name, or removes it when the name is empty.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ecs_set_entity_name(ulong entity, string name);
+
     // -- HTML and CSS UI (editor builds only)
 
     /// <summary>Reports whether the HTML and CSS surface is compiled in.</summary>
@@ -484,6 +511,42 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_xui_events(NativeUiEvent* buffer, int capacity);
+
+    /// <summary>Places an element absolutely, in logical pixels. NaN leaves an edge to the layout.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_set_rect(
+        ulong entity, float left, float top, float width, float height);
+
+    /// <summary>Shows or hides an element and everything under it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_set_visible(ulong entity, int visible);
+
+    /// <summary>Puts an element in front of or behind its siblings.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_set_layer(ulong entity, int layer);
+
+    /// <summary>Reads where an element ended up: x, y, width, height in logical pixels.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_rect(ulong entity, float* rect);
+
+    /// <summary>The element the keyboard is going to, or 0.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial ulong bcs_xui_focused();
+
+    /// <summary>Copies the scene entities clicked since the last call.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_pick_events(ulong* buffer, int capacity);
+
+    /// <summary>Writes an entity's world-space bounds: min x, y, z then max x, y, z.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_bounds(ulong entity, float* bounds);
 
     /// <summary>Sets the lens effects a camera draws through.</summary>
     [LibraryImport(Library)]

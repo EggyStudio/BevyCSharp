@@ -33,10 +33,12 @@ internal static class PanelEmitter
             .Append("    public global::BevyCSharp.Editor.Framework.EditorWindow? Window ")
             .Append("{ get; private set; }\n\n");
 
+        EmitChrome(source, model);
+
         source.Append("    /// <summary>Opens the panel's document.</summary>\n")
             .Append("    public void Open() => Window = ")
             .Append("global::BevyCSharp.Editor.Framework.EditorWindow.Open(\"")
-            .Append(model.Document).Append("\");\n\n");
+            .Append(model.Document).Append("\", Chrome);\n\n");
 
         source.Append("    /// <summary>Closes it again.</summary>\n")
             .Append("    public void Close()\n    {\n")
@@ -44,6 +46,7 @@ internal static class PanelEmitter
             .Append("        Window = null;\n")
             .Append("    }\n\n");
 
+        EmitRefresh(source, model);
         EmitPull(source, model);
         EmitPush(source, model);
         EmitInvoke(source, model);
@@ -51,6 +54,63 @@ internal static class PanelEmitter
 
         source.Append("}\n");
         return source.ToString();
+    }
+
+    /// <summary>Emits what the panel declared about where it sits.</summary>
+    /// <remarks>
+    /// A single static value, built once and handed out, because none of it changes while the
+    /// panel is open. Where the panel currently is belongs to the layout instead.
+    /// </remarks>
+    private static void EmitChrome(StringBuilder source, PanelModel model)
+    {
+        var chrome = model.Chrome;
+
+        source.Append("    /// <summary>What this panel declared about itself.</summary>\n")
+            .Append("    private static readonly global::BevyCSharp.Editor.Framework.PanelChrome ")
+            .Append("Declared = new(\n")
+            .Append("        ").Append(Text(chrome.Root)).Append(",\n")
+            .Append("        ").Append(Text(chrome.Handle)).Append(",\n")
+            .Append("        new global::BevyCSharp.Editor.Framework.PanelPlacement(\n")
+            .Append("            (global::BevyCSharp.Editor.Framework.EditorRegion)")
+            .Append(chrome.Region).Append(",\n")
+            .Append("            ").Append(Number(chrome.X)).Append(",\n")
+            .Append("            ").Append(Number(chrome.Y)).Append(",\n")
+            .Append("            ").Append(Number(chrome.Width)).Append(",\n")
+            .Append("            ").Append(Number(chrome.Height)).Append("),\n")
+            .Append("        (global::BevyCSharp.Editor.Framework.PanelDismiss)")
+            .Append(chrome.Dismiss).Append(",\n")
+            .Append("        ").Append(chrome.Layer).Append(");\n\n")
+            .Append("    /// <summary>What this panel declared about itself.</summary>\n")
+            .Append("    public global::BevyCSharp.Editor.Framework.PanelChrome Chrome => Declared;\n\n");
+    }
+
+    /// <summary>What a repeated binding writes to an element past the end of its array.</summary>
+    private static string Empty(BindKind kind) => kind switch
+    {
+        BindKind.Text => "string.Empty",
+        BindKind.Number => "0f",
+        _ => "false",
+    };
+
+    /// <summary>A string as C# source, or <c>null</c>.</summary>
+    private static string Text(string? value) => value is null ? "null" : "\"" + value + "\"";
+
+    /// <summary>A float as C# source, with <c>NaN</c> written as the constant rather than a literal.</summary>
+    private static string Number(float value) =>
+        float.IsNaN(value)
+            ? "float.NaN"
+            : value.ToString("0.0###", System.Globalization.CultureInfo.InvariantCulture) + "f";
+
+    /// <summary>Brings the panel's own values up to date before they are written out.</summary>
+    private static void EmitRefresh(StringBuilder source, PanelModel model)
+    {
+        source.Append("    /// <summary>Brings this panel's values up to date.</summary>\n")
+            .Append("    public void Refresh()\n    {\n");
+
+        foreach (var method in model.Refreshed)
+            source.Append("        ").Append(method).Append("();\n");
+
+        source.Append("    }\n\n");
     }
 
     /// <summary>Writes the panel's values out to its elements.</summary>
@@ -62,6 +122,27 @@ internal static class PanelEmitter
 
         foreach (var binding in model.Bindings)
         {
+            if (binding.Count > 0)
+            {
+                // A repeated binding writes every element it stands for, and an element past
+                // the end of the array is emptied rather than left holding the last list's
+                // value, which is what makes a list that got shorter look like one.
+                source.Append("\n        for (var __i = 0; __i < ").Append(binding.Count)
+                    .Append("; __i++)\n        {\n")
+                    .Append("            global::BevyCSharp.Editor.Framework.PanelBinding.Pull")
+                    .Append(binding.Kind).Append("(\n")
+                    .Append("                window.Element($\"").Append(binding.Element)
+                    .Append("-{__i}\"),\n")
+                    .Append("                __i < ").Append(binding.Member).Append(".Length ? ");
+
+                if (binding.Kind == BindKind.Number) source.Append("(float)");
+                source.Append(binding.Member).Append("[__i] : ").Append(Empty(binding.Kind))
+                    .Append(");\n")
+                    .Append("        }\n");
+
+                continue;
+            }
+
             source.Append("\n        global::BevyCSharp.Editor.Framework.PanelBinding.Pull")
                 .Append(binding.Kind).Append("(window.Element(\"").Append(binding.Element)
                 .Append("\"), ");
@@ -82,6 +163,40 @@ internal static class PanelEmitter
 
         foreach (var binding in model.Bindings)
         {
+            // Visibility is done to an element rather than held by it, so it never takes an edit
+            // and never claims the element: the member that holds the element's value still has
+            // to hear about the change.
+            if (binding.Kind == BindKind.Visible) continue;
+
+            if (binding.Count > 0)
+            {
+                source.Append("\n        for (var __i = 0; __i < ").Append(binding.Count)
+                    .Append("; __i++)\n        {\n")
+                    .Append("            if (element != window.Element($\"").Append(binding.Element)
+                    .Append("-{__i}\")) continue;\n");
+
+                if (binding.TwoWay)
+                {
+                    source.Append("\n            if (__i < ").Append(binding.Member)
+                        .Append(".Length)\n")
+                        .Append("            {\n")
+                        .Append("                ").Append(binding.Member).Append("[__i] = ");
+
+                    if (binding.Kind == BindKind.Number && binding.NumericType != "float")
+                        source.Append('(').Append(binding.NumericType).Append(')');
+
+                    source.Append("global::BevyCSharp.Editor.Framework.PanelBinding.Push")
+                        .Append(binding.Kind).Append("(element, ");
+
+                    if (binding.Kind == BindKind.Number) source.Append("(float)");
+                    source.Append(binding.Member).Append("[__i]);\n")
+                        .Append("            }\n\n");
+                }
+
+                source.Append("            return true;\n        }\n");
+                continue;
+            }
+
             // A one way binding still claims its element, so no other panel is asked about it.
             source.Append("\n        if (element == window.Element(\"").Append(binding.Element)
                 .Append("\"))\n        {\n");
@@ -115,6 +230,18 @@ internal static class PanelEmitter
 
         foreach (var command in model.Commands)
         {
+            if (command.Count > 0)
+            {
+                source.Append("\n        for (var __i = 0; __i < ").Append(command.Count)
+                    .Append("; __i++)\n        {\n")
+                    .Append("            if (element != window.Element($\"").Append(command.Element)
+                    .Append("-{__i}\")) continue;\n\n")
+                    .Append("            ").Append(command.Method).Append("(__i);\n")
+                    .Append("            return true;\n        }\n");
+
+                continue;
+            }
+
             source.Append("\n        if (element == window.Element(\"").Append(command.Element)
                 .Append("\"))\n        {\n")
                 .Append("            ").Append(command.Method).Append("();\n")

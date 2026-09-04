@@ -15,11 +15,32 @@ public interface IEditorPanel
     /// <summary>The window this panel is showing in, once it has been opened.</summary>
     EditorWindow? Window { get; }
 
+    /// <summary>
+    /// What the panel declared about itself: its root element, where it starts, what dismisses it.
+    /// </summary>
+    /// <remarks>
+    /// True before the panel is open and unchanged while it is, which is what lets the shell
+    /// decide how to open a panel before opening it. Where a panel currently <em>is</em> belongs
+    /// to <see cref="EditorLayout"/> instead, because that changes.
+    /// </remarks>
+    PanelChrome Chrome { get; }
+
     /// <summary>Opens the panel's document.</summary>
     void Open();
 
     /// <summary>Closes it again.</summary>
     void Close();
+
+    /// <summary>
+    /// Brings the panel's own values up to date, before any of them are written out.
+    /// </summary>
+    /// <remarks>
+    /// The hook a panel showing the world needs: a hierarchy reads the entities here, an
+    /// inspector reads the selection's components, and both then have ordinary values for the
+    /// bindings to write. Separate from <see cref="Pull"/> so that reading the world and writing
+    /// the screen stay two things, and so a panel that shows only its own state has nothing here.
+    /// </remarks>
+    void Refresh();
 
     /// <summary>
     /// Writes the panel's own values out to its elements.

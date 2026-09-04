@@ -12,7 +12,7 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 /// <example>
 /// <code>
-/// [EditorPanel("panels/settings.html")]
+/// [EditorPanel("panels/settings.html", Root = "#settings", Region = EditorRegion.TopRight)]
 /// public sealed partial class SettingsPanel
 /// {
 ///     [Bind("#bloom")]     public bool Bloom;
@@ -26,6 +26,47 @@ public sealed class EditorPanelAttribute(string document) : Attribute
 {
     /// <summary>The document's path, relative to the asset root.</summary>
     public string Document { get; } = document;
+
+    /// <summary>
+    /// The CSS id of the panel's outermost element, which is what gets placed.
+    /// </summary>
+    /// <remarks>
+    /// Ids are global across every open document, so this has to be unique in the whole editor
+    /// rather than in its own file. A panel that names none is left wherever its stylesheet puts
+    /// it, which is the right answer for a panel that fills the screen or that is placed by hand.
+    /// </remarks>
+    public string? Root { get; init; }
+
+    /// <summary>
+    /// The CSS id of the element the panel is dragged by, usually its title bar.
+    /// </summary>
+    /// <remarks>
+    /// A drag moves the panel by writing the layout, so dragging a window is the same operation
+    /// as loading a saved arrangement, and what a person drags into place is what a saved layout
+    /// records.
+    /// </remarks>
+    public string? Handle { get; init; }
+
+    /// <summary>Which part of the window the panel belongs to.</summary>
+    public EditorRegion Region { get; init; } = EditorRegion.Free;
+
+    /// <summary>Its offset inside that region, or its left edge when the region is free.</summary>
+    public float X { get; init; }
+
+    /// <summary>The same, vertically.</summary>
+    public float Y { get; init; }
+
+    /// <summary>How wide it is, or nothing to be as wide as its contents.</summary>
+    public float Width { get; init; } = float.NaN;
+
+    /// <summary>How tall it is, or nothing to be as tall as its contents.</summary>
+    public float Height { get; init; } = float.NaN;
+
+    /// <summary>What makes it go away.</summary>
+    public PanelDismiss Dismiss { get; init; } = PanelDismiss.Never;
+
+    /// <summary>Which panels it draws in front of. Higher is nearer.</summary>
+    public int Layer { get; init; }
 }
 
 /// <summary>Which way a binding carries a value.</summary>
@@ -63,6 +104,44 @@ public sealed class BindAttribute(string element) : Attribute
 
     /// <summary>Which way the value travels.</summary>
     public BindMode Mode { get; init; } = BindMode.TwoWay;
+
+    /// <summary>
+    /// How many elements the id stands for.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Left alone, one member is one element. Given a count, the id is a prefix and the elements
+    /// are numbered from it: <c>row</c> with a count of eight binds <c>row-0</c> through
+    /// <c>row-7</c>, and the member is an array holding a value for each.
+    /// </para>
+    /// <para>
+    /// This is how a document with a fixed set of elements shows a list whose length nobody knew
+    /// when the document was written. The elements are a pool: the panel decides which of them
+    /// stand for what, and <see cref="ShowAttribute"/> takes the leftovers off screen. It is
+    /// also what a long list wants anyway, since a hierarchy of ten thousand entities is drawn
+    /// by however many rows fit on the screen.
+    /// </para>
+    /// </remarks>
+    public int Count { get; init; }
+}
+
+/// <summary>
+/// Ties a <see cref="bool"/> to whether an element is on screen.
+/// </summary>
+/// <remarks>
+/// Its own attribute rather than a binding mode, because visibility is done to an element rather
+/// than held by it: an element can have its value bound and its visibility bound at the same
+/// time, and neither is the other's business. Always one way, since an element that is not drawn
+/// has nothing to say back.
+/// </remarks>
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+public sealed class ShowAttribute(string element) : Attribute
+{
+    /// <summary>The element's CSS id, with or without the leading hash.</summary>
+    public string Element { get; } = element;
+
+    /// <summary>How many elements the id stands for, exactly as on <see cref="BindAttribute"/>.</summary>
+    public int Count { get; init; }
 }
 
 /// <summary>
@@ -83,15 +162,42 @@ public sealed class BindAttribute(string element) : Attribute
 public sealed class OnChangeAttribute : Attribute;
 
 /// <summary>
+/// Runs a method once a frame, before the panel's values are written to its elements.
+/// </summary>
+/// <remarks>
+/// <para>
+/// Where a panel that shows the world reads it. A hierarchy fills its list of names here and an
+/// inspector fills its rows from the selection, and by the time the bindings run there is nothing
+/// left to do but write ordinary values out.
+/// </para>
+/// <para>
+/// The method takes no arguments. What it needs is the world, and that is
+/// <c>EditorShell.Ecs</c>, valid for exactly as long as this call is.
+/// </para>
+/// </remarks>
+[AttributeUsage(AttributeTargets.Method)]
+public sealed class OnRefreshAttribute : Attribute;
+
+/// <summary>
 /// Runs a method when the element carrying a CSS id is clicked.
 /// </summary>
 /// <remarks>
-/// The method takes no arguments and returns nothing. Which element was clicked is already known,
-/// since it is the one the attribute names.
+/// The method takes no arguments and returns nothing, because which element was clicked is
+/// already known: it is the one the attribute names. A command over repeated elements takes one
+/// <see cref="int"/> instead, for which of them it was.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class CommandAttribute(string element) : Attribute
 {
     /// <summary>The element's CSS id, with or without the leading hash.</summary>
     public string Element { get; } = element;
+
+    /// <summary>
+    /// How many elements the id stands for, exactly as on <see cref="BindAttribute"/>.
+    /// </summary>
+    /// <remarks>
+    /// A command over repeated elements is handed which of them was clicked, as an
+    /// <see cref="int"/>, since that is the one thing the attribute cannot say for it.
+    /// </remarks>
+    public int Count { get; init; }
 }

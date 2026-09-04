@@ -487,3 +487,79 @@ pub extern "C" fn bcs_render_set_shadow_maps(directional: u32, point: u32) -> i3
         }
     })
 }
+
+/// Writes an entity's world-space bounds into `out`: min x, y, z then max x, y, z.
+///
+/// What a tool needs to draw a box around what is selected, and what a camera needs to frame it.
+/// Bevy computes an `Aabb` for every mesh it draws, in the mesh's own space, so the eight corners
+/// are put through the entity's global transform here and the box around those is what comes
+/// back. Doing it on this side keeps a rotated object's box honest: transforming the two corners
+/// alone would give a box that shrinks as the object turns.
+///
+/// Reports [`status::NOT_PRESENT`] for an entity Bevy has computed no bounds for, which is
+/// anything that is not drawn.
+///
+/// # Safety
+/// `out` must be writable for six floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_bounds(entity: u64, out: *mut f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, out);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::camera::primitives::Aabb;
+            use bevy::math::Vec3A;
+            use bevy::transform::components::GlobalTransform;
+
+            if out.is_null() {
+                return status::NULL_ARG;
+            }
+
+            with_world(|world| {
+                let Ok(entity_ref) = world.get_entity(crate::ecs::entity_from(entity)) else {
+                    return status::NO_ENTITY;
+                };
+                let Some(aabb) = entity_ref.get::<Aabb>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                let transform = entity_ref
+                    .get::<GlobalTransform>()
+                    .copied()
+                    .unwrap_or_default();
+
+                let affine = transform.affine();
+                let mut min = Vec3A::splat(f32::INFINITY);
+                let mut max = Vec3A::splat(f32::NEG_INFINITY);
+
+                for corner in 0..8 {
+                    let offset = Vec3A::new(
+                        if corner & 1 == 0 { -1.0 } else { 1.0 },
+                        if corner & 2 == 0 { -1.0 } else { 1.0 },
+                        if corner & 4 == 0 { -1.0 } else { 1.0 },
+                    ) * aabb.half_extents;
+
+                    let point = affine.transform_point3a(aabb.center + offset);
+                    min = min.min(point);
+                    max = max.max(point);
+                }
+
+                unsafe {
+                    out.write(min.x);
+                    out.add(1).write(min.y);
+                    out.add(2).write(min.z);
+                    out.add(3).write(max.x);
+                    out.add(4).write(max.y);
+                    out.add(5).write(max.z);
+                }
+
+                status::OK
+            })
+        }
+    })
+}

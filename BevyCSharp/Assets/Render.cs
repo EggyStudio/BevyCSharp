@@ -1280,6 +1280,31 @@ public static unsafe class Render
     }
 
     /// <summary>
+    /// The box an entity occupies in the world, or <see langword="false"/> when it has none.
+    /// </summary>
+    /// <remarks>
+    /// Bevy computes bounds for everything it draws, in the mesh's own space; what comes back
+    /// here is those bounds put through the entity's global transform, so a rotated object gets
+    /// the box around its corners rather than its corners moved. Anything not drawn, a camera or
+    /// a bare entity, has no bounds and answers <see langword="false"/>.
+    /// </remarks>
+    public static bool TryGetBounds(Entity entity, out Vec3 min, out Vec3 max)
+    {
+        var bounds = stackalloc float[6];
+
+        if (Native.bcs_render_bounds(entity.Bits, bounds) < 0)
+        {
+            min = default;
+            max = default;
+            return false;
+        }
+
+        min = new Vec3(bounds[0], bounds[1], bounds[2]);
+        max = new Vec3(bounds[3], bounds[4], bounds[5]);
+        return true;
+    }
+
+    /// <summary>
     /// Sets how large a shadow map each kind of light gets, in pixels on a side.
     /// </summary>
     /// <remarks>
