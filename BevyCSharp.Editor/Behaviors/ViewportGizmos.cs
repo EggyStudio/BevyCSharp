@@ -49,6 +49,7 @@ public partial struct ViewportGizmos
     {
         if (!App.HasRenderer) return;
 
+        Ground(ctx);
         Orientation(ctx);
 
         if (!EditorSelection.Any) return;
@@ -65,6 +66,99 @@ public partial struct ViewportGizmos
             Reach(EditorSelection.Camera, centre),
             EditorTools.AxesFor(rotation),
             Facing(ctx, EditorSelection.Camera));
+    }
+
+    /// <summary>Whether the ground is drawn as a grid.</summary>
+    public static bool ShowGrid { get; set; } = true;
+
+    /// <summary>
+    /// A grid on the ground, under everything.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What tells a person where the floor is and how big things are. A scene without one is a
+    /// handful of objects in a void: nothing says which way is level, nothing says whether a cube
+    /// is a metre across or ten, and moving something is a guess about how far it went.
+    /// </para>
+    /// <para>
+    /// Drawn about the camera rather than about the origin, and at a spacing that steps by tens as
+    /// the camera climbs, so it is the same density on screen at any height. A fixed grid is either
+    /// a solid sheet from far away or four lines from close up.
+    /// </para>
+    /// </remarks>
+    private static void Ground(BehaviorContext ctx)
+    {
+        if (!ShowGrid) return;
+
+        var camera = EditorSelection.Camera;
+        if (camera.IsNone) return;
+
+        var basis = ctx.Ecs.GetOrDefault<GlobalTransform>(camera);
+        var eye = basis.Translation;
+
+        // How far apart the lines are: the power of ten that keeps a cell about a finger wide on
+        // screen at this height, so the grid neither disappears nor turns into a sheet.
+        var height = MathF.Max(0.5f, MathF.Abs(eye.Y));
+        var step = MathF.Max(0.1f, MathF.Pow(10f, MathF.Floor(MathF.Log10(height))));
+
+        const int Half = 26;
+
+        var reach = step * Half;
+
+        // Centred where the camera is looking rather than where it is. Looking out across a scene
+        // from head height puts the camera's own patch of ground behind and below the view, and a
+        // grid nobody can see is not a grid.
+        var forward = (basis.ZAxis * -1f).Normalized;
+        var look = eye;
+
+        if (forward.Y < -0.05f)
+        {
+            var travel = MathF.Min(-eye.Y / forward.Y, reach * 2f);
+            look = eye + (forward * travel);
+        }
+
+        var centreX = MathF.Round(look.X / step) * step;
+        var centreZ = MathF.Round(look.Z / step) * step;
+
+        // A hair above the floor rather than exactly on it. Scenes have a ground plane at zero and
+        // two surfaces at the same depth fight over every pixel; the lift is a thousandth of a
+        // cell, which is invisible at any height and enough to settle the argument.
+        var lift = step * 0.002f;
+
+        for (var i = -Half; i <= Half; i++)
+        {
+            var x = centreX + (i * step);
+            var z = centreZ + (i * step);
+
+            // Every tenth line is brighter, which is what gives a grid a scale to read rather than
+            // an even wash. The lines through the origin get their axis's own colour.
+            var alongZ = Line(x, step);
+            var alongX = Line(z, step);
+
+            // Behind what is in front of it. The grid is part of the scene, not a control drawn
+            // about it: one that shows through the objects standing on it says nothing about where
+            // they are.
+            Gizmos.Line(
+                new Vec3(x, lift, centreZ - reach),
+                new Vec3(x, lift, centreZ + reach),
+                MathF.Abs(x) < step * 0.5f ? AxisColours[2] : alongZ,
+                inFront: false);
+
+            Gizmos.Line(
+                new Vec3(centreX - reach, lift, z),
+                new Vec3(centreX + reach, lift, z),
+                MathF.Abs(z) < step * 0.5f ? AxisColours[0] : alongX,
+                inFront: false);
+        }
+    }
+
+    /// <summary>How bright one grid line is: every tenth stands out from the rest.</summary>
+    private static (float R, float G, float B, float A) Line(float at, float step)
+    {
+        var tenth = MathF.Abs(MathF.IEEERemainder(at, step * 10f)) < step * 0.5f;
+        var value = tenth ? 0.34f : 0.19f;
+
+        return (value, value, value * 1.05f, 1f);
     }
 
     /// <summary>Draws the twelve edges of the selection's box.</summary>

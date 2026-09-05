@@ -26,15 +26,32 @@ pub struct QueuedGizmo {
     pub radius: f32,
     /// Colour, linear RGBA. Axes use their own red, green and blue.
     pub color: [f32; 4],
+    /// Whether the scene can hide it. `0` is depth tested; anything else draws over everything.
+    pub in_front: i32,
 }
 
 /// What C# has asked to be drawn this frame.
 #[derive(bevy::ecs::resource::Resource, Default)]
 pub struct GizmoQueue(pub Vec<QueuedGizmo>);
 
+/// The group whose shapes nothing in the scene can hide.
+///
+/// Two groups, because a gizmo is asked for with one of two intentions and there is no third. A
+/// handle, an outline or a marker is a control: it is drawn *about* the scene and has to be
+/// reachable, so it wins the depth test outright and lives here. A grid, a path or a wireframe is
+/// drawn *in* the scene and has to be behind what is in front of it, or it is not describing the
+/// scene at all — that is the default group, left exactly as the engine set it up.
+#[cfg(feature = "render")]
+#[derive(Default, bevy::reflect::Reflect, bevy::gizmos::config::GizmoConfigGroup)]
+pub struct FrontGizmos;
+
 /// Draws everything the queue holds, then empties it.
 #[cfg(feature = "render")]
-pub fn drain(mut queue: bevy::ecs::system::ResMut<GizmoQueue>, mut gizmos: bevy::gizmos::gizmos::Gizmos) {
+pub fn drain(
+    mut queue: bevy::ecs::system::ResMut<GizmoQueue>,
+    mut behind: bevy::gizmos::gizmos::Gizmos,
+    mut gizmos: bevy::gizmos::gizmos::Gizmos<FrontGizmos>,
+) {
     use bevy::color::Color;
     use bevy::math::{Isometry3d, Quat, Vec3};
     use bevy::transform::components::Transform;
@@ -54,19 +71,42 @@ pub fn drain(mut queue: bevy::ecs::system::ResMut<GizmoQueue>, mut gizmos: bevy:
             shape.color[3],
         );
 
+        // Written twice rather than through a trait object: `Gizmos<T>` is a system parameter
+        // and the two are different types, so the only thing they can share is the shape of the
+        // call.
+        if shape.in_front != 0 {
+            match shape.kind {
+                1 => {
+                    gizmos.sphere(Isometry3d::new(position, rotation), shape.radius, color);
+                }
+                2 => {
+                    gizmos.axes(
+                        Transform::from_translation(position).with_rotation(rotation),
+                        shape.radius,
+                    );
+                }
+                _ => {
+                    let end = Vec3::new(shape.end[0], shape.end[1], shape.end[2]);
+                    gizmos.line(position, end, color);
+                }
+            }
+
+            continue;
+        }
+
         match shape.kind {
             1 => {
-                gizmos.sphere(Isometry3d::new(position, rotation), shape.radius, color);
+                behind.sphere(Isometry3d::new(position, rotation), shape.radius, color);
             }
             2 => {
-                gizmos.axes(
+                behind.axes(
                     Transform::from_translation(position).with_rotation(rotation),
                     shape.radius,
                 );
             }
             _ => {
                 let end = Vec3::new(shape.end[0], shape.end[1], shape.end[2]);
-                gizmos.line(position, end, color);
+                behind.line(position, end, color);
             }
         }
     }
@@ -79,7 +119,9 @@ pub fn drain(mut queue: bevy::ecs::system::ResMut<GizmoQueue>, mut gizmos: bevy:
 /// the scene can hide it.
 #[cfg(feature = "render")]
 pub fn draw_in_front(mut store: bevy::ecs::system::ResMut<bevy::gizmos::config::GizmoConfigStore>) {
-    let (config, _) = store.config_mut::<bevy::gizmos::config::DefaultGizmoConfigGroup>();
+    // Only this one is touched. The default group keeps the engine's own settings, which are what
+    // anything drawn as part of the scene wants: depth tested, like the scene.
+    let (config, _) = store.config_mut::<FrontGizmos>();
     config.depth_bias = -1.0;
 }
 
@@ -110,6 +152,7 @@ pub unsafe extern "C" fn bcs_gizmo_draw(config: *const BcsGizmoConfig) -> i32 {
                 rotation: config.rotation,
                 radius: config.radius,
                 color: config.color,
+                in_front: config.in_front,
             });
             status::OK
         })

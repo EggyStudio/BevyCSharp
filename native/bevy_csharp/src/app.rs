@@ -212,6 +212,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // Drawn in front of the scene rather than inside it. A gizmo is a thing drawn *about*
             // the world — a selection, a handle, an axis — and one that disappears into the object
             // it describes has failed at the only job it has.
+            app.init_gizmo_group::<crate::gizmos::FrontGizmos>();
             app.add_systems(bevy::app::Startup, crate::gizmos::draw_in_front);
 
             // Where the readers of Bevy's window messages keep their place between frames.

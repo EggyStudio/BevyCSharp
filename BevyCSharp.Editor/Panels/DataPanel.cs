@@ -105,6 +105,21 @@ public sealed partial class DataPanel
     [Bind("#dbtext", Count = Rows)]
     public string[] Buttons = new string[Rows];
 
+    /// <summary>How many tag chips the document declares.</summary>
+    public const int Chips = 24;
+
+    /// <summary>What each chip says.</summary>
+    [Bind("#dchiptext", Count = Chips)]
+    public string[] Tags = new string[Chips];
+
+    /// <summary>The word over the strip, which goes away when there is no strip.</summary>
+    [Show("#d-tags")]
+    public bool AnyTags;
+
+    /// <summary>Which chips stand for anything.</summary>
+    [Show("#dchip", Count = Chips)]
+    public bool[] TagShown = new bool[Chips];
+
     /// <summary>Which rows stand for anything.</summary>
     [Show("#drow", Count = Rows)]
     public bool[] Shown = new bool[Rows];
@@ -135,6 +150,18 @@ public sealed partial class DataPanel
 
     /// <summary>What each row stands for.</summary>
     private readonly Row[] _rows = new Row[Rows];
+
+    /// <summary>Which components are shut, by component id.</summary>
+    /// <remarks>
+    /// By id rather than by name, because that is what the world answers with and what the rows
+    /// already carry. It outlives the selection on purpose: somebody who shuts <c>GlobalTransform</c>
+    /// meant it about every entity they are going to look at, not only this one.
+    /// </remarks>
+    private readonly HashSet<int> _shut = [];
+
+    /// <summary>What each chip stands for: its schema when there is one, and its id.</summary>
+    private readonly (ComponentSchema? Schema, int Component)[] _tags =
+        new (ComponentSchema?, int)[Chips];
 
     /// <summary>Every row the selection has, of which the pool shows a screenful.</summary>
     private readonly List<Row> _all = [];
@@ -178,6 +205,13 @@ public sealed partial class DataPanel
         if (entity.IsNone)
         {
             Subject = "nothing selected";
+
+            for (var i = 0; i < Chips; i++)
+            {
+                Tags[i] = string.Empty;
+                TagShown[i] = false;
+            }
+
             Blank(0);
             return;
         }
@@ -185,19 +219,35 @@ public sealed partial class DataPanel
         Subject = world.NameOf(entity) is { } named ? named : $"entity {entity.Index}";
         _all.Add(new Row(RowKind.Name));
 
+        var tags = 0;
+
         foreach (var id in world.ComponentsOf(entity))
         {
             var schema = ComponentSchemas.For(id);
-            if (schema is null)
+
+            // A component with nothing to show is a tag, and a tag belongs on a chip rather than
+            // under a heading with an empty space beneath it. Two things end up here: a marker
+            // with no fields, and one this side has no description of — and to somebody reading
+            // the panel they are the same statement, which is "this is on it, and that is all I
+            // can tell you".
+            if (schema is null || schema.Fields.Count == 0)
             {
-                // Named and nothing else. An engine component with no mirror on this side has
-                // fields and none of them can be read from here, so the row says what is there
-                // rather than pretending otherwise.
-                _all.Add(new Row(RowKind.Heading, Component: id));
+                if (tags < Chips)
+                {
+                    Tags[tags] = schema?.Name ?? Short(world.ComponentName(id));
+                    TagShown[tags] = true;
+                    _tags[tags] = (schema, id);
+                    tags++;
+                }
+
                 continue;
             }
 
             _all.Add(new Row(RowKind.Heading, schema, Component: id));
+
+            // Shut is shut: what a component block is for is being able to put away the ones you
+            // are not working on, and an inspector where you cannot is a column of scrolling.
+            if (_shut.Contains(id)) continue;
 
             foreach (var field in schema.Fields)
             {
@@ -215,7 +265,51 @@ public sealed partial class DataPanel
                 _all.Add(new Row(RowKind.Method, schema, Method: method));
         }
 
+        for (var i = tags; i < Chips; i++)
+        {
+            Tags[i] = string.Empty;
+            TagShown[i] = false;
+            _tags[i] = (null, 0);
+        }
+
+        AnyTags = tags > 0;
+
         Draw(world, entity);
+    }
+
+    /// <summary>Offers what can be done with a tag, which is take it off.</summary>
+    [Context("#dchip", Count = Chips)]
+    public void TagMenu(int chip)
+    {
+        if (!TagShown[chip]) return;
+
+        var (schema, _) = _tags[chip];
+        var entity = EditorSelection.Current;
+        var name = Tags[chip];
+
+        var items = new List<MenuItem>();
+
+        if (schema is { CanAdd: true })
+        {
+            items.Add(new MenuItem(
+                "Remove",
+                MenuKind.Command,
+                world =>
+                {
+                    schema.Remove(world, entity);
+                    EditorHistory.Record(
+                        $"remove {name}",
+                        undo => schema.Add(undo, entity),
+                        redo => schema.Remove(redo, entity));
+                }));
+        }
+        else
+        {
+            items.Add(new MenuItem("Nothing to do", MenuKind.Command, null, () => false));
+        }
+
+        var (x, y) = Under($"dchip-{chip}");
+        EditorShell.ShowMenu(name, items, x, y);
     }
 
     /// <summary>Shows what a file is.</summary>
@@ -224,6 +318,14 @@ public sealed partial class DataPanel
         Kind = "Asset";
         _all.Clear();
         _subject = Entity.None;
+
+        AnyTags = false;
+
+        for (var i = 0; i < Chips; i++)
+        {
+            Tags[i] = string.Empty;
+            TagShown[i] = false;
+        }
 
         if (EditorAssets.Selected is not { } relative)
         {
@@ -332,7 +434,11 @@ public sealed partial class DataPanel
                 break;
 
             case RowKind.Heading:
-                Names[row] = what.Schema?.Name ?? Short(world.ComponentName(what.Component));
+                // The mark first, so a shut block and an open one line up and the eye can run down
+                // the column of them.
+                Names[row] = (_shut.Contains(what.Component) ? "+ " : "- ")
+                    + (what.Schema?.Name ?? Short(world.ComponentName(what.Component)));
+
                 break;
 
             case RowKind.Method:
@@ -505,6 +611,21 @@ public sealed partial class DataPanel
     /// the corner of the eye all day for the one time it is wanted, and there is more than one
     /// thing to offer anyway.
     /// </remarks>
+    /// <summary>Opens or shuts a component's block.</summary>
+    /// <remarks>
+    /// Only a heading answers. A click on a field row is a click on whatever editor that row draws,
+    /// and the row itself has nothing to do — the box, the checkbox and the button inside it are
+    /// what the click was for.
+    /// </remarks>
+    [Command("#drow", Count = Rows)]
+    public void Fold(int row)
+    {
+        if (_rows[row].Kind != RowKind.Heading) return;
+
+        var component = _rows[row].Component;
+        if (!_shut.Remove(component)) _shut.Add(component);
+    }
+
     [Context("#drow", Count = Rows)]
     public void RowMenu(int row)
     {

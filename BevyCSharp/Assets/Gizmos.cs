@@ -38,10 +38,22 @@ public static unsafe class Gizmos
     /// <param name="start">Where it begins, in world space.</param>
     /// <param name="end">Where it ends.</param>
     /// <param name="color">Linear RGBA.</param>
-    public static void Line(Vec3 start, Vec3 end, (float R, float G, float B, float A) color) =>
+    /// <param name="inFront">
+    /// Whether the scene can hide it. In front by default, because a gizmo is usually a control —
+    /// a handle, an outline, a marker — and one hiding inside the thing it describes has failed at
+    /// the only job it has. Pass <see langword="false"/> for a shape drawn *in* the scene rather
+    /// than about it: a grid, a path, a wireframe, all of which have to be behind what is in front
+    /// of them to describe the scene at all.
+    /// </param>
+    public static void Line(
+        Vec3 start,
+        Vec3 end,
+        (float R, float G, float B, float A) color,
+        bool inFront = true) =>
         Draw(new NativeGizmoConfig
         {
             Kind = 0,
+            InFront = inFront ? 1 : 0,
             StartX = start.X,
             StartY = start.Y,
             StartZ = start.Z,
@@ -60,13 +72,16 @@ public static unsafe class Gizmos
     /// <param name="center">Where it sits, in world space.</param>
     /// <param name="radius">How large.</param>
     /// <param name="color">Linear RGBA.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
     public static void Sphere(
         Vec3 center,
         float radius,
-        (float R, float G, float B, float A) color) =>
+        (float R, float G, float B, float A) color,
+        bool inFront = true) =>
         Draw(new NativeGizmoConfig
         {
             Kind = 1,
+            InFront = inFront ? 1 : 0,
             StartX = center.X,
             StartY = center.Y,
             StartZ = center.Z,
@@ -87,10 +102,12 @@ public static unsafe class Gizmos
     /// </remarks>
     /// <param name="transform">Where the axes sit and which way they point.</param>
     /// <param name="length">How long each arm is.</param>
-    public static void Axes(Transform transform, float length = 1f) =>
+    /// <param name="inFront">Whether the scene can hide them. See <see cref="Line"/>.</param>
+    public static void Axes(Transform transform, float length = 1f, bool inFront = true) =>
         Draw(new NativeGizmoConfig
         {
             Kind = 2,
+            InFront = inFront ? 1 : 0,
             StartX = transform.Translation.X,
             StartY = transform.Translation.Y,
             StartZ = transform.Translation.Z,

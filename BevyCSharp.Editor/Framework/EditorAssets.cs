@@ -98,6 +98,27 @@ public static class EditorAssets
         var other => other.TrimStart('.'),
     };
 
+    /// <summary>
+    /// The picture a file's tile wears, under the asset root.
+    /// </summary>
+    /// <remarks>
+    /// The kind rather than the file: a picture of what a PNG contains would be a thumbnail, which
+    /// needs the bridge to render one and hand back an asset key. A picture of what it <em>is</em>
+    /// needs nothing and is most of the use — in a list of forty files, telling the scripts from
+    /// the stylesheets at a glance is the whole job.
+    /// </remarks>
+    public static string IconOf(string relative) => KindOf(relative) switch
+    {
+        "document" or "stylesheet" => "icons/ui/terminal.png",
+        "behavior script" => "icons/ui/script.png",
+        "image" => "icons/ui/image.png",
+        "model" => "icons/ui/mesh.png",
+        "sound" => "icons/ui/package.png",
+        "scene" => "icons/ui/world.png",
+        "data" => "icons/ui/data.png",
+        _ => "icons/ui/file.png",
+    };
+
     /// <summary>Whether a file is one the editor reloads while it runs.</summary>
     public static bool Reloads(string relative) =>
         Path.GetExtension(relative).ToLowerInvariant() is ".html" or ".css" or ".cs";

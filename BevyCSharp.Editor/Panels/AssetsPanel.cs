@@ -68,6 +68,32 @@ public sealed partial class AssetsPanel
     /// <summary>How far down the files the tiles are looking.</summary>
     private int _scroll;
 
+    /// <summary>What each tree row's picture points at.</summary>
+    private readonly string[] _folderIcons = new string[Folders];
+
+    /// <summary>What each tile's picture points at.</summary>
+    private readonly string[] _tileIcons = new string[Tiles];
+
+    /// <summary>
+    /// Points a picture at a file, when it is not already pointing there.
+    /// </summary>
+    /// <remarks>
+    /// An image is a path the interface loads from rather than a value a widget carries, so it is
+    /// set rather than bound — and only on the frames it changes, because writing one restyles the
+    /// widget and a hundred and twenty tiles restyled every frame is a hundred and twenty too many.
+    /// </remarks>
+    private void Wear(string id, ref string current, string icon)
+    {
+        if (current == icon) return;
+        if (Window is not { IsOpen: true } window) return;
+
+        var element = window.Element(id);
+        if (element.IsNone) return;
+
+        Xui.SetImage(element, icon);
+        current = icon;
+    }
+
     /// <summary>Fills the tree and the tiles from the directory.</summary>
     [OnRefresh]
     public void Fill()
@@ -84,6 +110,7 @@ public sealed partial class AssetsPanel
             FolderNames[written] = "..";
             _folders[written] = null;
             FolderShown[written] = true;
+            Wear($"aficon-{written}", ref _folderIcons[written], "icons/ui/up.png");
             written++;
         }
 
@@ -92,9 +119,10 @@ public sealed partial class AssetsPanel
             if (!entry.IsDirectory) continue;
             if (written >= Folders) break;
 
-            FolderNames[written] = entry.Name + EditorIcons.Directory;
+            FolderNames[written] = entry.Name;
             _folders[written] = entry.Path;
             FolderShown[written] = true;
+            Wear($"aficon-{written}", ref _folderIcons[written], "icons/ui/folder.png");
             written++;
         }
 
@@ -120,7 +148,9 @@ public sealed partial class AssetsPanel
 
             TileNames[tile] = entry.Path == EditorAssets.Selected
                 ? EditorIcons.Selected + " " + entry.Name
-                : "  " + entry.Name;
+                : entry.Name;
+
+            Wear($"aticon-{tile}", ref _tileIcons[tile], EditorAssets.IconOf(entry.Path));
 
             _tiles[tile] = entry;
             TileShown[tile] = true;

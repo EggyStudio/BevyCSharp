@@ -23,10 +23,11 @@ an entity, an asset or a setting. Nothing is called a hierarchy or an inspector.
 
 | where | what | opens |
 |---|---|---|
-| left column | the world: a tree, a search, and one button that adds to it | always |
+| left column | the world: a tree with a picture per row, a search, and one button that adds to it | always |
 | right column | whatever is selected: an entity's components, or an asset's particulars | when something is selected or asked for |
+| the whole window | settings: pages on the left, one page's contents on the right | from the menu, the toolbar or Ctrl+, |
 | viewport corners | the menu and undo at the left, the tools in the middle, the information button at the right, the orientation cross at the bottom right | always |
-| bottom band | the asset browser or the console, whichever tab is open | from its tab |
+| bottom band | the asset browser or the console, both with a filter, whichever tab is open | from its tab |
 | bottom row | the tabs, like a browser's, and the key list beside them | always |
 | over the viewport | what the keys do | always |
 | over everything | menus, dropdowns, context menus | while they are being read |
@@ -70,6 +71,37 @@ time, and dismissing one on the next press closed a document *during* that press
 menu, built the first time anything asks for one and pointed at something else thereafter. Opening
 the hamburger six times in a row leaves the rebuild counter where it started; before, each one moved
 it twice.
+
+**Four tables and no fifth mechanism.** What is on the menu, what is on the toolbar, what a page of
+settings holds, and what an entity looks like in a list are all lists of records with an order and a
+lookup — `EditorMenu`, `EditorToolbar`, `EditorSettings`, `EditorKinds`. A game adds a spawn command,
+a tool button, a preferences page or a picture for its own component by adding a line to one of
+them, and no panel in this editor knows the name of a single one of its types. That is the whole
+reason the panels are as short as they are, and it is why the tables are the part with tests under
+them rather than the panels.
+
+**Escape closes before it quits.** In order of how much of the screen a thing has: a sheet, then a
+flyout, then the program. Quitting because somebody reached for the key that shuts every other
+window they have ever used is not a defensible thing for a tool to do, and a settings sheet covering
+the window is exactly when they will reach for it.
+
+**A sheet has the screen.** Settings take the whole window rather than a column, because a page of
+preferences squeezed beside a hierarchy is a page nobody opens. Nothing this side can reliably draw
+one panel over another, so a sheet does not cover the editor — it puts it away and fetches it back,
+which is both what the interface can do and what a sheet means.
+
+**A row of the hierarchy says what a thing is.** An entity is whatever components are on it and the
+engine has no notion of a camera or a light, so the answer is assembled from what it carries and
+the first match in order wins: a camera beats a mesh, a mesh beats a behavior of the project's own,
+and anything else is a plain entity. Matched on the component's qualified name and remembered per
+component id, because naming one crosses the ABI and the answer never changes while an app runs.
+
+**An inspector shows what can be edited and lists what cannot.** A component with fields is a block
+with a heading that opens and shuts, and every C# behavior is one of those — a behavior *is* a
+component and the generator writes a schema for it, so `Spin` sits beside `Transform` with its own
+`Speed` and `Angle`. A component with nothing to show is a chip in a strip at the foot: a marker
+with no fields and one this side has no description of make the same statement, which is "this is on
+it, and that is all I can tell you". A heading with an empty space under it says the opposite.
 
 **A panel is not dragged about.** The arrangement is three columns and a bottom split, and every
 panel belongs to one of them: what a person adjusts is where the edges between them are, not where
@@ -166,6 +198,20 @@ projected segments instead. The point a drag is measured about is the middle of 
 and is held for the whole drag, because an entity's origin and the middle of its bounds are not the
 same place, and turning about one while the ring is drawn about the other answers to somewhere
 nobody can see.
+
+**Two gizmo groups, because there are two intentions and no third.** A handle, an outline or a
+marker is a control drawn *about* the scene and has to be reachable, so it goes in a group with
+`depth_bias = -1` and nothing can hide it. A grid, a path or a wireframe is drawn *in* the scene and
+has to be behind what is in front of it, or it is not describing the scene at all — that is the
+default group, left exactly as the engine set it up. `Gizmos.Line` and its neighbours take
+`inFront`, true by default, and the bridge routes the shape to one group or the other.
+
+**There is a floor.** The ground grid is what says which way is level and how big things are; a
+scene without one is a handful of objects in a void, and moving something is a guess about how far
+it went. Drawn about where the camera is *looking* rather than where it is, at a spacing that steps
+by tens as the camera climbs, so it is the same density on screen at any height — and a thousandth
+of a cell above zero, because scenes have a ground plane at zero and two surfaces at one depth fight
+over every pixel.
 
 **A gizmo is drawn about the world, not in it.** The default gizmo config has `depth_bias = -1`,
 so a handle on an object is in front of the object rather than inside it, and the queue C# fills is
@@ -425,6 +471,29 @@ and the bridge walks up to the first ancestor with an id, so a label with an id 
 answer for the row it sits in — and every label the editor writes has one, since that is how it is
 written to. `pointer-events: none` on every label and picture inside something clickable puts the
 answer back where the command is.
+
+## Adding to it
+
+Nothing below needs a panel, a document or a stylesheet.
+
+```csharp
+// A row on the menu, which the hamburger, the plus button, the right click on the world and any
+// key bound to that path all get at once.
+EditorMenu.Command("Spawn/Enemy", world => Spawn(world, "Enemy"), 40);
+
+// A button in the middle of the toolbar. A picture alone is a circle, a word alone a pill.
+EditorToolbar.Add(new ToolbarButton(
+    ToolbarSlot.Centre, "icons/ui/zap.png", () => string.Empty, world => Bake(world), null, 40));
+
+// A page of settings, which appears because something is on it and is saved and restored with the
+// rest of the editor's preferences.
+EditorSettings.Heading("My game", "Difficulty");
+EditorSettings.Number("My game", "Enemy speed", () => Speed, value => Speed = value, 1);
+EditorSettings.Flag("My game", "Friendly fire", () => Friendly, value => Friendly = value, 2);
+
+// What one of the game's own entities looks like in the hierarchy.
+EditorKinds.Add(new EntityKind("MyGame.Enemy", "icons/ui/users.png", 15));
+```
 
 ## Verification
 

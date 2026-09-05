@@ -320,10 +320,11 @@ Points to get right:
 
 ## The editor
 
-`BevyCSharp.Editor` runs. The world on the left, the tools along the top, and everything else
-behind a hamburger whose contents are a table of paths; selecting something opens the panel that
-describes it, the asset browser lives as a tab along the bottom, and the docks reflow around each
-other. Gizmos draw the selection, its handles and the camera's orientation, and a drag on a handle
+`BevyCSharp.Editor` runs. The world on the left with a picture per row, the tools along the top, and
+everything else behind a hamburger whose contents are a table of paths; selecting something opens
+the panel that describes it — components with fields as blocks that open and shut, behaviors among
+them, and everything with nothing to show as a chip — the asset browser lives as a tab along the
+bottom, settings take the whole window as a sheet, and the docks reflow around each other. Gizmos draw the selection, its handles and the camera's orientation, and a drag on a handle
 moves, turns or stretches what is selected. Underneath is the framework each panel is three files
 on top of: documents in HTML and CSS, bindings to fields and commands to methods through the
 generator, and hot reload of the documents, the stylesheets and behavior scripts alike.
@@ -356,6 +357,14 @@ What is left:
   what was written to an element's display, a menu cannot be drawn over a panel whatever it is
   told about layering, and `align-content` is not read at all, so a wrapping box cannot be told to
   pack its lines.
+- **A grid, and nothing else drawn in the scene.** Two gizmo groups exist now — one that wins the
+  depth test and one that does not — and the ground grid is the first thing to use the second. The
+  same group is what a path, a physics wireframe or a navigation mesh overlay would want, and none
+  of those exists yet.
+- **Nothing renders to a texture**, which is what three separate wants have in common: a thumbnail
+  for an asset tile, a preview for a material, and a proper orientation widget drawn as a small
+  scene rather than as six lines in the world. One entry point that renders a camera to an image
+  and hands back an asset key would close all three.
 - **Tiles that show what a file is.** The asset browser draws a grid of names, elastic between a
   minimum and a maximum so a row divides evenly into the panel and wraps. What it does not draw is
   the file: an image tile should show the image, a mesh or a material tile a small render of it,
@@ -364,6 +373,15 @@ What is left:
   an `<img>` in it and a second tile shape to switch between. The second half needs the bridge to
   render a thumbnail to a texture and hand back an asset key, which is the same missing entry point
   as render-to-texture generally.
+- **The hierarchy names what it can see and the stats panel counts it.** Both go through
+  `EditorKinds`, so a camera in the tree and a camera in the count are the same question asked once.
+  What neither can do is see a component the bridge does not name: an entity whose only components
+  are engine-side and unnamed reads as plain. Naming more of them is a bridge job, not an editor
+  one.
+- **Settings are the editor's, not the project's.** `EditorSettings` saves to `assets/settings.txt`
+  beside the layout, and everything on it belongs to this editor build. A project setting worth the
+  name — a startup scene, a physics step, a build target — needs somewhere to live that is part of
+  the project rather than part of the tool, which is the same gap as the world file's.
 - **A list longer than its pool.** The hierarchy and the inspector both hold a fixed pool of rows
   and decide what each stands for, which is what a virtualised list does anyway. What they lack is
   a wheel: paging is two buttons, because the scroll wheel belongs to the camera.

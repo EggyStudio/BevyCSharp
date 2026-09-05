@@ -345,6 +345,9 @@ public struct NativeGizmoConfig
 
     /// <summary>Colour alpha.</summary>
     public float ColorA;
+
+    /// <summary>Whether the scene can hide it: 0 is depth tested, anything else draws in front.</summary>
+    public int InFront;
 }
 
 /// <summary>What a camera does to the picture after the scene has been drawn.</summary>

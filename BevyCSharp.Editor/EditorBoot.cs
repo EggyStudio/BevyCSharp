@@ -179,6 +179,11 @@ public partial struct EditorBoot
         if (!ctx.Input.KeyPressed(Key.Escape)) return;
         if (!PanelBinding.Focused.IsNone) return;
 
+        // Escape closes what is open before it closes the program. A settings sheet takes the whole
+        // window, and quitting because somebody reached for the key that shuts every other window
+        // they have ever used is not a defensible thing for a tool to do.
+        if (EditorShell.Dismiss()) return;
+
         ctx.Exit();
     }
 }

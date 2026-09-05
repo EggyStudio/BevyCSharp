@@ -19,6 +19,14 @@
 
     <ItemGroup>
         <ProjectReference Include="../BevyCSharp/BevyCSharp.csproj"/>
+
+        <!--
+          The editor, for the tables under it: what is on the menu, what an entity looks like in a
+          list, what a settings page holds. All three are ordinary data structures with ordinary
+          answers, and none of them needs a window to be asked. Referencing it also compiles the
+          editor wherever the tests are built, which is the only place that happened at all.
+        -->
+        <ProjectReference Include="../BevyCSharp.Editor/BevyCSharp.Editor.csproj"/>
         <ProjectReference Include="../BevyCSharp.Generator/BevyCSharp.Generator.csproj"
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"/>

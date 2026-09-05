@@ -44,4 +44,4 @@ pub mod xui;
 
 /// Version of the C ABI. C# checks this at load time and refuses a mismatch, so a stale
 /// native library next to a newer managed assembly fails loudly instead of corrupting memory.
-pub const ABI_VERSION: i32 = 57;
+pub const ABI_VERSION: i32 = 58;

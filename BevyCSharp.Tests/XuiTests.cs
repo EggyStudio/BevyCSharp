@@ -41,6 +41,8 @@ public sealed unsafe class XuiTests
 
             // Called straight at the bridge. Reaching them through a managed wrapper would prove
             // the wrapper guards them, and the point here is that the symbols exist at all.
+            var gizmo = new NativeGizmoConfig { Kind = 0, RotationW = 1f, InFront = 0 };
+
             var results = new[]
             {
                 Native.bcs_xui_open("panels/nothing.html"),
@@ -65,6 +67,10 @@ public sealed unsafe class XuiTests
                 // none. It belongs to the renderer rather than the interface, so a windowed build
                 // without the editor profile still has it.
                 Native.bcs_input_pointer(0f, 0f, 1, 0),
+
+                // Gizmos need the renderer too, and the in-front flag is part of the shape's
+                // description rather than a separate call, so this covers both halves of it.
+                Native.bcs_gizmo_draw(&gizmo),
 
                 // Picking is part of the same profile: a build with no interface has no viewport
                 // to click in either.

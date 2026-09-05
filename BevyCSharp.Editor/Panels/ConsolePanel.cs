@@ -33,6 +33,17 @@ public sealed partial class ConsolePanel
     [Bind("#c-count", Mode = BindMode.OneWay)]
     public string Summary { get; private set; } = string.Empty;
 
+    /// <summary>
+    /// What to look for, or nothing to see everything.
+    /// </summary>
+    /// <remarks>
+    /// A log is only useful in proportion to how quickly the line you want can be found in it, and
+    /// what a person is usually looking for is one word: the name of a script that will not build,
+    /// or the tag a subsystem writes in front of everything it says.
+    /// </remarks>
+    [Bind("#c-filter")]
+    public string Filter = string.Empty;
+
     /// <summary>How far up the log the pool is looking, counted from the newest line.</summary>
     private int _scroll;
 
@@ -45,7 +56,7 @@ public sealed partial class ConsolePanel
     {
         Roll();
 
-        var all = EditorLog.All();
+        var all = Matching(EditorLog.All());
 
         // A new line pulls the view back to the bottom, which is what a log that is being watched
         // should do, and what a log being scrolled through should not: scrolling is only undone
@@ -73,7 +84,32 @@ public sealed partial class ConsolePanel
             Shown[i] = false;
         }
 
-        Summary = all.Length == 0 ? "nothing yet" : $"{last}/{all.Length}";
+        Summary = Describe(all.Length, EditorLog.Written, last);
+    }
+
+    /// <summary>Only the lines the filter lets through.</summary>
+    private string[] Matching(string[] all)
+    {
+        var wanted = Filter.Trim();
+        if (wanted.Length == 0) return all;
+
+        var kept = new List<string>();
+
+        foreach (var line in all)
+        {
+            if (line.Contains(wanted, StringComparison.OrdinalIgnoreCase)) kept.Add(line);
+        }
+
+        return [.. kept];
+    }
+
+    /// <summary>What the count in the title bar says.</summary>
+    private string Describe(int shown, int written, int last)
+    {
+        if (written == 0) return "nothing yet";
+        if (Filter.Trim().Length == 0) return $"{last}/{shown}";
+
+        return shown == 0 ? $"nothing of {written}" : $"{last}/{shown} of {written}";
     }
 
     /// <summary>Scrolls back through the log when the wheel is rolled over it.</summary>

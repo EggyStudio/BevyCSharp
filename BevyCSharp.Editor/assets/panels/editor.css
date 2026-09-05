@@ -36,6 +36,8 @@
 
     /* Black, with enough left through to see the scene the panels float over. */
     --surface: rgba(0, 0, 0, 0.78);
+    /* What a full-window sheet is painted with: no scene showing through a page of settings. */
+    --sheet: rgba(22, 23, 26, 1);
     --surface-raised: rgba(255, 255, 255, 0.05);
     --surface-sunken: rgba(0, 0, 0, 0.35);
     --line: rgba(255, 255, 255, 0.10);
@@ -204,6 +206,7 @@ p {
     height: 18px;
     min-width: 0;
     padding: 0 6px;
+    column-gap: 4px;
     background-color: rgba(0, 0, 0, 0);
     border: 0;
     border-radius: var(--radius-small);
@@ -227,6 +230,28 @@ p {
     font-size: 11px;
     color: var(--text);
     text-wrap: nowrap;
+}
+
+/*
+ * What a row of the hierarchy is made of besides its name.
+ *
+ * The fold mark is text because it is one of three things and a picture of each would be three
+ * files for two characters; the kind is a picture because there is no character for a camera. Both
+ * keep a place of their own whether or not they have anything in them, so the names of a list line
+ * up rather than stepping in and out as rows gain and lose children.
+ */
+.row-fold {
+    min-width: 7px;
+    font-size: 10px;
+    color: var(--dim);
+    text-wrap: nowrap;
+    pointer-events: none;
+}
+
+.row-icon {
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
 }
 
 .row:hover {
@@ -262,6 +287,7 @@ p {
  * stayed where it was. Sharing the row out in proportion means the row is right at every width.
  */
 .field-name {
+    pointer-events: none;
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: 0;
@@ -272,6 +298,7 @@ p {
 }
 
 .field-text {
+    pointer-events: none;
     flex-grow: 1.25;
     flex-shrink: 1;
     flex-basis: 0;
@@ -488,6 +515,181 @@ button:hover {
     color: var(--bright);
 }
 
+/*
+ * A readout: a column of facts, each a name and a number.
+ *
+ * Its own shapes because the numbers want to line up and the names do not compete with them: the
+ * name takes what it needs and the value is pushed to the right edge, which is what makes a
+ * changing number easy to watch. A heading is a row with nothing on its right.
+ */
+.panel.stats {
+    width: 264px;
+}
+
+.stat-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 15px;
+    column-gap: 8px;
+    overflow: hidden;
+}
+
+.stat-name {
+    pointer-events: none;
+    font-size: 10px;
+    color: var(--label);
+    text-wrap: nowrap;
+}
+
+.stat-value {
+    pointer-events: none;
+    font-size: 10px;
+    color: var(--text);
+    text-wrap: nowrap;
+}
+
+/*
+ * A settings sheet: the whole window, a list of pages on the left, one page's contents on the
+ * right. Full width because that is what it is for — a page of settings that has to share the
+ * screen with a hierarchy and an inspector is a panel, and a panel is where these were not
+ * fitting.
+ */
+.panel.sheet {
+    width: 100%;
+    height: 100%;
+    row-gap: 8px;
+    /* Opaque. Every other panel is small enough that the scene behind it reads as depth; a sheet
+       covering the window with the scene showing through reads as a mistake. */
+    background-color: var(--sheet);
+}
+
+/*
+ * One line of a settings page.
+ *
+ * Its own shapes rather than the inspector's, because the room is different: an inspector row is
+ * two hundred pixels wide and shares them evenly, and a sheet row is a thousand and wants a label,
+ * a column for the value and the rest left alone. A box stretched across a wall is harder to read
+ * than a short one, not easier.
+ */
+.sheet-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: 22px;
+    column-gap: 10px;
+    overflow: hidden;
+}
+
+.sheet-name {
+    pointer-events: none;
+    width: 260px;
+    min-width: 0;
+    font-size: 11px;
+    color: var(--label);
+    text-wrap: nowrap;
+}
+
+.sheet-value {
+    width: 320px;
+    min-width: 0;
+    height: 18px;
+    margin: 0;
+    padding: 1px 5px;
+}
+
+.sheet-text {
+    pointer-events: none;
+    width: 420px;
+    min-width: 0;
+    font-size: 11px;
+    color: var(--text);
+    text-wrap: nowrap;
+}
+
+.sheet-btn {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 320px;
+    height: 18px;
+    padding: 0 6px;
+    background-color: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-small);
+}
+
+.sheet-btn:hover {
+    background-color: var(--accent-soft);
+    border-color: var(--accent);
+}
+
+.tree.pages {
+    width: 190px;
+    row-gap: 1px;
+}
+
+.sheet-body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+    row-gap: 3px;
+    padding-right: 6px;
+    overflow: hidden;
+}
+
+/* A round button small enough to sit in a title bar. */
+.round.small {
+    min-width: 20px;
+    height: 20px;
+    padding: 0 4px;
+    border-radius: 10px;
+}
+
+/*
+ * A strip of tags: the components an entity carries that have nothing to show.
+ *
+ * A marker component is a fact about an entity, not a thing to open — a heading with an empty
+ * space under it says the opposite. Wrapped so the strip is as tall as it needs and no taller.
+ */
+.chips {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    column-gap: 4px;
+    row-gap: 4px;
+}
+
+.chip {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 16px;
+    padding: 0 7px;
+    background-color: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+.chip:hover {
+    border-color: var(--accent);
+}
+
+.chip-text {
+    font-size: 10px;
+    color: var(--label);
+    text-wrap: nowrap;
+    pointer-events: none;
+}
+
 /* The one button at the foot of a panel: as wide as the panel, and the only thing on its row. */
 .wide-btn {
     display: flex;
@@ -644,6 +846,7 @@ button:hover {
     display: flex;
     flex-direction: row;
     align-items: center;
+    column-gap: 4px;
     flex-grow: 0;
     flex-shrink: 0;
     flex-basis: 132px;

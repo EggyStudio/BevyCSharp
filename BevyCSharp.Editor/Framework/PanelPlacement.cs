@@ -53,6 +53,16 @@ public enum EditorDock
 
     /// <summary>Floating in the viewport's bottom right corner, above the tab strip.</summary>
     ViewportBottomRight,
+
+    /// <summary>
+    /// The whole window, over everything.
+    /// </summary>
+    /// <remarks>
+    /// For the things that are not part of looking at a scene: settings, a project browser, an
+    /// about box. They want the room and they want the whole of somebody's attention, and
+    /// squeezing one into a column beside a hierarchy is what makes people not open it.
+    /// </remarks>
+    Sheet,
 }
 
 /// <summary>What makes a panel go away.</summary>

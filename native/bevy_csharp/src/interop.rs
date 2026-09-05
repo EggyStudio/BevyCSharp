@@ -482,6 +482,8 @@ pub struct BcsGizmoConfig {
     pub radius: f32,
     /// Linear RGBA. Axes colour themselves red, green and blue.
     pub color: [f32; 4],
+    /// Whether the scene can hide it. `0` is depth tested; anything else draws over everything.
+    pub in_front: i32,
 }
 
 /// How a sprite is drawn.

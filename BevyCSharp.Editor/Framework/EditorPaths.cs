@@ -22,4 +22,7 @@ public static class EditorPaths
 
     /// <summary>Where the panels are.</summary>
     public static string Layout => Asset("layout.txt");
+
+    /// <summary>Where the editor's own preferences are kept.</summary>
+    public static string Settings => Asset("settings.txt");
 }

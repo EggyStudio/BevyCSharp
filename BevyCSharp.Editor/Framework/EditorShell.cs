@@ -264,6 +264,57 @@ public static class EditorShell
         return false;
     }
 
+    /// <summary>What a sheet covered, so it can be put back when the sheet goes.</summary>
+    private static readonly List<IEditorPanel> Covered = [];
+
+    /// <summary>Whether a sheet was up the last time this looked.</summary>
+    private static bool _sheeted;
+
+    /// <summary>
+    /// Puts the rest of the editor away while a sheet is up, and back afterwards.
+    /// </summary>
+    /// <remarks>
+    /// A sheet is the whole window and everything else is under it — except that nothing this side
+    /// can reliably draw one panel over another, whatever it is told about layering. So what a
+    /// sheet covers is not covered, it is put away, which is both what the interface can do and
+    /// what a page of settings means: it has the screen and it has your attention.
+    /// </remarks>
+    private static void Sheeting()
+    {
+        var open = false;
+
+        foreach (var panel in Panels)
+        {
+            if (Concealed.Contains(panel)) continue;
+            if (Layout.PlacementOf(panel).Dock != EditorDock.Sheet) continue;
+
+            open = true;
+            break;
+        }
+
+        if (open == _sheeted) return;
+
+        _sheeted = open;
+
+        if (open)
+        {
+            foreach (var panel in Panels.ToArray())
+            {
+                if (Concealed.Contains(panel)) continue;
+                if (Layout.PlacementOf(panel).Dock == EditorDock.Sheet) continue;
+
+                Covered.Add(panel);
+                Conceal(panel);
+            }
+
+            return;
+        }
+
+        foreach (var panel in Covered.ToArray()) Reveal(panel);
+
+        Covered.Clear();
+    }
+
     /// <summary>The panels that are on screen, in the order they were opened.</summary>
     private static List<IEditorPanel> Showing()
     {
@@ -380,6 +431,38 @@ public static class EditorShell
         EditorTabs.Closed(panel);
         Rebuilding();
 
+    }
+
+    /// <summary>
+    /// Puts away the topmost thing that can be put away, and says whether there was one.
+    /// </summary>
+    /// <remarks>
+    /// What Escape does. In order of how much of the screen it has: a sheet first, then a flyout,
+    /// then nothing — so the key always closes the thing that is most in the way, and answers
+    /// honestly when there is nothing left for it to close.
+    /// </remarks>
+    public static bool Dismiss()
+    {
+        foreach (var panel in Panels.ToArray())
+        {
+            if (Concealed.Contains(panel)) continue;
+            if (Layout.PlacementOf(panel).Dock != EditorDock.Sheet) continue;
+
+            Conceal(panel);
+            return true;
+        }
+
+        foreach (var panel in Panels.ToArray())
+        {
+            if (Concealed.Contains(panel)) continue;
+            if (panel.Chrome.Dismiss != PanelDismiss.OnOutsideClick) continue;
+            if (Pinned.Contains(panel)) continue;
+
+            Conceal(panel);
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>Closes everything.</summary>
@@ -527,6 +610,8 @@ public static class EditorShell
 
             panel.Refresh();
         }
+
+        Sheeting();
 
         // A concealed panel is put out of sight every frame rather than once, because the
         // interface restyles a widget whenever anything is written to it and a restyle puts its

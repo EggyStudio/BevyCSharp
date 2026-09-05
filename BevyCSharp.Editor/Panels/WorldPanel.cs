@@ -53,6 +53,10 @@ public sealed partial class WorldPanel
     [Bind("#wtext", Count = Rows)]
     public string[] Labels = new string[Rows];
 
+    /// <summary>Each row's fold mark: what it is, and nothing when it has no children.</summary>
+    [Bind("#wfold", Count = Rows)]
+    public string[] Folds = new string[Rows];
+
     /// <summary>Which rows stand for an entity at all.</summary>
     [Show("#wrow", Count = Rows)]
     public bool[] Shown = new bool[Rows];
@@ -105,7 +109,7 @@ public sealed partial class WorldPanel
         Rebuild(world);
 
         var wanted = Filter.Trim();
-        var visible = new List<(Entity Entity, string Label)>();
+        var visible = new List<Line>();
 
         foreach (var row in _tree)
         {
@@ -115,17 +119,21 @@ public sealed partial class WorldPanel
                 // sits, and an indented match under a collapsed parent would not be shown at all.
                 if (!row.Name.Contains(wanted, StringComparison.OrdinalIgnoreCase)) continue;
 
-                visible.Add((row.Entity, "  " + row.Name));
+                visible.Add(new Line(row.Entity, row.Name, string.Empty));
                 continue;
             }
 
             if (Folded(row.Entity)) continue;
 
             var mark = row.HasChildren
-                ? (_collapsed.Contains(row.Entity.Bits) ? "+ " : "- ")
-                : "  ";
+                ? (_collapsed.Contains(row.Entity.Bits) ? "+" : "-")
+                : " ";
 
-            visible.Add((row.Entity, new string(' ', row.Depth * 2) + mark + row.Name));
+            // The indent belongs to the fold mark, not to the name. Put in front of the name it
+            // would push the row's picture sideways with it; in front of the mark the whole row
+            // steps in together, which is what a tree looks like.
+            visible.Add(new Line(
+                row.Entity, row.Name, new string(' ', row.Depth * 2) + mark));
         }
 
         _scroll = Math.Clamp(_scroll, 0, Math.Max(0, visible.Count - Rows));
@@ -133,13 +141,16 @@ public sealed partial class WorldPanel
         var written = 0;
         for (var i = _scroll; i < visible.Count && written < Rows; i++)
         {
-            var (entity, label) = visible[i];
+            var line = visible[i];
 
-            Labels[written] = entity == EditorSelection.Current
-                ? EditorIcons.Selected + label[1..]
-                : label;
+            Labels[written] = line.Entity == EditorSelection.Current
+                ? EditorIcons.Selected + " " + line.Label
+                : line.Label;
 
-            _entities[written] = entity;
+            Folds[written] = line.Mark;
+            Wear(written, EditorKinds.IconFor(world, line.Entity));
+
+            _entities[written] = line.Entity;
             Shown[written] = true;
             written++;
         }
@@ -147,12 +158,39 @@ public sealed partial class WorldPanel
         for (var i = written; i < Rows; i++)
         {
             Labels[i] = string.Empty;
+            Folds[i] = string.Empty;
             _entities[i] = Entity.None;
             Shown[i] = false;
         }
 
         Summary = $"{Math.Min(_scroll + written, visible.Count)}/{visible.Count}";
     }
+
+    /// <summary>One line of the list: what it stands for, what it says, and its fold mark.</summary>
+    private readonly record struct Line(Entity Entity, string Label, string Mark);
+
+    /// <summary>
+    /// Points a row's picture at a file, when it is not already pointing there.
+    /// </summary>
+    /// <remarks>
+    /// An image is not one of the values a widget carries — it is a path the interface loads from
+    /// — so it is set rather than bound, and only when it changes. Writing the same path every
+    /// frame would restyle every row of the list sixty times a second.
+    /// </remarks>
+    private void Wear(int row, string icon)
+    {
+        if (_icons[row] == icon) return;
+        if (Window is not { IsOpen: true } window) return;
+
+        var element = window.Element($"wicon-{row}");
+        if (element.IsNone) return;
+
+        Xui.SetImage(element, icon);
+        _icons[row] = icon;
+    }
+
+    /// <summary>What each row's picture is currently pointing at.</summary>
+    private readonly string[] _icons = new string[Rows];
 
     /// <summary>Whether an entity is inside something that is collapsed.</summary>
     private bool Folded(Entity entity)
@@ -278,9 +316,9 @@ public sealed partial class WorldPanel
 
     /// <summary>Selects a row, or folds it when the mark was clicked.</summary>
     /// <remarks>
-    /// The fold mark is part of the row's text rather than a control of its own, because a row is
-    /// one button and nothing can put a second one inside it. Where the click landed decides
-    /// which of the two it was, which is the same rule a tree view uses anyway.
+    /// The mark is an element of its own now, so where the click landed is a question about that
+    /// element's rectangle rather than a sum of indents. It takes no clicks itself — nothing
+    /// inside a row does — so the row still answers, and asks where the pointer was.
     /// </remarks>
     [Command("#wrow", Count = Rows)]
     public void Choose(int row)
@@ -290,8 +328,9 @@ public sealed partial class WorldPanel
 
         if (EditorShell.Context is { } ctx
             && Window is { } window
-            && Xui.TryRect(window.Element($"wrow-{row}"), out var rect)
-            && ctx.Input.MouseX < rect.X + 10f + (DepthOf(entity) * 7f)
+            && Xui.TryRect(window.Element($"wfold-{row}"), out var mark)
+            && mark.Width > 0f
+            && ctx.Input.MouseX <= mark.Right + 2f
             && HasChildren(entity))
         {
             if (!_collapsed.Remove(entity.Bits)) _collapsed.Add(entity.Bits);
@@ -301,7 +340,7 @@ public sealed partial class WorldPanel
         EditorSelection.Select(entity);
     }
 
-    /// <summary>How deep a row sits, for working out where its fold mark is.</summary>
+    /// <summary>How deep a row sits.</summary>
     private int DepthOf(Entity entity)
     {
         foreach (var row in _tree)

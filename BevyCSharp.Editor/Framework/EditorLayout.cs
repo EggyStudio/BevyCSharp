@@ -197,6 +197,7 @@ public sealed class EditorLayout
         Strip(placed, Margin, width - Margin, stripTop);
         Corners(placed, Viewport, width);
         Free(placed, width, height);
+        Sheets(placed, width, height);
     }
 
     /// <summary>One panel, where it wants to be, and where it currently is.</summary>
@@ -367,6 +368,26 @@ public sealed class EditorLayout
 
             run += Width(entry) + Gap;
             if (run >= right) break;
+        }
+    }
+
+    /// <summary>
+    /// Places whatever takes the whole window.
+    /// </summary>
+    /// <remarks>
+    /// Over everything and inset by the same margin as everything else, so it reads as a sheet
+    /// laid on the editor rather than as a different program.
+    /// </remarks>
+    private void Sheets(List<Placed> placed, float width, float height)
+    {
+        foreach (var entry in Members(placed, EditorDock.Sheet))
+        {
+            entry.Panel.Window!.PlaceAt(
+                Margin,
+                Margin,
+                MathF.Max(0f, width - (Margin * 2f)),
+                MathF.Max(0f, height - (Margin * 2f)),
+                entry.Rect);
         }
     }
 

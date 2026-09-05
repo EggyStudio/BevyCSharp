@@ -1,4 +1,5 @@
 using Bevy;
+using BevyCSharp.Editor.Behaviors;
 using BevyCSharp.Editor.Panels;
 
 namespace BevyCSharp.Editor.Framework;
@@ -30,6 +31,105 @@ public static class EditorCommands
         View();
         Project();
         Toolbar();
+        Settings();
+    }
+
+    /// <summary>
+    /// What goes on the settings sheet.
+    /// </summary>
+    /// <remarks>
+    /// The editor's own preferences and what it can say about the project. Everything here is a
+    /// line in a table, so a game adds a page of its own by adding lines and never touches the
+    /// panel that draws them.
+    /// </remarks>
+    private static void Settings()
+    {
+        EditorSettings.Heading("Editor", "Handles", 0);
+
+        EditorSettings.Choice(
+            "Editor",
+            "Axes",
+            ["global", "local"],
+            static () => EditorTools.Space == ToolSpace.Local ? "local" : "global",
+            static chosen => EditorTools.Space =
+                chosen == "local" ? ToolSpace.Local : ToolSpace.Global,
+            1);
+
+        EditorSettings.Flag(
+            "Editor",
+            "Snap to a grid",
+            static () => EditorKeys.SnapLocked,
+            static on =>
+            {
+                EditorKeys.SnapLocked = on;
+                EditorTools.Snap = on;
+            },
+            2);
+
+        EditorSettings.Number(
+            "Editor", "Move step (m)", static () => EditorTools.MoveStep,
+            static value => EditorTools.MoveStep = MathF.Max(0.001f, value), 3);
+
+        EditorSettings.Number(
+            "Editor", "Turn step (deg)", static () => EditorTools.RotateStep,
+            static value => EditorTools.RotateStep = MathF.Max(0.1f, value), 4);
+
+        EditorSettings.Number(
+            "Editor", "Stretch step", static () => EditorTools.ScaleStep,
+            static value => EditorTools.ScaleStep = MathF.Max(0.001f, value), 5);
+
+        EditorSettings.Flag(
+            "Editor", "Draw the ground grid",
+            static () => ViewportGizmos.ShowGrid,
+            static on => ViewportGizmos.ShowGrid = on, 6);
+
+        EditorSettings.Heading("Editor", "Hierarchy", 10);
+
+        EditorSettings.Flag(
+            "Editor", "Show the interface's own entities",
+            static () => WorldPanel.ShowInterface,
+            static on => WorldPanel.ShowInterface = on, 11);
+
+        EditorSettings.Flag(
+            "Editor", "Show every entity",
+            static () => WorldPanel.ShowAll,
+            static on => WorldPanel.ShowAll = on, 12);
+
+        EditorSettings.Heading("Editor", "Layout", 20);
+
+        EditorSettings.Action(
+            "Editor", "Put the panels back", static () => EditorShell.Layout.ResetAll(), 21);
+
+        EditorSettings.Action(
+            "Editor",
+            "Save the layout",
+            static () => File.WriteAllText(EditorPaths.Layout, EditorShell.Layout.Describe()),
+            22);
+
+        EditorSettings.Heading("Project", "Where things are", 0);
+
+        EditorSettings.Fact("Project", "Assets", static () => EditorPaths.Assets, 1);
+        EditorSettings.Fact("Project", "World file", static () => EditorPaths.World, 2);
+        EditorSettings.Fact("Project", "Layout file", static () => EditorPaths.Layout, 3);
+
+        EditorSettings.Heading("Project", "Scripts", 10);
+
+        EditorSettings.Fact(
+            "Project",
+            "Behaviors from scripts",
+            static () => $"{EditorScripts.Registered} registration(s)",
+            11);
+
+        EditorSettings.Fact(
+            "Project", "Last build", static () => EditorScripts.LastError ?? "no errors", 12);
+
+        EditorSettings.Action("Project", "Reload now", EditorScripts.Reload, 13);
+
+        EditorSettings.Heading("About", "BevyCSharp.Editor", 0);
+
+        EditorSettings.Fact("About", "Panels open", static () => EditorShell.Open.Count.ToString(), 2);
+        EditorSettings.Fact("About", "Component schemas", static () => ComponentSchemas.All.Count.ToString(), 3);
+        EditorSettings.Fact("About", "Menu rows", static () => EditorMenu.All.Count.ToString(), 4);
     }
 
     /// <summary>
@@ -120,6 +220,14 @@ public static class EditorCommands
                     EditorShell.Layout.Viewport.Y + 44f)),
             static () => EditorShell.Showing<InfoPanel>() is not null,
             0));
+
+        EditorToolbar.Add(new ToolbarButton(
+            ToolbarSlot.Right,
+            "icons/ui/settings.png",
+            static () => string.Empty,
+            static _ => EditorShell.Toggle(static () => new SettingsPanel()),
+            static () => EditorShell.Showing<SettingsPanel>() is not null,
+            1));
     }
 
     /// <summary>Where a menu opened from the toolbar goes: under the viewport's top left.</summary>
@@ -298,6 +406,12 @@ public static class EditorCommands
             1);
 
         EditorMenu.Toggle(
+            "View/Ground grid",
+            static _ => ViewportGizmos.ShowGrid = !ViewportGizmos.ShowGrid,
+            static () => ViewportGizmos.ShowGrid,
+            1);
+
+        EditorMenu.Toggle(
             "View/Snap to a grid",
             static _ => EditorTools.Snap = !EditorTools.Snap,
             static () => EditorTools.Snap,
@@ -312,6 +426,12 @@ public static class EditorCommands
             3);
 
         EditorMenu.Separator("View/-", 4);
+
+        EditorMenu.Toggle(
+            "View/Settings",
+            static _ => EditorShell.Toggle(static () => new SettingsPanel()),
+            static () => EditorShell.Showing<SettingsPanel>() is not null,
+            5);
 
         EditorMenu.Command(
             "View/Reset the layout",

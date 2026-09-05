@@ -83,6 +83,13 @@ public partial struct EditorKeys
 
         if (control && input.KeyPressed(Key.S)) EditorProject.Save(ctx.Ecs);
 
+        // Where every editor keeps its settings, and one of the few key bindings people carry
+        // between programs.
+        if (control && input.KeyPressed(Key.Comma))
+        {
+            EditorShell.Toggle(static () => new SettingsPanel());
+        }
+
         if (input.KeyPressed(Key.Delete)) Run(ctx, "Entity/Delete");
 
         // The menu, which is otherwise only reachable through a button on a panel that can be
