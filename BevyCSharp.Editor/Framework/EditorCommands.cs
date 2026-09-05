@@ -21,7 +21,7 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 public static class EditorCommands
 {
-    /// <summary>Fills the menu, given the camera the panels bind against.</summary>
+    /// <summary>Fills the menu and the toolbar, given the camera the panels bind against.</summary>
     public static void Register(Entity camera)
     {
         Panels(camera);
@@ -29,7 +29,95 @@ public static class EditorCommands
         Entities();
         View();
         Project();
+        Toolbar();
     }
+
+    /// <summary>
+    /// What floats in the viewport's corners.
+    /// </summary>
+    /// <remarks>
+    /// The menu on the left, the tools in the middle, what the editor is doing on the right. A
+    /// game adds its own the same way, and the corner panels never change.
+    /// </remarks>
+    private static void Toolbar()
+    {
+        EditorToolbar.Add(
+            ToolbarSlot.Left,
+            "icons/ui/menu.png",
+            string.Empty,
+            static _ => EditorShell.ShowMenu(string.Empty, MenuAt.X, MenuAt.Y),
+            0);
+
+        EditorToolbar.Add(
+            ToolbarSlot.Left,
+            "icons/ui/undo.png",
+            string.Empty,
+            static world => EditorHistory.Undo(world),
+            1);
+
+        EditorToolbar.Add(
+            ToolbarSlot.Left,
+            "icons/ui/redo.png",
+            string.Empty,
+            static world => EditorHistory.Redo(world),
+            2);
+
+        EditorToolbar.Add(
+            ToolbarSlot.Left,
+            "icons/ui/save.png",
+            string.Empty,
+            EditorProject.Save,
+            3);
+
+        foreach (var (_, tool, _) in EditorTools.Keys)
+        {
+            var chosen = tool;
+
+            EditorToolbar.Add(new ToolbarButton(
+                ToolbarSlot.Centre,
+                $"icons/ui/{tool.ToString().ToLowerInvariant()}.png",
+                static () => string.Empty,
+                _ => EditorTools.Current = chosen,
+                () => EditorTools.Current == chosen,
+                (int)tool));
+        }
+
+        EditorToolbar.Add(new ToolbarButton(
+            ToolbarSlot.Centre,
+            "icons/ui/snap.png",
+            static () => string.Empty,
+            static _ =>
+            {
+                EditorKeys.SnapLocked = !EditorKeys.SnapLocked;
+                EditorTools.Snap = EditorKeys.SnapLocked;
+            },
+            static () => EditorTools.Snap,
+            10));
+
+        EditorToolbar.Add(new ToolbarButton(
+            ToolbarSlot.Right,
+            "icons/ui/info.png",
+            static () => string.Empty,
+            static _ =>
+            {
+                if (EditorShell.Find<InfoPanel>() is { } open)
+                {
+                    EditorShell.Hide(open);
+                    return;
+                }
+
+                EditorShell.ShowAt(
+                    new InfoPanel(),
+                    EditorShell.Layout.Viewport.Right - 240f,
+                    EditorShell.Layout.Viewport.Y + 44f);
+            },
+            static () => EditorShell.Find<InfoPanel>() is not null,
+            0));
+    }
+
+    /// <summary>Where a menu opened from the toolbar goes: under the viewport's top left.</summary>
+    private static (float X, float Y) MenuAt =>
+        (EditorShell.Layout.Viewport.X + 4f, EditorShell.Layout.Viewport.Y + 36f);
 
     /// <summary>What can be opened, as toggles so the menu shows what already is.</summary>
     private static void Panels(Entity camera)
@@ -41,9 +129,9 @@ public static class EditorCommands
             0);
 
         EditorMenu.Toggle(
-            "Panels/Entity",
-            static _ => EditorShell.Toggle(static () => new EntityPanel()),
-            static () => EditorShell.Find<EntityPanel>() is not null,
+            "Panels/Data",
+            static _ => EditorShell.Toggle(static () => new DataPanel()),
+            static () => EditorShell.Find<DataPanel>() is not null,
             1);
 
         EditorMenu.Toggle(
@@ -62,12 +150,6 @@ public static class EditorCommands
                 if (EditorTabs.Find("Console") is { } tab) EditorTabs.Toggle(tab);
             },
             static () => EditorShell.Find<ConsolePanel>() is not null,
-            3);
-
-        EditorMenu.Toggle(
-            "Panels/Asset",
-            static _ => EditorShell.Toggle(static () => new AssetPanel()),
-            static () => EditorShell.Find<AssetPanel>() is not null,
             3);
 
         EditorMenu.Toggle(
@@ -90,8 +172,14 @@ public static class EditorCommands
 
         EditorMenu.Toggle(
             "Panels/Toolbar",
-            static _ => EditorShell.Toggle(static () => new ToolbarPanel()),
-            static () => EditorShell.Find<ToolbarPanel>() is not null,
+            static _ =>
+            {
+                EditorShell.Toggle(static () => new LeftBarPanel());
+                EditorShell.Toggle(static () => new CentreBarPanel());
+                EditorShell.Toggle(static () => new RightBarPanel());
+                EditorShell.Toggle(static () => new BottomBarPanel());
+            },
+            static () => EditorShell.Find<CentreBarPanel>() is not null,
             7);
 
         EditorMenu.Toggle(

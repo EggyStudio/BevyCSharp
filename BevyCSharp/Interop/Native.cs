@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 54;
+    internal const int ExpectedAbiVersion = 55;
 
     static Native() => NativeLoader.Initialize();
 
@@ -517,6 +517,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_xui_set_rect(
         ulong entity, float left, float top, float width, float height);
+
+    /// <summary>Points an image element at a file, relative to the asset root.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_set_image(ulong entity, string path);
 
     /// <summary>Reads whether an element is on screen.</summary>
     [LibraryImport(Library)]

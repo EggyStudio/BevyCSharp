@@ -40,7 +40,10 @@ public partial struct EditorBoot
         // something was selected or something was asked for, which is the difference between an
         // editor that starts with work in front of it and one that starts with its own furniture.
         EditorShell.Show(new WorldPanel());
-        EditorShell.Show(new ToolbarPanel());
+        EditorShell.Show(new LeftBarPanel());
+        EditorShell.Show(new CentreBarPanel());
+        EditorShell.Show(new RightBarPanel());
+        EditorShell.Show(new BottomBarPanel());
         EditorShell.Show(new TabsPanel());
         EditorShell.Show(new KeysPanel());
 
@@ -114,9 +117,9 @@ public partial struct EditorBoot
         _followed = EditorSelection.Current;
 
         if (!EditorSelection.Any) return;
-        if (EditorShell.Find<EntityPanel>() is not null) return;
+        if (EditorShell.Find<DataPanel>() is not null) return;
 
-        EditorShell.Show(new EntityPanel());
+        EditorShell.Show(new DataPanel());
     }
 
     /// <summary>What was selected when the entity panel was last opened for it.</summary>

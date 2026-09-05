@@ -1442,7 +1442,7 @@ frame in which anything was edited, and `[OnRefresh]` runs once a frame before t
 are written out, which is where a panel that shows the world reads it.
 
 **The menu is a table of paths.** Everything the editor can be told to do is a slash separated
-path in `EditorMenu`, and the hamburger, the plus button, a right click on the world and a right
+path in `EditorMenu`, and the hamburger, the add button, a right click on the world and a right
 click on an entity are four views of the same table:
 
 ```csharp
@@ -1468,12 +1468,13 @@ public void Choose(int row) => EditorSelection.Select(_entities[row]);
 ```
 
 **Where a panel sits is data, not CSS.** A stylesheet says what a panel looks like; `EditorLayout`
-holds a placement per panel and arranges them into docks: a left column, a right column, a top
-bar, a bottom band and a strip, plus free coordinates for anything floating. The docks reflow
-around each other, so opening the asset browser along the bottom shortens the columns rather than
-covering them. Because that table is data, a layout writes to text and reads back, dragging a
-window by its handle is nothing more than writing one entry, and a flyout is a panel whose
-declaration says a press outside dismisses it.
+holds a placement per panel and arranges them into docks: a left column, a right column, the band
+along the bottom of the viewport, the tab strip under it, and the viewport's own corners, plus
+free coordinates for anything floating. A docked panel is as tall as its contents and no taller
+than its column allows, the columns are as wide as they need and no wider than a third of the
+window, and all three edges can be dragged. Because that table is data, a layout writes to text
+and reads back, dragging a window by its handle is nothing more than writing one entry, and a
+flyout is a panel whose declaration says a press outside dismisses it.
 
 **Showing a component needs no reflection.** The generator emits a `ComponentSchema` for every
 `[Behavior]` struct, holding each field's name, its kind, and a pair of closures that read and
@@ -1503,10 +1504,14 @@ and an operation is recorded only when it can be reversed exactly: a field edit,
 entity. Despawning is not, because an entity's mesh and material have no mirror on this side and
 what came back would be a name with nothing to draw.
 
-The shipped panels are a starting point rather than the product: the world, the entity, the assets,
-the asset, the console, the rendering settings, the information, the toolbar, the tabs, the key
-strip and the menu are eleven uses of one mechanism, and every one of them can be edited, replaced
-or deleted without touching the shell.
+The toolbar is a table too. `EditorToolbar` holds what floats in the viewport's corners, each entry
+an icon, a label, what pressing it does and whether it is the one in force, so adding a mode to the
+viewport is a line rather than a change to a panel.
+
+The shipped panels are a starting point rather than the product: the world, the data panel, the
+assets, the console, the rendering settings, the information, three corner toolbars, the tabs, the
+key strip and the menu are twelve uses of one mechanism, and every one of them can be edited,
+replaced or deleted without touching the shell.
 [.github/EDITOR.md](.github/EDITOR.md) has the design language and what each stage delivered.
 
 ---

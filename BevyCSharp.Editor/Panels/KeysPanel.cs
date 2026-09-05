@@ -17,7 +17,7 @@ namespace BevyCSharp.Editor.Panels;
 /// truer than one that does not.
 /// </para>
 /// </remarks>
-[EditorPanel("panels/keys.html", Root = "#keys", Dock = EditorDock.Strip, Order = 10)]
+[EditorPanel("panels/keys.html", Root = "#keys", Dock = EditorDock.ViewportBottomLeft)]
 public sealed partial class KeysPanel
 {
     /// <summary>How many hints the document can draw.</summary>

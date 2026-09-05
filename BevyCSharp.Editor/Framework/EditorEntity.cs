@@ -54,4 +54,44 @@ public static class EditorEntity
 
         return false;
     }
+
+    /// <summary>
+    /// Whether an entity is one of the engine's own, carrying a name and nothing else.
+    /// </summary>
+    /// <remarks>
+    /// The renderers gizmo drawing spawns, the entities an observer is held on, and whatever else
+    /// a plugin names for its own logs. They are not the interface and they are not the scene, and
+    /// what gives them away is that there is nothing on them: a thing in the world being edited
+    /// has at least one component that says what it is.
+    /// </remarks>
+    public static bool IsBookkeeping(EcsWorld world, Entity entity)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+
+        var only = false;
+
+        foreach (var id in world.ComponentsOf(entity))
+        {
+            if (!IsName(world, id)) return false;
+            only = true;
+        }
+
+        return only;
+    }
+
+    /// <summary>The engine's name component, which this side has no type for.</summary>
+    private const string NameComponent = "bevy_ecs::name::Name";
+
+    /// <summary>Whether a component id is the name, remembered once per id.</summary>
+    private static bool IsName(EcsWorld world, int id)
+    {
+        if (Named.TryGetValue(id, out var answer)) return answer;
+
+        answer = world.ComponentName(id) == NameComponent;
+        Named[id] = answer;
+        return answer;
+    }
+
+    /// <summary>Which ids are the name component. Held for the same reason as the marks.</summary>
+    private static readonly Dictionary<int, bool> Named = [];
 }

@@ -22,12 +22,11 @@ namespace BevyCSharp.Editor.Panels;
     "panels/world.html",
     Root = "#world",
     Handle = "#world-title",
-    Dock = EditorDock.Left,
-    Fill = true)]
+    Dock = EditorDock.Left)]
 public sealed partial class WorldPanel
 {
     /// <summary>How many rows the document declares.</summary>
-    public const int Rows = 24;
+    public const int Rows = 26;
 
     /// <summary>
     /// Whether the editor's own widgets are listed alongside the world's entities.
@@ -52,7 +51,7 @@ public sealed partial class WorldPanel
     public static bool ShowAll { get; set; }
 
     /// <summary>What each row says.</summary>
-    [Bind("#wrow", Count = Rows)]
+    [Bind("#wtext", Count = Rows)]
     public string[] Labels = new string[Rows];
 
     /// <summary>Which rows stand for an entity at all.</summary>
@@ -66,26 +65,6 @@ public sealed partial class WorldPanel
     /// <summary>How much of the world is being shown.</summary>
     [Bind("#w-count", Mode = BindMode.OneWay)]
     public string Summary { get; private set; } = string.Empty;
-
-    /// <summary>The hamburger, which is where everything the editor can do lives.</summary>
-    [Bind("#w-menu", Mode = BindMode.OneWay)]
-    public string MenuIcon => EditorIcons.Menu;
-
-    /// <summary>Takes back the last change.</summary>
-    [Bind("#w-undo", Mode = BindMode.OneWay)]
-    public string UndoIcon => EditorIcons.Undo;
-
-    /// <summary>Puts it back.</summary>
-    [Bind("#w-redo", Mode = BindMode.OneWay)]
-    public string RedoIcon => EditorIcons.Redo;
-
-    /// <summary>Writes the world's edits and the layout.</summary>
-    [Bind("#w-save", Mode = BindMode.OneWay)]
-    public string SaveIcon => EditorIcons.Save;
-
-    /// <summary>Adds something to the world.</summary>
-    [Bind("#w-add", Mode = BindMode.OneWay)]
-    public string AddIcon => EditorIcons.Add;
 
     /// <summary>What the rows currently stand for, so a click can be turned into an entity.</summary>
     private readonly Entity[] _entities = new Entity[Rows];
@@ -222,6 +201,7 @@ public sealed partial class WorldPanel
 
             var name = world.NameOf(entity);
             if (!ShowAll && name is null && !world.HasById(entity, transform)) continue;
+            if (!ShowAll && EditorEntity.IsBookkeeping(world, entity)) continue;
 
             names[entity.Bits] = name ?? $"Entity {entity.Index}";
             parents[entity.Bits] = world.ParentOf(entity);
@@ -365,34 +345,22 @@ public sealed partial class WorldPanel
         EditorShell.ShowMenu("Spawn", x, y, "Spawn");
     }
 
-    /// <summary>Opens the editor's menu under the hamburger.</summary>
-    [Command("#w-menu")]
-    public void Menu() => OpenUnder("w-menu", string.Empty, null);
-
-    /// <summary>Takes back the last change.</summary>
-    [Command("#w-undo")]
-    public void Undo() => EditorHistory.Undo(EditorShell.Ecs);
-
-    /// <summary>Puts it back.</summary>
-    [Command("#w-redo")]
-    public void Redo() => EditorHistory.Redo(EditorShell.Ecs);
-
-    /// <summary>Writes the world's edits and the arrangement of the panels.</summary>
-    [Command("#w-save")]
-    public void Save() => EditorProject.Save(EditorShell.Ecs);
-
-    /// <summary>Offers what can be added to the world, under the button that asks.</summary>
+    /// <summary>
+    /// Offers what can be added to the world, from the button at the foot of the panel.
+    /// </summary>
+    /// <remarks>
+    /// The same list a right click on the panel offers, because it is the same list: a menu is a
+    /// table of paths and this opens it at <c>Spawn</c>. A game that adds a row there gets it in
+    /// both places without touching this panel.
+    /// </remarks>
     [Command("#w-add")]
-    public void Add() => OpenUnder("w-add", "Spawn", "Spawn");
-
-    /// <summary>Opens a menu under one of this panel's buttons.</summary>
-    private void OpenUnder(string element, string path, string? title)
+    public void Add()
     {
-        var below = Window is { } window && Xui.TryRect(window.Element(element), out var button)
-            ? (button.X, button.Bottom + 6f)
+        var above = Window is { } window && Xui.TryRect(window.Element("w-add"), out var button)
+            ? (button.X, button.Y - 6f)
             : (12f, 44f);
 
-        EditorShell.ShowMenu(path, below.Item1, below.Item2, title);
+        EditorShell.ShowMenu("Spawn", above.Item1, above.Item2, "Spawn");
     }
 
     /// <summary>Starts and finishes dragging one row onto another, which parents it.</summary>

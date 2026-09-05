@@ -5,34 +5,47 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Four docks and a floating layer, not a grid of nine. A dock is a column or a band that its
-/// panels share and that reflows when its neighbours change: opening the asset browser along the
-/// bottom shortens the left and right columns rather than covering them.
+/// The screen is three columns: a panel column on the left, a panel column on the right, and
+/// everything between them, which is the viewport. The viewport is split again along its bottom
+/// by whatever tab is open, and the tab strip sits at the very bottom edge of it.
 /// </para>
 /// <para>
-/// The viewport is behind all of it, full screen. Nothing here reserves space from a scene view,
-/// because there is no scene view to reserve it from: the docks float over the world.
+/// The columns run the full height of the window. Nothing is pushed down by the toolbar, because
+/// the toolbar is not a bar across the top: it is a handful of buttons floating in the viewport's
+/// corners, which is where an editor puts them when the viewport is the whole background.
 /// </para>
 /// </remarks>
 public enum EditorDock
 {
-    /// <summary>Wherever the placement's own coordinates say. Flyouts and dragged windows.</summary>
+    /// <summary>Wherever the placement's own coordinates say. Menus and dragged windows.</summary>
     Floating,
 
-    /// <summary>Centred along the top. The tools, and nothing else.</summary>
-    Top,
-
-    /// <summary>The left column: what is in the world.</summary>
+    /// <summary>The left column.</summary>
     Left,
 
-    /// <summary>The right column: what is selected, and what can be set.</summary>
+    /// <summary>The right column.</summary>
     Right,
 
-    /// <summary>The band along the bottom: the browsers that need width more than height.</summary>
+    /// <summary>The band along the bottom of the viewport: whichever tab is open.</summary>
     Bottom,
 
-    /// <summary>The strip at the very bottom left: tabs, and what the keys do.</summary>
+    /// <summary>The tab strip, at the very bottom edge of the viewport.</summary>
     Strip,
+
+    /// <summary>Floating in the viewport's top left corner.</summary>
+    ViewportTopLeft,
+
+    /// <summary>Floating along the top of the viewport, centred.</summary>
+    ViewportTop,
+
+    /// <summary>Floating in the viewport's top right corner.</summary>
+    ViewportTopRight,
+
+    /// <summary>Floating in the viewport's bottom left corner, above the tab strip.</summary>
+    ViewportBottomLeft,
+
+    /// <summary>Floating in the viewport's bottom right corner, above the tab strip.</summary>
+    ViewportBottomRight,
 }
 
 /// <summary>What makes a panel go away.</summary>
@@ -60,7 +73,6 @@ public enum PanelDismiss
 /// <param name="Width">How wide, or <see cref="float.NaN"/> to leave it to the stylesheet.</param>
 /// <param name="Height">How tall, or <see cref="float.NaN"/> to be as tall as its contents.</param>
 /// <param name="Order">Where it sits among the other panels of its dock. Lower is first.</param>
-/// <param name="Fill">Whether it takes whatever height its dock has left over.</param>
 /// <remarks>
 /// The reason this is not CSS. Appearance belongs in a stylesheet, where it can be changed
 /// without a rebuild; position has to be something the editor holds, because a layout that can be
@@ -73,12 +85,10 @@ public readonly record struct PanelPlacement(
     float Y = 0f,
     float Width = float.NaN,
     float Height = float.NaN,
-    int Order = 0,
-    bool Fill = false)
+    int Order = 0)
 {
     /// <summary>A panel in a dock, sized by its contents unless told otherwise.</summary>
-    public static PanelPlacement In(EditorDock dock, int order = 0, bool fill = false) =>
-        new(dock, Order: order, Fill: fill);
+    public static PanelPlacement In(EditorDock dock, int order = 0) => new(dock, Order: order);
 
     /// <summary>A panel at its own coordinates.</summary>
     public static PanelPlacement At(
@@ -87,11 +97,11 @@ public readonly record struct PanelPlacement(
 
     /// <summary>The same placement, moved to a point of its own.</summary>
     public PanelPlacement MovedTo(float x, float y) =>
-        this with { Dock = EditorDock.Floating, X = x, Y = y, Fill = false };
+        this with { Dock = EditorDock.Floating, X = x, Y = y };
 
     /// <summary>How this reads in a saved layout.</summary>
     public override string ToString() =>
-        $"{Dock} {Number(X)} {Number(Y)} {Number(Width)} {Number(Height)} {Order} {Fill}";
+        $"{Dock} {Number(X)} {Number(Y)} {Number(Width)} {Number(Height)} {Order}";
 
     /// <summary>Reads back what <see cref="ToString"/> wrote.</summary>
     public static bool TryParse(string text, out PanelPlacement placement)
@@ -109,8 +119,7 @@ public readonly record struct PanelPlacement(
             Value(parts, 2),
             Value(parts, 3),
             Value(parts, 4),
-            parts.Length > 5 && int.TryParse(parts[5], out var order) ? order : 0,
-            parts.Length > 6 && bool.TryParse(parts[6], out var fill) && fill);
+            parts.Length > 5 && int.TryParse(parts[5], out var order) ? order : 0);
 
         return true;
     }

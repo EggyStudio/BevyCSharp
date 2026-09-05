@@ -82,6 +82,7 @@ body {
 
 .panel {
     flex-direction: column;
+    align-self: flex-start;
     width: 238px;
     padding: 8px;
     row-gap: 5px;
@@ -92,28 +93,44 @@ body {
     width: 100%;
 }
 
-/* A toolbar is a panel whose contents are buttons. Nothing else about it is different. */
-.bar {
+/*
+ * The toolbars float in the viewport's corners and are not panels: no background, no border, just
+ * round buttons over the scene. A bar across the top would push the columns down and take a strip
+ * of the world for as long as the editor is open.
+ */
+.floatbar {
+    display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 4px;
-    column-gap: 4px;
+    column-gap: 6px;
+    background-color: rgba(0, 0, 0, 0);
+    pointer-events: auto;
 }
 
 /*
- * A row of buttons inside a panel, which is not a panel of its own: no background, no border, and
- * no padding to hold it away from edges it does not have.
+ * The tab strip, along the bottom edge of the viewport, shaped like a browser's: rounded where it
+ * meets the viewport and square where it meets the edge of the window it sits against.
  */
-.bar.flush {
-    padding: 0;
-    background-color: rgba(0, 0, 0, 0);
-    border: 0;
-    border-radius: 0;
+.tabstrip {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 3px 4px;
+    column-gap: 3px;
+    background-color: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: var(--radius) var(--radius) 0 0;
+    pointer-events: auto;
 }
 
-.tabs {
-    padding: 3px;
-    column-gap: 3px;
+/*
+ * A panel filling the band above the tab strip. Square at the bottom, because the strip is
+ * attached to it, and rounded at the top like everything else.
+ */
+.panel.band {
+    width: 100%;
+    border-radius: var(--radius) var(--radius) 0 0;
 }
 
 /* -- Title bars, which are also what a window is dragged by */
@@ -173,6 +190,9 @@ p {
  * thirty entities is readable at a glance rather than a wall.
  */
 .row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     width: 100%;
     height: 18px;
     min-width: 0;
@@ -180,10 +200,25 @@ p {
     background-color: rgba(0, 0, 0, 0);
     border: 0;
     border-radius: var(--radius-small);
-    color: var(--text);
+    overflow: hidden;
+}
+
+/*
+ * The text inside a row, a tab, a menu line or a button.
+ *
+ * Its own element rather than the box's own text, because a widget that draws its text through a
+ * child rebuilds that child whenever the text changes, and the rebuilt child comes back without
+ * the font the stylesheet gave it. A paragraph keeps what it was given.
+ *
+ * Out of the pointer's way, here and on every other label and picture inside something clickable.
+ * Picking reports the deepest thing under the cursor and the bridge walks up to the first element
+ * with an id; a paragraph that has one of its own would answer for the row it sits in, so it is
+ * told not to take the click and the row does.
+ */
+.row-text {
+    pointer-events: none;
     font-size: 11px;
-    justify-content: flex-start;
-    text-align: left;
+    color: var(--text);
     text-wrap: nowrap;
 }
 
@@ -259,14 +294,23 @@ p {
 }
 
 .field-btn {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
     height: 18px;
-    min-width: 0;
+    min-width: 22px;
     padding: 0 6px;
     background-color: var(--surface-raised);
     border: 1px solid var(--line);
     border-radius: var(--radius-small);
-    color: var(--text);
+}
+
+/* The words on a box that is pressed rather than read. */
+.btn-text {
+    pointer-events: none;
     font-size: 10px;
+    color: var(--text);
     text-wrap: nowrap;
 }
 
@@ -349,6 +393,96 @@ button:hover {
     border-color: var(--accent);
 }
 
+/*
+ * A round button floating over the scene. Dark enough to read against a bright sky and small
+ * enough not to be in the way of what is behind it.
+ */
+.round {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+    padding: 0 6px;
+    column-gap: 5px;
+    background-color: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    color: var(--label);
+    font-size: 11px;
+}
+
+/* The picture inside a round button, at the size the icons were rasterised for. */
+.glyph {
+    pointer-events: none;
+    width: 16px;
+    height: 16px;
+}
+
+/*
+ * A reserved square with nothing in it, for what is drawn in the scene rather than by the
+ * interface. It has no background because the thing it stands for is transparent: the viewport
+ * shows through, and only the lines drawn at its centre are seen.
+ */
+.gizmo-slot {
+    width: 48px;
+    height: 48px;
+    background-color: rgba(0, 0, 0, 0);
+    border-radius: 24px;
+}
+
+.gizmo-slot:hover {
+    background-color: var(--accent-soft);
+}
+
+/*
+ * The mark on the button whose mode is in force. A dot rather than a different background,
+ * because a class cannot be given to an element while the editor runs and this can simply be
+ * shown or hidden.
+ */
+.glyph-dot {
+    pointer-events: none;
+    width: 5px;
+    height: 5px;
+    margin-left: 1px;
+    background-color: var(--accent);
+    border-radius: 3px;
+}
+
+/* The words beside it, for a button that is not only a picture. */
+.glyph-text {
+    pointer-events: none;
+    font-size: 11px;
+    color: var(--label);
+    text-wrap: nowrap;
+}
+
+.round:hover {
+    background-color: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--bright);
+}
+
+/* The one button at the foot of a panel: as wide as the panel, and the only thing on its row. */
+.wide-btn {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 22px;
+    margin-top: 2px;
+    background-color: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-small);
+}
+
+.wide-btn:hover {
+    background-color: var(--accent-soft);
+    border-color: var(--accent);
+}
+
 /* A square button carrying one glyph: the hamburger, undo, the pin. */
 .icon {
     width: 22px;
@@ -375,13 +509,14 @@ button:hover {
 
 /* A tab says the name of a panel that is usually not on screen. */
 .tab {
-    height: 20px;
-    padding: 0 8px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 22px;
+    padding: 0 12px;
     background-color: rgba(0, 0, 0, 0);
     border: 0;
-    color: var(--label);
-    font-size: 11px;
-    text-wrap: nowrap;
+    border-radius: var(--radius-small) var(--radius-small) 0 0;
 }
 
 .tab:hover {
@@ -399,20 +534,58 @@ button:hover {
     color: var(--dim);
 }
 
-/* An asset row keeps its file name on one line however long the name is. */
-.asset {
-    width: 210px;
+/* -- The asset browser: where you are on the left, what is there on the right */
+
+.split {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    width: 100%;
+    column-gap: 10px;
+    overflow: hidden;
+}
+
+.tree {
+    display: flex;
+    flex-direction: column;
+    width: 168px;
+    row-gap: 2px;
+    padding-right: 8px;
+    border-right: 1px solid var(--line);
+}
+
+.tiles {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    align-content: flex-start;
+    column-gap: 6px;
+    row-gap: 6px;
+    overflow: hidden;
 }
 
 /*
- * The asset listing runs down and then across, so a wide panel along the bottom is used as a wide
- * panel rather than as a tall one lying on its side.
+ * A tile is a name in a box. Not a thumbnail: the interface draws images from files it can decode,
+ * and what is worth a picture here would need one made for it first.
  */
-.columns {
-    flex-direction: column;
-    flex-wrap: wrap;
-    height: 108px;
-    column-gap: 10px;
+.tile {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 132px;
+    height: 22px;
+    min-width: 0;
+    padding: 0 6px;
+    background-color: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-small);
+    overflow: hidden;
+}
+
+.tile:hover {
+    background-color: var(--accent-soft);
+    border-color: var(--accent);
 }
 
 /* -- Menus */
@@ -434,6 +607,9 @@ button:hover {
  * level at a time needs somewhere to put that, and the place a person looks is the top.
  */
 .menu-title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     width: 100%;
     height: 20px;
     margin-bottom: 3px;
@@ -442,12 +618,6 @@ button:hover {
     border: 0;
     border-bottom: 1px solid var(--line);
     border-radius: 0;
-    color: var(--dim);
-    font-size: 10px;
-    justify-content: flex-start;
-    text-align: left;
-    text-transform: uppercase;
-    text-wrap: nowrap;
 }
 
 .menu-title:hover {
@@ -455,17 +625,15 @@ button:hover {
 }
 
 .menu-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     width: 100%;
     height: 20px;
     padding: 0 6px;
     background-color: rgba(0, 0, 0, 0);
     border: 0;
     border-radius: var(--radius-small);
-    color: var(--text);
-    font-size: 11px;
-    justify-content: flex-start;
-    text-align: left;
-    text-wrap: nowrap;
 }
 
 .menu-row:hover {

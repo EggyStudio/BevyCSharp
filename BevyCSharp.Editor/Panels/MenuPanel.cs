@@ -61,7 +61,7 @@ public sealed partial class MenuPanel
     private readonly MenuItem?[] _rows = new MenuItem?[Rows];
 
     /// <summary>What each row says.</summary>
-    [Bind("#mrow", Count = Rows)]
+    [Bind("#mtext", Count = Rows)]
     public string[] Labels = new string[Rows];
 
     /// <summary>Which rows stand for anything.</summary>
@@ -69,7 +69,7 @@ public sealed partial class MenuPanel
     public bool[] Shown = new bool[Rows];
 
     /// <summary>The level being shown, which is also the way back out of it.</summary>
-    [Bind("#menu-title", Mode = BindMode.OneWay)]
+    [Bind("#menu-label", Mode = BindMode.OneWay)]
     public string Title { get; private set; } = string.Empty;
 
     /// <summary>Fills the rows from the level or the list.</summary>

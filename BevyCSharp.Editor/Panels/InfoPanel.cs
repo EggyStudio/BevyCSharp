@@ -91,7 +91,7 @@ public sealed partial class InfoPanel
         EditorShell.Layout.Place(
             this,
             _pinned
-                ? PanelPlacement.In(EditorDock.Right, order: 20)
+                ? PanelPlacement.In(EditorDock.Right, 20)
                 : Chrome.Placement.MovedTo(
                     Window?.Measure()?.X ?? 40f,
                     Window?.Measure()?.Y ?? 40f));

@@ -62,6 +62,13 @@ public static class EditorTabs
             return;
         }
 
+        // One at a time, which is what a tab means. They share the band along the bottom of the
+        // viewport, and two of them in it would be two panels in one place.
+        foreach (var other in Entries)
+        {
+            if (other.Panel is { } showing) EditorShell.Hide(showing);
+        }
+
         entry.Panel = EditorShell.Show(entry.Create());
     }
 

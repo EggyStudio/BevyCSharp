@@ -10,14 +10,15 @@ namespace BevyCSharp.Editor.Framework;
 /// <para>
 /// A layout is a table of placements, one per panel, and this is the thing that reads it. That is
 /// the whole design: because a placement is data, a layout can be saved, restored, edited by hand
-/// and changed by dragging a window, and none of those need a different mechanism from the others.
-/// A stylesheet cannot do any of it.
+/// and changed by dragging, and none of those need a different mechanism from the others. A
+/// stylesheet cannot do any of it.
 /// </para>
 /// <para>
-/// The docks reflow around each other. The bottom band takes the width it needs and the side
-/// columns end above it, so opening the asset browser shortens the world and the entity panels
-/// rather than covering them. A panel that asks to fill takes whatever its column has left after
-/// the panels above it, which is what makes a list as long as the screen allows.
+/// The screen is three columns. The side columns run the full height and are as wide as their
+/// contents until somebody drags their inner edge, up to a third of the window each. Everything
+/// between them is the viewport, and the viewport is split along its bottom by whichever tab is
+/// open, up to half the window. Those three numbers are the whole of the arrangement, and all
+/// three are draggable.
 /// </para>
 /// </remarks>
 public sealed class EditorLayout
@@ -25,10 +26,45 @@ public sealed class EditorLayout
     private readonly Dictionary<string, PanelPlacement> _overrides = [];
 
     /// <summary>How far a panel keeps from the edge of the window.</summary>
-    public float Margin { get; set; } = 10f;
+    public float Margin { get; set; } = 8f;
 
     /// <summary>How far panels keep from each other.</summary>
     public float Gap { get; set; } = 8f;
+
+    /// <summary>How wide the left column is, or <see cref="float.NaN"/> to follow its contents.</summary>
+    public float LeftWidth { get; set; } = float.NaN;
+
+    /// <summary>The same on the right.</summary>
+    public float RightWidth { get; set; } = float.NaN;
+
+    /// <summary>How tall the open tab is.</summary>
+    public float BottomHeight { get; set; } = 190f;
+
+    /// <summary>The narrowest a column can be dragged.</summary>
+    public const float MinimumColumn = 160f;
+
+    /// <summary>The shortest the tab band can be dragged.</summary>
+    public const float MinimumBand = 90f;
+
+    /// <summary>What the docks left for the world, which is everything they do not cover.</summary>
+    /// <remarks>
+    /// What a viewport button is placed against, what a click has to be inside to count as a click
+    /// on the scene, and where the orientation cross is drawn. Updated every time panels are
+    /// arranged.
+    /// </remarks>
+    public UiRect Viewport { get; private set; }
+
+    /// <summary>Where the left column's inner edge is, for dragging it.</summary>
+    public float LeftEdge { get; private set; }
+
+    /// <summary>Where the right column's inner edge is.</summary>
+    public float RightEdge { get; private set; }
+
+    /// <summary>Where the top of the open tab is, for dragging it.</summary>
+    public float BottomEdge { get; private set; }
+
+    /// <summary>Whether a tab is open, so its edge is worth dragging.</summary>
+    public bool BandOpen { get; private set; }
 
     /// <summary>Where a panel is, taking any override over what the panel itself asked for.</summary>
     public PanelPlacement PlacementOf(IEditorPanel panel)
@@ -53,15 +89,14 @@ public sealed class EditorLayout
         _overrides.Remove(KeyOf(panel));
     }
 
-    /// <summary>Forgets every override, putting the whole editor back to its declared layout.</summary>
-    public void ResetAll() => _overrides.Clear();
-
-    /// <summary>The rectangle the docks left for the world, which is everything they do not cover.</summary>
-    /// <remarks>
-    /// What a viewport gizmo is placed against and what a click has to be inside to count as a
-    /// click on the scene. Updated every time the panels are arranged.
-    /// </remarks>
-    public UiRect Viewport { get; private set; }
+    /// <summary>Forgets every override and every dragged size.</summary>
+    public void ResetAll()
+    {
+        _overrides.Clear();
+        LeftWidth = float.NaN;
+        RightWidth = float.NaN;
+        BottomHeight = 190f;
+    }
 
     /// <summary>
     /// Places every open panel for this frame.
@@ -79,8 +114,8 @@ public sealed class EditorLayout
         var (windowWidth, windowHeight) = Window.Size();
         if (windowWidth == 0 || windowHeight == 0) return;
 
-        var width = windowWidth;
-        var height = windowHeight;
+        float width = windowWidth;
+        float height = windowHeight;
 
         var placed = new List<Placed>();
         foreach (var panel in panels)
@@ -89,164 +124,145 @@ public sealed class EditorLayout
             if (window.Root.IsNone) continue;
             if (!Xui.TryRect(window.Root, out var rect)) continue;
 
-            // Layering is applied here rather than when the panel opened, because its elements
-            // did not exist yet then: a document is built a frame or two after it is asked for.
+            // Layering is applied here rather than when the panel opened, because its elements did
+            // not exist yet then: a document is built a frame or two after it is asked for.
             window.Layer(panel.Chrome.Layer);
 
             placed.Add(new Placed(panel, PlacementOf(panel), rect));
         }
 
-        // The bands are measured before anything is moved, because each one decides how much room
-        // the next has. Top first, then the strip along the bottom, then the bottom band, and the
-        // columns take what is left.
-        var top = Band(placed, EditorDock.Top);
-        var strip = Band(placed, EditorDock.Strip);
-        var bottom = Band(placed, EditorDock.Bottom);
+        var left = ColumnWidth(placed, EditorDock.Left, LeftWidth, width);
+        var right = ColumnWidth(placed, EditorDock.Right, RightWidth, width);
 
-        var contentTop = Margin + (top > 0f ? top + Gap : 0f);
-        var stripTop = height - Margin - strip;
-        var bottomTop = (strip > 0f ? stripTop - Gap : height - Margin) - bottom;
-        var contentBottom = bottom > 0f ? bottomTop - Gap : (strip > 0f ? stripTop - Gap : height - Margin);
+        var strip = Tallest(placed, EditorDock.Strip);
+        var band = Members(placed, EditorDock.Bottom).Count > 0
+            ? Math.Clamp(BottomHeight, MinimumBand, height * 0.5f)
+            : 0f;
 
-        var left = Column(placed, EditorDock.Left, Margin, contentTop, contentBottom, fromLeft: true);
-        var right = Column(
-            placed, EditorDock.Right, width - Margin, contentTop, contentBottom, fromLeft: false);
+        // The viewport is what the columns leave, and the tab band eats into it from the bottom.
+        var viewportLeft = left > 0f ? left + (Margin * 2f) : Margin;
+        var viewportRight = right > 0f ? width - right - (Margin * 2f) : width - Margin;
+        var viewportBottom = height - strip - (band > 0f ? band : 0f);
 
-        Row(placed, EditorDock.Top, width, Margin);
-        Row(placed, EditorDock.Bottom, width, bottomTop, stretch: true);
-        Strip(placed, stripTop);
-        Free(placed);
+        LeftEdge = viewportLeft - Margin;
+        RightEdge = viewportRight + Margin;
+        BottomEdge = viewportBottom;
+        BandOpen = band > 0f;
 
         Viewport = new UiRect(
-            left,
-            contentTop,
-            MathF.Max(0f, width - left - (width - right)),
-            MathF.Max(0f, contentBottom - contentTop));
+            viewportLeft,
+            Margin,
+            MathF.Max(0f, viewportRight - viewportLeft),
+            MathF.Max(0f, viewportBottom - Margin));
+
+        // The columns run the full height of the window, less the tab strip where it reaches
+        // under them, which it does not: the strip belongs to the viewport.
+        Column(placed, EditorDock.Left, Margin, Margin, height - Margin, left, fromLeft: true);
+        Column(placed, EditorDock.Right, width - Margin, Margin, height - Margin, right, fromLeft: false);
+
+        Band(placed, viewportLeft, viewportRight, viewportBottom, band);
+        Strip(placed, viewportLeft, height - strip);
+        Corners(placed, Viewport);
+        Free(placed);
     }
 
     /// <summary>One panel, where it wants to be, and where it currently is.</summary>
     private readonly record struct Placed(IEditorPanel Panel, PanelPlacement Placement, UiRect Rect);
 
-    /// <summary>How tall a horizontal band is, which is the tallest thing in it.</summary>
-    private float Band(List<Placed> placed, EditorDock dock)
+    /// <summary>
+    /// How wide a column is: what was dragged, or what its widest panel measured.
+    /// </summary>
+    /// <remarks>
+    /// A third of the window at most, whichever way it was decided. A column wider than that is
+    /// not a column any more, and the viewport is the point of the editor.
+    /// </remarks>
+    private float ColumnWidth(List<Placed> placed, EditorDock dock, float dragged, float width)
     {
-        var tallest = 0f;
+        var members = Members(placed, dock);
+        if (members.Count == 0) return 0f;
 
-        foreach (var entry in placed)
-        {
-            if (entry.Placement.Dock != dock) continue;
+        if (!float.IsNaN(dragged))
+            return Math.Clamp(dragged, MinimumColumn, width / 3f);
 
-            var measured = float.IsNaN(entry.Placement.Height)
-                ? entry.Rect.Height
-                : entry.Placement.Height;
+        var widest = 0f;
+        foreach (var entry in members) widest = MathF.Max(widest, Width(entry));
 
-            tallest = MathF.Max(tallest, measured);
-        }
-
-        return tallest;
+        return MathF.Min(widest, width / 3f);
     }
 
     /// <summary>
-    /// Stacks a column's panels and answers where its inner edge ended up.
+    /// Stacks a column's panels from the top, each as tall as its contents.
     /// </summary>
     /// <remarks>
-    /// A panel that asks to fill takes what the column has left after the ones above it, which is
-    /// how a list ends up as long as the screen allows without knowing how tall the screen is.
+    /// Content height rather than a share of the column: a panel with four rows in it should be
+    /// four rows tall. What stops one growing past the window is the room left after the panels
+    /// above it, which is also what makes an open tab shorten whatever is above it.
     /// </remarks>
-    private float Column(
+    private void Column(
         List<Placed> placed,
         EditorDock dock,
         float edge,
         float top,
         float bottom,
+        float columnWidth,
         bool fromLeft)
     {
-        var members = Members(placed, dock);
-        if (members.Count == 0) return edge;
-
-        // What is left over after everything that sizes itself, shared by whatever asked to fill.
-        var fixedHeight = 0f;
-        var filling = 0;
-
-        foreach (var entry in members)
-        {
-            if (entry.Placement.Fill) filling++;
-            else fixedHeight += Height(entry) + Gap;
-        }
-
-        var spare = MathF.Max(0f, bottom - top - fixedHeight - (filling > 0 ? (filling - 1) * Gap : 0f));
-        var share = filling > 0 ? spare / filling : 0f;
-
         var run = top;
-        var widest = 0f;
 
-        foreach (var entry in members)
+        foreach (var entry in Members(placed, dock))
         {
-            var panelWidth = float.IsNaN(entry.Placement.Width)
-                ? entry.Rect.Width
-                : entry.Placement.Width;
+            var room = MathF.Max(0f, bottom - run);
+            if (room <= 0f) break;
 
-            var panelHeight = entry.Placement.Fill ? share : Height(entry);
-            var x = fromLeft ? edge : edge - panelWidth;
+            var window = entry.Panel.Window!;
+            var x = fromLeft ? edge : edge - columnWidth;
 
-            entry.Panel.Window!.PlaceAt(
+            // As tall as its contents while the column has room for them, and as tall as the room
+            // when it does not. What it measured while it was free is what decides, because a
+            // panel given a height measures that height and can no longer be asked about its
+            // contents.
+            var free = float.IsNaN(entry.Placement.Height) && window.Natural <= room;
+            if (free) window.Measured(entry.Rect.Height);
+
+            var tall = free ? float.NaN : MathF.Min(Height(entry), room);
+
+            window.PlaceAt(
                 x + entry.Placement.X,
                 run + entry.Placement.Y,
-                entry.Placement.Width,
-                entry.Placement.Fill ? share : entry.Placement.Height,
+                columnWidth,
+                tall,
                 entry.Rect);
 
-            run += panelHeight + Gap;
-            widest = MathF.Max(widest, panelWidth);
+            run += MathF.Min(free ? entry.Rect.Height : tall, room) + Gap;
         }
-
-        return fromLeft ? edge + widest + Gap : edge - widest - Gap;
     }
 
-    /// <summary>Lays a band's panels out side by side, centred unless told to stretch.</summary>
-    private void Row(List<Placed> placed, EditorDock dock, float width, float top, bool stretch = false)
+    /// <summary>
+    /// Puts the open tab in the band between the viewport and the strip.
+    /// </summary>
+    /// <remarks>
+    /// <paramref name="top"/> is where the viewport ends, which is where the band begins: the two
+    /// share an edge and that edge is what a drag moves.
+    /// </remarks>
+    private static void Band(List<Placed> placed, float left, float right, float top, float height)
     {
-        var members = Members(placed, dock);
-        if (members.Count == 0) return;
+        if (height <= 0f) return;
 
-        if (stretch)
-        {
-            foreach (var entry in members)
-            {
-                entry.Panel.Window!.PlaceAt(
-                    Margin + entry.Placement.X,
-                    top + entry.Placement.Y,
-                    width - (Margin * 2f),
-                    entry.Placement.Height,
-                    entry.Rect);
-            }
-
-            return;
-        }
-
-        var total = 0f;
-        foreach (var entry in members) total += Width(entry) + Gap;
-        total = MathF.Max(0f, total - Gap);
-
-        var run = (width - total) * 0.5f;
-
-        foreach (var entry in members)
+        foreach (var entry in Members(placed, EditorDock.Bottom))
         {
             entry.Panel.Window!.PlaceAt(
-                run + entry.Placement.X,
-                top + entry.Placement.Y,
-                entry.Placement.Width,
-                entry.Placement.Height,
+                left,
+                top,
+                MathF.Max(0f, right - left),
+                height,
                 entry.Rect);
-
-            run += Width(entry) + Gap;
         }
     }
 
-    /// <summary>Lays the bottom strip out from the left, which is where a tab bar belongs.</summary>
-    private void Strip(List<Placed> placed, float top)
+    /// <summary>Puts the tab strip at the very bottom, from the left, the way a browser does.</summary>
+    private void Strip(List<Placed> placed, float left, float top)
     {
-        var run = Margin;
+        var run = left;
 
         foreach (var entry in Members(placed, EditorDock.Strip))
         {
@@ -258,6 +274,45 @@ public sealed class EditorLayout
                 entry.Rect);
 
             run += Width(entry) + Gap;
+        }
+    }
+
+    /// <summary>Places whatever floats in the viewport's corners.</summary>
+    /// <remarks>
+    /// Against the viewport rather than the window, so a button in a corner follows the panels: it
+    /// moves inwards when a column opens and back out when one is closed, which is the whole point
+    /// of putting it in the viewport rather than in a bar of its own.
+    /// </remarks>
+    private void Corners(List<Placed> placed, UiRect viewport)
+    {
+        foreach (var entry in placed)
+        {
+            var (x, y) = entry.Placement.Dock switch
+            {
+                EditorDock.ViewportTopLeft => (viewport.X + Margin, viewport.Y + Margin),
+                EditorDock.ViewportTop => (
+                    viewport.X + ((viewport.Width - Width(entry)) * 0.5f),
+                    viewport.Y + Margin),
+                EditorDock.ViewportTopRight => (
+                    viewport.Right - Margin - Width(entry),
+                    viewport.Y + Margin),
+                EditorDock.ViewportBottomLeft => (
+                    viewport.X + Margin,
+                    viewport.Bottom - Margin - Height(entry)),
+                EditorDock.ViewportBottomRight => (
+                    viewport.Right - Margin - Width(entry),
+                    viewport.Bottom - Margin - Height(entry)),
+                _ => (float.NaN, float.NaN),
+            };
+
+            if (float.IsNaN(x)) continue;
+
+            entry.Panel.Window!.PlaceAt(
+                x + entry.Placement.X,
+                y + entry.Placement.Y,
+                entry.Placement.Width,
+                entry.Placement.Height,
+                entry.Rect);
         }
     }
 
@@ -275,6 +330,15 @@ public sealed class EditorLayout
                 entry.Placement.Height,
                 entry.Rect);
         }
+    }
+
+    /// <summary>How tall the tallest panel of a dock is.</summary>
+    private static float Tallest(List<Placed> placed, EditorDock dock)
+    {
+        var tallest = 0f;
+        foreach (var entry in Members(placed, dock)) tallest = MathF.Max(tallest, Height(entry));
+
+        return tallest;
     }
 
     /// <summary>A dock's panels, in the order they asked for.</summary>
@@ -303,8 +367,8 @@ public sealed class EditorLayout
     /// <remarks>
     /// The type's name rather than the instance, so a layout survives a restart. Two panels of the
     /// same type share a placement, which is the right answer for the panels an editor actually
-    /// has one of and the wrong one for a flyout, which is why a flyout is placed where it was
-    /// opened rather than by the layout.
+    /// has one of and the wrong one for a menu, which is why a menu is placed where it was opened
+    /// rather than by the layout.
     /// </remarks>
     private static string KeyOf(IEditorPanel panel) => panel.GetType().Name;
 
@@ -320,12 +384,18 @@ public sealed class EditorLayout
         text.AppendLine("# BevyCSharp editor layout");
         text.AppendLine($"margin = {Margin}");
         text.AppendLine($"gap = {Gap}");
+        text.AppendLine($"left = {Size(LeftWidth)}");
+        text.AppendLine($"right = {Size(RightWidth)}");
+        text.AppendLine($"bottom = {BottomHeight}");
 
         foreach (var (panel, placement) in _overrides.OrderBy(entry => entry.Key, StringComparer.Ordinal))
             text.AppendLine($"{panel} = {placement}");
 
         return text.ToString();
     }
+
+    /// <summary>A dragged size as the file writes it, with <c>auto</c> for one never dragged.</summary>
+    private static string Size(float value) => float.IsNaN(value) ? "auto" : value.ToString("0.#");
 
     /// <summary>
     /// Reads a layout back, replacing every override with what it says.
@@ -360,6 +430,18 @@ public sealed class EditorLayout
 
                 case "gap" when float.TryParse(value, out var gap):
                     Gap = gap;
+                    continue;
+
+                case "left":
+                    LeftWidth = float.TryParse(value, out var leftWidth) ? leftWidth : float.NaN;
+                    continue;
+
+                case "right":
+                    RightWidth = float.TryParse(value, out var rightWidth) ? rightWidth : float.NaN;
+                    continue;
+
+                case "bottom" when float.TryParse(value, out var bottom):
+                    BottomHeight = bottom;
                     continue;
             }
 

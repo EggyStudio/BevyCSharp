@@ -25,7 +25,7 @@ public sealed partial class TabsPanel
     public const int Tabs = 8;
 
     /// <summary>What each tab says.</summary>
-    [Bind("#tab", Count = Tabs)]
+    [Bind("#tabtext", Count = Tabs)]
     public string[] Labels = new string[Tabs];
 
     /// <summary>Which tabs stand for anything.</summary>

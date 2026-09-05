@@ -176,8 +176,12 @@ pub fn install(app: &mut bevy::app::App) {
                 }
             }
 
-            #[allow(deprecated)]
-            registry.use_uis(names);
+            // The list is written rather than told through `use_uis`, which would also ask for a
+            // rebuild of every open document. A rebuild is not merely a blink: the widgets come
+            // back without their stylesheet, at the default font and the default layout, because
+            // the styles are resolved when a document is first built and not again. Writing the
+            // list leaves every open document standing and has the crate build only what is new.
+            registry.current = if names.is_empty() { None } else { Some(names) };
         },
     );
 
@@ -879,6 +883,56 @@ pub extern "C" fn bcs_xui_set_rect(entity: u64, left: f32, top: f32, width: f32,
                 }
                 if !height.is_nan() {
                     node.height = Val::Px(height);
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Points an image element at a file, relative to the asset root.
+///
+/// What makes a toolbar's icons a decision the program makes rather than one the document does.
+/// The interface reloads the picture itself once the source changes, cache and all, so this only
+/// has to say which file.
+///
+/// # Safety
+/// `path` must be a NUL-terminated UTF-8 string, or null to clear the image.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_xui_set_image(entity: u64, path: *const core::ffi::c_char) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (entity, path);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bevy_extended_ui::widgets::Img;
+
+            let source = unsafe { crate::interop::cstr_to_string(path) }.unwrap_or_default();
+
+            crate::state::with_world(|world| {
+                let entity = crate::ecs::entity_from(entity);
+                let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
+                    return status::NO_ENTITY;
+                };
+                let Some(mut image) = entity_mut.get_mut::<Img>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                let wanted = if source.is_empty() {
+                    None
+                } else {
+                    Some(source)
+                };
+
+                // Compared before writing, because writing marks the widget changed and the
+                // interface reloads the picture whenever it is.
+                if image.src != wanted {
+                    image.src = wanted;
                 }
 
                 status::OK

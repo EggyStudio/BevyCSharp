@@ -16,12 +16,11 @@ namespace BevyCSharp.Editor.Panels;
     Root = "#console",
     Handle = "#console-title",
     Dock = EditorDock.Bottom,
-    Order = 10,
-    Height = 176f)]
+    Order = 10)]
 public sealed partial class ConsolePanel
 {
     /// <summary>How many lines the document can draw.</summary>
-    public const int Rows = 11;
+    public const int Rows = 14;
 
     /// <summary>What each row says.</summary>
     [Bind("#crow", Count = Rows)]

@@ -201,7 +201,11 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // an exclusive system. Only registered here: the plugin that draws them comes with
             // `DefaultPlugins`, so a windowless app has nothing to drain into.
             app.init_resource::<crate::gizmos::GizmoQueue>();
-            app.add_systems(Update, crate::gizmos::drain);
+            // Drained after everything has had its say, so a line drawn from a C# system in the
+            // update reaches the renderer in the same frame it was asked for rather than the
+            // next. A gizmo that arrives a frame late reads as a gizmo that lags behind whatever
+            // it is drawn on.
+            app.add_systems(bevy::app::Last, crate::gizmos::drain);
 
             // Where the readers of Bevy's window messages keep their place between frames.
             app.init_resource::<crate::events::WindowEventCursors>();

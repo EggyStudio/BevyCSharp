@@ -54,6 +54,7 @@ public sealed unsafe class XuiTests
                 Native.bcs_xui_events(&events, 1),
                 Native.bcs_xui_set_rect(0, 0f, 0f, 1f, 1f),
                 Native.bcs_xui_get_visible(0, &flag),
+                Native.bcs_xui_set_image(0, "icons/ui/menu.png"),
                 Native.bcs_xui_set_visible(0, 1),
                 Native.bcs_xui_set_layer(0, 1),
                 Native.bcs_xui_rect(0, &rect),

@@ -53,15 +53,6 @@ public sealed class EditorPanelAttribute(string document) : Attribute
     /// <summary>Where it sits among the other panels of its dock. Lower is first.</summary>
     public int Order { get; init; }
 
-    /// <summary>
-    /// Whether it takes whatever height its dock has left over.
-    /// </summary>
-    /// <remarks>
-    /// What a list wants: as long as the screen allows, without the panel knowing how tall the
-    /// screen is or what else is open. Two panels that both fill share what is left equally.
-    /// </remarks>
-    public bool Fill { get; init; }
-
     /// <summary>Its offset inside that dock, or its left edge when the panel floats.</summary>
     public float X { get; init; }
 

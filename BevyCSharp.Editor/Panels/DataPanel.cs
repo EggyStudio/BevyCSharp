@@ -4,32 +4,36 @@ using BevyCSharp.Editor.Framework;
 namespace BevyCSharp.Editor.Panels;
 
 /// <summary>
-/// What the selected entity carries, a row per field, with an editor that suits the field.
+/// Whatever is selected, in detail: an entity's components or an asset's particulars.
 /// </summary>
 /// <remarks>
 /// <para>
-/// The payoff of everything under it. The bridge answers what an entity carries in component ids
-/// and can name one; the generator emits a field table per component; this puts the two together
-/// and gets an editable row without a single type being named here. An entity carrying a component
-/// this editor has never heard of shows a heading and no rows, which is the truthful answer.
+/// One panel rather than one per kind of thing. What a person wants when they pick something is
+/// to see what it is, and which sort of thing it happens to be should not move where the answer
+/// appears. The panel changes its heading and its rows; it does not change its place.
 /// </para>
 /// <para>
-/// A row is not a text box. What a field is decides what is drawn: three boxes for a vector, a
-/// checkbox for a flag, a button that opens the list for a choice, one box for a number, and a
-/// button for a method. The document declares every one of those on every row and the panel shows
-/// the ones that row needs, which is how a fixed document draws a shape it did not know about.
+/// For an entity the bridge answers what it carries in component ids and can name one, the
+/// generator emits a field table per component, and this puts the two together: an editable row
+/// without a single type being named here. A component the editor has never heard of shows a
+/// heading and no rows, which is the truthful answer.
+/// </para>
+/// <para>
+/// A row is not a text box. What a field is decides what is drawn: a box for a number, three rows
+/// for a vector, a checkbox for a flag, a button that opens the list for a choice, a button for a
+/// method. The document declares each of those on every row and the panel shows the ones that row
+/// needs, which is how a fixed document draws a shape it did not know about.
 /// </para>
 /// </remarks>
 [EditorPanel(
-    "panels/entity.html",
-    Root = "#entity",
-    Handle = "#entity-title",
-    Dock = EditorDock.Right,
-    Fill = true)]
-public sealed partial class EntityPanel
+    "panels/data.html",
+    Root = "#data",
+    Handle = "#data-title",
+    Dock = EditorDock.Right)]
+public sealed partial class DataPanel
 {
     /// <summary>How many rows the document declares.</summary>
-    public const int Rows = 22;
+    public const int Rows = 24;
 
     /// <summary>What kind of thing a row stands for.</summary>
     private enum RowKind
@@ -37,7 +41,7 @@ public sealed partial class EntityPanel
         /// <summary>Nothing.</summary>
         Empty,
 
-        /// <summary>A component's name, with a button that takes it off.</summary>
+        /// <summary>A component's name. Right clicking one offers what can be done to it.</summary>
         Heading,
 
         /// <summary>A field with one value: a number, a name, something with no better editor.</summary>
@@ -47,8 +51,7 @@ public sealed partial class EntityPanel
         /// <remarks>
         /// A vector is three rows rather than three boxes on one row. The interface draws the text
         /// of only the first input of a row, whatever is written to the others, so three boxes
-        /// side by side would show one number and two empty boxes. Three rows is the same three
-        /// numbers, each in a box that draws.
+        /// side by side would show one number and two empty boxes.
         /// </remarks>
         Axis,
 
@@ -63,6 +66,9 @@ public sealed partial class EntityPanel
 
         /// <summary>The entity's name, which is not a component this side can describe.</summary>
         Name,
+
+        /// <summary>Something about an asset, which is read and not edited.</summary>
+        Fact,
     }
 
     /// <summary>What one row is, and what it writes to.</summary>
@@ -80,40 +86,52 @@ public sealed partial class EntityPanel
         int Component = 0,
         int Part = -1);
 
-    /// <summary>Each row's label: a component's name, or a field's.</summary>
-    [Bind("#ename", Count = Rows)]
+    /// <summary>Each row's label.</summary>
+    [Bind("#dname", Count = Rows)]
     public string[] Names = new string[Rows];
 
-    /// <summary>The single-value editor, for anything that is one number or one word.</summary>
-    [Bind("#ev", Count = Rows)]
+    /// <summary>The editor for anything that is one number or one word.</summary>
+    [Bind("#dv", Count = Rows)]
     public string[] Values = new string[Rows];
 
+    /// <summary>What a row shows when it is read and not edited.</summary>
+    [Bind("#dt", Count = Rows)]
+    public string[] Texts = new string[Rows];
+
     /// <summary>The checkbox a flag row draws.</summary>
-    [Bind("#ec", Count = Rows)]
+    [Bind("#dc", Count = Rows)]
     public bool[] Flags = new bool[Rows];
 
     /// <summary>What the row's button says, when it has one.</summary>
-    [Bind("#eb", Count = Rows)]
+    [Bind("#dbtext", Count = Rows)]
     public string[] Buttons = new string[Rows];
 
     /// <summary>Which rows stand for anything.</summary>
-    [Show("#erow", Count = Rows)]
+    [Show("#drow", Count = Rows)]
     public bool[] Shown = new bool[Rows];
 
-    /// <summary>Which rows draw the single-value editor.</summary>
-    [Show("#ev", Count = Rows)]
+    /// <summary>Which rows draw an editor.</summary>
+    [Show("#dv", Count = Rows)]
     public bool[] ShowValue = new bool[Rows];
 
+    /// <summary>Which rows draw a plain value.</summary>
+    [Show("#dt", Count = Rows)]
+    public bool[] ShowText = new bool[Rows];
+
     /// <summary>Which rows draw a checkbox.</summary>
-    [Show("#ec", Count = Rows)]
+    [Show("#dc", Count = Rows)]
     public bool[] ShowFlag = new bool[Rows];
 
     /// <summary>Which rows draw a button.</summary>
-    [Show("#eb", Count = Rows)]
+    [Show("#db", Count = Rows)]
     public bool[] ShowButton = new bool[Rows];
 
-    /// <summary>Which entity is being shown.</summary>
-    [Bind("#e-subject", Mode = BindMode.OneWay)]
+    /// <summary>What sort of thing is being shown.</summary>
+    [Bind("#d-kind", Mode = BindMode.OneWay)]
+    public string Kind { get; private set; } = "Data";
+
+    /// <summary>Which one.</summary>
+    [Bind("#d-subject", Mode = BindMode.OneWay)]
     public string Subject { get; private set; } = string.Empty;
 
     /// <summary>What each row stands for.</summary>
@@ -132,10 +150,22 @@ public sealed partial class EntityPanel
     [OnRefresh]
     public void Fill()
     {
+        Roll();
+
+        if (EditorSelection.Latest == SelectionKind.Asset)
+        {
+            FillAsset();
+            return;
+        }
+
+        FillEntity();
+    }
+
+    /// <summary>Shows what an entity carries.</summary>
+    private void FillEntity()
+    {
         var world = EditorShell.Ecs;
         var entity = EditorSelection.Current;
-
-        Roll();
 
         if (entity != _subject)
         {
@@ -143,6 +173,7 @@ public sealed partial class EntityPanel
             _scroll = 0;
         }
 
+        Kind = "Entity";
         _all.Clear();
 
         if (entity.IsNone)
@@ -161,7 +192,7 @@ public sealed partial class EntityPanel
             if (schema is null)
             {
                 // Named and nothing else. An engine component with no mirror on this side has
-                // fields, and none of them can be read from here, so the row says what is there
+                // fields and none of them can be read from here, so the row says what is there
                 // rather than pretending otherwise.
                 _all.Add(new Row(RowKind.Heading, Component: id));
                 continue;
@@ -182,11 +213,78 @@ public sealed partial class EntityPanel
             }
 
             foreach (var method in schema.Methods)
-            {
                 _all.Add(new Row(RowKind.Method, schema, Method: method));
-            }
         }
 
+        Draw(world, entity);
+    }
+
+    /// <summary>Shows what a file is.</summary>
+    private void FillAsset()
+    {
+        Kind = "Asset";
+        _all.Clear();
+        _subject = Entity.None;
+
+        if (EditorAssets.Selected is not { } relative)
+        {
+            Subject = "nothing selected";
+            Blank(0);
+            return;
+        }
+
+        Subject = Path.GetFileName(relative);
+
+        var file = new FileInfo(EditorAssets.Absolute(relative));
+        var written = 0;
+
+        Fact(ref written, "Path", relative);
+        Fact(ref written, "Kind", EditorAssets.KindOf(relative));
+
+        if (file.Exists)
+        {
+            Fact(ref written, "Size", Size(file.Length));
+            Fact(ref written, "Changed", file.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
+        }
+        else
+        {
+            Fact(ref written, "State", "gone from disk");
+        }
+
+        Fact(
+            ref written,
+            "Reloads",
+            EditorAssets.Reloads(relative) ? "yes, while running" : "no");
+
+        // The path the engine would be given, which is the one to type into a document or a
+        // script. Worth showing because it is not the same as the path on disk.
+        Fact(ref written, "Load as", relative);
+
+        Blank(written);
+    }
+
+    /// <summary>Adds one line of an asset's description.</summary>
+    private void Fact(ref int row, string name, string value)
+    {
+        if (row >= Rows) return;
+
+        _rows[row] = new Row(RowKind.Fact);
+        Names[row] = name;
+        Texts[row] = value;
+        Values[row] = string.Empty;
+        Buttons[row] = string.Empty;
+        Flags[row] = false;
+        Shown[row] = true;
+        ShowText[row] = true;
+        ShowValue[row] = false;
+        ShowFlag[row] = false;
+        ShowButton[row] = false;
+        row++;
+    }
+
+    /// <summary>Writes the screenful of rows the pool is looking at.</summary>
+    private void Draw(EcsWorld world, Entity entity)
+    {
         _scroll = Math.Clamp(_scroll, 0, Math.Max(0, _all.Count - Rows));
 
         var written = 0;
@@ -218,9 +316,11 @@ public sealed partial class EntityPanel
 
         Shown[row] = true;
         ShowValue[row] = false;
+        ShowText[row] = false;
         ShowFlag[row] = false;
         ShowButton[row] = false;
         Values[row] = string.Empty;
+        Texts[row] = string.Empty;
         Buttons[row] = string.Empty;
         Flags[row] = false;
 
@@ -234,8 +334,6 @@ public sealed partial class EntityPanel
 
             case RowKind.Heading:
                 Names[row] = what.Schema?.Name ?? Short(world.ComponentName(what.Component));
-                Buttons[row] = EditorIcons.Remove;
-                ShowButton[row] = what.Schema is not null;
                 break;
 
             case RowKind.Method:
@@ -283,10 +381,12 @@ public sealed partial class EntityPanel
             _rows[i] = default;
             Names[i] = string.Empty;
             Values[i] = string.Empty;
+            Texts[i] = string.Empty;
             Buttons[i] = string.Empty;
             Flags[i] = false;
             Shown[i] = false;
             ShowValue[i] = false;
+            ShowText[i] = false;
             ShowFlag[i] = false;
             ShowButton[i] = false;
         }
@@ -308,7 +408,7 @@ public sealed partial class EntityPanel
     /// <remarks>
     /// Once a frame however many rows were touched, and only the rows that changed: a row whose
     /// value still reads as what the world says is not written, so an entity being moved by a
-    /// script is not fought over by an inspector writing back what it read last frame.
+    /// script is not fought over by a panel writing back what it read last frame.
     /// </remarks>
     [OnChange]
     public void Apply()
@@ -381,7 +481,7 @@ public sealed partial class EntityPanel
     }
 
     /// <summary>Runs whatever the row's button offers.</summary>
-    [Command("#eb", Count = Rows)]
+    [Command("#db", Count = Rows)]
     public void Press(int row)
     {
         var world = EditorShell.Ecs;
@@ -390,15 +490,6 @@ public sealed partial class EntityPanel
 
         switch (what.Kind)
         {
-            case RowKind.Heading when what.Schema is { } schema:
-                if (!schema.Remove(world, entity)) return;
-
-                EditorHistory.Record(
-                    $"remove {schema.Name}",
-                    undo => schema.Add(undo, entity),
-                    redo => schema.Remove(redo, entity));
-                return;
-
             case RowKind.Method when what.Method is { } method:
                 method.Run(world, entity);
                 return;
@@ -407,6 +498,85 @@ public sealed partial class EntityPanel
                 Choose(row, field, entity);
                 return;
         }
+    }
+
+    /// <summary>Offers what can be done to the component a row belongs to.</summary>
+    /// <remarks>
+    /// A right click rather than a button on the row. A row with a cross on it says "delete me" in
+    /// the corner of the eye all day for the one time it is wanted, and there is more than one
+    /// thing to offer anyway.
+    /// </remarks>
+    [Context("#drow", Count = Rows)]
+    public void RowMenu(int row)
+    {
+        if (_rows[row].Schema is not { } schema) return;
+
+        var entity = _subject;
+        var (x, y) = EditorShell.Context?.Input.MousePosition ?? (0f, 0f);
+
+        EditorShell.ShowMenu(
+            schema.Name,
+            [
+                new MenuItem(
+                    "Reset",
+                    MenuKind.Command,
+                    world =>
+                    {
+                        // Removing and adding again is what "reset" means for a component whose
+                        // fields this side can write: the value it comes back as is the one the
+                        // type declares.
+                        var before = Snapshot(schema, world, entity);
+                        if (!schema.Remove(world, entity)) return;
+                        if (!schema.Add(world, entity)) return;
+
+                        EditorHistory.Record(
+                            $"reset {schema.Name}",
+                            undo => Restore(schema, undo, entity, before),
+                            redo =>
+                            {
+                                redo.RemoveById(entity, schema.Id);
+                                schema.Add(redo, entity);
+                            });
+                    }),
+                new MenuItem(
+                    "Remove",
+                    MenuKind.Command,
+                    world =>
+                    {
+                        var before = Snapshot(schema, world, entity);
+                        if (!schema.Remove(world, entity)) return;
+
+                        EditorHistory.Record(
+                            $"remove {schema.Name}",
+                            undo => Restore(schema, undo, entity, before),
+                            redo => schema.Remove(redo, entity));
+                    }),
+            ],
+            x,
+            y);
+    }
+
+    /// <summary>Every field of a component, so removing it can be taken back.</summary>
+    private static Dictionary<string, object> Snapshot(
+        ComponentSchema schema, EcsWorld world, Entity entity)
+    {
+        var values = new Dictionary<string, object>();
+
+        foreach (var field in schema.Fields)
+        {
+            if (field.Read(world, entity) is { } value) values[field.Name] = value;
+        }
+
+        return values;
+    }
+
+    /// <summary>Puts a snapshot back onto an entity.</summary>
+    private static void Restore(
+        ComponentSchema schema, EcsWorld world, Entity entity, Dictionary<string, object> values)
+    {
+        schema.Add(world, entity);
+
+        foreach (var (name, value) in values) schema.Write(world, entity, name, value);
     }
 
     /// <summary>Opens the list of names a choice field can take, under the button that asks.</summary>
@@ -434,12 +604,12 @@ public sealed partial class EntityPanel
                 }));
         }
 
-        var (x, y) = Under($"eb-{row}");
+        var (x, y) = Under($"db-{row}");
         EditorShell.ShowMenu(field.Name, items, x, y);
     }
 
     /// <summary>Offers the components that can be put on the selection.</summary>
-    [Command("#e-add")]
+    [Command("#d-add")]
     public void AddComponent()
     {
         if (_subject.IsNone) return;
@@ -453,7 +623,7 @@ public sealed partial class EntityPanel
             if (!schema.CanAdd) continue;
 
             var chosen = schema;
-            var already = false;
+            bool already;
 
             // A component cannot resolve an id on a build that has no such component, and a
             // schema for one is skipped rather than allowed to take the menu down with it.
@@ -482,42 +652,10 @@ public sealed partial class EntityPanel
                 }));
         }
 
-        if (items.Count == 0)
-        {
-            items.Add(new MenuItem("nothing left to add", MenuKind.Separator));
-        }
+        if (items.Count == 0) items.Add(new MenuItem("nothing left to add", MenuKind.Separator));
 
-        var (x, y) = Under("e-add");
+        var (x, y) = Under("d-add");
         EditorShell.ShowMenu("Add component", items, x, y);
-    }
-
-    /// <summary>Offers what can be done to the component a row belongs to.</summary>
-    [Context("#erow", Count = Rows)]
-    public void RowMenu(int row)
-    {
-        if (_rows[row].Schema is not { } schema) return;
-
-        var entity = _subject;
-        var (x, y) = EditorShell.Context?.Input.MousePosition ?? (0f, 0f);
-
-        EditorShell.ShowMenu(
-            schema.Name,
-            [
-                new MenuItem(
-                    "Remove",
-                    MenuKind.Command,
-                    world =>
-                    {
-                        if (!schema.Remove(world, entity)) return;
-
-                        EditorHistory.Record(
-                            $"remove {schema.Name}",
-                            undo => schema.Add(undo, entity),
-                            redo => schema.Remove(redo, entity));
-                    }),
-            ],
-            x,
-            y);
     }
 
     /// <summary>Where a menu opened from one of this panel's elements should sit.</summary>
@@ -541,7 +679,7 @@ public sealed partial class EntityPanel
     };
 
     /// <summary>
-    /// A vector or a rotation as the three boxes show it.
+    /// A vector or a rotation as three numbers.
     /// </summary>
     /// <remarks>
     /// A rotation is shown as the three angles it turns through, in degrees, because four numbers
@@ -584,8 +722,8 @@ public sealed partial class EntityPanel
     /// <summary>Whether a value is close enough to what is on screen to leave alone.</summary>
     /// <remarks>
     /// Rounded to what the boxes actually show, because a box showing three decimals is not a
-    /// disagreement with a value that has more of them, and writing back on every frame would
-    /// fight anything else moving the entity.
+    /// disagreement with a value that has more of them, and writing back every frame would fight
+    /// anything else moving the entity.
     /// </remarks>
     private static bool Same(object? current, object composed) => (current, composed) switch
     {
@@ -598,6 +736,14 @@ public sealed partial class EntityPanel
 
     /// <summary>A number as a box shows it.</summary>
     private static string Number(float value) => value.ToString("0.###");
+
+    /// <summary>A byte count as a person reads one.</summary>
+    private static string Size(long bytes) => bytes switch
+    {
+        < 1024 => $"{bytes} B",
+        < 1024 * 1024 => $"{bytes / 1024f:0.#} KB",
+        _ => $"{bytes / (1024f * 1024f):0.#} MB",
+    };
 
     /// <summary>The last part of an engine component's path, which is its name.</summary>
     private static string Short(string name)

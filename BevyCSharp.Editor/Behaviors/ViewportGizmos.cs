@@ -36,8 +36,15 @@ public partial struct ViewportGizmos
     /// <summary>What a handle is drawn along.</summary>
     internal static readonly Vec3[] Axes = [Vec3.UnitX, Vec3.UnitY, Vec3.UnitZ];
 
-    /// <summary>Draws the box, the handles and the orientation cross.</summary>
-    [OnUpdate]
+    /// <summary>
+    /// Draws the box, the handles and the orientation cross.
+    /// </summary>
+    /// <remarks>
+    /// At the end of the frame rather than during the update, because the bounds a box is drawn
+    /// from come from the global transform, and that is propagated after the update: drawing
+    /// earlier draws where the thing was, which reads as a gizmo lagging behind what it is on.
+    /// </remarks>
+    [OnLast]
     public static void Draw(BehaviorContext ctx)
     {
         if (!App.HasRenderer) return;
@@ -157,26 +164,51 @@ public partial struct ViewportGizmos
     {
         var camera = EditorSelection.Camera;
         if (camera.IsNone) return;
-        if (!ctx.Ecs.TryGet<Transform>(camera, out var transform)) return;
 
-        var rotation = transform.Rotation;
-        var forward = rotation * new Vec3(0f, 0f, -1f);
-        var right = rotation * Vec3.UnitX;
-        var up = rotation * Vec3.UnitY;
+        // Where it goes is the interface's answer, not a guess: the toolbar reserves an empty
+        // square in the bottom right and reports where the layout put it, so the cross sits beside
+        // the buttons and moves with them. The viewport's own corner is the fallback for a frame
+        // before the bar has been measured, or with the bar closed.
+        var viewport = EditorShell.Layout.Viewport;
+        if (viewport.Width < 1f) return;
 
-        const float Ahead = 2f;
-        const float Size = 0.09f;
+        const float Inset = 74f;
+        const float Fallback = 48f;
 
-        // Bottom right of the view, far enough in not to be clipped by the edge of the screen at
-        // the field of view the editor's camera uses.
-        var origin = transform.Translation
-            + (forward * Ahead)
-            + (right * Ahead * 0.62f)
-            - (up * Ahead * 0.36f);
+        var (x, y) = EditorGizmoSlot.Known
+            ? EditorGizmoSlot.Centre
+            : (viewport.Right - Inset, viewport.Bottom - Inset);
 
+        var square = EditorGizmoSlot.Known ? EditorGizmoSlot.Size : Fallback;
+
+        if (!Render.TryRay(camera, x, y, out var origin, out var direction)) return;
+
+        // Close enough to the camera that nothing in the scene can get in front of it. Drawn in
+        // the world, a cross two metres out is behind the first wall the camera flies up to; a few
+        // centimetres out is inside everything.
+        const float Ahead = 0.3f;
+
+        var centre = origin + (direction * Ahead);
+
+        // How long an arm has to be, asked rather than assumed: the ray through a point half the
+        // square away lands somewhere at the same depth, and how far that is from the centre is
+        // exactly what a half-square measures in the world. No field of view appears here, so a
+        // camera set up any way at all draws a cross the size of its square.
+        if (!Render.TryRay(camera, x + (square * 0.42f), y, out var edge, out var sideways)) return;
+
+        var size = (edge + (sideways * Ahead) - centre).Length;
+
+        // Six arms rather than three. Three says which way X, Y and Z point and leaves a person to
+        // work out where the other halves went; six is the widget every editor draws, and the
+        // negative halves are dimmed so the positive ones are still the ones read first.
         for (var i = 0; i < 3; i++)
         {
-            Gizmos.Line(origin, origin + (Axes[i] * Size * Ahead), AxisColours[i]);
+            var (r, g, b, _) = AxisColours[i];
+            var arm = Axes[i] * size;
+
+            Gizmos.Line(centre, centre + arm, AxisColours[i]);
+            Gizmos.Sphere(centre + arm, size * 0.18f, AxisColours[i]);
+            Gizmos.Line(centre, centre - arm, (r * 0.45f, g * 0.45f, b * 0.45f, 1f));
         }
     }
 

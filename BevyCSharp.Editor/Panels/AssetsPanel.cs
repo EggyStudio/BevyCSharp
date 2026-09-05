@@ -4,87 +4,130 @@ using BevyCSharp.Editor.Framework;
 namespace BevyCSharp.Editor.Panels;
 
 /// <summary>
-/// The files the editor is running out of.
+/// The files the editor is running out of: directories on the left, what is in one on the right.
 /// </summary>
 /// <remarks>
 /// <para>
 /// A browser over the asset directory itself, so what is listed is exactly what a path in a
-/// document or a script would find. It lives along the bottom because it wants width rather than
-/// height, and it is a tab because it is opened, used and minimised again.
+/// document or a script would find. It lives along the bottom of the viewport because it wants
+/// width rather than height, and it is a tab because it is opened, used and minimised again.
 /// </para>
 /// <para>
-/// Clicking a file points the asset panel at it. Clicking a directory goes into it. Nothing here
-/// imports or catalogues anything, because the engine does not work that way either.
+/// Split in two the way every content browser is: the shape of the directory on one side and its
+/// contents on the other, so going somewhere and looking at what is there are two motions rather
+/// than one list that keeps changing under the pointer.
 /// </para>
 /// </remarks>
 [EditorPanel(
     "panels/assets.html",
     Root = "#assets",
     Handle = "#assets-title",
-    Dock = EditorDock.Bottom,
-    Height = 176f)]
+    Dock = EditorDock.Bottom)]
 public sealed partial class AssetsPanel
 {
-    /// <summary>How many entries the document can draw.</summary>
-    public const int Rows = 12;
+    /// <summary>How many directories the tree can draw.</summary>
+    public const int Folders = 10;
 
-    /// <summary>What each row says.</summary>
-    [Bind("#arow", Count = Rows)]
-    public string[] Labels = new string[Rows];
+    /// <summary>How many files the tiles can draw.</summary>
+    public const int Tiles = 24;
 
-    /// <summary>Which rows stand for anything.</summary>
-    [Show("#arow", Count = Rows)]
-    public bool[] Shown = new bool[Rows];
+    /// <summary>What each row of the tree says.</summary>
+    [Bind("#aftext", Count = Folders)]
+    public string[] FolderNames = new string[Folders];
+
+    /// <summary>Which rows of the tree stand for anything.</summary>
+    [Show("#afolder", Count = Folders)]
+    public bool[] FolderShown = new bool[Folders];
+
+    /// <summary>What each tile says.</summary>
+    [Bind("#attext", Count = Tiles)]
+    public string[] TileNames = new string[Tiles];
+
+    /// <summary>Which tiles stand for anything.</summary>
+    [Show("#atile", Count = Tiles)]
+    public bool[] TileShown = new bool[Tiles];
 
     /// <summary>Which directory is being looked at.</summary>
     [Bind("#a-path", Mode = BindMode.OneWay)]
     public string Where =>
         EditorAssets.Directory.Length == 0 ? "assets" : "assets/" + EditorAssets.Directory;
 
-    /// <summary>Goes up a directory.</summary>
-    [Bind("#a-up", Mode = BindMode.OneWay)]
-    public string UpIcon => EditorIcons.Up;
+    /// <summary>What each row of the tree stands for: a path, or null for the way up.</summary>
+    private readonly string?[] _folders = new string?[Folders];
 
-    /// <summary>What each row stands for.</summary>
-    private readonly AssetEntry[] _entries = new AssetEntry[Rows];
+    /// <summary>What each tile stands for.</summary>
+    private readonly AssetEntry[] _tiles = new AssetEntry[Tiles];
 
-    /// <summary>How far down the listing the pool is looking.</summary>
+    /// <summary>How far down the files the tiles are looking.</summary>
     private int _scroll;
 
-    /// <summary>Fills the rows from the directory.</summary>
+    /// <summary>Fills the tree and the tiles from the directory.</summary>
     [OnRefresh]
     public void Fill()
     {
         Roll();
 
         var entries = EditorAssets.List();
-        _scroll = Math.Clamp(_scroll, 0, Math.Max(0, entries.Count - Rows));
-
         var written = 0;
-        for (var i = _scroll; i < entries.Count && written < Rows; i++)
-        {
-            var entry = entries[i];
 
-            // A directory says so by ending in a slash, which is how a path reads anyway, and a
-            // selected file is marked the way a selected row is everywhere else.
-            Labels[written] = entry.IsDirectory
-                ? "  " + entry.Name + EditorIcons.Directory
-                : (entry.Path == EditorAssets.Selected ? EditorIcons.Selected + " " : "  ")
-                    + entry.Name;
-            _entries[written] = entry;
-            Shown[written] = true;
+        // The way up is the first row of the tree, so a person is never stuck in a directory.
+        if (EditorAssets.Directory.Length > 0)
+        {
+            FolderNames[written] = EditorIcons.Up + " ..";
+            _folders[written] = null;
+            FolderShown[written] = true;
             written++;
         }
 
-        for (var i = written; i < Rows; i++)
+        foreach (var entry in entries)
         {
-            Labels[i] = string.Empty;
-            _entries[i] = default;
-            Shown[i] = false;
+            if (!entry.IsDirectory) continue;
+            if (written >= Folders) break;
+
+            FolderNames[written] = "  " + entry.Name + EditorIcons.Directory;
+            _folders[written] = entry.Path;
+            FolderShown[written] = true;
+            written++;
+        }
+
+        for (var i = written; i < Folders; i++)
+        {
+            FolderNames[i] = string.Empty;
+            _folders[i] = null;
+            FolderShown[i] = false;
+        }
+
+        var files = new List<AssetEntry>();
+        foreach (var entry in entries)
+        {
+            if (!entry.IsDirectory) files.Add(entry);
+        }
+
+        _scroll = Math.Clamp(_scroll, 0, Math.Max(0, files.Count - Tiles));
+
+        var tile = 0;
+        for (var i = _scroll; i < files.Count && tile < Tiles; i++)
+        {
+            var entry = files[i];
+
+            TileNames[tile] = entry.Path == EditorAssets.Selected
+                ? EditorIcons.Selected + " " + entry.Name
+                : "  " + entry.Name;
+
+            _tiles[tile] = entry;
+            TileShown[tile] = true;
+            tile++;
+        }
+
+        for (var i = tile; i < Tiles; i++)
+        {
+            TileNames[i] = string.Empty;
+            _tiles[i] = default;
+            TileShown[i] = false;
         }
     }
 
-    /// <summary>Scrolls the listing when the wheel is rolled over it.</summary>
+    /// <summary>Scrolls the tiles when the wheel is rolled over the panel.</summary>
     private void Roll()
     {
         if (EditorShell.Context is not { } ctx) return;
@@ -93,44 +136,58 @@ public sealed partial class AssetsPanel
         if (wheel == 0f) return;
         if (Window?.Covers(ctx.Input.MouseX, ctx.Input.MouseY) != true) return;
 
-        _scroll = Math.Max(0, _scroll - ((int)wheel * 2));
+        _scroll = Math.Max(0, _scroll - ((int)wheel * 4));
     }
 
-    /// <summary>Goes into a directory, or points the asset panel at a file.</summary>
-    [Command("#arow", Count = Rows)]
-    public void Choose(int row)
+    /// <summary>Goes into a directory, or up out of one.</summary>
+    [Command("#afolder", Count = Folders)]
+    public void Enter(int row)
     {
-        if (!Shown[row]) return;
+        if (!FolderShown[row]) return;
 
-        var entry = _entries[row];
+        if (_folders[row] is { } path) EditorAssets.Enter(path);
+        else EditorAssets.Up();
 
-        if (entry.IsDirectory)
-        {
-            EditorAssets.Enter(entry.Path);
-            _scroll = 0;
-            return;
-        }
-
-        EditorAssets.Select(entry.Path);
-
-        // The right column answers what is selected, whichever kind of thing that is, so picking
-        // a file opens the panel that describes one.
-        if (EditorShell.Find<AssetPanel>() is null) EditorShell.Show(new AssetPanel());
-    }
-
-    /// <summary>Goes up one directory.</summary>
-    [Command("#a-up")]
-    public void Up()
-    {
-        EditorAssets.Up();
         _scroll = 0;
     }
 
-    /// <summary>Compiles the scripts directory again.</summary>
-    /// <remarks>
-    /// The watcher does this on its own when a file changes. The button is for the case it cannot
-    /// see: a file written by something that does not touch the directory it watches.
-    /// </remarks>
-    [Command("#a-reload")]
-    public void Reload() => EditorScripts.Reload();
+    /// <summary>Points the data panel at a file.</summary>
+    [Command("#atile", Count = Tiles)]
+    public void Choose(int tile)
+    {
+        if (!TileShown[tile]) return;
+
+        EditorAssets.Select(_tiles[tile].Path);
+
+        // The right column answers what is selected, whichever kind of thing that is, so picking
+        // a file opens the panel that describes one.
+        if (EditorShell.Find<DataPanel>() is null) EditorShell.Show(new DataPanel());
+    }
+
+    /// <summary>Offers what can be done with a file.</summary>
+    [Context("#atile", Count = Tiles)]
+    public void TileMenu(int tile)
+    {
+        if (!TileShown[tile]) return;
+
+        var entry = _tiles[tile];
+        EditorAssets.Select(entry.Path);
+
+        var (x, y) = EditorShell.Context?.Input.MousePosition ?? (0f, 0f);
+
+        EditorShell.ShowMenu(
+            entry.Name,
+            [
+                new MenuItem(
+                    "Reload scripts",
+                    MenuKind.Command,
+                    static _ => EditorScripts.Reload()),
+                new MenuItem(
+                    "Copy path to the console",
+                    MenuKind.Command,
+                    _ => Console.WriteLine($"[assets] {entry.Path}")),
+            ],
+            x,
+            y);
+    }
 }

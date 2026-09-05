@@ -228,6 +228,19 @@ public static unsafe class Xui
         Native.bcs_xui_set_visible(element.Bits, visible ? 1 : 0), $"showing {element}");
 
     /// <summary>
+    /// Points an image element at a file, relative to the asset root.
+    /// </summary>
+    /// <remarks>
+    /// What lets a picture be a decision the program makes rather than one the document does: a
+    /// toolbar whose buttons come from a table needs to say which icon each one draws. Passing
+    /// nothing clears it.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The element is gone or draws no image.</exception>
+    public static void SetImage(Entity element, string? path) => Native.Check(
+        Native.bcs_xui_set_image(element.Bits, path ?? string.Empty),
+        $"setting the image of {element}");
+
+    /// <summary>
     /// Whether an element is on screen.
     /// </summary>
     /// <remarks>

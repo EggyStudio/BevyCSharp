@@ -28,24 +28,55 @@ public static class PanelBinding
     /// </remarks>
     public static Entity Focused { get; internal set; } = Entity.None;
 
-    /// <summary>
-    /// The frame being drawn, so a widget that is not drawing what it holds can be nudged.
-    /// </summary>
-    /// <remarks>
-    /// The interface rebuilds an input from its template shortly after it is built, and that
-    /// leaves what is drawn behind what the widget holds: the box is empty and the widget agrees
-    /// with the panel, so nothing ever writes again and the box stays empty. Writing the same
-    /// value is not a change and redraws nothing. Twice a second, a value that already matches is
-    /// therefore written with a space after it, which is a change the eye cannot see, and the
-    /// next one writes it back without. Everything that reads a value back trims it.
-    /// </remarks>
+    /// <summary>The frame being drawn, for the settling window below.</summary>
     internal static ulong Frame { get; set; }
 
-    /// <summary>How often a value is written again whether or not it changed.</summary>
-    private const ulong Heartbeat = 30;
+    /// <summary>
+    /// When each element was first written to, so a new one can be written to twice.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The interface rebuilds an input from its template shortly after building it, which leaves
+    /// what is drawn behind what the widget holds: the box is empty, the widget agrees with the
+    /// panel, and nothing ever writes again. Writing the same value is not a change and redraws
+    /// nothing, so for a moment after an element first appears a matching value is written with a
+    /// space after it, which is a change, and then written back without one.
+    /// </para>
+    /// <para>
+    /// Only for a moment. Every write makes the widget restyle, and a restyle draws one frame at
+    /// the wrong font size, so doing this forever is a flicker twice a second forever. Doing it
+    /// while a panel is appearing hides it in the appearing.
+    /// </para>
+    /// </remarks>
+    private static readonly Dictionary<Entity, ulong> FirstWritten = [];
 
-    /// <summary>Whether this frame is one of the ones that writes regardless.</summary>
-    private static bool Repaint => Frame % Heartbeat == 0;
+    /// <summary>How long an element is written to twice after it appears.</summary>
+    private const ulong Settling = 40;
+
+    /// <summary>Whether an element is new enough to still be settling.</summary>
+    private static bool Unsettled(Entity element)
+    {
+        if (!FirstWritten.TryGetValue(element, out var first))
+        {
+            FirstWritten[element] = Frame;
+            return true;
+        }
+
+        return Frame - first < Settling;
+    }
+
+    /// <summary>
+    /// Forgets which elements have settled, because they are about to be replaced.
+    /// </summary>
+    /// <remarks>
+    /// Called when the interface is rebuilt. Without it the table grows with every rebuild and,
+    /// worse, an element that reused an old entity's identity would be taken for settled.
+    /// </remarks>
+    internal static void Forget()
+    {
+        FirstWritten.Clear();
+        Focused = Entity.None;
+    }
 
     /// <summary>Writes a flag out to a checkbox, a switch or a toggle.</summary>
     public static void PullFlag(Entity element, bool value)
@@ -60,7 +91,7 @@ public static class PanelBinding
     public static void PullNumber(Entity element, float value)
     {
         if (element.IsNone) return;
-        if (!Repaint && Nearly(Xui.GetNumber(element), value)) return;
+        if (Nearly(Xui.GetNumber(element), value) && !Unsettled(element)) return;
 
         Xui.SetNumber(element, value);
     }
@@ -84,9 +115,9 @@ public static class PanelBinding
 
         if (current == text)
         {
-            if (!Repaint) return;
-
-            Xui.SetText(element, text + " ");
+            // Written a second time only while the element is new, and with a space after it so
+            // that it counts as a change. See the note on the settling window above.
+            if (Unsettled(element)) Xui.SetText(element, text + " ");
             return;
         }
 
@@ -113,7 +144,7 @@ public static class PanelBinding
     public static void PullVisible(Entity element, bool value)
     {
         if (element.IsNone) return;
-        if (!Repaint && Xui.IsVisible(element) == value) return;
+        if (Xui.IsVisible(element) == value) return;
 
         Xui.SetVisible(element, value);
     }

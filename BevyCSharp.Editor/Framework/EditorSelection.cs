@@ -2,6 +2,19 @@ using Bevy;
 
 namespace BevyCSharp.Editor.Framework;
 
+/// <summary>What sort of thing the editor is pointed at.</summary>
+public enum SelectionKind
+{
+    /// <summary>Nothing.</summary>
+    None,
+
+    /// <summary>An entity in the world.</summary>
+    Entity,
+
+    /// <summary>A file in the asset directory.</summary>
+    Asset,
+}
+
 /// <summary>
 /// What the editor is currently pointed at.
 /// </summary>
@@ -19,6 +32,13 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 public static class EditorSelection
 {
+    /// <summary>Which kind of thing was picked last.</summary>
+    /// <remarks>
+    /// The data panel shows one thing, and this is how it knows which: picking a file does not
+    /// deselect an entity, it just becomes the more recent answer to "what am I looking at".
+    /// </remarks>
+    public static SelectionKind Latest { get; internal set; } = SelectionKind.None;
+
     /// <summary>The selected entity, or <see cref="Entity.None"/>.</summary>
     public static Entity Current { get; private set; } = Entity.None;
 
@@ -44,6 +64,7 @@ public static class EditorSelection
         if (entity == Current) return;
 
         Current = entity;
+        Latest = entity.IsNone ? SelectionKind.None : SelectionKind.Entity;
         ChangedOn = EditorShell.Context?.Time.FrameCount ?? 0;
     }
 

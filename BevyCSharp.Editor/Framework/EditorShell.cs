@@ -309,6 +309,7 @@ public static class EditorShell
 
                 case UiEventKind.Reloading:
                     foreach (var panel in Panels) panel.Window?.Suspend();
+                    PanelBinding.Forget();
                     break;
 
                 case UiEventKind.Reloaded:
@@ -327,6 +328,7 @@ public static class EditorShell
         // flyout is one of the events just drained and the flyout must not be dismissed by the
         // same press that opened it.
         Drag(input);
+        Resize(input);
         Dismiss(input);
         Menus(input);
 
@@ -343,6 +345,7 @@ public static class EditorShell
         // alone rather than overwritten with what the program still says.
         PanelBinding.Focused = Xui.Focused();
         PanelBinding.Frame = ctx.Time.FrameCount;
+        EditorWindow.Frame = ctx.Time.FrameCount;
 
         // Read the world first, arrange second, write the screen third. A panel that filled its
         // rows during this tick is one whose height changed, and the arrangement has to see that
@@ -368,6 +371,8 @@ public static class EditorShell
     private static void Rebuilding()
     {
         foreach (var panel in Panels) panel.Window?.Suspend();
+
+        PanelBinding.Forget();
     }
 
     /// <summary>
@@ -414,6 +419,76 @@ public static class EditorShell
         Layout.Place(drag.Panel, placement.MovedTo(x - drag.OffsetX, y - drag.OffsetY));
     }
 
+    /// <summary>What is being dragged to resize, or none.</summary>
+    private enum Edge
+    {
+        None,
+        Left,
+        Right,
+        Band,
+    }
+
+    /// <summary>Which edge a drag has hold of.</summary>
+    private static Edge _edge;
+
+    /// <summary>How near an edge the pointer has to be to take hold of it.</summary>
+    private const float Reach = 5f;
+
+    /// <summary>
+    /// Drags the edge of a column or of the tab band.
+    /// </summary>
+    /// <remarks>
+    /// The edges are not elements: a panel is a document and the gap between two of them belongs
+    /// to nothing. So the pointer is tested against where the layout says the edges are, which is
+    /// also what keeps the three numbers being dragged the same three the layout arranges from.
+    /// </remarks>
+    private static void Resize(Input input)
+    {
+        var (x, y) = input.MousePosition;
+
+        if (input.MouseReleased(MouseButton.Left)) _edge = Edge.None;
+
+        if (input.MousePressed(MouseButton.Left) && _edge == Edge.None && !_drag.HasValue)
+        {
+            var layout = Layout;
+
+            if (MathF.Abs(x - layout.LeftEdge) < Reach && layout.LeftEdge > 1f) _edge = Edge.Left;
+            else if (MathF.Abs(x - layout.RightEdge) < Reach && layout.RightEdge > 1f) _edge = Edge.Right;
+            else if (layout.BandOpen && MathF.Abs(y - layout.BottomEdge) < Reach) _edge = Edge.Band;
+        }
+
+        if (_edge == Edge.None || !input.MouseDown(MouseButton.Left)) return;
+
+        var (windowWidth, windowHeight) = Window.Size();
+
+        switch (_edge)
+        {
+            case Edge.Left:
+                Layout.LeftWidth = x - (Layout.Margin * 2f);
+                break;
+
+            case Edge.Right:
+                Layout.RightWidth = windowWidth - x - (Layout.Margin * 2f);
+                break;
+
+            case Edge.Band:
+                Layout.BottomHeight = windowHeight - y - StripHeight();
+                break;
+        }
+    }
+
+    /// <summary>How tall the tab strip is, which the band sits on top of.</summary>
+    private static float StripHeight()
+    {
+        foreach (var panel in Panels)
+        {
+            if (panel.Chrome.Placement.Dock != EditorDock.Strip) continue;
+            if (panel.Window?.Measure() is { } rect) return rect.Height;
+        }
+
+        return 0f;
+    }
+
     /// <summary>
     /// Opens the viewport's own menu when a right click landed on nothing.
     /// </summary>
@@ -427,17 +502,23 @@ public static class EditorShell
     {
         var (x, y) = input.MousePosition;
 
-        if (input.MousePressed(MouseButton.Right)) _rightPress = (x, y);
+        if (input.MousePressed(MouseButton.Right)) _rightMoved = 0f;
+
+        // While the camera is being steered the cursor is locked, so where it is does not change
+        // however far it is dragged. How far it moved is the only thing that tells a look from a
+        // click, and it is reported whether the cursor is locked or not.
+        if (input.MouseDown(MouseButton.Right))
+        {
+            var (dx, dy) = input.MouseDelta;
+            _rightMoved += MathF.Abs(dx) + MathF.Abs(dy);
+        }
 
         var wanted = _contextWanted;
         _contextWanted = false;
 
-        if (input.MouseReleased(MouseButton.Right) && _rightPress is { } press)
+        if (input.MouseReleased(MouseButton.Right) && _rightMoved < 6f && !PointerOverPanel(x, y))
         {
-            _rightPress = null;
-
-            var moved = MathF.Abs(x - press.X) + MathF.Abs(y - press.Y);
-            if (moved < 4f && !PointerOverPanel(x, y)) wanted = true;
+            wanted = true;
         }
 
         if (!wanted) return;
@@ -452,8 +533,8 @@ public static class EditorShell
     /// </remarks>
     public static Action<float, float>? ViewportMenu { get; set; }
 
-    /// <summary>Where the right button went down, so a click can be told from a look.</summary>
-    private static (float X, float Y)? _rightPress;
+    /// <summary>How far the pointer moved while the right button was held.</summary>
+    private static float _rightMoved;
 
     /// <summary>Whether an element reported a right click that nothing claimed.</summary>
     private static bool _contextWanted;

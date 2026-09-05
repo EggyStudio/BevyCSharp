@@ -73,7 +73,6 @@ internal enum ClickButton
 /// <param name="Width">How wide, or <c>NaN</c> for whatever the stylesheet says.</param>
 /// <param name="Height">How tall, or <c>NaN</c> for as tall as its contents.</param>
 /// <param name="Order">Where it sits among its dock's other panels.</param>
-/// <param name="Fill">Whether it takes what its dock has left over.</param>
 /// <param name="Dismiss">The <c>PanelDismiss</c> value it asked for.</param>
 /// <param name="Layer">Which panels it draws in front of.</param>
 internal sealed record PanelChromeModel(
@@ -85,7 +84,6 @@ internal sealed record PanelChromeModel(
     float Width,
     float Height,
     int Order,
-    bool Fill,
     int Dismiss,
     int Layer);
 

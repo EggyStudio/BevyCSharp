@@ -39,8 +39,12 @@ public static class EditorAssets
         Directory = cut < 0 ? string.Empty : Directory[..cut];
     }
 
-    /// <summary>Points the asset panel at a file.</summary>
-    public static void Select(string? relative) => Selected = relative;
+    /// <summary>Points the data panel at a file.</summary>
+    public static void Select(string? relative)
+    {
+        Selected = relative;
+        EditorSelection.Latest = relative is null ? SelectionKind.None : SelectionKind.Asset;
+    }
 
     /// <summary>
     /// What is in the current directory: directories first, then files, both by name.

@@ -23,17 +23,38 @@ an entity, an asset or a setting. Nothing is called a hierarchy or an inspector.
 
 | where | what | opens |
 |---|---|---|
-| top, centred | the tools, and the information button | always |
-| left column | the world: a tree, a search, and the editor's own commands | always |
-| right column | the entity, the asset, the rendering settings, the information | when something is selected or asked for |
-| bottom band | the asset browser and the console, and whatever else is given a tab | from its tab |
-| bottom strip | the tabs, and what the keys do | always |
+| left column | the world: a tree, a search, and one button that adds to it | always |
+| right column | whatever is selected: an entity's components, or an asset's particulars | when something is selected or asked for |
+| viewport corners | the menu and undo at the left, the tools in the middle, the information button at the right, the orientation cross at the bottom right | always |
+| bottom band | the asset browser or the console, whichever tab is open | from its tab |
+| bottom strip | the tabs, like a browser's | always |
+| over the viewport | what the keys do | always |
 | over everything | menus, dropdowns, context menus | while they are being read |
 
-The bottom band pushes the columns up rather than covering them, which is what `EditorDock` and
-the layout are for: a dock is a place panels share and reflow within, not a container that owns
-them. A panel can be dragged out of its dock by its title bar and becomes floating, which is one
-entry in a table that can be saved.
+**Three columns.** The side columns run the full height of the window and are as wide as their
+contents until their inner edge is dragged, up to a third of the window each. Everything between
+them is the viewport, and the viewport is split along its bottom by whichever tab is open, up to
+half the window. Those three numbers are the whole arrangement and all three are draggable.
+
+**A docked panel is as tall as its contents**, capped by what its column has left. There is no
+fill: a panel with four rows is four rows tall, and opening a tab along the bottom shortens
+whatever would have reached into it. The catch is that a panel given a height measures that height
+afterwards, so the layout remembers what each one measured while it was free and compares that
+against the room instead.
+
+**Nothing is pushed down by a toolbar**, because there is no bar: the tools float in the
+viewport's corners as round buttons over the scene, and they follow the viewport as columns open
+and close. What is in them is `EditorToolbar`, a table like the menu's, so a game adds a mode to
+the viewport by adding a line. A button carries a picture, a word, or both: a picture alone is a
+circle, a word alone a pill, and the slot and an order index are the whole of where it goes.
+
+**The orientation cross is laid out by the interface and drawn by the scene.** The bottom right
+bar holds an empty transparent square; the panel reads back where the layout put it and
+`EditorGizmoSlot` says so; `ViewportGizmos` casts a ray through its centre and draws six arms a few
+centimetres in front of the camera, sized by a second ray through the square's edge so no field of
+view is assumed and nothing in the scene can get in front of it. Nothing renders to a texture and
+nothing tracks a screen position of its own — the square already knows one, and it moves inwards
+with the panels because it is in the bar with the other buttons.
 
 **The menu is the editor.** Everything that is not a tool lives behind the hamburger, as a table
 of slash separated paths: `Panels/Rendering`, `Spawn/Light/Point`, `View/Every entity`. The same
@@ -220,8 +241,20 @@ These constraints shaped the panels, and all of them are the crate's rather than
   widget, so what a panel last wrote is not what is in force. Visibility is read before it is
   written rather than remembered.
 - **The font has no arrows, chevrons or hamburger.** A glyph it lacks draws as a box and says
-  nothing about why, so every icon in the editor is ASCII and lives in one table, `EditorIcons`,
-  for whoever ships a font with the better ones.
+  nothing about why, so every icon drawn as text is ASCII and lives in one table, `EditorIcons`.
+  Real icons are images instead: the toolbar's are PNGs rasterised from the SVG set in
+  `assets/icons`, pointed at by `bcs_xui_set_image`, which sets the source the interface loads
+  from. An image inside a `<button>` is dropped, because a button draws its own text and nothing
+  else, so a button with a picture in it is a `<div>` that takes the click instead.
+- **A widget restyles for one frame at the wrong font size** after anything is written to it. That
+  is why a value is only written twice while its element is new: doing it twice a second forever
+  is a flicker twice a second forever.
+- **A button that is written to loses its font.** A button draws its text through a child it
+  rebuilds whenever the text changes, and the rebuilt child comes back without the stylesheet's
+  font and layout, so a row of text the editor writes ends up half again too large. A paragraph
+  keeps what it was given. So nothing whose text this editor writes is a `<button>`: a row, a tab,
+  a menu line and a labelled button are each a `<div>` with a `<p>` inside, and the div takes the
+  click just as well, because what reports one is the nearest ancestor with an id.
 
 
 - **CSS ids are global**, not per document. Every open document is one document as far as the
@@ -236,13 +269,23 @@ These constraints shaped the panels, and all of them are the crate's rather than
   possible at once.
 - **One list of open documents, not one per document.** Opening a second panel with the crate's
   own `add_and_use` takes the first one off the screen, because it replaces that list rather than
-  adding to it. The bridge sets the whole list every time, and since doing that respawns every
-  widget on screen, the shell stops all the panels reading their elements until the rebuild
-  reports itself done.
+  adding to it. The bridge writes the registry's list directly instead, batched to once a frame
+  behind a dirty flag, and deliberately does not go through `use_uis`: that asks for a rebuild of
+  every open document, and a rebuild is not a blink but a loss — the widgets come back without
+  their stylesheet, at the default font and the default layout. Writing the list leaves the
+  documents that were already up alone, so opening a panel does not disturb the others. Elements
+  resolved during the frames a document is being built are looked up uncached, because the
+  entities behind the ids change while it settles.
 
 A fourth is cosmetic and left alone: a slider whose stylesheet is edited while the editor runs
 keeps its value and draws its handle at zero until the value next changes. What is drawn and what
 is held come apart in the restyle, and nothing on this side can see the difference.
+
+And one that follows from the button finding. Picking reports the deepest thing under the pointer
+and the bridge walks up to the first ancestor with an id, so a label with an id of its own would
+answer for the row it sits in — and every label the editor writes has one, since that is how it is
+written to. `pointer-events: none` on every label and picture inside something clickable puts the
+answer back where the command is.
 
 ## Verification
 

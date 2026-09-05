@@ -22,7 +22,7 @@ namespace BevyCSharp.Editor.Framework;
 public sealed class EditorWindow
 {
     private readonly Dictionary<string, Entity> _elements = [];
-    private bool _suspended;
+    private ulong _rebuildingUntil;
     private (float X, float Y, float Width, float Height)? _placed;
     private bool? _shown;
     private int? _layered;
@@ -74,9 +74,12 @@ public sealed class EditorWindow
     /// </remarks>
     public Entity Element(string cssId)
     {
-        // Nothing is worth resolving while the widgets are being replaced: the old ones are dead
-        // or dying, and a lookup now would cache one of them for good.
-        if (_suspended) return Entity.None;
+        // While the widgets are being replaced, every id is looked up afresh and nothing is kept:
+        // the entity that answers this frame may be dead the next, and caching one would hold a
+        // dead element for as long as the panel is open. Not reading at all was the earlier
+        // answer and it was worse, because it depended on being told when the rebuild finished,
+        // and that report does not always come.
+        if (Frame < _rebuildingUntil) return Xui.Element(cssId);
 
         if (_elements.TryGetValue(cssId, out var known)) return known;
 
@@ -86,6 +89,12 @@ public sealed class EditorWindow
         return found;
     }
 
+    /// <summary>The frame being drawn, so a rebuild can be waited out without being told.</summary>
+    internal static ulong Frame { get; set; }
+
+    /// <summary>How long a rebuild is assumed to take, in frames.</summary>
+    private const ulong RebuildFrames = 24;
+
     /// <summary>Whether an element of this window is the one an event happened to.</summary>
     public bool Owns(Entity element) => _elements.ContainsValue(element);
 
@@ -93,13 +102,13 @@ public sealed class EditorWindow
     /// Stops the window reading its elements, because they are about to be replaced.
     /// </summary>
     /// <remarks>
-    /// Every lookup answers <see cref="Entity.None"/> until <see cref="Resume"/>, and every
-    /// binding does nothing with that, so the frames between a document changing on disk and its
-    /// new widgets standing up pass without anything reading a despawned entity.
+    /// For a couple of dozen frames, every lookup is made afresh rather than remembered, so a
+    /// panel keeps working through the rebuild and never holds on to an element that died in it.
+    /// <see cref="Resume"/> ends it early when the interface says the new widgets are up.
     /// </remarks>
     public void Suspend()
     {
-        _suspended = true;
+        _rebuildingUntil = Frame + RebuildFrames;
         Forget();
     }
 
@@ -112,7 +121,7 @@ public sealed class EditorWindow
     /// </remarks>
     public void Resume()
     {
-        _suspended = false;
+        _rebuildingUntil = 0;
         Forget();
     }
 
@@ -193,6 +202,21 @@ public sealed class EditorWindow
         Xui.SetLayer(root, layer);
         _layered = layer;
     }
+
+    /// <summary>
+    /// How tall the window is when nothing is holding it back.
+    /// </summary>
+    /// <remarks>
+    /// A panel is as tall as its contents until its column runs out of room, and then it is as
+    /// tall as the room. The catch is that a panel given an explicit height measures that height
+    /// afterwards, so its own contents can no longer be asked about: the last height it measured
+    /// while it was free is remembered here instead, and the layout compares that against the
+    /// room rather than the measurement.
+    /// </remarks>
+    public float Natural { get; private set; }
+
+    /// <summary>Remembers the measured height as the natural one.</summary>
+    internal void Measured(float height) => Natural = height;
 
     /// <summary>Where the window ended up, or nothing when it has not been laid out yet.</summary>
     public UiRect? Measure()

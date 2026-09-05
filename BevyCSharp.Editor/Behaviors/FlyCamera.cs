@@ -161,6 +161,16 @@ public partial struct FlyCamera
     /// </remarks>
     public static bool FrameWanted { get; set; }
 
+    /// <summary>
+    /// Set by anything that wants the camera's horizon put back level.
+    /// </summary>
+    /// <remarks>
+    /// What the orientation cross is for: after flying about, the quickest way to know which way
+    /// is up is to be put back on it. Only the pitch is dropped, so the camera keeps facing what
+    /// it was facing.
+    /// </remarks>
+    public static bool LevelWanted { get; set; }
+
     /// <summary>Reads the mouse and keyboard and moves the camera.</summary>
     [OnUpdate]
     public void Steer(BehaviorContext ctx)
@@ -228,6 +238,13 @@ public partial struct FlyCamera
         else if (wheel != 0f)
         {
             position += Forward * wheel * DollyPerNotch;
+            moved = true;
+        }
+
+        if (LevelWanted)
+        {
+            LevelWanted = false;
+            Pitch = 0f;
             moved = true;
         }
 

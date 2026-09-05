@@ -290,7 +290,6 @@ public sealed class PanelGenerator : IIncrementalGenerator
             Number("Width") is { } width ? (float)width : float.NaN,
             Number("Height") is { } height ? (float)height : float.NaN,
             Number("Order") is { } order ? (int)order : 0,
-            Flag("Fill"),
             Number("Dismiss") is { } dismiss ? (int)dismiss : 0,
             Number("Layer") is { } layer ? (int)layer : 0);
 
@@ -306,8 +305,6 @@ public sealed class PanelGenerator : IIncrementalGenerator
                 ? System.Convert.ToDouble(value)
                 : null;
 
-        bool Flag(string key) =>
-            named.TryGetValue(key, out var value) && value is bool flag && flag;
     }
 
     /// <summary>Whether a member carries an attribute that takes no arguments.</summary>
