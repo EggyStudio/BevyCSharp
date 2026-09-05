@@ -232,23 +232,36 @@ public static class EditorCommands
     }
 
     /// <summary>Where a menu opened from the toolbar goes: under the viewport's top left.</summary>
+    /// <remarks>
+    /// Clear of the toolbar rather than against it. A flyout whose top edge meets the bottom edge of
+    /// the button that opened it reads as one tall panel instead of two things.
+    /// </remarks>
     private static (float X, float Y) MenuAt =>
-        (EditorShell.Layout.Viewport.X + 4f, EditorShell.Layout.Viewport.Y + 36f);
+        (EditorShell.Layout.Viewport.X + 4f, EditorShell.Layout.Viewport.Y + 46f);
 
     /// <summary>What can be opened, as toggles so the menu shows what already is.</summary>
     private static void Panels(Entity camera)
     {
+        EditorMenu.Branch("Panels", "icons/ui/list.png", 0);
+        EditorMenu.Branch("Spawn", "icons/ui/add.png", 1);
+        EditorMenu.Branch("Entity", "icons/ui/entity.png", 2);
+        EditorMenu.Branch("View", "icons/ui/eye.png", 3);
+        EditorMenu.Branch("Project", "icons/ui/folder.png", 4);
+        EditorMenu.Branch("Spawn/Light", "icons/ui/light.png", 8);
+
         EditorMenu.Toggle(
             "Panels/World",
             static _ => EditorShell.Toggle(static () => new WorldPanel()),
             static () => EditorShell.Showing<WorldPanel>() is not null,
-            0);
+            0,
+            "icons/ui/world.png");
 
         EditorMenu.Toggle(
             "Panels/Data",
             static _ => EditorShell.Toggle(static () => new DataPanel()),
             static () => EditorShell.Showing<DataPanel>() is not null,
-            1);
+            1,
+            "icons/ui/data.png");
 
         EditorMenu.Toggle(
             "Panels/Assets",
@@ -257,7 +270,8 @@ public static class EditorCommands
                 if (EditorTabs.Find("Assets") is { } tab) EditorTabs.Toggle(tab);
             },
             static () => EditorShell.Showing<AssetsPanel>() is not null,
-            2);
+            2,
+            "icons/ui/package.png");
 
         EditorMenu.Toggle(
             "Panels/Console",
@@ -266,25 +280,29 @@ public static class EditorCommands
                 if (EditorTabs.Find("Console") is { } tab) EditorTabs.Toggle(tab);
             },
             static () => EditorShell.Showing<ConsolePanel>() is not null,
-            3);
+            3,
+            "icons/ui/terminal.png");
 
         EditorMenu.Toggle(
             "Panels/Rendering",
             _ => EditorShell.Toggle(() => new RenderingPanel(camera)),
             static () => EditorShell.Find<RenderingPanel>() is not null,
-            4);
+            4,
+            "icons/ui/image.png");
 
         EditorMenu.Toggle(
             "Panels/Info",
             static _ => EditorShell.Toggle(static () => new InfoPanel()),
             static () => EditorShell.Showing<InfoPanel>() is not null,
-            5);
+            5,
+            "icons/ui/stats.png");
 
         EditorMenu.Toggle(
             "Panels/Keys",
             static _ => EditorShell.Toggle(static () => new KeysPanel()),
             static () => EditorShell.Find<KeysPanel>() is not null,
-            6);
+            6,
+            "icons/ui/list.png");
 
         EditorMenu.Toggle(
             "Panels/Toolbar",
@@ -296,13 +314,15 @@ public static class EditorCommands
                 EditorShell.Toggle(static () => new BottomBarPanel());
             },
             static () => EditorShell.Find<CentreBarPanel>() is not null,
-            7);
+            7,
+            "icons/ui/sliders.png");
 
         EditorMenu.Toggle(
             "Panels/Tabs",
             static _ => EditorShell.Toggle(static () => new TabsPanel()),
             static () => EditorShell.Showing<TabsPanel>() is not null,
-            8);
+            8,
+            "icons/ui/list.png");
     }
 
     /// <summary>What can be put into the world.</summary>
@@ -312,42 +332,53 @@ public static class EditorCommands
     /// </remarks>
     private static void Spawning()
     {
-        EditorMenu.Command("Spawn/Empty", static world => Spawn(world, "Empty", null), 0);
+        EditorMenu.Command(
+            "Spawn/Empty",
+            static world => Spawn(world, "Empty", null),
+            0,
+            "icons/ui/entity.png");
 
         EditorMenu.Command(
             "Spawn/Cube",
             static world => Spawn(world, "Cube", MeshShape.Cuboid, 1f, 1f, 1f),
-            1);
+            1,
+            "icons/ui/cube.png");
 
         EditorMenu.Command(
             "Spawn/Sphere",
             static world => Spawn(world, "Sphere", MeshShape.Sphere, 0.5f),
-            2);
+            2,
+            "icons/ui/mesh.png");
 
         EditorMenu.Command(
             "Spawn/Capsule",
             static world => Spawn(world, "Capsule", MeshShape.Capsule, 0.4f, 1f),
-            3);
+            3,
+            "icons/ui/mesh.png");
 
         EditorMenu.Command(
             "Spawn/Plane",
             static world => Spawn(world, "Plane", MeshShape.Plane, 4f, 4f),
-            4);
+            4,
+            "icons/ui/mesh.png");
 
         EditorMenu.Command(
             "Spawn/Light/Point",
             static world => Light(world, "Point light", LightKind.Point, 100_000f),
-            5);
+            5,
+            "icons/ui/light.png");
 
         EditorMenu.Command(
             "Spawn/Light/Spot",
             static world => Light(world, "Spot light", LightKind.Spot, 100_000f),
-            6);
+            6,
+            "icons/ui/light.png");
 
         EditorMenu.Command(
             "Spawn/Light/Directional",
             static world => Light(world, "Directional light", LightKind.Directional, 10_000f),
-            7);
+            7,
+            "icons/ui/light.png");
     }
 
     /// <summary>What can be done to whatever is selected.</summary>
@@ -356,7 +387,8 @@ public static class EditorCommands
         EditorMenu.Command(
             "Entity/Focus",
             static _ => FlyCameraFocus(),
-            0);
+            0,
+            "icons/ui/select.png");
 
         EditorMenu.Command(
             "Entity/Unparent",
@@ -374,7 +406,8 @@ public static class EditorCommands
                     undo => undo.SetParent(entity, previous),
                     redo => redo.ClearParent(entity));
             },
-            1);
+            1,
+            "icons/ui/remove.png");
 
         EditorMenu.Separator("Entity/-", 2);
 
@@ -388,7 +421,8 @@ public static class EditorCommands
                 world.Despawn(entity);
                 EditorSelection.Clear();
             },
-            3);
+            3,
+            "icons/ui/delete.png");
     }
 
     /// <summary>What the editor shows, as opposed to what is in the world.</summary>
@@ -398,25 +432,29 @@ public static class EditorCommands
             "View/Interface entities",
             static _ => WorldPanel.ShowInterface = !WorldPanel.ShowInterface,
             static () => WorldPanel.ShowInterface,
-            0);
+            0,
+            "icons/ui/interface.png");
 
         EditorMenu.Toggle(
             "View/Every entity",
             static _ => WorldPanel.ShowAll = !WorldPanel.ShowAll,
             static () => WorldPanel.ShowAll,
-            1);
+            1,
+            "icons/ui/eye.png");
 
         EditorMenu.Toggle(
             "View/Ground grid",
             static _ => ViewportGizmos.ShowGrid = !ViewportGizmos.ShowGrid,
             static () => ViewportGizmos.ShowGrid,
-            1);
+            1,
+            "icons/ui/grid.png");
 
         EditorMenu.Toggle(
             "View/Snap to a grid",
             static _ => EditorTools.Snap = !EditorTools.Snap,
             static () => EditorTools.Snap,
-            2);
+            2,
+            "icons/ui/snap.png");
 
         EditorMenu.Toggle(
             "View/Handles on the thing's own axes",
@@ -424,7 +462,8 @@ public static class EditorCommands
                 ? ToolSpace.Global
                 : ToolSpace.Local,
             static () => EditorTools.Space == ToolSpace.Local,
-            3);
+            3,
+            "icons/ui/move.png");
 
         EditorMenu.Separator("View/-", 4);
 
@@ -432,21 +471,27 @@ public static class EditorCommands
             "View/Settings",
             static _ => EditorShell.Toggle(static () => new SettingsPanel()),
             static () => EditorShell.Showing<SettingsPanel>() is not null,
-            5);
+            5,
+            "icons/ui/settings.png");
 
         EditorMenu.Command(
             "View/Reset the layout",
             static _ => EditorShell.Layout.ResetAll(),
-            4);
+            4,
+            "icons/ui/undo.png");
     }
 
     /// <summary>What keeps and restores the work.</summary>
     private static void Project()
     {
-        EditorMenu.Command("Project/Save", EditorProject.Save, 0);
-        EditorMenu.Command("Project/Load", EditorProject.Load, 1);
+        EditorMenu.Command("Project/Save", EditorProject.Save, 0, icon: "icons/ui/save.png");
+        EditorMenu.Command("Project/Load", EditorProject.Load, 1, icon: "icons/ui/folder.png");
         EditorMenu.Separator("Project/-", 2);
-        EditorMenu.Command("Project/Reload scripts", static _ => EditorScripts.Reload(), 3);
+        EditorMenu.Command(
+            "Project/Reload scripts",
+            static _ => EditorScripts.Reload(),
+            3,
+            "icons/ui/script.png");
     }
 
     /// <summary>Spawns a mesh in front of the camera.</summary>

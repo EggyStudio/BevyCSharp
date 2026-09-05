@@ -95,9 +95,28 @@ public sealed partial class MenuPanel
     [Show("#mrow", Count = Rows)]
     public bool[] Shown = new bool[Rows];
 
+    /// <summary>Which rows are toggles that are currently on.</summary>
+    /// <remarks>
+    /// The same dot the toolbar and the hierarchy mark a chosen thing with, rather than a pair of
+    /// brackets standing in for a checkbox. One mark for one meaning, wherever it appears.
+    /// </remarks>
+    [Show("#mdot", Count = Rows)]
+    public bool[] Ticked = new bool[Rows];
+
+    /// <summary>Which rows have a level under them.</summary>
+    [Show("#mnext", Count = Rows)]
+    public bool[] Deeper = new bool[Rows];
+
     /// <summary>The level being shown, which is also the way back out of it.</summary>
     [Bind("#menu-label", Mode = BindMode.OneWay)]
     public string Title { get; private set; } = string.Empty;
+
+    /// <summary>Whether the title row goes back to a level above rather than closing.</summary>
+    [Show("#menu-back")]
+    public bool CanGoBack;
+
+    /// <summary>What each row's picture is currently pointing at, so it is written once.</summary>
+    private readonly string[] _icons = new string[Rows];
 
     /// <summary>Fills the rows from the level or the list.</summary>
     [OnRefresh]
@@ -110,7 +129,8 @@ public sealed partial class MenuPanel
         var room = paged ? Rows - 1 : Rows;
         var start = _page * room;
 
-        Title = _title ?? (_level.Length == 0 ? "Menu" : "< " + _level.Replace("/", " / "));
+        CanGoBack = _items is null && _level.Length > 0 && _level != _path;
+        Title = _title ?? (_level.Length == 0 ? "Menu" : _level.Replace("/", " / "));
 
         var written = 0;
 
@@ -118,13 +138,11 @@ public sealed partial class MenuPanel
         {
             var item = items[i];
 
-            Labels[written] = item.Kind switch
-            {
-                MenuKind.Separator => "  ----",
-                MenuKind.Submenu => item.Label + "   >",
-                MenuKind.Toggle => (item.Checked?.Invoke() == true ? "[x] " : "[ ] ") + item.Label,
-                _ => "  " + item.Label,
-            };
+            Labels[written] = item.Kind == MenuKind.Separator ? string.Empty : item.Label;
+            Ticked[written] = item.Kind == MenuKind.Toggle && item.Checked?.Invoke() == true;
+            Deeper[written] = item.Kind == MenuKind.Submenu;
+
+            Wear(written, item.Icon ?? Blank);
 
             _rows[written] = item;
             Shown[written] = true;
@@ -133,7 +151,10 @@ public sealed partial class MenuPanel
 
         if (paged && written < Rows)
         {
-            Labels[written] = start + room < items.Count ? "  more..." : "  back to the start";
+            Labels[written] = start + room < items.Count ? "more..." : "back to the start";
+            Ticked[written] = false;
+            Deeper[written] = false;
+            Wear(written, Blank);
             _rows[written] = null;
             Shown[written] = true;
             written++;
@@ -142,9 +163,31 @@ public sealed partial class MenuPanel
         for (var i = written; i < Rows; i++)
         {
             Labels[i] = string.Empty;
+            Ticked[i] = false;
+            Deeper[i] = false;
             _rows[i] = null;
             Shown[i] = false;
         }
+    }
+
+    /// <summary>The picture a row with nothing of its own shows.</summary>
+    /// <remarks>
+    /// Nothing to look at, and it holds the column open so that a menu of five rows where two have
+    /// pictures still reads as one list rather than two indented differently.
+    /// </remarks>
+    private const string Blank = "icons/ui/blank.png";
+
+    /// <summary>Points a row's picture at whatever its item asked for.</summary>
+    private void Wear(int row, string icon)
+    {
+        if (_icons[row] == icon) return;
+        if (Window is not { IsOpen: true } window) return;
+
+        var element = window.Element($"micon-{row}");
+        if (element.IsNone) return;
+
+        Xui.SetImage(element, icon);
+        _icons[row] = icon;
     }
 
     /// <summary>Runs, toggles, or opens whatever a row stands for.</summary>
@@ -189,7 +232,7 @@ public sealed partial class MenuPanel
     [Command("#menu-title")]
     public void Back()
     {
-        if (_items is not null || _level.Length == 0 || _level == _path)
+        if (!CanGoBack)
         {
             EditorShell.Conceal(this);
             return;

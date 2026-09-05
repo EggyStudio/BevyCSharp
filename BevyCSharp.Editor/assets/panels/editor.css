@@ -40,8 +40,12 @@
      * thinner value a panel over the sky and a panel over a lit floor are two different colours.
      */
     --surface: rgba(0, 0, 0, 0.90);
-    /* What a full-window sheet is painted with: no scene showing through a page of settings. */
-    --sheet: rgba(0, 0, 0, 1);
+    /*
+     * What a sheet is painted with: nearly the panels' colour, and darker. A sheet is a whole
+     * column of the window rather than a corner of it, so the same translucency that reads as depth
+     * behind a small panel reads as a scene with writing on it behind a large one.
+     */
+    --sheet: rgba(0, 0, 0, 0.99);
     --surface-raised: rgba(255, 255, 255, 0.05);
     --surface-sunken: rgba(0, 0, 0, 0.35);
     --line: rgba(255, 255, 255, 0.10);
@@ -259,6 +263,23 @@ p {
  * with an id; a paragraph that has one of its own would answer for the row it sits in, so it is
  * told not to take the click and the row does.
  */
+/*
+ * A row's label where the row has a mark on its right.
+ *
+ * The same words as a tree row's, taking the width the row has left rather than the width the
+ * words want. That is what puts the dot for a chosen row and the arrow for a submenu against the
+ * right edge, in one column, instead of trailing whatever each label happens to say.
+ */
+.row-label {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 0;
+    pointer-events: none;
+    font-size: 11px;
+    color: var(--text);
+    text-wrap: nowrap;
+}
+
 .row-text {
     pointer-events: none;
     font-size: 11px;
@@ -578,37 +599,47 @@ button:hover {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    height: 15px;
+    min-height: 15px;
     column-gap: 8px;
-    overflow: hidden;
 }
 
 .stat-name {
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
     pointer-events: none;
     font-size: 10px;
     color: var(--label);
     text-wrap: nowrap;
 }
 
+/*
+ * The right hand side of a stats row.
+ *
+ * Wrapping, and the row is as tall as it makes itself. Most of these are a number and a unit, but
+ * the name of a graphics adapter is a sentence, and a panel that cuts it in half is a panel that
+ * does not answer the one question somebody opened it to ask.
+ */
 .stat-value {
+    flex-shrink: 0;
+    max-width: 150px;
     pointer-events: none;
     font-size: 10px;
     color: var(--text);
-    text-wrap: nowrap;
+    text-wrap: wrap;
 }
 
 /*
  * A settings sheet: the whole window, a list of pages on the left, one page's contents on the
- * right. Full width because that is what it is for — a page of settings that has to share the
- * screen with a hierarchy and an inspector is a panel, and a panel is where these were not
- * fitting.
+ * right. A page of settings that has to share its width with a hierarchy and an inspector is a
+ * panel, and a panel is where these were not fitting.
  */
 /*
- * A settings sheet: the window, edge to edge.
+ * A settings sheet: a tall column down the middle of the window.
  *
- * Opaque and black: every other panel is small enough that the scene behind it reads as depth, and
- * a whole window of settings with a scene showing through reads as a mistake. It keeps the margin
- * and the rounded corners the panels have, so it sits on the editor rather than replacing it.
+ * The panels' border and corners, and a black of its own that keeps rather less of the scene. What
+ * makes it a sheet is where the arrangement puts it: full height, centred, and no wider than a page
+ * of text wants to be.
  */
 .sheet {
     display: flex;
@@ -644,16 +675,18 @@ button:hover {
 }
 
 .sheet-name {
+    flex-grow: 1;
+    flex-basis: 0;
     pointer-events: none;
-    width: 260px;
     min-width: 0;
+    overflow: hidden;
     font-size: 11px;
     color: var(--label);
     text-wrap: nowrap;
 }
 
 .sheet-value {
-    width: 320px;
+    width: 250px;
     min-width: 0;
     height: 18px;
     margin: 0;
@@ -662,7 +695,7 @@ button:hover {
 
 .sheet-text {
     pointer-events: none;
-    width: 420px;
+    width: 250px;
     min-width: 0;
     font-size: 11px;
     color: var(--text);
@@ -674,7 +707,7 @@ button:hover {
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    width: 320px;
+    width: 250px;
     height: 18px;
     padding: 0 6px;
     background-color: var(--surface-raised);
@@ -698,7 +731,7 @@ button:hover {
 .pages {
     display: flex;
     flex-direction: column;
-    width: 190px;
+    width: 150px;
     row-gap: 1px;
     padding-right: 8px;
     border-right: 1px solid var(--line);
@@ -747,8 +780,8 @@ button:hover {
 /*
  * A strip of tags: the components an entity carries that have nothing to show.
  *
- * A marker component is a fact about an entity, not a thing to open — a heading with an empty
- * space under it says the opposite. Wrapped so the strip is as tall as it needs and no taller.
+ * A marker component is a fact about an entity rather than a thing to open, and a heading with an
+ * empty space under it says the opposite. Wrapped so the strip is as tall as it needs and no taller.
  */
 .chips {
     display: flex;
@@ -897,7 +930,7 @@ button:hover {
  *
  * `flex-basis: 0` with `flex-grow: 1` is what makes it take the width the tree left over rather
  * than the width its own contents want. Sized by its contents it would be as wide as every tile
- * laid end to end, which is a single row running off the side of the panel — there is nothing to
+ * laid end to end, which is a single row running off the side of the panel. There is nothing to
  * wrap against until the box has a width of its own.
  *
  * A column, so the grid inside it is as tall as its own rows. The interface does not read
@@ -984,6 +1017,7 @@ button:hover {
     height: 20px;
     margin-bottom: 3px;
     padding: 0 6px;
+    column-gap: 5px;
     background-color: rgba(0, 0, 0, 0);
     border: 0;
     border-bottom: 1px solid var(--line);
@@ -1001,6 +1035,7 @@ button:hover {
     width: 100%;
     height: 20px;
     padding: 0 6px;
+    column-gap: 5px;
     background-color: rgba(0, 0, 0, 0);
     border: 0;
     border-radius: var(--radius-small);

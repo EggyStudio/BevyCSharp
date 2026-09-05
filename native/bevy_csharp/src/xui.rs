@@ -1346,6 +1346,71 @@ pub extern "C" fn bcs_xui_set_visible(entity: u64, visible: i32) -> i32 {
     })
 }
 
+/// Draws an element, or stops drawing it while leaving it where it is.
+///
+/// The other way to hide something is `Display::None`, and it is not this. A node that is not
+/// displayed is not laid out either, so it never works out how large it is, and how large it is
+/// may be exactly what something is waiting to find out before it can decide where to put it. This
+/// keeps the box and stops the paint.
+///
+/// Nothing in the interface writes this component to an element inside a document, so unlike
+/// `display` it is not undone the next time the stylesheet is applied.
+///
+/// Both what is asked for and what it works out to are written. The engine works the second out
+/// from the first once a frame, and a caller during or after that pass would otherwise be answered
+/// a frame late, which for something hiding a panel before it is drawn is exactly one frame too
+/// late. The next pass computes the same answer from the same request.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_xui_set_drawn(entity: u64, drawn: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (entity, drawn);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bevy::prelude::{InheritedVisibility, Visibility};
+
+            crate::state::with_world(|world| {
+                let entity = crate::ecs::entity_from(entity);
+                let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
+                    return status::NO_ENTITY;
+                };
+
+                let wanted = if drawn != 0 {
+                    Visibility::Inherited
+                } else {
+                    Visibility::Hidden
+                };
+
+                match entity_mut.get_mut::<Visibility>() {
+                    Some(mut visibility) => *visibility = wanted,
+                    None => {
+                        entity_mut.insert(wanted);
+                    }
+                }
+
+                let inherited = if drawn != 0 {
+                    InheritedVisibility::VISIBLE
+                } else {
+                    InheritedVisibility::HIDDEN
+                };
+
+                match entity_mut.get_mut::<InheritedVisibility>() {
+                    Some(mut visibility) => *visibility = inherited,
+                    None => {
+                        entity_mut.insert(inherited);
+                    }
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
 /// Puts an element in front of or behind everything else on screen.
 ///
 /// Global rather than among its siblings, because a panel is the root of its own document and an

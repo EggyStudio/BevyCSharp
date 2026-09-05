@@ -29,11 +29,23 @@ public partial struct Probe
 
                 break;
 
+            case 150 when script.Contains("info"):
+                EditorShell.Show(new InfoPanel());
+                break;
+
             case 150 when script.Contains("settings"):
                 EditorShell.Show(new SettingsPanel());
                 break;
 
-            case 150:
+            case 150 when script.Contains("level"):
+                EditorShell.ShowMenu("Panels", 300f, 100f);
+                break;
+
+            case 150 when script.Contains("menu"):
+                EditorShell.ShowMenu(string.Empty, 300f, 100f);
+                break;
+
+            case 150 when script.Contains("place"):
                 Xui.TryRect(Xui.Element("tr-0"), out var button);
                 _grab = (button.X + (button.Width / 2f), button.Y + (button.Height / 2f));
                 SyntheticInput.MoveTo(_grab.X, _grab.Y);
@@ -47,11 +59,12 @@ public partial struct Probe
                 SyntheticInput.Release(_grab.X, _grab.Y);
                 break;
 
-            case >= 163 and <= 172 when !script.Contains("settings"):
+            case >= 163 and <= 175 when script.Contains("place"):
                 if (Xui.Element("info") is { IsNone: false } e && Xui.TryRect(e, out var r))
                 {
                     Console.WriteLine(
-                        $"[probe] f{ctx.Time.FrameCount} info {r.X:F0},{r.Y:F0} {r.Width:F0}x{r.Height:F0}");
+                        $"[probe] f{ctx.Time.FrameCount} info {r.X:F0},{r.Y:F0} {r.Width:F0}x{r.Height:F0}"
+                        + $" root {e.Bits} gen {Xui.Generation} vis {Xui.IsVisible(e)}");
                 }
 
                 break;

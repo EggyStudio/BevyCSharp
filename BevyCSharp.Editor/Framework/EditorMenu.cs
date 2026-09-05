@@ -30,13 +30,19 @@ public enum MenuKind
 /// <param name="Checked">Whether a toggle currently reads as on.</param>
 /// <param name="Enabled">Whether it can be clicked at all.</param>
 /// <param name="Order">Where it sits among its siblings. Lower is first.</param>
+/// <param name="Icon">
+/// A picture for the row, under the asset root, or nothing for a row that goes without one. A
+/// menu keeps a column for it either way, so the labels line up whether or not their neighbours
+/// have pictures.
+/// </param>
 public sealed record MenuItem(
     string Path,
     MenuKind Kind = MenuKind.Command,
     Action<EcsWorld>? Run = null,
     Func<bool>? Checked = null,
     Func<bool>? Enabled = null,
-    int Order = 0)
+    int Order = 0,
+    string? Icon = null)
 {
     /// <summary>The part shown on the row, which is the last part of the path.</summary>
     public string Label
@@ -92,12 +98,24 @@ public static class EditorMenu
     }
 
     /// <summary>Adds a command.</summary>
-    public static void Command(string path, Action<EcsWorld> run, int order = 0) =>
-        Add(new MenuItem(path, MenuKind.Command, run, Order: order));
+    public static void Command(string path, Action<EcsWorld> run, int order = 0, string? icon = null) =>
+        Add(new MenuItem(path, MenuKind.Command, run, Order: order, Icon: icon));
 
     /// <summary>Adds a toggle, which shows a mark when <paramref name="isOn"/> answers true.</summary>
-    public static void Toggle(string path, Action<EcsWorld> run, Func<bool> isOn, int order = 0) =>
-        Add(new MenuItem(path, MenuKind.Toggle, run, isOn, Order: order));
+    public static void Toggle(
+        string path, Action<EcsWorld> run, Func<bool> isOn, int order = 0, string? icon = null) =>
+        Add(new MenuItem(path, MenuKind.Toggle, run, isOn, Order: order, Icon: icon));
+
+    /// <summary>
+    /// Gives a branch a picture and a place among its siblings.
+    /// </summary>
+    /// <remarks>
+    /// A branch appears because something under it does, so this adds nothing to the menu that was
+    /// not there already. What it does is let the row that stands for the branch carry a picture
+    /// and an order of its own instead of the lowest one of its children.
+    /// </remarks>
+    public static void Branch(string path, string? icon = null, int order = 0) =>
+        Add(new MenuItem(path, MenuKind.Submenu, Order: order, Icon: icon));
 
     /// <summary>Adds a line between groups.</summary>
     public static void Separator(string path, int order = 0) =>

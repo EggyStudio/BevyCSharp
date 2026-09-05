@@ -204,6 +204,28 @@ public sealed class EditorWindow
     }
 
     /// <summary>
+    /// Draws the window, or stops drawing it while leaving it laid out.
+    /// </summary>
+    /// <remarks>
+    /// What a panel that does not yet know its own size is put in while it finds out. Hiding it
+    /// would take it out of the layout, so it would never find out; this leaves it measuring itself
+    /// where nobody can see it. Remembered rather than read back, because nothing in the interface
+    /// writes it, unlike the display property.
+    /// </remarks>
+    public void Draw(bool drawn)
+    {
+        var root = Root;
+        if (root.IsNone) return;
+        if (_drawn == drawn) return;
+
+        Xui.SetDrawn(root, drawn);
+        _drawn = drawn;
+    }
+
+    /// <summary>Whether the window is being drawn.</summary>
+    private bool _drawn = true;
+
+    /// <summary>
     /// Puts the window in front of or behind the others.
     /// </summary>
     /// <remarks>

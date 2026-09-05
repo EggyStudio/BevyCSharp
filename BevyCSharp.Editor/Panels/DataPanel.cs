@@ -232,6 +232,10 @@ public sealed partial class DataPanel
             // can tell you".
             if (schema is null || schema.Fields.Count == 0)
             {
+                // Except the engine's own, which are on everything and say nothing about this
+                // entity in particular.
+                if (schema is null && EditorEntity.IsDerived(world, id)) continue;
+
                 if (tags < Chips)
                 {
                     Tags[tags] = schema?.Name ?? Short(world.ComponentName(id));

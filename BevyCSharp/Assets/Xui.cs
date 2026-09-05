@@ -281,6 +281,19 @@ public static unsafe class Xui
         Native.bcs_xui_set_visible(element.Bits, visible ? 1 : 0), $"showing {element}");
 
     /// <summary>
+    /// Draws an element, or stops drawing it while leaving it where it is.
+    /// </summary>
+    /// <remarks>
+    /// Not the same as hiding it. A hidden element is taken out of the layout and takes no space,
+    /// so it also stops having a size, and a panel that has to know its own size before it can be
+    /// put in the right place would never find one out. This leaves the space and stops the paint,
+    /// which is what something waiting a frame to be measured wants.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The element is gone.</exception>
+    public static void SetDrawn(Entity element, bool drawn) => Native.Check(
+        Native.bcs_xui_set_drawn(element.Bits, drawn ? 1 : 0), $"drawing {element}");
+
+    /// <summary>
     /// Points an image element at a file, relative to the asset root.
     /// </summary>
     /// <remarks>

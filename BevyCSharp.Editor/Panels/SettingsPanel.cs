@@ -37,6 +37,14 @@ public sealed partial class SettingsPanel
     [Show("#spage", Count = Pages)]
     public bool[] PageShown = new bool[Pages];
 
+    /// <summary>Which page is the open one.</summary>
+    /// <remarks>
+    /// A dot, the same one the toolbar and the hierarchy mark a chosen thing with. A character in
+    /// front of the name would move the name, so the list would shift sideways as the page changed.
+    /// </remarks>
+    [Show("#spdot", Count = Pages)]
+    public bool[] PageOpen = new bool[Pages];
+
     /// <summary>Which page is open.</summary>
     [Bind("#s-page", Mode = BindMode.OneWay)]
     public string Where { get; private set; } = string.Empty;
@@ -109,16 +117,13 @@ public sealed partial class SettingsPanel
             {
                 PageNames[i] = string.Empty;
                 PageShown[i] = false;
+                PageOpen[i] = false;
                 _pages[i] = string.Empty;
                 continue;
             }
 
-            // The open page is marked in its own text, since a row's class cannot be changed
-            // while the editor runs.
-            PageNames[i] = pages[i] == _page
-                ? EditorIcons.Selected + " " + pages[i]
-                : "  " + pages[i];
-
+            PageNames[i] = pages[i];
+            PageOpen[i] = pages[i] == _page;
             PageShown[i] = true;
             _pages[i] = pages[i];
         }

@@ -79,6 +79,60 @@ public static class EditorEntity
         return only;
     }
 
+    /// <summary>
+    /// The components the engine keeps for itself, by their short names.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Every one of these is either worked out from something else (a global transform from a
+    /// local one, a view's visibility from an inherited one, a bounding box from a mesh) or a note
+    /// the engine leaves itself about what it has already done. They are on nearly every entity,
+    /// none of them can be usefully changed by hand, and a strip of them in front of an inspector
+    /// is a wall between somebody and the two or three components they came to read.
+    /// </para>
+    /// <para>
+    /// A table rather than a constant, so a plugin that adds bookkeeping of its own can say so.
+    /// </para>
+    /// </remarks>
+    public static readonly HashSet<string> Derived =
+    [
+        "GlobalTransform",
+        "PreviousGlobalTransform",
+        "TransformTreeChanged",
+        "InheritedVisibility",
+        "ViewVisibility",
+        "VisibilityClass",
+        "Aabb",
+        "Name",
+        "SyncToRenderWorld",
+        "MainEntity",
+        "RenderEntity",
+        "Children",
+        "ChildOf",
+    ];
+
+    /// <summary>Whether a component is one the engine keeps for itself.</summary>
+    /// <remarks>
+    /// Answered once per component id. The answer cannot change while the program runs, and the
+    /// question is asked for every component of every entity an inspector draws.
+    /// </remarks>
+    public static bool IsDerived(EcsWorld world, int id)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+
+        if (Bookkept.TryGetValue(id, out var answer)) return answer;
+
+        var name = world.ComponentName(id) ?? string.Empty;
+        var cut = name.LastIndexOf(':');
+
+        answer = Derived.Contains(cut < 0 ? name : name[(cut + 1)..]);
+        Bookkept[id] = answer;
+        return answer;
+    }
+
+    /// <summary>Which ids are the engine's own. Held for the same reason as the marks.</summary>
+    private static readonly Dictionary<int, bool> Bookkept = [];
+
     /// <summary>The engine's name component, which this side has no type for.</summary>
     private const string NameComponent = "bevy_ecs::name::Name";
 

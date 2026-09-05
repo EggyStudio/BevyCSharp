@@ -54,6 +54,10 @@ public sealed partial class AssetsPanel
     [Show("#atile", Count = Tiles)]
     public bool[] TileShown = new bool[Tiles];
 
+    /// <summary>Which tile is the chosen one.</summary>
+    [Show("#atdot", Count = Tiles)]
+    public bool[] TilePicked = new bool[Tiles];
+
     /// <summary>Which directory is being looked at.</summary>
     [Bind("#a-path", Mode = BindMode.OneWay)]
     public string Where =>
@@ -146,9 +150,8 @@ public sealed partial class AssetsPanel
         {
             var entry = files[i];
 
-            TileNames[tile] = entry.Path == EditorAssets.Selected
-                ? EditorIcons.Selected + " " + entry.Name
-                : entry.Name;
+            TileNames[tile] = entry.Name;
+            TilePicked[tile] = entry.Path == EditorAssets.Selected;
 
             Wear($"aticon-{tile}", ref _tileIcons[tile], EditorAssets.IconOf(entry.Path));
 
@@ -162,6 +165,7 @@ public sealed partial class AssetsPanel
             TileNames[i] = string.Empty;
             _tiles[i] = default;
             TileShown[i] = false;
+            TilePicked[i] = false;
         }
     }
 

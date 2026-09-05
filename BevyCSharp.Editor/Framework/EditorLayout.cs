@@ -155,19 +155,17 @@ public sealed class EditorLayout
             // limits it has of its own, and only a column has any.
             window.LimitTo(Xui.Auto, Xui.Auto);
 
-            var size = Seen(panel, rect);
+            // A panel that does not yet know how large it is is not drawn, rather than hidden: a
+            // hidden node is not laid out at all, so it would never acquire the size that would
+            // let it be shown. Not moved either, because a document that has just opened has its
+            // position written back by the stylesheet for a frame or two, so where it is put
+            // during that time is not where it stays.
+            var settled = Settled(panel, ref rect);
+            window.Draw(settled);
 
-            // A document that has never been laid out has no size, and everything that decides
-            // where a panel goes needs one. Put where nobody can see it until it has measured
-            // itself, rather than hidden: a hidden node is not laid out at all, so it would never
-            // acquire the size that would let it be shown.
-            if (size.Width < 1f || size.Height < 1f)
-            {
-                window.PlaceAt(Offstage, Offstage, float.NaN, float.NaN);
-                continue;
-            }
+            if (!settled) continue;
 
-            placed.Add(new Placed(panel, PlacementOf(panel), size));
+            placed.Add(new Placed(panel, PlacementOf(panel), rect));
         }
 
         var left = ColumnWidth(placed, EditorDock.Left, LeftWidth, width, ref _leftMeasured);
@@ -220,33 +218,50 @@ public sealed class EditorLayout
     /// <summary>One panel, where it wants to be, and where it currently is.</summary>
     private readonly record struct Placed(IEditorPanel Panel, PanelPlacement Placement, UiRect Rect);
 
-    /// <summary>Where a panel waits while it works out how large it is.</summary>
-    private const float Offstage = -20000f;
-
     /// <summary>How large each panel was last seen to be.</summary>
     private readonly Dictionary<string, UiRect> _seen = [];
 
+    /// <summary>Panels whose size has stopped changing, and can therefore be placed.</summary>
+    private readonly HashSet<string> _settled = [];
+
     /// <summary>
-    /// How large a panel is, falling back to the last time it was anything at all.
+    /// Whether a panel's size can be believed, and what it is.
     /// </summary>
     /// <remarks>
-    /// A panel that has just been fetched back measures nothing: it was hidden when the measurement
-    /// was taken, and the size it will have is a frame away. Anything that reads the size to decide
-    /// a position, which is every corner and every edge, would place it against zero for that frame
-    /// and against its real size on the next, which is a panel that appears in the wrong place and
-    /// jumps. What it was before it was put away is the right answer and is already known.
+    /// <para>
+    /// A document joins the interface at whatever size its stylesheet and the window give it, which
+    /// for a panel with no height of its own is the whole window. The arrangement is what turns it
+    /// into a box of its own, and that takes a frame. Believing the first measurement puts a panel
+    /// on screen a frame early, at the top left corner and the height of the window, which is the
+    /// jump somebody sees as the panel settling into place after it appears.
+    /// </para>
+    /// <para>
+    /// So a size counts once it has been measured the same twice. After that the panel is settled
+    /// for good and every later measurement is taken as it comes, including the zero a concealed
+    /// panel reports, which falls back to the size it had before it was put away.
+    /// </para>
     /// </remarks>
-    private UiRect Seen(IEditorPanel panel, UiRect rect)
+    private bool Settled(IEditorPanel panel, ref UiRect rect)
     {
         var key = KeyOf(panel);
+        var known = _seen.TryGetValue(key, out var before);
 
         if (rect.Width > 1f && rect.Height > 1f)
         {
             _seen[key] = rect;
-            return rect;
+
+            if (_settled.Contains(key)) return true;
+            if (!known || MathF.Abs(before.Width - rect.Width) > 1f
+                       || MathF.Abs(before.Height - rect.Height) > 1f) return false;
+
+            _settled.Add(key);
+            return true;
         }
 
-        return _seen.TryGetValue(key, out var before) ? before : rect;
+        if (!known || !_settled.Contains(key)) return false;
+
+        rect = before;
+        return true;
     }
 
     /// <summary>What a column is told to be, and how wide it turned out.</summary>
@@ -441,7 +456,32 @@ public sealed class EditorLayout
     }
 
     /// <summary>The widest a sheet gets, whatever the screen is.</summary>
+    /// <remarks>
+    /// What a page of prose is set to on a screen, and for the same reason: a line of text a whole
+    /// window wide is read by moving your head, and a setting's label and its box a thousand pixels
+    /// apart do not read as one row.
+    /// </remarks>
     public const float SheetWidth = 700f;
+
+    /// <summary>
+    /// The part of the window a sheet takes, whether or not one is up.
+    /// </summary>
+    /// <remarks>
+    /// Answered from the window rather than from a sheet's own rectangle, so it can be asked before
+    /// a sheet has been measured. That is when it is wanted: what a sheet covers has to be decided
+    /// on the frame the sheet opens.
+    /// </remarks>
+    public UiRect SheetArea()
+    {
+        var (windowWidth, windowHeight) = Window.Size();
+
+        float width = windowWidth;
+        float height = windowHeight;
+        var wide = MathF.Min(SheetWidth, MathF.Max(0f, width - (Margin * 2f)));
+
+        return new UiRect(
+            (width - wide) * 0.5f, Margin, wide, MathF.Max(0f, height - (Margin * 2f)));
+    }
 
     /// <summary>Places whatever floats in the viewport's corners.</summary>
     /// <remarks>

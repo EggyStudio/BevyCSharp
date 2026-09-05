@@ -264,20 +264,28 @@ public static class EditorShell
         return false;
     }
 
-    /// <summary>What a sheet covered, so it can be put back when the sheet goes.</summary>
+    /// <summary>What a sheet is standing over, so it can be put back when the sheet goes.</summary>
     private static readonly List<IEditorPanel> Covered = [];
 
     /// <summary>Whether a sheet was up the last time this looked.</summary>
     private static bool _sheeted;
 
     /// <summary>
-    /// Puts the rest of the editor away while a sheet is up, and back afterwards.
+    /// Puts away whatever a sheet is standing over, and brings it back afterwards.
     /// </summary>
     /// <remarks>
-    /// A sheet is the whole window and everything else is under it, except that nothing this side
-    /// can reliably draw one panel over another, whatever it is told about layering. So what a
-    /// sheet covers is not covered, it is put away, which is both what the interface can do and
-    /// what a page of settings means: it has the screen and it has your attention.
+    /// <para>
+    /// A sheet is a column down the middle of the window, so the editor stays where it is on either
+    /// side of it. What cannot stay is a panel underneath: a panel's own text and pictures draw
+    /// through whatever is over them, however the layers are set, which is the interface's doing
+    /// and not something this side can fix. A panel the sheet covers is therefore put away for as
+    /// long as it is covered.
+    /// </para>
+    /// <para>
+    /// Decided when the sheet opens rather than every frame. Nothing moves while a sheet is up, and
+    /// asking each frame would put a panel away and fetch it back on the frame a drag brushed the
+    /// column's edge.
+    /// </para>
     /// </remarks>
     private static void Sheeting()
     {
@@ -298,10 +306,13 @@ public static class EditorShell
 
         if (open)
         {
+            var column = Layout.SheetArea();
+
             foreach (var panel in Panels.ToArray())
             {
                 if (Concealed.Contains(panel)) continue;
                 if (Layout.PlacementOf(panel).Dock == EditorDock.Sheet) continue;
+                if (!Under(panel, column)) continue;
 
                 Covered.Add(panel);
                 Conceal(panel);
@@ -314,6 +325,19 @@ public static class EditorShell
         Covered.Clear();
 
         foreach (var panel in back) Reveal(panel);
+    }
+
+    /// <summary>Whether any of a panel is inside a rectangle.</summary>
+    private static bool Under(IEditorPanel panel, UiRect area)
+    {
+        if (panel.Window is not { IsOpen: true } window) return false;
+        if (!Xui.TryRect(window.Root, out var rect)) return false;
+        if (rect.Width < 1f || rect.Height < 1f) return false;
+
+        return rect.X < area.X + area.Width
+            && rect.X + rect.Width > area.X
+            && rect.Y < area.Y + area.Height
+            && rect.Y + rect.Height > area.Y;
     }
 
     /// <summary>The panels that are on screen, in the order they were opened.</summary>
@@ -354,16 +378,10 @@ public static class EditorShell
     {
         ArgumentNullException.ThrowIfNull(panel);
 
-        // Nothing comes back while a sheet is up. A sheet is the whole window and everything else
-        // is put away behind it, so a panel that answers to something other than a person asking
-        // for it (the selection, a menu row, a tab) would otherwise fetch itself back on top. It is
-        // remembered as covered instead, and appears when the sheet goes.
-        if (_sheeted && Layout.PlacementOf(panel).Dock != EditorDock.Sheet)
-        {
-            if (Panels.Contains(panel) && !Covered.Contains(panel)) Covered.Add(panel);
-
-            return;
-        }
+        // Nothing a sheet is standing over comes back while it is up. A panel that answers to
+        // something other than a person asking for it (the selection, a menu row, a tab) would
+        // otherwise fetch itself back under the sheet and draw through it.
+        if (_sheeted && Covered.Contains(panel)) return;
 
         if (!Concealed.Remove(panel)) return;
 
