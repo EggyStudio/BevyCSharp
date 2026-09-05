@@ -31,6 +31,13 @@ pub fn install(app: &mut bevy::app::App) {
         |click: On<Pointer<Click>>,
          meshes: Query<(), With<bevy::mesh::Mesh3d>>,
          mut picks: ResMut<Picks>| {
+            // The primary button only. The secondary one steers the camera in every editor
+            // there is, and a look that happens to begin over an object is not a choice to
+            // select that object.
+            if click.event().button != bevy::picking::pointer::PointerButton::Primary {
+                return;
+            }
+
             // Only meshes. Every widget in the interface is picked too, and those are reported
             // through the UI queue with the element that carries them; a click that hit a panel
             // is not also a click on whatever the panel is in front of.

@@ -84,6 +84,15 @@ and close. What is in them is `EditorToolbar`, a table like the menu's, so a gam
 the viewport by adding a line. A button carries a picture, a word, or both: a picture alone is a
 circle, a word alone a pill, and the slot and an order index are the whole of where it goes.
 
+**One gesture cannot mean two things.** The right button steers the camera and asks for a menu, so
+how far the pointer travelled while it was held decides which — and the answer is worked out once,
+at the top of the frame, before anything reads a right click. Everything downstream agrees with it:
+the menu the viewport offers, the menu a panel's row offers (the interface reports its own right
+clicks knowing nothing about the camera), and the mesh picking, which ignores the secondary button
+outright because a look that begins over an object is not a choice to select that object. The
+cursor is locked while the camera turns, so where it is never changes; how far the mouse moved is
+the only thing that tells the two apart.
+
 **A handle is the size a hand needs, not the size of what it is on.** `ViewportGizmos.Reach` asks
 the camera what ninety pixels are worth where the selection is — a ray through the centre and
 another through a point ninety pixels beside it, taken to the same depth — so a handle on a coin

@@ -1081,13 +1081,26 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
 
                 // The window carries the position as state as well as reporting the move, and
                 // anything asking where the pointer is reads the state.
+                let mut delta = Vec2::ZERO;
+
                 if let Ok(mut entity) = world.get_entity_mut(window)
                     && let Some(mut node) = entity.get_mut::<Window>()
                 {
+                    if let Some(was) = node.cursor_position() {
+                        delta = Vec2::new(x, y) - was;
+                    }
+
                     let scale = node.scale_factor();
                     node.set_physical_cursor_position(Some(
                         (Vec2::new(x, y) * scale).as_dvec2(),
                     ));
+                }
+
+                // How far the mouse itself moved, which is a different report from where the
+                // cursor ended up: a camera being looked around with reads this one, because the
+                // cursor is locked in place while it happens and so never goes anywhere at all.
+                if delta != Vec2::ZERO {
+                    world.write_message(bevy::input::mouse::MouseMotion { delta });
                 }
 
                 if action == 0 {

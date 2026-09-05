@@ -365,6 +365,10 @@ public static class EditorShell
 
         var input = ctx.Input;
 
+        // Before anything reads a right click, because whether the pointer travelled is what tells
+        // a menu from a camera look, and everything that acts on a right click has to agree.
+        TrackRightDrag(input);
+
         // Which panels took an edit this frame. A drag reports every frame it moves, and a panel
         // that applies its values to the engine should do that once a frame rather than once per
         // binding that happened to change in it.
@@ -391,6 +395,12 @@ public static class EditorShell
                     break;
 
                 case UiEventKind.Context:
+                    // Not after a look. The right button steers the camera as well as asking for a
+                    // menu, and the interface reports its own right clicks knowing nothing about
+                    // that: a drag that began on a panel and ended somewhere else is the camera
+                    // having been turned, and no menu was ever meant by it.
+                    if (RightDragged) break;
+
                     // Offered to the panels first: a row with a menu of its own answers, and an
                     // element with none falls through to the viewport's, which is what a right
                     // click on the background should get.
@@ -717,29 +727,45 @@ public static class EditorShell
     {
         var (x, y) = input.MousePosition;
 
-        if (input.MousePressed(MouseButton.Right)) _rightMoved = 0f;
-
-        // While the camera is being steered the cursor is locked, so where it is does not change
-        // however far it is dragged. How far it moved is the only thing that tells a look from a
-        // click, and it is reported whether the cursor is locked or not.
-        if (input.MouseDown(MouseButton.Right))
-        {
-            var (dx, dy) = input.MouseDelta;
-            _rightMoved += MathF.Abs(dx) + MathF.Abs(dy);
-        }
-
         var wanted = _contextWanted;
         _contextWanted = false;
 
-        if (input.MouseReleased(MouseButton.Right) && _rightMoved < 6f && !PointerOverPanel(x, y))
-        {
-            wanted = true;
-        }
+        if (RightDragged) return;
+
+        if (input.MouseReleased(MouseButton.Right) && !PointerOverPanel(x, y)) wanted = true;
 
         if (!wanted) return;
 
         ViewportMenu?.Invoke(x, y);
     }
+
+    /// <summary>
+    /// Watches how far the pointer travels while the right button is held.
+    /// </summary>
+    /// <remarks>
+    /// While the camera is being steered the cursor is locked, so where it is does not change
+    /// however far it is dragged. How far the mouse itself moved is the only thing that tells a
+    /// look from a click, and that is reported whether the cursor is locked or not.
+    /// </remarks>
+    private static void TrackRightDrag(Input input)
+    {
+        if (input.MousePressed(MouseButton.Right)) _rightMoved = 0f;
+
+        if (!input.MouseDown(MouseButton.Right) && !input.MouseReleased(MouseButton.Right)) return;
+
+        var (dx, dy) = input.MouseDelta;
+        _rightMoved += MathF.Abs(dx) + MathF.Abs(dy);
+    }
+
+    /// <summary>Whether the right button has been dragged rather than clicked.</summary>
+    /// <remarks>
+    /// Read by everything that acts on a right click, so that one gesture cannot be a menu to one
+    /// reader and a camera look to another.
+    /// </remarks>
+    private static bool RightDragged => _rightMoved >= DragSlop;
+
+    /// <summary>How far the pointer may travel and still count as having stayed put.</summary>
+    private const float DragSlop = 6f;
 
     /// <summary>What a right click on the scene offers, when nothing else claimed it.</summary>
     /// <remarks>
