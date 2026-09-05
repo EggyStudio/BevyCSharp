@@ -42,10 +42,6 @@ public sealed partial class InfoPanel
     [Show("#irow", Count = Rows)]
     public bool[] Shown = new bool[Rows];
 
-    /// <summary>The frame rate, in the title bar where it is glanced at.</summary>
-    [Bind("#i-rate", Mode = BindMode.OneWay)]
-    public string Rate { get; private set; } = string.Empty;
-
     /// <summary>Whether the panel has been pinned into the column.</summary>
     private bool _pinned;
 
@@ -77,8 +73,6 @@ public sealed partial class InfoPanel
         if (frame > _worst) _worst = frame;
 
         if (ctx.Time.FrameCount % 30 == 0) _census = Count(ctx.Ecs);
-
-        Rate = $"{ctx.Time.SmoothedFps:F0} fps";
 
         Wear(_pinned ? "icons/ui/pinned.png" : "icons/ui/pin.png");
 

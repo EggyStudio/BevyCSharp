@@ -114,7 +114,6 @@ body {
     align-self: flex-start;
     padding: 8px;
     row-gap: 5px;
-    overflow: hidden;
 }
 
 /* A panel in one of the side columns. */
@@ -203,7 +202,15 @@ body {
 
 /* -- Text */
 
+/*
+ * Every piece of text.
+ *
+ * No margin. A paragraph carries one by default, and a row of them measures three lines tall while
+ * showing one, which a panel of rows turns into a panel twice the height it needs. Space between
+ * rows is the row's business, and every row that wants any asks for it.
+ */
 p {
+    margin: 0;
     font-size: 11px;
     color: var(--text);
 }
@@ -626,6 +633,7 @@ button:hover {
     pointer-events: none;
     font-size: 10px;
     color: var(--text);
+    text-align: right;
     text-wrap: wrap;
 }
 
