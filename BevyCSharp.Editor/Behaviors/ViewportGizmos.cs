@@ -91,9 +91,12 @@ public partial struct ViewportGizmos
     /// is a metre across or ten, and moving something is a guess about how far it went.
     /// </para>
     /// <para>
-    /// Drawn about the camera rather than about the origin, and at a spacing that steps by tens as
-    /// the camera climbs, so it is the same density on screen at any height. A fixed grid is either
-    /// a solid sheet from far away or four lines from close up.
+    /// Two grids a decade apart, not one. A single grid that snaps from metres to tens as the
+    /// camera climbs changes the whole floor in one frame, which reads as the picture breaking;
+    /// drawn as a coarse grid that is always there and a fine one that fades away as its cells
+    /// shrink, the change is something nobody notices happening. The fine grid leaves out the lines
+    /// the coarse one already draws, so nothing is drawn twice and nothing appears out of nowhere
+    /// when the two swap roles.
     /// </para>
     /// <para>
     /// Round rather than square, and fading as it goes out. A square of lines ending all at once
@@ -111,118 +114,252 @@ public partial struct ViewportGizmos
         var basis = ctx.Ecs.GetOrDefault<GlobalTransform>(camera);
         var eye = basis.Translation;
 
-        // How far apart the lines are: the power of ten that keeps a cell about a finger wide on
-        // screen at this height, so the grid neither disappears nor turns into a sheet.
+        // Which two spacings to draw. The whole part of the decade picks them; how far the camera
+        // is through that decade is not used here at all, because how solid a spacing is asks a
+        // question about that spacing rather than about which pair happens to be on screen.
         var above = MathF.Max(0.5f, MathF.Abs(eye.Y - GridHeight));
-        var step = MathF.Max(0.1f, MathF.Pow(10f, MathF.Floor(MathF.Log10(above))));
+        var whole = MathF.Floor(MathF.Log10(above));
 
-        const int Half = 30;
+        var fine = MathF.Max(0.1f, MathF.Pow(10f, whole));
+        var coarse = fine * 10f;
 
-        var reach = step * Half;
+        // Under the camera, always. Following where the camera is looking sounds helpful and is
+        // not: turning on the spot then drags the whole floor around with the view, and the grid
+        // stops being a fixed thing the camera moves over. Straight down from the eye is where it
+        // ends up anyway when there is nothing to look at, and behaving the same either way is
+        // worth more than reaching a little further ahead.
+        var look = new Vec3(eye.X, GridHeight, eye.Z);
 
-        // Centred where the camera is looking rather than where it is. Looking out across a scene
-        // from head height puts the camera's own patch of ground behind and below the view, and a
-        // grid nobody can see is not a grid.
-        var forward = (basis.ZAxis * -1f).Normalized;
-        var look = eye;
+        // Three, because a spacing takes two decades to come in and one to go: at any height there
+        // is the one being read, the one behind it, and one further back still barely showing.
+        // Coarsest first, so the finer lines are drawn over them rather than under.
+        var coarsest = coarse * 10f;
 
-        if (forward.Y < -0.05f)
-        {
-            var travel = MathF.Min((GridHeight - eye.Y) / forward.Y, reach * 2f);
-            look = eye + (forward * travel);
-        }
+        Sheet(look, coarsest, Reach(above, coarsest), Solid(above, coarsest));
+        Sheet(look, coarse, Reach(above, coarse), Solid(above, coarse));
+        Sheet(look, fine, Reach(above, fine), Solid(above, fine));
 
+        Axis(eye, Reach(above, coarsest));
+    }
+
+    /// <summary>
+    /// The two lines through the world's origin, in the colours of the axes they lie along.
+    /// </summary>
+    /// <remarks>
+    /// Drawn once rather than by each grid. Every grid has a line at zero and would colour it, so
+    /// the axis came out three times over at three strengths — and each of those faded outwards
+    /// from its own grid's centre, which is snapped to that grid's own spacing. The lines were on
+    /// top of each other and their fades were not, which reads as one line that will not line up
+    /// with itself. There is one axis; it is drawn once.
+    /// </remarks>
+    private static void Axis(Vec3 eye, float reach)
+    {
+        var height = GridHeight;
+        var gone = (0f, 0f, 0f, 0f);
+
+        // From the point on each axis nearest the camera, which needs no snapping: one line has no
+        // spacing to be snapped to, and sliding smoothly is what a single line should do.
+        var alongX = new Vec3(eye.X, height, 0f);
+        var alongZ = new Vec3(0f, height, eye.Z);
+
+        var red = Tint(AxisColours[0], AxisSolid);
+        var blue = Tint(AxisColours[2], AxisSolid);
+
+        Gizmos.Fade(alongX, alongX + new Vec3(-reach, 0f, 0f), red, gone, inFront: false);
+        Gizmos.Fade(alongX, alongX + new Vec3(reach, 0f, 0f), red, gone, inFront: false);
+        Gizmos.Fade(alongZ, alongZ + new Vec3(0f, 0f, -reach), blue, gone, inFront: false);
+        Gizmos.Fade(alongZ, alongZ + new Vec3(0f, 0f, reach), blue, gone, inFront: false);
+    }
+
+    /// <summary>How solid the two lines through the origin are, which do not fade with a spacing.</summary>
+    private const float AxisSolid = 0.5f;
+
+    /// <summary>How many cells across a grid is, before the height has its say.</summary>
+    private const int Half = 20;
+
+    /// <summary>
+    /// How far a grid reaches before it has faded away entirely.
+    /// </summary>
+    /// <remarks>
+    /// The smaller of what the spacing wants and what the height allows. A grid sized only by its
+    /// own spacing puts the coarsest one a hundred times further out than the finest, which is a
+    /// haze of lines running to the horizon long after they have stopped saying anything about
+    /// where things are. How far somebody can usefully see is a question about how high they are,
+    /// and the answer is the same for every spacing.
+    /// </remarks>
+    private static float Reach(float above, float step)
+    {
+        const float Spread = 8f;
+
+        return MathF.Min(step * Half, above * Spread);
+    }
+
+    /// <summary>How solid a grid line is at its strongest.</summary>
+    private const float Base = 0.22f;
+
+    /// <summary>
+    /// How solid one spacing is, from how large its cells are for the height being looked from.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// One question asked of each spacing on its own, which is what makes the change between two of
+    /// them impossible to catch happening. A spacing is at full strength when its cells are the size
+    /// the height calls for, and fades away over the decade on either side of that: out below, as
+    /// the cells shrink towards nothing, and <em>in</em> from above, as they come down from being
+    /// too large to be a grid at all.
+    /// </para>
+    /// <para>
+    /// Both halves matter and only one of them is obvious. A grid written without thinking about
+    /// the way up fades out correctly and appears at full strength: descending looks right, and
+    /// every step of the climb drops a whole new spacing onto the floor in one frame.
+    /// </para>
+    /// <para>
+    /// Coming in takes twice as long as going, and eases rather than ramping. Something arriving is
+    /// noticed and something leaving is not, so the two want different lengths to feel like the
+    /// same speed — over one decade each, the way down is invisible and the way up is a spacing
+    /// appearing.
+    /// </para>
+    /// <para>
+    /// Nothing here knows which spacing is the fine one and which is the coarse one, so nothing
+    /// changes at the moment they swap roles: a ten metre line is as solid at ninety metres up as
+    /// at a hundred and ten.
+    /// </para>
+    /// </remarks>
+    private static float Solid(float above, float step)
+    {
+        // Decades a spacing takes to arrive, and to leave once it has been passed.
+        const float In = 2f;
+        const float Out = 1f;
+
+        var decades = MathF.Log10(above / step);
+
+        if (decades >= 0f) return Base * MathF.Max(0f, 1f - (decades / Out));
+
+        return Base * MathF.Pow(MathF.Max(0f, 1f + (decades / In)), 1.6f);
+    }
+
+    /// <summary>
+    /// One grid of a single spacing, as a disc fading to nothing at its rim.
+    /// </summary>
+    /// <param name="look">Where the middle of it goes, before being snapped to the spacing.</param>
+    /// <param name="step">How far apart the lines are.</param>
+    /// <param name="reach">How far out it goes before it has faded away entirely.</param>
+    /// <param name="solid">How solid a line is at its strongest.</param>
+    private static void Sheet(Vec3 look, float step, float reach, float solid)
+    {
+        if (solid <= 0.004f) return;
+
+        // A hair above the height asked for. A grid on the same plane as a floor fights it for
+        // every pixel, and a thousandth of a cell is invisible at any distance and enough to settle
+        // the argument for anybody who puts the grid at the floor rather than under it.
+        var height = GridHeight + (step * 0.002f);
         var centreX = MathF.Round(look.X / step) * step;
         var centreZ = MathF.Round(look.Z / step) * step;
-        var height = GridHeight;
+        var count = Math.Min(Half, (int)MathF.Ceiling(reach / step));
 
-        for (var i = -Half; i <= Half; i++)
+        for (var i = -count; i <= count; i++)
         {
-            var offset = i * step;
-
             // How long the line is before it leaves the disc, and how bright it starts. Both come
             // from how far the line passes from the middle: a line through the middle runs the
             // full width at full strength, and one near the rim is a short faint stroke.
+            var offset = i * step;
             var away = MathF.Abs(offset);
             if (away >= reach) continue;
 
             var span = MathF.Sqrt((reach * reach) - (away * away));
-            var strength = Falloff(away / reach);
+            var strength = solid * Falloff(away / reach);
 
             var x = centreX + offset;
             var z = centreZ + offset;
 
-            var alongZ = Tint(Line(x, step), strength);
-            var alongX = Tint(Line(z, step), strength);
+            // The lines through the origin belong to the axes, which are drawn once for all three
+            // spacings rather than three times at three strengths.
+            var atX = MathF.Abs(x) < step * 0.5f;
+            var atZ = MathF.Abs(z) < step * 0.5f;
 
-            var onZ = MathF.Abs(x) < step * 0.5f ? Tint(AxisColours[2], strength) : alongZ;
-            var onX = MathF.Abs(z) < step * 0.5f ? Tint(AxisColours[0], strength) : alongX;
+            var onZ = Shade(x, step, strength);
+            var onX = Shade(z, step, strength);
 
             var gone = (0f, 0f, 0f, 0f);
 
             // Two halves out from the middle, each fading to nothing, which is what makes the far
             // edge a horizon rather than a boundary.
-            Gizmos.Fade(
-                new Vec3(x, height, centreZ),
-                new Vec3(x, height, centreZ - span),
-                onZ,
-                gone,
-                inFront: false);
+            if (!atX)
+            {
+                Gizmos.Fade(
+                    new Vec3(x, height, centreZ),
+                    new Vec3(x, height, centreZ - span),
+                    onZ,
+                    gone,
+                    inFront: false);
 
-            Gizmos.Fade(
-                new Vec3(x, height, centreZ),
-                new Vec3(x, height, centreZ + span),
-                onZ,
-                gone,
-                inFront: false);
+                Gizmos.Fade(
+                    new Vec3(x, height, centreZ),
+                    new Vec3(x, height, centreZ + span),
+                    onZ,
+                    gone,
+                    inFront: false);
+            }
 
-            Gizmos.Fade(
-                new Vec3(centreX, height, z),
-                new Vec3(centreX - span, height, z),
-                onX,
-                gone,
-                inFront: false);
+            if (!atZ)
+            {
+                Gizmos.Fade(
+                    new Vec3(centreX, height, z),
+                    new Vec3(centreX - span, height, z),
+                    onX,
+                    gone,
+                    inFront: false);
 
-            Gizmos.Fade(
-                new Vec3(centreX, height, z),
-                new Vec3(centreX + span, height, z),
-                onX,
-                gone,
-                inFront: false);
+                Gizmos.Fade(
+                    new Vec3(centreX, height, z),
+                    new Vec3(centreX + span, height, z),
+                    onX,
+                    gone,
+                    inFront: false);
+            }
         }
     }
+
+    /// <summary>
+    /// What a grid line looks like at a world position: every tenth one brighter than its
+    /// neighbours, and anything else plain.
+    /// </summary>
+    /// <remarks>
+    /// The emphasis belongs to each grid rather than to the set of them. Letting a coarser grid
+    /// draw over a finer one and calling the overlap a marked line ties the marking to the
+    /// crossfade, so the scale of the floor becomes harder and easier to read as the camera moves —
+    /// and at the moment one of them has faded out there is no marking at all.
+    /// </remarks>
+    private static (float R, float G, float B, float A) Shade(
+        float at, float step, float strength)
+    {
+        var tenth = MathF.Abs(MathF.IEEERemainder(at, step * 10f)) < step * 0.5f;
+        return Grey(tenth ? strength * Marked : strength);
+    }
+
+    /// <summary>How much brighter every tenth line is, which is what gives the floor a scale.</summary>
+    private const float Marked = 2f;
 
     /// <summary>
     /// How bright the grid is at a fraction of the way out to its edge.
     /// </summary>
     /// <remarks>
-    /// Full strength for the first third and easing off after it, rather than falling from the
-    /// first pixel. A grid that starts fading immediately is dim everywhere; one that holds and
-    /// then goes reads as far larger than it is.
+    /// Fading from the middle, with no part of it held at full. A grid that holds its strength and
+    /// then drops away has a visible ring where it starts to go; one that has been thinning the
+    /// whole way simply runs out, and nowhere along it is there a place the eye can point at and
+    /// call the edge.
     /// </remarks>
-    private static float Falloff(float outward)
-    {
-        const float Holds = 0.35f;
-
-        if (outward <= Holds) return 1f;
-
-        var into = (outward - Holds) / (1f - Holds);
-        return MathF.Max(0f, 1f - (into * into));
-    }
+    private static float Falloff(float outward) =>
+        MathF.Pow(MathF.Max(0f, 1f - outward), 1.5f);
 
     /// <summary>A colour at a fraction of its strength, which for a grid means its alpha.</summary>
     private static (float R, float G, float B, float A) Tint(
         (float R, float G, float B, float A) colour, float strength) =>
-        (colour.R, colour.G, colour.B, colour.A * strength);
+        (colour.R, colour.G, colour.B, MathF.Min(1f, colour.A * strength));
 
-    /// <summary>How bright one grid line is: every tenth stands out from the rest.</summary>
-    private static (float R, float G, float B, float A) Line(float at, float step)
-    {
-        var tenth = MathF.Abs(MathF.IEEERemainder(at, step * 10f)) < step * 0.5f;
-        var value = tenth ? 0.42f : 0.24f;
-
-        return (value, value, value * 1.05f, 1f);
-    }
+    /// <summary>What an ordinary grid line is: white, at whatever strength it has left.</summary>
+    private static (float R, float G, float B, float A) Grey(float strength) =>
+        (0.72f, 0.74f, 0.80f, strength);
 
     /// <summary>Draws the twelve edges of the selection's box.</summary>
     private static void Outline(Vec3 min, Vec3 max)

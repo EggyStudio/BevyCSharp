@@ -213,12 +213,18 @@ by tens as the camera climbs, so it is the same density on screen at any height,
 its own — under the scene rather than through it, because a grid on the same plane as a floor fights
 it for every pixel and one at the height of what is standing on it cuts those things in half.
 
-**And it has no edge.** Round rather than square, and fading as it goes out: each line is cut to the
-chord of a disc and drawn as two halves running from the middle to nothing. A square of lines ending
-all at once announces where the editor stopped drawing, which is a fact about the editor and not
-about the scene. The fade holds full strength for the first third and eases off after it — falling
-from the first pixel makes a grid that is dim everywhere, and holding then going reads as far larger
-than it is. It costs about four percent of a frame.
+**And it has no edge, in either direction.** Round rather than square: each line is cut to the chord
+of a disc and thins to nothing at the rim, because a square of lines ending all at once announces
+where the editor stopped drawing, which is a fact about the editor and not about the scene.
+
+Two spacings are drawn, a decade apart, and each fades **in** as well as out. How solid a spacing is
+asks a question about that spacing alone — full strength while its cells are larger than the height
+suggests, fading over the decade in which they become smaller — so nothing changes at the moment two
+of them swap roles, and a ten metre line is as solid at ninety metres up as at a hundred and ten.
+The coarser grid is hollowed out over exactly the ground the finer one covers, by exactly how much
+of the finer one is left, so as one fades away the other fills in behind it. Measured across a
+decade boundary the picture's mean brightness moves by a fraction of a percent per step and never
+jumps. It costs about four percent of a frame.
 
 **A gizmo is drawn about the world, not in it.** The default gizmo config has `depth_bias = -1`,
 so a handle on an object is in front of the object rather than inside it, and the queue C# fills is
