@@ -72,10 +72,28 @@ public sealed class RotationTests
     {
         // The pole: pitch at a right angle, where the other two angles stop being separable. It
         // has to answer with something usable rather than a not-a-number.
-        var up = Quat.FromEuler(0f, MathF.PI / 2f, 0f);
+        var up = Quat.FromEuler(MathF.PI / 2f, 0f, 0f);
         var read = up.ToEuler();
 
         Assert.False(float.IsNaN(read.X) || float.IsNaN(read.Y) || float.IsNaN(read.Z));
-        Assert.Equal(MathF.PI / 2f, read.Y, 1e-3f);
+        Assert.Equal(MathF.PI / 2f, read.X, 1e-3f);
+    }
+
+    [Fact]
+    public void TurningOnTheSpotReadsAsOneAngleAllTheWayRound()
+    {
+        // What an editor shows for a thing spinning where it stands. Y is the outermost angle, so
+        // it has the whole circle to itself and the other two stay at nothing: the alternative is
+        // that a third of the way round the reading jumps to a half turn on both of its neighbours
+        // and walks the middle angle backwards, which is the same rotation and unreadable.
+        for (var degrees = -175f; degrees <= 175f; degrees += 5f)
+        {
+            var radians = degrees * MathF.PI / 180f;
+            var read = Quat.FromRotationY(radians).ToEuler();
+
+            Assert.Equal(0f, read.X, 1e-3f);
+            Assert.Equal(radians, read.Y, 1e-3f);
+            Assert.Equal(0f, read.Z, 1e-3f);
+        }
     }
 }

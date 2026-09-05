@@ -22,8 +22,11 @@ namespace BevyCSharp.Editor.Behaviors;
 [Behavior]
 public partial struct TransformGizmo
 {
-    /// <summary>Which axis is being dragged, or -1.</summary>
+    /// <summary>Which handle is being dragged: an axis, <see cref="Centre"/>, or -1.</summary>
     internal static int Axis { get; private set; } = -1;
+
+    /// <summary>The handle that picks no axis: a drag across the screen rather than along a line.</summary>
+    internal const int Centre = 3;
 
     /// <summary>The frame a drag last ended on.</summary>
     private static ulong _released;
@@ -84,22 +87,35 @@ public partial struct TransformGizmo
 
         var centre = (min + max) * 0.5f;
         var reach = ViewportGizmos.Reach(camera, centre);
+        var axes = EditorTools.AxesFor(ctx.Ecs.GetOrDefault<GlobalTransform>(entity).Rotation);
 
         var nearest = -1;
         var closest = Grab;
 
         for (var i = 0; i < 3; i++)
         {
-            var distance = ToHandle(camera, centre, reach, i, x, y);
+            var distance = ToHandle(camera, centre, reach, axes[i], x, y);
             if (distance is not { } near || near >= closest) continue;
 
             closest = near;
             nearest = i;
         }
 
+        // The middle handle wins ties, because it is drawn on top of where the arms begin and a
+        // press on the ball is unambiguous however near an arm's root it happens to be.
+        if (Render.TryProject(camera, centre, out var centreX, out var centreY))
+        {
+            var reachPixels = ViewportGizmos.CentreSize * PixelsPerReach(camera, centre, reach);
+            var away = MathF.Sqrt(
+                ((x - centreX) * (x - centreX)) + ((y - centreY) * (y - centreY)));
+
+            if (away <= MathF.Max(reachPixels, Grab)) nearest = Centre;
+        }
+
         if (nearest < 0) return;
 
         Axis = nearest;
+        _axes = axes;
         _subject = entity;
         _before = transform;
 
@@ -108,11 +124,77 @@ public partial struct TransformGizmo
         // a mesh whose origin sits in a corner: measuring a turn about one while the ring is drawn
         // about the other is a gizmo that answers to a place nobody can see.
         _centre = centre;
-        _start = Measure(ctx, camera, x, y, centre) ?? 0f;
+        _grabbedAt = (x, y);
+        _grabbedIn = PlanePoint(ctx, camera, x, y, centre) ?? centre;
+        _grabbedPixels = MathF.Max(1f, PixelsPerReach(camera, centre, reach));
+
+        _start = nearest == Centre ? 0f : Measure(ctx, camera, x, y, centre) ?? 0f;
     }
 
     /// <summary>Where the handles are drawn about, for as long as one is held.</summary>
     private static Vec3 _centre;
+
+    /// <summary>
+    /// The three axes as they were when the handle was taken hold of.
+    /// </summary>
+    /// <remarks>
+    /// Held rather than asked for each frame, because in local space they turn with the thing: a
+    /// rotation read against axes that the same rotation is moving accelerates away from the hand
+    /// holding it.
+    /// </remarks>
+    private static Vec3[] _axes = [Vec3.UnitX, Vec3.UnitY, Vec3.UnitZ];
+
+    /// <summary>Where on the screen the handle was taken hold of.</summary>
+    private static (float X, float Y) _grabbedAt;
+
+    /// <summary>Where in the world the press landed, on the plane facing the camera.</summary>
+    private static Vec3 _grabbedIn;
+
+    /// <summary>How many pixels a handle's reach was worth when it was taken hold of.</summary>
+    /// <remarks>
+    /// What turns a distance dragged in pixels into a fraction of the handle: dragging the width
+    /// of the gizmo means the same thing on a small screen and a large one.
+    /// </remarks>
+    private static float _grabbedPixels;
+
+    /// <summary>How many pixels one unit of reach is worth on screen.</summary>
+    private static float PixelsPerReach(Entity camera, Vec3 centre, float reach)
+    {
+        if (!Render.TryProject(camera, centre, out var fromX, out var fromY)) return 0f;
+        if (!Render.TryProject(camera, centre + (Vec3.UnitY * reach), out var toX, out var toY))
+        {
+            return 0f;
+        }
+
+        return MathF.Sqrt(((toX - fromX) * (toX - fromX)) + ((toY - fromY) * (toY - fromY)));
+    }
+
+    /// <summary>
+    /// Where the pointer's ray meets the plane through a point that faces the camera.
+    /// </summary>
+    /// <remarks>
+    /// What a drag across the screen means in the world. The plane faces the camera so that the
+    /// thing follows the pointer exactly however the view is angled, which is what makes the
+    /// middle handle feel like dragging the object itself rather than steering it.
+    /// </remarks>
+    private static Vec3? PlanePoint(
+        BehaviorContext ctx, Entity camera, float x, float y, Vec3 centre)
+    {
+        if (!Render.TryRay(camera, x, y, out var origin, out var direction)) return null;
+
+        var normal = Facing(ctx, camera);
+        var denominator = Vec3.Dot(direction, normal);
+        if (MathF.Abs(denominator) < 1e-4f) return null;
+
+        var travel = Vec3.Dot(centre - origin, normal) / denominator;
+        if (travel <= 0f) return null;
+
+        return origin + (direction * travel);
+    }
+
+    /// <summary>Which way the camera is pointing, in the world.</summary>
+    private static Vec3 Facing(BehaviorContext ctx, Entity camera) =>
+        (ctx.Ecs.GetOrDefault<GlobalTransform>(camera).ZAxis * -1f).Normalized;
 
     /// <summary>
     /// How near the pointer is to one handle, in pixels, or nothing when it cannot be seen.
@@ -124,10 +206,8 @@ public partial struct TransformGizmo
     /// centre — where nothing is drawn — and never on the part a hand reaches for.
     /// </remarks>
     private static float? ToHandle(
-        Entity camera, Vec3 centre, float reach, int index, float x, float y)
+        Entity camera, Vec3 centre, float reach, Vec3 axis, float x, float y)
     {
-        var axis = ViewportGizmos.Axes[index];
-
         if (EditorTools.Current != EditorTool.Rotate)
         {
             if (!Render.TryProject(camera, centre, out var fromX, out var fromY)) return null;
@@ -174,9 +254,16 @@ public partial struct TransformGizmo
     {
         if (!ctx.Ecs.TryGet<Transform>(_subject, out var current)) return;
 
+        if (Axis == Centre)
+        {
+            ApplyFree(ctx, camera, x, y, ref current);
+            ctx.Ecs.Set(_subject, current);
+            return;
+        }
+
         if (Measure(ctx, camera, x, y, _centre) is not { } now) return;
 
-        var axis = ViewportGizmos.Axes[Axis];
+        var axis = _axes[Axis];
 
         switch (EditorTools.Current)
         {
@@ -208,6 +295,72 @@ public partial struct TransformGizmo
 
         ctx.Ecs.Set(_subject, current);
     }
+
+    /// <summary>
+    /// Applies a drag of the middle handle, which picks no axis.
+    /// </summary>
+    /// <remarks>
+    /// One handle, three meanings, each the thing the tool cannot otherwise do: a move across the
+    /// screen instead of along a line, a turn about whatever way the hand went instead of about
+    /// one axis, and a stretch of all three axes at once instead of one.
+    /// </remarks>
+    private static void ApplyFree(
+        BehaviorContext ctx, Entity camera, float x, float y, ref Transform current)
+    {
+        switch (EditorTools.Current)
+        {
+            case EditorTool.Move:
+                if (PlanePoint(ctx, camera, x, y, _centre) is not { } now) return;
+
+                var travelled = now - _grabbedIn;
+
+                current.Translation = _before.Translation
+                    + new Vec3(
+                        EditorTools.Snapped(travelled.X, EditorTools.MoveStep),
+                        EditorTools.Snapped(travelled.Y, EditorTools.MoveStep),
+                        EditorTools.Snapped(travelled.Z, EditorTools.MoveStep));
+                return;
+
+            case EditorTool.Rotate:
+                // A trackball: the pointer's travel across the screen turns the thing about the
+                // camera's own two axes, so it rolls the way a ball under a fingertip would rather
+                // than about any axis of its own.
+                var basis = ctx.Ecs.GetOrDefault<GlobalTransform>(camera);
+                var right = basis.XAxis.Normalized;
+                var up = basis.YAxis.Normalized;
+
+                var yaw = EditorTools.Snapped(
+                    (x - _grabbedAt.X) * DegreesPerPixel, EditorTools.RotateStep);
+                var pitch = EditorTools.Snapped(
+                    (y - _grabbedAt.Y) * DegreesPerPixel, EditorTools.RotateStep);
+
+                current.Rotation =
+                    Quat.FromAxisAngle(up, yaw * ToRadians)
+                    * Quat.FromAxisAngle(right, pitch * ToRadians)
+                    * _before.Rotation;
+                return;
+
+            case EditorTool.Scale:
+                // How far the hand has gone, as a fraction of the handle's own size. Not the
+                // distance from the middle, which is where this grab began: that would divide by
+                // nothing and send the scale to eighty times its size on the first pixel.
+                // Rightwards and upwards grow, which is the direction the arms point on screen.
+                var travel =
+                    ((x - _grabbedAt.X) - (y - _grabbedAt.Y)) / _grabbedPixels;
+
+                var factor = MathF.Max(
+                    0.01f, EditorTools.Snapped(1f + travel, EditorTools.ScaleStep));
+
+                current.Scale = _before.Scale * factor;
+                return;
+        }
+    }
+
+    /// <summary>How far a pointer has to travel to turn the trackball one degree.</summary>
+    private const float DegreesPerPixel = 0.5f;
+
+    /// <summary>Degrees to radians, since a turn is read in one and applied in the other.</summary>
+    private const float ToRadians = MathF.PI / 180f;
 
     /// <summary>Finishes a drag and records it as one change.</summary>
     private static void Finish(BehaviorContext ctx)
@@ -249,7 +402,7 @@ public partial struct TransformGizmo
     {
         if (!Render.TryRay(camera, x, y, out var origin, out var direction)) return null;
 
-        var axis = ViewportGizmos.Axes[Axis];
+        var axis = _axes[Axis];
 
         if (EditorTools.Current == EditorTool.Rotate)
         {

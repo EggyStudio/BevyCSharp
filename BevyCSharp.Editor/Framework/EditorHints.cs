@@ -25,15 +25,15 @@ public static class EditorHints
         switch (EditorTools.Current)
         {
             case EditorTool.Move:
-                yield return ("drag", "move along an axis");
+                yield return ("drag", "an arm to move along it, the ball to move freely");
                 break;
 
             case EditorTool.Rotate:
-                yield return ("drag", "turn about an axis");
+                yield return ("drag", "a ring to turn about it, the ball to turn freely");
                 break;
 
             case EditorTool.Scale:
-                yield return ("drag", "stretch along an axis");
+                yield return ("drag", "an arm to stretch along it, the ball for all three");
                 break;
 
             default:
@@ -42,6 +42,13 @@ public static class EditorHints
         }
 
         yield return ("Q W E R", "select move rotate scale");
+
+        if (EditorTools.Current != EditorTool.Select)
+        {
+            yield return (
+                "X",
+                EditorTools.Space == ToolSpace.Local ? "handles: local" : "handles: global");
+        }
 
         if (EditorTools.Current != EditorTool.Select)
         {

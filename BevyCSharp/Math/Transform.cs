@@ -230,15 +230,24 @@ public struct Quat : IEquatable<Quat>
     }
 
     /// <summary>
-    /// The rotation that turns about X, then Y, then Z, in radians.
+    /// The rotation that rolls about Z, then pitches about X, then turns about Y, in radians.
     /// </summary>
     /// <remarks>
-    /// Applied in that order about the axes as they were before any of it, which is the order an
-    /// inspector's three boxes read in. <see cref="ToEuler"/> is its inverse for any rotation whose
-    /// pitch is short of straight up, where the other two angles stop being separable.
+    /// <para>
+    /// Y outermost, which is what an editor wants and why every editor does it. One of the three
+    /// angles has to be the middle one, and a middle angle only spans half a turn: past a quarter
+    /// turn its neighbours have to jump to a half turn to describe the rest. Standing that angle
+    /// up is the difference between a thing spinning on the spot reading 0, 120, 240 and reading
+    /// 180, 60, 180 — the same rotation, and unreadable.
+    /// </para>
+    /// <para>
+    /// So Y, which is what a thing standing on the ground turns about, gets the full circle, and X
+    /// is the one clamped to a quarter turn either way — where looking straight up or down is, and
+    /// where the other two stop being separable. <see cref="ToEuler"/> is the inverse.
+    /// </para>
     /// </remarks>
     public static Quat FromEuler(float x, float y, float z) =>
-        FromRotationZ(z) * FromRotationY(y) * FromRotationX(x);
+        FromRotationY(y) * FromRotationX(x) * FromRotationZ(z);
 
     /// <summary>
     /// The turns about X, Y and Z this rotation is made of, in radians.
@@ -246,33 +255,36 @@ public struct Quat : IEquatable<Quat>
     /// <remarks>
     /// The inverse of <see cref="FromEuler"/>. A rotation has more than one decomposition, so what
     /// comes back is the one with the pitch between straight down and straight up; at either pole
-    /// the roll and the yaw describe the same turn and the roll is given all of it.
+    /// the turn and the roll describe the same thing and the turn is given all of it.
     /// </remarks>
     public readonly Vec3 ToEuler()
     {
-        // The middle term is the sine of the pitch, and it is the one that saturates: outside
-        // the range the two other angles are no longer separable, so it is clamped and the yaw
-        // is taken from the remaining terms alone.
-        var sinPitch = 2f * ((W * Y) - (Z * X));
+        // Read off the rotation's matrix rather than out of the quaternion's terms directly. The
+        // three entries each angle needs are named here, which is the only way this stays checkable
+        // against the order `FromEuler` builds in.
+        var xx = X * X;
+        var yy = Y * Y;
+        var zz = Z * Z;
 
-        if (MathF.Abs(sinPitch) >= 0.999999f)
+        var m13 = 2f * ((X * Z) + (W * Y));
+        var m21 = 2f * ((X * Y) + (W * Z));
+        var m22 = 1f - (2f * (xx + zz));
+        var m23 = 2f * ((Y * Z) - (W * X));
+        var m31 = 2f * ((X * Z) - (W * Y));
+        var m33 = 1f - (2f * (xx + yy));
+        var m11 = 1f - (2f * (yy + zz));
+
+        var pitch = MathF.Asin(Math.Clamp(-m23, -1f, 1f));
+
+        // At the pole the turn and the roll are the same turn about the same line, and only their
+        // sum is a fact. It is given to the turn, because that is the one an editor's first box
+        // shows and the one that stays continuous as something spins.
+        if (MathF.Abs(m23) >= 0.999999f)
         {
-            var pole = MathF.CopySign(MathF.PI / 2f, sinPitch);
-            var roll = 2f * MathF.Atan2(X, W);
-
-            return new Vec3(0f, pole, roll);
+            return new Vec3(pitch, MathF.Atan2(-m31, m11), 0f);
         }
 
-        var sinRollCos = 2f * ((W * X) + (Y * Z));
-        var cosRollCos = 1f - (2f * ((X * X) + (Y * Y)));
-
-        var sinYawCos = 2f * ((W * Z) + (X * Y));
-        var cosYawCos = 1f - (2f * ((Y * Y) + (Z * Z)));
-
-        return new Vec3(
-            MathF.Atan2(sinRollCos, cosRollCos),
-            MathF.Asin(sinPitch),
-            MathF.Atan2(sinYawCos, cosYawCos));
+        return new Vec3(pitch, MathF.Atan2(m13, m33), MathF.Atan2(m21, m22));
     }
 
     /// <inheritdoc/>

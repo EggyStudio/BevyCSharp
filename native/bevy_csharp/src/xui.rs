@@ -63,7 +63,18 @@ mod live {
     /// write is kept for a few frames and applied again, which touches the field and has the
     /// change noticed a second time — with the child there to receive it.
     #[derive(Resource, Default)]
-    pub struct PendingText(pub Vec<(bevy::ecs::entity::Entity, String, u8)>);
+    pub struct PendingText {
+        /// What has been written lately, and how many frames it has left to be written again.
+        pub waiting: Vec<(bevy::ecs::entity::Entity, String, u8)>,
+        /// Widgets that have been through it once and need never go through it again.
+        ///
+        /// Only the first write to a given widget can arrive before it has anywhere to draw, so
+        /// only the first write is worth repeating. Repeating every write costs four times over
+        /// for ever, and each one restyles the widget: a panel showing a value that changes every
+        /// frame — which is what an inspector pointed at something moving is — pays it on every
+        /// row, every frame, and the editor slows to a crawl.
+        pub settled: bevy::platform::collections::HashSet<bevy::ecs::entity::Entity>,
+    }
 
     /// What the widgets reported since the managed side last looked.
     ///
@@ -179,6 +190,7 @@ pub fn install(app: &mut bevy::app::App) {
     app.add_systems(
         bevy::app::PreUpdate,
         |mut documents: ResMut<live::Documents>,
+         mut pending: ResMut<live::PendingText>,
          mut registry: ResMut<bevy_extended_ui::old::registry::UiRegistry>| {
             if !documents.dirty {
                 return;
@@ -200,6 +212,10 @@ pub fn install(app: &mut bevy::app::App) {
             // list leaves every open document standing and has the crate build only what is new.
             registry.current = if names.is_empty() { None } else { Some(names) };
             documents.generation = documents.generation.wrapping_add(1);
+
+            // Every widget is about to be replaced, so nothing that has settled has settled.
+            pending.waiting.clear();
+            pending.settled.clear();
         },
     );
 
@@ -585,9 +601,11 @@ pub unsafe extern "C" fn bcs_xui_set_text(entity: u64, text: *const core::ffi::c
                 // whether a widget has built its text child is the interface's business and not
                 // something the other side of an ABI should have to guess at.
                 if status == status::OK {
-                    if let Some(mut pending) = world.get_resource_mut::<live::PendingText>() {
-                        pending.0.retain(|(held, _, _)| *held != entity);
-                        pending.0.push((entity, text, RETRIES));
+                    if let Some(mut pending) = world.get_resource_mut::<live::PendingText>()
+                        && !pending.settled.contains(&entity)
+                    {
+                        pending.waiting.retain(|(held, _, _)| *held != entity);
+                        pending.waiting.push((entity, text, RETRIES));
                     }
                 }
 
@@ -954,17 +972,25 @@ fn reapply_text(world: &mut bevy::ecs::world::World) {
         return;
     };
 
-    if pending.0.is_empty() {
+    if pending.waiting.is_empty() {
         return;
     }
 
     let mut due: Vec<(bevy::ecs::entity::Entity, String)> = Vec::new();
+    let mut done: Vec<bevy::ecs::entity::Entity> = Vec::new();
 
-    pending.0.retain_mut(|(entity, text, left)| {
+    pending.waiting.retain_mut(|(entity, text, left)| {
         *left = left.saturating_sub(1);
         due.push((*entity, text.clone()));
+
+        if *left == 0 {
+            done.push(*entity);
+        }
+
         *left > 0
     });
+
+    pending.settled.extend(done);
 
     for (entity, text) in due {
         write_text(world, entity, &text);

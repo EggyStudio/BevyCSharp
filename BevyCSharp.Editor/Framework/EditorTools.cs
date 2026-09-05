@@ -18,6 +18,16 @@ public enum EditorTool
     Scale,
 }
 
+/// <summary>Which axes a handle is drawn along.</summary>
+public enum ToolSpace
+{
+    /// <summary>The world's own axes, whichever way the thing is facing.</summary>
+    Global,
+
+    /// <summary>The thing's own axes, which is what a drag along its length means.</summary>
+    Local,
+}
+
 /// <summary>
 /// Which tool the viewport is in, and what the tools agree on.
 /// </summary>
@@ -39,6 +49,33 @@ public static class EditorTools
 
     /// <summary>Whether a drag lands on round numbers.</summary>
     public static bool Snap { get; set; }
+
+    /// <summary>
+    /// Whether the handles follow the world's axes or the thing's own.
+    /// </summary>
+    /// <remarks>
+    /// Both are needed and neither is a default anyone agrees on. Moving a thing along a floor
+    /// wants the world; sliding a drawer out of a cabinet that is not square to the world wants
+    /// the cabinet's. What matters is that the handle drawn and the drag applied use the same one,
+    /// so it is asked here and nowhere else.
+    /// </remarks>
+    public static ToolSpace Space { get; set; } = ToolSpace.Global;
+
+    /// <summary>The three axes a handle is drawn along, for a thing with this rotation.</summary>
+    public static Vec3[] AxesFor(Quat rotation)
+    {
+        if (Space == ToolSpace.Global) return ViewportAxes;
+
+        return
+        [
+            (rotation * ViewportAxes[0]).Normalized,
+            (rotation * ViewportAxes[1]).Normalized,
+            (rotation * ViewportAxes[2]).Normalized,
+        ];
+    }
+
+    /// <summary>The world's axes, which are what a global handle is drawn along.</summary>
+    private static readonly Vec3[] ViewportAxes = [Vec3.UnitX, Vec3.UnitY, Vec3.UnitZ];
 
     /// <summary>Metres a snapped move lands on.</summary>
     public static float MoveStep { get; set; } = 0.25f;

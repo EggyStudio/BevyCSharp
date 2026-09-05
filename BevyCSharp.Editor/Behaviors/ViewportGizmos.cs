@@ -57,9 +57,10 @@ public partial struct ViewportGizmos
         if (!Render.TryGetBounds(entity, out var min, out var max)) return;
 
         var centre = (min + max) * 0.5f;
+        var rotation = ctx.Ecs.GetOrDefault<GlobalTransform>(entity).Rotation;
 
         Outline(min, max);
-        Handles(ctx, centre, Reach(EditorSelection.Camera, centre));
+        Handles(centre, Reach(EditorSelection.Camera, centre), EditorTools.AxesFor(rotation));
     }
 
     /// <summary>Draws the twelve edges of the selection's box.</summary>
@@ -90,16 +91,24 @@ public partial struct ViewportGizmos
     }
 
     /// <summary>Draws the tool's handles at the selection.</summary>
-    private static void Handles(BehaviorContext ctx, Vec3 centre, float reach)
+    private static void Handles(Vec3 centre, float reach, Vec3[] axes)
     {
         if (EditorTools.Current == EditorTool.Select) return;
 
         var held = TransformGizmo.Axis;
 
+        // The middle handle, which is the one that does not pick an axis: a drag across the screen
+        // for a move, a turn about whatever way the pointer went for a rotation, and every axis at
+        // once for a scale. Drawn first so the arms are over it rather than under.
+        Sphere(
+            centre,
+            reach * CentreSize,
+            held == TransformGizmo.Centre ? Accent : Middle);
+
         for (var i = 0; i < 3; i++)
         {
             var colour = held == i ? Accent : AxisColours[i];
-            var axis = Axes[i];
+            var axis = axes[i];
 
             switch (EditorTools.Current)
             {
@@ -118,6 +127,19 @@ public partial struct ViewportGizmos
                     break;
             }
         }
+    }
+
+    /// <summary>How large the middle handle is, as a fraction of a handle's reach.</summary>
+    internal const float CentreSize = 0.16f;
+
+    /// <summary>The middle handle when it is not held: no axis, so no axis colour.</summary>
+    private static readonly (float R, float G, float B, float A) Middle = (0.85f, 0.85f, 0.88f, 1f);
+
+    /// <summary>Draws a ball as three rings, so it reads as a ball from any angle.</summary>
+    private static void Sphere(
+        Vec3 centre, float radius, (float R, float G, float B, float A) colour)
+    {
+        for (var i = 0; i < 3; i++) Circle(centre, Axes[i], radius, colour);
     }
 
     /// <summary>Draws a ring about an axis, which is what a turn is dragged along.</summary>

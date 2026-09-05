@@ -349,10 +349,17 @@ public sealed partial class WorldPanel
     /// Offers what can be added to the world, from the button at the foot of the panel.
     /// </summary>
     /// <remarks>
+    /// The same on a right click as on a left one. The button opens a menu either way, and a
+    /// button that answers one press and ignores the other reads as broken.
+    /// </remarks>
+    /// <remarks>
     /// The same list a right click on the panel offers, because it is the same list: a menu is a
     /// table of paths and this opens it at <c>Spawn</c>. A game that adds a row there gets it in
     /// both places without touching this panel.
     /// </remarks>
+    [Context("#w-add")]
+    public void AddMenu() => Add();
+
     [Command("#w-add")]
     public void Add()
     {

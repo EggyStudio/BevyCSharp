@@ -608,6 +608,10 @@ public sealed partial class DataPanel
         EditorShell.ShowMenu(field.Name, items, x, y);
     }
 
+    /// <summary>Offers the same list on a right click, since the button is a menu either way.</summary>
+    [Context("#d-add")]
+    public void AddComponentMenu() => AddComponent();
+
     /// <summary>Offers the components that can be put on the selection.</summary>
     [Command("#d-add")]
     public void AddComponent()

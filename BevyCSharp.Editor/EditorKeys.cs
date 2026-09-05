@@ -38,6 +38,14 @@ public partial struct EditorKeys
             if (ctx.Input.KeyPressed(key)) EditorTools.Current = tool;
         }
 
+        // X for the world's axes or the thing's own, which is where every editor puts it.
+        if (ctx.Input.KeyPressed(Key.X))
+        {
+            EditorTools.Space = EditorTools.Space == ToolSpace.Local
+                ? ToolSpace.Global
+                : ToolSpace.Local;
+        }
+
         // Held rather than pressed: snapping while a handle is being dragged is what a person
         // reaches for mid-drag, and a toggle would be the wrong shape for that.
         if (ctx.Input.AnyKeyDown([Key.ControlLeft, Key.ControlRight])

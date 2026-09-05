@@ -82,6 +82,18 @@ public static class EditorCommands
                 (int)tool));
         }
 
+        // A word rather than a picture, because there is no picture of "the world's axes" that
+        // anyone reads faster than the word for it.
+        EditorToolbar.Add(new ToolbarButton(
+            ToolbarSlot.Centre,
+            null,
+            static () => EditorTools.Space == ToolSpace.Local ? "local" : "global",
+            static _ => EditorTools.Space = EditorTools.Space == ToolSpace.Local
+                ? ToolSpace.Global
+                : ToolSpace.Local,
+            static () => EditorTools.Space == ToolSpace.Local,
+            9));
+
         EditorToolbar.Add(new ToolbarButton(
             ToolbarSlot.Centre,
             "icons/ui/snap.png",
@@ -303,7 +315,15 @@ public static class EditorCommands
             static () => EditorTools.Snap,
             2);
 
-        EditorMenu.Separator("View/-", 3);
+        EditorMenu.Toggle(
+            "View/Handles on the thing's own axes",
+            static _ => EditorTools.Space = EditorTools.Space == ToolSpace.Local
+                ? ToolSpace.Global
+                : ToolSpace.Local,
+            static () => EditorTools.Space == ToolSpace.Local,
+            3);
+
+        EditorMenu.Separator("View/-", 4);
 
         EditorMenu.Command(
             "View/Reset the layout",

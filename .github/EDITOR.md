@@ -108,6 +108,19 @@ can be grabbed and one on a building does not fill the screen, and neither chang
 moves. It also has to hold still while it is used, and an object's own bounds change with every
 frame of a scale drag.
 
+**Every tool has a handle that picks no axis.** The ball in the middle is the thing the three arms
+cannot do: a move across the screen rather than along a line, a turn about whichever way the hand
+went rather than about one axis, and a stretch of all three at once. The move is a ray onto the
+plane through the selection facing the camera, so the thing follows the pointer exactly however the
+view is angled; the turn is a trackball about the camera's own two axes; the stretch is how far the
+hand has gone as a fraction of the handle's own size, because the distance from the middle — where
+the grab began — is nothing to divide by.
+
+**Global or local, and both halves have to agree.** `EditorTools.Space` is asked once, and the
+handle drawn and the drag applied read the same answer. The three axes are captured when a handle
+is taken hold of and held for the whole drag: in local space they turn with the thing, and a
+rotation read against axes that the same rotation is moving accelerates away from the hand.
+
 **A handle is grabbed by what it looks like.** Move and scale draw a line along the axis and are
 measured against that line. A turn draws a ring, and measuring a ring against the line is why one
 could only be grabbed near its centre, where nothing is drawn: the ring is walked as a few dozen
@@ -329,7 +342,9 @@ These constraints shaped the panels, and all of them are the crate's rather than
   else, so a button with a picture in it is a `<div>` that takes the click instead.
 - **A widget restyles for one frame at the wrong font size** after anything is written to it. That
   is why nothing is written to an element that already holds the value: writing regardless is a
-  flicker sixty times a second.
+  flicker sixty times a second, and why only the *first* write to a widget is repeated for the
+  frames its text child takes to appear. Repeating every write costs four restyles per row per
+  frame, which a panel pointed at something moving pays on every row it has.
 - **`align-self` and `align-content` are not read.** The first does not matter, because a document's
   body is a column and a column sizes its children by their contents. The second does: a wrapping
   box taller than its lines spreads them down its height with no way to say otherwise, which is an
