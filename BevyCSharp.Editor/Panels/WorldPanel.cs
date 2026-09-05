@@ -367,7 +367,7 @@ public sealed partial class WorldPanel
             ? (button.X, button.Y - 6f)
             : (12f, 44f);
 
-        EditorShell.ShowMenu("Spawn", above.Item1, above.Item2, "Spawn");
+        EditorShell.ToggleMenu("Spawn", above.Item1, above.Item2, "Spawn");
     }
 
     /// <summary>Starts and finishes dragging one row onto another, which parents it.</summary>

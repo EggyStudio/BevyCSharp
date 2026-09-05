@@ -103,6 +103,9 @@ public readonly record struct PanelPlacement(
         new(EditorDock.Floating, x, y, width, height);
 
     /// <summary>The same placement, moved to a point of its own.</summary>
+    public PanelPlacement MovedTo((float X, float Y) point) => MovedTo(point.X, point.Y);
+
+    /// <summary>The same placement, somewhere else.</summary>
     public PanelPlacement MovedTo(float x, float y) =>
         this with { Dock = EditorDock.Floating, X = x, Y = y };
 

@@ -45,7 +45,7 @@ public static class EditorCommands
             ToolbarSlot.Left,
             "icons/ui/menu.png",
             string.Empty,
-            static _ => EditorShell.ShowMenu(string.Empty, MenuAt.X, MenuAt.Y),
+            static _ => EditorShell.ToggleMenu(string.Empty, MenuAt.X, MenuAt.Y),
             0);
 
         EditorToolbar.Add(
@@ -110,26 +110,14 @@ public static class EditorCommands
             ToolbarSlot.Right,
             "icons/ui/info.png",
             static () => string.Empty,
-            static _ =>
-            {
-                // Put away rather than closed, and fetched back to wherever the viewport's corner
-                // is now. Somebody watching a number opens and closes this all day, and closing a
-                // document rebuilds every widget of every panel on screen.
-                if (EditorShell.Showing<InfoPanel>() is { } open)
-                {
-                    EditorShell.Conceal(open);
-                    return;
-                }
-
-                var panel = EditorShell.Find<InfoPanel>() ?? EditorShell.Show(new InfoPanel());
-
-                EditorShell.Reveal(panel);
-                EditorShell.Layout.Place(
-                    panel,
-                    panel.Chrome.Placement.MovedTo(
-                        EditorShell.Layout.Viewport.Right - 240f,
-                        EditorShell.Layout.Viewport.Y + 44f));
-            },
+            // Put away rather than closed, and fetched back to wherever the viewport's corner is
+            // now. Somebody watching a number opens and closes this all day, and closing a document
+            // rebuilds every widget of every panel on screen.
+            static _ => EditorShell.ToggleAt(
+                static () => new InfoPanel(),
+                static () => (
+                    EditorShell.Layout.Viewport.Right - 240f,
+                    EditorShell.Layout.Viewport.Y + 44f)),
             static () => EditorShell.Showing<InfoPanel>() is not null,
             0));
     }
@@ -143,13 +131,13 @@ public static class EditorCommands
     {
         EditorMenu.Toggle(
             "Panels/World",
-            static _ => EditorShell.ToggleShown(static () => new WorldPanel()),
+            static _ => EditorShell.Toggle(static () => new WorldPanel()),
             static () => EditorShell.Showing<WorldPanel>() is not null,
             0);
 
         EditorMenu.Toggle(
             "Panels/Data",
-            static _ => EditorShell.ToggleShown(static () => new DataPanel()),
+            static _ => EditorShell.Toggle(static () => new DataPanel()),
             static () => EditorShell.Showing<DataPanel>() is not null,
             1);
 
@@ -179,7 +167,7 @@ public static class EditorCommands
 
         EditorMenu.Toggle(
             "Panels/Info",
-            static _ => EditorShell.ToggleShown(static () => new InfoPanel()),
+            static _ => EditorShell.Toggle(static () => new InfoPanel()),
             static () => EditorShell.Showing<InfoPanel>() is not null,
             5);
 
@@ -203,7 +191,7 @@ public static class EditorCommands
 
         EditorMenu.Toggle(
             "Panels/Tabs",
-            static _ => EditorShell.ToggleShown(static () => new TabsPanel()),
+            static _ => EditorShell.Toggle(static () => new TabsPanel()),
             static () => EditorShell.Showing<TabsPanel>() is not null,
             8);
     }

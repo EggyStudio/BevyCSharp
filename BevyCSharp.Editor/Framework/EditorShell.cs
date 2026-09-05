@@ -109,19 +109,61 @@ public static class EditorShell
     /// </remarks>
     public static MenuPanel ShowMenu(string path, float x, float y, string? title = null)
     {
-        CloseMenus();
+        var menu = Menu();
+        menu.PointAt(path, title);
 
-        var (clearX, clearY) = Clear(x, y);
-        return ShowAt(new MenuPanel(path, title), clearX, clearY);
+        return Offer(menu, x, y);
+    }
+
+    /// <summary>
+    /// Opens the menu from a button, or closes it if that button's press is what dismissed it.
+    /// </summary>
+    /// <remarks>
+    /// What a button that owns a menu does, as against a right click on a row: a right click asks
+    /// a fresh question somewhere else and should always answer, and a button is a switch.
+    /// </remarks>
+    public static void ToggleMenu(string path, float x, float y, string? title = null)
+    {
+        // Only its own. A press on this button dismisses whatever flyout was open, and that may
+        // well be somebody else's — a row's context menu, another button's list — which this click
+        // should replace rather than decline to open.
+        if (Find<MenuPanel>() is { } open
+            && DismissedByThisPress(open)
+            && open.Owner == path)
+        {
+            return;
+        }
+
+        ShowMenu(path, x, y, title);
     }
 
     /// <summary>Opens a menu over a list built for the occasion, such as an enum's values.</summary>
     public static MenuPanel ShowMenu(string title, IReadOnlyList<MenuItem> items, float x, float y)
     {
-        CloseMenus();
+        var menu = Menu();
+        menu.PointAt(title, items);
 
+        return Offer(menu, x, y);
+    }
+
+    /// <summary>
+    /// The one menu, built the first time anything asks for one and kept for good.
+    /// </summary>
+    /// <remarks>
+    /// One at a time is what a menu means — a menu is a question, and two of them at once is two
+    /// questions with one pointer to answer them — so one is all there ever needs to be.
+    /// </remarks>
+    private static MenuPanel Menu() => Find<MenuPanel>() ?? Show(new MenuPanel());
+
+    /// <summary>Puts the menu where it was asked for, clear of the panels, and shows it.</summary>
+    private static MenuPanel Offer(MenuPanel menu, float x, float y)
+    {
         var (clearX, clearY) = Clear(x, y);
-        return ShowAt(new MenuPanel(title, items), clearX, clearY);
+
+        Layout.Place(menu, menu.Chrome.Placement.MovedTo(clearX, clearY));
+        Reveal(menu);
+
+        return menu;
     }
 
     /// <summary>
@@ -203,7 +245,7 @@ public static class EditorShell
     /// <summary>Closes any menu that is open.</summary>
     public static void CloseMenus()
     {
-        foreach (var panel in Panels.OfType<MenuPanel>().ToArray()) Hide(panel);
+        foreach (var panel in Panels.OfType<MenuPanel>()) Conceal(panel);
     }
 
     /// <summary>
@@ -266,53 +308,70 @@ public static class EditorShell
 
         if (!Concealed.Remove(panel)) return;
 
+        // As new as one that was just opened, and protected from dismissal for the same reason:
+        // the press that asked for it has not finished arriving.
+        Fresh.Add(panel);
         panel.Window?.Show(true);
     }
 
-    /// <summary>Opens a panel if it is closed and closes it if it is open.</summary>
-    /// <remarks>What a toolbar button bound to a panel does, which is most of them.</remarks>
-    public static void Toggle<T>(Func<T> create) where T : class, IEditorPanel
-    {
-        ArgumentNullException.ThrowIfNull(create);
 
-        if (Find<T>() is { } existing)
-        {
-            Hide(existing);
-            return;
-        }
-
-        Show(create());
-    }
 
     /// <summary>
     /// Puts a panel away if it is showing and fetches it back if it is not.
     /// </summary>
     /// <remarks>
-    /// What the panels a person opens and closes all day want, rather than <see cref="Toggle"/>:
-    /// the document is loaded once and stays, so no amount of showing and hiding disturbs anything
-    /// else on screen. <see cref="Toggle"/> remains what a panel that is genuinely finished with
-    /// wants, and what a flyout wants.
+    /// What a toolbar button or a menu row bound to a panel does, which is most of them. The
+    /// document is loaded once and stays, so no amount of showing and hiding disturbs anything
+    /// else on screen.
     /// </remarks>
-    public static void ToggleShown<T>(Func<T> create) where T : class, IEditorPanel
+    public static void Toggle<T>(Func<T> create) where T : class, IEditorPanel =>
+        ToggleAt(create, null);
+
+    /// <summary>The same, putting the panel somewhere when it is fetched back.</summary>
+    /// <remarks>
+    /// For a flyout, which belongs beside whatever opened it and so has a different place every
+    /// time. <paramref name="where"/> is asked at the moment it is shown, not when it was bound.
+    /// </remarks>
+    public static void ToggleAt<T>(Func<T> create, Func<(float X, float Y)>? where)
+        where T : class, IEditorPanel
     {
         ArgumentNullException.ThrowIfNull(create);
 
-        if (Find<T>() is { } existing)
+        if (Find<T>() is not { } existing)
         {
-            if (IsShowing(existing)) Conceal(existing);
-            else Reveal(existing);
+            var made = Show(create());
+            if (where is not null) Layout.Place(made, made.Chrome.Placement.MovedTo(where()));
 
             return;
         }
 
-        Show(create());
+        // Already put away by the press this click is the end of counts as showing: otherwise a
+        // flyout's own button can never close it, because the press dismisses it and the click
+        // opens it straight back up.
+        if (IsShowing(existing) || DismissedByThisPress(existing))
+        {
+            Conceal(existing);
+            return;
+        }
+
+        if (where is not null) Layout.Place(existing, existing.Chrome.Placement.MovedTo(where()));
+
+        Reveal(existing);
     }
 
     /// <summary>The panel of this type that is on screen, or <see langword="null"/>.</summary>
     public static T? Showing<T>() where T : class, IEditorPanel =>
         Find<T>() is { } panel && IsShowing(panel) ? panel : null;
 
-    /// <summary>Closes a panel and forgets it.</summary>
+    /// <summary>
+    /// Closes a panel and forgets it, document and all.
+    /// </summary>
+    /// <remarks>
+    /// For a panel that is finished with, not for one that is being put away: closing a document
+    /// respawns every widget of every panel on screen. Nothing in the ordinary run of the editor
+    /// calls this — showing and hiding go through <see cref="Conceal"/> and <see cref="Reveal"/> —
+    /// and it is here for a panel that will not be wanted again and for shutting down.
+    /// </remarks>
     public static void Hide(IEditorPanel panel)
     {
         ArgumentNullException.ThrowIfNull(panel);
@@ -364,6 +423,19 @@ public static class EditorShell
         Context = ctx;
 
         var input = ctx.Input;
+
+        // First of all, and before a single element is looked up. Every window drops what it holds
+        // when this moves, and the events drained below are dispatched by comparing an element
+        // against what a panel holds: reading it afterwards would spend one frame matching clicks
+        // against widgets that no longer exist.
+        EditorWindow.Frame = ctx.Time.FrameCount;
+        EditorWindow.Generation = Xui.Generation;
+
+        PanelBinding.Frame = ctx.Time.FrameCount;
+
+        // Asked once a frame, and used by every text binding: whatever is being typed in is left
+        // alone rather than overwritten with what the program still says.
+        PanelBinding.Focused = Focus(input);
 
         // Before anything reads a right click, because whether the pointer travelled is what tells
         // a menu from a camera look, and everything that acts on a right click has to agree.
@@ -452,16 +524,6 @@ public static class EditorShell
         // A selection whose entity is gone is worse than none: the inspector would read whatever
         // took its place in storage. Checked once here rather than in every panel that reads it.
         EditorSelection.Prune(ctx.Ecs);
-
-        // Asked once a frame, and used by every text binding: whatever is being typed in is left
-        // alone rather than overwritten with what the program still says.
-        PanelBinding.Focused = Focus(input);
-        PanelBinding.Frame = ctx.Time.FrameCount;
-        EditorWindow.Frame = ctx.Time.FrameCount;
-
-        // One call for every window, since the answer is about the interface rather than about any
-        // one of them.
-        EditorWindow.Generation = Xui.Generation;
 
         // Read the world first, arrange second, write the screen third. A panel that filled its
         // rows during this tick is one whose height changed, and the arrangement has to see that
@@ -816,17 +878,39 @@ public static class EditorShell
     {
         if (!input.MousePressed(MouseButton.Left)) return;
 
+        JustDismissed.Clear();
+
         var (x, y) = input.MousePosition;
 
         foreach (var panel in Panels.ToArray())
         {
             if (panel.Chrome.Dismiss != PanelDismiss.OnOutsideClick) continue;
+            if (Concealed.Contains(panel)) continue;
             if (Pinned.Contains(panel)) continue;
             if (Fresh.Contains(panel)) continue;
             if (panel.Window?.Measure() is not { } rect) continue;
             if (rect.Contains(x, y)) continue;
 
-            Hide(panel);
+            // Put away, never closed. Closing a document respawns every widget of every panel on
+            // screen, and a flyout is dismissed by the first press of the next thing somebody does
+            // — so closing it here is a rebuild in the middle of that press, and the click it was
+            // part of is lost. See the note on Concealed.
+            Conceal(panel);
+            JustDismissed.Add(panel);
         }
     }
+
+    /// <summary>
+    /// What the press now in flight dismissed.
+    /// </summary>
+    /// <remarks>
+    /// A press and the click it becomes are two events a few frames apart, and a flyout's own
+    /// button sees both: the press dismisses the flyout as an outside click, and the click then
+    /// finds it closed and opens it again, so the button that opened it cannot close it. Whoever
+    /// answers the click needs to know the press had already put it away, which is what this says.
+    /// </remarks>
+    private static readonly HashSet<IEditorPanel> JustDismissed = [];
+
+    /// <summary>Whether the press now in flight is what put a panel away.</summary>
+    public static bool DismissedByThisPress(IEditorPanel panel) => JustDismissed.Contains(panel);
 }

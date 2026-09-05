@@ -58,13 +58,24 @@ room the column has written as a maximum (`bcs_xui_set_limits`); an undragged wi
 at all, because `auto` is not the stylesheet's answer but "as wide as the longest word in it"; and
 no member of a row is ever told the row's height.
 
-**Put away, not closed.** The panels that come and go all day — the world, the panel that describes
-the selection, whichever tab is open, the information panel — are never closed. Closing a document
-takes it out of the interface's list, and changing that list respawns every widget of every panel: a
-blink, a frame at the wrong font, and a panel that eventually does not come back. So they are
-concealed instead: `EditorShell.Conceal` and `Reveal` write one display property, the layout is
-handed only what is showing, and the document is loaded once per session. `Toggle` still closes,
-and that is what a flyout wants.
+**Nothing is closed while anybody is using it.** Opening or closing a document takes it out of the
+interface's list, and changing that list respawns every widget of every panel — a rebuild in the
+middle of whatever gesture caused it. Every panel that comes and goes is concealed instead:
+`EditorShell.Conceal` and `Reveal` write one display property, the layout is handed only what is
+showing, and each document is loaded once per session. `Hide` closes for good and nothing in the
+ordinary run of the editor calls it.
+
+Flyouts were the last thing still churning, and they churned the most: a menu was a new panel every
+time, and dismissing one on the next press closed a document *during* that press. There is now one
+menu, built the first time anything asks for one and pointed at something else thereafter. Opening
+the hamburger six times in a row leaves the rebuild counter where it started; before, each one moved
+it twice.
+
+**A press and the click it becomes are two events.** A flyout's own button sees both: the press
+dismisses the flyout as an outside click, and the click a few frames later finds it closed and opens
+it again — so the button that opened it could never close it. `DismissedByThisPress` is what the
+click asks, and only a button whose own menu was the one dismissed declines to reopen; a press that
+happened to close somebody else's menu opens its own.
 
 **A rebuild is counted, not waited out.** `bcs_xui_generation` says how many times the interface has
 respawned everything, so a window notices that every element handle it holds is dead at exactly the

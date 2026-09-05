@@ -29,27 +29,54 @@ public sealed partial class MenuPanel
     /// <summary>How many rows the document declares.</summary>
     public const int Rows = 18;
 
-    /// <summary>Opens a menu at a path in the editor's own table.</summary>
-    public MenuPanel(string path = "", string? title = null)
+    /// <summary>
+    /// Points the menu at a path in the editor's own table.
+    /// </summary>
+    /// <remarks>
+    /// The menu is retargeted rather than replaced. One document is opened for it, once, and every
+    /// menu after that is the same document showing something else: opening and closing a document
+    /// respawns every widget of every panel on screen, and doing that to ask a question is what
+    /// made a flyout work the first time and not the second.
+    /// </remarks>
+    public void PointAt(string path = "", string? title = null)
     {
+        Owner = path;
         _path = path;
         _title = title;
+        _items = null;
+        _level = string.Empty;
+        _page = 0;
     }
 
-    /// <summary>Opens a menu over a list built for the occasion, such as an enum's values.</summary>
+    /// <summary>Points it at a list built for the occasion, such as an enum's values.</summary>
     /// <remarks>
     /// A flat list rather than a tree: the rows are not part of the editor's menu table and have
     /// nothing under them, so there is nowhere to navigate to.
     /// </remarks>
-    public MenuPanel(string title, IReadOnlyList<MenuItem> items)
+    public void PointAt(string title, IReadOnlyList<MenuItem> items)
     {
+        Owner = null;
+        _path = string.Empty;
         _title = title;
         _items = items;
+        _level = string.Empty;
+        _page = 0;
     }
 
-    private readonly string _path = string.Empty;
-    private readonly string? _title;
-    private readonly IReadOnlyList<MenuItem>? _items;
+    /// <summary>
+    /// What asked for the menu last, or <see langword="null"/> for a list built on the spot.
+    /// </summary>
+    /// <remarks>
+    /// So that a button owning a menu can be a switch. Pressing that button while its menu is open
+    /// dismisses the menu, and the click that press becomes has to tell "the thing I opened" from
+    /// "somebody else's menu that my press happened to close" — the first closes, the second opens
+    /// afresh.
+    /// </remarks>
+    public string? Owner { get; private set; }
+
+    private string _path = string.Empty;
+    private string? _title;
+    private IReadOnlyList<MenuItem>? _items;
 
     /// <summary>Which level is showing, when the menu is a tree.</summary>
     private string _level = string.Empty;
@@ -152,7 +179,7 @@ public sealed partial class MenuPanel
 
                 // A toggle leaves the menu open, because turning three things on in a row is the
                 // ordinary use of one. Anything else has done its job and gets out of the way.
-                if (item.Kind != MenuKind.Toggle) EditorShell.Hide(this);
+                if (item.Kind != MenuKind.Toggle) EditorShell.Conceal(this);
 
                 return;
         }
@@ -164,7 +191,7 @@ public sealed partial class MenuPanel
     {
         if (_items is not null || _level.Length == 0 || _level == _path)
         {
-            EditorShell.Hide(this);
+            EditorShell.Conceal(this);
             return;
         }
 
