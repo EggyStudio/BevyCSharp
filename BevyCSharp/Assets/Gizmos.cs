@@ -34,6 +34,48 @@ namespace Bevy;
 /// </example>
 public static unsafe class Gizmos
 {
+    /// <summary>
+    /// Draws a line that fades from one colour to another along its length.
+    /// </summary>
+    /// <param name="start">Where it begins, in world space.</param>
+    /// <param name="end">Where it ends.</param>
+    /// <param name="from">Linear RGBA at the start.</param>
+    /// <param name="to">Linear RGBA at the end. An alpha of zero is a line that runs out.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <remarks>
+    /// What draws something that has no edge: a grid that thins into the distance rather than
+    /// stopping at a square boundary, a trail that dies away behind what left it. Fading a line by
+    /// cutting it into pieces and colouring each is the same picture with a seam every few
+    /// centimetres and one call per piece.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
+    public static void Fade(
+        Vec3 start,
+        Vec3 end,
+        (float R, float G, float B, float A) from,
+        (float R, float G, float B, float A) to,
+        bool inFront = true) =>
+        Draw(new NativeGizmoConfig
+        {
+            Kind = 3,
+            InFront = inFront ? 1 : 0,
+            StartX = start.X,
+            StartY = start.Y,
+            StartZ = start.Z,
+            EndX = end.X,
+            EndY = end.Y,
+            EndZ = end.Z,
+            RotationW = 1f,
+            ColorR = from.R,
+            ColorG = from.G,
+            ColorB = from.B,
+            ColorA = from.A,
+            EndColorR = to.R,
+            EndColorG = to.G,
+            EndColorB = to.B,
+            EndColorA = to.A,
+        });
+
     /// <summary>Draws a line between two points.</summary>
     /// <param name="start">Where it begins, in world space.</param>
     /// <param name="end">Where it ends.</param>

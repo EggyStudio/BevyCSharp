@@ -72,7 +72,17 @@ public partial struct ViewportGizmos
     public static bool ShowGrid { get; set; } = true;
 
     /// <summary>
-    /// A grid on the ground, under everything.
+    /// What height the grid is drawn at.
+    /// </summary>
+    /// <remarks>
+    /// Below the scene rather than through it. A grid on the same plane as a floor fights it for
+    /// every pixel, and one at the height of whatever is standing on it cuts those things in half.
+    /// Settable because where the bottom of a world is depends entirely on the world.
+    /// </remarks>
+    public static float GridHeight { get; set; } = -10f;
+
+    /// <summary>
+    /// A grid under the scene, fading out to nothing.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -84,6 +94,11 @@ public partial struct ViewportGizmos
     /// Drawn about the camera rather than about the origin, and at a spacing that steps by tens as
     /// the camera climbs, so it is the same density on screen at any height. A fixed grid is either
     /// a solid sheet from far away or four lines from close up.
+    /// </para>
+    /// <para>
+    /// Round rather than square, and fading as it goes out. A square of lines ending all at once
+    /// announces where the editor stopped drawing, which is a fact about the editor and not about
+    /// the scene; a disc that thins into nothing says only "the floor carries on".
     /// </para>
     /// </remarks>
     private static void Ground(BehaviorContext ctx)
@@ -98,10 +113,10 @@ public partial struct ViewportGizmos
 
         // How far apart the lines are: the power of ten that keeps a cell about a finger wide on
         // screen at this height, so the grid neither disappears nor turns into a sheet.
-        var height = MathF.Max(0.5f, MathF.Abs(eye.Y));
-        var step = MathF.Max(0.1f, MathF.Pow(10f, MathF.Floor(MathF.Log10(height))));
+        var above = MathF.Max(0.5f, MathF.Abs(eye.Y - GridHeight));
+        var step = MathF.Max(0.1f, MathF.Pow(10f, MathF.Floor(MathF.Log10(above))));
 
-        const int Half = 26;
+        const int Half = 30;
 
         var reach = step * Half;
 
@@ -113,50 +128,98 @@ public partial struct ViewportGizmos
 
         if (forward.Y < -0.05f)
         {
-            var travel = MathF.Min(-eye.Y / forward.Y, reach * 2f);
+            var travel = MathF.Min((GridHeight - eye.Y) / forward.Y, reach * 2f);
             look = eye + (forward * travel);
         }
 
         var centreX = MathF.Round(look.X / step) * step;
         var centreZ = MathF.Round(look.Z / step) * step;
-
-        // A hair above the floor rather than exactly on it. Scenes have a ground plane at zero and
-        // two surfaces at the same depth fight over every pixel; the lift is a thousandth of a
-        // cell, which is invisible at any height and enough to settle the argument.
-        var lift = step * 0.002f;
+        var height = GridHeight;
 
         for (var i = -Half; i <= Half; i++)
         {
-            var x = centreX + (i * step);
-            var z = centreZ + (i * step);
+            var offset = i * step;
 
-            // Every tenth line is brighter, which is what gives a grid a scale to read rather than
-            // an even wash. The lines through the origin get their axis's own colour.
-            var alongZ = Line(x, step);
-            var alongX = Line(z, step);
+            // How long the line is before it leaves the disc, and how bright it starts. Both come
+            // from how far the line passes from the middle: a line through the middle runs the
+            // full width at full strength, and one near the rim is a short faint stroke.
+            var away = MathF.Abs(offset);
+            if (away >= reach) continue;
 
-            // Behind what is in front of it. The grid is part of the scene, not a control drawn
-            // about it: one that shows through the objects standing on it says nothing about where
-            // they are.
-            Gizmos.Line(
-                new Vec3(x, lift, centreZ - reach),
-                new Vec3(x, lift, centreZ + reach),
-                MathF.Abs(x) < step * 0.5f ? AxisColours[2] : alongZ,
+            var span = MathF.Sqrt((reach * reach) - (away * away));
+            var strength = Falloff(away / reach);
+
+            var x = centreX + offset;
+            var z = centreZ + offset;
+
+            var alongZ = Tint(Line(x, step), strength);
+            var alongX = Tint(Line(z, step), strength);
+
+            var onZ = MathF.Abs(x) < step * 0.5f ? Tint(AxisColours[2], strength) : alongZ;
+            var onX = MathF.Abs(z) < step * 0.5f ? Tint(AxisColours[0], strength) : alongX;
+
+            var gone = (0f, 0f, 0f, 0f);
+
+            // Two halves out from the middle, each fading to nothing, which is what makes the far
+            // edge a horizon rather than a boundary.
+            Gizmos.Fade(
+                new Vec3(x, height, centreZ),
+                new Vec3(x, height, centreZ - span),
+                onZ,
+                gone,
                 inFront: false);
 
-            Gizmos.Line(
-                new Vec3(centreX - reach, lift, z),
-                new Vec3(centreX + reach, lift, z),
-                MathF.Abs(z) < step * 0.5f ? AxisColours[0] : alongX,
+            Gizmos.Fade(
+                new Vec3(x, height, centreZ),
+                new Vec3(x, height, centreZ + span),
+                onZ,
+                gone,
+                inFront: false);
+
+            Gizmos.Fade(
+                new Vec3(centreX, height, z),
+                new Vec3(centreX - span, height, z),
+                onX,
+                gone,
+                inFront: false);
+
+            Gizmos.Fade(
+                new Vec3(centreX, height, z),
+                new Vec3(centreX + span, height, z),
+                onX,
+                gone,
                 inFront: false);
         }
     }
+
+    /// <summary>
+    /// How bright the grid is at a fraction of the way out to its edge.
+    /// </summary>
+    /// <remarks>
+    /// Full strength for the first third and easing off after it, rather than falling from the
+    /// first pixel. A grid that starts fading immediately is dim everywhere; one that holds and
+    /// then goes reads as far larger than it is.
+    /// </remarks>
+    private static float Falloff(float outward)
+    {
+        const float Holds = 0.35f;
+
+        if (outward <= Holds) return 1f;
+
+        var into = (outward - Holds) / (1f - Holds);
+        return MathF.Max(0f, 1f - (into * into));
+    }
+
+    /// <summary>A colour at a fraction of its strength, which for a grid means its alpha.</summary>
+    private static (float R, float G, float B, float A) Tint(
+        (float R, float G, float B, float A) colour, float strength) =>
+        (colour.R, colour.G, colour.B, colour.A * strength);
 
     /// <summary>How bright one grid line is: every tenth stands out from the rest.</summary>
     private static (float R, float G, float B, float A) Line(float at, float step)
     {
         var tenth = MathF.Abs(MathF.IEEERemainder(at, step * 10f)) < step * 0.5f;
-        var value = tenth ? 0.34f : 0.19f;
+        var value = tenth ? 0.42f : 0.24f;
 
         return (value, value, value * 1.05f, 1f);
     }

@@ -209,9 +209,16 @@ default group, left exactly as the engine set it up. `Gizmos.Line` and its neigh
 **There is a floor.** The ground grid is what says which way is level and how big things are; a
 scene without one is a handful of objects in a void, and moving something is a guess about how far
 it went. Drawn about where the camera is *looking* rather than where it is, at a spacing that steps
-by tens as the camera climbs, so it is the same density on screen at any height — and a thousandth
-of a cell above zero, because scenes have a ground plane at zero and two surfaces at one depth fight
-over every pixel.
+by tens as the camera climbs, so it is the same density on screen at any height, and at a height of
+its own — under the scene rather than through it, because a grid on the same plane as a floor fights
+it for every pixel and one at the height of what is standing on it cuts those things in half.
+
+**And it has no edge.** Round rather than square, and fading as it goes out: each line is cut to the
+chord of a disc and drawn as two halves running from the middle to nothing. A square of lines ending
+all at once announces where the editor stopped drawing, which is a fact about the editor and not
+about the scene. The fade holds full strength for the first third and eases off after it — falling
+from the first pixel makes a grid that is dim everywhere, and holding then going reads as far larger
+than it is. It costs about four percent of a frame.
 
 **A gizmo is drawn about the world, not in it.** The default gizmo config has `depth_bias = -1`,
 so a handle on an object is in front of the object rather than inside it, and the queue C# fills is

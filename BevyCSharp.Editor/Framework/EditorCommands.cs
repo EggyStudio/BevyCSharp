@@ -83,6 +83,10 @@ public static class EditorCommands
             static () => ViewportGizmos.ShowGrid,
             static on => ViewportGizmos.ShowGrid = on, 6);
 
+        EditorSettings.Number(
+            "Editor", "Grid height", static () => ViewportGizmos.GridHeight,
+            static value => ViewportGizmos.GridHeight = value, 7);
+
         EditorSettings.Heading("Editor", "Hierarchy", 10);
 
         EditorSettings.Flag(

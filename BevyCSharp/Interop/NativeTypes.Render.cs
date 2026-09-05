@@ -346,6 +346,18 @@ public struct NativeGizmoConfig
     /// <summary>Colour alpha.</summary>
     public float ColorA;
 
+    /// <summary>What a fading line reaches at its far end, red.</summary>
+    public float EndColorR;
+
+    /// <summary>Far end green.</summary>
+    public float EndColorG;
+
+    /// <summary>Far end blue.</summary>
+    public float EndColorB;
+
+    /// <summary>Far end alpha.</summary>
+    public float EndColorA;
+
     /// <summary>Whether the scene can hide it: 0 is depth tested, anything else draws in front.</summary>
     public int InFront;
 }

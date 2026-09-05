@@ -14,7 +14,7 @@ use crate::interop::{status, BcsGizmoConfig};
 /// One recorded draw call, waiting for the frame's drain.
 #[derive(Clone, Copy)]
 pub struct QueuedGizmo {
-    /// `0` line, `1` sphere, `2` axes.
+    /// `0` line, `1` sphere, `2` axes, `3` a line fading from one colour to another.
     pub kind: i32,
     /// Line start, sphere centre, or the position axes are drawn at.
     pub start: [f32; 3],
@@ -26,6 +26,8 @@ pub struct QueuedGizmo {
     pub radius: f32,
     /// Colour, linear RGBA. Axes use their own red, green and blue.
     pub color: [f32; 4],
+    /// What a fading line reaches at its far end.
+    pub end_color: [f32; 4],
     /// Whether the scene can hide it. `0` is depth tested; anything else draws over everything.
     pub in_front: i32,
 }
@@ -70,6 +72,12 @@ pub fn drain(
             shape.color[2],
             shape.color[3],
         );
+        let fades_to = Color::linear_rgba(
+            shape.end_color[0],
+            shape.end_color[1],
+            shape.end_color[2],
+            shape.end_color[3],
+        );
 
         // Written twice rather than through a trait object: `Gizmos<T>` is a system parameter
         // and the two are different types, so the only thing they can share is the shape of the
@@ -84,6 +92,10 @@ pub fn drain(
                         Transform::from_translation(position).with_rotation(rotation),
                         shape.radius,
                     );
+                }
+                3 => {
+                    let end = Vec3::new(shape.end[0], shape.end[1], shape.end[2]);
+                    gizmos.line_gradient(position, end, color, fades_to);
                 }
                 _ => {
                     let end = Vec3::new(shape.end[0], shape.end[1], shape.end[2]);
@@ -103,6 +115,10 @@ pub fn drain(
                     Transform::from_translation(position).with_rotation(rotation),
                     shape.radius,
                 );
+            }
+            3 => {
+                let end = Vec3::new(shape.end[0], shape.end[1], shape.end[2]);
+                behind.line_gradient(position, end, color, fades_to);
             }
             _ => {
                 let end = Vec3::new(shape.end[0], shape.end[1], shape.end[2]);
@@ -152,6 +168,7 @@ pub unsafe extern "C" fn bcs_gizmo_draw(config: *const BcsGizmoConfig) -> i32 {
                 rotation: config.rotation,
                 radius: config.radius,
                 color: config.color,
+                end_color: config.end_color,
                 in_front: config.in_front,
             });
             status::OK

@@ -357,6 +357,10 @@ What is left:
   what was written to an element's display, a menu cannot be drawn over a panel whatever it is
   told about layering, and `align-content` is not read at all, so a wrapping box cannot be told to
   pack its lines.
+- **One shape per call.** Every gizmo crosses the ABI on its own, and the fading grid asks for two
+  hundred and forty of them a frame — about four percent of one. Fine at this size and the wrong
+  shape at ten times it: a batched entry point taking an array would make the cost of a wireframe or
+  a debug overlay the size of the array rather than the number of lines in it.
 - **A grid, and nothing else drawn in the scene.** Two gizmo groups exist now — one that wins the
   depth test and one that does not — and the ground grid is the first thing to use the second. The
   same group is what a path, a physics wireframe or a navigation mesh overlay would want, and none
