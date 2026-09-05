@@ -749,23 +749,50 @@ public static class EditorShell
     /// </remarks>
     private static void TrackRightDrag(Input input)
     {
-        if (input.MousePressed(MouseButton.Right)) _rightMoved = 0f;
+        if (input.MousePressed(MouseButton.Right))
+        {
+            _rightWent = (0f, 0f);
+            _rightMoved = 0f;
+        }
 
         if (!input.MouseDown(MouseButton.Right) && !input.MouseReleased(MouseButton.Right)) return;
 
         var (dx, dy) = input.MouseDelta;
+
+        _rightWent = (_rightWent.X + dx, _rightWent.Y + dy);
         _rightMoved += MathF.Abs(dx) + MathF.Abs(dy);
     }
 
-    /// <summary>Whether the right button has been dragged rather than clicked.</summary>
+    /// <summary>
+    /// Whether the right button has been dragged rather than clicked.
+    /// </summary>
     /// <remarks>
-    /// Read by everything that acts on a right click, so that one gesture cannot be a menu to one
-    /// reader and a camera look to another.
+    /// <para>
+    /// Chiefly how far the pointer ended up from where it started. A hand holding a button still
+    /// is not still: it reports a fraction of a pixel most frames, and adding those up calls any
+    /// click held for a moment a drag — which is a context menu that works the first quick time
+    /// and never again. Summed as a direction rather than a distance, that jitter cancels itself
+    /// and a camera look does not.
+    /// </para>
+    /// <para>
+    /// The distance travelled still counts, but at a threshold no click reaches however long it is
+    /// held: a look that comes back to where it began has still been a look. Set generously on
+    /// purpose — a menu that never opens is a far worse failure than a menu that opens after
+    /// somebody turned the camera in a full circle and let go where they started.
+    /// </para>
     /// </remarks>
-    private static bool RightDragged => _rightMoved >= DragSlop;
+    private static bool RightDragged =>
+        MathF.Sqrt((_rightWent.X * _rightWent.X) + (_rightWent.Y * _rightWent.Y)) >= DragSlop
+        || _rightMoved >= WanderSlop;
 
-    /// <summary>How far the pointer may travel and still count as having stayed put.</summary>
-    private const float DragSlop = 6f;
+    /// <summary>How far from the press the pointer may end up and still count as a click.</summary>
+    private const float DragSlop = 8f;
+
+    /// <summary>How far it may travel in total, however much of that it came back from.</summary>
+    private const float WanderSlop = 200f;
+
+    /// <summary>Where the pointer went while the right button was held, as a direction.</summary>
+    private static (float X, float Y) _rightWent;
 
     /// <summary>What a right click on the scene offers, when nothing else claimed it.</summary>
     /// <remarks>

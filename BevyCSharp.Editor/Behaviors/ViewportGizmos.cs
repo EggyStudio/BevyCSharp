@@ -60,7 +60,11 @@ public partial struct ViewportGizmos
         var rotation = ctx.Ecs.GetOrDefault<GlobalTransform>(entity).Rotation;
 
         Outline(min, max);
-        Handles(centre, Reach(EditorSelection.Camera, centre), EditorTools.AxesFor(rotation));
+        Handles(
+            centre,
+            Reach(EditorSelection.Camera, centre),
+            EditorTools.AxesFor(rotation),
+            Facing(ctx, EditorSelection.Camera));
     }
 
     /// <summary>Draws the twelve edges of the selection's box.</summary>
@@ -91,7 +95,7 @@ public partial struct ViewportGizmos
     }
 
     /// <summary>Draws the tool's handles at the selection.</summary>
-    private static void Handles(Vec3 centre, float reach, Vec3[] axes)
+    private static void Handles(Vec3 centre, float reach, Vec3[] axes, Vec3 facing)
     {
         if (EditorTools.Current == EditorTool.Select) return;
 
@@ -100,8 +104,9 @@ public partial struct ViewportGizmos
         // The middle handle, which is the one that does not pick an axis: a drag across the screen
         // for a move, a turn about whatever way the pointer went for a rotation, and every axis at
         // once for a scale. Drawn first so the arms are over it rather than under.
-        Sphere(
+        Disc(
             centre,
+            facing,
             reach * CentreSize,
             held == TransformGizmo.Centre ? Accent : Middle);
 
@@ -135,11 +140,40 @@ public partial struct ViewportGizmos
     /// <summary>The middle handle when it is not held: no axis, so no axis colour.</summary>
     private static readonly (float R, float G, float B, float A) Middle = (0.85f, 0.85f, 0.88f, 1f);
 
-    /// <summary>Draws a ball as three rings, so it reads as a ball from any angle.</summary>
-    private static void Sphere(
-        Vec3 centre, float radius, (float R, float G, float B, float A) colour)
+    /// <summary>Which way the camera is pointing, in the world.</summary>
+    private static Vec3 Facing(BehaviorContext ctx, Entity camera) =>
+        camera.IsNone
+            ? Vec3.UnitZ
+            : (ctx.Ecs.GetOrDefault<GlobalTransform>(camera).ZAxis * -1f).Normalized;
+
+    /// <summary>
+    /// Draws a filled disc facing the camera.
+    /// </summary>
+    /// <remarks>
+    /// Filled rather than outlined, because a ring in the middle of three arms reads as a fourth
+    /// thing to aim at the edge of rather than as one thing to press. There is nothing to draw
+    /// with but lines, so it is filled the way a pen fills a circle: the rim, and spokes from the
+    /// middle out to it, close enough together to leave no gaps.
+    /// </remarks>
+    private static void Disc(
+        Vec3 centre, Vec3 facing, float radius, (float R, float G, float B, float A) colour)
     {
-        for (var i = 0; i < 3; i++) Circle(centre, Axes[i], radius, colour);
+        var (first, second) = Perpendiculars(facing);
+        const int Spokes = 28;
+
+        var previous = centre + (first * radius);
+
+        for (var i = 1; i <= Spokes; i++)
+        {
+            var angle = i / (float)Spokes * MathF.Tau;
+            var point = centre
+                + (first * (MathF.Cos(angle) * radius))
+                + (second * (MathF.Sin(angle) * radius));
+
+            Gizmos.Line(previous, point, colour);
+            Gizmos.Line(centre, point, colour);
+            previous = point;
+        }
     }
 
     /// <summary>Draws a ring about an axis, which is what a turn is dragged along.</summary>

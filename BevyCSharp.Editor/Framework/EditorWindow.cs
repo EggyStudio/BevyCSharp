@@ -149,7 +149,6 @@ public sealed class EditorWindow
         _placed = null;
         _shown = null;
         _layered = null;
-        _limited = null;
     }
 
     // -- Placement
@@ -239,19 +238,13 @@ public sealed class EditorWindow
         var root = Root;
         if (root.IsNone) return;
 
-        var wanted = (maxWidth, maxHeight);
-        if (_limited is { } already && Same(already, wanted)) return;
-
+        // Written every time the panels are arranged rather than remembered, for the same reason
+        // as the layering: the interface reapplies the stylesheet whenever it restyles a widget,
+        // and a stylesheet that says nothing about a maximum puts the maximum back to none. A
+        // remembered write is a cap that quietly stops holding, which is a panel that grows past
+        // the room it has and stays there. One call per panel per frame is nothing beside that.
         Xui.SetLimits(root, maxWidth, maxHeight);
-        _limited = wanted;
     }
-
-    /// <summary>The limits last written, so an unchanged frame touches nothing.</summary>
-    private (float Width, float Height)? _limited;
-
-    /// <summary>Whether two limits are the same.</summary>
-    private static bool Same((float Width, float Height) a, (float Width, float Height) b) =>
-        Near(a.Width, b.Width) && Near(a.Height, b.Height);
 
     /// <summary>Where the window ended up, or nothing when it has not been laid out yet.</summary>
     public UiRect? Measure()

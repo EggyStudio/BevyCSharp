@@ -92,6 +92,14 @@ and close. What is in them is `EditorToolbar`, a table like the menu's, so a gam
 the viewport by adding a line. A button carries a picture, a word, or both: a picture alone is a
 circle, a word alone a pill, and the slot and an order index are the whole of where it goes.
 
+**A hand holding a button still is not still.** Whether a right click was a click or a camera look
+is decided by how far the pointer ended up from where it started, not by how far it travelled: a
+hand reports a fraction of a pixel most frames, and adding those up calls any click held for a
+moment a drag — a context menu that works the first quick time and never again. Summed as a
+direction, that jitter cancels itself. The distance travelled still counts, but at a threshold no
+click reaches however long it is held, because a menu that never opens is a far worse failure than
+one that opens after somebody turned the camera in a circle and let go where they started.
+
 **One gesture cannot mean two things.** The right button steers the camera and asks for a menu, so
 how far the pointer travelled while it was held decides which — and the answer is worked out once,
 at the top of the frame, before anything reads a right click. Everything downstream agrees with it:
@@ -107,6 +115,12 @@ another through a point ninety pixels beside it, taken to the same depth — so 
 can be grabbed and one on a building does not fill the screen, and neither changes as the camera
 moves. It also has to hold still while it is used, and an object's own bounds change with every
 frame of a scale drag.
+
+**What the interface can undo is written every frame, not remembered.** A widget restyled by the
+crate goes back to what the stylesheet says, so anything the stylesheet has no opinion about — a
+maximum height, a layer — is quietly dropped. Those are written on every arrangement; only what can
+be read back (a position, a visibility) is compared first. A remembered write is a cap that
+silently stops holding.
 
 **Every tool has a handle that picks no axis.** The ball in the middle is the thing the three arms
 cannot do: a move across the screen rather than along a line, a turn about whichever way the hand

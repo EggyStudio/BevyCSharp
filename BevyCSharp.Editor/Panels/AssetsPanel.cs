@@ -28,8 +28,16 @@ public sealed partial class AssetsPanel
     /// <summary>How many directories the tree can draw.</summary>
     public const int Folders = 10;
 
-    /// <summary>How many files the tiles can draw.</summary>
-    public const int Tiles = 24;
+    /// <summary>
+    /// How many files the tiles can draw.
+    /// </summary>
+    /// <remarks>
+    /// A pool rather than a count, because a document's elements are fixed when it is parsed and
+    /// nothing can add one afterwards. Large enough that a directory of ordinary size is shown
+    /// whole; a larger one is scrolled through with the wheel, and the pool stands in for the part
+    /// being looked at.
+    /// </remarks>
+    public const int Tiles = 120;
 
     /// <summary>What each row of the tree says.</summary>
     [Bind("#aftext", Count = Folders)]
