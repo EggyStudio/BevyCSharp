@@ -122,6 +122,13 @@ maximum height, a layer — is quietly dropped. Those are written on every arran
 be read back (a position, a visibility) is compared first. A remembered write is a cap that
 silently stops holding.
 
+**A handle is a solid thing, drawn with lines.** There is nothing to draw with but lines, so the
+ball in the middle, the ball on the end of a stretch arm and the cone on the end of a move arm are
+all filled the same way: rings out from the middle and spokes across them, with the counts worked
+out from how many pixels across the shape is, so the gap between neighbours stays under the width
+of a line. A wire outline of a small thing is a scribble, and a ring in the middle of three arms
+reads as a fourth thing to aim at the edge of rather than as one thing to press.
+
 **Every tool has a handle that picks no axis.** The ball in the middle is the thing the three arms
 cannot do: a move across the screen rather than along a line, a turn about whichever way the hand
 went rather than about one axis, and a stretch of all three at once. The move is a ray onto the

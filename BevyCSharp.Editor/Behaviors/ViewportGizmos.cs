@@ -104,10 +104,15 @@ public partial struct ViewportGizmos
         // The middle handle, which is the one that does not pick an axis: a drag across the screen
         // for a move, a turn about whatever way the pointer went for a rotation, and every axis at
         // once for a scale. Drawn first so the arms are over it rather than under.
+        // Everything solid is drawn at a size in pixels, so how densely it has to be filled is
+        // known from that alone: the gizmo is the same size on screen wherever it is.
+        float InPixels(float world) => world / reach * Pixels;
+
         Disc(
             centre,
             facing,
             reach * CentreSize,
+            InPixels(reach * CentreSize),
             held == TransformGizmo.Centre ? Accent : Middle);
 
         for (var i = 0; i < 3; i++)
@@ -123,19 +128,38 @@ public partial struct ViewportGizmos
 
                 case EditorTool.Scale:
                     Gizmos.Line(centre, centre + (axis * reach), colour);
-                    Gizmos.Sphere(centre + (axis * reach), reach * 0.08f, colour);
+                    Disc(
+                        centre + (axis * reach),
+                        facing,
+                        reach * HeadSize,
+                        InPixels(reach * HeadSize),
+                        colour);
                     break;
 
                 default:
                     Gizmos.Line(centre, centre + (axis * reach), colour);
-                    Arrow(centre + (axis * reach), axis, reach * 0.12f, colour);
+                    Arrow(
+                        centre + (axis * reach),
+                        axis,
+                        reach * ArrowSize,
+                        InPixels(reach * ArrowSize * ArrowWidth),
+                        colour);
                     break;
             }
         }
     }
 
     /// <summary>How large the middle handle is, as a fraction of a handle's reach.</summary>
-    internal const float CentreSize = 0.16f;
+    internal const float CentreSize = 0.11f;
+
+    /// <summary>How large the ball on the end of a stretch handle is.</summary>
+    private const float HeadSize = 0.075f;
+
+    /// <summary>How long the head of a move handle's arrow is.</summary>
+    private const float ArrowSize = 0.14f;
+
+    /// <summary>How wide that head is at its base, as a fraction of its length.</summary>
+    private const float ArrowWidth = 0.42f;
 
     /// <summary>The middle handle when it is not held: no axis, so no axis colour.</summary>
     private static readonly (float R, float G, float B, float A) Middle = (0.85f, 0.85f, 0.88f, 1f);
@@ -150,29 +174,57 @@ public partial struct ViewportGizmos
     /// Draws a filled disc facing the camera.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Filled rather than outlined, because a ring in the middle of three arms reads as a fourth
     /// thing to aim at the edge of rather than as one thing to press. There is nothing to draw
-    /// with but lines, so it is filled the way a pen fills a circle: the rim, and spokes from the
-    /// middle out to it, close enough together to leave no gaps.
+    /// with but lines, so it is filled the way a pen fills a circle: rings from the middle out,
+    /// each a little wider than the last, and spokes across them.
+    /// </para>
+    /// <para>
+    /// How many of each comes from how large the disc is on screen rather than from a number that
+    /// looked right once — which is why the same routine fills the ball on a stretch handle and
+    /// the base of a move handle's cone without any of them being tuned separately. A spoke's
+    /// neighbours are furthest apart at the rim, so the count is whatever puts that gap under the
+    /// width of a line; the rings do the same for the space between one ring and the next.
+    /// Twenty-eight spokes and no rings left a band of dots two thirds of the way out, which is
+    /// where the spokes had spread past a line's width and the gaps began to show.
+    /// </para>
     /// </remarks>
     private static void Disc(
-        Vec3 centre, Vec3 facing, float radius, (float R, float G, float B, float A) colour)
+        Vec3 centre,
+        Vec3 facing,
+        float radius,
+        float pixels,
+        (float R, float G, float B, float A) colour)
     {
         var (first, second) = Perpendiculars(facing);
-        const int Spokes = 28;
 
-        var previous = centre + (first * radius);
+        var spokes = Sides(pixels);
+        var rings = Math.Clamp((int)(pixels / Covered), 2, 16);
 
-        for (var i = 1; i <= Spokes; i++)
+        Vec3 At(float angle, float from) =>
+            centre
+            + (first * (MathF.Cos(angle) * from))
+            + (second * (MathF.Sin(angle) * from));
+
+        for (var spoke = 0; spoke < spokes; spoke++)
         {
-            var angle = i / (float)Spokes * MathF.Tau;
-            var point = centre
-                + (first * (MathF.Cos(angle) * radius))
-                + (second * (MathF.Sin(angle) * radius));
+            Gizmos.Line(centre, At(spoke / (float)spokes * MathF.Tau, radius), colour);
+        }
 
-            Gizmos.Line(previous, point, colour);
-            Gizmos.Line(centre, point, colour);
-            previous = point;
+        for (var ring = 1; ring <= rings; ring++)
+        {
+            var at = radius * ring / rings;
+            var steps = Math.Max(8, spokes * ring / rings);
+            var previous = At(0f, at);
+
+            for (var step = 1; step <= steps; step++)
+            {
+                var point = At(step / (float)steps * MathF.Tau, at);
+
+                Gizmos.Line(previous, point, colour);
+                previous = point;
+            }
         }
     }
 
@@ -197,18 +249,49 @@ public partial struct ViewportGizmos
         }
     }
 
-    /// <summary>Draws the head of an arrow, as four lines back from its point.</summary>
+    /// <summary>
+    /// Draws a solid cone, point first, as the head of a move handle.
+    /// </summary>
+    /// <remarks>
+    /// Four lines back from the point was a wire outline, and a wire outline of a small thing is a
+    /// scribble. The cone is its base filled in and a fan of lines from the point down to the rim
+    /// of that base, which covers the side facing the camera; the other side is behind it and
+    /// never seen.
+    /// </remarks>
     private static void Arrow(
-        Vec3 tip, Vec3 direction, float size, (float R, float G, float B, float A) colour)
+        Vec3 tip,
+        Vec3 direction,
+        float size,
+        float pixels,
+        (float R, float G, float B, float A) colour)
     {
-        var (first, second) = Perpendiculars(direction);
+        var radius = size * ArrowWidth;
         var back = tip - (direction * size);
 
-        Gizmos.Line(tip, back + (first * size * 0.4f), colour);
-        Gizmos.Line(tip, back - (first * size * 0.4f), colour);
-        Gizmos.Line(tip, back + (second * size * 0.4f), colour);
-        Gizmos.Line(tip, back - (second * size * 0.4f), colour);
+        Disc(back, direction, radius, pixels, colour);
+
+        var (first, second) = Perpendiculars(direction);
+        var sides = Sides(pixels);
+
+        for (var side = 0; side < sides; side++)
+        {
+            var angle = side / (float)sides * MathF.Tau;
+
+            Gizmos.Line(
+                tip,
+                back
+                    + (first * (MathF.Cos(angle) * radius))
+                    + (second * (MathF.Sin(angle) * radius)),
+                colour);
+        }
     }
+
+    /// <summary>What a line covers, in pixels: anything closer together is one solid mark.</summary>
+    private const float Covered = 1.4f;
+
+    /// <summary>How many spokes a circle of this many pixels needs to have no gaps at its rim.</summary>
+    private static int Sides(float pixels) =>
+        Math.Clamp((int)(MathF.Tau * pixels / Covered), 12, 96);
 
     /// <summary>
     /// A small set of axes in front of the camera, showing which way it is pointing.
