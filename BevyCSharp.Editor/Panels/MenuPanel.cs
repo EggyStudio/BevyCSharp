@@ -69,7 +69,7 @@ public sealed partial class MenuPanel
     /// <remarks>
     /// So that a button owning a menu can be a switch. Pressing that button while its menu is open
     /// dismisses the menu, and the click that press becomes has to tell "the thing I opened" from
-    /// "somebody else's menu that my press happened to close" — the first closes, the second opens
+    /// "somebody else's menu that my press happened to close": the first closes, the second opens
     /// afresh.
     /// </remarks>
     public string? Owner { get; private set; }

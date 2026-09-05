@@ -26,8 +26,8 @@ namespace BevyCSharp.Editor.Framework;
 /// its own measured height measures that height for ever and stops following its contents; a
 /// strip told the row height it contributed to grows until it fills the window in two frames; a
 /// column told the width its only panel measured while that panel was put away is a strip of
-/// padding for the rest of the session. A measurement may decide where something goes — where the
-/// next panel starts, where the viewport ends — and may never decide how large it is. How large
+/// padding for the rest of the session. A measurement may decide where something goes (where the
+/// next panel starts, where the viewport ends) and may never decide how large it is. How large
 /// comes from the stylesheet, from the contents, or from a number a person dragged.
 /// </para>
 /// </remarks>
@@ -297,7 +297,7 @@ public sealed class EditorLayout
 
             // Handed back to its contents and capped at the room, rather than told a height. A
             // panel told a height measures that height, so the next frame's answer to "how tall
-            // are your contents" is the height it was given — which is a tree that grows a dozen
+            // are your contents" is the height it was given, which is a tree that grows a dozen
             // rows inside a panel that never changes size. A maximum leaves the measurement where
             // it belongs and only stops it running past the column.
             var tall = float.IsNaN(entry.Placement.Height) ? Xui.Auto : entry.Placement.Height;

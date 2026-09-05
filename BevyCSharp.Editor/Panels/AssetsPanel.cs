@@ -79,7 +79,7 @@ public sealed partial class AssetsPanel
     /// </summary>
     /// <remarks>
     /// An image is a path the interface loads from rather than a value a widget carries, so it is
-    /// set rather than bound — and only on the frames it changes, because writing one restyles the
+    /// set rather than bound, and only on the frames it changes, because writing one restyles the
     /// widget and a hundred and twenty tiles restyled every frame is a hundred and twenty too many.
     /// </remarks>
     private void Wear(string id, ref string current, string icon)

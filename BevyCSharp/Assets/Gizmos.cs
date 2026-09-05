@@ -81,9 +81,9 @@ public static unsafe class Gizmos
     /// <param name="end">Where it ends.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="inFront">
-    /// Whether the scene can hide it. In front by default, because a gizmo is usually a control —
-    /// a handle, an outline, a marker — and one hiding inside the thing it describes has failed at
-    /// the only job it has. Pass <see langword="false"/> for a shape drawn *in* the scene rather
+    /// Whether the scene can hide it. In front by default, because a gizmo is usually a control (a
+    /// handle, an outline, a marker) and one hiding inside the thing it describes has failed at the
+    /// only job it has. Pass <see langword="false"/> for a shape drawn *in* the scene rather
     /// than about it: a grid, a path, a wireframe, all of which have to be behind what is in front
     /// of them to describe the scene at all.
     /// </param>

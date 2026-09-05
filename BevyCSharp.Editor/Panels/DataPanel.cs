@@ -227,7 +227,7 @@ public sealed partial class DataPanel
 
             // A component with nothing to show is a tag, and a tag belongs on a chip rather than
             // under a heading with an empty space beneath it. Two things end up here: a marker
-            // with no fields, and one this side has no description of — and to somebody reading
+            // with no fields, and one this side has no description of, and to somebody reading
             // the panel they are the same statement, which is "this is on it, and that is all I
             // can tell you".
             if (schema is null || schema.Fields.Count == 0)
@@ -614,7 +614,7 @@ public sealed partial class DataPanel
     /// <summary>Opens or shuts a component's block.</summary>
     /// <remarks>
     /// Only a heading answers. A click on a field row is a click on whatever editor that row draws,
-    /// and the row itself has nothing to do — the box, the checkbox and the button inside it are
+    /// and the row itself has nothing to do: the box, the checkbox and the button inside it are
     /// what the click was for.
     /// </remarks>
     [Command("#drow", Count = Rows)]

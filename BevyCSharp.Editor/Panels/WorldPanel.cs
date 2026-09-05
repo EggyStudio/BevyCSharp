@@ -173,8 +173,8 @@ public sealed partial class WorldPanel
     /// Points a row's picture at a file, when it is not already pointing there.
     /// </summary>
     /// <remarks>
-    /// An image is not one of the values a widget carries — it is a path the interface loads from
-    /// — so it is set rather than bound, and only when it changes. Writing the same path every
+    /// An image is not one of the values a widget carries. It is a path the interface loads from,
+    /// so it is set rather than bound, and only when it changes. Writing the same path every
     /// frame would restyle every row of the list sixty times a second.
     /// </remarks>
     private void Wear(int row, string icon)
@@ -316,9 +316,9 @@ public sealed partial class WorldPanel
 
     /// <summary>Selects a row, or folds it when the mark was clicked.</summary>
     /// <remarks>
-    /// The mark is an element of its own now, so where the click landed is a question about that
-    /// element's rectangle rather than a sum of indents. It takes no clicks itself — nothing
-    /// inside a row does — so the row still answers, and asks where the pointer was.
+    /// The mark is an element of its own, so where the click landed is a question about that
+    /// element's rectangle rather than a sum of indents. It takes no clicks itself, as nothing
+    /// inside a row does, so the row answers and asks where the pointer was.
     /// </remarks>
     [Command("#wrow", Count = Rows)]
     public void Choose(int row)

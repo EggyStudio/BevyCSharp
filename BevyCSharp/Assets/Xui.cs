@@ -218,7 +218,7 @@ public static unsafe class Xui
     /// </para>
     /// <para>
     /// Naming a corner takes the element out of the flow, which is what placing a panel means.
-    /// Naming neither — both <paramref name="left"/> and <paramref name="top"/> left alone — says
+    /// Naming neither (both <paramref name="left"/> and <paramref name="top"/> left alone) says
     /// only how large, and the element stays where its parent's layout put it.
     /// </para>
     /// </remarks>
@@ -252,8 +252,8 @@ public static unsafe class Xui
     /// <remarks>
     /// There is no other way out of a text field. A widget takes focus when it is clicked and
     /// loses it when another widget is clicked, and a click on the scene is not a click on a
-    /// widget — so somebody who types in a search box and then goes back to the viewport leaves
-    /// the box holding the keyboard, and every key an editor binds is a letter going into it.
+    /// widget, so somebody who types in a search box and then goes back to the viewport leaves the
+    /// box holding the keyboard, and every key an editor binds is a letter going into it.
     /// </remarks>
     /// <exception cref="BevyNativeException">This build has no editor profile.</exception>
     public static void Blur() => Native.Check(Native.bcs_xui_blur(), "clearing the focus");

@@ -7,8 +7,8 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A script that does not compile reports why, and until now the why went to a terminal the person
-/// running the editor may not be looking at. Everything written to the console is teed into a ring
+/// A script that does not compile reports why, and the console it reports to is a terminal the
+/// person running the editor may not be looking at. Everything written there is teed into a ring
 /// here as well, so a panel can put it on screen without anything that writes a line having to
 /// know that a panel exists.
 /// </para>
@@ -30,7 +30,7 @@ public static class EditorLog
 
     /// <summary>Starts teeing the console into the ring.</summary>
     /// <remarks>
-    /// Idempotent, and harmless if it is never called: the ring is simply empty and the panel
+    /// Idempotent, and harmless if it is never called: the ring is empty and the panel
     /// showing it says so.
     /// </remarks>
     public static void Start()

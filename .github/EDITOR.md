@@ -34,25 +34,25 @@ an entity, an asset or a setting. Nothing is called a hierarchy or an inspector.
 
 **A top split and a bottom one.** The bottom split runs the whole width of the window: whichever
 tab is open, and under it one row holding the tabs on the left and the key list beside them, both
-the same height. Everything above is the top split, and that is three columns — the side columns as
+the same height. Everything above is the top split, and that is three columns: the side columns as
 wide as their contents until their inner edge is dragged, up to a third of the window each, and the
 viewport between them. The three dragged numbers are the whole arrangement.
 
-**The middle of the screen is the middle of the screen.** The tool buttons are centred on the
-window, not on the viewport, alone among the corner panels. Centring them on the viewport moves
-them whenever a column opens, which is a tool that is somewhere else every time it is reached for.
+**The tool buttons are centred on the window**, alone among the corner panels. Centring them on the
+viewport moves them whenever a column opens, which is a tool that is somewhere else every time it is
+reached for.
 
 **Nothing measured is ever written back to the thing that was measured.** This is the one rule the
-arrangement has, and every instability it has had came from breaking it:
+arrangement has, and breaking it costs the same way every time:
 
-| written back | what happened |
+| written back | what follows |
 |---|---|
 | a panel's own measured height | it measures that height for ever and stops following its contents |
 | the row height a strip contributed to | the strip grows until it fills the window, in two frames |
 | the width a column's only panel measured while put away | the column is a strip of padding for the rest of the session |
 
-A measurement may decide *where* something goes — where the next panel starts, where the viewport
-ends, where the right column's inner edge is — and may never decide *how large* it is. How large
+A measurement may decide *where* something goes (where the next panel starts, where the viewport
+ends, where the right column's inner edge is) and may never decide *how large* it is. How large
 comes from three places and no others: the stylesheet, the contents, or a number a person dragged.
 So a height is handed back to the contents (`bcs_xui_set_rect` reads infinity as `auto`) with the
 room the column has written as a maximum (`bcs_xui_set_limits`); an undragged width is not written
@@ -60,35 +60,35 @@ at all, because `auto` is not the stylesheet's answer but "as wide as the longes
 no member of a row is ever told the row's height.
 
 **Nothing is closed while anybody is using it.** Opening or closing a document takes it out of the
-interface's list, and changing that list respawns every widget of every panel — a rebuild in the
+interface's list, and changing that list respawns every widget of every panel: a rebuild in the
 middle of whatever gesture caused it. Every panel that comes and goes is concealed instead:
 `EditorShell.Conceal` and `Reveal` write one display property, the layout is handed only what is
 showing, and each document is loaded once per session. `Hide` closes for good and nothing in the
 ordinary run of the editor calls it.
 
-Flyouts were the last thing still churning, and they churned the most: a menu was a new panel every
-time, and dismissing one on the next press closed a document *during* that press. There is now one
-menu, built the first time anything asks for one and pointed at something else thereafter. Opening
-the hamburger six times in a row leaves the rebuild counter where it started; before, each one moved
-it twice.
+Flyouts are where this costs the most, because a flyout is dismissed by the first press of whatever
+somebody does next, so closing one there is a rebuild in the middle of that press. There is one
+menu, built the first time anything asks for one and pointed at something else thereafter, so
+opening the hamburger six times in a row leaves the rebuild counter where it started. A menu built
+fresh each time moves it twice per opening.
 
-**Four tables and no fifth mechanism.** What is on the menu, what is on the toolbar, what a page of
-settings holds, and what an entity looks like in a list are all lists of records with an order and a
-lookup — `EditorMenu`, `EditorToolbar`, `EditorSettings`, `EditorKinds`. A game adds a spawn command,
-a tool button, a preferences page or a picture for its own component by adding a line to one of
-them, and no panel in this editor knows the name of a single one of its types. That is the whole
-reason the panels are as short as they are, and it is why the tables are the part with tests under
-them rather than the panels.
+**Four tables, and nothing added any other way.** What is on the menu, what is on the toolbar, what
+a page of settings holds, and what an entity looks like in a list are all lists of records with an
+order and a lookup: `EditorMenu`, `EditorToolbar`, `EditorSettings`, `EditorKinds`. A game adds a
+spawn command, a tool button, a preferences page or a picture for its own component by adding a line
+to one of them, and no panel in this editor knows the name of a single one of its types. That is the
+whole reason the panels are as short as they are, and it is why the tables are the part with tests
+under them rather than the panels.
 
 **Escape closes before it quits.** In order of how much of the screen a thing has: a sheet, then a
 flyout, then the program. Quitting because somebody reached for the key that shuts every other
 window they have ever used is not a defensible thing for a tool to do, and a settings sheet covering
 the window is exactly when they will reach for it.
 
-**A sheet has the screen.** Settings take the whole window rather than a column, because a page of
-preferences squeezed beside a hierarchy is a page nobody opens. Nothing this side can reliably draw
-one panel over another, so a sheet does not cover the editor — it puts it away and fetches it back,
-which is both what the interface can do and what a sheet means.
+**A sheet takes the whole window.** Settings take the whole window rather than a column, because a
+page of preferences squeezed beside a hierarchy is a page nobody opens. Nothing this side can
+reliably draw one panel over another, so a sheet does not cover the editor. It puts it away and
+fetches it back, which is both what the interface can do and what a sheet means.
 
 **A row of the hierarchy says what a thing is.** An entity is whatever components are on it and the
 engine has no notion of a camera or a light, so the answer is assembled from what it carries and
@@ -97,31 +97,30 @@ and anything else is a plain entity. Matched on the component's qualified name a
 component id, because naming one crosses the ABI and the answer never changes while an app runs.
 
 **An inspector shows what can be edited and lists what cannot.** A component with fields is a block
-with a heading that opens and shuts, and every C# behavior is one of those — a behavior *is* a
+with a heading that opens and shuts, and every C# behavior is one of those. A behavior *is* a
 component and the generator writes a schema for it, so `Spin` sits beside `Transform` with its own
 `Speed` and `Angle`. A component with nothing to show is a chip in a strip at the foot: a marker
 with no fields and one this side has no description of make the same statement, which is "this is on
 it, and that is all I can tell you". A heading with an empty space under it says the opposite.
 
-**A panel is not dragged about.** The arrangement is three columns and a bottom split, and every
+**Panels are not dragged.** The arrangement is three columns and a bottom split, and every
 panel belongs to one of them: what a person adjusts is where the edges between them are, not where
 a panel floats. Dragging a docked panel by its title bar was a window manager's idea in a layout
 that is not one, and picking one up by a corner and dropping it over the scene left it nowhere the
 layout could put it back from. The edges are still dragged; the panels are not.
 
-**A press and the click it becomes are two events.** A flyout's own button sees both: the press
+**A press and the click it becomes arrive separately.** A flyout's own button sees both: the press
 dismisses the flyout as an outside click, and the click a few frames later finds it closed and opens
-it again — so the button that opened it could never close it. `DismissedByThisPress` is what the
+it again, so the button that opened it could never close it. `DismissedByThisPress` is what the
 click asks, and only a button whose own menu was the one dismissed declines to reopen; a press that
 happened to close somebody else's menu opens its own.
 
-**A rebuild is counted, not waited out.** `bcs_xui_generation` says how many times the interface has
-respawned everything, so a window notices that every element handle it holds is dead at exactly the
-moment it becomes true. What this replaced was a fixed number of frames started by whoever opened or
-closed a panel, and that was wrong twice over: a rebuild nobody here caused went unnoticed, and two
-rebuilds overlapping ended the wait early and left every panel holding handles to widgets that no
-longer existed — which is an editor where nothing opens and nothing can be selected until it is
-restarted.
+**A rebuild is counted rather than waited out.** `bcs_xui_generation` says how many times the
+interface has respawned everything, so a window notices that every element handle it holds is dead
+at exactly the moment it becomes true. Waiting a fixed number of frames from whoever opened or
+closed a panel is wrong twice over: a rebuild nobody here caused goes unnoticed, and two rebuilds
+overlapping end the wait early and leave every panel holding handles to widgets that do not exist,
+which is an editor where nothing opens and nothing can be selected until it is restarted.
 
 **There is a way out of a text field.** A widget takes the keyboard when it is clicked and gives it
 up when another widget is clicked, and a click on the scene is not a click on a widget. Without
@@ -141,33 +140,34 @@ and close. What is in them is `EditorToolbar`, a table like the menu's, so a gam
 the viewport by adding a line. A button carries a picture, a word, or both: a picture alone is a
 circle, a word alone a pill, and the slot and an order index are the whole of where it goes.
 
-**A hand holding a button still is not still.** Whether a right click was a click or a camera look
-is decided by how far the pointer ended up from where it started, not by how far it travelled: a
-hand reports a fraction of a pixel most frames, and adding those up calls any click held for a
-moment a drag — a context menu that works the first quick time and never again. Summed as a
-direction, that jitter cancels itself. The distance travelled still counts, but at a threshold no
-click reaches however long it is held, because a menu that never opens is a far worse failure than
-one that opens after somebody turned the camera in a circle and let go where they started.
+**A right click is told from a look by where the pointer ends up.** Whether a right click was a
+click or a camera look is decided by how far the pointer ended up from where it started, not by how
+far it travelled: a hand reports a fraction of a pixel most frames, and adding those up calls any
+click held for a moment a drag, which is a context menu that works the first quick time and never
+again. Summed as a direction, that jitter cancels itself. The distance travelled still counts, but
+at a threshold no click reaches however long it is held, because a menu that never opens is a far
+worse failure than one that opens after somebody turned the camera in a circle and let go where they
+started.
 
-**One gesture cannot mean two things.** The right button steers the camera and asks for a menu, so
-how far the pointer travelled while it was held decides which — and the answer is worked out once,
-at the top of the frame, before anything reads a right click. Everything downstream agrees with it:
-the menu the viewport offers, the menu a panel's row offers (the interface reports its own right
-clicks knowing nothing about the camera), and the mesh picking, which ignores the secondary button
-outright because a look that begins over an object is not a choice to select that object. The
-cursor is locked while the camera turns, so where it is never changes; how far the mouse moved is
-the only thing that tells the two apart.
+**Everything that reads a right click reads the same answer.** The right button steers the camera
+and asks for a menu, so how far the pointer travelled while it was held decides which, and the
+answer is worked out once, at the top of the frame, before anything reads a right click. Everything
+downstream agrees with it: the menu the viewport offers, the menu a panel's row offers (the
+interface reports its own right clicks knowing nothing about the camera), and the mesh picking,
+which ignores the secondary button outright because a look that begins over an object is not a
+choice to select that object. The cursor is locked while the camera turns, so where it is never
+changes; how far the mouse moved is the only thing that tells the two apart.
 
-**A handle is the size a hand needs, not the size of what it is on.** `ViewportGizmos.Reach` asks
-the camera what ninety pixels are worth where the selection is — a ray through the centre and
-another through a point ninety pixels beside it, taken to the same depth — so a handle on a coin
+**A handle is a fixed size on screen.** `ViewportGizmos.Reach` asks
+the camera what ninety pixels are worth where the selection is: a ray through the centre and
+another through a point ninety pixels beside it, taken to the same depth. So a handle on a coin
 can be grabbed and one on a building does not fill the screen, and neither changes as the camera
 moves. It also has to hold still while it is used, and an object's own bounds change with every
 frame of a scale drag.
 
-**What the interface can undo is written every frame, not remembered.** A widget restyled by the
-crate goes back to what the stylesheet says, so anything the stylesheet has no opinion about — a
-maximum height, a layer — is quietly dropped. Those are written on every arrangement; only what can
+**What the interface can undo is written on every arrangement.** A widget restyled by the
+crate goes back to what the stylesheet says, so anything the stylesheet has no opinion about (a
+maximum height, a layer) is quietly dropped. Those are written on every arrangement; only what can
 be read back (a position, a visibility) is compared first. A remembered write is a cap that
 silently stops holding.
 
@@ -183,8 +183,8 @@ cannot do: a move across the screen rather than along a line, a turn about which
 went rather than about one axis, and a stretch of all three at once. The move is a ray onto the
 plane through the selection facing the camera, so the thing follows the pointer exactly however the
 view is angled; the turn is a trackball about the camera's own two axes; the stretch is how far the
-hand has gone as a fraction of the handle's own size, because the distance from the middle — where
-the grab began — is nothing to divide by.
+hand has gone as a fraction of the handle's own size, because the distance from the middle, where
+the grab began, is nothing to divide by.
 
 **Global or local, and both halves have to agree.** `EditorTools.Space` is asked once, and the
 handle drawn and the drag applied read the same answer. The three axes are captured when a handle
@@ -199,54 +199,55 @@ and is held for the whole drag, because an entity's origin and the middle of its
 same place, and turning about one while the ring is drawn about the other answers to somewhere
 nobody can see.
 
-**Two gizmo groups, because there are two intentions and no third.** A handle, an outline or a
+**Two gizmo groups, one depth tested and one not.** A handle, an outline or a
 marker is a control drawn *about* the scene and has to be reachable, so it goes in a group with
 `depth_bias = -1` and nothing can hide it. A grid, a path or a wireframe is drawn *in* the scene and
-has to be behind what is in front of it, or it is not describing the scene at all — that is the
+has to be behind what is in front of it, or it is not describing the scene at all. That is the
 default group, left exactly as the engine set it up. `Gizmos.Line` and its neighbours take
 `inFront`, true by default, and the bridge routes the shape to one group or the other.
 
-**There is a floor.** The ground grid is what says which way is level and how big things are; a
-scene without one is a handful of objects in a void, and moving something is a guess about how far
-it went. Drawn about where the camera is *looking* rather than where it is, at a spacing that steps
-by tens as the camera climbs, so it is the same density on screen at any height, and at a height of
-its own — under the scene rather than through it, because a grid on the same plane as a floor fights
-it for every pixel and one at the height of what is standing on it cuts those things in half.
+**The ground grid** is what says which way is level and how big things are; a scene without one is a
+handful of objects in a void, and moving something is a guess about how far it went. Its spacing
+steps by tens as the camera climbs, so it is the same density on screen at any height, and it has a
+height of its own, under the scene rather than through it: a grid on the same plane as a floor
+fights it for every pixel, and one at the height of what is standing on it cuts those things in
+half.
 
-**And it has no edge, in either direction.** Round rather than square: each line is cut to the chord
-of a disc and thins to nothing at the rim, because a square of lines ending all at once announces
-where the editor stopped drawing, which is a fact about the editor and not about the scene.
+**The grid has no edge, and no step between spacings.** Round rather than square: each line is cut
+to the chord of a disc and thins to nothing at the rim, because a square of lines ending all at once
+announces where the editor stopped drawing, which is a fact about the editor and not about the
+scene.
 
 Three spacings are drawn, a decade apart, and each fades **in** as well as out. How solid one is
-asks a question about that spacing alone — full when its cells are the size the height calls for,
-fading away over the decade below and the two decades above — so nothing changes at the moment two
+asks a question about that spacing alone: full when its cells are the size the height calls for,
+fading away over the decade below and the two decades above. So nothing changes at the moment two
 of them swap roles, and a ten metre line is as solid at ninety metres up as at a hundred and ten.
 Both halves matter and only one is obvious: a grid written without thinking about the way up fades
 out correctly and *appears* at full strength, so descending looks right and every step of the climb
 drops a whole new spacing onto the floor in one frame. Coming in takes twice as long as going and
 eases rather than ramping, because something arriving is noticed and something leaving is not.
 
-**How far it reaches is a question about height, not about spacing.** Sized by its own spacing, the
-coarsest grid runs a hundred times further out than the finest — a haze of lines at the horizon long
-after they have stopped saying anything about where things are. Every spacing stops at the same
-distance, which is a multiple of how high the camera is.
+**How far the grid reaches follows the camera's height.** Sized by its own spacing, the coarsest
+grid runs a hundred times further out than the finest, a haze of lines at the horizon long after
+they have stopped saying anything about where things are. Every spacing stops at the same distance,
+which is a multiple of how high the camera is.
 
-**It sits under the camera and stays there.** Following the point the camera looks at sounds helpful
+**The grid is centred under the camera.** Following the point the camera looks at sounds helpful
 and is not: turning on the spot then drags the whole floor around with the view, and the grid stops
 being a fixed thing the camera moves over.
 
-**The two axes are drawn once.** Every spacing has a line at zero and would colour it, so the axis
-came out three times at three strengths — and each faded outwards from its own grid's centre, which
-is snapped to its own spacing. The lines were on top of each other and their fades were not, which
-reads as one line that will not line up with itself.
+**The two axes are drawn once.** Every spacing has a line at zero and would colour it, so leaving it
+to them puts the axis out three times at three strengths, each fading outwards from its own grid's
+centre, which is snapped to its own spacing. The lines land on top of each other and their fades do
+not, which reads as one line that will not line up with itself.
 
 The whole thing costs about four percent of a frame.
 
-**A gizmo is drawn about the world, not in it.** The default gizmo config has `depth_bias = -1`,
-so a handle on an object is in front of the object rather than inside it, and the queue C# fills is
-drained after the managed `Last` systems rather than merely in `Last` — both live in that schedule,
-and without the ordering the scheduler may drain the queue before the frame has filled it, which
-holds every shape back a frame. A frame is invisible on a selection box and unmissable on the
+**Gizmos in the front group are drawn over the scene.** The default gizmo config has `depth_bias =
+-1`, so a handle on an object is in front of the object rather than inside it, and the queue C#
+fills is drained after the managed `Last` systems rather than merely in `Last`. Both live in that
+schedule, and without the ordering the scheduler may drain the queue before the frame has filled it,
+which holds every shape back a frame. A frame is invisible on a selection box and unmissable on the
 orientation cross, which is placed relative to the camera and swims across the screen when the
 camera turns.
 
@@ -255,7 +256,7 @@ bar holds an empty transparent square; the panel reads back where the layout put
 `EditorGizmoSlot` says so; `ViewportGizmos` casts a ray through its centre and draws six arms a few
 centimetres in front of the camera, sized by a second ray through the square's edge so no field of
 view is assumed and nothing in the scene can get in front of it. Nothing renders to a texture and
-nothing tracks a screen position of its own — the square already knows one, and it moves inwards
+nothing tracks a screen position of its own: the square knows one, and it moves inwards
 with the panels because it is in the bar with the other buttons.
 
 **The menu is the editor.** Everything that is not a tool lives behind the hamburger, as a table
@@ -345,9 +346,9 @@ overlay with no horizontal or vertical layout collapses when docked to an edge.
 
 ## What the engine has to grow
 
-The framework could already open documents, bind fields and dispatch commands. What it could not
-do was find out what is in the world, which is most of what an editor shows. Every row below is
-now bridged except the last.
+The framework opens documents, binds fields and dispatches commands on its own. What it cannot do
+without the bridge is find out what is in the world, which is most of what an editor shows. Every
+row below is bridged except the last.
 
 | need | how | blocks | entry point |
 |---|---|---|---|
@@ -440,10 +441,10 @@ These constraints shaped the panels, and all of them are the crate's rather than
   then changes the field, is noticed with no child to update, and is overwritten when the child
   arrives carrying what the document said. The bridge keeps every write for four frames and applies
   it again, which touches the field and has the change noticed a second time with the child there
-  to receive it. This was done on the managed side by writing the value with a trailing space every
-  other frame for forty frames, which worked and was visible: a trailing space changes how wide a
-  label measures, so a panel grew and shrank and a number walked left and right for a second every
-  time anything appeared.
+  to receive it. Forcing the redraw from the managed side instead means writing the value with a
+  trailing space every other frame, which works and is visible: a trailing space changes how wide a
+  label measures, so a panel grows and shrinks and a number walks left and right for as long as the
+  writing goes on.
 - **An element's display is put back by the stylesheet** whenever the interface restyles the
   widget, so what a panel last wrote is not what is in force. Visibility is read before it is
   written rather than remembered.
@@ -485,7 +486,7 @@ These constraints shaped the panels, and all of them are the crate's rather than
   own `add_and_use` takes the first one off the screen, because it replaces that list rather than
   adding to it. The bridge writes the registry's list directly instead, batched to once a frame
   behind a dirty flag, and deliberately does not go through `use_uis`: that asks for a rebuild of
-  every open document, and a rebuild is not a blink but a loss — the widgets come back without
+  every open document, and a rebuild is not a blink but a loss: the widgets come back without
   their stylesheet, at the default font and the default layout. Writing the list leaves the
   documents that were already up alone, so opening a panel does not disturb the others. Elements
   resolved during the frames a document is being built are looked up uncached, because the
@@ -497,7 +498,7 @@ is held come apart in the restyle, and nothing on this side can see the differen
 
 And one that follows from the button finding. Picking reports the deepest thing under the pointer
 and the bridge walks up to the first ancestor with an id, so a label with an id of its own would
-answer for the row it sits in — and every label the editor writes has one, since that is how it is
+answer for the row it sits in, and every label the editor writes has one, since that is how it is
 written to. `pointer-events: none` on every label and picture inside something clickable puts the
 answer back where the command is.
 
@@ -526,9 +527,9 @@ EditorKinds.Add(new EntityKind("MyGame.Enemy", "icons/ui/users.png", 15));
 
 ## Verification
 
-**Clicks are driven, not simulated.** `SyntheticInput` writes the window's own messages — the
+**Clicks are driven rather than simulated.** `SyntheticInput` writes the window's own messages: the
 `CursorMoved` and `MouseButtonInput` a real pointer produces, both as themselves and inside the
-`WindowEvent` batch the picking backend reads — so a click goes through the picking raycast, the
+`WindowEvent` batch the picking backend reads. So a click goes through the picking raycast, the
 widget that decides it was clicked, and the button state the camera reads, exactly as a hand's
 would. Calling the method a click would have called tests the method and not the path to it, and
 the path is where the failures were: a ring that could not be grabbed, a flyout that opened once, a

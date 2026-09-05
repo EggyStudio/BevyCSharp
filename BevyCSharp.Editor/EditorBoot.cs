@@ -103,8 +103,8 @@ public partial struct EditorBoot
     /// there is not.
     /// </summary>
     /// <remarks>
-    /// The editor starts with the world and nothing else. Picking something — an entity or a file,
-    /// the panel answers for both — is the moment its details become worth the room, and letting go
+    /// The editor starts with the world and nothing else. Picking something (an entity or a file,
+    /// the panel answers for both) is the moment its details become worth the room, and letting go
     /// of it is the moment they stop being. Put away rather than closed, so the document is loaded
     /// once and the rest of the screen is undisturbed by any of it.
     /// </remarks>
@@ -114,8 +114,8 @@ public partial struct EditorBoot
         var wanted = EditorSelection.Any || EditorAssets.Selected is not null;
 
         // Compared against what is actually on screen rather than against what this did last time.
-        // A remembered answer goes stale the moment anything else shows or hides the panel — the
-        // menu row that toggles it, a rebuild, a person closing it — and once it is stale the
+        // A remembered answer goes stale the moment anything else shows or hides the panel (the
+        // menu row that toggles it, a rebuild, a person closing it), and once it is stale the
         // panel never appears again, because as far as this is concerned it already has.
         var panel = EditorShell.Find<DataPanel>();
         if (wanted == (panel is not null && EditorShell.IsShowing(panel))) return;

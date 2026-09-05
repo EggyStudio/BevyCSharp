@@ -75,11 +75,11 @@ public static class PanelBinding
         var text = value ?? string.Empty;
         if (Xui.GetText(element) == text) return;
 
-        // Written once. A widget that had nowhere to draw it yet is dealt with on the other side
-        // of the bridge, which applies the value again for a few frames and knows when the text
-        // child arrives; this used to write the value with a space after it, alternately, for
-        // forty frames, and a trailing space changes how wide a label measures — which is a panel
-        // that grows and shrinks and a number that walks left and right while it settles.
+        // Written once. A widget with nowhere to draw it yet is dealt with on the other side of
+        // the bridge, which applies the value again for a few frames and knows when the text child
+        // arrives. Forcing the redraw from here instead means writing the value with a space after
+        // it and then without, and a trailing space changes how wide a label measures: a panel that
+        // grows and shrinks, and a number that walks left and right while it settles.
         Xui.SetText(element, text);
     }
 

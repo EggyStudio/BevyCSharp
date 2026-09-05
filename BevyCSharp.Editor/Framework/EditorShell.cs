@@ -33,7 +33,7 @@ public static class EditorShell
     /// The difference between putting a panel away and closing it. Closing one takes its document
     /// out of the interface's list, and changing that list respawns every widget of every panel:
     /// a blink, a frame of the wrong font, and a panel that sometimes does not come back. So
-    /// anything that is put away and fetched again — the tabs, chiefly — is concealed instead. The
+    /// anything that is put away and fetched again (the tabs, chiefly) is concealed instead. The
     /// document stays where it was, the panel keeps reading it, and all that changes is whether it
     /// is drawn and whether the layout makes room for it.
     /// </remarks>
@@ -122,7 +122,7 @@ public static class EditorShell
     public static void ToggleMenu(string path, float x, float y, string? title = null)
     {
         // Only its own. A press on this button dismisses whatever flyout was open, and that may
-        // well be somebody else's — a row's context menu, another button's list — which this click
+        // well be somebody else's (a row's context menu, another button's list) which this click
         // should replace rather than decline to open.
         if (Find<MenuPanel>() is { } open
             && DismissedByThisPress(open)
@@ -147,8 +147,8 @@ public static class EditorShell
     /// The one menu, built the first time anything asks for one and kept for good.
     /// </summary>
     /// <remarks>
-    /// One at a time is what a menu means — a menu is a question, and two of them at once is two
-    /// questions with one pointer to answer them — so one is all there ever needs to be.
+    /// One at a time is what a menu means. A menu is a question, and two of them at once is two
+    /// questions with one pointer to answer them, so one is all there ever needs to be.
     /// </remarks>
     private static MenuPanel Menu() => Find<MenuPanel>() ?? Show(new MenuPanel());
 
@@ -274,7 +274,7 @@ public static class EditorShell
     /// Puts the rest of the editor away while a sheet is up, and back afterwards.
     /// </summary>
     /// <remarks>
-    /// A sheet is the whole window and everything else is under it — except that nothing this side
+    /// A sheet is the whole window and everything else is under it, except that nothing this side
     /// can reliably draw one panel over another, whatever it is told about layering. So what a
     /// sheet covers is not covered, it is put away, which is both what the interface can do and
     /// what a page of settings means: it has the screen and it has your attention.
@@ -416,7 +416,7 @@ public static class EditorShell
     /// <remarks>
     /// For a panel that is finished with, not for one that is being put away: closing a document
     /// respawns every widget of every panel on screen. Nothing in the ordinary run of the editor
-    /// calls this — showing and hiding go through <see cref="Conceal"/> and <see cref="Reveal"/> —
+    /// calls this (showing and hiding go through <see cref="Conceal"/> and <see cref="Reveal"/>)
     /// and it is here for a panel that will not be wanted again and for shutting down.
     /// </remarks>
     public static void Hide(IEditorPanel panel)
@@ -438,7 +438,7 @@ public static class EditorShell
     /// </summary>
     /// <remarks>
     /// What Escape does. In order of how much of the screen it has: a sheet first, then a flyout,
-    /// then nothing — so the key always closes the thing that is most in the way, and answers
+    /// then nothing, so the key always closes the thing that is most in the way, and answers
     /// honestly when there is nothing left for it to close.
     /// </remarks>
     public static bool Dismiss()
@@ -866,14 +866,14 @@ public static class EditorShell
     /// <para>
     /// Chiefly how far the pointer ended up from where it started. A hand holding a button still
     /// is not still: it reports a fraction of a pixel most frames, and adding those up calls any
-    /// click held for a moment a drag — which is a context menu that works the first quick time
+    /// click held for a moment a drag, which is a context menu that works the first quick time
     /// and never again. Summed as a direction rather than a distance, that jitter cancels itself
     /// and a camera look does not.
     /// </para>
     /// <para>
     /// The distance travelled still counts, but at a threshold no click reaches however long it is
     /// held: a look that comes back to where it began has still been a look. Set generously on
-    /// purpose — a menu that never opens is a far worse failure than a menu that opens after
+    /// purpose: a menu that never opens is a far worse failure than a menu that opens after
     /// somebody turned the camera in a full circle and let go where they started.
     /// </para>
     /// </remarks>
@@ -927,7 +927,7 @@ public static class EditorShell
 
             // Put away, never closed. Closing a document respawns every widget of every panel on
             // screen, and a flyout is dismissed by the first press of the next thing somebody does
-            // — so closing it here is a rebuild in the middle of that press, and the click it was
+            // so closing it here is a rebuild in the middle of that press, and the click it was
             // part of is lost. See the note on Concealed.
             Conceal(panel);
             JustDismissed.Add(panel);

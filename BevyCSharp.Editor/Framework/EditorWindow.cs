@@ -73,10 +73,10 @@ public sealed class EditorWindow
     public Entity Element(string cssId)
     {
         // The interface says how many times it has rebuilt everything, so a cache full of dead
-        // entities is noticed exactly rather than waited out. This was a fixed number of frames
-        // started by whoever opened or closed a panel, which is wrong twice over: a rebuild
-        // nobody here caused went unnoticed, and two rebuilds overlapping ended the wait early and
-        // left every panel holding handles to widgets that no longer existed.
+        // entities is noticed exactly rather than waited out. Counting a fixed number of frames
+        // from whoever opened or closed a panel is wrong twice over: a rebuild nobody here caused
+        // goes unnoticed, and two rebuilds overlapping end the wait early and leave every panel
+        // holding handles to widgets that do not exist.
         if (_builtAt != Generation)
         {
             _builtAt = Generation;

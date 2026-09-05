@@ -275,9 +275,9 @@ What is left:
 
 `bcs_component_id_of` resolves nine names by hand: `Transform`, `GlobalTransform`, `ChildOf`,
 `Children`, `Visibility`, `InheritedVisibility`, `ViewVisibility`, `WorldInstance` and
-`Interaction`. Anything else is unreachable. A general lookup is not possible through the type registry alone, since the managed
-side also needs a byte-compatible mirror, so this stays a curated list that grows as mirrors are
-written.
+`Interaction`. Anything else is unreachable. A general lookup is not possible through the type
+registry alone, since the managed side also needs a byte-compatible mirror, so this stays a curated
+list that grows as mirrors are written.
 
 Candidates, each blocked on being mirrorable rather than on the lookup: `Name` holds a `String`,
 and the render components (`Camera`, `PointLight`, `DirectionalLight`, `Mesh3d`,
@@ -322,19 +322,20 @@ Points to get right:
 
 `BevyCSharp.Editor` runs. The world on the left with a picture per row, the tools along the top, and
 everything else behind a hamburger whose contents are a table of paths; selecting something opens
-the panel that describes it — components with fields as blocks that open and shut, behaviors among
-them, and everything with nothing to show as a chip — the asset browser lives as a tab along the
-bottom, settings take the whole window as a sheet, and the docks reflow around each other. Gizmos draw the selection, its handles and the camera's orientation, and a drag on a handle
-moves, turns or stretches what is selected. Underneath is the framework each panel is three files
-on top of: documents in HTML and CSS, bindings to fields and commands to methods through the
-generator, and hot reload of the documents, the stylesheets and behavior scripts alike.
+the panel that describes it (components with fields as blocks that open and shut, behaviors among
+them, and everything with nothing to show as a chip), the asset browser lives as a tab along the
+bottom, settings take the whole window as a sheet, and the docks reflow around each other. Gizmos
+draw the selection, its handles, the ground and the camera's orientation, and a drag on a handle
+moves, turns or stretches what is selected. Underneath is the framework each panel is three files on
+top of: documents in HTML and CSS, bindings to fields and commands to methods through the generator,
+and hot reload of the documents, the stylesheets and behavior scripts alike.
 [EDITOR.md](EDITOR.md) has the design language, what each stage delivered, and the four things the
 interface crate cannot do that shaped the panels.
 
 What is left:
 
 - **Clicking a mesh to select it works**, and so does every other pointer path, driven through
-  `SyntheticInput` — which writes the window's own messages and so goes through picking, the
+  `SyntheticInput`, which writes the window's own messages and so goes through picking, the
   widgets and the camera exactly as a hand would. This was the largest hole in the editor's
   verification and it is closed; what is still untested that way is the keyboard, which has no
   equivalent yet and would want the same treatment.
@@ -358,11 +359,11 @@ What is left:
   told about layering, and `align-content` is not read at all, so a wrapping box cannot be told to
   pack its lines.
 - **One shape per call.** Every gizmo crosses the ABI on its own, and the fading grid asks for two
-  hundred and forty of them a frame — about four percent of one. Fine at this size and the wrong
+  hundred and forty of them a frame, about four percent of one. Fine at this size and the wrong
   shape at ten times it: a batched entry point taking an array would make the cost of a wireframe or
   a debug overlay the size of the array rather than the number of lines in it.
-- **A grid, and nothing else drawn in the scene.** Two gizmo groups exist now — one that wins the
-  depth test and one that does not — and the ground grid is the first thing to use the second. The
+- **A grid, and nothing else drawn in the scene.** There are two gizmo groups, one that wins the
+  depth test and one that does not, and the ground grid is the only thing using the second. The
   same group is what a path, a physics wireframe or a navigation mesh overlay would want, and none
   of those exists yet.
 - **Nothing renders to a texture**, which is what three separate wants have in common: a thumbnail
@@ -372,9 +373,9 @@ What is left:
 - **Tiles that show what a file is.** The asset browser draws a grid of names, elastic between a
   minimum and a maximum so a row divides evenly into the panel and wraps. What it does not draw is
   the file: an image tile should show the image, a mesh or a material tile a small render of it,
-  and both want a taller tile than a name needs. The first half is reachable now —
-  `bcs_xui_set_image` already points an element at a file, so an image tile is a taller tile with
-  an `<img>` in it and a second tile shape to switch between. The second half needs the bridge to
+  and both want a taller tile than a name needs. The first half is reachable: `bcs_xui_set_image`
+  points an element at a file, so an image tile is a taller tile with an `<img>` in it and a second
+  tile shape to switch between. The second half needs the bridge to
   render a thumbnail to a texture and hand back an asset key, which is the same missing entry point
   as render-to-texture generally.
 - **The hierarchy names what it can see and the stats panel counts it.** Both go through
@@ -384,7 +385,7 @@ What is left:
   one.
 - **Settings are the editor's, not the project's.** `EditorSettings` saves to `assets/settings.txt`
   beside the layout, and everything on it belongs to this editor build. A project setting worth the
-  name — a startup scene, a physics step, a build target — needs somewhere to live that is part of
+  name (a startup scene, a physics step, a build target) needs somewhere to live that is part of
   the project rather than part of the tool, which is the same gap as the world file's.
 - **A list longer than its pool.** The hierarchy and the inspector both hold a fixed pool of rows
   and decide what each stands for, which is what a virtualised list does anyway. What they lack is

@@ -124,7 +124,7 @@ public partial struct ViewportGizmos
         var coarse = fine * 10f;
 
         // One height for every spacing, worked out once. A hair above the height asked for, because
-        // a grid on the same plane as a floor fights it for every pixel — but a hair scaled to the
+        // a grid on the same plane as a floor fights it for every pixel. A hair scaled to the
         // spacing would put each spacing on a plane of its own, and the lines two of them draw in
         // the same place would run parallel a few millimetres apart instead of being one line.
         var plane = GridHeight + (above * 0.0004f);
@@ -153,10 +153,10 @@ public partial struct ViewportGizmos
     /// </summary>
     /// <remarks>
     /// Drawn once rather than by each grid. Every grid has a line at zero and would colour it, so
-    /// the axis came out three times over at three strengths — and each of those faded outwards
-    /// from its own grid's centre, which is snapped to that grid's own spacing. The lines were on
-    /// top of each other and their fades were not, which reads as one line that will not line up
-    /// with itself. There is one axis; it is drawn once.
+    /// leaving it to them puts the axis out three times over at three strengths, each fading
+    /// outwards from its own grid's centre, which is snapped to its own spacing. The lines land on
+    /// top of each other and their fades do not, which reads as one line that will not line up
+    /// with itself. There is one axis, so it is drawn once.
     /// </remarks>
     private static void Axis(Vec3 eye, float height, float reach)
     {
@@ -221,7 +221,7 @@ public partial struct ViewportGizmos
     /// <para>
     /// Coming in takes twice as long as going, and eases rather than ramping. Something arriving is
     /// noticed and something leaving is not, so the two want different lengths to feel like the
-    /// same speed — over one decade each, the way down is invisible and the way up is a spacing
+    /// same speed. Over one decade each, the way down is invisible and the way up is a spacing
     /// appearing.
     /// </para>
     /// <para>
@@ -333,7 +333,7 @@ public partial struct ViewportGizmos
     /// <remarks>
     /// The emphasis belongs to each grid rather than to the set of them. Letting a coarser grid
     /// draw over a finer one and calling the overlap a marked line ties the marking to the
-    /// crossfade, so the scale of the floor becomes harder and easier to read as the camera moves —
+    /// crossfade, so the scale of the floor becomes harder and easier to read as the camera moves,
     /// and at the moment one of them has faded out there is no marking at all.
     /// </remarks>
     private static (float R, float G, float B, float A) Shade(
@@ -352,7 +352,7 @@ public partial struct ViewportGizmos
     /// <remarks>
     /// Fading from the middle, with no part of it held at full. A grid that holds its strength and
     /// then drops away has a visible ring where it starts to go; one that has been thinning the
-    /// whole way simply runs out, and nowhere along it is there a place the eye can point at and
+    /// whole way runs out, and nowhere along it is there a place the eye can point at and
     /// call the edge.
     /// </remarks>
     private static float Falloff(float outward) =>
@@ -482,12 +482,12 @@ public partial struct ViewportGizmos
     /// </para>
     /// <para>
     /// How many of each comes from how large the disc is on screen rather than from a number that
-    /// looked right once — which is why the same routine fills the ball on a stretch handle and
+    /// looked right once, which is why the same routine fills the ball on a stretch handle and
     /// the base of a move handle's cone without any of them being tuned separately. A spoke's
     /// neighbours are furthest apart at the rim, so the count is whatever puts that gap under the
-    /// width of a line; the rings do the same for the space between one ring and the next.
-    /// Twenty-eight spokes and no rings left a band of dots two thirds of the way out, which is
-    /// where the spokes had spread past a line's width and the gaps began to show.
+    /// width of a line; the rings do the same for the space between one ring and the next. Spokes
+    /// alone leave a band of dots about two thirds of the way out, where they have spread past a
+    /// line's width and the gaps between them start to show.
     /// </para>
     /// </remarks>
     private static void Disc(
@@ -639,7 +639,7 @@ public partial struct ViewportGizmos
 
         var size = (edge + (sideways * Ahead) - centre).Length;
 
-        // How large the knob on an arm is, and how large that is on screen — which is what says
+        // How large the knob on an arm is, and how large that is on screen, which is what says
         // how finely it has to be filled. A wire sphere at this size is four pixels of hoops with
         // the scene showing through them.
         const float Knob = 0.18f;

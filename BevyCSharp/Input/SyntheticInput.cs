@@ -23,7 +23,7 @@ public enum PointerAction
 /// For tests and tools. What a click does is not one thing: the picking backend raycasts, a widget
 /// decides it was clicked, a camera reads a button, and an editor reads all three. Calling the
 /// method a click would have called tests the method and not the path to it, and the path is where
-/// the interesting failures are — a handle that cannot be grabbed, a menu that opens once, a
+/// the interesting failures are: a handle that cannot be grabbed, a menu that opens once, a
 /// selection that clears itself.
 /// </para>
 /// <para>

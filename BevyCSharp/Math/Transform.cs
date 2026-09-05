@@ -238,12 +238,12 @@ public struct Quat : IEquatable<Quat>
     /// angles has to be the middle one, and a middle angle only spans half a turn: past a quarter
     /// turn its neighbours have to jump to a half turn to describe the rest. Standing that angle
     /// up is the difference between a thing spinning on the spot reading 0, 120, 240 and reading
-    /// 180, 60, 180 — the same rotation, and unreadable.
+    /// 180, 60, 180, which is the same rotation and unreadable.
     /// </para>
     /// <para>
     /// So Y, which is what a thing standing on the ground turns about, gets the full circle, and X
-    /// is the one clamped to a quarter turn either way — where looking straight up or down is, and
-    /// where the other two stop being separable. <see cref="ToEuler"/> is the inverse.
+    /// is the one clamped to a quarter turn either way, which is where looking straight up or down
+    /// is and where the other two stop being separable. <see cref="ToEuler"/> is the inverse.
     /// </para>
     /// </remarks>
     public static Quat FromEuler(float x, float y, float z) =>

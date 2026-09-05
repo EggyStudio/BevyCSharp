@@ -61,7 +61,7 @@ mod live {
     /// widget. Text written before then changes the widget's field, the change is noticed with no
     /// child to update, and the child arrives afterwards carrying what the document said. So every
     /// write is kept for a few frames and applied again, which touches the field and has the
-    /// change noticed a second time — with the child there to receive it.
+    /// change noticed a second time, with the child there to receive it.
     #[derive(Resource, Default)]
     pub struct PendingText {
         /// What has been written lately, and how many frames it has left to be written again.
@@ -71,8 +71,8 @@ mod live {
         /// Only the first write to a given widget can arrive before it has anywhere to draw, so
         /// only the first write is worth repeating. Repeating every write costs four times over
         /// for ever, and each one restyles the widget: a panel showing a value that changes every
-        /// frame — which is what an inspector pointed at something moving is — pays it on every
-        /// row, every frame, and the editor slows to a crawl.
+        /// frame (which is what an inspector pointed at something moving is) pays it on every row,
+        /// every frame, and the editor slows to a crawl.
         pub settled: bevy::platform::collections::HashSet<bevy::ecs::entity::Entity>,
     }
 
@@ -1052,8 +1052,8 @@ pub extern "C" fn bcs_xui_set_limits(entity: u64, max_width: f32, max_height: f3
 
 /// Puts a pointer event into the window, as though a hand had done it.
 ///
-/// The only way to test what a click does. Everything downstream of a real pointer — the picking
-/// backend, the widget that reports being clicked, the button state a camera reads — starts from
+/// The only way to test what a click does. Everything downstream of a real pointer (the picking
+/// backend, the widget that reports being clicked, the button state a camera reads) starts from
 /// the window's own messages, so writing those drives all of it and nothing has to be simulated
 /// twice. Calling a panel's method directly tests the method and not the path to it, and the path
 /// is where the interesting failures are.
@@ -1160,7 +1160,7 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
 ///
 /// There is no other way out of a text field. The interface gives a widget focus when it is
 /// clicked and takes it back when another widget is clicked, and a click on the scene is not a
-/// click on a widget — so a person who types in a search box and then goes back to the viewport
+/// click on a widget, so a person who types in a search box and then goes back to the viewport
 /// leaves the box holding the keyboard, and every key the editor binds is a letter going into it.
 ///
 /// Returns [`status::UNSUPPORTED`] where there is no interface.

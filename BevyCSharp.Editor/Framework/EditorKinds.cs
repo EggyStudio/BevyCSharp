@@ -21,7 +21,7 @@ public sealed record EntityKind(string Mark, string Icon, int Order = 0);
 /// <remarks>
 /// <para>
 /// A tree of names is a tree of names; a tree with a camera, a light and a mesh in it is a scene.
-/// The engine has no such notion — an entity is whatever components are on it — so the answer is
+/// The engine has no such notion (an entity is whatever components are on it) so the answer is
 /// assembled here from the components it carries, and the first match in order wins.
 /// </para>
 /// <para>

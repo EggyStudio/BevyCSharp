@@ -42,7 +42,7 @@ pub struct GizmoQueue(pub Vec<QueuedGizmo>);
 /// handle, an outline or a marker is a control: it is drawn *about* the scene and has to be
 /// reachable, so it wins the depth test outright and lives here. A grid, a path or a wireframe is
 /// drawn *in* the scene and has to be behind what is in front of it, or it is not describing the
-/// scene at all — that is the default group, left exactly as the engine set it up.
+/// scene at all. That is the default group, left exactly as the engine set it up.
 #[cfg(feature = "render")]
 #[derive(Default, bevy::reflect::Reflect, bevy::gizmos::config::GizmoConfigGroup)]
 pub struct FrontGizmos;

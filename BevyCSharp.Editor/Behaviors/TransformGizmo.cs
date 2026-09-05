@@ -203,7 +203,7 @@ public partial struct TransformGizmo
     /// A handle is grabbed by what it looks like. Move and scale draw a line out along the axis
     /// and are measured against that line; a turn draws a ring in the plane the axis is normal to,
     /// and measuring that against the line as well is why a ring could only be grabbed near its
-    /// centre — where nothing is drawn — and never on the part a hand reaches for.
+    /// centre, where nothing is drawn, and never on the part a hand reaches for.
     /// </remarks>
     private static float? ToHandle(
         Entity camera, Vec3 centre, float reach, Vec3 axis, float x, float y)

@@ -9,13 +9,13 @@ namespace BevyCSharp.Editor.Panels;
 /// <remarks>
 /// <para>
 /// A sheet over the whole window: a list of pages on the left, the chosen page on the right. That
-/// is what every editor does with settings, and for a good reason — a page of preferences squeezed
+/// is what every editor does with settings, and for a good reason: a page of preferences squeezed
 /// into a column beside a hierarchy is a page nobody opens, and settings are read carefully and
 /// rarely rather than glanced at continuously.
 /// </para>
 /// <para>
 /// The panel knows about no setting in particular. <see cref="EditorSettings"/> is a table, the
-/// pages are whatever has anything on it, and a row is drawn from what the entry says it is —
+/// pages are whatever has anything on it, and a row is drawn from what the entry says it is,
 /// which is the same arrangement as the menu, the toolbar and the inspector, for the same reason:
 /// adding a preference should be a line, not a panel.
 /// </para>

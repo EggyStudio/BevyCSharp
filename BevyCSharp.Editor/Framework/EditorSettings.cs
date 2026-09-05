@@ -59,7 +59,7 @@ public sealed record EditorSetting(
 /// <para>
 /// A table, like the menu and the toolbar. Everything an editor keeps that is not part of the
 /// world belongs somewhere a person can find it, and the place to put it should be a line of
-/// registration rather than a panel to edit — otherwise every new preference is a new panel and
+/// registration rather than a panel to edit. Otherwise every new preference is a new panel and
 /// nobody adds one.
 /// </para>
 /// <para>

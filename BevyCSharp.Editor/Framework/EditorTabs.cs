@@ -13,8 +13,8 @@ public sealed record EditorTabEntry(string Name, Func<IEditorPanel> Create)
     /// <remarks>
     /// Built on first use and kept for good. Minimising a tab conceals its panel rather than
     /// closing it, so switching between two tabs is two writes to a display property instead of
-    /// two documents leaving and joining the interface's list — which is what made a tab blink,
-    /// come back at the wrong size, and eventually not come back at all.
+    /// two documents leaving and joining the interface's list. Doing it the other way makes a tab
+    /// blink, come back at the wrong size, and eventually not come back at all.
     /// </remarks>
     public IEditorPanel? Panel { get; internal set; }
 

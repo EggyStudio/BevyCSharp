@@ -104,7 +104,7 @@ public static class EditorAssets
     /// <remarks>
     /// The kind rather than the file: a picture of what a PNG contains would be a thumbnail, which
     /// needs the bridge to render one and hand back an asset key. A picture of what it <em>is</em>
-    /// needs nothing and is most of the use — in a list of forty files, telling the scripts from
+    /// needs nothing and is most of the use: in a list of forty files, telling the scripts from
     /// the stylesheets at a glance is the whole job.
     /// </remarks>
     public static string IconOf(string relative) => KindOf(relative) switch
