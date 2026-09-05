@@ -58,6 +58,13 @@ public sealed unsafe class XuiTests
                 Native.bcs_xui_set_visible(0, 1),
                 Native.bcs_xui_set_layer(0, 1),
                 Native.bcs_xui_rect(0, &rect),
+                Native.bcs_xui_set_limits(0, 1f, 1f),
+                Native.bcs_xui_blur(),
+
+                // Synthetic input needs a window to put the event into, and a headless build has
+                // none. It belongs to the renderer rather than the interface, so a windowed build
+                // without the editor profile still has it.
+                Native.bcs_input_pointer(0f, 0f, 1, 0),
 
                 // Picking is part of the same profile: a build with no interface has no viewport
                 // to click in either.
@@ -73,8 +80,9 @@ public sealed unsafe class XuiTests
             foreach (var status in results)
                 Assert.Equal(NativeStatus.Unsupported, status);
 
-            // The odd one out: it answers with an entity rather than a status, so "nothing" is 0.
+            // The odd ones out: they answer with a number rather than a status, so "nothing" is 0.
             Assert.Equal(0ul, Native.bcs_xui_element("#anything"));
+            Assert.Equal(0ul, Native.bcs_xui_generation());
         });
 
         harness.Run();

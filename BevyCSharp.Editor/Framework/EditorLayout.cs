@@ -164,7 +164,7 @@ public sealed class EditorLayout
 
         Band(placed, Margin, width - Margin, bandTop, band);
         Strip(placed, Margin, width - Margin, stripTop);
-        Corners(placed, Viewport);
+        Corners(placed, Viewport, width);
         Free(placed, width, height);
     }
 
@@ -301,16 +301,19 @@ public sealed class EditorLayout
     /// moves inwards when a column opens and back out when one is closed, which is the whole point
     /// of putting it in the viewport rather than in a bar of its own.
     /// </remarks>
-    private void Corners(List<Placed> placed, UiRect viewport)
+    private void Corners(List<Placed> placed, UiRect viewport, float width)
     {
         foreach (var entry in placed)
         {
             var (x, y) = entry.Placement.Dock switch
             {
                 EditorDock.ViewportTopLeft => (viewport.X + Margin, viewport.Y + Margin),
-                EditorDock.ViewportTop => (
-                    viewport.X + ((viewport.Width - Width(entry)) * 0.5f),
-                    viewport.Y + Margin),
+
+                // The one thing measured against the window rather than the viewport. What is in
+                // the middle of the screen should be in the middle of the screen: a person reaching
+                // for the move tool should not have to find it somewhere new because a panel on the
+                // right happened to open.
+                EditorDock.ViewportTop => ((width - Width(entry)) * 0.5f, viewport.Y + Margin),
                 EditorDock.ViewportTopRight => (
                     viewport.Right - Margin - Width(entry),
                     viewport.Y + Margin),

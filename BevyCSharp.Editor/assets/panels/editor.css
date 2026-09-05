@@ -236,6 +236,7 @@ p {
     height: 22px;
     margin: 0;
     column-gap: 5px;
+    overflow: hidden;
 }
 
 /*
@@ -246,8 +247,17 @@ p {
  * `text-wrap: nowrap` matters more than it looks: a name that wraps makes its paragraph three
  * lines tall inside a row 22 pixels high, and every row below it is then drawn through it.
  */
+/*
+ * A field's two halves, both elastic.
+ *
+ * Fixed widths were a row that fitted one panel width and no other: the box clipped as soon as a
+ * label was long, and dragging the panel wider left a stripe of empty panel beside a box that
+ * stayed where it was. Sharing the row out in proportion means the row is right at every width.
+ */
 .field-name {
-    width: 84px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
     min-width: 0;
     font-size: 11px;
     color: var(--label);
@@ -255,7 +265,9 @@ p {
 }
 
 .field-text {
-    width: 118px;
+    flex-grow: 1.25;
+    flex-shrink: 1;
+    flex-basis: 0;
     min-width: 0;
     font-size: 11px;
     color: var(--text);
@@ -263,7 +275,9 @@ p {
 }
 
 .field-value {
-    width: 118px;
+    flex-grow: 1.25;
+    flex-shrink: 1;
+    flex-basis: 0;
     min-width: 0;
     height: 18px;
     margin: 0;
@@ -298,6 +312,9 @@ p {
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    flex-grow: 1.25;
+    flex-shrink: 1;
+    flex-basis: 0;
     height: 18px;
     min-width: 22px;
     padding: 0 6px;
@@ -592,19 +609,20 @@ button:hover {
  * and what is worth a picture here would need one made for it first.
  */
 /*
- * One file. Wide enough to read a name and narrow enough that several fit, and elastic between
- * those two so a row divides evenly into whatever width the panel has: the tiles stretch to fill
- * the line they are on and wrap when the next one will not fit.
+ * One file. The width is worked out by the panel from how wide the pane is and written to every
+ * tile, so a line divides the pane exactly and every line is the same. Letting flex stretch them
+ * instead makes the last line wrong: four tiles sharing the room eight of them had are twice the
+ * width of the tiles above, which reads as a mistake because it is one.
+ *
+ * The basis here is what a tile is before the panel has measured anything.
  */
 .tile {
     display: flex;
     flex-direction: row;
     align-items: center;
-    flex-grow: 1;
-    flex-shrink: 1;
+    flex-grow: 0;
+    flex-shrink: 0;
     flex-basis: 132px;
-    min-width: 110px;
-    max-width: 210px;
     height: 22px;
     padding: 0 6px;
     background-color: var(--surface-raised);

@@ -35,7 +35,14 @@ public enum EditorDock
     /// <summary>Floating in the viewport's top left corner.</summary>
     ViewportTopLeft,
 
-    /// <summary>Floating along the top of the viewport, centred.</summary>
+    /// <summary>
+    /// Floating along the top, centred on the window rather than on the viewport.
+    /// </summary>
+    /// <remarks>
+    /// The middle of the screen is a place a hand learns. Centring this on the viewport would move
+    /// it whenever a column opened, which is a tool that is somewhere else every time it is
+    /// wanted.
+    /// </remarks>
     ViewportTop,
 
     /// <summary>Floating in the viewport's top right corner.</summary>

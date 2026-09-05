@@ -863,10 +863,16 @@ pub extern "C" fn bcs_xui_set_rect(entity: u64, left: f32, top: f32, width: f32,
                     return status::NOT_PRESENT;
                 };
 
-                // Absolute regardless, because a rectangle means nothing to a node the flex
-                // layout is still placing. Saying so here rather than in the stylesheet is what
-                // lets one document be a docked panel in one layout and a flyout in another.
-                node.position_type = PositionType::Absolute;
+                // Absolute once a corner is named, because a position means nothing to a node the
+                // flex layout is still placing. Saying so here rather than in the stylesheet is
+                // what lets one document be a docked panel in one layout and a flyout in another.
+                //
+                // Naming neither corner is a caller saying only how large, which leaves the node
+                // where the layout put it: that is how a grid of equal tiles is written without
+                // also having to work out where every one of them goes.
+                if !left.is_nan() || !top.is_nan() {
+                    node.position_type = PositionType::Absolute;
+                }
 
                 // Three answers, not two. `NaN` leaves a field alone, so a caller placing a
                 // panel keeps whatever the stylesheet said about its size; infinity puts a field
@@ -1011,6 +1017,99 @@ pub extern "C" fn bcs_xui_set_limits(entity: u64, max_width: f32, max_height: f3
                 if !max_height.is_nan() {
                     node.max_height = length(max_height);
                 }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Puts a pointer event into the window, as though a hand had done it.
+///
+/// The only way to test what a click does. Everything downstream of a real pointer — the picking
+/// backend, the widget that reports being clicked, the button state a camera reads — starts from
+/// the window's own messages, so writing those drives all of it and nothing has to be simulated
+/// twice. Calling a panel's method directly tests the method and not the path to it, and the path
+/// is where the interesting failures are.
+///
+/// `action` is `0` to move, `1` to press and `2` to release. `button` is `0` left, `1` right,
+/// `2` middle. A press and a release also move the pointer, because a real one is always somewhere.
+///
+/// Returns [`status::UNSUPPORTED`] where there is no window.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (x, y, action, button);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::input::mouse::{MouseButton, MouseButtonInput};
+            use bevy::input::ButtonState;
+            use bevy::math::Vec2;
+            use bevy::window::{CursorMoved, PrimaryWindow, Window, WindowEvent};
+
+            crate::state::with_world(|world| {
+                let Some(window) = world
+                    .query_filtered::<bevy::ecs::entity::Entity, (
+                        bevy::ecs::query::With<Window>,
+                        bevy::ecs::query::With<PrimaryWindow>,
+                    )>()
+                    .iter(world)
+                    .next()
+                else {
+                    return status::INVALID_STATE;
+                };
+
+                // Both the message and the batch it also arrives in. The window's own report goes
+                // out twice for real input: once as the message a reader of that one thing wants,
+                // and once inside `WindowEvent`, which is what the picking backend reads. Writing
+                // only one of the two drives half the engine.
+                let moved = CursorMoved {
+                    window,
+                    position: Vec2::new(x, y),
+                    delta: None,
+                };
+
+                // Where the pointer is, first and always. A press somewhere the pointer has not
+                // been reported to be is a press the picking backend tests against the old place.
+                world.write_message(moved.clone());
+                world.write_message(WindowEvent::CursorMoved(moved));
+
+                // The window carries the position as state as well as reporting the move, and
+                // anything asking where the pointer is reads the state.
+                if let Ok(mut entity) = world.get_entity_mut(window)
+                    && let Some(mut node) = entity.get_mut::<Window>()
+                {
+                    let scale = node.scale_factor();
+                    node.set_physical_cursor_position(Some(
+                        (Vec2::new(x, y) * scale).as_dvec2(),
+                    ));
+                }
+
+                if action == 0 {
+                    return status::OK;
+                }
+
+                let input = MouseButtonInput {
+                    button: match button {
+                        1 => MouseButton::Right,
+                        2 => MouseButton::Middle,
+                        _ => MouseButton::Left,
+                    },
+                    state: if action == 1 {
+                        ButtonState::Pressed
+                    } else {
+                        ButtonState::Released
+                    },
+                    window,
+                };
+
+                world.write_message(input.clone());
+                world.write_message(WindowEvent::MouseButtonInput(input));
 
                 status::OK
             })

@@ -31,27 +31,46 @@ an entity, an asset or a setting. Nothing is called a hierarchy or an inspector.
 | over the viewport | what the keys do | always |
 | over everything | menus, dropdowns, context menus | while they are being read |
 
-**A top split and a bottom one.** The bottom is a single row across the whole window: the tabs on
-the left, the key list beside them, both the same height. Everything above it is the top split, and
-that is three columns — the side columns as wide as their contents until their inner edge is
-dragged, up to a third of the window each, and the viewport between them, split along its own
-bottom by whichever tab is open, up to half the window. Those three numbers are the whole
-arrangement and all three are draggable.
+**A top split and a bottom one.** The bottom split runs the whole width of the window: whichever
+tab is open, and under it one row holding the tabs on the left and the key list beside them, both
+the same height. Everything above is the top split, and that is three columns — the side columns as
+wide as their contents until their inner edge is dragged, up to a third of the window each, and the
+viewport between them. The three dragged numbers are the whole arrangement.
 
-**A root has to say it is not stretching.** A document lays its body over the whole window and the
-body stretches its children to its own height, so a panel's outermost element measures the window
-unless the stylesheet says `align-self: flex-start`. Everything downstream reads that measurement:
-a strip that measures 900 pixels tall leaves the columns no room and nothing is placed at all. For
-the same reason no member of a row is ever told how tall the row is — the row is as tall as its
-tallest member, and telling one of them that is a loop that eats the window in two frames.
+**The middle of the screen is the middle of the screen.** The tool buttons are centred on the
+window, not on the viewport, alone among the corner panels. Centring them on the viewport moves
+them whenever a column opens, which is a tool that is somewhere else every time it is reached for.
 
-**Put away, not closed.** Three panels come and go all day: the world, the panel that describes the
-selection, and whichever tab is open. None of them is ever closed. Closing a document takes it out
-of the interface's list, and changing that list respawns every widget of every panel — a blink, a
-frame at the wrong font, and a panel that eventually does not come back. So they are concealed
-instead: `EditorShell.Conceal` and `Reveal` write one display property, the layout is handed only
-what is showing, and the document is loaded once per session. `Toggle` still closes, and that is
-what a flyout wants.
+**Nothing is ever told how tall it is.** A panel given a height measures that height afterwards, so
+its own contents can never be asked about again: a tree that grows a dozen rows sits inside a panel
+that stays the size it was, for good. Instead the height is handed back to the contents
+(`bcs_xui_set_rect` reads infinity as `auto`) and the room the column has is written as a maximum
+(`bcs_xui_set_limits`). The measurement stays where it belongs and the cap only stops it running
+past the column. The same rule is why no member of a row is told the row's height — the row is as
+tall as its tallest member, and telling one of them that is a loop that eats the window in two
+frames.
+
+**Put away, not closed.** The panels that come and go all day — the world, the panel that describes
+the selection, whichever tab is open, the information panel — are never closed. Closing a document
+takes it out of the interface's list, and changing that list respawns every widget of every panel: a
+blink, a frame at the wrong font, and a panel that eventually does not come back. So they are
+concealed instead: `EditorShell.Conceal` and `Reveal` write one display property, the layout is
+handed only what is showing, and the document is loaded once per session. `Toggle` still closes,
+and that is what a flyout wants.
+
+**A rebuild is counted, not waited out.** `bcs_xui_generation` says how many times the interface has
+respawned everything, so a window notices that every element handle it holds is dead at exactly the
+moment it becomes true. What this replaced was a fixed number of frames started by whoever opened or
+closed a panel, and that was wrong twice over: a rebuild nobody here caused went unnoticed, and two
+rebuilds overlapping ended the wait early and left every panel holding handles to widgets that no
+longer existed — which is an editor where nothing opens and nothing can be selected until it is
+restarted.
+
+**There is a way out of a text field.** A widget takes the keyboard when it is clicked and gives it
+up when another widget is clicked, and a click on the scene is not a click on a widget. Without
+`bcs_xui_blur` somebody who types in the search box and goes back to the viewport leaves the box
+holding the keyboard, and every key the editor binds is a letter going into it. The shell also
+refuses to believe a focused element no panel owns, which is what a rebuild leaves behind.
 
 **A docked panel is as tall as its contents**, capped by what its column has left. There is no
 fill: a panel with four rows is four rows tall, and opening a tab along the bottom shortens
@@ -64,6 +83,21 @@ viewport's corners as round buttons over the scene, and they follow the viewport
 and close. What is in them is `EditorToolbar`, a table like the menu's, so a game adds a mode to
 the viewport by adding a line. A button carries a picture, a word, or both: a picture alone is a
 circle, a word alone a pill, and the slot and an order index are the whole of where it goes.
+
+**A handle is the size a hand needs, not the size of what it is on.** `ViewportGizmos.Reach` asks
+the camera what ninety pixels are worth where the selection is — a ray through the centre and
+another through a point ninety pixels beside it, taken to the same depth — so a handle on a coin
+can be grabbed and one on a building does not fill the screen, and neither changes as the camera
+moves. It also has to hold still while it is used, and an object's own bounds change with every
+frame of a scale drag.
+
+**A handle is grabbed by what it looks like.** Move and scale draw a line along the axis and are
+measured against that line. A turn draws a ring, and measuring a ring against the line is why one
+could only be grabbed near its centre, where nothing is drawn: the ring is walked as a few dozen
+projected segments instead. The point a drag is measured about is the middle of what is on screen
+and is held for the whole drag, because an entity's origin and the middle of its bounds are not the
+same place, and turning about one while the ring is drawn about the other answers to somewhere
+nobody can see.
 
 **A gizmo is drawn about the world, not in it.** The default gizmo config has `depth_bias = -1`,
 so a handle on an object is in front of the object rather than inside it, and the queue C# fills is
@@ -258,10 +292,15 @@ These constraints shaped the panels, and all of them are the crate's rather than
   the other two empty, whatever is written to them, however often. So a vector is three rows, one
   per axis, each with a box that draws. This is the single largest thing a fork of the crate would
   buy back.
-- **Text written to a widget before its own text child exists is held and never drawn**, and
-  writing the same value again is not a change, so nothing redraws it. Every text binding therefore
-  writes the value with a trailing space twice a second and without one the rest of the time: a
-  change the eye cannot see, and everything that reads a value back trims it.
+- **Text written to a widget before its own text child exists is held and never drawn.** A widget
+  draws its text through a child spawned a frame or two after the widget itself, and a write before
+  then changes the field, is noticed with no child to update, and is overwritten when the child
+  arrives carrying what the document said. The bridge keeps every write for four frames and applies
+  it again, which touches the field and has the change noticed a second time with the child there
+  to receive it. This was done on the managed side by writing the value with a trailing space every
+  other frame for forty frames, which worked and was visible: a trailing space changes how wide a
+  label measures, so a panel grew and shrank and a number walked left and right for a second every
+  time anything appeared.
 - **An element's display is put back by the stylesheet** whenever the interface restyles the
   widget, so what a panel last wrote is not what is in force. Visibility is read before it is
   written rather than remembered.
@@ -272,8 +311,13 @@ These constraints shaped the panels, and all of them are the crate's rather than
   from. An image inside a `<button>` is dropped, because a button draws its own text and nothing
   else, so a button with a picture in it is a `<div>` that takes the click instead.
 - **A widget restyles for one frame at the wrong font size** after anything is written to it. That
-  is why a value is only written twice while its element is new: doing it twice a second forever
-  is a flicker twice a second forever.
+  is why nothing is written to an element that already holds the value: writing regardless is a
+  flicker sixty times a second.
+- **`align-self` and `align-content` are not read.** The first does not matter, because a document's
+  body is a column and a column sizes its children by their contents. The second does: a wrapping
+  box taller than its lines spreads them down its height with no way to say otherwise, which is an
+  asset grid with its rows pushed apart. The fix is to give the lines a box of their own, inside a
+  column, so there is no spare height for them to be spread through.
 - **A button that is written to loses its font.** A button draws its text through a child it
   rebuilds whenever the text changes, and the rebuilt child comes back without the stylesheet's
   font and layout, so a row of text the editor writes ends up half again too large. A paragraph
@@ -313,6 +357,15 @@ written to. `pointer-events: none` on every label and picture inside something c
 answer back where the command is.
 
 ## Verification
+
+**Clicks are driven, not simulated.** `SyntheticInput` writes the window's own messages — the
+`CursorMoved` and `MouseButtonInput` a real pointer produces, both as themselves and inside the
+`WindowEvent` batch the picking backend reads — so a click goes through the picking raycast, the
+widget that decides it was clicked, and the button state the camera reads, exactly as a hand's
+would. Calling the method a click would have called tests the method and not the path to it, and
+the path is where the failures were: a ring that could not be grabbed, a flyout that opened once, a
+selection that cleared itself on the frame it was made. What it cannot do is move the desktop's
+cursor, and it does not try.
 
 Nothing here is provable by a test alone. `Render.Screenshot` exists for that reason: a panel
 either lays out correctly or it does not, and only the picture says which. Every stage ends with a

@@ -66,6 +66,7 @@ public sealed partial class AssetsPanel
     public void Fill()
     {
         Roll();
+        Measure();
 
         var entries = EditorAssets.List();
         var written = 0;
@@ -124,6 +125,49 @@ public sealed partial class AssetsPanel
             TileNames[i] = string.Empty;
             _tiles[i] = default;
             TileShown[i] = false;
+        }
+    }
+
+    /// <summary>How wide a tile would like to be, before the room is divided up.</summary>
+    private const float IdealTile = 132f;
+
+    /// <summary>How far apart the tiles sit, matching the stylesheet's gap.</summary>
+    private const float TileGap = 6f;
+
+    /// <summary>The width every tile was last given.</summary>
+    private float _tileWidth;
+
+    /// <summary>
+    /// Divides the pane into a whole number of columns and gives every tile that width.
+    /// </summary>
+    /// <remarks>
+    /// Worked out here rather than left to the layout, because flex has no way to say "all the
+    /// same size and filling the line". Told to stretch, the tiles on a part-filled last line
+    /// share the room a full line's worth had and come out twice as wide as the tiles above them;
+    /// told not to, the right-hand edge is ragged. A width the panel computes is neither.
+    /// </remarks>
+    private void Measure()
+    {
+        if (Window is not { IsOpen: true } window) return;
+
+        var pane = window.Element("atiles");
+        if (pane.IsNone || !Xui.TryRect(pane, out var rect)) return;
+        if (rect.Width < 1f) return;
+
+        var columns = Math.Max(1, (int)((rect.Width + TileGap) / (IdealTile + TileGap)));
+        var width = MathF.Floor(((rect.Width + TileGap) / columns) - TileGap);
+
+        if (MathF.Abs(width - _tileWidth) < 0.5f) return;
+
+        _tileWidth = width;
+
+        for (var i = 0; i < Tiles; i++)
+        {
+            var tile = window.Element($"atile-{i}");
+            if (tile.IsNone) continue;
+
+            // Width alone: naming neither edge leaves the tile where the wrap put it.
+            Xui.SetRect(tile, float.NaN, float.NaN, width, float.NaN);
         }
     }
 

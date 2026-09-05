@@ -332,12 +332,11 @@ interface crate cannot do that shaped the panels.
 
 What is left:
 
-- **Every path a real pointer takes is unverified.** `bcs_pick_events`, the shell that drains it,
-  the click that reaches a row and the press that clears a selection are all in place, and no
-  pointer has been put through any of them: the editor runs on Wayland here, the compositor refuses
-  XTEST warping, and nothing else available can synthesise a click into the window. Everything
-  reachable from code has been driven from code instead. If picking turns out not to fire, suspect
-  the interface camera, which is ordered last and may be the camera the raycast starts from.
+- **Clicking a mesh to select it works**, and so does every other pointer path, driven through
+  `SyntheticInput` — which writes the window's own messages and so goes through picking, the
+  widgets and the camera exactly as a hand would. This was the largest hole in the editor's
+  verification and it is closed; what is still untested that way is the keyboard, which has no
+  equivalent yet and would want the same treatment.
 - **Half of the world is saved.** `assets/world.json` keeps every named entity's name and every
   component with a schema, which is what the editor can change. What it cannot write is the
   engine's own components: a mesh handle, a material, a camera's projection.
@@ -351,11 +350,12 @@ What is left:
   own text, because nothing can give an element a class after the document is parsed. An entry
   point that set a CSS class would replace that, and would also give hover and pressed states to
   anything built on the framework rather than only to what the stylesheet can reach.
-- **A fork of the interface crate would buy back four things**, all of them worked around today
+- **A fork of the interface crate would buy back five things**, all of them worked around today
   and all of them listed in EDITOR.md: only the first input of a row draws its text, a value
   written before a widget's text child exists is never drawn, a stylesheet reapplication undoes
-  what was written to an element's display, and a menu cannot be drawn over a panel whatever it is
-  told about layering.
+  what was written to an element's display, a menu cannot be drawn over a panel whatever it is
+  told about layering, and `align-content` is not read at all, so a wrapping box cannot be told to
+  pack its lines.
 - **Tiles that show what a file is.** The asset browser draws a grid of names, elastic between a
   minimum and a maximum so a row divides evenly into the panel and wraps. What it does not draw is
   the file: an image tile should show the image, a mesh or a material tile a small render of it,

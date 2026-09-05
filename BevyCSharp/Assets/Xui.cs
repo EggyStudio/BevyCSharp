@@ -216,6 +216,11 @@ public static unsafe class Xui
     /// contents. Something once given a height measures that height ever after, so without a way
     /// to undo it there is no asking what its contents want a second time.
     /// </para>
+    /// <para>
+    /// Naming a corner takes the element out of the flow, which is what placing a panel means.
+    /// Naming neither — both <paramref name="left"/> and <paramref name="top"/> left alone — says
+    /// only how large, and the element stays where its parent's layout put it.
+    /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">The element is gone or is not laid out.</exception>
     public static void SetRect(Entity element, float left, float top, float width, float height) =>

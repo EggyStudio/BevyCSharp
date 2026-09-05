@@ -83,22 +83,17 @@ public partial struct TransformGizmo
         if (!Render.TryGetBounds(entity, out var min, out var max)) return;
 
         var centre = (min + max) * 0.5f;
-        var reach = ViewportGizmos.Reach(min, max);
-
-        if (!Render.TryProject(camera, centre, out var originX, out var originY)) return;
+        var reach = ViewportGizmos.Reach(camera, centre);
 
         var nearest = -1;
         var closest = Grab;
 
         for (var i = 0; i < 3; i++)
         {
-            var tip = centre + (ViewportGizmos.Axes[i] * reach);
-            if (!Render.TryProject(camera, tip, out var tipX, out var tipY)) continue;
+            var distance = ToHandle(camera, centre, reach, i, x, y);
+            if (distance is not { } near || near >= closest) continue;
 
-            var distance = ToSegment(x, y, originX, originY, tipX, tipY);
-            if (distance >= closest) continue;
-
-            closest = distance;
+            closest = near;
             nearest = i;
         }
 
@@ -107,7 +102,71 @@ public partial struct TransformGizmo
         Axis = nearest;
         _subject = entity;
         _before = transform;
+
+        // The point the handles are drawn about, kept for the whole drag. It is the middle of what
+        // is on screen rather than the entity's own origin, and the two are not the same thing for
+        // a mesh whose origin sits in a corner: measuring a turn about one while the ring is drawn
+        // about the other is a gizmo that answers to a place nobody can see.
+        _centre = centre;
         _start = Measure(ctx, camera, x, y, centre) ?? 0f;
+    }
+
+    /// <summary>Where the handles are drawn about, for as long as one is held.</summary>
+    private static Vec3 _centre;
+
+    /// <summary>
+    /// How near the pointer is to one handle, in pixels, or nothing when it cannot be seen.
+    /// </summary>
+    /// <remarks>
+    /// A handle is grabbed by what it looks like. Move and scale draw a line out along the axis
+    /// and are measured against that line; a turn draws a ring in the plane the axis is normal to,
+    /// and measuring that against the line as well is why a ring could only be grabbed near its
+    /// centre — where nothing is drawn — and never on the part a hand reaches for.
+    /// </remarks>
+    private static float? ToHandle(
+        Entity camera, Vec3 centre, float reach, int index, float x, float y)
+    {
+        var axis = ViewportGizmos.Axes[index];
+
+        if (EditorTools.Current != EditorTool.Rotate)
+        {
+            if (!Render.TryProject(camera, centre, out var fromX, out var fromY)) return null;
+            if (!Render.TryProject(camera, centre + (axis * reach), out var toX, out var toY))
+            {
+                return null;
+            }
+
+            return ToSegment(x, y, fromX, fromY, toX, toY);
+        }
+
+        // The ring, as the line the eye follows: a few dozen points around it, each pair a
+        // segment. The projection is not a circle on screen unless the camera is looking straight
+        // down the axis, so walking it is both simpler and truer than solving for an ellipse.
+        var (first, second) = ViewportGizmos.Perpendiculars(axis);
+        const int Steps = 32;
+
+        float? closest = null;
+        var haveLast = Render.TryProject(camera, centre + (first * reach), out var lastX, out var lastY);
+
+        for (var step = 1; step <= Steps; step++)
+        {
+            var angle = step / (float)Steps * MathF.Tau;
+            var point = centre
+                + (first * (MathF.Cos(angle) * reach))
+                + (second * (MathF.Sin(angle) * reach));
+
+            var have = Render.TryProject(camera, point, out var pointX, out var pointY);
+
+            if (haveLast && have)
+            {
+                var distance = ToSegment(x, y, lastX, lastY, pointX, pointY);
+                if (closest is not { } best || distance < best) closest = distance;
+            }
+
+            (haveLast, lastX, lastY) = (have, pointX, pointY);
+        }
+
+        return closest;
     }
 
     /// <summary>Applies the drag to the selection.</summary>
@@ -115,8 +174,7 @@ public partial struct TransformGizmo
     {
         if (!ctx.Ecs.TryGet<Transform>(_subject, out var current)) return;
 
-        var centre = _before.Translation;
-        if (Measure(ctx, camera, x, y, centre) is not { } now) return;
+        if (Measure(ctx, camera, x, y, _centre) is not { } now) return;
 
         var axis = ViewportGizmos.Axes[Axis];
 

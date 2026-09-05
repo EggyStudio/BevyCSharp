@@ -56,8 +56,10 @@ public partial struct ViewportGizmos
         var entity = EditorSelection.Current;
         if (!Render.TryGetBounds(entity, out var min, out var max)) return;
 
+        var centre = (min + max) * 0.5f;
+
         Outline(min, max);
-        Handles(ctx, (min + max) * 0.5f, Reach(min, max));
+        Handles(ctx, centre, Reach(EditorSelection.Camera, centre));
     }
 
     /// <summary>Draws the twelve edges of the selection's box.</summary>
@@ -212,18 +214,45 @@ public partial struct ViewportGizmos
         }
     }
 
-    /// <summary>How far a handle reaches, given what it is attached to.</summary>
+    /// <summary>
+    /// How far a handle reaches: whatever a fixed number of pixels is worth where the thing is.
+    /// </summary>
     /// <remarks>
-    /// From the thing's own size, so a handle on a small object is small and one on a building is
-    /// not lost inside it, with a floor for something that has no size at all.
+    /// A handle is a control, not a part of the scene, and a control is the size a hand needs it
+    /// to be. Sized from the object it is on, a handle on a coin is too small to grab and one on a
+    /// building fills the screen; sized in metres it shrinks to nothing as the camera backs away.
+    /// It also has to be a size that does not change while it is being used, and the object's own
+    /// bounds change with every frame of a scale drag.
     /// </remarks>
-    internal static float Reach(Vec3 min, Vec3 max)
+    internal static float Reach(Entity camera, Vec3 centre)
     {
-        var extent = (max - min) * 0.5f;
-        var largest = MathF.Max(MathF.Max(extent.X, extent.Y), extent.Z);
+        if (camera.IsNone) return Fallback;
+        if (!Render.TryProject(camera, centre, out var screenX, out var screenY)) return Fallback;
+        if (!Render.TryRay(camera, screenX, screenY, out var origin, out var forward))
+        {
+            return Fallback;
+        }
 
-        return MathF.Max(largest * 1.6f, 0.6f);
+        var depth = Vec3.Dot(centre - origin, forward);
+        if (depth <= 0f) return Fallback;
+
+        // The ray through a point a fixed number of pixels away, taken to the same depth. How far
+        // that lands from the centre is what those pixels are worth in the world there, which is
+        // the whole calculation: no field of view is assumed, so a camera set up any way at all
+        // gets a handle the size it asked for.
+        if (!Render.TryRay(camera, screenX + Pixels, screenY, out var edge, out var sideways))
+        {
+            return Fallback;
+        }
+
+        return (edge + (sideways * depth) - centre).Length;
     }
+
+    /// <summary>How long a handle is on screen, in logical pixels.</summary>
+    private const float Pixels = 90f;
+
+    /// <summary>What a handle reaches when the camera cannot be asked.</summary>
+    private const float Fallback = 1f;
 
     /// <summary>Two directions at right angles to an axis and to each other.</summary>
     internal static (Vec3 First, Vec3 Second) Perpendiculars(Vec3 axis)
