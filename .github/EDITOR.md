@@ -217,14 +217,30 @@ it for every pixel and one at the height of what is standing on it cuts those th
 of a disc and thins to nothing at the rim, because a square of lines ending all at once announces
 where the editor stopped drawing, which is a fact about the editor and not about the scene.
 
-Two spacings are drawn, a decade apart, and each fades **in** as well as out. How solid a spacing is
-asks a question about that spacing alone — full strength while its cells are larger than the height
-suggests, fading over the decade in which they become smaller — so nothing changes at the moment two
+Three spacings are drawn, a decade apart, and each fades **in** as well as out. How solid one is
+asks a question about that spacing alone — full when its cells are the size the height calls for,
+fading away over the decade below and the two decades above — so nothing changes at the moment two
 of them swap roles, and a ten metre line is as solid at ninety metres up as at a hundred and ten.
-The coarser grid is hollowed out over exactly the ground the finer one covers, by exactly how much
-of the finer one is left, so as one fades away the other fills in behind it. Measured across a
-decade boundary the picture's mean brightness moves by a fraction of a percent per step and never
-jumps. It costs about four percent of a frame.
+Both halves matter and only one is obvious: a grid written without thinking about the way up fades
+out correctly and *appears* at full strength, so descending looks right and every step of the climb
+drops a whole new spacing onto the floor in one frame. Coming in takes twice as long as going and
+eases rather than ramping, because something arriving is noticed and something leaving is not.
+
+**How far it reaches is a question about height, not about spacing.** Sized by its own spacing, the
+coarsest grid runs a hundred times further out than the finest — a haze of lines at the horizon long
+after they have stopped saying anything about where things are. Every spacing stops at the same
+distance, which is a multiple of how high the camera is.
+
+**It sits under the camera and stays there.** Following the point the camera looks at sounds helpful
+and is not: turning on the spot then drags the whole floor around with the view, and the grid stops
+being a fixed thing the camera moves over.
+
+**The two axes are drawn once.** Every spacing has a line at zero and would colour it, so the axis
+came out three times at three strengths — and each faded outwards from its own grid's centre, which
+is snapped to its own spacing. The lines were on top of each other and their fades were not, which
+reads as one line that will not line up with itself.
+
+The whole thing costs about four percent of a frame.
 
 **A gizmo is drawn about the world, not in it.** The default gizmo config has `depth_bias = -1`,
 so a handle on an object is in front of the object rather than inside it, and the queue C# fills is
