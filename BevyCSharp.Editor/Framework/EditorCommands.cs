@@ -214,14 +214,11 @@ public static class EditorCommands
             ToolbarSlot.Right,
             "icons/ui/info.png",
             static () => string.Empty,
-            // Put away rather than closed, and fetched back to wherever the viewport's corner is
-            // now. Somebody watching a number opens and closes this all day, and closing a document
-            // rebuilds every widget of every panel on screen.
-            static _ => EditorShell.ToggleAt(
-                static () => new InfoPanel(),
-                static () => (
-                    EditorShell.Layout.Viewport.Right - 240f,
-                    EditorShell.Layout.Viewport.Y + 44f)),
+            // Put away rather than closed. Somebody watching a number opens and closes this all
+            // day, and closing a document rebuilds every widget of every panel on screen. Where it
+            // goes is its own declaration, which the arrangement reads every frame: a position
+            // worked out here would be worked out from a width the panel has not measured yet.
+            static _ => EditorShell.Toggle(static () => new InfoPanel()),
             static () => EditorShell.Showing<InfoPanel>() is not null,
             0));
 

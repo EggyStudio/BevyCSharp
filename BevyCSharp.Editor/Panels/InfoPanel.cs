@@ -10,16 +10,19 @@ namespace BevyCSharp.Editor.Panels;
 /// <para>
 /// Opened from the information button rather than kept on screen, because what it says is glanced
 /// at rather than worked in. Unpinned it behaves as a flyout and a click anywhere else dismisses
-/// it; pinned it moves into the right column and stays until it is closed.
+/// it; pinned it stays until it is closed.
 /// </para>
 /// <para>
-/// That is the whole of pinning: a placement and a dismissal rule, both of which are already
-/// things a panel has. Nothing about it needed a new kind of window.
+/// Pinning changes when it goes away and nothing else. Moving it into a column as well would put
+/// it under the panel that describes the selection, which is a long way from the button that
+/// opened it and a long way from where somebody's eye already is.
 /// </para>
 /// </remarks>
 [EditorPanel(
     "panels/info.html",
     Root = "#info",
+    Dock = EditorDock.ViewportTopRight,
+    Y = 34f,
     Dismiss = PanelDismiss.OnOutsideClick,
     Layer = 40)]
 public sealed partial class InfoPanel
@@ -43,12 +46,11 @@ public sealed partial class InfoPanel
     [Bind("#i-rate", Mode = BindMode.OneWay)]
     public string Rate { get; private set; } = string.Empty;
 
-    /// <summary>The pin, which is what keeps the panel where it is.</summary>
-    [Bind("#i-pin", Mode = BindMode.OneWay)]
-    public string PinIcon => _pinned ? EditorIcons.Pin : EditorIcons.Unpin;
-
     /// <summary>Whether the panel has been pinned into the column.</summary>
     private bool _pinned;
+
+    /// <summary>What the pin is currently pointing at, so it is only written when it changes.</summary>
+    private string _pinIcon = string.Empty;
 
     /// <summary>What the last walk of the world found.</summary>
     private Census _census;
@@ -77,6 +79,8 @@ public sealed partial class InfoPanel
         if (ctx.Time.FrameCount % 30 == 0) _census = Count(ctx.Ecs);
 
         Rate = $"{ctx.Time.SmoothedFps:F0} fps";
+
+        Wear(_pinned ? "icons/ui/pinned.png" : "icons/ui/pin.png");
 
         var written = 0;
         var (windowWidth, windowHeight) = Bevy.Window.Size();
@@ -115,6 +119,24 @@ public sealed partial class InfoPanel
             Values[i] = string.Empty;
             Shown[i] = false;
         }
+    }
+
+    /// <summary>Points the pin at whichever picture says what pressing it will do.</summary>
+    /// <remarks>
+    /// A picture rather than a character, because the font has no pin in it and a letter standing in
+    /// for one says nothing. Set rather than bound, since an image is a path the interface loads
+    /// from and not a value a widget carries.
+    /// </remarks>
+    private void Wear(string icon)
+    {
+        if (_pinIcon == icon) return;
+        if (Window is not { IsOpen: true } window) return;
+
+        var element = window.Element("i-pin-icon");
+        if (element.IsNone) return;
+
+        Xui.SetImage(element, icon);
+        _pinIcon = icon;
     }
 
     /// <summary>Which axes the handles are drawn along, in the words the toolbar uses.</summary>
@@ -219,19 +241,18 @@ public sealed partial class InfoPanel
         written++;
     }
 
-    /// <summary>Pins the panel into the column, or lets it float again.</summary>
+    /// <summary>
+    /// Pins the panel into the column, or lets it float again.
+    /// </summary>
+    /// <remarks>
+    /// The placement is not touched. It sits in the viewport's top right corner either way, which
+    /// is under the button that opened it and inside the part of the screen the scene has.
+    /// </remarks>
     [Command("#i-pin")]
     public void Pin()
     {
         _pinned = !_pinned;
 
         EditorShell.Pin(this, _pinned);
-        EditorShell.Layout.Place(
-            this,
-            _pinned
-                ? PanelPlacement.In(EditorDock.Right, 20)
-                : Chrome.Placement.MovedTo(
-                    Window?.Measure()?.X ?? 40f,
-                    Window?.Measure()?.Y ?? 40f));
     }
 }

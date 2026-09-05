@@ -57,6 +57,10 @@ public sealed partial class WorldPanel
     [Bind("#wfold", Count = Rows)]
     public string[] Folds = new string[Rows];
 
+    /// <summary>Which row wears the dot, being the one that is selected.</summary>
+    [Show("#wdot", Count = Rows)]
+    public bool[] Marked = new bool[Rows];
+
     /// <summary>Which rows stand for an entity at all.</summary>
     [Show("#wrow", Count = Rows)]
     public bool[] Shown = new bool[Rows];
@@ -143,10 +147,8 @@ public sealed partial class WorldPanel
         {
             var line = visible[i];
 
-            Labels[written] = line.Entity == EditorSelection.Current
-                ? EditorIcons.Selected + " " + line.Label
-                : line.Label;
-
+            Labels[written] = line.Label;
+            Marked[written] = line.Entity == EditorSelection.Current;
             Folds[written] = line.Mark;
             Wear(written, EditorKinds.IconFor(world, line.Entity));
 
@@ -159,6 +161,7 @@ public sealed partial class WorldPanel
         {
             Labels[i] = string.Empty;
             Folds[i] = string.Empty;
+            Marked[i] = false;
             _entities[i] = Entity.None;
             Shown[i] = false;
         }

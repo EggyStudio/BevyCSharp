@@ -35,9 +35,13 @@
     --gray-background-disabled: #202020;
 
     /* Black, with enough left through to see the scene the panels float over. */
-    --surface: rgba(0, 0, 0, 0.78);
+    /*
+     * Nearly opaque. The scene under a panel is worth a hint of depth and nothing more: at a
+     * thinner value a panel over the sky and a panel over a lit floor are two different colours.
+     */
+    --surface: rgba(0, 0, 0, 0.90);
     /* What a full-window sheet is painted with: no scene showing through a page of settings. */
-    --sheet: rgba(22, 23, 26, 1);
+    --sheet: rgba(0, 0, 0, 1);
     --surface-raised: rgba(255, 255, 255, 0.05);
     --surface-sunken: rgba(0, 0, 0, 0.35);
     --line: rgba(255, 255, 255, 0.10);
@@ -70,29 +74,58 @@ body {
 
 /* -- Panels */
 
-.panel,
+/*
+ * What a panel looks like, whichever kind it is.
+ *
+ * Every kind is named here rather than sharing a `.panel` class on the element, because the
+ * interface reads only the first class in a `class` attribute. A second one is not a weaker match,
+ * it is not a match at all, so every element carries exactly one class and a rule that applies to
+ * several of them names all of them.
+ */
+.column,
+.band,
+.stats,
 .bar,
 .strip,
 .menu {
     display: flex;
     background-color: var(--surface);
+    /*
+     * No `backdrop-filter`. The interface parses one and draws it over the element's own
+     * background rather than under it, so the panel takes the colour of whatever is behind it
+     * however opaque it is: a panel over the sky is black and a panel over a lit floor is grey.
+     * The blur also samples past the element's edge, which leaves a bright rim inside the rounded
+     * corner wherever the surroundings are brighter.
+     */
     border: 1px solid var(--line);
     border-radius: var(--radius);
     color: var(--text);
     pointer-events: auto;
 }
 
-.panel {
+.column,
+.band,
+.stats {
     flex-direction: column;
     align-self: flex-start;
-    width: 238px;
     padding: 8px;
     row-gap: 5px;
     overflow: hidden;
 }
 
-.panel.wide {
+/* A panel in one of the side columns. */
+.column {
+    width: 238px;
+}
+
+/* A panel that fills what it is given, which is the open tab along the bottom. */
+.band {
     width: 100%;
+}
+
+/* The readout, which is wider than a column because every line of it is a name and a number. */
+.stats {
+    width: 268px;
 }
 
 /*
@@ -138,10 +171,6 @@ body {
  * A panel filling the band above the tab strip. Square at the bottom, because the strip is
  * attached to it, and rounded at the top like everything else.
  */
-.panel.band {
-    width: 100%;
-}
-
 /* -- Title bars, which are also what a window is dragged by */
 
 .titlebar {
@@ -189,8 +218,13 @@ p {
  * footer, and clips rather than pushing them off the bottom, because the panel's height is the
  * layout's decision and not the contents'.
  */
-.rows.grow {
+/* A list that takes what the panel has left, which is what the open tab's contents want. */
+.rows-grow {
+    display: flex;
+    flex-direction: column;
     flex-grow: 1;
+    width: 100%;
+    row-gap: 2px;
     overflow: hidden;
 }
 
@@ -251,6 +285,22 @@ p {
 .row-icon {
     width: 12px;
     height: 12px;
+    pointer-events: none;
+}
+
+/*
+ * The mark on the row that is selected, matching the tabs and the toolbar.
+ *
+ * A dot after the name rather than a character in front of it. A character moves the name sideways
+ * whenever the selection changes, so a list of them shuffles as somebody arrows down it; a dot has
+ * a place of its own and the names hold still.
+ */
+.row-dot {
+    width: 5px;
+    height: 5px;
+    margin-left: 5px;
+    background-color: var(--accent);
+    border-radius: 3px;
     pointer-events: none;
 }
 
@@ -522,10 +572,6 @@ button:hover {
  * name takes what it needs and the value is pushed to the right edge, which is what makes a
  * changing number easy to watch. A heading is a row with nothing on its right.
  */
-.panel.stats {
-    width: 264px;
-}
-
 .stat-row {
     display: flex;
     flex-direction: row;
@@ -557,13 +603,26 @@ button:hover {
  * screen with a hierarchy and an inspector is a panel, and a panel is where these were not
  * fitting.
  */
-.panel.sheet {
+/*
+ * A settings sheet: the window, edge to edge.
+ *
+ * Opaque and black: every other panel is small enough that the scene behind it reads as depth, and
+ * a whole window of settings with a scene showing through reads as a mistake. It keeps the margin
+ * and the rounded corners the panels have, so it sits on the editor rather than replacing it.
+ */
+.sheet {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     height: 100%;
+    padding: 10px 14px;
     row-gap: 8px;
-    /* Opaque. Every other panel is small enough that the scene behind it reads as depth; a sheet
-       covering the window with the scene showing through reads as a mistake. */
     background-color: var(--sheet);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--text);
+    overflow: hidden;
+    pointer-events: auto;
 }
 
 /*
@@ -628,9 +687,21 @@ button:hover {
     border-color: var(--accent);
 }
 
-.tree.pages {
+/*
+ * The list of pages down the side of a sheet.
+ *
+ * A class of its own rather than `.tree.pages`, which selects the right element and then loses:
+ * two classes score the same as one here, and a tie against the base rule goes to the base rule.
+ * A compound selector can only add properties the single class does not set, so anything that has
+ * to override one carries the whole rule instead.
+ */
+.pages {
+    display: flex;
+    flex-direction: column;
     width: 190px;
     row-gap: 1px;
+    padding-right: 8px;
+    border-right: 1px solid var(--line);
 }
 
 .sheet-body {
@@ -645,14 +716,34 @@ button:hover {
     overflow: hidden;
 }
 
-/* A round button small enough to sit in a title bar. */
-.round.small {
-    min-width: 20px;
-    height: 20px;
-    padding: 0 4px;
-    border-radius: 10px;
+/*
+ * The round button that closes a sheet.
+ *
+ * A class of its own rather than the panels' round button with a fill added: the interface matches
+ * one class per rule, so `.round.solid` selects nothing. It also has to carry its own colour. A
+ * panel's round button is nearly transparent and takes what colour it has from the scene showing
+ * through it, and a sheet is opaque black with nothing behind it, so the same button would be a
+ * black circle on a black page with the title bar's rule running through it.
+ */
+.sheet-close {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    background-color: rgba(38, 39, 43, 1);
+    border: 1px solid var(--line-strong);
+    border-radius: 13px;
+    pointer-events: auto;
 }
 
+.sheet-close:hover {
+    background-color: var(--accent-soft);
+    border-color: var(--accent);
+}
+
+/* A round button small enough to sit in a title bar. */
 /*
  * A strip of tags: the components an entity carries that have nothing to show.
  *
@@ -768,13 +859,17 @@ button:hover {
 }
 
 /* A line of the log: smaller, dimmer, and never wrapped, so a burst of them stays readable. */
+/* One line of the console, which is a line of text rather than a row with things in it. */
 .log {
+    width: 100%;
     height: 13px;
+    min-width: 0;
     margin: 0;
     padding: 0 4px;
     font-size: 10px;
     line-height: 13px;
     color: var(--dim);
+    text-wrap: nowrap;
 }
 
 /* -- The asset browser: where you are on the left, what is there on the right */

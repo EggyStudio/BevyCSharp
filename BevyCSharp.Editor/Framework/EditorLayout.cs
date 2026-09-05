@@ -150,7 +150,24 @@ public sealed class EditorLayout
             // not exist yet then: a document is built a frame or two after it is asked for.
             window.Layer(panel.Chrome.Layer);
 
-            placed.Add(new Placed(panel, PlacementOf(panel), rect));
+            // Uncapped to begin with, so a panel that has moved out of a column is not still
+            // wearing the height that column gave it. Whichever dock takes it puts back whatever
+            // limits it has of its own, and only a column has any.
+            window.LimitTo(Xui.Auto, Xui.Auto);
+
+            var size = Seen(panel, rect);
+
+            // A document that has never been laid out has no size, and everything that decides
+            // where a panel goes needs one. Put where nobody can see it until it has measured
+            // itself, rather than hidden: a hidden node is not laid out at all, so it would never
+            // acquire the size that would let it be shown.
+            if (size.Width < 1f || size.Height < 1f)
+            {
+                window.PlaceAt(Offstage, Offstage, float.NaN, float.NaN);
+                continue;
+            }
+
+            placed.Add(new Placed(panel, PlacementOf(panel), size));
         }
 
         var left = ColumnWidth(placed, EditorDock.Left, LeftWidth, width, ref _leftMeasured);
@@ -202,6 +219,35 @@ public sealed class EditorLayout
 
     /// <summary>One panel, where it wants to be, and where it currently is.</summary>
     private readonly record struct Placed(IEditorPanel Panel, PanelPlacement Placement, UiRect Rect);
+
+    /// <summary>Where a panel waits while it works out how large it is.</summary>
+    private const float Offstage = -20000f;
+
+    /// <summary>How large each panel was last seen to be.</summary>
+    private readonly Dictionary<string, UiRect> _seen = [];
+
+    /// <summary>
+    /// How large a panel is, falling back to the last time it was anything at all.
+    /// </summary>
+    /// <remarks>
+    /// A panel that has just been fetched back measures nothing: it was hidden when the measurement
+    /// was taken, and the size it will have is a frame away. Anything that reads the size to decide
+    /// a position, which is every corner and every edge, would place it against zero for that frame
+    /// and against its real size on the next, which is a panel that appears in the wrong place and
+    /// jumps. What it was before it was put away is the right answer and is already known.
+    /// </remarks>
+    private UiRect Seen(IEditorPanel panel, UiRect rect)
+    {
+        var key = KeyOf(panel);
+
+        if (rect.Width > 1f && rect.Height > 1f)
+        {
+            _seen[key] = rect;
+            return rect;
+        }
+
+        return _seen.TryGetValue(key, out var before) ? before : rect;
+    }
 
     /// <summary>What a column is told to be, and how wide it turned out.</summary>
     /// <param name="Write">
@@ -375,21 +421,27 @@ public sealed class EditorLayout
     /// Places whatever takes the whole window.
     /// </summary>
     /// <remarks>
-    /// Over everything and inset by the same margin as everything else, so it reads as a sheet
-    /// laid on the editor rather than as a different program.
+    /// The full height, inset by the same margin as everything else, and no wider than a page of
+    /// text wants to be. A line of settings running the width of a large screen is a line the eye
+    /// loses its place in, which is why every page of prose on the web stops somewhere around here.
     /// </remarks>
     private void Sheets(List<Placed> placed, float width, float height)
     {
+        var wide = MathF.Min(SheetWidth, MathF.Max(0f, width - (Margin * 2f)));
+
         foreach (var entry in Members(placed, EditorDock.Sheet))
         {
             entry.Panel.Window!.PlaceAt(
+                (width - wide) * 0.5f,
                 Margin,
-                Margin,
-                MathF.Max(0f, width - (Margin * 2f)),
+                wide,
                 MathF.Max(0f, height - (Margin * 2f)),
                 entry.Rect);
         }
     }
+
+    /// <summary>The widest a sheet gets, whatever the screen is.</summary>
+    public const float SheetWidth = 700f;
 
     /// <summary>Places whatever floats in the viewport's corners.</summary>
     /// <remarks>
@@ -437,14 +489,25 @@ public sealed class EditorLayout
     /// Places whatever carries its own coordinates, kept inside the window.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// A flyout is opened at the thing that opened it, and the thing that opened it may be near an
     /// edge: a menu on the button at the foot of a panel would hang off the bottom of the screen
     /// and show its title and nothing else. Clamping against what it measured rather than against
     /// a guess is what makes a menu open upwards from a button at the bottom without anything
     /// having to ask for that.
+    /// </para>
+    /// <para>
+    /// Kept inside the viewport rather than inside the window, so a flyout that would overhang a
+    /// column steps back off it. A panel drawn under another cannot be read at all here, and the
+    /// columns are where the other panels are.
+    /// </para>
     /// </remarks>
     private void Free(List<Placed> placed, float width, float height)
     {
+        var room = Viewport.Width > 1f && Viewport.Height > 1f
+            ? Viewport
+            : new UiRect(Margin, Margin, width - (Margin * 2f), height - (Margin * 2f));
+
         foreach (var entry in placed)
         {
             if (entry.Placement.Dock != EditorDock.Floating) continue;
@@ -454,12 +517,12 @@ public sealed class EditorLayout
 
             if (entry.Rect.Width > 0f)
             {
-                x = MathF.Max(Margin, MathF.Min(x, width - Margin - entry.Rect.Width));
+                x = MathF.Max(room.X, MathF.Min(x, room.Right - entry.Rect.Width));
             }
 
             if (entry.Rect.Height > 0f)
             {
-                y = MathF.Max(Margin, MathF.Min(y, height - Margin - entry.Rect.Height));
+                y = MathF.Max(room.Y, MathF.Min(y, room.Bottom - entry.Rect.Height));
             }
 
             entry.Panel.Window!.PlaceAt(

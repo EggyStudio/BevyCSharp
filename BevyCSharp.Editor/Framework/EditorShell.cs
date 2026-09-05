@@ -310,9 +310,10 @@ public static class EditorShell
             return;
         }
 
-        foreach (var panel in Covered.ToArray()) Reveal(panel);
-
+        var back = Covered.ToArray();
         Covered.Clear();
+
+        foreach (var panel in back) Reveal(panel);
     }
 
     /// <summary>The panels that are on screen, in the order they were opened.</summary>
@@ -352,6 +353,17 @@ public static class EditorShell
     public static void Reveal(IEditorPanel panel)
     {
         ArgumentNullException.ThrowIfNull(panel);
+
+        // Nothing comes back while a sheet is up. A sheet is the whole window and everything else
+        // is put away behind it, so a panel that answers to something other than a person asking
+        // for it (the selection, a menu row, a tab) would otherwise fetch itself back on top. It is
+        // remembered as covered instead, and appears when the sheet goes.
+        if (_sheeted && Layout.PlacementOf(panel).Dock != EditorDock.Sheet)
+        {
+            if (Panels.Contains(panel) && !Covered.Contains(panel)) Covered.Add(panel);
+
+            return;
+        }
 
         if (!Concealed.Remove(panel)) return;
 

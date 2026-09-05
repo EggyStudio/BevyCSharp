@@ -352,12 +352,13 @@ What is left:
   own text, because nothing can give an element a class after the document is parsed. An entry
   point that set a CSS class would replace that, and would also give hover and pressed states to
   anything built on the framework rather than only to what the stylesheet can reach.
-- **A fork of the interface crate would buy back five things**, all of them worked around today
+- **A fork of the interface crate would buy back seven things**, all of them worked around today
   and all of them listed in EDITOR.md: only the first input of a row draws its text, a value
   written before a widget's text child exists is never drawn, a stylesheet reapplication undoes
   what was written to an element's display, a menu cannot be drawn over a panel whatever it is
-  told about layering, and `align-content` is not read at all, so a wrapping box cannot be told to
-  pack its lines.
+  told about layering, `align-content` is not read at all, so a wrapping box cannot be told to
+  pack its lines, only the first class in a `class` attribute is matched, and a backdrop blur is
+  drawn over an element's own background rather than under it.
 - **One shape per call.** Every gizmo crosses the ABI on its own, and the fading grid asks for two
   hundred and forty of them a frame, about four percent of one. Fine at this size and the wrong
   shape at ten times it: a batched entry point taking an array would make the cost of a wireframe or

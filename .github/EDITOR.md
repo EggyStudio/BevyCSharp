@@ -88,7 +88,18 @@ the window is exactly when they will reach for it.
 **A sheet takes the whole window.** Settings take the whole window rather than a column, because a
 page of preferences squeezed beside a hierarchy is a page nobody opens. Nothing this side can
 reliably draw one panel over another, so a sheet does not cover the editor. It puts it away and
-fetches it back, which is both what the interface can do and what a sheet means.
+fetches it back, which is both what the interface can do and what a sheet means. While one is up
+nothing else may be revealed either, or a panel that answers to something other than a person asking
+for it, such as the selection, fetches itself back on top.
+
+It keeps the margin, the border and the rounded corners the panels have, so it reads as a page laid
+on the editor rather than as a different program. What it does not keep is the translucency: a whole
+window of settings with a scene showing through it reads as a mistake.
+
+**A blue dot is what "this one" looks like.** The open tab, the tool in force, the axes in use and
+the selected row in the hierarchy all wear the same dot. A character in front of the name would do
+as well and moves the name sideways whenever the state changes, so a list of them shuffles as
+somebody arrows down it. A dot has a place of its own and the names hold still.
 
 **A row of the hierarchy says what a thing is.** An entity is whatever components are on it and the
 engine has no notion of a camera or a light, so the answer is assembled from what it carries and
@@ -472,6 +483,16 @@ These constraints shaped the panels, and all of them are the crate's rather than
   click just as well, because what reports one is the nearest ancestor with an id.
 
 
+- **`backdrop-filter` is drawn over the element's own background rather than under it.** So a panel
+  takes the colour of whatever is behind it however opaque it is: over the sky it is black, over a
+  lit floor it is grey, and a row of panels is a row of different colours. The blur also samples
+  past the element's edge, which leaves a bright rim inside the rounded corner wherever the
+  surroundings are brighter. Panels are plain translucent black instead.
+- **Only the first class in a `class` attribute is matched.** A second one is not a weaker match, it
+  is not a match at all, so `class="panel stats"` is a panel and nothing else and every rule written
+  for the second class is dead without a diagnostic. Every element in this editor therefore carries
+  exactly one class, and a rule that applies to several kinds of thing names all of them on the left
+  of the brace.
 - **CSS ids are global**, not per document. Every open document is one document as far as the
   crate is concerned, so `#row-0` in one panel and `#row-0` in another are the same element. Every
   id in this editor is prefixed by its panel.
