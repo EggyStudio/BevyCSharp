@@ -37,16 +37,6 @@ public sealed class EditorPanelAttribute(string document) : Attribute
     /// </remarks>
     public string? Root { get; init; }
 
-    /// <summary>
-    /// The CSS id of the element the panel is dragged by, usually its title bar.
-    /// </summary>
-    /// <remarks>
-    /// A drag moves the panel by writing the layout, so dragging a window is the same operation
-    /// as loading a saved arrangement, and what a person drags into place is what a saved layout
-    /// records.
-    /// </remarks>
-    public string? Handle { get; init; }
-
     /// <summary>Which part of the window the panel belongs to.</summary>
     public EditorDock Dock { get; init; } = EditorDock.Floating;
 

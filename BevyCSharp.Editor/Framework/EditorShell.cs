@@ -39,9 +39,6 @@ public static class EditorShell
     /// </remarks>
     private static readonly HashSet<IEditorPanel> Concealed = [];
 
-    /// <summary>The panel being dragged, and where the cursor grabbed it.</summary>
-    private static (IEditorPanel Panel, float OffsetX, float OffsetY)? _drag;
-
     /// <summary>The panels currently registered, open or not.</summary>
     public static IReadOnlyList<IEditorPanel> Open => Panels;
 
@@ -298,7 +295,6 @@ public static class EditorShell
 
         panel.Window?.Show(false);
 
-        if (_drag?.Panel == panel) _drag = null;
     }
 
     /// <summary>Puts a concealed panel back on the screen.</summary>
@@ -384,7 +380,6 @@ public static class EditorShell
         EditorTabs.Closed(panel);
         Rebuilding();
 
-        if (_drag?.Panel == panel) _drag = null;
     }
 
     /// <summary>Closes everything.</summary>
@@ -394,7 +389,6 @@ public static class EditorShell
         Panels.Clear();
         Fresh.Clear();
         Concealed.Clear();
-        _drag = null;
     }
 
     /// <summary>
@@ -508,7 +502,6 @@ public static class EditorShell
         // Pointer work comes after the widgets have had their say, because a click that opened a
         // flyout is one of the events just drained and the flyout must not be dismissed by the
         // same press that opened it.
-        Drag(input);
         Resize(input);
         Dismiss(input);
         Menus(input);
@@ -662,50 +655,6 @@ public static class EditorShell
         PanelBinding.Forget();
     }
 
-    /// <summary>
-    /// Moves a window while it is being dragged by its handle.
-    /// </summary>
-    /// <remarks>
-    /// A drag writes the layout rather than the window: the panel is moved by giving it a
-    /// placement of its own, which the arrangement then applies like any other. So a window
-    /// dragged out of a region stays where it was put, and saving the layout saves where it was
-    /// dragged to, without any of that being a separate mechanism.
-    /// </remarks>
-    private static void Drag(Input input)
-    {
-        var (x, y) = input.MousePosition;
-
-        if (input.MouseReleased(MouseButton.Left)) _drag = null;
-
-        if (_drag is null && input.MousePressed(MouseButton.Left))
-        {
-            // Front to back, so the window on top takes the drag rather than one under it.
-            for (var i = Panels.Count - 1; i >= 0; i--)
-            {
-                var panel = Panels[i];
-                if (panel.Window is not { IsOpen: true } window) continue;
-                if (window.Handle.IsNone) continue;
-                if (!Xui.TryRect(window.Handle, out var handle)) continue;
-                if (!handle.Contains(x, y)) continue;
-                if (window.Measure() is not { } rect) continue;
-
-                _drag = (panel, x - rect.X, y - rect.Y);
-                break;
-            }
-        }
-
-        if (_drag is not { } drag) return;
-
-        if (!input.MouseDown(MouseButton.Left))
-        {
-            _drag = null;
-            return;
-        }
-
-        var placement = Layout.PlacementOf(drag.Panel);
-        Layout.Place(drag.Panel, placement.MovedTo(x - drag.OffsetX, y - drag.OffsetY));
-    }
-
     /// <summary>What is being dragged to resize, or none.</summary>
     private enum Edge
     {
@@ -735,7 +684,7 @@ public static class EditorShell
 
         if (input.MouseReleased(MouseButton.Left)) _edge = Edge.None;
 
-        if (input.MousePressed(MouseButton.Left) && _edge == Edge.None && !_drag.HasValue)
+        if (input.MousePressed(MouseButton.Left) && _edge == Edge.None)
         {
             var layout = Layout;
 

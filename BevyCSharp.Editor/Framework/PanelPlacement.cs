@@ -162,10 +162,6 @@ public readonly record struct PanelPlacement(
 /// The CSS id of the panel's outermost element, which is what gets placed. A panel without one is
 /// left where its stylesheet puts it.
 /// </param>
-/// <param name="Handle">
-/// The CSS id of the element a person drags the panel by, or <see langword="null"/> for a panel
-/// that cannot be moved.
-/// </param>
 /// <param name="Placement">Where it starts, before any saved layout has its say.</param>
 /// <param name="Dismiss">What makes it go away.</param>
 /// <param name="Layer">Which panels it draws in front of.</param>
@@ -175,7 +171,6 @@ public readonly record struct PanelPlacement(
 /// </remarks>
 public sealed record PanelChrome(
     string? Root = null,
-    string? Handle = null,
     PanelPlacement Placement = default,
     PanelDismiss Dismiss = PanelDismiss.Never,
     int Layer = 0);

@@ -57,9 +57,6 @@ public sealed class EditorWindow
     /// </remarks>
     public Entity Root => Chrome.Root is { } root ? Element(root) : Entity.None;
 
-    /// <summary>The element a person drags the window by, or <see cref="Entity.None"/>.</summary>
-    public Entity Handle => Chrome.Handle is { } handle ? Element(handle) : Entity.None;
-
     /// <summary>Opens a document as a window.</summary>
     /// <exception cref="Bevy.Interop.BevyNativeException">This build has no editor profile.</exception>
     public static EditorWindow Open(string path, PanelChrome chrome) =>

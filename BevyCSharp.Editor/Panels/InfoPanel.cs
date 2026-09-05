@@ -19,7 +19,6 @@ namespace BevyCSharp.Editor.Panels;
 [EditorPanel(
     "panels/info.html",
     Root = "#info",
-    Handle = "#info-title",
     Dismiss = PanelDismiss.OnOutsideClick,
     Layer = 40)]
 public sealed partial class InfoPanel

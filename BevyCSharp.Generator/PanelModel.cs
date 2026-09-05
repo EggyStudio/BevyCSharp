@@ -66,7 +66,6 @@ internal enum ClickButton
 
 /// <summary>What a panel declared about where it sits and what dismisses it.</summary>
 /// <param name="Root">The CSS id of the panel's outermost element, or null.</param>
-/// <param name="Handle">The CSS id of the element it is dragged by, or null.</param>
 /// <param name="Dock">The <c>EditorDock</c> it belongs to, as its enum value.</param>
 /// <param name="X">Its offset within that dock, or its left edge when floating.</param>
 /// <param name="Y">The same, vertically.</param>
@@ -77,7 +76,6 @@ internal enum ClickButton
 /// <param name="Layer">Which panels it draws in front of.</param>
 internal sealed record PanelChromeModel(
     string? Root,
-    string? Handle,
     int Dock,
     float X,
     float Y,

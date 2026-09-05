@@ -70,7 +70,6 @@ internal static class PanelEmitter
             .Append("    private static readonly global::BevyCSharp.Editor.Framework.PanelChrome ")
             .Append("Declared = new(\n")
             .Append("        ").Append(Text(chrome.Root)).Append(",\n")
-            .Append("        ").Append(Text(chrome.Handle)).Append(",\n")
             .Append("        new global::BevyCSharp.Editor.Framework.PanelPlacement(\n")
             .Append("            (global::BevyCSharp.Editor.Framework.EditorDock)")
             .Append(chrome.Dock).Append(",\n")

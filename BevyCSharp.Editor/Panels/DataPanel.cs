@@ -28,7 +28,6 @@ namespace BevyCSharp.Editor.Panels;
 [EditorPanel(
     "panels/data.html",
     Root = "#data",
-    Handle = "#data-title",
     Dock = EditorDock.Right)]
 public sealed partial class DataPanel
 {

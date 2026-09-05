@@ -14,7 +14,6 @@ namespace BevyCSharp.Editor.Panels;
 [EditorPanel(
     "panels/console.html",
     Root = "#console",
-    Handle = "#console-title",
     Dock = EditorDock.Bottom,
     Order = 10)]
 public sealed partial class ConsolePanel

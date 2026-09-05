@@ -15,7 +15,6 @@ namespace BevyCSharp.Editor.Panels;
 [EditorPanel(
     "panels/rendering.html",
     Root = "#rendering",
-    Handle = "#rendering-title",
     Dock = EditorDock.Right,
     Order = 30)]
 public sealed partial class RenderingPanel(Entity camera)

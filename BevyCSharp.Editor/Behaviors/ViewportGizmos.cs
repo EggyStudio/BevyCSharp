@@ -339,6 +339,13 @@ public partial struct ViewportGizmos
 
         var size = (edge + (sideways * Ahead) - centre).Length;
 
+        // How large the knob on an arm is, and how large that is on screen — which is what says
+        // how finely it has to be filled. A wire sphere at this size is four pixels of hoops with
+        // the scene showing through them.
+        const float Knob = 0.18f;
+
+        var pixels = square * 0.42f * Knob;
+
         // Six arms rather than three. Three says which way X, Y and Z point and leaves a person to
         // work out where the other halves went; six is the widget every editor draws, and the
         // negative halves are dimmed so the positive ones are still the ones read first.
@@ -348,7 +355,7 @@ public partial struct ViewportGizmos
             var arm = Axes[i] * size;
 
             Gizmos.Line(centre, centre + arm, AxisColours[i]);
-            Gizmos.Sphere(centre + arm, size * 0.18f, AxisColours[i]);
+            Disc(centre + arm, direction, size * Knob, pixels, AxisColours[i]);
             Gizmos.Line(centre, centre - arm, (r * 0.45f, g * 0.45f, b * 0.45f, 1f));
         }
     }

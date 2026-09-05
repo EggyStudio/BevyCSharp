@@ -71,6 +71,12 @@ menu, built the first time anything asks for one and pointed at something else t
 the hamburger six times in a row leaves the rebuild counter where it started; before, each one moved
 it twice.
 
+**A panel is not dragged about.** The arrangement is three columns and a bottom split, and every
+panel belongs to one of them: what a person adjusts is where the edges between them are, not where
+a panel floats. Dragging a docked panel by its title bar was a window manager's idea in a layout
+that is not one, and picking one up by a corner and dropping it over the scene left it nowhere the
+layout could put it back from. The edges are still dragged; the panels are not.
+
 **A press and the click it becomes are two events.** A flyout's own button sees both: the press
 dismisses the flyout as an outside click, and the click a few frames later finds it closed and opens
 it again — so the button that opened it could never close it. `DismissedByThisPress` is what the

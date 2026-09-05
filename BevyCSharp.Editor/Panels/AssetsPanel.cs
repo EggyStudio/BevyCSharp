@@ -21,7 +21,6 @@ namespace BevyCSharp.Editor.Panels;
 [EditorPanel(
     "panels/assets.html",
     Root = "#assets",
-    Handle = "#assets-title",
     Dock = EditorDock.Bottom)]
 public sealed partial class AssetsPanel
 {

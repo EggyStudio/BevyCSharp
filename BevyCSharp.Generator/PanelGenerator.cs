@@ -283,7 +283,6 @@ public sealed class PanelGenerator : IIncrementalGenerator
 
         return new PanelChromeModel(
             Id("Root"),
-            Id("Handle"),
             Number("Dock") is { } dock ? (int)dock : 0,
             Number("X") is { } x ? (float)x : 0f,
             Number("Y") is { } y ? (float)y : 0f,

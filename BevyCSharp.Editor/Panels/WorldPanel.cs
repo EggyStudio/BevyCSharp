@@ -21,7 +21,6 @@ namespace BevyCSharp.Editor.Panels;
 [EditorPanel(
     "panels/world.html",
     Root = "#world",
-    Handle = "#world-title",
     Dock = EditorDock.Left)]
 public sealed partial class WorldPanel
 {
