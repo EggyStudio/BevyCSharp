@@ -48,6 +48,12 @@
     --sheet: rgba(0, 0, 0, 0.99);
     --surface-raised: rgba(255, 255, 255, 0.05);
     --surface-sunken: rgba(0, 0, 0, 0.35);
+    /*
+     * What a box somebody types in is painted with. Opaque, unlike the panel around it: a handle
+     * sits against its edge and the scene sits behind the panel, and a box that lets either of
+     * them through is a box whose number is read against whatever happens to be behind the window.
+     */
+    --field: #000000;
     --line: rgba(255, 255, 255, 0.10);
     --line-strong: rgba(255, 255, 255, 0.18);
 
@@ -310,6 +316,15 @@ p {
     pointer-events: none;
 }
 
+/*
+ * The mark at the start of an inspector row, which is the chevron on a component's heading.
+ */
+.row-mark {
+    width: 10px;
+    height: 10px;
+    pointer-events: none;
+}
+
 .row-icon {
     width: 12px;
     height: 12px;
@@ -365,7 +380,6 @@ p {
  * stayed where it was. Sharing the row out in proportion means the row is right at every width.
  */
 .field-name {
-    pointer-events: none;
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: 0;
@@ -375,48 +389,73 @@ p {
     text-wrap: nowrap;
 }
 
-.field-text {
-    pointer-events: none;
-    flex-grow: 1.25;
-    flex-shrink: 1;
-    flex-basis: 0;
-    min-width: 0;
-    font-size: 11px;
-    color: var(--text);
-    text-wrap: nowrap;
-}
-
-.field-value {
-    flex-grow: 1.25;
-    flex-shrink: 1;
-    flex-basis: 0;
-    min-width: 0;
-    height: 18px;
-    margin: 0;
-    padding: 1px 5px;
-}
 
 /*
- * Each editor sits in a box of its own inside the row.
+ * One number of a row, which is its box and the handle on its edge.
  *
- * Not for the look: three inputs as direct children of one row draw only the first one's text,
- * whatever is written to the others. A wrapper each is what the interface needs to keep them
- * apart, and the wrapper costs nothing since it takes exactly the size of what is in it.
+ * The handle is placed rather than laid out, so the box takes the whole width and the handle sits
+ * over its left border. It comes after the box in the document because that is what puts it on
+ * top.
  */
-.cell {
+.field-num {
+    position: relative;
     display: flex;
     flex-direction: row;
     align-items: center;
+    flex-grow: 1.25;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+    height: 18px;
 }
 
-/* Three of these are what a vector is: narrow enough that all three fit beside the name. */
-.field-num {
-    width: 36px;
+.field-value {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
     min-width: 0;
     height: 18px;
     margin: 0;
-    padding: 1px 3px;
-    font-size: 10px;
+    padding-top: 1px;
+    padding-right: 5px;
+    padding-bottom: 1px;
+    padding-left: 10px;
+}
+
+/*
+ * The handle a number is dragged by.
+ *
+ * Dragged sideways to change the number, which is how every other editor lets somebody set a
+ * position without typing it. It is on the edge of the box rather than inside it because dragging
+ * across a text box selects the text, and one gesture cannot mean both.
+ *
+ * Centred on the border and shorter than the box, so it sits against the straight part of it and
+ * clear of the rounded corners. Its colour is painted by whatever fills the row, since which axis
+ * a row shows changes as the rows are reused and a stylesheet cannot say that.
+ */
+.grip {
+    position: absolute;
+    left: -3px;
+    top: 3px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    min-width: 6px;
+    height: 12px;
+    border-radius: 6px;
+}
+
+/*
+ * The letter on a handle, which is usually nothing at all. An empty one takes no width, so a
+ * handle with no letter stays a bar.
+ */
+.grip-text {
+    padding: 0 3px 0 4px;
+    pointer-events: none;
+    font-size: 9px;
+    color: var(--bright);
+    text-wrap: nowrap;
 }
 
 .field-btn {
@@ -462,7 +501,7 @@ input {
     height: 20px;
     min-width: 0;
     padding: 3px 6px;
-    background-color: var(--surface-sunken);
+    background-color: var(--field);
     border: 1px solid var(--line);
     border-radius: var(--radius-small);
     color: var(--text);
@@ -535,7 +574,7 @@ button:hover {
     height: 30px;
     padding: 0 6px;
     column-gap: 5px;
-    background-color: var(--surface);
+    background-color: var(--field);
     border: 1px solid var(--line);
     border-radius: 15px;
     color: var(--label);

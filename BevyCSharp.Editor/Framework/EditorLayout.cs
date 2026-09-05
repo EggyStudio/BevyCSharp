@@ -161,7 +161,6 @@ public sealed class EditorLayout
             // position written back by the stylesheet for a frame or two, so where it is put
             // during that time is not where it stays.
             var settled = Settled(panel, ref rect);
-            window.Draw(settled);
 
             if (!settled) continue;
 
@@ -206,11 +205,12 @@ public sealed class EditorLayout
         var cap = width / 3f;
 
         Column(placed, EditorDock.Left, Margin, Margin, bandTop, left, cap, fromLeft: true);
-        Column(placed, EditorDock.Right, width - Margin, Margin, bandTop, right, cap, fromLeft: false);
+        var rightBottom = Column(
+            placed, EditorDock.Right, width - Margin, Margin, bandTop, right, cap, fromLeft: false);
 
         Band(placed, Margin, width - Margin, bandTop, band);
         Strip(placed, Margin, width - Margin, stripTop);
-        Corners(placed, Viewport, width);
+        Corners(placed, Viewport, width, rightBottom);
         Free(placed, width, height);
         Sheets(placed, width, height);
     }
@@ -336,7 +336,8 @@ public sealed class EditorLayout
     /// four rows tall. What stops one growing past the window is the room left after the panels
     /// above it, which is also what makes an open tab shorten whatever is above it.
     /// </remarks>
-    private void Column(
+    /// <returns>Where the last panel in the column ends, which is what is below it.</returns>
+    private float Column(
         List<Placed> placed,
         EditorDock dock,
         float edge,
@@ -347,6 +348,7 @@ public sealed class EditorLayout
         bool fromLeft)
     {
         var run = top;
+        var last = top;
 
         foreach (var entry in Members(placed, dock))
         {
@@ -373,7 +375,10 @@ public sealed class EditorLayout
                 entry.Rect);
 
             run += MathF.Min(entry.Rect.Height, room) + Gap;
+            last = run - Gap;
         }
+
+        return last;
     }
 
     /// <summary>
@@ -489,7 +494,7 @@ public sealed class EditorLayout
     /// moves inwards when a column opens and back out when one is closed, which is the whole point
     /// of putting it in the viewport rather than in a bar of its own.
     /// </remarks>
-    private void Corners(List<Placed> placed, UiRect viewport, float width)
+    private void Corners(List<Placed> placed, UiRect viewport, float width, float rightBottom)
     {
         foreach (var entry in placed)
         {
@@ -509,7 +514,8 @@ public sealed class EditorLayout
                     viewport.X + Margin,
                     viewport.Bottom - Margin - Height(entry)),
                 EditorDock.ViewportBottomRight => (
-                    viewport.Right - Margin - Width(entry),
+                    RightOf(viewport, width, rightBottom, viewport.Bottom - Margin - Height(entry))
+                        - Margin - Width(entry),
                     viewport.Bottom - Margin - Height(entry)),
                 _ => (float.NaN, float.NaN),
             };
@@ -524,6 +530,19 @@ public sealed class EditorLayout
                 entry.Rect);
         }
     }
+
+    /// <summary>
+    /// Which right edge something in the bottom corner is measured against.
+    /// </summary>
+    /// <remarks>
+    /// The window's, when the column on the right stops above it, and the viewport's when it does
+    /// not. The corner holds the orientation cross, which is drawn in the scene rather than in a
+    /// panel, so there is nothing to overlap where the column is not: keeping it against the
+    /// window means it stays where it was when a panel on the right opens, which is where somebody
+    /// last looked for it.
+    /// </remarks>
+    private float RightOf(UiRect viewport, float width, float rightBottom, float top) =>
+        rightBottom <= top - Gap ? width : viewport.Right;
 
     /// <summary>
     /// Places whatever carries its own coordinates, kept inside the window.

@@ -281,6 +281,21 @@ public static unsafe class Xui
         Native.bcs_xui_set_visible(element.Bits, visible ? 1 : 0), $"showing {element}");
 
     /// <summary>
+    /// Paints an element's background.
+    /// </summary>
+    /// <remarks>
+    /// For a colour that depends on what the element is showing rather than on what it is, which
+    /// is the one thing a stylesheet cannot say. An element painted from here should have no
+    /// background colour in the stylesheet: the interface writes that one, and the two would take
+    /// turns.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The element is gone.</exception>
+    public static void SetColour(Entity element, float red, float green, float blue, float alpha = 1f)
+        => Native.Check(
+            Native.bcs_xui_set_colour(element.Bits, red, green, blue, alpha),
+            $"painting {element}");
+
+    /// <summary>
     /// Draws an element, or stops drawing it while leaving it where it is.
     /// </summary>
     /// <remarks>

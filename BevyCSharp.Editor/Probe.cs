@@ -29,6 +29,41 @@ public partial struct Probe
 
                 break;
 
+            case >= 170 and <= 190 when script.Contains("three"):
+                Xui.SetText(Xui.Element("dvb-0"), "22");
+                Xui.SetText(Xui.Element("dvc-0"), "33");
+                break;
+
+            case 194 when script.Contains("rows"):
+                foreach (var open in EditorShell.Open)
+                {
+                    Console.WriteLine(
+                        $"[probe] open {open.GetType().Name} showing {EditorShell.IsShowing(open)}");
+                }
+
+                break;
+
+            case 190 when script.Contains("hide"):
+                if (EditorShell.Find<DataPanel>() is { } data) EditorShell.Conceal(data);
+                break;
+
+            case 193 when script.Contains("rows"):
+                for (var i = 0; i < 14; i++)
+                {
+                    foreach (var id in new[] { $"drow-{i}", $"dnum0-{i}", $"dv-{i}", $"dc-{i}" })
+                    {
+                        var el = Xui.Element(id);
+                        if (el.IsNone || !Xui.TryRect(el, out var box)) continue;
+                        if (box.Height < 1f) continue;
+
+                        Console.WriteLine(
+                            $"[probe] {id} {box.X:F0},{box.Y:F0} {box.Width:F0}x{box.Height:F0} "
+                            + $"visible {Xui.IsVisible(el)}");
+                    }
+                }
+
+                break;
+
             case 150 when script.Contains("info"):
                 EditorShell.Show(new InfoPanel());
                 break;

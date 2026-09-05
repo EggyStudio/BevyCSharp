@@ -13,100 +13,106 @@ namespace BevyCSharp.Editor.Panels;
 /// appears. The panel changes its heading and its rows; it does not change its place.
 /// </para>
 /// <para>
-/// For an entity the bridge answers what it carries in component ids and can name one, the
-/// generator emits a field table per component, and this puts the two together: an editable row
-/// without a single type being named here. A component the editor has never heard of shows a
-/// heading and no rows, which is the truthful answer.
-/// </para>
-/// <para>
-/// A row is not a text box. What a field is decides what is drawn: a box for a number, three rows
-/// for a vector, a checkbox for a flag, a button that opens the list for a choice, a button for a
-/// method. The document declares each of those on every row and the panel shows the ones that row
-/// needs, which is how a fixed document draws a shape it did not know about.
+/// It owns a pool of rows and nothing else. A row is claimed by a field and filled by whichever
+/// drawer takes that field, so what a number looks like, what a vector looks like and what a flag
+/// looks like are three small classes rather than three branches here. Adding a way to edit a new
+/// kind of value adds a drawer, and this file does not change.
 /// </para>
 /// </remarks>
 [EditorPanel(
     "panels/data.html",
     Root = "#data",
     Dock = EditorDock.Right)]
-public sealed partial class DataPanel
+public sealed partial class DataPanel : IInspectorRows
 {
     /// <summary>How many rows the document declares.</summary>
     public const int Rows = 24;
 
-    /// <summary>What kind of thing a row stands for.</summary>
-    private enum RowKind
+    /// <summary>How many tag chips it declares.</summary>
+    public const int Chips = 24;
+
+    /// <summary>What a line of the inspector stands for.</summary>
+    private enum LineKind
     {
         /// <summary>Nothing.</summary>
         Empty,
 
-        /// <summary>A component's name. Right clicking one offers what can be done to it.</summary>
+        /// <summary>A component's name. It folds, and offers what can be done to the component.</summary>
         Heading,
-
-        /// <summary>A field with one value: a number, a name, something with no better editor.</summary>
-        Value,
-
-        /// <summary>One axis of a vector, or one angle of a rotation.</summary>
-        /// <remarks>
-        /// A vector is three rows rather than three boxes on one row. The interface draws the text
-        /// of only the first input of a row, whatever is written to the others, so three boxes
-        /// side by side would show one number and two empty boxes.
-        /// </remarks>
-        Axis,
-
-        /// <summary>A field that is on or off.</summary>
-        Flag,
-
-        /// <summary>A field that is one of a fixed set of names.</summary>
-        Choice,
-
-        /// <summary>Something the component can be told to do.</summary>
-        Method,
 
         /// <summary>The entity's name, which is not a component this side can describe.</summary>
         Name,
+
+        /// <summary>One row of one field, drawn by whichever drawer took it.</summary>
+        Field,
+
+        /// <summary>Something the component can be told to do.</summary>
+        Method,
 
         /// <summary>Something about an asset, which is read and not edited.</summary>
         Fact,
     }
 
-    /// <summary>What one row is, and what it writes to.</summary>
-    /// <param name="Kind">Which editor the row draws.</param>
+    /// <summary>One line of the inspector, before it is given a row.</summary>
+    /// <param name="Kind">What the line stands for.</param>
     /// <param name="Schema">The component it belongs to.</param>
     /// <param name="Field">The field it edits.</param>
+    /// <param name="Drawer">What draws that field, and reads it back.</param>
+    /// <param name="Part">Which of the drawer's rows this is.</param>
     /// <param name="Method">The method it runs.</param>
     /// <param name="Component">The component id, for a heading with no schema.</param>
-    /// <param name="Part">Which of a vector's three numbers, or -1.</param>
-    private readonly record struct Row(
-        RowKind Kind,
+    private readonly record struct Line(
+        LineKind Kind,
         ComponentSchema? Schema = null,
         ComponentField? Field = null,
+        IFieldDrawer? Drawer = null,
+        int Part = 0,
         ComponentMethod? Method = null,
-        int Component = 0,
-        int Part = -1);
+        int Component = 0);
 
     /// <summary>Each row's label.</summary>
     [Bind("#dname", Count = Rows)]
     public string[] Names = new string[Rows];
 
-    /// <summary>The editor for anything that is one number or one word.</summary>
+    /// <summary>What is in each row's box.</summary>
     [Bind("#dv", Count = Rows)]
     public string[] Values = new string[Rows];
 
-    /// <summary>What a row shows when it is read and not edited.</summary>
-    [Bind("#dt", Count = Rows)]
-    public string[] Texts = new string[Rows];
+    /// <summary>What each row's handle says, which is usually nothing.</summary>
+    [Bind("#dgt", Count = Rows)]
+    public string[] Letters = new string[Rows];
 
-    /// <summary>The checkbox a flag row draws.</summary>
+    /// <summary>Each row's tick.</summary>
     [Bind("#dc", Count = Rows)]
     public bool[] Flags = new bool[Rows];
 
-    /// <summary>What the row's button says, when it has one.</summary>
+    /// <summary>What each row's button says.</summary>
     [Bind("#dbtext", Count = Rows)]
     public string[] Buttons = new string[Rows];
 
-    /// <summary>How many tag chips the document declares.</summary>
-    public const int Chips = 24;
+    /// <summary>Which rows stand for anything.</summary>
+    [Show("#drow", Count = Rows)]
+    public bool[] Shown = new bool[Rows];
+
+    /// <summary>Which rows show a box.</summary>
+    [Show("#dnum", Count = Rows)]
+    public bool[] ShowValue = new bool[Rows];
+
+    /// <summary>Which boxes have a handle beside them, which is which of them are numbers.</summary>
+    [Show("#dg", Count = Rows)]
+    public bool[] ShowGrip = new bool[Rows];
+
+    /// <summary>Which rows show a mark at the start, which is which of them are headings.</summary>
+    [Show("#dfold", Count = Rows)]
+    public bool[] ShowMark = new bool[Rows];
+
+    /// <summary>Which rows show a tick.</summary>
+    [Show("#dc", Count = Rows)]
+    public bool[] ShowFlag = new bool[Rows];
+
+    /// <summary>Which rows show a button.</summary>
+    [Show("#db", Count = Rows)]
+    public bool[] ShowButton = new bool[Rows];
 
     /// <summary>What each chip says.</summary>
     [Bind("#dchiptext", Count = Chips)]
@@ -120,26 +126,6 @@ public sealed partial class DataPanel
     [Show("#dchip", Count = Chips)]
     public bool[] TagShown = new bool[Chips];
 
-    /// <summary>Which rows stand for anything.</summary>
-    [Show("#drow", Count = Rows)]
-    public bool[] Shown = new bool[Rows];
-
-    /// <summary>Which rows draw an editor.</summary>
-    [Show("#dv", Count = Rows)]
-    public bool[] ShowValue = new bool[Rows];
-
-    /// <summary>Which rows draw a plain value.</summary>
-    [Show("#dt", Count = Rows)]
-    public bool[] ShowText = new bool[Rows];
-
-    /// <summary>Which rows draw a checkbox.</summary>
-    [Show("#dc", Count = Rows)]
-    public bool[] ShowFlag = new bool[Rows];
-
-    /// <summary>Which rows draw a button.</summary>
-    [Show("#db", Count = Rows)]
-    public bool[] ShowButton = new bool[Rows];
-
     /// <summary>What sort of thing is being shown.</summary>
     [Bind("#d-kind", Mode = BindMode.OneWay)]
     public string Kind { get; private set; } = "Data";
@@ -149,13 +135,16 @@ public sealed partial class DataPanel
     public string Subject { get; private set; } = string.Empty;
 
     /// <summary>What each row stands for.</summary>
-    private readonly Row[] _rows = new Row[Rows];
+    private readonly Line[] _lines = new Line[Rows];
+
+    /// <summary>What picture each row's mark wears, so it is written once.</summary>
+    private readonly string[] _marks = new string[Rows];
 
     /// <summary>Which components are shut, by component id.</summary>
     /// <remarks>
     /// By id rather than by name, because that is what the world answers with and what the rows
-    /// already carry. It outlives the selection on purpose: somebody who shuts <c>GlobalTransform</c>
-    /// meant it about every entity they are going to look at, not only this one.
+    /// already carry. It outlives the selection on purpose: somebody who shuts a component meant
+    /// it about every entity they are going to look at, not only this one.
     /// </remarks>
     private readonly HashSet<int> _shut = [];
 
@@ -163,13 +152,13 @@ public sealed partial class DataPanel
     private readonly (ComponentSchema? Schema, int Component)[] _tags =
         new (ComponentSchema?, int)[Chips];
 
-    /// <summary>Every row the selection has, of which the pool shows a screenful.</summary>
-    private readonly List<Row> _all = [];
+    /// <summary>Every line the selection has, of which the pool shows a screenful.</summary>
+    private readonly List<Line> _all = [];
 
     /// <summary>The entity the rows were filled from.</summary>
     private Entity _subject = Entity.None;
 
-    /// <summary>How far down the rows the pool is looking.</summary>
+    /// <summary>How far down the lines the pool is looking.</summary>
     private int _scroll;
 
     /// <summary>Fills the rows from whatever is selected.</summary>
@@ -177,6 +166,8 @@ public sealed partial class DataPanel
     public void Fill()
     {
         Roll();
+
+        if (EditorShell.Context is { } ctx) Scrub(ctx.Input);
 
         if (EditorSelection.Latest == SelectionKind.Asset)
         {
@@ -205,19 +196,13 @@ public sealed partial class DataPanel
         if (entity.IsNone)
         {
             Subject = "nothing selected";
-
-            for (var i = 0; i < Chips; i++)
-            {
-                Tags[i] = string.Empty;
-                TagShown[i] = false;
-            }
-
+            Untag(0);
             Blank(0);
             return;
         }
 
         Subject = world.NameOf(entity) is { } named ? named : $"entity {entity.Index}";
-        _all.Add(new Row(RowKind.Name));
+        _all.Add(new Line(LineKind.Name));
 
         var tags = 0;
 
@@ -247,7 +232,7 @@ public sealed partial class DataPanel
                 continue;
             }
 
-            _all.Add(new Row(RowKind.Heading, schema, Component: id));
+            _all.Add(new Line(LineKind.Heading, schema, Component: id));
 
             // Shut is shut: what a component block is for is being able to put away the ones you
             // are not working on, and an inspector where you cannot is a column of scrolling.
@@ -255,65 +240,33 @@ public sealed partial class DataPanel
 
             foreach (var field in schema.Fields)
             {
-                if (KindOf(field) != RowKind.Axis)
-                {
-                    _all.Add(new Row(KindOf(field), schema, field));
-                    continue;
-                }
+                var drawer = EditorDrawers.For(field);
 
-                for (var part = 0; part < 3; part++)
-                    _all.Add(new Row(RowKind.Axis, schema, field, Part: part));
+                for (var part = 0; part < drawer.Lines(field); part++)
+                    _all.Add(new Line(LineKind.Field, schema, field, drawer, part));
             }
 
             foreach (var method in schema.Methods)
-                _all.Add(new Row(RowKind.Method, schema, Method: method));
+                _all.Add(new Line(LineKind.Method, schema, Method: method));
         }
 
-        for (var i = tags; i < Chips; i++)
+        Untag(tags);
+        AnyTags = tags > 0;
+
+        Draw(world, entity);
+    }
+
+    /// <summary>Empties the chips from <paramref name="from"/> on.</summary>
+    private void Untag(int from)
+    {
+        for (var i = from; i < Chips; i++)
         {
             Tags[i] = string.Empty;
             TagShown[i] = false;
             _tags[i] = (null, 0);
         }
 
-        AnyTags = tags > 0;
-
-        Draw(world, entity);
-    }
-
-    /// <summary>Offers what can be done with a tag, which is take it off.</summary>
-    [Context("#dchip", Count = Chips)]
-    public void TagMenu(int chip)
-    {
-        if (!TagShown[chip]) return;
-
-        var (schema, _) = _tags[chip];
-        var entity = EditorSelection.Current;
-        var name = Tags[chip];
-
-        var items = new List<MenuItem>();
-
-        if (schema is { CanAdd: true })
-        {
-            items.Add(new MenuItem(
-                "Remove",
-                MenuKind.Command,
-                world =>
-                {
-                    schema.Remove(world, entity);
-                    EditorHistory.Record(
-                        $"remove {name}",
-                        undo => schema.Add(undo, entity),
-                        redo => schema.Remove(redo, entity));
-                }));
-        }
-        else
-        {
-            items.Add(new MenuItem("Nothing to do", MenuKind.Command, null, () => false));
-        }
-
-        var (x, y) = Under($"dchip-{chip}");
-        EditorShell.ShowMenu(name, items, x, y);
+        if (from == 0) AnyTags = false;
     }
 
     /// <summary>Shows what a file is.</summary>
@@ -323,13 +276,7 @@ public sealed partial class DataPanel
         _all.Clear();
         _subject = Entity.None;
 
-        AnyTags = false;
-
-        for (var i = 0; i < Chips; i++)
-        {
-            Tags[i] = string.Empty;
-            TagShown[i] = false;
-        }
+        Untag(0);
 
         if (EditorAssets.Selected is not { } relative)
         {
@@ -368,26 +315,20 @@ public sealed partial class DataPanel
         Blank(written);
     }
 
-    /// <summary>Adds one line of an asset's description.</summary>
+    /// <summary>Writes one thing that is read and not edited.</summary>
     private void Fact(ref int row, string name, string value)
     {
         if (row >= Rows) return;
 
-        _rows[row] = new Row(RowKind.Fact);
-        Names[row] = name;
-        Texts[row] = value;
-        Values[row] = string.Empty;
-        Buttons[row] = string.Empty;
-        Flags[row] = false;
+        Empty(row);
+        _lines[row] = new Line(LineKind.Fact);
         Shown[row] = true;
-        ShowText[row] = true;
-        ShowValue[row] = false;
-        ShowFlag[row] = false;
-        ShowButton[row] = false;
+        Name(row, name);
+        Box(row, value, null);
         row++;
     }
 
-    /// <summary>Writes the screenful of rows the pool is looking at.</summary>
+    /// <summary>Puts a screenful of lines into the rows.</summary>
     private void Draw(EcsWorld world, Entity entity)
     {
         _scroll = Math.Clamp(_scroll, 0, Math.Max(0, _all.Count - Rows));
@@ -402,102 +343,235 @@ public sealed partial class DataPanel
         Blank(written);
     }
 
-    /// <summary>Which editor a field's kind gets.</summary>
-    private static RowKind KindOf(ComponentField field) => field.Kind switch
+    /// <summary>Fills one row, showing only the pieces that line needs.</summary>
+    private void Write(int row, Line line, EcsWorld world, Entity entity)
     {
-        FieldKind.Vec3 or FieldKind.Quat => RowKind.Axis,
-        FieldKind.Bool => RowKind.Flag,
-        FieldKind.Enum => RowKind.Choice,
-        _ => RowKind.Value,
-    };
+        Empty(row);
 
-    /// <summary>What each of a vector's three numbers is called.</summary>
-    private static readonly string[] AxisNames = ["x", "y", "z"];
-
-    /// <summary>Fills in one row, drawing only the parts that row needs.</summary>
-    private void Write(int row, Row what, EcsWorld world, Entity entity)
-    {
-        _rows[row] = what;
-
+        _lines[row] = line;
         Shown[row] = true;
-        ShowValue[row] = false;
-        ShowText[row] = false;
-        ShowFlag[row] = false;
-        ShowButton[row] = false;
-        Values[row] = string.Empty;
-        Texts[row] = string.Empty;
-        Buttons[row] = string.Empty;
-        Flags[row] = false;
+        _under[row] = line.Kind is LineKind.Field or LineKind.Method;
 
-        switch (what.Kind)
+        switch (line.Kind)
         {
-            case RowKind.Name:
-                Names[row] = "Name";
-                Values[row] = world.NameOf(entity) ?? string.Empty;
-                ShowValue[row] = true;
+            case LineKind.Name:
+                Name(row, "Name");
+                Box(row, world.NameOf(entity) ?? string.Empty, null);
                 break;
 
-            case RowKind.Heading:
-                // The mark first, so a shut block and an open one line up and the eye can run down
-                // the column of them.
-                Names[row] = (_shut.Contains(what.Component) ? "+ " : "- ")
-                    + (what.Schema?.Name ?? Short(world.ComponentName(what.Component)));
+            case LineKind.Heading:
+                Name(row, line.Schema?.Name ?? Short(world.ComponentName(line.Component)));
+                Mark(row, _shut.Contains(line.Component)
+                    ? "icons/ui/next.png"
+                    : "icons/ui/down.png");
 
                 break;
 
-            case RowKind.Method:
-                Names[row] = "  " + (what.Method?.Name ?? string.Empty);
-                Buttons[row] = EditorIcons.Run;
-                ShowButton[row] = true;
+            case LineKind.Method:
+                Name(row, line.Method?.Name ?? string.Empty);
+                Button(row, EditorIcons.Run);
                 break;
 
-            case RowKind.Flag:
-                Names[row] = "  " + what.Field!.Name;
-                Flags[row] = what.Field.Read(world, entity) is bool set && set;
-                ShowFlag[row] = true;
-                break;
+            case LineKind.Field when line is { Field: { } field, Drawer: { } drawer }:
+                drawer.Draw(
+                    new InspectorRow(this, row), line.Part, new FieldTarget(field, world, entity));
 
-            case RowKind.Choice:
-                Names[row] = "  " + what.Field!.Name;
-                Buttons[row] = what.Field.Read(world, entity)?.ToString() ?? string.Empty;
-                ShowButton[row] = true;
-                break;
-
-            case RowKind.Axis:
-                // The field's name on the first of its three rows and the axis alone on the
-                // others, so a column of numbers reads as one thing rather than as three.
-                Names[row] = what.Part == 0
-                    ? "  " + what.Field!.Name
-                    : "     " + AxisNames[what.Part];
-
-                Values[row] = Parts(what.Field!.Read(world, entity))[what.Part];
-                ShowValue[row] = true;
-                break;
-
-            default:
-                Names[row] = "  " + (what.Field?.Name ?? string.Empty);
-                Values[row] = Format(what.Field?.Read(world, entity));
-                ShowValue[row] = true;
                 break;
         }
+    }
+
+    /// <summary>Takes back whatever the last thing in a row left showing.</summary>
+    private void Empty(int row)
+    {
+        _lines[row] = default;
+        _under[row] = false;
+        Names[row] = string.Empty;
+        Values[row] = string.Empty;
+        Letters[row] = string.Empty;
+        Buttons[row] = string.Empty;
+        Flags[row] = false;
+        Shown[row] = false;
+        ShowValue[row] = false;
+        ShowGrip[row] = false;
+        ShowMark[row] = false;
+        ShowFlag[row] = false;
+        ShowButton[row] = false;
     }
 
     /// <summary>Empties the rows from <paramref name="from"/> down.</summary>
     private void Blank(int from)
     {
-        for (var i = from; i < Rows; i++)
+        for (var i = from; i < Rows; i++) Empty(i);
+    }
+
+    /// <inheritdoc/>
+    public void Mark(int row, string? icon)
+    {
+        ShowMark[row] = icon is not null;
+        if (icon is null) return;
+
+        Point(row, "dfold", _marks, icon);
+    }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// A field's name is set in from a component's, so a block reads as a block. Which rows are
+    /// set in is the panel's business rather than a drawer's: a drawer says what its row is
+    /// called, and where that sits depends on what the row is under.
+    /// </remarks>
+    public void Name(int row, string text) =>
+        Names[row] = _under[row] && text.Length > 0 ? "  " + text : text;
+
+    /// <summary>Which rows sit under a heading.</summary>
+    private readonly bool[] _under = new bool[Rows];
+
+    /// <inheritdoc/>
+    public void Box(int row, string value, Grip? grip)
+    {
+        Values[row] = value;
+        ShowValue[row] = true;
+        ShowGrip[row] = grip is not null;
+        Letters[row] = grip?.Letter ?? string.Empty;
+
+        if (grip is not { } paint) return;
+        if (Window is not { IsOpen: true } window) return;
+
+        var found = window.Element($"dg-{row}");
+        if (found.IsNone) return;
+
+        // Painted every frame rather than when it changes. The interface writes this component
+        // too, whenever it restyles the widget, and a handle painted once goes back to nothing the
+        // next time anything in the row is touched.
+        Xui.SetColour(found, paint.Red, paint.Green, paint.Blue);
+    }
+
+    /// <inheritdoc/>
+    public void Tick(int row, bool on)
+    {
+        Flags[row] = on;
+        ShowFlag[row] = true;
+    }
+
+    /// <inheritdoc/>
+    public void Button(int row, string text)
+    {
+        Buttons[row] = text;
+        ShowButton[row] = true;
+    }
+
+    /// <inheritdoc/>
+    public string Typed(int row) => Values[row];
+
+    /// <inheritdoc/>
+    public bool Ticked(int row) => Flags[row];
+
+    /// <inheritdoc/>
+    public (float X, float Y) Below(int row) => Under($"db-{row}");
+
+    /// <summary>
+    /// Points a row's mark at a file.
+    /// </summary>
+    /// <remarks>
+    /// An image is a path the interface loads from rather than a value a widget carries, so it is
+    /// set rather than bound. Remembered per row so the same path is not written every frame.
+    /// </remarks>
+    private void Point(int row, string element, string[] worn, string icon)
+    {
+        if (worn[row] == icon) return;
+        if (Window is not { IsOpen: true } window) return;
+
+        var found = window.Element($"{element}-{row}");
+        if (found.IsNone) return;
+
+        Xui.SetImage(found, icon);
+        worn[row] = icon;
+    }
+
+    /// <summary>Which row's number a drag has hold of.</summary>
+    private int _held = -1;
+
+    /// <summary>What that number was when the drag started.</summary>
+    private double _from;
+
+    /// <summary>Where the pointer was then.</summary>
+    private float _went;
+
+    /// <summary>
+    /// Changes a number by dragging the handle beside it.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// How a position is set in every other editor, and the reason is worth stating: typing a
+    /// number means knowing which number you want, and most of the time somebody wants the thing
+    /// a bit further left, which is a gesture rather than a value.
+    /// </para>
+    /// <para>
+    /// Held with shift it moves ten times as fast and with alt a tenth, which is the pair every
+    /// tool offers. Held with control it lands on the tool's own step, so a thing dragged into
+    /// place sits on the same grid as a thing moved with the handles in the viewport.
+    /// </para>
+    /// <para>
+    /// What is being dragged is asked of the drawer rather than worked out here. A drawer that
+    /// answers with a number can be dragged, whatever the value behind it turns out to be.
+    /// </para>
+    /// </remarks>
+    private void Scrub(Input input)
+    {
+        if (input.MouseReleased(MouseButton.Left) || !input.MouseDown(MouseButton.Left))
         {
-            _rows[i] = default;
-            Names[i] = string.Empty;
-            Values[i] = string.Empty;
-            Texts[i] = string.Empty;
-            Buttons[i] = string.Empty;
-            Flags[i] = false;
-            Shown[i] = false;
-            ShowValue[i] = false;
-            ShowText[i] = false;
-            ShowFlag[i] = false;
-            ShowButton[i] = false;
+            _held = -1;
+            return;
+        }
+
+        if (input.MousePressed(MouseButton.Left) && _held < 0) Grab(input);
+        if (_held < 0) return;
+
+        if (_lines[_held] is not { Field: { } field, Drawer: { } drawer } line) return;
+
+        var target = new FieldTarget(field, EditorShell.Ecs, _subject);
+        var step = drawer.Step(line.Part, target);
+        if (step <= 0f) return;
+
+        var fine = input.KeyDown(Key.AltLeft) || input.KeyDown(Key.AltRight);
+        var fast = input.KeyDown(Key.ShiftLeft) || input.KeyDown(Key.ShiftRight);
+
+        var moved = _from + ((input.MouseX - _went) * step * (fine ? 0.1f : 1f) * (fast ? 10f : 1f));
+
+        if (input.KeyDown(Key.ControlLeft) || input.KeyDown(Key.ControlRight))
+        {
+            var grid = step * 10f;
+            moved = Math.Round(moved / grid) * grid;
+        }
+
+        drawer.Nudge(line.Part, target, moved);
+    }
+
+    /// <summary>Takes hold of whichever handle the pointer is over.</summary>
+    private void Grab(Input input)
+    {
+        if (Window is not { IsOpen: true } window) return;
+        if (_subject.IsNone) return;
+
+        var (x, y) = input.MousePosition;
+
+        for (var row = 0; row < Rows; row++)
+        {
+            if (!Shown[row] || !ShowGrip[row]) continue;
+            if (_lines[row] is not { Field: { } field, Drawer: { } drawer } line) continue;
+
+            var element = window.Element($"dg-{row}");
+            if (element.IsNone) continue;
+            if (!Xui.TryRect(element, out var rect)) continue;
+            if (x < rect.X || x > rect.X + rect.Width) continue;
+            if (y < rect.Y || y > rect.Y + rect.Height) continue;
+
+            var target = new FieldTarget(field, EditorShell.Ecs, _subject);
+            if (drawer.Number(line.Part, target) is not { } value) continue;
+
+            _held = row;
+            _went = x;
+            _from = value;
+            return;
         }
     }
 
@@ -529,64 +603,32 @@ public sealed partial class DataPanel
 
         for (var i = 0; i < Rows; i++)
         {
-            var row = _rows[i];
+            var line = _lines[i];
 
-            switch (row.Kind)
+            if (line.Kind == LineKind.Name)
             {
-                case RowKind.Name:
-                    var before = world.NameOf(entity);
-                    var renamed = Values[i].Trim();
-                    if (renamed.Length == 0 || renamed == before) break;
-
-                    world.SetName(entity, renamed);
-                    EditorHistory.Record(
-                        $"rename to {renamed}",
-                        undo => undo.SetName(entity, before),
-                        redo => redo.SetName(entity, renamed),
-                        $"{entity.Bits}:name");
-                    break;
-
-                case RowKind.Flag when row.Field is { } flag:
-                    if (flag.Read(world, entity) is bool current && current == Flags[i]) break;
-
-                    Change(world, entity, flag, Flags[i]);
-                    break;
-
-                case RowKind.Axis when row.Field is { } vector:
-                    // The other two numbers come from what the field currently holds, so editing
-                    // one axis changes one axis even when the other rows are scrolled away.
-                    var edited = Parts(vector.Read(world, entity));
-                    edited[row.Part] = Values[i].Trim();
-
-                    if (Compose(vector, edited) is not { } composed) break;
-                    if (Same(vector.Read(world, entity), composed)) break;
-
-                    Change(world, entity, vector, composed);
-                    break;
-
-                case RowKind.Value when row.Field is { } value:
-                    var typed = Values[i].Trim();
-                    if (typed.Length == 0) break;
-                    if (Format(value.Read(world, entity)) == typed) break;
-
-                    Change(world, entity, value, typed);
-                    break;
+                Rename(world, entity, Values[i].Trim());
+                continue;
             }
+
+            if (line is not { Kind: LineKind.Field, Field: { } field, Drawer: { } drawer }) continue;
+
+            drawer.Read(new InspectorRow(this, i), line.Part, new FieldTarget(field, world, entity));
         }
     }
 
-    /// <summary>Writes one field and records how to take it back.</summary>
-    private static void Change(EcsWorld world, Entity entity, ComponentField field, object value)
+    /// <summary>Gives the entity a new name, and a way back to the old one.</summary>
+    private static void Rename(EcsWorld world, Entity entity, string renamed)
     {
-        var before = field.Read(world, entity);
-        if (!field.Write(world, entity, value)) return;
-        if (before is null) return;
+        var before = world.NameOf(entity);
+        if (renamed.Length == 0 || renamed == before) return;
 
+        world.SetName(entity, renamed);
         EditorHistory.Record(
-            field.Name,
-            undo => field.Write(undo, entity, before),
-            redo => field.Write(redo, entity, value),
-            $"{entity.Bits}:{field.Name}");
+            $"rename to {renamed}",
+            undo => undo.SetName(entity, before),
+            redo => redo.SetName(entity, renamed),
+            $"{entity.Bits}:name");
     }
 
     /// <summary>Runs whatever the row's button offers.</summary>
@@ -594,18 +636,77 @@ public sealed partial class DataPanel
     public void Press(int row)
     {
         var world = EditorShell.Ecs;
-        var what = _rows[row];
-        var entity = _subject;
+        var line = _lines[row];
 
-        switch (what.Kind)
+        if (line is { Kind: LineKind.Method, Method: { } method })
         {
-            case RowKind.Method when what.Method is { } method:
-                method.Run(world, entity);
-                return;
+            method.Run(world, _subject);
+            return;
+        }
 
-            case RowKind.Choice when what.Field is { } field:
-                Choose(row, field, entity);
-                return;
+        if (line is not { Kind: LineKind.Field, Field: { } field, Drawer: { } drawer }) return;
+
+        drawer.Press(
+            new InspectorRow(this, row), line.Part, new FieldTarget(field, world, _subject));
+    }
+
+    /// <summary>Opens or shuts a component's block.</summary>
+    /// <remarks>
+    /// Only a heading answers. A click on a field row is a click on whatever editor that row
+    /// draws, and the row itself has nothing to do: the box, the tick and the button inside it are
+    /// what the click was for.
+    /// </remarks>
+    [Command("#drow", Count = Rows)]
+    public void Fold(int row)
+    {
+        if (_lines[row].Kind != LineKind.Heading) return;
+
+        var component = _lines[row].Component;
+        if (!_shut.Remove(component)) _shut.Add(component);
+    }
+
+    /// <summary>Folds a component's block from its name as well as from its row.</summary>
+    /// <remarks>
+    /// The label takes pointer events so it can be right clicked, and an element that takes them
+    /// keeps the click from the row underneath. So it answers the click itself.
+    /// </remarks>
+    [Command("#dname", Count = Rows)]
+    public void FoldByName(int row) => Fold(row);
+
+    /// <summary>
+    /// Puts a field back to what it is when the component is first put on something.
+    /// </summary>
+    /// <remarks>
+    /// Asked of the component itself rather than assumed. Nothing here knows that a scale starts
+    /// at one and a position at zero, and guessing would be wrong for the first component somebody
+    /// adds that this side has never heard of. A component that cannot be built has no answer, and
+    /// nothing happens.
+    /// </remarks>
+    [Context("#dname", Count = Rows)]
+    public void Reset(int row)
+    {
+        var line = _lines[row];
+
+        if (line.Kind != LineKind.Field) return;
+        if (line.Field is not { IsWritable: true } field) return;
+        if (line.Schema is not { CanAdd: true } schema) return;
+
+        var world = EditorShell.Ecs;
+        var entity = _subject;
+        if (entity.IsNone) return;
+
+        var probe = world.Spawn();
+
+        try
+        {
+            if (!schema.Add(world, probe)) return;
+            if (field.Read(world, probe) is not { } fresh) return;
+
+            EditorFields.Change(world, entity, field, fresh);
+        }
+        finally
+        {
+            world.Despawn(probe);
         }
     }
 
@@ -615,25 +716,10 @@ public sealed partial class DataPanel
     /// the corner of the eye all day for the one time it is wanted, and there is more than one
     /// thing to offer anyway.
     /// </remarks>
-    /// <summary>Opens or shuts a component's block.</summary>
-    /// <remarks>
-    /// Only a heading answers. A click on a field row is a click on whatever editor that row draws,
-    /// and the row itself has nothing to do: the box, the checkbox and the button inside it are
-    /// what the click was for.
-    /// </remarks>
-    [Command("#drow", Count = Rows)]
-    public void Fold(int row)
-    {
-        if (_rows[row].Kind != RowKind.Heading) return;
-
-        var component = _rows[row].Component;
-        if (!_shut.Remove(component)) _shut.Add(component);
-    }
-
     [Context("#drow", Count = Rows)]
     public void RowMenu(int row)
     {
-        if (_rows[row].Schema is not { } schema) return;
+        if (_lines[row].Schema is not { } schema) return;
 
         var entity = _subject;
         var (x, y) = EditorShell.Context?.Input.MousePosition ?? (0f, 0f);
@@ -661,7 +747,8 @@ public sealed partial class DataPanel
                                 redo.RemoveById(entity, schema.Id);
                                 schema.Add(redo, entity);
                             });
-                    }),
+                    },
+                    Icon: "icons/ui/undo.png"),
                 new MenuItem(
                     "Remove",
                     MenuKind.Command,
@@ -674,10 +761,47 @@ public sealed partial class DataPanel
                             $"remove {schema.Name}",
                             undo => Restore(schema, undo, entity, before),
                             redo => schema.Remove(redo, entity));
-                    }),
+                    },
+                    Icon: "icons/ui/delete.png"),
             ],
             x,
             y);
+    }
+
+    /// <summary>Offers what can be done with a tag, which is take it off.</summary>
+    [Context("#dchip", Count = Chips)]
+    public void TagMenu(int chip)
+    {
+        if (!TagShown[chip]) return;
+
+        var (schema, _) = _tags[chip];
+        var entity = EditorSelection.Current;
+        var name = Tags[chip];
+
+        var items = new List<MenuItem>();
+
+        if (schema is { CanAdd: true })
+        {
+            items.Add(new MenuItem(
+                "Remove",
+                MenuKind.Command,
+                world =>
+                {
+                    schema.Remove(world, entity);
+                    EditorHistory.Record(
+                        $"remove {name}",
+                        undo => schema.Add(undo, entity),
+                        redo => schema.Remove(redo, entity));
+                },
+                Icon: "icons/ui/delete.png"));
+        }
+        else
+        {
+            items.Add(new MenuItem("Nothing to do", MenuKind.Command, null, () => false));
+        }
+
+        var (x, y) = Under($"dchip-{chip}");
+        EditorShell.ShowMenu(name, items, x, y);
     }
 
     /// <summary>Every field of a component, so removing it can be taken back.</summary>
@@ -701,35 +825,6 @@ public sealed partial class DataPanel
         schema.Add(world, entity);
 
         foreach (var (name, value) in values) schema.Write(world, entity, name, value);
-    }
-
-    /// <summary>Opens the list of names a choice field can take, under the button that asks.</summary>
-    private void Choose(int row, ComponentField field, Entity entity)
-    {
-        var items = new List<MenuItem>();
-
-        foreach (var option in field.Options)
-        {
-            var chosen = option;
-
-            items.Add(new MenuItem(
-                option,
-                MenuKind.Command,
-                world =>
-                {
-                    var before = field.Read(world, entity);
-                    if (!field.Write(world, entity, chosen)) return;
-                    if (before is null) return;
-
-                    EditorHistory.Record(
-                        $"{field.Name} to {chosen}",
-                        undo => field.Write(undo, entity, before),
-                        redo => field.Write(redo, entity, chosen));
-                }));
-        }
-
-        var (x, y) = Under($"db-{row}");
-        EditorShell.ShowMenu(field.Name, items, x, y);
     }
 
     /// <summary>Offers the same list on a right click, since the button is a menu either way.</summary>
@@ -795,76 +890,6 @@ public sealed partial class DataPanel
         return EditorShell.Context?.Input.MousePosition ?? (0f, 0f);
     }
 
-    /// <summary>A value as a single box shows it.</summary>
-    private static string Format(object? value) => value switch
-    {
-        null => string.Empty,
-        float number => number.ToString("0.###"),
-        double number => number.ToString("0.###"),
-        Entity entity => entity.IsNone ? "none" : entity.Index.ToString(),
-        bool flag => flag ? "true" : "false",
-        _ => value.ToString() ?? string.Empty,
-    };
-
-    /// <summary>
-    /// A vector or a rotation as three numbers.
-    /// </summary>
-    /// <remarks>
-    /// A rotation is shown as the three angles it turns through, in degrees, because four numbers
-    /// that must stay normalised are not something a person can usefully type.
-    /// </remarks>
-    private static string[] Parts(object? value) => value switch
-    {
-        Vec3 vector => [Number(vector.X), Number(vector.Y), Number(vector.Z)],
-        Quat rotation => Angles(rotation),
-        _ => ["", "", ""],
-    };
-
-    /// <summary>A rotation as three angles in degrees.</summary>
-    private static string[] Angles(Quat rotation)
-    {
-        var euler = rotation.ToEuler();
-        const float ToDegrees = 180f / MathF.PI;
-
-        return
-        [
-            Number(euler.X * ToDegrees),
-            Number(euler.Y * ToDegrees),
-            Number(euler.Z * ToDegrees),
-        ];
-    }
-
-    /// <summary>The value three numbers describe, or nothing when they are not one yet.</summary>
-    private static object? Compose(ComponentField field, string[] parts)
-    {
-        if (!float.TryParse(parts[0], out var first)) return null;
-        if (!float.TryParse(parts[1], out var second)) return null;
-        if (!float.TryParse(parts[2], out var third)) return null;
-
-        if (field.Kind != FieldKind.Quat) return new Vec3(first, second, third);
-
-        const float ToRadians = MathF.PI / 180f;
-        return Quat.FromEuler(first * ToRadians, second * ToRadians, third * ToRadians);
-    }
-
-    /// <summary>Whether a value is close enough to what is on screen to leave alone.</summary>
-    /// <remarks>
-    /// Rounded to what the boxes actually show, because a box showing three decimals is not a
-    /// disagreement with a value that has more of them, and writing back every frame would fight
-    /// anything else moving the entity.
-    /// </remarks>
-    private static bool Same(object? current, object composed) => (current, composed) switch
-    {
-        (Vec3 a, Vec3 b) => Number(a.X) == Number(b.X)
-            && Number(a.Y) == Number(b.Y)
-            && Number(a.Z) == Number(b.Z),
-        (Quat a, Quat b) => Angles(a).SequenceEqual(Angles(b)),
-        _ => false,
-    };
-
-    /// <summary>A number as a box shows it.</summary>
-    private static string Number(float value) => value.ToString("0.###");
-
     /// <summary>A byte count as a person reads one.</summary>
     private static string Size(long bytes) => bytes switch
     {
@@ -873,7 +898,7 @@ public sealed partial class DataPanel
         _ => $"{bytes / (1024f * 1024f):0.#} MB",
     };
 
-    /// <summary>The last part of an engine component's path, which is its name.</summary>
+    /// <summary>The last part of a Rust path, which is the name somebody would recognise.</summary>
     private static string Short(string name)
     {
         // The arguments go first. A generic's arguments are paths too, so taking the last path

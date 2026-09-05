@@ -1346,6 +1346,43 @@ pub extern "C" fn bcs_xui_set_visible(entity: u64, visible: i32) -> i32 {
     })
 }
 
+/// Paints an element's background.
+///
+/// What a stylesheet cannot say, because the colour depends on what the element is showing at the
+/// time rather than on what it is: the handle beside the second number of a vector is green
+/// because it is the second, and the same element is red when the rows are reused for something
+/// else.
+///
+/// The interface writes this component too, for any element whose style says a background colour.
+/// An element painted from here should therefore have none in the stylesheet, or the two take
+/// turns.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_xui_set_colour(entity: u64, red: f32, green: f32, blue: f32, alpha: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (entity, red, green, blue, alpha);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bevy::color::Color;
+            use bevy::ui::BackgroundColor;
+
+            crate::state::with_world(|world| {
+                let entity = crate::ecs::entity_from(entity);
+                let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
+                    return status::NO_ENTITY;
+                };
+
+                entity_mut.insert(BackgroundColor(Color::srgba(red, green, blue, alpha)));
+                status::OK
+            })
+        }
+    })
+}
+
 /// Draws an element, or stops drawing it while leaving it where it is.
 ///
 /// The other way to hide something is `Display::None`, and it is not this. A node that is not
@@ -1379,8 +1416,11 @@ pub extern "C" fn bcs_xui_set_drawn(entity: u64, drawn: i32) -> i32 {
                     return status::NO_ENTITY;
                 };
 
+                // Told outright rather than inherited. The interface hides the body of a document
+                // that is not the one in front, and an element that only says "whatever my parent
+                // says" would go with it and never come back.
                 let wanted = if drawn != 0 {
-                    Visibility::Inherited
+                    Visibility::Visible
                 } else {
                     Visibility::Hidden
                 };
