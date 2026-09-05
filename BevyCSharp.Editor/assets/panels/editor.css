@@ -111,11 +111,19 @@ body {
  * The tab strip, along the bottom edge of the viewport, shaped like a browser's: rounded where it
  * meets the viewport and square where it meets the edge of the window it sits against.
  */
+/*
+ * The tab strip, sitting on the very bottom edge of the window.
+ *
+ * No padding under the tabs and no border along the bottom: a tab is meant to run off the edge of
+ * the screen the way a browser's does, and three pixels of strip below it reads as the tabs
+ * floating slightly above where they belong.
+ */
 .tabstrip {
     display: flex;
     flex-direction: row;
-    align-items: center;
-    padding: 3px 4px;
+    align-items: flex-end;
+    height: 29px;
+    padding: 3px 4px 0 4px;
     column-gap: 3px;
     background-color: var(--surface);
     border: 1px solid var(--line);
@@ -130,7 +138,6 @@ body {
  */
 .panel.band {
     width: 100%;
-    border-radius: var(--radius) var(--radius) 0 0;
 }
 
 /* -- Title bars, which are also what a window is dragged by */
@@ -529,11 +536,28 @@ button:hover {
     display: flex;
     flex-direction: row;
     align-items: center;
-    height: 22px;
+    height: 26px;
     padding: 0 12px;
+    column-gap: 6px;
     background-color: rgba(0, 0, 0, 0);
     border: 0;
     border-radius: var(--radius-small) var(--radius-small) 0 0;
+}
+
+/*
+ * The mark on the tab whose panel is open.
+ *
+ * A dot rather than a mark in the text, matching the toolbar. A character in front of the name
+ * moves the name when it appears, which is a row of tabs that shuffles every time one is opened;
+ * a dot has a place of its own and the names stay where they are. Nothing here can be told to
+ * change class while it runs, which is why the state is drawn rather than styled.
+ */
+.tab-dot {
+    width: 5px;
+    height: 5px;
+    background-color: var(--accent);
+    border-radius: 3px;
+    pointer-events: none;
 }
 
 .tab:hover {

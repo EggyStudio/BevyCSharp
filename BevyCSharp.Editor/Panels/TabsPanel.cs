@@ -32,6 +32,10 @@ public sealed partial class TabsPanel
     [Show("#tab", Count = Tabs)]
     public bool[] Shown = new bool[Tabs];
 
+    /// <summary>Which tabs wear the dot, being the ones whose panel is open.</summary>
+    [Show("#tabdot", Count = Tabs)]
+    public bool[] Marked = new bool[Tabs];
+
     /// <summary>The tab a drag started on, for reordering.</summary>
     private int _dragging = -1;
 
@@ -47,15 +51,18 @@ public sealed partial class TabsPanel
             {
                 Labels[i] = string.Empty;
                 Shown[i] = false;
+                Marked[i] = false;
                 continue;
             }
 
             var entry = entries[i];
 
-            // An open tab is marked rather than styled, since a row's class cannot be changed
-            // while the editor runs.
-            Labels[i] = entry.IsOpen ? EditorIcons.Selected + " " + entry.Name : "  " + entry.Name;
+            // An open tab wears a dot rather than a mark in its own text, since a row's class
+            // cannot be changed while the editor runs and a character in front of the name moves
+            // the name every time one is opened.
+            Labels[i] = entry.Name;
             Shown[i] = true;
+            Marked[i] = entry.IsOpen;
         }
 
         Drag();

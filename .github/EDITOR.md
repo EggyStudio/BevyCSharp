@@ -41,14 +41,22 @@ viewport between them. The three dragged numbers are the whole arrangement.
 window, not on the viewport, alone among the corner panels. Centring them on the viewport moves
 them whenever a column opens, which is a tool that is somewhere else every time it is reached for.
 
-**Nothing is ever told how tall it is.** A panel given a height measures that height afterwards, so
-its own contents can never be asked about again: a tree that grows a dozen rows sits inside a panel
-that stays the size it was, for good. Instead the height is handed back to the contents
-(`bcs_xui_set_rect` reads infinity as `auto`) and the room the column has is written as a maximum
-(`bcs_xui_set_limits`). The measurement stays where it belongs and the cap only stops it running
-past the column. The same rule is why no member of a row is told the row's height — the row is as
-tall as its tallest member, and telling one of them that is a loop that eats the window in two
-frames.
+**Nothing measured is ever written back to the thing that was measured.** This is the one rule the
+arrangement has, and every instability it has had came from breaking it:
+
+| written back | what happened |
+|---|---|
+| a panel's own measured height | it measures that height for ever and stops following its contents |
+| the row height a strip contributed to | the strip grows until it fills the window, in two frames |
+| the width a column's only panel measured while put away | the column is a strip of padding for the rest of the session |
+
+A measurement may decide *where* something goes — where the next panel starts, where the viewport
+ends, where the right column's inner edge is — and may never decide *how large* it is. How large
+comes from three places and no others: the stylesheet, the contents, or a number a person dragged.
+So a height is handed back to the contents (`bcs_xui_set_rect` reads infinity as `auto`) with the
+room the column has written as a maximum (`bcs_xui_set_limits`); an undragged width is not written
+at all, because `auto` is not the stylesheet's answer but "as wide as the longest word in it"; and
+no member of a row is ever told the row's height.
 
 **Put away, not closed.** The panels that come and go all day — the world, the panel that describes
 the selection, whichever tab is open, the information panel — are never closed. Closing a document

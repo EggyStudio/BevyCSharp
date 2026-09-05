@@ -20,6 +20,16 @@ namespace BevyCSharp.Editor.Framework;
 /// open, up to half the window. Those three numbers are the whole of the arrangement, and all
 /// three are draggable.
 /// </para>
+/// <para>
+/// <b>Nothing measured is ever written back to the thing that was measured.</b> This is the one
+/// rule the arrangement has, and every instability it has had came from breaking it: a panel told
+/// its own measured height measures that height for ever and stops following its contents; a
+/// strip told the row height it contributed to grows until it fills the window in two frames; a
+/// column told the width its only panel measured while that panel was put away is a strip of
+/// padding for the rest of the session. A measurement may decide where something goes — where the
+/// next panel starts, where the viewport ends — and may never decide how large it is. How large
+/// comes from the stylesheet, from the contents, or from a number a person dragged.
+/// </para>
 /// </remarks>
 public sealed class EditorLayout
 {
@@ -90,13 +100,25 @@ public sealed class EditorLayout
     }
 
     /// <summary>Forgets every override and every dragged size.</summary>
+    /// <remarks>
+    /// A column that was dragged goes back to the width it had before, as a number rather than by
+    /// handing the field back: the stylesheet's answer cannot be asked for again once it has been
+    /// written over, and the width it gave is exactly what was measured before anybody dragged
+    /// anything.
+    /// </remarks>
     public void ResetAll()
     {
         _overrides.Clear();
-        LeftWidth = float.NaN;
-        RightWidth = float.NaN;
+        LeftWidth = float.IsNaN(LeftWidth) ? float.NaN : _leftNatural;
+        RightWidth = float.IsNaN(RightWidth) ? float.NaN : _rightNatural;
         BottomHeight = 190f;
     }
+
+    /// <summary>How wide the left column was before anybody dragged it.</summary>
+    private float _leftNatural = float.NaN;
+
+    /// <summary>The same on the right.</summary>
+    private float _rightNatural = float.NaN;
 
     /// <summary>
     /// Places every open panel for this frame.
@@ -131,8 +153,11 @@ public sealed class EditorLayout
             placed.Add(new Placed(panel, PlacementOf(panel), rect));
         }
 
-        var left = ColumnWidth(placed, EditorDock.Left, LeftWidth, width);
-        var right = ColumnWidth(placed, EditorDock.Right, RightWidth, width);
+        var left = ColumnWidth(placed, EditorDock.Left, LeftWidth, width, ref _leftMeasured);
+        var right = ColumnWidth(placed, EditorDock.Right, RightWidth, width, ref _rightMeasured);
+
+        if (float.IsNaN(LeftWidth) && _leftMeasured > 0f) _leftNatural = _leftMeasured;
+        if (float.IsNaN(RightWidth) && _rightMeasured > 0f) _rightNatural = _rightMeasured;
 
         var strip = Tallest(placed, EditorDock.Strip);
         var band = Members(placed, EditorDock.Bottom).Count > 0
@@ -143,10 +168,14 @@ public sealed class EditorLayout
         // the tabs and the key list on one row; both run the whole width, because nothing is
         // beside them. The top holds the three columns and gets whatever is left.
         var stripTop = height - strip;
-        var bandTop = stripTop - band;
 
-        var viewportLeft = left > 0f ? left + (Margin * 2f) : Margin;
-        var viewportRight = right > 0f ? width - right - (Margin * 2f) : width - Margin;
+        // A gap between the two, so the open tab reads as a panel sitting above the strip rather
+        // than as one box the strip was cut out of.
+        var bandTop = band > 0f ? stripTop - band - Gap : stripTop;
+
+        var viewportLeft = left.Room > 0f ? left.Room + (Margin * 2f) : Margin;
+        var viewportRight =
+            right.Room > 0f ? width - right.Room - (Margin * 2f) : width - Margin;
 
         LeftEdge = viewportLeft - Margin;
         RightEdge = viewportRight + Margin;
@@ -159,8 +188,10 @@ public sealed class EditorLayout
             MathF.Max(0f, viewportRight - viewportLeft),
             MathF.Max(0f, bandTop - Margin));
 
-        Column(placed, EditorDock.Left, Margin, Margin, bandTop, left, fromLeft: true);
-        Column(placed, EditorDock.Right, width - Margin, Margin, bandTop, right, fromLeft: false);
+        var cap = width / 3f;
+
+        Column(placed, EditorDock.Left, Margin, Margin, bandTop, left, cap, fromLeft: true);
+        Column(placed, EditorDock.Right, width - Margin, Margin, bandTop, right, cap, fromLeft: false);
 
         Band(placed, Margin, width - Margin, bandTop, band);
         Strip(placed, Margin, width - Margin, stripTop);
@@ -171,25 +202,68 @@ public sealed class EditorLayout
     /// <summary>One panel, where it wants to be, and where it currently is.</summary>
     private readonly record struct Placed(IEditorPanel Panel, PanelPlacement Placement, UiRect Rect);
 
+    /// <summary>What a column is told to be, and how wide it turned out.</summary>
+    /// <param name="Write">
+    /// The width written to every panel in it: a dragged number, or <see cref="Xui.Auto"/> to
+    /// leave it to the stylesheet.
+    /// </param>
+    /// <param name="Room">How wide it is on screen, which is where the viewport's edge goes.</param>
+    private readonly record struct ColumnSize(float Write, float Room);
+
+    /// <summary>The last width each column was seen to have, so a blank frame does not move it.</summary>
+    private float _leftMeasured;
+
+    /// <summary>The same on the right.</summary>
+    private float _rightMeasured;
+
     /// <summary>
-    /// How wide a column is: what was dragged, or what its widest panel measured.
+    /// How wide a column is: what was dragged, or what its stylesheet says.
     /// </summary>
     /// <remarks>
+    /// <para>
+    /// Never what it measured. Writing a measured width back to the thing that was measured is a
+    /// latch, and the way in is a panel that measured nothing because it was put away when the
+    /// measurement was taken: it is written a width of nothing, measures nothing next frame, and
+    /// stays a strip of padding for the rest of the session. The same rule as the height, for the
+    /// same reason.
+    /// </para>
+    /// <para>
+    /// The measurement is still read, because the right column has to know where its own left edge
+    /// is and the viewport has to know where to stop. Read and not written is the whole of the
+    /// difference. A frame with nothing to measure keeps the last answer rather than believing
+    /// the blank one.
+    /// </para>
+    /// <para>
     /// A third of the window at most, whichever way it was decided. A column wider than that is
     /// not a column any more, and the viewport is the point of the editor.
+    /// </para>
     /// </remarks>
-    private float ColumnWidth(List<Placed> placed, EditorDock dock, float dragged, float width)
+    private ColumnSize ColumnWidth(
+        List<Placed> placed, EditorDock dock, float dragged, float width, ref float remembered)
     {
         var members = Members(placed, dock);
-        if (members.Count == 0) return 0f;
+        if (members.Count == 0)
+        {
+            remembered = 0f;
+            return new ColumnSize(float.NaN, 0f);
+        }
 
         if (!float.IsNaN(dragged))
-            return Math.Clamp(dragged, MinimumColumn, width / 3f);
+        {
+            var chosen = Math.Clamp(dragged, MinimumColumn, width / 3f);
+            remembered = chosen;
+            return new ColumnSize(chosen, chosen);
+        }
 
         var widest = 0f;
         foreach (var entry in members) widest = MathF.Max(widest, Width(entry));
 
-        return MathF.Min(widest, width / 3f);
+        if (widest >= 1f) remembered = MathF.Min(widest, width / 3f);
+
+        // Nothing written at all. The stylesheet has an answer and leaving the field untouched is
+        // the only way to keep it: `auto` is not the same answer, it is "as wide as the contents",
+        // which for a panel of rows that fill their parent is as wide as the longest word in it.
+        return new ColumnSize(float.NaN, remembered);
     }
 
     /// <summary>
@@ -206,7 +280,8 @@ public sealed class EditorLayout
         float edge,
         float top,
         float bottom,
-        float columnWidth,
+        ColumnSize column,
+        float widest,
         bool fromLeft)
     {
         var run = top;
@@ -217,7 +292,7 @@ public sealed class EditorLayout
             if (room <= 0f) break;
 
             var window = entry.Panel.Window!;
-            var x = fromLeft ? edge : edge - columnWidth;
+            var x = fromLeft ? edge : edge - column.Room;
 
             // Handed back to its contents and capped at the room, rather than told a height. A
             // panel told a height measures that height, so the next frame's answer to "how tall
@@ -226,12 +301,12 @@ public sealed class EditorLayout
             // it belongs and only stops it running past the column.
             var tall = float.IsNaN(entry.Placement.Height) ? Xui.Auto : entry.Placement.Height;
 
-            window.LimitTo(Xui.Auto, room);
+            window.LimitTo(widest, room);
 
             window.PlaceAt(
                 x + entry.Placement.X,
                 run + entry.Placement.Y,
-                columnWidth,
+                column.Write,
                 tall,
                 entry.Rect);
 

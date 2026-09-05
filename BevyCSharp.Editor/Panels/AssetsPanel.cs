@@ -74,7 +74,7 @@ public sealed partial class AssetsPanel
         // The way up is the first row of the tree, so a person is never stuck in a directory.
         if (EditorAssets.Directory.Length > 0)
         {
-            FolderNames[written] = EditorIcons.Up + " ..";
+            FolderNames[written] = "..";
             _folders[written] = null;
             FolderShown[written] = true;
             written++;
@@ -85,7 +85,7 @@ public sealed partial class AssetsPanel
             if (!entry.IsDirectory) continue;
             if (written >= Folders) break;
 
-            FolderNames[written] = "  " + entry.Name + EditorIcons.Directory;
+            FolderNames[written] = entry.Name + EditorIcons.Directory;
             _folders[written] = entry.Path;
             FolderShown[written] = true;
             written++;
