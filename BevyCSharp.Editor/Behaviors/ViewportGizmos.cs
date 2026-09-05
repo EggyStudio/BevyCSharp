@@ -123,23 +123,29 @@ public partial struct ViewportGizmos
         var fine = MathF.Max(0.1f, MathF.Pow(10f, whole));
         var coarse = fine * 10f;
 
+        // One height for every spacing, worked out once. A hair above the height asked for, because
+        // a grid on the same plane as a floor fights it for every pixel — but a hair scaled to the
+        // spacing would put each spacing on a plane of its own, and the lines two of them draw in
+        // the same place would run parallel a few millimetres apart instead of being one line.
+        var plane = GridHeight + (above * 0.0004f);
+
         // Under the camera, always. Following where the camera is looking sounds helpful and is
         // not: turning on the spot then drags the whole floor around with the view, and the grid
         // stops being a fixed thing the camera moves over. Straight down from the eye is where it
         // ends up anyway when there is nothing to look at, and behaving the same either way is
         // worth more than reaching a little further ahead.
-        var look = new Vec3(eye.X, GridHeight, eye.Z);
+        var look = new Vec3(eye.X, plane, eye.Z);
 
         // Three, because a spacing takes two decades to come in and one to go: at any height there
         // is the one being read, the one behind it, and one further back still barely showing.
         // Coarsest first, so the finer lines are drawn over them rather than under.
         var coarsest = coarse * 10f;
 
-        Sheet(look, coarsest, Reach(above, coarsest), Solid(above, coarsest));
-        Sheet(look, coarse, Reach(above, coarse), Solid(above, coarse));
-        Sheet(look, fine, Reach(above, fine), Solid(above, fine));
+        Sheet(look, plane, coarsest, Reach(above, coarsest), Solid(above, coarsest));
+        Sheet(look, plane, coarse, Reach(above, coarse), Solid(above, coarse));
+        Sheet(look, plane, fine, Reach(above, fine), Solid(above, fine));
 
-        Axis(eye, Reach(above, coarsest));
+        Axis(eye, plane, Reach(above, coarsest));
     }
 
     /// <summary>
@@ -152,9 +158,8 @@ public partial struct ViewportGizmos
     /// top of each other and their fades were not, which reads as one line that will not line up
     /// with itself. There is one axis; it is drawn once.
     /// </remarks>
-    private static void Axis(Vec3 eye, float reach)
+    private static void Axis(Vec3 eye, float height, float reach)
     {
-        var height = GridHeight;
         var gone = (0f, 0f, 0f, 0f);
 
         // From the point on each axis nearest the camera, which needs no snapping: one line has no
@@ -242,17 +247,18 @@ public partial struct ViewportGizmos
     /// One grid of a single spacing, as a disc fading to nothing at its rim.
     /// </summary>
     /// <param name="look">Where the middle of it goes, before being snapped to the spacing.</param>
+    /// <param name="height">
+    /// What height to draw at, worked out once for every spacing. Given rather than computed here,
+    /// because two spacings on two planes draw the lines they share as two parallel lines a few
+    /// millimetres apart.
+    /// </param>
     /// <param name="step">How far apart the lines are.</param>
     /// <param name="reach">How far out it goes before it has faded away entirely.</param>
     /// <param name="solid">How solid a line is at its strongest.</param>
-    private static void Sheet(Vec3 look, float step, float reach, float solid)
+    private static void Sheet(Vec3 look, float height, float step, float reach, float solid)
     {
         if (solid <= 0.004f) return;
 
-        // A hair above the height asked for. A grid on the same plane as a floor fights it for
-        // every pixel, and a thousandth of a cell is invisible at any distance and enough to settle
-        // the argument for anybody who puts the grid at the floor rather than under it.
-        var height = GridHeight + (step * 0.002f);
         var centreX = MathF.Round(look.X / step) * step;
         var centreZ = MathF.Round(look.Z / step) * step;
         var count = Math.Min(Half, (int)MathF.Ceiling(reach / step));
