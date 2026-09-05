@@ -72,6 +72,17 @@ pub fn drain(mut queue: bevy::ecs::system::ResMut<GizmoQueue>, mut gizmos: bevy:
     }
 }
 
+/// Puts every gizmo in front of the scene, once, as the app starts.
+///
+/// `depth_bias` is how a gizmo is moved towards or away from the camera before it is depth tested;
+/// `-1` is as far towards it as the range allows, which is another way of saying that nothing in
+/// the scene can hide it.
+#[cfg(feature = "render")]
+pub fn draw_in_front(mut store: bevy::ecs::system::ResMut<bevy::gizmos::config::GizmoConfigStore>) {
+    let (config, _) = store.config_mut::<bevy::gizmos::config::DefaultGizmoConfigGroup>();
+    config.depth_bias = -1.0;
+}
+
 /// Records one shape to draw this frame.
 ///
 /// Returns [`status::UNSUPPORTED`] where there is nothing to draw on: gizmos need the renderer

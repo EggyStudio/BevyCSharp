@@ -157,11 +157,9 @@ public sealed partial class AssetsPanel
     {
         if (!TileShown[tile]) return;
 
+        // The right column answers what is selected, whichever kind of thing that is, and it
+        // appears because something is selected rather than because this asked for it.
         EditorAssets.Select(_tiles[tile].Path);
-
-        // The right column answers what is selected, whichever kind of thing that is, so picking
-        // a file opens the panel that describes one.
-        if (EditorShell.Find<DataPanel>() is null) EditorShell.Show(new DataPanel());
     }
 
     /// <summary>Offers what can be done with a file.</summary>

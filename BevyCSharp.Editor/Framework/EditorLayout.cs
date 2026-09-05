@@ -139,10 +139,14 @@ public sealed class EditorLayout
             ? Math.Clamp(BottomHeight, MinimumBand, height * 0.5f)
             : 0f;
 
+        // The strip runs the whole width of the window: the columns are the top split and the
+        // strip is the bottom one, so nothing above it decides where it starts or ends.
+        var stripTop = height - strip;
+
         // The viewport is what the columns leave, and the tab band eats into it from the bottom.
         var viewportLeft = left > 0f ? left + (Margin * 2f) : Margin;
         var viewportRight = right > 0f ? width - right - (Margin * 2f) : width - Margin;
-        var viewportBottom = height - strip - (band > 0f ? band : 0f);
+        var viewportBottom = stripTop - (band > 0f ? band : 0f);
 
         LeftEdge = viewportLeft - Margin;
         RightEdge = viewportRight + Margin;
@@ -155,15 +159,16 @@ public sealed class EditorLayout
             MathF.Max(0f, viewportRight - viewportLeft),
             MathF.Max(0f, viewportBottom - Margin));
 
-        // The columns run the full height of the window, less the tab strip where it reaches
-        // under them, which it does not: the strip belongs to the viewport.
-        Column(placed, EditorDock.Left, Margin, Margin, height - Margin, left, fromLeft: true);
-        Column(placed, EditorDock.Right, width - Margin, Margin, height - Margin, right, fromLeft: false);
+        // The columns stop where the strip begins, because the strip is under everything: the
+        // window is a top split holding the three columns and a bottom split holding the tabs and
+        // the key list side by side.
+        Column(placed, EditorDock.Left, Margin, Margin, stripTop, left, fromLeft: true);
+        Column(placed, EditorDock.Right, width - Margin, Margin, stripTop, right, fromLeft: false);
 
         Band(placed, viewportLeft, viewportRight, viewportBottom, band);
-        Strip(placed, viewportLeft, height - strip);
+        Strip(placed, Margin, width - Margin, stripTop);
         Corners(placed, Viewport);
-        Free(placed);
+        Free(placed, width, height);
     }
 
     /// <summary>One panel, where it wants to be, and where it currently is.</summary>
@@ -259,14 +264,28 @@ public sealed class EditorLayout
         }
     }
 
-    /// <summary>Puts the tab strip at the very bottom, from the left, the way a browser does.</summary>
-    private void Strip(List<Placed> placed, float left, float top)
+    /// <summary>
+    /// Lays the bottom split out: the tabs from the left, and whatever else shares the row after
+    /// them.
+    /// </summary>
+    /// <remarks>
+    /// One row across the whole window, because the strip is the bottom split and the columns are
+    /// the top one. The tabs go where a browser puts them, and the key list follows on the same
+    /// line rather than floating above it, so the bottom of the screen is one band of the same
+    /// height instead of two things at two heights.
+    /// </remarks>
+    private void Strip(List<Placed> placed, float left, float right, float top)
     {
         var run = left;
 
         foreach (var entry in Members(placed, EditorDock.Strip))
         {
-            entry.Panel.Window!.PlaceAt(
+            var window = entry.Panel.Window!;
+
+            // Never given the row's height, only its top. A member told how tall the row is would
+            // measure that height next frame, and the row is as tall as its tallest member: two
+            // frames of that and the strip is the whole window.
+            window.PlaceAt(
                 run + entry.Placement.X,
                 top + entry.Placement.Y,
                 entry.Placement.Width,
@@ -274,6 +293,7 @@ public sealed class EditorLayout
                 entry.Rect);
 
             run += Width(entry) + Gap;
+            if (run >= right) break;
         }
     }
 
@@ -316,16 +336,38 @@ public sealed class EditorLayout
         }
     }
 
-    /// <summary>Places whatever carries its own coordinates.</summary>
-    private static void Free(List<Placed> placed)
+    /// <summary>
+    /// Places whatever carries its own coordinates, kept inside the window.
+    /// </summary>
+    /// <remarks>
+    /// A flyout is opened at the thing that opened it, and the thing that opened it may be near an
+    /// edge: a menu on the button at the foot of a panel would hang off the bottom of the screen
+    /// and show its title and nothing else. Clamping against what it measured rather than against
+    /// a guess is what makes a menu open upwards from a button at the bottom without anything
+    /// having to ask for that.
+    /// </remarks>
+    private void Free(List<Placed> placed, float width, float height)
     {
         foreach (var entry in placed)
         {
             if (entry.Placement.Dock != EditorDock.Floating) continue;
 
+            var x = entry.Placement.X;
+            var y = entry.Placement.Y;
+
+            if (entry.Rect.Width > 0f)
+            {
+                x = MathF.Max(Margin, MathF.Min(x, width - Margin - entry.Rect.Width));
+            }
+
+            if (entry.Rect.Height > 0f)
+            {
+                y = MathF.Max(Margin, MathF.Min(y, height - Margin - entry.Rect.Height));
+            }
+
             entry.Panel.Window!.PlaceAt(
-                entry.Placement.X,
-                entry.Placement.Y,
+                x,
+                y,
                 entry.Placement.Width,
                 entry.Placement.Height,
                 entry.Rect);

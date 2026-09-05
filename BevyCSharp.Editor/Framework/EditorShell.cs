@@ -26,6 +26,19 @@ public static class EditorShell
     /// <summary>Panels opened during this tick, which nothing may dismiss yet.</summary>
     private static readonly HashSet<IEditorPanel> Fresh = [];
 
+    /// <summary>
+    /// Panels that are loaded but not on screen.
+    /// </summary>
+    /// <remarks>
+    /// The difference between putting a panel away and closing it. Closing one takes its document
+    /// out of the interface's list, and changing that list respawns every widget of every panel:
+    /// a blink, a frame of the wrong font, and a panel that sometimes does not come back. So
+    /// anything that is put away and fetched again — the tabs, chiefly — is concealed instead. The
+    /// document stays where it was, the panel keeps reading it, and all that changes is whether it
+    /// is drawn and whether the layout makes room for it.
+    /// </remarks>
+    private static readonly HashSet<IEditorPanel> Concealed = [];
+
     /// <summary>The panel being dragged, and where the cursor grabbed it.</summary>
     private static (IEditorPanel Panel, float OffsetX, float OffsetY)? _drag;
 
@@ -115,10 +128,19 @@ public static class EditorShell
     /// The nearest point to <paramref name="x"/> that is not over a panel.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// A menu opened over a panel is unreadable: the panel's text draws through it whatever it is
     /// told about layering, which is the interface's doing and not something this side can fix. So
     /// a menu steps out from under the panel it was opened from, to its right where there is room
     /// and to its left where there is not, which is where a menu belongs anyway.
+    /// </para>
+    /// <para>
+    /// Only out from under the panels that hold reading: the columns and the open tab. The strip
+    /// and the corner buttons are furniture, a menu drawn over them is perfectly readable, and a
+    /// menu that stepped out of a strip running the width of the window would have to leave the
+    /// window to do it. What keeps it on screen instead is the clamp in the arrangement, which
+    /// works on what the menu measured rather than on a guess at how big it will be.
+    /// </para>
     /// </remarks>
     private static (float X, float Y) Clear(float x, float y)
     {
@@ -136,6 +158,8 @@ public static class EditorShell
             foreach (var panel in Panels)
             {
                 if (panel is MenuPanel) continue;
+                if (Concealed.Contains(panel)) continue;
+                if (!Obscures(Layout.PlacementOf(panel).Dock)) continue;
                 if (panel.Window?.Measure() is not { } rect) continue;
                 if (!rect.Contains(x + 4f, y + 4f) && !rect.Contains(x + MenuWidth - 4f, y + 4f))
                     continue;
@@ -152,6 +176,10 @@ public static class EditorShell
 
         return (x, y);
     }
+
+    /// <summary>Whether a panel in this dock is something a menu has to step out from under.</summary>
+    private static bool Obscures(EditorDock dock) =>
+        dock is EditorDock.Left or EditorDock.Right or EditorDock.Bottom;
 
     /// <summary>
     /// Keeps a panel that would otherwise dismiss itself, or lets it go again.
@@ -190,15 +218,56 @@ public static class EditorShell
     {
         foreach (var panel in Panels)
         {
+            if (Concealed.Contains(panel)) continue;
             if (panel.Window?.Covers(x, y) == true) return true;
         }
 
         return false;
     }
 
+    /// <summary>The panels that are on screen, in the order they were opened.</summary>
+    private static List<IEditorPanel> Showing()
+    {
+        var showing = new List<IEditorPanel>(Panels.Count);
+
+        foreach (var panel in Panels)
+        {
+            if (!Concealed.Contains(panel)) showing.Add(panel);
+        }
+
+        return showing;
+    }
+
     /// <summary>The open panel of this type, or <see langword="null"/>.</summary>
     public static T? Find<T>() where T : class, IEditorPanel =>
         Panels.OfType<T>().FirstOrDefault();
+
+    /// <summary>Whether a panel is loaded and on screen, rather than loaded and put away.</summary>
+    public static bool IsShowing(IEditorPanel panel) =>
+        Panels.Contains(panel) && !Concealed.Contains(panel);
+
+    /// <summary>Takes a panel off the screen without unloading it.</summary>
+    public static void Conceal(IEditorPanel panel)
+    {
+        ArgumentNullException.ThrowIfNull(panel);
+
+        if (!Panels.Contains(panel)) return;
+        if (!Concealed.Add(panel)) return;
+
+        panel.Window?.Show(false);
+
+        if (_drag?.Panel == panel) _drag = null;
+    }
+
+    /// <summary>Puts a concealed panel back on the screen.</summary>
+    public static void Reveal(IEditorPanel panel)
+    {
+        ArgumentNullException.ThrowIfNull(panel);
+
+        if (!Concealed.Remove(panel)) return;
+
+        panel.Window?.Show(true);
+    }
 
     /// <summary>Opens a panel if it is closed and closes it if it is open.</summary>
     /// <remarks>What a toolbar button bound to a panel does, which is most of them.</remarks>
@@ -215,6 +284,34 @@ public static class EditorShell
         Show(create());
     }
 
+    /// <summary>
+    /// Puts a panel away if it is showing and fetches it back if it is not.
+    /// </summary>
+    /// <remarks>
+    /// What the panels a person opens and closes all day want, rather than <see cref="Toggle"/>:
+    /// the document is loaded once and stays, so no amount of showing and hiding disturbs anything
+    /// else on screen. <see cref="Toggle"/> remains what a panel that is genuinely finished with
+    /// wants, and what a flyout wants.
+    /// </remarks>
+    public static void ToggleShown<T>(Func<T> create) where T : class, IEditorPanel
+    {
+        ArgumentNullException.ThrowIfNull(create);
+
+        if (Find<T>() is { } existing)
+        {
+            if (IsShowing(existing)) Conceal(existing);
+            else Reveal(existing);
+
+            return;
+        }
+
+        Show(create());
+    }
+
+    /// <summary>The panel of this type that is on screen, or <see langword="null"/>.</summary>
+    public static T? Showing<T>() where T : class, IEditorPanel =>
+        Find<T>() is { } panel && IsShowing(panel) ? panel : null;
+
     /// <summary>Closes a panel and forgets it.</summary>
     public static void Hide(IEditorPanel panel)
     {
@@ -223,6 +320,7 @@ public static class EditorShell
         panel.Close();
         Panels.Remove(panel);
         Fresh.Remove(panel);
+        Concealed.Remove(panel);
         Pinned.Remove(panel);
         EditorTabs.Closed(panel);
         Rebuilding();
@@ -236,6 +334,7 @@ public static class EditorShell
         foreach (var panel in Panels) panel.Close();
         Panels.Clear();
         Fresh.Clear();
+        Concealed.Clear();
         _drag = null;
     }
 
@@ -335,7 +434,10 @@ public static class EditorShell
         // A click on a mesh selects it, which is the other half of what the hierarchy does. The
         // shell does this rather than a panel, because selection belongs to the editor and not
         // to whichever panel happens to be open.
-        foreach (var picked in Picking.Drain()) EditorSelection.Select(picked);
+        var picked = Picking.Drain();
+        foreach (var entity in picked) EditorSelection.Select(entity);
+
+        Deselect(input, picked.Length > 0, ctx.Time.FrameCount);
 
         // A selection whose entity is gone is worse than none: the inspector would read whatever
         // took its place in storage. Checked once here rather than in every panel that reads it.
@@ -350,13 +452,64 @@ public static class EditorShell
         // Read the world first, arrange second, write the screen third. A panel that filled its
         // rows during this tick is one whose height changed, and the arrangement has to see that
         // before it stacks anything under it.
-        foreach (var panel in Panels) panel.Refresh();
+        foreach (var panel in Panels)
+        {
+            if (Concealed.Contains(panel)) continue;
 
-        Layout.Arrange(Panels);
+            panel.Refresh();
+        }
+
+        // A concealed panel is put out of sight every frame rather than once, because the
+        // interface restyles a widget whenever anything is written to it and a restyle puts its
+        // display back to whatever the stylesheet said.
+        foreach (var panel in Concealed) panel.Window?.Show(false);
+
+        Layout.Arrange(Showing());
 
         foreach (var panel in Panels) panel.Pull();
 
         Fresh.Clear();
+    }
+
+    /// <summary>Where a press on the scene began, while the button is still down.</summary>
+    private static (float X, float Y)? _pressedOnScene;
+
+    /// <summary>
+    /// Lets go of the selection when the scene is clicked and nothing is under the pointer.
+    /// </summary>
+    /// <remarks>
+    /// Choosing nothing is a choice. Without this the only way out of a selection is to pick
+    /// something else, and the panel describing it stays open over a scene the person has finished
+    /// with. A press and a release in the same place, on the scene, with no mesh reported between
+    /// them: a drag is the camera or a handle and says nothing about what is selected.
+    /// </remarks>
+    private static void Deselect(Input input, bool hitSomething, ulong frame)
+    {
+        var (x, y) = input.MousePosition;
+
+        if (input.MousePressed(MouseButton.Left))
+        {
+            _pressedOnScene = PointerOverPanel(x, y) || !Layout.Viewport.Contains(x, y)
+                ? null
+                : (x, y);
+        }
+
+        if (!input.MouseReleased(MouseButton.Left)) return;
+
+        var from = _pressedOnScene;
+        _pressedOnScene = null;
+
+        if (hitSomething || from is not { } start) return;
+
+        // A handle being dragged is a transform, however far the pointer moved: letting go of it
+        // over empty space would drop the thing that was just being moved.
+        if (Behaviors.TransformGizmo.DraggingOn(frame)) return;
+
+        const float Slop = 4f;
+        if (MathF.Abs(x - start.X) + MathF.Abs(y - start.Y) > Slop) return;
+
+        EditorSelection.Clear();
+        EditorAssets.Select(null);
     }
 
     /// <summary>

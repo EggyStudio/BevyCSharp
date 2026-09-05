@@ -201,11 +201,18 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // an exclusive system. Only registered here: the plugin that draws them comes with
             // `DefaultPlugins`, so a windowless app has nothing to drain into.
             app.init_resource::<crate::gizmos::GizmoQueue>();
-            // Drained after everything has had its say, so a line drawn from a C# system in the
-            // update reaches the renderer in the same frame it was asked for rather than the
-            // next. A gizmo that arrives a frame late reads as a gizmo that lags behind whatever
-            // it is drawn on.
-            app.add_systems(bevy::app::Last, crate::gizmos::drain);
+            // Drained after everything has had its say, and explicitly after the managed `Last`
+            // systems: both live in `Last`, and without the ordering the scheduler is free to
+            // drain the queue before the frame has filled it, which holds every shape back a
+            // frame. A gizmo that arrives a frame late reads as one that lags behind whatever it
+            // is drawn on, and worst of all on a shape placed relative to the camera, which then
+            // swims about the screen whenever the camera turns.
+            app.add_systems(bevy::app::Last, crate::gizmos::drain.after(BcsSet::Last));
+
+            // Drawn in front of the scene rather than inside it. A gizmo is a thing drawn *about*
+            // the world — a selection, a handle, an axis — and one that disappears into the object
+            // it describes has failed at the only job it has.
+            app.add_systems(bevy::app::Startup, crate::gizmos::draw_in_front);
 
             // Where the readers of Bevy's window messages keep their place between frames.
             app.init_resource::<crate::events::WindowEventCursors>();

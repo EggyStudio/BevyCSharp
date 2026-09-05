@@ -25,6 +25,19 @@ public partial struct TransformGizmo
     /// <summary>Which axis is being dragged, or -1.</summary>
     internal static int Axis { get; private set; } = -1;
 
+    /// <summary>The frame a drag last ended on.</summary>
+    private static ulong _released;
+
+    /// <summary>
+    /// Whether a handle is being dragged, or was let go on this frame.
+    /// </summary>
+    /// <remarks>
+    /// The frame matters. A drag ends on a release, and the same release is what everything else
+    /// reads as a click; whoever asks may run before or after the drag has finished, so the answer
+    /// has to outlast the moment the axis is given up.
+    /// </remarks>
+    internal static bool DraggingOn(ulong frame) => Axis >= 0 || _released == frame;
+
     /// <summary>How near the cursor has to be to a handle to grab it, in logical pixels.</summary>
     private const float Grab = 12f;
 
@@ -142,6 +155,8 @@ public partial struct TransformGizmo
     private static void Finish(BehaviorContext ctx)
     {
         if (Axis < 0) return;
+
+        _released = ctx.Time.FrameCount;
 
         var entity = _subject;
         var before = _before;

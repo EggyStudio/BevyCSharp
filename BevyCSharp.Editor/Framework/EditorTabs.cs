@@ -7,11 +7,19 @@ namespace BevyCSharp.Editor.Framework;
 /// <param name="Create">Builds the panel when the tab is opened.</param>
 public sealed record EditorTabEntry(string Name, Func<IEditorPanel> Create)
 {
-    /// <summary>The panel while it is open, or <see langword="null"/> while the tab is minimised.</summary>
+    /// <summary>
+    /// The panel once it has been opened, whether or not it is currently on screen.
+    /// </summary>
+    /// <remarks>
+    /// Built on first use and kept for good. Minimising a tab conceals its panel rather than
+    /// closing it, so switching between two tabs is two writes to a display property instead of
+    /// two documents leaving and joining the interface's list — which is what made a tab blink,
+    /// come back at the wrong size, and eventually not come back at all.
+    /// </remarks>
     public IEditorPanel? Panel { get; internal set; }
 
     /// <summary>Whether the tab is currently showing its panel.</summary>
-    public bool IsOpen => Panel is not null;
+    public bool IsOpen => Panel is { } panel && EditorShell.IsShowing(panel);
 }
 
 /// <summary>
@@ -55,10 +63,9 @@ public static class EditorTabs
     {
         ArgumentNullException.ThrowIfNull(entry);
 
-        if (entry.Panel is { } open)
+        if (entry.IsOpen)
         {
-            EditorShell.Hide(open);
-            entry.Panel = null;
+            EditorShell.Conceal(entry.Panel!);
             return;
         }
 
@@ -66,17 +73,20 @@ public static class EditorTabs
         // viewport, and two of them in it would be two panels in one place.
         foreach (var other in Entries)
         {
-            if (other.Panel is { } showing) EditorShell.Hide(showing);
+            if (other.Panel is { } showing) EditorShell.Conceal(showing);
         }
 
-        entry.Panel = EditorShell.Show(entry.Create());
+        // Built the first time it is asked for and concealed thereafter, so exactly one document
+        // joins the interface per tab per session and switching costs nothing.
+        entry.Panel ??= EditorShell.Show(entry.Create());
+        EditorShell.Reveal(entry.Panel);
     }
 
     /// <summary>Opens a tab if it is not open already.</summary>
     public static void Open(EditorTabEntry entry)
     {
         ArgumentNullException.ThrowIfNull(entry);
-        if (entry.Panel is null) Toggle(entry);
+        if (!entry.IsOpen) Toggle(entry);
     }
 
     /// <summary>

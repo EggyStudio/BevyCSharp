@@ -332,10 +332,12 @@ interface crate cannot do that shaped the panels.
 
 What is left:
 
-- **Clicking a mesh to select it is unverified.** `bcs_pick_events` and the shell that drains it
-  are in place, and no pointer has been put through them: the editor runs on Wayland here and
-  nothing available can synthesise a click into it. If it turns out not to fire, suspect the
-  interface camera, which is ordered last and may be the camera the raycast starts from.
+- **Every path a real pointer takes is unverified.** `bcs_pick_events`, the shell that drains it,
+  the click that reaches a row and the press that clears a selection are all in place, and no
+  pointer has been put through any of them: the editor runs on Wayland here, the compositor refuses
+  XTEST warping, and nothing else available can synthesise a click into the window. Everything
+  reachable from code has been driven from code instead. If picking turns out not to fire, suspect
+  the interface camera, which is ordered last and may be the camera the raycast starts from.
 - **Half of the world is saved.** `assets/world.json` keeps every named entity's name and every
   component with a schema, which is what the editor can change. What it cannot write is the
   engine's own components: a mesh handle, a material, a camera's projection.
@@ -354,6 +356,14 @@ What is left:
   written before a widget's text child exists is never drawn, a stylesheet reapplication undoes
   what was written to an element's display, and a menu cannot be drawn over a panel whatever it is
   told about layering.
+- **Tiles that show what a file is.** The asset browser draws a grid of names, elastic between a
+  minimum and a maximum so a row divides evenly into the panel and wraps. What it does not draw is
+  the file: an image tile should show the image, a mesh or a material tile a small render of it,
+  and both want a taller tile than a name needs. The first half is reachable now —
+  `bcs_xui_set_image` already points an element at a file, so an image tile is a taller tile with
+  an `<img>` in it and a second tile shape to switch between. The second half needs the bridge to
+  render a thumbnail to a texture and hand back an asset key, which is the same missing entry point
+  as render-to-texture generally.
 - **A list longer than its pool.** The hierarchy and the inspector both hold a fixed pool of rows
   and decide what each stands for, which is what a virtualised list does anyway. What they lack is
   a wheel: paging is two buttons, because the scroll wheel belongs to the camera.

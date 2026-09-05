@@ -554,14 +554,26 @@ button:hover {
     border-right: 1px solid var(--line);
 }
 
+/*
+ * The right half of the browser: what is in the directory, as a grid that wraps.
+ *
+ * `flex-basis: 0` with `flex-grow: 1` is what makes it take the width the tree left over rather
+ * than the width its own contents want. Sized by its contents it would be as wide as every tile
+ * laid end to end, which is a single row running off the side of the panel — there is nothing to
+ * wrap against until the box has a width of its own.
+ */
 .tiles {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
     align-content: flex-start;
     column-gap: 6px;
     row-gap: 6px;
+    padding-right: 2px;
     overflow: hidden;
 }
 
@@ -569,13 +581,21 @@ button:hover {
  * A tile is a name in a box. Not a thumbnail: the interface draws images from files it can decode,
  * and what is worth a picture here would need one made for it first.
  */
+/*
+ * One file. Wide enough to read a name and narrow enough that several fit, and elastic between
+ * those two so a row divides evenly into whatever width the panel has: the tiles stretch to fill
+ * the line they are on and wrap when the next one will not fit.
+ */
 .tile {
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: 132px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 132px;
+    min-width: 110px;
+    max-width: 210px;
     height: 22px;
-    min-width: 0;
     padding: 0 6px;
     background-color: var(--surface-raised);
     border: 1px solid var(--line);
@@ -652,8 +672,10 @@ button:hover {
     display: flex;
     flex-direction: row;
     align-items: center;
+    /* The tab strip's height, so the two halves of the bottom row sit on one line. */
+    height: 29px;
     column-gap: 16px;
-    padding: 2px 4px;
+    padding: 0 8px;
     background-color: rgba(0, 0, 0, 0);
     pointer-events: none;
 }

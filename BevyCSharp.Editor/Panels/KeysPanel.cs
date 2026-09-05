@@ -12,12 +12,17 @@ namespace BevyCSharp.Editor.Panels;
 /// long after it had been read. Unreal puts its viewport hints exactly here, for the same reason.
 /// </para>
 /// <para>
+/// On the same row as the tabs, and after them, because the bottom of the window is one band: two
+/// strips of text at two heights read as an accident, and the row is the full width of the window
+/// whatever the columns are doing above it.
+/// </para>
+/// <para>
 /// What it lists follows the tool. A person in the move tool wants to know what a drag does now,
 /// not what every key in the editor does, and a list that changes with the mode is shorter and
 /// truer than one that does not.
 /// </para>
 /// </remarks>
-[EditorPanel("panels/keys.html", Root = "#keys", Dock = EditorDock.ViewportBottomLeft)]
+[EditorPanel("panels/keys.html", Root = "#keys", Dock = EditorDock.Strip, Order = 1, Layer = 5)]
 public sealed partial class KeysPanel
 {
     /// <summary>How many hints the document can draw.</summary>

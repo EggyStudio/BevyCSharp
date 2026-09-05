@@ -99,31 +99,34 @@ public partial struct EditorBoot
     public static void ReloadScripts(BehaviorContext ctx) => EditorScripts.Poll();
 
     /// <summary>
-    /// Opens the entity panel as soon as something is selected.
+    /// Shows the panel that describes the selection while there is one, and puts it away when
+    /// there is not.
     /// </summary>
     /// <remarks>
-    /// The editor starts with the world and nothing else. Picking something is the moment its
-    /// details become worth the room, so that is when the panel appears, and closing it again is a
-    /// thing a person does rather than something that happens on the next click.
+    /// The editor starts with the world and nothing else. Picking something — an entity or a file,
+    /// the panel answers for both — is the moment its details become worth the room, and letting go
+    /// of it is the moment they stop being. Put away rather than closed, so the document is loaded
+    /// once and the rest of the screen is undisturbed by any of it.
     /// </remarks>
     [OnUpdate]
     public static void FollowSelection(BehaviorContext ctx)
     {
-        // Compared against what was last reacted to rather than against the frame the selection
-        // changed on: the shell ticks after this system, so the frame numbers are always one
-        // apart and a panel opened by comparing them would never open at all.
-        if (EditorSelection.Current == _followed) return;
+        var wanted = EditorSelection.Any || EditorAssets.Selected is not null;
+        if (wanted == _following) return;
 
-        _followed = EditorSelection.Current;
+        _following = wanted;
 
-        if (!EditorSelection.Any) return;
-        if (EditorShell.Find<DataPanel>() is not null) return;
+        if (!wanted)
+        {
+            if (EditorShell.Find<DataPanel>() is { } open) EditorShell.Conceal(open);
+            return;
+        }
 
-        EditorShell.Show(new DataPanel());
+        EditorShell.Reveal(EditorShell.Find<DataPanel>() ?? EditorShell.Show(new DataPanel()));
     }
 
-    /// <summary>What was selected when the entity panel was last opened for it.</summary>
-    private static Entity _followed = Entity.None;
+    /// <summary>Whether the panel was showing the last time this looked.</summary>
+    private static bool _following;
 
     /// <summary>
     /// Hands the interface's reports to the panels, once a frame.

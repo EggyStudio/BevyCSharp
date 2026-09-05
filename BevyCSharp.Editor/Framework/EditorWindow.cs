@@ -174,12 +174,20 @@ public sealed class EditorWindow
         _placed = wanted;
     }
 
-    /// <summary>Shows or hides the whole window.</summary>
+    /// <summary>
+    /// Shows or hides the whole window.
+    /// </summary>
+    /// <remarks>
+    /// Read before written, and not remembered. The interface puts an element's display back to
+    /// the stylesheet's answer whenever it restyles the widget, so a window told once that it is
+    /// hidden reappears the next time anything is written into it. Asking what it is now costs one
+    /// call and is the only answer that stays true.
+    /// </remarks>
     public void Show(bool visible)
     {
         var root = Root;
         if (root.IsNone) return;
-        if (_shown == visible) return;
+        if (Xui.IsVisible(root) == visible) return;
 
         Xui.SetVisible(root, visible);
         _shown = visible;

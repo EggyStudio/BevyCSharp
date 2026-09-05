@@ -18,7 +18,7 @@ namespace BevyCSharp.Editor.Panels;
 /// registration rather than a change to this panel.
 /// </para>
 /// </remarks>
-[EditorPanel("panels/tabs.html", Root = "#tabs", Dock = EditorDock.Strip, Layer = 5)]
+[EditorPanel("panels/tabs.html", Root = "#tabs", Dock = EditorDock.Strip, Order = 0, Layer = 5)]
 public sealed partial class TabsPanel
 {
     /// <summary>How many tabs the document can draw.</summary>

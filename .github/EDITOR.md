@@ -27,14 +27,31 @@ an entity, an asset or a setting. Nothing is called a hierarchy or an inspector.
 | right column | whatever is selected: an entity's components, or an asset's particulars | when something is selected or asked for |
 | viewport corners | the menu and undo at the left, the tools in the middle, the information button at the right, the orientation cross at the bottom right | always |
 | bottom band | the asset browser or the console, whichever tab is open | from its tab |
-| bottom strip | the tabs, like a browser's | always |
+| bottom row | the tabs, like a browser's, and the key list beside them | always |
 | over the viewport | what the keys do | always |
 | over everything | menus, dropdowns, context menus | while they are being read |
 
-**Three columns.** The side columns run the full height of the window and are as wide as their
-contents until their inner edge is dragged, up to a third of the window each. Everything between
-them is the viewport, and the viewport is split along its bottom by whichever tab is open, up to
-half the window. Those three numbers are the whole arrangement and all three are draggable.
+**A top split and a bottom one.** The bottom is a single row across the whole window: the tabs on
+the left, the key list beside them, both the same height. Everything above it is the top split, and
+that is three columns — the side columns as wide as their contents until their inner edge is
+dragged, up to a third of the window each, and the viewport between them, split along its own
+bottom by whichever tab is open, up to half the window. Those three numbers are the whole
+arrangement and all three are draggable.
+
+**A root has to say it is not stretching.** A document lays its body over the whole window and the
+body stretches its children to its own height, so a panel's outermost element measures the window
+unless the stylesheet says `align-self: flex-start`. Everything downstream reads that measurement:
+a strip that measures 900 pixels tall leaves the columns no room and nothing is placed at all. For
+the same reason no member of a row is ever told how tall the row is — the row is as tall as its
+tallest member, and telling one of them that is a loop that eats the window in two frames.
+
+**Put away, not closed.** Three panels come and go all day: the world, the panel that describes the
+selection, and whichever tab is open. None of them is ever closed. Closing a document takes it out
+of the interface's list, and changing that list respawns every widget of every panel — a blink, a
+frame at the wrong font, and a panel that eventually does not come back. So they are concealed
+instead: `EditorShell.Conceal` and `Reveal` write one display property, the layout is handed only
+what is showing, and the document is loaded once per session. `Toggle` still closes, and that is
+what a flyout wants.
 
 **A docked panel is as tall as its contents**, capped by what its column has left. There is no
 fill: a panel with four rows is four rows tall, and opening a tab along the bottom shortens
@@ -47,6 +64,14 @@ viewport's corners as round buttons over the scene, and they follow the viewport
 and close. What is in them is `EditorToolbar`, a table like the menu's, so a game adds a mode to
 the viewport by adding a line. A button carries a picture, a word, or both: a picture alone is a
 circle, a word alone a pill, and the slot and an order index are the whole of where it goes.
+
+**A gizmo is drawn about the world, not in it.** The default gizmo config has `depth_bias = -1`,
+so a handle on an object is in front of the object rather than inside it, and the queue C# fills is
+drained after the managed `Last` systems rather than merely in `Last` — both live in that schedule,
+and without the ordering the scheduler may drain the queue before the frame has filled it, which
+holds every shape back a frame. A frame is invisible on a selection box and unmissable on the
+orientation cross, which is placed relative to the camera and swims across the screen when the
+camera turns.
 
 **The orientation cross is laid out by the interface and drawn by the scene.** The bottom right
 bar holds an empty transparent square; the panel reads back where the layout put it and

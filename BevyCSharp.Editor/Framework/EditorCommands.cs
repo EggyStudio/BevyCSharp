@@ -124,14 +124,14 @@ public static class EditorCommands
     {
         EditorMenu.Toggle(
             "Panels/World",
-            static _ => EditorShell.Toggle(static () => new WorldPanel()),
-            static () => EditorShell.Find<WorldPanel>() is not null,
+            static _ => EditorShell.ToggleShown(static () => new WorldPanel()),
+            static () => EditorShell.Showing<WorldPanel>() is not null,
             0);
 
         EditorMenu.Toggle(
             "Panels/Data",
-            static _ => EditorShell.Toggle(static () => new DataPanel()),
-            static () => EditorShell.Find<DataPanel>() is not null,
+            static _ => EditorShell.ToggleShown(static () => new DataPanel()),
+            static () => EditorShell.Showing<DataPanel>() is not null,
             1);
 
         EditorMenu.Toggle(
@@ -140,7 +140,7 @@ public static class EditorCommands
             {
                 if (EditorTabs.Find("Assets") is { } tab) EditorTabs.Toggle(tab);
             },
-            static () => EditorShell.Find<AssetsPanel>() is not null,
+            static () => EditorShell.Showing<AssetsPanel>() is not null,
             2);
 
         EditorMenu.Toggle(
@@ -149,7 +149,7 @@ public static class EditorCommands
             {
                 if (EditorTabs.Find("Console") is { } tab) EditorTabs.Toggle(tab);
             },
-            static () => EditorShell.Find<ConsolePanel>() is not null,
+            static () => EditorShell.Showing<ConsolePanel>() is not null,
             3);
 
         EditorMenu.Toggle(
@@ -184,8 +184,8 @@ public static class EditorCommands
 
         EditorMenu.Toggle(
             "Panels/Tabs",
-            static _ => EditorShell.Toggle(static () => new TabsPanel()),
-            static () => EditorShell.Find<TabsPanel>() is not null,
+            static _ => EditorShell.ToggleShown(static () => new TabsPanel()),
+            static () => EditorShell.Showing<TabsPanel>() is not null,
             8);
     }
 
