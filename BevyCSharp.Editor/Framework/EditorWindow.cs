@@ -22,7 +22,8 @@ namespace BevyCSharp.Editor.Framework;
 public sealed class EditorWindow
 {
     private readonly Dictionary<string, Entity> _elements = [];
-    private ulong _rebuildingUntil;
+    private ulong _builtAt = ulong.MaxValue;
+    private ulong _settledAt;
     private (float X, float Y, float Width, float Height)? _placed;
     private bool? _shown;
     private int? _layered;
@@ -74,12 +75,22 @@ public sealed class EditorWindow
     /// </remarks>
     public Entity Element(string cssId)
     {
-        // While the widgets are being replaced, every id is looked up afresh and nothing is kept:
-        // the entity that answers this frame may be dead the next, and caching one would hold a
-        // dead element for as long as the panel is open. Not reading at all was the earlier
-        // answer and it was worse, because it depended on being told when the rebuild finished,
-        // and that report does not always come.
-        if (Frame < _rebuildingUntil) return Xui.Element(cssId);
+        // The interface says how many times it has rebuilt everything, so a cache full of dead
+        // entities is noticed exactly rather than waited out. This was a fixed number of frames
+        // started by whoever opened or closed a panel, which is wrong twice over: a rebuild
+        // nobody here caused went unnoticed, and two rebuilds overlapping ended the wait early and
+        // left every panel holding handles to widgets that no longer existed.
+        if (_builtAt != Generation)
+        {
+            _builtAt = Generation;
+            _settledAt = Frame + RebuildFrames;
+            Forget();
+        }
+
+        // Nothing is kept while the new widgets are still arriving: the entity that answers this
+        // frame may be replaced by the next, and caching one would hold a dead element for as long
+        // as the panel is open.
+        if (Frame < _settledAt) return Xui.Element(cssId);
 
         if (_elements.TryGetValue(cssId, out var known)) return known;
 
@@ -92,7 +103,11 @@ public sealed class EditorWindow
     /// <summary>The frame being drawn, so a rebuild can be waited out without being told.</summary>
     internal static ulong Frame { get; set; }
 
-    /// <summary>How long a rebuild is assumed to take, in frames.</summary>
+    /// <summary>How many times the interface has rebuilt every open document.</summary>
+    /// <remarks>Read once a frame by the shell, because every window asks and the answer is one.</remarks>
+    internal static ulong Generation { get; set; }
+
+    /// <summary>How long the widgets of a rebuild take to arrive, in frames.</summary>
     private const ulong RebuildFrames = 24;
 
     /// <summary>Whether an element of this window is the one an event happened to.</summary>
@@ -108,7 +123,7 @@ public sealed class EditorWindow
     /// </remarks>
     public void Suspend()
     {
-        _rebuildingUntil = Frame + RebuildFrames;
+        _settledAt = Frame + RebuildFrames;
         Forget();
     }
 
@@ -117,13 +132,11 @@ public sealed class EditorWindow
     /// </summary>
     /// <remarks>
     /// The elements are looked up afresh, since every widget is a new entity. What the panel
-    /// holds is untouched, so the values go straight back onto the new elements.
+    /// holds is untouched, so the values go straight back onto the new elements. The waiting
+    /// window is not cut short: a second rebuild may already be under way, and ending the wait on
+    /// the first one's report is how every panel ends up holding a dead element.
     /// </remarks>
-    public void Resume()
-    {
-        _rebuildingUntil = 0;
-        Forget();
-    }
+    public void Resume() => Forget();
 
     /// <summary>Drops every element and everything written to one.</summary>
     /// <remarks>
@@ -136,6 +149,7 @@ public sealed class EditorWindow
         _placed = null;
         _shown = null;
         _layered = null;
+        _limited = null;
     }
 
     // -- Placement
@@ -212,19 +226,32 @@ public sealed class EditorWindow
     }
 
     /// <summary>
-    /// How tall the window is when nothing is holding it back.
+    /// Caps how large the window may get, without saying how large it is.
     /// </summary>
     /// <remarks>
-    /// A panel is as tall as its contents until its column runs out of room, and then it is as
-    /// tall as the room. The catch is that a panel given an explicit height measures that height
-    /// afterwards, so its own contents can no longer be asked about: the last height it measured
-    /// while it was free is remembered here instead, and the layout compares that against the
-    /// room rather than the measurement.
+    /// How a panel is as tall as its contents up to the room its column has. Told as a maximum
+    /// rather than as a height, because a height decides the measurement: a panel given one
+    /// measures that height ever after and can never be asked what its contents want again, which
+    /// is a hierarchy that grows a dozen rows inside a panel that stays the size it was.
     /// </remarks>
-    public float Natural { get; private set; }
+    public void LimitTo(float maxWidth, float maxHeight)
+    {
+        var root = Root;
+        if (root.IsNone) return;
 
-    /// <summary>Remembers the measured height as the natural one.</summary>
-    internal void Measured(float height) => Natural = height;
+        var wanted = (maxWidth, maxHeight);
+        if (_limited is { } already && Same(already, wanted)) return;
+
+        Xui.SetLimits(root, maxWidth, maxHeight);
+        _limited = wanted;
+    }
+
+    /// <summary>The limits last written, so an unchanged frame touches nothing.</summary>
+    private (float Width, float Height)? _limited;
+
+    /// <summary>Whether two limits are the same.</summary>
+    private static bool Same((float Width, float Height) a, (float Width, float Height) b) =>
+        Near(a.Width, b.Width) && Near(a.Height, b.Height);
 
     /// <summary>Where the window ended up, or nothing when it has not been laid out yet.</summary>
     public UiRect? Measure()
@@ -247,9 +274,15 @@ public sealed class EditorWindow
         (float X, float Y, float Width, float Height) b) =>
         Near(a.X, b.X) && Near(a.Y, b.Y) && Near(a.Width, b.Width) && Near(a.Height, b.Height);
 
-    /// <summary>Whether two lengths agree, counting two <c>NaN</c>s as agreeing.</summary>
-    private static bool Near(float a, float b) =>
-        (float.IsNaN(a) && float.IsNaN(b)) || MathF.Abs(a - b) < 0.5f;
+    /// <summary>
+    /// Whether two lengths agree, counting two of the same non-number as agreeing.
+    /// </summary>
+    /// <remarks>
+    /// Both sentinels have to compare equal to themselves or every frame writes again: <c>NaN</c>
+    /// for a dimension left alone, and infinity for one handed back to the contents. Subtracting
+    /// either from itself does not give zero.
+    /// </remarks>
+    private static bool Near(float a, float b) => a.Equals(b) || MathF.Abs(a - b) < 0.5f;
 
     /// <summary>Takes the window off the screen.</summary>
     public void Close()

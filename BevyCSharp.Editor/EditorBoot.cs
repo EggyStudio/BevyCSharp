@@ -112,21 +112,22 @@ public partial struct EditorBoot
     public static void FollowSelection(BehaviorContext ctx)
     {
         var wanted = EditorSelection.Any || EditorAssets.Selected is not null;
-        if (wanted == _following) return;
 
-        _following = wanted;
+        // Compared against what is actually on screen rather than against what this did last time.
+        // A remembered answer goes stale the moment anything else shows or hides the panel — the
+        // menu row that toggles it, a rebuild, a person closing it — and once it is stale the
+        // panel never appears again, because as far as this is concerned it already has.
+        var panel = EditorShell.Find<DataPanel>();
+        if (wanted == (panel is not null && EditorShell.IsShowing(panel))) return;
 
         if (!wanted)
         {
-            if (EditorShell.Find<DataPanel>() is { } open) EditorShell.Conceal(open);
+            if (panel is not null) EditorShell.Conceal(panel);
             return;
         }
 
-        EditorShell.Reveal(EditorShell.Find<DataPanel>() ?? EditorShell.Show(new DataPanel()));
+        EditorShell.Reveal(panel ?? EditorShell.Show(new DataPanel()));
     }
-
-    /// <summary>Whether the panel was showing the last time this looked.</summary>
-    private static bool _following;
 
     /// <summary>
     /// Hands the interface's reports to the panels, once a frame.

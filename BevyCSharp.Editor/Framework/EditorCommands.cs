@@ -100,18 +100,25 @@ public static class EditorCommands
             static () => string.Empty,
             static _ =>
             {
-                if (EditorShell.Find<InfoPanel>() is { } open)
+                // Put away rather than closed, and fetched back to wherever the viewport's corner
+                // is now. Somebody watching a number opens and closes this all day, and closing a
+                // document rebuilds every widget of every panel on screen.
+                if (EditorShell.Showing<InfoPanel>() is { } open)
                 {
-                    EditorShell.Hide(open);
+                    EditorShell.Conceal(open);
                     return;
                 }
 
-                EditorShell.ShowAt(
-                    new InfoPanel(),
-                    EditorShell.Layout.Viewport.Right - 240f,
-                    EditorShell.Layout.Viewport.Y + 44f);
+                var panel = EditorShell.Find<InfoPanel>() ?? EditorShell.Show(new InfoPanel());
+
+                EditorShell.Reveal(panel);
+                EditorShell.Layout.Place(
+                    panel,
+                    panel.Chrome.Placement.MovedTo(
+                        EditorShell.Layout.Viewport.Right - 240f,
+                        EditorShell.Layout.Viewport.Y + 44f));
             },
-            static () => EditorShell.Find<InfoPanel>() is not null,
+            static () => EditorShell.Showing<InfoPanel>() is not null,
             0));
     }
 
@@ -160,8 +167,8 @@ public static class EditorCommands
 
         EditorMenu.Toggle(
             "Panels/Info",
-            static _ => EditorShell.Toggle(static () => new InfoPanel()),
-            static () => EditorShell.Find<InfoPanel>() is not null,
+            static _ => EditorShell.ToggleShown(static () => new InfoPanel()),
+            static () => EditorShell.Showing<InfoPanel>() is not null,
             5);
 
         EditorMenu.Toggle(

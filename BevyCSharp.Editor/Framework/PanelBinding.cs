@@ -28,55 +28,17 @@ public static class PanelBinding
     /// </remarks>
     public static Entity Focused { get; internal set; } = Entity.None;
 
-    /// <summary>The frame being drawn, for the settling window below.</summary>
+    /// <summary>The frame being drawn.</summary>
     internal static ulong Frame { get; set; }
 
     /// <summary>
-    /// When each element was first written to, so a new one can be written to twice.
+    /// Forgets what was read, because the widgets are about to be replaced.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// The interface rebuilds an input from its template shortly after building it, which leaves
-    /// what is drawn behind what the widget holds: the box is empty, the widget agrees with the
-    /// panel, and nothing ever writes again. Writing the same value is not a change and redraws
-    /// nothing, so for a moment after an element first appears a matching value is written with a
-    /// space after it, which is a change, and then written back without one.
-    /// </para>
-    /// <para>
-    /// Only for a moment. Every write makes the widget restyle, and a restyle draws one frame at
-    /// the wrong font size, so doing this forever is a flicker twice a second forever. Doing it
-    /// while a panel is appearing hides it in the appearing.
-    /// </para>
+    /// Called when the interface is rebuilt, so that nothing carries over onto an element that
+    /// happens to reuse a dead one's identity.
     /// </remarks>
-    private static readonly Dictionary<Entity, ulong> FirstWritten = [];
-
-    /// <summary>How long an element is written to twice after it appears.</summary>
-    private const ulong Settling = 40;
-
-    /// <summary>Whether an element is new enough to still be settling.</summary>
-    private static bool Unsettled(Entity element)
-    {
-        if (!FirstWritten.TryGetValue(element, out var first))
-        {
-            FirstWritten[element] = Frame;
-            return true;
-        }
-
-        return Frame - first < Settling;
-    }
-
-    /// <summary>
-    /// Forgets which elements have settled, because they are about to be replaced.
-    /// </summary>
-    /// <remarks>
-    /// Called when the interface is rebuilt. Without it the table grows with every rebuild and,
-    /// worse, an element that reused an old entity's identity would be taken for settled.
-    /// </remarks>
-    internal static void Forget()
-    {
-        FirstWritten.Clear();
-        Focused = Entity.None;
-    }
+    internal static void Forget() => Focused = Entity.None;
 
     /// <summary>Writes a flag out to a checkbox, a switch or a toggle.</summary>
     public static void PullFlag(Entity element, bool value)
@@ -91,7 +53,7 @@ public static class PanelBinding
     public static void PullNumber(Entity element, float value)
     {
         if (element.IsNone) return;
-        if (Nearly(Xui.GetNumber(element), value) && !Unsettled(element)) return;
+        if (Nearly(Xui.GetNumber(element), value)) return;
 
         Xui.SetNumber(element, value);
     }
@@ -111,16 +73,13 @@ public static class PanelBinding
         if (element == Focused) return;
 
         var text = value ?? string.Empty;
-        var current = Xui.GetText(element);
+        if (Xui.GetText(element) == text) return;
 
-        if (current == text)
-        {
-            // Written a second time only while the element is new, and with a space after it so
-            // that it counts as a change. See the note on the settling window above.
-            if (Unsettled(element)) Xui.SetText(element, text + " ");
-            return;
-        }
-
+        // Written once. A widget that had nowhere to draw it yet is dealt with on the other side
+        // of the bridge, which applies the value again for a few frames and knows when the text
+        // child arrives; this used to write the value with a space after it, alternately, for
+        // forty frames, and a trailing space changes how wide a label measures — which is a panel
+        // that grows and shrinks and a number that walks left and right while it settles.
         Xui.SetText(element, text);
     }
 

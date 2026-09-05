@@ -139,33 +139,30 @@ public sealed class EditorLayout
             ? Math.Clamp(BottomHeight, MinimumBand, height * 0.5f)
             : 0f;
 
-        // The strip runs the whole width of the window: the columns are the top split and the
-        // strip is the bottom one, so nothing above it decides where it starts or ends.
+        // The window is a top split and a bottom one. The bottom holds the open tab and, under it,
+        // the tabs and the key list on one row; both run the whole width, because nothing is
+        // beside them. The top holds the three columns and gets whatever is left.
         var stripTop = height - strip;
+        var bandTop = stripTop - band;
 
-        // The viewport is what the columns leave, and the tab band eats into it from the bottom.
         var viewportLeft = left > 0f ? left + (Margin * 2f) : Margin;
         var viewportRight = right > 0f ? width - right - (Margin * 2f) : width - Margin;
-        var viewportBottom = stripTop - (band > 0f ? band : 0f);
 
         LeftEdge = viewportLeft - Margin;
         RightEdge = viewportRight + Margin;
-        BottomEdge = viewportBottom;
+        BottomEdge = bandTop;
         BandOpen = band > 0f;
 
         Viewport = new UiRect(
             viewportLeft,
             Margin,
             MathF.Max(0f, viewportRight - viewportLeft),
-            MathF.Max(0f, viewportBottom - Margin));
+            MathF.Max(0f, bandTop - Margin));
 
-        // The columns stop where the strip begins, because the strip is under everything: the
-        // window is a top split holding the three columns and a bottom split holding the tabs and
-        // the key list side by side.
-        Column(placed, EditorDock.Left, Margin, Margin, stripTop, left, fromLeft: true);
-        Column(placed, EditorDock.Right, width - Margin, Margin, stripTop, right, fromLeft: false);
+        Column(placed, EditorDock.Left, Margin, Margin, bandTop, left, fromLeft: true);
+        Column(placed, EditorDock.Right, width - Margin, Margin, bandTop, right, fromLeft: false);
 
-        Band(placed, viewportLeft, viewportRight, viewportBottom, band);
+        Band(placed, Margin, width - Margin, bandTop, band);
         Strip(placed, Margin, width - Margin, stripTop);
         Corners(placed, Viewport);
         Free(placed, width, height);
@@ -222,14 +219,14 @@ public sealed class EditorLayout
             var window = entry.Panel.Window!;
             var x = fromLeft ? edge : edge - columnWidth;
 
-            // As tall as its contents while the column has room for them, and as tall as the room
-            // when it does not. What it measured while it was free is what decides, because a
-            // panel given a height measures that height and can no longer be asked about its
-            // contents.
-            var free = float.IsNaN(entry.Placement.Height) && window.Natural <= room;
-            if (free) window.Measured(entry.Rect.Height);
+            // Handed back to its contents and capped at the room, rather than told a height. A
+            // panel told a height measures that height, so the next frame's answer to "how tall
+            // are your contents" is the height it was given — which is a tree that grows a dozen
+            // rows inside a panel that never changes size. A maximum leaves the measurement where
+            // it belongs and only stops it running past the column.
+            var tall = float.IsNaN(entry.Placement.Height) ? Xui.Auto : entry.Placement.Height;
 
-            var tall = free ? float.NaN : MathF.Min(Height(entry), room);
+            window.LimitTo(Xui.Auto, room);
 
             window.PlaceAt(
                 x + entry.Placement.X,
@@ -238,7 +235,7 @@ public sealed class EditorLayout
                 tall,
                 entry.Rect);
 
-            run += MathF.Min(free ? entry.Rect.Height : tall, room) + Gap;
+            run += MathF.Min(entry.Rect.Height, room) + Gap;
         }
     }
 
@@ -246,8 +243,9 @@ public sealed class EditorLayout
     /// Puts the open tab in the band between the viewport and the strip.
     /// </summary>
     /// <remarks>
-    /// <paramref name="top"/> is where the viewport ends, which is where the band begins: the two
-    /// share an edge and that edge is what a drag moves.
+    /// The whole width of the window, not the viewport's: the band and the strip under it are the
+    /// bottom split, and the columns are the top one. <paramref name="top"/> is the edge the two
+    /// splits share, and that edge is what a drag moves.
     /// </remarks>
     private static void Band(List<Placed> placed, float left, float right, float top, float height)
     {

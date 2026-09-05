@@ -445,9 +445,13 @@ public static class EditorShell
 
         // Asked once a frame, and used by every text binding: whatever is being typed in is left
         // alone rather than overwritten with what the program still says.
-        PanelBinding.Focused = Xui.Focused();
+        PanelBinding.Focused = Focus(input);
         PanelBinding.Frame = ctx.Time.FrameCount;
         EditorWindow.Frame = ctx.Time.FrameCount;
+
+        // One call for every window, since the answer is about the interface rather than about any
+        // one of them.
+        EditorWindow.Generation = Xui.Generation;
 
         // Read the world first, arrange second, write the screen third. A panel that filled its
         // rows during this tick is one whose height changed, and the arrangement has to see that
@@ -471,8 +475,56 @@ public static class EditorShell
         Fresh.Clear();
     }
 
+    /// <summary>
+    /// What the keyboard is going to, and letting go of a field that should not still have it.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A widget takes the keyboard when it is clicked and gives it up when another widget is
+    /// clicked. A click on the scene is not a click on a widget, so without this a person who
+    /// types in the search box and goes back to the viewport leaves the box holding the keyboard,
+    /// and every key the editor binds is a letter going into a box nobody is looking at.
+    /// </para>
+    /// <para>
+    /// A focused element no panel owns is not believed at all. That is what a rebuild leaves
+    /// behind: a widget that is about to be replaced, still saying it has the keyboard, with
+    /// nothing on this side able to click anything else to take it away.
+    /// </para>
+    /// </remarks>
+    private static Entity Focus(Input input)
+    {
+        var focused = Xui.Focused();
+        if (focused.IsNone) return Entity.None;
+
+        var owned = false;
+        foreach (var panel in Panels)
+        {
+            if (panel.Window?.Owns(focused) != true) continue;
+
+            owned = true;
+            break;
+        }
+
+        if (!owned)
+        {
+            Xui.Blur();
+            return Entity.None;
+        }
+
+        if (!input.MousePressed(MouseButton.Left)) return focused;
+
+        var (x, y) = input.MousePosition;
+        if (Xui.TryRect(focused, out var rect) && rect.Contains(x, y)) return focused;
+
+        Xui.Blur();
+        return Entity.None;
+    }
+
     /// <summary>Where a press on the scene began, while the button is still down.</summary>
     private static (float X, float Y)? _pressedOnScene;
+
+    /// <summary>Whether anything was picked since that press.</summary>
+    private static bool _pickedSincePress;
 
     /// <summary>
     /// Lets go of the selection when the scene is clicked and nothing is under the pointer.
@@ -492,14 +544,24 @@ public static class EditorShell
             _pressedOnScene = PointerOverPanel(x, y) || !Layout.Viewport.Contains(x, y)
                 ? null
                 : (x, y);
+
+            _pickedSincePress = false;
         }
+
+        // Anywhere between the press and the release. Which of the two frames a pick is reported
+        // on is the interface's business and has been both, and a selection that survives only one
+        // of the two answers is a selection that clears itself the moment it is made.
+        _pickedSincePress |= hitSomething;
 
         if (!input.MouseReleased(MouseButton.Left)) return;
 
         var from = _pressedOnScene;
-        _pressedOnScene = null;
+        var hit = _pickedSincePress;
 
-        if (hitSomething || from is not { } start) return;
+        _pressedOnScene = null;
+        _pickedSincePress = false;
+
+        if (hit || from is not { } start) return;
 
         // A handle being dragged is a transform, however far the pointer moved: letting go of it
         // over empty space would drop the thing that was just being moved.

@@ -51,7 +51,19 @@ mod live {
         pub next: i32,
         /// Whether the list changed since the registry was last told about it.
         pub dirty: bool,
+        /// How many times the registry has been told, which is how many rebuilds there have been.
+        pub generation: u64,
     }
+
+    /// Text written to a widget that may not have had anywhere to draw it yet.
+    ///
+    /// A widget draws its text through a child, and the child is spawned a frame or two after the
+    /// widget. Text written before then changes the widget's field, the change is noticed with no
+    /// child to update, and the child arrives afterwards carrying what the document said. So every
+    /// write is kept for a few frames and applied again, which touches the field and has the
+    /// change noticed a second time — with the child there to receive it.
+    #[derive(Resource, Default)]
+    pub struct PendingText(pub Vec<(bevy::ecs::entity::Entity, String, u8)>);
 
     /// What the widgets reported since the managed side last looked.
     ///
@@ -118,7 +130,12 @@ pub fn install(app: &mut bevy::app::App) {
 
     app.add_plugins(ExtendedUiPlugin);
     app.init_resource::<live::Documents>();
+    app.init_resource::<live::PendingText>();
     app.init_resource::<UiEvents>();
+
+    // Before the crate's own systems look at what changed, so a value applied again this frame is
+    // one they notice this frame.
+    app.add_systems(bevy::app::PreUpdate, reapply_text);
 
     app.add_observer(
         |click: On<Pointer<Click>>,
@@ -182,6 +199,7 @@ pub fn install(app: &mut bevy::app::App) {
             // the styles are resolved when a document is first built and not again. Writing the
             // list leaves every open document standing and has the crate build only what is new.
             registry.current = if names.is_empty() { None } else { Some(names) };
+            documents.generation = documents.generation.wrapping_add(1);
         },
     );
 
@@ -554,48 +572,26 @@ pub unsafe extern "C" fn bcs_xui_set_text(entity: u64, text: *const core::ffi::c
 
         #[cfg(feature = "editor")]
         {
-            use bevy_extended_ui::html::HtmlInnerContent;
-            use bevy_extended_ui::widgets::{Button, Headline, InputField, Paragraph};
-
             let Some(text) = (unsafe { crate::interop::cstr_to_string(text) }) else {
                 return status::NULL_ARG;
             };
 
             crate::state::with_world(|world| {
                 let entity = crate::ecs::entity_from(entity);
-                let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
-                    return status::NO_ENTITY;
-                };
+                let status = write_text(world, entity, &text);
 
-                // The widget's own field, for the same reason as the read: writing the parsed
-                // content changes what the document said rather than what is being drawn, so it
-                // is the last resort rather than the first.
-                if let Some(mut field) = entity_mut.get_mut::<InputField>() {
-                    field.text = text;
-                    return status::OK;
+                // Kept and applied again for the next few frames, in case the widget had nowhere
+                // to draw it yet. Written down here rather than asked for by the caller, because
+                // whether a widget has built its text child is the interface's business and not
+                // something the other side of an ABI should have to guess at.
+                if status == status::OK {
+                    if let Some(mut pending) = world.get_resource_mut::<live::PendingText>() {
+                        pending.0.retain(|(held, _, _)| *held != entity);
+                        pending.0.push((entity, text, RETRIES));
+                    }
                 }
 
-                if let Some(mut paragraph) = entity_mut.get_mut::<Paragraph>() {
-                    paragraph.text = text;
-                    return status::OK;
-                }
-
-                if let Some(mut headline) = entity_mut.get_mut::<Headline>() {
-                    headline.text = text;
-                    return status::OK;
-                }
-
-                if let Some(mut button) = entity_mut.get_mut::<Button>() {
-                    button.text = text;
-                    return status::OK;
-                }
-
-                if let Some(mut content) = entity_mut.get_mut::<HtmlInnerContent>() {
-                    content.set_inner_text(text);
-                    return status::OK;
-                }
-
-                status::NOT_PRESENT
+                status
             })
         }
     })
@@ -856,7 +852,7 @@ pub extern "C" fn bcs_xui_set_rect(entity: u64, left: f32, top: f32, width: f32,
 
         #[cfg(feature = "editor")]
         {
-            use bevy::ui::{Node, PositionType, Val};
+            use bevy::ui::{Node, PositionType};
 
             crate::state::with_world(|world| {
                 let entity = crate::ecs::entity_from(entity);
@@ -872,21 +868,213 @@ pub extern "C" fn bcs_xui_set_rect(entity: u64, left: f32, top: f32, width: f32,
                 // lets one document be a docked panel in one layout and a flyout in another.
                 node.position_type = PositionType::Absolute;
 
+                // Three answers, not two. `NaN` leaves a field alone, so a caller placing a
+                // panel keeps whatever the stylesheet said about its size; infinity puts a field
+                // back to `auto`, which is how a panel is told to be as tall as its contents
+                // again after having been given a height. Without the third, a panel measured once
+                // at a fixed height can never be asked about its contents afterwards.
                 if !left.is_nan() {
-                    node.left = Val::Px(left);
+                    node.left = length(left);
                 }
                 if !top.is_nan() {
-                    node.top = Val::Px(top);
+                    node.top = length(top);
                 }
                 if !width.is_nan() {
-                    node.width = Val::Px(width);
+                    node.width = length(width);
                 }
                 if !height.is_nan() {
-                    node.height = Val::Px(height);
+                    node.height = length(height);
                 }
 
                 status::OK
             })
+        }
+    })
+}
+
+/// How many frames a written value is applied again for.
+#[cfg(feature = "editor")]
+const RETRIES: u8 = 4;
+
+/// Puts a string into whichever field the widget draws from.
+#[cfg(feature = "editor")]
+fn write_text(
+    world: &mut bevy::ecs::world::World,
+    entity: bevy::ecs::entity::Entity,
+    text: &str,
+) -> i32 {
+    use bevy_extended_ui::html::HtmlInnerContent;
+    use bevy_extended_ui::widgets::{Button, Headline, InputField, Paragraph};
+
+    let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
+        return status::NO_ENTITY;
+    };
+
+    // The widget's own field, for the same reason as the read: writing the parsed content changes
+    // what the document said rather than what is being drawn, so it is the last resort rather
+    // than the first.
+    if let Some(mut field) = entity_mut.get_mut::<InputField>() {
+        field.text = text.to_string();
+        return status::OK;
+    }
+
+    if let Some(mut paragraph) = entity_mut.get_mut::<Paragraph>() {
+        paragraph.text = text.to_string();
+        return status::OK;
+    }
+
+    if let Some(mut headline) = entity_mut.get_mut::<Headline>() {
+        headline.text = text.to_string();
+        return status::OK;
+    }
+
+    if let Some(mut button) = entity_mut.get_mut::<Button>() {
+        button.text = text.to_string();
+        return status::OK;
+    }
+
+    if let Some(mut content) = entity_mut.get_mut::<HtmlInnerContent>() {
+        content.set_inner_text(text.to_string());
+        return status::OK;
+    }
+
+    status::NOT_PRESENT
+}
+
+/// Applies each recently written value again, and forgets it once it has been.
+#[cfg(feature = "editor")]
+fn reapply_text(world: &mut bevy::ecs::world::World) {
+    let Some(mut pending) = world.get_resource_mut::<live::PendingText>() else {
+        return;
+    };
+
+    if pending.0.is_empty() {
+        return;
+    }
+
+    let mut due: Vec<(bevy::ecs::entity::Entity, String)> = Vec::new();
+
+    pending.0.retain_mut(|(entity, text, left)| {
+        *left = left.saturating_sub(1);
+        due.push((*entity, text.clone()));
+        *left > 0
+    });
+
+    for (entity, text) in due {
+        write_text(world, entity, &text);
+    }
+}
+
+/// A pixel length, or `auto` for anything that is not finite.
+#[cfg(feature = "editor")]
+fn length(value: f32) -> bevy::ui::Val {
+    if value.is_finite() {
+        bevy::ui::Val::Px(value)
+    } else {
+        bevy::ui::Val::Auto
+    }
+}
+
+/// Caps how large an element may get, without saying how large it is.
+///
+/// The difference between a panel that is as tall as its contents up to a limit and one that is a
+/// fixed height. A height decides the measurement, so a panel given one can never be asked what
+/// its contents want again; a maximum leaves the measurement to the contents and only stops it
+/// running past the room there is. `NaN` leaves a field alone and infinity removes the cap.
+///
+/// Returns [`status::UNSUPPORTED`] where there is no interface.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_xui_set_limits(entity: u64, max_width: f32, max_height: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (entity, max_width, max_height);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bevy::ui::Node;
+
+            crate::state::with_world(|world| {
+                let entity = crate::ecs::entity_from(entity);
+                let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
+                    return status::NO_ENTITY;
+                };
+                let Some(mut node) = entity_mut.get_mut::<Node>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                if !max_width.is_nan() {
+                    node.max_width = length(max_width);
+                }
+                if !max_height.is_nan() {
+                    node.max_height = length(max_height);
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Takes the keyboard away from whatever has it.
+///
+/// There is no other way out of a text field. The interface gives a widget focus when it is
+/// clicked and takes it back when another widget is clicked, and a click on the scene is not a
+/// click on a widget — so a person who types in a search box and then goes back to the viewport
+/// leaves the box holding the keyboard, and every key the editor binds is a letter going into it.
+///
+/// Returns [`status::UNSUPPORTED`] where there is no interface.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_xui_blur() -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bevy_extended_ui::widgets::UIWidgetState;
+
+            crate::state::with_world(|world| {
+                let mut query = world.query::<&mut UIWidgetState>();
+
+                for mut state in query.iter_mut(world) {
+                    if state.focused {
+                        state.focused = false;
+                    }
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// How many times the set of open documents has been rebuilt.
+///
+/// Every widget of every open document is respawned when the list changes, so every element
+/// handle anything is holding becomes a dead entity at that moment. A caller that remembers
+/// handles remembers this number beside them and throws the lot away when it moves, which is
+/// exact where waiting a fixed number of frames was a guess.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_xui_generation() -> u64 {
+    crate::interop::guard_with(0u64, || {
+        #[cfg(not(feature = "editor"))]
+        {
+            0u64
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            crate::state::with_world_opt(|world| {
+                world
+                    .get_resource::<live::Documents>()
+                    .map_or(0, |documents| documents.generation)
+            })
+            .unwrap_or(0)
         }
     })
 }

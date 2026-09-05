@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 55;
+    internal const int ExpectedAbiVersion = 56;
 
     static Native() => NativeLoader.Initialize();
 
@@ -517,6 +517,21 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_xui_set_rect(
         ulong entity, float left, float top, float width, float height);
+
+    /// <summary>Caps how large an element may get. NaN leaves a limit alone, infinity removes it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_set_limits(ulong entity, float maxWidth, float maxHeight);
+
+    /// <summary>Takes the keyboard away from whatever has it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_blur();
+
+    /// <summary>How many times the set of open documents has been rebuilt.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial ulong bcs_xui_generation();
 
     /// <summary>Points an image element at a file, relative to the asset root.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]

@@ -555,26 +555,36 @@ button:hover {
 }
 
 /*
- * The right half of the browser: what is in the directory, as a grid that wraps.
+ * The right half of the browser: the box the grid sits in.
  *
  * `flex-basis: 0` with `flex-grow: 1` is what makes it take the width the tree left over rather
  * than the width its own contents want. Sized by its contents it would be as wide as every tile
  * laid end to end, which is a single row running off the side of the panel — there is nothing to
  * wrap against until the box has a width of its own.
+ *
+ * A column, so the grid inside it is as tall as its own rows. The interface does not read
+ * `align-content`, so a wrapping box that is taller than its lines spreads them down its height
+ * with no way to say otherwise; giving the lines their own box takes the question away.
  */
-.tiles {
+.tilepane {
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: 0;
     min-width: 0;
-    align-content: flex-start;
-    column-gap: 6px;
-    row-gap: 6px;
     padding-right: 2px;
     overflow: hidden;
+}
+
+/* The grid itself: one line of tiles after another, each line as tall as a tile. */
+.tiles {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    column-gap: 6px;
+    row-gap: 6px;
 }
 
 /*

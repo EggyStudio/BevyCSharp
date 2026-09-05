@@ -207,14 +207,62 @@ public static unsafe class Xui
     /// Places an element at an absolute rectangle, in logical pixels.
     /// </summary>
     /// <remarks>
-    /// Any of the four may be <see cref="float.NaN"/>, which leaves that edge to the layout: a
-    /// width of <c>NaN</c> is a panel as wide as its contents.
+    /// <para>
+    /// Any of the four may be <see cref="float.NaN"/>, which leaves that edge untouched, so a
+    /// width of <c>NaN</c> keeps whatever the stylesheet said.
+    /// </para>
+    /// <para>
+    /// <see cref="Auto"/> is the third answer: it puts a field back to being decided by the
+    /// contents. Something once given a height measures that height ever after, so without a way
+    /// to undo it there is no asking what its contents want a second time.
+    /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">The element is gone or is not laid out.</exception>
     public static void SetRect(Entity element, float left, float top, float width, float height) =>
         Native.Check(
             Native.bcs_xui_set_rect(element.Bits, left, top, width, height),
             $"placing {element}");
+
+    /// <summary>Hands a dimension back to the contents, where <see cref="float.NaN"/> leaves it.</summary>
+    public const float Auto = float.PositiveInfinity;
+
+    /// <summary>
+    /// Caps how large an element may get, without saying how large it is.
+    /// </summary>
+    /// <remarks>
+    /// What a panel that is as tall as its contents up to a limit needs. A height decides the
+    /// measurement; a maximum leaves the measurement to the contents and only stops it running
+    /// past the room there is. <see cref="float.NaN"/> leaves a limit alone and
+    /// <see cref="Auto"/> removes it.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The element is gone or is not laid out.</exception>
+    public static void SetLimits(Entity element, float maxWidth, float maxHeight) =>
+        Native.Check(
+            Native.bcs_xui_set_limits(element.Bits, maxWidth, maxHeight),
+            $"limiting {element}");
+
+    /// <summary>
+    /// Takes the keyboard away from whatever has it.
+    /// </summary>
+    /// <remarks>
+    /// There is no other way out of a text field. A widget takes focus when it is clicked and
+    /// loses it when another widget is clicked, and a click on the scene is not a click on a
+    /// widget — so somebody who types in a search box and then goes back to the viewport leaves
+    /// the box holding the keyboard, and every key an editor binds is a letter going into it.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">This build has no editor profile.</exception>
+    public static void Blur() => Native.Check(Native.bcs_xui_blur(), "clearing the focus");
+
+    /// <summary>
+    /// How many times the set of open documents has been rebuilt.
+    /// </summary>
+    /// <remarks>
+    /// Every widget of every open document is respawned when the list changes, so every element
+    /// handle anything holds becomes a dead entity at that moment. Remembering this number beside
+    /// the handles and throwing them away when it moves is exact, where waiting a fixed number of
+    /// frames and hoping was a guess.
+    /// </remarks>
+    public static ulong Generation => App.HasEditor ? Native.bcs_xui_generation() : 0;
 
     /// <summary>
     /// Shows or hides an element and everything under it.
