@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Bevy.Generator;
 
 /// <summary>
-/// Turns <c>[EditorPanel]</c> classes into the wiring between a document and its bindings.
+/// Turns <c>[UiPanel]</c> classes into the wiring between a document and its bindings.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -26,13 +26,13 @@ namespace Bevy.Generator;
 [Generator(LanguageNames.CSharp)]
 public sealed class PanelGenerator : IIncrementalGenerator
 {
-    private const string PanelAttribute = "BevyCSharp.Editor.Framework.EditorPanelAttribute";
-    private const string BindAttribute = "BevyCSharp.Editor.Framework.BindAttribute";
-    private const string CommandAttribute = "BevyCSharp.Editor.Framework.CommandAttribute";
-    private const string ChangeAttribute = "BevyCSharp.Editor.Framework.OnChangeAttribute";
-    private const string ShowAttribute = "BevyCSharp.Editor.Framework.ShowAttribute";
-    private const string RefreshAttribute = "BevyCSharp.Editor.Framework.OnRefreshAttribute";
-    private const string ContextAttribute = "BevyCSharp.Editor.Framework.ContextAttribute";
+    private const string PanelAttribute = "Bevy.UiPanelAttribute";
+    private const string BindAttribute = "Bevy.BindAttribute";
+    private const string CommandAttribute = "Bevy.CommandAttribute";
+    private const string ChangeAttribute = "Bevy.OnChangeAttribute";
+    private const string ShowAttribute = "Bevy.ShowAttribute";
+    private const string RefreshAttribute = "Bevy.OnRefreshAttribute";
+    private const string ContextAttribute = "Bevy.ContextAttribute";
 
     /// <inheritdoc/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -70,7 +70,7 @@ public sealed class PanelGenerator : IIncrementalGenerator
     /// <summary>The model for one class, plus anything wrong with it.</summary>
     private sealed record ExtractResult(PanelModel? Model, ImmutableArray<Diagnostic> Diagnostics);
 
-    /// <summary>Reads one <c>[EditorPanel]</c> class into a model, validating as it goes.</summary>
+    /// <summary>Reads one <c>[UiPanel]</c> class into a model, validating as it goes.</summary>
     private static ExtractResult? Extract(
         GeneratorAttributeSyntaxContext context, CancellationToken token)
     {

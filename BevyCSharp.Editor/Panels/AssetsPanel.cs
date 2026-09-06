@@ -18,10 +18,10 @@ namespace BevyCSharp.Editor.Panels;
 /// than one list that keeps changing under the pointer.
 /// </para>
 /// </remarks>
-[EditorPanel(
+[UiPanel(
     "panels/assets.html",
     Root = "#assets",
-    Dock = EditorDock.Bottom)]
+    Dock = UiDock.Bottom)]
 public sealed partial class AssetsPanel
 {
     /// <summary>How many directories the tree can draw.</summary>

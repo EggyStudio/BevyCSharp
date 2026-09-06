@@ -27,17 +27,17 @@ internal static class PanelEmitter
             source.Append("\nnamespace ").Append(model.Namespace).Append(";\n");
 
         source.Append("\npartial class ").Append(model.Name)
-            .Append(" : global::BevyCSharp.Editor.Framework.IEditorPanel\n{\n");
+            .Append(" : global::Bevy.IUiPanel\n{\n");
 
         source.Append("    /// <summary>The window this panel is showing in.</summary>\n")
-            .Append("    public global::BevyCSharp.Editor.Framework.EditorWindow? Window ")
+            .Append("    public global::Bevy.UiWindow? Window ")
             .Append("{ get; private set; }\n\n");
 
         EmitChrome(source, model);
 
         source.Append("    /// <summary>Opens the panel's document.</summary>\n")
             .Append("    public void Open() => Window = ")
-            .Append("global::BevyCSharp.Editor.Framework.EditorWindow.Open(\"")
+            .Append("global::Bevy.UiWindow.Open(\"")
             .Append(model.Document).Append("\", Chrome);\n\n");
 
         source.Append("    /// <summary>Closes it again.</summary>\n")
@@ -67,22 +67,19 @@ internal static class PanelEmitter
         var chrome = model.Chrome;
 
         source.Append("    /// <summary>What this panel declared about itself.</summary>\n")
-            .Append("    private static readonly global::BevyCSharp.Editor.Framework.PanelChrome ")
-            .Append("Declared = new(\n")
+            .Append("    private static readonly global::Bevy.PanelChrome Declared = new(\n")
+            .Append("        ").Append(Text(model.Document)).Append(",\n")
             .Append("        ").Append(Text(chrome.Root)).Append(",\n")
-            .Append("        new global::BevyCSharp.Editor.Framework.PanelPlacement(\n")
-            .Append("            (global::BevyCSharp.Editor.Framework.EditorDock)")
-            .Append(chrome.Dock).Append(",\n")
-            .Append("            ").Append(Number(chrome.X)).Append(",\n")
-            .Append("            ").Append(Number(chrome.Y)).Append(",\n")
-            .Append("            ").Append(Number(chrome.Width)).Append(",\n")
-            .Append("            ").Append(Number(chrome.Height)).Append(",\n")
-            .Append("            ").Append(chrome.Order).Append("),\n")
-            .Append("        (global::BevyCSharp.Editor.Framework.PanelDismiss)")
-            .Append(chrome.Dismiss).Append(",\n")
+            .Append("        ").Append(chrome.Dock).Append(",\n")
+            .Append("        ").Append(Number(chrome.X)).Append(",\n")
+            .Append("        ").Append(Number(chrome.Y)).Append(",\n")
+            .Append("        ").Append(Number(chrome.Width)).Append(",\n")
+            .Append("        ").Append(Number(chrome.Height)).Append(",\n")
+            .Append("        ").Append(chrome.Order).Append(",\n")
+            .Append("        ").Append(chrome.Dismiss).Append(",\n")
             .Append("        ").Append(chrome.Layer).Append(");\n\n")
             .Append("    /// <summary>What this panel declared about itself.</summary>\n")
-            .Append("    public global::BevyCSharp.Editor.Framework.PanelChrome Chrome => Declared;\n\n");
+            .Append("    public global::Bevy.PanelChrome Chrome => Declared;\n\n");
     }
 
     /// <summary>What a repeated binding writes to an element past the end of its array.</summary>
@@ -130,7 +127,7 @@ internal static class PanelEmitter
                 // value, which is what makes a list that got shorter look like one.
                 source.Append("\n        for (var __i = 0; __i < ").Append(binding.Count)
                     .Append("; __i++)\n        {\n")
-                    .Append("            global::BevyCSharp.Editor.Framework.PanelBinding.Pull")
+                    .Append("            global::Bevy.PanelBinding.Pull")
                     .Append(binding.Kind).Append("(\n")
                     .Append("                window.Element($\"").Append(binding.Element)
                     .Append("-{__i}\"),\n")
@@ -144,7 +141,7 @@ internal static class PanelEmitter
                 continue;
             }
 
-            source.Append("\n        global::BevyCSharp.Editor.Framework.PanelBinding.Pull")
+            source.Append("\n        global::Bevy.PanelBinding.Pull")
                 .Append(binding.Kind).Append("(window.Element(\"").Append(binding.Element)
                 .Append("\"), ");
 
@@ -186,7 +183,7 @@ internal static class PanelEmitter
                     if (binding.Kind == BindKind.Number && binding.NumericType != "float")
                         source.Append('(').Append(binding.NumericType).Append(')');
 
-                    source.Append("global::BevyCSharp.Editor.Framework.PanelBinding.Push")
+                    source.Append("global::Bevy.PanelBinding.Push")
                         .Append(binding.Kind).Append("(element, ");
 
                     if (binding.Kind == BindKind.Number) source.Append("(float)");
@@ -209,7 +206,7 @@ internal static class PanelEmitter
                 if (binding.Kind == BindKind.Number && binding.NumericType != "float")
                     source.Append('(').Append(binding.NumericType).Append(')');
 
-                source.Append("global::BevyCSharp.Editor.Framework.PanelBinding.Push")
+                source.Append("global::Bevy.PanelBinding.Push")
                     .Append(binding.Kind).Append("(element, ");
 
                 if (binding.Kind == BindKind.Number) source.Append("(float)");

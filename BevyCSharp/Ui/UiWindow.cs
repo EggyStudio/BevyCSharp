@@ -1,6 +1,4 @@
-using Bevy;
-
-namespace BevyCSharp.Editor.Framework;
+namespace Bevy;
 
 /// <summary>
 /// One panel that is open on screen.
@@ -19,7 +17,7 @@ namespace BevyCSharp.Editor.Framework;
 /// exists and a panel reads its own elements every frame.
 /// </para>
 /// </remarks>
-public sealed class EditorWindow
+public sealed class UiWindow
 {
     private readonly Dictionary<string, Entity> _elements = [];
     private ulong _builtAt = ulong.MaxValue;
@@ -28,7 +26,7 @@ public sealed class EditorWindow
     private bool? _shown;
     private int? _layered;
 
-    private EditorWindow(string path, PanelChrome chrome, UiDocument document)
+    private UiWindow(string path, PanelChrome chrome, UiDocument document)
     {
         Path = path;
         Chrome = chrome;
@@ -58,8 +56,8 @@ public sealed class EditorWindow
     public Entity Root => Chrome.Root is { } root ? Element(root) : Entity.None;
 
     /// <summary>Opens a document as a window.</summary>
-    /// <exception cref="Bevy.Interop.BevyNativeException">This build has no editor profile.</exception>
-    public static EditorWindow Open(string path, PanelChrome chrome) =>
+    /// <exception cref="Bevy.Interop.BevyNativeException">No interface in this build.</exception>
+    public static UiWindow Open(string path, PanelChrome chrome) =>
         new(path, chrome, Xui.Open(path));
 
     /// <summary>
@@ -98,11 +96,11 @@ public sealed class EditorWindow
     }
 
     /// <summary>The frame being drawn, so a rebuild can be waited out without being told.</summary>
-    internal static ulong Frame { get; set; }
+    public static ulong Frame { get; set; }
 
     /// <summary>How many times the interface has rebuilt every open document.</summary>
-    /// <remarks>Read once a frame by the shell, because every window asks and the answer is one.</remarks>
-    internal static ulong Generation { get; set; }
+    /// <remarks>Read once a frame, because every window asks and the answer is one.</remarks>
+    public static ulong Generation { get; set; }
 
     /// <summary>How long the widgets of a rebuild take to arrive, in frames.</summary>
     private const ulong RebuildFrames = 24;
@@ -188,47 +186,19 @@ public sealed class EditorWindow
     /// Shows or hides the whole window.
     /// </summary>
     /// <remarks>
-    /// Read before written, and not remembered. The interface puts an element's display back to
-    /// the stylesheet's answer whenever it restyles the widget, so a window told once that it is
-    /// hidden reappears the next time anything is written into it. Asking what it is now costs one
-    /// call and is the only answer that stays true.
+    /// Remembered rather than read back, which it could not be until the interface kept what it
+    /// was told: showing and hiding is a decision the stylesheet no longer undoes, so what was
+    /// written last is what is in force.
     /// </remarks>
     public void Show(bool visible)
     {
         var root = Root;
         if (root.IsNone) return;
-        if (Xui.IsVisible(root) == visible) return;
+        if (_shown == visible) return;
 
         Xui.SetVisible(root, visible);
         _shown = visible;
     }
-
-    /// <summary>
-    /// Draws the window, or stops drawing it while leaving it laid out.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// What a panel that does not yet know its own size, or is not yet where it belongs, is put in
-    /// meanwhile. Hiding it would take it out of the layout, so it would never find out how large
-    /// it is; this leaves it measuring itself where nobody can see it.
-    /// </para>
-    /// <para>
-    /// Remembered rather than read back, because nothing in the interface writes this component,
-    /// unlike the display property.
-    /// </para>
-    /// </remarks>
-    public void Draw(bool drawn)
-    {
-        var root = Root;
-        if (root.IsNone) return;
-        if (_drawn == drawn) return;
-
-        Xui.SetDrawn(root, drawn);
-        _drawn = drawn;
-    }
-
-    /// <summary>Whether the window is being drawn.</summary>
-    private bool _drawn = true;
 
     /// <summary>
     /// Puts the window in front of or behind the others.

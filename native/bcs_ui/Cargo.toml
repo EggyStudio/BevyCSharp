@@ -1,0 +1,83 @@
+[package]
+name = "bcs_ui"
+version.workspace = true
+edition.workspace = true
+license = "Apache-2.0"
+description = "Documents, stylesheets and widgets for Bevy: the interface BevyCSharp draws with."
+
+[lib]
+name = "bcs_ui"
+path = "src/lib.rs"
+
+[features]
+# What this project builds. The parts of the original that need a system library or a service of
+# their own are left out rather than merely switched off, so nothing here can pull SQLite, a
+# native file dialog or an SVG rasteriser into a game's build by accident.
+default = ["css-breakpoints"]
+css-breakpoints = []
+
+# The source still carries the branches for the parts that were left out, so that it reads as it
+# did where nothing changed and so the diff against where it came from stays small. Their feature
+# names are gone from the list above, which is what this quietens: the code behind them is not
+# built here and the dependencies it needs are not declared.
+[lints.rust]
+unexpected_cfgs = "allow"
+
+[dependencies.bcs_ui_macros]
+path = "../bcs_ui_macros"
+
+[dependencies.bevy]
+version = "0.19.1"
+default-features = false
+features = [
+    "bevy_asset",
+    "bevy_color",
+    "bevy_core_pipeline",
+    "bevy_ui_render",
+    "bevy_render",
+    "bevy_text",
+    "bevy_ui",
+    "default_font",
+    "multi_threaded",
+    "picking",
+    "ui_picking",
+    "png",
+    "jpeg",
+    "bevy_picking",
+    "custom_cursor",
+    "bevy_winit",
+    "x11",
+    "bevy_log",
+    "keyboard",
+    "mouse",
+    "touch",
+]
+
+# Documents are parsed as HTML and stylesheets as CSS, by the two crates that do those jobs
+# properly. Everything else here is ours.
+[dependencies.kuchiki]
+version = "0.8.1"
+
+[dependencies.lightningcss]
+version = "1.0.0-alpha.71"
+
+[dependencies.once_cell]
+version = "1.21.4"
+
+[dependencies.regex]
+version = "1.12.4"
+
+[dependencies.base64]
+version = "0.22.1"
+
+[dependencies.inventory]
+version = "0.3.24"
+
+[dependencies.serde]
+version = "1"
+
+[dependencies.serde_json]
+version = "1"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+arboard = "3.5.0"

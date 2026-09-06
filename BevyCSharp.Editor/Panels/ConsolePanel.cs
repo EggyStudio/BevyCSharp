@@ -11,10 +11,10 @@ namespace BevyCSharp.Editor.Panels;
 /// one: a script that will not compile says why, and a person who is editing scripts inside the
 /// editor should not have to find the terminal it was started from to read it.
 /// </remarks>
-[EditorPanel(
+[UiPanel(
     "panels/console.html",
     Root = "#console",
-    Dock = EditorDock.Bottom,
+    Dock = UiDock.Bottom,
     Order = 10)]
 public sealed partial class ConsolePanel
 {

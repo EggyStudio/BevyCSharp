@@ -21,10 +21,10 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 public static class EditorShell
 {
-    private static readonly List<IEditorPanel> Panels = [];
+    private static readonly List<IUiPanel> Panels = [];
 
     /// <summary>Panels opened during this tick, which nothing may dismiss yet.</summary>
-    private static readonly HashSet<IEditorPanel> Fresh = [];
+    private static readonly HashSet<IUiPanel> Fresh = [];
 
     /// <summary>
     /// Panels that are loaded but not on screen.
@@ -37,10 +37,10 @@ public static class EditorShell
     /// document stays where it was, the panel keeps reading it, and all that changes is whether it
     /// is drawn and whether the layout makes room for it.
     /// </remarks>
-    private static readonly HashSet<IEditorPanel> Concealed = [];
+    private static readonly HashSet<IUiPanel> Concealed = [];
 
     /// <summary>The panels currently registered, open or not.</summary>
-    public static IReadOnlyList<IEditorPanel> Open => Panels;
+    public static IReadOnlyList<IUiPanel> Open => Panels;
 
     /// <summary>
     /// Where the panels are.
@@ -69,7 +69,7 @@ public static class EditorShell
             + "has loaned it out. Read it from a panel's Pull, Push, Changed or command method.");
 
     /// <summary>Adds a panel and opens its document.</summary>
-    public static T Show<T>(T panel) where T : IEditorPanel
+    public static T Show<T>(T panel) where T : IUiPanel
     {
         ArgumentNullException.ThrowIfNull(panel);
 
@@ -88,12 +88,12 @@ public static class EditorShell
     /// context menu under the cursor. Placing it here rather than in the panel's own declaration
     /// is what makes one flyout class usable from everywhere.
     /// </remarks>
-    public static T ShowAt<T>(T panel, float x, float y) where T : IEditorPanel
+    public static T ShowAt<T>(T panel, float x, float y) where T : IUiPanel
     {
         ArgumentNullException.ThrowIfNull(panel);
 
         Show(panel);
-        Layout.Place(panel, panel.Chrome.Placement.MovedTo(x, y));
+        Layout.Place(panel, panel.Chrome.Placement().MovedTo(x, y));
         return panel;
     }
 
@@ -157,7 +157,7 @@ public static class EditorShell
     {
         var (clearX, clearY) = Clear(x, y);
 
-        Layout.Place(menu, menu.Chrome.Placement.MovedTo(clearX, clearY));
+        Layout.Place(menu, menu.Chrome.Placement().MovedTo(clearX, clearY));
         Reveal(menu);
 
         return menu;
@@ -217,8 +217,8 @@ public static class EditorShell
     }
 
     /// <summary>Whether a panel in this dock is something a menu has to step out from under.</summary>
-    private static bool Obscures(EditorDock dock) =>
-        dock is EditorDock.Left or EditorDock.Right or EditorDock.Bottom;
+    private static bool Obscures(UiDock dock) =>
+        dock is UiDock.Left or UiDock.Right or UiDock.Bottom;
 
     /// <summary>
     /// Keeps a panel that would otherwise dismiss itself, or lets it go again.
@@ -228,7 +228,7 @@ public static class EditorShell
     /// thing about that which a person changes while it is open, so it is a set the shell holds
     /// rather than a property of the declaration.
     /// </remarks>
-    public static void Pin(IEditorPanel panel, bool pinned)
+    public static void Pin(IUiPanel panel, bool pinned)
     {
         ArgumentNullException.ThrowIfNull(panel);
 
@@ -237,7 +237,7 @@ public static class EditorShell
     }
 
     /// <summary>Panels that have been pinned, and so no longer dismiss on an outside press.</summary>
-    private static readonly HashSet<IEditorPanel> Pinned = [];
+    private static readonly HashSet<IUiPanel> Pinned = [];
 
     /// <summary>Closes any menu that is open.</summary>
     public static void CloseMenus()
@@ -265,7 +265,7 @@ public static class EditorShell
     }
 
     /// <summary>What a sheet is standing over, so it can be put back when the sheet goes.</summary>
-    private static readonly List<IEditorPanel> Covered = [];
+    private static readonly List<IUiPanel> Covered = [];
 
     /// <summary>Whether a sheet was up the last time this looked.</summary>
     private static bool _sheeted;
@@ -294,7 +294,7 @@ public static class EditorShell
         foreach (var panel in Panels)
         {
             if (Concealed.Contains(panel)) continue;
-            if (Layout.PlacementOf(panel).Dock != EditorDock.Sheet) continue;
+            if (Layout.PlacementOf(panel).Dock != UiDock.Sheet) continue;
 
             open = true;
             break;
@@ -311,7 +311,7 @@ public static class EditorShell
             foreach (var panel in Panels.ToArray())
             {
                 if (Concealed.Contains(panel)) continue;
-                if (Layout.PlacementOf(panel).Dock == EditorDock.Sheet) continue;
+                if (Layout.PlacementOf(panel).Dock == UiDock.Sheet) continue;
                 if (!Under(panel, column)) continue;
 
                 Covered.Add(panel);
@@ -328,7 +328,7 @@ public static class EditorShell
     }
 
     /// <summary>Whether any of a panel is inside a rectangle.</summary>
-    private static bool Under(IEditorPanel panel, UiRect area)
+    private static bool Under(IUiPanel panel, UiRect area)
     {
         if (panel.Window is not { IsOpen: true } window) return false;
         if (!Xui.TryRect(window.Root, out var rect)) return false;
@@ -341,9 +341,9 @@ public static class EditorShell
     }
 
     /// <summary>The panels that are on screen, in the order they were opened.</summary>
-    private static List<IEditorPanel> Showing()
+    private static List<IUiPanel> Showing()
     {
-        var showing = new List<IEditorPanel>(Panels.Count);
+        var showing = new List<IUiPanel>(Panels.Count);
 
         foreach (var panel in Panels)
         {
@@ -354,15 +354,15 @@ public static class EditorShell
     }
 
     /// <summary>The open panel of this type, or <see langword="null"/>.</summary>
-    public static T? Find<T>() where T : class, IEditorPanel =>
+    public static T? Find<T>() where T : class, IUiPanel =>
         Panels.OfType<T>().FirstOrDefault();
 
     /// <summary>Whether a panel is loaded and on screen, rather than loaded and put away.</summary>
-    public static bool IsShowing(IEditorPanel panel) =>
+    public static bool IsShowing(IUiPanel panel) =>
         Panels.Contains(panel) && !Concealed.Contains(panel);
 
     /// <summary>Takes a panel off the screen without unloading it.</summary>
-    public static void Conceal(IEditorPanel panel)
+    public static void Conceal(IUiPanel panel)
     {
         ArgumentNullException.ThrowIfNull(panel);
 
@@ -374,7 +374,7 @@ public static class EditorShell
     }
 
     /// <summary>Puts a concealed panel back on the screen.</summary>
-    public static void Reveal(IEditorPanel panel)
+    public static void Reveal(IUiPanel panel)
     {
         ArgumentNullException.ThrowIfNull(panel);
 
@@ -401,7 +401,7 @@ public static class EditorShell
     /// document is loaded once and stays, so no amount of showing and hiding disturbs anything
     /// else on screen.
     /// </remarks>
-    public static void Toggle<T>(Func<T> create) where T : class, IEditorPanel =>
+    public static void Toggle<T>(Func<T> create) where T : class, IUiPanel =>
         ToggleAt(create, null);
 
     /// <summary>The same, putting the panel somewhere when it is fetched back.</summary>
@@ -410,14 +410,14 @@ public static class EditorShell
     /// time. <paramref name="where"/> is asked at the moment it is shown, not when it was bound.
     /// </remarks>
     public static void ToggleAt<T>(Func<T> create, Func<(float X, float Y)>? where)
-        where T : class, IEditorPanel
+        where T : class, IUiPanel
     {
         ArgumentNullException.ThrowIfNull(create);
 
         if (Find<T>() is not { } existing)
         {
             var made = Show(create());
-            if (where is not null) Layout.Place(made, made.Chrome.Placement.MovedTo(where()));
+            if (where is not null) Layout.Place(made, made.Chrome.Placement().MovedTo(where()));
 
             return;
         }
@@ -431,13 +431,13 @@ public static class EditorShell
             return;
         }
 
-        if (where is not null) Layout.Place(existing, existing.Chrome.Placement.MovedTo(where()));
+        if (where is not null) Layout.Place(existing, existing.Chrome.Placement().MovedTo(where()));
 
         Reveal(existing);
     }
 
     /// <summary>The panel of this type that is on screen, or <see langword="null"/>.</summary>
-    public static T? Showing<T>() where T : class, IEditorPanel =>
+    public static T? Showing<T>() where T : class, IUiPanel =>
         Find<T>() is { } panel && IsShowing(panel) ? panel : null;
 
     /// <summary>
@@ -449,7 +449,7 @@ public static class EditorShell
     /// calls this (showing and hiding go through <see cref="Conceal"/> and <see cref="Reveal"/>)
     /// and it is here for a panel that will not be wanted again and for shutting down.
     /// </remarks>
-    public static void Hide(IEditorPanel panel)
+    public static void Hide(IUiPanel panel)
     {
         ArgumentNullException.ThrowIfNull(panel);
 
@@ -476,7 +476,7 @@ public static class EditorShell
         foreach (var panel in Panels.ToArray())
         {
             if (Concealed.Contains(panel)) continue;
-            if (Layout.PlacementOf(panel).Dock != EditorDock.Sheet) continue;
+            if (Layout.PlacementOf(panel).Dock != UiDock.Sheet) continue;
 
             Conceal(panel);
             return true;
@@ -485,7 +485,7 @@ public static class EditorShell
         foreach (var panel in Panels.ToArray())
         {
             if (Concealed.Contains(panel)) continue;
-            if (panel.Chrome.Dismiss != PanelDismiss.OnOutsideClick) continue;
+            if (panel.Chrome.Dismissal() != UiDismiss.OnOutsideClick) continue;
             if (Pinned.Contains(panel)) continue;
 
             Conceal(panel);
@@ -535,8 +535,8 @@ public static class EditorShell
         // when this moves, and the events drained below are dispatched by comparing an element
         // against what a panel holds: reading it afterwards would spend one frame matching clicks
         // against widgets that no longer exist.
-        EditorWindow.Frame = ctx.Time.FrameCount;
-        EditorWindow.Generation = Xui.Generation;
+        UiWindow.Frame = ctx.Time.FrameCount;
+        UiWindow.Generation = Xui.Generation;
 
         PanelBinding.Frame = ctx.Time.FrameCount;
 
@@ -551,7 +551,7 @@ public static class EditorShell
         // Which panels took an edit this frame. A drag reports every frame it moves, and a panel
         // that applies its values to the engine should do that once a frame rather than once per
         // binding that happened to change in it.
-        var edited = new HashSet<IEditorPanel>();
+        var edited = new HashSet<IUiPanel>();
 
         foreach (var report in Xui.Drain())
         {
@@ -833,7 +833,7 @@ public static class EditorShell
     {
         foreach (var panel in Panels)
         {
-            if (panel.Chrome.Placement.Dock != EditorDock.Strip) continue;
+            if (panel.Chrome.Placement().Dock != UiDock.Strip) continue;
             if (panel.Window?.Measure() is { } rect) return rect.Height;
         }
 
@@ -948,7 +948,7 @@ public static class EditorShell
 
         foreach (var panel in Panels.ToArray())
         {
-            if (panel.Chrome.Dismiss != PanelDismiss.OnOutsideClick) continue;
+            if (panel.Chrome.Dismissal() != UiDismiss.OnOutsideClick) continue;
             if (Concealed.Contains(panel)) continue;
             if (Pinned.Contains(panel)) continue;
             if (Fresh.Contains(panel)) continue;
@@ -973,8 +973,8 @@ public static class EditorShell
     /// finds it closed and opens it again, so the button that opened it cannot close it. Whoever
     /// answers the click needs to know the press had already put it away, which is what this says.
     /// </remarks>
-    private static readonly HashSet<IEditorPanel> JustDismissed = [];
+    private static readonly HashSet<IUiPanel> JustDismissed = [];
 
     /// <summary>Whether the press now in flight is what put a panel away.</summary>
-    public static bool DismissedByThisPress(IEditorPanel panel) => JustDismissed.Contains(panel);
+    public static bool DismissedByThisPress(IUiPanel panel) => JustDismissed.Contains(panel);
 }

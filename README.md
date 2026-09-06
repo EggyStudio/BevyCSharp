@@ -1404,11 +1404,52 @@ every platform.
 
 ---
 
+## Interfaces, for a game and for the editor
+
+An interface is **three files**: the structure is HTML, the appearance is CSS, and a C# class says
+what is bound to what. It is the same mechanism whether the interface is a game's heads up display
+or the editor's inspector, and it is part of the library rather than part of the editor.
+
+```csharp
+[UiPanel("ui/hud.html", Root = "#hud")]
+public sealed partial class HudPanel
+{
+    [Bind("#hud-frames", Mode = BindMode.OneWay)] public string Frames { get; private set; } = "0";
+    [Bind("#hud-spin")]                           public bool Spinning = true;
+
+    [OnRefresh]           public void Read() { /* runs before the values are written out */ }
+    [Command("#hud-add")] public void AddCube() { /* runs when the button is clicked */ }
+}
+```
+
+A game opens one and keeps it running with a `UiHost`, which is the whole of the plumbing:
+
+```csharp
+_host = new UiHost();
+_host.Show(new HudPanel());
+
+// once a frame
+_host.Tick(ctx);
+```
+
+`BevyCSharp.Sample` does exactly that, in `Panels/HudPanel.cs` and `assets/ui/hud.*`. It needs a
+bridge with the interface compiled in (`build/build-native.sh --editor`) and `Config.HtmlUi` asked
+for.
+
+The interface itself is **this project's own code**, in `native/bcs_ui`. It began as a copy of
+[`bevy_extended_ui`](https://github.com/exepta/bevy_extended_ui) under Apache 2.0, and
+`native/bcs_ui/NOTICE.md` says what was taken, what was left out and why. Owning it is what makes
+the shortcomings fixable rather than workaroundable: what a program decides about an element's
+box now survives the stylesheet being applied again, a document's body is the window so an element
+can be anchored to its right or bottom edge, `align-content` is read, and a widget that comes and
+goes inside a frame no longer ends the process.
+
 ## The editor
 
 `BevyCSharp.Editor` runs the same way the sample does and is built on the same library, with no
 privileged path into the engine: the editor is a BevyCSharp app whose behaviors happen to draw an
-editor.
+editor. Its panels are the same `[UiPanel]` classes a game writes, with a shell on top that adds
+docks, dismissal and a viewport.
 
 ```bash
 build/build-native.sh --editor
@@ -1418,13 +1459,11 @@ dotnet run --project BevyCSharp.Editor
 It opens with the **world** on the left, the **tools** along the top, and nothing else. Selecting
 something opens the panel that describes it; everything else is behind the hamburger.
 
-A **panel is three files**. The structure is HTML, the appearance is CSS, and a C# class says what
-is bound to what. Nothing looks an element up or dispatches a click; the attributes say what is
-tied to what, and the generator writes the rest:
+A **panel is three files**, as above. The editor's are declared the same way, with a dock saying
+where the shell puts them:
 
 ```csharp
-[EditorPanel("panels/rendering.html", Root = "#rendering", Handle = "#rendering-title",
-             Dock = EditorDock.Right)]
+[UiPanel("panels/rendering.html", Root = "#rendering", Dock = UiDock.Right)]
 public sealed partial class RenderingPanel(Entity camera)
 {
     [Bind("#bloom")]     public bool Bloom = true;

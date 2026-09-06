@@ -19,10 +19,10 @@ namespace BevyCSharp.Editor.Panels;
 /// kind of value adds a drawer, and this file does not change.
 /// </para>
 /// </remarks>
-[EditorPanel(
+[UiPanel(
     "panels/data.html",
     Root = "#data",
-    Dock = EditorDock.Right)]
+    Dock = UiDock.Right)]
 public sealed partial class DataPanel : IInspectorRows
 {
     /// <summary>

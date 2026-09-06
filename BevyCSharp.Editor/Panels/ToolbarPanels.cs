@@ -18,10 +18,10 @@ namespace BevyCSharp.Editor.Panels;
 /// The left corner is where the menu lives, and beside it whatever acts on the editor as a whole.
 /// </para>
 /// </remarks>
-[EditorPanel(
+[UiPanel(
     "panels/barleft.html",
     Root = "#barleft",
-    Dock = EditorDock.ViewportTopLeft,
+    Dock = UiDock.ViewportTopLeft,
     Layer = 20)]
 public sealed partial class LeftBarPanel
 {
@@ -63,10 +63,10 @@ public sealed partial class LeftBarPanel
 }
 
 /// <summary>The buttons along the top of the viewport: what a drag does.</summary>
-[EditorPanel(
+[UiPanel(
     "panels/barcentre.html",
     Root = "#barcentre",
-    Dock = EditorDock.ViewportTop,
+    Dock = UiDock.ViewportTop,
     Layer = 20)]
 public sealed partial class CentreBarPanel
 {
@@ -108,10 +108,10 @@ public sealed partial class CentreBarPanel
 }
 
 /// <summary>The buttons in the viewport's top right corner: what the editor is doing.</summary>
-[EditorPanel(
+[UiPanel(
     "panels/barright.html",
     Root = "#barright",
-    Dock = EditorDock.ViewportTopRight,
+    Dock = UiDock.ViewportTopRight,
     Layer = 20)]
 public sealed partial class RightBarPanel
 {
@@ -167,10 +167,10 @@ public sealed partial class RightBarPanel
 /// square says where it ended up.
 /// </para>
 /// </remarks>
-[EditorPanel(
+[UiPanel(
     "panels/barbottom.html",
     Root = "#barbottom",
-    Dock = EditorDock.ViewportBottomRight,
+    Dock = UiDock.ViewportBottomRight,
     Layer = 20)]
 public sealed partial class BottomBarPanel
 {
@@ -237,7 +237,7 @@ internal static class ToolbarSlots
     internal static void Fill(
         ToolbarSlot slot,
         string prefix,
-        EditorWindow? window,
+        UiWindow? window,
         string[] labels,
         bool[] shown,
         bool[] labelled,

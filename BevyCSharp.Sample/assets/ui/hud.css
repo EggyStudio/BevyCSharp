@@ -1,0 +1,94 @@
+/*
+ * A game's heads up display.
+ *
+ * Everything here is ordinary CSS, applied to the document beside it. A game that wants a
+ * different look changes this file and nothing else, and it can do it while the game is running.
+ */
+.hud {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    width: 220px;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 12px;
+    row-gap: 6px;
+    background-color: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    color: #d2d2d2;
+    pointer-events: auto;
+}
+
+.hud-title {
+    margin: 0;
+    font-size: 13px;
+    color: #eeeeee;
+    text-transform: uppercase;
+}
+
+.hud-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 20px;
+    column-gap: 8px;
+}
+
+.hud-name {
+    margin: 0;
+    font-size: 11px;
+    color: #c4c4c4;
+}
+
+.hud-value {
+    margin: 0;
+    font-size: 11px;
+    color: #d2d2d2;
+}
+
+.hud-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 22px;
+    margin-top: 4px;
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+}
+
+.hud-button-text {
+    margin: 0;
+    pointer-events: none;
+    font-size: 11px;
+    color: #d2d2d2;
+}
+
+/*
+ * The widgets are styled by the tokens the built-in styles are written against, so a game changes
+ * four colours rather than restyling a checkbox part by part. Anything that wants more says so by
+ * name: a widget's pieces have classes, and a game's rule beats the built-in one.
+ */
+:root {
+    --primary: #7aa2f7;
+    --primary-hover: #93b4f9;
+    --text-color: #d2d2d2;
+    --gray-background: rgba(255, 255, 255, 0.06);
+}
+
+checkbox {
+    width: auto;
+    height: 18px;
+    font-size: 11px;
+}
+
+slider {
+    width: 120px;
+    height: 14px;
+}

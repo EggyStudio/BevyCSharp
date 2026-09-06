@@ -34,7 +34,7 @@ public static class EditorGizmoSlot
     /// stops it being reported, and a couple of frames later the cross is back in the corner
     /// without anything having to tell it so.
     /// </remarks>
-    public static bool Known => Rect.Width > 1f && EditorWindow.Frame - _said < 4;
+    public static bool Known => Rect.Width > 1f && UiWindow.Frame - _said < 4;
 
     /// <summary>The middle of the square, which is what the cross is drawn at.</summary>
     public static (float X, float Y) Centre =>
@@ -53,7 +53,7 @@ public static class EditorGizmoSlot
         }
 
         Rect = rect;
-        _said = EditorWindow.Frame;
+        _said = UiWindow.Frame;
     }
 
     /// <summary>Says there is nowhere to draw, which puts the cross back in the corner.</summary>

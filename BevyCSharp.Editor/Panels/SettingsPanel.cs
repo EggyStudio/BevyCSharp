@@ -20,7 +20,7 @@ namespace BevyCSharp.Editor.Panels;
 /// adding a preference should be a line, not a panel.
 /// </para>
 /// </remarks>
-[EditorPanel("panels/settings.html", Root = "#settings", Dock = EditorDock.Sheet, Layer = 60)]
+[UiPanel("panels/settings.html", Root = "#settings", Dock = UiDock.Sheet, Layer = 60)]
 public sealed partial class SettingsPanel
 {
     /// <summary>How many pages the list can draw.</summary>

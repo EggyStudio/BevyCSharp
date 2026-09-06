@@ -18,7 +18,7 @@ namespace BevyCSharp.Editor.Panels;
 /// registration rather than a change to this panel.
 /// </para>
 /// </remarks>
-[EditorPanel("panels/tabs.html", Root = "#tabs", Dock = EditorDock.Strip, Order = 0, Layer = 5)]
+[UiPanel("panels/tabs.html", Root = "#tabs", Dock = UiDock.Strip, Order = 0, Layer = 5)]
 public sealed partial class TabsPanel
 {
     /// <summary>How many tabs the document can draw.</summary>
@@ -113,7 +113,7 @@ public sealed partial class TabsPanel
     }
 
     /// <summary>Which tab a point is over, or -1.</summary>
-    private int TabAt(EditorWindow window, float x, float y)
+    private int TabAt(UiWindow window, float x, float y)
     {
         for (var i = 0; i < Tabs; i++)
         {

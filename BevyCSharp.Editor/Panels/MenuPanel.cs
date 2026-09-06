@@ -19,10 +19,10 @@ namespace BevyCSharp.Editor.Panels;
 /// avoids a tree of windows each of which would need its own dismissal rules.
 /// </para>
 /// </remarks>
-[EditorPanel(
+[UiPanel(
     "panels/menu.html",
     Root = "#menu",
-    Dismiss = PanelDismiss.OnOutsideClick,
+    Dismiss = UiDismiss.OnOutsideClick,
     Layer = 100)]
 public sealed partial class MenuPanel
 {

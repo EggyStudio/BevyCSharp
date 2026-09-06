@@ -1,0 +1,34 @@
+<html lang="en">
+  <head>
+    <meta name="hud" />
+    <title>Sample HUD</title>
+    <link rel="stylesheet" href="hud.css" />
+  </head>
+  <body>
+    <!--
+      A game's interface, drawn from the same documents and stylesheets the editor uses. Nothing
+      here knows about the editor: the panel class beside it ties these ids to fields and methods,
+      and a host opens the document and keeps the two agreeing.
+    -->
+    <div class="hud" id="hud">
+      <p class="hud-title">BevyCSharp</p>
+      <div class="hud-row">
+        <p class="hud-name">Frames</p>
+        <p class="hud-value" id="hud-frames"></p>
+      </div>
+      <div class="hud-row">
+        <p class="hud-name">Cubes</p>
+        <p class="hud-value" id="hud-cubes"></p>
+      </div>
+      <div class="hud-row">
+        <p class="hud-name">Spinning</p>
+        <checkbox id="hud-spin"></checkbox>
+      </div>
+      <div class="hud-row">
+        <p class="hud-name">Speed</p>
+        <slider id="hud-speed" min="0" max="100" step="1" tip="false"></slider>
+      </div>
+      <div class="hud-button" id="hud-add"><p class="hud-button-text">Add a cube</p></div>
+    </div>
+  </body>
+</html>

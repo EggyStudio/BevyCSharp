@@ -1,3 +1,5 @@
+using Bevy;
+
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
@@ -5,7 +7,7 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <param name="Name">What the tab says.</param>
 /// <param name="Create">Builds the panel when the tab is opened.</param>
-public sealed record EditorTabEntry(string Name, Func<IEditorPanel> Create)
+public sealed record EditorTabEntry(string Name, Func<IUiPanel> Create)
 {
     /// <summary>
     /// The panel once it has been opened, whether or not it is currently on screen.
@@ -16,7 +18,7 @@ public sealed record EditorTabEntry(string Name, Func<IEditorPanel> Create)
     /// two documents leaving and joining the interface's list. Doing it the other way makes a tab
     /// blink, come back at the wrong size, and eventually not come back at all.
     /// </remarks>
-    public IEditorPanel? Panel { get; internal set; }
+    public IUiPanel? Panel { get; internal set; }
 
     /// <summary>Whether the tab is currently showing its panel.</summary>
     public bool IsOpen => Panel is { } panel && EditorShell.IsShowing(panel);
@@ -44,7 +46,7 @@ public static class EditorTabs
     public static IReadOnlyList<EditorTabEntry> All => Entries;
 
     /// <summary>Adds a tab, minimised.</summary>
-    public static EditorTabEntry Add(string name, Func<IEditorPanel> create)
+    public static EditorTabEntry Add(string name, Func<IUiPanel> create)
     {
         ArgumentException.ThrowIfNullOrEmpty(name);
         ArgumentNullException.ThrowIfNull(create);
@@ -113,7 +115,7 @@ public static class EditorTabs
     /// Called by the shell when any panel closes, so that a tab whose panel was closed from a menu
     /// reads as minimised rather than as open with nothing behind it.
     /// </remarks>
-    internal static void Closed(IEditorPanel panel)
+    internal static void Closed(IUiPanel panel)
     {
         foreach (var entry in Entries)
         {

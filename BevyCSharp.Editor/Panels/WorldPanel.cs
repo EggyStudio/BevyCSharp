@@ -18,10 +18,10 @@ namespace BevyCSharp.Editor.Panels;
 /// screen are ever drawn, and scrolling moves what the pool points at.
 /// </para>
 /// </remarks>
-[EditorPanel(
+[UiPanel(
     "panels/world.html",
     Root = "#world",
-    Dock = EditorDock.Left)]
+    Dock = UiDock.Left)]
 public sealed partial class WorldPanel
 {
     /// <summary>How many rows the document declares.</summary>
@@ -510,7 +510,7 @@ public sealed partial class WorldPanel
     }
 
     /// <summary>Which row a point is over, or -1.</summary>
-    private int RowAt(EditorWindow window, float x, float y)
+    private int RowAt(UiWindow window, float x, float y)
     {
         for (var i = 0; i < Rows; i++)
         {

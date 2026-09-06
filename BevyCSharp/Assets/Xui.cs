@@ -290,6 +290,22 @@ public static unsafe class Xui
     public static int Count(string cssId) => App.HasEditor ? Native.bcs_xui_count(cssId) : 0;
 
     /// <summary>
+    /// Where an element sits in the drawing order, or -1 when it is not drawn.
+    /// </summary>
+    /// <remarks>
+    /// Everything on screen is sorted into one list and drawn in that order, so of two elements
+    /// the one with the larger answer is the one in front. What it is for is telling a layer that
+    /// took from one that did not.
+    /// </remarks>
+    public static int StackOf(Entity element)
+    {
+        if (!App.HasEditor) return -1;
+
+        var index = Native.bcs_xui_stack(element.Bits);
+        return index < 0 ? -1 : index;
+    }
+
+    /// <summary>
     /// Gives an element a CSS class, replacing whatever it had.
     /// </summary>
     /// <remarks>

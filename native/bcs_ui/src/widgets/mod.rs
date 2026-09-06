@@ -1,0 +1,1913 @@
+pub mod body;
+pub mod content;
+pub mod controls;
+pub(crate) mod default_style;
+pub mod div;
+mod form;
+pub mod table;
+pub mod validation;
+pub mod widget_util;
+
+use crate::old::registry::*;
+use crate::styles::IconPlace;
+use crate::widgets::body::BodyWidget;
+use crate::widgets::div::DivWidget;
+use crate::widgets::form::FormWidget;
+use crate::widgets::table::TableWidget;
+use bevy::prelude::*;
+use std::any::Any;
+use std::fmt;
+use std::sync::Arc;
+
+pub use content::ExtendedContentWidgets;
+pub use controls::ExtendedControlWidgets;
+pub use table::{Table, TableCell, TableSection};
+pub use validation::evaluate_validation_state;
+
+/// Marker component for UI elements that should ignore the parent widget state.
+///
+/// Used to mark UI nodes that do not inherit state like `focused` or `hovered`.
+#[derive(Component)]
+pub struct IgnoreParentState;
+
+/// Tracks the currently hovered scrollable widget so wheel input is routed once.
+#[derive(Resource, Default)]
+pub struct ActiveScrollTarget {
+    pub entity: Option<Entity>,
+}
+
+/// Unique identifier for UI elements.
+///
+/// Each UI element should have a unique `UIGenID` generated atomically.
+#[derive(Component, Reflect, Debug, Clone)]
+#[reflect(Component)]
+pub struct UIGenID(usize);
+
+impl Default for UIGenID {
+    /// Generates a new unique `UIGenID` using a global atomic counter.
+    fn default() -> Self {
+        Self(UI_ID_GENERATE.lock().unwrap().acquire())
+    }
+}
+
+impl UIGenID {
+    /// Returns the underlying numeric ID.
+    pub fn get(&self) -> usize {
+        self.0
+    }
+}
+
+/// Associates a UI child entity with a parent widget by ID.
+///
+/// Used for binding UI components to their logical parent.
+#[derive(Component, Reflect, Debug, Clone)]
+#[reflect(Component)]
+pub struct BindToID(pub usize);
+
+impl BindToID {
+    /// Returns the bound widget ID.
+    pub fn get(&self) -> usize {
+        self.0
+    }
+}
+
+/// Stores the interaction and UI state flags for a widget.
+///
+/// Contains boolean flags for common widget states such as focused, hovered, disabled, etc.
+#[derive(Component, Reflect, Default, PartialEq, Eq, Debug, Clone)]
+#[reflect(Component)]
+pub struct UIWidgetState {
+    pub focused: bool,
+    pub hovered: bool,
+    pub disabled: bool,
+    pub readonly: bool,
+    pub checked: bool,
+    pub open: bool,
+    pub invalid: bool,
+}
+
+/// Component storing an optional widget controller name.
+#[derive(Component, Default, Clone, Debug, PartialEq, Eq)]
+pub struct Widget(pub Option<String>);
+
+/// Validation rules parsed from HTML attributes.
+#[derive(Component, Reflect, Debug, Clone, Default, PartialEq, Eq)]
+#[reflect(Component)]
+pub struct ValidationRules {
+    pub required: bool,
+    pub min_length: Option<usize>,
+    pub max_length: Option<usize>,
+    pub pattern: Option<String>,
+}
+
+impl ValidationRules {
+    /// Parses validation rules from a `validation` attribute string.
+    pub fn from_attribute(value: &str) -> Option<Self> {
+        let mut rules = ValidationRules::default();
+
+        for part in value.split('&') {
+            let trimmed = part.trim();
+            if trimmed.is_empty() {
+                continue;
+            }
+
+            let lower = trimmed.to_ascii_lowercase();
+            if lower == "required" {
+                rules.required = true;
+                continue;
+            }
+
+            if let Some((name, args)) = trimmed.split_once('(') {
+                let name = name.trim().to_ascii_lowercase();
+                let args = args.trim_end_matches(')').trim();
+                match name.as_str() {
+                    "length" => apply_length_rules(args, &mut rules),
+                    "pattern" => apply_pattern_rule(args, &mut rules),
+                    _ => {}
+                }
+            }
+        }
+
+        if rules.is_empty() { None } else { Some(rules) }
+    }
+
+    /// Returns true when no rules are configured.
+    fn is_empty(&self) -> bool {
+        !self.required
+            && self.min_length.is_none()
+            && self.max_length.is_none()
+            && self.pattern.is_none()
+    }
+}
+
+/// Applies length-related validation rules from arguments.
+fn apply_length_rules(args: &str, rules: &mut ValidationRules) {
+    let parts: Vec<&str> = args.split(',').map(|part| part.trim()).collect();
+    if parts.is_empty() {
+        return;
+    }
+
+    let parse_part = |part: &str| part.parse::<usize>().ok();
+
+    match parts.as_slice() {
+        [single] => {
+            if let Some(value) = parse_part(single) {
+                rules.min_length = Some(value);
+                rules.max_length = Some(value);
+            }
+        }
+        [min, max, ..] => {
+            if let Some(value) = parse_part(min) {
+                rules.min_length = Some(value);
+            }
+            if let Some(value) = parse_part(max) {
+                rules.max_length = Some(value);
+            }
+        }
+        &[] => {}
+    }
+}
+
+/// Applies a pattern rule from arguments.
+fn apply_pattern_rule(args: &str, rules: &mut ValidationRules) {
+    let trimmed = args.trim();
+    let stripped = trimmed
+        .strip_prefix('"')
+        .and_then(|rest| rest.strip_suffix('"'))
+        .or_else(|| {
+            trimmed
+                .strip_prefix('\'')
+                .and_then(|rest| rest.strip_suffix('\''))
+        })
+        .unwrap_or(trimmed);
+
+    if stripped.is_empty() {
+        return;
+    }
+
+    rules.pattern = Some(stripped.to_string());
+}
+
+/// Component carrying a widget ID and it's kind.
+#[derive(Component, Clone, Copy, Debug)]
+pub struct WidgetId {
+    pub id: usize,
+    pub kind: WidgetKind,
+}
+
+/// Enumerates the supported widget kinds.
+#[derive(Debug, Clone, Copy)]
+pub enum WidgetKind {
+    /// Variant `Body`.
+    Body,
+    /// Variant `Button`.
+    Button,
+    /// Variant `ColorPicker`.
+    ColorPicker,
+    /// Variant `CheckBox`.
+    CheckBox,
+    /// Variant `ChoiceBox`.
+    ChoiceBox,
+    /// Variant `DatePicker`.
+    DatePicker,
+    /// Variant `Div`.
+    Div,
+    /// Variant `Divider`.
+    Divider,
+    /// Variant `Form`.
+    Form,
+    /// Variant `Table`.
+    Table,
+    /// Variant `TableCell`.
+    TableCell,
+    /// Variant `FieldSet`.
+    FieldSet,
+    /// Variant `Headline`.
+    Headline,
+    /// Variant `HyperLink`.
+    HyperLink,
+    /// Variant `Img`.
+    Img,
+    /// Variant `InputField`.
+    InputField,
+    /// Variant `Paragraph`.
+    Paragraph,
+    /// Variant `ToolTip`.
+    ToolTip,
+    /// Variant `Badge`.
+    Badge,
+    /// Variant `ProgressBar`.
+    ProgressBar,
+    /// Variant `RadioButton`.
+    RadioButton,
+    /// Variant `Scrollbar`.
+    Scrollbar,
+    /// Variant `Slider`.
+    Slider,
+    /// Variant `SwitchButton`.
+    SwitchButton,
+    /// Variant `ToggleButton`.
+    ToggleButton,
+    /// Variant `ListBox`.
+    ListBox,
+}
+
+/// Plugin that registers all built-in widget types.
+pub struct ExtendedWidgetPlugin;
+
+impl Plugin for ExtendedWidgetPlugin {
+    /// Registers widget components and systems.
+    fn build(&self, app: &mut App) {
+        app.init_resource::<ActiveScrollTarget>();
+        app.register_type::<UIGenID>();
+        app.register_type::<BindToID>();
+        app.register_type::<UIWidgetState>();
+        app.register_type::<ValidationRules>();
+        app.register_type::<Body>();
+        app.register_type::<Form>();
+        app.register_type::<Table>();
+        app.register_type::<TableCell>();
+        app.register_type::<TableSection>();
+        app.add_plugins((
+            ExtendedControlWidgets,
+            ExtendedContentWidgets,
+            BodyWidget,
+            DivWidget,
+            FormWidget,
+            TableWidget,
+        ));
+        app.add_systems(Update, validation::update_validation_states);
+    }
+}
+
+// ===============================================
+//                       Body
+// ===============================================
+
+/// Root widget representing the HTML `<body>` element.
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, GlobalTransform, InheritedVisibility, Widget)]
+pub struct Body {
+    pub entry: usize,
+    pub html_key: Option<String>,
+}
+
+impl Default for Body {
+    /// Creates a default body widget with a unique entry ID.
+    fn default() -> Self {
+        let entry = BODY_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            html_key: None,
+        }
+    }
+}
+
+// ===============================================
+//                       Div
+// ===============================================
+
+/// Container widget representing a `<div>` element.
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, GlobalTransform, InheritedVisibility, Widget)]
+pub struct Div(pub usize);
+
+impl Default for Div {
+    /// Creates a default div widget with a unique entry ID.
+    fn default() -> Self {
+        let entry = DIV_ID_POOL.lock().unwrap().acquire();
+        Self(entry)
+    }
+}
+
+// ===============================================
+//                       Form
+// ===============================================
+
+/// Form the container widget with an optional submit action handler name.
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, GlobalTransform, InheritedVisibility, Widget)]
+pub struct Form {
+    pub entry: usize,
+    pub action: Option<String>,
+    pub validate_mode: FormValidationMode,
+}
+
+impl Default for Form {
+    /// Creates a default form widget with a unique entry ID.
+    fn default() -> Self {
+        let entry = FORM_ID_POOL.lock().unwrap().acquire();
+        Self {
+            entry,
+            action: None,
+            validate_mode: FormValidationMode::default(),
+        }
+    }
+}
+
+/// Defines when form validation should be evaluated.
+#[derive(Reflect, Default, Debug, Clone, Eq, PartialEq)]
+pub enum FormValidationMode {
+    /// Validate continuously (e.g. focus/hover/input changes).
+    Always,
+    /// Validate only on submit.
+    #[default]
+    Send,
+    /// Validate on direct interaction (e.g. input text changes).
+    Interact,
+}
+
+impl FormValidationMode {
+    /// Parses a validation mode from the form `validate` attribute.
+    pub fn from_str(value: &str) -> Option<FormValidationMode> {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "always" | "all" => Some(FormValidationMode::Always),
+            "send" => Some(FormValidationMode::Send),
+            "interact" => Some(FormValidationMode::Interact),
+            _ => None,
+        }
+    }
+}
+
+// ===============================================
+//                     Button
+// ===============================================
+
+/// Supported button behavior modes.
+#[derive(Reflect, Default, Debug, Clone, Eq, PartialEq)]
+pub enum ButtonType {
+    /// No explicit button type set.
+    #[default]
+    Auto,
+    /// Regular clickable button that does not submit a form.
+    Button,
+    /// Form submit button.
+    Submit,
+    /// Form reset button.
+    Reset,
+}
+
+impl ButtonType {
+    /// Parses a button type from an HTML `type` attribute.
+    pub fn from_str(value: &str) -> Option<ButtonType> {
+        match value.to_ascii_lowercase().as_str() {
+            "button" => Some(ButtonType::Button),
+            "submit" => Some(ButtonType::Submit),
+            "reset" => Some(ButtonType::Reset),
+            _ => None,
+        }
+    }
+}
+
+/// Button widget with optional icon.
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct Button {
+    pub entry: usize,
+    pub text: String,
+    pub icon_place: IconPlace,
+    pub icon_path: Option<String>,
+    pub button_type: ButtonType,
+}
+
+impl Default for Button {
+    /// Creates a default button widget.
+    fn default() -> Self {
+        let entry = BUTTON_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            text: String::from("Button"),
+            icon_path: None,
+            icon_place: IconPlace::default(),
+            button_type: ButtonType::default(),
+        }
+    }
+}
+
+// ===============================================
+//                     CheckBox
+// ===============================================
+
+/// Checkbox widget with label and checked state.
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct CheckBox {
+    pub entry: usize,
+    pub label: String,
+    pub icon_path: Option<String>,
+    pub checked: bool,
+}
+
+impl Default for CheckBox {
+    /// Creates a default checkbox widget.
+    fn default() -> Self {
+        let entry = CHECK_BOX_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            label: String::from("label"),
+            icon_path: Some(String::from("bcs_ui/icons/check.png")),
+            checked: false,
+        }
+    }
+}
+
+// ===============================================
+//                   ChoiceBox
+// ===============================================
+
+/// Choice box widget with selectable options.
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct ChoiceBox {
+    pub entry: usize,
+    pub label: String,
+    pub value: ChoiceOption,
+    pub options: Vec<ChoiceOption>,
+    pub icon_path: Option<String>,
+}
+
+impl Default for ChoiceBox {
+    /// Creates a default choice box widget.
+    fn default() -> Self {
+        let entry = CHOICE_BOX_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            label: String::from("select"),
+            value: ChoiceOption::default(),
+            options: vec![ChoiceOption::default()],
+            icon_path: Some(String::from("bcs_ui/icons/drop.png")),
+        }
+    }
+}
+
+/// Single option entry used by choice boxes.
+#[derive(Component, Reflect, Debug, Clone)]
+pub struct ChoiceOption {
+    pub text: String,
+    /// The option's value. Defaults to a `String` but can hold any `Send + Sync` type.
+    /// Use [`ChoiceOption::with_value`] to attach a typed value and
+    /// [`ChoiceOption::get_value`] to recover it. Use [`ChoiceOption::value_as_str`]
+    /// for the common `String` case.
+    #[reflect(ignore)]
+    pub value: WidgetValue,
+    pub icon_path: Option<String>,
+}
+
+impl PartialEq for ChoiceOption {
+    /// Handles `eq` in the extended UI workflow.
+    fn eq(&self, other: &Self) -> bool {
+        if self.text != other.text || self.icon_path != other.icon_path {
+            return false;
+        }
+        match (&self.value.0, &other.value.0) {
+            (None, None) => true,
+            (Some(a), Some(b)) => match (a.downcast_ref::<String>(), b.downcast_ref::<String>()) {
+                (Some(sa), Some(sb)) => sa == sb,
+                _ => Arc::ptr_eq(a, b),
+            },
+            _ => false,
+        }
+    }
+}
+
+impl Eq for ChoiceOption {}
+
+impl Default for ChoiceOption {
+    /// Creates a default option labeled "Please Select".
+    fn default() -> Self {
+        Self {
+            text: String::from("Please Select"),
+            value: WidgetValue::new(String::from("default")),
+            icon_path: None,
+        }
+    }
+}
+
+impl ChoiceOption {
+    /// Creates an option using the provided text as the internal string value.
+    pub fn new(text: &str) -> Self {
+        Self {
+            text: text.to_string(),
+            value: WidgetValue::new(text.trim().to_string()),
+            icon_path: None,
+        }
+    }
+
+    /// Sets a typed value for this option.
+    pub fn with_value<T: Any + Send + Sync>(mut self, value: T) -> Self {
+        self.value.set(value);
+        self
+    }
+
+    /// Returns the typed value if it can be downcast to `T`.
+    pub fn get_value<T: Any>(&self) -> Option<&T> {
+        self.value.get::<T>()
+    }
+
+    /// Returns the internal value as `&str` when it holds a `String`.
+    pub fn value_as_str(&self) -> Option<&str> {
+        self.value.as_str()
+    }
+
+    /// Returns a reflected value when the option was created from reflection.
+    pub fn get_reflected(&self) -> Option<&ReflectedValue> {
+        self.value.reflect()
+    }
+}
+
+/// Wraps a `Box<dyn PartialReflect>` so it can be stored as `Arc<dyn Any + Send + Sync>` and
+/// retrieved via [`ChoiceOption::get_reflected`].
+///
+/// Use [`ReflectedValue::downcast_ref`] to obtain the concrete type.
+///
+/// # Example
+/// ```ignore
+/// if let Some(rv) = option.get_reflected() {
+///     if let Some(my_val) = rv.downcast_ref::<MyStruct>() { ... }
+/// }
+/// ```
+pub struct ReflectedValue(pub Box<dyn PartialReflect>);
+
+impl ReflectedValue {
+    /// Downcasts the inner reflected value to `T`.
+    ///
+    /// Returns `None` if the concrete type doesn't implement the full [`Reflect`] trait or
+    /// if the type doesn't match.
+    pub fn downcast_ref<T: 'static>(&self) -> Option<&T> {
+        self.0.try_as_reflect()?.as_any().downcast_ref::<T>()
+    }
+}
+
+// ===============================================
+//                    ListBox
+// ===============================================
+
+/// List box widget displaying all options in a scrollable list.
+///
+/// Unlike [`ChoiceBox`], all options are always visible (no dropdown).
+/// Supports both single-select and multiselect modes via [`ListBox::multiselect`].
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct ListBox {
+    pub entry: usize,
+    pub options: Vec<ChoiceOption>,
+    /// Currently selected options. In single-select mode this holds at most one entry.
+    pub values: Vec<ChoiceOption>,
+    /// When `true`, clicking options toggles their selection independently.
+    /// When `false`, only one option can be selected at a time.
+    pub multiselect: bool,
+}
+
+impl Default for ListBox {
+    /// Creates a default list box widget with no pre-selected options.
+    fn default() -> Self {
+        let entry = LIST_BOX_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            options: vec![
+                ChoiceOption::new("Option A"),
+                ChoiceOption::new("Option B"),
+                ChoiceOption::new("Option C"),
+            ],
+            values: Vec::new(),
+            multiselect: false,
+        }
+    }
+}
+
+// ===============================================
+//                   Divider
+// ===============================================
+
+/// Divider widget with an alignment direction.
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct Divider {
+    pub entry: usize,
+    pub alignment: DividerAlignment,
+}
+
+impl Default for Divider {
+    /// Creates a default divider widget.
+    fn default() -> Self {
+        let entry = DIVIDER_ID_POOL.lock().unwrap().acquire();
+        Self {
+            entry,
+            alignment: DividerAlignment::default(),
+        }
+    }
+}
+
+/// Orientation of a divider widget.
+#[derive(Reflect, Default, Debug, Clone, Eq, PartialEq)]
+pub enum DividerAlignment {
+    /// Variant `Vertical`.
+    #[default]
+    Vertical,
+    /// Variant `Horizontal`.
+    Horizontal,
+}
+
+impl DividerAlignment {
+    /// Parses a divider alignment from a string.
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s.trim().to_ascii_lowercase().as_str() {
+            "vertical" | "vert" | "v" => Some(Self::Vertical),
+            "horizontal" | "horiz" | "h" => Some(Self::Horizontal),
+            _ => None,
+        }
+    }
+}
+
+impl fmt::Display for DividerAlignment {
+    /// Formats the alignment as a lowercase string.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            DividerAlignment::Horizontal => "horizontal",
+            DividerAlignment::Vertical => "vertical",
+        };
+        write!(f, "{}", s)
+    }
+}
+
+// ===============================================
+//                   FieldSet
+// ===============================================
+
+/// Field set widget grouping selectable children.
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct FieldSet {
+    pub entry: usize,
+    pub kind: Option<FieldKind>,
+    pub field_mode: FieldMode,
+    pub allow_none: bool,
+}
+
+impl Default for FieldSet {
+    /// Creates a default field set widget.
+    fn default() -> Self {
+        let entry = FIELDSET_ID_POOL.lock().unwrap().acquire();
+        Self {
+            entry,
+            kind: None,
+            field_mode: FieldMode::Single,
+            allow_none: false,
+        }
+    }
+}
+
+/// Field set content kind.
+#[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FieldKind {
+    /// Variant `Radio`.
+    Radio,
+    /// Variant `Toggle`.
+    Toggle,
+}
+
+/// Selection mode for field sets.
+#[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FieldMode {
+    /// Variant `Multi`.
+    Multi,
+    /// Variant `Single`.
+    Single,
+    /// Variant `Count`.
+    Count(u8),
+}
+
+impl FieldMode {
+    /// Parses a field mode from a string.
+    pub fn from_str(s: &str) -> Option<Self> {
+        let normalized = s.trim().to_ascii_lowercase();
+
+        if let Some(inner) = normalized
+            .strip_prefix("count(")
+            .and_then(|rest| rest.strip_suffix(')'))
+        {
+            let value = inner.trim();
+            if value.is_empty() {
+                return Some(Self::Count(0));
+            }
+            return value.parse::<u8>().ok().map(Self::Count);
+        }
+
+        match normalized.as_str() {
+            "single" | "solo" | "one" => Some(Self::Single),
+            "multi" | "more" => Some(Self::Multi),
+            "count" => Some(Self::Count(0)),
+            _ => None,
+        }
+    }
+}
+
+/// Component marking that an entity belongs to a field set.
+#[derive(Component, Reflect, Debug)]
+#[reflect(Component)]
+pub struct InFieldSet(pub Entity);
+
+/// Tracks a single selected entity within a field set.
+#[derive(Component, Reflect, Debug, Default)]
+pub struct FieldSelectionSingle(pub Option<Entity>);
+
+/// Tracks multiple selected entities within a field set.
+#[derive(Component, Reflect, Debug, Default)]
+pub struct FieldSelectionMulti(pub Vec<Entity>);
+
+// ===============================================
+//                   Headline
+// ===============================================
+
+/// Headline widget with a selectable heading level.
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct Headline {
+    pub entry: usize,
+    pub text: String,
+    pub h_type: HeadlineType,
+}
+
+impl Default for Headline {
+    /// Creates a default headline widget.
+    fn default() -> Self {
+        let entry = HEADLINE_ID_POOL.lock().unwrap().acquire();
+        Self {
+            entry,
+            text: String::from("Headline"),
+            h_type: HeadlineType::H3,
+        }
+    }
+}
+
+/// Heading level for headline widgets.
+#[derive(Reflect, Default, Debug, Clone, Eq, PartialEq)]
+pub enum HeadlineType {
+    /// Variant `H1`.
+    #[default]
+    H1,
+    /// Variant `H2`.
+    H2,
+    /// Variant `H3`.
+    H3,
+    /// Variant `H4`.
+    H4,
+    /// Variant `H5`.
+    H5,
+    /// Variant `H6`.
+    H6,
+}
+
+impl fmt::Display for HeadlineType {
+    /// Formats the heading level as a lowercase string.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            HeadlineType::H1 => "h1",
+            HeadlineType::H2 => "h2",
+            HeadlineType::H3 => "h3",
+            HeadlineType::H4 => "h4",
+            HeadlineType::H5 => "h5",
+            HeadlineType::H6 => "h6",
+        };
+        write!(f, "{}", s)
+    }
+}
+
+// ===============================================
+//                       Image
+// ===============================================
+
+/// Image widget referencing an optional source path.
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, GlobalTransform, InheritedVisibility, Widget)]
+pub struct Img {
+    pub entry: usize,
+    pub src: Option<String>,
+    pub alt: String,
+    /// Optional input id to auto-preview selected files from `input type="file"`.
+    pub preview: Option<String>,
+}
+
+impl Default for Img {
+    /// Creates a default image widget.
+    fn default() -> Self {
+        let entry = IMAGE_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            src: None,
+            alt: String::from(""),
+            preview: None,
+        }
+    }
+}
+
+// ===============================================
+//                   DatePicker
+// ===============================================
+
+/// Date value display format for date picker widgets.
+#[derive(Reflect, Default, Debug, Clone, Copy, Eq, PartialEq)]
+pub enum DateFormat {
+    /// Variant `MonthDayYear`.
+    #[default]
+    MonthDayYear,
+    /// Variant `DayMonthYear`.
+    DayMonthYear,
+    /// Variant `YearMonthDay`.
+    YearMonthDay,
+}
+
+impl DateFormat {
+    /// Parses a date format from a string.
+    pub fn from_str(value: &str) -> Option<DateFormat> {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "mdy" | "mm/dd/yyyy" | "mm-dd-yyyy" | "mm.dd.yyyy" | "month-day-year" => {
+                Some(DateFormat::MonthDayYear)
+            }
+            "dmy" | "dd/mm/yyyy" | "dd-mm-yyyy" | "dd.mm.yyyy" | "day-month-year" => {
+                Some(DateFormat::DayMonthYear)
+            }
+            "ymd" | "yyyy-mm-dd" | "yyyy/mm/dd" | "yyyy.mm.dd" | "year-month-day" | "iso" => {
+                Some(DateFormat::YearMonthDay)
+            }
+            _ => None,
+        }
+    }
+}
+
+/// Date picker widget with an anchored calendar popover.
+#[derive(Component, Reflect, Debug, Clone, PartialEq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget, InputValue)]
+pub struct DatePicker {
+    pub entry: usize,
+    /// Optional input id this picker binds to (`for="input-id"`).
+    pub for_id: Option<String>,
+    pub name: String,
+    pub label: String,
+    pub placeholder: String,
+    /// Stored in the configured display format.
+    pub value: String,
+    /// Optional minimum selectable date (`YYYY-MM-DD`).
+    pub min: Option<String>,
+    /// Optional maximum selectable date (`YYYY-MM-DD`).
+    pub max: Option<String>,
+    /// Optional explicit date format string, e.g. `dd.MM.yyyy`.
+    pub format_pattern: Option<String>,
+    pub format: DateFormat,
+}
+
+impl Default for DatePicker {
+    /// Creates a default date picker widget.
+    fn default() -> Self {
+        let entry = DATE_PICKER_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            for_id: None,
+            name: String::new(),
+            label: String::from("Date"),
+            placeholder: String::new(),
+            value: String::new(),
+            min: None,
+            max: None,
+            format_pattern: None,
+            format: DateFormat::default(),
+        }
+    }
+}
+
+// ===============================================
+//                   InputField
+// ===============================================
+
+/// Input field widget with text and validation settings.
+#[derive(Component, Reflect, Debug, Clone, PartialEq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget, InputValue)]
+pub struct InputField {
+    pub entry: usize,
+    pub name: String,
+    pub text: String,
+    pub label: String,
+    pub placeholder: String,
+    pub cursor_position: usize,
+    pub clear_after_focus_lost: bool,
+    pub icon_path: Option<String>,
+    pub input_type: InputType,
+    /// Optional date format string used when `input_type="date"`.
+    pub date_format: Option<String>,
+    /// Opens a folder picker instead of a file picker for `input_type="file"`.
+    pub folder: bool,
+    /// Allowed file extensions for `input_type="file"` (ignored when `folder=true`).
+    pub extensions: Vec<String>,
+    /// Displays the selected file size as a right-side suffix for `input_type="file"`.
+    pub show_size: bool,
+    /// Optional max file size in bytes for `input_type="file"` selections.
+    pub max_size_bytes: Option<u64>,
+    pub cap_text_at: InputCap,
+}
+
+impl Default for InputField {
+    /// Creates a default input field widget.
+    fn default() -> Self {
+        let entry = INPUT_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            name: String::new(),
+            text: String::from(""),
+            label: String::from("Label"),
+            placeholder: String::from(""),
+            clear_after_focus_lost: false,
+            cursor_position: 0,
+            icon_path: None,
+            cap_text_at: InputCap::default(),
+            input_type: InputType::default(),
+            date_format: None,
+            folder: false,
+            extensions: Vec::new(),
+            show_size: false,
+            max_size_bytes: None,
+        }
+    }
+}
+
+/// Supported input types for input fields.
+#[derive(Reflect, Default, Debug, Clone, Copy, Eq, PartialEq)]
+pub enum InputType {
+    /// Variant `Text`.
+    #[default]
+    Text,
+    /// Variant `Email`.
+    Email,
+    /// Variant `Date`.
+    Date,
+    /// Variant `Range`.
+    Range,
+    /// Variant `Password`.
+    Password,
+    /// Variant `Number`.
+    Number,
+    /// Variant `File`.
+    File,
+}
+
+impl InputType {
+    /// Returns true if the character is allowed for this input type.
+    pub fn is_valid_char(&self, c: char) -> bool {
+        match self {
+            InputType::Text | InputType::Password => true,
+            InputType::Number => c.is_ascii_digit() || "+-*/()., ".contains(c),
+            InputType::Email => c.is_ascii_alphanumeric() || c == '@' || c == '.' || c == '-',
+            InputType::Date => c.is_ascii_digit() || c == '/' || c == '-' || c == '.',
+            InputType::Range => c.is_ascii_digit() || c == '/' || c == '-' || c == '.' || c == ' ',
+            InputType::File => false,
+        }
+    }
+
+    /// Parses an input type from a string.
+    pub fn from_str(value: &str) -> Option<InputType> {
+        match value.to_lowercase().as_str() {
+            "text" => Some(InputType::Text),
+            "password" => Some(InputType::Password),
+            "number" => Some(InputType::Number),
+            "email" => Some(InputType::Email),
+            "date" => Some(InputType::Date),
+            "range" => Some(InputType::Range),
+            "file" => Some(InputType::File),
+            _ => None,
+        }
+    }
+}
+
+/// Input length capping configuration.
+#[derive(Reflect, Default, Debug, Clone, Eq, PartialEq)]
+pub enum InputCap {
+    /// Variant `NoCap`.
+    #[default]
+    NoCap,
+    /// Variant `CapAtNodeSize`.
+    CapAtNodeSize,
+    /// Variant `CapAt`.
+    CapAt(usize), // 0 means no cap!
+}
+
+impl InputCap {
+    /// Returns the configured maximum length or zero for no cap.
+    pub fn get_value(&self) -> usize {
+        match self {
+            Self::CapAt(value) => *value,
+            Self::NoCap => 0,
+            Self::CapAtNodeSize => 0,
+        }
+    }
+}
+
+/// Component storing the raw input value for a widget.
+#[derive(Component, Reflect, Debug, Clone, Default)]
+#[reflect(Component)]
+pub struct InputValue(pub String);
+
+// ===============================================
+//                     HyperLink
+// ===============================================
+
+/// Browser launch configuration for hyperlink widgets.
+#[derive(Reflect, Debug, Clone, Eq, PartialEq, Default)]
+pub enum HyperLinkBrowsers {
+    /// Variant `System`.
+    #[default]
+    System,
+    /// Variant `Custom`.
+    Custom(Vec<String>),
+}
+
+impl HyperLinkBrowsers {
+    /// Parses the hyperlink `browsers` attribute.
+    ///
+    /// Supported forms:
+    /// - `system`
+    /// - `firefox`
+    /// - `[firefox, brave, chrome]`
+    pub fn from_str(value: &str) -> Option<Self> {
+        let trimmed = value.trim();
+        if trimmed.is_empty() {
+            return Some(Self::System);
+        }
+
+        if trimmed.eq_ignore_ascii_case("system") {
+            return Some(Self::System);
+        }
+
+        let parsed = if let Some(inner) = trimmed
+            .strip_prefix('[')
+            .and_then(|raw| raw.strip_suffix(']'))
+        {
+            inner
+                .split(',')
+                .map(|entry| normalize_browser_name(entry))
+                .filter(|entry| !entry.is_empty())
+                .collect::<Vec<_>>()
+        } else {
+            let single = normalize_browser_name(trimmed);
+            if single.is_empty() {
+                Vec::new()
+            } else if single.eq_ignore_ascii_case("system") {
+                return Some(Self::System);
+            } else {
+                vec![single]
+            }
+        };
+
+        if parsed.is_empty() {
+            Some(Self::System)
+        } else {
+            Some(Self::Custom(parsed))
+        }
+    }
+}
+
+/// Handles `normalize_browser_name` in the extended UI workflow.
+fn normalize_browser_name(value: &str) -> String {
+    value
+        .trim()
+        .trim_matches('"')
+        .trim_matches('\'')
+        .trim()
+        .to_ascii_lowercase()
+}
+
+/// Hyperlink widget mapped from HTML `<a>`.
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct HyperLink {
+    pub entry: usize,
+    pub text: String,
+    pub href: String,
+    pub browsers: HyperLinkBrowsers,
+    pub open_modal: bool,
+}
+
+impl Default for HyperLink {
+    /// Handles `default` in the extended UI workflow.
+    fn default() -> Self {
+        let entry = HYPER_LINK_ID_POOL.lock().unwrap().acquire();
+        Self {
+            entry,
+            text: String::new(),
+            href: String::new(),
+            browsers: HyperLinkBrowsers::default(),
+            open_modal: false,
+        }
+    }
+}
+
+// ===============================================
+//                     Paragraph
+// ===============================================
+
+/// Paragraph widget for body text.
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct Paragraph {
+    pub entry: usize,
+    pub text: String,
+}
+
+impl Default for Paragraph {
+    /// Creates a default paragraph widget.
+    fn default() -> Self {
+        let entry = PARAGRAPH_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            text: String::from(""),
+        }
+    }
+}
+
+// ===============================================
+//                       Badge
+// ===============================================
+
+/// Corner anchor used to place a badge relative to its target widget.
+#[derive(Reflect, Default, Debug, Clone, Copy, Eq, PartialEq)]
+pub enum BadgeAnchor {
+    /// Variant `TopLeft`.
+    TopLeft,
+    /// Variant `TopRight`.
+    #[default]
+    TopRight,
+    /// Variant `BottomLeft`.
+    BottomLeft,
+    /// Variant `BottomRight`.
+    BottomRight,
+}
+
+impl BadgeAnchor {
+    /// Parses a badge anchor from values like `"top right"` or `"bottom-left"`.
+    pub fn from_str(value: &str) -> Option<Self> {
+        let normalized = value.to_ascii_lowercase().replace(['-', '_'], " ");
+
+        let mut vertical = None;
+        let mut horizontal = None;
+
+        for token in normalized.split([' ', ',', '|', '/']) {
+            let token = token.trim();
+            if token.is_empty() {
+                continue;
+            }
+
+            match token {
+                "top" => vertical = Some("top"),
+                "bottom" => vertical = Some("bottom"),
+                "left" => horizontal = Some("left"),
+                "right" => horizontal = Some("right"),
+                _ => {}
+            }
+        }
+
+        if vertical.is_none() && horizontal.is_none() {
+            return None;
+        }
+
+        Some(match (vertical, horizontal) {
+            (Some("top"), Some("left")) => Self::TopLeft,
+            (Some("top"), Some("right")) => Self::TopRight,
+            (Some("bottom"), Some("left")) => Self::BottomLeft,
+            (Some("bottom"), Some("right")) => Self::BottomRight,
+            (Some("top"), None) => Self::TopRight,
+            (Some("bottom"), None) => Self::BottomRight,
+            (None, Some("left")) => Self::TopLeft,
+            (None, Some("right")) => Self::TopRight,
+            _ => Self::TopRight,
+        })
+    }
+}
+
+/// Notification badge widget bound to a target via `for` or parent relationship.
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct Badge {
+    pub entry: usize,
+    pub value: u32,
+    pub max: u32,
+    pub for_id: Option<String>,
+    pub anchor: BadgeAnchor,
+}
+
+impl Default for Badge {
+    /// Creates a default badge widget.
+    fn default() -> Self {
+        let entry = BADGE_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            value: 0,
+            max: 99,
+            for_id: None,
+            anchor: BadgeAnchor::default(),
+        }
+    }
+}
+
+// ===============================================
+//                     ToolTip
+// ===============================================
+
+/// Tooltip positioning behavior.
+#[derive(Reflect, Default, Debug, Clone, Copy, Eq, PartialEq)]
+pub enum ToolTipVariant {
+    /// Tooltip follows the cursor.
+    #[default]
+    Follow,
+    /// Tooltip is anchored to the target element.
+    Point,
+}
+
+impl ToolTipVariant {
+    /// Parses a tooltip variant from a string.
+    pub fn from_str(value: &str) -> Option<Self> {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "follow" => Some(Self::Follow),
+            "point" => Some(Self::Point),
+            _ => None,
+        }
+    }
+}
+
+/// Preferred side for tooltip placement.
+#[derive(Reflect, Default, Debug, Clone, Copy, Eq, PartialEq)]
+pub enum ToolTipPriority {
+    /// Variant `Top`.
+    Top,
+    /// Variant `Bottom`.
+    Bottom,
+    /// Variant `Left`.
+    Left,
+    /// Variant `Right`.
+    #[default]
+    Right,
+}
+
+impl ToolTipPriority {
+    /// Parses a tooltip priority from a string.
+    pub fn from_str(value: &str) -> Option<Self> {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "top" => Some(Self::Top),
+            "bottom" => Some(Self::Bottom),
+            "left" => Some(Self::Left),
+            "right" => Some(Self::Right),
+            _ => None,
+        }
+    }
+}
+
+/// Axis along which tooltip side preference is resolved.
+#[derive(Reflect, Default, Debug, Clone, Copy, Eq, PartialEq)]
+pub enum ToolTipAlignment {
+    /// Variant `Vertical`.
+    Vertical,
+    /// Variant `Horizontal`.
+    #[default]
+    Horizontal,
+}
+
+impl ToolTipAlignment {
+    /// Parses a tooltip alignment from a string.
+    pub fn from_str(value: &str) -> Option<Self> {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "vertical" => Some(Self::Vertical),
+            "horizontal" => Some(Self::Horizontal),
+            _ => None,
+        }
+    }
+}
+
+/// Trigger mode controlling when a tooltip becomes visible.
+#[derive(Reflect, Debug, Clone, Copy, Eq, PartialEq)]
+pub enum ToolTipTrigger {
+    /// Variant `Hover`.
+    Hover,
+    /// Variant `Click`.
+    Click,
+    /// Variant `Drag`.
+    Drag,
+}
+
+impl ToolTipTrigger {
+    /// Parses one trigger token from a string.
+    pub fn from_str(value: &str) -> Option<Self> {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "hover" => Some(Self::Hover),
+            "click" => Some(Self::Click),
+            "drag" => Some(Self::Drag),
+            _ => None,
+        }
+    }
+}
+
+/// Tooltip widget that binds to either a parent element or an explicit `for` id target.
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct ToolTip {
+    pub entry: usize,
+    pub text: String,
+    pub for_id: Option<String>,
+    pub variant: ToolTipVariant,
+    pub prio: ToolTipPriority,
+    pub alignment: ToolTipAlignment,
+    pub trigger: Vec<ToolTipTrigger>,
+}
+
+impl Default for ToolTip {
+    /// Creates a default tooltip widget.
+    fn default() -> Self {
+        let entry = TOOL_TIP_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            text: String::new(),
+            for_id: None,
+            variant: ToolTipVariant::default(),
+            prio: ToolTipPriority::default(),
+            alignment: ToolTipAlignment::default(),
+            trigger: vec![ToolTipTrigger::Hover],
+        }
+    }
+}
+
+// ===============================================
+//                    ProgressBar
+// ===============================================
+
+/// Progress bar widget with numeric range.
+#[derive(Component, Reflect, Debug, Clone, PartialEq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, InheritedVisibility, Widget)]
+pub struct ProgressBar {
+    pub entry: usize,
+    pub value: f32,
+    pub min: f32,
+    pub max: f32,
+}
+
+impl Default for ProgressBar {
+    /// Creates a default progress bar widget.
+    fn default() -> Self {
+        let entry = PROGRESS_BAR_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            value: 0.0,
+            max: 100.0,
+            min: 0.0,
+        }
+    }
+}
+
+// ===============================================
+//                   Radio Button
+// ===============================================
+
+/// Radio button widget with a selectable value.
+#[derive(Component, Reflect, Debug, Clone, PartialEq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct RadioButton {
+    pub entry: usize,
+    pub label: String,
+    /// The button's value. Defaults to an empty `String` but can hold any `Send + Sync` type.
+    /// Use [`RadioButton::with_value`] to attach a typed value and
+    /// [`RadioButton::get_value`] to recover it. Use [`RadioButton::value_as_str`]
+    /// for the common `String` case.
+    #[reflect(ignore)]
+    pub value: WidgetValue,
+    pub selected: bool,
+}
+
+impl Default for RadioButton {
+    /// Creates a default radio button widget.
+    fn default() -> Self {
+        let entry = RADIO_BUTTON_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            label: String::from("label"),
+            value: WidgetValue::new(String::new()),
+            selected: false,
+        }
+    }
+}
+
+impl RadioButton {
+    /// Sets a typed value for this radio button.
+    pub fn with_value<T: Any + Send + Sync>(mut self, value: T) -> Self {
+        self.value.set(value);
+        self
+    }
+
+    /// Returns the typed value if it can be downcast to `T`.
+    pub fn get_value<T: Any>(&self) -> Option<&T> {
+        self.value.get::<T>()
+    }
+
+    /// Returns the internal value as `&str` when it holds a `String`.
+    pub fn value_as_str(&self) -> Option<&str> {
+        self.value.as_str()
+    }
+
+    /// Returns a reflected value when the radio value was created from reflection.
+    pub fn get_reflected(&self) -> Option<&ReflectedValue> {
+        self.value.reflect()
+    }
+}
+
+/// Represents the `WidgetValue` data structure used by the extended UI system.
+#[derive(Debug, Clone)]
+pub struct WidgetValue(Option<Arc<dyn Any + Send + Sync>>);
+
+impl PartialEq for WidgetValue {
+    /// Compares common string-backed values by value and other typed values by shared identity.
+    fn eq(&self, other: &Self) -> bool {
+        match (&self.0, &other.0) {
+            (None, None) => true,
+            (Some(a), Some(b)) => match (a.downcast_ref::<String>(), b.downcast_ref::<String>()) {
+                (Some(sa), Some(sb)) => sa == sb,
+                _ => Arc::ptr_eq(a, b),
+            },
+            _ => false,
+        }
+    }
+}
+
+impl Eq for WidgetValue {}
+
+impl Default for WidgetValue {
+    /// Handles `default` in the extended UI workflow.
+    fn default() -> Self {
+        Self(None)
+    }
+}
+
+impl WidgetValue {
+    /// Handles `new` in the extended UI workflow.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Call `new` with values from your app state and world context.
+    /// ```
+    pub fn new<T: Any + Send + Sync>(value: T) -> Self {
+        Self(Some(Arc::new(value)))
+    }
+
+    /// Handles `get` in the extended UI workflow.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Call `get` with values from your app state and world context.
+    /// ```
+    pub fn get<T: Any>(&self) -> Option<&T> {
+        self.0.as_ref()?.downcast_ref::<T>()
+    }
+
+    /// Handles `set` in the extended UI workflow.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Call `set` with values from your app state and world context.
+    /// ```
+    pub fn set<T: Any + Send + Sync>(&mut self, value: T) {
+        self.0 = Some(Arc::new(value));
+    }
+
+    /// Handles `as_str` in the extended UI workflow.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Call `as_str` with values from your app state and world context.
+    /// ```
+    pub fn as_str(&self) -> Option<&str> {
+        self.0
+            .as_ref()?
+            .downcast_ref::<String>()
+            .map(|s| s.as_str())
+    }
+
+    /// Handles `reflect` in the extended UI workflow.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Call `reflect` with values from your app state and world context.
+    /// ```
+    pub fn reflect(&self) -> Option<&ReflectedValue> {
+        self.get::<ReflectedValue>()
+    }
+}
+
+// ===============================================
+//                     Scrollbar
+// ===============================================
+
+/// Scrollbar widget for scrollable containers.
+#[derive(Component, Reflect, Debug, Clone, PartialEq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct Scrollbar {
+    pub entry: usize,
+    pub entity: Option<Entity>,
+    pub value: f32, // 3.146675432...............
+    pub min: f32,
+    pub max: f32,
+    pub step: f32,
+    pub vertical: bool,
+    pub viewport_extent: f32,
+    pub content_extent: f32,
+}
+
+impl Default for Scrollbar {
+    /// Creates a default scrollbar widget.
+    fn default() -> Self {
+        let entry = SCROLL_ID_POOL.lock().unwrap().acquire();
+        Self {
+            entry,
+            entity: None,
+            value: 0.0,
+            min: 0.0,
+            max: 1000.0,
+            step: 10.0,
+            vertical: true,
+            viewport_extent: 0.0,
+            content_extent: 0.0,
+        }
+    }
+}
+
+// ===============================================
+//                      Slider
+// ===============================================
+
+/// Slider behavior mode.
+#[derive(Reflect, Default, Debug, Clone, Copy, Eq, PartialEq)]
+pub enum SliderType {
+    /// Variant `Default`.
+    #[default]
+    Default,
+    /// Variant `Range`.
+    Range,
+}
+
+impl SliderType {
+    /// Parses slider type from string.
+    pub fn from_str(value: &str) -> Option<Self> {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "default" => Some(Self::Default),
+            "range" => Some(Self::Range),
+            _ => None,
+        }
+    }
+}
+
+/// Label anchor position for slider dots.
+#[derive(Reflect, Default, Debug, Clone, Copy, Eq, PartialEq)]
+pub enum SliderDotAnchor {
+    /// Variant `Top`.
+    #[default]
+    Top,
+    /// Variant `Bottom`.
+    Bottom,
+}
+
+impl SliderDotAnchor {
+    /// Parses dot anchor from string.
+    pub fn from_str(value: &str) -> Option<Self> {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "top" => Some(Self::Top),
+            "bottom" => Some(Self::Bottom),
+            _ => None,
+        }
+    }
+}
+
+/// Slider widget with numeric range.
+#[derive(Component, Reflect, Debug, Clone, PartialEq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct Slider {
+    pub entry: usize,
+    pub slider_type: SliderType,
+    pub value: f32,
+    pub range_start: f32,
+    pub range_end: f32,
+    pub step: f32,
+    pub min: f32,
+    pub max: f32,
+    pub dots: Option<u32>,
+    pub show_labels: bool,
+    pub show_tip: bool,
+    pub dot_anchor: SliderDotAnchor,
+}
+
+impl Default for Slider {
+    /// Creates a default slider widget.
+    fn default() -> Self {
+        let entry = SLIDER_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            slider_type: SliderType::Default,
+            value: 0.0,
+            range_start: 20.0,
+            range_end: 40.0,
+            step: 1.0,
+            min: 0.0,
+            max: 100.0,
+            dots: None,
+            show_labels: false,
+            show_tip: true,
+            dot_anchor: SliderDotAnchor::Top,
+        }
+    }
+}
+
+// ===============================================
+//                    Color Picker
+// ===============================================
+
+/// Color picker widget with HSV interaction and RGB/RGBA/HEX output values.
+#[derive(Component, Reflect, Debug, Clone, PartialEq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct ColorPicker {
+    pub entry: usize,
+    pub red: u8,
+    pub green: u8,
+    pub blue: u8,
+    pub alpha: u8,
+    pub hue: f32,
+    pub saturation: f32,
+    pub value: f32,
+}
+
+impl Default for ColorPicker {
+    /// Creates a default color picker set to Google blue.
+    fn default() -> Self {
+        let entry = COLOR_PICKER_ID_POOL.lock().unwrap().acquire();
+        Self::from_rgba_u8_with_entry(entry, 0x42, 0x85, 0xF4, 255)
+    }
+}
+
+impl ColorPicker {
+    /// Creates a color picker from RGBA bytes.
+    pub fn from_rgba_u8(red: u8, green: u8, blue: u8, alpha: u8) -> Self {
+        let entry = COLOR_PICKER_ID_POOL.lock().unwrap().acquire();
+        Self::from_rgba_u8_with_entry(entry, red, green, blue, alpha)
+    }
+
+    /// Handles `from_rgba_u8_with_entry` in the extended UI workflow.
+    fn from_rgba_u8_with_entry(entry: usize, red: u8, green: u8, blue: u8, alpha: u8) -> Self {
+        let (hue, saturation, value) = rgb_u8_to_hsv(red, green, blue);
+        Self {
+            entry,
+            red,
+            green,
+            blue,
+            alpha,
+            hue,
+            saturation,
+            value,
+        }
+    }
+
+    /// Updates RGB values from HSV while preserving alpha.
+    pub fn set_hsv(&mut self, hue: f32, saturation: f32, value: f32) {
+        self.hue = hue.rem_euclid(360.0);
+        self.saturation = saturation.clamp(0.0, 1.0);
+        self.value = value.clamp(0.0, 1.0);
+        let (r, g, b) = hsv_to_rgb_u8(self.hue, self.saturation, self.value);
+        self.red = r;
+        self.green = g;
+        self.blue = b;
+    }
+
+    /// Updates HSV values from RGB while preserving alpha.
+    pub fn set_rgb(&mut self, red: u8, green: u8, blue: u8) {
+        self.red = red;
+        self.green = green;
+        self.blue = blue;
+        let (hue, saturation, value) = rgb_u8_to_hsv(red, green, blue);
+        self.hue = hue;
+        self.saturation = saturation;
+        self.value = value;
+    }
+
+    /// Returns the current color as a HEX string (`#RRGGBB`).
+    pub fn hex(&self) -> String {
+        format!("#{:02X}{:02X}{:02X}", self.red, self.green, self.blue)
+    }
+
+    /// Returns the current color as an `rgb(r, g, b)` string.
+    pub fn rgb_string(&self) -> String {
+        format!("rgb({}, {}, {})", self.red, self.green, self.blue)
+    }
+
+    /// Returns the current color as an `rgba(r, g, b, a)` string (alpha in `0..255`).
+    pub fn rgba_string(&self) -> String {
+        format!(
+            "rgba({}, {}, {}, {})",
+            self.red, self.green, self.blue, self.alpha
+        )
+    }
+}
+
+/// Handles `hsv_to_rgb_u8` in the extended UI workflow.
+///
+/// # Examples
+///
+/// ```rust
+/// // Call `hsv_to_rgb_u8` with values from your app state and world context.
+/// ```
+pub fn hsv_to_rgb_u8(hue: f32, saturation: f32, value: f32) -> (u8, u8, u8) {
+    let h = hue.rem_euclid(360.0);
+    let s = saturation.clamp(0.0, 1.0);
+    let v = value.clamp(0.0, 1.0);
+
+    if s <= f32::EPSILON {
+        let gray = (v * 255.0).round() as u8;
+        return (gray, gray, gray);
+    }
+
+    let c = v * s;
+    let x = c * (1.0 - (((h / 60.0) % 2.0) - 1.0).abs());
+    let m = v - c;
+
+    let (r1, g1, b1) = match h as i32 {
+        0..=59 => (c, x, 0.0),
+        60..=119 => (x, c, 0.0),
+        120..=179 => (0.0, c, x),
+        180..=239 => (0.0, x, c),
+        240..=299 => (x, 0.0, c),
+        _ => (c, 0.0, x),
+    };
+
+    let to_u8 = |f: f32| ((f + m).clamp(0.0, 1.0) * 255.0).round() as u8;
+    (to_u8(r1), to_u8(g1), to_u8(b1))
+}
+
+/// Handles `rgb_u8_to_hsv` in the extended UI workflow.
+fn rgb_u8_to_hsv(red: u8, green: u8, blue: u8) -> (f32, f32, f32) {
+    let r = red as f32 / 255.0;
+    let g = green as f32 / 255.0;
+    let b = blue as f32 / 255.0;
+
+    let max = r.max(g.max(b));
+    let min = r.min(g.min(b));
+    let delta = max - min;
+
+    let hue = if delta <= f32::EPSILON {
+        0.0
+    } else if (max - r).abs() <= f32::EPSILON {
+        60.0 * (((g - b) / delta).rem_euclid(6.0))
+    } else if (max - g).abs() <= f32::EPSILON {
+        60.0 * (((b - r) / delta) + 2.0)
+    } else {
+        60.0 * (((r - g) / delta) + 4.0)
+    };
+
+    let saturation = if max <= f32::EPSILON {
+        0.0
+    } else {
+        delta / max
+    };
+    (hue.rem_euclid(360.0), saturation, max)
+}
+
+// ===============================================
+//                   Switch Button
+// ===============================================
+
+/// Switch button widget with a label and optional icon.
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct SwitchButton {
+    pub entry: usize,
+    pub label: String,
+    pub icon: Option<String>,
+    pub selected: bool,
+}
+
+impl Default for SwitchButton {
+    /// Creates a default switch button widget.
+    fn default() -> Self {
+        let entry = SWITCH_BUTTON_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            label: String::from(""),
+            icon: None,
+            selected: false,
+        }
+    }
+}
+
+// ===============================================
+//                   Toggle Button
+// ===============================================
+
+/// Toggle button widget with selectable state.
+#[derive(Component, Reflect, Debug, Clone, PartialEq)]
+#[reflect(Component)]
+#[require(UIGenID, UIWidgetState, Widget)]
+pub struct ToggleButton {
+    pub entry: usize,
+    pub label: String,
+    #[reflect(ignore)]
+    pub value: WidgetValue,
+    pub icon_place: IconPlace,
+    pub icon_path: Option<String>,
+    pub selected: bool,
+}
+
+impl Default for ToggleButton {
+    /// Creates a default toggle button widget.
+    fn default() -> Self {
+        let entry = TOGGLE_BUTTON_ID_POOL.lock().unwrap().acquire();
+
+        Self {
+            entry,
+            label: String::from("label"),
+            value: WidgetValue::new(String::from("")),
+            icon_path: None,
+            icon_place: IconPlace::default(),
+            selected: false,
+        }
+    }
+}

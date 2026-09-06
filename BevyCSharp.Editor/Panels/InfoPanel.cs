@@ -18,12 +18,12 @@ namespace BevyCSharp.Editor.Panels;
 /// opened it and a long way from where somebody's eye already is.
 /// </para>
 /// </remarks>
-[EditorPanel(
+[UiPanel(
     "panels/info.html",
     Root = "#info",
-    Dock = EditorDock.ViewportTopRight,
+    Dock = UiDock.ViewportTopRight,
     Y = 34f,
-    Dismiss = PanelDismiss.OnOutsideClick,
+    Dismiss = UiDismiss.OnOutsideClick,
     Layer = 40)]
 public sealed partial class InfoPanel
 {

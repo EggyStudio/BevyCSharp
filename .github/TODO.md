@@ -318,6 +318,35 @@ Points to get right:
 - **Teardown matters.** Bepu is pool-based and its `BufferPool` and `ThreadDispatcher` are
   disposable, so they have to be torn down with the app rather than left to the GC.
 
+## The interface
+
+`native/bcs_ui` is the interface the panels are drawn with: documents in HTML, stylesheets in CSS,
+and the widgets between them. It is this project's own copy of `bevy_extended_ui`, taken under
+Apache 2.0, with `NOTICE.md` saying what was taken and what was left out.
+
+What is left:
+
+- **A menu's background does not cover the pictures of the panel under it.** Asking where each
+  element sits in the drawing order (`bcs_xui_stack`) says the menu is later than the toolbar, and
+  the toolbar's icons and borders paint over it anyway. The editor works around it by stepping
+  menus out from under panels. The next thing to try is a small Bevy app with two documents and
+  nothing else, which would say whether this is the interface's doing or the engine's.
+- **A value written to a widget before its own text child exists is not drawn.** The bridge keeps
+  every first write for four frames and applies it again, which works and costs four writes. Now
+  that the widgets are ours, the widget could seed its text child from what it holds instead.
+- **A backdrop blur works, and what it samples is captured after the panels drawn before it.** One
+  blurred panel looks right, which the sample's own panel shows. Several of them blur each other,
+  which is occasionally what somebody wants and usually not; capturing the screen once, before any
+  panel is drawn, would settle it.
+- **The parts that were left out are still in the source**, behind feature names that are no longer
+  declared: the translation, dialog, provider and vector image features, and the plugin half of the
+  component framework. They are dead code that reads as live code. Deleting them is not the tidy it
+  looks: the framework module also holds the binding store the documents use, so the branches have
+  to be unpicked one at a time rather than by deleting a directory.
+- **A game's interface is a `UiHost` and its panels**, which is enough for a heads up display and
+  a menu. What it has no answer for yet is a game that wants the editor's docks: those live in the
+  editor's shell, and a game wanting a docked tool window would have to write its own.
+
 ## The editor
 
 `BevyCSharp.Editor` runs. The world on the left with a picture per row, the tools along the top, and
@@ -356,16 +385,15 @@ What is left:
   in its text. What nothing uses it for yet is hover and pressed states, which want the pointer's
   position tested against every row every frame, or an entry point that reports what the interface
   already knows about which widget is under the pointer.
-- **A fork of the interface crate would buy back nine things**, all of them worked around today
-  and all of them listed in EDITOR.md: a value written before a widget's text child exists is
-  never drawn, a stylesheet reapplication undoes what was written to an element's display, hiding
-  an element takes both a display and a visibility write because a node drawn once keeps being
-  painted at the size it had, painting an element's background makes the interface restyle it and
-  so undoes the hiding of everything else in the same row, a command that fails ends the process
-  rather than reporting, a menu cannot be drawn over a panel whatever it is told about layering,
-  `align-content` is not read at all, so a wrapping box cannot be told to pack its lines, only the
-  first class in a `class` attribute is matched, and a backdrop blur is drawn over an element's own
-  background rather than under it.
+- **The interface is this project's own code now**, in `native/bcs_ui`, copied from
+  `bevy_extended_ui` under Apache 2.0 with `NOTICE.md` beside it saying so. Five of the nine things
+  a fork was going to buy back are bought: what a program decides about an element's box survives
+  the stylesheet being applied again, so hiding, placing and sizing a panel no longer fight it; a
+  command that fails no longer ends the process; `align-content` and `align-self` are read; and two
+  of the nine turned out not to be true at all, since a rule naming two classes matches and three
+  inputs in a row all draw. What is left is a menu whose background the pictures of the panel under
+  it paint over, a value written before a widget's text child exists, and a backdrop blur drawn
+  over an element's own background rather than under it.
 - **One shape per call.** Every gizmo crosses the ABI on its own, and the fading grid asks for two
   hundred and forty of them a frame, about four percent of one. Fine at this size and the wrong
   shape at ten times it: a batched entry point taking an array would make the cost of a wireframe or

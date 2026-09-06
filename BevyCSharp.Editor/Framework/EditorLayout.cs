@@ -77,23 +77,23 @@ public sealed class EditorLayout
     public bool BandOpen { get; private set; }
 
     /// <summary>Where a panel is, taking any override over what the panel itself asked for.</summary>
-    public PanelPlacement PlacementOf(IEditorPanel panel)
+    public PanelPlacement PlacementOf(IUiPanel panel)
     {
         ArgumentNullException.ThrowIfNull(panel);
         return _overrides.TryGetValue(KeyOf(panel), out var placement)
             ? placement
-            : panel.Chrome.Placement;
+            : panel.Chrome.Placement();
     }
 
     /// <summary>Moves a panel, which is what a drag and a loaded layout both do.</summary>
-    public void Place(IEditorPanel panel, PanelPlacement placement)
+    public void Place(IUiPanel panel, PanelPlacement placement)
     {
         ArgumentNullException.ThrowIfNull(panel);
         _overrides[KeyOf(panel)] = placement;
     }
 
     /// <summary>Puts a panel back where its own declaration says.</summary>
-    public void Reset(IEditorPanel panel)
+    public void Reset(IUiPanel panel)
     {
         ArgumentNullException.ThrowIfNull(panel);
         _overrides.Remove(KeyOf(panel));
@@ -129,7 +129,7 @@ public sealed class EditorLayout
     /// runs, the window is resized. The writes themselves are compared first, so a frame in which
     /// nothing moved costs a handful of reads.
     /// </remarks>
-    public void Arrange(IReadOnlyList<IEditorPanel> panels)
+    public void Arrange(IReadOnlyList<IUiPanel> panels)
     {
         ArgumentNullException.ThrowIfNull(panels);
 
@@ -167,14 +167,14 @@ public sealed class EditorLayout
             placed.Add(new Placed(panel, PlacementOf(panel), rect));
         }
 
-        var left = ColumnWidth(placed, EditorDock.Left, LeftWidth, width, ref _leftMeasured);
-        var right = ColumnWidth(placed, EditorDock.Right, RightWidth, width, ref _rightMeasured);
+        var left = ColumnWidth(placed, UiDock.Left, LeftWidth, width, ref _leftMeasured);
+        var right = ColumnWidth(placed, UiDock.Right, RightWidth, width, ref _rightMeasured);
 
         if (float.IsNaN(LeftWidth) && _leftMeasured > 0f) _leftNatural = _leftMeasured;
         if (float.IsNaN(RightWidth) && _rightMeasured > 0f) _rightNatural = _rightMeasured;
 
-        var strip = Tallest(placed, EditorDock.Strip);
-        var band = Members(placed, EditorDock.Bottom).Count > 0
+        var strip = Tallest(placed, UiDock.Strip);
+        var band = Members(placed, UiDock.Bottom).Count > 0
             ? Math.Clamp(BottomHeight, MinimumBand, height * 0.5f)
             : 0f;
 
@@ -204,9 +204,9 @@ public sealed class EditorLayout
 
         var cap = width / 3f;
 
-        Column(placed, EditorDock.Left, Margin, Margin, bandTop, left, cap, fromLeft: true);
+        Column(placed, UiDock.Left, Margin, Margin, bandTop, left, cap, fromLeft: true);
         var rightBottom = Column(
-            placed, EditorDock.Right, width - Margin, Margin, bandTop, right, cap, fromLeft: false);
+            placed, UiDock.Right, width - Margin, Margin, bandTop, right, cap, fromLeft: false);
 
         Band(placed, Margin, width - Margin, bandTop, band);
         Strip(placed, Margin, width - Margin, stripTop);
@@ -216,7 +216,7 @@ public sealed class EditorLayout
     }
 
     /// <summary>One panel, where it wants to be, and where it currently is.</summary>
-    private readonly record struct Placed(IEditorPanel Panel, PanelPlacement Placement, UiRect Rect);
+    private readonly record struct Placed(IUiPanel Panel, PanelPlacement Placement, UiRect Rect);
 
     /// <summary>How large each panel was last seen to be.</summary>
     private readonly Dictionary<string, UiRect> _seen = [];
@@ -241,7 +241,7 @@ public sealed class EditorLayout
     /// panel reports, which falls back to the size it had before it was put away.
     /// </para>
     /// </remarks>
-    private bool Settled(IEditorPanel panel, ref UiRect rect)
+    private bool Settled(IUiPanel panel, ref UiRect rect)
     {
         var key = KeyOf(panel);
         var known = _seen.TryGetValue(key, out var before);
@@ -301,7 +301,7 @@ public sealed class EditorLayout
     /// </para>
     /// </remarks>
     private ColumnSize ColumnWidth(
-        List<Placed> placed, EditorDock dock, float dragged, float width, ref float remembered)
+        List<Placed> placed, UiDock dock, float dragged, float width, ref float remembered)
     {
         var members = Members(placed, dock);
         if (members.Count == 0)
@@ -339,7 +339,7 @@ public sealed class EditorLayout
     /// <returns>Where the last panel in the column ends, which is what is below it.</returns>
     private float Column(
         List<Placed> placed,
-        EditorDock dock,
+        UiDock dock,
         float edge,
         float top,
         float bottom,
@@ -393,7 +393,7 @@ public sealed class EditorLayout
     {
         if (height <= 0f) return;
 
-        foreach (var entry in Members(placed, EditorDock.Bottom))
+        foreach (var entry in Members(placed, UiDock.Bottom))
         {
             entry.Panel.Window!.PlaceAt(
                 left,
@@ -418,7 +418,7 @@ public sealed class EditorLayout
     {
         var run = left;
 
-        foreach (var entry in Members(placed, EditorDock.Strip))
+        foreach (var entry in Members(placed, UiDock.Strip))
         {
             var window = entry.Panel.Window!;
 
@@ -449,7 +449,7 @@ public sealed class EditorLayout
     {
         var wide = MathF.Min(SheetWidth, MathF.Max(0f, width - (Margin * 2f)));
 
-        foreach (var entry in Members(placed, EditorDock.Sheet))
+        foreach (var entry in Members(placed, UiDock.Sheet))
         {
             entry.Panel.Window!.PlaceAt(
                 (width - wide) * 0.5f,
@@ -500,20 +500,20 @@ public sealed class EditorLayout
         {
             var (x, y) = entry.Placement.Dock switch
             {
-                EditorDock.ViewportTopLeft => (viewport.X + Margin, viewport.Y + Margin),
+                UiDock.ViewportTopLeft => (viewport.X + Margin, viewport.Y + Margin),
 
                 // The one thing measured against the window rather than the viewport. What is in
                 // the middle of the screen should be in the middle of the screen: a person reaching
                 // for the move tool should not have to find it somewhere new because a panel on the
                 // right happened to open.
-                EditorDock.ViewportTop => ((width - Width(entry)) * 0.5f, viewport.Y + Margin),
-                EditorDock.ViewportTopRight => (
+                UiDock.ViewportTop => ((width - Width(entry)) * 0.5f, viewport.Y + Margin),
+                UiDock.ViewportTopRight => (
                     viewport.Right - Margin - Width(entry),
                     viewport.Y + Margin),
-                EditorDock.ViewportBottomLeft => (
+                UiDock.ViewportBottomLeft => (
                     viewport.X + Margin,
                     viewport.Bottom - Margin - Height(entry)),
-                EditorDock.ViewportBottomRight => (
+                UiDock.ViewportBottomRight => (
                     RightOf(viewport, width, rightBottom, viewport.Bottom - Margin - Height(entry))
                         - Margin - Width(entry),
                     viewport.Bottom - Margin - Height(entry)),
@@ -569,7 +569,7 @@ public sealed class EditorLayout
 
         foreach (var entry in placed)
         {
-            if (entry.Placement.Dock != EditorDock.Floating) continue;
+            if (entry.Placement.Dock != UiDock.Floating) continue;
 
             var x = entry.Placement.X;
             var y = entry.Placement.Y;
@@ -594,7 +594,7 @@ public sealed class EditorLayout
     }
 
     /// <summary>How tall the tallest panel of a dock is.</summary>
-    private static float Tallest(List<Placed> placed, EditorDock dock)
+    private static float Tallest(List<Placed> placed, UiDock dock)
     {
         var tallest = 0f;
         foreach (var entry in Members(placed, dock)) tallest = MathF.Max(tallest, Height(entry));
@@ -603,7 +603,7 @@ public sealed class EditorLayout
     }
 
     /// <summary>A dock's panels, in the order they asked for.</summary>
-    private static List<Placed> Members(List<Placed> placed, EditorDock dock)
+    private static List<Placed> Members(List<Placed> placed, UiDock dock)
     {
         var members = new List<Placed>();
 
@@ -631,7 +631,7 @@ public sealed class EditorLayout
     /// has one of and the wrong one for a menu, which is why a menu is placed where it was opened
     /// rather than by the layout.
     /// </remarks>
-    private static string KeyOf(IEditorPanel panel) => panel.GetType().Name;
+    private static string KeyOf(IUiPanel panel) => panel.GetType().Name;
 
     // -- Saving
     //

@@ -61,6 +61,7 @@ public sealed unsafe class XuiTests
                 Native.bcs_xui_set_drawn(0, 1),
                 Native.bcs_xui_set_colour(0, 1f, 1f, 1f, 1f),
                 Native.bcs_xui_set_class(0, "row"),
+                Native.bcs_xui_stack(0),
                 Native.bcs_xui_count("nothing"),
                 Native.bcs_xui_set_layer(0, 1),
                 Native.bcs_xui_rect(0, &rect),

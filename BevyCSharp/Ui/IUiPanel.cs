@@ -1,6 +1,4 @@
-using Bevy;
-
-namespace BevyCSharp.Editor.Framework;
+namespace Bevy;
 
 /// <summary>
 /// What the shell needs from a panel, and what the generator writes for one.
@@ -10,18 +8,18 @@ namespace BevyCSharp.Editor.Framework;
 /// implements none of it. It exists so the shell can drive a panel without knowing its type, and
 /// so a panel that wants to do something the attributes cannot describe can implement it by hand.
 /// </remarks>
-public interface IEditorPanel
+public interface IUiPanel
 {
     /// <summary>The window this panel is showing in, once it has been opened.</summary>
-    EditorWindow? Window { get; }
+    UiWindow? Window { get; }
 
     /// <summary>
     /// What the panel declared about itself: its root element, where it starts, what dismisses it.
     /// </summary>
     /// <remarks>
-    /// True before the panel is open and unchanged while it is, which is what lets the shell
-    /// decide how to open a panel before opening it. Where a panel currently <em>is</em> belongs
-    /// to <see cref="EditorLayout"/> instead, because that changes.
+    /// True before the panel is open and unchanged while it is, which is what lets whatever is
+    /// showing the panel decide how to open it before opening it. Where a panel currently
+    /// <em>is</em> belongs to whatever arranges them, because that changes.
     /// </remarks>
     PanelChrome Chrome { get; }
 

@@ -19,7 +19,7 @@ public static class EditorEntity
     /// named as freely as a cube is and the name is no help. What separates them is that a widget
     /// is a UI node and nothing in the world being edited is.
     /// </remarks>
-    private static readonly string[] Marks = ["bevy_ui::", "extended_ui"];
+    private static readonly string[] Marks = ["bevy_ui::", "bcs_ui"];
 
     /// <summary>
     /// Whether a component id belongs to the interface, remembered once per id.

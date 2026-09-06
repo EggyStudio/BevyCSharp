@@ -1,10 +1,10 @@
 //! HTML and CSS driven UI, reachable from C#.
 //!
-//! Needs the `editor` feature, which layers `bevy_extended_ui` on top of the render profile. A
+//! Needs the `editor` feature, which layers `bcs_ui` on top of the render profile. A
 //! build without it keeps every entry point here so the managed side links either way, and they
 //! report [`status::UNSUPPORTED`].
 //!
-//! The division of labour: `bevy_extended_ui` parses the documents and owns the widgets, which
+//! The division of labour: `bcs_ui` parses the documents and owns the widgets, which
 //! are ordinary `bevy_ui` entities. This module resolves an element to its entity and reads or
 //! writes the one value that element carries, so the managed side never holds a widget type.
 //! That containment is deliberate. The crate's own API is in flux, and keeping every mention of
@@ -131,9 +131,9 @@ struct Snapshot {
 pub fn install(app: &mut bevy::app::App) {
     use bevy::picking::events::{Click, Pointer};
     use bevy::prelude::*;
-    use bevy_extended_ui::styles::CssID;
-    use bevy_extended_ui::widgets::{InputField, Slider, UIWidgetState};
-    use bevy_extended_ui::ExtendedUiPlugin;
+    use bcs_ui::styles::CssID;
+    use bcs_ui::widgets::{InputField, Slider, UIWidgetState};
+    use bcs_ui::ExtendedUiPlugin;
     use std::collections::HashMap;
 
     use crate::interop::BcsUiEvent;
@@ -206,7 +206,7 @@ pub fn install(app: &mut bevy::app::App) {
         bevy::app::PreUpdate,
         |mut documents: ResMut<live::Documents>,
          mut pending: ResMut<live::PendingText>,
-         mut registry: ResMut<bevy_extended_ui::old::registry::UiRegistry>| {
+         mut registry: ResMut<bcs_ui::old::registry::UiRegistry>| {
             if !documents.dirty {
                 return;
             }
@@ -253,14 +253,14 @@ pub fn install(app: &mut bevy::app::App) {
             (bevy::ecs::query::Has<bevy::camera::Hdr>, &Msaa),
             (
                 bevy::ecs::query::With<bevy::camera::Camera3d>,
-                bevy::ecs::query::Without<bevy_extended_ui::UiCamera>,
+                bevy::ecs::query::Without<bcs_ui::UiCamera>,
             ),
         >,
          interface: Query<
             (bevy::ecs::entity::Entity, &Msaa),
-            bevy::ecs::query::With<bevy_extended_ui::UiCamera>,
+            bevy::ecs::query::With<bcs_ui::UiCamera>,
         >,
-         mut config: ResMut<bevy_extended_ui::ExtendedUiConfiguration>,
+         mut config: ResMut<bcs_ui::ExtendedUiConfiguration>,
          mut commands: Commands| {
             let Some((hdr, msaa)) = scene.iter().next() else {
                 return;
@@ -283,8 +283,8 @@ pub fn install(app: &mut bevy::app::App) {
     // an HTML edit does not. Asking the registry for a rebuild is what closes that.
     app.add_systems(
         Update,
-        |mut changes: MessageReader<bevy::asset::AssetEvent<bevy_extended_ui::io::HtmlAsset>>,
-         mut registry: ResMut<bevy_extended_ui::old::registry::UiRegistry>,
+        |mut changes: MessageReader<bevy::asset::AssetEvent<bcs_ui::io::HtmlAsset>>,
+         mut registry: ResMut<bcs_ui::old::registry::UiRegistry>,
          mut events: ResMut<UiEvents>| {
             let changed = changes
                 .read()
@@ -311,7 +311,7 @@ pub fn install(app: &mut bevy::app::App) {
     // up again, find the ones still standing, and cache those instead.
     app.add_systems(
         Update,
-        |mut spawned: MessageReader<bevy_extended_ui::html::HtmlAllWidgetsSpawned>,
+        |mut spawned: MessageReader<bcs_ui::html::HtmlAllWidgetsSpawned>,
          mut events: ResMut<UiEvents>| {
             if spawned.read().next().is_none() {
                 return;
@@ -407,9 +407,9 @@ pub unsafe extern "C" fn bcs_xui_open(path: *const core::ffi::c_char) -> i32 {
         #[cfg(feature = "editor")]
         {
             use bevy::asset::AssetServer;
-            use bevy_extended_ui::html::HtmlSource;
-            use bevy_extended_ui::io::HtmlAsset;
-            use bevy_extended_ui::old::registry::UiRegistry;
+            use bcs_ui::html::HtmlSource;
+            use bcs_ui::io::HtmlAsset;
+            use bcs_ui::old::registry::UiRegistry;
 
             let Some(path) = (unsafe { crate::interop::cstr_to_string(path) }) else {
                 return status::NULL_ARG;
@@ -464,7 +464,7 @@ pub extern "C" fn bcs_xui_close(document: i32) -> i32 {
 
         #[cfg(feature = "editor")]
         {
-            use bevy_extended_ui::old::registry::UiRegistry;
+            use bcs_ui::old::registry::UiRegistry;
 
             crate::state::with_world(|world| {
                 let name = {
@@ -518,7 +518,7 @@ pub unsafe extern "C" fn bcs_xui_element(css_id: *const core::ffi::c_char) -> u6
 
         #[cfg(feature = "editor")]
         {
-            use bevy_extended_ui::styles::CssID;
+            use bcs_ui::styles::CssID;
 
             let Some(wanted) = (unsafe { crate::interop::cstr_to_string(css_id) }) else {
                 return 0;
@@ -554,7 +554,7 @@ pub unsafe extern "C" fn bcs_xui_count(css_id: *const core::ffi::c_char) -> i32 
 
         #[cfg(feature = "editor")]
         {
-            use bevy_extended_ui::styles::CssID;
+            use bcs_ui::styles::CssID;
 
             let Some(wanted) = (unsafe { crate::interop::cstr_to_string(css_id) }) else {
                 return status::NULL_ARG;
@@ -590,8 +590,8 @@ pub unsafe extern "C" fn bcs_xui_get_text(entity: u64, out: *mut u8, capacity: i
 
         #[cfg(feature = "editor")]
         {
-            use bevy_extended_ui::html::HtmlInnerContent;
-            use bevy_extended_ui::widgets::{Button, Headline, InputField, Paragraph};
+            use bcs_ui::html::HtmlInnerContent;
+            use bcs_ui::widgets::{Button, Headline, InputField, Paragraph};
 
             crate::state::with_world(|world| {
                 let entity = crate::ecs::entity_from(entity);
@@ -645,10 +645,10 @@ pub unsafe extern "C" fn bcs_xui_set_text(entity: u64, text: *const core::ffi::c
                 let entity = crate::ecs::entity_from(entity);
                 let status = write_text(world, entity, &text);
 
-                // Kept and applied again for the next few frames, in case the widget had nowhere
-                // to draw it yet. Written down here rather than asked for by the caller, because
-                // whether a widget has built its text child is the interface's business and not
-                // something the other side of an ABI should have to guess at.
+                // Kept and applied again on the next frame, in case the widget had nowhere to draw
+                // it yet. The interface now says so itself when the node that draws a widget's
+                // text appears, so this is the belt beside that brace rather than the mechanism:
+                // one repeat rather than four, and only for the first write to each widget.
                 if status == status::OK {
                     if let Some(mut pending) = world.get_resource_mut::<live::PendingText>()
                         && !pending.settled.contains(&entity)
@@ -679,7 +679,7 @@ pub unsafe extern "C" fn bcs_xui_get_number(entity: u64, out: *mut f32) -> i32 {
 
         #[cfg(feature = "editor")]
         {
-            use bevy_extended_ui::widgets::Slider;
+            use bcs_ui::widgets::Slider;
 
             if out.is_null() {
                 return status::NULL_ARG;
@@ -713,7 +713,7 @@ pub extern "C" fn bcs_xui_set_number(entity: u64, value: f32) -> i32 {
 
         #[cfg(feature = "editor")]
         {
-            use bevy_extended_ui::widgets::Slider;
+            use bcs_ui::widgets::Slider;
 
             crate::state::with_world(|world| {
                 let entity = crate::ecs::entity_from(entity);
@@ -746,7 +746,7 @@ pub unsafe extern "C" fn bcs_xui_get_flag(entity: u64, out: *mut i32) -> i32 {
 
         #[cfg(feature = "editor")]
         {
-            use bevy_extended_ui::widgets::UIWidgetState;
+            use bcs_ui::widgets::UIWidgetState;
 
             if out.is_null() {
                 return status::NULL_ARG;
@@ -784,7 +784,7 @@ pub extern "C" fn bcs_xui_set_flag(entity: u64, value: i32) -> i32 {
             use bevy::picking::events::{Click, Pointer};
             use bevy::picking::pointer::{Location, PointerButton, PointerId};
             use bevy::camera::NormalizedRenderTarget;
-            use bevy_extended_ui::widgets::UIWidgetState;
+            use bcs_ui::widgets::UIWidgetState;
 
             crate::state::with_world(|world| {
                 let entity = crate::ecs::entity_from(entity);
@@ -919,55 +919,98 @@ pub extern "C" fn bcs_xui_set_rect(entity: u64, left: f32, top: f32, width: f32,
 
         #[cfg(feature = "editor")]
         {
-            use bevy::ui::{Node, PositionType};
+            use bevy::ui::PositionType;
 
             crate::state::with_world(|world| {
-                let entity = crate::ecs::entity_from(entity);
-                let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
-                    return status::NO_ENTITY;
-                };
-                let Some(mut node) = entity_mut.get_mut::<Node>() else {
-                    return status::NOT_PRESENT;
-                };
+                decide(world, entity, |over| {
+                    // Absolute once a corner is named, because a position means nothing to a node
+                    // the flex layout is still placing. Saying so here rather than in the
+                    // stylesheet is what lets one document be a docked panel in one layout and a
+                    // flyout in another.
+                    //
+                    // Naming neither corner is a caller saying only how large, which leaves the
+                    // node where the layout put it: that is how a grid of equal tiles is written
+                    // without also having to work out where every one of them goes.
+                    if !left.is_nan() || !top.is_nan() {
+                        over.position_type = Some(PositionType::Absolute);
+                    }
 
-                // Absolute once a corner is named, because a position means nothing to a node the
-                // flex layout is still placing. Saying so here rather than in the stylesheet is
-                // what lets one document be a docked panel in one layout and a flyout in another.
-                //
-                // Naming neither corner is a caller saying only how large, which leaves the node
-                // where the layout put it: that is how a grid of equal tiles is written without
-                // also having to work out where every one of them goes.
-                if !left.is_nan() || !top.is_nan() {
-                    node.position_type = PositionType::Absolute;
-                }
-
-                // Three answers, not two. `NaN` leaves a field alone, so a caller placing a
-                // panel keeps whatever the stylesheet said about its size; infinity puts a field
-                // back to `auto`, which is how a panel is told to be as tall as its contents
-                // again after having been given a height. Without the third, a panel measured once
-                // at a fixed height can never be asked about its contents afterwards.
-                if !left.is_nan() {
-                    node.left = length(left);
-                }
-                if !top.is_nan() {
-                    node.top = length(top);
-                }
-                if !width.is_nan() {
-                    node.width = length(width);
-                }
-                if !height.is_nan() {
-                    node.height = length(height);
-                }
-
-                status::OK
+                    // Three answers, not two. `NaN` leaves a field alone, so a caller placing a
+                    // panel keeps whatever the stylesheet said about its size; infinity puts a
+                    // field back to `auto`, which is how a panel is told to be as tall as its
+                    // contents again after having been given a height. Without the third, a panel
+                    // measured once at a fixed height can never be asked about its contents again.
+                    if !left.is_nan() {
+                        over.left = Some(length(left));
+                    }
+                    if !top.is_nan() {
+                        over.top = Some(length(top));
+                    }
+                    if !width.is_nan() {
+                        over.width = Some(length(width));
+                    }
+                    if !height.is_nan() {
+                        over.height = Some(length(height));
+                    }
+                })
             })
         }
     })
 }
 
+/// Writes what the program has decided about an element's box, and applies it at once.
+///
+/// Both halves matter. The decision is kept in a component the interface reads whenever it
+/// restyles the element, which is what stops the stylesheet putting the element back where it was;
+/// applying it to the node here as well is what makes it true this frame rather than next.
+#[cfg(feature = "editor")]
+fn decide(
+    world: &mut bevy::ecs::world::World,
+    entity: u64,
+    change: impl FnOnce(&mut bcs_ui::styles::StyleOverride),
+) -> i32 {
+    use bcs_ui::styles::StyleOverride;
+    use bevy::ui::Node;
+
+    let entity = crate::ecs::entity_from(entity);
+    let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
+        return status::NO_ENTITY;
+    };
+
+    if !entity_mut.contains::<Node>() {
+        return status::NOT_PRESENT;
+    }
+
+    let mut over = entity_mut
+        .get::<StyleOverride>()
+        .cloned()
+        .unwrap_or_default();
+
+    change(&mut over);
+
+    if let Some(mut node) = entity_mut.get_mut::<Node>() {
+        over.apply(node.as_mut());
+    }
+
+    match entity_mut.get_mut::<StyleOverride>() {
+        // Written only when it differs. The interface watches for changes to what it reads, and a
+        // component written every frame is a widget restyled every frame.
+        Some(mut current) => {
+            if *current != over {
+                *current = over;
+            }
+        }
+        None => {
+            entity_mut.insert(over);
+        }
+    }
+
+    status::OK
+}
+
 /// How many frames a written value is applied again for.
 #[cfg(feature = "editor")]
-const RETRIES: u8 = 4;
+const RETRIES: u8 = 1;
 
 /// Puts a string into whichever field the widget draws from.
 #[cfg(feature = "editor")]
@@ -976,8 +1019,8 @@ fn write_text(
     entity: bevy::ecs::entity::Entity,
     text: &str,
 ) -> i32 {
-    use bevy_extended_ui::html::HtmlInnerContent;
-    use bevy_extended_ui::widgets::{Button, Headline, InputField, Paragraph};
+    use bcs_ui::html::HtmlInnerContent;
+    use bcs_ui::widgets::{Button, Headline, InputField, Paragraph};
 
     let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
         return status::NO_ENTITY;
@@ -1278,7 +1321,7 @@ pub extern "C" fn bcs_xui_blur() -> i32 {
 
         #[cfg(feature = "editor")]
         {
-            use bevy_extended_ui::widgets::UIWidgetState;
+            use bcs_ui::widgets::UIWidgetState;
 
             crate::state::with_world(|world| {
                 let mut query = world.query::<&mut UIWidgetState>();
@@ -1340,7 +1383,7 @@ pub unsafe extern "C" fn bcs_xui_set_image(entity: u64, path: *const core::ffi::
 
         #[cfg(feature = "editor")]
         {
-            use bevy_extended_ui::widgets::Img;
+            use bcs_ui::widgets::Img;
 
             let source = unsafe { crate::interop::cstr_to_string(path) }.unwrap_or_default();
 
@@ -1405,17 +1448,7 @@ pub unsafe extern "C" fn bcs_xui_get_visible(entity: u64, out: *mut i32) -> i32 
                     return status::NOT_PRESENT;
                 };
 
-                // Both halves have to agree. Hiding writes the display and the visibility
-                // together, and the interface puts the display back whenever it restyles the
-                // element, so an element that says it is laid out but not painted is one that was
-                // hidden and has been half woken up. Answering "showing" there would leave it
-                // invisible for good, because nothing would write the visibility again.
-                let laid_out = node.display != Display::None;
-                let painted = entity_ref
-                    .get::<bevy::prelude::Visibility>()
-                    .is_none_or(|visibility| *visibility != bevy::prelude::Visibility::Hidden);
-
-                unsafe { out.write(i32::from(laid_out && painted)) };
+                unsafe { out.write(i32::from(node.display != Display::None)) };
                 status::OK
             })
         }
@@ -1424,11 +1457,9 @@ pub unsafe extern "C" fn bcs_xui_get_visible(entity: u64, out: *mut i32) -> i32 
 
 /// Shows or hides an element, and everything under it.
 ///
-/// Both ways at once, and both are needed. `Display::None` is what takes the element out of the
-/// layout so its neighbours close up, which is what a flyout being dismissed should look like. On
-/// its own it is not enough: a node that has been drawn once keeps the size it was last given, and
-/// a subtree the layout has stopped visiting goes on being painted at that size. Saying it is not
-/// visible as well stops the paint whatever the stale geometry says.
+/// Hidden by taking it out of the layout, so its neighbours close up, which is what a flyout being
+/// dismissed should look like. Written as a decision the interface keeps rather than onto the node
+/// directly, so that the next time the stylesheet is applied to the element it does not come back.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_xui_set_visible(entity: u64, visible: i32) -> i32 {
     crate::interop::guard(|| {
@@ -1440,44 +1471,16 @@ pub extern "C" fn bcs_xui_set_visible(entity: u64, visible: i32) -> i32 {
 
         #[cfg(feature = "editor")]
         {
-            use bevy::prelude::Visibility;
-            use bevy::ui::{Display, Node};
+            use bevy::ui::Display;
 
             crate::state::with_world(|world| {
-                let entity = crate::ecs::entity_from(entity);
-                let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
-                    return status::NO_ENTITY;
-                };
-
-                {
-                    let Some(mut node) = entity_mut.get_mut::<Node>() else {
-                        return status::NOT_PRESENT;
-                    };
-
-                    node.display = if visible != 0 {
+                decide(world, entity, |over| {
+                    over.display = Some(if visible != 0 {
                         Display::Flex
                     } else {
                         Display::None
-                    };
-                }
-
-                // Told outright rather than inherited: the interface hides the body of a document
-                // that is not the one in front, and an element that only says "whatever my parent
-                // says" would go with it and never come back.
-                let wanted = if visible != 0 {
-                    Visibility::Visible
-                } else {
-                    Visibility::Hidden
-                };
-
-                match entity_mut.get_mut::<Visibility>() {
-                    Some(mut current) => *current = wanted,
-                    None => {
-                        entity_mut.insert(wanted);
-                    }
-                }
-
-                status::OK
+                    });
+                })
             })
         }
     })
@@ -1506,7 +1509,7 @@ pub unsafe extern "C" fn bcs_xui_set_class(entity: u64, class: *const core::ffi:
 
         #[cfg(feature = "editor")]
         {
-            use bevy_extended_ui::styles::CssClass;
+            use bcs_ui::styles::CssClass;
 
             let wanted = unsafe { crate::interop::cstr_to_string(class) }.unwrap_or_default();
 
@@ -1680,6 +1683,39 @@ pub extern "C" fn bcs_xui_set_layer(entity: u64, layer: i32) -> i32 {
     })
 }
 
+/// Where an element sits in the drawing order, or a negative status code.
+///
+/// What is drawn over what, as a number rather than as a guess. Everything on screen is sorted
+/// into one list and drawn in that order, so of two elements the one with the larger answer is the
+/// one in front. Asking is the only way to tell a layer that did not take from one that did.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_xui_stack(entity: u64) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = entity;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bevy::ui::ComputedStackIndex;
+
+            crate::state::with_world(|world| {
+                let entity = crate::ecs::entity_from(entity);
+                let Ok(entity_ref) = world.get_entity(entity) else {
+                    return status::NO_ENTITY;
+                };
+
+                match entity_ref.get::<ComputedStackIndex>() {
+                    Some(index) => index.0 as i32,
+                    None => status::NOT_PRESENT,
+                }
+            })
+        }
+    })
+}
+
 /// The element the keyboard is going to, or `0` when nothing has focus.
 ///
 /// What a tool needs to know before writing to a text field: a panel that shows the world writes
@@ -1696,8 +1732,8 @@ pub extern "C" fn bcs_xui_focused() -> u64 {
         #[cfg(feature = "editor")]
         {
             use bevy::ecs::entity::Entity;
-            use bevy_extended_ui::styles::CssID;
-            use bevy_extended_ui::widgets::UIWidgetState;
+            use bcs_ui::styles::CssID;
+            use bcs_ui::widgets::UIWidgetState;
 
             crate::state::with_world_opt(|world| {
                 let mut query = world.query::<(Entity, &UIWidgetState, &CssID)>();

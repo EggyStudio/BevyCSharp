@@ -1,4 +1,4 @@
-namespace BevyCSharp.Editor.Framework;
+namespace Bevy;
 
 /// <summary>
 /// Marks a class as a panel backed by an HTML document.
@@ -12,7 +12,7 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 /// <example>
 /// <code>
-/// [EditorPanel("panels/settings.html", Root = "#settings", Dock = EditorDock.Right)]
+/// [UiPanel("panels/settings.html", Root = "#settings", Dock = EditorDock.Right)]
 /// public sealed partial class SettingsPanel
 /// {
 ///     [Bind("#bloom")]     public bool Bloom;
@@ -22,7 +22,7 @@ namespace BevyCSharp.Editor.Framework;
 /// </code>
 /// </example>
 [AttributeUsage(AttributeTargets.Class)]
-public sealed class EditorPanelAttribute(string document) : Attribute
+public sealed class UiPanelAttribute(string document) : Attribute
 {
     /// <summary>The document's path, relative to the asset root.</summary>
     public string Document { get; } = document;
@@ -31,14 +31,14 @@ public sealed class EditorPanelAttribute(string document) : Attribute
     /// The CSS id of the panel's outermost element, which is what gets placed.
     /// </summary>
     /// <remarks>
-    /// Ids are global across every open document, so this has to be unique in the whole editor
-    /// rather than in its own file. A panel that names none is left wherever its stylesheet puts
-    /// it, which is the right answer for a panel that fills the screen or that is placed by hand.
+    /// Ids are global across every open document, so this has to be unique across everything
+    /// open rather than in its own file. A panel that names none is left wherever its stylesheet
+    /// puts it, which is the right answer for one that fills the screen or is placed by hand.
     /// </remarks>
     public string? Root { get; init; }
 
     /// <summary>Which part of the window the panel belongs to.</summary>
-    public EditorDock Dock { get; init; } = EditorDock.Floating;
+    public UiDock Dock { get; init; } = UiDock.Floating;
 
     /// <summary>Where it sits among the other panels of its dock. Lower is first.</summary>
     public int Order { get; init; }
@@ -56,7 +56,7 @@ public sealed class EditorPanelAttribute(string document) : Attribute
     public float Height { get; init; } = float.NaN;
 
     /// <summary>What makes it go away.</summary>
-    public PanelDismiss Dismiss { get; init; } = PanelDismiss.Never;
+    public UiDismiss Dismiss { get; init; } = UiDismiss.Never;
 
     /// <summary>Which panels it draws in front of. Higher is nearer.</summary>
     public int Layer { get; init; }
@@ -136,7 +136,7 @@ public sealed class ShowAttribute(string element) : Attribute
     /// <summary>The element's CSS id, with or without the leading hash.</summary>
     public string Element { get; } = element;
 
-    /// <summary>How many elements the id stands for, exactly as on <see cref="BindAttribute"/>.</summary>
+    /// <summary>How many elements the id stands for, as on <see cref="BindAttribute"/>.</summary>
     public int Count { get; init; }
 }
 
@@ -171,7 +171,7 @@ public sealed class ContextAttribute(string element) : Attribute
     /// <summary>The element's CSS id, with or without the leading hash.</summary>
     public string Element { get; } = element;
 
-    /// <summary>How many elements the id stands for, exactly as on <see cref="BindAttribute"/>.</summary>
+    /// <summary>How many elements the id stands for, as on <see cref="BindAttribute"/>.</summary>
     public int Count { get; init; }
 }
 
@@ -186,7 +186,7 @@ public sealed class ContextAttribute(string element) : Attribute
 /// </para>
 /// <para>
 /// The method takes no arguments. What it needs is the world, and that is
-/// <c>EditorShell.Ecs</c>, valid for exactly as long as this call is.
+/// the world, valid for exactly as long as this call is.
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method)]

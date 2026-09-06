@@ -44,7 +44,7 @@ public static class EditorKinds
         new("Mesh2d", "icons/ui/mesh.png", 20),
         new("Sprite", "icons/ui/image.png", 21),
         new("bevy_ui::", "icons/ui/interface.png", 30),
-        new("extended_ui", "icons/ui/interface.png", 30),
+        new("bcs_ui", "icons/ui/interface.png", 30),
     ];
 
     /// <summary>What an entity with nothing recognisable on it wears.</summary>

@@ -391,6 +391,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "bcs_ui"
+version = "0.1.0"
+dependencies = [
+ "arboard",
+ "base64",
+ "bcs_ui_macros",
+ "bevy",
+ "inventory",
+ "kuchiki",
+ "lightningcss",
+ "once_cell",
+ "regex",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "bcs_ui_macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 3.0.4",
+]
+
+[[package]]
 name = "bevy"
 version = "0.19.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -628,8 +654,8 @@ dependencies = [
 name = "bevy_csharp"
 version = "0.1.0"
 dependencies = [
+ "bcs_ui",
  "bevy",
- "bevy_extended_ui",
  "nonmax",
  "winit",
 ]
@@ -723,38 +749,6 @@ checksum = "be03820f64f2279ae9d826c882e4ef764516ff75ab7bdc39bb40801891533b89"
 dependencies = [
  "bevy_macro_utils",
  "encase_derive_impl",
-]
-
-[[package]]
-name = "bevy_extended_ui"
-version = "1.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db977ea4ebb8c96e2f3363568115d28c39ea4965b587a5d6a18a0713801fe1b3"
-dependencies = [
- "arboard",
- "base64",
- "bevy",
- "bevy_extended_ui_macros",
- "getrandom 0.4.3",
- "inventory",
- "js-sys",
- "kuchiki",
- "lightningcss",
- "once_cell",
- "regex",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "bevy_extended_ui_macros"
-version = "1.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d1b91fa6b66739c93ed92b0c050af756a6e18b5aab33e7c91d7212033d319aca"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.119",
 ]
 
 [[package]]
@@ -2025,12 +2019,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "color_quant"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
-
-[[package]]
 name = "combine"
 version = "4.6.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2905,20 +2893,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "300e883d756b2e4ec94e02791f39b04b522276138852cfc41d9fb7e904106099"
 dependencies = [
  "cfg-if",
- "js-sys",
  "libc",
  "r-efi 6.0.0",
- "wasm-bindgen",
-]
-
-[[package]]
-name = "gif"
-version = "0.14.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee8cfcc411d9adbbaba82fb72661cc1bcca13e8bba98b364e62b2dba8f960159"
-dependencies = [
- "color_quant",
- "weezl",
 ]
 
 [[package]]
@@ -3291,8 +3267,6 @@ checksum = "85ab80394333c02fe689eaf900ab500fbd0c2213da414687ebf995a65d5a6104"
 dependencies = [
  "bytemuck",
  "byteorder-lite",
- "color_quant",
- "gif",
  "image-webp",
  "moxcms",
  "num-traits",

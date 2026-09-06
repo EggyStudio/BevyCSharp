@@ -439,26 +439,42 @@ Ordered so that each one is worth having before the next exists.
    file holding the engine's half and one holding the program's half, the program's half is the
    one an editor changed. A file with both is what a world asset eventually needs.
 
+## The interface is ours
+
+`native/bcs_ui` is this project's copy of the interface that draws the panels, taken from
+`bevy_extended_ui` under Apache 2.0 with `NOTICE.md` beside it saying so. It was copied rather than
+depended on because the editor kept hitting the same wall: a shortcoming in the interface meant a
+workaround in the editor, and the workaround made the next thing harder.
+
+What changed since:
+
+- **A program's decisions about an element's box survive a restyle.** Applying the stylesheet used
+  to write the whole of a `Node`, so where a panel was, how large it was and whether it was on
+  screen lasted until the next restyle and no longer. A `StyleOverride` component holds what the
+  program decided and is applied last, which is what `bcs_xui_set_rect`, `set_limits` and
+  `set_visible` now write.
+- **A document's body is the window.** It was sized by its contents, so an element anchored to the
+  right or the bottom was anchored to the right of nothing and landed off screen. It also does not
+  take the pointer, which every document but the front one has to do or it swallows their clicks.
+- **`align-content` and `align-self` are read**, so a wrapping box can be told to pack its lines.
+- **A widget that comes and goes inside a frame no longer ends the process.** The marker a restyle
+  leaves on a new node is queued quietly rather than asserted.
+- **The pictures on a checkbox, a choice box and a colour swatch are the editor's own**, drawn in
+  the same hand as the rest, and compiled in so a game that ships no icons still has a checkbox
+  that looks like one.
+
 ## What the documents cannot do
 
-These constraints shaped the panels, and all of them are the crate's rather than ours:
+These constraints shaped the panels, and the ones left are the interface's rather than ours:
 
-- **Hiding an element takes two writes.** Setting `display: none` takes it out of the layout, and
-  a node that has been drawn once keeps the size it was last given, so a subtree the layout has
-  stopped visiting goes on being painted at that size. `bcs_xui_set_visible` therefore writes the
-  display and the visibility together, and reads back as showing only when both agree. What it must
-  not write is the visibility the engine works out from those, which propagates on its own: writing
-  that directly leaves widgets that never come back.
-- **Painting an element defeats hiding.** Writing a background colour makes the interface restyle
-  the element, and a restyle puts back the display property the panel had just decided, so a panel
-  that paints one element cannot reliably hide another in the same row. `bcs_xui_set_colour` exists
-  and the editor does not use it: a colour that has to change while the editor runs is a picture
-  instead, which is why the handles beside a vector's numbers are three small files.
-- **A failed command ends the process.** The interface inserts a marker on every node that appeared
-  this frame without checking that the node is still there when the command runs, so a node that
-  came and went inside one frame takes the editor down with it. The editor replaces the fallback
-  error handler with one that logs, which a game built on the bridge does not: for a tool with
-  unsaved work in it, a line in a log beats an abort.
+- ~~Hiding an element takes two writes~~ and ~~painting an element defeats hiding~~ and ~~a failed
+  command ends the process~~. **All three are fixed** in `native/bcs_ui`, which is this project's
+  copy of the interface rather than a dependency. Applying the stylesheet used to write the whole
+  of an element's box, so anything a panel had decided about where an element went, how large it
+  was or whether it was on screen lasted until the next restyle. A `StyleOverride` component now
+  holds what the program decided and is applied after the stylesheet, which is why a panel no
+  longer has to fight for its own layout. The marker a restyle leaves on a new node is queued
+  quietly, so a widget that comes and goes inside one frame no longer ends the process.
 - **Text written to a widget before its own text child exists is held and never drawn.** A widget
   draws its text through a child spawned a frame or two after the widget itself, and a write before
   then changes the field, is noticed with no child to update, and is overwritten when the child
@@ -486,11 +502,10 @@ These constraints shaped the panels, and all of them are the crate's rather than
   flicker sixty times a second, and why only the *first* write to a widget is repeated for the
   frames its text child takes to appear. Repeating every write costs four restyles per row per
   frame, which a panel pointed at something moving pays on every row it has.
-- **`align-self` and `align-content` are not read.** The first does not matter, because a document's
-  body is a column and a column sizes its children by their contents. The second does: a wrapping
-  box taller than its lines spreads them down its height with no way to say otherwise, which is an
-  asset grid with its rows pushed apart. The fix is to give the lines a box of their own, inside a
-  column, so there is no spare height for them to be spread through.
+- ~~`align-self` and `align-content` are not read.~~ **Both are read now.** They were parsed
+  nowhere and applied nowhere, so a wrapping box spread its lines down whatever height it had and
+  nothing could say otherwise. `native/bcs_ui/tests/selectors.rs` checks that a rule naming them
+  survives parsing.
 - **A button that is written to loses its font.** A button draws its text through a child it
   rebuilds whenever the text changes, and the rebuilt child comes back without the stylesheet's
   font and layout, so a row of text the editor writes ends up half again too large. A paragraph
@@ -499,16 +514,16 @@ These constraints shaped the panels, and all of them are the crate's rather than
   click just as well, because what reports one is the nearest ancestor with an id.
 
 
-- **`backdrop-filter` is drawn over the element's own background rather than under it.** So a panel
-  takes the colour of whatever is behind it however opaque it is: over the sky it is black, over a
-  lit floor it is grey, and a row of panels is a row of different colours. The blur also samples
-  past the element's edge, which leaves a bright rim inside the rounded corner wherever the
-  surroundings are brighter. Panels are plain translucent black instead.
-- **Only the first class in a `class` attribute is matched.** A second one is not a weaker match, it
-  is not a match at all, so `class="panel stats"` is a panel and nothing else and every rule written
-  for the second class is dead without a diagnostic. Every element in this editor therefore carries
-  exactly one class, and a rule that applies to several kinds of thing names all of them on the left
-  of the brace.
+- ~~`backdrop-filter` is drawn over the element's own background rather than under it.~~ **It
+  works now**, and `BevyCSharp.Sample`'s own panel uses it: the element's background colour is the
+  tint the blurred screen is mixed with, which is what a frosted panel is. It was fixed by
+  something else: a document's body was sized by its contents rather than by the window, and what
+  the blur sampled followed. The editor's panels are still plain translucent black, which is a
+  choice rather than a limitation.
+- ~~Only the first class in a `class` attribute is matched.~~ **Not true**, and the editor's
+  one-class-per-element habit is left over from believing it. A rule naming two classes matches an
+  element carrying both, and an element carrying several is matched by a rule naming any of them,
+  which `native/bcs_ui/tests/selectors.rs` now checks.
 - **CSS ids are global**, not per document. Every open document is one document as far as the
   crate is concerned, so `#row-0` in one panel and `#row-0` in another are the same element. Every
   id in this editor is prefixed by its panel.

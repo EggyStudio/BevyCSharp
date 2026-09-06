@@ -12,10 +12,10 @@ namespace BevyCSharp.Editor.Panels;
 /// <c>assets/panels/editor.css</c> is the appearance, and this is the behavior. Nothing here looks
 /// an element up or dispatches a click.
 /// </remarks>
-[EditorPanel(
+[UiPanel(
     "panels/rendering.html",
     Root = "#rendering",
-    Dock = EditorDock.Right,
+    Dock = UiDock.Right,
     Order = 30)]
 public sealed partial class RenderingPanel(Entity camera)
 {

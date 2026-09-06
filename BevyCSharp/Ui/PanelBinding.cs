@@ -1,6 +1,4 @@
-using Bevy;
-
-namespace BevyCSharp.Editor.Framework;
+namespace Bevy;
 
 /// <summary>
 /// The reading and writing a generated panel does, in one place.
@@ -26,10 +24,10 @@ public static class PanelBinding
     /// Held here rather than asked for per binding: a panel of two dozen rows would otherwise
     /// ask the same question two dozen times a frame, and the answer cannot change in between.
     /// </remarks>
-    public static Entity Focused { get; internal set; } = Entity.None;
+    public static Entity Focused { get; set; } = Entity.None;
 
     /// <summary>The frame being drawn.</summary>
-    internal static ulong Frame { get; set; }
+    public static ulong Frame { get; set; }
 
     /// <summary>
     /// Forgets what was read, because the widgets are about to be replaced.
@@ -38,7 +36,11 @@ public static class PanelBinding
     /// Called when the interface is rebuilt, so that nothing carries over onto an element that
     /// happens to reuse a dead one's identity.
     /// </remarks>
-    internal static void Forget() => Focused = Entity.None;
+    public static void Forget()
+    {
+        Focused = Entity.None;
+        Shown.Clear();
+    }
 
     /// <summary>Writes a flag out to a checkbox, a switch or a toggle.</summary>
     public static void PullFlag(Entity element, bool value)
@@ -93,20 +95,23 @@ public static class PanelBinding
     /// than drawn empty.
     /// </para>
     /// <para>
-    /// Asked before it is written, like every other binding. Writing it regardless would touch
-    /// every node of every panel sixty times a second, and a widget restyled that often draws
-    /// nothing while holding the right value. Remembering what was written instead would be
-    /// wrong: the interface reapplies the stylesheet when it restyles a widget, which puts the
-    /// display back to what the CSS says, and only asking notices that.
+    /// Remembered rather than asked, which it could not be until the interface kept what it was
+    /// told: showing and hiding is now a decision the stylesheet does not undo, so what was
+    /// written last is what is in force. Asking instead costs a call across the bridge for every
+    /// element of every panel every frame, which for a screen of panels is a few hundred.
     /// </para>
     /// </remarks>
     public static void PullVisible(Entity element, bool value)
     {
         if (element.IsNone) return;
-        if (Xui.IsVisible(element) == value) return;
+        if (Shown.TryGetValue(element, out var already) && already == value) return;
 
         Xui.SetVisible(element, value);
+        Shown[element] = value;
     }
+
+    /// <summary>What each element was last told about being on screen.</summary>
+    private static readonly Dictionary<Entity, bool> Shown = [];
 
     /// <summary>Reads a flag back from an element.</summary>
     public static bool PushFlag(Entity element, bool current) =>
