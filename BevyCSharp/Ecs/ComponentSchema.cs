@@ -117,6 +117,17 @@ public sealed class ComponentField
     /// <summary>What the field's attributes asked for.</summary>
     public FieldHints Hints { get; }
 
+    /// <summary>
+    /// The component this field belongs to, once one has claimed it.
+    /// </summary>
+    /// <remarks>
+    /// Set by the schema that lists it rather than passed in, because a field is written before
+    /// the component that holds it exists. What it is for is everything that has to look sideways
+    /// from a field: the methods to call when it changes, the field a condition names, the values
+    /// to put back when it is reset.
+    /// </remarks>
+    public ComponentSchema? Schema { get; internal set; }
+
     /// <summary>What to call it on screen, which is its label when it has one.</summary>
     public string Title => Hints.Label is { Length: > 0 } label ? label : Name;
 
@@ -212,6 +223,8 @@ public sealed class ComponentSchema
         _id = id;
         Fields = fields;
         Methods = methods ?? [];
+
+        foreach (var field in fields) field.Schema ??= this;
         _add = add;
         _remove = remove;
     }
@@ -260,6 +273,10 @@ public sealed class ComponentSchema
     /// <summary>Finds a field by name, or <see langword="null"/>.</summary>
     public ComponentField? Field(string name) =>
         Fields.FirstOrDefault(field => field.Name == name);
+
+    /// <summary>Finds a method by name, or <see langword="null"/>.</summary>
+    public ComponentMethod? Method(string name) =>
+        Methods.FirstOrDefault(method => method.Name == name);
 
     /// <summary>Reads one field by name, or <see langword="null"/> when there is no such field.</summary>
     public object? Read(EcsWorld world, Entity entity, string field) =>
@@ -374,6 +391,9 @@ public static class ComponentSchemas
         _generation = ComponentRegistry.Generation;
     }
 
+    /// <summary>What a value of three numbers drawn beside each other asked for.</summary>
+    private static readonly FieldHints Across = new(Inline: true);
+
     /// <summary>Describes the few Bevy components this side mirrors byte for byte.</summary>
     private static void AddBuiltIn()
     {
@@ -382,18 +402,25 @@ public static class ComponentSchemas
             "Bevy.Transform",
             static () => ComponentType<Transform>.Id,
             [
+                // Across the line rather than down it. A transform is the one component every
+                // entity has and the one somebody looks at most, and nine numbers down a panel is
+                // most of the room a panel has for one thing that everybody can already read in
+                // three lines.
                 Mirror<Transform, Vec3>(
                     "Translation", FieldKind.Vec3, "Vec3",
                     static (in Transform t) => t.Translation,
-                    static (ref Transform t, Vec3 v) => t.Translation = v),
+                    static (ref Transform t, Vec3 v) => t.Translation = v,
+                    hints: Across),
                 Mirror<Transform, Quat>(
                     "Rotation", FieldKind.Quat, "Quat",
                     static (in Transform t) => t.Rotation,
-                    static (ref Transform t, Quat v) => t.Rotation = v),
+                    static (ref Transform t, Quat v) => t.Rotation = v,
+                    hints: Across),
                 Mirror<Transform, Vec3>(
                     "Scale", FieldKind.Vec3, "Vec3",
                     static (in Transform t) => t.Scale,
-                    static (ref Transform t, Vec3 v) => t.Scale = v),
+                    static (ref Transform t, Vec3 v) => t.Scale = v,
+                    hints: Across),
             ],
             add: static (world, entity) => world.Add(entity, Transform.Identity),
             remove: static (world, entity) => world.Remove<Transform>(entity)));
@@ -432,7 +459,8 @@ public static class ComponentSchemas
         string type,
         Getter<TComponent, TField> get,
         Setter<TComponent, TField> set,
-        IReadOnlyList<string>? options = null)
+        IReadOnlyList<string>? options = null,
+        FieldHints? hints = null)
         where TComponent : unmanaged
         where TField : struct
         => new(
@@ -450,7 +478,8 @@ public static class ComponentSchemas
                 world.Set(entity, component);
                 return true;
             },
-            options);
+            options,
+            hints);
 
     /// <summary>
     /// Turns a boxed value from a tool into the field's own type, reporting whether it fits.

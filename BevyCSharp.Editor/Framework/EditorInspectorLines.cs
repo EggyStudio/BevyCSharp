@@ -24,6 +24,22 @@ public static class EditorInspectorLines
             if (plan.World.ParentOf(plan.Entity) is { IsNone: false } parent)
                 plan.Add(new ParentLine(plan.World, plan.Entity, parent));
         });
+
+        // What hangs from this one, as a list. Not a field of anything either, and the same
+        // arrangement any other list gets: a fold that says how many there are, a fold per element,
+        // and the elements drawn by whoever knows what they are.
+        EditorInspector.OnAfter(static plan =>
+        {
+            var children = plan.World.ChildrenOf(plan.Entity);
+            if (children.Length == 0) return;
+
+            InspectorList.Add(
+                plan,
+                "entity/children",
+                "Children",
+                children.Length,
+                (into, index) => into.Add(new ChildLine(into.World, children[index])));
+        });
     }
 
     /// <summary>Whether the lines have been put in, so a second call does nothing.</summary>
@@ -80,4 +96,27 @@ public sealed record ParentLine(EcsWorld World, Entity Entity, Entity Parent) : 
             row.Below.X,
             row.Below.Y);
     }
+}
+
+/// <summary>
+/// One entity that hangs from the one being inspected.
+/// </summary>
+/// <remarks>
+/// A row inside the list of children. Pressing it goes there, which is what somebody who opened the
+/// list wanted: the list answers "what is under this", and the answer is only useful if it can be
+/// followed.
+/// </remarks>
+/// <param name="World">The world they live in.</param>
+/// <param name="Child">The entity the row stands for.</param>
+public sealed record ChildLine(EcsWorld World, Entity Child) : IInspectorLine
+{
+    /// <inheritdoc/>
+    public void Draw(InspectorRow row)
+    {
+        row.Wide();
+        row.Button(World.NameOf(Child) is { Length: > 0 } name ? name : $"entity {Child.Index}");
+    }
+
+    /// <inheritdoc/>
+    public void Press(InspectorRow row) => EditorSelection.Select(Child);
 }

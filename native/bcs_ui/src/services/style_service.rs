@@ -1941,20 +1941,29 @@ fn apply_style_components(
     if let Some(node) = components.0.as_mut() {
         apply_style_to_node(style, Some(node.as_mut()));
 
-        if let Some(over) = over {
+        if let Some(over) = over.as_ref() {
             over.apply(node.as_mut());
         }
     } else {
         apply_style_to_node(style, None);
     }
 
-    // BackgroundColor
+    // BackgroundColor, and then whatever the program decided about it.
+    //
+    // A colour written by a program is a decision about what the element is showing rather than
+    // about what it looks like: the patch beside a colour field is that colour, and no stylesheet
+    // can know it. Applied after the sheet for the same reason as the node's own fields, since a
+    // restyle would otherwise put a painted element back to grey a frame later.
     if let Some(bg) = components.1.as_mut() {
         bg.0 = style
             .background
             .as_ref()
             .map(|b| b.color)
             .unwrap_or(Color::NONE);
+
+        if let Some(painted) = over.as_ref().and_then(StyleOverride::colour) {
+            bg.0 = painted;
+        }
     }
 
     // BorderColor
@@ -2140,15 +2149,7 @@ fn compute_selector_metadata(selector: &str) -> SelectorMetadata {
         let segments: Vec<&str> = part.split(':').collect();
         let base = segments[0];
 
-        specificity += if base.starts_with('#') {
-            100
-        } else if base.starts_with('.') {
-            10
-        } else if base == "*" || base.is_empty() {
-            0
-        } else {
-            1
-        };
+        specificity += weight_of(base);
 
         if segments.len() > 1 {
             has_pseudo = true;
@@ -2174,6 +2175,53 @@ fn compute_selector_metadata(selector: &str) -> SelectorMetadata {
         has_pseudo,
         skip: false,
     }
+}
+
+/// What one step of a selector is worth, counting everything it names.
+///
+/// A step is a compound: `div.panel.stats#main` names a tag, two classes and an id, and each of
+/// them narrows what it matches. Counting only the first is what makes `.field-note.warn` weigh the
+/// same as `.field-note`, and two rules of equal weight are settled by whichever the map happens to
+/// hand over first: a colour that is right on some frames and wrong on others.
+fn weight_of(step: &str) -> u32 {
+    if step == "*" || step.is_empty() {
+        return 0;
+    }
+
+    let mut weight = 0;
+    let mut rest = step;
+
+    // What comes before the first marker is a tag name, if there is anything there at all.
+    if let Some(cut) = rest.find(['#', '.']) {
+        if cut > 0 {
+            weight += 1;
+        }
+
+        rest = &rest[cut..];
+    } else {
+        return 1;
+    }
+
+    // One count per marker. A class or an id cannot hold either character, so the markers are the
+    // names.
+    for character in rest.chars() {
+        match character {
+            '#' => weight += 100,
+            '.' => weight += 10,
+            _ => {}
+        }
+    }
+
+    weight
+}
+
+/// What a whole selector is worth, for anything that has to know which of two rules wins.
+///
+/// Public for the tests, which is where the question is worth answering: whether one rule beats
+/// another is not something a screenshot can show, and it was answered wrongly for long enough to
+/// be worth pinning down.
+pub fn selector_weight(selector: &str) -> u32 {
+    compute_selector_metadata(selector).specificity
 }
 
 /// Returns true if the selector's cached pseudo state matches the widget state.

@@ -31,6 +31,10 @@ public partial struct Probe
                         Mode = ShowcaseMode.Running,
                         Parts = ShowcaseParts.Head | ShowcaseParts.Tail,
                         Ticks = 12,
+                        Blend = 0.4f,
+                        Fill = 62f,
+                        Corner = new Vec3(1f, 0.5f, -2f),
+                        Radius = 3f,
                     });
 
                     EditorSelection.Select(entity);
@@ -96,6 +100,75 @@ public partial struct Probe
                             $"[probe] {id} stack {(el.IsNone ? -1 : Xui.StackOf(el))}"
                             + $" copies {Xui.Count(id)}");
                     }
+                }
+
+                break;
+
+            // A menu opened from a row of the inspector, which should sit under that row rather
+            // than step out from under the panel.
+            case 150 when script.Contains("rowmenu"):
+                if (EditorShell.Find<Panels.DataPanel>() is { } rows)
+                {
+                    for (var i = 0; i < Panels.DataPanel.Rows; i++)
+                    {
+                        if (rows.Names[i].Trim() != "Speed") continue;
+
+                        rows.RowMenu(i);
+                        break;
+                    }
+                }
+
+                break;
+
+            // What is drawn over what, as numbers rather than as a guess at a screenshot.
+            case 199 when script.Contains("rowmenu"):
+                foreach (var id in new[] { "menu", "mrow-0", "data", "drow-4", "dv-4", "dsw-15" })
+                {
+                    Console.Error.WriteLine($"[probe] {id} copies {Xui.Count(id)}");
+                }
+
+                foreach (var id in new[] { "menu", "mrow-0", "data", "drow-4", "dv-4", "dsw-15" })
+                {
+                    var found = Xui.Element(id);
+                    if (found.IsNone)
+                    {
+                        Console.Error.WriteLine($"[probe] {id} missing");
+                        continue;
+                    }
+
+                    Console.Error.WriteLine(
+                        $"[probe] {id} entity {found.Bits} stack {Xui.StackOf(found)}");
+
+                    foreach (var child in ctx.Ecs.ChildrenOf(found))
+                    {
+                        Console.Error.WriteLine(
+                            $"[probe]   child {child.Bits} stack {Xui.StackOf(child)}");
+                    }
+                }
+
+                break;
+
+            // The picker a patch of colour opens, over the row it was opened from.
+            case 150 when script.Contains("picker"):
+                if (EditorShell.Find<Panels.DataPanel>() is { } coloured)
+                {
+                    for (var i = 0; i < Panels.DataPanel.Rows; i++)
+                    {
+                        if (coloured.Names[i].Trim() != "Tint") continue;
+
+                        coloured.PressSwatch(i);
+                        break;
+                    }
+                }
+
+                break;
+
+            // The pointer left over a row that has something to say, so the hint is on screen.
+            case >= 150 and <= 210 when script.Contains("hint"):
+                if (Xui.Element("dname-9") is { IsNone: false } named
+                    && Xui.TryRect(named, out var over))
+                {
+                    SyntheticInput.MoveTo(over.X + 20f, over.Y + (over.Height / 2f));
                 }
 
                 break;

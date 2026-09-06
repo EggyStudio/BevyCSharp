@@ -34,34 +34,71 @@ public sealed partial class DataPanel : IInspectorRows
     /// be: a hundred fields scroll through forty rows. Every row is a handful of widgets whether
     /// or not it is showing anything, which is what stops this from being a much larger number.
     /// </remarks>
-    public const int Rows = 24;
+    public const int Rows = 28;
 
     /// <summary>How many tag chips it declares.</summary>
     public const int Chips = 24;
+
+    /// <summary>
+    /// How many boxes or buttons one row can hold.
+    /// </summary>
+    /// <remarks>
+    /// Three, so that the values with three parts can be read across a line rather than down three
+    /// of them, and so that a row of buttons is a row.
+    /// </remarks>
+    private const int Slots = InspectorRow.Slots;
 
     /// <summary>Each row's label.</summary>
     [Bind("#dname", Count = Rows)]
     public string[] Names = new string[Rows];
 
-    /// <summary>What is in each row's box.</summary>
+    /// <summary>What is in each row's first box.</summary>
     [Bind("#dv", Count = Rows)]
     public string[] Values = new string[Rows];
 
-    /// <summary>What each row's handle says, which is usually nothing.</summary>
-    [Bind("#dgt", Count = Rows)]
+    /// <summary>The second, for a value drawn across the line.</summary>
+    [Bind("#dv1", Count = Rows)]
+    public string[] Values1 = new string[Rows];
+
+    /// <summary>The third.</summary>
+    [Bind("#dv2", Count = Rows)]
+    public string[] Values2 = new string[Rows];
+
+    /// <summary>What each row's first handle says, which is usually nothing.</summary>
+    [Bind("#dgt0", Count = Rows)]
     public string[] Letters = new string[Rows];
+
+    /// <summary>The second handle's letter.</summary>
+    [Bind("#dgt1", Count = Rows)]
+    public string[] Letters1 = new string[Rows];
+
+    /// <summary>The third handle's letter.</summary>
+    [Bind("#dgt2", Count = Rows)]
+    public string[] Letters2 = new string[Rows];
 
     /// <summary>Each row's tick.</summary>
     [Bind("#dc", Count = Rows)]
     public bool[] Flags = new bool[Rows];
 
-    /// <summary>What each row's button says.</summary>
+    /// <summary>What each row's first button says.</summary>
     [Bind("#dbtext", Count = Rows)]
     public string[] Buttons = new string[Rows];
+
+    /// <summary>The second button.</summary>
+    [Bind("#dbtext1", Count = Rows)]
+    public string[] Buttons1 = new string[Rows];
+
+    /// <summary>The third.</summary>
+    [Bind("#dbtext2", Count = Rows)]
+    public string[] Buttons2 = new string[Rows];
 
     /// <summary>What each row's number is measured in.</summary>
     [Bind("#du", Count = Rows)]
     public string[] Units = new string[Rows];
+
+    /// <summary>What a row of words says, when a row is words.</summary>
+    [Bind("#dnote", Count = Rows)]
+    public string[] Notes = new string[Rows];
 
     /// <summary>Where each row's bar sits, from nothing to a thousand.</summary>
     /// <remarks>
@@ -76,15 +113,41 @@ public sealed partial class DataPanel : IInspectorRows
     [Show("#drow", Count = Rows)]
     public bool[] Shown = new bool[Rows];
 
-    /// <summary>Which rows show a box.</summary>
-    [Show("#dnum", Count = Rows)]
+    /// <summary>
+    /// Which rows show their name.
+    /// </summary>
+    /// <remarks>
+    /// All but the ones that asked for the whole width. The name is a column of its own, so taking
+    /// it away is what gives a drawer the panel from edge to edge rather than the value column.
+    /// </remarks>
+    [Show("#dname", Count = Rows)]
+    public bool[] ShowName = new bool[Rows];
+
+    /// <summary>Which rows show their first box.</summary>
+    [Show("#dnum0", Count = Rows)]
     public bool[] ShowValue = new bool[Rows];
 
-    /// <summary>Which boxes have a handle, which is which of them are numbers.</summary>
-    [Show("#dg", Count = Rows)]
+    /// <summary>The second.</summary>
+    [Show("#dnum1", Count = Rows)]
+    public bool[] ShowValue1 = new bool[Rows];
+
+    /// <summary>The third.</summary>
+    [Show("#dnum2", Count = Rows)]
+    public bool[] ShowValue2 = new bool[Rows];
+
+    /// <summary>Which first boxes have a handle, which is which of them are numbers.</summary>
+    [Show("#dg0", Count = Rows)]
     public bool[] ShowGrip = new bool[Rows];
 
-    /// <summary>Which rows show a mark at the start, which is which of them are headings.</summary>
+    /// <summary>The second handle.</summary>
+    [Show("#dg1", Count = Rows)]
+    public bool[] ShowGrip1 = new bool[Rows];
+
+    /// <summary>The third.</summary>
+    [Show("#dg2", Count = Rows)]
+    public bool[] ShowGrip2 = new bool[Rows];
+
+    /// <summary>Which rows show a mark at the start, which is which of them fold.</summary>
     [Show("#dfold", Count = Rows)]
     public bool[] ShowMark = new bool[Rows];
 
@@ -92,9 +155,17 @@ public sealed partial class DataPanel : IInspectorRows
     [Show("#dc", Count = Rows)]
     public bool[] ShowFlag = new bool[Rows];
 
-    /// <summary>Which rows show a button.</summary>
+    /// <summary>Which rows show their first button.</summary>
     [Show("#db", Count = Rows)]
     public bool[] ShowButton = new bool[Rows];
+
+    /// <summary>The second.</summary>
+    [Show("#db1", Count = Rows)]
+    public bool[] ShowButton1 = new bool[Rows];
+
+    /// <summary>The third.</summary>
+    [Show("#db2", Count = Rows)]
+    public bool[] ShowButton2 = new bool[Rows];
 
     /// <summary>Which rows show a unit.</summary>
     [Show("#du", Count = Rows)]
@@ -104,9 +175,25 @@ public sealed partial class DataPanel : IInspectorRows
     [Show("#dsl", Count = Rows)]
     public bool[] ShowBar = new bool[Rows];
 
+    /// <summary>Which rows show a patch of colour.</summary>
+    [Show("#dsw", Count = Rows)]
+    public bool[] ShowSwatch = new bool[Rows];
+
+    /// <summary>Which rows are words rather than a value.</summary>
+    [Show("#dnote", Count = Rows)]
+    public bool[] ShowNote = new bool[Rows];
+
+    /// <summary>Which rows are a line across the panel.</summary>
+    [Show("#drule", Count = Rows)]
+    public bool[] ShowRule = new bool[Rows];
+
     /// <summary>What the row under the pointer is for.</summary>
-    [Bind("#d-hint", Mode = BindMode.OneWay)]
+    [Bind("#d-hint-text", Mode = BindMode.OneWay)]
     public string Hint { get; private set; } = string.Empty;
+
+    /// <summary>Whether anything under the pointer had something to say.</summary>
+    [Show("#d-hint")]
+    public bool Hinting;
 
     /// <summary>What each chip says.</summary>
     [Bind("#dchiptext", Count = Chips)]
@@ -115,6 +202,10 @@ public sealed partial class DataPanel : IInspectorRows
     /// <summary>The word over the strip, which goes away when there is no strip.</summary>
     [Show("#d-tags")]
     public bool AnyTags;
+
+    /// <summary>Whether the button that adds a component is on screen.</summary>
+    [Show("#d-add")]
+    public bool CanAdd = true;
 
     /// <summary>Which chips stand for anything.</summary>
     [Show("#dchip", Count = Chips)]
@@ -128,14 +219,68 @@ public sealed partial class DataPanel : IInspectorRows
     [Bind("#d-subject", Mode = BindMode.OneWay)]
     public string Subject { get; private set; } = string.Empty;
 
+    /// <summary>The text of one of a row's boxes, by which box it is.</summary>
+    private string[] ValuesIn(int slot) => slot switch
+    {
+        0 => Values,
+        1 => Values1,
+        _ => Values2,
+    };
+
+    /// <summary>Which of a row's boxes are drawn.</summary>
+    private bool[] BoxesIn(int slot) => slot switch
+    {
+        0 => ShowValue,
+        1 => ShowValue1,
+        _ => ShowValue2,
+    };
+
+    /// <summary>What a row's handles say.</summary>
+    private string[] LettersIn(int slot) => slot switch
+    {
+        0 => Letters,
+        1 => Letters1,
+        _ => Letters2,
+    };
+
+    /// <summary>Which of a row's handles are drawn.</summary>
+    private bool[] GripsIn(int slot) => slot switch
+    {
+        0 => ShowGrip,
+        1 => ShowGrip1,
+        _ => ShowGrip2,
+    };
+
+    /// <summary>What a row's buttons say.</summary>
+    private string[] ButtonsIn(int slot) => slot switch
+    {
+        0 => Buttons,
+        1 => Buttons1,
+        _ => Buttons2,
+    };
+
+    /// <summary>Which of a row's buttons are drawn.</summary>
+    private bool[] PressedIn(int slot) => slot switch
+    {
+        0 => ShowButton,
+        1 => ShowButton1,
+        _ => ShowButton2,
+    };
+
     /// <summary>What each row stands for.</summary>
     private readonly InspectorLine[] _lines = new InspectorLine[Rows];
 
     /// <summary>What picture each row's mark wears, so it is written once.</summary>
     private readonly string[] _marks = new string[Rows];
 
-    /// <summary>The same for each row's handle.</summary>
-    private readonly string[] _grips = new string[Rows];
+    /// <summary>What colour each of a row's handles was painted, so it is written once.</summary>
+    private readonly uint[,] _painted = new uint[Rows, Slots];
+
+    /// <summary>What each row's patch of colour was painted.</summary>
+    private readonly uint[] _swatched = new uint[Rows];
+
+    /// <summary>How wide each of a row's buttons was made, so it is written once.</summary>
+    private readonly double[,] _weighed = new double[Rows, Slots];
 
     /// <summary>Which components are shut, by component id.</summary>
     /// <remarks>
@@ -144,6 +289,13 @@ public sealed partial class DataPanel : IInspectorRows
     /// it about every entity they are going to look at, not only this one.
     /// </remarks>
     private readonly HashSet<int> _shut = [];
+
+    /// <summary>Which folds inside components are shut, by key.</summary>
+    /// <remarks>
+    /// By name rather than by id, because a fold outlives the world an id belongs to and somebody
+    /// who shut the advanced settings of a light meant it about lights.
+    /// </remarks>
+    private readonly HashSet<string> _folds = [];
 
     /// <summary>What each chip stands for: its schema when there is one, and its id.</summary>
     private readonly (ComponentSchema? Schema, int Component)[] _tags =
@@ -217,7 +369,8 @@ public sealed partial class DataPanel : IInspectorRows
         _all.Add(new InspectorLine(InspectorLineKind.Subject));
 
         _found.Clear();
-        _all.AddRange(EditorInspector.Build(world, entity, _shut, _found, EditorSelection.All));
+        _all.AddRange(EditorInspector.Build(
+            world, entity, _shut, _found, EditorSelection.All, _folds));
 
         var tags = 0;
 
@@ -232,7 +385,7 @@ public sealed partial class DataPanel : IInspectorRows
         }
 
         Untag(tags);
-        AnyTags = tags > 0;
+        _tagged = tags;
 
         Draw(world, entity);
     }
@@ -305,24 +458,94 @@ public sealed partial class DataPanel : IInspectorRows
         _lines[row] = new InspectorLine(InspectorLineKind.Note);
         Shown[row] = true;
         Name(row, name);
-        Box(row, value, null, true);
+        Box(row, 0, value, null, true);
         row++;
     }
 
-    /// <summary>Puts a screenful of lines into the rows.</summary>
+    /// <summary>
+    /// Puts a screenful of lines into the rows.
+    /// </summary>
+    /// <remarks>
+    /// Everything the panel holds scrolls together, the strip of tags and the button under it
+    /// included. They are the end of the list rather than furniture below it, so they come into
+    /// view when the list has been scrolled to its end and not before. A strip pinned under a list
+    /// that scrolls is one somebody scrolls past nothing to reach.
+    /// </remarks>
     private void Draw(EcsWorld world, Entity entity)
     {
-        _scroll = Math.Clamp(_scroll, 0, Math.Max(0, _all.Count - Rows));
+        var room = Fits();
+
+        // Whether the end of the list is on screen, which is what decides whether the tail is.
+        // Worked out before the room is reduced to make space for it, so the answer does not
+        // depend on itself.
+        var tail = _scroll + room >= _all.Count;
+        var space = tail ? Math.Max(1, room - Tail()) : room;
+
+        _scroll = Math.Clamp(_scroll, 0, Math.Max(0, _all.Count - space));
 
         var written = 0;
-        for (var i = _scroll; i < _all.Count && written < Rows; i++)
+        for (var i = _scroll; i < _all.Count && written < space; i++)
         {
             Write(written, _all[i], world, entity);
             written++;
         }
 
         Blank(written);
+
+        AnyTags = tail && _tagged > 0;
+        CanAdd = tail;
+
+        for (var chip = 0; chip < Chips; chip++)
+        {
+            if (!tail) TagShown[chip] = false;
+        }
     }
+
+    /// <summary>How many rows the tail of the panel takes when it is on screen.</summary>
+    private int Tail() => (_tagged > 0 ? 1 : 0) + 1;
+
+    /// <summary>How many tags the selection has, whether or not they are on screen.</summary>
+    private int _tagged;
+
+    /// <summary>
+    /// How many rows there is room for.
+    /// </summary>
+    /// <remarks>
+    /// Asked of the panel rather than assumed, because what the panel is given is not up to it: a
+    /// tab opening along the bottom takes half its height away. Drawing more rows than fit is not
+    /// merely untidy, it is wrong: the rows that do not fit are the ones somebody would scroll to,
+    /// and a panel that thinks it is showing them will not scroll.
+    /// </remarks>
+    private int Fits()
+    {
+        if (Window is not { Room: var room } window || float.IsInfinity(room)) return Rows;
+
+        // What the panel was told it may be, less what is not rows. Asking what it measured
+        // instead cannot work, because a panel is as tall as its contents and a panel that drew one
+        // row measures one row.
+        //
+        // What is not rows is the difference between the panel and its list, which holds however
+        // many rows are in it: the title, the padding and the borders. Measured rather than
+        // assumed, so the stylesheet can be changed without this quietly being wrong, and guessed
+        // for the one frame before there is anything to measure.
+        var furniture = Furniture;
+
+        if (window.Measure() is { } panel
+            && Xui.TryRect(window.Element("d-rows"), out var rows)
+            && rows.Height > 0f
+            && panel.Height > rows.Height)
+        {
+            furniture = panel.Height - rows.Height;
+        }
+
+        return Math.Clamp((int)((room - furniture) / RowHeight), 1, Rows);
+    }
+
+    /// <summary>How tall one row is, with the gap under it, as the stylesheet has it.</summary>
+    private const float RowHeight = 24f;
+
+    /// <summary>How much of the panel is not rows: its border, its padding and its title.</summary>
+    private const float Furniture = 42f;
 
     /// <summary>Fills one row, showing only the pieces that line needs.</summary>
     private void Write(int row, InspectorLine line, EcsWorld world, Entity entity)
@@ -334,13 +557,18 @@ public sealed partial class DataPanel : IInspectorRows
         _lines[row] = line;
         Shown[row] = true;
         _under[row] = line.Kind is InspectorLineKind.Field or InspectorLineKind.Method
-            or InspectorLineKind.Note;
+            or InspectorLineKind.Buttons or InspectorLineKind.Note;
+
+        // How far in the row sits, before anything is drawn into it. A drawer says what its row is
+        // called and nothing about where that sits, so a field inside two folds is set in by two
+        // without any drawer knowing folds exist.
+        _indent[row] = line.Depth;
 
         switch (line.Kind)
         {
             case InspectorLineKind.Subject:
                 Name(row, "Name");
-                Box(row, world.NameOf(entity) ?? string.Empty, null, true);
+                Box(row, 0, world.NameOf(entity) ?? string.Empty, null, true);
                 break;
 
             case InspectorLineKind.Heading:
@@ -351,9 +579,28 @@ public sealed partial class DataPanel : IInspectorRows
 
                 break;
 
+            case InspectorLineKind.Group:
+                Name(row, line.Text);
+                Mark(row, _folds.Contains(line.Key)
+                    ? "icons/ui/next.png"
+                    : "icons/ui/down.png");
+
+                break;
+
             case InspectorLineKind.Method:
                 Name(row, line.Method?.Title ?? string.Empty);
-                Button(row, EditorIcons.Run);
+                Button(row, 0, EditorIcons.Run, 1d);
+                break;
+
+            case InspectorLineKind.Buttons when line.Buttons is { Count: > 0 } buttons:
+                // The name column is given up, because a row of buttons is already labelled: each
+                // of them says what it does. Leaving the column empty would push them all right
+                // for nothing.
+                Wide(row);
+
+                for (var slot = 0; slot < buttons.Count && slot < Slots; slot++)
+                    Button(row, slot, buttons[slot].Title, buttons[slot].Hints.Weight);
+
                 break;
 
             case InspectorLineKind.Field when line is { Field: { } field, Drawer: { } drawer }:
@@ -362,10 +609,25 @@ public sealed partial class DataPanel : IInspectorRows
                     line.Part,
                     new FieldTarget(field, world, entity, EditorSelection.All));
 
+                // After the drawer rather than before it. A field that asked for the whole width
+                // gets it whatever its drawer thinks, and a drawer written by somebody else does
+                // not have to know the attribute exists to honour it.
+                if (field.Hints.Wide) Wide(row);
+
                 break;
 
             case InspectorLineKind.Note:
                 Name(row, line.Text);
+                break;
+
+            case InspectorLineKind.Info:
+                Wide(row);
+                Note(row, line.Text, line.Note);
+                break;
+
+            case InspectorLineKind.Separator:
+                Wide(row);
+                Note(row, string.Empty, NoteKind.Heading);
                 break;
 
             case InspectorLineKind.Custom when line.Line is { } own:
@@ -384,20 +646,30 @@ public sealed partial class DataPanel : IInspectorRows
 
         _lines[row] = default;
         _under[row] = false;
+        _indent[row] = 0;
         Names[row] = string.Empty;
-        Values[row] = string.Empty;
-        Letters[row] = string.Empty;
         Units[row] = string.Empty;
-        Buttons[row] = string.Empty;
+        Notes[row] = string.Empty;
         Flags[row] = false;
         Shown[row] = false;
-        ShowValue[row] = false;
-        ShowGrip[row] = false;
+        ShowName[row] = true;
         ShowMark[row] = false;
         ShowFlag[row] = false;
-        ShowButton[row] = false;
         ShowUnit[row] = false;
         ShowBar[row] = false;
+        ShowSwatch[row] = false;
+        ShowNote[row] = false;
+        ShowRule[row] = false;
+
+        for (var slot = 0; slot < Slots; slot++)
+        {
+            ValuesIn(slot)[row] = string.Empty;
+            LettersIn(slot)[row] = string.Empty;
+            ButtonsIn(slot)[row] = string.Empty;
+            BoxesIn(slot)[row] = false;
+            GripsIn(slot)[row] = false;
+            PressedIn(slot)[row] = false;
+        }
     }
 
     /// <summary>Empties the rows from <paramref name="from"/> down.</summary>
@@ -417,15 +689,27 @@ public sealed partial class DataPanel : IInspectorRows
 
     /// <inheritdoc/>
     /// <remarks>
-    /// A field's name is set in from a component's, so a block reads as a block. Which rows are
-    /// set in is the panel's business rather than a drawer's: a drawer says what its row is
-    /// called, and where that sits depends on what the row is under.
+    /// A field's name is set in from a component's, and again for every fold it sits inside, so a
+    /// block reads as a block and a fold inside one reads as being inside it. How far in is the
+    /// panel's business rather than a drawer's: a drawer says what its row is called, and where
+    /// that sits depends on what the row is under.
     /// </remarks>
-    public void Name(int row, string text) =>
-        Names[row] = _under[row] && text.Length > 0 ? "  " + text : text;
+    public void Name(int row, string text, int indent = 0)
+    {
+        ShowName[row] = true;
+
+        var deep = _indent[row] + indent + (_under[row] ? 1 : 0);
+        Names[row] = text.Length > 0 && deep > 0 ? new string(' ', deep * 2) + text : text;
+    }
+
+    /// <inheritdoc/>
+    public void Wide(int row) => ShowName[row] = false;
 
     /// <summary>Which rows sit under a heading.</summary>
     private readonly bool[] _under = new bool[Rows];
+
+    /// <summary>How many folds deep each row sits.</summary>
+    private readonly int[] _indent = new int[Rows];
 
     /// <summary>
     /// How many more frames each row ignores what its widgets report.
@@ -442,26 +726,47 @@ public sealed partial class DataPanel : IInspectorRows
     private const int Deaf = 3;
 
     /// <inheritdoc/>
-    public void Box(int row, string value, Grip? grip, bool editable)
+    public void Box(int row, int slot, string value, Grip? grip, bool editable)
     {
+        if (slot < 0 || slot >= Slots) return;
+
         // A value that will not take an edit goes on the flat plate a button uses rather than in a
         // box, so that a row somebody cannot change says so before they try rather than after.
-        // Nothing is painted to say it: writing a colour to an element makes the interface restyle
-        // it, and a restyle puts back the display property the panel had just decided, so a row
-        // that stopped showing a tick or a button would go on drawing one.
         if (!editable)
         {
-            Button(row, value);
+            Button(row, slot, value, 1d);
             return;
         }
 
-        Values[row] = value;
-        ShowValue[row] = true;
-        ShowGrip[row] = grip is not null;
-        Letters[row] = grip?.Letter ?? string.Empty;
+        ValuesIn(slot)[row] = value;
+        BoxesIn(slot)[row] = true;
+        GripsIn(slot)[row] = grip is not null;
+        LettersIn(slot)[row] = grip?.Letter ?? string.Empty;
 
-        if (grip is { } paint) Point(row, "dg", _grips, paint.Picture);
+        if (grip is { } paint) Paint(row, slot, paint.Colour);
     }
+
+    /// <summary>Paints one of a row's handles, when it is not already that colour.</summary>
+    /// <remarks>
+    /// Nought means the editor's own grey rather than black. Painting is safe now that the
+    /// interface keeps what a panel decided about showing and hiding separately from the
+    /// stylesheet, which it did not when the handles were pictures of colours.
+    /// </remarks>
+    private void Paint(int row, int slot, uint colour)
+    {
+        var wanted = colour == 0u ? Grey : colour;
+        if (_painted[row, slot] == wanted) return;
+        if (Window is not { IsOpen: true } window) return;
+
+        var element = window.Element($"dg{slot}-{row}");
+        if (element.IsNone) return;
+
+        Xui.SetColour(element, wanted);
+        _painted[row, slot] = wanted;
+    }
+
+    /// <summary>What a handle is when nothing asked for a colour.</summary>
+    private const uint Grey = 0x5A5F69FFu;
 
     /// <inheritdoc/>
     public void Unit(int row, string suffix)
@@ -516,21 +821,101 @@ public sealed partial class DataPanel : IInspectorRows
     }
 
     /// <inheritdoc/>
-    public void Button(int row, string text)
+    public void Button(int row, int slot, string text, double weight)
     {
-        Buttons[row] = text;
-        ShowButton[row] = true;
+        if (slot < 0 || slot >= Slots) return;
+
+        ButtonsIn(slot)[row] = text;
+        PressedIn(slot)[row] = true;
+
+        Weigh(row, slot, weight);
     }
 
+    /// <summary>Makes one of a row's buttons as wide as it asked to be.</summary>
+    /// <remarks>
+    /// Written to the element rather than said in the stylesheet, because how many buttons share a
+    /// row and how wide each is against the others is a question about what is being shown.
+    /// </remarks>
+    private void Weigh(int row, int slot, double weight)
+    {
+        var wanted = weight <= 0d ? 1d : weight;
+        if (Math.Abs(_weighed[row, slot] - wanted) < 0.001d) return;
+        if (Window is not { IsOpen: true } window) return;
+
+        var element = window.Element($"{(slot == 0 ? "db" : $"db{slot}")}-{row}");
+        if (element.IsNone) return;
+
+        Xui.SetWeight(element, (float)wanted);
+        _weighed[row, slot] = wanted;
+    }
 
     /// <inheritdoc/>
-    public string Typed(int row) => Values[row];
+    public void Swatch(int row, uint colour)
+    {
+        ShowSwatch[row] = true;
+
+        if (_swatched[row] == colour) return;
+        if (Window is not { IsOpen: true } window) return;
+
+        var element = window.Element($"dsw-{row}");
+        if (element.IsNone) return;
+
+        Xui.SetColour(element, colour);
+        _swatched[row] = colour;
+    }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// A line with nothing to say is a rule rather than an empty paragraph: what a break between
+    /// two groups of fields needs is something to see, and a paragraph of no words is nothing.
+    /// </remarks>
+    public void Note(int row, string text, NoteKind kind)
+    {
+        if (text.Length == 0)
+        {
+            ShowRule[row] = true;
+            return;
+        }
+
+        Notes[row] = text;
+        ShowNote[row] = true;
+        Dress(row, kind);
+    }
+
+    /// <summary>Says how loudly a row of words is said, by the class it wears.</summary>
+    private void Dress(int row, NoteKind kind)
+    {
+        var wanted = kind switch
+        {
+            NoteKind.Warning => "field-note warn",
+            NoteKind.Error => "field-note bad",
+            NoteKind.Heading => "field-note head",
+            _ => "field-note",
+        };
+
+        if (_dressed[row] == wanted) return;
+        if (Window is not { IsOpen: true } window) return;
+
+        var element = window.Element($"dnote-{row}");
+        if (element.IsNone) return;
+
+        Xui.SetClass(element, wanted);
+        _dressed[row] = wanted;
+    }
+
+    /// <summary>What class each row's words wear, so it is written once.</summary>
+    private readonly string[] _dressed = new string[Rows];
+
+    /// <inheritdoc/>
+    public string Typed(int row, int slot) =>
+        slot >= 0 && slot < Slots ? ValuesIn(slot)[row] : string.Empty;
 
     /// <inheritdoc/>
     public bool Ticked(int row) => Flags[row];
 
     /// <inheritdoc/>
-    public (float X, float Y) Below(int row) => Under($"db-{row}");
+    public (float X, float Y) Below(int row, int slot) =>
+        Under($"{(slot <= 0 ? "db" : $"db{slot}")}-{row}");
 
     /// <summary>
     /// Points a row's mark at a file.
@@ -553,6 +938,9 @@ public sealed partial class DataPanel : IInspectorRows
 
     /// <summary>Which row's number a drag has hold of.</summary>
     private int _held = -1;
+
+    /// <summary>Which of that row's numbers, for a value drawn across the line.</summary>
+    private int _heldSlot;
 
     /// <summary>What that number was when the drag started.</summary>
     private double _from;
@@ -592,8 +980,11 @@ public sealed partial class DataPanel : IInspectorRows
 
         if (_lines[_held] is not { Field: { } field, Drawer: { } drawer } line) return;
 
+        // Which part of the value is being dragged. A row drawn across the line holds three of
+        // them, and the box somebody took hold of says which.
+        var part = line.Part + _heldSlot;
         var target = new FieldTarget(field, EditorShell.Ecs, _subject, EditorSelection.All);
-        var step = drawer.Step(line.Part, target);
+        var step = drawer.Step(part, target);
         if (step <= 0f) return;
 
         var fine = input.KeyDown(Key.AltLeft) || input.KeyDown(Key.AltRight);
@@ -608,7 +999,7 @@ public sealed partial class DataPanel : IInspectorRows
             moved = Math.Round(moved / grid) * grid;
         }
 
-        drawer.Nudge(line.Part, target, moved);
+        drawer.Nudge(part, target, moved);
     }
 
     /// <summary>Takes hold of whichever handle the pointer is over.</summary>
@@ -621,38 +1012,53 @@ public sealed partial class DataPanel : IInspectorRows
 
         for (var row = 0; row < Rows; row++)
         {
-            if (!Shown[row] || !ShowGrip[row]) continue;
+            if (!Shown[row]) continue;
             if (_lines[row] is not { Field: { } field, Drawer: { } drawer } line) continue;
 
-            var element = window.Element($"dg-{row}");
-            if (element.IsNone) continue;
-            if (!Xui.TryRect(element, out var rect)) continue;
-            if (x < rect.X || x > rect.X + rect.Width) continue;
-            if (y < rect.Y || y > rect.Y + rect.Height) continue;
+            for (var slot = 0; slot < Slots; slot++)
+            {
+                if (!GripsIn(slot)[row]) continue;
 
-            var target = new FieldTarget(field, EditorShell.Ecs, _subject, EditorSelection.All);
-            if (drawer.Number(line.Part, target) is not { } value) continue;
+                var element = window.Element($"dg{slot}-{row}");
+                if (element.IsNone) continue;
+                if (!Xui.TryRect(element, out var rect)) continue;
+                if (x < rect.X || x > rect.X + rect.Width) continue;
+                if (y < rect.Y || y > rect.Y + rect.Height) continue;
 
-            _held = row;
-            _went = x;
-            _from = value;
-            return;
+                var target = new FieldTarget(field, EditorShell.Ecs, _subject, EditorSelection.All);
+                if (drawer.Number(line.Part + slot, target) is not { } value) continue;
+
+                _held = row;
+                _heldSlot = slot;
+                _went = x;
+                _from = value;
+                return;
+            }
         }
     }
 
     /// <summary>
-    /// Says what the row under the pointer is for.
+    /// Says what the row under the pointer is for, beside that row.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Worked out from where the pointer is rather than from a hover state, because the answer is
     /// wanted for the row and the pointer may be over the box, the tick or the gap between them,
     /// all of which are the same row to a person.
+    /// </para>
+    /// <para>
+    /// Under the row where there is room and over it where there is not, which is what every
+    /// editor does and for the reason every editor does it: a hint that falls off the bottom of the
+    /// screen is not a hint. It is placed against the window rather than inside the panel, since a
+    /// panel clips what does not fit in it.
+    /// </para>
     /// </remarks>
     private void Hover(Input input)
     {
         if (Window is not { IsOpen: true } window)
         {
             Hint = string.Empty;
+            Hinting = false;
             return;
         }
 
@@ -667,11 +1073,44 @@ public sealed partial class DataPanel : IInspectorRows
             if (y < rect.Y || y > rect.Y + rect.Height) continue;
 
             Hint = said;
+            Hinting = true;
+            Beside(window, rect);
             return;
         }
 
         Hint = string.Empty;
+        Hinting = false;
     }
+
+    /// <summary>Puts the hint next to a row, on whichever side of it there is room for.</summary>
+    private void Beside(UiWindow window, UiRect row)
+    {
+        var hint = window.Element("d-hint");
+        if (hint.IsNone) return;
+
+        // How large it is now, which is how large it was when it last held these words. A hint
+        // whose size is not known yet is guessed at one line, and corrected on the frame after.
+        var known = Xui.TryRect(hint, out var measured) && measured.Height > 1f;
+        var height = known ? measured.Height : 20f;
+        var width = known ? measured.Width : 200f;
+
+        var (windowWidth, windowHeight) = Bevy.Window.Size();
+
+        // Under the row where there is room and over it where there is not, and never off the edge
+        // of the window: a hint that has to be scrolled to is not a hint.
+        var below = row.Bottom + 4f;
+        var top = below + height > windowHeight - 4f ? row.Y - height - 4f : below;
+
+        var left = Math.Clamp(row.X, 4f, Math.Max(4f, windowWidth - width - 4f));
+        if (_hinted is { } was && Math.Abs(was.X - left) < 0.5f && Math.Abs(was.Y - top) < 0.5f)
+            return;
+
+        Xui.SetRect(hint, left, top, float.NaN, float.NaN);
+        _hinted = (left, top);
+    }
+
+    /// <summary>Where the hint was last put, so it is not placed again every frame.</summary>
+    private (float X, float Y)? _hinted;
 
     /// <summary>Scrolls the rows when the wheel is rolled over the panel.</summary>
     private void Roll()
@@ -741,12 +1180,33 @@ public sealed partial class DataPanel : IInspectorRows
             $"{entity.Bits}:name");
     }
 
-    /// <summary>Runs whatever the row's button offers.</summary>
+    /// <summary>Runs whatever the row's first button offers.</summary>
     [Command("#db", Count = Rows)]
-    public void Press(int row)
+    public void Press(int row) => Press(row, 0);
+
+    /// <summary>The second button of a row that has several.</summary>
+    [Command("#db1", Count = Rows)]
+    public void PressSecond(int row) => Press(row, 1);
+
+    /// <summary>The third.</summary>
+    [Command("#db2", Count = Rows)]
+    public void PressThird(int row) => Press(row, 2);
+
+    /// <summary>Opens the colour a row's patch stands for.</summary>
+    [Command("#dsw", Count = Rows)]
+    public void PressSwatch(int row) => Press(row, 0);
+
+    /// <summary>Runs whatever one of a row's buttons offers.</summary>
+    private void Press(int row, int slot)
     {
         var world = EditorShell.Ecs;
         var line = _lines[row];
+
+        if (line is { Kind: InspectorLineKind.Buttons, Buttons: { } buttons })
+        {
+            if (slot >= 0 && slot < buttons.Count) buttons[slot].Run(world, _subject);
+            return;
+        }
 
         if (line is { Kind: InspectorLineKind.Method, Method: { } method })
         {
@@ -765,23 +1225,31 @@ public sealed partial class DataPanel : IInspectorRows
 
         drawer.Press(
             new InspectorRow(this, row),
-            line.Part,
+            line.Part + slot,
             new FieldTarget(field, world, _subject, EditorSelection.All));
     }
 
-    /// <summary>Opens or shuts a component's block.</summary>
+    /// <summary>Opens or shuts whatever the row heads.</summary>
     /// <remarks>
-    /// Only a heading answers. A click on a field row is a click on whatever editor that row
-    /// draws, and the row itself has nothing to do: the box, the tick and the button inside it are
-    /// what the click was for.
+    /// Only a heading answers, whether it heads a component or a fold inside one. A click on a
+    /// field row is a click on whatever editor that row draws, and the row itself has nothing to
+    /// do: the box, the tick and the button inside it are what the click was for.
     /// </remarks>
     [Command("#drow", Count = Rows)]
     public void Fold(int row)
     {
-        if (_lines[row].Kind != InspectorLineKind.Heading) return;
+        var line = _lines[row];
 
-        var component = _lines[row].Component;
-        if (!_shut.Remove(component)) _shut.Add(component);
+        switch (line.Kind)
+        {
+            case InspectorLineKind.Heading:
+                if (!_shut.Remove(line.Component)) _shut.Add(line.Component);
+                break;
+
+            case InspectorLineKind.Group when line.Key.Length > 0:
+                if (!_folds.Remove(line.Key)) _folds.Add(line.Key);
+                break;
+        }
     }
 
     /// <summary>Folds a component's block from its name as well as from its row.</summary>
@@ -841,7 +1309,7 @@ public sealed partial class DataPanel : IInspectorRows
         if (_lines[row].Schema is not { } schema) return;
 
         var entity = _subject;
-        var (x, y) = EditorShell.Context?.Input.MousePosition ?? (0f, 0f);
+        var (x, y) = Under($"drow-{row}");
 
         EditorShell.ShowMenu(
             schema.Name,
@@ -910,7 +1378,11 @@ public sealed partial class DataPanel : IInspectorRows
                     Icon: "icons/ui/package.png"),
             ],
             x,
-            y);
+            y,
+            // At the row rather than beside the panel. Which row a menu is about is said by where
+            // it opened, and a menu that steps out to the left of the panel to be read has stopped
+            // saying it.
+            beside: false);
     }
 
     /// <summary>Offers what can be done with a tag, which is take it off.</summary>

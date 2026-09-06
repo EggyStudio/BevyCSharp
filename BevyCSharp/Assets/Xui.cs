@@ -334,10 +334,11 @@ public static unsafe class Xui
     /// is the one thing a stylesheet cannot say.
     /// </para>
     /// <para>
-    /// The editor does not use it, and the reason is worth knowing: painting an element makes the
-    /// interface restyle it, and a restyle puts back the display property whoever is driving the
-    /// panel had just decided. A panel that paints one element cannot reliably hide another in the
-    /// same row.
+    /// Safe to mix with hiding, which it once was not. Painting an element makes the interface
+    /// restyle it, and a restyle used to put back both the display property and the colour that
+    /// whoever was driving the panel had just decided. What a panel decides is now kept apart from
+    /// what the stylesheet says and applied after it, so a painted element stays painted and still
+    /// hides when it is told to.
     /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">The element is gone.</exception>
@@ -376,9 +377,9 @@ public static unsafe class Xui
     /// Whether an element is on screen.
     /// </summary>
     /// <remarks>
-    /// Worth asking rather than remembering: the interface reapplies a widget's stylesheet
-    /// whenever it restyles one, which puts its display back to what the CSS says, so what was
-    /// last written is not what is necessarily in force.
+    /// The interface's own answer rather than what was last written to it, which is what makes it
+    /// worth asking at all: an element inside a hidden parent is not on screen whatever anyone
+    /// decided about the element itself.
     /// </remarks>
     public static bool IsVisible(Entity element)
     {
@@ -386,10 +387,38 @@ public static unsafe class Xui
         return Native.bcs_xui_get_visible(element.Bits, &visible) >= 0 && visible != 0;
     }
 
+    /// <summary>
+    /// Paints an element, as one number: red, green, blue and alpha, a byte each.
+    /// </summary>
+    /// <remarks>
+    /// The way a colour is written down everywhere else, so a colour that came from a stylesheet, a
+    /// file or a field does not have to be taken apart to be used. <c>0xFF0000FF</c> is red.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The element is gone.</exception>
+    public static void SetColour(Entity element, uint rgba) => SetColour(
+        element,
+        ((rgba >> 24) & 0xFF) / 255f,
+        ((rgba >> 16) & 0xFF) / 255f,
+        ((rgba >> 8) & 0xFF) / 255f,
+        (rgba & 0xFF) / 255f);
+
     /// <summary>Puts an element in front of or behind its siblings.</summary>
     /// <exception cref="BevyNativeException">The element is gone.</exception>
     public static void SetLayer(Entity element, int layer) => Native.Check(
         Native.bcs_xui_set_layer(element.Bits, layer), $"layering {element}");
+
+    /// <summary>
+    /// How much of the room left over an element takes, against its neighbours.
+    /// </summary>
+    /// <remarks>
+    /// The one part of a flex layout that has to be decided while the program runs: how many
+    /// things share a row, and how wide each of them is against the others, is a question about
+    /// what is being shown rather than about what the document looks like. A negative weight puts
+    /// the element back to whatever the stylesheet said.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The element is gone.</exception>
+    public static void SetWeight(Entity element, float weight) => Native.Check(
+        Native.bcs_xui_set_weight(element.Bits, weight), $"weighting {element}");
 
     /// <summary>
     /// Where an element ended up, in logical pixels.

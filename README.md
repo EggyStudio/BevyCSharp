@@ -1440,9 +1440,10 @@ The interface itself is **this project's own code**, in `native/bcs_ui`. It bega
 [`bevy_extended_ui`](https://github.com/exepta/bevy_extended_ui) under Apache 2.0, and
 `native/bcs_ui/NOTICE.md` says what was taken, what was left out and why. Owning it is what makes
 the shortcomings fixable rather than workaroundable: what a program decides about an element's
-box now survives the stylesheet being applied again, a document's body is the window so an element
-can be anchored to its right or bottom edge, `align-content` is read, and a widget that comes and
-goes inside a frame no longer ends the process.
+box or its colour now survives the stylesheet being applied again, a document's body is the window
+so an element can be anchored to its right or bottom edge, `align-content` is read, a rule naming
+two classes outweighs one naming either of them, and a widget that comes and goes inside a frame no
+longer ends the process.
 
 ## The editor
 
@@ -1533,10 +1534,32 @@ foreach (var id in ctx.Ecs.ComponentsOf(entity))
 Bevy's own components are a curated list, `Transform` and `Visibility` today, because each needs a
 byte-compatible mirror written by hand.
 
-The entity panel draws each field as what it is: three rows for a vector, one per axis; a checkbox
-for a flag; a button that opens the list for a choice; a box for a number. A schema also carries
-how to add the component, how to remove it, and any method the struct has that takes nothing, so
-the panel offers those as buttons without naming a single type.
+A field whose type is a **struct with fields of its own is taken apart**: `Front.Held.At` is a row
+called `At`, in a fold called `Held`, in one called `Front`. Writing one reads the component,
+changes that part and writes it back, so a part written does not wipe its neighbours. A vector is
+left alone, because a drawer already draws it as one thing.
+
+The entity panel draws each field as what it is: a checkbox for a flag; a button that opens the list
+for a choice; a box for a number; three boxes across a line for a place; a patch that opens a picker
+for a colour. A field says how it wants to be drawn in attributes the generator reads at compile
+time, so nothing reflects at runtime:
+
+```csharp
+[Range(0, 1, Readout = SliderReadout.Number)] public float Weight;   // a bar, and the number
+[Foldout("Advanced")] [Separator]                                    // in a fold, under a line
+[Info("Changing this rebuilds the shape.", Kind = NoteKind.Warning)] // said in the panel
+[OnValueChanged(nameof(Rebuild))] public float Radius;               // and something to call
+
+[ShowIf(nameof(Mode), Mode.Running)] public float WhileRunning;      // only while it is
+[Inline] public Vec3 Corner;                                         // three boxes, one row
+[Wide] public int Seed;                                              // no name column at all
+
+[Button("Save", Line = ButtonLine.Start, Weight = 2)] public void Save() { }
+[Button("Load", Line = ButtonLine.End)]               public void Load() { }
+```
+
+A schema also carries how to add the component, how to remove it, and any method the struct has
+that takes nothing, so the panel offers those as buttons without naming a single type.
 
 **What the editor changes can be taken back.** `EditorHistory` is a pair of stacks over closures,
 and an operation is recorded only when it can be reversed exactly: a field edit, a rename, a new

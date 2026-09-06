@@ -332,7 +332,15 @@ Unity's numbers, which this follows:
   inspector title bar.
 - **Text is left aligned**, except button labels, which are centred.
 - **Indentation carries nesting** in hierarchies, inspectors and menus.
-- The inspector must not scroll horizontally at its **275px minimum width**.
+- The inspector must not scroll horizontally at its **300px width**, which is what the name column
+  and a value beside it need without either being cut.
+- **The name is a column, not a label.** Every value in a panel starts at the same place however
+  long the names are, so a column of values can be read down its own edge. A drawer that wants the
+  whole width says so and there is no name column for that row at all.
+- **A panel clips and scrolls.** What does not fit is hidden rather than drawn over whatever is
+  below, and the whole of a panel's contents scrolls together: the strip of tags and the button
+  under an inspector are the end of the list, not furniture pinned below it. A panel that would
+  rather fill its column than hug its contents says `Stretch` in its placement.
 
 ### Windows
 
@@ -484,9 +492,24 @@ These constraints shaped the panels, and the ones left are the interface's rathe
   trailing space every other frame, which works and is visible: a trailing space changes how wide a
   label measures, so a panel grows and shrinks and a number walks left and right for as long as the
   writing goes on.
-- **An element's display is put back by the stylesheet** whenever the interface restyles the
-  widget, so what a panel last wrote is not what is in force. Visibility is read before it is
-  written rather than remembered.
+- **What a program decides about an element used to be put back by the stylesheet** whenever the
+  interface restyled the widget: its display, its box, and its colour. All three are now written
+  as a decision the sheet is applied before rather than after, so a panel can hide a row, place a
+  flyout and paint a patch of colour and have all three still be true a frame later. Painting was
+  the last of them, and the one that shaped the most code around it: the inspector drew its handles
+  as pictures of colours and its colour fields as six digits because a painted element could not
+  reliably be hidden.
+- **A panel's widgets draw over a flyout that is provably above them.** The drawing order is one
+  sorted list and `bcs_xui_stack` reports each element's place in it: a menu opened over the
+  inspector sits at 1797 against the panel's 143 to 972, and the menu's own background and text do
+  cover the panel's background. Some of the panel's widgets still draw over the menu. Painting the
+  menu bright green proved it is opaque and that it is the panel's boxes and patches that arrive
+  afterwards, so this is not translucency and not the stack. Not yet explained; a menu opened from
+  a row is still put at that row, because being next to its subject is worth more than being clear
+  of it.
+- **Two rules of equal weight were settled by whichever the map handed over first.** A compound
+  selector counted only its first name, so `.field-note.warn` weighed the same as `.field-note` and
+  which colour a warning took was a matter of iteration order. Every name in a step is counted now.
 - **A row that is reused reports what it used to say.** The pool draws whatever line is scrolled
   into it, and a widget whose text is replaced reports the change a frame or two later, which is
   indistinguishable from somebody typing that text into the new field. A row that turns therefore
@@ -579,26 +602,62 @@ and leaves the answers on the schema as `FieldHints`, so nothing reflects at run
 
 | attribute | what it does |
 |---|---|
-| `[Range(min, max)]` | draws a bar as well as a box |
 | `[Label("...")]` | what the row is called, when the field's name is not the right words |
-| `[Tooltip("...")]` | a sentence shown at the foot of the panel while the pointer is over the row |
-| `[Unit("m")]` | what the number is measured in, after the box |
+| `[Tooltip("...")]` | a sentence shown beside the row while the pointer is over it |
+| `[Unit("m")]` | what the number is measured in, in a column after the value |
 | `[Step(0.1)]` | what one pixel of a drag on the handle is worth |
+| `[Range(min, max)]` | draws a bar; `Readout` says whether a box, a number or nothing sits beside it |
 | `[ReadOnly]` | drawn on a flat plate rather than in a box, and not written back |
 | `[Hidden]` | not drawn at all, on a field or on a method |
 | `[Header("...")]` | a word above the field, grouping what follows |
 | `[Space]` | a blank row above the field |
-| `[Colour]` | three numbers that are a colour, with the six digits above them |
-| `[ShowIf(nameof(Other))]` | drawn only while another field of the same component reads true |
+| `[Separator]` | a line across the panel above the field |
+| `[Info("...", Kind = ...)]` | a sentence in the panel above the field: something to know, a warning, an error |
+| `[Foldout("A/B")]` | puts the field in a fold, which opens and shuts; slashes nest them |
+| `[Colour]` | three numbers that are a colour: a patch that opens a picker, and the numbers under it |
+| `[Inline]` | three numbers beside each other rather than one per row |
+| `[Wide]` | drawn across the panel, with no name column beside it |
+| `[ShowIf(nameof(Other))]` | drawn only while another field reads true, or equals a value |
+| `[HideIf(nameof(Other), Value)]` | the same, reversed; several conditions may sit on one field |
+| `[OnValueChanged(nameof(M))]` | calls the named methods once the field has been changed |
 | `[Order(n)]` | where the field or button sits among its neighbours |
-| `[Button("...")]` | what a method's button says |
+| `[Button("...")]` | what a method's button says; `Line` and `Weight` share a row between buttons |
 | `[Asset(AssetKind.Mesh)]` | which files to offer for a field that holds an asset |
+
+**A struct inside a component is taken apart.** A field whose type is a struct with fields of its
+own is described as those fields, named by the path they came from and folded under the name of the
+field they came from. `Front.Held.At` is a row called `At`, inside a fold called `Held`, inside one
+called `Front`. Writing one reads the whole component, changes the part and writes it back, so a
+part written does not wipe its neighbours. A vector is left alone: it is three numbers a drawer
+already draws as one thing.
 
 **A pass adds what is not a field at all.** `EditorInspector` runs passes before the components,
 per component, per field, per method, and after everything. A pass that takes a field says so and
 the ordinary drawing of it is skipped, which is enough to add a row, replace a row, hide a row, or
 take over a whole component without any of those being a separate mechanism. The editor uses it
-for the one line an entity has that is not a component's field: what it hangs from.
+for the two things an entity has that are not a component's field: what it hangs from, and what
+hangs from it.
+
+**A list is drawn by whoever has one.** Components are laid out in memory, so a component cannot
+hold a list or a dictionary and no attribute can change that. Everything else an inspector shows
+can: an asset's contents, a tool's own state, a game's managed objects, the children of an entity.
+So `InspectorList` is offered a count, a way to draw one element and what adding and removing mean,
+and arranges them the way every list in the editor is arranged:
+
+```csharp
+InspectorList.Add(
+    plan,
+    key: "entity/children",
+    name: "Children",
+    count: children.Length,
+    element: (into, index) => into.Add(new ChildLine(into.World, children[index])),
+    add: () => items.Add(new Slot()),        // left out for a list that cannot grow
+    remove: items.RemoveAt);                 // and for one nothing can be taken from
+```
+
+A fold that says how many there are, a fold per element, whatever the element drew inside it, a
+button to take each one away and one to add another. A shut list draws one row and does not ask its
+elements to draw at all, so a list of a thousand things costs nothing while it is closed.
 
 **More than one thing can be selected.** Control and a click in the hierarchy adds to the
 selection or takes something out of it, and the inspector then shows the components every selected

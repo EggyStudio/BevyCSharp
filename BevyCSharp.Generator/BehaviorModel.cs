@@ -194,12 +194,20 @@ internal sealed record FieldHintModel(
     double? Minimum = null,
     double? Maximum = null,
     double? Step = null,
+    string? Readout = null,
     bool ReadOnly = false,
     bool Hidden = false,
     bool Space = false,
+    bool Separator = false,
     bool Colour = false,
-    string? ShowIf = null,
-    bool ShowIfNot = false,
+    bool Wide = false,
+    bool Inline = false,
+    string? Foldout = null,
+    bool FoldoutShut = false,
+    string? Note = null,
+    string? NoteKind = null,
+    EquatableArray<ConditionModel> Conditions = default,
+    EquatableArray<string> Changed = default,
     int Order = 0,
     string? Asset = null,
     string? Extensions = null)
@@ -211,11 +219,26 @@ internal sealed record FieldHintModel(
     internal bool IsEmpty => Equals(None);
 }
 
+/// <summary>One reason a field might not be shown, as the generator read it.</summary>
+/// <param name="Field">The field of the same component that decides.</param>
+/// <param name="Value">What it has to read as, or nothing for "is on".</param>
+/// <param name="Not">Whether the sense is reversed.</param>
+internal sealed record ConditionModel(string Field, string? Value, bool Not);
+
 /// <summary>What one method's attributes asked for.</summary>
 internal sealed record MethodHintModel(
     string? Label = null,
     string? Tooltip = null,
     bool Hidden = false,
+    string? Line = null,
+    double Weight = 1d,
+    bool Space = false,
+    bool Separator = false,
+    string? Header = null,
+    string? Foldout = null,
+    bool FoldoutShut = false,
+    string? Note = null,
+    string? NoteKind = null,
     int Order = 0)
 {
     /// <summary>A method with no attributes on it.</summary>

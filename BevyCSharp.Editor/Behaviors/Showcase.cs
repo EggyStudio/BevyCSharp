@@ -107,10 +107,76 @@ public partial struct Showcase
     [Tooltip("A model file. What a handle points at is shown by name rather than by number.")]
     public AssetHandle Shape;
 
+    /// <summary>A bar with no box beside it, since the number means nothing on its own.</summary>
+    [Header("Bars")]
+    [Space]
+    [Range(0d, 1d, Readout = SliderReadout.None)]
+    [Tooltip("A bar and nothing else. There is no number worth typing here.")]
+    public float Blend;
+
+    /// <summary>A bar with the number beside it, which cannot be typed into.</summary>
+    [Range(0d, 100d, Readout = SliderReadout.Number)]
+    [Unit("%")]
+    public float Fill;
+
+    /// <summary>Three numbers on one line rather than three.</summary>
+    [Inline]
+    [Tooltip("One value read left to right, in the room one row costs.")]
+    public Vec3 Corner;
+
+    /// <summary>A line of text with no name beside it, across the whole panel.</summary>
+    [Wide]
+    [Tooltip("The name column has nothing to add to a sentence.")]
+    public int Seed;
+
+    /// <summary>Something rebuilt when the radius changes.</summary>
+    [Separator]
+    [Foldout("Advanced")]
+    [Info("Changing the radius rebuilds the shape.", Kind = NoteKind.Warning)]
+    [OnValueChanged(nameof(Rebuild))]
+    [Unit("m")]
+    public float Radius;
+
+    /// <summary>How many times that has happened, which the button above changes.</summary>
+    [Foldout("Advanced")]
+    [ReadOnly]
+    public int Rebuilds;
+
+    /// <summary>Shown only while the mode is the one that is going.</summary>
+    [Foldout("Advanced")]
+    [ShowIf(nameof(Mode), ShowcaseMode.Running)]
+    [Tooltip("Only there while the mode above says Running.")]
+    public float WhileRunning;
+
+    /// <summary>Inside a fold inside a fold.</summary>
+    [Foldout("Advanced/Debug")]
+    public bool Noisy;
+
+    /// <summary>The same, so there is more than one row in the inner fold.</summary>
+    [Foldout("Advanced/Debug")]
+    public int Every;
+
     /// <summary>Counts a tick, so the read-only row has something to say.</summary>
     [Button("Count one")]
     [Tooltip("Adds one to the count above.")]
     public void Tick() => Ticks++;
+
+    /// <summary>The first of three buttons on one line.</summary>
+    [Button("Save", Line = ButtonLine.Start, Weight = 2d)]
+    [Tooltip("Twice as wide as the two beside it, because it is the one being asked for.")]
+    public void Save() => Working = Speed;
+
+    /// <summary>The second.</summary>
+    [Button("Load", Line = ButtonLine.Middle)]
+    public void Load() => Speed = Working;
+
+    /// <summary>The third, after which the line is closed.</summary>
+    [Button("Clear", Line = ButtonLine.End)]
+    public void Clear() => Working = 0f;
+
+    /// <summary>What a change to the radius calls.</summary>
+    [Hidden]
+    public void Rebuild() => Rebuilds++;
 
     /// <summary>Puts the numbers back where they started.</summary>
     [Button("Put it back")]

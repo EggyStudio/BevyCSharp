@@ -204,9 +204,14 @@ public sealed class EditorLayout
 
         var cap = width / 3f;
 
-        Column(placed, UiDock.Left, Margin, Margin, bandTop, left, cap, fromLeft: true);
+        // The columns stop short of whatever is under them, so a panel that reaches the bottom of
+        // the screen has an edge rather than running into the tab below it. Two borders touching
+        // read as one thick line and neither panel looks like a panel any more.
+        var columnBottom = bandTop - Gap;
+
+        Column(placed, UiDock.Left, Margin, Margin, columnBottom, left, cap, fromLeft: true);
         var rightBottom = Column(
-            placed, UiDock.Right, width - Margin, Margin, bandTop, right, cap, fromLeft: false);
+            placed, UiDock.Right, width - Margin, Margin, columnBottom, right, cap, fromLeft: false);
 
         Band(placed, Margin, width - Margin, bandTop, band);
         Strip(placed, Margin, width - Margin, stripTop);
@@ -363,7 +368,13 @@ public sealed class EditorLayout
             // are your contents" is the height it was given, which is a tree that grows a dozen
             // rows inside a panel that never changes size. A maximum leaves the measurement where
             // it belongs and only stops it running past the column.
-            var tall = float.IsNaN(entry.Placement.Height) ? Xui.Auto : entry.Placement.Height;
+            // A panel that asked to fill its column is told the room as a height; every other one
+            // is handed back to its contents. Filling is what a panel somebody works in wants, so
+            // that its contents scroll inside a fixed frame rather than the panel growing and
+            // shrinking under the pointer as they change.
+            var tall = entry.Placement.Stretch
+                ? room
+                : float.IsNaN(entry.Placement.Height) ? Xui.Auto : entry.Placement.Height;
 
             window.LimitTo(widest, room);
 
@@ -563,25 +574,29 @@ public sealed class EditorLayout
     /// </remarks>
     private void Free(List<Placed> placed, float width, float height)
     {
-        var room = Viewport.Width > 1f && Viewport.Height > 1f
-            ? Viewport
-            : new UiRect(Margin, Margin, width - (Margin * 2f), height - (Margin * 2f));
+        var whole = new UiRect(Margin, Margin, width - (Margin * 2f), height - (Margin * 2f));
+        var room = Viewport.Width > 1f && Viewport.Height > 1f ? Viewport : whole;
 
         foreach (var entry in placed)
         {
             if (entry.Placement.Dock != UiDock.Floating) continue;
+
+            // Inside the viewport for a panel that is merely somewhere on the screen, and inside
+            // the window for one whose point was chosen: a menu opened from a row of a docked panel
+            // belongs beside that row, and the viewport does not reach there.
+            var bounds = entry.Placement.Pinned ? whole : room;
 
             var x = entry.Placement.X;
             var y = entry.Placement.Y;
 
             if (entry.Rect.Width > 0f)
             {
-                x = MathF.Max(room.X, MathF.Min(x, room.Right - entry.Rect.Width));
+                x = MathF.Max(bounds.X, MathF.Min(x, bounds.Right - entry.Rect.Width));
             }
 
             if (entry.Rect.Height > 0f)
             {
-                y = MathF.Max(room.Y, MathF.Min(y, room.Bottom - entry.Rect.Height));
+                y = MathF.Max(bounds.Y, MathF.Min(y, bounds.Bottom - entry.Rect.Height));
             }
 
             entry.Panel.Window!.PlaceAt(

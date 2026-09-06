@@ -62,3 +62,28 @@ fn the_alignment_properties_are_read() {
     assert_eq!(style.align_self, Some(bevy::ui::AlignSelf::Center));
     assert_eq!(style.align_items, Some(bevy::ui::AlignItems::Stretch));
 }
+
+#[test]
+fn a_rule_naming_two_classes_beats_one_naming_either() {
+    use bcs_ui::services::style_service::selector_weight;
+
+    // What settles the cascade between two rules that both match. Counting only the first name in
+    // a compound made these equal, and equal rules are settled by whichever the map hands over
+    // first: a colour that is right on some frames and wrong on others.
+    assert!(selector_weight(".field-note.warn") > selector_weight(".field-note"));
+    assert!(selector_weight("#main") > selector_weight(".panel.stats"));
+    assert!(selector_weight("div.panel") > selector_weight("div"));
+    assert_eq!(selector_weight("div"), 1);
+    assert_eq!(selector_weight(".panel"), 10);
+    assert_eq!(selector_weight(".panel.stats"), 20);
+    assert_eq!(selector_weight("div.panel.stats"), 21);
+    assert_eq!(selector_weight("*"), 0);
+}
+
+#[test]
+fn a_descendant_selector_counts_every_step() {
+    use bcs_ui::services::style_service::selector_weight;
+
+    assert_eq!(selector_weight(".column .field-name"), 20);
+    assert_eq!(selector_weight(".column > .field-name"), 20);
+}

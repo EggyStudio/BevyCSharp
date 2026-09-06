@@ -188,12 +188,25 @@ internal static class SchemaEmitter
         if (hints.Minimum is not null) parts.Add("Minimum: " + Literal(hints.Minimum.Value));
         if (hints.Maximum is not null) parts.Add("Maximum: " + Literal(hints.Maximum.Value));
         if (hints.Step is not null) parts.Add("Step: " + Literal(hints.Step.Value));
+        if (hints.Readout is not null)
+            parts.Add("Readout: global::Bevy.SliderReadout." + hints.Readout);
+
         if (hints.ReadOnly) parts.Add("ReadOnly: true");
         if (hints.Hidden) parts.Add("Hidden: true");
         if (hints.Space) parts.Add("Space: true");
+        if (hints.Separator) parts.Add("Separator: true");
         if (hints.Colour) parts.Add("Colour: true");
-        if (hints.ShowIf is not null) parts.Add("ShowIf: " + Quote(hints.ShowIf));
-        if (hints.ShowIfNot) parts.Add("ShowIfNot: true");
+        if (hints.Wide) parts.Add("Wide: true");
+        if (hints.Inline) parts.Add("Inline: true");
+        if (hints.Foldout is not null) parts.Add("Foldout: " + Quote(hints.Foldout));
+        if (hints.FoldoutShut) parts.Add("FoldoutOpen: false");
+        if (hints.Note is not null) parts.Add("Note: " + Quote(hints.Note));
+
+        if (hints.NoteKind is not null)
+            parts.Add("NoteKind: global::Bevy.NoteKind." + hints.NoteKind);
+
+        if (hints.Conditions.Items.Count > 0) parts.Add(Conditions(hints.Conditions));
+        if (hints.Changed.Items.Count > 0) parts.Add(Changed(hints.Changed));
         if (hints.Order != 0) parts.Add("Order: " + hints.Order.ToString(Invariant));
         if (hints.Asset is not null) parts.Add("Asset: " + Quote(hints.Asset));
         if (hints.Extensions is not null) parts.Add("Extensions: " + Quote(hints.Extensions));
@@ -207,6 +220,23 @@ internal static class SchemaEmitter
 
         source.Append("                    )");
     }
+
+    /// <summary>What has to hold for a field to be shown, as an array of conditions.</summary>
+    private static string Conditions(EquatableArray<ConditionModel> conditions)
+    {
+        var written = conditions.Items.Select(condition =>
+            "new global::Bevy.FieldCondition("
+            + Quote(condition.Field)
+            + ", " + (condition.Value is null ? "null" : Quote(condition.Value))
+            + (condition.Not ? ", true" : string.Empty)
+            + ")");
+
+        return "Conditions: [" + string.Join(", ", written) + "]";
+    }
+
+    /// <summary>The methods to call once a field has been changed.</summary>
+    private static string Changed(EquatableArray<string> methods) =>
+        "Changed: [" + string.Join(", ", methods.Items.Select(Quote)) + "]";
 
     /// <summary>The one culture a generator may write numbers in.</summary>
     private static readonly System.Globalization.CultureInfo Invariant =
@@ -228,6 +258,20 @@ internal static class SchemaEmitter
         if (hints.Label is not null) parts.Add("Label: " + Quote(hints.Label));
         if (hints.Tooltip is not null) parts.Add("Tooltip: " + Quote(hints.Tooltip));
         if (hints.Hidden) parts.Add("Hidden: true");
+
+        if (hints.Line is not null) parts.Add("Line: global::Bevy.ButtonLine." + hints.Line);
+
+        if (hints.Weight is not 1d) parts.Add("Weight: " + Literal(hints.Weight));
+        if (hints.Space) parts.Add("Space: true");
+        if (hints.Separator) parts.Add("Separator: true");
+        if (hints.Header is not null) parts.Add("Header: " + Quote(hints.Header));
+        if (hints.Foldout is not null) parts.Add("Foldout: " + Quote(hints.Foldout));
+        if (hints.FoldoutShut) parts.Add("FoldoutOpen: false");
+        if (hints.Note is not null) parts.Add("Note: " + Quote(hints.Note));
+
+        if (hints.NoteKind is not null)
+            parts.Add("NoteKind: global::Bevy.NoteKind." + hints.NoteKind);
+
         if (hints.Order != 0) parts.Add("Order: " + hints.Order.ToString(Invariant));
 
         source.Append("\n                {\n                    Hints = new global::Bevy.MethodHints(")

@@ -97,10 +97,111 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     [
         .. type.GetMembers()
             .Where(member => member is IFieldSymbol or IPropertySymbol)
-            .Select(Described)
-            .Where(field => field is not null)
-            .Select(field => field!),
+            .SelectMany(member => Expand(member, string.Empty, null, 0)),
     ];
+
+    /// <summary>
+    /// One member as the fields a tool sees, which for a value of its own is more than one.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A component's field may itself be a struct with fields: a spring with a stiffness and a
+    /// damping, a slot with a name and a weight. Described as one opaque row it says nothing, and
+    /// there is nothing a tool could do with it. So it is taken apart, and the parts are ordinary
+    /// fields whose names carry the path they came from.
+    /// </para>
+    /// <para>
+    /// The parts land in a fold named after the field they came from, which is what makes a struct
+    /// inside a component read as one thing that opens and shuts rather than as a run of unrelated
+    /// rows. Nesting goes as deep as the types do, up to a limit, since a struct cannot contain
+    /// itself and the recursion ends on its own.
+    /// </para>
+    /// <para>
+    /// Fields only. A property returns a copy of what it holds, so writing one part of what a
+    /// property answered with writes to the copy and nothing happens.
+    /// </para>
+    /// </remarks>
+    private static IEnumerable<BehaviorField> Expand(
+        ISymbol member, string prefix, string? fold, int depth)
+    {
+        if (Described(member) is not { } described) yield break;
+
+        var named = prefix + described.Name;
+        var inside = Inside(fold, described.Hints.Foldout);
+
+        if (member is IFieldSymbol field
+            && depth < Depth
+            && !described.Hints.Hidden
+            && Parts(field.Type) is { Count: > 0 } parts)
+        {
+            var under = Inside(inside, described.Name);
+
+            foreach (var part in parts)
+            {
+                foreach (var expanded in Expand(part, named + ".", under, depth + 1))
+                {
+                    yield return expanded;
+                }
+            }
+
+            yield break;
+        }
+
+        yield return described with
+        {
+            Name = named,
+            Hints = described.Hints with
+            {
+                // What it is called is the last part of the path. The rest of the path is said by
+                // the fold it sits in, and repeating it in every row inside would be reading the
+                // same word four times down a column.
+                Label = described.Hints.Label ?? described.Name,
+                Foldout = inside,
+            },
+        };
+    }
+
+    /// <summary>How many structs deep a field is taken apart.</summary>
+    /// <remarks>
+    /// Three. A struct cannot contain itself so this cannot run away, but a component whose fields
+    /// are four levels of struct is one whose inspector nobody can read however it is drawn.
+    /// </remarks>
+    private const int Depth = 3;
+
+    /// <summary>One fold path inside another.</summary>
+    private static string? Inside(string? outer, string? inner) => (outer, inner) switch
+    {
+        (null or "", null or "") => null,
+        (null or "", var only) => only,
+        (var only, null or "") => only,
+        var (above, below) => above + "/" + below,
+    };
+
+    /// <summary>
+    /// The members of a value that is worth taking apart, or nothing when it is not.
+    /// </summary>
+    /// <remarks>
+    /// A struct with fields of its own, that is not one of the shapes a tool already draws. A
+    /// vector is three numbers and is drawn as a vector; taking it apart would replace one row
+    /// somebody understands with three that say the same thing worse.
+    /// </remarks>
+    private static IReadOnlyList<ISymbol>? Parts(ITypeSymbol type)
+    {
+        if (type.TypeKind != TypeKind.Struct) return null;
+        if (type.SpecialType != SpecialType.None) return null;
+        if (KindOf(type) != FieldKind.Opaque) return null;
+
+        var parts = type.GetMembers()
+            .OfType<IFieldSymbol>()
+            .Where(field =>
+                !field.IsStatic
+                && !field.IsConst
+                && !field.IsImplicitlyDeclared
+                && field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal)
+            .ToList();
+
+        return parts.Count > 0 ? parts : null;
+    }
 
     /// <summary>How one member is described, or nothing when it is not shown at all.</summary>
     private static BehaviorField? Described(ISymbol member) => member switch
@@ -158,10 +259,34 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     {
         var hints = FieldHintModel.None;
 
+        // Conditions and change notifications gather rather than replace: several of either can sit
+        // on one field, and the last one written is not the only one meant.
+        var conditions = new List<ConditionModel>();
+        var changed = new List<string>();
+
         foreach (var attribute in attributes)
         {
             var name = attribute.AttributeClass?.Name;
             if (name is null) continue;
+
+            switch (name)
+            {
+                case "ShowIfAttribute":
+                    conditions.Add(new ConditionModel(
+                        Text(attribute, 0) ?? string.Empty,
+                        Written(attribute, 1),
+                        Flag(attribute, "Not")));
+                    continue;
+
+                case "HideIfAttribute":
+                    conditions.Add(new ConditionModel(
+                        Text(attribute, 0) ?? string.Empty, Written(attribute, 1), true));
+                    continue;
+
+                case "OnValueChangedAttribute":
+                    foreach (var method in Names(attribute)) changed.Add(method);
+                    continue;
+            }
 
             hints = name switch
             {
@@ -173,16 +298,26 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
                 {
                     Minimum = Number(attribute, 0),
                     Maximum = Number(attribute, 1),
+                    Readout = Chosen(attribute, "Readout"),
                 },
                 "StepAttribute" => hints with { Step = Number(attribute, 0) },
                 "ReadOnlyAttribute" => hints with { ReadOnly = true },
                 "HiddenAttribute" => hints with { Hidden = true },
                 "SpaceAttribute" => hints with { Space = true },
+                "SeparatorAttribute" => hints with { Separator = true },
                 "ColourAttribute" or "ColorAttribute" => hints with { Colour = true },
-                "ShowIfAttribute" => hints with
+                "WideAttribute" => hints with { Wide = true },
+                "InlineAttribute" => hints with { Inline = true },
+                "FoldoutAttribute" => hints with
                 {
-                    ShowIf = Text(attribute, 0),
-                    ShowIfNot = Flag(attribute, "Not"),
+                    Foldout = Text(attribute, 0),
+                    FoldoutShut = attribute.NamedArguments.Any(
+                        pair => pair.Key == "Open" && pair.Value.Value is false),
+                },
+                "InfoAttribute" => hints with
+                {
+                    Note = Text(attribute, 0),
+                    NoteKind = Chosen(attribute, "Kind"),
                 },
                 "OrderAttribute" => hints with { Order = (int)(Number(attribute, 0) ?? 0d) },
                 "AssetAttribute" => hints with
@@ -194,7 +329,84 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
             };
         }
 
+        if (conditions.Count > 0)
+            hints = hints with { Conditions = new EquatableArray<ConditionModel>([.. conditions]) };
+
+        if (changed.Count > 0)
+            hints = hints with { Changed = new EquatableArray<string>([.. changed]) };
+
         return hints;
+    }
+
+    /// <summary>
+    /// One of an attribute's positional arguments, written as the source wrote it.
+    /// </summary>
+    /// <remarks>
+    /// What a condition compares against, which can be a flag, a number, a word or one of an
+    /// enum's names. An enum argument arrives as the number behind the name, so the name is taken
+    /// from the type rather than from the value: a condition written against a name has to be
+    /// checked against one, since the number is not what the field reads as at runtime.
+    /// </remarks>
+    private static string? Written(AttributeData attribute, int index)
+    {
+        if (attribute.ConstructorArguments.Length <= index) return null;
+
+        var argument = attribute.ConstructorArguments[index];
+
+        // A boxed object argument arrives wrapped: the declared type is object and the value it
+        // holds is what was written.
+        if (argument.Kind == TypedConstantKind.Type) return null;
+        if (argument.Value is null) return null;
+
+        if (argument.Type is { TypeKind: TypeKind.Enum } enumeration)
+        {
+            foreach (var member in enumeration.GetMembers())
+            {
+                if (member is not IFieldSymbol { HasConstantValue: true } constant) continue;
+                if (!Equals(constant.ConstantValue, argument.Value)) continue;
+
+                return constant.Name;
+            }
+        }
+
+        return argument.Value switch
+        {
+            bool flag => flag ? "true" : "false",
+            string text => text,
+            var other => System.Convert.ToString(
+                other, System.Globalization.CultureInfo.InvariantCulture),
+        };
+    }
+
+    /// <summary>The name of an enum passed as a named argument, or nothing.</summary>
+    private static string? Chosen(AttributeData attribute, string name)
+    {
+        foreach (var argument in attribute.NamedArguments)
+        {
+            if (argument.Key != name) continue;
+            if (argument.Value.Type is not { TypeKind: TypeKind.Enum } enumeration) continue;
+
+            foreach (var member in enumeration.GetMembers())
+            {
+                if (member is not IFieldSymbol { HasConstantValue: true } constant) continue;
+                if (!Equals(constant.ConstantValue, argument.Value.Value)) continue;
+
+                return constant.Name;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>Every string in an attribute's one array argument.</summary>
+    private static IEnumerable<string> Names(AttributeData attribute)
+    {
+        if (attribute.ConstructorArguments.Length == 0) yield break;
+
+        foreach (var value in attribute.ConstructorArguments[0].Values)
+        {
+            if (value.Value is string text and { Length: > 0 }) yield return text;
+        }
     }
 
     /// <summary>One of an attribute's named arguments, as text.</summary>
@@ -220,15 +432,54 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 
             hints = name switch
             {
-                "ButtonAttribute" or "LabelAttribute" => hints with { Label = Text(attribute, 0) },
+                "ButtonAttribute" => hints with
+                {
+                    Label = Text(attribute, 0),
+                    Line = Chosen(attribute, "Line"),
+                    Weight = Weight(attribute),
+                },
+                "LabelAttribute" => hints with { Label = Text(attribute, 0) },
                 "TooltipAttribute" => hints with { Tooltip = Text(attribute, 0) },
                 "HiddenAttribute" => hints with { Hidden = true },
+                "SpaceAttribute" => hints with { Space = true },
+                "SeparatorAttribute" => hints with { Separator = true },
+                "HeaderAttribute" => hints with { Header = Text(attribute, 0) },
+                "FoldoutAttribute" => hints with
+                {
+                    Foldout = Text(attribute, 0),
+                    FoldoutShut = attribute.NamedArguments.Any(
+                        pair => pair.Key == "Open" && pair.Value.Value is false),
+                },
+                "InfoAttribute" => hints with
+                {
+                    Note = Text(attribute, 0),
+                    NoteKind = Chosen(attribute, "Kind"),
+                },
                 "OrderAttribute" => hints with { Order = (int)(Number(attribute, 0) ?? 0d) },
                 _ => hints,
             };
         }
 
         return hints;
+    }
+
+    /// <summary>How wide a button asked to be, which is one unless it said otherwise.</summary>
+    private static double Weight(AttributeData attribute)
+    {
+        foreach (var argument in attribute.NamedArguments)
+        {
+            if (argument.Key != "Weight") continue;
+
+            return argument.Value.Value switch
+            {
+                double value => value,
+                float value => value,
+                int value => value,
+                _ => 1d,
+            };
+        }
+
+        return 1d;
     }
 
     /// <summary>One of an attribute's positional arguments, as text.</summary>
@@ -335,8 +586,12 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         SpecialType.System_Boolean => FieldKind.Bool,
         SpecialType.System_Single => FieldKind.Float,
         SpecialType.System_Double => FieldKind.Double,
+        // Every width, as the kind says. A field a tool cannot edit because nobody listed its
+        // width is a field somebody has to write a drawer for, and there is nothing to write: it is
+        // a whole number.
         SpecialType.System_Int32 or SpecialType.System_Int16 or SpecialType.System_SByte
             or SpecialType.System_UInt32 or SpecialType.System_UInt16 or SpecialType.System_Byte
+            or SpecialType.System_Int64 or SpecialType.System_UInt64
             => FieldKind.Int,
         _ => type.ToDisplayString() switch
         {

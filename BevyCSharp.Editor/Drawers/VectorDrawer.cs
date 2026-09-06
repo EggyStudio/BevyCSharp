@@ -4,12 +4,13 @@ using BevyCSharp.Editor.Framework;
 namespace BevyCSharp.Editor.Drawers;
 
 /// <summary>
-/// Three numbers: three rows, one per axis.
+/// Three numbers: three rows, or one row of three boxes.
 /// </summary>
 /// <remarks>
-/// Down rather than across. Three boxes in the width a docked panel has are too narrow to read a
-/// number in, and what says which axis a row is, is the colour of the handle beside its box, so
-/// the letters nobody needs are not written at all.
+/// Down the panel by default, because three boxes in the width a docked panel has are too narrow
+/// to read a long number in. A field that says it would rather be read across the line gets that
+/// instead, which is what a position wants: it is one value, it is read left to right, and three
+/// rows of it costs three times the height for no more information.
 /// </remarks>
 public sealed class VectorDrawer : IFieldDrawer
 {
@@ -17,15 +18,41 @@ public sealed class VectorDrawer : IFieldDrawer
     public bool Handles(ComponentField field) => field.Kind == FieldKind.Vec3;
 
     /// <inheritdoc/>
-    public int Lines(ComponentField field) => 3;
+    public int Lines(ComponentField field) => field.Hints.Inline ? 1 : 3;
 
     /// <inheritdoc/>
     public void Draw(InspectorRow row, int part, FieldTarget target)
     {
+        var parts = Parts(target.Read());
+
+        if (target.Field.Hints.Inline)
+        {
+            row.Name(target.Field.Title);
+
+            for (var axis = 0; axis < 3; axis++)
+                row.Box(axis, parts[axis], Grips.Axis(axis), target.Field.IsWritable);
+
+            Say(row, target, part: 0);
+            return;
+        }
+
         // The name on the first row only, so three rows read as one thing rather than as three.
         row.Name(part == 0 ? target.Field.Title : string.Empty);
-        row.Box(Parts(target.Read())[part], Grips.Axis(part), target.Field.IsWritable);
-        row.Unit(Suffix(target.Field));
+        row.Box(parts[part], Grips.Axis(part), target.Field.IsWritable);
+        Say(row, target, part);
+    }
+
+    /// <summary>
+    /// What the numbers are measured in, and whether they agree.
+    /// </summary>
+    /// <remarks>
+    /// The unit is left off a row of three. It sits in a column of its own after the boxes, and
+    /// three boxes have already taken the width that column would want; a position in metres is
+    /// three numbers whose unit nobody was in doubt about.
+    /// </remarks>
+    private static void Say(InspectorRow row, FieldTarget target, int part)
+    {
+        if (!target.Field.Hints.Inline) row.Unit(target.Field.Hints.Unit ?? string.Empty);
 
         if (!target.Agree(value => Parts(value)[part])) row.Mixed();
     }
@@ -35,15 +62,26 @@ public sealed class VectorDrawer : IFieldDrawer
     {
         if (!target.Field.IsWritable) return;
 
-        var typed = row.Typed.Trim();
-        if (typed.Length == 0) return;
-
-        // The other two come from what the field holds, so editing one axis changes one axis even
-        // when the other rows have been scrolled away.
+        // The numbers not typed into come from what the field holds, so editing one axis changes
+        // one axis even when the other rows have been scrolled away.
         var parts = Parts(target.Read());
-        if (parts[part] == typed) return;
+        var changed = false;
 
-        parts[part] = typed;
+        var boxes = target.Field.Hints.Inline ? 3 : 1;
+
+        for (var box = 0; box < boxes; box++)
+        {
+            var axis = target.Field.Hints.Inline ? box : part;
+            var typed = row.TypedIn(box).Trim();
+
+            if (typed.Length == 0) continue;
+            if (parts[axis] == typed) continue;
+
+            parts[axis] = typed;
+            changed = true;
+        }
+
+        if (!changed) return;
         if (Compose(parts) is { } composed) target.Write(composed);
     }
 

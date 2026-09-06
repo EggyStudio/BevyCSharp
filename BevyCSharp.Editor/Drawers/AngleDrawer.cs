@@ -18,13 +18,28 @@ public sealed class AngleDrawer : IFieldDrawer
     public bool Handles(ComponentField field) => field.Kind == FieldKind.Quat;
 
     /// <inheritdoc/>
-    public int Lines(ComponentField field) => 3;
+    public int Lines(ComponentField field) => field.Hints.Inline ? 1 : 3;
 
     /// <inheritdoc/>
     public void Draw(InspectorRow row, int part, FieldTarget target)
     {
+        var parts = Parts(target.Read());
+
+        if (target.Field.Hints.Inline)
+        {
+            row.Name(target.Field.Title);
+
+            for (var axis = 0; axis < 3; axis++)
+                row.Box(axis, parts[axis], Grips.Axis(axis), target.Field.IsWritable);
+
+            // No unit on a row of three. Degrees is what a rotation is written in everywhere, and
+            // the word takes the width one of the three boxes needs to be readable in.
+            if (!target.Agree(value => Parts(value)[0])) row.Mixed();
+            return;
+        }
+
         row.Name(part == 0 ? target.Field.Title : string.Empty);
-        row.Box(Parts(target.Read())[part], Grips.Axis(part), target.Field.IsWritable);
+        row.Box(parts[part], Grips.Axis(part), target.Field.IsWritable);
         row.Unit(Suffix(target.Field));
 
         if (!target.Agree(value => Parts(value)[part])) row.Mixed();
@@ -35,13 +50,24 @@ public sealed class AngleDrawer : IFieldDrawer
     {
         if (!target.Field.IsWritable) return;
 
-        var typed = row.Typed.Trim();
-        if (typed.Length == 0) return;
-
         var parts = Parts(target.Read());
-        if (parts[part] == typed) return;
+        var changed = false;
 
-        parts[part] = typed;
+        var boxes = target.Field.Hints.Inline ? 3 : 1;
+
+        for (var box = 0; box < boxes; box++)
+        {
+            var axis = target.Field.Hints.Inline ? box : part;
+            var typed = row.TypedIn(box).Trim();
+
+            if (typed.Length == 0) continue;
+            if (parts[axis] == typed) continue;
+
+            parts[axis] = typed;
+            changed = true;
+        }
+
+        if (!changed) return;
         if (Compose(parts) is { } composed) target.Write(composed);
     }
 

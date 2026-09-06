@@ -28,6 +28,37 @@ public readonly record struct PanelPlacement(
     /// <summary>A panel in a dock, sized by its contents unless told otherwise.</summary>
     public static PanelPlacement In(UiDock dock, int order = 0) => new(dock, Order: order);
 
+    /// <summary>
+    /// Whether the panel takes all the room its column has rather than as much as it needs.
+    /// </summary>
+    /// <remarks>
+    /// A panel is as tall as its contents by default, which is what a column of several of them
+    /// wants: each is the size of what it says, and they stack. A panel that is the only one in
+    /// its column, or the one somebody works in, is better filling the room, so that what it holds
+    /// scrolls inside a panel of a fixed size instead of the panel growing and shrinking under the
+    /// pointer as its contents change.
+    /// </remarks>
+    public bool Stretch { get; init; }
+
+    /// <summary>The same placement, filling its column or hugging its contents.</summary>
+    public PanelPlacement Stretched(bool stretch = true) => this with { Stretch = stretch };
+
+    /// <summary>
+    /// Whether the point was chosen deliberately, rather than merely being somewhere on screen.
+    /// </summary>
+    /// <remarks>
+    /// A floating panel is kept inside the viewport, so that a flyout opened over the scene does
+    /// not end up under a docked column. A panel opened from a particular row of a particular panel
+    /// is the other case: being next to that row is the whole of what says which row it is about,
+    /// and moving it out from under the column it belongs to is moving it away from its subject. It
+    /// is still kept inside the window.
+    /// </remarks>
+    public bool Pinned { get; init; }
+
+    /// <summary>The same placement, at a point that means something.</summary>
+    public PanelPlacement PinnedAt(float x, float y) =>
+        this with { Dock = UiDock.Floating, X = x, Y = y, Pinned = true };
+
     /// <summary>A panel at its own coordinates.</summary>
     public static PanelPlacement At(
         float x, float y, float width = float.NaN, float height = float.NaN) =>
@@ -41,8 +72,14 @@ public readonly record struct PanelPlacement(
         this with { Dock = UiDock.Floating, X = x, Y = y };
 
     /// <summary>How this reads in a saved layout.</summary>
+    /// <remarks>
+    /// Filling is written last and only when it is asked for, so a line saved before there was
+    /// such a thing still reads, and one saved after it reads the same to anything that ignores
+    /// the word.
+    /// </remarks>
     public override string ToString() =>
-        $"{Dock} {Number(X)} {Number(Y)} {Number(Width)} {Number(Height)} {Order}";
+        $"{Dock} {Number(X)} {Number(Y)} {Number(Width)} {Number(Height)} {Order}"
+        + (Stretch ? " fill" : string.Empty);
 
     /// <summary>Reads back what <see cref="ToString"/> wrote.</summary>
     public static bool TryParse(string text, out PanelPlacement placement)
@@ -60,7 +97,10 @@ public readonly record struct PanelPlacement(
             Value(parts, 2),
             Value(parts, 3),
             Value(parts, 4),
-            parts.Length > 5 && int.TryParse(parts[5], out var order) ? order : 0);
+            parts.Length > 5 && int.TryParse(parts[5], out var order) ? order : 0)
+        {
+            Stretch = parts.Length > 6 && parts[6] == "fill",
+        };
 
         return true;
     }

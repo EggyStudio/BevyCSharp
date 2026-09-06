@@ -30,10 +30,25 @@ public sealed class SliderDrawer : IFieldDrawer
     public void Draw(InspectorRow row, int part, FieldTarget target)
     {
         var (low, high) = Ends(target.Field);
+        var written = TextDrawer.Written(target.Read());
 
         row.Name(target.Field.Title);
         row.Bar(Value(target), low, high);
-        row.Box(TextDrawer.Written(target.Read()), Grips.Plain, target.Field.IsWritable);
+
+        // What sits beside the bar is the field's choice. A weight between nought and one is
+        // dragged and its number means nothing on its own; a field of view is typed, and a bar
+        // without a box is a bar somebody cannot give the number they were told to use.
+        switch (target.Field.Hints.Readout)
+        {
+            case SliderReadout.Box:
+                row.Box(written, Grips.Plain, target.Field.IsWritable);
+                break;
+
+            case SliderReadout.Number:
+                row.Box(written, null, editable: false);
+                break;
+        }
+
         row.Unit(target.Field.Hints.Unit ?? string.Empty);
 
         if (!target.Agree()) row.Mixed();
@@ -55,6 +70,10 @@ public sealed class SliderDrawer : IFieldDrawer
             Set(target, slid);
             return;
         }
+
+        // Only a box that can be typed into is read back. A bar with the number beside it is
+        // showing the value, not asking for one, and reading it back would write what was drawn.
+        if (target.Field.Hints.Readout != SliderReadout.Box) return;
 
         var typed = row.Typed.Trim();
         if (typed.Length == 0) return;

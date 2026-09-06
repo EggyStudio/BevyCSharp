@@ -154,18 +154,57 @@ public static class EditorFields
 
         var before = field.Read(world, entity);
         if (!field.Write(world, entity, value)) return;
+
+        Told(world, entity, field);
         if (before is null) return;
 
         EditorHistory.Record(
             field.Name,
-            undo => field.Write(undo, entity, before),
-            redo => field.Write(redo, entity, value),
+            undo =>
+            {
+                field.Write(undo, entity, before);
+                Told(undo, entity, field);
+            },
+            redo =>
+            {
+                field.Write(redo, entity, value);
+                Told(redo, entity, field);
+            },
             $"{entity.Bits}:{field.Name}");
     }
 
-    /// <summary>A number as a row writes it: enough digits to be exact, no more.</summary>
-    public static string Text(double value) =>
-        value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+    /// <summary>
+    /// Calls whatever the field asked to have called once it has changed.
+    /// </summary>
+    /// <remarks>
+    /// After the write rather than before, so that what the methods read is the new value. Taking a
+    /// change back counts as changing it: something derived from a radius is as wrong after an undo
+    /// as it was before the write, and an editor where undo leaves the collider the wrong size is
+    /// one nobody trusts.
+    /// </remarks>
+    private static void Told(EcsWorld world, Entity entity, ComponentField field)
+    {
+        if (field.Hints.Changed.Count == 0) return;
+        if (field.Schema is not { } schema) return;
+
+        foreach (var name in field.Hints.Changed)
+        {
+            schema.Method(name)?.Run(world, entity);
+        }
+    }
+
+    /// <summary>
+    /// A number as a row writes it: enough digits to be exact, no more.
+    /// </summary>
+    /// <remarks>
+    /// Nought is nought. A rotation of a millionth of a degree the wrong way rounds to "-0", which
+    /// is a number nobody has ever meant and which reads as something being subtly wrong.
+    /// </remarks>
+    public static string Text(double value)
+    {
+        var written = value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+        return written == "-0" ? "0" : written;
+    }
 
     /// <summary>Reads a number a person typed, in the one culture the editor writes.</summary>
     public static bool TryNumber(string text, out double value) => double.TryParse(

@@ -232,6 +232,8 @@ public sealed class UiWindow
         var root = Root;
         if (root.IsNone) return;
 
+        Room = maxHeight;
+
         // Written every time the panels are arranged rather than remembered, for the same reason
         // as the layering: the interface reapplies the stylesheet whenever it restyles a widget,
         // and a stylesheet that says nothing about a maximum puts the maximum back to none. A
@@ -239,6 +241,16 @@ public sealed class UiWindow
         // the room it has and stays there. One call per panel per frame is nothing beside that.
         Xui.SetLimits(root, maxWidth, maxHeight);
     }
+
+    /// <summary>
+    /// The tallest the window was last told it may be.
+    /// </summary>
+    /// <remarks>
+    /// What a panel that decides how much to draw has to ask, and the only honest answer to it.
+    /// Measuring what it drew last frame cannot answer it: a panel is as tall as its contents, so a
+    /// panel that drew one row measures one row and would decide to go on drawing one row for ever.
+    /// </remarks>
+    public float Room { get; private set; } = float.PositiveInfinity;
 
     /// <summary>Where the window ended up, or nothing when it has not been laid out yet.</summary>
     public UiRect? Measure()

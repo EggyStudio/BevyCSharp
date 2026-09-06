@@ -125,6 +125,10 @@ public sealed class UiHost
         UiWindow.Frame = frame;
         UiWindow.Generation = Xui.Generation;
         PanelBinding.Frame = frame;
+
+        // Before anything is read or written. A rebuild hands the element ids out again, and what
+        // a panel remembers writing to an element is only true of the element it wrote it to.
+        PanelBinding.Generation = Xui.Generation;
         PanelBinding.Focused = Xui.Focused();
 
         _edited.Clear();

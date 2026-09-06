@@ -1,21 +1,22 @@
 using Bevy;
 using BevyCSharp.Editor.Framework;
+using BevyCSharp.Editor.Panels;
 
 namespace BevyCSharp.Editor.Drawers;
 
 /// <summary>
-/// Three numbers that are a colour: what it comes to, and the numbers under it.
+/// Three numbers that are a colour: the colour itself, and the numbers under it.
 /// </summary>
 /// <remarks>
 /// <para>
-/// The first row says what the three numbers come to, as the six digits everybody who has ever
-/// picked a colour already reads. Nobody reads 0.8, 0.2, 0.15 as a shade of red, and an inspector
-/// that makes somebody run the game to find out what colour they set is one they stop using.
+/// The first row is the colour, as a patch of it. Nobody reads 0.8, 0.2, 0.15 as a shade of red,
+/// and an inspector that makes somebody run the game to find out what colour they set is one they
+/// stop using. Pressing it opens a picker, which is what a patch of colour does everywhere else.
 /// </para>
 /// <para>
-/// A patch of the colour itself would be better and is not possible: painting an element makes
-/// the interface restyle it, and a restyle undoes the panel's own decisions about what the rest of
-/// the row is showing.
+/// The three numbers sit under it on one line, because they are one value and because the patch
+/// above them has already said what they come to. They are still the truth: a colour that is a
+/// light's tint can be brighter than white, and a patch cannot show that.
 /// </para>
 /// </remarks>
 public sealed class ColourDrawer : IFieldDrawer
@@ -25,8 +26,8 @@ public sealed class ColourDrawer : IFieldDrawer
         field.Hints.Colour && field.Kind == FieldKind.Vec3;
 
     /// <inheritdoc/>
-    /// <remarks>One for the patch, and one for each of the three numbers.</remarks>
-    public int Lines(ComponentField field) => 4;
+    /// <remarks>One for the patch, one for the three numbers beside each other.</remarks>
+    public int Lines(ComponentField field) => 2;
 
     /// <inheritdoc/>
     public void Draw(InspectorRow row, int part, FieldTarget target)
@@ -36,15 +37,35 @@ public sealed class ColourDrawer : IFieldDrawer
         if (part == 0)
         {
             row.Name(target.Field.Title);
-            row.Box(Digits(colour), null, editable: false);
+            row.Swatch(Packed(colour));
             return;
         }
 
         row.Name(string.Empty);
-        row.Box(
-            EditorFields.Text(Part(colour, part - 1)),
-            Grips.Axis(part - 1),
-            target.Field.IsWritable);
+
+        for (var channel = 0; channel < 3; channel++)
+        {
+            row.Box(
+                channel,
+                EditorFields.Text(Part(colour, channel)),
+                Grips.Axis(channel),
+                target.Field.IsWritable);
+        }
+    }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Pressing the patch asks for a colour. What answers is a panel like any other, so the same
+    /// picker serves a light's tint, a material's base and anything a game adds later.
+    /// </remarks>
+    public void Press(InspectorRow row, int part, FieldTarget target)
+    {
+        if (part != 0 || !target.Field.IsWritable) return;
+
+        var colour = target.Read() as Vec3? ?? default;
+        var (x, y) = row.Below;
+
+        ColourPanel.Ask(target.Field.Title, colour, x, y, picked => target.Write(picked));
     }
 
     /// <inheritdoc/>
@@ -52,17 +73,30 @@ public sealed class ColourDrawer : IFieldDrawer
     {
         if (part == 0 || !target.Field.IsWritable) return;
 
-        var typed = row.Typed.Trim();
-        if (typed.Length == 0) return;
-        if (!EditorFields.TryNumber(typed, out var value)) return;
-
         var colour = target.Read() as Vec3? ?? default;
-        if (Math.Abs(Part(colour, part - 1) - value) < 0.0001d) return;
+        var changed = colour;
+        var moved = false;
 
-        target.Write(With(colour, part - 1, (float)value));
+        for (var channel = 0; channel < 3; channel++)
+        {
+            var typed = row.TypedIn(channel).Trim();
+
+            if (typed.Length == 0) continue;
+            if (!EditorFields.TryNumber(typed, out var value)) continue;
+            if (Math.Abs(Part(changed, channel) - value) < 0.0001d) continue;
+
+            changed = With(changed, channel, (float)value);
+            moved = true;
+        }
+
+        if (moved) target.Write(changed);
     }
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// The row of numbers is three of them, so which one is being dragged arrives as the part past
+    /// the row's own: one for red, two for green, three for blue.
+    /// </remarks>
     public double? Number(int part, FieldTarget target) => part == 0
         ? null
         : Part(target.Read() as Vec3? ?? default, part - 1);
@@ -77,9 +111,16 @@ public sealed class ColourDrawer : IFieldDrawer
     }
 
     /// <inheritdoc/>
-    /// <remarks>A hundredth of the way from black to bright per pixel.</remarks>
+    /// <remarks>A two hundredth of the way from black to bright per pixel.</remarks>
     public float Step(int part, FieldTarget target) =>
         part == 0 ? 0f : (float)(target.Field.Hints.Step ?? 0.005d);
+
+    /// <summary>The colour as one number, which is how a patch of it is painted.</summary>
+    private static uint Packed(Vec3 colour) =>
+        ((uint)Byte(colour.X) << 24)
+        | ((uint)Byte(colour.Y) << 16)
+        | ((uint)Byte(colour.Z) << 8)
+        | 0xFFu;
 
     /// <summary>One of the three numbers.</summary>
     private static double Part(Vec3 colour, int part) => part switch
@@ -105,7 +146,7 @@ public sealed class ColourDrawer : IFieldDrawer
     /// cannot say so. The three numbers underneath are the truth; this is the part a person
     /// recognises.
     /// </remarks>
-    private static string Digits(Vec3 colour) =>
+    internal static string Digits(Vec3 colour) =>
         $"#{Byte(colour.X):X2}{Byte(colour.Y):X2}{Byte(colour.Z):X2}";
 
     /// <summary>One channel as a byte, as a screen would show it.</summary>

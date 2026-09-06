@@ -1519,11 +1519,13 @@ pub unsafe extern "C" fn bcs_xui_set_class(entity: u64, class: *const core::ffi:
                     return status::NO_ENTITY;
                 };
 
-                let names = if wanted.is_empty() {
-                    Vec::new()
-                } else {
-                    vec![wanted.clone()]
-                };
+                // Split the way the document's own class attribute is, so that what a panel
+                // writes and what the file says mean the same thing. An element can wear several
+                // classes at once, and a rule naming two of them wants both.
+                let names: Vec<String> = wanted
+                    .split_whitespace()
+                    .map(std::string::ToString::to_string)
+                    .collect();
 
                 match entity_mut.get_mut::<CssClass>() {
                     // Written only when it is not the class the element already has. The interface
@@ -1572,12 +1574,26 @@ pub extern "C" fn bcs_xui_set_colour(entity: u64, red: f32, green: f32, blue: f3
             use bevy::ui::BackgroundColor;
 
             crate::state::with_world(|world| {
+                let painted = Color::srgba(red, green, blue, alpha);
+
+                // Written twice: once so it is painted now, and once as a decision the stylesheet
+                // does not get to undo. Writing only the component paints it for as long as it
+                // takes something to restyle the element, and then the sheet's own colour comes
+                // back; writing only the decision waits for the next restyle to show anything.
+                let status = decide(world, entity, |over| {
+                    over.background_colour = Some(painted);
+                });
+
+                if status < 0 {
+                    return status;
+                }
+
                 let entity = crate::ecs::entity_from(entity);
                 let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
                     return status::NO_ENTITY;
                 };
 
-                entity_mut.insert(BackgroundColor(Color::srgba(red, green, blue, alpha)));
+                entity_mut.insert(BackgroundColor(painted));
                 status::OK
             })
         }
@@ -1647,6 +1663,32 @@ pub extern "C" fn bcs_xui_set_drawn(entity: u64, drawn: i32) -> i32 {
                 }
 
                 status::OK
+            })
+        }
+    })
+}
+
+/// How much of the room left over an element takes, against its neighbours.
+///
+/// What a row of buttons of different widths needs, and the only part of a flex layout that has to
+/// be decided while the program runs rather than in the stylesheet: how many buttons share the row
+/// and how wide each of them is, is a question about what is being shown rather than about what the
+/// document looks like. A negative weight puts the element back to whatever the sheet said.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_xui_set_weight(entity: u64, weight: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (entity, weight);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            crate::state::with_world(|world| {
+                decide(world, entity, |over| {
+                    over.flex_grow = if weight < 0.0 { None } else { Some(weight) };
+                })
             })
         }
     })

@@ -1,0 +1,41 @@
+<html lang="en">
+  <head>
+    <meta name="colour" />
+    <title>Colour</title>
+    <link rel="stylesheet" href="editor.css" />
+  </head>
+  <body>
+    <div class="flyout" id="colour">
+      <div class="titlebar">
+        <p class="title" id="c-name">Colour</p>
+        <p class="dim" id="c-hex">#000000</p>
+      </div>
+
+      <!-- What the three bars come to, which is the only reason a picker beats three numbers. -->
+      <div class="swatch tall" id="c-patch"></div>
+
+      <div class="field-row">
+        <p class="field-name">Red</p>
+        <div class="field-body">
+          <slider class="field-slider" id="c-red" min="0" max="1000" step="1" tip="false"></slider>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <p class="field-name">Green</p>
+        <div class="field-body">
+          <slider class="field-slider" id="c-green" min="0" max="1000" step="1" tip="false"></slider>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <p class="field-name">Blue</p>
+        <div class="field-body">
+          <slider class="field-slider" id="c-blue" min="0" max="1000" step="1" tip="false"></slider>
+        </div>
+      </div>
+
+      <div class="wide-btn" id="c-done"><p class="btn-text">Done</p></div>
+    </div>
+  </body>
+</html>

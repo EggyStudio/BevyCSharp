@@ -88,12 +88,24 @@ public static class EditorShell
     /// context menu under the cursor. Placing it here rather than in the panel's own declaration
     /// is what makes one flyout class usable from everywhere.
     /// </remarks>
-    public static T ShowAt<T>(T panel, float x, float y) where T : IUiPanel
+    /// <param name="panel">What to show.</param>
+    /// <param name="x">Where, across.</param>
+    /// <param name="y">And down.</param>
+    /// <param name="pinned">
+    /// Whether the point means something. A flyout opened over the scene is kept inside the
+    /// viewport, so it does not end up under a docked column; one opened from a particular row
+    /// stays where it was put, because being next to that row is what says what it is about.
+    /// </param>
+    public static T ShowAt<T>(T panel, float x, float y, bool pinned = false) where T : IUiPanel
     {
         ArgumentNullException.ThrowIfNull(panel);
 
         Show(panel);
-        Layout.Place(panel, panel.Chrome.Placement().MovedTo(x, y));
+
+        Layout.Place(panel, pinned
+            ? panel.Chrome.Placement().PinnedAt(x, y)
+            : panel.Chrome.Placement().MovedTo(x, y));
+
         return panel;
     }
 
@@ -134,13 +146,25 @@ public static class EditorShell
         ShowMenu(path, x, y, title);
     }
 
-    /// <summary>Opens a menu over a list built for the occasion, such as an enum's values.</summary>
-    public static MenuPanel ShowMenu(string title, IReadOnlyList<MenuItem> items, float x, float y)
+    /// <summary>
+    /// Opens a menu over a list built for the occasion, such as an enum's values.
+    /// </summary>
+    /// <param name="title">What the menu is called.</param>
+    /// <param name="items">What it offers.</param>
+    /// <param name="x">Where it opens, across.</param>
+    /// <param name="y">And down.</param>
+    /// <param name="beside">
+    /// Whether to step out from under the panel it was opened over. On for a menu whose point is
+    /// merely somewhere on the screen; off for one opened from a particular row, where being next
+    /// to that row is the whole of what says which row it is about.
+    /// </param>
+    public static MenuPanel ShowMenu(
+        string title, IReadOnlyList<MenuItem> items, float x, float y, bool beside = true)
     {
         var menu = Menu();
         menu.PointAt(title, items);
 
-        return Offer(menu, x, y);
+        return Offer(menu, x, y, beside);
     }
 
     /// <summary>
@@ -153,11 +177,15 @@ public static class EditorShell
     private static MenuPanel Menu() => Find<MenuPanel>() ?? Show(new MenuPanel());
 
     /// <summary>Puts the menu where it was asked for, clear of the panels, and shows it.</summary>
-    private static MenuPanel Offer(MenuPanel menu, float x, float y)
+    private static MenuPanel Offer(MenuPanel menu, float x, float y, bool beside = true)
     {
-        var (clearX, clearY) = Clear(x, y);
+        // A menu asked for beside a panel steps out from under it and is kept in the viewport; one
+        // asked for at a point stays at that point and is only kept in the window.
+        var placement = beside
+            ? menu.Chrome.Placement().MovedTo(Clear(x, y))
+            : menu.Chrome.Placement().PinnedAt(x, y);
 
-        Layout.Place(menu, menu.Chrome.Placement().MovedTo(clearX, clearY));
+        Layout.Place(menu, placement);
         Reveal(menu);
 
         return menu;
@@ -168,10 +196,11 @@ public static class EditorShell
     /// </summary>
     /// <remarks>
     /// <para>
-    /// A menu opened over a panel is unreadable: the panel's text draws through it whatever it is
-    /// told about layering, which is the interface's doing and not something this side can fix. So
-    /// a menu steps out from under the panel it was opened from, to its right where there is room
-    /// and to its left where there is not, which is where a menu belongs anyway.
+    /// A menu opened over a panel used to be unreadable, which looked like a layering fault and was
+    /// not one: the drawing order was right all along and the menu was nine tenths opaque, so the
+    /// panel behind it read through. A menu is opaque now. What this is still for is the menu that
+    /// was asked for at a point that means nothing in particular, which is better off beside the
+    /// panel than over it.
     /// </para>
     /// <para>
     /// Only out from under the panels that hold reading: the columns and the open tab. The strip
@@ -540,6 +569,10 @@ public static class EditorShell
 
         PanelBinding.Frame = ctx.Time.FrameCount;
 
+        // Before anything is read or written. A rebuild hands the element ids out again, and what
+        // a panel remembers writing to an element is only true of the element it wrote it to.
+        PanelBinding.Generation = Xui.Generation;
+
         // Asked once a frame, and used by every text binding: whatever is being typed in is left
         // alone rather than overwritten with what the program still says.
         PanelBinding.Focused = Focus(input);
@@ -643,9 +676,9 @@ public static class EditorShell
 
         Sheeting();
 
-        // A concealed panel is put out of sight every frame rather than once, because the
-        // interface restyles a widget whenever anything is written to it and a restyle puts its
-        // display back to whatever the stylesheet said.
+        // Told every frame, and written only when it is not already what it was told: hiding is a
+        // decision the stylesheet no longer undoes, so the window keeps what it wrote and a
+        // concealed panel costs nothing to keep concealed.
         foreach (var panel in Concealed) panel.Window?.Show(false);
 
         Layout.Arrange(Showing());

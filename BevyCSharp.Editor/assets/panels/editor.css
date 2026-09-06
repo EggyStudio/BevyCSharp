@@ -67,6 +67,17 @@
     --accent: #4d7cff;
     --accent-soft: rgba(77, 124, 255, 0.22);
 
+    /*
+     * The handle a number is dragged by. Grey, and the same grey for all three axes: three
+     * saturated colours down the side of a panel is the loudest thing on the screen for
+     * information the order of the boxes already carries.
+     */
+    --grip: #5a5f69;
+
+    /* Said more loudly than the rest, and only where something is actually wrong. */
+    --warn: #d8a33c;
+    --bad: #d4614f;
+
     --radius: 9px;
     --radius-small: 5px;
 }
@@ -87,19 +98,26 @@ body {
 /*
  * What a panel looks like, whichever kind it is.
  *
- * Every kind is named here rather than sharing a `.panel` class on the element, because the
- * interface reads only the first class in a `class` attribute. A second one is not a weaker match,
- * it is not a match at all, so every element carries exactly one class and a rule that applies to
- * several of them names all of them.
+ * Every kind is named here rather than sharing a `.panel` class on the element. Either would work
+ * now that an element can wear several classes at once, and naming them is the honest one: what a
+ * column and a menu have in common is that they are both panels, not that they both happen to
+ * carry a word.
  */
 .column,
 .band,
 .stats,
 .bar,
 .strip,
+.flyout,
 .menu {
     display: flex;
-    background-color: var(--surface);
+    /*
+     * Opaque, unlike the panels. A menu is a question asked over whatever was already there,
+     * and the panel it opened from is behind it: nine tenths of black over a black box with
+     * white text in it still reads as a box with white text in it, and a menu somebody has to
+     * look through is one they misread.
+     */
+    background-color: var(--sheet);
     /*
      * No `backdrop-filter`. The interface parses one and draws it over the element's own
      * background rather than under it, so the panel takes the colour of whatever is behind it
@@ -123,13 +141,36 @@ body {
 }
 
 /* A panel in one of the side columns. */
+/*
+ * A docked column of panels.
+ *
+ * Wide enough for a name, a value and a unit beside each other without any of them being cut, which
+ * is what decides the number: the value column is what is left after the name's ninety two.
+ */
 .column {
-    width: 238px;
+    width: 300px;
+    overflow: hidden;
 }
 
 /* A panel that fills what it is given, which is the open tab along the bottom. */
 .band {
     width: 100%;
+}
+
+/*
+ * A small panel that asks one question: a colour, a name, a number.
+ *
+ * Opaque and narrower than a column, because it is read against whatever it was opened over and
+ * dismissed as soon as it is answered.
+ */
+.flyout {
+    flex-direction: column;
+    align-self: flex-start;
+    width: 232px;
+    padding: 8px;
+    row-gap: 4px;
+    background-color: var(--sheet);
+    overflow: hidden;
 }
 
 /* The readout, which is wider than a column because every line of it is a name and a number. */
@@ -231,16 +272,43 @@ p {
 }
 
 /*
+ * Room under the last row of a readout, for the second line of a value that wrapped.
+ *
+ * A row measures the one line its value fitted on before the box was clamped, so a value that
+ * wraps draws a line the row was never told about. Room below is what stops that line being drawn
+ * through the bottom of the panel.
+ */
+.stats .rows {
+    padding-bottom: 8px;
+}
+
+/*
  * The list inside a panel that fills its column. It takes what is left after the header and the
  * footer, and clips rather than pushing them off the bottom, because the panel's height is the
  * layout's decision and not the contents'.
  */
 /* A list that takes what the panel has left, which is what the open tab's contents want. */
+/*
+ * The part of a panel that gives way.
+ *
+ * A panel is a column: a title, a list, and whatever is pinned under it. When something else takes
+ * the room, the list is what shrinks, and what it cannot show is hidden rather than drawn over
+ * whatever is below. What is pinned under it stays put, which is why a strip of tags and a button
+ * do not scroll away with the rows.
+ */
 .rows-grow {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    flex-shrink: 1;
+    /*
+     * Measured from its contents, not from nothing. A panel is as tall as what is in it up to a
+     * limit, so a list whose basis is nought has nothing to be a proportion of and collapses to a
+     * title bar with a button under it.
+     */
+    flex-basis: auto;
     width: 100%;
+    min-height: 0;
     row-gap: 2px;
     overflow: hidden;
 }
@@ -376,15 +444,20 @@ p {
 
 /* -- Fields: a label and whatever editor the value deserves */
 
+/*
+ * One line of an inspector: a mark, a name, and everything a value can be drawn as.
+ *
+ * As tall as what is in it rather than a fixed height, so a value that wraps onto a second line
+ * pushes the rows below it down instead of drawing through them.
+ */
 .field-row {
     display: flex;
     flex-direction: row;
     align-items: center;
     width: 100%;
-    height: 22px;
+    min-height: 22px;
     margin: 0;
     column-gap: 5px;
-    overflow: hidden;
 }
 
 /*
@@ -402,14 +475,40 @@ p {
  * label was long, and dragging the panel wider left a stripe of empty panel beside a box that
  * stayed where it was. Sharing the row out in proportion means the row is right at every width.
  */
+/*
+ * The name of a line, in a column of its own.
+ *
+ * A fixed width, which is the whole point: every value in the panel starts at the same place
+ * however long the names are, so the eye runs down one edge rather than a ragged one. A name too
+ * long for it is cut rather than allowed to push the values about.
+ */
 .field-name {
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 92px;
+    min-width: 0;
+    overflow: hidden;
+    font-size: 11px;
+    color: var(--label);
+    text-wrap: nowrap;
+}
+
+/*
+ * Everything to the right of the name.
+ *
+ * One box, so that what a value is drawn as (a number, three numbers, a bar, a tick, a button, a
+ * patch of colour) does not change where the value column begins. A drawer that wants the whole
+ * width is drawn here too, with the name column not drawn at all.
+ */
+.field-body {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: 0;
     min-width: 0;
-    font-size: 11px;
-    color: var(--label);
-    text-wrap: nowrap;
+    column-gap: 5px;
 }
 
 
@@ -456,12 +555,21 @@ p {
  * clear of the rounded corners. Its colour is painted by whatever fills the row, since which axis
  * a row shows changes as the rows are reused and a stylesheet cannot say that.
  */
+/*
+ * The handle on the edge of a number's box, which is what a number is dragged by.
+ *
+ * Behind the box and tucked under its left edge, so the two read as one thing and the right side
+ * of the handle is not rounded against the box's square corner. Grey, and the same grey for all
+ * three axes: three saturated colours down the side of a panel is the loudest thing on the screen
+ * for information the order of the boxes already carries.
+ */
 .grip {
     position: absolute;
     left: -3px;
     top: 3px;
     width: 6px;
     height: 12px;
+    background-color: var(--grip);
     border-radius: 6px;
 }
 
@@ -469,12 +577,39 @@ p {
  * What a number is measured in, after its box. Dim, because it is the same word on every row of a
  * block and the number beside it is what somebody is reading.
  */
+/*
+ * What a number is measured in.
+ *
+ * Last in the row and a column of its own, so a row that has one and a row that does not put their
+ * values in the same place. A unit that pushed the box left would undo the whole point of the
+ * value column.
+ */
 .field-unit {
-    min-width: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 22px;
     pointer-events: none;
     font-size: 9px;
     color: var(--dim);
     text-wrap: nowrap;
+}
+
+/*
+ * A line of words rather than a value: a heading, a note, a warning.
+ *
+ * The whole width of the body, wrapping, and as tall as it needs. Nothing else in the row is drawn
+ * beside it.
+ */
+.field-note {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+    padding: 2px 0;
+    pointer-events: none;
+    font-size: 10px;
+    color: var(--dim);
+    text-wrap: wrap;
 }
 
 /*
@@ -502,14 +637,100 @@ p {
  * At the foot of the panel rather than in a box that appears over the row after a wait. A tooltip
  * that covers what it is describing is a tooltip you have to move away from to use.
  */
+/*
+ * What the thing under the pointer is for, said next to it.
+ *
+ * Placed against the window rather than inside the panel it belongs to, because a panel clips what
+ * does not fit in it and a hint about the last row would be cut in half by the edge it is next to.
+ * It never takes the pointer: a hint that can be hovered is a hint that flickers.
+ */
 .hint {
-    width: 100%;
-    min-height: 13px;
-    margin-top: 2px;
-    padding: 0 2px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    /*
+     * A width rather than a maximum. A box with only a maximum is as wide as its longest line
+     * wants to be, and a line of text wants to be one line however long it is: the sentence runs
+     * off the edge of the window instead of wrapping inside a box that had room for it.
+     */
+    width: 240px;
+    padding: 3px 6px;
+    pointer-events: none;
+    background-color: var(--sheet);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-small);
+}
+
+.hint-text {
+    /*
+     * Told how wide it is, not merely how wide it may be. A line of text measures the width its
+     * longest unbroken run wants, and it takes that width unless something says otherwise, so a
+     * box with room to wrap in is not enough on its own.
+     */
+    width: 228px;
+    min-width: 0;
     pointer-events: none;
     font-size: 10px;
-    color: var(--dim);
+    color: var(--text);
+    text-wrap: wrap;
+}
+
+/*
+ * A patch of colour that opens a picker.
+ *
+ * The whole of the value column, because what it is for is being looked at: a colour in a box the
+ * size of a full stop tells nobody anything.
+ */
+.swatch {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+    height: 16px;
+    background-color: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-small);
+}
+
+/*
+ * The same patch, as the subject of a panel rather than a row of one.
+ *
+ * A basis of its own, because the row it usually sits in is a row and the panel it sits in here is
+ * a column: a patch that shares out the width in one shares out the height in the other, and a
+ * colour nought pixels tall is not a colour anybody can judge.
+ */
+.swatch.tall {
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: 40px;
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+    margin: 4px 0;
+}
+
+/* A line across the panel, for a break between groups of fields with no word to it. */
+.rule {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+    height: 1px;
+    margin: 0 2px;
+    background-color: var(--line);
+}
+
+/* A sentence said more loudly than the ordinary note. */
+.field-note.head {
+    color: var(--label);
+}
+
+.field-note.warn {
+    color: var(--warn);
+}
+
+.field-note.bad {
+    color: var(--bad);
 }
 
 /*
@@ -733,6 +954,15 @@ button:hover {
  * Wrapping, and the row is as tall as it makes itself. Most of these are a number and a unit, but
  * the name of a graphics adapter is a sentence, and a panel that cuts it in half is a panel that
  * does not answer the one question somebody opened it to ask.
+ */
+/*
+ * A value, which wraps when it is long.
+ *
+ * A maximum rather than a width, which is worth writing down because the obvious change makes it
+ * worse: given a width, the row is wider than the panel and the value drops onto a line of its own
+ * under the name. The cost of the maximum is that the box is clamped after the text has measured
+ * itself on one line, so the row is a line shorter than what is drawn in it. The panel leaves room
+ * for that below rather than pretending it does not happen.
  */
 .stat-value {
     flex-shrink: 0;

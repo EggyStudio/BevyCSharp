@@ -72,6 +72,12 @@ pub struct StyleOverride {
 
     /// The tallest it may get.
     pub max_height: Option<Val>,
+
+    /// How much of the room left over it takes, against its neighbours.
+    pub flex_grow: Option<f32>,
+
+    /// What it is painted, over whatever the stylesheet says.
+    pub background_colour: Option<Color>,
 }
 
 impl StyleOverride {
@@ -85,6 +91,17 @@ impl StyleOverride {
             && self.height.is_none()
             && self.max_width.is_none()
             && self.max_height.is_none()
+            && self.flex_grow.is_none()
+            && self.background_colour.is_none()
+    }
+
+    /// The colour decided for an element, if one was.
+    ///
+    /// Apart from `apply`, because a colour is not part of the node: it lives on its own component,
+    /// and the stylesheet writes it from a different place. Both are applied after the sheet, which
+    /// is the whole point of the override.
+    pub fn colour(&self) -> Option<Color> {
+        self.background_colour
     }
 
     /// Writes whatever has been decided onto a node, over what the stylesheet said.
@@ -112,6 +129,9 @@ impl StyleOverride {
         }
         if let Some(max_height) = self.max_height {
             node.max_height = max_height;
+        }
+        if let Some(grow) = self.flex_grow {
+            node.flex_grow = grow;
         }
     }
 }

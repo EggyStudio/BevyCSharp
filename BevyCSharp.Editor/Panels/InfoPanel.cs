@@ -28,7 +28,7 @@ namespace BevyCSharp.Editor.Panels;
 public sealed partial class InfoPanel
 {
     /// <summary>How many rows the document declares.</summary>
-    public const int Rows = 20;
+    public const int Rows = 22;
 
     /// <summary>Each row's label.</summary>
     [Bind("#iname", Count = Rows)]

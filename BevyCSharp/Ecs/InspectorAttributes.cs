@@ -18,6 +18,27 @@ public sealed class RangeAttribute(double minimum, double maximum) : Attribute
 
     /// <summary>The high end.</summary>
     public double Maximum { get; } = maximum;
+
+    /// <summary>What sits beside the bar, if anything.</summary>
+    public SliderReadout Readout { get; init; } = SliderReadout.Box;
+}
+
+/// <summary>What a slider shows beside its bar.</summary>
+/// <remarks>
+/// A bar with a box beside it is two ways to set one value, which is worth the width when the
+/// number is worth typing and a waste of it when the number means nothing on its own. A weight
+/// between nought and one is dragged; a field of view is typed.
+/// </remarks>
+public enum SliderReadout
+{
+    /// <summary>A box that can be typed into.</summary>
+    Box,
+
+    /// <summary>The number, read only, after the bar.</summary>
+    Number,
+
+    /// <summary>Nothing. The bar is the whole of it.</summary>
+    None,
 }
 
 /// <summary>What a field is called on screen, when its own name is not the right words.</summary>
@@ -107,22 +128,170 @@ public sealed class UnitAttribute(string suffix) : Attribute
 public sealed class ColourAttribute : Attribute;
 
 /// <summary>
-/// Shown only when another field of the same component is on.
+/// Shown only while another field of the same component says so.
 /// </summary>
 /// <remarks>
-/// What keeps a component with three modes from showing the settings of all three at once. The
-/// named field has to be one that reads as true or false.
+/// <para>
+/// What keeps a component with three modes from showing the settings of all three at once. With a
+/// value it compares: a field shown only while a mode is one particular one. Without, it asks
+/// whether the other field is on, which is the same question of a flag.
+/// </para>
+/// <para>
+/// Several of them can sit on one field, and all of them have to hold. A condition naming a field
+/// that is not there is ignored rather than obeyed, because a row that vanishes because an
+/// attribute has a typo in it is worse than one that should not have been there.
+/// </para>
 /// </remarks>
 /// <param name="field">The field that decides.</param>
-[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public sealed class ShowIfAttribute(string field) : Attribute
+/// <param name="value">
+/// What it has to read as, or nothing for "is on". An enum is named by its name, and everything
+/// else compares as it is written.
+/// </param>
+[AttributeUsage(
+    AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
+public sealed class ShowIfAttribute(string field, object? value = null) : Attribute
 {
     /// <summary>The field that decides.</summary>
     public string Field { get; } = field;
 
-    /// <summary>Whether the sense is reversed, so the row shows while the other is off.</summary>
+    /// <summary>What it has to read as, or nothing for "is on".</summary>
+    public object? Value { get; } = value;
+
+    /// <summary>Whether the sense is reversed, so the row shows while the other does not.</summary>
     public bool Not { get; init; }
 }
+
+/// <summary>Hidden while another field says so, which is <see cref="ShowIfAttribute"/> reversed.</summary>
+/// <remarks>
+/// The same thing written the way somebody means it. Half of these conditions are naturally
+/// phrased as "not while", and spelling that as a show with a flag on it reads backwards at the
+/// point where it matters.
+/// </remarks>
+/// <param name="field">The field that decides.</param>
+/// <param name="value">What it has to read as for the row to go away, or nothing for "is on".</param>
+[AttributeUsage(
+    AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
+public sealed class HideIfAttribute(string field, object? value = null) : Attribute
+{
+    /// <summary>The field that decides.</summary>
+    public string Field { get; } = field;
+
+    /// <summary>What it has to read as for the row to go away.</summary>
+    public object? Value { get; } = value;
+}
+
+/// <summary>
+/// Puts a field inside a fold, which can be opened and shut.
+/// </summary>
+/// <remarks>
+/// <para>
+/// A component with twenty fields is unreadable however well it is ordered, and the answer every
+/// editor arrives at is the same: put the eight that are wanted at the top and fold the rest away.
+/// Consecutive fields naming the same fold share it.
+/// </para>
+/// <para>
+/// Folds nest, written as a path: <c>[Foldout("Advanced/Debug")]</c> is a fold inside a fold, and
+/// it goes as deep as somebody writes slashes. Whether a fold is open is remembered per component
+/// rather than per entity, because somebody who shut one meant it about the component.
+/// </para>
+/// </remarks>
+/// <param name="path">What the fold is called, with slashes between the levels.</param>
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method)]
+public sealed class FoldoutAttribute(string path) : Attribute
+{
+    /// <summary>What the fold is called, with slashes between the levels.</summary>
+    public string Path { get; } = path;
+
+    /// <summary>Whether it starts open the first time it is seen.</summary>
+    public bool Open { get; init; } = true;
+}
+
+/// <summary>A line across the panel above a field.</summary>
+/// <remarks>
+/// For a break that is not worth a word. A heading says what comes next; a line only says that
+/// what comes next is something else.
+/// </remarks>
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method)]
+public sealed class SeparatorAttribute : Attribute;
+
+/// <summary>What a note beside a field is saying.</summary>
+public enum NoteKind
+{
+    /// <summary>A word over a group of fields.</summary>
+    Heading,
+
+    /// <summary>Something worth knowing.</summary>
+    Info,
+
+    /// <summary>Something that will probably go wrong.</summary>
+    Warning,
+
+    /// <summary>Something that is already wrong.</summary>
+    Error,
+}
+
+/// <summary>
+/// A sentence or two above a field, in the panel rather than on hover.
+/// </summary>
+/// <remarks>
+/// Not a tooltip. A tooltip answers somebody who already suspects there is something to know; this
+/// is for what has to be read before the field below it is touched, which is the difference
+/// between "what does this do" and "this is in metres, not centimetres".
+/// </remarks>
+/// <param name="text">What it says.</param>
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method)]
+public sealed class InfoAttribute(string text) : Attribute
+{
+    /// <summary>What it says.</summary>
+    public string Text { get; } = text;
+
+    /// <summary>How loudly it says it.</summary>
+    public NoteKind Kind { get; init; } = NoteKind.Info;
+}
+
+/// <summary>
+/// Calls the named methods when the field is changed.
+/// </summary>
+/// <remarks>
+/// <para>
+/// For a value something else is derived from: a radius a collider is rebuilt from, a count a pool
+/// is resized to. Without it the derived thing is only right after whatever recomputes it happens
+/// to run, which in an editor with nothing playing may be never.
+/// </para>
+/// <para>
+/// The methods are named on the same component and take nothing. They are called after the write
+/// has landed, so what they read is the new value.
+/// </para>
+/// </remarks>
+/// <param name="methods">The methods to call.</param>
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+public sealed class OnValueChangedAttribute(params string[] methods) : Attribute
+{
+    /// <summary>The methods to call.</summary>
+    public string[] Methods { get; } = methods ?? [];
+}
+
+/// <summary>
+/// Drawn across the whole panel, with no name beside it.
+/// </summary>
+/// <remarks>
+/// For a value the name column has nothing to add to: a sentence of text, a script, a long path.
+/// Every other row keeps its name in its column, so the one that gives it up has to say so.
+/// </remarks>
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+public sealed class WideAttribute : Attribute;
+
+/// <summary>
+/// Draws the parts of a value beside each other rather than one per row.
+/// </summary>
+/// <remarks>
+/// Three numbers on one line is what a position wants: it is one value, it is read left to right,
+/// and three rows of it costs three times the height for no more information. Long numbers are cut
+/// rather than allowed to wrap, which is the trade, and a value whose numbers matter to five digits
+/// is one to leave stacked.
+/// </remarks>
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+public sealed class InlineAttribute : Attribute;
 
 /// <summary>Where a field or a button sits among its neighbours. Lower is first.</summary>
 /// <param name="order">The place.</param>
@@ -133,12 +302,35 @@ public sealed class OrderAttribute(int order) : Attribute
     public int Order { get; } = order;
 }
 
+/// <summary>Where a button sits when several of them share a line.</summary>
+public enum ButtonLine
+{
+    /// <summary>On a line of its own.</summary>
+    Alone,
+
+    /// <summary>The first of a row of buttons.</summary>
+    Start,
+
+    /// <summary>One of the middle ones.</summary>
+    Middle,
+
+    /// <summary>The last one, after which the line is drawn.</summary>
+    End,
+}
+
 /// <summary>
 /// A method a tool can offer as a button.
 /// </summary>
 /// <remarks>
-/// Every method that takes nothing is offered already, so this is for saying what the button
-/// should be called and where it should sit rather than for making one appear.
+/// <para>
+/// Every method that takes nothing is offered already, so this is for saying what the button should
+/// be called, how wide it is, and whether it shares a line.
+/// </para>
+/// <para>
+/// A row of buttons is written as a start, any number of middles and an end. Save, Load and Reset
+/// are one line of three because they are one decision; three lines of one is a column of buttons
+/// that says they are unrelated.
+/// </para>
 /// </remarks>
 /// <param name="label">What the button says, or nothing for the method's own name.</param>
 [AttributeUsage(AttributeTargets.Method)]
@@ -146,6 +338,18 @@ public sealed class ButtonAttribute(string label = "") : Attribute
 {
     /// <summary>What the button says.</summary>
     public string Label { get; } = label;
+
+    /// <summary>Whether it shares a line, and where in it.</summary>
+    public ButtonLine Line { get; init; } = ButtonLine.Alone;
+
+    /// <summary>
+    /// How much of the line it takes against the others on it.
+    /// </summary>
+    /// <remarks>
+    /// One each is even. Two against one is twice as wide, which is what a line reading Apply,
+    /// Cancel wants: they are not the same size decision.
+    /// </remarks>
+    public double Weight { get; init; } = 1d;
 }
 
 /// <summary>

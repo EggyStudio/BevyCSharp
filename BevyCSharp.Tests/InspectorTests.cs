@@ -47,8 +47,19 @@ public sealed class InspectorDrawerTests
         var field = Field("Tint", FieldKind.Vec3, new FieldHints(Colour: true));
         var drawer = EditorDrawers.For(field);
 
+        // The colour itself, and the three numbers behind it on one line under it.
         Assert.IsType<ColourDrawer>(drawer);
-        Assert.Equal(4, drawer.Lines(field));
+        Assert.Equal(2, drawer.Lines(field));
+    }
+
+    [Fact]
+    public void ThreeNumbersAcrossTheLineAreOneRow()
+    {
+        var stacked = Field("Offset", FieldKind.Vec3);
+        var across = Field("Offset", FieldKind.Vec3, new FieldHints(Inline: true));
+
+        Assert.Equal(3, EditorDrawers.For(stacked).Lines(stacked));
+        Assert.Equal(1, EditorDrawers.For(across).Lines(across));
     }
 
     [Fact]
@@ -304,11 +315,259 @@ public sealed class InspectorPlanTests
         harness.Run();
     }
 
+    [Fact]
+    public void AFoldHoldsWhatFollowsItAndOpensAndShuts()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(entity, default(Arranged));
+
+            var lines = Build(ctx.Ecs, entity);
+
+            // The fold's own heading, once, before the fields inside it.
+            var fold = lines.FindIndex(line =>
+                line.Kind == InspectorLineKind.Group && line.Text == "Advanced");
+            var radius = lines.FindIndex(line => line.Field?.Name == "Radius");
+
+            Assert.True(fold >= 0);
+            Assert.True(radius > fold);
+
+            // A fold inside a fold is a heading one level deeper, not a second top-level one.
+            var inner = Assert.Single(
+                lines, line => line.Kind == InspectorLineKind.Group && line.Text == "Debug");
+
+            Assert.Equal(1, inner.Depth);
+            Assert.Equal(0, lines[fold].Depth);
+
+            // Shut, the fold is still drawn, since that is what somebody opens it with, and
+            // everything inside it is gone: the fields, and the fold inside it too.
+            var shut = Build(ctx.Ecs, entity, folds: new HashSet<string> { lines[fold].Key });
+
+            Assert.Contains(
+                shut, line => line.Kind == InspectorLineKind.Group && line.Text == "Advanced");
+
+            Assert.DoesNotContain(shut, line => line.Field?.Name == "Radius");
+            Assert.DoesNotContain(shut, line => line.Text == "Debug");
+
+            // What is outside the fold is untouched by any of it.
+            Assert.Contains(shut, line => line.Field?.Name == "Mode");
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void AConditionAgainstAValueDecidesTheRow()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(entity, new Arranged { Mode = ArrangedMode.Steady });
+
+            Assert.Contains(Build(ctx.Ecs, entity), line => line.Field?.Name == "Held");
+
+            ctx.Ecs.Set(entity, new Arranged { Mode = ArrangedMode.Wild });
+
+            Assert.DoesNotContain(Build(ctx.Ecs, entity), line => line.Field?.Name == "Held");
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void EveryConditionOnAFieldHasToHold()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var entity = ctx.Ecs.Spawn();
+
+            // Hidden while the mode is Wild, and shown only while the switch is on. Neither alone
+            // is enough.
+            ctx.Ecs.Add(entity, new Arranged { Mode = ArrangedMode.Off, Switched = false });
+            Assert.DoesNotContain(Build(ctx.Ecs, entity), line => line.Field?.Name == "Careful");
+
+            ctx.Ecs.Set(entity, new Arranged { Mode = ArrangedMode.Wild, Switched = true });
+            Assert.DoesNotContain(Build(ctx.Ecs, entity), line => line.Field?.Name == "Careful");
+
+            ctx.Ecs.Set(entity, new Arranged { Mode = ArrangedMode.Off, Switched = true });
+            Assert.Contains(Build(ctx.Ecs, entity), line => line.Field?.Name == "Careful");
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void ButtonsThatShareALineBecomeOneRow()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(entity, default(Arranged));
+
+            var lines = Build(ctx.Ecs, entity);
+            var row = Assert.Single(lines, line => line.Kind == InspectorLineKind.Buttons);
+
+            Assert.Equal(
+                ["Save", "Load", "Reset"],
+                row.Buttons!.Select(method => method.Title));
+
+            // And none of the three is also a row of its own.
+            Assert.DoesNotContain(
+                lines,
+                line => line.Kind == InspectorLineKind.Method && line.Method?.Name == "Load");
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void ALineIsTheSameLineFrameAfterFrame()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(entity, default(Arranged));
+
+            var first = Build(ctx.Ecs, entity);
+            var again = Build(ctx.Ecs, entity);
+
+            // What a panel uses to notice that a row now stands for something else. A row of
+            // buttons carries a list, and a list compared by reference is a new one every frame,
+            // which would make every button row look like it had just turned.
+            Assert.Equal(first.Count, again.Count);
+
+            for (var i = 0; i < first.Count; i++) Assert.Equal(first[i], again[i]);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void AChangedFieldCallsWhatItSaidToCall()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(entity, default(Arranged));
+
+            var schema = ComponentSchemas.For("Bevy.Tests.Arranged")!;
+            var radius = schema.Field("Radius")!;
+
+            EditorFields.Change(ctx.Ecs, entity, radius, 2f);
+
+            Assert.True(ctx.Ecs.TryGet<Arranged>(entity, out var read));
+            Assert.Equal(2f, read.Radius);
+            Assert.Equal(1, read.Rebuilt);
+
+            // Taking it back counts as changing it. Something derived from a value is as wrong
+            // after an undo as it was before the write.
+            EditorHistory.Undo(ctx.Ecs);
+
+            Assert.True(ctx.Ecs.TryGet<Arranged>(entity, out read));
+            Assert.Equal(0f, read.Radius);
+            Assert.Equal(2, read.Rebuilt);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void AListIsAFoldPerElementWithButtonsToChangeIt()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var items = new List<string> { "one", "two" };
+            var plan = new InspectorPlan(ctx.Ecs, Entity.None);
+
+            InspectorList.Add(
+                plan,
+                "test/slots",
+                "Slots",
+                items.Count,
+                (into, index) => into.Note(items[index]),
+                add: () => items.Add("new"),
+                remove: items.RemoveAt);
+
+            // The list itself, then a fold per element with what the element drew inside it, and a
+            // way to take each one away.
+            var heading = Assert.Single(plan.Lines, line => line.Key == "test/slots");
+            Assert.Equal("Slots (2)", heading.Text);
+
+            Assert.Equal("Slot 1", Assert.Single(plan.Lines, l => l.Key == "test/slots/0").Text);
+            Assert.Equal("Slot 2", Assert.Single(plan.Lines, l => l.Key == "test/slots/1").Text);
+            Assert.Contains(plan.Lines, line => line.Text == "one");
+
+            var buttons = plan.Lines
+                .Select(line => line.Line)
+                .OfType<InspectorAction>()
+                .ToList();
+
+            Assert.Equal(3, buttons.Count);
+            Assert.Equal("Add Slots", buttons[^1].Button);
+
+            // Pressing one reaches the list it was built from, which is the whole point: nothing
+            // here knows what the elements are or where they live.
+            buttons[^1].Pressed();
+            Assert.Equal(3, items.Count);
+
+            buttons[0].Pressed();
+            Assert.Equal(["two", "new"], items);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void AShutListDrawsItsHeadingAndNothingElse()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var drawn = 0;
+            var plan = new InspectorPlan(ctx.Ecs, Entity.None)
+            {
+                Folds = new HashSet<string> { "test/slots" },
+            };
+
+            InspectorList.Add(plan, "test/slots", "Slots", 3, (_, _) => drawn++, add: () => { });
+
+            // Nothing inside is drawn, and nothing inside is even asked to draw: a list of a
+            // thousand things costs one row while it is shut.
+            var line = Assert.Single(plan.Lines);
+
+            Assert.Equal("Slots (3)", line.Text);
+            Assert.Equal(0, drawn);
+        });
+
+        harness.Run();
+    }
+
     /// <summary>Every line for an entity, with nothing folded.</summary>
-    private static List<InspectorLine> Build(EcsWorld world, Entity entity)
+    private static List<InspectorLine> Build(
+        EcsWorld world, Entity entity, IReadOnlySet<string>? folds = null)
     {
         var tags = new List<(ComponentSchema? Schema, int Component)>();
-        return [.. EditorInspector.Build(world, entity, new HashSet<int>(), tags)];
+
+        return
+        [
+            .. EditorInspector.Build(world, entity, new HashSet<int>(), tags, null, folds),
+        ];
     }
 }
 

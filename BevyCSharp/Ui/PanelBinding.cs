@@ -30,6 +30,39 @@ public static class PanelBinding
     public static ulong Frame { get; set; }
 
     /// <summary>
+    /// Which build of the interface the remembered answers belong to.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What a panel wrote is remembered rather than read back, which is what keeps a screen of
+    /// rows from costing several hundred calls across the bridge every frame. The memory is keyed
+    /// by element, and an element is an entity: when the interface respawns its widgets the ids
+    /// are handed out again, so an answer remembered about a dead element can be believed about a
+    /// live one that happens to have taken its place.
+    /// </para>
+    /// <para>
+    /// The symptom is worth writing down, because it is not obvious from the cause: a row shows a
+    /// value from an unrelated row, the widget reports that value as though somebody had typed it,
+    /// and the panel writes it into the world. A scale of one becomes the blue of a colour three
+    /// rows down.
+    /// </para>
+    /// </remarks>
+    public static ulong Generation
+    {
+        get => _generation;
+        set
+        {
+            if (_generation == value) return;
+
+            _generation = value;
+            Forget();
+        }
+    }
+
+    /// <summary>Which build of the interface is in force.</summary>
+    private static ulong _generation;
+
+    /// <summary>
     /// Forgets what was read, because the widgets are about to be replaced.
     /// </summary>
     /// <remarks>
@@ -40,6 +73,7 @@ public static class PanelBinding
     {
         Focused = Entity.None;
         Shown.Clear();
+        Written.Clear();
     }
 
     /// <summary>Writes a flag out to a checkbox, a switch or a toggle.</summary>
@@ -72,12 +106,28 @@ public static class PanelBinding
     public static void PullText(Entity element, string? value)
     {
         if (element.IsNone) return;
-        if (element == Focused) return;
+
+        // A field being typed in is forgotten rather than skipped. Skipping alone would leave what
+        // was written before the typing started as the last thing this side believes is there, and
+        // the value it wanted to write on the frame after the field is left would look like a
+        // repeat and be dropped, leaving a half-typed number on screen for good.
+        if (element == Focused)
+        {
+            Written.Remove(element);
+            return;
+        }
 
         var text = value ?? string.Empty;
-        if (Xui.GetText(element) == text) return;
+        if (Written.TryGetValue(element, out var already) && already == text) return;
 
-        // Written once. A widget with nowhere to draw it yet is dealt with on the other side of
+        Written[element] = text;
+
+        // Written once, and remembered rather than read back. Asking what an element says costs a
+        // call across the bridge and a copy of the text for every bound element of every panel
+        // every frame, which for a screen of inspector rows is several hundred of each; what was
+        // written last is what is there, since nothing but this and a person typing writes it.
+        //
+        // A widget with nowhere to draw it yet is dealt with on the other side of
         // the bridge, which applies the value again for a few frames and knows when the text child
         // arrives. Forcing the redraw from here instead means writing the value with a space after
         // it and then without, and a trailing space changes how wide a label measures: a panel that
@@ -112,6 +162,9 @@ public static class PanelBinding
 
     /// <summary>What each element was last told about being on screen.</summary>
     private static readonly Dictionary<Entity, bool> Shown = [];
+
+    /// <summary>What each element was last told to say.</summary>
+    private static readonly Dictionary<Entity, string> Written = [];
 
     /// <summary>Reads a flag back from an element.</summary>
     public static bool PushFlag(Entity element, bool current) =>

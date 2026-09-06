@@ -114,6 +114,24 @@ public sealed class EditorTableTests
         }
     }
 
+    [Fact]
+    public void APlacementSurvivesBeingWrittenDownAndReadBack()
+    {
+        var placement = PanelPlacement.In(UiDock.Right, order: 2).Stretched();
+
+        Assert.True(PanelPlacement.TryParse(placement.ToString(), out var read));
+
+        Assert.Equal(UiDock.Right, read.Dock);
+        Assert.Equal(2, read.Order);
+        Assert.True(read.Stretch);
+
+        // And a line written before there was such a thing still reads, as not filling.
+        Assert.True(PanelPlacement.TryParse("Right auto auto auto auto 2", out var older));
+
+        Assert.Equal(UiDock.Right, older.Dock);
+        Assert.False(older.Stretch);
+    }
+
     /// <summary>A page name nothing else in this run uses, since the table is one static list.</summary>
     private static string Fresh() => $"Test {Guid.NewGuid():N}";
 }

@@ -20,10 +20,22 @@ public enum InspectorLineKind
     /// <summary>Something the component can be told to do.</summary>
     Method,
 
+    /// <summary>Several of those, sharing a line.</summary>
+    Buttons,
+
+    /// <summary>A fold inside a component, which opens and shuts on its own.</summary>
+    Group,
+
     /// <summary>A word over a group of fields, from a heading attribute.</summary>
     Note,
 
-    /// <summary>A blank line, for a break without a word.</summary>
+    /// <summary>A sentence in the panel: something worth knowing, or a warning.</summary>
+    Info,
+
+    /// <summary>A line across the panel, for a break with no word to it.</summary>
+    Separator,
+
+    /// <summary>A blank line, for a break without a line either.</summary>
     Gap,
 
     /// <summary>A line something else contributed, which draws and reads itself.</summary>
@@ -64,8 +76,12 @@ public interface IInspectorLine
 /// <param name="Part">Which of the drawer's rows this is.</param>
 /// <param name="Method">The method it runs.</param>
 /// <param name="Component">The component id, for a heading with no schema.</param>
-/// <param name="Text">What a note says.</param>
+/// <param name="Text">What a note, a heading or a fold says.</param>
 /// <param name="Line">What draws a line something else contributed.</param>
+/// <param name="Depth">How many folds deep the line sits.</param>
+/// <param name="Key">What a fold is remembered by, when the line is one.</param>
+/// <param name="Note">How loudly a sentence is said.</param>
+/// <param name="Buttons">The methods sharing a line, when several do.</param>
 public readonly record struct InspectorLine(
     InspectorLineKind Kind,
     ComponentSchema? Schema = null,
@@ -75,7 +91,11 @@ public readonly record struct InspectorLine(
     ComponentMethod? Method = null,
     int Component = 0,
     string Text = "",
-    IInspectorLine? Line = null)
+    IInspectorLine? Line = null,
+    int Depth = 0,
+    string Key = "",
+    NoteKind Note = NoteKind.Heading,
+    IReadOnlyList<ComponentMethod>? Buttons = null)
 {
     /// <summary>What the line says while the pointer is over it.</summary>
     public string Tooltip => Kind switch
@@ -85,6 +105,50 @@ public readonly record struct InspectorLine(
         InspectorLineKind.Heading => Schema?.QualifiedName ?? string.Empty,
         _ => string.Empty,
     };
+
+    /// <summary>
+    /// Whether two lines stand for the same thing.
+    /// </summary>
+    /// <remarks>
+    /// Written out rather than left to the compiler because of the list. A row that is redrawn
+    /// every frame is compared against what it held last frame to notice when it has turned into
+    /// something else, and a list compared by reference is a fresh one every frame, which would
+    /// make every button row look like it had just turned.
+    /// </remarks>
+    public bool Equals(InspectorLine other) =>
+        Kind == other.Kind
+        && ReferenceEquals(Schema, other.Schema)
+        && ReferenceEquals(Field, other.Field)
+        && ReferenceEquals(Drawer, other.Drawer)
+        && Part == other.Part
+        && Equals(Method, other.Method)
+        && Component == other.Component
+        && Text == other.Text
+        && ReferenceEquals(Line, other.Line)
+        && Depth == other.Depth
+        && Key == other.Key
+        && Note == other.Note
+        && Same(Buttons, other.Buttons);
+
+    /// <inheritdoc/>
+    public override int GetHashCode() =>
+        HashCode.Combine(Kind, Schema, Field, Part, Component, Text, Depth, Key);
+
+    /// <summary>Whether two lists of buttons hold the same methods in the same order.</summary>
+    private static bool Same(
+        IReadOnlyList<ComponentMethod>? left, IReadOnlyList<ComponentMethod>? right)
+    {
+        if (ReferenceEquals(left, right)) return true;
+        if (left is null || right is null) return false;
+        if (left.Count != right.Count) return false;
+
+        for (var i = 0; i < left.Count; i++)
+        {
+            if (!Equals(left[i], right[i])) return false;
+        }
+
+        return true;
+    }
 }
 
 /// <summary>
@@ -104,6 +168,9 @@ public sealed record InspectorPlan(EcsWorld World, Entity Entity)
 
     /// <summary>Which components are folded shut, by id.</summary>
     public IReadOnlySet<int> Shut { get; init; } = new HashSet<int>();
+
+    /// <summary>Which folds inside components are shut, by key.</summary>
+    public IReadOnlySet<string> Folds { get; init; } = new HashSet<string>();
 
     /// <summary>Everything selected, when more than one thing is.</summary>
     public IReadOnlyList<Entity> Others { get; init; } = [];
@@ -127,6 +194,16 @@ public sealed record InspectorPlan(EcsWorld World, Entity Entity)
     /// <summary>Adds a word over whatever comes next.</summary>
     public void Note(string text) =>
         Lines.Add(new InspectorLine(InspectorLineKind.Note, Text: text));
+
+    /// <summary>Adds a sentence in the panel, said as loudly as asked.</summary>
+    public void Say(string text, NoteKind kind = NoteKind.Info) =>
+        Lines.Add(new InspectorLine(InspectorLineKind.Info, Text: text, Note: kind));
+
+    /// <summary>Adds a line across the panel.</summary>
+    public void Rule() => Lines.Add(new InspectorLine(InspectorLineKind.Separator));
+
+    /// <summary>Adds a blank line.</summary>
+    public void Gap() => Lines.Add(new InspectorLine(InspectorLineKind.Gap));
 
     /// <summary>Says a field has been dealt with, so nothing else draws it.</summary>
     public void Claim(ComponentField field) => _fields.Add(field);
@@ -243,17 +320,24 @@ public static class EditorInspector
     /// them carry is left out: an inspector showing a field that half the selection has no room
     /// for is one where an edit does something to some of them and nothing to the others.
     /// </param>
+    /// <param name="folds">Which folds inside components are shut, by key.</param>
     public static IReadOnlyList<InspectorLine> Build(
         EcsWorld world,
         Entity entity,
         IReadOnlySet<int> shut,
         List<(ComponentSchema? Schema, int Component)> tags,
-        IReadOnlyList<Entity>? others = null)
+        IReadOnlyList<Entity>? others = null,
+        IReadOnlySet<string>? folds = null)
     {
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(tags);
 
-        var plan = new InspectorPlan(world, entity) { Shut = shut, Others = others ?? [] };
+        var plan = new InspectorPlan(world, entity)
+        {
+            Shut = shut,
+            Others = others ?? [],
+            Folds = folds ?? new HashSet<string>(),
+        };
 
         foreach (var (pass, _) in Before) pass(plan);
 
@@ -329,10 +413,24 @@ public static class EditorInspector
         return true;
     }
 
-    /// <summary>Puts one component's fields and methods into the plan.</summary>
+    /// <summary>
+    /// Puts one component's fields and methods into the plan.
+    /// </summary>
+    /// <remarks>
+    /// The order is what the component declared, adjusted by whatever asked to be moved, and the
+    /// folds are read off the members as they go past. A fold is opened when the first member
+    /// inside it is reached and everything after it that names the same fold falls inside; a shut
+    /// fold swallows its members and its inner folds both.
+    /// </remarks>
     private static void Members(
         InspectorPlan plan, ComponentSchema schema, EcsWorld world, Entity entity)
     {
+        // Where the reader is, as a path of fold names. It only ever changes at a member that asked
+        // for a different one, which is what makes consecutive fields share a fold without anything
+        // having to say where one ends.
+        var open = System.Array.Empty<string>();
+        var group = new List<ComponentMethod>();
+
         foreach (var field in Ordered(schema.Fields))
         {
             if (field.Hints.Hidden) continue;
@@ -349,13 +447,24 @@ public static class EditorInspector
 
             if (taken || plan.IsClaimed(field)) continue;
 
-            if (field.Hints.Space) plan.Add(new InspectorLine(InspectorLineKind.Gap));
-            if (field.Hints.Header is { Length: > 0 } header) plan.Note(header);
+            var depth = Enter(plan, schema, ref open, field.Hints.Foldout);
+            if (Buried(plan, schema, open)) continue;
+
+            Above(
+                plan,
+                field.Hints.Space,
+                field.Hints.Separator,
+                field.Hints.Header,
+                field.Hints.Note,
+                field.Hints.NoteKind);
 
             var drawer = EditorDrawers.For(field);
 
             for (var part = 0; part < drawer.Lines(field); part++)
-                plan.Add(new InspectorLine(InspectorLineKind.Field, schema, field, drawer, part));
+            {
+                plan.Add(new InspectorLine(
+                    InspectorLineKind.Field, schema, field, drawer, part, Depth: depth));
+            }
         }
 
         foreach (var method in Ordered(schema.Methods))
@@ -373,34 +482,241 @@ public static class EditorInspector
 
             if (taken || plan.IsClaimed(method)) continue;
 
-            plan.Add(new InspectorLine(InspectorLineKind.Method, schema, Method: method));
+            var depth = Enter(plan, schema, ref open, method.Hints.Foldout);
+            if (Buried(plan, schema, open)) continue;
+
+            // A row of buttons is written as a start, some middles and an end. Anything that
+            // arrives while a row is open joins it, and the row is closed by its end, by a button
+            // that says it is on its own, or by there being no more room on the line.
+            switch (method.Hints.Line)
+            {
+                case ButtonLine.Start:
+                    Flush(plan, schema, group, depth);
+                    Above(
+                        plan,
+                        method.Hints.Space,
+                        method.Hints.Separator,
+                        method.Hints.Header,
+                        method.Hints.Note,
+                        method.Hints.NoteKind);
+
+                    group.Add(method);
+                    break;
+
+                case ButtonLine.Middle or ButtonLine.End when group.Count > 0:
+                    group.Add(method);
+                    if (method.Hints.Line == ButtonLine.End || group.Count == InspectorRow.Slots)
+                        Flush(plan, schema, group, depth);
+
+                    break;
+
+                default:
+                    Flush(plan, schema, group, depth);
+                    Above(
+                        plan,
+                        method.Hints.Space,
+                        method.Hints.Separator,
+                        method.Hints.Header,
+                        method.Hints.Note,
+                        method.Hints.NoteKind);
+
+                    plan.Add(new InspectorLine(
+                        InspectorLineKind.Method, schema, Method: method, Depth: depth));
+
+                    break;
+            }
         }
+
+        Flush(plan, schema, group, open.Length);
+    }
+
+    /// <summary>Puts whatever a member asked to have above it above it.</summary>
+    /// <remarks>
+    /// In the order somebody reading down the panel would want them: the blank line, then the rule,
+    /// then the word, then the sentence, then the field itself.
+    /// </remarks>
+    private static void Above(
+        InspectorPlan plan,
+        bool space,
+        bool rule,
+        string? header,
+        string? note,
+        NoteKind kind)
+    {
+        if (space) plan.Gap();
+        if (rule) plan.Rule();
+        if (header is { Length: > 0 } word) plan.Note(word);
+        if (note is { Length: > 0 } said) plan.Say(said, kind);
+    }
+
+    /// <summary>Closes a row of buttons, if one is open.</summary>
+    private static void Flush(
+        InspectorPlan plan, ComponentSchema schema, List<ComponentMethod> group, int depth)
+    {
+        if (group.Count == 0) return;
+
+        // One button on a line is a line with one button on it, whatever it was written as. There
+        // is no reason for a different kind of row, and one of them can be dragged into a menu.
+        plan.Add(group.Count == 1
+            ? new InspectorLine(
+                InspectorLineKind.Method, schema, Method: group[0], Depth: depth)
+            : new InspectorLine(
+                InspectorLineKind.Buttons, schema, Depth: depth, Buttons: [.. group]));
+
+        group.Clear();
     }
 
     /// <summary>
-    /// Whether a field asked to be shown only under a condition, and whether that holds.
+    /// Moves the reader into the fold a member asked for, adding whatever headings that opens.
+    /// </summary>
+    /// <returns>How many folds deep the member itself sits.</returns>
+    private static int Enter(
+        InspectorPlan plan, ComponentSchema schema, ref string[] open, string? path)
+    {
+        var wanted = Path(path);
+
+        // Only the part of the path that is new gets a heading. Going from Advanced/Debug back to
+        // Advanced is not a new fold, and drawing one there would be a second Advanced under the
+        // first.
+        var shared = 0;
+        while (shared < open.Length
+            && shared < wanted.Length
+            && open[shared] == wanted[shared]) shared++;
+
+        for (var level = shared; level < wanted.Length; level++)
+        {
+            // A fold inside a shut fold is not drawn at all, its own heading included: it is a row
+            // inside something that is closed. A shut fold's own heading is drawn, since that is
+            // what somebody opens it again with.
+            if (level > 0 && Shut(plan, schema, wanted, level - 1)) break;
+
+            var key = Fold(schema, wanted, level);
+
+            plan.Add(new InspectorLine(
+                InspectorLineKind.Group,
+                schema,
+                Component: schema.Id,
+                Text: wanted[level],
+                Depth: level,
+                Key: key));
+
+            if (plan.Folds.Contains(key)) break;
+        }
+
+        open = wanted;
+        return wanted.Length;
+    }
+
+    /// <summary>Whether the fold a member sits in, or any fold above it, is shut.</summary>
+    private static bool Buried(InspectorPlan plan, ComponentSchema schema, string[] open)
+    {
+        for (var level = 0; level < open.Length; level++)
+        {
+            if (Shut(plan, schema, open, level)) return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Whether one level of a path is shut, or anything above it is.</summary>
+    private static bool Shut(
+        InspectorPlan plan, ComponentSchema schema, string[] path, int level)
+    {
+        for (var above = 0; above <= level; above++)
+        {
+            if (plan.Folds.Contains(Fold(schema, path, above))) return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>What a fold is remembered by: which component, and which levels.</summary>
+    /// <remarks>
+    /// By name rather than by id, because a fold outlives the world an id belongs to. Somebody who
+    /// shut the advanced settings of a light meant it about lights.
+    /// </remarks>
+    public static string Fold(ComponentSchema schema, IReadOnlyList<string> path, int level)
+    {
+        ArgumentNullException.ThrowIfNull(schema);
+        ArgumentNullException.ThrowIfNull(path);
+
+        return schema.Name + "/" + string.Join("/", path.Take(level + 1));
+    }
+
+    /// <summary>A fold path split into its levels, with the empty parts thrown away.</summary>
+    private static string[] Path(string? path) =>
+        path is { Length: > 0 }
+            ? path.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            : [];
+
+    /// <summary>
+    /// Whether every condition a field asked for holds.
     /// </summary>
     /// <remarks>
-    /// The condition is another field of the same component that reads as true or false. A
-    /// condition naming a field that is not there, or one that is not a flag, shows the row: a row
-    /// that disappears because an attribute has a typo in it is worse than one that should not
-    /// have been there.
+    /// <para>
+    /// A condition names another field of the same component and, when it has one, what that field
+    /// has to read as. Without a value it asks whether the field is on, which is the same question
+    /// of a flag and the one nearly every condition is.
+    /// </para>
+    /// <para>
+    /// A condition naming a field that is not there shows the row. A row that disappears because an
+    /// attribute has a typo in it is worse than one that should not have been there, and there is
+    /// no way to report the typo from inside a panel.
+    /// </para>
     /// </remarks>
     private static bool Shows(
         ComponentField field, ComponentSchema schema, EcsWorld world, Entity entity)
     {
-        if (field.Hints.ShowIf is not { Length: > 0 } named) return true;
-
-        foreach (var other in schema.Fields)
+        foreach (var condition in field.Hints.Conditions)
         {
-            if (other.Name != named) continue;
-            if (other.Read(world, entity) is not bool on) return true;
+            if (schema.Field(condition.Field) is not { } other) continue;
+            if (other.Read(world, entity) is not { } value) continue;
 
-            return field.Hints.ShowIfNot ? !on : on;
+            var holds = condition.Value is { } wanted ? Reads(value, wanted) : Truthy(value);
+            if (holds == condition.Not) return false;
         }
 
         return true;
     }
+
+    /// <summary>Whether a value reads as what a condition asked for.</summary>
+    /// <remarks>
+    /// Compared as written rather than as typed. What the attribute carries is the word somebody
+    /// wrote, and what the field answers with is a number, a flag or one of an enum's names, so the
+    /// comparison that works for all of them is the one done in words. An enum arrives as its name
+    /// already, since the number behind a name is not what the field reads as.
+    /// </remarks>
+    private static bool Reads(object value, string wanted)
+    {
+        var written = value switch
+        {
+            bool flag => flag ? "true" : "false",
+            IFormattable number => number.ToString(
+                null, System.Globalization.CultureInfo.InvariantCulture),
+            _ => value.ToString() ?? string.Empty,
+        };
+
+        return string.Equals(written, wanted, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>Whether a value counts as on.</summary>
+    /// <remarks>
+    /// A flag is what a condition without a value nearly always names. A number counts as on when
+    /// it is not nought, and a handle or a name when it is there at all, which is what somebody
+    /// writing the condition meant either way.
+    /// </remarks>
+    private static bool Truthy(object value) => value switch
+    {
+        bool flag => flag,
+        int number => number != 0,
+        uint number => number != 0u,
+        long number => number != 0L,
+        float number => number != 0f,
+        double number => number != 0d,
+        string text => text.Length > 0,
+        Entity entity => !entity.IsNone,
+        _ => true,
+    };
 
     /// <summary>The fields in the order they asked to be in, and otherwise as declared.</summary>
     private static IEnumerable<ComponentField> Ordered(IReadOnlyList<ComponentField> fields) =>
