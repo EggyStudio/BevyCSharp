@@ -12,7 +12,7 @@ public sealed class FlagDrawer : IFieldDrawer
     /// <inheritdoc/>
     public void Draw(InspectorRow row, int part, FieldTarget target)
     {
-        row.Name(target.Field.Name);
+        row.Name(target.Field.Title);
         row.Tick(target.Read() is bool on && on);
     }
 

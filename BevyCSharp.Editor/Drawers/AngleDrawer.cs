@@ -23,8 +23,11 @@ public sealed class AngleDrawer : IFieldDrawer
     /// <inheritdoc/>
     public void Draw(InspectorRow row, int part, FieldTarget target)
     {
-        row.Name(part == 0 ? target.Field.Name : string.Empty);
-        row.Box(Parts(target.Read())[part], Grips.Axis(part));
+        row.Name(part == 0 ? target.Field.Title : string.Empty);
+        row.Box(Parts(target.Read())[part], Grips.Axis(part), target.Field.IsWritable);
+        row.Unit(Suffix(target.Field));
+
+        if (!target.Agree(value => Parts(value)[part])) row.Mixed();
     }
 
     /// <inheritdoc/>
@@ -58,6 +61,9 @@ public sealed class AngleDrawer : IFieldDrawer
     /// <inheritdoc/>
     /// <remarks>Degrees, so a drag turns a thing at the rate the tool turns it.</remarks>
     public float Step(int part, FieldTarget target) => EditorTools.RotateStep * 0.1f;
+
+    /// <summary>What the angles are measured in, which is degrees unless told otherwise.</summary>
+    private static string Suffix(ComponentField field) => field.Hints.Unit ?? "deg";
 
     /// <summary>How many degrees are in a radian, and the way back.</summary>
     private const float ToDegrees = 180f / MathF.PI;

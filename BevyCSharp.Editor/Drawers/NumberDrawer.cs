@@ -20,8 +20,11 @@ public sealed class NumberDrawer : IFieldDrawer
     /// <inheritdoc/>
     public void Draw(InspectorRow row, int part, FieldTarget target)
     {
-        row.Name(target.Field.Name);
-        row.Box(TextDrawer.Written(target.Read()), Grips.Plain);
+        row.Name(target.Field.Title);
+        row.Box(TextDrawer.Written(target.Read()), Grips.Plain, target.Field.IsWritable);
+        row.Unit(target.Field.Hints.Unit ?? string.Empty);
+
+        if (!target.Agree()) row.Mixed();
     }
 
     /// <inheritdoc/>
@@ -47,7 +50,12 @@ public sealed class NumberDrawer : IFieldDrawer
             : EditorFields.Text(value));
 
     /// <inheritdoc/>
-    /// <remarks>A whole number moves by whole numbers, however slowly the hand moves.</remarks>
-    public float Step(int part, FieldTarget target) =>
-        target.Field.Kind == FieldKind.Int ? 0.25f : EditorTools.MoveStep * 0.1f;
+    /// <remarks>
+    /// What the field said, when it said. Otherwise the editor's own step, which is right for a
+    /// position in metres, and a quarter of a unit for a whole number, so a drag across the panel
+    /// counts up rather than jumping.
+    /// </remarks>
+    public float Step(int part, FieldTarget target) => target.Field.Hints.Step is { } asked
+        ? (float)asked
+        : target.Field.Kind == FieldKind.Int ? 0.25f : EditorTools.MoveStep * 0.1f;
 }

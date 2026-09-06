@@ -20,9 +20,15 @@ public enum SelectionKind
 /// </summary>
 /// <remarks>
 /// <para>
-/// One entity, held in one place, because the alternative is every panel holding its own idea of
-/// what is selected and a web of panels telling each other. A hierarchy writes it, an inspector
-/// reads it, a toolbar acts on it, and none of the three knows the others exist.
+/// Held in one place, because the alternative is every panel holding its own idea of what is
+/// selected and a web of panels telling each other. A hierarchy writes it, an inspector reads it,
+/// a toolbar acts on it, and none of the three knows the others exist.
+/// </para>
+/// <para>
+/// More than one entity can be selected, and one of them is the current one: the last one picked.
+/// Everything that acts on a single thing acts on that one, and everything that can act on many
+/// (an inspector writing a field, a menu row deleting) reads the whole list. A list of one is the
+/// ordinary case and reads exactly as it did when one was all there could be.
 /// </para>
 /// <para>
 /// Selection is not an ECS component. It belongs to the tool rather than to the world: an entity
@@ -39,8 +45,22 @@ public static class EditorSelection
     /// </remarks>
     public static SelectionKind Latest { get; internal set; } = SelectionKind.None;
 
-    /// <summary>The selected entity, or <see cref="Entity.None"/>.</summary>
+    /// <summary>The entity picked last, or <see cref="Entity.None"/>.</summary>
+    /// <remarks>
+    /// What everything acting on one thing acts on: the gizmo handles, the camera framing a
+    /// selection, the inspector's heading. When several are selected it is the last one picked,
+    /// which is the one somebody was looking at when they picked it.
+    /// </remarks>
     public static Entity Current { get; private set; } = Entity.None;
+
+    /// <summary>Everything selected, with <see cref="Current"/> last.</summary>
+    public static IReadOnlyList<Entity> All => Chosen;
+
+    /// <summary>How many are selected.</summary>
+    public static int Count => Chosen.Count;
+
+    /// <summary>The entities picked, oldest first.</summary>
+    private static readonly List<Entity> Chosen = [];
 
     /// <summary>
     /// The camera the viewport is looking through.
@@ -58,15 +78,47 @@ public static class EditorSelection
     /// <summary>Whether anything is selected.</summary>
     public static bool Any => !Current.IsNone;
 
-    /// <summary>Points the editor at an entity.</summary>
+    /// <summary>Points the editor at one entity, instead of whatever it was pointed at.</summary>
     public static void Select(Entity entity)
     {
-        if (entity == Current) return;
+        if (entity == Current && Chosen.Count <= 1) return;
+
+        Chosen.Clear();
+        if (!entity.IsNone) Chosen.Add(entity);
 
         Current = entity;
         Latest = entity.IsNone ? SelectionKind.None : SelectionKind.Entity;
         ChangedOn = EditorShell.Context?.Time.FrameCount ?? 0;
     }
+
+    /// <summary>
+    /// Adds an entity to the selection, or takes it out again.
+    /// </summary>
+    /// <remarks>
+    /// What holding a modifier while clicking does, in every tool there has ever been. Taking the
+    /// current one out leaves whichever was picked before it as the current one, so the handles
+    /// stay on something rather than disappearing.
+    /// </remarks>
+    public static void Toggle(Entity entity)
+    {
+        if (entity.IsNone) return;
+
+        if (Chosen.Remove(entity))
+        {
+            Current = Chosen.Count > 0 ? Chosen[^1] : Entity.None;
+            Latest = Current.IsNone ? SelectionKind.None : SelectionKind.Entity;
+            ChangedOn = EditorShell.Context?.Time.FrameCount ?? 0;
+            return;
+        }
+
+        Chosen.Add(entity);
+        Current = entity;
+        Latest = SelectionKind.Entity;
+        ChangedOn = EditorShell.Context?.Time.FrameCount ?? 0;
+    }
+
+    /// <summary>Whether an entity is one of the selected.</summary>
+    public static bool Holds(Entity entity) => Chosen.Contains(entity);
 
     /// <summary>Points it at nothing.</summary>
     public static void Clear() => Select(Entity.None);
@@ -81,9 +133,13 @@ public static class EditorSelection
     /// </remarks>
     internal static void Prune(EcsWorld world)
     {
-        if (Current.IsNone) return;
-        if (world.IsAlive(Current)) return;
+        if (Chosen.Count == 0) return;
 
-        Clear();
+        var went = Chosen.RemoveAll(entity => !world.IsAlive(entity));
+        if (went == 0) return;
+
+        Current = Chosen.Count > 0 ? Chosen[^1] : Entity.None;
+        Latest = Current.IsNone ? SelectionKind.None : SelectionKind.Entity;
+        ChangedOn = EditorShell.Context?.Time.FrameCount ?? 0;
     }
 }

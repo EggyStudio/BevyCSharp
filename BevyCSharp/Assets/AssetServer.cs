@@ -46,8 +46,15 @@ public readonly struct AssetHandle : IEquatable<AssetHandle>
     /// <summary>A handle that refers to nothing.</summary>
     public static AssetHandle None => new(-1);
 
-    /// <summary>True when this handle was produced by a successful load.</summary>
-    public bool IsValid => Key >= 0;
+    /// <summary>
+    /// True when this handle was produced by a successful load.
+    /// </summary>
+    /// <remarks>
+    /// Zero is not a handle. A component holding an asset is a struct that starts out zeroed, and
+    /// the engine's table therefore never hands out a key of zero: a freshly added component holds
+    /// nothing rather than whatever was loaded first.
+    /// </remarks>
+    public bool IsValid => Key > 0;
 
     /// <summary>How far along this asset's load is.</summary>
     public AssetLoadState State => AssetServer.StateOf(this);
@@ -345,6 +352,28 @@ public static unsafe class AssetServer
         ArgumentOutOfRangeException.ThrowIfNegative(scene);
 
         return Load(AssetKind.Scene, $"{path}#Scene{scene}");
+    }
+
+    /// <summary>
+    /// The path an asset was loaded from, or <see langword="null"/> when it has none.
+    /// </summary>
+    /// <remarks>
+    /// What turns a handle back into something a person recognises: a field holding an asset shows
+    /// the file it points at rather than a number, and something saving a world writes the path
+    /// rather than a key that means nothing the next time the program runs. An asset built rather
+    /// than loaded has no path, and answers nothing.
+    /// </remarks>
+    public static unsafe string? PathOf(AssetHandle handle)
+    {
+        if (!handle.IsValid) return null;
+
+        var length = Native.bcs_asset_path(handle.Key, null, 0);
+        if (length < 0) return null;
+        if (length == 0) return string.Empty;
+
+        return Native.ReadText(
+            (buffer, capacity) => Native.bcs_asset_path(handle.Key, buffer, capacity),
+            $"reading the path of {handle}");
     }
 
     /// <summary>

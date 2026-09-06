@@ -124,7 +124,10 @@ internal static class SchemaEmitter
                 .Append(">(entity, out var component)) return;\n\n")
                 .Append("                        component.").Append(method.Name).Append("();\n")
                 .Append("                        world.Set(entity, component);\n")
-                .Append("                    }),\n");
+                .Append("                    })");
+
+            EmitMethodHints(source, method.Hints);
+            source.Append(",\n");
         }
 
         source.Append("            ],\n");
@@ -142,21 +145,14 @@ internal static class SchemaEmitter
             .Append("                    static (world, entity) =>\n")
             .Append("                        world.TryGet<").Append(model.QualifiedName)
             .Append(">(entity, out var component) ? component.").Append(field.Name)
-            .Append(" : null,\n")
+            .Append(" : null")
             // Write: read, modify, write back. Going through Set rather than a reference into
             // storage is what makes Bevy see the change.
-            .Append("                    static (world, entity, value) =>\n")
-            .Append("                    {\n")
-            .Append("                        if (!world.TryGet<").Append(model.QualifiedName)
-            .Append(">(entity, out var component)) return false;\n")
-            .Append("                        if (!global::Bevy.ComponentSchemas.TryCoerce<")
-            .Append(field.Type).Append(">(value, out var coerced)) return false;\n\n")
-            .Append("                        component.").Append(field.Name).Append(" = coerced;\n")
-            .Append("                        world.Set(entity, component);\n")
-            .Append("                        return true;\n")
-            .Append("                    }");
+            .Append(Writer(model, field));
 
-        if (field.Options.Items.Count > 0)
+        var hints = field.Hints.IsEmpty ? null : field.Hints;
+
+        if (field.Options.Items.Count > 0 || hints is not null)
         {
             source.Append(",\n                    [");
             var first = true;
@@ -170,7 +166,99 @@ internal static class SchemaEmitter
             source.Append(']');
         }
 
+        if (hints is not null) EmitHints(source, hints);
+
         source.Append("),\n");
+    }
+
+    /// <summary>Emits what a field's attributes asked for, as the record a tool reads.</summary>
+    /// <remarks>
+    /// Named arguments throughout, so a hint added to the record later does not shift the meaning
+    /// of what is emitted here.
+    /// </remarks>
+    private static void EmitHints(StringBuilder source, FieldHintModel hints)
+    {
+        source.Append(",\n                    new global::Bevy.FieldHints(\n");
+
+        var parts = new List<string>();
+        if (hints.Label is not null) parts.Add("Label: " + Quote(hints.Label));
+        if (hints.Tooltip is not null) parts.Add("Tooltip: " + Quote(hints.Tooltip));
+        if (hints.Header is not null) parts.Add("Header: " + Quote(hints.Header));
+        if (hints.Unit is not null) parts.Add("Unit: " + Quote(hints.Unit));
+        if (hints.Minimum is not null) parts.Add("Minimum: " + Literal(hints.Minimum.Value));
+        if (hints.Maximum is not null) parts.Add("Maximum: " + Literal(hints.Maximum.Value));
+        if (hints.Step is not null) parts.Add("Step: " + Literal(hints.Step.Value));
+        if (hints.ReadOnly) parts.Add("ReadOnly: true");
+        if (hints.Hidden) parts.Add("Hidden: true");
+        if (hints.Space) parts.Add("Space: true");
+        if (hints.Colour) parts.Add("Colour: true");
+        if (hints.ShowIf is not null) parts.Add("ShowIf: " + Quote(hints.ShowIf));
+        if (hints.ShowIfNot) parts.Add("ShowIfNot: true");
+        if (hints.Order != 0) parts.Add("Order: " + hints.Order.ToString(Invariant));
+        if (hints.Asset is not null) parts.Add("Asset: " + Quote(hints.Asset));
+        if (hints.Extensions is not null) parts.Add("Extensions: " + Quote(hints.Extensions));
+
+        for (var i = 0; i < parts.Count; i++)
+        {
+            source.Append("                        ").Append(parts[i]);
+            if (i < parts.Count - 1) source.Append(',');
+            source.Append('\n');
+        }
+
+        source.Append("                    )");
+    }
+
+    /// <summary>The one culture a generator may write numbers in.</summary>
+    private static readonly System.Globalization.CultureInfo Invariant =
+        System.Globalization.CultureInfo.InvariantCulture;
+
+    /// <summary>A number as C# source.</summary>
+    private static string Literal(double value) => value.ToString("R", Invariant) + "d";
+
+    /// <summary>A string as C# source.</summary>
+    private static string Quote(string text) =>
+        "\"" + text.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+
+    /// <summary>Emits what a method's attributes asked for, when they asked for anything.</summary>
+    private static void EmitMethodHints(StringBuilder source, MethodHintModel hints)
+    {
+        if (hints.IsEmpty) return;
+
+        var parts = new List<string>();
+        if (hints.Label is not null) parts.Add("Label: " + Quote(hints.Label));
+        if (hints.Tooltip is not null) parts.Add("Tooltip: " + Quote(hints.Tooltip));
+        if (hints.Hidden) parts.Add("Hidden: true");
+        if (hints.Order != 0) parts.Add("Order: " + hints.Order.ToString(Invariant));
+
+        source.Append("\n                {\n                    Hints = new global::Bevy.MethodHints(")
+            .Append(string.Join(", ", parts))
+            .Append("),\n                }");
+    }
+
+    /// <summary>
+    /// The setter for one member, or the word for "this one cannot be written".
+    /// </summary>
+    /// <remarks>
+    /// Read, modify, write back, through the member itself. A property that clamps what it is
+    /// given, or keeps two fields in step, does that here exactly as it would anywhere else, which
+    /// is the whole reason a property is described rather than the fields behind it. A property
+    /// with no setter has nothing to emit and says so with a null.
+    /// </remarks>
+    private static string Writer(BehaviorModel model, BehaviorField field)
+    {
+        if (field.IsProperty && field.Hints.ReadOnly) return ",\n                    null";
+
+        return ",\n"
+            + "                    static (world, entity, value) =>\n"
+            + "                    {\n"
+            + "                        if (!world.TryGet<" + model.QualifiedName
+            + ">(entity, out var component)) return false;\n"
+            + "                        if (!global::Bevy.ComponentSchemas.TryCoerce<"
+            + field.Type + ">(value, out var coerced)) return false;\n\n"
+            + "                        component." + field.Name + " = coerced;\n"
+            + "                        world.Set(entity, component);\n"
+            + "                        return true;\n"
+            + "                    }";
     }
 
     /// <summary>The name Bevy knows the component by, which is its CLR full name.</summary>

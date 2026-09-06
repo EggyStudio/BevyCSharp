@@ -1,3 +1,5 @@
+using Bevy;
+
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>What one entry in the asset directory is.</summary>
@@ -77,6 +79,63 @@ public static class EditorAssets
 
         return entries;
     }
+
+    /// <summary>
+    /// Every file under the asset root, whatever directory the browser is looking at.
+    /// </summary>
+    /// <remarks>
+    /// For anything that offers a file to choose rather than one to open: a field holding a mesh
+    /// is not asking about the directory somebody last browsed to. Read from disk on each call,
+    /// for the same reason the listing is, and capped so that an asset tree nobody expected cannot
+    /// make a menu that takes a second to build.
+    /// </remarks>
+    /// <param name="extensions">
+    /// Which files to answer with, lower case and with their dots, or nothing for all of them.
+    /// </param>
+    /// <param name="most">The most to answer with.</param>
+    public static IReadOnlyList<string> Every(
+        IReadOnlyCollection<string>? extensions = null, int most = 200)
+    {
+        var root = EditorPaths.Assets;
+        if (!System.IO.Directory.Exists(root)) return [];
+
+        var found = new List<string>();
+
+        foreach (var path in System.IO.Directory.EnumerateFiles(
+            root, "*", SearchOption.AllDirectories))
+        {
+            if (found.Count >= most) break;
+
+            if (extensions is { Count: > 0 }
+                && !extensions.Contains(Path.GetExtension(path).ToLowerInvariant()))
+            {
+                continue;
+            }
+
+            found.Add(Path.GetRelativePath(root, path).Replace(Path.DirectorySeparatorChar, '/'));
+        }
+
+        found.Sort(StringComparer.Ordinal);
+        return found;
+    }
+
+    /// <summary>
+    /// The file extensions that go with an asset type.
+    /// </summary>
+    /// <remarks>
+    /// What an asset field offers when it was not told. The engine decides what it can load by
+    /// extension too, so this is the same list from the other side.
+    /// </remarks>
+    public static IReadOnlyList<string> ExtensionsFor(string kind) => kind switch
+    {
+        AssetKind.Mesh or AssetKind.Gltf => [".gltf", ".glb", ".obj"],
+        AssetKind.Image => [".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tga", ".ktx2"],
+        AssetKind.Audio => [".ogg", ".wav", ".flac", ".mp3"],
+        AssetKind.Scene => [".scn", ".ron", ".gltf", ".glb"],
+        AssetKind.Font => [".ttf", ".otf"],
+        AssetKind.Shader => [".wgsl", ".spv"],
+        _ => [],
+    };
 
     /// <summary>What a file is, as far as the engine is concerned.</summary>
     /// <remarks>

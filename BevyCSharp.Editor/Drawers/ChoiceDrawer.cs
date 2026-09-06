@@ -19,7 +19,7 @@ public sealed class ChoiceDrawer : IFieldDrawer
     /// <inheritdoc/>
     public void Draw(InspectorRow row, int part, FieldTarget target)
     {
-        row.Name(target.Field.Name);
+        row.Name(target.Field.Title);
         row.Button(target.Read()?.ToString() ?? string.Empty);
     }
 

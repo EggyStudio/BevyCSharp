@@ -140,12 +140,23 @@ internal enum FieldKind
     Vec3,
     Quat,
     Entity,
+    Asset,
     Enum,
+
+    /// <summary>Any number of a fixed set of names at once.</summary>
+    Flags,
 }
 
 /// <summary>A method on a behavior that something can simply be told to call.</summary>
 /// <param name="Name">The method's name.</param>
-internal sealed record BehaviorInvokable(string Name);
+internal sealed record BehaviorInvokable(string Name, MethodHintModel Hints)
+{
+    /// <summary>A method with no attributes on it.</summary>
+    internal BehaviorInvokable(string name)
+        : this(name, MethodHintModel.None)
+    {
+    }
+}
 
 /// <summary>One field of a behavior, and how a tool should draw it.</summary>
 /// <param name="Name">The field's name, which is what a tool labels the row with.</param>
@@ -156,13 +167,62 @@ internal sealed record BehaviorField(
     string Name,
     FieldKind Kind,
     string Type,
-    EquatableArray<string> Options)
+    EquatableArray<string> Options,
+    FieldHintModel Hints,
+    bool IsProperty = false)
 {
     /// <summary>A field of a type with no fixed set of values.</summary>
     internal BehaviorField(string name, FieldKind kind, string type)
-        : this(name, kind, type, EquatableArray<string>.Empty)
+        : this(name, kind, type, EquatableArray<string>.Empty, FieldHintModel.None)
     {
     }
+}
+
+/// <summary>
+/// What one field's attributes asked for, as the generator read them.
+/// </summary>
+/// <remarks>
+/// The same shape as the record the schema carries, so emitting it is writing the values out in
+/// order. Everything is a string or a number, which is what an incremental generator's model has
+/// to be for it to compare cheaply between runs.
+/// </remarks>
+internal sealed record FieldHintModel(
+    string? Label = null,
+    string? Tooltip = null,
+    string? Header = null,
+    string? Unit = null,
+    double? Minimum = null,
+    double? Maximum = null,
+    double? Step = null,
+    bool ReadOnly = false,
+    bool Hidden = false,
+    bool Space = false,
+    bool Colour = false,
+    string? ShowIf = null,
+    bool ShowIfNot = false,
+    int Order = 0,
+    string? Asset = null,
+    string? Extensions = null)
+{
+    /// <summary>A field with no attributes on it.</summary>
+    internal static readonly FieldHintModel None = new();
+
+    /// <summary>Whether anything was asked for at all.</summary>
+    internal bool IsEmpty => Equals(None);
+}
+
+/// <summary>What one method's attributes asked for.</summary>
+internal sealed record MethodHintModel(
+    string? Label = null,
+    string? Tooltip = null,
+    bool Hidden = false,
+    int Order = 0)
+{
+    /// <summary>A method with no attributes on it.</summary>
+    internal static readonly MethodHintModel None = new();
+
+    /// <summary>Whether anything was asked for at all.</summary>
+    internal bool IsEmpty => Equals(None);
 }
 
 /// <summary>A list that compares by contents, so an incremental model can cache on it.</summary>

@@ -148,7 +148,8 @@ public sealed partial class WorldPanel
             var line = visible[i];
 
             Labels[written] = line.Label;
-            Marked[written] = line.Entity == EditorSelection.Current;
+            Marked[written] = EditorSelection.Holds(line.Entity);
+            Wear(written, Marked[written]);
             Folds[written] = line.Mark;
             Wear(written, EditorKinds.IconFor(world, line.Entity));
 
@@ -162,6 +163,7 @@ public sealed partial class WorldPanel
             Labels[i] = string.Empty;
             Folds[i] = string.Empty;
             Marked[i] = false;
+            Wear(i, false);
             _entities[i] = Entity.None;
             Shown[i] = false;
         }
@@ -340,8 +342,40 @@ public sealed partial class WorldPanel
             return;
         }
 
+        // Held with control, a click adds to the selection or takes something out of it, which is
+        // what a modifier means everywhere. Plain, it replaces.
+        if (EditorShell.Context is { Input: { } input }
+            && (input.KeyDown(Key.ControlLeft) || input.KeyDown(Key.ControlRight)))
+        {
+            EditorSelection.Toggle(entity);
+            return;
+        }
+
         EditorSelection.Select(entity);
     }
+
+    /// <summary>
+    /// Gives a row the look of being selected, or takes it away.
+    /// </summary>
+    /// <remarks>
+    /// A class given while the editor runs, which the interface answers by applying the stylesheet
+    /// to that row again. Written only when it changes: the interface watches the class for
+    /// changes, so writing the same one every frame is a restyle every frame.
+    /// </remarks>
+    private void Wear(int row, bool picked)
+    {
+        if (_picked[row] == picked) return;
+        if (Window is not { IsOpen: true } window) return;
+
+        var element = window.Element($"wrow-{row}");
+        if (element.IsNone) return;
+
+        Xui.SetClass(element, picked ? "row-picked" : "row");
+        _picked[row] = picked;
+    }
+
+    /// <summary>Which rows are wearing the selected look.</summary>
+    private readonly bool[] _picked = new bool[Rows];
 
     /// <summary>How deep a row sits.</summary>
     private int DepthOf(Entity entity)
@@ -372,7 +406,9 @@ public sealed partial class WorldPanel
         var entity = _entities[row];
         if (entity.IsNone) return;
 
-        EditorSelection.Select(entity);
+        // A right click on something already in the selection leaves the selection alone, so that
+        // a menu opened over three chosen things acts on the three.
+        if (!EditorSelection.Holds(entity)) EditorSelection.Select(entity);
 
         var (x, y) = EditorShell.Context?.Input.MousePosition ?? (0f, 0f);
         EditorShell.ShowMenu("Entity", x, y, EditorShell.Ecs.NameOf(entity) ?? "Entity");

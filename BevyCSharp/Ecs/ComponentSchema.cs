@@ -36,8 +36,21 @@ public enum FieldKind
     /// <summary>A reference to another entity.</summary>
     Entity,
 
+    /// <summary>A reference to a loaded asset: a mesh, an image, a material, a sound.</summary>
+    Asset,
+
     /// <summary>One of a fixed set of names, which <see cref="ComponentField.Options"/> lists.</summary>
     Enum,
+
+    /// <summary>
+    /// Any number of a fixed set of names at once.
+    /// </summary>
+    /// <remarks>
+    /// An enum whose values are bits. It is a different kind rather than a flag on
+    /// <see cref="Enum"/> because it is drawn differently: one row that offers a choice against
+    /// several that are each on or off.
+    /// </remarks>
+    Flags,
 }
 
 /// <summary>
@@ -67,13 +80,15 @@ public sealed class ComponentField
     /// <param name="read">Reads the field from an entity, or <see langword="null"/> when absent.</param>
     /// <param name="write">Writes it back, or <see langword="null"/> when the field is read-only.</param>
     /// <param name="options">The names an <see cref="FieldKind.Enum"/> field can take.</param>
+    /// <param name="hints">What the field's attributes asked for.</param>
     public ComponentField(
         string name,
         FieldKind kind,
         string type,
         Func<EcsWorld, Entity, object?> read,
         Func<EcsWorld, Entity, object, bool>? write = null,
-        IReadOnlyList<string>? options = null)
+        IReadOnlyList<string>? options = null,
+        FieldHints? hints = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(name);
         ArgumentNullException.ThrowIfNull(read);
@@ -82,6 +97,7 @@ public sealed class ComponentField
         Kind = kind;
         Type = type ?? string.Empty;
         Options = options ?? [];
+        Hints = hints ?? FieldHints.None;
         _read = read;
         _write = write;
     }
@@ -98,8 +114,19 @@ public sealed class ComponentField
     /// <summary>The names an <see cref="FieldKind.Enum"/> field can take, in declaration order.</summary>
     public IReadOnlyList<string> Options { get; }
 
+    /// <summary>What the field's attributes asked for.</summary>
+    public FieldHints Hints { get; }
+
+    /// <summary>What to call it on screen, which is its label when it has one.</summary>
+    public string Title => Hints.Label is { Length: > 0 } label ? label : Name;
+
     /// <summary>Whether this field can be written as well as read.</summary>
-    public bool IsWritable => _write is not null;
+    /// <remarks>
+    /// A field the attributes marked as read only answers no, whatever the generator emitted: it
+    /// is the same question from a tool's point of view, and answering it in one place means every
+    /// drawer honours the attribute without knowing about it.
+    /// </remarks>
+    public bool IsWritable => _write is not null && !Hints.ReadOnly;
 
     /// <summary>Reads the field, or <see langword="null"/> when the entity does not carry it.</summary>
     public object? Read(EcsWorld world, Entity entity)
@@ -134,7 +161,14 @@ public sealed class ComponentField
 /// method that needs values needs a form, and a method that needs the world is a system rather
 /// than something a person presses once.
 /// </remarks>
-public sealed record ComponentMethod(string Name, Action<EcsWorld, Entity> Run);
+public sealed record ComponentMethod(string Name, Action<EcsWorld, Entity> Run)
+{
+    /// <summary>What the method's attributes asked for.</summary>
+    public MethodHints Hints { get; init; } = MethodHints.None;
+
+    /// <summary>What the button says, which is its label when it has one.</summary>
+    public string Title => Hints.Label is { Length: > 0 } label ? label : Name;
+}
 
 /// <summary>
 /// The fields of one component type, and the id the engine knows it by.

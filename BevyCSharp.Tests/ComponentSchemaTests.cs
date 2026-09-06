@@ -37,8 +37,15 @@ public partial struct Described
     /// <summary>Left out, because it belongs to the type rather than to an entity.</summary>
     public static int Shared;
 
-    /// <summary>Keeps the private field from reading as unused.</summary>
+    /// <summary>Keeps the private field from reading as unused, and is shown as a read only row.</summary>
     public readonly int Private => _private;
+
+    /// <summary>Shown, and written through itself: what it is given is doubled on the way in.</summary>
+    public float Doubled
+    {
+        readonly get => Speed;
+        set => Speed = value * 2f;
+    }
 }
 
 /// <summary>An enum, so a field of it has a fixed set of names.</summary>
@@ -77,9 +84,24 @@ public sealed class ComponentSchemaTests
 
         Assert.NotNull(schema);
         Assert.Equal("Described", schema.Name);
+
+        // The property comes last because it is declared last. A property is described alongside
+        // the fields and read through itself, so what a tool shows is what the type says rather
+        // than what is stored behind it.
         Assert.Equal(
-            ["Enabled", "Count", "Speed", "Offset", "When", "Unknown"],
+            ["Enabled", "Count", "Speed", "Offset", "When", "Unknown", "Private", "Doubled"],
             schema.Fields.Select(field => field.Name));
+    }
+
+    [Fact]
+    public void APropertyWithNoSetterIsDescribedAsReadOnly()
+    {
+        var schema = ComponentSchemas.For("Bevy.Tests.Described");
+        var read = Assert.Single(schema!.Fields, field => field.Name == "Private");
+
+        Assert.Equal(FieldKind.Int, read.Kind);
+        Assert.True(read.Hints.ReadOnly);
+        Assert.False(read.IsWritable);
     }
 
     [Fact]
@@ -251,6 +273,167 @@ public sealed class ComponentSchemaTests
             Assert.Equal(new Vec3(1f, 2f, 3f), schema.Read(ctx.Ecs, entity, "Translation"));
             Assert.True(schema.Write(ctx.Ecs, entity, "Translation", new Vec3(4f, 5f, 6f)));
             Assert.Equal(new Vec3(4f, 5f, 6f), ctx.Ecs.GetOrDefault<Transform>(entity).Translation);
+        });
+
+        harness.Run();
+    }
+}
+
+/// <summary>A component whose fields say how they want to be drawn.</summary>
+/// <remarks>
+/// Every attribute the generator reads, on one struct, so that the emitted hints are checked
+/// against what was written rather than against what the emitter happens to do today.
+/// </remarks>
+[Behavior]
+public partial struct Hinted
+{
+    /// <summary>A slider between two ends, with a name of its own.</summary>
+    [Range(0d, 10d)]
+    [Label("How fast")]
+    [Tooltip("Metres a second.")]
+    [Unit("m/s")]
+    public float Speed;
+
+    /// <summary>Under a heading, and after a gap.</summary>
+    [Header("Looks")]
+    [Space]
+    [Colour]
+    public Vec3 Tint;
+
+    /// <summary>Shown, and not editable.</summary>
+    [ReadOnly]
+    public int Counted;
+
+    /// <summary>Not shown at all.</summary>
+    [Hidden]
+    public int Working;
+
+    /// <summary>Shown only while <see cref="Enabled"/> is off.</summary>
+    [ShowIf(nameof(Enabled), Not = true)]
+    [Step(0.5d)]
+    [Order(3)]
+    public float Fallback;
+
+    /// <summary>What the one above answers to.</summary>
+    public bool Enabled;
+
+    /// <summary>A button with words of its own.</summary>
+    [Button("Do the thing")]
+    [Tooltip("Runs it once.")]
+    public void Run()
+    {
+    }
+
+    /// <summary>A method nothing offers.</summary>
+    [Hidden]
+    public void Internal()
+    {
+    }
+}
+
+/// <summary>Covers the hints a field's attributes leave on the schema.</summary>
+[Collection("engine")]
+public sealed class FieldHintTests
+{
+    [Fact]
+    public void AttributesReachTheSchema()
+    {
+        var schema = ComponentSchemas.For("Bevy.Tests.Hinted");
+        Assert.NotNull(schema);
+
+        var speed = Assert.Single(schema.Fields, field => field.Name == "Speed");
+
+        Assert.Equal("How fast", speed.Title);
+        Assert.Equal("Metres a second.", speed.Hints.Tooltip);
+        Assert.Equal("m/s", speed.Hints.Unit);
+        Assert.True(speed.Hints.HasRange);
+        Assert.Equal(0d, speed.Hints.Minimum);
+        Assert.Equal(10d, speed.Hints.Maximum);
+    }
+
+    [Fact]
+    public void AHeadingAndAGapAreCarried()
+    {
+        var schema = ComponentSchemas.For("Bevy.Tests.Hinted");
+        var tint = Assert.Single(schema!.Fields, field => field.Name == "Tint");
+
+        Assert.Equal("Looks", tint.Hints.Header);
+        Assert.True(tint.Hints.Space);
+        Assert.True(tint.Hints.Colour);
+    }
+
+    [Fact]
+    public void ReadOnlyMakesAFieldUnwritable()
+    {
+        var schema = ComponentSchemas.For("Bevy.Tests.Hinted");
+        var counted = Assert.Single(schema!.Fields, field => field.Name == "Counted");
+
+        Assert.True(counted.Hints.ReadOnly);
+        Assert.False(counted.IsWritable);
+    }
+
+    [Fact]
+    public void HiddenIsCarriedRatherThanDropped()
+    {
+        var schema = ComponentSchemas.For("Bevy.Tests.Hinted");
+        var working = Assert.Single(schema!.Fields, field => field.Name == "Working");
+
+        // Left in the table and marked, rather than left out of it: a tool decides what to show,
+        // and something that saves a component still needs every field.
+        Assert.True(working.Hints.Hidden);
+    }
+
+    [Fact]
+    public void AConditionAndAStepAreCarried()
+    {
+        var schema = ComponentSchemas.For("Bevy.Tests.Hinted");
+        var fallback = Assert.Single(schema!.Fields, field => field.Name == "Fallback");
+
+        Assert.Equal("Enabled", fallback.Hints.ShowIf);
+        Assert.True(fallback.Hints.ShowIfNot);
+        Assert.Equal(0.5d, fallback.Hints.Step);
+        Assert.Equal(3, fallback.Hints.Order);
+    }
+
+    [Fact]
+    public void AMethodCarriesItsButtonAndItsTooltip()
+    {
+        var schema = ComponentSchemas.For("Bevy.Tests.Hinted");
+        var run = Assert.Single(schema!.Methods, method => method.Name == "Run");
+
+        Assert.Equal("Do the thing", run.Title);
+        Assert.Equal("Runs it once.", run.Hints.Tooltip);
+
+        var hidden = Assert.Single(schema.Methods, method => method.Name == "Internal");
+        Assert.True(hidden.Hints.Hidden);
+    }
+}
+
+/// <summary>Covers a property being read and written through itself.</summary>
+[Collection("engine")]
+public sealed class PropertyFieldTests
+{
+    [Fact]
+    public void APropertyIsWrittenThroughItself()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(entity, new Described { Speed = 1f });
+
+            var schema = ComponentSchemas.For("Bevy.Tests.Described");
+            var doubled = Assert.Single(schema!.Fields, field => field.Name == "Doubled");
+
+            Assert.True(doubled.IsWritable);
+            Assert.True(doubled.Write(ctx.Ecs, entity, 4f));
+
+            // The property doubled it on the way in, which is the whole point of describing the
+            // property rather than the field behind it.
+            Assert.True(ctx.Ecs.TryGet<Described>(entity, out var after));
+            Assert.Equal(8f, after.Speed);
+            Assert.Equal(8f, doubled.Read(ctx.Ecs, entity));
         });
 
         harness.Run();

@@ -78,6 +78,11 @@ public static class EditorDrawers
         Add(new ChoiceDrawer());
         Add(new VectorDrawer());
         Add(new AngleDrawer());
+        Add(new SliderDrawer());
+        Add(new ColourDrawer());
+        Add(new EntityDrawer());
+        Add(new FlagsDrawer());
+        Add(new AssetDrawer());
     }
 
     /// <summary>Adds a drawer, which takes precedence over everything added before it.</summary>
@@ -91,6 +96,20 @@ public static class EditorDrawers
             var order = b.Priority.CompareTo(a.Priority);
             return order != 0 ? order : b.Added.CompareTo(a.Added);
         });
+    }
+
+    /// <summary>
+    /// Takes a drawer back out.
+    /// </summary>
+    /// <remarks>
+    /// For a game that wants its own drawer only while something of its own is open, and for a
+    /// test that has to leave the table as it found it.
+    /// </remarks>
+    public static bool Remove(IFieldDrawer drawer)
+    {
+        ArgumentNullException.ThrowIfNull(drawer);
+
+        return Table.RemoveAll(entry => ReferenceEquals(entry.Drawer, drawer)) > 0;
     }
 
     /// <summary>Every drawer, in the order they are asked.</summary>

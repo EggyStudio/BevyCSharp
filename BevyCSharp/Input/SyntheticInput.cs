@@ -48,6 +48,19 @@ public static class SyntheticInput
     public static void Release(float x, float y, MouseButton button = MouseButton.Left) =>
         Send(x, y, PointerAction.Release, button);
 
+    /// <summary>
+    /// Rolls the wheel, in the lines a wheel with detents reports.
+    /// </summary>
+    /// <remarks>
+    /// Positive is away from the hand, which is up in a list and in towards the scene for a
+    /// camera. The pointer is not moved first: what the wheel affects is decided by where the
+    /// pointer already is, so a test moves it and then rolls.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">There is no window.</exception>
+    public static void Wheel(float lines, float sideways = 0f) => Native.Check(
+        Native.bcs_input_wheel(sideways, lines),
+        $"rolling the wheel by {lines}");
+
     /// <summary>Moves, presses or releases the pointer.</summary>
     /// <exception cref="BevyNativeException">There is no window.</exception>
     public static void Send(

@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 61;
+    internal const int ExpectedAbiVersion = 65;
 
     static Native() => NativeLoader.Initialize();
 
@@ -528,6 +528,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_input_pointer(float x, float y, int action, int button);
 
+    /// <summary>Rolls the mouse wheel, as the window would report it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_input_wheel(float x, float y);
+
     /// <summary>Takes the keyboard away from whatever has it.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -552,6 +557,16 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_xui_set_visible(ulong entity, int visible);
+
+    /// <summary>How many live elements carry a CSS id.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_count(string cssId);
+
+    /// <summary>Gives an element a CSS class, replacing whatever it had.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_xui_set_class(ulong entity, string? cssClass);
 
     /// <summary>Paints an element's background.</summary>
     [LibraryImport(Library)]
@@ -658,6 +673,11 @@ internal static unsafe partial class Native
     internal static partial int bcs_atlas_create(
         uint tileWidth, uint tileHeight, uint columns, uint rows,
         uint paddingX, uint paddingY, uint offsetX, uint offsetY);
+
+    /// <summary>Writes the path an asset was loaded from into a buffer.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static unsafe partial int bcs_asset_path(int handle, byte* buffer, int capacity);
 
     /// <summary>Reports how far along a load is.</summary>
     [LibraryImport(Library)]

@@ -20,8 +20,10 @@ public sealed class TextDrawer : IFieldDrawer
     /// <inheritdoc/>
     public void Draw(InspectorRow row, int part, FieldTarget target)
     {
-        row.Name(target.Field.Name);
-        row.Box(Written(target.Read()));
+        row.Name(target.Field.Title);
+        row.Box(Written(target.Read()), null, target.Field.IsWritable);
+
+        if (!target.Agree()) row.Mixed();
     }
 
     /// <inheritdoc/>

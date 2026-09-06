@@ -25,50 +25,19 @@ namespace BevyCSharp.Editor.Panels;
     Dock = EditorDock.Right)]
 public sealed partial class DataPanel : IInspectorRows
 {
-    /// <summary>How many rows the document declares.</summary>
+    /// <summary>
+    /// How many rows the document declares.
+    /// </summary>
+    /// <remarks>
+    /// A screenful, and no more. The rows are a pool that whatever is being inspected is drawn
+    /// into, so what this decides is how much can be shown at once rather than how much there can
+    /// be: a hundred fields scroll through forty rows. Every row is a handful of widgets whether
+    /// or not it is showing anything, which is what stops this from being a much larger number.
+    /// </remarks>
     public const int Rows = 24;
 
     /// <summary>How many tag chips it declares.</summary>
     public const int Chips = 24;
-
-    /// <summary>What a line of the inspector stands for.</summary>
-    private enum LineKind
-    {
-        /// <summary>Nothing.</summary>
-        Empty,
-
-        /// <summary>A component's name. It folds, and offers what can be done to the component.</summary>
-        Heading,
-
-        /// <summary>The entity's name, which is not a component this side can describe.</summary>
-        Name,
-
-        /// <summary>One row of one field, drawn by whichever drawer took it.</summary>
-        Field,
-
-        /// <summary>Something the component can be told to do.</summary>
-        Method,
-
-        /// <summary>Something about an asset, which is read and not edited.</summary>
-        Fact,
-    }
-
-    /// <summary>One line of the inspector, before it is given a row.</summary>
-    /// <param name="Kind">What the line stands for.</param>
-    /// <param name="Schema">The component it belongs to.</param>
-    /// <param name="Field">The field it edits.</param>
-    /// <param name="Drawer">What draws that field, and reads it back.</param>
-    /// <param name="Part">Which of the drawer's rows this is.</param>
-    /// <param name="Method">The method it runs.</param>
-    /// <param name="Component">The component id, for a heading with no schema.</param>
-    private readonly record struct Line(
-        LineKind Kind,
-        ComponentSchema? Schema = null,
-        ComponentField? Field = null,
-        IFieldDrawer? Drawer = null,
-        int Part = 0,
-        ComponentMethod? Method = null,
-        int Component = 0);
 
     /// <summary>Each row's label.</summary>
     [Bind("#dname", Count = Rows)]
@@ -90,6 +59,19 @@ public sealed partial class DataPanel : IInspectorRows
     [Bind("#dbtext", Count = Rows)]
     public string[] Buttons = new string[Rows];
 
+    /// <summary>What each row's number is measured in.</summary>
+    [Bind("#du", Count = Rows)]
+    public string[] Units = new string[Rows];
+
+    /// <summary>Where each row's bar sits, from nothing to a thousand.</summary>
+    /// <remarks>
+    /// The bar's own ends never move: a widget's range is written in the document and cannot be
+    /// changed while it runs, so every bar runs from nothing to a thousand and whichever drawer
+    /// uses one maps its field onto that. A thousand steps is finer than the panel is wide.
+    /// </remarks>
+    [Bind("#dsl", Count = Rows)]
+    public float[] Bars = new float[Rows];
+
     /// <summary>Which rows stand for anything.</summary>
     [Show("#drow", Count = Rows)]
     public bool[] Shown = new bool[Rows];
@@ -98,7 +80,7 @@ public sealed partial class DataPanel : IInspectorRows
     [Show("#dnum", Count = Rows)]
     public bool[] ShowValue = new bool[Rows];
 
-    /// <summary>Which boxes have a handle beside them, which is which of them are numbers.</summary>
+    /// <summary>Which boxes have a handle, which is which of them are numbers.</summary>
     [Show("#dg", Count = Rows)]
     public bool[] ShowGrip = new bool[Rows];
 
@@ -113,6 +95,18 @@ public sealed partial class DataPanel : IInspectorRows
     /// <summary>Which rows show a button.</summary>
     [Show("#db", Count = Rows)]
     public bool[] ShowButton = new bool[Rows];
+
+    /// <summary>Which rows show a unit.</summary>
+    [Show("#du", Count = Rows)]
+    public bool[] ShowUnit = new bool[Rows];
+
+    /// <summary>Which rows show a bar.</summary>
+    [Show("#dsl", Count = Rows)]
+    public bool[] ShowBar = new bool[Rows];
+
+    /// <summary>What the row under the pointer is for.</summary>
+    [Bind("#d-hint", Mode = BindMode.OneWay)]
+    public string Hint { get; private set; } = string.Empty;
 
     /// <summary>What each chip says.</summary>
     [Bind("#dchiptext", Count = Chips)]
@@ -135,10 +129,13 @@ public sealed partial class DataPanel : IInspectorRows
     public string Subject { get; private set; } = string.Empty;
 
     /// <summary>What each row stands for.</summary>
-    private readonly Line[] _lines = new Line[Rows];
+    private readonly InspectorLine[] _lines = new InspectorLine[Rows];
 
     /// <summary>What picture each row's mark wears, so it is written once.</summary>
     private readonly string[] _marks = new string[Rows];
+
+    /// <summary>The same for each row's handle.</summary>
+    private readonly string[] _grips = new string[Rows];
 
     /// <summary>Which components are shut, by component id.</summary>
     /// <remarks>
@@ -153,7 +150,10 @@ public sealed partial class DataPanel : IInspectorRows
         new (ComponentSchema?, int)[Chips];
 
     /// <summary>Every line the selection has, of which the pool shows a screenful.</summary>
-    private readonly List<Line> _all = [];
+    private readonly List<InspectorLine> _all = [];
+
+    /// <summary>The components with nothing to show, which the strip of chips names.</summary>
+    private readonly List<(ComponentSchema? Schema, int Component)> _found = [];
 
     /// <summary>The entity the rows were filled from.</summary>
     private Entity _subject = Entity.None;
@@ -161,13 +161,23 @@ public sealed partial class DataPanel : IInspectorRows
     /// <summary>How far down the lines the pool is looking.</summary>
     private int _scroll;
 
+
     /// <summary>Fills the rows from whatever is selected.</summary>
     [OnRefresh]
     public void Fill()
     {
         Roll();
 
-        if (EditorShell.Context is { } ctx) Scrub(ctx.Input);
+        for (var i = 0; i < Rows; i++)
+        {
+            if (_turned[i] > 0) _turned[i]--;
+        }
+
+        if (EditorShell.Context is { } ctx)
+        {
+            Scrub(ctx.Input);
+            Hover(ctx.Input);
+        }
 
         if (EditorSelection.Latest == SelectionKind.Asset)
         {
@@ -201,53 +211,24 @@ public sealed partial class DataPanel : IInspectorRows
             return;
         }
 
-        Subject = world.NameOf(entity) is { } named ? named : $"entity {entity.Index}";
-        _all.Add(new Line(LineKind.Name));
+        Subject = EditorSelection.Count > 1
+            ? $"{EditorSelection.Count} entities"
+            : world.NameOf(entity) is { } named ? named : $"entity {entity.Index}";
+        _all.Add(new InspectorLine(InspectorLineKind.Subject));
+
+        _found.Clear();
+        _all.AddRange(EditorInspector.Build(world, entity, _shut, _found, EditorSelection.All));
 
         var tags = 0;
 
-        foreach (var id in world.ComponentsOf(entity))
+        foreach (var (schema, id) in _found)
         {
-            var schema = ComponentSchemas.For(id);
+            if (tags >= Chips) break;
 
-            // A component with nothing to show is a tag, and a tag belongs on a chip rather than
-            // under a heading with an empty space beneath it. Two things end up here: a marker
-            // with no fields, and one this side has no description of, and to somebody reading
-            // the panel they are the same statement, which is "this is on it, and that is all I
-            // can tell you".
-            if (schema is null || schema.Fields.Count == 0)
-            {
-                // Except the engine's own, which are on everything and say nothing about this
-                // entity in particular.
-                if (schema is null && EditorEntity.IsDerived(world, id)) continue;
-
-                if (tags < Chips)
-                {
-                    Tags[tags] = schema?.Name ?? Short(world.ComponentName(id));
-                    TagShown[tags] = true;
-                    _tags[tags] = (schema, id);
-                    tags++;
-                }
-
-                continue;
-            }
-
-            _all.Add(new Line(LineKind.Heading, schema, Component: id));
-
-            // Shut is shut: what a component block is for is being able to put away the ones you
-            // are not working on, and an inspector where you cannot is a column of scrolling.
-            if (_shut.Contains(id)) continue;
-
-            foreach (var field in schema.Fields)
-            {
-                var drawer = EditorDrawers.For(field);
-
-                for (var part = 0; part < drawer.Lines(field); part++)
-                    _all.Add(new Line(LineKind.Field, schema, field, drawer, part));
-            }
-
-            foreach (var method in schema.Methods)
-                _all.Add(new Line(LineKind.Method, schema, Method: method));
+            Tags[tags] = schema?.Name ?? Short(world.ComponentName(id));
+            TagShown[tags] = true;
+            _tags[tags] = (schema, id);
+            tags++;
         }
 
         Untag(tags);
@@ -321,10 +302,10 @@ public sealed partial class DataPanel : IInspectorRows
         if (row >= Rows) return;
 
         Empty(row);
-        _lines[row] = new Line(LineKind.Fact);
+        _lines[row] = new InspectorLine(InspectorLineKind.Note);
         Shown[row] = true;
         Name(row, name);
-        Box(row, value, null);
+        Box(row, value, null, true);
         row++;
     }
 
@@ -344,22 +325,25 @@ public sealed partial class DataPanel : IInspectorRows
     }
 
     /// <summary>Fills one row, showing only the pieces that line needs.</summary>
-    private void Write(int row, Line line, EcsWorld world, Entity entity)
+    private void Write(int row, InspectorLine line, EcsWorld world, Entity entity)
     {
         Empty(row);
 
+        if (!_lines[row].Equals(line)) _turned[row] = Deaf;
+
         _lines[row] = line;
         Shown[row] = true;
-        _under[row] = line.Kind is LineKind.Field or LineKind.Method;
+        _under[row] = line.Kind is InspectorLineKind.Field or InspectorLineKind.Method
+            or InspectorLineKind.Note;
 
         switch (line.Kind)
         {
-            case LineKind.Name:
+            case InspectorLineKind.Subject:
                 Name(row, "Name");
-                Box(row, world.NameOf(entity) ?? string.Empty, null);
+                Box(row, world.NameOf(entity) ?? string.Empty, null, true);
                 break;
 
-            case LineKind.Heading:
+            case InspectorLineKind.Heading:
                 Name(row, line.Schema?.Name ?? Short(world.ComponentName(line.Component)));
                 Mark(row, _shut.Contains(line.Component)
                     ? "icons/ui/next.png"
@@ -367,15 +351,28 @@ public sealed partial class DataPanel : IInspectorRows
 
                 break;
 
-            case LineKind.Method:
-                Name(row, line.Method?.Name ?? string.Empty);
+            case InspectorLineKind.Method:
+                Name(row, line.Method?.Title ?? string.Empty);
                 Button(row, EditorIcons.Run);
                 break;
 
-            case LineKind.Field when line is { Field: { } field, Drawer: { } drawer }:
+            case InspectorLineKind.Field when line is { Field: { } field, Drawer: { } drawer }:
                 drawer.Draw(
-                    new InspectorRow(this, row), line.Part, new FieldTarget(field, world, entity));
+                    new InspectorRow(this, row),
+                    line.Part,
+                    new FieldTarget(field, world, entity, EditorSelection.All));
 
+                break;
+
+            case InspectorLineKind.Note:
+                Name(row, line.Text);
+                break;
+
+            case InspectorLineKind.Custom when line.Line is { } own:
+                own.Draw(new InspectorRow(this, row));
+                break;
+
+            case InspectorLineKind.Gap:
                 break;
         }
     }
@@ -383,11 +380,14 @@ public sealed partial class DataPanel : IInspectorRows
     /// <summary>Takes back whatever the last thing in a row left showing.</summary>
     private void Empty(int row)
     {
+        if (_lines[row].Kind != InspectorLineKind.Empty) _turned[row] = Deaf;
+
         _lines[row] = default;
         _under[row] = false;
         Names[row] = string.Empty;
         Values[row] = string.Empty;
         Letters[row] = string.Empty;
+        Units[row] = string.Empty;
         Buttons[row] = string.Empty;
         Flags[row] = false;
         Shown[row] = false;
@@ -396,6 +396,8 @@ public sealed partial class DataPanel : IInspectorRows
         ShowMark[row] = false;
         ShowFlag[row] = false;
         ShowButton[row] = false;
+        ShowUnit[row] = false;
+        ShowBar[row] = false;
     }
 
     /// <summary>Empties the rows from <paramref name="from"/> down.</summary>
@@ -425,25 +427,86 @@ public sealed partial class DataPanel : IInspectorRows
     /// <summary>Which rows sit under a heading.</summary>
     private readonly bool[] _under = new bool[Rows];
 
+    /// <summary>
+    /// How many more frames each row ignores what its widgets report.
+    /// </summary>
+    /// <remarks>
+    /// A row that now stands for something else still holds the last line's text, and the change
+    /// the widget reports as that text is replaced would be taken for somebody typing it into the
+    /// new field. The report can arrive a frame or two after the row turned, so the row stops
+    /// listening for a moment rather than for exactly one frame.
+    /// </remarks>
+    private readonly int[] _turned = new int[Rows];
+
+    /// <summary>How long a row ignores its widgets after it turns.</summary>
+    private const int Deaf = 3;
+
     /// <inheritdoc/>
-    public void Box(int row, string value, Grip? grip)
+    public void Box(int row, string value, Grip? grip, bool editable)
     {
+        // A value that will not take an edit goes on the flat plate a button uses rather than in a
+        // box, so that a row somebody cannot change says so before they try rather than after.
+        // Nothing is painted to say it: writing a colour to an element makes the interface restyle
+        // it, and a restyle puts back the display property the panel had just decided, so a row
+        // that stopped showing a tick or a button would go on drawing one.
+        if (!editable)
+        {
+            Button(row, value);
+            return;
+        }
+
         Values[row] = value;
         ShowValue[row] = true;
         ShowGrip[row] = grip is not null;
         Letters[row] = grip?.Letter ?? string.Empty;
 
-        if (grip is not { } paint) return;
-        if (Window is not { IsOpen: true } window) return;
-
-        var found = window.Element($"dg-{row}");
-        if (found.IsNone) return;
-
-        // Painted every frame rather than when it changes. The interface writes this component
-        // too, whenever it restyles the widget, and a handle painted once goes back to nothing the
-        // next time anything in the row is touched.
-        Xui.SetColour(found, paint.Red, paint.Green, paint.Blue);
+        if (grip is { } paint) Point(row, "dg", _grips, paint.Picture);
     }
+
+    /// <inheritdoc/>
+    public void Unit(int row, string suffix)
+    {
+        Units[row] = suffix;
+        ShowUnit[row] = suffix.Length > 0;
+    }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// In the unit's place, and instead of it. What a number is measured in is worth knowing and
+    /// what it is on the other things selected is worth knowing more, and one word fits.
+    /// </remarks>
+    public void Mixed(int row)
+    {
+        Units[row] = "mixed";
+        ShowUnit[row] = true;
+    }
+
+    /// <inheritdoc/>
+    public void Bar(int row, double value, double minimum, double maximum)
+    {
+        ShowBar[row] = true;
+
+        // Written only when it does not already read as the value, so that a bar somebody is
+        // dragging is not pushed back to where the world says it is on the same frame.
+        var wanted = (float)(BarSteps * Math.Clamp(Where(value, minimum, maximum), 0d, 1d));
+        if (MathF.Abs(Bars[row] - wanted) < 0.5f) return;
+
+        Bars[row] = wanted;
+    }
+
+    /// <inheritdoc/>
+    public double Barred(int row, double minimum, double maximum) =>
+        minimum + ((maximum - minimum) * (Bars[row] / BarSteps));
+
+    /// <inheritdoc/>
+    public bool Slid(int row) => ShowBar[row];
+
+    /// <summary>How many steps a bar has, which is what the document says.</summary>
+    private const double BarSteps = 1000d;
+
+    /// <summary>Where a value sits between two ends, from nothing to one.</summary>
+    private static double Where(double value, double minimum, double maximum) =>
+        maximum - minimum is var span && span != 0d ? (value - minimum) / span : 0d;
 
     /// <inheritdoc/>
     public void Tick(int row, bool on)
@@ -458,6 +521,7 @@ public sealed partial class DataPanel : IInspectorRows
         Buttons[row] = text;
         ShowButton[row] = true;
     }
+
 
     /// <inheritdoc/>
     public string Typed(int row) => Values[row];
@@ -528,14 +592,15 @@ public sealed partial class DataPanel : IInspectorRows
 
         if (_lines[_held] is not { Field: { } field, Drawer: { } drawer } line) return;
 
-        var target = new FieldTarget(field, EditorShell.Ecs, _subject);
+        var target = new FieldTarget(field, EditorShell.Ecs, _subject, EditorSelection.All);
         var step = drawer.Step(line.Part, target);
         if (step <= 0f) return;
 
         var fine = input.KeyDown(Key.AltLeft) || input.KeyDown(Key.AltRight);
         var fast = input.KeyDown(Key.ShiftLeft) || input.KeyDown(Key.ShiftRight);
 
-        var moved = _from + ((input.MouseX - _went) * step * (fine ? 0.1f : 1f) * (fast ? 10f : 1f));
+        var scale = step * (fine ? 0.1f : 1f) * (fast ? 10f : 1f);
+        var moved = _from + ((input.MouseX - _went) * scale);
 
         if (input.KeyDown(Key.ControlLeft) || input.KeyDown(Key.ControlRight))
         {
@@ -565,7 +630,7 @@ public sealed partial class DataPanel : IInspectorRows
             if (x < rect.X || x > rect.X + rect.Width) continue;
             if (y < rect.Y || y > rect.Y + rect.Height) continue;
 
-            var target = new FieldTarget(field, EditorShell.Ecs, _subject);
+            var target = new FieldTarget(field, EditorShell.Ecs, _subject, EditorSelection.All);
             if (drawer.Number(line.Part, target) is not { } value) continue;
 
             _held = row;
@@ -573,6 +638,39 @@ public sealed partial class DataPanel : IInspectorRows
             _from = value;
             return;
         }
+    }
+
+    /// <summary>
+    /// Says what the row under the pointer is for.
+    /// </summary>
+    /// <remarks>
+    /// Worked out from where the pointer is rather than from a hover state, because the answer is
+    /// wanted for the row and the pointer may be over the box, the tick or the gap between them,
+    /// all of which are the same row to a person.
+    /// </remarks>
+    private void Hover(Input input)
+    {
+        if (Window is not { IsOpen: true } window)
+        {
+            Hint = string.Empty;
+            return;
+        }
+
+        var (x, y) = input.MousePosition;
+
+        for (var row = 0; row < Rows; row++)
+        {
+            if (!Shown[row]) continue;
+            if (_lines[row].Tooltip is not { Length: > 0 } said) continue;
+            if (!Xui.TryRect(window.Element($"drow-{row}"), out var rect)) continue;
+            if (x < rect.X || x > rect.X + rect.Width) continue;
+            if (y < rect.Y || y > rect.Y + rect.Height) continue;
+
+            Hint = said;
+            return;
+        }
+
+        Hint = string.Empty;
     }
 
     /// <summary>Scrolls the rows when the wheel is rolled over the panel.</summary>
@@ -603,17 +701,29 @@ public sealed partial class DataPanel : IInspectorRows
 
         for (var i = 0; i < Rows; i++)
         {
+            if (_turned[i] > 0) continue;
+
             var line = _lines[i];
 
-            if (line.Kind == LineKind.Name)
+            if (line.Kind == InspectorLineKind.Subject)
             {
                 Rename(world, entity, Values[i].Trim());
                 continue;
             }
 
-            if (line is not { Kind: LineKind.Field, Field: { } field, Drawer: { } drawer }) continue;
+            if (line is { Kind: InspectorLineKind.Custom, Line: { } own })
+            {
+                own.Read(new InspectorRow(this, i));
+                continue;
+            }
 
-            drawer.Read(new InspectorRow(this, i), line.Part, new FieldTarget(field, world, entity));
+            if (line is not { Kind: InspectorLineKind.Field, Field: { } field, Drawer: { } drawer })
+                continue;
+
+            drawer.Read(
+                new InspectorRow(this, i),
+                line.Part,
+                new FieldTarget(field, world, entity, EditorSelection.All));
         }
     }
 
@@ -638,16 +748,25 @@ public sealed partial class DataPanel : IInspectorRows
         var world = EditorShell.Ecs;
         var line = _lines[row];
 
-        if (line is { Kind: LineKind.Method, Method: { } method })
+        if (line is { Kind: InspectorLineKind.Method, Method: { } method })
         {
             method.Run(world, _subject);
             return;
         }
 
-        if (line is not { Kind: LineKind.Field, Field: { } field, Drawer: { } drawer }) return;
+        if (line is { Kind: InspectorLineKind.Custom, Line: { } own })
+        {
+            own.Press(new InspectorRow(this, row));
+            return;
+        }
+
+        if (line is not { Kind: InspectorLineKind.Field, Field: { } field, Drawer: { } drawer })
+            return;
 
         drawer.Press(
-            new InspectorRow(this, row), line.Part, new FieldTarget(field, world, _subject));
+            new InspectorRow(this, row),
+            line.Part,
+            new FieldTarget(field, world, _subject, EditorSelection.All));
     }
 
     /// <summary>Opens or shuts a component's block.</summary>
@@ -659,7 +778,7 @@ public sealed partial class DataPanel : IInspectorRows
     [Command("#drow", Count = Rows)]
     public void Fold(int row)
     {
-        if (_lines[row].Kind != LineKind.Heading) return;
+        if (_lines[row].Kind != InspectorLineKind.Heading) return;
 
         var component = _lines[row].Component;
         if (!_shut.Remove(component)) _shut.Add(component);
@@ -687,7 +806,7 @@ public sealed partial class DataPanel : IInspectorRows
     {
         var line = _lines[row];
 
-        if (line.Kind != LineKind.Field) return;
+        if (line.Kind != InspectorLineKind.Field) return;
         if (line.Field is not { IsWritable: true } field) return;
         if (line.Schema is not { CanAdd: true } schema) return;
 
@@ -763,6 +882,32 @@ public sealed partial class DataPanel : IInspectorRows
                             redo => schema.Remove(redo, entity));
                     },
                     Icon: "icons/ui/delete.png"),
+                new MenuItem("-", MenuKind.Separator),
+                new MenuItem(
+                    "Copy values",
+                    MenuKind.Command,
+                    world => _copied = (schema.Name, Snapshot(schema, world, entity)),
+                    Icon: "icons/ui/data.png"),
+                new MenuItem(
+                    "Paste values",
+                    MenuKind.Command,
+                    world =>
+                    {
+                        if (_copied is not { } held || held.Schema != schema.Name) return;
+
+                        var before = Snapshot(schema, world, entity);
+                        Write(schema, world, entity, held.Values);
+
+                        EditorHistory.Record(
+                            $"paste {schema.Name}",
+                            undo => Write(schema, undo, entity, before),
+                            redo => Write(schema, redo, entity, held.Values));
+                    },
+                    // Offered whatever the clipboard holds, and refused unless it holds this
+                    // component: a greyed row says what could be done here, and no row at all
+                    // leaves somebody wondering whether the editor can do it at all.
+                    Enabled: () => _copied is { } held && held.Schema == schema.Name,
+                    Icon: "icons/ui/package.png"),
             ],
             x,
             y);
@@ -804,6 +949,20 @@ public sealed partial class DataPanel : IInspectorRows
         EditorShell.ShowMenu(name, items, x, y);
     }
 
+    /// <summary>What was copied from a component, and which component it came from.</summary>
+    /// <remarks>
+    /// Shared by every inspector rather than held per panel, because copying from one entity and
+    /// pasting onto another is the whole of what it is for.
+    /// </remarks>
+    private static (string Schema, Dictionary<string, object> Values)? _copied;
+
+    /// <summary>Writes a set of values onto a component that is already there.</summary>
+    private static void Write(
+        ComponentSchema schema, EcsWorld world, Entity entity, Dictionary<string, object> values)
+    {
+        foreach (var (name, value) in values) schema.Write(world, entity, name, value);
+    }
+
     /// <summary>Every field of a component, so removing it can be taken back.</summary>
     private static Dictionary<string, object> Snapshot(
         ComponentSchema schema, EcsWorld world, Entity entity)
@@ -827,7 +986,7 @@ public sealed partial class DataPanel : IInspectorRows
         foreach (var (name, value) in values) schema.Write(world, entity, name, value);
     }
 
-    /// <summary>Offers the same list on a right click, since the button is a menu either way.</summary>
+    /// <summary>Offers the same list on a right click, since it is a menu either way.</summary>
     [Context("#d-add")]
     public void AddComponentMenu() => AddComponent();
 

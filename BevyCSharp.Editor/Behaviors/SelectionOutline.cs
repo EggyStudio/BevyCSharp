@@ -25,13 +25,24 @@ public partial struct SelectionOutline
     /// <summary>The accent, matching the one the panels use.</summary>
     private static readonly (float R, float G, float B, float A) Accent = (0.30f, 0.49f, 1f, 1f);
 
-    /// <summary>Draws the box, once a frame, for as long as something is selected.</summary>
+    /// <summary>Draws a box round each selected thing, once a frame.</summary>
+    /// <remarks>
+    /// Each of them rather than one box round the lot: what somebody wants to see is which things
+    /// they picked, and a box drawn round two objects at opposite ends of a level contains mostly
+    /// the things they did not pick.
+    /// </remarks>
     [OnUpdate]
     public static void Draw(BehaviorContext ctx)
     {
         if (!App.HasRenderer) return;
-        if (!EditorSelection.Any) return;
-        if (!Render.TryGetBounds(EditorSelection.Current, out var min, out var max)) return;
+
+        foreach (var entity in EditorSelection.All) Outline(entity);
+    }
+
+    /// <summary>Draws the box round one thing.</summary>
+    private static void Outline(Entity entity)
+    {
+        if (!Render.TryGetBounds(entity, out var min, out var max)) return;
 
         // Twelve edges, written as three groups of four parallel lines, which is the order that
         // makes a mistake in one of them obvious.

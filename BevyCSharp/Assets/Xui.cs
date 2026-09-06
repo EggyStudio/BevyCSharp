@@ -281,13 +281,48 @@ public static unsafe class Xui
         Native.bcs_xui_set_visible(element.Bits, visible ? 1 : 0), $"showing {element}");
 
     /// <summary>
+    /// How many live elements carry a CSS id.
+    /// </summary>
+    /// <remarks>
+    /// One, for a document that is behaving. More than one means two widget trees are alive under
+    /// the same names, and everything written by name reaches only one of them.
+    /// </remarks>
+    public static int Count(string cssId) => App.HasEditor ? Native.bcs_xui_count(cssId) : 0;
+
+    /// <summary>
+    /// Gives an element a CSS class, replacing whatever it had.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What a document cannot say, because it is decided while the program runs: which row is
+    /// selected, which button is armed, which field holds something that will not parse. The
+    /// interface applies the stylesheet again when it notices, so the element takes on everything
+    /// the new class says.
+    /// </para>
+    /// <para>
+    /// One class rather than a list, because the interface matches only the first class an element
+    /// has. Passing nothing leaves the element with none.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The element is gone.</exception>
+    public static void SetClass(Entity element, string? cssClass) => Native.Check(
+        Native.bcs_xui_set_class(element.Bits, cssClass),
+        $"classing {element}");
+
+    /// <summary>
     /// Paints an element's background.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// For a colour that depends on what the element is showing rather than on what it is, which
-    /// is the one thing a stylesheet cannot say. An element painted from here should have no
-    /// background colour in the stylesheet: the interface writes that one, and the two would take
-    /// turns.
+    /// is the one thing a stylesheet cannot say.
+    /// </para>
+    /// <para>
+    /// The editor does not use it, and the reason is worth knowing: painting an element makes the
+    /// interface restyle it, and a restyle puts back the display property whoever is driving the
+    /// panel had just decided. A panel that paints one element cannot reliably hide another in the
+    /// same row.
+    /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">The element is gone.</exception>
     public static void SetColour(Entity element, float red, float green, float blue, float alpha = 1f)

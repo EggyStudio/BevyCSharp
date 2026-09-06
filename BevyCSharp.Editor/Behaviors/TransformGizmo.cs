@@ -50,6 +50,16 @@ public partial struct TransformGizmo
     /// <summary>What it was before the drag, so the drag is one change rather than many.</summary>
     private static Transform _before;
 
+    /// <summary>
+    /// The other selected things and where they were when the drag started.
+    /// </summary>
+    /// <remarks>
+    /// Captured once rather than followed, so a drag applies the same change to each of them from
+    /// where each of them was. Reading them every frame instead would compound: a hand that moved
+    /// a metre would move the second thing a metre per frame.
+    /// </remarks>
+    private static (Entity Entity, Transform Was)[] _others = [];
+
     /// <summary>Where along the axis, or at what angle, the drag started.</summary>
     private static float _start;
 
@@ -117,6 +127,7 @@ public partial struct TransformGizmo
         Axis = nearest;
         _axes = axes;
         _subject = entity;
+        _others = Rest(ctx, entity);
         _before = transform;
 
         // The point the handles are drawn about, kept for the whole drag. It is the middle of what
@@ -249,6 +260,59 @@ public partial struct TransformGizmo
         return closest;
     }
 
+    /// <summary>Everything selected except the one the handles are on, and where it was.</summary>
+    private static (Entity Entity, Transform Was)[] Rest(BehaviorContext ctx, Entity subject)
+    {
+        if (EditorSelection.Count < 2) return [];
+
+        var rest = new List<(Entity, Transform)>();
+
+        foreach (var entity in EditorSelection.All)
+        {
+            if (entity == subject) continue;
+            if (!ctx.Ecs.TryGet<Transform>(entity, out var was)) continue;
+
+            rest.Add((entity, was));
+        }
+
+        return [.. rest];
+    }
+
+    /// <summary>
+    /// Gives everything else selected the same change the handles made.
+    /// </summary>
+    /// <remarks>
+    /// Each about its own origin rather than about the one being dragged. Turning three things
+    /// about a shared centre swings two of them across the level, which is occasionally what
+    /// somebody wants and never what they expect from a first drag.
+    /// </remarks>
+    private static void Share(BehaviorContext ctx, Transform current)
+    {
+        if (_others.Length == 0) return;
+
+        var moved = current.Translation - _before.Translation;
+        var turned = current.Rotation * _before.Rotation.Conjugate;
+        var grew = new Vec3(
+            Ratio(current.Scale.X, _before.Scale.X),
+            Ratio(current.Scale.Y, _before.Scale.Y),
+            Ratio(current.Scale.Z, _before.Scale.Z));
+
+        foreach (var (entity, was) in _others)
+        {
+            if (!ctx.Ecs.TryGet<Transform>(entity, out var now)) continue;
+
+            now.Translation = was.Translation + moved;
+            now.Rotation = turned * was.Rotation;
+            now.Scale = new Vec3(
+                was.Scale.X * grew.X, was.Scale.Y * grew.Y, was.Scale.Z * grew.Z);
+
+            ctx.Ecs.Set(entity, now);
+        }
+    }
+
+    /// <summary>How much larger one number is than another, with nothing meaning the same.</summary>
+    private static float Ratio(float now, float was) => MathF.Abs(was) < 0.0001f ? 1f : now / was;
+
     /// <summary>Applies the drag to the selection.</summary>
     private static void Apply(BehaviorContext ctx, Entity camera, float x, float y)
     {
@@ -258,6 +322,7 @@ public partial struct TransformGizmo
         {
             ApplyFree(ctx, camera, x, y, ref current);
             ctx.Ecs.Set(_subject, current);
+            Share(ctx, current);
             return;
         }
 
@@ -294,6 +359,7 @@ public partial struct TransformGizmo
         }
 
         ctx.Ecs.Set(_subject, current);
+        Share(ctx, current);
     }
 
     /// <summary>
@@ -371,9 +437,11 @@ public partial struct TransformGizmo
 
         var entity = _subject;
         var before = _before;
+        var others = _others;
 
         Axis = -1;
         _subject = Entity.None;
+        _others = [];
 
         if (!ctx.Ecs.TryGet<Transform>(entity, out var after)) return;
         if (after.Translation == before.Translation
@@ -383,10 +451,30 @@ public partial struct TransformGizmo
             return;
         }
 
+        // Everything the drag touched, taken back together. One drag is one thing somebody did,
+        // however many things it moved.
+        var moved = new List<(Entity Entity, Transform Was, Transform Now)>
+        {
+            (entity, before, after),
+        };
+
+        foreach (var (other, was) in others)
+        {
+            if (!ctx.Ecs.TryGet<Transform>(other, out var now)) continue;
+
+            moved.Add((other, was, now));
+        }
+
         EditorHistory.Record(
             EditorTools.Current.ToString().ToLowerInvariant(),
-            world => world.Set(entity, before),
-            world => world.Set(entity, after));
+            world =>
+            {
+                foreach (var (which, was, _) in moved) world.Set(which, was);
+            },
+            world =>
+            {
+                foreach (var (which, _, now) in moved) world.Set(which, now);
+            });
     }
 
     /// <summary>

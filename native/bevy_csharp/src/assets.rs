@@ -76,6 +76,23 @@ fn pack(index: u32, generation: u32) -> i32 {
     ((generation & 0x7FF) << 20 | (index & 0xF_FFFF)) as i32
 }
 
+/// The generation a slot starts at, which is one rather than nothing.
+///
+/// So that no live handle ever packs to zero. A component holding an asset is a struct that starts
+/// out zeroed, and a zero that named the first asset ever loaded would give every freshly added
+/// component somebody else's mesh.
+const FIRST: u32 = 1;
+
+/// The generation after this one, never landing back on nothing.
+fn next(generation: u32) -> u32 {
+    // Wrapping keeps the packing width honest. A slot would have to be recycled two thousand
+    // times before a stale value could collide, by which point it is long discarded.
+    match generation.wrapping_add(1) & 0x7FF {
+        0 => FIRST,
+        wrapped => wrapped,
+    }
+}
+
 /// Splits the integer C# holds back into a slot index and generation.
 fn unpack(packed: i32) -> Option<(usize, u32)> {
     if packed < 0 {
@@ -101,9 +118,9 @@ impl AssetHandles {
         let index = self.slots.len() as u32;
         self.slots.push(Slot {
             handle: Some(handle),
-            generation: 0,
+            generation: FIRST,
         });
-        pack(index, 0)
+        pack(index, FIRST)
     }
 
     /// Borrows a handle, rejecting one whose slot has since been reused.
@@ -129,9 +146,7 @@ impl AssetHandles {
         }
 
         slot.handle = None;
-        // Wrapping keeps the packing width honest. A slot would have to be recycled two thousand
-        // times before a stale value could collide, by which point it is long discarded.
-        slot.generation = slot.generation.wrapping_add(1) & 0x7FF;
+        slot.generation = next(slot.generation);
         self.free.push(index as u32);
         true
     }
@@ -309,6 +324,39 @@ pub unsafe extern "C" fn bcs_asset_load_image(
 
             world.get_resource_or_init::<AssetHandles>().insert(handle)
         })
+    })
+}
+
+/// Writes the path an asset was loaded from into `out`, returning the length in bytes it needs.
+///
+/// What turns a handle back into something a person recognises: a field holding an asset shows the
+/// file it points at rather than a number, and something saving a world writes the path rather
+/// than a key that means nothing next time the program runs.
+///
+/// Answers nothing for a handle to an asset that was built rather than loaded, which has no path.
+///
+/// # Safety
+/// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_asset_path(handle: i32, out: *mut u8, capacity: i32) -> i32 {
+    crate::interop::guard(|| {
+        with_world_opt(|world| {
+            let Some(handles) = world.get_resource::<AssetHandles>() else {
+                return status::NOT_PRESENT;
+            };
+            let Some(id) = handles.get(handle).map(|h| h.id()) else {
+                return status::NOT_PRESENT;
+            };
+            let Some(server) = world.get_resource::<AssetServer>() else {
+                return status::INVALID_STATE;
+            };
+
+            match server.get_path(id) {
+                Some(path) => unsafe { crate::interop::write_text(&path.to_string(), out, capacity) },
+                None => status::NOT_PRESENT,
+            }
+        })
+        .unwrap_or(status::INVALID_STATE)
     })
 }
 

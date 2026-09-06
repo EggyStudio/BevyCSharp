@@ -443,10 +443,22 @@ Ordered so that each one is worth having before the next exists.
 
 These constraints shaped the panels, and all of them are the crate's rather than ours:
 
-- **One input per row draws.** Three number boxes side by side show the first one's text and leave
-  the other two empty, whatever is written to them, however often. So a vector is three rows, one
-  per axis, each with a box that draws. This is the single largest thing a fork of the crate would
-  buy back.
+- **Hiding an element takes two writes.** Setting `display: none` takes it out of the layout, and
+  a node that has been drawn once keeps the size it was last given, so a subtree the layout has
+  stopped visiting goes on being painted at that size. `bcs_xui_set_visible` therefore writes the
+  display and the visibility together, and reads back as showing only when both agree. What it must
+  not write is the visibility the engine works out from those, which propagates on its own: writing
+  that directly leaves widgets that never come back.
+- **Painting an element defeats hiding.** Writing a background colour makes the interface restyle
+  the element, and a restyle puts back the display property the panel had just decided, so a panel
+  that paints one element cannot reliably hide another in the same row. `bcs_xui_set_colour` exists
+  and the editor does not use it: a colour that has to change while the editor runs is a picture
+  instead, which is why the handles beside a vector's numbers are three small files.
+- **A failed command ends the process.** The interface inserts a marker on every node that appeared
+  this frame without checking that the node is still there when the command runs, so a node that
+  came and went inside one frame takes the editor down with it. The editor replaces the fallback
+  error handler with one that logs, which a game built on the bridge does not: for a tool with
+  unsaved work in it, a line in a log beats an abort.
 - **Text written to a widget before its own text child exists is held and never drawn.** A widget
   draws its text through a child spawned a frame or two after the widget itself, and a write before
   then changes the field, is noticed with no child to update, and is overwritten when the child
@@ -459,6 +471,10 @@ These constraints shaped the panels, and all of them are the crate's rather than
 - **An element's display is put back by the stylesheet** whenever the interface restyles the
   widget, so what a panel last wrote is not what is in force. Visibility is read before it is
   written rather than remembered.
+- **A row that is reused reports what it used to say.** The pool draws whatever line is scrolled
+  into it, and a widget whose text is replaced reports the change a frame or two later, which is
+  indistinguishable from somebody typing that text into the new field. A row that turns therefore
+  ignores what its widgets report for a few frames.
 - **The font has no arrows, chevrons or hamburger.** A glyph it lacks draws as a box and says
   nothing about why, so every icon drawn as text is ASCII and lives in one table, `EditorIcons`.
   Real icons are images instead: the toolbar's are PNGs rasterised from the SVG set in
@@ -496,9 +512,11 @@ These constraints shaped the panels, and all of them are the crate's rather than
 - **CSS ids are global**, not per document. Every open document is one document as far as the
   crate is concerned, so `#row-0` in one panel and `#row-0` in another are the same element. Every
   id in this editor is prefixed by its panel.
-- **A class cannot be given to an element after the document is parsed.** So a selected row says
-  so in its own text rather than by being styled. This is the one place the editor visibly settles
-  for less than it should, and an entry point that set a class would replace it.
+- **A class is one class.** An element's class can be set while the editor runs, and the interface
+  applies the stylesheet again when it notices, which is how a selected row takes on a background
+  the document knew nothing about. What it cannot have is two of them: the interface matches only
+  the first, so `bcs_xui_set_class` takes one name and replaces whatever was there. It is written
+  only when it changes, since the interface restyles the element every time it is written.
 - **Every document lays a body over the whole window**, and a body that takes the pointer swallows
   every click meant for the panels underneath it. `body { pointer-events: none }` and
   `.panel { pointer-events: auto }` in the shipped stylesheet are what make more than one panel
@@ -523,6 +541,68 @@ answer for the row it sits in, and every label the editor writes has one, since 
 written to. `pointer-events: none` on every label and picture inside something clickable puts the
 answer back where the command is.
 
+## The inspector
+
+The panel that shows what is selected owns a pool of rows and nothing else. Everything about what
+goes in them is decided elsewhere, in three pieces.
+
+**A drawer draws one kind of value.** `IFieldDrawer` answers whether it takes a field, says how
+many rows it wants, fills each of them, and reads back what was typed or ticked. There is one per
+kind of value and each is a file: a number, a number with two ends, three numbers, a rotation as
+three angles, a colour, a flag, a choice, a set of flags, a reference to another entity, and text
+for anything left over. The table is searched newest first, so a game takes over a field by adding
+a drawer after the built-in ones.
+
+A component's **properties are described as well as its fields**, and read and written through
+themselves. Something worked out from two fields, something clamped on the way in, something kept
+in one unit and shown in another: all of that is the property's own business, and a tool that went
+round it would show a number nothing else in the program agrees with. A property with no setter is
+a row that can be read and not changed.
+
+**A field says how it wants to be drawn, in attributes.** The generator reads them at compile time
+and leaves the answers on the schema as `FieldHints`, so nothing reflects at runtime:
+
+| attribute | what it does |
+|---|---|
+| `[Range(min, max)]` | draws a bar as well as a box |
+| `[Label("...")]` | what the row is called, when the field's name is not the right words |
+| `[Tooltip("...")]` | a sentence shown at the foot of the panel while the pointer is over the row |
+| `[Unit("m")]` | what the number is measured in, after the box |
+| `[Step(0.1)]` | what one pixel of a drag on the handle is worth |
+| `[ReadOnly]` | drawn on a flat plate rather than in a box, and not written back |
+| `[Hidden]` | not drawn at all, on a field or on a method |
+| `[Header("...")]` | a word above the field, grouping what follows |
+| `[Space]` | a blank row above the field |
+| `[Colour]` | three numbers that are a colour, with the six digits above them |
+| `[ShowIf(nameof(Other))]` | drawn only while another field of the same component reads true |
+| `[Order(n)]` | where the field or button sits among its neighbours |
+| `[Button("...")]` | what a method's button says |
+| `[Asset(AssetKind.Mesh)]` | which files to offer for a field that holds an asset |
+
+**A pass adds what is not a field at all.** `EditorInspector` runs passes before the components,
+per component, per field, per method, and after everything. A pass that takes a field says so and
+the ordinary drawing of it is skipped, which is enough to add a row, replace a row, hide a row, or
+take over a whole component without any of those being a separate mechanism. The editor uses it
+for the one line an entity has that is not a component's field: what it hangs from.
+
+**More than one thing can be selected.** Control and a click in the hierarchy adds to the
+selection or takes something out of it, and the inspector then shows the components every selected
+thing carries, marks a field the selection disagrees about as mixed, and writes an edit to all of
+them. A vector says so per row, because two things in different places may still agree about two
+of the three numbers. A drag on the handles moves, turns or stretches all of them, each about its
+own origin, and undoes as one change. What still reads the last one picked is where the handles are
+drawn and what the panel's heading names.
+
+A field holding an asset shows the file it points at rather than the number a handle is, and
+pressing it offers the files under the asset root that suit it. Which those are is the field's own
+business, because a handle to a mesh and a handle to a sound are the same type and nothing else can
+tell them apart.
+
+Every number has a handle beside its box. Dragging it sideways changes the number, at the field's
+own step or the editor's; shift moves ten times as fast, alt a tenth, and control lands on the
+tool's grid. Right clicking a field's name puts it back to what it is on a freshly added component,
+which is asked of the component rather than assumed.
+
 ## Adding to it
 
 Nothing below needs a panel, a document or a stylesheet.
@@ -544,18 +624,30 @@ EditorSettings.Flag("My game", "Friendly fire", () => Friendly, value => Friendl
 
 // What one of the game's own entities looks like in the hierarchy.
 EditorKinds.Add(new EntityKind("MyGame.Enemy", "icons/ui/users.png", 15));
+
+// How one of the game's own values is drawn in the inspector. Added after the built-in drawers,
+// so it wins for the fields it takes.
+EditorDrawers.Add(new HealthBarDrawer());
+
+// A line in the inspector that is not a field of anything: a warning, a readout, a button that
+// only makes sense for one kind of thing.
+EditorInspector.OnAfter(plan =>
+{
+    if (plan.World.NameOf(plan.Entity) is null) plan.Note("This entity has no name.");
+});
 ```
 
 ## Verification
 
-**Clicks are driven rather than simulated.** `SyntheticInput` writes the window's own messages: the
+**Clicks and the wheel are driven rather than simulated.** `SyntheticInput` writes the window's own messages: the
 `CursorMoved` and `MouseButtonInput` a real pointer produces, both as themselves and inside the
 `WindowEvent` batch the picking backend reads. So a click goes through the picking raycast, the
 widget that decides it was clicked, and the button state the camera reads, exactly as a hand's
 would. Calling the method a click would have called tests the method and not the path to it, and
 the path is where the failures were: a ring that could not be grabbed, a flyout that opened once, a
-selection that cleared itself on the frame it was made. What it cannot do is move the desktop's
-cursor, and it does not try.
+selection that cleared itself on the frame it was made. `SyntheticInput.Wheel` does the same for
+the wheel, which is what a list that pages and a camera that zooms read. What none of it can do is
+move the desktop's cursor, and it does not try.
 
 Nothing here is provable by a test alone. `Render.Screenshot` exists for that reason: a panel
 either lays out correctly or it does not, and only the picture says which. Every stage ends with a

@@ -323,8 +323,10 @@ Points to get right:
 `BevyCSharp.Editor` runs. The world on the left with a picture per row, the tools along the top, and
 everything else behind a hamburger whose contents are a table of paths; selecting something opens
 the panel that describes it (components with fields as blocks that open and shut, behaviors among
-them, and everything with nothing to show as a chip), the asset browser lives as a tab along the
-bottom, settings take the whole window as a sheet, and the docks reflow around each other. Gizmos
+them, and everything with nothing to show as a chip), each field drawn by whichever drawer takes
+it and told how to draw itself by the attributes on the field, the asset browser lives as a tab
+along the bottom, settings are a column down the middle of the window, and the docks reflow around
+each other. Gizmos
 draw the selection, its handles, the ground and the camera's orientation, and a drag on a handle
 moves, turns or stretches what is selected. Underneath is the framework each panel is three files on
 top of: documents in HTML and CSS, bindings to fields and commands to methods through the generator,
@@ -336,9 +338,10 @@ What is left:
 
 - **Clicking a mesh to select it works**, and so does every other pointer path, driven through
   `SyntheticInput`, which writes the window's own messages and so goes through picking, the
-  widgets and the camera exactly as a hand would. This was the largest hole in the editor's
-  verification and it is closed; what is still untested that way is the keyboard, which has no
-  equivalent yet and would want the same treatment.
+  widgets and the camera exactly as a hand would. The wheel is driven the same way, so a list that
+  pages can be exercised too. This was the largest hole in the editor's verification and it is
+  closed; what is still untested that way is the keyboard, which has no equivalent yet and would
+  want the same treatment.
 - **Half of the world is saved.** `assets/world.json` keeps every named entity's name and every
   component with a schema, which is what the editor can change. What it cannot write is the
   engine's own components: a mesh handle, a material, a camera's projection.
@@ -348,17 +351,21 @@ What is left:
 - **Selection that survives a rebuild.** A selected entity is an id, and a hot reload that
   respawns what a script made hands back different ids. Selecting by name would survive it, at the
   cost of being wrong for the entities that share one.
-- **Rows that can be styled while they run.** A row says it is selected by putting a mark in its
-  own text, because nothing can give an element a class after the document is parsed. An entry
-  point that set a CSS class would replace that, and would also give hover and pressed states to
-  anything built on the framework rather than only to what the stylesheet can reach.
-- **A fork of the interface crate would buy back seven things**, all of them worked around today
-  and all of them listed in EDITOR.md: only the first input of a row draws its text, a value
-  written before a widget's text child exists is never drawn, a stylesheet reapplication undoes
-  what was written to an element's display, a menu cannot be drawn over a panel whatever it is
-  told about layering, `align-content` is not read at all, so a wrapping box cannot be told to
-  pack its lines, only the first class in a `class` attribute is matched, and a backdrop blur is
-  drawn over an element's own background rather than under it.
+- **Rows that can be styled while they run.** `bcs_xui_set_class` gives an element a class while
+  the editor runs, and the hierarchy uses it: a selected row wears a background rather than a mark
+  in its text. What nothing uses it for yet is hover and pressed states, which want the pointer's
+  position tested against every row every frame, or an entry point that reports what the interface
+  already knows about which widget is under the pointer.
+- **A fork of the interface crate would buy back nine things**, all of them worked around today
+  and all of them listed in EDITOR.md: a value written before a widget's text child exists is
+  never drawn, a stylesheet reapplication undoes what was written to an element's display, hiding
+  an element takes both a display and a visibility write because a node drawn once keeps being
+  painted at the size it had, painting an element's background makes the interface restyle it and
+  so undoes the hiding of everything else in the same row, a command that fails ends the process
+  rather than reporting, a menu cannot be drawn over a panel whatever it is told about layering,
+  `align-content` is not read at all, so a wrapping box cannot be told to pack its lines, only the
+  first class in a `class` attribute is matched, and a backdrop blur is drawn over an element's own
+  background rather than under it.
 - **One shape per call.** Every gizmo crosses the ABI on its own, and the fading grid asks for two
   hundred and forty of them a frame, about four percent of one. Fine at this size and the wrong
   shape at ten times it: a batched entry point taking an array would make the cost of a wireframe or
@@ -384,6 +391,18 @@ What is left:
   What neither can do is see a component the bridge does not name: an entity whose only components
   are engine-side and unnamed reads as plain. Naming more of them is a bridge job, not an editor
   one.
+- **The inspector draws a field through a drawer, and anything else through a pass.** One class
+  per kind of value, a table searched newest first, and attributes on the field that say what it
+  wants: a range, a unit, a step, a heading, a condition, a label, a tooltip. Several things can be
+  selected and edited together, with a field the selection disagrees about marked as mixed, and a
+  drag on the handles takes all of them. What a selection cannot yet do is turn or stretch about a
+  shared centre: each thing turns about its own origin, which is what a first drag should do and
+  not the only thing an editor should offer.
+- **A field can hold an asset, and the engine's own cannot.** A component of the game's own that
+  holds an `AssetHandle` is drawn by name, and pressing it offers the files under the asset root
+  that suit it. What is still out of reach is the engine's side of the same question: the mesh and
+  the material on an entity are Rust components with no schema, so the editor can put a handle in
+  a game's field and cannot yet point an entity at a different mesh.
 - **Settings are the editor's, not the project's.** `EditorSettings` saves to `assets/settings.txt`
   beside the layout, and everything on it belongs to this editor build. A project setting worth the
   name (a startup scene, a physics step, a build target) needs somewhere to live that is part of

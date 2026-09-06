@@ -215,6 +215,17 @@ public struct Quat : IEquatable<Quat>
         a.W * b.Z + a.X * b.Y - a.Y * b.X + a.Z * b.W,
         a.W * b.W - a.X * b.X - a.Y * b.Y - a.Z * b.Z);
 
+    /// <summary>
+    /// The rotation that undoes this one.
+    /// </summary>
+    /// <remarks>
+    /// The conjugate, which is the inverse for a rotation, since a rotation is a unit quaternion.
+    /// What it is for is asking how one orientation differs from another: <c>b * a.Conjugate</c>
+    /// is the turn that takes <c>a</c> to <c>b</c>, which is what applying somebody's drag to a
+    /// second thing needs.
+    /// </remarks>
+    public Quat Conjugate => new(-X, -Y, -Z, W);
+
     /// <summary>Turns a point by this rotation.</summary>
     /// <remarks>
     /// The usual expansion of <c>q v q*</c>, which is a handful of multiplications rather than

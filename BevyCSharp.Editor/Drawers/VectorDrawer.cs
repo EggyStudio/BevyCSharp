@@ -23,8 +23,11 @@ public sealed class VectorDrawer : IFieldDrawer
     public void Draw(InspectorRow row, int part, FieldTarget target)
     {
         // The name on the first row only, so three rows read as one thing rather than as three.
-        row.Name(part == 0 ? target.Field.Name : string.Empty);
-        row.Box(Parts(target.Read())[part], Grips.Axis(part));
+        row.Name(part == 0 ? target.Field.Title : string.Empty);
+        row.Box(Parts(target.Read())[part], Grips.Axis(part), target.Field.IsWritable);
+        row.Unit(Suffix(target.Field));
+
+        if (!target.Agree(value => Parts(value)[part])) row.Mixed();
     }
 
     /// <inheritdoc/>
@@ -60,12 +63,15 @@ public sealed class VectorDrawer : IFieldDrawer
     /// <inheritdoc/>
     public float Step(int part, FieldTarget target) => EditorTools.MoveStep * 0.1f;
 
+    /// <summary>What the three numbers are measured in.</summary>
+    private static string Suffix(ComponentField field) => field.Hints.Unit ?? string.Empty;
+
     /// <summary>The three numbers as they are written in their boxes.</summary>
     private static string[] Parts(object? value) => value is Vec3 vector
         ? [EditorFields.Text(vector.X), EditorFields.Text(vector.Y), EditorFields.Text(vector.Z)]
         : ["", "", ""];
 
-    /// <summary>The three numbers back into a vector, or nothing when one of them is not one.</summary>
+    /// <summary>The numbers back into a vector, or nothing when one of them is not a number.</summary>
     private static object? Compose(string[] parts)
     {
         if (!EditorFields.TryNumber(parts[0], out var x)) return null;

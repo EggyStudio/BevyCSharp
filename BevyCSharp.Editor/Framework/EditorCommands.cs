@@ -32,6 +32,7 @@ public static class EditorCommands
         Project();
         Toolbar();
         Settings();
+        EditorInspectorLines.Register();
     }
 
     /// <summary>
@@ -128,6 +129,15 @@ public static class EditorCommands
             "Project", "Last build", static () => EditorScripts.LastError ?? "no errors", 12);
 
         EditorSettings.Action("Project", "Reload now", EditorScripts.Reload, 13);
+
+        EditorSettings.Heading("Editor", "Inspector", 6);
+
+        EditorSettings.Flag(
+            "Editor",
+            "Letter the axis handles",
+            static () => Grips.Letters,
+            static on => Grips.Letters = on,
+            7);
 
         EditorSettings.Heading("About", "BevyCSharp.Editor", 0);
 
@@ -394,17 +404,21 @@ public static class EditorCommands
             "Entity/Unparent",
             static world =>
             {
-                var entity = EditorSelection.Current;
-                if (entity.IsNone) return;
+                // Everything selected, because a menu opened over three chosen things is about
+                // the three. One selected is the ordinary case and behaves as it always did.
+                foreach (var entity in EditorSelection.All.ToArray())
+                {
+                    var previous = world.ParentOf(entity);
+                    if (previous.IsNone) continue;
 
-                var previous = world.ParentOf(entity);
-                if (previous.IsNone) return;
+                    var moved = entity;
 
-                world.ClearParent(entity);
-                EditorHistory.Record(
-                    "unparent",
-                    undo => undo.SetParent(entity, previous),
-                    redo => redo.ClearParent(entity));
+                    world.ClearParent(moved);
+                    EditorHistory.Record(
+                        "unparent",
+                        undo => undo.SetParent(moved, previous),
+                        redo => redo.ClearParent(moved));
+                }
             },
             1,
             "icons/ui/remove.png");
@@ -415,10 +429,8 @@ public static class EditorCommands
             "Entity/Delete",
             static world =>
             {
-                var entity = EditorSelection.Current;
-                if (entity.IsNone) return;
+                foreach (var entity in EditorSelection.All.ToArray()) world.Despawn(entity);
 
-                world.Despawn(entity);
                 EditorSelection.Clear();
             },
             3,

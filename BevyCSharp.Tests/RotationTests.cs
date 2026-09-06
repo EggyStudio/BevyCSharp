@@ -97,3 +97,36 @@ public sealed class RotationTests
         }
     }
 }
+
+/// <summary>Covers the rotation that undoes another, which is how one drag reaches many things.</summary>
+public sealed class ConjugateTests
+{
+    [Fact]
+    public void AConjugateUndoesTheRotation()
+    {
+        var turn = Quat.FromEuler(0.3f, 1.1f, -0.4f);
+        var back = turn.Conjugate * turn;
+
+        Assert.Equal(0f, back.X, 4);
+        Assert.Equal(0f, back.Y, 4);
+        Assert.Equal(0f, back.Z, 4);
+        Assert.Equal(1f, MathF.Abs(back.W), 4);
+    }
+
+    [Fact]
+    public void TheDifferenceBetweenTwoRotationsTakesOneToTheOther()
+    {
+        var from = Quat.FromEuler(0.2f, 0.5f, 0f);
+        var to = Quat.FromEuler(-0.1f, 1.2f, 0.3f);
+
+        // What the gizmo does with a drag: work out how the thing being dragged turned, and give
+        // everything else the same turn.
+        var difference = to * from.Conjugate;
+        var applied = difference * from;
+
+        Assert.Equal(to.X, applied.X, 4);
+        Assert.Equal(to.Y, applied.Y, 4);
+        Assert.Equal(to.Z, applied.Z, 4);
+        Assert.Equal(to.W, applied.W, 4);
+    }
+}

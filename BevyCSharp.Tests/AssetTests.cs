@@ -33,6 +33,46 @@ public sealed class AssetTests
     }
 
     [Fact]
+    public void AZeroedHandleNamesNothing()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            // A component holding an asset starts out zeroed, so the table must never hand out a
+            // key of zero: a freshly added component would otherwise hold whatever was loaded
+            // first, and nothing about it would look wrong.
+            Assert.False(default(AssetHandle).IsValid);
+
+            var first = AssetServer.Load(AssetKind.Mesh, "models/first.gltf");
+
+            Assert.True(first.IsValid);
+            Assert.NotEqual(default, first);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
+    public void AHandleRemembersThePathItCameFrom()
+    {
+        using var harness = new EngineHarness(frames: 3);
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            var handle = AssetServer.Load(AssetKind.Mesh, "models/nothing-here.gltf");
+
+            // The path is what the handle was asked for, whether or not the file is there: a tool
+            // showing what a field points at has to be able to say so before the load finishes,
+            // and has to say something truthful when it never does.
+            Assert.Equal("models/nothing-here.gltf", AssetServer.PathOf(handle));
+            Assert.Null(AssetServer.PathOf(AssetHandle.None));
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void AMissingFileEndsUpFailedRatherThanStuck()
     {
         // Nothing here loads a real asset, so this is the state transition that can be observed

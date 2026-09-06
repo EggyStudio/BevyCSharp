@@ -139,7 +139,22 @@ pub fn install(app: &mut bevy::app::App) {
     use crate::interop::BcsUiEvent;
     use live::UiEvents;
 
+    // A failed command warns rather than ending the process.
+    //
+    // The interface spawns and despawns widget nodes of its own accord, and one of its systems
+    // inserts a marker on every node that appeared this frame without checking that the node is
+    // still there when the command runs. A node that came and went inside one frame therefore
+    // takes the whole editor down, which for a tool somebody has unsaved work in is the worst
+    // possible answer to a race nothing here can avoid.
+    //
+    // Only the editor asks for this. A game built on the bridge keeps the strict default, where a
+    // command that could not be applied is a fault to be fixed rather than a line in a log.
     app.add_plugins(ExtendedUiPlugin);
+
+    // Written outright rather than through `set_error_handler`, which fills the resource in only
+    // when nothing has yet, and written after the plugins so that theirs is the one replaced.
+    app.world_mut()
+        .insert_resource(bevy::ecs::error::FallbackErrorHandler(bevy::ecs::error::warn));
     app.init_resource::<live::Documents>();
     app.init_resource::<live::PendingText>();
     app.init_resource::<UiEvents>();
@@ -518,6 +533,40 @@ pub unsafe extern "C" fn bcs_xui_element(css_id: *const core::ffi::c_char) -> u6
                     .unwrap_or(0)
             })
             .unwrap_or(0)
+        }
+    })
+}
+
+/// How many live elements carry a CSS id.
+///
+/// One, for a document that is behaving. More than one means two widget trees are alive with the
+/// same names in them, which is what a rebuild leaves behind when it spawns the new tree without
+/// taking the old one down: writes land on whichever the lookup finds first, and the other draws
+/// whatever it was last told.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_xui_count(css_id: *const core::ffi::c_char) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = css_id;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bevy_extended_ui::styles::CssID;
+
+            let Some(wanted) = (unsafe { crate::interop::cstr_to_string(css_id) }) else {
+                return status::NULL_ARG;
+            };
+
+            crate::state::with_world(|world| {
+                world
+                    .query::<&CssID>()
+                    .iter(world)
+                    .filter(|id| id.0 == wanted)
+                    .count() as i32
+            })
         }
     })
 }
@@ -1156,6 +1205,61 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
     })
 }
 
+/// Rolls the mouse wheel, as the window would report it.
+///
+/// The other half of driving the pointer. A list that scrolls, a camera that zooms and a panel
+/// that pages all read the wheel, and until this existed none of those could be exercised without
+/// a hand on a mouse. Written as lines rather than pixels, which is what a wheel with detents
+/// reports and what everything reading it is written against.
+///
+/// Returns [`status::UNSUPPORTED`] on a build with no window.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_input_wheel(x: f32, y: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (x, y);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
+            use bevy::window::{PrimaryWindow, Window, WindowEvent};
+
+            crate::state::with_world(|world| {
+                let Some(window) = world
+                    .query_filtered::<bevy::ecs::entity::Entity, (
+                        bevy::ecs::query::With<Window>,
+                        bevy::ecs::query::With<PrimaryWindow>,
+                    )>()
+                    .iter(world)
+                    .next()
+                else {
+                    return status::INVALID_STATE;
+                };
+
+                let wheel = MouseWheel {
+                    unit: MouseScrollUnit::Line,
+                    x,
+                    y,
+                    window,
+                    // What a mouse always reports. The phase is there for a touchpad, which says
+                    // when a two-finger scroll starts and ends.
+                    phase: bevy::input::touch::TouchPhase::Moved,
+                };
+
+                // Both the message and the batch, for the same reason a click is written twice:
+                // one reader wants the message and another reads the window's own report.
+                world.write_message(wheel.clone());
+                world.write_message(WindowEvent::MouseWheel(wheel));
+
+                status::OK
+            })
+        }
+    })
+}
+
 /// Takes the keyboard away from whatever has it.
 ///
 /// There is no other way out of a text field. The interface gives a widget focus when it is
@@ -1301,7 +1405,17 @@ pub unsafe extern "C" fn bcs_xui_get_visible(entity: u64, out: *mut i32) -> i32 
                     return status::NOT_PRESENT;
                 };
 
-                unsafe { out.write(i32::from(node.display != Display::None)) };
+                // Both halves have to agree. Hiding writes the display and the visibility
+                // together, and the interface puts the display back whenever it restyles the
+                // element, so an element that says it is laid out but not painted is one that was
+                // hidden and has been half woken up. Answering "showing" there would leave it
+                // invisible for good, because nothing would write the visibility again.
+                let laid_out = node.display != Display::None;
+                let painted = entity_ref
+                    .get::<bevy::prelude::Visibility>()
+                    .is_none_or(|visibility| *visibility != bevy::prelude::Visibility::Hidden);
+
+                unsafe { out.write(i32::from(laid_out && painted)) };
                 status::OK
             })
         }
@@ -1310,8 +1424,11 @@ pub unsafe extern "C" fn bcs_xui_get_visible(entity: u64, out: *mut i32) -> i32 
 
 /// Shows or hides an element, and everything under it.
 ///
-/// Hidden by `Display::None` rather than by visibility, so a hidden panel takes no space and its
-/// neighbours close up, which is what a flyout being dismissed should look like.
+/// Both ways at once, and both are needed. `Display::None` is what takes the element out of the
+/// layout so its neighbours close up, which is what a flyout being dismissed should look like. On
+/// its own it is not enough: a node that has been drawn once keeps the size it was last given, and
+/// a subtree the layout has stopped visiting goes on being painted at that size. Saying it is not
+/// visible as well stops the paint whatever the stale geometry says.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_xui_set_visible(entity: u64, visible: i32) -> i32 {
     crate::interop::guard(|| {
@@ -1323,6 +1440,7 @@ pub extern "C" fn bcs_xui_set_visible(entity: u64, visible: i32) -> i32 {
 
         #[cfg(feature = "editor")]
         {
+            use bevy::prelude::Visibility;
             use bevy::ui::{Display, Node};
 
             crate::state::with_world(|world| {
@@ -1330,15 +1448,93 @@ pub extern "C" fn bcs_xui_set_visible(entity: u64, visible: i32) -> i32 {
                 let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
                     return status::NO_ENTITY;
                 };
-                let Some(mut node) = entity_mut.get_mut::<Node>() else {
-                    return status::NOT_PRESENT;
+
+                {
+                    let Some(mut node) = entity_mut.get_mut::<Node>() else {
+                        return status::NOT_PRESENT;
+                    };
+
+                    node.display = if visible != 0 {
+                        Display::Flex
+                    } else {
+                        Display::None
+                    };
+                }
+
+                // Told outright rather than inherited: the interface hides the body of a document
+                // that is not the one in front, and an element that only says "whatever my parent
+                // says" would go with it and never come back.
+                let wanted = if visible != 0 {
+                    Visibility::Visible
+                } else {
+                    Visibility::Hidden
                 };
 
-                node.display = if visible != 0 {
-                    Display::Flex
-                } else {
-                    Display::None
+                match entity_mut.get_mut::<Visibility>() {
+                    Some(mut current) => *current = wanted,
+                    None => {
+                        entity_mut.insert(wanted);
+                    }
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Gives an element a CSS class, replacing whatever it had.
+///
+/// What a document cannot say, because it is decided while the program runs: which row is
+/// selected, which button is armed, which field holds something that will not parse. The interface
+/// notices the change and applies the stylesheet again, so the element takes on everything the new
+/// class says.
+///
+/// One class, not a list. The interface matches only the first class an element has, so a list
+/// would be a list with one entry that mattered and several that quietly did not.
+///
+/// # Safety
+/// `class` must be a NUL-terminated UTF-8 string, or null to leave the element with no class.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_xui_set_class(entity: u64, class: *const core::ffi::c_char) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (entity, class);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bevy_extended_ui::styles::CssClass;
+
+            let wanted = unsafe { crate::interop::cstr_to_string(class) }.unwrap_or_default();
+
+            crate::state::with_world(|world| {
+                let entity = crate::ecs::entity_from(entity);
+                let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
+                    return status::NO_ENTITY;
                 };
+
+                let names = if wanted.is_empty() {
+                    Vec::new()
+                } else {
+                    vec![wanted.clone()]
+                };
+
+                match entity_mut.get_mut::<CssClass>() {
+                    // Written only when it is not the class the element already has. The interface
+                    // watches this component for changes and reapplies the stylesheet when it sees
+                    // one, so writing the same class every frame is a restyle every frame.
+                    Some(mut current) => {
+                        if current.0 != names {
+                            current.0 = names;
+                        }
+                    }
+                    None => {
+                        entity_mut.insert(CssClass(names));
+                    }
+                }
 
                 status::OK
             })
@@ -1353,9 +1549,11 @@ pub extern "C" fn bcs_xui_set_visible(entity: u64, visible: i32) -> i32 {
 /// because it is the second, and the same element is red when the rows are reused for something
 /// else.
 ///
-/// The interface writes this component too, for any element whose style says a background colour.
-/// An element painted from here should therefore have none in the stylesheet, or the two take
-/// turns.
+/// Not used by the editor, and worth saying why before anything else reaches for it: writing this
+/// makes the interface restyle the element, and a restyle puts back the display property whoever
+/// is driving the panel had just decided. A panel that paints an element cannot reliably hide any
+/// other element in the same row. It is here because painting an element is an ordinary thing to
+/// want, and because a later version of the interface may stop reacting to it.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_xui_set_colour(entity: u64, red: f32, green: f32, blue: f32, alpha: f32) -> i32 {
     crate::interop::guard(|| {

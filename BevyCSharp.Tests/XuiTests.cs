@@ -60,6 +60,8 @@ public sealed unsafe class XuiTests
                 Native.bcs_xui_set_visible(0, 1),
                 Native.bcs_xui_set_drawn(0, 1),
                 Native.bcs_xui_set_colour(0, 1f, 1f, 1f, 1f),
+                Native.bcs_xui_set_class(0, "row"),
+                Native.bcs_xui_count("nothing"),
                 Native.bcs_xui_set_layer(0, 1),
                 Native.bcs_xui_rect(0, &rect),
                 Native.bcs_xui_set_limits(0, 1f, 1f),
@@ -69,6 +71,7 @@ public sealed unsafe class XuiTests
                 // none. It belongs to the renderer rather than the interface, so a windowed build
                 // without the editor profile still has it.
                 Native.bcs_input_pointer(0f, 0f, 1, 0),
+                Native.bcs_input_wheel(0f, 1f),
 
                 // Gizmos need the renderer too, and the in-front flag is part of the shape's
                 // description rather than a separate call, so this covers both halves of it.

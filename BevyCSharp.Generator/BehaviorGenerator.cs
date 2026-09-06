@@ -76,29 +76,192 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Reads a behavior's instance fields, in declaration order.
+    /// Reads what a behavior shows: its instance fields and its readable properties.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Declaration order matters: it is the order the runtime lays the struct out in, and the
     /// order a tool shows the fields in. Static and constant members are left out, since they
     /// belong to the type rather than to any entity carrying it, and so are private ones, which
     /// are the behavior's own working state and not reachable from the generated schema anyway.
+    /// </para>
+    /// <para>
+    /// A property is described too, and read and written through itself rather than through
+    /// whatever it is made of. Something worked out from two fields, something clamped on the way
+    /// in, something stored in one unit and shown in another: all of those are the property's own
+    /// business, and a tool that went round it would show a number nothing else in the program
+    /// agrees with. One without a setter is described as read only, which is exactly what it is.
+    /// </para>
     /// </remarks>
     private static IReadOnlyList<BehaviorField> ReadFields(INamedTypeSymbol type) =>
     [
         .. type.GetMembers()
-            .OfType<IFieldSymbol>()
-            .Where(field =>
-                !field.IsStatic
+            .Where(member => member is IFieldSymbol or IPropertySymbol)
+            .Select(Described)
+            .Where(field => field is not null)
+            .Select(field => field!),
+    ];
+
+    /// <summary>How one member is described, or nothing when it is not shown at all.</summary>
+    private static BehaviorField? Described(ISymbol member) => member switch
+    {
+        IFieldSymbol field
+            when !field.IsStatic
                 && !field.IsConst
                 && !field.IsImplicitlyDeclared
-                && field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal)
-            .Select(field => new BehaviorField(
+                && field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal
+            => new BehaviorField(
                 field.Name,
                 KindOf(field.Type),
                 field.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                OptionsOf(field.Type))),
-    ];
+                OptionsOf(field.Type),
+                HintsOf(field)),
+
+        IPropertySymbol property
+            when !property.IsStatic
+                && !property.IsIndexer
+                && !property.IsImplicitlyDeclared
+                && property.GetMethod is not null
+                && property.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal
+                && KindOf(property.Type) != FieldKind.Opaque
+            => new BehaviorField(
+                property.Name,
+                KindOf(property.Type),
+                property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                OptionsOf(property.Type),
+                Settable(property) ? HintsOf(property) : HintsOf(property) with { ReadOnly = true },
+                IsProperty: true),
+
+        _ => null,
+    };
+
+    /// <summary>Whether a property can be written from outside the type.</summary>
+    private static bool Settable(IPropertySymbol property) =>
+        property.SetMethod is { } setter
+        && setter.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal;
+
+    /// <summary>What a member's attributes asked for, whichever kind of member it is.</summary>
+    private static FieldHintModel HintsOf(IPropertySymbol property) => HintsOf(property.GetAttributes());
+
+    /// <summary>
+    /// What a field's attributes asked for.
+    /// </summary>
+    /// <remarks>
+    /// Read here, at compile time, rather than reflected over at runtime. The attributes are
+    /// matched by name so that a game can declare its own with the same names if it would rather
+    /// not reference this assembly, and an attribute nothing recognises is left alone.
+    /// </remarks>
+    private static FieldHintModel HintsOf(IFieldSymbol field) => HintsOf(field.GetAttributes());
+
+    /// <inheritdoc cref="HintsOf(IFieldSymbol)"/>
+    private static FieldHintModel HintsOf(ImmutableArray<AttributeData> attributes)
+    {
+        var hints = FieldHintModel.None;
+
+        foreach (var attribute in attributes)
+        {
+            var name = attribute.AttributeClass?.Name;
+            if (name is null) continue;
+
+            hints = name switch
+            {
+                "LabelAttribute" => hints with { Label = Text(attribute, 0) },
+                "TooltipAttribute" => hints with { Tooltip = Text(attribute, 0) },
+                "HeaderAttribute" => hints with { Header = Text(attribute, 0) },
+                "UnitAttribute" => hints with { Unit = Text(attribute, 0) },
+                "RangeAttribute" => hints with
+                {
+                    Minimum = Number(attribute, 0),
+                    Maximum = Number(attribute, 1),
+                },
+                "StepAttribute" => hints with { Step = Number(attribute, 0) },
+                "ReadOnlyAttribute" => hints with { ReadOnly = true },
+                "HiddenAttribute" => hints with { Hidden = true },
+                "SpaceAttribute" => hints with { Space = true },
+                "ColourAttribute" or "ColorAttribute" => hints with { Colour = true },
+                "ShowIfAttribute" => hints with
+                {
+                    ShowIf = Text(attribute, 0),
+                    ShowIfNot = Flag(attribute, "Not"),
+                },
+                "OrderAttribute" => hints with { Order = (int)(Number(attribute, 0) ?? 0d) },
+                "AssetAttribute" => hints with
+                {
+                    Asset = Text(attribute, 0),
+                    Extensions = Named(attribute, "Extensions"),
+                },
+                _ => hints,
+            };
+        }
+
+        return hints;
+    }
+
+    /// <summary>One of an attribute's named arguments, as text.</summary>
+    private static string? Named(AttributeData attribute, string name)
+    {
+        foreach (var argument in attribute.NamedArguments)
+        {
+            if (argument.Key == name && argument.Value.Value is string value) return value;
+        }
+
+        return null;
+    }
+
+    /// <summary>What a method's attributes asked for.</summary>
+    private static MethodHintModel MethodHintsOf(IMethodSymbol method)
+    {
+        var hints = MethodHintModel.None;
+
+        foreach (var attribute in method.GetAttributes())
+        {
+            var name = attribute.AttributeClass?.Name;
+            if (name is null) continue;
+
+            hints = name switch
+            {
+                "ButtonAttribute" or "LabelAttribute" => hints with { Label = Text(attribute, 0) },
+                "TooltipAttribute" => hints with { Tooltip = Text(attribute, 0) },
+                "HiddenAttribute" => hints with { Hidden = true },
+                "OrderAttribute" => hints with { Order = (int)(Number(attribute, 0) ?? 0d) },
+                _ => hints,
+            };
+        }
+
+        return hints;
+    }
+
+    /// <summary>One of an attribute's positional arguments, as text.</summary>
+    private static string? Text(AttributeData attribute, int index) =>
+        attribute.ConstructorArguments.Length > index
+            ? attribute.ConstructorArguments[index].Value as string
+            : null;
+
+    /// <summary>One of an attribute's positional arguments, as a number.</summary>
+    private static double? Number(AttributeData attribute, int index)
+    {
+        if (attribute.ConstructorArguments.Length <= index) return null;
+
+        return attribute.ConstructorArguments[index].Value switch
+        {
+            double value => value,
+            float value => value,
+            int value => value,
+            long value => value,
+            _ => null,
+        };
+    }
+
+    /// <summary>One of an attribute's named arguments, as a flag.</summary>
+    private static bool Flag(AttributeData attribute, string name)
+    {
+        foreach (var argument in attribute.NamedArguments)
+        {
+            if (argument.Key == name && argument.Value.Value is bool value) return value;
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// The behavior's own methods that take nothing and return nothing.
@@ -120,22 +283,53 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
                 && method.ReturnsVoid
                 && GetStages(method).Count == 0
                 && GetStateEdge(method) is null)
-            .Select(method => new BehaviorInvokable(method.Name)),
+            .Select(method => new BehaviorInvokable(method.Name, MethodHintsOf(method))),
     ];
 
+    /// <summary>Whether an enum's values are bits rather than a choice of one.</summary>
+    private static bool IsFlags(ITypeSymbol type)
+    {
+        foreach (var attribute in type.GetAttributes())
+        {
+            if (attribute.AttributeClass?.Name == "FlagsAttribute") return true;
+        }
+
+        return false;
+    }
+
     /// <summary>The names an enum field can take, in declaration order, or nothing.</summary>
-    private static EquatableArray<string> OptionsOf(ITypeSymbol type) =>
-        type.TypeKind == TypeKind.Enum
-            ? new EquatableArray<string>([
-                .. type.GetMembers().OfType<IFieldSymbol>()
-                    .Where(member => member.IsConst)
-                    .Select(member => member.Name),
-            ])
-            : EquatableArray<string>.Empty;
+    private static EquatableArray<string> OptionsOf(ITypeSymbol type)
+    {
+        if (type.TypeKind != TypeKind.Enum) return EquatableArray<string>.Empty;
+
+        // A flags enum's zero is not one of the things that can be on: it is the name for none of
+        // them, and a row offering to turn it on would be a row that turns the others off.
+        var bits = IsFlags(type);
+
+        return new EquatableArray<string>([
+            .. type.GetMembers().OfType<IFieldSymbol>()
+                .Where(member => member.IsConst && !(bits && IsZero(member)))
+                .Select(member => member.Name),
+        ]);
+    }
+
+    /// <summary>Whether an enum member stands for no bits at all.</summary>
+    private static bool IsZero(IFieldSymbol member) => member.ConstantValue switch
+    {
+        int value => value == 0,
+        long value => value == 0L,
+        uint value => value == 0u,
+        ulong value => value == 0ul,
+        short value => value == 0,
+        ushort value => value == 0,
+        byte value => value == 0,
+        sbyte value => value == 0,
+        _ => false,
+    };
 
     /// <summary>How a tool should read and draw a field of this type.</summary>
     private static FieldKind KindOf(ITypeSymbol type) => type.TypeKind == TypeKind.Enum
-        ? FieldKind.Enum
+        ? IsFlags(type) ? FieldKind.Flags : FieldKind.Enum
         : type.SpecialType switch
     {
         SpecialType.System_Boolean => FieldKind.Bool,
@@ -149,6 +343,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
             "Bevy.Vec3" => FieldKind.Vec3,
             "Bevy.Quat" => FieldKind.Quat,
             "Bevy.Entity" => FieldKind.Entity,
+            "Bevy.AssetHandle" => FieldKind.Asset,
             _ => FieldKind.Opaque,
         },
     };
