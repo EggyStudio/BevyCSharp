@@ -26,7 +26,7 @@ public partial struct ViewportGizmos
     private static readonly (float R, float G, float B, float A) Accent = (0.30f, 0.49f, 1f, 1f);
 
     /// <summary>Red, green and blue for X, Y and Z, which is what every editor uses.</summary>
-    private static readonly (float R, float G, float B, float A)[] AxisColours =
+    private static readonly (float R, float G, float B, float A)[] AxisColors =
     [
         (0.90f, 0.25f, 0.28f, 1f),
         (0.45f, 0.85f, 0.30f, 1f),
@@ -149,10 +149,10 @@ public partial struct ViewportGizmos
     }
 
     /// <summary>
-    /// The two lines through the world's origin, in the colours of the axes they lie along.
+    /// The two lines through the world's origin, in the colors of the axes they lie along.
     /// </summary>
     /// <remarks>
-    /// Drawn once rather than by each grid. Every grid has a line at zero and would colour it, so
+    /// Drawn once rather than by each grid. Every grid has a line at zero and would color it, so
     /// leaving it to them puts the axis out three times over at three strengths, each fading
     /// outwards from its own grid's centre, which is snapped to its own spacing. The lines land on
     /// top of each other and their fades do not, which reads as one line that will not line up
@@ -167,8 +167,8 @@ public partial struct ViewportGizmos
         var alongX = new Vec3(eye.X, height, 0f);
         var alongZ = new Vec3(0f, height, eye.Z);
 
-        var red = Tint(AxisColours[0], AxisSolid);
-        var blue = Tint(AxisColours[2], AxisSolid);
+        var red = Tint(AxisColors[0], AxisSolid);
+        var blue = Tint(AxisColors[2], AxisSolid);
 
         Gizmos.Fade(alongX, alongX + new Vec3(-reach, 0f, 0f), red, gone, inFront: false);
         Gizmos.Fade(alongX, alongX + new Vec3(reach, 0f, 0f), red, gone, inFront: false);
@@ -358,10 +358,10 @@ public partial struct ViewportGizmos
     private static float Falloff(float outward) =>
         MathF.Pow(MathF.Max(0f, 1f - outward), 1.5f);
 
-    /// <summary>A colour at a fraction of its strength, which for a grid means its alpha.</summary>
+    /// <summary>A color at a fraction of its strength, which for a grid means its alpha.</summary>
     private static (float R, float G, float B, float A) Tint(
-        (float R, float G, float B, float A) colour, float strength) =>
-        (colour.R, colour.G, colour.B, MathF.Min(1f, colour.A * strength));
+        (float R, float G, float B, float A) color, float strength) =>
+        (color.R, color.G, color.B, MathF.Min(1f, color.A * strength));
 
     /// <summary>What an ordinary grid line is: white, at whatever strength it has left.</summary>
     private static (float R, float G, float B, float A) Grey(float strength) =>
@@ -417,33 +417,33 @@ public partial struct ViewportGizmos
 
         for (var i = 0; i < 3; i++)
         {
-            var colour = held == i ? Accent : AxisColours[i];
+            var color = held == i ? Accent : AxisColors[i];
             var axis = axes[i];
 
             switch (EditorTools.Current)
             {
                 case EditorTool.Rotate:
-                    Circle(centre, axis, reach, colour);
+                    Circle(centre, axis, reach, color);
                     break;
 
                 case EditorTool.Scale:
-                    Gizmos.Line(centre, centre + (axis * reach), colour);
+                    Gizmos.Line(centre, centre + (axis * reach), color);
                     Disc(
                         centre + (axis * reach),
                         facing,
                         reach * HeadSize,
                         InPixels(reach * HeadSize),
-                        colour);
+                        color);
                     break;
 
                 default:
-                    Gizmos.Line(centre, centre + (axis * reach), colour);
+                    Gizmos.Line(centre, centre + (axis * reach), color);
                     Arrow(
                         centre + (axis * reach),
                         axis,
                         reach * ArrowSize,
                         InPixels(reach * ArrowSize * ArrowWidth),
-                        colour);
+                        color);
                     break;
             }
         }
@@ -461,7 +461,7 @@ public partial struct ViewportGizmos
     /// <summary>How wide that head is at its base, as a fraction of its length.</summary>
     private const float ArrowWidth = 0.42f;
 
-    /// <summary>The middle handle when it is not held: no axis, so no axis colour.</summary>
+    /// <summary>The middle handle when it is not held: no axis, so no axis color.</summary>
     private static readonly (float R, float G, float B, float A) Middle = (0.85f, 0.85f, 0.88f, 1f);
 
     /// <summary>Which way the camera is pointing, in the world.</summary>
@@ -495,7 +495,7 @@ public partial struct ViewportGizmos
         Vec3 facing,
         float radius,
         float pixels,
-        (float R, float G, float B, float A) colour)
+        (float R, float G, float B, float A) color)
     {
         var (first, second) = Perpendiculars(facing);
 
@@ -509,7 +509,7 @@ public partial struct ViewportGizmos
 
         for (var spoke = 0; spoke < spokes; spoke++)
         {
-            Gizmos.Line(centre, At(spoke / (float)spokes * MathF.Tau, radius), colour);
+            Gizmos.Line(centre, At(spoke / (float)spokes * MathF.Tau, radius), color);
         }
 
         for (var ring = 1; ring <= rings; ring++)
@@ -522,7 +522,7 @@ public partial struct ViewportGizmos
             {
                 var point = At(step / (float)steps * MathF.Tau, at);
 
-                Gizmos.Line(previous, point, colour);
+                Gizmos.Line(previous, point, color);
                 previous = point;
             }
         }
@@ -530,7 +530,7 @@ public partial struct ViewportGizmos
 
     /// <summary>Draws a ring about an axis, which is what a turn is dragged along.</summary>
     private static void Circle(
-        Vec3 centre, Vec3 axis, float radius, (float R, float G, float B, float A) colour)
+        Vec3 centre, Vec3 axis, float radius, (float R, float G, float B, float A) color)
     {
         var (first, second) = Perpendiculars(axis);
         const int Steps = 32;
@@ -544,7 +544,7 @@ public partial struct ViewportGizmos
                 + (first * (MathF.Cos(angle) * radius))
                 + (second * (MathF.Sin(angle) * radius));
 
-            Gizmos.Line(previous, point, colour);
+            Gizmos.Line(previous, point, color);
             previous = point;
         }
     }
@@ -563,12 +563,12 @@ public partial struct ViewportGizmos
         Vec3 direction,
         float size,
         float pixels,
-        (float R, float G, float B, float A) colour)
+        (float R, float G, float B, float A) color)
     {
         var radius = size * ArrowWidth;
         var back = tip - (direction * size);
 
-        Disc(back, direction, radius, pixels, colour);
+        Disc(back, direction, radius, pixels, color);
 
         var (first, second) = Perpendiculars(direction);
         var sides = Sides(pixels);
@@ -582,7 +582,7 @@ public partial struct ViewportGizmos
                 back
                     + (first * (MathF.Cos(angle) * radius))
                     + (second * (MathF.Sin(angle) * radius)),
-                colour);
+                color);
         }
     }
 
@@ -651,11 +651,11 @@ public partial struct ViewportGizmos
         // negative halves are dimmed so the positive ones are still the ones read first.
         for (var i = 0; i < 3; i++)
         {
-            var (r, g, b, _) = AxisColours[i];
+            var (r, g, b, _) = AxisColors[i];
             var arm = Axes[i] * size;
 
-            Gizmos.Line(centre, centre + arm, AxisColours[i]);
-            Disc(centre + arm, direction, size * Knob, pixels, AxisColours[i]);
+            Gizmos.Line(centre, centre + arm, AxisColors[i]);
+            Disc(centre + arm, direction, size * Knob, pixels, AxisColors[i]);
             Gizmos.Line(centre, centre - arm, (r * 0.45f, g * 0.45f, b * 0.45f, 1f));
         }
     }

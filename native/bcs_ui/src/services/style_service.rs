@@ -1950,8 +1950,8 @@ fn apply_style_components(
 
     // BackgroundColor, and then whatever the program decided about it.
     //
-    // A colour written by a program is a decision about what the element is showing rather than
-    // about what it looks like: the patch beside a colour field is that colour, and no stylesheet
+    // A color written by a program is a decision about what the element is showing rather than
+    // about what it looks like: the patch beside a color field is that color, and no stylesheet
     // can know it. Applied after the sheet for the same reason as the node's own fields, since a
     // restyle would otherwise put a painted element back to grey a frame later.
     if let Some(bg) = components.1.as_mut() {
@@ -1961,7 +1961,7 @@ fn apply_style_components(
             .map(|b| b.color)
             .unwrap_or(Color::NONE);
 
-        if let Some(painted) = over.as_ref().and_then(StyleOverride::colour) {
+        if let Some(painted) = over.as_ref().and_then(StyleOverride::color) {
             bg.0 = painted;
         }
     }
@@ -2182,7 +2182,7 @@ fn compute_selector_metadata(selector: &str) -> SelectorMetadata {
 /// A step is a compound: `div.panel.stats#main` names a tag, two classes and an id, and each of
 /// them narrows what it matches. Counting only the first is what makes `.field-note.warn` weigh the
 /// same as `.field-note`, and two rules of equal weight are settled by whichever the map happens to
-/// hand over first: a colour that is right on some frames and wrong on others.
+/// hand over first: a color that is right on some frames and wrong on others.
 fn weight_of(step: &str) -> u32 {
     if step == "*" || step.is_empty() {
         return 0;

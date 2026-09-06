@@ -70,8 +70,8 @@ public enum AlphaMode
 /// </para>
 /// <para>
 /// A texture is an image handle from <see cref="AssetServer.Load"/>, and is combined with the
-/// matching factor rather than replacing it: a base colour map on a white base colour shows the
-/// map unchanged, and tinting it is a matter of setting a colour. The image need not have
+/// matching factor rather than replacing it: a base color map on a white base color shows the
+/// map unchanged, and tinting it is a matter of setting a color. The image need not have
 /// finished loading, because the material holds a handle rather than pixels.
 /// </para>
 /// </remarks>
@@ -86,7 +86,7 @@ public enum AlphaMode
 /// </example>
 public sealed class MaterialSettings
 {
-    /// <summary>Base colour, linear RGBA. White by default, so a texture shows unchanged.</summary>
+    /// <summary>Base color, linear RGBA. White by default, so a texture shows unchanged.</summary>
     public (float R, float G, float B, float A) BaseColor { get; set; } = (1f, 1f, 1f, 1f);
 
     /// <summary>Zero for a dielectric, one for a metal. Values between are rarely physical.</summary>
@@ -100,7 +100,7 @@ public sealed class MaterialSettings
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The three colour channels are a luminance in nits, not a fraction of white, so the
+    /// The three color channels are a luminance in nits, not a fraction of white, so the
     /// numbers that read as bright are far larger than one. The alpha decides whether the
     /// camera's exposure is applied to them, and at 1 it is: a camera left at Bevy's own
     /// exposure divides by about a thousand, so 12 nits arrives as a hundredth of white and 12000
@@ -133,23 +133,23 @@ public sealed class MaterialSettings
     /// </remarks>
     public bool DoubleSided { get; set; }
 
-    /// <summary>Show the base colour flat, with no lighting at all.</summary>
+    /// <summary>Show the base color flat, with no lighting at all.</summary>
     /// <remarks>
-    /// For a skybox, a UI panel in the world, or anything meant to read as its own colour. It
+    /// For a skybox, a UI panel in the world, or anything meant to read as its own color. It
     /// takes <see cref="Emissive"/> with it: Bevy adds the emission inside the lighting, so an
-    /// unlit material shows its base colour and nothing else. A surface that should glow wants
-    /// an emissive colour and no unlit flag, and <see cref="BaseColor"/> can exceed one if what
-    /// is wanted is a flat colour brighter than white.
+    /// unlit material shows its base color and nothing else. A surface that should glow wants
+    /// an emissive color and no unlit flag, and <see cref="BaseColor"/> can exceed one if what
+    /// is wanted is a flat color brighter than white.
     /// </remarks>
     public bool Unlit { get; set; }
 
-    /// <summary>The base colour map, which is the texture people mean by "the texture".</summary>
+    /// <summary>The base color map, which is the texture people mean by "the texture".</summary>
     public AssetHandle BaseColorTexture { get; set; } = AssetHandle.None;
 
     /// <summary>
     /// A tangent-space normal map, which fakes detail the geometry does not have.
     /// </summary>
-    /// <remarks>Must not be loaded as sRGB; a normal map holds directions rather than colours.</remarks>
+    /// <remarks>Must not be loaded as sRGB; a normal map holds directions rather than colors.</remarks>
     public AssetHandle NormalMap { get; set; } = AssetHandle.None;
 
     /// <summary>
@@ -197,10 +197,10 @@ public enum CameraProjection
 /// <summary>What a camera does with the pixels it is about to draw over.</summary>
 public enum ClearMode
 {
-    /// <summary>Clear to the world's clear colour.</summary>
+    /// <summary>Clear to the world's clear color.</summary>
     World = 0,
 
-    /// <summary>Clear to this camera's own colour.</summary>
+    /// <summary>Clear to this camera's own color.</summary>
     Custom = 1,
 
     /// <summary>
@@ -236,10 +236,10 @@ public enum Tonemapper
     /// <summary>Clip anything brighter than white, which is what no tonemapping means.</summary>
     None = 0,
 
-    /// <summary>The classic curve. Colours shift hue as they brighten.</summary>
+    /// <summary>The classic curve. Colors shift hue as they brighten.</summary>
     Reinhard = 1,
 
-    /// <summary>The same on luminance only, so bright colours keep their hue better.</summary>
+    /// <summary>The same on luminance only, so bright colors keep their hue better.</summary>
     ReinhardLuminance = 2,
 
     /// <summary>Film-like and high contrast, with deliberate hue shifts. Dramatic.</summary>
@@ -394,7 +394,7 @@ public sealed class PostSettings
     /// <remarks>
     /// Needs <see cref="Hdr"/> to have anything to work with: without it nothing is brighter than
     /// white, so nothing is bright enough to glow. To make one object glow harder, raise its
-    /// material's emissive colour rather than this.
+    /// material's emissive color rather than this.
     /// </remarks>
     public bool Bloom { get; set; }
 
@@ -507,10 +507,10 @@ public sealed class EffectSettings
     public uint MotionBlurSamples { get; set; } = 1;
 
     /// <summary>
-    /// Width of the coloured fringe around edges, as a fraction of the window. Zero for none.
+    /// Width of the colored fringe around edges, as a fraction of the window. Zero for none.
     /// </summary>
     /// <remarks>
-    /// What a lens does when it fails to focus every colour at one point. Bevy's own strength is
+    /// What a lens does when it fails to focus every color at one point. Bevy's own strength is
     /// 0.02, and a horror game reaching for it on a hit wants more.
     /// </remarks>
     public float Aberration { get; set; }
@@ -519,7 +519,7 @@ public sealed class EffectSettings
     public uint AberrationSamples { get; set; }
 
     /// <summary>
-    /// An image the fringe takes its colours from, read across its width.
+    /// An image the fringe takes its colors from, read across its width.
     /// </summary>
     /// <remarks>
     /// Nothing here gives the usual red, green, blue. The image is sampled down its vertical
@@ -582,7 +582,7 @@ public sealed class EffectSettings
     /// </summary>
     public float VignetteEdgeCompensation { get; set; } = 1f;
 
-    /// <summary>The colour the corners are taken towards, linear. Black is the usual one.</summary>
+    /// <summary>The color the corners are taken towards, linear. Black is the usual one.</summary>
     public (float R, float G, float B, float A) VignetteColor { get; set; } = (0f, 0f, 0f, 1f);
 
     /// <summary>
@@ -649,13 +649,13 @@ public sealed class EffectSettings
 /// </summary>
 /// <remarks>
 /// <para>
-/// Not a picture of a sky but a simulation of one: the colour of every direction is worked out
+/// Not a picture of a sky but a simulation of one: the color of every direction is worked out
 /// from how far light travels through the air to reach it, so the horizon reddens, the zenith
 /// stays blue, and the whole thing turns over as the sun moves. Distant geometry picks up the
 /// same haze.
 /// </para>
 /// <para>
-/// The sun is whichever directional light is in the scene, so its direction and colour are what
+/// The sun is whichever directional light is in the scene, so its direction and color are what
 /// move the sky. A scene with no directional light gets a night sky.
 /// </para>
 /// </remarks>
@@ -718,7 +718,7 @@ public sealed class CameraSettings
     /// <summary>What to do with the pixels already there.</summary>
     public ClearMode Clear { get; set; } = ClearMode.World;
 
-    /// <summary>The colour used when <see cref="Clear"/> is <see cref="ClearMode.Custom"/>.</summary>
+    /// <summary>The color used when <see cref="Clear"/> is <see cref="ClearMode.Custom"/>.</summary>
     /// <remarks>Linear RGBA, not sRGB, so these are the numbers a shader works in.</remarks>
     public (float R, float G, float B, float A) ClearColor { get; set; } = (0f, 0f, 0f, 1f);
 

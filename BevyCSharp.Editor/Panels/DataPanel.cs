@@ -175,7 +175,7 @@ public sealed partial class DataPanel : IInspectorRows
     [Show("#dsl", Count = Rows)]
     public bool[] ShowBar = new bool[Rows];
 
-    /// <summary>Which rows show a patch of colour.</summary>
+    /// <summary>Which rows show a patch of color.</summary>
     [Show("#dsw", Count = Rows)]
     public bool[] ShowSwatch = new bool[Rows];
 
@@ -273,10 +273,10 @@ public sealed partial class DataPanel : IInspectorRows
     /// <summary>What picture each row's mark wears, so it is written once.</summary>
     private readonly string[] _marks = new string[Rows];
 
-    /// <summary>What colour each of a row's handles was painted, so it is written once.</summary>
+    /// <summary>What color each of a row's handles was painted, so it is written once.</summary>
     private readonly uint[,] _painted = new uint[Rows, Slots];
 
-    /// <summary>What each row's patch of colour was painted.</summary>
+    /// <summary>What each row's patch of color was painted.</summary>
     private readonly uint[] _swatched = new uint[Rows];
 
     /// <summary>How wide each of a row's buttons was made, so it is written once.</summary>
@@ -743,29 +743,29 @@ public sealed partial class DataPanel : IInspectorRows
         GripsIn(slot)[row] = grip is not null;
         LettersIn(slot)[row] = grip?.Letter ?? string.Empty;
 
-        if (grip is { } paint) Paint(row, slot, paint.Colour);
+        if (grip is { } paint) Paint(row, slot, paint.Color);
     }
 
-    /// <summary>Paints one of a row's handles, when it is not already that colour.</summary>
+    /// <summary>Paints one of a row's handles, when it is not already that color.</summary>
     /// <remarks>
     /// Nought means the editor's own grey rather than black. Painting is safe now that the
     /// interface keeps what a panel decided about showing and hiding separately from the
-    /// stylesheet, which it did not when the handles were pictures of colours.
+    /// stylesheet, which it did not when the handles were pictures of colors.
     /// </remarks>
-    private void Paint(int row, int slot, uint colour)
+    private void Paint(int row, int slot, uint color)
     {
-        var wanted = colour == 0u ? Grey : colour;
+        var wanted = color == 0u ? Grey : color;
         if (_painted[row, slot] == wanted) return;
         if (Window is not { IsOpen: true } window) return;
 
         var element = window.Element($"dg{slot}-{row}");
         if (element.IsNone) return;
 
-        Xui.SetColour(element, wanted);
+        Xui.SetColor(element, wanted);
         _painted[row, slot] = wanted;
     }
 
-    /// <summary>What a handle is when nothing asked for a colour.</summary>
+    /// <summary>What a handle is when nothing asked for a color.</summary>
     private const uint Grey = 0x5A5F69FFu;
 
     /// <inheritdoc/>
@@ -850,18 +850,18 @@ public sealed partial class DataPanel : IInspectorRows
     }
 
     /// <inheritdoc/>
-    public void Swatch(int row, uint colour)
+    public void Swatch(int row, uint color)
     {
         ShowSwatch[row] = true;
 
-        if (_swatched[row] == colour) return;
+        if (_swatched[row] == color) return;
         if (Window is not { IsOpen: true } window) return;
 
         var element = window.Element($"dsw-{row}");
         if (element.IsNone) return;
 
-        Xui.SetColour(element, colour);
-        _swatched[row] = colour;
+        Xui.SetColor(element, color);
+        _swatched[row] = color;
     }
 
     /// <inheritdoc/>
@@ -1192,7 +1192,7 @@ public sealed partial class DataPanel : IInspectorRows
     [Command("#db2", Count = Rows)]
     public void PressThird(int row) => Press(row, 2);
 
-    /// <summary>Opens the colour a row's patch stands for.</summary>
+    /// <summary>Opens the color a row's patch stands for.</summary>
     [Command("#dsw", Count = Rows)]
     public void PressSwatch(int row) => Press(row, 0);
 

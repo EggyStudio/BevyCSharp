@@ -275,7 +275,7 @@ Gizmos.Axes(transform, 1.5f);
 
 A gizmo lasts one frame, so anything that should stay on screen is asked for again every frame.
 That is what makes them right for a value that changes and wrong for anything permanent, which
-wants an entity. `Axes` colours itself red, green and blue for X, Y and Z, which is the quickest
+wants an entity. `Axes` colors itself red, green and blue for X, Y and Z, which is the quickest
 way to see whether something faces where it should.
 
 Gizmos are drawn by a plugin that comes with the window, so a windowless run refuses rather than
@@ -426,7 +426,7 @@ The width it breaks against comes from the layout, so the text or something abov
 rather than folded. `Justify` aligns the lines against each other inside the text's own box, which
 is a different question from where that box sits in its parent.
 
-`UiSettings.Color` is the text's colour rather than a background for a run of text, and it is
+`UiSettings.Color` is the text's color rather than a background for a run of text, and it is
 transparent by default like any other node, so a `SpawnText` that passes plain `new UiSettings()`
 lays out correctly and draws nothing.
 
@@ -450,7 +450,7 @@ first, a health bar that blinks the second.
 clipped and scrollable. Bevy has no scrolling of its own, so a list is moved by reading the wheel
 like any other input and calling `Ui.SetScroll(list, 0f, offset)`.
 
-A node can hold a picture as well as a colour:
+A node can hold a picture as well as a color:
 
 ```csharp
 var icon = Ui.SpawnNode(new UiSettings { Width = Length.Px(32f), Height = Length.Px(32f) });
@@ -603,10 +603,10 @@ var glass = Render.CreateMaterial(new MaterialSettings
 });
 ```
 
-A texture is combined with its matching factor rather than replacing it, so a base colour map on
-the default white shows unchanged and tinting it is a matter of setting a colour. The image need
+A texture is combined with its matching factor rather than replacing it, so a base color map on
+the default white shows unchanged and tinting it is a matter of setting a color. The image need
 not have finished loading, because the material holds a handle rather than pixels. Five maps are
-bound this way: base colour, normal, metallic-roughness, emissive and occlusion.
+bound this way: base color, normal, metallic-roughness, emissive and occlusion.
 
 How a texture is sampled is decided when it loads:
 
@@ -637,7 +637,7 @@ it, deciding at `AlphaCutoff`, so the surface still writes depth and nothing has
 which is what foliage and fences are drawn with. `Blend` is real transparency, drawn after
 everything else and sorted back to front. `Add` adds to what is behind, so it never darkens it.
 `DoubleSided` draws back faces, for anything modelled as a single sheet, and `Unlit` shows the
-base colour flat. `CreateMaterial(r, g, b)` still exists for the simple case.
+base color flat. `CreateMaterial(r, g, b)` still exists for the simple case.
 
 PNG, JPEG, WebP, BMP and TGA decode in every build, headless included, because that is work on
 data rather than on a GPU.
@@ -739,7 +739,7 @@ aliasing a single finished frame gives a pass no way to see, at the cost of a tr
 anything whose motion the renderer reports wrongly. It needs a 3D camera and `Msaa = 1`, and
 asking for it alongside multisampling throws rather than quietly drawing nothing. Bloom scatters light out of whatever is brighter than white, so it needs
 `Hdr` and something emissive to work on: to make one object glow harder, raise its material's
-emissive colour rather than the bloom.
+emissive color rather than the bloom.
 
 The lens the picture is drawn through is a second call, because it is decided at a different
 time: the pipeline above is what a settings screen owns, and these are what a scene does for a
@@ -752,7 +752,7 @@ Render.SetEffects(camera, new EffectSettings
     FocalDistance = 8f,
     Aperture = 1.4f,
     ShutterAngle = 0.5f,                     // a film camera's 180 degree shutter
-    Aberration = 0.02f,                      // coloured fringes on the edges
+    Aberration = 0.02f,                      // colored fringes on the edges
     Distortion = 0.3f,                       // a wide lens bulging the picture outwards
     Vignette = 0.4f,                         // corners going dark
     AutoExposure = true,                     // the camera metering the frame for itself
@@ -776,7 +776,7 @@ Render.SetAtmosphere(camera, new AtmosphereSettings());
 Render.SetPostProcessing(camera, new PostSettings { Hdr = true });
 ```
 
-Bevy computes the colour of every direction from how far sunlight travels through the air to
+Bevy computes the color of every direction from how far sunlight travels through the air to
 reach it, so the horizon reddens, the zenith stays pale, and the whole sky turns over as the sun
 moves. Distant geometry picks up the same haze. The sun is whichever directional light is in the
 scene: point that light differently and the sky follows, and a scene with no directional light
@@ -1440,7 +1440,7 @@ The interface itself is **this project's own code**, in `native/bcs_ui`. It bega
 [`bevy_extended_ui`](https://github.com/exepta/bevy_extended_ui) under Apache 2.0, and
 `native/bcs_ui/NOTICE.md` says what was taken, what was left out and why. Owning it is what makes
 the shortcomings fixable rather than workaroundable: what a program decides about an element's
-box or its colour now survives the stylesheet being applied again, a document's body is the window
+box or its color now survives the stylesheet being applied again, a document's body is the window
 so an element can be anchored to its right or bottom edge, `align-content` is read, a rule naming
 two classes outweighs one naming either of them, and a widget that comes and goes inside a frame no
 longer ends the process.
@@ -1541,7 +1541,7 @@ left alone, because a drawer already draws it as one thing.
 
 The entity panel draws each field as what it is: a checkbox for a flag; a button that opens the list
 for a choice; a box for a number; three boxes across a line for a place; a patch that opens a picker
-for a colour. A field says how it wants to be drawn in attributes the generator reads at compile
+for a color. A field says how it wants to be drawn in attributes the generator reads at compile
 time, so nothing reflects at runtime:
 
 ```csharp

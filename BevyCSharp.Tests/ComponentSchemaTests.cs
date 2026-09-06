@@ -319,7 +319,7 @@ public partial struct Hinted
     /// <summary>Under a heading, and after a gap.</summary>
     [Header("Looks")]
     [Space]
-    [Colour]
+    [Color]
     public Vec3 Tint;
 
     /// <summary>Shown, and not editable.</summary>
@@ -504,7 +504,7 @@ public sealed class FieldHintTests
 
         Assert.Equal("Looks", tint.Hints.Header);
         Assert.True(tint.Hints.Space);
-        Assert.True(tint.Hints.Colour);
+        Assert.True(tint.Hints.Color);
     }
 
     [Fact]

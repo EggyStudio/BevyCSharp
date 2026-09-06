@@ -233,9 +233,9 @@ pub struct BcsCameraConfig {
     pub near: f32,
     /// Furthest visible distance. Ignored by an orthographic camera, which has no horizon.
     pub far: f32,
-    /// `0` uses the world's clear colour, `1` the one below, `2` draws over what is already there.
+    /// `0` uses the world's clear color, `1` the one below, `2` draws over what is already there.
     pub clear_mode: i32,
-    /// Clear colour, used when `clear_mode` is `1`.
+    /// Clear color, used when `clear_mode` is `1`.
     pub clear: [f32; 4],
     /// Draw order. A camera with a higher order draws over one with a lower.
     pub order: i32,
@@ -367,11 +367,11 @@ pub struct BcsEffectsConfig {
     pub shutter_angle: f32,
     /// Samples taken either side of a pixel along its motion. `0` also turns motion blur off.
     pub motion_blur_samples: u32,
-    /// Width of the coloured fringe, as a fraction of the window. `0` for none.
+    /// Width of the colored fringe, as a fraction of the window. `0` for none.
     pub aberration: f32,
     /// Cap on the samples the fringe is built from. `0` takes Bevy's own.
     pub aberration_samples: u32,
-    /// Asset key of the image the fringe takes its colours from, or `-1` for red, green, blue.
+    /// Asset key of the image the fringe takes its colors from, or `-1` for red, green, blue.
     pub aberration_lut: i32,
     /// Strength of the lens warp: positive bulges outwards, negative pinches inwards, `0` for a
     /// straight picture.
@@ -397,7 +397,7 @@ pub struct BcsEffectsConfig {
     /// How far the vignette is stretched to fit a window that is not square, `0` not at all and
     /// `1` exactly.
     pub vignette_edge_compensation: f32,
-    /// Linear colour the corners are taken towards, usually black.
+    /// Linear color the corners are taken towards, usually black.
     pub vignette_color: [f32; 4],
     /// Non-zero to let the camera find its own exposure from what it can see.
     pub auto_exposure: i32,
@@ -480,7 +480,7 @@ pub struct BcsGizmoConfig {
     pub rotation: [f32; 4],
     /// Sphere radius, or the length of each axis.
     pub radius: f32,
-    /// Linear RGBA. Axes colour themselves red, green and blue.
+    /// Linear RGBA. Axes color themselves red, green and blue.
     pub color: [f32; 4],
     /// What a line fades to at its far end. Only read by kind `3`.
     pub end_color: [f32; 4],
@@ -679,9 +679,9 @@ pub struct BcsUiNodeConfig {
     pub column_gap: f32,
     /// Unit of `column_gap`.
     pub column_gap_unit: i32,
-    /// Background colour for a node, or the text colour for a run of text. Linear RGBA.
+    /// Background color for a node, or the text color for a run of text. Linear RGBA.
     pub color: [f32; 4],
-    /// Colour of the border, on every side. Linear RGBA, and transparent draws nothing.
+    /// Color of the border, on every side. Linear RGBA, and transparent draws nothing.
     pub border_color: [f32; 4],
 }
 
@@ -701,19 +701,19 @@ pub struct BcsImageConfig {
     pub mipmap_filter: i32,
     /// Maximum anisotropic samples. `1` disables it.
     pub anisotropy: u32,
-    /// Non-zero to read the file as sRGB, which is right for colour and wrong for data.
+    /// Non-zero to read the file as sRGB, which is right for color and wrong for data.
     pub srgb: i32,
 }
 
 /// Everything a physically based material is made of.
 ///
 /// Texture fields are asset keys, or `-1` for none. An image bound here is used as-is; combining
-/// one with the matching factor is what the renderer already does, so a white base colour with a
-/// base colour map shows the map unchanged.
+/// one with the matching factor is what the renderer already does, so a white base color with a
+/// base color map shows the map unchanged.
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct BcsMaterialConfig {
-    /// Base colour, as linear sRGB with alpha.
+    /// Base color, as linear sRGB with alpha.
     pub base_color: [f32; 4],
     /// How metallic the surface is, from dielectric at zero to metal at one.
     pub metallic: f32,
@@ -731,9 +731,9 @@ pub struct BcsMaterialConfig {
     pub alpha_cutoff: f32,
     /// Non-zero to draw back faces as well as front ones.
     pub double_sided: i32,
-    /// Non-zero to show the base colour flat, with no lighting at all.
+    /// Non-zero to show the base color flat, with no lighting at all.
     pub unlit: i32,
-    /// Asset key of the base colour map, or `-1`.
+    /// Asset key of the base color map, or `-1`.
     pub base_color_texture: i32,
     /// Asset key of the tangent-space normal map, or `-1`.
     pub normal_map: i32,

@@ -79,7 +79,7 @@ public partial struct Scene
         ctx.Ecs.Add(sun, Transform.LookingAt(new Vec3(6f, 2.5f, 4f), Vec3.Zero, Vec3.UnitY));
 
         // A cool rim from the other side, so the cube reads as a solid rather than a silhouette
-        // against the dark clear colour.
+        // against the dark clear color.
         var rim = Render.SpawnLight(new LightSettings
         {
             Kind = LightKind.Spot,
@@ -97,7 +97,7 @@ public partial struct Scene
         // at Bevy's own setting is about a thousand. Thousands here are what arrive as the
         // handful of multiples of white that blow the sphere out and feed the bloom. It is lit
         // rather than unlit because Bevy adds the emission as part of the lighting, so an unlit
-        // sphere would show its base colour and nothing else.
+        // sphere would show its base color and nothing else.
         var lamp = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, lamp, Render.CreateMesh(MeshShape.Sphere, 0.6f));
         Render.SetMaterial(ctx.Ecs, lamp, Render.CreateMaterial(new MaterialSettings

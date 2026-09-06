@@ -148,15 +148,15 @@ public partial struct Probe
 
                 break;
 
-            // The picker a patch of colour opens, over the row it was opened from.
+            // The picker a patch of color opens, over the row it was opened from.
             case 150 when script.Contains("picker"):
-                if (EditorShell.Find<Panels.DataPanel>() is { } coloured)
+                if (EditorShell.Find<Panels.DataPanel>() is { } colored)
                 {
                     for (var i = 0; i < Panels.DataPanel.Rows; i++)
                     {
-                        if (coloured.Names[i].Trim() != "Tint") continue;
+                        if (colored.Names[i].Trim() != "Tint") continue;
 
-                        coloured.PressSwatch(i);
+                        colored.PressSwatch(i);
                         break;
                     }
                 }

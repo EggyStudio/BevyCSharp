@@ -225,7 +225,7 @@ What is left:
   scene *from* the sky rather than only drawing it, which is the difference between a lit scene
   and one that merely has a sky behind it. The LUT sizes and sample counts on `AtmosphereSettings`
   are Bevy's defaults, and they are the quality knob.
-- **Colour grading.** `ColorGrading` sits on the camera and carries exposure, gamma, saturation
+- **Color grading.** `ColorGrading` sits on the camera and carries exposure, gamma, saturation
   and lift/gamma/gain per tonal range. That is a nested struct of three sections, and it is the
   knob a game gives an artist rather than a player.
 - **Order-independent transparency** and `Skybox` are both camera components as well.  A skybox
@@ -248,7 +248,7 @@ What is left:
   unbridged: every entry point here addresses the primary one.
 - **Verification**: the tests assert that settings are accepted and that a windowless run
   refuses, which is what can go wrong silently. Whether the picture is right is confirmed by
-  running the sample, which uses a custom clear colour, a tinted sun, a spot light, a bokeh
+  running the sample, which uses a custom clear color, a tinted sun, a spot light, a bokeh
   focus on the cube and a vignette, and binds F11 to fullscreen and Tab to cursor lock. An effect
   is worth checking against a second run with it turned off: bloom was confirmed that way, since
   a halo is obvious beside the same frame without one and easy to imagine without the

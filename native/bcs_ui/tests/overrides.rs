@@ -2,9 +2,9 @@
 //!
 //! The stylesheet is reapplied whenever anything restyles a widget, and it rewrites the whole node
 //! from the rules it matched. So a panel that had hidden a row, placed a flyout or painted a patch
-//! of colour would find its decision quietly undone a frame later. The override is what a program
+//! of color would find its decision quietly undone a frame later. The override is what a program
 //! writes instead, and it is applied after the sheet; these check that it is applied at all, that
-//! it only touches what was decided, and that a colour survives alongside the rest.
+//! it only touches what was decided, and that a color survives alongside the rest.
 
 use bcs_ui::styles::StyleOverride;
 use bevy::color::Color;
@@ -59,18 +59,18 @@ fn what_was_decided_wins_and_the_rest_is_left_alone() {
 }
 
 #[test]
-fn a_colour_is_decided_apart_from_the_node() {
+fn a_color_is_decided_apart_from_the_node() {
     let painted = Color::srgba(0.85, 0.35, 0.15, 1.0);
 
     let over = StyleOverride {
-        background_colour: Some(painted),
+        background_color: Some(painted),
         ..Default::default()
     };
 
-    // Not part of the node: a colour lives on its own component, and the sheet writes it from a
+    // Not part of the node: a color lives on its own component, and the sheet writes it from a
     // different place. Both are applied after the sheet, which is the point of the override.
     assert!(!over.is_empty());
-    assert_eq!(over.colour(), Some(painted));
+    assert_eq!(over.color(), Some(painted));
 
     let mut node = Node::default();
     let before = node.clone();
@@ -81,11 +81,11 @@ fn a_colour_is_decided_apart_from_the_node() {
 }
 
 #[test]
-fn deciding_nothing_about_a_colour_leaves_the_sheet_in_charge() {
+fn deciding_nothing_about_a_color_leaves_the_sheet_in_charge() {
     let over = StyleOverride {
         width: Some(Val::Px(10.0)),
         ..Default::default()
     };
 
-    assert_eq!(over.colour(), None);
+    assert_eq!(over.color(), None);
 }

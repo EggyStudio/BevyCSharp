@@ -37,11 +37,11 @@
     /* Black, with enough left through to see the scene the panels float over. */
     /*
      * Nearly opaque. The scene under a panel is worth a hint of depth and nothing more: at a
-     * thinner value a panel over the sky and a panel over a lit floor are two different colours.
+     * thinner value a panel over the sky and a panel over a lit floor are two different colors.
      */
     --surface: rgba(0, 0, 0, 0.90);
     /*
-     * What a sheet is painted with: nearly the panels' colour, and darker. A sheet is a whole
+     * What a sheet is painted with: nearly the panels' color, and darker. A sheet is a whole
      * column of the window rather than a corner of it, so the same translucency that reads as depth
      * behind a small panel reads as a scene with writing on it behind a large one.
      */
@@ -63,13 +63,13 @@
     --bright: #eeeeee;
     --dim: #8a8a8a;
 
-    /* The one colour in the editor. Anything that is not acting stays grey. */
+    /* The one color in the editor. Anything that is not acting stays grey. */
     --accent: #4d7cff;
     --accent-soft: rgba(77, 124, 255, 0.22);
 
     /*
      * The handle a number is dragged by. Grey, and the same grey for all three axes: three
-     * saturated colours down the side of a panel is the loudest thing on the screen for
+     * saturated colors down the side of a panel is the loudest thing on the screen for
      * information the order of the boxes already carries.
      */
     --grip: #5a5f69;
@@ -120,7 +120,7 @@ body {
     background-color: var(--sheet);
     /*
      * No `backdrop-filter`. The interface parses one and draws it over the element's own
-     * background rather than under it, so the panel takes the colour of whatever is behind it
+     * background rather than under it, so the panel takes the color of whatever is behind it
      * however opaque it is: a panel over the sky is black and a panel over a lit floor is grey.
      * The blur also samples past the element's edge, which leaves a bright rim inside the rounded
      * corner wherever the surroundings are brighter.
@@ -158,7 +158,7 @@ body {
 }
 
 /*
- * A small panel that asks one question: a colour, a name, a number.
+ * A small panel that asks one question: a color, a name, a number.
  *
  * Opaque and narrower than a column, because it is read against whatever it was opened over and
  * dismissed as soon as it is answered.
@@ -497,7 +497,7 @@ p {
  * Everything to the right of the name.
  *
  * One box, so that what a value is drawn as (a number, three numbers, a bar, a tick, a button, a
- * patch of colour) does not change where the value column begins. A drawer that wants the whole
+ * patch of color) does not change where the value column begins. A drawer that wants the whole
  * width is drawn here too, with the name column not drawn at all.
  */
 .field-body {
@@ -552,7 +552,7 @@ p {
  * across a text box selects the text, and one gesture cannot mean both.
  *
  * Centred on the border and shorter than the box, so it sits against the straight part of it and
- * clear of the rounded corners. Its colour is painted by whatever fills the row, since which axis
+ * clear of the rounded corners. Its color is painted by whatever fills the row, since which axis
  * a row shows changes as the rows are reused and a stylesheet cannot say that.
  */
 /*
@@ -560,7 +560,7 @@ p {
  *
  * Behind the box and tucked under its left edge, so the two read as one thing and the right side
  * of the handle is not rounded against the box's square corner. Grey, and the same grey for all
- * three axes: three saturated colours down the side of a panel is the loudest thing on the screen
+ * three axes: three saturated colors down the side of a panel is the loudest thing on the screen
  * for information the order of the boxes already carries.
  */
 .grip {
@@ -676,9 +676,9 @@ p {
 }
 
 /*
- * A patch of colour that opens a picker.
+ * A patch of color that opens a picker.
  *
- * The whole of the value column, because what it is for is being looked at: a colour in a box the
+ * The whole of the value column, because what it is for is being looked at: a color in a box the
  * size of a full stop tells nobody anything.
  */
 .swatch {
@@ -697,7 +697,7 @@ p {
  *
  * A basis of its own, because the row it usually sits in is a row and the panel it sits in here is
  * a column: a patch that shares out the width in one shares out the height in the other, and a
- * colour nought pixels tall is not a colour anybody can judge.
+ * color nought pixels tall is not a color anybody can judge.
  */
 .swatch.tall {
     flex-grow: 0;
@@ -1098,8 +1098,8 @@ button:hover {
  * The round button that closes a sheet.
  *
  * A class of its own rather than the panels' round button with a fill added: the interface matches
- * one class per rule, so `.round.solid` selects nothing. It also has to carry its own colour. A
- * panel's round button is nearly transparent and takes what colour it has from the scene showing
+ * one class per rule, so `.round.solid` selects nothing. It also has to carry its own color. A
+ * panel's round button is nearly transparent and takes what color it has from the scene showing
  * through it, and a sheet is opaque black with nothing behind it, so the same button would be a
  * black circle on a black page with the title bar's rule running through it.
  */

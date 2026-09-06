@@ -451,7 +451,7 @@ pub unsafe extern "C" fn bcs_render_set_effects(
 /// between by distance rather than by intent.
 ///
 /// The sun is whichever directional light is in the scene: the sky is scattered from its
-/// direction and colour, so moving that light moves the sun and a scene without one gets a
+/// direction and color, so moving that light moves the sun and a scene without one gets a
 /// night sky.
 ///
 /// The planet is metres across, and Bevy places it so the ground sits at the origin. A scene

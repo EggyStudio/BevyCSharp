@@ -195,7 +195,7 @@ internal static class SchemaEmitter
         if (hints.Hidden) parts.Add("Hidden: true");
         if (hints.Space) parts.Add("Space: true");
         if (hints.Separator) parts.Add("Separator: true");
-        if (hints.Colour) parts.Add("Colour: true");
+        if (hints.Color) parts.Add("Color: true");
         if (hints.Wide) parts.Add("Wide: true");
         if (hints.Inline) parts.Add("Inline: true");
         if (hints.Foldout is not null) parts.Add("Foldout: " + Quote(hints.Foldout));

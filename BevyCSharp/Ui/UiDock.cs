@@ -75,7 +75,7 @@ public enum UiDismiss
     /// A press anywhere outside it.
     /// </summary>
     /// <remarks>
-    /// What separates a flyout from a panel: a menu, a colour picker, an enum list and a context
+    /// What separates a flyout from a panel: a menu, a color picker, an enum list and a context
     /// menu are all this, and everything else about them is their content.
     /// </remarks>
     OnOutsideClick,

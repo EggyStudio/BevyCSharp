@@ -247,7 +247,7 @@ which is a multiple of how high the camera is.
 and is not: turning on the spot then drags the whole floor around with the view, and the grid stops
 being a fixed thing the camera moves over.
 
-**The two axes are drawn once.** Every spacing has a line at zero and would colour it, so leaving it
+**The two axes are drawn once.** Every spacing has a line at zero and would color it, so leaving it
 to them puts the axis out three times at three strengths, each fading outwards from its own grid's
 centre, which is snapped to its own spacing. The lines land on top of each other and their fades do
 not, which reads as one line that will not line up with itself.
@@ -288,7 +288,7 @@ beside the thing being edited, and Unity publishes the values rather than leavin
 guessed at. What follows is taken from Unity's Editor Foundations design system, then adjusted
 where this editor differs.
 
-### Colour
+### Color
 
 Unity's dark theme, for reference:
 
@@ -467,7 +467,7 @@ What changed since:
 - **`align-content` and `align-self` are read**, so a wrapping box can be told to pack its lines.
 - **A widget that comes and goes inside a frame no longer ends the process.** The marker a restyle
   leaves on a new node is queued quietly rather than asserted.
-- **The pictures on a checkbox, a choice box and a colour swatch are the editor's own**, drawn in
+- **The pictures on a checkbox, a choice box and a color swatch are the editor's own**, drawn in
   the same hand as the rest, and compiled in so a game that ships no icons still has a checkbox
   that looks like one.
 
@@ -493,11 +493,11 @@ These constraints shaped the panels, and the ones left are the interface's rathe
   label measures, so a panel grows and shrinks and a number walks left and right for as long as the
   writing goes on.
 - **What a program decides about an element used to be put back by the stylesheet** whenever the
-  interface restyled the widget: its display, its box, and its colour. All three are now written
+  interface restyled the widget: its display, its box, and its color. All three are now written
   as a decision the sheet is applied before rather than after, so a panel can hide a row, place a
-  flyout and paint a patch of colour and have all three still be true a frame later. Painting was
+  flyout and paint a patch of color and have all three still be true a frame later. Painting was
   the last of them, and the one that shaped the most code around it: the inspector drew its handles
-  as pictures of colours and its colour fields as six digits because a painted element could not
+  as pictures of colors and its color fields as six digits because a painted element could not
   reliably be hidden.
 - **A panel's widgets draw over a flyout that is provably above them.** The drawing order is one
   sorted list and `bcs_xui_stack` reports each element's place in it: a menu opened over the
@@ -509,7 +509,7 @@ These constraints shaped the panels, and the ones left are the interface's rathe
   of it.
 - **Two rules of equal weight were settled by whichever the map handed over first.** A compound
   selector counted only its first name, so `.field-note.warn` weighed the same as `.field-note` and
-  which colour a warning took was a matter of iteration order. Every name in a step is counted now.
+  which color a warning took was a matter of iteration order. Every name in a step is counted now.
 - **A row that is reused reports what it used to say.** The pool draws whatever line is scrolled
   into it, and a widget whose text is replaced reports the change a frame or two later, which is
   indistinguishable from somebody typing that text into the new field. A row that turns therefore
@@ -538,7 +538,7 @@ These constraints shaped the panels, and the ones left are the interface's rathe
 
 
 - ~~`backdrop-filter` is drawn over the element's own background rather than under it.~~ **It
-  works now**, and `BevyCSharp.Sample`'s own panel uses it: the element's background colour is the
+  works now**, and `BevyCSharp.Sample`'s own panel uses it: the element's background color is the
   tint the blurred screen is mixed with, which is what a frosted panel is. It was fixed by
   something else: a document's body was sized by its contents rather than by the window, and what
   the blur sampled followed. The editor's panels are still plain translucent black, which is a
@@ -587,7 +587,7 @@ goes in them is decided elsewhere, in three pieces.
 **A drawer draws one kind of value.** `IFieldDrawer` answers whether it takes a field, says how
 many rows it wants, fills each of them, and reads back what was typed or ticked. There is one per
 kind of value and each is a file: a number, a number with two ends, three numbers, a rotation as
-three angles, a colour, a flag, a choice, a set of flags, a reference to another entity, and text
+three angles, a color, a flag, a choice, a set of flags, a reference to another entity, and text
 for anything left over. The table is searched newest first, so a game takes over a field by adding
 a drawer after the built-in ones.
 
@@ -614,7 +614,7 @@ and leaves the answers on the schema as `FieldHints`, so nothing reflects at run
 | `[Separator]` | a line across the panel above the field |
 | `[Info("...", Kind = ...)]` | a sentence in the panel above the field: something to know, a warning, an error |
 | `[Foldout("A/B")]` | puts the field in a fold, which opens and shuts; slashes nest them |
-| `[Colour]` | three numbers that are a colour: a patch that opens a picker, and the numbers under it |
+| `[Color]` | three numbers that are a color: a patch that opens a picker, and the numbers under it |
 | `[Inline]` | three numbers beside each other rather than one per row |
 | `[Wide]` | drawn across the panel, with no name column beside it |
 | `[ShowIf(nameof(Other))]` | drawn only while another field reads true, or equals a value |
@@ -725,5 +725,5 @@ move the desktop's cursor, and it does not try.
 
 Nothing here is provable by a test alone. `Render.Screenshot` exists for that reason: a panel
 either lays out correctly or it does not, and only the picture says which. Every stage ends with a
-capture, and the pictures are compared against the density and colour rules above rather than
+capture, and the pictures are compared against the density and color rules above rather than
 against an opinion.

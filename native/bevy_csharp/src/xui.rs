@@ -1549,7 +1549,7 @@ pub unsafe extern "C" fn bcs_xui_set_class(entity: u64, class: *const core::ffi:
 
 /// Paints an element's background.
 ///
-/// What a stylesheet cannot say, because the colour depends on what the element is showing at the
+/// What a stylesheet cannot say, because the color depends on what the element is showing at the
 /// time rather than on what it is: the handle beside the second number of a vector is green
 /// because it is the second, and the same element is red when the rows are reused for something
 /// else.
@@ -1560,7 +1560,7 @@ pub unsafe extern "C" fn bcs_xui_set_class(entity: u64, class: *const core::ffi:
 /// other element in the same row. It is here because painting an element is an ordinary thing to
 /// want, and because a later version of the interface may stop reacting to it.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_xui_set_colour(entity: u64, red: f32, green: f32, blue: f32, alpha: f32) -> i32 {
+pub extern "C" fn bcs_xui_set_color(entity: u64, red: f32, green: f32, blue: f32, alpha: f32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "editor"))]
         {
@@ -1578,10 +1578,10 @@ pub extern "C" fn bcs_xui_set_colour(entity: u64, red: f32, green: f32, blue: f3
 
                 // Written twice: once so it is painted now, and once as a decision the stylesheet
                 // does not get to undo. Writing only the component paints it for as long as it
-                // takes something to restyle the element, and then the sheet's own colour comes
+                // takes something to restyle the element, and then the sheet's own color comes
                 // back; writing only the decision waits for the next restyle to show anything.
                 let status = decide(world, entity, |over| {
-                    over.background_colour = Some(painted);
+                    over.background_color = Some(painted);
                 });
 
                 if status < 0 {

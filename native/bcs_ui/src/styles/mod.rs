@@ -77,7 +77,7 @@ pub struct StyleOverride {
     pub flex_grow: Option<f32>,
 
     /// What it is painted, over whatever the stylesheet says.
-    pub background_colour: Option<Color>,
+    pub background_color: Option<Color>,
 }
 
 impl StyleOverride {
@@ -92,16 +92,16 @@ impl StyleOverride {
             && self.max_width.is_none()
             && self.max_height.is_none()
             && self.flex_grow.is_none()
-            && self.background_colour.is_none()
+            && self.background_color.is_none()
     }
 
-    /// The colour decided for an element, if one was.
+    /// The color decided for an element, if one was.
     ///
-    /// Apart from `apply`, because a colour is not part of the node: it lives on its own component,
+    /// Apart from `apply`, because a color is not part of the node: it lives on its own component,
     /// and the stylesheet writes it from a different place. Both are applied after the sheet, which
     /// is the whole point of the override.
-    pub fn colour(&self) -> Option<Color> {
-        self.background_colour
+    pub fn color(&self) -> Option<Color> {
+        self.background_color
     }
 
     /// Writes whatever has been decided onto a node, over what the stylesheet said.

@@ -262,7 +262,7 @@ public sealed class MaterialTests
     }
 
     [Fact]
-    public void TheShortColourOverloadStillWorks()
+    public void TheShortColorOverloadStillWorks()
     {
         // The old argument list, kept so existing code and the simple case stay one line.
         using var harness = new EngineHarness(frames: 2);

@@ -14,7 +14,7 @@ use crate::interop::{status, BcsGizmoConfig};
 /// One recorded draw call, waiting for the frame's drain.
 #[derive(Clone, Copy)]
 pub struct QueuedGizmo {
-    /// `0` line, `1` sphere, `2` axes, `3` a line fading from one colour to another.
+    /// `0` line, `1` sphere, `2` axes, `3` a line fading from one color to another.
     pub kind: i32,
     /// Line start, sphere centre, or the position axes are drawn at.
     pub start: [f32; 3],
@@ -24,7 +24,7 @@ pub struct QueuedGizmo {
     pub rotation: [f32; 4],
     /// Sphere radius, or the length of each axis.
     pub radius: f32,
-    /// Colour, linear RGBA. Axes use their own red, green and blue.
+    /// Color, linear RGBA. Axes use their own red, green and blue.
     pub color: [f32; 4],
     /// What a fading line reaches at its far end.
     pub end_color: [f32; 4],

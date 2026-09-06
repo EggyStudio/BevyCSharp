@@ -330,21 +330,21 @@ public static unsafe class Xui
     /// </summary>
     /// <remarks>
     /// <para>
-    /// For a colour that depends on what the element is showing rather than on what it is, which
+    /// For a color that depends on what the element is showing rather than on what it is, which
     /// is the one thing a stylesheet cannot say.
     /// </para>
     /// <para>
     /// Safe to mix with hiding, which it once was not. Painting an element makes the interface
-    /// restyle it, and a restyle used to put back both the display property and the colour that
+    /// restyle it, and a restyle used to put back both the display property and the color that
     /// whoever was driving the panel had just decided. What a panel decides is now kept apart from
     /// what the stylesheet says and applied after it, so a painted element stays painted and still
     /// hides when it is told to.
     /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">The element is gone.</exception>
-    public static void SetColour(Entity element, float red, float green, float blue, float alpha = 1f)
+    public static void SetColor(Entity element, float red, float green, float blue, float alpha = 1f)
         => Native.Check(
-            Native.bcs_xui_set_colour(element.Bits, red, green, blue, alpha),
+            Native.bcs_xui_set_color(element.Bits, red, green, blue, alpha),
             $"painting {element}");
 
     /// <summary>
@@ -391,11 +391,11 @@ public static unsafe class Xui
     /// Paints an element, as one number: red, green, blue and alpha, a byte each.
     /// </summary>
     /// <remarks>
-    /// The way a colour is written down everywhere else, so a colour that came from a stylesheet, a
+    /// The way a color is written down everywhere else, so a color that came from a stylesheet, a
     /// file or a field does not have to be taken apart to be used. <c>0xFF0000FF</c> is red.
     /// </remarks>
     /// <exception cref="BevyNativeException">The element is gone.</exception>
-    public static void SetColour(Entity element, uint rgba) => SetColour(
+    public static void SetColor(Entity element, uint rgba) => SetColor(
         element,
         ((rgba >> 24) & 0xFF) / 255f,
         ((rgba >> 16) & 0xFF) / 255f,

@@ -43,7 +43,7 @@ public static class PanelBinding
     /// <para>
     /// The symptom is worth writing down, because it is not obvious from the cause: a row shows a
     /// value from an unrelated row, the widget reports that value as though somebody had typed it,
-    /// and the panel writes it into the world. A scale of one becomes the blue of a colour three
+    /// and the panel writes it into the world. A scale of one becomes the blue of a color three
     /// rows down.
     /// </para>
     /// </remarks>

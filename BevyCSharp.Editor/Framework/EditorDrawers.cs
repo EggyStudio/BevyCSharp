@@ -79,7 +79,7 @@ public static class EditorDrawers
         Add(new VectorDrawer());
         Add(new AngleDrawer());
         Add(new SliderDrawer());
-        Add(new ColourDrawer());
+        Add(new ColorDrawer());
         Add(new EntityDrawer());
         Add(new FlagsDrawer());
         Add(new AssetDrawer());

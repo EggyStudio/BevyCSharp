@@ -43,7 +43,7 @@ public readonly record struct FieldCondition(string Field, string? Value = null,
 /// <param name="Hidden">Whether it is shown at all.</param>
 /// <param name="Space">Whether a blank row goes above it.</param>
 /// <param name="Separator">Whether a line goes above it.</param>
-/// <param name="Colour">Whether three numbers are a colour rather than a place.</param>
+/// <param name="Color">Whether three numbers are a color rather than a place.</param>
 /// <param name="Wide">Whether it is drawn across the panel with no name beside it.</param>
 /// <param name="Inline">Whether the parts of it are drawn beside each other.</param>
 /// <param name="Foldout">The fold it sits in, with slashes between the levels.</param>
@@ -71,7 +71,7 @@ public sealed record FieldHints(
     bool Hidden = false,
     bool Space = false,
     bool Separator = false,
-    bool Colour = false,
+    bool Color = false,
     bool Wide = false,
     bool Inline = false,
     string? Foldout = null,

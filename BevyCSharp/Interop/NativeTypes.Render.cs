@@ -21,19 +21,19 @@ public struct NativeCameraConfig
     /// <summary>Furthest visible distance.</summary>
     public float Far;
 
-    /// <summary>0 world clear colour, 1 the one below, 2 no clear.</summary>
+    /// <summary>0 world clear color, 1 the one below, 2 no clear.</summary>
     public int ClearMode;
 
-    /// <summary>Clear colour red.</summary>
+    /// <summary>Clear color red.</summary>
     public float ClearR;
 
-    /// <summary>Clear colour green.</summary>
+    /// <summary>Clear color green.</summary>
     public float ClearG;
 
-    /// <summary>Clear colour blue.</summary>
+    /// <summary>Clear color blue.</summary>
     public float ClearB;
 
-    /// <summary>Clear colour alpha.</summary>
+    /// <summary>Clear color alpha.</summary>
     public float ClearA;
 
     /// <summary>Draw order; higher draws over lower.</summary>
@@ -103,13 +103,13 @@ public struct NativeLightConfig
 [StructLayout(LayoutKind.Sequential)]
 public struct NativeMaterialConfig
 {
-    /// <summary>Base colour red, linear.</summary>
+    /// <summary>Base color red, linear.</summary>
     public float BaseR;
 
-    /// <summary>Base colour green, linear.</summary>
+    /// <summary>Base color green, linear.</summary>
     public float BaseG;
 
-    /// <summary>Base colour blue, linear.</summary>
+    /// <summary>Base color blue, linear.</summary>
     public float BaseB;
 
     /// <summary>Opacity.</summary>
@@ -145,7 +145,7 @@ public struct NativeMaterialConfig
     /// <summary>Non-zero to skip lighting.</summary>
     public int Unlit;
 
-    /// <summary>Asset key of the base colour map, or -1.</summary>
+    /// <summary>Asset key of the base color map, or -1.</summary>
     public int BaseColorTexture;
 
     /// <summary>Asset key of the normal map, or -1.</summary>
@@ -334,16 +334,16 @@ public struct NativeGizmoConfig
     /// <summary>Sphere radius or axis length.</summary>
     public float Radius;
 
-    /// <summary>Colour red.</summary>
+    /// <summary>Color red.</summary>
     public float ColorR;
 
-    /// <summary>Colour green.</summary>
+    /// <summary>Color green.</summary>
     public float ColorG;
 
-    /// <summary>Colour blue.</summary>
+    /// <summary>Color blue.</summary>
     public float ColorB;
 
-    /// <summary>Colour alpha.</summary>
+    /// <summary>Color alpha.</summary>
     public float ColorA;
 
     /// <summary>What a fading line reaches at its far end, red.</summary>
@@ -451,13 +451,13 @@ public unsafe struct NativeEffectsConfig
     /// <summary>Samples either side of a pixel along its motion; 0 also turns it off.</summary>
     public uint MotionBlurSamples;
 
-    /// <summary>Width of the coloured fringe, as a fraction of the window; 0 for none.</summary>
+    /// <summary>Width of the colored fringe, as a fraction of the window; 0 for none.</summary>
     public float Aberration;
 
     /// <summary>Cap on the samples the fringe is built from; 0 for Bevy's own.</summary>
     public uint AberrationSamples;
 
-    /// <summary>Asset key of the image the fringe takes its colours from, or -1.</summary>
+    /// <summary>Asset key of the image the fringe takes its colors from, or -1.</summary>
     public int AberrationLut;
 
     /// <summary>Strength of the lens warp; 0 for a straight picture.</summary>
@@ -502,16 +502,16 @@ public unsafe struct NativeEffectsConfig
     /// <summary>How far the vignette is stretched to fit a window that is not square.</summary>
     public float VignetteEdgeCompensation;
 
-    /// <summary>Vignette colour red, linear.</summary>
+    /// <summary>Vignette color red, linear.</summary>
     public float VignetteColorR;
 
-    /// <summary>Vignette colour green, linear.</summary>
+    /// <summary>Vignette color green, linear.</summary>
     public float VignetteColorG;
 
-    /// <summary>Vignette colour blue, linear.</summary>
+    /// <summary>Vignette color blue, linear.</summary>
     public float VignetteColorB;
 
-    /// <summary>Vignette colour alpha.</summary>
+    /// <summary>Vignette color alpha.</summary>
     public float VignetteColorA;
 
     /// <summary>Non-zero to let the camera find its own exposure.</summary>

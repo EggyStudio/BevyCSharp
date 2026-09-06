@@ -430,13 +430,13 @@ public sealed class UiSettings
     public Length ColumnGap { get; set; } = Length.Zero;
 
     /// <summary>
-    /// The node's background, or the text's colour for a run of text. Linear RGBA.
+    /// The node's background, or the text's color for a run of text. Linear RGBA.
     /// </summary>
     /// <remarks>Transparent by default, so a plain node is a layout box that draws nothing.</remarks>
     public (float R, float G, float B, float A) Color { get; set; } = (1f, 1f, 1f, 0f);
 
     /// <summary>
-    /// The border's colour, on every side. Linear RGBA.
+    /// The border's color, on every side. Linear RGBA.
     /// </summary>
     /// <remarks>
     /// Transparent by default, so a border takes both this and a <see cref="Border"/> thickness
@@ -656,7 +656,7 @@ public static unsafe class Ui
     /// </summary>
     /// <remarks>
     /// The font is Bevy's own, compiled into the engine, so nothing has to be loaded to put words
-    /// on the screen. <see cref="UiSettings.Color"/> is the colour of the text itself, and
+    /// on the screen. <see cref="UiSettings.Color"/> is the color of the text itself, and
     /// <see cref="UiTextSettings"/> is where another font goes.
     /// </remarks>
     /// <param name="text">What it says.</param>

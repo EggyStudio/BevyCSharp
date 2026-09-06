@@ -38,10 +38,10 @@ public partial struct Showcase
     [Tooltip("Whole numbers only, however finely the bar is dragged.")]
     public int Count;
 
-    /// <summary>Three numbers that are a colour.</summary>
+    /// <summary>Three numbers that are a color.</summary>
     [Header("Looks")]
     [Space]
-    [Colour]
+    [Color]
     [Tooltip("The patch shows what the three numbers come to.")]
     public Vec3 Tint;
 

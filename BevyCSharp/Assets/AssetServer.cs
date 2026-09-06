@@ -194,10 +194,10 @@ public sealed class TextureSettings
     public uint Anisotropy { get; set; } = 1;
 
     /// <summary>
-    /// Whether the file holds colour, in which case it is read as sRGB.
+    /// Whether the file holds color, in which case it is read as sRGB.
     /// </summary>
     /// <remarks>
-    /// Set false for a texture whose bytes are data rather than colour: a normal map, a
+    /// Set false for a texture whose bytes are data rather than color: a normal map, a
     /// metallic-roughness map, an occlusion map. Reading one as sRGB bends every value in it.
     /// </remarks>
     public bool Srgb { get; set; } = true;
@@ -211,7 +211,7 @@ public sealed class TextureSettings
         MipmapFilter = TextureFilter.Linear,
     };
 
-    /// <summary>Linear filtering with no colour conversion, for a normal or roughness map.</summary>
+    /// <summary>Linear filtering with no color conversion, for a normal or roughness map.</summary>
     public static TextureSettings Data => new()
     {
         MagFilter = TextureFilter.Linear,
@@ -274,7 +274,7 @@ public static unsafe class AssetServer
     /// <remarks>
     /// <see cref="Load"/> takes Bevy's default sampler, which clamps at the edges and filters to
     /// the nearest pixel. A texture meant to tile has to say so, and so does one whose bytes are
-    /// data rather than colour.
+    /// data rather than color.
     /// </remarks>
     /// <example>
     /// <code>

@@ -192,28 +192,28 @@ public struct NativeUiNodeConfig
     /// <summary>Unit of <see cref="ColumnGap"/>.</summary>
     public int ColumnGapUnit;
 
-    /// <summary>Background or text colour, red.</summary>
+    /// <summary>Background or text color, red.</summary>
     public float ColorR;
 
-    /// <summary>Background or text colour, green.</summary>
+    /// <summary>Background or text color, green.</summary>
     public float ColorG;
 
-    /// <summary>Background or text colour, blue.</summary>
+    /// <summary>Background or text color, blue.</summary>
     public float ColorB;
 
-    /// <summary>Background or text colour, alpha.</summary>
+    /// <summary>Background or text color, alpha.</summary>
     public float ColorA;
 
-    /// <summary>Border colour, red.</summary>
+    /// <summary>Border color, red.</summary>
     public float BorderColorR;
 
-    /// <summary>Border colour, green.</summary>
+    /// <summary>Border color, green.</summary>
     public float BorderColorG;
 
-    /// <summary>Border colour, blue.</summary>
+    /// <summary>Border color, blue.</summary>
     public float BorderColorB;
 
-    /// <summary>Border colour, alpha.</summary>
+    /// <summary>Border color, alpha.</summary>
     public float BorderColorA;
 }
 

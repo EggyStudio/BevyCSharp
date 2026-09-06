@@ -42,13 +42,13 @@ public sealed class InspectorDrawerTests
     }
 
     [Fact]
-    public void AColourAsksForOneMore()
+    public void AColorAsksForOneMore()
     {
-        var field = Field("Tint", FieldKind.Vec3, new FieldHints(Colour: true));
+        var field = Field("Tint", FieldKind.Vec3, new FieldHints(Color: true));
         var drawer = EditorDrawers.For(field);
 
-        // The colour itself, and the three numbers behind it on one line under it.
-        Assert.IsType<ColourDrawer>(drawer);
+        // The color itself, and the three numbers behind it on one line under it.
+        Assert.IsType<ColorDrawer>(drawer);
         Assert.Equal(2, drawer.Lines(field));
     }
 

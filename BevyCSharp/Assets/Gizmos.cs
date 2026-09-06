@@ -35,7 +35,7 @@ namespace Bevy;
 public static unsafe class Gizmos
 {
     /// <summary>
-    /// Draws a line that fades from one colour to another along its length.
+    /// Draws a line that fades from one color to another along its length.
     /// </summary>
     /// <param name="start">Where it begins, in world space.</param>
     /// <param name="end">Where it ends.</param>
@@ -45,7 +45,7 @@ public static unsafe class Gizmos
     /// <remarks>
     /// What draws something that has no edge: a grid that thins into the distance rather than
     /// stopping at a square boundary, a trail that dies away behind what left it. Fading a line by
-    /// cutting it into pieces and colouring each is the same picture with a seam every few
+    /// cutting it into pieces and coloring each is the same picture with a seam every few
     /// centimetres and one call per piece.
     /// </remarks>
     /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
@@ -139,7 +139,7 @@ public static unsafe class Gizmos
     /// Draws a set of axes, so an orientation can be read at a glance.
     /// </summary>
     /// <remarks>
-    /// Coloured by Bevy: red for X, green for Y, blue for Z. Drawing these on an entity is the
+    /// Colored by Bevy: red for X, green for Y, blue for Z. Drawing these on an entity is the
     /// quickest way to see whether something is facing where it should.
     /// </remarks>
     /// <param name="transform">Where the axes sit and which way they point.</param>

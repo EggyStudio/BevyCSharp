@@ -246,7 +246,7 @@ pub unsafe extern "C" fn bcs_asset_load(
 /// Starts loading an image with the sampler it should be drawn with.
 ///
 /// The plain [`bcs_asset_load`] takes Bevy's default sampler, which clamps at the edges. A
-/// texture meant to tile has to say so, and so does one whose bytes are data rather than colour:
+/// texture meant to tile has to say so, and so does one whose bytes are data rather than color:
 /// a normal map read as sRGB has every direction in it bent.
 ///
 /// # Safety

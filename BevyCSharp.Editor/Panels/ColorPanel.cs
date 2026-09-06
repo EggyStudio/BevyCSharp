@@ -5,32 +5,32 @@ using BevyCSharp.Editor.Framework;
 namespace BevyCSharp.Editor.Panels;
 
 /// <summary>
-/// Asks for a colour.
+/// Asks for a color.
 /// </summary>
 /// <remarks>
 /// <para>
-/// What pressing a patch of colour opens, and not only in the inspector: it is asked for a colour
-/// and it answers with one, so anything that has a colour to set can use it without knowing where
-/// the colour is kept.
+/// What pressing a patch of color opens, and not only in the inspector: it is asked for a color
+/// and it answers with one, so anything that has a color to set can use it without knowing where
+/// the color is kept.
 /// </para>
 /// <para>
-/// It reports every change rather than only the last one, so the thing being coloured changes while
-/// the bar is moving. Picking a colour is a thing somebody does by looking at the result, and a
+/// It reports every change rather than only the last one, so the thing being colored changes while
+/// the bar is moving. Picking a color is a thing somebody does by looking at the result, and a
 /// picker that only tells you at the end is one where every choice is a guess.
 /// </para>
 /// </remarks>
 [UiPanel(
-    "panels/colour.html",
-    Root = "#colour",
+    "panels/color.html",
+    Root = "#color",
     Dismiss = UiDismiss.OnOutsideClick,
     Layer = 100)]
-public sealed partial class ColourPanel
+public sealed partial class ColorPanel
 {
-    /// <summary>What is being coloured.</summary>
+    /// <summary>What is being colored.</summary>
     [Bind("#c-name", Mode = BindMode.OneWay)]
-    public string Title { get; private set; } = "Colour";
+    public string Title { get; private set; } = "Color";
 
-    /// <summary>The colour as the six digits everybody reads.</summary>
+    /// <summary>The color as the six digits everybody reads.</summary>
     [Bind("#c-hex", Mode = BindMode.OneWay)]
     public string Digits { get; private set; } = "#000000";
 
@@ -46,51 +46,51 @@ public sealed partial class ColourPanel
     [Bind("#c-blue")]
     public float Blue;
 
-    /// <summary>Who to tell when the colour changes.</summary>
+    /// <summary>Who to tell when the color changes.</summary>
     private Action<Vec3>? _tell;
 
-    /// <summary>What was last reported, so the same colour is not reported twice.</summary>
+    /// <summary>What was last reported, so the same color is not reported twice.</summary>
     private Vec3 _told;
 
     /// <summary>
-    /// Opens the picker over a colour, and answers with every colour chosen after it.
+    /// Opens the picker over a color, and answers with every color chosen after it.
     /// </summary>
-    /// <param name="title">What is being coloured.</param>
-    /// <param name="colour">What it is now.</param>
+    /// <param name="title">What is being colored.</param>
+    /// <param name="color">What it is now.</param>
     /// <param name="x">Where to open, across.</param>
     /// <param name="y">And down.</param>
-    /// <param name="picked">Told each time the colour changes.</param>
-    public static void Ask(string title, Vec3 colour, float x, float y, Action<Vec3> picked)
+    /// <param name="picked">Told each time the color changes.</param>
+    public static void Ask(string title, Vec3 color, float x, float y, Action<Vec3> picked)
     {
         ArgumentNullException.ThrowIfNull(picked);
 
-        var panel = EditorShell.Find<ColourPanel>() ?? new ColourPanel();
+        var panel = EditorShell.Find<ColorPanel>() ?? new ColorPanel();
 
         panel.Title = title;
         panel._tell = picked;
-        panel._told = colour;
-        panel.Red = Bar(colour.X);
-        panel.Green = Bar(colour.Y);
-        panel.Blue = Bar(colour.Z);
-        panel.Digits = ColourDrawer.Digits(colour);
+        panel._told = color;
+        panel.Red = Bar(color.X);
+        panel.Green = Bar(color.Y);
+        panel.Blue = Bar(color.Z);
+        panel.Digits = ColorDrawer.Digits(color);
 
         EditorShell.ShowAt(panel, x, y, pinned: true);
         EditorShell.Reveal(panel);
     }
 
-    /// <summary>Reports the colour while it is being chosen.</summary>
+    /// <summary>Reports the color while it is being chosen.</summary>
     [OnChange]
     public void Chosen()
     {
-        var colour = new Vec3(Channel(Red), Channel(Green), Channel(Blue));
+        var color = new Vec3(Channel(Red), Channel(Green), Channel(Blue));
 
-        Digits = ColourDrawer.Digits(colour);
+        Digits = ColorDrawer.Digits(color);
 
         if (_tell is not { } tell) return;
-        if (Near(colour, _told)) return;
+        if (Near(color, _told)) return;
 
-        _told = colour;
-        tell(colour);
+        _told = color;
+        tell(color);
     }
 
     /// <summary>Keeps the patch showing what the bars come to.</summary>
@@ -99,10 +99,10 @@ public sealed partial class ColourPanel
     {
         if (Window is not { IsOpen: true } window) return;
 
-        var colour = new Vec3(Channel(Red), Channel(Green), Channel(Blue));
-        var packed = ((uint)Byte(colour.X) << 24)
-            | ((uint)Byte(colour.Y) << 16)
-            | ((uint)Byte(colour.Z) << 8)
+        var color = new Vec3(Channel(Red), Channel(Green), Channel(Blue));
+        var packed = ((uint)Byte(color.X) << 24)
+            | ((uint)Byte(color.Y) << 16)
+            | ((uint)Byte(color.Z) << 8)
             | 0xFFu;
 
         if (_painted == packed) return;
@@ -110,7 +110,7 @@ public sealed partial class ColourPanel
         var patch = window.Element("c-patch");
         if (patch.IsNone) return;
 
-        Xui.SetColour(patch, packed);
+        Xui.SetColor(patch, packed);
         _painted = packed;
     }
 
@@ -123,8 +123,8 @@ public sealed partial class ColourPanel
 
     /// <summary>Where a channel sits on a bar of a thousand steps.</summary>
     /// <remarks>
-    /// Clamped, because a colour used as a light's tint can be brighter than white and a bar
-    /// cannot say so. Touching the bar of such a colour brings it back into the range the bar has,
+    /// Clamped, because a color used as a light's tint can be brighter than white and a bar
+    /// cannot say so. Touching the bar of such a color brings it back into the range the bar has,
     /// which is the honest thing for a bar to do: what it shows is what it will set.
     /// </remarks>
     private static float Bar(float channel) => Math.Clamp(channel, 0f, 1f) * 1000f;
@@ -136,7 +136,7 @@ public sealed partial class ColourPanel
     private static int Byte(float channel) =>
         (int)Math.Round(Math.Clamp(channel, 0f, 1f) * 255f);
 
-    /// <summary>Whether two colours are the same as far as a screen is concerned.</summary>
+    /// <summary>Whether two colors are the same as far as a screen is concerned.</summary>
     private static bool Near(Vec3 left, Vec3 right) =>
         Byte(left.X) == Byte(right.X)
         && Byte(left.Y) == Byte(right.Y)

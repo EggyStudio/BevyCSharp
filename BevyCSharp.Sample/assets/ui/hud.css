@@ -72,7 +72,7 @@
 
 /*
  * The widgets are styled by the tokens the built-in styles are written against, so a game changes
- * four colours rather than restyling a checkbox part by part. Anything that wants more says so by
+ * four colors rather than restyling a checkbox part by part. Anything that wants more says so by
  * name: a widget's pieces have classes, and a game's rule beats the built-in one.
  */
 :root {

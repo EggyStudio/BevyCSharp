@@ -58,8 +58,8 @@ public interface IInspectorRows
     /// <summary>Shows a button, and how much of the row it takes against its neighbours.</summary>
     void Button(int row, int slot, string text, double weight);
 
-    /// <summary>Shows a patch of colour that opens a picker.</summary>
-    void Swatch(int row, uint colour);
+    /// <summary>Shows a patch of color that opens a picker.</summary>
+    void Swatch(int row, uint color);
 
     /// <summary>Shows words across the row rather than a value.</summary>
     void Note(int row, string text, NoteKind kind);
@@ -97,7 +97,7 @@ public readonly record struct InspectorRow(IInspectorRows Panel, int Index)
     /// </summary>
     /// <remarks>
     /// Three, because the values that want to share a line are the ones with three parts: a place,
-    /// a rotation, a size. A fourth is the alpha of a colour, and a colour is drawn as a patch with
+    /// a rotation, a size. A fourth is the alpha of a color, and a color is drawn as a patch with
     /// its numbers folded away rather than as four boxes nobody can read.
     /// </remarks>
     public const int Slots = 3;
@@ -140,7 +140,7 @@ public readonly record struct InspectorRow(IInspectorRows Panel, int Index)
         Panel.Button(Index, slot, text, weight);
 
     /// <inheritdoc cref="IInspectorRows.Swatch"/>
-    public void Swatch(uint colour) => Panel.Swatch(Index, colour);
+    public void Swatch(uint color) => Panel.Swatch(Index, color);
 
     /// <inheritdoc cref="IInspectorRows.Note"/>
     public void Note(string text, NoteKind kind = NoteKind.Info) => Panel.Note(Index, text, kind);
@@ -168,33 +168,33 @@ public readonly record struct InspectorRow(IInspectorRows Panel, int Index)
 }
 
 /// <summary>
-/// The handle on a box's edge: what colour it is, and what it says.
+/// The handle on a box's edge: what color it is, and what it says.
 /// </summary>
 /// <remarks>
-/// A colour rather than a picture. Painting an element used to be impossible here: writing a colour
-/// made the interface restyle it, and the restyle put back both the colour and the display property
+/// A color rather than a picture. Painting an element used to be impossible here: writing a color
+/// made the interface restyle it, and the restyle put back both the color and the display property
 /// the panel had just decided. What a program decides is now applied after the sheet, so a painted
 /// element stays painted and still hides when it is told to.
 /// </remarks>
-/// <param name="Colour">
+/// <param name="Color">
 /// What it is painted, as red, green, blue and alpha bytes, or nought for whatever the stylesheet
 /// says. Nought is not black: it means the handle is left alone, which is how the inspector gets a
-/// column of grey handles without writing a colour sixty times a second.
+/// column of grey handles without writing a color sixty times a second.
 /// </param>
 /// <param name="Letter">
 /// What is written on it, or nothing. A handle with nothing on it is a bar the width of a finger;
 /// one with a letter grows to the right to take it.
 /// </param>
-public readonly record struct Grip(uint Colour = 0u, string Letter = "");
+public readonly record struct Grip(uint Color = 0u, string Letter = "");
 
 /// <summary>
 /// The handles the editor uses.
 /// </summary>
 /// <remarks>
-/// Grey, and the same grey for all three axes. Three saturated colours down the side of a panel is
+/// Grey, and the same grey for all three axes. Three saturated colors down the side of a panel is
 /// the loudest thing on the screen for information the order of the boxes already carries, and the
-/// viewport handles that do need to be told apart are the ones that should have the colour. A tool
-/// that wants them coloured anyway turns them on.
+/// viewport handles that do need to be told apart are the ones that should have the color. A tool
+/// that wants them colored anyway turns them on.
 /// </remarks>
 public static class Grips
 {
@@ -207,7 +207,7 @@ public static class Grips
     public static bool Letters { get; set; }
 
     /// <summary>Whether the axis handles are painted red, green and blue.</summary>
-    public static bool Colourful { get; set; }
+    public static bool Colorful { get; set; }
 
     /// <summary>A number that is not one of three.</summary>
     public static readonly Grip Plain = new();
@@ -216,7 +216,7 @@ public static class Grips
     public static Grip Axis(int part)
     {
         var index = Math.Clamp(part, 0, Axes.Length - 1);
-        var grip = new Grip(Colourful ? Axes[index] : 0u, Letters ? Letter(index) : string.Empty);
+        var grip = new Grip(Colorful ? Axes[index] : 0u, Letters ? Letter(index) : string.Empty);
 
         return grip;
     }

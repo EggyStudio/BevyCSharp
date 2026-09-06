@@ -305,7 +305,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
                 "HiddenAttribute" => hints with { Hidden = true },
                 "SpaceAttribute" => hints with { Space = true },
                 "SeparatorAttribute" => hints with { Separator = true },
-                "ColourAttribute" or "ColorAttribute" => hints with { Colour = true },
+                "ColorAttribute" => hints with { Color = true },
                 "WideAttribute" => hints with { Wide = true },
                 "InlineAttribute" => hints with { Inline = true },
                 "FoldoutAttribute" => hints with

@@ -10,16 +10,16 @@ use std::borrow::Cow;
 use std::fs;
 use std::path::{Component, Path, PathBuf};
 // The three pictures a widget draws that are not the program's own: the tick on a checkbox, the
-// arrow on a choice box, the swatch on a colour picker. They are the editor's own drawings, so
+// arrow on a choice box, the swatch on a color picker. They are the editor's own drawings, so
 // that everything on screen is drawn in one hand, and they are compiled in so that a game that
 // ships no icons still has a checkbox that looks like one. A game that wants its own puts a file
 // of the same name under its asset root and it is used instead.
 pub const DEFAULT_CHECK_MARK_KEY: &str = "bcs_ui/icons/check.png";
 pub const DEFAULT_CHOICE_BOX_KEY: &str = "bcs_ui/icons/drop.png";
-pub const DEFAULT_COLOR_KEY: &str = "bcs_ui/icons/colour.png";
+pub const DEFAULT_COLOR_KEY: &str = "bcs_ui/icons/color.png";
 const EMBEDDED_CHECK_MARK: &[u8] = include_bytes!("../../assets/bcs_ui/icons/check.png");
 const EMBEDDED_DROP_ARROW: &[u8] = include_bytes!("../../assets/bcs_ui/icons/drop.png");
-const EMBEDDED_COLOR: &[u8] = include_bytes!("../../assets/bcs_ui/icons/colour.png");
+const EMBEDDED_COLOR: &[u8] = include_bytes!("../../assets/bcs_ui/icons/color.png");
 
 /// Plugin that manages image caching and preload.
 pub struct ImageCacheService;

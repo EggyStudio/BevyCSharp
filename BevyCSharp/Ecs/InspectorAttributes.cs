@@ -119,13 +119,13 @@ public sealed class UnitAttribute(string suffix) : Attribute
     public string Suffix { get; } = suffix;
 }
 
-/// <summary>Three numbers that are a colour rather than a place.</summary>
+/// <summary>Three numbers that are a color rather than a place.</summary>
 /// <remarks>
-/// The rows are the same three boxes; what this adds is the patch of colour beside them, which is
+/// The rows are the same three boxes; what this adds is the patch of color beside them, which is
 /// the only way to tell 0.8, 0.2, 0.1 from a shade of red at a glance.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public sealed class ColourAttribute : Attribute;
+public sealed class ColorAttribute : Attribute;
 
 /// <summary>
 /// Shown only while another field of the same component says so.

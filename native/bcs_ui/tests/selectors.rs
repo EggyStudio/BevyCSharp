@@ -69,7 +69,7 @@ fn a_rule_naming_two_classes_beats_one_naming_either() {
 
     // What settles the cascade between two rules that both match. Counting only the first name in
     // a compound made these equal, and equal rules are settled by whichever the map hands over
-    // first: a colour that is right on some frames and wrong on others.
+    // first: a color that is right on some frames and wrong on others.
     assert!(selector_weight(".field-note.warn") > selector_weight(".field-note"));
     assert!(selector_weight("#main") > selector_weight(".panel.stats"));
     assert!(selector_weight("div.panel") > selector_weight("div"));

@@ -213,7 +213,7 @@ fn linebreak(value: i32) -> bevy::text::LineBreak {
     }
 }
 
-/// Builds the border colour a config describes.
+/// Builds the border color a config describes.
 ///
 /// Always inserted, because transparent is what a node with no border draws and the component is
 /// four floats either way. Leaving it off would make a border that is set later invisible.
@@ -353,7 +353,7 @@ pub unsafe extern "C" fn bcs_ui_spawn_text(
                         justify(text_config.justify),
                         linebreak(text_config.linebreak),
                     ),
-                    // The node's colour is the text's here: a run of text has no background
+                    // The node's color is the text's here: a run of text has no background
                     // of its own, and giving it one would need a second entity behind it.
                     TextColor(Color::linear_rgba(
                         config.color[0],

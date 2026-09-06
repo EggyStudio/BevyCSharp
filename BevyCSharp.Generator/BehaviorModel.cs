@@ -199,7 +199,7 @@ internal sealed record FieldHintModel(
     bool Hidden = false,
     bool Space = false,
     bool Separator = false,
-    bool Colour = false,
+    bool Color = false,
     bool Wide = false,
     bool Inline = false,
     string? Foldout = null,
