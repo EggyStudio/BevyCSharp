@@ -42,14 +42,15 @@ public sealed class InspectorDrawerTests
     }
 
     [Fact]
-    public void AColorAsksForOneMore()
+    public void AColorIsOneRowAndAPicker()
     {
         var field = Field("Tint", FieldKind.Vec3, new FieldHints(Color: true));
         var drawer = EditorDrawers.For(field);
 
-        // The color itself, and the three numbers behind it on one line under it.
+        // One row: the color, pressed to open a picker. Three channels between nought and one are
+        // not what anybody came to read, and they are still reachable where they belong.
         Assert.IsType<ColorDrawer>(drawer);
-        Assert.Equal(2, drawer.Lines(field));
+        Assert.Equal(1, drawer.Lines(field));
     }
 
     [Fact]

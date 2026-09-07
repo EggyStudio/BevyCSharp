@@ -55,6 +55,17 @@ public enum UiDock
     ViewportBottomRight,
 
     /// <summary>
+    /// The middle of the window, over everything.
+    /// </summary>
+    /// <remarks>
+    /// What something summoned by a key rather than opened from a button wants: it appears where
+    /// the eye already is, does its job and goes away. A console is the example, and it is the
+    /// example everywhere: the key is pressed without looking, so the answer has to arrive without
+    /// being looked for.
+    /// </remarks>
+    Centre,
+
+    /// <summary>
     /// The whole window, over everything.
     /// </summary>
     /// <remarks>

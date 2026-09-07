@@ -215,6 +215,7 @@ public sealed class EditorLayout
 
         Band(placed, Margin, width - Margin, bandTop, band);
         Strip(placed, Margin, width - Margin, stripTop);
+        Centred(placed, width, height);
         Corners(placed, Viewport, width, rightBottom);
         Free(placed, width, height);
         Sheets(placed, width, height);
@@ -447,6 +448,34 @@ public sealed class EditorLayout
             if (run >= right) break;
         }
     }
+
+    /// <summary>
+    /// Places whatever appears in the middle of the window.
+    /// </summary>
+    /// <remarks>
+    /// Across the middle, and a third of the way down rather than halfway: something summoned over
+    /// the work should not sit on top of the middle of it, and everything that drops in from a key
+    /// press has landed here since terminals had one.
+    /// </remarks>
+    private void Centred(List<Placed> placed, float width, float height)
+    {
+        var wide = MathF.Min(CentreWidth, MathF.Max(0f, width - (Margin * 2f)));
+
+        foreach (var entry in Members(placed, UiDock.Centre))
+        {
+            entry.Panel.Window!.LimitTo(wide, MathF.Max(0f, height * 0.6f));
+
+            entry.Panel.Window!.PlaceAt(
+                (width - wide) * 0.5f,
+                MathF.Max(Margin, height * 0.22f),
+                wide,
+                float.IsNaN(entry.Placement.Height) ? Xui.Auto : entry.Placement.Height,
+                entry.Rect);
+        }
+    }
+
+    /// <summary>How wide something in the middle of the window is.</summary>
+    public const float CentreWidth = 620f;
 
     /// <summary>
     /// Places whatever takes the whole window.

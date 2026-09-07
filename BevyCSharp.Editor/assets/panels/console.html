@@ -11,9 +11,19 @@
         <p class="dim" id="c-count"></p>
       </div>
 
-      <input id="c-filter" type="text" placeholder="filter" />
+      <!--
+        What is shown and what is looked for. The three chips are the levels: a console that cannot
+        be narrowed to the errors is a console nobody reads twice.
+      -->
+      <div class="line">
+        <input class="grow" id="c-filter" type="text" placeholder="find" />
+        <div class="chip" id="c-info"><p class="chip-text">Info</p></div>
+        <div class="chip" id="c-warn"><p class="chip-text">Warnings</p></div>
+        <div class="chip" id="c-bad"><p class="chip-text">Errors</p></div>
+        <div class="field-btn" id="c-clear"><p class="btn-text">Clear</p></div>
+      </div>
 
-      <div class="rows-grow">
+      <div class="rows-grow" id="c-rows">
         <p class="log" id="crow-0"></p>
         <p class="log" id="crow-1"></p>
         <p class="log" id="crow-2"></p>
@@ -28,9 +38,19 @@
         <p class="log" id="crow-11"></p>
         <p class="log" id="crow-12"></p>
         <p class="log" id="crow-13"></p>
+        <p class="log" id="crow-14"></p>
+        <p class="log" id="crow-15"></p>
+        <p class="log" id="crow-16"></p>
+        <p class="log" id="crow-17"></p>
       </div>
 
-      <div class="wide-btn" id="c-clear"><p class="btn-text">Clear</p></div>
+      <!-- What is typed. The prompt is a character rather than a label for the obvious reason. -->
+      <div class="line">
+        <p class="prompt">&gt;</p>
+        <input class="grow" id="c-input" type="text" placeholder="command" />
+      </div>
+
+      <p class="dim" id="c-hint"></p>
     </div>
   </body>
 </html>

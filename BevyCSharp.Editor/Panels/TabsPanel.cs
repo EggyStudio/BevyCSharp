@@ -69,7 +69,7 @@ public sealed partial class TabsPanel
     }
 
     /// <summary>Opens or minimises a tab.</summary>
-    [Command("#tab", Count = Tabs)]
+    [OnClick("#tab", Count = Tabs)]
     public void Press(int index)
     {
         if (index >= EditorTabs.All.Count) return;

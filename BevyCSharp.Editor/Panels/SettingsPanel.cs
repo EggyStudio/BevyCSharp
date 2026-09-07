@@ -188,7 +188,7 @@ public sealed partial class SettingsPanel
     }
 
     /// <summary>Opens a page.</summary>
-    [Command("#spage", Count = Pages)]
+    [OnClick("#spage", Count = Pages)]
     public void Open(int row)
     {
         if (!PageShown[row]) return;
@@ -226,7 +226,7 @@ public sealed partial class SettingsPanel
     }
 
     /// <summary>Runs an action, or offers the names a choice may take.</summary>
-    [Command("#sb", Count = Rows)]
+    [OnClick("#sb", Count = Rows)]
     public void Pressed(int row)
     {
         if (_rows[row] is not { } entry) return;
@@ -252,7 +252,7 @@ public sealed partial class SettingsPanel
     }
 
     /// <summary>Puts the sheet away.</summary>
-    [Command("#s-close")]
+    [OnClick("#s-close")]
     public void Done() => EditorShell.Conceal(this);
 
     /// <summary>Just under an element, which is where a list it opens belongs.</summary>

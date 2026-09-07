@@ -43,6 +43,13 @@ public interface IInspectorRows
     /// </remarks>
     void Box(int row, int slot, string value, Grip? grip, bool editable);
 
+    /// <summary>Shows a number that is read rather than typed, after the value.</summary>
+    /// <remarks>
+    /// What sits beside a bar. Narrow, because the bar is the control and the number is only there
+    /// to say exactly where it was left.
+    /// </remarks>
+    void Readout(int row, string text);
+
     /// <summary>Shows what the number is measured in, in a column after everything else.</summary>
     void Unit(int row, string suffix);
 
@@ -118,6 +125,9 @@ public readonly record struct InspectorRow(IInspectorRows Panel, int Index)
     /// <inheritdoc cref="IInspectorRows.Box"/>
     public void Box(int slot, string value, Grip? grip = null, bool editable = true) =>
         Panel.Box(Index, slot, value, grip, editable);
+
+    /// <inheritdoc cref="IInspectorRows.Readout"/>
+    public void Readout(string text) => Panel.Readout(Index, text);
 
     /// <inheritdoc cref="IInspectorRows.Unit"/>
     public void Unit(string suffix) => Panel.Unit(Index, suffix);

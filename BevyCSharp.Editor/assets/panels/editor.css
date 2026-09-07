@@ -152,6 +152,96 @@ body {
     overflow: hidden;
 }
 
+/*
+ * A row of things across a panel: a box and the buttons beside it.
+ *
+ * Not `.field-row`, which is an inspector's shape and has a name column in it. This is the general
+ * one: whatever is in it, side by side, with the one that says `grow` taking what is left.
+ */
+.line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    /*
+     * No width. A hundred per cent is measured against the box its parent draws rather than the
+     * room inside it, so a row that asks for it is as wide as the panel's padding on either side
+     * and the last thing in it is cut off by the border.
+     */
+    column-gap: 5px;
+}
+
+.line .grow {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    /*
+     * Width taken back from whatever the element is. A box is a hundred per cent wide by default,
+     * which in a row means it takes the whole row and pushes everything beside it off the end.
+     * Nought and grow rather than `auto`, because a width of `auto` is not read.
+     */
+    width: 0;
+    min-width: 0;
+}
+
+/*
+ * A button in such a row is as wide as its words.
+ *
+ * The inspector's buttons share out the row between them, which is right there and wrong here: a
+ * Clear button beside a search box should be the size of the word Clear.
+ */
+.line .field-btn {
+    /*
+     * A size of its own, given as a basis. The inspector's buttons share out the row between them,
+     * which is right there and wrong here, and a width alone does nothing: the basis of nought
+     * they inherit is what decides a flex item's size, so the plate comes out at its minimum with
+     * the word hanging off the end of it.
+     */
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: 56px;
+    width: 56px;
+}
+
+/* The character in front of what is typed, which is the whole of what a prompt has to be. */
+.prompt {
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 10px;
+    pointer-events: none;
+    font-size: 11px;
+    color: var(--accent);
+}
+
+/*
+ * One line of a log.
+ *
+ * Levels are a color rather than a word in front of the line: what somebody does with a console is
+ * scan it, and a column of the word "warning" is a column to read past.
+ */
+.log.warn {
+    color: var(--warn);
+}
+
+.log.bad {
+    color: var(--bad);
+}
+
+/* What was typed, and what answered it. Neither is the program talking. */
+.log.said {
+    color: var(--bright);
+}
+
+/* A chip that is not in force, which is what a level that is being hidden looks like. */
+.chip.off {
+    color: var(--dim);
+    background-color: transparent;
+}
+
+/* The console a key drops into the middle of the window, which is wider than a flyout. */
+.flyout.wide {
+    width: 100%;
+}
+
 /* A panel that fills what it is given, which is the open tab along the bottom. */
 .band {
     width: 100%;
@@ -271,16 +361,7 @@ p {
     row-gap: 2px;
 }
 
-/*
- * Room under the last row of a readout, for the second line of a value that wrapped.
- *
- * A row measures the one line its value fitted on before the box was clamped, so a value that
- * wraps draws a line the row was never told about. Room below is what stops that line being drawn
- * through the bottom of the panel.
- */
-.stats .rows {
-    padding-bottom: 8px;
-}
+
 
 /*
  * The list inside a panel that fills its column. It takes what is left after the header and the
@@ -584,6 +665,24 @@ p {
  * values in the same place. A unit that pushed the box left would undo the whole point of the
  * value column.
  */
+/*
+ * The number beside a bar, which is read and not typed.
+ *
+ * Narrow and on the right, because the bar is the control and the number is only there to say
+ * exactly where it was left. A box wide enough to type in takes half the row from the thing being
+ * dragged.
+ */
+.field-readout {
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 44px;
+    pointer-events: none;
+    font-size: 10px;
+    color: var(--text);
+    text-align: right;
+    text-wrap: nowrap;
+}
+
 .field-unit {
     flex-grow: 0;
     flex-shrink: 0;
@@ -939,7 +1038,9 @@ button:hover {
 }
 
 .stat-name {
+    flex-grow: 1;
     flex-shrink: 1;
+    flex-basis: 0;
     min-width: 0;
     overflow: hidden;
     pointer-events: none;
@@ -956,17 +1057,23 @@ button:hover {
  * does not answer the one question somebody opened it to ask.
  */
 /*
- * A value, which wraps when it is long.
+ * The column a value sits in.
  *
- * A maximum rather than a width, which is worth writing down because the obvious change makes it
- * worse: given a width, the row is wider than the panel and the value drops onto a line of its own
- * under the name. The cost of the maximum is that the box is clamped after the text has measured
- * itself on one line, so the row is a line shorter than what is drawn in it. The panel leaves room
- * for that below rather than pretending it does not happen.
+ * A width, on a box of its own rather than on the text. A maximum on the text does not reach the
+ * measurement: the words measure the width their longest unbroken run wants, draw on two lines,
+ * and report the height of one, so the row is a line shorter than what is in it and the line below
+ * is drawn through. A box that is told its width measures what actually fits in it.
  */
-.stat-value {
+.stat-cell {
+    flex-grow: 0;
     flex-shrink: 0;
-    max-width: 150px;
+    width: 150px;
+    overflow: hidden;
+}
+
+.stat-value {
+    width: 100%;
+    min-width: 0;
     pointer-events: none;
     font-size: 10px;
     color: var(--text);

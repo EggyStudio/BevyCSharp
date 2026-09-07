@@ -17,7 +17,7 @@ namespace Bevy;
 /// {
 ///     [Bind("#bloom")]     public bool Bloom;
 ///     [Bind("#intensity")] public float Intensity;
-///     [Command("#apply")]  public void Apply() { }
+///     [OnClick("#apply")]  public void Apply() { }
 /// }
 /// </code>
 /// </example>
@@ -161,7 +161,7 @@ public sealed class OnChangeAttribute : Attribute;
 /// Runs a method when the element carrying a CSS id is clicked with the secondary button.
 /// </summary>
 /// <remarks>
-/// What offers a context menu. Kept apart from <see cref="CommandAttribute"/> because asking what
+/// What offers a context menu. Kept apart from <see cref="OnClickAttribute"/> because asking what
 /// can be done to a thing is a different gesture from doing it, and a row usually wants both: a
 /// left click selects, a right click offers the list.
 /// </remarks>
@@ -196,12 +196,19 @@ public sealed class OnRefreshAttribute : Attribute;
 /// Runs a method when the element carrying a CSS id is clicked.
 /// </summary>
 /// <remarks>
+/// <para>
 /// The method takes no arguments and returns nothing, because which element was clicked is
-/// already known: it is the one the attribute names. A command over repeated elements takes one
+/// already known: it is the one the attribute names. One over repeated elements takes an
 /// <see cref="int"/> instead, for which of them it was.
+/// </para>
+/// <para>
+/// Named for when it runs, like <see cref="OnRefreshAttribute"/> and
+/// <see cref="OnChangeAttribute"/> beside it. It was <c>Command</c>, which is the better word for
+/// something typed into a console and a poor one for a click.
+/// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method)]
-public sealed class CommandAttribute(string element) : Attribute
+public sealed class OnClickAttribute(string element) : Attribute
 {
     /// <summary>The element's CSS id, with or without the leading hash.</summary>
     public string Element { get; } = element;

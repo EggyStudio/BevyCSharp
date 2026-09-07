@@ -225,7 +225,7 @@ public sealed partial class AssetsPanel
     }
 
     /// <summary>Goes into a directory, or up out of one.</summary>
-    [Command("#afolder", Count = Folders)]
+    [OnClick("#afolder", Count = Folders)]
     public void Enter(int row)
     {
         if (!FolderShown[row]) return;
@@ -237,7 +237,7 @@ public sealed partial class AssetsPanel
     }
 
     /// <summary>Points the data panel at a file.</summary>
-    [Command("#atile", Count = Tiles)]
+    [OnClick("#atile", Count = Tiles)]
     public void Choose(int tile)
     {
         if (!TileShown[tile]) return;

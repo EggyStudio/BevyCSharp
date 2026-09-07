@@ -325,7 +325,7 @@ public sealed partial class WorldPanel
     /// element's rectangle rather than a sum of indents. It takes no clicks itself, as nothing
     /// inside a row does, so the row answers and asks where the pointer was.
     /// </remarks>
-    [Command("#wrow", Count = Rows)]
+    [OnClick("#wrow", Count = Rows)]
     public void Choose(int row)
     {
         var entity = _entities[row];
@@ -437,7 +437,7 @@ public sealed partial class WorldPanel
     [Context("#w-add")]
     public void AddMenu() => Add();
 
-    [Command("#w-add")]
+    [OnClick("#w-add")]
     public void Add()
     {
         var above = Window is { } window && Xui.TryRect(window.Element("w-add"), out var button)

@@ -45,7 +45,7 @@ public sealed class SliderDrawer : IFieldDrawer
                 break;
 
             case SliderReadout.Number:
-                row.Box(written, null, editable: false);
+                row.Readout(written);
                 break;
         }
 

@@ -100,6 +100,10 @@ public sealed partial class DataPanel : IInspectorRows
     [Bind("#dnote", Count = Rows)]
     public string[] Notes = new string[Rows];
 
+    /// <summary>The number beside a bar, for a row that has one.</summary>
+    [Bind("#dro", Count = Rows)]
+    public string[] Readouts = new string[Rows];
+
     /// <summary>Where each row's bar sits, from nothing to a thousand.</summary>
     /// <remarks>
     /// The bar's own ends never move: a widget's range is written in the document and cannot be
@@ -186,6 +190,10 @@ public sealed partial class DataPanel : IInspectorRows
     /// <summary>Which rows are a line across the panel.</summary>
     [Show("#drule", Count = Rows)]
     public bool[] ShowRule = new bool[Rows];
+
+    /// <summary>Which rows show the number beside their bar.</summary>
+    [Show("#dro", Count = Rows)]
+    public bool[] ShowReadout = new bool[Rows];
 
     /// <summary>What the row under the pointer is for.</summary>
     [Bind("#d-hint-text", Mode = BindMode.OneWay)]
@@ -501,8 +509,31 @@ public sealed partial class DataPanel : IInspectorRows
         }
     }
 
-    /// <summary>How many rows the tail of the panel takes when it is on screen.</summary>
-    private int Tail() => (_tagged > 0 ? 1 : 0) + 1;
+    /// <summary>
+    /// How many rows the tail of the panel takes when it is on screen.
+    /// </summary>
+    /// <remarks>
+    /// Measured rather than counted. The strip of tags is as tall as the number of tags makes it,
+    /// wrapping onto a second and third line for an entity that carries a lot of them, so a
+    /// reservation of one row apiece leaves the button under it half off the bottom of the panel:
+    /// scrolled to the end, with the thing somebody was scrolling towards still out of reach.
+    /// </remarks>
+    private int Tail()
+    {
+        if (Window is not { IsOpen: true } window) return 2;
+
+        var tall = Measure(window, "d-tags") + Measure(window, "dchips") + Measure(window, "d-add");
+
+        // Nothing has been laid out yet on the frame the tail first appears, so it is worth two
+        // rows until there is something to measure, and exactly right from then on.
+        return tall <= 0f ? 2 : Math.Max(1, (int)Math.Ceiling(tall / RowHeight));
+    }
+
+    /// <summary>How tall one part of the tail is, with the gap under it, or nothing.</summary>
+    private static float Measure(UiWindow window, string element) =>
+        Xui.TryRect(window.Element(element), out var rect) && rect.Height > 0f
+            ? rect.Height + 5f
+            : 0f;
 
     /// <summary>How many tags the selection has, whether or not they are on screen.</summary>
     private int _tagged;
@@ -550,9 +581,15 @@ public sealed partial class DataPanel : IInspectorRows
     /// <summary>Fills one row, showing only the pieces that line needs.</summary>
     private void Write(int row, InspectorLine line, EcsWorld world, Entity entity)
     {
+        // What the row stood for before it was cleared, which is the only thing that can say
+        // whether it has turned into something else. Asked before `Empty`, because `Empty` is what
+        // forgets it: comparing afterwards compares the new line against nothing and answers "this
+        // row has just turned" every frame, which stops the row ever being read back at all.
+        var before = _lines[row];
+
         Empty(row);
 
-        if (!_lines[row].Equals(line)) _turned[row] = Deaf;
+        if (!before.Equals(line)) _turned[row] = Deaf;
 
         _lines[row] = line;
         Shown[row] = true;
@@ -640,16 +677,20 @@ public sealed partial class DataPanel : IInspectorRows
     }
 
     /// <summary>Takes back whatever the last thing in a row left showing.</summary>
+    /// <remarks>
+    /// Says nothing about whether the row has turned. It is called both to clear a row for good
+    /// and to clear it before it is filled again with the same line, and only the caller knows
+    /// which of those happened.
+    /// </remarks>
     private void Empty(int row)
     {
-        if (_lines[row].Kind != InspectorLineKind.Empty) _turned[row] = Deaf;
-
         _lines[row] = default;
         _under[row] = false;
         _indent[row] = 0;
         Names[row] = string.Empty;
         Units[row] = string.Empty;
         Notes[row] = string.Empty;
+        Readouts[row] = string.Empty;
         Flags[row] = false;
         Shown[row] = false;
         ShowName[row] = true;
@@ -660,6 +701,7 @@ public sealed partial class DataPanel : IInspectorRows
         ShowSwatch[row] = false;
         ShowNote[row] = false;
         ShowRule[row] = false;
+        ShowReadout[row] = false;
 
         for (var slot = 0; slot < Slots; slot++)
         {
@@ -673,9 +715,19 @@ public sealed partial class DataPanel : IInspectorRows
     }
 
     /// <summary>Empties the rows from <paramref name="from"/> down.</summary>
+    /// <remarks>
+    /// A row that held something and now holds nothing has turned, so it stops listening: the
+    /// widget it held reports the text being cleared a frame or two later, and that report is
+    /// indistinguishable from somebody having typed it.
+    /// </remarks>
     private void Blank(int from)
     {
-        for (var i = from; i < Rows; i++) Empty(i);
+        for (var i = from; i < Rows; i++)
+        {
+            if (_lines[i].Kind != InspectorLineKind.Empty) _turned[i] = Deaf;
+
+            Empty(i);
+        }
     }
 
     /// <inheritdoc/>
@@ -767,6 +819,13 @@ public sealed partial class DataPanel : IInspectorRows
 
     /// <summary>What a handle is when nothing asked for a color.</summary>
     private const uint Grey = 0x5A5F69FFu;
+
+    /// <inheritdoc/>
+    public void Readout(int row, string text)
+    {
+        Readouts[row] = text;
+        ShowReadout[row] = text.Length > 0;
+    }
 
     /// <inheritdoc/>
     public void Unit(int row, string suffix)
@@ -1181,19 +1240,19 @@ public sealed partial class DataPanel : IInspectorRows
     }
 
     /// <summary>Runs whatever the row's first button offers.</summary>
-    [Command("#db", Count = Rows)]
+    [OnClick("#db", Count = Rows)]
     public void Press(int row) => Press(row, 0);
 
     /// <summary>The second button of a row that has several.</summary>
-    [Command("#db1", Count = Rows)]
+    [OnClick("#db1", Count = Rows)]
     public void PressSecond(int row) => Press(row, 1);
 
     /// <summary>The third.</summary>
-    [Command("#db2", Count = Rows)]
+    [OnClick("#db2", Count = Rows)]
     public void PressThird(int row) => Press(row, 2);
 
     /// <summary>Opens the color a row's patch stands for.</summary>
-    [Command("#dsw", Count = Rows)]
+    [OnClick("#dsw", Count = Rows)]
     public void PressSwatch(int row) => Press(row, 0);
 
     /// <summary>Runs whatever one of a row's buttons offers.</summary>
@@ -1235,7 +1294,7 @@ public sealed partial class DataPanel : IInspectorRows
     /// field row is a click on whatever editor that row draws, and the row itself has nothing to
     /// do: the box, the tick and the button inside it are what the click was for.
     /// </remarks>
-    [Command("#drow", Count = Rows)]
+    [OnClick("#drow", Count = Rows)]
     public void Fold(int row)
     {
         var line = _lines[row];
@@ -1257,7 +1316,7 @@ public sealed partial class DataPanel : IInspectorRows
     /// The label takes pointer events so it can be right clicked, and an element that takes them
     /// keeps the click from the row underneath. So it answers the click itself.
     /// </remarks>
-    [Command("#dname", Count = Rows)]
+    [OnClick("#dname", Count = Rows)]
     public void FoldByName(int row) => Fold(row);
 
     /// <summary>
@@ -1463,7 +1522,7 @@ public sealed partial class DataPanel : IInspectorRows
     public void AddComponentMenu() => AddComponent();
 
     /// <summary>Offers the components that can be put on the selection.</summary>
-    [Command("#d-add")]
+    [OnClick("#d-add")]
     public void AddComponent()
     {
         if (_subject.IsNone) return;

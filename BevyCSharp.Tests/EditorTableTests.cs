@@ -132,6 +132,40 @@ public sealed class EditorTableTests
         Assert.False(older.Stretch);
     }
 
+    [Fact]
+    public void ACommandIsRegisteredByBeingWritten()
+    {
+        // The generator found it at compile time and a module initialiser registered it, so the
+        // console has it without anything having scanned for it.
+        var help = ConsoleCommands.Find("help");
+
+        Assert.NotNull(help);
+        Assert.Contains("Lists commands", help.Help);
+
+        var listed = ConsoleCommands.Run("help");
+        Assert.Contains("echo", listed);
+
+        // One string parameter takes the whole of what was typed after the name.
+        Assert.Equal("two words", ConsoleCommands.Run("echo two words"));
+
+        // And a name nobody declared is answered rather than thrown.
+        Assert.Equal("unknown command: nonesuch", ConsoleCommands.Run("nonesuch"));
+    }
+
+    [Fact]
+    public void ACommandTakesTypedArguments()
+    {
+        Assert.Equal("counted 3 twice: True", ConsoleCommands.Run("test.count 3 yes"));
+
+        // A word that is not a number is refused with a sentence, not an exception.
+        Assert.Equal("not a whole: three", ConsoleCommands.Run("test.count three yes"));
+        Assert.Equal("needs 2 arguments", ConsoleCommands.Run("test.count"));
+    }
+
+    /// <summary>A command with arguments, for the test above.</summary>
+    [Command("test.count", "Counts, for a test")]
+    internal static string Counted(int times, bool twice) => $"counted {times} twice: {twice}";
+
     /// <summary>A page name nothing else in this run uses, since the table is one static list.</summary>
     private static string Fresh() => $"Test {Guid.NewGuid():N}";
 }

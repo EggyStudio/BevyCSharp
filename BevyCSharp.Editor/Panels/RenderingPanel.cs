@@ -62,7 +62,7 @@ public sealed partial class RenderingPanel(Entity camera)
     }
 
     /// <summary>Puts the panel back to the values it starts with.</summary>
-    [Command("#reset")]
+    [OnClick("#reset")]
     public void Reset()
     {
         Bloom = true;

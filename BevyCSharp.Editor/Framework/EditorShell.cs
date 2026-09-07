@@ -21,6 +21,14 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 public static class EditorShell
 {
+    /// <summary>Whether every report from the interface is written out as it arrives.</summary>
+    /// <remarks>
+    /// Off unless something turns it on. Whether an edit that did not land was never reported or
+    /// was reported and dropped looks the same from outside, and the two have nothing in common as
+    /// faults.
+    /// </remarks>
+    internal static bool Watching { get; set; }
+
     private static readonly List<IUiPanel> Panels = [];
 
     /// <summary>Panels opened during this tick, which nothing may dismiss yet.</summary>
@@ -571,6 +579,10 @@ public static class EditorShell
 
         // Before anything is read or written. A rebuild hands the element ids out again, and what
         // a panel remembers writing to an element is only true of the element it wrote it to.
+        //
+        // Watching is off unless something turns it on: whether an edit that did not land was
+        // never reported or was reported and dropped looks the same from outside, and the two have
+        // nothing in common as faults.
         PanelBinding.Generation = Xui.Generation;
 
         // Asked once a frame, and used by every text binding: whatever is being typed in is left
@@ -588,6 +600,8 @@ public static class EditorShell
 
         foreach (var report in Xui.Drain())
         {
+            if (Watching) Console.Error.WriteLine($"[events] {report.Kind} {report.Element.Bits}");
+
             switch (report.Kind)
             {
                 case UiEventKind.Change:

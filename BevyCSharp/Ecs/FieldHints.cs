@@ -66,7 +66,7 @@ public sealed record FieldHints(
     double? Minimum = null,
     double? Maximum = null,
     double? Step = null,
-    SliderReadout Readout = SliderReadout.Box,
+    SliderReadout Readout = SliderReadout.Number,
     bool ReadOnly = false,
     bool Hidden = false,
     bool Space = false,

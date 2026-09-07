@@ -24,7 +24,7 @@ public partial struct EditorBoot
     public static void Start(BehaviorContext ctx)
     {
         // Before anything else says anything, so the console panel has the startup lines in it.
-        EditorLog.Start();
+        ConsoleLog.Start();
 
         var camera = Scene(ctx);
 
@@ -139,7 +139,14 @@ public partial struct EditorBoot
     /// reported.
     /// </remarks>
     [OnPostUpdate]
-    public static void Drive(BehaviorContext ctx) => EditorShell.Tick(ctx);
+    public static void Drive(BehaviorContext ctx)
+    {
+        // Told the frame before anything writes a line, so the log can say when something was said
+        // without every writer having to ask the engine what time it is.
+        ConsoleLog.Frame = ctx.Time.FrameCount;
+
+        EditorShell.Tick(ctx);
+    }
 
     /// <summary>
     /// Writes the window to a PNG when <c>BCS_SHOT</c> names one, then keeps running.
@@ -173,10 +180,33 @@ public partial struct EditorBoot
     /// A person clearing a value field and changing their mind reaches for Escape, and an editor
     /// that quits at that point has thrown away more than the edit.
     /// </remarks>
+    /// <summary>
+    /// Drops the console into the middle of the window, or puts it away.
+    /// </summary>
+    /// <remarks>
+    /// The key under Escape, which is where every game has put this since Quake. It works while
+    /// something is being typed into as well, because what is usually being typed into when
+    /// somebody reaches for it is the console itself.
+    /// </remarks>
+    [OnUpdate]
+    public static void ConsoleOnBackquote(BehaviorContext ctx)
+    {
+        if (ctx.Input.KeyPressed(Key.Backquote)) Panels.QuickConsolePanel.Toggle();
+    }
+
     [OnUpdate]
     public static void QuitOnEscape(BehaviorContext ctx)
     {
         if (!ctx.Input.KeyPressed(Key.Escape)) return;
+
+        // The console it opened is the first thing Escape closes, since it is the thing most
+        // recently put in the way and the one holding the keyboard.
+        if (Panels.QuickConsolePanel.IsOpen)
+        {
+            Panels.QuickConsolePanel.Toggle();
+            return;
+        }
+
         if (!PanelBinding.Focused.IsNone) return;
 
         // Escape closes what is open before it closes the program. A settings sheet takes the whole

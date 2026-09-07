@@ -1418,7 +1418,7 @@ public sealed partial class HudPanel
     [Bind("#hud-spin")]                           public bool Spinning = true;
 
     [OnRefresh]           public void Read() { /* runs before the values are written out */ }
-    [Command("#hud-add")] public void AddCube() { /* runs when the button is clicked */ }
+    [OnClick("#hud-add")] public void AddCube() { /* runs when the button is clicked */ }
 }
 ```
 
@@ -1471,13 +1471,14 @@ public sealed partial class RenderingPanel(Entity camera)
     [Bind("#intensity")] public float Intensity = 0.3f;
 
     [OnChange]           public void Apply() { /* runs when a value is edited */ }
-    [Command("#reset")]  public void Reset() { /* runs when the button is clicked */ }
+    [OnClick("#reset")]  public void Reset() { /* runs when the button is clicked */ }
 }
 ```
 
 `[Bind]` ties a member to an element, two way by default and one way for a readout. `[Show]` ties
 a `bool` to whether an element is drawn, and may be written more than once on one member.
-`[Command]` ties a method to a click and `[Context]` to a right click. `[OnChange]` runs once a
+`[OnClick]` ties a method to a click and `[Context]` to a right click. (`[Command]` is not that: it
+declares a **console** command, described below.) `[OnChange]` runs once a
 frame in which anything was edited, and `[OnRefresh]` runs once a frame before the panel's values
 are written out, which is where a panel that shows the world reads it.
 
@@ -1496,14 +1497,14 @@ shown. Panels that belong along the bottom are registered as tabs, which are min
 their name is clicked.
 
 **A list is a pool of elements.** A document is a file, so it cannot grow a row per entity. Both
-`[Bind]` and `[Command]` take a `Count`, which makes the id a prefix over numbered elements and
+`[Bind]` and `[OnClick]` take a `Count`, which makes the id a prefix over numbered elements and
 the member an array, and the panel decides what each row stands for:
 
 ```csharp
 [Bind("#hrow", Count = 18)] public string[] Labels = new string[18];
 [Show("#hrow", Count = 18)] public bool[] Shown = new bool[18];
 
-[Command("#hrow", Count = 18)]
+[OnClick("#hrow", Count = 18)]
 public void Choose(int row) => EditorSelection.Select(_entities[row]);
 ```
 
@@ -1575,6 +1576,27 @@ assets, the console, the rendering settings, the information, three corner toolb
 key strip and the menu are twelve uses of one mechanism, and every one of them can be edited,
 replaced or deleted without touching the shell.
 [.github/EDITOR.md](.github/EDITOR.md) has the design language and what each stage delivered.
+
+### The console
+
+Everything written to the output and error streams is teed into `ConsoleLog`, a ring of levelled
+lines that collapses repeats, so a console can show it without anything that writes a line knowing
+a console exists. What can be typed into one is a static method with `[Command]` on it:
+
+```csharp
+[Command("select", "Selects the first entity with a name: select <name>")]
+internal static string Select(string name) { … }
+```
+
+A generator finds them at compile time and a module initialiser registers them, so nothing reflects
+at runtime and a command survives trimming. Parameters are read from the words after the name and
+may be strings, numbers or flags; a single string parameter takes the whole of what was typed after
+it. Returning a string writes that line back, and anything a person can get wrong is answered with
+a sentence rather than an exception.
+
+`ConsoleCommands.Run(line)` is the whole of the runtime surface, so a game gets a console by
+drawing one: the editor has two, a tab and the one the key under Escape drops into the middle of
+the window, and they share every part except their documents.
 
 ---
 

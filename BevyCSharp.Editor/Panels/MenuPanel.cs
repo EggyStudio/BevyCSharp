@@ -191,7 +191,7 @@ public sealed partial class MenuPanel
     }
 
     /// <summary>Runs, toggles, or opens whatever a row stands for.</summary>
-    [Command("#mrow", Count = Rows)]
+    [OnClick("#mrow", Count = Rows)]
     public void Choose(int row)
     {
         if (!Shown[row]) return;
@@ -229,7 +229,7 @@ public sealed partial class MenuPanel
     }
 
     /// <summary>Goes back up a level, or closes at the top.</summary>
-    [Command("#menu-title")]
+    [OnClick("#menu-title")]
     public void Back()
     {
         if (!CanGoBack)

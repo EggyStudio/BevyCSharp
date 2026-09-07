@@ -69,7 +69,9 @@ public sealed class AssetDrawer : IFieldDrawer
         if (items.Count == 1) items.Add(new MenuItem("no files of that kind", MenuKind.Separator));
 
         var (x, y) = row.Below;
-        EditorShell.ShowMenu(field.Title, items, x, y);
+        // At the row it was opened from, like every other list the inspector offers. Which field a
+        // list of values belongs to is said by where it appeared.
+        EditorShell.ShowMenu(field.Title, items, x, y, beside: false);
     }
 
     /// <summary>Which files suit a field: what it asked for, or what its kind usually is.</summary>

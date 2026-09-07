@@ -58,7 +58,7 @@ public sealed partial class LeftBarPanel
             Slot, "tl", Window, Labels, Shown, Labelled, Pictured, Active, Buttons);
 
     /// <summary>Runs whichever was pressed.</summary>
-    [Command("#tl", Count = Buttons)]
+    [OnClick("#tl", Count = Buttons)]
     public void Press(int index) => ToolbarSlots.Press(Slot, index);
 }
 
@@ -103,7 +103,7 @@ public sealed partial class CentreBarPanel
             Slot, "tc", Window, Labels, Shown, Labelled, Pictured, Active, Buttons);
 
     /// <summary>Runs whichever was pressed.</summary>
-    [Command("#tc", Count = Buttons)]
+    [OnClick("#tc", Count = Buttons)]
     public void Press(int index) => ToolbarSlots.Press(Slot, index);
 }
 
@@ -148,7 +148,7 @@ public sealed partial class RightBarPanel
             Slot, "tr", Window, Labels, Shown, Labelled, Pictured, Active, Buttons);
 
     /// <summary>Runs whichever was pressed.</summary>
-    [Command("#tr", Count = Buttons)]
+    [OnClick("#tr", Count = Buttons)]
     public void Press(int index) => ToolbarSlots.Press(Slot, index);
 }
 
@@ -211,11 +211,11 @@ public sealed partial class BottomBarPanel
     }
 
     /// <summary>Runs whichever was pressed.</summary>
-    [Command("#tb", Count = Buttons)]
+    [OnClick("#tb", Count = Buttons)]
     public void Press(int index) => ToolbarSlots.Press(Slot, index);
 
     /// <summary>Puts the camera's horizon back level.</summary>
-    [Command("#tb-cross")]
+    [OnClick("#tb-cross")]
     public void Level() => FlyCamera.LevelWanted = true;
 }
 

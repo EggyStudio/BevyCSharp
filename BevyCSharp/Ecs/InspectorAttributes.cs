@@ -20,22 +20,23 @@ public sealed class RangeAttribute(double minimum, double maximum) : Attribute
     public double Maximum { get; } = maximum;
 
     /// <summary>What sits beside the bar, if anything.</summary>
-    public SliderReadout Readout { get; init; } = SliderReadout.Box;
+    public SliderReadout Readout { get; init; } = SliderReadout.Number;
 }
 
 /// <summary>What a slider shows beside its bar.</summary>
 /// <remarks>
-/// A bar with a box beside it is two ways to set one value, which is worth the width when the
-/// number is worth typing and a waste of it when the number means nothing on its own. A weight
-/// between nought and one is dragged; a field of view is typed.
+/// The number, by default, small and on the right: the bar is the control, and what the number is
+/// for is saying exactly where the bar was left. A box wide enough to type in takes half the row
+/// from the thing being dragged, which is worth it only when the number is one somebody was told
+/// to use rather than one they are looking for.
 /// </remarks>
 public enum SliderReadout
 {
-    /// <summary>A box that can be typed into.</summary>
-    Box,
-
     /// <summary>The number, read only, after the bar.</summary>
     Number,
+
+    /// <summary>A box that can be typed into, which takes the width a box needs.</summary>
+    Box,
 
     /// <summary>Nothing. The bar is the whole of it.</summary>
     None,

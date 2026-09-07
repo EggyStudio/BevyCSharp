@@ -118,7 +118,7 @@ public sealed partial class ColorPanel
     private uint _painted;
 
     /// <summary>Shuts the picker.</summary>
-    [Command("#c-done")]
+    [OnClick("#c-done")]
     public void Done() => EditorShell.Conceal(this);
 
     /// <summary>Where a channel sits on a bar of a thousand steps.</summary>

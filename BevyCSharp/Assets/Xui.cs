@@ -259,6 +259,18 @@ public static unsafe class Xui
     public static void Blur() => Native.Check(Native.bcs_xui_blur(), "clearing the focus");
 
     /// <summary>
+    /// Gives an element the keyboard, taking it from whatever had it.
+    /// </summary>
+    /// <remarks>
+    /// What a panel that appears in answer to a key press needs: something summoned by a key and
+    /// then clicked into costs more than whatever it was meant to save. Focus is one at a time, so
+    /// this takes it rather than sharing it.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The element is gone or takes no keyboard.</exception>
+    public static void Focus(Entity element) => Native.Check(
+        Native.bcs_xui_focus(element.Bits), $"focusing {element}");
+
+    /// <summary>
     /// How many times the set of open documents has been rebuilt.
     /// </summary>
     /// <remarks>

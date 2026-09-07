@@ -28,7 +28,7 @@ public sealed class PanelGenerator : IIncrementalGenerator
 {
     private const string PanelAttribute = "Bevy.UiPanelAttribute";
     private const string BindAttribute = "Bevy.BindAttribute";
-    private const string CommandAttribute = "Bevy.CommandAttribute";
+    private const string OnClickAttribute = "Bevy.OnClickAttribute";
     private const string ChangeAttribute = "Bevy.OnChangeAttribute";
     private const string ShowAttribute = "Bevy.ShowAttribute";
     private const string RefreshAttribute = "Bevy.OnRefreshAttribute";
@@ -168,9 +168,9 @@ public sealed class PanelGenerator : IIncrementalGenerator
                     break;
                 }
 
-                case IMethodSymbol method when Element(method, CommandAttribute) is { } element:
+                case IMethodSymbol method when Element(method, OnClickAttribute) is { } element:
                 {
-                    var repeat = CountOf(method, CommandAttribute);
+                    var repeat = CountOf(method, OnClickAttribute);
 
                     // A repeated command is told which of its elements was clicked, and an
                     // ordinary one is told nothing, because the attribute already named it.

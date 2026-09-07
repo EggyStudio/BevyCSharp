@@ -242,7 +242,7 @@ public sealed partial class InfoPanel
     /// The placement is not touched. It sits in the viewport's top right corner either way, which
     /// is under the button that opened it and inside the part of the screen the scene has.
     /// </remarks>
-    [Command("#i-pin")]
+    [OnClick("#i-pin")]
     public void Pin()
     {
         _pinned = !_pinned;

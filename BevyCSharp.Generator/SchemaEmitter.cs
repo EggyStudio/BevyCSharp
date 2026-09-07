@@ -188,6 +188,8 @@ internal static class SchemaEmitter
         if (hints.Minimum is not null) parts.Add("Minimum: " + Literal(hints.Minimum.Value));
         if (hints.Maximum is not null) parts.Add("Maximum: " + Literal(hints.Maximum.Value));
         if (hints.Step is not null) parts.Add("Step: " + Literal(hints.Step.Value));
+        // Written out even when it is the default, because the default is a value of the enum and
+        // the record's own default may not stay the same one.
         if (hints.Readout is not null)
             parts.Add("Readout: global::Bevy.SliderReadout." + hints.Readout);
 

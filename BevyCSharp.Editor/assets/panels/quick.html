@@ -1,0 +1,39 @@
+<html lang="en">
+  <head>
+    <meta name="quick" />
+    <title>Console</title>
+    <link rel="stylesheet" href="editor.css" />
+  </head>
+  <body>
+    <!--
+      The console a key drops into the middle of the window: the last few lines, and somewhere to
+      type. The tab along the bottom is where a log is read; this is where one command is run.
+    -->
+    <div class="flyout wide" id="quick">
+      <div class="titlebar">
+        <p class="title">Console</p>
+        <p class="dim" id="q-count"></p>
+      </div>
+
+      <div class="rows-grow" id="q-rows">
+        <p class="log" id="qrow-0"></p>
+        <p class="log" id="qrow-1"></p>
+        <p class="log" id="qrow-2"></p>
+        <p class="log" id="qrow-3"></p>
+        <p class="log" id="qrow-4"></p>
+        <p class="log" id="qrow-5"></p>
+        <p class="log" id="qrow-6"></p>
+        <p class="log" id="qrow-7"></p>
+        <p class="log" id="qrow-8"></p>
+        <p class="log" id="qrow-9"></p>
+      </div>
+
+      <div class="line">
+        <p class="prompt">&gt;</p>
+        <input class="grow" id="q-input" type="text" placeholder="command" />
+      </div>
+
+      <p class="dim" id="q-hint"></p>
+    </div>
+  </body>
+</html>

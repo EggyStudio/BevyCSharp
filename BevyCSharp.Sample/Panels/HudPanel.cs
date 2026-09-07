@@ -72,7 +72,7 @@ public sealed partial class HudPanel
     }
 
     /// <summary>Puts another cube in the world, a little to the side of the last one.</summary>
-    [Command("#hud-add")]
+    [OnClick("#hud-add")]
     public void AddCube()
     {
         if (UiHost.Context is not { } ctx) return;

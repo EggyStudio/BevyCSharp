@@ -606,7 +606,7 @@ and leaves the answers on the schema as `FieldHints`, so nothing reflects at run
 | `[Tooltip("...")]` | a sentence shown beside the row while the pointer is over it |
 | `[Unit("m")]` | what the number is measured in, in a column after the value |
 | `[Step(0.1)]` | what one pixel of a drag on the handle is worth |
-| `[Range(min, max)]` | draws a bar; `Readout` says whether a box, a number or nothing sits beside it |
+| `[Range(min, max)]` | draws a bar, with the number beside it; `Readout` asks for a box or nothing instead |
 | `[ReadOnly]` | drawn on a flat plate rather than in a box, and not written back |
 | `[Hidden]` | not drawn at all, on a field or on a method |
 | `[Header("...")]` | a word above the field, grouping what follows |
@@ -630,6 +630,29 @@ field they came from. `Front.Held.At` is a row called `At`, inside a fold called
 called `Front`. Writing one reads the whole component, changes the part and writes it back, so a
 part written does not wipe its neighbours. A vector is left alone: it is three numbers a drawer
 already draws as one thing.
+
+**The console reads and writes.** The tab along the bottom is where a log is read; the key under
+Escape drops the same console into the middle of the window, which is where one command is run and
+dismissed. Both are documents with bindings over one `ConsoleView`, and everything they show lives
+outside them: `ConsoleLog` is a ring of levelled lines that the output and error streams are teed
+into, and `ConsoleCommands` is the list of what can be typed.
+
+A command is a static method with `[Command]` on it, found at compile time by a generator and
+registered by a module initialiser, so nothing scans for them and one that does not compile is not
+a command:
+
+```csharp
+[Command("select", "Selects the first entity with a name: select <name>")]
+internal static string Select(string name) { … }
+```
+
+Its parameters are read from the words that follow the name and may be strings, numbers or flags;
+one string parameter takes everything typed after the name. Returning a string writes that line
+back. Anything a person can get wrong is answered with a sentence rather than an exception, since
+a console is where people type things that are not quite right.
+
+Note the two attributes that used to share a word: `[Command]` is the console's, and a click on an
+element is `[OnClick]`, named for when it runs like `[OnChange]` and `[OnRefresh]` beside it.
 
 **A pass adds what is not a field at all.** `EditorInspector` runs passes before the components,
 per component, per field, per method, and after everything. A pass that takes a field says so and

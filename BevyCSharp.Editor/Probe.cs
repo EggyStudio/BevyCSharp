@@ -14,6 +14,10 @@ public partial struct Probe
     {
         if (Environment.GetEnvironmentVariable("BCS_PROBE") is not { Length: > 0 } script) return;
 
+        // Every report the interface makes, while the frames of interest are running.
+        EditorShell.Watching = script.Contains("tick")
+            && ctx.Time.FrameCount is >= 148 and <= 172;
+
         switch (ctx.Time.FrameCount)
         {
             case 100:
@@ -116,6 +120,148 @@ public partial struct Probe
                         rows.RowMenu(i);
                         break;
                     }
+                }
+
+                break;
+
+            // A tick and a drag, reported frame by frame: what the panel holds, and what the world
+            // says, which is the only way to tell which half of the round trip is losing the edit.
+            case >= 140 and <= 175 when script.Contains("tick"):
+                if (EditorShell.Find<Panels.DataPanel>() is not { } watched) break;
+
+                var flag = -1;
+                var bar = -1;
+
+                for (var i = 0; i < Panels.DataPanel.Rows; i++)
+                {
+                    if (watched.Names[i].Trim() == "Enabled") flag = i;
+                    if (watched.Names[i].Trim() == "Speed") bar = i;
+                }
+
+                var schema = ComponentSchemas.For("BevyCSharp.Editor.Behaviors.Showcase");
+                var subject = EditorSelection.Current;
+
+                if (ctx.Time.FrameCount == 150 && flag >= 0
+                    && Xui.TryRect(Xui.Element($"dc-{flag}"), out var hit))
+                {
+                    SyntheticInput.MoveTo(hit.X + (hit.Width / 2f), hit.Y + (hit.Height / 2f));
+                    SyntheticInput.Press(hit.X + (hit.Width / 2f), hit.Y + (hit.Height / 2f));
+                }
+
+                if (ctx.Time.FrameCount == 151 && flag >= 0
+                    && Xui.TryRect(Xui.Element($"dc-{flag}"), out var up))
+                {
+                    SyntheticInput.Release(up.X + (up.Width / 2f), up.Y + (up.Height / 2f));
+                }
+
+                if (ctx.Time.FrameCount == 149 && flag >= 0 && bar >= 0)
+                {
+                    Console.Error.WriteLine(
+                        $"[probe] element dc-{flag} is {Xui.Element($"dc-{flag}").Bits}"
+                        + $", dsl-{bar} is {Xui.Element($"dsl-{bar}").Bits}");
+                }
+
+                if (ctx.Time.FrameCount is >= 149 and <= 156 && flag >= 0)
+                {
+                    Console.Error.WriteLine(
+                        $"[probe] {ctx.Time.FrameCount} tick row {flag}"
+                        + $" panel {watched.Flags[flag]}"
+                        + $" world {schema?.Read(ctx.Ecs, subject, "Enabled")}");
+                }
+
+                if (ctx.Time.FrameCount == 165 && bar >= 0
+                    && Xui.TryRect(Xui.Element($"dsl-{bar}"), out var slid))
+                {
+                    SyntheticInput.MoveTo(slid.X + 10f, slid.Y + (slid.Height / 2f));
+                    SyntheticInput.Press(slid.X + 10f, slid.Y + (slid.Height / 2f));
+                }
+
+                if (ctx.Time.FrameCount == 167 && bar >= 0
+                    && Xui.TryRect(Xui.Element($"dsl-{bar}"), out var moved))
+                {
+                    SyntheticInput.MoveTo(
+                        moved.X + (moved.Width * 0.75f), moved.Y + (moved.Height / 2f));
+                }
+
+                if (ctx.Time.FrameCount == 169 && bar >= 0
+                    && Xui.TryRect(Xui.Element($"dsl-{bar}"), out var done))
+                {
+                    SyntheticInput.Release(
+                        done.X + (done.Width * 0.75f), done.Y + (done.Height / 2f));
+                }
+
+                if (ctx.Time.FrameCount is >= 164 and <= 175 && bar >= 0)
+                {
+                    Console.Error.WriteLine(
+                        $"[probe] {ctx.Time.FrameCount} bar row {bar}"
+                        + $" panel {watched.Bars[bar]:F1}"
+                        + $" widget {Xui.GetNumber(Xui.Element($"dsl-{bar}")):F1}"
+                        + $" world {schema?.Read(ctx.Ecs, subject, "Speed")}");
+                }
+
+                break;
+
+            // The console a key drops into the middle of the window, with something typed into it.
+            case 140 when script.Contains("console"):
+                Panels.QuickConsolePanel.Toggle();
+                break;
+
+            case 150 when script.Contains("console"):
+                Console.WriteLine("[scene] a line the console shows");
+                Console.Error.WriteLine("[scene] and one it shows in red");
+                break;
+
+            case >= 160 and <= 190 when script.Contains("console"):
+                if (EditorShell.Find<Panels.QuickConsolePanel>() is not { } quick) break;
+
+                switch (ctx.Time.FrameCount)
+                {
+                    case 160:
+                        quick.Typed = "help";
+                        break;
+
+                    case 165:
+                        quick.Run(quick.Typed);
+                        break;
+
+                    case 170:
+                        quick.Typed = "entiti";
+                        break;
+
+                    case 175:
+                        quick.Complete();
+                        break;
+
+                    case 180:
+                        quick.Run(quick.Typed);
+                        break;
+                }
+
+                break;
+
+            // The console tab along the bottom, with the same log in it.
+            case 140 when script.Contains("band"):
+                if (EditorTabs.Find("Console") is { } tab) EditorTabs.Open(tab);
+                break;
+
+            case 145 when script.Contains("wide"):
+                foreach (var many in new[] { 40, 80, 120, 160, 200 })
+                {
+                    Console.WriteLine($"{many}:" + new string('x', many));
+                }
+
+                break;
+
+            case 150 when script.Contains("band"):
+                Console.WriteLine("[scene] an ordinary line");
+                Console.Error.WriteLine("[scene] something that went wrong");
+                break;
+
+            case 160 when script.Contains("band"):
+                if (EditorShell.Find<Panels.ConsolePanel>() is { } band)
+                {
+                    band.Typed = "components";
+                    band.Run(band.Typed);
                 }
 
                 break;

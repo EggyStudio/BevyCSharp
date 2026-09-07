@@ -48,6 +48,8 @@ public sealed class ChoiceDrawer : IFieldDrawer
         }
 
         var (x, y) = row.Below;
-        EditorShell.ShowMenu(field.Name, items, x, y);
+        // At the row it was opened from, like every other list the inspector offers. Which field a
+        // list of values belongs to is said by where it appeared.
+        EditorShell.ShowMenu(field.Name, items, x, y, beside: false);
     }
 }

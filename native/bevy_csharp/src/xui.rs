@@ -1338,6 +1338,51 @@ pub extern "C" fn bcs_xui_blur() -> i32 {
     })
 }
 
+/// Gives an element the keyboard, taking it from whatever had it.
+///
+/// What a panel that appears in answer to a key press needs, and the reason it is worth an entry
+/// point of its own: a console summoned by a key and then clicked into is a console that costs
+/// more than finding the tab. Focus is one at a time, so this clears whatever held it first.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_xui_focus(entity: u64) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = entity;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bcs_ui::widgets::UIWidgetState;
+
+            crate::state::with_world(|world| {
+                let wanted = crate::ecs::entity_from(entity);
+
+                let Ok(entity_ref) = world.get_entity(wanted) else {
+                    return status::NO_ENTITY;
+                };
+
+                if !entity_ref.contains::<UIWidgetState>() {
+                    return status::NOT_PRESENT;
+                }
+
+                let mut query = world.query::<(bevy::ecs::entity::Entity, &mut UIWidgetState)>();
+
+                for (held, mut state) in query.iter_mut(world) {
+                    let focused = held == wanted;
+
+                    if state.focused != focused {
+                        state.focused = focused;
+                    }
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
 /// How many times the set of open documents has been rebuilt.
 ///
 /// Every widget of every open document is respawned when the list changes, so every element

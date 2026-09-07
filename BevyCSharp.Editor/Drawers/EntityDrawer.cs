@@ -78,7 +78,9 @@ public sealed class EntityDrawer : IFieldDrawer
         if (items.Count == 0) items.Add(new MenuItem("nothing to point at", MenuKind.Separator));
 
         var (x, y) = row.Below;
-        EditorShell.ShowMenu(field.Title, items, x, y);
+        // At the row it was opened from, like every other list the inspector offers. Which field a
+        // list of values belongs to is said by where it appeared.
+        EditorShell.ShowMenu(field.Title, items, x, y, beside: false);
     }
 
     /// <summary>What an entity is called, or what it is when it has no name.</summary>
