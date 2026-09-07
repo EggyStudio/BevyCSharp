@@ -117,10 +117,6 @@ public sealed partial class ColorPanel
     /// <summary>What the patch was last painted, so it is written once.</summary>
     private uint _painted;
 
-    /// <summary>Shuts the picker.</summary>
-    [OnClick("#c-done")]
-    public void Done() => EditorShell.Conceal(this);
-
     /// <summary>Where a channel sits on a bar of a thousand steps.</summary>
     /// <remarks>
     /// Clamped, because a color used as a light's tint can be brighter than white and a bar

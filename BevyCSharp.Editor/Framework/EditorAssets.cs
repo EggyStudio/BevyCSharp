@@ -161,10 +161,10 @@ public static class EditorAssets
     /// The picture a file's tile wears, under the asset root.
     /// </summary>
     /// <remarks>
-    /// The kind rather than the file: a picture of what a PNG contains would be a thumbnail, which
-    /// needs the bridge to render one and hand back an asset key. A picture of what it <em>is</em>
-    /// needs nothing and is most of the use: in a list of forty files, telling the scripts from
-    /// the stylesheets at a glance is the whole job.
+    /// The kind rather than the file, for everything but an image: a browser points an image tile
+    /// at the image itself, since the interface loads a picture from a path and that is all it
+    /// takes. A picture of what a model or a sound contains would be a thumbnail, which needs the
+    /// bridge to render one and hand back an asset key.
     /// </remarks>
     public static string IconOf(string relative) => KindOf(relative) switch
     {

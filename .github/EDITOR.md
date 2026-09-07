@@ -290,37 +290,39 @@ where this editor differs.
 
 ### Color
 
-Unity's dark theme, for reference:
+Unreal's greys, which this follows:
 
-| role | Unity |
+| role | value |
 |---|---|
-| app toolbar | `#191919` |
-| window | `#383838` |
-| default background | `#282828` |
-| toolbar | `#3C3C3C` |
-| input field | `#2A2A2A` |
-| inspector titlebar | `#3E3E3E` |
-| default border | `#232323` |
-| button border | `#303030` |
-| default text | `#D2D2D2` |
-| label text | `#C4C4C4` |
-| button text | `#EEEEEE` |
-| highlight background | `#2C5D87` |
-| focus border | `#7BAEFA` |
-| link | `#4C7EFF` |
+| panel | `#242424` |
+| sheet, the darker ground behind a whole page | `#1B1B1B` |
+| raised: a button's plate, a chip | `#2F2F2F` |
+| sunken: a track, a well, a list's ground | `#1A1A1A` |
+| a box that is typed into | `#0D0D0D` |
+| seam between panels | `#131313` |
+| a border worth seeing | `#3B3B3B` |
+| text | `#DFDFDF` |
+| label | `#C8C8C8` |
+| dim | `#8C8C8C` |
+| hover | `#323232` |
+| a bar's fill | `#5A5A5A` |
+| accent | `#0070E0` |
 
-The rule that matters more than the values: **accent appears on focused, hovered, pressed and
-selected states, and greys carry everything else.** Unity's own note is that accented borders
-exist "to inset and outset UI to support the layering of the user interface", which is why their
-accent is a border and a selection fill rather than a fill on every control.
+Two rules matter more than the values:
 
-This editor departs in two ways, both deliberate:
+- **Panels are opaque.** A panel is a surface with things on it, not a window onto the scene: the
+  scene shows through the viewport, which is what the viewport is for, and a value read against
+  whatever happens to be behind it is a value read wrong. What translucency used to supply, the
+  greys being different from each other supplies instead.
+- **The accent is for what is acting**: a checkbox that is ticked, a menu row under the pointer, a
+  field with the keyboard. Everything else is grey, including a slider's fill, which is a lighter
+  grey against a darker one and reads perfectly well. A bar filled with the one color in the editor
+  shouts as loudly as a selection and says much less.
 
-- **Panels are black with transparency, not opaque grey.** The viewport is fullscreen behind the
-  panels rather than a pane between them, so a panel is a thing floating over the work rather
-  than a wall beside it. Unity's greys assume an opaque docked frame.
-- **Corners are rounded.** Unity's are square. The rounding, the inset margin and the single
-  accent are the parts taken from newer tools rather than from Unity.
+Borders are darker than what they separate, not lighter: a light hairline reads as a raised edge
+and suits a translucent panel over a scene, and on a grey surface the line that reads as a seam is
+a dark one. Corners are rounded by a few pixels rather than by nine, for the same reason: the more
+rounded a panel is, the more it reads as a card floating apart from its neighbours.
 
 ### Density
 
@@ -339,8 +341,14 @@ Unity's numbers, which this follows:
   whole width says so and there is no name column for that row at all.
 - **A panel clips and scrolls.** What does not fit is hidden rather than drawn over whatever is
   below, and the whole of a panel's contents scrolls together: the strip of tags and the button
-  under an inspector are the end of the list, not furniture pinned below it. A panel that would
-  rather fill its column than hug its contents says `Stretch` in its placement.
+  under an inspector are the end of the list, not furniture pinned below it. The room the tail
+  needs is set aside whether or not the tail is showing, because a reserve that depends on what it
+  decides is a list that shakes at the bottom. A panel that would rather fill its column than hug
+  its contents says `Stretch` in its placement.
+- **The bottom of the window is the tabs and the key list.** What a tab opens is a flyout over the
+  work, dismissed by a click anywhere else, so the columns are the full height of the window whether
+  a tab is open or not. A tab can be dragged taller for as long as it is up, and the next one opens
+  at the size that suits reading a list.
 
 ### Windows
 
@@ -510,6 +518,12 @@ These constraints shaped the panels, and the ones left are the interface's rathe
 - **Two rules of equal weight were settled by whichever the map handed over first.** A compound
   selector counted only its first name, so `.field-note.warn` weighed the same as `.field-note` and
   which color a warning took was a matter of iteration order. Every name in a step is counted now.
+- **A report in flight outlives the widget that made it.** A widget's change is noticed on one
+  frame and delivered on the next, and a rebuild in between hands the entity ids out again: the
+  report still names an id, that id belongs to another element now, and the value it carries is
+  written into whatever binding claims it. A scale of one became the mass from ten rows down. The
+  reports around a rebuild are dropped, for as many frames as the interface takes to respawn its
+  widgets, since nothing typed before one is worth keeping.
 - **A row that is reused reports what it used to say.** The pool draws whatever line is scrolled
   into it, and a widget whose text is replaced reports the change a frame or two later, which is
   indistinguishable from somebody typing that text into the new field. A row that turns therefore

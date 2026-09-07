@@ -61,9 +61,17 @@ public static class EditorTabs
         Entries.FirstOrDefault(entry => entry.Name == name);
 
     /// <summary>Opens a minimised tab, or minimises an open one.</summary>
+    /// <remarks>
+    /// A tab is a flyout: a click anywhere else puts it away. That press and the click it becomes
+    /// are two events, and the tab's own button sees both, so a button pressed while its tab is up
+    /// would put the tab away and then find it away and open it again. Whether the press in flight
+    /// is what dismissed it is the one thing this cannot work out for itself.
+    /// </remarks>
     public static void Toggle(EditorTabEntry entry)
     {
         ArgumentNullException.ThrowIfNull(entry);
+
+        if (entry.Panel is { } dismissed && EditorShell.DismissedByThisPress(dismissed)) return;
 
         if (entry.IsOpen)
         {
@@ -81,6 +89,11 @@ public static class EditorTabs
         // Built the first time it is asked for and concealed thereafter, so exactly one document
         // joins the interface per tab per session and switching costs nothing.
         entry.Panel ??= EditorShell.Show(entry.Create());
+
+        // At the size a tab opens at, whatever the last one was dragged to. Dragging one taller is
+        // for the minute it is up, not a decision about every tab from then on.
+        EditorShell.Layout.BottomHeight = EditorLayout.DefaultBand;
+
         EditorShell.Reveal(entry.Panel);
     }
 

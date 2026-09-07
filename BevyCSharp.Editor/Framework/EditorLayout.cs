@@ -48,7 +48,17 @@ public sealed class EditorLayout
     public float RightWidth { get; set; } = float.NaN;
 
     /// <summary>How tall the open tab is.</summary>
-    public float BottomHeight { get; set; } = 190f;
+    public float BottomHeight { get; set; } = DefaultBand;
+
+    /// <summary>
+    /// How tall an opening tab is, whatever the last one was dragged to.
+    /// </summary>
+    /// <remarks>
+    /// A tab is a flyout: it appears over the work, is read, and goes away. Dragging one taller is
+    /// for the minute it is up rather than a decision about every tab from then on, so the next one
+    /// opens at the size that suits reading a list.
+    /// </remarks>
+    public const float DefaultBand = 220f;
 
     /// <summary>The narrowest a column can be dragged.</summary>
     public const float MinimumColumn = 160f;
@@ -175,12 +185,16 @@ public sealed class EditorLayout
 
         var strip = Tallest(placed, UiDock.Strip);
         var band = Members(placed, UiDock.Bottom).Count > 0
-            ? Math.Clamp(BottomHeight, MinimumBand, height * 0.5f)
+            // Up to nearly the whole window. A tab is a flyout over the work, so a person who wants
+            // to read a long list can have the screen for as long as the list is up; half the
+            // window was the right limit when it took that room away from the columns for good.
+            ? Math.Clamp(BottomHeight, MinimumBand, height * 0.85f)
             : 0f;
 
-        // The window is a top split and a bottom one. The bottom holds the open tab and, under it,
-        // the tabs and the key list on one row; both run the whole width, because nothing is
-        // beside them. The top holds the three columns and gets whatever is left.
+        // The bottom of the window belongs to the tabs and the key list, and to nothing else. What
+        // a tab opens is a flyout over the work rather than a third split: the columns keep the
+        // full height either way, so opening the asset browser does not shorten the hierarchy and
+        // closing it does not make everything jump back.
         var stripTop = height - strip;
 
         // A gap between the two, so the open tab reads as a panel sitting above the strip rather
@@ -191,6 +205,9 @@ public sealed class EditorLayout
         var viewportRight =
             right.Room > 0f ? width - right.Room - (Margin * 2f) : width - Margin;
 
+        // Everything above the strip, whether or not a tab is open over part of it.
+        var floor = stripTop - Gap;
+
         LeftEdge = viewportLeft - Margin;
         RightEdge = viewportRight + Margin;
         BottomEdge = bandTop;
@@ -200,14 +217,13 @@ public sealed class EditorLayout
             viewportLeft,
             Margin,
             MathF.Max(0f, viewportRight - viewportLeft),
-            MathF.Max(0f, bandTop - Margin));
+            MathF.Max(0f, floor - Margin));
 
         var cap = width / 3f;
 
-        // The columns stop short of whatever is under them, so a panel that reaches the bottom of
-        // the screen has an edge rather than running into the tab below it. Two borders touching
-        // read as one thick line and neither panel looks like a panel any more.
-        var columnBottom = bandTop - Gap;
+        // The columns stop short of the strip, and of nothing else. What a tab opens is drawn over
+        // them, so the hierarchy is as tall as the window whether the asset browser is up or not.
+        var columnBottom = floor;
 
         Column(placed, UiDock.Left, Margin, Margin, columnBottom, left, cap, fromLeft: true);
         var rightBottom = Column(

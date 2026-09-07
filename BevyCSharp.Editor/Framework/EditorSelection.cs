@@ -129,17 +129,90 @@ public static class EditorSelection
     /// <remarks>
     /// Called once a frame by the shell. An entity can be despawned by anything, including a
     /// script the editor just reloaded, and an inspector reading a dead entity would show the
-    /// bytes of whatever took its place in storage.
+    /// bytes of whatever took its place in storage. It is also where a selection comes back: what
+    /// a reload despawned it usually spawns again, under the same name.
     /// </remarks>
-    internal static void Prune(EcsWorld world)
+    public static void Prune(EcsWorld world)
     {
-        if (Chosen.Count == 0) return;
+        if (Chosen.Count == 0)
+        {
+            Recover(world);
+            return;
+        }
+
+        // What each of them is called, kept while they are all alive. An id says nothing once the
+        // entity behind it is gone, and a name is the only thing about a selection that outlives
+        // the entity holding it.
+        //
+        // Only while they are all alive: the frame something is despawned is the frame its name
+        // can no longer be asked for, so remembering then would forget exactly the name that is
+        // about to be needed.
+        if (Chosen.TrueForAll(world.IsAlive)) Remember(world);
 
         var went = Chosen.RemoveAll(entity => !world.IsAlive(entity));
         if (went == 0) return;
 
         Current = Chosen.Count > 0 ? Chosen[^1] : Entity.None;
         Latest = Current.IsNone ? SelectionKind.None : SelectionKind.Entity;
+        ChangedOn = EditorShell.Context?.Time.FrameCount ?? 0;
+    }
+
+    /// <summary>What the selection was called, in the order it was selected.</summary>
+    private static readonly List<string> Named = [];
+
+    /// <summary>Keeps the names of everything selected, while they can still be asked for.</summary>
+    private static void Remember(EcsWorld world)
+    {
+        Named.Clear();
+
+        foreach (var entity in Chosen)
+        {
+            if (world.NameOf(entity) is not { Length: > 0 } name) continue;
+
+            Named.Add(name);
+        }
+    }
+
+    /// <summary>
+    /// Selects by name what was selected by id before a reload.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A script that is reloaded despawns what it made and makes it again, and the new entities
+    /// have new ids: what was selected is gone in the only sense the editor can see. Losing the
+    /// selection on every save is the difference between editing a value while the game runs and
+    /// finding the thing again each time.
+    /// </para>
+    /// <para>
+    /// By name, which is the only thing that survives, and so wrong for two entities that share
+    /// one: the first with the name is taken. That is worth it, and the alternative is a stable
+    /// identity the engine does not have.
+    /// </para>
+    /// </remarks>
+    private static void Recover(EcsWorld world)
+    {
+        if (Named.Count == 0) return;
+
+        var found = new List<Entity>();
+
+        foreach (var entity in world.All())
+        {
+            if (world.NameOf(entity) is not { Length: > 0 } name) continue;
+            if (!Named.Contains(name)) continue;
+            if (found.Contains(entity)) continue;
+
+            found.Add(entity);
+        }
+
+        // All of them or none. Half a selection coming back is worse than none: an edit meant for
+        // three things would reach two of them without saying so.
+        if (found.Count != Named.Count) return;
+
+        Named.Clear();
+        Chosen.AddRange(found);
+
+        Current = Chosen[^1];
+        Latest = SelectionKind.Entity;
         ChangedOn = EditorShell.Context?.Time.FrameCount ?? 0;
     }
 }

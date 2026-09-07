@@ -282,9 +282,17 @@ public partial struct TransformGizmo
     /// Gives everything else selected the same change the handles made.
     /// </summary>
     /// <remarks>
-    /// Each about its own origin rather than about the one being dragged. Turning three things
-    /// about a shared centre swings two of them across the level, which is occasionally what
-    /// somebody wants and never what they expect from a first drag.
+    /// <para>
+    /// Each about its own origin by default. Turning three things about a shared centre swings two
+    /// of them across the level, which is occasionally what somebody wants and never what they
+    /// expect from a first drag.
+    /// </para>
+    /// <para>
+    /// It is what somebody wants often enough to be a toggle, though: arranging a row of lamps
+    /// about a point is turning the arrangement rather than the lamps. In that mode the change is
+    /// applied to where each thing is as well as to how it is facing, about the point the handles
+    /// are drawn at.
+    /// </para>
     /// </remarks>
     private static void Share(BehaviorContext ctx, Transform current)
     {
@@ -297,14 +305,32 @@ public partial struct TransformGizmo
             Ratio(current.Scale.Y, _before.Scale.Y),
             Ratio(current.Scale.Z, _before.Scale.Z));
 
+        var about = EditorTools.Pivot == ToolPivot.Centre;
+
         foreach (var (entity, was) in _others)
         {
             if (!ctx.Ecs.TryGet<Transform>(entity, out var now)) continue;
 
-            now.Translation = was.Translation + moved;
             now.Rotation = turned * was.Rotation;
             now.Scale = new Vec3(
                 was.Scale.X * grew.X, was.Scale.Y * grew.Y, was.Scale.Z * grew.Z);
+
+            if (!about)
+            {
+                now.Translation = was.Translation + moved;
+                ctx.Ecs.Set(entity, now);
+                continue;
+            }
+
+            // Where it stands relative to the point the handles are on, turned and stretched the
+            // same way the handles were, and put back. A thing at the centre does not move, which
+            // is what makes this read as turning the arrangement.
+            var out_ = was.Translation - _centre;
+            var swung = turned * out_;
+
+            now.Translation = _centre
+                + new Vec3(swung.X * grew.X, swung.Y * grew.Y, swung.Z * grew.Z)
+                + moved;
 
             ctx.Ecs.Set(entity, now);
         }

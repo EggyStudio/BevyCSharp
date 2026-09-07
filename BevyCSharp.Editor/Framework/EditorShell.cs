@@ -605,6 +605,11 @@ public static class EditorShell
             switch (report.Kind)
             {
                 case UiEventKind.Change:
+                    // Not on the frame after a rebuild. The report names an element by id, and a
+                    // rebuild hands the ids out again, so what it carries would be written into
+                    // whichever binding now happens to own that id.
+                    if (PanelBinding.Rebuilt) break;
+
                     foreach (var panel in Panels)
                     {
                         if (!panel.Push(report.Element)) continue;
@@ -656,6 +661,8 @@ public static class EditorShell
                     break;
             }
         }
+
+        PanelBinding.Settle();
 
         foreach (var panel in edited) panel.Changed();
 

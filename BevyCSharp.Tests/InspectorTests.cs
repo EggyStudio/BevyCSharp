@@ -584,6 +584,40 @@ public sealed class InspectorPlanTests
 public sealed class SelectionTests
 {
     [Fact]
+    public void ASelectionComesBackByNameAfterWhatItNamedIsRespawned()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.SetName(entity, "Lamp");
+
+            EditorSelection.Select(entity);
+            EditorSelection.Prune(ctx.Ecs);
+
+            Assert.Equal(entity, EditorSelection.Current);
+
+            // What a reloaded script does: the entity is gone and one like it is made again, with
+            // an id nothing was holding.
+            ctx.Ecs.Despawn(entity);
+            EditorSelection.Prune(ctx.Ecs);
+
+            Assert.False(EditorSelection.Any);
+
+            var again = ctx.Ecs.Spawn();
+            ctx.Ecs.SetName(again, "Lamp");
+
+            EditorSelection.Prune(ctx.Ecs);
+
+            Assert.True(EditorSelection.Any);
+            Assert.Equal(again, EditorSelection.Current);
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void SelectingReplacesAndTogglingAdds()
     {
         using var harness = new EngineHarness(frames: 2);

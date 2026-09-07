@@ -353,9 +353,11 @@ What is left:
 everything else behind a hamburger whose contents are a table of paths; selecting something opens
 the panel that describes it (components with fields as blocks that open and shut, behaviors among
 them, and everything with nothing to show as a chip), each field drawn by whichever drawer takes
-it and told how to draw itself by the attributes on the field, the asset browser lives as a tab
-along the bottom, settings are a column down the middle of the window, and the docks reflow around
-each other. Gizmos
+it and told how to draw itself by the attributes on the field. The bottom of the window belongs to
+the tabs and the key list: a tab opens as a flyout over the work and a click anywhere else puts it
+away, so the columns keep the full height whether the asset browser is up or not. Settings are a
+column down the middle of the window, a console reads the log and takes commands, and the docks
+reflow around each other. Gizmos
 draw the selection, its handles, the ground and the camera's orientation, and a drag on a handle
 moves, turns or stretches what is selected. Underneath is the framework each panel is three files on
 top of: documents in HTML and CSS, bindings to fields and commands to methods through the generator,
@@ -377,14 +379,17 @@ What is left:
   `bevy_world_serialization` is compiled in and would write exactly those, and can see no C#
   component at all, because those are bytes registered at runtime with no Rust type behind them.
   A world asset worth the name is both files or one format that holds both halves.
-- **Selection that survives a rebuild.** A selected entity is an id, and a hot reload that
-  respawns what a script made hands back different ids. Selecting by name would survive it, at the
-  cost of being wrong for the entities that share one.
-- **Rows that can be styled while they run.** `bcs_xui_set_class` gives an element a class while
-  the editor runs, and the hierarchy uses it: a selected row wears a background rather than a mark
-  in its text. What nothing uses it for yet is hover and pressed states, which want the pointer's
-  position tested against every row every frame, or an entry point that reports what the interface
-  already knows about which widget is under the pointer.
+- **A selection survives a rebuild now.** What was selected is remembered by name while it is
+  alive, and when a reload respawns what a script made, the names are looked for again and the
+  selection comes back. All of them or none: half a selection coming back is worse than none, since
+  an edit meant for three things would reach two without saying so. Two entities that share a name
+  still resolve to the first.
+- **Rows are styled while they run.** `bcs_xui_set_class` gives an element a class while the editor
+  runs: a selected row wears a background, a log line wears its level, a tile says whether its
+  picture is the file or a stand-in for it. Hover turned out to need none of that, since the
+  stylesheet can ask for `:hover` and the interface already tracks it, so it costs nothing per
+  frame. What is still not reachable is a pressed state, which the interface tracks and no selector
+  names.
 - **The interface is this project's own code now**, in `native/bcs_ui`, copied from
   `bevy_extended_ui` under Apache 2.0 with `NOTICE.md` beside it saying so. Five of the nine things
   a fork was going to buy back are bought: what a program decides about an element's box survives
@@ -406,14 +411,12 @@ What is left:
   for an asset tile, a preview for a material, and a proper orientation widget drawn as a small
   scene rather than as six lines in the world. One entry point that renders a camera to an image
   and hands back an asset key would close all three.
-- **Tiles that show what a file is.** The asset browser draws a grid of names, elastic between a
-  minimum and a maximum so a row divides evenly into the panel and wraps. What it does not draw is
-  the file: an image tile should show the image, a mesh or a material tile a small render of it,
-  and both want a taller tile than a name needs. The first half is reachable: `bcs_xui_set_image`
-  points an element at a file, so an image tile is a taller tile with an `<img>` in it and a second
-  tile shape to switch between. The second half needs the bridge to
-  render a thumbnail to a texture and hand back an asset key, which is the same missing entry point
-  as render-to-texture generally.
+- **Tiles show an image, and nothing else.** The asset browser draws a grid of tiles, elastic so a
+  row divides evenly into the panel, each with a picture over its name. An image tile points at the
+  file itself, which is all it takes: the interface loads a picture from a path. Everything else
+  wears its kind's icon at icon size, said with a second class rather than a size written per tile.
+  A mesh or a material tile wants a small render of the thing, which needs the bridge to render to
+  a texture and hand back an asset key, the same missing entry point as everywhere else.
 - **The hierarchy names what it can see and the stats panel counts it.** Both go through
   `EditorKinds`, so a camera in the tree and a camera in the count are the same question asked once.
   What neither can do is see a component the bridge does not name: an entity whose only components
@@ -423,9 +426,9 @@ What is left:
   per kind of value, a table searched newest first, and attributes on the field that say what it
   wants: a range, a unit, a step, a heading, a condition, a label, a tooltip. Several things can be
   selected and edited together, with a field the selection disagrees about marked as mixed, and a
-  drag on the handles takes all of them. What a selection cannot yet do is turn or stretch about a
-  shared centre: each thing turns about its own origin, which is what a first drag should do and
-  not the only thing an editor should offer.
+  drag on the handles takes all of them, about their own origins or about the middle of the
+  selection as the toolbar's pivot says. Origins is the default, because a first drag that swings
+  the selection across the level is a surprise nobody asked for.
 - **A field can hold an asset, and the engine's own cannot.** A component of the game's own that
   holds an `AssetHandle` is drawn by name, and pressing it offers the files under the asset root
   that suit it. What is still out of reach is the engine's side of the same question: the mesh and
@@ -435,9 +438,10 @@ What is left:
   beside the layout, and everything on it belongs to this editor build. A project setting worth the
   name (a startup scene, a physics step, a build target) needs somewhere to live that is part of
   the project rather than part of the tool, which is the same gap as the world file's.
-- **A list longer than its pool.** The hierarchy and the inspector both hold a fixed pool of rows
-  and decide what each stands for, which is what a virtualised list does anyway. What they lack is
-  a wheel: paging is two buttons, because the scroll wheel belongs to the camera.
+- **A list longer than its pool.** The hierarchy, the inspector, the console and the asset browser
+  all hold a fixed pool of rows and decide what each stands for, which is what a virtualised list
+  does anyway, and the wheel scrolls whichever one the pointer is over. What none of them has is a
+  scrollbar: how far down a long list you are is only visible by what is on screen.
 - **Undo covers what can be reversed exactly**: a field edited in the inspector, a rename, a new
   entity. Despawning is deliberately not recorded, because an entity's mesh and material are
   engine-side components with no mirror on this side and what came back would be a name with

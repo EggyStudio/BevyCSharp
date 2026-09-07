@@ -56,6 +56,15 @@ public static class EditorCommands
                 chosen == "local" ? ToolSpace.Local : ToolSpace.Global,
             1);
 
+        EditorSettings.Choice(
+            "Editor",
+            "What several things turn about",
+            ["origins", "centre"],
+            static () => EditorTools.Pivot == ToolPivot.Centre ? "centre" : "origins",
+            static chosen => EditorTools.Pivot =
+                chosen == "centre" ? ToolPivot.Centre : ToolPivot.Origins,
+            2);
+
         EditorSettings.Flag(
             "Editor",
             "Snap to a grid",
@@ -208,6 +217,18 @@ public static class EditorCommands
             static () => EditorTools.Space == ToolSpace.Local,
             9));
 
+        // The other thing a drag on the handles has to be told, and a word for the same reason: no
+        // picture says "about each thing's own origin" faster than the word does.
+        EditorToolbar.Add(new ToolbarButton(
+            ToolbarSlot.Centre,
+            null,
+            static () => EditorTools.Pivot == ToolPivot.Centre ? "centre" : "origins",
+            static _ => EditorTools.Pivot = EditorTools.Pivot == ToolPivot.Centre
+                ? ToolPivot.Origins
+                : ToolPivot.Centre,
+            static () => EditorTools.Pivot == ToolPivot.Centre,
+            10));
+
         EditorToolbar.Add(new ToolbarButton(
             ToolbarSlot.Centre,
             "icons/ui/snap.png",
@@ -218,7 +239,7 @@ public static class EditorCommands
                 EditorTools.Snap = EditorKeys.SnapLocked;
             },
             static () => EditorTools.Snap,
-            10));
+            11));
 
         EditorToolbar.Add(new ToolbarButton(
             ToolbarSlot.Right,

@@ -201,6 +201,12 @@ public partial struct Probe
 
                 break;
 
+            // The asset browser, which draws a picture of what it can.
+            case 140 when script.Contains("tiles"):
+                if (EditorTabs.Find("Assets") is { } files) EditorTabs.Open(files);
+                EditorAssets.Enter("icons/ui");
+                break;
+
             // The console a key drops into the middle of the window, with something typed into it.
             case 140 when script.Contains("console"):
                 Panels.QuickConsolePanel.Toggle();

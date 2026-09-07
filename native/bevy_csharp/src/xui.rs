@@ -64,8 +64,13 @@ mod live {
     /// change noticed a second time, with the child there to receive it.
     #[derive(Resource, Default)]
     pub struct PendingText {
-        /// What has been written lately, and how many frames it has left to be written again.
-        pub waiting: Vec<(bevy::ecs::entity::Entity, String, u8)>,
+        /// What has been written lately, how many frames it has left, and to which set of widgets.
+        ///
+        /// The generation matters as much as the entity. A rebuild respawns every widget and hands
+        /// the entity ids out again, so a write kept from before one would be applied to whatever
+        /// now holds that id: a mass of 1.25 reappearing as the x of a position three rows away.
+        /// An entry from an older generation is dropped rather than applied.
+        pub waiting: Vec<(bevy::ecs::entity::Entity, String, u8, u64)>,
         /// Widgets that have been through it once and need never go through it again.
         ///
         /// Only the first write to a given widget can arrive before it has anywhere to draw, so
@@ -650,11 +655,17 @@ pub unsafe extern "C" fn bcs_xui_set_text(entity: u64, text: *const core::ffi::c
                 // text appears, so this is the belt beside that brace rather than the mechanism:
                 // one repeat rather than four, and only for the first write to each widget.
                 if status == status::OK {
+                    // Which set of widgets this was written to, so that a rebuild's new ids do not
+                    // inherit it.
+                    let born = world
+                        .get_resource::<live::Documents>()
+                        .map_or(0, |documents| documents.generation);
+
                     if let Some(mut pending) = world.get_resource_mut::<live::PendingText>()
                         && !pending.settled.contains(&entity)
                     {
-                        pending.waiting.retain(|(held, _, _)| *held != entity);
-                        pending.waiting.push((entity, text, RETRIES));
+                        pending.waiting.retain(|(held, _, _, _)| *held != entity);
+                        pending.waiting.push((entity, text, RETRIES, born));
                     }
                 }
 
@@ -1060,6 +1071,12 @@ fn write_text(
 /// Applies each recently written value again, and forgets it once it has been.
 #[cfg(feature = "editor")]
 fn reapply_text(world: &mut bevy::ecs::world::World) {
+    // Which set of widgets is on screen. Anything kept from an earlier one names ids that now
+    // belong to other elements, and applying it would write one row's value into another's.
+    let now = world
+        .get_resource::<live::Documents>()
+        .map_or(0, |documents| documents.generation);
+
     let Some(mut pending) = world.get_resource_mut::<live::PendingText>() else {
         return;
     };
@@ -1071,7 +1088,11 @@ fn reapply_text(world: &mut bevy::ecs::world::World) {
     let mut due: Vec<(bevy::ecs::entity::Entity, String)> = Vec::new();
     let mut done: Vec<bevy::ecs::entity::Entity> = Vec::new();
 
-    pending.waiting.retain_mut(|(entity, text, left)| {
+    pending.waiting.retain_mut(|(entity, text, left, born)| {
+        if *born != now {
+            return false;
+        }
+
         *left = left.saturating_sub(1);
         due.push((*entity, text.clone()));
 

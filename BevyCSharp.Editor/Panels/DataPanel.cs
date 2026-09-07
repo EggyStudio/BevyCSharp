@@ -481,15 +481,19 @@ public sealed partial class DataPanel : IInspectorRows
     /// </remarks>
     private void Draw(EcsWorld world, Entity entity)
     {
-        var room = Fits();
+        // Room for the rows, with the tail's space set aside whether or not the tail is showing.
+        //
+        // Reserving it only when the tail shows is what made the last few lines shake: the reserve
+        // decided how far the list could scroll, how far it had scrolled decided whether the tail
+        // showed, and whether the tail showed decided the reserve. A constant reserve costs two
+        // rows of nothing in the middle of a long list and is still.
+        var space = Math.Max(1, Fits() - Tail());
+        var most = Math.Max(0, _all.Count - space);
 
-        // Whether the end of the list is on screen, which is what decides whether the tail is.
-        // Worked out before the room is reduced to make space for it, so the answer does not
-        // depend on itself.
-        var tail = _scroll + room >= _all.Count;
-        var space = tail ? Math.Max(1, room - Tail()) : room;
+        _scroll = Math.Clamp(_scroll, 0, most);
 
-        _scroll = Math.Clamp(_scroll, 0, Math.Max(0, _all.Count - space));
+        // The tail is the end of the list, so it comes into view when the end does.
+        var tail = _scroll >= most;
 
         var written = 0;
         for (var i = _scroll; i < _all.Count && written < space; i++)
@@ -520,14 +524,20 @@ public sealed partial class DataPanel : IInspectorRows
     /// </remarks>
     private int Tail()
     {
-        if (Window is not { IsOpen: true } window) return 2;
+        if (Window is not { IsOpen: true } window) return _tail;
 
         var tall = Measure(window, "d-tags") + Measure(window, "dchips") + Measure(window, "d-add");
 
-        // Nothing has been laid out yet on the frame the tail first appears, so it is worth two
-        // rows until there is something to measure, and exactly right from then on.
-        return tall <= 0f ? 2 : Math.Max(1, (int)Math.Ceiling(tall / RowHeight));
+        // Remembered once measured, and only remeasured when there is something on screen to
+        // measure. What changes it is the number of tags, which changes when the selection does,
+        // not from one frame to the next.
+        if (tall > 0f) _tail = Math.Max(1, (int)Math.Ceiling(tall / RowHeight));
+
+        return _tail;
     }
+
+    /// <summary>How many rows the tail took when it was last on screen.</summary>
+    private int _tail = 2;
 
     /// <summary>How tall one part of the tail is, with the gap under it, or nothing.</summary>
     private static float Measure(UiWindow window, string element) =>
@@ -841,7 +851,7 @@ public sealed partial class DataPanel : IInspectorRows
     /// </remarks>
     public void Mixed(int row)
     {
-        Units[row] = "mixed";
+        Units[row] = "mix";
         ShowUnit[row] = true;
     }
 

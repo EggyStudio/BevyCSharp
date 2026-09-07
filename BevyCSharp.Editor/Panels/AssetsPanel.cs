@@ -21,7 +21,8 @@ namespace BevyCSharp.Editor.Panels;
 [UiPanel(
     "panels/assets.html",
     Root = "#assets",
-    Dock = UiDock.Bottom)]
+    Dock = UiDock.Bottom,
+    Dismiss = UiDismiss.OnOutsideClick)]
 public sealed partial class AssetsPanel
 {
     /// <summary>How many directories the tree can draw.</summary>
@@ -98,6 +99,27 @@ public sealed partial class AssetsPanel
         current = icon;
     }
 
+    /// <summary>Says how large a tile's picture is drawn, by the class it wears.</summary>
+    /// <remarks>
+    /// A picture of the file fills the tile; an icon standing in for one is drawn at the size an
+    /// icon is drawn at. Stretching a twelve pixel picture across a hundred is worse than showing
+    /// nothing.
+    /// </remarks>
+    private void Dress(int tile, string wanted)
+    {
+        if (_tileClasses[tile] == wanted) return;
+        if (Window is not { IsOpen: true } window) return;
+
+        var element = window.Element($"atimg-{tile}");
+        if (element.IsNone) return;
+
+        Xui.SetClass(element, wanted);
+        _tileClasses[tile] = wanted;
+    }
+
+    /// <summary>What class each tile's picture wears, so it is written once.</summary>
+    private readonly string[] _tileClasses = new string[Tiles];
+
     /// <summary>Fills the tree and the tiles from the directory.</summary>
     [OnRefresh]
     public void Fill()
@@ -153,7 +175,17 @@ public sealed partial class AssetsPanel
             TileNames[tile] = entry.Name;
             TilePicked[tile] = entry.Path == EditorAssets.Selected;
 
-            Wear($"aticon-{tile}", ref _tileIcons[tile], EditorAssets.IconOf(entry.Path));
+            // The file itself where the editor can draw it, and its kind's icon where it cannot.
+            // Which of the two it is decides how large the picture is drawn, which is a class
+            // rather than a size written per tile.
+            var drawable = EditorAssets.KindOf(entry.Path) == "image";
+
+            Wear(
+                $"atimg-{tile}",
+                ref _tileIcons[tile],
+                drawable ? entry.Path : EditorAssets.IconOf(entry.Path));
+
+            Dress(tile, drawable ? "tile-image" : "tile-image kind");
 
             _tiles[tile] = entry;
             TileShown[tile] = true;
@@ -170,7 +202,7 @@ public sealed partial class AssetsPanel
     }
 
     /// <summary>How wide a tile would like to be, before the room is divided up.</summary>
-    private const float IdealTile = 132f;
+    private const float IdealTile = 104f;
 
     /// <summary>How far apart the tiles sit, matching the stylesheet's gap.</summary>
     private const float TileGap = 6f;

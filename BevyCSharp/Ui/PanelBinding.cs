@@ -55,8 +55,50 @@ public static class PanelBinding
             if (_generation == value) return;
 
             _generation = value;
+            _settling = Settling;
             Forget();
         }
+    }
+
+    /// <summary>
+    /// Whether the widgets were respawned since the last frame.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What it is for is the reports still in flight. A widget's change is noticed on one frame and
+    /// delivered on the next, and a rebuild in between hands the entity ids out again: the report
+    /// still names an id, that id now belongs to some other element, and the value it carries is
+    /// written into whatever binding claims it. A scale of one becomes the nought from an offset
+    /// three rows down.
+    /// </para>
+    /// <para>
+    /// Nothing typed before a rebuild is worth keeping, so the frames around one are frames whose
+    /// reports are dropped. Frames, plural: the widgets are respawned a frame or two after the
+    /// list of documents is written, so a single frame's silence lands before the ids have even
+    /// been handed out again. Counted down by whoever reads it, once a frame.
+    /// </para>
+    /// </remarks>
+    public static bool Rebuilt
+    {
+        get => _settling > 0;
+        set => _settling = value ? Settling : 0;
+    }
+
+    /// <summary>How many frames of reports a rebuild costs.</summary>
+    /// <remarks>
+    /// Four, which is longer than the interface takes to respawn its widgets and shorter than
+    /// anybody notices. What is lost is whatever was typed into a panel in the instant another
+    /// panel opened, which is nothing anybody has ever done on purpose.
+    /// </remarks>
+    private const int Settling = 4;
+
+    /// <summary>How many frames are left of the silence after a rebuild.</summary>
+    private static int _settling;
+
+    /// <summary>Counts off one frame of that silence.</summary>
+    public static void Settle()
+    {
+        if (_settling > 0) _settling--;
     }
 
     /// <summary>Which build of the interface is in force.</summary>

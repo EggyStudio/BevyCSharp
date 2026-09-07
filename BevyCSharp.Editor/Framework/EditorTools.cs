@@ -28,6 +28,22 @@ public enum ToolSpace
     Local,
 }
 
+/// <summary>What several selected things turn and stretch about.</summary>
+/// <remarks>
+/// Every editor offers both, and the reason is that both are right for different work. Turning
+/// three lamps about their own origins aims each of them; turning them about the middle of the
+/// three swings them around the room. A first drag should do the first, which is why that is the
+/// default, and the second is a toggle away.
+/// </remarks>
+public enum ToolPivot
+{
+    /// <summary>Each about its own origin.</summary>
+    Origins,
+
+    /// <summary>All about the middle of what is selected.</summary>
+    Centre,
+}
+
 /// <summary>
 /// Which tool the viewport is in, and what the tools agree on.
 /// </summary>
@@ -60,6 +76,13 @@ public static class EditorTools
     /// so it is asked here and nowhere else.
     /// </remarks>
     public static ToolSpace Space { get; set; } = ToolSpace.Global;
+
+    /// <summary>What several selected things turn and stretch about.</summary>
+    /// <remarks>
+    /// Origins, until somebody says otherwise. A drag that swings the selection across the level
+    /// is a surprise when it was not asked for, and asking for it is one press.
+    /// </remarks>
+    public static ToolPivot Pivot { get; set; } = ToolPivot.Origins;
 
     /// <summary>The three axes a handle is drawn along, for a thing with this rotation.</summary>
     public static Vec3[] AxesFor(Quat rotation)

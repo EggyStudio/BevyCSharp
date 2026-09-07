@@ -135,6 +135,10 @@ public sealed class UiHost
 
         foreach (var report in Xui.Drain()) Deliver(report);
 
+        // The reports in flight when the widgets were respawned named ids that now belong to other
+        // elements, and have been dropped rather than delivered.
+        PanelBinding.Settle();
+
         foreach (var panel in _edited) panel.Changed();
 
         foreach (var panel in _panels)
@@ -150,6 +154,11 @@ public sealed class UiHost
         switch (report.Kind)
         {
             case UiEventKind.Change:
+                // Not on the frame after a rebuild. The report names an element by id, and a
+                // rebuild hands the ids out again, so what it carries would be written into
+                // whichever binding now happens to own that id.
+                if (PanelBinding.Rebuilt) break;
+
                 foreach (var panel in _panels)
                 {
                     if (!panel.Push(report.Element)) continue;

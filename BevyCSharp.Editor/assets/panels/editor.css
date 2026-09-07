@@ -21,65 +21,100 @@
      * follow from here. Setting our own names alone would restyle the panel and leave every
      * control the blue it was born with.
      */
-    --primary: #6e6e6e;
-    --primary-hover: #8a8a8a;
-    --primary-disabled: #3a3a3a;
-    --primary-transparent-layer: rgba(110, 110, 110, 0.3);
-    --headline: #e8e8e8;
-    --headline-sec: #b4b4b4;
-    --text-color: #d2d2d2;
-    --text-color-dark: #8a8a8a;
-    --disabled-text: #4a4a4a;
+    /*
+     * What the interface's own controls are painted with, which is a bar's fill and a tick's box.
+     *
+     * Grey, not the accent. A bar filled with the one color in the editor shouts at the same
+     * volume as a selected row and says much less: what a bar is for is showing where a number
+     * sits, and a lighter grey against a darker one reads perfectly well. What is asked for in the
+     * accent is the tick, below, since a checkbox is either acting or not.
+     */
+    --primary: #5a5a5a;
+    --primary-hover: #6e6e6e;
+    --primary-disabled: #2b2b2b;
+    --primary-transparent-layer: rgba(90, 90, 90, 0.35);
+    --headline: #f2f2f2;
+    --headline-sec: #c8c8c8;
+    --text-color: #dfdfdf;
+    --text-color-dark: #8c8c8c;
+    --disabled-text: #5a5a5a;
     --disabled-text-darker: #3a3a3a;
-    --gray-background: #141414;
+    --gray-background: #151515;
     --gray-background-disabled: #202020;
 
-    /* Black, with enough left through to see the scene the panels float over. */
     /*
-     * Nearly opaque. The scene under a panel is worth a hint of depth and nothing more: at a
-     * thinner value a panel over the sky and a panel over a lit floor are two different colors.
+     * Unreal's greys, and opaque.
+     *
+     * A panel is a surface with things on it rather than a window onto the scene: the scene shows
+     * through the viewport, which is what the viewport is for, and a value read against whatever
+     * happens to be behind it is a value read wrong. What the depth used to come from now comes
+     * from the greys being different from each other, which is how every tool that is looked at all
+     * day does it.
      */
-    --surface: rgba(0, 0, 0, 0.90);
-    /*
-     * What a sheet is painted with: nearly the panels' color, and darker. A sheet is a whole
-     * column of the window rather than a corner of it, so the same translucency that reads as depth
-     * behind a small panel reads as a scene with writing on it behind a large one.
-     */
-    --sheet: rgba(0, 0, 0, 0.99);
-    --surface-raised: rgba(255, 255, 255, 0.05);
-    --surface-sunken: rgba(0, 0, 0, 0.35);
-    /*
-     * What a box somebody types in is painted with. Opaque, unlike the panel around it: a handle
-     * sits against its edge and the scene sits behind the panel, and a box that lets either of
-     * them through is a box whose number is read against whatever happens to be behind the window.
-     */
-    --field: #000000;
-    --line: rgba(255, 255, 255, 0.10);
-    --line-strong: rgba(255, 255, 255, 0.18);
+    --surface: #242424;
 
-    /* Unity's text ramp, which is three greys and no more. */
-    --text: #d2d2d2;
-    --label: #c4c4c4;
-    --bright: #eeeeee;
-    --dim: #8a8a8a;
+    /* A sheet takes the window, so it is the darker grey that reads as further back. */
+    --sheet: #1b1b1b;
+
+    /* What sits on a panel: a button's plate, a chip, a row that is not sunken. */
+    --surface-raised: #2f2f2f;
+
+    /* And what is cut into it: a track, a well, the ground of a list. */
+    --surface-sunken: #1a1a1a;
+
+    /*
+     * What a box somebody types in is painted with. Nearly black, and darker than everything
+     * around it, which is the one part of Unreal's scheme that is not a grey: a field is a hole in
+     * the panel and reads as one.
+     */
+    --field: #0d0d0d;
+
+    /*
+     * Borders are darker than what they separate, not lighter.
+     *
+     * A light hairline reads as a raised edge and suits a translucent panel over a scene. On a grey
+     * surface the line that reads as a seam is a dark one, which is what every panel in Unreal is
+     * drawn with.
+     */
+    --line: #131313;
+    --line-strong: #3b3b3b;
+
+    /* Three greys and no more, at the weights Unreal writes them. */
+    --text: #dfdfdf;
+    --label: #c8c8c8;
+    --bright: #ffffff;
+    --dim: #8c8c8c;
 
     /* The one color in the editor. Anything that is not acting stays grey. */
-    --accent: #4d7cff;
-    --accent-soft: rgba(77, 124, 255, 0.22);
+    --accent: #0070e0;
+    --accent-soft: rgba(0, 112, 224, 0.25);
+
+    /* What a row under the pointer is washed with, which is a lighter grey and not the accent. */
+    --hover: #323232;
+
+    /* What a bar is filled up to, which is a grey for the same reason a row's hover is. */
+    --track: #5a5a5a;
 
     /*
      * The handle a number is dragged by. Grey, and the same grey for all three axes: three
      * saturated colors down the side of a panel is the loudest thing on the screen for
      * information the order of the boxes already carries.
      */
-    --grip: #5a5f69;
+    --grip: #4a4a4a;
 
     /* Said more loudly than the rest, and only where something is actually wrong. */
-    --warn: #d8a33c;
-    --bad: #d4614f;
+    --warn: #e0a020;
+    --bad: #e04c40;
 
-    --radius: 9px;
-    --radius-small: 5px;
+    /*
+     * Corners, nearly square.
+     *
+     * A tool's panels are boxes that meet each other, and the more rounded they are the more they
+     * read as cards floating apart. Unreal rounds by a few pixels, which softens an edge without
+     * pretending the panel is a card.
+     */
+    --radius: 4px;
+    --radius-small: 3px;
 }
 
 /*
@@ -495,6 +530,23 @@ p {
  * name stays: a row can be the current one and off the top of somebody's attention, and two
  * quiet marks read better than one loud one.
  */
+/*
+ * A row under the pointer.
+ *
+ * The interface tracks what is hovered and the stylesheet can ask for it, so this costs nothing
+ * per frame: no rectangle is tested against the pointer anywhere in the editor for it.
+ */
+.row:hover {
+    background-color: var(--hover);
+}
+
+.chip:hover,
+.field-btn:hover,
+.wide-btn:hover,
+.tab:hover {
+    background-color: var(--hover);
+}
+
 .row-picked {
     display: flex;
     flex-direction: row;
@@ -684,9 +736,19 @@ p {
 }
 
 .field-unit {
+    /*
+     * Three characters wide, and not a pixel more.
+     *
+     * Every row with a number pays for this column whether it has a unit or not, so it is the
+     * smallest thing that can hold the units anybody writes: m, kg, deg, m/s. A longer one is cut,
+     * which is the right trade for a word that is only there to say what the number beside it
+     * means.
+     */
     flex-grow: 0;
     flex-shrink: 0;
-    width: 22px;
+    flex-basis: 17px;
+    width: 17px;
+    overflow: hidden;
     pointer-events: none;
     font-size: 9px;
     color: var(--dim);
@@ -727,7 +789,7 @@ p {
     background-color: var(--surface-sunken);
     border: 0;
     border-radius: var(--radius-small);
-    color: var(--accent);
+    color: var(--track);
 }
 
 /*
@@ -1422,19 +1484,72 @@ button:hover {
  *
  * The basis here is what a tile is before the panel has measured anything.
  */
+/*
+ * One file in the browser: what it looks like, and what it is called.
+ *
+ * Tall enough for a picture, because a browser that draws a grid of names is a directory listing
+ * with more space between the lines. A picture is what somebody is looking for when they open one.
+ */
 .tile {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    column-gap: 4px;
+    row-gap: 3px;
     flex-grow: 0;
     flex-shrink: 0;
-    flex-basis: 132px;
-    height: 22px;
-    padding: 0 6px;
+    /*
+     * No basis. The panel gives every tile a width of its own so a line divides evenly, and a
+     * basis would win over that: a flex item is the size of its basis, and its width is only
+     * consulted when it has none.
+     */
+    width: 104px;
+    height: 92px;
+    padding: 4px;
     background-color: var(--surface-raised);
     border: 1px solid var(--line);
     border-radius: var(--radius-small);
+    overflow: hidden;
+}
+
+/* Where the picture goes, which is most of the tile. */
+.tile-shot {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 96px;
+    height: 62px;
+    background-color: var(--surface-sunken);
+    border-radius: var(--radius-small);
+    overflow: hidden;
+}
+
+/*
+ * A picture of the file itself, drawn as large as the space allows.
+ *
+ * Not everything has one. A file the editor cannot draw wears its kind's icon instead, at the size
+ * an icon is drawn rather than stretched to fill the tile, which is what the second class says.
+ */
+.tile-image {
+    width: 96px;
+    height: 62px;
+    pointer-events: none;
+}
+
+.tile-image.kind {
+    width: 22px;
+    height: 22px;
+}
+
+/* The name under the picture, with the mark that says which one is chosen. */
+.tile-line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    column-gap: 4px;
+    width: 96px;
+    min-width: 0;
     overflow: hidden;
 }
 
@@ -1494,7 +1609,7 @@ button:hover {
 }
 
 .menu-row:hover {
-    background-color: var(--accent-soft);
+    background-color: var(--accent);
     color: var(--bright);
 }
 
