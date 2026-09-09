@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["bcs_ui", "bcs_ui_macros", "bevy_csharp"]
+members = ["bcs_dom", "bcs_ui", "bcs_ui_macros", "bevy_csharp"]
 
 [workspace.package]
 version = "0.1.0"

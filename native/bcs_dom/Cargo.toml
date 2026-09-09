@@ -1,0 +1,29 @@
+# The interface's model: a real DOM, styled by a real CSS engine, laid out by a real layout engine.
+#
+# Nothing here is written by us that somebody else has written better. Stylo is the style system
+# from Firefox and Servo; Taffy is the layout engine Bevy's own interface uses; Parley shapes the
+# text; Blitz joins the three into a document that behaves the way a document is supposed to. What
+# this crate adds is the part nobody else can write: how that document reaches the engine.
+[package]
+name = "bcs_dom"
+version.workspace = true
+edition.workspace = true
+license = "MIT OR Apache-2.0"
+description = "An HTML and CSS document, styled by Stylo and laid out by Taffy, for the BevyCSharp bridge"
+publish = false
+
+[dependencies]
+# The document: Stylo for style, Taffy for layout, Parley for text.
+blitz-dom = "0.2"
+
+# The parser, which is the one Servo and Firefox use.
+blitz-html = "0.2"
+
+# Shared types: the viewport, events, colour scheme.
+blitz-traits = "0.2"
+
+# Turning a styled document into drawing commands, and a painter for them. The painter is the one
+# piece that will be swapped for the engine's own once the pixels are proven right.
+blitz-paint = "0.2"
+anyrender = "0.6"
+anyrender_vello_cpu = "0.7"

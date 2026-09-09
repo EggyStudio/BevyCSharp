@@ -2107,6 +2107,17 @@ pub fn convert_to_color(value: String) -> Option<Color> {
         return color;
     }
 
+    // The parser this crate already depends on understands every color syntax CSS has, and can
+    // convert any of them to sRGB. Asking it first is what makes `hsl()`, `oklch()`, `lab()`,
+    // `color(display-p3 ...)` and the modern slash-alpha forms work everywhere at once, rather
+    // than each being another branch of hand-written string reading below.
+    //
+    // What follows is kept for what it is still the fastest answer for, and for anything the
+    // parser refuses that a person clearly meant.
+    if let Some(parsed) = parse_color_properly(trimmed) {
+        return Some(parsed);
+    }
+
     if trimmed.starts_with("#") {
         if trimmed.eq("#00000000") {
             color = Some(Color::NONE);
@@ -2127,6 +2138,32 @@ pub fn convert_to_color(value: String) -> Option<Color> {
     }
 
     color
+}
+
+/// Reads a color the way a browser does, in whatever syntax it was written.
+///
+/// Every color function CSS has lands in one type, which converts to sRGB on request: hex, `rgb`,
+/// `rgba`, `hsl`, `hwb`, `lab`, `lch`, `oklab`, `oklch`, `color()` in any space, and the alpha
+/// after a slash. A stylesheet written today uses most of these, and a color that fails to parse
+/// is a rule that silently does nothing.
+fn parse_color_properly(value: &str) -> Option<Color> {
+    use lightningcss::traits::Parse;
+    use lightningcss::values::color::CssColor;
+
+    let parsed = CssColor::parse_string(value).ok()?;
+
+    // Everything else is a color in some other space, and this is the conversion the printer uses
+    // when it writes a fallback for an older browser.
+    let CssColor::RGBA(rgba) = parsed.to_rgb().ok()? else {
+        return None;
+    };
+
+    Some(Color::srgba(
+        f32::from(rgba.red) / 255.0,
+        f32::from(rgba.green) / 255.0,
+        f32::from(rgba.blue) / 255.0,
+        f32::from(rgba.alpha) / 255.0,
+    ))
 }
 
 /// Handles `parse_color_components` in the extended UI workflow.
