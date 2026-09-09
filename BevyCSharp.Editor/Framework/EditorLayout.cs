@@ -372,7 +372,16 @@ public sealed class EditorLayout
         var run = top;
         var last = top;
 
-        foreach (var entry in Members(placed, dock))
+        var members = Members(placed, dock);
+
+        // A column with one panel in it is that panel: it fills the column, so its height never
+        // changes and what it holds scrolls inside a frame that stays put. A panel that grows and
+        // shrinks as its contents change is the single thing that makes an interface feel unsteady,
+        // and an inspector's contents change constantly. Two or more share the column and are as
+        // tall as what is in them, since neither can fill it.
+        var alone = members.Count == 1;
+
+        foreach (var entry in members)
         {
             var room = MathF.Max(0f, bottom - run);
             if (room <= 0f) break;
@@ -389,7 +398,7 @@ public sealed class EditorLayout
             // is handed back to its contents. Filling is what a panel somebody works in wants, so
             // that its contents scroll inside a fixed frame rather than the panel growing and
             // shrinking under the pointer as they change.
-            var tall = entry.Placement.Stretch
+            var tall = entry.Placement.Stretch || alone
                 ? room
                 : float.IsNaN(entry.Placement.Height) ? Xui.Auto : entry.Placement.Height;
 

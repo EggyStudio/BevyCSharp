@@ -22,6 +22,7 @@ namespace BevyCSharp.Editor.Panels;
     Root = "#console",
     Dock = UiDock.Bottom,
     Dismiss = UiDismiss.OnOutsideClick,
+    Layer = 30,
     Order = 10)]
 public sealed partial class ConsolePanel
 {

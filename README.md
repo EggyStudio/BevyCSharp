@@ -1436,6 +1436,12 @@ _host.Tick(ctx);
 bridge with the interface compiled in (`build/build-native.sh --editor`) and `Config.HtmlUi` asked
 for.
 
+The editor's look comes from one block of custom properties at the top of `editor.css`: six
+surfaces from the window's ground to what floats over it, a space scale, a height scale and a type
+scale. Rules name those rather than repeat numbers, so the density and the palette of the whole
+editor are a handful of values in one file. `.github/EDITOR.md` says why no CSS framework is used
+for it.
+
 The interface itself is **this project's own code**, in `native/bcs_ui`. It began as a copy of
 [`bevy_extended_ui`](https://github.com/exepta/bevy_extended_ui) under Apache 2.0, and
 `native/bcs_ui/NOTICE.md` says what was taken, what was left out and why. Owning it is what makes

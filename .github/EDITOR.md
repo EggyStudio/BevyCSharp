@@ -290,39 +290,55 @@ where this editor differs.
 
 ### Color
 
-Unreal's greys, which this follows:
+Everything in the editor is drawn on one of six surfaces, and which one says what a thing is. This
+is the whole of the scheme; the values live in `:root` at the top of `editor.css` and nowhere else.
 
-| role | value |
-|---|---|
-| panel | `#242424` |
-| sheet, the darker ground behind a whole page | `#1B1B1B` |
-| raised: a button's plate, a chip | `#2F2F2F` |
-| sunken: a track, a well, a list's ground | `#1A1A1A` |
-| a box that is typed into | `#0D0D0D` |
-| seam between panels | `#131313` |
-| a border worth seeing | `#3B3B3B` |
-| text | `#DFDFDF` |
-| label | `#C8C8C8` |
-| dim | `#8C8C8C` |
-| hover | `#323232` |
-| a bar's fill | `#5A5A5A` |
-| accent | `#0070E0` |
+| token | value | what it is |
+|---|---|---|
+| `--app` | `#141414` | the window's ground |
+| `--sunken` | `#1A1A1A` | a well cut into a pane: a list, a track |
+| `--pane-head` | `#1D1D1D` | a panel's header band |
+| `--pane` | `#242424` | a docked panel |
+| `--band` | `#2D2D2D` | a section header on a pane |
+| `--overlay` | `#2E2E2E` | what floats: a menu, a flyout, a tab, a hint |
+| `--raised` | `#313131` | a control's plate |
+| `--field` | `#0D0D0D` | a box that is typed in |
 
-Two rules matter more than the values:
+Two rules follow from the ladder, and they matter more than the values:
 
-- **Panels are opaque.** A panel is a surface with things on it, not a window onto the scene: the
-  scene shows through the viewport, which is what the viewport is for, and a value read against
-  whatever happens to be behind it is a value read wrong. What translucency used to supply, the
-  greys being different from each other supplies instead.
-- **The accent is for what is acting**: a checkbox that is ticked, a menu row under the pointer, a
-  field with the keyboard. Everything else is grey, including a slider's fill, which is a lighter
-  grey against a darker one and reads perfectly well. A bar filled with the one color in the editor
-  shouts as loudly as a selection and says much less.
+- **Separation is a step on the ladder first and a line second.** A component's name is a band, not
+  a rule above a row; a list is a well, not a bordered box. The lines that remain are seams between
+  surfaces of different colors, so they are darker than both (`--edge`), never lighter: a light
+  hairline reads as a raised edge and suits a translucent panel over a scene, which this is not.
+- **What floats is lighter than what it covers.** An overlay painted the same grey as the panel
+  under it reads as transparent however opaque it is. That single mistake — one surface color for
+  panels, menus and flyouts alike — is what made this interface look unfinished for a long time: a
+  color picker over an inspector was an outline with writing in it.
 
-Borders are darker than what they separate, not lighter: a light hairline reads as a raised edge
-and suits a translucent panel over a scene, and on a grey surface the line that reads as a seam is
-a dark one. Corners are rounded by a few pixels rather than by nine, for the same reason: the more
-rounded a panel is, the more it reads as a card floating apart from its neighbours.
+The accent (`#0070E0`) is for what is acting: a tick that is on, a menu row under the pointer, a
+field with the keyboard. Everything else is grey, including a slider's fill, which is a lighter grey
+against a darker one and reads perfectly well.
+
+Space, height and type come from scales in the same block: `--gap-1` to `--gap-5`, `--row-height`,
+`--control-height`, `--head-height`, and `--type-tiny` to `--type-head`. Rules use the names, so the
+density of the whole editor is a handful of numbers in one place rather than whatever each rule
+happened to be typed with.
+
+### On using a CSS framework
+
+Worth writing down, because it looks like the obvious answer. The classless frameworks
+(Pico, Simple, MVP, Tacit) style semantic HTML for reading: headings, prose, forms, tables, on a
+light-first palette, at a document's density. A tool is the opposite of a document — eighteen pixel
+rows, panes that fill a column, nothing that reflows — so adopting one means overriding nearly all
+of it and inheriting the half that does not apply. Open Props is the closer idea, being tokens and
+no components, but its tokens are a web palette (fluid type, shadow ramps, animations) sized for
+pages rather than panels.
+
+What was worth taking is the principle rather than any package: one place that holds the surfaces,
+the space, the type and the radii, and rules that name those rather than repeat numbers. That is
+what the block above is. The renderer is also a subset of CSS — it has grid, calc, transitions and
+custom properties, but no pseudo-elements — so a framework written for browsers would be partly
+ignored in ways that are hard to see.
 
 ### Density
 
@@ -339,6 +355,10 @@ Unity's numbers, which this follows:
 - **The name is a column, not a label.** Every value in a panel starts at the same place however
   long the names are, so a column of values can be read down its own edge. A drawer that wants the
   whole width says so and there is no name column for that row at all.
+- **A docked panel fills its column.** Its height never changes, so what it holds scrolls inside a
+  frame that stays put. A panel that grows and shrinks as its contents change is the single thing
+  that makes an interface feel unsteady, and an inspector's contents change constantly. Two panels
+  in one column share it and are as tall as what is in them, since neither can fill it.
 - **A panel clips and scrolls.** What does not fit is hidden rather than drawn over whatever is
   below, and the whole of a panel's contents scrolls together: the strip of tags and the button
   under an inspector are the end of the list, not furniture pinned below it. The room the tail

@@ -611,6 +611,16 @@ public sealed partial class DataPanel : IInspectorRows
         // without any drawer knowing folds exist.
         _indent[row] = line.Depth;
 
+        // What the row is, said as a surface. A component's name is a band across the panel and a
+        // fold inside it is a quieter one, which is how every tool separates a block of settings
+        // from the next: a line between them says the same thing far more faintly.
+        Banded(row, line.Kind switch
+        {
+            InspectorLineKind.Heading => "field-row head",
+            InspectorLineKind.Group => "field-row fold",
+            _ => "field-row",
+        });
+
         switch (line.Kind)
         {
             case InspectorLineKind.Subject:
@@ -950,6 +960,22 @@ public sealed partial class DataPanel : IInspectorRows
         ShowNote[row] = true;
         Dress(row, kind);
     }
+
+    /// <summary>Says what a row is, by the class it wears.</summary>
+    private void Banded(int row, string wanted)
+    {
+        if (_banded[row] == wanted) return;
+        if (Window is not { IsOpen: true } window) return;
+
+        var element = window.Element($"drow-{row}");
+        if (element.IsNone) return;
+
+        Xui.SetClass(element, wanted);
+        _banded[row] = wanted;
+    }
+
+    /// <summary>What class each row wears, so it is written once.</summary>
+    private readonly string[] _banded = new string[Rows];
 
     /// <summary>Says how loudly a row of words is said, by the class it wears.</summary>
     private void Dress(int row, NoteKind kind)

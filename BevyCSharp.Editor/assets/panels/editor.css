@@ -43,43 +43,55 @@
     --gray-background-disabled: #202020;
 
     /*
-     * Unreal's greys, and opaque.
+     * The surfaces, darkest to lightest, and the whole of what makes this read as a tool.
      *
-     * A panel is a surface with things on it rather than a window onto the scene: the scene shows
-     * through the viewport, which is what the viewport is for, and a value read against whatever
-     * happens to be behind it is a value read wrong. What the depth used to come from now comes
-     * from the greys being different from each other, which is how every tool that is looked at all
-     * day does it.
+     * A panel is not one color with lines drawn on it. It is a ladder: the window's ground, a
+     * pane on it, a header on the pane, a well cut into the pane, a plate raised off it, and a
+     * box cut deeper than any of them. Anything that floats above the lot is lighter again, so
+     * that a flyout over a panel is a different surface rather than the same grey with a border.
+     *
+     * That last one is what a single surface color costs: an overlay the color of what it covers
+     * reads as transparent however opaque it is. Separation is a step on this ladder first and a
+     * line second, which is why the lines below are quiet.
      */
-    --surface: #242424;
+    --app: #141414;
+    --pane: #242424;
+    --pane-head: #1d1d1d;
+    --sunken: #1a1a1a;
+    --raised: #313131;
+    --raised-hover: #3b3b3b;
 
-    /* A sheet takes the window, so it is the darker grey that reads as further back. */
-    --sheet: #1b1b1b;
+    /* What floats: a menu, a flyout, a tab, a hint. A step above a pane, never level with it. */
+    --overlay: #2e2e2e;
+    --overlay-head: #262626;
 
-    /* What sits on a panel: a button's plate, a chip, a row that is not sunken. */
-    --surface-raised: #2f2f2f;
-
-    /* And what is cut into it: a track, a well, the ground of a list. */
-    --surface-sunken: #1a1a1a;
+    /*
+     * A band across a pane: the name of a component, the header of a section.
+     *
+     * Lighter than the pane it sits on, so a list can be a well cut into the pane and the bands
+     * still stand off it. A darker band over a darker well is two shades of the same thing.
+     */
+    --band: #2d2d2d;
 
     /*
      * What a box somebody types in is painted with. Nearly black, and darker than everything
-     * around it, which is the one part of Unreal's scheme that is not a grey: a field is a hole in
-     * the panel and reads as one.
+     * around it, which is the one part of the scheme that is not a grey: a field is a hole in the
+     * panel and reads as one.
      */
     --field: #0d0d0d;
 
     /*
-     * Borders are darker than what they separate, not lighter.
+     * Lines are a seam, not a highlight.
      *
-     * A light hairline reads as a raised edge and suits a translucent panel over a scene. On a grey
-     * surface the line that reads as a seam is a dark one, which is what every panel in Unreal is
-     * drawn with.
+     * Where two surfaces of different colors meet, a dark line reads as the join between them. A
+     * light one reads as a raised edge, which is what a translucent panel over a scene wanted and
+     * what an opaque one does not.
      */
-    --line: #131313;
-    --line-strong: #3b3b3b;
+    --edge: #151515;
+    --edge-soft: #2c2c2c;
+    --edge-strong: #3f3f3f;
 
-    /* Three greys and no more, at the weights Unreal writes them. */
+    /* Three greys and no more, at the weights a dense tool writes them. */
     --text: #dfdfdf;
     --label: #c8c8c8;
     --bright: #ffffff;
@@ -95,16 +107,33 @@
     /* What a bar is filled up to, which is a grey for the same reason a row's hover is. */
     --track: #5a5a5a;
 
-    /*
-     * The handle a number is dragged by. Grey, and the same grey for all three axes: three
-     * saturated colors down the side of a panel is the loudest thing on the screen for
-     * information the order of the boxes already carries.
-     */
+    /* The handle a number is dragged by, grey for all three axes. */
     --grip: #4a4a4a;
 
     /* Said more loudly than the rest, and only where something is actually wrong. */
     --warn: #e0a020;
     --bad: #e04c40;
+
+    /*
+     * The one ladder of space in the editor, so that a gap between rows and a gap between panels
+     * are the same few numbers rather than whatever each file happened to type.
+     */
+    --gap-1: 2px;
+    --gap-2: 4px;
+    --gap-3: 6px;
+    --gap-4: 8px;
+    --gap-5: 12px;
+
+    /* And of heights: a row of a list, a control, a header. */
+    --row-height: 18px;
+    --control-height: 20px;
+    --head-height: 22px;
+
+    /* And of type, densest first. */
+    --type-tiny: 9px;
+    --type-small: 10px;
+    --type-body: 11px;
+    --type-head: 11px;
 
     /*
      * Corners, nearly square.
@@ -146,24 +175,34 @@ body {
 .flyout,
 .menu {
     display: flex;
-    /*
-     * Opaque, unlike the panels. A menu is a question asked over whatever was already there,
-     * and the panel it opened from is behind it: nine tenths of black over a black box with
-     * white text in it still reads as a box with white text in it, and a menu somebody has to
-     * look through is one they misread.
-     */
-    background-color: var(--sheet);
+    background-color: var(--pane);
     /*
      * No `backdrop-filter`. The interface parses one and draws it over the element's own
      * background rather than under it, so the panel takes the color of whatever is behind it
-     * however opaque it is: a panel over the sky is black and a panel over a lit floor is grey.
-     * The blur also samples past the element's edge, which leaves a bright rim inside the rounded
-     * corner wherever the surroundings are brighter.
+     * however opaque it is.
      */
-    border: 1px solid var(--line);
+    border: 1px solid var(--edge);
     border-radius: var(--radius);
     color: var(--text);
     pointer-events: auto;
+}
+
+/*
+ * What floats over the panels: a menu, a flyout, a hint.
+ *
+ * A step up the ladder, never level with what it covers. An overlay painted the same grey as the
+ * panel under it reads as transparent however opaque it is, which is the single thing that made
+ * this interface look unfinished: a color picker over an inspector was an outline with writing in
+ * it. The lighter surface says "above", the darker edge says where it ends, and the shadow says it
+ * is not part of what it is on top of.
+ */
+.menu,
+.flyout,
+.band,
+.hint {
+    background-color: var(--overlay);
+    border: 1px solid var(--edge-strong);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
 }
 
 .column,
@@ -243,7 +282,7 @@ body {
     flex-shrink: 0;
     width: 10px;
     pointer-events: none;
-    font-size: 11px;
+    font-size: var(--type-body);
     color: var(--accent);
 }
 
@@ -293,8 +332,8 @@ body {
     align-self: flex-start;
     width: 232px;
     padding: 8px;
-    row-gap: 4px;
-    background-color: var(--sheet);
+    row-gap: var(--gap-2);
+    background-color: var(--pane);
     overflow: hidden;
 }
 
@@ -312,7 +351,7 @@ body {
     display: flex;
     flex-direction: row;
     align-items: center;
-    column-gap: 6px;
+    column-gap: var(--gap-3);
     background-color: rgba(0, 0, 0, 0);
     pointer-events: auto;
 }
@@ -335,8 +374,8 @@ body {
     height: 29px;
     padding: 3px 4px 0 4px;
     column-gap: 3px;
-    background-color: var(--surface);
-    border: 1px solid var(--line);
+    background-color: var(--pane);
+    border: 1px solid var(--edge);
     border-bottom: 0;
     border-radius: var(--radius) var(--radius) 0 0;
     pointer-events: auto;
@@ -348,26 +387,40 @@ body {
  */
 /* -- Title bars, which are also what a window is dragged by */
 
+/*
+ * A panel's header.
+ *
+ * A darker band across the top of the pane rather than a line under a word. A header that is a
+ * surface says where the panel begins from the corner of the eye; a hairline says it to somebody
+ * already looking for it, which is the wrong way round for the part of a panel that never changes.
+ */
 .titlebar {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    height: 20px;
-    padding: 0 2px;
-    margin-bottom: 2px;
-    border-bottom: 1px solid var(--line);
+    height: var(--head-height);
+    padding: 0 var(--gap-3);
+    margin-bottom: var(--gap-1);
+    background-color: var(--pane-head);
+    border-radius: var(--radius-small);
+}
+
+/* The same band on something that floats, one step up the ladder with it. */
+.menu .titlebar,
+.flyout .titlebar {
+    background-color: var(--overlay-head);
 }
 
 .title {
-    font-size: 11px;
+    font-size: var(--type-body);
     color: var(--label);
     text-transform: uppercase;
 }
 
 .dim {
-    font-size: 10px;
+    font-size: var(--type-small);
     color: var(--dim);
     text-wrap: nowrap;
 }
@@ -383,7 +436,7 @@ body {
  */
 p {
     margin: 0;
-    font-size: 11px;
+    font-size: var(--type-body);
     color: var(--text);
 }
 
@@ -393,7 +446,10 @@ p {
     display: flex;
     flex-direction: column;
     width: 100%;
-    row-gap: 2px;
+    row-gap: var(--gap-1);
+    padding: var(--gap-1);
+    background-color: var(--sunken);
+    border-radius: var(--radius-small);
 }
 
 
@@ -415,6 +471,9 @@ p {
 .rows-grow {
     display: flex;
     flex-direction: column;
+    padding: var(--gap-1);
+    background-color: var(--sunken);
+    border-radius: var(--radius-small);
     flex-grow: 1;
     flex-shrink: 1;
     /*
@@ -425,7 +484,7 @@ p {
     flex-basis: auto;
     width: 100%;
     min-height: 0;
-    row-gap: 2px;
+    row-gap: var(--gap-1);
     overflow: hidden;
 }
 
@@ -438,10 +497,10 @@ p {
     flex-direction: row;
     align-items: center;
     width: 100%;
-    height: 18px;
+    height: var(--row-height);
     min-width: 0;
     padding: 0 6px;
-    column-gap: 4px;
+    column-gap: var(--gap-2);
     background-color: rgba(0, 0, 0, 0);
     border: 0;
     border-radius: var(--radius-small);
@@ -472,14 +531,14 @@ p {
     flex-basis: 0;
     min-width: 0;
     pointer-events: none;
-    font-size: 11px;
+    font-size: var(--type-body);
     color: var(--text);
     text-wrap: nowrap;
 }
 
 .row-text {
     pointer-events: none;
-    font-size: 11px;
+    font-size: var(--type-body);
     color: var(--text);
     text-wrap: nowrap;
 }
@@ -494,7 +553,7 @@ p {
  */
 .row-fold {
     min-width: 7px;
-    font-size: 10px;
+    font-size: var(--type-small);
     color: var(--dim);
     text-wrap: nowrap;
     pointer-events: none;
@@ -552,11 +611,11 @@ p {
     flex-direction: row;
     align-items: center;
     width: 100%;
-    height: 18px;
+    height: var(--row-height);
     min-width: 0;
     padding: 0 6px;
-    column-gap: 4px;
-    background-color: var(--surface-raised);
+    column-gap: var(--gap-2);
+    background-color: var(--raised);
     border: 0;
     border-radius: var(--radius-small);
     overflow: hidden;
@@ -572,7 +631,7 @@ p {
 }
 
 .row:hover {
-    background-color: var(--surface-raised);
+    background-color: var(--raised);
 }
 
 /* -- Fields: a label and whatever editor the value deserves */
@@ -588,7 +647,7 @@ p {
     flex-direction: row;
     align-items: center;
     width: 100%;
-    min-height: 22px;
+    min-height: var(--head-height);
     margin: 0;
     column-gap: 5px;
 }
@@ -615,13 +674,32 @@ p {
  * however long the names are, so the eye runs down one edge rather than a ragged one. A name too
  * long for it is cut rather than allowed to push the values about.
  */
+/*
+ * A component's name, as a band across the panel.
+ *
+ * The block of fields under it belongs to it, and a surface says so where a line only marks where
+ * one thing stopped. Unity, Unreal and every audio tool ever written draw this band.
+ */
+.field-row.head {
+    padding: 0 var(--gap-2);
+    background-color: var(--band);
+    border-radius: var(--radius-small);
+}
+
+/* A fold inside a component, which is the same idea one step quieter. */
+.field-row.fold {
+    padding: 0 var(--gap-2);
+    background-color: var(--pane-head);
+    border-radius: var(--radius-small);
+}
+
 .field-name {
     flex-grow: 0;
     flex-shrink: 0;
     width: 92px;
     min-width: 0;
     overflow: hidden;
-    font-size: 11px;
+    font-size: var(--type-body);
     color: var(--label);
     text-wrap: nowrap;
 }
@@ -661,7 +739,7 @@ p {
     flex-shrink: 1;
     flex-basis: 0;
     min-width: 0;
-    height: 18px;
+    height: var(--row-height);
 }
 
 .field-value {
@@ -669,7 +747,7 @@ p {
     flex-shrink: 1;
     flex-basis: 0;
     min-width: 0;
-    height: 18px;
+    height: var(--row-height);
     margin: 0;
     padding-top: 1px;
     padding-right: 5px;
@@ -729,7 +807,7 @@ p {
     flex-shrink: 0;
     width: 44px;
     pointer-events: none;
-    font-size: 10px;
+    font-size: var(--type-small);
     color: var(--text);
     text-align: right;
     text-wrap: nowrap;
@@ -750,7 +828,7 @@ p {
     width: 17px;
     overflow: hidden;
     pointer-events: none;
-    font-size: 9px;
+    font-size: var(--type-tiny);
     color: var(--dim);
     text-wrap: nowrap;
 }
@@ -768,7 +846,7 @@ p {
     min-width: 0;
     padding: 2px 0;
     pointer-events: none;
-    font-size: 10px;
+    font-size: var(--type-small);
     color: var(--dim);
     text-wrap: wrap;
 }
@@ -786,7 +864,7 @@ p {
     min-width: 0;
     height: 14px;
     margin: 0;
-    background-color: var(--surface-sunken);
+    background-color: var(--sunken);
     border: 0;
     border-radius: var(--radius-small);
     color: var(--track);
@@ -817,8 +895,8 @@ p {
     width: 240px;
     padding: 3px 6px;
     pointer-events: none;
-    background-color: var(--sheet);
-    border: 1px solid var(--line);
+    background-color: var(--pane);
+    border: 1px solid var(--edge);
     border-radius: var(--radius-small);
 }
 
@@ -831,7 +909,7 @@ p {
     width: 228px;
     min-width: 0;
     pointer-events: none;
-    font-size: 10px;
+    font-size: var(--type-small);
     color: var(--text);
     text-wrap: wrap;
 }
@@ -848,8 +926,8 @@ p {
     flex-basis: 0;
     min-width: 0;
     height: 16px;
-    background-color: var(--surface-raised);
-    border: 1px solid var(--line);
+    background-color: var(--raised);
+    border: 1px solid var(--edge);
     border-radius: var(--radius-small);
 }
 
@@ -878,7 +956,7 @@ p {
     min-width: 0;
     height: 1px;
     margin: 0 2px;
-    background-color: var(--line);
+    background-color: var(--edge);
 }
 
 /* A sentence said more loudly than the ordinary note. */
@@ -903,7 +981,7 @@ p {
     left: 6px;
     top: 4px;
     pointer-events: none;
-    font-size: 9px;
+    font-size: var(--type-tiny);
     color: var(--dim);
     text-wrap: nowrap;
 }
@@ -916,18 +994,18 @@ p {
     flex-grow: 1.25;
     flex-shrink: 1;
     flex-basis: 0;
-    height: 18px;
+    height: var(--row-height);
     min-width: 22px;
     padding: 0 6px;
-    background-color: var(--surface-raised);
-    border: 1px solid var(--line);
+    background-color: var(--raised);
+    border: 1px solid var(--edge);
     border-radius: var(--radius-small);
 }
 
 /* The words on a box that is pressed rather than read. */
 .btn-text {
     pointer-events: none;
-    font-size: 10px;
+    font-size: var(--type-small);
     color: var(--text);
     text-wrap: nowrap;
 }
@@ -948,18 +1026,18 @@ p {
 
 input {
     width: 100%;
-    height: 20px;
+    height: var(--control-height);
     min-width: 0;
     padding: 3px 6px;
     background-color: var(--field);
-    border: 1px solid var(--line);
+    border: 1px solid var(--edge);
     border-radius: var(--radius-small);
     color: var(--text);
-    font-size: 11px;
+    font-size: var(--type-body);
 }
 
 input:hover {
-    border-color: var(--line-strong);
+    border-color: var(--edge-strong);
 }
 
 /* Accent on what is focused, which is Unity's rule and the only place blue appears on an input. */
@@ -980,13 +1058,13 @@ slider {
  */
 checkbox {
     width: 18px;
-    height: 18px;
+    height: var(--row-height);
     gap: 0;
 }
 
 checkbox > .mark-box {
     width: 18px;
-    height: 18px;
+    height: var(--row-height);
     border-radius: var(--radius-small);
 }
 
@@ -996,14 +1074,14 @@ checkbox > .mark-box {
  * reading as eight things demanding attention.
  */
 button {
-    height: 20px;
+    height: var(--control-height);
     min-width: 0;
     padding: 0 10px;
-    background-color: var(--surface-raised);
-    border: 1px solid var(--line);
+    background-color: var(--raised);
+    border: 1px solid var(--edge);
     border-radius: var(--radius-small);
     color: var(--bright);
-    font-size: 11px;
+    font-size: var(--type-body);
 }
 
 button:hover {
@@ -1025,10 +1103,10 @@ button:hover {
     padding: 0 6px;
     column-gap: 5px;
     background-color: var(--field);
-    border: 1px solid var(--line);
+    border: 1px solid var(--edge);
     border-radius: 15px;
     color: var(--label);
-    font-size: 11px;
+    font-size: var(--type-body);
 }
 
 /* The picture inside a round button, at the size the icons were rasterised for. */
@@ -1071,7 +1149,7 @@ button:hover {
 /* The words beside it, for a button that is not only a picture. */
 .glyph-text {
     pointer-events: none;
-    font-size: 11px;
+    font-size: var(--type-body);
     color: var(--label);
     text-wrap: nowrap;
 }
@@ -1096,7 +1174,7 @@ button:hover {
     justify-content: space-between;
     width: 100%;
     min-height: 15px;
-    column-gap: 8px;
+    column-gap: var(--gap-4);
 }
 
 .stat-name {
@@ -1106,7 +1184,7 @@ button:hover {
     min-width: 0;
     overflow: hidden;
     pointer-events: none;
-    font-size: 10px;
+    font-size: var(--type-small);
     color: var(--label);
     text-wrap: nowrap;
 }
@@ -1137,7 +1215,7 @@ button:hover {
     width: 100%;
     min-width: 0;
     pointer-events: none;
-    font-size: 10px;
+    font-size: var(--type-small);
     color: var(--text);
     text-align: right;
     text-wrap: wrap;
@@ -1161,9 +1239,13 @@ button:hover {
     width: 100%;
     height: 100%;
     padding: 10px 14px;
-    row-gap: 8px;
-    background-color: var(--sheet);
-    border: 1px solid var(--line);
+    row-gap: var(--gap-4);
+    /*
+     * The overlay grey, because a sheet floats over everything the way a menu does. It is only
+     * larger.
+     */
+    background-color: var(--overlay);
+    border: 1px solid var(--edge);
     border-radius: var(--radius);
     color: var(--text);
     overflow: hidden;
@@ -1183,7 +1265,7 @@ button:hover {
     flex-direction: row;
     align-items: center;
     width: 100%;
-    height: 22px;
+    height: var(--head-height);
     column-gap: 10px;
     overflow: hidden;
 }
@@ -1194,7 +1276,7 @@ button:hover {
     pointer-events: none;
     min-width: 0;
     overflow: hidden;
-    font-size: 11px;
+    font-size: var(--type-body);
     color: var(--label);
     text-wrap: nowrap;
 }
@@ -1202,7 +1284,7 @@ button:hover {
 .sheet-value {
     width: 250px;
     min-width: 0;
-    height: 18px;
+    height: var(--row-height);
     margin: 0;
     padding: 1px 5px;
 }
@@ -1211,7 +1293,7 @@ button:hover {
     pointer-events: none;
     width: 250px;
     min-width: 0;
-    font-size: 11px;
+    font-size: var(--type-body);
     color: var(--text);
     text-wrap: nowrap;
 }
@@ -1222,10 +1304,10 @@ button:hover {
     align-items: center;
     justify-content: center;
     width: 250px;
-    height: 18px;
+    height: var(--row-height);
     padding: 0 6px;
-    background-color: var(--surface-raised);
-    border: 1px solid var(--line);
+    background-color: var(--raised);
+    border: 1px solid var(--edge);
     border-radius: var(--radius-small);
 }
 
@@ -1248,7 +1330,7 @@ button:hover {
     width: 150px;
     row-gap: 1px;
     padding-right: 8px;
-    border-right: 1px solid var(--line);
+    border-right: 1px solid var(--edge);
 }
 
 .sheet-body {
@@ -1280,7 +1362,7 @@ button:hover {
     width: 26px;
     height: 26px;
     background-color: rgba(38, 39, 43, 1);
-    border: 1px solid var(--line-strong);
+    border: 1px solid var(--edge-strong);
     border-radius: 13px;
     pointer-events: auto;
 }
@@ -1302,8 +1384,8 @@ button:hover {
     flex-direction: row;
     flex-wrap: wrap;
     width: 100%;
-    column-gap: 4px;
-    row-gap: 4px;
+    column-gap: var(--gap-2);
+    row-gap: var(--gap-2);
 }
 
 .chip {
@@ -1312,8 +1394,8 @@ button:hover {
     align-items: center;
     height: 16px;
     padding: 0 7px;
-    background-color: var(--surface-raised);
-    border: 1px solid var(--line);
+    background-color: var(--raised);
+    border: 1px solid var(--edge);
     border-radius: 8px;
 }
 
@@ -1322,7 +1404,7 @@ button:hover {
 }
 
 .chip-text {
-    font-size: 10px;
+    font-size: var(--type-small);
     color: var(--label);
     text-wrap: nowrap;
     pointer-events: none;
@@ -1335,10 +1417,10 @@ button:hover {
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 22px;
+    height: var(--head-height);
     margin-top: 2px;
-    background-color: var(--surface-raised);
-    border: 1px solid var(--line);
+    background-color: var(--raised);
+    border: 1px solid var(--edge);
     border-radius: var(--radius-small);
 }
 
@@ -1350,7 +1432,7 @@ button:hover {
 /* A square button carrying one glyph: the hamburger, undo, the pin. */
 .icon {
     width: 22px;
-    height: 20px;
+    height: var(--control-height);
     padding: 0;
     background-color: rgba(0, 0, 0, 0);
     border: 0;
@@ -1365,9 +1447,9 @@ button:hover {
 
 /* A tool is wider than an icon and narrower than a sentence. */
 .tool {
-    height: 22px;
+    height: var(--head-height);
     padding: 0 8px;
-    font-size: 11px;
+    font-size: var(--type-body);
     text-wrap: nowrap;
 }
 
@@ -1377,11 +1459,21 @@ button:hover {
     flex-direction: row;
     align-items: center;
     height: 26px;
-    padding: 0 12px;
-    column-gap: 6px;
+    padding: 0 var(--gap-5);
+    column-gap: var(--gap-3);
     background-color: rgba(0, 0, 0, 0);
     border: 0;
     border-radius: var(--radius-small) var(--radius-small) 0 0;
+}
+
+/*
+ * The tab whose panel is open, which wears the surface that panel is drawn on.
+ *
+ * A strip of words where one of them is lit is the clearest way to say which is showing, and it
+ * costs no room: the alternative is a mark beside the word, which says the same thing smaller.
+ */
+.tab.open {
+    background-color: var(--overlay);
 }
 
 /*
@@ -1413,7 +1505,7 @@ button:hover {
     min-width: 0;
     margin: 0;
     padding: 0 4px;
-    font-size: 10px;
+    font-size: var(--type-small);
     line-height: 13px;
     color: var(--dim);
     text-wrap: nowrap;
@@ -1434,9 +1526,9 @@ button:hover {
     display: flex;
     flex-direction: column;
     width: 168px;
-    row-gap: 2px;
+    row-gap: var(--gap-1);
     padding-right: 8px;
-    border-right: 1px solid var(--line);
+    border-right: 1px solid var(--edge);
 }
 
 /*
@@ -1468,8 +1560,8 @@ button:hover {
     flex-direction: row;
     flex-wrap: wrap;
     width: 100%;
-    column-gap: 6px;
-    row-gap: 6px;
+    column-gap: var(--gap-3);
+    row-gap: var(--gap-3);
 }
 
 /*
@@ -1505,8 +1597,8 @@ button:hover {
     width: 104px;
     height: 92px;
     padding: 4px;
-    background-color: var(--surface-raised);
-    border: 1px solid var(--line);
+    background-color: var(--raised);
+    border: 1px solid var(--edge);
     border-radius: var(--radius-small);
     overflow: hidden;
 }
@@ -1519,7 +1611,7 @@ button:hover {
     justify-content: center;
     width: 96px;
     height: 62px;
-    background-color: var(--surface-sunken);
+    background-color: var(--sunken);
     border-radius: var(--radius-small);
     overflow: hidden;
 }
@@ -1538,7 +1630,7 @@ button:hover {
 
 .tile-image.kind {
     width: 22px;
-    height: 22px;
+    height: var(--head-height);
 }
 
 /* The name under the picture, with the mark that says which one is chosen. */
@@ -1547,7 +1639,7 @@ button:hover {
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    column-gap: 4px;
+    column-gap: var(--gap-2);
     width: 96px;
     min-width: 0;
     overflow: hidden;
@@ -1581,13 +1673,13 @@ button:hover {
     flex-direction: row;
     align-items: center;
     width: 100%;
-    height: 20px;
+    height: var(--control-height);
     margin-bottom: 3px;
     padding: 0 6px;
     column-gap: 5px;
     background-color: rgba(0, 0, 0, 0);
     border: 0;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--edge);
     border-radius: 0;
 }
 
@@ -1600,7 +1692,7 @@ button:hover {
     flex-direction: row;
     align-items: center;
     width: 100%;
-    height: 20px;
+    height: var(--control-height);
     padding: 0 6px;
     column-gap: 5px;
     background-color: rgba(0, 0, 0, 0);
@@ -1633,7 +1725,7 @@ button:hover {
 }
 
 .key {
-    font-size: 10px;
+    font-size: var(--type-small);
     color: rgba(255, 255, 255, 0.72);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
     text-wrap: nowrap;

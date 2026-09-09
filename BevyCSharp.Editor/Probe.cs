@@ -315,6 +315,24 @@ public partial struct Probe
 
                 break;
 
+            case 199 when script.Contains("picker"):
+                foreach (var id in new[] { "color", "c-name", "data", "dname-14", "dv-14" })
+                {
+                    var found = Xui.Element(id);
+                    if (found.IsNone) continue;
+
+                    Console.Error.WriteLine(
+                        $"[probe] {id} stack {Xui.StackOf(found)}");
+
+                    foreach (var child in ctx.Ecs.ChildrenOf(found))
+                    {
+                        Console.Error.WriteLine(
+                            $"[probe]   child {child.Bits} stack {Xui.StackOf(child)}");
+                    }
+                }
+
+                break;
+
             // The pointer left over a row that has something to say, so the hint is on screen.
             case >= 150 and <= 210 when script.Contains("hint"):
                 if (Xui.Element("dname-9") is { IsNone: false } named

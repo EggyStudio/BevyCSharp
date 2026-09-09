@@ -57,16 +57,34 @@ public sealed partial class TabsPanel
 
             var entry = entries[i];
 
-            // An open tab wears a dot rather than a mark in its own text, since a row's class
-            // cannot be changed while the editor runs and a character in front of the name moves
-            // the name every time one is opened.
+            // An open tab is lit: it wears the surface its panel is drawn on, so the strip says
+            // which one is showing the way a row of tabs has always said it. The dot stays beside
+            // it, since a tab whose panel is open but concealed behind a sheet is still open.
             Labels[i] = entry.Name;
             Shown[i] = true;
             Marked[i] = entry.IsOpen;
+
+            Lit(i, entry.IsOpen ? "tab open" : "tab");
         }
 
         Drag();
     }
+
+    /// <summary>Says whether a tab's panel is showing, by the class it wears.</summary>
+    private void Lit(int index, string wanted)
+    {
+        if (_lit[index] == wanted) return;
+        if (Window is not { IsOpen: true } window) return;
+
+        var element = window.Element($"tab-{index}");
+        if (element.IsNone) return;
+
+        Xui.SetClass(element, wanted);
+        _lit[index] = wanted;
+    }
+
+    /// <summary>What class each tab wears, so it is written once.</summary>
+    private readonly string[] _lit = new string[Tabs];
 
     /// <summary>Opens or minimises a tab.</summary>
     [OnClick("#tab", Count = Tabs)]

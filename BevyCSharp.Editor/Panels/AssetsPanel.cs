@@ -22,7 +22,8 @@ namespace BevyCSharp.Editor.Panels;
     "panels/assets.html",
     Root = "#assets",
     Dock = UiDock.Bottom,
-    Dismiss = UiDismiss.OnOutsideClick)]
+    Dismiss = UiDismiss.OnOutsideClick,
+    Layer = 30)]
 public sealed partial class AssetsPanel
 {
     /// <summary>How many directories the tree can draw.</summary>
