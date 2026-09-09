@@ -1,0 +1,322 @@
+/*
+ * The editor's appearance, and all of it.
+ *
+ * Read by Stylo, the engine Firefox styles pages with, so what is written here is what a browser
+ * would do with it: the cascade, specificity, inheritance, layers, nesting and custom properties
+ * are that engine's rather than an approximation of them.
+ *
+ * Layers first, because they decide what beats what regardless of how a selector is written. A
+ * component can be styled with one class and still be overridden by a utility, which is the whole
+ * arrangement Tailwind is built on and the reason a rule here never needs to be made more specific
+ * to win.
+ */
+@layer base, surface, components, utilities;
+
+@layer base {
+  :root {
+    /* One hue and one chroma, and every surface a step of lightness along it. Unreal's editor is
+       this: a very dark neutral ground, panels a shade above it, and one saturated accent that
+       only ever means "this is what you picked". */
+    --hue: 250;
+    --chroma: 0.008;
+
+    --ground: oklch(18% var(--chroma) var(--hue));
+    --sunken: oklch(21% var(--chroma) var(--hue));
+    --surface: oklch(25% var(--chroma) var(--hue));
+    --raised: oklch(29% var(--chroma) var(--hue));
+    --overlay: oklch(33% var(--chroma) var(--hue));
+
+    --line: oklch(38% var(--chroma) var(--hue));
+    --line-soft: oklch(32% var(--chroma) var(--hue));
+
+    --text: oklch(92% 0.005 var(--hue));
+    --text-dim: oklch(70% 0.008 var(--hue));
+    --text-faint: oklch(55% 0.008 var(--hue));
+
+    --accent: oklch(70% 0.16 235);
+    --accent-quiet: color-mix(in oklab, var(--accent) 22%, var(--surface));
+    --warn: oklch(72% 0.15 65);
+    --bad: oklch(65% 0.19 25);
+
+    --radius: 4px;
+    --radius-lg: 8px;
+    --row: 22px;
+    --gap: 6px;
+
+    --font: system-ui, "Segoe UI", "DejaVu Sans", sans-serif;
+    --mono: "DejaVu Sans Mono", ui-monospace, monospace;
+
+    color-scheme: dark;
+  }
+
+  *,
+  *::before,
+  *::after {
+    /* Every box measures the way a person means it: a width is the width, not the width before
+       padding and borders are added to it. */
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font);
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--text);
+
+    /* Nothing behind the interface, so the scene shows wherever the interface does not draw. */
+    background: transparent;
+  }
+
+  :where(h1, h2, h3, p) {
+    margin: 0;
+  }
+}
+
+@layer surface {
+  /* The shell: a bar, a middle that fills, and a strip. The middle is a grid of three columns so
+     that a panel appearing or leaving moves nothing else. */
+  .app {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100vh;
+  }
+
+  .middle {
+    display: grid;
+    grid-template-columns: 260px 1fr 320px;
+    min-height: 0;
+  }
+
+  /* The hole the scene shows through. The interface paints over the render, so a surface with no
+     background is a window onto it, and where the window is is wherever the layout put it. */
+  .viewport {
+    background: transparent;
+    position: relative;
+    min-width: 0;
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--surface);
+    border-inline: 1px solid var(--line-soft);
+  }
+
+  .panel > header {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+    height: 26px;
+    padding-inline: 8px;
+    background: var(--raised);
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .panel > .body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 4px;
+  }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+    height: 34px;
+    padding-inline: 8px;
+    background: var(--sunken);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 22px;
+    padding-inline: 8px;
+    background: var(--sunken);
+    border-top: 1px solid var(--line);
+    color: var(--text-faint);
+    font-size: 11px;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+}
+
+@layer components {
+  .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 24px;
+    padding-inline: 10px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    background: var(--raised);
+    color: var(--text);
+    font: inherit;
+  }
+
+  .button:hover {
+    background: var(--overlay);
+    border-color: var(--line);
+  }
+
+  .button:active,
+  .button[data-on="1"] {
+    background: var(--accent-quiet);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .tree-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: var(--row);
+    padding-inline: 6px;
+    border-radius: var(--radius);
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tree-item:hover {
+    background: var(--raised);
+    color: var(--text);
+  }
+
+  /* Selection is a state written on the element, and everything about how selection looks lives
+     here rather than anywhere that decides what is selected. */
+  .tree-item[data-selected="1"] {
+    background: var(--accent-quiet);
+    color: var(--text);
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    align-items: center;
+    gap: var(--gap);
+    min-height: var(--row);
+    padding-inline: 4px;
+  }
+
+  .row > label {
+    color: var(--text-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .field {
+    display: flex;
+    align-items: center;
+    height: 20px;
+    padding-inline: 6px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    background: var(--sunken);
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .field:focus-within {
+    border-color: var(--accent);
+  }
+
+  .group {
+    margin-bottom: 4px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    background: var(--sunken);
+    overflow: hidden;
+  }
+
+  .group > header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: var(--row);
+    padding-inline: 6px;
+    background: var(--raised);
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .console {
+    padding: 6px 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .console > .line + .line {
+    margin-top: 1px;
+  }
+
+  .console > .line[data-level="warn"] {
+    color: var(--warn);
+  }
+
+  .console > .line[data-level="error"] {
+    color: var(--bad);
+  }
+
+  /* A menu is markup put into the page and taken out again, positioned where it was asked for.
+     There is no layer to arrange and no other document to sit above. */
+  .menu {
+    position: absolute;
+    min-width: 160px;
+    padding: 4px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--overlay);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 45%);
+  }
+
+  .menu > .item {
+    display: flex;
+    align-items: center;
+    height: var(--row);
+    padding-inline: 8px;
+    border-radius: var(--radius);
+    color: var(--text);
+  }
+
+  .menu > .item:hover {
+    background: var(--accent-quiet);
+  }
+
+  .empty {
+    padding: 12px 8px;
+    color: var(--text-faint);
+    text-align: center;
+  }
+}
+
+@layer utilities {
+  .hidden {
+    display: none;
+  }
+
+  .dim {
+    color: var(--text-dim);
+  }
+
+  .mono {
+    font-family: var(--mono);
+  }
+}

@@ -190,7 +190,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // one, so the sample and a game are built against exactly this library.
             #[cfg(feature = "editor")]
             if config.html_ui != 0 {
-                crate::xui::install(&mut app);
+                crate::dom::install(&mut app);
 
                 // Clicking a mesh to select it is the other half of what a hierarchy list does,
                 // and it costs a raycast per click rather than anything per frame.

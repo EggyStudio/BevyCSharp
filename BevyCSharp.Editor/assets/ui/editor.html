@@ -1,0 +1,46 @@
+<!-- The editor, as one page. A panel is a piece of this, not a document of its own. -->
+<html>
+  <head>
+    <!-- Spliced in when the page is opened, so a stylesheet is a file that can be edited while
+         the editor runs rather than something compiled in. -->
+    <style id="theme"></style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="toolbar" id="toolbar">
+        <div class="button" id="tool-select" data-on="1">Select</div>
+        <div class="button" id="tool-move">Move</div>
+        <div class="button" id="tool-rotate">Rotate</div>
+        <div class="button" id="tool-scale">Scale</div>
+        <div class="spacer"></div>
+        <div class="button" id="play">Play</div>
+      </header>
+
+      <div class="middle">
+        <aside class="panel" id="hierarchy-panel">
+          <header>World</header>
+          <div class="body" id="hierarchy"></div>
+        </aside>
+
+        <section class="viewport" id="viewport"></section>
+
+        <aside class="panel" id="inspector-panel">
+          <header>Details</header>
+          <div class="body" id="inspector">
+            <div class="empty">Nothing selected</div>
+          </div>
+        </aside>
+      </div>
+
+      <footer class="status">
+        <span id="status-selection">No selection</span>
+        <span class="spacer"></span>
+        <span id="status-frame" class="mono"></span>
+      </footer>
+    </div>
+
+    <!-- Where a menu, a flyout or a dialog is put. Last in the page, so it draws over everything
+         without anything having to say so. -->
+    <div id="overlays"></div>
+  </body>
+</html>

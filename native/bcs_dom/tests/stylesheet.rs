@@ -126,3 +126,98 @@ fn a_document_paints() {
 
     assert!(opaque > 1000, "the panel covers some of the page, got {opaque}");
 }
+
+#[test]
+fn a_document_answers_a_click_on_the_element_that_was_clicked() {
+    use bcs_dom::{Button, Report};
+
+    let mut document = Interface::open(
+        r#"<html><head><style>
+             #a { width: 100px; height: 40px; }
+             #b { width: 100px; height: 40px; }
+           </style></head>
+           <body><div id="a"></div><div id="b"></div></body></html>"#,
+        400,
+        300,
+    );
+
+    let b = document.element("b").expect("the second box is there");
+
+    // Where the second box ended up, rather than a guess at where it should be: the layout engine
+    // is the authority on that, and asking it is what makes a test like this mean anything.
+    let (x, y, width, height) = document.rect(b).expect("and laid out");
+
+    document.moved(x + (width / 2.0), y + (height / 2.0));
+    document.pressed(Button::Left);
+    document.released(Button::Left);
+
+    let reports = document.drain();
+
+    assert!(
+        reports.contains(&Report::Click(b)),
+        "the click landed on the box under the pointer, got {reports:?}"
+    );
+}
+
+#[test]
+fn changing_the_document_changes_the_layout() {
+    let mut document = Interface::open(
+        r#"<html><head><style>
+             .box { width: 50px; height: 10px; }
+             .box.big { width: 200px; }
+           </style></head><body><div class="box" id="x">hello</div></body></html>"#,
+        400,
+        300,
+    );
+
+    let node = document.element("x").expect("the box is there");
+    assert_eq!(document.rect(node).unwrap().2, 50.0);
+
+    // A class written while the program runs, which is how a program says what state something is
+    // in and lets the stylesheet decide what that looks like.
+    document.set_attribute(node, "class", "box big");
+    document.resolve();
+
+    assert_eq!(document.rect(node).unwrap().2, 200.0);
+
+    document.set_text(node, "something else");
+    document.resolve();
+
+    assert_eq!(document.text(node), "something else");
+}
+
+#[test]
+fn a_panel_is_a_piece_of_markup_put_into_the_page() {
+    let mut document = Interface::open(
+        r#"<html><head><style>
+             .panel { width: 200px; height: 100px; }
+             .row { height: 20px; }
+           </style></head><body><div id="shell"></div></body></html>"#,
+        800,
+        600,
+    );
+
+    let shell = document.element("shell").expect("the shell is there");
+
+    // What used to be a document of its own, with a layer, a placement and a rebuild of every
+    // other document when it opened. It is a subtree.
+    document.set_html(
+        shell,
+        r#"<div class="panel" id="p"><div class="row" id="r">Hierarchy</div></div>"#,
+    );
+
+    document.resolve();
+
+    let panel = document.element("p").expect("the panel arrived");
+    let row = document.element("r").expect("and its row");
+
+    assert_eq!(document.rect(panel).unwrap().2, 200.0);
+    assert_eq!(document.rect(row).unwrap().3, 20.0);
+    assert_eq!(document.text(row), "Hierarchy");
+
+    // And it can be taken out again, which is what closing a panel is.
+    document.set_html(shell, "");
+    document.resolve();
+
+    assert!(document.element("p").is_none(), "the panel went away");
+}
