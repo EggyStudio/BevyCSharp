@@ -616,20 +616,33 @@ internal static unsafe partial class Native
     // CSS, read by the same engine a browser reads it with.
     // ---------------------------------------------------------------------------------------
 
-    /// <summary>Moves, presses or releases the pointer, as though a hand had.</summary>
+    // ---------------------------------------------------------------------------------------
+    // The interface.
+    //
+    // Dear ImGui runs on this side: it owns the windows, the widgets and what they are worth. All
+    // that crosses is the triangles it asked for, once a frame, and the pictures they read from.
+    // ---------------------------------------------------------------------------------------
+
+    /// <summary>Hands over this frame's triangles.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_input_pointer(float x, float y, int action, int button);
+    internal static partial int bcs_imgui_frame(NativeImGuiFrame* frame);
 
-    /// <summary>Presses or releases a key, as though a hand had.</summary>
-    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_input_key(string name, int down);
-
-    /// <summary>Rolls the wheel where the pointer is.</summary>
+    /// <summary>Takes a picture the interface draws with, and answers what to call it.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_input_wheel(float x, float y);
+    internal static partial ulong bcs_imgui_texture(byte* pixels, uint width, uint height);
+
+    /// <summary>Forgets a picture.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_imgui_drop_texture(ulong texture);
+
+    /// <summary>Gives a camera part of the window to draw into, or all of it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_viewport(
+        ulong camera, uint x, uint y, uint width, uint height);
 
     /// <summary>Throws if <paramref name="status"/> is a failure code.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
