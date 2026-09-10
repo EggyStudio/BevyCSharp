@@ -8,6 +8,7 @@
 //! Nothing in this module knows what a window or a widget is. It draws clipped, textured triangles
 //! in screen space, which is the whole of what an ImGui backend has to do.
 
+#[cfg(feature = "editor")]
 pub mod render;
 
 #[cfg(feature = "editor")]
@@ -187,8 +188,13 @@ pub unsafe extern "C" fn bcs_imgui_texture(pixels: *const u8, width: u32, height
             let pixels = unsafe { std::slice::from_raw_parts(pixels, count) }.to_vec();
 
             crate::state::with_world_opt(|world| {
+                let image = render::picture(pixels, width, height);
+                let handle = world
+                    .get_resource_mut::<bevy::asset::Assets<bevy::image::Image>>()?
+                    .add(image);
+
                 let mut pictures = world.get_resource_mut::<render::Pictures>()?;
-                Some(pictures.add(pixels, width, height))
+                Some(pictures.add(handle))
             })
             .flatten()
             .unwrap_or(0)
