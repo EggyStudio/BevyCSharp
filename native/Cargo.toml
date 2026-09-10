@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["bcs_dom", "bevy_csharp"]
+members = ["bevy_csharp"]
 
 [workspace.package]
 version = "0.1.0"
