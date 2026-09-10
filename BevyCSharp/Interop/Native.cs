@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 70;
+    internal const int ExpectedAbiVersion = 71;
 
     static Native() => NativeLoader.Initialize();
 
@@ -630,117 +630,6 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_input_wheel(float x, float y);
-
-    /// <summary>Opens the page from markup.</summary>
-    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_open(string html, string assets);
-
-    /// <summary>Takes the page down.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_close();
-
-    /// <summary>The element carrying an id, or 0.</summary>
-    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial ulong bcs_dom_element(string id);
-
-    /// <summary>The first element a selector matches, or 0.</summary>
-    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial ulong bcs_dom_select(string selector);
-
-    /// <summary>Makes an element, unattached until it is appended.</summary>
-    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial ulong bcs_dom_create(string tag);
-
-    /// <summary>Puts an element inside another, at the end.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_append(ulong parent, ulong child);
-
-    /// <summary>Takes an element out of the page.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_remove(ulong element);
-
-    /// <summary>Puts markup inside an element, replacing what was there.</summary>
-    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_set_html(ulong element, string html);
-
-    /// <summary>Writes an element's text into a buffer, returning the bytes it needs.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_get_text(ulong element, byte* buffer, int capacity);
-
-    /// <summary>Sets an element's text.</summary>
-    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_set_text(ulong element, string text);
-
-    /// <summary>Sets an attribute, which is how state reaches the stylesheet.</summary>
-    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_set_attribute(ulong element, string name, string value);
-
-    /// <summary>What holds an element, or 0.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial ulong bcs_dom_parent(ulong element);
-
-    /// <summary>Writes what an attribute says into a buffer, returning the bytes it needs.</summary>
-    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_get_attribute(
-        ulong element, string name, byte* buffer, int capacity);
-
-    /// <summary>Takes an attribute off.</summary>
-    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_clear_attribute(ulong element, string name);
-
-    /// <summary>Writes what a field holds into a buffer, returning the bytes it needs.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_get_value(ulong element, byte* buffer, int capacity);
-
-    /// <summary>Puts text into a field, replacing what was there.</summary>
-    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_set_value(ulong element, string value);
-
-    /// <summary>The box an element was laid out in: left, top, width, height.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_rect(ulong element, float* rect);
-
-    /// <summary>Gives an element the keyboard.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_focus(ulong element);
-
-    /// <summary>Takes the keyboard away from whatever holds it.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_blur();
-
-    /// <summary>Whatever holds the keyboard, or 0.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial ulong bcs_dom_focused();
-
-    /// <summary>The element at a point, or 0.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial ulong bcs_dom_hit(float x, float y);
-
-    /// <summary>Copies what the page reported since the last call.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_events(NativeDomEvent* buffer, int capacity);
 
     /// <summary>Throws if <paramref name="status"/> is a failure code.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

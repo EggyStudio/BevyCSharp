@@ -206,6 +206,57 @@ pub extern "C" fn bcs_render_set_layers(entity: u64, mask: u32) -> i32 {
     })
 }
 
+/// Gives a camera part of the window to draw into, or the whole of it.
+///
+/// What a docked panel needs: the interface takes the right of the window and the scene is told to
+/// draw into what is left, so the picture is the shape of the space rather than the shape of the
+/// window with something over it. A width or height of zero means the whole window again.
+///
+/// In physical pixels, because that is what a framebuffer is divided into.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_viewport(
+    camera: u64,
+    x: u32,
+    y: u32,
+    width: u32,
+    height: u32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, x, y, width, height);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_world(|world| {
+                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(camera))
+                else {
+                    return status::NO_ENTITY;
+                };
+
+                let Some(mut camera) = entity_mut.get_mut::<bevy::camera::Camera>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                if width == 0 || height == 0 {
+                    camera.viewport = None;
+                    return status::OK;
+                }
+
+                camera.viewport = Some(bevy::camera::Viewport {
+                    physical_position: bevy::math::UVec2::new(x, y),
+                    physical_size: bevy::math::UVec2::new(width, height),
+                    ..Default::default()
+                });
+
+                status::OK
+            })
+        }
+    })
+}
+
 /// Spawns a light and returns its entity, or `0` on a headless build.
 ///
 /// Position and aim it by writing its `Transform`; a directional or spot light shines down its
