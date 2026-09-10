@@ -95,10 +95,11 @@ public sealed class Config
     /// </summary>
     /// <remarks>
     /// <para>
-    /// What <see cref="Xui"/> needs. Off unless asked for, because it is not free to an app that
-    /// never opens a document: it brings a camera of its own and the systems that build and draw
-    /// widgets. The editor profile is a superset of the render one, so a game and the editor run
-    /// against the same library and this is what tells them apart.
+    /// What <see cref="Dom"/> needs. Off unless asked for, because it is not free to an app that
+    /// never opens a page: it brings a camera of its own, a texture the size of the window, and
+    /// the systems that lay the page out and paint it. The editor profile is a superset of the
+    /// render one, so a game and the editor run against the same library and this is what tells
+    /// them apart.
     /// </para>
     /// <para>
     /// Needs a bridge built with that profile, which <see cref="App.HasEditor"/> reports. On a

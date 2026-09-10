@@ -1406,87 +1406,73 @@ every platform.
 
 ## Interfaces, for a game and for the editor
 
-An interface is **three files**: the structure is HTML, the appearance is CSS, and a C# class says
-what is bound to what. It is the same mechanism whether the interface is a game's heads up display
-or the editor's inspector, and it is part of the library rather than part of the editor.
+An interface is **a page**: markup in HTML, appearance in CSS, and C# for what it does. It is the
+same mechanism whether the interface is a game's heads up display or the editor's details panel,
+and it is part of the library rather than part of the editor.
+
+Behind it is the stack a browser uses. [Stylo](https://github.com/servo/stylo) is the CSS engine
+Firefox ships, [Taffy](https://github.com/DioxusLabs/taffy) does the layout and
+[Parley](https://github.com/linebender/parley) the text, joined by
+[Blitz](https://github.com/DioxusLabs/blitz). So the cascade, specificity, inheritance, `@layer`,
+`:where`, nesting, custom properties, `oklch` and `color-mix` are that engine's rather than an
+approximation of them, and a stylesheet written for a browser is a stylesheet that works here.
 
 ```csharp
-[UiPanel("ui/hud.html", Root = "#hud")]
-public sealed partial class HudPanel
+// Read the two files, splice the stylesheet in, and open the page.
+Dom.Open(markup.Replace("<style id=\"theme\"></style>", $"<style id=\"theme\">{theme}</style>"));
+
+// Once a frame: what was clicked, and what to show.
+var count = Dom.Drain(reports);
+
+for (var index = 0; index < count; index++)
 {
-    [Bind("#hud-frames", Mode = BindMode.OneWay)] public string Frames { get; private set; } = "0";
-    [Bind("#hud-spin")]                           public bool Spinning = true;
-
-    [OnRefresh]           public void Read() { /* runs before the values are written out */ }
-    [OnClick("#hud-add")] public void AddCube() { /* runs when the button is clicked */ }
+    if (reports[index].Kind == DomEventKind.Click
+        && Dom.Attribute(reports[index].Target, "id") == "score-up") _score++;
 }
+
+Dom.SetText(Dom.Element("score"), _score.ToString());
 ```
 
-A game opens one and keeps it running with a `UiHost`, which is the whole of the plumbing:
+`BevyCSharp.Sample` does exactly that, in `Behaviors/Interface.cs` and `assets/ui/hud.*`. It needs
+a bridge with the interface compiled in (`build/build-native.sh --editor`) and `Config.HtmlUi`
+asked for.
 
-```csharp
-_host = new UiHost();
-_host.Show(new HudPanel());
+**One page holds the whole interface.** A panel is a piece of markup put into it with
+`Dom.SetHtml`, not a document of its own, so there is no list of open documents to order, no
+placement to compute and nothing to rebuild when something opens. Where a panel sits, what is in
+front, and what a state looks like are all the stylesheet's answers: state reaches it as an
+attribute (`data-selected="1"`), and a rule written against that attribute decides the rest.
 
-// once a frame
-_host.Tick(ctx);
-```
+The page is painted into a texture that covers the window, over whatever the scene drew. A surface
+with no background is therefore a hole the scene shows through, which is all the editor's viewport
+is. The interface spawns no camera of its own: it is an ordinary UI node, drawn by whatever camera
+the app already has.
 
-`BevyCSharp.Sample` does exactly that, in `Panels/HudPanel.cs` and `assets/ui/hud.*`. It needs a
-bridge with the interface compiled in (`build/build-native.sh --editor`) and `Config.HtmlUi` asked
-for.
+**A page reads pictures from one directory and nowhere else.** `Dom.Open(html, assets)` says which,
+and an `img` resolves against it. There is no network, and a source that climbs out with `..` is
+refused, because markup that can read any file on the machine is markup that can read a private
+key.
 
-The editor's look comes from one block of custom properties at the top of `editor.css`: six
-surfaces from the window's ground to what floats over it, a space scale, a height scale and a type
-scale. Rules name those rather than repeat numbers, so the density and the palette of the whole
-editor are a handful of values in one file. `.github/EDITOR.md` says why no CSS framework is used
-for it.
-
-The interface itself is **this project's own code**, in `native/bcs_ui`. It began as a copy of
-[`bevy_extended_ui`](https://github.com/exepta/bevy_extended_ui) under Apache 2.0, and
-`native/bcs_ui/NOTICE.md` says what was taken, what was left out and why. Owning it is what makes
-the shortcomings fixable rather than workaroundable: what a program decides about an element's
-box or its color now survives the stylesheet being applied again, a document's body is the window
-so an element can be anchored to its right or bottom edge, `align-content` is read, a rule naming
-two classes outweighs one naming either of them, and a widget that comes and goes inside a frame no
-longer ends the process.
+**Typing works, and can be tested without hands.** Keys, the pointer and the wheel reach whatever
+holds the keyboard, `Dom.GetValue` and `SetValue` read and write a field, and Enter and Escape come
+back as reports. `SyntheticInput.Type`, `Key`, `Press` and `Release` drive all of it from a test.
 
 ## The editor
 
 `BevyCSharp.Editor` runs the same way the sample does and is built on the same library, with no
 privileged path into the engine: the editor is a BevyCSharp app whose behaviors happen to draw an
-editor. Its panels are the same `[UiPanel]` classes a game writes, with a shell on top that adds
-docks, dismissal and a viewport.
+editor. Its interface is the same page a game writes.
 
 ```bash
 build/build-native.sh --editor
 dotnet run --project BevyCSharp.Editor
 ```
 
-It opens with the **world** on the left, the **tools** along the top, and nothing else. Selecting
-something opens the panel that describes it; everything else is behind the hamburger.
-
-A **panel is three files**, as above. The editor's are declared the same way, with a dock saying
-where the shell puts them:
-
-```csharp
-[UiPanel("panels/rendering.html", Root = "#rendering", Dock = UiDock.Right)]
-public sealed partial class RenderingPanel(Entity camera)
-{
-    [Bind("#bloom")]     public bool Bloom = true;
-    [Bind("#intensity")] public float Intensity = 0.3f;
-
-    [OnChange]           public void Apply() { /* runs when a value is edited */ }
-    [OnClick("#reset")]  public void Reset() { /* runs when the button is clicked */ }
-}
-```
-
-`[Bind]` ties a member to an element, two way by default and one way for a readout. `[Show]` ties
-a `bool` to whether an element is drawn, and may be written more than once on one member.
-`[OnClick]` ties a method to a click and `[Context]` to a right click. (`[Command]` is not that: it
-declares a **console** command, described below.) `[OnChange]` runs once a
-frame in which anything was edited, and `[OnRefresh]` runs once a frame before the panel's values
-are written out, which is where a panel that shows the world reads it.
+The page is `BevyCSharp.Editor/assets/ui/editor.html` and its look is
+`BevyCSharp.Editor/assets/ui/editor.css`: a toolbar, a grid of hierarchy, viewport and details, and
+a status strip. The palette is one hue and one chroma with every surface a step of lightness along
+it, written in `oklch`, so the whole editor's density and colour are a handful of custom properties
+in one file. `EditorViews` writes into the parts that change and says what a click on them means.
 
 **The menu is a table of paths.** Everything the editor can be told to do is a slash separated
 path in `EditorMenu`, and the hamburger, the add button, a right click on the world and a right
@@ -1502,26 +1488,23 @@ A game adds its own commands the same way, and they appear wherever that part of
 shown. Panels that belong along the bottom are registered as tabs, which are minimised until
 their name is clicked.
 
-**A list is a pool of elements.** A document is a file, so it cannot grow a row per entity. Both
-`[Bind]` and `[OnClick]` take a `Count`, which makes the id a prefix over numbered elements and
-the member an array, and the panel decides what each row stands for:
+**A list is markup.** A document is a file, but a list is not in it: the rows are written as
+markup when what they show changes, and an id per row is what a click lands on.
 
 ```csharp
-[Bind("#hrow", Count = 18)] public string[] Labels = new string[18];
-[Show("#hrow", Count = 18)] public bool[] Shown = new bool[18];
-
-[OnClick("#hrow", Count = 18)]
-public void Choose(int row) => EditorSelection.Select(_entities[row]);
+foreach (var entity in rows)
+{
+    markup.Append(
+        $"<div class=\"tree-item\" id=\"entity-{entity.Bits}\" data-selected=\"{picked}\">"
+        + EditorShell.Escape(name)
+        + "</div>");
+}
 ```
 
-**Where a panel sits is data, not CSS.** A stylesheet says what a panel looks like; `EditorLayout`
-holds a placement per panel and arranges them into docks: a left column, a right column, the band
-along the bottom of the viewport, the tab strip under it, and the viewport's own corners, plus
-free coordinates for anything floating. A docked panel is as tall as its contents and no taller
-than its column allows, the columns are as wide as they need and no wider than a third of the
-window, and all three edges can be dragged. Because that table is data, a layout writes to text
-and reads back, dragging a window by its handle is nothing more than writing one entry, and a
-flyout is a panel whose declaration says a press outside dismisses it.
+**Where a panel sits is CSS.** The shell is a grid, a panel is a box in it, and a flyout is markup
+in the overlay element at the end of the page, which is why it draws over everything without
+anything saying so. There is no layout table to keep, nothing to write to disk and nothing to
+arrange: a stylesheet is already a file that is kept.
 
 **Showing a component needs no reflection.** The generator emits a `ComponentSchema` for every
 `[Behavior]` struct, holding each field's name, its kind, and a pair of closures that read and
@@ -1544,12 +1527,12 @@ byte-compatible mirror written by hand.
 A field whose type is a **struct with fields of its own is taken apart**: `Front.Held.At` is a row
 called `At`, in a fold called `Held`, in one called `Front`. Writing one reads the component,
 changes that part and writes it back, so a part written does not wipe its neighbours. A vector is
-left alone, because a drawer already draws it as one thing.
+left alone, because it is drawn as one row of three numbers.
 
-The entity panel draws each field as what it is: a checkbox for a flag; a button that opens the list
-for a choice; a box for a number; three boxes across a line for a place; a patch that opens a picker
-for a color. A field says how it wants to be drawn in attributes the generator reads at compile
-time, so nothing reflects at runtime:
+The details panel draws each field as what it is: a checkbox for a flag; a button that offers the
+list for a choice; a field for a number; a bar with a readout for a number with two ends; three
+fields across a line for a place. A field says how it wants to be drawn in attributes the generator
+reads at compile time, so nothing reflects at runtime:
 
 ```csharp
 [Range(0, 1, Readout = SliderReadout.Number)] public float Weight;   // a bar, and the number
@@ -1573,14 +1556,13 @@ and an operation is recorded only when it can be reversed exactly: a field edit,
 entity. Despawning is not, because an entity's mesh and material have no mirror on this side and
 what came back would be a name with nothing to draw.
 
-The toolbar is a table too. `EditorToolbar` holds what floats in the viewport's corners, each entry
-an icon, a label, what pressing it does and whether it is the one in force, so adding a mode to the
-viewport is a line rather than a change to a panel.
+**The menu is a table of paths**, and a right click on the scene, the hamburger and a submenu are
+three views of it. `EditorToolbar` is the same idea for what sits along the top.
 
-The shipped panels are a starting point rather than the product: the world, the data panel, the
-assets, the console, the rendering settings, the information, three corner toolbars, the tabs, the
-key strip and the menu are twelve uses of one mechanism, and every one of them can be edited,
-replaced or deleted without touching the shell.
+The shipped page is a starting point rather than the product: the toolbar, the world, the viewport,
+the details panel, the status strip and the console are pieces of one document, and every one of
+them can be moved, restyled or taken out by editing `assets/ui/editor.html` and `editor.css`
+without touching a line of C#.
 [.github/EDITOR.md](.github/EDITOR.md) has the design language and what each stage delivered.
 
 ### The console

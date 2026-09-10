@@ -9,7 +9,7 @@ namespace Bevy;
 /// <para>
 /// A click on a mesh, resolved by Bevy's own picking, which raycasts the scene against the
 /// pointer. The interface is not reported here: a click that landed on a panel belongs to that
-/// panel, and arrives through <see cref="Xui.Drain"/> with the element it hit.
+/// panel, and arrives through <see cref="Dom.Drain"/> with the element it hit.
 /// </para>
 /// <para>
 /// Needs a bridge built with the editor profile, which <see cref="App.HasEditor"/> reports.

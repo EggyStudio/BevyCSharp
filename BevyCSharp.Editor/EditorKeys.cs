@@ -1,6 +1,5 @@
 using Bevy;
 using BevyCSharp.Editor.Framework;
-using BevyCSharp.Editor.Panels;
 
 namespace BevyCSharp.Editor;
 
@@ -30,7 +29,7 @@ public partial struct EditorKeys
     public static void Tools(BehaviorContext ctx)
     {
         if (!App.HasEditor) return;
-        if (!PanelBinding.Focused.IsNone) return;
+        if (Dom.Focused().Exists) return;
         if (ctx.Input.MouseDown(MouseButton.Right)) return;
 
         foreach (var (key, tool, _) in EditorTools.Keys)
@@ -70,7 +69,7 @@ public partial struct EditorKeys
     public static void Commands(BehaviorContext ctx)
     {
         if (!App.HasEditor) return;
-        if (!PanelBinding.Focused.IsNone) return;
+        if (Dom.Focused().Exists) return;
 
         var input = ctx.Input;
         var control = input.AnyKeyDown([Key.ControlLeft, Key.ControlRight]);
@@ -85,11 +84,6 @@ public partial struct EditorKeys
 
         // Where every editor keeps its settings, and one of the few key bindings people carry
         // between programs.
-        if (control && input.KeyPressed(Key.Comma))
-        {
-            EditorShell.Toggle(static () => new SettingsPanel());
-        }
-
         if (input.KeyPressed(Key.Delete)) Run(ctx, "Entity/Delete");
 
         // The menu, which is otherwise only reachable through a button on a panel that can be

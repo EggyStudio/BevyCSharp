@@ -4,8 +4,8 @@ namespace BevyCSharp.Editor.Framework;
 /// Where the editor keeps what it writes.
 /// </summary>
 /// <remarks>
-/// Beside the panels, in the asset directory, so that the world's edits and the arrangement of
-/// the windows are ordinary files: edited by hand, diffed, and shipped with everything else the
+/// Beside the page, in the asset directory, so that the world's edits and the editor's
+/// preferences are ordinary files: edited by hand, diffed, and shipped with everything else the
 /// editor is made of. A file written anywhere else would be a second kind of state with a second
 /// set of rules.
 /// </remarks>
@@ -19,9 +19,6 @@ public static class EditorPaths
 
     /// <summary>The edits made to the world.</summary>
     public static string World => Asset("world.json");
-
-    /// <summary>Where the panels are.</summary>
-    public static string Layout => Asset("layout.txt");
 
     /// <summary>Where the editor's own preferences are kept.</summary>
     public static string Settings => Asset("settings.txt");

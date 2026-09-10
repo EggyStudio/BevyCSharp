@@ -22,9 +22,14 @@ use anyrender_vello_cpu::VelloCpuImageRenderer;
 use blitz_dom::{BaseDocument, DocumentConfig, DocumentMutator, EventDriver, EventHandler};
 use blitz_html::HtmlDocument;
 use blitz_traits::events::{
-    BlitzMouseButtonEvent, DomEvent, DomEventData, EventState, MouseEventButton,
+    BlitzKeyEvent, BlitzMouseButtonEvent, DomEvent, DomEventData, EventState, MouseEventButton,
     MouseEventButtons, UiEvent,
 };
+
+// Re-exported, because a caller sending a key has to name one and there is no reason for a second
+// spelling of what a key is.
+pub use blitz_traits::events::KeyState;
+pub use keyboard_types::{Code, Key, Location, Modifiers};
 use blitz_traits::shell::{ColorScheme, Viewport};
 
 /// What a document reports back: something happened, and to which element.
@@ -41,6 +46,22 @@ pub enum Report {
 
     /// The element took the keyboard.
     Focus(usize),
+
+    /// A key was pressed while the element held the keyboard.
+    ///
+    /// Enter and Escape, which is what a field being finished with and a field being abandoned
+    /// are. Everything else a key does inside a field the document does for itself.
+    Key(usize, Ending),
+}
+
+/// How somebody finished with a field.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Ending {
+    /// Enter: what was typed is meant.
+    Accepted,
+
+    /// Escape: it is not.
+    Abandoned,
 }
 
 /// Which mouse button, in the words the engine's own input uses.
@@ -95,6 +116,11 @@ impl EventHandler for Collector<'_> {
         let report = match event.data {
             DomEventData::Click(_) => Report::Click(event.target),
             DomEventData::Input(_) => Report::Input(event.target),
+            DomEventData::KeyDown(ref key) => match key.key {
+                Key::Enter => Report::Key(event.target, Ending::Accepted),
+                Key::Escape => Report::Key(event.target, Ending::Abandoned),
+                _ => return,
+            },
             _ => return,
         };
 
@@ -102,10 +128,74 @@ impl EventHandler for Collector<'_> {
     }
 }
 
+/// What a fetch left for the document.
+type Arrived = std::sync::Arc<std::sync::Mutex<Vec<blitz_dom::net::Resource>>>;
+
+/// Reads what a page asks for out of one directory.
+///
+/// A page may read pictures, fonts and stylesheets from the assets it was opened with, and nothing
+/// else: no network, and nothing outside that directory. A document is markup somebody wrote, and
+/// markup that can read any file on the machine is markup that can read a private key.
+struct Files {
+    root: std::path::PathBuf,
+    arrived: Arrived,
+}
+
+impl blitz_traits::net::NetProvider<blitz_dom::net::Resource> for Files {
+    fn fetch(
+        &self,
+        doc_id: usize,
+        request: blitz_traits::net::Request,
+        handler: blitz_traits::net::BoxedHandler<blitz_dom::net::Resource>,
+    ) {
+        let Ok(path) = request.url.to_file_path() else {
+            return;
+        };
+
+        // Inside the assets directory, whatever the page asked for. `..` in a source would
+        // otherwise reach the rest of the disk.
+        let Ok(path) = path.canonicalize() else {
+            return;
+        };
+
+        let Ok(root) = self.root.canonicalize() else {
+            return;
+        };
+
+        if !path.starts_with(&root) {
+            return;
+        }
+
+        let Ok(bytes) = std::fs::read(&path) else {
+            return;
+        };
+
+        let waiting = self.arrived.clone();
+
+        handler.bytes(
+            doc_id,
+            blitz_traits::net::Bytes::from(bytes),
+            std::sync::Arc::new(move |_document, result| {
+                if let Ok(resource) = result
+                    && let Ok(mut waiting) = waiting.lock()
+                {
+                    waiting.push(resource);
+                }
+            }),
+        );
+    }
+}
+
 /// One open document.
 pub struct Interface {
     document: HtmlDocument,
     reports: Vec<Report>,
+
+    /// What the document asked for and got, waiting to be handed to it.
+    ///
+    /// A fetch answers on whatever thread asked, and a document may not be touched from two places
+    /// at once, so what came back is put here and taken up the next time the page is laid out.
+    arrived: Arrived,
     width: u32,
     height: u32,
     pointer: (f32, f32),
@@ -115,11 +205,48 @@ pub struct Interface {
 impl Interface {
     /// Opens a document from its markup, at a size.
     pub fn open(html: &str, width: u32, height: u32) -> Self {
+        Self::open_from(html, width, height, None)
+    }
+
+    /// Opens a document that can reach files, for the pictures in it.
+    ///
+    /// `assets` is the directory a `src` is resolved against. Without one an `<img>` is a box with
+    /// nothing in it, because the document has no way to fetch anything and no business inventing
+    /// one: what a page may read is the program's decision, not the page's.
+    pub fn open_from(html: &str, width: u32, height: u32, assets: Option<&std::path::Path>) -> Self {
+        // Made absolute, because a relative directory is not a base a URL can be built from and a
+        // page whose base is missing panics the first time it resolves a relative source.
+        let assets = assets.and_then(|root| root.canonicalize().ok());
+        let assets = assets.as_deref();
+
         // The parser is handed to the document as well as used to build it, so that markup written
         // later can be put into an element the way `innerHTML` does. That is how a panel arrives:
         // as a piece of a page rather than as a page of its own.
+        let arrived = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+
         let config = DocumentConfig {
             html_parser_provider: Some(std::sync::Arc::new(blitz_html::HtmlProvider)),
+            net_provider: assets.map(|root| -> std::sync::Arc<dyn blitz_traits::net::NetProvider<blitz_dom::net::Resource>> {
+                std::sync::Arc::new(Files {
+                    root: root.to_path_buf(),
+                    arrived: arrived.clone(),
+                })
+            }),
+            // A directory, with the trailing slash a base needs: without it the last segment is
+            // taken for a file name and every relative source resolves one level too high. There
+            // is always a base, even with no assets to read, because resolving a relative source
+            // against nothing is a panic rather than a miss.
+            base_url: Some(
+                assets
+                    .and_then(|root| url::Url::from_directory_path(root).ok())
+                    .or_else(|| {
+                        std::env::current_dir()
+                            .ok()
+                            .and_then(|here| url::Url::from_directory_path(here).ok())
+                    })
+                    .map(|url| url.to_string())
+                    .unwrap_or_else(|| "file:///".to_string()),
+            ),
             ..Default::default()
         };
 
@@ -130,6 +257,7 @@ impl Interface {
         let mut interface = Self {
             document,
             reports: Vec::new(),
+            arrived,
             width,
             height,
             pointer: (0.0, 0.0),
@@ -152,6 +280,18 @@ impl Interface {
 
     /// Restyles and lays the document out, if anything has changed since it last was.
     pub fn resolve(&mut self) {
+        // Whatever arrived since the last look, first: a picture that has just been read is part
+        // of this layout rather than of the one after it.
+        let arrived: Vec<_> = match self.arrived.lock() {
+            Ok(mut waiting) => waiting.drain(..).collect(),
+            Err(_) => Vec::new(),
+        };
+
+        for resource in arrived {
+            self.document.load_resource(resource);
+            self.dirty = true;
+        }
+
         if !self.dirty {
             return;
         }
@@ -216,12 +356,39 @@ impl Interface {
         let node = self.document.get_node(node)?;
         let layout = node.final_layout;
 
-        Some((
-            layout.location.x,
-            layout.location.y,
-            layout.size.width,
-            layout.size.height,
-        ))
+        // Where it is on the page, not where it is inside whatever holds it. A caller asking this
+        // is putting something over it, hit testing it, or drawing into it, and all three are in
+        // the page's coordinates.
+        let at = node.absolute_position(0.0, 0.0);
+
+        Some((at.x, at.y, layout.size.width, layout.size.height))
+    }
+
+    /// What a field holds, for the elements that hold text of their own.
+    ///
+    /// An `<input>` keeps its value in an editor rather than in its children, so reading its text
+    /// the way an ordinary element is read answers nothing.
+    pub fn value(&self, node: usize) -> Option<String> {
+        let element = self.document.get_node(node)?.element_data()?;
+
+        if let Some(field) = element.text_input_data() {
+            return Some(field.editor.text().to_string());
+        }
+
+        element
+            .attrs
+            .iter()
+            .find(|attribute| attribute.name == qual_name("value"))
+            .map(|attribute| attribute.value.to_string())
+    }
+
+    /// Puts text into a field, replacing what was there.
+    ///
+    /// Through the attribute rather than into the editor directly. A field's text has a layout of
+    /// its own, built with the document's fonts, and text set without building it leaves a field
+    /// that the painter reaches with nothing to draw.
+    pub fn set_value(&mut self, node: usize, value: &str) {
+        self.set_attribute(node, "value", value);
     }
 
     /// What an element says.
@@ -267,6 +434,15 @@ impl Interface {
     pub fn set_attribute(&mut self, node: usize, name: &str, value: &str) {
         let name = qual_name(name);
         self.mutate(|mutator| mutator.set_attribute(node, name, value));
+    }
+
+    /// What holds an element, or nothing for the root.
+    ///
+    /// A click lands on the innermost thing under the pointer, which for a button with a picture
+    /// in it is the picture. Walking up from there is how a document answers "what was clicked",
+    /// and it is the caller's to decide how far up to look.
+    pub fn parent(&self, node: usize) -> Option<usize> {
+        self.document.get_node(node)?.parent
     }
 
     /// What an attribute says, or nothing.
@@ -367,6 +543,45 @@ impl Interface {
     /// And came up again, which is what makes a click.
     pub fn released(&mut self, button: Button) {
         self.send(UiEvent::MouseUp(self.mouse(button)));
+    }
+
+    /// Tells the document a key went down, and what it would type.
+    ///
+    /// A key reaches whatever holds the keyboard, which is how typing into a field works and why
+    /// nothing here has to know which element that is. `text` is what the key produces, which is
+    /// the platform's answer rather than something derived from the key: a layout, a dead key and
+    /// a modifier all change it.
+    pub fn key_down(&mut self, key: Key, text: Option<&str>, modifiers: Modifiers) {
+        let event = self.key(key, text, modifiers, KeyState::Pressed);
+        self.send(UiEvent::KeyDown(event));
+    }
+
+    /// And came up again.
+    pub fn key_up(&mut self, key: Key, modifiers: Modifiers) {
+        let event = self.key(key, None, modifiers, KeyState::Released);
+        self.send(UiEvent::KeyUp(event));
+    }
+
+    /// One key event, filled in the way a browser fills one.
+    fn key(
+        &self,
+        key: Key,
+        text: Option<&str>,
+        modifiers: Modifiers,
+        state: KeyState,
+    ) -> BlitzKeyEvent {
+        BlitzKeyEvent {
+            key,
+            // The physical key, which nothing in the document reads and which cannot be worked
+            // out from a logical key without knowing the layout.
+            code: Code::Unidentified,
+            modifiers,
+            location: Location::Standard,
+            is_auto_repeating: false,
+            is_composing: false,
+            state,
+            text: text.map(smol_str::SmolStr::new),
+        }
     }
 
     /// Rolls the wheel where the pointer is.

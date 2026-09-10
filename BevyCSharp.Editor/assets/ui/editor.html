@@ -8,6 +8,8 @@
   <body>
     <div class="app">
       <header class="toolbar" id="toolbar">
+        <div class="button icon-button" id="menu"><img class="icon" src="icons/ui/menu.png" /></div>
+        <div class="divider"></div>
         <div class="button" id="tool-select" data-on="1">Select</div>
         <div class="button" id="tool-move">Move</div>
         <div class="button" id="tool-rotate">Rotate</div>
@@ -19,6 +21,9 @@
       <div class="middle">
         <aside class="panel" id="hierarchy-panel">
           <header>World</header>
+          <div class="strip">
+            <input class="field" id="search" type="text" value="" placeholder="Search" />
+          </div>
           <div class="body" id="hierarchy"></div>
         </aside>
 
@@ -37,6 +42,13 @@
         <span class="spacer"></span>
         <span id="status-frame" class="mono"></span>
       </footer>
+    </div>
+
+    <!-- The console, which drops out of the top of the window the way every game's has since
+         Quake. Hidden rather than absent, so what it holds survives being put away. -->
+    <div class="console-sheet hidden" id="console">
+      <div class="console" id="console-lines"></div>
+      <input class="console-entry" id="console-entry" type="text" value="" />
     </div>
 
     <!-- Where a menu, a flyout or a dialog is put. Last in the page, so it draws over everything

@@ -21,6 +21,9 @@ blitz-html = "0.2"
 
 # Shared types: the viewport, events, colour scheme.
 blitz-traits = "0.2"
+url = "2"
+keyboard-types = "0.7"
+smol_str = "0.2"
 
 # Turning a styled document into drawing commands, and a painter for them. The painter is the one
 # piece that will be swapped for the engine's own once the pixels are proven right.

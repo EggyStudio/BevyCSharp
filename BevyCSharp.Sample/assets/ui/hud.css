@@ -1,94 +1,74 @@
-/*
- * A game's heads up display.
- *
- * Everything here is ordinary CSS, applied to the document beside it. A game that wants a
- * different look changes this file and nothing else, and it can do it while the game is running.
- */
-.hud {
-    position: absolute;
-    right: 16px;
-    top: 16px;
-    width: 220px;
-    display: flex;
-    flex-direction: column;
-    padding: 10px 12px;
-    row-gap: 6px;
-    background-color: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 8px;
-    color: #d2d2d2;
-    pointer-events: auto;
-}
-
-.hud-title {
-    margin: 0;
-    font-size: 13px;
-    color: #eeeeee;
-    text-transform: uppercase;
-}
-
-.hud-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    min-height: 20px;
-    column-gap: 8px;
-}
-
-.hud-name {
-    margin: 0;
-    font-size: 11px;
-    color: #c4c4c4;
-}
-
-.hud-value {
-    margin: 0;
-    font-size: 11px;
-    color: #d2d2d2;
-}
-
-.hud-button {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 22px;
-    margin-top: 4px;
-    background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 4px;
-}
-
-.hud-button-text {
-    margin: 0;
-    pointer-events: none;
-    font-size: 11px;
-    color: #d2d2d2;
-}
-
-/*
- * The widgets are styled by the tokens the built-in styles are written against, so a game changes
- * four colors rather than restyling a checkbox part by part. Anything that wants more says so by
- * name: a widget's pieces have classes, and a game's rule beats the built-in one.
- */
+/* A game's interface, styled the way a page is. */
 :root {
-    --primary: #7aa2f7;
-    --primary-hover: #93b4f9;
-    --text-color: #d2d2d2;
-    --gray-background: rgba(255, 255, 255, 0.06);
+  --card: oklch(24% 0.02 265 / 78%);
+  --edge: oklch(45% 0.04 265 / 60%);
+  --text: oklch(95% 0.01 265);
+  --accent: oklch(72% 0.16 150);
 }
 
-checkbox {
-    width: auto;
-    height: 18px;
-    font-size: 11px;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-slider {
-    width: 120px;
-    height: 14px;
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: var(--text);
+
+  /* Nothing behind it, so the game shows wherever the interface does not draw. */
+  background: transparent;
+}
+
+.hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  height: 100vh;
+  padding: 16px;
+}
+
+.card {
+  min-width: 160px;
+  padding: 12px 14px;
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  background: var(--card);
+  backdrop-filter: blur(6px);
+}
+
+.label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.value {
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 8px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--accent) 30%, transparent);
+  border: 1px solid var(--accent);
+  font-size: 12px;
+}
+
+.button:hover {
+  background: color-mix(in oklab, var(--accent) 45%, transparent);
+}
+
+.corner {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.65;
 }

@@ -32,6 +32,12 @@ pub mod event_kind {
 
     /// An element took the keyboard.
     pub const FOCUS: i32 = 2;
+
+    /// Enter was pressed in a field: what was typed is meant.
+    pub const ACCEPTED: i32 = 3;
+
+    /// Escape was pressed in a field: it is not.
+    pub const ABANDONED: i32 = 4;
 }
 
 #[cfg(feature = "editor")]
@@ -39,7 +45,7 @@ pub use live::install;
 
 #[cfg(feature = "editor")]
 mod live {
-    use bcs_dom::{Button, Interface, Report};
+    use bcs_dom::{Button, Interface, Key, Modifiers, Report};
     use bevy::asset::RenderAssetUsages;
     use bevy::image::Image;
     use bevy::prelude::*;
@@ -71,7 +77,7 @@ mod live {
         app.add_systems(Startup, spawn_canvas);
         app.add_systems(
             Update,
-            (follow_window, feed_pointer, repaint)
+            (follow_window, feed_pointer, feed_keyboard, repaint)
                 .chain()
                 .after(bevy::input::InputSystems),
         );
@@ -92,17 +98,10 @@ mod live {
         let canvas = images.add(blank(width, height));
         page.canvas = canvas.clone();
 
-        // A camera of the interface's own, over whatever the scene drew, clearing nothing.
-        commands.spawn((
-            Camera2d,
-            Camera {
-                order: 2,
-                clear_color: ClearColorConfig::None,
-                ..default()
-            },
-            Msaa::Off,
-            Name::new("Interface camera"),
-        ));
+        // No camera of its own. The interface is an ordinary UI node, so it is drawn by whatever
+        // camera the app already has, over whatever that camera drew. A second camera would be a
+        // second pass over the same window, and one that clears nothing still costs the scene its
+        // colors, because the two disagree about tonemapping.
 
         // One node, the size of the window, showing the page. Everything the interface is, is
         // inside the picture: this is the only entity the engine knows about.
@@ -149,18 +148,20 @@ mod live {
         let width = window.physical_width().max(1);
         let height = window.physical_height().max(1);
 
-        let Some(image) = images.get(&page.canvas) else {
-            return;
-        };
+        let sized = images
+            .get(&page.canvas)
+            .is_some_and(|image| image.width() == width && image.height() == height);
 
-        if image.width() == width && image.height() == height {
-            return;
+        if !sized {
+            page.canvas = images.add(blank(width, height));
         }
 
-        let canvas = images.add(blank(width, height));
-        page.canvas = canvas;
-
-        if let Some(interface) = page.interface.as_mut() {
+        // The page's own size is checked separately, because a page opened before this system
+        // first ran took whatever size the canvas had then, and a canvas that is already the right
+        // size would leave it at that size for ever.
+        if let Some(interface) = page.interface.as_mut()
+            && interface.size() != (width, height)
+        {
             interface.resize(width, height);
         }
     }
@@ -215,6 +216,88 @@ mod live {
 
         let reported = interface.drain();
         page.reports.extend(reported);
+    }
+
+    /// Hands the window's keyboard to the page.
+    ///
+    /// Whatever holds the keyboard in the document is what a key reaches, so nothing here decides
+    /// which element is being typed into. What a key produces is the platform's answer, taken from
+    /// Bevy's own event rather than worked out from the key, because a layout and a dead key both
+    /// change it.
+    fn feed_keyboard(
+        mut page: NonSendMut<Page>,
+        mut typed: MessageReader<bevy::input::keyboard::KeyboardInput>,
+        keys: Res<ButtonInput<KeyCode>>,
+    ) {
+        let Some(interface) = page.interface.as_mut() else {
+            return;
+        };
+
+        let mut modifiers = Modifiers::empty();
+
+        modifiers.set(
+            Modifiers::SHIFT,
+            keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]),
+        );
+        modifiers.set(
+            Modifiers::CONTROL,
+            keys.any_pressed([KeyCode::ControlLeft, KeyCode::ControlRight]),
+        );
+        modifiers.set(
+            Modifiers::ALT,
+            keys.any_pressed([KeyCode::AltLeft, KeyCode::AltRight]),
+        );
+        modifiers.set(
+            Modifiers::META,
+            keys.any_pressed([KeyCode::SuperLeft, KeyCode::SuperRight]),
+        );
+
+        for event in typed.read() {
+            let key = named(&event.logical_key);
+
+            let text = match &event.logical_key {
+                bevy::input::keyboard::Key::Character(typed) => Some(typed.as_str()),
+                bevy::input::keyboard::Key::Space => Some(" "),
+                _ => None,
+            };
+
+            if event.state.is_pressed() {
+                interface.key_down(key, text, modifiers);
+            } else {
+                interface.key_up(key, modifiers);
+            }
+        }
+    }
+
+    /// What a key is called, in the words the document uses.
+    ///
+    /// The named keys are the ones a document acts on: moving through a field, ending an edit,
+    /// abandoning one, moving between fields. Everything else arrives as the text it produces.
+    fn named(key: &bevy::input::keyboard::Key) -> Key {
+        use bevy::input::keyboard::Key as Bevy;
+
+        match key {
+            Bevy::Character(typed) => Key::Character(typed.to_string()),
+            Bevy::Space => Key::Character(" ".to_string()),
+            Bevy::Enter => Key::Enter,
+            Bevy::Tab => Key::Tab,
+            Bevy::Escape => Key::Escape,
+            Bevy::Backspace => Key::Backspace,
+            Bevy::Delete => Key::Delete,
+            Bevy::Home => Key::Home,
+            Bevy::End => Key::End,
+            Bevy::PageUp => Key::PageUp,
+            Bevy::PageDown => Key::PageDown,
+            Bevy::ArrowLeft => Key::ArrowLeft,
+            Bevy::ArrowRight => Key::ArrowRight,
+            Bevy::ArrowUp => Key::ArrowUp,
+            Bevy::ArrowDown => Key::ArrowDown,
+            Bevy::Shift => Key::Shift,
+            Bevy::Control => Key::Control,
+            Bevy::Alt => Key::Alt,
+            Bevy::Super => Key::Meta,
+            _ => Key::Unidentified,
+        }
     }
 
     /// Lays the page out and paints it, when anything has changed.
@@ -302,16 +385,20 @@ fn ask_page<F: FnOnce(&mut bcs_dom::Interface) -> u64>(f: F) -> u64 {
 ///
 /// The whole interface is one document, so this is called once. Markup rather than a path, because
 /// the managed side knows where its assets are and because an interface a game builds at runtime
-/// never was a file.
+/// never was a file. `assets` is the directory the page's pictures are read from, and the only
+/// place it may read from at all.
 ///
 /// # Safety
-/// `html` must be a NUL-terminated UTF-8 string.
+/// `html` and `assets` must be NUL-terminated UTF-8 strings.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn bcs_dom_open(html: *const core::ffi::c_char) -> i32 {
+pub unsafe extern "C" fn bcs_dom_open(
+    html: *const core::ffi::c_char,
+    assets: *const core::ffi::c_char,
+) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "editor"))]
         {
-            let _ = html;
+            let _ = (html, assets);
             crate::interop::status::UNSUPPORTED
         }
 
@@ -320,6 +407,10 @@ pub unsafe extern "C" fn bcs_dom_open(html: *const core::ffi::c_char) -> i32 {
             let Some(html) = (unsafe { crate::interop::cstr_to_string(html) }) else {
                 return status::NULL_ARG;
             };
+
+            let assets = unsafe { crate::interop::cstr_to_string(assets) }
+                .filter(|path| !path.is_empty())
+                .map(std::path::PathBuf::from);
 
             crate::state::with_world(|world| {
                 let (width, height) = {
@@ -334,7 +425,8 @@ pub unsafe extern "C" fn bcs_dom_open(html: *const core::ffi::c_char) -> i32 {
                     }
                 };
 
-                let opened = bcs_dom::Interface::open(&html, width, height);
+                let opened =
+                    bcs_dom::Interface::open_from(&html, width, height, assets.as_deref());
 
                 let Some(mut page) = world.get_non_send_mut::<live::Page>() else {
                     return status::INVALID_STATE;
@@ -632,6 +724,27 @@ pub unsafe extern "C" fn bcs_dom_set_attribute(
     })
 }
 
+/// What holds an element, or zero.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_dom_parent(element: u64) -> u64 {
+    crate::interop::guard_with(0, || {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = element;
+            0
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            let Some(element) = node(element) else {
+                return 0;
+            };
+
+            ask_page(|page| page.parent(element).map(handle).unwrap_or(0))
+        }
+    })
+}
+
 /// What an attribute says.
 ///
 /// # Safety
@@ -704,6 +817,69 @@ pub unsafe extern "C" fn bcs_dom_clear_attribute(
 
             with_page(|page| {
                 page.clear_attribute(element, &name);
+                status::OK
+            })
+        }
+    })
+}
+
+/// What a field holds.
+///
+/// # Safety
+/// `out` must point to `capacity` writable bytes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_dom_get_value(element: u64, out: *mut u8, capacity: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (element, out, capacity);
+            crate::interop::status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            let Some(element) = node(element) else {
+                return status::NULL_ARG;
+            };
+
+            let value = crate::state::with_world_opt(|world| {
+                let page = world.get_non_send::<live::Page>()?;
+                let interface = page.interface.as_ref()?;
+                interface.value(element)
+            })
+            .flatten()
+            .unwrap_or_default();
+
+            unsafe { crate::interop::write_text(&value, out, capacity) }
+        }
+    })
+}
+
+/// Puts text into a field, replacing what was there.
+///
+/// # Safety
+/// `value` must be a NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_dom_set_value(element: u64, value: *const core::ffi::c_char) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (element, value);
+            crate::interop::status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            let Some(element) = node(element) else {
+                return status::NULL_ARG;
+            };
+
+            let Some(value) = (unsafe { crate::interop::cstr_to_string(value) }) else {
+                return status::NULL_ARG;
+            };
+
+            with_page(|page| {
+                page.set_value(element, &value);
                 status::OK
             })
         }
@@ -865,6 +1041,12 @@ pub unsafe extern "C" fn bcs_dom_events(out: *mut BcsDomEvent, capacity: i32) ->
                         bcs_dom::Report::Click(element) => (event_kind::CLICK, element),
                         bcs_dom::Report::Input(element) => (event_kind::INPUT, element),
                         bcs_dom::Report::Focus(element) => (event_kind::FOCUS, element),
+                        bcs_dom::Report::Key(element, bcs_dom::Ending::Accepted) => {
+                            (event_kind::ACCEPTED, element)
+                        }
+                        bcs_dom::Report::Key(element, bcs_dom::Ending::Abandoned) => {
+                            (event_kind::ABANDONED, element)
+                        }
                     };
 
                     unsafe {
@@ -937,6 +1119,59 @@ pub extern "C" fn bcs_input_wheel(x: f32, y: f32) -> i32 {
 
             with_page(|page| {
                 page.scroll(f64::from(x) * LINE, f64::from(y) * LINE);
+                status::OK
+            })
+        }
+    })
+}
+
+/// Presses or releases a key, as though a hand had.
+///
+/// `name` is either what the key types (`"a"`, `"7"`, `"."`) or what it is called (`"Enter"`,
+/// `"Escape"`, `"Backspace"`, `"Tab"`, `"ArrowLeft"`). What a key types is the platform's answer
+/// on a real keyboard, so a test says it rather than deriving it.
+///
+/// # Safety
+/// `name` must be a NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_input_key(name: *const core::ffi::c_char, down: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (name, down);
+            crate::interop::status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bcs_dom::{Key, Modifiers};
+
+            let Some(name) = (unsafe { crate::interop::cstr_to_string(name) }) else {
+                return status::NULL_ARG;
+            };
+
+            let (key, text) = match name.as_str() {
+                "Enter" => (Key::Enter, None),
+                "Escape" => (Key::Escape, None),
+                "Tab" => (Key::Tab, None),
+                "Backspace" => (Key::Backspace, None),
+                "Delete" => (Key::Delete, None),
+                "Home" => (Key::Home, None),
+                "End" => (Key::End, None),
+                "ArrowLeft" => (Key::ArrowLeft, None),
+                "ArrowRight" => (Key::ArrowRight, None),
+                "ArrowUp" => (Key::ArrowUp, None),
+                "ArrowDown" => (Key::ArrowDown, None),
+                typed => (Key::Character(typed.to_string()), Some(typed.to_string())),
+            };
+
+            with_page(|page| {
+                if down != 0 {
+                    page.key_down(key, text.as_deref(), Modifiers::empty());
+                } else {
+                    page.key_up(key, Modifiers::empty());
+                }
+
                 status::OK
             })
         }

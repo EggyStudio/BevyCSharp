@@ -621,6 +621,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_input_pointer(float x, float y, int action, int button);
 
+    /// <summary>Presses or releases a key, as though a hand had.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_input_key(string name, int down);
+
     /// <summary>Rolls the wheel where the pointer is.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -629,7 +634,7 @@ internal static unsafe partial class Native
     /// <summary>Opens the page from markup.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_dom_open(string html);
+    internal static partial int bcs_dom_open(string html, string assets);
 
     /// <summary>Takes the page down.</summary>
     [LibraryImport(Library)]
@@ -681,6 +686,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_dom_set_attribute(ulong element, string name, string value);
 
+    /// <summary>What holds an element, or 0.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial ulong bcs_dom_parent(ulong element);
+
     /// <summary>Writes what an attribute says into a buffer, returning the bytes it needs.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -691,6 +701,16 @@ internal static unsafe partial class Native
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_dom_clear_attribute(ulong element, string name);
+
+    /// <summary>Writes what a field holds into a buffer, returning the bytes it needs.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_dom_get_value(ulong element, byte* buffer, int capacity);
+
+    /// <summary>Puts text into a field, replacing what was there.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_dom_set_value(ulong element, string value);
 
     /// <summary>The box an element was laid out in: left, top, width, height.</summary>
     [LibraryImport(Library)]

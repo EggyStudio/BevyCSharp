@@ -443,6 +443,9 @@ dependencies = [
  "blitz-html",
  "blitz-paint",
  "blitz-traits",
+ "keyboard-types",
+ "smol_str",
+ "url",
 ]
 
 [[package]]

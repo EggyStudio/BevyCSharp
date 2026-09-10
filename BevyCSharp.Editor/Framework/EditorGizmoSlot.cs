@@ -21,7 +21,7 @@ namespace BevyCSharp.Editor.Framework;
 public static class EditorGizmoSlot
 {
     /// <summary>Where the square is, or a zero-width rect when there is none.</summary>
-    public static UiRect Rect { get; private set; }
+    public static Rect Rect { get; private set; }
 
     /// <summary>The frame the square was last reported on.</summary>
     private static ulong _said;
@@ -34,26 +34,26 @@ public static class EditorGizmoSlot
     /// stops it being reported, and a couple of frames later the cross is back in the corner
     /// without anything having to tell it so.
     /// </remarks>
-    public static bool Known => Rect.Width > 1f && UiWindow.Frame - _said < 4;
+    public static bool Known => Rect.Width > 1f && EditorShell.Frame - _said < 4;
 
     /// <summary>The middle of the square, which is what the cross is drawn at.</summary>
     public static (float X, float Y) Centre =>
-        (Rect.X + (Rect.Width * 0.5f), Rect.Y + (Rect.Height * 0.5f));
+        (Rect.Left + (Rect.Width * 0.5f), Rect.Top + (Rect.Height * 0.5f));
 
     /// <summary>How wide the square is, which is how big the cross should be drawn.</summary>
     public static float Size => Rect.Width;
 
     /// <summary>Says where the reserved square ended up.</summary>
-    public static void Report(Entity element)
+    public static void Report(Element element)
     {
-        if (element.IsNone || !Xui.TryRect(element, out var rect))
+        if (!element.Exists || !Dom.TryRect(element, out var rect))
         {
             Forget();
             return;
         }
 
         Rect = rect;
-        _said = UiWindow.Frame;
+        _said = EditorShell.Frame;
     }
 
     /// <summary>Says there is nowhere to draw, which puts the cross back in the corner.</summary>

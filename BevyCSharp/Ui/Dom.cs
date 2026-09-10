@@ -14,6 +14,12 @@ public enum DomEventKind
 
     /// <summary>An element took the keyboard.</summary>
     Focus = 2,
+
+    /// <summary>Enter was pressed in a field: what was typed is meant.</summary>
+    Accepted = 3,
+
+    /// <summary>Escape was pressed in a field: it is not.</summary>
+    Abandoned = 4,
 }
 
 /// <summary>One element of the page.</summary>
@@ -38,6 +44,12 @@ public readonly record struct Element(ulong Value)
 /// <param name="Height">How tall the box is.</param>
 public readonly record struct Rect(float Left, float Top, float Width, float Height)
 {
+    /// <summary>The right edge.</summary>
+    public float Right => Left + Width;
+
+    /// <summary>The bottom edge.</summary>
+    public float Bottom => Top + Height;
+
     /// <summary>Whether a point is inside the box.</summary>
     public bool Contains(float x, float y) =>
         x >= Left && y >= Top && x < Left + Width && y < Top + Height;
@@ -68,13 +80,22 @@ public static unsafe class Dom
 {
     /// <summary>Opens the page from markup.</summary>
     /// <remarks>
+    /// <para>
     /// Markup rather than a path, because the caller knows where its assets live and because an
     /// interface a game builds at runtime never was a file.
+    /// </para>
+    /// <para>
+    /// <paramref name="assets"/> is the directory the page's pictures are read from, and the only
+    /// place it may read from at all. Without one an <c>img</c> is a box with nothing in it: what
+    /// a page may read is the program's decision rather than the page's.
+    /// </para>
     /// </remarks>
-    public static void Open(string html)
+    public static void Open(string html, string assets = "")
     {
         ArgumentNullException.ThrowIfNull(html);
-        Native.Check(Native.bcs_dom_open(html), nameof(Native.bcs_dom_open));
+        ArgumentNullException.ThrowIfNull(assets);
+
+        Native.Check(Native.bcs_dom_open(html, assets), nameof(Native.bcs_dom_open));
     }
 
     /// <summary>Takes the page down.</summary>
@@ -176,6 +197,32 @@ public static unsafe class Dom
         SetClass(element, string.Join(' ', parts));
     }
 
+    /// <summary>What holds an element.</summary>
+    public static Element Parent(Element element) => new(Native.bcs_dom_parent(element.Value));
+
+    /// <summary>
+    /// The nearest element from here up that carries an id, and what that id is.
+    /// </summary>
+    /// <remarks>
+    /// A click lands on the innermost thing under the pointer, which for a button with a picture
+    /// in it is the picture and for a row with an icon is the icon. What was clicked, as a person
+    /// means it, is the nearest thing above that somebody gave a name to.
+    /// </remarks>
+    public static string ClosestId(Element element)
+    {
+        // Bounded, because a document can be deep and a walk with no end is a frame that never
+        // finishes if anything ever goes wrong with the tree.
+        for (var step = 0; step < 64 && element.Exists; step++)
+        {
+            var id = Attribute(element, "id");
+            if (id.Length > 0) return id;
+
+            element = Parent(element);
+        }
+
+        return string.Empty;
+    }
+
     /// <summary>What an attribute says, or the empty string.</summary>
     /// <remarks>
     /// Read back out of the page rather than remembered here, so that markup replaced wholesale
@@ -188,6 +235,23 @@ public static unsafe class Dom
         return Native.ReadText(
             (buffer, capacity) => Native.bcs_dom_get_attribute(element.Value, name, buffer, capacity),
             nameof(Native.bcs_dom_get_attribute));
+    }
+
+    /// <summary>What a field holds.</summary>
+    /// <remarks>
+    /// A field keeps its value in an editor of its own rather than in its children, so reading it
+    /// the way an ordinary element is read answers nothing.
+    /// </remarks>
+    public static string GetValue(Element element) =>
+        Native.ReadText(
+            (buffer, capacity) => Native.bcs_dom_get_value(element.Value, buffer, capacity),
+            nameof(Native.bcs_dom_get_value));
+
+    /// <summary>Puts text into a field, replacing what was there.</summary>
+    public static void SetValue(Element element, string value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        Native.Check(Native.bcs_dom_set_value(element.Value, value), nameof(Native.bcs_dom_set_value));
     }
 
     /// <summary>The box an element was laid out in.</summary>

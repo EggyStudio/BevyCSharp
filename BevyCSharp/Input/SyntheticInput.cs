@@ -61,6 +61,31 @@ public static class SyntheticInput
         Native.bcs_input_wheel(sideways, lines),
         $"rolling the wheel by {lines}");
 
+    /// <summary>
+    /// Presses and releases a key, as though a hand had.
+    /// </summary>
+    /// <remarks>
+    /// <paramref name="name"/> is either what the key types (<c>"a"</c>, <c>"7"</c>) or what it is
+    /// called (<c>"Enter"</c>, <c>"Escape"</c>, <c>"Backspace"</c>, <c>"ArrowLeft"</c>). It reaches
+    /// whatever holds the keyboard, which is how a test types into a field.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">There is no window.</exception>
+    public static void Key(string name)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+
+        Native.Check(Native.bcs_input_key(name, 1), $"pressing {name}");
+        Native.Check(Native.bcs_input_key(name, 0), $"releasing {name}");
+    }
+
+    /// <summary>Types a run of characters, one key at a time.</summary>
+    public static void Type(string text)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+
+        foreach (var character in text) Key(character.ToString());
+    }
+
     /// <summary>Moves, presses or releases the pointer.</summary>
     /// <exception cref="BevyNativeException">There is no window.</exception>
     public static void Send(

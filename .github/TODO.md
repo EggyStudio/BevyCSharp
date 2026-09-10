@@ -320,32 +320,28 @@ Points to get right:
 
 ## The interface
 
-`native/bcs_ui` is the interface the panels are drawn with: documents in HTML, stylesheets in CSS,
-and the widgets between them. It is this project's own copy of `bevy_extended_ui`, taken under
-Apache 2.0, with `NOTICE.md` saying what was taken and what was left out.
+`native/bcs_dom` is the interface: one HTML document through
+[Blitz](https://github.com/DioxusLabs/blitz), which is Stylo for CSS, Taffy for layout and Parley
+for text. `bcs_dom_*` is a document interface, and `BevyCSharp/Ui/Dom.cs` is the same interface in
+C#. It replaced a hand-rolled interface of this project's own, along with every workaround that one
+needed.
 
 What is left:
 
-- **A menu's background does not cover the pictures of the panel under it.** Asking where each
-  element sits in the drawing order (`bcs_xui_stack`) says the menu is later than the toolbar, and
-  the toolbar's icons and borders paint over it anyway. The editor works around it by stepping
-  menus out from under panels. The next thing to try is a small Bevy app with two documents and
-  nothing else, which would say whether this is the interface's doing or the engine's.
-- **A value written to a widget before its own text child exists is not drawn.** The bridge keeps
-  every first write for four frames and applies it again, which works and costs four writes. Now
-  that the widgets are ours, the widget could seed its text child from what it holds instead.
-- **A backdrop blur works, and what it samples is captured after the panels drawn before it.** One
-  blurred panel looks right, which the sample's own panel shows. Several of them blur each other,
-  which is occasionally what somebody wants and usually not; capturing the screen once, before any
-  panel is drawn, would settle it.
-- **The parts that were left out are still in the source**, behind feature names that are no longer
-  declared: the translation, dialog, provider and vector image features, and the plugin half of the
-  component framework. They are dead code that reads as live code. Deleting them is not the tidy it
-  looks: the framework module also holds the binding store the documents use, so the branches have
-  to be unpicked one at a time rather than by deleting a directory.
-- **A game's interface is a `UiHost` and its panels**, which is enough for a heads up display and
-  a menu. What it has no answer for yet is a game that wants the editor's docks: those live in the
-  editor's shell, and a game wanting a docked tool window would have to write its own.
+- **The page is painted on the CPU.** `anyrender_vello_cpu` draws it into a texture that is handed
+  to Bevy each frame it changed. That is the right first answer, because it works everywhere and
+  because a page that has not changed costs nothing, but a GPU renderer through `anyrender_vello`
+  is the one to move to when the interface is animating rather than sitting still.
+- **IME is not forwarded.** Keys, the pointer and the wheel are, so a field can be typed into and a
+  list scrolls; composing a character in Japanese or Korean is what is missing. Blitz takes an
+  `Ime` event and nothing sends one yet.
+- **Tailwind is a build step away.** The stylesheet the engine reads is CSS, and Tailwind's output
+  is CSS, so pointing it at this needs a Node build producing a file rather than anything in the
+  engine. Whether the editor's own stylesheet should be written that way is a separate question
+  from whether a game can.
+- **There is no script engine.** Blitz has none, which is why a React component library cannot run
+  here. `rquickjs` bound to this document would make a page scriptable; it would still not make it
+  a browser.
 
 ## The editor
 
@@ -384,21 +380,6 @@ What is left:
   selection comes back. All of them or none: half a selection coming back is worse than none, since
   an edit meant for three things would reach two without saying so. Two entities that share a name
   still resolve to the first.
-- **Rows are styled while they run.** `bcs_xui_set_class` gives an element a class while the editor
-  runs: a selected row wears a background, a log line wears its level, a tile says whether its
-  picture is the file or a stand-in for it. Hover turned out to need none of that, since the
-  stylesheet can ask for `:hover` and the interface already tracks it, so it costs nothing per
-  frame. What is still not reachable is a pressed state, which the interface tracks and no selector
-  names.
-- **The interface is this project's own code now**, in `native/bcs_ui`, copied from
-  `bevy_extended_ui` under Apache 2.0 with `NOTICE.md` beside it saying so. Five of the nine things
-  a fork was going to buy back are bought: what a program decides about an element's box survives
-  the stylesheet being applied again, so hiding, placing and sizing a panel no longer fight it; a
-  command that fails no longer ends the process; `align-content` and `align-self` are read; and two
-  of the nine turned out not to be true at all, since a rule naming two classes matches and three
-  inputs in a row all draw. What is left is a menu whose background the pictures of the panel under
-  it paint over, a value written before a widget's text child exists, and a backdrop blur drawn
-  over an element's own background rather than under it.
 - **One shape per call.** Every gizmo crosses the ABI on its own, and the fading grid asks for two
   hundred and forty of them a frame, about four percent of one. Fine at this size and the wrong
   shape at ten times it: a batched entry point taking an array would make the cost of a wireframe or

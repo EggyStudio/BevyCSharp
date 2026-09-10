@@ -1,16 +1,15 @@
 using Bevy;
-using BevyCSharp.Sample.Panels;
 
 namespace BevyCSharp.Sample.Behaviors;
 
 /// <summary>
-/// Opens the game's own interface and keeps it running.
+/// The game's own interface, which is a page.
 /// </summary>
 /// <remarks>
 /// <para>
-/// The whole of what a game has to write to have an interface built from documents and
-/// stylesheets: make a host, show a panel, and tick the host once a frame. Everything else is in
-/// the three files the panel is made of.
+/// The whole of what a game writes to have one: read the markup and the stylesheet, open them, and
+/// write into the parts that change. There is no panel type, no binding declaration and no
+/// generator: an element has an id, and an id is what is written to.
 /// </para>
 /// <para>
 /// It needs a bridge with the interface compiled in (<c>build/build-native.sh --editor</c>) and
@@ -20,26 +19,56 @@ namespace BevyCSharp.Sample.Behaviors;
 [Behavior]
 public partial struct Interface
 {
-    /// <summary>The host, kept for the life of the program.</summary>
-    private static UiHost? _host;
+    private static readonly DomEvent[] Reports = new DomEvent[16];
 
-    /// <summary>Opens the panel once the interface is up.</summary>
+    private static bool _open;
+    private static int _score;
+
+    /// <summary>Opens the page once the engine is up.</summary>
     [OnStartup]
     public static void Open(BehaviorContext ctx)
     {
         if (!App.HasEditor)
         {
             Console.WriteLine(
-                "[sample] this bridge has no interface compiled in, so the panel is not opened."
+                "[sample] this bridge has no interface compiled in, so the page is not opened."
                 + " Rebuild it with build/build-native.sh --editor.");
             return;
         }
 
-        _host = new UiHost();
-        _host.Show(new HudPanel());
+        var assets = Path.Combine(AppContext.BaseDirectory, "assets");
+        var ui = Path.Combine(assets, "ui");
+
+        var markup = File.ReadAllText(Path.Combine(ui, "hud.html"));
+        var theme = File.ReadAllText(Path.Combine(ui, "hud.css"));
+
+        // Spliced rather than linked, so the stylesheet is one file on disk and one read here.
+        Dom.Open(
+            markup.Replace("<style id=\"theme\"></style>", $"<style id=\"theme\">{theme}</style>"),
+            assets);
+
+        _open = true;
     }
 
-    /// <summary>Does the interface's frame: what was clicked, what changed, what to draw.</summary>
+    /// <summary>Says what happened and shows what changed.</summary>
     [OnUpdate]
-    public static void Tick(BehaviorContext ctx) => _host?.Tick(ctx);
+    public static void Tick(BehaviorContext ctx)
+    {
+        if (!_open) return;
+
+        var count = Dom.Drain(Reports);
+
+        for (var index = 0; index < count; index++)
+        {
+            if (Reports[index].Kind != DomEventKind.Click) continue;
+
+            if (Dom.ClosestId(Reports[index].Target) == "score-up") _score++;
+        }
+
+        var score = Dom.Element("score");
+        if (score.Exists) Dom.SetText(score, _score.ToString());
+
+        var rate = Dom.Element("rate");
+        if (rate.Exists) Dom.SetText(rate, $"{1f / MathF.Max(ctx.Time.Delta, 0.0001f):0} fps");
+    }
 }

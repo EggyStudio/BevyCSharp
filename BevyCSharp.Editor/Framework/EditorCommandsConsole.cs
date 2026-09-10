@@ -112,17 +112,6 @@ internal static class EditorConsoleCommands
         return "redone";
     }
 
-    /// <summary>Says what is on screen.</summary>
-    [Command("panels", "Lists the panels that are open")]
-    internal static string OpenPanels()
-    {
-        var names = EditorShell.Open
-            .Where(EditorShell.IsShowing)
-            .Select(panel => panel.GetType().Name);
-
-        var listed = string.Join(", ", names);
-        return listed.Length == 0 ? "none" : listed;
-    }
 
     /// <summary>Closes the editor.</summary>
     [Command("quit", "Closes the editor")]

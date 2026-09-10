@@ -1,7 +1,6 @@
 using Bevy;
 using BevyCSharp.Editor.Behaviors;
 using BevyCSharp.Editor.Framework;
-using BevyCSharp.Editor.Panels;
 
 namespace BevyCSharp.Editor;
 
@@ -31,29 +30,18 @@ public partial struct EditorBoot
         EditorSelection.Camera = camera;
         EditorCommands.Register(camera);
 
-        // Tabs are minimised panels. The asset browser is the one an editor wants at hand and not
-        // on screen, which is what a tab is for.
-        EditorTabs.Add("Assets", static () => new AssetsPanel());
-        EditorTabs.Add("Console", static () => new ConsolePanel());
-
-        // Only the world, the tools, the tabs and the key strip. Everything else appears because
-        // something was selected or something was asked for, which is the difference between an
-        // editor that starts with work in front of it and one that starts with its own furniture.
-        EditorShell.Show(new WorldPanel());
-        EditorShell.Show(new LeftBarPanel());
-        EditorShell.Show(new CentreBarPanel());
-        EditorShell.Show(new RightBarPanel());
-        EditorShell.Show(new BottomBarPanel());
-        EditorShell.Show(new TabsPanel());
-        EditorShell.Show(new KeysPanel());
+        // The whole editor is one page. What it looks like and where its parts sit is the
+        // stylesheet's, so opening it is reading two files.
+        EditorShell.Load(EditorPaths.Assets);
+        EditorViews.Install();
 
         EditorProject.RestoreLayout();
 
         // A right click on nothing offers what can be spawned, which is what a right click on an
         // empty scene means everywhere else.
-        EditorShell.ViewportMenu = static (x, y) => EditorShell.ShowMenu("Spawn", x, y, "Spawn");
+        EditorShell.ViewportMenu = static (x, y) => EditorShell.ShowMenu("Spawn", x, y);
 
-        Console.WriteLine($"[editor] {EditorShell.Open.Count} panels open");
+        Console.WriteLine("[editor] the page is open");
 
         if (Host is { } app) EditorScripts.Start(app);
     }
@@ -99,37 +87,6 @@ public partial struct EditorBoot
     public static void ReloadScripts(BehaviorContext ctx) => EditorScripts.Poll();
 
     /// <summary>
-    /// Shows the panel that describes the selection while there is one, and puts it away when
-    /// there is not.
-    /// </summary>
-    /// <remarks>
-    /// The editor starts with the world and nothing else. Picking something (an entity or a file,
-    /// the panel answers for both) is the moment its details become worth the room, and letting go
-    /// of it is the moment they stop being. Put away rather than closed, so the document is loaded
-    /// once and the rest of the screen is undisturbed by any of it.
-    /// </remarks>
-    [OnUpdate]
-    public static void FollowSelection(BehaviorContext ctx)
-    {
-        var wanted = EditorSelection.Any || EditorAssets.Selected is not null;
-
-        // Compared against what is actually on screen rather than against what this did last time.
-        // A remembered answer goes stale the moment anything else shows or hides the panel (the
-        // menu row that toggles it, a rebuild, a person closing it), and once it is stale the
-        // panel never appears again, because as far as this is concerned it already has.
-        var panel = EditorShell.Find<DataPanel>();
-        if (wanted == (panel is not null && EditorShell.IsShowing(panel))) return;
-
-        if (!wanted)
-        {
-            if (panel is not null) EditorShell.Conceal(panel);
-            return;
-        }
-
-        EditorShell.Reveal(panel ?? EditorShell.Show(new DataPanel()));
-    }
-
-    /// <summary>
     /// Hands the interface's reports to the panels, once a frame.
     /// </summary>
     /// <remarks>
@@ -146,6 +103,8 @@ public partial struct EditorBoot
         ConsoleLog.Frame = ctx.Time.FrameCount;
 
         EditorShell.Tick(ctx);
+        EditorViews.Draw(ctx);
+        ConsolePage.Draw();
     }
 
     /// <summary>
@@ -174,14 +133,7 @@ public partial struct EditorBoot
     }
 
     /// <summary>
-    /// Closes on Escape, unless something is being typed into.
-    /// </summary>
-    /// <remarks>
-    /// A person clearing a value field and changing their mind reaches for Escape, and an editor
-    /// that quits at that point has thrown away more than the edit.
-    /// </remarks>
-    /// <summary>
-    /// Drops the console into the middle of the window, or puts it away.
+    /// Drops the console into the window, or puts it away.
     /// </summary>
     /// <remarks>
     /// The key under Escape, which is where every game has put this since Quake. It works while
@@ -191,9 +143,16 @@ public partial struct EditorBoot
     [OnUpdate]
     public static void ConsoleOnBackquote(BehaviorContext ctx)
     {
-        if (ctx.Input.KeyPressed(Key.Backquote)) Panels.QuickConsolePanel.Toggle();
+        if (ctx.Input.KeyPressed(Key.Backquote)) ConsolePage.Toggle();
     }
 
+    /// <summary>
+    /// Closes on Escape, unless something is being typed into.
+    /// </summary>
+    /// <remarks>
+    /// A person clearing a value field and changing their mind reaches for Escape, and an editor
+    /// that quits at that point has thrown away more than the edit.
+    /// </remarks>
     [OnUpdate]
     public static void QuitOnEscape(BehaviorContext ctx)
     {
@@ -201,17 +160,23 @@ public partial struct EditorBoot
 
         // The console it opened is the first thing Escape closes, since it is the thing most
         // recently put in the way and the one holding the keyboard.
-        if (Panels.QuickConsolePanel.IsOpen)
+        if (ConsolePage.IsOpen)
         {
-            Panels.QuickConsolePanel.Toggle();
+            ConsolePage.Toggle();
             return;
         }
 
-        if (!PanelBinding.Focused.IsNone) return;
+        // Whatever holds the keyboard keeps Escape, because what is usually being typed into is a
+        // value somebody is in the middle of changing their mind about.
+        if (Dom.Focused().Exists)
+        {
+            Dom.Blur();
+            return;
+        }
 
-        // Escape closes what is open before it closes the program. A settings sheet takes the whole
-        // window, and quitting because somebody reached for the key that shuts every other window
-        // they have ever used is not a defensible thing for a tool to do.
+        // Escape closes what is open before it closes the program. Quitting because somebody
+        // reached for the key that shuts every other window they have ever used is not a
+        // defensible thing for a tool to do.
         if (EditorShell.Dismiss()) return;
 
         ctx.Exit();

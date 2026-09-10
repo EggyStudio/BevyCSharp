@@ -1,16 +1,31 @@
-//! What a real style system makes of the editor's own stylesheet.
+//! What the editor's own stylesheet lays out.
 //!
-//! The point of these is not that Stylo works: it styles Firefox. It is that the editor's markup
-//! and stylesheet, written against a hand-rolled subset of CSS, are ordinary CSS that a real
-//! engine reads the same way, and that the things the old reader could not do now happen.
+//! The point of these is not that Stylo works: it styles Firefox. It is that the editor's page is
+//! ordinary markup and ordinary CSS, that the shell it describes measures the way it reads, and
+//! that everything a modern stylesheet is written with works here.
 
 use bcs_dom::Interface;
 
 /// The editor's stylesheet, read from the assets it ships with.
 fn editor_css() -> String {
-    std::fs::read_to_string("../../BevyCSharp.Editor/assets/panels/editor.css")
-        .expect("the editor's stylesheet is where it has always been")
+    std::fs::read_to_string("../../BevyCSharp.Editor/assets/ui/editor.css")
+        .expect("the editor's stylesheet ships with the editor")
 }
+
+/// The editor's shell, as the page ships it.
+const SHELL: &str = r#"
+    <div class="app">
+      <header class="toolbar" id="toolbar"></header>
+      <div class="middle">
+        <aside class="panel" id="hierarchy-panel"><header>World</header>
+          <div class="body" id="hierarchy"></div></aside>
+        <section class="viewport" id="viewport"></section>
+        <aside class="panel" id="inspector-panel"><header>Details</header>
+          <div class="body" id="inspector"></div></aside>
+      </div>
+      <footer class="status" id="status"></footer>
+    </div>
+"#;
 
 /// A document using the editor's own classes.
 fn page(body: &str) -> String {
@@ -22,47 +37,38 @@ fn page(body: &str) -> String {
 }
 
 #[test]
-fn the_editors_stylesheet_lays_a_panel_out() {
-    let document = Interface::open(
-        &page(r#"<div class="column" id="panel"><p class="title" id="t">World</p></div>"#),
-        1600,
-        900,
-    );
+fn the_editors_stylesheet_lays_the_shell_out() {
+    let document = Interface::open(&page(SHELL), 1600, 900);
 
-    let panel = document.element("panel").expect("the panel is in the document");
-    let (_, _, width, _) = document.rect(panel).expect("and it was laid out");
+    let box_of = |id: &str| {
+        let node = document.element(id).expect("the part is in the page");
+        document.rect(node).expect("and it was laid out")
+    };
 
-    // Three hundred, and then the padding and the borders on top of it, because that is what a
-    // width means in CSS: the box is the content, and what surrounds it is extra.
-    //
-    // The old engine measured the other way round, since the interface it drew into takes a width
-    // as the whole box. Every rule in this stylesheet was written against that, which is the first
-    // thing a real style system finds. What fixes it is one line saying `box-sizing: border-box`,
-    // which is the same line every stylesheet on the web starts with and the first thing in
-    // Tailwind's own reset.
-    assert!(
-        (width - 318.0).abs() < 1.0,
-        "a column is its width plus its padding and border, got {width}"
-    );
+    let (_, _, hierarchy, _) = box_of("hierarchy-panel");
+    let (left, _, viewport, _) = box_of("viewport");
+    let (_, _, inspector, _) = box_of("inspector-panel");
+
+    // The two panels are the widths the stylesheet gives them and the viewport is the rest, which
+    // is what a grid of `260px 1fr 320px` means. Nothing worked any of that out on the way in.
+    assert_eq!(hierarchy, 260.0);
+    assert_eq!(inspector, 320.0);
+    assert_eq!(viewport, 1600.0 - 260.0 - 320.0);
+    assert_eq!(left, 260.0);
 }
 
 #[test]
-fn one_line_puts_the_old_measurements_back() {
-    let markup = format!(
-        "<html><head><style>* {{ box-sizing: border-box; }}{}</style></head>{}</html>",
-        editor_css(),
-        r#"<body><div class="column" id="panel"></div></body>"#
-    );
+fn the_viewport_is_a_hole_the_scene_shows_through() {
+    let document = Interface::open(&page(SHELL), 1600, 900);
 
-    let document = Interface::open(&markup, 1600, 900);
+    let (_, top, _, height) = {
+        let node = document.element("viewport").expect("the viewport is in the page");
+        document.rect(node).expect("and it was laid out")
+    };
 
-    let panel = document.element("panel").expect("the panel is in the document");
-    let (_, _, width, _) = document.rect(panel).expect("and it was laid out");
-
-    assert!(
-        (width - 300.0).abs() < 1.0,
-        "with border-box the width is the whole box again, got {width}"
-    );
+    // Between the toolbar and the status strip, both of which are as tall as the stylesheet says.
+    assert_eq!(top, 34.0);
+    assert_eq!(height, 900.0 - 34.0 - 22.0);
 }
 
 #[test]
@@ -112,11 +118,7 @@ fn the_rules_the_old_reader_could_not_match_now_apply() {
 
 #[test]
 fn a_document_paints() {
-    let document = Interface::open(
-        &page(r#"<div class="column" id="panel"><p class="title">World</p></div>"#),
-        320,
-        200,
-    );
+    let document = Interface::open(&page(SHELL), 320, 200);
 
     let mut pixels = vec![0u8; document.pixels()];
     document.paint(&mut pixels);
@@ -220,4 +222,132 @@ fn a_panel_is_a_piece_of_markup_put_into_the_page() {
     document.resolve();
 
     assert!(document.element("p").is_none(), "the panel went away");
+}
+
+#[test]
+fn a_field_holds_what_was_typed_into_it() {
+    let mut document = Interface::open(
+        r#"<html><body><input id="name" type="text" value="Cube" /></body></html>"#,
+        400,
+        200,
+    );
+
+    let field = document.element("name").expect("the field is there");
+
+    // A field keeps its value in an editor of its own rather than in its children, so reading it
+    // the way an ordinary element is read answers nothing.
+    assert_eq!(document.value(field).as_deref(), Some("Cube"));
+
+    document.set_value(field, "Crate");
+    document.resolve();
+
+    assert_eq!(document.value(field).as_deref(), Some("Crate"));
+
+    // And it can be drawn afterwards. A field's text has a layout of its own, and text put into it
+    // without building that layout leaves the painter with nothing to draw and no way to say so.
+    let mut pixels = vec![0u8; document.pixels()];
+    document.paint(&mut pixels);
+}
+
+#[test]
+fn a_field_that_was_hidden_draws_when_it_is_shown() {
+    // What the console does: it is in the page all along, out of the way, and a key brings it in.
+    let mut document = Interface::open(
+        r#"<html><head><style>
+             .hidden { display: none; }
+             .sheet { position: absolute; top: 0; left: 0; right: 0; height: 45vh; }
+             #entry { height: 26px; font-family: var(--mono); font-size: 12px; }
+             :root { --mono: "DejaVu Sans Mono", ui-monospace, monospace; }
+           </style></head>
+           <body><div class="sheet hidden" id="sheet">
+             <div id="lines"></div>
+             <input id="entry" type="text" />
+           </div></body></html>"#,
+        400,
+        200,
+    );
+
+    let sheet = document.element("sheet").expect("the sheet is there");
+    let entry = document.element("entry").expect("the field came with it");
+
+    document.set_attribute(sheet, "class", "sheet");
+
+    // Focused as it appears, which is what a console does: it is no use if it has to be clicked
+    // before it can be typed in. A focused field draws a caret, and a caret needs the layout that
+    // a field which was never on screen has not built.
+    document.focus(entry);
+    document.resolve();
+
+    let mut pixels = vec![0u8; document.pixels()];
+    document.paint(&mut pixels);
+
+    assert_eq!(document.value(entry).as_deref(), Some(" "));
+}
+
+#[test]
+fn a_page_reads_pictures_only_from_the_assets_it_was_opened_with() {
+    let assets = std::path::Path::new("../../BevyCSharp.Editor/assets");
+
+    let mut document = Interface::open_from(
+        r#"<html><body><img id="mark" src="icons/ui/camera.png" /></body></html>"#,
+        400,
+        200,
+        Some(assets),
+    );
+
+    // A fetch answers on its own, so what arrived is taken up the next time the page is laid out.
+    document.touch();
+    document.resolve();
+    document.touch();
+    document.resolve();
+
+    let picture = document.element("mark").expect("the picture is in the page");
+    let (_, _, width, height) = document.rect(picture).expect("and it was laid out");
+
+    // A picture that was read has the size it was drawn at; one that was not is a box of nothing.
+    assert!(
+        width > 1.0 && height > 1.0,
+        "the picture was read and laid out, got {width}x{height}"
+    );
+}
+
+#[test]
+fn a_click_lands_on_the_innermost_thing_and_walks_up_to_a_name() {
+    let mut document = Interface::open(
+        r#"<html><head><style>
+             .button { width: 60px; height: 24px; }
+             .icon { width: 14px; height: 14px; }
+           </style></head>
+           <body><div class="button" id="menu"><span class="icon" id="mark">x</span></div></body></html>"#,
+        200,
+        100,
+    );
+
+    document.resolve();
+
+    let hit = document.hit(8.0, 8.0).expect("something is under the pointer");
+    let mark = document.element("mark").expect("the picture is in the page");
+
+    // The picture, not the button: a click reports the innermost thing under the pointer, which is
+    // why what was clicked has to be walked up to.
+    assert_eq!(hit, mark);
+
+    let mut walked = hit;
+    let mut named = None;
+
+    for _ in 0..8 {
+        if let Some(id) = document.attribute(walked, "id")
+            && id == "menu"
+        {
+            named = Some(walked);
+            break;
+        }
+
+        match document.parent(walked) {
+            Some(above) => walked = above,
+            None => break,
+        }
+    }
+
+    assert_eq!(named, document.element("menu"), "the button is above the picture");
 }

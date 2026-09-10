@@ -1,6 +1,5 @@
 using Bevy;
 using BevyCSharp.Editor.Behaviors;
-using BevyCSharp.Editor.Panels;
 
 namespace BevyCSharp.Editor.Framework;
 
@@ -25,14 +24,12 @@ public static class EditorCommands
     /// <summary>Fills the menu and the toolbar, given the camera the panels bind against.</summary>
     public static void Register(Entity camera)
     {
-        Panels(camera);
         Spawning();
         Entities();
         View();
         Project();
         Toolbar();
         Settings();
-        EditorInspectorLines.Register();
     }
 
     /// <summary>
@@ -97,34 +94,10 @@ public static class EditorCommands
             "Editor", "Grid height", static () => ViewportGizmos.GridHeight,
             static value => ViewportGizmos.GridHeight = value, 7);
 
-        EditorSettings.Heading("Editor", "Hierarchy", 10);
-
-        EditorSettings.Flag(
-            "Editor", "Show the interface's own entities",
-            static () => WorldPanel.ShowInterface,
-            static on => WorldPanel.ShowInterface = on, 11);
-
-        EditorSettings.Flag(
-            "Editor", "Show every entity",
-            static () => WorldPanel.ShowAll,
-            static on => WorldPanel.ShowAll = on, 12);
-
-        EditorSettings.Heading("Editor", "Layout", 20);
-
-        EditorSettings.Action(
-            "Editor", "Put the panels back", static () => EditorShell.Layout.ResetAll(), 21);
-
-        EditorSettings.Action(
-            "Editor",
-            "Save the layout",
-            static () => File.WriteAllText(EditorPaths.Layout, EditorShell.Layout.Describe()),
-            22);
-
         EditorSettings.Heading("Project", "Where things are", 0);
 
         EditorSettings.Fact("Project", "Assets", static () => EditorPaths.Assets, 1);
         EditorSettings.Fact("Project", "World file", static () => EditorPaths.World, 2);
-        EditorSettings.Fact("Project", "Layout file", static () => EditorPaths.Layout, 3);
 
         EditorSettings.Heading("Project", "Scripts", 10);
 
@@ -139,18 +112,8 @@ public static class EditorCommands
 
         EditorSettings.Action("Project", "Reload now", EditorScripts.Reload, 13);
 
-        EditorSettings.Heading("Editor", "Inspector", 6);
-
-        EditorSettings.Flag(
-            "Editor",
-            "Letter the axis handles",
-            static () => Grips.Letters,
-            static on => Grips.Letters = on,
-            7);
-
         EditorSettings.Heading("About", "BevyCSharp.Editor", 0);
 
-        EditorSettings.Fact("About", "Panels open", static () => EditorShell.Open.Count.ToString(), 2);
         EditorSettings.Fact("About", "Component schemas", static () => ComponentSchemas.All.Count.ToString(), 3);
         EditorSettings.Fact("About", "Menu rows", static () => EditorMenu.All.Count.ToString(), 4);
     }
@@ -241,25 +204,6 @@ public static class EditorCommands
             static () => EditorTools.Snap,
             11));
 
-        EditorToolbar.Add(new ToolbarButton(
-            ToolbarSlot.Right,
-            "icons/ui/info.png",
-            static () => string.Empty,
-            // Put away rather than closed. Somebody watching a number opens and closes this all
-            // day, and closing a document rebuilds every widget of every panel on screen. Where it
-            // goes is its own declaration, which the arrangement reads every frame: a position
-            // worked out here would be worked out from a width the panel has not measured yet.
-            static _ => EditorShell.Toggle(static () => new InfoPanel()),
-            static () => EditorShell.Showing<InfoPanel>() is not null,
-            0));
-
-        EditorToolbar.Add(new ToolbarButton(
-            ToolbarSlot.Right,
-            "icons/ui/settings.png",
-            static () => string.Empty,
-            static _ => EditorShell.Toggle(static () => new SettingsPanel()),
-            static () => EditorShell.Showing<SettingsPanel>() is not null,
-            1));
     }
 
     /// <summary>Where a menu opened from the toolbar goes: under the viewport's top left.</summary>
@@ -268,93 +212,7 @@ public static class EditorCommands
     /// the button that opened it reads as one tall panel instead of two things.
     /// </remarks>
     private static (float X, float Y) MenuAt =>
-        (EditorShell.Layout.Viewport.X + 4f, EditorShell.Layout.Viewport.Y + 46f);
-
-    /// <summary>What can be opened, as toggles so the menu shows what already is.</summary>
-    private static void Panels(Entity camera)
-    {
-        EditorMenu.Branch("Panels", "icons/ui/list.png", 0);
-        EditorMenu.Branch("Spawn", "icons/ui/add.png", 1);
-        EditorMenu.Branch("Entity", "icons/ui/entity.png", 2);
-        EditorMenu.Branch("View", "icons/ui/eye.png", 3);
-        EditorMenu.Branch("Project", "icons/ui/folder.png", 4);
-        EditorMenu.Branch("Spawn/Light", "icons/ui/light.png", 8);
-
-        EditorMenu.Toggle(
-            "Panels/World",
-            static _ => EditorShell.Toggle(static () => new WorldPanel()),
-            static () => EditorShell.Showing<WorldPanel>() is not null,
-            0,
-            "icons/ui/world.png");
-
-        EditorMenu.Toggle(
-            "Panels/Data",
-            static _ => EditorShell.Toggle(static () => new DataPanel()),
-            static () => EditorShell.Showing<DataPanel>() is not null,
-            1,
-            "icons/ui/data.png");
-
-        EditorMenu.Toggle(
-            "Panels/Assets",
-            static _ =>
-            {
-                if (EditorTabs.Find("Assets") is { } tab) EditorTabs.Toggle(tab);
-            },
-            static () => EditorShell.Showing<AssetsPanel>() is not null,
-            2,
-            "icons/ui/package.png");
-
-        EditorMenu.Toggle(
-            "Panels/Console",
-            static _ =>
-            {
-                if (EditorTabs.Find("Console") is { } tab) EditorTabs.Toggle(tab);
-            },
-            static () => EditorShell.Showing<ConsolePanel>() is not null,
-            3,
-            "icons/ui/terminal.png");
-
-        EditorMenu.Toggle(
-            "Panels/Rendering",
-            _ => EditorShell.Toggle(() => new RenderingPanel(camera)),
-            static () => EditorShell.Find<RenderingPanel>() is not null,
-            4,
-            "icons/ui/image.png");
-
-        EditorMenu.Toggle(
-            "Panels/Info",
-            static _ => EditorShell.Toggle(static () => new InfoPanel()),
-            static () => EditorShell.Showing<InfoPanel>() is not null,
-            5,
-            "icons/ui/stats.png");
-
-        EditorMenu.Toggle(
-            "Panels/Keys",
-            static _ => EditorShell.Toggle(static () => new KeysPanel()),
-            static () => EditorShell.Find<KeysPanel>() is not null,
-            6,
-            "icons/ui/list.png");
-
-        EditorMenu.Toggle(
-            "Panels/Toolbar",
-            static _ =>
-            {
-                EditorShell.Toggle(static () => new LeftBarPanel());
-                EditorShell.Toggle(static () => new CentreBarPanel());
-                EditorShell.Toggle(static () => new RightBarPanel());
-                EditorShell.Toggle(static () => new BottomBarPanel());
-            },
-            static () => EditorShell.Find<CentreBarPanel>() is not null,
-            7,
-            "icons/ui/sliders.png");
-
-        EditorMenu.Toggle(
-            "Panels/Tabs",
-            static _ => EditorShell.Toggle(static () => new TabsPanel()),
-            static () => EditorShell.Showing<TabsPanel>() is not null,
-            8,
-            "icons/ui/list.png");
-    }
+        (EditorShell.Viewport.Left + 4f, EditorShell.Viewport.Top + 46f);
 
     /// <summary>What can be put into the world.</summary>
     /// <remarks>
@@ -462,20 +320,6 @@ public static class EditorCommands
     private static void View()
     {
         EditorMenu.Toggle(
-            "View/Interface entities",
-            static _ => WorldPanel.ShowInterface = !WorldPanel.ShowInterface,
-            static () => WorldPanel.ShowInterface,
-            0,
-            "icons/ui/interface.png");
-
-        EditorMenu.Toggle(
-            "View/Every entity",
-            static _ => WorldPanel.ShowAll = !WorldPanel.ShowAll,
-            static () => WorldPanel.ShowAll,
-            1,
-            "icons/ui/eye.png");
-
-        EditorMenu.Toggle(
             "View/Ground grid",
             static _ => ViewportGizmos.ShowGrid = !ViewportGizmos.ShowGrid,
             static () => ViewportGizmos.ShowGrid,
@@ -500,18 +344,6 @@ public static class EditorCommands
 
         EditorMenu.Separator("View/-", 4);
 
-        EditorMenu.Toggle(
-            "View/Settings",
-            static _ => EditorShell.Toggle(static () => new SettingsPanel()),
-            static () => EditorShell.Showing<SettingsPanel>() is not null,
-            5,
-            "icons/ui/settings.png");
-
-        EditorMenu.Command(
-            "View/Reset the layout",
-            static _ => EditorShell.Layout.ResetAll(),
-            4,
-            "icons/ui/undo.png");
     }
 
     /// <summary>What keeps and restores the work.</summary>

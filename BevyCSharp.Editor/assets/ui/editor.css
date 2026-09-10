@@ -148,8 +148,41 @@
     font-size: 11px;
   }
 
+  /* A band inside a panel that is not part of what scrolls: a search box, a row of filters. */
+  .strip {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+    padding: 4px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .strip > .field {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .divider {
+    width: 1px;
+    height: 18px;
+    background: var(--line);
+  }
+
   .spacer {
     flex: 1;
+  }
+
+  /* The layer menus and flyouts are put into.
+     At the window's corner, out of the flow, and with no size of its own: what is inside it is
+     placed against its box, so a layer that took part in the layout would put a menu below the
+     page, and one that covered the window would swallow every click meant for what is under it.
+     A menu inside it is a box of its own and is hit and drawn normally. */
+  #overlays {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
   }
 }
 
@@ -177,6 +210,19 @@
     background: var(--accent-quiet);
     border-color: var(--accent);
     color: var(--text);
+  }
+
+  .icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+
+  .button.icon-button {
+    width: 26px;
+    padding-inline: 0;
+    justify-content: center;
   }
 
   .tree-item {
@@ -237,6 +283,87 @@
     border-color: var(--accent);
   }
 
+  /* Three numbers across, each taking a third of what is left after the name column. */
+  .triple {
+    display: flex;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .triple > * {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* A flag, drawn as what it is rather than as a character in the markup. */
+  .check {
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--sunken);
+  }
+
+  .check[data-on="1"] {
+    border-color: var(--accent);
+    background:
+      linear-gradient(45deg, transparent 42%, var(--text) 42%, var(--text) 55%, transparent 55%),
+      linear-gradient(-45deg, transparent 42%, var(--text) 42%, var(--text) 55%, transparent 55%),
+      var(--accent);
+  }
+
+  .button.wide {
+    justify-content: space-between;
+    width: 100%;
+    height: 20px;
+  }
+
+  /* A row that says what its number is measured in keeps a narrow column for it, so the values
+     above and below still line up. */
+  .row.united {
+    grid-template-columns: 96px 1fr 28px;
+  }
+
+  .unit {
+    color: var(--text-faint);
+    font-size: 11px;
+    text-align: right;
+  }
+
+  .heading {
+    padding: 6px 6px 2px;
+    color: var(--text-faint);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .rule {
+    height: 1px;
+    margin: 4px 6px;
+    background: var(--line-soft);
+  }
+
+  /* A bar with the number it is at beside it, which is what a field with a range is drawn as. */
+  .ranged {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .ranged > .bar {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ranged > .readout {
+    width: 42px;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
   .group {
     margin-bottom: 4px;
     border: 1px solid var(--line-soft);
@@ -275,6 +402,11 @@
     color: var(--bad);
   }
 
+  /* What somebody typed and what answered it, which is not the program talking. */
+  .console > .line[data-level="said"] {
+    color: var(--text);
+  }
+
   /* A menu is markup put into the page and taken out again, positioned where it was asked for.
      There is no layer to arrange and no other document to sit above. */
   .menu {
@@ -298,6 +430,59 @@
 
   .menu > .item:hover {
     background: var(--accent-quiet);
+  }
+
+  .menu > .item[data-on="1"] {
+    color: var(--accent);
+  }
+
+  .menu > .item > .more {
+    margin-left: auto;
+    color: var(--text-faint);
+  }
+
+  .menu > .rule {
+    height: 1px;
+    margin: 4px 6px;
+    background: var(--line-soft);
+  }
+
+  /* Dropped from the top edge, over everything, at a height that leaves the scene visible. What
+     is being typed sits at the bottom, under the lines it will join. */
+  .console-sheet {
+    position: absolute;
+
+    /* Under the toolbar rather than over it, so what the console is being used to look at can
+       still be reached while it is down. */
+    top: 34px;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    height: 45vh;
+    border-bottom: 1px solid var(--line);
+
+    /* Nearly opaque: enough that the scene reads as being behind it, not so much that a log line
+       has the panel underneath showing through the middle of it. */
+    background: color-mix(in oklab, var(--ground) 96%, transparent);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 55%);
+  }
+
+  .console-sheet > .console {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .console-entry {
+    height: 26px;
+    padding-inline: 10px;
+    border: 0;
+    border-top: 1px solid var(--line);
+    background: var(--sunken);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
   }
 
   .empty {

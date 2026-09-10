@@ -7,10 +7,10 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// <para>
-/// There are two consoles: the tab along the bottom, which is where somebody reads a log, and the
-/// one a key drops into the middle of the window, which is where somebody types one command and
-/// dismisses it. They differ in size and in nothing else, so what they have in common lives here
-/// and each of them is a document and a handful of bindings.
+/// Everything a console does that is not drawing: which lines are worth showing, what was typed
+/// before, what a half-typed name would complete to, and what to say about it. Where it is drawn
+/// is <see cref="ConsolePage"/>, and a game that wants its own console draws it differently
+/// against this same class.
 /// </para>
 /// <para>
 /// It keeps what was typed, what was typed before, and what is being looked for. Everything it
@@ -175,8 +175,7 @@ public sealed class ConsoleView
     /// </summary>
     /// <remarks>
     /// Cut if it is very long. A log row is one line and does not wrap, so what is past the edge
-    /// cannot be read however wide the window is, and a text node of several thousand characters
-    /// is one the interface lays out and then draws nothing of at all.
+    /// cannot be read however wide the window is.
     /// </remarks>
     public static string Written(LogLine line)
     {

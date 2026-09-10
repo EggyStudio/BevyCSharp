@@ -20,11 +20,10 @@ public static class EditorProject
 
         var written = EditorWorld.Save(world, EditorPaths.World);
 
-        File.WriteAllText(EditorPaths.Layout, EditorShell.Layout.Describe());
         File.WriteAllText(EditorPaths.Settings, EditorSettings.Describe());
 
         Console.WriteLine(
-            $"[editor] saved {written} entities, the layout and the settings to {EditorPaths.Assets}");
+            $"[editor] saved {written} entities and the settings to {EditorPaths.Assets}");
     }
 
     /// <summary>Puts the saved edits and the saved arrangement back.</summary>
@@ -35,24 +34,25 @@ public static class EditorProject
         var applied = EditorWorld.Load(world, EditorPaths.World);
         RestoreLayout();
 
-        Console.WriteLine($"[editor] applied {applied} entities and the layout");
+        Console.WriteLine($"[editor] applied {applied} entities");
     }
 
     /// <summary>
-    /// Restores the arrangement and the preferences, which is what starting up wants.
+    /// Restores the preferences, which is what starting up wants.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Not the world: the world is what the project is, and loading it is a thing a person asks
-    /// for. How the editor looks and behaves is not, and having to ask for it every time is how a
-    /// tool feels like it does not remember you.
+    /// for. How the editor behaves is not, and having to ask for it every time is how a tool feels
+    /// like it does not remember you.
+    /// </para>
+    /// <para>
+    /// Nor the arrangement of the panels. Where a panel sits is the stylesheet's answer now, and a
+    /// stylesheet is already a file that is kept.
+    /// </para>
     /// </remarks>
     public static void RestoreLayout()
     {
-        if (File.Exists(EditorPaths.Layout))
-        {
-            EditorShell.Layout.Restore(File.ReadAllText(EditorPaths.Layout));
-        }
-
         if (File.Exists(EditorPaths.Settings))
         {
             EditorSettings.Restore(File.ReadAllText(EditorPaths.Settings));
