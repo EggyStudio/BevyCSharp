@@ -96,6 +96,20 @@ public static unsafe class Window
         return (width, height);
     }
 
+    /// <summary>
+    /// How many physical pixels a logical one is.
+    /// </summary>
+    /// <remarks>
+    /// Everything a window reports is in logical pixels, so this is what turns one into what the
+    /// framebuffer is divided into: a viewport, a scissor rectangle, a screenshot.
+    /// </remarks>
+    public static float Scale()
+    {
+        float scale;
+        Native.Check(Native.bcs_window_scale(&scale), "Window.Scale");
+        return scale <= 0f ? 1f : scale;
+    }
+
     /// <summary>Sets how the window fills the screen.</summary>
     public static void SetMode(WindowMode mode) =>
         Native.Check(Native.bcs_window_set_mode((int)mode), "Window.SetMode");

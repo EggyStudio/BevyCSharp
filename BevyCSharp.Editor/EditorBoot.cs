@@ -30,18 +30,14 @@ public partial struct EditorBoot
         EditorSelection.Camera = camera;
         EditorCommands.Register(camera);
 
-        // The whole editor is one page. What it looks like and where its parts sit is the
-        // stylesheet's, so opening it is reading two files.
+        // The interface: one ImGui context, the editor's style, and the panels that make it.
         EditorShell.Load(EditorPaths.Assets);
-        EditorViews.Install();
+
+        EditorShell.Tabs.Add(("Console", ConsoleTab.Draw));
 
         EditorProject.RestoreLayout();
 
-        // A right click on nothing offers what can be spawned, which is what a right click on an
-        // empty scene means everywhere else.
-        EditorShell.ViewportMenu = static (x, y) => EditorShell.ShowMenu("Spawn", x, y);
-
-        Console.WriteLine("[editor] the page is open");
+        Console.WriteLine("[editor] the interface is up");
 
         if (Host is { } app) EditorScripts.Start(app);
     }
@@ -102,9 +98,10 @@ public partial struct EditorBoot
         // without every writer having to ask the engine what time it is.
         ConsoleLog.Frame = ctx.Time.FrameCount;
 
+        // Everything the interface is happens between these two: the shell lays the panels out
+        // and they draw themselves, and what came of it goes to the renderer.
         EditorShell.Tick(ctx);
-        EditorViews.Draw(ctx);
-        ConsolePage.Draw();
+        EditorShell.Draw();
     }
 
     /// <summary>
@@ -143,7 +140,11 @@ public partial struct EditorBoot
     [OnUpdate]
     public static void ConsoleOnBackquote(BehaviorContext ctx)
     {
-        if (ctx.Input.KeyPressed(Key.Backquote)) ConsolePage.Toggle();
+        if (!ctx.Input.KeyPressed(Key.Backquote)) return;
+
+        // The console tab, raised or put away. Where every game has put this since Quake.
+        var console = EditorShell.Tabs.FindIndex(tab => tab.Name == "Console");
+        if (console >= 0) EditorShell.OpenTab = EditorShell.OpenTab == console ? -1 : console;
     }
 
     /// <summary>
@@ -158,26 +159,16 @@ public partial struct EditorBoot
     {
         if (!ctx.Input.KeyPressed(Key.Escape)) return;
 
-        // The console it opened is the first thing Escape closes, since it is the thing most
-        // recently put in the way and the one holding the keyboard.
-        if (ConsolePage.IsOpen)
+        // Whatever is being typed into keeps Escape: it is what somebody reaches for when they
+        // have changed their mind about a value, and quitting instead throws away more than that.
+        if (ImGuiRuntime.WantsKeyboard) return;
+
+        // What is open closes before the program does. A tab is up, and then it is not.
+        if (EditorShell.OpenTab >= 0)
         {
-            ConsolePage.Toggle();
+            EditorShell.OpenTab = -1;
             return;
         }
-
-        // Whatever holds the keyboard keeps Escape, because what is usually being typed into is a
-        // value somebody is in the middle of changing their mind about.
-        if (Dom.Focused().Exists)
-        {
-            Dom.Blur();
-            return;
-        }
-
-        // Escape closes what is open before it closes the program. Quitting because somebody
-        // reached for the key that shuts every other window they have ever used is not a
-        // defensible thing for a tool to do.
-        if (EditorShell.Dismiss()) return;
 
         ctx.Exit();
     }

@@ -1406,105 +1406,74 @@ every platform.
 
 ## Interfaces, for a game and for the editor
 
-An interface is **a page**: markup in HTML, appearance in CSS, and C# for what it does. It is the
-same mechanism whether the interface is a game's heads up display or the editor's details panel,
-and it is part of the library rather than part of the editor.
-
-Behind it is the stack a browser uses. [Stylo](https://github.com/servo/stylo) is the CSS engine
-Firefox ships, [Taffy](https://github.com/DioxusLabs/taffy) does the layout and
-[Parley](https://github.com/linebender/parley) the text, joined by
-[Blitz](https://github.com/DioxusLabs/blitz). So the cascade, specificity, inheritance, `@layer`,
-`:where`, nesting, custom properties, `oklch` and `color-mix` are that engine's rather than an
-approximation of them, and a stylesheet written for a browser is a stylesheet that works here.
+An interface is **Dear ImGui**, running in C# and drawn by Bevy. Immediate mode: a call per widget
+per frame, no document to load, no binding to declare, and nothing to keep in step with the world.
+It is part of the library rather than part of the editor, so a game gets one by referencing
+`BevyCSharp` and nothing else.
 
 ```csharp
-// Read the two files, splice the stylesheet in, and open the page.
-Dom.Open(markup.Replace("<style id=\"theme\"></style>", $"<style id=\"theme\">{theme}</style>"));
-
-// Once a frame: what was clicked, and what to show.
-var count = Dom.Drain(reports);
-
-for (var index = 0; index < count; index++)
+[Behavior]
+public partial struct Interface
 {
-    if (reports[index].Kind == DomEventKind.Click
-        && Dom.Attribute(reports[index].Target, "id") == "score-up") _score++;
-}
+    private static int _score;
 
-Dom.SetText(Dom.Element("score"), _score.ToString());
+    [OnStartup] public static void Open(BehaviorContext ctx) => ImGuiRuntime.Start();
+
+    [OnUpdate]
+    public static void Tick(BehaviorContext ctx)
+    {
+        ImGuiRuntime.Begin(ctx);
+
+        if (ImGui.Begin("Sample"))
+        {
+            ImGui.Text($"Score {_score}");
+            if (ImGui.Button("Add one")) _score++;
+        }
+
+        ImGui.End();
+        ImGuiRuntime.End();
+    }
+}
 ```
 
-`BevyCSharp.Sample` does exactly that, in `Behaviors/Interface.cs` and `assets/ui/hud.*`. It needs
-a bridge with the interface compiled in (`build/build-native.sh --editor`) and `Config.HtmlUi`
-asked for.
+`BevyCSharp.Sample` does exactly that, in `Behaviors/Interface.cs`. It needs a bridge with the
+interface compiled in (`build/build-native.sh --editor`) and `Config.HtmlUi` asked for.
 
-**One page holds the whole interface.** A panel is a piece of markup put into it with
-`Dom.SetHtml`, not a document of its own, so there is no list of open documents to order, no
-placement to compute and nothing to rebuild when something opens. Where a panel sits, what is in
-front, and what a state looks like are all the stylesheet's answers: state reaches it as an
-attribute (`data-selected="1"`), and a rule written against that attribute decides the rest.
+**The engine only rasterises.** ImGui hands over vertices, indices and a list of draw calls, each
+with a clip rectangle and a picture; `bcs_imgui_frame` takes them and a pass in Bevy's renderer
+draws them straight onto the window, over whatever the cameras drew. Nothing on the Rust side knows
+what a widget is, which is why the interface can change completely without touching it.
 
-The page is painted into a texture that covers the window, over whatever the scene drew. A surface
-with no background is therefore a hole the scene shows through, which is all the editor's viewport
-is. The interface spawns no camera of its own: it is an ordinary UI node, drawn by whatever camera
-the app already has.
+**Pictures come from the asset server.** `ImGuiTextures.Load("icons/ui/camera.png")` answers a name
+ImGui can put in a draw call, decoded by the engine like any other asset, and drawn with
+`ImGui.Image` tinted to whatever it means.
 
-**A page reads pictures from one directory and nowhere else.** `Dom.Open(html, assets)` says which,
-and an `img` resolves against it. There is no network, and a source that climbs out with `..` is
-refused, because markup that can read any file on the machine is markup that can read a private
-key.
-
-**Typing works, and can be tested without hands.** Keys, the pointer and the wheel reach whatever
-holds the keyboard, `Dom.GetValue` and `SetValue` read and write a field, and Enter and Escape come
-back as reports. `SyntheticInput.Type`, `Key`, `Press` and `Release` drive all of it from a test.
+**Input is fed, not polled.** `ImGuiRuntime.Begin` turns the engine's per-frame input into the
+events ImGui expects, and `ImGuiRuntime.WantsMouse` is what stops the camera flying while a panel
+is being dragged. `SyntheticInput` writes into the same queue, so a test drives the interface the
+way a hand does.
 
 ## The editor
 
 `BevyCSharp.Editor` runs the same way the sample does and is built on the same library, with no
 privileged path into the engine: the editor is a BevyCSharp app whose behaviors happen to draw an
-editor. Its interface is the same page a game writes.
+editor.
 
 ```bash
 build/build-native.sh --editor
 dotnet run --project BevyCSharp.Editor
 ```
 
-The page is `BevyCSharp.Editor/assets/ui/editor.html` and its look is
-`BevyCSharp.Editor/assets/ui/editor.css`: a toolbar, a grid of hierarchy, viewport and details, and
-a status strip. The palette is one hue and one chroma with every surface a step of lightness along
-it, written in `oklch`, so the whole editor's density and colour are a handful of custom properties
-in one file. `EditorViews` writes into the parts that change and says what a click on them means.
+The scene fills the window and the panels float over it, spaced from the edges and rounded, the way
+Unity arranges itself. The panel on the right holds the **world** above and the **details** below;
+a button at its top right docks it, and then the camera is given the rectangle that is left rather
+than being drawn behind the panel. Dragging its left edge widens it, and past a threshold the world
+moves beside the data instead of above it. The tabs sit at the bottom left, spanning the width the
+panel leaves, and clicking one raises its contents above the strip.
 
-**The menu is a table of paths.** Everything the editor can be told to do is a slash separated
-path in `EditorMenu`, and the hamburger, the add button, a right click on the world and a right
-click on an entity are four views of the same table:
-
-```csharp
-EditorMenu.Command("Spawn/Enemy", world => SpawnEnemy(world));
-EditorMenu.Toggle("View/Every entity",
-    _ => WorldPanel.ShowAll = !WorldPanel.ShowAll, () => WorldPanel.ShowAll);
-```
-
-A game adds its own commands the same way, and they appear wherever that part of the table is
-shown. Panels that belong along the bottom are registered as tabs, which are minimised until
-their name is clicked.
-
-**A list is markup.** A document is a file, but a list is not in it: the rows are written as
-markup when what they show changes, and an id per row is what a click lands on.
-
-```csharp
-foreach (var entity in rows)
-{
-    markup.Append(
-        $"<div class=\"tree-item\" id=\"entity-{entity.Bits}\" data-selected=\"{picked}\">"
-        + EditorShell.Escape(name)
-        + "</div>");
-}
-```
-
-**Where a panel sits is CSS.** The shell is a grid, a panel is a box in it, and a flyout is markup
-in the overlay element at the end of the page, which is why it draws over everything without
-anything saying so. There is no layout table to keep, nothing to write to disk and nothing to
-arrange: a stylesheet is already a file that is kept.
+Everything about that arrangement is three numbers — docked, how wide, which tab — and a
+calculation in `EditorShell`. `EditorStyle` holds what it looks like: one dark neutral ladder, one
+blue accent, small rounded corners, Inter at 15px.
 
 **Showing a component needs no reflection.** The generator emits a `ComponentSchema` for every
 `[Behavior]` struct, holding each field's name, its kind, and a pair of closures that read and

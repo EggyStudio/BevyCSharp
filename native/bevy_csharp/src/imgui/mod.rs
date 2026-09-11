@@ -202,6 +202,43 @@ pub unsafe extern "C" fn bcs_imgui_texture(pixels: *const u8, width: u32, height
     })
 }
 
+/// Takes a picture from a file under the asset root, and answers what to call it.
+///
+/// What an icon is: a file the editor ships, loaded the way every other asset is, so it is decoded
+/// by the engine rather than by the managed side. It is not there for a frame or two, and a draw
+/// call naming a picture that has not arrived draws nothing rather than something wrong.
+///
+/// # Safety
+/// `path` must be a NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_imgui_picture(path: *const core::ffi::c_char) -> u64 {
+    crate::interop::guard_with(0, || {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = path;
+            0
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            let Some(path) = (unsafe { crate::interop::cstr_to_string(path) }) else {
+                return 0;
+            };
+
+            crate::state::with_world_opt(|world| {
+                let handle = world
+                    .get_resource::<bevy::asset::AssetServer>()?
+                    .load::<bevy::image::Image>(path);
+
+                let mut pictures = world.get_resource_mut::<render::Pictures>()?;
+                Some(pictures.add(handle))
+            })
+            .flatten()
+            .unwrap_or(0)
+        }
+    })
+}
+
 /// Forgets a picture, so the memory behind it can go.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_imgui_drop_texture(texture: u64) -> i32 {

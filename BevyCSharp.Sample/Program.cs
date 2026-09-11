@@ -36,7 +36,7 @@ config.AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets");
 
 // Asks for the document and stylesheet interface, which is what the sample's own panel is built
 // from. A bridge without it compiled in ignores this and the panel is not opened.
-config.HtmlUi = windowed;
+config.Gui = windowed;
 
 if (windowed && !App.HasRenderer)
 {

@@ -172,7 +172,7 @@ row below is bridged except the last.
 | an entity's name | Bevy's `Name`, which holds a `String` | hierarchy labels | `bcs_ecs_entity_name` |
 | naming an entity | the same, written | a list nobody can work in | `bcs_ecs_set_entity_name` |
 | a field's name and type | the source generator, not the bridge | editing a value | none needed |
-| where an element ended up | the page's own layout | the viewport, hit testing, the orientation cross | `bcs_dom_rect` |
+| where a panel ended up | ImGui's own layout | the viewport, the orientation cross | none needed |
 | the entity under the cursor | `bevy_picking`, already compiled in | selection in the viewport | `bcs_pick_events` |
 | what an entity fills | `Aabb` through the global transform | outlining and framing a selection | `bcs_render_bounds` |
 | pausing | `Time<Virtual>` | play and pause | none yet |
@@ -200,11 +200,11 @@ Ordered so that each one is worth having before the next exists.
    through, and all of those are already known to the compiler that emitted the table, so each
    field carries a closure that reads and writes the real struct. Bevy's `Transform` and
    `Visibility` are described by hand, which is the curated list the plan asked for.
-3. **The page.** Done, and then done again. The first answer was a hand-rolled interface with
-   placement written from C#, which is what the rest of this document used to describe. It was
-   replaced by the browser stack: `native/bcs_dom` holds one document through Blitz, and
-   `bcs_dom_*` is a document interface rather than a widget one. Placement went back into the
-   stylesheet, where it always belonged.
+3. **The interface.** Done three times. A hand-rolled widget set with placement written from C#;
+   then one HTML document through Blitz, with placement back in a stylesheet; then Dear ImGui, which
+   is what an editor's panels are actually made of. The first two are on the `ui/dom` branch. What
+   survived all three is everything that was never about drawing: the selection, the history, the
+   menu table, the component schemas and the console.
 
 4. **The panels.** Done. World, entity, assets, asset, rendering, information, toolbar, tabs, key
    strip and the menu. The test of the framework was whether they needed anything it did not have,
@@ -238,33 +238,24 @@ Ordered so that each one is worth having before the next exists.
 
 ## The interface
 
-The editor's interface is a page: one HTML document, one stylesheet, painted into a texture over
-the scene. Stylo styles it, Taffy lays it out and Parley draws its text, joined by Blitz. The
-managed side sees a document interface and nothing else, in `BevyCSharp/Ui/Dom.cs`.
+The editor's interface is **Dear ImGui**, running in C# and drawn by Bevy. The managed side owns the
+context and builds the windows; the engine gets triangles. `BevyCSharp/Ui/ImGuiRuntime.cs` is the
+join, `native/bevy_csharp/src/imgui` the pass.
 
-What that changes, against the framework this replaced:
+What that changes, against the two frameworks it replaced:
 
-- **A panel is markup, not a document.** `Dom.SetHtml` puts one into the page and takes it out
-  again. Nothing keeps a list of open documents, nothing has a layer, and opening one does not
-  rebuild the others.
-- **Where things sit is CSS.** The shell is a grid. A flyout is markup in the overlay element at
-  the end of the page, so it draws over everything without a number saying so. Nothing measures a
-  panel to place it.
-- **The viewport is a hole.** A surface with no background shows the scene, because the page is
-  painted over what the scene drew. Where the scene appears is therefore wherever the layout put
-  that box, read back with `Dom.TryRect` and handed to the camera.
-- **State is an attribute.** `data-selected="1"` on a row, `data-on="1"` on a tool button, and the
-  stylesheet decides the rest. No C# knows what being selected looks like.
-- **Pictures come from the assets.** The page is opened with a directory, and an `img` resolves
-  against it. Nothing else is readable, so a stylesheet or a piece of markup cannot reach the rest
-  of the disk.
-- **The whole of CSS is available.** `@layer`, `:where`, nesting, attribute and sibling selectors,
-  custom properties, `oklch`, `color-mix`, `overflow` with real scrolling. A stylesheet written for
-  a browser is a stylesheet that works here, which is what makes a modern stylesheet, Tailwind's
-  output included, something this can be pointed at rather than something to approximate.
-
-There is no JavaScript. Blitz has no script engine, so a React component library cannot run here;
-what runs is the page, and the logic is C#.
+- **A panel is a function.** It runs every frame and draws what is true then. There is no widget to
+  build, no state to invalidate, and nothing that can be out of step with the world it is showing.
+- **The arrangement is a calculation.** Whether the panel is docked, how wide it is and which tab is
+  open are three numbers; every rectangle follows from them, so a layout cannot get into a state
+  nothing put it in.
+- **The scene is a viewport, not a hole.** Floating, the camera fills the window and the panels are
+  over it. Docked, `bcs_render_set_viewport` gives the camera what is left, so the picture is the
+  shape of the space rather than the shape of the window with something on top.
+- **The engine only rasterises.** The Rust side draws clipped, textured triangles in screen space
+  and knows nothing else. The entire interface can be rewritten without touching it.
+- **Immediate mode costs a redraw a frame.** A few thousand triangles and one buffer write, which is
+  the trade ImGui makes and the reason it is the tool for a panel full of numbers that change.
 
 ## The inspector
 

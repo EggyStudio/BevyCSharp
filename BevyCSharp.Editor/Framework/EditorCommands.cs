@@ -212,7 +212,7 @@ public static class EditorCommands
     /// the button that opened it reads as one tall panel instead of two things.
     /// </remarks>
     private static (float X, float Y) MenuAt =>
-        (EditorShell.Viewport.Left + 4f, EditorShell.Viewport.Top + 46f);
+        (EditorShell.Scene.X + 4f, EditorShell.Scene.Y + 46f);
 
     /// <summary>What can be put into the world.</summary>
     /// <remarks>

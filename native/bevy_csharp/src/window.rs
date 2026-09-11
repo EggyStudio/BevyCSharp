@@ -84,6 +84,45 @@ pub extern "C" fn bcs_window_set_size(width: u32, height: u32) -> i32 {
     })
 }
 
+/// How many physical pixels a logical one is.
+///
+/// What the desktop's scaling is set to. Everything the bridge reports about a window is in
+/// logical pixels, so this is what turns one into what the framebuffer is actually divided into.
+///
+/// # Safety
+/// `scale` must point to a writable float.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_window_scale(scale: *mut f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = scale;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if scale.is_null() {
+                return status::NULL_ARG;
+            }
+
+            crate::state::with_world(|world| {
+                use bevy::window::{PrimaryWindow, Window};
+
+                let mut windows =
+                    world.query_filtered::<&Window, bevy::prelude::With<PrimaryWindow>>();
+
+                let Ok(window) = windows.single(world) else {
+                    return status::INVALID_STATE;
+                };
+
+                unsafe { scale.write(window.resolution.scale_factor()) };
+                status::OK
+            })
+        }
+    })
+}
+
 /// Writes the window's current size, in logical pixels.
 ///
 /// The size the window ended up at, which is not always the size that was asked for: a window

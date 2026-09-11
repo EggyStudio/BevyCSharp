@@ -1,4 +1,4 @@
-using Bevy.Interop;
+using ImGuiNET;
 
 namespace Bevy;
 
@@ -16,35 +16,40 @@ public enum PointerAction
 }
 
 /// <summary>
-/// Puts input into the window as though a hand had done it.
+/// Puts input into the interface as though a hand had done it.
 /// </summary>
 /// <remarks>
 /// <para>
-/// For tests and tools. What a click does is not one thing: the picking backend raycasts, a widget
-/// decides it was clicked, a camera reads a button, and an editor reads all three. Calling the
-/// method a click would have called tests the method and not the path to it, and the path is where
-/// the interesting failures are: a handle that cannot be grabbed, a menu that opens once, a
-/// selection that clears itself.
+/// For tests and tools. What a click does is not one thing: a widget decides it was clicked, an
+/// editor decides what that meant, and something in the world changes. Calling the method a click
+/// would have called tests the method and not the path to it, and the path is where the interesting
+/// failures are: a handle that cannot be grabbed, a menu that opens once, a value that goes in and
+/// does not come back.
 /// </para>
 /// <para>
-/// It writes the window's own messages, which is where a real pointer's report begins, so
-/// everything downstream behaves exactly as it would. It cannot move the operating system's
+/// It writes into ImGui's own event queue, which is where a real pointer's report ends up, so
+/// everything the interface does behaves exactly as it would. It cannot move the operating system's
 /// cursor, and does not try to: what it drives is the application, not the desktop.
+/// </para>
+/// <para>
+/// While anything here has been called, the pointer the interface sees is the one that was asked
+/// for rather than the one on the desk. <see cref="Release"/> leaves it where it was put; there is
+/// no need to hand it back.
 /// </para>
 /// </remarks>
 public static class SyntheticInput
 {
+    /// <summary>Where the pretend pointer is, or nothing while the real one is in charge.</summary>
+    internal static (float X, float Y)? Pretend { get; private set; }
+
     /// <summary>Moves the pointer to a point in the window, in logical pixels.</summary>
-    /// <exception cref="BevyNativeException">There is no window.</exception>
     public static void MoveTo(float x, float y) => Send(x, y, PointerAction.Move);
 
     /// <summary>Presses a button where the pointer is put.</summary>
-    /// <exception cref="BevyNativeException">There is no window.</exception>
     public static void Press(float x, float y, MouseButton button = MouseButton.Left) =>
         Send(x, y, PointerAction.Press, button);
 
     /// <summary>Releases a button where the pointer is put.</summary>
-    /// <exception cref="BevyNativeException">There is no window.</exception>
     public static void Release(float x, float y, MouseButton button = MouseButton.Left) =>
         Send(x, y, PointerAction.Release, button);
 
@@ -52,45 +57,79 @@ public static class SyntheticInput
     /// Rolls the wheel, in the lines a wheel with detents reports.
     /// </summary>
     /// <remarks>
-    /// Positive is away from the hand, which is up in a list and in towards the scene for a
-    /// camera. The pointer is not moved first: what the wheel affects is decided by where the
-    /// pointer already is, so a test moves it and then rolls.
+    /// Positive is away from the hand, which is up in a list. The pointer is not moved first: what
+    /// the wheel affects is decided by where it already is, so a test moves it and then rolls.
     /// </remarks>
-    /// <exception cref="BevyNativeException">There is no window.</exception>
-    public static void Wheel(float lines, float sideways = 0f) => Native.Check(
-        Native.bcs_input_wheel(sideways, lines),
-        $"rolling the wheel by {lines}");
-
-    /// <summary>
-    /// Presses and releases a key, as though a hand had.
-    /// </summary>
-    /// <remarks>
-    /// <paramref name="name"/> is either what the key types (<c>"a"</c>, <c>"7"</c>) or what it is
-    /// called (<c>"Enter"</c>, <c>"Escape"</c>, <c>"Backspace"</c>, <c>"ArrowLeft"</c>). It reaches
-    /// whatever holds the keyboard, which is how a test types into a field.
-    /// </remarks>
-    /// <exception cref="BevyNativeException">There is no window.</exception>
-    public static void Key(string name)
+    public static void Wheel(float lines, float sideways = 0f)
     {
-        ArgumentException.ThrowIfNullOrEmpty(name);
+        if (!ImGuiRuntime.IsRunning) return;
 
-        Native.Check(Native.bcs_input_key(name, 1), $"pressing {name}");
-        Native.Check(Native.bcs_input_key(name, 0), $"releasing {name}");
+        ImGui.GetIO().AddMouseWheelEvent(sideways, lines);
     }
 
-    /// <summary>Types a run of characters, one key at a time.</summary>
+    /// <summary>
+    /// Presses and releases a key.
+    /// </summary>
+    /// <remarks>
+    /// A key that types something types it as well, because that is what a keyboard does and what
+    /// a field is waiting for.
+    /// </remarks>
+    public static void Key(ImGuiKey key, string? typed = null)
+    {
+        if (!ImGuiRuntime.IsRunning) return;
+
+        var io = ImGui.GetIO();
+
+        io.AddKeyEvent(key, true);
+
+        if (typed is { Length: > 0 })
+        {
+            foreach (var character in typed) io.AddInputCharacter(character);
+        }
+
+        io.AddKeyEvent(key, false);
+    }
+
+    /// <summary>Types a run of characters.</summary>
     public static void Type(string text)
     {
         ArgumentNullException.ThrowIfNull(text);
+        if (!ImGuiRuntime.IsRunning) return;
 
-        foreach (var character in text) Key(character.ToString());
+        var io = ImGui.GetIO();
+        foreach (var character in text) io.AddInputCharacter(character);
     }
 
     /// <summary>Moves, presses or releases the pointer.</summary>
-    /// <exception cref="BevyNativeException">There is no window.</exception>
     public static void Send(
-        float x, float y, PointerAction action, MouseButton button = MouseButton.Left) =>
-        Native.Check(
-            Native.bcs_input_pointer(x, y, (int)action, (int)button),
-            $"sending a pointer {action} at {x},{y}");
+        float x, float y, PointerAction action, MouseButton button = MouseButton.Left)
+    {
+        if (!ImGuiRuntime.IsRunning) return;
+
+        Pretend = (x, y);
+
+        var io = ImGui.GetIO();
+        io.AddMousePosEvent(x, y);
+
+        var which = button switch
+        {
+            MouseButton.Right => 1,
+            MouseButton.Middle => 2,
+            _ => 0,
+        };
+
+        switch (action)
+        {
+            case PointerAction.Press:
+                io.AddMouseButtonEvent(which, true);
+                break;
+
+            case PointerAction.Release:
+                io.AddMouseButtonEvent(which, false);
+                break;
+        }
+    }
+
+    /// <summary>Gives the pointer back to the hand on the desk.</summary>
+    public static void Forget() => Pretend = null;
 }

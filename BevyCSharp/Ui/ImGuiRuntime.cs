@@ -20,7 +20,7 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// It needs a bridge with the interface compiled in (<c>build/build-native.sh --editor</c>) and
-/// <see cref="Config.HtmlUi"/> asked for, and says so rather than drawing nothing.
+/// <see cref="Config.Gui"/> asked for, and says so rather than drawing nothing.
 /// </para>
 /// </remarks>
 public static unsafe class ImGuiRuntime
@@ -83,8 +83,9 @@ public static unsafe class ImGuiRuntime
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard;
 
-        // Off: the engine holds the mouse position and there is nothing to warp.
-        io.ConfigFlags &= ~ImGuiConfigFlags.NavEnableSetMousePos;
+        // A draw call says where its own vertices begin, so ImGui is free to put a whole window in
+        // one buffer instead of splitting it every sixty-five thousand vertices.
+        io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
 
         if (fonts is { Length: > 0 } && faces.Length > 0)
         {
@@ -132,10 +133,12 @@ public static unsafe class ImGuiRuntime
 
         var io = ImGui.GetIO();
 
-        var window = Window.Size;
-        var scale = Window.Scale;
+        var window = Window.Size();
+        var scale = Window.Scale();
 
-        Size = new Vector2(Math.Max(1f, window.Width / scale), Math.Max(1f, window.Height / scale));
+        // Logical pixels, which is what everything the bridge reports about a window is in, and
+        // what the pointer arrives in. The scale is only what a clip rectangle is turned into.
+        Size = new Vector2(Math.Max(1f, window.Width), Math.Max(1f, window.Height));
         Scale = scale;
 
         io.DisplaySize = Size;

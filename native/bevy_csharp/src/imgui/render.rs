@@ -7,8 +7,6 @@
 
 use bevy::app::App;
 use bevy::asset::{AssetId, AssetServer, Handle, RenderAssetUsages, load_embedded_asset};
-use bevy::core_pipeline::schedule::{Core2d, Core2dSystems, Core3d, Core3dSystems};
-use bevy::core_pipeline::upscaling::upscaling;
 use bevy::image::Image;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
@@ -16,8 +14,15 @@ use bevy::mesh::VertexBufferLayout;
 use bevy::render::render_asset::RenderAssets;
 use bevy::render::render_resource::binding_types::{sampler, texture_2d, uniform_buffer};
 use bevy::render::render_resource::*;
-use bevy::render::renderer::{RenderContext, RenderDevice, RenderQueue, ViewQuery};
+use bevy::render::renderer::{RenderContext, RenderDevice, RenderQueue};
 use bevy::render::texture::GpuImage;
+use bevy::camera::{CameraOutputMode, ClearColorConfig};
+use bevy::core_pipeline::schedule::{Core2d, Core2dSystems};
+use bevy::core_pipeline::upscaling::upscaling;
+use bevy::core_pipeline::tonemapping::Tonemapping;
+use bevy::render::extract_component::{ExtractComponent, ExtractComponentPlugin};
+use bevy::render::render_resource::BlendState;
+use bevy::render::renderer::ViewQuery;
 use bevy::render::view::ViewTarget;
 use bevy::render::{
     Extract, ExtractSchedule, Render, RenderApp, RenderStartup, RenderSystems,
@@ -114,11 +119,8 @@ struct Frame {
     /// How many physical pixels a logical one is, which is what a clip rectangle is measured in.
     scale: Vec2,
 
-    /// Whether the pass has already run this frame.
-    ///
-    /// The view schedule runs once per camera, and an interface drawn once per camera is an
-    /// interface drawn twice.
-    done: bool,
+    /// How large the interface said it was, in logical pixels.
+    display: Vec2,
 }
 
 /// One draw call, with its picture resolved to something the renderer holds.
@@ -153,10 +155,20 @@ struct Buffers {
 #[derive(Resource, Default)]
 struct Built(HashMap<TextureFormat, CachedRenderPipelineId>);
 
+/// The camera the interface is drawn through.
+///
+/// Its own rather than the scene's, because the interface covers the whole window and a scene
+/// camera may have been given only part of it. Its picture starts transparent and is blended over
+/// whatever the other cameras drew, which is what makes it an overlay rather than a replacement.
+#[derive(Component, Clone, Copy, ExtractComponent)]
+pub struct InterfaceView;
+
 /// Puts the interface into an app.
 pub fn install(app: &mut App) {
     app.init_resource::<Drawn>();
     app.init_resource::<Pictures>();
+    app.add_plugins(ExtractComponentPlugin::<InterfaceView>::default());
+    app.add_systems(bevy::app::Startup, camera);
 
     bevy::asset::embedded_asset!(app, "imgui.wgsl");
 
@@ -170,16 +182,46 @@ pub fn install(app: &mut App) {
         .add_systems(RenderStartup, start)
         .add_systems(ExtractSchedule, extract)
         .add_systems(Render, prepare.in_set(RenderSystems::PrepareBindGroups))
-        // After what the camera does and before the picture is handed to the window, which is
-        // where an overlay belongs: over the scene, under nothing.
+        // Into the interface camera's own picture, after whatever that camera did and before that
+        // picture is put on the window.
+        //
+        // Not into a scene camera's: one given part of the window to draw into has a picture the
+        // size of that part, and an interface drawn there is cut off exactly where the panels are.
+        // Not straight onto the window either: what reaches the screen is not the texture a window
+        // hands out here, so a pass drawing there draws where nobody looks.
         .add_systems(
             Core2d,
             draw.after(Core2dSystems::PostProcess).before(upscaling),
-        )
-        .add_systems(
-            Core3d,
-            draw.after(Core3dSystems::PostProcess).before(upscaling),
         );
+}
+
+/// Spawns the camera the interface is drawn through.
+fn camera(mut commands: Commands) {
+    commands.spawn((
+        Camera2d,
+        Camera {
+            // Last, so what it writes goes over every other camera's picture.
+            order: isize::MAX,
+
+            // Its picture starts as nothing at all. Whatever it is not drawn on stays the scene.
+            clear_color: ClearColorConfig::Custom(bevy::color::Color::NONE),
+
+            // And is put on the window by blending rather than by overwriting, which is the whole
+            // of what makes this an overlay.
+            output_mode: CameraOutputMode::Write {
+                blend_state: Some(BlendState::ALPHA_BLENDING),
+                clear_color: ClearColorConfig::None,
+            },
+
+            ..default()
+        },
+        // The interface's colours are already what they should be; anything applied to them here
+        // would be applied twice.
+        Tonemapping::None,
+        Msaa::Off,
+        InterfaceView,
+        Name::new("Interface camera"),
+    ));
 }
 
 /// Builds what the pass needs once the device is there.
@@ -229,7 +271,6 @@ fn extract(
     drawn: Extract<Res<Drawn>>,
     pictures: Extract<Res<Pictures>>,
 ) {
-    frame.done = false;
     frame.calls.clear();
 
     frame.vertices.clear();
@@ -259,6 +300,7 @@ fn extract(
     // Screen space, y downwards, straight to clip space. What ImGui's own backends build.
     frame.projection = Mat4::orthographic_rh(left, left + width, top + height, top, -1.0, 1.0);
     frame.scale = Vec2::new(drawn.framebuffer_scale[0], drawn.framebuffer_scale[1]);
+    frame.display = Vec2::new(width, height);
 }
 
 /// Puts this frame's triangles and pictures where the GPU can reach them.
@@ -281,6 +323,13 @@ fn prepare(
 
     buffers.indices.clear();
     buffers.indices.extend(frame.indices.iter().copied());
+
+    // Rounded up to an even count, because a write to the GPU is measured in four byte words and
+    // an odd number of two byte indices is not one. The extra index is never drawn.
+    if buffers.indices.len() % 2 == 1 {
+        buffers.indices.push(0);
+    }
+
     buffers.indices.write_buffer(&device, &queue);
 
     buffers.projection.set(frame.projection);
@@ -316,31 +365,41 @@ fn prepare(
     }
 }
 
-/// Draws the interface over what the camera drew.
+/// Draws the interface into the camera that carries it.
 fn draw(
-    view: ViewQuery<&ViewTarget>,
-    mut frame: ResMut<Frame>,
+    mut said: Local<String>,
+    view: ViewQuery<&ViewTarget, With<InterfaceView>>,
+    frame: Res<Frame>,
     mut built: ResMut<Built>,
     buffers: Res<Buffers>,
     pipeline: Res<Pipeline>,
     cache: Res<PipelineCache>,
     mut ctx: RenderContext,
 ) {
-    if frame.done || frame.calls.is_empty() {
+    // A pass that draws nothing says why, once, rather than leaving a blank window and no
+    // explanation. Silent while it is working, because a working editor has nothing to report.
+    let mut announce = |what: &str| {
+        if *said != what {
+            *said = what.to_string();
+            bevy::log::debug!("bcs_imgui: {what}");
+        }
+    };
+
+    if frame.calls.is_empty() {
+        announce("nothing to draw");
         return;
     }
 
     let target = view.into_inner();
     let format = target.main_texture_format();
 
-    // Built for the format of whatever it is drawing into, and kept: a pipeline is compiled once
-    // and there is one format in an ordinary run.
-    let id = *built.0.entry(format).or_insert_with(|| {
-        cache.queue_render_pipeline(descriptor(&pipeline, format))
-    });
+    let id = *built
+        .0
+        .entry(format)
+        .or_insert_with(|| cache.queue_render_pipeline(descriptor(&pipeline, format)));
 
     let Some(built) = cache.get_render_pipeline(id) else {
-        // Still compiling. Nothing is drawn this frame, which is a frame or two at startup.
+        announce("the pipeline is not ready");
         return;
     };
 
@@ -349,15 +408,19 @@ fn draw(
         buffers.vertices.buffer(),
         buffers.indices.buffer(),
     ) else {
+        announce("the buffers are not ready");
         return;
     };
 
-    frame.done = true;
-
     let scale = frame.scale;
-    let width = (frame.projection.x_axis.x.abs().recip() * 2.0 * scale.x).round() as u32;
-    let height = (frame.projection.y_axis.y.abs().recip() * 2.0 * scale.y).round() as u32;
+    let width = (frame.display.x * scale.x).round() as u32;
+    let height = (frame.display.y * scale.y).round() as u32;
 
+    announce("drawing");
+
+    // The camera's own attachment, asked for rather than built: a view target holds two textures
+    // and hands out whichever is current, and a pass that picks one for itself draws into the one
+    // nothing goes on to read.
     let mut pass = ctx.begin_tracked_render_pass(RenderPassDescriptor {
         label: Some("bcs_imgui"),
         color_attachments: &[Some(target.get_unsampled_color_attachment())],
@@ -377,26 +440,34 @@ fn draw(
             continue;
         };
 
-        // In physical pixels, and inside the target: a scissor rectangle that reaches past the
-        // edge is a validation error rather than a clamp.
-        let left = (call.clip[0] * scale.x).max(0.0).round() as u32;
-        let top = (call.clip[1] * scale.y).max(0.0).round() as u32;
-        let right = (call.clip[2] * scale.x).round() as u32;
-        let bottom = (call.clip[3] * scale.y).round() as u32;
-
-        let right = right.min(width);
-        let bottom = bottom.min(height);
-
-        if right <= left || bottom <= top {
+        let Some((left, top, wide, tall)) = scissor(call.clip, scale, width, height) else {
             continue;
-        }
+        };
 
-        pass.set_scissor_rect(left, top, right - left, bottom - top);
+        pass.set_scissor_rect(left, top, wide, tall);
         pass.set_bind_group(1, picture, &[]);
 
         let start = call.index;
         pass.draw_indexed(start..start + call.elements, call.vertex as i32, 0..1);
     }
+}
+
+/// Where a draw call's clip rectangle lands on the window, in physical pixels.
+///
+/// Nothing outside the window, and nothing empty: a scissor rectangle reaching past the edge is a
+/// validation error rather than a clamp, and a zero-sized one is a draw call worth skipping.
+fn scissor(clip: [f32; 4], scale: Vec2, width: u32, height: u32) -> Option<(u32, u32, u32, u32)> {
+    let left = (clip[0] * scale.x).max(0.0).round() as u32;
+    let top = (clip[1] * scale.y).max(0.0).round() as u32;
+
+    let right = ((clip[2] * scale.x).max(0.0).round() as u32).min(width);
+    let bottom = ((clip[3] * scale.y).max(0.0).round() as u32).min(height);
+
+    if right <= left || bottom <= top {
+        return None;
+    }
+
+    Some((left, top, right - left, bottom - top))
 }
 
 /// What the pipeline for a target format looks like.
@@ -447,5 +518,36 @@ fn descriptor(pipeline: &Pipeline, format: TextureFormat) -> RenderPipelineDescr
             ..default()
         }),
         ..default()
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_clip_rectangle_becomes_a_scissor_in_physical_pixels() {
+        let box_of = scissor([10.0, 20.0, 110.0, 220.0], Vec2::splat(2.0), 800, 600);
+
+        assert_eq!(box_of, Some((20, 40, 200, 400)));
+    }
+
+    #[test]
+    fn one_reaching_past_the_window_is_cut_to_it() {
+        let box_of = scissor([-50.0, -50.0, 2000.0, 2000.0], Vec2::splat(1.0), 800, 600);
+
+        // Clamped rather than refused: a window's own clip rectangle is the whole window, and ImGui
+        // writes it as a very large number rather than as the size.
+        assert_eq!(box_of, Some((0, 0, 800, 600)));
+    }
+
+    #[test]
+    fn an_empty_one_is_no_rectangle_at_all() {
+        assert_eq!(scissor([100.0, 100.0, 100.0, 200.0], Vec2::splat(1.0), 800, 600), None);
+        assert_eq!(scissor([100.0, 100.0, 90.0, 200.0], Vec2::splat(1.0), 800, 600), None);
+
+        // Entirely off the window, which is what a panel dragged past the edge produces.
+        assert_eq!(scissor([900.0, 10.0, 1000.0, 20.0], Vec2::splat(1.0), 800, 600), None);
     }
 }

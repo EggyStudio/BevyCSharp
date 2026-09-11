@@ -320,28 +320,25 @@ Points to get right:
 
 ## The interface
 
-`native/bcs_dom` is the interface: one HTML document through
-[Blitz](https://github.com/DioxusLabs/blitz), which is Stylo for CSS, Taffy for layout and Parley
-for text. `bcs_dom_*` is a document interface, and `BevyCSharp/Ui/Dom.cs` is the same interface in
-C#. It replaced a hand-rolled interface of this project's own, along with every workaround that one
-needed.
+The editor runs on **Dear ImGui**. The C# side owns the context through
+`Twizzle.ImGui-Bundle.NET`, builds the windows the way ImGui is built anywhere, and hands the
+triangles it asked for to `bcs_imgui_frame`; `native/bevy_csharp/src/imgui` draws them over what the
+cameras drew, straight onto the window.
+
+Immediate mode is the point: an inspector is a call per field per frame, so there is no tree of
+widgets to keep in step with the world, and nothing to invalidate when a value changes underneath.
 
 What is left:
 
-- **The page is painted on the CPU.** `anyrender_vello_cpu` draws it into a texture that is handed
-  to Bevy each frame it changed. That is the right first answer, because it works everywhere and
-  because a page that has not changed costs nothing, but a GPU renderer through `anyrender_vello`
-  is the one to move to when the interface is animating rather than sitting still.
-- **IME is not forwarded.** Keys, the pointer and the wheel are, so a field can be typed into and a
-  list scrolls; composing a character in Japanese or Korean is what is missing. Blitz takes an
-  `Ime` event and nothing sends one yet.
-- **Tailwind is a build step away.** The stylesheet the engine reads is CSS, and Tailwind's output
-  is CSS, so pointing it at this needs a Node build producing a file rather than anything in the
-  engine. Whether the editor's own stylesheet should be written that way is a separate question
-  from whether a game can.
-- **There is no script engine.** Blitz has none, which is why a React component library cannot run
-  here. `rquickjs` bound to this document would make a page scriptable; it would still not make it
-  a browser.
+- **The scene is the camera's viewport rather than a texture.** Docked, `Render.SetViewport` gives
+  the camera the rectangle the panels left. A texture would make the scene a panel of its own,
+  dockable and tabbable, and is the thing to do when a second view is wanted.
+- **No icon font.** The icons are the PNGs the editor ships, loaded through the asset server and
+  drawn with `ImGui.Image`. `.ref/icons` has 1,175 SVGs to rasterise from when more are wanted.
+- **The interface is redrawn every frame**, which is what immediate mode means. At editor scale it
+  is a few thousand triangles and one buffer write; if it ever matters, the frame can be skipped
+  when nothing moved and the last one drawn again.
+- **IME is not forwarded.** Keys, characters, the pointer and the wheel are.
 
 ## The editor
 

@@ -15,7 +15,7 @@ config.AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets");
 
 // The panels are HTML and CSS, and the point of describing them in files is being able to change
 // them without a rebuild.
-config.HtmlUi = true;
+config.Gui = true;
 config.WatchAssets = true;
 
 if (!App.HasRenderer)

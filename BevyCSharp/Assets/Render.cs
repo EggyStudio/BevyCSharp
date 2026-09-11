@@ -949,6 +949,25 @@ public static unsafe class Render
     /// <returns><see cref="Entity.None"/> on a build with no renderer.</returns>
     public static Entity SpawnCamera3d() => new(Native.bcs_render_spawn_camera_3d(null));
 
+    /// <summary>
+    /// Gives a camera part of the window to draw into, or the whole of it.
+    /// </summary>
+    /// <remarks>
+    /// What a docked panel needs: the interface takes the right of the window and the scene is told
+    /// to draw into what is left, so the picture is the shape of the space rather than the shape of
+    /// the window with something over it. A width or height of zero means the whole window again.
+    /// </remarks>
+    /// <param name="camera">The camera to place.</param>
+    /// <param name="x">Left edge, in physical pixels.</param>
+    /// <param name="y">Top edge, in physical pixels.</param>
+    /// <param name="width">How wide, in physical pixels, or zero for the whole window.</param>
+    /// <param name="height">How tall, in physical pixels, or zero for the whole window.</param>
+    public static void SetViewport(Entity camera, uint x, uint y, uint width, uint height) =>
+        Native.Check(
+            Native.bcs_render_set_viewport(camera.Bits, x, y, width, height),
+            "Render.SetViewport");
+
+
     /// <summary>Spawns a 3D camera set up by <paramref name="settings"/>.</summary>
     /// <returns><see cref="Entity.None"/> on a build with no renderer.</returns>
     public static Entity SpawnCamera3d(CameraSettings settings)

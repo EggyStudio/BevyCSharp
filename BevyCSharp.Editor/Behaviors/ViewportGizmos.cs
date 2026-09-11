@@ -610,7 +610,7 @@ public partial struct ViewportGizmos
         // square in the bottom right and reports where the layout put it, so the cross sits beside
         // the buttons and moves with them. The viewport's own corner is the fallback for a frame
         // before the bar has been measured, or with the bar closed.
-        var viewport = EditorShell.Viewport;
+        var viewport = EditorShell.Scene;
         if (viewport.Width < 1f) return;
 
         const float Inset = 74f;
@@ -618,7 +618,7 @@ public partial struct ViewportGizmos
 
         var (x, y) = EditorGizmoSlot.Known
             ? EditorGizmoSlot.Centre
-            : (viewport.Right - Inset, viewport.Bottom - Inset);
+            : (viewport.X + viewport.Width - Inset, viewport.Y + viewport.Height - Inset);
 
         var square = EditorGizmoSlot.Known ? EditorGizmoSlot.Size : Fallback;
 

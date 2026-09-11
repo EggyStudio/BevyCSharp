@@ -623,6 +623,11 @@ internal static unsafe partial class Native
     // that crosses is the triangles it asked for, once a frame, and the pictures they read from.
     // ---------------------------------------------------------------------------------------
 
+    /// <summary>Writes how many physical pixels a logical one is.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_scale(float* scale);
+
     /// <summary>Hands over this frame's triangles.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -632,6 +637,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial ulong bcs_imgui_texture(byte* pixels, uint width, uint height);
+
+    /// <summary>Takes a picture from a file under the asset root.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial ulong bcs_imgui_picture(string path);
 
     /// <summary>Forgets a picture.</summary>
     [LibraryImport(Library)]

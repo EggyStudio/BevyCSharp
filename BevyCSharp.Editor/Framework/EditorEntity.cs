@@ -21,6 +21,13 @@ public static class EditorEntity
     /// </remarks>
     private static readonly string[] Marks = ["bevy_ui::"];
 
+    /// <summary>What the engine calls the camera it draws the interface through.</summary>
+    /// <remarks>
+    /// A camera like any other as far as the world is concerned, which is exactly why it has to be
+    /// left out of a list of what is in the world: nobody put it there and nobody can edit it.
+    /// </remarks>
+    private const string InterfaceCamera = "Interface camera";
+
     /// <summary>
     /// Whether a component id belongs to the interface, remembered once per id.
     /// </summary>
@@ -39,6 +46,8 @@ public static class EditorEntity
     public static bool IsInterface(EcsWorld world, Entity entity)
     {
         ArgumentNullException.ThrowIfNull(world);
+
+        if (world.NameOf(entity) == InterfaceCamera) return true;
 
         foreach (var id in world.ComponentsOf(entity))
         {

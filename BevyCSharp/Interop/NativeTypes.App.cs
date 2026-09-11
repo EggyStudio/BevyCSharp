@@ -40,5 +40,5 @@ public unsafe struct NativeConfig
     public uint WatchAssets;
 
     /// <summary>Non-zero to build in the HTML and CSS interface.</summary>
-    public uint HtmlUi;
+    public uint Gui;
 }

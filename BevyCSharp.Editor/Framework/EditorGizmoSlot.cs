@@ -1,3 +1,5 @@
+using System.Numerics;
+
 using Bevy;
 
 namespace BevyCSharp.Editor.Framework;
@@ -20,8 +22,8 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 public static class EditorGizmoSlot
 {
-    /// <summary>Where the square is, or a zero-width rect when there is none.</summary>
-    public static Rect Rect { get; private set; }
+    /// <summary>Where the square is, or a zero-width one when there is none.</summary>
+    public static (float Left, float Top, float Width, float Height) Rect { get; private set; }
 
     /// <summary>The frame the square was last reported on.</summary>
     private static ulong _said;
@@ -34,7 +36,7 @@ public static class EditorGizmoSlot
     /// stops it being reported, and a couple of frames later the cross is back in the corner
     /// without anything having to tell it so.
     /// </remarks>
-    public static bool Known => Rect.Width > 1f && EditorShell.Frame - _said < 4;
+    public static bool Known => Rect.Width > 1f && Frame - _said < 4;
 
     /// <summary>The middle of the square, which is what the cross is drawn at.</summary>
     public static (float X, float Y) Centre =>
@@ -43,18 +45,21 @@ public static class EditorGizmoSlot
     /// <summary>How wide the square is, which is how big the cross should be drawn.</summary>
     public static float Size => Rect.Width;
 
-    /// <summary>Says where the reserved square ended up.</summary>
-    public static void Report(Element element)
+    /// <summary>Says where the reserved square ended up, in logical pixels.</summary>
+    public static void Report(Vector2 at, float size, ulong frame)
     {
-        if (!element.Exists || !Dom.TryRect(element, out var rect))
+        if (size <= 1f)
         {
             Forget();
             return;
         }
 
-        Rect = rect;
-        _said = EditorShell.Frame;
+        Rect = (at.X, at.Y, size, size);
+        _said = frame;
     }
+
+    /// <summary>What frame it is, as far as the cross is concerned.</summary>
+    public static ulong Frame { get; set; }
 
     /// <summary>Says there is nowhere to draw, which puts the cross back in the corner.</summary>
     public static void Forget() => Rect = default;

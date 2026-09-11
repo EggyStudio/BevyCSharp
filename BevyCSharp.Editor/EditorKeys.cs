@@ -29,7 +29,7 @@ public partial struct EditorKeys
     public static void Tools(BehaviorContext ctx)
     {
         if (!App.HasEditor) return;
-        if (Dom.Focused().Exists) return;
+        if (ImGuiRuntime.WantsKeyboard) return;
         if (ctx.Input.MouseDown(MouseButton.Right)) return;
 
         foreach (var (key, tool, _) in EditorTools.Keys)
@@ -69,7 +69,7 @@ public partial struct EditorKeys
     public static void Commands(BehaviorContext ctx)
     {
         if (!App.HasEditor) return;
-        if (Dom.Focused().Exists) return;
+        if (ImGuiRuntime.WantsKeyboard) return;
 
         var input = ctx.Input;
         var control = input.AnyKeyDown([Key.ControlLeft, Key.ControlRight]);

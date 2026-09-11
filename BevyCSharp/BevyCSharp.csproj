@@ -24,6 +24,15 @@
         <DevelopmentDependency>false</DevelopmentDependency>
     </PropertyGroup>
 
+    <ItemGroup>
+        <!--
+          Dear ImGui, which the interface is built with. The package carries the native library for
+          every platform the bridge builds for, so a game gets an interface by referencing this one
+          and nothing else.
+        -->
+        <PackageReference Include="Twizzle.ImGui-Bundle.NET" Version="1.91.5.2"/>
+    </ItemGroup>
+
     <!--
       The generator runs against the consumer's compilation. It is referenced as an analyzer
       (never as a library) so its Roslyn dependencies never leak into the consumer's closure.

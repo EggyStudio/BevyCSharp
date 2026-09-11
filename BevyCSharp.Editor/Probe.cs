@@ -1,6 +1,8 @@
+using System.Numerics;
 using Bevy;
 using BevyCSharp.Editor.Behaviors;
 using BevyCSharp.Editor.Framework;
+using ImGuiNET;
 
 namespace BevyCSharp.Editor;
 
@@ -10,14 +12,13 @@ namespace BevyCSharp.Editor;
 /// <remarks>
 /// <para>
 /// What <c>BCS_PROBE</c> names is run at fixed frames: something is put into the world, something
-/// is clicked, something is typed, and what the page ended up saying is printed. Together with
+/// is clicked, something is typed, and what the interface ended up saying is printed. Together with
 /// <c>BCS_SHOT</c> that makes a still of a known state rather than of whatever the editor happened
 /// to be doing.
 /// </para>
 /// <para>
-/// It asks the page questions rather than asking a panel: an element by selector, the box it was
-/// laid out in, the text it holds, what a field holds. That is the same interface a test has,
-/// which is the point.
+/// The clicks go into ImGui's own event queue, which is where a real pointer's report ends up, so
+/// everything they set off behaves exactly as it would.
 /// </para>
 /// </remarks>
 [Behavior]
@@ -35,37 +36,21 @@ public partial struct Probe
                 if (script.Contains("select")) Select(ctx);
                 break;
 
-            case 130:
-                // The console, driven the way a person drives it: dropped in, typed into, and the
-                // answer read off the page.
-                if (script.Contains("console"))
-                {
-                    ConsolePage.Toggle();
-                    Console.WriteLine($"[probe] console open: {ConsolePage.IsOpen}");
-                }
-
+            case 120:
+                if (script.Contains("dock")) EditorShell.Docked = !EditorShell.Docked;
+                if (script.Contains("wide")) EditorShell.PanelWidth = 700f;
+                if (script.Contains("tab")) EditorShell.OpenTab = 0;
                 break;
 
             case 140:
                 if (script.Contains("click")) Click(0);
-
-                if (script.Contains("console"))
-                {
-                    SyntheticInput.Type("help");
-                    SyntheticInput.Key("Enter");
-                }
-
                 break;
 
             case 150:
-                // Typed into whatever the click left holding the keyboard, and finished with, so
-                // that a value going in and coming back is one run rather than a person's hands.
                 if (Environment.GetEnvironmentVariable("BCS_PROBE_TYPE") is { Length: > 0 } typed)
                 {
-                    for (var back = 0; back < 8; back++) SyntheticInput.Key("Backspace");
-
                     SyntheticInput.Type(typed);
-                    SyntheticInput.Key("Enter");
+                    SyntheticInput.Key(ImGuiKey.Enter);
 
                     Console.WriteLine($"[probe] typed {typed}");
                 }
@@ -74,10 +59,6 @@ public partial struct Probe
 
             case 155:
                 if (script.Contains("click")) Click(1);
-                break;
-
-            case 160:
-                if (script.Contains("click")) Click(2);
                 break;
 
             case 170:
@@ -114,75 +95,52 @@ public partial struct Probe
         }
     }
 
-    /// <summary>Clicks what BCS_PROBE_CLICK selects, in the middle of it.</summary>
+    /// <summary>
+    /// Clicks where BCS_PROBE_CLICK says, in logical pixels.
+    /// </summary>
     /// <remarks>
-    /// Several selectors separated by commas are clicked one after another, a few frames apart,
-    /// which is how a menu is opened and then something in it picked.
+    /// Points rather than names, because an immediate mode interface has no elements to look up: a
+    /// widget is a call that happened, and where it landed is what the layout decided. Several
+    /// points separated by semicolons are clicked one after another, a few frames apart.
     /// </remarks>
     private static void Click(int step)
     {
-        var wanted = (Environment.GetEnvironmentVariable("BCS_PROBE_CLICK") ?? "#tool-move")
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var wanted = (Environment.GetEnvironmentVariable("BCS_PROBE_CLICK") ?? string.Empty)
+            .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
         if (step >= wanted.Length) return;
 
-        var selector = wanted[step];
-        var element = Dom.Select(selector);
+        var parts = wanted[step].Split(',', StringSplitOptions.TrimEntries);
 
-        if (!element.Exists || !Dom.TryRect(element, out var rect))
+        if (parts.Length != 2
+            || !float.TryParse(parts[0], out var x)
+            || !float.TryParse(parts[1], out var y))
         {
-            Console.WriteLine($"[probe] nothing matched {selector}");
+            Console.WriteLine($"[probe] {wanted[step]} is not a point");
             return;
         }
-
-        var x = rect.Left + (rect.Width * 0.5f);
-        var y = rect.Top + (rect.Height * 0.5f);
 
         SyntheticInput.Press(x, y);
         SyntheticInput.Release(x, y);
 
-        Console.WriteLine($"[probe] clicked {selector} at {x:0},{y:0}");
+        Console.WriteLine($"[probe] clicked {x:0},{y:0}");
     }
 
-    /// <summary>Prints where the parts of the page ended up, and what they say.</summary>
+    /// <summary>Prints where the interface put things, and what the world made of it.</summary>
     private static void Report(string script, BehaviorContext ctx)
     {
-        foreach (var id in new[] { "toolbar", "hierarchy", "viewport", "inspector", "status-frame" })
-        {
-            var element = Dom.Element(id);
+        var scene = EditorShell.Scene;
+        var panel = EditorShell.Panel;
 
-            if (!element.Exists)
-            {
-                Console.WriteLine($"[probe] {id}: missing");
-                continue;
-            }
+        Console.WriteLine(
+            $"[probe] docked={EditorShell.Docked} panel={panel.X:0},{panel.Y:0}"
+            + $" {panel.Width:0}x{panel.Height:0}");
 
-            var laid = Dom.TryRect(element, out var rect)
-                ? $"{rect.Left:0},{rect.Top:0} {rect.Width:0}x{rect.Height:0}"
-                : "not laid out";
+        Console.WriteLine(
+            $"[probe] scene={scene.X:0},{scene.Y:0} {scene.Width:0}x{scene.Height:0}"
+            + $" split={(EditorShell.Stacked ? "above" : "beside")}"
+            + $" tab={EditorShell.OpenTab}");
 
-            Console.WriteLine($"[probe] {id}: {laid}");
-        }
-
-        if (Environment.GetEnvironmentVariable("BCS_PROBE_CLICK") is { Length: > 0 } clicked)
-        {
-            var selector = clicked.Split(',')[0].Trim();
-            var element = Dom.Select(selector);
-
-            Console.WriteLine(element.Exists
-                ? $"[probe] {selector}: on={Dom.Attribute(element, "data-on")}"
-                    + $" value={Dom.GetValue(element)}"
-                : $"[probe] {selector} is gone");
-
-            var over = Dom.Select("#overlays > *");
-
-            Console.WriteLine(over.Exists && Dom.TryRect(over, out var box)
-                ? $"[probe] overlay: {box.Left:0},{box.Top:0} {box.Width:0}x{box.Height:0}"
-                : "[probe] overlay: nothing");
-        }
-
-        // What the component made of what was typed, which is the half a field cannot show: a
-        // field holding 12.5 may be a value that was written or a value that never left the box.
         if (EditorSelection.Any)
         {
             foreach (var id in ctx.Ecs.ComponentsOf(EditorSelection.Current))
@@ -202,22 +160,9 @@ public partial struct Probe
 
         if (script.Contains("console"))
         {
-            var lines = Dom.Select("#console-lines");
-
-            Console.WriteLine(lines.Exists
-                ? $"[probe] console says {Dom.GetText(lines).Length} characters"
-                : "[probe] the console has no lines");
+            Console.WriteLine($"[probe] the log holds {ConsoleLog.All().Length} lines");
         }
 
-        if (script.Contains("text"))
-        {
-            foreach (var selector in new[] { "#status-selection", ".tree-item", ".group > header" })
-            {
-                var element = Dom.Select(selector);
-                var text = element.Exists ? Dom.GetText(element) : "(none)";
-
-                Console.WriteLine($"[probe] {selector}: {text}");
-            }
-        }
+        _ = Vector2.Zero;
     }
 }

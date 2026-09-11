@@ -213,7 +213,7 @@ pub struct BcsConfig {
     pub watch_assets: u32,
     /// Non-zero to build in the HTML and CSS interface. Needs the editor profile, and brings a
     /// camera and a set of systems that an app not using it has no reason to carry.
-    pub html_ui: u32,
+    pub gui: u32,
 }
 
 /// How a camera should see, passed from C# when one is spawned.

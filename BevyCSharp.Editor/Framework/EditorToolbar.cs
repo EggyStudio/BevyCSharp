@@ -16,6 +16,9 @@ public enum ToolbarSlot
 
     /// <summary>Bottom right: what describes the view rather than acting on it.</summary>
     BottomRight,
+
+    /// <summary>Left edge, stacked downwards: the modes a viewport can be in.</summary>
+    LeftEdge,
 }
 
 /// <summary>

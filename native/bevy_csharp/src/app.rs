@@ -189,7 +189,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // watches for documents to build. The editor profile is a superset of the render
             // one, so the sample and a game are built against exactly this library.
             #[cfg(feature = "editor")]
-            if config.html_ui != 0 {
+            if config.gui != 0 {
                 crate::imgui::install(&mut app);
 
                 // Clicking a mesh to select it is the other half of what a hierarchy list does,

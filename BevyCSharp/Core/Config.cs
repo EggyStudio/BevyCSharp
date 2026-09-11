@@ -91,22 +91,21 @@ public sealed class Config
     public bool WatchAssets { get; set; }
 
     /// <summary>
-    /// Build in the interface described in HTML and CSS.
+    /// Draw an interface: Dear ImGui, rasterised by the engine.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// What <see cref="Dom"/> needs. Off unless asked for, because it is not free to an app that
-    /// never opens a page: it brings a camera of its own, a texture the size of the window, and
-    /// the systems that lay the page out and paint it. The editor profile is a superset of the
-    /// render one, so a game and the editor run against the same library and this is what tells
-    /// them apart.
+    /// What <see cref="ImGuiRuntime"/> needs. Off unless asked for, because it is not free to an
+    /// app that never draws one: it brings the pass that rasterises the interface and the buffers
+    /// it draws from. The editor profile is a superset of the render one, so a game and the editor
+    /// run against the same library and this is what tells them apart.
     /// </para>
     /// <para>
     /// Needs a bridge built with that profile, which <see cref="App.HasEditor"/> reports. On a
     /// build without it this does nothing.
     /// </para>
     /// </remarks>
-    public bool HtmlUi { get; set; }
+    public bool Gui { get; set; }
 
     /// <summary>
     /// How many times a second <see cref="Stage.FixedUpdate"/> runs. Zero keeps Bevy's own
