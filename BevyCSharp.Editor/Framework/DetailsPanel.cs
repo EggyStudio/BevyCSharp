@@ -53,7 +53,11 @@ public static class DetailsPanel
 
         ImGui.Spacing();
 
-        if (!ImGui.BeginChild("##components", new Vector2(0f, 0f))) return;
+        if (!ImGui.BeginChild("##components", new Vector2(0f, 0f), ImGuiChildFlags.NavFlattened))
+        {
+            ImGui.EndChild();
+            return;
+        }
 
         foreach (var id in ctx.Ecs.ComponentsOf(entity))
         {

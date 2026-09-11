@@ -330,7 +330,15 @@ public static class EditorShell
         ImGui.SetCursorScreenPos(at + ImGui.GetStyle().WindowPadding);
     }
 
-    /// <summary>The strip along the bottom left, and whatever tab is open above it.</summary>
+    /// <summary>
+    /// The strip along the bottom left, with whatever is open growing upwards out of it.
+    /// </summary>
+    /// <remarks>
+    /// The bar is drawn under its content rather than over it, which is what a console does: the
+    /// headers stay where the hand last left them and the lines rise out of the bottom of the
+    /// screen. ImGui's own tab bar either way, so hovering, ordering and the mark on the one in
+    /// force are its to draw.
+    /// </remarks>
     private static void DrawTabs(float width, float strip, float margin)
     {
         if (Tabs.Count == 0 || width < 80f) return;
@@ -340,6 +348,7 @@ public static class EditorShell
 
         ImGui.SetNextWindowPos(new Vector2(margin, top));
         ImGui.SetNextWindowSize(new Vector2(width, strip));
+        ImGui.SetNextWindowBgAlpha(EditorTheme.Current.PanelAlpha);
 
         var flags = ImGuiWindowFlags.NoTitleBar
             | ImGuiWindowFlags.NoResize
@@ -354,33 +363,36 @@ public static class EditorShell
             return;
         }
 
-        // What is open is drawn above its own header, the way a browser puts a page above its tab.
+        // What is open, first, in the room left above the bar.
         if (OpenTab >= 0 && OpenTab < Tabs.Count)
         {
-            ImGui.BeginChild("##tab", new Vector2(0f, TabHeight), ImGuiChildFlags.Borders);
-            Tabs[OpenTab].Draw();
+            var room = ImGui.GetContentRegionAvail();
+
+            if (ImGui.BeginChild("##tab", new Vector2(0f, room.Y - TabStrip)))
+            {
+                Tabs[OpenTab].Draw();
+            }
+
             ImGui.EndChild();
         }
 
-        // The headers read like a browser's: the open one wears the colour of what is above it,
-        // the others sit back, and clicking the open one puts it away again.
-        for (var index = 0; index < Tabs.Count; index++)
+        // And the bar under it. A header is a button as far as ImGui is concerned here, because
+        // what a click means is ours: the one already open closes rather than staying open.
+        if (ImGui.BeginTabBar("##strip", ImGuiTabBarFlags.NoTooltip))
         {
-            if (index > 0) ImGui.SameLine(0f, 2f);
+            for (var index = 0; index < Tabs.Count; index++)
+            {
+                var open = index == OpenTab;
 
-            var open = index == OpenTab;
+                if (ImGui.TabItemButton(
+                        $" {Tabs[index].Name} ",
+                        open ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None))
+                {
+                    OpenTab = open ? -1 : index;
+                }
+            }
 
-            ImGui.PushStyleColor(
-                ImGuiCol.Button,
-                ImGui.GetColorU32(open ? ImGuiCol.WindowBg : ImGuiCol.FrameBg));
-
-            ImGui.PushStyleColor(
-                ImGuiCol.Text,
-                ImGui.GetColorU32(open ? ImGuiCol.Text : ImGuiCol.TextDisabled));
-
-            if (ImGui.Button($"  {Tabs[index].Name}  ")) OpenTab = open ? -1 : index;
-
-            ImGui.PopStyleColor(2);
+            ImGui.EndTabBar();
         }
 
         ImGui.End();
