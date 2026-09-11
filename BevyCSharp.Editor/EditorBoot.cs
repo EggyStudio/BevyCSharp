@@ -34,6 +34,7 @@ public partial struct EditorBoot
         EditorShell.Load(EditorPaths.Assets);
 
         EditorShell.Tabs.Add(("Console", ConsoleTab.Draw));
+        EditorShell.Tabs.Add(("Assets", AssetsTab.Draw));
         EditorShell.Tabs.Add(("Style", StyleTab.Draw));
 
         EditorProject.RestoreLayout();

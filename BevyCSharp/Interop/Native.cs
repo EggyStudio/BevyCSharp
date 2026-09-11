@@ -623,6 +623,11 @@ internal static unsafe partial class Native
     // that crosses is the triangles it asked for, once a frame, and the pictures they read from.
     // ---------------------------------------------------------------------------------------
 
+    /// <summary>Moves, presses or releases the pointer, as though a hand had.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_input_pointer(float x, float y, int action, int button);
+
     /// <summary>Writes how many physical pixels a logical one is.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

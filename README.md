@@ -1449,9 +1449,10 @@ ImGui can put in a draw call, decoded by the engine like any other asset, and dr
 `ImGui.Image` tinted to whatever it means.
 
 **Input is fed, not polled.** `ImGuiRuntime.Begin` turns the engine's per-frame input into the
-events ImGui expects, and `ImGuiRuntime.WantsMouse` is what stops the camera flying while a panel
-is being dragged. `SyntheticInput` writes into the same queue, so a test drives the interface the
-way a hand does.
+events ImGui expects, and `ImGuiRuntime.WantsMouse` is what stops the camera flying, or a click
+picking something behind a panel, while the interface has the pointer. `SyntheticInput` writes into
+both halves — ImGui's queue and the window's own messages — so a test selects a mesh and drags a
+handle the way a hand does.
 
 ## The editor
 

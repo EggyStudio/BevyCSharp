@@ -72,16 +72,22 @@ public sealed record EditorTheme
     public float PanelAlpha { get; init; } = 0.85f;
 
     /// <summary>How round a floating panel is.</summary>
-    public float WindowRounding { get; init; } = 10f;
+    public float WindowRounding { get; init; } = 14f;
 
     /// <summary>How round a card inside one is.</summary>
-    public float ChildRounding { get; init; } = 8f;
+    public float ChildRounding { get; init; } = 10f;
 
-    /// <summary>How round a box, a button or a field is.</summary>
-    public float FrameRounding { get; init; } = 6f;
+    /// <summary>
+    /// How round a box, a button or a field is.
+    /// </summary>
+    /// <remarks>
+    /// Half the height of a row, so a field is a pill rather than a rectangle with the corners
+    /// taken off. A button with only a picture in it goes further and is a circle.
+    /// </remarks>
+    public float FrameRounding { get; init; } = 9f;
 
     /// <summary>How round a tab is.</summary>
-    public float TabRounding { get; init; } = 8f;
+    public float TabRounding { get; init; } = 10f;
 
     /// <summary>How much air a panel keeps inside its edge.</summary>
     public Vector2 WindowPadding { get; init; } = new(12f, 10f);
@@ -160,7 +166,9 @@ public sealed record EditorTheme
         style.GrabMinSize = 10f;
 
         style.WindowTitleAlign = new Vector2(0f, 0.5f);
-        style.SeparatorTextBorderSize = 1f;
+
+        // A heading inside a panel is a word, not a word with a line through the rest of the row.
+        style.SeparatorTextBorderSize = theme.Borders;
         style.SeparatorTextPadding = new Vector2(14f, 4f);
         style.SeparatorTextAlign = new Vector2(0f, 0.5f);
 

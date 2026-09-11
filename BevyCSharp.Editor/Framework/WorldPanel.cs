@@ -17,9 +17,26 @@ public static class WorldPanel
 {
     private static readonly List<Row> Rows = [];
 
+    /// <summary>What has been folded away, by the entity that holds it.</summary>
+    /// <remarks>
+    /// What is folded rather than what is open, so a thing spawned into the world arrives visible.
+    /// A list that remembered what was open would hide everything it has not seen before.
+    /// </remarks>
+    private static readonly HashSet<ulong> Folded = [];
+
     private static ulong _built;
     private static int _population;
     private static string _search = string.Empty;
+
+    /// <summary>What is being renamed in place, and what has been typed so far.</summary>
+    private static ulong _renaming;
+    private static string _typed = string.Empty;
+
+    /// <summary>Which rename has already been given the keyboard.</summary>
+    private static ulong _started;
+
+    /// <summary>The last row picked, which is what a range is measured from.</summary>
+    private static ulong _anchor;
 
     /// <summary>One line of the list.</summary>
     /// <param name="Entity">What the row stands for.</param>
@@ -49,67 +66,239 @@ public static class WorldPanel
 
         if (!ImGui.BeginChild("##rows", new Vector2(0f, 0f))) return;
 
+        // How deep a fold reaches: everything under a folded row, until something at its own
+        // depth or shallower comes along.
+        var hidden = -1;
+
         foreach (var row in Rows)
         {
+            if (hidden >= 0 && row.Depth > hidden) continue;
+
+            hidden = -1;
+
             if (wanted.Length > 0 && !row.Name.Contains(wanted, StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
 
-            var picked = EditorSelection.All.Contains(row.Entity);
+            Line(ctx, row);
 
-            // The accent means one thing: this is what is chosen. Pushed here rather than set on
-            // the theme, because the same colour draws every collapsing header in the editor.
-            // Under the stock look ImGui already draws a selected row as it thinks best, and a
-            // colour of ours over it would be the editor disagreeing with the theme it was asked
-            // to wear.
-            var mark = picked && !EditorTheme.Current.Stock;
-
-            if (mark)
+            // A search shows what matches wherever it is, so nothing is folded while one is on.
+            if (wanted.Length == 0 && row.HasChildren && Folded.Contains(row.Entity.Bits))
             {
-                ImGui.PushStyleColor(ImGuiCol.Header, EditorTheme.Current.Accent);
-                ImGui.PushStyleColor(
-                    ImGuiCol.HeaderHovered,
-                    EditorTheme.Alpha(EditorTheme.Current.Accent, 0.9f));
+                hidden = row.Depth;
             }
-
-            ImGui.Indent(row.Depth * ImGui.GetStyle().IndentSpacing);
-
-            // The picture first, then the row it belongs to, on one line. Drawn before the
-            // selectable so the highlight runs the whole width behind both.
-            ImGuiTextures.Draw(row.Icon, 14f, EditorTheme.IconTint(picked));
-            ImGui.SameLine(0f, 6f);
-
-            if (ImGui.Selectable($"{row.Name}##{row.Entity.Bits}", picked))
-            {
-                // Holding control adds to what is chosen rather than replacing it, which is what
-                // every list of things anywhere does.
-                if (ctx.Input.AnyKeyDown([Key.ControlLeft, Key.ControlRight]))
-                {
-                    EditorSelection.Toggle(row.Entity);
-                }
-                else
-                {
-                    EditorSelection.Select(row.Entity);
-                }
-            }
-
-            if (ImGui.BeginPopupContextItem($"##menu{row.Entity.Bits}"))
-            {
-                EditorSelection.Select(row.Entity);
-
-                if (ImGui.MenuItem("Delete")) EditorMenu.Find("Entity/Delete")?.Run?.Invoke(ctx.Ecs);
-                if (ImGui.MenuItem("Duplicate")) EditorMenu.Find("Entity/Duplicate")?.Run?.Invoke(ctx.Ecs);
-
-                ImGui.EndPopup();
-            }
-
-            ImGui.Unindent(row.Depth * ImGui.GetStyle().IndentSpacing);
-
-            if (mark) ImGui.PopStyleColor(2);
         }
 
         ImGui.EndChild();
+    }
+
+    /// <summary>
+    /// One row: a pill the width of the list, with a picture and a name in it.
+    /// </summary>
+    /// <remarks>
+    /// Drawn rather than asked for, because a selectable is a rectangle with square corners in this
+    /// version of ImGui and everything else in the editor is rounded. What that buys besides the
+    /// shape is the fill running the whole width behind the indent, which is what makes a list of
+    /// nested things read as rows rather than as ragged text.
+    /// </remarks>
+    private static void Line(BehaviorContext ctx, Row row)
+    {
+        var picked = EditorSelection.All.Contains(row.Entity);
+        var theme = EditorTheme.Current;
+
+        var height = ImGui.GetFrameHeight();
+        var width = ImGui.GetContentRegionAvail().X;
+        var at = ImGui.GetCursorScreenPos();
+
+        // Being renamed: the row is a box to type in and nothing else, until Enter or Escape.
+        if (_renaming == row.Entity.Bits)
+        {
+            ImGui.SetNextItemWidth(width);
+
+            // The keyboard goes to the box the frame it appears, so a name can be typed without
+            // clicking the thing that was just double-clicked.
+            if (_started != row.Entity.Bits)
+            {
+                _started = row.Entity.Bits;
+                ImGui.SetKeyboardFocusHere();
+            }
+
+            var done = ImGui.InputText(
+                $"##rename{row.Entity.Bits}",
+                ref _typed,
+                128,
+                ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll);
+
+            if (done && _typed.Trim() is { Length: > 0 } name)
+            {
+                ctx.Ecs.SetName(row.Entity, name.Trim());
+                _renaming = 0;
+                _started = 0;
+
+                // Walked again, because a name is what the list is sorted by.
+                _built = 0;
+            }
+
+            // Let go of it by pressing Escape or by clicking somewhere else.
+            if (ImGui.IsKeyPressed(ImGuiKey.Escape)
+                || (_started == row.Entity.Bits && !ImGui.IsItemActive() && !ImGui.IsItemFocused()))
+            {
+                _renaming = 0;
+                _started = 0;
+            }
+
+            return;
+        }
+
+        ImGui.InvisibleButton($"##row{row.Entity.Bits}", new Vector2(width, height));
+
+        var over = ImGui.IsItemHovered();
+
+        // Twice on a name is how a name is changed, in every list of things there is.
+        if (over && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+        {
+            _renaming = row.Entity.Bits;
+            _typed = row.Name;
+            return;
+        }
+
+        if (ImGui.IsItemClicked())
+        {
+            // Control adds one, shift takes everything between this and the last one picked, and
+            // neither replaces what was chosen. Which is what every list of things anywhere does.
+            if (ctx.Input.AnyKeyDown([Key.ControlLeft, Key.ControlRight]))
+            {
+                EditorSelection.Toggle(row.Entity);
+                _anchor = row.Entity.Bits;
+            }
+            else if (ctx.Input.AnyKeyDown([Key.ShiftLeft, Key.ShiftRight]) && _anchor != 0)
+            {
+                Range(row.Entity);
+            }
+            else
+            {
+                EditorSelection.Select(row.Entity);
+                _anchor = row.Entity.Bits;
+            }
+        }
+
+        if (ImGui.BeginPopupContextItem($"##menu{row.Entity.Bits}"))
+        {
+            EditorSelection.Select(row.Entity);
+
+            if (ImGui.MenuItem("Delete")) EditorMenu.Find("Entity/Delete")?.Run?.Invoke(ctx.Ecs);
+            if (ImGui.MenuItem("Duplicate")) EditorMenu.Find("Entity/Duplicate")?.Run?.Invoke(ctx.Ecs);
+
+            ImGui.EndPopup();
+        }
+
+        // Everything after the button is drawn rather than laid out: the button is the row as far
+        // as ImGui is concerned, and moving the cursor to put things inside it is how a window ends
+        // up believing it is taller than it is.
+        var draw = ImGui.GetWindowDrawList();
+
+        if (picked || over)
+        {
+            // Under the stock look the row wears what ImGui says a chosen row wears, rather than
+            // the editor's own accent: a theme taken whole is taken whole.
+            var fill = theme.Stock
+                ? ImGui.GetColorU32(picked ? ImGuiCol.Header : ImGuiCol.HeaderHovered)
+                : ImGui.GetColorU32(picked
+                    ? theme.Accent
+                    : EditorTheme.Alpha(theme.Hover, theme.PanelAlpha));
+
+            draw.AddRectFilled(at, at + new Vector2(width, height), fill, theme.FrameRounding);
+        }
+
+        var line = ImGui.GetTextLineHeight();
+        var indent = 6f + (row.Depth * ImGui.GetStyle().IndentSpacing);
+        var middle = at.Y + ((height - line) * 0.5f);
+
+        // A triangle for anything with things under it, pointing down when they are showing and
+        // right when they are folded away. Drawn where an arrow goes and hit where it is drawn.
+        if (row.HasChildren)
+        {
+            var folded = Folded.Contains(row.Entity.Bits);
+            var arrow = new Vector2(at.X + indent, middle);
+            var mark = line * 0.34f;
+
+            var colour = ImGui.GetColorU32(EditorTheme.Alpha(theme.Text, over || picked ? 0.9f : 0.6f));
+            var centre = arrow + new Vector2(line * 0.5f, line * 0.5f);
+
+            if (folded)
+            {
+                draw.AddTriangleFilled(
+                    centre + new Vector2(-mark * 0.6f, -mark),
+                    centre + new Vector2(-mark * 0.6f, mark),
+                    centre + new Vector2(mark * 0.8f, 0f),
+                    colour);
+            }
+            else
+            {
+                draw.AddTriangleFilled(
+                    centre + new Vector2(-mark, -mark * 0.6f),
+                    centre + new Vector2(mark, -mark * 0.6f),
+                    centre + new Vector2(0f, mark * 0.8f),
+                    colour);
+            }
+
+            // The arrow is its own target: clicking it folds, clicking the rest of the row picks.
+            if (over
+                && ImGui.IsMouseClicked(ImGuiMouseButton.Left)
+                && ImGui.GetIO().MousePos.X < arrow.X + line + 4f)
+            {
+                if (folded) Folded.Remove(row.Entity.Bits);
+                else Folded.Add(row.Entity.Bits);
+            }
+
+            indent += line + 2f;
+        }
+        else if (Rows.Exists(other => other.HasChildren))
+        {
+            // Kept in step with the rows that do have an arrow, so names line up in a column.
+            indent += line + 2f;
+        }
+
+        if (ImGuiTextures.Load(row.Icon) is var picture && picture != 0)
+        {
+            draw.AddImage(
+                (IntPtr)picture,
+                new Vector2(at.X + indent, middle),
+                new Vector2(at.X + indent + line, middle + line),
+                Vector2.Zero,
+                Vector2.One,
+                ImGui.GetColorU32(EditorTheme.IconTint(picked)));
+        }
+
+        draw.AddText(
+            new Vector2(at.X + indent + line + 6f, middle),
+            ImGui.GetColorU32(picked ? theme.Text : EditorTheme.Alpha(theme.Text, 0.88f)),
+            row.Name);
+    }
+
+    /// <summary>
+    /// Chooses everything between the last row picked and this one.
+    /// </summary>
+    /// <remarks>
+    /// Measured down the list as it is drawn rather than through the tree, because what somebody
+    /// means by "everything between these two" is what they can see between them.
+    /// </remarks>
+    private static void Range(Entity to)
+    {
+        var first = Rows.FindIndex(row => row.Entity.Bits == _anchor);
+        var last = Rows.FindIndex(row => row.Entity == to);
+
+        if (first < 0 || last < 0) return;
+
+        if (first > last) (first, last) = (last, first);
+
+        EditorSelection.Clear();
+
+        for (var index = first; index <= last; index++)
+        {
+            EditorSelection.Toggle(Rows[index].Entity);
+        }
     }
 
     /// <summary>Walks the world into a flat list of rows carrying their depth.</summary>
@@ -165,6 +354,10 @@ public static class WorldPanel
         foreach (var list in children.Values) list.Sort(Compare);
 
         foreach (var root in roots) Add(root, 0);
+
+        // A fold on something that is no longer there is a fold that hides the next thing to take
+        // its place in storage.
+        Folded.RemoveWhere(bits => !names.ContainsKey(bits));
 
         int Compare(Entity a, Entity b) => string.Compare(
             names.GetValueOrDefault(a.Bits), names.GetValueOrDefault(b.Bits),

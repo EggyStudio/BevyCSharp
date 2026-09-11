@@ -64,3 +64,92 @@ pub fn set_key(bits: &mut [u64; KEY_WORDS], key: KeyCode) {
         bits[bit / 64] |= 1u64 << (bit % 64);
     }
 }
+
+/// Moves, presses or releases the pointer, as though a hand had.
+///
+/// What a test drives the scene with. The window's own messages are written, which is where a real
+/// pointer's report begins, so everything downstream behaves exactly as it would: the camera reads
+/// the button, picking raycasts the meshes, and a gizmo takes hold.
+///
+/// `action` is 0 to move, 1 to press and 2 to release; `button` is 0 for left, 1 for right and 2
+/// for middle. The position is in logical pixels from the window's top left.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (x, y, action, button);
+            crate::interop::status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::input::ButtonState;
+            use bevy::input::mouse::MouseButtonInput;
+            use bevy::prelude::*;
+            use bevy::window::{CursorMoved, PrimaryWindow, Window};
+
+            crate::state::with_world(|world| {
+                let mut windows =
+                    world.query_filtered::<Entity, bevy::prelude::With<PrimaryWindow>>();
+
+                let Ok(window) = windows.single(world) else {
+                    return crate::interop::status::INVALID_STATE;
+                };
+
+                // Moved first whatever the action is: a press somewhere the pointer has never been
+                // is a press on whatever it was last over.
+                let moved = CursorMoved {
+                    window,
+                    position: Vec2::new(x, y),
+                    delta: None,
+                };
+
+                world.write_message(moved.clone());
+
+                // And again as a window event, which is the one picking reads. Winit writes both
+                // for every real pointer, so writing one is writing half a pointer.
+                world.write_message(bevy::window::WindowEvent::CursorMoved(moved));
+
+                // And the window itself is told, because what reads the pointer's position reads
+                // the window rather than the message that moved it.
+                if let Some(mut held) = world.get_mut::<Window>(window) {
+                    held.set_cursor_position(Some(Vec2::new(x, y)));
+                }
+
+                let button = match button {
+                    1 => MouseButton::Right,
+                    2 => MouseButton::Middle,
+                    _ => MouseButton::Left,
+                };
+
+                let state = match action {
+                    1 => ButtonState::Pressed,
+                    2 => ButtonState::Released,
+                    _ => return crate::interop::status::OK,
+                };
+
+                let pressed = MouseButtonInput {
+                    button,
+                    state,
+                    window,
+                };
+
+                world.write_message(pressed.clone());
+                world.write_message(bevy::window::WindowEvent::MouseButtonInput(pressed));
+
+                // The state the rest of the frame reads, which the message only reaches next
+                // frame: a test that presses and releases in one call would otherwise report
+                // nothing to anything asking whether a button is down.
+                if let Some(mut buttons) = world.get_resource_mut::<ButtonInput<MouseButton>>() {
+                    match state {
+                        ButtonState::Pressed => buttons.press(button),
+                        ButtonState::Released => buttons.release(button),
+                    }
+                }
+
+                crate::interop::status::OK
+            })
+        }
+    })
+}

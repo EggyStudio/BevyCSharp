@@ -215,8 +215,20 @@ public static class DetailsPanel
         if (field.Hints.Header is { Length: > 0 } heading) ImGui.SeparatorText(heading);
 
         ImGui.PushID(id);
-        ImGui.Columns(2, "##row", false);
-        ImGui.SetColumnWidth(0, 110f);
+
+        if (!ImGui.BeginTable("##row", 2, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.NoSavedSettings))
+        {
+            ImGui.PopID();
+            return;
+        }
+
+        // The name takes a third and the value the rest, which holds at any width: a fixed column
+        // that fits at five hundred pixels leaves nothing for the value at three hundred.
+        ImGui.TableSetupColumn("##name", ImGuiTableColumnFlags.WidthStretch, 0.38f);
+        ImGui.TableSetupColumn("##value", ImGuiTableColumnFlags.WidthStretch, 0.62f);
+
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
 
         ImGui.AlignTextToFramePadding();
         ImGui.TextUnformatted(field.Title);
@@ -226,7 +238,7 @@ public static class DetailsPanel
             ImGui.SetTooltip(why);
         }
 
-        ImGui.NextColumn();
+        ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(-1f);
 
         var editable = field.IsWritable;
@@ -305,6 +317,64 @@ public static class DetailsPanel
                 break;
             }
 
+            case FieldKind.Asset:
+            {
+                // What it holds, and a list of what it could hold instead. The files are asked for
+                // when the list opens rather than when the row is drawn: a field that listed the
+                // project every frame would read the disk sixty times a second.
+                var held = value?.ToString() ?? "none";
+
+                if (ImGui.Button(Short(held), new Vector2(-1f, 0f))) ImGui.OpenPopup($"##pick{id}");
+
+                if (ImGui.BeginPopup($"##pick{id}"))
+                {
+                    if (ImGui.MenuItem("Nothing")) field.Write(ctx.Ecs, entity, AssetHandle.None);
+
+                    var kind = field.Hints.Asset ?? AssetKind.Mesh;
+
+                    foreach (var file in EditorAssets.Every(Suits(field, kind)))
+                    {
+                        if (!ImGui.MenuItem(file)) continue;
+
+                        // Loaded when it is chosen rather than when the list was built: a list that
+                        // loaded everything it offered would load the project to ask a question.
+                        field.Write(ctx.Ecs, entity, AssetServer.Load(kind, file));
+                    }
+
+                    ImGui.EndPopup();
+                }
+
+                break;
+            }
+
+            case FieldKind.Entity:
+            {
+                var held = value as Entity? ?? Entity.None;
+
+                var name = held.IsNone
+                    ? "none"
+                    : ctx.Ecs.NameOf(held) ?? $"Entity {held.Index}";
+
+                if (ImGui.Button(name, new Vector2(-1f, 0f))) ImGui.OpenPopup($"##pick{id}");
+
+                if (ImGui.BeginPopup($"##pick{id}"))
+                {
+                    if (ImGui.MenuItem("Nothing")) field.Write(ctx.Ecs, entity, Entity.None);
+
+                    foreach (var other in ctx.Ecs.All())
+                    {
+                        if (ctx.Ecs.NameOf(other) is not { Length: > 0 } called) continue;
+                        if (EditorEntity.IsInterface(ctx.Ecs, other)) continue;
+
+                        if (ImGui.MenuItem(called)) field.Write(ctx.Ecs, entity, other);
+                    }
+
+                    ImGui.EndPopup();
+                }
+
+                break;
+            }
+
             case FieldKind.Flags:
             {
                 // Any number of a fixed set at once, so one box per name rather than one choice.
@@ -348,8 +418,19 @@ public static class DetailsPanel
             ImGui.TextDisabled(unit);
         }
 
-        ImGui.Columns(1);
+        ImGui.EndTable();
         ImGui.PopID();
+    }
+
+    /// <summary>Which files suit a field: what it asked for, or what its kind usually holds.</summary>
+    private static IReadOnlyCollection<string> Suits(ComponentField field, string kind)
+    {
+        if (field.Hints.Extensions is { Length: > 0 } asked)
+        {
+            return asked.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        }
+
+        return [.. EditorAssets.ExtensionsFor(kind)];
     }
 
     /// <summary>

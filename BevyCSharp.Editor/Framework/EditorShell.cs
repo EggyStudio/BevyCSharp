@@ -36,14 +36,32 @@ public static class EditorShell
     /// </remarks>
     public const float Stacks = 460f;
 
-    private const float TabStrip = 30f;
+    /// <summary>The narrowest the panel goes, and what it opens at.</summary>
+    public const float Narrowest = 320f;
+
     private const float Header = 28f;
+
+    /// <summary>
+    /// How tall the strip of tabs is, measured rather than guessed.
+    /// </summary>
+    /// <remarks>
+    /// A guess is wrong the moment the font or the padding changes, and what it looks like when it
+    /// is wrong is a row of tabs with their text cut off along the bottom of the window.
+    /// </remarks>
+    private static float TabStrip => ImGui.GetFrameHeight()
+        + (ImGui.GetStyle().WindowPadding.Y * 2f)
+        + ImGui.GetStyle().ItemSpacing.Y;
 
     /// <summary>Whether the panel is against the window's edge, with the scene beside it.</summary>
     public static bool Docked { get; set; }
 
     /// <summary>How wide the panel is, in logical pixels.</summary>
-    public static float PanelWidth { get; set; } = 560f;
+    /// <remarks>
+    /// As narrow as it goes, which is the stacked arrangement: an editor opens with the scene
+    /// taking the room and the panel taking what it needs, and widening it is a thing somebody
+    /// does when they want two columns.
+    /// </remarks>
+    public static float PanelWidth { get; set; } = Narrowest;
 
     /// <summary>How much of the panel the world gets, the data taking the rest.</summary>
     public static float WorldShare { get; set; } = 0.45f;
@@ -148,10 +166,27 @@ public static class EditorShell
 
         ImGuiRuntime.Begin(ctx);
 
+        // A click on a mesh selects it, which is the other half of what the world list does. The
+        // shell does this rather than a panel, because a selection belongs to the editor.
+        //
+        // Not while the interface has the pointer: the scene is raycast by the engine, which knows
+        // nothing about the panels drawn over it, so a click on a panel would also land on
+        // whatever happens to be behind it.
+        foreach (var picked in Picking.Drain())
+        {
+            if (ImGuiRuntime.WantsMouse) break;
+
+            EditorSelection.Select(picked);
+        }
+
+        // A selection whose entity is gone is worse than none: the details panel would read
+        // whatever took its place in storage.
+        EditorSelection.Prune(ctx.Ecs);
+
         var window = ImGuiRuntime.Size;
         var margin = Docked ? 0f : Margin;
 
-        PanelWidth = Math.Clamp(PanelWidth, 320f, Math.Max(360f, window.X - 320f));
+        PanelWidth = Math.Clamp(PanelWidth, Narrowest, Math.Max(Narrowest + 40f, window.X - 320f));
 
         var panelX = window.X - margin - PanelWidth;
         Panel = (panelX, margin, PanelWidth, window.Y - (margin * 2f));
@@ -394,7 +429,9 @@ public static class EditorShell
         {
             var room = ImGui.GetContentRegionAvail();
 
-            if (ImGui.BeginChild("##tab", new Vector2(0f, room.Y - TabStrip)))
+            var bar = ImGui.GetFrameHeight() + ImGui.GetStyle().ItemSpacing.Y;
+
+            if (ImGui.BeginChild("##tab", new Vector2(0f, room.Y - bar)))
             {
                 Tabs[OpenTab].Draw();
             }
@@ -482,8 +519,9 @@ public static class EditorShell
             Scene.Y + (Scene.Height * corner.Y) + (corner.Y > 0.5f ? -inset : inset));
 
         ImGui.SetNextWindowPos(at, ImGuiCond.Always, pivot);
-        ImGui.SetNextWindowBgAlpha(EditorTheme.Current.PanelAlpha);
 
+        // No panel behind them. A group of buttons floating over the scene is a group of buttons,
+        // and a plate under them is a second thing to look at that says nothing.
         var flags = ImGuiWindowFlags.NoTitleBar
             | ImGuiWindowFlags.NoResize
             | ImGuiWindowFlags.NoMove
@@ -491,13 +529,25 @@ public static class EditorShell
             | ImGuiWindowFlags.NoSavedSettings
             | ImGuiWindowFlags.NoScrollbar
             | ImGuiWindowFlags.AlwaysAutoResize
-            | ImGuiWindowFlags.NoFocusOnAppearing;
+            | ImGuiWindowFlags.NoFocusOnAppearing
+            | ImGuiWindowFlags.NoBackground;
+
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0f, 0f));
 
         if (!ImGui.Begin($"##bar{slot}", flags))
         {
             ImGui.End();
+            ImGui.PopStyleVar();
             return;
         }
+
+        // Round enough that a square button is a circle, which is what a button with a picture in
+        // it and no words wants to be.
+        const float Size = 34f;
+
+        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, Size * 0.5f);
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0f, 0f));
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(6f, 6f));
 
         for (var index = 0; index < buttons.Count; index++)
         {
@@ -506,17 +556,36 @@ public static class EditorShell
             if (index > 0 && !down) ImGui.SameLine();
 
             var on = button.Active?.Invoke() == true;
-            if (on) ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.ButtonActive));
+            var theme = EditorTheme.Current;
+
+            // Nothing behind a button that is not in force or under the hand: the picture is the
+            // button. What is in force wears the accent, which is the one thing colour means.
+            ImGui.PushStyleColor(
+                ImGuiCol.Button,
+                on ? theme.Accent : EditorTheme.Alpha(theme.Card, theme.PanelAlpha * 0.55f));
+
+            ImGui.PushStyleColor(
+                ImGuiCol.ButtonHovered,
+                on ? EditorTheme.Alpha(theme.Accent, 0.85f) : EditorTheme.Alpha(theme.Hover, 0.9f));
+
+            ImGui.PushStyleColor(
+                ImGuiCol.ButtonActive,
+                on ? theme.Accent : EditorTheme.Alpha(theme.Active, 0.95f));
 
             var label = button.Label();
+
             var pressed = button.Icon is { Length: > 0 } icon && label.Length == 0
-                ? ImGuiTextures.Button($"{slot}{index}", icon, 16f, EditorTheme.IconTint(on))
-                : ImGui.Button($"{(label.Length == 0 ? Icon(button.Icon) : label)}##{slot}{index}");
+                ? Round(ctx, $"{slot}{index}", icon, on, Size)
+                : ImGui.Button(
+                    $" {(label.Length == 0 ? Icon(button.Icon) : label)} ##{slot}{index}",
+                    new Vector2(0f, Size));
 
             if (pressed) button.Run(ctx.Ecs);
 
-            if (on) ImGui.PopStyleColor();
+            ImGui.PopStyleColor(3);
         }
+
+        ImGui.PopStyleVar(3);
 
         // The bottom right corner also holds the orientation cross, which is a thing in the scene
         // drawn where the interface says. Where that is, is here.
@@ -532,6 +601,24 @@ public static class EditorShell
         }
 
         ImGui.End();
+        ImGui.PopStyleVar();
+    }
+
+    /// <summary>A round button with a picture in it, and nothing else.</summary>
+    private static bool Round(BehaviorContext ctx, string id, string icon, bool on, float size)
+    {
+        _ = ctx;
+
+        // The picture sits in the middle of the circle, which is what the padding is for: an image
+        // button is the picture plus whatever is asked for around it.
+        var padding = MathF.Max(0f, (size - 18f) * 0.5f);
+
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(padding, padding));
+
+        var pressed = ImGuiTextures.Button(id, icon, 18f, EditorTheme.IconTint(on));
+
+        ImGui.PopStyleVar();
+        return pressed;
     }
 
     /// <summary>A word standing in for a picture, until the icons are loaded.</summary>

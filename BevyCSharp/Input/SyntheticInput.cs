@@ -1,3 +1,4 @@
+using Bevy.Interop;
 using ImGuiNET;
 
 namespace Bevy;
@@ -100,10 +101,21 @@ public static class SyntheticInput
         foreach (var character in text) io.AddInputCharacter(character);
     }
 
-    /// <summary>Moves, presses or releases the pointer.</summary>
+    /// <summary>
+    /// Moves, presses or releases the pointer.
+    /// </summary>
+    /// <remarks>
+    /// Into both halves of what a pointer does: the interface's own event queue, and the window's
+    /// messages, which is what raycasts the scene and steers the camera. A click that is only told
+    /// to one of them tests half the path a hand takes.
+    /// </remarks>
     public static void Send(
         float x, float y, PointerAction action, MouseButton button = MouseButton.Left)
     {
+        Native.Check(
+            Native.bcs_input_pointer(x, y, (int)action, (int)button),
+            $"sending a pointer {action} at {x},{y}");
+
         if (!ImGuiRuntime.IsRunning) return;
 
         Pretend = (x, y);

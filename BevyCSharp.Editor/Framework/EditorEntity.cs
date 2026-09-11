@@ -118,6 +118,10 @@ public static class EditorEntity
         "RenderEntity",
         "Children",
         "ChildOf",
+
+        // What picking leaves on anything it has raycast, which is every mesh in the scene.
+        "PickingInteraction",
+        "Pickable",
     ];
 
     /// <summary>Whether a component is one the engine keeps for itself.</summary>

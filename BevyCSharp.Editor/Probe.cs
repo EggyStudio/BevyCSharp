@@ -41,11 +41,56 @@ public partial struct Probe
                 if (script.Contains("wide")) EditorShell.PanelWidth = 760f;
                 if (script.Contains("narrow")) EditorShell.PanelWidth = 340f;
                 if (script.Contains("tab")) EditorShell.OpenTab = 0;
-                if (script.Contains("style")) EditorShell.OpenTab = 1;
+                if (script.Contains("assets")) EditorShell.OpenTab = 1;
+                if (script.Contains("style")) EditorShell.OpenTab = 2;
                 break;
 
             case 140:
                 if (script.Contains("click")) Click(0);
+
+                // Nothing chosen, so that what a click on the scene picks is the click's doing and
+                // not what was already there.
+                if (script.Contains("pick")) EditorSelection.Clear();
+
+                // The tool a frame before the hand reaches for a handle, because the handles are
+                // drawn by the frame that knows which tool is in force.
+                if (script.Contains("drag")) EditorTools.Current = EditorTool.Move;
+
+                break;
+
+            case 145:
+                // Pressed on one frame and released on the next, because that is what a click is:
+                // the engine decides an object was clicked by matching a release to the press that
+                // landed on it, and both in one frame is one event, not two.
+                if (script.Contains("pick")) Press(0);
+
+                if (script.Contains("drag")) Press(0);
+
+                break;
+
+            case 146:
+                if (script.Contains("pick")) Release(0);
+
+                // Moved while held, over several frames, because a drag is a run of positions and
+                // a handle that is grabbed and let go at once has moved nothing.
+                if (script.Contains("drag")) Move(1);
+
+                break;
+
+            case 147 when script.Contains("scroll"):
+                // Over the details panel and rolled down, so a capture can see what is past the
+                // bottom of it without a hand.
+                SyntheticInput.MoveTo(1450f, 700f);
+                SyntheticInput.Wheel(-12f);
+                break;
+
+            case 147:
+            case 148:
+                if (script.Contains("drag")) Move(1);
+                break;
+
+            case 149:
+                if (script.Contains("drag")) Release(1);
                 break;
 
             case 150:
@@ -128,6 +173,51 @@ public partial struct Probe
         Console.WriteLine($"[probe] clicked {x:0},{y:0}");
     }
 
+    /// <summary>Puts the pointer on a point and holds the button.</summary>
+    private static void Press(int step)
+    {
+        if (Point(step) is not { } at) return;
+
+        SyntheticInput.Press(at.X, at.Y);
+        Console.WriteLine($"[probe] pressed {at.X:0},{at.Y:0}");
+    }
+
+    /// <summary>Moves the pointer without changing what is held.</summary>
+    private static void Move(int step)
+    {
+        if (Point(step) is not { } at) return;
+
+        SyntheticInput.MoveTo(at.X, at.Y);
+    }
+
+    /// <summary>And lets go of it, which is what makes the click.</summary>
+    private static void Release(int step)
+    {
+        if (Point(step) is not { } at) return;
+
+        SyntheticInput.Release(at.X, at.Y);
+    }
+
+    /// <summary>What BCS_PROBE_CLICK names, as a point.</summary>
+    private static (float X, float Y)? Point(int step)
+    {
+        var wanted = (Environment.GetEnvironmentVariable("BCS_PROBE_CLICK") ?? string.Empty)
+            .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        if (step >= wanted.Length) return null;
+
+        var parts = wanted[step].Split(',', StringSplitOptions.TrimEntries);
+
+        if (parts.Length != 2
+            || !float.TryParse(parts[0], out var x)
+            || !float.TryParse(parts[1], out var y))
+        {
+            return null;
+        }
+
+        return (x, y);
+    }
+
     /// <summary>Prints where the interface put things, and what the world made of it.</summary>
     private static void Report(string script, BehaviorContext ctx)
     {
@@ -146,6 +236,13 @@ public partial struct Probe
         Console.WriteLine(EditorSelection.Any
             ? $"[probe] selected {ctx.Ecs.NameOf(EditorSelection.Current) ?? "?"}"
             : "[probe] nothing selected");
+
+        if (EditorSelection.Any && ctx.Ecs.TryGet<Transform>(EditorSelection.Current, out var where))
+        {
+            Console.WriteLine(
+                $"[probe] at {where.Translation.X:0.###},{where.Translation.Y:0.###},"
+                + $"{where.Translation.Z:0.###}");
+        }
 
         if (EditorSelection.Any)
         {
