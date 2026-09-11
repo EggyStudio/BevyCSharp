@@ -29,19 +29,23 @@ public sealed record EditorTheme
     public string Name { get; init; } = "Modern";
 
     /// <summary>The window behind everything.</summary>
-    public Vector4 Ground { get; init; } = Rgb(0x0B, 0x0B, 0x0D);
+    public Vector4 Ground { get; init; } = Rgb(0x08, 0x08, 0x0A);
 
     /// <summary>A floating panel, seen through at <see cref="PanelAlpha"/>.</summary>
-    public Vector4 Panel { get; init; } = Rgb(0x14, 0x14, 0x16);
+    public Vector4 Panel { get; init; } = Rgb(0x0E, 0x0E, 0x11);
 
     /// <summary>A group inside a panel.</summary>
-    public Vector4 Card { get; init; } = Rgb(0x1A, 0x1A, 0x1D);
+    /// <remarks>
+    /// Far enough above the panel that the step survives the scene showing through both: what a
+    /// person sees is the difference between two blended colours, not between two written ones.
+    /// </remarks>
+    public Vector4 Card { get; init; } = Rgb(0x1E, 0x1E, 0x23);
 
     /// <summary>Under the pointer.</summary>
-    public Vector4 Hover { get; init; } = Rgb(0x23, 0x23, 0x27);
+    public Vector4 Hover { get; init; } = Rgb(0x2A, 0x2A, 0x30);
 
     /// <summary>Held down.</summary>
-    public Vector4 Active { get; init; } = Rgb(0x2C, 0x2C, 0x31);
+    public Vector4 Active { get; init; } = Rgb(0x33, 0x33, 0x3A);
 
     /// <summary>A separator, for the rare place a gap will not do.</summary>
     public Vector4 Line { get; init; } = Rgb(0x24, 0x24, 0x28);
@@ -171,38 +175,47 @@ public sealed record EditorTheme
     }
 
     /// <summary>Writes the ladder into every colour ImGui asks about.</summary>
+    /// <remarks>
+    /// Every surface carries the same transparency, so the steps between them hold however bright
+    /// the scene behind is. One opaque surface among transparent ones is a surface that reads as
+    /// lighter over a dark scene and darker over a bright one, which is worse than no step at all.
+    /// </remarks>
     private void Paint(ImGuiStylePtr style)
     {
+        var seen = PanelAlpha;
+
         Set(style, ImGuiCol.Text, Text);
         Set(style, ImGuiCol.TextDisabled, Faint);
 
-        Set(style, ImGuiCol.WindowBg, Panel);
-        Set(style, ImGuiCol.ChildBg, Card);
-        Set(style, ImGuiCol.PopupBg, Card);
-        Set(style, ImGuiCol.MenuBarBg, Card);
+        Set(style, ImGuiCol.WindowBg, Alpha(Panel, seen));
+        Set(style, ImGuiCol.ChildBg, Alpha(Card, seen));
+        Set(style, ImGuiCol.PopupBg, Alpha(Card, MathF.Min(1f, seen + 0.1f)));
+        Set(style, ImGuiCol.MenuBarBg, Alpha(Card, seen));
 
         Set(style, ImGuiCol.Border, Line);
         Set(style, ImGuiCol.BorderShadow, Clear);
 
         // A box to type in, and what it does under a hand.
-        Set(style, ImGuiCol.FrameBg, Card);
-        Set(style, ImGuiCol.FrameBgHovered, Hover);
-        Set(style, ImGuiCol.FrameBgActive, Active);
+        Set(style, ImGuiCol.FrameBg, Alpha(Hover, seen));
+        Set(style, ImGuiCol.FrameBgHovered, Alpha(Active, seen));
+        Set(style, ImGuiCol.FrameBgActive, Alpha(Active, 1f));
 
-        Set(style, ImGuiCol.TitleBg, Panel);
-        Set(style, ImGuiCol.TitleBgActive, Panel);
-        Set(style, ImGuiCol.TitleBgCollapsed, Panel);
+        Set(style, ImGuiCol.TitleBg, Alpha(Panel, seen));
+        Set(style, ImGuiCol.TitleBgActive, Alpha(Panel, seen));
+        Set(style, ImGuiCol.TitleBgCollapsed, Alpha(Panel, seen));
 
-        Set(style, ImGuiCol.Button, Card);
-        Set(style, ImGuiCol.ButtonHovered, Hover);
-        Set(style, ImGuiCol.ButtonActive, Active);
+        Set(style, ImGuiCol.Button, Alpha(Hover, seen));
+        Set(style, ImGuiCol.ButtonHovered, Alpha(Active, seen));
+        Set(style, ImGuiCol.ButtonActive, Alpha(Accent, 0.9f));
 
         // A header is what a component's fold wears, and what a row wears when it is chosen. The
         // accent is the second, so the first is grey and the second is written over it where it is
         // drawn.
-        Set(style, ImGuiCol.Header, Hover);
-        Set(style, ImGuiCol.HeaderHovered, Active);
-        Set(style, ImGuiCol.HeaderActive, Active);
+        // What a component's fold wears, which is most of what uses this colour. A row that is
+        // selected wears the accent instead, and says so where it is drawn.
+        Set(style, ImGuiCol.Header, Alpha(Hover, seen));
+        Set(style, ImGuiCol.HeaderHovered, Alpha(Active, seen));
+        Set(style, ImGuiCol.HeaderActive, Alpha(Active, 1f));
 
         Set(style, ImGuiCol.Separator, Line);
         Set(style, ImGuiCol.SeparatorHovered, Accent);
@@ -217,18 +230,18 @@ public sealed record EditorTheme
         Set(style, ImGuiCol.ResizeGripActive, Accent);
 
         Set(style, ImGuiCol.Tab, Clear);
-        Set(style, ImGuiCol.TabHovered, Hover);
-        Set(style, ImGuiCol.TabSelected, Card);
+        Set(style, ImGuiCol.TabHovered, Alpha(Hover, seen));
+        Set(style, ImGuiCol.TabSelected, Alpha(Hover, seen));
         Set(style, ImGuiCol.TabSelectedOverline, Accent);
         Set(style, ImGuiCol.TabDimmed, Clear);
-        Set(style, ImGuiCol.TabDimmedSelected, Card);
+        Set(style, ImGuiCol.TabDimmedSelected, Alpha(Hover, seen));
 
         Set(style, ImGuiCol.ScrollbarBg, Clear);
-        Set(style, ImGuiCol.ScrollbarGrab, Hover);
-        Set(style, ImGuiCol.ScrollbarGrabHovered, Active);
-        Set(style, ImGuiCol.ScrollbarGrabActive, Dim);
+        Set(style, ImGuiCol.ScrollbarGrab, Alpha(Hover, seen));
+        Set(style, ImGuiCol.ScrollbarGrabHovered, Alpha(Active, seen));
+        Set(style, ImGuiCol.ScrollbarGrabActive, Alpha(Dim, seen));
 
-        Set(style, ImGuiCol.TableHeaderBg, Card);
+        Set(style, ImGuiCol.TableHeaderBg, Alpha(Card, seen));
         Set(style, ImGuiCol.TableBorderStrong, Line);
         Set(style, ImGuiCol.TableBorderLight, Line);
         Set(style, ImGuiCol.TableRowBg, Clear);
@@ -337,10 +350,12 @@ public sealed record EditorTheme
     /// What colour an icon is drawn in.
     /// </summary>
     /// <remarks>
-    /// The icons are shapes cut out of white, so what one appears in is what it means: the accent
-    /// while it is the one in force, and the ordinary text colour otherwise.
+    /// The icons are shapes cut out of white, and what is in force already wears the accent behind
+    /// it, so the shape on top has to be the colour that reads against the accent rather than the
+    /// accent again. What is not in force sits back a little instead.
     /// </remarks>
-    public static Vector4 IconTint(bool active) => active ? Current.Accent : Current.Text;
+    public static Vector4 IconTint(bool active) =>
+        active ? Current.Text : Alpha(Current.Text, 0.72f);
 
     /// <summary>Nothing at all, which is what a surface with no fill is.</summary>
     private static Vector4 Clear => new(0f, 0f, 0f, 0f);

@@ -256,6 +256,21 @@ What that changes, against the two frameworks it replaced:
   and knows nothing else. The entire interface can be rewritten without touching it.
 - **Immediate mode costs a redraw a frame.** A few thousand triangles and one buffer write, which is
   the trade ImGui makes and the reason it is the tool for a panel full of numbers that change.
+- **The look is data.** `EditorTheme` is a record of every colour and metric, written to
+  `assets/theme.txt` and read back at startup. Nothing else in the editor names a colour.
+
+### Why there are no borders
+
+A bordered box inside a bordered box inside a bordered panel is three lines saying what one gap
+says better, and it is what the first two attempts at this editor both did. What replaced it is a
+ladder: the panel is a step above the ground, a card a step above the panel, what is under the
+pointer a step above that. Two rules keep it honest:
+
+- **Every surface carries the same transparency.** A surface that is opaque among transparent ones
+  reads as lighter over a dark scene and darker over a bright one, so the step it was meant to make
+  disappears exactly when the scene is interesting.
+- **The accent means one thing.** Selected, or in force. A colour that also draws every component
+  header is a colour that means nothing.
 
 ## The inspector
 

@@ -58,6 +58,21 @@ public static class WorldPanel
 
             var picked = EditorSelection.All.Contains(row.Entity);
 
+            // The accent means one thing: this is what is chosen. Pushed here rather than set on
+            // the theme, because the same colour draws every collapsing header in the editor.
+            // Under the stock look ImGui already draws a selected row as it thinks best, and a
+            // colour of ours over it would be the editor disagreeing with the theme it was asked
+            // to wear.
+            var mark = picked && !EditorTheme.Current.Stock;
+
+            if (mark)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Header, EditorTheme.Current.Accent);
+                ImGui.PushStyleColor(
+                    ImGuiCol.HeaderHovered,
+                    EditorTheme.Alpha(EditorTheme.Current.Accent, 0.9f));
+            }
+
             ImGui.Indent(row.Depth * ImGui.GetStyle().IndentSpacing);
 
             // The picture first, then the row it belongs to, on one line. Drawn before the
@@ -90,6 +105,8 @@ public static class WorldPanel
             }
 
             ImGui.Unindent(row.Depth * ImGui.GetStyle().IndentSpacing);
+
+            if (mark) ImGui.PopStyleColor(2);
         }
 
         ImGui.EndChild();

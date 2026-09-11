@@ -335,6 +335,11 @@ What is left:
   dockable and tabbable, and is the thing to do when a second view is wanted.
 - **No icon font.** The icons are the PNGs the editor ships, loaded through the asset server and
   drawn with `ImGui.Image`. `.ref/icons` has 1,175 SVGs to rasterise from when more are wanted.
+- **The bundle is ImGui 1.91.5.** From 1.92 Dear ImGui embeds a scalable version of its classic
+  font, which is what the native theme should use rather than the ProggyClean bitmap it gets today.
+  It arrives when `Twizzle.ImGui-Bundle.NET` updates; nothing here has to change for it.
+- **A theme is a file, and only the running build has it.** `assets/theme.txt` is written beside the
+  binary, so a look dialled in has to be copied back into the project by hand to be shipped.
 - **The interface is redrawn every frame**, which is what immediate mode means. At editor scale it
   is a few thousand triangles and one buffer write; if it ever matters, the frame can be skipped
   when nothing moved and the last one drawn again.

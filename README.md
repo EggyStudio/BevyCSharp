@@ -1465,15 +1465,26 @@ dotnet run --project BevyCSharp.Editor
 ```
 
 The scene fills the window and the panels float over it, spaced from the edges and rounded, the way
-Unity arranges itself. The panel on the right holds the **world** above and the **details** below;
-a button at its top right docks it, and then the camera is given the rectangle that is left rather
-than being drawn behind the panel. Dragging its left edge widens it, and past a threshold the world
-moves beside the data instead of above it. The tabs sit at the bottom left, spanning the width the
-panel leaves, and clicking one raises its contents above the strip.
+Unity arranges itself. The panel on the right holds the **world** beside the **details**, split by
+ImGui's own resizable columns; drag it narrow enough and they stack instead, with a grip between
+them. A button at its top right docks it, and then the camera is given the rectangle that is left
+rather than being drawn behind the panel. The tabs sit at the bottom left, spanning the width the
+panel leaves, and their bar is **under** their contents, so a console grows upwards out of the
+bottom of the screen.
 
 Everything about that arrangement is three numbers — docked, how wide, which tab — and a
-calculation in `EditorShell`. `EditorStyle` holds what it looks like: one dark neutral ladder, one
-blue accent, small rounded corners, Inter at 15px.
+calculation in `EditorShell`.
+
+**The look is a theme, and a theme is a file.** `EditorTheme` holds one ladder of greys, one accent
+that only ever means "this is what is selected", the roundings and the paddings, and how much of the
+scene shows through a panel. There are no borders anywhere: a card is separated from what holds it
+by a step in fill and a gap, which is what the reference in `.ref/Editor/MODERN.webp` does. Every
+surface carries the same transparency so the steps hold however bright the scene behind them is.
+
+Two themes ship: the editor's own and **Native**, which is stock ImGui, one click apart. The Style
+tab is ImGui's own style editor with the theme picker and the panel opacity above it, and **Save**
+writes `assets/theme.txt`, which the editor reads at startup. A look dialled in by hand survives a
+restart and can be shipped with the project.
 
 **Showing a component needs no reflection.** The generator emits a `ComponentSchema` for every
 `[Behavior]` struct, holding each field's name, its kind, and a pair of closures that read and

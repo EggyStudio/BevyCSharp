@@ -190,6 +190,12 @@ public static class EditorShell
         // Seen through, so the scene is behind the panel rather than cut off by it.
         ImGui.SetNextWindowBgAlpha(EditorTheme.Current.PanelAlpha);
 
+        // Square against the window's edge when it is docked. A rounded corner is what says a
+        // thing is floating, and a docked panel is not.
+        ImGui.PushStyleVar(
+            ImGuiStyleVar.WindowRounding,
+            Docked ? 0f : EditorTheme.Current.WindowRounding);
+
         var flags = ImGuiWindowFlags.NoTitleBar
             | ImGuiWindowFlags.NoResize
             | ImGuiWindowFlags.NoMove
@@ -201,6 +207,7 @@ public static class EditorShell
         if (!ImGui.Begin("##panel", flags))
         {
             ImGui.End();
+            ImGui.PopStyleVar();
             return;
         }
 
@@ -245,6 +252,7 @@ public static class EditorShell
         }
 
         ImGui.End();
+        ImGui.PopStyleVar();
     }
 
     /// <summary>
@@ -283,13 +291,20 @@ public static class EditorShell
     }
 
     /// <summary>The bar between the world and the data, which a drag moves.</summary>
+    /// <remarks>
+    /// A short pill in the middle rather than a line across: it says where to take hold without
+    /// drawing a border, which is the one thing this look does not do.
+    /// </remarks>
     private static void Splitter(float width)
     {
-        ImGui.InvisibleButton("##split", new Vector2(width, 6f));
+        ImGui.InvisibleButton("##split", new Vector2(width, 10f));
 
-        if (ImGui.IsItemHovered()) ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNS);
+        var held = ImGui.IsItemActive();
+        var over = ImGui.IsItemHovered();
 
-        if (ImGui.IsItemActive())
+        if (over || held) ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNS);
+
+        if (held)
         {
             var body = ImGui.GetWindowHeight() - Header;
             if (body > 1f) WorldShare = Math.Clamp(WorldShare + (ImGui.GetIO().MouseDelta.Y / body), 0.15f, 0.85f);
@@ -298,10 +313,16 @@ public static class EditorShell
         var at = ImGui.GetItemRectMin();
         var to = ImGui.GetItemRectMax();
 
-        ImGui.GetWindowDrawList().AddLine(
-            new Vector2(at.X, (at.Y + to.Y) * 0.5f),
-            new Vector2(to.X, (at.Y + to.Y) * 0.5f),
-            ImGui.GetColorU32(ImGuiCol.Separator));
+        var middle = new Vector2((at.X + to.X) * 0.5f, (at.Y + to.Y) * 0.5f);
+        var grip = new Vector2(26f, 3f);
+
+        var theme = EditorTheme.Current;
+
+        ImGui.GetWindowDrawList().AddRectFilled(
+            middle - grip,
+            middle + grip,
+            ImGui.GetColorU32(held ? theme.Accent : EditorTheme.Alpha(theme.Text, over ? 0.5f : 0.22f)),
+            grip.Y);
     }
 
     /// <summary>The panel's left edge, which a drag widens.</summary>
@@ -350,6 +371,10 @@ public static class EditorShell
         ImGui.SetNextWindowSize(new Vector2(width, strip));
         ImGui.SetNextWindowBgAlpha(EditorTheme.Current.PanelAlpha);
 
+        ImGui.PushStyleVar(
+            ImGuiStyleVar.WindowRounding,
+            Docked ? 0f : EditorTheme.Current.WindowRounding);
+
         var flags = ImGuiWindowFlags.NoTitleBar
             | ImGuiWindowFlags.NoResize
             | ImGuiWindowFlags.NoMove
@@ -360,6 +385,7 @@ public static class EditorShell
         if (!ImGui.Begin("##tabs", flags))
         {
             ImGui.End();
+            ImGui.PopStyleVar();
             return;
         }
 
@@ -384,18 +410,34 @@ public static class EditorShell
             {
                 var open = index == OpenTab;
 
+                // The one that is open wears the colour of what is above it, so the header and its
+                // contents read as one thing, and the accent marks which it is.
+                if (open)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Tab, ImGui.GetColorU32(ImGuiCol.ChildBg));
+                    ImGui.PushStyleColor(ImGuiCol.Text, EditorTheme.Current.Text);
+                }
+                else
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Tab, EditorTheme.Alpha(EditorTheme.Current.Panel, 0f));
+                    ImGui.PushStyleColor(ImGuiCol.Text, EditorTheme.Current.Dim);
+                }
+
                 if (ImGui.TabItemButton(
-                        $" {Tabs[index].Name} ",
+                        $"  {Tabs[index].Name}  ",
                         open ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None))
                 {
                     OpenTab = open ? -1 : index;
                 }
+
+                ImGui.PopStyleColor(2);
             }
 
             ImGui.EndTabBar();
         }
 
         ImGui.End();
+        ImGui.PopStyleVar();
     }
 
     /// <summary>
@@ -440,7 +482,7 @@ public static class EditorShell
             Scene.Y + (Scene.Height * corner.Y) + (corner.Y > 0.5f ? -inset : inset));
 
         ImGui.SetNextWindowPos(at, ImGuiCond.Always, pivot);
-        ImGui.SetNextWindowBgAlpha(0.85f);
+        ImGui.SetNextWindowBgAlpha(EditorTheme.Current.PanelAlpha);
 
         var flags = ImGuiWindowFlags.NoTitleBar
             | ImGuiWindowFlags.NoResize

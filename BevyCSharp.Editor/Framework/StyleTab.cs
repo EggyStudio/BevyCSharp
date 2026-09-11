@@ -47,14 +47,14 @@ public static class StyleTab
         }
 
         // How much of the scene shows through a panel, which is a decision about the look and so
-        // belongs beside the rest of them.
-        var alpha = theme.PanelAlpha;
+        // belongs beside the rest of them. In whole percent, because that is how somebody says it.
+        var alpha = theme.PanelAlpha * 100f;
 
-        ImGui.SetNextItemWidth(180f);
+        ImGui.SetNextItemWidth(200f);
 
-        if (ImGui.SliderFloat("##alpha", ref alpha, 0.4f, 1f, "panels %.0f%%", ImGuiSliderFlags.None))
+        if (ImGui.SliderFloat("##alpha", ref alpha, 40f, 100f, "panels %.0f%%"))
         {
-            EditorShell.Wear(theme with { PanelAlpha = alpha });
+            EditorShell.Wear(theme with { PanelAlpha = alpha / 100f });
         }
 
         ImGui.SameLine();
@@ -91,7 +91,10 @@ public static class StyleTab
         try
         {
             File.WriteAllText(path, Read().Describe());
-            Announce($"saved to {Path.GetFileName(path)}");
+
+            // The whole path, because it is written beside the running build rather than into the
+            // project, and somebody who wants to keep it has to know where it went.
+            Announce($"saved to {path}");
         }
         catch (IOException failure)
         {
@@ -134,12 +137,15 @@ public static class StyleTab
         var style = ImGui.GetStyle();
         var theme = EditorTheme.Current;
 
+        // Read back through the same colours the theme writes, in the same order: `Button` is what
+        // the ladder's hover step paints and `ButtonHovered` the step above it, so reading them the
+        // other way round saves a theme nobody chose.
         return theme with
         {
             Panel = style.Colors[(int)ImGuiCol.WindowBg],
             Card = style.Colors[(int)ImGuiCol.ChildBg],
-            Hover = style.Colors[(int)ImGuiCol.ButtonHovered],
-            Active = style.Colors[(int)ImGuiCol.ButtonActive],
+            Hover = style.Colors[(int)ImGuiCol.Button],
+            Active = style.Colors[(int)ImGuiCol.ButtonHovered],
             Line = style.Colors[(int)ImGuiCol.Border],
             Text = style.Colors[(int)ImGuiCol.Text],
             Faint = style.Colors[(int)ImGuiCol.TextDisabled],

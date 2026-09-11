@@ -38,8 +38,10 @@ public partial struct Probe
 
             case 120:
                 if (script.Contains("dock")) EditorShell.Docked = !EditorShell.Docked;
-                if (script.Contains("wide")) EditorShell.PanelWidth = 700f;
+                if (script.Contains("wide")) EditorShell.PanelWidth = 760f;
+                if (script.Contains("narrow")) EditorShell.PanelWidth = 340f;
                 if (script.Contains("tab")) EditorShell.OpenTab = 0;
+                if (script.Contains("style")) EditorShell.OpenTab = 1;
                 break;
 
             case 140:
@@ -140,6 +142,10 @@ public partial struct Probe
             $"[probe] scene={scene.X:0},{scene.Y:0} {scene.Width:0}x{scene.Height:0}"
             + $" split={(EditorShell.Stacked ? "above" : "beside")}"
             + $" tab={EditorShell.OpenTab}");
+
+        Console.WriteLine(EditorSelection.Any
+            ? $"[probe] selected {ctx.Ecs.NameOf(EditorSelection.Current) ?? "?"}"
+            : "[probe] nothing selected");
 
         if (EditorSelection.Any)
         {

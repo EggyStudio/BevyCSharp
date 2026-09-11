@@ -64,6 +64,26 @@ public static class DetailsPanel
             if (ComponentSchemas.For(id) is not { } schema) continue;
             if (schema.Fields.Count == 0) continue;
 
+            // A card per component, tall enough for what is in it. What separates one from the next
+            // is the gap and the step in fill, the same as everywhere else in the editor.
+            //
+            // Only under the editor's own look. The stock one is ImGui's decisions taken whole, and
+            // a colour of ours pushed into it is exactly the kind of half-measure that makes a
+            // theme look like two themes.
+            var card = !EditorTheme.Current.Stock;
+
+            if (card)
+            {
+                ImGui.PushStyleColor(ImGuiCol.ChildBg, EditorTheme.Alpha(
+                    EditorTheme.Current.Hover,
+                    EditorTheme.Current.PanelAlpha * 0.5f));
+            }
+
+            ImGui.BeginChild(
+                $"##card{schema.Name}",
+                new Vector2(0f, 0f),
+                ImGuiChildFlags.AutoResizeY | ImGuiChildFlags.NavFlattened);
+
             var open = ImGui.CollapsingHeader(schema.Name, ImGuiTreeNodeFlags.DefaultOpen);
 
             // A component's own menu, where taking it off lives. On the header, because that is
@@ -78,22 +98,29 @@ public static class DetailsPanel
                 ImGui.EndPopup();
             }
 
-            if (!open) continue;
-
-            foreach (var field in schema.Fields)
+            if (open)
             {
-                if (field.Hints.Hidden) continue;
+                foreach (var field in schema.Fields)
+                {
+                    if (field.Hints.Hidden) continue;
 
-                Row(ctx, entity, schema, field);
+                    Row(ctx, entity, schema, field);
+                }
+
+                foreach (var method in schema.Methods)
+                {
+                    if (ImGui.Button(method.Title)) method.Run(ctx.Ecs, entity);
+                    ImGui.SameLine();
+                }
+
+                if (schema.Methods.Count > 0) ImGui.NewLine();
             }
 
-            foreach (var method in schema.Methods)
-            {
-                if (ImGui.Button(method.Title)) method.Run(ctx.Ecs, entity);
-                ImGui.SameLine();
-            }
+            ImGui.EndChild();
 
-            ImGui.NewLine();
+            if (card) ImGui.PopStyleColor();
+
+            ImGui.Spacing();
         }
 
         Add(ctx, entity);
