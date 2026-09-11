@@ -43,7 +43,7 @@ public readonly record struct LogLine(
 /// <para>
 /// Everything written to the standard output and error streams is teed into a ring here, so a
 /// console can put it on screen without anything that writes a line having to know that a console
-/// exists. Writing through <see cref="Write"/> says the level outright; a line that arrives through
+/// exists. Writing through <see cref="Write(LogLevel, string)"/> says the level outright; a line that arrives through
 /// the streams is an error if it came from the error stream and information otherwise.
 /// </para>
 /// <para>

@@ -9,7 +9,7 @@ namespace BevyCSharp.Editor.Framework;
 /// <para>
 /// Everything a console does that is not drawing: which lines are worth showing, what was typed
 /// before, what a half-typed name would complete to, and what to say about it. Where it is drawn
-/// is <see cref="ConsolePage"/>, and a game that wants its own console draws it differently
+/// is <see cref="ConsoleTab"/>, and a game that wants its own console draws it differently
 /// against this same class.
 /// </para>
 /// <para>

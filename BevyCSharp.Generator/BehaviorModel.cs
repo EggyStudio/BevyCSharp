@@ -149,6 +149,7 @@ internal enum FieldKind
 
 /// <summary>A method on a behavior that something can simply be told to call.</summary>
 /// <param name="Name">The method's name.</param>
+/// <param name="Hints">What its attributes asked for.</param>
 internal sealed record BehaviorInvokable(string Name, MethodHintModel Hints)
 {
     /// <summary>A method with no attributes on it.</summary>
@@ -163,6 +164,8 @@ internal sealed record BehaviorInvokable(string Name, MethodHintModel Hints)
 /// <param name="Kind">How to read and draw it.</param>
 /// <param name="Type">The declared type, for a row that cannot be edited.</param>
 /// <param name="Options">The names an enum field can take, empty for anything else.</param>
+/// <param name="Hints">What its attributes asked for.</param>
+/// <param name="IsProperty">Whether it is a property, which is read and written through itself.</param>
 internal sealed record BehaviorField(
     string Name,
     FieldKind Kind,

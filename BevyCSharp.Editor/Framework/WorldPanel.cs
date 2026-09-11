@@ -43,6 +43,7 @@ public static class WorldPanel
     /// <param name="Name">What it is called.</param>
     /// <param name="Depth">How far in it sits, which is what makes a list read as a tree.</param>
     /// <param name="HasChildren">Whether anything hangs under it.</param>
+    /// <param name="Icon">The picture it wears, under the asset root.</param>
     private readonly record struct Row(
         Entity Entity, string Name, int Depth, bool HasChildren, string Icon);
 
