@@ -342,14 +342,21 @@ public static class EditorShell
         var color = ImGui.GetColorU32(EditorTheme.Alpha(theme.Ground, 1f));
 
         var left = Scene.X;
-        var top = Scene.Y;
-        var right = Scene.X + Scene.Width;
         var bottom = Scene.Y + Scene.Height;
 
-        Wedge(draw, new Vector2(left + radius, top + radius), radius, MathF.PI, MathF.PI * 1.5f, new Vector2(left, top), color);
-        Wedge(draw, new Vector2(right - radius, top + radius), radius, MathF.PI * 1.5f, MathF.PI * 2f, new Vector2(right, top), color);
-        Wedge(draw, new Vector2(right - radius, bottom - radius), radius, 0f, MathF.PI * 0.5f, new Vector2(right, bottom), color);
-        Wedge(draw, new Vector2(left + radius, bottom - radius), radius, MathF.PI * 0.5f, MathF.PI, new Vector2(left, bottom), color);
+        // The bottom left only. That is the one corner of a docked scene that sits inside the
+        // window rather than against its edge: the strip is under it and the window's own frame is
+        // to the left of it, and taking it off is what joins the two. The other three are either
+        // the window's own corners or a straight edge the panel butts against, and rounding those
+        // is rounding nothing.
+        Wedge(
+            draw,
+            new Vector2(left + radius, bottom - radius),
+            radius,
+            MathF.PI * 0.5f,
+            MathF.PI,
+            new Vector2(left, bottom),
+            color);
     }
 
     /// <summary>One corner's worth of what a rounded rectangle leaves out.</summary>
@@ -618,21 +625,7 @@ public static class EditorShell
             if (body > 1f) WorldShare = Math.Clamp(WorldShare + (ImGui.GetIO().MouseDelta.Y / body), 0.15f, 0.85f);
         }
 
-        var at = ImGui.GetItemRectMin();
-        var to = ImGui.GetItemRectMax();
-
-        var middle = new Vector2((at.X + to.X) * 0.5f, (at.Y + to.Y) * 0.5f);
-        var grip = new Vector2(26f, 3f);
-
-        var theme = EditorTheme.Current;
-
-        ImGui.GetWindowDrawList().AddRectFilled(
-            middle - grip,
-            middle + grip,
-            ImGui.GetColorU32(held
-                ? EditorTheme.LiveAccent
-                : EditorTheme.Alpha(EditorTheme.LiveText, over ? 0.5f : 0.22f)),
-            grip.Y);
+        Grab(new Vector2(26f, 3f), over, held);
     }
 
     /// <summary>The panel's left edge, which a drag widens.</summary>
@@ -806,11 +799,30 @@ public static class EditorShell
                 MathF.Max(120f, ImGuiRuntime.Size.Y * 0.75f));
         }
 
+        Grab(new Vector2(26f, 2f), over, held);
+    }
+
+    /// <summary>
+    /// The short pill that says a thing can be taken hold of and dragged.
+    /// </summary>
+    /// <remarks>
+    /// Out of the way until it is wanted, when the panel is floating. A handle laid over a lit
+    /// scene is one more mark on a picture somebody is trying to look at, and the edge it sits on
+    /// already says where to reach; docked there is no picture under it and a handle nobody can
+    /// see is a handle nobody finds.
+    /// </remarks>
+    /// <param name="grab">Half the pill's width and height.</param>
+    /// <param name="over">Whether the pointer is on it.</param>
+    /// <param name="held">Whether it is being dragged.</param>
+    private static void Grab(Vector2 grab, bool over, bool held)
+    {
+        var showing = held || over || Docked;
+        if (!showing) return;
+
         var at = ImGui.GetItemRectMin();
         var to = ImGui.GetItemRectMax();
 
         var middle = new Vector2((at.X + to.X) * 0.5f, (at.Y + to.Y) * 0.5f);
-        var grab = new Vector2(26f, 2f);
 
         ImGui.GetWindowDrawList().AddRectFilled(
             middle - grab,
@@ -855,13 +867,17 @@ public static class EditorShell
             // and pressed, a brighter one under the hand, and the accent when it is the one
             // showing. Nothing at all under the two that are not open reads as two words somebody
             // has left lying on the strip.
-            var fill = open
-                ? EditorTheme.LiveAccent
-                : over
-                    ? EditorTheme.LiveHover
-                    : ImGui.GetStyle().Colors[(int)ImGuiCol.Button];
-
-            draw.AddRectFilled(at, at + size, ImGui.GetColorU32(fill), height * 0.5f);
+            // Nothing behind a tab that is neither open nor under the hand. The word alone is
+            // enough against the strip, and a row of filled pills where only one of them means
+            // anything is a row of things that all look pressable in the same way.
+            if (open || over)
+            {
+                draw.AddRectFilled(
+                    at,
+                    at + size,
+                    ImGui.GetColorU32(open ? EditorTheme.LiveAccent : EditorTheme.LiveHover),
+                    height * 0.5f);
+            }
 
             // White whether it is open or not. What says which one is showing is the pill under it,
             // and a grey word reads as a tab that cannot be pressed.
