@@ -59,13 +59,21 @@ public static class WorldPanel
         ImGui.SetNextItemWidth(-1f);
         ImGui.InputTextWithHint("##search", "Search", ref _search, 128);
 
-        ImGui.Separator();
+        ImGui.Spacing();
 
         Walk(ctx);
 
         var wanted = _search.Trim();
 
-        if (!ImGui.BeginChild("##rows", new Vector2(0f, 0f))) return;
+        // No fill of its own. The card this panel is drawn in is the surface, and a second one
+        // filling it edge to edge with no padding is the box inside a box this look does without.
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0u);
+
+        var open = ImGui.BeginChild("##rows", new Vector2(0f, 0f));
+
+        ImGui.PopStyleColor();
+
+        if (!open) return;
 
         // How deep a fold reaches: everything under a folded row, until something at its own
         // depth or shallower comes along.
@@ -206,10 +214,10 @@ public static class WorldPanel
             var fill = theme.Stock
                 ? ImGui.GetColorU32(picked ? ImGuiCol.Header : ImGuiCol.HeaderHovered)
                 : ImGui.GetColorU32(picked
-                    ? theme.Accent
-                    : EditorTheme.Alpha(theme.Hover, theme.PanelAlpha));
+                    ? EditorTheme.LiveAccent
+                    : EditorTheme.LiveHover);
 
-            draw.AddRectFilled(at, at + new Vector2(width, height), fill, theme.FrameRounding);
+            draw.AddRectFilled(at, at + new Vector2(width, height), fill, ImGui.GetStyle().FrameRounding);
         }
 
         var line = ImGui.GetTextLineHeight();
@@ -224,7 +232,8 @@ public static class WorldPanel
             var arrow = new Vector2(at.X + indent, middle);
             var mark = line * 0.34f;
 
-            var colour = ImGui.GetColorU32(EditorTheme.Alpha(theme.Text, over || picked ? 0.9f : 0.6f));
+            var colour = ImGui.GetColorU32(
+                EditorTheme.Alpha(EditorTheme.LiveText, over || picked ? 0.9f : 0.6f));
             var centre = arrow + new Vector2(line * 0.5f, line * 0.5f);
 
             if (folded)
@@ -274,7 +283,7 @@ public static class WorldPanel
 
         draw.AddText(
             new Vector2(at.X + indent + line + 6f, middle),
-            ImGui.GetColorU32(picked ? theme.Text : EditorTheme.Alpha(theme.Text, 0.88f)),
+            ImGui.GetColorU32(picked ? EditorTheme.LiveText : EditorTheme.Alpha(EditorTheme.LiveText, 0.88f)),
             row.Name);
     }
 

@@ -26,16 +26,29 @@ public static class ConsoleTab
         var lines = View.Lines();
         var room = ImGui.GetContentRegionAvail();
 
-        if (ImGui.BeginChild("##log", new Vector2(0f, room.Y - 30f)))
+        // What the box to type in takes, asked for rather than guessed: a number written here is a
+        // number that stops matching the moment the padding changes, and the last line of the log
+        // is then cut in half by the edge of the region.
+        var typing = ImGui.GetFrameHeightWithSpacing();
+
+        if (ImGui.BeginChild("##log", new Vector2(0f, room.Y - typing)))
         {
+            // Wrapped at the edge of the region rather than run off it. A path or a stack trace is
+            // longer than any panel, and the half of it past the edge is the half worth reading.
+            ImGui.PushTextWrapPos(0f);
+
             foreach (var line in lines)
             {
+                var theme = EditorTheme.Current;
+
+                // Out of the theme, so a look dialled in reaches the log as well. Written here in
+                // four colours the palette already has rather than four of this file's own.
                 var color = line.Level switch
                 {
-                    LogLevel.Warning => new Vector4(0.95f, 0.72f, 0.31f, 1f),
-                    LogLevel.Error => new Vector4(0.95f, 0.43f, 0.40f, 1f),
-                    LogLevel.Echo => new Vector4(0.90f, 0.92f, 0.95f, 1f),
-                    _ => new Vector4(0.66f, 0.70f, 0.76f, 1f),
+                    LogLevel.Warning => theme.Warn,
+                    LogLevel.Error => theme.Bad,
+                    LogLevel.Echo => EditorTheme.LiveText,
+                    _ => theme.Dim,
                 };
 
                 ImGui.PushStyleColor(ImGuiCol.Text, color);
@@ -48,6 +61,8 @@ public static class ConsoleTab
             {
                 ImGui.SetScrollHereY(1f);
             }
+
+            ImGui.PopTextWrapPos();
 
             _seen = ConsoleLog.Written;
         }

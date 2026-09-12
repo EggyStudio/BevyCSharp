@@ -23,7 +23,12 @@ namespace BevyCSharp.Editor.Behaviors;
 public partial struct ViewportGizmos
 {
     /// <summary>The accent, matching the one the panels use.</summary>
-    private static readonly (float R, float G, float B, float A) Accent = (0.30f, 0.49f, 1f, 1f);
+    /// <remarks>
+    /// Read every time rather than written down here, so an accent changed in the style editor
+    /// reaches what is drawn in the scene as well as the panels.
+    /// </remarks>
+    private static (float R, float G, float B, float A) Accent =>
+        EditorTheme.Linear(EditorTheme.LiveAccent);
 
     /// <summary>Red, green and blue for X, Y and Z, which is what every editor uses.</summary>
     private static readonly (float R, float G, float B, float A)[] AxisColors =
@@ -50,7 +55,6 @@ public partial struct ViewportGizmos
         if (!App.HasRenderer) return;
 
         Ground(ctx);
-        Orientation(ctx);
 
         if (!EditorSelection.Any) return;
 
@@ -60,7 +64,8 @@ public partial struct ViewportGizmos
         var centre = (min + max) * 0.5f;
         var rotation = ctx.Ecs.GetOrDefault<GlobalTransform>(entity).Rotation;
 
-        Outline(min, max);
+        // The box round it is SelectionOutline's, which draws one for every selected thing rather
+        // than for the one a tool is working on. Drawn here as well it was drawn twice over.
         Handles(
             centre,
             Reach(EditorSelection.Camera, centre),
@@ -79,7 +84,7 @@ public partial struct ViewportGizmos
     /// every pixel, and one at the height of whatever is standing on it cuts those things in half.
     /// Settable because where the bottom of a world is depends entirely on the world.
     /// </remarks>
-    public static float GridHeight { get; set; } = -10f;
+    public static float GridHeight { get; set; }
 
     /// <summary>
     /// A grid under the scene, fading out to nothing.
@@ -144,40 +149,7 @@ public partial struct ViewportGizmos
         Sheet(look, plane, coarsest, Reach(above, coarsest), Solid(above, coarsest));
         Sheet(look, plane, coarse, Reach(above, coarse), Solid(above, coarse));
         Sheet(look, plane, fine, Reach(above, fine), Solid(above, fine));
-
-        Axis(eye, plane, Reach(above, coarsest));
     }
-
-    /// <summary>
-    /// The two lines through the world's origin, in the colors of the axes they lie along.
-    /// </summary>
-    /// <remarks>
-    /// Drawn once rather than by each grid. Every grid has a line at zero and would color it, so
-    /// leaving it to them puts the axis out three times over at three strengths, each fading
-    /// outwards from its own grid's centre, which is snapped to its own spacing. The lines land on
-    /// top of each other and their fades do not, which reads as one line that will not line up
-    /// with itself. There is one axis, so it is drawn once.
-    /// </remarks>
-    private static void Axis(Vec3 eye, float height, float reach)
-    {
-        var gone = (0f, 0f, 0f, 0f);
-
-        // From the point on each axis nearest the camera, which needs no snapping: one line has no
-        // spacing to be snapped to, and sliding smoothly is what a single line should do.
-        var alongX = new Vec3(eye.X, height, 0f);
-        var alongZ = new Vec3(0f, height, eye.Z);
-
-        var red = Tint(AxisColors[0], AxisSolid);
-        var blue = Tint(AxisColors[2], AxisSolid);
-
-        Gizmos.Fade(alongX, alongX + new Vec3(-reach, 0f, 0f), red, gone, inFront: false);
-        Gizmos.Fade(alongX, alongX + new Vec3(reach, 0f, 0f), red, gone, inFront: false);
-        Gizmos.Fade(alongZ, alongZ + new Vec3(0f, 0f, -reach), blue, gone, inFront: false);
-        Gizmos.Fade(alongZ, alongZ + new Vec3(0f, 0f, reach), blue, gone, inFront: false);
-    }
-
-    /// <summary>How solid the two lines through the origin are, which do not fade with a spacing.</summary>
-    private const float AxisSolid = 0.5f;
 
     /// <summary>How many cells across a grid is, before the height has its say.</summary>
     private const int Half = 20;
@@ -278,10 +250,9 @@ public partial struct ViewportGizmos
             var x = centreX + offset;
             var z = centreZ + offset;
 
-            // The lines through the origin belong to the axes, which are drawn once for all three
-            // spacings rather than three times at three strengths.
-            var atX = MathF.Abs(x) < step * 0.5f;
-            var atZ = MathF.Abs(z) < step * 0.5f;
+            // Drawn like any other line. The two through the origin used to be left out and put
+            // back in the colors of their axes, which read as a warm bar and a blue dot floating in
+            // the middle of the view rather than as the world's origin.
 
             var onZ = Shade(x, step, strength);
             var onX = Shade(z, step, strength);
@@ -290,7 +261,6 @@ public partial struct ViewportGizmos
 
             // Two halves out from the middle, each fading to nothing, which is what makes the far
             // edge a horizon rather than a boundary.
-            if (!atX)
             {
                 Gizmos.Fade(
                     new Vec3(x, height, centreZ),
@@ -307,7 +277,6 @@ public partial struct ViewportGizmos
                     inFront: false);
             }
 
-            if (!atZ)
             {
                 Gizmos.Fade(
                     new Vec3(centreX, height, z),
@@ -366,33 +335,6 @@ public partial struct ViewportGizmos
     /// <summary>What an ordinary grid line is: white, at whatever strength it has left.</summary>
     private static (float R, float G, float B, float A) Grey(float strength) =>
         (0.72f, 0.74f, 0.80f, strength);
-
-    /// <summary>Draws the twelve edges of the selection's box.</summary>
-    private static void Outline(Vec3 min, Vec3 max)
-    {
-        // Three groups of four parallel lines, which is the order that makes a mistake in one of
-        // them obvious.
-        for (var i = 0; i < 4; i++)
-        {
-            var y = (i & 1) == 0 ? min.Y : max.Y;
-            var z = (i & 2) == 0 ? min.Z : max.Z;
-            Gizmos.Line(new Vec3(min.X, y, z), new Vec3(max.X, y, z), Accent);
-        }
-
-        for (var i = 0; i < 4; i++)
-        {
-            var x = (i & 1) == 0 ? min.X : max.X;
-            var z = (i & 2) == 0 ? min.Z : max.Z;
-            Gizmos.Line(new Vec3(x, min.Y, z), new Vec3(x, max.Y, z), Accent);
-        }
-
-        for (var i = 0; i < 4; i++)
-        {
-            var x = (i & 1) == 0 ? min.X : max.X;
-            var y = (i & 2) == 0 ? min.Y : max.Y;
-            Gizmos.Line(new Vec3(x, y, min.Z), new Vec3(x, y, max.Z), Accent);
-        }
-    }
 
     /// <summary>Draws the tool's handles at the selection.</summary>
     private static void Handles(Vec3 centre, float reach, Vec3[] axes, Vec3 facing)

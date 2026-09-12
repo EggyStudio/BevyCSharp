@@ -111,10 +111,14 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
                 // for every real pointer, so writing one is writing half a pointer.
                 world.write_message(bevy::window::WindowEvent::CursorMoved(moved));
 
-                // And the window itself is told, because what reads the pointer's position reads
-                // the window rather than the message that moved it.
+                // And the window is told where the pointer now is, which is what everything asking
+                // for a cursor position reads. Not `set_cursor_position`, which moves the hand's
+                // own pointer on the desktop and fails on a compositor that will not have it.
                 if let Some(mut held) = world.get_mut::<Window>(window) {
-                    held.set_cursor_position(Some(Vec2::new(x, y)));
+                    let scale = held.resolution.scale_factor();
+                    held.set_physical_cursor_position(Some(
+                        (Vec2::new(x, y) * scale).as_dvec2(),
+                    ));
                 }
 
                 let button = match button {

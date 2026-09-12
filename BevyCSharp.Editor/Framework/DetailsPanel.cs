@@ -28,11 +28,10 @@ public static class DetailsPanel
         if (EditorShell.Context is not { } ctx) return;
 
         ImGui.TextDisabled("DETAILS");
-        ImGui.Separator();
+        ImGui.Spacing();
 
         if (!EditorSelection.Any)
         {
-            ImGui.Spacing();
             ImGui.TextDisabled("Nothing selected");
             return;
         }
@@ -49,11 +48,24 @@ public static class DetailsPanel
             ctx.Ecs.SetName(entity, renamed);
         }
 
-        Tags(ctx, entity);
-
         ImGui.Spacing();
 
-        if (!ImGui.BeginChild("##components", new Vector2(0f, 0f), ImGuiChildFlags.NavFlattened))
+        // One scrolling region and nothing nested inside it.
+        //
+        // A card used to be a child window of its own, and a child window whose height is worked
+        // out from its contents, inside a region that scrolls, is the thing that made this panel
+        // jump while it was being scrolled: the height it reports depends on what is visible, and
+        // what is visible depends on the height. Drawn as a rectangle behind a group instead, it
+        // is one region with one scroll and no argument.
+        // No fill of its own: the panel's card is the surface this scrolls over, and the component
+        // cards drawn into it are the step above it.
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0u);
+
+        var open = ImGui.BeginChild("##components", new Vector2(0f, 0f), ImGuiChildFlags.NavFlattened);
+
+        ImGui.PopStyleColor();
+
+        if (!open)
         {
             ImGui.EndChild();
             return;
@@ -64,68 +76,104 @@ public static class DetailsPanel
             if (ComponentSchemas.For(id) is not { } schema) continue;
             if (schema.Fields.Count == 0) continue;
 
-            // A card per component, tall enough for what is in it. What separates one from the next
-            // is the gap and the step in fill, the same as everywhere else in the editor.
-            //
-            // Only under the editor's own look. The stock one is ImGui's decisions taken whole, and
-            // a colour of ours pushed into it is exactly the kind of half-measure that makes a
-            // theme look like two themes.
-            var card = !EditorTheme.Current.Stock;
-
-            if (card)
-            {
-                ImGui.PushStyleColor(ImGuiCol.ChildBg, EditorTheme.Alpha(
-                    EditorTheme.Current.Hover,
-                    EditorTheme.Current.PanelAlpha * 0.5f));
-            }
-
-            ImGui.BeginChild(
-                $"##card{schema.Name}",
-                new Vector2(0f, 0f),
-                ImGuiChildFlags.AutoResizeY | ImGuiChildFlags.NavFlattened);
-
-            var open = ImGui.CollapsingHeader(schema.Name, ImGuiTreeNodeFlags.DefaultOpen);
-
-            // A component's own menu, where taking it off lives. On the header, because that is
-            // the thing the component is.
-            if (ImGui.BeginPopupContextItem($"##menu{schema.Name}"))
-            {
-                if (ImGui.MenuItem("Remove", string.Empty, false, schema.CanAdd))
-                {
-                    schema.Remove(ctx.Ecs, entity);
-                }
-
-                ImGui.EndPopup();
-            }
-
-            if (open)
-            {
-                foreach (var field in schema.Fields)
-                {
-                    if (field.Hints.Hidden) continue;
-
-                    Row(ctx, entity, schema, field);
-                }
-
-                foreach (var method in schema.Methods)
-                {
-                    if (ImGui.Button(method.Title)) method.Run(ctx.Ecs, entity);
-                    ImGui.SameLine();
-                }
-
-                if (schema.Methods.Count > 0) ImGui.NewLine();
-            }
-
-            ImGui.EndChild();
-
-            if (card) ImGui.PopStyleColor();
-
-            ImGui.Spacing();
+            Component(ctx, entity, schema);
         }
 
         Add(ctx, entity);
 
+        // What the thing is, under what can be edited about it: a tag says what something carries,
+        // which is worth knowing and never worth the room at the top.
+        Tags(ctx, entity);
+
         ImGui.EndChild();
+    }
+
+    /// <summary>One component, as a card with its fields in it.</summary>
+    /// <remarks>
+    /// The fill is drawn behind the group rather than around it, through a split in the draw list:
+    /// the content goes on the upper channel, the rectangle on the lower one, and the merge puts
+    /// the rectangle underneath. That is how a card is drawn without a window to hold it.
+    /// </remarks>
+    private static void Component(BehaviorContext ctx, Entity entity, ComponentSchema schema)
+    {
+        var theme = EditorTheme.Current;
+        var draw = ImGui.GetWindowDrawList();
+        var padding = ImGui.GetStyle().WindowPadding;
+
+        // Where the card's right edge goes, taken before anything is drawn: the room left on the
+        // row is the room inside the scrollbar, which is what the card has to stop at.
+        var right = ImGui.GetCursorScreenPos().X + ImGui.GetContentRegionAvail().X;
+
+        draw.ChannelsSplit(2);
+        draw.ChannelsSetCurrent(1);
+
+        ImGui.BeginGroup();
+
+        ImGui.Dummy(new Vector2(0f, padding.Y * 0.5f));
+        ImGui.Indent(padding.X * 0.5f);
+
+        var open = ImGui.CollapsingHeader(schema.Name, ImGuiTreeNodeFlags.DefaultOpen);
+
+        // A component's own menu, where taking it off lives. On the header, because that is the
+        // thing the component is.
+        if (ImGui.BeginPopupContextItem($"##menu{schema.Name}"))
+        {
+            if (ImGui.MenuItem("Remove", string.Empty, false, schema.CanAdd))
+            {
+                schema.Remove(ctx.Ecs, entity);
+            }
+
+            ImGui.EndPopup();
+        }
+
+        if (open)
+        {
+            foreach (var field in schema.Fields)
+            {
+                if (field.Hints.Hidden) continue;
+
+                Row(ctx, entity, schema, field);
+            }
+
+            // Wrapped rather than run off the edge: a row of buttons as wide as the panel is a row
+            // whose last button cannot be pressed.
+            var room = ImGui.GetContentRegionAvail().X;
+            var used = 0f;
+
+            foreach (var method in schema.Methods)
+            {
+                var width = ImGui.CalcTextSize(method.Title).X + (ImGui.GetStyle().FramePadding.X * 2f);
+
+                if (used > 0f && used + width < room) ImGui.SameLine();
+                else used = 0f;
+
+                used += width + ImGui.GetStyle().ItemSpacing.X;
+
+                if (ImGui.Button(method.Title)) method.Run(ctx.Ecs, entity);
+            }
+        }
+
+        ImGui.Unindent(padding.X * 0.5f);
+        ImGui.Dummy(new Vector2(0f, padding.Y * 0.5f));
+
+        ImGui.EndGroup();
+
+        if (!theme.Stock)
+        {
+            var from = ImGui.GetItemRectMin();
+            var to = ImGui.GetItemRectMax();
+
+            draw.ChannelsSetCurrent(0);
+            draw.AddRectFilled(
+                new Vector2(from.X - 2f, from.Y),
+                new Vector2(right, to.Y),
+                ImGui.GetColorU32(EditorTheme.LiveGroup),
+                ImGui.GetStyle().ChildRounding);
+        }
+
+        draw.ChannelsMerge();
+
+        ImGui.Spacing();
     }
 
     /// <summary>
@@ -139,7 +187,7 @@ public static class DetailsPanel
     private static void Add(BehaviorContext ctx, Entity entity)
     {
         ImGui.Spacing();
-        ImGui.Separator();
+        EditorTheme.Divide();
         ImGui.Spacing();
 
         var room = ImGui.GetContentRegionAvail().X;
@@ -177,18 +225,19 @@ public static class DetailsPanel
     {
         var room = ImGui.GetContentRegionAvail().X;
         var used = 0f;
+        var any = false;
 
         foreach (var id in ctx.Ecs.ComponentsOf(entity))
         {
             var schema = ComponentSchemas.For(id);
 
-            // Something of this project's own with no fields, or one of Bevy's worth naming.
-            if (schema is { Fields.Count: > 0 }) continue;
+            // Something of this project's own with no fields to edit. Not the engine's: a mesh, a
+            // material and a visibility are on everything that is drawn, so naming them says
+            // nothing about the thing being looked at and crowds out what does.
+            if (schema is null) continue;
+            if (schema.Fields.Count > 0) continue;
 
-            // What the engine works out for itself says nothing about the thing being edited.
-            if (EditorEntity.IsDerived(ctx.Ecs, id)) continue;
-
-            var label = schema?.Name ?? Short(ctx.Ecs.ComponentName(id));
+            var label = schema.Name;
             if (label.Length == 0) continue;
 
             var width = ImGui.CalcTextSize(label).X + (ImGui.GetStyle().FramePadding.X * 2f) + 8f;
@@ -197,6 +246,19 @@ public static class DetailsPanel
             else used = 0f;
 
             used += width + ImGui.GetStyle().ItemSpacing.X;
+
+            if (!any)
+            {
+                any = true;
+
+                ImGui.Spacing();
+                ImGui.TextDisabled("ALSO CARRIES");
+                ImGui.Spacing();
+
+                // Said before the first one, so a thing carrying nothing extra says nothing at all
+                // rather than showing a heading over an empty row.
+                used = width + ImGui.GetStyle().ItemSpacing.X;
+            }
 
             ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.FrameBg));
             ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(ImGuiCol.TextDisabled));

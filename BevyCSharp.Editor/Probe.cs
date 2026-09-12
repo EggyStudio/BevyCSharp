@@ -55,6 +55,20 @@ public partial struct Probe
                 // The tool a frame before the hand reaches for a handle, because the handles are
                 // drawn by the frame that knows which tool is in force.
                 if (script.Contains("drag")) EditorTools.Current = EditorTool.Move;
+                if (script.Contains("nogrid")) ViewportGizmos.ShowGrid = false;
+                if (script.Contains("gridup")) ViewportGizmos.GridHeight = 4f;
+                if (script.Contains("native")) EditorShell.Wear(EditorTheme.Native);
+
+                if (script.Contains("shift"))
+                {
+                    foreach (var entity in ctx.Ecs.All())
+                    {
+                        if (ctx.Ecs.NameOf(entity) != "Cube") continue;
+
+                        var was = ctx.Ecs.GetOrDefault<Transform>(entity);
+                        ctx.Ecs.Set(entity, was with { Translation = new Vec3(3f, 0f, 0f) });
+                    }
+                }
 
                 break;
 
@@ -81,7 +95,7 @@ public partial struct Probe
                 // Over the details panel and rolled down, so a capture can see what is past the
                 // bottom of it without a hand.
                 SyntheticInput.MoveTo(1450f, 700f);
-                SyntheticInput.Wheel(-12f);
+                SyntheticInput.Wheel(script.Contains("deep") ? -60f : -12f);
                 break;
 
             case 147:
@@ -110,6 +124,12 @@ public partial struct Probe
 
             case 170:
                 Report(script, ctx);
+                break;
+
+            // Well after the shot, which is read back off the GPU over several frames: quitting on
+            // the frame it was asked for loses the file.
+            case 200:
+                ctx.Exit();
                 break;
         }
     }
@@ -233,9 +253,59 @@ public partial struct Probe
             + $" split={(EditorShell.Stacked ? "above" : "beside")}"
             + $" tab={EditorShell.OpenTab}");
 
+        Console.WriteLine($"[probe] menu open: {EditorShell.MenuOpen}");
+
+        var style = ImGui.GetStyle();
+
+        Console.WriteLine(
+            $"[probe] theme={EditorTheme.Current.Name} frame-rounding={style.FrameRounding:0.##}"
+            + $" child={style.ChildRounding:0.##} window={style.WindowRounding:0.##}"
+            + $" frame-padding={style.FramePadding.Y:0.##}");
+
+
+        // What the orientation gizmo reads, so an arm pointing the wrong way can be checked
+        // against numbers rather than against a screenshot.
+        if (!EditorSelection.Camera.IsNone)
+        {
+            var view = ctx.Ecs.GetOrDefault<GlobalTransform>(EditorSelection.Camera);
+
+            Console.WriteLine(
+                $"[probe] eye {view.Translation.X:0.##},{view.Translation.Y:0.##},{view.Translation.Z:0.##}"
+                + $" grid={ViewportGizmos.GridHeight:0.##} shown={ViewportGizmos.ShowGrid}");
+
+            Console.WriteLine(
+                $"[probe] camera right={view.XAxis.X:0.###},{view.XAxis.Y:0.###},{view.XAxis.Z:0.###}"
+                + $" up={view.YAxis.X:0.###},{view.YAxis.Y:0.###},{view.YAxis.Z:0.###}"
+                + $" back={view.ZAxis.X:0.###},{view.ZAxis.Y:0.###},{view.ZAxis.Z:0.###}");
+        }
+
         Console.WriteLine(EditorSelection.Any
             ? $"[probe] selected {ctx.Ecs.NameOf(EditorSelection.Current) ?? "?"}"
             : "[probe] nothing selected");
+
+        if (EditorSelection.Any)
+        {
+            var tags = new List<string>();
+
+            foreach (var id in ctx.Ecs.ComponentsOf(EditorSelection.Current))
+            {
+                if (ComponentSchemas.For(id) is not { Fields.Count: 0 } schema) continue;
+
+                tags.Add(schema.Name);
+            }
+
+            Console.WriteLine($"[probe] tags {string.Join(", ", tags)}");
+
+            foreach (var one in EditorSelection.All)
+            {
+                var has = Render.TryGetBounds(one, out var low, out var high);
+
+                Console.WriteLine(
+                    $"[probe] bounds {ctx.Ecs.NameOf(one) ?? "?"} {has}"
+                    + $" {low.X:0.##},{low.Y:0.##},{low.Z:0.##}"
+                    + $" to {high.X:0.##},{high.Y:0.##},{high.Z:0.##}");
+            }
+        }
 
         if (EditorSelection.Any && ctx.Ecs.TryGet<Transform>(EditorSelection.Current, out var where))
         {
@@ -259,6 +329,16 @@ public partial struct Probe
                         + $"{field.Read(ctx.Ecs, EditorSelection.Current)}");
                 }
             }
+        }
+
+        if (script.Contains("camera")
+            && EditorSelection.Camera is { IsNone: false } eye
+            && ctx.Ecs.TryGet<GlobalTransform>(eye, out var basis))
+        {
+            Console.WriteLine(
+                $"[probe] camera x={basis.XAxis.X:0.##},{basis.XAxis.Y:0.##},{basis.XAxis.Z:0.##}"
+                + $" y={basis.YAxis.X:0.##},{basis.YAxis.Y:0.##},{basis.YAxis.Z:0.##}"
+                + $" z={basis.ZAxis.X:0.##},{basis.ZAxis.Y:0.##},{basis.ZAxis.Z:0.##}");
         }
 
         if (script.Contains("console"))

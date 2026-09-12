@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Reflection;
 using BevyCSharp.Editor.Framework;
 using Xunit;
 
@@ -35,6 +36,49 @@ public sealed class EditorThemeTests
         Assert.Equal(dialled.Accent.X, read.Accent.X, 2);
         Assert.Equal(dialled.Accent.Y, read.Accent.Y, 2);
         Assert.Equal(dialled.Accent.Z, read.Accent.Z, 2);
+    }
+
+    [Fact]
+    public void EveryColourInAThemeIsWrittenDown()
+    {
+        // The ladder grew a rung once and the file did not, so a theme saved from the style editor
+        // came back a step short at every surface. What guards that is asking the record itself
+        // what colours it has rather than keeping a second list by hand.
+        var written = EditorTheme.Modern.Describe();
+
+        // The theme's own colours, not the readers that fetch one back out of the running style.
+        var colours = typeof(EditorTheme)
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(property => property.PropertyType == typeof(Vector4));
+
+        foreach (var colour in colours)
+        {
+            var key = string.Concat(colour.Name.Select((letter, index) =>
+                char.IsUpper(letter) && index > 0 ? $"-{char.ToLowerInvariant(letter)}" : $"{char.ToLowerInvariant(letter)}"));
+
+            Assert.Contains($"{key}\t", written, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void TheLadderClimbsFromTheGroundToWhatIsHeldDown()
+    {
+        // Each surface a step above the one it sits on, in that order. Two rungs the same is a
+        // panel whose inside cannot be told from its outside, which is what the look is for.
+        var theme = EditorTheme.Modern;
+
+        var ladder = new[]
+        {
+            theme.Ground.X, theme.Panel.X, theme.Card.X, theme.Group.X,
+            theme.Field.X, theme.Hover.X, theme.Active.X,
+        };
+
+        for (var step = 1; step < ladder.Length; step++)
+        {
+            Assert.True(
+                ladder[step] > ladder[step - 1],
+                $"rung {step} is not above the one below it");
+        }
     }
 
     [Fact]

@@ -65,13 +65,20 @@ public static class StyleTab
 
         if (ImGui.Button("Reload")) Reload();
 
+        ImGui.SameLine();
+
+        // The way back from a look that went wrong. A theme saved to file is read at every startup,
+        // so without this the only way out of a bad one is to go and delete a file by hand, which
+        // is not something an editor should ask of anybody.
+        if (ImGui.Button("Reset")) Reset();
+
         if (_said.Length > 0 && EditorShell.Frame - _saidOn < 240)
         {
             ImGui.SameLine();
             ImGui.TextDisabled(_said);
         }
 
-        ImGui.Separator();
+        EditorTheme.Divide();
 
         // Everything else, in ImGui's own editor: it knows every field it has, and anything written
         // here would be a second list to keep in step with it.
@@ -124,6 +131,25 @@ public static class StyleTab
         }
     }
 
+    /// <summary>Puts the built-in look back, and forgets whatever was saved over it.</summary>
+    private static void Reset()
+    {
+        EditorShell.Wear(EditorTheme.Modern);
+
+        var path = EditorPaths.Asset("theme.txt");
+
+        try
+        {
+            if (File.Exists(path)) File.Delete(path);
+
+            Announce("back to the built-in look");
+        }
+        catch (IOException failure)
+        {
+            Announce(failure.Message);
+        }
+    }
+
     /// <summary>
     /// What is in force, with whatever ImGui's own editor has been told taken back from it.
     /// </summary>
@@ -137,19 +163,26 @@ public static class StyleTab
         var style = ImGui.GetStyle();
         var theme = EditorTheme.Current;
 
-        // Read back through the same colours the theme writes, in the same order: `Button` is what
-        // the ladder's hover step paints and `ButtonHovered` the step above it, so reading them the
-        // other way round saves a theme nobody chose.
+        // Read back out of the slot each rung was painted into, and no other: reading a rung out of
+        // the slot below it saves a ladder nobody dialled in, one step short at every rung, which
+        // is what the file that shipped with the last build turned out to be.
         return theme with
         {
             Panel = style.Colors[(int)ImGuiCol.WindowBg],
             Card = style.Colors[(int)ImGuiCol.ChildBg],
-            Hover = style.Colors[(int)ImGuiCol.Button],
-            Active = style.Colors[(int)ImGuiCol.ButtonHovered],
+            Group = style.Colors[(int)ImGuiCol.MenuBarBg],
+            Field = style.Colors[(int)ImGuiCol.FrameBg],
+            Hover = style.Colors[(int)ImGuiCol.FrameBgHovered],
+            Active = style.Colors[(int)ImGuiCol.FrameBgActive],
             Line = style.Colors[(int)ImGuiCol.Border],
             Text = style.Colors[(int)ImGuiCol.Text],
+            Dim = style.Colors[(int)ImGuiCol.SliderGrab],
             Faint = style.Colors[(int)ImGuiCol.TextDisabled],
             Accent = style.Colors[(int)ImGuiCol.CheckMark],
+
+            // How far through a panel the scene shows is the alpha the panel was painted with, so
+            // dragging it in ImGui's own editor is picked up here rather than ignored.
+            PanelAlpha = style.Colors[(int)ImGuiCol.WindowBg].W,
             WindowRounding = style.WindowRounding,
             ChildRounding = style.ChildRounding,
             FrameRounding = style.FrameRounding,

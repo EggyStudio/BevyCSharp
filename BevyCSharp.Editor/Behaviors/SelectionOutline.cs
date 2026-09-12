@@ -23,7 +23,12 @@ namespace BevyCSharp.Editor.Behaviors;
 public partial struct SelectionOutline
 {
     /// <summary>The accent, matching the one the panels use.</summary>
-    private static readonly (float R, float G, float B, float A) Accent = (0.30f, 0.49f, 1f, 1f);
+    /// <remarks>
+    /// Read every time rather than written down here, so an accent changed in the style editor
+    /// reaches the box round the selection as well as the panels.
+    /// </remarks>
+    private static (float R, float G, float B, float A) Accent =>
+        EditorTheme.Linear(EditorTheme.LiveAccent);
 
     /// <summary>Draws a box round each selected thing, once a frame.</summary>
     /// <remarks>

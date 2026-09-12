@@ -29,35 +29,45 @@ public sealed record EditorTheme
     public string Name { get; init; } = "Modern";
 
     /// <summary>The window behind everything.</summary>
-    public Vector4 Ground { get; init; } = Rgb(0x08, 0x08, 0x0A);
+    public Vector4 Ground { get; init; } = Rgb(0x00, 0x00, 0x00);
 
     /// <summary>A floating panel, seen through at <see cref="PanelAlpha"/>.</summary>
-    public Vector4 Panel { get; init; } = Rgb(0x0E, 0x0E, 0x11);
+    public Vector4 Panel { get; init; } = Rgb(0x0C, 0x0C, 0x0C);
 
     /// <summary>A group inside a panel.</summary>
     /// <remarks>
     /// Far enough above the panel that the step survives the scene showing through both: what a
     /// person sees is the difference between two blended colours, not between two written ones.
     /// </remarks>
-    public Vector4 Card { get; init; } = Rgb(0x1E, 0x1E, 0x23);
+    public Vector4 Card { get; init; } = Rgb(0x1A, 0x1A, 0x1A);
+
+    /// <summary>One component's worth of rows inside a card, which is a step above it again.</summary>
+    /// <remarks>
+    /// The rung the old ladder was missing. A panel holding a card holding fields is three surfaces
+    /// and was drawn in two colours, which is why the inside of a panel read as flat.
+    /// </remarks>
+    public Vector4 Group { get; init; } = Rgb(0x26, 0x26, 0x26);
+
+    /// <summary>A box to type in or a button, which sits above the card holding it.</summary>
+    public Vector4 Field { get; init; } = Rgb(0x34, 0x34, 0x34);
 
     /// <summary>Under the pointer.</summary>
-    public Vector4 Hover { get; init; } = Rgb(0x2A, 0x2A, 0x30);
+    public Vector4 Hover { get; init; } = Rgb(0x46, 0x46, 0x46);
 
     /// <summary>Held down.</summary>
-    public Vector4 Active { get; init; } = Rgb(0x33, 0x33, 0x3A);
+    public Vector4 Active { get; init; } = Rgb(0x58, 0x58, 0x58);
 
     /// <summary>A separator, for the rare place a gap will not do.</summary>
-    public Vector4 Line { get; init; } = Rgb(0x24, 0x24, 0x28);
+    public Vector4 Line { get; init; } = Rgb(0x30, 0x30, 0x30);
 
     /// <summary>What is being read.</summary>
-    public Vector4 Text { get; init; } = Rgb(0xE8, 0xE8, 0xEA);
+    public Vector4 Text { get; init; } = Rgb(0xF2, 0xF2, 0xF2);
 
     /// <summary>What a value is called, and what it is measured in.</summary>
-    public Vector4 Dim { get; init; } = Rgb(0x8A, 0x8A, 0x8E);
+    public Vector4 Dim { get; init; } = Rgb(0x9A, 0x9A, 0x9A);
 
     /// <summary>What is switched off.</summary>
-    public Vector4 Faint { get; init; } = Rgb(0x5A, 0x5A, 0x5F);
+    public Vector4 Faint { get; init; } = Rgb(0x66, 0x66, 0x66);
 
     /// <summary>Selected, in force, checked. Nothing else.</summary>
     public Vector4 Accent { get; init; } = Rgb(0x2B, 0x6C, 0xF6);
@@ -69,13 +79,13 @@ public sealed record EditorTheme
     public Vector4 Bad { get; init; } = Rgb(0xE0, 0x6C, 0x63);
 
     /// <summary>How solid a floating panel is over the scene.</summary>
-    public float PanelAlpha { get; init; } = 0.85f;
+    public float PanelAlpha { get; init; } = 0.92f;
 
     /// <summary>How round a floating panel is.</summary>
-    public float WindowRounding { get; init; } = 14f;
+    public float WindowRounding { get; init; } = 16f;
 
     /// <summary>How round a card inside one is.</summary>
-    public float ChildRounding { get; init; } = 10f;
+    public float ChildRounding { get; init; } = 12f;
 
     /// <summary>
     /// How round a box, a button or a field is.
@@ -84,10 +94,15 @@ public sealed record EditorTheme
     /// Half the height of a row, so a field is a pill rather than a rectangle with the corners
     /// taken off. A button with only a picture in it goes further and is a circle.
     /// </remarks>
-    public float FrameRounding { get; init; } = 9f;
+    /// <remarks>
+    /// Larger than any control is tall, because ImGui takes the smaller of the rounding and half
+    /// the height: asking for more than that is asking for a capsule, and for a square button it
+    /// is asking for a circle.
+    /// </remarks>
+    public float FrameRounding { get; init; } = 32f;
 
     /// <summary>How round a tab is.</summary>
-    public float TabRounding { get; init; } = 10f;
+    public float TabRounding { get; init; } = 12f;
 
     /// <summary>How much air a panel keeps inside its edge.</summary>
     public Vector2 WindowPadding { get; init; } = new(12f, 10f);
@@ -165,6 +180,11 @@ public sealed record EditorTheme
         style.ScrollbarSize = 10f;
         style.GrabMinSize = 10f;
 
+        // No line under a bar of tabs. The tabs themselves say where they are, and a rule across
+        // the panel is the border this look does without.
+        style.TabBarBorderSize = 0f;
+        style.TabBarOverlineSize = theme.Stock ? 2f : 0f;
+
         style.WindowTitleAlign = new Vector2(0f, 0.5f);
 
         // A heading inside a panel is a word, not a word with a line through the rest of the row.
@@ -198,22 +218,24 @@ public sealed record EditorTheme
         Set(style, ImGuiCol.WindowBg, Alpha(Panel, seen));
         Set(style, ImGuiCol.ChildBg, Alpha(Card, seen));
         Set(style, ImGuiCol.PopupBg, Alpha(Card, MathF.Min(1f, seen + 0.1f)));
-        Set(style, ImGuiCol.MenuBarBg, Alpha(Card, seen));
+        // Nothing here has a menu bar, so this slot carries the group fill instead: it puts the
+        // rung in the style editor beside the others rather than leaving one colour unreachable.
+        Set(style, ImGuiCol.MenuBarBg, Alpha(Group, seen));
 
         Set(style, ImGuiCol.Border, Line);
         Set(style, ImGuiCol.BorderShadow, Clear);
 
         // A box to type in, and what it does under a hand.
-        Set(style, ImGuiCol.FrameBg, Alpha(Hover, seen));
-        Set(style, ImGuiCol.FrameBgHovered, Alpha(Active, seen));
+        Set(style, ImGuiCol.FrameBg, Alpha(Field, seen));
+        Set(style, ImGuiCol.FrameBgHovered, Alpha(Hover, seen));
         Set(style, ImGuiCol.FrameBgActive, Alpha(Active, 1f));
 
         Set(style, ImGuiCol.TitleBg, Alpha(Panel, seen));
         Set(style, ImGuiCol.TitleBgActive, Alpha(Panel, seen));
         Set(style, ImGuiCol.TitleBgCollapsed, Alpha(Panel, seen));
 
-        Set(style, ImGuiCol.Button, Alpha(Hover, seen));
-        Set(style, ImGuiCol.ButtonHovered, Alpha(Active, seen));
+        Set(style, ImGuiCol.Button, Alpha(Field, seen));
+        Set(style, ImGuiCol.ButtonHovered, Alpha(Hover, seen));
         Set(style, ImGuiCol.ButtonActive, Alpha(Accent, 0.9f));
 
         // A header is what a component's fold wears, and what a row wears when it is chosen. The
@@ -221,8 +243,8 @@ public sealed record EditorTheme
         // drawn.
         // What a component's fold wears, which is most of what uses this colour. A row that is
         // selected wears the accent instead, and says so where it is drawn.
-        Set(style, ImGuiCol.Header, Alpha(Hover, seen));
-        Set(style, ImGuiCol.HeaderHovered, Alpha(Active, seen));
+        Set(style, ImGuiCol.Header, Alpha(Field, seen));
+        Set(style, ImGuiCol.HeaderHovered, Alpha(Hover, seen));
         Set(style, ImGuiCol.HeaderActive, Alpha(Active, 1f));
 
         Set(style, ImGuiCol.Separator, Line);
@@ -239,14 +261,14 @@ public sealed record EditorTheme
 
         Set(style, ImGuiCol.Tab, Clear);
         Set(style, ImGuiCol.TabHovered, Alpha(Hover, seen));
-        Set(style, ImGuiCol.TabSelected, Alpha(Hover, seen));
+        Set(style, ImGuiCol.TabSelected, Alpha(Card, seen));
         Set(style, ImGuiCol.TabSelectedOverline, Accent);
         Set(style, ImGuiCol.TabDimmed, Clear);
-        Set(style, ImGuiCol.TabDimmedSelected, Alpha(Hover, seen));
+        Set(style, ImGuiCol.TabDimmedSelected, Alpha(Card, seen));
 
         Set(style, ImGuiCol.ScrollbarBg, Clear);
-        Set(style, ImGuiCol.ScrollbarGrab, Alpha(Hover, seen));
-        Set(style, ImGuiCol.ScrollbarGrabHovered, Alpha(Active, seen));
+        Set(style, ImGuiCol.ScrollbarGrab, Alpha(Field, seen));
+        Set(style, ImGuiCol.ScrollbarGrabHovered, Alpha(Hover, seen));
         Set(style, ImGuiCol.ScrollbarGrabActive, Alpha(Dim, seen));
 
         Set(style, ImGuiCol.TableHeaderBg, Alpha(Card, seen));
@@ -278,6 +300,8 @@ public sealed record EditorTheme
             $"ground\t{Hex(Ground)}",
             $"panel\t{Hex(Panel)}",
             $"card\t{Hex(Card)}",
+            $"group\t{Hex(Group)}",
+            $"field\t{Hex(Field)}",
             $"hover\t{Hex(Hover)}",
             $"active\t{Hex(Active)}",
             $"line\t{Hex(Line)}",
@@ -328,6 +352,8 @@ public sealed record EditorTheme
                 "ground" => theme with { Ground = Read(value, theme.Ground) },
                 "panel" => theme with { Panel = Read(value, theme.Panel) },
                 "card" => theme with { Card = Read(value, theme.Card) },
+                "group" => theme with { Group = Read(value, theme.Group) },
+                "field" => theme with { Field = Read(value, theme.Field) },
                 "hover" => theme with { Hover = Read(value, theme.Hover) },
                 "active" => theme with { Active = Read(value, theme.Active) },
                 "line" => theme with { Line = Read(value, theme.Line) },
@@ -355,6 +381,28 @@ public sealed record EditorTheme
     }
 
     /// <summary>
+    /// The accent as it stands in the running style, not as the theme wrote it.
+    /// </summary>
+    /// <remarks>
+    /// Anything drawn by hand reads the live style rather than the theme, so a colour dragged in
+    /// the style editor changes what is drawn instead of being written over on the next frame.
+    /// The tick is where the accent lives once a theme has been applied.
+    /// </remarks>
+    public static Vector4 LiveAccent => ImGui.GetStyle().Colors[(int)ImGuiCol.CheckMark];
+
+    /// <summary>The card colour as it stands in the running style.</summary>
+    public static Vector4 LiveCard => ImGui.GetStyle().Colors[(int)ImGuiCol.ChildBg];
+
+    /// <summary>The group fill as it stands in the running style.</summary>
+    public static Vector4 LiveGroup => ImGui.GetStyle().Colors[(int)ImGuiCol.MenuBarBg];
+
+    /// <summary>What is under the pointer, as it stands in the running style.</summary>
+    public static Vector4 LiveHover => ImGui.GetStyle().Colors[(int)ImGuiCol.ButtonHovered];
+
+    /// <summary>What is being read, as it stands in the running style.</summary>
+    public static Vector4 LiveText => ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
+
+    /// <summary>
     /// What colour an icon is drawn in.
     /// </summary>
     /// <remarks>
@@ -363,7 +411,42 @@ public sealed record EditorTheme
     /// accent again. What is not in force sits back a little instead.
     /// </remarks>
     public static Vector4 IconTint(bool active) =>
-        active ? Current.Text : Alpha(Current.Text, 0.72f);
+        active ? LiveText : Alpha(LiveText, 0.72f);
+
+    /// <summary>
+    /// A theme colour as the scene wants it: linear, and as four numbers rather than a vector.
+    /// </summary>
+    /// <remarks>
+    /// The palette is written the way colours are written down, which is sRGB, and gizmos are drawn
+    /// in linear light. Handing one straight to the other is how an accent that matches the panels
+    /// on paper comes out a different colour in the viewport.
+    /// </remarks>
+    public static (float R, float G, float B, float A) Linear(Vector4 color) =>
+        (Straight(color.X), Straight(color.Y), Straight(color.Z), color.W);
+
+    /// <summary>One channel out of sRGB.</summary>
+    private static float Straight(float channel) => channel <= 0.04045f
+        ? channel / 12.92f
+        : MathF.Pow((channel + 0.055f) / 1.055f, 2.4f);
+
+    /// <summary>
+    /// Whatever this look uses to part two groups of things.
+    /// </summary>
+    /// <remarks>
+    /// A gap, where the look is the editor's own: hierarchy comes from fill and spacing, and a rule
+    /// across a panel is the border it does without. A line, where the look is ImGui's, because
+    /// that is what ImGui's own look does and it is taken whole.
+    /// </remarks>
+    public static void Divide()
+    {
+        if (Current.Stock)
+        {
+            ImGui.Separator();
+            return;
+        }
+
+        ImGui.Dummy(new Vector2(0f, ImGui.GetStyle().ItemSpacing.Y));
+    }
 
     /// <summary>Nothing at all, which is what a surface with no fill is.</summary>
     private static Vector4 Clear => new(0f, 0f, 0f, 0f);

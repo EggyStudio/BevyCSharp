@@ -48,9 +48,14 @@ public static class EditorShell
     /// A guess is wrong the moment the font or the padding changes, and what it looks like when it
     /// is wrong is a row of tabs with their text cut off along the bottom of the window.
     /// </remarks>
-    private static float TabStrip => ImGui.GetFrameHeight()
-        + (ImGui.GetStyle().WindowPadding.Y * 2f)
-        + ImGui.GetStyle().ItemSpacing.Y;
+    private static float TabStrip => ImGui.GetFrameHeight() + (StripPadding * 2f);
+
+    /// <summary>How much air the strip of tabs keeps around them.</summary>
+    /// <remarks>
+    /// Less than a panel's, because a strip that is mostly air reads as an empty panel with some
+    /// words in it rather than as a row of tabs.
+    /// </remarks>
+    private const float StripPadding = 5f;
 
     /// <summary>Whether the panel is against the window's edge, with the scene beside it.</summary>
     public static bool Docked { get; set; }
@@ -102,6 +107,17 @@ public static class EditorShell
     /// <summary>Which branch of the menu is up, if any.</summary>
     private static string? _menu;
 
+    /// <summary>Whether it still has to be handed to ImGui, which happens once per opening.</summary>
+    private static bool _opening;
+
+    /// <summary>Whether a menu is up, for anything asking outside the interface's own frame.</summary>
+    /// <remarks>
+    /// Asked rather than looked up: ImGui answers questions about its windows only between the
+    /// beginning and the end of a frame, and a system that runs before the interface does would be
+    /// asking a context that is not in one.
+    /// </remarks>
+    public static bool MenuOpen => _menu is not null;
+
     /// <summary>Shows a branch of the editor's menu at a point.</summary>
     /// <remarks>
     /// A menu is a popup, and a popup belongs to the frame it is opened in, so what is asked for
@@ -110,6 +126,7 @@ public static class EditorShell
     public static void ShowMenu(string branch, float x, float y)
     {
         _menu = branch ?? string.Empty;
+        _opening = true;
         MenuAt = new Vector2(x, y);
     }
 
@@ -200,9 +217,19 @@ public static class EditorShell
             ? (0f, 0f, Math.Max(1f, panelX), Math.Max(1f, window.Y - strip))
             : (0f, 0f, window.X, window.Y);
 
+        // Where the scene is still visible, which is what anything drawn over the scene has to
+        // stay inside: docked that is the scene itself, floating it is what the panels leave.
+        Free = Docked
+            ? (Scene.X + Scene.Width, Scene.Y + Scene.Height)
+            : (panelX, window.Y - strip - margin);
+
         DrawPanel();
+        DrawOrientation(ctx);
         DrawTabs(tabsWidth, strip, margin);
         DrawToolbars(ctx);
+
+        // Last, so it floats over every panel rather than under whichever was drawn after it.
+        DrawDock();
         DrawMenu(ctx);
         Apply(ctx);
     }
@@ -227,9 +254,12 @@ public static class EditorShell
 
         // Square against the window's edge when it is docked. A rounded corner is what says a
         // thing is floating, and a docked panel is not.
+        //
+        // Floating, whatever the style says: a value taken from the theme would be written over
+        // the style editor's every frame, and nothing dragged there would ever hold.
         ImGui.PushStyleVar(
             ImGuiStyleVar.WindowRounding,
-            Docked ? 0f : EditorTheme.Current.WindowRounding);
+            Docked ? 0f : ImGui.GetStyle().WindowRounding);
 
         var flags = ImGuiWindowFlags.NoTitleBar
             | ImGuiWindowFlags.NoResize
@@ -247,7 +277,6 @@ public static class EditorShell
         }
 
         Handle();
-        Chrome();
 
         var body = ImGui.GetContentRegionAvail();
 
@@ -300,29 +329,69 @@ public static class EditorShell
     /// </remarks>
     private static void Card(string id, Vector2 size, Action draw)
     {
-        if (ImGui.BeginChild(id, size, ImGuiChildFlags.None)) draw();
+        if (ImGui.BeginChild(id, size, ImGuiChildFlags.AlwaysUseWindowPadding)) draw();
 
         ImGui.EndChild();
     }
 
-    /// <summary>The panel's own top row: what it is, and the button that docks it.</summary>
+    /// <summary>
+    /// The button that docks the panel, over everything at the window's top right.
+    /// </summary>
     /// <remarks>
-    /// No line under it. The gap to what follows says the same thing, and a line across a panel
-    /// that has no border anywhere else is the one rule the rest of the look does not keep.
+    /// Its own window rather than a corner of the panel, so it stays reachable and in the same
+    /// place whatever the panel is doing underneath it. Round with a picture in it, like the rest
+    /// of what floats over the scene.
     /// </remarks>
-    private static void Chrome()
+    private static void DrawDock()
     {
-        ImGui.AlignTextToFramePadding();
-        ImGui.TextDisabled(Docked ? "DOCKED" : "EDITOR");
+        const float Size = 34f;
 
-        var label = Docked ? "Undock" : "Dock";
-        var width = ImGui.CalcTextSize(label).X + (ImGui.GetStyle().FramePadding.X * 2f);
+        // Clear of the panel's rounded corner rather than across it: a circle straddling the arc of
+        // the corner behind it reads as a button that fell off the edge.
+        var window = ImGuiRuntime.Size;
+        var inset = Docked ? 8f : Margin + 16f;
 
-        ImGui.SameLine(ImGui.GetContentRegionAvail().X - width + ImGui.GetCursorPosX());
+        ImGui.SetNextWindowPos(new Vector2(window.X - inset, inset), ImGuiCond.Always, new Vector2(1f, 0f));
 
-        if (ImGui.SmallButton(label)) Docked = !Docked;
+        var flags = ImGuiWindowFlags.NoTitleBar
+            | ImGuiWindowFlags.NoResize
+            | ImGuiWindowFlags.NoMove
+            | ImGuiWindowFlags.NoCollapse
+            | ImGuiWindowFlags.NoSavedSettings
+            | ImGuiWindowFlags.NoScrollbar
+            | ImGuiWindowFlags.AlwaysAutoResize
+            | ImGuiWindowFlags.NoFocusOnAppearing
+            | ImGuiWindowFlags.NoBackground;
 
-        ImGui.Spacing();
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0f, 0f));
+
+        if (ImGui.Begin("##dock", flags))
+        {
+            var theme = EditorTheme.Current;
+
+            ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, Size * 0.5f);
+
+            // A step above the panel it sits on, or the disc cannot be told from the panel and what
+            // is left is a picture floating in the corner.
+            ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.FrameBg));
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, EditorTheme.LiveHover);
+
+            // Never in the accent: the accent says what is in force in the scene, and a bright blue
+            // disc in the corner of the panel reads as a close button somebody has to think about.
+            // Which way it is set is what the picture in it says.
+            if (Round($"dock{Docked}", Docked ? "icons/ui/close.png" : "icons/ui/pinned.png", false, Size))
+            {
+                Docked = !Docked;
+            }
+
+            if (ImGui.IsItemHovered()) ImGui.SetTooltip(Docked ? "Undock the panel" : "Dock the panel");
+
+            ImGui.PopStyleColor(2);
+            ImGui.PopStyleVar();
+        }
+
+        ImGui.End();
+        ImGui.PopStyleVar();
     }
 
     /// <summary>The bar between the world and the data, which a drag moves.</summary>
@@ -356,7 +425,9 @@ public static class EditorShell
         ImGui.GetWindowDrawList().AddRectFilled(
             middle - grip,
             middle + grip,
-            ImGui.GetColorU32(held ? theme.Accent : EditorTheme.Alpha(theme.Text, over ? 0.5f : 0.22f)),
+            ImGui.GetColorU32(held
+                ? EditorTheme.LiveAccent
+                : EditorTheme.Alpha(EditorTheme.LiveText, over ? 0.5f : 0.22f)),
             grip.Y);
     }
 
@@ -410,6 +481,12 @@ public static class EditorShell
             ImGuiStyleVar.WindowRounding,
             Docked ? 0f : EditorTheme.Current.WindowRounding);
 
+        // The strip is measured as StripPadding above and below the bar, so its own window padding
+        // has to be that and no more or the bar sinks and the text clips.
+        ImGui.PushStyleVar(
+            ImGuiStyleVar.WindowPadding,
+            new Vector2(ImGui.GetStyle().WindowPadding.X, StripPadding));
+
         var flags = ImGuiWindowFlags.NoTitleBar
             | ImGuiWindowFlags.NoResize
             | ImGuiWindowFlags.NoMove
@@ -420,7 +497,7 @@ public static class EditorShell
         if (!ImGui.Begin("##tabs", flags))
         {
             ImGui.End();
-            ImGui.PopStyleVar();
+            ImGui.PopStyleVar(2);
             return;
         }
 
@@ -439,8 +516,22 @@ public static class EditorShell
             ImGui.EndChild();
         }
 
-        // And the bar under it. A header is a button as far as ImGui is concerned here, because
-        // what a click means is ours: the one already open closes rather than staying open.
+        // And the bar under it, drawn rather than asked for.
+        //
+        // ImGui's own tab draws a few pixels of itself below its frame, to join the tab to the
+        // content underneath it. Here the content is above the bar, so that join points into the
+        // scene: a dark tongue hanging off whichever tab is open, past the edge of the strip. A
+        // pill under the word says which one is open without any of that.
+        if (!EditorTheme.Current.Stock)
+        {
+            Pills();
+
+            ImGui.End();
+            ImGui.PopStyleVar(2);
+            return;
+        }
+
+        // The stock look keeps ImGui's own tabs, because that is what it is for.
         if (ImGui.BeginTabBar("##strip", ImGuiTabBarFlags.NoTooltip))
         {
             for (var index = 0; index < Tabs.Count; index++)
@@ -474,7 +565,53 @@ public static class EditorShell
         }
 
         ImGui.End();
-        ImGui.PopStyleVar();
+        ImGui.PopStyleVar(2);
+    }
+
+    /// <summary>
+    /// The tabs as a row of pills, which is the shape the rest of this look is drawn in.
+    /// </summary>
+    /// <remarks>
+    /// A click on the one already open closes it, which is why these are buttons rather than tabs:
+    /// what a header means here is ours to say, and a tab bar has its own idea about which of its
+    /// tabs is selected.
+    /// </remarks>
+    private static void Pills()
+    {
+        var draw = ImGui.GetWindowDrawList();
+        var height = ImGui.GetFrameHeight();
+        var padding = ImGui.GetStyle().FramePadding.X + 6f;
+
+        for (var index = 0; index < Tabs.Count; index++)
+        {
+            if (index > 0) ImGui.SameLine();
+
+            var open = index == OpenTab;
+            var name = Tabs[index].Name;
+            var word = ImGui.CalcTextSize(name);
+            var at = ImGui.GetCursorScreenPos();
+            var size = new Vector2(word.X + (padding * 2f), height);
+
+            ImGui.InvisibleButton($"##tab{index}", size);
+
+            if (ImGui.IsItemClicked()) OpenTab = open ? -1 : index;
+
+            var over = ImGui.IsItemHovered();
+
+            if (open || over)
+            {
+                draw.AddRectFilled(
+                    at,
+                    at + size,
+                    ImGui.GetColorU32(open ? EditorTheme.LiveGroup : EditorTheme.LiveHover),
+                    height * 0.5f);
+            }
+
+            draw.AddText(
+                at + new Vector2(padding, (height - word.Y) * 0.5f),
+                ImGui.GetColorU32(open ? EditorTheme.LiveText : EditorTheme.Current.Dim),
+                name);
+        }
     }
 
     /// <summary>
@@ -562,22 +699,22 @@ public static class EditorShell
             // button. What is in force wears the accent, which is the one thing colour means.
             ImGui.PushStyleColor(
                 ImGuiCol.Button,
-                on ? theme.Accent : EditorTheme.Alpha(theme.Card, theme.PanelAlpha * 0.55f));
+                on ? EditorTheme.LiveAccent : EditorTheme.Alpha(EditorTheme.LiveCard, theme.PanelAlpha));
 
             ImGui.PushStyleColor(
                 ImGuiCol.ButtonHovered,
-                on ? EditorTheme.Alpha(theme.Accent, 0.85f) : EditorTheme.Alpha(theme.Hover, 0.9f));
+                on ? EditorTheme.Alpha(EditorTheme.LiveAccent, 0.85f) : EditorTheme.LiveHover);
 
             ImGui.PushStyleColor(
                 ImGuiCol.ButtonActive,
-                on ? theme.Accent : EditorTheme.Alpha(theme.Active, 0.95f));
+                on ? EditorTheme.LiveAccent : EditorTheme.Alpha(EditorTheme.LiveHover, 1f));
 
             var label = button.Label();
 
             var pressed = button.Icon is { Length: > 0 } icon && label.Length == 0
-                ? Round(ctx, $"{slot}{index}", icon, on, Size)
+                ? Round($"{slot}{index}", icon, on, Size)
                 : ImGui.Button(
-                    $" {(label.Length == 0 ? Icon(button.Icon) : label)} ##{slot}{index}",
+                    $"  {(label.Length == 0 ? Icon(button.Icon) : label)}  ##{slot}{index}",
                     new Vector2(0f, Size));
 
             if (pressed) button.Run(ctx.Ecs);
@@ -587,37 +724,54 @@ public static class EditorShell
 
         ImGui.PopStyleVar(3);
 
-        // The bottom right corner also holds the orientation cross, which is a thing in the scene
-        // drawn where the interface says. Where that is, is here.
-        if (slot == ToolbarSlot.BottomRight)
-        {
-            const float Square = 56f;
-
-            ImGui.SameLine();
-            ImGui.InvisibleButton("##cross", new Vector2(Square, Square));
-
-            var box = ImGui.GetItemRectMin();
-            EditorGizmoSlot.Report(new Vector2(box.X, box.Y) + new Vector2(Square * 0.5f), Square, Frame);
-        }
-
         ImGui.End();
         ImGui.PopStyleVar();
     }
 
-    /// <summary>A round button with a picture in it, and nothing else.</summary>
-    private static bool Round(BehaviorContext ctx, string id, string icon, bool on, float size)
+    /// <summary>
+    /// A round button with a picture in it, and nothing else.
+    /// </summary>
+    /// <remarks>
+    /// Drawn rather than asked for. ImGui rounds an image button by the smaller of its padding and
+    /// the style's rounding, so a circle would need padding half the button wide, which is padding
+    /// around nothing. A circle and a picture over it is what was wanted and what this draws.
+    /// </remarks>
+    private static bool Round(string id, string icon, bool on, float size)
     {
-        _ = ctx;
+        var at = ImGui.GetCursorScreenPos();
 
-        // The picture sits in the middle of the circle, which is what the padding is for: an image
-        // button is the picture plus whatever is asked for around it.
-        var padding = MathF.Max(0f, (size - 18f) * 0.5f);
+        ImGui.InvisibleButton($"##{id}", new Vector2(size, size));
 
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(padding, padding));
+        var pressed = ImGui.IsItemClicked();
+        var over = ImGui.IsItemHovered();
+        var held = ImGui.IsItemActive();
 
-        var pressed = ImGuiTextures.Button(id, icon, 18f, EditorTheme.IconTint(on));
+        // Out of the colours the caller pushed, which is what a button of ImGui's own would use:
+        // reading the palette directly here instead would quietly ignore them.
+        var fill = held
+            ? ImGuiCol.ButtonActive
+            : over
+                ? ImGuiCol.ButtonHovered
+                : ImGuiCol.Button;
 
-        ImGui.PopStyleVar();
+        var draw = ImGui.GetWindowDrawList();
+        var middle = at + new Vector2(size * 0.5f, size * 0.5f);
+
+        draw.AddCircleFilled(middle, size * 0.5f, ImGui.GetColorU32(fill));
+
+        const float Mark = 18f;
+
+        if (ImGuiTextures.Load(icon) is var picture && picture != 0)
+        {
+            draw.AddImage(
+                (IntPtr)picture,
+                middle - new Vector2(Mark * 0.5f, Mark * 0.5f),
+                middle + new Vector2(Mark * 0.5f, Mark * 0.5f),
+                Vector2.Zero,
+                Vector2.One,
+                ImGui.GetColorU32(EditorTheme.IconTint(on)));
+        }
+
         return pressed;
     }
 
@@ -630,15 +784,24 @@ public static class EditorShell
         return name.Length == 0 ? "?" : char.ToUpperInvariant(name[0]) + name[1..];
     }
 
-    /// <summary>Whatever branch of the menu was asked for, where it was asked for.</summary>
+    /// <summary>
+    /// Whatever branch of the menu was asked for, where it was asked for.
+    /// </summary>
+    /// <remarks>
+    /// Opened once, when it is asked for. Opening it whenever it is not open is how a menu becomes
+    /// one that cannot be dismissed: the click that closes it is followed by a frame that finds it
+    /// closed and opens it again.
+    /// </remarks>
     private static void DrawMenu(BehaviorContext ctx)
     {
         if (_menu is null) return;
 
         const string Name = "##menu";
 
-        if (!ImGui.IsPopupOpen(Name))
+        if (_opening)
         {
+            _opening = false;
+
             ImGui.SetNextWindowPos(MenuAt);
             ImGui.OpenPopup(Name);
         }
@@ -693,6 +856,27 @@ public static class EditorShell
             }
         }
     }
+
+    /// <summary>
+    /// Which way the world faces, at the bottom right of what the scene has to itself.
+    /// </summary>
+    /// <remarks>
+    /// Not the bottom right of the scene: undocked the scene is the whole window and the panel is
+    /// over its right, so a cross in that corner is a cross behind the panel.
+    /// </remarks>
+    private static void DrawOrientation(BehaviorContext ctx)
+    {
+        var half = OrientationGizmo.Size * 0.5f;
+        var gap = (Docked ? 0f : Margin) + half + 12f;
+
+        var right = Docked ? Scene.X + Scene.Width : Panel.X;
+        var bottom = Docked ? Scene.Y + Scene.Height : Free.Bottom;
+
+        OrientationGizmo.Draw(ctx, new Vector2(right - gap, bottom - gap));
+    }
+
+    /// <summary>What the scene has to itself: the part of it no panel is over.</summary>
+    public static (float Right, float Bottom) Free { get; private set; }
 
     /// <summary>Tells the camera which part of the window it has.</summary>
     private static void Apply(BehaviorContext ctx)
