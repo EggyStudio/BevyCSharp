@@ -2,7 +2,9 @@
 
 Write [Bevy](https://bevy.org) games in C#.
 
-![Render](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/screenshot-7.png)
+![Render](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/screenshot-8.png)
+
+![Render](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/screenshot-9.png)
 
 <sup>`BevyCSharp.Sample`, running on Bevy's PBR renderer through the bridge:
 `dotnet run --project BevyCSharp.Sample`</sup>
@@ -1451,7 +1453,7 @@ ImGui can put in a draw call, decoded by the engine like any other asset, and dr
 **Input is fed, not polled.** `ImGuiRuntime.Begin` turns the engine's per-frame input into the
 events ImGui expects, and `ImGuiRuntime.WantsMouse` is what stops the camera flying, or a click
 picking something behind a panel, while the interface has the pointer. `SyntheticInput` writes into
-both halves — ImGui's queue and the window's own messages — so a test selects a mesh and drags a
+both halves, ImGui's queue and the window's own messages, so a test selects a mesh and drags a
 handle the way a hand does.
 
 ## The editor
@@ -1473,13 +1475,13 @@ rather than being drawn behind the panel. The tabs sit at the bottom left, spann
 panel leaves, and their bar is **under** their contents, so a console grows upwards out of the
 bottom of the screen.
 
-Everything about that arrangement is three numbers — docked, how wide, which tab — and a
+Everything about that arrangement is three numbers (docked, how wide, which tab) and a
 calculation in `EditorShell`.
 
 **The look is a theme, and a theme is a file.** `EditorTheme` holds one ladder of greys, one accent
 that only ever means "this is what is selected", the roundings and the paddings, and how much of the
 scene shows through a panel. There are no borders anywhere: a card is separated from what holds it
-by a step in fill and a gap, which is what the reference in `.ref/Editor/MODERN.webp` does. Every
+by a step in fill and a gap. Every
 surface carries the same transparency so the steps hold however bright the scene behind them is.
 
 Two themes ship: the editor's own and **Native**, which is stock ImGui, one click apart. The Style
