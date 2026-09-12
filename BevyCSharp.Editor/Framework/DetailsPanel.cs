@@ -110,6 +110,68 @@ public static class DetailsPanel
     /// <summary>How much air a component's card keeps inside its own edge.</summary>
     private const float Inset = 8f;
 
+    /// <summary>One degree, in radians.</summary>
+    private const float Radians = MathF.PI / 180f;
+
+    /// <summary>Which rotation field is being turned, while it is being turned.</summary>
+    /// <remarks>
+    /// The angles are held here for as long as the box is held, because a rotation has more than
+    /// one set of angles that describe it: reading them back out of the quaternion on every frame
+    /// of a drag means the numbers jump to a different decomposition halfway through, and a box
+    /// whose value changes while it is being dragged cannot be dragged.
+    /// </remarks>
+    private static string _turning = string.Empty;
+
+    /// <summary>The angles that field is being turned to, in degrees.</summary>
+    private static Vector3 _turned;
+
+    /// <summary>The angles to show for a rotation: the ones being typed, or the world's own.</summary>
+    /// <param name="id">Which field is asking.</param>
+    /// <param name="turn">What the world says it is rotated by.</param>
+    private static Vector3 Turning(string id, Quat turn)
+    {
+        if (_turning == id) return _turned;
+
+        var euler = turn.ToEuler();
+
+        return new Vector3(Tidy(euler.X), Tidy(euler.Y), Tidy(euler.Z));
+    }
+
+    /// <summary>One angle in degrees, with the noise of the round trip taken off it.</summary>
+    /// <remarks>
+    /// A rotation that is exactly none comes back out of the quaternion as a few millionths of a
+    /// degree, sometimes negative, which a box then shows as -0.000. That is not a rotation and
+    /// reads as a fault.
+    /// </remarks>
+    private static float Tidy(float radians)
+    {
+        var degrees = radians / Radians;
+
+        return MathF.Abs(degrees) < 0.0005f ? 0f : degrees;
+    }
+
+    /// <summary>
+    /// A value as a person reads it, rather than as a round trip through binary writes it.
+    /// </summary>
+    /// <remarks>
+    /// Four places at most, and none of them trailing zeroes. A number that came from a rotation
+    /// or a division prints seventeen digits by default, and sixteen of them are the difference
+    /// between what a float can hold and what was meant.
+    /// </remarks>
+    private static string Say(object? value) => value switch
+    {
+        null => "-",
+        float number => Digits(number),
+        double number => Digits((float)number),
+        Vec3 vector => $"{Digits(vector.X)}, {Digits(vector.Y)}, {Digits(vector.Z)}",
+        Quat turn => Say(turn.ToEuler() * (1f / Radians)),
+        _ => value.ToString() ?? "-",
+    };
+
+    /// <summary>One number, to four places at most.</summary>
+    private static string Digits(float number) =>
+        MathF.Round(number, 4).ToString("0.####", CultureInfo.InvariantCulture);
+
     /// <summary>One component, as a card with its fields in it.</summary>
     /// <remarks>
     /// The fill is drawn behind the group rather than around it, through a split in the draw list:
@@ -400,6 +462,36 @@ public static class DetailsPanel
                 break;
             }
 
+            case FieldKind.Quat:
+            {
+                var turn = value as Quat? ?? Quat.Identity;
+
+                // Degrees about X, Y and Z, which is the only way anybody reads or writes a
+                // rotation. Four numbers that must stay on the unit sphere are not something to
+                // type into, and three that say pitch, turn and roll are.
+                var degrees = Turning(id, turn);
+
+                if (ImGui.DragFloat3(id, ref degrees, 0.5f, 0f, 0f, "%.3f"))
+                {
+                    _turning = id;
+                    _turned = degrees;
+
+                    field.Write(
+                        ctx.Ecs,
+                        entity,
+                        Quat.FromEuler(
+                            degrees.X * Radians,
+                            degrees.Y * Radians,
+                            degrees.Z * Radians));
+                }
+
+                // Let go of the angles the moment the box is let go of, so the rotation is what the
+                // world says again rather than what was last typed.
+                if (_turning == id && !ImGui.IsItemActive()) _turning = string.Empty;
+
+                break;
+            }
+
             case FieldKind.Enum:
             {
                 var options = field.Options;
@@ -542,7 +634,7 @@ public static class DetailsPanel
 
             default:
             {
-                var said = value?.ToString() ?? "-";
+                var said = Say(value);
                 ImGui.TextDisabled(said);
                 break;
             }

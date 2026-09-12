@@ -63,6 +63,12 @@ public static class EditorShell
     /// <summary>The frame the engine last said a click had hit something.</summary>
     private static ulong _pickedOn;
 
+    /// <summary>The frame the pointer's button last went down.</summary>
+    private static ulong _pressedOn;
+
+    /// <summary>Whether that press was on the scene rather than on the interface.</summary>
+    private static bool _onScene;
+
     /// <summary>How many frames the engine gets to say what a click hit before it hit nothing.</summary>
     private const ulong Patience = 3;
 
@@ -206,6 +212,16 @@ public static class EditorShell
         // whatever happens to be behind it.
         MarqueeSelect.Tick(ctx);
 
+        // Where the click that is being answered began. Asked at the press rather than now,
+        // because the pointer moves: the engine raycasts the scene and knows nothing of the panels
+        // drawn over it, so what decides whether a pick belongs to the editor is where the button
+        // went down, and a hand that has since travelled over a panel has not changed that.
+        if (ctx.Input.MousePressed(MouseButton.Left))
+        {
+            _pressedOn = Frame;
+            _onScene = !ImGuiRuntime.WantsMouse;
+        }
+
         // A click on the scene that hit nothing means nothing was meant, which is how every editor
         // clears a selection.
         //
@@ -213,13 +229,13 @@ public static class EditorShell
         // raycasts on its own schedule and the pointer is read on ours, so the answer can arrive
         // on the frame of the press, of the release, or after it; a rule that only waits for one
         // that comes later throws away a selection the moment it is made.
-        var answered = _pickedOn >= MarqueeSelect.PressedOn;
+        var answered = _pickedOn >= _pressedOn;
 
-        if (MarqueeSelect.Clicked && !ImGuiRuntime.WantsMouse && !answered) _emptyClick = Frame;
+        if (MarqueeSelect.Clicked && _onScene && !answered) _emptyClick = Frame;
 
         foreach (var picked in Picking.Drain())
         {
-            if (ImGuiRuntime.WantsMouse) break;
+            if (!_onScene) break;
 
             // A release that ended a box is not also a click on whatever the pointer came to rest
             // over: the box already said what it meant.
@@ -822,9 +838,11 @@ public static class EditorShell
                     height * 0.5f);
             }
 
+            // White whether it is open or not. What says which one is showing is the pill under it,
+            // and a grey word reads as a tab that cannot be pressed.
             draw.AddText(
                 at + new Vector2(padding, (height - word.Y) * 0.5f),
-                ImGui.GetColorU32(open ? EditorTheme.LiveText : EditorTheme.Current.Dim),
+                ImGui.GetColorU32(EditorTheme.LiveText),
                 name);
         }
     }
