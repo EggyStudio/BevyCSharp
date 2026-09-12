@@ -24,6 +24,21 @@ macro_rules! key_table {
             let _ = index;
             None
         }
+
+        /// The other way round: a bit index back to the key that owns it.
+        ///
+        /// What a synthetic keypress needs. The table is the shared truth about which key is
+        /// which, so reading it backwards is the only way to send one without the two sides
+        /// keeping separate lists.
+        pub fn key_from(index: usize) -> Option<KeyCode> {
+            let mut at = 0usize;
+            $(
+                if index == at { return Some(KeyCode::$name); }
+                at += 1;
+            )*
+            let _ = at;
+            None
+        }
     };
 }
 
@@ -149,6 +164,103 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
                     match state {
                         ButtonState::Pressed => buttons.press(button),
                         ButtonState::Released => buttons.release(button),
+                    }
+                }
+
+                crate::interop::status::OK
+            })
+        }
+    })
+}
+
+/// Presses or releases a key, as though a hand had, with whatever text it produced.
+///
+/// The other half of [`bcs_input_pointer`]. A test that can move a pointer but not press a key
+/// cannot reach a text field at all, and the path from the window to a field is exactly where the
+/// interesting failures are.
+///
+/// `key` is the bit index the key table gives the key, `action` is 1 to press and 2 to release.
+/// `text` is what the keypress typed, as UTF-8, or null for a key that types nothing; it is only
+/// carried on a press, which is what a window does.
+///
+/// # Safety
+/// `text` must point to `len` readable bytes, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_input_key(key: i32, action: i32, text: *const u8, len: u32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (key, action, text, len);
+            crate::interop::status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::input::ButtonState;
+            use bevy::input::keyboard::{Key, KeyboardInput};
+            use bevy::prelude::*;
+            use bevy::window::PrimaryWindow;
+
+            let Ok(index) = usize::try_from(key) else {
+                return crate::interop::status::NULL_ARG;
+            };
+
+            let Some(code) = key_from(index) else {
+                return crate::interop::status::NULL_ARG;
+            };
+
+            let state = match action {
+                1 => ButtonState::Pressed,
+                2 => ButtonState::Released,
+                _ => return crate::interop::status::NULL_ARG,
+            };
+
+            let typed = if text.is_null() || len == 0 || state != ButtonState::Pressed {
+                None
+            } else {
+                let bytes = unsafe { core::slice::from_raw_parts(text, len as usize) };
+
+                // Whatever `KeyboardInput` holds its text in, which is one of two types
+                // depending on how the engine was built. Converted rather than named.
+                match core::str::from_utf8(bytes) {
+                    Ok(text) => Some(text.into()),
+                    Err(_) => return crate::interop::status::NULL_ARG,
+                }
+            };
+
+            crate::state::with_world(|world| {
+                let mut windows = world.query_filtered::<Entity, With<PrimaryWindow>>();
+
+                let Ok(window) = windows.single(world) else {
+                    return crate::interop::status::INVALID_STATE;
+                };
+
+                let logical = match typed.clone() {
+                    Some(text) => Key::Character(text),
+                    None => Key::Unidentified(bevy::input::keyboard::NativeKey::Unidentified),
+                };
+
+                let press = KeyboardInput {
+                    key_code: code,
+                    logical_key: logical,
+                    state,
+                    text: typed,
+                    repeat: false,
+                    window,
+                };
+
+                world.write_message(press.clone());
+
+                // And as a window event, for the same reason the pointer writes both: winit writes
+                // each of them for every real key, so writing one is writing half a keyboard.
+                world.write_message(bevy::window::WindowEvent::KeyboardInput(press));
+
+                // The state the rest of this frame reads, which the message only reaches on the
+                // next one.
+                if let Some(mut keys) = world.get_resource_mut::<ButtonInput<KeyCode>>() {
+                    match state {
+                        ButtonState::Pressed => keys.press(code),
+                        ButtonState::Released => keys.release(code),
                     }
                 }
 

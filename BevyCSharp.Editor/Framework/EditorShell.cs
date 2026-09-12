@@ -72,6 +72,17 @@ public static class EditorShell
     /// <summary>How many frames the engine gets to say what a click hit before it hit nothing.</summary>
     private const ulong Patience = 3;
 
+    /// <summary>
+    /// What a floating window's background is painted in.
+    /// </summary>
+    /// <remarks>
+    /// The panel while it floats over the scene, and the ground while it is docked, where there is
+    /// no scene behind it to show through and a grey a shade off black is a frame nobody asked for.
+    /// </remarks>
+    private static Vector4 Chrome() => EditorTheme.Alpha(
+        Docked ? EditorTheme.Current.Ground : EditorTheme.Current.Panel,
+        Docked ? 1f : EditorTheme.Current.WindowAlpha);
+
     /// <summary>The gap between the panel's edge and the cards inside it.</summary>
     private const float Gutter = 6f;
 
@@ -328,7 +339,7 @@ public static class EditorShell
 
         // One coat, opaque. Two of them put the feathered edge an antialiased fill draws down
         // twice, and the second one over the first is a seam along the arc.
-        var color = ImGui.GetColorU32(EditorTheme.Alpha(theme.Panel, 1f));
+        var color = ImGui.GetColorU32(EditorTheme.Alpha(theme.Ground, 1f));
 
         var left = Scene.X;
         var top = Scene.Y;
@@ -375,7 +386,12 @@ public static class EditorShell
 
         // Seen through, so the scene is behind the panel rather than cut off by it. Thinner than
         // the cards inside it: this is the layer against the scene.
-        ImGui.SetNextWindowBgAlpha(EditorTheme.Current.WindowAlpha);
+        //
+        // Docked there is no scene behind it at all, so it is solid whatever the alpha says, and
+        // what it is solid in is the ground: the darkest there is, and the same thing the corners
+        // taken off the viewport are painted in, so the frame round the scene is one colour.
+        ImGui.SetNextWindowBgAlpha(Docked ? 1f : EditorTheme.Current.WindowAlpha);
+        ImGui.PushStyleColor(ImGuiCol.WindowBg, Chrome());
 
         // Square against the window's edge when it is docked. A rounded corner is what says a
         // thing is floating, and a docked panel is not.
@@ -412,6 +428,7 @@ public static class EditorShell
         {
             ImGui.End();
             ImGui.PopStyleVar(2);
+            ImGui.PopStyleColor();
             return;
         }
 
@@ -456,6 +473,7 @@ public static class EditorShell
 
         ImGui.End();
         ImGui.PopStyleVar(2);
+        ImGui.PopStyleColor();
     }
 
     /// <summary>
@@ -661,7 +679,8 @@ public static class EditorShell
 
         ImGui.SetNextWindowPos(new Vector2(margin, top));
         ImGui.SetNextWindowSize(new Vector2(width, strip));
-        ImGui.SetNextWindowBgAlpha(EditorTheme.Current.WindowAlpha);
+        ImGui.SetNextWindowBgAlpha(Docked ? 1f : EditorTheme.Current.WindowAlpha);
+        ImGui.PushStyleColor(ImGuiCol.WindowBg, Chrome());
 
         ImGui.PushStyleVar(
             ImGuiStyleVar.WindowRounding,
@@ -687,6 +706,7 @@ public static class EditorShell
         {
             ImGui.End();
             ImGui.PopStyleVar(2);
+            ImGui.PopStyleColor();
             return;
         }
 
@@ -716,6 +736,7 @@ public static class EditorShell
 
             ImGui.End();
             ImGui.PopStyleVar(2);
+            ImGui.PopStyleColor();
             return;
         }
 
@@ -754,6 +775,7 @@ public static class EditorShell
 
         ImGui.End();
         ImGui.PopStyleVar(2);
+        ImGui.PopStyleColor();
     }
 
     /// <summary>
@@ -829,14 +851,17 @@ public static class EditorShell
 
             var over = ImGui.IsItemHovered();
 
-            if (open || over)
-            {
-                draw.AddRectFilled(
-                    at,
-                    at + size,
-                    ImGui.GetColorU32(open ? EditorTheme.LiveGroup : EditorTheme.LiveHover),
-                    height * 0.5f);
-            }
+            // A tab is a button and wears a button's three steps: a fill of its own to be seen
+            // and pressed, a brighter one under the hand, and the accent when it is the one
+            // showing. Nothing at all under the two that are not open reads as two words somebody
+            // has left lying on the strip.
+            var fill = open
+                ? EditorTheme.LiveAccent
+                : over
+                    ? EditorTheme.LiveHover
+                    : ImGui.GetStyle().Colors[(int)ImGuiCol.Button];
+
+            draw.AddRectFilled(at, at + size, ImGui.GetColorU32(fill), height * 0.5f);
 
             // White whether it is open or not. What says which one is showing is the pill under it,
             // and a grey word reads as a tab that cannot be pressed.

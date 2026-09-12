@@ -69,11 +69,57 @@ public static class SyntheticInput
     }
 
     /// <summary>
-    /// Presses and releases a key.
+    /// Presses a key where a real one is reported: the window.
+    /// </summary>
+    /// <remarks>
+    /// The keyboard's half of <see cref="Send"/>. Everything between the window and a text field
+    /// runs: the engine's own key state, the messages it writes, whatever turns those into the
+    /// characters an interface inserts. Putting characters straight into the interface's queue
+    /// tests the field and not the path to it, and the path is where a keyboard goes wrong.
+    /// </remarks>
+    /// <param name="key">Which key.</param>
+    /// <param name="typed">What it typed, or nothing for a key that types nothing.</param>
+    public static void Press(Key key, string typed = "")
+    {
+        ArgumentNullException.ThrowIfNull(typed);
+
+        Stroke(key, PointerAction.Press, typed);
+    }
+
+    /// <summary>Lets a key go, where a real one is reported.</summary>
+    /// <param name="key">Which key.</param>
+    public static void Lift(Key key) => Stroke(key, PointerAction.Release, string.Empty);
+
+    /// <summary>Presses a key and lets it go again.</summary>
+    /// <param name="key">Which key.</param>
+    /// <param name="typed">What it typed, or nothing for a key that types nothing.</param>
+    public static void Tap(Key key, string typed = "")
+    {
+        Press(key, typed);
+        Lift(key);
+    }
+
+    /// <summary>One end of a keystroke, written to the window.</summary>
+    private static unsafe void Stroke(Key key, PointerAction action, string typed)
+    {
+        var bytes = System.Text.Encoding.UTF8.GetBytes(typed);
+
+        fixed (byte* text = bytes)
+        {
+            Native.Check(
+                Native.bcs_input_key(
+                    (int)key, (int)action, bytes.Length > 0 ? text : null, (uint)bytes.Length),
+                $"sending a key {action} for {key}");
+        }
+    }
+
+    /// <summary>
+    /// Presses and releases a key in the interface's own queue.
     /// </summary>
     /// <remarks>
     /// A key that types something types it as well, because that is what a keyboard does and what
-    /// a field is waiting for.
+    /// a field is waiting for. This reaches the interface only; <see cref="Press(Key, string)"/>
+    /// starts where a real key starts.
     /// </remarks>
     public static void Key(ImGuiKey key, string? typed = null)
     {

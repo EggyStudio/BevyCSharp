@@ -936,3 +936,31 @@ mod tests {
         assert_eq!(status::PANIC, caught);
     }
 }
+
+#[cfg(test)]
+mod layout {
+    use super::BcsInput;
+
+    /// The offsets `NativeInput` on the C# side mirrors, field by field.
+    ///
+    /// A managed struct that is the right *size* but has a field in the wrong place reads whatever
+    /// its neighbour wrote and no check based on size catches it. That is not a story: an extra
+    /// padding field in the mirror put `text_len` where `touch_count` is, and typed text never
+    /// reached a text field for as long as the bridge has existed.
+    #[test]
+    fn the_input_snapshot_is_laid_out_where_the_mirror_expects() {
+        assert_eq!(core::mem::offset_of!(BcsInput, mouse_x), 0);
+        assert_eq!(core::mem::offset_of!(BcsInput, wheel_y), 20);
+        assert_eq!(core::mem::offset_of!(BcsInput, keys_down), 24);
+        assert_eq!(core::mem::offset_of!(BcsInput, keys_pressed), 40);
+        assert_eq!(core::mem::offset_of!(BcsInput, keys_released), 56);
+        assert_eq!(core::mem::offset_of!(BcsInput, mouse_down), 72);
+        assert_eq!(core::mem::offset_of!(BcsInput, mouse_pressed), 76);
+        assert_eq!(core::mem::offset_of!(BcsInput, mouse_released), 80);
+        assert_eq!(core::mem::offset_of!(BcsInput, text_len), 84);
+        assert_eq!(core::mem::offset_of!(BcsInput, touch_count), 88);
+        assert_eq!(core::mem::offset_of!(BcsInput, text), 92);
+        assert_eq!(core::mem::offset_of!(BcsInput, touches), 128);
+        assert_eq!(core::mem::size_of::<BcsInput>(), 320);
+    }
+}

@@ -49,13 +49,13 @@ public sealed record EditorTheme
     public Vector4 Group { get; init; } = Rgb(0x26, 0x26, 0x26);
 
     /// <summary>A box to type in or a button, which sits above the card holding it.</summary>
-    public Vector4 Field { get; init; } = Rgb(0x34, 0x34, 0x34);
+    public Vector4 Field { get; init; } = Rgb(0x3E, 0x3E, 0x3E);
 
     /// <summary>Under the pointer.</summary>
-    public Vector4 Hover { get; init; } = Rgb(0x46, 0x46, 0x46);
+    public Vector4 Hover { get; init; } = Rgb(0x52, 0x52, 0x52);
 
     /// <summary>Held down.</summary>
-    public Vector4 Active { get; init; } = Rgb(0x58, 0x58, 0x58);
+    public Vector4 Active { get; init; } = Rgb(0x66, 0x66, 0x66);
 
     /// <summary>A separator, for the rare place a gap will not do.</summary>
     public Vector4 Line { get; init; } = Rgb(0x30, 0x30, 0x30);
@@ -79,7 +79,7 @@ public sealed record EditorTheme
     public Vector4 Bad { get; init; } = Rgb(0xE0, 0x6C, 0x63);
 
     /// <summary>How solid a card inside a panel is over what is behind it.</summary>
-    public float PanelAlpha { get; init; } = 0.72f;
+    public float PanelAlpha { get; init; } = 0.92f;
 
     /// <summary>
     /// How solid the panel the cards are laid out in is over the scene.
@@ -245,31 +245,38 @@ public sealed record EditorTheme
         Set(style, ImGuiCol.PopupBg, Alpha(Card, MathF.Min(1f, seen + 0.1f)));
         // Nothing here has a menu bar, so this slot carries the group fill instead: it puts the
         // rung in the style editor beside the others rather than leaving one colour unreachable.
-        Set(style, ImGuiCol.MenuBarBg, Alpha(Group, seen));
+        //
+        // Solid: a component's card is what its fields are read against, and the two have to keep
+        // their step whatever the scene behind the panel is doing.
+        Set(style, ImGuiCol.MenuBarBg, Alpha(Group, 1f));
 
         Set(style, ImGuiCol.Border, Line);
         Set(style, ImGuiCol.BorderShadow, Clear);
 
         // A box to type in, and what it does under a hand.
-        Set(style, ImGuiCol.FrameBg, Alpha(Field, seen));
-        Set(style, ImGuiCol.FrameBgHovered, Alpha(Hover, seen));
+        //
+        // Solid, like everything from here inwards. A panel is seen through because it is laid over
+        // a world; a box somebody is about to type a number into is not, and one that changes tone
+        // with whatever drifts past behind it is a box whose contrast cannot be relied on.
+        Set(style, ImGuiCol.FrameBg, Alpha(Field, 1f));
+        Set(style, ImGuiCol.FrameBgHovered, Alpha(Hover, 1f));
         Set(style, ImGuiCol.FrameBgActive, Alpha(Active, 1f));
 
         Set(style, ImGuiCol.TitleBg, Alpha(Panel, seen));
         Set(style, ImGuiCol.TitleBgActive, Alpha(Panel, seen));
         Set(style, ImGuiCol.TitleBgCollapsed, Alpha(Panel, seen));
 
-        Set(style, ImGuiCol.Button, Alpha(Field, seen));
-        Set(style, ImGuiCol.ButtonHovered, Alpha(Hover, seen));
-        Set(style, ImGuiCol.ButtonActive, Alpha(Accent, 0.9f));
+        Set(style, ImGuiCol.Button, Alpha(Field, 1f));
+        Set(style, ImGuiCol.ButtonHovered, Alpha(Hover, 1f));
+        Set(style, ImGuiCol.ButtonActive, Alpha(Accent, 1f));
 
         // A header is what a component's fold wears, and what a row wears when it is chosen. The
         // accent is the second, so the first is grey and the second is written over it where it is
         // drawn.
         // What a component's fold wears, which is most of what uses this colour. A row that is
         // selected wears the accent instead, and says so where it is drawn.
-        Set(style, ImGuiCol.Header, Alpha(Field, seen));
-        Set(style, ImGuiCol.HeaderHovered, Alpha(Hover, seen));
+        Set(style, ImGuiCol.Header, Alpha(Field, 1f));
+        Set(style, ImGuiCol.HeaderHovered, Alpha(Hover, 1f));
         Set(style, ImGuiCol.HeaderActive, Alpha(Active, 1f));
 
         Set(style, ImGuiCol.Separator, Line);

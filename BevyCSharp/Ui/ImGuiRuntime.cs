@@ -50,6 +50,18 @@ public static unsafe class ImGuiRuntime
     /// <summary>Whether the interface is taking the keyboard, so no key binding should fire.</summary>
     public static bool WantsKeyboard => IsRunning && ImGui.GetIO().WantCaptureKeyboard;
 
+    /// <summary>
+    /// Whether a box somebody is typing into has the keyboard.
+    /// </summary>
+    /// <remarks>
+    /// The question a shortcut has to ask, and not the same question as
+    /// <see cref="WantsKeyboard"/>. With keyboard navigation switched on, the interface wants the
+    /// keyboard whenever any of its windows is focused, which in an editor whose panels are always
+    /// up is always: a shortcut that steps aside for that is a shortcut that never runs. What it
+    /// has to step aside for is a field with a caret in it.
+    /// </remarks>
+    public static bool Typing => IsRunning && ImGui.GetIO().WantTextInput;
+
     /// <summary>How large the interface thinks the window is, in logical pixels.</summary>
     public static Vector2 Size { get; private set; }
 

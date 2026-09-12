@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 72;
+    internal const int ExpectedAbiVersion = 73;
 
     static Native() => NativeLoader.Initialize();
 
@@ -633,6 +633,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_input_pointer(float x, float y, int action, int button);
+
+    /// <summary>Presses or releases a key, with whatever text it typed.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_input_key(int key, int action, byte* text, uint length);
 
     /// <summary>Writes how many physical pixels a logical one is.</summary>
     [LibraryImport(Library)]

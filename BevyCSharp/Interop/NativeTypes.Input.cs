@@ -57,8 +57,6 @@ public unsafe struct NativeInput
     /// <summary>Bit per mouse button that went up this frame.</summary>
     public uint MouseReleased;
 
-    /// <summary>Alignment padding; matches the native struct.</summary>
-    public uint Padding;
     /// <summary>Bytes of <see cref="Text"/> that are in use.</summary>
     public uint TextLength;
 

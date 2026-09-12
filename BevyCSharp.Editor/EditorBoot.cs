@@ -163,7 +163,7 @@ public partial struct EditorBoot
 
         // Whatever is being typed into keeps Escape: it is what somebody reaches for when they
         // have changed their mind about a value, and quitting instead throws away more than that.
-        if (ImGuiRuntime.WantsKeyboard) return;
+        if (ImGuiRuntime.Typing) return;
 
         // What is open closes before the program does. A tab is up, and then it is not.
         if (EditorShell.OpenTab >= 0)

@@ -248,7 +248,11 @@ public partial struct FlyCamera
             moved = true;
         }
 
-        if (input.KeyPressed(Key.F) || FrameWanted)
+        // Not while the interface has the keyboard. A letter typed into a name or a command is a
+        // letter, and an editor that also reads it as a shortcut moves the camera out from under
+        // somebody in the middle of a word. The button on the toolbar still asks for it, which is
+        // what `FrameWanted` is.
+        if ((input.KeyPressed(Key.F) && !ImGuiRuntime.Typing) || FrameWanted)
         {
             FrameWanted = false;
 

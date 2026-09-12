@@ -122,9 +122,29 @@ public partial struct Probe
             case 150:
                 if (Environment.GetEnvironmentVariable("BCS_PROBE_TYPE") is { Length: > 0 } typed)
                 {
-                    SyntheticInput.Type(typed);
+                    // Through the window when the script asks for it, which is the path a real
+                    // keyboard takes, and straight into the interface otherwise.
+                    if (script.Contains("keys"))
+                    {
+                        foreach (var letter in typed) SyntheticInput.Tap(Letter(letter), $"{letter}");
+                    }
+                    else
+                    {
+                        SyntheticInput.Type(typed);
+                    }
 
                     Console.WriteLine($"[probe] typed {typed}");
+                }
+
+                break;
+
+            case 154:
+                if (script.Contains("keys"))
+                {
+                    foreach (var letter in Environment.GetEnvironmentVariable("BCS_PROBE_TYPE") ?? string.Empty)
+                    {
+                        SyntheticInput.Lift(Letter(letter));
+                    }
                 }
 
                 break;
@@ -152,6 +172,16 @@ public partial struct Probe
                 break;
         }
     }
+
+    /// <summary>Which key types a letter, for the handful a probe needs.</summary>
+    private static Key Letter(char letter) => letter switch
+    {
+        >= 'a' and <= 'z' => Key.A + (letter - 'a'),
+        >= 'A' and <= 'Z' => Key.A + (letter - 'A'),
+        >= '0' and <= '9' => Key.Digit0 + (letter - '0'),
+        ' ' => Key.Space,
+        _ => Key.Space,
+    };
 
     /// <summary>Puts a component with one of everything on the cube, and selects it.</summary>
     private static void Select(BehaviorContext ctx)
@@ -273,7 +303,8 @@ public partial struct Probe
             + $" tab={EditorShell.OpenTab}");
 
         Console.WriteLine(
-            $"[probe] menu open: {EditorShell.MenuOpen} scene clicks: {MarqueeSelect.Clicks}");
+            $"[probe] menu open: {EditorShell.MenuOpen} scene clicks: {MarqueeSelect.Clicks}"
+            + $" tool: {EditorTools.Current}");
 
         if (script.Contains("world"))
         {
