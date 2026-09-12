@@ -31,7 +31,16 @@ public static class ConsoleTab
         // is then cut in half by the edge of the region.
         var typing = ImGui.GetFrameHeightWithSpacing();
 
-        if (ImGui.BeginChild("##log", new Vector2(0f, room.Y - typing)))
+        // No fill of its own: the strip it sits in is the surface, and a second rectangle inside
+        // it with square corners against the strip's rounded ones is the box-in-a-box this look
+        // does without.
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0u);
+
+        var open = ImGui.BeginChild("##log", new Vector2(0f, room.Y - typing));
+
+        ImGui.PopStyleColor();
+
+        if (open)
         {
             // Wrapped at the edge of the region rather than run off it. A path or a stack trace is
             // longer than any panel, and the half of it past the edge is the half worth reading.

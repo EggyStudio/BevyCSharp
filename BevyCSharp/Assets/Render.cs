@@ -1372,6 +1372,33 @@ public static unsafe class Render
     }
 
     /// <summary>
+    /// Draws an entity's mesh as its own edges, or stops drawing them.
+    /// </summary>
+    /// <remarks>
+    /// The shape itself rather than a box round it, which is what an editor outlines a selection
+    /// with when the box is not enough. The line pipeline it needs is a desktop one: where a
+    /// backend cannot draw lines, this is accepted and nothing appears.
+    /// </remarks>
+    /// <param name="entity">What to draw, or stop drawing.</param>
+    /// <param name="on">Whether to draw it.</param>
+    /// <param name="color">Linear RGBA for the lines.</param>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static void SetWireframe(
+        Entity entity, bool on, (float R, float G, float B, float A) color = default)
+    {
+        var status = Native.bcs_render_wireframe(
+            entity.Bits, on ? 1 : 0, color.R, color.G, color.B, color.A);
+
+        if (status == NativeStatus.Unsupported) throw NoRenderer("Drawing a wireframe");
+
+        // An entity that has gone is not an error to stop drawing: a selection outlives what it
+        // pointed at by a frame, and asking after that is how it is cleaned up.
+        if (status == NativeStatus.NoEntity) return;
+
+        Native.Check(status, "drawing a wireframe");
+    }
+
+    /// <summary>
     /// Sets how large a shadow map each kind of light gets, in pixels on a side.
     /// </summary>
     /// <remarks>

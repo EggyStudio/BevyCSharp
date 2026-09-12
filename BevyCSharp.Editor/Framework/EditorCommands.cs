@@ -94,6 +94,19 @@ public static class EditorCommands
             "Editor", "Grid height", static () => ViewportGizmos.GridHeight,
             static value => ViewportGizmos.GridHeight = value, 7);
 
+        // A box round what is selected, its own edges, or both. The box never hides what it marks
+        // and the edges say exactly which thing was picked, which is the trade.
+        EditorSettings.Choice(
+            "Editor",
+            "Selection outline",
+            ["Box", "Mesh", "Both"],
+            static () => SelectionOutline.Mark.ToString(),
+            static chosen =>
+            {
+                if (Enum.TryParse<SelectionMark>(chosen, out var mark)) SelectionOutline.Mark = mark;
+            },
+            8);
+
         EditorSettings.Heading("Project", "Where things are", 0);
 
         EditorSettings.Fact("Project", "Assets", static () => EditorPaths.Assets, 1);

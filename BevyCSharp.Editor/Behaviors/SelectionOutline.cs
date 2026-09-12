@@ -19,9 +19,32 @@ namespace BevyCSharp.Editor.Behaviors;
 /// bounds, and nothing is drawn rather than a box around a point.
 /// </para>
 /// </remarks>
+/// <summary>How a selected thing is marked out in the viewport.</summary>
+public enum SelectionMark
+{
+    /// <summary>The box it occupies, which is cheap and never hides the thing inside it.</summary>
+    Box,
+
+    /// <summary>Its own edges, which say exactly what was picked.</summary>
+    Mesh,
+
+    /// <summary>Both at once.</summary>
+    Both,
+}
+
 [Behavior]
 public partial struct SelectionOutline
 {
+    /// <summary>Which of them is drawn.</summary>
+    public static SelectionMark Mark { get; set; } = SelectionMark.Box;
+
+    /// <summary>What the engine is currently drawing edges for.</summary>
+    /// <remarks>
+    /// Kept rather than worked out, because turning a wireframe off is a call about an entity that
+    /// is no longer selected, and something has to remember which those were.
+    /// </remarks>
+    private static readonly HashSet<ulong> Wired = [];
+
     /// <summary>The accent, matching the one the panels use.</summary>
     /// <remarks>
     /// Read every time rather than written down here, so an accent changed in the style editor
@@ -41,7 +64,33 @@ public partial struct SelectionOutline
     {
         if (!App.HasRenderer) return;
 
+        Edges();
+
+        if (Mark == SelectionMark.Mesh) return;
+
         foreach (var entity in EditorSelection.All) Outline(entity);
+    }
+
+    /// <summary>Puts the engine's wireframe on what is selected, and takes it off what is not.</summary>
+    private static void Edges()
+    {
+        var wanted = Mark == SelectionMark.Box ? [] : EditorSelection.All;
+
+        foreach (var bits in Wired.ToArray())
+        {
+            var entity = new Entity(bits);
+            if (wanted.Contains(entity)) continue;
+
+            Render.SetWireframe(entity, false);
+            Wired.Remove(bits);
+        }
+
+        foreach (var entity in wanted)
+        {
+            if (!Wired.Add(entity.Bits)) continue;
+
+            Render.SetWireframe(entity, true, Accent);
+        }
     }
 
     /// <summary>Draws the box round one thing.</summary>

@@ -39,7 +39,7 @@ public static class DetailsPanel
         var entity = EditorSelection.Current;
         var name = ctx.Ecs.NameOf(entity) ?? $"Entity {entity.Index}";
 
-        ImGui.SetNextItemWidth(-1f);
+        ImGui.SetNextItemWidth(-1f - EditorShell.DockRoom());
         var renamed = name;
 
         if (ImGui.InputText("##name", ref renamed, 128, ImGuiInputTextFlags.EnterReturnsTrue)
@@ -61,7 +61,16 @@ public static class DetailsPanel
         // cards drawn into it are the step above it.
         ImGui.PushStyleColor(ImGuiCol.ChildBg, 0u);
 
-        var open = ImGui.BeginChild("##components", new Vector2(0f, 0f), ImGuiChildFlags.NavFlattened);
+        // The room the button at the bottom keeps for itself, taken out of the scrolling region
+        // rather than scrolled with it: adding a component is not something to go looking for at
+        // the end of a long list of what is already there.
+        var button = ImGui.GetFrameHeight() + (ImGui.GetStyle().ItemSpacing.Y * 2f);
+        var room = ImGui.GetContentRegionAvail().Y - button;
+
+        var open = ImGui.BeginChild(
+            "##components",
+            new Vector2(0f, MathF.Max(1f, room)),
+            ImGuiChildFlags.NavFlattened);
 
         ImGui.PopStyleColor();
 
@@ -79,14 +88,17 @@ public static class DetailsPanel
             Component(ctx, entity, schema);
         }
 
-        Add(ctx, entity);
-
         // What the thing is, under what can be edited about it: a tag says what something carries,
         // which is worth knowing and never worth the room at the top.
         Tags(ctx, entity);
 
         ImGui.EndChild();
+
+        Add(ctx, entity);
     }
+
+    /// <summary>How much air a component's card keeps inside its own edge.</summary>
+    private const float Inset = 10f;
 
     /// <summary>One component, as a card with its fields in it.</summary>
     /// <remarks>
@@ -110,9 +122,22 @@ public static class DetailsPanel
         ImGui.BeginGroup();
 
         ImGui.Dummy(new Vector2(0f, padding.Y * 0.5f));
-        ImGui.Indent(padding.X * 0.5f);
+        ImGui.Indent(Inset);
+
+        // The expander wears no fill of its own. The card behind it is the expander grown
+        // downwards: one rounded shape, the width of the header, holding the header and everything
+        // it opened. A pill for the header inside a card for the component is two surfaces saying
+        // the same thing, and the inner one always looked stuck on.
+        if (!theme.Stock)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Header, 0u);
+            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, EditorTheme.LiveHover);
+            ImGui.PushStyleColor(ImGuiCol.HeaderActive, EditorTheme.LiveHover);
+        }
 
         var open = ImGui.CollapsingHeader(schema.Name, ImGuiTreeNodeFlags.DefaultOpen);
+
+        if (!theme.Stock) ImGui.PopStyleColor(3);
 
         // A component's own menu, where taking it off lives. On the header, because that is the
         // thing the component is.
@@ -153,7 +178,7 @@ public static class DetailsPanel
             }
         }
 
-        ImGui.Unindent(padding.X * 0.5f);
+        ImGui.Unindent(Inset);
         ImGui.Dummy(new Vector2(0f, padding.Y * 0.5f));
 
         ImGui.EndGroup();
@@ -165,7 +190,7 @@ public static class DetailsPanel
 
             draw.ChannelsSetCurrent(0);
             draw.AddRectFilled(
-                new Vector2(from.X - 2f, from.Y),
+                new Vector2(from.X - Inset, from.Y),
                 new Vector2(right, to.Y),
                 ImGui.GetColorU32(EditorTheme.LiveGroup),
                 ImGui.GetStyle().ChildRounding);
@@ -187,12 +212,13 @@ public static class DetailsPanel
     private static void Add(BehaviorContext ctx, Entity entity)
     {
         ImGui.Spacing();
-        EditorTheme.Divide();
-        ImGui.Spacing();
 
         var room = ImGui.GetContentRegionAvail().X;
 
-        if (ImGui.Button("Add Component", new Vector2(room, 26f))) ImGui.OpenPopup("##add");
+        if (ImGui.Button("Add Component", new Vector2(room, ImGui.GetFrameHeight())))
+        {
+            ImGui.OpenPopup("##add");
+        }
 
         if (!ImGui.BeginPopup("##add")) return;
 
@@ -278,7 +304,17 @@ public static class DetailsPanel
 
         ImGui.PushID(id);
 
-        if (!ImGui.BeginTable("##row", 2, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.NoSavedSettings))
+        // Short of the card's edge on the right by the same air it keeps on the left, or the last
+        // field in every row runs into the side of the card it is drawn in.
+        var across = new Vector2(
+            MathF.Max(1f, ImGui.GetContentRegionAvail().X - Inset),
+            0f);
+
+        if (!ImGui.BeginTable(
+                "##row",
+                2,
+                ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.NoSavedSettings,
+                across))
         {
             ImGui.PopID();
             return;
@@ -451,7 +487,11 @@ public static class DetailsPanel
                 {
                     var on = chosen.Contains(option);
 
-                    if (ImGui.Checkbox($"{option}##{id}", ref on))
+                    // The name of the flag is part of the identifier, not only of the label: what
+                    // ImGui hashes is what follows the two hashes, so every box in a set of flags
+                    // sharing the field's id is a set of boxes ImGui cannot tell apart. It says so,
+                    // in a window that takes the keyboard with it.
+                    if (ImGui.Checkbox($"{option}##{id}.{option}", ref on))
                     {
                         if (on) chosen.Add(option);
                         else chosen.Remove(option);

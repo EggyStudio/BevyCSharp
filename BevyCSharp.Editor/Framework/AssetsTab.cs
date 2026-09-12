@@ -14,24 +14,111 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 public static class AssetsTab
 {
-    /// <summary>Draws it.</summary>
+    /// <summary>Which folders are unfolded in the tree.</summary>
+    private static readonly HashSet<string> Unfolded = [string.Empty];
+
+    /// <summary>
+    /// Draws it: the folders down the left, what is in the chosen one as tiles on the right.
+    /// </summary>
+    /// <remarks>
+    /// The shape every asset browser has, and the reason is navigation. A single pane with a way
+    /// back out means every move between two directories goes up through their parent, and where
+    /// something is has to be held in the head instead of being on the screen.
+    /// </remarks>
     public static void Draw()
     {
         var theme = EditorTheme.Current;
 
-        // Where in the tree it is, and the way back out.
-        if (ImGui.Button(" Up ")) EditorAssets.Up();
+        var split = ImGuiTableFlags.Resizable
+            | ImGuiTableFlags.NoBordersInBody
+            | ImGuiTableFlags.NoSavedSettings;
 
-        ImGui.SameLine();
-        ImGui.AlignTextToFramePadding();
+        if (!ImGui.BeginTable("##assets", 2, split)) return;
 
-        ImGui.TextDisabled(EditorAssets.Directory.Length == 0
-            ? "assets"
-            : $"assets / {EditorAssets.Directory.Replace('/', ' ').Trim()}");
+        ImGui.TableSetupColumn("##tree", ImGuiTableColumnFlags.WidthFixed, 170f);
+        ImGui.TableSetupColumn("##tiles", ImGuiTableColumnFlags.WidthStretch);
 
-        ImGui.Spacing();
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
 
-        if (!ImGui.BeginChild("##files", new Vector2(0f, 0f))) return;
+        Tree();
+
+        ImGui.TableNextColumn();
+
+        Tiles(theme);
+
+        ImGui.EndTable();
+    }
+
+    /// <summary>The folders, from the asset root down.</summary>
+    private static void Tree()
+    {
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0u);
+
+        var open = ImGui.BeginChild("##tree", new Vector2(0f, 0f));
+
+        ImGui.PopStyleColor();
+
+        if (open) Branch(string.Empty, "assets");
+
+        ImGui.EndChild();
+    }
+
+    /// <summary>One folder and, when it is unfolded, the folders under it.</summary>
+    /// <param name="path">Its path under the asset root, empty for the root itself.</param>
+    /// <param name="name">What to call it.</param>
+    private static void Branch(string path, string name)
+    {
+        var children = EditorAssets.Directories(path);
+        var here = EditorAssets.Directory == path;
+        var unfolded = Unfolded.Contains(path);
+
+        var flags = ImGuiTreeNodeFlags.OpenOnArrow
+            | ImGuiTreeNodeFlags.SpanAvailWidth
+            | ImGuiTreeNodeFlags.FramePadding;
+
+        if (here) flags |= ImGuiTreeNodeFlags.Selected;
+        if (children.Count == 0) flags |= ImGuiTreeNodeFlags.Leaf;
+        if (unfolded) flags |= ImGuiTreeNodeFlags.DefaultOpen;
+
+        ImGui.SetNextItemOpen(unfolded, ImGuiCond.Always);
+
+        var shown = ImGui.TreeNodeEx($"{name}##{path}", flags);
+
+        // The arrow folds, the word walks. Clicking a folder's name is how somebody says they want
+        // to look inside it, and folding is what the arrow is for.
+        if (ImGui.IsItemClicked() && !ImGui.IsItemToggledOpen())
+        {
+            EditorAssets.Enter(path);
+            Unfolded.Add(path);
+        }
+        else if (ImGui.IsItemToggledOpen())
+        {
+            if (shown) Unfolded.Add(path);
+            else Unfolded.Remove(path);
+        }
+
+        if (!shown) return;
+
+        foreach (var (child, called) in children) Branch(child, called);
+
+        ImGui.TreePop();
+    }
+
+    /// <summary>What is in the chosen folder.</summary>
+    private static void Tiles(EditorTheme theme)
+    {
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0u);
+
+        var started = ImGui.BeginChild("##files", new Vector2(0f, 0f));
+
+        ImGui.PopStyleColor();
+
+        if (!started)
+        {
+            ImGui.EndChild();
+            return;
+        }
 
         var entries = EditorAssets.List();
 
@@ -85,9 +172,9 @@ public static class AssetsTab
             at,
             at + new Vector2(size, size),
             ImGui.GetColorU32(picked
-                ? EditorTheme.Alpha(theme.Accent, 0.85f)
-                : EditorTheme.Alpha(over ? theme.Hover : theme.Card, theme.PanelAlpha)),
-            theme.ChildRounding);
+                ? EditorTheme.LiveAccent
+                : over ? EditorTheme.LiveHover : EditorTheme.LiveGroup),
+            ImGui.GetStyle().ChildRounding);
 
         // The picture that says what kind of thing it is, in the middle of the tile.
         var icon = entry.IsDirectory ? "icons/ui/folder.png" : EditorAssets.IconOf(entry.Path);

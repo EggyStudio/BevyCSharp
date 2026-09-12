@@ -182,6 +182,11 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // backend the bridge builds for has them.
             app.add_plugins(bevy::post_process::auto_exposure::AutoExposurePlugin);
 
+            // Drawing a mesh as its edges, which an editor offers as a way to outline what is
+            // selected. Off unless something asks for it per entity, so it costs a pipeline that is
+            // never specialised in an app that never does.
+            app.add_plugins(bevy::pbr::wireframe::WireframePlugin::default());
+
             // HTML and CSS driven UI, when the profile carries it and the app asked for it.
             //
             // Asked for rather than assumed, because the plugin is not free to an app that never

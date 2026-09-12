@@ -81,6 +81,37 @@ public static class EditorAssets
     }
 
     /// <summary>
+    /// The directories directly inside one, for a tree down the side of the browser.
+    /// </summary>
+    /// <remarks>
+    /// One level at a time rather than the whole tree at once: a tree draws what is unfolded, and
+    /// a deep asset directory read whole on every frame is a directory read for nothing.
+    /// </remarks>
+    /// <param name="relative">Which directory to look inside, or empty for the root.</param>
+    public static IReadOnlyList<(string Path, string Name)> Directories(string relative)
+    {
+        ArgumentNullException.ThrowIfNull(relative);
+
+        var root = EditorPaths.Assets;
+
+        var here = relative.Length == 0
+            ? root
+            : Path.Combine(root, relative.Replace('/', Path.DirectorySeparatorChar));
+
+        if (!System.IO.Directory.Exists(here)) return [];
+
+        var found = new List<(string Path, string Name)>();
+
+        foreach (var path in System.IO.Directory.GetDirectories(here).OrderBy(p => p, StringComparer.Ordinal))
+        {
+            var name = Path.GetFileName(path);
+            found.Add((Join(relative, name), name));
+        }
+
+        return found;
+    }
+
+    /// <summary>
     /// Every file under the asset root, whatever directory the browser is looking at.
     /// </summary>
     /// <remarks>

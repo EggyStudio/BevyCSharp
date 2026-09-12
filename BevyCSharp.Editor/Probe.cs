@@ -58,6 +58,7 @@ public partial struct Probe
                 if (script.Contains("nogrid")) ViewportGizmos.ShowGrid = false;
                 if (script.Contains("gridup")) ViewportGizmos.GridHeight = 4f;
                 if (script.Contains("native")) EditorShell.Wear(EditorTheme.Native);
+                if (script.Contains("wire")) SelectionOutline.Mark = SelectionMark.Mesh;
 
                 if (script.Contains("shift"))
                 {
@@ -79,6 +80,7 @@ public partial struct Probe
                 if (script.Contains("pick")) Press(0);
 
                 if (script.Contains("drag")) Press(0);
+                if (script.Contains("band")) Press(0);
 
                 break;
 
@@ -88,6 +90,7 @@ public partial struct Probe
                 // Moved while held, over several frames, because a drag is a run of positions and
                 // a handle that is grabbed and let go at once has moved nothing.
                 if (script.Contains("drag")) Move(1);
+                if (script.Contains("band")) Move(1);
 
                 break;
 
@@ -101,17 +104,18 @@ public partial struct Probe
             case 147:
             case 148:
                 if (script.Contains("drag")) Move(1);
+                if (script.Contains("band")) Move(1);
                 break;
 
             case 149:
                 if (script.Contains("drag")) Release(1);
+                if (script.Contains("band")) Release(1);
                 break;
 
             case 150:
                 if (Environment.GetEnvironmentVariable("BCS_PROBE_TYPE") is { Length: > 0 } typed)
                 {
                     SyntheticInput.Type(typed);
-                    SyntheticInput.Key(ImGuiKey.Enter);
 
                     Console.WriteLine($"[probe] typed {typed}");
                 }
@@ -120,6 +124,11 @@ public partial struct Probe
 
             case 155:
                 if (script.Contains("click")) Click(1);
+
+                // Well after the characters, so a capture in between shows whether they landed in
+                // the field at all rather than only whether the line ran.
+                if (script.Contains("enter")) SyntheticInput.Key(ImGuiKey.Enter);
+
                 break;
 
             case 170:
@@ -280,7 +289,8 @@ public partial struct Probe
         }
 
         Console.WriteLine(EditorSelection.Any
-            ? $"[probe] selected {ctx.Ecs.NameOf(EditorSelection.Current) ?? "?"}"
+            ? $"[probe] selected {EditorSelection.Count}:"
+                + $" {string.Join(", ", EditorSelection.All.Select(one => ctx.Ecs.NameOf(one) ?? "?"))}"
             : "[probe] nothing selected");
 
         if (EditorSelection.Any)
@@ -344,6 +354,11 @@ public partial struct Probe
         if (script.Contains("console"))
         {
             Console.WriteLine($"[probe] the log holds {ConsoleLog.All().Length} lines");
+
+            foreach (var line in ConsoleLog.All()[^Math.Min(3, ConsoleLog.All().Length)..])
+            {
+                Console.WriteLine($"[probe] log: {line.Text}");
+            }
         }
 
         _ = Vector2.Zero;

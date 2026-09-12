@@ -57,6 +57,9 @@ public static class EditorShell
     /// </remarks>
     private const float StripPadding = 5f;
 
+    /// <summary>The gap between the panel's edge and the cards inside it.</summary>
+    private const float Gutter = 6f;
+
     /// <summary>Whether the panel is against the window's edge, with the scene beside it.</summary>
     public static bool Docked { get; set; }
 
@@ -189,9 +192,15 @@ public static class EditorShell
         // Not while the interface has the pointer: the scene is raycast by the engine, which knows
         // nothing about the panels drawn over it, so a click on a panel would also land on
         // whatever happens to be behind it.
+        MarqueeSelect.Tick(ctx);
+
         foreach (var picked in Picking.Drain())
         {
             if (ImGuiRuntime.WantsMouse) break;
+
+            // A release that ended a box is not also a click on whatever the pointer came to rest
+            // over: the box already said what it meant.
+            if (MarqueeSelect.Dragging) break;
 
             EditorSelection.Select(picked);
         }
@@ -223,6 +232,7 @@ public static class EditorShell
             ? (Scene.X + Scene.Width, Scene.Y + Scene.Height)
             : (panelX, window.Y - strip - margin);
 
+        RoundScene();
         DrawPanel();
         DrawOrientation(ctx);
         DrawTabs(tabsWidth, strip, margin);
@@ -243,6 +253,62 @@ public static class EditorShell
     /// <summary>Whether the world sits above the data rather than beside it.</summary>
     public static bool Stacked => PanelWidth < Stacks;
 
+    /// <summary>
+    /// Takes the corners off the scene, so that docked it reads as a card like everything else.
+    /// </summary>
+    /// <remarks>
+    /// The scene is drawn by the engine into a rectangle, and a rectangle has square corners. What
+    /// rounds it is four wedges of the ground colour laid over those corners, on the list that
+    /// draws under every window, so the panels still cover what they cover.
+    /// <para>
+    /// Only when docked. Floating, the scene is the whole window and a window with its corners
+    /// taken off is a window with four notches of nothing in it.
+    /// </para>
+    /// </remarks>
+    private static void RoundScene()
+    {
+        if (!Docked) return;
+
+        var radius = EditorTheme.Current.WindowRounding;
+        if (radius < 1f) return;
+
+        var draw = ImGui.GetBackgroundDrawList();
+        var color = ImGui.GetColorU32(EditorTheme.Alpha(EditorTheme.Current.Ground, 1f));
+
+        var left = Scene.X;
+        var top = Scene.Y;
+        var right = Scene.X + Scene.Width;
+        var bottom = Scene.Y + Scene.Height;
+
+        Wedge(draw, new Vector2(left + radius, top + radius), radius, MathF.PI, MathF.PI * 1.5f, new Vector2(left, top), color);
+        Wedge(draw, new Vector2(right - radius, top + radius), radius, MathF.PI * 1.5f, MathF.PI * 2f, new Vector2(right, top), color);
+        Wedge(draw, new Vector2(right - radius, bottom - radius), radius, 0f, MathF.PI * 0.5f, new Vector2(right, bottom), color);
+        Wedge(draw, new Vector2(left + radius, bottom - radius), radius, MathF.PI * 0.5f, MathF.PI, new Vector2(left, bottom), color);
+    }
+
+    /// <summary>One corner's worth of what a rounded rectangle leaves out.</summary>
+    /// <param name="draw">What to draw into.</param>
+    /// <param name="middle">Where the corner's arc is centred.</param>
+    /// <param name="radius">How large the arc is.</param>
+    /// <param name="from">Where the arc starts, in radians.</param>
+    /// <param name="to">Where it ends.</param>
+    /// <param name="corner">The square corner the arc cuts off.</param>
+    /// <param name="color">What to fill it with.</param>
+    private static void Wedge(
+        ImDrawListPtr draw,
+        Vector2 middle,
+        float radius,
+        float from,
+        float to,
+        Vector2 corner,
+        uint color)
+    {
+        draw.PathClear();
+        draw.PathLineTo(corner);
+        draw.PathArcTo(middle, radius, from, to, 12);
+        draw.PathFillConvex(color);
+    }
+
     /// <summary>The world beside the data, or above it when there is no room for two columns.</summary>
     private static void DrawPanel()
     {
@@ -261,18 +327,32 @@ public static class EditorShell
             ImGuiStyleVar.WindowRounding,
             Docked ? 0f : ImGui.GetStyle().WindowRounding);
 
+        // One inset rather than two. The panel keeps a gutter wide enough to read as a gap between
+        // its cards, and the padding a person sees is the one inside each card; the panel's own
+        // padding on top of that is the doubled air the old look was criticised for. The stock look
+        // has no card fill at all, so there the window's padding is the only one there is.
+        ImGui.PushStyleVar(
+            ImGuiStyleVar.WindowPadding,
+            EditorTheme.Current.Stock ? ImGui.GetStyle().WindowPadding : new Vector2(Gutter, Gutter));
+
         var flags = ImGuiWindowFlags.NoTitleBar
             | ImGuiWindowFlags.NoResize
             | ImGuiWindowFlags.NoMove
             | ImGuiWindowFlags.NoCollapse
             | ImGuiWindowFlags.NoSavedSettings
             | ImGuiWindowFlags.NoBringToFrontOnFocus
-            | ImGuiWindowFlags.NoScrollbar;
+            | ImGuiWindowFlags.NoScrollbar
+
+            // The wheel never moves the panel itself. Without this, rolling over a list that has
+            // reached its end hands the wheel to whatever holds it, and the whole panel slides up
+            // under its own edge: the world shrinks away, the split appears to climb, and nothing
+            // put it there but a scroll that had nowhere else to go.
+            | ImGuiWindowFlags.NoScrollWithMouse;
 
         if (!ImGui.Begin("##panel", flags))
         {
             ImGui.End();
-            ImGui.PopStyleVar();
+            ImGui.PopStyleVar(2);
             return;
         }
 
@@ -316,7 +396,7 @@ public static class EditorShell
         }
 
         ImGui.End();
-        ImGui.PopStyleVar();
+        ImGui.PopStyleVar(2);
     }
 
     /// <summary>
@@ -329,7 +409,15 @@ public static class EditorShell
     /// </remarks>
     private static void Card(string id, Vector2 size, Action draw)
     {
-        if (ImGui.BeginChild(id, size, ImGuiChildFlags.AlwaysUseWindowPadding)) draw();
+        // The card holds a scrolling region rather than being one, so the wheel belongs to what is
+        // inside it and stops there.
+        var open = ImGui.BeginChild(
+            id,
+            size,
+            EditorTheme.Current.Stock ? ImGuiChildFlags.None : ImGuiChildFlags.AlwaysUseWindowPadding,
+            ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+
+        if (open) draw();
 
         ImGui.EndChild();
     }
@@ -346,10 +434,11 @@ public static class EditorShell
     {
         const float Size = 34f;
 
-        // Clear of the panel's rounded corner rather than across it: a circle straddling the arc of
-        // the corner behind it reads as a button that fell off the edge.
+        // The same corner of the window whatever the panel is doing. It belongs to the editor
+        // rather than to the panel it happens to sit over, so docking must not move it: a control
+        // that jumps when it is used is one somebody has to find again every time.
         var window = ImGuiRuntime.Size;
-        var inset = Docked ? 8f : Margin + 16f;
+        const float inset = 14f;
 
         ImGui.SetNextWindowPos(new Vector2(window.X - inset, inset), ImGuiCond.Always, new Vector2(1f, 0f));
 
@@ -386,12 +475,41 @@ public static class EditorShell
 
             if (ImGui.IsItemHovered()) ImGui.SetTooltip(Docked ? "Undock the panel" : "Dock the panel");
 
+            // Where it ended up, so a panel underneath can leave the corner alone.
+            DockRect = (ImGui.GetItemRectMin(), ImGui.GetItemRectMax());
+
             ImGui.PopStyleColor(2);
             ImGui.PopStyleVar();
         }
 
         ImGui.End();
         ImGui.PopStyleVar();
+    }
+
+    /// <summary>Where the dock button is on the screen.</summary>
+    public static (Vector2 Min, Vector2 Max) DockRect { get; private set; }
+
+    /// <summary>
+    /// How much width to leave free on the row about to be drawn, so it stays clear of the dock
+    /// button floating over it.
+    /// </summary>
+    /// <remarks>
+    /// Asked of the row rather than worked out per panel: which card is under the corner depends on
+    /// whether the panel is split beside or above, and a rule written per panel is a rule that is
+    /// wrong in one of them.
+    /// </remarks>
+    public static float DockRoom()
+    {
+        if (DockRect.Max.X <= DockRect.Min.X) return 0f;
+
+        var at = ImGui.GetCursorScreenPos();
+        var right = ImGui.GetWindowPos().X + ImGui.GetWindowWidth();
+        var line = ImGui.GetFrameHeight();
+
+        if (at.Y > DockRect.Max.Y || at.Y + line < DockRect.Min.Y) return 0f;
+        if (right <= DockRect.Min.X) return 0f;
+
+        return right - DockRect.Min.X + 6f;
     }
 
     /// <summary>The bar between the world and the data, which a drag moves.</summary>
@@ -492,7 +610,8 @@ public static class EditorShell
             | ImGuiWindowFlags.NoMove
             | ImGuiWindowFlags.NoCollapse
             | ImGuiWindowFlags.NoSavedSettings
-            | ImGuiWindowFlags.NoScrollbar;
+            | ImGuiWindowFlags.NoScrollbar
+            | ImGuiWindowFlags.NoScrollWithMouse;
 
         if (!ImGui.Begin("##tabs", flags))
         {

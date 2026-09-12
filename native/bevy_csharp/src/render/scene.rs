@@ -615,6 +615,53 @@ pub unsafe extern "C" fn bcs_render_bounds(entity: u64, out: *mut f32) -> i32 {
     })
 }
 
+/// Draws an entity's mesh as a wireframe, or stops.
+///
+/// What an editor outlines a selection with when a box round it is not enough: the shape itself,
+/// edge by edge, which says what was picked rather than roughly where it is.
+///
+/// Reports [`status::UNSUPPORTED`] where there is no renderer. The wireframe pipeline itself needs
+/// a backend that can draw lines, which is every desktop one and neither of the web ones; where it
+/// cannot, the component is set and nothing is drawn, which is the engine's answer to give.
+///
+/// # Safety
+/// Nothing is dereferenced; `entity` is checked against the world.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_wireframe(entity: u64, on: i32, r: f32, g: f32, b: f32, a: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, on, r, g, b, a);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::pbr::wireframe::{Wireframe, WireframeColor};
+
+            with_world(|world| {
+                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity)) else {
+                    return status::NO_ENTITY;
+                };
+
+                if on == 0 {
+                    entity_mut.remove::<(Wireframe, WireframeColor)>();
+                    return status::OK;
+                }
+
+                entity_mut.insert((
+                    Wireframe,
+                    WireframeColor {
+                        color: bevy::color::Color::linear_rgba(r, g, b, a),
+                    },
+                ));
+
+                status::OK
+            })
+        }
+    })
+}
+
 /// Projects a world point onto the camera's viewport, writing `x` and `y` in logical pixels.
 ///
 /// What a tool needs to hit-test something it drew in the world against the cursor, which is

@@ -23,6 +23,7 @@ use bevy::core_pipeline::tonemapping::Tonemapping;
 use bevy::render::extract_component::{ExtractComponent, ExtractComponentPlugin};
 use bevy::render::render_resource::BlendState;
 use bevy::render::renderer::ViewQuery;
+use bevy::camera::visibility::RenderLayers;
 use bevy::render::view::ViewTarget;
 use bevy::render::{
     Extract, ExtractSchedule, Render, RenderApp, RenderStartup, RenderSystems,
@@ -219,6 +220,15 @@ fn camera(mut commands: Commands) {
         // would be applied twice.
         Tonemapping::None,
         Msaa::Off,
+        // A layer of its own, which nothing else is on.
+        //
+        // Every 2D camera is a camera the gizmo renderer queues into, and a gizmo queued into this
+        // one is drawn again in screen space: a line a few metres long in the world becomes a mark
+        // a few pixels wide at the middle of the window, on top of the scene. That is what the grey
+        // streak across the centre of the viewport was, and the dot with it. Putting this camera
+        // where the gizmos are not takes both away and costs nothing: what this camera draws is one
+        // pass of our own, which asks about `InterfaceView` and not about layers.
+        RenderLayers::layer(31),
         InterfaceView,
         Name::new("Interface camera"),
     ));
