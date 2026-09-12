@@ -89,7 +89,7 @@ public partial struct TransformGizmo
     {
         if (EditorTools.Current == EditorTool.Select) return;
         if (!EditorSelection.Any) return;
-        if (EditorShell.PointerOverPanel(x, y)) return;
+        if (EditorShell.PointerOverPanel) return;
 
         var entity = EditorSelection.Current;
         if (!ctx.Ecs.TryGet<Transform>(entity, out var transform)) return;

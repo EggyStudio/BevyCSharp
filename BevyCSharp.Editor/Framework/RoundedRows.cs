@@ -22,7 +22,7 @@ public static class RoundedRows
 {
     /// <summary>Starts a region whose highlights are drawn rounded.</summary>
     /// <returns>The list to hand back to <see cref="End"/> and <see cref="Behind"/>.</returns>
-    public static ImDrawListPtr Begin()
+    private static ImDrawListPtr Begin()
     {
         var draw = ImGui.GetWindowDrawList();
 
@@ -34,12 +34,12 @@ public static class RoundedRows
 
     /// <summary>Ends it, putting the fills under the rows.</summary>
     /// <param name="draw">What <see cref="Begin"/> returned.</param>
-    public static void End(ImDrawListPtr draw) => draw.ChannelsMerge();
+    private static void End(ImDrawListPtr draw) => draw.ChannelsMerge();
 
     /// <summary>Fills a rounded rectangle behind the row just drawn.</summary>
     /// <param name="draw">What <see cref="Begin"/> returned.</param>
     /// <param name="color">What to fill it with.</param>
-    public static void Behind(ImDrawListPtr draw, Vector4 color)
+    private static void Behind(ImDrawListPtr draw, Vector4 color)
     {
         var from = ImGui.GetItemRectMin();
         var to = ImGui.GetItemRectMax();
@@ -60,16 +60,16 @@ public static class RoundedRows
     private static bool _inside;
 
     /// <summary>
-    /// Draws the rows of a popup, with a rounded fill behind whichever of them wants one.
+    /// Draws a run of rows, with a rounded fill behind whichever of them wants one.
     /// </summary>
     /// <remarks>
-    /// Every flyout in the editor goes through here, so they all highlight the same way: the menu
-    /// off the toolbar, a component's own menu, and the list of what can be added. The nesting a
-    /// submenu needs comes for free, because each call keeps whatever was in force and puts it
-    /// back.
+    /// Every list in the editor that lets ImGui draw its own rows goes through here, so they all
+    /// highlight the same way: the menu off the toolbar, a component's own menu, what can be
+    /// added to an entity, and the folder tree. Nesting comes for free, because each call keeps
+    /// whatever was in force and puts it back.
     /// </remarks>
     /// <param name="rows">What to draw, calling <see cref="Row"/> after each row.</param>
-    public static void Menu(Action rows)
+    public static void Rows(Action rows)
     {
         ArgumentNullException.ThrowIfNull(rows);
 
@@ -120,7 +120,7 @@ public static class RoundedRows
     /// </summary>
     /// <param name="chosen">Whether the row is the one selected.</param>
     /// <param name="over">Whether the pointer is on it.</param>
-    public static Vector4? Fill(bool chosen, bool over) => chosen
+    private static Vector4? Fill(bool chosen, bool over) => chosen
         ? EditorTheme.LiveAccent
         : over ? EditorTheme.LiveHover : null;
 }

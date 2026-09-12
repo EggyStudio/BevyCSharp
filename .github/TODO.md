@@ -357,11 +357,9 @@ away, so the columns keep the full height whether the asset browser is up or not
 column down the middle of the window, a console reads the log and takes commands, and the docks
 reflow around each other. Gizmos
 draw the selection, its handles, the ground and the camera's orientation, and a drag on a handle
-moves, turns or stretches what is selected. Underneath is the framework each panel is three files on
-top of: documents in HTML and CSS, bindings to fields and commands to methods through the generator,
-and hot reload of the documents, the stylesheets and behavior scripts alike.
-[EDITOR.md](EDITOR.md) has the design language, what each stage delivered, and the four things the
-interface crate cannot do that shaped the panels.
+moves, turns or stretches what is selected. Underneath is Dear ImGui, drawn by
+Bevy, with the arrangement worked out from three numbers and the look held in one theme file.
+[EDITOR.md](EDITOR.md) has the design language.
 
 What is left:
 

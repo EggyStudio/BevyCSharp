@@ -147,7 +147,7 @@ internal enum FieldKind
     Flags,
 }
 
-/// <summary>A method on a behavior that something can simply be told to call.</summary>
+/// <summary>A method on a behavior that takes nothing, so anything can be told to call it.</summary>
 /// <param name="Name">The method's name.</param>
 /// <param name="Hints">What its attributes asked for.</param>
 internal sealed record BehaviorInvokable(string Name, MethodHintModel Hints)

@@ -93,13 +93,7 @@ public static class StyleTab
 
         // Everything else, in ImGui's own editor: it knows every field it has, and anything written
         // here would be a second list to keep in step with it.
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0u);
-
-        var open = ImGui.BeginChild("##style", new Vector2(0f, 0f));
-
-        ImGui.PopStyleColor();
-
-        if (open)
+        if (EditorSurface.Region("##style", new Vector2(0f, 0f)))
         {
             ImGui.ShowStyleEditor();
         }

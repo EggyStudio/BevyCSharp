@@ -66,15 +66,7 @@ public static class WorldPanel
 
         var wanted = _search.Trim();
 
-        // No fill of its own. The card this panel is drawn in is the surface, and a second one
-        // filling it edge to edge with no padding is the box inside a box this look does without.
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0u);
-
-        var open = ImGui.BeginChild("##rows", new Vector2(0f, 0f));
-
-        ImGui.PopStyleColor();
-
-        if (!open) return;
+        if (!EditorSurface.Region("##rows", new Vector2(0f, 0f))) return;
 
         // How deep a fold reaches: everything under a folded row, until something at its own
         // depth or shallower comes along.
@@ -116,6 +108,49 @@ public static class WorldPanel
     }
 
     /// <summary>
+    /// A row that is being renamed: a box to type in and nothing else, until Enter or Escape.
+    /// </summary>
+    /// <param name="ctx">This frame.</param>
+    /// <param name="row">Which row is being renamed.</param>
+    /// <param name="width">How wide the list is.</param>
+    private static void Rename(BehaviorContext ctx, Row row, float width)
+    {
+        ImGui.SetNextItemWidth(width);
+
+        // The keyboard goes to the box the frame it appears, so a name can be typed without
+        // clicking the thing that was just double-clicked.
+        if (_started != row.Entity.Bits)
+        {
+            _started = row.Entity.Bits;
+            ImGui.SetKeyboardFocusHere();
+        }
+
+        var done = ImGui.InputText(
+            $"##rename{row.Entity.Bits}",
+            ref _typed,
+            128,
+            ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll);
+
+        if (done && _typed.Trim() is { Length: > 0 } name)
+        {
+            ctx.Ecs.SetName(row.Entity, name.Trim());
+            _renaming = 0;
+            _started = 0;
+
+            // Walked again, because a name is what the list is sorted by.
+            _built = 0;
+        }
+
+        // Let go of it by pressing Escape or by clicking somewhere else.
+        if (ImGui.IsKeyPressed(ImGuiKey.Escape)
+            || (_started == row.Entity.Bits && !ImGui.IsItemActive() && !ImGui.IsItemFocused()))
+        {
+            _renaming = 0;
+            _started = 0;
+        }
+    }
+
+    /// <summary>
     /// One row: a pill the width of the list, with a picture and a name in it.
     /// </summary>
     /// <remarks>
@@ -133,43 +168,9 @@ public static class WorldPanel
         var width = ImGui.GetContentRegionAvail().X;
         var at = ImGui.GetCursorScreenPos();
 
-        // Being renamed: the row is a box to type in and nothing else, until Enter or Escape.
         if (_renaming == row.Entity.Bits)
         {
-            ImGui.SetNextItemWidth(width);
-
-            // The keyboard goes to the box the frame it appears, so a name can be typed without
-            // clicking the thing that was just double-clicked.
-            if (_started != row.Entity.Bits)
-            {
-                _started = row.Entity.Bits;
-                ImGui.SetKeyboardFocusHere();
-            }
-
-            var done = ImGui.InputText(
-                $"##rename{row.Entity.Bits}",
-                ref _typed,
-                128,
-                ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll);
-
-            if (done && _typed.Trim() is { Length: > 0 } name)
-            {
-                ctx.Ecs.SetName(row.Entity, name.Trim());
-                _renaming = 0;
-                _started = 0;
-
-                // Walked again, because a name is what the list is sorted by.
-                _built = 0;
-            }
-
-            // Let go of it by pressing Escape or by clicking somewhere else.
-            if (ImGui.IsKeyPressed(ImGuiKey.Escape)
-                || (_started == row.Entity.Bits && !ImGui.IsItemActive() && !ImGui.IsItemFocused()))
-            {
-                _renaming = 0;
-                _started = 0;
-            }
-
+            Rename(ctx, row, width);
             return;
         }
 
@@ -215,6 +216,28 @@ public static class WorldPanel
             ImGui.EndPopup();
         }
 
+        Paint(row, at, width, height, picked, over);
+    }
+
+    /// <summary>
+    /// What a row looks like: its fill, its fold arrow, its picture and its name.
+    /// </summary>
+    /// <remarks>
+    /// Drawn rather than laid out. The invisible button is the row as far as ImGui is concerned,
+    /// and moving the cursor to put things inside it is how a window ends up believing it is
+    /// taller than it is.
+    /// </remarks>
+    /// <param name="row">What to draw.</param>
+    /// <param name="at">Where the row starts, on the screen.</param>
+    /// <param name="width">How wide it is.</param>
+    /// <param name="height">How tall it is.</param>
+    /// <param name="picked">Whether it is one of the selected.</param>
+    /// <param name="over">Whether the pointer is on it.</param>
+    private static void Paint(
+        Row row, Vector2 at, float width, float height, bool picked, bool over)
+    {
+        var theme = EditorTheme.Current;
+
         // Everything after the button is drawn rather than laid out: the button is the row as far
         // as ImGui is concerned, and moving the cursor to put things inside it is how a window ends
         // up believing it is taller than it is.
@@ -222,12 +245,13 @@ public static class WorldPanel
 
         if (picked || over)
         {
-            // Under the stock look the row wears what ImGui says a chosen row wears, rather than
-            // the editor's own accent: a theme taken whole is taken whole.
             // The one the details panel is showing wears the accent outright; the rest of a
             // selection wears it at half strength. A dozen rows all at full accent says which
             // twelve were picked and not which one is being looked at, which is the thing somebody
             // is about to edit.
+            //
+            // Under the stock look the row wears what ImGui says a chosen row wears instead: a
+            // theme taken whole is taken whole.
             var current = row.Entity == EditorSelection.Current;
 
             var fill = theme.Stock
@@ -289,16 +313,7 @@ public static class WorldPanel
             indent += line + 2f;
         }
 
-        if (ImGuiTextures.Load(row.Icon) is var picture && picture != 0)
-        {
-            draw.AddImage(
-                (IntPtr)picture,
-                new Vector2(at.X + indent, middle),
-                new Vector2(at.X + indent + line, middle + line),
-                Vector2.Zero,
-                Vector2.One,
-                ImGui.GetColorU32(EditorTheme.IconTint(picked)));
-        }
+        EditorSurface.Icon(draw, row.Icon, new Vector2(at.X + indent, middle), line, picked);
 
         draw.AddText(
             new Vector2(at.X + indent + line + 6f, middle),

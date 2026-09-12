@@ -20,31 +20,26 @@ Bevy's own words where there is one: the left column is the **world**, because t
 calls the thing being listed, and the right column answers what is **selected**, whether that is
 an entity, an asset or a setting. Nothing is called a hierarchy or an inspector.
 
-The page is `assets/ui/editor.html` and it is short, because it describes only the shell:
+`EditorShell` owns the arrangement and nothing else: three numbers, the rectangles that follow
+from them, and a call to each part that draws one. The parts are:
 
-| where | what |
+| class | what it draws |
 |---|---|
-| toolbar | the tools, and what the editor is doing |
-| left column | the world: what is in it, one row per thing |
-| middle | the viewport, which is a box with no background |
-| right column | whatever is selected: an entity's components, or an asset's particulars |
-| status strip | what is selected, and where the frame is |
-| overlays | menus, flyouts and dialogs, put in and taken out again |
+| `EditorPanes` | the panel holding the world beside or above the details, and the handles that move it |
+| `EditorStrip` | the tabs along the bottom left, and whichever is open above them |
+| `ToolbarView` | the groups of buttons that float in the scene's corners |
+| `EditorFlyout` | the menu, and every submenu of it |
+| `EditorSceneFrame` | the corner taken off the scene, and the button that docks the panel |
+| `EditorSurface` | what all of them draw with: the gutters, the cards, the grab handles, the icons |
+| `EditorPicking` | what a click on the scene selects, and what an unanswered one clears |
 
-The arrangement is a CSS grid: `auto 1fr auto` down the page and `260px 1fr 320px` across the
-middle. Changing where a panel lives is changing that line, and a person who wants the columns the
-other way round edits a stylesheet rather than a layout table.
+A part reads the shell's numbers and draws; nothing reads back. Adding a panel is a class with a
+draw method and one line in `Tick`, and moving one is moving that line.
 
-**Everything the old arrangement had to be careful about is gone.** There is no measuring a panel
-to place it, so nothing can write a measurement back into what it measured; no list of open
-documents, so nothing rebuilds when a panel opens; no z order to keep, so a flyout is markup at the
-end of the page; and no handle to a widget that a rebuild can invalidate, because an element is
-found by id when it is used.
-
-**There is still a way out of a text field.** An element takes the keyboard when it is clicked and
-gives it up when another is clicked, and a click on the viewport is not a click on the interface.
-`Dom.Blur` is what Escape does first, so somebody who types in a box and goes back to the scene
-does not leave every key the editor binds going into that box.
+**There is a way out of a text field.** A shortcut asks `ImGuiRuntime.Typing`, which is true only
+while a box with a caret in it has the keyboard. Asking whether the interface wants the keyboard at
+all is a different question with a different answer: with keyboard navigation on, it wants it
+whenever any window is focused, which in an editor whose panels are always up is always.
 
 ## Design language
 
@@ -57,7 +52,7 @@ where this editor differs.
 ### Color
 
 Everything in the editor is drawn on one of six surfaces, and which one says what a thing is. This
-is the whole of the scheme; the values live in `:root` at the top of `editor.css` and nowhere else.
+is the whole of the scheme; the values live in `EditorTheme` and nowhere else.
 
 | token | value | what it is |
 |---|---|---|
@@ -89,22 +84,6 @@ Space, height and type come from scales in the same block: `--gap-1` to `--gap-5
 density of the whole editor is a handful of numbers in one place rather than whatever each rule
 happened to be typed with.
 
-### On using a CSS framework
-
-Worth writing down, because it looks like the obvious answer. The classless frameworks
-(Pico, Simple, MVP, Tacit) style semantic HTML for reading: headings, prose, forms, tables, on a
-light-first palette, at a document's density. A tool is the opposite of a document (eighteen pixel
-rows, panes that fill a column, nothing that reflows), so adopting one means overriding nearly all
-of it and inheriting the half that does not apply. Open Props is the closer idea, being tokens and
-no components, but its tokens are a web palette (fluid type, shadow ramps, animations) sized for
-pages rather than panels.
-
-What was worth taking is the principle rather than any package: one place that holds the surfaces,
-the space, the type and the radii, and rules that name those rather than repeat numbers. That is
-what the block above is. The renderer is also a subset of CSS (it has grid, calc, transitions and
-custom properties, but no pseudo-elements), so a framework written for browsers would be partly
-ignored in ways that are hard to see.
-
 ### Density
 
 Unity's numbers, which this follows:
@@ -118,19 +97,18 @@ Unity's numbers, which this follows:
 - The inspector must not scroll horizontally at its **300px width**, which is what the name column
   and a value beside it need without either being cut.
 - **The name is a column, not a label.** Every value in a panel starts at the same place however
-  long the names are, so a column of values can be read down its own edge. That is one
-  `grid-template-columns` in the stylesheet rather than an arrangement anything computes.
+  long the names are, so a column of values can be read down its own edge. Each row is a two
+  column table, weighted towards the value, because a name that runs out of room is still readable
+  from its first half and a number that runs out of room is a different number.
 - **A panel fills its column.** Its height never changes, so what it holds scrolls inside a frame
-  that stays put: the shell is a grid, and a panel is a box in it with `overflow-y: auto` on its
-  body. A panel that grows and shrinks as its contents change is the single thing that makes an
-  interface feel unsteady, and an inspector's contents change constantly. Two panels
-  in one column share it and are as tall as what is in them, since neither can fill it.
+  that stays put. A panel that grows and shrinks as its contents change is the single thing that
+  makes an interface feel unsteady, and an inspector's contents change constantly. Two panels in
+  one column share it.
 - **A panel clips and scrolls.** What does not fit is hidden rather than drawn over whatever is
   below, and the whole of a panel's contents scrolls together: the strip of tags and the button
   under an inspector are the end of the list, not furniture pinned below it. The room the tail
   needs is set aside whether or not the tail is showing, because a reserve that depends on what it
-  decides is a list that shakes at the bottom. A panel that would rather fill its column than hug
-  its contents says `Stretch` in its placement.
+  decides is a list that shakes at the bottom.
 - **The bottom of the window is the tabs and the key list.** What a tab opens is a flyout over the
   work, dismissed by a click anywhere else, so the columns are the full height of the window whether
   a tab is open or not. A tab can be dragged taller for as long as it is up, and the next one opens
@@ -185,63 +163,13 @@ the ABI.
 Bevy's own components stay a curated list, because a general answer needs a byte-compatible mirror
 on this side and that is written by hand per type.
 
-## Stages
-
-Ordered so that each one is worth having before the next exists.
-
-1. **Introspection.** Done. `bcs_ecs_entities`, `bcs_ecs_components_of`, `bcs_component_name`,
-   `bcs_ecs_entity_name` and, added later for the same reason, `bcs_ecs_set_entity_name`. Bevy
-   discards component names without its `debug` feature, which cost 495 KB to turn back on and is
-   the difference between an inspector with headings and one with numbers.
-2. **Component metadata.** Done. The generator emits a `ComponentSchema` per `[Behavior]` struct
-   with fields and their kinds, and `ComponentSchemas` maps a component id to it.
-   **Accessors, not offsets**: an offset would need a size, a signedness and a layout to be read
-   through, and all of those are already known to the compiler that emitted the table, so each
-   field carries a closure that reads and writes the real struct. Bevy's `Transform` and
-   `Visibility` are described by hand, which is the curated list the plan asked for.
-3. **The interface.** Done three times. A hand-rolled widget set with placement written from C#;
-   then one HTML document through Blitz, with placement back in a stylesheet; then Dear ImGui, which
-   is what an editor's panels are actually made of. The first two are on the `ui/dom` branch. What
-   survived all three is everything that was never about drawing: the selection, the history, the
-   menu table, the component schemas and the console.
-
-4. **The panels.** Done. World, entity, assets, asset, rendering, information, toolbar, tabs, key
-   strip and the menu. The test of the framework was whether they needed anything it did not have,
-   and they needed four things, all general rather than panel-specific: **repeated bindings**,
-   where one id stands for a numbered pool of elements and the member is an array; **`[Show]`**,
-   which ties a bool to whether an element is drawn and can be written more than once on one
-   member; **`[OnRefresh]`**, where a panel reads the world before its values are written out; and
-   **`[Context]`**, which is a right click rather than a click and needed the bridge to tell the
-   two apart.
-
-   Two pieces of the framework came out of the panels and belong to anything built on it.
-   `EditorMenu` is a table of slash separated paths that the hamburger, the plus button and both
-   right-click menus all read, so a command is added once and appears in all of them. `EditorTabs`
-   is a list of panels that live minimised along the bottom, which is where a browser belongs.
-5. **Selection and saving.** Done, with two caveats. `bcs_pick_events` reports a click on a mesh,
-   so the viewport selects, and `bcs_render_bounds` gives the box drawn around what is selected.
-   The world's edits and the arrangement of the panels save to `assets/world.json` and
-   `assets/layout.txt` and load back.
-
-   **The picking half is unverified.** It is wired end to end and has not been seen to fire: this
-   machine runs the editor on Wayland and nothing here can synthesise a pointer into it. The
-   hierarchy's selection is verified, and the outline is drawn from the engine's own bounds, so a
-   click that selects will be visible the moment it works.
-
-   **The world file keeps one half of the world**: an entity's name and every component with a
-   schema, which is what the editor can change. Bevy's own `bevy_world_serialization` is compiled
-   in and would write the engine's reflected components properly, and it cannot see a C# component
-   at all, since those are bytes registered at runtime with no Rust type behind them. Between a
-   file holding the engine's half and one holding the program's half, the program's half is the
-   one an editor changed. A file with both is what a world asset eventually needs.
-
 ## The interface
 
 The editor's interface is **Dear ImGui**, running in C# and drawn by Bevy. The managed side owns the
 context and builds the windows; the engine gets triangles. `BevyCSharp/Ui/ImGuiRuntime.cs` is the
 join, `native/bevy_csharp/src/imgui` the pass.
 
-What that changes, against the two frameworks it replaced:
+What that buys:
 
 - **A panel is a function.** It runs every frame and draws what is true then. There is no widget to
   build, no state to invalidate, and nothing that can be out of step with the world it is showing.
@@ -261,27 +189,31 @@ What that changes, against the two frameworks it replaced:
 ### Why there are no borders
 
 A bordered box inside a bordered box inside a bordered panel is three lines saying what one gap
-says better, and it is what the first two attempts at this editor both did. What replaced it is a
-ladder: the panel is a step above the ground, a card a step above the panel, what is under the
+says better. What this uses instead is a ladder: the panel is a step above the ground, a card a step above the panel, what is under the
 pointer a step above that. Two rules keep it honest:
 
-- **Every surface carries the same transparency.** A surface that is opaque among transparent ones
-  reads as lighter over a dark scene and darker over a bright one, so the step it was meant to make
-  disappears exactly when the scene is interesting.
+- **Transparency stops at the panel.** The window a panel is drawn in is the layer against the
+  scene and is the most transparent thing there is; the cards in it are heavier; everything from a
+  component's card inwards is solid. A box somebody is about to type a number into whose tone
+  drifts with whatever passes behind it is a box with no reliable contrast, and the steps between
+  the rungs have to hold however bright the scene is.
 - **The accent means one thing.** Selected, or in force. A colour that also draws every component
   header is a colour that means nothing.
 
 ## The inspector
 
-The panel that shows what is selected writes markup, in `InspectorPage`. What a field is drawn as
-follows from its kind and from the hints its attributes declared: a checkbox for a flag, a field
+**Accessors, not offsets.** An offset would need a size, a signedness and a layout to be read
+through, and all of those are already known to the compiler that emitted the table, so each field
+carries a closure that reads and writes the real struct instead.
+
+`DetailsPanel` draws the cards and `ComponentFields` draws the rows in them. What a field is drawn
+as follows from its kind and from the hints its attributes declared: a checkbox for a flag, a field
 for a number, a bar with a readout for a number with two ends, three fields across for a vector, a
 button that offers the list for a choice, and a dimmed field for anything that cannot be edited. A
 heading, a rule and a unit are the field's own declaration too.
 
-There is no drawer table any more. The pool of rows that one served is gone with the framework
-that needed it: a row is markup written when what it says changes, so a kind that wants a different
-shape is a branch in one method and a rule in one stylesheet.
+There is no drawer table. A field kind is one arm of one switch, so a kind that wants a different
+shape is a branch in one method.
 
 A component's **properties are described as well as its fields**, and read and written through
 themselves. Something worked out from two fields, something clamped on the way in, something kept
@@ -394,7 +326,7 @@ which is asked of the component rather than assumed.
 
 ## Adding to it
 
-Nothing below needs a panel, a document or a stylesheet.
+None of this needs a panel of its own.
 
 ```csharp
 // A row on the menu, which the hamburger, the plus button, the right click on the world and any
@@ -421,17 +353,17 @@ EditorKinds.Add(new EntityKind("MyGame.Enemy", "icons/ui/users.png", 15));
 
 ## Verification
 
-**Clicks and the wheel are driven rather than simulated.** `SyntheticInput` writes the window's own messages: the
-`CursorMoved` and `MouseButtonInput` a real pointer produces, both as themselves and inside the
-`WindowEvent` batch the picking backend reads. So a click goes through the picking raycast, the
+**Input is driven rather than simulated.** `SyntheticInput` writes the window's own messages: the
+`CursorMoved` and `MouseButtonInput` a real pointer produces, and the `KeyboardInput` a real key
+produces, each both as itself and inside the `WindowEvent` batch the backends read. So a click goes through the picking raycast, the
 widget that decides it was clicked, and the button state the camera reads, exactly as a hand's
 would. Calling the method a click would have called tests the method and not the path to it, and
 the path is where the failures were: a ring that could not be grabbed, a flyout that opened once, a
-selection that cleared itself on the frame it was made. `SyntheticInput.Wheel` does the same for
-the wheel, which is what a list that pages and a camera that zooms read. What none of it can do is
-move the desktop's cursor, and it does not try.
+selection that cleared itself on the frame it was made, a text field that could not be typed into.
+`SyntheticInput.Wheel` does the same for the wheel, which is what a list that pages and a camera
+that zooms read. What none of it can do is move the desktop's cursor, and it does not try.
 
 Nothing here is provable by a test alone. `Render.Screenshot` exists for that reason: a panel
-either lays out correctly or it does not, and only the picture says which. Every stage ends with a
-capture, and the pictures are compared against the density and color rules above rather than
-against an opinion.
+either lays out correctly or it does not, and only the picture says which. A change to the look is
+checked by capturing the same probe before and after and comparing the chrome pixel by pixel, so a
+refactor that was meant to change nothing can be shown to have changed nothing.

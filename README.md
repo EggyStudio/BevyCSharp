@@ -1290,7 +1290,7 @@ The bridge builds in two profiles:
 |------------|------------------------------------------------------------------------|
 | `headless` | App, ECS, time, input, transform, assets. No window, no GPU. The default. |
 | `render`   | The above plus windowing, the renderer, post processing, UI, 2D, gizmos and audio. |
-| `editor`   | The above plus user interface described in HTML and CSS, for `BevyCSharp.Editor`. |
+| `editor`   | The above plus Dear ImGui, entity introspection and picking, for `BevyCSharp.Editor`. |
 
 The editor profile costs about a hundred crates and several minutes of build time over the render
 one, which is why it is a profile of its own rather than part of it: the test suite and the
@@ -1480,13 +1480,14 @@ panel leaves, and their bar is **under** their contents, so a console grows upwa
 bottom of the screen.
 
 Everything about that arrangement is three numbers (docked, how wide, which tab) and a
-calculation in `EditorShell`.
+calculation in `EditorShell`, which the parts that draw read and none of them write back to.
 
 **The look is a theme, and a theme is a file.** `EditorTheme` holds one ladder of greys, one accent
 that only ever means "this is what is selected", the roundings and the paddings, and how much of the
 scene shows through a panel. There are no borders anywhere: a card is separated from what holds it
-by a step in fill and a gap. Every
-surface carries the same transparency so the steps hold however bright the scene behind them is.
+by a step in fill and a gap. Transparency stops at the panel, which is the layer against the scene;
+the cards on it are heavier, and everything from a component's card inwards is solid, so the steps
+hold however bright the scene behind them is.
 
 Two themes ship: the editor's own and **Native**, which is stock ImGui, one click apart. The Style
 tab is ImGui's own style editor with the theme picker and the panel opacity above it, and **Save**
@@ -1546,11 +1547,10 @@ what came back would be a name with nothing to draw.
 **The menu is a table of paths**, and a right click on the scene, the hamburger and a submenu are
 three views of it. `EditorToolbar` is the same idea for what sits along the top.
 
-The shipped page is a starting point rather than the product: the toolbar, the world, the viewport,
-the details panel, the status strip and the console are pieces of one document, and every one of
-them can be moved, restyled or taken out by editing `assets/ui/editor.html` and `editor.css`
-without touching a line of C#.
-[.github/EDITOR.md](.github/EDITOR.md) has the design language and what each stage delivered.
+The shipped set is a starting point rather than the product. `EditorShell` owns the arrangement and
+nothing else; each piece of chrome is a class beside it with a draw method, so adding a panel is a
+class and one line, and moving one is moving that line.
+[.github/EDITOR.md](.github/EDITOR.md) has the design language.
 
 ### The console
 
@@ -1580,11 +1580,7 @@ the window, and they share every part except their documents.
 The editor profile watches the asset directory, so a running app picks up what changed on disk.
 `Config.WatchAssets` turns it on.
 
-A panel is three files, and two of them reload. A stylesheet is restyled in place. A document is
-rebuilt, which respawns every widget, so the bridge says so twice: once when the rebuild is asked
-for, so nothing reads an element that is about to be despawned, and once when the new widgets are
-up. What a panel holds is untouched either way, so the values go straight back onto the new
-elements.
+Assets reload: a texture, a mesh or a font changed on disk is picked up by the running app.
 
 Behavior scripts reload too. A script is an ordinary `[Behavior]` struct in a `.cs` file that is
 compiled while the app runs, with the same source generator the compiled projects use, so what it
@@ -1638,8 +1634,6 @@ run against a real Bevy app. Known gaps:
 - The editor's world file keeps what this side can describe: an entity's name and every component
   with a schema. A component the engine owns and C# has no mirror for, a mesh handle or a
   material, is not written, so the file is a set of edits over a scene rather than the scene.
-- An element cannot be given a CSS class while the editor runs, so a selected row in the hierarchy
-  says so with a mark in its own text rather than by being styled.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
 

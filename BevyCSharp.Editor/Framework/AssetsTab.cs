@@ -53,31 +53,9 @@ public static class AssetsTab
     /// <summary>The folders, from the asset root down.</summary>
     private static void Tree()
     {
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0u);
-
-        var open = ImGui.BeginChild("##tree", new Vector2(0f, 0f));
-
-        ImGui.PopStyleColor();
-
-        if (open)
+        if (EditorSurface.Region("##tree", new Vector2(0f, 0f)))
         {
-            var stock = EditorTheme.Current.Stock;
-            var draw = stock ? default : RoundedRows.Begin();
-
-            if (!stock)
-            {
-                ImGui.PushStyleColor(ImGuiCol.Header, 0u);
-                ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0u);
-                ImGui.PushStyleColor(ImGuiCol.HeaderActive, 0u);
-            }
-
-            Branch(string.Empty, "assets", draw, stock);
-
-            if (!stock)
-            {
-                ImGui.PopStyleColor(3);
-                RoundedRows.End(draw);
-            }
+            RoundedRows.Rows(() => Branch(string.Empty, "assets"));
         }
 
         ImGui.EndChild();
@@ -86,9 +64,7 @@ public static class AssetsTab
     /// <summary>One folder and, when it is unfolded, the folders under it.</summary>
     /// <param name="path">Its path under the asset root, empty for the root itself.</param>
     /// <param name="name">What to call it.</param>
-    /// <param name="draw">The list the rows are split across, for the rounded highlight.</param>
-    /// <param name="stock">Whether the stock look is on, which draws its own highlights.</param>
-    private static void Branch(string path, string name, ImDrawListPtr draw, bool stock)
+    private static void Branch(string path, string name)
     {
         var children = EditorAssets.Directories(path);
         var here = EditorAssets.Directory == path;
@@ -106,10 +82,7 @@ public static class AssetsTab
 
         var shown = ImGui.TreeNodeEx($"{name}##{path}", flags);
 
-        if (!stock && RoundedRows.Fill(here, ImGui.IsItemHovered()) is { } fill)
-        {
-            RoundedRows.Behind(draw, fill);
-        }
+        RoundedRows.Row(here);
 
         // The arrow folds, the word walks. Clicking a folder's name is how somebody says they want
         // to look inside it, and folding is what the arrow is for.
@@ -126,7 +99,7 @@ public static class AssetsTab
 
         if (!shown) return;
 
-        foreach (var (child, called) in children) Branch(child, called, draw, stock);
+        foreach (var (child, called) in children) Branch(child, called);
 
         ImGui.TreePop();
     }
@@ -134,13 +107,7 @@ public static class AssetsTab
     /// <summary>What is in the chosen folder.</summary>
     private static void Tiles(EditorTheme theme)
     {
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0u);
-
-        var started = ImGui.BeginChild("##files", new Vector2(0f, 0f));
-
-        ImGui.PopStyleColor();
-
-        if (!started)
+        if (!EditorSurface.Region("##files", new Vector2(0f, 0f)))
         {
             ImGui.EndChild();
             return;
@@ -205,19 +172,14 @@ public static class AssetsTab
         // The picture that says what kind of thing it is, in the middle of the tile.
         var icon = entry.IsDirectory ? "icons/ui/folder.png" : EditorAssets.IconOf(entry.Path);
 
-        if (ImGuiTextures.Load(icon) is var picture && picture != 0)
-        {
-            const float Mark = 34f;
-            var middle = at + new Vector2((size - Mark) * 0.5f, (size - Mark) * 0.5f - (line * 0.6f));
+        const float Mark = 34f;
 
-            draw.AddImage(
-                (IntPtr)picture,
-                middle,
-                middle + new Vector2(Mark, Mark),
-                Vector2.Zero,
-                Vector2.One,
-                ImGui.GetColorU32(EditorTheme.IconTint(picked)));
-        }
+        EditorSurface.Icon(
+            draw,
+            icon,
+            at + new Vector2((size - Mark) * 0.5f, (size - Mark) * 0.5f - (line * 0.6f)),
+            Mark,
+            picked);
 
         // And its name under it, cut to what fits rather than spilling into the next tile.
         var name = Fit(entry.Name, size - 10f);

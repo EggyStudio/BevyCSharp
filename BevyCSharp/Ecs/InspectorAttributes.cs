@@ -6,7 +6,7 @@ namespace Bevy;
 /// <remarks>
 /// What a field with a sensible range wants: a bar you can throw to one end is faster than a box
 /// you have to type into, and it says what the ends are without a word of documentation. A value
-/// outside the range is still shown; the slider simply sits at the end it is past.
+/// outside the range is still shown, with the slider at the end it is past.
 /// </remarks>
 /// <param name="minimum">The low end.</param>
 /// <param name="maximum">The high end.</param>
@@ -78,7 +78,7 @@ public sealed class ReadOnlyAttribute : Attribute;
 /// <summary>Not shown at all.</summary>
 /// <remarks>
 /// For a field that is a component's own working state. It is still a field of the struct and
-/// still saved; it is simply not somebody else's business.
+/// still saved; it is not somebody else's business.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method)]
 public sealed class HiddenAttribute : Attribute;

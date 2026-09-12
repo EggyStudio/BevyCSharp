@@ -193,7 +193,7 @@ public partial struct FlyCamera
         // belongs to that panel: rolling it over a list should scroll the list rather than fly
         // the camera through the wall behind it. A drag is not affected, because a drag that
         // began over the viewport should keep working wherever the pointer goes.
-        if (wheel != 0f && EditorShell.PointerOverPanel(input.MouseX, input.MouseY)) wheel = 0f;
+        if (wheel != 0f && EditorShell.PointerOverPanel) wheel = 0f;
         var position = ctx.Ecs.GetOrDefault<Transform>(ctx.Entity).Translation;
         var moved = false;
 
