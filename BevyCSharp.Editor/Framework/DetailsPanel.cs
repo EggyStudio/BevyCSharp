@@ -113,6 +113,25 @@ public static class DetailsPanel
     /// <summary>One degree, in radians.</summary>
     private const float Radians = MathF.PI / 180f;
 
+    /// <summary>
+    /// How a number somebody can edit is written.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// As many digits as it takes and no more: zero is <c>0</c> rather than <c>0.000</c>, and a
+    /// tenth is <c>1.2</c> rather than <c>1.200</c>. Three zeroes after every whole number is
+    /// three characters of nothing in a column that is already tight.
+    /// </para>
+    /// <para>
+    /// Seven figures, because that is what a single-precision number holds. It matters for more
+    /// than reading: ImGui rounds a dragged value to whatever its format can print, so a field
+    /// written as three decimal places is a field that cannot hold 1.2345 even if somebody types
+    /// it in. Asking for fewer digits than the number has is asking the editor to quietly lose
+    /// them.
+    /// </para>
+    /// </remarks>
+    private const string Figures = "%.7g";
+
     /// <summary>Which rotation field is being turned, while it is being turned.</summary>
     /// <remarks>
     /// The angles are held here for as long as the box is held, because a rotation has more than
@@ -454,7 +473,7 @@ public static class DetailsPanel
                 var vector = value as Vec3? ?? default;
                 var three = new Vector3(vector.X, vector.Y, vector.Z);
 
-                if (ImGui.DragFloat3(id, ref three, 0.01f))
+                if (ImGui.DragFloat3(id, ref three, 0.01f, 0f, 0f, Figures))
                 {
                     field.Write(ctx.Ecs, entity, new Vec3(three.X, three.Y, three.Z));
                 }
@@ -471,7 +490,7 @@ public static class DetailsPanel
                 // type into, and three that say pitch, turn and roll are.
                 var degrees = Turning(id, turn);
 
-                if (ImGui.DragFloat3(id, ref degrees, 0.5f, 0f, 0f, "%.3f"))
+                if (ImGui.DragFloat3(id, ref degrees, 0.5f, 0f, 0f, Figures))
                 {
                     _turning = id;
                     _turned = degrees;
@@ -529,8 +548,8 @@ public static class DetailsPanel
                 var number = Convert.ToSingle(value ?? 0, CultureInfo.InvariantCulture);
 
                 var changed = field.Hints is { HasRange: true, Minimum: { } least, Maximum: { } most }
-                    ? ImGui.SliderFloat(id, ref number, (float)least, (float)most)
-                    : ImGui.DragFloat(id, ref number, 0.01f);
+                    ? ImGui.SliderFloat(id, ref number, (float)least, (float)most, Figures)
+                    : ImGui.DragFloat(id, ref number, 0.01f, 0f, 0f, Figures);
 
                 if (changed)
                 {
