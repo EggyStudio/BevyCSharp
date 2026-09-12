@@ -69,3 +69,7 @@ desktop.ini
 
 # Per-machine build defaults, set by whoever works on this checkout.
 /build/build-native.local
+
+# Dear ImGui's own window layout file. The editor places every window itself and asks
+# ImGui not to write one, so a file here is a leftover from a build that did.
+imgui.ini

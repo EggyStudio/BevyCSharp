@@ -62,11 +62,10 @@ public static class DetailsPanel
 
         // One scrolling region and nothing nested inside it.
         //
-        // A card used to be a child window of its own, and a child window whose height is worked
-        // out from its contents, inside a region that scrolls, is the thing that made this panel
-        // jump while it was being scrolled: the height it reports depends on what is visible, and
-        // what is visible depends on the height. Drawn as a rectangle behind a group instead, it
-        // is one region with one scroll and no argument.
+        // A child window whose height is worked out from its contents, inside a region that
+        // scrolls, makes the region jump while it is being scrolled: the height it reports depends
+        // on what is visible, and what is visible depends on the height. A card is a rectangle
+        // drawn behind a group instead, so this is one region with one scroll and no argument.
         // No fill of its own: the panel's card is the surface this scrolls over, and the component
         // cards drawn into it are the step above it.
         ImGui.PushStyleColor(ImGuiCol.ChildBg, 0u);

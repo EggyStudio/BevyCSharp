@@ -15,8 +15,8 @@ namespace BevyCSharp.Editor.Framework;
 /// rather than behind it.
 /// </para>
 /// <para>
-/// Everything here is worked out from three numbers a person can change — whether it is docked, how
-/// wide the panel is, and which tab is open — and nothing is remembered between frames beyond
+/// Everything here is worked out from three numbers a person can change (whether it is docked, how
+/// wide the panel is, and which tab is open), and nothing is remembered between frames beyond
 /// those. That is what immediate mode buys: the arrangement is a calculation, not a tree of
 /// widgets that has to be kept in step with itself.
 /// </para>
@@ -439,8 +439,8 @@ public static class EditorShell
 
         // One inset rather than two. The panel keeps a gutter wide enough to read as a gap between
         // its cards, and the padding a person sees is the one inside each card; the panel's own
-        // padding on top of that is the doubled air the old look was criticised for. The stock look
-        // has no card fill at all, so there the window's padding is the only one there is.
+        // padding on top of that doubles the air round everything. The stock look has no card fill
+        // at all, so there the window's padding is the only one there is.
         ImGui.PushStyleVar(
             ImGuiStyleVar.WindowPadding,
             EditorTheme.Current.Stock ? ImGui.GetStyle().WindowPadding : new Vector2(Gutter, Gutter));

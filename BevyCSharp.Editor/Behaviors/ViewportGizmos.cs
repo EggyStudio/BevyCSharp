@@ -65,7 +65,7 @@ public partial struct ViewportGizmos
         var rotation = ctx.Ecs.GetOrDefault<GlobalTransform>(entity).Rotation;
 
         // The box round it is SelectionOutline's, which draws one for every selected thing rather
-        // than for the one a tool is working on. Drawn here as well it was drawn twice over.
+        // than only for the one a tool is working on.
         Handles(
             centre,
             Reach(EditorSelection.Camera, centre),
@@ -250,9 +250,9 @@ public partial struct ViewportGizmos
             var x = centreX + offset;
             var z = centreZ + offset;
 
-            // Drawn like any other line. The two through the origin used to be left out and put
-            // back in the colors of their axes, which read as a warm bar and a blue dot floating in
-            // the middle of the view rather than as the world's origin.
+            // The two through the origin are drawn like any other line. In the colors of their
+            // axes they read as a warm bar and a blue dot floating in the middle of the view
+            // rather than as the world's origin.
 
             var onZ = Shade(x, step, strength);
             var onX = Shade(z, step, strength);

@@ -77,9 +77,8 @@ Two rules follow from the ladder, and they matter more than the values:
   surfaces of different colors, so they are darker than both (`--edge`), never lighter: a light
   hairline reads as a raised edge and suits a translucent panel over a scene, which this is not.
 - **What floats is lighter than what it covers.** An overlay painted the same grey as the panel
-  under it reads as transparent however opaque it is. That single mistake — one surface color for
-  panels, menus and flyouts alike — is what made this interface look unfinished for a long time: a
-  color picker over an inspector was an outline with writing in it.
+  under it reads as transparent however opaque it is. One surface color for panels, menus and
+  flyouts alike makes a color picker over an inspector an outline with writing in it.
 
 The accent (`#0070E0`) is for what is acting: a tick that is on, a menu row under the pointer, a
 field with the keyboard. Everything else is grey, including a slider's fill, which is a lighter grey
@@ -94,16 +93,16 @@ happened to be typed with.
 
 Worth writing down, because it looks like the obvious answer. The classless frameworks
 (Pico, Simple, MVP, Tacit) style semantic HTML for reading: headings, prose, forms, tables, on a
-light-first palette, at a document's density. A tool is the opposite of a document — eighteen pixel
-rows, panes that fill a column, nothing that reflows — so adopting one means overriding nearly all
+light-first palette, at a document's density. A tool is the opposite of a document (eighteen pixel
+rows, panes that fill a column, nothing that reflows), so adopting one means overriding nearly all
 of it and inheriting the half that does not apply. Open Props is the closer idea, being tokens and
 no components, but its tokens are a web palette (fluid type, shadow ramps, animations) sized for
 pages rather than panels.
 
 What was worth taking is the principle rather than any package: one place that holds the surfaces,
 the space, the type and the radii, and rules that name those rather than repeat numbers. That is
-what the block above is. The renderer is also a subset of CSS — it has grid, calc, transitions and
-custom properties, but no pseudo-elements — so a framework written for browsers would be partly
+what the block above is. The renderer is also a subset of CSS (it has grid, calc, transitions and
+custom properties, but no pseudo-elements), so a framework written for browsers would be partly
 ignored in ways that are hard to see.
 
 ### Density

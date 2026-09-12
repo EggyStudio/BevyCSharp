@@ -95,6 +95,11 @@ public static unsafe class ImGuiRuntime
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard;
 
+        // No layout file. Every window here is placed by the editor from its own state, so what
+        // ImGui would write is a file that is never read and appears in whichever directory the
+        // program happened to start in.
+        io.NativePtr->IniFilename = null;
+
         // A draw call says where its own vertices begin, so ImGui is free to put a whole window in
         // one buffer instead of splitting it every sixty-five thousand vertices.
         io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;

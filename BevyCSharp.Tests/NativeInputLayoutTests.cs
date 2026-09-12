@@ -9,10 +9,9 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// A mirror that is the right size but has one field in the wrong place reads whatever its
-/// neighbour wrote, and nothing about the size says so. That is not hypothetical: a padding field
-/// that the native struct does not have put <c>TextLength</c> where <c>touch_count</c> is, and the
-/// two together still came to the same number of bytes, so every typed character was dropped
-/// between the window and the interface for as long as the bridge existed.
+/// neighbour wrote, and nothing about the size says so. A single padding field of four bytes is
+/// enough to put <c>TextLength</c> where <c>touch_count</c> is while both structs still measure
+/// 320 bytes, and the symptom is that typed text never arrives.
 /// <para>
 /// The same numbers are asserted on the Rust side, so neither half can move without the other.
 /// </para>

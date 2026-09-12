@@ -334,7 +334,7 @@ What is left:
   the camera the rectangle the panels left. A texture would make the scene a panel of its own,
   dockable and tabbable, and is the thing to do when a second view is wanted.
 - **No icon font.** The icons are the PNGs the editor ships, loaded through the asset server and
-  drawn with `ImGui.Image`. `.ref/icons` has 1,175 SVGs to rasterise from when more are wanted.
+  drawn with `ImGui.Image`. More can be rasterised from SVG when they are wanted.
 - **The bundle is ImGui 1.91.5.** From 1.92 Dear ImGui embeds a scalable version of its classic
   font, which is what the native theme should use rather than the ProggyClean bitmap it gets today.
   It arrives when `Twizzle.ImGui-Bundle.NET` updates; nothing here has to change for it.

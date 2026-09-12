@@ -944,9 +944,9 @@ mod layout {
     /// The offsets `NativeInput` on the C# side mirrors, field by field.
     ///
     /// A managed struct that is the right *size* but has a field in the wrong place reads whatever
-    /// its neighbour wrote and no check based on size catches it. That is not a story: an extra
-    /// padding field in the mirror put `text_len` where `touch_count` is, and typed text never
-    /// reached a text field for as long as the bridge has existed.
+    /// its neighbour wrote, and no check based on size catches it. One padding field of four bytes
+    /// in the mirror is enough to put `text_len` where `touch_count` is while both sides still
+    /// measure 320 bytes, and the symptom is that typed text never arrives.
     #[test]
     fn the_input_snapshot_is_laid_out_where_the_mirror_expects() {
         assert_eq!(core::mem::offset_of!(BcsInput, mouse_x), 0);

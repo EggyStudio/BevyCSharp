@@ -11,8 +11,8 @@ namespace BevyCSharp.Editor.Framework;
 /// <para>
 /// Hierarchy comes from fill and from how bright the text is, not from lines. A panel is a shade
 /// above the ground, a card a shade above the panel, and what is under the pointer a shade above
-/// that; nothing is outlined. Borders were what the old look leaned on, and a bordered box inside a
-/// bordered box inside a bordered panel is three lines saying what one gap says better.
+/// that; nothing is outlined. A bordered box inside a bordered box inside a bordered panel is three
+/// lines saying what one gap says better.
 /// </para>
 /// <para>
 /// The accent means one thing only: this is what is selected, or what is in force. A colour that

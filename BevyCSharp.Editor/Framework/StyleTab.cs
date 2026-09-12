@@ -180,9 +180,8 @@ public static class StyleTab
         var style = ImGui.GetStyle();
         var theme = EditorTheme.Current;
 
-        // Read back out of the slot each rung was painted into, and no other: reading a rung out of
-        // the slot below it saves a ladder nobody dialled in, one step short at every rung, which
-        // is what the file that shipped with the last build turned out to be.
+        // Read back out of the slot each rung was painted into, and no other. Reading a rung out
+        // of the slot below it saves a ladder nobody dialled in, one step short at every rung.
         return theme with
         {
             Panel = style.Colors[(int)ImGuiCol.WindowBg],
