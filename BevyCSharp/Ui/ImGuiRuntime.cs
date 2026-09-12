@@ -111,7 +111,7 @@ public static unsafe class ImGuiRuntime
                     continue;
                 }
 
-                io.Fonts.AddFontFromFileTTF(path, size);
+                Faces[face] = io.Fonts.AddFontFromFileTTF(path, size);
             }
         }
 
@@ -136,6 +136,21 @@ public static unsafe class ImGuiRuntime
         // The pixels are the engine's now; ImGui's copy is a few megabytes doing nothing.
         io.Fonts.ClearTexData();
     }
+
+    /// <summary>Every face that was asked for and found, by the file it came from.</summary>
+    private static readonly Dictionary<string, ImFontPtr> Faces = [];
+
+    /// <summary>
+    /// One of the loaded faces, or whatever is in force when it was not loaded.
+    /// </summary>
+    /// <remarks>
+    /// By name rather than by the order they were added, so the caller that wants a particular
+    /// face says which one it wants. An index would put the same piece of knowledge in two places
+    /// and one of them would eventually be wrong.
+    /// </remarks>
+    /// <param name="face">The font file it was loaded from.</param>
+    public static ImFontPtr Face(string face) =>
+        Faces.TryGetValue(face, out var found) ? found : ImGui.GetFont();
 
     /// <summary>Starts a frame: how large the window is, what the pointer did, what was typed.</summary>
     public static void Begin(BehaviorContext ctx)

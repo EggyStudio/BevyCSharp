@@ -83,6 +83,17 @@ public static class EditorShell
         Docked ? EditorTheme.Current.Ground : EditorTheme.Current.Panel,
         Docked ? 1f : EditorTheme.Current.WindowAlpha);
 
+    /// <summary>
+    /// The face numbers are written in.
+    /// </summary>
+    /// <remarks>
+    /// Monospaced, because a column of numbers that changes while it is being dragged is a column
+    /// whose digits are all different widths: the value shifts sideways under the pointer with
+    /// every digit that turns over, and three boxes side by side do it out of step with each
+    /// other. A figure the same width as every other figure holds still.
+    /// </remarks>
+    public const string Figures = "PaperMono-Regular.ttf";
+
     /// <summary>The gap between the panel's edge and the cards inside it.</summary>
     private const float Gutter = 6f;
 
@@ -185,10 +196,12 @@ public static class EditorShell
     {
         ArgumentException.ThrowIfNullOrEmpty(assets);
 
+        // Two faces: what everything is written in, and the one numbers are written in.
         ImGuiRuntime.Start(
             Path.Combine(assets, "fonts"),
             15f,
-            "Inter-Regular.ttf");
+            "Inter-Regular.ttf",
+            Figures);
 
         // Whatever was dialled in and saved, or the editor's own look when there is no file. A
         // theme is an asset like any other: read at startup, edited by hand or in the style tab.
@@ -530,11 +543,12 @@ public static class EditorShell
         // run the whole way across.
         const float Size = 26f;
 
-        // The same corner of the window whatever the panel is doing. It belongs to the editor
-        // rather than to the panel it happens to sit over, so docking must not move it: a control
-        // that jumps when it is used is one somebody has to find again every time.
+        // The window's top right corner, and how far into it depends only on where the panel's
+        // first row starts: docked the panel is flush against the window and everything in it sits
+        // ten pixels higher, so the button has to move with it or it reaches down into the row
+        // below and takes width from the filter box there.
         var window = ImGuiRuntime.Size;
-        const float inset = 10f;
+        var inset = 4f;
 
         ImGui.SetNextWindowPos(new Vector2(window.X - inset, inset), ImGuiCond.Always, new Vector2(1f, 0f));
 
@@ -637,8 +651,12 @@ public static class EditorShell
         var at = ImGui.GetWindowPos();
         var height = ImGui.GetWindowHeight();
 
-        ImGui.SetCursorScreenPos(new Vector2(at.X - 3f, at.Y));
-        ImGui.InvisibleButton("##width", new Vector2(6f, height));
+        // Wholly inside the panel, in the gutter its cards already leave empty. Straddling the
+        // edge puts half the handle outside the window, where it is clipped away: what is left is
+        // a pill cut down the middle, which is what the tab strip's grip avoids by sitting inside
+        // the strip rather than on its edge.
+        ImGui.SetCursorScreenPos(at);
+        ImGui.InvisibleButton("##width", new Vector2(Gutter, height));
 
         var over = ImGui.IsItemHovered();
         var held = ImGui.IsItemActive();

@@ -476,7 +476,13 @@ public static class DetailsPanel
                 var vector = value as Vec3? ?? default;
                 var three = new Vector3(vector.X, vector.Y, vector.Z);
 
-                if (ImGui.DragFloat3(id, ref three, 0.01f, 0f, 0f, Figures))
+                ImGui.PushFont(ImGuiRuntime.Face(EditorShell.Figures));
+
+                var moved = ImGui.DragFloat3(id, ref three, 0.01f, 0f, 0f, Figures);
+
+                ImGui.PopFont();
+
+                if (moved)
                 {
                     field.Write(ctx.Ecs, entity, new Vec3(three.X, three.Y, three.Z));
                 }
@@ -493,7 +499,13 @@ public static class DetailsPanel
                 // type into, and three that say pitch, turn and roll are.
                 var degrees = Turning(id, turn);
 
-                if (ImGui.DragFloat3(id, ref degrees, 0.5f, 0f, 0f, Figures))
+                ImGui.PushFont(ImGuiRuntime.Face(EditorShell.Figures));
+
+                var turned = ImGui.DragFloat3(id, ref degrees, 0.5f, 0f, 0f, Figures);
+
+                ImGui.PopFont();
+
+                if (turned)
                 {
                     _turning = id;
                     _turned = degrees;
@@ -537,9 +549,13 @@ public static class DetailsPanel
             {
                 var number = Convert.ToInt32(value ?? 0, CultureInfo.InvariantCulture);
 
+                ImGui.PushFont(ImGuiRuntime.Face(EditorShell.Figures));
+
                 var changed = field.Hints is { HasRange: true, Minimum: { } least, Maximum: { } most }
                     ? ImGui.SliderInt(id, ref number, (int)least, (int)most)
                     : ImGui.DragInt(id, ref number);
+
+                ImGui.PopFont();
 
                 if (changed) field.Write(ctx.Ecs, entity, number);
                 break;
@@ -550,9 +566,13 @@ public static class DetailsPanel
             {
                 var number = Convert.ToSingle(value ?? 0, CultureInfo.InvariantCulture);
 
+                ImGui.PushFont(ImGuiRuntime.Face(EditorShell.Figures));
+
                 var changed = field.Hints is { HasRange: true, Minimum: { } least, Maximum: { } most }
                     ? ImGui.SliderFloat(id, ref number, (float)least, (float)most, Figures)
                     : ImGui.DragFloat(id, ref number, 0.01f, 0f, 0f, Figures);
+
+                ImGui.PopFont();
 
                 if (changed)
                 {
@@ -657,7 +677,16 @@ public static class DetailsPanel
             default:
             {
                 var said = Say(value);
+
+                // The same face for a number nobody can edit, so a column of them lines up
+                // whether or not it happens to be writable.
+                var figures = value is float or double or Vec3 or Quat;
+
+                if (figures) ImGui.PushFont(ImGuiRuntime.Face(EditorShell.Figures));
+
                 ImGui.TextDisabled(said);
+
+                if (figures) ImGui.PopFont();
                 break;
             }
         }
