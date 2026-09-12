@@ -294,8 +294,13 @@ public static class EditorShell
 
         // Docked, the scene keeps the top left corner and the tabs sit under it. Floating, the
         // scene is the whole window and everything else is over it.
+        //
+        // Docked it also stops a gutter short of the panel rather than hard against it, so its
+        // right edge lands on the same line as the right edge of the card in the strip below, and
+        // the handle that moves the panel has room on both sides instead of a viewport against one
+        // of them.
         Scene = Docked
-            ? (0f, 0f, Math.Max(1f, panelX), Math.Max(1f, window.Y - strip))
+            ? (0f, 0f, Math.Max(1f, panelX - Gutter), Math.Max(1f, window.Y - strip))
             : (0f, 0f, window.X, window.Y);
 
         // Where the scene is still visible, which is what anything drawn over the scene has to
@@ -341,7 +346,10 @@ public static class EditorShell
     {
         if (!Docked) return;
 
-        var radius = EditorTheme.Current.WindowRounding;
+        // The rounding a card takes, not a window's: what the scene sits among docked is the cards
+        // in the panel and the strip, and a corner rounder than theirs is a corner that does not
+        // match the ones beside it.
+        var radius = EditorTheme.Current.ChildRounding;
         if (radius < 1f) return;
 
         // Docked, the scene is a card among the other cards, and what a corner taken off a card
@@ -356,6 +364,14 @@ public static class EditorShell
 
         var right = Scene.X + Scene.Width;
         var bottom = Scene.Y + Scene.Height;
+
+        // The gutter the scene now stops short of, filled in. What is under it otherwise is
+        // whatever the camera clears its window to, which is a band of sky between the viewport
+        // and the panel: the gap is chrome and has to be the colour the rest of the chrome is.
+        if (Panel.X > right)
+        {
+            draw.AddRectFilled(new Vector2(right, 0f), new Vector2(Panel.X, ImGuiRuntime.Size.Y), color);
+        }
 
         // The bottom right only. That is the one corner of a docked scene with chrome on both
         // sides of it: the strip runs under it and the panel stands beside it, so taking it off is
