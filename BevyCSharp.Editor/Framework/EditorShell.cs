@@ -341,21 +341,20 @@ public static class EditorShell
         // twice, and the second one over the first is a seam along the arc.
         var color = ImGui.GetColorU32(EditorTheme.Alpha(theme.Ground, 1f));
 
-        var left = Scene.X;
+        var right = Scene.X + Scene.Width;
         var bottom = Scene.Y + Scene.Height;
 
-        // The bottom left only. That is the one corner of a docked scene that sits inside the
-        // window rather than against its edge: the strip is under it and the window's own frame is
-        // to the left of it, and taking it off is what joins the two. The other three are either
-        // the window's own corners or a straight edge the panel butts against, and rounding those
-        // is rounding nothing.
+        // The bottom right only. That is the one corner of a docked scene with chrome on both
+        // sides of it: the strip runs under it and the panel stands beside it, so taking it off is
+        // what joins the two. The other three meet the window's own edges, where there is nothing
+        // to round against.
         Wedge(
             draw,
-            new Vector2(left + radius, bottom - radius),
+            new Vector2(right - radius, bottom - radius),
             radius,
+            0f,
             MathF.PI * 0.5f,
-            MathF.PI,
-            new Vector2(left, bottom),
+            new Vector2(right, bottom),
             color);
     }
 
@@ -525,13 +524,17 @@ public static class EditorShell
     /// </remarks>
     private static void DrawDock()
     {
-        const float Size = 34f;
+        // Small enough and high enough to sit in the empty right end of a panel's title row,
+        // which is the one row under it with nothing in it. A button that reaches into the row
+        // below takes width from whatever is there, and what is there is a search box that should
+        // run the whole way across.
+        const float Size = 26f;
 
         // The same corner of the window whatever the panel is doing. It belongs to the editor
         // rather than to the panel it happens to sit over, so docking must not move it: a control
         // that jumps when it is used is one somebody has to find again every time.
         var window = ImGuiRuntime.Size;
-        const float inset = 14f;
+        const float inset = 10f;
 
         ImGui.SetNextWindowPos(new Vector2(window.X - inset, inset), ImGuiCond.Always, new Vector2(1f, 0f));
 
@@ -631,25 +634,23 @@ public static class EditorShell
     /// <summary>The panel's left edge, which a drag widens.</summary>
     private static void Handle()
     {
-        var draw = ImGui.GetWindowDrawList();
         var at = ImGui.GetWindowPos();
         var height = ImGui.GetWindowHeight();
 
         ImGui.SetCursorScreenPos(new Vector2(at.X - 3f, at.Y));
         ImGui.InvisibleButton("##width", new Vector2(6f, height));
 
-        if (ImGui.IsItemHovered()) ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
+        var over = ImGui.IsItemHovered();
+        var held = ImGui.IsItemActive();
 
-        if (ImGui.IsItemActive())
-        {
-            PanelWidth -= ImGui.GetIO().MouseDelta.X;
+        if (over || held) ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
 
-            draw.AddLine(
-                new Vector2(at.X, at.Y),
-                new Vector2(at.X, at.Y + height),
-                ImGui.GetColorU32(ImGuiCol.ButtonActive),
-                2f);
-        }
+        if (held) PanelWidth -= ImGui.GetIO().MouseDelta.X;
+
+        // Standing up, because this edge moves sideways, and otherwise the same handle as the one
+        // between the world and the data: out of the way while the panel floats over the scene,
+        // and always there once it is docked.
+        Grab(new Vector2(2f, 26f), over, held);
 
         ImGui.SetCursorScreenPos(at + ImGui.GetStyle().WindowPadding);
     }
@@ -867,16 +868,18 @@ public static class EditorShell
             // and pressed, a brighter one under the hand, and the accent when it is the one
             // showing. Nothing at all under the two that are not open reads as two words somebody
             // has left lying on the strip.
-            // Nothing behind a tab that is neither open nor under the hand. The word alone is
-            // enough against the strip, and a row of filled pills where only one of them means
-            // anything is a row of things that all look pressable in the same way.
-            if (open || over)
+            // Docked, a tab that is neither open nor under the hand wears nothing: the strip is
+            // black behind it and the word carries on its own. Floating, the strip is the lit
+            // scene seen through, and a word on that needs something under it to sit on.
+            var idle = Docked ? null : (Vector4?)ImGui.GetStyle().Colors[(int)ImGuiCol.Button];
+
+            var fill = open
+                ? EditorTheme.LiveAccent
+                : over ? EditorTheme.LiveHover : idle;
+
+            if (fill is { } under)
             {
-                draw.AddRectFilled(
-                    at,
-                    at + size,
-                    ImGui.GetColorU32(open ? EditorTheme.LiveAccent : EditorTheme.LiveHover),
-                    height * 0.5f);
+                draw.AddRectFilled(at, at + size, ImGui.GetColorU32(under), height * 0.5f);
             }
 
             // White whether it is open or not. What says which one is showing is the pill under it,
