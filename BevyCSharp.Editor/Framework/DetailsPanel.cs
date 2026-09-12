@@ -49,7 +49,7 @@ public static class DetailsPanel
         var entity = EditorSelection.Current;
         var name = ctx.Ecs.NameOf(entity) ?? $"Entity {entity.Index}";
 
-        ImGui.SetNextItemWidth(-1f - EditorShell.DockRoom());
+        ImGui.SetNextItemWidth(-1f - EditorSceneFrame.DockRoom());
         var renamed = name;
 
         if (ImGui.InputText("##name", ref renamed, 128, ImGuiInputTextFlags.EnterReturnsTrue)

@@ -57,7 +57,7 @@ public static class WorldPanel
         ImGui.TextDisabled($"({Rows.Count})");
 
         // Short of the dock button when it happens to float over this corner.
-        ImGui.SetNextItemWidth(-1f - EditorShell.DockRoom());
+        ImGui.SetNextItemWidth(-1f - EditorSceneFrame.DockRoom());
         ImGui.InputTextWithHint("##search", "Search", ref _search, 128);
 
         ImGui.Spacing();

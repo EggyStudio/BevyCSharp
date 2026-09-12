@@ -144,7 +144,7 @@ public static class EditorCommands
             ToolbarSlot.Left,
             "icons/ui/menu.png",
             string.Empty,
-            static _ => EditorShell.ToggleMenu(string.Empty, MenuAt.X, MenuAt.Y),
+            static _ => EditorFlyout.ToggleMenu(string.Empty, MenuAt.X, MenuAt.Y),
             0);
 
         EditorToolbar.Add(

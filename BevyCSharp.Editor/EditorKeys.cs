@@ -91,7 +91,7 @@ public partial struct EditorKeys
         if (input.KeyPressed(Key.F1))
         {
             var (x, y) = input.MousePosition;
-            EditorShell.ShowMenu(string.Empty, x, y);
+            EditorFlyout.ShowMenu(string.Empty, x, y);
         }
     }
 

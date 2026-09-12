@@ -303,7 +303,7 @@ public partial struct Probe
             + $" tab={EditorShell.OpenTab}");
 
         Console.WriteLine(
-            $"[probe] menu open: {EditorShell.MenuOpen} scene clicks: {MarqueeSelect.Clicks}"
+            $"[probe] menu open: {EditorFlyout.MenuOpen} scene clicks: {MarqueeSelect.Clicks}"
             + $" tool: {EditorTools.Current}");
 
         if (script.Contains("world"))
