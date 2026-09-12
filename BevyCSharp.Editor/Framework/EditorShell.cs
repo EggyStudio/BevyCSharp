@@ -658,7 +658,7 @@ public static class EditorShell
             if (body > 1f) WorldShare = Math.Clamp(WorldShare + (ImGui.GetIO().MouseDelta.Y / body), 0.15f, 0.85f);
         }
 
-        Grab(new Vector2(26f, 3f), over, held);
+        Grab(Pill, over, held);
     }
 
     /// <summary>The panel's left edge, which a drag widens.</summary>
@@ -684,7 +684,17 @@ public static class EditorShell
         // Standing up, because this edge moves sideways, and otherwise the same handle as the one
         // between the world and the data: out of the way while the panel floats over the scene,
         // and always there once it is docked.
-        Grab(new Vector2(2f, 26f), over, held);
+        //
+        // Drawn on the front of everything and centred on the panel's edge rather than inside it.
+        // What a person sees a gap between is the scene and the card, and the middle of that gap
+        // is the edge itself; a pill centred in the half of it that happens to be inside the
+        // window sits visibly off to one side.
+        Grab(
+            new Vector2(Pill.Y, Pill.X),
+            over,
+            held,
+            ImGui.GetForegroundDrawList(),
+            at.X);
 
         ImGui.SetCursorScreenPos(at + ImGui.GetStyle().WindowPadding);
     }
@@ -834,7 +844,7 @@ public static class EditorShell
                 MathF.Max(120f, ImGuiRuntime.Size.Y * 0.75f));
         }
 
-        Grab(new Vector2(26f, 2f), over, held);
+        Grab(Pill, over, held);
     }
 
     /// <summary>
@@ -849,7 +859,7 @@ public static class EditorShell
     /// <param name="grab">Half the pill's width and height.</param>
     /// <param name="over">Whether the pointer is on it.</param>
     /// <param name="held">Whether it is being dragged.</param>
-    private static void Grab(Vector2 grab, bool over, bool held)
+    private static void Grab(Vector2 grab, bool over, bool held, ImDrawListPtr? onto = null, float? middleX = null)
     {
         var showing = held || over || Docked;
         if (!showing) return;
@@ -857,16 +867,25 @@ public static class EditorShell
         var at = ImGui.GetItemRectMin();
         var to = ImGui.GetItemRectMax();
 
-        var middle = new Vector2((at.X + to.X) * 0.5f, (at.Y + to.Y) * 0.5f);
+        var middle = new Vector2(middleX ?? ((at.X + to.X) * 0.5f), (at.Y + to.Y) * 0.5f);
+        var draw = onto ?? ImGui.GetWindowDrawList();
 
-        ImGui.GetWindowDrawList().AddRectFilled(
+        draw.AddRectFilled(
             middle - grab,
             middle + grab,
             ImGui.GetColorU32(held
                 ? EditorTheme.LiveAccent
                 : EditorTheme.Alpha(EditorTheme.LiveText, over ? 0.5f : 0.22f)),
-            grab.Y);
+            MathF.Min(grab.X, grab.Y));
     }
+
+    /// <summary>How large a grab handle's pill is, as half its width and half its height.</summary>
+    /// <remarks>
+    /// One size for all of them. Two handles that do the same job at two thicknesses read as two
+    /// different things, and there is no reason for either number to be the one it is beyond the
+    /// other one matching it.
+    /// </remarks>
+    private static readonly Vector2 Pill = new(26f, 2f);
 
     /// <summary>
     /// The tabs as a row of pills, which is the shape the rest of this look is drawn in.
