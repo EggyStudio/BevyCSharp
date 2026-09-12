@@ -48,11 +48,22 @@ public static class StyleTab
 
         // How much of the scene shows through a panel, which is a decision about the look and so
         // belongs beside the rest of them. In whole percent, because that is how somebody says it.
+        var behind = theme.WindowAlpha * 100f;
+
+        ImGui.SetNextItemWidth(150f);
+
+        if (ImGui.SliderFloat("##behind", ref behind, 20f, 100f, "panel %.0f%%"))
+        {
+            EditorShell.Wear(theme with { WindowAlpha = behind / 100f });
+        }
+
+        ImGui.SameLine();
+
         var alpha = theme.PanelAlpha * 100f;
 
-        ImGui.SetNextItemWidth(200f);
+        ImGui.SetNextItemWidth(150f);
 
-        if (ImGui.SliderFloat("##alpha", ref alpha, 40f, 100f, "panels %.0f%%"))
+        if (ImGui.SliderFloat("##alpha", ref alpha, 40f, 100f, "cards %.0f%%"))
         {
             EditorShell.Wear(theme with { PanelAlpha = alpha / 100f });
         }
@@ -188,7 +199,8 @@ public static class StyleTab
 
             // How far through a panel the scene shows is the alpha the panel was painted with, so
             // dragging it in ImGui's own editor is picked up here rather than ignored.
-            PanelAlpha = style.Colors[(int)ImGuiCol.WindowBg].W,
+            PanelAlpha = style.Colors[(int)ImGuiCol.ChildBg].W,
+            WindowAlpha = style.Colors[(int)ImGuiCol.WindowBg].W,
             WindowRounding = style.WindowRounding,
             ChildRounding = style.ChildRounding,
             FrameRounding = style.FrameRounding,

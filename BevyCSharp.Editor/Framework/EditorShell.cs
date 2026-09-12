@@ -60,6 +60,9 @@ public static class EditorShell
     /// <summary>The frame a click on the scene landed, while it is still waiting to be answered.</summary>
     private static ulong _emptyClick;
 
+    /// <summary>The frame the engine last said a click had hit something.</summary>
+    private static ulong _pickedOn;
+
     /// <summary>How many frames the engine gets to say what a click hit before it hit nothing.</summary>
     private const ulong Patience = 3;
 
@@ -204,10 +207,15 @@ public static class EditorShell
         MarqueeSelect.Tick(ctx);
 
         // A click on the scene that hit nothing means nothing was meant, which is how every editor
-        // clears a selection. Waited on rather than acted on at once: the engine raycasts the scene
-        // and answers a frame or two later, and clearing the moment the button comes up would wipe
-        // the selection the answer is about to make.
-        if (MarqueeSelect.Clicked && !ImGuiRuntime.WantsMouse) _emptyClick = Frame;
+        // clears a selection.
+        //
+        // Only when nothing has answered this click since the button went down. The engine
+        // raycasts on its own schedule and the pointer is read on ours, so the answer can arrive
+        // on the frame of the press, of the release, or after it; a rule that only waits for one
+        // that comes later throws away a selection the moment it is made.
+        var answered = _pickedOn >= MarqueeSelect.PressedOn;
+
+        if (MarqueeSelect.Clicked && !ImGuiRuntime.WantsMouse && !answered) _emptyClick = Frame;
 
         foreach (var picked in Picking.Drain())
         {
@@ -217,7 +225,9 @@ public static class EditorShell
             // over: the box already said what it meant.
             if (MarqueeSelect.Dragging) break;
 
+            _pickedOn = Frame;
             _emptyClick = 0;
+
             EditorSelection.Select(picked);
         }
 
@@ -347,8 +357,9 @@ public static class EditorShell
         ImGui.SetNextWindowPos(new Vector2(Panel.X, Panel.Y));
         ImGui.SetNextWindowSize(new Vector2(Panel.Width, Panel.Height));
 
-        // Seen through, so the scene is behind the panel rather than cut off by it.
-        ImGui.SetNextWindowBgAlpha(EditorTheme.Current.PanelAlpha);
+        // Seen through, so the scene is behind the panel rather than cut off by it. Thinner than
+        // the cards inside it: this is the layer against the scene.
+        ImGui.SetNextWindowBgAlpha(EditorTheme.Current.WindowAlpha);
 
         // Square against the window's edge when it is docked. A rounded corner is what says a
         // thing is floating, and a docked panel is not.
@@ -634,7 +645,7 @@ public static class EditorShell
 
         ImGui.SetNextWindowPos(new Vector2(margin, top));
         ImGui.SetNextWindowSize(new Vector2(width, strip));
-        ImGui.SetNextWindowBgAlpha(EditorTheme.Current.PanelAlpha);
+        ImGui.SetNextWindowBgAlpha(EditorTheme.Current.WindowAlpha);
 
         ImGui.PushStyleVar(
             ImGuiStyleVar.WindowRounding,
@@ -642,9 +653,11 @@ public static class EditorShell
 
         // The strip is measured as StripPadding above and below the bar, so its own window padding
         // has to be that and no more or the bar sinks and the text clips.
+        // The same gutter the panel keeps round its cards, and no more above and below the bar
+        // than the strip was measured with.
         ImGui.PushStyleVar(
             ImGuiStyleVar.WindowPadding,
-            new Vector2(ImGui.GetStyle().WindowPadding.X, StripPadding));
+            new Vector2(Gutter, StripPadding));
 
         var flags = ImGuiWindowFlags.NoTitleBar
             | ImGuiWindowFlags.NoResize
@@ -670,12 +683,9 @@ public static class EditorShell
 
             var bar = ImGui.GetFrameHeight() + ImGui.GetStyle().ItemSpacing.Y;
 
-            if (ImGui.BeginChild("##tab", new Vector2(0f, room.Y - bar)))
-            {
-                Tabs[OpenTab].Draw();
-            }
-
-            ImGui.EndChild();
+            // A card like the ones in the panel, which is what it is: the same gap outside it and
+            // the same air inside it, rather than a rectangle pushed against its own edges.
+            Card("##tab", new Vector2(0f, room.Y - bar), Tabs[OpenTab].Draw);
         }
 
         // And the bar under it, drawn rather than asked for.

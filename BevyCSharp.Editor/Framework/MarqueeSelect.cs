@@ -55,6 +55,15 @@ public static class MarqueeSelect
     /// <summary>How many clicks on the scene there have been, which a probe can check.</summary>
     public static int Clicks { get; private set; }
 
+    /// <summary>The frame the button went down on, which is where a click starts.</summary>
+    /// <remarks>
+    /// What tells a click that hit nothing from one whose answer has already arrived. The engine
+    /// raycasts the scene on its own schedule and the pointer's state is read on ours, so which of
+    /// the two a frame carries first is not fixed: an answer that landed before the button came up
+    /// is still this click's answer.
+    /// </remarks>
+    public static ulong PressedOn { get; private set; }
+
     /// <summary>Takes the pointer's part in this frame, and draws the box if there is one.</summary>
     public static void Tick(BehaviorContext ctx)
     {
@@ -78,6 +87,7 @@ public static class MarqueeSelect
         {
             _from = at;
             _adds = input.AnyKeyDown([Key.ShiftLeft, Key.ShiftRight]);
+            PressedOn = EditorShell.Frame;
         }
 
         if (_from is not { } start)

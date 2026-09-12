@@ -78,8 +78,18 @@ public sealed record EditorTheme
     /// <summary>Something that went wrong.</summary>
     public Vector4 Bad { get; init; } = Rgb(0xE0, 0x6C, 0x63);
 
-    /// <summary>How solid a floating panel is over the scene.</summary>
-    public float PanelAlpha { get; init; } = 0.92f;
+    /// <summary>How solid a card inside a panel is over what is behind it.</summary>
+    public float PanelAlpha { get; init; } = 0.72f;
+
+    /// <summary>
+    /// How solid the panel the cards are laid out in is over the scene.
+    /// </summary>
+    /// <remarks>
+    /// Thinner than the cards it holds, because it is the layer nearest the scene and the one that
+    /// says the panel is floating over a world rather than covering it. The cards keep their own
+    /// weight so that what is being read stays readable whatever is behind them.
+    /// </remarks>
+    public float WindowAlpha { get; init; } = 0f;
 
     /// <summary>How round a floating panel is.</summary>
     public float WindowRounding { get; init; } = 16f;
@@ -137,6 +147,7 @@ public sealed record EditorTheme
         Name = "Native",
         Stock = true,
         PanelAlpha = 0.94f,
+        WindowAlpha = 0.94f,
         WindowRounding = 6f,
         ChildRounding = 4f,
         FrameRounding = 4f,
@@ -229,7 +240,7 @@ public sealed record EditorTheme
         Set(style, ImGuiCol.Text, Text);
         Set(style, ImGuiCol.TextDisabled, Faint);
 
-        Set(style, ImGuiCol.WindowBg, Alpha(Panel, seen));
+        Set(style, ImGuiCol.WindowBg, Alpha(Panel, WindowAlpha));
         Set(style, ImGuiCol.ChildBg, Alpha(Card, seen));
         Set(style, ImGuiCol.PopupBg, Alpha(Card, MathF.Min(1f, seen + 0.1f)));
         // Nothing here has a menu bar, so this slot carries the group fill instead: it puts the
@@ -326,6 +337,7 @@ public sealed record EditorTheme
             $"warn\t{Hex(Warn)}",
             $"bad\t{Hex(Bad)}",
             $"alpha\t{Say(PanelAlpha)}",
+            $"window-alpha\t{Say(WindowAlpha)}",
             $"window-rounding\t{Say(WindowRounding)}",
             $"child-rounding\t{Say(ChildRounding)}",
             $"frame-rounding\t{Say(FrameRounding)}",
@@ -378,6 +390,7 @@ public sealed record EditorTheme
                 "warn" => theme with { Warn = Read(value, theme.Warn) },
                 "bad" => theme with { Bad = Read(value, theme.Bad) },
                 "alpha" => theme with { PanelAlpha = Number(value, theme.PanelAlpha) },
+                "window-alpha" => theme with { WindowAlpha = Number(value, theme.WindowAlpha) },
                 "window-rounding" => theme with { WindowRounding = Number(value, theme.WindowRounding) },
                 "child-rounding" => theme with { ChildRounding = Number(value, theme.ChildRounding) },
                 "frame-rounding" => theme with { FrameRounding = Number(value, theme.FrameRounding) },

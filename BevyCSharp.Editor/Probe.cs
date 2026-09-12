@@ -79,6 +79,7 @@ public partial struct Probe
                 // landed on it, and both in one frame is one event, not two.
                 if (script.Contains("pick")) Press(0);
                 if (script.Contains("sky")) Press(0);
+                if (script.Contains("hold")) Press(0);
 
                 if (script.Contains("drag")) Press(0);
                 if (script.Contains("band")) Press(0);
@@ -130,6 +131,9 @@ public partial struct Probe
 
             case 155:
                 if (script.Contains("click")) Click(1);
+
+                // Let go well after pressing, which is how long a hand takes over a click.
+                if (script.Contains("hold")) Release(0);
 
                 // Well after the characters, so a capture in between shows whether they landed in
                 // the field at all rather than only whether the line ran.

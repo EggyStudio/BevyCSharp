@@ -19,6 +19,7 @@ public sealed class EditorThemeTests
             Name = "Mine",
             Accent = new Vector4(0.2f, 0.7f, 0.4f, 1f),
             PanelAlpha = 0.73f,
+            WindowAlpha = 0.41f,
             WindowRounding = 14f,
             FramePadding = new Vector2(9f, 6f),
             Borders = 1f,
@@ -28,6 +29,7 @@ public sealed class EditorThemeTests
 
         Assert.Equal("Mine", read.Name);
         Assert.Equal(dialled.PanelAlpha, read.PanelAlpha, 3);
+        Assert.Equal(dialled.WindowAlpha, read.WindowAlpha, 3);
         Assert.Equal(dialled.WindowRounding, read.WindowRounding, 3);
         Assert.Equal(dialled.FramePadding, read.FramePadding);
         Assert.Equal(dialled.Borders, read.Borders, 3);
