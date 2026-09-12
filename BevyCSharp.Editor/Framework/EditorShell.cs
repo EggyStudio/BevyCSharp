@@ -87,7 +87,7 @@ public static class EditorShell
     private const float Gutter = 6f;
 
     /// <summary>How much air a card keeps inside its own edge.</summary>
-    private const float Air = 8f;
+    private const float Air = 6f;
 
     /// <summary>Whether the panel is against the window's edge, with the scene beside it.</summary>
     public static bool Docked { get; set; }

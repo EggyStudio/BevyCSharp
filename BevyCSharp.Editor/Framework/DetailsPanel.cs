@@ -108,7 +108,7 @@ public static class DetailsPanel
     }
 
     /// <summary>How much air a component's card keeps inside its own edge.</summary>
-    private const float Inset = 8f;
+    private const float Inset = 6f;
 
     /// <summary>One degree, in radians.</summary>
     private const float Radians = MathF.PI / 180f;
@@ -437,10 +437,13 @@ public static class DetailsPanel
             return;
         }
 
-        // The name takes a third and the value the rest, which holds at any width: a fixed column
-        // that fits at five hundred pixels leaves nothing for the value at three hundred.
-        ImGui.TableSetupColumn("##name", ImGuiTableColumnFlags.WidthStretch, 0.38f);
-        ImGui.TableSetupColumn("##value", ImGuiTableColumnFlags.WidthStretch, 0.62f);
+        // The name takes under a third and the value the rest, which holds at any width: a fixed
+        // column that fits at five hundred pixels leaves nothing for the value at three hundred.
+        //
+        // Weighted towards the value, because a name that runs out of room is still readable from
+        // its first half and a number that runs out of room is a different number.
+        ImGui.TableSetupColumn("##name", ImGuiTableColumnFlags.WidthStretch, 0.3f);
+        ImGui.TableSetupColumn("##value", ImGuiTableColumnFlags.WidthStretch, 0.7f);
 
         ImGui.TableNextRow();
         ImGui.TableNextColumn();

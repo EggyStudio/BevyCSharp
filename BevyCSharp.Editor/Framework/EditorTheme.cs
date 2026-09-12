@@ -123,7 +123,7 @@ public sealed record EditorTheme
     /// and there are a great many rows, so the difference between this and a pixel more is the
     /// difference between a panel that shows a component and one that shows half of it.
     /// </remarks>
-    public Vector2 FramePadding { get; init; } = new(8f, 4f);
+    public Vector2 FramePadding { get; init; } = new(6f, 4f);
 
     /// <summary>How far apart two things on a row are, and two rows.</summary>
     public Vector2 ItemSpacing { get; init; } = new(8f, 5f);
@@ -199,7 +199,10 @@ public sealed record EditorTheme
         style.WindowPadding = theme.WindowPadding;
         style.FramePadding = theme.FramePadding;
         style.ItemSpacing = theme.ItemSpacing;
-        style.ItemInnerSpacing = new Vector2(6f, 4f);
+        // The gap between the three boxes of a vector, among other things. Every pixel of it is a
+        // pixel the numbers do not get, and three boxes on one row need the numbers more than they
+        // need the air.
+        style.ItemInnerSpacing = new Vector2(4f, 4f);
         style.CellPadding = new Vector2(6f, 2f);
         style.IndentSpacing = 16f;
         style.ScrollbarSize = 10f;
