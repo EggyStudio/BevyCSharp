@@ -100,6 +100,18 @@ public static class WorldPanel
             }
         }
 
+        // The room under the last row, which is part of the list and means nothing is chosen. A
+        // list somebody can add to a selection with but never clear it from is a list they have to
+        // leave to start again.
+        var rest = ImGui.GetContentRegionAvail();
+
+        if (rest.Y > 1f)
+        {
+            ImGui.InvisibleButton("##empty", new Vector2(MathF.Max(1f, rest.X), rest.Y));
+
+            if (ImGui.IsItemClicked()) EditorSelection.Clear();
+        }
+
         ImGui.EndChild();
     }
 

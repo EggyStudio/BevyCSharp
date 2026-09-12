@@ -42,6 +42,19 @@ public static class MarqueeSelect
     /// </remarks>
     public static bool Dragging { get; private set; }
 
+    /// <summary>
+    /// Whether the scene was clicked this frame without a box being dragged.
+    /// </summary>
+    /// <remarks>
+    /// What says a click landed on the sky. The engine answers a click that hit something by
+    /// handing over what it hit and says nothing at all about one that hit nothing, so the only
+    /// way to know the difference is to notice the click and wait to be told.
+    /// </remarks>
+    public static bool Clicked { get; private set; }
+
+    /// <summary>How many clicks on the scene there have been, which a probe can check.</summary>
+    public static int Clicks { get; private set; }
+
     /// <summary>Takes the pointer's part in this frame, and draws the box if there is one.</summary>
     public static void Tick(BehaviorContext ctx)
     {
@@ -49,6 +62,8 @@ public static class MarqueeSelect
 
         // Only the tool that is about choosing things. The others own a drag on the viewport: it
         // moves, turns or scales what is already chosen.
+        Clicked = false;
+
         if (EditorTools.Current != EditorTool.Select)
         {
             _from = null;
@@ -81,6 +96,9 @@ public static class MarqueeSelect
         }
 
         _from = null;
+        Clicked = !far;
+
+        if (Clicked) Clicks++;
 
         // Still counted as a drag on the frame it ends, so that the release which closed the box is
         // not also read as a click by the picking that runs after this. It goes back to false on

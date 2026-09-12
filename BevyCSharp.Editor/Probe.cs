@@ -78,6 +78,7 @@ public partial struct Probe
                 // the engine decides an object was clicked by matching a release to the press that
                 // landed on it, and both in one frame is one event, not two.
                 if (script.Contains("pick")) Press(0);
+                if (script.Contains("sky")) Press(0);
 
                 if (script.Contains("drag")) Press(0);
                 if (script.Contains("band")) Press(0);
@@ -86,6 +87,7 @@ public partial struct Probe
 
             case 146:
                 if (script.Contains("pick")) Release(0);
+                if (script.Contains("sky")) Release(0);
 
                 // Moved while held, over several frames, because a drag is a run of positions and
                 // a handle that is grabbed and let go at once has moved nothing.
@@ -266,7 +268,8 @@ public partial struct Probe
             + $" split={(EditorShell.Stacked ? "above" : "beside")}"
             + $" tab={EditorShell.OpenTab}");
 
-        Console.WriteLine($"[probe] menu open: {EditorShell.MenuOpen}");
+        Console.WriteLine(
+            $"[probe] menu open: {EditorShell.MenuOpen} scene clicks: {MarqueeSelect.Clicks}");
 
         if (script.Contains("world"))
         {

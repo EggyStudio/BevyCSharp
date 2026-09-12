@@ -170,11 +170,20 @@ public sealed record EditorTheme
         style.TabRounding = theme.TabRounding;
         style.ScrollbarRounding = theme.FrameRounding;
 
-        style.WindowBorderSize = theme.Borders;
+        // No line round a window or a popup in either look. What they are is said by the fill and
+        // the shadow of one surface over another, and ImGui's own border is a hairline that reads
+        // as an artefact at any rounding worth having.
+        style.WindowBorderSize = 0f;
         style.ChildBorderSize = theme.Borders;
-        style.PopupBorderSize = theme.Borders;
+        style.PopupBorderSize = 0f;
         style.FrameBorderSize = 0f;
         style.TabBorderSize = 0f;
+
+        // Smooth edges on everything drawn by hand, which is most of this look: the rounded row
+        // behind a menu item, a circle under a toolbar picture, the corners taken off the scene.
+        style.AntiAliasedLines = true;
+        style.AntiAliasedLinesUseTex = true;
+        style.AntiAliasedFill = true;
 
         style.WindowPadding = theme.WindowPadding;
         style.FramePadding = theme.FramePadding;

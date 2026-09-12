@@ -84,6 +84,12 @@ public static class EditorSelection
         if (entity == Current && Chosen.Count <= 1) return;
 
         Chosen.Clear();
+
+        // Choosing nothing is a decision, and what is remembered is only there to survive a
+        // reload. Left in place it comes straight back on the next frame, which is a selection
+        // that cannot be let go of.
+        if (entity.IsNone) Named.Clear();
+
         if (!entity.IsNone) Chosen.Add(entity);
 
         Current = entity;
@@ -105,6 +111,8 @@ public static class EditorSelection
 
         if (Chosen.Remove(entity))
         {
+            if (Chosen.Count == 0) Named.Clear();
+
             Current = Chosen.Count > 0 ? Chosen[^1] : Entity.None;
             Latest = Current.IsNone ? SelectionKind.None : SelectionKind.Entity;
             ChangedOn = EditorShell.Context?.Time.FrameCount ?? 0;

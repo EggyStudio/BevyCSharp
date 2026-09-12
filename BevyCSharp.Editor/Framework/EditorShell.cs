@@ -57,6 +57,12 @@ public static class EditorShell
     /// </remarks>
     private const float StripPadding = 5f;
 
+    /// <summary>The frame a click on the scene landed, while it is still waiting to be answered.</summary>
+    private static ulong _emptyClick;
+
+    /// <summary>How many frames the engine gets to say what a click hit before it hit nothing.</summary>
+    private const ulong Patience = 3;
+
     /// <summary>The gap between the panel's edge and the cards inside it.</summary>
     private const float Gutter = 6f;
 
@@ -75,7 +81,7 @@ public static class EditorShell
     public static float PanelWidth { get; set; } = Narrowest;
 
     /// <summary>How much of the panel the world gets, the data taking the rest.</summary>
-    public static float WorldShare { get; set; } = 0.45f;
+    public static float WorldShare { get; set; } = 0.3f;
 
     /// <summary>Which tab is open, or -1 for none.</summary>
     public static int OpenTab { get; set; } = -1;
@@ -197,6 +203,12 @@ public static class EditorShell
         // whatever happens to be behind it.
         MarqueeSelect.Tick(ctx);
 
+        // A click on the scene that hit nothing means nothing was meant, which is how every editor
+        // clears a selection. Waited on rather than acted on at once: the engine raycasts the scene
+        // and answers a frame or two later, and clearing the moment the button comes up would wipe
+        // the selection the answer is about to make.
+        if (MarqueeSelect.Clicked && !ImGuiRuntime.WantsMouse) _emptyClick = Frame;
+
         foreach (var picked in Picking.Drain())
         {
             if (ImGuiRuntime.WantsMouse) break;
@@ -205,7 +217,14 @@ public static class EditorShell
             // over: the box already said what it meant.
             if (MarqueeSelect.Dragging) break;
 
+            _emptyClick = 0;
             EditorSelection.Select(picked);
+        }
+
+        if (_emptyClick != 0 && Frame - _emptyClick >= Patience)
+        {
+            _emptyClick = 0;
+            EditorSelection.Clear();
         }
 
         // A selection whose entity is gone is worse than none: the details panel would read
@@ -276,27 +295,24 @@ public static class EditorShell
         if (radius < 1f) return;
 
         // Docked, the scene is a card among the other cards, and what a corner taken off a card
-        // shows is the surface it is lying on. That surface is what a panel resolves to once the
-        // scene behind it has been blended in, which is a rung up from the panel's own colour and
-        // not black: a corner painted in the ground is a notch cut out of the window.
+        // shows is the surface it is lying on: the panel the cards are laid out in, which is the
+        // darkest thing on the screen that is not the ground itself.
         var draw = ImGui.GetBackgroundDrawList();
         var theme = EditorTheme.Current;
 
-        var under = ImGui.GetColorU32(EditorTheme.Alpha(theme.Ground, 1f));
-        var over = ImGui.GetColorU32(EditorTheme.Alpha(theme.Card, 1f));
+        // One coat, opaque. Two of them put the feathered edge an antialiased fill draws down
+        // twice, and the second one over the first is a seam along the arc.
+        var color = ImGui.GetColorU32(EditorTheme.Alpha(theme.Panel, 1f));
 
         var left = Scene.X;
         var top = Scene.Y;
         var right = Scene.X + Scene.Width;
         var bottom = Scene.Y + Scene.Height;
 
-        foreach (var color in new[] { under, over })
-        {
-            Wedge(draw, new Vector2(left + radius, top + radius), radius, MathF.PI, MathF.PI * 1.5f, new Vector2(left, top), color);
-            Wedge(draw, new Vector2(right - radius, top + radius), radius, MathF.PI * 1.5f, MathF.PI * 2f, new Vector2(right, top), color);
-            Wedge(draw, new Vector2(right - radius, bottom - radius), radius, 0f, MathF.PI * 0.5f, new Vector2(right, bottom), color);
-            Wedge(draw, new Vector2(left + radius, bottom - radius), radius, MathF.PI * 0.5f, MathF.PI, new Vector2(left, bottom), color);
-        }
+        Wedge(draw, new Vector2(left + radius, top + radius), radius, MathF.PI, MathF.PI * 1.5f, new Vector2(left, top), color);
+        Wedge(draw, new Vector2(right - radius, top + radius), radius, MathF.PI * 1.5f, MathF.PI * 2f, new Vector2(right, top), color);
+        Wedge(draw, new Vector2(right - radius, bottom - radius), radius, 0f, MathF.PI * 0.5f, new Vector2(right, bottom), color);
+        Wedge(draw, new Vector2(left + radius, bottom - radius), radius, MathF.PI * 0.5f, MathF.PI, new Vector2(left, bottom), color);
     }
 
     /// <summary>One corner's worth of what a rounded rectangle leaves out.</summary>
@@ -316,9 +332,12 @@ public static class EditorShell
         Vector2 corner,
         uint color)
     {
+        // Segments enough that the arc has no steps in it at the sizes a window rounding takes.
+        // What ImGui works out for itself is tuned for a whole circle of this radius and leaves a
+        // quarter of one with four or five, which is a visible staircase.
         draw.PathClear();
         draw.PathLineTo(corner);
-        draw.PathArcTo(middle, radius, from, to, 12);
+        draw.PathArcTo(middle, radius, from, to, Math.Max(8, (int)(radius * 1.5f)));
         draw.PathFillConvex(color);
     }
 
@@ -645,6 +664,8 @@ public static class EditorShell
         // What is open, first, in the room left above the bar.
         if (OpenTab >= 0 && OpenTab < Tabs.Count)
         {
+            Grip();
+
             var room = ImGui.GetContentRegionAvail();
 
             var bar = ImGui.GetFrameHeight() + ImGui.GetStyle().ItemSpacing.Y;
@@ -707,6 +728,49 @@ public static class EditorShell
 
         ImGui.End();
         ImGui.PopStyleVar(2);
+    }
+
+    /// <summary>
+    /// The bar across the top of an open tab, which a drag makes it taller or shorter.
+    /// </summary>
+    /// <remarks>
+    /// The console is a thing somebody reads, and how much of it they want to read at once is
+    /// theirs to say. The height is kept rather than worked out, so a tab closed and opened again
+    /// comes back the size it was left.
+    /// </remarks>
+    private static void Grip()
+    {
+        var width = ImGui.GetContentRegionAvail().X;
+
+        ImGui.InvisibleButton("##height", new Vector2(MathF.Max(1f, width), 8f));
+
+        var held = ImGui.IsItemActive();
+        var over = ImGui.IsItemHovered();
+
+        if (over || held) ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNS);
+
+        if (held)
+        {
+            // Up is taller, because the strip grows upward out of the bottom of the window.
+            TabHeight = Math.Clamp(
+                TabHeight - ImGui.GetIO().MouseDelta.Y,
+                80f,
+                MathF.Max(120f, ImGuiRuntime.Size.Y * 0.75f));
+        }
+
+        var at = ImGui.GetItemRectMin();
+        var to = ImGui.GetItemRectMax();
+
+        var middle = new Vector2((at.X + to.X) * 0.5f, (at.Y + to.Y) * 0.5f);
+        var grab = new Vector2(26f, 2f);
+
+        ImGui.GetWindowDrawList().AddRectFilled(
+            middle - grab,
+            middle + grab,
+            ImGui.GetColorU32(held
+                ? EditorTheme.LiveAccent
+                : EditorTheme.Alpha(EditorTheme.LiveText, over ? 0.5f : 0.22f)),
+            grab.Y);
     }
 
     /// <summary>
@@ -960,20 +1024,8 @@ public static class EditorShell
     }
 
     /// <summary>One level of the menu, with a submenu per branch under it.</summary>
-    private static void Branch(BehaviorContext ctx, string path)
+    private static void Branch(BehaviorContext ctx, string path) => RoundedRows.Menu(() =>
     {
-        var stock = EditorTheme.Current.Stock;
-        var draw = stock ? default : RoundedRows.Begin();
-
-        // The row's own fill goes off, and a rounded one is drawn behind it instead. ImGui has no
-        // rounding for these and the whole look is rounded shapes.
-        if (!stock)
-        {
-            ImGui.PushStyleColor(ImGuiCol.Header, 0u);
-            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0u);
-            ImGui.PushStyleColor(ImGuiCol.HeaderActive, 0u);
-        }
-
         foreach (var item in EditorMenu.Level(path))
         {
             switch (item.Kind)
@@ -985,7 +1037,7 @@ public static class EditorShell
                 case MenuKind.Submenu:
                     var opened = ImGui.BeginMenu(item.Label);
 
-                    if (!stock) Mark(draw, opened);
+                    RoundedRows.Row(opened);
 
                     if (opened)
                     {
@@ -1000,7 +1052,7 @@ public static class EditorShell
 
                     if (ImGui.MenuItem(item.Label, string.Empty, ticked)) item.Run?.Invoke(ctx.Ecs);
 
-                    if (!stock) Mark(draw, false);
+                    RoundedRows.Row();
 
                     break;
 
@@ -1010,27 +1062,13 @@ public static class EditorShell
                         item.Run?.Invoke(ctx.Ecs);
                     }
 
-                    if (!stock) Mark(draw, false);
+                    RoundedRows.Row();
 
                     break;
             }
         }
+    });
 
-        if (stock) return;
-
-        ImGui.PopStyleColor(3);
-        RoundedRows.End(draw);
-    }
-
-    /// <summary>Draws the rounded fill behind the menu row just written, when it wants one.</summary>
-    /// <param name="draw">The list the rows are being split across.</param>
-    /// <param name="open">Whether this row is a submenu that is showing.</param>
-    private static void Mark(ImDrawListPtr draw, bool open)
-    {
-        if (RoundedRows.Fill(open, ImGui.IsItemHovered()) is not { } fill) return;
-
-        RoundedRows.Behind(draw, fill);
-    }
 
     /// <summary>
     /// Which way the world faces, at the bottom right of what the scene has to itself.

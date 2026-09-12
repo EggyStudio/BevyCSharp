@@ -120,54 +120,51 @@ public static class DetailsPanel
     {
         var theme = EditorTheme.Current;
         var draw = ImGui.GetWindowDrawList();
-        var padding = ImGui.GetStyle().WindowPadding;
-
-        // Where the card's two edges go, taken before anything is drawn: the room left on the row
-        // is the room inside the scrollbar, which is what the card has to fit between.
-        //
-        // Measured rather than worked back from the group, because the group's own rectangle starts
-        // where its first item does. Reaching left of that to make room for the indent puts the
-        // card's corner outside the region it is drawn in, where it is clipped square.
-        var left = ImGui.GetCursorScreenPos().X;
-        var right = left + ImGui.GetContentRegionAvail().X;
 
         draw.ChannelsSplit(2);
         draw.ChannelsSetCurrent(1);
 
         ImGui.BeginGroup();
 
-        ImGui.Dummy(new Vector2(0f, padding.Y * 0.5f));
-        ImGui.Indent(Inset);
-
-        // The expander wears no fill of its own. The card behind it is the expander grown
-        // downwards: one rounded shape, the width of the header, holding the header and everything
-        // it opened. A pill for the header inside a card for the component is two surfaces saying
-        // the same thing, and the inner one always looked stuck on.
+        // The header wears no fill of its own, and neither does the card: both are drawn behind,
+        // so the card can be exactly the header grown downwards. Nothing is indented round it, so
+        // a component that is closed is the header and nothing else, at the header's own size.
         if (!theme.Stock)
         {
             ImGui.PushStyleColor(ImGuiCol.Header, 0u);
-            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, EditorTheme.LiveHover);
-            ImGui.PushStyleColor(ImGuiCol.HeaderActive, EditorTheme.LiveHover);
+            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0u);
+            ImGui.PushStyleColor(ImGuiCol.HeaderActive, 0u);
         }
 
         var open = ImGui.CollapsingHeader(schema.Name, ImGuiTreeNodeFlags.DefaultOpen);
 
         if (!theme.Stock) ImGui.PopStyleColor(3);
 
+        var head = ImGui.GetItemRectMin();
+        var headTo = ImGui.GetItemRectMax();
+        var over = ImGui.IsItemHovered();
+
         // A component's own menu, where taking it off lives. On the header, because that is the
         // thing the component is.
         if (ImGui.BeginPopupContextItem($"##menu{schema.Name}"))
         {
-            if (ImGui.MenuItem("Remove", string.Empty, false, schema.CanAdd))
+            RoundedRows.Menu(() =>
             {
-                schema.Remove(ctx.Ecs, entity);
-            }
+                if (ImGui.MenuItem("Remove", string.Empty, false, schema.CanAdd))
+                {
+                    schema.Remove(ctx.Ecs, entity);
+                }
+
+                RoundedRows.Row();
+            });
 
             ImGui.EndPopup();
         }
 
         if (open)
         {
+            ImGui.Indent(Inset);
+
             foreach (var field in schema.Fields)
             {
                 if (field.Hints.Hidden) continue;
@@ -177,7 +174,7 @@ public static class DetailsPanel
 
             // Wrapped rather than run off the edge: a row of buttons as wide as the panel is a row
             // whose last button cannot be pressed.
-            var room = ImGui.GetContentRegionAvail().X;
+            var room = ImGui.GetContentRegionAvail().X - Inset;
             var used = 0f;
 
             foreach (var method in schema.Methods)
@@ -191,24 +188,36 @@ public static class DetailsPanel
 
                 if (ImGui.Button(method.Title)) method.Run(ctx.Ecs, entity);
             }
-        }
 
-        ImGui.Unindent(Inset);
-        ImGui.Dummy(new Vector2(0f, padding.Y * 0.5f));
+            ImGui.Unindent(Inset);
+            ImGui.Dummy(new Vector2(0f, Inset * 0.5f));
+        }
 
         ImGui.EndGroup();
 
         if (!theme.Stock)
         {
-            var from = ImGui.GetItemRectMin();
             var to = ImGui.GetItemRectMax();
 
+            // Rounded by half the header's height, so a component that is closed is a capsule and
+            // one that is open is that capsule with its bottom pulled down. Anything larger is the
+            // same shape, because that is as round as a rectangle this tall can be.
+            var round = (headTo.Y - head.Y) * 0.5f;
+
             draw.ChannelsSetCurrent(0);
+
             draw.AddRectFilled(
-                new Vector2(left, from.Y),
-                new Vector2(right, to.Y),
+                head,
+                new Vector2(headTo.X, MathF.Max(headTo.Y, to.Y)),
                 ImGui.GetColorU32(EditorTheme.LiveGroup),
-                ImGui.GetStyle().ChildRounding);
+                round);
+
+            // And the header on top of it when the pointer is there, which is the one thing that
+            // says a header is something to press.
+            if (over)
+            {
+                draw.AddRectFilled(head, headTo, ImGui.GetColorU32(EditorTheme.LiveHover), round);
+            }
         }
 
         draw.ChannelsMerge();
@@ -244,12 +253,24 @@ public static class DetailsPanel
             if (ComponentSchemas.For(id) is { } schema) carried.Add(schema.Name);
         }
 
-        foreach (var schema in ComponentSchemas.All)
+        RoundedRows.Menu(() =>
         {
-            if (!schema.CanAdd || carried.Contains(schema.Name)) continue;
+            var any = false;
 
-            if (ImGui.MenuItem(schema.Name)) schema.Add(ctx.Ecs, entity);
-        }
+            foreach (var schema in ComponentSchemas.All)
+            {
+                if (!schema.CanAdd || carried.Contains(schema.Name)) continue;
+
+                if (ImGui.MenuItem(schema.Name)) schema.Add(ctx.Ecs, entity);
+
+                RoundedRows.Row();
+                any = true;
+            }
+
+            // Said rather than left blank, because an empty flyout reads as one that failed to
+            // open. Everything this project generates a way to add is already on the entity.
+            if (!any) ImGui.TextDisabled("nothing left to add");
+        });
 
         ImGui.EndPopup();
     }

@@ -53,6 +53,68 @@ public static class RoundedRows
         draw.ChannelsSetCurrent(1);
     }
 
+    /// <summary>The list the rows of the flyout being drawn are split across.</summary>
+    private static ImDrawListPtr _list;
+
+    /// <summary>Whether there is a flyout being drawn at all.</summary>
+    private static bool _inside;
+
+    /// <summary>
+    /// Draws the rows of a popup, with a rounded fill behind whichever of them wants one.
+    /// </summary>
+    /// <remarks>
+    /// Every flyout in the editor goes through here, so they all highlight the same way: the menu
+    /// off the toolbar, a component's own menu, and the list of what can be added. The nesting a
+    /// submenu needs comes for free, because each call keeps whatever was in force and puts it
+    /// back.
+    /// </remarks>
+    /// <param name="rows">What to draw, calling <see cref="Row"/> after each row.</param>
+    public static void Menu(Action rows)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+
+        if (EditorTheme.Current.Stock)
+        {
+            rows();
+            return;
+        }
+
+        var wasList = _list;
+        var wasInside = _inside;
+
+        var draw = Begin();
+
+        ImGui.PushStyleColor(ImGuiCol.Header, 0u);
+        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0u);
+        ImGui.PushStyleColor(ImGuiCol.HeaderActive, 0u);
+
+        _list = draw;
+        _inside = true;
+
+        try
+        {
+            rows();
+        }
+        finally
+        {
+            _list = wasList;
+            _inside = wasInside;
+
+            ImGui.PopStyleColor(3);
+            End(draw);
+        }
+    }
+
+    /// <summary>Fills behind the flyout row just drawn, when it wants a fill.</summary>
+    /// <param name="chosen">Whether the row is open or ticked, which wears the accent.</param>
+    public static void Row(bool chosen = false)
+    {
+        if (!_inside) return;
+        if (Fill(chosen, ImGui.IsItemHovered()) is not { } fill) return;
+
+        Behind(_list, fill);
+    }
+
     /// <summary>
     /// What a row's fill should be, or nothing when it wants none.
     /// </summary>
