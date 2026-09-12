@@ -28,6 +28,16 @@ public static class DetailsPanel
         if (EditorShell.Context is not { } ctx) return;
 
         ImGui.TextDisabled("DETAILS");
+
+        // How many were picked, when it is more than one. The rest of the panel is about the last
+        // of them, and without this a drag that took a dozen things looks like a click that took
+        // one: the other eleven are only visible in the list, which may not be on screen.
+        if (EditorSelection.Count > 1)
+        {
+            ImGui.SameLine();
+            ImGui.TextDisabled($"({EditorSelection.Count} selected)");
+        }
+
         ImGui.Spacing();
 
         if (!EditorSelection.Any)
@@ -98,7 +108,7 @@ public static class DetailsPanel
     }
 
     /// <summary>How much air a component's card keeps inside its own edge.</summary>
-    private const float Inset = 10f;
+    private const float Inset = 8f;
 
     /// <summary>One component, as a card with its fields in it.</summary>
     /// <remarks>
@@ -112,9 +122,14 @@ public static class DetailsPanel
         var draw = ImGui.GetWindowDrawList();
         var padding = ImGui.GetStyle().WindowPadding;
 
-        // Where the card's right edge goes, taken before anything is drawn: the room left on the
-        // row is the room inside the scrollbar, which is what the card has to stop at.
-        var right = ImGui.GetCursorScreenPos().X + ImGui.GetContentRegionAvail().X;
+        // Where the card's two edges go, taken before anything is drawn: the room left on the row
+        // is the room inside the scrollbar, which is what the card has to fit between.
+        //
+        // Measured rather than worked back from the group, because the group's own rectangle starts
+        // where its first item does. Reaching left of that to make room for the indent puts the
+        // card's corner outside the region it is drawn in, where it is clipped square.
+        var left = ImGui.GetCursorScreenPos().X;
+        var right = left + ImGui.GetContentRegionAvail().X;
 
         draw.ChannelsSplit(2);
         draw.ChannelsSetCurrent(1);
@@ -190,7 +205,7 @@ public static class DetailsPanel
 
             draw.ChannelsSetCurrent(0);
             draw.AddRectFilled(
-                new Vector2(from.X - Inset, from.Y),
+                new Vector2(left, from.Y),
                 new Vector2(right, to.Y),
                 ImGui.GetColorU32(EditorTheme.LiveGroup),
                 ImGui.GetStyle().ChildRounding);

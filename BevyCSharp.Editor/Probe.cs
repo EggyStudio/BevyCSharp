@@ -103,6 +103,10 @@ public partial struct Probe
 
             case 147:
             case 148:
+                // Put the pointer somewhere and leave it, so a capture shows what a row looks like
+                // under the hand.
+                if (script.Contains("hover")) Move(1);
+
                 if (script.Contains("drag")) Move(1);
                 if (script.Contains("band")) Move(1);
                 break;
@@ -263,6 +267,20 @@ public partial struct Probe
             + $" tab={EditorShell.OpenTab}");
 
         Console.WriteLine($"[probe] menu open: {EditorShell.MenuOpen}");
+
+        if (script.Contains("world"))
+        {
+            foreach (var entity in ctx.Ecs.All())
+            {
+                if (EditorEntity.IsInterface(ctx.Ecs, entity)) continue;
+                if (EditorEntity.IsBookkeeping(ctx.Ecs, entity)) continue;
+                if (ctx.Ecs.NameOf(entity) is { Length: > 0 }) continue;
+                if (!Render.TryGetBounds(entity, out _, out _)) continue;
+
+                Console.WriteLine(
+                    $"[probe] entity {entity.Index} {ctx.Ecs.NameOf(entity) ?? "(no name)"}");
+            }
+        }
 
         var style = ImGui.GetStyle();
 

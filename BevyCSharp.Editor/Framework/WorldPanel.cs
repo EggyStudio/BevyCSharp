@@ -212,10 +212,16 @@ public static class WorldPanel
         {
             // Under the stock look the row wears what ImGui says a chosen row wears, rather than
             // the editor's own accent: a theme taken whole is taken whole.
+            // The one the details panel is showing wears the accent outright; the rest of a
+            // selection wears it at half strength. A dozen rows all at full accent says which
+            // twelve were picked and not which one is being looked at, which is the thing somebody
+            // is about to edit.
+            var current = row.Entity == EditorSelection.Current;
+
             var fill = theme.Stock
                 ? ImGui.GetColorU32(picked ? ImGuiCol.Header : ImGuiCol.HeaderHovered)
                 : ImGui.GetColorU32(picked
-                    ? EditorTheme.LiveAccent
+                    ? current ? EditorTheme.LiveAccent : EditorTheme.Alpha(EditorTheme.LiveAccent, 0.45f)
                     : EditorTheme.LiveHover);
 
             draw.AddRectFilled(at, at + new Vector2(width, height), fill, ImGui.GetStyle().FrameRounding);
@@ -331,7 +337,17 @@ public static class WorldPanel
         {
             if (EditorEntity.IsInterface(ctx.Ecs, entity)) continue;
             if (EditorEntity.IsBookkeeping(ctx.Ecs, entity)) continue;
-            if (ctx.Ecs.NameOf(entity) is not { Length: > 0 } name) continue;
+
+            // Named, or drawn. A thing with a mesh is in the world whether or not anybody called
+            // it anything, and leaving it out of the list is how an object ends up visible in the
+            // viewport, selectable by clicking it, and absent from the one place that lists what
+            // is there. Everything else without a name is the engine's own.
+            if (ctx.Ecs.NameOf(entity) is not { Length: > 0 } name)
+            {
+                if (!Render.TryGetBounds(entity, out _, out _)) continue;
+
+                name = $"Entity {entity.Index}";
+            }
 
             names[entity.Bits] = name;
             parents[entity.Bits] = ctx.Ecs.ParentOf(entity);

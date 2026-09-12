@@ -101,7 +101,7 @@ public static class MarqueeSelect
         var draw = ImGui.GetBackgroundDrawList();
         var accent = EditorTheme.LiveAccent;
 
-        draw.AddRectFilled(low, high, ImGui.GetColorU32(EditorTheme.Alpha(accent, 0.18f)), 2f);
+        draw.AddRectFilled(low, high, ImGui.GetColorU32(EditorTheme.Alpha(accent, 0.25f)), 2f);
         draw.AddRect(low, high, ImGui.GetColorU32(accent), 2f, ImDrawFlags.None, 1.5f);
     }
 
@@ -126,8 +126,10 @@ public static class MarqueeSelect
             // nothing a person meant.
             if (EditorEntity.IsInterface(ctx.Ecs, entity)) continue;
             if (EditorEntity.IsBookkeeping(ctx.Ecs, entity)) continue;
-            if (ctx.Ecs.NameOf(entity) is not { Length: > 0 }) continue;
 
+            // Having a box to draw is the same test the world list uses for something nobody
+            // named, and it is the whole test here: what a drag over the viewport can take is
+            // what the viewport is showing.
             if (!Render.TryGetBounds(entity, out var min, out var max)) continue;
             if (!Touches(camera, min, max, low, high)) continue;
 

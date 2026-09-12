@@ -60,6 +60,9 @@ public static class EditorShell
     /// <summary>The gap between the panel's edge and the cards inside it.</summary>
     private const float Gutter = 6f;
 
+    /// <summary>How much air a card keeps inside its own edge.</summary>
+    private const float Air = 8f;
+
     /// <summary>Whether the panel is against the window's edge, with the scene beside it.</summary>
     public static bool Docked { get; set; }
 
@@ -272,18 +275,28 @@ public static class EditorShell
         var radius = EditorTheme.Current.WindowRounding;
         if (radius < 1f) return;
 
+        // Docked, the scene is a card among the other cards, and what a corner taken off a card
+        // shows is the surface it is lying on. That surface is what a panel resolves to once the
+        // scene behind it has been blended in, which is a rung up from the panel's own colour and
+        // not black: a corner painted in the ground is a notch cut out of the window.
         var draw = ImGui.GetBackgroundDrawList();
-        var color = ImGui.GetColorU32(EditorTheme.Alpha(EditorTheme.Current.Ground, 1f));
+        var theme = EditorTheme.Current;
+
+        var under = ImGui.GetColorU32(EditorTheme.Alpha(theme.Ground, 1f));
+        var over = ImGui.GetColorU32(EditorTheme.Alpha(theme.Card, 1f));
 
         var left = Scene.X;
         var top = Scene.Y;
         var right = Scene.X + Scene.Width;
         var bottom = Scene.Y + Scene.Height;
 
-        Wedge(draw, new Vector2(left + radius, top + radius), radius, MathF.PI, MathF.PI * 1.5f, new Vector2(left, top), color);
-        Wedge(draw, new Vector2(right - radius, top + radius), radius, MathF.PI * 1.5f, MathF.PI * 2f, new Vector2(right, top), color);
-        Wedge(draw, new Vector2(right - radius, bottom - radius), radius, 0f, MathF.PI * 0.5f, new Vector2(right, bottom), color);
-        Wedge(draw, new Vector2(left + radius, bottom - radius), radius, MathF.PI * 0.5f, MathF.PI, new Vector2(left, bottom), color);
+        foreach (var color in new[] { under, over })
+        {
+            Wedge(draw, new Vector2(left + radius, top + radius), radius, MathF.PI, MathF.PI * 1.5f, new Vector2(left, top), color);
+            Wedge(draw, new Vector2(right - radius, top + radius), radius, MathF.PI * 1.5f, MathF.PI * 2f, new Vector2(right, top), color);
+            Wedge(draw, new Vector2(right - radius, bottom - radius), radius, 0f, MathF.PI * 0.5f, new Vector2(right, bottom), color);
+            Wedge(draw, new Vector2(left + radius, bottom - radius), radius, MathF.PI * 0.5f, MathF.PI, new Vector2(left, bottom), color);
+        }
     }
 
     /// <summary>One corner's worth of what a rounded rectangle leaves out.</summary>
@@ -409,13 +422,22 @@ public static class EditorShell
     /// </remarks>
     private static void Card(string id, Vector2 size, Action draw)
     {
+        var stock = EditorTheme.Current.Stock;
+
+        // Less air inside a card than a floating window keeps, because a card is already inside
+        // one. The window's padding is the room round a thing standing on its own; repeating it at
+        // every step inwards is how a panel ends up mostly margin.
+        if (!stock) ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(Air, Air));
+
         // The card holds a scrolling region rather than being one, so the wheel belongs to what is
         // inside it and stops there.
         var open = ImGui.BeginChild(
             id,
             size,
-            EditorTheme.Current.Stock ? ImGuiChildFlags.None : ImGuiChildFlags.AlwaysUseWindowPadding,
+            stock ? ImGuiChildFlags.None : ImGuiChildFlags.AlwaysUseWindowPadding,
             ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+
+        if (!stock) ImGui.PopStyleVar();
 
         if (open) draw();
 
@@ -940,16 +962,32 @@ public static class EditorShell
     /// <summary>One level of the menu, with a submenu per branch under it.</summary>
     private static void Branch(BehaviorContext ctx, string path)
     {
+        var stock = EditorTheme.Current.Stock;
+        var draw = stock ? default : RoundedRows.Begin();
+
+        // The row's own fill goes off, and a rounded one is drawn behind it instead. ImGui has no
+        // rounding for these and the whole look is rounded shapes.
+        if (!stock)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Header, 0u);
+            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0u);
+            ImGui.PushStyleColor(ImGuiCol.HeaderActive, 0u);
+        }
+
         foreach (var item in EditorMenu.Level(path))
         {
             switch (item.Kind)
             {
                 case MenuKind.Separator:
-                    ImGui.Separator();
-                    break;
+                    EditorTheme.Divide();
+                    continue;
 
                 case MenuKind.Submenu:
-                    if (ImGui.BeginMenu(item.Label))
+                    var opened = ImGui.BeginMenu(item.Label);
+
+                    if (!stock) Mark(draw, opened);
+
+                    if (opened)
                     {
                         Branch(ctx, item.Path);
                         ImGui.EndMenu();
@@ -958,10 +996,11 @@ public static class EditorShell
                     break;
 
                 case MenuKind.Toggle:
-                    if (ImGui.MenuItem(item.Label, string.Empty, item.Checked?.Invoke() == true))
-                    {
-                        item.Run?.Invoke(ctx.Ecs);
-                    }
+                    var ticked = item.Checked?.Invoke() == true;
+
+                    if (ImGui.MenuItem(item.Label, string.Empty, ticked)) item.Run?.Invoke(ctx.Ecs);
+
+                    if (!stock) Mark(draw, false);
 
                     break;
 
@@ -971,9 +1010,26 @@ public static class EditorShell
                         item.Run?.Invoke(ctx.Ecs);
                     }
 
+                    if (!stock) Mark(draw, false);
+
                     break;
             }
         }
+
+        if (stock) return;
+
+        ImGui.PopStyleColor(3);
+        RoundedRows.End(draw);
+    }
+
+    /// <summary>Draws the rounded fill behind the menu row just written, when it wants one.</summary>
+    /// <param name="draw">The list the rows are being split across.</param>
+    /// <param name="open">Whether this row is a submenu that is showing.</param>
+    private static void Mark(ImDrawListPtr draw, bool open)
+    {
+        if (RoundedRows.Fill(open, ImGui.IsItemHovered()) is not { } fill) return;
+
+        RoundedRows.Behind(draw, fill);
     }
 
     /// <summary>

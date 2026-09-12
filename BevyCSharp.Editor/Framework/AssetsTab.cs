@@ -59,7 +59,26 @@ public static class AssetsTab
 
         ImGui.PopStyleColor();
 
-        if (open) Branch(string.Empty, "assets");
+        if (open)
+        {
+            var stock = EditorTheme.Current.Stock;
+            var draw = stock ? default : RoundedRows.Begin();
+
+            if (!stock)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Header, 0u);
+                ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0u);
+                ImGui.PushStyleColor(ImGuiCol.HeaderActive, 0u);
+            }
+
+            Branch(string.Empty, "assets", draw, stock);
+
+            if (!stock)
+            {
+                ImGui.PopStyleColor(3);
+                RoundedRows.End(draw);
+            }
+        }
 
         ImGui.EndChild();
     }
@@ -67,7 +86,9 @@ public static class AssetsTab
     /// <summary>One folder and, when it is unfolded, the folders under it.</summary>
     /// <param name="path">Its path under the asset root, empty for the root itself.</param>
     /// <param name="name">What to call it.</param>
-    private static void Branch(string path, string name)
+    /// <param name="draw">The list the rows are split across, for the rounded highlight.</param>
+    /// <param name="stock">Whether the stock look is on, which draws its own highlights.</param>
+    private static void Branch(string path, string name, ImDrawListPtr draw, bool stock)
     {
         var children = EditorAssets.Directories(path);
         var here = EditorAssets.Directory == path;
@@ -85,6 +106,11 @@ public static class AssetsTab
 
         var shown = ImGui.TreeNodeEx($"{name}##{path}", flags);
 
+        if (!stock && RoundedRows.Fill(here, ImGui.IsItemHovered()) is { } fill)
+        {
+            RoundedRows.Behind(draw, fill);
+        }
+
         // The arrow folds, the word walks. Clicking a folder's name is how somebody says they want
         // to look inside it, and folding is what the arrow is for.
         if (ImGui.IsItemClicked() && !ImGui.IsItemToggledOpen())
@@ -100,7 +126,7 @@ public static class AssetsTab
 
         if (!shown) return;
 
-        foreach (var (child, called) in children) Branch(child, called);
+        foreach (var (child, called) in children) Branch(child, called, draw, stock);
 
         ImGui.TreePop();
     }

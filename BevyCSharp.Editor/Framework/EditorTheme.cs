@@ -105,13 +105,18 @@ public sealed record EditorTheme
     public float TabRounding { get; init; } = 12f;
 
     /// <summary>How much air a panel keeps inside its edge.</summary>
-    public Vector2 WindowPadding { get; init; } = new(12f, 10f);
+    public Vector2 WindowPadding { get; init; } = new(10f, 8f);
 
     /// <summary>How much air a box keeps around what it holds.</summary>
-    public Vector2 FramePadding { get; init; } = new(8f, 5f);
+    /// <remarks>
+    /// Enough that a row is comfortable to hit and no more. Every pixel here is spent once per row
+    /// and there are a great many rows, so the difference between this and a pixel more is the
+    /// difference between a panel that shows a component and one that shows half of it.
+    /// </remarks>
+    public Vector2 FramePadding { get; init; } = new(8f, 4f);
 
     /// <summary>How far apart two things on a row are, and two rows.</summary>
-    public Vector2 ItemSpacing { get; init; } = new(8f, 7f);
+    public Vector2 ItemSpacing { get; init; } = new(8f, 5f);
 
     /// <summary>How wide a line is, where there is one at all.</summary>
     public float Borders { get; init; }
@@ -175,8 +180,8 @@ public sealed record EditorTheme
         style.FramePadding = theme.FramePadding;
         style.ItemSpacing = theme.ItemSpacing;
         style.ItemInnerSpacing = new Vector2(6f, 4f);
-        style.CellPadding = new Vector2(6f, 3f);
-        style.IndentSpacing = 18f;
+        style.CellPadding = new Vector2(6f, 2f);
+        style.IndentSpacing = 16f;
         style.ScrollbarSize = 10f;
         style.GrabMinSize = 10f;
 
