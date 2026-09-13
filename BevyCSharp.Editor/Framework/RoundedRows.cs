@@ -126,5 +126,5 @@ public static class RoundedRows
     /// <param name="over">Whether the pointer is on it.</param>
     private static Vector4? Fill(bool chosen, bool over) => chosen
         ? EditorTheme.LiveAccent
-        : over ? EditorTheme.LiveHover : null;
+        : over ? EditorTheme.LiveLift : null;
 }

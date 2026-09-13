@@ -267,7 +267,11 @@ public sealed record EditorTheme
 
         Set(style, ImGuiCol.WindowBg, Alpha(Panel, WindowAlpha));
         Set(style, ImGuiCol.ChildBg, Alpha(Card, seen));
-        Set(style, ImGuiCol.PopupBg, Alpha(Card, MathF.Min(1f, seen + 0.1f)));
+        // A menu and a tooltip are not surfaces the eye rests on, they are things held up in front
+        // of one, so they are the brightest plate the ladder has rather than another dark card. It
+        // is the grey a row under the pointer wears elsewhere, which is what makes a flyout read as
+        // one of those rows grown large enough to hold a list.
+        Set(style, ImGuiCol.PopupBg, Alpha(Hover, MathF.Min(1f, seen + 0.1f)));
         // Nothing here has a menu bar, so this slot carries the group fill instead, which puts the
         // rung in the style editor beside the others rather than leaving one colour unreachable.
         //
@@ -457,6 +461,15 @@ public sealed record EditorTheme
 
     /// <summary>What is under the pointer, as it stands in the running style.</summary>
     public static Vector4 LiveHover => ImGui.GetStyle().Colors[(int)ImGuiCol.ButtonHovered];
+
+    /// <summary>What a row in a list wears under the pointer.</summary>
+    /// <remarks>
+    /// A wash of the text colour rather than a grey of its own, because the same row is drawn on a
+    /// card in one list and on a menu's own plate in another. A fixed grey that lifts off the
+    /// first disappears into the second, while a wash is always one step above whatever it is
+    /// lying on. Over a card it comes out at the grey the rest of the editor highlights with.
+    /// </remarks>
+    public static Vector4 LiveLift => Alpha(LiveText, 0.23f);
 
     /// <summary>What is being read, as it stands in the running style.</summary>
     public static Vector4 LiveText => ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
