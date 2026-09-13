@@ -9,10 +9,16 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A theme picked, an opacity dragged, and under them ImGui's own style editor, which is every
-/// colour, rounding and spacing there is. That is what the visual designers people reach for offer,
-/// without any of them. They generate C++ and cannot be part of a C# editor, but the thing they are
-/// wanted for is dialling a look in and taking it away, and that is a file.
+/// A theme picked, and under it every rung of the ladder it is made of. That is what the visual
+/// designers people reach for offer, without any of them. They generate C++ and cannot be part of
+/// a C# editor, but the thing they are wanted for is dialling a look in and taking it away, and
+/// that is a file.
+/// </para>
+/// <para>
+/// The rows are the theme's own fields rather than ImGui's style, which is what makes what is
+/// dragged here the same thing that is saved. ImGui's own editor offers every slot it has, most of
+/// which no theme records, and draws them with widgets that are rounded the way ImGui rounds
+/// things rather than the way this editor does.
 /// </para>
 /// <para>
 /// Saved to <c>assets/theme.txt</c>, which the editor reads at startup. A look dialled in by hand
@@ -95,14 +101,153 @@ public static class StyleTab
 
         EditorTheme.Divide();
 
-        // Everything else, in ImGui's own editor, which knows every field it has. Anything written
-        // here would be a second list to keep in step with it.
-        if (EditorSurface.Region("##style", new Vector2(0f, 0f)))
-        {
-            ImGui.ShowStyleEditor();
-        }
+        if (EditorSurface.Region("##style", new Vector2(0f, 0f))) Rungs();
 
         EditorSurface.EndRegion();
+    }
+
+    /// <summary>What a colour swatch offers, which is the colour and a way through to a picker.</summary>
+    private const ImGuiColorEditFlags Swatch =
+        ImGuiColorEditFlags.NoInputs
+        | ImGuiColorEditFlags.AlphaPreviewHalf
+        | ImGuiColorEditFlags.AlphaBar;
+
+    /// <summary>Every colour and number a theme is made of, as rows to change.</summary>
+    private static void Rungs()
+    {
+        var theme = EditorTheme.Current;
+
+        var table = ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.NoSavedSettings;
+
+        if (!ImGui.BeginTable("##rungs", 2, table)) return;
+
+        ImGui.TableSetupColumn("##name", ImGuiTableColumnFlags.WidthStretch, 0.35f);
+        ImGui.TableSetupColumn("##value", ImGuiTableColumnFlags.WidthStretch, 0.65f);
+
+        Group("SURFACES");
+        Color("Ground", theme.Ground, c => theme with { Ground = c });
+        Color("Panel", theme.Panel, c => theme with { Panel = c });
+        Color("Card", theme.Card, c => theme with { Card = c });
+        Color("Group", theme.Group, c => theme with { Group = c });
+        Color("Field", theme.Field, c => theme with { Field = c });
+        Color("Hover", theme.Hover, c => theme with { Hover = c });
+        Color("Active", theme.Active, c => theme with { Active = c });
+        Color("Line", theme.Line, c => theme with { Line = c });
+
+        Group("INK");
+        Color("Text", theme.Text, c => theme with { Text = c });
+        Color("Dim", theme.Dim, c => theme with { Dim = c });
+        Color("Faint", theme.Faint, c => theme with { Faint = c });
+        Color("Accent", theme.Accent, c => theme with { Accent = c });
+        Color("Warn", theme.Warn, c => theme with { Warn = c });
+        Color("Bad", theme.Bad, c => theme with { Bad = c });
+
+        Group("SEEN THROUGH");
+        Share("Panel", theme.WindowAlpha, a => theme with { WindowAlpha = a });
+        Share("Cards", theme.PanelAlpha, a => theme with { PanelAlpha = a });
+
+        Group("SHAPE");
+        Number("Window rounding", theme.WindowRounding, n => theme with { WindowRounding = n });
+        Number("Card rounding", theme.ChildRounding, n => theme with { ChildRounding = n });
+        Number("Field rounding", theme.FrameRounding, n => theme with { FrameRounding = n });
+        Number("Tab rounding", theme.TabRounding, n => theme with { TabRounding = n });
+        Number("Borders", theme.Borders, n => theme with { Borders = n });
+
+        Group("AIR");
+        Pair("Window padding", theme.WindowPadding, v => theme with { WindowPadding = v });
+        Pair("Field padding", theme.FramePadding, v => theme with { FramePadding = v });
+        Pair("Item spacing", theme.ItemSpacing, v => theme with { ItemSpacing = v });
+
+        ImGui.EndTable();
+    }
+
+    /// <summary>A heading over the rows that follow it.</summary>
+    private static void Group(string name)
+    {
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+
+        ImGui.Spacing();
+        ImGui.TextDisabled(name);
+
+        ImGui.TableNextColumn();
+    }
+
+    /// <summary>One row, with its name written and the cursor left where its control goes.</summary>
+    private static void Line(string name)
+    {
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+
+        ImGui.AlignTextToFramePadding();
+        ImGui.TextUnformatted(name);
+
+        ImGui.TableNextColumn();
+        ImGui.SetNextItemWidth(-1f);
+    }
+
+    /// <summary>
+    /// One colour of the ladder, as a swatch the width of its row with a picker behind it.
+    /// </summary>
+    /// <remarks>
+    /// A button rather than ImGui's own colour field, which draws its swatch as a square of one
+    /// row's height however wide the row is and leaves the rest of it empty.
+    /// </remarks>
+    private static void Color(string name, Vector4 held, Func<Vector4, EditorTheme> onto)
+    {
+        Line(name);
+
+        var value = held;
+        var across = new Vector2(ImGui.GetContentRegionAvail().X, 0f);
+
+        if (ImGui.ColorButton($"##{name}", value, Swatch, across)) ImGui.OpenPopup($"##pick{name}");
+
+        if (!EditorSurface.Flyout($"##pick{name}")) return;
+
+        if (ImGui.ColorPicker4($"##picker{name}", ref value, Swatch)) EditorShell.Wear(onto(value));
+
+        EditorSurface.EndFlyout();
+    }
+
+    /// <summary>How far through something is seen, in whole percent, which is how somebody says it.</summary>
+    private static void Share(string name, float held, Func<float, EditorTheme> onto)
+    {
+        Line(name);
+
+        var value = held * 100f;
+
+        var moved = EditorSurface.Sliding(
+            $"##{name}",
+            value / 100f,
+            () => ImGui.SliderFloat($"##{name}", ref value, 0f, 100f, "%.0f%%"));
+
+        if (moved) EditorShell.Wear(onto(value / 100f));
+    }
+
+    /// <summary>One number, dragged rather than slid, because it has no end to run to.</summary>
+    private static void Number(string name, float held, Func<float, EditorTheme> onto)
+    {
+        Line(name);
+
+        var value = held;
+
+        if (ImGui.DragFloat($"##{name}", ref value, 0.25f, 0f, 64f, "%.0f"))
+        {
+            EditorShell.Wear(onto(value));
+        }
+    }
+
+    /// <summary>Two numbers, which is what every measure of air in here is.</summary>
+    private static void Pair(string name, Vector2 held, Func<Vector2, EditorTheme> onto)
+    {
+        Line(name);
+
+        var value = held;
+
+        if (ImGui.DragFloat2($"##{name}", ref value, 0.25f, 0f, 40f, "%.0f"))
+        {
+            EditorShell.Wear(onto(value));
+        }
     }
 
     /// <summary>Writes what is in force to the file the editor reads at startup.</summary>
@@ -112,7 +257,7 @@ public static class StyleTab
 
         try
         {
-            File.WriteAllText(path, Read().Describe());
+            File.WriteAllText(path, EditorTheme.Current.Describe());
 
             // The whole path, because it is written beside the running build rather than into the
             // project, and somebody who wants to keep it has to know where it went.
@@ -163,50 +308,6 @@ public static class StyleTab
         {
             Announce(failure.Message);
         }
-    }
-
-    /// <summary>
-    /// What is in force, with whatever ImGui's own editor has been told taken back from it.
-    /// </summary>
-    /// <remarks>
-    /// The style editor writes straight into ImGui, so the theme is what was applied plus whatever
-    /// has been dragged since. Reading the handful of values back is what makes saving mean what
-    /// somebody sees rather than what they picked.
-    /// </remarks>
-    private static EditorTheme Read()
-    {
-        var style = ImGui.GetStyle();
-        var theme = EditorTheme.Current;
-
-        // Read back out of the slot each rung was painted into, and no other. Reading a rung out
-        // of the slot below it saves a ladder nobody dialled in, one step short at every rung.
-        return theme with
-        {
-            Panel = style.Colors[(int)ImGuiCol.WindowBg],
-            Card = style.Colors[(int)ImGuiCol.ChildBg],
-            Group = style.Colors[(int)ImGuiCol.MenuBarBg],
-            Field = style.Colors[(int)ImGuiCol.FrameBg],
-            Hover = style.Colors[(int)ImGuiCol.FrameBgHovered],
-            Active = style.Colors[(int)ImGuiCol.FrameBgActive],
-            Line = style.Colors[(int)ImGuiCol.Border],
-            Text = style.Colors[(int)ImGuiCol.Text],
-            Dim = style.Colors[(int)ImGuiCol.SliderGrab],
-            Faint = style.Colors[(int)ImGuiCol.TextDisabled],
-            Accent = style.Colors[(int)ImGuiCol.DragDropTarget],
-
-            // How far through a panel the scene shows is the alpha the panel was painted with, so
-            // dragging it in ImGui's own editor is picked up here rather than ignored.
-            PanelAlpha = style.Colors[(int)ImGuiCol.ChildBg].W,
-            WindowAlpha = style.Colors[(int)ImGuiCol.WindowBg].W,
-            WindowRounding = style.WindowRounding,
-            ChildRounding = style.ChildRounding,
-            FrameRounding = style.FrameRounding,
-            TabRounding = style.TabRounding,
-            WindowPadding = style.WindowPadding,
-            FramePadding = style.FramePadding,
-            ItemSpacing = style.ItemSpacing,
-            Borders = style.WindowBorderSize,
-        };
     }
 
     /// <summary>Says what happened, for a few seconds.</summary>
