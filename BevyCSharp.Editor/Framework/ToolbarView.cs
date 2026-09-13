@@ -54,9 +54,9 @@ public static class ToolbarView
             EditorShell.Free.Bottom - EditorShell.Margin - EditorSurface.Tall - EditorSurface.Air);
 
         ImGui.SetNextWindowPos(at, ImGuiCond.Always, new Vector2(1f, 1f));
-        ImGui.SetNextWindowBgAlpha(EditorTheme.Current.PanelAlpha);
 
-        ImGui.PushStyleColor(ImGuiCol.WindowBg, EditorTheme.LiveCard);
+        // The plate everything else lying on the scene wears.
+        ImGui.PushStyleColor(ImGuiCol.WindowBg, EditorSurface.Lying());
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, EditorSurface.Around);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, EditorTheme.Current.ChildRounding);
 
@@ -156,6 +156,9 @@ public static class ToolbarView
                 on ? EditorTheme.LiveAccent : EditorTheme.Alpha(EditorTheme.LiveHover, 1f));
 
             var label = button.Label();
+            var can = button.Enabled?.Invoke() != false;
+
+            if (!can) ImGui.BeginDisabled();
 
             var pressed = button.Icon is { Length: > 0 } icon && label.Length == 0
                 ? Circle($"{slot}{index}", icon, on, size)
@@ -164,6 +167,8 @@ public static class ToolbarView
                     new Vector2(0f, size));
 
             if (pressed) button.Run(ctx.Ecs);
+
+            if (!can) ImGui.EndDisabled();
 
             // What it is, for a button that is only a picture, and for one with a word in it that
             // has more to say than the word does.

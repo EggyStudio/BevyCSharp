@@ -38,6 +38,7 @@ public partial struct Showcase
     [Tooltip("Whole numbers only, however finely the bar is dragged.")]
     public int Count;
 
+
     /// <summary>Three numbers that are a color.</summary>
     [Header("Looks")]
     [Space]
@@ -114,8 +115,8 @@ public partial struct Showcase
     [Tooltip("A bar and nothing else. There is no number worth typing here.")]
     public float Blend;
 
-    /// <summary>A bar with the number beside it, which cannot be typed into.</summary>
-    [Range(0d, 100d, Readout = SliderReadout.Number)]
+    /// <summary>A bar with a box beside it, for a number dragged roughly and typed exactly.</summary>
+    [Range(0d, 100d, Readout = SliderReadout.Box)]
     [Unit("%")]
     public float Fill;
 

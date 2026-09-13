@@ -15,6 +15,148 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 public static class ComponentFields
 {
+    /// <summary>How wide the box beside a bar is, when a field asks for one.</summary>
+    private const float Boxed = 64f;
+
+    /// <summary>What one pixel of a drag on a field is worth, which the field may say.</summary>
+    /// <param name="field">Which field.</param>
+    private static float Pixel(ComponentField field) =>
+        field.Hints.Step is { } step and > 0d ? (float)step : 0.01f;
+
+    /// <summary>
+    /// Whether a field is drawn at all, which is what its conditions say.
+    /// </summary>
+    /// <remarks>
+    /// A condition names another field of the same component and either a value it has to have or,
+    /// with none, that it has to read as true. A condition naming a field that is not there is
+    /// ignored rather than obeyed, because a row that vanishes on account of a typo is worse than
+    /// a row that stays.
+    /// </remarks>
+    /// <param name="ctx">This frame.</param>
+    /// <param name="entity">What the field belongs to.</param>
+    /// <param name="schema">The component it is part of, which holds the field it names.</param>
+    /// <param name="field">Which field.</param>
+    private static bool Shown(
+        BehaviorContext ctx, Entity entity, ComponentSchema schema, ComponentField field)
+    {
+        if (field.Hints.Hidden) return false;
+        if (field.Hints.Conditions.Count == 0) return true;
+
+        foreach (var (named, wanted, not) in field.Hints.Conditions)
+        {
+            var other = Named(schema, named);
+            if (other is null) continue;
+
+            var held = other.Read(ctx.Ecs, entity);
+
+            var met = wanted is { Length: > 0 }
+                ? string.Equals(held?.ToString(), wanted, StringComparison.Ordinal)
+                : held is true;
+
+            if (met == not) return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>One field of a component by name, or nothing when it names none.</summary>
+    /// <param name="schema">The component to look in.</param>
+    /// <param name="name">What the field is called.</param>
+    private static ComponentField? Named(ComponentSchema schema, string name)
+    {
+        foreach (var field in schema.Fields)
+        {
+            if (field.Name == name) return field;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// A sentence above a field, in the colour of what it is.
+    /// </summary>
+    /// <remarks>
+    /// Wrapped, because this is a sentence rather than a label and the panel it is in is narrow.
+    /// </remarks>
+    /// <param name="text">What it says.</param>
+    /// <param name="kind">How much it matters.</param>
+    private static void Note(string text, NoteKind kind)
+    {
+        var theme = EditorTheme.Current;
+
+        var color = kind switch
+        {
+            NoteKind.Warning => theme.Warn,
+            NoteKind.Error => theme.Bad,
+            NoteKind.Heading => EditorTheme.LiveText,
+            _ => theme.Dim,
+        };
+
+        ImGui.PushStyleColor(ImGuiCol.Text, color);
+        ImGui.PushTextWrapPos(0f);
+
+        ImGui.TextUnformatted(text);
+
+        ImGui.PopTextWrapPos();
+        ImGui.PopStyleColor();
+    }
+
+    /// <summary>
+    /// Puts what a field's widget just did on the undo stack.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Told by what the field holds rather than by what the widget returned, because every arm of
+    /// the switch writes through the field itself and one of them writes a rotation the box was
+    /// never given. What changed is the difference between what was there before the widget was
+    /// drawn and what is there after it.
+    /// </para>
+    /// <para>
+    /// Under the field's own name as the key, so a drag along a handle or a number typed one
+    /// character at a time is one edit rather than one per frame. That is what the key on an edit
+    /// is for.
+    /// </para>
+    /// </remarks>
+    /// <param name="ctx">This frame.</param>
+    /// <param name="entity">What the field belongs to.</param>
+    /// <param name="schema">The component it is part of, which names the edit.</param>
+    /// <param name="field">Which field.</param>
+    /// <param name="id">What the field is called, which makes a run of edits one edit.</param>
+    /// <param name="before">What it held before the widget was drawn.</param>
+    private static void Recorded(
+        BehaviorContext ctx,
+        Entity entity,
+        ComponentSchema schema,
+        ComponentField field,
+        string id,
+        object? before)
+    {
+        var after = field.Read(ctx.Ecs, entity);
+
+        if (Equals(before, after)) return;
+
+        // Only what can be put back. A field that reads as nothing has no value to write, and an
+        // undo that writes nothing is one that says it did something and did not.
+        if (before is { } was && after is { } now)
+        {
+            EditorHistory.Record(
+                $"{schema.Name}.{field.Title}",
+                world => field.Write(world, entity, was),
+                world => field.Write(world, entity, now),
+                id);
+        }
+
+        // And whatever the field asked to have run once it had changed, which is how a component
+        // keeps something worked out from a field in step with it.
+        foreach (var wanted in field.Hints.Changed)
+        {
+            foreach (var method in schema.Methods)
+            {
+                if (method.Name == wanted) method.Run(ctx.Ecs, entity);
+            }
+        }
+    }
+
     /// <summary>
     /// A heading over the rows that belong to it, with a rule carried out to the end of the row.
     /// </summary>
@@ -77,10 +219,17 @@ public static class ComponentFields
     internal static void Row(
         BehaviorContext ctx, Entity entity, ComponentSchema schema, ComponentField field)
     {
+        if (!Shown(ctx, entity, schema, field)) return;
+
         var id = $"##{schema.Name}.{field.Name}";
         var value = field.Read(ctx.Ecs, entity);
 
         if (field.Hints.Header is { Length: > 0 } heading) Heading(heading);
+
+        // What the field asked for above itself, in the order a person reads them.
+        if (field.Hints.Space) ImGui.Spacing();
+        if (field.Hints.Separator) EditorTheme.Divide();
+        if (field.Hints.Note is { Length: > 0 } note) Note(note, field.Hints.NoteKind);
 
         ImGui.PushID(id);
 
@@ -90,13 +239,33 @@ public static class ComponentFields
             MathF.Max(1f, ImGui.GetContentRegionAvail().X - DetailsPanel.Inset),
             0f);
 
-        if (!EditorRows.Open("##row", across))
-        {
-            ImGui.PopID();
-            return;
-        }
+        // A field that asked for the whole row gets it, with its name on the line above rather
+        // than in a column beside it. What wants that is anything a name column would leave no
+        // room for: a sentence, a path, a colour.
+        var wide = field.Hints.Wide;
 
-        EditorRows.Line(field.Title, field.Hints.Tooltip);
+        if (wide)
+        {
+            ImGui.AlignTextToFramePadding();
+            ImGui.TextUnformatted(field.Title);
+
+            if (field.Hints.Tooltip is { Length: > 0 } says && ImGui.IsItemHovered())
+            {
+                EditorWidgets.Tip(says);
+            }
+
+            ImGui.SetNextItemWidth(across.X);
+        }
+        else
+        {
+            if (!EditorRows.Open("##row", across))
+            {
+                ImGui.PopID();
+                return;
+            }
+
+            EditorRows.Line(field.Title, field.Hints.Tooltip);
+        }
 
         var editable = field.IsWritable;
         if (!editable) ImGui.BeginDisabled();
@@ -107,6 +276,8 @@ public static class ComponentFields
         // longer in use.
         FieldNumbers.Close(id);
 
+        if (editable) Recorded(ctx, entity, schema, field, id, value);
+
         if (!editable) ImGui.EndDisabled();
 
         if (field.Hints.Unit is { Length: > 0 } unit)
@@ -115,7 +286,8 @@ public static class ComponentFields
             ImGui.TextDisabled(unit);
         }
 
-        EditorRows.Close();
+        if (!wide) EditorRows.Close();
+
         ImGui.PopID();
     }
 
@@ -151,9 +323,22 @@ public static class ComponentFields
                 var vector = value as Vec3? ?? default;
                 var three = new Vector3(vector.X, vector.Y, vector.Z);
 
+                // Three numbers that are a colour are a colour, and nobody reads one as numbers.
+                if (field.Hints.Color)
+                {
+                    var shade = new Vector4(three, 1f);
+
+                    if (EditorWidgets.Swatch(id, ref shade))
+                    {
+                        field.Write(ctx.Ecs, entity, new Vec3(shade.X, shade.Y, shade.Z));
+                    }
+
+                    break;
+                }
+
                 ImGui.PushFont(ImGuiRuntime.Face(EditorShell.Figures));
 
-                var moved = FieldNumbers.Vector(id, ref three, 0.01f, out _);
+                var moved = FieldNumbers.Vector(id, ref three, Pixel(field), out _);
 
                 ImGui.PopFont();
 
@@ -260,12 +445,44 @@ public static class ComponentFields
                     var high = (float)most;
                     var held = number;
 
+                    // What the bar says about its own number. A box beside it is for a value that
+                    // has to be typed exactly as well as dragged roughly, and nothing at all is
+                    // for one where the position is the whole of the answer.
+                    var readout = field.Hints.Readout;
+                    var inside = readout == SliderReadout.Number ? format : string.Empty;
+
+                    if (readout == SliderReadout.Box)
+                    {
+                        ImGui.SetNextItemWidth(
+                            MathF.Max(40f, ImGui.CalcItemWidth() - Boxed - ImGui.GetStyle().ItemSpacing.X));
+                    }
+
                     changed = EditorWidgets.Sliding(
                         id,
                         high > low ? (number - low) / (high - low) : 0f,
-                        () => ImGui.SliderFloat(id, ref held, low, high, format, FieldNumbers.Whole));
+                        () => ImGui.SliderFloat(id, ref held, low, high, inside, FieldNumbers.Whole));
 
                     number = held;
+
+                    if (readout == SliderReadout.Box)
+                    {
+                        ImGui.SameLine();
+                        ImGui.SetNextItemWidth(Boxed);
+
+                        if (ImGui.DragFloat(
+                                $"{id}.box",
+                                ref number,
+                                Pixel(field),
+                                low,
+                                high,
+                                FieldNumbers.Written($"{id}.box", number),
+                                FieldNumbers.Whole))
+                        {
+                            changed = true;
+                        }
+
+                        FieldNumbers.Close($"{id}.box");
+                    }
                 }
                 else
                 {

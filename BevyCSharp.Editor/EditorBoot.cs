@@ -169,6 +169,10 @@ public partial struct EditorBoot
         // that.
         if (ImGuiRuntime.Typing) return;
 
+        // A menu closes on Escape as well, which ImGui does for itself. What this does is not quit
+        // in the same breath, because the key was pressed at the menu rather than at the editor.
+        if (EditorFlyout.MenuOpen) return;
+
         // What is open closes before the program does. A tab is up, and then it is not.
         if (EditorShell.OpenTab >= 0)
         {

@@ -1,66 +1,117 @@
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// The glyphs the editor draws instead of pictures.
+/// The pictures the editor draws, by name.
 /// </summary>
 /// <remarks>
 /// <para>
-/// One table, because the font decides what is possible and the answer is the same everywhere. An
-/// icon here is a character rather than an image, because the interface has no icon set, an image
-/// would be another asset to ship and load per button, and a glyph is styled by the same rules as
-/// the text beside it.
+/// One table, because a button's picture is a thing somebody might want to change without going
+/// looking for the line that draws the button, and because the same picture stands for the same
+/// idea in three places at once. A mesh is a mesh in the menu that spawns one, in the list of what
+/// is in the world, and in the browser that shows the file.
 /// </para>
 /// <para>
-/// Kept away from the documents on purpose. A button's picture is a thing a person might want to
-/// change without rebuilding, and a table of one-line constants is the smallest place to change
-/// it.
-/// </para>
-/// <para>
-/// <b>All of them are ASCII</b>, which was not the first choice. The interface draws with a
-/// monospace font that has no arrows, no chevrons and no hamburger, and a font that lacks a glyph
-/// draws a box and says nothing about why. A person shipping a font with those characters in it
-/// changes these lines and gets the better icons; until then, a plain <c>=</c> that draws beats an
-/// elegant one that does not.
+/// Paths under the asset root rather than pictures, because what loads one is the interface's own
+/// texture table and it loads by path, once, whenever a name is first drawn.
 /// </para>
 /// </remarks>
 public static class EditorIcons
 {
-    /// <summary>The hamburger: everything the editor can do.</summary>
-    public static string Menu { get; set; } = "=";
+    /// <summary>Everything the editor can do.</summary>
+    public static string Menu { get; set; } = "icons/ui/menu.png";
 
     /// <summary>Take back the last change.</summary>
-    public static string Undo { get; set; } = "<";
+    public static string Undo { get; set; } = "icons/ui/undo.png";
 
     /// <summary>Put it back.</summary>
-    public static string Redo { get; set; } = ">";
+    public static string Redo { get; set; } = "icons/ui/redo.png";
 
-    /// <summary>Write the world and the layout.</summary>
-    public static string Save { get; set; } = "S";
+    /// <summary>Write the world and the settings.</summary>
+    public static string Save { get; set; } = "icons/ui/save.png";
+
+    /// <summary>Read them back.</summary>
+    public static string Load { get; set; } = "icons/ui/folder.png";
 
     /// <summary>Add something.</summary>
-    public static string Add { get; set; } = "+";
+    public static string Add { get; set; } = "icons/ui/add.png";
 
-    /// <summary>Take something away.</summary>
-    public static string Remove { get; set; } = "x";
+    /// <summary>Take something off what is selected.</summary>
+    public static string Remove { get; set; } = "icons/ui/remove.png";
 
-    /// <summary>Go up a level.</summary>
-    public static string Up { get; set; } = "^";
+    /// <summary>Take something out of the world.</summary>
+    public static string Delete { get; set; } = "icons/ui/delete.png";
 
-    /// <summary>What the editor is doing.</summary>
-    public static string Info { get; set; } = "i";
+    /// <summary>What the editor is doing, or what the keys do.</summary>
+    public static string Info { get; set; } = "icons/ui/info.png";
 
-    /// <summary>Keep a panel where it is.</summary>
-    public static string Pin { get; set; } = "*";
+    /// <summary>The panel is against the window's edge.</summary>
+    public static string Pinned { get; set; } = "icons/ui/pin.png";
 
-    /// <summary>Let it go again.</summary>
-    public static string Unpin { get; set; } = "o";
+    /// <summary>And is floating over the scene.</summary>
+    public static string Loose { get; set; } = "icons/ui/pinned.png";
 
-    /// <summary>The row the editor is pointed at.</summary>
-    public static string Selected { get; set; } = ">";
+    /// <summary>Snapping to a grid.</summary>
+    public static string Snap { get; set; } = "icons/ui/snap.png";
 
-    /// <summary>Run something.</summary>
-    public static string Run { get; set; } = ">";
+    /// <summary>The ground grid.</summary>
+    public static string Grid { get; set; } = "icons/ui/grid.png";
 
-    /// <summary>What a directory's name ends with, so it reads as one.</summary>
-    public static string Directory { get; set; } = "/";
+    /// <summary>The panels themselves.</summary>
+    public static string Interface { get; set; } = "icons/ui/interface.png";
+
+    /// <summary>What the view shows.</summary>
+    public static string View { get; set; } = "icons/ui/image.png";
+
+    /// <summary>The project, as a thing on disk.</summary>
+    public static string Project { get; set; } = "icons/ui/package.png";
+
+    /// <summary>Something to hear, wearing a project's picture until there is a better one.</summary>
+    public static string Sound { get; set; } = "icons/ui/package.png";
+
+    /// <summary>A thing in the world with nothing on it yet.</summary>
+    public static string Entity { get; set; } = "icons/ui/entity.png";
+
+    /// <summary>A box.</summary>
+    public static string Cube { get; set; } = "icons/ui/cube.png";
+
+    /// <summary>Anything else with a shape.</summary>
+    public static string Mesh { get; set; } = "icons/ui/mesh.png";
+
+    /// <summary>Something that lights the scene.</summary>
+    public static string Light { get; set; } = "icons/ui/light.png";
+
+    /// <summary>Something that looks at it.</summary>
+    public static string Camera { get; set; } = "icons/ui/camera.png";
+
+    /// <summary>A saved world.</summary>
+    public static string World { get; set; } = "icons/ui/world.png";
+
+    /// <summary>What a behavior is written in.</summary>
+    public static string Script { get; set; } = "icons/ui/script.png";
+
+    /// <summary>A picture.</summary>
+    public static string Image { get; set; } = "icons/ui/image.png";
+
+    /// <summary>Numbers in a file.</summary>
+    public static string Data { get; set; } = "icons/ui/data.png";
+
+    /// <summary>Words in one.</summary>
+    public static string Text { get; set; } = "icons/ui/terminal.png";
+
+    /// <summary>Anything the editor has nothing better to say about.</summary>
+    public static string File { get; set; } = "icons/ui/file.png";
+
+    /// <summary>A folder.</summary>
+    public static string Folder { get; set; } = "icons/ui/folder.png";
+
+    /// <summary>What is selected.</summary>
+    public static string Select { get; set; } = "icons/ui/select.png";
+
+    /// <summary>The handles that move it.</summary>
+    public static string Move { get; set; } = "icons/ui/move.png";
+
+    /// <summary>The picture for a tool, which is named after it.</summary>
+    /// <param name="tool">Which tool.</param>
+    public static string For(EditorTool tool) =>
+        $"icons/ui/{tool.ToString().ToLowerInvariant()}.png";
 }

@@ -108,12 +108,6 @@ public static class StyleTab
         EditorSurface.EndRegion();
     }
 
-    /// <summary>What a colour swatch offers, which is the colour and a way through to a picker.</summary>
-    private const ImGuiColorEditFlags Swatch =
-        ImGuiColorEditFlags.NoInputs
-        | ImGuiColorEditFlags.AlphaPreviewHalf
-        | ImGuiColorEditFlags.AlphaBar;
-
     /// <summary>Every colour and number a theme is made of, as rows to change.</summary>
     private static void Rungs()
     {
@@ -170,15 +164,8 @@ public static class StyleTab
         EditorRows.Line(name);
 
         var value = held;
-        var across = EditorRows.Across();
 
-        if (ImGui.ColorButton($"##{name}", value, Swatch, across)) ImGui.OpenPopup($"##pick{name}");
-
-        if (!EditorWidgets.Flyout($"##pick{name}")) return;
-
-        if (ImGui.ColorPicker4($"##picker{name}", ref value, Swatch)) EditorShell.Wear(onto(value));
-
-        EditorWidgets.EndFlyout();
+        if (EditorWidgets.Swatch($"##{name}", ref value)) EditorShell.Wear(onto(value));
     }
 
     /// <summary>How far through something is seen, in whole percent, which is how somebody says it.</summary>

@@ -163,6 +163,8 @@ public partial struct Probe
                 break;
 
             case 154:
+                if (script.Contains("pull")) Move(1);
+
                 if (script.Contains("keys"))
                 {
                     foreach (var letter in Environment.GetEnvironmentVariable("BCS_PROBE_TYPE") ?? string.Empty)
@@ -195,6 +197,8 @@ public partial struct Probe
                 break;
 
             case 153:
+                if (script.Contains("pull")) Move(1);
+
                 if (script.Contains("project"))
                 {
                     foreach (var entity in ctx.Ecs.All())
@@ -209,10 +213,14 @@ public partial struct Probe
                 break;
 
             case 156:
+                if (script.Contains("pull")) Release(1);
+
                 if (script.Contains("project")) EditorProject.Load(ctx.Ecs);
                 break;
 
             case 155:
+                if (script.Contains("pull")) Move(1);
+
                 if (script.Contains("click")) Click(1);
 
                 // Let go well after pressing, which is how long a hand takes over a click.
@@ -222,6 +230,34 @@ public partial struct Probe
                 // the field at all rather than only whether the line ran.
                 if (script.Contains("enter")) SyntheticInput.Key(ImGuiKey.Enter);
 
+                break;
+
+            case 152 when script.Contains("pull"):
+                // Well after anything that scrolls, because a wheel turned during a drag moves
+                // the field out from under the pointer.
+                Press(0);
+                break;
+
+            case 158 when script.Contains("undo"):
+                // Through the window, because that is where the editor reads its shortcuts from.
+                // Held on one frame and pressed on the next, because a key that goes down and up
+                // inside one frame is a key the engine never saw down.
+                SyntheticInput.Press(Key.ControlLeft);
+                break;
+
+            case 160 when script.Contains("undo"):
+                SyntheticInput.Press(Key.Z, "z");
+                break;
+
+            case 162 when script.Contains("undo"):
+                SyntheticInput.Lift(Key.Z);
+                SyntheticInput.Lift(Key.ControlLeft);
+                break;
+
+            case 160 when script.Contains("back"):
+                // After the line has run and the box has been emptied, which is when reaching for
+                // what was typed before is worth anything.
+                SyntheticInput.Key(ImGuiKey.UpArrow);
                 break;
 
             case 170:

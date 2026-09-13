@@ -81,6 +81,10 @@ public static class DetailsPanel
             return;
         }
 
+        // Back to the top whenever the selection changes. Left where it was, a panel opened on
+        // something with a dozen components shows the middle of the last thing that was looked at.
+        if (EditorSelection.ChangedOn == EditorShell.Frame) ImGui.SetScrollY(0f);
+
         foreach (var id in ctx.Ecs.ComponentsOf(entity))
         {
             if (EditorEntity.IsDerived(ctx.Ecs, id)) continue;
@@ -170,10 +174,10 @@ public static class DetailsPanel
         {
             ImGui.Indent(Inset);
 
-            foreach (var field in schema.Fields)
+            // In the order the fields asked for, which is declaration order for anything that
+            // did not ask.
+            foreach (var field in Ordered(schema))
             {
-                if (field.Hints.Hidden) continue;
-
                 ComponentFields.Row(ctx, entity, schema, field);
             }
 
@@ -237,6 +241,35 @@ public static class DetailsPanel
         draw.ChannelsMerge();
 
         ImGui.Spacing();
+    }
+
+    /// <summary>
+    /// A component's fields, in the order they are drawn.
+    /// </summary>
+    /// <remarks>
+    /// Sorted rather than reordered in place, and stable, so fields that asked for nothing stay in
+    /// the order they were written in and the ones that asked move around them.
+    /// </remarks>
+    /// <param name="schema">The component whose fields to order.</param>
+    private static IEnumerable<ComponentField> Ordered(ComponentSchema schema)
+    {
+        var ordered = new List<ComponentField>(schema.Fields);
+
+        for (var i = 1; i < ordered.Count; i++)
+        {
+            var field = ordered[i];
+            var j = i - 1;
+
+            while (j >= 0 && ordered[j].Hints.Order > field.Hints.Order)
+            {
+                ordered[j + 1] = ordered[j];
+                j--;
+            }
+
+            ordered[j + 1] = field;
+        }
+
+        return ordered;
     }
 
     /// <summary>

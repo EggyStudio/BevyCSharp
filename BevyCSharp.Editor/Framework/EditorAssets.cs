@@ -176,8 +176,6 @@ public static class EditorAssets
     /// </remarks>
     public static string KindOf(string relative) => Path.GetExtension(relative).ToLowerInvariant() switch
     {
-        ".html" => "document",
-        ".css" => "stylesheet",
         ".cs" => "behavior script",
         ".png" or ".jpg" or ".jpeg" or ".webp" or ".bmp" or ".tga" or ".ktx2" => "image",
         ".gltf" or ".glb" => "model",
@@ -200,19 +198,15 @@ public static class EditorAssets
     /// </remarks>
     public static string IconOf(string relative) => KindOf(relative) switch
     {
-        "document" or "stylesheet" => "icons/ui/terminal.png",
-        "behavior script" => "icons/ui/script.png",
-        "image" => "icons/ui/image.png",
-        "model" => "icons/ui/mesh.png",
-        "sound" => "icons/ui/package.png",
-        "scene" => "icons/ui/world.png",
-        "data" => "icons/ui/data.png",
-        _ => "icons/ui/file.png",
+        "behavior script" => EditorIcons.Script,
+        "text" => EditorIcons.Text,
+        "image" => EditorIcons.Image,
+        "model" => EditorIcons.Mesh,
+        "sound" => EditorIcons.Sound,
+        "scene" => EditorIcons.World,
+        "data" => EditorIcons.Data,
+        _ => EditorIcons.File,
     };
-
-    /// <summary>Whether a file is one the editor reloads while it runs.</summary>
-    public static bool Reloads(string relative) =>
-        Path.GetExtension(relative).ToLowerInvariant() is ".html" or ".css" or ".cs";
 
     /// <summary>The absolute path of something in the asset directory.</summary>
     public static string Absolute(string relative) =>

@@ -180,7 +180,7 @@ public static class AssetsTab
         }
 
         // The picture that says what kind of thing it is, in the middle of the tile.
-        var icon = entry.IsDirectory ? "icons/ui/folder.png" : EditorAssets.IconOf(entry.Path);
+        var icon = entry.IsDirectory ? EditorIcons.Folder : EditorAssets.IconOf(entry.Path);
 
         const float Mark = 34f;
 

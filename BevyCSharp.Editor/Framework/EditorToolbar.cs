@@ -32,6 +32,11 @@ public enum ToolbarSlot
 /// <param name="Run">What pressing it does.</param>
 /// <param name="Active">Whether it is drawn as the one in force.</param>
 /// <param name="Order">Where it sits among its neighbours. Lower is first.</param>
+/// <param name="Enabled">
+/// Whether it can be pressed at all, or nothing for one that always can. A button for something
+/// there is nothing to do is drawn dim and answers no click, which is how a person learns there is
+/// nothing to undo without pressing it and watching nothing happen.
+/// </param>
 /// <param name="Tip">
 /// What it says when the pointer rests on it, or nothing to say what it is called. A button that
 /// is only a picture is a button nobody can read until they press it, so one of these is written
@@ -50,7 +55,8 @@ public sealed record ToolbarButton(
     Action<EcsWorld> Run,
     Func<bool>? Active = null,
     int Order = 0,
-    string? Tip = null);
+    string? Tip = null,
+    Func<bool>? Enabled = null);
 
 /// <summary>
 /// The buttons floating in the viewport's corners.
@@ -88,8 +94,10 @@ public static class EditorToolbar
         string label,
         Action<EcsWorld> run,
         int order = 0,
-        string? tip = null) =>
-        Add(new ToolbarButton(slot, icon, () => label, run, Order: order, Tip: tip));
+        string? tip = null,
+        Func<bool>? enabled = null) =>
+        Add(new ToolbarButton(
+            slot, icon, () => label, run, Order: order, Tip: tip, Enabled: enabled));
 
     /// <summary>What is in one slot, in order.</summary>
     public static IReadOnlyList<ToolbarButton> Slot(ToolbarSlot slot)

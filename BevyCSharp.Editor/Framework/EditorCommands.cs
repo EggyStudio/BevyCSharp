@@ -27,10 +27,10 @@ public static class EditorCommands
     {
         // The four branches of the menu, so the top level wears pictures like every row under it
         // and sits in an order somebody decided rather than the alphabet's.
-        EditorMenu.Branch("Entity", "icons/ui/entity.png", 0);
-        EditorMenu.Branch("Spawn", "icons/ui/add.png", 1);
-        EditorMenu.Branch("View", "icons/ui/image.png", 2);
-        EditorMenu.Branch("Project", "icons/ui/package.png", 3);
+        EditorMenu.Branch("Entity", EditorIcons.Entity, 0);
+        EditorMenu.Branch("Spawn", EditorIcons.Add, 1);
+        EditorMenu.Branch("View", EditorIcons.View, 2);
+        EditorMenu.Branch("Project", EditorIcons.Project, 3);
 
         Spawning();
         Entities();
@@ -203,7 +203,7 @@ public static class EditorCommands
     {
         EditorToolbar.Add(
             ToolbarSlot.Left,
-            "icons/ui/menu.png",
+            EditorIcons.Menu,
             string.Empty,
             static _ => EditorFlyout.ToggleMenu(string.Empty, MenuAt.X, MenuAt.Y),
             0,
@@ -211,23 +211,25 @@ public static class EditorCommands
 
         EditorToolbar.Add(
             ToolbarSlot.Left,
-            "icons/ui/undo.png",
+            EditorIcons.Undo,
             string.Empty,
             static world => EditorHistory.Undo(world),
             1,
-            "Undo  Ctrl+Z");
+            "Undo  Ctrl+Z",
+            static () => EditorHistory.CanUndo);
 
         EditorToolbar.Add(
             ToolbarSlot.Left,
-            "icons/ui/redo.png",
+            EditorIcons.Redo,
             string.Empty,
             static world => EditorHistory.Redo(world),
             2,
-            "Redo  Ctrl+Y");
+            "Redo  Ctrl+Y",
+            static () => EditorHistory.CanRedo);
 
         EditorToolbar.Add(
             ToolbarSlot.Left,
-            "icons/ui/save.png",
+            EditorIcons.Save,
             string.Empty,
             EditorProject.Save,
             3,
@@ -239,7 +241,7 @@ public static class EditorCommands
 
             EditorToolbar.Add(new ToolbarButton(
                 ToolbarSlot.Centre,
-                $"icons/ui/{tool.ToString().ToLowerInvariant()}.png",
+                EditorIcons.For(tool),
                 static () => string.Empty,
                 _ => EditorTools.Current = chosen,
                 () => EditorTools.Current == chosen,
@@ -275,7 +277,7 @@ public static class EditorCommands
 
         EditorToolbar.Add(new ToolbarButton(
             ToolbarSlot.Centre,
-            "icons/ui/snap.png",
+            EditorIcons.Snap,
             static () => string.Empty,
             static _ =>
             {
@@ -290,7 +292,7 @@ public static class EditorCommands
         // for what describes the view rather than for what acts on it.
         EditorToolbar.Add(new ToolbarButton(
             ToolbarSlot.BottomRight,
-            "icons/ui/info.png",
+            EditorIcons.Info,
             static () => string.Empty,
             static _ => ToolbarView.ShowKeys = !ToolbarView.ShowKeys,
             static () => ToolbarView.ShowKeys,
@@ -324,60 +326,65 @@ public static class EditorCommands
             "Spawn/Empty",
             static world => Spawn(world, "Empty", null),
             0,
-            "icons/ui/entity.png");
+            EditorIcons.Entity);
 
         EditorMenu.Command(
             "Spawn/Cube",
             static world => Spawn(world, "Cube", MeshShape.Cuboid, 1f, 1f, 1f),
             1,
-            "icons/ui/cube.png");
+            EditorIcons.Cube);
 
         EditorMenu.Command(
             "Spawn/Sphere",
             static world => Spawn(world, "Sphere", MeshShape.Sphere, 0.5f),
             2,
-            "icons/ui/mesh.png");
+            EditorIcons.Mesh);
 
         EditorMenu.Command(
             "Spawn/Capsule",
             static world => Spawn(world, "Capsule", MeshShape.Capsule, 0.4f, 1f),
             3,
-            "icons/ui/mesh.png");
+            EditorIcons.Mesh);
 
         EditorMenu.Command(
             "Spawn/Plane",
             static world => Spawn(world, "Plane", MeshShape.Plane, 4f, 4f),
             4,
-            "icons/ui/mesh.png");
+            EditorIcons.Mesh);
 
         EditorMenu.Command(
             "Spawn/Light/Point",
             static world => Light(world, "Point light", LightKind.Point, 100_000f),
             5,
-            "icons/ui/light.png");
+            EditorIcons.Light);
 
         EditorMenu.Command(
             "Spawn/Light/Spot",
             static world => Light(world, "Spot light", LightKind.Spot, 100_000f),
             6,
-            "icons/ui/light.png");
+            EditorIcons.Light);
 
         EditorMenu.Command(
             "Spawn/Light/Directional",
             static world => Light(world, "Directional light", LightKind.Directional, 10_000f),
             7,
-            "icons/ui/light.png");
+            EditorIcons.Light);
     }
 
     /// <summary>What can be done to whatever is selected.</summary>
+    /// <remarks>
+    /// Every one of these is about the selection, so every one of them says so by being dim while
+    /// there is none. A row that can be pressed and does nothing teaches nothing.
+    /// </remarks>
     private static void Entities()
     {
         EditorMenu.Command(
             "Entity/Focus",
             static _ => FlyCameraFocus(),
             0,
-            "icons/ui/select.png",
-            "F");
+            EditorIcons.Select,
+            "F",
+            static () => EditorSelection.Any);
 
         EditorMenu.Command(
             "Entity/Unparent",
@@ -400,7 +407,8 @@ public static class EditorCommands
                 }
             },
             1,
-            "icons/ui/remove.png");
+            EditorIcons.Remove,
+            enabled: static () => EditorSelection.Any);
 
         EditorMenu.Separator("Entity/-", 2);
 
@@ -413,8 +421,9 @@ public static class EditorCommands
                 EditorSelection.Clear();
             },
             3,
-            "icons/ui/delete.png",
-            "Del");
+            EditorIcons.Delete,
+            "Del",
+            static () => EditorSelection.Any);
     }
 
     /// <summary>What the editor shows, as opposed to what is in the world.</summary>
@@ -433,21 +442,21 @@ public static class EditorCommands
                 which);
         }
 
-        EditorMenu.Branch("View/Panels", "icons/ui/interface.png", 0);
+        EditorMenu.Branch("View/Panels", EditorIcons.Interface, 0);
 
         EditorMenu.Toggle(
             "View/Ground grid",
             static _ => ViewportGizmos.ShowGrid = !ViewportGizmos.ShowGrid,
             static () => ViewportGizmos.ShowGrid,
             1,
-            "icons/ui/grid.png");
+            EditorIcons.Grid);
 
         EditorMenu.Toggle(
             "View/Snap to a grid",
             static _ => EditorTools.Snap = !EditorTools.Snap,
             static () => EditorTools.Snap,
             2,
-            "icons/ui/snap.png");
+            EditorIcons.Snap);
 
         EditorMenu.Toggle(
             "View/Handles on the thing's own axes",
@@ -456,7 +465,7 @@ public static class EditorCommands
                 : ToolSpace.Local,
             static () => EditorTools.Space == ToolSpace.Local,
             3,
-            "icons/ui/move.png",
+            EditorIcons.Move,
             "X");
 
         EditorMenu.Separator("View/-", 4);
@@ -466,14 +475,14 @@ public static class EditorCommands
     /// <summary>What keeps and restores the work.</summary>
     private static void Project()
     {
-        EditorMenu.Command("Project/Save", EditorProject.Save, 0, "icons/ui/save.png", "Ctrl+S");
-        EditorMenu.Command("Project/Load", EditorProject.Load, 1, icon: "icons/ui/folder.png");
+        EditorMenu.Command("Project/Save", EditorProject.Save, 0, EditorIcons.Save, "Ctrl+S");
+        EditorMenu.Command("Project/Load", EditorProject.Load, 1, icon: EditorIcons.Folder);
         EditorMenu.Separator("Project/-", 2);
         EditorMenu.Command(
             "Project/Reload scripts",
             static _ => EditorScripts.Reload(),
             3,
-            "icons/ui/script.png");
+            EditorIcons.Script);
     }
 
     /// <summary>Spawns a mesh in front of the camera.</summary>

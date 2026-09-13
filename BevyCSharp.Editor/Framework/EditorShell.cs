@@ -115,6 +115,8 @@ public static class EditorShell
     /// <param name="name">What the tab is called.</param>
     public static void Show(string name)
     {
+        ArgumentNullException.ThrowIfNull(name);
+
         var which = Tabs.FindIndex(tab => tab.Name == name);
 
         if (which >= 0) OpenTab = OpenTab == which ? -1 : which;

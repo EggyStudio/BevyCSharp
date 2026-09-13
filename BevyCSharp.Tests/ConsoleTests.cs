@@ -121,4 +121,30 @@ public sealed class ConsoleTests
         Assert.Equal(["one two", "three"], ConsoleCommands.Split("\"one two\" three"));
         Assert.Empty(ConsoleCommands.Split("   "));
     }
+    [Fact]
+    public void WhatWasTypedComesBackInOrder()
+    {
+        var view = new ConsoleView();
+
+        view.Run("echo one");
+        view.Run("echo two");
+
+        // Newest first, which is what reaching back up a shell's history gives.
+        Assert.Equal("echo two", view.Back(string.Empty));
+        Assert.Equal("echo one", view.Back("echo two"));
+
+        // And down again, ending at an empty box rather than at the oldest line.
+        Assert.Equal("echo two", view.Forward("echo one"));
+        Assert.Equal(string.Empty, view.Forward("echo two"));
+    }
+
+    [Fact]
+    public void ReachingBackThroughNothingLeavesWhatIsThere()
+    {
+        var view = new ConsoleView();
+
+        Assert.Equal("half a command", view.Back("half a command"));
+        Assert.Equal("half a command", view.Forward("half a command"));
+    }
+
 }

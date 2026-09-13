@@ -34,23 +34,23 @@ public static class EditorKinds
 {
     private static readonly List<EntityKind> Kinds =
     [
-        new("bevy_camera::components::Camera", "icons/ui/camera.png", 0),
-        new("Camera3d", "icons/ui/camera.png", 1),
-        new("Camera2d", "icons/ui/camera.png", 1),
-        new("light::DirectionalLight", "icons/ui/light.png", 10),
-        new("light::PointLight", "icons/ui/light.png", 10),
-        new("light::SpotLight", "icons/ui/light.png", 10),
-        new("Mesh3d", "icons/ui/mesh.png", 20),
-        new("Mesh2d", "icons/ui/mesh.png", 20),
-        new("Sprite", "icons/ui/image.png", 21),
-        new("bevy_ui::", "icons/ui/interface.png", 30),
+        new("bevy_camera::components::Camera", EditorIcons.Camera, 0),
+        new("Camera3d", EditorIcons.Camera, 1),
+        new("Camera2d", EditorIcons.Camera, 1),
+        new("light::DirectionalLight", EditorIcons.Light, 10),
+        new("light::PointLight", EditorIcons.Light, 10),
+        new("light::SpotLight", EditorIcons.Light, 10),
+        new("Mesh3d", EditorIcons.Mesh, 20),
+        new("Mesh2d", EditorIcons.Mesh, 20),
+        new("Sprite", EditorIcons.Image, 21),
+        new("bevy_ui::", EditorIcons.Interface, 30),
     ];
 
     /// <summary>What an entity with nothing recognisable on it wears.</summary>
-    public const string Plain = "icons/ui/entity.png";
+    public static string Plain => EditorIcons.Entity;
 
     /// <summary>What an entity carrying a behavior of this project's own wears.</summary>
-    public const string Scripted = "icons/ui/script.png";
+    public static string Scripted => EditorIcons.Script;
 
     /// <summary>Every way of telling, in the order they are asked.</summary>
     public static IReadOnlyList<EntityKind> All

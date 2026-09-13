@@ -110,8 +110,16 @@ public static class EditorMenu
         Action<EcsWorld> run,
         int order = 0,
         string? icon = null,
-        string? keys = null) =>
-        Add(new MenuItem(path, MenuKind.Command, run, Order: order, Icon: icon, Keys: keys));
+        string? keys = null,
+        Func<bool>? enabled = null) =>
+        Add(new MenuItem(
+            path,
+            MenuKind.Command,
+            run,
+            Enabled: enabled,
+            Order: order,
+            Icon: icon,
+            Keys: keys));
 
     /// <summary>Adds a toggle, which shows a mark when <paramref name="isOn"/> answers true.</summary>
     public static void Toggle(
@@ -195,9 +203,6 @@ public static class EditorMenu
 
         return rows;
     }
-
-    /// <summary>Whether a path has anything under it.</summary>
-    public static bool HasLevel(string path) => Level(path).Count > 0;
 
     /// <summary>The row at a path, or <see langword="null"/>.</summary>
     public static MenuItem? Find(string path) =>

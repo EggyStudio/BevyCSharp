@@ -135,7 +135,7 @@ public static class EditorSceneFrame
             // think about. Which way it is set is what the picture in it says.
             // The pin as it stands. Pushed in while the panel is docked, and lying loose while it
             // floats, so the picture says what the panel is rather than what the button does.
-            var pin = EditorShell.Docked ? "icons/ui/pin.png" : "icons/ui/pinned.png";
+            var pin = EditorShell.Docked ? EditorIcons.Pinned : EditorIcons.Loose;
 
             if (ToolbarView.Circle($"dock{EditorShell.Docked}", pin, false, Size))
             {

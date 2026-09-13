@@ -187,12 +187,4 @@ public sealed class ConsoleView
     /// <summary>How much of a line is drawn.</summary>
     private const int Longest = 300;
 
-    /// <summary>Which class a line wears, so its level can be seen rather than read.</summary>
-    public static string Dress(LogLevel level) => level switch
-    {
-        LogLevel.Warning => "log warn",
-        LogLevel.Error => "log bad",
-        LogLevel.Echo => "log said",
-        _ => "log",
-    };
 }

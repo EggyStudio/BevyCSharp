@@ -37,6 +37,8 @@ public static class EditorRows
     /// <returns>Whether it opened.</returns>
     public static bool Open(string id, Vector2 size = default)
     {
+        ArgumentException.ThrowIfNullOrEmpty(id);
+
         var flags = ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.NoSavedSettings;
 
         if (!ImGui.BeginTable(id, 2, flags, size)) return false;
@@ -54,6 +56,8 @@ public static class EditorRows
     /// <param name="name">What the group is called.</param>
     public static void Group(string name)
     {
+        ArgumentNullException.ThrowIfNull(name);
+
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
 
@@ -70,6 +74,8 @@ public static class EditorRows
     /// <param name="tip">What to say when the pointer rests on the name, if anything.</param>
     public static void Line(string name, string? tip = null)
     {
+        ArgumentNullException.ThrowIfNull(name);
+
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
 

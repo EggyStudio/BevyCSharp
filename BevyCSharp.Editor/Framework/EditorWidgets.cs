@@ -170,6 +170,37 @@ public static class EditorWidgets
         ImGui.PopStyleVar();
     }
 
+    /// <summary>What a colour swatch offers, which is the colour and a way through to a picker.</summary>
+    private const ImGuiColorEditFlags Picking =
+        ImGuiColorEditFlags.NoInputs
+        | ImGuiColorEditFlags.AlphaPreviewHalf
+        | ImGuiColorEditFlags.AlphaBar;
+
+    /// <summary>
+    /// A colour, as a swatch the width of its row with a picker behind it.
+    /// </summary>
+    /// <remarks>
+    /// A button rather than ImGui's own colour field, which draws its swatch as a square of one
+    /// row's height however wide the row is and leaves the rest of it empty.
+    /// </remarks>
+    /// <param name="id">What to call it, which is what ImGui hashes it by.</param>
+    /// <param name="color">The colour, changed in place when the picker is used.</param>
+    /// <returns>Whether it changed.</returns>
+    public static bool Swatch(string id, ref Vector4 color)
+    {
+        var across = new Vector2(ImGui.GetContentRegionAvail().X, 0f);
+
+        if (ImGui.ColorButton(id, color, Picking, across)) ImGui.OpenPopup($"##pick{id}");
+
+        if (!Flyout($"##pick{id}")) return false;
+
+        var changed = ImGui.ColorPicker4($"##picker{id}", ref color, Picking);
+
+        EndFlyout();
+
+        return changed;
+    }
+
     /// <summary>Which slider is being dragged, while it is.</summary>
     private static string _sliding = string.Empty;
 
