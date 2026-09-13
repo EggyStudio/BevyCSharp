@@ -82,6 +82,10 @@ public partial struct EditorKeys
 
         if (control && input.KeyPressed(Key.S)) EditorProject.Save(ctx.Ecs);
 
+        // Where every editor keeps its settings, and the key the list of keys has always said it
+        // is on.
+        if (control && input.KeyPressed(Key.Comma)) EditorShell.Show("Settings");
+
         // Where every editor keeps its settings, and one of the few key bindings people carry
         // between programs.
         if (input.KeyPressed(Key.Delete)) Run(ctx, "Entity/Delete");

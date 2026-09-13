@@ -5,6 +5,13 @@ using ImGuiNET;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
+/// One tab along the bottom, which is a name and what to draw when it is open.
+/// </summary>
+/// <param name="Name">What the tab says, which is how a person finds it.</param>
+/// <param name="Draw">What to draw into the card above the strip while it is open.</param>
+public sealed record EditorTab(string Name, Action Draw);
+
+/// <summary>
 /// The strip of tabs along the bottom left, with whatever is open growing upwards out of it.
 /// </summary>
 public static class EditorStrip
@@ -224,9 +231,7 @@ public static class EditorStrip
             // Docked, a tab that is neither open nor under the hand wears nothing, because the
             // strip is black behind it and the word carries on its own. Floating, the strip is the
             // lit scene seen through, and a word on that needs something under it to sit on.
-            var idle = EditorShell.Docked
-                ? null
-                : (Vector4?)EditorTheme.Alpha(EditorTheme.LiveCard, theme.PanelAlpha);
+            var idle = EditorShell.Docked ? null : (Vector4?)EditorSurface.Lying();
 
             var fill = open
                 ? over ? EditorTheme.Alpha(EditorTheme.LiveAccent, 0.85f) : EditorTheme.LiveAccent
@@ -234,7 +239,7 @@ public static class EditorStrip
 
             if (fill is { } under)
             {
-                EditorSurface.Capsule(draw, at, at + size, ImGui.GetColorU32(under));
+                EditorDraw.Capsule(at, at + size, ImGui.GetColorU32(under), draw);
             }
 
             // White whether it is open or not. What says which one is showing is the pill under it,

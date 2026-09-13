@@ -55,7 +55,8 @@ public partial struct Probe
                 if (script.Contains("narrow")) EditorShell.PanelWidth = 340f;
                 if (script.Contains("tab")) EditorShell.OpenTab = 0;
                 if (script.Contains("assets")) EditorShell.OpenTab = 1;
-                if (script.Contains("style")) EditorShell.OpenTab = 2;
+                if (script.Contains("settings")) EditorShell.OpenTab = 2;
+                if (script.Contains("style")) EditorShell.OpenTab = 3;
                 break;
 
             case 140:

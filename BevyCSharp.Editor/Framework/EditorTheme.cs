@@ -246,6 +246,12 @@ public sealed record EditorTheme
         if (theme.Stock)
         {
             ImGui.StyleColorsDark();
+
+            // Except for the one slot the accent lives in, which ImGui paints the yellow it drags
+            // things onto. What is drawn by hand reads the accent from there, so it is given the
+            // blue ImGui marks a ticked box and a chosen row with.
+            style.Colors[(int)ImGuiCol.DragDropTarget] = style.Colors[(int)ImGuiCol.CheckMark];
+
             return;
         }
 

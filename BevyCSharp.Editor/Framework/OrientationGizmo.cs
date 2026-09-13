@@ -95,7 +95,7 @@ public static class OrientationGizmo
 
                 draw.AddText(
                     arm.At - (size * 0.5f),
-                    ImGui.GetColorU32(new Vector4(0.04f, 0.04f, 0.04f, 1f)),
+                    ImGui.GetColorU32(EditorTheme.Alpha(EditorTheme.Current.Ground, 1f)),
                     arm.Name);
 
                 continue;

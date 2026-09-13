@@ -28,14 +28,18 @@ public partial struct EditorBoot
         var camera = Scene(ctx);
 
         EditorSelection.Camera = camera;
-        EditorCommands.Register(camera);
 
         // The interface: one ImGui context, the editor's style, and the panels that make it.
         EditorShell.Load(EditorPaths.Assets);
 
-        EditorShell.Tabs.Add(("Console", ConsoleTab.Draw));
-        EditorShell.Tabs.Add(("Assets", AssetsTab.Draw));
-        EditorShell.Tabs.Add(("Style", StyleTab.Draw));
+        // Before the commands are registered, because the menu offers a row for each of these and
+        // builds that list from this one.
+        EditorShell.Tabs.Add(new EditorTab("Console", ConsoleTab.Draw));
+        EditorShell.Tabs.Add(new EditorTab("Assets", AssetsTab.Draw));
+        EditorShell.Tabs.Add(new EditorTab("Settings", SettingsTab.Draw));
+        EditorShell.Tabs.Add(new EditorTab("Style", StyleTab.Draw));
+
+        EditorCommands.Register(camera);
 
         EditorProject.RestoreLayout();
 
@@ -145,8 +149,7 @@ public partial struct EditorBoot
         if (!ctx.Input.KeyPressed(Key.Backquote)) return;
 
         // The console tab, raised or put away. Where every game has put this since Quake.
-        var console = EditorShell.Tabs.FindIndex(tab => tab.Name == "Console");
-        if (console >= 0) EditorShell.OpenTab = EditorShell.OpenTab == console ? -1 : console;
+        EditorShell.Show("Console");
     }
 
     /// <summary>

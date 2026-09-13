@@ -27,7 +27,7 @@ public sealed class EditorFieldTests
     [InlineData(3.001f, 3)]
     public void ANumberIsWrittenToAsFewPlacesAsSayIt(float number, int places)
     {
-        Assert.Equal(places, ComponentFields.Needed(number));
+        Assert.Equal(places, FieldNumbers.Needed(number));
     }
 
     [Theory]
@@ -36,6 +36,6 @@ public sealed class EditorFieldTests
     [InlineData(-7.98765f)]
     public void ANumberWithMorePlacesThanFitIsWrittenToTheMostThereIs(float number)
     {
-        Assert.Equal(ComponentFields.Places, ComponentFields.Needed(number));
+        Assert.Equal(FieldNumbers.Places, FieldNumbers.Needed(number));
     }
 }

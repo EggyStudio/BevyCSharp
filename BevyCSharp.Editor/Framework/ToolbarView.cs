@@ -30,6 +30,56 @@ public static class ToolbarView
 
         // Down the left edge rather than across the top, for the groups that are a list of modes.
         Group(ctx, ToolbarSlot.LeftEdge, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), down: true);
+
+        Keys();
+    }
+
+    /// <summary>Whether the list of keys is pinned open.</summary>
+    public static bool ShowKeys { get; set; }
+
+    /// <summary>
+    /// What the keys do here, as a card over the scene's bottom right.
+    /// </summary>
+    /// <remarks>
+    /// What <see cref="EditorHints"/> has to say, which follows the tool rather than listing every
+    /// key there is. Shown only while it is asked for, because a list nobody is reading is a list
+    /// lying over the thing they are looking at.
+    /// </remarks>
+    internal static void Keys()
+    {
+        if (!ShowKeys) return;
+
+        var at = new Vector2(
+            EditorShell.Free.Right - EditorShell.Margin,
+            EditorShell.Free.Bottom - EditorShell.Margin - EditorSurface.Tall - EditorSurface.Air);
+
+        ImGui.SetNextWindowPos(at, ImGuiCond.Always, new Vector2(1f, 1f));
+        ImGui.SetNextWindowBgAlpha(EditorTheme.Current.PanelAlpha);
+
+        ImGui.PushStyleColor(ImGuiCol.WindowBg, EditorTheme.LiveCard);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, EditorSurface.Around);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, EditorTheme.Current.ChildRounding);
+
+        var flags = EditorSurface.Placed
+            | ImGuiWindowFlags.AlwaysAutoResize
+            | ImGuiWindowFlags.NoFocusOnAppearing
+            | ImGuiWindowFlags.NoNav;
+
+        if (ImGui.Begin("##keys", flags) && EditorRows.Open("##hints"))
+        {
+            foreach (var (key, does) in EditorHints.Current())
+            {
+                EditorRows.Line(key);
+                ImGui.TextDisabled(does);
+            }
+
+            EditorRows.Close();
+        }
+
+        ImGui.End();
+
+        ImGui.PopStyleVar(2);
+        ImGui.PopStyleColor();
     }
 
     /// <summary>One corner's worth of buttons, in a row.</summary>
@@ -90,13 +140,12 @@ public static class ToolbarView
             if (index > 0 && !down) ImGui.SameLine();
 
             var on = button.Active?.Invoke() == true;
-            var theme = EditorTheme.Current;
 
-            // Nothing behind a button that is not in force or under the hand, so the picture is
-            // the button. What is in force wears the accent, which is the one thing colour means.
+            // The plate everything lying on the scene wears, until it is in force, when it wears
+            // the accent, which is the one thing colour means here.
             ImGui.PushStyleColor(
                 ImGuiCol.Button,
-                on ? EditorTheme.LiveAccent : EditorTheme.Alpha(EditorTheme.LiveCard, theme.PanelAlpha));
+                on ? EditorTheme.LiveAccent : EditorSurface.Lying());
 
             ImGui.PushStyleColor(
                 ImGuiCol.ButtonHovered,
@@ -115,6 +164,15 @@ public static class ToolbarView
                     new Vector2(0f, size));
 
             if (pressed) button.Run(ctx.Ecs);
+
+            // What it is, for a button that is only a picture, and for one with a word in it that
+            // has more to say than the word does.
+            if (ImGui.IsItemHovered())
+            {
+                var says = button.Tip ?? (label.Length > 0 ? label : Icon(button.Icon));
+
+                if (says.Length > 0) EditorWidgets.Tip(says);
+            }
 
             ImGui.PopStyleColor(3);
         }
@@ -160,7 +218,7 @@ public static class ToolbarView
         // whatever the button is sized to.
         var mark = MathF.Floor(size * 0.6f);
 
-        EditorSurface.Icon(draw, icon, middle - new Vector2(mark * 0.5f, mark * 0.5f), mark, on);
+        EditorDraw.Icon(draw, icon, middle - new Vector2(mark * 0.5f, mark * 0.5f), mark, on);
 
         return pressed;
     }

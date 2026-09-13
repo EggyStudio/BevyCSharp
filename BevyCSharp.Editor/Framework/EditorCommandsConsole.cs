@@ -12,6 +12,41 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 internal static class EditorConsoleCommands
 {
+    /// <summary>
+    /// Runs a menu command by its path, or lists what there is to run.
+    /// </summary>
+    /// <remarks>
+    /// One command rather than one per row, so what the console offers stays a short list and the
+    /// menu stays the one place the editor's commands are written down. Somebody who found a
+    /// command in the menu can type it the next time, and a script can run anything a person can.
+    /// </remarks>
+    /// <param name="path">Which row to run, quoted when it has spaces in it.</param>
+    [Command("do", "Runs a menu command by its path, or lists them: do Spawn/Cube")]
+    internal static string Do(string path)
+    {
+        if (path.Length == 0)
+        {
+            var paths = new List<string>();
+
+            foreach (var item in EditorMenu.All)
+            {
+                if (item.Kind is MenuKind.Separator or MenuKind.Submenu) continue;
+                if (item.Run is null) continue;
+
+                paths.Add(item.Path);
+            }
+
+            paths.Sort(StringComparer.Ordinal);
+
+            return string.Join("\n", paths);
+        }
+
+        if (EditorMenu.Find(path) is not { Run: { } run }) return $"nothing at {path}";
+
+        run(EditorShell.Ecs);
+        return $"ran {path}";
+    }
+
     /// <summary>Says what is selected.</summary>
     [Command("selection", "Says what is selected")]
     internal static string Selection()

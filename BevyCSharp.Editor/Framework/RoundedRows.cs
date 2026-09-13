@@ -8,6 +8,10 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// <para>
+/// Not <see cref="EditorRows"/>, which is about where a name and its value sit on a row. This is
+/// about what a row looks like under the pointer.
+/// </para>
+/// <para>
 /// A menu row, a tree node and a selectable are all drawn by ImGui with a rectangle behind them and
 /// no rounding to give it, and there is no style value for one, so a look built on rounded shapes
 /// has square corners wherever a list highlights a row.
@@ -53,7 +57,7 @@ public static class RoundedRows
         if (!EditorSurface.Clipped(ref from, ref to)) return;
 
         draw.ChannelsSetCurrent(0);
-        draw.AddRectFilled(from, to, ImGui.GetColorU32(color), rounding);
+        EditorDraw.Rounded(from, to, rounding, ImGui.GetColorU32(color), draw);
         draw.ChannelsSetCurrent(1);
     }
 

@@ -115,6 +115,25 @@ public sealed class EditorTableTests
     }
 
     [Fact]
+    public void EveryMenuCommandCanBeRunFromTheConsole()
+    {
+        // The editor's own tables, registered as the editor registers them. Nothing here draws
+        // anything, so none of it needs a window.
+        EditorCommands.Register(Entity.None);
+
+        var listed = ConsoleCommands.Run("do");
+
+        Assert.NotNull(listed);
+        Assert.Contains("Spawn/Cube", listed);
+        Assert.Contains("Project/Save", listed);
+
+        // A branch is a place to look, not something to run, so it is not offered as one.
+        Assert.DoesNotContain("Spawn\n", listed);
+
+        Assert.Equal("nothing at Spawn/Teapot", ConsoleCommands.Run("do Spawn/Teapot"));
+    }
+
+    [Fact]
     public void ACommandIsRegisteredByBeingWritten()
     {
         // The generator found it at compile time and a module initialiser registered it, so the

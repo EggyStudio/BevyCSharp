@@ -36,6 +36,11 @@ public enum MenuKind
 /// menu keeps a column for it either way, so the labels line up whether or not their neighbours
 /// have pictures.
 /// </param>
+/// <param name="Keys">
+/// The keys that do the same thing, written as somebody would say them, or nothing where there
+/// are none. A menu is where a person finds out that there is a key for something, so a row with
+/// a key and no word for it teaches nobody.
+/// </param>
 public sealed record MenuItem(
     string Path,
     MenuKind Kind = MenuKind.Command,
@@ -43,7 +48,8 @@ public sealed record MenuItem(
     Func<bool>? Checked = null,
     Func<bool>? Enabled = null,
     int Order = 0,
-    string? Icon = null)
+    string? Icon = null,
+    string? Keys = null)
 {
     /// <summary>The part shown on the row, which is the last part of the path.</summary>
     public string Label
@@ -99,13 +105,23 @@ public static class EditorMenu
     }
 
     /// <summary>Adds a command.</summary>
-    public static void Command(string path, Action<EcsWorld> run, int order = 0, string? icon = null) =>
-        Add(new MenuItem(path, MenuKind.Command, run, Order: order, Icon: icon));
+    public static void Command(
+        string path,
+        Action<EcsWorld> run,
+        int order = 0,
+        string? icon = null,
+        string? keys = null) =>
+        Add(new MenuItem(path, MenuKind.Command, run, Order: order, Icon: icon, Keys: keys));
 
     /// <summary>Adds a toggle, which shows a mark when <paramref name="isOn"/> answers true.</summary>
     public static void Toggle(
-        string path, Action<EcsWorld> run, Func<bool> isOn, int order = 0, string? icon = null) =>
-        Add(new MenuItem(path, MenuKind.Toggle, run, isOn, Order: order, Icon: icon));
+        string path,
+        Action<EcsWorld> run,
+        Func<bool> isOn,
+        int order = 0,
+        string? icon = null,
+        string? keys = null) =>
+        Add(new MenuItem(path, MenuKind.Toggle, run, isOn, Order: order, Icon: icon, Keys: keys));
 
     /// <summary>
     /// Gives a branch a picture and a place among its siblings.

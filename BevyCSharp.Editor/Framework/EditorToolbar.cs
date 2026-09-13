@@ -32,6 +32,11 @@ public enum ToolbarSlot
 /// <param name="Run">What pressing it does.</param>
 /// <param name="Active">Whether it is drawn as the one in force.</param>
 /// <param name="Order">Where it sits among its neighbours. Lower is first.</param>
+/// <param name="Tip">
+/// What it says when the pointer rests on it, or nothing to say what it is called. A button that
+/// is only a picture is a button nobody can read until they press it, so one of these is written
+/// for every one of those.
+/// </param>
 /// <remarks>
 /// The same shape as a menu row and for the same reason, which is that a game adding a mode to the
 /// viewport should add a line rather than edit a panel. Both halves are optional and either is
@@ -44,7 +49,8 @@ public sealed record ToolbarButton(
     Func<string> Label,
     Action<EcsWorld> Run,
     Func<bool>? Active = null,
-    int Order = 0);
+    int Order = 0,
+    string? Tip = null);
 
 /// <summary>
 /// The buttons floating in the viewport's corners.
@@ -77,8 +83,13 @@ public static class EditorToolbar
 
     /// <summary>Adds a button with an icon and a label that do not change.</summary>
     public static void Add(
-        ToolbarSlot slot, string? icon, string label, Action<EcsWorld> run, int order = 0) =>
-        Add(new ToolbarButton(slot, icon, () => label, run, Order: order));
+        ToolbarSlot slot,
+        string? icon,
+        string label,
+        Action<EcsWorld> run,
+        int order = 0,
+        string? tip = null) =>
+        Add(new ToolbarButton(slot, icon, () => label, run, Order: order, Tip: tip));
 
     /// <summary>What is in one slot, in order.</summary>
     public static IReadOnlyList<ToolbarButton> Slot(ToolbarSlot slot)

@@ -54,6 +54,25 @@ public static class WorldPanel
     private static bool _eyes = true;
 
     /// <summary>
+    /// Starts renaming a row, which is a box to type in where its name was.
+    /// </summary>
+    /// <remarks>
+    /// The same state a double click on the name sets, so a rename started from the menu and one
+    /// started by pointing at it are the same thing happening.
+    /// </remarks>
+    /// <param name="entity">Which row.</param>
+    /// <param name="name">What it is called now, which is what the box opens holding.</param>
+    public static void Rename(Entity entity, string name)
+    {
+        _renaming = entity.Bits;
+        _typed = name;
+    }
+
+    /// <summary>How far in a row's picture sits, which is what makes the list a tree.</summary>
+    private static float Indent(Row row) =>
+        EditorSurface.Air + (row.Depth * ImGui.GetStyle().IndentSpacing);
+
+    /// <summary>
     /// What an entity asks to be drawn, and whether it asks at all.
     /// </summary>
     /// <remarks>
@@ -94,12 +113,9 @@ public static class WorldPanel
     {
         if (EditorShell.Context is not { } ctx) return;
 
-        ImGui.TextDisabled("WORLD");
-        ImGui.SameLine();
-        ImGui.TextDisabled($"({Rows.Count})");
+        EditorSurface.Title("WORLD", $"({Rows.Count})");
 
-        // Short of the dock button when it happens to float over this corner.
-        ImGui.SetNextItemWidth(-1f - EditorSceneFrame.DockRoom());
+        EditorSurface.FullWidth();
         ImGui.InputTextWithHint("##search", "Search", ref _search, 128);
 
         ImGui.Spacing();
@@ -228,11 +244,16 @@ public static class WorldPanel
         var eyed = Sighted(ctx, row.Entity, out var sight);
         var onEye = eyed && over && ImGui.GetIO().MousePos.X >= at.X + width - EyeRoom;
 
+        // The arrow at the front of a row that has children is its own target, as wide as the
+        // picture it stands beside.
+        var onArrow = row.HasChildren
+            && over
+            && ImGui.GetIO().MousePos.X < at.X + Indent(row) + ImGui.GetTextLineHeight() + 4f;
+
         // Twice on a name is how a name is changed, in every list of things there is.
-        if (over && !onEye && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+        if (over && !onEye && !onArrow && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
         {
-            _renaming = row.Entity.Bits;
-            _typed = row.Name;
+            Rename(row.Entity, row.Name);
             return;
         }
 
@@ -246,6 +267,12 @@ public static class WorldPanel
                 ctx.Ecs.Set(
                     row.Entity,
                     sight.Mode == VisibilityMode.Hidden ? Visibility.Inherited : Visibility.Hidden);
+            }
+
+            // And the arrow takes its own, so folding a branch away leaves the selection alone.
+            else if (onArrow)
+            {
+                if (!Folded.Add(row.Entity.Bits)) Folded.Remove(row.Entity.Bits);
             }
 
             // Control adds one, shift takes everything between this and the last one picked, and
@@ -266,22 +293,28 @@ public static class WorldPanel
             }
         }
 
-        if (EditorSurface.FlyoutHere($"##menu{row.Entity.Bits}"))
+        if (EditorWidgets.FlyoutHere($"##menu{row.Entity.Bits}"))
         {
             EditorSelection.Select(row.Entity);
 
             RoundedRows.Rows(() =>
             {
-                if (ImGui.MenuItem("Delete")) EditorMenu.Find("Entity/Delete")?.Run?.Invoke(ctx.Ecs);
+                // The three things a row itself offers, which are the three a double click, a key
+                // and a drag would otherwise be the only way to reach.
+                if (ImGui.MenuItem("Rename")) Rename(row.Entity, row.Name);
 
                 RoundedRows.Row();
 
                 if (ImGui.MenuItem("Duplicate")) EditorMenu.Find("Entity/Duplicate")?.Run?.Invoke(ctx.Ecs);
 
                 RoundedRows.Row();
+
+                if (ImGui.MenuItem("Delete", "Del")) EditorMenu.Find("Entity/Delete")?.Run?.Invoke(ctx.Ecs);
+
+                RoundedRows.Row();
             });
 
-            EditorSurface.EndFlyout();
+            EditorWidgets.EndFlyout();
         }
 
         Paint(row, at, width, height, picked, over, eyed);
@@ -290,7 +323,7 @@ public static class WorldPanel
         // says a thing has been put away has to still be there once the hand has moved on.
         if (eyed && (over || sight.Mode == VisibilityMode.Hidden))
         {
-            EditorSurface.Eye(
+            EditorDraw.Eye(
                 ImGui.GetWindowDrawList(),
                 new Vector2(at.X + width - (EyeRoom * 0.5f), at.Y + (height * 0.5f)),
                 ImGui.GetTextLineHeight() * 0.95f,
@@ -341,7 +374,7 @@ public static class WorldPanel
                 ? ImGui.GetColorU32(picked ? ImGuiCol.Header : ImGuiCol.HeaderHovered)
                 : ImGui.GetColorU32(picked
                     ? current ? EditorTheme.LiveAccent : EditorTheme.Alpha(EditorTheme.LiveAccent, 0.45f)
-                    : EditorTheme.LiveHover);
+                    : EditorTheme.LiveLift);
 
             // Cut to the list rather than run under its edge, so a row scrolled half out of sight
             // ends in a rounded corner instead of a square one.
@@ -350,12 +383,12 @@ public static class WorldPanel
 
             if (EditorSurface.Clipped(ref top, ref bottom))
             {
-                draw.AddRectFilled(top, bottom, fill, ImGui.GetStyle().FrameRounding);
+                EditorDraw.Rounded(top, bottom, ImGui.GetStyle().FrameRounding, fill, draw);
             }
         }
 
         var line = ImGui.GetTextLineHeight();
-        var indent = 6f + (row.Depth * ImGui.GetStyle().IndentSpacing);
+        var indent = Indent(row);
         var middle = at.Y + ((height - line) * 0.5f);
 
         // A triangle for anything with things under it, pointing down when they are showing and
@@ -387,15 +420,6 @@ public static class WorldPanel
                     colour);
             }
 
-            // The arrow is its own target, so clicking it folds while the rest of the row picks.
-            if (over
-                && ImGui.IsMouseClicked(ImGuiMouseButton.Left)
-                && ImGui.GetIO().MousePos.X < arrow.X + line + 4f)
-            {
-                if (folded) Folded.Remove(row.Entity.Bits);
-                else Folded.Add(row.Entity.Bits);
-            }
-
             indent += line + 2f;
         }
         else if (Rows.Exists(other => other.HasChildren))
@@ -404,7 +428,7 @@ public static class WorldPanel
             indent += line + 2f;
         }
 
-        EditorSurface.Icon(draw, row.Icon, new Vector2(at.X + indent, middle), line, picked);
+        EditorDraw.Icon(draw, row.Icon, new Vector2(at.X + indent, middle), line, picked);
 
         // Cut where the eye begins rather than where the row ends, so a long name runs out of
         // room instead of running under the thing that hides it.

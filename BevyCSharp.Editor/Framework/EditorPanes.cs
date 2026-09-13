@@ -13,9 +13,6 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 public static class EditorPanes
 {
-    /// <summary>How much of the panel's height its own header row takes.</summary>
-    private const float Header = 28f;
-
     /// <summary>The world beside the data, or above it when there is no room for two columns.</summary>
     internal static void Draw()
     {
@@ -77,7 +74,7 @@ public static class EditorPanes
             EditorSurface.Card("##world", new Vector2(0f, world), WorldPanel.Draw);
 
             ImGui.SetCursorPosY(top + world);
-            Splitter(body.X);
+            Splitter(body);
 
             ImGui.SetCursorPosY(top + world + EditorSurface.Gutter);
             EditorSurface.Card("##data", new Vector2(0f, 0f), DetailsPanel.Draw);
@@ -119,19 +116,22 @@ public static class EditorPanes
     /// A short pill in the middle rather than a line across, so that it says where to take hold
     /// without drawing a border, which is the one thing this look does not do.
     /// </remarks>
-    internal static void Splitter(float width)
+    /// <param name="body">The room the two cards share, which is what a drag divides.</param>
+    internal static void Splitter(Vector2 body)
     {
-        ImGui.InvisibleButton("##split", new Vector2(width, EditorSurface.Gutter));
+        ImGui.InvisibleButton("##split", new Vector2(body.X, EditorSurface.Gutter));
 
         var held = ImGui.IsItemActive();
         var over = ImGui.IsItemHovered();
 
         if (over || held) ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNS);
 
-        if (held)
+        // Against the room the cards are laid out in rather than the window's own height, so a
+        // drag of ten pixels moves the line ten pixels wherever the panel's edges happen to be.
+        if (held && body.Y > 1f)
         {
-            var body = ImGui.GetWindowHeight() - Header;
-            if (body > 1f) EditorShell.WorldShare = Math.Clamp(EditorShell.WorldShare + (ImGui.GetIO().MouseDelta.Y / body), 0.15f, 0.85f);
+            EditorShell.WorldShare = Math.Clamp(
+                EditorShell.WorldShare + (ImGui.GetIO().MouseDelta.Y / body.Y), 0.15f, 0.85f);
         }
 
         EditorSurface.Grab(EditorSurface.Pill, over, held);

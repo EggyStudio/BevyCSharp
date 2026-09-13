@@ -43,7 +43,9 @@ public static class StyleTab
         {
             var chosen = offered.Name == theme.Name;
 
-            if (chosen) ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.ButtonActive));
+            // The accent, because that is what the editor says "this is the one in force" with
+            // everywhere else.
+            if (chosen) ImGui.PushStyleColor(ImGuiCol.Button, EditorTheme.LiveAccent);
 
             if (ImGui.Button($" {offered.Name} ")) EditorShell.Wear(offered);
 
@@ -58,7 +60,7 @@ public static class StyleTab
 
         ImGui.SetNextItemWidth(150f);
 
-        var moved = EditorSurface.Sliding(
+        var moved = EditorWidgets.Sliding(
             "##behind",
             (behind - 20f) / 80f,
             () => ImGui.SliderFloat("##behind", ref behind, 20f, 100f, "panel %.0f%%"));
@@ -71,7 +73,7 @@ public static class StyleTab
 
         ImGui.SetNextItemWidth(150f);
 
-        var faded = EditorSurface.Sliding(
+        var faded = EditorWidgets.Sliding(
             "##alpha",
             (alpha - 40f) / 60f,
             () => ImGui.SliderFloat("##alpha", ref alpha, 40f, 100f, "cards %.0f%%"));
@@ -117,14 +119,9 @@ public static class StyleTab
     {
         var theme = EditorTheme.Current;
 
-        var table = ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.NoSavedSettings;
+        if (!EditorRows.Open("##rungs")) return;
 
-        if (!ImGui.BeginTable("##rungs", 2, table)) return;
-
-        ImGui.TableSetupColumn("##name", ImGuiTableColumnFlags.WidthStretch, 0.35f);
-        ImGui.TableSetupColumn("##value", ImGuiTableColumnFlags.WidthStretch, 0.65f);
-
-        Group("SURFACES");
+        EditorRows.Group("SURFACES");
         Color("Ground", theme.Ground, c => theme with { Ground = c });
         Color("Panel", theme.Panel, c => theme with { Panel = c });
         Color("Card", theme.Card, c => theme with { Card = c });
@@ -134,7 +131,7 @@ public static class StyleTab
         Color("Active", theme.Active, c => theme with { Active = c });
         Color("Line", theme.Line, c => theme with { Line = c });
 
-        Group("INK");
+        EditorRows.Group("INK");
         Color("Text", theme.Text, c => theme with { Text = c });
         Color("Dim", theme.Dim, c => theme with { Dim = c });
         Color("Faint", theme.Faint, c => theme with { Faint = c });
@@ -142,48 +139,23 @@ public static class StyleTab
         Color("Warn", theme.Warn, c => theme with { Warn = c });
         Color("Bad", theme.Bad, c => theme with { Bad = c });
 
-        Group("SEEN THROUGH");
+        EditorRows.Group("SEEN THROUGH");
         Share("Panel", theme.WindowAlpha, a => theme with { WindowAlpha = a });
         Share("Cards", theme.PanelAlpha, a => theme with { PanelAlpha = a });
 
-        Group("SHAPE");
+        EditorRows.Group("SHAPE");
         Number("Window rounding", theme.WindowRounding, n => theme with { WindowRounding = n });
         Number("Card rounding", theme.ChildRounding, n => theme with { ChildRounding = n });
         Number("Field rounding", theme.FrameRounding, n => theme with { FrameRounding = n });
         Number("Tab rounding", theme.TabRounding, n => theme with { TabRounding = n });
         Number("Borders", theme.Borders, n => theme with { Borders = n });
 
-        Group("AIR");
+        EditorRows.Group("AIR");
         Pair("Window padding", theme.WindowPadding, v => theme with { WindowPadding = v });
         Pair("Field padding", theme.FramePadding, v => theme with { FramePadding = v });
         Pair("Item spacing", theme.ItemSpacing, v => theme with { ItemSpacing = v });
 
-        ImGui.EndTable();
-    }
-
-    /// <summary>A heading over the rows that follow it.</summary>
-    private static void Group(string name)
-    {
-        ImGui.TableNextRow();
-        ImGui.TableNextColumn();
-
-        ImGui.Spacing();
-        ImGui.TextDisabled(name);
-
-        ImGui.TableNextColumn();
-    }
-
-    /// <summary>One row, with its name written and the cursor left where its control goes.</summary>
-    private static void Line(string name)
-    {
-        ImGui.TableNextRow();
-        ImGui.TableNextColumn();
-
-        ImGui.AlignTextToFramePadding();
-        ImGui.TextUnformatted(name);
-
-        ImGui.TableNextColumn();
-        ImGui.SetNextItemWidth(-1f);
+        EditorRows.Close();
     }
 
     /// <summary>
@@ -195,28 +167,28 @@ public static class StyleTab
     /// </remarks>
     private static void Color(string name, Vector4 held, Func<Vector4, EditorTheme> onto)
     {
-        Line(name);
+        EditorRows.Line(name);
 
         var value = held;
-        var across = new Vector2(ImGui.GetContentRegionAvail().X, 0f);
+        var across = EditorRows.Across();
 
         if (ImGui.ColorButton($"##{name}", value, Swatch, across)) ImGui.OpenPopup($"##pick{name}");
 
-        if (!EditorSurface.Flyout($"##pick{name}")) return;
+        if (!EditorWidgets.Flyout($"##pick{name}")) return;
 
         if (ImGui.ColorPicker4($"##picker{name}", ref value, Swatch)) EditorShell.Wear(onto(value));
 
-        EditorSurface.EndFlyout();
+        EditorWidgets.EndFlyout();
     }
 
     /// <summary>How far through something is seen, in whole percent, which is how somebody says it.</summary>
     private static void Share(string name, float held, Func<float, EditorTheme> onto)
     {
-        Line(name);
+        EditorRows.Line(name);
 
         var value = held * 100f;
 
-        var moved = EditorSurface.Sliding(
+        var moved = EditorWidgets.Sliding(
             $"##{name}",
             value / 100f,
             () => ImGui.SliderFloat($"##{name}", ref value, 0f, 100f, "%.0f%%"));
@@ -227,7 +199,7 @@ public static class StyleTab
     /// <summary>One number, dragged rather than slid, because it has no end to run to.</summary>
     private static void Number(string name, float held, Func<float, EditorTheme> onto)
     {
-        Line(name);
+        EditorRows.Line(name);
 
         var value = held;
 
@@ -240,7 +212,7 @@ public static class StyleTab
     /// <summary>Two numbers, which is what every measure of air in here is.</summary>
     private static void Pair(string name, Vector2 held, Func<Vector2, EditorTheme> onto)
     {
-        Line(name);
+        EditorRows.Line(name);
 
         var value = held;
 

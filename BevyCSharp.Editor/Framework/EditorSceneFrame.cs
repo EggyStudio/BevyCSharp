@@ -102,11 +102,11 @@ public static class EditorSceneFrame
     /// </remarks>
     internal static void DockButton()
     {
-        // Small enough and high enough to sit in the empty right end of a panel's title row,
-        // which is the one row under it with nothing in it. A button that reaches into the row
-        // below takes width from whatever is there, and what is there is a search box that should
-        // run the whole way across.
-        const float Size = 26f;
+        // The size everything else that floats over the scene is, so the pin in the corner is one
+        // of that family rather than a disc of its own. It sits in the empty right end of a
+        // panel's title row, which is the one row under it with nothing in it; a button that
+        // reached into the row below would take width from the search box there.
+        const float Size = EditorSurface.Tall;
 
         // The window's top right corner, and how far into it depends only on where the panel's
         // first row starts. Docked, the panel is flush against the window and everything in it sits
@@ -125,9 +125,9 @@ public static class EditorSceneFrame
 
             ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, Size * 0.5f);
 
-            // A step above the panel it sits on, or the disc cannot be told from the panel and what
-            // is left is a picture floating in the corner.
-            ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.FrameBg));
+            // The plate everything lying on the scene wears, so the pin matches the buttons in the
+            // scene's own corners rather than being a disc of its own shade.
+            ImGui.PushStyleColor(ImGuiCol.Button, EditorSurface.Lying());
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, EditorTheme.LiveHover);
 
             // Never in the accent, because the accent says what is in force in the scene, and a
@@ -144,7 +144,7 @@ public static class EditorSceneFrame
 
             if (ImGui.IsItemHovered())
             {
-                EditorSurface.Tip(EditorShell.Docked ? "Undock the panel" : "Dock the panel");
+                EditorWidgets.Tip(EditorShell.Docked ? "Undock the panel" : "Dock the panel");
             }
 
             // Where it ended up, so a panel underneath can leave the corner alone.
@@ -181,7 +181,7 @@ public static class EditorSceneFrame
         if (at.Y > DockRect.Max.Y || at.Y + line < DockRect.Min.Y) return 0f;
         if (right <= DockRect.Min.X) return 0f;
 
-        return right - DockRect.Min.X + 6f;
+        return right - DockRect.Min.X + EditorSurface.Air;
     }
 
 }

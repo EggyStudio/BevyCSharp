@@ -47,8 +47,8 @@ public static class EditorProject
     /// like it does not remember you.
     /// </para>
     /// <para>
-    /// Nor the arrangement of the panels. Where a panel sits is the stylesheet's answer now, and a
-    /// stylesheet is already a file that is kept.
+    /// The arrangement of the panels comes back with them, because where a panel sits and how wide
+    /// it is are registered as settings like everything else a person sets.
     /// </para>
     /// </remarks>
     public static void RestoreLayout()

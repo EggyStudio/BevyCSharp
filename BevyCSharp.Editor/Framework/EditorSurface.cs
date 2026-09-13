@@ -70,6 +70,35 @@ public static class EditorSurface
     /// <summary>How much air a card keeps inside its own edge.</summary>
     internal const float Air = 6f;
 
+    /// <summary>
+    /// A panel's own heading, and what it has to say about itself beside it.
+    /// </summary>
+    /// <remarks>
+    /// Every panel opens with one of these, so they are written in one place and read as one row
+    /// rather than as two panels that happen to agree.
+    /// </remarks>
+    /// <param name="name">What the panel is called, which is written in small capitals.</param>
+    /// <param name="note">What it has to add, such as how many things it is listing.</param>
+    internal static void Title(string name, string? note = null)
+    {
+        ImGui.TextDisabled(name);
+
+        if (note is not { Length: > 0 }) return;
+
+        ImGui.SameLine();
+        ImGui.TextDisabled(note);
+    }
+
+    /// <summary>
+    /// Gives the next widget the whole row, less whatever the dock button is floating over.
+    /// </summary>
+    /// <remarks>
+    /// The button is its own window over the panel's top right corner, so a field on the first row
+    /// has to stop short of it or the two overlap.
+    /// </remarks>
+    internal static void FullWidth() =>
+        ImGui.SetNextItemWidth(-1f - EditorSceneFrame.DockRoom());
+
     /// <summary>How much air a menu or a tooltip keeps inside its own edge.</summary>
     /// <remarks>
     /// The same for every one of them, pushed rather than taken from the style, because a popup
@@ -128,64 +157,6 @@ public static class EditorSurface
     }
 
     /// <summary>
-    /// Opens a flyout, with the air every flyout keeps.
-    /// </summary>
-    /// <remarks>
-    /// Ended with <see cref="EndFlyout"/>, and only when it opened, which is the shape ImGui's own
-    /// popups take.
-    /// </remarks>
-    /// <param name="id">What the popup is called.</param>
-    internal static bool Flyout(string id)
-    {
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Around);
-
-        var open = ImGui.BeginPopup(id);
-
-        if (!open) ImGui.PopStyleVar();
-
-        return open;
-    }
-
-    /// <summary>Opens the flyout a right click asks for, with the same air.</summary>
-    /// <param name="id">What the popup is called.</param>
-    internal static bool FlyoutHere(string id)
-    {
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Around);
-
-        var open = ImGui.BeginPopupContextItem(id);
-
-        if (!open) ImGui.PopStyleVar();
-
-        return open;
-    }
-
-    /// <summary>Closes what <see cref="Flyout"/> or <see cref="FlyoutHere"/> opened.</summary>
-    internal static void EndFlyout()
-    {
-        ImGui.EndPopup();
-        ImGui.PopStyleVar();
-    }
-
-    /// <summary>
-    /// What to say about the thing under the pointer.
-    /// </summary>
-    /// <remarks>
-    /// The air is pushed here rather than left to the style, because a tooltip asked for inside a
-    /// panel or a toolbar inherits whatever window padding that has pushed, and one of those is
-    /// nothing at all, which draws the words against the edge of their own box.
-    /// </remarks>
-    /// <param name="text">What to say.</param>
-    internal static void Tip(string text)
-    {
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Around);
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, EditorTheme.Current.ChildRounding);
-
-        ImGui.SetTooltip(text);
-
-        ImGui.PopStyleVar(2);
-    }
-
-    /// <summary>
     /// Ends a region, whether or not it opened.
     /// </summary>
     /// <remarks>
@@ -229,183 +200,14 @@ public static class EditorSurface
     }
 
     /// <summary>
-    /// Draws an icon into a square, if the picture has loaded.
+    /// What something pressed that lies on the scene wears when it is neither held nor in force.
     /// </summary>
     /// <remarks>
-    /// The icons are shapes cut out of white, so what colour one comes out is the tint it is drawn
-    /// with, which is the theme's to decide. A picture that has not arrived yet draws nothing
-    /// rather than a placeholder, because the asset server answers on a later frame and the row
-    /// redraws then.
+    /// One colour for the buttons floating in the scene's corners and the tabs along its bottom,
+    /// because they are the same kind of thing and two of them at two shades read as two kinds.
     /// </remarks>
-    /// <param name="draw">What to draw into.</param>
-    /// <param name="path">The icon's path under the asset root, or nothing.</param>
-    /// <param name="at">Where its top left corner goes.</param>
-    /// <param name="size">How large a square to draw it in.</param>
-    /// <param name="lit">Whether it belongs to something chosen or in force.</param>
-    internal static void Icon(ImDrawListPtr draw, string? path, Vector2 at, float size, bool lit)
-    {
-        if (path is not { Length: > 0 }) return;
-
-        var picture = ImGuiTextures.Load(path);
-        if (picture == 0) return;
-
-        draw.AddImage(
-            (IntPtr)picture,
-            at,
-            at + new Vector2(size, size),
-            Vector2.Zero,
-            Vector2.One,
-            ImGui.GetColorU32(EditorTheme.IconTint(lit)));
-    }
-
-    /// <summary>
-    /// A rectangle with round ends, drawn as round ends rather than as a rounded rectangle.
-    /// </summary>
-    /// <remarks>
-    /// ImGui rounds a rectangle by at most half its shortest side less a pixel, and some of its
-    /// widgets clamp further still, so what should be a circle comes out as a square with the
-    /// corners taken off. Two discs and the rectangle between them have no such limit.
-    /// </remarks>
-    /// <param name="draw">What to draw into.</param>
-    /// <param name="min">The top left corner.</param>
-    /// <param name="max">The bottom right.</param>
-    /// <param name="color">What to fill it with.</param>
-    internal static void Capsule(ImDrawListPtr draw, Vector2 min, Vector2 max, uint color)
-    {
-        var radius = (max.Y - min.Y) * 0.5f;
-        if (radius <= 0.5f) return;
-
-        var middle = (min.Y + max.Y) * 0.5f;
-
-        if (max.X - min.X <= radius * 2f)
-        {
-            draw.AddCircleFilled(new Vector2((min.X + max.X) * 0.5f, middle), radius, color, 0);
-            return;
-        }
-
-        // One shape rather than a rectangle with a disc laid over each end. A fill that is seen
-        // through is laid down twice wherever two of those overlap, and what that draws is a pair
-        // of darker half circles inside the pill.
-        var quarter = MathF.PI * 0.5f;
-
-        draw.PathClear();
-        draw.PathArcTo(new Vector2(max.X - radius, middle), radius, -quarter, quarter, 0);
-        draw.PathArcTo(new Vector2(min.X + radius, middle), radius, quarter, quarter * 3f, 0);
-        draw.PathFillConvex(color);
-    }
-
-    /// <summary>Which slider is being dragged, while it is.</summary>
-    private static string _sliding = string.Empty;
-
-    /// <summary>
-    /// A slider drawn as a groove with a round handle on it.
-    /// </summary>
-    /// <remarks>
-    /// ImGui's own, with its fill and its handle turned off and both drawn here first instead. A
-    /// rounded rectangle is only ever as round as half its shortest side less a pixel, which
-    /// leaves a flat edge on anything meant to be a circle, and a groove and its handle are where
-    /// that shows. Everything the slider does is still ImGui's, including the control click that
-    /// opens it for typing.
-    /// </remarks>
-    /// <param name="id">Which field this is, so a drag can be followed between frames.</param>
-    /// <param name="fraction">How far along the value sits, from nothing to all of it.</param>
-    /// <param name="slide">The slider to call, once its own colours are out of the way.</param>
-    internal static bool Sliding(string id, float fraction, Func<bool> slide)
-    {
-        var draw = ImGui.GetWindowDrawList();
-
-        var min = ImGui.GetCursorScreenPos();
-        var max = min + new Vector2(ImGui.CalcItemWidth(), ImGui.GetFrameHeight());
-
-        // Held is what ImGui said last frame, because the answer for this one arrives after the
-        // call that draws it. A drag reads as held from its second frame, which is the frame the
-        // handle first moves.
-        var held = _sliding == id;
-        var groove = held || ImGui.IsMouseHoveringRect(min, max)
-            ? ImGuiCol.FrameBgHovered
-            : ImGuiCol.FrameBg;
-
-        Capsule(draw, min, max, ImGui.GetColorU32(groove));
-
-        // Where ImGui would have put its own handle. It keeps two pixels of the groove clear at
-        // each end and slides the handle along what is left, so the same two numbers put a disc
-        // exactly where the rectangle would have been.
-        const float Clear = 2f;
-
-        var handle = MathF.Max(1f, ImGui.GetStyle().GrabMinSize);
-        var travel = MathF.Max(0f, max.X - min.X - (Clear * 2f) - handle);
-        var along = min.X + Clear + (handle * 0.5f) + (travel * Math.Clamp(fraction, 0f, 1f));
-
-        draw.AddCircleFilled(
-            new Vector2(along, (min.Y + max.Y) * 0.5f),
-            handle * 0.5f,
-            ImGui.GetColorU32(held ? ImGuiCol.SliderGrabActive : ImGuiCol.SliderGrab),
-            0);
-
-        ImGui.PushStyleColor(ImGuiCol.FrameBg, 0u);
-        ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, 0u);
-        ImGui.PushStyleColor(ImGuiCol.FrameBgActive, 0u);
-        ImGui.PushStyleColor(ImGuiCol.SliderGrab, 0u);
-        ImGui.PushStyleColor(ImGuiCol.SliderGrabActive, 0u);
-
-        var changed = slide();
-
-        ImGui.PopStyleColor(5);
-
-        if (ImGui.IsItemActive()) _sliding = id;
-        else if (held) _sliding = string.Empty;
-
-        return changed;
-    }
-
-    /// <summary>
-    /// The eye that says whether a thing is drawn.
-    /// </summary>
-    /// <remarks>
-    /// Drawn rather than written, because the interface is set in a monospace font with no eye in
-    /// it and a font that lacks a glyph draws a box that says nothing. Two lids and a pupil is the
-    /// shape every editor has put on this, so it is read without being explained, and the same
-    /// shape with a stroke through it is the shape for something that has been put away.
-    /// </remarks>
-    /// <param name="draw">What to draw into.</param>
-    /// <param name="middle">Where the eye is centred.</param>
-    /// <param name="size">How wide it is, corner to corner.</param>
-    /// <param name="open">Whether the thing it belongs to is being drawn.</param>
-    /// <param name="color">What to draw it in.</param>
-    internal static void Eye(
-        ImDrawListPtr draw, Vector2 middle, float size, bool open, uint color)
-    {
-        var across = size * 0.5f;
-
-        // A quarter as tall as it is wide, which is the shape of an eye and not of a circle. The
-        // control points are twice that out, because a quadratic curve reaches half way to the
-        // point it is bent towards.
-        var tall = size * 0.26f;
-
-        var left = middle - new Vector2(across, 0f);
-        var right = middle + new Vector2(across, 0f);
-        var line = MathF.Max(1f, size * 0.09f);
-
-        draw.PathClear();
-        draw.PathLineTo(left);
-        draw.PathBezierQuadraticCurveTo(middle - new Vector2(0f, tall * 2f), right, 0);
-        draw.PathBezierQuadraticCurveTo(middle + new Vector2(0f, tall * 2f), left, 0);
-        draw.PathStroke(color, ImDrawFlags.Closed, line);
-
-        // The pupil only while it is open. An eye with a pupil and a stroke through it reads as an
-        // eye that is looking anyway, and what is meant is one that is shut.
-        if (open)
-        {
-            draw.AddCircleFilled(middle, tall * 0.62f, color, 0);
-            return;
-        }
-
-        draw.AddLine(
-            middle + new Vector2(-across * 0.7f, tall * 1.6f),
-            middle + new Vector2(across * 0.7f, -tall * 1.6f),
-            color,
-            line);
-    }
+    internal static Vector4 Lying() =>
+        EditorTheme.Alpha(EditorTheme.LiveCard, EditorTheme.Current.PanelAlpha);
 
     /// <summary>
     /// What a floating window's background is painted in.
@@ -450,11 +252,7 @@ public static class EditorSurface
             ? ImGuiCol.ScrollbarGrabActive
             : over ? ImGuiCol.ScrollbarGrabHovered : ImGuiCol.ScrollbarGrab;
 
-        draw.AddRectFilled(
-            middle - grab,
-            middle + grab,
-            ImGui.GetColorU32(color),
-            MathF.Min(grab.X, grab.Y));
+        EditorDraw.Capsule(middle - grab, middle + grab, ImGui.GetColorU32(color), draw);
     }
 
     /// <summary>How large a grab handle's pill is, as half its width and half its height.</summary>
@@ -496,5 +294,4 @@ public static class EditorSurface
 
         ImGui.EndChild();
     }
-
 }

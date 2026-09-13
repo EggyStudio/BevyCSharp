@@ -1,3 +1,4 @@
+using System.Globalization;
 using Bevy;
 using BevyCSharp.Editor.Behaviors;
 
@@ -24,6 +25,13 @@ public static class EditorCommands
     /// <summary>Fills the menu and the toolbar, given the camera the panels bind against.</summary>
     public static void Register(Entity camera)
     {
+        // The four branches of the menu, so the top level wears pictures like every row under it
+        // and sits in an order somebody decided rather than the alphabet's.
+        EditorMenu.Branch("Entity", "icons/ui/entity.png", 0);
+        EditorMenu.Branch("Spawn", "icons/ui/add.png", 1);
+        EditorMenu.Branch("View", "icons/ui/image.png", 2);
+        EditorMenu.Branch("Project", "icons/ui/package.png", 3);
+
         Spawning();
         Entities();
         View();
@@ -107,6 +115,54 @@ public static class EditorCommands
             },
             8);
 
+        // How the editor is arranged, which is a preference like any other and saved with the
+        // rest of them, so it opens the way it was left rather than the way it was written.
+        EditorSettings.Heading("Editor", "Arrangement", 20);
+
+        EditorSettings.Flag(
+            "Editor",
+            "Docked",
+            static () => EditorShell.Docked,
+            static on => EditorShell.Docked = on,
+            21);
+
+        EditorSettings.Number(
+            "Editor",
+            "Panel width",
+            static () => EditorShell.PanelWidth,
+            static width => EditorShell.PanelWidth = width,
+            22);
+
+        EditorSettings.Number(
+            "Editor",
+            "What the world gets of it",
+            static () => EditorShell.WorldShare,
+            static share => EditorShell.WorldShare = Math.Clamp(share, 0.15f, 0.85f),
+            23);
+
+        EditorSettings.Number(
+            "Editor",
+            "Tab height",
+            static () => EditorShell.TabHeight,
+            static height => EditorShell.TabHeight = MathF.Max(80f, height),
+            24);
+
+        // By name, because a number would mean a different panel the moment a game adds one of its
+        // own.
+        EditorSettings.Choice(
+            "Editor",
+            "Open panel",
+            [Shut, .. EditorShell.Tabs.Select(static tab => tab.Name)],
+            static () => EditorShell.OpenTab >= 0 && EditorShell.OpenTab < EditorShell.Tabs.Count
+                ? EditorShell.Tabs[EditorShell.OpenTab].Name
+                : Shut,
+            static chosen =>
+            {
+                EditorShell.OpenTab = -1;
+                if (chosen != Shut) EditorShell.Show(chosen);
+            },
+            25);
+
         EditorSettings.Heading("Project", "Where things are", 0);
 
         EditorSettings.Fact("Project", "Assets", static () => EditorPaths.Assets, 1);
@@ -125,10 +181,15 @@ public static class EditorCommands
 
         EditorSettings.Action("Project", "Reload now", EditorScripts.Reload, 13);
 
+        // What the editor is made of, which is every table something registered itself in. A count
+        // that reads as zero is a table nothing reached, which is worth knowing.
         EditorSettings.Heading("About", "BevyCSharp.Editor", 0);
 
-        EditorSettings.Fact("About", "Component schemas", static () => ComponentSchemas.All.Count.ToString(), 3);
-        EditorSettings.Fact("About", "Menu rows", static () => EditorMenu.All.Count.ToString(), 4);
+        EditorSettings.Fact("About", "Component schemas", static () => Count(ComponentSchemas.All.Count), 1);
+        EditorSettings.Fact("About", "Menu rows", static () => Count(EditorMenu.All.Count), 2);
+        EditorSettings.Fact("About", "Toolbar buttons", static () => Count(EditorToolbar.All.Count), 3);
+        EditorSettings.Fact("About", "Panels", static () => Count(EditorShell.Tabs.Count), 4);
+        EditorSettings.Fact("About", "Settings", static () => Count(EditorSettings.All.Count), 5);
     }
 
     /// <summary>
@@ -145,30 +206,34 @@ public static class EditorCommands
             "icons/ui/menu.png",
             string.Empty,
             static _ => EditorFlyout.ToggleMenu(string.Empty, MenuAt.X, MenuAt.Y),
-            0);
+            0,
+            "Menu  F1");
 
         EditorToolbar.Add(
             ToolbarSlot.Left,
             "icons/ui/undo.png",
             string.Empty,
             static world => EditorHistory.Undo(world),
-            1);
+            1,
+            "Undo  Ctrl+Z");
 
         EditorToolbar.Add(
             ToolbarSlot.Left,
             "icons/ui/redo.png",
             string.Empty,
             static world => EditorHistory.Redo(world),
-            2);
+            2,
+            "Redo  Ctrl+Y");
 
         EditorToolbar.Add(
             ToolbarSlot.Left,
             "icons/ui/save.png",
             string.Empty,
             EditorProject.Save,
-            3);
+            3,
+            "Save the project  Ctrl+S");
 
-        foreach (var (_, tool, _) in EditorTools.Keys)
+        foreach (var (_, tool, key) in EditorTools.Keys)
         {
             var chosen = tool;
 
@@ -178,7 +243,8 @@ public static class EditorCommands
                 static () => string.Empty,
                 _ => EditorTools.Current = chosen,
                 () => EditorTools.Current == chosen,
-                (int)tool));
+                (int)tool,
+                $"{tool}  {key}"));
         }
 
         // A word rather than a picture, because there is no picture of "the world's axes" that
@@ -191,7 +257,8 @@ public static class EditorCommands
                 ? ToolSpace.Global
                 : ToolSpace.Local,
             static () => EditorTools.Space == ToolSpace.Local,
-            9));
+            9,
+            "Handles on the thing's own axes  X"));
 
         // The other thing a drag on the handles has to be told, and a word for the same reason,
         // because no picture says "about each thing's own origin" faster than the word does.
@@ -203,7 +270,8 @@ public static class EditorCommands
                 ? ToolPivot.Origins
                 : ToolPivot.Centre,
             static () => EditorTools.Pivot == ToolPivot.Centre,
-            10));
+            10,
+            "Turn and scale about the middle of what is picked"));
 
         EditorToolbar.Add(new ToolbarButton(
             ToolbarSlot.Centre,
@@ -215,7 +283,19 @@ public static class EditorCommands
                 EditorTools.Snap = EditorKeys.SnapLocked;
             },
             static () => EditorTools.Snap,
-            11));
+            11,
+            "Snap to a grid, which holding Control does as well"));
+
+        // What the keys do here, kept out of the way until it is asked for. In the corner that is
+        // for what describes the view rather than for what acts on it.
+        EditorToolbar.Add(new ToolbarButton(
+            ToolbarSlot.BottomRight,
+            "icons/ui/info.png",
+            static () => string.Empty,
+            static _ => ToolbarView.ShowKeys = !ToolbarView.ShowKeys,
+            static () => ToolbarView.ShowKeys,
+            0,
+            "What the keys do here"));
 
     }
 
@@ -226,6 +306,12 @@ public static class EditorCommands
     /// </remarks>
     private static (float X, float Y) MenuAt =>
         (EditorShell.Scene.X + 4f, EditorShell.Scene.Y + 46f);
+
+    /// <summary>What the open panel reads as when there is none.</summary>
+    private const string Shut = "none";
+
+    /// <summary>A number as a fact says it, which is the same wherever the editor is run.</summary>
+    private static string Count(int many) => many.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>What can be put into the world.</summary>
     /// <remarks>
@@ -290,7 +376,8 @@ public static class EditorCommands
             "Entity/Focus",
             static _ => FlyCameraFocus(),
             0,
-            "icons/ui/select.png");
+            "icons/ui/select.png",
+            "F");
 
         EditorMenu.Command(
             "Entity/Unparent",
@@ -326,12 +413,28 @@ public static class EditorCommands
                 EditorSelection.Clear();
             },
             3,
-            "icons/ui/delete.png");
+            "icons/ui/delete.png",
+            "Del");
     }
 
     /// <summary>What the editor shows, as opposed to what is in the world.</summary>
     private static void View()
     {
+        // A row for every tab along the bottom, built from the list of them rather than written
+        // out, so a tab a game adds appears here as well without anybody saying so twice.
+        for (var index = 0; index < EditorShell.Tabs.Count; index++)
+        {
+            var which = index;
+
+            EditorMenu.Toggle(
+                $"View/Panels/{EditorShell.Tabs[index].Name}",
+                _ => EditorShell.OpenTab = EditorShell.OpenTab == which ? -1 : which,
+                () => EditorShell.OpenTab == which,
+                which);
+        }
+
+        EditorMenu.Branch("View/Panels", "icons/ui/interface.png", 0);
+
         EditorMenu.Toggle(
             "View/Ground grid",
             static _ => ViewportGizmos.ShowGrid = !ViewportGizmos.ShowGrid,
@@ -353,7 +456,8 @@ public static class EditorCommands
                 : ToolSpace.Local,
             static () => EditorTools.Space == ToolSpace.Local,
             3,
-            "icons/ui/move.png");
+            "icons/ui/move.png",
+            "X");
 
         EditorMenu.Separator("View/-", 4);
 
@@ -362,7 +466,7 @@ public static class EditorCommands
     /// <summary>What keeps and restores the work.</summary>
     private static void Project()
     {
-        EditorMenu.Command("Project/Save", EditorProject.Save, 0, icon: "icons/ui/save.png");
+        EditorMenu.Command("Project/Save", EditorProject.Save, 0, "icons/ui/save.png", "Ctrl+S");
         EditorMenu.Command("Project/Load", EditorProject.Load, 1, icon: "icons/ui/folder.png");
         EditorMenu.Separator("Project/-", 2);
         EditorMenu.Command(

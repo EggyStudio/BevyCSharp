@@ -99,7 +99,26 @@ public static class EditorShell
     public static bool PointerOverPanel => ImGuiRuntime.WantsMouse;
 
     /// <summary>The tabs along the bottom, in the order they are listed.</summary>
-    public static List<(string Name, Action Draw)> Tabs { get; } = [];
+    /// <remarks>
+    /// A list a game adds to, the way the menu and the toolbar are. A tab is a name and something
+    /// to draw, and where it goes and what it is drawn on is the strip's business.
+    /// </remarks>
+    public static List<EditorTab> Tabs { get; } = [];
+
+    /// <summary>
+    /// Raises the tab of that name, or puts it away when it is the one showing.
+    /// </summary>
+    /// <remarks>
+    /// By name rather than by number, because a game that adds a tab of its own changes what every
+    /// number after it means, and nothing outside this list should have to know the order.
+    /// </remarks>
+    /// <param name="name">What the tab is called.</param>
+    public static void Show(string name)
+    {
+        var which = Tabs.FindIndex(tab => tab.Name == name);
+
+        if (which >= 0) OpenTab = OpenTab == which ? -1 : which;
+    }
 
     /// <summary>Opens the editor's interface.</summary>
     public static void Load(string assets)
@@ -132,7 +151,6 @@ public static class EditorShell
 
         Context = ctx;
         Frame = ctx.Time.FrameCount;
-        EditorGizmoSlot.Frame = Frame;
 
         if (!ImGuiRuntime.IsRunning) return;
 

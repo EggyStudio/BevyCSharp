@@ -76,7 +76,7 @@ public static class EditorFlyout
             ImGui.OpenPopup(Name);
         }
 
-        if (!EditorSurface.Flyout(Name))
+        if (!EditorWidgets.Flyout(Name))
         {
             // Dismissed by a click somewhere else, which is what a menu is for.
             _menu = null;
@@ -85,7 +85,48 @@ public static class EditorFlyout
 
         Branch(ctx, _menu);
 
-        EditorSurface.EndFlyout();
+        EditorWidgets.EndFlyout();
+    }
+
+    /// <summary>
+    /// A label with room at its left for the row's picture.
+    /// </summary>
+    /// <remarks>
+    /// Spaces rather than a widget, because what draws the row is ImGui's own menu item and it
+    /// draws its label where it likes. Every row is padded whether or not it has a picture, so the
+    /// labels line up down the menu instead of stepping in and out with whatever has one.
+    /// </remarks>
+    /// <param name="label">What the row says.</param>
+    private static string Padded(string label)
+    {
+        var room = ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.X;
+        var space = MathF.Max(1f, ImGui.CalcTextSize(" ").X);
+
+        return new string(' ', (int)MathF.Ceiling(room / space)) + label;
+    }
+
+    /// <summary>
+    /// The picture for the row just drawn, in the room its label left at the front.
+    /// </summary>
+    /// <remarks>
+    /// Drawn over the row rather than laid out before it, so the fill behind a row under the
+    /// pointer still runs the whole width of the menu.
+    /// </remarks>
+    /// <param name="item">The row that was drawn.</param>
+    private static void Picture(MenuItem item)
+    {
+        if (item.Icon is not { Length: > 0 } icon) return;
+
+        var min = ImGui.GetItemRectMin();
+        var max = ImGui.GetItemRectMax();
+        var line = ImGui.GetTextLineHeight();
+
+        EditorDraw.Icon(
+            ImGui.GetWindowDrawList(),
+            icon,
+            new Vector2(min.X, ((min.Y + max.Y) * 0.5f) - (line * 0.5f)),
+            line,
+            false);
     }
 
     /// <summary>One level of the menu, with a submenu per branch under it.</summary>
@@ -100,8 +141,9 @@ public static class EditorFlyout
                     continue;
 
                 case MenuKind.Submenu:
-                    var opened = ImGui.BeginMenu(item.Label);
+                    var opened = ImGui.BeginMenu(Padded(item.Label));
 
+                    Picture(item);
                     RoundedRows.Row(opened);
 
                     if (opened)
@@ -115,18 +157,27 @@ public static class EditorFlyout
                 case MenuKind.Toggle:
                     var ticked = item.Checked?.Invoke() == true;
 
-                    if (ImGui.MenuItem(item.Label, string.Empty, ticked)) item.Run?.Invoke(ctx.Ecs);
+                    if (ImGui.MenuItem(Padded(item.Label), item.Keys ?? string.Empty, ticked))
+                    {
+                        item.Run?.Invoke(ctx.Ecs);
+                    }
 
+                    Picture(item);
                     RoundedRows.Row();
 
                     break;
 
                 default:
-                    if (ImGui.MenuItem(item.Label, string.Empty, false, item.Enabled?.Invoke() != false))
+                    if (ImGui.MenuItem(
+                            Padded(item.Label),
+                            item.Keys ?? string.Empty,
+                            false,
+                            item.Enabled?.Invoke() != false))
                     {
                         item.Run?.Invoke(ctx.Ecs);
                     }
 
+                    Picture(item);
                     RoundedRows.Row();
 
                     break;

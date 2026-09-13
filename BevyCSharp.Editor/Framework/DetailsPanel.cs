@@ -27,16 +27,12 @@ public static class DetailsPanel
     {
         if (EditorShell.Context is not { } ctx) return;
 
-        ImGui.TextDisabled("DETAILS");
-
         // How many were picked, when it is more than one. The rest of the panel is about the last
         // of them, and without this a drag that took a dozen things looks like a click that took
         // one, since the other eleven are only visible in the list, which may not be on screen.
-        if (EditorSelection.Count > 1)
-        {
-            ImGui.SameLine();
-            ImGui.TextDisabled($"({EditorSelection.Count} selected)");
-        }
+        EditorSurface.Title(
+            "DETAILS",
+            EditorSelection.Count > 1 ? $"({EditorSelection.Count} selected)" : null);
 
         ImGui.Spacing();
 
@@ -49,7 +45,8 @@ public static class DetailsPanel
         var entity = EditorSelection.Current;
         var name = ctx.Ecs.NameOf(entity) ?? $"Entity {entity.Index}";
 
-        ImGui.SetNextItemWidth(-1f - EditorSceneFrame.DockRoom());
+        EditorSurface.FullWidth();
+
         var renamed = name;
 
         if (ImGui.InputText("##name", ref renamed, 128, ImGuiInputTextFlags.EnterReturnsTrue)
@@ -86,6 +83,7 @@ public static class DetailsPanel
 
         foreach (var id in ctx.Ecs.ComponentsOf(entity))
         {
+            if (EditorEntity.IsDerived(ctx.Ecs, id)) continue;
             if (ComponentSchemas.For(id) is not { } schema) continue;
             if (schema.Fields.Count == 0) continue;
             if (Elsewhere.Contains(schema.Name)) continue;
@@ -103,7 +101,8 @@ public static class DetailsPanel
     }
 
     /// <summary>How much air a component's card keeps inside its own edge.</summary>
-    internal const float Inset = 6f;
+    /// <remarks>The air every card keeps, because a component's card is one.</remarks>
+    internal const float Inset = EditorSurface.Air;
 
     /// <summary>
     /// What this panel leaves to something else to draw.
@@ -152,7 +151,7 @@ public static class DetailsPanel
 
         // A component's own menu, where taking it off lives. On the header, because that is the
         // thing the component is.
-        if (EditorSurface.FlyoutHere($"##menu{schema.Name}"))
+        if (EditorWidgets.FlyoutHere($"##menu{schema.Name}"))
         {
             RoundedRows.Rows(() =>
             {
@@ -164,7 +163,7 @@ public static class DetailsPanel
                 RoundedRows.Row();
             });
 
-            EditorSurface.EndFlyout();
+            EditorWidgets.EndFlyout();
         }
 
         if (open)
@@ -219,7 +218,8 @@ public static class DetailsPanel
 
             if (EditorSurface.Clipped(ref top, ref bottom))
             {
-                draw.AddRectFilled(top, bottom, ImGui.GetColorU32(EditorTheme.LiveGroup), round);
+                EditorDraw.Rounded(
+                    top, bottom, round, ImGui.GetColorU32(EditorTheme.LiveGroup), draw);
             }
 
             // And the header on top of it when the pointer is there, which is the one thing that
@@ -229,7 +229,8 @@ public static class DetailsPanel
 
             if (over && EditorSurface.Clipped(ref lit, ref litTo))
             {
-                draw.AddRectFilled(lit, litTo, ImGui.GetColorU32(EditorTheme.LiveHover), round);
+                EditorDraw.Rounded(
+                    lit, litTo, round, ImGui.GetColorU32(EditorTheme.LiveLift), draw);
             }
         }
 
@@ -257,7 +258,7 @@ public static class DetailsPanel
             ImGui.OpenPopup("##add");
         }
 
-        if (!EditorSurface.Flyout("##add")) return;
+        if (!EditorWidgets.Flyout("##add")) return;
 
         var carried = new HashSet<string>();
 
@@ -282,10 +283,10 @@ public static class DetailsPanel
 
             // Said rather than left blank, because an empty flyout reads as one that failed to
             // open. Everything this project generates a way to add is already on the entity.
-            if (!any) ImGui.TextDisabled("nothing left to add");
+            if (!any) ImGui.TextDisabled("Nothing left to add");
         });
 
-        EditorSurface.EndFlyout();
+        EditorWidgets.EndFlyout();
     }
 
     /// <summary>
@@ -304,6 +305,8 @@ public static class DetailsPanel
 
         foreach (var id in ctx.Ecs.ComponentsOf(entity))
         {
+            if (EditorEntity.IsDerived(ctx.Ecs, id)) continue;
+
             var schema = ComponentSchemas.For(id);
 
             // Something of this project's own with no fields to edit. Not the engine's, because
@@ -335,10 +338,26 @@ public static class DetailsPanel
                 used = width + ImGui.GetStyle().ItemSpacing.X;
             }
 
-            ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.FrameBg));
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(ImGuiCol.TextDisabled));
-            ImGui.SmallButton(label);
-            ImGui.PopStyleColor(2);
+            // Drawn rather than asked for, because a tag is a word on a pill and not something to
+            // press. A button that answers a click by doing nothing is a button that says it will.
+            var at = ImGui.GetCursorScreenPos();
+            var word = ImGui.CalcTextSize(label);
+            var air = ImGui.GetStyle().FramePadding;
+
+            var size = new Vector2(word.X + (air.X * 2f), word.Y + (air.Y * 2f));
+
+            ImGui.Dummy(size);
+
+            var draw = ImGui.GetWindowDrawList();
+
+            EditorDraw.Rounded(
+                at,
+                at + size,
+                ImGui.GetStyle().FrameRounding,
+                ImGui.GetColorU32(ImGuiCol.FrameBg),
+                draw);
+
+            draw.AddText(at + air, ImGui.GetColorU32(ImGuiCol.TextDisabled), label);
         }
     }
 }

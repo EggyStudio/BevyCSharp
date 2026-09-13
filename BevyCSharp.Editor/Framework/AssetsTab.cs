@@ -169,13 +169,14 @@ public static class AssetsTab
 
         if (EditorSurface.Clipped(ref top, ref bottom))
         {
-            draw.AddRectFilled(
+            EditorDraw.Rounded(
                 top,
                 bottom,
+                ImGui.GetStyle().ChildRounding,
                 ImGui.GetColorU32(picked
                     ? EditorTheme.LiveAccent
-                    : over ? EditorTheme.LiveHover : EditorTheme.LiveGroup),
-                ImGui.GetStyle().ChildRounding);
+                    : over ? EditorTheme.LiveLift : EditorTheme.LiveGroup),
+                draw);
         }
 
         // The picture that says what kind of thing it is, in the middle of the tile.
@@ -183,7 +184,7 @@ public static class AssetsTab
 
         const float Mark = 34f;
 
-        EditorSurface.Icon(
+        EditorDraw.Icon(
             draw,
             icon,
             at + new Vector2((size - Mark) * 0.5f, (size - Mark) * 0.5f - (line * 0.6f)),
@@ -201,7 +202,7 @@ public static class AssetsTab
 
         ImGui.EndGroup();
 
-        if (over) EditorSurface.Tip(entry.IsDirectory ? entry.Name : $"{entry.Name}  ({Say(entry.Size)})");
+        if (over) EditorWidgets.Tip(entry.IsDirectory ? entry.Name : $"{entry.Name}  ({Say(entry.Size)})");
     }
 
     /// <summary>As much of a name as fits, with an ellipsis where the rest was.</summary>
