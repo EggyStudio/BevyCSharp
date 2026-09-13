@@ -34,6 +34,19 @@ public partial struct Probe
         {
             case 100:
                 if (script.Contains("select")) Select(ctx);
+
+                // More than one, so that what a drag on a handle does to the rest of a selection
+                // can be checked.
+                if (script.Contains("several"))
+                {
+                    foreach (var entity in ctx.Ecs.All())
+                    {
+                        if (ctx.Ecs.NameOf(entity) is not ("Cube" or "Ground")) continue;
+
+                        if (EditorSelection.Any) EditorSelection.Toggle(entity);
+                        else EditorSelection.Select(entity);
+                    }
+                }
                 break;
 
             case 120:
@@ -149,6 +162,45 @@ public partial struct Probe
 
                 break;
 
+            case 151:
+                // Saved, changed, and loaded again: what a project file is for is putting the
+                // world back the way it was written, and only a round trip says whether it does.
+                //
+                // This writes the editor's own world and settings files beside the running build,
+                // which a later run then reads at startup. Delete them to go back to a clean one.
+                if (script.Contains("project"))
+                {
+                    EditorProject.Save(ctx.Ecs);
+
+                    foreach (var entity in ctx.Ecs.All())
+                    {
+                        if (ctx.Ecs.NameOf(entity) != "Cube") continue;
+
+                        var was = ctx.Ecs.GetOrDefault<Transform>(entity);
+                        ctx.Ecs.Set(entity, was with { Translation = new Vec3(9f, 9f, 9f) });
+                    }
+                }
+
+                break;
+
+            case 153:
+                if (script.Contains("project"))
+                {
+                    foreach (var entity in ctx.Ecs.All())
+                    {
+                        if (ctx.Ecs.NameOf(entity) != "Cube") continue;
+
+                        var moved = ctx.Ecs.GetOrDefault<Transform>(entity).Translation;
+                        Console.WriteLine($"[probe] changed to {moved.X},{moved.Y},{moved.Z}");
+                    }
+                }
+
+                break;
+
+            case 156:
+                if (script.Contains("project")) EditorProject.Load(ctx.Ecs);
+                break;
+
             case 155:
                 if (script.Contains("click")) Click(1);
 
@@ -172,6 +224,10 @@ public partial struct Probe
                 break;
         }
     }
+
+    /// <summary>Where the console's command box is, which is the bottom of the open tab.</summary>
+    private static (float X, float Y) Command =>
+        (EditorShell.Panel.X * 0.3f, ImGuiRuntime.Size.Y - 60f);
 
     /// <summary>Which key types a letter, for the handful a probe needs.</summary>
     private static Key Letter(char letter) => letter switch
@@ -371,6 +427,15 @@ public partial struct Probe
                     + $" {low.X:0.##},{low.Y:0.##},{low.Z:0.##}"
                     + $" to {high.X:0.##},{high.Y:0.##},{high.Z:0.##}");
             }
+        }
+
+        foreach (var one in EditorSelection.All)
+        {
+            if (!ctx.Ecs.TryGet<Transform>(one, out var was)) continue;
+
+            Console.WriteLine(
+                $"[probe] {ctx.Ecs.NameOf(one) ?? "?"} at"
+                + $" {was.Translation.X:0.###},{was.Translation.Y:0.###},{was.Translation.Z:0.###}");
         }
 
         if (EditorSelection.Any && ctx.Ecs.TryGet<Transform>(EditorSelection.Current, out var where))

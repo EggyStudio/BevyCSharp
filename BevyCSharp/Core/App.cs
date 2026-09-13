@@ -627,7 +627,9 @@ public sealed unsafe class App : IDisposable
         // Rethrowing here would unwind into Rust, so stop the loop instead and let Run return.
         try
         {
-            Native.bcs_app_request_exit();
+            // Discarded on purpose: the loop is being stopped because a system already threw, and
+            // there is nothing left to do about a request to stop that the bridge refuses.
+            _ = Native.bcs_app_request_exit();
         }
         catch (Exception)
         {

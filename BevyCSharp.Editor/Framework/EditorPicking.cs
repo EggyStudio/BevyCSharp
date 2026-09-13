@@ -1,4 +1,5 @@
 using Bevy;
+using BevyCSharp.Editor.Behaviors;
 
 namespace BevyCSharp.Editor.Framework;
 
@@ -24,6 +25,9 @@ public static class EditorPicking
     /// <summary>Whether that press was on the scene rather than on the interface.</summary>
     private static bool _onScene;
 
+    /// <summary>Whether it took hold of a transform handle at any point.</summary>
+    private static bool _onHandle;
+
     /// <summary>How many frames the engine gets to say what a click hit before it hit nothing.</summary>
     private const ulong Patience = 3;
 
@@ -43,7 +47,13 @@ public static class EditorPicking
         {
             _pressedOn = EditorShell.Frame;
             _onScene = !ImGuiRuntime.WantsMouse;
+            _onHandle = false;
         }
+
+        // Remembered for the whole press rather than asked at the end of it. A drag on a handle
+        // gives the axis up on the release, and the answer to what that release hit arrives a
+        // frame or two later, by which time nothing is being dragged any more.
+        if (TransformGizmo.DraggingOn(EditorShell.Frame)) _onHandle = true;
 
         // A click on the scene that hit nothing means nothing was meant, which is how every editor
         // clears a selection.
@@ -63,6 +73,11 @@ public static class EditorPicking
             // A release that ended a box is not also a click on whatever the pointer came to rest
             // over: the box already said what it meant.
             if (MarqueeSelect.Dragging) break;
+
+            // Nor is the release that ends a drag on a transform handle. Read as a click it
+            // selects whatever was under the pointer, which throws away the rest of a selection
+            // at the end of the very drag that was moving all of it.
+            if (_onHandle) break;
 
             _pickedOn = EditorShell.Frame;
             _emptyClick = 0;

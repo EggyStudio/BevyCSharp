@@ -556,7 +556,7 @@ public sealed class FieldHintTests
 
         // A vector is left alone. It is three numbers a tool already draws as one thing, and
         // taking it apart would say the same thing worse.
-        Assert.DoesNotContain(schema.Fields, field => field.Name.StartsWith("Front.Held.At."));
+        Assert.DoesNotContain(schema.Fields, field => field.Name.StartsWith("Front.Held.At.", StringComparison.Ordinal));
     }
 
     [Fact]

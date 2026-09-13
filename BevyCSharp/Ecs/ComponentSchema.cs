@@ -1,3 +1,4 @@
+using System.Globalization;
 using Bevy.Interop;
 
 namespace Bevy;
@@ -497,6 +498,11 @@ public static class ComponentSchemas
     /// </remarks>
     public static bool TryCoerce<TField>(object value, out TField coerced) where TField : struct
     {
+        // Arithmetic, not text somebody is reading, so the machine's regional settings have no
+        // business in it. Left to the current culture, the same saved file reads differently on
+        // two machines.
+        var plain = CultureInfo.InvariantCulture;
+
         if (value is TField exact)
         {
             coerced = exact;
@@ -514,13 +520,13 @@ public static class ComponentSchemas
             {
                 coerced = value is string name
                     ? (TField)Enum.Parse(target, name, ignoreCase: true)
-                    : (TField)Enum.ToObject(target, Convert.ToInt64(value));
+                    : (TField)Enum.ToObject(target, Convert.ToInt64(value, plain));
                 return true;
             }
 
             if (value is not IConvertible) return false;
 
-            coerced = (TField)Convert.ChangeType(value, target);
+            coerced = (TField)Convert.ChangeType(value, target, plain);
             return true;
         }
         catch (Exception error) when (

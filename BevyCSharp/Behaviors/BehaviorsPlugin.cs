@@ -165,6 +165,8 @@ public sealed class BehaviorsPlugin : IPlugin
         }
         catch (Exception)
         {
+            // An assembly that cannot be enumerated at all carries nothing of ours, and a scan
+            // that is a fallback in the first place has nothing to report about it.
             yield break;
         }
 
@@ -182,6 +184,8 @@ public sealed class BehaviorsPlugin : IPlugin
             }
             catch (Exception)
             {
+                // Same again for one type: what cannot be reflected over is not a behavior this
+                // scan is looking for.
                 continue;
             }
 

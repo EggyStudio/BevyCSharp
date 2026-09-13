@@ -50,9 +50,16 @@ public static class ToolbarView
 
         var inset = EditorShell.Margin + 4f;
 
+        // Pinned to the corners of what the scene still has to itself, not of the scene's own
+        // rectangle. Floating, the scene is the whole window and the panels lie over it, so a
+        // group placed by the window's middle ends up under the panel, which then draws a row of
+        // buttons across its own top edge.
+        var width = EditorShell.Free.Right - EditorShell.Scene.X;
+        var height = EditorShell.Free.Bottom - EditorShell.Scene.Y;
+
         var at = new Vector2(
-            EditorShell.Scene.X + (EditorShell.Scene.Width * corner.X) + (corner.X > 0.5f ? -inset : corner.X > 0f ? 0f : inset),
-            EditorShell.Scene.Y + (EditorShell.Scene.Height * corner.Y) + (corner.Y > 0.5f ? -inset : inset));
+            EditorShell.Scene.X + (width * corner.X) + (corner.X > 0.5f ? -inset : corner.X > 0f ? 0f : inset),
+            EditorShell.Scene.Y + (height * corner.Y) + (corner.Y > 0.5f ? -inset : inset));
 
         ImGui.SetNextWindowPos(at, ImGuiCond.Always, pivot);
 

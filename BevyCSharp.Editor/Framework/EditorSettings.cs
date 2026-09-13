@@ -1,3 +1,4 @@
+using System.Globalization;
 using Bevy;
 
 namespace BevyCSharp.Editor.Framework;
@@ -112,16 +113,25 @@ public static class EditorSettings
         Add(new EditorSetting(page, label, SettingKind.Text, read, write, Order: order));
 
     /// <summary>A number somebody can edit.</summary>
+    /// <remarks>
+    /// Written and read the same way whatever machine it is on. These go into a file that ships
+    /// with a project, and a number written as <c>1,5</c> under one set of regional settings is a
+    /// number read as fifteen, or not at all, under another.
+    /// </remarks>
     public static void Number(
         string page, string label, Func<float> read, Action<float> write, int order = 0) =>
         Add(new EditorSetting(
             page,
             label,
             SettingKind.Number,
-            () => read().ToString("0.###"),
+            () => read().ToString("0.###", CultureInfo.InvariantCulture),
             text =>
             {
-                if (float.TryParse(text, out var value)) write(value);
+                if (float.TryParse(
+                        text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+                {
+                    write(value);
+                }
             },
             Order: order));
 

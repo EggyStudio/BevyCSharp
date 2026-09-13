@@ -28,8 +28,13 @@ public partial struct TransformGizmo
     /// <summary>The handle that picks no axis: a drag across the screen rather than along a line.</summary>
     internal const int Centre = 3;
 
-    /// <summary>The frame a drag last ended on.</summary>
-    private static ulong _released;
+    /// <summary>The frame a drag last ended on, or a frame that never happens.</summary>
+    /// <remarks>
+    /// Not zero, which is a frame the app really has: left at zero this reads as a drag that ended
+    /// on the first frame, and everything asking whether one just finished is told yes until the
+    /// first real drag replaces it.
+    /// </remarks>
+    private static ulong _released = ulong.MaxValue;
 
     /// <summary>
     /// Whether a handle is being dragged, or was let go on this frame.
