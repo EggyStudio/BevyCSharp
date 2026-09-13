@@ -284,11 +284,15 @@ public static class EditorSurface
             return;
         }
 
-        draw.AddRectFilled(
-            new Vector2(min.X + radius, min.Y), new Vector2(max.X - radius, max.Y), color, 0f);
+        // One shape rather than a rectangle with a disc laid over each end. A fill that is seen
+        // through is laid down twice wherever two of those overlap, and what that draws is a pair
+        // of darker half circles inside the pill.
+        var quarter = MathF.PI * 0.5f;
 
-        draw.AddCircleFilled(new Vector2(min.X + radius, middle), radius, color, 0);
-        draw.AddCircleFilled(new Vector2(max.X - radius, middle), radius, color, 0);
+        draw.PathClear();
+        draw.PathArcTo(new Vector2(max.X - radius, middle), radius, -quarter, quarter, 0);
+        draw.PathArcTo(new Vector2(min.X + radius, middle), radius, quarter, quarter * 3f, 0);
+        draw.PathFillConvex(color);
     }
 
     /// <summary>
