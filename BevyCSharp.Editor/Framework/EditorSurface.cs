@@ -443,12 +443,17 @@ public static class EditorSurface
         var middle = new Vector2(middleX ?? ((at.X + to.X) * 0.5f), (at.Y + to.Y) * 0.5f);
         var draw = onto ?? ImGui.GetWindowDrawList();
 
+        // The colours a scrollbar's grab wears, because that is the other thing in the editor that
+        // is taken hold of and slid, and two things that are dragged should not look like two
+        // different kinds of thing.
+        var color = held
+            ? ImGuiCol.ScrollbarGrabActive
+            : over ? ImGuiCol.ScrollbarGrabHovered : ImGuiCol.ScrollbarGrab;
+
         draw.AddRectFilled(
             middle - grab,
             middle + grab,
-            ImGui.GetColorU32(held
-                ? EditorTheme.LiveAccent
-                : EditorTheme.Alpha(EditorTheme.LiveText, over ? 0.5f : 0.22f)),
+            ImGui.GetColorU32(color),
             MathF.Min(grab.X, grab.Y));
     }
 

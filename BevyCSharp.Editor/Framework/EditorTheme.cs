@@ -312,7 +312,9 @@ public sealed record EditorTheme
         Set(style, ImGuiCol.SeparatorHovered, Accent);
         Set(style, ImGuiCol.SeparatorActive, Accent);
 
-        Set(style, ImGuiCol.CheckMark, Accent);
+        // A ticked box is a value, not a thing in force, so the mark is read in the colour every
+        // other value is read in. The accent keeps its own slot below.
+        Set(style, ImGuiCol.CheckMark, Text);
         Set(style, ImGuiCol.SliderGrab, Dim);
         Set(style, ImGuiCol.SliderGrabActive, Accent);
 
@@ -340,6 +342,10 @@ public sealed record EditorTheme
 
         Set(style, ImGuiCol.TextSelectedBg, Alpha(Accent, 0.35f));
         Set(style, ImGuiCol.NavCursor, Accent);
+        // Nothing here is dragged onto anything, so this slot carries the accent instead. Anything
+        // drawn by hand reads the accent from the live style rather than from the theme, so it has
+        // to live somewhere a person can reach in the style editor, and every slot that draws
+        // something is a slot where changing the accent would change that thing as well.
         Set(style, ImGuiCol.DragDropTarget, Accent);
         Set(style, ImGuiCol.ModalWindowDimBg, Alpha(Ground, 0.65f));
         Set(style, ImGuiCol.PlotLines, Dim);
@@ -449,9 +455,10 @@ public sealed record EditorTheme
     /// <remarks>
     /// Anything drawn by hand reads the live style rather than the theme, so a colour dragged in
     /// the style editor changes what is drawn instead of being written over on the next frame.
-    /// The tick is where the accent lives once a theme has been applied.
+    /// The drop target is where the accent lives once a theme has been applied, because nothing
+    /// here is dragged onto anything and every other slot draws something of its own.
     /// </remarks>
-    public static Vector4 LiveAccent => ImGui.GetStyle().Colors[(int)ImGuiCol.CheckMark];
+    public static Vector4 LiveAccent => ImGui.GetStyle().Colors[(int)ImGuiCol.DragDropTarget];
 
     /// <summary>The card colour as it stands in the running style.</summary>
     public static Vector4 LiveCard => ImGui.GetStyle().Colors[(int)ImGuiCol.ChildBg];

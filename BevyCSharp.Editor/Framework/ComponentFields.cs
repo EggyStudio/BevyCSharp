@@ -245,10 +245,8 @@ public static class ComponentFields
     /// ImGui draws the tick over it with a fill of its own that is not there.
     /// </para>
     /// <para>
-    /// The tick is the text colour, not the accent. The accent says what is selected or in force,
-    /// and a box that has been ticked is neither; it is a value, read in the colour every other
-    /// value is read in. The slot the tick is drawn from is where the theme keeps the accent, so
-    /// it is pushed around the box rather than written into the style.
+    /// The tick itself is ImGui's, drawn in the colour the theme gives it, which is the one every
+    /// other value is read in rather than the accent.
     /// </para>
     /// </remarks>
     /// <param name="label">What to call it, which is what ImGui hashes it by.</param>
@@ -274,11 +272,10 @@ public static class ComponentFields
         ImGui.PushStyleColor(ImGuiCol.FrameBg, 0u);
         ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, 0u);
         ImGui.PushStyleColor(ImGuiCol.FrameBgActive, 0u);
-        ImGui.PushStyleColor(ImGuiCol.CheckMark, EditorTheme.LiveText);
 
         var changed = ImGui.Checkbox(label, ref on);
 
-        ImGui.PopStyleColor(4);
+        ImGui.PopStyleColor(3);
 
         return changed;
     }

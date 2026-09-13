@@ -192,7 +192,7 @@ public static class StyleTab
             Text = style.Colors[(int)ImGuiCol.Text],
             Dim = style.Colors[(int)ImGuiCol.SliderGrab],
             Faint = style.Colors[(int)ImGuiCol.TextDisabled],
-            Accent = style.Colors[(int)ImGuiCol.CheckMark],
+            Accent = style.Colors[(int)ImGuiCol.DragDropTarget],
 
             // How far through a panel the scene shows is the alpha the panel was painted with, so
             // dragging it in ImGui's own editor is picked up here rather than ignored.
