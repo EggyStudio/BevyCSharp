@@ -63,6 +63,26 @@ public static class EditorSurface
     internal const float Air = 6f;
 
     /// <summary>
+    /// How tall a button that floats over the scene is, and how tall a tab is.
+    /// </summary>
+    /// <remarks>
+    /// One number for both, because the row of tabs along the bottom and the groups of buttons in
+    /// the corners are the same kind of thing: something pressed that is lying on the scene rather
+    /// than inside a panel. Two sizes for one kind of thing is two sizes to look at. Large enough
+    /// that a square one is a circle worth aiming at with a picture in it.
+    /// </remarks>
+    internal const float Tall = 34f;
+
+    /// <summary>
+    /// How much air one of those keeps at each end when it has words in it rather than a picture.
+    /// </summary>
+    /// <remarks>
+    /// A word pressed against the ends of its own capsule reads as a word that overflowed, and the
+    /// rounder the ends the more room the word needs to sit clear of them.
+    /// </remarks>
+    internal const float Sides = 14f;
+
+    /// <summary>
     /// A scrolling region with no fill of its own.
     /// </summary>
     /// <remarks>

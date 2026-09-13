@@ -74,10 +74,13 @@ public static class ToolbarView
 
         // Round enough that a square button is a circle, which is what a button with a picture in
         // it and no words wants to be.
-        const float Size = 34f;
+        const float Size = EditorSurface.Tall;
 
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, Size * 0.5f);
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0f, 0f));
+
+        // Air at the ends of a button with words in it. Nothing above or below, because the height
+        // is given outright and padding there would only fight it.
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(EditorSurface.Sides, 0f));
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(6f, 6f));
 
         for (var index = 0; index < buttons.Count; index++)
@@ -108,7 +111,7 @@ public static class ToolbarView
             var pressed = button.Icon is { Length: > 0 } icon && label.Length == 0
                 ? Circle($"{slot}{index}", icon, on, Size)
                 : ImGui.Button(
-                    $"  {(label.Length == 0 ? Icon(button.Icon) : label)}  ##{slot}{index}",
+                    $"{(label.Length == 0 ? Icon(button.Icon) : label)}##{slot}{index}",
                     new Vector2(0f, Size));
 
             if (pressed) button.Run(ctx.Ecs);
@@ -140,8 +143,8 @@ public static class ToolbarView
         var over = ImGui.IsItemHovered();
         var held = ImGui.IsItemActive();
 
-        // Out of the colours the caller pushed, which is what a button of ImGui's own would use:
-        // reading the palette directly here instead would quietly ignore them.
+        // Out of the colours the caller pushed, which is what a button of ImGui's own would read.
+        // Reaching for the palette directly here would quietly ignore them.
         var fill = held
             ? ImGuiCol.ButtonActive
             : over

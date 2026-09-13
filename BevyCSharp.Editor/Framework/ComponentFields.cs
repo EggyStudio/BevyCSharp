@@ -235,6 +235,18 @@ public static class ComponentFields
     }
 
     /// <summary>
+    /// Asks for a tick drawn in the text colour rather than in the accent.
+    /// </summary>
+    /// <remarks>
+    /// The accent says what is selected or in force, and a box that has been ticked is neither. It
+    /// is a value, like the number in the box on the row above, and a value is read in the colour
+    /// everything else is read in. The slot the tick is drawn from is also where the theme keeps
+    /// the accent, so this is pushed around the box rather than written into the style.
+    /// </remarks>
+    private static void Ticked() =>
+        ImGui.PushStyleColor(ImGuiCol.CheckMark, EditorTheme.LiveText);
+
+    /// <summary>
     /// Asks for a slider handle as round as the groove it runs in.
     /// </summary>
     /// <remarks>
@@ -344,7 +356,11 @@ public static class ComponentFields
             case FieldKind.Bool:
             {
                 var on = value is true;
+
+                Ticked();
                 if (ImGui.Checkbox(id, ref on)) field.Write(ctx.Ecs, entity, on);
+                ImGui.PopStyleColor();
+
                 break;
             }
 
@@ -558,7 +574,13 @@ public static class ComponentFields
                     // ImGui hashes is what follows the two hashes, so every box in a set of flags
                     // sharing the field's id is a set of boxes ImGui cannot tell apart. It says so,
                     // in a window that takes the keyboard with it.
-                    if (ImGui.Checkbox($"{option}##{id}.{option}", ref on))
+                    Ticked();
+
+                    var set = ImGui.Checkbox($"{option}##{id}.{option}", ref on);
+
+                    ImGui.PopStyleColor();
+
+                    if (set)
                     {
                         if (on) chosen.Add(option);
                         else chosen.Remove(option);

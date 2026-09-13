@@ -16,14 +16,12 @@ public static class EditorStrip
     /// </remarks>
     internal const float Padding = 5f;
 
-    /// <summary>
-    /// How tall the strip is with no tab open, measured rather than guessed.
-    /// </summary>
+    /// <summary>How tall the strip is with no tab open.</summary>
     /// <remarks>
-    /// A guess is wrong the moment the font or the padding changes, and what it looks like when it
-    /// is wrong is a row of tabs with their text cut off along the bottom of the window.
+    /// A tab is one of the things that float over the scene, so it is as tall as the buttons in
+    /// the corners are, and the strip is that plus the air it keeps above and below.
     /// </remarks>
-    internal static float Shut => ImGui.GetFrameHeight() + (Padding * 2f);
+    internal static float Shut => EditorSurface.Tall + (Padding * 2f);
 
     /// <summary>
     /// The strip along the bottom left, with whatever is open growing upwards out of it.
@@ -73,7 +71,7 @@ public static class EditorStrip
 
             var room = ImGui.GetContentRegionAvail();
 
-            var bar = ImGui.GetFrameHeight() + ImGui.GetStyle().ItemSpacing.Y;
+            var bar = EditorSurface.Tall + ImGui.GetStyle().ItemSpacing.Y;
 
             // A card like the ones in the panel, with the same gap outside it and the same air
             // inside it, rather than a rectangle pushed against its own edges.
@@ -176,8 +174,14 @@ public static class EditorStrip
     internal static void Pills()
     {
         var draw = ImGui.GetWindowDrawList();
-        var height = ImGui.GetFrameHeight();
-        var padding = ImGui.GetStyle().FramePadding.X + 6f;
+        var theme = EditorTheme.Current;
+
+        // The same height, the same air at the ends and the same colours as a button floating in
+        // the scene's corner, because a tab is one of those lying along the bottom edge. Two
+        // things that are pressed, on the same surface, that do not match are two things to look
+        // at rather than one.
+        var height = EditorSurface.Tall;
+        var padding = EditorSurface.Sides;
 
         for (var index = 0; index < EditorShell.Tabs.Count; index++)
         {
@@ -195,17 +199,15 @@ public static class EditorStrip
 
             var over = ImGui.IsItemHovered();
 
-            // A tab is a button and wears a button's three steps, which are a fill of its own to
-            // be seen and pressed, a brighter one under the hand, and the accent when it is the one
-            // showing. Nothing at all under the two that are not open reads as two words somebody
-            // has left lying on the strip.
             // Docked, a tab that is neither open nor under the hand wears nothing, because the
             // strip is black behind it and the word carries on its own. Floating, the strip is the
             // lit scene seen through, and a word on that needs something under it to sit on.
-            var idle = EditorShell.Docked ? null : (Vector4?)ImGui.GetStyle().Colors[(int)ImGuiCol.Button];
+            var idle = EditorShell.Docked
+                ? null
+                : (Vector4?)EditorTheme.Alpha(EditorTheme.LiveCard, theme.PanelAlpha);
 
             var fill = open
-                ? EditorTheme.LiveAccent
+                ? over ? EditorTheme.Alpha(EditorTheme.LiveAccent, 0.85f) : EditorTheme.LiveAccent
                 : over ? EditorTheme.LiveHover : idle;
 
             if (fill is { } under)
