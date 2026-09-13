@@ -94,11 +94,10 @@ public static class EditorSurface
     /// How much air one of those keeps at each end when it has words in it rather than a picture.
     /// </summary>
     /// <remarks>
-    /// What a field keeps at its own ends, for the same reason. Asked of the running style rather
-    /// than written down, so a theme that changes the padding moves the tabs and the buttons with
-    /// the fields.
+    /// More than a field keeps, because these have round ends and a word set against the inside of
+    /// a curve looks closer to it than the same word against a straight edge.
     /// </remarks>
-    internal static float Sides => ImGui.GetStyle().FramePadding.X;
+    internal const float Sides = 10f;
 
     /// <summary>
     /// A scrolling region with no fill of its own.
@@ -295,6 +294,70 @@ public static class EditorSurface
         draw.PathFillConvex(color);
     }
 
+    /// <summary>Which slider is being dragged, while it is.</summary>
+    private static string _sliding = string.Empty;
+
+    /// <summary>
+    /// A slider drawn as a groove with a round handle on it.
+    /// </summary>
+    /// <remarks>
+    /// ImGui's own, with its fill and its handle turned off and both drawn here first instead. A
+    /// rounded rectangle is only ever as round as half its shortest side less a pixel, which
+    /// leaves a flat edge on anything meant to be a circle, and a groove and its handle are where
+    /// that shows. Everything the slider does is still ImGui's, including the control click that
+    /// opens it for typing.
+    /// </remarks>
+    /// <param name="id">Which field this is, so a drag can be followed between frames.</param>
+    /// <param name="fraction">How far along the value sits, from nothing to all of it.</param>
+    /// <param name="slide">The slider to call, once its own colours are out of the way.</param>
+    internal static bool Sliding(string id, float fraction, Func<bool> slide)
+    {
+        var draw = ImGui.GetWindowDrawList();
+
+        var min = ImGui.GetCursorScreenPos();
+        var max = min + new Vector2(ImGui.CalcItemWidth(), ImGui.GetFrameHeight());
+
+        // Held is what ImGui said last frame, because the answer for this one arrives after the
+        // call that draws it. A drag reads as held from its second frame, which is the frame the
+        // handle first moves.
+        var held = _sliding == id;
+        var groove = held || ImGui.IsMouseHoveringRect(min, max)
+            ? ImGuiCol.FrameBgHovered
+            : ImGuiCol.FrameBg;
+
+        Capsule(draw, min, max, ImGui.GetColorU32(groove));
+
+        // Where ImGui would have put its own handle. It keeps two pixels of the groove clear at
+        // each end and slides the handle along what is left, so the same two numbers put a disc
+        // exactly where the rectangle would have been.
+        const float Clear = 2f;
+
+        var handle = MathF.Max(1f, ImGui.GetStyle().GrabMinSize);
+        var travel = MathF.Max(0f, max.X - min.X - (Clear * 2f) - handle);
+        var along = min.X + Clear + (handle * 0.5f) + (travel * Math.Clamp(fraction, 0f, 1f));
+
+        draw.AddCircleFilled(
+            new Vector2(along, (min.Y + max.Y) * 0.5f),
+            handle * 0.5f,
+            ImGui.GetColorU32(held ? ImGuiCol.SliderGrabActive : ImGuiCol.SliderGrab),
+            0);
+
+        ImGui.PushStyleColor(ImGuiCol.FrameBg, 0u);
+        ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, 0u);
+        ImGui.PushStyleColor(ImGuiCol.FrameBgActive, 0u);
+        ImGui.PushStyleColor(ImGuiCol.SliderGrab, 0u);
+        ImGui.PushStyleColor(ImGuiCol.SliderGrabActive, 0u);
+
+        var changed = slide();
+
+        ImGui.PopStyleColor(5);
+
+        if (ImGui.IsItemActive()) _sliding = id;
+        else if (held) _sliding = string.Empty;
+
+        return changed;
+    }
+
     /// <summary>
     /// The eye that says whether a thing is drawn.
     /// </summary>
@@ -391,12 +454,11 @@ public static class EditorSurface
 
     /// <summary>How large a grab handle's pill is, as half its width and half its height.</summary>
     /// <remarks>
-    /// One size for all of them. Two handles that do the same job at two thicknesses read as two
-    /// different things. About a third of the gap it lies in, so the air either side of it is as
-    /// wide as the pill and the handle reads as something resting in the gap rather than filling
-    /// it.
+    /// One size for all of them, and the thickness of the grab on a scrollbar, which is the other
+    /// thing in the editor that is taken hold of and slid. Two handles that do the same job at two
+    /// thicknesses read as two different things.
     /// </remarks>
-    internal static readonly Vector2 Pill = new(22f, 2.5f);
+    internal static readonly Vector2 Pill = new(22f, 2f);
 
     /// <summary>
     /// One card inside the panel, which is a fill a shade above it, rounded, with no line anywhere.

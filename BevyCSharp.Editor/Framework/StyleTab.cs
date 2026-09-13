@@ -52,10 +52,12 @@ public static class StyleTab
 
         ImGui.SetNextItemWidth(150f);
 
-        if (ImGui.SliderFloat("##behind", ref behind, 20f, 100f, "panel %.0f%%"))
-        {
-            EditorShell.Wear(theme with { WindowAlpha = behind / 100f });
-        }
+        var moved = EditorSurface.Sliding(
+            "##behind",
+            (behind - 20f) / 80f,
+            () => ImGui.SliderFloat("##behind", ref behind, 20f, 100f, "panel %.0f%%"));
+
+        if (moved) EditorShell.Wear(theme with { WindowAlpha = behind / 100f });
 
         ImGui.SameLine();
 
@@ -63,10 +65,12 @@ public static class StyleTab
 
         ImGui.SetNextItemWidth(150f);
 
-        if (ImGui.SliderFloat("##alpha", ref alpha, 40f, 100f, "cards %.0f%%"))
-        {
-            EditorShell.Wear(theme with { PanelAlpha = alpha / 100f });
-        }
+        var faded = EditorSurface.Sliding(
+            "##alpha",
+            (alpha - 40f) / 60f,
+            () => ImGui.SliderFloat("##alpha", ref alpha, 40f, 100f, "cards %.0f%%"));
+
+        if (faded) EditorShell.Wear(theme with { PanelAlpha = alpha / 100f });
 
         ImGui.SameLine();
 

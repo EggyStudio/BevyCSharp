@@ -283,68 +283,62 @@ public static class ComponentFields
         return changed;
     }
 
-    /// <summary>Which slider is being dragged, while it is.</summary>
-    private static string _sliding = string.Empty;
-
     /// <summary>
-    /// A slider drawn as a groove with a round handle on it.
+    /// A heading over the rows that belong to it, with a rule carried out to the end of the row.
     /// </summary>
     /// <remarks>
-    /// ImGui's own, with its fill and its handle turned off and both drawn here first instead. A
-    /// rounded rectangle is only ever as round as half its shortest side less a pixel, which
-    /// leaves a flat edge on anything meant to be a circle, and a groove and its handle are where
-    /// that shows. Everything the slider does is still ImGui's, including the control click that
-    /// opens it for typing.
+    /// ImGui's own runs its rule to the edge of the whole region, which is further right than the
+    /// fields reach and close enough to the card's edge to read as a line that ran out of room.
+    /// This ends where the fields end, so the row is inset by the same amount at both ends.
     /// </remarks>
-    /// <param name="id">Which field this is, so a drag can be followed between frames.</param>
-    /// <param name="fraction">How far along the value sits, from nothing to all of it.</param>
-    /// <param name="slide">The slider to call, once its own colours are out of the way.</param>
-    private static bool Sliding(string id, float fraction, Func<bool> slide)
+    /// <param name="text">What the heading says.</param>
+    private static void Heading(string text)
     {
+        if (EditorTheme.Current.Stock)
+        {
+            ImGui.SeparatorText(text);
+            return;
+        }
+
+        var style = ImGui.GetStyle();
+        var thick = MathF.Max(1f, style.SeparatorTextBorderSize);
+
+        var at = ImGui.GetCursorScreenPos();
+        var word = ImGui.CalcTextSize(text);
+
+        var width = MathF.Max(
+            word.X + (style.SeparatorTextPadding.X * 2f),
+            ImGui.GetContentRegionAvail().X - DetailsPanel.Inset);
+
+        var height = MathF.Max(word.Y + (style.SeparatorTextPadding.Y * 2f), thick);
+
+        ImGui.Dummy(new Vector2(width, height));
+
         var draw = ImGui.GetWindowDrawList();
+        var rule = MathF.Floor(at.Y + (height * 0.5f));
+        var color = ImGui.GetColorU32(ImGuiCol.Separator);
 
-        var min = ImGui.GetCursorScreenPos();
-        var max = min + new Vector2(ImGui.CalcItemWidth(), ImGui.GetFrameHeight());
+        var from = at.X + style.SeparatorTextPadding.X;
+        var to = from + word.X + style.ItemSpacing.X;
 
-        // Held is what ImGui said last frame, because the answer for this one arrives after the
-        // call that draws it. A drag reads as held from its second frame, which is the frame the
-        // handle first moves.
-        var held = _sliding == id;
-        var groove = held || ImGui.IsMouseHoveringRect(min, max)
-            ? ImGuiCol.FrameBgHovered
-            : ImGuiCol.FrameBg;
+        if (from - style.ItemSpacing.X > at.X)
+        {
+            draw.AddLine(
+                new Vector2(at.X, rule),
+                new Vector2(from - style.ItemSpacing.X, rule),
+                color,
+                thick);
+        }
 
-        EditorSurface.Capsule(draw, min, max, ImGui.GetColorU32(groove));
+        if (to < at.X + width)
+        {
+            draw.AddLine(new Vector2(to, rule), new Vector2(at.X + width, rule), color, thick);
+        }
 
-        // Where ImGui would have put its own handle. It keeps two pixels of the groove clear at
-        // each end and slides the handle along what is left, so the same two numbers put a disc
-        // exactly where the rectangle would have been.
-        const float Clear = 2f;
-
-        var handle = MathF.Max(1f, ImGui.GetStyle().GrabMinSize);
-        var travel = MathF.Max(0f, max.X - min.X - (Clear * 2f) - handle);
-        var along = min.X + Clear + (handle * 0.5f) + (travel * Math.Clamp(fraction, 0f, 1f));
-
-        draw.AddCircleFilled(
-            new Vector2(along, (min.Y + max.Y) * 0.5f),
-            handle * 0.5f,
-            ImGui.GetColorU32(held ? ImGuiCol.SliderGrabActive : ImGuiCol.SliderGrab),
-            0);
-
-        ImGui.PushStyleColor(ImGuiCol.FrameBg, 0u);
-        ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, 0u);
-        ImGui.PushStyleColor(ImGuiCol.FrameBgActive, 0u);
-        ImGui.PushStyleColor(ImGuiCol.SliderGrab, 0u);
-        ImGui.PushStyleColor(ImGuiCol.SliderGrabActive, 0u);
-
-        var changed = slide();
-
-        ImGui.PopStyleColor(5);
-
-        if (ImGui.IsItemActive()) _sliding = id;
-        else if (held) _sliding = string.Empty;
-
-        return changed;
+        draw.AddText(
+            new Vector2(from, at.Y + style.SeparatorTextPadding.Y),
+            ImGui.GetColorU32(ImGuiCol.Text),
+            text);
     }
 
     /// <summary>One field, drawn as what it is.</summary>
@@ -354,7 +348,7 @@ public static class ComponentFields
         var id = $"##{schema.Name}.{field.Name}";
         var value = field.Read(ctx.Ecs, entity);
 
-        if (field.Hints.Header is { Length: > 0 } heading) ImGui.SeparatorText(heading);
+        if (field.Hints.Header is { Length: > 0 } heading) Heading(heading);
 
         ImGui.PushID(id);
 
@@ -551,7 +545,7 @@ public static class ComponentFields
                     var high = (int)most;
                     var held = number;
 
-                    changed = Sliding(
+                    changed = EditorSurface.Sliding(
                         id,
                         high > low ? (float)(number - low) / (high - low) : 0f,
                         () => ImGui.SliderInt(id, ref held, low, high));
@@ -586,7 +580,7 @@ public static class ComponentFields
                     var high = (float)most;
                     var held = number;
 
-                    changed = Sliding(
+                    changed = EditorSurface.Sliding(
                         id,
                         high > low ? (number - low) / (high - low) : 0f,
                         () => ImGui.SliderFloat(id, ref held, low, high, format, Whole));
