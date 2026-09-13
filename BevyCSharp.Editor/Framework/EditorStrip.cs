@@ -35,14 +35,14 @@ public static class EditorStrip
     /// screen. ImGui's own tab bar either way, so hovering, ordering and the mark on the one in
     /// force are its to draw.
     /// </remarks>
-    internal static void Draw(float width, float strip, float margin)
+    internal static void Draw(float width, float strip)
     {
         if (EditorShell.Tabs.Count == 0 || width < 80f) return;
 
         var window = ImGuiRuntime.Size;
-        var top = window.Y - margin - strip;
+        var top = window.Y - strip;
 
-        ImGui.SetNextWindowPos(new Vector2(margin, top));
+        ImGui.SetNextWindowPos(new Vector2(0f, top));
         ImGui.SetNextWindowSize(new Vector2(width, strip));
         ImGui.SetNextWindowBgAlpha(EditorShell.Docked ? 1f : EditorTheme.Current.WindowAlpha);
         ImGui.PushStyleColor(ImGuiCol.WindowBg, EditorSurface.Chrome());
@@ -77,14 +77,12 @@ public static class EditorStrip
             // A card like the ones in the panel, with the same gap outside it and the same air
             // inside it, rather than a rectangle pushed against its own edges.
             //
-            // Docked it runs past the strip's own right padding as far as the panel's edge, so the
-            // gap between this card and the one in the panel beside it is the panel's inset and
+            // It runs past the strip's own right padding as far as the panel's edge, so the gap
+            // between this card and the one in the panel beside it is the panel's inset and
             // nothing else, which is the gap every other pair of cards has between them.
-            var across = EditorShell.Docked ? room.X + EditorSurface.Gutter : 0f;
-
             EditorSurface.Card(
                 "##tab",
-                new Vector2(across, room.Y - bar),
+                new Vector2(room.X + EditorSurface.Gutter, room.Y - bar),
                 EditorShell.Tabs[EditorShell.OpenTab].Draw);
         }
 
@@ -236,7 +234,7 @@ public static class EditorStrip
 
             if (fill is { } under)
             {
-                draw.AddRectFilled(at, at + size, ImGui.GetColorU32(under), height * 0.5f);
+                EditorSurface.Capsule(draw, at, at + size, ImGui.GetColorU32(under));
             }
 
             // White whether it is open or not. What says which one is showing is the pill under it,

@@ -235,16 +235,117 @@ public static class ComponentFields
     }
 
     /// <summary>
-    /// Asks for a tick drawn in the text colour rather than in the accent.
+    /// A box to tick, drawn as a circle with the tick in the text colour.
     /// </summary>
     /// <remarks>
-    /// The accent says what is selected or in force, and a box that has been ticked is neither. It
-    /// is a value, like the number in the box on the row above, and a value is read in the colour
-    /// everything else is read in. The slot the tick is drawn from is also where the theme keeps
-    /// the accent, so this is pushed around the box rather than written into the style.
+    /// <para>
+    /// ImGui's own box is a rounded square however round the style asks for, because it clamps the
+    /// rounding to a quarter of the box so that a checkbox still reads as a checkbox. Here the
+    /// round shape is the one every other control has, so the fill is drawn as a disc first and
+    /// ImGui draws the tick over it with a fill of its own that is not there.
+    /// </para>
+    /// <para>
+    /// The tick is the text colour, not the accent. The accent says what is selected or in force,
+    /// and a box that has been ticked is neither; it is a value, read in the colour every other
+    /// value is read in. The slot the tick is drawn from is where the theme keeps the accent, so
+    /// it is pushed around the box rather than written into the style.
+    /// </para>
     /// </remarks>
-    private static void Ticked() =>
+    /// <param name="label">What to call it, which is what ImGui hashes it by.</param>
+    /// <param name="on">What it holds, and what it is left holding.</param>
+    private static bool Ticked(string label, ref bool on)
+    {
+        var at = ImGui.GetCursorScreenPos();
+        var size = ImGui.GetFrameHeight();
+        var box = new Vector2(size, size);
+
+        // Asked of the rectangle the box is about to take, because what it looks like has to be
+        // drawn before ImGui is called and ImGui has not been called yet.
+        var over = ImGui.IsMouseHoveringRect(at, at + box);
+        var held = over && ImGui.IsMouseDown(ImGuiMouseButton.Left);
+
+        var fill = held
+            ? ImGuiCol.FrameBgActive
+            : over ? ImGuiCol.FrameBgHovered : ImGuiCol.FrameBg;
+
+        ImGui.GetWindowDrawList().AddCircleFilled(
+            at + (box * 0.5f), size * 0.5f, ImGui.GetColorU32(fill), 0);
+
+        ImGui.PushStyleColor(ImGuiCol.FrameBg, 0u);
+        ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, 0u);
+        ImGui.PushStyleColor(ImGuiCol.FrameBgActive, 0u);
         ImGui.PushStyleColor(ImGuiCol.CheckMark, EditorTheme.LiveText);
+
+        var changed = ImGui.Checkbox(label, ref on);
+
+        ImGui.PopStyleColor(4);
+
+        return changed;
+    }
+
+    /// <summary>Which slider is being dragged, while it is.</summary>
+    private static string _sliding = string.Empty;
+
+    /// <summary>
+    /// A slider drawn as a groove with a round handle on it.
+    /// </summary>
+    /// <remarks>
+    /// ImGui's own, with its fill and its handle turned off and both drawn here first instead. A
+    /// rounded rectangle is only ever as round as half its shortest side less a pixel, which
+    /// leaves a flat edge on anything meant to be a circle, and a groove and its handle are where
+    /// that shows. Everything the slider does is still ImGui's, including the control click that
+    /// opens it for typing.
+    /// </remarks>
+    /// <param name="id">Which field this is, so a drag can be followed between frames.</param>
+    /// <param name="fraction">How far along the value sits, from nothing to all of it.</param>
+    /// <param name="slide">The slider to call, once its own colours are out of the way.</param>
+    private static bool Sliding(string id, float fraction, Func<bool> slide)
+    {
+        var draw = ImGui.GetWindowDrawList();
+
+        var min = ImGui.GetCursorScreenPos();
+        var max = min + new Vector2(ImGui.CalcItemWidth(), ImGui.GetFrameHeight());
+
+        // Held is what ImGui said last frame, because the answer for this one arrives after the
+        // call that draws it. A drag reads as held from its second frame, which is the frame the
+        // handle first moves.
+        var held = _sliding == id;
+        var groove = held || ImGui.IsMouseHoveringRect(min, max)
+            ? ImGuiCol.FrameBgHovered
+            : ImGuiCol.FrameBg;
+
+        EditorSurface.Capsule(draw, min, max, ImGui.GetColorU32(groove));
+
+        // Where ImGui would have put its own handle. It keeps two pixels of the groove clear at
+        // each end and slides the handle along what is left, so the same two numbers put a disc
+        // exactly where the rectangle would have been.
+        const float Clear = 2f;
+
+        var handle = MathF.Max(1f, ImGui.GetStyle().GrabMinSize);
+        var travel = MathF.Max(0f, max.X - min.X - (Clear * 2f) - handle);
+        var along = min.X + Clear + (handle * 0.5f) + (travel * Math.Clamp(fraction, 0f, 1f));
+
+        draw.AddCircleFilled(
+            new Vector2(along, (min.Y + max.Y) * 0.5f),
+            handle * 0.5f,
+            ImGui.GetColorU32(held ? ImGuiCol.SliderGrabActive : ImGuiCol.SliderGrab),
+            0);
+
+        ImGui.PushStyleColor(ImGuiCol.FrameBg, 0u);
+        ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, 0u);
+        ImGui.PushStyleColor(ImGuiCol.FrameBgActive, 0u);
+        ImGui.PushStyleColor(ImGuiCol.SliderGrab, 0u);
+        ImGui.PushStyleColor(ImGuiCol.SliderGrabActive, 0u);
+
+        var changed = slide();
+
+        ImGui.PopStyleColor(5);
+
+        if (ImGui.IsItemActive()) _sliding = id;
+        else if (held) _sliding = string.Empty;
+
+        return changed;
+    }
 
     /// <summary>One field, drawn as what it is.</summary>
     internal static void Row(
@@ -339,9 +440,7 @@ public static class ComponentFields
             {
                 var on = value is true;
 
-                Ticked();
-                if (ImGui.Checkbox(id, ref on)) field.Write(ctx.Ecs, entity, on);
-                ImGui.PopStyleColor();
+                if (Ticked(id, ref on)) field.Write(ctx.Ecs, entity, on);
 
                 break;
             }
@@ -448,7 +547,16 @@ public static class ComponentFields
 
                 if (field.Hints is { HasRange: true, Minimum: { } least, Maximum: { } most })
                 {
-                    changed = ImGui.SliderInt(id, ref number, (int)least, (int)most);
+                    var low = (int)least;
+                    var high = (int)most;
+                    var held = number;
+
+                    changed = Sliding(
+                        id,
+                        high > low ? (float)(number - low) / (high - low) : 0f,
+                        () => ImGui.SliderInt(id, ref held, low, high));
+
+                    number = held;
                 }
                 else
                 {
@@ -474,7 +582,16 @@ public static class ComponentFields
 
                 if (field.Hints is { HasRange: true, Minimum: { } least, Maximum: { } most })
                 {
-                    changed = ImGui.SliderFloat(id, ref number, (float)least, (float)most, format, Whole);
+                    var low = (float)least;
+                    var high = (float)most;
+                    var held = number;
+
+                    changed = Sliding(
+                        id,
+                        high > low ? (number - low) / (high - low) : 0f,
+                        () => ImGui.SliderFloat(id, ref held, low, high, format, Whole));
+
+                    number = held;
                 }
                 else
                 {
@@ -585,13 +702,7 @@ public static class ComponentFields
                     // ImGui hashes is what follows the two hashes, so every box in a set of flags
                     // sharing the field's id is a set of boxes ImGui cannot tell apart. It says so,
                     // in a window that takes the keyboard with it.
-                    Ticked();
-
-                    var set = ImGui.Checkbox($"{option}##{id}.{option}", ref on);
-
-                    ImGui.PopStyleColor();
-
-                    if (set)
+                    if (Ticked($"{option}##{id}.{option}", ref on))
                     {
                         if (on) chosen.Add(option);
                         else chosen.Remove(option);

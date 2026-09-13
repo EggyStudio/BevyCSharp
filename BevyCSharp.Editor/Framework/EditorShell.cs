@@ -23,8 +23,12 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 public static class EditorShell
 {
-    /// <summary>How far a floating panel sits from the window's edge and from its neighbours.</summary>
-    public const float Margin = 10f;
+    /// <summary>How far anything lying on the scene sits from the edge of what it lies on.</summary>
+    /// <remarks>
+    /// The same gap the panels keep round their cards, so a group of buttons floating in a corner
+    /// of the scene is as far from the edge as a card is from the edge of the panel holding it.
+    /// </remarks>
+    public const float Margin = EditorSurface.Gutter;
 
     /// <summary>
     /// How narrow the panel has to be before the world sits above the data rather than beside it.
@@ -141,15 +145,19 @@ public static class EditorShell
         EditorSelection.Prune(ctx.Ecs);
 
         var window = ImGuiRuntime.Size;
-        var margin = Docked ? 0f : Margin;
 
         PanelWidth = Math.Clamp(PanelWidth, Narrowest, Math.Max(Narrowest + 40f, window.X - 320f));
 
-        var panelX = window.X - margin - PanelWidth;
-        Panel = (panelX, margin, PanelWidth, window.Y - (margin * 2f));
+        // The panel and the strip are in the same place whether the editor is docked or not, and
+        // they reach the window's own edges in both. What a person sees is not the window they are
+        // drawn in but the cards inside them, which the padding holds a gap in from every edge.
+        // Docking changes what is behind those cards rather than where they are, so nothing on
+        // screen moves when it is switched.
+        var panelX = window.X - PanelWidth;
+        Panel = (panelX, 0f, PanelWidth, window.Y);
 
         var strip = EditorStrip.Shut + (OpenTab >= 0 ? TabHeight + 1f : 0f);
-        var tabsWidth = panelX - margin - (Docked ? 0f : Margin);
+        var tabsWidth = panelX;
 
         // Docked, the scene keeps the top left corner and the tabs sit under it. Floating, the
         // scene is the whole window and everything else is over it.
@@ -162,15 +170,13 @@ public static class EditorShell
             : (0f, 0f, window.X, window.Y);
 
         // Where the scene is still visible, which is what anything drawn over the scene has to
-        // stay inside. Docked that is the scene itself, floating it is what the panels leave.
-        Free = Docked
-            ? (Scene.X + Scene.Width, Scene.Y + Scene.Height)
-            : (panelX, window.Y - strip - margin);
+        // stay inside. The same rectangle either way, because the panels are.
+        Free = (panelX, window.Y - strip);
 
         EditorSceneFrame.Round();
         EditorPanes.Draw();
         DrawOrientation(ctx);
-        EditorStrip.Draw(tabsWidth, strip, margin);
+        EditorStrip.Draw(tabsWidth, strip);
         ToolbarView.Draw(ctx);
 
         // Last, so it floats over every panel rather than under whichever was drawn after it.
@@ -198,12 +204,9 @@ public static class EditorShell
     private static void DrawOrientation(BehaviorContext ctx)
     {
         var half = OrientationGizmo.Size * 0.5f;
-        var gap = (Docked ? 0f : Margin) + half + 12f;
+        var gap = Margin + half + 12f;
 
-        var right = Docked ? Scene.X + Scene.Width : Panel.X;
-        var bottom = Docked ? Scene.Y + Scene.Height : Free.Bottom;
-
-        OrientationGizmo.Draw(ctx, new Vector2(right - gap, bottom - gap));
+        OrientationGizmo.Draw(ctx, new Vector2(Free.Right - gap, Free.Bottom - gap));
     }
 
     /// <summary>What the scene has to itself, which is the part of it no panel is over.</summary>

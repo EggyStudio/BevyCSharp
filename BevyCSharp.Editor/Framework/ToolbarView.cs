@@ -158,7 +158,7 @@ public static class ToolbarView
 
         // A share of the circle rather than a number of pixels, so the picture keeps its margin
         // whatever the button is sized to.
-        var mark = MathF.Floor(size * 0.6f);
+        var mark = MathF.Floor(size * 0.65f);
 
         EditorSurface.Icon(draw, icon, middle - new Vector2(mark * 0.5f, mark * 0.5f), mark, on);
 

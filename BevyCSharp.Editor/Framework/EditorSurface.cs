@@ -65,7 +65,7 @@ public static class EditorSurface
     /// their fill, and the gap only has to be wide enough to be read as deliberate. Two gaps of
     /// different widths in one picture read as an arrangement that has slipped.
     /// </remarks>
-    internal const float Gutter = 8f;
+    internal const float Gutter = 14f;
 
     /// <summary>How much air a card keeps inside its own edge.</summary>
     internal const float Air = 6f;
@@ -84,11 +84,11 @@ public static class EditorSurface
     /// <remarks>
     /// A row of tabs along the bottom and a group of buttons in a corner are the same kind of
     /// thing, which is something pressed that lies on the scene rather than inside a panel, so
-    /// they take one number between them. That number is the height of a field, because a row of
-    /// controls the size of the ones being read in the panel is the size the whole editor is
-    /// already set in, and anything larger is a second scale to look at.
+    /// they take one number between them. Larger than a field, because most of these hold a
+    /// picture rather than a word and a picture drawn at a row's height is a picture nobody can
+    /// read; small enough that a row of them is still a row of buttons rather than a bar.
     /// </remarks>
-    internal static float Tall => ImGui.GetFrameHeight();
+    internal const float Tall = 28f;
 
     /// <summary>
     /// How much air one of those keeps at each end when it has words in it rather than a picture.
@@ -260,6 +260,38 @@ public static class EditorSurface
     }
 
     /// <summary>
+    /// A rectangle with round ends, drawn as round ends rather than as a rounded rectangle.
+    /// </summary>
+    /// <remarks>
+    /// ImGui rounds a rectangle by at most half its shortest side less a pixel, and some of its
+    /// widgets clamp further still, so what should be a circle comes out as a square with the
+    /// corners taken off. Two discs and the rectangle between them have no such limit.
+    /// </remarks>
+    /// <param name="draw">What to draw into.</param>
+    /// <param name="min">The top left corner.</param>
+    /// <param name="max">The bottom right.</param>
+    /// <param name="color">What to fill it with.</param>
+    internal static void Capsule(ImDrawListPtr draw, Vector2 min, Vector2 max, uint color)
+    {
+        var radius = (max.Y - min.Y) * 0.5f;
+        if (radius <= 0.5f) return;
+
+        var middle = (min.Y + max.Y) * 0.5f;
+
+        if (max.X - min.X <= radius * 2f)
+        {
+            draw.AddCircleFilled(new Vector2((min.X + max.X) * 0.5f, middle), radius, color, 0);
+            return;
+        }
+
+        draw.AddRectFilled(
+            new Vector2(min.X + radius, min.Y), new Vector2(max.X - radius, max.Y), color, 0f);
+
+        draw.AddCircleFilled(new Vector2(min.X + radius, middle), radius, color, 0);
+        draw.AddCircleFilled(new Vector2(max.X - radius, middle), radius, color, 0);
+    }
+
+    /// <summary>
     /// The eye that says whether a thing is drawn.
     /// </summary>
     /// <remarks>
@@ -356,10 +388,11 @@ public static class EditorSurface
     /// <summary>How large a grab handle's pill is, as half its width and half its height.</summary>
     /// <remarks>
     /// One size for all of them. Two handles that do the same job at two thicknesses read as two
-    /// different things, and there is no reason for either number to be the one it is beyond the
-    /// other one matching it.
+    /// different things. About a third of the gap it lies in, so the air either side of it is as
+    /// wide as the pill and the handle reads as something resting in the gap rather than filling
+    /// it.
     /// </remarks>
-    internal static readonly Vector2 Pill = new(22f, 3f);
+    internal static readonly Vector2 Pill = new(22f, 2.5f);
 
     /// <summary>
     /// One card inside the panel, which is a fill a shade above it, rounded, with no line anywhere.

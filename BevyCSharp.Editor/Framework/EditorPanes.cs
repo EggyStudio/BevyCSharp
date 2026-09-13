@@ -68,9 +68,16 @@ public static class EditorPanes
         {
             var world = MathF.Max(120f, body.Y * EditorShell.WorldShare);
 
+            // No spacing of ImGui's own around the bar between them, so the gap the two cards
+            // have between them is the one gap this editor spaces everything by and not that plus
+            // a row's worth at each end.
+            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 0f));
+
             EditorSurface.Card("##world", new Vector2(0f, world), WorldPanel.Draw);
             Splitter(body.X);
             EditorSurface.Card("##data", new Vector2(0f, 0f), DetailsPanel.Draw);
+
+            ImGui.PopStyleVar();
         }
         else
         {
