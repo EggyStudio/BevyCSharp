@@ -55,8 +55,8 @@ public static class ComponentFields
 
     /// <summary>How the next field's number is written, which is who is about to read it.</summary>
     /// <param name="id">Which field is asking.</param>
-    /// <param name="numbers">What the field holds, which decides how much of it there is to show.</param>
-    private static string Written(string id, params ReadOnlySpan<float> numbers)
+    /// <param name="number">What the box holds, which decides how much of it there is to show.</param>
+    private static string Written(string id, float number)
     {
         if (_opened == id) return Figures;
 
@@ -66,11 +66,7 @@ public static class ComponentFields
             return Figures;
         }
 
-        var places = 0;
-
-        foreach (var number in numbers) places = Math.Max(places, Needed(number));
-
-        return Shortly[places];
+        return Shortly[Needed(number)];
     }
 
     /// <summary>
@@ -172,17 +168,89 @@ public static class ComponentFields
         MathF.Round(number, 4).ToString("0.####", CultureInfo.InvariantCulture);
 
     /// <summary>
+    /// Three number boxes on one row, each written to its own number of places.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What <c>DragFloat3</c> draws, except for the format. ImGui takes one format for the three
+    /// boxes, and a vector whose Y is turning then writes X and Z as 0.000 while they are exactly
+    /// nothing. Worse, the places change as Y passes each tenth, so the two boxes that are not
+    /// changing are redrawn at a different width every frame and the numbers in them appear to
+    /// shake. A number that is not moving has to look like it.
+    /// </para>
+    /// <para>
+    /// The widths are ImGui's own arithmetic for a row of boxes, which is equal shares with the
+    /// last one taking whatever the rounding left over.
+    /// </para>
+    /// </remarks>
+    /// <param name="id">What the row is called, which each box takes a name under.</param>
+    /// <param name="value">The three numbers, written back as they are dragged.</param>
+    /// <param name="speed">How far a pixel of drag moves one of them.</param>
+    /// <param name="active">Whether any of the three is being dragged or typed into.</param>
+    /// <returns>Whether any of them changed.</returns>
+    private static bool Vector(string id, ref Vector3 value, float speed, out bool active)
+    {
+        var inner = ImGui.GetStyle().ItemInnerSpacing.X;
+        var full = ImGui.CalcItemWidth();
+
+        var one = MathF.Max(1f, MathF.Floor((full - (inner * 2f)) / 3f));
+        var last = MathF.Max(1f, MathF.Floor(full - ((one + inner) * 2f)));
+
+        var changed = false;
+
+        active = false;
+
+        ImGui.BeginGroup();
+        ImGui.PushID(id);
+
+        for (var axis = 0; axis < 3; axis++)
+        {
+            if (axis > 0) ImGui.SameLine(0f, inner);
+
+            ImGui.PushID(axis);
+            ImGui.SetNextItemWidth(axis == 2 ? last : one);
+
+            var number = axis switch { 0 => value.X, 1 => value.Y, _ => value.Z };
+            var key = $"{id}.{axis}";
+
+            if (ImGui.DragFloat("##n", ref number, speed, 0f, 0f, Written(key, number), Whole))
+            {
+                if (axis == 0) value.X = number;
+                else if (axis == 1) value.Y = number;
+                else value.Z = number;
+
+                changed = true;
+            }
+
+            if (ImGui.IsItemActive()) active = true;
+            else if (_opened == key) _opened = string.Empty;
+
+            ImGui.PopID();
+        }
+
+        ImGui.PopID();
+        ImGui.EndGroup();
+
+        return changed;
+    }
+
+    /// <summary>
     /// Asks for a slider handle as round as the groove it runs in.
     /// </summary>
     /// <remarks>
     /// ImGui rounds a rectangle by at most half its shortest side, so a ten pixel handle in a
     /// groove twenty pixels tall cannot take the groove's own corner however large the rounding
-    /// is. A handle as wide as the groove is tall is a circle, which is the same corner the ends
-    /// of the groove are drawn with. Pushed rather than set once, because the number is a frame
-    /// height and that is not known until there is a font to measure.
+    /// is. A square handle is a circle, which is the corner the ends of the groove are drawn with.
+    /// <para>
+    /// Square means the height ImGui gives a handle rather than the height of the groove, which is
+    /// two pixels less at the top and two at the bottom. Asking for the groove's own height is
+    /// asking for a handle wider than it is tall, which reads as an oval. Pushed rather than set
+    /// once, because the number is a frame height and that is not known until there is a font to
+    /// measure.
+    /// </para>
     /// </remarks>
     private static void Knob() =>
-        ImGui.PushStyleVar(ImGuiStyleVar.GrabMinSize, ImGui.GetFrameHeight());
+        ImGui.PushStyleVar(ImGuiStyleVar.GrabMinSize, MathF.Max(1f, ImGui.GetFrameHeight() - 4f));
 
     /// <summary>One field, drawn as what it is.</summary>
     internal static void Row(
@@ -287,12 +355,7 @@ public static class ComponentFields
 
                 ImGui.PushFont(ImGuiRuntime.Face(EditorShell.Figures));
 
-                // One format for the three of them, because ImGui takes one and a vector is one
-                // value. Whichever of them needs the most places decides, so the three stay a
-                // column rather than three lengths of number.
-                var format = Written(id, three.X, three.Y, three.Z);
-
-                var moved = ImGui.DragFloat3(id, ref three, 0.01f, 0f, 0f, format, Whole);
+                var moved = Vector(id, ref three, 0.01f, out _);
 
                 ImGui.PopFont();
 
@@ -315,9 +378,7 @@ public static class ComponentFields
 
                 ImGui.PushFont(ImGuiRuntime.Face(EditorShell.Figures));
 
-                var written = Written(id, degrees.X, degrees.Y, degrees.Z);
-
-                var turned = ImGui.DragFloat3(id, ref degrees, 0.5f, 0f, 0f, written, Whole);
+                var turned = Vector(id, ref degrees, 0.5f, out var holding);
 
                 ImGui.PopFont();
 
@@ -337,7 +398,7 @@ public static class ComponentFields
 
                 // Let go of the angles the moment the box is let go of, so the rotation is what the
                 // world says again rather than what was last typed.
-                if (_turning == id && !ImGui.IsItemActive()) _turning = string.Empty;
+                if (_turning == id && !holding) _turning = string.Empty;
 
                 break;
             }
