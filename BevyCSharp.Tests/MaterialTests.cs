@@ -64,7 +64,8 @@ public sealed class MaterialTests
     [Fact]
     public void AnImageLoadsOnAnyBuild()
     {
-        // No renderer guard: decoding a PNG is work on data, not on a GPU, which is why the
+        // No renderer guard, because decoding a PNG is work on data rather than on a GPU, which is
+        // why the
         // minimal profile carries the image formats too. This is the test that would have caught
         // the loader never being registered.
         using var harness = new EngineHarness(frames: 40, fps: 120);
@@ -98,7 +99,8 @@ public sealed class MaterialTests
         {
             image = AssetServer.Load(AssetKind.Image, Texture);
 
-            // Bound before the image has finished loading, on purpose: a material holds a handle
+            // Bound before the image has finished loading, on purpose, because a material holds a
+            // handle
             // rather than pixels, so the texture arrives when it arrives.
             material = Render.CreateMaterial(new MaterialSettings
             {
@@ -189,7 +191,7 @@ public sealed class MaterialTests
     public void AnImageLoadsWithAnExplicitSampler()
     {
         // Sampler settings ride along with the load rather than being set afterwards, so a wrong
-        // one is a wrong asset rather than a wrong draw call. Any build: this is decoding.
+        // one is a wrong asset rather than a wrong draw call. Any build, because this is decoding.
         using var harness = new EngineHarness(frames: 40, fps: 240);
         var tiling = AssetLoadState.Loading;
         var data = AssetLoadState.Loading;

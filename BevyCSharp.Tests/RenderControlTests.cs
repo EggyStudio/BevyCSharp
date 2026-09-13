@@ -94,7 +94,8 @@ public sealed class RenderControlTests
                 Tonemapper = Tonemapper.AgX,
             });
 
-            // Off again, which has to take the jitter and the prepasses with it: a camera left
+            // Off again, which has to take the jitter and the prepasses with it, because a camera
+            // left
             // jittering with nothing resolving it shimmers, and the prepasses draw the scene a
             // second time for nobody.
             Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
@@ -152,7 +153,7 @@ public sealed class RenderControlTests
     [Fact]
     public void ACameraTakesAWholeLens()
     {
-        // The same shape as the pipeline above: every effect is accepted, and a settings object
+        // The same shape as the pipeline above. Every effect is accepted, and a settings object
         // that asks for none of them has to take off the ones a previous call put on.
         using var harness = new EngineHarness(frames: 4);
         if (!App.HasRenderer) return;
@@ -248,7 +249,7 @@ public sealed class RenderControlTests
 
         harness.OnContext(Stage.Startup, _ =>
         {
-            // Bound before the image has finished loading, as a material's texture is: the
+            // Bound before the image has finished loading, as a material's texture is, because the
             // effect holds a handle rather than pixels.
             var image = AssetServer.Load(AssetKind.Image, "textures/checker.png");
             var camera = Render.SpawnCamera3d();
@@ -582,7 +583,7 @@ public sealed class RenderControlTests
 
         harness.OnContext(Stage.Update, ctx =>
         {
-            // True on either build, and for a different reason on each: a headless bridge has no
+            // True on either build, and for a different reason on each. A headless bridge has no
             // renderer to have computed bounds, and a render build has computed none for an
             // entity carrying nothing. What matters is that neither answers with a box.
             Assert.False(Render.TryGetBounds(ctx.Ecs.Spawn(), out var min, out var max));
@@ -600,7 +601,7 @@ public sealed class RenderControlTests
     [Fact]
     public void WindowCallsReportThatAHeadlessRunHasNoWindow()
     {
-        // The whole point of failing loudly: a behavior that locks the cursor should say why it
+        // The whole point of failing loudly. A behavior that locks the cursor should say why it
         // could not rather than leave a first-person camera mysteriously dead.
         using var harness = new EngineHarness(frames: 2);
 
@@ -671,7 +672,8 @@ public sealed class RenderControlTests
     [Fact]
     public void WindowStyleAndPositionReportTheirAbsence()
     {
-        // Same contract as the rest of the window surface: a windowless run says so rather than
+        // Same contract as the rest of the window surface, where a windowless run says so rather
+        // than
         // pretending, so a behavior that arranges the window fails visibly in a test.
         using var harness = new EngineHarness(frames: 2);
 

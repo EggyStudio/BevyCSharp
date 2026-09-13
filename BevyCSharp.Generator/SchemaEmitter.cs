@@ -10,13 +10,13 @@ namespace Bevy.Generator;
 /// <remarks>
 /// <para>
 /// The bridge answers what an entity carries in component ids, and can name one, but a name is
-/// not enough to draw a row: that needs the fields, their types, and a way to read and write
+/// not enough to draw a row. That needs the fields, their types, and a way to read and write
 /// them. None of that has to cross the ABI, because a <c>[Behavior]</c> struct is a C# type this
 /// generator is already reading. So the field table is emitted here, beside the runner, and the
 /// engine stays out of it entirely.
 /// </para>
 /// <para>
-/// Accessors rather than byte offsets: the emitted closure reads and writes the real struct
+/// Accessors rather than byte offsets, because the emitted closure reads and writes the real struct
 /// through the ordinary typed API, which means the runtime's own layout decisions cannot be got
 /// wrong, and change detection fires exactly as it would for a behavior writing its own field.
 /// </para>

@@ -25,7 +25,8 @@ public static class EditorSceneFrame
     {
         if (!EditorShell.Docked) return;
 
-        // The rounding a card takes, not a window's: what the scene sits among docked is the cards
+        // The rounding a card takes, not a window's, because what the scene sits among docked is
+        // the cards
         // in the panel and the strip, and a corner rounder than theirs is a corner that does not
         // match the ones beside it.
         var radius = EditorTheme.Current.ChildRounding;
@@ -46,14 +47,14 @@ public static class EditorSceneFrame
 
         // The gutter the scene now stops short of, filled in. What is under it otherwise is
         // whatever the camera clears its window to, which is a band of sky between the viewport
-        // and the panel: the gap is chrome and has to be the colour the rest of the chrome is.
+        // and the panel. The gap is chrome and has to be the colour the rest of the chrome is.
         if (EditorShell.Panel.X > right)
         {
             draw.AddRectFilled(new Vector2(right, 0f), new Vector2(EditorShell.Panel.X, ImGuiRuntime.Size.Y), color);
         }
 
         // The bottom right only. That is the one corner of a docked scene with chrome on both
-        // sides of it: the strip runs under it and the panel stands beside it, so taking it off is
+        // sides of it. The strip runs under it and the panel stands beside it, so taking it off is
         // what joins the two. The other three meet the window's own edges, where there is nothing
         // to round against.
         Wedge(
@@ -109,7 +110,7 @@ public static class EditorSceneFrame
         const float Size = 26f;
 
         // The window's top right corner, and how far into it depends only on where the panel's
-        // first row starts: docked the panel is flush against the window and everything in it sits
+        // first row starts. Docked, the panel is flush against the window and everything in it sits
         // ten pixels higher, so the button has to move with it or it reaches down into the row
         // below and takes width from the filter box there.
         var window = ImGuiRuntime.Size;
@@ -130,7 +131,8 @@ public static class EditorSceneFrame
             ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.FrameBg));
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, EditorTheme.LiveHover);
 
-            // Never in the accent: the accent says what is in force in the scene, and a bright blue
+            // Never in the accent, because the accent says what is in force in the scene, and a
+            // bright blue
             // disc in the corner of the panel reads as a close button somebody has to think about.
             // Which way it is set is what the picture in it says.
             if (ToolbarView.Circle($"dock{EditorShell.Docked}", EditorShell.Docked ? "icons/ui/close.png" : "icons/ui/pinned.png", false, Size))
@@ -159,7 +161,8 @@ public static class EditorSceneFrame
     /// button floating over it.
     /// </summary>
     /// <remarks>
-    /// Asked of the row rather than worked out per panel: which card is under the corner depends on
+    /// Asked of the row rather than worked out per panel, because which card is under the corner
+    /// depends on
     /// whether the panel is split beside or above, and a rule written per panel is a rule that is
     /// wrong in one of them.
     /// </remarks>

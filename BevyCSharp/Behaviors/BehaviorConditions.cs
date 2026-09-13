@@ -172,7 +172,7 @@ public static class BehaviorConditions
 /// Tags every system registered inside the scope with a provenance string.
 /// </summary>
 /// <remarks>
-/// This is what makes hot-reload swappable: a reloaded generation of behaviors registers under
+/// This is what makes hot-reload swappable. A reloaded generation of behaviors registers under
 /// its own tag, and <see cref="App.RemoveSystemsBySource"/> retires the previous one without
 /// touching systems that came from anywhere else.
 /// </remarks>

@@ -1,11 +1,13 @@
 //! Debug drawing, reachable from C#.
 //!
-//! Bevy draws gizmos through a `Gizmos` system parameter, which a C# system cannot hold: every
+//! Bevy draws gizmos through a `Gizmos` system parameter, which a C# system cannot hold, because
+//! every
 //! managed system is an exclusive one, handed the whole world rather than a set of parameters. So
 //! calls from C# are recorded in a queue, and one ordinary Bevy system drains it each frame with
 //! the real parameter in hand.
 //!
-//! Gizmos are immediate: what is drawn lasts one frame, so a shape that should stay on screen has
+//! Gizmos are immediate, so what is drawn lasts one frame and a shape that should stay on screen
+//! has
 //! to be asked for again every frame. That is what makes them useful for watching a value change
 //! and useless for building anything.
 
@@ -39,7 +41,7 @@ pub struct GizmoQueue(pub Vec<QueuedGizmo>);
 /// The group whose shapes nothing in the scene can hide.
 ///
 /// Two groups, because a gizmo is asked for with one of two intentions and there is no third. A
-/// handle, an outline or a marker is a control: it is drawn *about* the scene and has to be
+/// handle, an outline or a marker is a control. It is drawn *about* the scene and has to be
 /// reachable, so it wins the depth test outright and lives here. A grid, a path or a wireframe is
 /// drawn *in* the scene and has to be behind what is in front of it, or it is not describing the
 /// scene at all. That is the default group, left exactly as the engine set it up.
@@ -143,7 +145,8 @@ pub fn draw_in_front(mut store: bevy::ecs::system::ResMut<bevy::gizmos::config::
 
 /// Records one shape to draw this frame.
 ///
-/// Returns [`status::UNSUPPORTED`] where there is nothing to draw on: gizmos need the renderer
+/// Returns [`status::UNSUPPORTED`] where there is nothing to draw on, because gizmos need the
+/// renderer
 /// and a window, because the plugin that draws them comes with both.
 ///
 /// # Safety

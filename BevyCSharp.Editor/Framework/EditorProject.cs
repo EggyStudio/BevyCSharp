@@ -6,7 +6,7 @@ namespace BevyCSharp.Editor.Framework;
 /// Saving and restoring everything the editor holds.
 /// </summary>
 /// <remarks>
-/// Three files, because they answer different questions and are edited by different hands: the
+/// Three files, because they answer different questions and are edited by different hands. The
 /// world is what the thing being made is, the layout is how one person likes to look at it, and the
 /// settings are how they like it to behave. Anything that saves saves all three, since a person
 /// pressing save means "keep what I have done".
@@ -42,7 +42,7 @@ public static class EditorProject
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Not the world: the world is what the project is, and loading it is a thing a person asks
+    /// Not the world, which is what the project is, and loading it is a thing a person asks
     /// for. How the editor behaves is not, and having to ask for it every time is how a tool feels
     /// like it does not remember you.
     /// </para>

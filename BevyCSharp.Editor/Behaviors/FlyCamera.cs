@@ -24,7 +24,7 @@ namespace BevyCSharp.Editor.Behaviors;
 /// </list>
 /// <para>
 /// Position and rotation are written to Bevy's own <see cref="Transform"/>, so nothing here is a
-/// parallel camera model: the engine's propagation and the renderer read exactly what this
+/// parallel camera model. The engine's propagation and the renderer read exactly what this
 /// writes. The transform is only written on a frame where something actually moved, so a camera
 /// nobody is steering does not report a change to Bevy every frame.
 /// </para>
@@ -79,7 +79,7 @@ public partial struct FlyCamera
 
     /// <summary>Whether this behavior currently holds the cursor.</summary>
     /// <remarks>
-    /// Tracked because the cursor is shared: anything else in the editor may lock it too, and
+    /// Tracked because the cursor is shared, since anything else in the editor may lock it too, and
     /// the window offers no way to read back which mode is in force. Releasing only what was
     /// taken here keeps the two from fighting over a button neither is holding.
     /// </remarks>
@@ -165,7 +165,7 @@ public partial struct FlyCamera
     /// Set by anything that wants the camera's horizon put back level.
     /// </summary>
     /// <remarks>
-    /// What the orientation cross is for: after flying about, the quickest way to know which way
+    /// What the orientation cross is for. After flying about, the quickest way to know which way
     /// is up is to be put back on it. Only the pitch is dropped, so the camera keeps facing what
     /// it was facing.
     /// </remarks>
@@ -190,7 +190,8 @@ public partial struct FlyCamera
         var wheel = input.WheelY;
 
         // The difference between this copy of the camera and the sample's. A wheel over a panel
-        // belongs to that panel: rolling it over a list should scroll the list rather than fly
+        // belongs to that panel, because rolling it over a list should scroll the list rather than
+        // fly
         // the camera through the wall behind it. A drag is not affected, because a drag that
         // began over the viewport should keep working wherever the pointer goes.
         if (wheel != 0f && EditorShell.PointerOverPanel) wheel = 0f;

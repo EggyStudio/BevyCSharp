@@ -11,12 +11,13 @@ namespace BevyCSharp.Editor.Framework;
 /// <para>
 /// Drawn flat, in the interface, rather than as lines in the world. A cross put into the scene a
 /// few centimetres in front of the camera and off to one side is seen through the same perspective
-/// as everything else, and perspective at the edge of a wide view shears it: the arms come out at
+/// as everything else, and perspective at the edge of a wide view shears it, so the arms come out
+/// at
 /// angles that say nothing about where the world is pointing. What a person reads this for is the
 /// direction of three axes, so it is drawn the way a direction is drawn, with no depth at all.
 /// </para>
 /// <para>
-/// The camera's own basis does the work: a world axis seen through the camera is that axis measured
+/// The camera's own basis does the work. A world axis seen through the camera is that axis measured
 /// against the camera's right, up and forward, and the first two of those are the position on
 /// screen. The third only says which arms are in front.
 /// </para>
@@ -42,7 +43,8 @@ public static class OrientationGizmo
         if (camera.IsNone) return;
 
         var view = ctx.Ecs.GetOrDefault<GlobalTransform>(camera);
-        // Under the panels rather than over them: it belongs to the scene, and a panel dragged
+        // Under the panels rather than over them, because it belongs to the scene and a panel
+        // dragged
         // across it should cover it like anything else the scene is showing.
         var draw = ImGui.GetBackgroundDrawList();
 
@@ -58,8 +60,9 @@ public static class OrientationGizmo
             {
                 var world = axis * way;
 
-                // Against the camera's own basis: right and up place it, forward says how far in
-                // front it is. Bevy's camera looks down its negative Z, so a smaller Z is nearer.
+                // Against the camera's own basis, where right and up place it and forward says how
+                // far in front it is. Bevy's camera looks down its negative Z, so a smaller Z is
+                // nearer.
                 var right = Vec3.Dot(world, view.XAxis);
                 var up = Vec3.Dot(world, view.YAxis);
                 var ahead = -Vec3.Dot(world, view.ZAxis);
@@ -77,7 +80,7 @@ public static class OrientationGizmo
 
         foreach (var arm in arms)
         {
-            // Which half is solid says which way is positive, not which way is nearer: an axis
+            // Which half is solid says which way is positive, not which way is nearer. An axis
             // pointing a little away from the camera still points the way it points, and dimming
             // it because of that is the gizmo saying the world turned over.
             //
@@ -100,7 +103,8 @@ public static class OrientationGizmo
                 continue;
             }
 
-            // The other half is a ring: it says where the axis went without competing with the end
+            // The other half is a ring, which says where the axis went without competing with the
+            // end
             // somebody is reading.
             draw.AddCircle(arm.At, knob * 0.8f, packed, 0, 1.6f);
         }

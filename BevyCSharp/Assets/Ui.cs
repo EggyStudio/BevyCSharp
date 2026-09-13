@@ -63,7 +63,7 @@ public static unsafe class Ui
     /// Spawns a run of text, set as <paramref name="style"/> describes.
     /// </summary>
     /// <remarks>
-    /// Where a paragraph rather than a label is wanted: the text is broken to the width the
+    /// Where a paragraph rather than a label is wanted. The text is broken to the width the
     /// layout gives it, so a node with a <see cref="UiSettings.Width"/> or
     /// <see cref="UiSettings.MaxWidth"/> holds it and a node free to grow does not.
     /// </remarks>
@@ -122,7 +122,8 @@ public static unsafe class Ui
     /// <remarks>
     /// <para>
     /// <see cref="UiInteraction.Pressed"/> lasts from the frame the pointer goes down until it is
-    /// released, so a click is the edge into it: keep the previous answer and compare. A release
+    /// released, so a click is the edge into it, found by keeping the previous answer and comparing.
+    /// A release
     /// over the node reads as <see cref="UiInteraction.Hovered"/> again in the same frame.
     /// </para>
     /// <para>
@@ -167,7 +168,8 @@ public static unsafe class Ui
     /// Draws an image inside a node, tinted, cut down or sliced.
     /// </summary>
     /// <remarks>
-    /// <see cref="UiImageMode.Sliced"/> is what a panel that resizes is drawn with: the corners
+    /// <see cref="UiImageMode.Sliced"/> is what a panel that resizes is drawn with, because the
+    /// corners
     /// keep their size while the middle stretches, so one small image covers every size of box.
     /// </remarks>
     /// <exception cref="BevyNativeException">

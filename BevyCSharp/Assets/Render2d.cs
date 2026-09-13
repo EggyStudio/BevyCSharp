@@ -41,7 +41,7 @@ public static unsafe class Render2d
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The layout is a list of rectangles and nothing else: it says where each frame sits, while
+    /// The layout is a list of rectangles and nothing else, so it says where each frame sits while
     /// the image it describes stays a separate asset. No image is passed here for that reason,
     /// and one layout serves every sheet cut the same way.
     /// </para>

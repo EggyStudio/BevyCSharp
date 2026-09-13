@@ -11,7 +11,7 @@ namespace BevyCSharp.Editor.Framework;
 /// <para>
 /// A theme picked, an opacity dragged, and under them ImGui's own style editor, which is every
 /// colour, rounding and spacing there is. That is what the visual designers people reach for offer,
-/// without any of them: they generate C++ and cannot be part of a C# editor, but the thing they are
+/// without any of them. They generate C++ and cannot be part of a C# editor, but the thing they are
 /// wanted for is dialling a look in and taking it away, and that is a file.
 /// </para>
 /// <para>
@@ -91,7 +91,7 @@ public static class StyleTab
 
         EditorTheme.Divide();
 
-        // Everything else, in ImGui's own editor: it knows every field it has, and anything written
+        // Everything else, in ImGui's own editor, which knows every field it has. Anything written
         // here would be a second list to keep in step with it.
         if (EditorSurface.Region("##style", new Vector2(0f, 0f)))
         {

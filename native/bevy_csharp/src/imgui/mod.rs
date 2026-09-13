@@ -1,8 +1,8 @@
 //! Dear ImGui, drawn by Bevy.
 //!
-//! The interface itself lives on the managed side: it owns the ImGui context, builds the windows
-//! and asks ImGui for the triangles they came to. What is here is the other half of that bargain:
-//! the triangles arrive over the ABI once a frame, and a pass in Bevy's renderer draws them over
+//! The interface itself lives on the managed side. It owns the ImGui context, builds the windows
+//! and asks ImGui for the triangles they came to. What is here is the other half of that bargain.
+//! The triangles arrive over the ABI once a frame, and a pass in Bevy's renderer draws them over
 //! whatever the scene drew.
 //!
 //! Nothing in this module knows what a window or a widget is. It draws clipped, textured triangles
@@ -86,7 +86,8 @@ pub struct BcsImGuiFrame {
 
 /// Takes this frame's triangles.
 ///
-/// Copied rather than kept: the pointers are ImGui's own buffers, and ImGui is free to reuse them
+/// Copied rather than kept, because the pointers are ImGui's own buffers and ImGui is free to
+/// reuse them
 /// the moment this returns.
 ///
 /// # Safety

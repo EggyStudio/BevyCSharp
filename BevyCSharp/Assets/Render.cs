@@ -70,7 +70,8 @@ public static unsafe class Render
     /// <remarks>
     /// A texture the settings leave at <see cref="AssetHandle.None"/> is one the material does
     /// without. A handle that names nothing, which is what a released one becomes, is refused
-    /// instead: drawing the surface untextured and reporting success would leave the caller with
+    /// instead, because drawing the surface untextured and reporting success would leave the caller
+    /// with
     /// a wrong picture and nothing pointing at why.
     /// </remarks>
     /// <exception cref="BevyNativeException">
@@ -147,7 +148,7 @@ public static unsafe class Render
     /// Gives a camera part of the window to draw into, or the whole of it.
     /// </summary>
     /// <remarks>
-    /// What a docked panel needs: the interface takes the right of the window and the scene is told
+    /// What a docked panel needs. The interface takes the right of the window and the scene is told
     /// to draw into what is left, so the picture is the shape of the space rather than the shape of
     /// the window with something over it. A width or height of zero means the whole window again.
     /// </remarks>
@@ -232,7 +233,7 @@ public static unsafe class Render
     /// Sets what a camera does to the picture after the scene has been drawn.
     /// </summary>
     /// <remarks>
-    /// The whole pipeline in one call: an effect the settings leave off is removed from the
+    /// The whole pipeline in one call. An effect the settings leave off is removed from the
     /// camera, so the same call turns something on and off again. Only a camera can be given
     /// these, since it is the camera's render graph that reads them.
     /// </remarks>
@@ -413,7 +414,8 @@ public static unsafe class Render
     /// so calling it for a second camera adds a viewer rather than a second sky.
     /// </para>
     /// <para>
-    /// The camera is given a high dynamic range target, which the sky needs: a sun scattered
+    /// The camera is given a high dynamic range target, which the sky needs, because a sun
+    /// scattered
     /// through air is far brighter than white. Pair it with
     /// <see cref="SetPostProcessing"/> for a tonemapper to bring that range back down.
     /// </para>
@@ -570,7 +572,7 @@ public static unsafe class Render
     /// </summary>
     /// <remarks>
     /// The shape itself rather than a box round it, which is what an editor outlines a selection
-    /// with when the box is not enough. The line pipeline it needs is a desktop one: where a
+    /// with when the box is not enough. The line pipeline it needs is a desktop one. Where a
     /// backend cannot draw lines, this is accepted and nothing appears.
     /// </remarks>
     /// <param name="entity">What to draw, or stop drawing.</param>
@@ -585,7 +587,8 @@ public static unsafe class Render
 
         if (status == NativeStatus.Unsupported) throw NoRenderer("Drawing a wireframe");
 
-        // An entity that has gone is not an error to stop drawing: a selection outlives what it
+        // An entity that has gone is not an error to stop drawing, because a selection outlives
+        // what it
         // pointed at by a frame, and asking after that is how it is cleaned up.
         if (status == NativeStatus.NoEntity) return;
 

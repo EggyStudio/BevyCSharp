@@ -6,7 +6,7 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// A struct C# declares is registered with Bevy from its layout, because Bevy has never heard of
-/// it. Bevy's own components are the opposite problem: they are Rust types the managed side has
+/// it. Bevy's own components are the opposite problem. They are Rust types the managed side has
 /// no handle on, so they are asked for by name and come back as the same kind of id. This
 /// interface carries that name, and the name is the only thing that differs between the two
 /// cases. A type implementing it resolves to the engine's component id instead of registering a
@@ -18,7 +18,7 @@ namespace Bevy;
 /// foreach (var row in ctx.Ecs.Query&lt;Transform&gt;()) { }
 /// </code>
 /// <para>
-/// Implement it explicitly, so the members stay off the value's own surface: they answer a
+/// Implement it explicitly, so the members stay off the value's own surface. They answer a
 /// question about the type, and nothing that holds one of these values wants to see them.
 /// </para>
 /// </remarks>

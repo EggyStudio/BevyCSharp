@@ -30,7 +30,7 @@ pub struct WindowEventCursors {
 
 /// Copies whatever the window has reported since the last call into `out`.
 ///
-/// Returns how many were written, or a negative status. A full buffer is not an error: the rest
+/// Returns how many were written, or a negative status. A full buffer is not an error. The rest
 /// are left in the queue and come back on the next call, because dropping a resize silently would
 /// leave the caller's idea of the window wrong until the next one.
 ///
@@ -126,7 +126,7 @@ pub unsafe extern "C" fn bcs_window_events(out: *mut BcsWindowEvent, capacity: i
 /// Files dropped on the window, waiting to be read out.
 ///
 /// Held between the drain and the reads because a path is text, and text crosses the boundary one
-/// call at a time: the drain reports how many there are, then each is asked for by index.
+/// call at a time. The drain reports how many there are, then each is asked for by index.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::resource::Resource, Default)]
 pub struct FileDrops {

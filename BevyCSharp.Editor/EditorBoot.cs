@@ -100,7 +100,7 @@ public partial struct EditorBoot
         // without every writer having to ask the engine what time it is.
         ConsoleLog.Frame = ctx.Time.FrameCount;
 
-        // Everything the interface is happens between these two: the shell lays the panels out
+        // Everything the interface is happens between these two. The shell lays the panels out
         // and they draw themselves, and what came of it goes to the renderer.
         EditorShell.Tick(ctx);
         EditorShell.Draw();
@@ -161,7 +161,8 @@ public partial struct EditorBoot
     {
         if (!ctx.Input.KeyPressed(Key.Escape)) return;
 
-        // Whatever is being typed into keeps Escape: it is what somebody reaches for when they
+        // Whatever is being typed into keeps Escape, because it is what somebody reaches for when
+        // they
         // have changed their mind about a value, and quitting instead throws away more than that.
         if (ImGuiRuntime.Typing) return;
 

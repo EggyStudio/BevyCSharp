@@ -10,8 +10,8 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// A file under the asset root, loaded by the engine the way every other asset is, and answered by
-/// a name ImGui can put in a draw call. Asked for once per path and kept: an icon is drawn every
-/// frame and loaded once.
+/// a name ImGui can put in a draw call. Asked for once per path and kept, because an icon is drawn
+/// every frame and loaded once.
 /// </para>
 /// <para>
 /// A picture is not there for a frame or two after it is asked for. Nothing is drawn for it until

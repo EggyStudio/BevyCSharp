@@ -26,7 +26,8 @@ public static class ConsoleTab
         var lines = View.Lines();
         var room = ImGui.GetContentRegionAvail();
 
-        // What the box to type in takes, asked for rather than guessed: a number written here is a
+        // What the box to type in takes, asked for rather than guessed, because a number written
+        // here is a
         // number that stops matching the moment the padding changes, and the last line of the log
         // is then cut in half by the edge of the region.
         var typing = ImGui.GetFrameHeightWithSpacing();

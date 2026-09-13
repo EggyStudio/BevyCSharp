@@ -8,7 +8,7 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// Entities and components live in Bevy, reached through <see cref="EcsWorld"/>. Resources
-/// live here, as ordinary C# objects. That split is deliberate: components are hot, blittable
+/// live here, as ordinary C# objects. That split is deliberate. Components are hot, blittable
 /// and iterated by the million, so they belong in Bevy's tables; resources are singletons your
 /// gameplay code reads by type, so keeping them managed avoids marshalling on every access and
 /// lets them be any C# type at all, rather than only a blittable struct.

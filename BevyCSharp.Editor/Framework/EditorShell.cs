@@ -10,14 +10,14 @@ namespace BevyCSharp.Editor.Framework;
 /// <remarks>
 /// <para>
 /// The scene fills the window and the panels float over it, spaced from the window's edges and
-/// from each other, the way Unity's editor arranges itself. A button on the panel docks it: the
-/// margins go, the panel meets the window's edge, and the camera is told to draw into what is left
-/// rather than behind it.
+/// from each other, the way Unity's editor arranges itself. A button on the panel docks it, and
+/// then the margins go, the panel meets the window's edge, and the camera is told to draw into what
+/// is left rather than behind it.
 /// </para>
 /// <para>
 /// Everything here is worked out from three numbers a person can change (whether it is docked, how
 /// wide the panel is, and which tab is open), and nothing is remembered between frames beyond
-/// those. That is what immediate mode buys: the arrangement is a calculation, not a tree of
+/// those. That is what immediate mode buys. The arrangement is a calculation rather than a tree of
 /// widgets that has to be kept in step with itself.
 /// </para>
 /// </remarks>
@@ -30,9 +30,9 @@ public static class EditorShell
     /// How narrow the panel has to be before the world sits above the data rather than beside it.
     /// </summary>
     /// <remarks>
-    /// Beside is the normal arrangement: two columns of a tree and its details is what an editor
-    /// looks like. Stacking is what happens when there is no room for two columns, which is the
-    /// panel at its narrowest and nowhere else.
+    /// Beside is the normal arrangement, because two columns of a tree and its details is what an
+    /// editor looks like. Stacking is what happens when there is no room for two columns, which is
+    /// the panel at its narrowest and nowhere else.
     /// </remarks>
     public const float Stacks = 460f;
 
@@ -44,7 +44,7 @@ public static class EditorShell
     /// </summary>
     /// <remarks>
     /// Monospaced, because a column of numbers that changes while it is being dragged is a column
-    /// whose digits are all different widths: the value shifts sideways under the pointer with
+    /// whose digits are all different widths. The value shifts sideways under the pointer with
     /// every digit that turns over, and three boxes side by side do it out of step with each
     /// other. A figure the same width as every other figure holds still.
     /// </remarks>
@@ -55,7 +55,7 @@ public static class EditorShell
 
     /// <summary>How wide the panel is, in logical pixels.</summary>
     /// <remarks>
-    /// As narrow as it goes, which is the stacked arrangement: an editor opens with the scene
+    /// As narrow as it goes, which is the stacked arrangement. An editor opens with the scene
     /// taking the room and the panel taking what it needs, and widening it is a thing somebody
     /// does when they want two columns.
     /// </remarks>
@@ -88,8 +88,8 @@ public static class EditorShell
 
     /// <summary>Whether the pointer is over the interface rather than over the scene.</summary>
     /// <remarks>
-    /// ImGui answers it: it hit tested every window this frame, and a click it wants is a click
-    /// the scene must not also act on. No position is asked for because none is needed, and a
+    /// ImGui answers it, having hit tested every window this frame, and a click it wants is a
+    /// click the scene must not also act on. No position is asked for because none is needed, and a
     /// parameter that is ignored reads as one that is not.
     /// </remarks>
     public static bool PointerOverPanel => ImGuiRuntime.WantsMouse;
@@ -102,7 +102,7 @@ public static class EditorShell
     {
         ArgumentException.ThrowIfNullOrEmpty(assets);
 
-        // Two faces: what everything is written in, and the one numbers are written in.
+        // Two faces, one for everything and one for numbers.
         ImGuiRuntime.Start(
             Path.Combine(assets, "fonts"),
             15f,
@@ -110,7 +110,7 @@ public static class EditorShell
             Figures);
 
         // Whatever was dialled in and saved, or the editor's own look when there is no file. A
-        // theme is an asset like any other: read at startup, edited by hand or in the style tab.
+        // theme is an asset like any other, read at startup and edited by hand or in the style tab.
         var saved = Path.Combine(assets, "theme.txt");
 
         Wear(File.Exists(saved)
@@ -136,8 +136,8 @@ public static class EditorShell
 
         EditorPicking.Tick(ctx);
 
-        // A selection whose entity is gone is worse than none: the details panel would read
-        // whatever took its place in storage.
+        // A selection whose entity is gone is worse than none, because the details panel would
+        // read whatever took its place in storage.
         EditorSelection.Prune(ctx.Ecs);
 
         var window = ImGuiRuntime.Size;
@@ -163,7 +163,7 @@ public static class EditorShell
             : (0f, 0f, window.X, window.Y);
 
         // Where the scene is still visible, which is what anything drawn over the scene has to
-        // stay inside: docked that is the scene itself, floating it is what the panels leave.
+        // stay inside. Docked that is the scene itself, floating it is what the panels leave.
         Free = Docked
             ? (Scene.X + Scene.Width, Scene.Y + Scene.Height)
             : (panelX, window.Y - strip - margin);
@@ -193,8 +193,8 @@ public static class EditorShell
     /// Which way the world faces, at the bottom right of what the scene has to itself.
     /// </summary>
     /// <remarks>
-    /// Not the bottom right of the scene: undocked the scene is the whole window and the panel is
-    /// over its right, so a cross in that corner is a cross behind the panel.
+    /// Not the bottom right of the scene, because undocked the scene is the whole window and the
+    /// panel is over its right, so a cross in that corner is a cross behind the panel.
     /// </remarks>
     private static void DrawOrientation(BehaviorContext ctx)
     {
@@ -207,7 +207,7 @@ public static class EditorShell
         OrientationGizmo.Draw(ctx, new Vector2(right - gap, bottom - gap));
     }
 
-    /// <summary>What the scene has to itself: the part of it no panel is over.</summary>
+    /// <summary>What the scene has to itself, which is the part of it no panel is over.</summary>
     public static (float Right, float Bottom) Free { get; private set; }
 
     /// <summary>Tells the camera which part of the window it has.</summary>

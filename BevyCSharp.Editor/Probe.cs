@@ -163,7 +163,7 @@ public partial struct Probe
                 break;
 
             case 151:
-                // Saved, changed, and loaded again: what a project file is for is putting the
+                // Saved, changed, and loaded again. What a project file is for is putting the
                 // world back the way it was written, and only a round trip says whether it does.
                 //
                 // This writes the editor's own world and settings files beside the running build,
@@ -217,7 +217,8 @@ public partial struct Probe
                 Report(script, ctx);
                 break;
 
-            // Well after the shot, which is read back off the GPU over several frames: quitting on
+            // Well after the shot, which is read back off the GPU over several frames, so quitting
+            // on
             // the frame it was asked for loses the file.
             case 200:
                 ctx.Exit();
@@ -271,7 +272,7 @@ public partial struct Probe
     /// Clicks where BCS_PROBE_CLICK says, in logical pixels.
     /// </summary>
     /// <remarks>
-    /// Points rather than names, because an immediate mode interface has no elements to look up: a
+    /// Points rather than names, because an immediate mode interface has no elements to look up. A
     /// widget is a call that happened, and where it landed is what the layout decided. Several
     /// points separated by semicolons are clicked one after another, a few frames apart.
     /// </remarks>

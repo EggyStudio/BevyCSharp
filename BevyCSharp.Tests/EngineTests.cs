@@ -174,7 +174,7 @@ public sealed class EngineTests
     [Fact]
     public void SystemExceptionsAreReportedRatherThanUnwindingIntoRust()
     {
-        // The point of this test is that the process survives at all: an exception crossing the
+        // The point of this test is that the process survives at all. An exception crossing the
         // FFI boundary would be undefined behavior, so the engine has to swallow it.
         using var app = new App(new Config
         {

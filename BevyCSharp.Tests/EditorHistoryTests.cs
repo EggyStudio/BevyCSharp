@@ -9,7 +9,7 @@ namespace Bevy.Tests;
 /// <remarks>
 /// A pair of stacks over closures, so what is worth testing is which of them runs, in what order,
 /// and what the stacks hold afterwards. The world is only passed through to the closures, but it
-/// is a real one: the ECS is loaned for the length of a system callback, so the assertions run
+/// is a real one. The ECS is loaned for the length of a system callback, so the assertions run
 /// inside one.
 /// </remarks>
 public sealed class EditorHistoryTests

@@ -84,7 +84,8 @@ public static class StageOrder
 
     /// <summary>The stages that run exactly once every frame, in execution order.</summary>
     /// <remarks>
-    /// <see cref="Stage.FixedUpdate"/> is not among them: it runs zero or more times a frame
+    /// <see cref="Stage.FixedUpdate"/> is not among them, because it runs zero or more times a
+    /// frame
     /// rather than once, which is the whole reason it exists.
     /// </remarks>
     public static ReadOnlySpan<Stage> FrameStages() => Frame;

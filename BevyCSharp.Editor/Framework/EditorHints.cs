@@ -10,7 +10,7 @@ namespace BevyCSharp.Editor.Framework;
 /// is nowhere else for the list to come from.
 /// </para>
 /// <para>
-/// The list follows the mode, which is what makes it worth reading: in the move tool it says what
+/// The list follows the mode, which is what makes it worth reading. In the move tool it says what
 /// a drag does, and while flying it says what W and S do. A list of every key in the editor is a
 /// list nobody reads twice.
 /// </para>

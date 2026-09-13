@@ -116,7 +116,8 @@ public sealed class OnFixedUpdateAttribute : Attribute;
 /// <remarks>
 /// <para>
 /// Where a level is built, a menu is shown, or a screen's entities are spawned. Unlike a stage
-/// attribute this is not per frame: it runs once per transition, so anything it creates lasts
+/// attribute this is not per frame, because it runs once per transition, so anything it creates
+/// lasts
 /// until <see cref="OnExitAttribute"/> takes it away.
 /// </para>
 /// <para>
@@ -244,7 +245,7 @@ public sealed class WithoutAttribute : Attribute
 /// <remarks>
 /// Unlike <see cref="WithAttribute"/>, this is a per-entity test against Bevy's change ticks,
 /// so a method carrying it is iterated on the main thread rather than fanned out in parallel.
-/// That is usually the better trade anyway: the filter exists to make the set small.
+/// That is usually the better trade anyway, because the filter exists to make the set small.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 public sealed class ChangedAttribute : Attribute

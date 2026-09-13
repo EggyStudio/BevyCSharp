@@ -7,7 +7,7 @@ namespace BevyCSharp.Editor.Behaviors;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Nothing uses it and nothing spawns with it: it is added by hand from the inspector's own list,
+/// Nothing uses it and nothing spawns with it. It is added by hand from the inspector's own list,
 /// and it is here so that every hint an attribute can leave has somewhere to be looked at. A game
 /// writing its first component can read this file and copy the two or three lines it needs.
 /// </para>

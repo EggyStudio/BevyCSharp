@@ -9,7 +9,7 @@ namespace BevyCSharp.Editor.Behaviors;
 /// <remarks>
 /// <para>
 /// The handles are drawn by <see cref="ViewportGizmos"/> and grabbed here. A handle is picked in
-/// screen space, because that is where the pointer is: the axis is projected onto the viewport and
+/// screen space, because that is where the pointer is. The axis is projected onto the viewport and
 /// whichever line the cursor is nearest to, within a few pixels, is the one grabbed.
 /// </para>
 /// <para>
@@ -30,7 +30,7 @@ public partial struct TransformGizmo
 
     /// <summary>The frame a drag last ended on, or a frame that never happens.</summary>
     /// <remarks>
-    /// Not zero, which is a frame the app really has: left at zero this reads as a drag that ended
+    /// Not zero, which is a frame the app really has. Left at zero this reads as a drag that ended
     /// on the first frame, and everything asking whether one just finished is told yes until the
     /// first real drag replaces it.
     /// </remarks>
@@ -60,7 +60,8 @@ public partial struct TransformGizmo
     /// </summary>
     /// <remarks>
     /// Captured once rather than followed, so a drag applies the same change to each of them from
-    /// where each of them was. Reading them every frame instead would compound: a hand that moved
+    /// where each of them was. Reading them every frame instead would compound, because a hand that
+    /// moved
     /// a metre would move the second thing a metre per frame.
     /// </remarks>
     private static (Entity Entity, Transform Was)[] _others = [];
@@ -137,7 +138,7 @@ public partial struct TransformGizmo
 
         // The point the handles are drawn about, kept for the whole drag. It is the middle of what
         // is on screen rather than the entity's own origin, and the two are not the same thing for
-        // a mesh whose origin sits in a corner: measuring a turn about one while the ring is drawn
+        // a mesh whose origin sits in a corner. Measuring a turn about one while the ring is drawn
         // about the other is a gizmo that answers to a place nobody can see.
         _centre = centre;
         _grabbedAt = (x, y);
@@ -154,8 +155,8 @@ public partial struct TransformGizmo
     /// The three axes as they were when the handle was taken hold of.
     /// </summary>
     /// <remarks>
-    /// Held rather than asked for each frame, because in local space they turn with the thing: a
-    /// rotation read against axes that the same rotation is moving accelerates away from the hand
+    /// Held rather than asked for each frame, because in local space they turn with the thing, and
+    /// a rotation read against axes that the same rotation is moving accelerates away from the hand
     /// holding it.
     /// </remarks>
     private static Vec3[] _axes = [Vec3.UnitX, Vec3.UnitY, Vec3.UnitZ];
@@ -168,7 +169,7 @@ public partial struct TransformGizmo
 
     /// <summary>How many pixels a handle's reach was worth when it was taken hold of.</summary>
     /// <remarks>
-    /// What turns a distance dragged in pixels into a fraction of the handle: dragging the width
+    /// What turns a distance dragged in pixels into a fraction of the handle. Dragging the width
     /// of the gizmo means the same thing on a small screen and a large one.
     /// </remarks>
     private static float _grabbedPixels;
@@ -293,7 +294,7 @@ public partial struct TransformGizmo
     /// expect from a first drag.
     /// </para>
     /// <para>
-    /// It is what somebody wants often enough to be a toggle, though: arranging a row of lamps
+    /// It is what somebody wants often enough to be a toggle, though. Arranging a row of lamps
     /// about a point is turning the arrangement rather than the lamps. In that mode the change is
     /// applied to where each thing is as well as to how it is facing, about the point the handles
     /// are drawn at.
@@ -419,7 +420,8 @@ public partial struct TransformGizmo
                 return;
 
             case EditorTool.Rotate:
-                // A trackball: the pointer's travel across the screen turns the thing about the
+                // A trackball, where the pointer's travel across the screen turns the thing about
+                // the
                 // camera's own two axes, so it rolls the way a ball under a fingertip would rather
                 // than about any axis of its own.
                 var basis = ctx.Ecs.GetOrDefault<GlobalTransform>(camera);
@@ -439,7 +441,7 @@ public partial struct TransformGizmo
 
             case EditorTool.Scale:
                 // How far the hand has gone, as a fraction of the handle's own size. Not the
-                // distance from the middle, which is where this grab began: that would divide by
+                // distance from the middle, which is where this grab began. That would divide by
                 // nothing and send the scale to eighty times its size on the first pixel.
                 // Rightwards and upwards grow, which is the direction the arms point on screen.
                 var travel =

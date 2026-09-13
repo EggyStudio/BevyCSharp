@@ -59,8 +59,8 @@ public static class EditorFlyout
     /// </summary>
     /// <remarks>
     /// Opened once, when it is asked for. Opening it whenever it is not open is how a menu becomes
-    /// one that cannot be dismissed: the click that closes it is followed by a frame that finds it
-    /// closed and opens it again.
+    /// one that cannot be dismissed, because the click that closes it is followed by a frame that
+    /// finds it closed and opens it again.
     /// </remarks>
     internal static void Draw(BehaviorContext ctx)
     {

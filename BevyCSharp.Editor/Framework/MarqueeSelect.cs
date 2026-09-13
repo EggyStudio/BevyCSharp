@@ -15,12 +15,13 @@ namespace BevyCSharp.Editor.Framework;
 /// </para>
 /// <para>
 /// Anything whose box on the screen touches the one being dragged is taken, rather than only what
-/// is wholly inside it: a drag round part of a large object is a drag that meant that object, and a
+/// is wholly inside it, because a drag round part of a large object is a drag that meant that
+/// object, and a
 /// rule that needs the whole of a thing inside the box cannot reach anything larger than the view.
 /// </para>
 /// <para>
 /// Drawn and decided here rather than in a behavior, because both halves need the frame the shell
-/// is in the middle of: the box goes on ImGui's background list, and what the pointer is allowed to
+/// is in the middle of. The box goes on ImGui's background list, and what the pointer is allowed to
 /// start is a question about whether the interface wants it.
 /// </para>
 /// </remarks>
@@ -37,7 +38,8 @@ public static class MarqueeSelect
 
     /// <summary>Whether a box is being dragged right now.</summary>
     /// <remarks>
-    /// Asked by the picking that runs on a release: a release that ended a box is not also a click
+    /// Asked by the picking that runs on a release, because a release that ended a box is not also
+    /// a click
     /// on whatever happened to be under it.
     /// </remarks>
     public static bool Dragging { get; private set; }
@@ -61,8 +63,8 @@ public static class MarqueeSelect
     {
         ArgumentNullException.ThrowIfNull(ctx);
 
-        // Only the tool that is about choosing things. The others own a drag on the viewport: it
-        // moves, turns or scales what is already chosen.
+        // Only the tool that is about choosing things. The others own a drag on the viewport, where
+        // it moves, turns or scales what is already chosen.
         Clicked = false;
 
         if (EditorTools.Current != EditorTool.Select)
@@ -106,7 +108,7 @@ public static class MarqueeSelect
         // the next frame, where there is no drag to find.
         Dragging = far;
 
-        // A drag that went nowhere is a click, and a click is the engine's to answer: it raycasts
+        // A drag that went nowhere is a click, and a click is the engine's to answer. It raycasts
         // the scene and knows what is in front of what, which no rectangle on the screen does.
         if (far) Choose(ctx, start, at, _adds);
     }
@@ -139,7 +141,7 @@ public static class MarqueeSelect
         {
             if (entity == camera) continue;
 
-            // The same things the world list shows, and for the same reason: the interface's own
+            // The same things the world list shows, and for the same reason. The interface's own
             // entities and the engine's bookkeeping have meshes and so have boxes on the screen,
             // and a drag across the viewport that picks up the gizmo renderer has picked up
             // nothing a person meant.
@@ -147,7 +149,8 @@ public static class MarqueeSelect
             if (EditorEntity.IsBookkeeping(ctx.Ecs, entity)) continue;
 
             // Having a box to draw is the same test the world list uses for something nobody
-            // named, and it is the whole test here: what a drag over the viewport can take is
+            // named, and it is the whole test here, because what a drag over the viewport can take
+            // is
             // what the viewport is showing.
             if (!Render.TryGetBounds(entity, out var min, out var max)) continue;
             if (!Touches(camera, min, max, low, high)) continue;

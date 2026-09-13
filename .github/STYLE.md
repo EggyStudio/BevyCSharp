@@ -24,6 +24,20 @@ and a colon introduces a list.
 Hyphens within words (`side-agnostic`), arithmetic operators (`count - 1`) and the names of
 characters (`the minus key`) are unaffected.
 
+The colon introduces a list or labels what follows. It is not a joint between two clauses, and a
+statement followed by its reason is two sentences or one sentence with `because` in it. Used as a
+joint it becomes a tic: every paragraph acquires the same shape, and the reader stops reading the
+mark as anything at all.
+
+| instead of | write |
+|---|---|
+| `the wheel never moves the panel: rolling over a list hands it to whatever holds it` | `the wheel never moves the panel, because rolling over a list hands it to whatever holds it` |
+| `a click is the engine's to answer: it raycasts the scene` | `a click is the engine's to answer. It raycasts the scene` |
+| `not the world: the world is what the project is` | `not the world, which is what the project is` |
+| `three files, because they are edited by different hands: the first is` | `three files, because they are edited by different hands. The first is` |
+| `it offers three: a menu, a button, a key` | unchanged, because a list follows |
+| `**What is not here.** Despawning is not recorded` | unchanged, because the mark labels rather than joins |
+
 ## Section banners
 
 A banner names its section and ends:
@@ -164,6 +178,10 @@ grep -rn "[—–]" --include=*.cs --include=*.rs --include=*.md --include=*.yml
 
 # Spaced hyphens in comments and strings.
 grep -rn "^\s*\(///\|//\|//!\) .* - \|\"[^\"]* - [^\"]*\"" --include=*.cs --include=*.rs .
+
+# Colons joining two clauses in a comment. A list or a label after the mark is correct, so the
+# hits are read rather than counted.
+grep -rn "^\s*\(///\|//\|//!\) .*[a-z]: [a-z]" --include=*.cs --include=*.rs .
 
 # Padded section banners.
 grep -rn "// -- .*--" --include=*.cs --include=*.rs .

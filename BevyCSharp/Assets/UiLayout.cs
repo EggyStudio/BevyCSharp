@@ -29,8 +29,8 @@ public readonly record struct Length(float Value, LengthUnit Unit)
 
     /// <summary>No distance at all.</summary>
     /// <remarks>
-    /// Different from <see cref="Auto"/> where the layout has room to spare: an automatic margin
-    /// takes that room, a zero one does not.
+    /// Different from <see cref="Auto"/> where the layout has room to spare, because an automatic
+    /// margin takes that room and a zero one does not.
     /// </remarks>
     public static Length Zero => new(0f, LengthUnit.Px);
 
@@ -315,7 +315,7 @@ public sealed class UiSettings
     /// </summary>
     /// <remarks>
     /// An interactive node also captures the pointer, so nothing behind it is hovered through it.
-    /// A node left plain carries nothing to update, which is why this is off by default: a HUD is
+    /// A node left plain carries nothing to update, which is why this is off by default. A HUD is
     /// mostly nodes that never react, and every one of them would otherwise be tested against the
     /// pointer each frame. Read the result with <see cref="Ui.InteractionOf"/>.
     /// </remarks>

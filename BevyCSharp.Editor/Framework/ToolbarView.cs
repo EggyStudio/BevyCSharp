@@ -17,7 +17,7 @@ public static class ToolbarView
     /// What floats in the scene's corners.
     /// </summary>
     /// <remarks>
-    /// Not a bar across the top: a bar would take a strip of the scene permanently, and these take
+    /// Not a bar across the top, which would take a strip of the scene permanently. These take
     /// only what they cover. Each group is pinned to a corner of whatever the scene has been left,
     /// so they follow it as the panel is docked or dragged.
     /// </remarks>
@@ -89,8 +89,8 @@ public static class ToolbarView
             var on = button.Active?.Invoke() == true;
             var theme = EditorTheme.Current;
 
-            // Nothing behind a button that is not in force or under the hand: the picture is the
-            // button. What is in force wears the accent, which is the one thing colour means.
+            // Nothing behind a button that is not in force or under the hand, so the picture is
+            // the button. What is in force wears the accent, which is the one thing colour means.
             ImGui.PushStyleColor(
                 ImGuiCol.Button,
                 on ? EditorTheme.LiveAccent : EditorTheme.Alpha(EditorTheme.LiveCard, theme.PanelAlpha));

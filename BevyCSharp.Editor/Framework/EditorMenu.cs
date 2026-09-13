@@ -23,7 +23,8 @@ public enum MenuKind
 /// </summary>
 /// <param name="Path">
 /// Slash separated, so <c>Panels/World/Show interface</c> is a row two levels down. The path is
-/// the whole structure: nothing declares a submenu, they appear because something under them does.
+/// the whole structure. Nothing declares a submenu; they appear because something under them
+/// does.
 /// </param>
 /// <param name="Kind">What the row does.</param>
 /// <param name="Run">What clicking it runs, or nothing for a separator or a submenu.</param>
@@ -70,7 +71,7 @@ public sealed record MenuItem(
 /// </summary>
 /// <remarks>
 /// <para>
-/// A menu is data, for the same reason a layout is: a hamburger menu, a right-click on the world,
+/// A menu is data, for the same reason a layout is. A hamburger menu, a right-click on the world,
 /// a right-click on an entity and a dropdown on a field are the same mechanism pointed at
 /// different paths, and anything that wants to add a command adds a row rather than editing a
 /// panel. A game's own code can add to it as readily as the editor does, which is what makes the
@@ -151,7 +152,7 @@ public static class EditorMenu
                 continue;
             }
 
-            // Something deeper: the branch it goes through becomes a row of this level.
+            // Something deeper, so the branch it goes through becomes a row of this level.
             var prefix = path.Length == 0 ? string.Empty : path + "/";
             if (!item.Path.StartsWith(prefix, StringComparison.Ordinal)) continue;
 

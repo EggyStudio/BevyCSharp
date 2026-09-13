@@ -9,8 +9,8 @@ namespace Bevy;
 /// <para>
 /// Spawning, despawning, adding and removing all move entities between archetypes, which
 /// invalidates every outstanding component reference, including the ones a behavior is
-/// iterating. Rather than forbid the operation mid-loop, commands buffer it: you queue the
-/// change now, it lands during <see cref="Stage.CommandFlush"/> at the end of
+/// iterating. Rather than forbid the operation mid-loop, commands buffer it. You queue the
+/// change now, and it lands during <see cref="Stage.CommandFlush"/> at the end of
 /// <see cref="Stage.PostUpdate"/>, after every system has finished reading.
 /// </para>
 /// <para>

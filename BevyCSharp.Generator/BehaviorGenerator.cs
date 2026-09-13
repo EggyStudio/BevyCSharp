@@ -16,7 +16,7 @@ namespace Bevy.Generator;
 /// a <c>Register(App)</c> that adds them to the schedule. It then emits a single per-assembly
 /// entry point tagged <c>[GeneratedBehaviorRegistration]</c>, which
 /// <c>BehaviorsPlugin</c> finds reflectively at startup. That is the whole reason a consuming
-/// project needs no registration code: the wiring is generated and then discovered.
+/// project needs no registration code, because the wiring is generated and then discovered.
 /// </para>
 /// <para>
 /// The emitted code stays deliberately thin. Iteration, filtering and parallel partitioning
@@ -80,7 +80,8 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Declaration order matters: it is the order the runtime lays the struct out in, and the
+    /// Declaration order matters, because it is the order the runtime lays the struct out in, and
+    /// the
     /// order a tool shows the fields in. Static and constant members are left out, since they
     /// belong to the type rather than to any entity carrying it, and so are private ones, which
     /// are the behavior's own working state and not reachable from the generated schema anyway.
@@ -88,7 +89,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// <para>
     /// A property is described too, and read and written through itself rather than through
     /// whatever it is made of. Something worked out from two fields, something clamped on the way
-    /// in, something stored in one unit and shown in another: all of those are the property's own
+    /// in, something stored in one unit and shown in another. All of those are the property's own
     /// business, and a tool that went round it would show a number nothing else in the program
     /// agrees with. One without a setter is described as read only, which is exactly what it is.
     /// </para>
@@ -259,7 +260,8 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     {
         var hints = FieldHintModel.None;
 
-        // Conditions and change notifications gather rather than replace: several of either can sit
+        // Conditions and change notifications gather rather than replace, because several of either
+        // can sit
         // on one field, and the last one written is not the only one meant.
         var conditions = new List<ConditionModel>();
         var changed = new List<string>();
@@ -344,7 +346,8 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// <remarks>
     /// What a condition compares against, which can be a flag, a number, a word or one of an
     /// enum's names. An enum argument arrives as the number behind the name, so the name is taken
-    /// from the type rather than from the value: a condition written against a name has to be
+    /// from the type rather than from the value, because a condition written against a name has to
+    /// be
     /// checked against one, since the number is not what the field reads as at runtime.
     /// </remarks>
     private static string? Written(AttributeData attribute, int index)
@@ -353,7 +356,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 
         var argument = attribute.ConstructorArguments[index];
 
-        // A boxed object argument arrives wrapped: the declared type is object and the value it
+        // A boxed object argument arrives wrapped, so the declared type is object and the value it
         // holds is what was written.
         if (argument.Kind == TypedConstantKind.Type) return null;
         if (argument.Value is null) return null;
@@ -518,7 +521,8 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// The behavior's own methods that take nothing and return nothing.
     /// </summary>
     /// <remarks>
-    /// Instance methods only, and only the ordinary ones: a property's getter is a method too, and
+    /// Instance methods only, and only the ordinary ones, because a property's getter is a method
+    /// too, and
     /// a static method is not a thing an entity can be told to do. Anything carrying a stage
     /// attribute is a system, which runs on its own schedule rather than when somebody asks.
     /// </remarks>
@@ -553,7 +557,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     {
         if (type.TypeKind != TypeKind.Enum) return EquatableArray<string>.Empty;
 
-        // A flags enum's zero is not one of the things that can be on: it is the name for none of
+        // A flags enum's zero is not one of the things that can be on. It is the name for none of
         // them, and a row offering to turn it on would be a row that turns the others off.
         var bits = IsFlags(type);
 
@@ -587,8 +591,8 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         SpecialType.System_Single => FieldKind.Float,
         SpecialType.System_Double => FieldKind.Double,
         // Every width, as the kind says. A field a tool cannot edit because nobody listed its
-        // width is a field somebody has to write a drawer for, and there is nothing to write: it is
-        // a whole number.
+        // width is a field somebody has to write a drawer for, and there is nothing to write,
+        // because it is a whole number.
         SpecialType.System_Int32 or SpecialType.System_Int16 or SpecialType.System_SByte
             or SpecialType.System_UInt32 or SpecialType.System_UInt16 or SpecialType.System_Byte
             or SpecialType.System_Int64 or SpecialType.System_UInt64
@@ -668,7 +672,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 
         var fields = ReadFields(type);
 
-        // A behavior with fields and no methods is a plain data component: it carries state that
+        // A behavior with fields and no methods is a plain data component, which carries state that
         // other behaviors read and that a tool can show, which is a reason to exist. One with
         // neither is the mistake this warns about.
         if (methods.Count == 0 && fields.Count == 0)

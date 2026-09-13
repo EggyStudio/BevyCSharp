@@ -57,7 +57,7 @@ public static unsafe class ImGuiRuntime
     /// The question a shortcut has to ask, and not the same question as
     /// <see cref="WantsKeyboard"/>. With keyboard navigation switched on, the interface wants the
     /// keyboard whenever any of its windows is focused, which in an editor whose panels are always
-    /// up is always: a shortcut that steps aside for that is a shortcut that never runs. What it
+    /// up is always. A shortcut that steps aside for that is a shortcut that never runs. What it
     /// has to step aside for is a field with a caret in it.
     /// </remarks>
     public static bool Typing => IsRunning && ImGui.GetIO().WantTextInput;
@@ -273,7 +273,7 @@ public static unsafe class ImGuiRuntime
 
     /// <summary>Makes sure a buffer has room, keeping it between frames.</summary>
     /// <remarks>
-    /// Grown and kept rather than allocated per frame: an interface produces a few thousand
+    /// Grown and kept rather than allocated per frame, because an interface produces a few thousand
     /// vertices sixty times a second, and the size it settles at is the size it stays.
     /// </remarks>
     private static void Room<T>(ref T* buffer, ref int room, int wanted, int size) where T : unmanaged

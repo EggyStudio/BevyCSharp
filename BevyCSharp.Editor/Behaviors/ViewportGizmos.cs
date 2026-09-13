@@ -46,7 +46,7 @@ public partial struct ViewportGizmos
     /// </summary>
     /// <remarks>
     /// At the end of the frame rather than during the update, because the bounds a box is drawn
-    /// from come from the global transform, and that is propagated after the update: drawing
+    /// from come from the global transform, and that is propagated after the update, so drawing
     /// earlier draws where the thing was, which reads as a gizmo lagging behind what it is on.
     /// </remarks>
     [OnLast]
@@ -92,7 +92,7 @@ public partial struct ViewportGizmos
     /// <remarks>
     /// <para>
     /// What tells a person where the floor is and how big things are. A scene without one is a
-    /// handful of objects in a void: nothing says which way is level, nothing says whether a cube
+    /// handful of objects in a void. Nothing says which way is level, nothing says whether a cube
     /// is a metre across or ten, and moving something is a guess about how far it went.
     /// </para>
     /// <para>
@@ -135,13 +135,15 @@ public partial struct ViewportGizmos
         var plane = GridHeight + (above * 0.0004f);
 
         // Under the camera, always. Following where the camera is looking sounds helpful and is
-        // not: turning on the spot then drags the whole floor around with the view, and the grid
+        // not, because turning on the spot then drags the whole floor around with the view and the
+        // grid
         // stops being a fixed thing the camera moves over. Straight down from the eye is where it
         // ends up anyway when there is nothing to look at, and behaving the same either way is
         // worth more than reaching a little further ahead.
         var look = new Vec3(eye.X, plane, eye.Z);
 
-        // Three, because a spacing takes two decades to come in and one to go: at any height there
+        // Three, because a spacing takes two decades to come in and one to go, so at any height
+        // there
         // is the one being read, the one behind it, and one further back still barely showing.
         // Coarsest first, so the finer lines are drawn over them rather than under.
         var coarsest = coarse * 10f;
@@ -187,7 +189,7 @@ public partial struct ViewportGizmos
     /// </para>
     /// <para>
     /// Both halves matter and only one of them is obvious. A grid written without thinking about
-    /// the way up fades out correctly and appears at full strength: descending looks right, and
+    /// the way up fades out correctly and appears at full strength. Descending looks right, and
     /// every step of the climb drops a whole new spacing onto the floor in one frame.
     /// </para>
     /// <para>
@@ -198,7 +200,8 @@ public partial struct ViewportGizmos
     /// </para>
     /// <para>
     /// Nothing here knows which spacing is the fine one and which is the coarse one, so nothing
-    /// changes at the moment they swap roles: a ten metre line is as solid at ninety metres up as
+    /// changes at the moment they swap roles, so a ten metre line is as solid at ninety metres up
+    /// as
     /// at a hundred and ten.
     /// </para>
     /// </remarks>
@@ -238,7 +241,7 @@ public partial struct ViewportGizmos
         for (var i = -count; i <= count; i++)
         {
             // How long the line is before it leaves the disc, and how bright it starts. Both come
-            // from how far the line passes from the middle: a line through the middle runs the
+            // from how far the line passes from the middle, so a line through the middle runs the
             // full width at full strength, and one near the rim is a short faint stroke.
             var offset = i * step;
             var away = MathF.Abs(offset);
@@ -347,7 +350,7 @@ public partial struct ViewportGizmos
         // for a move, a turn about whatever way the pointer went for a rotation, and every axis at
         // once for a scale. Drawn first so the arms are over it rather than under.
         // Everything solid is drawn at a size in pixels, so how densely it has to be filled is
-        // known from that alone: the gizmo is the same size on screen wherever it is.
+        // known from that alone. The gizmo is the same size on screen wherever it is.
         float InPixels(float world) => world / reach * Pixels;
 
         Disc(
@@ -528,7 +531,7 @@ public partial struct ViewportGizmos
         }
     }
 
-    /// <summary>What a line covers, in pixels: anything closer together is one solid mark.</summary>
+    /// <summary>What a line covers in pixels. Anything closer together is one solid mark.</summary>
     private const float Covered = 1.4f;
 
     /// <summary>How many spokes a circle of this many pixels needs to have no gaps at its rim.</summary>
@@ -559,7 +562,7 @@ public partial struct ViewportGizmos
 
         // The ray through a point a fixed number of pixels away, taken to the same depth. How far
         // that lands from the centre is what those pixels are worth in the world there, which is
-        // the whole calculation: no field of view is assumed, so a camera set up any way at all
+        // the whole calculation. No field of view is assumed, so a camera set up any way at all
         // gets a handle the size it asked for.
         if (!Render.TryRay(camera, screenX + Pixels, screenY, out var edge, out var sideways))
         {

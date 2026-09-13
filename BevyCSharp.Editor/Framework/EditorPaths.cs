@@ -5,7 +5,7 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// Beside the page, in the asset directory, so that the world's edits and the editor's
-/// preferences are ordinary files: edited by hand, diffed, and shipped with everything else the
+/// preferences are ordinary files, edited by hand, diffed, and shipped with everything else the
 /// editor is made of. A file written anywhere else would be a second kind of state with a second
 /// set of rules.
 /// </remarks>

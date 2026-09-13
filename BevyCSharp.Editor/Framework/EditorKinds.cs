@@ -9,7 +9,7 @@ namespace BevyCSharp.Editor.Framework;
 /// <param name="Icon">The picture a row wears when it matches, under the asset root.</param>
 /// <param name="Order">Which answer wins when more than one matches. Lower is first.</param>
 /// <remarks>
-/// A table rather than a chain of ifs, for the same reason the menu is one: a game that spawns
+/// A table rather than a chain of ifs, for the same reason the menu is one. A game that spawns
 /// something of its own should be able to say what it looks like in the hierarchy by adding a
 /// line, without this file knowing the name of a single one of its types.
 /// </remarks>
@@ -25,7 +25,8 @@ public sealed record EntityKind(string Mark, string Icon, int Order = 0);
 /// assembled here from the components it carries, and the first match in order wins.
 /// </para>
 /// <para>
-/// Matched on the component's qualified name, and remembered per component id: naming a component
+/// Matched on the component's qualified name, and remembered per component id, because naming a
+/// component
 /// crosses the ABI and copies a string, the answer never changes while an app runs, and a
 /// hierarchy would otherwise ask it thousands of times a second.
 /// </para>
@@ -80,7 +81,8 @@ public static class EditorKinds
     /// The picture an entity's row wears.
     /// </summary>
     /// <remarks>
-    /// A behavior of this project's own beats nothing at all but loses to a camera or a mesh: what
+    /// A behavior of this project's own beats nothing at all but loses to a camera or a mesh,
+    /// because what
     /// a thing <em>is</em> is more use in a list than what it happens to be doing.
     /// </remarks>
     public static string IconFor(EcsWorld world, Entity entity)

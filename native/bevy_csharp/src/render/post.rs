@@ -37,7 +37,8 @@ fn drop_temporal(entity: &mut bevy::ecs::world::EntityWorldMut) {
 /// Sets what a camera does to the picture after the scene has been drawn.
 ///
 /// Every effect is applied on every call, so a config describes the whole pipeline rather than
-/// one change to it: an effect the config leaves off is removed from the camera if it was there.
+/// one change to it, so an effect the config leaves off is removed from the camera if it was
+/// there.
 /// That keeps a settings screen honest, since turning bloom off is the same call as turning it on.
 ///
 /// Bloom reads a high dynamic range target, so asking for it without `hdr` gets a picture where
@@ -47,7 +48,8 @@ fn drop_temporal(entity: &mut bevy::ecs::world::EntityWorldMut) {
 /// Temporal antialiasing is the one arm that can be refused. It resolves the whole picture from
 /// past frames, which a multisampled target has not got, and Bevy answers the pair by warning
 /// once a frame and drawing nothing, so a config asking for both is reported as
-/// [`status::INVALID_STATE`] and the camera is left as it was. It also wants a 3D camera: the
+/// [`status::INVALID_STATE`] and the camera is left as it was. It also wants a 3D camera, because
+/// the
 /// jitter it reads back is only applied to one, and on a 2D camera the pass finds nothing to
 /// resolve.
 ///
@@ -212,7 +214,8 @@ pub unsafe extern "C" fn bcs_render_set_post(entity: u64, config: *const BcsPost
 
 /// Sets the lens effects a camera draws through.
 ///
-/// Beside [`bcs_render_set_post`] rather than part of it: that call is the pipeline a settings
+/// Beside [`bcs_render_set_post`] rather than part of it, because that call is the pipeline a
+/// settings
 /// screen owns, and these are what a scene does for a moment. The same rule holds, so a config is
 /// the whole set rather than one change to it and an effect left off is taken off the camera.
 ///
@@ -450,7 +453,7 @@ pub unsafe extern "C" fn bcs_render_set_effects(
 /// points the camera at it, because a scene has one sky and a second planet would be picked
 /// between by distance rather than by intent.
 ///
-/// The sun is whichever directional light is in the scene: the sky is scattered from its
+/// The sun is whichever directional light is in the scene, so the sky is scattered from its
 /// direction and color, so moving that light moves the sun and a scene without one gets a
 /// night sky.
 ///
@@ -514,7 +517,8 @@ pub unsafe extern "C" fn bcs_render_set_atmosphere(
 
                 let scale = if config.scale > 0.0 { config.scale } else { 1.0 };
 
-                // One planet: the existing one is rewritten rather than joined by another, since
+                // One planet, so the existing one is rewritten rather than joined by another,
+                // since
                 // Bevy renders whichever is nearest and two would be a coin toss.
                 let existing = world
                     .query_filtered::<Entity, With<Atmosphere>>()

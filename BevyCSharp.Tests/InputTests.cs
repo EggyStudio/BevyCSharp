@@ -60,7 +60,7 @@ public sealed class InputTests
     public void TheFrameSnapshotIsTheSameSizeOnBothSidesOfTheBridge()
     {
         // Rust writes this struct straight into C#'s memory, so a disagreement about its size or
-        // padding would not fail: it would quietly read input out of the wrong bytes, or write
+        // padding would not fail. It would quietly read input out of the wrong bytes, or write
         // past the end. The numbers are checked against the engine's in the native crate, so a
         // change to either half breaks one of the two.
         Assert.Equal(40, Unsafe.SizeOf<Interop.NativeTime>());

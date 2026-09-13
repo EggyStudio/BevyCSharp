@@ -5,7 +5,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// What the interface does when there is no interface: the entry points exist either way, so the
+/// What the interface does when there is no interface. The entry points exist either way, so the
 /// managed side links against one library and finds out at the call rather than at load.
 /// </summary>
 public sealed class ImGuiTests

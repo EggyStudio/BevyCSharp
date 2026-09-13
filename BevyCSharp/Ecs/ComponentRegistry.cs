@@ -15,7 +15,7 @@ namespace Bevy;
 /// Bevy's own change detection.
 /// </para>
 /// <para>
-/// Ids are per world, so the cache is generation-stamped: creating a second
+/// Ids are per world, so the cache is generation-stamped and creating a second
 /// <see cref="App"/> invalidates every cached id rather than handing out stale ones.
 /// </para>
 /// </remarks>
@@ -162,7 +162,8 @@ public static class ComponentType<T> where T : unmanaged
                     IsSparse)
                 : NativeComponents.Resolve(
                     NativeHandle.NativeName,
-                    // A handle that mirrors nothing has no layout worth checking: its size is
+                    // A handle that mirrors nothing has no layout worth checking, because its size
+                    // is
                     // whatever an empty C# struct happens to be, not the engine type's.
                     NativeHandle.MirrorsLayout ? Size : 0);
             _generation = ComponentRegistry.Generation;

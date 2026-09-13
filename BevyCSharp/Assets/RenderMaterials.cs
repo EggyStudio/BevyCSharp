@@ -26,14 +26,14 @@ public enum AlphaMode
     /// Draw a pixel or skip it, deciding at <see cref="MaterialSettings.AlphaCutoff"/>.
     /// </summary>
     /// <remarks>
-    /// What foliage and chain-link fences want: it keeps the depth buffer honest, so nothing has
+    /// What foliage and chain-link fences want. It keeps the depth buffer honest, so nothing has
     /// to be sorted, at the cost of a hard edge.
     /// </remarks>
     Mask = 1,
 
     /// <summary>Blend with what is behind.</summary>
     /// <remarks>
-    /// Real transparency, and the expensive one: blended surfaces are drawn after everything
+    /// Real transparency, and the expensive one. Blended surfaces are drawn after everything
     /// else and sorted back to front, so two of them overlapping can still be drawn in the wrong
     /// order.
     /// </remarks>
@@ -53,7 +53,7 @@ public enum AlphaMode
 /// </para>
 /// <para>
 /// A texture is an image handle from <see cref="AssetServer.Load"/>, and is combined with the
-/// matching factor rather than replacing it: a base color map on a white base color shows the
+/// matching factor rather than replacing it, so a base color map on a white base color shows the
 /// map unchanged, and tinting it is a matter of setting a color. The image need not have
 /// finished loading, because the material holds a handle rather than pixels.
 /// </para>
@@ -85,7 +85,7 @@ public sealed class MaterialSettings
     /// <para>
     /// The three color channels are a luminance in nits, not a fraction of white, so the
     /// numbers that read as bright are far larger than one. The alpha decides whether the
-    /// camera's exposure is applied to them, and at 1 it is: a camera left at Bevy's own
+    /// camera's exposure is applied to them, and at 1 it is. A camera left at Bevy's own
     /// exposure divides by about a thousand, so 12 nits arrives as a hundredth of white and 12000
     /// arrives as twelve times it. That is what it takes to blow out to white and to give bloom
     /// something to scatter.

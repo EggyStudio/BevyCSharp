@@ -190,7 +190,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // HTML and CSS driven UI, when the profile carries it and the app asked for it.
             //
             // Asked for rather than assumed, because the plugin is not free to an app that never
-            // opens a document: it spawns a camera of its own, registers its widget systems and
+            // opens a document. It spawns a camera of its own, registers its widget systems and
             // watches for documents to build. The editor profile is a superset of the render
             // one, so the sample and a game are built against exactly this library.
             #[cfg(feature = "editor")]
@@ -203,11 +203,13 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             }
 
             // Debug drawing goes through a queue, because a `Gizmos` parameter cannot be held by
-            // an exclusive system. Only registered here: the plugin that draws them comes with
+            // an exclusive system. Only registered here, because the plugin that draws them comes
+            // with
             // `DefaultPlugins`, so a windowless app has nothing to drain into.
             app.init_resource::<crate::gizmos::GizmoQueue>();
             // Drained after everything has had its say, and explicitly after the managed `Last`
-            // systems: both live in `Last`, and without the ordering the scheduler is free to
+            // systems, because both live in `Last` and without the ordering the scheduler is free
+            // to
             // drain the queue before the frame has filled it, which holds every shape back a
             // frame. A gizmo that arrives a frame late reads as one that lags behind whatever it
             // is drawn on, and worst of all on a shape placed relative to the camera, which then
@@ -281,7 +283,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         #[cfg(feature = "render")]
         init_asset_once::<bevy::pbr::StandardMaterial>(&mut app);
 
-        // The same for the air a sky is scattered through: the medium is a description rather
+        // The same for the air a sky is scattered through. The medium is a description rather
         // than a picture, so it is buildable without a window even though nothing draws it.
         // `LightPlugin` registers it on the windowed path.
         #[cfg(feature = "render")]
@@ -301,7 +303,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         app.add_plugins(bevy::world_serialization::WorldSerializationPlugin);
 
         // Registers `AudioSource`, its decoders, and the output device if there is one. Bevy
-        // tolerates having none: it logs and plays nothing, which is what a windowless run wants
+        // tolerates having none, so it logs and plays nothing, which is what a windowless run wants
         // anyway. Without this a sound load panics rather than failing, because Bevy refuses to
         // hand out a handle for an asset type it was never told about.
         #[cfg(feature = "render")]
@@ -315,7 +317,8 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
 
         // A font is a file like any other, and loading one without a window has to work or the
         // load would panic rather than fail. The asset and its loader are all that is registered
-        // here: the rest of `TextPlugin` is layout and glyph atlases, which belong to drawing.
+        // here, because the rest of `TextPlugin` is layout and glyph atlases, which belong to
+        // drawing.
         #[cfg(feature = "render")]
         {
             use bevy::asset::AssetApp;
@@ -340,7 +343,8 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     // Pin the orderings that matter between exclusive C# systems.
     //
     // The frame snapshot runs after Bevy has advanced its clocks, or it would report the previous
-    // frame's time: nothing else in `First` orders the two, so without this the schedule is free
+    // frame's time, because nothing else in `First` orders the two, so without this the schedule
+    // is free
     // to run the snapshot first and `ctx.Time` lags by a frame.
     app.configure_sets(
         First,
@@ -457,7 +461,7 @@ pub unsafe extern "C" fn bcs_app_destroy(handle: *mut BcsApp) {
 
 /// Translates the storage selector the managed side sends into Bevy's own.
 ///
-/// `0` is table storage, which is what almost everything wants: components sit in contiguous
+/// `0` is table storage, which is what almost everything wants. Components sit in contiguous
 /// columns that a query can walk without indirection. `1` is sparse-set storage, which trades
 /// that for cheap insertion and removal, because adding or removing one does not move the entity
 /// between archetypes. It suits a tag that is toggled far more often than it is iterated.
@@ -574,7 +578,7 @@ pub unsafe extern "C" fn bcs_component_register_live(
 /// Resolves one of Bevy's own components to the id the ECS entry points take.
 ///
 /// C# components are registered from a layout because Bevy has never heard of them. Bevy's own
-/// components are the opposite problem: they are Rust types the managed side has no handle on,
+/// components are the opposite problem. They are Rust types the managed side has no handle on,
 /// so it asks for them by name and gets back the same kind of id. Everything downstream, the
 /// inserts, the queries, the chunked iteration, is already keyed on ids rather than types, so
 /// nothing else has to change to make these usable.
@@ -667,7 +671,7 @@ pub unsafe extern "C" fn bcs_component_layout(
 /// Reports where Bevy places each field of `Transform`.
 ///
 /// A size check alone is not enough to trust a mirrored struct. `Transform` uses Rust's default
-/// representation, which allows the compiler to reorder fields, and it does: the sixteen-byte
+/// representation, which allows the compiler to reorder fields, and it does. The sixteen-byte
 /// aligned `Quat` is moved ahead of the two vectors. The reordered and source-order layouts
 /// happen to be the same total size, so only the offsets tell the two apart.
 ///
@@ -702,7 +706,8 @@ pub unsafe extern "C" fn bcs_transform_layout(
 /// The world-space result of propagation, and the one component a parented entity cannot compute
 /// for itself. `GlobalTransform` wraps a private `Affine3A`, so its offsets cannot be taken the
 /// way `Transform`'s are. They come from the affine instead, and the wrapper is confirmed to be
-/// nothing but that affine by comparing the two sizes: a single-field struct that is exactly the
+/// nothing but that affine by comparing the two sizes, because a single-field struct that is
+/// exactly the
 /// size of its field has nowhere else to put it.
 ///
 /// The offsets matter as much as they do for `Transform`, and for the same reason. `Vec3A` is
@@ -750,7 +755,8 @@ pub unsafe extern "C" fn bcs_global_transform_layout(
 /// The other mirrors are structs, where a size and a set of offsets pin the layout down. This one
 /// is a fieldless enum, and what has to match is which number stands for which variant. Rust does
 /// not promise a discriminant order for a default-representation enum, and nothing about a
-/// one-byte mirror would look wrong if the engine renumbered them: hiding an entity would quietly
+/// one-byte mirror would look wrong if the engine renumbered them, because hiding an entity would
+/// quietly
 /// start meaning something else.
 ///
 /// # Safety
@@ -826,7 +832,7 @@ pub unsafe extern "C" fn bcs_app_add_system(
             Stage::Update => {
                 app.app.add_systems(Update, run);
             }
-            // Deliberately unordered against the once-a-frame stages: it runs a variable
+            // Deliberately unordered against the once-a-frame stages, because it runs a variable
             // number of times between them.
             Stage::FixedUpdate => {
                 app.app.add_systems(FixedUpdate, run);

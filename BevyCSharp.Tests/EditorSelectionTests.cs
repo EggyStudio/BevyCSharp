@@ -52,8 +52,8 @@ public sealed class EditorSelectionTests
         var again = Entity.None;
         var found = false;
 
-        // A frame apart, because a despawn asked for inside a system happens at the end of it: the
-        // entity is still alive for the rest of the callback that let it go.
+        // A frame apart, because a despawn asked for inside a system happens at the end of it, so
+        // the entity is still alive for the rest of the callback that let it go.
         harness.OnContext(Stage.Update, ctx =>
         {
             switch (step++)

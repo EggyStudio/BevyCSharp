@@ -21,7 +21,7 @@ public enum PointerAction
 /// </summary>
 /// <remarks>
 /// <para>
-/// For tests and tools. What a click does is not one thing: a widget decides it was clicked, an
+/// For tests and tools. What a click does is not one thing. A widget decides it was clicked, an
 /// editor decides what that meant, and something in the world changes. Calling the method a click
 /// would have called tests the method and not the path to it, and the path is where the interesting
 /// failures are: a handle that cannot be grabbed, a menu that opens once, a value that goes in and
@@ -30,7 +30,7 @@ public enum PointerAction
 /// <para>
 /// It writes into ImGui's own event queue, which is where a real pointer's report ends up, so
 /// everything the interface does behaves exactly as it would. It cannot move the operating system's
-/// cursor, and does not try to: what it drives is the application, not the desktop.
+/// cursor, and does not try to, because what it drives is the application rather than the desktop.
 /// </para>
 /// <para>
 /// While anything here has been called, the pointer the interface sees is the one that was asked
@@ -58,8 +58,9 @@ public static class SyntheticInput
     /// Rolls the wheel, in the lines a wheel with detents reports.
     /// </summary>
     /// <remarks>
-    /// Positive is away from the hand, which is up in a list. The pointer is not moved first: what
-    /// the wheel affects is decided by where it already is, so a test moves it and then rolls.
+    /// Positive is away from the hand, which is up in a list. The pointer is not moved first,
+    /// because what the wheel affects is decided by where it already is, so a test moves it and then
+    /// rolls.
     /// </remarks>
     public static void Wheel(float lines, float sideways = 0f)
     {

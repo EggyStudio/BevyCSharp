@@ -31,7 +31,7 @@ public sealed class Time
     /// </summary>
     /// <remarks>
     /// A constant, set by <see cref="Config.FixedHz"/> and defaulting to Bevy's 64 Hz, not a
-    /// reading that varies with the frame. That is the point: integrate with this and the same
+    /// reading that varies with the frame. That is the point. Integrate with this and the same
     /// inputs give the same results on any machine, where integrating with
     /// <see cref="DeltaSeconds"/> ties the result to how fast the frame happened to be.
     /// </remarks>

@@ -40,7 +40,7 @@ public static class EditorPicking
         MarqueeSelect.Tick(ctx);
 
         // Where the click that is being answered began. Asked at the press rather than now,
-        // because the pointer moves: the engine raycasts the scene and knows nothing of the panels
+        // because the pointer moves. The engine raycasts the scene and knows nothing of the panels
         // drawn over it, so what decides whether a pick belongs to the editor is where the button
         // went down, and a hand that has since travelled over a panel has not changed that.
         if (ctx.Input.MousePressed(MouseButton.Left))
@@ -71,7 +71,7 @@ public static class EditorPicking
             if (!_onScene) break;
 
             // A release that ended a box is not also a click on whatever the pointer came to rest
-            // over: the box already said what it meant.
+            // over, because the box already said what it meant.
             if (MarqueeSelect.Dragging) break;
 
             // Nor is the release that ends a drag on a transform handle. Read as a click it

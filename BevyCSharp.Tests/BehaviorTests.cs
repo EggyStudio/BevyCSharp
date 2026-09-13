@@ -190,7 +190,8 @@ public sealed class BehaviorTests
 
         StageRecorder.Recording = false;
 
-        // Recording runs for the whole app rather than being switched on mid-frame: two systems
+        // Recording runs for the whole app rather than being switched on mid-frame, because two
+        // systems
         // in the same stage have no ordering between them, so anything that tried to start
         // recording from inside a stage would race whichever system shares it. Instead, take a
         // whole frame out of the middle by anchoring on the first First.

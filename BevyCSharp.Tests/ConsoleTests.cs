@@ -8,7 +8,8 @@ namespace Bevy.Tests;
 /// The log a console shows, and what it does with what is typed into it.
 /// </summary>
 /// <remarks>
-/// None of this needs an engine: a console is a list of lines, a list of commands and a history,
+/// None of this needs an engine, because a console is a list of lines, a list of commands and a
+/// history,
 /// and the panels that draw it are the only part that needs a window.
 /// </remarks>
 public sealed class ConsoleTests
@@ -87,7 +88,8 @@ public sealed class ConsoleTests
         view.Run("echo two");
         view.Run("echo two");
 
-        // A command run twice in a row is remembered once: the arrows are for getting back to a
+        // A command run twice in a row is remembered once, because the arrows are for getting back
+        // to a
         // command, and two presses that do nothing are two presses too many.
         Assert.Equal("echo two", view.Back(string.Empty));
         Assert.Equal("echo one", view.Back(string.Empty));

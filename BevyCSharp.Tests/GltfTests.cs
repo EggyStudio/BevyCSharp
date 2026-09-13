@@ -69,7 +69,7 @@ public sealed class GltfTests
     [Fact]
     public void AGltfMeshIsAnOrdinaryMeshHandle()
     {
-        // The point of loading the part rather than the file: what comes back is the same kind of
+        // The point of loading the part rather than the file. What comes back is the same kind of
         // handle Render.CreateMesh produces, so nothing downstream needs a glTF-shaped path.
         using var harness = new EngineHarness(frames: 40, fps: 120);
         if (!App.HasRenderer) return;

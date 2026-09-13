@@ -151,7 +151,7 @@ internal static class BehaviorEmitter
     /// </summary>
     /// <remarks>
     /// Ids are resolved per call rather than cached in a static, because they belong to a
-    /// specific world: caching them would hand stale ids to a second <c>App</c>. The lookup is
+    /// specific world, so caching them would hand stale ids to a second <c>App</c>. The lookup is
     /// a generic static field read, which the JIT reduces to almost nothing.
     /// </remarks>
     private static void EmitFilterIds(StringBuilder source, string name, IReadOnlyList<string> types)

@@ -304,8 +304,8 @@ public sealed class StateTests
     public void AStateRestrictionAndARunConditionMustBothPass()
     {
         // Two run conditions on one system, from two different attributes. They accumulate, so
-        // neither can quietly discard the other: the state being right is not enough if the
-        // other gate is shut.
+        // neither can quietly discard the other, because the state being right is not enough if
+        // the other gate is shut.
         PlayingAndEnabled.Ticks = 0;
         PlayingAndEnabled.Enabled = false;
 
@@ -372,8 +372,8 @@ public sealed class StateTests
     [Fact]
     public void ATransitionRunsOnceRatherThanEveryFrame()
     {
-        // The distinction that makes these worth having: a stage runs every frame the state is
-        // held, an edge runs once as it changes. A screen is built by one and driven by the
+        // The distinction that makes these worth having. A stage runs every frame the state is
+        // held, and an edge runs once as it changes. A screen is built by one and driven by the
         // other.
         ScreenLifecycle.Entered = 0;
         ScreenLifecycle.Exited = 0;

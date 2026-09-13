@@ -15,7 +15,7 @@ public enum PlaybackMode
     /// Play through, then despawn the entity.
     /// </summary>
     /// <remarks>
-    /// What a one-shot effect wants: nothing has to remember to clean it up, and a game firing
+    /// What a one-shot effect wants. Nothing has to remember to clean it up, and a game firing
     /// hundreds of them does not accumulate entities.
     /// </remarks>
     Despawn = 2,
@@ -56,7 +56,8 @@ public sealed class AudioSettings
     /// Scale applied to the distance between the sound and the listener.
     /// </summary>
     /// <remarks>
-    /// A world measured in metres needs nothing here. One measured in pixels does: a sound a
+    /// A world measured in metres needs nothing here. One measured in pixels does, because a sound
+    /// a
     /// hundred units away would otherwise be inaudible, and a scale of <c>0.01</c> makes that a
     /// metre. Zero leaves Bevy's own scale in place.
     /// </remarks>

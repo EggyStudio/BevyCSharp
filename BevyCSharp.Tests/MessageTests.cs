@@ -65,7 +65,7 @@ public sealed class MessageTests
     [Fact]
     public void AMessageIsNotReadableInTheFrameItWasSent()
     {
-        // The cost of swapping once a frame instead of giving each reader a cursor: the whole
+        // The cost of swapping once a frame instead of giving each reader a cursor. The whole
         // frame agrees on one set, and the sender's own frame is not part of it.
         using var harness = new EngineHarness(frames: 3);
         var sameFrame = -1;
@@ -207,7 +207,7 @@ public sealed class MessageTests
     [Fact]
     public void EngineMessagesArriveOnTheSameBus()
     {
-        // The point of draining Bevy's own messages onto this bus: a reader uses one API and does
+        // The point of draining Bevy's own messages onto this bus. A reader uses one API and does
         // not care which side sent what it is reading. A windowless run reports nothing, so what
         // is asserted here is that reading is safe and empty rather than broken.
         using var harness = new EngineHarness(frames: 4);

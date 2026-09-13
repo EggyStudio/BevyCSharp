@@ -18,7 +18,7 @@ public sealed class GizmoTests
     [Fact]
     public void EveryShapeIsRefusedWithoutAWindow()
     {
-        // The refusal is the contract here: a windowless run must say so rather than collect
+        // The refusal is the contract here. A windowless run must say so rather than collect
         // shapes that nothing will ever draw, which would look like a silent failure.
         using var harness = new EngineHarness(frames: 3);
 

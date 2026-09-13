@@ -46,7 +46,7 @@ public static class EditorSurface
     /// A window that is only the thing drawn in it, on top of <see cref="Placed"/>.
     /// </summary>
     /// <remarks>
-    /// No plate behind it and no room round it: a group of buttons floating over the scene is a
+    /// No plate behind it and no room round it. A group of buttons floating over the scene is a
     /// group of buttons, and a panel under them is a second thing to look at that says nothing.
     /// Taking focus is not wanted either, since pressing one is not a reason to stop typing.
     /// </remarks>
@@ -96,7 +96,8 @@ public static class EditorSurface
     /// <remarks>
     /// The icons are shapes cut out of white, so what colour one comes out is the tint it is drawn
     /// with, which is the theme's to decide. A picture that has not arrived yet draws nothing
-    /// rather than a placeholder: the asset server answers on a later frame and the row redraws.
+    /// rather than a placeholder, because the asset server answers on a later frame and the row
+    /// redraws then.
     /// </remarks>
     /// <param name="draw">What to draw into.</param>
     /// <param name="path">The icon's path under the asset root, or nothing.</param>
@@ -173,7 +174,7 @@ public static class EditorSurface
     internal static readonly Vector2 Pill = new(26f, 2f);
 
     /// <summary>
-    /// One card inside the panel: a fill a shade above it, rounded, and no line anywhere.
+    /// One card inside the panel, which is a fill a shade above it, rounded, with no line anywhere.
     /// </summary>
     /// <remarks>
     /// What separates two of these is the gap between them and the step in their fill. A border

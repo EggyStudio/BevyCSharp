@@ -4,7 +4,7 @@ namespace Bevy;
 /// How a sprite is drawn.
 /// </summary>
 /// <remarks>
-/// A sprite is a picture in the world rather than on the screen: it carries a
+/// A sprite is a picture in the world rather than on the screen. It carries a
 /// <see cref="Transform"/> like anything else, and a 2D camera decides what a world unit is worth
 /// in pixels. For something pinned to the screen, use <see cref="Ui"/>.
 /// </remarks>
@@ -33,7 +33,7 @@ public enum SpriteImageMode
 /// </summary>
 /// <remarks>
 /// A sprite is centred on its transform unless told otherwise, which is awkward for anything
-/// standing on the ground: its feet are then half a sprite below where it was placed. The
+/// standing on the ground, whose feet are then half a sprite below where it was placed. The
 /// coordinates run from <c>-0.5</c> to <c>0.5</c> on each axis, with y upwards, so any point in
 /// between is expressible as well as the nine named here.
 /// </remarks>

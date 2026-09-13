@@ -140,8 +140,9 @@ fn align_items(value: i32) -> bevy::ui::AlignItems {
 
 /// Builds the `Node` a config describes.
 ///
-/// An unknown code for one of the three enums takes Bevy's default rather than being refused: the
-/// managed side is what names them, and a bridge older than the assembly calling it should lay a
+/// An unknown code for one of the three enums takes Bevy's default rather than being refused,
+/// because the managed side is what names them, and a bridge older than the assembly calling it
+/// should lay a
 /// screen out plainly rather than not at all.
 #[cfg(feature = "render")]
 fn node_from(config: &BcsUiNodeConfig) -> bevy::ui::Node {
@@ -229,7 +230,8 @@ fn border_color_from(config: &BcsUiNodeConfig) -> bevy::ui::BorderColor {
 
 /// Gives a node the components the pointer is tracked with, when its config asks for them.
 ///
-/// `Button` rather than `Interaction` alone: it is the marker that requires both, and it brings
+/// `Button` rather than `Interaction` alone, because it is the marker that requires both, and it
+/// brings
 /// `FocusPolicy::Block` with it, so an interactive node captures the pointer instead of letting
 /// it reach whatever sits behind it. A node left plain carries neither, which keeps the focus
 /// system's work proportional to the number of things that react rather than to the whole screen.
@@ -327,7 +329,8 @@ pub unsafe extern "C" fn bcs_ui_spawn_text(
                 // working with no asset at all. A key that names nothing is a mistake rather
                 // than a reason to fall back quietly, so it refuses.
                 //
-                // `FontSource` can also name a generic family, which is not offered here: that
+                // `FontSource` can also name a generic family, which is not offered here, because
+                // that
                 // path needs Bevy's `system_font_discovery`, and on Linux the crate behind it
                 // links against fontconfig at build time. Text renders nothing at all without
                 // the feature, so the choice is a font of your own or Bevy's.
@@ -353,7 +356,7 @@ pub unsafe extern "C" fn bcs_ui_spawn_text(
                         justify(text_config.justify),
                         linebreak(text_config.linebreak),
                     ),
-                    // The node's color is the text's here: a run of text has no background
+                    // The node's color is the text's here, because a run of text has no background
                     // of its own, and giving it one would need a second entity behind it.
                     TextColor(Color::linear_rgba(
                         config.color[0],
@@ -457,7 +460,7 @@ pub unsafe extern "C" fn bcs_ui_interaction(entity: u64) -> i32 {
 
 /// Draws a picture inside a node, or replaces the one it draws.
 ///
-/// The node keeps its layout: the image fills what the layout gave it, which is what `mode` is
+/// The node keeps its layout, so the image fills what the layout gave it, which is what `mode` is
 /// about. `Auto` takes the picture's own size, so a node with no width or height of its own ends
 /// up the size of the image; the other three fit it to the node instead.
 ///
@@ -551,13 +554,14 @@ pub unsafe extern "C" fn bcs_ui_set_image(entity: u64, config: *const BcsUiImage
 
 /// Moves a node's contents inside it, for a list that scrolls.
 ///
-/// Only means anything on a node whose overflow is set to scroll: that is what clips the contents
+/// Only means anything on a node whose overflow is set to scroll, because that is what clips the
+/// contents
 /// to the node, and this is how far they have been pushed, in logical pixels from the top left.
 /// Bevy has no scrolling input of its own, so a wheel or a drag is read like any other input and
 /// turned into a call here.
 ///
 /// A node is required, and anything else is refused. `ScrollPosition` is a bare component, unlike
-/// `ImageNode`, which brings a `Node` with it: nothing would make the entity a node, so the
+/// `ImageNode`, which brings a `Node` with it. Nothing would make the entity a node, so the
 /// component would sit there being read by no layout while the call reported success. The overflow
 /// is not checked, because the two are set independently and either order has to work.
 #[unsafe(no_mangle)]

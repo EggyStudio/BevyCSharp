@@ -8,13 +8,14 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// A click on a mesh, resolved by Bevy's own picking, which raycasts the scene against the
-/// pointer. The interface is not reported here: a click that landed on a panel belongs to that
+/// pointer. The interface is not reported here, because a click that landed on a panel belongs to
+/// that
 /// panel, and the interface answers for it.
 /// </para>
 /// <para>
 /// Needs a bridge built with the editor profile, which <see cref="App.HasEditor"/> reports.
-/// Drained rather than subscribed to, for the same reason the interface events are: a C# system
-/// is handed the world and cannot hold an observer.
+/// Drained rather than subscribed to, for the same reason the interface events are, which is that a
+/// C# system is handed the world and cannot hold an observer.
 /// </para>
 /// </remarks>
 public static unsafe class Picking

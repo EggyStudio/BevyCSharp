@@ -110,7 +110,7 @@ public sealed unsafe class EcsWorld
     /// </summary>
     /// <remarks>
     /// <para>
-    /// What takes a level away without a teardown system listing everything in it: each entity a
+    /// What takes a level away without a teardown system listing everything in it. Each entity a
     /// screen spawns says which screen it belongs to, and leaving that screen takes it with it.
     /// The despawn is Bevy's own and reaches the entity's children like any other.
     /// </para>
@@ -386,7 +386,7 @@ public sealed unsafe class EcsWorld
     /// </summary>
     /// <remarks>
     /// The other direction of resolving a component by name, and the one a tool showing an
-    /// entity needs: it is handed ids and has to label them. A C# component answers with the
+    /// entity needs. It is handed ids and has to label them. A C# component answers with the
     /// managed type's full name, one of the engine's own with its Rust path.
     /// </remarks>
     /// <exception cref="BevyNativeException">No component has that id.</exception>
@@ -416,7 +416,8 @@ public sealed unsafe class EcsWorld
     /// </summary>
     /// <remarks>
     /// The one thing about an entity that is for people rather than for the program, which is
-    /// why it is also the one an editor has to be able to write: a list of "Entity 42" is a list
+    /// why it is also the one an editor has to be able to write, because a list of "Entity 42" is a
+    /// list
     /// nobody can work in. Bevy's <c>Name</c> holds a string, so it is set through here rather
     /// than through the generic component API, which carries blittable structs only.
     /// </remarks>
@@ -445,7 +446,7 @@ public sealed unsafe class EcsWorld
     /// <remarks>
     /// A filter may name a sparse-stored component (see <see cref="ISparseComponent"/>). That one
     /// cannot be answered per table, so it is answered per entity, which splits a table into the
-    /// runs that satisfy it: the same rows come back, in more chunks.
+    /// runs that satisfy it, so the same rows come back, in more chunks.
     /// </remarks>
     public ChunkSet<T> Chunks<T>(
         ReadOnlySpan<int> with = default,

@@ -80,7 +80,8 @@ public sealed class EditorTableTests
         EditorSettings.Fact(page, "A fact", () => "read only");
         EditorSettings.Action(page, "An action", () => { });
 
-        // Three entries on the page, and nothing about any of them worth keeping: a heading says
+        // Three entries on the page, and nothing about any of them worth keeping, because a
+        // heading says
         // nothing, a fact is worked out again next time, and an action is not a value at all.
         Assert.Equal(3, EditorSettings.On(page).Count);
         Assert.DoesNotContain(page, EditorSettings.Describe());
@@ -95,7 +96,7 @@ public sealed class EditorTableTests
         EditorSettings.Text(page, "Kept", () => kept, value => kept = value);
 
         // A file written by a build that had a setting since renamed. It has to be ignored, not
-        // refused: somebody's preferences outlive the version that wrote them.
+        // refused, because somebody's preferences outlive the version that wrote them.
         EditorSettings.Restore($"{page}\tGone\tsomething\n{page}\tKept\tthere");
 
         Assert.Equal("there", kept);

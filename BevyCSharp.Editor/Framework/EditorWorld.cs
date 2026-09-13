@@ -19,11 +19,13 @@ namespace BevyCSharp.Editor.Framework;
 /// <b>What it does not save.</b> A component the engine owns and this side has no schema for, a
 /// mesh handle or a material or a camera's projection, is not written, because nothing here can
 /// read its fields. Those come back from the code that spawned them. So this is a file of edits over a
-/// scene rather than the scene itself, and it says so: a saved entity is matched back up by name.
+/// scene rather than the scene itself, and it says so, since a saved entity is matched back up by
+/// name.
 /// </para>
 /// <para>
 /// Deliberately not Bevy's own world serialization, which is compiled in and would write the
-/// engine's reflected components properly. It cannot see a C# component at all: those are bytes
+/// engine's reflected components properly. It cannot see a C# component at all, because those are
+/// bytes
 /// registered at runtime with no Rust type behind them, so a file written that way would be
 /// missing everything the game itself put in the world. Between a file that keeps the engine's
 /// half and one that keeps the program's half, the program's half is the one an editor changed.
@@ -31,7 +33,7 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 public static class EditorWorld
 {
-    /// <summary>How the file is written: indented, because it is meant to be read and diffed.</summary>
+    /// <summary>Indented, because the file is meant to be read and diffed.</summary>
     private static readonly JsonSerializerOptions Layout = new() { WriteIndented = true };
 
     /// <summary>UTF-8 without a byte order mark, which nothing here wants and git shows.</summary>
@@ -100,7 +102,7 @@ public static class EditorWorld
     /// Reads a saved world back onto the entities that are already there.
     /// </summary>
     /// <remarks>
-    /// Applied by name rather than by spawning: the entities exist because something spawned
+    /// Applied by name rather than by spawning, because the entities exist already, spawned
     /// them, and what was saved is the edits made to them. An entry naming an entity that is not
     /// in the world is skipped rather than reported, since a scene that changed under a saved
     /// file is ordinary and not an error.

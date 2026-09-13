@@ -112,7 +112,7 @@ public sealed class AudioTests
     public void ControlNeedsTheSinkThatArrivesWithPlayback()
     {
         // Bevy attaches the sink once playback has started, so a call in the same frame reports
-        // that rather than silently doing nothing. Worth pinning down: it reads as a bug
+        // that rather than silently doing nothing. Worth pinning down, because it reads as a bug
         // otherwise.
         using var harness = new EngineHarness(frames: 4);
         if (!App.HasRenderer) return;
@@ -186,7 +186,7 @@ public sealed class AudioTests
     [Fact]
     public void PositionAndSeekNeedTheSinkThatArrivesWithPlayback()
     {
-        // The same rule the volume follows: the sink is what knows where a clip is, and it is
+        // The same rule the volume follows. The sink is what knows where a clip is, and it is
         // attached once playback has started. A machine with no audio device never attaches one
         // at all, which is why the answer is checked for being refused rather than for a number.
         using var harness = new EngineHarness(frames: 4);
@@ -234,7 +234,7 @@ public sealed class AudioTests
     [Fact]
     public void ASoundReportsWhereItIsUntilItIsAskedToLoop()
     {
-        // Both halves need a sound device: without one Bevy attaches no sink and there is
+        // Both halves need a sound device, because without one Bevy attaches no sink and there is
         // nothing to ask, which is why the assertions are guarded on having got an answer.
         using var harness = new EngineHarness(frames: 400, fps: 240);
         if (!App.HasRenderer) return;

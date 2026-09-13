@@ -180,7 +180,8 @@ public static unsafe class StateRegistry
                 + "cannot hold. Declare it over int or a narrower type.");
 
         // Goes through Convert rather than reinterpreting the bytes, which would widen a signed
-        // narrow enum wrongly: a byte-backed member of -1 would arrive as 255. Invariant, because
+        // narrow enum wrongly, since a byte-backed member of -1 would arrive as 255. Invariant,
+        // because
         // what is being converted is a number and a machine's regional settings have no business
         // in it.
         return Convert.ToInt32(value, CultureInfo.InvariantCulture);

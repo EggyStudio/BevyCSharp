@@ -85,7 +85,8 @@ public static unsafe class Window
     /// The window's current size, in logical pixels.
     /// </summary>
     /// <remarks>
-    /// What the window ended up at, which is not always what was asked for: a window manager may
+    /// What the window ended up at, which is not always what was asked for, because a window
+    /// manager may
     /// refuse a resize, and a fullscreen window takes the monitor's size.
     /// </remarks>
     public static (uint Width, uint Height) Size()
@@ -189,7 +190,8 @@ public static unsafe class Window
     /// </summary>
     /// <remarks>
     /// <para>
-    /// <see cref="CursorGrab.Locked"/> is what a first-person camera needs: it reads how far the
+    /// <see cref="CursorGrab.Locked"/> is what a first-person camera needs, because it reads how
+    /// far the
     /// mouse moved rather than where it is, and a free cursor stops moving at the edge of the
     /// screen.
     /// </para>

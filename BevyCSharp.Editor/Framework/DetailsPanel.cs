@@ -15,7 +15,8 @@ namespace BevyCSharp.Editor.Framework;
 /// hints its attributes declared.
 /// </para>
 /// <para>
-/// Bevy's own components are not shown as rows: an entity carries a dozen of them and not one is
+/// Bevy's own components are not shown as rows, because an entity carries a dozen of them and not
+/// one is
 /// something a person edits. The ones worth knowing about are named as tags under the entity, which
 /// is also where a component of this project's own with no fields at all ends up.
 /// </para>
@@ -31,7 +32,7 @@ public static class DetailsPanel
 
         // How many were picked, when it is more than one. The rest of the panel is about the last
         // of them, and without this a drag that took a dozen things looks like a click that took
-        // one: the other eleven are only visible in the list, which may not be on screen.
+        // one, since the other eleven are only visible in the list, which may not be on screen.
         if (EditorSelection.Count > 1)
         {
             ImGui.SameLine();
@@ -63,11 +64,13 @@ public static class DetailsPanel
         // One scrolling region and nothing nested inside it.
         //
         // A child window whose height is worked out from its contents, inside a region that
-        // scrolls, makes the region jump while it is being scrolled: the height it reports depends
+        // scrolls, makes the region jump while it is being scrolled, because the height it reports
+        // depends
         // on what is visible, and what is visible depends on the height. A card is a rectangle
         // drawn behind a group instead, so this is one region with one scroll and no argument.
         // The room the button at the bottom keeps for itself, taken out of the scrolling region
-        // rather than scrolled with it: adding a component is not something to go looking for at
+        // rather than scrolled with it, because adding a component is not something to go looking
+        // for at
         // the end of a long list of what is already there.
         var button = ImGui.GetFrameHeight() + (ImGui.GetStyle().ItemSpacing.Y * 2f);
         var room = ImGui.GetContentRegionAvail().Y - button;
@@ -91,7 +94,7 @@ public static class DetailsPanel
             Component(ctx, entity, schema);
         }
 
-        // What the thing is, under what can be edited about it: a tag says what something carries,
+        // What the thing is, under what can be edited about it. A tag says what something carries,
         // which is worth knowing and never worth the room at the top.
         Tags(ctx, entity);
 
@@ -119,7 +122,8 @@ public static class DetailsPanel
 
         ImGui.BeginGroup();
 
-        // The header wears no fill of its own, and neither does the card: both are drawn behind,
+        // The header wears no fill of its own, and neither does the card, because both are drawn
+        // behind,
         // so the card can be exactly the header grown downwards. Nothing is indented round it, so
         // a component that is closed is the header and nothing else, at the header's own size.
         if (!theme.Stock)
@@ -165,7 +169,8 @@ public static class DetailsPanel
                 ComponentFields.Row(ctx, entity, schema, field);
             }
 
-            // Wrapped rather than run off the edge: a row of buttons as wide as the panel is a row
+            // Wrapped rather than run off the edge, because a row of buttons as wide as the panel
+            // is a row
             // whose last button cannot be pressed.
             var room = ImGui.GetContentRegionAvail().X - Inset;
             var used = 0f;
@@ -222,7 +227,7 @@ public static class DetailsPanel
     /// What can be put on the entity that is not on it already.
     /// </summary>
     /// <remarks>
-    /// Only what the generator emitted a way to add, which is every <c>[Behavior]</c> struct: the
+    /// Only what the generator emitted a way to add, which is every <c>[Behavior]</c> struct. The
     /// engine's own components need a byte-compatible mirror on this side and cannot be built from
     /// a name.
     /// </remarks>
@@ -286,7 +291,8 @@ public static class DetailsPanel
         {
             var schema = ComponentSchemas.For(id);
 
-            // Something of this project's own with no fields to edit. Not the engine's: a mesh, a
+            // Something of this project's own with no fields to edit. Not the engine's, because a
+            // mesh, a
             // material and a visibility are on everything that is drawn, so naming them says
             // nothing about the thing being looked at and crowds out what does.
             if (schema is null) continue;

@@ -74,7 +74,7 @@ public sealed class DynamicSystemTests
     [Fact]
     public void AddingWhileRunningIsRefusedWithoutTheDispatchers()
     {
-        // The default, and the one that catches a system registered from the wrong place: without
+        // The default, and the one that catches a system registered from the wrong place. Without
         // somewhere to put it, a late system would never run and nothing would say so.
         using var harness = new EngineHarness(frames: 4);
 

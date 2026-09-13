@@ -134,8 +134,9 @@ public sealed class ComponentField
 
     /// <summary>Whether this field can be written as well as read.</summary>
     /// <remarks>
-    /// A field the attributes marked as read only answers no, whatever the generator emitted: it
-    /// is the same question from a tool's point of view, and answering it in one place means every
+    /// A field the attributes marked as read only answers no, whatever the generator emitted,
+    /// because it is the same question from a tool's point of view, and answering it in one place
+    /// means every
     /// drawer honours the attribute without knowing about it.
     /// </remarks>
     public bool IsWritable => _write is not null && !Hints.ReadOnly;
@@ -169,8 +170,8 @@ public sealed class ComponentField
 /// <param name="Name">The method's name, which is what the button says.</param>
 /// <param name="Run">Calls it on an entity's copy of the component and writes the result back.</param>
 /// <remarks>
-/// A method with no arguments on a component struct. Anything else has no obvious button: a
-/// method that needs values needs a form, and a method that needs the world is a system rather
+/// A method with no arguments on a component struct. Anything else has no obvious button, because
+/// a method that needs values needs a form, and a method that needs the world is a system rather
 /// than something a person presses once.
 /// </remarks>
 public sealed record ComponentMethod(string Name, Action<EcsWorld, Entity> Run)

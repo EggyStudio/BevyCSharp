@@ -24,7 +24,7 @@ use crate::state::{with_world, with_world_opt};
 /// the asset server a second handle provider for the type, inserts the new store over whatever
 /// was there and adds another copy of the per-frame asset systems. Handles minted before that
 /// point come from a different id space than the one anything reads afterwards, so they resolve
-/// to nothing while every call still reports success: on a windowed build this showed up as
+/// to nothing while every call still reports success. On a windowed build this showed up as
 /// every mesh and material drawing with the fallback and no error anywhere.
 ///
 /// Which types a profile has to register is a question about plugins, and it is answered in
@@ -54,7 +54,8 @@ pub mod load_state {
 
 /// The handles C# is currently holding.
 ///
-/// Freed slots are reused, so an index alone would be ambiguous after a release: a stale index
+/// Freed slots are reused, so an index alone would be ambiguous after a release, because a stale
+/// index
 /// could name a slot that has since been handed to something else. Each slot therefore carries a
 /// generation, and the value C# holds packs both, in the same spirit as an `Entity`.
 #[derive(Resource, Default)]
@@ -175,10 +176,10 @@ pub(crate) fn clone_handle(world: &World, key: i32) -> Option<UntypedHandle> {
 /// Starts loading `path` as the asset type named by `kind`.
 ///
 /// The kind is a name rather than a type because C# has no way to name a Rust type. Which names
-/// are accepted depends on what this build was compiled with: a headless build has the data-only
-/// asset types, a render build adds the ones that need the GPU pipeline.
+/// are accepted depends on what this build was compiled with. A headless build has the data-only
+/// asset types, and a render build adds the ones that need the GPU pipeline.
 ///
-/// A path may name a sub-asset, which is how one glTF file yields many assets: everything after a
+/// A path may name a sub-asset, which is how one glTF file yields many assets. Everything after a
 /// `#` is a label Bevy resolves against the file. `ship.gltf#Mesh0/Primitive0` is a `Mesh` and
 /// `ship.gltf#Material0` a `StandardMaterial`, so a glTF part arrives as an ordinary handle of the
 /// kind it already is, and needs no bridge of its own. `Gltf` itself loads the whole file, which
@@ -329,7 +330,7 @@ pub unsafe extern "C" fn bcs_asset_load_image(
 
 /// Writes the path an asset was loaded from into `out`, returning the length in bytes it needs.
 ///
-/// What turns a handle back into something a person recognises: a field holding an asset shows the
+/// What turns a handle back into something a person recognises. A field holding an asset shows the
 /// file it points at rather than a number, and something saving a world writes the path rather
 /// than a key that means nothing next time the program runs.
 ///
@@ -459,7 +460,8 @@ pub extern "C" fn bcs_scene_spawn(asset: i32) -> u64 {
 
 /// Builds an atlas layout over a grid of equal tiles, and returns its key or a negative status.
 ///
-/// The layout is a list of rectangles and nothing else: it names where each frame sits, while the
+/// The layout is a list of rectangles and nothing else, so it names where each frame sits while
+/// the
 /// image it describes stays a separate asset. That is why no image is passed here, and why one
 /// layout serves every sheet cut the same way.
 ///

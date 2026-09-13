@@ -33,9 +33,10 @@ public enum ToolbarSlot
 /// <param name="Active">Whether it is drawn as the one in force.</param>
 /// <param name="Order">Where it sits among its neighbours. Lower is first.</param>
 /// <remarks>
-/// The same shape as a menu row and for the same reason: a game adding a mode to the viewport
-/// should add a line, not edit a panel. Both halves are optional and either is enough: a picture
-/// alone makes a round button, a word alone makes a pill, and both together make a labelled one.
+/// The same shape as a menu row and for the same reason, which is that a game adding a mode to the
+/// viewport should add a line rather than edit a panel. Both halves are optional and either is
+/// enough. A picture alone makes a round button, a word alone makes a pill, and both together make
+/// a labelled one.
 /// </remarks>
 public sealed record ToolbarButton(
     ToolbarSlot Slot,
@@ -56,8 +57,8 @@ public sealed record ToolbarButton(
 /// </para>
 /// <para>
 /// A table, like the menu, so what is on the toolbar is a decision a game can change. Four slots
-/// rather than nine: the corners a person looks at are the ones near the panels they are working
-/// in, and a toolbar with nine places to look is a search.
+/// rather than nine, because the corners a person looks at are the ones near the panels they are
+/// working in, and a toolbar with nine places to look is a search.
 /// </para>
 /// </remarks>
 public static class EditorToolbar

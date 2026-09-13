@@ -11,7 +11,7 @@ namespace BevyCSharp.Editor.Framework;
 /// <para>
 /// The cross is a thing in the scene that has to appear in a corner of the interface, which is two
 /// coordinate systems meeting. Rendering it to a texture and showing that in a panel would be one
-/// answer; this is the cheaper one: the layout puts an empty square wherever the bar ends up, the
+/// answer; this is the cheaper one. The layout puts an empty square wherever the bar ends up, the
 /// panel reads back where that square landed, and the lines are drawn along the ray through its
 /// centre. Nothing tracks a screen position, because the interface already knows one.
 /// </para>
@@ -32,7 +32,7 @@ public static class EditorGizmoSlot
     /// Whether anything has said where the cross goes lately.
     /// </summary>
     /// <remarks>
-    /// Lately rather than this frame, because the answer goes stale on its own: closing the bar
+    /// Lately rather than this frame, because the answer goes stale on its own. Closing the bar
     /// stops it being reported, and a couple of frames later the cross is back in the corner
     /// without anything having to tell it so.
     /// </remarks>

@@ -246,7 +246,7 @@ public struct Quat : IEquatable<Quat>
     /// <remarks>
     /// <para>
     /// Y outermost, which is what an editor wants and why every editor does it. One of the three
-    /// angles has to be the middle one, and a middle angle only spans half a turn: past a quarter
+    /// angles has to be the middle one, and a middle angle only spans half a turn. Past a quarter
     /// turn its neighbours have to jump to a half turn to describe the rest. Standing that angle
     /// up is the difference between a thing spinning on the spot reading 0, 120, 240 and reading
     /// 180, 60, 180, which is the same rotation and unreadable.
@@ -351,7 +351,7 @@ public struct Transform : INativeComponent
     /// Bevy's own <c>Transform</c> rather than register a second one that merely shares the name.
     /// </summary>
     /// <remarks>
-    /// Implemented explicitly: it answers a question about the type, and nothing holding a
+    /// Implemented explicitly, because it answers a question about the type and nothing holding a
     /// transform wants it on the value's surface.
     /// </remarks>
     readonly string INativeComponent.NativeName => "Transform";
@@ -362,7 +362,7 @@ public struct Transform : INativeComponent
     /// <summary>The layout Bevy gives this struct, which the field order above reproduces.</summary>
     /// <remarks>
     /// Rotation first is not a stylistic choice. Bevy's <c>Transform</c> uses Rust's default
-    /// representation, which permits the compiler to reorder fields, and it does: the
+    /// representation, which permits the compiler to reorder fields, and it does. The
     /// sixteen-byte-aligned <c>Quat</c> is moved ahead of the two vectors to save padding.
     /// Declaring the fields in source order here would compile, pass a size check, and read
     /// every value from the wrong place.

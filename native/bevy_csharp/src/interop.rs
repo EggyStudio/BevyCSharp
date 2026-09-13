@@ -249,7 +249,8 @@ pub struct BcsCameraConfig {
 
 /// What a monitor is and where it sits.
 ///
-/// The name is left out: it is the one field that is text, and nothing else in the bridge hands
+/// The name is left out, because it is the one field that is text and nothing else in the bridge
+/// hands
 /// a string back. A monitor is identified by its index here.
 #[repr(C)]
 #[derive(Clone, Copy, Default)]
@@ -299,7 +300,7 @@ pub struct BcsWindowEvent {
 
 /// What a camera does to the picture after the scene has been drawn.
 ///
-/// One config rather than a component per effect, because these are decided together: bloom wants
+/// One config rather than a component per effect, because these are decided together. Bloom wants
 /// a high dynamic range target, and an antialiasing pass and multisampling are two answers to the
 /// same question. Every field is applied on every call, so a setting left alone is a setting
 /// turned off, and one call describes the whole pipeline.
@@ -339,7 +340,7 @@ pub struct BcsPostConfig {
 /// The lens effects a camera can be given, beside the ones on [`BcsPostConfig`].
 ///
 /// A second config rather than more fields on the first, because the two are decided at
-/// different times: the pipeline is a settings screen, while these are what a scene does for a
+/// different times. The pipeline is a settings screen, while these are what a scene does for a
 /// moment, a hit, a dream, a shot pulling focus. Both share the rule that every field is applied
 /// on every call, so an effect a config leaves off is taken off the camera.
 ///
@@ -490,7 +491,7 @@ pub struct BcsGizmoConfig {
 
 /// How a sprite is drawn.
 ///
-/// A sprite is a picture in the world rather than on the screen: it has a `Transform` like any
+/// A sprite is a picture in the world rather than on the screen. It has a `Transform` like any
 /// other entity, and a 2D camera decides what a world unit is worth in pixels.
 #[repr(C)]
 #[derive(Clone, Copy)]
@@ -552,8 +553,8 @@ pub struct BcsUiTextConfig {
 /// The picture a UI node draws inside itself.
 ///
 /// Separate from the node's own config because an image is attached to a node that already
-/// exists, the way a sprite is attached to an entity: the layout is one decision and what fills
-/// it is another.
+/// exists, the way a sprite is attached to an entity, where the layout is one decision and what
+/// fills it is another.
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct BcsUiImageConfig {
@@ -793,7 +794,7 @@ const _: () = assert!(core::mem::size_of::<BcsFrameState>() == 360);
 /// string is before asking for it. The return value is the length in bytes, whether or not it
 /// fitted, so a caller that guessed too small learns the right size and asks again rather than
 /// receiving a truncated answer. Nothing is written when the buffer is too small, and the bytes
-/// written are never NUL-terminated: the length is the answer.
+/// written are never NUL-terminated, and the length is the answer.
 ///
 /// # Safety
 /// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.

@@ -7,7 +7,7 @@ namespace Bevy.Tests;
 /// Covers turning points by a rotation and reading a rotation back as three angles.
 /// </summary>
 /// <remarks>
-/// Both exist for the same reason: an inspector shows a rotation as three boxes and a gizmo turns
+/// Both exist for the same reason. An inspector shows a rotation as three boxes and a gizmo turns
 /// a handle about an axis, and neither can be written without them. Pure maths, so no engine.
 /// </remarks>
 public sealed class RotationTests
@@ -83,7 +83,7 @@ public sealed class RotationTests
     public void TurningOnTheSpotReadsAsOneAngleAllTheWayRound()
     {
         // What an editor shows for a thing spinning where it stands. Y is the outermost angle, so
-        // it has the whole circle to itself and the other two stay at nothing: the alternative is
+        // it has the whole circle to itself and the other two stay at nothing. The alternative is
         // that a third of the way round the reading jumps to a half turn on both of its neighbours
         // and walks the middle angle backwards, which is the same rotation and unreadable.
         for (var degrees = -175f; degrees <= 175f; degrees += 5f)

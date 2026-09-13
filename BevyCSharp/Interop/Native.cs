@@ -593,7 +593,7 @@ internal static unsafe partial class Native
     /// <remarks>
     /// Text cannot be handed back in a fixed struct field the way a number can, and returning a
     /// pointer would leave the question of who frees it. So the caller owns the buffer and the
-    /// bridge reports the length: one call covers anything short, and only longer text pays for a
+    /// bridge reports the length, so one call covers anything short and only longer text pays for a
     /// second call against a buffer sized from the first answer.
     /// </remarks>
     internal static string ReadText(TextWriter write, string operation)
@@ -618,14 +618,15 @@ internal static unsafe partial class Native
     // The page.
     //
     // One document holds the whole interface. What is here is a document interface and nothing
-    // else: no widgets, no panels, no placement. Where a thing sits and what it looks like is
+    // else, so no widgets, no panels and no placement. Where a thing sits and what it looks like is
     // CSS, read by the same engine a browser reads it with.
     // ---------------------------------------------------------------------------------------
 
     // ---------------------------------------------------------------------------------------
     // The interface.
     //
-    // Dear ImGui runs on this side: it owns the windows, the widgets and what they are worth. All
+    // Dear ImGui runs on this side, where it owns the windows, the widgets and what they are worth.
+    // All
     // that crosses is the triangles it asked for, once a frame, and the pictures they read from.
     // ---------------------------------------------------------------------------------------
 

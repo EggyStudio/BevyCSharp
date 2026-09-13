@@ -96,7 +96,8 @@ public sealed class Config
     /// <remarks>
     /// <para>
     /// What <see cref="ImGuiRuntime"/> needs. Off unless asked for, because it is not free to an
-    /// app that never draws one: it brings the pass that rasterises the interface and the buffers
+    /// app that never draws one, because it brings the pass that rasterises the interface and the
+    /// buffers
     /// it draws from. The editor profile is a superset of the render one, so a game and the editor
     /// run against the same library and this is what tells them apart.
     /// </para>
@@ -112,7 +113,8 @@ public sealed class Config
     /// default of 64.
     /// </summary>
     /// <remarks>
-    /// The rate is a simulation decision rather than a performance one: it fixes the slice of
+    /// The rate is a simulation decision rather than a performance one, because it fixes the slice
+    /// of
     /// time each step covers, and so fixes the results. Change it and a replay of the same
     /// inputs diverges, which is why it belongs here rather than being tuned at runtime.
     /// </remarks>

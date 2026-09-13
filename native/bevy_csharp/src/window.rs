@@ -1,8 +1,8 @@
 //! The window, after it has opened.
 //!
 //! `BcsConfig` decides how the window is created; everything here changes it while the app runs.
-//! Cursor grab is the one that blocks something outright rather than merely being convenient: a
-//! first-person camera cannot work without it.
+//! Cursor grab is the one that blocks something outright rather than merely being convenient,
+//! because a first-person camera cannot work without it.
 //!
 //! Every entry point addresses the primary window. A headless run has none, and says so rather
 //! than silently doing nothing.
@@ -125,7 +125,8 @@ pub unsafe extern "C" fn bcs_window_scale(scale: *mut f32) -> i32 {
 
 /// Writes the window's current size, in logical pixels.
 ///
-/// The size the window ended up at, which is not always the size that was asked for: a window
+/// The size the window ended up at, which is not always the size that was asked for, because a
+/// window
 /// manager may refuse, and a fullscreen window takes the monitor's.
 ///
 /// # Safety
@@ -348,7 +349,8 @@ pub unsafe extern "C" fn bcs_monitor_info(index: i32, out: *mut crate::interop::
 
 /// Writes a monitor's name into `out`, and returns its length in bytes.
 ///
-/// Follows the text convention: the return value is the length whether or not it fitted, so a
+/// Follows the text convention, where the return value is the length whether or not it fitted, so
+/// a
 /// caller that guessed too small can ask again. A monitor the platform does not name reports a
 /// length of zero rather than failing, because an unnamed monitor is ordinary.
 ///

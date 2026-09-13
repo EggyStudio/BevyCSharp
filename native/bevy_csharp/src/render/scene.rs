@@ -12,7 +12,7 @@ use crate::state::{with_world, with_world_opt};
 /// file rather than for this returning.
 ///
 /// This is how a change to the picture is checked without a person looking at it, which is
-/// otherwise the only way: the tests can assert that settings are accepted, and nothing else can
+/// otherwise the only way. The tests can assert that settings are accepted, and nothing else can
 /// tell whether the scene is drawn at all.
 ///
 /// # Safety
@@ -141,7 +141,7 @@ pub unsafe extern "C" fn bcs_render_spawn_camera_3d(config: *const BcsCameraConf
 /// Builds the viewport a camera config asks for, if it asks for one.
 ///
 /// Measured in physical pixels rather than logical ones, because that is what a framebuffer is
-/// divided into: half of a window is half its physical width whatever the display scaling.
+/// divided into, so half of a window is half its physical width whatever the display scaling.
 #[cfg(feature = "render")]
 fn viewport_from(config: &BcsCameraConfig) -> Option<bevy::camera::Viewport> {
     if config.has_viewport == 0 {
@@ -208,7 +208,7 @@ pub extern "C" fn bcs_render_set_layers(entity: u64, mask: u32) -> i32 {
 
 /// Gives a camera part of the window to draw into, or the whole of it.
 ///
-/// What a docked panel needs: the interface takes the right of the window and the scene is told to
+/// What a docked panel needs. The interface takes the right of the window and the scene is told to
 /// draw into what is left, so the picture is the shape of the space rather than the shape of the
 /// window with something over it. A width or height of zero means the whole window again.
 ///
@@ -544,7 +544,8 @@ pub extern "C" fn bcs_render_set_shadow_maps(directional: u32, point: u32) -> i3
 /// What a tool needs to draw a box around what is selected, and what a camera needs to frame it.
 /// Bevy computes an `Aabb` for every mesh it draws, in the mesh's own space, so the eight corners
 /// are put through the entity's global transform here and the box around those is what comes
-/// back. Doing it on this side keeps a rotated object's box honest: transforming the two corners
+/// back. Doing it on this side keeps a rotated object's box honest, because transforming the two
+/// corners
 /// alone would give a box that shrinks as the object turns.
 ///
 /// Reports [`status::NOT_PRESENT`] for an entity Bevy has computed no bounds for, which is
@@ -727,7 +728,7 @@ pub unsafe extern "C" fn bcs_render_world_to_viewport(
 /// Turns a point on the viewport into a ray: origin `x, y, z` then direction `x, y, z`.
 ///
 /// The other half of [`bcs_render_world_to_viewport`], and what makes dragging a gizmo handle
-/// exact rather than approximate: the point being dragged to is where the cursor's ray comes
+/// exact rather than approximate. The point being dragged to is where the cursor's ray comes
 /// closest to the axis being dragged along, which is a question about two lines in the world.
 ///
 /// # Safety

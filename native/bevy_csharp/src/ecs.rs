@@ -22,7 +22,7 @@ const _: () = assert!(size_of::<Entity>() == size_of::<u64>());
 
 /// Rebuilds an `Entity` from the handle C# is holding.
 ///
-/// `Entity.None` is zero, which is not a valid encoding, and it is a value C# hands out: it is
+/// `Entity.None` is zero, which is not a valid encoding, and it is a value C# hands out, being
 /// what `ParentOf` returns for an entity with no parent. Bevy's placeholder is a well-formed
 /// handle that no world ever contains, so passing one on reports "no such entity" through the
 /// ordinary path rather than panicking at the boundary.
@@ -239,7 +239,7 @@ fn table_storage(world: &World, component: ComponentId) -> Option<StorageType> {
 /// exist. A return value greater than `capacity` means the buffer was too small and
 /// nothing usable was written past the end, the caller should grow and call again.
 ///
-/// `mark_changed` mirrors what Bevy's `Query<&mut T>` does: it stamps every returned row
+/// `mark_changed` mirrors what Bevy's `Query<&mut T>` does. It stamps every returned row
 /// with the current change tick, because C# writes straight through `data` and Bevy has
 /// no way to observe those writes itself.
 ///
@@ -419,7 +419,7 @@ pub unsafe extern "C" fn bcs_ecs_chunks(
 // -- Hierarchy
 //
 // Parenting goes through Bevy's own API rather than through raw component writes. `ChildOf` is a
-// relationship: inserting it makes Bevy maintain the matching `Children` list, fire hooks and
+// relationship. Inserting it makes Bevy maintain the matching `Children` list, fire hooks and
 // keep transform propagation honest. Writing the bytes directly would set the field and skip all
 // of that, leaving a hierarchy that looks right in one direction only.
 
@@ -553,7 +553,8 @@ pub unsafe extern "C" fn bcs_ecs_entities(out: *mut u64, capacity: i32) -> i32 {
 
 /// Copies the ids of the components an entity carries into `out`, returning how many it has.
 ///
-/// Follows the same probe convention: a return greater than `capacity` means nothing usable was
+/// Follows the same probe convention, where a return greater than `capacity` means nothing usable
+/// was
 /// written.
 ///
 /// # Safety

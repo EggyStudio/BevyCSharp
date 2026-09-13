@@ -113,7 +113,7 @@ public sealed class ScaleTests
         harness.Run();
 
         // An iteration this size must be handed to the thread pool rather than looped inline.
-        // How many threads the pool then uses is its decision: with few cores and a body this
+        // How many threads the pool then uses is its decision. With few cores and a body this
         // cheap it may finish every partition on the calling thread, which is correct and not
         // something to assert on.
         Assert.True(

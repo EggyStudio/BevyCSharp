@@ -6,8 +6,8 @@ namespace BevyCSharp.Editor.Framework;
 /// Questions about an entity that the editor asks and the world does not.
 /// </summary>
 /// <remarks>
-/// Chiefly one: is this entity part of the thing being edited, or part of the editor looking at
-/// it? The interface is built out of ordinary entities in the same world as the scene, and it
+/// Chiefly one question. Is this entity part of the thing being edited, or part of the editor
+/// looking at it? The interface is built out of ordinary entities in the same world as the scene, and it
 /// names them, so a hierarchy that lists everything lists a row per span of text in its own title
 /// bar. Nothing in the engine draws that line, so it is drawn here.
 /// </remarks>
@@ -24,7 +24,8 @@ public static class EditorEntity
     /// <summary>What the engine calls the camera it draws the interface through.</summary>
     /// <remarks>
     /// A camera like any other as far as the world is concerned, which is exactly why it has to be
-    /// left out of a list of what is in the world: nobody put it there and nobody can edit it.
+    /// left out of a list of what is in the world, because nobody put it there and nobody can
+    /// edit it.
     /// </remarks>
     private const string InterfaceCamera = "Interface camera";
 
@@ -70,7 +71,7 @@ public static class EditorEntity
     /// <remarks>
     /// The renderers gizmo drawing spawns, the entities an observer is held on, and whatever else
     /// a plugin names for its own logs. They are not the interface and they are not the scene, and
-    /// what gives them away is that there is nothing on them: a thing in the world being edited
+    /// what gives them away is that there is nothing on them. A thing in the world being edited
     /// has at least one component that says what it is.
     /// </remarks>
     public static bool IsBookkeeping(EcsWorld world, Entity entity)

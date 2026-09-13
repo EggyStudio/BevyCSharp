@@ -25,13 +25,14 @@ public enum SelectionKind
 /// a toolbar acts on it, and none of the three knows the others exist.
 /// </para>
 /// <para>
-/// More than one entity can be selected, and one of them is the current one: the last one picked.
+/// More than one entity can be selected, and the current one is the last one picked.
 /// Everything that acts on a single thing acts on that one, and everything that can act on many
 /// (an inspector writing a field, a menu row deleting) reads the whole list. A list of one is the
 /// ordinary case and reads exactly as it did when one was all there could be.
 /// </para>
 /// <para>
-/// Selection is not an ECS component. It belongs to the tool rather than to the world: an entity
+/// Selection is not an ECS component. It belongs to the tool rather than to the world, and an
+/// entity
 /// does not become different by being looked at, and a world saved while something was selected
 /// should not carry that.
 /// </para>
@@ -40,14 +41,15 @@ public static class EditorSelection
 {
     /// <summary>Which kind of thing was picked last.</summary>
     /// <remarks>
-    /// The data panel shows one thing, and this is how it knows which: picking a file does not
+    /// The data panel shows one thing, and this is how it knows which. Picking a file does not
     /// deselect an entity, it just becomes the more recent answer to "what am I looking at".
     /// </remarks>
     public static SelectionKind Latest { get; internal set; } = SelectionKind.None;
 
     /// <summary>The entity picked last, or <see cref="Entity.None"/>.</summary>
     /// <remarks>
-    /// What everything acting on one thing acts on: the gizmo handles, the camera framing a
+    /// What everything acting on one thing acts on, which is the gizmo handles, the camera framing
+    /// a
     /// selection, the inspector's heading. When several are selected it is the last one picked,
     /// which is the one somebody was looking at when they picked it.
     /// </remarks>
@@ -66,7 +68,7 @@ public static class EditorSelection
     /// The camera the viewport is looking through.
     /// </summary>
     /// <remarks>
-    /// Held beside the selection because everything that draws into the viewport needs it: a
+    /// Held beside the selection because everything that draws into the viewport needs it. A
     /// handle is projected through this camera, a click is turned into a ray through it, and the
     /// orientation cross is drawn in front of it.
     /// </remarks>
@@ -137,7 +139,8 @@ public static class EditorSelection
     /// <remarks>
     /// Called once a frame by the shell. An entity can be despawned by anything, including a
     /// script the editor just reloaded, and an inspector reading a dead entity would show the
-    /// bytes of whatever took its place in storage. It is also where a selection comes back: what
+    /// bytes of whatever took its place in storage. It is also where a selection comes back, since
+    /// what
     /// a reload despawned it usually spawns again, under the same name.
     /// </remarks>
     public static void Prune(EcsWorld world)
@@ -152,7 +155,8 @@ public static class EditorSelection
         // entity behind it is gone, and a name is the only thing about a selection that outlives
         // the entity holding it.
         //
-        // Only while they are all alive: the frame something is despawned is the frame its name
+        // Only while they are all alive, because the frame something is despawned is the frame its
+        // name
         // can no longer be asked for, so remembering then would forget exactly the name that is
         // about to be needed.
         if (Chosen.TrueForAll(world.IsAlive)) Remember(world);
@@ -187,13 +191,14 @@ public static class EditorSelection
     /// <remarks>
     /// <para>
     /// A script that is reloaded despawns what it made and makes it again, and the new entities
-    /// have new ids: what was selected is gone in the only sense the editor can see. Losing the
+    /// have new ids, so what was selected is gone in the only sense the editor can see. Losing the
     /// selection on every save is the difference between editing a value while the game runs and
     /// finding the thing again each time.
     /// </para>
     /// <para>
     /// By name, which is the only thing that survives, and so wrong for two entities that share
-    /// one: the first with the name is taken. That is worth it, and the alternative is a stable
+    /// one, where the first with the name is taken. That is worth it, and the alternative is a
+    /// stable
     /// identity the engine does not have.
     /// </para>
     /// </remarks>
@@ -212,7 +217,8 @@ public static class EditorSelection
             found.Add(entity);
         }
 
-        // All of them or none. Half a selection coming back is worse than none: an edit meant for
+        // All of them or none. Half a selection coming back is worse than none, because an edit
+        // meant for
         // three things would reach two of them without saying so.
         if (found.Count != Named.Count) return;
 

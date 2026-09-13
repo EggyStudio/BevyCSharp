@@ -60,8 +60,8 @@ internal static class ImGuiInput
             io.AddKeyEvent(mapped, down);
         }
 
-        // What the keys produced, which is the platform's answer: a layout, a dead key and a
-        // modifier all change it, and none of that can be worked out from the key alone.
+        // What the keys produced, which is the platform's answer, because a layout, a dead key and
+        // a modifier all change it, and none of that can be worked out from the key alone.
         foreach (var character in input.Text)
         {
             io.AddInputCharacter(character);
@@ -79,7 +79,7 @@ internal static class ImGuiInput
 
     /// <summary>What was down last frame, so a change can be reported rather than a state.</summary>
     /// <remarks>
-    /// Written after the table it is sized from: a static field is built in the order it is
+    /// Written after the table it is sized from, because a static field is built in the order it is
     /// written, and one built from a field below it is built from nothing.
     /// </remarks>
     private static readonly bool[] Held;

@@ -118,8 +118,9 @@ public static class ConsoleCommands
     /// Runs a line as it was typed, and answers with what to write back.
     /// </summary>
     /// <remarks>
-    /// Everything a command can do wrong is answered with a sentence rather than an exception: the
-    /// console is a place where people type things that are not quite right, and a program that
+    /// Everything a command can do wrong is answered with a sentence rather than an exception,
+    /// because the console is a place where people type things that are not quite right, and a
+    /// program that
     /// stops because somebody misspelled a name is not a tool.
     /// </remarks>
     public static string? Run(string line)
@@ -147,7 +148,7 @@ public static class ConsoleCommands
     /// A line of arguments as words, keeping quoted runs together.
     /// </summary>
     /// <remarks>
-    /// The one piece of syntax a console needs: a name with a space in it is one argument when it
+    /// The one piece of syntax a console needs. A name with a space in it is one argument when it
     /// is quoted. Anything more is a language, and this is not one.
     /// </remarks>
     public static string[] Split(string line)

@@ -14,7 +14,7 @@ namespace BevyCSharp.Editor.Behaviors;
 /// </para>
 /// <para>
 /// Bounds come from the engine, which computes them for everything it draws, so the box is the
-/// object's own rather than a guess from its transform: a scaled, rotated mesh gets a box around
+/// object's own rather than a guess from its transform, so a scaled, rotated mesh gets a box around
 /// where it actually is. An entity the engine draws nothing for, a camera or a light, has no
 /// bounds, and nothing is drawn rather than a box around a point.
 /// </para>
@@ -55,7 +55,8 @@ public partial struct SelectionOutline
 
     /// <summary>Draws a box round each selected thing, once a frame.</summary>
     /// <remarks>
-    /// Each of them rather than one box round the lot: what somebody wants to see is which things
+    /// Each of them rather than one box round the lot, because what somebody wants to see is which
+    /// things
     /// they picked, and a box drawn round two objects at opposite ends of a level contains mostly
     /// the things they did not pick.
     /// </remarks>

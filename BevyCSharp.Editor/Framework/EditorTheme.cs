@@ -15,7 +15,7 @@ namespace BevyCSharp.Editor.Framework;
 /// lines saying what one gap says better.
 /// </para>
 /// <para>
-/// The accent means one thing only: this is what is selected, or what is in force. A colour that
+/// The accent means one thing only, which is what is selected or what is in force. A colour that
 /// means two things means neither.
 /// </para>
 /// <para>
@@ -36,8 +36,9 @@ public sealed record EditorTheme
 
     /// <summary>A group inside a panel.</summary>
     /// <remarks>
-    /// Far enough above the panel that the step survives the scene showing through both: what a
-    /// person sees is the difference between two blended colours, not between two written ones.
+    /// Far enough above the panel that the step survives the scene showing through both, because
+    /// what a person sees is the difference between two blended colours rather than between two
+    /// written ones.
     /// </remarks>
     public Vector4 Card { get; init; } = Rgb(0x1A, 0x1A, 0x1A);
 
@@ -106,8 +107,8 @@ public sealed record EditorTheme
     /// </remarks>
     /// <remarks>
     /// Larger than any control is tall, because ImGui takes the smaller of the rounding and half
-    /// the height: asking for more than that is asking for a capsule, and for a square button it
-    /// is asking for a circle.
+    /// the height. Asking for more than that is asking for a capsule, and for a square button it is
+    /// asking for a circle.
     /// </remarks>
     public float FrameRounding { get; init; } = 32f;
 
@@ -133,7 +134,7 @@ public sealed record EditorTheme
 
     /// <summary>Whether this is the stock ImGui look rather than the editor's own.</summary>
     /// <remarks>
-    /// The stock look is somebody else's decisions, taken whole: applying it means asking ImGui for
+    /// The stock look is somebody else's decisions, taken whole. Applying it means asking ImGui for
     /// its colours rather than writing ours over them, so it stays what ImGui says it is.
     /// </remarks>
     public bool Stock { get; init; }
@@ -246,11 +247,11 @@ public sealed record EditorTheme
         Set(style, ImGuiCol.WindowBg, Alpha(Panel, WindowAlpha));
         Set(style, ImGuiCol.ChildBg, Alpha(Card, seen));
         Set(style, ImGuiCol.PopupBg, Alpha(Card, MathF.Min(1f, seen + 0.1f)));
-        // Nothing here has a menu bar, so this slot carries the group fill instead: it puts the
+        // Nothing here has a menu bar, so this slot carries the group fill instead, which puts the
         // rung in the style editor beside the others rather than leaving one colour unreachable.
         //
-        // Solid: a component's card is what its fields are read against, and the two have to keep
-        // their step whatever the scene behind the panel is doing.
+        // Solid, because a component's card is what its fields are read against, and the two have
+        // to keep their step whatever the scene behind the panel is doing.
         Set(style, ImGuiCol.MenuBarBg, Alpha(Group, 1f));
 
         Set(style, ImGuiCol.Border, Line);
@@ -470,7 +471,8 @@ public sealed record EditorTheme
     /// Whatever this look uses to part two groups of things.
     /// </summary>
     /// <remarks>
-    /// A gap, where the look is the editor's own: hierarchy comes from fill and spacing, and a rule
+    /// A gap, where the look is the editor's own, because hierarchy comes from fill and spacing and
+    /// a rule
     /// across a panel is the border it does without. A line, where the look is ImGui's, because
     /// that is what ImGui's own look does and it is taken whole.
     /// </remarks>

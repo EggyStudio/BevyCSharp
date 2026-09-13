@@ -36,7 +36,7 @@ public sealed class FixedUpdateTests
     [Fact]
     public void FixedDeltaReportsTheConfiguredRate()
     {
-        // A constant, not a reading: this is the slice each step covers, which is what makes a
+        // A constant, not a reading. This is the slice each step covers, which is what makes a
         // fixed-step simulation reproduce itself on a different machine.
         using var harness = new EngineHarness(frames: 3, fixedHz: 50);
         var fixedDelta = 0f;
@@ -64,7 +64,7 @@ public sealed class FixedUpdateTests
     [Fact]
     public void FixedUpdateRunsLessOftenThanTheFrameWhenTheRateIsLow()
     {
-        // With the test above, this is the whole claim: the two are independent in both
+        // With the test above, this is the whole claim. The two are independent in both
         // directions, not merely at different rates.
         using var harness = new EngineHarness(frames: 6, fps: 60, fixedHz: 2);
         var steps = 0;

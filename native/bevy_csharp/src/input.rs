@@ -112,7 +112,8 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
                     return crate::interop::status::INVALID_STATE;
                 };
 
-                // Moved first whatever the action is: a press somewhere the pointer has never been
+                // Moved first whatever the action is, because a press somewhere the pointer has
+                // never been
                 // is a press on whatever it was last over.
                 let moved = CursorMoved {
                     window,
@@ -158,7 +159,7 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
                 world.write_message(bevy::window::WindowEvent::MouseButtonInput(pressed));
 
                 // The state the rest of the frame reads, which the message only reaches next
-                // frame: a test that presses and releases in one call would otherwise report
+                // frame, since a test that presses and releases in one call would otherwise report
                 // nothing to anything asking whether a button is down.
                 if let Some(mut buttons) = world.get_resource_mut::<ButtonInput<MouseButton>>() {
                     match state {
@@ -251,7 +252,8 @@ pub unsafe extern "C" fn bcs_input_key(key: i32, action: i32, text: *const u8, l
 
                 world.write_message(press.clone());
 
-                // And as a window event, for the same reason the pointer writes both: winit writes
+                // And as a window event, for the same reason the pointer writes both, which is
+                // that winit writes
                 // each of them for every real key, so writing one is writing half a keyboard.
                 world.write_message(bevy::window::WindowEvent::KeyboardInput(press));
 

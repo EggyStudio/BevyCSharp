@@ -98,7 +98,7 @@ public sealed class NativeComponentTests
     [Fact]
     public void TransformsCanBeIteratedLikeAnyOtherComponent()
     {
-        // The point of resolving native components to ids: everything downstream already works
+        // The point of resolving native components to ids. Everything downstream already works
         // on ids, so chunked iteration needs no special case.
         using var harness = new EngineHarness(frames: 3);
         var total = 0f;
@@ -238,7 +238,7 @@ public sealed class NativeComponentTests
             Assert.Equal(NativeComponents.Transform, EcsWorld.ComponentId<Transform>());
             Assert.Equal(NativeComponents.ChildOf, EcsWorld.ComponentId<ChildOf>());
 
-            // And the id is the engine's, not one registered from a C# layout: a spawn carrying
+            // And the id is the engine's, not one registered from a C# layout. A spawn carrying
             // the mirror comes back through the id NativeComponents resolved by name.
             var entity = ctx.Ecs.Spawn();
             ctx.Ecs.Add(entity, Transform.At(4f, 0f, 0f));
@@ -251,7 +251,8 @@ public sealed class NativeComponentTests
     [Fact]
     public void NameOnlyHandlesFilterButRefuseTheirBytes()
     {
-        // ChildOf and Children have no C# mirror: an empty struct naming one is a single byte,
+        // ChildOf and Children have no C# mirror, because an empty struct naming one is a single
+        // byte,
         // so an insert through it would write nonsense over a live component. Everything that
         // only needs the id still works.
         using var harness = new EngineHarness(frames: 2);
@@ -305,7 +306,7 @@ public sealed class NativeComponentTests
     [Fact]
     public void GlobalTransformReadsAChildsWorldPosition()
     {
-        // The gap this closes: a child's Transform is relative to its parent, so it cannot answer
+        // The gap this closes. A child's Transform is relative to its parent, so it cannot answer
         // "where is this actually" on its own. Propagation runs in PostUpdate, so Last is the
         // first stage that can read the result.
         using var harness = new EngineHarness(frames: 4);
@@ -459,7 +460,8 @@ public sealed class NativeComponentTests
         Assert.Equal(VisibilityMode.Hidden, read.Mode);
 
         // What Bevy computes from it arrived with the mesh, because that insert goes through the
-        // engine's own path. Whether propagation then updates them is not asserted here: it needs
+        // engine's own path. Whether propagation then updates them is not asserted here, since it
+        // needs
         // VisibilityPlugin, which only a windowed run installs.
         Assert.True(companions);
     }

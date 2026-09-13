@@ -7,7 +7,8 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Everything a console does that is not drawing: which lines are worth showing, what was typed
+/// Everything a console does that is not drawing, which is which lines are worth showing, what was
+/// typed
 /// before, what a half-typed name would complete to, and what to say about it. Where it is drawn
 /// is <see cref="ConsoleTab"/>, and a game that wants its own console draws it differently
 /// against this same class.
@@ -94,7 +95,8 @@ public sealed class ConsoleView
 
         ConsoleLog.Write(LogLevel.Echo, "> " + typed);
 
-        // Remembered once, however many times in a row it is run: what the arrows are for is
+        // Remembered once, however many times in a row it is run, because what the arrows are for
+        // is
         // getting back to a command, and ten copies of the same one is nine presses of nothing.
         if (_history.Count == 0 || _history[^1] != typed) _history.Add(typed);
 
@@ -150,7 +152,7 @@ public sealed class ConsoleView
         return null;
     }
 
-    /// <summary>What to say under the input: what it would complete to, or what it takes.</summary>
+    /// <summary>What it would complete to, or what it takes, said under the input.</summary>
     public string Hint(string typed)
     {
         if (Completion(typed) is { } completion)

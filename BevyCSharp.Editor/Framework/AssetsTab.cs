@@ -8,7 +8,8 @@ namespace BevyCSharp.Editor.Framework;
 /// The files the editor is running out of, as a tab along the bottom.
 /// </summary>
 /// <remarks>
-/// A browser over the asset directory itself: what is listed is exactly what a path in a script or
+/// A browser over the asset directory itself, where what is listed is exactly what a path in a
+/// script or
 /// a component would find, because nothing here imports or catalogues anything. What a row shows is
 /// <see cref="EditorAssets"/>'s to answer; this draws it.
 /// </remarks>
@@ -18,7 +19,7 @@ public static class AssetsTab
     private static readonly HashSet<string> Unfolded = [string.Empty];
 
     /// <summary>
-    /// Draws it: the folders down the left, what is in the chosen one as tiles on the right.
+    /// Draws the folders down the left, and what is in the chosen one as tiles on the right.
     /// </summary>
     /// <remarks>
     /// The shape every asset browser has, and the reason is navigation. A single pane with a way

@@ -26,8 +26,8 @@ public sealed record EditorEdit(
 /// more honest than snapshotting a world and diffing it.
 /// </para>
 /// <para>
-/// <b>What is not here.</b> Despawning is not undoable and is deliberately not recorded: an
-/// entity's mesh and material are engine-side components with no mirror on this side, so what
+/// <b>What is not here.</b> Despawning is not undoable and is deliberately not recorded, because
+/// an entity's mesh and material are engine-side components with no mirror on this side, so what
 /// came back would be an entity with the right name and nothing to draw. Recording it would make
 /// undo look like it worked. The rule this follows is that an operation goes in the history only
 /// when it can be reversed exactly.
@@ -58,7 +58,7 @@ public static class EditorHistory
     /// Records a change that has already been made.
     /// </summary>
     /// <remarks>
-    /// Recording clears what was undone, which is what every editor does: once the world has been
+    /// Recording clears what was undone, which is what every editor does. Once the world has been
     /// changed by hand, the branch that was undone is no longer a thing to return to.
     /// </remarks>
     public static void Record(
@@ -75,8 +75,8 @@ public static class EditorHistory
 
         // Typing a number into a field is one edit to the person doing it and a keystroke's worth
         // of edits to the program. When the last edit was to the same field and nothing else has
-        // happened since, this continues it: the undo stays the value before the typing started
-        // and the redo becomes whatever was typed last.
+        // happened since, this continues it, so the undo stays the value before the typing
+        // started and the redo becomes whatever was typed last.
         if (key is not null && Done.Count > 0 && Done[^1].Key == key)
         {
             Done[^1] = Done[^1] with { What = what, Redo = redo };

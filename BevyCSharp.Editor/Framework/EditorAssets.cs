@@ -15,7 +15,8 @@ public readonly record struct AssetEntry(string Name, string Path, bool IsDirect
 /// <remarks>
 /// <para>
 /// An asset browser over the same directory the engine loads from, which is the honest thing to
-/// show: what is listed here is exactly what a path in a document or a script would find. Nothing
+/// show, since what is listed here is exactly what a path in a document or a script would find.
+/// Nothing
 /// is imported and nothing is catalogued, because the engine does not work that way either.
 /// </para>
 /// <para>
@@ -84,7 +85,8 @@ public static class EditorAssets
     /// The directories directly inside one, for a tree down the side of the browser.
     /// </summary>
     /// <remarks>
-    /// One level at a time rather than the whole tree at once: a tree draws what is unfolded, and
+    /// One level at a time rather than the whole tree at once, because a tree draws what is
+    /// unfolded, and
     /// a deep asset directory read whole on every frame is a directory read for nothing.
     /// </remarks>
     /// <param name="relative">Which directory to look inside, or empty for the root.</param>
@@ -115,7 +117,7 @@ public static class EditorAssets
     /// Every file under the asset root, whatever directory the browser is looking at.
     /// </summary>
     /// <remarks>
-    /// For anything that offers a file to choose rather than one to open: a field holding a mesh
+    /// For anything that offers a file to choose rather than one to open. A field holding a mesh
     /// is not asking about the directory somebody last browsed to. Read from disk on each call,
     /// for the same reason the listing is, and capped so that an asset tree nobody expected cannot
     /// make a menu that takes a second to build.
@@ -192,7 +194,8 @@ public static class EditorAssets
     /// The picture a file's tile wears, under the asset root.
     /// </summary>
     /// <remarks>
-    /// The kind rather than the file, for everything but an image: a browser points an image tile
+    /// The kind rather than the file, for everything but an image, because a browser points an
+    /// image tile
     /// at the image itself, since the interface loads a picture from a path and that is all it
     /// takes. A picture of what a model or a sound contains would be a thumbnail, which needs the
     /// bridge to render one and hand back an asset key.

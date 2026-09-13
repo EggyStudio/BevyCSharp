@@ -5,8 +5,8 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A table-stored component sits in a contiguous column, which is what makes iteration fast: a
-/// query walks it with no indirection. The cost is paid on insertion and removal, because both
+/// A table-stored component sits in a contiguous column, which is what makes iteration fast, since
+/// a query walks it with no indirection. The cost is paid on insertion and removal, because both
 /// move the entity to a different archetype and copy every one of its other components along
 /// with it.
 /// </para>

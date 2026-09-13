@@ -65,7 +65,7 @@ public sealed record EditorSetting(
 /// </para>
 /// <para>
 /// A page is a name and nothing else; it exists because something on it does. That keeps the two
-/// halves from drifting apart: there can be no empty page and no setting with nowhere to live.
+/// halves from drifting apart, so there can be no empty page and no setting with nowhere to live.
 /// </para>
 /// </remarks>
 public static class EditorSettings

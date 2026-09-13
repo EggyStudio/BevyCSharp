@@ -29,7 +29,7 @@ public partial struct Described
     /// <summary>Taken apart, since what it holds is drawable even though it is not.</summary>
     public Mystery Unknown;
 
-    /// <summary>Not drawn at all: there is nothing inside it to draw either.</summary>
+    /// <summary>Not drawn at all, and there is nothing inside it to draw either.</summary>
     public Sealed Shut;
 
     /// <summary>Left out, because a tool has no business with a behavior's own state.</summary>
@@ -43,7 +43,7 @@ public partial struct Described
     /// <summary>Keeps the private field from reading as unused, and is shown as a read only row.</summary>
     public readonly int Private => _private;
 
-    /// <summary>Shown, and written through itself: what it is given is doubled on the way in.</summary>
+    /// <summary>Shown, and written through itself, so what it is given is doubled going in.</summary>
     public float Doubled
     {
         readonly get => Speed;
@@ -523,7 +523,8 @@ public sealed class FieldHintTests
         var schema = ComponentSchemas.For("Bevy.Tests.Hinted");
         var working = Assert.Single(schema!.Fields, field => field.Name == "Working");
 
-        // Left in the table and marked, rather than left out of it: a tool decides what to show,
+        // Left in the table and marked, rather than left out of it, because a tool decides what to
+        // show,
         // and something that saves a component still needs every field.
         Assert.True(working.Hints.Hidden);
     }
@@ -550,7 +551,7 @@ public sealed class FieldHintTests
         Assert.Equal("Front/Held", at.Hints.Foldout);
         Assert.Equal(FieldKind.Vec3, at.Kind);
 
-        // The struct itself is not also a row: it has been replaced by its parts, not annotated
+        // The struct itself is not also a row. It has been replaced by its parts, not annotated
         // with them.
         Assert.DoesNotContain(schema.Fields, field => field.Name == "Front");
 
@@ -592,7 +593,8 @@ public sealed class FieldHintTests
         var held = Assert.Single(schema!.Fields, field => field.Name == "Held");
         var condition = Assert.Single(held.Hints.Conditions);
 
-        // The name rather than the number behind it: what the field reads as at runtime is the
+        // The name rather than the number behind it, because what the field reads as at runtime is
+        // the
         // name, and a condition written against one has to be checked against one.
         Assert.Equal("Mode", condition.Field);
         Assert.Equal("Steady", condition.Value);

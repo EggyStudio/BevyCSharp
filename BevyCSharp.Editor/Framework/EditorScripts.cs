@@ -6,7 +6,7 @@ namespace BevyCSharp.Editor.Framework;
 /// The behavior scripts in the asset directory, compiled while the editor runs.
 /// </summary>
 /// <remarks>
-/// A wrapper around the host and the watcher so that anything can ask for a reload: the watcher
+/// A wrapper around the host and the watcher so that anything can ask for a reload. The watcher
 /// does it when a file changes, and the asset browser offers a button for the case the watcher
 /// cannot see, such as a file written by something that never touches the directory it watches.
 /// </remarks>

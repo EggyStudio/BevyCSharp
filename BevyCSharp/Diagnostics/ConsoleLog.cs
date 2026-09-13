@@ -47,7 +47,8 @@ public readonly record struct LogLine(
 /// the streams is an error if it came from the error stream and information otherwise.
 /// </para>
 /// <para>
-/// A ring rather than a list: a program left running all day writes a great many lines and the
+/// A ring rather than a list, because a program left running all day writes a great many lines and
+/// the
 /// interesting ones are always the last few. Repeats collapse, because the line that repeats every
 /// frame is the one that would otherwise push everything else off the end.
 /// </para>
@@ -72,7 +73,8 @@ public static class ConsoleLog
 
     /// <summary>Starts teeing the output and error streams into the ring.</summary>
     /// <remarks>
-    /// Idempotent, and harmless if it is never called: the ring stays empty and whatever shows it
+    /// Idempotent, and harmless if it is never called, since the ring stays empty and whatever
+    /// shows it
     /// says so.
     /// </remarks>
     public static void Start()

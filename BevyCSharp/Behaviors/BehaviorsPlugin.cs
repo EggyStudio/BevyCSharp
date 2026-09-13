@@ -8,7 +8,7 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// The point of this plugin is that a consuming project needs no registration call, no
-/// partial-class list and no startup boilerplate: drop a <c>[Behavior]</c> struct into any
+/// partial-class list and no startup boilerplate. Drop a <c>[Behavior]</c> struct into any
 /// referenced assembly and it gets scheduled.
 /// </para>
 /// <para>
@@ -184,7 +184,7 @@ public sealed class BehaviorsPlugin : IPlugin
             }
             catch (Exception)
             {
-                // Same again for one type: what cannot be reflected over is not a behavior this
+                // Same again for one type. What cannot be reflected over is not a behavior this
                 // scan is looking for.
                 continue;
             }

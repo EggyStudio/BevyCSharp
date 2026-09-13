@@ -10,7 +10,8 @@ namespace BevyCSharp.Editor.Framework;
 /// <remarks>
 /// Bevy's own word for the thing being listed, so that is what the panel is called. The tree is
 /// walked again only when the population changes or enough frames have gone by that a rename would
-/// otherwise never show: a query and a sort per frame for a list that is the same list is work for
+/// otherwise never show, because a query and a sort per frame for a list that is the same list is
+/// work for
 /// nothing, even in immediate mode.
 /// </remarks>
 public static class WorldPanel
@@ -238,7 +239,8 @@ public static class WorldPanel
     {
         var theme = EditorTheme.Current;
 
-        // Everything after the button is drawn rather than laid out: the button is the row as far
+        // Everything after the button is drawn rather than laid out, because the button is the row
+        // as far
         // as ImGui is concerned, and moving the cursor to put things inside it is how a window ends
         // up believing it is taller than it is.
         var draw = ImGui.GetWindowDrawList();
@@ -250,7 +252,7 @@ public static class WorldPanel
             // twelve were picked and not which one is being looked at, which is the thing somebody
             // is about to edit.
             //
-            // Under the stock look the row wears what ImGui says a chosen row wears instead: a
+            // Under the stock look the row wears what ImGui says a chosen row wears instead. A
             // theme taken whole is taken whole.
             var current = row.Entity == EditorSelection.Current;
 
@@ -296,7 +298,7 @@ public static class WorldPanel
                     colour);
             }
 
-            // The arrow is its own target: clicking it folds, clicking the rest of the row picks.
+            // The arrow is its own target, so clicking it folds while the rest of the row picks.
             if (over
                 && ImGui.IsMouseClicked(ImGuiMouseButton.Left)
                 && ImGui.GetIO().MousePos.X < arrow.X + line + 4f)
@@ -387,7 +389,8 @@ public static class WorldPanel
         {
             var entity = new Entity(bits);
 
-            // A parent that is not itself listed makes its child a root: the alternative is a row
+            // A parent that is not itself listed makes its child a root, because the alternative
+            // is a row
             // nothing can reach.
             if (parent.IsNone || !names.ContainsKey(parent.Bits))
             {

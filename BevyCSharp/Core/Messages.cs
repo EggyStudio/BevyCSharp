@@ -16,7 +16,8 @@ namespace Bevy;
 /// <para>
 /// <b>A reader sees the previous frame's messages.</b> The queue is swapped once at the top of
 /// each frame, so every reader sees the same complete set, exactly once, whatever stage it runs
-/// in and whatever order the systems happen to run. That costs a frame of latency: a message sent
+/// in and whatever order the systems happen to run. That costs a frame of latency, because a
+/// message sent
 /// during a frame is not readable until the next one, including by the sender.
 /// </para>
 /// <para>
@@ -26,7 +27,7 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// <b>Threading.</b> <see cref="Send{T}"/> is safe from a parallel behavior method, like
-/// <see cref="EcsCommands"/>. Reading is not: the readable set belongs to the frame and is
+/// <see cref="EcsCommands"/>. Reading is not, because the readable set belongs to the frame and is
 /// replaced between frames on the main thread.
 /// </para>
 /// </remarks>

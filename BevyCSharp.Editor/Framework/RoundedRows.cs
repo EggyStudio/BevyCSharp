@@ -9,8 +9,8 @@ namespace BevyCSharp.Editor.Framework;
 /// <remarks>
 /// <para>
 /// A menu row, a tree node and a selectable are all drawn by ImGui with a rectangle behind them and
-/// no rounding to give it, and there is no style value for one: a look built on rounded shapes has
-/// square corners wherever a list highlights a row.
+/// no rounding to give it, and there is no style value for one, so a look built on rounded shapes
+/// has square corners wherever a list highlights a row.
 /// </para>
 /// <para>
 /// What fixes it without rewriting those widgets is the draw list's own channels. The row goes on

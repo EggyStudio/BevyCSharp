@@ -193,8 +193,8 @@ public static class EditorCommands
             static () => EditorTools.Space == ToolSpace.Local,
             9));
 
-        // The other thing a drag on the handles has to be told, and a word for the same reason: no
-        // picture says "about each thing's own origin" faster than the word does.
+        // The other thing a drag on the handles has to be told, and a word for the same reason,
+        // because no picture says "about each thing's own origin" faster than the word does.
         EditorToolbar.Add(new ToolbarButton(
             ToolbarSlot.Centre,
             null,
@@ -230,7 +230,7 @@ public static class EditorCommands
     /// <summary>What can be put into the world.</summary>
     /// <remarks>
     /// Everything spawned here is named, because the world panel lists names and the world file
-    /// matches entities up by them: something spawned and left unnamed could not be saved.
+    /// matches entities up by them, so something spawned and left unnamed could not be saved.
     /// </remarks>
     private static void Spawning()
     {
@@ -411,8 +411,8 @@ public static class EditorCommands
     {
         EditorSelection.Select(entity);
 
-        // Undoing a spawn is exact: despawning what was just made, which nothing else has heard
-        // of yet. Redoing it cannot put the same entity back, so the redo says so by doing
+        // Undoing a spawn is exact, since it despawns what was just made and nothing else has
+        // heard of it yet. Redoing it cannot put the same entity back, so the redo says so by doing
         // nothing rather than by spawning something that looks like it and is not.
         EditorHistory.Record(
             $"spawn {name}",

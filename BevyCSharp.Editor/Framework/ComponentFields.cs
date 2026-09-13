@@ -23,7 +23,7 @@ public static class ComponentFields
     /// </summary>
     /// <remarks>
     /// <para>
-    /// As many digits as it takes and no more: zero is <c>0</c> rather than <c>0.000</c>, and a
+    /// As many digits as it takes and no more, so zero is <c>0</c> rather than <c>0.000</c> and a
     /// tenth is <c>1.2</c> rather than <c>1.200</c>. Three zeroes after every whole number is
     /// three characters of nothing in a column that is already tight.
     /// </para>
@@ -40,7 +40,7 @@ public static class ComponentFields
     /// <summary>Which rotation field is being turned, while it is being turned.</summary>
     /// <remarks>
     /// The angles are held here for as long as the box is held, because a rotation has more than
-    /// one set of angles that describe it: reading them back out of the quaternion on every frame
+    /// one set of angles that describe it. Reading them back out of the quaternion on every frame
     /// of a drag means the numbers jump to a different decomposition halfway through, and a box
     /// whose value changes while it is being dragged cannot be dragged.
     /// </remarks>
@@ -123,7 +123,8 @@ public static class ComponentFields
             return;
         }
 
-        // The name takes under a third and the value the rest, which holds at any width: a fixed
+        // The name takes under a third and the value the rest, which holds at any width, because a
+        // fixed
         // column that fits at five hundred pixels leaves nothing for the value at three hundred.
         //
         // Weighted towards the value, because a name that runs out of room is still readable from
@@ -167,7 +168,7 @@ public static class ComponentFields
     /// </summary>
     /// <remarks>
     /// Each arm reads what is there, offers it, and writes back only when the widget says it
-    /// changed. Nothing here decides where the widget goes: the row it sits in has already set
+    /// changed. Nothing here decides where the widget goes. The row it sits in has already set
     /// the column and the width.
     /// </remarks>
     /// <param name="ctx">This frame.</param>
@@ -304,8 +305,8 @@ public static class ComponentFields
             case FieldKind.Asset:
             {
                 // What it holds, and a list of what it could hold instead. The files are asked for
-                // when the list opens rather than when the row is drawn: a field that listed the
-                // project every frame would read the disk sixty times a second.
+                // when the list opens rather than when the row is drawn, because a field that
+                // listed the project every frame would read the disk sixty times a second.
                 var held = value?.ToString() ?? "none";
 
                 if (ImGui.Button(Short(held), new Vector2(-1f, 0f))) ImGui.OpenPopup($"##pick{id}");
@@ -320,7 +321,7 @@ public static class ComponentFields
                     {
                         if (!ImGui.MenuItem(file)) continue;
 
-                        // Loaded when it is chosen rather than when the list was built: a list that
+                        // Loaded when it is chosen rather than when the list was built. A list that
                         // loaded everything it offered would load the project to ask a question.
                         field.Write(ctx.Ecs, entity, AssetServer.Load(kind, file));
                     }
@@ -373,7 +374,7 @@ public static class ComponentFields
                 {
                     var on = chosen.Contains(option);
 
-                    // The name of the flag is part of the identifier, not only of the label: what
+                    // The name of the flag is part of the identifier, not only of the label. What
                     // ImGui hashes is what follows the two hashes, so every box in a set of flags
                     // sharing the field's id is a set of boxes ImGui cannot tell apart. It says so,
                     // in a window that takes the keyboard with it.
@@ -424,7 +425,7 @@ public static class ComponentFields
     /// </summary>
     /// <remarks>
     /// Every part of the name loses its path, not just the last one, because a component's name is
-    /// often another component's name inside it: cutting at the last <c>::</c> of
+    /// often another component's name inside it, so cutting at the last <c>::</c> of
     /// <c>MeshMaterial3d&lt;StandardMaterial&gt;</c> leaves <c>StandardMaterial&gt;</c>.
     /// </remarks>
     private static string Short(string name)

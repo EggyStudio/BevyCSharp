@@ -30,7 +30,8 @@ public enum VisibilityMode : byte
 /// </para>
 /// <para>
 /// Needs a render build; a headless one has no such component and says so when the id is
-/// resolved. Set it on an entity that is already drawable: adding it writes the component but
+/// resolved. Set it on an entity that is already drawable, because adding it writes the component
+/// but
 /// does not pull in the two Bevy computes from it, which arrive with the mesh.
 /// </para>
 /// </remarks>

@@ -149,7 +149,7 @@ public enum BloomMode
 /// </summary>
 /// <remarks>
 /// One settings object for the whole pipeline rather than a call per effect, because these are
-/// decided together: bloom wants a high dynamic range target, and multisampling and an
+/// decided together, because bloom wants a high dynamic range target, and multisampling and an
 /// antialiasing pass are two answers to the same question. Every field is applied on every call,
 /// so an effect this object leaves off is taken off the camera. Turning bloom off is the same
 /// call as turning it on, which is what a settings screen wants.
@@ -196,7 +196,8 @@ public sealed class PostSettings
     /// </summary>
     /// <remarks>
     /// Read by <see cref="AntiAliasPass.Fxaa"/> and <see cref="AntiAliasPass.Smaa"/>. Temporal
-    /// antialiasing has no such setting: how much it catches is decided by how many frames it
+    /// antialiasing has no such setting, because how much it catches is decided by how many frames
+    /// it
     /// has to work from.
     /// </remarks>
     public AntiAliasQuality Quality { get; set; } = AntiAliasQuality.Medium;
@@ -211,7 +212,8 @@ public sealed class PostSettings
     /// Scatter light out of the brightest parts of the picture.
     /// </summary>
     /// <remarks>
-    /// Needs <see cref="Hdr"/> to have anything to work with: without it nothing is brighter than
+    /// Needs <see cref="Hdr"/> to have anything to work with, because without it nothing is
+    /// brighter than
     /// white, so nothing is bright enough to glow. To make one object glow harder, raise its
     /// material's emissive color rather than this.
     /// </remarks>
@@ -256,7 +258,7 @@ public enum DepthOfFieldMode
 /// <remarks>
 /// <para>
 /// Beside <see cref="PostSettings"/> rather than part of it, because the two are decided at
-/// different times: the pipeline is what a settings screen owns, and these are what a scene does
+/// different times. The pipeline is what a settings screen owns, and these are what a scene does
 /// for a moment, a hit, a dream, a shot pulling focus. The rule is the same, so every field is
 /// applied on every call and an effect these settings leave off is taken off the camera.
 /// </para>
@@ -446,8 +448,8 @@ public sealed class EffectSettings
     /// An image weighting where in the frame the metering looks.
     /// </summary>
     /// <remarks>
-    /// Only the red channel is read, and it is stretched over the whole frame: black ignores a
-    /// pixel, white counts it fully. Nothing here weights the whole frame alike.
+    /// Only the red channel is read, and it is stretched over the whole frame, so black ignores a
+    /// pixel and white counts it fully. Nothing here weights the whole frame alike.
     /// </remarks>
     public AssetHandle MeteringMask { get; set; } = AssetHandle.None;
 
@@ -468,7 +470,7 @@ public sealed class EffectSettings
 /// </summary>
 /// <remarks>
 /// <para>
-/// Not a picture of a sky but a simulation of one: the color of every direction is worked out
+/// Not a picture of a sky but a simulation of one. The color of every direction is worked out
 /// from how far light travels through the air to reach it, so the horizon reddens, the zenith
 /// stays blue, and the whole thing turns over as the sun moves. Distant geometry picks up the
 /// same haze.

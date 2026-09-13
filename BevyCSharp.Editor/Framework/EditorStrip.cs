@@ -29,7 +29,7 @@ public static class EditorStrip
     /// The strip along the bottom left, with whatever is open growing upwards out of it.
     /// </summary>
     /// <remarks>
-    /// The bar is drawn under its content rather than over it, which is what a console does: the
+    /// The bar is drawn under its content rather than over it, which is what a console does. The
     /// headers stay where the hand last left them and the lines rise out of the bottom of the
     /// screen. ImGui's own tab bar either way, so hovering, ordering and the mark on the one in
     /// force are its to draw.
@@ -75,8 +75,8 @@ public static class EditorStrip
 
             var bar = ImGui.GetFrameHeight() + ImGui.GetStyle().ItemSpacing.Y;
 
-            // A card like the ones in the panel, which is what it is: the same gap outside it and
-            // the same air inside it, rather than a rectangle pushed against its own edges.
+            // A card like the ones in the panel, with the same gap outside it and the same air
+            // inside it, rather than a rectangle pushed against its own edges.
             EditorSurface.Card("##tab", new Vector2(0f, room.Y - bar), EditorShell.Tabs[EditorShell.OpenTab].Draw);
         }
 
@@ -84,7 +84,7 @@ public static class EditorStrip
         //
         // ImGui's own tab draws a few pixels of itself below its frame, to join the tab to the
         // content underneath it. Here the content is above the bar, so that join points into the
-        // scene: a dark tongue hanging off whichever tab is open, past the edge of the strip. A
+        // scene, as a dark tongue hanging off whichever tab is open, past the edge of the strip. A
         // pill under the word says which one is open without any of that.
         if (!EditorTheme.Current.Stock)
         {
@@ -195,13 +195,13 @@ public static class EditorStrip
 
             var over = ImGui.IsItemHovered();
 
-            // A tab is a button and wears a button's three steps: a fill of its own to be seen
-            // and pressed, a brighter one under the hand, and the accent when it is the one
+            // A tab is a button and wears a button's three steps, which are a fill of its own to
+            // be seen and pressed, a brighter one under the hand, and the accent when it is the one
             // showing. Nothing at all under the two that are not open reads as two words somebody
             // has left lying on the strip.
-            // Docked, a tab that is neither open nor under the hand wears nothing: the strip is
-            // black behind it and the word carries on its own. Floating, the strip is the lit
-            // scene seen through, and a word on that needs something under it to sit on.
+            // Docked, a tab that is neither open nor under the hand wears nothing, because the
+            // strip is black behind it and the word carries on its own. Floating, the strip is the
+            // lit scene seen through, and a word on that needs something under it to sit on.
             var idle = EditorShell.Docked ? null : (Vector4?)ImGui.GetStyle().Colors[(int)ImGuiCol.Button];
 
             var fill = open

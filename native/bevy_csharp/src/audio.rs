@@ -5,7 +5,7 @@
 //! an `AudioSink` to it once playback begins, which is what volume and pausing go through.
 //!
 //! Everything here needs a render build, because that is the profile Bevy's audio is compiled
-//! into: it is the one that takes a system library.
+//! into, which is the one that takes a system library.
 
 use crate::interop::{status, BcsAudioConfig};
 #[cfg(feature = "render")]

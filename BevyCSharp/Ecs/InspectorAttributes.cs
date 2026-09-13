@@ -4,7 +4,7 @@ namespace Bevy;
 /// Draws a number as a slider between two ends.
 /// </summary>
 /// <remarks>
-/// What a field with a sensible range wants: a bar you can throw to one end is faster than a box
+/// What a field with a sensible range wants. A bar you can throw to one end is faster than a box
 /// you have to type into, and it says what the ends are without a word of documentation. A value
 /// outside the range is still shown, with the slider at the end it is past.
 /// </remarks>
@@ -25,7 +25,8 @@ public sealed class RangeAttribute(double minimum, double maximum) : Attribute
 
 /// <summary>What a slider shows beside its bar.</summary>
 /// <remarks>
-/// The number, by default, small and on the right: the bar is the control, and what the number is
+/// The number, by default, small and on the right, because the bar is the control and what the
+/// number is
 /// for is saying exactly where the bar was left. A box wide enough to type in takes half the row
 /// from the thing being dragged, which is worth it only when the number is one somebody was told
 /// to use rather than one they are looking for.
@@ -286,7 +287,8 @@ public sealed class WideAttribute : Attribute;
 /// Draws the parts of a value beside each other rather than one per row.
 /// </summary>
 /// <remarks>
-/// Three numbers on one line is what a position wants: it is one value, it is read left to right,
+/// Three numbers on one line is what a position wants, because it is one value, it is read left to
+/// right,
 /// and three rows of it costs three times the height for no more information. Long numbers are cut
 /// rather than allowed to wrap, which is the trade, and a value whose numbers matter to five digits
 /// is one to leave stacked.
@@ -348,7 +350,7 @@ public sealed class ButtonAttribute(string label = "") : Attribute
     /// </summary>
     /// <remarks>
     /// One each is even. Two against one is twice as wide, which is what a line reading Apply,
-    /// Cancel wants: they are not the same size decision.
+    /// Cancel wants, since they are not the same size decision.
     /// </remarks>
     public double Weight { get; init; } = 1d;
 }

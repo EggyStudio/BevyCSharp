@@ -7,7 +7,7 @@
 //! Split three ways, along the seams the managed surface already has:
 //!
 //! - [`assets`] builds the meshes and materials a picture is made of, and attaches them. Those
-//!   two cannot go through the generic component path: each is a Rust value that has to be
+//!   two cannot go through the generic component path, because each is a Rust value that has to be
 //!   constructed rather than described by a layout, and the components carrying them hold a
 //!   typed `Handle<T>`, which raw bytes cannot represent.
 //! - [`scene`] spawns what the picture contains: cameras, lights and sprites.
@@ -26,7 +26,8 @@ use crate::interop::status;
 /// Resolves an asset key to the image it names.
 ///
 /// A negative key is the caller saying "no image", which every image on a config is allowed to
-/// be. A key that names nothing is a mistake rather than a default: that is what a released or
+/// be. A key that names nothing is a mistake rather than a default, because that is what a
+/// released or
 /// fabricated handle looks like from this side, and quietly drawing without the texture that was
 /// asked for is a wrong picture nothing reports.
 #[cfg(feature = "render")]

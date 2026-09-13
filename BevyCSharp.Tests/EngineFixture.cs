@@ -9,7 +9,7 @@ namespace Bevy.Tests;
 /// <remarks>
 /// <para>
 /// Everything the ECS surface does needs a live world loaned by a running system, so there is
-/// no way to assert on it from outside the loop. The harness inverts that: you hand it the
+/// no way to assert on it from outside the loop. The harness inverts that. You hand it the
 /// assertions as systems, it runs a real Bevy app for a few frames, and afterwards you inspect
 /// what those systems recorded.
 /// </para>

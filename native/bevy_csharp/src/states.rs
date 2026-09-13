@@ -214,7 +214,7 @@ pub unsafe extern "C" fn bcs_state_add_system(
 
 /// Marks an entity to be despawned when `slot` leaves `value`.
 ///
-/// What removes a level without a teardown system listing everything it spawned: the entities a
+/// What removes a level without a teardown system listing everything it spawned. The entities a
 /// screen produced say which screen they belong to, and leaving it takes them with it. Bevy acts
 /// on this at the transition rather than in `OnExit`, so it covers every way out of the value.
 #[unsafe(no_mangle)]

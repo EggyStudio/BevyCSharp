@@ -141,7 +141,7 @@ public sealed class SparseComponentTests
     [Fact]
     public void ASparseFilterSplitsATableIntoContiguousRuns()
     {
-        // What a per-entity filter costs: the rows still come back, but a table that alternates
+        // What a per-entity filter costs. The rows still come back, but a table that alternates
         // yields one chunk per matching row rather than one chunk for the table. Asserting it
         // here pins down the contract, because a caller holding a pointer and a length has to be
         // able to trust that every row in the chunk matched.

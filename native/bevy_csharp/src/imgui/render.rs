@@ -1,7 +1,7 @@
 //! The pass that draws what ImGui asked for.
 //!
 //! One system in the view's schedule, after everything else the camera does and before the picture
-//! reaches the window. It knows nothing about widgets: it uploads this frame's triangles, and for
+//! reaches the window. It knows nothing about widgets. It uploads this frame's triangles, and for
 //! each draw call sets a scissor rectangle and a texture and draws a run of indices. That is the
 //! whole of an ImGui backend, and the same shape the reference engine's Vulkan one has.
 
@@ -186,9 +186,11 @@ pub fn install(app: &mut App) {
         // Into the interface camera's own picture, after whatever that camera did and before that
         // picture is put on the window.
         //
-        // Not into a scene camera's: one given part of the window to draw into has a picture the
+        // Not into a scene camera's, because one given part of the window to draw into has a
+        // picture the
         // size of that part, and an interface drawn there is cut off exactly where the panels are.
-        // Not straight onto the window either: what reaches the screen is not the texture a window
+        // Not straight onto the window either, because what reaches the screen is not the texture
+        // a window
         // hands out here, so a pass drawing there draws where nobody looks.
         .add_systems(
             Core2d,
@@ -223,7 +225,8 @@ fn camera(mut commands: Commands) {
         // A layer of its own, which nothing else is on.
         //
         // Every 2D camera is a camera the gizmo renderer queues into, and a gizmo queued into this
-        // one is drawn a second time in screen space: a line a few metres long in the world becomes
+        // one is drawn a second time in screen space, where a line a few metres long in the world
+        // becomes
         // a mark a few pixels wide at the middle of the window, over the scene. Putting this camera
         // where the gizmos are not costs nothing, because what it draws is one pass of our own,
         // which asks about `InterfaceView` and not about layers.
@@ -352,7 +355,8 @@ fn prepare(
         ));
     }
 
-    // A picture's bind group is built once and kept for as long as the picture is: the atlas is
+    // A picture's bind group is built once and kept for as long as the picture is, because the
+    // atlas is
     // the same atlas every frame, and rebuilding its binding sixty times a second is work for
     // nothing.
     for call in &frame.calls {
@@ -427,7 +431,8 @@ fn draw(
 
     announce("drawing");
 
-    // The camera's own attachment, asked for rather than built: a view target holds two textures
+    // The camera's own attachment, asked for rather than built, because a view target holds two
+    // textures
     // and hands out whichever is current, and a pass that picks one for itself draws into the one
     // nothing goes on to read.
     let mut pass = ctx.begin_tracked_render_pass(RenderPassDescriptor {
@@ -463,7 +468,8 @@ fn draw(
 
 /// Where a draw call's clip rectangle lands on the window, in physical pixels.
 ///
-/// Nothing outside the window, and nothing empty: a scissor rectangle reaching past the edge is a
+/// Nothing outside the window, and nothing empty, because a scissor rectangle reaching past the
+/// edge is a
 /// validation error rather than a clamp, and a zero-sized one is a draw call worth skipping.
 fn scissor(clip: [f32; 4], scale: Vec2, width: u32, height: u32) -> Option<(u32, u32, u32, u32)> {
     let left = (clip[0] * scale.x).max(0.0).round() as u32;
@@ -546,7 +552,8 @@ mod tests {
     fn one_reaching_past_the_window_is_cut_to_it() {
         let box_of = scissor([-50.0, -50.0, 2000.0, 2000.0], Vec2::splat(1.0), 800, 600);
 
-        // Clamped rather than refused: a window's own clip rectangle is the whole window, and ImGui
+        // Clamped rather than refused, because a window's own clip rectangle is the whole window
+        // and ImGui
         // writes it as a very large number rather than as the size.
         assert_eq!(box_of, Some((0, 0, 800, 600)));
     }

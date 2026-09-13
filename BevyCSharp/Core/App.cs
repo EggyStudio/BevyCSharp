@@ -60,7 +60,7 @@ public sealed unsafe class App : IDisposable
     /// <summary>True when the loaded native bridge has the HTML and CSS UI compiled in.</summary>
     /// <remarks>
     /// A separate question from <see cref="HasRenderer"/>, because the editor profile is a
-    /// superset of the render one: a bridge can draw a scene without carrying the document
+    /// superset of the render one, because a bridge can draw a scene without carrying the document
     /// surface, and a panel opened against one that does not is refused rather than ignored.
     /// </remarks>
     public static bool HasEditor => Native.bcs_has_editor() != 0;
@@ -181,7 +181,7 @@ public sealed unsafe class App : IDisposable
     /// </remarks>
     private static void PostWindowMessages(MessageBus bus)
     {
-        // Sized for a frame's worth. A burst larger than this is not lost: the bridge leaves the
+        // Sized for a frame's worth. A burst larger than this is not lost. The bridge leaves the
         // rest queued and hands them over on the next call.
         const int Capacity = 16;
 
@@ -219,7 +219,7 @@ public sealed unsafe class App : IDisposable
     /// <summary>Moves what was dropped on the window onto the message bus.</summary>
     /// <remarks>
     /// Separate from the other window messages because each path is text, which crosses the
-    /// boundary one call at a time: the drain reports how many there are, then each is read by
+    /// boundary one call at a time. The drain reports how many there are, then each is read by
     /// index.
     /// </remarks>
     private static void PostFileDrops(MessageBus bus)
@@ -303,7 +303,8 @@ public sealed unsafe class App : IDisposable
 
     /// <summary>The stages a dynamically added system can be put in.</summary>
     /// <remarks>
-    /// The ones a behavior can name. The two internal stages are left out: what they do is fixed,
+    /// The ones a behavior can name. The two internal stages are left out, because what they do is
+    /// fixed,
     /// and nothing loaded at runtime has business in either.
     /// </remarks>
     private static readonly Stage[] DispatchStages =
@@ -375,7 +376,7 @@ public sealed unsafe class App : IDisposable
 
     /// <summary>Adds a system to the dispatcher for its stage.</summary>
     /// <remarks>
-    /// A startup system is the exception: it is run once, here, rather than queued. The stage
+    /// A startup system is the exception. It is run once, here, rather than queued. The stage
     /// already happened, so queueing it would mean it never ran at all, and what it means for
     /// something loaded at runtime is "when this arrives" rather than "when the app began". That
     /// is what lets a reloaded script spawn what it needs.
@@ -407,7 +408,7 @@ public sealed unsafe class App : IDisposable
     /// </summary>
     /// <remarks>
     /// Bevy has no API for pulling a system back out of a built schedule, so the descriptors
-    /// stay registered and are neutered instead: a removed system's callback returns
+    /// stay registered and are neutered instead, so a removed system's callback returns
     /// immediately. That keeps hot-reload swapping generations correctly at the cost of an
     /// empty call per removed system per frame.
     /// </remarks>
@@ -497,7 +498,8 @@ public sealed unsafe class App : IDisposable
 
         descriptor.Source ??= SystemRegistrationSourceScope.Current;
 
-        // The stage is only a label here: a transition system belongs to no frame stage, and
+        // The stage is only a label here, because a transition system belongs to no frame stage,
+        // and
         // Startup is the closest thing to "runs outside the ordinary loop".
         var registration = new RegisteredSystem(this, descriptor, Stage.Startup);
         _systems.Add(registration);
@@ -564,7 +566,7 @@ public sealed unsafe class App : IDisposable
 
         // macOS insists the *window* event loop owns the main thread, and breaking that rule
         // crashes inside AppKit rather than anywhere that points back here. The constraint
-        // belongs to windowing, not to the engine: a headless run creates no window and no
+        // belongs to windowing, not to the engine, because a headless run creates no window and no
         // event loop, so it is free to run anywhere, which is what lets a test runner drive it
         // from its own worker threads. The bridge answers yes on every platform but Apple, so
         // this costs one call and only ever fires where it genuinely matters.
@@ -627,7 +629,7 @@ public sealed unsafe class App : IDisposable
         // Rethrowing here would unwind into Rust, so stop the loop instead and let Run return.
         try
         {
-            // Discarded on purpose: the loop is being stopped because a system already threw, and
+            // Discarded on purpose. The loop is being stopped because a system already threw, and
             // there is nothing left to do about a request to stop that the bridge refuses.
             _ = Native.bcs_app_request_exit();
         }
@@ -684,8 +686,8 @@ public sealed unsafe class App : IDisposable
         }
 
         /// <summary>
-        /// The one entry point Bevy calls. Nothing may escape it: an exception crossing back
-        /// into Rust is undefined behavior, so everything is caught and reported here.
+        /// The one entry point Bevy calls. Nothing may escape it, because an exception crossing
+        /// back into Rust is undefined behavior, so everything is caught and reported here.
         /// </summary>
         [UnmanagedCallersOnly(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
         internal static void Trampoline(IntPtr user)

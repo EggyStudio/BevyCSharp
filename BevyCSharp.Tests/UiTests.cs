@@ -229,8 +229,8 @@ public sealed class UiTests
 
             Assert.True(ctx.Ecs.IsAlive(run));
 
-            // A font is loaded like any other asset, and a windowless run gets that far: the
-            // asset is a file, and only drawing with it needs a window.
+            // A font is loaded like any other asset, and a windowless run gets that far, because
+            // the asset is a file and only drawing with it needs a window.
             font = AssetServer.Load(AssetKind.Font, "fonts/missing.ttf");
         });
 
@@ -356,7 +356,7 @@ public sealed class UiTests
             icon = Ui.SpawnNode(new UiSettings { Width = Length.Px(32f), Height = Length.Px(32f) });
             Ui.SetImage(icon, image);
 
-            // A panel that resizes: the corners keep their size and the middle stretches.
+            // A panel that resizes, where the corners keep their size and the middle stretches.
             var panel = Ui.SpawnNode(new UiSettings
             {
                 Width = Length.Px(200f),
@@ -453,7 +453,8 @@ public sealed class UiTests
 
         harness.OnContext(Stage.Startup, ctx =>
         {
-            // `ScrollPosition` is a bare component: unlike an image node it brings no `Node`
+            // `ScrollPosition` is a bare component, because unlike an image node it brings no
+            // `Node`
             // along with it, so on anything that is not already one it would sit there doing
             // nothing while the call reported success.
             var plain = ctx.Ecs.Spawn();
@@ -559,7 +560,7 @@ public sealed class UiTests
     [Fact]
     public void OneLengthMeansTheSameOnEverySide()
     {
-        // No engine needed: the point is that the common case stays a single value.
+        // No engine needed, because the point is that the common case stays a single value.
         Sides all = Length.Px(8f);
 
         Assert.Equal(Length.Px(8f), all.Left);
@@ -574,7 +575,7 @@ public sealed class UiTests
 
         Assert.Equal("(8px, 0px, 8px, 0px)", Sides.Horizontal(Length.Px(8f)).ToString());
 
-        // Zero and Auto are not the same distance: an automatic margin takes the space the
+        // Zero and Auto are not the same distance. An automatic margin takes the space the
         // parent has left over, which is what centres a child, and a zero one leaves it.
         Assert.NotEqual(Length.Auto, Length.Zero);
     }
@@ -582,7 +583,7 @@ public sealed class UiTests
     [Fact]
     public void ALengthCarriesItsUnit()
     {
-        // No engine needed: the point is that a bare number cannot say what it means.
+        // No engine needed, because the point is that a bare number cannot say what it means.
         Assert.Equal(LengthUnit.Auto, Length.Auto.Unit);
         Assert.Equal(LengthUnit.Px, Length.Px(12f).Unit);
         Assert.Equal(LengthUnit.Percent, Length.Percent(50f).Unit);
