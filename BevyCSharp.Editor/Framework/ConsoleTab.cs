@@ -27,9 +27,8 @@ public static class ConsoleTab
         var room = ImGui.GetContentRegionAvail();
 
         // What the box to type in takes, asked for rather than guessed, because a number written
-        // here is a
-        // number that stops matching the moment the padding changes, and the last line of the log
-        // is then cut in half by the edge of the region.
+        // here is a number that stops matching the moment the padding changes, and the last line
+        // of the log is then cut in half by the edge of the region.
         var typing = ImGui.GetFrameHeightWithSpacing();
 
         if (EditorSurface.Region("##log", new Vector2(0f, room.Y - typing)))
@@ -68,7 +67,7 @@ public static class ConsoleTab
             _seen = ConsoleLog.Written;
         }
 
-        ImGui.EndChild();
+        EditorSurface.EndRegion();
 
         ImGui.SetNextItemWidth(-1f);
 

@@ -16,9 +16,8 @@ namespace BevyCSharp.Editor.Framework;
 /// </para>
 /// <para>
 /// Bevy's own components are not shown as rows, because an entity carries a dozen of them and not
-/// one is
-/// something a person edits. The ones worth knowing about are named as tags under the entity, which
-/// is also where a component of this project's own with no fields at all ends up.
+/// one is something a person edits. The ones worth knowing about are named as tags under the
+/// entity, which is also where a component of this project's own with no fields at all ends up.
 /// </para>
 /// </remarks>
 public static class DetailsPanel
@@ -64,14 +63,13 @@ public static class DetailsPanel
         // One scrolling region and nothing nested inside it.
         //
         // A child window whose height is worked out from its contents, inside a region that
-        // scrolls, makes the region jump while it is being scrolled, because the height it reports
-        // depends
-        // on what is visible, and what is visible depends on the height. A card is a rectangle
-        // drawn behind a group instead, so this is one region with one scroll and no argument.
+        // scrolls, makes the region jump while it is being scrolled, because the height it
+        // reports depends on what is visible, and what is visible depends on the height. A card is
+        // a rectangle drawn behind a group instead, so this is one region with one scroll and no
+        // argument.
         // The room the button at the bottom keeps for itself, taken out of the scrolling region
         // rather than scrolled with it, because adding a component is not something to go looking
-        // for at
-        // the end of a long list of what is already there.
+        // for at the end of a long list of what is already there.
         var button = ImGui.GetFrameHeight() + (ImGui.GetStyle().ItemSpacing.Y * 2f);
         var room = ImGui.GetContentRegionAvail().Y - button;
 
@@ -82,7 +80,7 @@ public static class DetailsPanel
 
         if (!open)
         {
-            ImGui.EndChild();
+            EditorSurface.EndRegion();
             return;
         }
 
@@ -90,6 +88,7 @@ public static class DetailsPanel
         {
             if (ComponentSchemas.For(id) is not { } schema) continue;
             if (schema.Fields.Count == 0) continue;
+            if (Elsewhere.Contains(schema.Name)) continue;
 
             Component(ctx, entity, schema);
         }
@@ -98,13 +97,24 @@ public static class DetailsPanel
         // which is worth knowing and never worth the room at the top.
         Tags(ctx, entity);
 
-        ImGui.EndChild();
+        EditorSurface.EndRegion();
 
         Add(ctx, entity);
     }
 
     /// <summary>How much air a component's card keeps inside its own edge.</summary>
     internal const float Inset = 6f;
+
+    /// <summary>
+    /// What this panel leaves to something else to draw.
+    /// </summary>
+    /// <remarks>
+    /// Visibility is one enum, and the world list draws it as an eye on the entity's own line,
+    /// where things are shown and hidden while looking at the list of them. A card here as well
+    /// would be a second place to set one value, and the list is the better of the two. It is
+    /// still on the list of what can be added, so an entity that has no eye can be given one.
+    /// </remarks>
+    private static readonly HashSet<string> Elsewhere = ["Visibility"];
 
     /// <summary>One component, as a card with its fields in it.</summary>
     /// <remarks>
@@ -123,9 +133,8 @@ public static class DetailsPanel
         ImGui.BeginGroup();
 
         // The header wears no fill of its own, and neither does the card, because both are drawn
-        // behind,
-        // so the card can be exactly the header grown downwards. Nothing is indented round it, so
-        // a component that is closed is the header and nothing else, at the header's own size.
+        // behind, so the card can be exactly the header grown downwards. Nothing is indented round
+        // it, so a component that is closed is the header and nothing else, at the header's size.
         if (!theme.Stock)
         {
             ImGui.PushStyleColor(ImGuiCol.Header, 0u);
@@ -169,9 +178,8 @@ public static class DetailsPanel
                 ComponentFields.Row(ctx, entity, schema, field);
             }
 
-            // Wrapped rather than run off the edge, because a row of buttons as wide as the panel
-            // is a row
-            // whose last button cannot be pressed.
+            // Wrapped rather than run off the edge, because a row of buttons as wide as the
+            // panel is a row whose last button cannot be pressed.
             var room = ImGui.GetContentRegionAvail().X - Inset;
             var used = 0f;
 
@@ -204,9 +212,13 @@ public static class DetailsPanel
 
             draw.ChannelsSetCurrent(0);
 
+            // Cut to the region rather than run under its edge, so a card scrolled half out of
+            // sight ends in a rounded corner instead of a square one.
+            var card = EditorSurface.Clipped(head, new Vector2(headTo.X, MathF.Max(headTo.Y, to.Y)));
+
             draw.AddRectFilled(
-                head,
-                new Vector2(headTo.X, MathF.Max(headTo.Y, to.Y)),
+                card.From,
+                card.To,
                 ImGui.GetColorU32(EditorTheme.LiveGroup),
                 round);
 
@@ -214,7 +226,10 @@ public static class DetailsPanel
             // says a header is something to press.
             if (over)
             {
-                draw.AddRectFilled(head, headTo, ImGui.GetColorU32(EditorTheme.LiveHover), round);
+                var lit = EditorSurface.Clipped(head, headTo);
+
+                draw.AddRectFilled(
+                    lit.From, lit.To, ImGui.GetColorU32(EditorTheme.LiveHover), round);
             }
         }
 
@@ -291,10 +306,9 @@ public static class DetailsPanel
         {
             var schema = ComponentSchemas.For(id);
 
-            // Something of this project's own with no fields to edit. Not the engine's, because a
-            // mesh, a
-            // material and a visibility are on everything that is drawn, so naming them says
-            // nothing about the thing being looked at and crowds out what does.
+            // Something of this project's own with no fields to edit. Not the engine's, because
+            // a mesh, a material and a visibility are on everything that is drawn, so naming them
+            // says nothing about the thing being looked at and crowds out what does.
             if (schema is null) continue;
             if (schema.Fields.Count > 0) continue;
 

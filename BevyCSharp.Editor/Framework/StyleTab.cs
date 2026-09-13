@@ -98,7 +98,7 @@ public static class StyleTab
             ImGui.ShowStyleEditor();
         }
 
-        ImGui.EndChild();
+        EditorSurface.EndRegion();
     }
 
     /// <summary>Writes what is in force to the file the editor reads at startup.</summary>

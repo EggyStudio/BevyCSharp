@@ -187,9 +187,8 @@ public sealed class Input
     /// <para>
     /// The characters a text field should insert, in the order they were typed. This is not the
     /// same question as which keys are down, because it is the layout's answer rather than the
-    /// hardware's,
-    /// so a French keyboard gives what its user expects, and a dead key followed by a vowel gives
-    /// one accented character.
+    /// hardware's, so a French keyboard gives what its user expects, and a dead key followed by a
+    /// vowel gives one accented character.
     /// </para>
     /// <para>
     /// Control characters are left out. Backspace and Enter arrive as text on some platforms, and

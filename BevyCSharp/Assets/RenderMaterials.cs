@@ -61,9 +61,7 @@ public enum AlphaMode
 /// <example>
 /// <code>
 /// var crate = Render.CreateMaterial(new MaterialSettings
-/// {
-///     BaseColorTexture = AssetServer.Load(AssetKind.Image, "textures/crate.png"),
-///     Roughness = 0.8f,
+/// { BaseColorTexture = AssetServer.Load(AssetKind.Image, "textures/crate.png"), Roughness = 0.8f,
 /// });
 /// </code>
 /// </example>

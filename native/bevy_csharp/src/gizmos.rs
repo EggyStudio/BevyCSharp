@@ -1,15 +1,13 @@
 //! Debug drawing, reachable from C#.
 //!
 //! Bevy draws gizmos through a `Gizmos` system parameter, which a C# system cannot hold, because
-//! every
-//! managed system is an exclusive one, handed the whole world rather than a set of parameters. So
-//! calls from C# are recorded in a queue, and one ordinary Bevy system drains it each frame with
-//! the real parameter in hand.
+//! every managed system is an exclusive one, handed the whole world rather than a set of
+//! parameters. So calls from C# are recorded in a queue, and one ordinary Bevy system drains it
+//! each frame with the real parameter in hand.
 //!
 //! Gizmos are immediate, so what is drawn lasts one frame and a shape that should stay on screen
-//! has
-//! to be asked for again every frame. That is what makes them useful for watching a value change
-//! and useless for building anything.
+//! has to be asked for again every frame. That is what makes them useful for watching a value
+//! change and useless for building anything.
 
 use crate::interop::{status, BcsGizmoConfig};
 
@@ -145,9 +143,8 @@ pub fn draw_in_front(mut store: bevy::ecs::system::ResMut<bevy::gizmos::config::
 
 /// Records one shape to draw this frame.
 ///
-/// Returns [`status::UNSUPPORTED`] where there is nothing to draw on, because gizmos need the
-/// renderer
-/// and a window, because the plugin that draws them comes with both.
+/// Returns [`status::UNSUPPORTED`] where there is nothing to draw on, since gizmos need the
+/// renderer and a window and the plugin that draws them comes with both.
 ///
 /// # Safety
 /// `config` must point to a readable [`BcsGizmoConfig`].

@@ -25,10 +25,9 @@ namespace BevyCSharp.Editor.Framework;
 /// <para>
 /// Deliberately not Bevy's own world serialization, which is compiled in and would write the
 /// engine's reflected components properly. It cannot see a C# component at all, because those are
-/// bytes
-/// registered at runtime with no Rust type behind them, so a file written that way would be
-/// missing everything the game itself put in the world. Between a file that keeps the engine's
-/// half and one that keeps the program's half, the program's half is the one an editor changed.
+/// bytes registered at runtime with no Rust type behind them, so a file written that way would be
+/// missing everything the game itself put in the world. Between a file that keeps the engine's half
+/// and one that keeps the program's half, the program's half is the one an editor changed.
 /// </para>
 /// </remarks>
 public static class EditorWorld

@@ -52,8 +52,7 @@ public readonly struct AssetHandle : IEquatable<AssetHandle>
     /// <remarks>
     /// Zero is not a handle. A component holding an asset is a struct that starts out zeroed, and
     /// the engine's table therefore never hands out a key of zero, so a freshly added component
-    /// holds
-    /// nothing rather than whatever was loaded first.
+    /// holds nothing rather than whatever was loaded first.
     /// </remarks>
     public bool IsValid => Key > 0;
 

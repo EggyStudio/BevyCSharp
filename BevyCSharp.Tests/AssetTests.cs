@@ -41,8 +41,7 @@ public sealed class AssetTests
         {
             // A component holding an asset starts out zeroed, so the table must never hand out a
             // key of zero, because a freshly added component would otherwise hold whatever was
-            // loaded
-            // first, and nothing about it would look wrong.
+            // loaded first, and nothing about it would look wrong.
             Assert.False(default(AssetHandle).IsValid);
 
             var first = AssetServer.Load(AssetKind.Mesh, "models/first.gltf");
@@ -65,8 +64,7 @@ public sealed class AssetTests
 
             // The path is what the handle was asked for, whether or not the file is there, because
             // a tool showing what a field points at has to be able to say so before the load
-            // finishes,
-            // and has to say something truthful when it never does.
+            // finishes, and has to say something truthful when it never does.
             Assert.Equal("models/nothing-here.gltf", AssetServer.PathOf(handle));
             Assert.Null(AssetServer.PathOf(AssetHandle.None));
         });

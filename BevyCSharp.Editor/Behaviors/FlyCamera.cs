@@ -191,8 +191,7 @@ public partial struct FlyCamera
 
         // The difference between this copy of the camera and the sample's. A wheel over a panel
         // belongs to that panel, because rolling it over a list should scroll the list rather than
-        // fly
-        // the camera through the wall behind it. A drag is not affected, because a drag that
+        // fly the camera through the wall behind it. A drag is not affected, because a drag that
         // began over the viewport should keep working wherever the pointer goes.
         if (wheel != 0f && EditorShell.PointerOverPanel) wheel = 0f;
         var position = ctx.Ecs.GetOrDefault<Transform>(ctx.Entity).Translation;

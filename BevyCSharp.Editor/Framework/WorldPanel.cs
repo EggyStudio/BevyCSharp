@@ -1,5 +1,6 @@
 using System.Numerics;
 using Bevy;
+using Bevy.Interop;
 using ImGuiNET;
 
 namespace BevyCSharp.Editor.Framework;
@@ -11,8 +12,7 @@ namespace BevyCSharp.Editor.Framework;
 /// Bevy's own word for the thing being listed, so that is what the panel is called. The tree is
 /// walked again only when the population changes or enough frames have gone by that a rename would
 /// otherwise never show, because a query and a sort per frame for a list that is the same list is
-/// work for
-/// nothing, even in immediate mode.
+/// work for nothing, even in immediate mode.
 /// </remarks>
 public static class WorldPanel
 {
@@ -38,6 +38,47 @@ public static class WorldPanel
 
     /// <summary>The last row picked, which is what a range is measured from.</summary>
     private static ulong _anchor;
+
+    /// <summary>How wide the eye's end of a row is.</summary>
+    /// <remarks>
+    /// Wide enough to press without aiming, and the room the name stops short of so that a long
+    /// one does not run under the eye.
+    /// </remarks>
+    private const float EyeRoom = 24f;
+
+    /// <summary>Whether this build has Bevy's <c>Visibility</c> at all.</summary>
+    /// <remarks>
+    /// Asked once. Resolving a component the bridge was compiled without throws rather than
+    /// answering no, and a list that asked per row per frame would throw as often.
+    /// </remarks>
+    private static bool _eyes = true;
+
+    /// <summary>
+    /// What an entity asks to be drawn, and whether it asks at all.
+    /// </summary>
+    /// <remarks>
+    /// Only the ones carrying the component get an eye. Adding one to an entity that is not drawn
+    /// would put a control on a row where it means nothing, and everything Bevy draws carries it
+    /// already.
+    /// </remarks>
+    /// <param name="ctx">This frame.</param>
+    /// <param name="entity">Which entity.</param>
+    /// <param name="sight">What it asks for, when it asks.</param>
+    private static bool Sighted(BehaviorContext ctx, Entity entity, out Visibility sight)
+    {
+        sight = default;
+        if (!_eyes) return false;
+
+        try
+        {
+            return ctx.Ecs.TryGet(entity, out sight);
+        }
+        catch (BevyNativeException)
+        {
+            _eyes = false;
+            return false;
+        }
+    }
 
     /// <summary>One line of the list.</summary>
     /// <param name="Entity">What the row stands for.</param>
@@ -67,7 +108,12 @@ public static class WorldPanel
 
         var wanted = _search.Trim();
 
-        if (!EditorSurface.Region("##rows", new Vector2(0f, 0f))) return;
+        if (!EditorSurface.Region("##rows", new Vector2(0f, 0f)))
+        {
+            // Ended whether or not it opened, which is what a child window asks for.
+            EditorSurface.EndRegion();
+            return;
+        }
 
         // How deep a fold reaches: everything under a folded row, until something at its own
         // depth or shallower comes along.
@@ -105,7 +151,7 @@ public static class WorldPanel
             if (ImGui.IsItemClicked()) EditorSelection.Clear();
         }
 
-        ImGui.EndChild();
+        EditorSurface.EndRegion();
     }
 
     /// <summary>
@@ -179,8 +225,11 @@ public static class WorldPanel
 
         var over = ImGui.IsItemHovered();
 
+        var eyed = Sighted(ctx, row.Entity, out var sight);
+        var onEye = eyed && over && ImGui.GetIO().MousePos.X >= at.X + width - EyeRoom;
+
         // Twice on a name is how a name is changed, in every list of things there is.
-        if (over && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+        if (over && !onEye && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
         {
             _renaming = row.Entity.Bits;
             _typed = row.Name;
@@ -189,9 +238,19 @@ public static class WorldPanel
 
         if (ImGui.IsItemClicked())
         {
+            // The eye takes the click that lands on it, so putting something away never also
+            // picks it. Back to inherited rather than to visible, because what a thing was before
+            // it was hidden is what its parent says, and forcing it on outlives the hierarchy.
+            if (onEye)
+            {
+                ctx.Ecs.Set(
+                    row.Entity,
+                    sight.Mode == VisibilityMode.Hidden ? Visibility.Inherited : Visibility.Hidden);
+            }
+
             // Control adds one, shift takes everything between this and the last one picked, and
             // neither replaces what was chosen. Which is what every list of things anywhere does.
-            if (ctx.Input.AnyKeyDown([Key.ControlLeft, Key.ControlRight]))
+            else if (ctx.Input.AnyKeyDown([Key.ControlLeft, Key.ControlRight]))
             {
                 EditorSelection.Toggle(row.Entity);
                 _anchor = row.Entity.Bits;
@@ -217,7 +276,21 @@ public static class WorldPanel
             ImGui.EndPopup();
         }
 
-        Paint(row, at, width, height, picked, over);
+        Paint(row, at, width, height, picked, over, eyed);
+
+        // On the row while the pointer is on it, and on a hidden one whether or not, because what
+        // says a thing has been put away has to still be there once the hand has moved on.
+        if (eyed && (over || sight.Mode == VisibilityMode.Hidden))
+        {
+            EditorSurface.Eye(
+                ImGui.GetWindowDrawList(),
+                new Vector2(at.X + width - (EyeRoom * 0.5f), at.Y + (height * 0.5f)),
+                ImGui.GetTextLineHeight() * 0.95f,
+                sight.Mode != VisibilityMode.Hidden,
+                ImGui.GetColorU32(EditorTheme.Alpha(
+                    EditorTheme.LiveText,
+                    sight.Mode == VisibilityMode.Hidden ? 0.85f : 0.7f)));
+        }
     }
 
     /// <summary>
@@ -234,15 +307,15 @@ public static class WorldPanel
     /// <param name="height">How tall it is.</param>
     /// <param name="picked">Whether it is one of the selected.</param>
     /// <param name="over">Whether the pointer is on it.</param>
+    /// <param name="eyed">Whether the row ends in an eye, which the name stops short of.</param>
     private static void Paint(
-        Row row, Vector2 at, float width, float height, bool picked, bool over)
+        Row row, Vector2 at, float width, float height, bool picked, bool over, bool eyed)
     {
         var theme = EditorTheme.Current;
 
         // Everything after the button is drawn rather than laid out, because the button is the row
-        // as far
-        // as ImGui is concerned, and moving the cursor to put things inside it is how a window ends
-        // up believing it is taller than it is.
+        // as far as ImGui is concerned, and moving the cursor to put things inside it is how a
+        // window ends up believing it is taller than it is.
         var draw = ImGui.GetWindowDrawList();
 
         if (picked || over)
@@ -262,7 +335,11 @@ public static class WorldPanel
                     ? current ? EditorTheme.LiveAccent : EditorTheme.Alpha(EditorTheme.LiveAccent, 0.45f)
                     : EditorTheme.LiveHover);
 
-            draw.AddRectFilled(at, at + new Vector2(width, height), fill, ImGui.GetStyle().FrameRounding);
+            // Cut to the list rather than run under its edge, so a row scrolled half out of sight
+            // ends in a rounded corner instead of a square one.
+            var pill = EditorSurface.Clipped(at, at + new Vector2(width, height));
+
+            draw.AddRectFilled(pill.From, pill.To, fill, ImGui.GetStyle().FrameRounding);
         }
 
         var line = ImGui.GetTextLineHeight();
@@ -317,10 +394,19 @@ public static class WorldPanel
 
         EditorSurface.Icon(draw, row.Icon, new Vector2(at.X + indent, middle), line, picked);
 
+        // Cut where the eye begins rather than where the row ends, so a long name runs out of
+        // room instead of running under the thing that hides it.
+        draw.PushClipRect(
+            at,
+            new Vector2(at.X + width - (eyed ? EyeRoom : 0f), at.Y + height),
+            true);
+
         draw.AddText(
             new Vector2(at.X + indent + line + 6f, middle),
             ImGui.GetColorU32(picked ? EditorTheme.LiveText : EditorTheme.Alpha(EditorTheme.LiveText, 0.88f)),
             row.Name);
+
+        draw.PopClipRect();
     }
 
     /// <summary>
@@ -389,9 +475,8 @@ public static class WorldPanel
         {
             var entity = new Entity(bits);
 
-            // A parent that is not itself listed makes its child a root, because the alternative
-            // is a row
-            // nothing can reach.
+            // A parent that is not itself listed makes its child a root, because the alternative is
+            // a row nothing can reach.
             if (parent.IsNone || !names.ContainsKey(parent.Bits))
             {
                 roots.Add(entity);

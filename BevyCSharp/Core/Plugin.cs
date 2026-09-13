@@ -11,8 +11,7 @@ namespace Bevy;
 ///     {
 ///         app.World.InsertResource(new Score());
 ///         app.AddSystem(Stage.PostUpdate, world =&gt; world.Resource&lt;Score&gt;().Commit());
-///     }
-/// }
+/// } }
 /// </code>
 /// </example>
 public interface IPlugin

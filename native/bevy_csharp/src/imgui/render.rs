@@ -187,11 +187,9 @@ pub fn install(app: &mut App) {
         // picture is put on the window.
         //
         // Not into a scene camera's, because one given part of the window to draw into has a
-        // picture the
-        // size of that part, and an interface drawn there is cut off exactly where the panels are.
-        // Not straight onto the window either, because what reaches the screen is not the texture
-        // a window
-        // hands out here, so a pass drawing there draws where nobody looks.
+        // picture the size of that part, and an interface drawn there is cut off exactly where the
+        // panels are. Not straight onto the window either, because what reaches the screen is not
+        // the texture a window hands out here, so a pass drawing there draws where nobody looks.
         .add_systems(
             Core2d,
             draw.after(Core2dSystems::PostProcess).before(upscaling),
@@ -226,10 +224,9 @@ fn camera(mut commands: Commands) {
         //
         // Every 2D camera is a camera the gizmo renderer queues into, and a gizmo queued into this
         // one is drawn a second time in screen space, where a line a few metres long in the world
-        // becomes
-        // a mark a few pixels wide at the middle of the window, over the scene. Putting this camera
-        // where the gizmos are not costs nothing, because what it draws is one pass of our own,
-        // which asks about `InterfaceView` and not about layers.
+        // becomes a mark a few pixels wide at the middle of the window, over the scene. Putting
+        // this camera where the gizmos are not costs nothing, because what it draws is one pass of
+        // our own, which asks about `InterfaceView` and not about layers.
         RenderLayers::layer(31),
         InterfaceView,
         Name::new("Interface camera"),
@@ -356,9 +353,8 @@ fn prepare(
     }
 
     // A picture's bind group is built once and kept for as long as the picture is, because the
-    // atlas is
-    // the same atlas every frame, and rebuilding its binding sixty times a second is work for
-    // nothing.
+    // atlas is the same atlas every frame, and rebuilding its binding sixty times a second is work
+    // for nothing.
     for call in &frame.calls {
         if buffers.pictures.contains_key(&call.image) {
             continue;
@@ -432,9 +428,8 @@ fn draw(
     announce("drawing");
 
     // The camera's own attachment, asked for rather than built, because a view target holds two
-    // textures
-    // and hands out whichever is current, and a pass that picks one for itself draws into the one
-    // nothing goes on to read.
+    // textures and hands out whichever is current, and a pass that picks one for itself draws into
+    // the one nothing goes on to read.
     let mut pass = ctx.begin_tracked_render_pass(RenderPassDescriptor {
         label: Some("bcs_imgui"),
         color_attachments: &[Some(target.get_unsampled_color_attachment())],
@@ -469,8 +464,8 @@ fn draw(
 /// Where a draw call's clip rectangle lands on the window, in physical pixels.
 ///
 /// Nothing outside the window, and nothing empty, because a scissor rectangle reaching past the
-/// edge is a
-/// validation error rather than a clamp, and a zero-sized one is a draw call worth skipping.
+/// edge is a validation error rather than a clamp, and a zero-sized one is a draw call worth
+/// skipping.
 fn scissor(clip: [f32; 4], scale: Vec2, width: u32, height: u32) -> Option<(u32, u32, u32, u32)> {
     let left = (clip[0] * scale.x).max(0.0).round() as u32;
     let top = (clip[1] * scale.y).max(0.0).round() as u32;
@@ -553,8 +548,7 @@ mod tests {
         let box_of = scissor([-50.0, -50.0, 2000.0, 2000.0], Vec2::splat(1.0), 800, 600);
 
         // Clamped rather than refused, because a window's own clip rectangle is the whole window
-        // and ImGui
-        // writes it as a very large number rather than as the size.
+        // and ImGui writes it as a very large number rather than as the size.
         assert_eq!(box_of, Some((0, 0, 800, 600)));
     }
 

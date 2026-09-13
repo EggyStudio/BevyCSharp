@@ -59,9 +59,9 @@ public sealed unsafe class App : IDisposable
 
     /// <summary>True when the loaded native bridge has the HTML and CSS UI compiled in.</summary>
     /// <remarks>
-    /// A separate question from <see cref="HasRenderer"/>, because the editor profile is a
-    /// superset of the render one, because a bridge can draw a scene without carrying the document
-    /// surface, and a panel opened against one that does not is refused rather than ignored.
+    /// A separate question from <see cref="HasRenderer"/>. The editor profile is a superset of the
+    /// render one, so a bridge can draw a scene without carrying the document surface, and a panel
+    /// opened against one that does not is refused rather than ignored.
     /// </remarks>
     public static bool HasEditor => Native.bcs_has_editor() != 0;
 
@@ -304,8 +304,7 @@ public sealed unsafe class App : IDisposable
     /// <summary>The stages a dynamically added system can be put in.</summary>
     /// <remarks>
     /// The ones a behavior can name. The two internal stages are left out, because what they do is
-    /// fixed,
-    /// and nothing loaded at runtime has business in either.
+    /// fixed, and nothing loaded at runtime has business in either.
     /// </remarks>
     private static readonly Stage[] DispatchStages =
     [
@@ -499,8 +498,7 @@ public sealed unsafe class App : IDisposable
         descriptor.Source ??= SystemRegistrationSourceScope.Current;
 
         // The stage is only a label here, because a transition system belongs to no frame stage,
-        // and
-        // Startup is the closest thing to "runs outside the ordinary loop".
+        // and Startup is the closest thing to "runs outside the ordinary loop".
         var registration = new RegisteredSystem(this, descriptor, Stage.Startup);
         _systems.Add(registration);
 

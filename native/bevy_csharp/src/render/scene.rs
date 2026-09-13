@@ -543,9 +543,8 @@ pub extern "C" fn bcs_render_set_shadow_maps(directional: u32, point: u32) -> i3
 ///
 /// What a tool needs to draw a box around what is selected, and what a camera needs to frame it.
 /// Bevy computes an `Aabb` for every mesh it draws, in the mesh's own space, so the eight corners
-/// are put through the entity's global transform here and the box around those is what comes
-/// back. Doing it on this side keeps a rotated object's box honest, because transforming the two
-/// corners
+/// are put through the entity's global transform here and the box around those is what comes back.
+/// Doing it on this side keeps a rotated object's box honest, because transforming the two corners
 /// alone would give a box that shrinks as the object turns.
 ///
 /// Reports [`status::NOT_PRESENT`] for an entity Bevy has computed no bounds for, which is

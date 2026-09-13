@@ -26,10 +26,9 @@ public sealed class RangeAttribute(double minimum, double maximum) : Attribute
 /// <summary>What a slider shows beside its bar.</summary>
 /// <remarks>
 /// The number, by default, small and on the right, because the bar is the control and what the
-/// number is
-/// for is saying exactly where the bar was left. A box wide enough to type in takes half the row
-/// from the thing being dragged, which is worth it only when the number is one somebody was told
-/// to use rather than one they are looking for.
+/// number is for is saying exactly where the bar was left. A box wide enough to type in takes half
+/// the row from the thing being dragged, which is worth it only when the number is one somebody was
+/// told to use rather than one they are looking for.
 /// </remarks>
 public enum SliderReadout
 {
@@ -288,10 +287,9 @@ public sealed class WideAttribute : Attribute;
 /// </summary>
 /// <remarks>
 /// Three numbers on one line is what a position wants, because it is one value, it is read left to
-/// right,
-/// and three rows of it costs three times the height for no more information. Long numbers are cut
-/// rather than allowed to wrap, which is the trade, and a value whose numbers matter to five digits
-/// is one to leave stacked.
+/// right, and three rows of it costs three times the height for no more information. Long numbers
+/// are cut rather than allowed to wrap, which is the trade, and a value whose numbers matter to
+/// five digits is one to leave stacked.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public sealed class InlineAttribute : Attribute;

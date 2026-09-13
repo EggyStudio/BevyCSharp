@@ -120,8 +120,7 @@ public static class ConsoleCommands
     /// <remarks>
     /// Everything a command can do wrong is answered with a sentence rather than an exception,
     /// because the console is a place where people type things that are not quite right, and a
-    /// program that
-    /// stops because somebody misspelled a name is not a tool.
+    /// program that stops because somebody misspelled a name is not a tool.
     /// </remarks>
     public static string? Run(string line)
     {

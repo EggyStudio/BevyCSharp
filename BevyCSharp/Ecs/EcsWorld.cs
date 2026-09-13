@@ -415,10 +415,9 @@ public sealed unsafe class EcsWorld
     /// Names an entity, or takes its name away when given nothing.
     /// </summary>
     /// <remarks>
-    /// The one thing about an entity that is for people rather than for the program, which is
-    /// why it is also the one an editor has to be able to write, because a list of "Entity 42" is a
-    /// list
-    /// nobody can work in. Bevy's <c>Name</c> holds a string, so it is set through here rather
+    /// The one thing about an entity that is for people rather than for the program, which is why
+    /// it is also the one an editor has to be able to write, because a list of "Entity 42" is a
+    /// list nobody can work in. Bevy's <c>Name</c> holds a string, so it is set through here rather
     /// than through the generic component API, which carries blittable structs only.
     /// </remarks>
     public void SetName(Entity entity, string? name) => Native.Check(

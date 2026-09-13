@@ -19,23 +19,98 @@ public static class ComponentFields
     private const float Radians = MathF.PI / 180f;
 
     /// <summary>
-    /// How a number somebody can edit is written.
+    /// How many places a number nobody is typing into is written to, at most.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// As many digits as it takes and no more, so zero is <c>0</c> rather than <c>0.000</c> and a
-    /// tenth is <c>1.2</c> rather than <c>1.200</c>. Three zeroes after every whole number is
-    /// three characters of nothing in a column that is already tight.
-    /// </para>
-    /// <para>
-    /// Seven figures, because that is what a single-precision number holds. It matters for more
-    /// than reading: ImGui rounds a dragged value to whatever its format can print, so a field
-    /// written as three decimal places is a field that cannot hold 1.2345 even if somebody types
-    /// it in. Asking for fewer digits than the number has is asking the editor to quietly lose
-    /// them.
-    /// </para>
+    /// As much as a box this narrow shows without the last digits running under its edge. The
+    /// value itself is never rounded to it, so what is shown is short and what is held is whole.
+    /// </remarks>
+    internal const int Places = 3;
+
+    /// <summary>The formats for every number of places, so a frame builds no strings.</summary>
+    private static readonly string[] Shortly = ["%.0f", "%.1f", "%.2f", "%.3f"];
+
+    /// <summary>
+    /// How a number that is open for typing is written.
+    /// </summary>
+    /// <remarks>
+    /// Seven figures, because that is what a single-precision number holds. ImGui fills the text
+    /// box with the value put through the format the moment the box opens, so a field written at
+    /// three places would offer 1.235 to somebody who came to correct 1.2345.
     /// </remarks>
     private const string Figures = "%.7g";
+
+    /// <summary>
+    /// What keeps a drag from rounding the value to the format it is shown in.
+    /// </summary>
+    /// <remarks>
+    /// ImGui rounds a dragged value to whatever its format can print unless it is told not to, so
+    /// without this a field shown to three places is a field that cannot hold 1.2345 even after
+    /// somebody has typed it in.
+    /// </remarks>
+    private const ImGuiSliderFlags Whole = ImGuiSliderFlags.NoRoundToFormat;
+
+    /// <summary>Which field is open for typing, while it is.</summary>
+    private static string _opened = string.Empty;
+
+    /// <summary>How the next field's number is written, which is who is about to read it.</summary>
+    /// <param name="id">Which field is asking.</param>
+    /// <param name="numbers">What the field holds, which decides how much of it there is to show.</param>
+    private static string Written(string id, params ReadOnlySpan<float> numbers)
+    {
+        if (_opened == id) return Figures;
+
+        if (Opening())
+        {
+            _opened = id;
+            return Figures;
+        }
+
+        var places = 0;
+
+        foreach (var number in numbers) places = Math.Max(places, Needed(number));
+
+        return Shortly[places];
+    }
+
+    /// <summary>
+    /// How many places one number needs, up to <see cref="Places"/>.
+    /// </summary>
+    /// <remarks>
+    /// The fewest that says what the value is. Three zeroes after every whole number is three
+    /// characters of nothing in a column that is already tight, and a tenth written as 1.200 says
+    /// that two digits were measured which were not.
+    /// </remarks>
+    internal static int Needed(float number)
+    {
+        for (var places = 0; places < Places; places++)
+        {
+            if (MathF.Abs(number - MathF.Round(number, places)) < 0.0005f) return places;
+        }
+
+        return Places;
+    }
+
+    /// <summary>
+    /// Whether the gesture this frame is the one that opens the next field for typing.
+    /// </summary>
+    /// <remarks>
+    /// ImGui turns a drag box into a text box on a double click or a control click, and fills the
+    /// text with the value as the format writes it, both inside the one call that draws the
+    /// widget. The format has to be right before that call rather than after it, so the gesture is
+    /// read here instead of being asked about afterwards. The rectangle is the one the widget is
+    /// about to take, which is where the cursor is and how wide the row said it may be.
+    /// </remarks>
+    private static bool Opening()
+    {
+        var at = ImGui.GetCursorScreenPos();
+        var size = new Vector2(ImGui.CalcItemWidth(), ImGui.GetFrameHeight());
+
+        if (!ImGui.IsMouseHoveringRect(at, at + size)) return false;
+
+        return ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)
+            || (ImGui.GetIO().KeyCtrl && ImGui.IsMouseClicked(ImGuiMouseButton.Left));
+    }
 
     /// <summary>Which rotation field is being turned, while it is being turned.</summary>
     /// <remarks>
@@ -96,6 +171,19 @@ public static class ComponentFields
     private static string Digits(float number) =>
         MathF.Round(number, 4).ToString("0.####", CultureInfo.InvariantCulture);
 
+    /// <summary>
+    /// Asks for a slider handle as round as the groove it runs in.
+    /// </summary>
+    /// <remarks>
+    /// ImGui rounds a rectangle by at most half its shortest side, so a ten pixel handle in a
+    /// groove twenty pixels tall cannot take the groove's own corner however large the rounding
+    /// is. A handle as wide as the groove is tall is a circle, which is the same corner the ends
+    /// of the groove are drawn with. Pushed rather than set once, because the number is a frame
+    /// height and that is not known until there is a font to measure.
+    /// </remarks>
+    private static void Knob() =>
+        ImGui.PushStyleVar(ImGuiStyleVar.GrabMinSize, ImGui.GetFrameHeight());
+
     /// <summary>One field, drawn as what it is.</summary>
     internal static void Row(
         BehaviorContext ctx, Entity entity, ComponentSchema schema, ComponentField field)
@@ -124,8 +212,8 @@ public static class ComponentFields
         }
 
         // The name takes under a third and the value the rest, which holds at any width, because a
-        // fixed
-        // column that fits at five hundred pixels leaves nothing for the value at three hundred.
+        // fixed column that fits at five hundred pixels leaves nothing for the value at three
+        // hundred.
         //
         // Weighted towards the value, because a name that runs out of room is still readable from
         // its first half and a number that runs out of room is a different number.
@@ -150,6 +238,10 @@ public static class ComponentFields
         if (!editable) ImGui.BeginDisabled();
 
         Edit(ctx, entity, field, id, value);
+
+        // Written whole only while the box is open, which it is until ImGui says the widget is no
+        // longer in use.
+        if (_opened == id && !ImGui.IsItemActive()) _opened = string.Empty;
 
         if (!editable) ImGui.EndDisabled();
 
@@ -195,7 +287,12 @@ public static class ComponentFields
 
                 ImGui.PushFont(ImGuiRuntime.Face(EditorShell.Figures));
 
-                var moved = ImGui.DragFloat3(id, ref three, 0.01f, 0f, 0f, Figures);
+                // One format for the three of them, because ImGui takes one and a vector is one
+                // value. Whichever of them needs the most places decides, so the three stay a
+                // column rather than three lengths of number.
+                var format = Written(id, three.X, three.Y, three.Z);
+
+                var moved = ImGui.DragFloat3(id, ref three, 0.01f, 0f, 0f, format, Whole);
 
                 ImGui.PopFont();
 
@@ -218,7 +315,9 @@ public static class ComponentFields
 
                 ImGui.PushFont(ImGuiRuntime.Face(EditorShell.Figures));
 
-                var turned = ImGui.DragFloat3(id, ref degrees, 0.5f, 0f, 0f, Figures);
+                var written = Written(id, degrees.X, degrees.Y, degrees.Z);
+
+                var turned = ImGui.DragFloat3(id, ref degrees, 0.5f, 0f, 0f, written, Whole);
 
                 ImGui.PopFont();
 
@@ -268,9 +367,18 @@ public static class ComponentFields
 
                 ImGui.PushFont(ImGuiRuntime.Face(EditorShell.Figures));
 
-                var changed = field.Hints is { HasRange: true, Minimum: { } least, Maximum: { } most }
-                    ? ImGui.SliderInt(id, ref number, (int)least, (int)most)
-                    : ImGui.DragInt(id, ref number);
+                bool changed;
+
+                if (field.Hints is { HasRange: true, Minimum: { } least, Maximum: { } most })
+                {
+                    Knob();
+                    changed = ImGui.SliderInt(id, ref number, (int)least, (int)most);
+                    ImGui.PopStyleVar();
+                }
+                else
+                {
+                    changed = ImGui.DragInt(id, ref number);
+                }
 
                 ImGui.PopFont();
 
@@ -285,9 +393,20 @@ public static class ComponentFields
 
                 ImGui.PushFont(ImGuiRuntime.Face(EditorShell.Figures));
 
-                var changed = field.Hints is { HasRange: true, Minimum: { } least, Maximum: { } most }
-                    ? ImGui.SliderFloat(id, ref number, (float)least, (float)most, Figures)
-                    : ImGui.DragFloat(id, ref number, 0.01f, 0f, 0f, Figures);
+                var format = Written(id, number);
+
+                bool changed;
+
+                if (field.Hints is { HasRange: true, Minimum: { } least, Maximum: { } most })
+                {
+                    Knob();
+                    changed = ImGui.SliderFloat(id, ref number, (float)least, (float)most, format, Whole);
+                    ImGui.PopStyleVar();
+                }
+                else
+                {
+                    changed = ImGui.DragFloat(id, ref number, 0.01f, 0f, 0f, format, Whole);
+                }
 
                 ImGui.PopFont();
 

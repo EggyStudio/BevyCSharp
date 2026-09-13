@@ -86,9 +86,8 @@ pub struct BcsImGuiFrame {
 
 /// Takes this frame's triangles.
 ///
-/// Copied rather than kept, because the pointers are ImGui's own buffers and ImGui is free to
-/// reuse them
-/// the moment this returns.
+/// Copied rather than kept, because the pointers are ImGui's own buffers and ImGui is free to reuse
+/// them the moment this returns.
 ///
 /// # Safety
 /// `frame` must point to a [`BcsImGuiFrame`] whose buffers hold the counts it declares.

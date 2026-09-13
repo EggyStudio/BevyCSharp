@@ -16,8 +16,7 @@ public readonly record struct AssetEntry(string Name, string Path, bool IsDirect
 /// <para>
 /// An asset browser over the same directory the engine loads from, which is the honest thing to
 /// show, since what is listed here is exactly what a path in a document or a script would find.
-/// Nothing
-/// is imported and nothing is catalogued, because the engine does not work that way either.
+/// Nothing is imported and nothing is catalogued, because the engine does not work that way either.
 /// </para>
 /// <para>
 /// Selection is separate from the world's, because an asset is not an entity and a panel showing
@@ -86,8 +85,8 @@ public static class EditorAssets
     /// </summary>
     /// <remarks>
     /// One level at a time rather than the whole tree at once, because a tree draws what is
-    /// unfolded, and
-    /// a deep asset directory read whole on every frame is a directory read for nothing.
+    /// unfolded, and a deep asset directory read whole on every frame is a directory read for
+    /// nothing.
     /// </remarks>
     /// <param name="relative">Which directory to look inside, or empty for the root.</param>
     public static IReadOnlyList<(string Path, string Name)> Directories(string relative)
@@ -195,10 +194,9 @@ public static class EditorAssets
     /// </summary>
     /// <remarks>
     /// The kind rather than the file, for everything but an image, because a browser points an
-    /// image tile
-    /// at the image itself, since the interface loads a picture from a path and that is all it
-    /// takes. A picture of what a model or a sound contains would be a thumbnail, which needs the
-    /// bridge to render one and hand back an asset key.
+    /// image tile at the image itself, since the interface loads a picture from a path and that is
+    /// all it takes. A picture of what a model or a sound contains would be a thumbnail, which
+    /// needs the bridge to render one and hand back an asset key.
     /// </remarks>
     public static string IconOf(string relative) => KindOf(relative) switch
     {

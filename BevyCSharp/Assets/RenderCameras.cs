@@ -149,7 +149,7 @@ public enum BloomMode
 /// </summary>
 /// <remarks>
 /// One settings object for the whole pipeline rather than a call per effect, because these are
-/// decided together, because bloom wants a high dynamic range target, and multisampling and an
+/// decided together. Bloom wants a high dynamic range target, and multisampling and an
 /// antialiasing pass are two answers to the same question. Every field is applied on every call,
 /// so an effect this object leaves off is taken off the camera. Turning bloom off is the same
 /// call as turning it on, which is what a settings screen wants.
@@ -197,8 +197,7 @@ public sealed class PostSettings
     /// <remarks>
     /// Read by <see cref="AntiAliasPass.Fxaa"/> and <see cref="AntiAliasPass.Smaa"/>. Temporal
     /// antialiasing has no such setting, because how much it catches is decided by how many frames
-    /// it
-    /// has to work from.
+    /// it has to work from.
     /// </remarks>
     public AntiAliasQuality Quality { get; set; } = AntiAliasQuality.Medium;
 
@@ -213,9 +212,8 @@ public sealed class PostSettings
     /// </summary>
     /// <remarks>
     /// Needs <see cref="Hdr"/> to have anything to work with, because without it nothing is
-    /// brighter than
-    /// white, so nothing is bright enough to glow. To make one object glow harder, raise its
-    /// material's emissive color rather than this.
+    /// brighter than white, so nothing is bright enough to glow. To make one object glow harder,
+    /// raise its material's emissive color rather than this.
     /// </remarks>
     public bool Bloom { get; set; }
 

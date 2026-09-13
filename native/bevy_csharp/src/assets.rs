@@ -55,9 +55,8 @@ pub mod load_state {
 /// The handles C# is currently holding.
 ///
 /// Freed slots are reused, so an index alone would be ambiguous after a release, because a stale
-/// index
-/// could name a slot that has since been handed to something else. Each slot therefore carries a
-/// generation, and the value C# holds packs both, in the same spirit as an `Entity`.
+/// index could name a slot that has since been handed to something else. Each slot therefore
+/// carries a generation, and the value C# holds packs both, in the same spirit as an `Entity`.
 #[derive(Resource, Default)]
 pub struct AssetHandles {
     slots: Vec<Slot>,
@@ -460,8 +459,7 @@ pub extern "C" fn bcs_scene_spawn(asset: i32) -> u64 {
 
 /// Builds an atlas layout over a grid of equal tiles, and returns its key or a negative status.
 ///
-/// The layout is a list of rectangles and nothing else, so it names where each frame sits while
-/// the
+/// The layout is a list of rectangles and nothing else, so it names where each frame sits while the
 /// image it describes stays a separate asset. That is why no image is passed here, and why one
 /// layout serves every sheet cut the same way.
 ///

@@ -252,8 +252,7 @@ public sealed class NativeComponentTests
     public void NameOnlyHandlesFilterButRefuseTheirBytes()
     {
         // ChildOf and Children have no C# mirror, because an empty struct naming one is a single
-        // byte,
-        // so an insert through it would write nonsense over a live component. Everything that
+        // byte, so an insert through it would write nonsense over a live component. Everything that
         // only needs the id still works.
         using var harness = new EngineHarness(frames: 2);
 
@@ -461,8 +460,7 @@ public sealed class NativeComponentTests
 
         // What Bevy computes from it arrived with the mesh, because that insert goes through the
         // engine's own path. Whether propagation then updates them is not asserted here, since it
-        // needs
-        // VisibilityPlugin, which only a windowed run installs.
+        // needs VisibilityPlugin, which only a windowed run installs.
         Assert.True(companions);
     }
 

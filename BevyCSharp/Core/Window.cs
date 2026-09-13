@@ -86,8 +86,7 @@ public static unsafe class Window
     /// </summary>
     /// <remarks>
     /// What the window ended up at, which is not always what was asked for, because a window
-    /// manager may
-    /// refuse a resize, and a fullscreen window takes the monitor's size.
+    /// manager may refuse a resize, and a fullscreen window takes the monitor's size.
     /// </remarks>
     public static (uint Width, uint Height) Size()
     {
@@ -191,9 +190,8 @@ public static unsafe class Window
     /// <remarks>
     /// <para>
     /// <see cref="CursorGrab.Locked"/> is what a first-person camera needs, because it reads how
-    /// far the
-    /// mouse moved rather than where it is, and a free cursor stops moving at the edge of the
-    /// screen.
+    /// far the mouse moved rather than where it is, and a free cursor stops moving at the edge of
+    /// the screen.
     /// </para>
     /// <para>
     /// Platforms differ in which grab they support. Windows confines and macOS locks, and each

@@ -7,9 +7,8 @@ namespace BevyCSharp.Editor.Framework;
 /// <para>
 /// One table, because the font decides what is possible and the answer is the same everywhere. An
 /// icon here is a character rather than an image, because the interface has no icon set, an image
-/// would be
-/// another asset to ship and load per button, and a glyph is styled by the same rules as the text
-/// beside it.
+/// would be another asset to ship and load per button, and a glyph is styled by the same rules as
+/// the text beside it.
 /// </para>
 /// <para>
 /// Kept away from the documents on purpose. A button's picture is a thing a person might want to

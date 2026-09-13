@@ -136,8 +136,7 @@ public sealed class ComponentField
     /// <remarks>
     /// A field the attributes marked as read only answers no, whatever the generator emitted,
     /// because it is the same question from a tool's point of view, and answering it in one place
-    /// means every
-    /// drawer honours the attribute without knowing about it.
+    /// means every drawer honours the attribute without knowing about it.
     /// </remarks>
     public bool IsWritable => _write is not null && !Hints.ReadOnly;
 

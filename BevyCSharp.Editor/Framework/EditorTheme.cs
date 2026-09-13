@@ -472,9 +472,8 @@ public sealed record EditorTheme
     /// </summary>
     /// <remarks>
     /// A gap, where the look is the editor's own, because hierarchy comes from fill and spacing and
-    /// a rule
-    /// across a panel is the border it does without. A line, where the look is ImGui's, because
-    /// that is what ImGui's own look does and it is taken whole.
+    /// a rule across a panel is the border it does without. A line, where the look is ImGui's,
+    /// because that is what ImGui's own look does and it is taken whole.
     /// </remarks>
     public static void Divide()
     {

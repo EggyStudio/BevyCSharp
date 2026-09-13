@@ -80,9 +80,8 @@ public sealed class EditorTableTests
         EditorSettings.Fact(page, "A fact", () => "read only");
         EditorSettings.Action(page, "An action", () => { });
 
-        // Three entries on the page, and nothing about any of them worth keeping, because a
-        // heading says
-        // nothing, a fact is worked out again next time, and an action is not a value at all.
+        // Three entries on the page, and nothing about any of them worth keeping, because a heading
+        // says nothing, a fact is worked out again next time, and an action is not a value at all.
         Assert.Equal(3, EditorSettings.On(page).Count);
         Assert.DoesNotContain(page, EditorSettings.Describe());
     }

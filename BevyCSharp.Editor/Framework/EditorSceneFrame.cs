@@ -26,9 +26,8 @@ public static class EditorSceneFrame
         if (!EditorShell.Docked) return;
 
         // The rounding a card takes, not a window's, because what the scene sits among docked is
-        // the cards
-        // in the panel and the strip, and a corner rounder than theirs is a corner that does not
-        // match the ones beside it.
+        // the cards in the panel and the strip, and a corner rounder than theirs is a corner that
+        // does not match the ones beside it.
         var radius = EditorTheme.Current.ChildRounding;
         if (radius < 1f) return;
 
@@ -132,9 +131,8 @@ public static class EditorSceneFrame
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, EditorTheme.LiveHover);
 
             // Never in the accent, because the accent says what is in force in the scene, and a
-            // bright blue
-            // disc in the corner of the panel reads as a close button somebody has to think about.
-            // Which way it is set is what the picture in it says.
+            // bright blue disc in the corner of the panel reads as a close button somebody has to
+            // think about. Which way it is set is what the picture in it says.
             if (ToolbarView.Circle($"dock{EditorShell.Docked}", EditorShell.Docked ? "icons/ui/close.png" : "icons/ui/pinned.png", false, Size))
             {
                 EditorShell.Docked = !EditorShell.Docked;
@@ -162,9 +160,8 @@ public static class EditorSceneFrame
     /// </summary>
     /// <remarks>
     /// Asked of the row rather than worked out per panel, because which card is under the corner
-    /// depends on
-    /// whether the panel is split beside or above, and a rule written per panel is a rule that is
-    /// wrong in one of them.
+    /// depends on whether the panel is split beside or above, and a rule written per panel is a
+    /// rule that is wrong in one of them.
     /// </remarks>
     public static float DockRoom()
     {

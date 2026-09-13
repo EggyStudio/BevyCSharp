@@ -73,12 +73,8 @@ public static unsafe class Ui
     /// <exception cref="BevyNativeException">This build has no renderer.</exception>
     /// <example>
     /// <code>
-    /// Ui.SpawnText(paragraph, new UiSettings { Width = Length.Px(280f) }, new UiTextSettings
-    /// {
-    ///     FontSize = 16f,
-    ///     Justify = TextJustify.Center,
-    ///     Wrap = TextWrap.WordBoundary,
-    /// });
+    /// Ui.SpawnText(paragraph, new UiSettings { Width = Length.Px(280f) }, new UiTextSettings {
+    /// FontSize = 16f, Justify = TextJustify.Center, Wrap = TextWrap.WordBoundary, });
     /// </code>
     /// </example>
     public static Entity SpawnText(string text, UiSettings settings, UiTextSettings style)
@@ -122,9 +118,9 @@ public static unsafe class Ui
     /// <remarks>
     /// <para>
     /// <see cref="UiInteraction.Pressed"/> lasts from the frame the pointer goes down until it is
-    /// released, so a click is the edge into it, found by keeping the previous answer and comparing.
-    /// A release
-    /// over the node reads as <see cref="UiInteraction.Hovered"/> again in the same frame.
+    /// released, so a click is the edge into it, found by keeping the previous answer and
+    /// comparing. A release over the node reads as <see cref="UiInteraction.Hovered"/> again in the
+    /// same frame.
     /// </para>
     /// <para>
     /// The pointer is tracked by a system that comes with the window, so a windowless run leaves
@@ -169,8 +165,8 @@ public static unsafe class Ui
     /// </summary>
     /// <remarks>
     /// <see cref="UiImageMode.Sliced"/> is what a panel that resizes is drawn with, because the
-    /// corners
-    /// keep their size while the middle stretches, so one small image covers every size of box.
+    /// corners keep their size while the middle stretches, so one small image covers every size of
+    /// box.
     /// </remarks>
     /// <exception cref="BevyNativeException">
     /// The entity is gone, the handle is not one this app is holding, or this build has no

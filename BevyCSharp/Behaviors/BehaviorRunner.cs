@@ -35,8 +35,7 @@ public static class BehaviorRunners
     /// <remarks>
     /// Below this, the scheduling overhead costs more than the parallelism buys. The figure is
     /// deliberately high, because most behaviors run over tens or hundreds of entities, where a
-    /// plain
-    /// loop over contiguous memory is already close to optimal.
+    /// plain loop over contiguous memory is already close to optimal.
     /// </remarks>
     public const int DefaultParallelThreshold = 4096;
 

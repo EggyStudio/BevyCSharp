@@ -58,9 +58,7 @@ namespace Bevy;
 ///         ctx.Ecs.Add(entity, new Spinner { Speed = 2f });
 ///     }
 ///
-///     [OnUpdate]
-///     public void Tick(BehaviorContext ctx) =&gt; Angle += Speed * ctx.Time.Delta;
-/// }
+/// [OnUpdate] public void Tick(BehaviorContext ctx) =&gt; Angle += Speed * ctx.Time.Delta; }
 /// </code>
 /// </example>
 [AttributeUsage(AttributeTargets.Struct, Inherited = false)]
@@ -117,8 +115,7 @@ public sealed class OnFixedUpdateAttribute : Attribute;
 /// <para>
 /// Where a level is built, a menu is shown, or a screen's entities are spawned. Unlike a stage
 /// attribute this is not per frame, because it runs once per transition, so anything it creates
-/// lasts
-/// until <see cref="OnExitAttribute"/> takes it away.
+/// lasts until <see cref="OnExitAttribute"/> takes it away.
 /// </para>
 /// <para>
 /// The state must have been added with <see cref="App.AddState{TState}"/> before the app runs,

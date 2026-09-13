@@ -229,9 +229,8 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
                 };
 
                 // try_typed rather than typed, because asking for a mesh component with a material
-                // handle
-                // is a mistake the managed side can make, and it should be an error rather than
-                // a panic crossing the boundary.
+                // handle is a mistake the managed side can make, and it should be an error rather
+                // than a panic crossing the boundary.
                 match component.as_str() {
                     "Mesh3d" => match untyped.try_typed::<Mesh>() {
                         Ok(handle) => {

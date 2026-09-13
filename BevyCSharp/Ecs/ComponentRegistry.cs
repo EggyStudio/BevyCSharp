@@ -163,8 +163,7 @@ public static class ComponentType<T> where T : unmanaged
                 : NativeComponents.Resolve(
                     NativeHandle.NativeName,
                     // A handle that mirrors nothing has no layout worth checking, because its size
-                    // is
-                    // whatever an empty C# struct happens to be, not the engine type's.
+                    // is whatever an empty C# struct happens to be, not the engine type's.
                     NativeHandle.MirrorsLayout ? Size : 0);
             _generation = ComponentRegistry.Generation;
             return _id;

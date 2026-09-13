@@ -7,9 +7,8 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// These are the raw ids. Reaching for one is rarely necessary, because every component listed
-/// here has
-/// a C# type implementing <see cref="INativeComponent"/>, and those resolve to the same ids
+/// These are the raw ids. Reaching for one is rarely necessary, because every component listed here
+/// has a C# type implementing <see cref="INativeComponent"/>, and those resolve to the same ids
 /// through the ordinary generic API, so <c>ctx.Ecs.Add(entity, Transform.Identity)</c> writes
 /// Bevy's own <c>Transform</c>. The ids are still here for the id-shaped entry points such as
 /// <see cref="EcsWorld.HasById"/>, and for passing an explicit component to

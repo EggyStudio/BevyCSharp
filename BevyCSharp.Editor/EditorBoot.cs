@@ -162,8 +162,8 @@ public partial struct EditorBoot
         if (!ctx.Input.KeyPressed(Key.Escape)) return;
 
         // Whatever is being typed into keeps Escape, because it is what somebody reaches for when
-        // they
-        // have changed their mind about a value, and quitting instead throws away more than that.
+        // they have changed their mind about a value, and quitting instead throws away more than
+        // that.
         if (ImGuiRuntime.Typing) return;
 
         // What is open closes before the program does. A tab is up, and then it is not.

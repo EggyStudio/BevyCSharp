@@ -15,10 +15,9 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// <b>A reader sees the previous frame's messages.</b> The queue is swapped once at the top of
-/// each frame, so every reader sees the same complete set, exactly once, whatever stage it runs
-/// in and whatever order the systems happen to run. That costs a frame of latency, because a
-/// message sent
-/// during a frame is not readable until the next one, including by the sender.
+/// each frame, so every reader sees the same complete set, exactly once, whatever stage it runs in
+/// and whatever order the systems happen to run. That costs a frame of latency, because a message
+/// sent during a frame is not readable until the next one, including by the sender.
 /// </para>
 /// <para>
 /// This differs from Bevy's own messages, which give each reader a cursor and let it catch up

@@ -16,8 +16,8 @@ namespace BevyCSharp.Editor.Framework;
 /// <para>
 /// Anything whose box on the screen touches the one being dragged is taken, rather than only what
 /// is wholly inside it, because a drag round part of a large object is a drag that meant that
-/// object, and a
-/// rule that needs the whole of a thing inside the box cannot reach anything larger than the view.
+/// object, and a rule that needs the whole of a thing inside the box cannot reach anything larger
+/// than the view.
 /// </para>
 /// <para>
 /// Drawn and decided here rather than in a behavior, because both halves need the frame the shell
@@ -39,8 +39,7 @@ public static class MarqueeSelect
     /// <summary>Whether a box is being dragged right now.</summary>
     /// <remarks>
     /// Asked by the picking that runs on a release, because a release that ended a box is not also
-    /// a click
-    /// on whatever happened to be under it.
+    /// a click on whatever happened to be under it.
     /// </remarks>
     public static bool Dragging { get; private set; }
 
@@ -148,10 +147,9 @@ public static class MarqueeSelect
             if (EditorEntity.IsInterface(ctx.Ecs, entity)) continue;
             if (EditorEntity.IsBookkeeping(ctx.Ecs, entity)) continue;
 
-            // Having a box to draw is the same test the world list uses for something nobody
-            // named, and it is the whole test here, because what a drag over the viewport can take
-            // is
-            // what the viewport is showing.
+            // Having a box to draw is the same test the world list uses for something nobody named,
+            // and it is the whole test here, because what a drag over the viewport can take is what
+            // the viewport is showing.
             if (!Render.TryGetBounds(entity, out var min, out var max)) continue;
             if (!Touches(camera, min, max, low, high)) continue;
 

@@ -7,9 +7,8 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A click on a mesh, resolved by Bevy's own picking, which raycasts the scene against the
-/// pointer. The interface is not reported here, because a click that landed on a panel belongs to
-/// that
+/// A click on a mesh, resolved by Bevy's own picking, which raycasts the scene against the pointer.
+/// The interface is not reported here, because a click that landed on a panel belongs to that
 /// panel, and the interface answers for it.
 /// </para>
 /// <para>

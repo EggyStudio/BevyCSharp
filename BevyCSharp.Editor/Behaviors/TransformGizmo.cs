@@ -61,8 +61,7 @@ public partial struct TransformGizmo
     /// <remarks>
     /// Captured once rather than followed, so a drag applies the same change to each of them from
     /// where each of them was. Reading them every frame instead would compound, because a hand that
-    /// moved
-    /// a metre would move the second thing a metre per frame.
+    /// moved a metre would move the second thing a metre per frame.
     /// </remarks>
     private static (Entity Entity, Transform Was)[] _others = [];
 
@@ -421,9 +420,8 @@ public partial struct TransformGizmo
 
             case EditorTool.Rotate:
                 // A trackball, where the pointer's travel across the screen turns the thing about
-                // the
-                // camera's own two axes, so it rolls the way a ball under a fingertip would rather
-                // than about any axis of its own.
+                // the camera's own two axes, so it rolls the way a ball under a fingertip would
+                // rather than about any axis of its own.
                 var basis = ctx.Ecs.GetOrDefault<GlobalTransform>(camera);
                 var right = basis.XAxis.Normalized;
                 var up = basis.YAxis.Normalized;

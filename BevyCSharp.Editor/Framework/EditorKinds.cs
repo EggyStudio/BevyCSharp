@@ -26,8 +26,7 @@ public sealed record EntityKind(string Mark, string Icon, int Order = 0);
 /// </para>
 /// <para>
 /// Matched on the component's qualified name, and remembered per component id, because naming a
-/// component
-/// crosses the ABI and copies a string, the answer never changes while an app runs, and a
+/// component crosses the ABI and copies a string, the answer never changes while an app runs, and a
 /// hierarchy would otherwise ask it thousands of times a second.
 /// </para>
 /// </remarks>
@@ -82,8 +81,7 @@ public static class EditorKinds
     /// </summary>
     /// <remarks>
     /// A behavior of this project's own beats nothing at all but loses to a camera or a mesh,
-    /// because what
-    /// a thing <em>is</em> is more use in a list than what it happens to be doing.
+    /// because what a thing <em>is</em> is more use in a list than what it happens to be doing.
     /// </remarks>
     public static string IconFor(EcsWorld world, Entity entity)
     {

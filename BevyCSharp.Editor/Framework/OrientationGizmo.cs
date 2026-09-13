@@ -12,9 +12,8 @@ namespace BevyCSharp.Editor.Framework;
 /// Drawn flat, in the interface, rather than as lines in the world. A cross put into the scene a
 /// few centimetres in front of the camera and off to one side is seen through the same perspective
 /// as everything else, and perspective at the edge of a wide view shears it, so the arms come out
-/// at
-/// angles that say nothing about where the world is pointing. What a person reads this for is the
-/// direction of three axes, so it is drawn the way a direction is drawn, with no depth at all.
+/// at angles that say nothing about where the world is pointing. What a person reads this for is
+/// the direction of three axes, so it is drawn the way a direction is drawn, with no depth at all.
 /// </para>
 /// <para>
 /// The camera's own basis does the work. A world axis seen through the camera is that axis measured
@@ -44,8 +43,7 @@ public static class OrientationGizmo
 
         var view = ctx.Ecs.GetOrDefault<GlobalTransform>(camera);
         // Under the panels rather than over them, because it belongs to the scene and a panel
-        // dragged
-        // across it should cover it like anything else the scene is showing.
+        // dragged across it should cover it like anything else the scene is showing.
         var draw = ImGui.GetBackgroundDrawList();
 
         var reach = (Size * 0.5f) - 10f;
@@ -104,8 +102,7 @@ public static class OrientationGizmo
             }
 
             // The other half is a ring, which says where the axis went without competing with the
-            // end
-            // somebody is reading.
+            // end somebody is reading.
             draw.AddCircle(arm.At, knob * 0.8f, packed, 0, 1.6f);
         }
     }

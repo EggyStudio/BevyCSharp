@@ -71,8 +71,7 @@ public sealed class UiTextSettings
     /// names nothing is refused rather than quietly falling back, since a game that ships a font
     /// and then does not use it looks like a font that failed to load, which it is. Asking for a
     /// font by family name instead is not offered, because that needs a Bevy feature which links
-    /// against
-    /// fontconfig on Linux, and this bridge builds with nothing but a C compiler.
+    /// against fontconfig on Linux, and this bridge builds with nothing but a C compiler.
     /// </remarks>
     public AssetHandle Font { get; set; } = AssetHandle.None;
 

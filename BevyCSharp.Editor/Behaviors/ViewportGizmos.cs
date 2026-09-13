@@ -136,16 +136,14 @@ public partial struct ViewportGizmos
 
         // Under the camera, always. Following where the camera is looking sounds helpful and is
         // not, because turning on the spot then drags the whole floor around with the view and the
-        // grid
-        // stops being a fixed thing the camera moves over. Straight down from the eye is where it
-        // ends up anyway when there is nothing to look at, and behaving the same either way is
+        // grid stops being a fixed thing the camera moves over. Straight down from the eye is where
+        // it ends up anyway when there is nothing to look at, and behaving the same either way is
         // worth more than reaching a little further ahead.
         var look = new Vec3(eye.X, plane, eye.Z);
 
         // Three, because a spacing takes two decades to come in and one to go, so at any height
-        // there
-        // is the one being read, the one behind it, and one further back still barely showing.
-        // Coarsest first, so the finer lines are drawn over them rather than under.
+        // there is the one being read, the one behind it, and one further back still barely
+        // showing. Coarsest first, so the finer lines are drawn over them rather than under.
         var coarsest = coarse * 10f;
 
         Sheet(look, plane, coarsest, Reach(above, coarsest), Solid(above, coarsest));
@@ -201,8 +199,7 @@ public partial struct ViewportGizmos
     /// <para>
     /// Nothing here knows which spacing is the fine one and which is the coarse one, so nothing
     /// changes at the moment they swap roles, so a ten metre line is as solid at ninety metres up
-    /// as
-    /// at a hundred and ten.
+    /// as at a hundred and ten.
     /// </para>
     /// </remarks>
     private static float Solid(float above, float step)

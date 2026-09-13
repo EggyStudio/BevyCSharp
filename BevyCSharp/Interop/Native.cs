@@ -626,9 +626,8 @@ internal static unsafe partial class Native
     // The interface.
     //
     // Dear ImGui runs on this side, where it owns the windows, the widgets and what they are worth.
-    // All
-    // that crosses is the triangles it asked for, once a frame, and the pictures they read from.
-    // ---------------------------------------------------------------------------------------
+    // All that crosses is the triangles it asked for, once a frame, and the pictures they read
+    // from. ---------------------------------------------------------------------------------------
 
     /// <summary>Moves, presses or releases the pointer, as though a hand had.</summary>
     [LibraryImport(Library)]

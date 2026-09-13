@@ -48,9 +48,8 @@ public readonly record struct LogLine(
 /// </para>
 /// <para>
 /// A ring rather than a list, because a program left running all day writes a great many lines and
-/// the
-/// interesting ones are always the last few. Repeats collapse, because the line that repeats every
-/// frame is the one that would otherwise push everything else off the end.
+/// the interesting ones are always the last few. Repeats collapse, because the line that repeats
+/// every frame is the one that would otherwise push everything else off the end.
 /// </para>
 /// </remarks>
 public static class ConsoleLog
@@ -74,8 +73,7 @@ public static class ConsoleLog
     /// <summary>Starts teeing the output and error streams into the ring.</summary>
     /// <remarks>
     /// Idempotent, and harmless if it is never called, since the ring stays empty and whatever
-    /// shows it
-    /// says so.
+    /// shows it says so.
     /// </remarks>
     public static void Start()
     {

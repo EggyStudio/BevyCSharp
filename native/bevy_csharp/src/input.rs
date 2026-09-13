@@ -113,8 +113,7 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
                 };
 
                 // Moved first whatever the action is, because a press somewhere the pointer has
-                // never been
-                // is a press on whatever it was last over.
+                // never been is a press on whatever it was last over.
                 let moved = CursorMoved {
                     window,
                     position: Vec2::new(x, y),
@@ -252,9 +251,9 @@ pub unsafe extern "C" fn bcs_input_key(key: i32, action: i32, text: *const u8, l
 
                 world.write_message(press.clone());
 
-                // And as a window event, for the same reason the pointer writes both, which is
-                // that winit writes
-                // each of them for every real key, so writing one is writing half a keyboard.
+                // And as a window event, for the same reason the pointer writes both, which is that
+                // winit writes each of them for every real key, so writing one is writing half a
+                // keyboard.
                 world.write_message(bevy::window::WindowEvent::KeyboardInput(press));
 
                 // The state the rest of this frame reads, which the message only reaches on the

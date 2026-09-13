@@ -454,8 +454,7 @@ public sealed class UiTests
         harness.OnContext(Stage.Startup, ctx =>
         {
             // `ScrollPosition` is a bare component, because unlike an image node it brings no
-            // `Node`
-            // along with it, so on anything that is not already one it would sit there doing
+            // `Node` along with it, so on anything that is not already one it would sit there doing
             // nothing while the call reported success.
             var plain = ctx.Ecs.Spawn();
             var notANode = Assert.Throws<BevyNativeException>(() => Ui.SetScroll(plain, 0f, 24f));

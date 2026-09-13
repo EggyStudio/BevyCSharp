@@ -81,10 +81,9 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// <remarks>
     /// <para>
     /// Declaration order matters, because it is the order the runtime lays the struct out in, and
-    /// the
-    /// order a tool shows the fields in. Static and constant members are left out, since they
-    /// belong to the type rather than to any entity carrying it, and so are private ones, which
-    /// are the behavior's own working state and not reachable from the generated schema anyway.
+    /// the order a tool shows the fields in. Static and constant members are left out, since they
+    /// belong to the type rather than to any entity carrying it, and so are private ones, which are
+    /// the behavior's own working state and not reachable from the generated schema anyway.
     /// </para>
     /// <para>
     /// A property is described too, and read and written through itself rather than through
@@ -261,8 +260,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         var hints = FieldHintModel.None;
 
         // Conditions and change notifications gather rather than replace, because several of either
-        // can sit
-        // on one field, and the last one written is not the only one meant.
+        // can sit on one field, and the last one written is not the only one meant.
         var conditions = new List<ConditionModel>();
         var changed = new List<string>();
 
@@ -344,10 +342,9 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// One of an attribute's positional arguments, written as the source wrote it.
     /// </summary>
     /// <remarks>
-    /// What a condition compares against, which can be a flag, a number, a word or one of an
-    /// enum's names. An enum argument arrives as the number behind the name, so the name is taken
-    /// from the type rather than from the value, because a condition written against a name has to
-    /// be
+    /// What a condition compares against, which can be a flag, a number, a word or one of an enum's
+    /// names. An enum argument arrives as the number behind the name, so the name is taken from the
+    /// type rather than from the value, because a condition written against a name has to be
     /// checked against one, since the number is not what the field reads as at runtime.
     /// </remarks>
     private static string? Written(AttributeData attribute, int index)
@@ -522,9 +519,8 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// </summary>
     /// <remarks>
     /// Instance methods only, and only the ordinary ones, because a property's getter is a method
-    /// too, and
-    /// a static method is not a thing an entity can be told to do. Anything carrying a stage
-    /// attribute is a system, which runs on its own schedule rather than when somebody asks.
+    /// too, and a static method is not a thing an entity can be told to do. Anything carrying a
+    /// stage attribute is a system, which runs on its own schedule rather than when somebody asks.
     /// </remarks>
     private static IReadOnlyList<BehaviorInvokable> ReadInvokables(INamedTypeSymbol type) =>
     [
@@ -592,7 +588,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         SpecialType.System_Double => FieldKind.Double,
         // Every width, as the kind says. A field a tool cannot edit because nobody listed its
         // width is a field somebody has to write a drawer for, and there is nothing to write,
-        // because it is a whole number.
+        // since it is a whole number.
         SpecialType.System_Int32 or SpecialType.System_Int16 or SpecialType.System_SByte
             or SpecialType.System_UInt32 or SpecialType.System_UInt16 or SpecialType.System_Byte
             or SpecialType.System_Int64 or SpecialType.System_UInt64

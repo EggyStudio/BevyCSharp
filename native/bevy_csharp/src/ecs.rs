@@ -554,8 +554,7 @@ pub unsafe extern "C" fn bcs_ecs_entities(out: *mut u64, capacity: i32) -> i32 {
 /// Copies the ids of the components an entity carries into `out`, returning how many it has.
 ///
 /// Follows the same probe convention, where a return greater than `capacity` means nothing usable
-/// was
-/// written.
+/// was written.
 ///
 /// # Safety
 /// `out` must be valid for `capacity` writes of `i32`.

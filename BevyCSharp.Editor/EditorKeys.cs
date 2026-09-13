@@ -23,8 +23,7 @@ public partial struct EditorKeys
     /// <summary>Chooses a tool, the way Q, W, E and R do everywhere else.</summary>
     /// <remarks>
     /// Not while the right button is held, because that is the camera flying and W and E belong to
-    /// it
-    /// then. Not while something is being typed into either, for the obvious reason.
+    /// it then. Not while something is being typed into either, for the obvious reason.
     /// </remarks>
     [OnUpdate]
     public static void Tools(BehaviorContext ctx)
@@ -47,8 +46,7 @@ public partial struct EditorKeys
         }
 
         // Held rather than pressed, because snapping while a handle is being dragged is what a
-        // person
-        // reaches for mid-drag, and a toggle would be the wrong shape for that.
+        // person reaches for mid-drag, and a toggle would be the wrong shape for that.
         if (ctx.Input.AnyKeyDown([Key.ControlLeft, Key.ControlRight])
             && !ctx.Input.KeyDown(Key.ShiftLeft))
         {

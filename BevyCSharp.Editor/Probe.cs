@@ -132,6 +132,16 @@ public partial struct Probe
                 if (script.Contains("band")) Release(1);
                 break;
 
+            case 150 when script.Contains("into"):
+                // Held for the click that follows, because a control click is how ImGui is told to
+                // open a number for typing rather than for dragging.
+                SyntheticInput.Press(Key.ControlLeft);
+                break;
+
+            case 152 when script.Contains("into"):
+                Click(0);
+                break;
+
             case 150:
                 if (Environment.GetEnvironmentVariable("BCS_PROBE_TYPE") is { Length: > 0 } typed)
                 {
@@ -218,8 +228,7 @@ public partial struct Probe
                 break;
 
             // Well after the shot, which is read back off the GPU over several frames, so quitting
-            // on
-            // the frame it was asked for loses the file.
+            // on the frame it was asked for loses the file.
             case 200:
                 ctx.Exit();
                 break;
@@ -260,7 +269,10 @@ public partial struct Probe
                 Blend = 0.4f,
                 Fill = 62f,
                 Corner = new Vec3(1f, 0.5f, -2f),
-                Radius = 3f,
+
+                // More places than a field shows, so a capture says whether a number is rounded
+                // for reading and kept whole for editing.
+                Radius = 1.2345f,
             });
 
             EditorSelection.Select(entity);

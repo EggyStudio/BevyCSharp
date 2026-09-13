@@ -46,11 +46,10 @@ fn drop_temporal(entity: &mut bevy::ecs::world::EntityWorldMut) {
 /// together, because a game may want the range without the glow.
 ///
 /// Temporal antialiasing is the one arm that can be refused. It resolves the whole picture from
-/// past frames, which a multisampled target has not got, and Bevy answers the pair by warning
-/// once a frame and drawing nothing, so a config asking for both is reported as
+/// past frames, which a multisampled target has not got, and Bevy answers the pair by warning once
+/// a frame and drawing nothing, so a config asking for both is reported as
 /// [`status::INVALID_STATE`] and the camera is left as it was. It also wants a 3D camera, because
-/// the
-/// jitter it reads back is only applied to one, and on a 2D camera the pass finds nothing to
+/// the jitter it reads back is only applied to one, and on a 2D camera the pass finds nothing to
 /// resolve.
 ///
 /// # Safety
@@ -215,9 +214,9 @@ pub unsafe extern "C" fn bcs_render_set_post(entity: u64, config: *const BcsPost
 /// Sets the lens effects a camera draws through.
 ///
 /// Beside [`bcs_render_set_post`] rather than part of it, because that call is the pipeline a
-/// settings
-/// screen owns, and these are what a scene does for a moment. The same rule holds, so a config is
-/// the whole set rather than one change to it and an effect left off is taken off the camera.
+/// settings screen owns, and these are what a scene does for a moment. The same rule holds, so a
+/// config is the whole set rather than one change to it and an effect left off is taken off the
+/// camera.
 ///
 /// Depth of field needs a perspective camera, because focus has no meaning without one, and Bevy
 /// drops the effect rather than reporting it. Auto exposure needs compute shaders, which every
@@ -517,8 +516,7 @@ pub unsafe extern "C" fn bcs_render_set_atmosphere(
 
                 let scale = if config.scale > 0.0 { config.scale } else { 1.0 };
 
-                // One planet, so the existing one is rewritten rather than joined by another,
-                // since
+                // One planet, so the existing one is rewritten rather than joined by another, since
                 // Bevy renders whichever is nearest and two would be a coin toss.
                 let existing = world
                     .query_filtered::<Entity, With<Atmosphere>>()

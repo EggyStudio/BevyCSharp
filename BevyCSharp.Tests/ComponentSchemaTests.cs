@@ -524,8 +524,7 @@ public sealed class FieldHintTests
         var working = Assert.Single(schema!.Fields, field => field.Name == "Working");
 
         // Left in the table and marked, rather than left out of it, because a tool decides what to
-        // show,
-        // and something that saves a component still needs every field.
+        // show, and something that saves a component still needs every field.
         Assert.True(working.Hints.Hidden);
     }
 
@@ -594,8 +593,7 @@ public sealed class FieldHintTests
         var condition = Assert.Single(held.Hints.Conditions);
 
         // The name rather than the number behind it, because what the field reads as at runtime is
-        // the
-        // name, and a condition written against one has to be checked against one.
+        // the name, and a condition written against one has to be checked against one.
         Assert.Equal("Mode", condition.Field);
         Assert.Equal("Steady", condition.Value);
         Assert.False(condition.Not);

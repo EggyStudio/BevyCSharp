@@ -32,9 +32,8 @@ public enum SelectionKind
 /// </para>
 /// <para>
 /// Selection is not an ECS component. It belongs to the tool rather than to the world, and an
-/// entity
-/// does not become different by being looked at, and a world saved while something was selected
-/// should not carry that.
+/// entity does not become different by being looked at, and a world saved while something was
+/// selected should not carry that.
 /// </para>
 /// </remarks>
 public static class EditorSelection
@@ -49,8 +48,7 @@ public static class EditorSelection
     /// <summary>The entity picked last, or <see cref="Entity.None"/>.</summary>
     /// <remarks>
     /// What everything acting on one thing acts on, which is the gizmo handles, the camera framing
-    /// a
-    /// selection, the inspector's heading. When several are selected it is the last one picked,
+    /// a selection, the inspector's heading. When several are selected it is the last one picked,
     /// which is the one somebody was looking at when they picked it.
     /// </remarks>
     public static Entity Current { get; private set; } = Entity.None;
@@ -137,11 +135,10 @@ public static class EditorSelection
     /// Drops a selection whose entity has gone.
     /// </summary>
     /// <remarks>
-    /// Called once a frame by the shell. An entity can be despawned by anything, including a
-    /// script the editor just reloaded, and an inspector reading a dead entity would show the
-    /// bytes of whatever took its place in storage. It is also where a selection comes back, since
-    /// what
-    /// a reload despawned it usually spawns again, under the same name.
+    /// Called once a frame by the shell. An entity can be despawned by anything, including a script
+    /// the editor just reloaded, and an inspector reading a dead entity would show the bytes of
+    /// whatever took its place in storage. It is also where a selection comes back, since what a
+    /// reload despawned it usually spawns again, under the same name.
     /// </remarks>
     public static void Prune(EcsWorld world)
     {
@@ -156,9 +153,8 @@ public static class EditorSelection
         // the entity holding it.
         //
         // Only while they are all alive, because the frame something is despawned is the frame its
-        // name
-        // can no longer be asked for, so remembering then would forget exactly the name that is
-        // about to be needed.
+        // name can no longer be asked for, so remembering then would forget exactly the name that
+        // is about to be needed.
         if (Chosen.TrueForAll(world.IsAlive)) Remember(world);
 
         var went = Chosen.RemoveAll(entity => !world.IsAlive(entity));
@@ -198,8 +194,7 @@ public static class EditorSelection
     /// <para>
     /// By name, which is the only thing that survives, and so wrong for two entities that share
     /// one, where the first with the name is taken. That is worth it, and the alternative is a
-    /// stable
-    /// identity the engine does not have.
+    /// stable identity the engine does not have.
     /// </para>
     /// </remarks>
     private static void Recover(EcsWorld world)
@@ -218,8 +213,7 @@ public static class EditorSelection
         }
 
         // All of them or none. Half a selection coming back is worse than none, because an edit
-        // meant for
-        // three things would reach two of them without saying so.
+        // meant for three things would reach two of them without saying so.
         if (found.Count != Named.Count) return;
 
         Named.Clear();

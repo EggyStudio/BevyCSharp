@@ -13,16 +13,14 @@ namespace BevyCSharp.Editor.Framework;
 /// <para>
 /// A script is an ordinary <c>.cs</c> file holding an ordinary <c>[Behavior]</c> struct. Nothing
 /// about it is special, because it is compiled with the same source generator the rest of the
-/// project
-/// uses, so what it gets is the same runner, the same attributes and the same scheduling. The
-/// only difference is when it is compiled.
+/// project uses, so what it gets is the same runner, the same attributes and the same scheduling.
+/// The only difference is when it is compiled.
 /// </para>
 /// <para>
-/// Each build goes into a collectible load context of its own, and each generation registers
-/// under a tag of its own. Reloading is therefore three steps, which are to compile the new one,
-/// retire the old tag and drop the old context. A generation that fails to compile changes nothing,
-/// so a half-typed file
-/// leaves the running one alone rather than taking the editor down with it.
+/// Each build goes into a collectible load context of its own, and each generation registers under
+/// a tag of its own. Reloading is therefore three steps, which are to compile the new one, retire
+/// the old tag and drop the old context. A generation that fails to compile changes nothing, so a
+/// half-typed file leaves the running one alone rather than taking the editor down with it.
 /// </para>
 /// <para>
 /// The app has to have had <see cref="App.EnableDynamicSystems"/> called before it started, or

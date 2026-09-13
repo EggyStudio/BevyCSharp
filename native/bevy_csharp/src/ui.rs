@@ -142,8 +142,7 @@ fn align_items(value: i32) -> bevy::ui::AlignItems {
 ///
 /// An unknown code for one of the three enums takes Bevy's default rather than being refused,
 /// because the managed side is what names them, and a bridge older than the assembly calling it
-/// should lay a
-/// screen out plainly rather than not at all.
+/// should lay a screen out plainly rather than not at all.
 #[cfg(feature = "render")]
 fn node_from(config: &BcsUiNodeConfig) -> bevy::ui::Node {
     use bevy::ui::PositionType;
@@ -231,10 +230,10 @@ fn border_color_from(config: &BcsUiNodeConfig) -> bevy::ui::BorderColor {
 /// Gives a node the components the pointer is tracked with, when its config asks for them.
 ///
 /// `Button` rather than `Interaction` alone, because it is the marker that requires both, and it
-/// brings
-/// `FocusPolicy::Block` with it, so an interactive node captures the pointer instead of letting
-/// it reach whatever sits behind it. A node left plain carries neither, which keeps the focus
-/// system's work proportional to the number of things that react rather than to the whole screen.
+/// brings `FocusPolicy::Block` with it, so an interactive node captures the pointer instead of
+/// letting it reach whatever sits behind it. A node left plain carries neither, which keeps the
+/// focus system's work proportional to the number of things that react rather than to the whole
+/// screen.
 #[cfg(feature = "render")]
 fn make_interactive(entity: &mut bevy::ecs::world::EntityWorldMut, config: &BcsUiNodeConfig) {
     if config.interactive != 0 {
@@ -330,10 +329,9 @@ pub unsafe extern "C" fn bcs_ui_spawn_text(
                 // than a reason to fall back quietly, so it refuses.
                 //
                 // `FontSource` can also name a generic family, which is not offered here, because
-                // that
-                // path needs Bevy's `system_font_discovery`, and on Linux the crate behind it
-                // links against fontconfig at build time. Text renders nothing at all without
-                // the feature, so the choice is a font of your own or Bevy's.
+                // that path needs Bevy's `system_font_discovery`, and on Linux the crate behind it
+                // links against fontconfig at build time. Text renders nothing at all without the
+                // feature, so the choice is a font of your own or Bevy's.
                 let font = if text_config.font >= 0 {
                     match crate::assets::clone_handle(world, text_config.font) {
                         Some(handle) => FontSource::Handle(handle.typed::<Font>()),
@@ -555,10 +553,9 @@ pub unsafe extern "C" fn bcs_ui_set_image(entity: u64, config: *const BcsUiImage
 /// Moves a node's contents inside it, for a list that scrolls.
 ///
 /// Only means anything on a node whose overflow is set to scroll, because that is what clips the
-/// contents
-/// to the node, and this is how far they have been pushed, in logical pixels from the top left.
-/// Bevy has no scrolling input of its own, so a wheel or a drag is read like any other input and
-/// turned into a call here.
+/// contents to the node, and this is how far they have been pushed, in logical pixels from the top
+/// left. Bevy has no scrolling input of its own, so a wheel or a drag is read like any other input
+/// and turned into a call here.
 ///
 /// A node is required, and anything else is refused. `ScrollPosition` is a bare component, unlike
 /// `ImageNode`, which brings a `Node` with it. Nothing would make the entity a node, so the

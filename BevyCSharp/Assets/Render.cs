@@ -71,8 +71,7 @@ public static unsafe class Render
     /// A texture the settings leave at <see cref="AssetHandle.None"/> is one the material does
     /// without. A handle that names nothing, which is what a released one becomes, is refused
     /// instead, because drawing the surface untextured and reporting success would leave the caller
-    /// with
-    /// a wrong picture and nothing pointing at why.
+    /// with a wrong picture and nothing pointing at why.
     /// </remarks>
     /// <exception cref="BevyNativeException">
     /// A texture handle names nothing, or this build has no renderer.
@@ -415,8 +414,7 @@ public static unsafe class Render
     /// </para>
     /// <para>
     /// The camera is given a high dynamic range target, which the sky needs, because a sun
-    /// scattered
-    /// through air is far brighter than white. Pair it with
+    /// scattered through air is far brighter than white. Pair it with
     /// <see cref="SetPostProcessing"/> for a tonemapper to bring that range back down.
     /// </para>
     /// </remarks>
@@ -588,8 +586,7 @@ public static unsafe class Render
         if (status == NativeStatus.Unsupported) throw NoRenderer("Drawing a wireframe");
 
         // An entity that has gone is not an error to stop drawing, because a selection outlives
-        // what it
-        // pointed at by a frame, and asking after that is how it is cleaned up.
+        // what it pointed at by a frame, and asking after that is how it is cleaned up.
         if (status == NativeStatus.NoEntity) return;
 
         Native.Check(status, "drawing a wireframe");

@@ -126,8 +126,7 @@ pub unsafe extern "C" fn bcs_window_scale(scale: *mut f32) -> i32 {
 /// Writes the window's current size, in logical pixels.
 ///
 /// The size the window ended up at, which is not always the size that was asked for, because a
-/// window
-/// manager may refuse, and a fullscreen window takes the monitor's.
+/// window manager may refuse, and a fullscreen window takes the monitor's.
 ///
 /// # Safety
 /// `width` and `height` must be writable, or null to skip that output.
@@ -349,8 +348,7 @@ pub unsafe extern "C" fn bcs_monitor_info(index: i32, out: *mut crate::interop::
 
 /// Writes a monitor's name into `out`, and returns its length in bytes.
 ///
-/// Follows the text convention, where the return value is the length whether or not it fitted, so
-/// a
+/// Follows the text convention, where the return value is the length whether or not it fitted, so a
 /// caller that guessed too small can ask again. A monitor the platform does not name reports a
 /// length of zero rather than failing, because an unnamed monitor is ordinary.
 ///

@@ -202,18 +202,16 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 crate::pick::install(&mut app);
             }
 
-            // Debug drawing goes through a queue, because a `Gizmos` parameter cannot be held by
-            // an exclusive system. Only registered here, because the plugin that draws them comes
-            // with
+            // Debug drawing goes through a queue, because a `Gizmos` parameter cannot be held by an
+            // exclusive system. Only registered here, because the plugin that draws them comes with
             // `DefaultPlugins`, so a windowless app has nothing to drain into.
             app.init_resource::<crate::gizmos::GizmoQueue>();
             // Drained after everything has had its say, and explicitly after the managed `Last`
             // systems, because both live in `Last` and without the ordering the scheduler is free
-            // to
-            // drain the queue before the frame has filled it, which holds every shape back a
-            // frame. A gizmo that arrives a frame late reads as one that lags behind whatever it
-            // is drawn on, and worst of all on a shape placed relative to the camera, which then
-            // swims about the screen whenever the camera turns.
+            // to drain the queue before the frame has filled it, which holds every shape back a
+            // frame. A gizmo that arrives a frame late reads as one that lags behind whatever it is
+            // drawn on, and worst of all on a shape placed relative to the camera, which then swims
+            // about the screen whenever the camera turns.
             app.add_systems(bevy::app::Last, crate::gizmos::drain.after(BcsSet::Last));
 
             // Drawn in front of the scene rather than inside it. A gizmo is a thing drawn *about*
@@ -343,9 +341,8 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     // Pin the orderings that matter between exclusive C# systems.
     //
     // The frame snapshot runs after Bevy has advanced its clocks, or it would report the previous
-    // frame's time, because nothing else in `First` orders the two, so without this the schedule
-    // is free
-    // to run the snapshot first and `ctx.Time` lags by a frame.
+    // frame's time, because nothing else in `First` orders the two, so without this the schedule is
+    // free to run the snapshot first and `ctx.Time` lags by a frame.
     app.configure_sets(
         First,
         (BcsSet::Sync, BcsSet::First)
@@ -704,10 +701,9 @@ pub unsafe extern "C" fn bcs_transform_layout(
 /// Reports where Bevy places each part of `GlobalTransform`.
 ///
 /// The world-space result of propagation, and the one component a parented entity cannot compute
-/// for itself. `GlobalTransform` wraps a private `Affine3A`, so its offsets cannot be taken the
-/// way `Transform`'s are. They come from the affine instead, and the wrapper is confirmed to be
-/// nothing but that affine by comparing the two sizes, because a single-field struct that is
-/// exactly the
+/// for itself. `GlobalTransform` wraps a private `Affine3A`, so its offsets cannot be taken the way
+/// `Transform`'s are. They come from the affine instead, and the wrapper is confirmed to be nothing
+/// but that affine by comparing the two sizes, because a single-field struct that is exactly the
 /// size of its field has nowhere else to put it.
 ///
 /// The offsets matter as much as they do for `Transform`, and for the same reason. `Vec3A` is
@@ -754,9 +750,8 @@ pub unsafe extern "C" fn bcs_global_transform_layout(
 ///
 /// The other mirrors are structs, where a size and a set of offsets pin the layout down. This one
 /// is a fieldless enum, and what has to match is which number stands for which variant. Rust does
-/// not promise a discriminant order for a default-representation enum, and nothing about a
-/// one-byte mirror would look wrong if the engine renumbered them, because hiding an entity would
-/// quietly
+/// not promise a discriminant order for a default-representation enum, and nothing about a one-byte
+/// mirror would look wrong if the engine renumbered them, because hiding an entity would quietly
 /// start meaning something else.
 ///
 /// # Safety

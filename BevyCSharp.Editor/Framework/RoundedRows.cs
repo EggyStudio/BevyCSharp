@@ -48,8 +48,12 @@ public static class RoundedRows
         // rounding this look asks for is larger than anything is tall, on purpose.
         var rounding = MathF.Min(ImGui.GetStyle().FrameRounding, (to.Y - from.Y) * 0.5f);
 
+        // Cut to whatever is holding the row, so one scrolled half out of a list ends in a rounded
+        // corner rather than a square one.
+        var pill = EditorSurface.Clipped(from, to);
+
         draw.ChannelsSetCurrent(0);
-        draw.AddRectFilled(from, to, ImGui.GetColorU32(color), rounding);
+        draw.AddRectFilled(pill.From, pill.To, ImGui.GetColorU32(color), rounding);
         draw.ChannelsSetCurrent(1);
     }
 

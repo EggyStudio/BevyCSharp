@@ -95,8 +95,7 @@ public sealed class RenderControlTests
             });
 
             // Off again, which has to take the jitter and the prepasses with it, because a camera
-            // left
-            // jittering with nothing resolving it shimmers, and the prepasses draw the scene a
+            // left jittering with nothing resolving it shimmers, and the prepasses draw the scene a
             // second time for nobody.
             Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
 
@@ -673,8 +672,7 @@ public sealed class RenderControlTests
     public void WindowStyleAndPositionReportTheirAbsence()
     {
         // Same contract as the rest of the window surface, where a windowless run says so rather
-        // than
-        // pretending, so a behavior that arranges the window fails visibly in a test.
+        // than pretending, so a behavior that arranges the window fails visibly in a test.
         using var harness = new EngineHarness(frames: 2);
 
         harness.OnContext(Stage.Update, _ =>

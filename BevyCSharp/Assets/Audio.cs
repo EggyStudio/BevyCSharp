@@ -57,8 +57,7 @@ public sealed class AudioSettings
     /// </summary>
     /// <remarks>
     /// A world measured in metres needs nothing here. One measured in pixels does, because a sound
-    /// a
-    /// hundred units away would otherwise be inaudible, and a scale of <c>0.01</c> makes that a
+    /// a hundred units away would otherwise be inaudible, and a scale of <c>0.01</c> makes that a
     /// metre. Zero leaves Bevy's own scale in place.
     /// </remarks>
     public float SpatialScale { get; set; }

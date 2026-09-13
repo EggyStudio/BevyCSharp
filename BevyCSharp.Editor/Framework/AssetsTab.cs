@@ -9,8 +9,8 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// A browser over the asset directory itself, where what is listed is exactly what a path in a
-/// script or
-/// a component would find, because nothing here imports or catalogues anything. What a row shows is
+/// script or a component would find, because nothing here imports or catalogues anything. What a
+/// row shows is
 /// <see cref="EditorAssets"/>'s to answer; this draws it.
 /// </remarks>
 public static class AssetsTab
@@ -59,7 +59,7 @@ public static class AssetsTab
             RoundedRows.Rows(() => Branch(string.Empty, "assets"));
         }
 
-        ImGui.EndChild();
+        EditorSurface.EndRegion();
     }
 
     /// <summary>One folder and, when it is unfolded, the folders under it.</summary>
@@ -110,7 +110,7 @@ public static class AssetsTab
     {
         if (!EditorSurface.Region("##files", new Vector2(0f, 0f)))
         {
-            ImGui.EndChild();
+            EditorSurface.EndRegion();
             return;
         }
 
@@ -119,7 +119,7 @@ public static class AssetsTab
         if (entries.Count == 0)
         {
             ImGui.TextDisabled("Nothing here");
-            ImGui.EndChild();
+            EditorSurface.EndRegion();
             return;
         }
 
@@ -137,7 +137,7 @@ public static class AssetsTab
             Tile(entry, tile, theme);
         }
 
-        ImGui.EndChild();
+        EditorSurface.EndRegion();
     }
 
     /// <summary>One file or directory, as a tile.</summary>
@@ -162,9 +162,13 @@ public static class AssetsTab
 
         var draw = ImGui.GetWindowDrawList();
 
+        // Cut to the region rather than run under its edge, so a tile scrolled half out of sight
+        // ends in a rounded corner instead of a square one.
+        var plate = EditorSurface.Clipped(at, at + new Vector2(size, size));
+
         draw.AddRectFilled(
-            at,
-            at + new Vector2(size, size),
+            plate.From,
+            plate.To,
             ImGui.GetColorU32(picked
                 ? EditorTheme.LiveAccent
                 : over ? EditorTheme.LiveHover : EditorTheme.LiveGroup),

@@ -56,9 +56,8 @@ public partial struct SelectionOutline
     /// <summary>Draws a box round each selected thing, once a frame.</summary>
     /// <remarks>
     /// Each of them rather than one box round the lot, because what somebody wants to see is which
-    /// things
-    /// they picked, and a box drawn round two objects at opposite ends of a level contains mostly
-    /// the things they did not pick.
+    /// things they picked, and a box drawn round two objects at opposite ends of a level contains
+    /// mostly the things they did not pick.
     /// </remarks>
     [OnUpdate]
     public static void Draw(BehaviorContext ctx)

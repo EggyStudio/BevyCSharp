@@ -67,8 +67,8 @@ public static class EditorSurface
     /// </summary>
     /// <remarks>
     /// The card a region is drawn in is the surface; a second rectangle filling it edge to edge is
-    /// the box inside a box this look does without. Ended with <see cref="ImGui.EndChild"/> like
-    /// any other child, and like any other child it has to be ended whether or not it opened.
+    /// the box inside a box this look does without. Ended with <see cref="EndRegion"/> whether or
+    /// not it opened, like any other child window.
     /// </remarks>
     /// <param name="id">What to call it.</param>
     /// <param name="size">How large, in the usual child window terms.</param>
@@ -88,6 +88,44 @@ public static class EditorSurface
         ImGui.PopStyleColor();
 
         return open;
+    }
+
+    /// <summary>
+    /// Ends a region, whether or not it opened.
+    /// </summary>
+    /// <remarks>
+    /// The pair to <see cref="Region"/>, so that a region is begun and ended by name rather than
+    /// by remembering that a child window has to be ended even when it is closed.
+    /// </remarks>
+    internal static void EndRegion() => ImGui.EndChild();
+
+    /// <summary>
+    /// A fill cut to the region it is drawn in, so that what is clipped keeps its corners.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A region clips with a rectangle, so a rounded card scrolled under its edge is cut square
+    /// while every other edge in the editor is round. Nothing can round the cut itself. What is
+    /// behind a floating panel here is the scene rather than a colour, so there is nothing to
+    /// paint back over the corner.
+    /// </para>
+    /// <para>
+    /// What can be done is to stop the fill at the edge rather than let it run under it. The
+    /// rectangle then ends where the region does, and the rounding it was drawn with is the
+    /// rounding the cut has. Only the fill is moved, so the text and the widgets on it stay where
+    /// they were and scroll out of sight as they did.
+    /// </para>
+    /// </remarks>
+    /// <param name="from">The fill's top left corner.</param>
+    /// <param name="to">Its bottom right.</param>
+    internal static (Vector2 From, Vector2 To) Clipped(Vector2 from, Vector2 to)
+    {
+        var min = ImGui.GetWindowPos();
+        var max = min + ImGui.GetWindowSize();
+
+        return (
+            new Vector2(from.X, MathF.Max(from.Y, min.Y)),
+            new Vector2(to.X, MathF.Min(to.Y, max.Y)));
     }
 
     /// <summary>
@@ -118,6 +156,55 @@ public static class EditorSurface
             Vector2.Zero,
             Vector2.One,
             ImGui.GetColorU32(EditorTheme.IconTint(lit)));
+    }
+
+    /// <summary>
+    /// The eye that says whether a thing is drawn.
+    /// </summary>
+    /// <remarks>
+    /// Drawn rather than written, because the interface is set in a monospace font with no eye in
+    /// it and a font that lacks a glyph draws a box that says nothing. Two lids and a pupil is the
+    /// shape every editor has put on this, so it is read without being explained, and the same
+    /// shape with a stroke through it is the shape for something that has been put away.
+    /// </remarks>
+    /// <param name="draw">What to draw into.</param>
+    /// <param name="middle">Where the eye is centred.</param>
+    /// <param name="size">How wide it is, corner to corner.</param>
+    /// <param name="open">Whether the thing it belongs to is being drawn.</param>
+    /// <param name="color">What to draw it in.</param>
+    internal static void Eye(
+        ImDrawListPtr draw, Vector2 middle, float size, bool open, uint color)
+    {
+        var across = size * 0.5f;
+
+        // A quarter as tall as it is wide, which is the shape of an eye and not of a circle. The
+        // control points are twice that out, because a quadratic curve reaches half way to the
+        // point it is bent towards.
+        var tall = size * 0.26f;
+
+        var left = middle - new Vector2(across, 0f);
+        var right = middle + new Vector2(across, 0f);
+        var line = MathF.Max(1f, size * 0.09f);
+
+        draw.PathClear();
+        draw.PathLineTo(left);
+        draw.PathBezierQuadraticCurveTo(middle - new Vector2(0f, tall * 2f), right, 0);
+        draw.PathBezierQuadraticCurveTo(middle + new Vector2(0f, tall * 2f), left, 0);
+        draw.PathStroke(color, ImDrawFlags.Closed, line);
+
+        // The pupil only while it is open. An eye with a pupil and a stroke through it reads as an
+        // eye that is looking anyway, and what is meant is one that is shut.
+        if (open)
+        {
+            draw.AddCircleFilled(middle, tall * 0.62f, color, 0);
+            return;
+        }
+
+        draw.AddLine(
+            middle + new Vector2(-across * 0.7f, tall * 1.6f),
+            middle + new Vector2(across * 0.7f, -tall * 1.6f),
+            color,
+            line);
     }
 
     /// <summary>

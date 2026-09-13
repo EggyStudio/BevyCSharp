@@ -250,8 +250,7 @@ pub struct BcsCameraConfig {
 /// What a monitor is and where it sits.
 ///
 /// The name is left out, because it is the one field that is text and nothing else in the bridge
-/// hands
-/// a string back. A monitor is identified by its index here.
+/// hands a string back. A monitor is identified by its index here.
 #[repr(C)]
 #[derive(Clone, Copy, Default)]
 pub struct BcsMonitor {
