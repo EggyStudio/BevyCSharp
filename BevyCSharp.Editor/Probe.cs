@@ -50,6 +50,16 @@ public partial struct Probe
                 break;
 
             case 120:
+                // Enough rows that the list scrolls, for checking what a list does at its edges
+                // rather than what one short enough to fit does.
+                if (script.Contains("many"))
+                {
+                    for (var which = 0; which < 24; which++)
+                    {
+                        EditorMenu.Find("Spawn/Cube")?.Run?.Invoke(ctx.Ecs);
+                    }
+                }
+
                 if (script.Contains("dock")) EditorShell.Docked = !EditorShell.Docked;
                 if (script.Contains("wide")) EditorShell.PanelWidth = 760f;
                 if (script.Contains("narrow")) EditorShell.PanelWidth = 340f;
@@ -216,6 +226,12 @@ public partial struct Probe
                 if (script.Contains("pull")) Release(1);
 
                 if (script.Contains("project")) EditorProject.Load(ctx.Ecs);
+                break;
+
+            case 165:
+                // A third point, well clear of the second, for the case a click opens something
+                // and the thing worth capturing is what a click inside it does.
+                if (script.Contains("click")) Click(2);
                 break;
 
             case 155:

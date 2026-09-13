@@ -26,11 +26,12 @@ public static class OrientationGizmo
     /// <summary>How wide the whole thing is, in logical pixels.</summary>
     public const float Size = 84f;
 
+    /// <summary>The three arms, in the colors the handles in the scene are drawn in.</summary>
     private static readonly (string Name, Vec3 Axis, Vector4 Color)[] Axes =
     [
-        ("X", new Vec3(1f, 0f, 0f), new Vector4(0.91f, 0.30f, 0.36f, 1f)),
-        ("Y", new Vec3(0f, 1f, 0f), new Vector4(0.49f, 0.78f, 0.30f, 1f)),
-        ("Z", new Vec3(0f, 0f, 1f), new Vector4(0.28f, 0.56f, 0.93f, 1f)),
+        ("X", new Vec3(1f, 0f, 0f), EditorTheme.Axes[0]),
+        ("Y", new Vec3(0f, 1f, 0f), EditorTheme.Axes[1]),
+        ("Z", new Vec3(0f, 0f, 1f), EditorTheme.Axes[2]),
     ];
 
     /// <summary>Draws it at a point, which is the middle of the cross.</summary>

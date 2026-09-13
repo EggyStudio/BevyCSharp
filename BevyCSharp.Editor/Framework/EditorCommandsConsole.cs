@@ -107,26 +107,10 @@ internal static class EditorConsoleCommands
 
         foreach (var id in world.ComponentsOf(EditorSelection.Current))
         {
-            names.Add(ComponentSchemas.For(id)?.Name ?? Short(world.ComponentName(id)));
+            names.Add(ComponentSchemas.For(id)?.Name ?? EditorText.Short(world.ComponentName(id)));
         }
 
         return names.Count == 0 ? "nothing" : string.Join(", ", names);
-    }
-
-    /// <summary>
-    /// The last part of a Rust path, which is the name somebody would recognise.
-    /// </summary>
-    /// <remarks>
-    /// A console answers in one line, and a line of thirteen fully qualified paths is one nobody
-    /// reads to the end of.
-    /// </remarks>
-    private static string Short(string name)
-    {
-        var generic = name.IndexOf('<');
-        var bare = generic < 0 ? name : name[..generic];
-
-        var cut = bare.LastIndexOf("::", StringComparison.Ordinal);
-        return cut < 0 ? bare : bare[(cut + 2)..];
     }
 
     /// <summary>Takes back the last change.</summary>

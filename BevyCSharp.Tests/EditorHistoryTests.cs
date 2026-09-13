@@ -133,4 +133,73 @@ public sealed class EditorHistoryTests
         Assert.Null(redo);
         Assert.Null(last);
     }
+
+    [Fact]
+    public void TakingAComponentOffAndPuttingItBackKeepsWhatItHeld()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        var speed = 0f;
+        var count = 0;
+        var carried = false;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            EditorHistory.Clear();
+
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(entity, new Described { Speed = 7.5f, Count = 3 });
+
+            var schema = ComponentSchemas.For("Bevy.Tests.Described")!;
+
+            EditorEntity.Drop(ctx.Ecs, entity, schema);
+
+            // Gone, which is the change being undone.
+            Assert.Null(schema.Read(ctx.Ecs, entity, "Speed"));
+
+            EditorHistory.Undo(ctx.Ecs);
+
+            carried = schema.Read(ctx.Ecs, entity, "Speed") is not null;
+            speed = (float)(schema.Read(ctx.Ecs, entity, "Speed") ?? 0f);
+            count = (int)(schema.Read(ctx.Ecs, entity, "Count") ?? 0);
+        });
+
+        harness.Run();
+
+        // What a component holds is the component. One put back empty is the same loss with a row
+        // drawn over it, so the values are what this is asserting rather than the row.
+        Assert.True(carried);
+        Assert.Equal(7.5f, speed, 3);
+        Assert.Equal(3, count);
+    }
+
+    [Fact]
+    public void AddingAComponentIsTakenBackAsOneChange()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        var after = true;
+        var again = false;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            EditorHistory.Clear();
+
+            var entity = ctx.Ecs.Spawn();
+            var schema = ComponentSchemas.For("Bevy.Tests.Described")!;
+
+            EditorEntity.Carry(ctx.Ecs, entity, schema);
+
+            EditorHistory.Undo(ctx.Ecs);
+            after = schema.Read(ctx.Ecs, entity, "Count") is not null;
+
+            EditorHistory.Redo(ctx.Ecs);
+            again = schema.Read(ctx.Ecs, entity, "Count") is not null;
+        });
+
+        harness.Run();
+
+        Assert.False(after);
+        Assert.True(again);
+    }
 }

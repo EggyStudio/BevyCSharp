@@ -34,28 +34,28 @@ public sealed class EditorThemeTests
         Assert.Equal(dialled.FramePadding, read.FramePadding);
         Assert.Equal(dialled.Borders, read.Borders, 3);
 
-        // Colours go through hex, so they come back to the nearest byte rather than exactly.
+        // Colors go through hex, so they come back to the nearest byte rather than exactly.
         Assert.Equal(dialled.Accent.X, read.Accent.X, 2);
         Assert.Equal(dialled.Accent.Y, read.Accent.Y, 2);
         Assert.Equal(dialled.Accent.Z, read.Accent.Z, 2);
     }
 
     [Fact]
-    public void EveryColourInAThemeIsWrittenDown()
+    public void EveryColorInAThemeIsWrittenDown()
     {
         // The ladder grew a rung once and the file did not, so a theme saved from the style editor
         // came back a step short at every surface. What guards that is asking the record itself
-        // what colours it has rather than keeping a second list by hand.
+        // what colors it has rather than keeping a second list by hand.
         var written = EditorTheme.Modern.Describe();
 
-        // The theme's own colours, not the readers that fetch one back out of the running style.
-        var colours = typeof(EditorTheme)
+        // The theme's own colors, not the readers that fetch one back out of the running style.
+        var colors = typeof(EditorTheme)
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Where(property => property.PropertyType == typeof(Vector4));
 
-        foreach (var colour in colours)
+        foreach (var color in colors)
         {
-            var key = string.Concat(colour.Name.Select((letter, index) =>
+            var key = string.Concat(color.Name.Select((letter, index) =>
                 char.IsUpper(letter) && index > 0 ? $"-{char.ToLowerInvariant(letter)}" : $"{char.ToLowerInvariant(letter)}"));
 
             Assert.Contains($"{key}\t", written, StringComparison.Ordinal);
@@ -103,7 +103,7 @@ public sealed class EditorThemeTests
         Assert.Contains(EditorTheme.Native, EditorTheme.All);
 
         // One is the editor's own, the other is what ImGui says. The difference that matters is
-        // that the stock one asks ImGui for its colours rather than being written over it.
+        // that the stock one asks ImGui for its colors rather than being written over it.
         Assert.False(EditorTheme.Modern.Stock);
         Assert.True(EditorTheme.Native.Stock);
         Assert.Equal(0f, EditorTheme.Modern.Borders);

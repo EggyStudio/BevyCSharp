@@ -60,6 +60,14 @@ internal static class FieldNumbers
     /// <summary>Which field is open for typing, while it is.</summary>
     private static string _opened = string.Empty;
 
+    /// <summary>Whether a field is the one open for typing.</summary>
+    /// <remarks>
+    /// Asked by anything that draws over a number, since what is written while somebody is typing
+    /// is theirs and not the editor's to replace.
+    /// </remarks>
+    /// <param name="id">Which field is asking.</param>
+    internal static bool Typing(string id) => _opened == id;
+
     /// <summary>How the next field's number is written, which is who is about to read it.</summary>
     /// <param name="id">Which field is asking.</param>
     /// <param name="number">What the box holds, which decides how much of it there is to show.</param>

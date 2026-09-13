@@ -12,7 +12,7 @@ namespace BevyCSharp.Editor.Framework;
 /// the pointer. This is about where a name and its value sit.
 /// </para>
 /// <para>
-/// The shape every page of settings takes, whether what it lists is a theme's colours or an
+/// The shape every page of settings takes, whether what it lists is a theme's colors or an
 /// editor's preferences. Written once so that two such pages are the same two columns at the same
 /// widths rather than two tables that happen to agree today.
 /// </para>
@@ -51,21 +51,6 @@ public static class EditorRows
 
     /// <summary>Closes it.</summary>
     public static void Close() => ImGui.EndTable();
-
-    /// <summary>A heading over the rows that follow it.</summary>
-    /// <param name="name">What the group is called.</param>
-    public static void Group(string name)
-    {
-        ArgumentNullException.ThrowIfNull(name);
-
-        ImGui.TableNextRow();
-        ImGui.TableNextColumn();
-
-        ImGui.Spacing();
-        ImGui.TextDisabled(name);
-
-        ImGui.TableNextColumn();
-    }
 
     /// <summary>
     /// One row, with its name written and the cursor left where its value goes.

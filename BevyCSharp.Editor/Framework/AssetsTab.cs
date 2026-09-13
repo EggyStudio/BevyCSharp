@@ -28,8 +28,6 @@ public static class AssetsTab
     /// </remarks>
     public static void Draw()
     {
-        var theme = EditorTheme.Current;
-
         var split = ImGuiTableFlags.Resizable
             | ImGuiTableFlags.NoBordersInBody
             | ImGuiTableFlags.NoSavedSettings;
@@ -46,7 +44,7 @@ public static class AssetsTab
 
         ImGui.TableNextColumn();
 
-        Tiles(theme);
+        Tiles();
 
         ImGui.EndTable();
     }
@@ -106,7 +104,7 @@ public static class AssetsTab
     }
 
     /// <summary>What is in the chosen folder.</summary>
-    private static void Tiles(EditorTheme theme)
+    private static void Tiles()
     {
         if (!EditorSurface.Region("##files", new Vector2(0f, 0f)))
         {
@@ -125,8 +123,9 @@ public static class AssetsTab
 
         // A grid of tiles rather than a list of names, because most of what is in here is a picture
         // or a mesh, and a name in a column says nothing about which one it is.
-        var tile = 96f;
-        var across = Math.Max(1, (int)(ImGui.GetContentRegionAvail().X / (tile + ImGui.GetStyle().ItemSpacing.X)));
+        var across = Math.Max(
+            1,
+            (int)(ImGui.GetContentRegionAvail().X / (Size + ImGui.GetStyle().ItemSpacing.X)));
 
         for (var index = 0; index < entries.Count; index++)
         {
@@ -134,14 +133,17 @@ public static class AssetsTab
 
             if (index % across != 0) ImGui.SameLine();
 
-            Tile(entry, tile, theme);
+            Tile(entry, Size);
         }
 
         EditorSurface.EndRegion();
     }
 
+    /// <summary>How wide and how tall one tile is.</summary>
+    private const float Size = 96f;
+
     /// <summary>One file or directory, as a tile.</summary>
-    private static void Tile(AssetEntry entry, float size, EditorTheme theme)
+    private static void Tile(AssetEntry entry, float size)
     {
         var picked = EditorAssets.Selected == entry.Path;
 
@@ -150,11 +152,10 @@ public static class AssetsTab
         var at = ImGui.GetCursorScreenPos();
         var line = ImGui.GetTextLineHeight();
 
-        ImGui.InvisibleButton($"##tile{entry.Path}", new Vector2(size, size));
-
+        var pressed = ImGui.InvisibleButton($"##tile{entry.Path}", new Vector2(size, size));
         var over = ImGui.IsItemHovered();
 
-        if (ImGui.IsItemClicked())
+        if (pressed)
         {
             if (entry.IsDirectory) EditorAssets.Enter(entry.Path);
             else EditorAssets.Select(picked ? null : entry.Path);
@@ -192,31 +193,17 @@ public static class AssetsTab
             picked);
 
         // And its name under it, cut to what fits rather than spilling into the next tile.
-        var name = Fit(entry.Name, size - 10f);
+        var name = EditorText.Fit(entry.Name, size - EditorSurface.Sides);
         var width = ImGui.CalcTextSize(name).X;
 
         draw.AddText(
-            at + new Vector2((size - width) * 0.5f, size - line - 8f),
-            ImGui.GetColorU32(picked ? theme.Text : EditorTheme.Alpha(theme.Text, 0.8f)),
+            at + new Vector2((size - width) * 0.5f, size - line - EditorSurface.Air),
+            ImGui.GetColorU32(EditorTheme.Ink(picked)),
             name);
 
         ImGui.EndGroup();
 
         if (over) EditorWidgets.Tip(entry.IsDirectory ? entry.Name : $"{entry.Name}  ({Say(entry.Size)})");
-    }
-
-    /// <summary>As much of a name as fits, with an ellipsis where the rest was.</summary>
-    private static string Fit(string name, float room)
-    {
-        if (ImGui.CalcTextSize(name).X <= room) return name;
-
-        for (var length = name.Length - 1; length > 1; length--)
-        {
-            var cut = string.Concat(name.AsSpan(0, length), "...");
-            if (ImGui.CalcTextSize(cut).X <= room) return cut;
-        }
-
-        return name;
     }
 
     /// <summary>How large a file is, in the units a person reads.</summary>

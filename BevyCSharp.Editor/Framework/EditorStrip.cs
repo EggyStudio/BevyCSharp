@@ -122,7 +122,7 @@ public static class EditorStrip
             {
                 var open = index == EditorShell.OpenTab;
 
-                // The one that is open wears the colour of what is above it, so the header and its
+                // The one that is open wears the color of what is above it, so the header and its
                 // contents read as one thing, and the accent marks which it is.
                 if (open)
                 {
@@ -202,52 +202,23 @@ public static class EditorStrip
     /// </remarks>
     internal static void Pills()
     {
-        var draw = ImGui.GetWindowDrawList();
-        var theme = EditorTheme.Current;
-
-        // The same height, the same air at the ends and the same colours as a button floating in
-        // the scene's corner, because a tab is one of those lying along the bottom edge. Two
-        // things that are pressed, on the same surface, that do not match are two things to look
-        // at rather than one.
-        var height = EditorSurface.Tall;
-        var padding = EditorSurface.Sides;
-
         for (var index = 0; index < EditorShell.Tabs.Count; index++)
         {
             if (index > 0) ImGui.SameLine();
 
             var open = index == EditorShell.OpenTab;
-            var name = EditorShell.Tabs[index].Name;
-            var word = ImGui.CalcTextSize(name);
-            var at = ImGui.GetCursorScreenPos();
-            var size = new Vector2(word.X + (padding * 2f), height);
-
-            ImGui.InvisibleButton($"##tab{index}", size);
-
-            if (ImGui.IsItemClicked()) EditorShell.OpenTab = open ? -1 : index;
-
-            var over = ImGui.IsItemHovered();
 
             // Docked, a tab that is neither open nor under the hand wears nothing, because the
             // strip is black behind it and the word carries on its own. Floating, the strip is the
             // lit scene seen through, and a word on that needs something under it to sit on.
-            var idle = EditorShell.Docked ? null : (Vector4?)EditorSurface.Lying();
+            var idle = EditorShell.Docked ? new Vector4(0f, 0f, 0f, 0f) : EditorSurface.Lying();
 
-            var fill = open
-                ? over ? EditorTheme.Alpha(EditorTheme.LiveAccent, 0.85f) : EditorTheme.LiveAccent
-                : over ? EditorTheme.LiveHover : idle;
-
-            if (fill is { } under)
+            // As tall as a button floating in the scene's corner, because a tab is one of those
+            // lying along the bottom edge.
+            if (EditorWidgets.Pill(EditorShell.Tabs[index].Name, open, idle, EditorSurface.Tall))
             {
-                EditorDraw.Capsule(at, at + size, ImGui.GetColorU32(under), draw);
+                EditorShell.OpenTab = open ? -1 : index;
             }
-
-            // White whether it is open or not. What says which one is showing is the pill under it,
-            // and a grey word reads as a tab that cannot be pressed.
-            draw.AddText(
-                at + new Vector2(padding, (height - word.Y) * 0.5f),
-                ImGui.GetColorU32(EditorTheme.LiveText),
-                name);
         }
     }
 

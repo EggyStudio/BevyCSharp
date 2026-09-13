@@ -172,7 +172,7 @@ public static class EditorSurface
     /// <para>
     /// A region clips with a rectangle, so a rounded card scrolled under its edge is cut square
     /// while every other edge in the editor is round. Nothing can round the cut itself. What is
-    /// behind a floating panel here is the scene rather than a colour, so there is nothing to
+    /// behind a floating panel here is the scene rather than a color, so there is nothing to
     /// paint back over the corner.
     /// </para>
     /// <para>
@@ -203,7 +203,7 @@ public static class EditorSurface
     /// What something pressed that lies on the scene wears when it is neither held nor in force.
     /// </summary>
     /// <remarks>
-    /// One colour for the buttons floating in the scene's corners and the tabs along its bottom,
+    /// One color for the buttons floating in the scene's corners and the tabs along its bottom,
     /// because they are the same kind of thing and two of them at two shades read as two kinds.
     /// </remarks>
     internal static Vector4 Lying() =>
@@ -245,7 +245,7 @@ public static class EditorSurface
         var middle = new Vector2(middleX ?? ((at.X + to.X) * 0.5f), (at.Y + to.Y) * 0.5f);
         var draw = onto ?? ImGui.GetWindowDrawList();
 
-        // The colours a scrollbar's grab wears, because that is the other thing in the editor that
+        // The colors a scrollbar's grab wears, because that is the other thing in the editor that
         // is taken hold of and slid, and two things that are dragged should not look like two
         // different kinds of thing.
         var color = held
@@ -293,5 +293,64 @@ public static class EditorSurface
         if (open) draw();
 
         ImGui.EndChild();
+    }
+
+    /// <summary>
+    /// A heading over the rows that belong to it, with a rule carried out to the end of the row.
+    /// </summary>
+    /// <remarks>
+    /// ImGui's own runs its rule to the edge of the whole region, which is further right than the
+    /// fields reach and close enough to the card's edge to read as a line that ran out of room.
+    /// This ends where the fields end, so the row is inset by the same amount at both ends.
+    /// </remarks>
+    /// <param name="text">What the heading says.</param>
+    /// <param name="inset">How far short of the region's right edge the rule stops.</param>
+    internal static void Heading(string text, float inset = 0f)
+    {
+        if (EditorTheme.Current.Stock)
+        {
+            ImGui.SeparatorText(text);
+            return;
+        }
+
+        var style = ImGui.GetStyle();
+        var thick = MathF.Max(1f, style.SeparatorTextBorderSize);
+
+        var at = ImGui.GetCursorScreenPos();
+        var word = ImGui.CalcTextSize(text);
+
+        var width = MathF.Max(
+            word.X + (style.SeparatorTextPadding.X * 2f),
+            ImGui.GetContentRegionAvail().X - inset);
+
+        var height = MathF.Max(word.Y + (style.SeparatorTextPadding.Y * 2f), thick);
+
+        ImGui.Dummy(new Vector2(width, height));
+
+        var draw = ImGui.GetWindowDrawList();
+        var rule = MathF.Floor(at.Y + (height * 0.5f));
+        var color = ImGui.GetColorU32(ImGuiCol.Separator);
+
+        var from = at.X + style.SeparatorTextPadding.X;
+        var to = from + word.X + style.ItemSpacing.X;
+
+        if (from - style.ItemSpacing.X > at.X)
+        {
+            draw.AddLine(
+                new Vector2(at.X, rule),
+                new Vector2(from - style.ItemSpacing.X, rule),
+                color,
+                thick);
+        }
+
+        if (to < at.X + width)
+        {
+            draw.AddLine(new Vector2(to, rule), new Vector2(at.X + width, rule), color, thick);
+        }
+
+        draw.AddText(
+            new Vector2(from, at.Y + style.SeparatorTextPadding.Y),
+            ImGui.GetColorU32(ImGuiCol.Text),
+            text);
     }
 }

@@ -51,7 +51,7 @@ public partial struct Showcase
     public Vec3 Offset;
 
     /// <summary>Something that is on or off, and which the row below answers to.</summary>
-    [Header("Behaviour")]
+    [Header("Behavior")]
     [Space]
     public bool Enabled;
 
@@ -219,3 +219,4 @@ public enum ShowcaseMode
     /// <summary>Stopped on purpose.</summary>
     Paused,
 }
+

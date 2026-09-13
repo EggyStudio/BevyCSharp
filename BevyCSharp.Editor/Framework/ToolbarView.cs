@@ -14,6 +14,17 @@ namespace BevyCSharp.Editor.Framework;
 public static class ToolbarView
 {
     /// <summary>
+    /// How far a group sits from the corner of the scene it is pinned to.
+    /// </summary>
+    /// <remarks>
+    /// The editor's own gap plus a little, because a group in a corner is measured against a
+    /// rounded one and reads as tighter than the same gap along a straight edge. Anything that
+    /// lines up with the toolbar, such as the menu that opens under it, takes this rather than
+    /// repeating the number.
+    /// </remarks>
+    internal static float Inset => EditorShell.Margin + 4f;
+
+    /// <summary>
     /// What floats in the scene's corners.
     /// </summary>
     /// <remarks>
@@ -98,7 +109,7 @@ public static class ToolbarView
         var buttons = EditorToolbar.Slot(slot);
         if (buttons.Count == 0) return;
 
-        var inset = EditorShell.Margin + 4f;
+        var inset = Inset;
 
         // Pinned to the corners of what the scene still has to itself, not of the scene's own
         // rectangle. Floating, the scene is the whole window and the panels lie over it, so a
@@ -131,7 +142,7 @@ public static class ToolbarView
         // Air at the ends of a button with words in it. Nothing above or below, because the height
         // is given outright and padding there would only fight it.
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(EditorSurface.Sides, 0f));
-        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(6f, 6f));
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(EditorSurface.Air, EditorSurface.Air));
 
         for (var index = 0; index < buttons.Count; index++)
         {
@@ -142,7 +153,7 @@ public static class ToolbarView
             var on = button.Active?.Invoke() == true;
 
             // The plate everything lying on the scene wears, until it is in force, when it wears
-            // the accent, which is the one thing colour means here.
+            // the accent, which is the one thing color means here.
             ImGui.PushStyleColor(
                 ImGuiCol.Button,
                 on ? EditorTheme.LiveAccent : EditorSurface.Lying());
@@ -206,7 +217,7 @@ public static class ToolbarView
         var over = ImGui.IsItemHovered();
         var held = ImGui.IsItemActive();
 
-        // Out of the colours the caller pushed, which is what a button of ImGui's own would read.
+        // Out of the colors the caller pushed, which is what a button of ImGui's own would read.
         // Reaching for the palette directly here would quietly ignore them.
         var fill = held
             ? ImGuiCol.ButtonActive

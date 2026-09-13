@@ -52,7 +52,7 @@ public static class DetailsPanel
         if (ImGui.InputText("##name", ref renamed, 128, ImGuiInputTextFlags.EnterReturnsTrue)
             && renamed.Length > 0)
         {
-            ctx.Ecs.SetName(entity, renamed);
+            EditorEntity.Rename(ctx.Ecs, entity, renamed);
         }
 
         ImGui.Spacing();
@@ -161,7 +161,7 @@ public static class DetailsPanel
             {
                 if (ImGui.MenuItem("Remove", string.Empty, false, schema.CanAdd))
                 {
-                    schema.Remove(ctx.Ecs, entity);
+                    EditorEntity.Drop(ctx.Ecs, entity, schema);
                 }
 
                 RoundedRows.Row();
@@ -188,14 +188,14 @@ public static class DetailsPanel
 
             foreach (var method in schema.Methods)
             {
-                var width = ImGui.CalcTextSize(method.Title).X + (ImGui.GetStyle().FramePadding.X * 2f);
+                var width = EditorWidgets.PillWidth(method.Title);
 
                 if (used > 0f && used + width < room) ImGui.SameLine();
                 else used = 0f;
 
                 used += width + ImGui.GetStyle().ItemSpacing.X;
 
-                if (ImGui.Button(method.Title)) method.Run(ctx.Ecs, entity);
+                if (EditorWidgets.Pill(method.Title, false)) method.Run(ctx.Ecs, entity);
             }
 
             ImGui.Unindent(Inset);
@@ -308,7 +308,7 @@ public static class DetailsPanel
             {
                 if (!schema.CanAdd || carried.Contains(schema.Name)) continue;
 
-                if (ImGui.MenuItem(schema.Name)) schema.Add(ctx.Ecs, entity);
+                if (ImGui.MenuItem(schema.Name)) EditorEntity.Carry(ctx.Ecs, entity, schema);
 
                 RoundedRows.Row();
                 any = true;
@@ -351,7 +351,7 @@ public static class DetailsPanel
             var label = schema.Name;
             if (label.Length == 0) continue;
 
-            var width = ImGui.CalcTextSize(label).X + (ImGui.GetStyle().FramePadding.X * 2f) + 8f;
+            var width = EditorWidgets.PillWidth(label);
 
             if (used > 0f && used + width < room) ImGui.SameLine();
             else used = 0f;
@@ -362,8 +362,7 @@ public static class DetailsPanel
             {
                 any = true;
 
-                ImGui.Spacing();
-                ImGui.TextDisabled("ALSO CARRIES");
+                EditorSurface.Heading("Also carries", Inset);
                 ImGui.Spacing();
 
                 // Said before the first one, so a thing carrying nothing extra says nothing at all
@@ -375,22 +374,21 @@ public static class DetailsPanel
             // press. A button that answers a click by doing nothing is a button that says it will.
             var at = ImGui.GetCursorScreenPos();
             var word = ImGui.CalcTextSize(label);
-            var air = ImGui.GetStyle().FramePadding;
-
-            var size = new Vector2(word.X + (air.X * 2f), word.Y + (air.Y * 2f));
+            var size = new Vector2(width, ImGui.GetFrameHeight());
 
             ImGui.Dummy(size);
 
             var draw = ImGui.GetWindowDrawList();
 
-            EditorDraw.Rounded(
-                at,
-                at + size,
-                ImGui.GetStyle().FrameRounding,
-                ImGui.GetColorU32(ImGuiCol.FrameBg),
-                draw);
+            // The shape a pill is, since that is what a word on a plate is everywhere else here,
+            // in the fill a field wears rather than the one a button does, because this is a
+            // label and not something to press.
+            EditorDraw.Capsule(at, at + size, ImGui.GetColorU32(ImGuiCol.FrameBg), draw);
 
-            draw.AddText(at + air, ImGui.GetColorU32(ImGuiCol.TextDisabled), label);
+            draw.AddText(
+                at + new Vector2(EditorSurface.Sides, (size.Y - word.Y) * 0.5f),
+                ImGui.GetColorU32(ImGuiCol.TextDisabled),
+                label);
         }
     }
 }

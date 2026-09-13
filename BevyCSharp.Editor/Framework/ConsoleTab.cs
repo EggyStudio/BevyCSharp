@@ -47,7 +47,7 @@ public static class ConsoleTab
                 var theme = EditorTheme.Current;
 
                 // Out of the theme, so a look dialled in reaches the log as well. Written here in
-                // four colours the palette already has rather than four of this file's own.
+                // four colors the palette already has rather than four of this file's own.
                 var color = line.Level switch
                 {
                     LogLevel.Warning => theme.Warn,
@@ -122,9 +122,7 @@ public static class ConsoleTab
 
         foreach (var (name, _, _) in levels)
         {
-            buttons += ImGui.CalcTextSize(name).X
-                + (ImGui.GetStyle().FramePadding.X * 2f)
-                + ImGui.GetStyle().ItemSpacing.X;
+            buttons += EditorWidgets.PillWidth(name) + ImGui.GetStyle().ItemSpacing.X;
         }
 
         var search = View.Search;
@@ -143,11 +141,7 @@ public static class ConsoleTab
             var on = read();
 
             // The accent for what is in force, as everywhere else, and the plate for what is not.
-            if (on) ImGui.PushStyleColor(ImGuiCol.Button, EditorTheme.LiveAccent);
-
-            if (ImGui.Button(name)) write(!on);
-
-            if (on) ImGui.PopStyleColor();
+            if (EditorWidgets.Pill(name, on)) write(!on);
         }
 
         ImGui.Spacing();

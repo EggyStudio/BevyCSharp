@@ -79,7 +79,7 @@ public static class EditorWidgets
     }
 
     /// <summary>
-    /// A box to tick, drawn as a circle with the tick in the text colour.
+    /// A box to tick, drawn as a circle with the tick in the text color.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -89,7 +89,7 @@ public static class EditorWidgets
     /// ImGui draws the tick over it with a fill of its own that is not there.
     /// </para>
     /// <para>
-    /// The tick itself is ImGui's, drawn in the colour the theme gives it, which is the one every
+    /// The tick itself is ImGui's, drawn in the color the theme gives it, which is the one every
     /// other value is read in rather than the accent.
     /// </para>
     /// </remarks>
@@ -128,13 +128,112 @@ public static class EditorWidgets
         return changed;
     }
 
+    /// <summary>How wide a pill saying this is, which is what a row of them measures with.</summary>
+    /// <param name="name">What the pill says.</param>
+    internal static float PillWidth(string name) =>
+        ImGui.CalcTextSize(name).X + (EditorSurface.Sides * 2f);
+
     /// <summary>
-    /// One of a list of names, chosen from a flyout.
+    /// One of a row of pills, where whichever is in force wears the accent.
+    /// </summary>
+    /// <remarks>
+    /// The tabs along the bottom, the pages of the settings, the themes in the style tab and the
+    /// levels a console shows are the same thing four times over: a row of words, one or more of
+    /// which is in force. Drawn here rather than as a button per caller, so they are one size, one
+    /// shape and one set of colors, and so the shape is a capsule, which ImGui's own button cannot
+    /// quite be however far its rounding is pushed.
+    /// </remarks>
+    /// <param name="name">What it says, which is also what it is hashed by.</param>
+    /// <param name="chosen">Whether this is the one in force.</param>
+    /// <param name="idle">
+    /// What it wears while it is neither chosen nor under the hand, or nothing for the plate the
+    /// rest of them wear. A pill on a surface dark enough to read a bare word against passes one
+    /// that is seen through.
+    /// </param>
+    /// <param name="height">
+    /// How tall, or nothing for as tall as a field. A row of pills inside a panel stands beside
+    /// fields and matches those; one lying on the scene stands beside the toolbar and is given
+    /// <see cref="EditorSurface.Tall"/> to match that instead.
+    /// </param>
+    /// <returns>Whether it was pressed.</returns>
+    internal static bool Pill(string name, bool chosen, Vector4? idle = null, float? height = null)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+
+        if (EditorTheme.Current.Stock)
+        {
+            if (chosen) ImGui.PushStyleColor(ImGuiCol.Button, EditorTheme.LiveAccent);
+
+            var stock = ImGui.Button(name);
+
+            if (chosen) ImGui.PopStyleColor();
+
+            return stock;
+        }
+
+        var draw = ImGui.GetWindowDrawList();
+        var word = ImGui.CalcTextSize(name);
+
+        var at = ImGui.GetCursorScreenPos();
+        var size = new Vector2(PillWidth(name), height ?? ImGui.GetFrameHeight());
+
+        // Its own answer rather than a click on it, so a pill acts when the button is let go the
+        // way every other button does, and a press that slides off it acts on nothing.
+        var pressed = ImGui.InvisibleButton($"##pill{name}", size);
+        var over = ImGui.IsItemHovered();
+
+        var fill = chosen
+            ? over ? EditorTheme.Alpha(EditorTheme.LiveAccent, 0.85f) : EditorTheme.LiveAccent
+            : over ? EditorTheme.LiveHover : idle ?? EditorSurface.Lying();
+
+        if (fill.W > 0f) EditorDraw.Capsule(at, at + size, ImGui.GetColorU32(fill), draw);
+
+        // White whether it is chosen or not. What says which one is in force is the pill under it,
+        // and a grey word reads as one that cannot be pressed.
+        draw.AddText(
+            at + new Vector2(EditorSurface.Sides, (size.Y - word.Y) * 0.5f),
+            ImGui.GetColorU32(EditorTheme.LiveText),
+            name);
+
+        return pressed;
+    }
+
+    /// <summary>
+    /// A row holding one thing, which opens a list of what it could hold instead.
     /// </summary>
     /// <remarks>
     /// ImGui's own combo for the arrow and the keyboard it brings, with this editor's rows inside
     /// it, so the name under the pointer is a rounded row like the one in every other list and the
     /// list keeps the air every other flyout keeps.
+    /// </remarks>
+    /// <param name="id">What to call it, which is what ImGui hashes it by.</param>
+    /// <param name="held">What it holds now, which is what the row says while the list is shut.</param>
+    /// <param name="list">
+    /// The rows to offer, drawn only while the list is open, each followed by
+    /// <see cref="RoundedRows.Row"/>.
+    /// </param>
+    internal static void Picking(string id, string held, Action list)
+    {
+        ArgumentNullException.ThrowIfNull(list);
+
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, EditorSurface.Around);
+
+        if (ImGui.BeginCombo(id, held))
+        {
+            RoundedRows.Rows(list);
+            ImGui.EndCombo();
+        }
+
+        ImGui.PopStyleVar();
+    }
+
+    /// <summary>
+    /// One of a list of names, chosen from a flyout.
+    /// </summary>
+    /// <remarks>
+    /// The list is the names themselves, which is every case where what can be chosen is known
+    /// outright. Anything whose list has to be gathered, such as the files in a project, builds its
+    /// own rows through <see cref="Picking"/> instead.
     /// </remarks>
     /// <param name="id">What to call it, which is what ImGui hashes it by.</param>
     /// <param name="held">What it holds now.</param>
@@ -148,53 +247,44 @@ public static class EditorWidgets
 
         if (options.Count == 0) return;
 
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, EditorSurface.Around);
-
-        if (ImGui.BeginCombo(id, held))
+        Picking(id, held, () =>
         {
-            RoundedRows.Rows(() =>
+            foreach (var option in options)
             {
-                foreach (var option in options)
-                {
-                    var picked = option == held;
+                var picked = option == held;
 
-                    if (ImGui.Selectable(option, picked)) onto(option);
+                if (ImGui.Selectable(option, picked)) onto(option);
 
-                    RoundedRows.Row(picked);
-                }
-            });
-
-            ImGui.EndCombo();
-        }
-
-        ImGui.PopStyleVar();
+                RoundedRows.Row(picked);
+            }
+        });
     }
 
-    /// <summary>What a colour swatch offers, which is the colour and a way through to a picker.</summary>
-    private const ImGuiColorEditFlags Picking =
+    /// <summary>What a color swatch offers, which is the color and a way through to a picker.</summary>
+    private const ImGuiColorEditFlags Coloring =
         ImGuiColorEditFlags.NoInputs
         | ImGuiColorEditFlags.AlphaPreviewHalf
         | ImGuiColorEditFlags.AlphaBar;
 
     /// <summary>
-    /// A colour, as a swatch the width of its row with a picker behind it.
+    /// A color, as a swatch the width of its row with a picker behind it.
     /// </summary>
     /// <remarks>
-    /// A button rather than ImGui's own colour field, which draws its swatch as a square of one
+    /// A button rather than ImGui's own color field, which draws its swatch as a square of one
     /// row's height however wide the row is and leaves the rest of it empty.
     /// </remarks>
     /// <param name="id">What to call it, which is what ImGui hashes it by.</param>
-    /// <param name="color">The colour, changed in place when the picker is used.</param>
+    /// <param name="color">The color, changed in place when the picker is used.</param>
     /// <returns>Whether it changed.</returns>
     public static bool Swatch(string id, ref Vector4 color)
     {
         var across = new Vector2(ImGui.GetContentRegionAvail().X, 0f);
 
-        if (ImGui.ColorButton(id, color, Picking, across)) ImGui.OpenPopup($"##pick{id}");
+        if (ImGui.ColorButton(id, color, Coloring, across)) ImGui.OpenPopup($"##pick{id}");
 
         if (!Flyout($"##pick{id}")) return false;
 
-        var changed = ImGui.ColorPicker4($"##picker{id}", ref color, Picking);
+        var changed = ImGui.ColorPicker4($"##picker{id}", ref color, Coloring);
 
         EndFlyout();
 
@@ -216,8 +306,13 @@ public static class EditorWidgets
     /// </remarks>
     /// <param name="id">Which field this is, so a drag can be followed between frames.</param>
     /// <param name="fraction">How far along the value sits, from nothing to all of it.</param>
-    /// <param name="slide">The slider to call, once its own colours are out of the way.</param>
-    internal static bool Sliding(string id, float fraction, Func<bool> slide)
+    /// <param name="slide">The slider to call, once its own colors are out of the way.</param>
+    /// <param name="readout">
+    /// What to write on the bar, clear of the handle, or nothing at all for a bar that says
+    /// nothing. Left out entirely to keep whatever ImGui writes on it, which is what a bar with a
+    /// word rather than a number in it wants.
+    /// </param>
+    internal static bool Sliding(string id, float fraction, Func<bool> slide, string? readout = null)
     {
         ArgumentNullException.ThrowIfNull(slide);
 
@@ -261,13 +356,67 @@ public static class EditorWidgets
         ImGui.PushStyleColor(ImGuiCol.SliderGrab, 0u);
         ImGui.PushStyleColor(ImGuiCol.SliderGrabActive, 0u);
 
+        // ImGui writes the value in the middle of the bar, where the handle passes through it.
+        // Hidden rather than left out, because the format it is left out of is also the one the
+        // box is filled with when somebody types into it, and an empty one offers an empty box.
+        var mine = readout is not null && !FieldNumbers.Typing(id);
+
+        if (mine) ImGui.PushStyleColor(ImGuiCol.Text, 0u);
+
         var changed = slide();
 
+        if (mine) ImGui.PopStyleColor();
+
         ImGui.PopStyleColor(5);
+
+        if (mine && readout is { Length: > 0 }) Readout(draw, readout, min, max, along, handle);
 
         if (ImGui.IsItemActive()) _sliding = id;
         else if (held) _sliding = string.Empty;
 
         return changed;
+    }
+
+    /// <summary>
+    /// The value a bar holds, written where the handle is not.
+    /// </summary>
+    /// <remarks>
+    /// In the middle, until the handle comes near enough to touch it, and then pushed aside by as
+    /// little as it takes. Moved rather than swapped from one side to the other, so the number
+    /// drifts out of the way as the bar is dragged instead of jumping across it, and never outside
+    /// the bar, because a number written past the end of what it belongs to belongs to nothing.
+    /// </remarks>
+    /// <param name="draw">What to draw into.</param>
+    /// <param name="readout">What the bar holds, as it should be written.</param>
+    /// <param name="min">The bar's top left.</param>
+    /// <param name="max">The bar's bottom right.</param>
+    /// <param name="along">Where the middle of the handle is.</param>
+    /// <param name="handle">How wide the handle is.</param>
+    private static void Readout(
+        ImDrawListPtr draw, string readout, Vector2 min, Vector2 max, float along, float handle)
+    {
+        var style = ImGui.GetStyle();
+        var word = ImGui.CalcTextSize(readout);
+
+        var middle = (min.X + max.X) * 0.5f;
+        var clear = (handle * 0.5f) + (word.X * 0.5f) + style.ItemInnerSpacing.X;
+
+        var at = MathF.Abs(middle - along) >= clear
+            ? middle
+            : along < middle ? along + clear : along - clear;
+
+        var edge = style.FramePadding.X + (word.X * 0.5f);
+        var room = (max.X - min.X) * 0.5f;
+
+        // A bar too narrow to hold the number at either end keeps it in the middle, which is at
+        // least the same place every frame.
+        at = edge <= room
+            ? Math.Clamp(at, min.X + edge, max.X - edge)
+            : middle;
+
+        draw.AddText(
+            new Vector2(at - (word.X * 0.5f), ((min.Y + max.Y) * 0.5f) - (word.Y * 0.5f)),
+            ImGui.GetColorU32(ImGuiCol.Text),
+            readout);
     }
 }

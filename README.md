@@ -1443,7 +1443,7 @@ public partial struct Interface
 ```
 
 `BevyCSharp.Sample` does exactly that, in `Behaviors/Interface.cs`. It needs a bridge with the
-interface compiled in (`build/build-native.sh --editor`) and `Config.HtmlUi` asked for.
+interface compiled in (`build/build-native.sh --editor`) and `Config.Gui` asked for.
 
 **The engine only rasterises.** ImGui hands over vertices, indices and a list of draw calls, each
 with a clip rectangle and a picture; `bcs_imgui_frame` takes them and a pass in Bevy's renderer
@@ -1479,8 +1479,10 @@ rather than being drawn behind the panel. The tabs sit at the bottom left, spann
 panel leaves, and their bar is **under** their contents, so a console grows upwards out of the
 bottom of the screen.
 
-Everything about that arrangement is three numbers (docked, how wide, which tab) and a
-calculation in `EditorShell`, which the parts that draw read and none of them write back to.
+Everything about that arrangement is a handful of numbers (docked, how wide, which tab, how the
+panel is split) and a calculation in `EditorShell`, which the parts that draw read and none of them
+write back to. They are registered as settings like everything else a person sets, so the editor
+opens the way it was left.
 
 **The look is a theme, and a theme is a file.** `EditorTheme` holds one ladder of greys, one accent
 that only ever means "this is what is selected", the roundings and the paddings, and how much of the
@@ -1490,9 +1492,9 @@ the cards on it are heavier, and everything from a component's card inwards is s
 hold however bright the scene behind them is.
 
 Two themes ship: the editor's own and **Native**, which is stock ImGui, one click apart. The Style
-tab is ImGui's own style editor with the theme picker and the panel opacity above it, and **Save**
-writes `assets/theme.txt`, which the editor reads at startup. A look dialled in by hand survives a
-restart and can be shipped with the project.
+tab lists the theme's own fields, every rung of the ladder and every metric, and **Save** writes
+`assets/theme.txt`, which the editor reads at startup. What the tab shows is what the file keeps, so
+a look dialled in by hand survives a restart and can be shipped with the project.
 
 **Showing a component needs no reflection.** The generator emits a `ComponentSchema` for every
 `[Behavior]` struct, holding each field's name, its kind, and a pair of closures that read and
@@ -1524,7 +1526,7 @@ reads at compile time, so nothing reflects at runtime:
 
 ```csharp
 [Range(0, 1, Readout = SliderReadout.Number)] public float Weight;   // a bar, and the number
-[Foldout("Advanced")] [Separator]                                    // in a fold, under a line
+[Separator]                                                          // under a line
 [Info("Changing this rebuilds the shape.", Kind = NoteKind.Warning)] // said in the panel
 [OnValueChanged(nameof(Rebuild))] public float Radius;               // and something to call
 
@@ -1570,8 +1572,8 @@ it. Returning a string writes that line back, and anything a person can get wron
 a sentence rather than an exception.
 
 `ConsoleCommands.Run(line)` is the whole of the runtime surface, so a game gets a console by
-drawing one: the editor has two, a tab and the one the key under Escape drops into the middle of
-the window, and they share every part except their documents.
+drawing one. The editor's is the tab along the bottom, which the key under Escape raises and puts
+away, and everything it knows about the log and the commands it asks the library for.
 
 ---
 
@@ -1640,8 +1642,8 @@ run against a real Bevy app. Known gaps:
 ## Contributing
 
 Prose in this repository follows [.github/STYLE.md](.github/STYLE.md): no em dashes, no spaced
-hyphens as punctuation, no padded section banners, and comments that explain why rather than
-restate the code.
+hyphens as punctuation, no colon joining two clauses where a full stop or a "because" belongs, no
+padded section banners, and comments that explain why rather than restate the code.
 
 ## License
 

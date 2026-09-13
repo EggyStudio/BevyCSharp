@@ -46,6 +46,16 @@ public static class WorldPanel
     /// </remarks>
     private const float EyeRoom = 24f;
 
+    /// <summary>
+    /// The room a row's fold arrow takes, whether or not the row has one.
+    /// </summary>
+    /// <remarks>
+    /// One number, because it decides three things that have to agree: how far the arrow is drawn,
+    /// how far a row without one indents so the names still line up, and how much of the front of a
+    /// row a click folds rather than selects.
+    /// </remarks>
+    private static float Arrow => ImGui.GetTextLineHeight() + 2f;
+
     /// <summary>Whether this build has Bevy's <c>Visibility</c> at all.</summary>
     /// <remarks>
     /// Asked once. Resolving a component the bridge was compiled without throws rather than
@@ -196,7 +206,7 @@ public static class WorldPanel
 
         if (done && _typed.Trim() is { Length: > 0 } name)
         {
-            ctx.Ecs.SetName(row.Entity, name.Trim());
+            EditorEntity.Rename(ctx.Ecs, row.Entity, name.Trim());
             _renaming = 0;
             _started = 0;
 
@@ -248,7 +258,7 @@ public static class WorldPanel
         // picture it stands beside.
         var onArrow = row.HasChildren
             && over
-            && ImGui.GetIO().MousePos.X < at.X + Indent(row) + ImGui.GetTextLineHeight() + 4f;
+            && ImGui.GetIO().MousePos.X < at.X + Indent(row) + Arrow;
 
         // Twice on a name is how a name is changed, in every list of things there is.
         if (over && !onEye && !onArrow && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
@@ -264,9 +274,25 @@ public static class WorldPanel
             // it was hidden is what its parent says, and forcing it on outlives the hierarchy.
             if (onEye)
             {
-                ctx.Ecs.Set(
-                    row.Entity,
-                    sight.Mode == VisibilityMode.Hidden ? Visibility.Inherited : Visibility.Hidden);
+                var was = sight;
+                var now = sight.Mode == VisibilityMode.Hidden
+                    ? Visibility.Inherited
+                    : Visibility.Hidden;
+
+                var which = row.Entity;
+
+                ctx.Ecs.Set(which, now);
+
+                // Taken back like anything else. Putting something away by accident is the easiest
+                // mistake to make in a list, and an editor where one of the things a click does
+                // cannot be undone is one nobody trusts the rest of.
+                //
+                // No key, so each click is its own entry rather than the last one continued: two
+                // clicks on an eye are two changes of mind, not one edit still being made.
+                EditorHistory.Record(
+                    now.Mode == VisibilityMode.Hidden ? $"hide {row.Name}" : $"show {row.Name}",
+                    undo => undo.Set(which, was),
+                    redo => redo.Set(which, now));
             }
 
             // And the arrow takes its own, so folding a branch away leaves the selection alone.
@@ -398,7 +424,7 @@ public static class WorldPanel
             var arrow = new Vector2(at.X + indent, middle);
             var mark = line * 0.34f;
 
-            var colour = ImGui.GetColorU32(
+            var color = ImGui.GetColorU32(
                 EditorTheme.Alpha(EditorTheme.LiveText, over || picked ? 0.9f : 0.6f));
             var centre = arrow + new Vector2(line * 0.5f, line * 0.5f);
 
@@ -408,7 +434,7 @@ public static class WorldPanel
                     centre + new Vector2(-mark * 0.6f, -mark),
                     centre + new Vector2(-mark * 0.6f, mark),
                     centre + new Vector2(mark * 0.8f, 0f),
-                    colour);
+                    color);
             }
             else
             {
@@ -416,15 +442,15 @@ public static class WorldPanel
                     centre + new Vector2(-mark, -mark * 0.6f),
                     centre + new Vector2(mark, -mark * 0.6f),
                     centre + new Vector2(0f, mark * 0.8f),
-                    colour);
+                    color);
             }
 
-            indent += line + 2f;
+            indent += Arrow;
         }
         else if (Rows.Exists(other => other.HasChildren))
         {
             // Kept in step with the rows that do have an arrow, so names line up in a column.
-            indent += line + 2f;
+            indent += Arrow;
         }
 
         EditorDraw.Icon(draw, row.Icon, new Vector2(at.X + indent, middle), line, picked);
@@ -437,8 +463,8 @@ public static class WorldPanel
             true);
 
         draw.AddText(
-            new Vector2(at.X + indent + line + 6f, middle),
-            ImGui.GetColorU32(picked ? EditorTheme.LiveText : EditorTheme.Alpha(EditorTheme.LiveText, 0.88f)),
+            new Vector2(at.X + indent + line + ImGui.GetStyle().ItemSpacing.X, middle),
+            ImGui.GetColorU32(EditorTheme.Ink(picked)),
             row.Name);
 
         draw.PopClipRect();
@@ -536,9 +562,8 @@ public static class WorldPanel
         // its place in storage.
         Folded.RemoveWhere(bits => !names.ContainsKey(bits));
 
-        int Compare(Entity a, Entity b) => string.Compare(
-            names.GetValueOrDefault(a.Bits), names.GetValueOrDefault(b.Bits),
-            StringComparison.OrdinalIgnoreCase);
+        int Compare(Entity a, Entity b) => EditorSort.Naturally(
+            names.GetValueOrDefault(a.Bits), names.GetValueOrDefault(b.Bits));
 
         void Add(Entity entity, int depth)
         {

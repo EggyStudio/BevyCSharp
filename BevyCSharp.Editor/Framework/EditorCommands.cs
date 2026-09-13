@@ -307,7 +307,8 @@ public static class EditorCommands
     /// the button that opened it reads as one tall panel instead of two things.
     /// </remarks>
     private static (float X, float Y) MenuAt =>
-        (EditorShell.Scene.X + 4f, EditorShell.Scene.Y + 46f);
+        (EditorShell.Scene.X + ToolbarView.Inset,
+            EditorShell.Scene.Y + ToolbarView.Inset + EditorSurface.Tall + EditorSurface.Air);
 
     /// <summary>What the open panel reads as when there is none.</summary>
     private const string Shut = "none";
@@ -510,13 +511,43 @@ public static class EditorCommands
     private static void Spawn(EcsWorld world, string name, Action<Entity>? build)
     {
         var entity = world.Spawn();
+        var called = Unused(world, name);
 
         var where = Ahead(world);
         world.Add(entity, Transform.At(where.X, where.Y, where.Z));
-        world.SetName(entity, name);
+        world.SetName(entity, called);
         build?.Invoke(entity);
 
-        Finish(world, entity, name);
+        Finish(world, entity, called);
+    }
+
+    /// <summary>
+    /// The name asked for, or the first one after it that nothing is called.
+    /// </summary>
+    /// <remarks>
+    /// A name is how the editor tells one entity from another. The world file matches a saved
+    /// entity back up by it, and a selection that survives a script reload is found again by it, so
+    /// a second thing called Cube is a thing the editor confuses with the first.
+    /// </remarks>
+    /// <param name="world">The world to look in.</param>
+    /// <param name="name">What it would be called.</param>
+    private static string Unused(EcsWorld world, string name)
+    {
+        var taken = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var entity in world.All())
+        {
+            if (world.NameOf(entity) is { Length: > 0 } called) taken.Add(called);
+        }
+
+        if (!taken.Contains(name)) return name;
+
+        for (var next = 2; ; next++)
+        {
+            var tried = $"{name} {next}";
+
+            if (!taken.Contains(tried)) return tried;
+        }
     }
 
     /// <summary>Selects what was spawned and records the spawn.</summary>

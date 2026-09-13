@@ -38,7 +38,7 @@ public static class ImGuiTextures
     /// <summary>Draws a picture, tinted.</summary>
     /// <remarks>
     /// Tinted rather than drawn as it is, because the editor's icons are shapes cut out of white:
-    /// what colour one appears in is what the interface says it means, not what the file says.
+    /// what color one appears in is what the interface says it means, not what the file says.
     /// </remarks>
     public static void Draw(string path, float size, Vector4 tint)
     {

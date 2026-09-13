@@ -119,6 +119,18 @@ public sealed class ComponentField
     public FieldHints Hints { get; }
 
     /// <summary>
+    /// Whether the row is a view of other state rather than state of its own.
+    /// </summary>
+    /// <remarks>
+    /// True for a property, which reads and writes through itself and usually stands for one of
+    /// the fields beside it. A tool drawing rows does not care, but a tool that copies a component,
+    /// writes one to a file, or puts one back after taking it off has to write the state and not
+    /// the views of it, or a setter that changes what it was derived from runs over the value that
+    /// was just restored.
+    /// </remarks>
+    public bool Derived { get; init; }
+
+    /// <summary>
     /// The component this field belongs to, once one has claimed it.
     /// </summary>
     /// <remarks>

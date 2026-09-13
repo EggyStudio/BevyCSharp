@@ -13,6 +13,98 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 public static class EditorEntity
 {
+    /// <summary>
+    /// Gives an entity a name, and puts the change on the undo stack.
+    /// </summary>
+    /// <remarks>
+    /// Both places a name can be typed go through here, so a rename undoes the same way whichever
+    /// of them did it, and typing one name over another is one change rather than two.
+    /// </remarks>
+    /// <param name="world">The world the entity is in.</param>
+    /// <param name="entity">Which entity.</param>
+    /// <param name="name">What to call it.</param>
+    public static void Rename(EcsWorld world, Entity entity, string name)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        ArgumentException.ThrowIfNullOrEmpty(name);
+
+        var was = world.NameOf(entity) ?? string.Empty;
+        if (was == name) return;
+
+        world.SetName(entity, name);
+
+        EditorHistory.Record(
+            $"rename to {name}",
+            undo => undo.SetName(entity, was),
+            redo => redo.SetName(entity, name),
+            $"name{entity.Bits}");
+    }
+
+    /// <summary>
+    /// Puts a component on an entity, and puts the change on the undo stack.
+    /// </summary>
+    /// <param name="world">The world the entity is in.</param>
+    /// <param name="entity">Which entity.</param>
+    /// <param name="schema">Which component.</param>
+    public static void Carry(EcsWorld world, Entity entity, ComponentSchema schema)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(schema);
+
+        if (!schema.Add(world, entity)) return;
+
+        EditorHistory.Record(
+            $"add {schema.Name}",
+            undo => schema.Remove(undo, entity),
+            redo => schema.Add(redo, entity));
+    }
+
+    /// <summary>
+    /// Takes a component off an entity, and puts the change on the undo stack.
+    /// </summary>
+    /// <remarks>
+    /// What the component held is read before it goes, so taking it back puts the values back with
+    /// it. A component added again empty is not the change undone; it is the same loss with the
+    /// row drawn again over it.
+    /// </remarks>
+    /// <param name="world">The world the entity is in.</param>
+    /// <param name="entity">Which entity.</param>
+    /// <param name="schema">Which component.</param>
+    public static void Drop(EcsWorld world, Entity entity, ComponentSchema schema)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(schema);
+
+        var held = new List<(ComponentField Field, object Value)>();
+
+        foreach (var field in schema.Fields)
+        {
+            if (!field.IsWritable) continue;
+
+            // The state, and not the rows that are a view of it. A property written back after the
+            // field it stands for is a setter running over the value just restored.
+            if (field.Derived) continue;
+
+            // A field that reads as nothing is one this side has no value for, which is not the
+            // same as one holding nothing, and writing it back would be writing a guess.
+            if (field.Read(world, entity) is not { } value) continue;
+
+            held.Add((field, value));
+        }
+
+        if (!schema.Remove(world, entity)) return;
+
+        EditorHistory.Record(
+            $"remove {schema.Name}",
+            undo =>
+            {
+                if (!schema.Add(undo, entity)) return;
+
+                foreach (var (field, value) in held) field.Write(undo, entity, value);
+            },
+            redo => schema.Remove(redo, entity));
+    }
+
     /// <summary>What a component of the interface is called, in part.</summary>
     /// <remarks>
     /// Matched on the component's own name rather than on the entity's, because a widget is

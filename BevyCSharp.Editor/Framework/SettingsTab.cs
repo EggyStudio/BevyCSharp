@@ -49,13 +49,7 @@ public static class SettingsTab
             {
                 ImGui.SameLine();
 
-                var chosen = page == _page;
-
-                if (chosen) ImGui.PushStyleColor(ImGuiCol.Button, EditorTheme.LiveAccent);
-
-                if (ImGui.Button($" {page} ")) _page = page;
-
-                if (chosen) ImGui.PopStyleColor();
+                if (EditorWidgets.Pill(page, page == _page)) _page = page;
             }
 
             EditorTheme.Divide();
@@ -67,12 +61,7 @@ public static class SettingsTab
             return;
         }
 
-        if (EditorRows.Open("##rows"))
-        {
-            foreach (var entry in EditorSettings.On(_page)) Row(entry);
-
-            EditorRows.Close();
-        }
+        foreach (var entry in EditorSettings.On(_page)) Row(entry);
 
         EditorSurface.EndRegion();
     }
@@ -83,14 +72,24 @@ public static class SettingsTab
     {
         if (entry.Kind == SettingKind.Heading)
         {
-            EditorRows.Group(entry.Label.ToUpperInvariant());
+            EditorSurface.Heading(entry.Label);
+            return;
+        }
+
+        var id = $"##{entry.Page}.{entry.Label}";
+        var held = entry.Read?.Invoke() ?? string.Empty;
+
+        // A table of its own per row, the way a component's fields are laid out, so a heading can
+        // be drawn between two rows rather than inside the name column of one.
+        ImGui.PushID(id);
+
+        if (!EditorRows.Open("##row"))
+        {
+            ImGui.PopID();
             return;
         }
 
         EditorRows.Line(entry.Label);
-
-        var id = $"##{entry.Page}.{entry.Label}";
-        var held = entry.Read?.Invoke() ?? string.Empty;
 
         switch (entry.Kind)
         {
@@ -166,5 +165,8 @@ public static class SettingsTab
                 break;
             }
         }
+
+        EditorRows.Close();
+        ImGui.PopID();
     }
 }

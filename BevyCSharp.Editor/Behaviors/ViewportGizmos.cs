@@ -30,13 +30,14 @@ public partial struct ViewportGizmos
     private static (float R, float G, float B, float A) Accent =>
         EditorTheme.Linear(EditorTheme.LiveAccent);
 
-    /// <summary>Red, green and blue for X, Y and Z, which is what every editor uses.</summary>
-    private static readonly (float R, float G, float B, float A)[] AxisColors =
-    [
-        (0.90f, 0.25f, 0.28f, 1f),
-        (0.45f, 0.85f, 0.30f, 1f),
-        (0.28f, 0.55f, 0.95f, 1f),
-    ];
+    /// <summary>Red, green and blue for X, Y and Z, as the scene wants them.</summary>
+    /// <remarks>
+    /// <see cref="EditorTheme.Axes"/>, which the cross in the corner draws with as well, put
+    /// through the conversion everything drawn in the scene needs.
+    /// </remarks>
+    /// <param name="axis">Which of the three.</param>
+    private static (float R, float G, float B, float A) AxisColor(int axis) =>
+        EditorTheme.Linear(EditorTheme.Axes[axis]);
 
     /// <summary>What a handle is drawn along.</summary>
     internal static readonly Vec3[] Axes = [Vec3.UnitX, Vec3.UnitY, Vec3.UnitZ];
@@ -359,7 +360,7 @@ public partial struct ViewportGizmos
 
         for (var i = 0; i < 3; i++)
         {
-            var color = held == i ? Accent : AxisColors[i];
+            var color = held == i ? Accent : AxisColor(i);
             var axis = axes[i];
 
             switch (EditorTools.Current)

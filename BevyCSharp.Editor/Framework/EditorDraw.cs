@@ -18,7 +18,7 @@ public static class EditorDraw
     /// Draws an icon into a square, if the picture has loaded.
     /// </summary>
     /// <remarks>
-    /// The icons are shapes cut out of white, so what colour one comes out is the tint it is drawn
+    /// The icons are shapes cut out of white, so what color one comes out is the tint it is drawn
     /// with, which is the theme's to decide. A picture that has not arrived yet draws nothing
     /// rather than a placeholder, because the asset server answers on a later frame and the row
     /// redraws then.

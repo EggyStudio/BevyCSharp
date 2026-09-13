@@ -24,7 +24,7 @@ public static class EditorPanes
         //
         // Docked there is no scene behind it at all, so it is solid whatever the alpha says, and
         // what it is solid in is the ground, the darkest there is and the same thing the corners
-        // taken off the viewport are painted in, so the frame round the scene is one colour.
+        // taken off the viewport are painted in, so the frame round the scene is one color.
         ImGui.SetNextWindowBgAlpha(EditorShell.Docked ? 1f : EditorTheme.Current.WindowAlpha);
         ImGui.PushStyleColor(ImGuiCol.WindowBg, EditorSurface.Chrome());
 

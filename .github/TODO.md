@@ -347,28 +347,25 @@ What is left:
 
 ## The editor
 
-`BevyCSharp.Editor` runs. The world on the left with a picture per row, the tools along the top, and
-everything else behind a hamburger whose contents are a table of paths; selecting something opens
-the panel that describes it (components with fields as blocks that open and shut, behaviors among
-them, and everything with nothing to show as a chip), each field drawn by whichever drawer takes
-it and told how to draw itself by the attributes on the field. The bottom of the window belongs to
-the tabs and the key list: a tab opens as a flyout over the work and a click anywhere else puts it
-away, so the columns keep the full height whether the asset browser is up or not. Settings are a
-column down the middle of the window, a console reads the log and takes commands, and the docks
-reflow around each other. Gizmos
-draw the selection, its handles, the ground and the camera's orientation, and a drag on a handle
-moves, turns or stretches what is selected. Underneath is Dear ImGui, drawn by
-Bevy, with the arrangement worked out from three numbers and the look held in one theme file.
+`BevyCSharp.Editor` runs. One panel on the right holds the world with a picture per row above the
+details of whatever is selected, the tools float in the scene's corners, and everything else is
+behind a hamburger whose contents are a table of paths. A component is a card that opens and shuts,
+a field is a row drawn as what its kind and its attributes say, and a component with nothing to
+show is a tag. The bottom left is a strip of tabs, and one opens into a card above it: the console,
+the asset browser, the settings and the style, each a class with a draw method and a line in a
+list. What the keys do is a card behind a button in the corner. Gizmos draw the selection, its
+handles, the ground and the camera's orientation, and a drag on a handle moves, turns or stretches
+what is selected. Underneath is Dear ImGui, drawn by Bevy, with the arrangement worked out from a
+handful of numbers that are saved with the settings, and the look held in one theme file.
 [EDITOR.md](EDITOR.md) has the design language.
 
 What is left:
 
-- **Clicking a mesh to select it works**, and so does every other pointer path, driven through
-  `SyntheticInput`, which writes the window's own messages and so goes through picking, the
-  widgets and the camera exactly as a hand would. The wheel is driven the same way, so a list that
-  pages can be exercised too. This was the largest hole in the editor's verification and it is
-  closed; what is still untested that way is the keyboard, which has no equivalent yet and would
-  want the same treatment.
+- **Every input path is driven rather than simulated.** `SyntheticInput` writes the window's own
+  messages, so a click goes through picking, the widgets and the camera exactly as a hand's would,
+  and the wheel and the keyboard go the same way: a probe run can type a command, press Enter,
+  reach back through the history, hold Control and press Z, or drag a field by its box. What none
+  of it reaches is IME.
 - **Half of the world is saved.** `assets/world.json` keeps every named entity's name and every
   component with a schema, which is what the editor can change. What it cannot write is the
   engine's own components: a mesh handle, a material, a camera's projection.
@@ -403,13 +400,15 @@ What is left:
   What neither can do is see a component the bridge does not name: an entity whose only components
   are engine-side and unnamed reads as plain. Naming more of them is a bridge job, not an editor
   one.
-- **The inspector draws a field through a drawer, and anything else through a pass.** One class
-  per kind of value, a table searched newest first, and attributes on the field that say what it
-  wants: a range, a unit, a step, a heading, a condition, a label, a tooltip. Several things can be
-  selected and edited together, with a field the selection disagrees about marked as mixed, and a
-  drag on the handles takes all of them, about their own origins or about the middle of the
-  selection as the toolbar's pivot says. Origins is the default, because a first drag that swings
-  the selection across the level is a surprise nobody asked for.
+- **The inspector draws a field as one arm of one switch**, told how by the attributes the
+  generator carried through: a range and what its bar says about itself, a step, a unit, a
+  heading, a rule, a sentence, a condition on another field, methods to call once it has changed,
+  a color, a row with no name column. A drag on the handles takes everything selected, about
+  their own origins or about the middle as the toolbar's pivot says, and origins is the default
+  because a first drag that swings the selection across the level is a surprise nobody asked for.
+  What is left is a fold, which `[Foldout]` asks for and nothing draws, and editing several things
+  at once: the panel shows the last one picked with a count beside it rather than what they agree
+  and disagree about.
 - **A field can hold an asset, and the engine's own cannot.** A component of the game's own that
   holds an `AssetHandle` is drawn by name, and pressing it offers the files under the asset root
   that suit it. What is still out of reach is the engine's side of the same question: the mesh and
@@ -419,14 +418,17 @@ What is left:
   beside the layout, and everything on it belongs to this editor build. A project setting worth the
   name (a startup scene, a physics step, a build target) needs somewhere to live that is part of
   the project rather than part of the tool, which is the same gap as the world file's.
-- **A list longer than its pool.** The hierarchy, the inspector, the console and the asset browser
-  all hold a fixed pool of rows and decide what each stands for, which is what a virtualised list
-  does anyway, and the wheel scrolls whichever one the pointer is over. What none of them has is a
-  scrollbar: how far down a long list you are is only visible by what is on screen.
+- **Every row is drawn every frame.** A list is a call per row inside a scrolling region, which is
+  what immediate mode means, and the wheel belongs to whichever region the pointer is over. At
+  editor scale that is nothing; a list of ten thousand entities would want ImGui's own clipper,
+  which asks a list only for the rows that are on screen and is a change to the loops rather than
+  to what they draw.
 - **Undo covers what can be reversed exactly**: a field edited in the inspector, a rename, a new
-  entity. Despawning is deliberately not recorded, because an entity's mesh and material are
-  engine-side components with no mirror on this side and what came back would be a name with
-  nothing to draw. That is the same gap as the world file's, and closing one closes both.
+  entity, something hidden with its eye, and a component put on or taken off, which keeps what it
+  held so that putting it back is the component rather than an empty one. Despawning is
+  deliberately not recorded, because an entity's mesh and material are engine-side components with
+  no mirror on this side and what came back would be a name with nothing to draw. That is the same
+  gap as the world file's, and closing one closes both.
 
 ## Assets and scenes
 
@@ -446,7 +448,7 @@ What is left:
 - **What reaches the render world is still unchecked.** Every registration goes through
   `assets::init_asset_once`, so calling `init_asset` twice is inert, and the crate's own tests
   cover both halves of that: a handle minted between two guarded registrations survives, and one
-  minted between two unguarded ones does not, which is what pins the behaviour the guard exists
+  minted between two unguarded ones does not, which is what pins the behavior the guard exists
   for. What no test covers is the step after, that the meshes and materials the bridge creates
   are extracted into the render world and drawn with. That needs a real GPU, so it belongs in a
   windowed run rather than in the suite.

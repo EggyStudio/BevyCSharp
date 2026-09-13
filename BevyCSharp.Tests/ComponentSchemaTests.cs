@@ -237,6 +237,18 @@ public sealed class ComponentSchemaTests
     }
 
     [Fact]
+    public void APropertySaysItStandsForSomethingElse()
+    {
+        var schema = ComponentSchemas.For("Bevy.Tests.Described")!;
+
+        // What a tool has to know before it writes a component back: which rows are the state and
+        // which are another way of reading it. Doubled is Speed seen twice over, and writing it
+        // after Speed would put twice the value back.
+        Assert.False(schema.Field("Speed")!.Derived);
+        Assert.True(schema.Field("Doubled")!.Derived);
+    }
+
+    [Fact]
     public void AnEntityWithoutTheComponentReadsAsNothing()
     {
         using var harness = new EngineHarness(frames: 2);

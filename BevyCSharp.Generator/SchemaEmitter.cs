@@ -168,7 +168,9 @@ internal static class SchemaEmitter
 
         if (hints is not null) EmitHints(source, hints);
 
-        source.Append("),\n");
+        // A property stands for something else, and anything putting a component back has to know
+        // which rows are the state and which are a view of it.
+        source.Append(field.IsProperty ? ") { Derived = true },\n" : "),\n");
     }
 
     /// <summary>Emits what a field's attributes asked for, as the record a tool reads.</summary>

@@ -18,7 +18,7 @@ use crate::interop::status;
 ///
 /// The managed side hands over ImGui's own buffers rather than a copy in another shape, so this
 /// must stay byte for byte what ImGui writes: two floats of position, two of texture coordinate,
-/// and a packed RGBA byte colour.
+/// and a packed RGBA byte color.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct BcsImGuiVertex {
@@ -28,7 +28,7 @@ pub struct BcsImGuiVertex {
     /// Where it reads from its texture.
     pub uv: [f32; 2],
 
-    /// Its colour, as ImGui packs one: red in the low byte, alpha in the high one.
+    /// Its color, as ImGui packs one: red in the low byte, alpha in the high one.
     pub color: u32,
 }
 

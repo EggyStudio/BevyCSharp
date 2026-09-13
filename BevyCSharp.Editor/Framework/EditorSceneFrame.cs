@@ -14,7 +14,7 @@ public static class EditorSceneFrame
     /// </summary>
     /// <remarks>
     /// The scene is drawn by the engine into a rectangle, and a rectangle has square corners. What
-    /// rounds it is four wedges of the ground colour laid over those corners, on the list that
+    /// rounds it is four wedges of the ground color laid over those corners, on the list that
     /// draws under every window, so the panels still cover what they cover.
     /// <para>
     /// Only when docked. Floating, the scene is the whole window and a window with its corners
@@ -46,7 +46,7 @@ public static class EditorSceneFrame
 
         // The gutter the scene now stops short of, filled in. What is under it otherwise is
         // whatever the camera clears its window to, which is a band of sky between the viewport
-        // and the panel. The gap is chrome and has to be the colour the rest of the chrome is.
+        // and the panel. The gap is chrome and has to be the color the rest of the chrome is.
         if (EditorShell.Panel.X > right)
         {
             draw.AddRectFilled(new Vector2(right, 0f), new Vector2(EditorShell.Panel.X, ImGuiRuntime.Size.Y), color);
@@ -108,12 +108,13 @@ public static class EditorSceneFrame
         // reached into the row below would take width from the search box there.
         const float Size = EditorSurface.Tall;
 
-        // The window's top right corner, and how far into it depends only on where the panel's
-        // first row starts. Docked, the panel is flush against the window and everything in it sits
-        // ten pixels higher, so the button has to move with it or it reaches down into the row
-        // below and takes width from the filter box there.
+        // The window's top right corner, as far into it as the panel's own first row is: the gap
+        // the panel keeps round its cards, and then the air a card keeps inside its edge. That
+        // lands the button at the right end of the panel's title row, lined up with what is
+        // written at the left end of it, in either arrangement, since the panel is laid out the
+        // same way docked and floating.
         var window = ImGuiRuntime.Size;
-        var inset = 4f;
+        var inset = EditorSurface.Gutter + EditorSurface.Air;
 
         ImGui.SetNextWindowPos(new Vector2(window.X - inset, inset), ImGuiCond.Always, new Vector2(1f, 0f));
 

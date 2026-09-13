@@ -100,7 +100,7 @@ pub fn picture(pixels: Vec<u8>, width: u32, height: u32) -> Image {
         },
         TextureDimension::D2,
         pixels,
-        // The colours in an atlas are what somebody chose, so they are sRGB, and saying so is what
+        // The colors in an atlas are what somebody chose, so they are sRGB, and saying so is what
         // makes sampling give the linear values the shader expects.
         TextureFormat::Rgba8UnormSrgb,
         RenderAssetUsages::RENDER_WORLD,
@@ -216,7 +216,7 @@ fn camera(mut commands: Commands) {
 
             ..default()
         },
-        // The interface's colours are already what they should be; anything applied to them here
+        // The interface's colors are already what they should be; anything applied to them here
         // would be applied twice.
         Tonemapping::None,
         Msaa::Off,
@@ -498,7 +498,7 @@ fn descriptor(pipeline: &Pipeline, format: TextureFormat) -> RenderPipelineDescr
                     VertexFormat::Float32x2,
                     // Where it reads from its picture.
                     VertexFormat::Float32x2,
-                    // Its colour, as ImGui packs one.
+                    // Its color, as ImGui packs one.
                     VertexFormat::Unorm8x4,
                 ],
             )],

@@ -65,13 +65,13 @@ public static class EditorAssets
 
         var entries = new List<AssetEntry>();
 
-        foreach (var path in System.IO.Directory.GetDirectories(here).OrderBy(p => p, StringComparer.Ordinal))
+        foreach (var path in System.IO.Directory.GetDirectories(here).OrderBy(p => p, EditorSort.Comparer))
         {
             var name = Path.GetFileName(path);
             entries.Add(new AssetEntry(name, Join(Directory, name), true, 0));
         }
 
-        foreach (var path in System.IO.Directory.GetFiles(here).OrderBy(p => p, StringComparer.Ordinal))
+        foreach (var path in System.IO.Directory.GetFiles(here).OrderBy(p => p, EditorSort.Comparer))
         {
             var name = Path.GetFileName(path);
             entries.Add(new AssetEntry(name, Join(Directory, name), false, new FileInfo(path).Length));
@@ -103,7 +103,7 @@ public static class EditorAssets
 
         var found = new List<(string Path, string Name)>();
 
-        foreach (var path in System.IO.Directory.GetDirectories(here).OrderBy(p => p, StringComparer.Ordinal))
+        foreach (var path in System.IO.Directory.GetDirectories(here).OrderBy(p => p, EditorSort.Comparer))
         {
             var name = Path.GetFileName(path);
             found.Add((Join(relative, name), name));
@@ -147,7 +147,7 @@ public static class EditorAssets
             found.Add(Path.GetRelativePath(root, path).Replace(Path.DirectorySeparatorChar, '/'));
         }
 
-        found.Sort(StringComparer.Ordinal);
+        found.Sort(EditorSort.Naturally);
         return found;
     }
 

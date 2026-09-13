@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Numerics;
 using Bevy;
 using ImGuiNET;
@@ -41,15 +42,12 @@ public static class StyleTab
 
         foreach (var offered in EditorTheme.All)
         {
-            var chosen = offered.Name == theme.Name;
-
             // The accent, because that is what the editor says "this is the one in force" with
             // everywhere else.
-            if (chosen) ImGui.PushStyleColor(ImGuiCol.Button, EditorTheme.LiveAccent);
-
-            if (ImGui.Button($" {offered.Name} ")) EditorShell.Wear(offered);
-
-            if (chosen) ImGui.PopStyleColor();
+            if (EditorWidgets.Pill(offered.Name, offered.Name == theme.Name))
+            {
+                EditorShell.Wear(offered);
+            }
 
             ImGui.SameLine();
         }
@@ -62,8 +60,9 @@ public static class StyleTab
 
         var moved = EditorWidgets.Sliding(
             "##behind",
-            (behind - 20f) / 80f,
-            () => ImGui.SliderFloat("##behind", ref behind, 20f, 100f, "panel %.0f%%"));
+            behind / 100f,
+            () => ImGui.SliderFloat("##behind", ref behind, 0f, 100f, "panel %.0f%%"),
+            Percent("panel", behind));
 
         if (moved) EditorShell.Wear(theme with { WindowAlpha = behind / 100f });
 
@@ -75,25 +74,26 @@ public static class StyleTab
 
         var faded = EditorWidgets.Sliding(
             "##alpha",
-            (alpha - 40f) / 60f,
-            () => ImGui.SliderFloat("##alpha", ref alpha, 40f, 100f, "cards %.0f%%"));
+            alpha / 100f,
+            () => ImGui.SliderFloat("##alpha", ref alpha, 0f, 100f, "cards %.0f%%"),
+            Percent("cards", alpha));
 
         if (faded) EditorShell.Wear(theme with { PanelAlpha = alpha / 100f });
 
         ImGui.SameLine();
 
-        if (ImGui.Button("Save")) Save();
+        if (EditorWidgets.Pill("Save", false)) Save();
 
         ImGui.SameLine();
 
-        if (ImGui.Button("Reload")) Reload();
+        if (EditorWidgets.Pill("Reload", false)) Reload();
 
         ImGui.SameLine();
 
         // The way back from a look that went wrong. A theme saved to file is read at every startup,
         // so without this the only way out of a bad one is to go and delete a file by hand, which
         // is not something an editor should ask of anybody.
-        if (ImGui.Button("Reset")) Reset();
+        if (EditorWidgets.Pill("Reset", false)) Reset();
 
         if (_said.Length > 0 && EditorShell.Frame - _saidOn < 240)
         {
@@ -108,14 +108,12 @@ public static class StyleTab
         EditorSurface.EndRegion();
     }
 
-    /// <summary>Every colour and number a theme is made of, as rows to change.</summary>
+    /// <summary>Every color and number a theme is made of, as rows to change.</summary>
     private static void Rungs()
     {
         var theme = EditorTheme.Current;
 
-        if (!EditorRows.Open("##rungs")) return;
-
-        EditorRows.Group("SURFACES");
+        EditorSurface.Heading("Surfaces");
         Color("Ground", theme.Ground, c => theme with { Ground = c });
         Color("Panel", theme.Panel, c => theme with { Panel = c });
         Color("Card", theme.Card, c => theme with { Card = c });
@@ -125,7 +123,7 @@ public static class StyleTab
         Color("Active", theme.Active, c => theme with { Active = c });
         Color("Line", theme.Line, c => theme with { Line = c });
 
-        EditorRows.Group("INK");
+        EditorSurface.Heading("Ink");
         Color("Text", theme.Text, c => theme with { Text = c });
         Color("Dim", theme.Dim, c => theme with { Dim = c });
         Color("Faint", theme.Faint, c => theme with { Faint = c });
@@ -133,80 +131,109 @@ public static class StyleTab
         Color("Warn", theme.Warn, c => theme with { Warn = c });
         Color("Bad", theme.Bad, c => theme with { Bad = c });
 
-        EditorRows.Group("SEEN THROUGH");
+        EditorSurface.Heading("Seen through");
         Share("Panel", theme.WindowAlpha, a => theme with { WindowAlpha = a });
         Share("Cards", theme.PanelAlpha, a => theme with { PanelAlpha = a });
 
-        EditorRows.Group("SHAPE");
+        EditorSurface.Heading("Shape");
         Number("Window rounding", theme.WindowRounding, n => theme with { WindowRounding = n });
         Number("Card rounding", theme.ChildRounding, n => theme with { ChildRounding = n });
         Number("Field rounding", theme.FrameRounding, n => theme with { FrameRounding = n });
         Number("Tab rounding", theme.TabRounding, n => theme with { TabRounding = n });
         Number("Borders", theme.Borders, n => theme with { Borders = n });
 
-        EditorRows.Group("AIR");
+        EditorSurface.Heading("Air");
         Pair("Window padding", theme.WindowPadding, v => theme with { WindowPadding = v });
         Pair("Field padding", theme.FramePadding, v => theme with { FramePadding = v });
         Pair("Item spacing", theme.ItemSpacing, v => theme with { ItemSpacing = v });
-
-        EditorRows.Close();
     }
 
     /// <summary>
-    /// One colour of the ladder, as a swatch the width of its row with a picker behind it.
+    /// One rung, with its name beside whatever changes it.
     /// </summary>
     /// <remarks>
-    /// A button rather than ImGui's own colour field, which draws its swatch as a square of one
+    /// A table of its own per row, the way a component's fields are laid out, so a heading can be
+    /// drawn between two rows rather than inside the name column of one.
+    /// </remarks>
+    /// <param name="name">What the rung is called.</param>
+    /// <param name="value">What changes it, drawn in the column beside the name.</param>
+    private static void Rung(string name, Action value)
+    {
+        ImGui.PushID(name);
+
+        if (EditorRows.Open("##row"))
+        {
+            EditorRows.Line(name);
+            value();
+
+            EditorRows.Close();
+        }
+
+        ImGui.PopID();
+    }
+
+    /// <summary>
+    /// One color of the ladder, as a swatch the width of its row with a picker behind it.
+    /// </summary>
+    /// <remarks>
+    /// A button rather than ImGui's own color field, which draws its swatch as a square of one
     /// row's height however wide the row is and leaves the rest of it empty.
     /// </remarks>
-    private static void Color(string name, Vector4 held, Func<Vector4, EditorTheme> onto)
-    {
-        EditorRows.Line(name);
+    private static void Color(string name, Vector4 held, Func<Vector4, EditorTheme> onto) =>
+        Rung(name, () =>
+        {
+            var value = held;
 
-        var value = held;
-
-        if (EditorWidgets.Swatch($"##{name}", ref value)) EditorShell.Wear(onto(value));
-    }
+            if (EditorWidgets.Swatch($"##{name}", ref value)) EditorShell.Wear(onto(value));
+        });
 
     /// <summary>How far through something is seen, in whole percent, which is how somebody says it.</summary>
-    private static void Share(string name, float held, Func<float, EditorTheme> onto)
-    {
-        EditorRows.Line(name);
+    private static void Share(string name, float held, Func<float, EditorTheme> onto) =>
+        Rung(name, () =>
+        {
+            var value = held * 100f;
 
-        var value = held * 100f;
+            var moved = EditorWidgets.Sliding(
+                $"##{name}",
+                value / 100f,
+                () => ImGui.SliderFloat($"##{name}", ref value, 0f, 100f, "%.0f%%"),
+                Percent(string.Empty, value));
 
-        var moved = EditorWidgets.Sliding(
-            $"##{name}",
-            value / 100f,
-            () => ImGui.SliderFloat($"##{name}", ref value, 0f, 100f, "%.0f%%"));
-
-        if (moved) EditorShell.Wear(onto(value / 100f));
-    }
+            if (moved) EditorShell.Wear(onto(value / 100f));
+        });
 
     /// <summary>One number, dragged rather than slid, because it has no end to run to.</summary>
-    private static void Number(string name, float held, Func<float, EditorTheme> onto)
-    {
-        EditorRows.Line(name);
-
-        var value = held;
-
-        if (ImGui.DragFloat($"##{name}", ref value, 0.25f, 0f, 64f, "%.0f"))
+    private static void Number(string name, float held, Func<float, EditorTheme> onto) =>
+        Rung(name, () =>
         {
-            EditorShell.Wear(onto(value));
-        }
-    }
+            var value = held;
+
+            if (ImGui.DragFloat($"##{name}", ref value, 0.25f, 0f, 64f, "%.0f"))
+            {
+                EditorShell.Wear(onto(value));
+            }
+        });
 
     /// <summary>Two numbers, which is what every measure of air in here is.</summary>
-    private static void Pair(string name, Vector2 held, Func<Vector2, EditorTheme> onto)
-    {
-        EditorRows.Line(name);
-
-        var value = held;
-
-        if (ImGui.DragFloat2($"##{name}", ref value, 0.25f, 0f, 40f, "%.0f"))
+    private static void Pair(string name, Vector2 held, Func<Vector2, EditorTheme> onto) =>
+        Rung(name, () =>
         {
-            EditorShell.Wear(onto(value));
-        }
+            var value = held;
+
+            if (ImGui.DragFloat2($"##{name}", ref value, 0.25f, 0f, 40f, "%.0f"))
+            {
+                EditorShell.Wear(onto(value));
+            }
+        });
+
+    /// <summary>A share written the way the bars here write one, in whole percent.</summary>
+    /// <param name="what">What the number is about, or nothing for the number alone.</param>
+    /// <param name="value">The share, from nothing to a hundred.</param>
+    private static string Percent(string what, float value)
+    {
+        var number = MathF.Round(value).ToString("0", CultureInfo.InvariantCulture);
+
+        return what.Length == 0 ? $"{number}%" : $"{what} {number}%";
     }
 
     /// <summary>Writes what is in force to the file the editor reads at startup.</summary>

@@ -122,6 +122,16 @@ public static class EditorShell
         if (which >= 0) OpenTab = OpenTab == which ? -1 : which;
     }
 
+    /// <summary>
+    /// How large the editor's text is, in logical pixels.
+    /// </summary>
+    /// <remarks>
+    /// Everything else follows from it. A field is as tall as a line of this plus its padding, a
+    /// row's pitch is that plus the spacing, and a picture beside a name is the height of the name,
+    /// so this is the one number that decides how dense the editor is.
+    /// </remarks>
+    public const float Lettering = 15f;
+
     /// <summary>Opens the editor's interface.</summary>
     public static void Load(string assets)
     {
@@ -130,7 +140,7 @@ public static class EditorShell
         // Two faces, one for everything and one for numbers.
         ImGuiRuntime.Start(
             Path.Combine(assets, "fonts"),
-            15f,
+            Lettering,
             "Inter-Regular.ttf",
             Figures);
 
@@ -224,9 +234,14 @@ public static class EditorShell
     private static void DrawOrientation(BehaviorContext ctx)
     {
         var half = OrientationGizmo.Size * 0.5f;
-        var gap = Margin + half + 12f;
 
-        OrientationGizmo.Draw(ctx, new Vector2(Free.Right - gap, Free.Bottom - gap));
+        // Above the buttons pinned to the same corner rather than beside them. Both want the
+        // bottom right, and a cross laid over a row of buttons is a cross with a button through
+        // one of its arms.
+        var side = Free.Right - ToolbarView.Inset - half;
+        var up = ToolbarView.Inset + EditorSurface.Tall + EditorSurface.Air + half;
+
+        OrientationGizmo.Draw(ctx, new Vector2(side, Free.Bottom - up));
     }
 
     /// <summary>What the scene has to itself, which is the part of it no panel is over.</summary>

@@ -23,7 +23,7 @@ public struct NativeImGuiVertex
     /// <inheritdoc cref="U"/>
     public float V;
 
-    /// <summary>Its colour, red in the low byte and alpha in the high one.</summary>
+    /// <summary>Its color, red in the low byte and alpha in the high one.</summary>
     public uint Color;
 }
 

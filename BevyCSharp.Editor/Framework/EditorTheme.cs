@@ -16,7 +16,7 @@ namespace BevyCSharp.Editor.Framework;
 /// lines saying what one gap says better.
 /// </para>
 /// <para>
-/// The accent means one thing only, which is what is selected or what is in force. A colour that
+/// The accent means one thing only, which is what is selected or what is in force. A color that
 /// means two things means neither.
 /// </para>
 /// <para>
@@ -38,7 +38,7 @@ public sealed record EditorTheme
     /// <summary>A group inside a panel.</summary>
     /// <remarks>
     /// Far enough above the panel that the step survives the scene showing through both, because
-    /// what a person sees is the difference between two blended colours rather than between two
+    /// what a person sees is the difference between two blended colors rather than between two
     /// written ones.
     /// </remarks>
     public Vector4 Card { get; init; } = Rgb(0x1A, 0x1A, 0x1A);
@@ -46,7 +46,7 @@ public sealed record EditorTheme
     /// <summary>One component's worth of rows inside a card, which is a step above it again.</summary>
     /// <remarks>
     /// The rung the old ladder was missing. A panel holding a card holding fields is three surfaces
-    /// and was drawn in two colours, which is why the inside of a panel read as flat.
+    /// and was drawn in two colors, which is why the inside of a panel read as flat.
     /// </remarks>
     public Vector4 Group { get; init; } = Rgb(0x26, 0x26, 0x26);
 
@@ -136,7 +136,7 @@ public sealed record EditorTheme
     /// <summary>Whether this is the stock ImGui look rather than the editor's own.</summary>
     /// <remarks>
     /// The stock look is somebody else's decisions, taken whole. Applying it means asking ImGui for
-    /// its colours rather than writing ours over them, so it stays what ImGui says it is.
+    /// its colors rather than writing ours over them, so it stays what ImGui says it is.
     /// </remarks>
     public bool Stock { get; init; }
 
@@ -258,7 +258,7 @@ public sealed record EditorTheme
         theme.Paint(style);
     }
 
-    /// <summary>Writes the ladder into every colour ImGui asks about.</summary>
+    /// <summary>Writes the ladder into every color ImGui asks about.</summary>
     /// <remarks>
     /// Every surface carries the same transparency, so the steps between them hold however bright
     /// the scene behind is. One opaque surface among transparent ones is a surface that reads as
@@ -279,7 +279,7 @@ public sealed record EditorTheme
         // one of those rows grown large enough to hold a list.
         Set(style, ImGuiCol.PopupBg, Alpha(Hover, MathF.Min(1f, seen + 0.1f)));
         // Nothing here has a menu bar, so this slot carries the group fill instead, which puts the
-        // rung in the style editor beside the others rather than leaving one colour unreachable.
+        // rung in the style editor beside the others rather than leaving one color unreachable.
         //
         // Solid, because a component's card is what its fields are read against, and the two have
         // to keep their step whatever the scene behind the panel is doing.
@@ -308,7 +308,7 @@ public sealed record EditorTheme
         // A header is what a component's fold wears, and what a row wears when it is chosen. The
         // accent is the second, so the first is grey and the second is written over it where it is
         // drawn.
-        // What a component's fold wears, which is most of what uses this colour. A row that is
+        // What a component's fold wears, which is most of what uses this color. A row that is
         // selected wears the accent instead, and says so where it is drawn.
         Set(style, ImGuiCol.Header, Alpha(Field, 1f));
         Set(style, ImGuiCol.HeaderHovered, Alpha(Hover, 1f));
@@ -318,7 +318,7 @@ public sealed record EditorTheme
         Set(style, ImGuiCol.SeparatorHovered, Accent);
         Set(style, ImGuiCol.SeparatorActive, Accent);
 
-        // A ticked box is a value, not a thing in force, so the mark is read in the colour every
+        // A ticked box is a value, not a thing in force, so the mark is read in the color every
         // other value is read in. The accent keeps its own slot below.
         Set(style, ImGuiCol.CheckMark, Text);
         Set(style, ImGuiCol.SliderGrab, Dim);
@@ -459,14 +459,14 @@ public sealed record EditorTheme
     /// The accent as it stands in the running style, not as the theme wrote it.
     /// </summary>
     /// <remarks>
-    /// Anything drawn by hand reads the live style rather than the theme, so a colour dragged in
+    /// Anything drawn by hand reads the live style rather than the theme, so a color dragged in
     /// the style editor changes what is drawn instead of being written over on the next frame.
     /// The drop target is where the accent lives once a theme has been applied, because nothing
     /// here is dragged onto anything and every other slot draws something of its own.
     /// </remarks>
     public static Vector4 LiveAccent => ImGui.GetStyle().Colors[(int)ImGuiCol.DragDropTarget];
 
-    /// <summary>The card colour as it stands in the running style.</summary>
+    /// <summary>The card color as it stands in the running style.</summary>
     public static Vector4 LiveCard => ImGui.GetStyle().Colors[(int)ImGuiCol.ChildBg];
 
     /// <summary>The group fill as it stands in the running style.</summary>
@@ -477,7 +477,7 @@ public sealed record EditorTheme
 
     /// <summary>What a row in a list wears under the pointer.</summary>
     /// <remarks>
-    /// A wash of the text colour rather than a grey of its own, because the same row is drawn on a
+    /// A wash of the text color rather than a grey of its own, because the same row is drawn on a
     /// card in one list and on a menu's own plate in another. A fixed grey that lifts off the
     /// first disappears into the second, while a wash is always one step above whatever it is
     /// lying on. Over a card it comes out at the grey the rest of the editor highlights with.
@@ -488,23 +488,50 @@ public sealed record EditorTheme
     public static Vector4 LiveText => ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
 
     /// <summary>
-    /// What colour an icon is drawn in.
+    /// Red, green and blue for X, Y and Z, which is what every editor uses.
+    /// </summary>
+    /// <remarks>
+    /// Not part of a theme, because which arm is which is not a matter of taste: somebody reading a
+    /// picture of three arms expects the red one to be X wherever they last saw one. Written the way
+    /// a color is picked, so whatever draws in the scene puts it through <see cref="Linear"/> first
+    /// and the cross in the corner and the handles on the thing itself are the same three colors.
+    /// </remarks>
+    public static readonly Vector4[] Axes =
+    [
+        new(0.91f, 0.30f, 0.36f, 1f),
+        new(0.49f, 0.78f, 0.30f, 1f),
+        new(0.28f, 0.56f, 0.93f, 1f),
+    ];
+
+    /// <summary>
+    /// What color a name in a list is written in.
+    /// </summary>
+    /// <remarks>
+    /// One step back from full strength for a name nothing has been done to, so the one that is
+    /// chosen is brighter than the rest without the rest reading as switched off. The same step
+    /// wherever a list writes names, or two lists side by side are two different looks.
+    /// </remarks>
+    /// <param name="picked">Whether this is the one chosen.</param>
+    public static Vector4 Ink(bool picked) => picked ? LiveText : Alpha(LiveText, 0.88f);
+
+    /// <summary>
+    /// What color an icon is drawn in.
     /// </summary>
     /// <remarks>
     /// The icons are shapes cut out of white, and what is in force already wears the accent behind
-    /// it, so the shape on top has to be the colour that reads against the accent rather than the
+    /// it, so the shape on top has to be the color that reads against the accent rather than the
     /// accent again. What is not in force sits back a little instead.
     /// </remarks>
     public static Vector4 IconTint(bool active) =>
         active ? LiveText : Alpha(LiveText, 0.72f);
 
     /// <summary>
-    /// A theme colour as the scene wants it: linear, and as four numbers rather than a vector.
+    /// A theme color as the scene wants it: linear, and as four numbers rather than a vector.
     /// </summary>
     /// <remarks>
-    /// The palette is written the way colours are written down, which is sRGB, and gizmos are drawn
+    /// The palette is written the way colors are written down, which is sRGB, and gizmos are drawn
     /// in linear light. Handing one straight to the other is how an accent that matches the panels
-    /// on paper comes out a different colour in the viewport.
+    /// on paper comes out a different color in the viewport.
     /// </remarks>
     public static (float R, float G, float B, float A) Linear(Vector4 color) =>
         (Straight(color.X), Straight(color.Y), Straight(color.Z), color.W);
@@ -536,15 +563,15 @@ public sealed record EditorTheme
     /// <summary>Nothing at all, which is what a surface with no fill is.</summary>
     private static Vector4 Clear => new(0f, 0f, 0f, 0f);
 
-    /// <summary>A colour from the bytes a palette is written in.</summary>
+    /// <summary>A color from the bytes a palette is written in.</summary>
     private static Vector4 Rgb(int red, int green, int blue) =>
         new(red / 255f, green / 255f, blue / 255f, 1f);
 
-    /// <summary>The same colour, seen through.</summary>
+    /// <summary>The same color, seen through.</summary>
     public static Vector4 Alpha(Vector4 color, float alpha) =>
         new(color.X, color.Y, color.Z, alpha);
 
-    /// <summary>How a colour is written down.</summary>
+    /// <summary>How a color is written down.</summary>
     private static string Hex(Vector4 color) => string.Create(
         CultureInfo.InvariantCulture,
         $"#{(int)MathF.Round(color.X * 255f):X2}{(int)MathF.Round(color.Y * 255f):X2}{(int)MathF.Round(color.Z * 255f):X2}");

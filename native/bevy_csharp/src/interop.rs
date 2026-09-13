@@ -923,7 +923,7 @@ mod tests {
 
     #[test]
     fn a_panic_becomes_a_status_rather_than_an_unwind() {
-        // Unwinding into the .NET runtime is undefined behaviour, so the guard is what stands
+        // Unwinding into the .NET runtime is undefined behavior, so the guard is what stands
         // between a bug on this side and a process that dies without saying why.
         assert_eq!(status::OK, guard(|| status::OK));
         assert_eq!(-42, guard_with(-42, || panic!("a bug on this side")));

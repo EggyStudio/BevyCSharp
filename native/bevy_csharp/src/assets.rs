@@ -557,7 +557,7 @@ mod tests {
 
     #[test]
     fn registering_an_asset_type_twice_through_bevy_loses_them() {
-        // Pins the behaviour `init_asset_once` exists to guard, so that if Bevy ever makes
+        // Pins the behavior `init_asset_once` exists to guard, so that if Bevy ever makes
         // `init_asset` idempotent this fails and says the guard can go. Nothing reports an
         // error here, which is what made the original failure so hard to place: the handle is
         // valid, the call succeeded, and the mesh is gone.
