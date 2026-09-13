@@ -76,7 +76,7 @@ public static class EditorFlyout
             ImGui.OpenPopup(Name);
         }
 
-        if (!ImGui.BeginPopup(Name))
+        if (!EditorSurface.Flyout(Name))
         {
             // Dismissed by a click somewhere else, which is what a menu is for.
             _menu = null;
@@ -85,7 +85,7 @@ public static class EditorFlyout
 
         Branch(ctx, _menu);
 
-        ImGui.EndPopup();
+        EditorSurface.EndFlyout();
     }
 
     /// <summary>One level of the menu, with a submenu per branch under it.</summary>

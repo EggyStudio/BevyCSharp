@@ -56,31 +56,49 @@ public static class EditorSurface
         | ImGuiWindowFlags.NoFocusOnAppearing
         | ImGuiWindowFlags.NoBackground;
 
-    /// <summary>The gap between a panel's edge and the cards inside it.</summary>
-    internal const float Gutter = 6f;
+    /// <summary>
+    /// The gap between two surfaces, and between a surface and the edge it is inset from.
+    /// </summary>
+    /// <remarks>
+    /// One number for every gap inside the editor: a panel's edge to its cards, one card to the
+    /// next, the scene to whatever is beside it. What tells two surfaces apart is the step in
+    /// their fill, and the gap only has to be wide enough to be read as deliberate. Two gaps of
+    /// different widths in one picture read as an arrangement that has slipped.
+    /// </remarks>
+    internal const float Gutter = 8f;
 
     /// <summary>How much air a card keeps inside its own edge.</summary>
     internal const float Air = 6f;
+
+    /// <summary>How much air a menu or a tooltip keeps inside its own edge.</summary>
+    /// <remarks>
+    /// The same for every one of them, pushed rather than taken from the style, because a popup
+    /// opened while something else has the window padding pushed would otherwise wear that
+    /// instead. What a menu looks like should not depend on what was on screen when it opened.
+    /// </remarks>
+    internal static readonly Vector2 Around = new(10f, 8f);
 
     /// <summary>
     /// How tall a button that floats over the scene is, and how tall a tab is.
     /// </summary>
     /// <remarks>
-    /// One number for both, because the row of tabs along the bottom and the groups of buttons in
-    /// the corners are the same kind of thing: something pressed that is lying on the scene rather
-    /// than inside a panel. Two sizes for one kind of thing is two sizes to look at. Large enough
-    /// that a square one is a circle worth aiming at with a picture in it.
+    /// A row of tabs along the bottom and a group of buttons in a corner are the same kind of
+    /// thing, which is something pressed that lies on the scene rather than inside a panel, so
+    /// they take one number between them. That number is the height of a field, because a row of
+    /// controls the size of the ones being read in the panel is the size the whole editor is
+    /// already set in, and anything larger is a second scale to look at.
     /// </remarks>
-    internal const float Tall = 34f;
+    internal static float Tall => ImGui.GetFrameHeight();
 
     /// <summary>
     /// How much air one of those keeps at each end when it has words in it rather than a picture.
     /// </summary>
     /// <remarks>
-    /// A word pressed against the ends of its own capsule reads as a word that overflowed, and the
-    /// rounder the ends the more room the word needs to sit clear of them.
+    /// What a field keeps at its own ends, for the same reason. Asked of the running style rather
+    /// than written down, so a theme that changes the padding moves the tabs and the buttons with
+    /// the fields.
     /// </remarks>
-    internal const float Sides = 14f;
+    internal static float Sides => ImGui.GetStyle().FramePadding.X;
 
     /// <summary>
     /// A scrolling region with no fill of its own.
@@ -111,6 +129,64 @@ public static class EditorSurface
     }
 
     /// <summary>
+    /// Opens a flyout, with the air every flyout keeps.
+    /// </summary>
+    /// <remarks>
+    /// Ended with <see cref="EndFlyout"/>, and only when it opened, which is the shape ImGui's own
+    /// popups take.
+    /// </remarks>
+    /// <param name="id">What the popup is called.</param>
+    internal static bool Flyout(string id)
+    {
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Around);
+
+        var open = ImGui.BeginPopup(id);
+
+        if (!open) ImGui.PopStyleVar();
+
+        return open;
+    }
+
+    /// <summary>Opens the flyout a right click asks for, with the same air.</summary>
+    /// <param name="id">What the popup is called.</param>
+    internal static bool FlyoutHere(string id)
+    {
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Around);
+
+        var open = ImGui.BeginPopupContextItem(id);
+
+        if (!open) ImGui.PopStyleVar();
+
+        return open;
+    }
+
+    /// <summary>Closes what <see cref="Flyout"/> or <see cref="FlyoutHere"/> opened.</summary>
+    internal static void EndFlyout()
+    {
+        ImGui.EndPopup();
+        ImGui.PopStyleVar();
+    }
+
+    /// <summary>
+    /// What to say about the thing under the pointer.
+    /// </summary>
+    /// <remarks>
+    /// The air is pushed here rather than left to the style, because a tooltip asked for inside a
+    /// panel or a toolbar inherits whatever window padding that has pushed, and one of those is
+    /// nothing at all, which draws the words against the edge of their own box.
+    /// </remarks>
+    /// <param name="text">What to say.</param>
+    internal static void Tip(string text)
+    {
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Around);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, EditorTheme.Current.ChildRounding);
+
+        ImGui.SetTooltip(text);
+
+        ImGui.PopStyleVar(2);
+    }
+
+    /// <summary>
     /// Ends a region, whether or not it opened.
     /// </summary>
     /// <remarks>
@@ -136,16 +212,21 @@ public static class EditorSurface
     /// they were and scroll out of sight as they did.
     /// </para>
     /// </remarks>
-    /// <param name="from">The fill's top left corner.</param>
-    /// <param name="to">Its bottom right.</param>
-    internal static (Vector2 From, Vector2 To) Clipped(Vector2 from, Vector2 to)
+    /// <param name="from">The fill's top left corner, moved down to the region's top edge.</param>
+    /// <param name="to">Its bottom right, moved up to the region's bottom edge.</param>
+    /// <returns>Whether any of it is in sight and worth drawing.</returns>
+    internal static bool Clipped(ref Vector2 from, ref Vector2 to)
     {
         var min = ImGui.GetWindowPos();
         var max = min + ImGui.GetWindowSize();
 
-        return (
-            new Vector2(from.X, MathF.Max(from.Y, min.Y)),
-            new Vector2(to.X, MathF.Min(to.Y, max.Y)));
+        from.Y = MathF.Max(from.Y, min.Y);
+        to.Y = MathF.Min(to.Y, max.Y);
+
+        // Nothing at all when the whole of it is past one edge or the other. A rectangle cut to
+        // less than nothing is one ImGui fills as though its corners were the other way up, and
+        // one cut to a hair is a line drawn along the edge it was cut against.
+        return to.Y - from.Y >= 1f;
     }
 
     /// <summary>
@@ -278,7 +359,7 @@ public static class EditorSurface
     /// different things, and there is no reason for either number to be the one it is beyond the
     /// other one matching it.
     /// </remarks>
-    internal static readonly Vector2 Pill = new(26f, 2f);
+    internal static readonly Vector2 Pill = new(22f, 3f);
 
     /// <summary>
     /// One card inside the panel, which is a fill a shade above it, rounded, with no line anywhere.

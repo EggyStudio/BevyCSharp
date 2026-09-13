@@ -246,24 +246,6 @@ public static class ComponentFields
     private static void Ticked() =>
         ImGui.PushStyleColor(ImGuiCol.CheckMark, EditorTheme.LiveText);
 
-    /// <summary>
-    /// Asks for a slider handle as round as the groove it runs in.
-    /// </summary>
-    /// <remarks>
-    /// ImGui rounds a rectangle by at most half its shortest side, so a ten pixel handle in a
-    /// groove twenty pixels tall cannot take the groove's own corner however large the rounding
-    /// is. A square handle is a circle, which is the corner the ends of the groove are drawn with.
-    /// <para>
-    /// Square means the height ImGui gives a handle rather than the height of the groove, which is
-    /// two pixels less at the top and two at the bottom. Asking for the groove's own height is
-    /// asking for a handle wider than it is tall, which reads as an oval. Pushed rather than set
-    /// once, because the number is a frame height and that is not known until there is a font to
-    /// measure.
-    /// </para>
-    /// </remarks>
-    private static void Knob() =>
-        ImGui.PushStyleVar(ImGuiStyleVar.GrabMinSize, MathF.Max(1f, ImGui.GetFrameHeight() - 4f));
-
     /// <summary>One field, drawn as what it is.</summary>
     internal static void Row(
         BehaviorContext ctx, Entity entity, ComponentSchema schema, ComponentField field)
@@ -308,7 +290,7 @@ public static class ComponentFields
 
         if (field.Hints.Tooltip is { Length: > 0 } why && ImGui.IsItemHovered())
         {
-            ImGui.SetTooltip(why);
+            EditorSurface.Tip(why);
         }
 
         ImGui.TableNextColumn();
@@ -423,17 +405,35 @@ public static class ComponentFields
             {
                 var options = field.Options;
                 var said = value?.ToString() ?? string.Empty;
-                var current = 0;
 
-                for (var index = 0; index < options.Count; index++)
+                if (options.Count == 0) break;
+
+                // ImGui's own combo rather than a button and a popup, for the arrow and the
+                // keyboard it brings. What is drawn inside it is this editor's, so the choice
+                // under the pointer is a rounded row like the choice in every other list.
+                ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, EditorSurface.Around);
+
+                if (ImGui.BeginCombo(id, said))
                 {
-                    if (options[index] == said) current = index;
+                    RoundedRows.Rows(() =>
+                    {
+                        foreach (var option in options)
+                        {
+                            var picked = option == said;
+
+                            if (ImGui.Selectable(option, picked))
+                            {
+                                field.Write(ctx.Ecs, entity, option);
+                            }
+
+                            RoundedRows.Row(picked);
+                        }
+                    });
+
+                    ImGui.EndCombo();
                 }
 
-                if (options.Count > 0 && ImGui.Combo(id, ref current, [.. options], options.Count))
-                {
-                    field.Write(ctx.Ecs, entity, options[current]);
-                }
+                ImGui.PopStyleVar();
 
                 break;
             }
@@ -448,9 +448,7 @@ public static class ComponentFields
 
                 if (field.Hints is { HasRange: true, Minimum: { } least, Maximum: { } most })
                 {
-                    Knob();
                     changed = ImGui.SliderInt(id, ref number, (int)least, (int)most);
-                    ImGui.PopStyleVar();
                 }
                 else
                 {
@@ -476,9 +474,7 @@ public static class ComponentFields
 
                 if (field.Hints is { HasRange: true, Minimum: { } least, Maximum: { } most })
                 {
-                    Knob();
                     changed = ImGui.SliderFloat(id, ref number, (float)least, (float)most, format, Whole);
-                    ImGui.PopStyleVar();
                 }
                 else
                 {
@@ -507,22 +503,30 @@ public static class ComponentFields
 
                 if (ImGui.Button(Short(held), new Vector2(-1f, 0f))) ImGui.OpenPopup($"##pick{id}");
 
-                if (ImGui.BeginPopup($"##pick{id}"))
+                if (EditorSurface.Flyout($"##pick{id}"))
                 {
-                    if (ImGui.MenuItem("Nothing")) field.Write(ctx.Ecs, entity, AssetHandle.None);
-
-                    var kind = field.Hints.Asset ?? AssetKind.Mesh;
-
-                    foreach (var file in EditorAssets.Every(Suits(field, kind)))
+                    RoundedRows.Rows(() =>
                     {
-                        if (!ImGui.MenuItem(file)) continue;
+                        if (ImGui.MenuItem("Nothing")) field.Write(ctx.Ecs, entity, AssetHandle.None);
 
-                        // Loaded when it is chosen rather than when the list was built. A list that
-                        // loaded everything it offered would load the project to ask a question.
-                        field.Write(ctx.Ecs, entity, AssetServer.Load(kind, file));
-                    }
+                        RoundedRows.Row();
 
-                    ImGui.EndPopup();
+                        var kind = field.Hints.Asset ?? AssetKind.Mesh;
+
+                        foreach (var file in EditorAssets.Every(Suits(field, kind)))
+                        {
+                            var chosen = ImGui.MenuItem(file);
+
+                            RoundedRows.Row();
+
+                            // Loaded when it is chosen rather than when the list was built. A list
+                            // that loaded everything it offered would load the project to ask a
+                            // question.
+                            if (chosen) field.Write(ctx.Ecs, entity, AssetServer.Load(kind, file));
+                        }
+                    });
+
+                    EditorSurface.EndFlyout();
                 }
 
                 break;
@@ -538,19 +542,26 @@ public static class ComponentFields
 
                 if (ImGui.Button(name, new Vector2(-1f, 0f))) ImGui.OpenPopup($"##pick{id}");
 
-                if (ImGui.BeginPopup($"##pick{id}"))
+                if (EditorSurface.Flyout($"##pick{id}"))
                 {
-                    if (ImGui.MenuItem("Nothing")) field.Write(ctx.Ecs, entity, Entity.None);
-
-                    foreach (var other in ctx.Ecs.All())
+                    RoundedRows.Rows(() =>
                     {
-                        if (ctx.Ecs.NameOf(other) is not { Length: > 0 } called) continue;
-                        if (EditorEntity.IsInterface(ctx.Ecs, other)) continue;
+                        if (ImGui.MenuItem("Nothing")) field.Write(ctx.Ecs, entity, Entity.None);
 
-                        if (ImGui.MenuItem(called)) field.Write(ctx.Ecs, entity, other);
-                    }
+                        RoundedRows.Row();
 
-                    ImGui.EndPopup();
+                        foreach (var other in ctx.Ecs.All())
+                        {
+                            if (ctx.Ecs.NameOf(other) is not { Length: > 0 } called) continue;
+                            if (EditorEntity.IsInterface(ctx.Ecs, other)) continue;
+
+                            if (ImGui.MenuItem(called)) field.Write(ctx.Ecs, entity, other);
+
+                            RoundedRows.Row(other == held);
+                        }
+                    });
+
+                    EditorSurface.EndFlyout();
                 }
 
                 break;

@@ -111,7 +111,7 @@ public static class EditorPanes
     /// </remarks>
     internal static void Splitter(float width)
     {
-        ImGui.InvisibleButton("##split", new Vector2(width, 10f));
+        ImGui.InvisibleButton("##split", new Vector2(width, EditorSurface.Gutter));
 
         var held = ImGui.IsItemActive();
         var over = ImGui.IsItemHovered();
@@ -151,16 +151,15 @@ public static class EditorPanes
         // between the world and the data, out of the way while the panel floats over the scene and
         // always there once it is docked.
         //
-        // Drawn on the front of everything and centred on the panel's edge rather than inside it.
-        // What a person sees a gap between is the scene and the card, and the middle of that gap
-        // is the edge itself; a pill centred in the half of it that happens to be inside the
-        // window sits visibly off to one side.
+        // In the middle of the gap the panel keeps to the left of its cards, which is the gap a
+        // person sees between the scene and the card. Centred on the window's own edge instead,
+        // the half of it outside the window is clipped away and what is left is a pill sliced down
+        // its length.
         EditorSurface.Grab(
             new Vector2(EditorSurface.Pill.Y, EditorSurface.Pill.X),
             over,
             held,
-            ImGui.GetForegroundDrawList(),
-            at.X);
+            middleX: at.X + (EditorSurface.Gutter * 0.5f));
 
         ImGui.SetCursorScreenPos(at + ImGui.GetStyle().WindowPadding);
     }

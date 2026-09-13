@@ -68,6 +68,14 @@ public static unsafe class ImGuiRuntime
     /// <summary>How many physical pixels a logical one is.</summary>
     public static float Scale { get; private set; } = 1f;
 
+    /// <summary>How large the text is, in logical pixels.</summary>
+    /// <remarks>
+    /// What <see cref="Start"/> loaded the faces at. Kept so that anything working out how tall a
+    /// control is can ask rather than assume, and so that it can be asked before a frame has begun
+    /// and <see cref="ImGui.GetFontSize"/> has an answer.
+    /// </remarks>
+    public static float FontSize { get; private set; } = 15f;
+
     /// <summary>
     /// Creates the context and hands the engine the font atlas.
     /// </summary>
@@ -91,6 +99,8 @@ public static unsafe class ImGuiRuntime
         }
 
         ImGui.CreateContext();
+
+        FontSize = size;
 
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard;

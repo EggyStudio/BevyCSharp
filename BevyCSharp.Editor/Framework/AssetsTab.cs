@@ -164,15 +164,19 @@ public static class AssetsTab
 
         // Cut to the region rather than run under its edge, so a tile scrolled half out of sight
         // ends in a rounded corner instead of a square one.
-        var plate = EditorSurface.Clipped(at, at + new Vector2(size, size));
+        var top = at;
+        var bottom = at + new Vector2(size, size);
 
-        draw.AddRectFilled(
-            plate.From,
-            plate.To,
-            ImGui.GetColorU32(picked
-                ? EditorTheme.LiveAccent
-                : over ? EditorTheme.LiveHover : EditorTheme.LiveGroup),
-            ImGui.GetStyle().ChildRounding);
+        if (EditorSurface.Clipped(ref top, ref bottom))
+        {
+            draw.AddRectFilled(
+                top,
+                bottom,
+                ImGui.GetColorU32(picked
+                    ? EditorTheme.LiveAccent
+                    : over ? EditorTheme.LiveHover : EditorTheme.LiveGroup),
+                ImGui.GetStyle().ChildRounding);
+        }
 
         // The picture that says what kind of thing it is, in the middle of the tile.
         var icon = entry.IsDirectory ? "icons/ui/folder.png" : EditorAssets.IconOf(entry.Path);
@@ -197,7 +201,7 @@ public static class AssetsTab
 
         ImGui.EndGroup();
 
-        if (over) ImGui.SetTooltip(entry.IsDirectory ? entry.Name : $"{entry.Name}  ({Say(entry.Size)})");
+        if (over) EditorSurface.Tip(entry.IsDirectory ? entry.Name : $"{entry.Name}  ({Say(entry.Size)})");
     }
 
     /// <summary>As much of a name as fits, with an ellipsis where the rest was.</summary>

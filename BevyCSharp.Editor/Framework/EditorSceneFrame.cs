@@ -133,12 +133,19 @@ public static class EditorSceneFrame
             // Never in the accent, because the accent says what is in force in the scene, and a
             // bright blue disc in the corner of the panel reads as a close button somebody has to
             // think about. Which way it is set is what the picture in it says.
-            if (ToolbarView.Circle($"dock{EditorShell.Docked}", EditorShell.Docked ? "icons/ui/close.png" : "icons/ui/pinned.png", false, Size))
+            // The pin as it stands. Pushed in while the panel is docked, and lying loose while it
+            // floats, so the picture says what the panel is rather than what the button does.
+            var pin = EditorShell.Docked ? "icons/ui/pin.png" : "icons/ui/pinned.png";
+
+            if (ToolbarView.Circle($"dock{EditorShell.Docked}", pin, false, Size))
             {
                 EditorShell.Docked = !EditorShell.Docked;
             }
 
-            if (ImGui.IsItemHovered()) ImGui.SetTooltip(EditorShell.Docked ? "Undock the panel" : "Dock the panel");
+            if (ImGui.IsItemHovered())
+            {
+                EditorSurface.Tip(EditorShell.Docked ? "Undock the panel" : "Dock the panel");
+            }
 
             // Where it ended up, so a panel underneath can leave the corner alone.
             DockRect = (ImGui.GetItemRectMin(), ImGui.GetItemRectMax());

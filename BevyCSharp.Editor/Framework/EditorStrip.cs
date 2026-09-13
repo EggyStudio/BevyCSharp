@@ -11,17 +11,20 @@ public static class EditorStrip
 {
     /// <summary>How much air the strip keeps around its tabs.</summary>
     /// <remarks>
-    /// Less than a panel's, because a strip that is mostly air reads as an empty panel with some
-    /// words in it rather than as a row of tabs.
+    /// The gap everything else in the editor is spaced by, so the tab card sits the same distance
+    /// from the scene above it as the world card sits from the scene beside it.
     /// </remarks>
-    internal const float Padding = 5f;
+    internal const float Padding = EditorSurface.Gutter;
 
     /// <summary>How tall the strip is with no tab open.</summary>
     /// <remarks>
-    /// A tab is one of the things that float over the scene, so it is as tall as the buttons in
-    /// the corners are, and the strip is that plus the air it keeps above and below.
+    /// A tab is one of the things that lie on the scene, so it is as tall as the buttons in the
+    /// corners are, and the strip is that plus the air it keeps above and below it. The stock look
+    /// keeps none below, because ImGui draws a tab with a flat bottom for the content to join, and
+    /// a flat bottom with a gap under it is a tab hanging in the air.
     /// </remarks>
-    internal static float Shut => EditorSurface.Tall + (Padding * 2f);
+    internal static float Shut =>
+        EditorSurface.Tall + (Padding * (EditorTheme.Current.Stock ? 1f : 2f));
 
     /// <summary>
     /// The strip along the bottom left, with whatever is open growing upwards out of it.
@@ -48,10 +51,8 @@ public static class EditorStrip
             ImGuiStyleVar.WindowRounding,
             EditorShell.Docked ? 0f : EditorTheme.Current.WindowRounding);
 
-        // The strip is measured as Padding above and below the bar, so its own window padding
-        // has to be that and no more or the bar sinks and the text clips.
-        // The same gutter the panel keeps round its cards, and no more above and below the bar
-        // than the strip was measured with.
+        // The same gap the panel keeps round its cards, and no more above and below the bar than
+        // the strip was measured with, or the bar sinks and its text clips.
         ImGui.PushStyleVar(
             ImGuiStyleVar.WindowPadding,
             new Vector2(EditorSurface.Gutter, Padding));
@@ -75,7 +76,16 @@ public static class EditorStrip
 
             // A card like the ones in the panel, with the same gap outside it and the same air
             // inside it, rather than a rectangle pushed against its own edges.
-            EditorSurface.Card("##tab", new Vector2(0f, room.Y - bar), EditorShell.Tabs[EditorShell.OpenTab].Draw);
+            //
+            // Docked it runs past the strip's own right padding as far as the panel's edge, so the
+            // gap between this card and the one in the panel beside it is the panel's inset and
+            // nothing else, which is the gap every other pair of cards has between them.
+            var across = EditorShell.Docked ? room.X + EditorSurface.Gutter : 0f;
+
+            EditorSurface.Card(
+                "##tab",
+                new Vector2(across, room.Y - bar),
+                EditorShell.Tabs[EditorShell.OpenTab].Draw);
         }
 
         // And the bar under it, drawn rather than asked for.
@@ -95,6 +105,12 @@ public static class EditorStrip
         }
 
         // The stock look keeps ImGui's own tabs, because that is what it is for.
+        //
+        // Against the bottom of the strip rather than where the layout left the cursor. ImGui
+        // draws a tab as a shape with a flat bottom, for content to join underneath it, and here
+        // the content is above, so the flat edge has to land on the edge of the window.
+        ImGui.SetCursorPosY(ImGui.GetWindowHeight() - ImGui.GetFrameHeight());
+
         if (ImGui.BeginTabBar("##strip", ImGuiTabBarFlags.NoTooltip))
         {
             for (var index = 0; index < EditorShell.Tabs.Count; index++)
@@ -143,8 +159,14 @@ public static class EditorStrip
     internal static void Grip()
     {
         var width = ImGui.GetContentRegionAvail().X;
+        var top = ImGui.GetCursorPosY();
 
-        ImGui.InvisibleButton("##height", new Vector2(MathF.Max(1f, width), 8f));
+        // In the gap above the card rather than above the gap. The air between the scene and the
+        // tab card is the same air every other pair of surfaces has between them, and a handle
+        // that added its own height to it would make this one gap twice the size of the rest.
+        ImGui.SetCursorPosY(top - Padding);
+
+        ImGui.InvisibleButton("##height", new Vector2(MathF.Max(1f, width), Padding));
 
         var held = ImGui.IsItemActive();
         var over = ImGui.IsItemHovered();
@@ -161,6 +183,8 @@ public static class EditorStrip
         }
 
         EditorSurface.Grab(EditorSurface.Pill, over, held);
+
+        ImGui.SetCursorPosY(top);
     }
 
     /// <summary>

@@ -266,14 +266,22 @@ public static class WorldPanel
             }
         }
 
-        if (ImGui.BeginPopupContextItem($"##menu{row.Entity.Bits}"))
+        if (EditorSurface.FlyoutHere($"##menu{row.Entity.Bits}"))
         {
             EditorSelection.Select(row.Entity);
 
-            if (ImGui.MenuItem("Delete")) EditorMenu.Find("Entity/Delete")?.Run?.Invoke(ctx.Ecs);
-            if (ImGui.MenuItem("Duplicate")) EditorMenu.Find("Entity/Duplicate")?.Run?.Invoke(ctx.Ecs);
+            RoundedRows.Rows(() =>
+            {
+                if (ImGui.MenuItem("Delete")) EditorMenu.Find("Entity/Delete")?.Run?.Invoke(ctx.Ecs);
 
-            ImGui.EndPopup();
+                RoundedRows.Row();
+
+                if (ImGui.MenuItem("Duplicate")) EditorMenu.Find("Entity/Duplicate")?.Run?.Invoke(ctx.Ecs);
+
+                RoundedRows.Row();
+            });
+
+            EditorSurface.EndFlyout();
         }
 
         Paint(row, at, width, height, picked, over, eyed);
@@ -337,9 +345,13 @@ public static class WorldPanel
 
             // Cut to the list rather than run under its edge, so a row scrolled half out of sight
             // ends in a rounded corner instead of a square one.
-            var pill = EditorSurface.Clipped(at, at + new Vector2(width, height));
+            var top = at;
+            var bottom = at + new Vector2(width, height);
 
-            draw.AddRectFilled(pill.From, pill.To, fill, ImGui.GetStyle().FrameRounding);
+            if (EditorSurface.Clipped(ref top, ref bottom))
+            {
+                draw.AddRectFilled(top, bottom, fill, ImGui.GetStyle().FrameRounding);
+            }
         }
 
         var line = ImGui.GetTextLineHeight();

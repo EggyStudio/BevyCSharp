@@ -74,9 +74,9 @@ public static class ToolbarView
 
         // Round enough that a square button is a circle, which is what a button with a picture in
         // it and no words wants to be.
-        const float Size = EditorSurface.Tall;
+        var size = EditorSurface.Tall;
 
-        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, Size * 0.5f);
+        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, size * 0.5f);
 
         // Air at the ends of a button with words in it. Nothing above or below, because the height
         // is given outright and padding there would only fight it.
@@ -109,10 +109,10 @@ public static class ToolbarView
             var label = button.Label();
 
             var pressed = button.Icon is { Length: > 0 } icon && label.Length == 0
-                ? Circle($"{slot}{index}", icon, on, Size)
+                ? Circle($"{slot}{index}", icon, on, size)
                 : ImGui.Button(
                     $"{(label.Length == 0 ? Icon(button.Icon) : label)}##{slot}{index}",
-                    new Vector2(0f, Size));
+                    new Vector2(0f, size));
 
             if (pressed) button.Run(ctx.Ecs);
 
@@ -156,9 +156,11 @@ public static class ToolbarView
 
         draw.AddCircleFilled(middle, size * 0.5f, ImGui.GetColorU32(fill));
 
-        const float Mark = 18f;
+        // A share of the circle rather than a number of pixels, so the picture keeps its margin
+        // whatever the button is sized to.
+        var mark = MathF.Floor(size * 0.6f);
 
-        EditorSurface.Icon(draw, icon, middle - new Vector2(Mark * 0.5f, Mark * 0.5f), Mark, on);
+        EditorSurface.Icon(draw, icon, middle - new Vector2(mark * 0.5f, mark * 0.5f), mark, on);
 
         return pressed;
     }

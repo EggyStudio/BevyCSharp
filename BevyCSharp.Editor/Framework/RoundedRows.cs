@@ -50,10 +50,10 @@ public static class RoundedRows
 
         // Cut to whatever is holding the row, so one scrolled half out of a list ends in a rounded
         // corner rather than a square one.
-        var pill = EditorSurface.Clipped(from, to);
+        if (!EditorSurface.Clipped(ref from, ref to)) return;
 
         draw.ChannelsSetCurrent(0);
-        draw.AddRectFilled(pill.From, pill.To, ImGui.GetColorU32(color), rounding);
+        draw.AddRectFilled(from, to, ImGui.GetColorU32(color), rounding);
         draw.ChannelsSetCurrent(1);
     }
 

@@ -154,12 +154,11 @@ public static class EditorShell
         // Docked, the scene keeps the top left corner and the tabs sit under it. Floating, the
         // scene is the whole window and everything else is over it.
         //
-        // Docked it also stops a gutter short of the panel rather than hard against it, so its
-        // right edge lands on the same line as the right edge of the card in the strip below, and
-        // the handle that moves the panel has room on both sides instead of a viewport against one
-        // of them.
+        // Docked it runs right up to the panel's own edge, so the only gap between the picture and
+        // the cards beside it is the one the panel keeps inside itself, which is the same gap
+        // every other pair of surfaces has between them.
         Scene = Docked
-            ? (0f, 0f, Math.Max(1f, panelX - EditorSurface.Gutter), Math.Max(1f, window.Y - strip))
+            ? (0f, 0f, Math.Max(1f, panelX), Math.Max(1f, window.Y - strip))
             : (0f, 0f, window.X, window.Y);
 
         // Where the scene is still visible, which is what anything drawn over the scene has to

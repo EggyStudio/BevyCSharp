@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Numerics;
+using Bevy;
 using ImGuiNET;
 
 namespace BevyCSharp.Editor.Framework;
@@ -59,7 +60,7 @@ public sealed record EditorTheme
     public Vector4 Active { get; init; } = Rgb(0x66, 0x66, 0x66);
 
     /// <summary>A separator, for the rare place a gap will not do.</summary>
-    public Vector4 Line { get; init; } = Rgb(0x30, 0x30, 0x30);
+    public Vector4 Line { get; init; } = Rgb(0x3C, 0x3C, 0x40);
 
     /// <summary>What is being read.</summary>
     public Vector4 Text { get; init; } = Rgb(0xF2, 0xF2, 0xF2);
@@ -124,7 +125,7 @@ public sealed record EditorTheme
     /// and there are a great many rows, so the difference between this and a pixel more is the
     /// difference between a panel that shows a component and one that shows half of it.
     /// </remarks>
-    public Vector2 FramePadding { get; init; } = new(6f, 4f);
+    public Vector2 FramePadding { get; init; } = new(6f, 3f);
 
     /// <summary>How far apart two things on a row are, and two rows.</summary>
     public Vector2 ItemSpacing { get; init; } = new(8f, 5f);
@@ -197,6 +198,13 @@ public sealed record EditorTheme
         style.AntiAliasedLinesUseTex = true;
         style.AntiAliasedFill = true;
 
+        // How far a drawn arc may stray from the circle it stands for, which is what decides how
+        // many segments it is cut into. ImGui's own number is tuned for the corner of a square
+        // window; a capsule the height of a row is mostly corner, and at that radius the default
+        // leaves four segments to a quarter turn, which reads as two flat sides on what should be
+        // a circle.
+        style.CircleTessellationMaxError = 0.1f;
+
         style.WindowPadding = theme.WindowPadding;
         style.FramePadding = theme.FramePadding;
         style.ItemSpacing = theme.ItemSpacing;
@@ -204,10 +212,20 @@ public sealed record EditorTheme
         // pixel the numbers do not get, and three boxes on one row need the numbers more than they
         // need the air.
         style.ItemInnerSpacing = new Vector2(4f, 4f);
-        style.CellPadding = new Vector2(6f, 2f);
+
+        // Half the gap everything else is spaced by, because a table puts this on both sides of
+        // the line between two cells and the two halves are the gap.
+        style.CellPadding = new Vector2(EditorSurface.Gutter * 0.5f, 2f);
         style.IndentSpacing = 16f;
         style.ScrollbarSize = 10f;
-        style.GrabMinSize = 10f;
+
+        // A handle as round as the groove it runs in, which means one as wide as a handle is tall.
+        // ImGui insets a handle two pixels from the top of its groove and two from the bottom, and
+        // rounds a rectangle by at most half its shortest side, so anything wider than that is a
+        // capsule lying on its side rather than a circle. Worked out from the theme rather than
+        // measured, because a style is written before there is a frame to measure in.
+        style.GrabMinSize = MathF.Max(
+            1f, ImGuiRuntime.FontSize + (theme.FramePadding.Y * 2f) - 4f);
 
         // No line under a bar of tabs. The tabs themselves say where they are, and a rule across
         // the panel is the border this look does without.
@@ -216,8 +234,11 @@ public sealed record EditorTheme
 
         style.WindowTitleAlign = new Vector2(0f, 0.5f);
 
-        // A heading inside a panel is a word, not a word with a line through the rest of the row.
-        style.SeparatorTextBorderSize = theme.Borders;
+        // A heading inside a component carries a rule out to the edge of its row, short on the
+        // side the word is aligned to and long on the other. What it says is that the rows under
+        // it are that heading's, which is worth a hairline even in a look that does without
+        // borders everywhere else.
+        style.SeparatorTextBorderSize = 1f;
         style.SeparatorTextPadding = new Vector2(14f, 4f);
         style.SeparatorTextAlign = new Vector2(0f, 0.5f);
 

@@ -152,7 +152,7 @@ public static class DetailsPanel
 
         // A component's own menu, where taking it off lives. On the header, because that is the
         // thing the component is.
-        if (ImGui.BeginPopupContextItem($"##menu{schema.Name}"))
+        if (EditorSurface.FlyoutHere($"##menu{schema.Name}"))
         {
             RoundedRows.Rows(() =>
             {
@@ -164,7 +164,7 @@ public static class DetailsPanel
                 RoundedRows.Row();
             });
 
-            ImGui.EndPopup();
+            EditorSurface.EndFlyout();
         }
 
         if (open)
@@ -214,22 +214,22 @@ public static class DetailsPanel
 
             // Cut to the region rather than run under its edge, so a card scrolled half out of
             // sight ends in a rounded corner instead of a square one.
-            var card = EditorSurface.Clipped(head, new Vector2(headTo.X, MathF.Max(headTo.Y, to.Y)));
+            var top = head;
+            var bottom = new Vector2(headTo.X, MathF.Max(headTo.Y, to.Y));
 
-            draw.AddRectFilled(
-                card.From,
-                card.To,
-                ImGui.GetColorU32(EditorTheme.LiveGroup),
-                round);
+            if (EditorSurface.Clipped(ref top, ref bottom))
+            {
+                draw.AddRectFilled(top, bottom, ImGui.GetColorU32(EditorTheme.LiveGroup), round);
+            }
 
             // And the header on top of it when the pointer is there, which is the one thing that
             // says a header is something to press.
-            if (over)
-            {
-                var lit = EditorSurface.Clipped(head, headTo);
+            var lit = head;
+            var litTo = headTo;
 
-                draw.AddRectFilled(
-                    lit.From, lit.To, ImGui.GetColorU32(EditorTheme.LiveHover), round);
+            if (over && EditorSurface.Clipped(ref lit, ref litTo))
+            {
+                draw.AddRectFilled(lit, litTo, ImGui.GetColorU32(EditorTheme.LiveHover), round);
             }
         }
 
@@ -257,7 +257,7 @@ public static class DetailsPanel
             ImGui.OpenPopup("##add");
         }
 
-        if (!ImGui.BeginPopup("##add")) return;
+        if (!EditorSurface.Flyout("##add")) return;
 
         var carried = new HashSet<string>();
 
@@ -285,7 +285,7 @@ public static class DetailsPanel
             if (!any) ImGui.TextDisabled("nothing left to add");
         });
 
-        ImGui.EndPopup();
+        EditorSurface.EndFlyout();
     }
 
     /// <summary>
