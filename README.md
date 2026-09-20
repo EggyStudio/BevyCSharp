@@ -1170,9 +1170,24 @@ build/build-native.sh --render                  # once: build a bridge with the 
 dotnet run --project BevyCSharp.Sample          # a rotating cube
 dotnet run --project BevyCSharp.Sample -- --backend vulkan
 dotnet run --project BevyCSharp.Sample -- --headless --frames 120
+dotnet run --project BevyCSharp.Sample -- --offscreen --frames 120
 ```
 
 The sample opens a window by default and draws a lit cube turning in place. Escape closes it.
+
+There are three ways to run the same behaviors, and `Config` chooses between them. A window is the
+usual one. `Headless` installs no renderer, which is what a test or a dedicated server wants.
+`Offscreen` installs the renderer and draws into an image instead of onto a screen, which is the
+only one of the three that produces a picture on a machine with no display server:
+
+```csharp
+var config = Config.OffscreenFor(1280, 720, frames: 120);
+```
+
+`Width` and `Height` size the image the way they would size the window, `Render.Screenshot` writes
+it to a PNG, and `HeadlessFps` and `HeadlessFrames` pace and bound the run, because a run with no
+window has no window to close. The editor takes `--offscreen` as well, so the interface itself can
+be captured where there is no screen to draw it on.
 
 The camera is steered the way an editor's scene view is, so the scene can be looked at from
 anywhere while trying something out:
@@ -1585,6 +1600,7 @@ and asks it things:
 
 ```bash
 ./bcs open --editor                    # start one, detached, and wait until it answers
+./bcs open --editor --offscreen        # the same, on a machine with no display
 ./bcs list                             # every command that app offers, with its parameters
 ./bcs command entity.set Cube Transform.Translation 0,2.5,0
 ./bcs command input.click 1450 700
@@ -1680,9 +1696,9 @@ run against a real Bevy app. Known gaps:
   material, is not written, so the file is a set of edits over a scene rather than the scene.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
-- Capturing the window needs one. The bridge captures the primary window rather than a render
-  target, so a headless run answers `NO_WINDOW` instead of producing a picture, and a machine with
-  no display cannot check what a change draws.
+- A camera is pointed at a window, or at the image an offscreen run draws into, and nothing else.
+  There is no managed way to create an image and aim a camera at it, which is what a portal, a
+  security monitor or a second viewport would need.
 
 ## Contributing
 

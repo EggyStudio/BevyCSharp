@@ -5,7 +5,10 @@ use crate::interop::{status, BcsCameraConfig, BcsLightConfig, BcsSpriteConfig};
 #[cfg(feature = "render")]
 use crate::state::{with_world, with_world_opt};
 
-/// Writes what the window is showing to a PNG file.
+/// Writes what is being drawn to a PNG file.
+///
+/// The window, or the image an offscreen run draws into instead. Which one is not the caller's to
+/// decide: a run has exactly one thing it is drawing, and a capture is a picture of that.
 ///
 /// The capture happens on the frame after this call, because the picture has to come back off the
 /// GPU, and the file appears once it has. A caller that wants to know it arrived watches for the
@@ -35,9 +38,12 @@ pub unsafe extern "C" fn bcs_render_screenshot(path: *const core::ffi::c_char) -
             };
 
             with_world(|world| {
-                world
-                    .spawn(Screenshot::primary_window())
-                    .observe(save_to_disk(path));
+                let capture = match world.get_resource::<crate::app::OffscreenTarget>() {
+                    Some(target) => Screenshot::image(target.image.clone()),
+                    None => Screenshot::primary_window(),
+                };
+
+                world.spawn(capture).observe(save_to_disk(path));
                 status::OK
             })
         }

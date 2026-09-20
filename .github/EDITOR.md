@@ -471,8 +471,10 @@ against an editor that is already up. The difference is the loop. A probe is one
 process, decided before the run starts and read afterwards, while a session is asked and answered a
 frame at a time, so what to do next can depend on what the last answer said. The probe covers what
 a session cannot, which is a fixed arrangement captured the same way every time with no session to
-keep alive. That is what a comparison of the chrome before and after a change wants, and it is what
-a run with no display to attach to can do at all.
+keep alive. That is what a comparison of the chrome before and after a change wants, and it is one
+command rather than a session to open, drive and stop. Either works on a machine with no display,
+as long as the run is given `--offscreen`, which draws the editor into an image instead of onto a
+screen.
 
 `BCS_PROBE` names what a run should do, as words separated by commas, and `BCS_SHOT` says where to
 write the picture. `select`, `several` and `many` put something in the world and choose it, `dock`,

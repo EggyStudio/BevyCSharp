@@ -82,7 +82,7 @@ public sealed unsafe class App : IDisposable
     /// Both halves matter. Asking for a window on a bridge with no renderer compiled in gets a
     /// headless run instead, so the config alone does not settle it.
     /// </remarks>
-    public bool WillOpenWindow => !Config.Headless && HasRenderer;
+    public bool WillOpenWindow => !Config.Headless && !Config.Offscreen && HasRenderer;
 
     /// <summary>Creates the engine and its native Bevy app.</summary>
     /// <param name="config">Startup configuration; <see cref="Config.Default"/> when omitted.</param>
@@ -113,6 +113,7 @@ public sealed unsafe class App : IDisposable
                 AssetRoot = assetRoot,
                 WatchAssets = Config.WatchAssets ? 1u : 0u,
                 Gui = Config.Gui ? 1u : 0u,
+                Offscreen = Config.Offscreen ? 1u : 0u,
             };
             _handle = Native.bcs_app_create(&native);
         }
@@ -137,8 +138,9 @@ public sealed unsafe class App : IDisposable
         if (!Config.Headless && !HasRenderer)
             return new BevyNativeException(
                 NativeStatus.InvalidState,
-                "The native Bevy bridge has no renderer compiled in, so it cannot open a window. "
-                + "Set Config.Headless, or rebuild the bridge with build/build-native.sh --render.");
+                "The native Bevy bridge has no renderer compiled in, so it can neither open a "
+                + "window nor draw into an image. Set Config.Headless to run the behaviors without "
+                + "one, or rebuild the bridge with build/build-native.sh --render.");
 
         if (Config.Backend != GraphicsBackend.Automatic)
             return new BevyNativeException(

@@ -41,4 +41,7 @@ public unsafe struct NativeConfig
 
     /// <summary>Non-zero to build in the HTML and CSS interface.</summary>
     public uint Gui;
+
+    /// <summary>Non-zero to draw with no window, into an image a capture reads back.</summary>
+    public uint Offscreen;
 }

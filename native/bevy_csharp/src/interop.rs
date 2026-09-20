@@ -214,6 +214,10 @@ pub struct BcsConfig {
     /// Non-zero to build in the HTML and CSS interface. Needs the editor profile, and brings a
     /// camera and a set of systems that an app not using it has no reason to carry.
     pub gui: u32,
+    /// Non-zero to draw with no window, into an image that a capture reads back. Needs a `render`
+    /// build and is ignored when `headless` is set, which asks for no renderer at all. `width` and
+    /// `height` size the image the way they would size the window.
+    pub offscreen: u32,
 }
 
 /// How a camera should see, passed from C# when one is spawned.

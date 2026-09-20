@@ -119,6 +119,30 @@ public sealed class Config
     public double FixedHz { get; set; }
 
     /// <summary>
+    /// Draw with no window, into an image a capture can be read back from.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The renderer without a screen. Everything else about the run is what it would be in a
+    /// window, down to the plugins that are installed and the cameras that draw.
+    /// <see cref="Width"/> and <see cref="Height"/> size the image the way they would size the
+    /// window, and <see cref="Render.Screenshot"/> captures it.
+    /// </para>
+    /// <para>
+    /// What it is for is a machine with no display. A windowed run needs a display server to open
+    /// a window on, and a build server or a container has none, so this is the only way to see
+    /// what a change draws there. It needs a bridge with the renderer compiled in, which
+    /// <see cref="App.HasRenderer"/> reports, and is ignored when <see cref="Headless"/> is set,
+    /// which asks for no renderer at all.
+    /// </para>
+    /// <para>
+    /// <see cref="HeadlessFps"/> and <see cref="HeadlessFrames"/> pace and bound it, because a run
+    /// with no window has no window to close and would otherwise never end.
+    /// </para>
+    /// </remarks>
+    public bool Offscreen { get; set; }
+
+    /// <summary>
     /// Answer the command line while this app runs.
     /// </summary>
     /// <remarks>
@@ -157,6 +181,26 @@ public sealed class Config
         FailFastOnSystemException = true,
     };
 
+    /// <summary>
+    /// A configuration that draws into an image of the given size instead of a window.
+    /// </summary>
+    /// <remarks>
+    /// Paced at 60 rather than run flat out, because what an offscreen run is usually asked for is
+    /// a picture of a scene that has settled, and a loop with no frame budget spends the wait
+    /// competing with the work it is waiting for.
+    /// </remarks>
+    /// <param name="width">Width of the image, in pixels.</param>
+    /// <param name="height">Height of the image, in pixels.</param>
+    /// <param name="frames">Frames to run before exiting, or 0 to run until asked to stop.</param>
+    public static Config OffscreenFor(uint width = 1280, uint height = 720, uint frames = 0) => new()
+    {
+        Offscreen = true,
+        Width = width,
+        Height = height,
+        HeadlessFps = 60,
+        HeadlessFrames = frames,
+    };
+
     /// <summary>A window of the given size, drawn with <paramref name="backend"/>.</summary>
     public static Config Windowed(
         string title,
@@ -173,7 +217,9 @@ public sealed class Config
     /// <inheritdoc/>
     public override string ToString() => (Headless
         ? $"Config(headless, fps={HeadlessFps}, frames={HeadlessFrames}"
-        : $"Config('{Title}', {Width}x{Height}, vsync={Vsync}, backend={Backend}")
+        : Offscreen
+            ? $"Config(offscreen {Width}x{Height}, fps={HeadlessFps}, frames={HeadlessFrames}"
+            : $"Config('{Title}', {Width}x{Height}, vsync={Vsync}, backend={Backend}")
         + (Serve ? ", serving)" : ")");
 }
 

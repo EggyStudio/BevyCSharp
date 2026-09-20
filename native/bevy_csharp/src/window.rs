@@ -113,6 +113,14 @@ pub unsafe extern "C" fn bcs_window_scale(scale: *mut f32) -> i32 {
                     world.query_filtered::<&Window, bevy::prelude::With<PrimaryWindow>>();
 
                 let Ok(window) = windows.single(world) else {
+                    // An offscreen run draws into an image, and an image has pixels rather than a
+                    // desktop's opinion about how big a pixel is. Bevy says the same by giving
+                    // `ImageRenderTarget` a scale factor of 1.0.
+                    if world.contains_resource::<crate::app::OffscreenTarget>() {
+                        unsafe { scale.write(1.0) };
+                        return status::OK;
+                    }
+
                     return status::INVALID_STATE;
                 };
 
@@ -141,13 +149,50 @@ pub unsafe extern "C" fn bcs_window_size(width: *mut u32, height: *mut u32) -> i
 
         #[cfg(feature = "render")]
         {
-            with_window(|window, _| {
+            // The size of whatever is being drawn into. A window has one, and so does the image an
+            // offscreen run draws into instead, and everything that lays out an interface needs an
+            // answer rather than needing to know which kind of run this is. The rest of this
+            // module is about a window and has nothing to say without one.
+            let answered = with_window(|window, _| {
                 if !width.is_null() {
                     unsafe { width.write(window.resolution.width() as u32) };
                 }
                 if !height.is_null() {
                     unsafe { height.write(window.resolution.height() as u32) };
                 }
+                status::OK
+            });
+
+            if answered != status::NOT_PRESENT {
+                return answered;
+            }
+
+            with_world(|world| {
+                use bevy::asset::Assets;
+                use bevy::image::Image;
+
+                let Some(target) = world.get_resource::<crate::app::OffscreenTarget>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                let handle = target.image.clone();
+                let Some(images) = world.get_resource::<Assets<Image>>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                let Some(image) = images.get(&handle) else {
+                    return status::NOT_PRESENT;
+                };
+
+                let size = image.texture_descriptor.size;
+
+                if !width.is_null() {
+                    unsafe { width.write(size.width) };
+                }
+                if !height.is_null() {
+                    unsafe { height.write(size.height) };
+                }
+
                 status::OK
             })
         }

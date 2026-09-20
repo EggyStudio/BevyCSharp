@@ -18,35 +18,44 @@ const GraphicsBackend Backend = GraphicsBackend.Vulkan;
 
 // Command line wins over the constants above, so the same build can do either.
 //   --window / --headless      choose the mode
+//   --offscreen                draw with no window, into an image a capture reads back
 //   --backend                  vulkan|dx12|metal|gl|auto
-//   --frames N                 headless only: run N ticks and exit
+//   --frames N                 how many ticks to run, for a run with no window
 //   --serve                    answer `bcs` while it runs
 //   --verbose                  print a progress line every 20 frames
-var windowed = RunInWindow || args.Contains("--window");
+var offscreen = args.Contains("--offscreen");
+var windowed = !offscreen && (RunInWindow || args.Contains("--window"));
 if (args.Contains("--headless")) windowed = false;
 
 Trace.Verbose = args.Contains("--verbose");
 
+// Three ways to run the same behaviors: onto a screen, into an image, or with no renderer at
+// all. The middle one is what a machine with no display can still see the picture from.
 var config = windowed
     ? Config.Windowed("BevyCSharp Sample", 1280, 720, ParseBackend(args, Backend))
-    : new Config { Headless = true, HeadlessFrames = ParseFrames(args), HeadlessFps = 60 };
+    : offscreen
+        ? Config.OffscreenFor(1280, 720, ParseFrames(args))
+        : new Config { Headless = true, HeadlessFrames = ParseFrames(args), HeadlessFps = 60 };
 
 // Bevy looks beside the running executable otherwise, which for a .NET app is whichever host
 // launched it rather than the directory the assets were copied to.
 config.AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets");
 
 // Asks for the document and stylesheet interface, which is what the sample's own panel is built
-// from. A bridge without it compiled in ignores this and the panel is not opened.
+// from. A bridge without it compiled in ignores this and the panel is not opened. An offscreen run
+// leaves it off, because the panel is driven by a pointer and a keyboard that a run with no window
+// never receives.
 config.Gui = windowed;
 
 // Answers `bcs` while it runs. A headless run that serves is worth pairing with --frames 0, which
 // runs until something asks it to stop rather than counting down to an exit.
 config.Serve = args.Contains("--serve");
 
-if (windowed && !App.HasRenderer)
+if ((windowed || offscreen) && !App.HasRenderer)
 {
     Console.Error.WriteLine(
-        "This native bridge was built without Bevy's renderer, so there is no window to open.");
+        "This native bridge was built without Bevy's renderer, so it can neither open a window "
+        + "nor draw into an image.");
     Console.Error.WriteLine("  rebuild it : build/build-native.sh --render");
     Console.Error.WriteLine("  or run     : dotnet run -- --headless --frames 120");
     return 1;
@@ -54,11 +63,12 @@ if (windowed && !App.HasRenderer)
 
 Console.WriteLine($"BevyCSharp sample: {config}");
 Console.WriteLine($"renderer compiled in: {App.HasRenderer}");
-Console.WriteLine(windowed ? "close the window to exit" : "");
+Console.WriteLine(windowed ? "close the window to exit" : string.Empty);
 
 return BevyApp.Run(config);
 
-// Reads --frames N, defaulting to a short run so a plain `dotnet run` still does something.
+// Reads --frames N, defaulting to a short run so a plain `dotnet run` still does something. Zero
+// runs until something asks the app to stop, which is what a session driven from `bcs` wants.
 static uint ParseFrames(string[] arguments)
 {
     var index = Array.IndexOf(arguments, "--frames");

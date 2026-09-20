@@ -23,7 +23,8 @@ If nothing is serving, start one and wait for it to be ready:
 
 ```bash
 ./bcs open --editor               # a window, the editor, and something to click
-./bcs open --sample --headless --frames 0   # no window; frames 0 means "until asked to stop"
+./bcs open --editor --offscreen   # the same, drawn into an image, on a machine with no display
+./bcs open --sample --headless --frames 0   # no renderer at all; frames 0 runs until asked to stop
 ```
 
 `open` returns only once the app has written that it is ready, so the next command will be
@@ -119,6 +120,10 @@ A capture is read back off the GPU over the frames after the request, so `./bcs 
 file to appear and settle. Use it rather than `./bcs command shot`, which returns as soon as the
 request is accepted.
 
+**On a machine with no display**, open the session with `--offscreen`. It installs the renderer and
+draws into an image instead of a window, so `shot` produces a real picture of the scene, panels and
+all, where a windowed session could not start at all. Everything else is the same session.
+
 ## More than one app serving
 
 Every session-driving verb refuses to guess:
@@ -141,9 +146,10 @@ and before falling back to editing files by hand.
    which says whether the bridge loaded, which ABI it is, and whether the renderer and interface
    are compiled in. The fix is `./bcs build --editor`. Note the order it enforces, because a native
    rebuild is invisible until a managed build copies the library beside each project.
-2. **A headless bridge, or a headless run.** `shot` answers `NO_RENDERER` (the build has no
-   renderer) or `NO_WINDOW` (this run opened none). Neither is a bug in the tool; capture from a
-   windowed session instead.
+2. **A headless bridge, or a headless run.** `shot` answers `NO_RENDERER` when the bridge was
+   built without one, and `NO_WINDOW` when this run installed no renderer. Neither is a bug in the
+   tool. Rebuild with `./bcs build --render` for the first, and for the second start a session
+   that draws: a window, or `--offscreen`, which needs no display.
 3. **A sandboxed shell.** If your own commands run in a restrictive sandbox, a genuinely running
    app can be invisible to `./bcs status`, because the session file or the loopback connection may
    be out of reach. Say so and ask, rather than concluding the app is down and rewriting files

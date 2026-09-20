@@ -232,10 +232,12 @@ What is left:
   needs a cubemap, which the asset surface cannot load, and that same gap blocks light probes
   below.
 - **Camera**: render layers and viewports are bridged, so splitscreen and a minimap are
-  expressible. Render-to-texture is not: `RenderTarget::Image` points a camera at a texture
-  instead of the window, which is what a security monitor, a portal or a reflection needs, and
-  what an editor viewport is built on. It needs an image created empty at a given size, which
-  `Render.CreateMaterial` and the asset surface have no way to ask for.
+  expressible. Render-to-texture is bridged for the whole run rather than per camera. An offscreen
+  run creates one image at the configured size and points every camera at it, which is what draws
+  a picture on a machine with no display. What is missing is the per-camera case, where one camera
+  draws into a texture the scene then samples, which is what a security monitor, a portal or a
+  reflection needs. That needs an image created empty at a given size and a handle to it on the
+  managed side, which `Render.CreateMaterial` and the asset surface have no way to ask for.
 - **Lights**: shadow bias is per light and shadow map size is settable. What is left is optical
   rather than structural: a spot light has no cookie texture to shape its beam, cascade
   configuration for a directional light's shadow distance is Bevy's default, and light probes,
@@ -246,15 +248,10 @@ What is left:
   monitor's list of video modes is a list of structs, so exclusive fullscreen takes the monitor's
   current mode rather than offering a resolution to pick from. Multiple windows are also
   unbridged: every entry point here addresses the primary one.
-- **Capturing without a window.** `bcs_render_screenshot` spawns
-  `Screenshot::primary_window()`, so a run that opened none captures nothing and the console's
-  `shot` command answers `NO_WINDOW`. `Screenshot::image(Handle<Image>)` captures a render target
-  instead, so a headless run could produce a picture given the same empty image asset the camera
-  bullet above needs for render-to-texture. That is what would let a machine with no display
-  check what a change draws, which today only a windowed session can do.
-- **Verification**: the tests assert that settings are accepted and that a windowless run
-  refuses, which is what can go wrong silently. Whether the picture is right is confirmed by
-  running the sample, which uses a custom clear color, a tinted sun, a spot light, a bokeh
+- **Verification**: the tests assert that settings are accepted and that a run with no renderer
+  refuses, which is what can go wrong silently, and an offscreen run captures a picture of a real
+  scene so that a machine with no display can check that anything was drawn at all. Whether the
+  picture is *right* is confirmed by running the sample, which uses a custom clear color, a tinted sun, a spot light, a bokeh
   focus on the cube and a vignette, and binds F11 to fullscreen and Tab to cursor lock. An effect
   is worth checking against a second run with it turned off: bloom was confirmed that way, since
   a halo is obvious beside the same frame without one and easy to imagine without the

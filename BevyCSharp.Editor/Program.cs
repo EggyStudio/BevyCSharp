@@ -7,7 +7,12 @@ using BevyCSharp.Editor;
 // surface on top of the renderer:
 //     build/build-native.sh --editor
 
-var config = Config.Windowed("BevyCSharp Editor", 1600, 900);
+// A window by default, and an image when asked for one. The editor is an app like any other, so
+// what lets a game be drawn on a machine with no display lets the editor be drawn there too, which
+// is what a build server checking the interface against a capture needs.
+var config = args.Contains("--offscreen")
+    ? Config.OffscreenFor(1600, 900)
+    : Config.Windowed("BevyCSharp Editor", 1600, 900);
 
 // Bevy looks beside the running executable otherwise, which for a .NET app is whichever host
 // launched it rather than the directory the assets were copied to.
@@ -24,7 +29,7 @@ config.Serve = args.Contains("--serve");
 
 if (!App.HasRenderer)
 {
-    Console.Error.WriteLine("This native bridge has no renderer, so there is no window to open.");
+    Console.Error.WriteLine("This native bridge has no renderer, so there is nothing to draw with.");
     Console.Error.WriteLine("  rebuild it : build/build-native.sh --editor");
     return 1;
 }

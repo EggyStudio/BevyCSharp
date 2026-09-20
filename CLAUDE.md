@@ -14,6 +14,7 @@ about a running app (what is in the world, what a click does, what the window lo
 ```bash
 ./bcs status          # is anything serving?
 ./bcs open --editor   # start one, detached, and wait until it answers
+                      # add --offscreen where there is no display to open a window on
 ./bcs list            # what that app can be asked
 ./bcs command app.status
 ./bcs shot /tmp/x.png

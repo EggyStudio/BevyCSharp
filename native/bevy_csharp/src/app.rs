@@ -91,6 +91,88 @@ struct HeadlessFrameLimit {
     remaining: u32,
 }
 
+/// The image a windowless run draws into.
+///
+/// Present only in an offscreen run, so its absence is what says a capture should read the window
+/// instead. [`crate::render::scene::bcs_render_screenshot`] asks it that question.
+#[cfg(feature = "render")]
+#[derive(Resource)]
+pub struct OffscreenTarget {
+    /// The texture every camera is pointed at, and the one a capture is read back from.
+    pub image: bevy::asset::Handle<bevy::image::Image>,
+}
+
+/// Creates the image an offscreen run draws into, and points the cameras at it.
+///
+/// Two steps rather than one, because the image is an asset and a camera is spawned by whatever
+/// managed code asked for one, at whatever point in the run it asked. Creating the target once at
+/// startup and re-pointing cameras every frame covers a camera the app spawns later, and one the
+/// interface spawns for itself, without either having to know how this run is drawing.
+#[cfg(feature = "render")]
+fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
+    use bevy::asset::{Assets, RenderAssetUsages};
+    use bevy::camera::{Camera, RenderTarget};
+    use bevy::ecs::query::With;
+    use bevy::ecs::system::{Commands, Query, Res, ResMut};
+    use bevy::image::Image;
+    use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat, TextureUsages};
+    use bevy::window::WindowRef;
+
+    app.add_systems(
+        Startup,
+        move |mut commands: Commands, mut images: ResMut<Assets<Image>>| {
+            let size = Extent3d {
+                width,
+                height,
+                depth_or_array_layers: 1,
+            };
+
+            // Opaque black rather than transparent, because a picture of a scene with nothing in
+            // front of the camera should look like an empty scene rather than like a failure.
+            // The format is named outright: Bevy deprecated its default in favour of asking the
+            // view, and a target created before there is a view to ask has to choose one.
+            let mut image = Image::new_fill(
+                size,
+                TextureDimension::D2,
+                &[0, 0, 0, 255],
+                TextureFormat::Rgba8UnormSrgb,
+                RenderAssetUsages::default(),
+            );
+
+            // What separates a texture that can be drawn into and read back from one that can only
+            // be sampled. Without `COPY_SRC` the capture finds nothing to copy.
+            image.texture_descriptor.usage = TextureUsages::COPY_SRC
+                | TextureUsages::RENDER_ATTACHMENT
+                | TextureUsages::TEXTURE_BINDING;
+
+            commands.insert_resource(OffscreenTarget {
+                image: images.add(image),
+            });
+        },
+    );
+
+    app.add_systems(
+        First,
+        |target: Option<Res<OffscreenTarget>>,
+         mut cameras: Query<&mut RenderTarget, With<Camera>>| {
+            let Some(target) = target else {
+                return;
+            };
+
+            for mut render_target in &mut cameras {
+                // Read through the shared borrow, so a camera that is already pointed at the image
+                // is not marked changed by the asking, every frame, for the life of the run.
+                let current: &RenderTarget = &render_target;
+                if !matches!(current, RenderTarget::Window(WindowRef::Primary)) {
+                    continue;
+                }
+
+                *render_target = RenderTarget::Image(target.image.clone().into());
+            }
+        },
+    );
+}
+
 /// Builds the Bevy app for the requested configuration.
 ///
 /// In a `render` build with `headless == 0` this installs `DefaultPlugins` (window,
@@ -121,18 +203,28 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     };
     let asset_root = unsafe { crate::interop::cstr_to_string(config.asset_root) };
 
+    // Whether the renderer is installed at all. A window is one way to draw and an image is the
+    // other, and both take Bevy's full plugin set, so everything below asks this rather than
+    // asking about the window. Only a run with no renderer takes the minimal set.
     #[cfg(feature = "render")]
-    let windowed = config.headless == 0;
+    let drawing = config.headless == 0;
     #[cfg(not(feature = "render"))]
-    let windowed = false;
+    let drawing = false;
 
-    if windowed {
+    if drawing {
         #[cfg(feature = "render")]
         {
             use bevy::prelude::*;
             use bevy::render::settings::{Backends, RenderCreation, WgpuSettings};
             use bevy::render::RenderPlugin;
-            use bevy::window::{PresentMode, Window, WindowPlugin};
+            use bevy::window::{ExitCondition, PresentMode, Window, WindowPlugin};
+            use bevy::winit::WinitPlugin;
+
+            // Drawing into an image instead of onto a screen. Everything else about the app is
+            // unchanged, which is the point, because the same behavior code running against the
+            // same renderer is what makes the picture worth looking at on a machine that has no
+            // display to open a window on.
+            let offscreen = config.offscreen != 0;
 
             let present_mode = if config.vsync != 0 {
                 PresentMode::AutoVsync
@@ -159,23 +251,54 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 None => WgpuSettings::default(),
             };
 
-            app.add_plugins(
-                DefaultPlugins
-                    .set(WindowPlugin {
-                        primary_window: Some(Window {
+            let plugins = DefaultPlugins
+                .set(WindowPlugin {
+                    primary_window: if offscreen {
+                        None
+                    } else {
+                        Some(Window {
                             title: title.clone().unwrap_or_else(|| "BevyCSharp".to_string()),
                             resolution: (config.width, config.height).into(),
                             present_mode,
                             ..default()
-                        }),
-                        ..default()
-                    })
-                    .set(RenderPlugin {
-                        render_creation: RenderCreation::Automatic(Box::new(wgpu)),
-                        ..default()
-                    })
-                    .set(asset_plugin(&asset_root)),
-            );
+                        })
+                    },
+
+                    // A windowless run has no window to close, and the default condition ends an
+                    // app the moment the last one is gone, which here is immediately.
+                    exit_condition: if offscreen {
+                        ExitCondition::DontExit
+                    } else {
+                        ExitCondition::OnPrimaryClosed
+                    },
+                    ..default()
+                })
+                .set(RenderPlugin {
+                    render_creation: RenderCreation::Automatic(Box::new(wgpu)),
+                    ..default()
+                })
+                .set(asset_plugin(&asset_root));
+
+            if offscreen {
+                // Winit owns the loop when there is a window, and panics on a machine with no
+                // display server, which is exactly the machine this mode is for. Dropping it
+                // leaves the app with no runner, so the schedule runner takes the loop instead,
+                // paced like a headless run.
+                app.add_plugins(plugins.disable::<WinitPlugin>());
+
+                let runner = if config.headless_fps > 0 {
+                    ScheduleRunnerPlugin::run_loop(Duration::from_secs_f64(
+                        1.0 / config.headless_fps as f64,
+                    ))
+                } else {
+                    ScheduleRunnerPlugin::run_loop(Duration::ZERO)
+                };
+
+                app.add_plugins(runner);
+                install_offscreen_target(&mut app, config.width.max(1), config.height.max(1));
+            } else {
+                app.add_plugins(plugins);
+            }
 
             // Auto exposure is the one post-processing effect `DefaultPlugins` leaves out, since
             // it needs compute shaders and so cannot run everywhere the rest can. Every desktop
@@ -251,7 +374,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     // Asking twice is destructive rather than harmless, which is why every bare registration
     // below goes through `init_asset_once` rather than `init_asset`. What that guards against,
     // and what it cost the one time it was not guarded, is written up on the helper.
-    if !windowed {
+    if !drawing {
         use bevy::asset::AssetApp;
         use crate::assets::init_asset_once;
 

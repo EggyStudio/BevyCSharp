@@ -470,9 +470,14 @@ public static unsafe class Render
     }
 
     /// <summary>
-    /// Writes what the window is showing to a PNG file.
+    /// Writes what is being drawn to a PNG file.
     /// </summary>
     /// <remarks>
+    /// <para>
+    /// The window, or the image an offscreen run draws into instead. Which one is not the caller's
+    /// to choose: a run has one thing it is drawing, and a capture is a picture of that. A headless
+    /// run draws nothing and captures nothing.
+    /// </para>
     /// <para>
     /// The capture happens on the frame after this call, because the picture has to come back off
     /// the GPU, and the file appears once it has. Watch for the file rather than assuming it is
@@ -485,6 +490,7 @@ public static unsafe class Render
     /// </remarks>
     /// <param name="path">Where to write the PNG. Relative paths are resolved by the process.</param>
     /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    /// <seealso cref="Config.Offscreen"/>
     public static void Screenshot(string path)
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
