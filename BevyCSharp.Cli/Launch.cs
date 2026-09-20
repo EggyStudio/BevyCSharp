@@ -13,7 +13,7 @@ internal static class Launch
     /// <para>
     /// The piece that makes the loop startable without a person. It launches the app with its
     /// output redirected to a log beside the checkout, then watches the session directory until the
-    /// app writes that it is ready — so when this returns, the next command will be answered.
+    /// app writes that it is ready, so when this returns the next command will be answered.
     /// </para>
     /// <para>
     /// Detached through the platform's own shell, which is the only portable way to hand a child a

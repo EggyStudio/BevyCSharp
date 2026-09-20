@@ -188,7 +188,7 @@ public static class ConsoleCommands
     /// </para>
     /// <para>
     /// Only a line that is entirely one quoted run is unwrapped, so a fragment that merely contains
-    /// quotes - <c>eval world.SetName(e, "x")</c> - is left exactly as it was written.
+    /// quotes, such as <c>eval world.SetName(e, "x")</c>, is left exactly as it was written.
     /// </para>
     /// </remarks>
     public static string Unwrap(string line)

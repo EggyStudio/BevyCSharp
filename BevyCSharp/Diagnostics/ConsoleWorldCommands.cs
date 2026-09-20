@@ -178,8 +178,8 @@ internal static class ConsoleWorldCommands
     /// </summary>
     /// <remarks>
     /// Both halves in one frame, which is what a click is for an interface that reads the button's
-    /// state. Something that matches a release to the press that landed on it — picking a mesh, for
-    /// one — needs the two on separate frames, so it gets <c>input.press</c> and
+    /// state. Something that matches a release to the press that landed on it, such as picking a
+    /// mesh, needs the two on separate frames, so it gets <c>input.press</c> and
     /// <c>input.release</c> instead.
     /// </remarks>
     [Command("input.click", "Clicks a point: input.click <x> <y>")]
@@ -244,8 +244,8 @@ internal static class ConsoleWorldCommands
     /// <remarks>
     /// The other end of <c>input.key</c>, and the one a field being typed into is listening on. A
     /// key starts at the window and reaches the interface through it, so either route types a
-    /// letter - but Enter, Escape and the arrows inside a text field are read by the interface
-    /// directly, and a window key alone leaves a line typed and never submitted.
+    /// letter. Enter, Escape and the arrows inside a text field are read by the interface directly,
+    /// so a window key alone leaves a line typed and never submitted.
     /// </remarks>
     [Command("input.uikey", "Taps a key in the interface: input.uikey <Enter|Escape|UpArrow|Tab>")]
     internal static string UiKey(string name)
@@ -263,7 +263,7 @@ internal static class ConsoleWorldCommands
     /// <summary>Writes the window to a PNG.</summary>
     /// <remarks>
     /// The file appears a frame or two later, because the picture comes back off the GPU. Wait for
-    /// it — <c>frames.wait 3</c> — rather than reading it the moment this answers.
+    /// it with <c>frames.wait 3</c> rather than reading it the moment this answers.
     /// </remarks>
     [Command("shot", "Captures the window to a PNG: shot <path>")]
     internal static string Shot(string path)
@@ -292,7 +292,7 @@ internal static class ConsoleWorldCommands
             ConsoleHost.Fail(
                 "NO_WINDOW",
                 "This app is running headless, so there is no window to capture. Start one with a "
-                + "window - 'bcs open --editor' - and capture that.");
+                + "window (bcs open --editor) and capture that.");
 
             return "headless, so there is no window to capture";
         }
@@ -413,8 +413,8 @@ internal static class ConsoleWorldCommands
     /// A word read into whatever the field already holds, or nothing when it will not go.
     /// </summary>
     /// <remarks>
-    /// The current value is what says what the field is. Nothing else on this side knows: the
-    /// schema describes a field's kind for an inspector to draw, and a kind is not a type.
+    /// The current value is what says what the field is, because nothing else on this side knows.
+    /// The schema describes a field's kind for an inspector to draw, and a kind is not a type.
     /// </remarks>
     private static object? Parse(string value, object? current) => current switch
     {

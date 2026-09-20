@@ -63,7 +63,7 @@ internal sealed class CliServer : IDisposable
     /// <summary>How long a request may sit in the queue before the caller is told it timed out.</summary>
     /// <remarks>
     /// A backstop rather than a policy. A frame answers in milliseconds, so reaching this means the
-    /// app stopped running frames — and a caller learning that in thirty seconds is better than one
+    /// app stopped running frames, and a caller learning that in thirty seconds is better than one
     /// waiting on a socket that will never answer.
     /// </remarks>
     public static readonly TimeSpan Patience = TimeSpan.FromSeconds(30);

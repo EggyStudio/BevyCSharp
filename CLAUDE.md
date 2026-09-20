@@ -5,10 +5,10 @@ turns `[Behavior]` structs into systems, an ImGui editor that is itself an ordin
 and a native bridge (`native/bevy_csharp`, a Rust cdylib) that the managed side calls through a C
 ABI.
 
-## Driving the engine: use `./bcs`
+## Driving the engine with `./bcs`
 
 `./bcs` talks to a running app over a local socket and answers in JSON. **Before asking anything
-about a running app - what is in the world, what a click does, what the window looks like - check
+about a running app (what is in the world, what a click does, what the window looks like), check
 `./bcs status` and drive the live session instead of launching a process per question.**
 
 ```bash
@@ -48,9 +48,10 @@ cargo test --manifest-path native/Cargo.toml
 ```
 
 The suite runs real headless engines through `EngineHarness` (`BevyCSharp.Tests/EngineFixture.cs`),
-which inverts assertions into systems - everything ECS-touching needs a world on loan from a
-running system, so there is no way to assert from outside the loop. Engine tests share the
-`"engine"` collection, which disables parallelisation: two native apps at once is not allowed.
+which inverts assertions into systems, because everything ECS-touching needs a world on loan from
+a running system and there is no way to assert from outside the loop. Engine tests share the
+`"engine"` collection, which disables parallelisation, because two native apps at once is not
+allowed.
 Stop any serving session before running the suite.
 
 ## Where things are
@@ -71,7 +72,9 @@ Stop any serving session before running the suite.
 - Comments explain **why**, at length, in prose. Match the surrounding density rather than trimming
   them; a file here usually carries more explanation than code.
 - Public API carries XML docs with a `<remarks>` section covering the reasoning and the traps.
-- Nothing in the library reflects at runtime: the generators emit registrations that module
-  initialisers run, so everything survives trimming and AOT.
+- Nothing in the library reflects at runtime, because the generators emit registrations that
+  module initialisers run, so everything survives trimming and AOT.
 - A `[Command]` method is a console command, a CLI verb and an editor console entry all at once.
   Adding one is writing one.
+- Prose in this repository follows `.github/STYLE.md`, which governs comments, XML documentation,
+  messages and Markdown. Read it before writing any of them.

@@ -7,7 +7,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers a running app answering a socket: a real engine, a real port, a real round trip.
+/// Covers a running app answering a socket, end to end.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -98,8 +98,8 @@ public sealed class CliServerTests : IDisposable
     /// </summary>
     /// <remarks>
     /// The console answers anything it cannot do with a sentence, which is right for a person
-    /// typing and useless to a caller: "unknown command: nope" and "nothing at Spawn/Cube" are the
-    /// same shape as an answer that worked. The name is therefore checked before the line is run.
+    /// typing and useless to a caller, because "unknown command: nope" and "nothing at Spawn/Cube"
+    /// are the same shape as an answer that worked. The name is checked before the line is run.
     /// </remarks>
     [Fact]
     public void AMisspelledCommandIsRefusedWithACode()

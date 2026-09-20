@@ -26,7 +26,7 @@ internal static class Repo
     /// </summary>
     /// <remarks>
     /// Preferred over <c>dotnet run</c>, which builds first and then launches the app as a child of
-    /// itself: two processes where one will do, and a second of delay on every start.
+    /// itself, which is two processes where one will do and a second of delay on every start.
     /// </remarks>
     public static string? BinaryFor(string project)
     {

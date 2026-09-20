@@ -14,7 +14,7 @@ namespace Bevy;
 /// usually finds an empty queue.
 /// </para>
 /// <para>
-/// Nothing here is privileged, which is the point: the editor is a BevyCSharp app like any other,
+/// Nothing here is privileged, which is the point. The editor is a BevyCSharp app like any other,
 /// so a game gets the same thing the editor does, and a tool written against one works against the
 /// other.
 /// </para>
@@ -53,8 +53,8 @@ public sealed class CliPlugin : IPlugin
         CliSessionFile.Write(session);
 
         Console.WriteLine(
-            $"[bcs] serving on 127.0.0.1:{_server.Port} - "
-            + $"drive it with: bcs status, bcs list, bcs command <name>");
+            $"[bcs] serving on 127.0.0.1:{_server.Port}. "
+            + "Drive it with bcs status, bcs list, bcs command <name>.");
 
         // Announced once the first frame is in, because a caller waiting for "ready" is waiting to
         // be able to ask something, and nothing can be asked until there is a frame to answer in.

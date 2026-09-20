@@ -1579,9 +1579,9 @@ away, and everything it knows about the log and the commands it asks the library
 
 ## Driving a running app
 
-The same catalog is reachable from a terminal. `Config.Serve` — or `--serve`, or `BCS_SERVE` in the
-environment — opens a socket on the loopback interface and writes a session file, and `bcs` finds
-it and asks it things:
+The same catalog is reachable from a terminal. `Config.Serve`, or `--serve`, or `BCS_SERVE` in the
+environment, opens a socket on the loopback interface and writes a session file, and `bcs` finds it
+and asks it things:
 
 ```bash
 ./bcs open --editor                    # start one, detached, and wait until it answers
@@ -1593,10 +1593,10 @@ it and asks it things:
 ```
 
 Each of those is answered inside the next frame of the app that is already running, which is the
-point: a fresh process per question costs a second of startup, a new world, and a guess about which
-frame to look at. What arrives over the socket is queued and run by a system at the top of the
-frame, because everything ECS-touching is ambient on the world Bevy lends the running system — the
-socket thread never touches an entity.
+point, because a fresh process per question costs a second of startup, a new world, and a guess
+about which frame to look at. What arrives over the socket is queued and run by a system at the top
+of the frame, because everything ECS-touching is ambient on the world Bevy lends the running
+system. The socket thread never touches an entity.
 
 Every verb writes one envelope to the standard output stream under `--json`, whether it worked or
 not, with a stable token in `errors[0].code` and an exit code that separates *it failed* from
@@ -1612,7 +1612,7 @@ bridge and then the managed side, `bcs test` runs the suite and exits 8 when tes
 the run never reached a verdict, and `bcs doctor` answers why nothing is starting. `bcs help` lists
 the rest.
 
-Nothing about this is privileged: the plugin ships in the library and is off unless asked for, so a
+Nothing about this is privileged. The plugin ships in the library and is off unless asked for, so a
 game built on BevyCSharp is drivable exactly the way the editor is. The editor additionally
 registers `eval`, which compiles a fragment of C# and runs it against the live world through the
 same script host that reloads behavior scripts.

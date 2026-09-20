@@ -14,7 +14,7 @@ namespace BevyCSharp.Editor.Framework;
 /// The escape hatch that makes a command line complete. A catalog of commands covers what somebody
 /// thought to write a command for; this covers the rest, and it does it against the world that is
 /// already loaded rather than a fresh one. Reading a field nobody exposed, calling a method on the
-/// way to deciding whether it deserves a command, spawning something to look at - all one line.
+/// way to deciding whether it deserves a command, or spawning something to look at is one line.
 /// </para>
 /// <para>
 /// Each fragment is compiled into its own collectible load context and dropped afterwards, the same
@@ -22,7 +22,7 @@ namespace BevyCSharp.Editor.Framework;
 /// of compiling, which is a few tens of milliseconds against a Roslyn that is already loaded.
 /// </para>
 /// <para>
-/// It runs arbitrary code in this process, which is the point and also the whole of its danger: it
+/// It runs arbitrary code in this process, which is the point and also the whole of its danger. It
 /// is exactly as privileged as the person at the terminal, and no more. It lives in the editor
 /// rather than in the library so that a shipped game carries no compiler.
 /// </para>

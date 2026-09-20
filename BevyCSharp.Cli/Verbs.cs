@@ -9,7 +9,7 @@ internal static class Verbs
     /// <summary>What is running.</summary>
     /// <remarks>
     /// Reads the session files rather than connecting, so it answers even when an app has stopped
-    /// running frames — which is the state worth being told about. A session whose process is gone
+    /// running frames, which is the state worth being told about. A session whose process is gone
     /// is reported rather than hidden, because a file left behind is the usual reason a port refuses
     /// a connection.
     /// </remarks>
@@ -134,7 +134,8 @@ internal static class Verbs
         {
             if (File.Exists(path) && File.GetLastWriteTimeUtc(path) > was)
             {
-                // Settled rather than merely present: the file appears when the write starts.
+                // Settled rather than merely present, because the file appears when the write
+                // starts rather than when it finishes.
                 var size = new FileInfo(path).Length;
                 Thread.Sleep(120);
 
@@ -181,8 +182,8 @@ internal static class Verbs
 
         if (session.Running)
         {
-            // By the id in the session file, never by name: killing every process that looks like
-            // an editor takes other people's unsaved work with it.
+            // By the id in the session file, never by name, because killing every process that
+            // looks like an editor takes other people's unsaved work with it.
             try
             {
                 System.Diagnostics.Process.GetProcessById(session.Pid).Kill();

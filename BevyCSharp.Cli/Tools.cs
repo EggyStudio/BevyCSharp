@@ -11,8 +11,8 @@ internal static partial class Tools
     /// </summary>
     /// <remarks>
     /// The order is the point. A rebuilt bridge is invisible until a managed build copies it beside
-    /// each project's binaries, so a native-only rebuild leaves every app running the previous one
-    /// — which looks exactly like a change that did nothing.
+    /// each project's binaries, so a native-only rebuild leaves every app running the previous one,
+    /// which looks exactly like a change that did nothing.
     /// </remarks>
     public static int Build(Options options, string[] arguments)
     {
@@ -82,9 +82,9 @@ internal static partial class Tools
     /// Runs the tests, and says which kind of failure it was.
     /// </summary>
     /// <remarks>
-    /// A run that finished and reported failures exits 8; a run that never reached a verdict —
-    /// a compile error, a missing bridge, a crash — keeps 6. Only the second is ever worth
-    /// retrying, and a caller can only tell them apart if they are different numbers.
+    /// A run that finished and reported failures exits 8. A run that never reached a verdict (a
+    /// compile error, a missing bridge, a crash) keeps 6. Only the second is ever worth retrying,
+    /// and a caller can only tell them apart if they are different numbers.
     /// </remarks>
     public static int Test(Options options, string[] arguments)
     {
@@ -131,7 +131,7 @@ internal static partial class Tools
                 "test",
                 ran.Ok ? "NO_VERDICT" : "TEST_RUN_ERROR",
                 "The test run did not report a result. That is an infrastructure failure rather "
-                + "than a failing test - a compile error, or a bridge that will not load.",
+                + "than a failing test, such as a compile error or a bridge that will not load.",
                 ran));
         }
 

@@ -168,7 +168,8 @@ internally consistent.
 - exception messages, log output and `GITHUB_STEP_SUMMARY` content
 - MSBuild `<!-- -->` comments and analyzer `messageFormat` strings
 - YAML comments under `.github/workflows`
-- `README.md`, `.github/TODO.md` and this file
+- `README.md`, `CLAUDE.md`, `.github/TODO.md`, `.github/EDITOR.md`, the skills under
+  `.claude/skills/` and this file
 
 ## Checks
 

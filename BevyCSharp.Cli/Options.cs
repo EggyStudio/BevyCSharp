@@ -85,8 +85,8 @@ internal sealed record Options
                     };
                     continue;
 
-                // No short form: -n belongs to `logs`, where it means how many lines, and a flag
-                // that means two things is a flag that silently does the wrong one.
+                // No short form, because -n belongs to `logs`, where it means how many lines,
+                // and a flag that means two things is a flag that silently does the wrong one.
                 case "--name" when index + 1 < arguments.Length:
                     options = options with { Name = arguments[++index] };
                     continue;

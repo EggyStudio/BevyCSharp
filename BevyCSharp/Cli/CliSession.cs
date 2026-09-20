@@ -216,7 +216,7 @@ public static class CliSessionFile
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException)
         {
-            // Nothing useful left to do: the app is closing, and a file it could not delete is a
+            // Nothing useful left to do. The app is closing, and a file it could not delete is a
             // file the next `bcs status` reports as gone anyway.
         }
     }
