@@ -132,6 +132,51 @@ internal static class EditorConsoleCommands
     }
 
 
+    /// <summary>Compiles a fragment of C# and runs it here.</summary>
+    /// <remarks>
+    /// What a catalog of commands cannot cover. The world is in scope as <c>world</c>, a fragment
+    /// with no semicolon is an expression, and anything else has to return to say something:
+    /// <c>eval world.All().Length</c>, or <c>eval var e = world.Spawn(); world.SetName(e, "x");
+    /// return e.Index;</c>.
+    /// </remarks>
+    [Command("eval", "Runs a fragment of C# here: eval <expression or statements>")]
+    internal static string Eval(string code) => EditorEval.Run(code);
+
+    /// <summary>The same, from a file.</summary>
+    [Command("eval.file", "Runs a file of C# here: eval.file <path>")]
+    internal static string EvalFile(string path) => EditorEval.RunFile(path);
+
+    /// <summary>Writes the world to a file.</summary>
+    /// <remarks>
+    /// The named entities and their described components, which is what an edit is. Loading it back
+    /// puts those values onto the entities of the same names, so it is a file of changes over a
+    /// scene rather than the scene itself.
+    /// </remarks>
+    [Command("world.save", "Writes the named entities to a file: world.save <path>")]
+    internal static string WorldSave(string path)
+    {
+        if (path.Length == 0) return "world.save <path>";
+
+        var written = EditorWorld.Save(EditorShell.Ecs, path);
+        return $"wrote {written} entities to {path}";
+    }
+
+    /// <summary>Reads one back.</summary>
+    [Command("world.load", "Reads entity values back from a file: world.load <path>")]
+    internal static string WorldLoad(string path)
+    {
+        if (path.Length == 0) return "world.load <path>";
+
+        if (!File.Exists(path))
+        {
+            ConsoleHost.Fail("NO_SUCH_FILE", $"There is no file at {path}.");
+            return $"no file at {path}";
+        }
+
+        var read = EditorWorld.Load(EditorShell.Ecs, path);
+        return $"applied {read} entities from {path}";
+    }
+
     /// <summary>Closes the editor.</summary>
     [Command("quit", "Closes the editor")]
     internal static string Quit()

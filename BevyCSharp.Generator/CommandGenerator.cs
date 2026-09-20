@@ -63,13 +63,18 @@ public sealed class CommandGenerator : IIncrementalGenerator
         });
     }
 
+    /// <summary>One argument, as the method declared it and as a word is read into it.</summary>
+    /// <param name="Name">The parameter's own name.</param>
+    /// <param name="Kind">Which reader turns a word into it.</param>
+    private readonly record struct ParameterModel(string Name, string Kind);
+
     /// <summary>One command, or what is wrong with the method that asked to be one.</summary>
     private sealed record CommandModel(
         string Name,
         string Help,
         string Usage,
         string Call,
-        EquatableArray<string> Parameters,
+        EquatableArray<ParameterModel> Parameters,
         bool ReturnsText,
         bool TakesLine,
         Diagnostic? Diagnostic = null);
@@ -113,7 +118,7 @@ public sealed class CommandGenerator : IIncrementalGenerator
                 name, location, CommandDiagnostics.WrongReturn, method.Name);
         }
 
-        var parameters = new List<string>();
+        var parameters = new List<ParameterModel>();
         foreach (var parameter in method.Parameters)
         {
             if (Reader(parameter.Type) is not { } reader)
@@ -126,12 +131,12 @@ public sealed class CommandGenerator : IIncrementalGenerator
                     parameter.Type.ToDisplayString());
             }
 
-            parameters.Add(reader);
+            parameters.Add(new ParameterModel(parameter.Name, reader));
         }
 
         // One string parameter takes the whole of what was typed after the name, spaces and all,
         // which is what a command that takes a sentence wants. Anything else is words.
-        var takesLine = parameters.Count == 1 && parameters[0] == "text";
+        var takesLine = parameters.Count == 1 && parameters[0].Kind == "text";
 
         return new CommandModel(
             name,
@@ -139,7 +144,7 @@ public sealed class CommandGenerator : IIncrementalGenerator
             Usage(method),
             method.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
                 + "." + method.Name,
-            new EquatableArray<string>([.. parameters]),
+            new EquatableArray<ParameterModel>([.. parameters]),
             returnsText,
             takesLine);
     }
@@ -152,7 +157,7 @@ public sealed class CommandGenerator : IIncrementalGenerator
             string.Empty,
             string.Empty,
             string.Empty,
-            EquatableArray<string>.Empty,
+            EquatableArray<ParameterModel>.Empty,
             false,
             false,
             Diagnostic.Create(rule, location, arguments));
@@ -204,7 +209,19 @@ public sealed class CommandGenerator : IIncrementalGenerator
 
             EmitBody(source, model);
 
-            source.Append("            }));\n\n");
+            source.Append("            })");
+
+            // A command with no arguments gets no initialiser, so the common case reads the way it
+            // did before there was a schema to carry.
+            if (model.Parameters.Items.Count == 0)
+            {
+                source.Append(");\n\n");
+                continue;
+            }
+
+            source.Append('\n');
+            EmitSchema(source, model);
+            source.Append("            );\n\n");
         }
 
         source.Append("    }\n");
@@ -238,9 +255,9 @@ public sealed class CommandGenerator : IIncrementalGenerator
 
         for (var i = 0; i < parameters.Count; i++)
         {
-            source.Append("                if (!Read").Append(Title(parameters[i]))
+            source.Append("                if (!Read").Append(Title(parameters[i].Kind))
                 .Append("(words[").Append(i).Append("], out var argument").Append(i)
-                .Append(")) return $\"not a ").Append(parameters[i])
+                .Append(")) return $\"not a ").Append(parameters[i].Kind)
                 .Append(": {words[").Append(i).Append("]}\";\n");
         }
 
@@ -259,6 +276,34 @@ public sealed class CommandGenerator : IIncrementalGenerator
         source.Append(");\n");
 
         if (!model.ReturnsText) source.Append("                return null;\n");
+    }
+
+    /// <summary>
+    /// Writes what the command takes, so something that has never seen it can call it.
+    /// </summary>
+    /// <remarks>
+    /// The method already declared all of this, and the alternative is a caller parsing the usage
+    /// string, which is written for a person and says nothing about what a word is read as.
+    /// </remarks>
+    private static void EmitSchema(StringBuilder source, CommandModel model)
+    {
+        var parameters = model.Parameters.Items;
+
+        source.Append("            {\n")
+            .Append("                Parameters =\n")
+            .Append("                [\n");
+
+        foreach (var parameter in parameters)
+        {
+            source.Append("                    new global::Bevy.CommandParameter(")
+                .Append(Quote(parameter.Name)).Append(", ")
+                .Append(Quote(parameter.Kind)).Append(", ")
+                .Append(model.TakesLine ? "true" : "false")
+                .Append("),\n");
+        }
+
+        source.Append("                ],\n")
+            .Append("            }\n");
     }
 
     /// <summary>Writes the readers the bodies call, once per assembly.</summary>

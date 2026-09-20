@@ -464,6 +464,16 @@ selection that cleared itself on the frame it was made, a text field that could 
 `SyntheticInput.Wheel` does the same for the wheel, which is what a list that pages and a camera
 that zooms read. What none of it can do is move the desktop's cursor, and it does not try.
 
+**A running editor can be driven instead, and usually should be.** `./bcs open --editor` starts one
+that answers a socket; `./bcs command input.click 1450 700`, `./bcs command frames.wait 5` and
+`./bcs shot /tmp/after.png` then do from a terminal what a probe script does from the environment,
+against an editor that is already up. The difference is the loop: a probe is one arrangement per
+process, decided before the run starts and read afterwards, while a session is asked and answered a
+frame at a time, so what to do next can depend on what the last answer said. The probe stays for
+what it is better at - a fixed, repeatable arrangement captured the same way every time, with no
+session to keep alive, which is what a comparison of the chrome before and after a change wants,
+and what something running without a display to attach to can do at all.
+
 `BCS_PROBE` names what a run should do, as words separated by commas, and `BCS_SHOT` says where to
 write the picture. `select`, `several` and `many` put something in the world and choose it, `dock`,
 `wide`, `narrow`, `tab`, `assets`, `settings` and `style` arrange the editor, `click`, `hover`,

@@ -20,6 +20,7 @@ const GraphicsBackend Backend = GraphicsBackend.Vulkan;
 //   --window / --headless      choose the mode
 //   --backend                  vulkan|dx12|metal|gl|auto
 //   --frames N                 headless only: run N ticks and exit
+//   --serve                    answer `bcs` while it runs
 //   --verbose                  print a progress line every 20 frames
 var windowed = RunInWindow || args.Contains("--window");
 if (args.Contains("--headless")) windowed = false;
@@ -37,6 +38,10 @@ config.AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets");
 // Asks for the document and stylesheet interface, which is what the sample's own panel is built
 // from. A bridge without it compiled in ignores this and the panel is not opened.
 config.Gui = windowed;
+
+// Answers `bcs` while it runs. A headless run that serves is worth pairing with --frames 0, which
+// runs until something asks it to stop rather than counting down to an exit.
+config.Serve = args.Contains("--serve");
 
 if (windowed && !App.HasRenderer)
 {

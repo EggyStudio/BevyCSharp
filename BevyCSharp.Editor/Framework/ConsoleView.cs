@@ -101,8 +101,22 @@ public sealed class ConsoleView
         _recalled = -1;
         Scroll = 0;
 
-        if (ConsoleCommands.Run(typed) is { Length: > 0 } answer)
-            ConsoleLog.Write(LogLevel.Echo, answer);
+        // The world is lent for the length of the call, because a command that reads or changes an
+        // entity can only do it from inside a frame and has no other way to be handed one. This is
+        // drawn from a system, so the frame is already here; without the loan every command about
+        // the world would answer that it was called from outside one.
+        string? answer;
+
+        if (EditorShell.Context is { } context)
+        {
+            using (ConsoleHost.Lend(context.World)) answer = ConsoleCommands.Run(typed);
+        }
+        else
+        {
+            answer = ConsoleCommands.Run(typed);
+        }
+
+        if (answer is { Length: > 0 }) ConsoleLog.Write(LogLevel.Echo, answer);
     }
 
     /// <summary>What was typed before this, or what is already there at the end of the list.</summary>

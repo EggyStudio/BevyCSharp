@@ -54,6 +54,16 @@ public sealed unsafe class App : IDisposable
     /// <summary>Number of registered systems, across every stage.</summary>
     public int SystemCount => _systems.Count;
 
+    /// <summary>
+    /// The bridge version this build of the library was written against.
+    /// </summary>
+    /// <remarks>
+    /// Checked against what the loaded bridge reports the first time anything touches it, and a
+    /// mismatch is refused there rather than crashing later. Worth reporting by a tool, because a
+    /// bridge that is one rebuild behind is the usual reason an app will not start at all.
+    /// </remarks>
+    public static int AbiVersion => Native.ExpectedAbiVersion;
+
     /// <summary>True when the loaded native bridge has Bevy's renderer compiled in.</summary>
     public static bool HasRenderer => Native.bcs_has_render() != 0;
 

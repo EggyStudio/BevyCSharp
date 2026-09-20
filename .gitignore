@@ -30,6 +30,9 @@ msbuild.log
 /build/artifacts/
 /build/package/
 
+# What an app launched by `bcs open` writes, so its output can be read after it is gone.
+/build/sessions/
+
 # A bare `cargo build` in native/ bypasses the script and defaults to here.
 /native/target/
 

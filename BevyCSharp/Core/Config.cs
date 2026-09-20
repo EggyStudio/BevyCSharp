@@ -119,6 +119,24 @@ public sealed class Config
     public double FixedHz { get; set; }
 
     /// <summary>
+    /// Answer the command line while this app runs.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Opens a socket on the loopback interface and writes a session file, so <c>bcs</c> can ask
+    /// the running app what it holds, run any console command against it, and capture what it
+    /// draws, without stopping it. The alternative is a process per question, which is a second of
+    /// startup and a fresh world for every answer.
+    /// </para>
+    /// <para>
+    /// Off unless asked for, because it is a port. <c>BCS_SERVE</c> in the environment turns it on
+    /// for a run that cannot be recompiled, and the sample and the editor both accept
+    /// <c>--serve</c>.
+    /// </para>
+    /// </remarks>
+    public bool Serve { get; set; }
+
+    /// <summary>
     /// Rethrow exceptions escaping a system instead of logging them and continuing.
     /// </summary>
     /// <remarks>
@@ -153,9 +171,10 @@ public sealed class Config
     };
 
     /// <inheritdoc/>
-    public override string ToString() => Headless
-        ? $"Config(headless, fps={HeadlessFps}, frames={HeadlessFrames})"
-        : $"Config('{Title}', {Width}x{Height}, vsync={Vsync}, backend={Backend})";
+    public override string ToString() => (Headless
+        ? $"Config(headless, fps={HeadlessFps}, frames={HeadlessFrames}"
+        : $"Config('{Title}', {Width}x{Height}, vsync={Vsync}, backend={Backend}")
+        + (Serve ? ", serving)" : ")");
 }
 
 /// <summary>

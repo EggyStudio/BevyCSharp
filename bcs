@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+# Runs the BevyCSharp command line out of this checkout, building it once if it is not there.
+#
+# The point of a script rather than a global tool install is that an agent working in a fresh
+# clone can use `./bcs` immediately, and that the CLI it runs is always this checkout's.
+set -eu
+
+root=$(cd "$(dirname "$0")" && pwd)
+binary="$root/BevyCSharp.Cli/bin/Debug/net10.0/bcs"
+
+if [ ! -x "$binary" ]; then
+    dotnet build "$root/BevyCSharp.Cli/BevyCSharp.Cli.csproj" -v q --nologo >&2
+fi
+
+exec "$binary" "$@"
