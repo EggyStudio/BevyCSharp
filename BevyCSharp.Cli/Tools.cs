@@ -33,12 +33,23 @@ internal static partial class Tools
 
         if (native)
         {
-            var script = Path.Combine(Repo.Root, "build", "build-native.sh");
-
+            // The two scripts are twins that produce identical output, and they spell their
+            // profiles differently, so the flag is chosen with the script rather than passed
+            // through.
             bridge = OperatingSystem.IsWindows()
-                ? Shell.Run("pwsh", [Path.Combine(Repo.Root, "build", "build-native.ps1"),
-                    .. Profile(profile)], Repo.Root, echo)
-                : Shell.Run(script, Profile(profile), Repo.Root, echo);
+                ? Shell.Run(
+                    "pwsh",
+                    [
+                        "-File", Path.Combine(Repo.Root, "build", "build-native.ps1"),
+                        .. Profile(profile, windows: true),
+                    ],
+                    Repo.Root,
+                    echo)
+                : Shell.Run(
+                    Path.Combine(Repo.Root, "build", "build-native.sh"),
+                    Profile(profile, windows: false),
+                    Repo.Root,
+                    echo);
 
             if (!bridge.Ok)
             {
@@ -291,11 +302,13 @@ internal static partial class Tools
         });
     }
 
-    /// <summary>The flags a build profile becomes.</summary>
-    private static string[] Profile(string? profile) => profile switch
+    /// <summary>The flag a build profile becomes, in the spelling that script understands.</summary>
+    private static string[] Profile(string? profile, bool windows) => profile switch
     {
-        "--render" => ["--render"],
-        "--editor" => ["--editor"],
+        "--render" => windows ? ["-Render"] : ["--render"],
+        "--editor" => windows ? ["-Editor"] : ["--editor"],
+
+        // Neither script takes a flag for the headless profile, which is what it builds by default.
         _ => [],
     };
 

@@ -1680,6 +1680,9 @@ run against a real Bevy app. Known gaps:
   material, is not written, so the file is a set of edits over a scene rather than the scene.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
+- Capturing the window needs one. The bridge captures the primary window rather than a render
+  target, so a headless run answers `NO_WINDOW` instead of producing a picture, and a machine with
+  no display cannot check what a change draws.
 
 ## Contributing
 

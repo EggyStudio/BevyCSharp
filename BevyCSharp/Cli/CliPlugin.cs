@@ -73,7 +73,15 @@ public sealed class CliPlugin : IPlugin
         AppDomain.CurrentDomain.ProcessExit += (_, _) => Close();
     }
 
-    /// <summary>Answers what has been asked, and says the app is still here.</summary>
+    /// <summary>
+    /// Answers what has been asked, and says the app is still here.
+    /// </summary>
+    /// <remarks>
+    /// A heartbeat that cannot be written is swallowed, because the app is running whether or not
+    /// its file says so, and an exception out of a system on a transient filesystem error would
+    /// stop a session over bookkeeping. The first write, in <see cref="Build"/>, is not swallowed:
+    /// a directory that cannot be written to at all means nothing will ever find this app.
+    /// </remarks>
     private void Tick(App app, World world)
     {
         _queue.Pump(world);
@@ -81,7 +89,14 @@ public sealed class CliPlugin : IPlugin
         var frame = Frame(world);
         if (frame % Beat != 0) return;
 
-        CliSessionFile.Write(Describe(app, "ready", frame));
+        try
+        {
+            CliSessionFile.Write(Describe(app, "ready", frame));
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            // Tried again on the next beat.
+        }
     }
 
     /// <summary>Stops serving and takes the session file back out.</summary>

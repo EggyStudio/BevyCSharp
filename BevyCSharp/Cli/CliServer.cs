@@ -31,7 +31,6 @@ internal sealed class CliServer : IDisposable
 {
     private readonly CliQueue _queue;
     private readonly TcpListener _listener;
-    private readonly List<Thread> _connections = [];
     private volatile bool _stopping;
 
     /// <summary>Starts listening, on a port chosen by the kernel.</summary>
@@ -85,15 +84,14 @@ internal sealed class CliServer : IDisposable
                 return;
             }
 
-            var thread = new Thread(() => Serve(caller))
+            // Not tracked once started. A connection ends with its socket, the thread is a
+            // background one so it holds nothing open, and a list of them would grow by one per
+            // command for the life of the app and never be read.
+            new Thread(() => Serve(caller))
             {
                 IsBackground = true,
                 Name = "bcs-cli-connection",
-            };
-
-            lock (_connections) _connections.Add(thread);
-
-            thread.Start();
+            }.Start();
         }
     }
 

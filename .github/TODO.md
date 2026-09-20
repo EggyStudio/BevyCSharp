@@ -246,6 +246,12 @@ What is left:
   monitor's list of video modes is a list of structs, so exclusive fullscreen takes the monitor's
   current mode rather than offering a resolution to pick from. Multiple windows are also
   unbridged: every entry point here addresses the primary one.
+- **Capturing without a window.** `bcs_render_screenshot` spawns
+  `Screenshot::primary_window()`, so a run that opened none captures nothing and the console's
+  `shot` command answers `NO_WINDOW`. `Screenshot::image(Handle<Image>)` captures a render target
+  instead, so a headless run could produce a picture given the same empty image asset the camera
+  bullet above needs for render-to-texture. That is what would let a machine with no display
+  check what a change draws, which today only a windowed session can do.
 - **Verification**: the tests assert that settings are accepted and that a windowless run
   refuses, which is what can go wrong silently. Whether the picture is right is confirmed by
   running the sample, which uses a custom clear color, a tinted sun, a spot light, a bokeh
