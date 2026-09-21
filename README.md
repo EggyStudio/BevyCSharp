@@ -688,6 +688,45 @@ It is measured in physical pixels rather than logical ones, because that is what
 divided into. `Layers` decides what a camera can see at all: a camera draws an entity only where
 their layers overlap, so a minimap shows different things from the main view.
 
+A camera can draw into an image instead of into the window, which is what a portal, a security
+monitor, a mirror or a second viewport is:
+
+```csharp
+var target = Render.CreateTarget(512, 512);
+var watcher = Render.SpawnCamera3d(new CameraSettings { Order = 1 });
+
+ctx.Ecs.Add(watcher, Transform.LookingAt(new Vec3(0f, 6f, 0f), Vec3.Zero, Vec3.UnitZ));
+Render.SetCameraTarget(watcher, target);
+
+// The same handle, read as a texture, so the screen shows what that camera sees.
+Render.SetMaterial(ctx.Ecs, screen, Render.CreateMaterial(new MaterialSettings
+{
+    BaseColorTexture = target,
+}));
+```
+
+The image is empty until something draws into it, and the handle is usable on the frame it is
+returned, because nothing loads. `Render.SetCameraTarget(camera, AssetHandle.None)` puts the
+camera back on the window, and `Render.Screenshot(path, target)` writes out what it drew, which is
+how a view nothing on screen shows can be checked.
+
+A picture can also come back into memory instead of into a file, which is what asserting on what
+was drawn needs:
+
+```csharp
+var ticket = Render.BeginCapture(target);       // or BeginCapture() for what the run is drawing
+
+// A frame or two later, because the picture has to come back off the GPU:
+if (Render.TryReadCapture(ticket, out var picture))
+{
+    var (r, g, b, a) = picture.At(16, 8);       // four bytes a pixel, rows top to bottom
+}
+```
+
+`TryReadCapture` answers false while the picture is still on its way, hands it over once it has
+arrived, and drops the engine's copy when it does. `Render.ReleaseCapture(ticket)` is for a caller
+that stopped waiting.
+
 Shadows are tuned per light and sized globally:
 
 ```csharp
@@ -1696,9 +1735,8 @@ run against a real Bevy app. Known gaps:
   material, is not written, so the file is a set of edits over a scene rather than the scene.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
-- A camera is pointed at a window, or at the image an offscreen run draws into, and nothing else.
-  There is no managed way to create an image and aim a camera at it, which is what a portal, a
-  security monitor or a second viewport would need.
+- An image to draw into is created empty at a size. Loading one, or creating a cubemap, has no
+  bridge, so a skybox and the light probes that would light a room to match it are out of reach.
 
 ## Contributing
 

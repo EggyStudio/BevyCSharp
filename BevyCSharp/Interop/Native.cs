@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 74;
+    internal const int ExpectedAbiVersion = 76;
 
     static Native() => NativeLoader.Initialize();
 
@@ -501,10 +501,36 @@ internal static unsafe partial class Native
     internal static partial int bcs_render_set_atmosphere(
         ulong camera, NativeAtmosphereConfig* config);
 
-    /// <summary>Writes what the window is showing to a PNG file.</summary>
+    /// <summary>Writes what a camera drew to a PNG file.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_render_screenshot(string path);
+    internal static partial int bcs_render_screenshot(string path, int target);
+
+    /// <summary>Creates an empty image a camera can draw into.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_create_target(uint width, uint height);
+
+    /// <summary>Asks for a picture to be read back into memory.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_capture(int target);
+
+    /// <summary>Reads a capture, and forgets it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_capture_read(
+        int id, uint* width, uint* height, byte* buffer, int capacity);
+
+    /// <summary>Forgets a capture that will not be read.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_capture_release(int id);
+
+    /// <summary>Points a camera at an image, or back at the window.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_camera_target(ulong entity, int image);
 
     /// <summary>Sets the shadow map size for each kind of light.</summary>
     [LibraryImport(Library)]

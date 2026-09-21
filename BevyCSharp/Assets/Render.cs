@@ -475,8 +475,8 @@ public static unsafe class Render
     /// <remarks>
     /// <para>
     /// The window, or the image an offscreen run draws into instead. Which one is not the caller's
-    /// to choose: a run has one thing it is drawing, and a capture is a picture of that. A headless
-    /// run draws nothing and captures nothing.
+    /// to choose, because a run has one thing it is drawing and a capture is a picture of that. A
+    /// headless run draws nothing and captures nothing.
     /// </para>
     /// <para>
     /// The capture happens on the frame after this call, because the picture has to come back off
@@ -495,8 +495,166 @@ public static unsafe class Render
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
 
-        Native.Check(Native.bcs_render_screenshot(path), $"capturing the window to {path}");
+        Native.Check(
+            Native.bcs_render_screenshot(path, AssetHandle.None.Key),
+            $"capturing what is being drawn to {path}");
     }
+
+    /// <summary>
+    /// Writes what a camera drew into an image to a PNG file.
+    /// </summary>
+    /// <remarks>
+    /// The other end of <see cref="CreateTarget"/>. A camera pointed at a texture draws a picture
+    /// nothing on screen shows, and this is how it is read back: a minimap, a portal, or a second
+    /// viewport, checked without a person looking at the window it is not in.
+    /// </remarks>
+    /// <param name="path">Where to write the PNG. Relative paths are resolved by the process.</param>
+    /// <param name="target">The image to capture, from <see cref="CreateTarget"/>.</param>
+    /// <exception cref="BevyNativeException">
+    /// This build has no renderer, or the handle names no image.
+    /// </exception>
+    public static void Screenshot(string path, AssetHandle target)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+
+        Native.Check(
+            Native.bcs_render_screenshot(path, target.Key), $"capturing {target} to {path}");
+    }
+
+    /// <summary>
+    /// Asks for a picture to be read back into memory rather than written to a file.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The same capture <see cref="Screenshot(string)"/> takes, delivered as bytes instead of as a
+    /// PNG. A file is for a person to look at; this is for a program to inspect, which is what
+    /// asserting on what was drawn needs.
+    /// </para>
+    /// <para>
+    /// The picture arrives a frame or two later, because it has to come back off the GPU, so this
+    /// answers with a ticket rather than with pixels. Poll
+    /// <see cref="TryReadCapture(Capture, out CapturedImage?)"/> until it says yes, from a later
+    /// frame rather than in a loop, because the frames are what the picture is waiting on.
+    /// </para>
+    /// <para>
+    /// A capture of the first frames of a run is a picture of a window that has been cleared and
+    /// not yet drawn into, which reads as fully transparent black. Ask once the scene is up.
+    /// </para>
+    /// </remarks>
+    /// <param name="target">
+    /// The image to capture, from <see cref="CreateTarget"/>, or
+    /// <see cref="AssetHandle.None"/> for whatever this run is drawing into.
+    /// </param>
+    /// <returns>A ticket naming the capture.</returns>
+    /// <exception cref="BevyNativeException">
+    /// This build has no renderer, or the handle names no image.
+    /// </exception>
+    public static Capture BeginCapture(AssetHandle target)
+    {
+        var id = Native.bcs_render_capture(target.Key);
+        if (id == NativeStatus.Unsupported) throw NoRenderer("Capturing a picture");
+
+        Native.Check(id, $"asking for a capture of {target}");
+        return new Capture(id);
+    }
+
+    /// <summary>Asks for a picture of whatever this run is drawing into.</summary>
+    public static Capture BeginCapture() => BeginCapture(AssetHandle.None);
+
+    /// <summary>
+    /// Reads a capture once it has arrived, and forgets it.
+    /// </summary>
+    /// <remarks>
+    /// False means the picture is still on its way, which is the ordinary answer for the first
+    /// frame or two. True hands it over and drops the engine's copy, because it is a megabyte or
+    /// two and nothing on that side knows when the caller would be done with it.
+    /// </remarks>
+    /// <param name="capture">The ticket from <see cref="BeginCapture(AssetHandle)"/>.</param>
+    /// <param name="picture">The pixels, when this returns true.</param>
+    /// <returns>Whether the picture had arrived.</returns>
+    /// <exception cref="BevyNativeException">The ticket names no capture.</exception>
+    public static bool TryReadCapture(Capture capture, out CapturedImage? picture)
+    {
+        picture = null;
+
+        uint width;
+        uint height;
+
+        var needed = Native.bcs_render_capture_read(capture.Id, &width, &height, null, 0);
+
+        // Still coming back off the GPU. Asking again next frame is the whole of the protocol.
+        if (needed == NativeStatus.InvalidState) return false;
+        if (needed == NativeStatus.Unsupported) throw NoRenderer("Reading a capture");
+
+        Native.Check(needed, $"asking how large {capture} is");
+
+        var pixels = new byte[needed];
+
+        fixed (byte* buffer = pixels)
+        {
+            Native.Check(
+                Native.bcs_render_capture_read(capture.Id, &width, &height, buffer, needed),
+                $"reading {capture}");
+        }
+
+        picture = new CapturedImage(width, height, pixels);
+        return true;
+    }
+
+    /// <summary>Forgets a capture that will not be read.</summary>
+    /// <remarks>
+    /// For a caller that stopped waiting. A capture that has arrived holds its pixels until
+    /// something drops them, and one that never arrives holds nothing.
+    /// </remarks>
+    public static void ReleaseCapture(Capture capture) =>
+        Native.Check(Native.bcs_render_capture_release(capture.Id), $"releasing {capture}");
+
+    /// <summary>
+    /// Creates an empty image a camera can draw into.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What a portal, a security monitor, a minimap or a second viewport is built from. Point a
+    /// camera at it with <see cref="SetCameraTarget"/>, and give the same handle to a material as
+    /// its <see cref="MaterialSettings.BaseColorTexture"/>, and the surface carrying that material
+    /// shows what the camera sees.
+    /// </para>
+    /// <para>
+    /// The image is empty until something draws into it, and nothing loads, so the handle is
+    /// usable on the frame it is returned. It is sized in pixels rather than in logical units,
+    /// because nothing about it is scaled by a desktop.
+    /// </para>
+    /// </remarks>
+    /// <param name="width">Width in pixels.</param>
+    /// <param name="height">Height in pixels.</param>
+    /// <returns>A handle to the image.</returns>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static AssetHandle CreateTarget(uint width, uint height)
+    {
+        var key = Native.bcs_render_create_target(width, height);
+        if (key == NativeStatus.Unsupported) throw NoRenderer("Creating a render target");
+
+        Native.Check(key, $"creating a {width}x{height} render target");
+        return new AssetHandle(key);
+    }
+
+    /// <summary>
+    /// Points a camera at an image instead of at the window.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="AssetHandle.None"/> puts it back on the window, which is where a camera starts.
+    /// The camera keeps everything else it was given, because its projection, its layers, its
+    /// order and its post-processing are about what it draws rather than about where the result
+    /// goes.
+    /// </remarks>
+    /// <param name="camera">The camera, from <see cref="SpawnCamera3d(CameraSettings)"/>.</param>
+    /// <param name="target">The image to draw into, or <see cref="AssetHandle.None"/> for the window.</param>
+    /// <exception cref="BevyNativeException">
+    /// The entity is not a camera, or the handle names no image.
+    /// </exception>
+    public static void SetCameraTarget(Entity camera, AssetHandle target) => Native.Check(
+        Native.bcs_render_set_camera_target(camera.Bits, target.Key),
+        $"pointing {camera} at {target}");
 
     /// <summary>
     /// Where a world point lands on a camera's viewport, in logical pixels.

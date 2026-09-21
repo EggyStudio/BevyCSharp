@@ -126,7 +126,7 @@ public sealed class Config
     /// The renderer without a screen. Everything else about the run is what it would be in a
     /// window, down to the plugins that are installed and the cameras that draw.
     /// <see cref="Width"/> and <see cref="Height"/> size the image the way they would size the
-    /// window, and <see cref="Render.Screenshot"/> captures it.
+    /// window, and <see cref="Render.Screenshot(string)"/> captures it.
     /// </para>
     /// <para>
     /// What it is for is a machine with no display. A windowed run needs a display server to open

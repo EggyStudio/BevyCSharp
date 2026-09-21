@@ -231,13 +231,14 @@ What is left:
 - **Order-independent transparency** and `Skybox` are both camera components as well.  A skybox
   needs a cubemap, which the asset surface cannot load, and that same gap blocks light probes
   below.
-- **Camera**: render layers and viewports are bridged, so splitscreen and a minimap are
-  expressible. Render-to-texture is bridged for the whole run rather than per camera. An offscreen
-  run creates one image at the configured size and points every camera at it, which is what draws
-  a picture on a machine with no display. What is missing is the per-camera case, where one camera
-  draws into a texture the scene then samples, which is what a security monitor, a portal or a
-  reflection needs. That needs an image created empty at a given size and a handle to it on the
-  managed side, which `Render.CreateMaterial` and the asset surface have no way to ask for.
+- **Camera**: render layers, viewports and render-to-texture are bridged, so splitscreen, a
+  minimap, a portal and an offscreen run are all expressible. `Render.CreateTarget` makes an empty
+  image, `Render.SetCameraTarget` points a camera at it, and a material sampling the same handle
+  shows what that camera drew, and `Render.BeginCapture` reads a target back into managed memory as
+  RGBA bytes. What is left is the shape of the target rather than the mechanism. A cubemap, which a
+  skybox and the light probes below both need, cannot be created or loaded, and an image cannot be
+  created from bytes the managed side already holds, which is what a caller that generated a
+  texture rather than loading one would want.
 - **Lights**: shadow bias is per light and shadow map size is settable. What is left is optical
   rather than structural: a spot light has no cookie texture to shape its beam, cascade
   configuration for a directional light's shadow distance is Bevy's default, and light probes,
@@ -249,9 +250,11 @@ What is left:
   current mode rather than offering a resolution to pick from. Multiple windows are also
   unbridged: every entry point here addresses the primary one.
 - **Verification**: the tests assert that settings are accepted and that a run with no renderer
-  refuses, which is what can go wrong silently, and an offscreen run captures a picture of a real
-  scene so that a machine with no display can check that anything was drawn at all. Whether the
-  picture is *right* is confirmed by running the sample, which uses a custom clear color, a tinted sun, a spot light, a bokeh
+  refuses, which is what can go wrong silently. An offscreen run captures a picture of a real scene
+  so that a machine with no display can check that anything was drawn at all, and a capture read
+  back into memory is asserted on pixel by pixel, which is how the colour a camera was told to
+  clear to is checked rather than assumed. Whether a whole scene is *right* is confirmed by running
+  the sample, which uses a custom clear color, a tinted sun, a spot light, a bokeh
   focus on the cube and a vignette, and binds F11 to fullscreen and Tab to cursor lock. An effect
   is worth checking against a second run with it turned off: bloom was confirmed that way, since
   a halo is obvious beside the same frame without one and easy to imagine without the

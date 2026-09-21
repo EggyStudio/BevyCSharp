@@ -7,8 +7,12 @@ use crate::state::{with_world, with_world_opt};
 
 /// Writes what is being drawn to a PNG file.
 ///
-/// The window, or the image an offscreen run draws into instead. Which one is not the caller's to
-/// decide: a run has exactly one thing it is drawing, and a capture is a picture of that.
+/// A negative `target` captures whatever this run is drawing into, which is the window, or the
+/// image an offscreen run draws into instead. Which of those it is is not the caller's to decide,
+/// because a run has one thing it is drawing and a capture is a picture of that.
+///
+/// An asset key instead captures that image, which is how the view of a camera pointed at a
+/// texture is read back: a minimap, a portal, or the second viewport an editor draws.
 ///
 /// The capture happens on the frame after this call, because the picture has to come back off the
 /// GPU, and the file appears once it has. A caller that wants to know it arrived watches for the
@@ -21,11 +25,11 @@ use crate::state::{with_world, with_world_opt};
 /// # Safety
 /// `path` must be a NUL-terminated UTF-8 string.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn bcs_render_screenshot(path: *const core::ffi::c_char) -> i32 {
+pub unsafe extern "C" fn bcs_render_screenshot(path: *const core::ffi::c_char, target: i32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = path;
+            let _ = (path, target);
             status::UNSUPPORTED
         }
 
@@ -38,12 +42,259 @@ pub unsafe extern "C" fn bcs_render_screenshot(path: *const core::ffi::c_char) -
             };
 
             with_world(|world| {
-                let capture = match world.get_resource::<crate::app::OffscreenTarget>() {
-                    Some(target) => Screenshot::image(target.image.clone()),
-                    None => Screenshot::primary_window(),
+                let capture = match crate::render::image_handle(world, target) {
+                    Err(refusal) => return refusal,
+                    Ok(Some(image)) => Screenshot::image(image),
+                    Ok(None) => match world.get_resource::<crate::app::OffscreenTarget>() {
+                        Some(target) => Screenshot::image(target.image.clone()),
+                        None => Screenshot::primary_window(),
+                    },
                 };
 
                 world.spawn(capture).observe(save_to_disk(path));
+                status::OK
+            })
+        }
+    })
+}
+
+/// A picture that has come back off the GPU, waiting to be read.
+///
+/// Held as straight RGBA bytes rather than as Bevy's `Image`, because what the managed side can do
+/// with it is copy it, and converting once here beats handing over a format that depends on what
+/// this run happens to be drawing into.
+#[cfg(feature = "render")]
+struct CapturedPixels {
+    /// Width in pixels.
+    width: u32,
+    /// Height in pixels.
+    height: u32,
+    /// Four bytes a pixel, rows top to bottom.
+    rgba: Vec<u8>,
+}
+
+/// The captures asked for and not yet read.
+///
+/// A capture is answered frames after it is asked for, so it cannot be a return value. Each one is
+/// given a number when it is asked for, and the number is what the managed side holds on to until
+/// the picture arrives.
+#[cfg(feature = "render")]
+#[derive(bevy::ecs::resource::Resource, Default)]
+struct Captures {
+    /// The last number handed out. Counts up, so a released number is never reused and a stale
+    /// read is refused rather than answered with somebody else's picture.
+    last: i32,
+    /// What has arrived, by number.
+    ready: bevy::platform::collections::HashMap<i32, CapturedPixels>,
+}
+
+/// Asks for a picture to be read back into memory rather than written to a file.
+///
+/// A negative `target` captures whatever this run is drawing into, and an asset key captures that
+/// image, exactly as [`bcs_render_screenshot`] does. What differs is where the picture goes. A file
+/// is for a person to look at, and this is for a program to inspect, which is what asserting on a
+/// pixel needs.
+///
+/// Returns a positive number naming the capture. The picture arrives a frame or two later, because
+/// it has to come back off the GPU, and [`bcs_render_capture_read`] says when.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_capture(target: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = target;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::ecs::system::ResMut;
+            use bevy::render::view::screenshot::{Screenshot, ScreenshotCaptured};
+
+            with_world(|world| {
+                let capture = match crate::render::image_handle(world, target) {
+                    Err(refusal) => return refusal,
+                    Ok(Some(image)) => Screenshot::image(image),
+                    Ok(None) => match world.get_resource::<crate::app::OffscreenTarget>() {
+                        Some(target) => Screenshot::image(target.image.clone()),
+                        None => Screenshot::primary_window(),
+                    },
+                };
+
+                let mut captures = world.get_resource_or_init::<Captures>();
+                captures.last += 1;
+
+                let id = captures.last;
+
+                world.spawn(capture).observe(
+                    move |captured: bevy::ecs::observer::On<ScreenshotCaptured>,
+                          mut captures: ResMut<Captures>| {
+                        // Converted here, once, while there is still something that knows what
+                        // format the picture arrived in.
+                        let Ok(image) = captured.image.clone().try_into_dynamic() else {
+                            return;
+                        };
+
+                        let rgba = image.to_rgba8();
+
+                        captures.ready.insert(
+                            id,
+                            CapturedPixels {
+                                width: rgba.width(),
+                                height: rgba.height(),
+                                rgba: rgba.into_raw(),
+                            },
+                        );
+                    },
+                );
+
+                id
+            })
+        }
+    })
+}
+
+/// Reads a capture, and forgets it.
+///
+/// Follows the same shape as [`crate::app::bcs_render_adapter`]: a null `buffer` answers with the
+/// number of bytes the picture needs, and a second call with a buffer that size copies it out. The
+/// picture is dropped once it has been copied, because it is a megabyte or two and nothing here
+/// knows when the caller would otherwise be done with it.
+///
+/// Answers [`status::INVALID_STATE`] while the picture is still coming back off the GPU, which is
+/// the normal answer for the first frame or two, and [`status::NOT_PRESENT`] for a number that
+/// names nothing.
+///
+/// # Safety
+/// `width` and `height` must be writable or null, and `buffer` must be null or point to at least
+/// `capacity` writable bytes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_capture_read(
+    id: i32,
+    width: *mut u32,
+    height: *mut u32,
+    buffer: *mut u8,
+    capacity: i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (id, width, height, buffer, capacity);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_world(|world| {
+                let Some(mut captures) = world.get_resource_mut::<Captures>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                let Some(picture) = captures.ready.get(&id) else {
+                    // Either still on its way back or never asked for. The two are told apart by
+                    // whether the number was ever handed out, which counting up makes cheap.
+                    return if id > 0 && id <= captures.last {
+                        status::INVALID_STATE
+                    } else {
+                        status::NOT_PRESENT
+                    };
+                };
+
+                if !width.is_null() {
+                    unsafe { width.write(picture.width) };
+                }
+                if !height.is_null() {
+                    unsafe { height.write(picture.height) };
+                }
+
+                let needed = picture.rgba.len() as i32;
+
+                if buffer.is_null() {
+                    return needed;
+                }
+
+                if capacity < needed {
+                    return status::BUFFER_TOO_SMALL;
+                }
+
+                unsafe {
+                    core::ptr::copy_nonoverlapping(
+                        picture.rgba.as_ptr(),
+                        buffer,
+                        picture.rgba.len(),
+                    );
+                }
+
+                captures.ready.remove(&id);
+                needed
+            })
+        }
+    })
+}
+
+/// Forgets a capture that will not be read.
+///
+/// For a caller that stopped waiting. A capture that never arrives holds nothing, and one that has
+/// arrived holds its pixels until something drops them.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_capture_release(id: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = id;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_world(|world| match world.get_resource_mut::<Captures>() {
+                Some(mut captures) => {
+                    captures.ready.remove(&id);
+                    status::OK
+                }
+                None => status::OK,
+            })
+        }
+    })
+}
+
+/// Points a camera at an image instead of at the window.
+///
+/// A negative `image` puts it back on the window, which is where a camera starts. The image comes
+/// from [`crate::render::assets::bcs_render_create_target`], and a material given the same handle
+/// samples what this camera drew, which is the whole of a portal or a security monitor.
+///
+/// The camera keeps everything else it was given. Its projection, its layers, its order and its
+/// post-processing are about what it draws rather than about where the result goes.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_camera_target(entity: u64, image: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, image);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::camera::RenderTarget;
+            use bevy::ecs::entity::Entity;
+            use bevy::window::WindowRef;
+
+            let entity = Entity::from_bits(entity);
+
+            with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let target = match crate::render::image_handle(world, image) {
+                    Err(refusal) => return refusal,
+                    Ok(Some(image)) => RenderTarget::Image(image.into()),
+                    Ok(None) => RenderTarget::Window(WindowRef::Primary),
+                };
+
+                world.entity_mut(entity).insert(target);
                 status::OK
             })
         }

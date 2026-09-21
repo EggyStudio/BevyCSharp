@@ -67,6 +67,78 @@ pub unsafe extern "C" fn bcs_mesh_create(
     })
 }
 
+/// Builds an empty image sized for a camera to draw into.
+///
+/// The usages are what separate a texture that can be drawn into and copied out of from one that
+/// can only be sampled. Without `RENDER_ATTACHMENT` a camera cannot target it, and without
+/// `COPY_SRC` a capture finds nothing to read back.
+#[cfg(feature = "render")]
+pub(crate) fn target_image(width: u32, height: u32) -> bevy::image::Image {
+    use bevy::asset::RenderAssetUsages;
+    use bevy::image::Image;
+    use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat, TextureUsages};
+
+    let size = Extent3d {
+        width: width.max(1),
+        height: height.max(1),
+        depth_or_array_layers: 1,
+    };
+
+    // Opaque black rather than transparent, because a picture of a scene with nothing in front of
+    // the camera should look like an empty scene rather than like a failure. The format is named
+    // outright: Bevy deprecated its default in favour of asking the view, and a target created
+    // before there is a view to ask has to choose one.
+    let mut image = Image::new_fill(
+        size,
+        TextureDimension::D2,
+        &[0, 0, 0, 255],
+        TextureFormat::Rgba8UnormSrgb,
+        RenderAssetUsages::default(),
+    );
+
+    image.texture_descriptor.usage =
+        TextureUsages::COPY_SRC | TextureUsages::RENDER_ATTACHMENT | TextureUsages::TEXTURE_BINDING;
+
+    image
+}
+
+/// Creates an image a camera can draw into, and returns an asset handle for it.
+///
+/// The other half of [`crate::render::scene::bcs_render_set_camera_target`], and what a portal, a
+/// security monitor or a second viewport is built from. A camera draws into this image, and a
+/// material sampling the same handle shows what that camera sees.
+///
+/// The image is empty until something draws into it. Nothing loads, so the handle is usable on the
+/// frame it is returned.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_create_target(width: u32, height: u32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (width, height);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::asset::Assets;
+            use bevy::image::Image;
+
+            with_world(|world| {
+                let image = target_image(width, height);
+
+                let Some(mut images) = world.get_resource_mut::<Assets<Image>>() else {
+                    return status::UNSUPPORTED;
+                };
+
+                let handle = images.add(image).untyped();
+
+                crate::assets::insert_handle(world, handle)
+            })
+        }
+    })
+}
+
 /// Builds a physically based material and returns an asset handle for it.
 ///
 /// Color components are linear sRGB in the range zero to one. `metallic` and `roughness` follow

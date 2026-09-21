@@ -110,40 +110,19 @@ pub struct OffscreenTarget {
 /// interface spawns for itself, without either having to know how this run is drawing.
 #[cfg(feature = "render")]
 fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
-    use bevy::asset::{Assets, RenderAssetUsages};
+    use bevy::asset::Assets;
     use bevy::camera::{Camera, RenderTarget};
     use bevy::ecs::query::With;
     use bevy::ecs::system::{Commands, Query, Res, ResMut};
     use bevy::image::Image;
-    use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat, TextureUsages};
     use bevy::window::WindowRef;
 
     app.add_systems(
         Startup,
         move |mut commands: Commands, mut images: ResMut<Assets<Image>>| {
-            let size = Extent3d {
-                width,
-                height,
-                depth_or_array_layers: 1,
-            };
-
-            // Opaque black rather than transparent, because a picture of a scene with nothing in
-            // front of the camera should look like an empty scene rather than like a failure.
-            // The format is named outright: Bevy deprecated its default in favour of asking the
-            // view, and a target created before there is a view to ask has to choose one.
-            let mut image = Image::new_fill(
-                size,
-                TextureDimension::D2,
-                &[0, 0, 0, 255],
-                TextureFormat::Rgba8UnormSrgb,
-                RenderAssetUsages::default(),
-            );
-
-            // What separates a texture that can be drawn into and read back from one that can only
-            // be sampled. Without `COPY_SRC` the capture finds nothing to copy.
-            image.texture_descriptor.usage = TextureUsages::COPY_SRC
-                | TextureUsages::RENDER_ATTACHMENT
-                | TextureUsages::TEXTURE_BINDING;
+            // The same image a camera is given one of when a portal or a minimap asks for one.
+            // What makes this one the run's is that every camera is pointed at it below.
+            let image = crate::render::assets::target_image(width, height);
 
             commands.insert_resource(OffscreenTarget {
                 image: images.add(image),
