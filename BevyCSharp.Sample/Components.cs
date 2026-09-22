@@ -27,7 +27,7 @@ public struct Velocity
 
 /// <summary>Marks an entity that should be affected by gravity.</summary>
 /// <remarks>
-/// A zero-field struct is a tag: it costs nothing to store and is used purely to include or
+/// A zero-field struct is a tag. It costs nothing to store, and is used purely to include or
 /// exclude entities with <c>[With]</c> and <c>[Without]</c>.
 /// </remarks>
 public struct Falls;

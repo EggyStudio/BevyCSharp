@@ -287,8 +287,9 @@ public static class WorldPanel
                 // mistake to make in a list, and an editor where one of the things a click does
                 // cannot be undone is one nobody trusts the rest of.
                 //
-                // No key, so each click is its own entry rather than the last one continued: two
-                // clicks on an eye are two changes of mind, not one edit still being made.
+                // No key, so each click is its own entry rather than the last one continued,
+                // because two clicks on an eye are two changes of mind rather than one edit still
+                // being made.
                 EditorHistory.Record(
                     now.Mode == VisibilityMode.Hidden ? $"hide {row.Name}" : $"show {row.Name}",
                     undo => undo.Set(which, was),

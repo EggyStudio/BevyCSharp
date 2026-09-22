@@ -40,12 +40,12 @@ public partial struct Scene
             + "middle button to slide; wheel to move along the view; Alt and the left button to "
             + "orbit; F to frame the origin");
 
-        // The sky, scattered from the sun below rather than painted: it is what the camera sees
+        // The sky, scattered from the sun below rather than painted. It is what the camera sees
         // where the scene does not cover, and what tints everything in the distance.
         Render.SetAtmosphere(camera, new AtmosphereSettings());
 
         // What the camera does with the picture once the scene is drawn. The high dynamic range
-        // target is what makes the rest worth having: without it nothing is brighter than white,
+        // target is what makes the rest worth having. Without it nothing is brighter than white,
         // so the tonemapper has nothing to bring down and bloom has nothing to scatter.
         Render.SetPostProcessing(camera, new PostSettings
         {

@@ -491,8 +491,8 @@ public sealed record EditorTheme
     /// Red, green and blue for X, Y and Z, which is what every editor uses.
     /// </summary>
     /// <remarks>
-    /// Not part of a theme, because which arm is which is not a matter of taste: somebody reading a
-    /// picture of three arms expects the red one to be X wherever they last saw one. Written the way
+    /// Not part of a theme, because which arm is which is not a matter of taste. Somebody reading
+    /// a picture of three arms expects the red one to be X wherever they last saw one. Written the way
     /// a color is picked, so whatever draws in the scene puts it through <see cref="Linear"/> first
     /// and the cross in the corner and the handles on the thing itself are the same three colors.
     /// </remarks>

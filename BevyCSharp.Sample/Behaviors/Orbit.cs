@@ -64,7 +64,7 @@ public partial struct Orbit
 
     /// <summary>Draws each orbiting body's position and facing, on F2.</summary>
     /// <remarks>
-    /// What gizmos are for: the numbers printed at the end say where things finished, and this
+    /// What gizmos are for. The numbers printed at the end say where things finished, and this
     /// shows where they are while they move. Re-issued every frame, because a gizmo lasts one.
     /// </remarks>
     [OnUpdate]

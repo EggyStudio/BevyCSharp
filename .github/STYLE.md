@@ -26,8 +26,13 @@ characters (`the minus key`) are unaffected.
 
 The colon introduces a list or labels what follows. It is not a joint between two clauses, and a
 statement followed by its reason is two sentences or one sentence with `because` in it. Used as a
-joint it becomes a tic: every paragraph acquires the same shape, and the reader stops reading the
-mark as anything at all.
+joint it becomes a tic, because every paragraph then acquires the same shape and the reader stops
+reading the mark as anything at all.
+
+The test is what follows the mark. A list, or a phrase naming the thing just mentioned, is what
+the colon is for. A clause that could stand on its own and explains what precedes it is a joint,
+whatever it is about, so `a tag is cheap: it costs nothing to store` is wrong where `a tag is
+cheap, because it costs nothing to store` is right.
 
 | instead of | write |
 |---|---|

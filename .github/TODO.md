@@ -451,13 +451,16 @@ What is left:
 
 ## Maintenance
 
-- **What reaches the render world is still unchecked.** Every registration goes through
+- **What reaches the render world is checked for one shape only.** Every registration goes through
   `assets::init_asset_once`, so calling `init_asset` twice is inert, and the crate's own tests
   cover both halves of that: a handle minted between two guarded registrations survives, and one
   minted between two unguarded ones does not, which is what pins the behavior the guard exists
-  for. What no test covers is the step after, that the meshes and materials the bridge creates
-  are extracted into the render world and drawn with. That needs a real GPU, so it belongs in a
-  windowed run rather than in the suite.
+  for. The step after is covered by `DrawnTests`, which draws a primitive mesh with an unlit
+  material into an offscreen target and asserts on the pixels, so a mesh or material that never
+  reaches the render world now fails a test rather than producing an empty picture. It needs a
+  GPU, so it skips on the headless bridge the test workflow builds. What is still unchecked that
+  way is everything with more than one moving part: a lit surface, a glTF file's own materials,
+  a sprite, and text.
 - **The Rust build is not cached in CI.** `Swatinem/rust-cache` is configured with
   `workspaces: native`, so it caches `native/target`, while `build-native.sh` writes to
   `build/target`. The bridge is therefore rebuilt from nothing on every run. The crate's own

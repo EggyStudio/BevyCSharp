@@ -538,7 +538,11 @@ public static unsafe class Render
     /// </para>
     /// <para>
     /// A capture of the first frames of a run is a picture of a window that has been cleared and
-    /// not yet drawn into, which reads as fully transparent black. Ask once the scene is up.
+    /// not yet drawn into. A material's render pipeline is compiled the first time something asks
+    /// to be drawn with it, and until it is ready the renderer skips the mesh and clears the frame
+    /// anyway, so an early capture shows the clear color with nothing in it. That is indistinguishable
+    /// from a mesh that never arrived, so give a fresh run a hundred frames before believing an
+    /// empty picture.
     /// </para>
     /// </remarks>
     /// <param name="target">

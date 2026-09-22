@@ -72,13 +72,13 @@ public partial struct Gravity
     /// <summary>Accelerates everything that falls and has not landed yet.</summary>
     /// <remarks>
     /// <para>
-    /// The queued <c>Add</c> matters: adding a component moves the entity to a different
+    /// The queued <c>Add</c> matters, because adding a component moves the entity to a different
     /// archetype, which would invalidate the references this loop is holding. Queuing it means
     /// it lands after every system has finished reading.
     /// </para>
     /// <para>
-    /// Acceleration is where a per-frame step shows up worst: integrating gravity with a delta
-    /// that varies gives a different fall on every machine, and a slow frame overshoots the
+    /// Acceleration is where a per-frame step shows up worst, because integrating gravity with a
+    /// delta that varies gives a different fall on every machine, and a slow frame overshoots the
     /// floor. The fixed timestep is what makes the answer the same everywhere.
     /// </para>
     /// </remarks>

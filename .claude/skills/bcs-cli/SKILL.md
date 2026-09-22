@@ -120,6 +120,12 @@ A capture is read back off the GPU over the frames after the request, so `./bcs 
 file to appear and settle. Use it rather than `./bcs command shot`, which returns as soon as the
 request is accepted.
 
+**A capture taken in the first moments of a session shows an empty scene**, because a material's
+render pipeline is compiled the first time something asks to be drawn with it and the renderer
+skips the mesh until it is ready. `./bcs open` returns as soon as the app answers, which is before
+that. Give a fresh session `./bcs command frames.wait 120` before believing a picture with nothing
+in it.
+
 **On a machine with no display**, open the session with `--offscreen`. It installs the renderer and
 draws into an image instead of a window, so `shot` produces a real picture of the scene, panels and
 all, where a windowed session could not start at all. Everything else is the same session.
