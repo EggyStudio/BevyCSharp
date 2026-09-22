@@ -26,6 +26,45 @@ public enum SpriteImageMode
 
     /// <summary>Repeated across the sprite rather than stretched.</summary>
     Tiled = 2,
+
+    /// <summary>
+    /// Fitted inside the size, keeping the picture's proportions.
+    /// </summary>
+    /// <remarks>
+    /// What a video player does with a film that is the wrong shape for the screen. Which edges
+    /// are left over, and whether the picture is fitted inside the size or made to fill it, is
+    /// <see cref="SpriteSettings.Scaling"/>.
+    /// </remarks>
+    Scaled = 3,
+}
+
+/// <summary>
+/// How a scaled picture is fitted to the size it is drawn at.
+/// </summary>
+/// <remarks>
+/// Fitting keeps the whole picture and leaves empty edges, which is letterboxing. Filling covers
+/// the whole size and loses what hangs over the edges. The rest of the name says which part is
+/// kept when they do not agree.
+/// </remarks>
+public enum SpriteScaling
+{
+    /// <summary>The whole picture, centred, with empty edges where it does not reach.</summary>
+    FitCentre = 0,
+
+    /// <summary>The whole picture, against the left and top edges.</summary>
+    FitStart = 1,
+
+    /// <summary>The whole picture, against the right and bottom edges.</summary>
+    FitEnd = 2,
+
+    /// <summary>Covering the size, centred, losing what hangs over.</summary>
+    FillCentre = 3,
+
+    /// <summary>Covering the size, keeping the left and top.</summary>
+    FillStart = 4,
+
+    /// <summary>Covering the size, keeping the right and bottom.</summary>
+    FillEnd = 5,
 }
 
 /// <summary>
@@ -113,6 +152,10 @@ public sealed class SpriteSettings
 
     /// <summary>How the picture meets the size the sprite is drawn at.</summary>
     public SpriteImageMode Mode { get; set; } = SpriteImageMode.Auto;
+
+    /// <summary>How a scaled picture is fitted.</summary>
+    /// <remarks>Read only when <see cref="Mode"/> is <see cref="SpriteImageMode.Scaled"/>.</remarks>
+    public SpriteScaling Scaling { get; set; } = SpriteScaling.FitCentre;
 
     /// <summary>
     /// How far in from each edge the nine-slice cuts are, in pixels of the source image.

@@ -303,4 +303,74 @@ public sealed class AudioTests
     private struct Sounding;
 
     private static AssetHandle _clip;
+    /// <summary>
+    /// A sound can be told to play part of a clip rather than all of it.
+    /// </summary>
+    /// <remarks>
+    /// What lets one file hold several effects, where the alternative is a file per effect and a
+    /// decode each. Whether the right samples come out needs an ear; what is checked here is that
+    /// the window is obeyed, by playing a second of tone twice and letting both clean up after
+    /// themselves. The one given a fifth of a second is gone long before the one given all of it.
+    /// </remarks>
+    [Fact]
+    public void ASoundCanPlayPartOfAClip()
+    {
+        if (!App.HasRenderer) return;
+
+        using var harness = new EngineHarness(frames: 40, fps: 60);
+
+        var clipped = Entity.None;
+        var whole = Entity.None;
+        var started = false;
+        bool? clippedGone = null;
+        bool? wholeGone = null;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            var clip = AssetServer.Load(AssetKind.Audio, "sounds/tone.wav");
+
+            clipped = Audio.Play(clip, new AudioSettings
+            {
+                Mode = PlaybackMode.Despawn,
+                Volume = 0f,
+                Play = 0.2f,
+            });
+
+            whole = Audio.Play(
+                clip, new AudioSettings { Mode = PlaybackMode.Despawn, Volume = 0f });
+        });
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            // Playback starts when the sink arrives, and only where there is a device to play on.
+            if (!started)
+            {
+                try
+                {
+                    _ = Audio.PositionOf(whole);
+                    started = true;
+                }
+                catch (BevyNativeException)
+                {
+                    return;
+                }
+            }
+
+            // A third of a second in: past the window the first was given and well short of the
+            // second's whole tone.
+            if (ctx.Time.FrameCount != 30) return;
+
+            clippedGone = !ctx.Ecs.IsAlive(clipped);
+            wholeGone = !ctx.Ecs.IsAlive(whole);
+        });
+
+        harness.Run();
+
+        // No device on this machine, so there was nothing to play.
+        if (clippedGone is not { } clippedEnded || wholeGone is not { } wholeEnded) return;
+
+        Assert.True(clippedEnded, "the sound given a fifth of a second was still playing");
+        Assert.False(wholeEnded, "the sound given the whole tone ended early");
+    }
+
 }

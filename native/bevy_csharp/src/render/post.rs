@@ -211,6 +211,303 @@ pub unsafe extern "C" fn bcs_render_set_post(entity: u64, config: *const BcsPost
     })
 }
 
+/// Lights the scene from the sky the camera is already scattering.
+///
+/// An environment map is what makes a surface pick up the color of what is around it rather than
+/// only what a lamp points at it, and this derives one from the atmosphere instead of from a file
+/// somebody baked. It needs [`bcs_render_set_atmosphere`] on the same camera, because what it
+/// filters is the sky that is being drawn.
+///
+/// `intensity` scales the result, `size` is the square resolution of the cubemap it generates and
+/// has to be a power of two, and `on` at zero takes it off again.
+///
+/// # Safety
+/// `camera` must be a live camera entity.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_sky_lighting(
+    camera: u64,
+    on: i32,
+    intensity: f32,
+    size: u32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, on, intensity, size);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::ecs::entity::Entity;
+            use bevy::light::AtmosphereEnvironmentMapLight;
+            use bevy::math::UVec2;
+
+            let entity = Entity::from_bits(camera);
+
+            with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let mut camera = world.entity_mut(entity);
+
+                if on == 0 {
+                    camera.remove::<AtmosphereEnvironmentMapLight>();
+                    return status::OK;
+                }
+
+                // A size that is not a power of two is refused here rather than by the renderer,
+                // which would take it, allocate nothing usable and light the scene with black.
+                if size == 0 || !size.is_power_of_two() {
+                    return status::NULL_ARG;
+                }
+
+                camera.insert(AtmosphereEnvironmentMapLight {
+                    intensity,
+                    size: UVec2::new(size, size),
+                    ..Default::default()
+                });
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// The images asked to become cubemaps, waiting for their pixels to arrive.
+///
+/// An image loads as one tall picture and has to be told it is six square faces stacked on top of
+/// each other, which can only happen once the file has been decoded. A handle asked for before then
+/// waits here until it has.
+#[cfg(feature = "render")]
+#[derive(bevy::ecs::resource::Resource, Default)]
+pub struct PendingCubemaps(Vec<bevy::asset::Handle<bevy::image::Image>>);
+
+/// Turns each loaded image on the list into a cubemap, and forgets it.
+///
+/// Six faces stacked vertically, which is the layout every cubemap texture on the web is in and the
+/// one Bevy's own examples use. An image that is not six times as tall as it is wide is refused by
+/// Bevy rather than by this, and stays on the list doing nothing, which is what a loud failure
+/// would cost a frame instead of once.
+#[cfg(feature = "render")]
+pub fn reinterpret_cubemaps(
+    mut pending: bevy::ecs::system::ResMut<PendingCubemaps>,
+    mut images: bevy::ecs::system::ResMut<bevy::asset::Assets<bevy::image::Image>>,
+) {
+    use bevy::render::render_resource::{TextureViewDescriptor, TextureViewDimension};
+
+    pending.0.retain(|handle| {
+        let Some(mut image) = images.get_mut(handle) else {
+            // Still loading. Asking again next frame is the whole of the wait.
+            return true;
+        };
+
+        // Six layers is what makes it a cube, and an image that already has them was asked for
+        // twice, which is not worth refusing.
+        if image.texture_descriptor.size.depth_or_array_layers == 1
+            && image.reinterpret_stacked_2d_as_array(6).is_err()
+        {
+            bevy::log::warn!(
+                "An image asked to be a cubemap is not six square faces stacked vertically, so \
+                 the skybox using it will not draw."
+            );
+
+            return false;
+        }
+
+        image.texture_view_descriptor = Some(TextureViewDescriptor {
+            dimension: Some(TextureViewDimension::Cube),
+            ..Default::default()
+        });
+
+        false
+    });
+}
+
+/// Draws a cubemap behind everything a camera draws.
+///
+/// The image is a column of six square faces, in the order every cubemap texture uses, and it is
+/// reinterpreted as a cube once it has loaded. `brightness` scales the samples into the units the
+/// rest of the scene is lit in, which are candelas per square metre, so the useful numbers are in
+/// the hundreds or thousands and a brightness of `1` comes out black.
+///
+/// A negative `image` takes the skybox off. A null `rotation` leaves the cube unturned; otherwise
+/// it is four floats, `x, y, z, w`, which is what puts a Z-up cubemap the right way round in a
+/// Y-up world.
+///
+/// # Safety
+/// `camera` must be a live camera entity; `rotation` must be null or point to four readable floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_set_skybox(
+    camera: u64,
+    image: i32,
+    brightness: f32,
+    rotation: *const f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, image, brightness, rotation);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::ecs::entity::Entity;
+            use bevy::light::Skybox;
+            use bevy::math::Quat;
+
+            let turn = if rotation.is_null() {
+                Quat::IDENTITY
+            } else {
+                let parts = unsafe { core::slice::from_raw_parts(rotation, 4) };
+                Quat::from_xyzw(parts[0], parts[1], parts[2], parts[3])
+            };
+
+            let entity = Entity::from_bits(camera);
+
+            with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let handle = match crate::render::image_handle(world, image) {
+                    Err(refusal) => return refusal,
+                    Ok(handle) => handle,
+                };
+
+                if let Some(handle) = handle.clone() {
+                    world
+                        .get_resource_or_init::<PendingCubemaps>()
+                        .0
+                        .push(handle);
+                }
+
+                world.entity_mut(entity).insert(Skybox {
+                    image: handle,
+                    brightness,
+                    rotation: turn,
+                });
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Grades the picture a camera drew, after tonemapping.
+///
+/// What a game gives an artist rather than a player. The three tonal ranges are shadows, midtones
+/// and highlights, and what separates them is the luminance range on the config, so a grade that
+/// warms the shadows and cools the highlights is two sections and one number saying where one ends.
+///
+/// A null `config` puts the camera back to Bevy's own grading, which changes nothing about the
+/// picture.
+///
+/// # Safety
+/// `camera` must be a live camera entity; `config` must be null or point to a readable
+/// [`BcsGradingConfig`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_set_grading(
+    camera: u64,
+    config: *const crate::interop::BcsGradingConfig,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, config);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::ecs::entity::Entity;
+            use bevy::render::view::{ColorGrading, ColorGradingGlobal, ColorGradingSection};
+
+            let config = if config.is_null() {
+                None
+            } else {
+                Some(unsafe { *config })
+            };
+
+            let entity = Entity::from_bits(camera);
+
+            with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let section = |part: crate::interop::BcsGradingSection| ColorGradingSection {
+                    saturation: part.saturation,
+                    contrast: part.contrast,
+                    gamma: part.gamma,
+                    gain: part.gain,
+                    lift: part.lift,
+                };
+
+                let grading = match config {
+                    None => ColorGrading::default(),
+                    Some(config) => ColorGrading {
+                        global: ColorGradingGlobal {
+                            exposure: config.exposure,
+                            temperature: config.temperature,
+                            tint: config.tint,
+                            hue: config.hue,
+                            post_saturation: config.post_saturation,
+                            midtones_range: config.midtones_from..config.midtones_to,
+                        },
+                        shadows: section(config.shadows),
+                        midtones: section(config.midtones),
+                        highlights: section(config.highlights),
+                    },
+                };
+
+                world.entity_mut(entity).insert(grading);
+                status::OK
+            })
+        }
+    })
+}
+
+/// Sets the exposure a camera meters the scene at, in EV-100.
+///
+/// The number a photographer would set, and the base an auto exposure pass corrects rather than an
+/// alternative to it. Bevy's own default is what a Blender scene assumes; sunlight is around 15,
+/// an overcast day around 12 and an interior around 7, so a scene lit in physical units and
+/// metered wrongly is far too bright or far too dark rather than subtly off.
+///
+/// # Safety
+/// `camera` must be a live camera entity.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_exposure(camera: u64, ev100: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, ev100);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::camera::Exposure;
+            use bevy::ecs::entity::Entity;
+
+            let entity = Entity::from_bits(camera);
+
+            with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                world.entity_mut(entity).insert(Exposure { ev100 });
+                status::OK
+            })
+        }
+    })
+}
+
+
 /// Sets the lens effects a camera draws through.
 ///
 /// Beside [`bcs_render_set_post`] rather than part of it, because that call is the pipeline a

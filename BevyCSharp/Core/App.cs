@@ -171,6 +171,7 @@ public sealed unsafe class App : IDisposable
             // readable during it rather than during the next one.
             PostWindowMessages(world.Resource<MessageBus>());
             PostFileDrops(world.Resource<MessageBus>());
+            PostAssetFailures(world.Resource<MessageBus>());
 
             // Swapped here so the whole frame reads one complete, unchanging set.
             world.Resource<MessageBus>().Swap();
@@ -266,6 +267,35 @@ public sealed unsafe class App : IDisposable
                     bus.Send(new FileHoverCancelled());
                     break;
             }
+        }
+    }
+
+    /// <summary>
+    /// Moves the assets that failed to load onto the message bus.
+    /// </summary>
+    /// <remarks>
+    /// Two texts per failure, each read the way every text crosses the boundary: ask with nothing
+    /// to learn the length, then ask again with a buffer that size. Failures are rare, so the
+    /// reads cost nothing and a frame with none costs one call that answers zero.
+    /// </remarks>
+    private static void PostAssetFailures(MessageBus bus)
+    {
+        var count = Native.bcs_asset_failures_drain();
+        if (count <= 0) return;
+
+        for (var i = 0; i < count; i++)
+        {
+            var index = i;
+
+            var path = Native.ReadText(
+                (buffer, capacity) => Native.bcs_asset_failure_path(index, buffer, capacity),
+                "reading the path of an asset that failed to load");
+
+            var reason = Native.ReadText(
+                (buffer, capacity) => Native.bcs_asset_failure_reason(index, buffer, capacity),
+                "reading why an asset failed to load");
+
+            bus.Send(new AssetLoadFailed(path, reason));
         }
     }
 
@@ -473,9 +503,71 @@ public sealed unsafe class App : IDisposable
         return this;
     }
 
+    /// <summary>
+    /// Adds a sub-state over <typeparamref name="TState"/>, which exists only while its parent
+    /// holds the value its <see cref="SubStateOfAttribute"/> names.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The parent has to have been added first, because Bevy works out whether a sub-state exists
+    /// from its parent's value and has nothing to read otherwise.
+    /// </para>
+    /// <para>
+    /// <paramref name="initial"/> is where it starts each time it comes into existence, which is
+    /// every time the parent enters the value it lives under. A pause that is left on when a run
+    /// ends is off again when the next run starts, which is what a player expects and what a
+    /// remembered value would get wrong.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">
+    /// The app is running, the enum carries no <see cref="SubStateOfAttribute"/>, or its parent
+    /// was never added.
+    /// </exception>
+    public App AddSubState<TState>(TState initial) where TState : struct, Enum
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (IsRunning)
+            throw new InvalidOperationException(
+                $"Cannot add sub-state {typeof(TState).Name}: the app is already running. Add "
+                + "states from a plugin's Build method or before calling Run.");
+
+        var sub = StateRegistry.Describe(typeof(TState))
+                  ?? throw new InvalidOperationException(
+                      $"{typeof(TState).Name} is not a sub-state of anything. Put "
+                      + "[SubStateOf(typeof(Parent), Parent.Value)] on the enum, which is where a "
+                      + "reader looks for what it belongs to.");
+
+        // The paired slot, which is the parent's, because that is what the bridge keys the pairing
+        // on. Claiming the sub-state itself is what gives it the slot everything else addresses it
+        // by.
+        var parent = StateRegistry.Claim(sub.Parent);
+        _ = StateRegistry.Claim<TState>();
+
+        Native.Check(
+            Native.bcs_substate_add(
+                _handle,
+                parent,
+                Convert.ToInt32(sub.WhileIn, System.Globalization.CultureInfo.InvariantCulture),
+                StateRegistry.ToInt(initial)),
+            $"adding sub-state {typeof(TState).Name} under {sub.Parent.Name}");
+
+        return this;
+    }
+
     /// <summary>The current value of <typeparamref name="TState"/>. Only valid inside a system.</summary>
     public static TState State<TState>() where TState : struct, Enum =>
         StateRegistry.Current<TState>();
+
+    /// <summary>
+    /// The current value of <typeparamref name="TState"/>, or false when it does not exist.
+    /// </summary>
+    /// <remarks>
+    /// What a sub-state needs, because while its parent holds another value there is no state to
+    /// read. Only valid inside a system.
+    /// </remarks>
+    public static bool TryState<TState>(out TState value) where TState : struct, Enum =>
+        StateRegistry.TryCurrent(out value);
 
     /// <summary>Queues a transition of <typeparamref name="TState"/>. Only valid inside a system.</summary>
     public static void SetState<TState>(TState value) where TState : struct, Enum =>

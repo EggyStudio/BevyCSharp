@@ -15,6 +15,8 @@
 //! and room to spare, at about four seconds of build time each. Raising it is this list and a
 //! rebuild; nothing else, because the managed side asks how many there are.
 
+use core::sync::atomic::{AtomicI32, Ordering};
+
 use bevy::app::App;
 use bevy::ecs::world::World;
 use bevy::state::app::AppExtStates;
@@ -30,15 +32,65 @@ use crate::state::{app_mut, loan_world, with_world, BcsApp, SystemReg};
 /// resources, its transitions and its run conditions on the type, so two slots are two independent
 /// state machines rather than two names for one.
 macro_rules! define_slots {
-    ($($ty:ident = $slot:literal),+ $(,)?) => {
+    ($($ty:ident / $sub:ident = $slot:literal),+ $(,)?) => {
         $(
             /// One state axis, whose values are given meaning by the managed side.
             #[derive(States, Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
             pub struct $ty(pub i32);
+
+            /// The sub-state paired with the axis above, which exists only while that axis holds
+            /// the value [`bcs_substate_add`] was given.
+            #[derive(States, Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+            pub struct $sub(pub i32);
+
+            impl bevy::state::state::SubStates for $sub {
+                type SourceStates = $ty;
+
+                fn should_exist(sources: $ty) -> Option<Self> {
+                    // Read from a static rather than from the world, because Bevy asks this
+                    // through a plain function with the parent's value and nothing else. The
+                    // managed side writes both numbers before the app runs.
+                    (sources.0 == SUB_PARENT[$slot].load(Ordering::Relaxed))
+                        .then(|| $sub(SUB_INITIAL[$slot].load(Ordering::Relaxed)))
+                }
+            }
         )+
 
         /// How many slots exist, for the error the managed side reports when they run out.
         pub const SLOT_COUNT: i32 = 0 $(+ { let _ = $slot; 1 })+;
+
+        /// Which parent value each sub-state exists under.
+        ///
+        /// Process-wide rather than per app, because `should_exist` is a static function. A second
+        /// app in the same process overwrites what the first wrote, which is what a test that
+        /// builds one app after another wants and the only shape this trait allows.
+        static SUB_PARENT: [AtomicI32; SLOT_COUNT as usize] =
+            [const { AtomicI32::new(i32::MIN) }; SLOT_COUNT as usize];
+
+        /// What each sub-state starts at when it comes into existence.
+        static SUB_INITIAL: [AtomicI32; SLOT_COUNT as usize] =
+            [const { AtomicI32::new(0) }; SLOT_COUNT as usize];
+
+        /// Adds the sub-state paired with `slot`, existing while that slot holds `parent`.
+        fn insert_sub(app: &mut App, slot: i32, parent: i32, initial: i32) -> i32 {
+            match slot {
+                $($slot => {
+                    // The parent has to be there first. Bevy computes a sub-state from its
+                    // source whenever that source changes, and a sub-state added under a slot
+                    // that holds no state would simply never come into existence, which is a
+                    // silence rather than an answer.
+                    if !app.world().contains_resource::<State<$ty>>() {
+                        return status::INVALID_STATE;
+                    }
+
+                    SUB_PARENT[$slot].store(parent, Ordering::Relaxed);
+                    SUB_INITIAL[$slot].store(initial, Ordering::Relaxed);
+                    app.add_sub_state::<$sub>();
+                    status::OK
+                })+
+                _ => status::NULL_ARG,
+            }
+        }
 
         fn insert(app: &mut App, slot: i32, initial: i32) -> i32 {
             match slot {
@@ -53,6 +105,12 @@ macro_rules! define_slots {
         fn read(world: &World, slot: i32) -> Option<i32> {
             match slot {
                 $($slot => world.get_resource::<State<$ty>>().map(|s| s.get().0),)+
+
+                // A sub-state has no resource at all while its parent is elsewhere, so this
+                // answers nothing and the caller is told the state does not exist, which is the
+                // honest answer rather than a default value.
+                $(_ if slot == SLOT_COUNT + $slot =>
+                    world.get_resource::<State<$sub>>().map(|s| s.get().0),)+
                 _ => None,
             }
         }
@@ -70,6 +128,14 @@ macro_rules! define_slots {
                         app.add_systems(OnEnter($ty(value)), run);
                     } else {
                         app.add_systems(OnExit($ty(value)), run);
+                    }
+                    status::OK
+                })+
+                $(_ if slot == SLOT_COUNT + $slot => {
+                    if entering {
+                        app.add_systems(OnEnter($sub(value)), run);
+                    } else {
+                        app.add_systems(OnExit($sub(value)), run);
                     }
                     status::OK
                 })+
@@ -94,6 +160,10 @@ macro_rules! define_slots {
                     entity_mut.insert(DespawnOnExit($ty(value)));
                     status::OK
                 })+
+                $(_ if slot == SLOT_COUNT + $slot => {
+                    entity_mut.insert(DespawnOnExit($sub(value)));
+                    status::OK
+                })+
                 _ => status::NULL_ARG,
             }
         }
@@ -107,6 +177,18 @@ macro_rules! define_slots {
                     }
                     None => status::NOT_PRESENT,
                 },)+
+                $(_ if slot == SLOT_COUNT + $slot =>
+                    match world.get_resource_mut::<NextState<$sub>>() {
+                        Some(mut next) => {
+                            next.set($sub(value));
+                            status::OK
+                        }
+
+                        // The parent is elsewhere, so there is nothing to transition. Queuing it
+                        // anyway would be a change that happens when the parent comes back, which
+                        // is not what the caller asked for.
+                        None => status::NOT_PRESENT,
+                    },)+
                 _ => status::NULL_ARG,
             }
         }
@@ -114,8 +196,14 @@ macro_rules! define_slots {
 }
 
 define_slots!(
-    BcsState0 = 0, BcsState1 = 1, BcsState2 = 2, BcsState3 = 3, BcsState4 = 4, BcsState5 = 5,
-    BcsState6 = 6, BcsState7 = 7
+    BcsState0 / BcsSub0 = 0,
+    BcsState1 / BcsSub1 = 1,
+    BcsState2 / BcsSub2 = 2,
+    BcsState3 / BcsSub3 = 3,
+    BcsState4 / BcsSub4 = 4,
+    BcsState5 / BcsSub5 = 5,
+    BcsState6 / BcsSub6 = 6,
+    BcsState7 / BcsSub7 = 7,
 );
 
 /// Reports how many state slots this bridge provides.
@@ -146,6 +234,44 @@ pub unsafe extern "C" fn bcs_state_add(
         }
 
         insert(&mut app.app, slot, initial)
+    })
+}
+
+/// Creates a sub-state under `slot`, existing only while that slot holds `parent`.
+///
+/// A sub-state is a state whose existence is decided by another one, which is what a pause screen
+/// inside a run is: leaving the run should take the pause with it rather than leave a menu state
+/// that means nothing. While the parent holds any other value there is no state at all, and
+/// [`bcs_state_get`] on it reports [`status::NOT_PRESENT`] rather than a value.
+///
+/// The sub-state is addressed as `slot + `[`bcs_state_slots`]`()` everywhere else, so reading it,
+/// queueing a transition, hanging a system off one of its edges and scoping an entity to it are
+/// the calls that already exist rather than four more.
+///
+/// One sub-state per slot, because Bevy names the parent as an associated type and the types have
+/// to exist at compile time. Adding a second one under the same parent means another pair in the
+/// slot list and a rebuild.
+///
+/// Must happen before the app runs, for the same reason a state must.
+///
+/// # Safety
+/// `handle` must be a live app.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_substate_add(
+    handle: *mut BcsApp,
+    slot: i32,
+    parent: i32,
+    initial: i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        let Some(app) = (unsafe { app_mut(handle) }) else {
+            return status::NULL_ARG;
+        };
+        if app.running {
+            return status::ALREADY_RUNNING;
+        }
+
+        insert_sub(&mut app.app, slot, parent, initial)
     })
 }
 

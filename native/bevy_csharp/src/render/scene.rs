@@ -417,7 +417,7 @@ fn viewport_from(config: &BcsCameraConfig) -> Option<bevy::camera::Viewport> {
 /// A mask of zero means "say nothing", so the entity or camera keeps Bevy's default of layer 0.
 /// Asking for layer 0 explicitly is bit 0, which is the same thing said out loud.
 #[cfg(feature = "render")]
-fn layers_from(mask: u32) -> Option<bevy::camera::visibility::RenderLayers> {
+pub(crate) fn layers_from(mask: u32) -> Option<bevy::camera::visibility::RenderLayers> {
     if mask == 0 {
         return None;
     }
@@ -663,7 +663,8 @@ pub unsafe extern "C" fn bcs_render_set_sprite(entity: u64, config: *const BcsSp
             use bevy::image::{Image, TextureAtlas, TextureAtlasLayout};
             use bevy::math::{Rect, Vec2};
             use bevy::sprite::{
-                Anchor, BorderRect, SliceScaleMode, Sprite, SpriteImageMode, TextureSlicer,
+                Anchor, BorderRect, SliceScaleMode, Sprite, SpriteImageMode, SpriteScalingMode,
+                TextureSlicer,
             };
 
             if config.is_null() {
@@ -716,6 +717,14 @@ pub unsafe extern "C" fn bcs_render_set_sprite(entity: u64, config: *const BcsSp
                             1.0
                         },
                     },
+                    3 => SpriteImageMode::Scale(match config.scaling {
+                        1 => SpriteScalingMode::FitStart,
+                        2 => SpriteScalingMode::FitEnd,
+                        3 => SpriteScalingMode::FillCenter,
+                        4 => SpriteScalingMode::FillStart,
+                        5 => SpriteScalingMode::FillEnd,
+                        _ => SpriteScalingMode::FitCenter,
+                    }),
                     _ => SpriteImageMode::Auto,
                 };
 

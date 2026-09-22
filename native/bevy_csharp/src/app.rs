@@ -304,6 +304,14 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 crate::pick::install(&mut app);
             }
 
+            // An image cannot be told it is a cubemap until it has loaded, so what asks for one
+            // leaves the handle here and this picks it up on whichever frame the pixels arrive.
+            app.init_resource::<crate::render::post::PendingCubemaps>();
+            app.add_systems(
+                bevy::app::PreUpdate,
+                crate::render::post::reinterpret_cubemaps,
+            );
+
             // Debug drawing goes through a queue, because a `Gizmos` parameter cannot be held by an
             // exclusive system. Only registered here, because the plugin that draws them comes with
             // `DefaultPlugins`, so a windowless app has nothing to drain into.
@@ -473,6 +481,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         Last,
         (move |world: &mut World| run_cleanup_on_exit(world, &cleanup)).in_set(BcsSet::Cleanup),
     );
+
+    // An asset that will not load is as wrong in a headless run as in a windowed one, and harder
+    // to notice there, so the queue exists in every profile.
+    app.init_resource::<crate::events::AssetFailures>();
 
     if config.headless_frames > 0 {
         app.insert_resource(HeadlessFrameLimit {

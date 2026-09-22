@@ -62,6 +62,19 @@ public sealed class AudioSettings
     /// </remarks>
     public float SpatialScale { get; set; }
 
+    /// <summary>
+    /// Where in the clip to start, in seconds. Zero starts at the beginning.
+    /// </summary>
+    /// <remarks>
+    /// With <see cref="Play"/> this is how one file holds several effects: a sheet of footsteps or
+    /// gunshots is cut by naming where each one begins and how long it runs, which costs one decode
+    /// rather than one file each.
+    /// </remarks>
+    public float Start { get; set; }
+
+    /// <summary>How much of the clip to play from there, in seconds. Zero plays to the end.</summary>
+    public float Play { get; set; }
+
     /// <summary>Plays once and cleans up after itself.</summary>
     public static AudioSettings Effect => new() { Mode = PlaybackMode.Despawn };
 
@@ -116,6 +129,8 @@ public static unsafe class Audio
             Paused = settings.Paused ? 1 : 0,
             Spatial = settings.Spatial ? 1 : 0,
             SpatialScale = settings.SpatialScale,
+            StartSeconds = settings.Start,
+            PlaySeconds = settings.Play,
         };
 
         var bits = Native.bcs_audio_play(clip.Key, &native);

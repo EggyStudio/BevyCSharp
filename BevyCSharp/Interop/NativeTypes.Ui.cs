@@ -215,6 +215,21 @@ public struct NativeUiNodeConfig
 
     /// <summary>Border color, alpha.</summary>
     public float BorderColorA;
+
+    /// <summary>How the lines of a wrapped node are spread across it.</summary>
+    public int AlignContent;
+
+    /// <summary>The other axis as a multiple of the known one, or zero for neither.</summary>
+    public float AspectRatio;
+
+    /// <summary>Which box a node that clips its overflow clips at.</summary>
+    public int ClipBox;
+
+    /// <summary>How far outside that box the clipping is pushed.</summary>
+    public float ClipMargin;
+
+    /// <summary>Which camera draws this node, or zero for the one drawing to the window.</summary>
+    public ulong Camera;
 }
 
 /// <summary>How a run of UI text is set.</summary>
@@ -232,6 +247,33 @@ public struct NativeUiTextConfig
 
     /// <summary>0 word boundaries, 1 any character, 2 word then character, 3 never.</summary>
     public int LineBreak;
+
+    /// <summary>How far apart the lines sit, or zero for the font's own spacing.</summary>
+    public float LineHeight;
+
+    /// <summary>0 multiples of the font size, 1 logical pixels.</summary>
+    public int LineHeightUnit;
+
+    /// <summary>0 antialiased, 1 not.</summary>
+    public int FontSmoothing;
+
+    /// <summary>How far a shadow is cast, across.</summary>
+    public float ShadowOffsetX;
+
+    /// <summary>How far a shadow is cast, down.</summary>
+    public float ShadowOffsetY;
+
+    /// <summary>Shadow color, red.</summary>
+    public float ShadowColorR;
+
+    /// <summary>Shadow color, green.</summary>
+    public float ShadowColorG;
+
+    /// <summary>Shadow color, blue.</summary>
+    public float ShadowColorB;
+
+    /// <summary>Shadow color, alpha. Zero is no shadow.</summary>
+    public float ShadowColorA;
 }
 
 /// <summary>The picture a UI node draws inside itself.</summary>
@@ -300,4 +342,10 @@ public struct NativeUiImageConfig
 
     /// <summary>How far the picture stretches before a tile repeats; 0 for Bevy's default.</summary>
     public float TileStretch;
+
+    /// <summary>Asset key of a layout cutting the image into frames, or negative for none.</summary>
+    public int Atlas;
+
+    /// <summary>Which frame of that layout to draw.</summary>
+    public uint AtlasIndex;
 }

@@ -23,4 +23,10 @@ public struct NativeAudioConfig
 
     /// <summary>Scale applied to the distance to the listener; 0 for Bevy's own.</summary>
     public float SpatialScale;
+
+    /// <summary>Where in the clip to start, in seconds.</summary>
+    public float StartSeconds;
+
+    /// <summary>How much of the clip to play from there, in seconds.</summary>
+    public float PlaySeconds;
 }

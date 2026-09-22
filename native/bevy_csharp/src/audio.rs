@@ -56,6 +56,16 @@ pub unsafe extern "C" fn bcs_audio_play(clip: i32, config: *const BcsAudioConfig
                     spatial: config.spatial != 0,
                     spatial_scale: (config.spatial_scale > 0.0)
                         .then(|| SpatialScale::new(config.spatial_scale)),
+
+                    // Where in the clip to start and how much of it to play, which is how one
+                    // file holds several effects. Both are left alone at zero, because a clip
+                    // played for no time is not what a caller means by not saying.
+                    start_position: (config.start_seconds > 0.0).then(|| {
+                        core::time::Duration::from_secs_f32(config.start_seconds)
+                    }),
+                    duration: (config.play_seconds > 0.0).then(|| {
+                        core::time::Duration::from_secs_f32(config.play_seconds)
+                    }),
                     ..Default::default()
                 };
 

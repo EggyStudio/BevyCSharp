@@ -123,6 +123,7 @@ public static unsafe class Render2d
             AnchorX = settings.Anchor?.X ?? 0f,
             AnchorY = settings.Anchor?.Y ?? 0f,
             Mode = (int)settings.Mode,
+            Scaling = (int)settings.Scaling,
             SliceLeft = settings.SliceBorder.Left,
             SliceTop = settings.SliceBorder.Top,
             SliceRight = settings.SliceBorder.Right,

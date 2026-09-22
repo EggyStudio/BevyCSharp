@@ -58,6 +58,19 @@ public sealed class UiImageSettings
     public UiImageMode Mode { get; set; } = UiImageMode.Auto;
 
     /// <summary>
+    /// A layout that cuts the image into frames, or none to draw the whole picture.
+    /// </summary>
+    /// <remarks>
+    /// The same layout a sprite is cut by, from <see cref="Render2d.CreateAtlas"/>, so one sheet
+    /// of icons serves the world and the interface. <see cref="Frame"/> says which one to draw,
+    /// which is what an icon named by number rather than by pixel rectangle wants.
+    /// </remarks>
+    public AssetHandle Atlas { get; set; } = AssetHandle.None;
+
+    /// <summary>Which frame of <see cref="Atlas"/> to draw, counted from zero.</summary>
+    public uint Frame { get; set; }
+
+    /// <summary>
     /// How far in from each edge the nine-slice cuts are, in pixels of the source image.
     /// </summary>
     /// <remarks>Read only when <see cref="Mode"/> is <see cref="UiImageMode.Sliced"/>.</remarks>

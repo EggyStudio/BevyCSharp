@@ -205,6 +205,23 @@ public enum UiDirection
 /// The main axis is <see cref="UiSettings.Direction"/>. `Start` and `End` are the edges of the
 /// node itself; the `Flex` pair follows the direction instead, so they swap when it is reversed.
 /// </remarks>
+/// <summary>Which box a node that clips its overflow clips at.</summary>
+/// <remarks>
+/// The three boxes a node has: the content it holds, that plus its padding, and that plus its
+/// border. Which one is clipped at decides where a scrolling list's rows disappear.
+/// </remarks>
+public enum UiClipBox
+{
+    /// <summary>Clip at the content box, inside the padding.</summary>
+    Content = 0,
+
+    /// <summary>Clip at the padding box, which is Bevy's own answer.</summary>
+    Padding = 1,
+
+    /// <summary>Clip at the border box, so the border itself is inside what is kept.</summary>
+    Border = 2,
+}
+
 public enum UiJustify
 {
     /// <summary>Whatever the layout would do unasked.</summary>
@@ -368,6 +385,57 @@ public sealed class UiSettings
 
     /// <summary>How the children sit across it.</summary>
     public UiAlign Align { get; set; } = UiAlign.Default;
+
+    /// <summary>
+    /// How the lines of a wrapped node are spread across it.
+    /// </summary>
+    /// <remarks>
+    /// The same question <see cref="Justify"/> asks of the children within one line, asked of the
+    /// lines themselves, so it does nothing until <see cref="Wrap"/> has produced more than one.
+    /// A row of tiles that wraps onto three lines is spread by this and packed by that.
+    /// </remarks>
+    public UiJustify AlignContent { get; set; } = UiJustify.Default;
+
+    /// <summary>
+    /// The other axis as a multiple of the one that is known, or zero to size both on their own.
+    /// </summary>
+    /// <remarks>
+    /// What keeps a tile square or a panel sixteen by nine while only one of its sides is being
+    /// decided by the layout. The ratio is width over height, so <c>1</c> is a square and
+    /// <c>16f / 9f</c> is a widescreen box.
+    /// </remarks>
+    public float AspectRatio { get; set; }
+
+    /// <summary>
+    /// Which box a node that clips its overflow clips at.
+    /// </summary>
+    /// <remarks>
+    /// Only matters when <see cref="OverflowX"/> or <see cref="OverflowY"/> is clipping. A
+    /// scrolling list with a border wants <see cref="UiClipBox.Padding"/> or
+    /// <see cref="UiClipBox.Border"/>, or its rows are cut off inside the border rather than at it.
+    /// </remarks>
+    public UiClipBox ClipBox { get; set; } = UiClipBox.Padding;
+
+    /// <summary>How far outside that box the clipping is pushed, in logical pixels.</summary>
+    /// <remarks>A few pixels of slack, for a shadow or a focus ring that should not be cut off.</remarks>
+    public float ClipMargin { get; set; }
+
+    /// <summary>
+    /// Which camera draws this node, or <see cref="Entity.None"/> for whichever draws the window.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Left alone, Bevy picks the camera whose target is the window, which is what a game wants
+    /// and what a run drawing into an image does not have. Naming one is what lets a screen be
+    /// drawn with no window at all, which is how a screen is captured on a machine with no
+    /// display.
+    /// </para>
+    /// <para>
+    /// It carries to the node's children, so the root of a screen is the only one that has to be
+    /// told.
+    /// </para>
+    /// </remarks>
+    public Entity Camera { get; set; } = Entity.None;
 
     /// <summary>Whether the node lays out at all, and by which model.</summary>
     /// <remarks>

@@ -12,17 +12,22 @@
 use crate::interop::{status, BcsGizmoConfig};
 
 /// One recorded draw call, waiting for the frame's drain.
+///
+/// Every shape is described by the same handful of numbers, and which of them a shape reads is
+/// what `kind` decides. A struct per shape would be a struct per arm of one match, and the
+/// managed side would need a mirror of each.
 #[derive(Clone, Copy)]
 pub struct QueuedGizmo {
-    /// `0` line, `1` sphere, `2` axes, `3` a line fading from one color to another.
+    /// Which shape. See [`crate::interop::BcsGizmoConfig::kind`] for the list.
     pub kind: i32,
-    /// Line start, sphere centre, or the position axes are drawn at.
+    /// Where the shape sits: a line's start, or the centre of everything else.
     pub start: [f32; 3],
-    /// Line end. Unused by the other two.
+    /// A line's far end, and for the shapes that need two or three more numbers, whatever
+    /// [`crate::interop::BcsGizmoConfig::end`] says they are.
     pub end: [f32; 3],
-    /// Orientation for a sphere or a set of axes, as a quaternion.
+    /// Which way it faces, as a quaternion. A line and an arrow have two ends instead.
     pub rotation: [f32; 4],
-    /// Sphere radius, or the length of each axis.
+    /// How large: a radius, an axis length, or a grid's cell spacing.
     pub radius: f32,
     /// Color, linear RGBA. Axes use their own red, green and blue.
     pub color: [f32; 4],
@@ -47,6 +52,115 @@ pub struct GizmoQueue(pub Vec<QueuedGizmo>);
 #[derive(Default, bevy::reflect::Reflect, bevy::gizmos::config::GizmoConfigGroup)]
 pub struct FrontGizmos;
 
+/// Draws one recorded shape, with whichever set of gizmos it belongs to.
+///
+/// A macro rather than a function, because `Gizmos` and `Gizmos<FrontGizmos>` are different types
+/// and the only thing they share is the shape of the call. Written once all the same, because the
+/// alternative is every new shape being added in two places and eventually in only one.
+#[cfg(feature = "render")]
+macro_rules! draw_shape {
+    ($gizmos:expr, $shape:expr, $position:expr, $rotation:expr, $color:expr, $fades_to:expr) => {{
+        use bevy::math::primitives::{Capsule3d, Cone, Cuboid, Cylinder, Torus};
+        use bevy::math::{Isometry3d, UVec2, Vec2, Vec3};
+        use bevy::transform::components::Transform;
+
+        let shape = $shape;
+        let position = $position;
+        let rotation = $rotation;
+        let far = Vec3::new(shape.end[0], shape.end[1], shape.end[2]);
+        let at = Isometry3d::new(position, rotation);
+
+        match shape.kind {
+            1 => {
+                $gizmos.sphere(at, shape.radius, $color);
+            }
+            2 => {
+                $gizmos.axes(
+                    Transform::from_translation(position).with_rotation(rotation),
+                    shape.radius,
+                );
+            }
+            3 => {
+                $gizmos.line_gradient(position, far, $color, $fades_to);
+            }
+            4 => {
+                $gizmos.rect(at, Vec2::new(far.x, far.y), $color);
+            }
+            5 => {
+                $gizmos.circle(at, shape.radius, $color);
+            }
+            6 => {
+                // The angle is in radians, and the arc starts where the isometry's own X axis
+                // points, so turning the shape is how an arc is aimed.
+                $gizmos.arc_3d(far.x, shape.radius, at, $color);
+            }
+            7 => {
+                $gizmos.arrow(position, far, $color);
+            }
+            8 => {
+                // Counts rather than a size, because a grid is described by how many cells it has
+                // and how large one is. Negative or absurd counts would be a caller's mistake, so
+                // they are clamped rather than refused: a gizmo call answers nothing.
+                let cells = UVec2::new(
+                    far.x.clamp(0.0, 4096.0) as u32,
+                    far.y.clamp(0.0, 4096.0) as u32,
+                );
+
+                $gizmos.grid(at, cells, Vec2::splat(shape.radius), $color);
+            }
+            9 => {
+                $gizmos.primitive_3d(
+                    &Cuboid::new(far.x, far.y, far.z),
+                    at,
+                    $color,
+                );
+            }
+
+            // The rest of the primitives take a radius and one more number, which is what `end.x`
+            // carries for each of them.
+            10 => {
+                $gizmos.primitive_3d(
+                    &Capsule3d::new(shape.radius, far.x),
+                    at,
+                    $color,
+                );
+            }
+            11 => {
+                $gizmos.primitive_3d(
+                    &Cone {
+                        radius: shape.radius,
+                        height: far.x,
+                    },
+                    at,
+                    $color,
+                );
+            }
+            12 => {
+                $gizmos.primitive_3d(
+                    &Cylinder::new(shape.radius, far.x),
+                    at,
+                    $color,
+                );
+            }
+            13 => {
+                // The major radius is the ring's own, and the minor one is how thick the ring is,
+                // which is the number every other shape here spends on a length.
+                $gizmos.primitive_3d(
+                    &Torus {
+                        minor_radius: far.x,
+                        major_radius: shape.radius,
+                    },
+                    at,
+                    $color,
+                );
+            }
+            _ => {
+                $gizmos.line(position, far, $color);
+            }
+        }
+    }};
+}
+
 /// Draws everything the queue holds, then empties it.
 #[cfg(feature = "render")]
 pub fn drain(
@@ -55,8 +169,8 @@ pub fn drain(
     mut gizmos: bevy::gizmos::gizmos::Gizmos<FrontGizmos>,
 ) {
     use bevy::color::Color;
-    use bevy::math::{Isometry3d, Quat, Vec3};
-    use bevy::transform::components::Transform;
+    use bevy::gizmos::primitives::dim3::GizmoPrimitive3d;
+    use bevy::math::{Quat, Vec3};
 
     for shape in queue.0.drain(..) {
         let position = Vec3::new(shape.start[0], shape.start[1], shape.start[2]);
@@ -79,51 +193,10 @@ pub fn drain(
             shape.end_color[3],
         );
 
-        // Written twice rather than through a trait object: `Gizmos<T>` is a system parameter
-        // and the two are different types, so the only thing they can share is the shape of the
-        // call.
         if shape.in_front != 0 {
-            match shape.kind {
-                1 => {
-                    gizmos.sphere(Isometry3d::new(position, rotation), shape.radius, color);
-                }
-                2 => {
-                    gizmos.axes(
-                        Transform::from_translation(position).with_rotation(rotation),
-                        shape.radius,
-                    );
-                }
-                3 => {
-                    let end = Vec3::new(shape.end[0], shape.end[1], shape.end[2]);
-                    gizmos.line_gradient(position, end, color, fades_to);
-                }
-                _ => {
-                    let end = Vec3::new(shape.end[0], shape.end[1], shape.end[2]);
-                    gizmos.line(position, end, color);
-                }
-            }
-
-            continue;
-        }
-
-        match shape.kind {
-            1 => {
-                behind.sphere(Isometry3d::new(position, rotation), shape.radius, color);
-            }
-            2 => {
-                behind.axes(
-                    Transform::from_translation(position).with_rotation(rotation),
-                    shape.radius,
-                );
-            }
-            3 => {
-                let end = Vec3::new(shape.end[0], shape.end[1], shape.end[2]);
-                behind.line_gradient(position, end, color, fades_to);
-            }
-            _ => {
-                let end = Vec3::new(shape.end[0], shape.end[1], shape.end[2]);
-                behind.line(position, end, color);
-            }
+            draw_shape!(gizmos, shape, position, rotation, color, fades_to);
+        } else {
+            draw_shape!(behind, shape, position, rotation, color, fades_to);
         }
     }
 }
@@ -139,6 +212,65 @@ pub fn draw_in_front(mut store: bevy::ecs::system::ResMut<bevy::gizmos::config::
     // anything drawn as part of the scene wants: depth tested, like the scene.
     let (config, _) = store.config_mut::<FrontGizmos>();
     config.depth_bias = -1.0;
+}
+
+/// Sets how gizmos are drawn, for both groups at once.
+///
+/// `width` is the line thickness in pixels, and `layers` is the render layer mask deciding which
+/// cameras see gizmos at all; a mask of `0` is Bevy's own default of layer zero. Both groups take
+/// the same values, because the two exist to answer whether the scene may hide a shape and nothing
+/// else. `enabled` at zero stops the drawing without the caller having to stop asking for it,
+/// which is what a debug overlay bound to a key wants.
+///
+/// Returns [`status::UNSUPPORTED`] where there is nothing to draw on.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_gizmo_configure(width: f32, layers: u32, enabled: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (width, layers, enabled);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::camera::visibility::RenderLayers;
+            use bevy::gizmos::config::{DefaultGizmoConfigGroup, GizmoConfigStore};
+
+            crate::state::with_world(|world| {
+                let Some(mut store) = world.get_resource_mut::<GizmoConfigStore>() else {
+                    return status::UNSUPPORTED;
+                };
+
+                // Zero means "whatever Bevy starts with" rather than "no layers at all", because a
+                // caller that wanted gizmos on no camera would turn them off instead, and a
+                // zeroed struct arriving from the managed side should change nothing.
+                let layers = if layers == 0 {
+                    RenderLayers::default()
+                } else {
+                    crate::render::scene::layers_from(layers).unwrap_or_default()
+                };
+
+                // One group at a time, because the store hands out a borrow of itself per group
+                // and the two are wanted with the same values rather than at the same moment.
+                let apply = |config: &mut bevy::gizmos::config::GizmoConfig| {
+                    // A width of zero is a caller leaving it alone rather than asking for lines
+                    // with no thickness, which would draw nothing and read as a broken bridge.
+                    if width > 0.0 {
+                        config.line.width = width;
+                    }
+
+                    config.render_layers = layers.clone();
+                    config.enabled = enabled != 0;
+                };
+
+                apply(store.config_mut::<DefaultGizmoConfigGroup>().0);
+                apply(store.config_mut::<FrontGizmos>().0);
+
+                status::OK
+            })
+        }
+    })
 }
 
 /// Records one shape to draw this frame.

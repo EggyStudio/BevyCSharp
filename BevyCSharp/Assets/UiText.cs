@@ -83,4 +83,38 @@ public sealed class UiTextSettings
 
     /// <summary>Where a line may be broken.</summary>
     public TextWrap Wrap { get; set; } = TextWrap.WordBoundary;
+
+    /// <summary>
+    /// How far apart the lines sit, or zero for the spacing the font asks for.
+    /// </summary>
+    /// <remarks>
+    /// Read as a multiple of the font size unless <see cref="LineHeightInPixels"/> says otherwise,
+    /// so <c>1.2f</c> is the usual body spacing and <c>1f</c> packs the lines against each other.
+    /// </remarks>
+    public float LineHeight { get; set; }
+
+    /// <summary>Whether <see cref="LineHeight"/> is in logical pixels rather than font sizes.</summary>
+    public bool LineHeightInPixels { get; set; }
+
+    /// <summary>
+    /// Whether the glyphs are smoothed at their edges.
+    /// </summary>
+    /// <remarks>
+    /// Off is what a pixel font wants, because smoothing a font drawn to land on whole pixels is
+    /// what makes it look blurred rather than sharp.
+    /// </remarks>
+    public bool Smooth { get; set; } = true;
+
+    /// <summary>
+    /// A shadow cast behind the text, in logical pixels across and down.
+    /// </summary>
+    /// <remarks>
+    /// What keeps light text readable over a picture that might be light too. Drawn in
+    /// <see cref="ShadowColor"/>, which is transparent until it is set, so an offset alone draws
+    /// nothing.
+    /// </remarks>
+    public (float X, float Y) ShadowOffset { get; set; }
+
+    /// <summary>The shadow's color, linear RGBA. Transparent draws no shadow.</summary>
+    public (float R, float G, float B, float A) ShadowColor { get; set; } = (0f, 0f, 0f, 0f);
 }

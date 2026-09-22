@@ -181,7 +181,64 @@ fn node_from(config: &BcsUiNodeConfig) -> bevy::ui::Node {
         },
         row_gap: length(config.row_gap, config.row_gap_unit),
         column_gap: length(config.column_gap, config.column_gap_unit),
+        align_content: align_content(config.align_content),
+
+        // Zero leaves the two axes independent rather than asking for a node with no height,
+        // which is what a ratio of zero would otherwise mean.
+        aspect_ratio: (config.aspect_ratio > 0.0).then_some(config.aspect_ratio),
+        overflow_clip_margin: bevy::ui::OverflowClipMargin {
+            visual_box: visual_box(config.clip_box),
+            margin: config.clip_margin,
+        },
         ..Default::default()
+    }
+}
+
+/// Translates how the lines of a wrapped node are spread across it.
+///
+/// The same vocabulary as `justify_content`, because it is the same question asked of the lines a
+/// wrap produced rather than of the children within one line.
+#[cfg(feature = "render")]
+fn align_content(value: i32) -> bevy::ui::AlignContent {
+    use bevy::ui::AlignContent;
+
+    match value {
+        1 => AlignContent::Start,
+        2 => AlignContent::End,
+        3 => AlignContent::FlexStart,
+        4 => AlignContent::FlexEnd,
+        5 => AlignContent::Center,
+        6 => AlignContent::Stretch,
+        7 => AlignContent::SpaceBetween,
+        8 => AlignContent::SpaceEvenly,
+        9 => AlignContent::SpaceAround,
+        _ => AlignContent::Default,
+    }
+}
+
+/// Translates which box a node that clips its overflow clips at.
+#[cfg(feature = "render")]
+fn visual_box(value: i32) -> bevy::ui::VisualBox {
+    use bevy::ui::VisualBox;
+
+    match value {
+        0 => VisualBox::ContentBox,
+        2 => VisualBox::BorderBox,
+        _ => VisualBox::PaddingBox,
+    }
+}
+
+/// Translates how far apart the lines of a run of text sit.
+///
+/// Only called for a height above zero, because zero is a caller leaving the field alone and the
+/// font's own spacing is what Bevy uses when the component is absent.
+#[cfg(feature = "render")]
+fn line_height(value: f32, unit: i32) -> bevy::text::LineHeight {
+    use bevy::text::LineHeight;
+
+    match unit {
+        1 => LineHeight::Px(value),
+        _ => LineHeight::RelativeToFont(value),
     }
 }
 
@@ -241,6 +298,24 @@ fn make_interactive(entity: &mut bevy::ecs::world::EntityWorldMut, config: &BcsU
     }
 }
 
+/// Points a node at the camera that should draw it, when it was given one.
+///
+/// Without this, Bevy picks whichever camera draws to a window, so a run that draws into an image
+/// has no camera the interface can find and lays out nothing at all. Naming one is what lets a
+/// screen be drawn on a machine with no display, and what lets a test look at the result.
+///
+/// It propagates to children, so the root of a screen is the only node that has to be told.
+#[cfg(feature = "render")]
+fn target_camera(entity: &mut bevy::ecs::world::EntityWorldMut, config: &BcsUiNodeConfig) {
+    if config.camera == 0 {
+        return;
+    }
+
+    entity.insert(bevy::ui::UiTargetCamera(
+        bevy::ecs::entity::Entity::from_bits(config.camera),
+    ));
+}
+
 /// Spawns a rectangle, and returns its entity or `0`.
 ///
 /// The building block everything else sits in or on: a panel, a bar, a backdrop. Parent one to
@@ -279,6 +354,7 @@ pub unsafe extern "C" fn bcs_ui_spawn_node(config: *const BcsUiNodeConfig) -> u6
                     border_color_from(&config),
                 ));
                 make_interactive(&mut entity, &config);
+                target_camera(&mut entity, &config);
                 entity.id().to_bits()
             })
             .unwrap_or(0)
@@ -346,6 +422,11 @@ pub unsafe extern "C" fn bcs_ui_spawn_text(
                     TextFont {
                         font,
                         font_size: FontSize::Px(text_config.font_size),
+                        font_smoothing: if text_config.font_smoothing == 1 {
+                            bevy::text::FontSmoothing::None
+                        } else {
+                            bevy::text::FontSmoothing::AntiAliased
+                        },
                         ..Default::default()
                     },
                     // What keeps a long string inside its node. The width it breaks against is
@@ -366,6 +447,35 @@ pub unsafe extern "C" fn bcs_ui_spawn_text(
                     border_color_from(&config),
                 ));
                 make_interactive(&mut entity, &config);
+                target_camera(&mut entity, &config);
+
+                // The spacing between lines is a component of its own rather than part of the
+                // font, so it is inserted beside it.
+                if text_config.line_height > 0.0 {
+                    entity.insert(line_height(
+                        text_config.line_height,
+                        text_config.line_height_unit,
+                    ));
+                }
+
+                // A shadow is a component beside the text rather than part of its font, and an
+                // invisible one is a caller leaving it alone rather than asking for a shadow that
+                // cannot be seen.
+                if text_config.shadow_color[3] > 0.0 {
+                    entity.insert(bevy::ui::widget::TextShadow {
+                        offset: bevy::math::Vec2::new(
+                            text_config.shadow_offset[0],
+                            text_config.shadow_offset[1],
+                        ),
+                        color: Color::linear_rgba(
+                            text_config.shadow_color[0],
+                            text_config.shadow_color[1],
+                            text_config.shadow_color[2],
+                            text_config.shadow_color[3],
+                        ),
+                    });
+                }
+
                 entity.id().to_bits()
             })
             .unwrap_or(0)
@@ -520,6 +630,22 @@ pub unsafe extern "C" fn bcs_ui_set_image(entity: u64, config: *const BcsUiImage
                     _ => NodeImageMode::Auto,
                 };
 
+                // A frame of a sheet rather than the whole picture, cut by the same layout asset
+                // a sprite uses, so one sheet serves the world and the interface. A key that names
+                // nothing is a mistake rather than a default, so it is refused.
+                let atlas = if config.atlas < 0 {
+                    None
+                } else {
+                    let Some(layout) = crate::assets::clone_handle(world, config.atlas) else {
+                        return status::NO_COMPONENT;
+                    };
+
+                    Some(bevy::image::TextureAtlas {
+                        layout: layout.typed::<bevy::image::TextureAtlasLayout>(),
+                        index: config.atlas_index as usize,
+                    })
+                };
+
                 let node_image = ImageNode {
                     image: image.typed::<Image>(),
                     color: Color::linear_rgba(
@@ -534,6 +660,7 @@ pub unsafe extern "C" fn bcs_ui_set_image(entity: u64, config: *const BcsUiImage
                         Rect::new(config.rect[0], config.rect[1], config.rect[2], config.rect[3])
                     }),
                     image_mode,
+                    texture_atlas: atlas,
                     ..Default::default()
                 };
 

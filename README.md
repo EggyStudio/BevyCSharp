@@ -245,6 +245,15 @@ A looping sound refuses to be sought: looping keeps the decoded samples so the c
 again, and what holds them has no way to move within them. Music that has to resume where it left
 off is played once and restarted rather than looped.
 
+`Start` and `Play` cut a window out of a clip, which is how one file holds several effects:
+
+```csharp
+Audio.Play(footsteps, new AudioSettings { Start = 1.2f, Play = 0.35f, Mode = PlaybackMode.Despawn });
+```
+
+One decode covers the sheet, rather than one file and one decode per effect. `Play` left at zero
+runs to the end of the clip.
+
 A sound can be placed in the world instead of played into both ears equally. That takes two
 things: the sound saying so, and an entity to hear from.
 
@@ -275,14 +284,33 @@ Debug drawing, for watching what a program is doing:
 
 ```csharp
 Gizmos.Line(from, to, (0.3f, 0.8f, 1f, 1f));
+Gizmos.Arrow(position, position + velocity, (1f, 0.4f, 0.2f, 1f));
 Gizmos.Sphere(position, 0.35f, (1f, 0.85f, 0.2f, 1f));
 Gizmos.Axes(transform, 1.5f);
+```
+
+Fourteen shapes in all. `Line` and `Fade` for a plain or a dying line, `Arrow` where a line has to
+say which way along it, `Sphere`, `Circle`, `Arc`, `Rect` and `Grid` for a volume, a plane, an angle
+or a floor, `Box`, `Capsule`, `Cone`, `Cylinder` and `Torus` for the shapes a collider or a radius
+of effect usually is, and `Axes` for an orientation. Everything but a line takes a `Quat`, because a
+shape with a flat side has to be told which way it faces.
+
+```csharp
+Gizmos.Arc(joint, facing, radius: 1.2f, angle: MathF.PI / 3f, (0.9f, 0.9f, 0.2f, 1f));
+Gizmos.Box(bounds.Center, Quat.Identity, bounds.Size, (0.2f, 1f, 0.4f, 1f));
+Gizmos.Grid(Vec3.Zero, Quat.Identity, across: 20, down: 20, spacing: 1f, (1f, 1f, 1f, 0.15f));
 ```
 
 A gizmo lasts one frame, so anything that should stay on screen is asked for again every frame.
 That is what makes them right for a value that changes and wrong for anything permanent, which
 wants an entity. `Axes` colors itself red, green and blue for X, Y and Z, which is the quickest
 way to see whether something faces where it should.
+
+`inFront` decides whether the scene may hide a shape, and it is true everywhere except `Grid`. A
+handle, an outline or a marker is drawn *about* the scene and has to be reachable; a grid, a path
+or a wireframe is drawn *in* it and has to be behind what is in front of it. `Gizmos.Configure`
+sets the line width, which render layers gizmos appear on, and whether they are drawn at all,
+which is what a debug overlay bound to a key wants.
 
 Gizmos are drawn by a plugin that comes with the window, so a windowless run refuses rather than
 collecting shapes nothing will draw. Guard with `App.HasRenderer`.
@@ -333,7 +361,9 @@ The layout takes no image, because it describes a cut rather than a picture: one
 every sheet cut the same way. `Anchor` moves the transform off the middle of the sprite, which is
 what anything standing on the ground wants, and `SpriteAnchor` names the nine usual points.
 `Mode` decides how the picture meets `Size`: `Sliced` keeps the corners and stretches the middle,
-so one small image draws a panel at any size, and `Tiled` repeats it instead.
+so one small image draws a panel at any size, `Tiled` repeats it instead, and `Scaled` keeps the
+picture's proportions and letterboxes what is left over, with `Scaling` saying whether it is fitted
+inside the size or made to fill it and which edges are kept.
 
 Ordering a 2D camera above a 3D one draws it over the scene without clearing, which is how a 2D
 overlay sits on a 3D game.
@@ -436,6 +466,12 @@ is a different question from where that box sits in its parent.
 transparent by default like any other node, so a `SpawnText` that passes plain `new UiSettings()`
 lays out correctly and draws nothing.
 
+`LineHeight` sets the spacing between lines, as a multiple of the font size unless
+`LineHeightInPixels` says otherwise. `Smooth` turned off keeps a pixel font sharp, since smoothing
+a font drawn to land on whole pixels is what makes it look blurred. `ShadowOffset` and
+`ShadowColor` put a shadow behind the glyphs, which is what keeps light text readable over a
+picture that might be light too.
+
 The children answer back. `Grow` takes a share of whatever room the parent has left over, `Shrink`
 gives up a share of the overflow, `Basis` is the size to start from, and `AlignSelf` overrides the
 parent's alignment for one child. `MinWidth` and its three companions bound the result, `Wrap` runs
@@ -454,7 +490,18 @@ first, a health bar that blinks the second.
 
 `OverflowX` and `OverflowY` say what happens to contents past an edge: drawn anyway, clipped, or
 clipped and scrollable. Bevy has no scrolling of its own, so a list is moved by reading the wheel
-like any other input and calling `Ui.SetScroll(list, 0f, offset)`.
+like any other input and calling `Ui.SetScroll(list, 0f, offset)`. `ClipBox` says where the
+clipping falls, which for a list with a border is the difference between rows disappearing at the
+border and disappearing inside it, and `ClipMargin` pushes that line out by a few pixels for a
+shadow or a focus ring.
+
+`AspectRatio` decides the side the layout was not told about, so a tile stays square while only its
+width is being decided, and `AlignContent` spreads the lines a wrapped node produced the way
+`Justify` spreads the children within one line.
+
+`Camera` names which camera draws the screen, and carries to the node's children. Left alone, Bevy
+picks whichever camera draws to the window, which is what a game wants; a run drawing into an image
+has none, so a screen that should appear in an offscreen capture names the camera itself.
 
 A node can hold a picture as well as a color:
 
@@ -463,8 +510,10 @@ var icon = Ui.SpawnNode(new UiSettings { Width = Length.Px(32f), Height = Length
 Ui.SetImage(icon, AssetServer.Load(AssetKind.Image, "ui/icon.png"));
 ```
 
-`UiImageSettings` tints it, mirrors it, cuts one icon out of a sheet with `Rect`, and chooses how
-it meets the node's size. `UiImageMode.Sliced` is the one worth knowing: the image is cut into
+`UiImageSettings` tints it, mirrors it, cuts one icon out of a sheet with `Rect` or by frame number
+with `Atlas` and `Frame`, and chooses how it meets the node's size. The layout `Atlas` takes is the
+one `Render2d.CreateAtlas` makes, so a sheet of icons serves the world and the interface without
+being cut a second way. `UiImageMode.Sliced` is the one worth knowing: the image is cut into
 nine, the corners keep their size and the middle stretches, so one small picture draws a panel at
 any size. `Auto` keeps the picture's own size, which is what a node with no width or height of
 its own then takes.
@@ -773,6 +822,38 @@ Every effect is applied on every call, so an effect the settings leave off is ta
 camera: turning bloom off is the same call as turning it on, which is what a settings screen
 wants. Only a camera takes these, since it is the camera's render graph that reads them.
 
+What the camera does either side of drawing is two more calls. `SetExposure` is what the scene is
+metered at, in EV-100, which is the photographer's number: around 15 for sunlight, 12 for an
+overcast day and 7 indoors. `SetColorGrading` is the look applied after tonemapping, in the three
+tonal ranges a colorist works in:
+
+```csharp
+Render.SetExposure(camera, 12f);
+
+Render.SetColorGrading(camera, new GradingSettings
+{
+    Temperature = -0.15f,                                   // cooler overall
+    Shadows = new GradingSection { Lift = 0.02f },          // lifted blacks
+    Highlights = new GradingSection { Saturation = 0.9f },  // calmer highlights
+});
+```
+
+A cubemap goes behind everything the camera draws:
+
+```csharp
+Render.SetSkybox(camera, AssetServer.Load(AssetKind.Image, "sky.png"), brightness: 1500f);
+```
+
+The file is a column of six square faces, which is the layout cubemap textures ship in, and it is
+turned into a cube once it has decoded. `brightness` is in candelas per square metre like the rest
+of the lighting, so the useful numbers are in the hundreds or thousands; a brightness of one is a
+night sky and comes out black. A skybox is seen behind the scene and does not light it.
+
+`MidtonesRange` says which luminances count as the middle, so it decides how much of the picture
+each of the three sections has to work on. The terms inside a section are the standard ASC CDL
+ones, so a grade written for a film pipeline carries across unchanged. Passing `null` puts the
+camera back to the engine's own grading.
+
 A tonemapper is the curve from what was rendered, which has no upper bound, to what a display can
 show, which does. All eight of Bevy's are there, from `None` through `Reinhard` to `AgX` and
 Bevy's own `TonyMcMapface`; the choice is a look rather than a correctness question, and it shows
@@ -834,6 +915,17 @@ else sets `Scale` rather than moving anything. `Density` thickens or thins the a
 decides how far ahead the haze is computed, and `ClearAtmosphere` takes the sky off a camera
 again. The camera is given a high dynamic range target either way, because a sun scattered through
 air is far brighter than white.
+
+The same sky can light the scene as well as be seen in it:
+
+```csharp
+Render.SetSkyLighting(camera, intensity: 1f);
+```
+
+That derives an environment map from the atmosphere each frame, so a surface picks up the color of
+what is around it rather than only what a lamp points at it, and the light follows the sun without
+anything being animated: a scene goes warm at dusk on its own. The size it generates is a square
+cubemap resolution and has to be a power of two. `ClearSkyLighting` takes it off.
 
 The window can be driven while the app runs:
 
@@ -967,6 +1059,17 @@ foreach (var dropped in ctx.Read<FileDropped>())
 One message per file, so dropping three sends three. The path is absolute and outside the asset
 directory, so it is read with ordinary file APIs rather than through the asset server. Every
 hover ends in either a drop or a cancellation.
+
+An asset that will not load says why the same way:
+
+```csharp
+foreach (var failed in ctx.Read<AssetLoadFailed>())
+    Console.Error.WriteLine($"{failed.Path}: {failed.Reason}");
+```
+
+A handle reports that a load failed and nothing more, so this is what tells a misspelled path apart
+from a file that is there and unreadable. It arrives in every profile, because an asset that will
+not load is exactly as wrong in a headless run and harder to notice there.
 
 ---
 
@@ -1105,6 +1208,30 @@ public static void BuildLevel(BehaviorContext ctx)
 
 The despawn is Bevy's own, so it reaches the entity's children as well, and it happens at the
 transition rather than inside `[OnExit]`, which means it covers every way out of the value.
+
+A mode that only means anything inside another one is a sub-state. A pause outside a run is not
+"off", it is nothing, and saying so is what keeps a pause from being held when the next run starts:
+
+```csharp
+public enum Screen { Menu, Playing }
+
+[SubStateOf(typeof(Screen), Screen.Playing)]
+public enum Paused { No, Yes }
+
+app.AddState(Screen.Menu);
+app.AddSubState(Paused.No);      // after its parent, which it is computed from
+```
+
+While `Screen` is anything but `Playing` the state does not exist, so `App.TryState<Paused>(out
+var held)` answers false rather than a value, and a method scoped to `[InState(Paused.Yes)]` does
+not run. Entering `Playing` brings it into existence at `Paused.No` every time, which is why a
+pause left on when a run ended is off again when the next one begins. `[OnEnter]`, `[OnExit]` and
+`DespawnOnExit` work on it exactly as they do on a plain state, because the relationship is
+written on the enum rather than at the call.
+
+One sub-state per state, and a sub-state cannot itself be a parent. Both are refused rather than
+half-worked, because the bridge pairs each sub-state with one state: Bevy names the parent as an
+associated type, so the pairs exist when the native library is built.
 
 A transition is queued, not immediate: it lands at Bevy's next transition point, so every system
 in the frame agrees on which state it is in rather than some seeing the change halfway through.

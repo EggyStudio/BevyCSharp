@@ -61,6 +61,10 @@ public static class BehaviorConditions
     /// report would repeat for as long as the app ran. It is written to standard error once
     /// instead.
     /// </para>
+    /// <para>
+    /// A sub-state reads the same way while its parent holds another value, and that is not worth
+    /// reporting, because it is the whole point of a sub-state rather than a mistake.
+    /// </para>
     /// </remarks>
     public static Func<World, bool> InState<TState>(TState value) where TState : struct, Enum
     {
@@ -71,7 +75,7 @@ public static class BehaviorConditions
         {
             if (StateRegistry.TryCurrentRaw<TState>(out var current)) return current == wanted;
 
-            if (!reported)
+            if (!reported && !StateRegistry.IsSub<TState>())
             {
                 reported = true;
                 Console.Error.WriteLine(

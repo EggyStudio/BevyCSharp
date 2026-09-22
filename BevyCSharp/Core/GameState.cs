@@ -5,6 +5,47 @@ using Bevy.Interop;
 namespace Bevy;
 
 /// <summary>
+/// Declares an enum to be a sub-state of another, existing only while that one holds a value.
+/// </summary>
+/// <remarks>
+/// <para>
+/// A pause that only means anything during a run is a sub-state of the run: leaving the run should
+/// take the pause with it rather than leave a state nothing is looking at. While the parent holds
+/// any other value the sub-state does not exist at all, and <see cref="App.TryState{TState}"/>
+/// says so rather than answering with a default.
+/// </para>
+/// <para>
+/// On the type rather than on the call that adds it, because which state a sub-state belongs to is
+/// a property of the type in Bevy too, and because a behavior's <c>[OnEnter]</c> systems are
+/// registered before an app has had the chance to add anything. A relationship declared here is
+/// known whichever happens first.
+/// </para>
+/// <para>
+/// One sub-state per parent. The bridge pairs each sub-state slot with one state slot, because
+/// Bevy names the parent as an associated type and the types are fixed when the bridge is built.
+/// </para>
+/// </remarks>
+/// <example>
+/// <code>
+/// public enum Screen { Menu, Playing }
+///
+/// [SubStateOf(typeof(Screen), Screen.Playing)]
+/// public enum Pause { Off, On }
+/// </code>
+/// </example>
+/// <param name="parent">The state enum this one lives inside.</param>
+/// <param name="whileIn">The value of that state which this one exists under.</param>
+[AttributeUsage(AttributeTargets.Enum)]
+public sealed class SubStateOfAttribute(Type parent, object whileIn) : Attribute
+{
+    /// <summary>The state enum this one lives inside.</summary>
+    public Type Parent { get; } = parent;
+
+    /// <summary>The value of that state which this one exists under.</summary>
+    public object WhileIn { get; } = whileIn;
+}
+
+/// <summary>
 /// Maps C# enums onto Bevy's app states.
 /// </summary>
 /// <remarks>
@@ -70,25 +111,84 @@ public static unsafe class StateRegistry
 
     /// <summary>Claims a slot for <typeparamref name="TState"/>, or returns the one it holds.</summary>
     /// <exception cref="InvalidOperationException">Every slot is taken.</exception>
-    internal static int Claim<TState>() where TState : struct, Enum
+    internal static int Claim<TState>() where TState : struct, Enum => Claim(typeof(TState));
+
+    /// <summary>
+    /// The same, for a type known only at runtime.
+    /// </summary>
+    /// <remarks>
+    /// Which is how a sub-state reaches its parent: the relationship is written as an attribute,
+    /// so the parent arrives as a <see cref="Type"/> rather than as a type argument.
+    /// </remarks>
+    internal static int Claim(Type state)
     {
         lock (Gate)
         {
             Reset();
-            if (Slots.TryGetValue(typeof(TState), out var existing)) return existing;
+            if (Slots.TryGetValue(state, out var existing)) return existing;
+
+            // A sub-state takes the slot paired with its parent's rather than one of its own,
+            // which is what makes the pairing the bridge is built around hold.
+            if (Describe(state) is { } sub)
+            {
+                var paired = SlotCount + Claim(sub.Parent);
+
+                foreach (var (type, slot) in Slots)
+                {
+                    if (slot != paired) continue;
+
+                    throw new InvalidOperationException(
+                        $"{type.Name} is already the sub-state of {sub.Parent.Name}, so "
+                        + $"{state.Name} cannot be. A state carries one sub-state, because the "
+                        + "bridge pairs each sub-state with one state.");
+                }
+
+                Slots[state] = paired;
+                return paired;
+            }
 
             var count = SlotCount;
             if (_next >= count)
                 throw new InvalidOperationException(
-                    $"All {count} state slots are in use, so {typeof(TState).Name} cannot have "
+                    $"All {count} state slots are in use, so {state.Name} cannot have "
                     + "one. Independent state machines are rarer than they look: a pause that "
                     + "only matters while playing is a value of the state it belongs to, not a "
                     + "second machine beside it.");
 
-            var slot = _next++;
-            Slots[typeof(TState)] = slot;
-            return slot;
+            var next = _next++;
+            Slots[state] = next;
+            return next;
         }
+    }
+
+    /// <summary>
+    /// What an enum says about being a sub-state, or null when it says nothing.
+    /// </summary>
+    /// <remarks>
+    /// Refuses a parent that is not an enum, and one that is itself a sub-state. The first is a
+    /// mistake the compiler cannot catch, because the attribute takes a <see cref="Type"/>; the
+    /// second is a chain of sub-states, which Bevy allows and this bridge's fixed pairing does
+    /// not.
+    /// </remarks>
+    internal static SubStateOfAttribute? Describe(Type state)
+    {
+        var sub = (SubStateOfAttribute?)Attribute.GetCustomAttribute(
+            state, typeof(SubStateOfAttribute));
+
+        if (sub is null) return null;
+
+        if (!sub.Parent.IsEnum)
+            throw new InvalidOperationException(
+                $"{state.Name} names {sub.Parent.Name} as its parent state, which is not an "
+                + "enum. A state is an enum, so a sub-state's parent is one too.");
+
+        if (Attribute.IsDefined(sub.Parent, typeof(SubStateOfAttribute)))
+            throw new InvalidOperationException(
+                $"{state.Name} is a sub-state of {sub.Parent.Name}, which is itself a sub-state. "
+                + "The bridge pairs one sub-state with one state, so a chain of them has nowhere "
+                + "to live.");
+
+        return sub;
     }
 
     /// <summary>Drops every assignment when a new app is created.</summary>
@@ -145,11 +245,50 @@ public static unsafe class StateRegistry
         if (!TryGetSlot<TState>(out var slot)) return false;
 
         int read;
-        Native.Check(
-            Native.bcs_state_get(slot, &read),
-            $"reading state {typeof(TState).Name}");
+        var status = Native.bcs_state_get(slot, &read);
+
+        // Not there is an answer rather than a failure. A sub-state whose parent is elsewhere does
+        // not exist at all, and a state that claimed a slot when a behavior registered but was
+        // never added has none either. Both mean the system is not in that state, which is what
+        // the caller asked.
+        if (status == NativeStatus.NotPresent) return false;
+
+        Native.Check(status, $"reading state {typeof(TState).Name}");
 
         value = read;
+        return true;
+    }
+
+    /// <summary>Whether this enum is declared as a sub-state of another.</summary>
+    internal static bool IsSub<TState>() where TState : struct, Enum =>
+        Attribute.IsDefined(typeof(TState), typeof(SubStateOfAttribute));
+
+    /// <summary>
+    /// The current value of <typeparamref name="TState"/>, reporting whether it exists at all.
+    /// </summary>
+    /// <remarks>
+    /// What a sub-state needs. While its parent holds another value there is no state, and the
+    /// honest answer to "which value is it in" is that it is in none. A plain state that was never
+    /// added answers the same way.
+    /// </remarks>
+    /// <param name="value">The value, when this returns true.</param>
+    /// <returns>Whether the state exists right now.</returns>
+    public static bool TryCurrent<TState>(out TState value) where TState : struct, Enum
+    {
+        value = default;
+
+        if (!TryGetSlot<TState>(out var slot)) return false;
+
+        int read;
+        var status = Native.bcs_state_get(slot, &read);
+
+        // Missing is an answer here rather than a failure, which is the whole point of asking this
+        // way. Anything else is still a failure worth reporting.
+        if (status == NativeStatus.NotPresent) return false;
+
+        Native.Check(status, $"reading state {typeof(TState).Name}");
+
+        value = Unsafe.As<int, TState>(ref read);
         return true;
     }
 

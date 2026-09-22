@@ -1,0 +1,130 @@
+using Bevy;
+using Bevy.Interop;
+using Xunit;
+
+namespace Bevy.Tests;
+
+/// <summary>
+/// Covers lighting a scene from the sky rather than from a lamp.
+/// </summary>
+/// <remarks>
+/// The side of a surface a lamp does not reach is black in a scene lit only by lamps, and is the
+/// color of the sky in one lit by the sky as well. That difference is what this asserts, because
+/// an environment map that is accepted and never generated looks exactly like one that worked
+/// until something is in shadow.
+/// </remarks>
+[Collection("engine")]
+public sealed class SkyLightingTests
+{
+    /// <summary>Frames to let the pipelines compile and the map be generated.</summary>
+    private const ulong Settled = 160;
+
+    [Fact]
+    public void TheSkyLightsWhatTheSunDoesNot()
+    {
+        if (!App.HasRenderer) return;
+
+        var unlit = Draw(sky: false);
+        var lit = Draw(sky: true);
+
+        Assert.NotNull(unlit);
+        Assert.NotNull(lit);
+
+        var shaded = Brightness(unlit.At(20, 40));
+        var skylit = Brightness(lit.At(20, 40));
+
+        Assert.True(
+            skylit > shaded + 4,
+            $"the shaded side reads {shaded} without the sky and {skylit} with it");
+    }
+
+    [Fact]
+    public void ASizeThatIsNotAPowerOfTwoIsRefused()
+    {
+        if (!App.HasRenderer) return;
+
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.On(Stage.Update, _ =>
+        {
+            var camera = Render.SpawnCamera3d();
+
+            var refused = Assert.Throws<BevyNativeException>(
+                () => Render.SetSkyLighting(camera, size: 300));
+
+            Assert.Equal(NativeStatus.NullArgument, refused.Status);
+        });
+
+        harness.Run();
+    }
+
+    /// <summary>How bright a pixel is, which is all this test needs of a color.</summary>
+    private static int Brightness((byte R, byte G, byte B, byte A) pixel) =>
+        pixel.R + pixel.G + pixel.B;
+
+    /// <summary>Draws a sphere lit by one low sun, with or without the sky helping.</summary>
+    private static CapturedImage? Draw(bool sky)
+    {
+        CapturedImage? picture = null;
+
+        using var app = new App(Config.OffscreenFor(64, 64, frames: (uint)Settled + 40));
+
+        app.AddPlugin(new EnginePlugin());
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(
+            world =>
+            {
+                var ecs = world.Resource<EcsWorld>();
+
+                var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 50f });
+
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 0f, 5f), Vec3.Zero, Vec3.UnitY));
+
+                // The sky has to be there for anything to be derived from it, and a high dynamic
+                // range target for the scattering to have anywhere to put its brightest values.
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true });
+                Render.SetAtmosphere(camera, new AtmosphereSettings());
+
+                if (sky) Render.SetSkyLighting(camera, intensity: 4f, size: 64);
+
+                // Low and to one side, so one side of the sphere is in shadow and the sky is the
+                // only thing that could light it.
+                var sun = Render.SpawnLight(new LightSettings
+                {
+                    Kind = LightKind.Directional,
+                    Intensity = 4_000f,
+                });
+
+                ecs.Add(sun, Transform.LookingAt(new Vec3(6f, 1f, 2f), Vec3.Zero, Vec3.UnitY));
+
+                var ball = ecs.Spawn();
+
+                Render.SetMesh(ecs, ball, Render.CreateMesh(MeshShape.Sphere, 1.6f));
+                Render.SetMaterial(ecs, ball, Render.CreateMaterial(0.8f, 0.8f, 0.8f, roughness: 0.4f));
+                ecs.Add(ball, Transform.Identity);
+            },
+            "Test.Scene"));
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(
+            world =>
+            {
+                if (world.Resource<Time>().FrameCount == Settled)
+                {
+                    world.InsertResource(new Ticket(Render.BeginCapture()));
+                    return;
+                }
+
+                if (picture is not null) return;
+                if (!world.TryGetResource<Ticket>(out var ticket)) return;
+
+                if (Render.TryReadCapture(ticket.Capture, out var arrived)) picture = arrived;
+            },
+            "Test.Read"));
+
+        Assert.Equal(0, app.Run());
+        return picture;
+    }
+
+    /// <summary>Where the run keeps what it asked for, so a later frame can pick it up.</summary>
+    private sealed record Ticket(Capture Capture);
+}

@@ -171,6 +171,51 @@ public sealed class RenderTargetTests : IDisposable
         harness.Run();
     }
 
+    /// <summary>
+    /// A target can be handed to the interface, which is what a thumbnail is made of.
+    /// </summary>
+    /// <remarks>
+    /// The editor draws its icons from files, and a preview of a mesh or a material has no file to
+    /// draw from. What it has is a camera pointed at an image, and this is the seam between that
+    /// image and a draw call.
+    /// </remarks>
+    [Fact]
+    public void ATargetCanBeDrawnByTheInterface()
+    {
+        if (!App.HasRenderer || !App.HasEditor) return;
+
+        // The interface has to be installed for a picture to have anywhere to be named, and it is
+        // installed only when an app asks to draw one. An offscreen run can, which is what makes
+        // this checkable without a window.
+        var config = Config.OffscreenFor(64, 64, frames: 4);
+        config.Gui = true;
+
+        using var app = new App(config);
+
+        app.AddPlugin(new EnginePlugin());
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(
+            world =>
+            {
+                if (world.Resource<Time>().FrameCount != 2) return;
+
+                var target = Render.CreateTarget(32, 32);
+                var named = ImGuiTextures.Of(target);
+
+                Assert.NotEqual(0ul, named);
+
+                // Asked for twice, named once, because what it names does not change when the
+                // picture behind it is redrawn.
+                Assert.Equal(named, ImGuiTextures.Of(target));
+
+                // A handle that names nothing is not a picture, and says so rather than naming one.
+                Assert.Equal(0ul, ImGuiTextures.Of(AssetHandle.None));
+            },
+            "Test.Name"));
+
+        Assert.Equal(0, app.Run());
+    }
+
     /// <summary>Where a test keeps the handle it made, so a later frame can capture it.</summary>
     private sealed record Target(AssetHandle Handle);
 

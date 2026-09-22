@@ -266,8 +266,11 @@ public struct NativeSpriteConfig
     /// <summary>Where the transform sits on the sprite, vertically.</summary>
     public float AnchorY;
 
-    /// <summary>0 the image's own size, 1 sliced, 2 tiled.</summary>
+    /// <summary>0 the image's own size, 1 sliced, 2 tiled, 3 scaled to fit.</summary>
     public int Mode;
+
+    /// <summary>How a scaled picture is fitted, when the mode is scaled.</summary>
+    public int Scaling;
 
     /// <summary>Left inset of the nine-slice border, in pixels.</summary>
     public float SliceLeft;
@@ -546,4 +549,57 @@ public unsafe struct NativeEffectsConfig
 
     /// <summary>Luminance in EV-100 and compensation in f-stops, in pairs, rising.</summary>
     public fixed float CompensationCurve[CompensationPoints * 2];
+}
+
+/// <summary>One tonal range's part of a color grade. Mirrors <c>BcsGradingSection</c>.</summary>
+public struct NativeGradingSection
+{
+    /// <summary>Below one drains color towards grey, above one spreads it out.</summary>
+    public float Saturation;
+
+    /// <summary>Below one pulls towards neutral grey, above one pushes away.</summary>
+    public float Contrast;
+
+    /// <summary>The exponent, which mostly moves the top of the range.</summary>
+    public float Gamma;
+
+    /// <summary>The multiplier, which mostly moves the middle of the range.</summary>
+    public float Gain;
+
+    /// <summary>The offset, which mostly moves the bottom of the range.</summary>
+    public float Lift;
+}
+
+/// <summary>How a camera grades the picture. Mirrors <c>BcsGradingConfig</c>.</summary>
+public struct NativeGradingConfig
+{
+    /// <summary>Stops of exposure applied before anything else.</summary>
+    public float Exposure;
+
+    /// <summary>White balance, towards blue below zero and towards orange above it.</summary>
+    public float Temperature;
+
+    /// <summary>White balance the other way, towards green and towards magenta.</summary>
+    public float Tint;
+
+    /// <summary>Hue rotation in degrees.</summary>
+    public float Hue;
+
+    /// <summary>Saturation applied to everything, after the three sections.</summary>
+    public float PostSaturation;
+
+    /// <summary>Where the midtones begin, as a luminance.</summary>
+    public float MidtonesFrom;
+
+    /// <summary>Where they end.</summary>
+    public float MidtonesTo;
+
+    /// <summary>The darkest range.</summary>
+    public NativeGradingSection Shadows;
+
+    /// <summary>The middle range.</summary>
+    public NativeGradingSection Midtones;
+
+    /// <summary>The brightest range.</summary>
+    public NativeGradingSection Highlights;
 }

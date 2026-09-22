@@ -11,7 +11,12 @@ namespace Bevy.Tests;
 /// and what the stacks hold afterwards. The world is only passed through to the closures, but it
 /// is a real one. The ECS is loaned for the length of a system callback, so the assertions run
 /// inside one.
+///
+/// In the engine collection, because it runs a real app and two of those at once is not something
+/// the native side allows: the component registry belongs to whichever app is current, so a test
+/// building one while another is being torn down fails on a registration that has nowhere to go.
 /// </remarks>
+[Collection("engine")]
 public sealed class EditorHistoryTests
 {
     [Fact]

@@ -21,6 +21,7 @@ namespace Bevy;
 public static class ImGuiTextures
 {
     private static readonly Dictionary<string, ulong> Loaded = [];
+    private static readonly Dictionary<int, ulong> Assets = [];
 
     /// <summary>What to call the picture at a path, loading it the first time it is asked for.</summary>
     public static ulong Load(string path)
@@ -31,6 +32,28 @@ public static class ImGuiTextures
 
         picture = Native.bcs_imgui_picture(path);
         Loaded[path] = picture;
+
+        return picture;
+    }
+
+    /// <summary>
+    /// What to call a picture the caller already holds, such as one a camera is drawing into.
+    /// </summary>
+    /// <remarks>
+    /// The other half of <see cref="Load"/>, which takes a path. This takes a handle, which is
+    /// what a render target is, so a thumbnail or a preview is a small scene drawn every frame
+    /// rather than a picture somebody saved. Asked for once per handle and kept, because what it
+    /// names does not change when the picture behind it is redrawn.
+    /// </remarks>
+    /// <param name="image">The image, usually from <see cref="Render.CreateTarget"/>.</param>
+    /// <returns>A name ImGui can draw with, or zero when the handle names no image.</returns>
+    public static ulong Of(AssetHandle image)
+    {
+        if (!image.IsValid) return 0;
+        if (Assets.TryGetValue(image.Key, out var picture)) return picture;
+
+        picture = Native.bcs_imgui_asset_texture(image.Key);
+        Assets[image.Key] = picture;
 
         return picture;
     }

@@ -465,6 +465,10 @@ pub struct BcsAudioConfig {
     pub spatial: i32,
     /// Scale applied to the distance between the sound and the listener. `0` takes Bevy's own.
     pub spatial_scale: f32,
+    /// Where in the clip to start, in seconds. `0` starts at the beginning.
+    pub start_seconds: f32,
+    /// How much of the clip to play from there, in seconds. `0` plays to the end.
+    pub play_seconds: f32,
 }
 
 /// One debug shape to draw this frame.
@@ -474,15 +478,24 @@ pub struct BcsAudioConfig {
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct BcsGizmoConfig {
-    /// `0` line, `1` sphere, `2` axes.
+    /// Which shape to draw.
+    ///
+    /// `0` line, `1` sphere, `2` axes, `3` a line fading from one color to another, `4` rectangle,
+    /// `5` circle, `6` arc, `7` arrow, `8` grid, `9` box, `10` capsule, `11` cone, `12` cylinder,
+    /// `13` torus. What the fields below mean depends on this, because every shape is described by
+    /// the same handful of numbers.
     pub kind: i32,
-    /// Line start, sphere centre, or where the axes are drawn.
+    /// Where the shape sits: a line's start, or the centre of everything else.
     pub start: [f32; 3],
-    /// Line end, and nothing for the other two.
+    /// The second set of numbers, read differently by each shape that needs one.
+    ///
+    /// A line's or an arrow's far end, a rectangle's width and height, an arc's angle in radians,
+    /// a grid's cell counts across and down, a box's width, height and depth, or the one further
+    /// number a capsule, a cone, a cylinder or a torus needs beside its radius.
     pub end: [f32; 3],
-    /// Orientation of a sphere or a set of axes, as a quaternion.
+    /// Which way the shape faces, as a quaternion. A line and an arrow have two ends instead.
     pub rotation: [f32; 4],
-    /// Sphere radius, or the length of each axis.
+    /// How large: a sphere's or a circle's radius, an axis arm's length, or a grid cell's side.
     pub radius: f32,
     /// Linear RGBA. Axes color themselves red, green and blue.
     pub color: [f32; 4],
@@ -490,6 +503,55 @@ pub struct BcsGizmoConfig {
     pub end_color: [f32; 4],
     /// Whether the scene can hide it. `0` is depth tested; anything else draws over everything.
     pub in_front: i32,
+}
+
+/// One tonal range's part of a color grade.
+///
+/// The four multipliers are the standard ASC CDL terms, so a grade written for a film pipeline
+/// carries across: `out = (i * gain + lift) ^ gamma`, with saturation applied around it.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsGradingSection {
+    /// Below one drains color towards grey, above one spreads it out. One leaves it alone.
+    pub saturation: f32,
+    /// Below one pulls towards neutral grey, above one pushes away from it.
+    pub contrast: f32,
+    /// The exponent, which mostly moves the top of the range.
+    pub gamma: f32,
+    /// The multiplier, which mostly moves the middle of the range.
+    pub gain: f32,
+    /// The offset, which mostly moves the bottom of the range.
+    pub lift: f32,
+}
+
+/// How a camera grades the picture after it has been tonemapped.
+///
+/// Three tonal ranges plus what applies to all of them, which is the shape a colorist works in and
+/// the shape Bevy keeps it in. Flat rather than nested ranges, because a range is two numbers and a
+/// struct that crosses the ABI is easier to mirror when everything in it is a float.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsGradingConfig {
+    /// Stops of exposure applied before anything else. `0` leaves it alone.
+    pub exposure: f32,
+    /// White balance, towards blue below zero and towards orange above it.
+    pub temperature: f32,
+    /// White balance the other way, towards green and towards magenta.
+    pub tint: f32,
+    /// Hue rotation in degrees.
+    pub hue: f32,
+    /// Saturation applied to everything, after the three sections.
+    pub post_saturation: f32,
+    /// Where the midtones begin, as a luminance. Below this is shadow.
+    pub midtones_from: f32,
+    /// Where they end. Above this is highlight.
+    pub midtones_to: f32,
+    /// The darkest range.
+    pub shadows: BcsGradingSection,
+    /// The middle range.
+    pub midtones: BcsGradingSection,
+    /// The brightest range.
+    pub highlights: BcsGradingSection,
 }
 
 /// How a sprite is drawn.
@@ -523,8 +585,11 @@ pub struct BcsSpriteConfig {
     pub has_anchor: i32,
     /// Where the transform sits on the sprite, from `-0.5` to `0.5` on each axis.
     pub anchor: [f32; 2],
-    /// How the picture meets `size`: `0` its own, `1` sliced, `2` tiled.
+    /// How the picture meets `size`: `0` its own, `1` sliced, `2` tiled, `3` scaled to fit.
     pub mode: i32,
+    /// How a scaled picture fits: `0` fit centred, `1` fit at the start, `2` fit at the end,
+    /// `3` fill centred, `4` fill at the start, `5` fill at the end. Read only when `mode` is `3`.
+    pub scaling: i32,
     /// Left, top, right and bottom insets of the nine-slice border, in pixels.
     pub slice_border: [f32; 4],
     /// How far a sliced corner may be scaled up. `0` takes Bevy's default of one.
@@ -551,6 +616,16 @@ pub struct BcsUiTextConfig {
     /// Where a line may be broken: `0` at word boundaries, `1` at any character, `2` at words
     /// falling back to characters, `3` never.
     pub linebreak: i32,
+    /// How far apart the lines sit. `0` keeps the font's own spacing.
+    pub line_height: f32,
+    /// What `line_height` is measured in: `0` multiples of the font size, `1` logical pixels.
+    pub line_height_unit: i32,
+    /// Whether the glyphs are smoothed: `0` antialiased, `1` not, which is what a pixel font wants.
+    pub font_smoothing: i32,
+    /// How far a shadow is cast behind the text, in logical pixels: across, then down.
+    pub shadow_offset: [f32; 2],
+    /// The shadow's color, linear RGBA. An alpha of zero is no shadow.
+    pub shadow_color: [f32; 4],
 }
 
 /// The picture a UI node draws inside itself.
@@ -585,6 +660,10 @@ pub struct BcsUiImageConfig {
     pub tile_y: i32,
     /// How far the picture stretches before a tile repeats. `0` takes Bevy's default of one.
     pub tile_stretch: f32,
+    /// Asset key of a layout that cuts the image into frames, or a negative for none.
+    pub atlas: i32,
+    /// Which frame of that layout to draw, counted from zero.
+    pub atlas_index: u32,
 }
 
 /// Where a UI node sits and how large it is.
@@ -687,6 +766,17 @@ pub struct BcsUiNodeConfig {
     pub color: [f32; 4],
     /// Color of the border, on every side. Linear RGBA, and transparent draws nothing.
     pub border_color: [f32; 4],
+    /// How the lines of a wrapped node are spread across it, the way `justify` spreads the
+    /// children within one line. Same numbering as `justify`.
+    pub align_content: i32,
+    /// The other axis as a multiple of the one that is known, or `0` to size both independently.
+    pub aspect_ratio: f32,
+    /// Which box a node that clips its overflow clips at: `0` content, `1` padding, `2` border.
+    pub clip_box: i32,
+    /// How far outside that box the clipping is pushed, in logical pixels.
+    pub clip_margin: f32,
+    /// Which camera draws this node, as entity bits, or `0` for whichever one draws to the window.
+    pub camera: u64,
 }
 
 /// How an image should be sampled, and how its bytes should be read.

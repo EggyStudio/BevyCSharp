@@ -237,3 +237,112 @@ pub unsafe extern "C" fn bcs_file_drop_path(
         }
     })
 }
+
+/// Assets that failed to load, waiting to be read out.
+///
+/// The same shape as [`FileDrops`], and for the same reason: a path and a reason are both text, and
+/// text crosses the boundary one call at a time.
+///
+/// Registered in every profile, unlike the window's messages, because an asset that will not load
+/// is exactly as wrong in a headless run and a good deal harder to notice there.
+#[derive(bevy::ecs::resource::Resource, Default)]
+pub struct AssetFailures {
+    /// The path each failure names.
+    pub paths: Vec<String>,
+    /// Why each one failed, as Bevy described it.
+    pub reasons: Vec<String>,
+    /// Where the reader has got to in the message queue.
+    pub cursor: bevy::ecs::message::MessageCursor<
+        bevy::asset::UntypedAssetLoadFailedEvent,
+    >,
+}
+
+/// Collects the assets that failed to load since the last call, and reports how many.
+///
+/// One queue for every kind of asset, because Bevy reports failures untyped as well as typed. The
+/// path and the reason are read afterwards with [`bcs_asset_failure`].
+///
+/// What this is for is the silence otherwise: a handle whose file is missing reports that it
+/// failed and nothing about why, so a misspelled path and an unreadable file look the same from
+/// the managed side.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_asset_failures_drain() -> i32 {
+    crate::interop::guard(|| {
+        use bevy::asset::UntypedAssetLoadFailedEvent;
+        use bevy::ecs::message::Messages;
+
+        crate::state::with_world(|world| {
+            if !world.contains_resource::<AssetFailures>() {
+                return 0;
+            }
+
+            world.resource_scope(|world, mut failures: bevy::ecs::world::Mut<AssetFailures>| {
+                failures.paths.clear();
+                failures.reasons.clear();
+
+                let Some(messages) = world.get_resource::<Messages<UntypedAssetLoadFailedEvent>>()
+                else {
+                    return 0;
+                };
+
+                let read: Vec<_> = failures.cursor.read(messages).cloned().collect();
+
+                for failure in read {
+                    failures.paths.push(failure.path.to_string());
+                    failures.reasons.push(failure.error.to_string());
+                }
+
+                failures.paths.len() as i32
+            })
+        })
+    })
+}
+
+/// Writes the path of one drained failure into `out`, and returns its length in bytes.
+///
+/// The usual text convention: pass null with a capacity of zero to learn the length, then call
+/// again with a buffer that size.
+///
+/// # Safety
+/// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_asset_failure_path(index: i32, out: *mut u8, capacity: i32) -> i32 {
+    crate::interop::guard(|| read_failure(index, out, capacity, true))
+}
+
+/// Writes why one drained failure failed into `out`, and returns its length in bytes.
+///
+/// # Safety
+/// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_asset_failure_reason(index: i32, out: *mut u8, capacity: i32) -> i32 {
+    crate::interop::guard(|| read_failure(index, out, capacity, false))
+}
+
+/// Writes one of the two texts a failure carries.
+///
+/// # Safety
+/// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.
+fn read_failure(index: i32, out: *mut u8, capacity: i32, path: bool) -> i32 {
+    let Ok(index) = usize::try_from(index) else {
+        return status::NULL_ARG;
+    };
+
+    crate::state::with_world(|world| {
+        let Some(failures) = world.get_resource::<AssetFailures>() else {
+            return status::UNSUPPORTED;
+        };
+
+        let text = if path {
+            failures.paths.get(index)
+        } else {
+            failures.reasons.get(index)
+        };
+
+        let Some(text) = text else {
+            return status::NO_ENTITY;
+        };
+
+        unsafe { crate::interop::write_text(text, out, capacity) }
+    })
+}

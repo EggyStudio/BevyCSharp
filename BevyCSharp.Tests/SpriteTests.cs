@@ -218,4 +218,36 @@ public sealed class SpriteTests
 
         harness.Run();
     }
+    /// <summary>A picture can be fitted inside the size rather than stretched to it.</summary>
+    /// <remarks>
+    /// What a video player does with a film that is the wrong shape for the screen. Whether the
+    /// letterboxing is where it should be needs an eye; what is checked is that the mode and the
+    /// fitting are accepted together, which is the part that would fail silently.
+    /// </remarks>
+    [Fact]
+    public void ASpriteCanBeFittedInsideItsSize()
+    {
+        if (!App.HasRenderer) return;
+
+        using var harness = new EngineHarness(frames: 3);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var badge = ctx.Ecs.Spawn();
+
+            Render2d.SetSprite(
+                ctx.Ecs,
+                badge,
+                AssetServer.Load(AssetKind.Image, Texture),
+                new SpriteSettings
+                {
+                    Size = (64f, 32f),
+                    Mode = SpriteImageMode.Scaled,
+                    Scaling = SpriteScaling.FitCentre,
+                });
+        });
+
+        harness.Run();
+    }
+
 }

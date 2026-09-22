@@ -239,6 +239,37 @@ pub unsafe extern "C" fn bcs_imgui_picture(path: *const core::ffi::c_char) -> u6
     })
 }
 
+/// Names an image asset the caller already has, so the interface can draw it.
+///
+/// The other half of [`bcs_imgui_picture`], which loads a file. This takes an asset key, which is
+/// what a render target is: a camera draws into an image, and the interface draws that image, so a
+/// thumbnail or a preview is a small scene rather than a picture somebody saved.
+///
+/// Returns `0` when the key names no image.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_imgui_asset_texture(image: i32) -> u64 {
+    crate::interop::guard_with(0, || {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = image;
+            0
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            crate::state::with_world_opt(|world| {
+                let handle = crate::assets::clone_handle(world, image)?
+                    .typed::<bevy::image::Image>();
+
+                let mut pictures = world.get_resource_mut::<render::Pictures>()?;
+                Some(pictures.add(handle))
+            })
+            .flatten()
+            .unwrap_or(0)
+        }
+    })
+}
+
 /// Forgets a picture, so the memory behind it can go.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_imgui_drop_texture(texture: u64) -> i32 {

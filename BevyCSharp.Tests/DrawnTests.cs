@@ -42,7 +42,7 @@ public sealed class DrawnTests
 
         CapturedImage? picture = null;
 
-        using var app = new App(Config.OffscreenFor(64, 64, frames: (uint)Settled * 3));
+        using var app = new App(Config.OffscreenFor(64, 64, frames: (uint)Settled + 40));
 
         app.AddPlugin(new EnginePlugin());
 

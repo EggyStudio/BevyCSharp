@@ -522,6 +522,134 @@ public static unsafe class Render
     }
 
     /// <summary>
+    /// Lights the scene from the sky this camera is already scattering.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What makes a surface pick up the color of what is around it rather than only what a lamp
+    /// points at it. The environment map is derived from the atmosphere each frame, so it follows
+    /// the sun: a scene lit this way goes warm at dusk without anything being animated.
+    /// </para>
+    /// <para>
+    /// Needs <see cref="SetAtmosphere"/> on the same camera, because what it filters is the sky
+    /// being drawn. A camera with no atmosphere has nothing to derive a map from.
+    /// </para>
+    /// </remarks>
+    /// <param name="camera">The camera whose view is lit.</param>
+    /// <param name="intensity">How bright the lighting is. One matches the sky's own.</param>
+    /// <param name="size">
+    /// The square resolution of the cubemap it generates, which has to be a power of two.
+    /// </param>
+    /// <exception cref="BevyNativeException">
+    /// The entity is not a camera, or the size is not a power of two.
+    /// </exception>
+    public static void SetSkyLighting(Entity camera, float intensity = 1f, uint size = 512) =>
+        Native.Check(
+            Native.bcs_render_set_sky_lighting(camera.Bits, 1, intensity, size),
+            $"lighting {camera} from the sky");
+
+    /// <summary>Stops lighting the scene from the sky.</summary>
+    public static void ClearSkyLighting(Entity camera) => Native.Check(
+        Native.bcs_render_set_sky_lighting(camera.Bits, 0, 0f, 0),
+        $"taking the sky lighting off {camera}");
+
+    /// <summary>
+    /// Draws a cubemap behind everything a camera draws.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The image is a column of six square faces, which is the layout every cubemap texture ships
+    /// in, and it is turned into a cube once it has loaded. An image of any other shape draws
+    /// nothing and says so on the log rather than failing here, because whether the file is the
+    /// right shape is not known until it has been decoded.
+    /// </para>
+    /// <para>
+    /// <paramref name="brightness"/> scales the samples into the units the rest of the scene is
+    /// lit in, which are candelas per square metre, so the useful numbers are in the hundreds or
+    /// thousands. A brightness of one is a night sky and comes out black, which reads as a skybox
+    /// that failed rather than one that is very dark. The skybox is what is seen behind the scene
+    /// and does not light it; lighting from a sky is an environment map, which has no bridge yet.
+    /// </para>
+    /// <para>
+    /// Pass <see cref="AssetHandle.None"/> to take the skybox off.
+    /// </para>
+    /// </remarks>
+    /// <param name="camera">The camera to draw it behind.</param>
+    /// <param name="cubemap">Six square faces stacked vertically, from the asset server.</param>
+    /// <param name="brightness">How much to scale the samples by.</param>
+    /// <param name="rotation">Which way the cube is turned, for a cubemap authored Z-up.</param>
+    /// <exception cref="BevyNativeException">The entity is not a camera.</exception>
+    public static void SetSkybox(
+        Entity camera,
+        AssetHandle cubemap,
+        float brightness = 1000f,
+        Quat? rotation = null)
+    {
+        if (rotation is not { } turn)
+        {
+            Native.Check(
+                Native.bcs_render_set_skybox(camera.Bits, cubemap.Key, brightness, null),
+                $"putting a skybox on {camera}");
+
+            return;
+        }
+
+        var parts = stackalloc float[4] { turn.X, turn.Y, turn.Z, turn.W };
+
+        Native.Check(
+            Native.bcs_render_set_skybox(camera.Bits, cubemap.Key, brightness, parts),
+            $"putting a skybox on {camera}");
+    }
+
+    /// <summary>
+    /// Grades the picture a camera drew, after tonemapping.
+    /// </summary>
+    /// <remarks>
+    /// What a look is made of once the scene is drawn. Passing <see langword="null"/> puts the
+    /// camera back to the engine's own grading, which changes nothing about the picture.
+    /// </remarks>
+    /// <param name="camera">The camera to grade.</param>
+    /// <param name="settings">The grade, or null for none.</param>
+    /// <exception cref="BevyNativeException">The entity is not a camera.</exception>
+    public static void SetColorGrading(Entity camera, GradingSettings? settings)
+    {
+        if (settings is null)
+        {
+            Native.Check(
+                Native.bcs_render_set_grading(camera.Bits, null),
+                $"clearing the color grade on {camera}");
+
+            return;
+        }
+
+        var native = settings.ToNative();
+
+        Native.Check(
+            Native.bcs_render_set_grading(camera.Bits, &native),
+            $"grading {camera}");
+    }
+
+    /// <summary>
+    /// Sets the exposure a camera meters the scene at, in EV-100.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The number a photographer would set. Sunlight is around 15, an overcast day around 12 and
+    /// an interior around 7, so a scene lit in physical units and metered wrongly comes out far too
+    /// bright or far too dark rather than subtly off.
+    /// </para>
+    /// <para>
+    /// This is the base an auto exposure pass corrects rather than an alternative to it: with
+    /// <see cref="EffectSettings.AutoExposure"/> on, what is set here is where it starts from.
+    /// </para>
+    /// </remarks>
+    /// <param name="camera">The camera to meter.</param>
+    /// <param name="ev100">The exposure value at ISO 100.</param>
+    /// <exception cref="BevyNativeException">The entity is not a camera.</exception>
+    public static void SetExposure(Entity camera, float ev100) => Native.Check(
+        Native.bcs_render_set_exposure(camera.Bits, ev100), $"metering {camera}");
+
+    /// <summary>
     /// Asks for a picture to be read back into memory rather than written to a file.
     /// </summary>
     /// <remarks>

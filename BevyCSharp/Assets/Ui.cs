@@ -90,6 +90,15 @@ public static unsafe class Ui
             FontSize = style.FontSize,
             Justify = (int)style.Justify,
             LineBreak = (int)style.Wrap,
+            LineHeight = style.LineHeight,
+            LineHeightUnit = style.LineHeightInPixels ? 1 : 0,
+            FontSmoothing = style.Smooth ? 0 : 1,
+            ShadowOffsetX = style.ShadowOffset.X,
+            ShadowOffsetY = style.ShadowOffset.Y,
+            ShadowColorR = style.ShadowColor.R,
+            ShadowColorG = style.ShadowColor.G,
+            ShadowColorB = style.ShadowColor.B,
+            ShadowColorA = style.ShadowColor.A,
         };
 
         var bits = Native.bcs_ui_spawn_text(text, &native, &nativeText);
@@ -209,6 +218,8 @@ public static unsafe class Ui
             TileX = settings.TileX ? 1 : 0,
             TileY = settings.TileY ? 1 : 0,
             TileStretch = settings.TileStretch,
+            Atlas = settings.Atlas.Key,
+            AtlasIndex = settings.Frame,
         };
 
         Native.Check(
@@ -310,6 +321,11 @@ public static unsafe class Ui
         BorderColorG = settings.BorderColor.G,
         BorderColorB = settings.BorderColor.B,
         BorderColorA = settings.BorderColor.A,
+        AlignContent = (int)settings.AlignContent,
+        AspectRatio = settings.AspectRatio,
+        ClipBox = (int)settings.ClipBox,
+        ClipMargin = settings.ClipMargin,
+        Camera = settings.Camera.Bits,
     };
 
     private static BevyNativeException NoUi(string operation) =>

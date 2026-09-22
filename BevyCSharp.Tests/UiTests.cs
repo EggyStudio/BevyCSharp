@@ -134,6 +134,10 @@ public sealed class UiTests
                 Border = Length.Px(2f),
                 Color = (0f, 0f, 0f, 0.6f),
                 BorderColor = (0.4f, 0.7f, 1f, 1f),
+                AlignContent = UiJustify.SpaceEvenly,
+                AspectRatio = 16f / 9f,
+                ClipBox = UiClipBox.Border,
+                ClipMargin = 2f,
             });
 
             foreach (var caption in new[] { "Play", "Options", "Quit" })
@@ -591,4 +595,47 @@ public sealed class UiTests
         Assert.Equal("12px", Length.Px(12f).ToString());
         Assert.Equal("50%", Length.Percent(50f).ToString());
     }
+    /// <summary>An icon can be one frame of a sheet rather than a file of its own.</summary>
+    /// <remarks>
+    /// The same layout asset a sprite is cut by, so a sheet of icons serves the interface without
+    /// being cut a second way. A layout naming nothing is refused rather than drawing the whole
+    /// sheet, which is what would otherwise appear in a 32-pixel box.
+    /// </remarks>
+    [Fact]
+    public void AnIconCanBeOneFrameOfASheet()
+    {
+        if (!App.HasRenderer) return;
+
+        using var harness = new EngineHarness(frames: 3);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var icons = Render2d.CreateAtlas(16, 16, columns: 4, rows: 4);
+
+            var node = Ui.SpawnNode(new UiSettings
+            {
+                Width = Length.Px(32f),
+                Height = Length.Px(32f),
+            });
+
+            Ui.SetImage(node, new UiImageSettings
+            {
+                Image = AssetServer.Load(AssetKind.Image, "textures/checker.png"),
+                Atlas = icons,
+                Frame = 5,
+            });
+
+            var refused = Assert.Throws<BevyNativeException>(() => Ui.SetImage(node,
+                new UiImageSettings
+                {
+                    Image = AssetServer.Load(AssetKind.Image, "textures/checker.png"),
+                    Atlas = new AssetHandle(0x7FFF_FFFF),
+                }));
+
+            Assert.Equal(NativeStatus.NoComponent, refused.Status);
+        });
+
+        harness.Run();
+    }
+
 }

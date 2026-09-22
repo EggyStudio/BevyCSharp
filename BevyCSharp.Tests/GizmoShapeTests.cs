@@ -1,0 +1,171 @@
+using Bevy;
+using Xunit;
+
+namespace Bevy.Tests;
+
+/// <summary>
+/// Covers the shapes gizmos can draw, by drawing them and looking.
+/// </summary>
+/// <remarks>
+/// A gizmo call answers nothing, which is what makes it pleasant to write and impossible to check
+/// any other way. The queue can be asserted on, and <see cref="GizmoTests"/> does, but a shape
+/// that reaches the queue and is then drawn as a different shape, or as nothing, looks the same
+/// from there. An offscreen run draws them against a known background and the pixels say which
+/// happened.
+/// </remarks>
+[Collection("engine")]
+public sealed class GizmoShapeTests
+{
+    /// <summary>Frames to let the pipelines compile before the picture is worth reading.</summary>
+    private const ulong Settled = 120;
+
+    /// <summary>Each shape, drawn alone, covers some of the picture and leaves the rest alone.</summary>
+    [Theory]
+    [InlineData("rect")]
+    [InlineData("circle")]
+    [InlineData("arc")]
+    [InlineData("arrow")]
+    [InlineData("grid")]
+    [InlineData("box")]
+    [InlineData("capsule")]
+    [InlineData("cone")]
+    [InlineData("cylinder")]
+    [InlineData("torus")]
+    public void AShapeIsDrawn(string shape)
+    {
+        if (!App.HasRenderer) return;
+
+        var picture = Draw(shape);
+
+        Assert.NotNull(picture);
+
+        var drawn = 0;
+        var background = 0;
+
+        for (var i = 0; i < picture.Pixels.Length; i += 4)
+        {
+            // Green, and nothing else in the picture is, so a green pixel is a pixel the shape
+            // reached. The camera clears to black.
+            if (picture.Pixels[i + 1] > 100) drawn++;
+            else background++;
+        }
+
+        Assert.True(drawn > 0, $"{shape} drew nothing");
+        Assert.True(background > 0, $"{shape} covered the whole picture, so it is not a shape");
+    }
+
+    /// <summary>Turning gizmos off stops the drawing without the caller stopping asking.</summary>
+    [Fact]
+    public void ConfiguringThemOffDrawsNothing()
+    {
+        if (!App.HasRenderer) return;
+
+        var picture = Draw("circle", enabled: false);
+
+        Assert.NotNull(picture);
+        Assert.All(
+            Enumerable.Range(0, (int)(picture.Width * picture.Height)),
+            i => Assert.True(picture.Pixels[(i * 4) + 1] < 100, "something was drawn"));
+    }
+
+    /// <summary>Runs one shape in an offscreen app and hands back the picture.</summary>
+    private static CapturedImage? Draw(string shape, bool enabled = true)
+    {
+        CapturedImage? picture = null;
+
+        using var app = new App(Config.OffscreenFor(96, 96, frames: (uint)Settled + 40));
+
+        app.AddPlugin(new EnginePlugin());
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(
+            world =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings
+                {
+                    FieldOfView = 50f,
+                    Clear = ClearMode.Custom,
+                    ClearColor = (0f, 0f, 0f, 1f),
+                });
+
+                world.Resource<EcsWorld>().Add(
+                    camera, Transform.LookingAt(new Vec3(0f, 0f, 8f), Vec3.Zero, Vec3.UnitY));
+
+                Gizmos.Configure(width: 4f, enabled: enabled);
+            },
+            "Test.Camera"));
+
+        // Every frame, because a gizmo lasts one, and the capture is read frames after it is asked
+        // for rather than on the frame that asked.
+        app.AddSystem(Stage.Update, new SystemDescriptor(
+            _ =>
+            {
+                var green = (0f, 1f, 0f, 1f);
+
+                switch (shape)
+                {
+                    case "rect":
+                        Gizmos.Rect(Vec3.Zero, Quat.Identity, 3f, 2f, green);
+                        break;
+
+                    case "circle":
+                        Gizmos.Circle(Vec3.Zero, Quat.Identity, 1.5f, green);
+                        break;
+
+                    case "arc":
+                        Gizmos.Arc(Vec3.Zero, Quat.Identity, 2f, 2f, green);
+                        break;
+
+                    case "arrow":
+                        Gizmos.Arrow(new Vec3(-2f, -1f, 0f), new Vec3(2f, 1f, 0f), green);
+                        break;
+
+                    case "grid":
+                        Gizmos.Grid(Vec3.Zero, Quat.Identity, 4, 4, 0.8f, green, inFront: true);
+                        break;
+
+                    case "capsule":
+                        Gizmos.Capsule(Vec3.Zero, Quat.Identity, 1f, 2f, green);
+                        break;
+
+                    case "cone":
+                        Gizmos.Cone(Vec3.Zero, Quat.Identity, 1.5f, 2f, green);
+                        break;
+
+                    case "cylinder":
+                        Gizmos.Cylinder(Vec3.Zero, Quat.Identity, 1.2f, 1.2f, green);
+                        break;
+
+                    case "torus":
+                        Gizmos.Torus(Vec3.Zero, Quat.Identity, 2f, 0.5f, green);
+                        break;
+
+                    default:
+                        Gizmos.Box(Vec3.Zero, Quat.Identity, new Vec3(2f, 2f, 2f), green);
+                        break;
+                }
+            },
+            "Test.Draw"));
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(
+            world =>
+            {
+                if (world.Resource<Time>().FrameCount == Settled)
+                {
+                    world.InsertResource(new Ticket(Render.BeginCapture()));
+                    return;
+                }
+
+                if (picture is not null) return;
+                if (!world.TryGetResource<Ticket>(out var ticket)) return;
+
+                if (Render.TryReadCapture(ticket.Capture, out var arrived)) picture = arrived;
+            },
+            "Test.Read"));
+
+        Assert.Equal(0, app.Run());
+        return picture;
+    }
+
+    /// <summary>Where the run keeps what it asked for, so a later frame can pick it up.</summary>
+    private sealed record Ticket(Capture Capture);
+}

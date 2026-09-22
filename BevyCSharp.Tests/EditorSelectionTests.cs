@@ -11,7 +11,12 @@ namespace Bevy.Tests;
 /// everything it made and makes it again with new ids, does not lose it. That memory has to tell
 /// a selection somebody gave up from one the world took away, which is the distinction these
 /// check.
+///
+/// In the engine collection, because it runs a real app and two of those at once is not something
+/// the native side allows: the component registry belongs to whichever app is current, so a test
+/// building one while another is being torn down fails on a registration that has nowhere to go.
 /// </remarks>
+[Collection("engine")]
 public sealed class EditorSelectionTests
 {
     [Fact]

@@ -1,281 +1,295 @@
 # TODO
 
-Work outstanding on BevyCSharp, ordered roughly by how much it blocks building a game.
+Work outstanding on BevyCSharp, in the order it blocks building a game: getting content in, drawing
+it, putting an interface on it, making it behave, reaching the devices a player has, and shipping
+the result.
 
 The ECS half of the project is finished and covered by tests: the behavior model, chunked
-iteration, change detection, filters, hierarchy, scheduling, commands and input. What is thin is
-the engine-facing half. Bevy is compiled in far further than it is bridged, so several items
-below are bridge work over code that is already linked into the binary.
+iteration, change detection, filters, hierarchy, scheduling, commands, input and states. What is
+thin is the engine-facing half. Bevy is compiled in far further than it is bridged, so most of what
+follows is bridge work over code already linked into the binary rather than a dependency to add.
 
-Every item names the Cargo features it needs, the `bcs_*` exports to add, and the managed surface
-that goes on top. Adding an export means bumping `ABI_VERSION` in `native/bevy_csharp/src/lib.rs`
-and `Native.ExpectedAbiVersion`, which is what stops a stale bridge loading against new managed
-code.
+An item says what exists, what is missing, and what the missing part needs. Adding an export means
+bumping `ABI_VERSION` in `native/bevy_csharp/src/lib.rs` and `Native.ExpectedAbiVersion`, which is
+what stops a stale bridge loading against new managed code.
 
-## Content pipeline
+## Content
 
 ### Composing what a glTF file describes
 
-A glTF file's geometry, scenes and materials are all reachable. `LoadGltfMaterial` needs a window,
-because the translation from a glTF material to the one the renderer draws with belongs to the
-renderer, and a windowless run has nothing to draw. That is the arrangement rather than a
-limitation: a run with no renderer is running code, not showing a model.
+A glTF file's geometry, scenes and materials load, and `ctx.Ecs.SpawnScene` spawns either a glTF
+scene or a `.scn`/`.scn.ron` file, both of which are a `WorldAsset` in 0.19. `LoadGltfMaterial`
+needs a window, because translating a glTF material into one the renderer draws with belongs to the
+renderer, which is the arrangement rather than a limitation.
 
-The division of labour this is aiming at: glTF carries the geometry, materials and animations,
-because that is what Blender and every other tool exports. Composition on top of it, adding
-components to what a file defines, attaching child entities, overriding what an artist set,
-happens after the scene is spawned.
+The division of labour this aims at: glTF carries geometry, materials and animations, because that
+is what Blender and every other tool exports, and composition happens after the scene is spawned by
+adding components to what the file defined.
 
-Bevy's own answer to that composition is Bevy Scene Notation, new in 0.19, and it is **not**
-reachable from C#. `bsn!` is a compile-time Rust macro: it expands into types implementing the
-`Scene` trait, so there is nothing to call at runtime, and Bevy ships no `.bsn` asset format or
-loader yet, which its own documentation states is intended for a later release. Scenes written in
-BSN exist only in Rust source.
+Bevy's own answer to composition is Bevy Scene Notation, and it is **not** reachable from C#.
+`bsn!` is a compile-time Rust macro expanding into types that implement the `Scene` trait, so there
+is nothing to call at runtime, and Bevy ships no `.bsn` asset format or loader yet. Scenes written
+in BSN exist only in Rust source.
 
-What C# has instead is spawn-then-patch, through the ECS surface that already exists: spawn the
-scene, walk it with `ChildrenOf`, `Add` components to the entities it produced, overwrite the
-`Transform` an artist set. That reaches the same result as BSN's patching, expressed at runtime
-rather than in the type system, and with the same last-write-wins rule, because both end as
-component inserts.
+What C# has instead is spawn-then-patch through the ECS surface: spawn the scene, walk it with
+`ChildrenOf`, add components to the entities it produced, overwrite the `Transform` an artist set.
+That reaches the same result with the same last-write-wins rule, because both end as component
+inserts. Two things BSN has that it does not:
 
-Two things BSN has that spawn-then-patch does not, worth knowing before anyone tries to close the
-gap:
+- **Templates.** A BSN field takes a value turned into a component when the scene spawns, which is
+  what lets `image: "player.png"` stand for an `AssetServer::load`. On this side those are separate
+  calls that already exist, so what is missing is the convenience rather than the capability.
+- **Field-level patching.** Two BSN scenes naming the same component merge field by field, while
+  adding a component from C# replaces the whole thing. A `Patch<T>` helper would cover it and needs
+  no bridge.
 
-- **Templates.** A BSN field takes a value that is turned into a component when the scene spawns,
-  which is what lets `image: "player.png"` stand for an `AssetServer::load` and `asset_value(mesh)`
-  for an `AssetServer::add`. On this side those are separate calls that already exist, so the
-  convenience is missing rather than the capability.
-- **Field-level patching.** Two BSN scenes naming the same component merge field by field. Adding
-  a component from C# replaces the whole thing, so overriding one field means reading it, changing
-  it and writing it back. A `Patch<T>` helper on the managed side would cover this, and needs no
-  bridge.
+Revisit when `.bsn` ships as a loadable asset. It would load through the same path a glTF scene
+does and be authorable without recompiling the bridge, which is the part worth having here.
 
-Revisit when `.bsn` ships as a loadable asset: it would load and spawn through the same
-`WorldAssetRoot` export a glTF scene needs, and would then be authorable without recompiling the
-bridge, which is the part of BSN actually worth having on this side.
+### Textures and shaders
 
-### GPU-compressed textures
+PNG, JPEG, WebP, BMP and TGA decode in every build. The GPU-compressed formats do not: `ktx2` is
+compiled in but its payload formats, BCn and ASTC and ETC2, are not, and
+`CompressedImageFormatSupport` has to carry what the adapter can decode, which a windowless app
+reports as nothing. Nothing here blocks a game; it is size on disk and upload cost.
 
-PNG, JPEG, WebP, BMP and TGA decode in every build. What is missing is the compressed formats a
-GPU can hold without expanding: `ktx2` is compiled in but its payload formats, BCn and ASTC and
-ETC2, are not, and `CompressedImageFormatSupport` has to carry what the adapter can decode, which
-a windowless app reports as nothing.
+`AssetKind.Shader` loads and returns a handle nothing consumes. Either give it a custom material
+path or remove the kind.
 
-Nothing here blocks a game; it is a matter of size on disk and upload cost.
+### Scripts a game can load
 
-## Presentation
+`BehaviorsPlugin.ScriptsDirectory` is reserved and does nothing. The engine half exists,
+`App.EnableDynamicSystems` and `App.RemoveSystemsBySource`, and `BevyCSharp.Editor` drives Roslyn
+through them. What is left is deciding whether the core should carry a compiler at all, which is
+what a game loading a script without the editor would take.
 
-### UI beyond a HUD
+## Rendering
 
-`bevy_ui_render` is compiled in and `Ui` spawns nodes and text, sets a node's position, size,
-per-side padding, margin and border, direction, justification, alignment, gaps, growth, wrapping,
-bounds and overflow, draws an image inside one, scrolls what it clips, breaks and aligns a run of
-text in a font of its own, rewrites it in place, and reports the pointer over a node asked to be
-interactive. That covers a HUD, a button, a menu that lays itself out, a panel that resizes, a
-list that scrolls and a paragraph that fits its box. What is left:
-
-- **Odds and ends of flexbox.** `align_content` spreads the lines a wrapped node produces, the
-  way `justify_content` spreads the children within one. `aspect_ratio` sizes the other axis from
-  the one that is known. `OverflowClipMargin` clips at the padding or border box rather than at
-  the content box, which matters for a scrolling list with a border.
-- **Grid.** `GridPlacement` and the row and column tracks are a second layout algorithm rather
-  than more fields on this one, and an inventory is what wants it.
-- **Image detail.** `ImageNode.texture_atlas` names a frame by index instead of by pixel
-  rectangle. The layout asset a sprite uses is the same one, so this is two fields on the image
-  config rather than new machinery. A sliced image's centre and sides are stretched, since
-  `SliceScaleMode::Tile` is a payload the flat config has no room for.
-- **Fonts by family name.** Excluded deliberately, the way gamepads are. `FontSource` can name
-  `SansSerif`, `Monospace` or the system interface font instead of a file, but Bevy resolves those
-  through `system_font_discovery`, whose Linux backend links against fontconfig at build time.
-  Without the feature such text renders nothing at all and logs why, so the bridge offers a loaded
-  font or Bevy's own and nothing in between. Revisit if the feature becomes dlopen-based, the way
-  the Wayland backend already is.
-- **Rich text.** One run of text is one style. Bevy builds a mixed paragraph out of `TextSpan`
-  children under the `Text` entity, so a bold word inside a sentence is a second entity rather
-  than markup. That wants a spawn entry point of its own.
-- **Text trimmings.** `LineHeight` for the spacing between lines, `FontSmoothing` for pixel fonts
-  that should not be antialiased, and `TextShadow`, which is a component beside the text rather
-  than part of it.
-
-### 2D beyond a sprite
-
-`bevy_sprite_render` is compiled in, `Render2d` spawns a 2D camera and attaches sprites, and a
-sprite can be tinted, resized, mirrored, anchored off its centre, cut down to one rectangle of a
-sheet or to one frame of an atlas layout, and drawn sliced or tiled. What a 2D game needs on top
-of that:
-
-- **Animation.** Nothing steps a sprite through its frames. That is a component holding a frame
-  range and a timer, and it needs no bridge: `Frame` names a frame by number, so a behavior that
-  counts and calls `SetSprite` is the whole of it. Worth writing once in the sample rather than
-  in every game built on top of it.
-- **Scaled fitting.** `SpriteImageMode::Scale` fits a picture inside `Size` the way a video
-  player letterboxes, keeping its proportions. Its payload is another enum, which the flat config
-  has no room for, the same limit the sliced modes hit.
-
-### Gizmos beyond three shapes
-
-`bevy_gizmos_render` is compiled in and `Gizmos` draws lines, spheres and axis markers. Calls are
-queued and drained by one Bevy system each frame, because a `Gizmos` parameter cannot be held by
-an exclusive system, which is what every C# system is.
-
-What is not bridged:
-
-- **The other shapes.** Bevy draws rectangles, circles, arcs, arrows, grids and any 2D or 3D
-  primitive through `primitive_3d`. Each is another arm on the same queue.
-- **Configuration.** `GizmoConfig` sets line width, whether gizmos draw on top of the scene or
-  are occluded by it, and which render layers they appear on. All of it is Bevy's default.
-- **Gizmo groups.** A second `GizmoConfigGroup` lets one category be toggled or styled apart from
-  another, which is what a project with several kinds of debug drawing wants.
-
-## Audio
-
-`bevy_audio` is compiled into the render profile with Ogg Vorbis, WAV, FLAC and MP3, and `Audio`
-plays, stops, pauses, sets volume per sound and over everything at once, places a sound in the
-world for a nominated listener, and reads and moves the point a clip has reached. A playing sound
-is an entity.
-
-It is the one part of the bridge that takes a system library: cpal links against ALSA on Linux,
-so a render build needs `libasound2-dev` or the equivalent. `build-native.sh` installs it into the
-container on the `--portable` path and checks for it before a local build, naming the package per
-distribution. The minimal profile is untouched and still builds with nothing but a C compiler.
-
-What is not bridged:
-
-- **Seeking a looping sound.** Looping is rodio's `Repeat` over a `Buffered` source, which keeps
-  the decoded samples so the clip can start again and refuses to move within them, so a seek
-  reports `INVALID_STATE`. Nothing on this side can work around it: music that has to resume
-  where it left off is played once and restarted. Revisit if rodio makes a buffered source
-  seekable.
-- **Where the sound goes.** `PlaybackSettings.start_position` and `duration` play part of a clip
-  without seeking afterwards, which is how one file holds several effects. `SpatialScale` is per
-  sound, while `AudioPlugin::default_spatial_scale` sets it once for the whole app.
-- **Ear geometry.** `SpatialListener` takes the two ear offsets separately; the bridge takes one
-  gap and places them on the x axis, which is what Bevy's own constructor does.
-
-## Simulation structure
-
-### Sub-states
-
-States carry their edges and their entities: `[OnEnter]` and `[OnExit]` run once per transition,
-`[InState]` every frame a state is held, and `DespawnOnExit` ties an entity's life to a value so
-that leaving it clears the level.
-
-What is left is `SubStates`, a state that exists only while a parent holds a value, so a pause
-menu's own state disappears with the run it belongs to. The obstacle is that `SubStates` names its
-parent as an associated type, while the bridge's slots are chosen at runtime. A way through, in
-the order the work falls:
-
-- **Pair a sub slot to each parent slot.** `BcsSub0` implements `SubStates` with
-  `SourceStates = BcsState0`, and so on, so the parent type is fixed at compile time and only the
-  parent *value* has to be configured. `should_exist` reads that value from an atomic the
-  registration wrote, which puts one sub-state under each state axis: a pause state under the app
-  state, which is the shape a game wants anyway.
-- **`app.AddSubState(Pause.Off, whileIn: Screen.Playing)`.** States are added by hand rather than
-  by the generator, so the managed surface is one more method on `App` and no attribute work. It
-  can refuse a parent whose slot already carries a sub-state, which is where the pairing shows.
-- **The edges and conditions need sub arms.** `bcs_state_get`, `_set` and `_add_system` dispatch
-  on the slot index, and a sub-state is a different type in the same position, so each grows a
-  second table. `[InState(Pause.On)]` and `[OnEnter(Pause.On)]` should work exactly as they do for
-  a plain state, which is most of the work in this item.
-- **Reading a sub-state that does not exist.** While the parent is elsewhere there is no
-  `State<BcsSub0>` resource at all, so the read reports `NOT_PRESENT` rather than a value. That is
-  the honest answer and the managed side should surface it as one, not as a default.
-
-### Engine messages that carry text
-
-The window's messages are drained onto the managed bus each frame, so `ctx.Read<WindowResized>()`
-reads an engine message the same way it reads one another system sent. Nine are bridged: six
-whose payload is numbers, and the three file drag-and-drop messages.
-
-Text crosses the boundary by the caller owning the buffer: the entry point writes into it and
-returns the length in bytes, so a caller probes with a small buffer and calls again only when the
-answer did not fit. Anything else carrying text follows that convention.
-
-What is left:
-
-- **Asset load failures.** `AssetEvent` reports which asset failed and why, where the handle only
-  says that it did. The message is generic over the asset type, so it needs the curated-name
-  treatment as well.
-- **IME**, which the Input section covers.
-
-## Rendering control
+### Cameras, lights and the window
 
 Cameras, lights and the window take their common parameters, and a camera tonemaps, dithers,
 multisamples, antialiases, sharpens, blooms and scatters a sky over what it draws, pulls focus,
-smears what moves, fringes and warps its lens, darkens its corners and finds its own exposure.
-`bevy_post_process` and `bevy_anti_alias` are compiled into the render profile, so most of what
-is left in this area is bridge work over code already in the binary rather than a feature to add.
-What is left:
+smears what moves, fringes and warps its lens, darkens its corners, finds its own exposure, meters
+at an exposure it is given, and grades the finished picture in three tonal ranges.
+Render layers, viewports and render-to-texture are bridged, so splitscreen, a minimap, a portal and
+a run that draws with no window at all are expressible, and a cubemap can be drawn behind the scene
+as a skybox or used to light the scene through the atmosphere. `bevy_post_process` and
+`bevy_anti_alias` are compiled into the render profile, so most of what is left is bridge work over
+code already in the binary.
 
-- **Exposure the camera does not choose.** `Exposure` is one number on the camera, the EV-100 a
-  scene is metered at, and it is the base `AutoExposure` corrects rather than an alternative to
-  it: the compute pass adds its own answer to `ColorGrading.exposure` and leaves this alone.
-  `PhysicalCameraParameters::ev100` derives it from aperture, shutter speed and sensitivity,
-  which is the same struct that fixes a lens's depth of field, so the two can be given matching
-  numbers.
-- **DLSS.** `bevy_anti_alias` carries it behind a `dlss` feature that pulls in `dlss_wgpu`, which
-  has licensing terms of its own, and it runs only on an NVIDIA RTX card through Vulkan on
-  Windows or Linux. It also wants a `DlssProjectId` inserted before `DefaultPlugins` and a
-  runtime check of whether the machine supports it at all, so it is a fourth arm on `AntiAlias`
-  that most machines have to be told they cannot have, rather than one more value.
-- **The rest of the sky.** Earth's air is bridged; Mars is the other medium Bevy ships and its
-  dust phase comes from a texture, so it needs an image handle on the config and a texture worth
-  shipping. `ScatteringMedium::new` takes arbitrary scattering terms, which is what an alien
-  planet would want and what a flat config cannot describe. `AtmosphereEnvironmentMap` lights the
-  scene *from* the sky rather than only drawing it, which is the difference between a lit scene
-  and one that merely has a sky behind it. The LUT sizes and sample counts on `AtmosphereSettings`
-  are Bevy's defaults, and they are the quality knob.
-- **Color grading.** `ColorGrading` sits on the camera and carries exposure, gamma, saturation
-  and lift/gamma/gain per tonal range. That is a nested struct of three sections, and it is the
-  knob a game gives an artist rather than a player.
-- **Order-independent transparency** and `Skybox` are both camera components as well.  A skybox
-  needs a cubemap, which the asset surface cannot load, and that same gap blocks light probes
-  below.
-- **Camera**: render layers, viewports and render-to-texture are bridged, so splitscreen, a
-  minimap, a portal and an offscreen run are all expressible. `Render.CreateTarget` makes an empty
-  image, `Render.SetCameraTarget` points a camera at it, and a material sampling the same handle
-  shows what that camera drew, and `Render.BeginCapture` reads a target back into managed memory as
-  RGBA bytes. What is left is the shape of the target rather than the mechanism. A cubemap, which a
-  skybox and the light probes below both need, cannot be created or loaded, and an image cannot be
-  created from bytes the managed side already holds, which is what a caller that generated a
-  texture rather than loading one would want.
-- **Lights**: shadow bias is per light and shadow map size is settable. What is left is optical
-  rather than structural: a spot light has no cookie texture to shape its beam, cascade
-  configuration for a directional light's shadow distance is Bevy's default, and light probes,
-  which is how a room gets ambient light that matches it, need cubemap assets the asset surface
-  cannot load.
-- **Window**: position, decorations, resizability, always-on-top and exclusive fullscreen are
-  bridged, and the monitors are readable by size and by name. What is left is choosing a mode: a
-  monitor's list of video modes is a list of structs, so exclusive fullscreen takes the monitor's
-  current mode rather than offering a resolution to pick from. Multiple windows are also
-  unbridged: every entry point here addresses the primary one.
-- **Verification**: the tests assert that settings are accepted and that a run with no renderer
-  refuses, which is what can go wrong silently. An offscreen run captures a picture of a real scene
-  so that a machine with no display can check that anything was drawn at all, and a capture read
-  back into memory is asserted on pixel by pixel, which is how the colour a camera was told to
-  clear to is checked rather than assumed. Whether a whole scene is *right* is confirmed by running
-  the sample, which uses a custom clear color, a tinted sun, a spot light, a bokeh
-  focus on the cube and a vignette, and binds F11 to fullscreen and Tab to cursor lock. An effect
-  is worth checking against a second run with it turned off: bloom was confirmed that way, since
-  a halo is obvious beside the same frame without one and easy to imagine without the
-  comparison. The lens effects have not been through that comparison.
+- **Exposure from a lens rather than a number.** `Render.SetExposure` takes the EV-100 a scene is
+  metered at. `PhysicalCameraParameters::ev100` derives that from aperture, shutter speed and
+  sensitivity, which is the same struct that fixes a lens's depth of field, so a camera could be
+  described once and have both read from it.
+- **Lighting from a picture rather than from the sky.** `Render.SetSkyLighting` derives an
+  environment map from the atmosphere, which covers an outdoor scene. What it does not cover is an
+  indoor one, or any scene lit from a photograph: `EnvironmentMapLight` takes a diffuse and a
+  specular cubemap that a tool bakes, and `GeneratedEnvironmentMapLight` filters one on the GPU
+  instead. Both are a handle and a few numbers now that a cubemap loads.
+- **A cubemap of anything else.** The reinterpretation is a column of six faces stacked
+  vertically, which is what a file holds. A cubemap rendered into, which is what a reflection probe
+  or a point light's shadow would want, needs an image created with six layers rather than one
+  reinterpreted after loading.
+- **The rest of the sky.** Earth's air is bridged; Mars is the other medium Bevy ships and its dust
+  phase comes from a texture. `ScatteringMedium::new` takes arbitrary scattering terms, which is
+  what an alien planet wants and what a flat config cannot describe. The LUT sizes and sample
+  counts on `AtmosphereSettings` are Bevy's defaults, and they are the quality knob.
+- **DLSS.** `bevy_anti_alias` carries it behind a `dlss` feature pulling in `dlss_wgpu`, which has
+  licensing terms of its own and runs only on an NVIDIA RTX card through Vulkan on Windows or
+  Linux. It also wants a `DlssProjectId` inserted before `DefaultPlugins` and a runtime check of
+  whether the machine supports it, so it is a fourth arm on `AntiAlias` that most machines have to
+  be told they cannot have.
+- **Order-independent transparency** is a camera component like the rest.
+- **Lights.** Shadow bias is per light and shadow map size is settable. What is left is optical: a
+  spot light has no cookie texture to shape its beam, and cascade configuration for a directional
+  light's shadow distance is Bevy's default.
+- **Window.** Position, decorations, resizability, always-on-top and exclusive fullscreen are
+  bridged, and the monitors are readable by size and by name. A monitor's video modes are a list of
+  structs, so exclusive fullscreen takes the monitor's current mode rather than offering a
+  resolution to pick from. Multiple windows are unbridged: every entry point addresses the primary
+  one.
+- **Reading pixels back costs a PNG or a copy.** `Render.BeginCapture` hands back RGBA bytes, which
+  is what a test asserts on. An image cannot be created from bytes the managed side holds, which is
+  what a caller that generated a texture rather than loading one would want.
 
-## Input
+### Gizmos
 
-- **Gamepad**: excluded deliberately. `bevy_gilrs` needs libudev development headers at build
-  time on Linux, which the current profile avoids so the bridge builds with nothing but a C
-  compiler. Adding it means either accepting that build dependency or gating the feature per
-  platform.
-- **IME**: `Input.Text` covers typing, including dead keys, so a name field works. What is not
-  bridged is composition: Bevy's `Ime` messages report a candidate string being assembled, which
-  is what a Japanese or Chinese input method needs to show underlined text before it is
-  committed. The text convention the file drop messages use is what carries the candidate string;
-  what is left is the messages themselves and the window's `ime_enabled` and `ime_position`.
-- **Touch**: bridged as this frame's list, up to eight at once. Untested: this machine has no
-  touchscreen, so only the empty case is covered. Gestures are not derived, and a touch that
-  ends is reported once rather than lingering for a frame.
+`Gizmos` draws lines, fading lines, arrows, spheres, circles, arcs, rectangles, boxes, capsules,
+cones, cylinders, tori, grids and axis markers, in either of two groups: one the scene can hide and
+one it cannot. Calls are queued
+and drained by one Bevy system each frame, because a `Gizmos` parameter cannot be held by an
+exclusive system, which is what every C# system is. `Gizmos.Configure` sets line width, render
+layers and whether anything is drawn at all.
 
-## ECS gaps
+- **The rest of the primitives.** `primitive_3d` draws any shape in `bevy_math`. What the bridge
+  does not reach are the ones described by more than a radius and one length: a triangle, a
+  polyline, a tetrahedron and a conical frustum, each of which needs more numbers than the queued
+  shape carries.
+- **The 2D shapes.** `rect_2d`, `circle_2d` and the rest draw in screen space for a 2D camera. The
+  queue describes everything in world space, so these need a flag saying which space a shape is in
+  rather than a second set of calls.
+- **Line style.** `GizmoLineConfig` also carries joints, a dotted or dashed style, and whether
+  width is in pixels or world units. The bridge sets width alone.
+- **Gizmo groups.** A third `GizmoConfigGroup` would let one category be toggled or styled apart
+  from another. A group is a Rust type rather than a value, so a third is added where the two are.
+- **One shape per call.** Every gizmo crosses the ABI on its own, and the editor's fading grid asks
+  for two hundred and forty of them a frame, about four percent of one. Fine at this size and the
+  wrong shape at ten times it: an entry point taking an array would make a wireframe cost the array
+  rather than the number of lines in it.
+
+### 2D
+
+`Render2d` spawns a 2D camera and attaches sprites, and a sprite can be tinted, resized, mirrored,
+anchored off its centre, cut down to one rectangle of a sheet or one frame of an atlas layout, and
+drawn sliced, tiled or fitted inside its size the way a video player letterboxes.
+
+- **Animation.** Nothing steps a sprite through its frames. That is a component holding a frame
+  range and a timer, and it needs no bridge, since `Frame` names a frame by number and a behavior
+  that counts and calls `SetSprite` is the whole of it. Worth writing once in the sample rather
+  than in every game built on it.
+- **The sliced modes' payloads.** `SliceScaleMode::Tile` carries a stretch value the flat config
+  has no room for, so a sliced sprite's sides and centre are stretched rather than tiled. The same
+  limit is what keeps a UI image from tiling its slices.
+
+## Interface
+
+### Layout and text
+
+`Ui` spawns nodes and text, sets a node's position, size, per-side padding, margin and border,
+direction, justification, alignment, gaps, growth, wrapping, bounds, overflow, aspect ratio, where
+its clipping falls and which camera draws it, draws an image inside one, scrolls what it clips,
+draws one frame of a sheet rather than a whole picture, breaks and aligns a run of text in a font of
+its own at a spacing and smoothing it chooses, casts a shadow behind it, rewrites it in place, and
+reports the pointer over a node asked to be interactive. Naming the camera is what lets a screen be drawn with no
+window, so the layout is asserted on pixel by pixel in an offscreen run like the rest of the
+renderer. That covers a HUD, a button,
+a menu that lays itself out, a panel that resizes, a list that scrolls and a paragraph that fits its
+box.
+
+- **Odds and ends of flexbox.** `align_content` and `aspect_ratio` are bridged. What is left of
+  the box model is `OverflowClipMargin`'s per-side control, since the bridge takes one margin for
+  all four edges.
+- **Grid.** `GridPlacement` and the row and column tracks are a second layout algorithm rather than
+  more fields on this one. An inventory is what wants it.
+- **Image detail.** A sliced image's centre and sides are stretched, because `SliceScaleMode::Tile`
+  is a payload the flat config has no room for, which is the same limit a sliced sprite hits.
+- **Rich text.** One run of text is one style. Bevy builds a mixed paragraph from `TextSpan`
+  children under the `Text` entity, so a bold word inside a sentence is a second entity rather than
+  markup, and that wants a spawn entry point of its own.
+- **Letter spacing.** `LetterSpacing` is the component beside `LineHeight` that the bridge does
+  not set, which is what a heading tracked out wants.
+- **Fonts by family name.** Excluded deliberately, the way gamepads are. `FontSource` can name
+  `SansSerif`, `Monospace` or the system interface font, but Bevy resolves those through
+  `system_font_discovery`, whose Linux backend links against fontconfig at build time. Without the
+  feature such text renders nothing and logs why, so the bridge offers a loaded font or Bevy's own
+  and nothing in between. Revisit if the feature becomes dlopen-based, as the Wayland backend is.
+
+### Dear ImGui
+
+The editor runs on Dear ImGui. The C# side owns the context through `Twizzle.ImGui-Bundle.NET`,
+builds the windows the way ImGui is built anywhere, and hands the triangles to `bcs_imgui_frame`,
+which draws them over what the cameras drew. Immediate mode is the point: an inspector is a call per
+field per frame, so there is no widget tree to keep in step with the world.
+
+- **The bundle is ImGui 1.91.5.** From 1.92 Dear ImGui embeds a scalable version of its classic
+  font, which is what the native theme should use rather than the ProggyClean bitmap it has. It
+  arrives when the bundle updates and needs no change here.
+- **No icon font.** The icons are PNGs the editor ships, loaded through the asset server and drawn
+  with `ImGui.Image`. More can be rasterised from SVG when they are wanted.
+- **IME is not forwarded.** Keys, characters, the pointer and the wheel are.
+- **The interface is redrawn every frame**, which is what immediate mode means. At editor scale
+  that is a few thousand triangles and one buffer write; if it ever matters, a frame where nothing
+  moved can be drawn again instead of rebuilt.
+
+### The editor
+
+`BevyCSharp.Editor` runs. One panel on the right holds the world with a picture per row above the
+details of whatever is selected, the tools float in the scene's corners, and the rest is behind a
+hamburger whose contents are a table of paths. A component is a card that opens and shuts, a field
+is a row drawn as its kind and attributes say, and a component with nothing to show is a tag. The
+bottom left is a strip of tabs opening into a card: the console, the asset browser, the settings and
+the style. Gizmos draw the selection, its handles, the ground and the camera's orientation, and a
+drag on a handle moves, turns or stretches what is selected. [EDITOR.md](EDITOR.md) has the design
+language.
+
+- **Half of the world is saved.** `assets/world.json` keeps every named entity's name and every
+  component with a schema, which is what the editor can change. What it cannot write is the
+  engine's own components: a mesh handle, a material, a camera's projection.
+  `bevy_world_serialization` would write exactly those and can see no C# component at all, because
+  those are bytes registered at runtime with no Rust type behind them. A world asset worth the name
+  is both files, or one format holding both halves.
+- **Nothing is rendered to a texture yet.** Every piece exists: `Render.CreateTarget` and
+  `Render.SetCameraTarget` point a camera at an image, and `ImGuiTextures.Of` hands that image to a
+  draw call. Three wants in the editor share them, and all three are editor work rather than bridge
+  work: a thumbnail for an asset tile, a preview for a material, and an orientation widget drawn as
+  a small scene rather than as six lines in the world.
+- **A field can hold an asset, and the engine's own cannot.** A game's component holding an
+  `AssetHandle` is drawn by name, and pressing it offers the files under the asset root that suit
+  it. The mesh and the material on an entity are Rust components with no schema, so the editor
+  cannot point an entity at a different mesh.
+- **The hierarchy names what it can see and the stats panel counts it.** Both go through
+  `EditorKinds`, so a camera in the tree and a camera in the count are one question asked once.
+  Neither can see a component the bridge does not name, so an entity whose components are all
+  engine-side reads as plain. Naming more of them is a bridge job.
+- **The inspector draws a field as one arm of one switch**, told how by the attributes the
+  generator carried through. What is left is a fold, which `[Foldout]` asks for and nothing draws,
+  and editing several things at once: the panel shows the last one picked with a count beside it
+  rather than what they agree and disagree about.
+- **A selection is remembered by name**, so what a reloaded script respawns is found again. All of
+  them or none, since half a selection coming back is worse than none. Two entities sharing a name
+  still resolve to the first.
+- **Undo covers what can be reversed exactly**: a field edited in the inspector, a rename, a new
+  entity, something hidden with its eye, and a component put on or taken off, which keeps what it
+  held. Despawning is deliberately not recorded, because an entity's mesh and material are
+  engine-side components with no mirror and what came back would be a name with nothing to draw.
+  That is the world file's gap, and closing one closes both.
+- **Settings are the editor's, not the project's.** `EditorSettings` saves to `assets/settings.txt`
+  beside the layout, and everything on it belongs to this editor build. A project setting worth the
+  name (a startup scene, a physics step, a build target) needs somewhere to live that is part of
+  the project, which is the world file's gap again.
+- **The scene is the camera's viewport rather than a texture.** Docked, `Render.SetViewport` gives
+  the camera the rectangle the panels left. A texture would make the scene a panel of its own,
+  dockable and tabbable, which is what a second view wants.
+- **A theme is a file, and only the running build has it.** `assets/theme.txt` is written beside the
+  binary, so a look dialled in has to be copied back into the project by hand to be shipped.
+- **Every row is drawn every frame.** A list is a call per row inside a scrolling region, which is
+  what immediate mode means. At editor scale that is nothing; a list of ten thousand entities would
+  want ImGui's own clipper, which asks only for the rows on screen and is a change to the loops
+  rather than to what they draw.
+
+## Simulation
+
+### States
+
+States carry their edges and their entities: `[OnEnter]` and `[OnExit]` run once per transition,
+`[InState]` every frame a state is held, `DespawnOnExit` ties an entity's life to a value, and
+`[SubStateOf]` declares a state that exists only while another holds a value, so a pause disappears
+with the run it belongs to. The bridge pairs one sub-state slot with each state slot, because
+`SubStates` names its parent as an associated type and the types exist when the crate is built.
+
+- **More than one sub-state under a state**, and sub-states of sub-states. Both are refused, the
+  first because the pairing is one to one and the second because a chain has nowhere to live. More
+  pairs are cheap; what is not obvious is how the managed side would name the second one without
+  the attribute becoming a tree.
+- **Computed states.** `ComputedStates` derives a value from one or more others rather than only
+  its existence, which is what "the HUD is visible in these three screens" wants. Same shape of
+  problem, same pairing.
+- **A sub-state over more than one parent.** `SourceStates` can be a tuple, so a state can exist
+  only while two others hold values. The pairing is per parent slot, so this needs a different
+  arrangement rather than another pair.
+
+### Engine messages
+
+The window's messages are drained onto the managed bus each frame, so `ctx.Read<WindowResized>()`
+reads an engine message the way it reads one another system sent. Ten are bridged: six whose
+payload is numbers, the three file drag-and-drop messages, and `AssetLoadFailed`, which carries the
+path and the reason for an asset that would not load. Text crosses the boundary by the caller
+owning the buffer, so a caller probes with a small buffer and calls again only when the answer did
+not fit.
+
+- **Which kind of asset failed.** `UntypedAssetLoadFailedEvent` carries a type id as well as a path
+  and a reason, and the bridge passes on the two texts. Naming the type means the same curated list
+  the components need, so a caller tells an image from a mesh by the path it asked for.
 
 ### Components Bevy owns
 
@@ -285,187 +299,98 @@ What is left:
 registry alone, since the managed side also needs a byte-compatible mirror, so this stays a curated
 list that grows as mirrors are written.
 
-Candidates, each blocked on being mirrorable rather than on the lookup: `Name` holds a `String`,
-and the render components (`Camera`, `PointLight`, `DirectionalLight`, `Mesh3d`,
-`MeshMaterial3d`) hold typed asset handles or projection data that raw bytes cannot represent.
-Those need named operations of the kind `Render` already provides, or name-only handles if
-filtering on them is enough.
+Each candidate is blocked on being mirrorable rather than on the lookup. `Name` holds a `String`,
+and the render components (`Camera`, `PointLight`, `DirectionalLight`, `Mesh3d`, `MeshMaterial3d`)
+hold typed asset handles or projection data that raw bytes cannot represent. Those need named
+operations of the kind `Render` provides, or name-only handles if filtering on them is enough.
 
-## Physics
+### Physics
 
 Not a priority.
 
 Bevy ships no physics engine, and the answer is **not** to bridge Avian or Rapier. Use
-[BepuPhysics v2](https://github.com/bepu/bepuphysics2), which is C#, so the simulation lives on
-the managed side and needs no bridge surface at all: nothing new crosses the ABI, no Cargo feature
-is added, and the only thing that has to reach Bevy is the pose each body ends up with, which is
-one `Transform` write through the API that already exists.
+[BepuPhysics v2](https://github.com/bepu/bepuphysics2), which is C#, so the simulation lives on the
+managed side and needs no bridge surface at all: nothing new crosses the ABI, no Cargo feature is
+added, and the only thing that has to reach Bevy is the pose each body ends up with, which is one
+`Transform` write through the API that already exists.
 
-Two layers, so that no Bepu type reaches user code and the backend can be replaced:
-
-- a façade: settings (gravity, timestep, substeps, solver iterations, worker threads), a body
-  handle struct that forwards every operation to the world owning it, and a body kind for
-  dynamic, kinematic and static.
-- the backend: a physics world owning Bepu's `Simulation`, `BufferPool` and `ThreadDispatcher`,
-  plus the `INarrowPhaseCallbacks` and `IPoseIntegratorCallbacks` structs Bepu requires. Worth
-  splitting across partial files, one each for creation, per-body operations, queries and
-  stepping, because it grows large.
-
-Points to get right:
+Two layers, so that no Bepu type reaches user code and the backend can be replaced. A façade
+carrying settings, a body handle that forwards to the world owning it, and a body kind for dynamic,
+kinematic and static; and a backend owning Bepu's `Simulation`, `BufferPool` and `ThreadDispatcher`
+plus the callback structs it requires.
 
 - **Stepping.** A physics integration usually carries its own accumulator and a guard against the
-  spiral of death, where a slow frame asks for more steps than the next frame has time for.
-  Neither is needed here: `[OnFixedUpdate]` means one step per fixed step, with Bevy owning the
-  accumulation.
-- **Write-back is a `Transform` write.** Poses go into Bevy's own `Transform`, and propagation
-  carries them to `GlobalTransform` and the renderer for free.
+  spiral of death. Neither is needed here, because `[OnFixedUpdate]` means one step per fixed step
+  with Bevy owning the accumulation.
+- **Write-back is a `Transform` write.** Propagation carries it to `GlobalTransform` and the
+  renderer for free.
 - **It belongs in its own package**, so the core does not take the dependency. `BepuPhysics` and
-  `BepuUtilities` are separate NuGet packages, published on a 2.5.0-beta line.
-- **Teardown matters.** Bepu is pool-based and its `BufferPool` and `ThreadDispatcher` are
+  `BepuUtilities` are separate NuGet packages on a 2.5.0-beta line.
+- **Teardown matters.** Bepu is pool-based, and its `BufferPool` and `ThreadDispatcher` are
   disposable, so they have to be torn down with the app rather than left to the GC.
 
-## The interface
+## Platform
 
-The editor runs on **Dear ImGui**. The C# side owns the context through
-`Twizzle.ImGui-Bundle.NET`, builds the windows the way ImGui is built anywhere, and hands the
-triangles it asked for to `bcs_imgui_frame`; `native/bevy_csharp/src/imgui` draws them over what the
-cameras drew, straight onto the window.
+### Input
 
-Immediate mode is the point: an inspector is a call per field per frame, so there is no tree of
-widgets to keep in step with the world, and nothing to invalidate when a value changes underneath.
+- **Gamepad.** Excluded deliberately. `bevy_gilrs` needs libudev development headers at build time
+  on Linux, which the current profile avoids so the bridge builds with nothing but a C compiler.
+  Adding it means accepting that build dependency or gating the feature per platform.
+- **IME.** `Input.Text` covers typing, including dead keys, so a name field works. What is missing
+  is composition: Bevy's `Ime` messages report a candidate string being assembled, which is what a
+  Japanese or Chinese input method needs to show underlined text before it is committed. The text
+  convention the file drop messages use is what carries the candidate string; what is left is the
+  messages themselves and the window's `ime_enabled` and `ime_position`.
+- **Touch.** Bridged as this frame's list, up to eight at once, and untested, because this machine
+  has no touchscreen and only the empty case is covered. Gestures are not derived, and a touch that
+  ends is reported once rather than lingering for a frame.
 
-What is left:
+### Audio
 
-- **The scene is the camera's viewport rather than a texture.** Docked, `Render.SetViewport` gives
-  the camera the rectangle the panels left. A texture would make the scene a panel of its own,
-  dockable and tabbable, and is the thing to do when a second view is wanted.
-- **No icon font.** The icons are the PNGs the editor ships, loaded through the asset server and
-  drawn with `ImGui.Image`. More can be rasterised from SVG when they are wanted.
-- **The bundle is ImGui 1.91.5.** From 1.92 Dear ImGui embeds a scalable version of its classic
-  font, which is what the native theme should use rather than the ProggyClean bitmap it gets today.
-  It arrives when `Twizzle.ImGui-Bundle.NET` updates; nothing here has to change for it.
-- **A theme is a file, and only the running build has it.** `assets/theme.txt` is written beside the
-  binary, so a look dialled in has to be copied back into the project by hand to be shipped.
-- **The interface is redrawn every frame**, which is what immediate mode means. At editor scale it
-  is a few thousand triangles and one buffer write; if it ever matters, the frame can be skipped
-  when nothing moved and the last one drawn again.
-- **IME is not forwarded.** Keys, characters, the pointer and the wheel are.
+`bevy_audio` is compiled into the render profile with Ogg Vorbis, WAV, FLAC and MP3, and `Audio`
+plays, stops, pauses, sets volume per sound and over everything at once, plays a window out of a
+clip rather than all of it, places a sound in the world for a nominated listener, and reads and
+moves the point a clip has reached. A playing sound is an
+entity.
 
-## The editor
+It is the one part of the bridge that takes a system library: cpal links against ALSA on Linux, so
+a render build needs `libasound2-dev` or the equivalent. `build-native.sh` installs it into the
+container on the portable path and checks for it before a local build, naming the package per
+distribution. The minimal profile still builds with nothing but a C compiler.
 
-`BevyCSharp.Editor` runs. One panel on the right holds the world with a picture per row above the
-details of whatever is selected, the tools float in the scene's corners, and everything else is
-behind a hamburger whose contents are a table of paths. A component is a card that opens and shuts,
-a field is a row drawn as what its kind and its attributes say, and a component with nothing to
-show is a tag. The bottom left is a strip of tabs, and one opens into a card above it: the console,
-the asset browser, the settings and the style, each a class with a draw method and a line in a
-list. What the keys do is a card behind a button in the corner. Gizmos draw the selection, its
-handles, the ground and the camera's orientation, and a drag on a handle moves, turns or stretches
-what is selected. Underneath is Dear ImGui, drawn by Bevy, with the arrangement worked out from a
-handful of numbers that are saved with the settings, and the look held in one theme file.
-[EDITOR.md](EDITOR.md) has the design language.
+- **Seeking a looping sound.** Looping is rodio's `Repeat` over a `Buffered` source, which keeps
+  the decoded samples so the clip can start again and refuses to move within them, so a seek
+  reports `INVALID_STATE`. Nothing here can work around it, so music that has to resume where it
+  left off is played once and restarted. Revisit if rodio makes a buffered source seekable.
+- **One spatial scale for the app.** `SpatialScale` is per sound, and
+  `AudioPlugin::default_spatial_scale` sets it once for the whole app, which is where it belongs
+  for a game whose world is measured in something other than metres.
+- **Ear geometry.** `SpatialListener` takes the two ear offsets separately; the bridge takes one
+  gap and places them on the x axis, which is what Bevy's own constructor does.
 
-What is left:
+## Project
 
-- **Every input path is driven rather than simulated.** `SyntheticInput` writes the window's own
-  messages, so a click goes through picking, the widgets and the camera exactly as a hand's would,
-  and the wheel and the keyboard go the same way: a probe run can type a command, press Enter,
-  reach back through the history, hold Control and press Z, or drag a field by its box. What none
-  of it reaches is IME.
-- **Half of the world is saved.** `assets/world.json` keeps every named entity's name and every
-  component with a schema, which is what the editor can change. What it cannot write is the
-  engine's own components: a mesh handle, a material, a camera's projection.
-  `bevy_world_serialization` is compiled in and would write exactly those, and can see no C#
-  component at all, because those are bytes registered at runtime with no Rust type behind them.
-  A world asset worth the name is both files or one format that holds both halves.
-- **A selection survives a rebuild now.** What was selected is remembered by name while it is
-  alive, and when a reload respawns what a script made, the names are looked for again and the
-  selection comes back. All of them or none: half a selection coming back is worse than none, since
-  an edit meant for three things would reach two without saying so. Two entities that share a name
-  still resolve to the first.
-- **One shape per call.** Every gizmo crosses the ABI on its own, and the fading grid asks for two
-  hundred and forty of them a frame, about four percent of one. Fine at this size and the wrong
-  shape at ten times it: a batched entry point taking an array would make the cost of a wireframe or
-  a debug overlay the size of the array rather than the number of lines in it.
-- **A grid, and nothing else drawn in the scene.** There are two gizmo groups, one that wins the
-  depth test and one that does not, and the ground grid is the only thing using the second. The
-  same group is what a path, a physics wireframe or a navigation mesh overlay would want, and none
-  of those exists yet.
-- **Nothing renders to a texture**, which is what three separate wants have in common: a thumbnail
-  for an asset tile, a preview for a material, and a proper orientation widget drawn as a small
-  scene rather than as six lines in the world. One entry point that renders a camera to an image
-  and hands back an asset key would close all three.
-- **Tiles show an image, and nothing else.** The asset browser draws a grid of tiles, elastic so a
-  row divides evenly into the panel, each with a picture over its name. An image tile points at the
-  file itself, which is all it takes: the interface loads a picture from a path. Everything else
-  wears its kind's icon at icon size, said with a second class rather than a size written per tile.
-  A mesh or a material tile wants a small render of the thing, which needs the bridge to render to
-  a texture and hand back an asset key, the same missing entry point as everywhere else.
-- **The hierarchy names what it can see and the stats panel counts it.** Both go through
-  `EditorKinds`, so a camera in the tree and a camera in the count are the same question asked once.
-  What neither can do is see a component the bridge does not name: an entity whose only components
-  are engine-side and unnamed reads as plain. Naming more of them is a bridge job, not an editor
-  one.
-- **The inspector draws a field as one arm of one switch**, told how by the attributes the
-  generator carried through: a range and what its bar says about itself, a step, a unit, a
-  heading, a rule, a sentence, a condition on another field, methods to call once it has changed,
-  a color, a row with no name column. A drag on the handles takes everything selected, about
-  their own origins or about the middle as the toolbar's pivot says, and origins is the default
-  because a first drag that swings the selection across the level is a surprise nobody asked for.
-  What is left is a fold, which `[Foldout]` asks for and nothing draws, and editing several things
-  at once: the panel shows the last one picked with a count beside it rather than what they agree
-  and disagree about.
-- **A field can hold an asset, and the engine's own cannot.** A component of the game's own that
-  holds an `AssetHandle` is drawn by name, and pressing it offers the files under the asset root
-  that suit it. What is still out of reach is the engine's side of the same question: the mesh and
-  the material on an entity are Rust components with no schema, so the editor can put a handle in
-  a game's field and cannot yet point an entity at a different mesh.
-- **Settings are the editor's, not the project's.** `EditorSettings` saves to `assets/settings.txt`
-  beside the layout, and everything on it belongs to this editor build. A project setting worth the
-  name (a startup scene, a physics step, a build target) needs somewhere to live that is part of
-  the project rather than part of the tool, which is the same gap as the world file's.
-- **Every row is drawn every frame.** A list is a call per row inside a scrolling region, which is
-  what immediate mode means, and the wheel belongs to whichever region the pointer is over. At
-  editor scale that is nothing; a list of ten thousand entities would want ImGui's own clipper,
-  which asks a list only for the rows that are on screen and is a change to the loops rather than
-  to what they draw.
-- **Undo covers what can be reversed exactly**: a field edited in the inspector, a rename, a new
-  entity, something hidden with its eye, and a component put on or taken off, which keeps what it
-  held so that putting it back is the component rather than an empty one. Despawning is
-  deliberately not recorded, because an entity's mesh and material are engine-side components with
-  no mirror on this side and what came back would be a name with nothing to draw. That is the same
-  gap as the world file's, and closing one closes both.
+### Testing
 
-## Assets and scenes
+- **What reaches the render world is checked for one shape.** Every registration goes through
+  `assets::init_asset_once`, and the crate's own tests pin both halves of that guard. `DrawnTests`
+  covers the step after by drawing a primitive mesh with an unlit material into an offscreen target
+  and asserting on the pixels, so a mesh or material that never reaches the render world fails a
+  test rather than producing an empty picture. It needs a GPU, so it skips on the headless bridge
+  the test workflow builds. Unchecked that way is everything with more than one moving part: a lit
+  surface, a glTF file's own materials, a sprite, and text.
+- **The lens effects have not been compared.** Whether a whole scene is right is confirmed by
+  running the sample, and an effect is worth checking against a second run with it turned off.
+  Bloom was confirmed that way, since a halo is obvious beside the same frame without one and easy
+  to imagine without the comparison. The lens effects have not been through it.
 
-- **Scene loading** works. `Scene` is a trait in 0.19 and the loadable asset is `WorldAsset`:
-  `.scn` and `.scn.ron` load into one through `WorldAssetLoader`, and a glTF file's scenes are
-  handles to the same type. `ctx.Ecs.SpawnScene` spawns either.
-- **Shaders**: `AssetKind.Shader` loads and returns a handle that nothing consumes. Either give
-  it a custom material path or remove the kind.
-- **Hot reload**: `BehaviorsPlugin.ScriptsDirectory` is reserved and does nothing. The engine
-  half is there, `App.EnableDynamicSystems` and `App.RemoveSystemsBySource`, and
-  `BevyCSharp.Editor` drives Roslyn through them. What is left is deciding whether the core
-  should carry a compiler at all, which is what it would take for a game to load a script without
-  the editor.
+### Build and release
 
-## Maintenance
-
-- **What reaches the render world is checked for one shape only.** Every registration goes through
-  `assets::init_asset_once`, so calling `init_asset` twice is inert, and the crate's own tests
-  cover both halves of that: a handle minted between two guarded registrations survives, and one
-  minted between two unguarded ones does not, which is what pins the behavior the guard exists
-  for. The step after is covered by `DrawnTests`, which draws a primitive mesh with an unlit
-  material into an offscreen target and asserts on the pixels, so a mesh or material that never
-  reaches the render world now fails a test rather than producing an empty picture. It needs a
-  GPU, so it skips on the headless bridge the test workflow builds. What is still unchecked that
-  way is everything with more than one moving part: a lit surface, a glTF file's own materials,
-  a sprite, and text.
 - **The Rust build is not cached in CI.** `Swatinem/rust-cache` is configured with
   `workspaces: native`, so it caches `native/target`, while `build-native.sh` writes to
-  `build/target`. The bridge is therefore rebuilt from nothing on every run. The crate's own
-  tests do use `native/target` and are cached. Either point the script at the cached directory or
-  point the cache at the script's.
+  `build/target`. The bridge is rebuilt from nothing on every run. The crate's own tests do use
+  `native/target` and are cached. Either point the script at the cached directory or the cache at
+  the script's.
 - **Packing on one machine produces a package for one platform.** Use the CI workflow, or run
   `build-native.sh` on each target, to produce a package covering all six runtime identifiers.
 - **Publishing is manual by choice.** The workflow builds and uploads; the upload to nuget.org is

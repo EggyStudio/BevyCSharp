@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 76;
+    internal const int ExpectedAbiVersion = 89;
 
     static Native() => NativeLoader.Initialize();
 
@@ -212,6 +212,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_state_add(IntPtr app, int slot, int initial);
 
+    /// <summary>Creates a sub-state under a slot, existing while that slot holds a value.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_substate_add(IntPtr app, int slot, int parent, int initial);
+
     /// <summary>Marks an entity to be despawned when a slot leaves a value.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -373,6 +378,21 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_file_drops_drain();
 
+    /// <summary>Collects the assets that failed to load, and reports how many.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_asset_failures_drain();
+
+    /// <summary>Writes the path of one drained failure.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_asset_failure_path(int index, byte* buffer, int capacity);
+
+    /// <summary>Writes why one drained failure failed.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_asset_failure_reason(int index, byte* buffer, int capacity);
+
     /// <summary>Writes one drained drop's path, returning its length in bytes.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -417,6 +437,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_gizmo_draw(NativeGizmoConfig* config);
+
+    /// <summary>Sets how gizmos are drawn, for both groups at once.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gizmo_configure(float width, uint layers, int enabled);
 
     /// <summary>Spawns a 2D camera and returns its entity, or 0.</summary>
     [LibraryImport(Library)]
@@ -500,6 +525,28 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_atmosphere(
         ulong camera, NativeAtmosphereConfig* config);
+
+    /// <summary>Lights the scene from the sky the camera is scattering.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_sky_lighting(
+        ulong camera, int on, float intensity, uint size);
+
+    /// <summary>Draws a cubemap behind everything a camera draws.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_skybox(
+        ulong camera, int image, float brightness, float* rotation);
+
+    /// <summary>Grades the picture a camera drew, after tonemapping.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_grading(ulong camera, NativeGradingConfig* config);
+
+    /// <summary>Sets the exposure a camera meters the scene at, in EV-100.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_exposure(ulong camera, float ev100);
 
     /// <summary>Writes what a camera drew to a PNG file.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
@@ -684,6 +731,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial ulong bcs_imgui_picture(string path);
+
+    /// <summary>Names an image asset the caller already has, so the interface can draw it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial ulong bcs_imgui_asset_texture(int image);
 
     /// <summary>Forgets a picture.</summary>
     [LibraryImport(Library)]
