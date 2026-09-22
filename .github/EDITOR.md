@@ -264,9 +264,9 @@ style tab lists the theme's own fields instead of using `ImGui.ShowStyleEditor`.
 ### Why there are no borders
 
 A bordered box inside a bordered box inside a bordered panel is three lines saying what one gap
-says better. What this uses instead is the ladder above: the panel is a step above the ground, a
-card a step above the panel, a component's card a step above that, and what is under the pointer a
-step above whatever it lies on.
+says better. What this uses instead is the ladder above, where the panel is a step above the
+ground, a card a step above the panel, a component's card a step above that, and what is under the
+pointer a step above whatever it lies on.
 
 ## The inspector
 
@@ -333,8 +333,8 @@ and leaves the answers on the schema as `FieldHints`, so nothing reflects at run
 own is described as those fields, named by the path they came from and folded under the name of the
 field they came from. `Front.Held.At` is a row called `At`, inside a fold called `Held`, inside one
 called `Front`. Writing one reads the whole component, changes the part and writes it back, so a
-part written does not wipe its neighbours. A vector is left alone: it is three numbers a drawer
-already draws as one thing.
+part written does not wipe its neighbours. A vector is left alone, because it is three numbers a
+drawer already draws as one thing.
 
 **The console reads and writes.** The tab along the bottom is where a log is read, and the key
 under Escape raises or puts away that tab. `ConsoleTab` draws it and `ConsoleView` decides what it

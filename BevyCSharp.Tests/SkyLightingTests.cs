@@ -58,16 +58,44 @@ public sealed class SkyLightingTests
         harness.Run();
     }
 
+    /// <summary>A cubemap can light the scene as well as be seen behind it.</summary>
+    /// <remarks>
+    /// The same file the skybox draws, filtered on the GPU into the two halves an environment map
+    /// carries. What is asserted is the same thing the sky test asserts, that the side no lamp
+    /// reaches is no longer black.
+    /// </remarks>
+    [Fact]
+    public void AnImageLightsWhatTheSunDoesNot()
+    {
+        if (!App.HasRenderer) return;
+
+        var unlit = Draw(sky: false);
+        var lit = Draw(sky: false, image: true);
+
+        Assert.NotNull(unlit);
+        Assert.NotNull(lit);
+
+        var shaded = Brightness(unlit.At(20, 40));
+        var imageLit = Brightness(lit.At(20, 40));
+
+        Assert.True(
+            imageLit > shaded + 4,
+            $"the shaded side reads {shaded} without the map and {imageLit} with it");
+    }
+
     /// <summary>How bright a pixel is, which is all this test needs of a color.</summary>
     private static int Brightness((byte R, byte G, byte B, byte A) pixel) =>
         pixel.R + pixel.G + pixel.B;
 
     /// <summary>Draws a sphere lit by one low sun, with or without the sky helping.</summary>
-    private static CapturedImage? Draw(bool sky)
+    private static CapturedImage? Draw(bool sky, bool image = false)
     {
         CapturedImage? picture = null;
 
-        using var app = new App(Config.OffscreenFor(64, 64, frames: (uint)Settled + 40));
+        var config = Config.OffscreenFor(64, 64, frames: (uint)Settled + 40);
+        config.AssetRoot = EngineHarness.AssetDirectory;
+
+        using var app = new App(config);
 
         app.AddPlugin(new EnginePlugin());
 
@@ -86,6 +114,14 @@ public sealed class SkyLightingTests
                 Render.SetAtmosphere(camera, new AtmosphereSettings());
 
                 if (sky) Render.SetSkyLighting(camera, intensity: 4f, size: 64);
+
+                if (image)
+                {
+                    Render.SetImageLighting(
+                        camera,
+                        AssetServer.Load(AssetKind.Image, "textures/cubemap.png"),
+                        intensity: 3000f);
+                }
 
                 // Low and to one side, so one side of the sphere is in shadow and the sky is the
                 // only thing that could light it.

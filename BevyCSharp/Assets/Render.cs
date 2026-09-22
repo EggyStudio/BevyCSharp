@@ -522,6 +522,52 @@ public static unsafe class Render
     }
 
     /// <summary>
+    /// Lights the scene from a cubemap, filtered on the GPU.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The other way to light a scene from its surroundings. <see cref="SetSkyLighting"/> derives
+    /// the map from the atmosphere, which covers an outdoor scene; this takes a picture, which is
+    /// what an indoor one, or a scene lit from a photograph, needs.
+    /// </para>
+    /// <para>
+    /// One cubemap rather than the two a baked environment map carries, because Bevy filters it
+    /// into its diffuse and specular halves itself. It is the same column of six faces
+    /// <see cref="SetSkybox"/> takes, so the same file can be seen behind the scene and be the
+    /// light in it.
+    /// </para>
+    /// </remarks>
+    /// <param name="camera">The camera whose view is lit.</param>
+    /// <param name="cubemap">
+    /// Six square faces stacked vertically, or <see cref="AssetHandle.None"/> to take the lighting
+    /// off.
+    /// </param>
+    /// <param name="intensity">How bright the lighting is.</param>
+    /// <param name="rotation">Which way the map is turned, for one authored with another axis up.</param>
+    /// <exception cref="BevyNativeException">The entity is not a camera.</exception>
+    public static void SetImageLighting(
+        Entity camera,
+        AssetHandle cubemap,
+        float intensity = 1000f,
+        Quat? rotation = null)
+    {
+        if (rotation is not { } turn)
+        {
+            Native.Check(
+                Native.bcs_render_set_image_lighting(camera.Bits, cubemap.Key, intensity, null),
+                $"lighting {camera} from an image");
+
+            return;
+        }
+
+        var parts = stackalloc float[4] { turn.X, turn.Y, turn.Z, turn.W };
+
+        Native.Check(
+            Native.bcs_render_set_image_lighting(camera.Bits, cubemap.Key, intensity, parts),
+            $"lighting {camera} from an image");
+    }
+
+    /// <summary>
     /// Lights the scene from the sky this camera is already scattering.
     /// </summary>
     /// <remarks>

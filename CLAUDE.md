@@ -33,8 +33,9 @@ build/build-native.sh --editor    # or --render, or nothing for headless
 dotnet build                      # this is what moves the .so where apps will find it
 ```
 
-`./bcs build --editor` does both in that order. The three profiles are cumulative: `headless` <
-`render` (window, audio) < `editor` (asset watcher, picking). `App.HasRenderer` and `App.HasEditor`
+`./bcs build --editor` does both in that order, and [.github/BUILDING.md](.github/BUILDING.md) has
+the rest. The three profiles are cumulative: `headless` < `render` (window, audio) < `editor`
+(asset watcher, picking). `App.HasRenderer` and `App.HasEditor`
 report which one is loaded; `Native.ExpectedAbiVersion` must match what the bridge reports, and a
 mismatch means the bridge needs rebuilding.
 

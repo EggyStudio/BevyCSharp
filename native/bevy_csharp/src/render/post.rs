@@ -275,6 +275,84 @@ pub extern "C" fn bcs_render_set_sky_lighting(
     })
 }
 
+/// Lights the scene from a cubemap, filtered on the GPU.
+///
+/// The other way to light a scene from its surroundings. [`bcs_render_set_sky_lighting`] derives
+/// the map from the atmosphere, which covers an outdoor scene; this takes a picture, which is what
+/// an indoor one or a scene lit from a photograph needs.
+///
+/// One cubemap rather than the two a baked environment map carries, because Bevy filters it into
+/// the diffuse and specular halves itself. It is the same column of six faces a skybox takes, and
+/// it is reinterpreted the same way once it has loaded, so the same file can be seen and be the
+/// light.
+///
+/// A negative `image` takes the lighting off. `rotation` turns the map, for a cubemap authored
+/// with a different axis up, and is four floats or null for none.
+///
+/// # Safety
+/// `camera` must be a live camera entity; `rotation` must be null or point to four readable floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_set_image_lighting(
+    camera: u64,
+    image: i32,
+    intensity: f32,
+    rotation: *const f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, image, intensity, rotation);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::ecs::entity::Entity;
+            use bevy::light::GeneratedEnvironmentMapLight;
+            use bevy::math::Quat;
+
+            let turn = if rotation.is_null() {
+                Quat::IDENTITY
+            } else {
+                let parts = unsafe { core::slice::from_raw_parts(rotation, 4) };
+                Quat::from_xyzw(parts[0], parts[1], parts[2], parts[3])
+            };
+
+            let entity = Entity::from_bits(camera);
+
+            with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let handle = match crate::render::image_handle(world, image) {
+                    Err(refusal) => return refusal,
+                    Ok(handle) => handle,
+                };
+
+                let Some(handle) = handle else {
+                    world.entity_mut(entity).remove::<GeneratedEnvironmentMapLight>();
+                    return status::OK;
+                };
+
+                world
+                    .get_resource_or_init::<PendingCubemaps>()
+                    .0
+                    .push(handle.clone());
+
+                world.entity_mut(entity).insert(GeneratedEnvironmentMapLight {
+                    environment_map: handle,
+                    intensity,
+                    rotation: turn,
+                    ..Default::default()
+                });
+
+                status::OK
+            })
+        }
+    })
+}
+
 /// The images asked to become cubemaps, waiting for their pixels to arrive.
 ///
 /// An image loads as one tall picture and has to be told it is six square faces stacked on top of

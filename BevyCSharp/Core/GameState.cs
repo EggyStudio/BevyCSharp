@@ -151,7 +151,7 @@ public static unsafe class StateRegistry
             if (_next >= count)
                 throw new InvalidOperationException(
                     $"All {count} state slots are in use, so {state.Name} cannot have "
-                    + "one. Independent state machines are rarer than they look: a pause that "
+                    + "one. Independent state machines are rarer than they look, because a pause that "
                     + "only matters while playing is a value of the state it belongs to, not a "
                     + "second machine beside it.");
 

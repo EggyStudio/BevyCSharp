@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 89;
+    internal const int ExpectedAbiVersion = 90;
 
     static Native() => NativeLoader.Initialize();
 
@@ -525,6 +525,12 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_atmosphere(
         ulong camera, NativeAtmosphereConfig* config);
+
+    /// <summary>Lights the scene from a cubemap, filtered on the GPU.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_image_lighting(
+        ulong camera, int image, float intensity, float* rotation);
 
     /// <summary>Lights the scene from the sky the camera is scattering.</summary>
     [LibraryImport(Library)]

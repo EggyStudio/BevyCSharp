@@ -432,7 +432,7 @@ public static unsafe class Gizmos
         if (status == NativeStatus.Unsupported)
             throw new BevyNativeException(
                 NativeStatus.Unsupported,
-                "Drawing a gizmo failed: gizmos are drawn by a plugin that comes with the "
+                "Drawing a gizmo failed, because gizmos are drawn by a plugin that comes with the "
                 + "window, so a windowless run has nothing to draw on. Guard with App.HasRenderer "
                 + "and Config.Headless.");
 

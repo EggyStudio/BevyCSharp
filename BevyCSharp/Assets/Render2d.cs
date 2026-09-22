@@ -138,7 +138,7 @@ public static unsafe class Render2d
         if (status == NativeStatus.Unsupported)
             throw new BevyNativeException(
                 NativeStatus.Unsupported,
-                "Attaching a sprite failed: this native build has no renderer. Rebuild the "
+                "Attaching a sprite failed, because this native build has no renderer. Rebuild the "
                 + "bridge with build/build-native.sh --render.");
 
         Native.Check(status, $"attaching a sprite to {entity}");

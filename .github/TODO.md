@@ -310,7 +310,7 @@ Not a priority.
 
 Bevy ships no physics engine, and the answer is **not** to bridge Avian or Rapier. Use
 [BepuPhysics v2](https://github.com/bepu/bepuphysics2), which is C#, so the simulation lives on the
-managed side and needs no bridge surface at all: nothing new crosses the ABI, no Cargo feature is
+managed side and needs no bridge surface at all. Nothing new crosses the ABI, no Cargo feature is
 added, and the only thing that has to reach Bevy is the pose each body ends up with, which is one
 `Transform` write through the API that already exists.
 

@@ -382,7 +382,7 @@ public sealed unsafe class App : IDisposable
 
         if (IsRunning)
             throw new InvalidOperationException(
-                "Cannot enable dynamic systems: the app is already running, and the dispatchers "
+                "Cannot enable dynamic systems, because the app is already running and the dispatchers "
                 + "have to be in the schedule before the loop takes it. Call this before Run.");
 
         _dynamicStages = [];
@@ -434,7 +434,7 @@ public sealed unsafe class App : IDisposable
 
         if (_dynamicStages is null || !_dynamicStages.TryGetValue(stage, out var waiting))
             throw new InvalidOperationException(
-                $"Cannot register system '{descriptor.Name}' in {stage} while running: only "
+                $"Cannot register system '{descriptor.Name}' in {stage} while running, because only "
                 + string.Join(", ", DispatchStages) + " and Startup accept one.");
 
         var registration = new RegisteredSystem(this, descriptor, stage);

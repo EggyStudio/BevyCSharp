@@ -137,7 +137,7 @@ public static unsafe class Audio
         if (bits == 0)
             throw new BevyNativeException(
                 NativeStatus.Unsupported,
-                $"Playing {clip} failed: either it names no loaded sound, or this native build "
+                $"Playing {clip} failed, because either it names no loaded sound or this native build "
                 + "has no audio. Rebuild the bridge with build/build-native.sh --render.");
 
         return new Entity(bits);

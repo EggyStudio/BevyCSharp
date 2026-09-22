@@ -330,6 +330,7 @@ public static unsafe class Ui
 
     private static BevyNativeException NoUi(string operation) =>
         new(NativeStatus.Unsupported,
-            $"{operation} failed: this native build has no renderer, so there is no UI to build "
+            $"{operation} failed, because this native build has no renderer, so there is no UI to "
+            + "build "
             + "on. Rebuild the bridge with build/build-native.sh --render.");
 }

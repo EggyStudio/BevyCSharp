@@ -182,7 +182,7 @@ internal static partial class Tools
                     new CliError(
                         "TESTS_FAILED",
                         $"{failed} of {failed + passed} tests failed. This is a real failure, "
-                        + "not an infrastructure one: do not retry it."),
+                        + "not an infrastructure one. Do not retry it."),
                 ]),
             data => Console.WriteLine(data.GetProperty("tail").GetString()));
     }
