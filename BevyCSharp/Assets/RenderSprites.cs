@@ -176,4 +176,12 @@ public sealed class SpriteSettings
     /// How far the picture is drawn before a tile repeats, as a multiple of its own size.
     /// </summary>
     public float TileStretch { get; set; } = 1f;
+
+    /// <summary>Which parts of a sliced picture tile rather than stretch.</summary>
+    /// <remarks>
+    /// Read only when <see cref="Mode"/> is sliced. The repeat is measured by
+    /// <see cref="TileStretch"/>, the same number a whole tiled picture uses, since both answer how
+    /// much of the source is laid down before it starts again.
+    /// </remarks>
+    public SliceTiling SliceTiling { get; set; } = SliceTiling.None;
 }

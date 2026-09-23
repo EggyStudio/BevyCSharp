@@ -614,8 +614,28 @@ pub extern "C" fn bcs_render_spawn_camera_2d(order: i32) -> u64 {
 
         #[cfg(feature = "render")]
         {
-            use bevy::camera::{Camera, Camera2d, ClearColorConfig};
+            use bevy::camera::{Camera, Camera2d, CameraOutputMode, ClearColorConfig};
+            use bevy::color::Color;
+            use bevy::render::render_resource::BlendState;
             use bevy::transform::components::Transform;
+
+            // An overlay is not simply a second camera with a higher order. A camera renders into
+            // a view texture of its own and then writes that over the target, so one left alone
+            // replaces whatever the camera below it drew, and one told not to clear accumulates
+            // its own output frame after frame instead. Both have to be said: clear the camera's
+            // own view to nothing, and blend the result over the target rather than overwriting
+            // it.
+            let (clear_color, output_mode) = if order == 0 {
+                (ClearColorConfig::Default, CameraOutputMode::default())
+            } else {
+                (
+                    ClearColorConfig::Custom(Color::NONE),
+                    CameraOutputMode::Write {
+                        blend_state: Some(BlendState::ALPHA_BLENDING),
+                        clear_color: ClearColorConfig::None,
+                    },
+                )
+            };
 
             with_world_opt(|world| {
                 world
@@ -623,13 +643,8 @@ pub extern "C" fn bcs_render_spawn_camera_2d(order: i32) -> u64 {
                         Camera2d,
                         Camera {
                             order: order as isize,
-                            // A second camera that cleared would wipe out whatever drew before
-                            // it, so one layered over a scene keeps what is already there.
-                            clear_color: if order == 0 {
-                                ClearColorConfig::Default
-                            } else {
-                                ClearColorConfig::None
-                            },
+                            clear_color,
+                            output_mode,
                             ..Default::default()
                         },
                         Transform::default(),
@@ -663,7 +678,7 @@ pub unsafe extern "C" fn bcs_render_set_sprite(entity: u64, config: *const BcsSp
             use bevy::image::{Image, TextureAtlas, TextureAtlasLayout};
             use bevy::math::{Rect, Vec2};
             use bevy::sprite::{
-                Anchor, BorderRect, SliceScaleMode, Sprite, SpriteImageMode, SpriteScalingMode,
+                Anchor, BorderRect, Sprite, SpriteImageMode, SpriteScalingMode,
                 TextureSlicer,
             };
 
@@ -697,8 +712,8 @@ pub unsafe extern "C" fn bcs_render_set_sprite(entity: u64, config: *const BcsSp
                         min_inset: Vec2::new(config.slice_border[0], config.slice_border[1]),
                         max_inset: Vec2::new(config.slice_border[2], config.slice_border[3]),
                     },
-                    center_scale_mode: SliceScaleMode::Stretch,
-                    sides_scale_mode: SliceScaleMode::Stretch,
+                    center_scale_mode: slice_scale(config.slice_tiling & 2, config.tile_stretch),
+                    sides_scale_mode: slice_scale(config.slice_tiling & 1, config.tile_stretch),
                     max_corner_scale: if config.corner_scale > 0.0 {
                         config.corner_scale
                     } else {
@@ -1260,4 +1275,24 @@ pub unsafe extern "C" fn bcs_render_create_image(
             .unwrap_or(-1)
         }
     })
+}
+
+/// How one part of a sliced picture meets the size it is drawn at.
+///
+/// Stretching is what a nine-slice does by default, and it is wrong for anything with a pattern in
+/// it, because a border of dots drawn twice as wide becomes a border of ovals. Tiling repeats the
+/// slice instead, which is what keeps a drawn edge looking drawn at every size.
+#[cfg(feature = "render")]
+pub fn slice_scale(tiling: i32, stretch: f32) -> bevy::sprite::SliceScaleMode {
+    use bevy::sprite::SliceScaleMode;
+
+    if tiling == 0 {
+        return SliceScaleMode::Stretch;
+    }
+
+    SliceScaleMode::Tile {
+        // The same number a tiled picture measures its repeat by, since both answer how much of
+        // the source is laid down before it starts again.
+        stretch_value: if stretch > 0.0 { stretch } else { 1.0 },
+    }
 }

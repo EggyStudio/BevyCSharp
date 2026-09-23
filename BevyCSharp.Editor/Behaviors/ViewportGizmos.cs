@@ -236,6 +236,12 @@ public partial struct ViewportGizmos
         var centreZ = MathF.Round(look.Z / step) * step;
         var count = Math.Min(Half, (int)MathF.Ceiling(reach / step));
 
+        // Four halves per line through the middle, gathered and handed over once. A sheet is the
+        // largest single thing this editor draws, and every line of it crossing the boundary on
+        // its own is the cost that grows with how much floor is on screen.
+        Span<GizmoSegment> sheet = stackalloc GizmoSegment[((count * 2) + 1) * 4];
+        var drawn = 0;
+
         for (var i = -count; i <= count; i++)
         {
             // How long the line is before it leaves the disc, and how bright it starts. Both come
@@ -262,38 +268,32 @@ public partial struct ViewportGizmos
 
             // Two halves out from the middle, each fading to nothing, which is what makes the far
             // edge a horizon rather than a boundary.
-            {
-                Gizmos.Fade(
-                    new Vec3(x, height, centreZ),
-                    new Vec3(x, height, centreZ - span),
-                    onZ,
-                    gone,
-                    inFront: false);
+            sheet[drawn++] = GizmoSegment.Fading(
+                new Vec3(x, height, centreZ),
+                new Vec3(x, height, centreZ - span),
+                onZ,
+                gone);
 
-                Gizmos.Fade(
-                    new Vec3(x, height, centreZ),
-                    new Vec3(x, height, centreZ + span),
-                    onZ,
-                    gone,
-                    inFront: false);
-            }
+            sheet[drawn++] = GizmoSegment.Fading(
+                new Vec3(x, height, centreZ),
+                new Vec3(x, height, centreZ + span),
+                onZ,
+                gone);
 
-            {
-                Gizmos.Fade(
-                    new Vec3(centreX, height, z),
-                    new Vec3(centreX - span, height, z),
-                    onX,
-                    gone,
-                    inFront: false);
+            sheet[drawn++] = GizmoSegment.Fading(
+                new Vec3(centreX, height, z),
+                new Vec3(centreX - span, height, z),
+                onX,
+                gone);
 
-                Gizmos.Fade(
-                    new Vec3(centreX, height, z),
-                    new Vec3(centreX + span, height, z),
-                    onX,
-                    gone,
-                    inFront: false);
-            }
+            sheet[drawn++] = GizmoSegment.Fading(
+                new Vec3(centreX, height, z),
+                new Vec3(centreX + span, height, z),
+                onX,
+                gone);
         }
+
+        Gizmos.Lines(sheet[..drawn]);
     }
 
     /// <summary>

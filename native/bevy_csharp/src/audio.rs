@@ -209,6 +209,56 @@ pub extern "C" fn bcs_audio_listener(entity: u64, gap: f32) -> i32 {
     })
 }
 
+/// Makes an entity the ear, with each ear placed exactly.
+///
+/// The long form of [`bcs_audio_listener`], which puts the two ears on the x axis a gap apart.
+/// `left` and `right` each point at three floats, a position relative to the entity's own
+/// transform, which is what a listener attached to a head rather than to a camera needs.
+///
+/// # Safety
+/// `left` and `right` must each point at three readable floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_audio_listener_ears(
+    entity: u64,
+    left: *const f32,
+    right: *const f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, left, right);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::audio::SpatialListener;
+            use bevy::math::Vec3;
+
+            if left.is_null() || right.is_null() {
+                return status::NULL_ARG;
+            }
+
+            let left = unsafe { core::slice::from_raw_parts(left, 3) };
+            let right = unsafe { core::slice::from_raw_parts(right, 3) };
+
+            with_world(|world| {
+                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity))
+                else {
+                    return status::NO_ENTITY;
+                };
+
+                entity_mut.insert(SpatialListener {
+                    left_ear_offset: Vec3::new(left[0], left[1], left[2]),
+                    right_ear_offset: Vec3::new(right[0], right[1], right[2]),
+                });
+
+                status::OK
+            })
+        }
+    })
+}
+
 /// Writes how far into its clip a sound has played, in seconds.
 ///
 /// # Safety

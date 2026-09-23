@@ -77,10 +77,10 @@ as a skybox or used to light the scene through the atmosphere. `bevy_post_proces
 `bevy_anti_alias` are compiled into the render profile, so most of what is left is bridge work over
 code already in the binary.
 
-- **Exposure from a lens rather than a number.** `Render.SetExposure` takes the EV-100 a scene is
-  metered at. `PhysicalCameraParameters::ev100` derives that from aperture, shutter speed and
-  sensitivity, which is the same struct that fixes a lens's depth of field, so a camera could be
-  described once and have both read from it.
+- **A lens is described twice.** `Render.SetLensExposure` takes an aperture, a shutter speed and a
+  sensitivity, and `Render.SetDepthOfField` takes an aperture and a focal length of its own.
+  `PhysicalCameraParameters` is one struct behind both, so a camera could be written down once and
+  have the exposure and the blur read from it.
 - **A prebaked environment map.** `Render.SetImageLighting` filters a cubemap on the GPU every
   time the app starts, which costs a moment of startup and needs the faces square and a power of
   two. `EnvironmentMapLight` takes the diffuse and specular cubemaps a tool baked earlier instead,
@@ -98,7 +98,6 @@ code already in the binary.
   Linux. It also wants a `DlssProjectId` inserted before `DefaultPlugins` and a runtime check of
   whether the machine supports it, so it is a fourth arm on `AntiAlias` that most machines have to
   be told they cannot have.
-- **Order-independent transparency** is a camera component like the rest.
 - **Lights.** Shadow bias, map size, cascades and a spot light's cookie are all settable. What is
   left is the experimental half of Bevy's own lighting: soft shadows sit behind the
   `experimental_pbr_pcss` feature, and contact shadows need a camera component to go with the flag
@@ -123,15 +122,17 @@ exclusive system, which is what every C# system is. `Gizmos.Configure` sets line
 layers and whether anything is drawn at all.
 
 - **The rest of the primitives.** `primitive_3d` draws any shape in `bevy_math`. What the bridge
-  does not reach are the ones described by more than a radius and one length: a triangle, a
-  polyline, a tetrahedron and a conical frustum, each of which needs more numbers than the queued
-  shape carries.
-- **Gizmo groups.** A third `GizmoConfigGroup` would let one category be toggled or styled apart
-  from another. A group is a Rust type rather than a value, so a third is added where the two are.
-- **One shape per call.** Every gizmo crosses the ABI on its own, and the editor's fading grid asks
-  for two hundred and forty of them a frame, about four percent of one. Fine at this size and the
-  wrong shape at ten times it: an entry point taking an array would make a wireframe cost the array
-  rather than the number of lines in it.
+  does not reach are the ones described by a list of points rather than by numbers, which is a
+  triangle, a polyline and a tetrahedron. All three are runs of lines, so `Gizmos.Lines` draws them
+  today at the cost of naming the corners; a call of their own would only save that.
+- **Two groups, not many.** `Gizmos.Configure` takes a `GizmoGroup`, so the shapes the scene can
+  hide are settable apart from the ones it cannot, which is the split a game usually wants. A third
+  category needs a third `GizmoConfigGroup`, and a group is a Rust type rather than a value, so it
+  is added where the two are and rebuilt.
+- **Only lines batch.** `Gizmos.Lines` hands a whole run over at once, which is what the editor's
+  fading grid uses and what a wireframe or a path wants. Every other shape still crosses the
+  boundary on its own, and a scene drawing thousands of spheres or boxes a frame would want the
+  same treatment.
 
 ### 2D
 
@@ -139,13 +140,10 @@ layers and whether anything is drawn at all.
 anchored off its centre, cut down to one rectangle of a sheet or one frame of an atlas layout, and
 drawn sliced, tiled or fitted inside its size the way a video player letterboxes.
 
-- **Animation.** Nothing steps a sprite through its frames. That is a component holding a frame
-  range and a timer, and it needs no bridge, since `Frame` names a frame by number and a behavior
-  that counts and calls `SetSprite` is the whole of it. Worth writing once in the sample rather
-  than in every game built on it.
-- **The sliced modes' payloads.** `SliceScaleMode::Tile` carries a stretch value the flat config
-  has no room for, so a sliced sprite's sides and centre are stretched rather than tiled. The same
-  limit is what keeps a UI image from tiling its slices.
+- **Animation is a sample, not a feature.** `SpriteAnimation` in `BevyCSharp.Sample` steps a sheet
+  and is there to be copied. Frame events, a queue of clips and animation driven by the state
+  machine are what a game adds, and each would be the wrong shape shipped in the library while
+  still costing a query a frame.
 
 ## Interface
 
@@ -165,8 +163,6 @@ box.
 - **Scrollbar width.** `scrollbar_width` is the one `Node` field left unbridged, and it reserves
   room at the edge of a scrolling node for a scrollbar. Nothing here draws one, so the room would
   be a gap.
-- **Image detail.** A sliced image's centre and sides are stretched, because `SliceScaleMode::Tile`
-  is a payload the flat config has no room for, which is the same limit a sliced sprite hits.
 - **Fonts by family name.** Excluded deliberately, the way gamepads are. `FontSource` can name
   `SansSerif`, `Monospace` or the system interface font, but Bevy resolves those through
   `system_font_discovery`, whose Linux backend links against fontconfig at build time. Without the
@@ -256,10 +252,10 @@ States carry their edges and their entities: `[OnEnter]` and `[OnExit]` run once
 with the run it belongs to. The bridge pairs one sub-state slot with each state slot, because
 `SubStates` names its parent as an associated type and the types exist when the crate is built.
 
-- **More than one sub-state under a state**, and sub-states of sub-states. Both are refused, the
-  first because the pairing is one to one and the second because a chain has nowhere to live. More
-  pairs are cheap; what is not obvious is how the managed side would name the second one without
-  the attribute becoming a tree.
+- **Sub-states of sub-states.** A state carries two sub-states, and a third is refused because
+  every axis is given the same fixed block of them when the bridge is built. A chain is the harder
+  one, since a sub-state of a sub-state has nowhere to live in a layout that is one block per
+  axis.
 - **Computed states.** `ComputedStates` derives a value from one or more others rather than only
   its existence, which is what "the HUD is visible in these three screens" wants. Same shape of
   problem, same pairing.
@@ -351,11 +347,9 @@ distribution. The minimal profile still builds with nothing but a C compiler.
   the decoded samples so the clip can start again and refuses to move within them, so a seek
   reports `INVALID_STATE`. Nothing here can work around it, so music that has to resume where it
   left off is played once and restarted. Revisit if rodio makes a buffered source seekable.
-- **One spatial scale for the app.** `SpatialScale` is per sound, and
-  `AudioPlugin::default_spatial_scale` sets it once for the whole app, which is where it belongs
-  for a game whose world is measured in something other than metres.
-- **Ear geometry.** `SpatialListener` takes the two ear offsets separately; the bridge takes one
-  gap and places them on the x axis, which is what Bevy's own constructor does.
+- **Volume is linear.** A sound's volume is a multiplier, and Bevy's `Volume` can also be given in
+  decibels, which is the unit a mixer and a settings slider are both written in. Converting is one
+  line the caller writes today.
 
 ## Project
 

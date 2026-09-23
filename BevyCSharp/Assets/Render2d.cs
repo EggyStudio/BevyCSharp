@@ -132,6 +132,7 @@ public static unsafe class Render2d
             TileX = settings.TileX ? 1 : 0,
             TileY = settings.TileY ? 1 : 0,
             TileStretch = settings.TileStretch,
+            SliceTiling = (int)settings.SliceTiling,
         };
 
         var status = Native.bcs_render_set_sprite(entity.Bits, &native);

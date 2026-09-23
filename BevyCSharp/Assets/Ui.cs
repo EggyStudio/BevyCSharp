@@ -273,6 +273,7 @@ public static unsafe class Ui
             TileX = settings.TileX ? 1 : 0,
             TileY = settings.TileY ? 1 : 0,
             TileStretch = settings.TileStretch,
+            SliceTiling = (int)settings.SliceTiling,
             Atlas = settings.Atlas.Key,
             AtlasIndex = settings.Frame,
         };

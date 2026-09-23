@@ -335,9 +335,11 @@ pause left on when a run ended is off again when the next one begins. `[OnEnter]
 `DespawnOnExit` work on it exactly as they do on a plain state, because the relationship is
 written on the enum rather than at the call.
 
-One sub-state per state, and a sub-state cannot itself be a parent. Both are refused rather than
-half-worked, because the bridge pairs each sub-state with one state: Bevy names the parent as an
-associated type, so the pairs exist when the native library is built.
+A state carries two sub-states, and a sub-state cannot itself be a parent. Both limits come from
+the same place. Bevy names a sub-state's parent as an associated type, so every pairing exists when
+the native library is built, and a third sub-state or a chain of them is refused rather than
+half-worked. Two is what a run that can be paused and played at a difficulty needs, and raising it
+is a longer list in the same place as the state slots below.
 
 A transition is queued rather than immediate. It lands at Bevy's next transition point, so every
 system in the frame agrees on which state it is in rather than some seeing the change halfway
@@ -832,6 +834,9 @@ in:
 ```csharp
 Render.SetExposure(camera, 12f);
 
+// Or the same thing as a lens, which is what a real camera is written down as.
+Render.SetLensExposure(camera, aperture: 2.8f, shutter: 1f / 250f, sensitivity: 400f);
+
 Render.SetColorGrading(camera, new GradingSettings
 {
     Temperature = -0.15f,                                   // cooler overall
@@ -839,6 +844,12 @@ Render.SetColorGrading(camera, new GradingSettings
     Highlights = new GradingSection { Saturation = 0.9f },  // calmer highlights
 });
 ```
+
+`Render.SetSortedTransparency` sorts transparent fragments rather than whole objects. Ordinary
+alpha blending sorts by distance between objects, so two panes of glass crossing each other, or one
+mesh whose own faces overlap, come out right from some angles and wrong from others, and no
+reordering of the scene fixes both. It costs a buffer the size of the screen times the layer count,
+which is why it is per camera and off unless asked for.
 
 `MidtonesRange` says which luminances count as the middle, so it decides how much of the picture
 each of the three sections has to work on. The terms inside a section are the standard ASC CDL ones,
@@ -1049,8 +1060,21 @@ so one small image draws a panel at any size, `Tiled` repeats it instead, and `S
 picture's proportions and letterboxes what is left over, with `Scaling` saying whether it is fitted
 inside the size or made to fill it and which edges are kept.
 
-Ordering a 2D camera above a 3D one draws it over the scene without clearing, which is how a 2D
-overlay sits on a 3D game.
+`SliceTiling` says which parts of a sliced picture repeat rather than stretch. Stretching is wrong
+for anything with a pattern in it, since a border of dots drawn twice as wide becomes a border of
+ovals, and `SliceTiling.Sides`, `.Centre` or `.All` keep a drawn edge looking drawn at every size.
+The repeat is measured by `TileStretch`, the same number a whole tiled picture uses.
+
+`Render2d.SpawnCamera2d(order: 1)` or any order above zero makes an overlay, which is how a 2D
+layer sits on a 3D game. An overlay is not simply a second camera with a higher order, since a
+camera draws into a view of its own and then writes that over the target, so the bridge clears the
+overlay's own view to nothing each frame and blends the result rather than overwriting. Left to
+itself a second camera replaces the scene under it, which reads as the scene having failed to draw.
+
+Stepping a sprite through the frames of a sheet needs no engine support, since `Frame` names a
+frame by number. `SpriteAnimation` in `BevyCSharp.Sample` is the whole of it, a timer and a
+counter, and it is there to be copied rather than shipped in the library, where it would be the
+wrong shape for any game wanting frame events or a queue of clips.
 
 ### Gizmos
 
@@ -1063,10 +1087,10 @@ Gizmos.Sphere(position, 0.35f, (1f, 0.85f, 0.2f, 1f));
 Gizmos.Axes(transform, 1.5f);
 ```
 
-Fourteen shapes in all. `Line` and `Fade` for a plain or a dying line, `Arrow` where a line has to
+Fifteen shapes in all. `Line` and `Fade` for a plain or a dying line, `Arrow` where a line has to
 say which way along it, `Sphere`, `Circle`, `Arc`, `Rect` and `Grid` for a volume, a plane, an angle
-or a floor, `Box`, `Capsule`, `Cone`, `Cylinder` and `Torus` for the shapes a collider or a radius
-of effect usually is, and `Axes` for an orientation. Everything but a line takes a `Quat`, because a
+or a floor, `Box`, `Capsule`, `Cone`, `Cylinder`, `Torus` and `Frustum` for the shapes a collider or
+a radius of effect usually is, and `Axes` for an orientation. Everything but a line takes a `Quat`, because a
 shape with a flat side has to be told which way it faces.
 
 ```csharp
@@ -1084,7 +1108,9 @@ way to see whether something faces where it should.
 handle, an outline or a marker is drawn *about* the scene and has to be reachable; a grid, a path
 or a wireframe is drawn *in* it and has to be behind what is in front of it. `Gizmos.Configure`
 sets the line width, which render layers gizmos appear on, and whether they are drawn at all,
-which is what a debug overlay bound to a key wants.
+which is what a debug overlay bound to a key wants. Its `which` names one of the two groups, so a
+floor grid and a set of handles can be turned on and off apart. The groups are the same split
+`inFront` chooses between, which is why they line up with the two kinds of drawing already.
 
 `Gizmos.SetLineStyle` decides what the line itself looks like. A dotted or dashed line tells one
 meaning from another without spending a second color on it, so a path already walked can be drawn
@@ -1092,6 +1118,11 @@ against the one still to come, and the gap and the run of a dash are measured in
 `joint` rounds, mitres or bevels the corners of a closed shape, which shows at the thick widths an
 overlay meant to be read at a glance uses. `perspective` makes the width a size at the camera's
 near plane rather than a size on screen, so a line further away is drawn thinner.
+
+`Gizmos.Lines` draws a whole run of segments in one crossing, each with its own two ends and color,
+and `GizmoSegment.Fading` gives one a second color so it can run out to nothing. What that is for is
+a wireframe, a path or a grid, where the cost otherwise grows with the number of lines rather than
+with the call. The editor's own floor grid is one of these.
 
 `Rect2d`, `Circle2d`, `Line2d`, `Arrow2d`, `Arc2d` and `Grid2d` are the same shapes for a 2D
 camera. They take a point on the XY plane and an angle about Z, because that is all a flat shape
@@ -1340,8 +1371,9 @@ with `Atlas` and `Frame`, and chooses how it meets the node's size. The layout `
 one `Render2d.CreateAtlas` makes, so a sheet of icons serves the world and the interface without
 being cut a second way. `UiImageMode.Sliced` is the one worth knowing. The image is cut into
 nine, the corners keep their size and the middle stretches, so one small picture draws a panel at
-any size. `Auto` keeps the picture's own size, which is what a node with no width or height of
-its own then takes.
+any size. `SliceTiling` makes the edges or the middle repeat rather than stretch, which is what a
+patterned border needs. `Auto` keeps the picture's own size, which is what a node with no width or
+height of its own then takes.
 
 A node can be asked to report the pointer, which is what makes it a button:
 
@@ -1419,8 +1451,13 @@ ctx.Ecs.Add(engine, Transform.At(4f, 0f, -2f));
 ```
 
 A spatial sound is given a `Transform` to be moved by, and is heard quieter with distance and
-further to one side as it crosses the listener. `SpatialScale` is what makes that work in a world
-whose units are not metres.
+further to one side as it crosses the listener. `Config.SpatialScale` is what makes that work in a
+world whose units are not metres, set once for the app because what the world is measured in is a
+fact about the game rather than about any one sound; a sound may still say otherwise for itself.
+
+`Audio.SetListener` takes an ear gap, and an overload takes the two ear positions instead. Placing
+them says which way a head is facing as well as how wide it is, which is what a listener carried by
+a character rather than by a camera needs.
 
 Sound is in the render profile rather than the minimal one, and not because it draws. It is the
 one part of the engine that needs a system library at build time. See

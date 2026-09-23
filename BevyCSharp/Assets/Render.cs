@@ -759,6 +759,70 @@ public static unsafe class Render
         Native.bcs_render_set_exposure(camera.Bits, ev100), $"metering {camera}");
 
     /// <summary>
+    /// Sets a camera's exposure from the lens it stands in for.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The same three numbers a photographer sets, and the same ones a real lens is described by,
+    /// so a camera can be written down once as a lens and metered from that rather than from an
+    /// exposure value worked out by hand. This and <see cref="SetExposure"/> set the same thing.
+    /// </para>
+    /// <para>
+    /// Each number keeps Bevy's own when it is left at zero, which is f/1 at a hundred and
+    /// twenty-fifth of a second and ISO 100.
+    /// </para>
+    /// </remarks>
+    /// <param name="camera">The camera to meter.</param>
+    /// <param name="aperture">The f-stop. A larger number lets less light in.</param>
+    /// <param name="shutter">How long the shutter is open, in seconds.</param>
+    /// <param name="sensitivity">The ISO.</param>
+    /// <exception cref="BevyNativeException">The entity is not a camera.</exception>
+    public static void SetLensExposure(
+        Entity camera,
+        float aperture = 0f,
+        float shutter = 0f,
+        float sensitivity = 0f) =>
+        Native.Check(
+            Native.bcs_render_set_lens_exposure(camera.Bits, aperture, shutter, sensitivity),
+            $"metering {camera} from a lens");
+
+    /// <summary>
+    /// Sorts transparent fragments rather than whole objects, for one camera.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What fixes transparent surfaces drawn in the wrong order. Ordinary alpha blending sorts
+    /// objects by distance, so two panes of glass crossing each other, or one mesh whose own faces
+    /// overlap, come out right from some angles and wrong from others, and no amount of reordering
+    /// the scene fixes both. This sorts each pixel's fragments instead.
+    /// </para>
+    /// <para>
+    /// It costs a buffer the size of the screen times <paramref name="layers"/>, which is why it
+    /// is per camera and off unless asked for. Every number keeps Bevy's own when it is left at
+    /// zero.
+    /// </para>
+    /// </remarks>
+    /// <param name="camera">The camera to sort for.</param>
+    /// <param name="on">Whether to sort at all. False takes it off again.</param>
+    /// <param name="layers">
+    /// How many fragments a pixel sorts exactly before the rest are merged approximately. More is
+    /// more accurate and slower.
+    /// </param>
+    /// <param name="average">How many fragments a pixel budgets for on average.</param>
+    /// <param name="threshold">The alpha below which a fragment is dropped rather than stored.</param>
+    /// <exception cref="BevyNativeException">The entity is not a camera.</exception>
+    public static void SetSortedTransparency(
+        Entity camera,
+        bool on = true,
+        uint layers = 0,
+        float average = 0f,
+        float threshold = 0f) =>
+        Native.Check(
+            Native.bcs_render_set_sorted_transparency(
+                camera.Bits, on ? 1 : 0, layers, average, threshold),
+            $"sorting transparency for {camera}");
+
+    /// <summary>
     /// Asks for a picture to be read back into memory rather than written to a file.
     /// </summary>
     /// <remarks>

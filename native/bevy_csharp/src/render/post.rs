@@ -613,6 +613,149 @@ pub extern "C" fn bcs_render_set_exposure(camera: u64, ev100: f32) -> i32 {
     })
 }
 
+/// Sets a camera's exposure from the lens it is standing in for.
+///
+/// The same three numbers a photographer sets, which is what a scene lit in real units wants to be
+/// metered by. `aperture` is the f-stop, `shutter` the shutter speed in seconds, and `sensitivity`
+/// the ISO. Bevy works the EV-100 out from them, so this and [`bcs_render_set_exposure`] set the
+/// same thing two ways, and the same numbers are what a lens's depth of field is described by.
+///
+/// A zero or negative in any of them keeps Bevy's own value for it, which is f/1, 1/125 and ISO
+/// 100.
+///
+/// Returns [`status::NOT_PRESENT`] where the entity is not a camera, as every other camera call
+/// does.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_lens_exposure(
+    camera: u64,
+    aperture: f32,
+    shutter: f32,
+    sensitivity: f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, aperture, shutter, sensitivity);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::camera::{Exposure, PhysicalCameraParameters};
+            use bevy::ecs::entity::Entity;
+
+            let entity = Entity::from_bits(camera);
+            let stock = PhysicalCameraParameters::default();
+
+            let lens = PhysicalCameraParameters {
+                aperture_f_stops: if aperture > 0.0 {
+                    aperture
+                } else {
+                    stock.aperture_f_stops
+                },
+                shutter_speed_s: if shutter > 0.0 {
+                    shutter
+                } else {
+                    stock.shutter_speed_s
+                },
+                sensitivity_iso: if sensitivity > 0.0 {
+                    sensitivity
+                } else {
+                    stock.sensitivity_iso
+                },
+                ..stock
+            };
+
+            with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                world.entity_mut(entity).insert(Exposure {
+                    ev100: lens.ev100(),
+                });
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Turns order-independent transparency on or off for a camera.
+///
+/// What fixes transparent surfaces drawn in the wrong order. Ordinary alpha blending sorts whole
+/// objects by distance, so two panes of glass crossing each other, or one mesh whose own faces
+/// overlap, come out wrong from some angles and right from others. This sorts the fragments
+/// instead, at the cost of a buffer the size of the screen times `layers`.
+///
+/// `layers` is how many fragments a pixel sorts exactly before the rest are merged approximately,
+/// `average` is how many it budgets for on average, and `threshold` is the alpha below which a
+/// fragment is dropped rather than stored. A zero in any of them keeps Bevy's own number. `on` at
+/// zero takes it off again.
+///
+/// Returns [`status::NOT_PRESENT`] where the entity is not a camera, as every other camera call
+/// does.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_sorted_transparency(
+    camera: u64,
+    on: i32,
+    layers: u32,
+    average: f32,
+    threshold: f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, on, layers, average, threshold);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::core_pipeline::oit::OrderIndependentTransparencySettings;
+            use bevy::ecs::entity::Entity;
+
+            let entity = Entity::from_bits(camera);
+            let stock = OrderIndependentTransparencySettings::default();
+
+            with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                if on == 0 {
+                    world
+                        .entity_mut(entity)
+                        .remove::<OrderIndependentTransparencySettings>();
+
+                    return status::OK;
+                }
+
+                world
+                    .entity_mut(entity)
+                    .insert(OrderIndependentTransparencySettings {
+                        sorted_fragment_max_count: if layers > 0 {
+                            layers
+                        } else {
+                            stock.sorted_fragment_max_count
+                        },
+                        fragments_per_pixel_average: if average > 0.0 {
+                            average
+                        } else {
+                            stock.fragments_per_pixel_average
+                        },
+                        alpha_threshold: if threshold > 0.0 {
+                            threshold
+                        } else {
+                            stock.alpha_threshold
+                        },
+                    });
+
+                status::OK
+            })
+        }
+    })
+}
 
 /// Sets the lens effects a camera draws through.
 ///

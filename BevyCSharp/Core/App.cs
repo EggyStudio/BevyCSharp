@@ -124,6 +124,7 @@ public sealed unsafe class App : IDisposable
                 WatchAssets = Config.WatchAssets ? 1u : 0u,
                 Gui = Config.Gui ? 1u : 0u,
                 Offscreen = Config.Offscreen ? 1u : 0u,
+                SpatialScale = Config.SpatialScale,
             };
             _handle = Native.bcs_app_create(&native);
         }
@@ -539,8 +540,8 @@ public sealed unsafe class App : IDisposable
 
         if (IsRunning)
             throw new InvalidOperationException(
-                $"Cannot add sub-state {typeof(TState).Name}: the app is already running. Add "
-                + "states from a plugin's Build method or before calling Run.");
+                $"Cannot add sub-state {typeof(TState).Name}, because the app is already "
+                + "running. Add states from a plugin's Build method or before calling Run.");
 
         var sub = StateRegistry.Describe(typeof(TState))
                   ?? throw new InvalidOperationException(
@@ -548,16 +549,15 @@ public sealed unsafe class App : IDisposable
                       + "[SubStateOf(typeof(Parent), Parent.Value)] on the enum, which is where a "
                       + "reader looks for what it belongs to.");
 
-        // The paired slot, which is the parent's, because that is what the bridge keys the pairing
-        // on. Claiming the sub-state itself is what gives it the slot everything else addresses it
-        // by.
-        var parent = StateRegistry.Claim(sub.Parent);
-        _ = StateRegistry.Claim<TState>();
+        // Claiming the sub-state is what gives it the slot everything else addresses it by, and
+        // the bridge is told where it sits among the sub-states rather than among the states, so
+        // the state count comes back off again here.
+        var slot = StateRegistry.Claim<TState>() - StateRegistry.SlotCount;
 
         Native.Check(
             Native.bcs_substate_add(
                 _handle,
-                parent,
+                slot,
                 Convert.ToInt32(sub.WhileIn, System.Globalization.CultureInfo.InvariantCulture),
                 StateRegistry.ToInt(initial)),
             $"adding sub-state {typeof(TState).Name} under {sub.Parent.Name}");

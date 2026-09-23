@@ -218,6 +218,9 @@ pub struct BcsConfig {
     /// build and is ignored when `headless` is set, which asks for no renderer at all. `width` and
     /// `height` size the image the way they would size the window.
     pub offscreen: u32,
+    /// How many world units a metre is, for every spatial sound that does not say otherwise. `0`
+    /// keeps Bevy's own of one, which is what a world measured in metres wants.
+    pub spatial_scale: f32,
 }
 
 /// How a camera should see, passed from C# when one is spawned.
@@ -482,10 +485,10 @@ pub struct BcsGizmoConfig {
     ///
     /// `0` line, `1` sphere, `2` axes, `3` a line fading from one color to another, `4` rectangle,
     /// `5` circle, `6` arc, `7` arrow, `8` grid, `9` box, `10` capsule, `11` cone, `12` cylinder,
-    /// `13` torus. `14` to `19` are the flat rectangle, circle, fading line, arrow, arc and grid a
-    /// 2D camera draws, which read the same numbers with the third one dropped. What the fields
-    /// below mean depends on this, because every shape is described by the same handful of
-    /// numbers.
+    /// `13` torus, `20` conical frustum. `14` to `19` are the flat rectangle, circle, fading line,
+    /// arrow, arc and grid a 2D camera draws, which read the same numbers with the third one
+    /// dropped. What the fields below mean depends on this, because every shape is described by
+    /// the same handful of numbers.
     pub kind: i32,
     /// Where the shape sits: a line's start, or the centre of everything else.
     pub start: [f32; 3],
@@ -602,6 +605,10 @@ pub struct BcsSpriteConfig {
     pub tile_y: i32,
     /// How far the picture stretches before a tile repeats. `0` takes Bevy's default of one.
     pub tile_stretch: f32,
+    /// Which parts of a sliced picture tile rather than stretch, as a mask: `1` the sides, `2` the
+    /// middle, `3` both, `0` neither. Read only when the picture is sliced, and the repeat is
+    /// measured by `tile_stretch` the way a tiled picture's is.
+    pub slice_tiling: i32,
 }
 
 /// How a run of UI text is set: its size, and what happens to it at the edges of its node.
@@ -667,6 +674,10 @@ pub struct BcsUiImageConfig {
     pub tile_y: i32,
     /// How far the picture stretches before a tile repeats. `0` takes Bevy's default of one.
     pub tile_stretch: f32,
+    /// Which parts of a sliced picture tile rather than stretch, as a mask: `1` the sides, `2` the
+    /// middle, `3` both, `0` neither. Read only when the picture is sliced, and the repeat is
+    /// measured by `tile_stretch` the way a tiled picture's is.
+    pub slice_tiling: i32,
     /// Asset key of a layout that cuts the image into frames, or a negative for none.
     pub atlas: i32,
     /// Which frame of that layout to draw, counted from zero.

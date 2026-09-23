@@ -90,4 +90,37 @@ public sealed class UiImageSettings
     /// How far the picture is drawn before a tile repeats, as a multiple of its own size.
     /// </summary>
     public float TileStretch { get; set; } = 1f;
+
+    /// <summary>Which parts of a sliced picture tile rather than stretch.</summary>
+    /// <remarks>
+    /// Read only when <see cref="Mode"/> is sliced. The repeat is measured by
+    /// <see cref="TileStretch"/>, the same number a whole tiled picture uses, since both answer how
+    /// much of the source is laid down before it starts again.
+    /// </remarks>
+    public SliceTiling SliceTiling { get; set; } = SliceTiling.None;
+}
+
+/// <summary>
+/// Which parts of a sliced picture tile rather than stretch.
+/// </summary>
+/// <remarks>
+/// A nine-slice stretches by default, which is wrong for anything with a pattern in it, because a
+/// border of dots drawn twice as wide becomes a border of ovals. Tiling repeats the slice instead,
+/// which is what keeps a drawn edge looking drawn at every size. The repeat is measured by the same
+/// <c>TileStretch</c> a whole tiled picture uses.
+/// </remarks>
+[Flags]
+public enum SliceTiling
+{
+    /// <summary>Every part stretches, which is Bevy's own answer.</summary>
+    None = 0,
+
+    /// <summary>The four edges between the corners tile.</summary>
+    Sides = 1,
+
+    /// <summary>The middle tiles.</summary>
+    Centre = 2,
+
+    /// <summary>Both, which is what a patterned panel wants.</summary>
+    All = Sides | Centre,
 }

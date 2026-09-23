@@ -731,7 +731,7 @@ pub unsafe extern "C" fn bcs_ui_set_image(entity: u64, config: *const BcsUiImage
             use bevy::color::Color;
             use bevy::image::Image;
             use bevy::math::{Rect, Vec2};
-            use bevy::sprite::{BorderRect, SliceScaleMode, TextureSlicer};
+            use bevy::sprite::{BorderRect, TextureSlicer};
             use bevy::ui::widget::{ImageNode, NodeImageMode};
 
             if config.is_null() {
@@ -749,8 +749,14 @@ pub unsafe extern "C" fn bcs_ui_set_image(entity: u64, config: *const BcsUiImage
                         min_inset: Vec2::new(config.slice_border[0], config.slice_border[1]),
                         max_inset: Vec2::new(config.slice_border[2], config.slice_border[3]),
                     },
-                    center_scale_mode: SliceScaleMode::Stretch,
-                    sides_scale_mode: SliceScaleMode::Stretch,
+                    center_scale_mode: crate::render::scene::slice_scale(
+                        config.slice_tiling & 2,
+                        config.tile_stretch,
+                    ),
+                    sides_scale_mode: crate::render::scene::slice_scale(
+                        config.slice_tiling & 1,
+                        config.tile_stretch,
+                    ),
                     max_corner_scale: if config.corner_scale > 0.0 {
                         config.corner_scale
                     } else {

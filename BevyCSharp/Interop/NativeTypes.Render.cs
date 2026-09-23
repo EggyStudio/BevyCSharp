@@ -295,6 +295,9 @@ public struct NativeSpriteConfig
 
     /// <summary>How far the picture stretches before a tile repeats; 0 for Bevy's default.</summary>
     public float TileStretch;
+
+    /// <summary>Which parts of a sliced picture tile: 1 the sides, 2 the middle, 3 both.</summary>
+    public int SliceTiling;
 }
 
 /// <summary>One debug shape to draw this frame.</summary>

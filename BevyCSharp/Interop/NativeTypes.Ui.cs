@@ -376,6 +376,9 @@ public struct NativeUiImageConfig
     /// <summary>How far the picture stretches before a tile repeats; 0 for Bevy's default.</summary>
     public float TileStretch;
 
+    /// <summary>Which parts of a sliced picture tile: 1 the sides, 2 the middle, 3 both.</summary>
+    public int SliceTiling;
+
     /// <summary>Asset key of a layout cutting the image into frames, or negative for none.</summary>
     public int Atlas;
 

@@ -70,6 +70,14 @@ public static unsafe class StateRegistry
     /// <summary>How many independent state machines this bridge supports.</summary>
     public static int SlotCount => Native.bcs_state_slots();
 
+    /// <summary>How many sub-states one state can carry.</summary>
+    /// <remarks>
+    /// Fixed by the bridge, because Bevy names a sub-state's parent as an associated type and the
+    /// types exist when the crate is built. The sub-states of the state in slot <c>n</c> are the
+    /// block of slots starting at <see cref="SlotCount"/> plus <c>n</c> times this.
+    /// </remarks>
+    public static int SubsPerSlot => Native.bcs_state_subs_per_slot();
+
     /// <summary>The slot <typeparamref name="TState"/> was added under.</summary>
     /// <exception cref="InvalidOperationException">It was never added.</exception>
     internal static int SlotOf<TState>() where TState : struct, Enum
@@ -127,24 +135,26 @@ public static unsafe class StateRegistry
             Reset();
             if (Slots.TryGetValue(state, out var existing)) return existing;
 
-            // A sub-state takes the slot paired with its parent's rather than one of its own,
-            // which is what makes the pairing the bridge is built around hold.
+            // A sub-state takes one of the slots set aside for its parent's rather than one of
+            // its own, which is what makes the pairing the bridge is built around hold.
             if (Describe(state) is { } sub)
             {
-                var paired = SlotCount + Claim(sub.Parent);
+                var parent = Claim(sub.Parent);
+                var room = SubsPerSlot;
+                var first = SlotCount + (parent * room);
 
-                foreach (var (type, slot) in Slots)
+                for (var offset = 0; offset < room; offset++)
                 {
-                    if (slot != paired) continue;
+                    if (Slots.ContainsValue(first + offset)) continue;
 
-                    throw new InvalidOperationException(
-                        $"{type.Name} is already the sub-state of {sub.Parent.Name}, so "
-                        + $"{state.Name} cannot be. A state carries one sub-state, because the "
-                        + "bridge pairs each sub-state with one state.");
+                    Slots[state] = first + offset;
+                    return first + offset;
                 }
 
-                Slots[state] = paired;
-                return paired;
+                throw new InvalidOperationException(
+                    $"{sub.Parent.Name} already carries {room} sub-states, so {state.Name} "
+                    + "cannot be another. Bevy names a sub-state's parent as a type, so how many "
+                    + "a state can carry is fixed when the bridge is built.");
             }
 
             var count = SlotCount;

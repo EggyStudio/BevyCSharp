@@ -44,4 +44,7 @@ public unsafe struct NativeConfig
 
     /// <summary>Non-zero to draw with no window, into an image a capture reads back.</summary>
     public uint Offscreen;
+
+    /// <summary>How many world units a metre is, for spatial sound. Zero keeps Bevy's own.</summary>
+    public float SpatialScale;
 }

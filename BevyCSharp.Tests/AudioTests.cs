@@ -145,6 +145,14 @@ public sealed class AudioTests
             var listener = ctx.Ecs.Spawn();
             Audio.SetListener(listener, earGap: 3f);
 
+            // And the long form, which places each ear rather than spacing them on one axis. The
+            // second call replaces the first, which is what a listener that has turned its head
+            // would do every frame.
+            Audio.SetListener(
+                listener,
+                new Vec3(-1.5f, 0f, 0.2f),
+                new Vec3(1.5f, 0f, 0.2f));
+
             engine = Audio.Play(
                 AssetServer.Load(AssetKind.Audio, Clip),
                 new AudioSettings

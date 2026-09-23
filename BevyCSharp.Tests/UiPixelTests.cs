@@ -105,6 +105,93 @@ public sealed class UiPixelTests
             $"the words took {normalWidth} pixels normally and {trackedWidth} tracked out");
     }
 
+    /// <summary>A sliced edge that tiles repeats its pattern where a stretched one smears it.</summary>
+    /// <remarks>
+    /// The same picture drawn at the same size both ways. A stripe per source column becomes four
+    /// wide bands when the slice is stretched and a row of thin ones when it is tiled, so counting
+    /// the changes across the top edge tells the two apart without knowing where any of them fell.
+    /// </remarks>
+    [Fact]
+    public void ASlicedEdgeCanTileRatherThanStretch()
+    {
+        if (!App.HasRenderer) return;
+
+        var stretched = DrawStripes(SliceTiling.None);
+        var tiled = DrawStripes(SliceTiling.Sides);
+
+        Assert.NotNull(stretched);
+        Assert.NotNull(tiled);
+
+        // Two rows down, which is inside the top edge rather than in the middle below it. The
+        // middle is a slice of its own and stretches either way here.
+        var smeared = Changes(stretched, y: 2);
+        var repeated = Changes(tiled, y: 2);
+
+        Assert.True(smeared > 0, "the stretched edge drew no stripes at all");
+        Assert.True(
+            repeated > smeared * 2,
+            $"the edge changed {smeared} times stretched and {repeated} times tiled");
+    }
+
+    /// <summary>How many times the row changes between lit and unlit across the picture.</summary>
+    private static int Changes(CapturedImage picture, uint y)
+    {
+        var changes = 0;
+        var lit = false;
+
+        for (var x = 0u; x < picture.Width; x++)
+        {
+            var now = picture.At(x, y).R > 120;
+            if (now != lit) changes++;
+            lit = now;
+        }
+
+        return changes;
+    }
+
+    /// <summary>Draws a striped nine-slice, sliced the way <paramref name="tiling"/> asks.</summary>
+    private static CapturedImage? DrawStripes(SliceTiling tiling) => Capture((camera, _) =>
+    {
+        // Twelve pixels square with a four-pixel border, so the slice between the corners is the
+        // four middle columns, and those carry a stripe each.
+        const int side = 12;
+        var pixels = new byte[side * side * 4];
+
+        for (var y = 0; y < side; y++)
+        {
+            for (var x = 0; x < side; x++)
+            {
+                var at = ((y * side) + x) * 4;
+
+                // Red on the odd columns of the middle band, opaque black everywhere else, so the
+                // pattern is only in the slice the test reads.
+                if (x is >= 4 and < 8 && x % 2 == 1) pixels[at] = 255;
+
+                pixels[at + 3] = 255;
+            }
+        }
+
+        var made = Render.CreateImage(pixels, side, side);
+
+        var node = Ui.SpawnNode(new UiSettings
+        {
+            Absolute = true,
+            Left = Length.Zero,
+            Top = Length.Zero,
+            Width = Length.Px(120f),
+            Height = Length.Px(40f),
+            Camera = camera,
+        });
+
+        Ui.SetImage(node, new UiImageSettings
+        {
+            Image = made,
+            Mode = UiImageMode.Sliced,
+            SliceBorder = (4f, 4f, 4f, 4f),
+            SliceTiling = tiling,
+        });
+    });
+
     /// <summary>An image built from bytes here is drawn like any other.</summary>
     /// <remarks>
     /// The whole round trip. The pixels never touch a file, so red arriving on screen says the

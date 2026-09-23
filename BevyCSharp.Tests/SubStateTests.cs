@@ -25,12 +25,23 @@ public enum Paused
     Yes,
 }
 
+/// <summary>A second state under the same parent, for the test that two can share one.</summary>
+[SubStateOf(typeof(Session), Session.Playing)]
+public enum Difficulty
+{
+    /// <summary>The usual.</summary>
+    Normal,
+
+    /// <summary>Harder.</summary>
+    Brutal,
+}
+
 /// <summary>
 /// Covers a state that exists only while another holds a value.
 /// </summary>
 /// <remarks>
 /// The thing a sub-state is for is not being asked about when it does not apply. A pause outside a
-/// run is not "off", it is nothing, and the difference shows the moment a system asks: a plain
+/// run is not "off", it is nothing, and the difference shows the moment a system asks. A plain
 /// state would answer with a value that means nothing, and this answers that there is no state.
 /// </remarks>
 [Collection("engine")]
@@ -207,6 +218,52 @@ public sealed class SubStateTests
         // Frames 4, 5 and 6, which is every frame the pause was held and none of the ones before
         // the run started or after it was let go.
         Assert.InRange(Held.Ran, 2, 4);
+    }
+
+    /// <summary>Two sub-states can hang from one parent, and each keeps its own value.</summary>
+    /// <remarks>
+    /// A run that can be paused and can be played at a difficulty wants both, and neither is a
+    /// value of the other. What is checked is that the second one is not silently given the first
+    /// one's slot, which would show as the two reading the same number.
+    /// </remarks>
+    [Fact]
+    public void TwoSubStatesCanShareAParent()
+    {
+        var seen = new List<(bool Paused, Paused Pause, bool Hard, Difficulty Level)>();
+
+        using var harness = new EngineHarness(frames: 8);
+
+        harness.App.AddState(Session.Menu);
+        harness.App.AddSubState(Paused.No);
+        harness.App.AddSubState(Difficulty.Normal);
+
+        harness.On(Stage.Update, world =>
+        {
+            var frame = world.Resource<Time>().FrameCount;
+
+            if (frame == 1) App.SetState(Session.Playing);
+            if (frame == 3) App.SetState(Difficulty.Brutal);
+            if (frame == 5) App.SetState(Session.Menu);
+
+            seen.Add((
+                App.TryState<Paused>(out var pause),
+                pause,
+                App.TryState<Difficulty>(out var level),
+                level));
+        });
+
+        harness.Run();
+
+        // Outside the run neither exists, and inside it both do, each at its own value.
+        Assert.All(seen, row => Assert.Equal(row.Paused, row.Hard));
+
+        var during = seen.Where(row => row.Paused).ToList();
+        Assert.NotEmpty(during);
+
+        // The pause was never asked to change, so it stays where it started while the difficulty
+        // moves, which is what two slots rather than one looks like.
+        Assert.All(during, row => Assert.Equal(Paused.No, row.Pause));
+        Assert.Contains(during, row => row.Level == Difficulty.Brutal);
     }
 
     /// <summary>A sub-state added before its parent has nothing to hang from.</summary>

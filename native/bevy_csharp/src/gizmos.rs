@@ -60,7 +60,7 @@ pub struct FrontGizmos;
 #[cfg(feature = "render")]
 macro_rules! draw_shape {
     ($gizmos:expr, $shape:expr, $position:expr, $rotation:expr, $color:expr, $fades_to:expr) => {{
-        use bevy::math::primitives::{Capsule3d, Cone, Cuboid, Cylinder, Torus};
+        use bevy::math::primitives::{Capsule3d, ConicalFrustum, Cone, Cuboid, Cylinder, Torus};
         use bevy::math::{Isometry2d, Isometry3d, Rot2, UVec2, Vec2, Vec3};
         use bevy::transform::components::Transform;
 
@@ -163,6 +163,20 @@ macro_rules! draw_shape {
                     $color,
                 );
             }
+            20 => {
+                // A cone with its point cut off, which is the one remaining primitive whose
+                // numbers fit the queue: a radius at each end and a height between them.
+                $gizmos.primitive_3d(
+                    &ConicalFrustum {
+                        radius_bottom: shape.radius,
+                        radius_top: far.x,
+                        height: far.y,
+                    },
+                    at,
+                    $color,
+                );
+            }
+
             // The flat shapes. Each is the one above it seen from a 2D camera, drawn with Bevy's
             // own 2D call rather than with the 3D one at zero depth, because the two differ in
             // more than a coordinate once a line has width and a grid has a plane.
@@ -249,21 +263,25 @@ pub fn draw_in_front(mut store: bevy::ecs::system::ResMut<bevy::gizmos::config::
     config.depth_bias = -1.0;
 }
 
-/// Sets how gizmos are drawn, for both groups at once.
+/// Sets how gizmos are drawn.
 ///
 /// `width` is the line thickness in pixels, and `layers` is the render layer mask deciding which
-/// cameras see gizmos at all; a mask of `0` is Bevy's own default of layer zero. Both groups take
-/// the same values, because the two exist to answer whether the scene may hide a shape and nothing
-/// else. `enabled` at zero stops the drawing without the caller having to stop asking for it,
-/// which is what a debug overlay bound to a key wants.
+/// cameras see gizmos at all; a mask of `0` is Bevy's own default of layer zero. `enabled` at zero
+/// stops the drawing without the caller having to stop asking for it, which is what a debug
+/// overlay bound to a key wants.
+///
+/// `which` picks the group: `0` both, `1` the one the scene can hide, `2` the one it cannot. The
+/// two groups are what a shape's `in_front` already chooses between, so setting them apart is what
+/// turns a floor grid off while leaving the handles drawn over it, without either side of the
+/// editor knowing about the other.
 ///
 /// Returns [`status::UNSUPPORTED`] where there is nothing to draw on.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_gizmo_configure(width: f32, layers: u32, enabled: i32) -> i32 {
+pub extern "C" fn bcs_gizmo_configure(width: f32, layers: u32, enabled: i32, which: i32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (width, layers, enabled);
+            let _ = (width, layers, enabled, which);
             status::UNSUPPORTED
         }
 
@@ -287,7 +305,7 @@ pub extern "C" fn bcs_gizmo_configure(width: f32, layers: u32, enabled: i32) -> 
                 };
 
                 // One group at a time, because the store hands out a borrow of itself per group
-                // and the two are wanted with the same values rather than at the same moment.
+                // and both are wanted with the same values rather than at the same moment.
                 let apply = |config: &mut bevy::gizmos::config::GizmoConfig| {
                     // A width of zero is a caller leaving it alone rather than asking for lines
                     // with no thickness, which would draw nothing and read as a broken bridge.
@@ -299,8 +317,13 @@ pub extern "C" fn bcs_gizmo_configure(width: f32, layers: u32, enabled: i32) -> 
                     config.enabled = enabled != 0;
                 };
 
-                apply(store.config_mut::<DefaultGizmoConfigGroup>().0);
-                apply(store.config_mut::<FrontGizmos>().0);
+                if which != 2 {
+                    apply(store.config_mut::<DefaultGizmoConfigGroup>().0);
+                }
+
+                if which != 1 {
+                    apply(store.config_mut::<FrontGizmos>().0);
+                }
 
                 status::OK
             })
@@ -406,17 +429,62 @@ pub unsafe extern "C" fn bcs_gizmo_draw(config: *const BcsGizmoConfig) -> i32 {
                 return status::UNSUPPORTED;
             };
 
-            queue.0.push(QueuedGizmo {
-                kind: config.kind,
-                start: config.start,
-                end: config.end,
-                rotation: config.rotation,
-                radius: config.radius,
-                color: config.color,
-                end_color: config.end_color,
-                in_front: config.in_front,
-            });
+            queue.0.push(queued(&config));
             status::OK
         })
     })
+}
+
+/// Records a whole array of shapes to draw this frame.
+///
+/// One crossing for all of them, which is what a wireframe, a path or a grid wants. A shape costs
+/// about four percent of a frame at a few hundred a frame and the same again at a few thousand, so
+/// the point of this is not the saving at the sizes drawn today. It is that the cost stops growing
+/// with the number of lines.
+///
+/// Returns [`status::UNSUPPORTED`] where there is nothing to draw on, and
+/// [`status::NULL_ARG`] for a null array with a count above zero.
+///
+/// # Safety
+/// `configs` must point at `count` shapes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_gizmo_draw_many(configs: *const BcsGizmoConfig, count: i32) -> i32 {
+    crate::interop::guard(|| {
+        if count <= 0 {
+            // Nothing to draw is not a mistake, and a caller looping over an empty list should not
+            // have to check before asking.
+            return status::OK;
+        }
+
+        if configs.is_null() {
+            return status::NULL_ARG;
+        }
+
+        let described = unsafe { core::slice::from_raw_parts(configs, count as usize) };
+
+        crate::state::with_world(|world| {
+            let Some(mut queue) = world.get_resource_mut::<GizmoQueue>() else {
+                return status::UNSUPPORTED;
+            };
+
+            queue.0.reserve(described.len());
+            queue.0.extend(described.iter().map(queued));
+
+            status::OK
+        })
+    })
+}
+
+/// One described shape as the queue holds it.
+fn queued(config: &BcsGizmoConfig) -> QueuedGizmo {
+    QueuedGizmo {
+        kind: config.kind,
+        start: config.start,
+        end: config.end,
+        rotation: config.rotation,
+        radius: config.radius,
+        color: config.color,
+        end_color: config.end_color,
+        in_front: config.in_front,
+    }
 }

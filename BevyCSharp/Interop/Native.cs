@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 98;
+    internal const int ExpectedAbiVersion = 104;
 
     static Native() => NativeLoader.Initialize();
 
@@ -223,6 +223,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_state_slots();
+
+    /// <summary>Reports how many sub-states one state slot can carry.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_state_subs_per_slot();
 
     /// <summary>Creates a state machine in a slot, before the app runs.</summary>
     [LibraryImport(Library)]
@@ -447,6 +452,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_audio_stop(ulong entity);
 
+    /// <summary>Makes an entity the ear, with each ear placed exactly.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_audio_listener_ears(ulong entity, float* left, float* right);
+
     /// <summary>Makes an entity the ear spatial sound is heard from.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -472,10 +482,16 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_gizmo_draw(NativeGizmoConfig* config);
 
+    /// <summary>Records a whole array of shapes to draw this frame.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gizmo_draw_many(NativeGizmoConfig* configs, int count);
+
     /// <summary>Sets how gizmos are drawn, for both groups at once.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_gizmo_configure(float width, uint layers, int enabled);
+    internal static partial int bcs_gizmo_configure(
+        float width, uint layers, int enabled, int which);
 
     /// <summary>Sets what a gizmo line looks like, for both groups at once.</summary>
     [LibraryImport(Library)]
@@ -603,6 +619,18 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_exposure(ulong camera, float ev100);
+
+    /// <summary>Sets a camera's exposure from the lens it stands in for.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_lens_exposure(
+        ulong camera, float aperture, float shutter, float sensitivity);
+
+    /// <summary>Turns order-independent transparency on or off for a camera.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_sorted_transparency(
+        ulong camera, int on, uint layers, float average, float threshold);
 
     /// <summary>Writes what a camera drew to a PNG file.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]

@@ -15,6 +15,64 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class RenderControlTests
 {
+    /// <summary>A lens meters a camera the way an exposure value does, and both are refused elsewhere.</summary>
+    [Fact]
+    public void ACameraCanBeMeteredByANumberOrByALens()
+    {
+        using var harness = new EngineHarness(frames: 4);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            var camera = Render.SpawnCamera3d();
+
+            Render.SetExposure(camera, 12f);
+            Render.SetLensExposure(camera, aperture: 2.8f, shutter: 1f / 250f, sensitivity: 400f);
+
+            // And nothing at all, which is the three defaults rather than a refusal.
+            Render.SetLensExposure(camera);
+
+            var lamp = Render.SpawnLight(new LightSettings { Kind = LightKind.Point });
+
+            var refused = Assert.Throws<BevyNativeException>(
+                () => Render.SetLensExposure(lamp, aperture: 4f));
+
+            Assert.Equal(NativeStatus.NotPresent, refused.Status);
+        });
+
+        harness.Run();
+    }
+
+    /// <summary>Sorted transparency goes on and comes off again with the same call.</summary>
+    /// <remarks>
+    /// Whether the glass looks right needs a scene with two panes crossing in it and an eye. What
+    /// is checked here is that a camera takes it, that turning it off is the same call, and that
+    /// anything else is refused rather than quietly given a component nothing reads.
+    /// </remarks>
+    [Fact]
+    public void SortedTransparencyIsACameraSetting()
+    {
+        using var harness = new EngineHarness(frames: 4);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            var camera = Render.SpawnCamera3d();
+
+            Render.SetSortedTransparency(camera, layers: 16, average: 6f, threshold: 0.01f);
+            Render.SetSortedTransparency(camera, on: false);
+
+            var lamp = Render.SpawnLight(new LightSettings { Kind = LightKind.Point });
+
+            var refused = Assert.Throws<BevyNativeException>(
+                () => Render.SetSortedTransparency(lamp));
+
+            Assert.Equal(NativeStatus.NotPresent, refused.Status);
+        });
+
+        harness.Run();
+    }
+
     /// <summary>Cascades are a directional light's, and asking any other light for them is refused.</summary>
     /// <remarks>
     /// The refusal is the part worth pinning. Whether the shadows look better for it needs a GPU

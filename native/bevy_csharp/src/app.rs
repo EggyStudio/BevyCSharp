@@ -416,7 +416,17 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         // anyway. Without this a sound load panics rather than failing, because Bevy refuses to
         // hand out a handle for an asset type it was never told about.
         #[cfg(feature = "render")]
-        app.add_plugins(bevy::audio::AudioPlugin::default());
+        app.add_plugins(bevy::audio::AudioPlugin {
+            // One answer for the app, because how far away a sound is depends on what the world
+            // is measured in, and that is a fact about the game rather than about any one sound.
+            // A sound may still say otherwise for itself.
+            default_spatial_scale: if config.spatial_scale > 0.0 {
+                bevy::audio::SpatialScale::new(config.spatial_scale)
+            } else {
+                bevy::audio::SpatialScale::new(1.0)
+            },
+            ..Default::default()
+        });
 
         // Registers the glTF loader and the asset types it produces. `DefaultPlugins` carries it
         // on the windowed path, so adding it there as well would hit the double-registration

@@ -341,6 +341,32 @@ public static unsafe class Gizmos
             radius: spacing,
             end: new Vec3(across, down, 0f)));
 
+    /// <summary>Draws a cone with its point cut off.</summary>
+    /// <remarks>
+    /// What a spot light's beam, a funnel or a tapering shaft is. A radius of zero at the top is a
+    /// cone and two equal radii is a cylinder, so this is the general case of both, and it is here
+    /// because neither of those can describe a beam that starts wide.
+    /// </remarks>
+    /// <param name="center">Where the middle of it sits, in world space.</param>
+    /// <param name="rotation">Which way it points. Unrotated stands on its Y axis.</param>
+    /// <param name="bottom">The radius at the base.</param>
+    /// <param name="top">The radius at the cut end.</param>
+    /// <param name="height">How far apart the two ends are.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    public static void Frustum(
+        Vec3 center,
+        Quat rotation,
+        float bottom,
+        float top,
+        float height,
+        (float R, float G, float B, float A) color,
+        bool inFront = true) =>
+        Draw(Shape(
+            20, center, rotation, color, inFront,
+            radius: bottom,
+            end: new Vec3(top, height, 0f)));
+
     /// <summary>Draws the outline of a rectangle, flat, for a 2D camera.</summary>
     /// <remarks>
     /// <para>
@@ -493,14 +519,94 @@ public static unsafe class Gizmos
     }
 
     /// <summary>
+    /// Draws a whole run of lines in one crossing.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What a wireframe, a path or a grid is. Every other call here crosses the boundary on its
+    /// own, which is fine at the few hundred shapes a frame an editor overlay asks for and stops
+    /// being fine well before a mesh's worth. This costs the array rather than the number of lines
+    /// in it.
+    /// </para>
+    /// <para>
+    /// The lines are all drawn the same way, since <paramref name="inFront"/> is one answer for the
+    /// run. A path drawn in two colors is two calls, which is still two rather than one per
+    /// segment.
+    /// </para>
+    /// </remarks>
+    /// <param name="lines">The segments, each with its own two ends and color.</param>
+    /// <param name="inFront">
+    /// Whether the scene can hide them. False by default here where it is true elsewhere, because
+    /// what is drawn in runs is usually drawn *in* the scene rather than about it.
+    /// </param>
+    /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
+    /// <example>
+    /// <code>
+    /// Span&lt;GizmoSegment&gt; path = stackalloc GizmoSegment[points.Length - 1];
+    ///
+    /// for (var i = 0; i &lt; path.Length; i++)
+    ///     path[i] = new GizmoSegment(points[i], points[i + 1], (0f, 1f, 0f, 1f));
+    ///
+    /// Gizmos.Lines(path);
+    /// </code>
+    /// </example>
+    public static void Lines(ReadOnlySpan<GizmoSegment> lines, bool inFront = false)
+    {
+        if (lines.IsEmpty) return;
+
+        // Built here rather than by the caller, so the wire format stays this file's business the
+        // way it is for every single-shape call above.
+        var configs = lines.Length <= 64
+            ? stackalloc NativeGizmoConfig[lines.Length]
+            : new NativeGizmoConfig[lines.Length];
+
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var line = lines[i];
+
+            configs[i] = Shape(
+                line.Fades ? 3 : 0,
+                line.Start,
+                Quat.Identity,
+                line.Color,
+                inFront,
+                end: line.End);
+
+            configs[i].EndColorR = line.EndColor.R;
+            configs[i].EndColorG = line.EndColor.G;
+            configs[i].EndColorB = line.EndColor.B;
+            configs[i].EndColorA = line.EndColor.A;
+        }
+
+        fixed (NativeGizmoConfig* at = configs)
+        {
+            var status = Native.bcs_gizmo_draw_many(at, lines.Length);
+
+            if (status == NativeStatus.Unsupported)
+                throw new BevyNativeException(
+                    NativeStatus.Unsupported,
+                    "Drawing gizmos failed, because gizmos are drawn by a plugin that comes with "
+                    + "the window, so a windowless run has nothing to draw on. Guard with "
+                    + "App.HasRenderer and Config.Headless.");
+
+            Native.Check(status, "drawing a run of gizmo lines");
+        }
+    }
+
+    /// <summary>
     /// Sets how every gizmo is drawn.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// One setting for both groups, because the two exist to answer whether the scene may hide a
-    /// shape and nothing else. A game that wants two kinds of debug drawing styled apart from each
-    /// other wants what Bevy calls a config group, which is a type rather than a value and so has
-    /// no bridge.
+    /// <paramref name="which"/> is the only way one kind of debug drawing is told from another
+    /// here. Bevy groups gizmos by a config group, which is a Rust type rather than a value, so
+    /// the two that exist are the two a shape's <c>inFront</c> already chooses between, and a
+    /// game wanting more than that runs out of groups rather than of settings.
+    /// </para>
+    /// <para>
+    /// Those two are enough for the thing usually wanted, because what is drawn *in* a scene and
+    /// what is drawn *about* it are already on opposite sides of the split. Turning off the group
+    /// the scene can hide takes the floor grid and the paths away and leaves the handles.
     /// </para>
     /// <para>
     /// <paramref name="enabled"/> is what a debug overlay bound to a key wants, because it stops
@@ -513,10 +619,15 @@ public static unsafe class Gizmos
     /// draws them. Zero keeps Bevy's own default of layer zero.
     /// </param>
     /// <param name="enabled">Whether to draw gizmos at all.</param>
+    /// <param name="which">Which group this applies to.</param>
     /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
-    public static void Configure(float width = 0f, uint layers = 0, bool enabled = true) =>
+    public static void Configure(
+        float width = 0f,
+        uint layers = 0,
+        bool enabled = true,
+        GizmoGroup which = GizmoGroup.Both) =>
         Native.Check(
-            Native.bcs_gizmo_configure(width, layers, enabled ? 1 : 0),
+            Native.bcs_gizmo_configure(width, layers, enabled ? 1 : 0, (int)which),
             "configuring gizmos");
 
     /// <summary>
@@ -678,4 +789,92 @@ public enum GizmoJoint
 
     /// <summary>A straight line across the gap between the two ends.</summary>
     Bevel = 3,
+}
+
+/// <summary>
+/// One line of a run drawn by <see cref="Gizmos.Lines"/>.
+/// </summary>
+/// <remarks>
+/// Its own two ends and its own color, because a run is usually a path or a wireframe where each
+/// segment is somewhere different and some of them mean something different. <see cref="Fading"/>
+/// gives it a second color, which is what a line running out to a horizon needs.
+/// </remarks>
+public readonly struct GizmoSegment
+{
+    /// <summary>A line of one color.</summary>
+    /// <param name="start">Where it begins, in world space.</param>
+    /// <param name="end">Where it ends.</param>
+    /// <param name="color">Linear RGBA.</param>
+    public GizmoSegment(Vec3 start, Vec3 end, (float R, float G, float B, float A) color)
+    {
+        Start = start;
+        End = end;
+        Color = color;
+        EndColor = color;
+    }
+
+    private GizmoSegment(
+        Vec3 start,
+        Vec3 end,
+        (float R, float G, float B, float A) from,
+        (float R, float G, float B, float A) to)
+    {
+        Start = start;
+        End = end;
+        Color = from;
+        EndColor = to;
+        Fades = true;
+    }
+
+    /// <summary>Where it begins, in world space.</summary>
+    public Vec3 Start { get; }
+
+    /// <summary>Where it ends.</summary>
+    public Vec3 End { get; }
+
+    /// <summary>The color at the start, linear RGBA.</summary>
+    public (float R, float G, float B, float A) Color { get; }
+
+    /// <summary>The color at the end, which is the same one unless it fades.</summary>
+    public (float R, float G, float B, float A) EndColor { get; }
+
+    /// <summary>Whether the two colors are meant to be different.</summary>
+    /// <remarks>
+    /// Kept rather than compared, because a line fading from a color to the same color is a
+    /// reasonable thing to ask for and would otherwise be silently turned into a plain one.
+    /// </remarks>
+    public bool Fades { get; }
+
+    /// <summary>A line that fades from one color to another.</summary>
+    /// <param name="start">Where it begins, in world space.</param>
+    /// <param name="end">Where it ends.</param>
+    /// <param name="from">The color at the start, linear RGBA.</param>
+    /// <param name="to">The color at the end. Transparent is what makes a line run out.</param>
+    public static GizmoSegment Fading(
+        Vec3 start,
+        Vec3 end,
+        (float R, float G, float B, float A) from,
+        (float R, float G, float B, float A) to) => new(start, end, from, to);
+}
+
+/// <summary>
+/// Which of the two gizmo groups a setting applies to.
+/// </summary>
+/// <remarks>
+/// The same split a shape's <c>inFront</c> chooses between, seen from the other end. A handle, an
+/// outline or a marker is drawn about the scene and has to be reachable; a grid, a path or a
+/// wireframe is drawn in it and has to be behind what is in front of it. Because the two kinds of
+/// drawing already fall on opposite sides of that line, it doubles as the category a game turns
+/// one kind of debug drawing off by.
+/// </remarks>
+public enum GizmoGroup
+{
+    /// <summary>Both, which is what a setting meant for everything wants.</summary>
+    Both = 0,
+
+    /// <summary>The group the scene can hide, which is where a grid or a path is drawn.</summary>
+    Behind = 1,
+
+    /// <summary>The group nothing can hide, which is where a handle or a marker is drawn.</summary>
+    InFront = 2,
 }

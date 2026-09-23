@@ -143,6 +143,17 @@ public sealed class Config
     public bool Offscreen { get; set; }
 
     /// <summary>
+    /// How many world units a metre is, for every spatial sound that does not say otherwise.
+    /// </summary>
+    /// <remarks>
+    /// How far away a sound is depends on what the world is measured in, which is a fact about the
+    /// game rather than about any one sound, so it is set once here. Zero keeps Bevy's own of one,
+    /// which is what a world measured in metres wants; a world measured in centimetres wants a
+    /// hundred. A sound may still say otherwise for itself.
+    /// </remarks>
+    public float SpatialScale { get; set; }
+
+    /// <summary>
     /// Answer the command line while this app runs.
     /// </summary>
     /// <remarks>

@@ -196,6 +196,29 @@ public static unsafe class Audio
             Native.bcs_audio_listener(entity.Bits, earGap), $"listening from {entity}");
 
     /// <summary>
+    /// Makes an entity the ear, with each ear placed exactly.
+    /// </summary>
+    /// <remarks>
+    /// The long form of <see cref="SetListener"/>, which puts the two ears a gap apart on the x
+    /// axis. Placing them says where a head is facing as well as how wide it is, which is what a
+    /// listener carried by a character rather than by a camera needs, and what a first-person view
+    /// with the ears behind the eyes wants.
+    /// </remarks>
+    /// <param name="entity">The entity to listen from. It is given a transform if it has none.</param>
+    /// <param name="left">Where the left ear sits, relative to that entity.</param>
+    /// <param name="right">Where the right ear sits.</param>
+    /// <exception cref="BevyNativeException">The entity is gone, or this build has no audio.</exception>
+    public static unsafe void SetListener(Entity entity, Vec3 left, Vec3 right)
+    {
+        var from = stackalloc float[3] { left.X, left.Y, left.Z };
+        var to = stackalloc float[3] { right.X, right.Y, right.Z };
+
+        Native.Check(
+            Native.bcs_audio_listener_ears(entity.Bits, from, to),
+            $"listening from {entity}");
+    }
+
+    /// <summary>
     /// How far into its clip a sound has played, in seconds.
     /// </summary>
     /// <remarks>

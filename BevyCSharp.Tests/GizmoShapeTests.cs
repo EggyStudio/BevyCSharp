@@ -31,6 +31,7 @@ public sealed class GizmoShapeTests
     [InlineData("cone")]
     [InlineData("cylinder")]
     [InlineData("torus")]
+    [InlineData("frustum")]
     public void AShapeIsDrawn(string shape)
     {
         if (!App.HasRenderer) return;
@@ -97,6 +98,57 @@ public sealed class GizmoShapeTests
             $"the flat {shape} covered the whole picture, so it is not a shape");
     }
 
+    /// <summary>Turning one group off leaves the other drawing.</summary>
+    /// <remarks>
+    /// The grid is drawn behind the scene and the circle in front of it, so switching the group
+    /// the scene can hide takes one away and leaves the other. Configuring both at once, which is
+    /// what the call did before there was a group to name, would have taken both.
+    /// </remarks>
+    [Fact]
+    public void OneGroupCanBeTurnedOffWithoutTheOther()
+    {
+        if (!App.HasRenderer) return;
+
+        var both = Draw("pair");
+        var front = Draw("pair", behind: false);
+
+        Assert.NotNull(both);
+        Assert.NotNull(front);
+
+        var all = Lit(both);
+        var some = Lit(front);
+
+        Assert.True(some > 0, "turning the far group off took the near one with it");
+        Assert.True(
+            some < all,
+            $"both groups covered {all} pixels and one covered {some}");
+    }
+
+    /// <summary>A run of lines drawn in one call reaches the screen like any other shape.</summary>
+    /// <remarks>
+    /// Three segments making a triangle, so what is checked is that every one of them arrived
+    /// rather than only the first, which is the way a batched call goes wrong.
+    /// </remarks>
+    [Fact]
+    public void ARunOfLinesIsDrawnInOneCall()
+    {
+        if (!App.HasRenderer) return;
+
+        var one = Draw("line");
+        var run = Draw("run");
+
+        Assert.NotNull(one);
+        Assert.NotNull(run);
+
+        var single = Lit(one);
+        var many = Lit(run);
+
+        Assert.True(single > 0, "the single line drew nothing");
+        Assert.True(
+            many > single * 2,
+            $"one line covered {single} pixels and a run of three covered {many}");
+    }
+
     /// <summary>A dashed line covers less of the picture than the same shape drawn solid.</summary>
     /// <remarks>
     /// The same shape at the same width, so the gaps are the only thing that can take pixels away,
@@ -139,7 +191,8 @@ public sealed class GizmoShapeTests
     private static CapturedImage? Draw(
         string shape,
         bool enabled = true,
-        GizmoLine style = GizmoLine.Solid)
+        GizmoLine style = GizmoLine.Solid,
+        bool behind = true)
     {
         CapturedImage? picture = null;
 
@@ -162,6 +215,9 @@ public sealed class GizmoShapeTests
 
                 Gizmos.Configure(width: 4f, enabled: enabled);
                 Gizmos.SetLineStyle(style);
+
+                // Said second, so it narrows what the line above set for everything.
+                if (!behind) Gizmos.Configure(width: 4f, enabled: false, which: GizmoGroup.Behind);
             },
             "Test.Camera"));
 
@@ -176,6 +232,25 @@ public sealed class GizmoShapeTests
                 {
                     case "rect":
                         Gizmos.Rect(Vec3.Zero, Quat.Identity, 3f, 2f, green);
+                        break;
+
+                    case "line":
+                        Gizmos.Line(new Vec3(-2f, -2f, 0f), new Vec3(2f, -2f, 0f), green);
+                        break;
+
+                    case "pair":
+                        // One in each group, so which of them survives says which was configured.
+                        Gizmos.Grid(Vec3.Zero, Quat.Identity, 4, 4, 0.8f, green, inFront: false);
+                        Gizmos.Circle(Vec3.Zero, Quat.Identity, 1.5f, green, inFront: true);
+                        break;
+
+                    case "run":
+                        Gizmos.Lines(
+                        [
+                            new GizmoSegment(new Vec3(-2f, -2f, 0f), new Vec3(2f, -2f, 0f), green),
+                            new GizmoSegment(new Vec3(2f, -2f, 0f), new Vec3(0f, 2f, 0f), green),
+                            new GizmoSegment(new Vec3(0f, 2f, 0f), new Vec3(-2f, -2f, 0f), green),
+                        ]);
                         break;
 
                     case "circle":
@@ -208,6 +283,10 @@ public sealed class GizmoShapeTests
 
                     case "torus":
                         Gizmos.Torus(Vec3.Zero, Quat.Identity, 2f, 0.5f, green);
+                        break;
+
+                    case "frustum":
+                        Gizmos.Frustum(Vec3.Zero, Quat.Identity, 1.6f, 0.6f, 2.4f, green);
                         break;
 
                     default:
