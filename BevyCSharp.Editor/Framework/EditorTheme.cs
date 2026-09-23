@@ -173,6 +173,12 @@ public sealed record EditorTheme
 
         Current = theme;
 
+        // Which theme is worn is worth knowing to an app that draws no interface, so it is
+        // recorded first. What follows writes into ImGui's own style, and ImGui answers a question
+        // about a context that was never made by stopping the process, so nothing below runs until
+        // there is one.
+        if (!ImGuiRuntime.IsRunning) return;
+
         var style = ImGui.GetStyle();
 
         style.WindowRounding = theme.WindowRounding;

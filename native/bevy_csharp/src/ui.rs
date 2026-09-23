@@ -43,6 +43,7 @@ fn display(value: i32) -> bevy::ui::Display {
     match value {
         1 => Display::Block,
         2 => Display::None,
+        3 => Display::Grid,
         _ => Display::Flex,
     }
 }
@@ -145,9 +146,24 @@ fn align_items(value: i32) -> bevy::ui::AlignItems {
 /// should lay a screen out plainly rather than not at all.
 #[cfg(feature = "render")]
 fn node_from(config: &BcsUiNodeConfig) -> bevy::ui::Node {
-    use bevy::ui::PositionType;
+    use bevy::ui::{BoxSizing, PositionType};
 
     bevy::ui::Node {
+        // Bevy's own default is the border box, which is the one people expect, so a zeroed
+        // config asks for what it would have got anyway.
+        box_sizing: if config.box_sizing == 1 {
+            BoxSizing::ContentBox
+        } else {
+            BoxSizing::BorderBox
+        },
+        // Rounded corners are a field on the node rather than a component beside it, so a zeroed
+        // config asks for the square ones it would have had anyway.
+        border_radius: bevy::ui::BorderRadius {
+            top_left: length(config.corners[0], config.corner_units[0]),
+            top_right: length(config.corners[1], config.corner_units[1]),
+            bottom_right: length(config.corners[2], config.corner_units[2]),
+            bottom_left: length(config.corners[3], config.corner_units[3]),
+        },
         position_type: if config.absolute != 0 {
             PositionType::Absolute
         } else {
@@ -225,6 +241,21 @@ fn visual_box(value: i32) -> bevy::ui::VisualBox {
         0 => VisualBox::ContentBox,
         2 => VisualBox::BorderBox,
         _ => VisualBox::PaddingBox,
+    }
+}
+
+/// Translates how much room is added between the letters of a run of text.
+///
+/// Only called for a value other than zero, because zero is both the default and no change, so a
+/// caller leaving the field alone and one asking for the fit the font already has want the same
+/// thing, which is no component at all.
+#[cfg(feature = "render")]
+fn letter_spacing(value: f32, unit: i32) -> bevy::text::LetterSpacing {
+    use bevy::text::LetterSpacing;
+
+    match unit {
+        1 => LetterSpacing::Px(value),
+        _ => LetterSpacing::Rem(value),
     }
 }
 
@@ -458,6 +489,16 @@ pub unsafe extern "C" fn bcs_ui_spawn_text(
                     ));
                 }
 
+                // The room between letters is another component beside the font. Zero is both the
+                // default and no change, so leaving it alone and asking for the fit the font
+                // already has are the same request and neither inserts anything.
+                if text_config.letter_spacing != 0.0 {
+                    entity.insert(letter_spacing(
+                        text_config.letter_spacing,
+                        text_config.letter_spacing_unit,
+                    ));
+                }
+
                 // A shadow is a component beside the text rather than part of its font, and an
                 // invisible one is a caller leaving it alone rather than asking for a shadow that
                 // cannot be seen.
@@ -478,6 +519,108 @@ pub unsafe extern "C" fn bcs_ui_spawn_text(
 
                 entity.id().to_bits()
             })
+            .unwrap_or(0)
+        }
+    })
+}
+
+/// Adds a run of text to an existing one, set in its own font and color.
+///
+/// A paragraph with a bold word in it is one `Text` entity with a child per run rather than markup
+/// inside a string, because each run carries its own font, size and color as components and the
+/// parent's layout breaks and aligns the lot as one block. Spans read in the order they were added.
+///
+/// `color` points at four linear RGBA floats, kept out of [`BcsUiTextConfig`] because a span has no
+/// node of its own to take a color from, where a whole text takes the node's.
+///
+/// Returns `0` where the parent is gone, the font names nothing, or there is no renderer.
+///
+/// # Safety
+/// `text` must be a NUL-terminated UTF-8 string, `text_config` must point at one
+/// [`BcsUiTextConfig`], and `color` at four floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_ui_spawn_text_span(
+    parent: u64,
+    text: *const core::ffi::c_char,
+    text_config: *const BcsUiTextConfig,
+    color: *const f32,
+) -> u64 {
+    crate::interop::guard_with(0u64, || {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (parent, text, text_config, color);
+            0
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::color::Color;
+            use bevy::text::{Font, FontSize, FontSource, TextColor, TextFont, TextSpan};
+
+            let Some(text) = (unsafe { crate::interop::cstr_to_string(text) }) else {
+                return 0;
+            };
+            if text_config.is_null() || color.is_null() {
+                return 0;
+            }
+            let text_config = unsafe { *text_config };
+            let color = unsafe { core::slice::from_raw_parts(color, 4) };
+
+            with_world_opt(|world| {
+                let parent = bevy::ecs::entity::Entity::from_bits(parent);
+                if world.get_entity(parent).is_err() {
+                    return None;
+                }
+
+                let font = if text_config.font >= 0 {
+                    match crate::assets::clone_handle(world, text_config.font) {
+                        Some(handle) => FontSource::Handle(handle.typed::<Font>()),
+                        None => return None,
+                    }
+                } else {
+                    FontSource::default()
+                };
+
+                let mut entity = world.spawn((
+                    TextSpan(text),
+                    TextFont {
+                        font,
+                        font_size: FontSize::Px(text_config.font_size),
+                        font_smoothing: if text_config.font_smoothing == 1 {
+                            bevy::text::FontSmoothing::None
+                        } else {
+                            bevy::text::FontSmoothing::AntiAliased
+                        },
+                        ..Default::default()
+                    },
+                    TextColor(Color::linear_rgba(color[0], color[1], color[2], color[3])),
+                ));
+
+                // The spacing components are the span's own, the way the font is, so a run set
+                // wider than the sentence around it is one entity's business.
+                if text_config.line_height > 0.0 {
+                    entity.insert(line_height(
+                        text_config.line_height,
+                        text_config.line_height_unit,
+                    ));
+                }
+
+                if text_config.letter_spacing != 0.0 {
+                    entity.insert(letter_spacing(
+                        text_config.letter_spacing,
+                        text_config.letter_spacing_unit,
+                    ));
+                }
+
+                let span = entity.id();
+
+                // Last, because a span is only text once it is under something carrying `Text`,
+                // and until then it is an entity holding a string.
+                world.entity_mut(parent).add_child(span);
+
+                Some(span.to_bits())
+            })
+            .flatten()
             .unwrap_or(0)
         }
     })
@@ -713,6 +856,246 @@ pub extern "C" fn bcs_ui_set_scroll(entity: u64, x: f32, y: f32) -> i32 {
                 }
 
                 entity_mut.insert(ScrollPosition(Vec2::new(x, y)));
+                status::OK
+            })
+        }
+    })
+}
+
+/// Turns one described track into Bevy's, repeated as many times as it asked for.
+#[cfg(feature = "render")]
+fn grid_track(track: &crate::interop::BcsGridTrack) -> bevy::ui::RepeatedGridTrack {
+    use bevy::ui::{GridTrackRepetition, RepeatedGridTrack};
+
+    // A count of at least one, because a track repeated no times is a track that is not there and
+    // a caller asking for that would leave it out of the list.
+    let count = track.repeat.clamp(1, u16::MAX as i32) as u16;
+
+    // Filling the grid is only offered where a track has a size to divide the room by, which is
+    // pixels and percent. Asked for on any other track it reads as once, because the alternative
+    // is refusing a whole layout over one number.
+    let repetition = match track.repeat {
+        -1 => GridTrackRepetition::AutoFill,
+        -2 => GridTrackRepetition::AutoFit,
+        _ => GridTrackRepetition::Count(count),
+    };
+
+    match track.kind {
+        1 => RepeatedGridTrack::px(repetition, track.value),
+        2 => RepeatedGridTrack::percent(repetition, track.value),
+        3 => RepeatedGridTrack::fr(count, track.value),
+        4 => RepeatedGridTrack::min_content(count),
+        5 => RepeatedGridTrack::max_content(count),
+        _ => RepeatedGridTrack::auto(count),
+    }
+}
+
+/// Turns one described track into Bevy's, ignoring how many times it said it repeats.
+///
+/// What a grid makes on demand for an item placed past the tracks it was given. Bevy takes these
+/// as plain tracks rather than repeated ones, because the list is cycled through as often as it is
+/// needed and a repeat inside it would say the same thing twice.
+#[cfg(feature = "render")]
+fn auto_track(track: &crate::interop::BcsGridTrack) -> bevy::ui::GridTrack {
+    use bevy::ui::GridTrack;
+
+    match track.kind {
+        1 => GridTrack::px(track.value),
+        2 => GridTrack::percent(track.value),
+        3 => GridTrack::fr(track.value),
+        4 => GridTrack::min_content(),
+        5 => GridTrack::max_content(),
+        _ => GridTrack::auto(),
+    }
+}
+
+/// Reads one of the config's lists as tracks made on demand, or nothing where it named none.
+///
+/// # Safety
+/// `tracks` must point at `count` tracks, or be null.
+#[cfg(feature = "render")]
+unsafe fn auto_tracks(
+    tracks: *const crate::interop::BcsGridTrack,
+    count: i32,
+) -> Option<Vec<bevy::ui::GridTrack>> {
+    if tracks.is_null() || count <= 0 {
+        return None;
+    }
+
+    let described = unsafe { core::slice::from_raw_parts(tracks, count as usize) };
+
+    Some(described.iter().map(auto_track).collect())
+}
+
+/// Reads one of the config's lists, or nothing where it named none.
+///
+/// # Safety
+/// `tracks` must point at `count` tracks, or be null.
+#[cfg(feature = "render")]
+unsafe fn grid_tracks(
+    tracks: *const crate::interop::BcsGridTrack,
+    count: i32,
+) -> Option<Vec<bevy::ui::RepeatedGridTrack>> {
+    if tracks.is_null() || count <= 0 {
+        return None;
+    }
+
+    let described = unsafe { core::slice::from_raw_parts(tracks, count as usize) };
+
+    Some(described.iter().map(grid_track).collect())
+}
+
+/// How an item sits across the cell it was placed in.
+#[cfg(feature = "render")]
+fn justify_items(value: i32) -> bevy::ui::JustifyItems {
+    use bevy::ui::JustifyItems;
+
+    match value {
+        1 => JustifyItems::Start,
+        2 => JustifyItems::End,
+        3 => JustifyItems::Center,
+        4 => JustifyItems::Baseline,
+        5 => JustifyItems::Stretch,
+        _ => JustifyItems::Default,
+    }
+}
+
+/// Lays a node's children out on a grid.
+///
+/// Applied to a node that already exists rather than passed with one, because the tracks are lists
+/// and a list has no room in the flat config every other field arrives in. The node is also told to
+/// lay out as a grid here, since a grid with no `Display::Grid` is a set of numbers nothing reads.
+///
+/// Returns [`status::NO_COMPONENT`] where the entity is gone or carries no node.
+///
+/// # Safety
+/// `config` must point at one [`BcsUiGridConfig`], whose lists must each point at as many tracks as
+/// their count says, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_ui_set_grid(
+    entity: u64,
+    config: *const crate::interop::BcsUiGridConfig,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, config);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if config.is_null() {
+                return status::NULL_ARG;
+            }
+            let config = unsafe { *config };
+
+            let rows = unsafe { grid_tracks(config.rows, config.row_count) };
+            let columns = unsafe { grid_tracks(config.columns, config.column_count) };
+            let auto_rows = unsafe { auto_tracks(config.auto_rows, config.auto_row_count) };
+            let auto_columns =
+                unsafe { auto_tracks(config.auto_columns, config.auto_column_count) };
+
+            crate::state::with_world(|world| {
+                use bevy::ui::{Display, GridAutoFlow, Node};
+
+                let entity = bevy::ecs::entity::Entity::from_bits(entity);
+                let Some(mut node) = world.get_mut::<Node>(entity) else {
+                    return status::NO_COMPONENT;
+                };
+
+                node.display = Display::Grid;
+                node.grid_auto_flow = match config.auto_flow {
+                    1 => GridAutoFlow::Column,
+                    2 => GridAutoFlow::RowDense,
+                    3 => GridAutoFlow::ColumnDense,
+                    _ => GridAutoFlow::Row,
+                };
+                node.justify_items = justify_items(config.justify_items);
+
+                // A list left out keeps what the node had, so a caller setting the columns alone
+                // does not silently clear the rows it set a moment ago.
+                if let Some(rows) = rows {
+                    node.grid_template_rows = rows;
+                }
+                if let Some(columns) = columns {
+                    node.grid_template_columns = columns;
+                }
+                if let Some(auto_rows) = auto_rows {
+                    node.grid_auto_rows = auto_rows;
+                }
+                if let Some(auto_columns) = auto_columns {
+                    node.grid_auto_columns = auto_columns;
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Places one child on its parent's grid.
+///
+/// `row` and `column` are grid lines, counted from one, where a negative counts back from the far
+/// edge and `0` leaves the item where the flow would have put it. `row_span` and `column_span` are
+/// how many tracks it covers, and `0` is one track. `justify_self` overrides how this one item sits
+/// across its cell, in the order `JustifySelf` declares.
+///
+/// Returns [`status::NO_COMPONENT`] where the entity is gone or carries no node.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_ui_set_grid_placement(
+    entity: u64,
+    row: i32,
+    row_span: i32,
+    column: i32,
+    column_span: i32,
+    justify_self: i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, row, row_span, column, column_span, justify_self);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            crate::state::with_world(|world| {
+                use bevy::ui::{GridPlacement, JustifySelf, Node};
+
+                let entity = bevy::ecs::entity::Entity::from_bits(entity);
+                let Some(mut node) = world.get_mut::<Node>(entity) else {
+                    return status::NO_COMPONENT;
+                };
+
+                let place = |line: i32, span: i32| {
+                    let mut placement = GridPlacement::default();
+
+                    if line != 0 {
+                        placement = placement.set_start(line.clamp(
+                            i16::MIN as i32 + 1,
+                            i16::MAX as i32,
+                        ) as i16);
+                    }
+
+                    if span > 0 {
+                        placement = placement.set_span(span.min(u16::MAX as i32) as u16);
+                    }
+
+                    placement
+                };
+
+                node.grid_row = place(row, row_span);
+                node.grid_column = place(column, column_span);
+                node.justify_self = match justify_self {
+                    1 => JustifySelf::Start,
+                    2 => JustifySelf::End,
+                    3 => JustifySelf::Center,
+                    4 => JustifySelf::Baseline,
+                    5 => JustifySelf::Stretch,
+                    _ => JustifySelf::Auto,
+                };
+
                 status::OK
             })
         }

@@ -83,7 +83,7 @@ pub fn set_key(bits: &mut [u64; KEY_WORDS], key: KeyCode) {
 /// Moves, presses or releases the pointer, as though a hand had.
 ///
 /// What a test drives the scene with. The window's own messages are written, which is where a real
-/// pointer's report begins, so everything downstream behaves exactly as it would: the camera reads
+/// pointer's report begins, so everything downstream behaves exactly as it would. The camera reads
 /// the button, picking raycasts the meshes, and a gizmo takes hold.
 ///
 /// `action` is 0 to move, 1 to press and 2 to release; `button` is 0 for left, 1 for right and 2

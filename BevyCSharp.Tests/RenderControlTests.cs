@@ -15,6 +15,72 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class RenderControlTests
 {
+    /// <summary>Cascades are a directional light's, and asking any other light for them is refused.</summary>
+    /// <remarks>
+    /// The refusal is the part worth pinning. Whether the shadows look better for it needs a GPU
+    /// and an eye, but a point light quietly given a component nothing reads would look exactly
+    /// like a setting that did nothing.
+    /// </remarks>
+    [Fact]
+    public void ShadowCascadesBelongToADirectionalLight()
+    {
+        using var harness = new EngineHarness(frames: 4);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            var sun = Render.SpawnLight(new LightSettings
+            {
+                Kind = LightKind.Directional,
+                Intensity = 10_000f,
+            });
+
+            Render.SetShadowCascades(sun, cascades: 3, maximum: 120f, firstBound: 8f);
+
+            // And one of them alone, since every number keeps Bevy's own when it is left out.
+            Render.SetShadowCascades(sun, maximum: 200f);
+
+            var lamp = Render.SpawnLight(new LightSettings { Kind = LightKind.Point });
+
+            var refused = Assert.Throws<BevyNativeException>(
+                () => Render.SetShadowCascades(lamp, cascades: 2));
+
+            Assert.Equal(NativeStatus.NoComponent, refused.Status);
+        });
+
+        harness.Run();
+    }
+
+    /// <summary>A cookie shapes a spot light's beam, and no other light has a beam to shape.</summary>
+    [Fact]
+    public void ALightCookieBelongsToASpotLight()
+    {
+        using var harness = new EngineHarness(frames: 4);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            var spot = Render.SpawnLight(new LightSettings
+            {
+                Kind = LightKind.Spot,
+                Intensity = 4_000f,
+                OuterAngle = 0.6f,
+            });
+
+            // Taking it off again is the same call, which is what a settings screen needs.
+            Render.SetLightCookie(spot, AssetHandle.None);
+
+            var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional });
+
+            var refused = Assert.Throws<BevyNativeException>(
+                () => Render.SetLightCookie(sun, AssetHandle.None));
+
+            Assert.Equal(NativeStatus.NoComponent, refused.Status);
+        });
+
+        harness.Run();
+    }
+
     [Fact]
     public void ACameraTakesAWholePostProcessingPipeline()
     {

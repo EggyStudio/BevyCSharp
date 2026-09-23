@@ -47,7 +47,15 @@ so the first build is slow and later ones are incremental.
 ```bash
 dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj   # or ./bcs test
 cargo test --manifest-path native/Cargo.toml
+
+# After touching native/, all three profiles, because most of that code is behind a feature and
+# only the smallest profile compiles the paths the other two leave out.
+for f in headless render editor; do
+  cargo check --manifest-path native/Cargo.toml --no-default-features --features $f
+done
 ```
+
+`cargo check` with no feature at all fails by design, so a profile is always named.
 
 The suite runs real headless engines through `EngineHarness` (`BevyCSharp.Tests/EngineFixture.cs`),
 which inverts assertions into systems, because everything ECS-touching needs a world on loan from

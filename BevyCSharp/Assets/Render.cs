@@ -229,6 +229,69 @@ public static unsafe class Render
     }
 
     /// <summary>
+    /// Sets how a directional light divides its shadows across the distance.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A directional light covers the whole scene, so one shadow map stretched over all of it is
+    /// coarse near the camera, which is where it is looked at closest. Cascades split the range
+    /// into a few maps, each covering a nearer and smaller slice of it. A shadow that looks blocky
+    /// at arm's length is this rather than a resolution.
+    /// </para>
+    /// <para>
+    /// Every number here keeps Bevy's own when it is left at zero, so a call setting one of them
+    /// says one thing rather than restating the rest.
+    /// </para>
+    /// </remarks>
+    /// <param name="light">A directional light from <see cref="SpawnLight(LightSettings)"/>.</param>
+    /// <param name="cascades">How many maps to split the range into, up to four.</param>
+    /// <param name="minimum">The nearest distance that receives a shadow.</param>
+    /// <param name="maximum">
+    /// The furthest. The cost of a large number is quality rather than time, since the same maps
+    /// are stretched over more ground.
+    /// </param>
+    /// <param name="firstBound">
+    /// Where the first cascade ends. The ones after it are spaced out towards
+    /// <paramref name="maximum"/>, so this is the knob for how much detail the near ground gets.
+    /// </param>
+    /// <param name="overlap">
+    /// How much of each cascade is blended into the next, as a proportion, which is what keeps the
+    /// join between two of them from showing as a line across the ground.
+    /// </param>
+    /// <exception cref="BevyNativeException">The entity is not a directional light.</exception>
+    public static void SetShadowCascades(
+        Entity light,
+        int cascades = 0,
+        float minimum = 0f,
+        float maximum = 0f,
+        float firstBound = 0f,
+        float overlap = 0f) =>
+        Native.Check(
+            Native.bcs_render_set_shadow_cascades(
+                light.Bits, cascades, minimum, maximum, firstBound, overlap),
+            $"setting the shadow cascades of {light}");
+
+    /// <summary>
+    /// Shapes a spot light's beam with a picture, the way a gobo shapes a stage light.
+    /// </summary>
+    /// <remarks>
+    /// What puts the shadow of a window frame on the floor without a window being there, or breaks
+    /// a torch beam up so it does not read as a cone of paint. Only the red channel is read, so the
+    /// picture says how much light gets through rather than what color it is, and its border should
+    /// be black or the light leaks past the edge of it.
+    /// </remarks>
+    /// <param name="light">A spot light from <see cref="SpawnLight(LightSettings)"/>.</param>
+    /// <param name="cookie">
+    /// The picture, or <see cref="AssetHandle.None"/> to take the shaping off and leave a plain
+    /// cone.
+    /// </param>
+    /// <exception cref="BevyNativeException">The entity is not a spot light.</exception>
+    public static void SetLightCookie(Entity light, AssetHandle cookie) =>
+        Native.Check(
+            Native.bcs_render_set_light_cookie(light.Bits, cookie.Key),
+            $"shaping the beam of {light}");
+
+    /// <summary>
     /// Sets what a camera does to the picture after the scene has been drawn.
     /// </summary>
     /// <remarks>
@@ -813,6 +876,67 @@ public static unsafe class Render
         if (key == NativeStatus.Unsupported) throw NoRenderer("Creating a render target");
 
         Native.Check(key, $"creating a {width}x{height} render target");
+        return new AssetHandle(key);
+    }
+
+    /// <summary>
+    /// Makes an image out of pixels held here, and hands back a handle to it.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The other end of <see cref="TryReadCapture"/>. Reading gives back what was drawn; this takes
+    /// a picture that was never in a file, which is what a texture worked out at startup, a mask
+    /// built from a heightmap, or a capture handed on to a material needs.
+    /// </para>
+    /// <para>
+    /// Nothing loads, so the handle is usable on the frame it is returned, and the pixels are
+    /// copied rather than kept, so the array is the caller's again afterwards.
+    /// </para>
+    /// </remarks>
+    /// <param name="pixels">
+    /// <paramref name="width"/> by <paramref name="height"/> pixels of RGBA, a row at a time from
+    /// the top, which is the layout <see cref="CapturedImage.Pixels"/> comes back in.
+    /// </param>
+    /// <param name="width">Width in pixels.</param>
+    /// <param name="height">Height in pixels.</param>
+    /// <param name="srgb">
+    /// Whether the numbers are a color somebody chose, which is what a picture usually is. False
+    /// reads them as they are, for a picture whose numbers mean something else, such as a normal
+    /// map or a roughness mask.
+    /// </param>
+    /// <returns>A handle to the image.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="pixels"/> is not four bytes per pixel of the size given.
+    /// </exception>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static AssetHandle CreateImage(
+        ReadOnlySpan<byte> pixels,
+        uint width,
+        uint height,
+        bool srgb = true)
+    {
+        var wanted = (long)width * height * 4;
+
+        if (width == 0 || height == 0)
+            throw new ArgumentException("An image needs a width and a height.", nameof(width));
+
+        if (pixels.Length != wanted)
+        {
+            throw new ArgumentException(
+                $"A {width}x{height} image is {wanted} bytes of RGBA, and {pixels.Length} were "
+                + "given.",
+                nameof(pixels));
+        }
+
+        int key;
+
+        fixed (byte* at = pixels)
+        {
+            key = Native.bcs_render_create_image(at, width, height, srgb ? 1 : 0);
+        }
+
+        if (key < 0) throw NoRenderer($"Creating a {width}x{height} image");
+
         return new AssetHandle(key);
     }
 

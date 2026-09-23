@@ -117,7 +117,7 @@ public static unsafe class StateRegistry
     /// The same, for a type known only at runtime.
     /// </summary>
     /// <remarks>
-    /// Which is how a sub-state reaches its parent: the relationship is written as an attribute,
+    /// Which is how a sub-state reaches its parent. The relationship is written as an attribute,
     /// so the parent arrives as a <see cref="Type"/> rather than as a type argument.
     /// </remarks>
     internal static int Claim(Type state)

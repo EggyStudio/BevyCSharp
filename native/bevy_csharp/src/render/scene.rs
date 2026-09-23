@@ -1051,3 +1051,213 @@ pub unsafe extern "C" fn bcs_render_viewport_to_world(
         }
     })
 }
+
+/// Sets how a directional light divides its shadows across the distance.
+///
+/// A directional light covers the whole scene, so one shadow map stretched over all of it is
+/// coarse near the camera where it is looked at closest. Cascades split the range into a few maps,
+/// each covering a nearer and smaller slice, which is why a shadow that looks blocky at arm's
+/// length is a cascade setting rather than a resolution one.
+///
+/// `cascades` is how many maps to split it into, `minimum` and `maximum` are the nearest and
+/// furthest distances that receive a shadow at all, `first_bound` is where the first cascade ends,
+/// and `overlap` is how much of each cascade is blended into the next, as a proportion. A zero in
+/// any of them keeps Bevy's own number for it.
+///
+/// Returns [`status::NO_COMPONENT`] where the entity is gone or is not a directional light.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_shadow_cascades(
+    light: u64,
+    cascades: i32,
+    minimum: f32,
+    maximum: f32,
+    first_bound: f32,
+    overlap: f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (light, cascades, minimum, maximum, first_bound, overlap);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::light::{CascadeShadowConfigBuilder, DirectionalLight};
+
+            crate::state::with_world(|world| {
+                let entity = bevy::ecs::entity::Entity::from_bits(light);
+
+                // The component says this is the kind of light cascades mean anything to, so a
+                // point light asked for them is refused rather than silently given a component
+                // nothing reads.
+                if world.get::<DirectionalLight>(entity).is_none() {
+                    return status::NO_COMPONENT;
+                }
+
+                let stock = CascadeShadowConfigBuilder::default();
+
+                let config = CascadeShadowConfigBuilder {
+                    num_cascades: if cascades > 0 {
+                        (cascades as usize).min(4)
+                    } else {
+                        stock.num_cascades
+                    },
+                    minimum_distance: if minimum > 0.0 {
+                        minimum
+                    } else {
+                        stock.minimum_distance
+                    },
+                    maximum_distance: if maximum > 0.0 {
+                        maximum
+                    } else {
+                        stock.maximum_distance
+                    },
+                    first_cascade_far_bound: if first_bound > 0.0 {
+                        first_bound
+                    } else {
+                        stock.first_cascade_far_bound
+                    },
+                    overlap_proportion: if overlap > 0.0 {
+                        overlap.clamp(0.0, 1.0)
+                    } else {
+                        stock.overlap_proportion
+                    },
+                }
+                .build();
+
+                world.entity_mut(entity).insert(config);
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Shapes a spot light's beam with a picture, the way a gobo shapes a stage light.
+///
+/// Only the red channel is read, so the image says how much light gets through and not what color
+/// it is. Its border should be black, or the light leaks past the edge of the picture. A negative
+/// `image` takes the shaping off again and leaves a plain cone.
+///
+/// Returns [`status::NO_COMPONENT`] where the entity is gone or is not a spot light.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_light_cookie(light: u64, image: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (light, image);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::light::{SpotLight, SpotLightTexture};
+
+            let handle = if image >= 0 {
+                match crate::state::with_world_opt(|world| {
+                    crate::assets::clone_handle(world, image)
+                })
+                .flatten()
+                {
+                    Some(handle) => Some(handle.typed::<bevy::image::Image>()),
+                    None => return status::NOT_PRESENT,
+                }
+            } else {
+                None
+            };
+
+            crate::state::with_world(|world| {
+                let entity = bevy::ecs::entity::Entity::from_bits(light);
+
+                if world.get::<SpotLight>(entity).is_none() {
+                    return status::NO_COMPONENT;
+                }
+
+                match handle {
+                    Some(image) => {
+                        world.entity_mut(entity).insert(SpotLightTexture { image });
+                    }
+                    None => {
+                        world.entity_mut(entity).remove::<SpotLightTexture>();
+                    }
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Makes an image out of pixels the caller already holds, and returns its asset key.
+///
+/// The other half of [`bcs_render_read_capture`]. Reading gives back what was drawn; this takes a
+/// picture that was never in a file, which is what a texture worked out at startup, a mask built
+/// from a heightmap, or a capture handed back to a material needs.
+///
+/// `pixels` is `width * height * 4` bytes of RGBA, read as sRGB, which is what a color somebody
+/// chose is. `srgb` at zero reads them as linear instead, for a picture whose numbers mean
+/// something other than a color, such as a normal map or a roughness mask.
+///
+/// Returns a negative where the size is zero, the pointer is null, or there is no renderer.
+///
+/// # Safety
+/// `pixels` must point at `width * height * 4` readable bytes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_create_image(
+    pixels: *const u8,
+    width: u32,
+    height: u32,
+    srgb: i32,
+) -> i32 {
+    crate::interop::guard_with(-1, || {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (pixels, width, height, srgb);
+            -1
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::asset::RenderAssetUsages;
+            use bevy::image::Image;
+            use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
+
+            if pixels.is_null() || width == 0 || height == 0 {
+                return -1;
+            }
+
+            let count = width as usize * height as usize * 4;
+            let pixels = unsafe { core::slice::from_raw_parts(pixels, count) }.to_vec();
+
+            // Kept in both worlds rather than only in the renderer's, because a picture made this
+            // way is usually made to be read back or handed on, and an asset the main world has
+            // dropped cannot be either.
+            let image = Image::new(
+                Extent3d {
+                    width,
+                    height,
+                    depth_or_array_layers: 1,
+                },
+                TextureDimension::D2,
+                pixels,
+                if srgb != 0 {
+                    TextureFormat::Rgba8UnormSrgb
+                } else {
+                    TextureFormat::Rgba8Unorm
+                },
+                RenderAssetUsages::default(),
+            );
+
+            crate::state::with_world_opt(|world| {
+                let handle = world
+                    .get_resource_mut::<bevy::asset::Assets<Image>>()?
+                    .add(image);
+
+                Some(crate::assets::insert_handle(world, handle.untyped()))
+            })
+            .flatten()
+            .unwrap_or(-1)
+        }
+    })
+}

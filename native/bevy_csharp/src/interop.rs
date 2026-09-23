@@ -482,8 +482,10 @@ pub struct BcsGizmoConfig {
     ///
     /// `0` line, `1` sphere, `2` axes, `3` a line fading from one color to another, `4` rectangle,
     /// `5` circle, `6` arc, `7` arrow, `8` grid, `9` box, `10` capsule, `11` cone, `12` cylinder,
-    /// `13` torus. What the fields below mean depends on this, because every shape is described by
-    /// the same handful of numbers.
+    /// `13` torus. `14` to `19` are the flat rectangle, circle, fading line, arrow, arc and grid a
+    /// 2D camera draws, which read the same numbers with the third one dropped. What the fields
+    /// below mean depends on this, because every shape is described by the same handful of
+    /// numbers.
     pub kind: i32,
     /// Where the shape sits: a line's start, or the centre of everything else.
     pub start: [f32; 3],
@@ -620,6 +622,11 @@ pub struct BcsUiTextConfig {
     pub line_height: f32,
     /// What `line_height` is measured in: `0` multiples of the font size, `1` logical pixels.
     pub line_height_unit: i32,
+    /// How much room is added between the letters. `0` leaves the font's own fit alone, and a
+    /// negative value pulls them together.
+    pub letter_spacing: f32,
+    /// What `letter_spacing` is measured in: `0` multiples of the font size, `1` logical pixels.
+    pub letter_spacing_unit: i32,
     /// Whether the glyphs are smoothed: `0` antialiased, `1` not, which is what a pixel font wants.
     pub font_smoothing: i32,
     /// How far a shadow is cast behind the text, in logical pixels: across, then down.
@@ -775,6 +782,12 @@ pub struct BcsUiNodeConfig {
     pub clip_box: i32,
     /// How far outside that box the clipping is pushed, in logical pixels.
     pub clip_margin: f32,
+    /// How far each corner is rounded: top left, top right, bottom right, bottom left.
+    pub corners: [f32; 4],
+    /// Units of `corners`, in the same order.
+    pub corner_units: [i32; 4],
+    /// What `width` and the rest measure: `0` the border box, `1` the content box.
+    pub box_sizing: i32,
     /// Which camera draws this node, as entity bits, or `0` for whichever one draws to the window.
     pub camera: u64,
 }
@@ -1057,4 +1070,54 @@ mod layout {
         assert_eq!(core::mem::offset_of!(BcsInput, touches), 128);
         assert_eq!(core::mem::size_of::<BcsInput>(), 320);
     }
+}
+
+/// One track of a grid, and how many times it repeats.
+///
+/// A row or a column, described the way a stylesheet describes one. The list of them is what a
+/// grid is, and a list is what a flat config has no room for, which is why a grid arrives through
+/// its own call with a pointer to an array rather than as more fields on the node.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsGridTrack {
+    /// How the track is sized: `0` to what it holds, `1` logical pixels, `2` a percentage of the
+    /// grid, `3` a share of whatever is left over, `4` the smallest its contents can be, `5` the
+    /// largest they want to be.
+    pub kind: i32,
+    /// The number `kind` reads, where it reads one.
+    pub value: f32,
+    /// How many times this track repeats: a count, `-1` to fill the grid, `-2` to fill it and drop
+    /// the tracks nothing landed in. Filling is only offered for a track sized in pixels or in
+    /// percent, because the rest have no size to divide the room by, and a fill asked for on one of
+    /// those is read as once.
+    pub repeat: i32,
+}
+
+/// The tracks a grid is laid out on.
+///
+/// Every list is a pointer and a count, and a null list leaves that part of the grid as it was.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsUiGridConfig {
+    /// Which way an item with no place of its own is put next: `0` along the row, `1` down the
+    /// column, `2` and `3` the same while backfilling any gap it fits in.
+    pub auto_flow: i32,
+    /// The rows stated up front.
+    pub rows: *const BcsGridTrack,
+    /// How many of them.
+    pub row_count: i32,
+    /// The columns stated up front.
+    pub columns: *const BcsGridTrack,
+    /// How many of them.
+    pub column_count: i32,
+    /// The rows made for items placed past the ones stated, used in turn.
+    pub auto_rows: *const BcsGridTrack,
+    /// How many of them.
+    pub auto_row_count: i32,
+    /// The columns made the same way.
+    pub auto_columns: *const BcsGridTrack,
+    /// How many of them.
+    pub auto_column_count: i32,
+    /// How an item sits across its cell, in the order `JustifyItems` declares.
+    pub justify_items: i32,
 }

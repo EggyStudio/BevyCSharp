@@ -85,6 +85,62 @@ public readonly record struct Sides(Length Left, Length Top, Length Right, Lengt
 }
 
 /// <summary>
+/// How far each corner of a node is rounded.
+/// </summary>
+/// <remarks>
+/// Clockwise from the top left, which is the order every stylesheet states them in. A percentage is
+/// read against the node's own size, so a radius of fifty percent on all four corners is an
+/// ellipse and anything past that is clamped rather than refused.
+/// </remarks>
+/// <param name="TopLeft">How far the top left corner is rounded.</param>
+/// <param name="TopRight">How far the top right corner is rounded.</param>
+/// <param name="BottomRight">How far the bottom right corner is rounded.</param>
+/// <param name="BottomLeft">How far the bottom left corner is rounded.</param>
+public readonly record struct Corners(
+    Length TopLeft,
+    Length TopRight,
+    Length BottomRight,
+    Length BottomLeft)
+{
+    /// <summary>Square corners.</summary>
+    public static Corners None => All(Length.Zero);
+
+    /// <summary>The same radius on every corner.</summary>
+    public static Corners All(Length value) => new(value, value, value, value);
+
+    /// <summary>Rounded along the top edge only, which is what a tab is.</summary>
+    public static Corners Top(Length value) =>
+        new(value, value, Length.Zero, Length.Zero);
+
+    /// <summary>Rounded along the bottom edge only.</summary>
+    public static Corners Bottom(Length value) =>
+        new(Length.Zero, Length.Zero, value, value);
+
+    /// <summary>Reads a single length as the same radius on every corner.</summary>
+    public static implicit operator Corners(Length value) => All(value);
+
+    /// <inheritdoc/>
+    public override string ToString() =>
+        $"({TopLeft}, {TopRight}, {BottomRight}, {BottomLeft})";
+}
+
+/// <summary>
+/// What the sizes on a node measure.
+/// </summary>
+/// <remarks>
+/// Bevy's default is the border box, unlike the web's, because a node told to be a hundred pixels
+/// wide and given a border is easier to place if it stays a hundred pixels wide.
+/// </remarks>
+public enum BoxSizing
+{
+    /// <summary>The size includes the padding and the border.</summary>
+    BorderBox = 0,
+
+    /// <summary>The size is what is left for the contents, with padding and border outside it.</summary>
+    ContentBox = 1,
+}
+
+/// <summary>
 /// Whether a node lays out at all, and by which model.
 /// </summary>
 public enum UiDisplay
@@ -104,6 +160,16 @@ public enum UiDisplay
     /// occupies, so its siblings do not move.
     /// </remarks>
     None = 2,
+
+    /// <summary>
+    /// A grid, whose rows and columns are stated up front by <see cref="UiGrid.Set"/>.
+    /// </summary>
+    /// <remarks>
+    /// Setting this alone gives a grid of one column, since the tracks are lists and arrive
+    /// through their own call. <see cref="UiGrid.Set"/> sets this as well, so a node laid out by
+    /// it needs nothing said here.
+    /// </remarks>
+    Grid = 3,
 }
 
 /// <summary>
@@ -419,6 +485,17 @@ public sealed class UiSettings
     /// <summary>How far outside that box the clipping is pushed, in logical pixels.</summary>
     /// <remarks>A few pixels of slack, for a shadow or a focus ring that should not be cut off.</remarks>
     public float ClipMargin { get; set; }
+
+    /// <summary>How far each corner is rounded.</summary>
+    /// <remarks>
+    /// A <see cref="Length"/> assigned here is the same radius on every corner, so
+    /// <c>Corners = Length.Px(6f)</c> is the usual card and button. The background, the border and
+    /// anything the node clips all follow the same curve.
+    /// </remarks>
+    public Corners Corners { get; set; } = Corners.None;
+
+    /// <summary>What <see cref="Width"/> and the rest measure.</summary>
+    public BoxSizing Sizing { get; set; } = BoxSizing.BorderBox;
 
     /// <summary>
     /// Which camera draws this node, or <see cref="Entity.None"/> for whichever draws the window.

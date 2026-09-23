@@ -228,6 +228,33 @@ public struct NativeUiNodeConfig
     /// <summary>How far outside that box the clipping is pushed.</summary>
     public float ClipMargin;
 
+    /// <summary>How far the top left corner is rounded.</summary>
+    public float CornerTopLeft;
+
+    /// <summary>How far the top right corner is rounded.</summary>
+    public float CornerTopRight;
+
+    /// <summary>How far the bottom right corner is rounded.</summary>
+    public float CornerBottomRight;
+
+    /// <summary>How far the bottom left corner is rounded.</summary>
+    public float CornerBottomLeft;
+
+    /// <summary>Unit of <see cref="CornerTopLeft"/>.</summary>
+    public int CornerTopLeftUnit;
+
+    /// <summary>Unit of <see cref="CornerTopRight"/>.</summary>
+    public int CornerTopRightUnit;
+
+    /// <summary>Unit of <see cref="CornerBottomRight"/>.</summary>
+    public int CornerBottomRightUnit;
+
+    /// <summary>Unit of <see cref="CornerBottomLeft"/>.</summary>
+    public int CornerBottomLeftUnit;
+
+    /// <summary>What the sizes measure: 0 the border box, 1 the content box.</summary>
+    public int BoxSizing;
+
     /// <summary>Which camera draws this node, or zero for the one drawing to the window.</summary>
     public ulong Camera;
 }
@@ -253,6 +280,12 @@ public struct NativeUiTextConfig
 
     /// <summary>0 multiples of the font size, 1 logical pixels.</summary>
     public int LineHeightUnit;
+
+    /// <summary>Room added between the letters, or zero for the font's own fit.</summary>
+    public float LetterSpacing;
+
+    /// <summary>0 multiples of the font size, 1 logical pixels.</summary>
+    public int LetterSpacingUnit;
 
     /// <summary>0 antialiased, 1 not.</summary>
     public int FontSmoothing;
@@ -348,4 +381,53 @@ public struct NativeUiImageConfig
 
     /// <summary>Which frame of that layout to draw.</summary>
     public uint AtlasIndex;
+}
+
+/// <summary>One track of a grid, and how many times it repeats.</summary>
+[StructLayout(LayoutKind.Sequential)]
+public struct NativeGridTrack
+{
+    /// <summary>0 auto, 1 pixels, 2 percent, 3 a share of what is left, 4 min, 5 max.</summary>
+    public int Kind;
+
+    /// <summary>The number the kind reads, where it reads one.</summary>
+    public float Value;
+
+    /// <summary>A repeat count, -1 to fill the grid, -2 to fill it and drop the empty tracks.</summary>
+    public int Repeat;
+}
+
+/// <summary>The tracks a grid is laid out on.</summary>
+[StructLayout(LayoutKind.Sequential)]
+public unsafe struct NativeUiGridConfig
+{
+    /// <summary>0 along the row, 1 down the column, 2 and 3 the same while backfilling.</summary>
+    public int AutoFlow;
+
+    /// <summary>The rows stated up front.</summary>
+    public NativeGridTrack* Rows;
+
+    /// <summary>How many of them.</summary>
+    public int RowCount;
+
+    /// <summary>The columns stated up front.</summary>
+    public NativeGridTrack* Columns;
+
+    /// <summary>How many of them.</summary>
+    public int ColumnCount;
+
+    /// <summary>The rows made for items placed past the ones stated.</summary>
+    public NativeGridTrack* AutoRows;
+
+    /// <summary>How many of them.</summary>
+    public int AutoRowCount;
+
+    /// <summary>The columns made the same way.</summary>
+    public NativeGridTrack* AutoColumns;
+
+    /// <summary>How many of them.</summary>
+    public int AutoColumnCount;
+
+    /// <summary>How an item sits across its cell.</summary>
+    public int JustifyItems;
 }

@@ -68,8 +68,78 @@ public sealed class GizmoShapeTests
             i => Assert.True(picture.Pixels[(i * 4) + 1] < 100, "something was drawn"));
     }
 
+    /// <summary>Each flat shape, drawn alone for a 2D camera, covers some of the picture.</summary>
+    /// <remarks>
+    /// The same question as <see cref="AShapeIsDrawn"/> and a different camera, because a flat
+    /// shape reaches Bevy through its own call and a kind that fell through to the default arm
+    /// would draw a line instead of the shape asked for.
+    /// </remarks>
+    [Theory]
+    [InlineData("rect")]
+    [InlineData("circle")]
+    [InlineData("line")]
+    [InlineData("arrow")]
+    [InlineData("arc")]
+    [InlineData("grid")]
+    public void AFlatShapeIsDrawn(string shape)
+    {
+        if (!App.HasRenderer) return;
+
+        var picture = DrawFlat(shape);
+
+        Assert.NotNull(picture);
+
+        var drawn = Lit(picture);
+
+        Assert.True(drawn > 0, $"the flat {shape} drew nothing");
+        Assert.True(
+            drawn < picture.Width * picture.Height,
+            $"the flat {shape} covered the whole picture, so it is not a shape");
+    }
+
+    /// <summary>A dashed line covers less of the picture than the same shape drawn solid.</summary>
+    /// <remarks>
+    /// The same shape at the same width, so the gaps are the only thing that can take pixels away,
+    /// and a style that never reached the renderer would leave the two counts equal.
+    /// </remarks>
+    [Fact]
+    public void ADashedLineLeavesGapsInItself()
+    {
+        if (!App.HasRenderer) return;
+
+        var solid = Draw("rect");
+        var dashed = Draw("rect", style: GizmoLine.Dashed);
+
+        Assert.NotNull(solid);
+        Assert.NotNull(dashed);
+
+        var whole = Lit(solid);
+        var broken = Lit(dashed);
+
+        Assert.True(broken > 0, "the dashed line drew nothing at all");
+        Assert.True(
+            broken < whole,
+            $"the line covered {whole} pixels solid and {broken} dashed");
+    }
+
+    /// <summary>How many pixels the shape reached.</summary>
+    private static int Lit(CapturedImage picture)
+    {
+        var drawn = 0;
+
+        for (var i = 0; i < picture.Pixels.Length; i += 4)
+        {
+            if (picture.Pixels[i + 1] > 100) drawn++;
+        }
+
+        return drawn;
+    }
+
     /// <summary>Runs one shape in an offscreen app and hands back the picture.</summary>
-    private static CapturedImage? Draw(string shape, bool enabled = true)
+    private static CapturedImage? Draw(
+        string shape,
+        bool enabled = true,
+        GizmoLine style = GizmoLine.Solid)
     {
         CapturedImage? picture = null;
 
@@ -91,6 +161,7 @@ public sealed class GizmoShapeTests
                     camera, Transform.LookingAt(new Vec3(0f, 0f, 8f), Vec3.Zero, Vec3.UnitY));
 
                 Gizmos.Configure(width: 4f, enabled: enabled);
+                Gizmos.SetLineStyle(style);
             },
             "Test.Camera"));
 
@@ -141,6 +212,81 @@ public sealed class GizmoShapeTests
 
                     default:
                         Gizmos.Box(Vec3.Zero, Quat.Identity, new Vec3(2f, 2f, 2f), green);
+                        break;
+                }
+            },
+            "Test.Draw"));
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(
+            world =>
+            {
+                if (world.Resource<Time>().FrameCount == Settled)
+                {
+                    world.InsertResource(new Ticket(Render.BeginCapture()));
+                    return;
+                }
+
+                if (picture is not null) return;
+                if (!world.TryGetResource<Ticket>(out var ticket)) return;
+
+                if (Render.TryReadCapture(ticket.Capture, out var arrived)) picture = arrived;
+            },
+            "Test.Read"));
+
+        Assert.Equal(0, app.Run());
+        return picture;
+    }
+
+    /// <summary>Runs one flat shape against a 2D camera and hands back the picture.</summary>
+    private static CapturedImage? DrawFlat(string shape)
+    {
+        CapturedImage? picture = null;
+
+        using var app = new App(Config.OffscreenFor(96, 96, frames: (uint)Settled + 40));
+
+        app.AddPlugin(new EnginePlugin());
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(
+            _ =>
+            {
+                // Bevy's own clear color, which is a dark grey well under the green the shapes
+                // are drawn in, so nothing has to be said about it here.
+                Render2d.SpawnCamera2d();
+                Gizmos.Configure(width: 4f);
+            },
+            "Test.Camera"));
+
+        // A 2D camera counts in pixels from the middle of the screen, so a shape tens of units
+        // across fills a picture this size the way a shape a few units across does in the scene.
+        app.AddSystem(Stage.Update, new SystemDescriptor(
+            _ =>
+            {
+                var green = (0f, 1f, 0f, 1f);
+
+                switch (shape)
+                {
+                    case "rect":
+                        Gizmos.Rect2d((0f, 0f), 40f, 30f, green);
+                        break;
+
+                    case "circle":
+                        Gizmos.Circle2d((0f, 0f), 24f, green);
+                        break;
+
+                    case "line":
+                        Gizmos.Line2d((-30f, -20f), (30f, 20f), green);
+                        break;
+
+                    case "arrow":
+                        Gizmos.Arrow2d((-30f, -10f), (30f, 10f), green);
+                        break;
+
+                    case "arc":
+                        Gizmos.Arc2d((0f, 0f), 30f, 2f, green);
+                        break;
+
+                    default:
+                        Gizmos.Grid2d((0f, 0f), 4, 4, 16f, green, inFront: true);
                         break;
                 }
             },

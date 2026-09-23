@@ -781,6 +781,17 @@ Bias is per light because one light's acne is another's floating shadow. Size is
 every directional light and one for every point and spot light, because that is how Bevy keeps it,
 and raising it costs memory and fill rate on every shadow-casting light at once.
 
+A directional light covers the whole scene, so one shadow map stretched over all of it is coarse
+near the camera, which is where it is looked at closest. `Render.SetShadowCascades` splits the
+range into a few maps, each covering a nearer and smaller slice, so a shadow that looks blocky at
+arm's length is this rather than a resolution. Every number it takes keeps Bevy's own when it is
+left at zero.
+
+`Render.SetLightCookie` shapes a spot light's beam with a picture, the way a gobo shapes a stage
+light, which is what puts the shadow of a window frame on the floor without a window being there.
+Only the red channel is read, so the picture says how much light gets through rather than what
+color it is, and its border should be black or the light leaks past the edge of it.
+
 **The picture the camera makes** is one call, describing the whole pipeline rather than one change
 to it:
 
@@ -898,6 +909,19 @@ turned into a cube once it has decoded. `brightness` is in candelas per square m
 of the lighting, so the useful numbers are in the hundreds or thousands; a brightness of one is a
 night sky and comes out black. A skybox is seen behind the scene and does not light it.
 
+The same file can light it, though, which is what a scene lit from a photograph of a real place
+wants:
+
+```csharp
+Render.SetImageLighting(camera, AssetServer.Load(AssetKind.Image, "sky.png"), intensity: 3000f);
+```
+
+The cubemap is filtered on the GPU into the blurred versions a surface reflects, so a rough material
+picks up the average color around it and a polished one picks up a recognisable reflection, with no
+bake step and no second file. `rotation` turns the environment without touching the scene. Each face
+has to be square and a power of two, and the light waits for the image to decode before it is
+applied, so a handle asked for in the same frame the camera is spawned works.
+
 **Drawing into an image.** A camera can draw into a texture instead of into the window, which is
 what a portal, a security monitor, a mirror or a second viewport is:
 
@@ -936,6 +960,12 @@ if (Render.TryReadCapture(ticket, out var picture))
 arrived, and drops the engine's copy when it does. `Render.ReleaseCapture(ticket)` is for a caller
 that stopped waiting. A capture taken in the first frames of a run is a picture of a cleared window,
 because a material's pipeline is compiled the first time something asks to be drawn with it.
+
+`Render.CreateImage` goes the other way, turning bytes into an asset with no file behind it, which
+is what a texture worked out at startup or a capture handed on to a material needs. It takes the
+same RGBA layout a capture comes back in, so a picture can be read, changed and given back. Pass
+`srgb: false` for a picture whose numbers mean something other than a color, such as a normal map
+or a roughness mask.
 
 **The window** can be driven while the app runs:
 
@@ -1055,6 +1085,18 @@ handle, an outline or a marker is drawn *about* the scene and has to be reachabl
 or a wireframe is drawn *in* it and has to be behind what is in front of it. `Gizmos.Configure`
 sets the line width, which render layers gizmos appear on, and whether they are drawn at all,
 which is what a debug overlay bound to a key wants.
+
+`Gizmos.SetLineStyle` decides what the line itself looks like. A dotted or dashed line tells one
+meaning from another without spending a second color on it, so a path already walked can be drawn
+against the one still to come, and the gap and the run of a dash are measured in line widths.
+`joint` rounds, mitres or bevels the corners of a closed shape, which shows at the thick widths an
+overlay meant to be read at a glance uses. `perspective` makes the width a size at the camera's
+near plane rather than a size on screen, so a line further away is drawn thinner.
+
+`Rect2d`, `Circle2d`, `Line2d`, `Arrow2d`, `Arc2d` and `Grid2d` are the same shapes for a 2D
+camera. They take a point on the XY plane and an angle about Z, because that is all a flat shape
+can be turned by, and they go through Bevy's own flat calls rather than through the solid ones at
+zero depth, which differ once a line has width.
 
 Gizmos are drawn by a plugin that comes with the window, so a windowless run refuses rather than
 collecting shapes nothing will draw. Guard with `App.HasRenderer`.
@@ -1207,10 +1249,53 @@ transparent by default like any other node, so a `SpawnText` that passes plain `
 lays out correctly and draws nothing.
 
 `LineHeight` sets the spacing between lines, as a multiple of the font size unless
-`LineHeightInPixels` says otherwise. `Smooth` turned off keeps a pixel font sharp, since smoothing
+`LineHeightInPixels` says otherwise, and `LetterSpacing` does the same between the letters, where a
+negative value pulls them together and `LetterSpacingInPixels` switches the unit the same way.
+`Smooth` turned off keeps a pixel font sharp, since smoothing
 a font drawn to land on whole pixels is what makes it look blurred. `ShadowOffset` and
 `ShadowColor` put a shadow behind the glyphs, which is what keeps light text readable over a
 picture that might be light too.
+
+`Ui.SpawnTextSpan` adds a run to a text that already exists, in its own font, size and color, which
+is what a bold word inside a sentence is. The spans read in the order they were added, after
+whatever the parent itself says, and the whole is broken and aligned as one block by the settings
+the parent was given. A span has no node of its own, so it takes its color as an argument where a
+whole text takes the color of the node it sits in.
+
+**Laying out on a grid.** Flexbox lays a run of children along one axis and takes the other from
+what they are. A grid states both axes up front and drops the children into the cells, which is
+what makes a column line up with the column above it:
+
+```csharp
+UiGrid.Set(panel, new GridSettings
+{
+    Columns = [Track.Px(96f).Filling()],   // as many 96-pixel columns as there is room for
+    AutoRows = [Track.Px(96f)],            // and a row of the same height whenever one is needed
+});
+```
+
+A track is sized by `Track.Px`, `Track.Percent`, `Track.Fr` (a share of whatever is left after the
+fixed tracks have taken theirs), `Track.Auto`, `Track.MinContent` or `Track.MaxContent`.
+`Repeated(n)` states the same track n times over, and `Filling()` states it as many times as the
+grid has room for, which is what a gallery that reflows with its window is. `Rows` and `Columns`
+are the tracks stated up front; `AutoRows` and `AutoColumns` are the ones made when an item lands
+past them, cycled through as often as they are needed, so a list of unknown length states its
+columns and leaves its rows to these.
+
+`UiGrid.Place` puts one child somewhere in particular. Lines are counted from one, and a negative
+counts back from the far edge, so a column of `-1` is the last one whatever the grid turned out to
+be. A child with no placement goes wherever `Flow` reaches next.
+
+Since the tracks are lists and the rest of the layout arrives as a flat struct, a grid is set on a
+node that already exists rather than passed with one. `UiGrid.Set` also switches the node to
+`UiDisplay.Grid`, so nothing has to say that twice.
+
+`Corners` rounds the node, clockwise from the top left, and a single `Length` assigned to it is the
+same radius on all four. The background, the border and anything the node clips follow the same
+curve, and a percentage is read against the node's own size, so fifty percent everywhere is an
+ellipse. `Sizing` decides what `Width` and the rest measure, and Bevy's default is the border box
+rather than the web's content box, because a node told to be a hundred pixels wide and then given a
+border is easier to place if it stays a hundred pixels wide.
 
 The children answer back. `Grow` takes a share of whatever room the parent has left over, `Shrink`
 gives up a share of the overflow, `Basis` is the size to start from, and `AlignSelf` overrides the
@@ -1688,8 +1773,8 @@ run against a real Bevy app. Known gaps:
   material, is not written, so the file is a set of edits over a scene rather than the scene.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
-- An image to draw into is created empty at a size. Loading one, or creating a cubemap, has no
-  bridge, so a skybox and the light probes that would light a room to match it are out of reach.
+- A cubemap comes from a file, as six square faces stacked into a column. One rendered into, which
+  is what a reflection probe placed in a room would want, has no bridge.
 
 ---
 

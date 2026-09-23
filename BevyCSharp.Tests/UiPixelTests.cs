@@ -9,7 +9,7 @@ namespace Bevy.Tests;
 /// <remarks>
 /// <para>
 /// Every other interface test asks whether a node was accepted, because whether a screen looks
-/// right needs an eye. A run that draws into an image is the eye: the screen is drawn, the pixels
+/// right needs an eye. A run that draws into an image is the eye. The screen is drawn, the pixels
 /// come back, and a field that decides a size can be checked against the size it decided.
 /// </para>
 /// <para>
@@ -81,6 +81,261 @@ public sealed class UiPixelTests
             $"the lines took {packedHeight} pixels packed and {spreadHeight} spread");
     }
 
+    /// <summary>Text tracked out takes more room across than the same words set normally.</summary>
+    /// <remarks>
+    /// The same words in the same font at the same size, so the only thing that can widen them is
+    /// the room asked for between the letters.
+    /// </remarks>
+    [Fact]
+    public void LetterSpacingMovesTheLettersApart()
+    {
+        if (!App.HasRenderer) return;
+
+        var normal = DrawText(lineHeight: 1f);
+        var tracked = DrawText(lineHeight: 1f, letterSpacing: 0.5f);
+
+        Assert.NotNull(normal);
+        Assert.NotNull(tracked);
+
+        var (normalWidth, _) = Filled(normal);
+        var (trackedWidth, _) = Filled(tracked);
+
+        Assert.True(
+            trackedWidth > normalWidth + 4,
+            $"the words took {normalWidth} pixels normally and {trackedWidth} tracked out");
+    }
+
+    /// <summary>An image built from bytes here is drawn like any other.</summary>
+    /// <remarks>
+    /// The whole round trip. The pixels never touch a file, so red arriving on screen says the
+    /// bytes crossed the bridge, became an asset, took a key the table knows, and reached the
+    /// renderer through the same path a loaded picture does.
+    /// </remarks>
+    [Fact]
+    public void AnImageMadeFromBytesIsDrawn()
+    {
+        if (!App.HasRenderer) return;
+
+        var picture = Capture((camera, _) =>
+        {
+            // Four red pixels, which is the smallest picture that still has a shape.
+            var pixels = new byte[2 * 2 * 4];
+
+            for (var i = 0; i < pixels.Length; i += 4)
+            {
+                pixels[i] = 255;
+                pixels[i + 3] = 255;
+            }
+
+            var made = Render.CreateImage(pixels, 2, 2);
+
+            var node = Ui.SpawnNode(new UiSettings
+            {
+                Absolute = true,
+                Left = Length.Px(8f),
+                Top = Length.Px(8f),
+                Width = Length.Px(32f),
+                Height = Length.Px(32f),
+                Camera = camera,
+            });
+
+            Ui.SetImage(node, new UiImageSettings { Image = made });
+        });
+
+        Assert.NotNull(picture);
+        Assert.True(Red(picture) > 400, $"the picture reached {Red(picture)} pixels");
+    }
+
+    /// <summary>A grid puts its children in the cells the tracks describe.</summary>
+    /// <remarks>
+    /// Two columns of a quarter of the screen each and one row, so the second child starts where
+    /// the first column ends. Laid out by the flexbox the node would otherwise use, the two would
+    /// be packed against each other at their own widths instead.
+    /// </remarks>
+    [Fact]
+    public void AGridPutsItsChildrenInItsCells()
+    {
+        if (!App.HasRenderer) return;
+
+        var picture = Capture((camera, world) =>
+        {
+            var panel = Ui.SpawnNode(new UiSettings
+            {
+                Absolute = true,
+                Left = Length.Zero,
+                Top = Length.Zero,
+                Width = Length.Px(128f),
+                Height = Length.Px(32f),
+                Camera = camera,
+            });
+
+            // Two columns of a fixed width, so where the second child lands is arithmetic rather
+            // than whatever it measured itself to be.
+            UiGrid.Set(panel, new GridSettings
+            {
+                Columns = [Track.Px(64f).Repeated(2)],
+                Rows = [Track.Px(32f)],
+            });
+
+            // Small, so each fills a corner of its own cell rather than the whole of it, and the
+            // gap between the two says the cells are where the tracks put them.
+            var first = Ui.SpawnNode(new UiSettings
+            {
+                Width = Length.Px(8f),
+                Height = Length.Px(8f),
+                Color = (0f, 1f, 0f, 1f),
+                Camera = camera,
+            });
+
+            var second = Ui.SpawnNode(new UiSettings
+            {
+                Width = Length.Px(8f),
+                Height = Length.Px(8f),
+                Color = (0f, 1f, 0f, 1f),
+                Camera = camera,
+            });
+
+            var ecs = world.Resource<EcsWorld>();
+            ecs.SetParent(first, panel);
+            ecs.SetParent(second, panel);
+        });
+
+        Assert.NotNull(picture);
+
+        var (left, right) = Edges(picture, red: false);
+
+        // The first child at the left edge and the second at the start of the second column, so
+        // what was drawn reaches from zero to a little past sixty-four.
+        Assert.InRange(left, 0, 2);
+        Assert.InRange(right, 66, 76);
+    }
+
+    /// <summary>A rounded corner takes the corner pixel off a node that still fills its middle.</summary>
+    /// <remarks>
+    /// The same node twice, so the corner going dark while the middle stays lit is the radius and
+    /// nothing else. A radius that never reached the layout would leave the two pictures equal.
+    /// </remarks>
+    [Fact]
+    public void RoundedCornersCutTheCornerOffANode()
+    {
+        if (!App.HasRenderer) return;
+
+        var square = DrawBox(radius: 0f);
+        var rounded = DrawBox(radius: 16f);
+
+        Assert.NotNull(square);
+        Assert.NotNull(rounded);
+
+        // Two pixels in from the node's own top left, which is inside a square corner and outside
+        // a sixteen-pixel curve.
+        Assert.True(square.At(10, 10).G > 120, "the square node did not reach its own corner");
+        Assert.True(rounded.At(10, 10).G < 90, "the corner was not rounded off");
+
+        // And the middle of the node is filled either way, so nothing simply failed to draw.
+        Assert.True(rounded.At(28, 28).G > 120, "the rounded node drew nothing at all");
+    }
+
+    /// <summary>Draws one square node, rounded by <paramref name="radius"/> pixels.</summary>
+    private static CapturedImage? DrawBox(float radius) => Capture((camera, _) => Ui.SpawnNode(
+        new UiSettings
+        {
+            Absolute = true,
+            Left = Length.Px(8f),
+            Top = Length.Px(8f),
+            Width = Length.Px(40f),
+            Height = Length.Px(40f),
+            Corners = Length.Px(radius),
+            Color = (0f, 1f, 0f, 1f),
+            Camera = camera,
+        }));
+
+    /// <summary>A span adds its own words to the line, in its own color.</summary>
+    /// <remarks>
+    /// Two colors in one line of text is the thing a single run cannot do, so red appearing at all
+    /// is the whole assertion, and the line growing wider says the words were laid out rather than
+    /// drawn on top of the ones already there.
+    /// </remarks>
+    [Fact]
+    public void ASpanSetsPartOfALineInItsOwnColor()
+    {
+        if (!App.HasRenderer) return;
+
+        var plain = DrawSpan(span: false);
+        var mixed = DrawSpan(span: true);
+
+        Assert.NotNull(plain);
+        Assert.NotNull(mixed);
+
+        Assert.Equal(0, Red(plain));
+        Assert.True(Red(mixed) > 0, "the span drew nothing of its own");
+
+        // The span follows the parent's own words, so every red pixel is to the right of the last
+        // green one. Drawn over the top instead, or laid out as a line of its own, and they would
+        // overlap.
+        var (_, green) = Edges(mixed, red: false);
+        var (spanStart, _) = Edges(mixed, red: true);
+
+        Assert.True(
+            spanStart > green,
+            $"the line ended at {green} and the span began at {spanStart}");
+    }
+
+    /// <summary>The leftmost and rightmost pixel of one color in the picture.</summary>
+    private static (int Left, int Right) Edges(CapturedImage picture, bool red)
+    {
+        int left = int.MaxValue, right = -1;
+
+        for (var y = 0u; y < picture.Height; y++)
+        {
+            for (var x = 0u; x < picture.Width; x++)
+            {
+                var pixel = picture.At(x, y);
+                var lit = red ? pixel.R > 120 && pixel.G < 90 : pixel.G > 120 && pixel.R < 90;
+                if (!lit) continue;
+
+                left = Math.Min(left, (int)x);
+                right = Math.Max(right, (int)x);
+            }
+        }
+
+        Assert.True(right >= 0, red ? "the span drew nothing" : "the line drew nothing");
+        return (left, right);
+    }
+
+    /// <summary>How many pixels the span reached, which is the only red in the picture.</summary>
+    private static int Red(CapturedImage picture)
+    {
+        var lit = 0;
+
+        for (var i = 0; i < picture.Pixels.Length; i += 4)
+        {
+            if (picture.Pixels[i] > 120 && picture.Pixels[i + 1] < 90) lit++;
+        }
+
+        return lit;
+    }
+
+    /// <summary>Draws one line of text, with or without a second run after it.</summary>
+    private static CapturedImage? DrawSpan(bool span) => Capture(
+        (camera, _) =>
+        {
+            var style = new UiTextSettings { FontSize = 16f };
+
+            var line = Ui.SpawnText(
+                "one",
+                new UiSettings
+                {
+                    Absolute = true,
+                    Left = Length.Px(4f),
+                    Top = Length.Px(4f),
+                    Color = (0f, 1f, 0f, 1f),
+                    Camera = camera,
+                },
+                style);
+
+            if (span) Ui.SpawnTextSpan(line, " two", style, (1f, 0f, 0f, 1f));
+        });
+
     /// <summary>A shadow puts something behind the glyphs that was not there before.</summary>
     [Fact]
     public void AShadowIsDrawnBehindTheText()
@@ -112,7 +367,10 @@ public sealed class UiPixelTests
     }
 
     /// <summary>Draws two lines of text and hands back the picture.</summary>
-    private static CapturedImage? DrawText(float lineHeight, bool shadow = false) => Capture(
+    private static CapturedImage? DrawText(
+        float lineHeight,
+        bool shadow = false,
+        float letterSpacing = 0f) => Capture(
         (camera, _) => Ui.SpawnText(
             "one\ntwo",
             new UiSettings
@@ -127,6 +385,7 @@ public sealed class UiPixelTests
             {
                 FontSize = 16f,
                 LineHeight = lineHeight,
+                LetterSpacing = letterSpacing,
                 ShadowOffset = (2f, 2f),
                 ShadowColor = shadow ? (0f, 0.6f, 0f, 1f) : (0f, 0f, 0f, 0f),
             }));

@@ -298,6 +298,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             #[cfg(feature = "editor")]
             if config.gui != 0 {
                 crate::imgui::install(&mut app);
+                INTERFACE_INSTALLED.store(true, std::sync::atomic::Ordering::Relaxed);
 
                 // Clicking a mesh to select it is the other half of what a hierarchy list does,
                 // and it costs a raycast per click rather than anything per frame.
@@ -1030,6 +1031,21 @@ pub extern "C" fn bcs_has_render() -> i32 {
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_has_editor() -> i32 {
     if cfg!(feature = "editor") { 1 } else { 0 }
+}
+
+/// Whether this app installed the interface, as [`bcs_has_interface`] reports.
+static INTERFACE_INSTALLED: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
+
+/// Reports whether the running app installed the interface: `1` when it did, `0` otherwise.
+///
+/// A different question again from [`bcs_has_editor`], which answers what the library was built
+/// with rather than what this app asked for. A build carrying the surface still draws no interface
+/// unless the config turned it on, and something drawing one wants to know which of the two is
+/// missing before it tells anybody to rebuild.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_has_interface() -> i32 {
+    if INTERFACE_INSTALLED.load(std::sync::atomic::Ordering::Relaxed) { 1 } else { 0 }
 }
 
 /// Reports whether the caller is on the process main thread.

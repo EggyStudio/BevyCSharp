@@ -341,6 +341,157 @@ public static unsafe class Gizmos
             radius: spacing,
             end: new Vec3(across, down, 0f)));
 
+    /// <summary>Draws the outline of a rectangle, flat, for a 2D camera.</summary>
+    /// <remarks>
+    /// <para>
+    /// Every call below is the shape above it seen by <see cref="Render2d.SpawnCamera2d"/>. They take
+    /// a point on the XY plane and an angle about Z, because that is all a flat shape can be turned
+    /// by, and they are drawn by Bevy's own flat calls rather than by the solid ones at zero depth,
+    /// which differ once a line has width.
+    /// </para>
+    /// <para>
+    /// A 2D camera in Bevy sees the same world the 3D one does, so these are world space in the
+    /// same sense as everything else here. What makes them flat is that nothing about them has a
+    /// depth to give.
+    /// </para>
+    /// </remarks>
+    /// <param name="center">Where the middle of it sits, on the XY plane.</param>
+    /// <param name="width">How wide, along the rectangle's own X axis.</param>
+    /// <param name="height">How tall, along its own Y axis.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="angle">How far it is turned about Z, in radians.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    public static void Rect2d(
+        (float X, float Y) center,
+        float width,
+        float height,
+        (float R, float G, float B, float A) color,
+        float angle = 0f,
+        bool inFront = true) =>
+        Draw(Shape(
+            14, Flat(center), Turn(angle), color, inFront, end: new Vec3(width, height, 0f)));
+
+    /// <summary>Draws the outline of a circle, flat, for a 2D camera.</summary>
+    /// <inheritdoc cref="Rect2d" path="/remarks"/>
+    /// <param name="center">Where it sits, on the XY plane.</param>
+    /// <param name="radius">How large.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    public static void Circle2d(
+        (float X, float Y) center,
+        float radius,
+        (float R, float G, float B, float A) color,
+        bool inFront = true) =>
+        Draw(Shape(15, Flat(center), Quat.Identity, color, inFront, radius: radius));
+
+    /// <summary>Draws a line between two points, flat, for a 2D camera.</summary>
+    /// <inheritdoc cref="Rect2d" path="/remarks"/>
+    /// <param name="start">Where it begins, on the XY plane.</param>
+    /// <param name="end">Where it ends.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    public static void Line2d(
+        (float X, float Y) start,
+        (float X, float Y) end,
+        (float R, float G, float B, float A) color,
+        bool inFront = true) =>
+        Draw(Gradient(16, start, end, color, color, inFront));
+
+    /// <summary>Draws a line that fades from one color to another, flat, for a 2D camera.</summary>
+    /// <inheritdoc cref="Rect2d" path="/remarks"/>
+    /// <param name="start">Where it begins, on the XY plane.</param>
+    /// <param name="end">Where it ends.</param>
+    /// <param name="from">The color at the start, linear RGBA.</param>
+    /// <param name="to">The color at the end.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    public static void Line2d(
+        (float X, float Y) start,
+        (float X, float Y) end,
+        (float R, float G, float B, float A) from,
+        (float R, float G, float B, float A) to,
+        bool inFront = true) =>
+        Draw(Gradient(16, start, end, from, to, inFront));
+
+    /// <summary>Draws a line with a head on its far end, flat, for a 2D camera.</summary>
+    /// <inheritdoc cref="Rect2d" path="/remarks"/>
+    /// <param name="start">Where it begins, on the XY plane.</param>
+    /// <param name="end">Where the head is.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    public static void Arrow2d(
+        (float X, float Y) start,
+        (float X, float Y) end,
+        (float R, float G, float B, float A) color,
+        bool inFront = true) =>
+        Draw(Gradient(17, start, end, color, color, inFront));
+
+    /// <summary>Draws part of a circle, flat, for a 2D camera.</summary>
+    /// <inheritdoc cref="Rect2d" path="/remarks"/>
+    /// <param name="center">The centre the arc is struck about.</param>
+    /// <param name="radius">How far from the centre.</param>
+    /// <param name="angle">How much of the circle to draw, in radians.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="from">Where the arc starts, as an angle about Z in radians.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    public static void Arc2d(
+        (float X, float Y) center,
+        float radius,
+        float angle,
+        (float R, float G, float B, float A) color,
+        float from = 0f,
+        bool inFront = true) =>
+        Draw(Shape(
+            18, Flat(center), Turn(from), color, inFront,
+            radius: radius,
+            end: new Vec3(angle, 0f, 0f)));
+
+    /// <summary>Draws a grid of lines, flat, for a 2D camera.</summary>
+    /// <inheritdoc cref="Rect2d" path="/remarks"/>
+    /// <param name="center">Where the middle of the grid sits, on the XY plane.</param>
+    /// <param name="across">How many cells wide.</param>
+    /// <param name="down">How many cells tall.</param>
+    /// <param name="spacing">How large one cell is, along both axes.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="angle">How far it is turned about Z, in radians.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    public static void Grid2d(
+        (float X, float Y) center,
+        uint across,
+        uint down,
+        float spacing,
+        (float R, float G, float B, float A) color,
+        float angle = 0f,
+        bool inFront = false) =>
+        Draw(Shape(
+            19, Flat(center), Turn(angle), color, inFront,
+            radius: spacing,
+            end: new Vec3(across, down, 0f)));
+
+    /// <summary>A point on the XY plane, as the queue's three numbers.</summary>
+    private static Vec3 Flat((float X, float Y) point) => new(point.X, point.Y, 0f);
+
+    /// <summary>An angle about Z, as the queue's quaternion.</summary>
+    private static Quat Turn(float angle) => Quat.FromAxisAngle(Vec3.UnitZ, angle);
+
+    /// <summary>Fills in a flat shape described by two points and two colors.</summary>
+    private static NativeGizmoConfig Gradient(
+        int kind,
+        (float X, float Y) start,
+        (float X, float Y) end,
+        (float R, float G, float B, float A) from,
+        (float R, float G, float B, float A) to,
+        bool inFront)
+    {
+        var config = Shape(kind, Flat(start), Quat.Identity, from, inFront, end: Flat(end));
+
+        config.EndColorR = to.R;
+        config.EndColorG = to.G;
+        config.EndColorB = to.B;
+        config.EndColorA = to.A;
+
+        return config;
+    }
+
     /// <summary>
     /// Sets how every gizmo is drawn.
     /// </summary>
@@ -367,6 +518,57 @@ public static unsafe class Gizmos
         Native.Check(
             Native.bcs_gizmo_configure(width, layers, enabled ? 1 : 0),
             "configuring gizmos");
+
+    /// <summary>
+    /// Sets what a gizmo line looks like.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Apart from <see cref="Configure"/> because how thick a line is and who can see it is one
+    /// decision, and what the line looks like is another. Both cover every gizmo, for the same
+    /// reason.
+    /// </para>
+    /// <para>
+    /// A dotted or dashed line is what tells one meaning from another without a second color, so a
+    /// path already walked can be drawn against the one still to come. <see cref="GizmoJoint"/>
+    /// only shows on a shape whose lines meet, which is every closed shape and no single segment.
+    /// </para>
+    /// </remarks>
+    /// <param name="style">Whether the line is solid, dotted or dashed.</param>
+    /// <param name="gapScale">
+    /// How long the gap in a dashed line is, in line widths. Zero takes Bevy's own default of one,
+    /// and it is read only for <see cref="GizmoLine.Dashed"/>.
+    /// </param>
+    /// <param name="lineScale">
+    /// How long the drawn run of a dashed line is, in line widths. Zero takes Bevy's own default
+    /// of three.
+    /// </param>
+    /// <param name="joint">How two lines meet at a corner.</param>
+    /// <param name="jointResolution">
+    /// How many triangles a round joint is drawn with. Zero takes Bevy's own default of four, and
+    /// it is read only for <see cref="GizmoJoint.Round"/>.
+    /// </param>
+    /// <param name="perspective">
+    /// Whether the width is a size at the camera's near plane rather than a size on screen, so a
+    /// line further away is drawn thinner. Only a perspective 3D camera can honour it.
+    /// </param>
+    /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
+    public static void SetLineStyle(
+        GizmoLine style = GizmoLine.Solid,
+        float gapScale = 0f,
+        float lineScale = 0f,
+        GizmoJoint joint = GizmoJoint.None,
+        uint jointResolution = 0,
+        bool perspective = false) =>
+        Native.Check(
+            Native.bcs_gizmo_style(
+                (int)style,
+                gapScale,
+                lineScale,
+                (int)joint,
+                jointResolution,
+                perspective ? 1 : 0),
+            "styling gizmo lines");
 
     /// <summary>
     /// Fills in the shape every call above builds, so each of them is its own arguments and
@@ -438,4 +640,42 @@ public static unsafe class Gizmos
 
         Native.Check(status, "drawing a gizmo");
     }
+}
+
+/// <summary>What a gizmo line is drawn as, along its length.</summary>
+/// <remarks>
+/// The way one meaning is told from another without spending a second color on it, which matters
+/// where the color already says something else.
+/// </remarks>
+public enum GizmoLine
+{
+    /// <summary>One unbroken run.</summary>
+    Solid = 0,
+
+    /// <summary>A row of dots.</summary>
+    Dotted = 1,
+
+    /// <summary>Alternating runs and gaps, each measured in line widths.</summary>
+    Dashed = 2,
+}
+
+/// <summary>How two gizmo lines meet at a corner.</summary>
+/// <remarks>
+/// Only visible on a shape whose lines meet, which is every closed shape and no single segment. At
+/// a thin width the corners are too small to tell apart, so this is for the thick lines an overlay
+/// drawn to be read at a glance uses.
+/// </remarks>
+public enum GizmoJoint
+{
+    /// <summary>Nothing is drawn, so a thick corner has a notch out of it.</summary>
+    None = 0,
+
+    /// <summary>Both lines are carried on until they meet at a point.</summary>
+    Miter = 1,
+
+    /// <summary>A rounded corner, drawn with as many triangles as it is given.</summary>
+    Round = 2,
+
+    /// <summary>A straight line across the gap between the two ends.</summary>
+    Bevel = 3,
 }

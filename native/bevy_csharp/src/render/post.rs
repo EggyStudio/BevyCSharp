@@ -335,22 +335,32 @@ pub unsafe extern "C" fn bcs_render_set_image_lighting(
                     return status::OK;
                 };
 
+                // Asked for here and inserted by `reinterpret_cubemaps` once the image is a
+                // cube, because Bevy's own filter panics on one that is not rather than waiting.
                 world
                     .get_resource_or_init::<PendingCubemaps>()
                     .0
-                    .push(handle.clone());
-
-                world.entity_mut(entity).insert(GeneratedEnvironmentMapLight {
-                    environment_map: handle,
-                    intensity,
-                    rotation: turn,
-                    ..Default::default()
-                });
+                    .push(PendingCubemap {
+                        image: handle,
+                        light: Some((entity, intensity, turn)),
+                    });
 
                 status::OK
             })
         }
     })
+}
+
+/// One image asked to become a cubemap, and what to do once it is.
+#[cfg(feature = "render")]
+pub struct PendingCubemap {
+    /// The image, still a tall picture until its pixels arrive.
+    pub image: bevy::asset::Handle<bevy::image::Image>,
+    /// A camera to light with it once it is a cube, with the intensity and rotation asked for.
+    ///
+    /// Held rather than inserted straight away, because Bevy refuses to filter an image that is
+    /// not yet square, and refuses it by panicking inside a system rather than by reporting it.
+    pub light: Option<(bevy::ecs::entity::Entity, f32, bevy::math::Quat)>,
 }
 
 /// The images asked to become cubemaps, waiting for their pixels to arrive.
@@ -360,7 +370,7 @@ pub unsafe extern "C" fn bcs_render_set_image_lighting(
 /// waits here until it has.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::resource::Resource, Default)]
-pub struct PendingCubemaps(Vec<bevy::asset::Handle<bevy::image::Image>>);
+pub struct PendingCubemaps(Vec<PendingCubemap>);
 
 /// Turns each loaded image on the list into a cubemap, and forgets it.
 ///
@@ -370,13 +380,15 @@ pub struct PendingCubemaps(Vec<bevy::asset::Handle<bevy::image::Image>>);
 /// would cost a frame instead of once.
 #[cfg(feature = "render")]
 pub fn reinterpret_cubemaps(
+    mut commands: bevy::ecs::system::Commands,
     mut pending: bevy::ecs::system::ResMut<PendingCubemaps>,
     mut images: bevy::ecs::system::ResMut<bevy::asset::Assets<bevy::image::Image>>,
 ) {
+    use bevy::light::GeneratedEnvironmentMapLight;
     use bevy::render::render_resource::{TextureViewDescriptor, TextureViewDimension};
 
-    pending.0.retain(|handle| {
-        let Some(mut image) = images.get_mut(handle) else {
+    pending.0.retain(|waiting| {
+        let Some(mut image) = images.get_mut(&waiting.image) else {
             // Still loading. Asking again next frame is the whole of the wait.
             return true;
         };
@@ -388,7 +400,7 @@ pub fn reinterpret_cubemaps(
         {
             bevy::log::warn!(
                 "An image asked to be a cubemap is not six square faces stacked vertically, so \
-                 the skybox using it will not draw."
+                 whatever asked for it will not draw."
             );
 
             return false;
@@ -398,6 +410,19 @@ pub fn reinterpret_cubemaps(
             dimension: Some(TextureViewDimension::Cube),
             ..Default::default()
         });
+
+        // Only now, because filtering an image that is not yet square is a panic inside Bevy
+        // rather than a refusal, and the image is not square until the line above.
+        if let Some((camera, intensity, rotation)) = waiting.light
+            && let Ok(mut camera) = commands.get_entity(camera)
+        {
+            camera.insert(GeneratedEnvironmentMapLight {
+                environment_map: waiting.image.clone(),
+                intensity,
+                rotation,
+                ..Default::default()
+            });
+        }
 
         false
     });
@@ -459,7 +484,10 @@ pub unsafe extern "C" fn bcs_render_set_skybox(
                     world
                         .get_resource_or_init::<PendingCubemaps>()
                         .0
-                        .push(handle);
+                        .push(PendingCubemap {
+                            image: handle,
+                            light: None,
+                        });
                 }
 
                 world.entity_mut(entity).insert(Skybox {

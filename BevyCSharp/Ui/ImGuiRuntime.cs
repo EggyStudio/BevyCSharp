@@ -98,6 +98,16 @@ public static unsafe class ImGuiRuntime
             return;
         }
 
+        // The bridge carries the interface and this app left it out, which is a different mistake
+        // with a different fix, so it gets its own sentence rather than the one above.
+        if (!App.HasInterface)
+        {
+            Console.WriteLine(
+                "[imgui] this app did not ask for an interface, so nothing is drawn."
+                + " Set Config.Gui before running it.");
+            return;
+        }
+
         ImGui.CreateContext();
 
         FontSize = size;

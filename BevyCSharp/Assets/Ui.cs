@@ -84,28 +84,83 @@ public static unsafe class Ui
         ArgumentNullException.ThrowIfNull(style);
 
         var native = ToNative(settings);
-        var nativeText = new NativeUiTextConfig
-        {
-            Font = style.Font.Key,
-            FontSize = style.FontSize,
-            Justify = (int)style.Justify,
-            LineBreak = (int)style.Wrap,
-            LineHeight = style.LineHeight,
-            LineHeightUnit = style.LineHeightInPixels ? 1 : 0,
-            FontSmoothing = style.Smooth ? 0 : 1,
-            ShadowOffsetX = style.ShadowOffset.X,
-            ShadowOffsetY = style.ShadowOffset.Y,
-            ShadowColorR = style.ShadowColor.R,
-            ShadowColorG = style.ShadowColor.G,
-            ShadowColorB = style.ShadowColor.B,
-            ShadowColorA = style.ShadowColor.A,
-        };
+        var nativeText = ToNative(style);
 
         var bits = Native.bcs_ui_spawn_text(text, &native, &nativeText);
         if (bits == 0) throw NoUi("Spawning UI text");
 
         return new Entity(bits);
     }
+
+    /// <summary>
+    /// Adds a run of text to an existing one, set in its own font and color.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What a bold word inside a sentence is. A paragraph with more than one style in it is one
+    /// text entity with a span per run rather than markup inside a string, so each run carries its
+    /// own font, size and color, and the whole is broken and aligned as one block by the settings
+    /// the parent was given.
+    /// </para>
+    /// <para>
+    /// Spans read in the order they were added, after whatever the parent itself says. A span has
+    /// no node of its own and so takes no <see cref="UiSettings"/>, which is why its color is a
+    /// parameter here where a whole text takes the color of the node it sits in.
+    /// </para>
+    /// </remarks>
+    /// <param name="parent">The text entity this run belongs to.</param>
+    /// <param name="text">What the run says.</param>
+    /// <param name="style">How it is set.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <exception cref="BevyNativeException">
+    /// The parent is gone, the font names nothing, or this build has no renderer.
+    /// </exception>
+    /// <example>
+    /// <code>
+    /// var line = Ui.SpawnText("the word ", settings, new UiTextSettings { FontSize = 16f });
+    /// Ui.SpawnTextSpan(line, "bold", new UiTextSettings { Font = heavy, FontSize = 16f },
+    ///     (1f, 1f, 1f, 1f));
+    /// Ui.SpawnTextSpan(line, " is heavier", new UiTextSettings { FontSize = 16f },
+    ///     (0.7f, 0.7f, 0.7f, 1f));
+    /// </code>
+    /// </example>
+    public static Entity SpawnTextSpan(
+        Entity parent,
+        string text,
+        UiTextSettings style,
+        (float R, float G, float B, float A) color)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        ArgumentNullException.ThrowIfNull(style);
+
+        var nativeText = ToNative(style);
+        var rgba = stackalloc float[4] { color.R, color.G, color.B, color.A };
+
+        var bits = Native.bcs_ui_spawn_text_span(parent.Bits, text, &nativeText, rgba);
+        if (bits == 0) throw NoUi($"Adding a run of text to {parent}");
+
+        return new Entity(bits);
+    }
+
+    /// <summary>How a run of text is set, as the bridge takes it.</summary>
+    private static NativeUiTextConfig ToNative(UiTextSettings style) => new()
+    {
+        Font = style.Font.Key,
+        FontSize = style.FontSize,
+        Justify = (int)style.Justify,
+        LineBreak = (int)style.Wrap,
+        LineHeight = style.LineHeight,
+        LineHeightUnit = style.LineHeightInPixels ? 1 : 0,
+        LetterSpacing = style.LetterSpacing,
+        LetterSpacingUnit = style.LetterSpacingInPixels ? 1 : 0,
+        FontSmoothing = style.Smooth ? 0 : 1,
+        ShadowOffsetX = style.ShadowOffset.X,
+        ShadowOffsetY = style.ShadowOffset.Y,
+        ShadowColorR = style.ShadowColor.R,
+        ShadowColorG = style.ShadowColor.G,
+        ShadowColorB = style.ShadowColor.B,
+        ShadowColorA = style.ShadowColor.A,
+    };
 
     /// <summary>
     /// Replaces what a text entity says.
@@ -325,6 +380,15 @@ public static unsafe class Ui
         AspectRatio = settings.AspectRatio,
         ClipBox = (int)settings.ClipBox,
         ClipMargin = settings.ClipMargin,
+        CornerTopLeft = settings.Corners.TopLeft.Value,
+        CornerTopRight = settings.Corners.TopRight.Value,
+        CornerBottomRight = settings.Corners.BottomRight.Value,
+        CornerBottomLeft = settings.Corners.BottomLeft.Value,
+        CornerTopLeftUnit = (int)settings.Corners.TopLeft.Unit,
+        CornerTopRightUnit = (int)settings.Corners.TopRight.Unit,
+        CornerBottomRightUnit = (int)settings.Corners.BottomRight.Unit,
+        CornerBottomLeftUnit = (int)settings.Corners.BottomLeft.Unit,
+        BoxSizing = (int)settings.Sizing,
         Camera = settings.Camera.Bits,
     };
 

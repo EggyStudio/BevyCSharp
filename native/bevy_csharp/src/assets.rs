@@ -436,7 +436,7 @@ pub extern "C" fn bcs_asset_live_count() -> i32 {
 /// normal answer on the first frame. `WorldInstance` appears on it when the spawn has happened,
 /// which is what makes the wait observable.
 ///
-/// This is what a glTF scene and a `.scn.ron` file have in common: both load as a `WorldAsset`,
+/// This is what a glTF scene and a `.scn.ron` file have in common. Both load as a `WorldAsset`,
 /// and both spawn by pointing an entity at one.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_scene_spawn(asset: i32) -> u64 {
@@ -559,7 +559,7 @@ mod tests {
     fn registering_an_asset_type_twice_through_bevy_loses_them() {
         // Pins the behavior `init_asset_once` exists to guard, so that if Bevy ever makes
         // `init_asset` idempotent this fails and says the guard can go. Nothing reports an
-        // error here, which is what made the original failure so hard to place: the handle is
+        // error here, which is what made the original failure so hard to place. The handle is
         // valid, the call succeeded, and the mesh is gone.
         let mut app = asset_app();
         app.init_asset::<Mesh>();

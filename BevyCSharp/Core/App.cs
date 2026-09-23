@@ -75,6 +75,16 @@ public sealed unsafe class App : IDisposable
     /// </remarks>
     public static bool HasEditor => Native.bcs_has_editor() != 0;
 
+    /// <summary>True when the running app installed the interface.</summary>
+    /// <remarks>
+    /// The third of the three questions, and the one an app drawing an interface actually wants
+    /// answered. <see cref="HasRenderer"/> and <see cref="HasEditor"/> report what the bridge was
+    /// built with; this reports what this run asked for, which is <see cref="Config.Gui"/>. A
+    /// bridge carrying the surface still draws nothing without it, and telling those apart is the
+    /// difference between rebuilding the bridge and setting a property.
+    /// </remarks>
+    public static bool HasInterface => Native.bcs_has_interface() != 0;
+
     /// <summary>
     /// True when running this app will actually create a window.
     /// </summary>

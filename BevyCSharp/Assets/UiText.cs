@@ -97,6 +97,20 @@ public sealed class UiTextSettings
     public bool LineHeightInPixels { get; set; }
 
     /// <summary>
+    /// How much room is added between the letters, or zero for the fit the font asks for.
+    /// </summary>
+    /// <remarks>
+    /// What a heading tracked out wants, and what a line of small capitals needs to stay legible.
+    /// Read as a multiple of the font size unless <see cref="LetterSpacingInPixels"/> says
+    /// otherwise, so the useful numbers are small. Negative pulls the letters together, which a
+    /// display face set large can take and body text cannot.
+    /// </remarks>
+    public float LetterSpacing { get; set; }
+
+    /// <summary>Whether <see cref="LetterSpacing"/> is in logical pixels rather than font sizes.</summary>
+    public bool LetterSpacingInPixels { get; set; }
+
+    /// <summary>
     /// Whether the glyphs are smoothed at their edges.
     /// </summary>
     /// <remarks>

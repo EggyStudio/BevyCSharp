@@ -61,7 +61,7 @@ pub struct FrontGizmos;
 macro_rules! draw_shape {
     ($gizmos:expr, $shape:expr, $position:expr, $rotation:expr, $color:expr, $fades_to:expr) => {{
         use bevy::math::primitives::{Capsule3d, Cone, Cuboid, Cylinder, Torus};
-        use bevy::math::{Isometry3d, UVec2, Vec2, Vec3};
+        use bevy::math::{Isometry2d, Isometry3d, Rot2, UVec2, Vec2, Vec3};
         use bevy::transform::components::Transform;
 
         let shape = $shape;
@@ -69,6 +69,15 @@ macro_rules! draw_shape {
         let rotation = $rotation;
         let far = Vec3::new(shape.end[0], shape.end[1], shape.end[2]);
         let at = Isometry3d::new(position, rotation);
+
+        // The flat half of the same numbers. A 2D shape sits on the XY plane and turns about Z,
+        // which is the one angle a quaternion in that plane can carry, so nothing needs a second
+        // way of arriving.
+        let flat = Vec2::new(position.x, position.y);
+        let turn = Isometry2d::new(
+            flat,
+            Rot2::radians(rotation.to_euler(bevy::math::EulerRot::ZYX).0),
+        );
 
         match shape.kind {
             1 => {
@@ -153,6 +162,32 @@ macro_rules! draw_shape {
                     at,
                     $color,
                 );
+            }
+            // The flat shapes. Each is the one above it seen from a 2D camera, drawn with Bevy's
+            // own 2D call rather than with the 3D one at zero depth, because the two differ in
+            // more than a coordinate once a line has width and a grid has a plane.
+            14 => {
+                $gizmos.rect_2d(turn, Vec2::new(far.x, far.y), $color);
+            }
+            15 => {
+                $gizmos.circle_2d(turn, shape.radius, $color);
+            }
+            16 => {
+                $gizmos.line_gradient_2d(flat, Vec2::new(far.x, far.y), $color, $fades_to);
+            }
+            17 => {
+                $gizmos.arrow_2d(flat, Vec2::new(far.x, far.y), $color);
+            }
+            18 => {
+                $gizmos.arc_2d(turn, far.x, shape.radius, $color);
+            }
+            19 => {
+                let cells = UVec2::new(
+                    far.x.clamp(0.0, 4096.0) as u32,
+                    far.y.clamp(0.0, 4096.0) as u32,
+                );
+
+                $gizmos.grid_2d(turn, cells, Vec2::splat(shape.radius), $color);
             }
             _ => {
                 $gizmos.line(position, far, $color);
@@ -262,6 +297,84 @@ pub extern "C" fn bcs_gizmo_configure(width: f32, layers: u32, enabled: i32) -> 
 
                     config.render_layers = layers.clone();
                     config.enabled = enabled != 0;
+                };
+
+                apply(store.config_mut::<DefaultGizmoConfigGroup>().0);
+                apply(store.config_mut::<FrontGizmos>().0);
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Sets what a gizmo line looks like, for both groups at once.
+///
+/// `style` is `0` solid, `1` dotted and `2` dashed, where `gap_scale` and `line_scale` are the
+/// lengths of the gap and of the visible run, both measured in line widths. `joint` is `0` none,
+/// `1` mitred, `2` round and `3` bevelled, and `joint_resolution` is how many triangles a round
+/// joint is drawn with. `perspective` at non-zero makes the width a size at the near plane rather
+/// than a size on screen, so a line further away is drawn thinner, which only a 3D camera with a
+/// perspective projection can honour.
+///
+/// Separate from [`bcs_gizmo_configure`] because how thick a line is and who can see it is one
+/// decision and what the line looks like is another, and the first is what most callers set.
+///
+/// Returns [`status::UNSUPPORTED`] where there is nothing to draw on.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_gizmo_style(
+    style: i32,
+    gap_scale: f32,
+    line_scale: f32,
+    joint: i32,
+    joint_resolution: u32,
+    perspective: i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (style, gap_scale, line_scale, joint, joint_resolution, perspective);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::gizmos::config::{
+                DefaultGizmoConfigGroup, GizmoConfigStore, GizmoLineJoint, GizmoLineStyle,
+            };
+
+            crate::state::with_world(|world| {
+                let Some(mut store) = world.get_resource_mut::<GizmoConfigStore>() else {
+                    return status::UNSUPPORTED;
+                };
+
+                // Bevy's own defaults where a caller passed nothing, so a zeroed request asks for
+                // the dashes it would have drawn rather than for a line of zero-length dashes,
+                // which is a line that draws nothing.
+                let style = match style {
+                    1 => GizmoLineStyle::Dotted,
+                    2 => GizmoLineStyle::Dashed {
+                        gap_scale: if gap_scale > 0.0 { gap_scale } else { 1.0 },
+                        line_scale: if line_scale > 0.0 { line_scale } else { 3.0 },
+                    },
+                    _ => GizmoLineStyle::Solid,
+                };
+
+                let joint = match joint {
+                    1 => GizmoLineJoint::Miter,
+                    2 => GizmoLineJoint::Round(if joint_resolution > 0 {
+                        joint_resolution
+                    } else {
+                        4
+                    }),
+                    3 => GizmoLineJoint::Bevel,
+                    _ => GizmoLineJoint::None,
+                };
+
+                let apply = |config: &mut bevy::gizmos::config::GizmoConfig| {
+                    config.line.style = style;
+                    config.line.joints = joint;
+                    config.line.perspective = perspective != 0;
                 };
 
                 apply(store.config_mut::<DefaultGizmoConfigGroup>().0);

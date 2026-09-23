@@ -81,11 +81,10 @@ code already in the binary.
   metered at. `PhysicalCameraParameters::ev100` derives that from aperture, shutter speed and
   sensitivity, which is the same struct that fixes a lens's depth of field, so a camera could be
   described once and have both read from it.
-- **Lighting from a picture rather than from the sky.** `Render.SetSkyLighting` derives an
-  environment map from the atmosphere, which covers an outdoor scene. What it does not cover is an
-  indoor one, or any scene lit from a photograph: `EnvironmentMapLight` takes a diffuse and a
-  specular cubemap that a tool bakes, and `GeneratedEnvironmentMapLight` filters one on the GPU
-  instead. Both are a handle and a few numbers now that a cubemap loads.
+- **A prebaked environment map.** `Render.SetImageLighting` filters a cubemap on the GPU every
+  time the app starts, which costs a moment of startup and needs the faces square and a power of
+  two. `EnvironmentMapLight` takes the diffuse and specular cubemaps a tool baked earlier instead,
+  which is what a shipped game wants and what a large environment cannot afford to redo.
 - **A cubemap of anything else.** The reinterpretation is a column of six faces stacked
   vertically, which is what a file holds. A cubemap rendered into, which is what a reflection probe
   or a point light's shadow would want, needs an image created with six layers rather than one
@@ -100,17 +99,19 @@ code already in the binary.
   whether the machine supports it, so it is a fourth arm on `AntiAlias` that most machines have to
   be told they cannot have.
 - **Order-independent transparency** is a camera component like the rest.
-- **Lights.** Shadow bias is per light and shadow map size is settable. What is left is optical: a
-  spot light has no cookie texture to shape its beam, and cascade configuration for a directional
-  light's shadow distance is Bevy's default.
+- **Lights.** Shadow bias, map size, cascades and a spot light's cookie are all settable. What is
+  left is the experimental half of Bevy's own lighting: soft shadows sit behind the
+  `experimental_pbr_pcss` feature, and contact shadows need a camera component to go with the flag
+  on the light.
 - **Window.** Position, decorations, resizability, always-on-top and exclusive fullscreen are
   bridged, and the monitors are readable by size and by name. A monitor's video modes are a list of
   structs, so exclusive fullscreen takes the monitor's current mode rather than offering a
   resolution to pick from. Multiple windows are unbridged: every entry point addresses the primary
   one.
-- **Reading pixels back costs a PNG or a copy.** `Render.BeginCapture` hands back RGBA bytes, which
-  is what a test asserts on. An image cannot be created from bytes the managed side holds, which is
-  what a caller that generated a texture rather than loading one would want.
+- **A picture is always RGBA and always eight bits a channel.** `Render.CreateImage` takes bytes
+  and `Render.BeginCapture` hands them back, both in that one format. A heightmap of floats, a
+  single-channel mask or a compressed texture would each need the format to be a parameter rather
+  than an assumption.
 
 ### Gizmos
 
@@ -125,11 +126,6 @@ layers and whether anything is drawn at all.
   does not reach are the ones described by more than a radius and one length: a triangle, a
   polyline, a tetrahedron and a conical frustum, each of which needs more numbers than the queued
   shape carries.
-- **The 2D shapes.** `rect_2d`, `circle_2d` and the rest draw in screen space for a 2D camera. The
-  queue describes everything in world space, so these need a flag saying which space a shape is in
-  rather than a second set of calls.
-- **Line style.** `GizmoLineConfig` also carries joints, a dotted or dashed style, and whether
-  width is in pixels or world units. The bridge sets width alone.
 - **Gizmo groups.** A third `GizmoConfigGroup` would let one category be toggled or styled apart
   from another. A group is a Rust type rather than a value, so a third is added where the two are.
 - **One shape per call.** Every gizmo crosses the ABI on its own, and the editor's fading grid asks
@@ -166,18 +162,11 @@ renderer. That covers a HUD, a button,
 a menu that lays itself out, a panel that resizes, a list that scrolls and a paragraph that fits its
 box.
 
-- **Odds and ends of flexbox.** `align_content` and `aspect_ratio` are bridged. What is left of
-  the box model is `OverflowClipMargin`'s per-side control, since the bridge takes one margin for
-  all four edges.
-- **Grid.** `GridPlacement` and the row and column tracks are a second layout algorithm rather than
-  more fields on this one. An inventory is what wants it.
+- **Scrollbar width.** `scrollbar_width` is the one `Node` field left unbridged, and it reserves
+  room at the edge of a scrolling node for a scrollbar. Nothing here draws one, so the room would
+  be a gap.
 - **Image detail.** A sliced image's centre and sides are stretched, because `SliceScaleMode::Tile`
   is a payload the flat config has no room for, which is the same limit a sliced sprite hits.
-- **Rich text.** One run of text is one style. Bevy builds a mixed paragraph from `TextSpan`
-  children under the `Text` entity, so a bold word inside a sentence is a second entity rather than
-  markup, and that wants a spawn entry point of its own.
-- **Letter spacing.** `LetterSpacing` is the component beside `LineHeight` that the bridge does
-  not set, which is what a heading tracked out wants.
 - **Fonts by family name.** Excluded deliberately, the way gamepads are. `FontSource` can name
   `SansSerif`, `Monospace` or the system interface font, but Bevy resolves those through
   `system_font_discovery`, whose Linux backend links against fontconfig at build time. Without the

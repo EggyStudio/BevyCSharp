@@ -11,7 +11,7 @@ namespace BevyCSharp.Editor;
 /// </summary>
 /// <remarks>
 /// <para>
-/// What <c>BCS_PROBE</c> names is run at fixed frames: something is put into the world, something
+/// What <c>BCS_PROBE</c> names is run at fixed frames. Something is put into the world, something
 /// is clicked, something is typed, and what the interface ended up saying is printed. Together with
 /// <c>BCS_SHOT</c> that makes a still of a known state rather than of whatever the editor happened
 /// to be doing.

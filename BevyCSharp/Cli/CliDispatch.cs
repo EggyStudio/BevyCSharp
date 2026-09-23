@@ -96,7 +96,7 @@ internal static class CliDispatch
     /// <remarks>
     /// The name is looked up before the line is run, so a caller that misspelled a command is told
     /// so with a code rather than with a sentence it would have to read. Everything past that is
-    /// the command's own business: what it answers is the payload, and whether that counts as a
+    /// the command's own business. What it answers is the payload, and whether that counts as a
     /// failure is what it said through <see cref="ConsoleHost.Fail"/>.
     /// </remarks>
     private static string? Run(CliRequest request, World world)

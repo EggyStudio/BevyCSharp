@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 90;
+    internal const int ExpectedAbiVersion = 98;
 
     static Native() => NativeLoader.Initialize();
 
@@ -132,6 +132,23 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial ulong bcs_ui_spawn_text(
         string text, NativeUiNodeConfig* config, NativeUiTextConfig* style);
+
+    /// <summary>Adds a run of text to an existing one, returning its entity or 0.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial ulong bcs_ui_spawn_text_span(
+        ulong parent, string text, NativeUiTextConfig* style, float* color);
+
+    /// <summary>Lays a node's children out on a grid.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ui_set_grid(ulong entity, NativeUiGridConfig* config);
+
+    /// <summary>Places one child on its parent's grid.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ui_set_grid_placement(
+        ulong entity, int row, int rowSpan, int column, int columnSpan, int justifySelf);
 
     /// <summary>Replaces what a text entity says.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
@@ -363,6 +380,23 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial ulong bcs_render_spawn_light(NativeLightConfig* config);
 
+    /// <summary>Makes an image out of pixels the caller holds, returning its key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_create_image(
+        byte* pixels, uint width, uint height, int srgb);
+
+    /// <summary>Sets how a directional light divides its shadows across the distance.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_shadow_cascades(
+        ulong light, int cascades, float minimum, float maximum, float firstBound, float overlap);
+
+    /// <summary>Shapes a spot light's beam with a picture.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_light_cookie(ulong light, int image);
+
     /// <summary>Drains what the window has reported since the last call.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -443,6 +477,17 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_gizmo_configure(float width, uint layers, int enabled);
 
+    /// <summary>Sets what a gizmo line looks like, for both groups at once.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gizmo_style(
+        int style,
+        float gapScale,
+        float lineScale,
+        int joint,
+        uint jointResolution,
+        int perspective);
+
     /// <summary>Spawns a 2D camera and returns its entity, or 0.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -486,6 +531,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_has_editor();
+
+    /// <summary>Reports whether the running app installed the interface.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_has_interface();
 
     /// <summary>Copies the scene entities clicked since the last call.</summary>
     [LibraryImport(Library)]
