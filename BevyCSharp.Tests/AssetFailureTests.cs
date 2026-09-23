@@ -8,9 +8,9 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// A handle reports that a load failed and nothing else, so a misspelled path and a file that is
-/// there and unreadable look the same. What the message carries is the pair that tells them apart,
-/// and the test that matters is that the pair arrives at all: a failure nobody is told about is
-/// the state this exists to end.
+/// there and unreadable look the same. What the message carries is what tells them apart, and the
+/// test that matters is that it arrives at all, because a failure nobody is told about is the
+/// state this exists to end.
 /// </remarks>
 [Collection("engine")]
 public sealed class AssetFailureTests
@@ -36,6 +36,10 @@ public sealed class AssetFailureTests
 
         Assert.Contains("not-here.png", failure.Path);
         Assert.False(string.IsNullOrWhiteSpace(failure.Reason));
+
+        // And what kind it was, which the path alone does not say once a loader is picked by
+        // content rather than by extension.
+        Assert.Equal("Image", failure.Kind);
     }
 
     /// <summary>A load that works says nothing, which is what makes the message worth reading.</summary>

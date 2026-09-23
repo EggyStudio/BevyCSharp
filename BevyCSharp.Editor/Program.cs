@@ -7,12 +7,26 @@ using BevyCSharp.Editor;
 // surface on top of the renderer:
 //     build/build-native.sh --editor
 
+// How large to draw, which matters more without a window than with one: a window can be resized
+// by hand and an image cannot, so a panel taller than the picture has no way to be seen.
+var size = args.SkipWhile(argument => argument != "--size").Skip(1).FirstOrDefault();
+var across = 1600u;
+var down = 900u;
+
+if (size is { Length: > 0 } && size.Split('x') is [var wide, var tall]
+    && uint.TryParse(wide, out var parsedWidth)
+    && uint.TryParse(tall, out var parsedHeight))
+{
+    across = Math.Clamp(parsedWidth, 320u, 7680u);
+    down = Math.Clamp(parsedHeight, 240u, 4320u);
+}
+
 // A window by default, and an image when asked for one. The editor is an app like any other, so
 // what lets a game be drawn on a machine with no display lets the editor be drawn there too, which
 // is what a build server checking the interface against a capture needs.
 var config = args.Contains("--offscreen")
-    ? Config.OffscreenFor(1600, 900)
-    : Config.Windowed("BevyCSharp Editor", 1600, 900);
+    ? Config.OffscreenFor(across, down)
+    : Config.Windowed("BevyCSharp Editor", across, down);
 
 // Bevy looks beside the running executable otherwise, which for a .NET app is whichever host
 // launched it rather than the directory the assets were copied to.

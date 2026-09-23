@@ -18,7 +18,7 @@ namespace Bevy;
 /// it arrives, which is what an icon appearing a moment after a panel opens looks like.
 /// </para>
 /// </remarks>
-public static class ImGuiTextures
+public static unsafe class ImGuiTextures
 {
     private static readonly Dictionary<string, ulong> Loaded = [];
     private static readonly Dictionary<int, ulong> Assets = [];
@@ -56,6 +56,29 @@ public static class ImGuiTextures
         Assets[image.Key] = picture;
 
         return picture;
+    }
+
+    /// <summary>
+    /// How large a picture is, in pixels, or zero by zero while it is still loading.
+    /// </summary>
+    /// <remarks>
+    /// What anything fitting a picture into a box needs, since a picture drawn into a square
+    /// without knowing its shape is a picture stretched. A file is loaded in the background, so
+    /// the first frame it is asked for answers zero and the frame after answers its size, which is
+    /// why a caller reads it every frame rather than once.
+    /// </remarks>
+    /// <param name="picture">A name from <see cref="Load"/> or <see cref="Of"/>.</param>
+    public static (uint Width, uint Height) SizeOf(ulong picture)
+    {
+        if (picture == 0) return (0, 0);
+
+        uint width;
+        uint height;
+
+        if (Native.bcs_imgui_picture_size(picture, &width, &height) != NativeStatus.Ok)
+            return (0, 0);
+
+        return (width, height);
     }
 
     /// <summary>Draws a picture, tinted.</summary>

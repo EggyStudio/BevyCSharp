@@ -31,9 +31,12 @@ public partial struct Renderer
             var monitor = Window.Monitor(i);
             var name = Window.MonitorName(i);
 
+            var modes = Window.MonitorModes(i);
+
             Console.WriteLine(
                 $"[Renderer] monitor {i}: {(name.Length > 0 ? name : "unnamed")} "
-                + $"{monitor.Width}x{monitor.Height} at {monitor.RefreshHz:F0} Hz");
+                + $"{monitor.Width}x{monitor.Height} at {monitor.RefreshHz:F0} Hz, "
+                + $"{modes.Length} video mode{(modes.Length == 1 ? "" : "s")}");
         }
     }
 

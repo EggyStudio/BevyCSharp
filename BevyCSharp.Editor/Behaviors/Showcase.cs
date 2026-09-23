@@ -149,12 +149,12 @@ public partial struct Showcase
     [Tooltip("Only there while the mode above says Running.")]
     public float WhileRunning;
 
-    /// <summary>Inside a fold inside a fold.</summary>
-    [Foldout("Advanced/Debug")]
+    /// <summary>Inside a fold inside a fold, shut until somebody opens it.</summary>
+    [Foldout("Advanced/Debug", Open = false)]
     public bool Noisy;
 
     /// <summary>The same, so there is more than one row in the inner fold.</summary>
-    [Foldout("Advanced/Debug")]
+    [Foldout("Advanced/Debug", Open = false)]
     public int Every;
 
     /// <summary>Counts a tick, so the read-only row has something to say.</summary>

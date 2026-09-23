@@ -251,6 +251,8 @@ pub struct AssetFailures {
     pub paths: Vec<String>,
     /// Why each one failed, as Bevy described it.
     pub reasons: Vec<String>,
+    /// What kind of asset each one was, by the name the managed side loads it under.
+    pub kinds: Vec<String>,
     /// Where the reader has got to in the message queue.
     pub cursor: bevy::ecs::message::MessageCursor<
         bevy::asset::UntypedAssetLoadFailedEvent,
@@ -279,6 +281,7 @@ pub extern "C" fn bcs_asset_failures_drain() -> i32 {
             world.resource_scope(|world, mut failures: bevy::ecs::world::Mut<AssetFailures>| {
                 failures.paths.clear();
                 failures.reasons.clear();
+                failures.kinds.clear();
 
                 let Some(messages) = world.get_resource::<Messages<UntypedAssetLoadFailedEvent>>()
                 else {
@@ -290,6 +293,7 @@ pub extern "C" fn bcs_asset_failures_drain() -> i32 {
                 for failure in read {
                     failures.paths.push(failure.path.to_string());
                     failures.reasons.push(failure.error.to_string());
+                    failures.kinds.push(kind_of(failure.id.type_id()).to_string());
                 }
 
                 failures.paths.len() as i32
@@ -307,7 +311,7 @@ pub extern "C" fn bcs_asset_failures_drain() -> i32 {
 /// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn bcs_asset_failure_path(index: i32, out: *mut u8, capacity: i32) -> i32 {
-    crate::interop::guard(|| read_failure(index, out, capacity, true))
+    crate::interop::guard(|| read_failure(index, out, capacity, Text::Path))
 }
 
 /// Writes why one drained failure failed into `out`, and returns its length in bytes.
@@ -316,14 +320,84 @@ pub unsafe extern "C" fn bcs_asset_failure_path(index: i32, out: *mut u8, capaci
 /// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn bcs_asset_failure_reason(index: i32, out: *mut u8, capacity: i32) -> i32 {
-    crate::interop::guard(|| read_failure(index, out, capacity, false))
+    crate::interop::guard(|| read_failure(index, out, capacity, Text::Reason))
 }
 
-/// Writes one of the two texts a failure carries.
+/// Writes what kind of asset one drained failure was, and returns its length in bytes.
+///
+/// The same names [`crate::assets::bcs_asset_load`] takes, so a caller tells an image from a mesh
+/// by what it asked for rather than by guessing from the path. An asset type the bridge does not
+/// load under a name of its own answers an empty string rather than a made-up one.
 ///
 /// # Safety
 /// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.
-fn read_failure(index: i32, out: *mut u8, capacity: i32, path: bool) -> i32 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_asset_failure_kind(index: i32, out: *mut u8, capacity: i32) -> i32 {
+    crate::interop::guard(|| read_failure(index, out, capacity, Text::Kind))
+}
+
+/// Which of a failure's three texts to read.
+#[derive(Clone, Copy)]
+enum Text {
+    /// The path it named.
+    Path,
+    /// Why it failed.
+    Reason,
+    /// What kind of asset it was.
+    Kind,
+}
+
+/// The name the managed side loads an asset type under, or an empty string for one it does not.
+///
+/// The same curated list [`crate::assets::bcs_asset_load`] matches on, read the other way round.
+/// A general answer would need Bevy's type registry to carry every asset type's name, which it
+/// does not, so this grows as the load list does.
+fn kind_of(id: core::any::TypeId) -> &'static str {
+    use core::any::TypeId;
+
+    if id == TypeId::of::<bevy::mesh::Mesh>() {
+        return "Mesh";
+    }
+
+    if id == TypeId::of::<bevy::image::Image>() {
+        return "Image";
+    }
+
+    if id == TypeId::of::<bevy::world_serialization::WorldAsset>() {
+        return "Scene";
+    }
+
+    #[cfg(feature = "render")]
+    {
+        if id == TypeId::of::<bevy::pbr::StandardMaterial>() {
+            return "StandardMaterial";
+        }
+
+        if id == TypeId::of::<bevy::shader::Shader>() {
+            return "Shader";
+        }
+
+        if id == TypeId::of::<bevy::gltf::Gltf>() {
+            return "Gltf";
+        }
+
+        if id == TypeId::of::<bevy::audio::AudioSource>() {
+            return "Audio";
+        }
+
+        if id == TypeId::of::<bevy::text::Font>() {
+            return "Font";
+        }
+    }
+
+    ""
+}
+
+/// Writes one of the three texts a failure carries.
+///
+/// # Safety
+/// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.
+fn read_failure(index: i32, out: *mut u8, capacity: i32, which: Text) -> i32 {
     let Ok(index) = usize::try_from(index) else {
         return status::NULL_ARG;
     };
@@ -333,10 +407,10 @@ fn read_failure(index: i32, out: *mut u8, capacity: i32, path: bool) -> i32 {
             return status::UNSUPPORTED;
         };
 
-        let text = if path {
-            failures.paths.get(index)
-        } else {
-            failures.reasons.get(index)
+        let text = match which {
+            Text::Path => failures.paths.get(index),
+            Text::Reason => failures.reasons.get(index),
+            Text::Kind => failures.kinds.get(index),
         };
 
         let Some(text) = text else {

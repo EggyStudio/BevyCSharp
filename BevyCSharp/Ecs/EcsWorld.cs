@@ -322,6 +322,80 @@ public sealed unsafe class EcsWorld
         return children;
     }
 
+    /// <summary>
+    /// Changes the fields of a component without replacing the rest of it.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What composing a spawned scene is made of. Adding a component from C# replaces the whole
+    /// thing, so setting one field means reading the component, changing it and writing it back,
+    /// and doing that by hand on every entity of a spawned model is where the mistakes are. This
+    /// is that read, change and write in one call.
+    /// </para>
+    /// <para>
+    /// An entity that does not carry the component gets one built from
+    /// <see langword="default"/> and then changed, so a patch names what it cares about whether or
+    /// not anything set the rest. <see cref="GetRef{T}"/> is the other way round, writing straight
+    /// into storage, and is what a system changing a component it knows is there should use.
+    /// </para>
+    /// </remarks>
+    /// <param name="entity">The entity to change.</param>
+    /// <param name="change">What to change about it.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="change"/> is null.</exception>
+    /// <example>
+    /// <code>
+    /// // The artist placed it; the game decides how large it is.
+    /// ctx.Ecs.Patch&lt;Transform&gt;(part, (ref Transform t) => t.Scale = Vec3.One * 0.5f);
+    /// </code>
+    /// </example>
+    public void Patch<T>(Entity entity, PatchOf<T> change) where T : unmanaged
+    {
+        ArgumentNullException.ThrowIfNull(change);
+
+        var component = GetOrDefault<T>(entity);
+        change(ref component);
+        Add(entity, component);
+    }
+
+    /// <summary>
+    /// The same, for an entity and everything under it.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A glTF scene spawns as a tree, and what a game wants to say about it is usually about the
+    /// whole model rather than about the one entity the file happened to put at the root. Every
+    /// entity in the tree is patched, including ones that did not carry the component, which is
+    /// what makes this useful for adding a component as well as for changing one.
+    /// </para>
+    /// <para>
+    /// The tree is walked before anything is written, so a patch that spawns or despawns does not
+    /// change what is visited halfway through.
+    /// </para>
+    /// </remarks>
+    /// <param name="root">The entity to start at. It is patched too.</param>
+    /// <param name="change">What to change about each of them.</param>
+    /// <returns>How many entities were changed.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="change"/> is null.</exception>
+    public int PatchTree<T>(Entity root, PatchOf<T> change) where T : unmanaged
+    {
+        ArgumentNullException.ThrowIfNull(change);
+
+        var tree = new List<Entity>();
+        Gather(root, tree);
+
+        foreach (var entity in tree) Patch(entity, change);
+
+        return tree.Count;
+    }
+
+    /// <summary>Collects an entity and everything under it, deepest last.</summary>
+    private void Gather(Entity entity, List<Entity> into)
+    {
+        into.Add(entity);
+
+        foreach (var child in ChildrenOf(entity)) Gather(child, into);
+    }
+
     // -- Introspection
     //
     // What an editor needs and a game does not. Everything above answers a question about a
@@ -538,3 +612,14 @@ public sealed unsafe class EcsWorld
         return result;
     }
 }
+
+/// <summary>
+/// What <see cref="EcsWorld.Patch{T}"/> does to a component.
+/// </summary>
+/// <remarks>
+/// By reference, so a patch names the fields it cares about and leaves the rest as they were, which
+/// is the whole difference between patching a component and replacing it.
+/// </remarks>
+/// <typeparam name="T">The component being changed.</typeparam>
+/// <param name="component">The component as it stands, to be changed in place.</param>
+public delegate void PatchOf<T>(ref T component) where T : unmanaged;

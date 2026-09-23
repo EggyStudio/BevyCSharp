@@ -191,9 +191,9 @@ public sealed class HideIfAttribute(string field, object? value = null) : Attrib
 /// Consecutive fields naming the same fold share it.
 /// </para>
 /// <para>
-/// Folds nest, written as a path: <c>[Foldout("Advanced/Debug")]</c> is a fold inside a fold, and
-/// it goes as deep as somebody writes slashes. Whether a fold is open is remembered per component
-/// rather than per entity, because somebody who shut one meant it about the component.
+/// Folds nest, written as a path, so <c>[Foldout("Advanced/Debug")]</c> is a fold inside a fold
+/// and it goes as deep as somebody writes slashes. Whether a fold is open is remembered per
+/// component rather than per entity, because somebody who shut one meant it about the component.
 /// </para>
 /// </remarks>
 /// <param name="path">What the fold is called, with slashes between the levels.</param>

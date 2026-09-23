@@ -17,6 +17,28 @@ public sealed class AudioTests
 {
     private const string Clip = "sounds/beep.wav";
 
+    /// <summary>Decibels and multipliers convert both ways, and zero has no decibels.</summary>
+    /// <remarks>
+    /// Arithmetic rather than engine behavior, and worth pinning because the exponent is easy to
+    /// write with the wrong divisor. Twenty is for amplitude, where ten would be for power.
+    /// </remarks>
+    [Fact]
+    public void VolumeAndDecibelsConvertBothWays()
+    {
+        Assert.Equal(1f, Audio.VolumeFromDecibels(0f), 4);
+        Assert.Equal(0.5f, Audio.VolumeFromDecibels(-6.0206f), 3);
+        Assert.Equal(2f, Audio.VolumeFromDecibels(6.0206f), 3);
+
+        Assert.Equal(0f, Audio.DecibelsFromVolume(1f), 4);
+        Assert.Equal(-6.0206f, Audio.DecibelsFromVolume(0.5f), 3);
+
+        // Round trips, which is the property a settings slider depends on.
+        Assert.Equal(0.35f, Audio.VolumeFromDecibels(Audio.DecibelsFromVolume(0.35f)), 4);
+
+        // And silence is infinitely quiet rather than a large negative number pretending so.
+        Assert.Equal(float.NegativeInfinity, Audio.DecibelsFromVolume(0f));
+    }
+
     [Fact]
     public void AClipLoads()
     {

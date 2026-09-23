@@ -21,8 +21,9 @@ namespace Bevy;
 /// known whichever happens first.
 /// </para>
 /// <para>
-/// One sub-state per parent. The bridge pairs each sub-state slot with one state slot, because
-/// Bevy names the parent as an associated type and the types are fixed when the bridge is built.
+/// A state carries a fixed number of sub-states, because Bevy names the parent as an associated
+/// type and the types exist when the bridge is built. <see cref="StateRegistry.SubsPerSlot"/>
+/// reports how many, and one past that is refused rather than half-worked.
 /// </para>
 /// </remarks>
 /// <example>
@@ -46,6 +47,46 @@ public sealed class SubStateOfAttribute(Type parent, object whileIn) : Attribute
 }
 
 /// <summary>
+/// Declares an enum as a state worked out from another rather than set.
+/// </summary>
+/// <remarks>
+/// <para>
+/// The third shape of state. A plain state is set, a sub-state exists while its parent holds one
+/// value, and a computed state takes a value of its own from whatever its source holds. What that
+/// is for is a fact that follows from another fact, such as whether the interface is up, which is
+/// true on three screens and false on the rest. Writing it as a plain state leaves two facts to
+/// keep in step, and one of them eventually lies.
+/// </para>
+/// <para>
+/// The table is stated at <c>app.AddComputedState</c> rather than here, because it is a list of
+/// pairs and an attribute carrying one would be a worse way to read the same thing. A source value
+/// the table says nothing about means the computed state does not exist at all, so a system scoped
+/// to it does not run and <c>App.TryState</c> answers false.
+/// </para>
+/// <para>
+/// Setting one is always refused, because there is nothing to set. It changes when its source
+/// does.
+/// </para>
+/// </remarks>
+/// <example>
+/// <code>
+/// public enum Screen { Menu, Playing, Paused, Cutscene }
+///
+/// [ComputedFrom(typeof(Screen))]
+/// public enum Hud { Hidden, Shown }
+///
+/// app.AddComputedState((Screen.Playing, Hud.Shown), (Screen.Paused, Hud.Shown));
+/// </code>
+/// </example>
+/// <param name="source">The state enum this one is worked out from.</param>
+[AttributeUsage(AttributeTargets.Enum)]
+public sealed class ComputedFromAttribute(Type source) : Attribute
+{
+    /// <summary>The state enum this one is worked out from.</summary>
+    public Type Source { get; } = source;
+}
+
+/// <summary>
 /// Maps C# enums onto Bevy's app states.
 /// </summary>
 /// <remarks>
@@ -53,7 +94,7 @@ public sealed class SubStateOfAttribute(Type parent, object whileIn) : Attribute
 /// A Bevy state is a Rust type, and C# cannot define one, so the bridge provides a fixed number
 /// of state slots that each hold an integer and let the managed side decide what the numbers
 /// mean. An enum claims a slot the first time it is added, which is what keeps two unrelated
-/// state machines apart: Bevy keys its state resource and its transitions on the type, so two
+/// state machines apart. Bevy keys its state resource and its transitions on the type, so two
 /// slots really are two independent state machines.
 /// </para>
 /// <para>
@@ -77,6 +118,13 @@ public static unsafe class StateRegistry
     /// block of slots starting at <see cref="SlotCount"/> plus <c>n</c> times this.
     /// </remarks>
     public static int SubsPerSlot => Native.bcs_state_subs_per_slot();
+
+    /// <summary>How many computed states one state can carry.</summary>
+    /// <remarks>Fixed by the bridge for the same reason <see cref="SubsPerSlot"/> is.</remarks>
+    public static int ComputedPerSlot => Native.bcs_state_computed_per_slot();
+
+    /// <summary>How many sub-states exist in total, which is where computed slots start.</summary>
+    internal static int SubCount => Native.bcs_state_sub_count();
 
     /// <summary>The slot <typeparamref name="TState"/> was added under.</summary>
     /// <exception cref="InvalidOperationException">It was never added.</exception>
@@ -157,6 +205,28 @@ public static unsafe class StateRegistry
                     + "a state can carry is fixed when the bridge is built.");
             }
 
+            // A computed state takes one of the slots set aside for its source, past every
+            // sub-state, which is how one number addresses all three shapes of state.
+            if (DescribeComputed(state) is { } computed)
+            {
+                var source = Claim(computed.Source);
+                var room = ComputedPerSlot;
+                var first = SlotCount + SubCount + (source * room);
+
+                for (var offset = 0; offset < room; offset++)
+                {
+                    if (Slots.ContainsValue(first + offset)) continue;
+
+                    Slots[state] = first + offset;
+                    return first + offset;
+                }
+
+                throw new InvalidOperationException(
+                    $"{computed.Source.Name} already has {room} states computed from it, so "
+                    + $"{state.Name} cannot be another. Bevy names a computed state's source as a "
+                    + "type, so how many one state can carry is fixed when the bridge is built.");
+            }
+
             var count = SlotCount;
             if (_next >= count)
                 throw new InvalidOperationException(
@@ -199,6 +269,35 @@ public static unsafe class StateRegistry
                 + "to live.");
 
         return sub;
+    }
+
+    /// <summary>
+    /// What an enum says about being computed from another, or null when it says nothing.
+    /// </summary>
+    /// <remarks>
+    /// Refuses a source that is not an enum, and one that is itself computed. The first is a
+    /// mistake the compiler cannot catch, because the attribute takes a <see cref="Type"/>; the
+    /// second is a chain, which needs a slot layout this bridge does not have.
+    /// </remarks>
+    internal static ComputedFromAttribute? DescribeComputed(Type state)
+    {
+        var computed = (ComputedFromAttribute?)Attribute.GetCustomAttribute(
+            state, typeof(ComputedFromAttribute));
+
+        if (computed is null) return null;
+
+        if (!computed.Source.IsEnum)
+            throw new InvalidOperationException(
+                $"{state.Name} names {computed.Source.Name} as its source, which is not an enum. "
+                + "A state is an enum, so what one is computed from is one too.");
+
+        if (Attribute.IsDefined(computed.Source, typeof(ComputedFromAttribute)))
+            throw new InvalidOperationException(
+                $"{state.Name} is computed from {computed.Source.Name}, which is itself computed. "
+                + "The bridge sets a computed state's source aside when it is built, so a chain "
+                + "of them has nowhere to live.");
+
+        return computed;
     }
 
     /// <summary>Drops every assignment when a new app is created.</summary>

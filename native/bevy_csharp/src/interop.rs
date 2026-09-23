@@ -275,6 +275,24 @@ pub struct BcsMonitor {
     pub scale_factor: f32,
 }
 
+/// One video mode a monitor can be driven at.
+///
+/// A resolution, a colour depth and a refresh rate together, which is what exclusive fullscreen
+/// takes the screen over with. A monitor offers a fixed list of these and can be driven at no
+/// others, so a settings screen offers what the list holds rather than a pair of number boxes.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsVideoMode {
+    /// Width in physical pixels.
+    pub width: u32,
+    /// Height in physical pixels.
+    pub height: u32,
+    /// Bits per pixel.
+    pub bit_depth: u32,
+    /// Refresh rate in millihertz.
+    pub refresh_millihertz: u32,
+}
+
 /// One thing a UI widget reported.
 ///
 /// A tagged pair rather than an event per kind, because they cross the boundary as one array and

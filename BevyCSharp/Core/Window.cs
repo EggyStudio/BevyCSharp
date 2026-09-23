@@ -41,6 +41,25 @@ public readonly record struct MonitorInfo(
     float RefreshHz,
     float ScaleFactor);
 
+/// <summary>
+/// One video mode a monitor can be driven at.
+/// </summary>
+/// <remarks>
+/// A resolution, a colour depth and a refresh rate together, which is what exclusive fullscreen
+/// takes the screen over with. A monitor offers a fixed list of these and can be driven at no
+/// others, so a settings screen offers what <see cref="Window.MonitorModes"/> returns rather than a
+/// pair of number boxes.
+/// </remarks>
+/// <param name="Width">Width in physical pixels.</param>
+/// <param name="Height">Height in physical pixels.</param>
+/// <param name="BitDepth">Bits per pixel.</param>
+/// <param name="RefreshHz">Refresh rate in hertz.</param>
+public readonly record struct VideoMode(
+    uint Width,
+    uint Height,
+    uint BitDepth,
+    float RefreshHz);
+
 /// <summary>What the window does with the mouse cursor.</summary>
 public enum CursorGrab
 {
@@ -182,6 +201,79 @@ public static unsafe class Window
         return Native.ReadText(
             (buffer, capacity) => Native.bcs_monitor_name(index, buffer, capacity),
             $"reading the name of monitor {index}");
+    }
+
+    /// <summary>
+    /// Every video mode a monitor can be driven at, by an index below <see cref="MonitorCount"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What a settings screen lists when it offers exclusive fullscreen. A monitor can only be
+    /// driven at the modes it reports, so the list is the choice rather than a validation of one
+    /// somebody typed.
+    /// </para>
+    /// <para>
+    /// The list is in whatever order the platform gives it, which is not sorted, and it can hold
+    /// the same resolution several times at different refresh rates.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">There is no monitor at that index.</exception>
+    public static VideoMode[] MonitorModes(int index)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(index);
+
+        var count = Native.bcs_monitor_mode_count(index);
+        if (count == NativeStatus.Unsupported) return [];
+
+        Native.Check(count, $"counting the video modes of monitor {index}");
+        if (count == 0) return [];
+
+        var modes = new VideoMode[count];
+
+        for (var i = 0; i < count; i++)
+        {
+            NativeVideoMode mode;
+            Native.Check(
+                Native.bcs_monitor_mode(index, i, &mode),
+                $"reading video mode {i} of monitor {index}");
+
+            modes[i] = new VideoMode(
+                mode.Width,
+                mode.Height,
+                mode.BitDepth,
+                mode.RefreshMillihertz / 1000f);
+        }
+
+        return modes;
+    }
+
+    /// <summary>
+    /// Takes the screen over in exclusive fullscreen at one of a monitor's own video modes.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <see cref="SetMode"/> with <see cref="WindowMode.Fullscreen"/> takes the mode the monitor is
+    /// already in, which is what avoids a switch the compositor has to undo on every alt-tab. This
+    /// is the other case, where a game runs at a resolution the desktop is not in.
+    /// </para>
+    /// <para>
+    /// The mode is named by its place in <see cref="MonitorModes"/> rather than by numbers, because
+    /// a monitor can only be driven at the modes it offers.
+    /// </para>
+    /// </remarks>
+    /// <param name="monitor">An index below <see cref="MonitorCount"/>.</param>
+    /// <param name="mode">An index into that monitor's <see cref="MonitorModes"/>.</param>
+    /// <exception cref="BevyNativeException">
+    /// There is no such monitor, it has no such mode, or this build has no window.
+    /// </exception>
+    public static void SetVideoMode(int monitor, int mode)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(monitor);
+        ArgumentOutOfRangeException.ThrowIfNegative(mode);
+
+        Native.Check(
+            Native.bcs_window_set_video_mode(monitor, mode),
+            $"taking monitor {monitor} over at video mode {mode}");
     }
 
     /// <summary>

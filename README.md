@@ -341,6 +341,24 @@ the native library is built, and a third sub-state or a chain of them is refused
 half-worked. Two is what a run that can be paused and played at a difficulty needs, and raising it
 is a longer list in the same place as the state slots below.
 
+A state whose value follows from another's is a computed state. Whether the interface is up is
+true on some screens and false on the rest, and writing that as a plain state leaves two facts to
+keep in step until one of them lies:
+
+```csharp
+[ComputedFrom(typeof(Screen))]
+public enum Hud { Shown, Dimmed }
+
+app.AddState(Screen.Menu);
+app.AddComputedState((Screen.Playing, Hud.Shown), (Screen.Paused, Hud.Dimmed));
+```
+
+The table says what it is while the source holds each value, and a value the table says nothing
+about means it does not exist at all, so `TryState<Hud>` answers false there and a method scoped to
+`[InState(Hud.Shown)]` does not run. Setting one is refused, since there is nothing to set. Its
+`[OnEnter]` and `[OnExit]` edges run like any other state's, which is what makes it useful rather
+than merely tidy.
+
 A transition is queued rather than immediate. It lands at Bevy's next transition point, so every
 system in the frame agrees on which state it is in rather than some seeing the change halfway
 through.
@@ -417,12 +435,14 @@ An asset that will not load says why the same way:
 
 ```csharp
 foreach (var failed in ctx.Read<AssetLoadFailed>())
-    Console.Error.WriteLine($"{failed.Path}: {failed.Reason}");
+    Console.Error.WriteLine($"{failed.Kind} {failed.Path} failed, because {failed.Reason}");
 ```
 
 A handle reports that a load failed and nothing more, so this is what tells a misspelled path apart
-from a file that is there and unreadable. It arrives in every profile, because an asset that will
-not load is exactly as wrong in a headless run and harder to notice there.
+from a file that is there and unreadable. `Kind` names the asset type the way `AssetServer.Load`
+names one, and is empty for a type the engine loaded for itself as part of something else. It
+arrives in every profile, because an asset that will not load is exactly as wrong in a headless run
+and harder to notice there.
 
 ---
 
@@ -623,6 +643,18 @@ foreach (var child in ctx.Ecs.ChildrenOf(root))
     ctx.Ecs.Add(child, new Selectable());           // add what the file knows nothing about
 }
 ```
+
+`Add` replaces a component whole, which is right for one the game owns and wrong for one an artist
+part-filled in. `Patch` changes the fields it names and leaves the rest, and `PatchTree` does it to
+an entity and everything under it, which is usually what a model wants said about it:
+
+```csharp
+// Keep where the artist put each part, and halve how large the whole model is.
+ctx.Ecs.PatchTree<Transform>(root, (ref Transform t) => t.Scale = Vec3.One * 0.5f);
+```
+
+That is the same field-by-field merge Bevy's `bsn!` does between two scenes, done at runtime rather
+than at compile time.
 
 `.scn` and `.scn.ron` worlds load as the same asset through `AssetKind.Scene`, so `SpawnScene`
 takes either.
@@ -1009,6 +1041,12 @@ for (var i = 0; i < Window.MonitorCount(); i++)
 A monitor's name is read separately from the rest of it, because it is text. Platforms name a
 monitor nothing often enough that a settings screen wants the fallback shown above. A headless run
 has no window, and every call here says so rather than doing nothing.
+
+`Window.MonitorModes` lists the resolutions and refresh rates a monitor can actually be driven at,
+and `Window.SetVideoMode(monitor, mode)` takes the screen over at one of them. That is the case
+`WindowMode.Fullscreen` does not cover, where a game runs at a resolution the desktop is not in. The
+mode is named by its place in the list rather than by numbers, because a monitor can only be driven
+at the modes it offers, and how many it offers depends on the platform as much as on the hardware.
 
 ### 2D
 
@@ -1668,9 +1706,17 @@ nothing reflects at runtime:
 [Inline] public Vec3 Corner;                                         // three boxes, one row
 [Wide] public int Seed;                                              // no name column at all
 
+[Foldout("Advanced")] public float Bias;                             // folded away
+[Foldout("Advanced/Debug", Open = false)] public bool Noisy;         // and a fold inside it
+
 [Button("Save", Line = ButtonLine.Start, Weight = 2)] public void Save() { }
 [Button("Load", Line = ButtonLine.End)]               public void Load() { }
 ```
+
+A component with twenty fields is unreadable however well it is ordered, so `[Foldout]` puts the
+rest away under a name. Consecutive fields naming the same fold share it, folds nest as deep as the
+slashes go, and whether one is open is remembered per component rather than per entity, because
+somebody who shut one meant it about the component.
 
 A schema also carries how to add the component, how to remove it, and any method the struct has
 that takes nothing, so a panel offers those as buttons without naming a type. What the editor

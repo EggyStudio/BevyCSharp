@@ -285,9 +285,9 @@ public sealed unsafe class App : IDisposable
     /// Moves the assets that failed to load onto the message bus.
     /// </summary>
     /// <remarks>
-    /// Two texts per failure, each read the way every text crosses the boundary: ask with nothing
-    /// to learn the length, then ask again with a buffer that size. Failures are rare, so the
-    /// reads cost nothing and a frame with none costs one call that answers zero.
+    /// Three texts per failure, each read the way every text crosses the boundary, which is to ask
+    /// with nothing to learn the length and then ask again with a buffer that size. Failures are
+    /// rare, so the reads cost nothing and a frame with none costs one call that answers zero.
     /// </remarks>
     private static void PostAssetFailures(MessageBus bus)
     {
@@ -306,7 +306,13 @@ public sealed unsafe class App : IDisposable
                 (buffer, capacity) => Native.bcs_asset_failure_reason(index, buffer, capacity),
                 "reading why an asset failed to load");
 
-            bus.Send(new AssetLoadFailed(path, reason));
+            // What kind it was, which the path alone does not say once a loader is picked by
+            // content rather than by extension.
+            var kind = Native.ReadText(
+                (buffer, capacity) => Native.bcs_asset_failure_kind(index, buffer, capacity),
+                "reading what kind of asset failed to load");
+
+            bus.Send(new AssetLoadFailed(path, reason, kind));
         }
     }
 
@@ -561,6 +567,95 @@ public sealed unsafe class App : IDisposable
                 Convert.ToInt32(sub.WhileIn, System.Globalization.CultureInfo.InvariantCulture),
                 StateRegistry.ToInt(initial)),
             $"adding sub-state {typeof(TState).Name} under {sub.Parent.Name}");
+
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a state worked out from another rather than set.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The third shape of state, for a fact that follows from another fact. Whether the interface
+    /// is up is true on three screens and false on the rest, and writing that as a plain state
+    /// leaves two facts to keep in step until one of them lies.
+    /// </para>
+    /// <para>
+    /// The source has to be added first, because Bevy works the value out whenever the source
+    /// changes and a source that holds no state never changes. A source value the table says
+    /// nothing about means the computed state does not exist at all, so a system scoped to it does
+    /// not run and <see cref="TryState{TState}"/> answers false.
+    /// </para>
+    /// <para>
+    /// <see cref="SetState{TState}"/> on one is always refused, since there is nothing to set.
+    /// </para>
+    /// </remarks>
+    /// <typeparam name="TState">The enum being computed, carrying <see cref="ComputedFromAttribute"/>.</typeparam>
+    /// <typeparam name="TSource">The enum it is computed from.</typeparam>
+    /// <param name="table">
+    /// What the state is while the source holds each value. A value named twice takes the first
+    /// answer, and one not named at all means the state does not exist.
+    /// </param>
+    /// <exception cref="InvalidOperationException">
+    /// The app is running, the enum says nothing about what it is computed from, or the table is
+    /// empty.
+    /// </exception>
+    /// <example>
+    /// <code>
+    /// app.AddState(Screen.Menu);
+    /// app.AddComputedState((Screen.Playing, Hud.Shown), (Screen.Paused, Hud.Shown));
+    /// </code>
+    /// </example>
+    public App AddComputedState<TState, TSource>(params (TSource Source, TState Is)[] table)
+        where TState : struct, Enum
+        where TSource : struct, Enum
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(table);
+
+        if (IsRunning)
+            throw new InvalidOperationException(
+                $"Cannot add computed state {typeof(TState).Name}, because the app is already "
+                + "running. Add states from a plugin's Build method or before calling Run.");
+
+        if (table.Length == 0)
+            throw new InvalidOperationException(
+                $"{typeof(TState).Name} was given an empty table, so it would never exist. Name "
+                + "at least one value of its source that it applies to.");
+
+        var computed = StateRegistry.DescribeComputed(typeof(TState))
+                       ?? throw new InvalidOperationException(
+                           $"{typeof(TState).Name} is not computed from anything. Put "
+                           + "[ComputedFrom(typeof(Source))] on the enum, which is where a reader "
+                           + "looks for what it follows from.");
+
+        if (computed.Source != typeof(TSource))
+            throw new InvalidOperationException(
+                $"{typeof(TState).Name} is computed from {computed.Source.Name}, and the table "
+                + $"was written in terms of {typeof(TSource).Name}. The two have to be the same "
+                + "state, or the table says nothing about when it applies.");
+
+        // Past the states and every sub-state, which is where the computed block begins.
+        var slot = StateRegistry.Claim<TState>()
+                   - StateRegistry.SlotCount
+                   - StateRegistry.SubCount;
+
+        var from = new int[table.Length];
+        var to = new int[table.Length];
+
+        for (var i = 0; i < table.Length; i++)
+        {
+            from[i] = StateRegistry.ToInt(table[i].Source);
+            to[i] = StateRegistry.ToInt(table[i].Is);
+        }
+
+        fixed (int* sources = from)
+        fixed (int* results = to)
+        {
+            Native.Check(
+                Native.bcs_computed_add(_handle, slot, sources, results, table.Length),
+                $"adding computed state {typeof(TState).Name} from {computed.Source.Name}");
+        }
 
         return this;
     }

@@ -180,17 +180,27 @@ public static class AssetsTab
                 draw);
         }
 
-        // The picture that says what kind of thing it is, in the middle of the tile.
-        var icon = entry.IsDirectory ? EditorIcons.Folder : EditorAssets.IconOf(entry.Path);
-
         const float Mark = 34f;
 
-        EditorDraw.Icon(
-            draw,
-            icon,
-            at + new Vector2((size - Mark) * 0.5f, (size - Mark) * 0.5f - (line * 0.6f)),
-            Mark,
-            picked);
+        var middle = at + new Vector2((size - Mark) * 0.5f, (size - Mark) * 0.5f - (line * 0.6f));
+
+        // An image tile wears the image, because the interface loads a picture from a path and
+        // that is all it takes. Everything else wears the picture of its kind, since what a model
+        // or a sound looks like is a thumbnail somebody has to render.
+        var shown = !entry.IsDirectory
+                    && EditorAssets.KindOf(entry.Path) == "image"
+                    && EditorDraw.Picture(
+                        draw,
+                        entry.Path,
+                        at + new Vector2(EditorSurface.Air, EditorSurface.Air),
+                        size - (EditorSurface.Air * 2f) - line);
+
+        if (!shown)
+        {
+            var icon = entry.IsDirectory ? EditorIcons.Folder : EditorAssets.IconOf(entry.Path);
+
+            EditorDraw.Icon(draw, icon, middle, Mark, picked);
+        }
 
         // And its name under it, cut to what fits rather than spilling into the next tile.
         var name = EditorText.Fit(entry.Name, size - EditorSurface.Sides);

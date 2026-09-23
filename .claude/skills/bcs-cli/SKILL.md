@@ -128,7 +128,12 @@ in it.
 
 **On a machine with no display**, open the session with `--offscreen`. It installs the renderer and
 draws into an image instead of a window, so `shot` produces a real picture of the scene, panels and
-all, where a windowed session could not start at all. Everything else is the same session.
+all, where a windowed session could not start at all.
+
+One thing is not the same. Every `input.*` verb writes a window message, so an offscreen session
+has nowhere to send one and refuses with a sentence saying why. The interface is drawn and laid out
+there, and it cannot be clicked. Drive what the click would have done instead, which is usually a
+command of its own (`assets.open`, `select`, `do <menu path>`), and take the picture afterwards.
 
 ## More than one app serving
 

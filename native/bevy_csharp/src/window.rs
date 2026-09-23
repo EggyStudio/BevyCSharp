@@ -430,3 +430,152 @@ pub unsafe extern "C" fn bcs_monitor_name(index: i32, out: *mut u8, capacity: i3
         }
     })
 }
+
+/// Reports how many video modes a monitor offers.
+///
+/// A video mode is a resolution, a colour depth and a refresh rate together, which is what an
+/// exclusive fullscreen window takes over the screen with. Returns [`status::NO_ENTITY`] where
+/// there is no monitor at that index.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_monitor_mode_count(index: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = index;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::window::Monitor;
+
+            let Ok(index) = usize::try_from(index) else {
+                return status::NULL_ARG;
+            };
+
+            crate::state::with_world(|world| {
+                let mut monitors = world.query::<&Monitor>();
+
+                match monitors.iter(world).nth(index) {
+                    Some(monitor) => monitor.video_modes.len() as i32,
+                    None => status::NO_ENTITY,
+                }
+            })
+        }
+    })
+}
+
+/// Describes one video mode of one monitor.
+///
+/// `mode` counts up to what [`bcs_monitor_mode_count`] reported. The width and height are physical
+/// pixels, and the refresh rate is in millihertz the way a monitor's own is.
+///
+/// # Safety
+/// `out` must be writable for one [`crate::interop::BcsVideoMode`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_monitor_mode(
+    index: i32,
+    mode: i32,
+    out: *mut crate::interop::BcsVideoMode,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (index, mode, out);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::window::Monitor;
+
+            if out.is_null() {
+                return status::NULL_ARG;
+            }
+
+            let (Ok(index), Ok(mode)) = (usize::try_from(index), usize::try_from(mode)) else {
+                return status::NULL_ARG;
+            };
+
+            crate::state::with_world(|world| {
+                let mut monitors = world.query::<&Monitor>();
+
+                let Some(monitor) = monitors.iter(world).nth(index) else {
+                    return status::NO_ENTITY;
+                };
+
+                let Some(found) = monitor.video_modes.get(mode) else {
+                    return status::NOT_PRESENT;
+                };
+
+                unsafe {
+                    out.write(crate::interop::BcsVideoMode {
+                        width: found.physical_size.x,
+                        height: found.physical_size.y,
+                        bit_depth: found.bit_depth as u32,
+                        refresh_millihertz: found.refresh_rate_millihertz,
+                    });
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Takes the screen over in exclusive fullscreen at one of a monitor's own video modes.
+///
+/// [`bcs_window_set_mode`] takes the mode the monitor is already in, which is what avoids a switch
+/// the compositor has to undo on every alt-tab. This is the other case, where a game wants to run
+/// at a resolution the desktop is not in, and it asks for one of the modes
+/// [`bcs_monitor_mode`] described rather than for arbitrary numbers, because a monitor can only be
+/// driven at the modes it offers.
+///
+/// Returns [`status::NO_ENTITY`] where there is no such monitor and [`status::NOT_PRESENT`] where
+/// it has no such mode.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_window_set_video_mode(index: i32, mode: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (index, mode);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::window::{Monitor, VideoModeSelection};
+
+            let (Ok(index), Ok(mode)) = (usize::try_from(index), usize::try_from(mode)) else {
+                return status::NULL_ARG;
+            };
+
+            // Read before the window is borrowed, because both live in the same world and the
+            // monitor list is a query rather than a resource.
+            let chosen = crate::state::with_world_opt(|world| {
+                let mut monitors = world.query::<&Monitor>();
+
+                monitors
+                    .iter(world)
+                    .nth(index)
+                    .map(|monitor| monitor.video_modes.get(mode).copied())
+            });
+
+            let chosen = match chosen {
+                None => return status::NO_WORLD,
+                Some(None) => return status::NO_ENTITY,
+                Some(Some(None)) => return status::NOT_PRESENT,
+                Some(Some(Some(chosen))) => chosen,
+            };
+
+            with_window(|window, _| {
+                window.mode = WindowMode::Fullscreen(
+                    MonitorSelection::Index(index),
+                    VideoModeSelection::Specific(chosen),
+                );
+
+                status::OK
+            })
+        }
+    })
+}

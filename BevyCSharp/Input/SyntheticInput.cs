@@ -152,16 +152,32 @@ public static class SyntheticInput
     /// Moves, presses or releases the pointer.
     /// </summary>
     /// <remarks>
-    /// Into both halves of what a pointer does: the interface's own event queue, and the window's
-    /// messages, which is what raycasts the scene and steers the camera. A click that is only told
-    /// to one of them tests half the path a hand takes.
+    /// <para>
+    /// Into both halves of what a pointer does, which is the interface's own event queue and the
+    /// window's messages. The second is what raycasts the scene and steers the camera, so a click
+    /// told to only one of them tests half the path a hand takes.
+    /// </para>
+    /// <para>
+    /// A pointer is a thing that happens to a window, so a run with none has nowhere to send one.
+    /// That is every headless run and every offscreen one, including an editor opened with
+    /// <c>--offscreen</c>, where the interface is drawn and laid out but cannot be clicked.
+    /// </para>
     /// </remarks>
+    /// <exception cref="BevyNativeException">This run has no window.</exception>
     public static void Send(
         float x, float y, PointerAction action, MouseButton button = MouseButton.Left)
     {
-        Native.Check(
-            Native.bcs_input_pointer(x, y, (int)action, (int)button),
-            $"sending a pointer {action} at {x},{y}");
+        var status = Native.bcs_input_pointer(x, y, (int)action, (int)button);
+
+        if (status == NativeStatus.InvalidState)
+            throw new BevyNativeException(
+                NativeStatus.InvalidState,
+                $"Sending a pointer {action} at {x},{y} failed, because this run has no window to "
+                + "send it to. A synthetic pointer is a window message, so a headless or offscreen "
+                + "run cannot be clicked even where it draws an interface. Run with a window, or "
+                + "drive what the click would have done directly.");
+
+        Native.Check(status, $"sending a pointer {action} at {x},{y}");
 
         if (!ImGuiRuntime.IsRunning) return;
 

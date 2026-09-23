@@ -242,7 +242,7 @@ pub unsafe extern "C" fn bcs_imgui_picture(path: *const core::ffi::c_char) -> u6
 /// Names an image asset the caller already has, so the interface can draw it.
 ///
 /// The other half of [`bcs_imgui_picture`], which loads a file. This takes an asset key, which is
-/// what a render target is: a camera draws into an image, and the interface draws that image, so a
+/// what a render target is. A camera draws into an image, and the interface draws that image, so a
 /// thumbnail or a preview is a small scene rather than a picture somebody saved.
 ///
 /// Returns `0` when the key names no image.
@@ -298,4 +298,61 @@ pub extern "C" fn bcs_imgui_drop_texture(texture: u64) -> i32 {
 #[cfg(feature = "editor")]
 pub fn install(app: &mut bevy::app::App) {
     render::install(app);
+}
+
+/// Writes how large a picture is, in pixels.
+///
+/// What a tile drawing a file needs, because an image drawn into a square without knowing its
+/// shape is an image stretched. Answers zero for both while the file is still loading, which is
+/// the normal answer on the frame a picture is first asked for.
+///
+/// Returns [`status::NOT_PRESENT`] where the name stands for no picture.
+///
+/// # Safety
+/// `width` and `height` must both be writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_imgui_picture_size(
+    picture: u64,
+    width: *mut u32,
+    height: *mut u32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (picture, width, height);
+            crate::interop::status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use crate::interop::status;
+
+            if width.is_null() || height.is_null() {
+                return status::NULL_ARG;
+            }
+
+            crate::state::with_world(|world| {
+                let Some(pictures) = world.get_resource::<render::Pictures>() else {
+                    return status::UNSUPPORTED;
+                };
+
+                let Some(handle) = pictures.get(picture).cloned() else {
+                    return status::NOT_PRESENT;
+                };
+
+                let size = world
+                    .get_resource::<bevy::asset::Assets<bevy::image::Image>>()
+                    .and_then(|images| images.get(&handle))
+                    .map(|image| image.texture_descriptor.size)
+                    .unwrap_or_default();
+
+                unsafe {
+                    width.write(size.width);
+                    height.write(size.height);
+                }
+
+                status::OK
+            })
+        }
+    })
 }

@@ -175,11 +175,18 @@ public static class DetailsPanel
             ImGui.Indent(Inset);
 
             // In the order the fields asked for, which is declaration order for anything that
-            // did not ask.
+            // did not ask, and inside whatever fold each one named.
+            var fold = new FoldStack(schema.Name);
+
             foreach (var field in Ordered(schema))
             {
-                ComponentFields.Row(ctx, entity, schema, field);
+                if (fold.Enter(field.Hints.Foldout, field.Hints.FoldoutOpen))
+                {
+                    ComponentFields.Row(ctx, entity, schema, field);
+                }
             }
+
+            fold.Leave();
 
             // Wrapped rather than run off the edge, because a row of buttons as wide as the
             // panel is a row whose last button cannot be pressed.
@@ -241,6 +248,121 @@ public static class DetailsPanel
         draw.ChannelsMerge();
 
         ImGui.Spacing();
+    }
+
+    /// <summary>
+    /// Opens and closes the folds a run of fields names, one field at a time.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A fold is written on each field rather than around a group of them, because an attribute
+    /// can only be put on the thing it is about. Consecutive fields naming the same fold share it,
+    /// which means the run of fields is what says where a fold begins and ends, and something has
+    /// to keep that as it walks them.
+    /// </para>
+    /// <para>
+    /// Whether a fold is open is remembered per component rather than per entity, because somebody
+    /// who shut one meant it about the component. Nested folds are a path with slashes in it, so
+    /// entering <c>Advanced/Debug</c> from <c>Advanced</c> opens one level and entering it from
+    /// nothing opens two.
+    /// </para>
+    /// </remarks>
+    /// <param name="component">Which component's folds these are.</param>
+    private sealed class FoldStack(string component)
+    {
+        /// <summary>Which folds are open, by component and path, for as long as the editor runs.</summary>
+        private static readonly Dictionary<string, bool> Shown = [];
+
+        /// <summary>The levels currently entered, outermost first.</summary>
+        private readonly List<string> _open = [];
+
+        /// <summary>Whether every level entered so far is open, so the fields inside show.</summary>
+        private bool _visible = true;
+
+        /// <summary>
+        /// Moves to the fold a field named, and says whether the field should be drawn.
+        /// </summary>
+        /// <param name="path">The fold, or null for none.</param>
+        /// <param name="starts">Whether a fold seen for the first time starts open.</param>
+        internal bool Enter(string? path, bool starts)
+        {
+            var wanted = path is { Length: > 0 } ? path.Split('/') : [];
+
+            // Everything the two have in common stays as it is, which is what lets consecutive
+            // fields share a fold rather than closing and reopening it each time.
+            var shared = 0;
+
+            while (shared < wanted.Length
+                   && shared < _open.Count
+                   && wanted[shared] == _open[shared])
+            {
+                shared++;
+            }
+
+            Close(shared);
+
+            for (var level = shared; level < wanted.Length; level++)
+            {
+                _open.Add(wanted[level]);
+
+                // Named by the whole path, so two folds called Debug under different parents are
+                // two folds rather than one remembered in both places.
+                var key = component + "/" + string.Join("/", _open);
+
+                if (!Shown.TryGetValue(key, out var open))
+                {
+                    open = starts;
+                    Shown[key] = open;
+                }
+
+                // A shut fold still has its levels pushed, so the next field's path is compared
+                // against where it actually is rather than against where it would have been.
+                if (!_visible) continue;
+
+                ImGui.SetNextItemOpen(open, ImGuiCond.Always);
+
+                if (ImGui.TreeNodeEx(
+                        wanted[level],
+                        ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.NoTreePushOnOpen))
+                {
+                    _visible = true;
+                }
+                else
+                {
+                    _visible = false;
+                }
+
+                // ImGui reports the state it drew, and a click on the arrow is what changes it.
+                if (ImGui.IsItemToggledOpen()) Shown[key] = !open;
+            }
+
+            return _visible;
+        }
+
+        /// <summary>Closes everything still open, at the end of a component.</summary>
+        internal void Leave() => Close(0);
+
+        /// <summary>Leaves every level past <paramref name="depth"/>.</summary>
+        private void Close(int depth)
+        {
+            while (_open.Count > depth) _open.RemoveAt(_open.Count - 1);
+
+            // Visibility is a property of what is left open, so it is worked out again rather than
+            // remembered, and leaving every level puts it back to showing. The key is the whole
+            // path, the same way it was when the level was entered.
+            _visible = true;
+
+            for (var level = 1; level <= _open.Count; level++)
+            {
+                var key = component + "/" + string.Join("/", _open.Take(level));
+
+                if (Shown.TryGetValue(key, out var open) && !open)
+                {
+                    _visible = false;
+                    return;
+                }
+            }
+        }
     }
 
     /// <summary>

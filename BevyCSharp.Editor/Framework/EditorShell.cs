@@ -122,6 +122,21 @@ public static class EditorShell
         if (which >= 0) OpenTab = OpenTab == which ? -1 : which;
     }
 
+    /// <summary>Opens a tab by name, leaving an already open one open.</summary>
+    /// <remarks>
+    /// Apart from <see cref="Show"/>, which toggles, because a button in the strip wants the
+    /// second press to put the panel away and anything asking to be taken to a place wants to
+    /// arrive whether or not it was already there.
+    /// </remarks>
+    public static void Open(string name)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+
+        var which = Tabs.FindIndex(tab => tab.Name == name);
+
+        if (which >= 0) OpenTab = which;
+    }
+
     /// <summary>
     /// How large the editor's text is, in logical pixels.
     /// </summary>

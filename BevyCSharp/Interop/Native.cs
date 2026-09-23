@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 104;
+    internal const int ExpectedAbiVersion = 108;
 
     static Native() => NativeLoader.Initialize();
 
@@ -207,6 +207,21 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_monitor_count();
 
+    /// <summary>Reports how many video modes a monitor offers.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_monitor_mode_count(int index);
+
+    /// <summary>Describes one video mode of one monitor.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_monitor_mode(int index, int mode, NativeVideoMode* output);
+
+    /// <summary>Takes the screen over at one of a monitor's own video modes.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_video_mode(int monitor, int mode);
+
     /// <summary>Describes one monitor by index.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -228,6 +243,22 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_state_subs_per_slot();
+
+    /// <summary>Reports how many computed states one state slot can carry.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_state_computed_per_slot();
+
+    /// <summary>Reports how many sub-states exist in total.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_state_sub_count();
+
+    /// <summary>Creates a computed state, working its value out from a table.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_computed_add(
+        IntPtr app, int slot, int* from, int* to, int count);
 
     /// <summary>Creates a state machine in a slot, before the app runs.</summary>
     [LibraryImport(Library)]
@@ -431,6 +462,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_asset_failure_reason(int index, byte* buffer, int capacity);
+
+    /// <summary>Writes what kind of asset one drained failure was, returning its length.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_asset_failure_kind(int index, byte* buffer, int capacity);
 
     /// <summary>Writes one drained drop's path, returning its length in bytes.</summary>
     [LibraryImport(Library)]
@@ -815,6 +851,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial ulong bcs_imgui_picture(string path);
+
+    /// <summary>Writes how large a picture is, in pixels.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_imgui_picture_size(ulong picture, uint* width, uint* height);
 
     /// <summary>Names an image asset the caller already has, so the interface can draw it.</summary>
     [LibraryImport(Library)]

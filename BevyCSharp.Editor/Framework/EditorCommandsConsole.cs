@@ -79,6 +79,26 @@ internal static class EditorConsoleCommands
         return $"no entity called {name}";
     }
 
+    /// <summary>Opens a folder under the asset root in the assets panel.</summary>
+    /// <remarks>
+    /// What a person does by clicking a tile, reachable from the console and so from <c>bcs</c>.
+    /// Driving the editor to a particular folder is what checking a tile looks like from outside
+    /// the window, and it is the same call the tile makes.
+    /// </remarks>
+    [Command("assets.open", "Opens a folder in the assets panel: assets.open <folder>")]
+    internal static string OpenAssets(string folder)
+    {
+        var path = folder.Trim();
+
+        if (path.Length > 0 && !Directory.Exists(EditorAssets.Absolute(path)))
+            return $"no folder called {path} under the asset root";
+
+        EditorAssets.Enter(path);
+        EditorShell.Open("Assets");
+
+        return path.Length > 0 ? $"opened {path}" : "opened the asset root";
+    }
+
     /// <summary>Counts what is in the world.</summary>
     [Command("entities", "Counts the entities in the world")]
     internal static string Entities()

@@ -45,6 +45,47 @@ public static class EditorDraw
     }
 
     /// <summary>
+    /// Draws a picture as itself, fitted inside a square without being stretched.
+    /// </summary>
+    /// <remarks>
+    /// Untinted, unlike <see cref="Icon"/>, because the editor's icons are shapes cut out of white
+    /// and a file's own picture is what it is. The shape comes back only once the file has loaded,
+    /// so a picture asked for on the frame a folder is opened is drawn square for that one frame
+    /// and correctly from the next.
+    /// </remarks>
+    /// <param name="draw">The list to draw into.</param>
+    /// <param name="path">The picture, under the asset root.</param>
+    /// <param name="at">The top left of the square it is fitted into.</param>
+    /// <param name="size">How large that square is.</param>
+    /// <returns>True when something was drawn.</returns>
+    internal static bool Picture(ImDrawListPtr draw, string path, Vector2 at, float size)
+    {
+        var picture = ImGuiTextures.Load(path);
+        if (picture == 0) return false;
+
+        var (width, height) = ImGuiTextures.SizeOf(picture);
+
+        // The largest square that fits, until the file says otherwise.
+        var shape = width > 0 && height > 0
+            ? new Vector2(width, height)
+            : new Vector2(size, size);
+
+        var scale = MathF.Min(size / shape.X, size / shape.Y);
+        var drawn = shape * scale;
+        var inset = (new Vector2(size, size) - drawn) * 0.5f;
+
+        draw.AddImage(
+            (IntPtr)picture,
+            at + inset,
+            at + inset + drawn,
+            Vector2.Zero,
+            Vector2.One,
+            ImGui.GetColorU32(Vector4.One));
+
+        return true;
+    }
+
+    /// <summary>
     /// A rectangle with its corners taken off, rounded by exactly what it was asked for.
     /// </summary>
     /// <remarks>

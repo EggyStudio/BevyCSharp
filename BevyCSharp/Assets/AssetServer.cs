@@ -52,7 +52,12 @@ public enum AssetLoadState
 /// </remarks>
 /// <param name="Path">What was asked for, as the asset server saw it.</param>
 /// <param name="Reason">Why it failed, as the engine described it.</param>
-public readonly record struct AssetLoadFailed(string Path, string Reason);
+/// <param name="Kind">
+/// What kind of asset it was, named the way <see cref="AssetServer.Load"/> names one. Empty for an
+/// asset type the bridge does not load under a name of its own, which is one the engine loaded for
+/// itself as part of something else.
+/// </param>
+public readonly record struct AssetLoadFailed(string Path, string Reason, string Kind = "");
 
 public readonly struct AssetHandle : IEquatable<AssetHandle>
 {

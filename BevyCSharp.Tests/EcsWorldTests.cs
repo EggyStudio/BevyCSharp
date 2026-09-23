@@ -17,6 +17,13 @@ public struct Armour
 
 public struct Poisoned;
 
+/// <summary>Two fields, so a patch can change one and be asked about the other.</summary>
+public struct Sized
+{
+    public float Width;
+    public float Height;
+}
+
 public struct Shielded;
 
 /// <summary>
@@ -30,6 +37,74 @@ public struct Shielded;
 [Collection("engine")]
 public sealed class EcsWorldTests
 {
+    /// <summary>A patch changes the fields it names and leaves the rest of the component alone.</summary>
+    /// <remarks>
+    /// The difference between patching and adding is the whole point, so the test sets two fields
+    /// by two separate patches and asks whether the first survived the second.
+    /// </remarks>
+    [Fact]
+    public void APatchLeavesTheFieldsItDoesNotName()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var entity = ctx.Ecs.Spawn();
+
+            // Nothing there yet, so the patch builds one from default and changes it.
+            ctx.Ecs.Patch<Sized>(entity, (ref Sized s) => s.Width = 4f);
+            Assert.True(ctx.Ecs.Has<Sized>(entity));
+            Assert.Equal(4f, ctx.Ecs.GetOrDefault<Sized>(entity).Width);
+
+            ctx.Ecs.Patch<Sized>(entity, (ref Sized s) => s.Height = 9f);
+
+            var sized = ctx.Ecs.GetOrDefault<Sized>(entity);
+            Assert.Equal(4f, sized.Width);
+            Assert.Equal(9f, sized.Height);
+
+            // And adding one replaces it whole, which is what a patch is not.
+            ctx.Ecs.Add(entity, new Sized { Height = 1f });
+            Assert.Equal(0f, ctx.Ecs.GetOrDefault<Sized>(entity).Width);
+        });
+
+        harness.Run();
+    }
+
+    /// <summary>Patching a tree reaches every entity under the root, and the root itself.</summary>
+    /// <remarks>
+    /// What composing a spawned model is. The entity the file put at the root is rarely the one
+    /// the game has something to say about, so a walk that stopped at the direct children would
+    /// miss most of a real scene.
+    /// </remarks>
+    [Fact]
+    public void PatchingATreeReachesEveryEntityUnderIt()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var root = ctx.Ecs.Spawn();
+            var child = ctx.Ecs.Spawn();
+            var grandchild = ctx.Ecs.Spawn();
+            var stranger = ctx.Ecs.Spawn();
+
+            ctx.Ecs.SetParent(child, root);
+            ctx.Ecs.SetParent(grandchild, child);
+
+            var changed = ctx.Ecs.PatchTree<Sized>(root, (ref Sized s) => s.Width = 2f);
+
+            Assert.Equal(3, changed);
+            Assert.Equal(2f, ctx.Ecs.GetOrDefault<Sized>(root).Width);
+            Assert.Equal(2f, ctx.Ecs.GetOrDefault<Sized>(child).Width);
+            Assert.Equal(2f, ctx.Ecs.GetOrDefault<Sized>(grandchild).Width);
+
+            // And nothing outside the tree, which is what makes it a tree rather than a query.
+            Assert.False(ctx.Ecs.Has<Sized>(stranger));
+        });
+
+        harness.Run();
+    }
+
     [Fact]
     public void SpawnInsertReadRemoveRoundTrips()
     {

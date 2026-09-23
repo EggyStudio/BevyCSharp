@@ -191,6 +191,36 @@ public static unsafe class Audio
     /// ctx.Ecs.Add(engine, Transform.At(4f, 0f, -2f));
     /// </code>
     /// </example>
+    /// <summary>
+    /// A volume multiplier from a number of decibels.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Every volume here is a multiplier, where one is unchanged and a half is half the amplitude.
+    /// Decibels are what a mixer, a settings slider and anybody who has worked with sound think
+    /// in, because loudness is heard on a logarithmic scale and a linear slider spends most of its
+    /// travel on differences nobody can hear.
+    /// </para>
+    /// <para>
+    /// Zero decibels is unchanged, minus six is roughly half as loud, and minus eighty is near
+    /// enough to silence for a fade to end on.
+    /// </para>
+    /// </remarks>
+    /// <param name="decibels">How much louder or quieter than unchanged.</param>
+    public static float VolumeFromDecibels(float decibels) => MathF.Pow(10f, decibels / 20f);
+
+    /// <summary>
+    /// The decibels a volume multiplier stands for.
+    /// </summary>
+    /// <remarks>
+    /// The other way round, for showing a slider's position as a number somebody can read. A
+    /// volume of zero has no answer, since silence is infinitely quiet, and this reports negative
+    /// infinity rather than a large negative number pretending otherwise.
+    /// </remarks>
+    /// <param name="volume">The multiplier.</param>
+    public static float DecibelsFromVolume(float volume) =>
+        volume > 0f ? 20f * MathF.Log10(volume) : float.NegativeInfinity;
+
     public static void SetListener(Entity entity, float earGap = 0f) =>
         Native.Check(
             Native.bcs_audio_listener(entity.Bits, earGap), $"listening from {entity}");

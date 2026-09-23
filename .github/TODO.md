@@ -39,9 +39,10 @@ inserts. Two things BSN has that it does not:
 - **Templates.** A BSN field takes a value turned into a component when the scene spawns, which is
   what lets `image: "player.png"` stand for an `AssetServer::load`. On this side those are separate
   calls that already exist, so what is missing is the convenience rather than the capability.
-- **Field-level patching.** Two BSN scenes naming the same component merge field by field, while
-  adding a component from C# replaces the whole thing. A `Patch<T>` helper would cover it and needs
-  no bridge.
+- **Patching is per component, not per scene.** `ctx.Ecs.Patch` and `PatchTree` change the fields
+  they name and leave the rest, which is what BSN's field-level merge does between two scenes. What
+  has no equivalent is stating the patch as data rather than as code, so a second file can overlay
+  the first without anything being compiled.
 
 Revisit when `.bsn` ships as a loadable asset. It would load through the same path a glTF scene
 does and be authorable without recompiling the bridge, which is the part worth having here.
@@ -102,11 +103,10 @@ code already in the binary.
   left is the experimental half of Bevy's own lighting: soft shadows sit behind the
   `experimental_pbr_pcss` feature, and contact shadows need a camera component to go with the flag
   on the light.
-- **Window.** Position, decorations, resizability, always-on-top and exclusive fullscreen are
-  bridged, and the monitors are readable by size and by name. A monitor's video modes are a list of
-  structs, so exclusive fullscreen takes the monitor's current mode rather than offering a
-  resolution to pick from. Multiple windows are unbridged: every entry point addresses the primary
-  one.
+- **One window.** Position, decorations, resizability, always-on-top and exclusive fullscreen are
+  bridged, the monitors are readable by size, name and video mode, and `Window.SetVideoMode` takes
+  the screen over at one of them. What is left is more than one window, since every entry point
+  addresses the primary one.
 - **A picture is always RGBA and always eight bits a channel.** `Render.CreateImage` takes bytes
   and `Render.BeginCapture` hands them back, both in that one format. A heightmap of floats, a
   single-channel mask or a compressed texture would each need the format to be a parameter rather
@@ -203,11 +203,12 @@ language.
   `bevy_world_serialization` would write exactly those and can see no C# component at all, because
   those are bytes registered at runtime with no Rust type behind them. A world asset worth the name
   is both files, or one format holding both halves.
-- **Nothing is rendered to a texture yet.** Every piece exists: `Render.CreateTarget` and
-  `Render.SetCameraTarget` point a camera at an image, and `ImGuiTextures.Of` hands that image to a
-  draw call. Three wants in the editor share them, and all three are editor work rather than bridge
-  work: a thumbnail for an asset tile, a preview for a material, and an orientation widget drawn as
-  a small scene rather than as six lines in the world.
+- **An image tile shows itself; nothing else does.** A picture is drawn from its path, fitted to
+  the tile by the size `ImGuiTextures.SizeOf` reports. What a model or a sound looks like needs a
+  camera pointed at a render target, which every piece exists for. `Render.CreateTarget` and
+  `Render.SetCameraTarget` point a camera at an image and `ImGuiTextures.Of` hands that image to a
+  draw call, so a model thumbnail, a material preview and an orientation widget drawn as a small
+  scene are all editor work rather than bridge work.
 - **A field can hold an asset, and the engine's own cannot.** A game's component holding an
   `AssetHandle` is drawn by name, and pressing it offers the files under the asset root that suit
   it. The mesh and the material on an entity are Rust components with no schema, so the editor
@@ -217,9 +218,9 @@ language.
   Neither can see a component the bridge does not name, so an entity whose components are all
   engine-side reads as plain. Naming more of them is a bridge job.
 - **The inspector draws a field as one arm of one switch**, told how by the attributes the
-  generator carried through. What is left is a fold, which `[Foldout]` asks for and nothing draws,
-  and editing several things at once: the panel shows the last one picked with a count beside it
-  rather than what they agree and disagree about.
+  generator carried through, folds included. What is left is editing several things at once, where
+  the panel shows the last one picked with a count beside it rather than what they agree and
+  disagree about.
 - **A selection is remembered by name**, so what a reloaded script respawns is found again. All of
   them or none, since half a selection coming back is worse than none. Two entities sharing a name
   still resolve to the first.
@@ -249,16 +250,19 @@ language.
 States carry their edges and their entities: `[OnEnter]` and `[OnExit]` run once per transition,
 `[InState]` every frame a state is held, `DespawnOnExit` ties an entity's life to a value, and
 `[SubStateOf]` declares a state that exists only while another holds a value, so a pause disappears
-with the run it belongs to. The bridge pairs one sub-state slot with each state slot, because
-`SubStates` names its parent as an associated type and the types exist when the crate is built.
+with the run it belongs to, and `[ComputedFrom]` declares one whose value follows from another's.
+The bridge sets aside a fixed block of each per state slot, because both name their source as an
+associated type and the types exist when the crate is built.
 
 - **Sub-states of sub-states.** A state carries two sub-states, and a third is refused because
   every axis is given the same fixed block of them when the bridge is built. A chain is the harder
   one, since a sub-state of a sub-state has nowhere to live in a layout that is one block per
   axis.
-- **Computed states.** `ComputedStates` derives a value from one or more others rather than only
-  its existence, which is what "the HUD is visible in these three screens" wants. Same shape of
-  problem, same pairing.
+- **A computed state reads one source, and by a table.** `app.AddComputedState` maps values of one
+  state onto values of another, which covers "the interface is up on these three screens". Bevy's
+  `compute` is an arbitrary function over a `StateSet`, so deriving from two states at once, or by
+  any rule a table cannot state, needs a way to call back into managed code from a static function
+  with no world in hand.
 - **A sub-state over more than one parent.** `SourceStates` can be a tuple, so a state can exist
   only while two others hold values. The pairing is per parent slot, so this needs a different
   arrangement rather than another pair.
@@ -268,13 +272,14 @@ with the run it belongs to. The bridge pairs one sub-state slot with each state 
 The window's messages are drained onto the managed bus each frame, so `ctx.Read<WindowResized>()`
 reads an engine message the way it reads one another system sent. Ten are bridged: six whose
 payload is numbers, the three file drag-and-drop messages, and `AssetLoadFailed`, which carries the
-path and the reason for an asset that would not load. Text crosses the boundary by the caller
+path, the reason and the kind for an asset that would not load. Text crosses the boundary by the caller
 owning the buffer, so a caller probes with a small buffer and calls again only when the answer did
 not fit.
 
-- **Which kind of asset failed.** `UntypedAssetLoadFailedEvent` carries a type id as well as a path
-  and a reason, and the bridge passes on the two texts. Naming the type means the same curated list
-  the components need, so a caller tells an image from a mesh by the path it asked for.
+- **Only the asset types the bridge loads are named.** `AssetLoadFailed.Kind` matches the type id
+  against the same curated list `AssetServer.Load` takes, so an asset type the engine loaded for
+  itself as part of something else answers an empty string. A general answer needs Bevy's registry
+  to carry every asset type's name, which it does not.
 
 ### Components Bevy owns
 
@@ -326,6 +331,11 @@ plus the callback structs it requires.
   Japanese or Chinese input method needs to show underlined text before it is committed. The text
   convention the file drop messages use is what carries the candidate string; what is left is the
   messages themselves and the window's `ime_enabled` and `ime_position`.
+- **A synthetic pointer needs a window.** `SyntheticInput` writes window messages, so a headless
+  or offscreen run has nowhere to send one and says so. That is the one thing `bcs` cannot drive in
+  an offscreen editor, where the interface is drawn and laid out but cannot be clicked. Feeding the
+  interface's own queue without a window would cover the panels and still leave picking and the
+  camera untouched, which is half the path a hand takes.
 - **Touch.** Bridged as this frame's list, up to eight at once, and untested, because this machine
   has no touchscreen and only the empty case is covered. Gestures are not derived, and a touch that
   ends is reported once rather than lingering for a frame.
@@ -347,9 +357,9 @@ distribution. The minimal profile still builds with nothing but a C compiler.
   the decoded samples so the clip can start again and refuses to move within them, so a seek
   reports `INVALID_STATE`. Nothing here can work around it, so music that has to resume where it
   left off is played once and restarted. Revisit if rodio makes a buffered source seekable.
-- **Volume is linear.** A sound's volume is a multiplier, and Bevy's `Volume` can also be given in
-  decibels, which is the unit a mixer and a settings slider are both written in. Converting is one
-  line the caller writes today.
+- **No mixer.** Every sound carries its own volume, so a music and an effects slider are a
+  multiplication the game does itself before it plays anything. Bevy has no bus to hang them off
+  either, so a mixer would be a managed layer over the volumes rather than a bridge.
 
 ## Project
 

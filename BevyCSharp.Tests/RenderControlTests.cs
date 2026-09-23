@@ -771,6 +771,18 @@ public sealed class RenderControlTests
             // past the end is refused the same way the rest of the monitor surface refuses it.
             Assert.NotNull(Window.MonitorName(0));
             Assert.Throws<BevyNativeException>(() => Window.MonitorName(Window.MonitorCount()));
+
+            // The video modes are the same shape of answer. A platform may report none, so what
+            // is guaranteed is that every mode reported describes a screen somebody could see.
+            var modes = Window.MonitorModes(0);
+            Assert.All(modes, mode => Assert.True(mode.Width > 0 && mode.Height > 0));
+
+            Assert.Throws<BevyNativeException>(
+                () => Window.MonitorModes(Window.MonitorCount()));
+
+            // And a mode past the end of the list is refused rather than taken as the last one.
+            Assert.Throws<BevyNativeException>(
+                () => Window.SetVideoMode(0, modes.Length));
         });
 
         second.Run();
