@@ -1770,6 +1770,10 @@ Several things selected are edited together. The panel shows the last one picked
 made in it reaches everything else in the selection carrying the same component. A field they
 disagree about has its name dimmed, since the box beside it can only show one of their values.
 
+A model picked in the assets panel is drawn beside the tiles by a camera of its own, framed by its
+bounds, on a render layer nothing else is on. It is put away when no panel asks for it, since a
+camera pointed at an image costs a pass a frame whether or not anybody is looking.
+
 The mesh and the material an entity is drawn with are Bevy's own components holding typed handles,
 so they have no schema and are drawn as a section of their own. It shows where each came from, says
 "made here" for anything built in memory, and offers the files under the asset root that suit.
@@ -1907,9 +1911,11 @@ run against a real Bevy app. Known gaps:
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does
   nothing yet. The editor reloads scripts through `App.EnableDynamicSystems` instead, because
   the compiler lives there.
-- The editor's world file keeps what this side can describe: an entity's name and every component
-  with a schema. A component the engine owns and C# has no mirror for, a mesh handle or a
-  material, is not written, so the file is a set of edits over a scene rather than the scene.
+- The editor's world file keeps what this side can name, which is an entity's name, every
+  component with a schema, and where its mesh and material were loaded from. Anything built in
+  memory has no name to write, and a camera's projection or a light's settings are engine
+  components with neither a schema nor a path, so the file is a set of edits over a scene rather
+  than the scene.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
 - A cubemap comes from a file, as six square faces stacked into a column. One rendered into, which

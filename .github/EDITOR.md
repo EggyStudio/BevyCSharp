@@ -368,6 +368,10 @@ moves, turns or stretches all of them, each about its own origin or all about th
 undoes as one change. What the details panel shows is the last one picked, with a count beside its
 heading saying how many others there are.
 
+What an entity is drawn with is saved as well, by the path its mesh and material were loaded from,
+which is the only thing about a typed handle this side can name. A mesh built in memory is a set of
+numbers with no name, so it is left out rather than written as something it is not.
+
 **A name is what the editor tells one entity from another by.** Spawning something gives it a name
 nothing else is called, because the world file matches a saved entity back up by name and a
 selection that survives a script reload is found again by it, so a second thing called Cube is a

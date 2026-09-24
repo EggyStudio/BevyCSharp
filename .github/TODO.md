@@ -210,18 +210,22 @@ the style. Gizmos draw the selection, its handles, the ground and the camera's o
 drag on a handle moves, turns or stretches what is selected. [EDITOR.md](EDITOR.md) has the design
 language.
 
-- **Half of the world is saved.** `assets/world.json` keeps every named entity's name and every
-  component with a schema, which is what the editor can change. What it cannot write is the
-  engine's own components: a mesh handle, a material, a camera's projection.
+- **What is saved is what can be named.** `assets/world.json` keeps every named entity's name,
+  every component with a schema, and where its mesh and material were loaded from. What it cannot
+  write is anything built in memory, since a set of numbers has no name, nor a camera's projection
+  or a light's settings, which are engine components with no schema and no path either.
   `bevy_world_serialization` would write exactly those and can see no C# component at all, because
   those are bytes registered at runtime with no Rust type behind them. A world asset worth the name
   is both files, or one format holding both halves.
-- **An image tile shows itself; nothing else does.** A picture is drawn from its path, fitted to
-  the tile by the size `ImGuiTextures.SizeOf` reports. What a model or a sound looks like needs a
-  camera pointed at a render target, which every piece exists for. `Render.CreateTarget` and
-  `Render.SetCameraTarget` point a camera at an image and `ImGuiTextures.Of` hands that image to a
-  draw call, so a model thumbnail, a material preview and an orientation widget drawn as a small
-  scene are all editor work rather than bridge work.
+- **One preview, not a thumbnail each.** An image tile shows itself, and a selected model is drawn
+  by a camera of its own into a render target beside the tiles, framed by its bounds and kept on a
+  render layer nothing else is on. One scene rather than one per tile, because a camera drawing
+  into an image costs a pass a frame and forty tiles would cost forty. A thumbnail on every tile
+  wants a pass that draws once and is kept, which nothing here does.
+- **A material has no preview.** The pieces are the same ones the model preview uses, and what is
+  missing is a material to point at. The editor can name the material an entity is drawn with but
+  not hand it to a second mesh, because a handle read back from an entity is a path rather than a
+  handle.
 - **A mesh and a material are shown by where they came from.** They are Bevy components holding
   typed handles, so they have no schema and the panel draws them as their own section, reading the
   asset path and offering the files that suit. What it cannot do is name a part of a file other
@@ -238,11 +242,11 @@ language.
 - **A selection is remembered by name**, so what a reloaded script respawns is found again. All of
   them or none, since half a selection coming back is worse than none. Two entities sharing a name
   still resolve to the first.
-- **Undo covers what can be reversed exactly**: a field edited in the inspector, a rename, a new
-  entity, something hidden with its eye, and a component put on or taken off, which keeps what it
-  held. Despawning is deliberately not recorded, because an entity's mesh and material are
-  engine-side components with no mirror and what came back would be a name with nothing to draw.
-  That is the world file's gap, and closing one closes both.
+- **Undo covers what can be reversed exactly**, which is a field edited in the inspector, a
+  rename, a new entity, something hidden with its eye, and a component put on or taken off, keeping
+  what it held. Despawning is deliberately not recorded. An entity's mesh and material can now be
+  named where they were loaded from, so a despawn could be reversed for one drawn with files, and
+  not for one drawn with a mesh built in memory. Half a despawn coming back is worse than none.
 - **Settings are the editor's, not the project's.** `EditorSettings` saves to `assets/settings.txt`
   beside the layout, and everything on it belongs to this editor build. A project setting worth the
   name (a startup scene, a physics step, a build target) needs somewhere to live that is part of

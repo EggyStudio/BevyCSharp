@@ -76,13 +76,24 @@ public static class EditorWorld
                 if (fields.Count > 0) components[schema.QualifiedName] = fields;
             }
 
-            if (components.Count == 0) continue;
+            // What it is drawn with, which is the engine's own components and has no schema. Only
+            // a mesh or a material loaded from a file can be written, because one built in memory
+            // is a set of numbers nothing here can name, and a name is what a file is made of.
+            var mesh = App.HasRenderer ? Render.MeshPathOf(entity) : string.Empty;
+            var material = App.HasRenderer ? Render.MaterialPathOf(entity) : string.Empty;
 
-            entities.Add(new JsonObject
+            if (components.Count == 0 && mesh.Length == 0 && material.Length == 0) continue;
+
+            var written = new JsonObject
             {
                 ["name"] = name,
                 ["components"] = components,
-            });
+            };
+
+            if (mesh.Length > 0) written["mesh"] = mesh;
+            if (material.Length > 0) written["material"] = material;
+
+            entities.Add(written);
         }
 
         var document = new JsonObject
@@ -131,7 +142,29 @@ public static class EditorWorld
             if (entry is not JsonObject fields) continue;
             if (fields["name"]?.GetValue<string>() is not { } name) continue;
             if (!byName.TryGetValue(name, out var entity)) continue;
-            if (fields["components"] is not JsonObject components) continue;
+            // Pointed at what it was drawn with before anything else, so an entity whose mesh
+            // changed is drawing the right thing while its fields are being written.
+            if (App.HasRenderer)
+            {
+                if (fields["mesh"]?.GetValue<string>() is { Length: > 0 } mesh)
+                {
+                    Render.SetMesh(world, entity, AssetServer.Load(AssetKind.Mesh, mesh));
+                }
+
+                if (fields["material"]?.GetValue<string>() is { Length: > 0 } material)
+                {
+                    Render.SetMaterial(
+                        world,
+                        entity,
+                        AssetServer.Load(AssetKind.StandardMaterial, material));
+                }
+            }
+
+            if (fields["components"] is not JsonObject components)
+            {
+                applied++;
+                continue;
+            }
 
             foreach (var (type, values) in components)
             {

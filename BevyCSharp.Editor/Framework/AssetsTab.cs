@@ -28,14 +28,28 @@ public static class AssetsTab
     /// </remarks>
     public static void Draw()
     {
+        // A model is geometry rather than pixels, so the only way to show one is to draw it. The
+        // picture is asked for here, once a frame, and drawn in the column below once it exists.
+        if (EditorShell.Context is { } ctx)
+        {
+            EditorPreview.Show(ctx, Previewable(EditorAssets.Selected));
+        }
+
         var split = ImGuiTableFlags.Resizable
             | ImGuiTableFlags.NoBordersInBody
             | ImGuiTableFlags.NoSavedSettings;
 
-        if (!ImGui.BeginTable("##assets", 2, split)) return;
+        var columns = EditorPreview.Ready ? 3 : 2;
+
+        if (!ImGui.BeginTable("##assets", columns, split)) return;
 
         ImGui.TableSetupColumn("##tree", ImGuiTableColumnFlags.WidthFixed, 170f);
         ImGui.TableSetupColumn("##tiles", ImGuiTableColumnFlags.WidthStretch);
+
+        if (columns == 3)
+        {
+            ImGui.TableSetupColumn("##preview", ImGuiTableColumnFlags.WidthFixed, Preview);
+        }
 
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
@@ -46,8 +60,27 @@ public static class AssetsTab
 
         Tiles();
 
+        if (columns == 3)
+        {
+            ImGui.TableNextColumn();
+            EditorPreview.Draw(Preview);
+        }
+
         ImGui.EndTable();
     }
+
+    /// <summary>How large the preview is drawn, in logical pixels.</summary>
+    private const float Preview = 220f;
+
+    /// <summary>
+    /// The file to draw a picture of, or null for one nothing can be drawn of.
+    /// </summary>
+    /// <remarks>
+    /// Models only. An image already shows itself on its tile, and a sound or a script has nothing
+    /// to look at, so drawing a scene for one would be a pass a frame spent on an empty picture.
+    /// </remarks>
+    private static string? Previewable(string? selected) =>
+        selected is { Length: > 0 } && EditorAssets.KindOf(selected) == "model" ? selected : null;
 
     /// <summary>The folders, from the asset root down.</summary>
     private static void Tree()

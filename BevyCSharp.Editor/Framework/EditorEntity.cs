@@ -142,6 +142,10 @@ public static class EditorEntity
 
         if (world.NameOf(entity) == InterfaceCamera) return true;
 
+        // The asset preview is the editor's too. It is in this world because there is one world,
+        // and nobody put it there.
+        if (EditorPreview.Owns(entity)) return true;
+
         foreach (var id in world.ComponentsOf(entity))
         {
             if (!Known.TryGetValue(id, out var isInterface))

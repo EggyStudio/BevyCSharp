@@ -224,6 +224,10 @@ public static class EditorShell
         EditorStrip.Draw(tabsWidth, strip);
         ToolbarView.Draw(ctx);
 
+        // After the panels, because what decides whether the asset preview is still wanted is
+        // whether any of them asked for it while they drew.
+        EditorPreview.Keep(ctx);
+
         // Last, so it floats over every panel rather than under whichever was drawn after it.
         EditorSceneFrame.DockButton();
         EditorFlyout.Draw(ctx);
