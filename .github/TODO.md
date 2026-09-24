@@ -391,10 +391,15 @@ distribution. The minimal profile still builds with nothing but a C compiler.
   the test workflow builds. A lit surface is covered by the sky and environment map tests, a sprite
   by the overlay one, and text and the interface by the pixel tests over the layout. What is
   unchecked that way is a glTF file's own materials, which need a file with one in it.
-- **The lens effects have not been compared.** Whether a whole scene is right is confirmed by
-  running the sample, and an effect is worth checking against a second run with it turned off.
-  Bloom was confirmed that way, since a halo is obvious beside the same frame without one and easy
-  to imagine without the comparison. The lens effects have not been through it.
+- **Depth of field is the one lens effect with no test.** `LensTests` draws the same scene twice
+  for the vignette, the chromatic fringe and the lens distortion, and asserts the shape of the
+  change. Depth of field resists it for three reasons worth knowing before trying again. The blur
+  is capped in pixels rather than scaled, so `MaxBlurDiameter` decides it and the aperture
+  saturates against that cap. A short lens focused far away has an enormous depth of field, so
+  the physically obvious settings produce under a pixel of blur. And the pass keeps a silhouette
+  from smearing into what is behind it, which is what the depth buffer is for, so the strongest
+  edge in a simple scene is the one edge the effect is built not to touch. A test wants a textured
+  surface filling the frame at a focus it misses, measured inside the shape.
 
 ### Build and release
 
