@@ -424,6 +424,12 @@ public struct NativeAtmosphereConfig
 
     /// <summary>How far the haze in front of the scene is computed, in metres; 0 for Bevy's.</summary>
     public float HazeDistance;
+
+    /// <summary>How finely the sky is computed: 0 Bevy's own, 1 cheaper, 2 finer.</summary>
+    public int Quality;
+
+    /// <summary>How much light the ground bounces back, or 0 for the medium's own.</summary>
+    public float GroundAlbedo;
 }
 
 /// <summary>The lens effects a camera draws through, beside <see cref="NativePostConfig"/>.</summary>

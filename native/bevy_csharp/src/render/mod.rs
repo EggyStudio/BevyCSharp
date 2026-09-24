@@ -19,22 +19,26 @@
 pub mod assets;
 pub mod post;
 pub mod scene;
+pub mod shaders;
 
 #[cfg(feature = "render")]
 use crate::interop::status;
 
 /// Resolves an asset key to the image it names.
 ///
-/// A negative key is the caller saying "no image", which every image on a config is allowed to be.
-/// A key that names nothing is a mistake rather than a default, because that is what a released or
-/// fabricated handle looks like from this side, and quietly drawing without the texture that was
-/// asked for is a wrong picture nothing reports.
+/// Zero or a negative key is the caller saying "no image", which every image on a config is
+/// allowed to be. A key that names nothing else is a mistake rather than a default, because that
+/// is what a released or fabricated handle looks like from this side, and quietly drawing without
+/// the texture that was asked for is a wrong picture nothing reports.
 #[cfg(feature = "render")]
 pub(crate) fn image_handle(
     world: &mut bevy::ecs::world::World,
     key: i32,
 ) -> Result<Option<bevy::asset::Handle<bevy::image::Image>>, i32> {
-    if key < 0 {
+    // Zero as well as a negative, because the table never hands out zero and a component holding
+    // an asset starts out zeroed. A freshly added component therefore holds nothing, which is what
+    // the managed side documents and what a caller passing a default handle means.
+    if key <= 0 {
         return Ok(None);
     }
 

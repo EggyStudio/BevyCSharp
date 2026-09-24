@@ -735,6 +735,36 @@ what foliage and fences are drawn with. `Blend` is real transparency, drawn afte
 and sorted back to front. `Add` adds to what is behind, so it never darkens it. `DoubleSided` draws
 back faces, for anything modelled as a single sheet, and `Unlit` shows the base color flat.
 
+**A shader of your own.** Bevy asks a material's *type* for its shader rather than the material, so
+one type draws with one shader and C# cannot declare a type. The bridge declares four material
+slots instead, and an app says what each is for before it runs:
+
+```csharp
+app.UseShader(0, "shaders/ripple.wgsl");           // once, before Run
+
+var water = Shaders.CreateMaterial(0, [0.1f, 0.4f, 0.8f, 1f, speed]);
+Render.SetMaterial(ctx.Ecs, pond, water);          // as many materials as the game wants
+```
+
+A slot carries sixteen floats and one picture, which covers a colour, a scroll, a threshold and a
+mask. The material's own bind group is group three, where binding zero is the floats as four
+`vec4`, binding one is the texture and binding two its sampler:
+
+```wgsl
+#import bevy_pbr::forward_io::VertexOutput
+
+struct Params { values: array<vec4<f32>, 4> };
+@group(3) @binding(0) var<uniform> params: Params;
+
+@fragment
+fn fragment(mesh: VertexOutput) -> @location(0) vec4<f32> {
+    return params.values[0];
+}
+```
+
+The fragment shader is what a slot overrides, so the vertices, the depth pass and the shadow a mesh
+casts are still the engine's.
+
 **Textures.** How one is sampled is decided when it loads:
 
 ```csharp
@@ -932,7 +962,10 @@ The sky is a planet-sized entity that the camera looks out from, and `SetAtmosph
 one of them, so calling it for a second camera adds a viewer rather than a second sky. The planet is
 measured in metres with its ground at the origin, which is why a scene measured in something else
 sets `Scale` rather than moving anything. `Density` thickens or thins the air, `HazeDistance`
-decides how far ahead the haze is computed, and `ClearAtmosphere` takes the sky off a camera again.
+decides how far ahead the haze is computed, `GroundAlbedo` is how much light the ground bounces
+back into it, and `ClearAtmosphere` takes the sky off a camera again. `Quality` is one number over
+the dozen Bevy exposes, because every one of them trades the same thing; the sky is the same at
+each setting, and what changes is banding in a gradient and how much of a frame it costs.
 The camera is given a high dynamic range target either way, because a sun scattered through air is
 far brighter than white.
 
@@ -964,6 +997,18 @@ picks up the average color around it and a polished one picks up a recognisable 
 bake step and no second file. `rotation` turns the environment without touching the scene. Each face
 has to be square and a power of two, and the light waits for the image to decode before it is
 applied, so a handle asked for in the same frame the camera is spawned works.
+
+`Render.SetEnvironmentMap` is the other end of that, taking the two maps a baking tool already
+produced rather than filtering one at startup:
+
+```csharp
+Render.SetEnvironmentMap(camera, diffuse, specular, intensity: 3000f);
+```
+
+The first is the blurred map a rough surface reflects and the second the sharp one a polished
+surface reflects. It costs nothing at startup, which is what a shipped game wants and what an
+environment too large to filter again needs. Passing `AssetHandle.None` for either takes the
+lighting off, since a baked map is the pair and half of one is not a weaker version of it.
 
 **Drawing into an image.** A camera can draw into a texture instead of into the window, which is
 what a portal, a security monitor, a mirror or a second viewport is:
@@ -1717,6 +1762,10 @@ A component with twenty fields is unreadable however well it is ordered, so `[Fo
 rest away under a name. Consecutive fields naming the same fold share it, folds nest as deep as the
 slashes go, and whether one is open is remembered per component rather than per entity, because
 somebody who shut one meant it about the component.
+
+Several things selected are edited together. The panel shows the last one picked, and a change
+made in it reaches everything else in the selection carrying the same component. A field they
+disagree about has its name dimmed, since the box beside it can only show one of their values.
 
 A schema also carries how to add the component, how to remove it, and any method the struct has
 that takes nothing, so a panel offers those as buttons without naming a type. What the editor

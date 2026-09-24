@@ -166,6 +166,11 @@ public static class ComponentFields
         var id = $"##{schema.Name}.{field.Name}";
         var value = field.Read(ctx.Ecs, entity);
 
+        // What the rest of the selection holds, so the row can say they disagree and an edit can
+        // reach all of them. One entity selected is the usual case and costs nothing here.
+        var others = Others(ctx, entity, schema);
+        var differs = Differs(ctx, others, field, value);
+
         if (field.Hints.Header is { Length: > 0 } heading)
         {
             EditorSurface.Heading(heading, DetailsPanel.Inset);
@@ -209,7 +214,7 @@ public static class ComponentFields
                 return;
             }
 
-            EditorRows.Line(field.Title, field.Hints.Tooltip);
+            EditorRows.Line(field.Title, field.Hints.Tooltip, differs);
         }
 
         var editable = field.IsWritable;
@@ -223,6 +228,9 @@ public static class ComponentFields
 
         if (editable) Recorded(ctx, entity, schema, field, id, value);
 
+        // And the same value onto everything else selected.
+        if (editable) Spread(ctx, entity, others, field, value);
+
         if (!editable) ImGui.EndDisabled();
 
         if (field.Hints.Unit is { Length: > 0 } unit)
@@ -235,6 +243,96 @@ public static class ComponentFields
 
         ImGui.PopID();
     }
+
+    /// <summary>
+    /// Everything else selected that carries the same component.
+    /// </summary>
+    /// <remarks>
+    /// The panel is about one entity and a selection is often several, so an edit made here is
+    /// meant for all of them. Anything in the selection without the component is left out rather
+    /// than given one, because a person editing a field asked to change a value and not to put a
+    /// component on something.
+    /// </remarks>
+    private static List<Entity> Others(BehaviorContext ctx, Entity entity, ComponentSchema schema)
+    {
+        var others = new List<Entity>();
+
+        if (EditorSelection.Count <= 1) return others;
+
+        foreach (var other in EditorSelection.All)
+        {
+            if (other == entity || !ctx.Ecs.IsAlive(other)) continue;
+
+            foreach (var id in ctx.Ecs.ComponentsOf(other))
+            {
+                if (ComponentSchemas.For(id) != schema) continue;
+
+                others.Add(other);
+                break;
+            }
+        }
+
+        return others;
+    }
+
+    /// <summary>Whether any of them holds something other than what the panel is showing.</summary>
+    private static bool Differs(
+        BehaviorContext ctx, List<Entity> others, ComponentField field, object? value)
+    {
+        foreach (var other in others)
+        {
+            if (!Same(field.Read(ctx.Ecs, other), value)) return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Copies what one field now holds onto the rest of the selection, if it changed.
+    /// </summary>
+    /// <remarks>
+    /// Worked out by asking what the field holds after the widget ran rather than by every widget
+    /// reporting it, so a kind of field added later is covered without being told to be. A widget
+    /// that changed nothing leaves the two equal and nothing is written, which matters because a
+    /// write is a change the history records.
+    /// </remarks>
+    /// <param name="ctx">This frame.</param>
+    /// <param name="entity">The one the panel is showing.</param>
+    /// <param name="others">The rest of the selection carrying the same component.</param>
+    /// <param name="field">Which field.</param>
+    /// <param name="before">What it held before the widget ran.</param>
+    /// <returns>How many others were written.</returns>
+    internal static int Spread(
+        BehaviorContext ctx,
+        Entity entity,
+        IReadOnlyList<Entity> others,
+        ComponentField field,
+        object? before)
+    {
+        if (others.Count == 0 || !field.IsWritable) return 0;
+
+        var now = field.Read(ctx.Ecs, entity);
+        if (Same(now, before)) return 0;
+
+        var written = 0;
+
+        foreach (var other in others)
+        {
+            if (!ctx.Ecs.IsAlive(other)) continue;
+
+            field.Write(ctx.Ecs, other, now);
+            written++;
+        }
+
+        return written;
+    }
+
+    /// <summary>Whether two field values are the same, for a value that may be null.</summary>
+    /// <remarks>
+    /// By <see cref="object.Equals(object?, object?)"/>, which is right for every kind a field
+    /// holds here, since each is a struct or a string and compares by value.
+    /// </remarks>
+    private static bool Same(object? left, object? right) => Equals(left, right);
 
     /// <summary>
     /// The widget one field is edited through, chosen by what kind of value it holds.

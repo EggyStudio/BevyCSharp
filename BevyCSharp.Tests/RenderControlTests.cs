@@ -427,7 +427,13 @@ public sealed class RenderControlTests
                 Density = 1.4f,
                 Scale = 0.5f,
                 HazeDistance = 20_000f,
+                Quality = SkyQuality.Fine,
+                GroundAlbedo = 0.1f,
             });
+
+            // And the cheap end of the same setting, since halving a sample count and doubling it
+            // are the two ways the arithmetic can go wrong.
+            Render.SetAtmosphere(first, new AtmosphereSettings { Quality = SkyQuality.Cheap });
 
             // Asking twice rewrites the planet rather than adding another, which matters because
             // Bevy renders whichever is nearest and two would be a coin toss.

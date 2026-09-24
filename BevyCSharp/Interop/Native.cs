@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 108;
+    internal const int ExpectedAbiVersion = 111;
 
     static Native() => NativeLoader.Initialize();
 
@@ -401,6 +401,22 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_material_create(NativeMaterialConfig* config);
 
+    /// <summary>Reports how many shader material slots this bridge provides.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_slots();
+
+    /// <summary>Points a slot at a fragment shader, and installs what draws with it.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_slot(IntPtr app, int slot, string path);
+
+    /// <summary>Makes a material drawn by one of the slots, returning its key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_material_create(
+        int slot, float* parameters, int count, int texture);
+
     /// <summary>Attaches an asset through a component that carries a handle.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -655,6 +671,12 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_exposure(ulong camera, float ev100);
+
+    /// <summary>Lights the scene from a pair of cubemaps somebody baked.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_environment_map(
+        ulong camera, int diffuse, int specular, float intensity, float* rotation);
 
     /// <summary>Sets a camera's exposure from the lens it stands in for.</summary>
     [LibraryImport(Library)]

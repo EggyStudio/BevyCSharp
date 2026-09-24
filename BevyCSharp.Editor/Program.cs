@@ -44,7 +44,7 @@ config.Serve = args.Contains("--serve");
 if (!App.HasRenderer)
 {
     Console.Error.WriteLine("This native bridge has no renderer, so there is nothing to draw with.");
-    Console.Error.WriteLine("  rebuild it : build/build-native.sh --editor");
+    Console.Error.WriteLine("Rebuild it with build/build-native.sh --editor.");
     return 1;
 }
 
@@ -53,7 +53,7 @@ if (!App.HasEditor)
     Console.Error.WriteLine(
         "This native bridge has the renderer but not the HTML and CSS surface, so the panels "
         + "cannot open.");
-    Console.Error.WriteLine("  rebuild it : build/build-native.sh --editor");
+    Console.Error.WriteLine("Rebuild it with build/build-native.sh --editor.");
     return 1;
 }
 

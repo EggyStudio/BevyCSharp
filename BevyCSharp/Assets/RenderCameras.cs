@@ -506,6 +506,43 @@ public sealed class AtmosphereSettings
     /// which suits a scene measured in metres.
     /// </remarks>
     public float HazeDistance { get; set; }
+
+    /// <summary>
+    /// How finely the sky is computed.
+    /// </summary>
+    /// <remarks>
+    /// One number rather than the dozen Bevy exposes, because every one of them trades the same
+    /// thing and setting them apart is tuning a renderer rather than describing a sky. The sky is
+    /// the same either way, and what changes is banding in a gradient and how much of a frame it
+    /// costs.
+    /// </remarks>
+    public SkyQuality Quality { get; set; } = SkyQuality.Default;
+
+    /// <summary>
+    /// How much light the ground bounces back into the air, from zero to one.
+    /// </summary>
+    /// <remarks>
+    /// What makes the underside of the haze bright over snow and dark over sea. Earth's is 0.3 and
+    /// Mars's is 0.1. Zero leaves the one that belongs to the medium.
+    /// </remarks>
+    public float GroundAlbedo { get; set; }
+}
+
+/// <summary>How finely the sky is computed.</summary>
+/// <remarks>
+/// Every one of these draws the same sky. What changes is how smooth a gradient across it is and
+/// how much of a frame it costs, so this is a graphics setting rather than an artistic one.
+/// </remarks>
+public enum SkyQuality
+{
+    /// <summary>What Bevy chose, which suits most scenes.</summary>
+    Default = 0,
+
+    /// <summary>Half the samples, for a machine that needs the frame back.</summary>
+    Cheap = 1,
+
+    /// <summary>Twice the samples, for a sky that fills the screen and has to be smooth.</summary>
+    Fine = 2,
 }
 
 public sealed class CameraSettings

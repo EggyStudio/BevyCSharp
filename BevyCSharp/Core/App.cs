@@ -660,6 +660,55 @@ public sealed unsafe class App : IDisposable
         return this;
     }
 
+    /// <summary>
+    /// Points a material slot at a fragment shader this game wrote.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy asks a material's type for its shader rather than the material, so one type draws with
+    /// one shader and the bridge declares a fixed set of them. This says what one is for, and
+    /// <see cref="Shaders.CreateMaterial"/> then makes as many materials from it as the game wants,
+    /// each with its own numbers and its own picture.
+    /// </para>
+    /// <para>
+    /// Before the app runs, because what it installs is a plugin carrying a render pipeline. A slot
+    /// takes one shader for the life of the process, since a second answer would apply to
+    /// everything already made from the first.
+    /// </para>
+    /// <para>
+    /// The file is WGSL under the asset root. Its fragment entry point is called <c>fragment</c>,
+    /// and the material's own bind group is group three, where binding zero is the sixteen floats
+    /// as four <c>vec4</c>, binding one is the texture and binding two its sampler.
+    /// </para>
+    /// </remarks>
+    /// <param name="slot">Which slot, below <see cref="Shaders.SlotCount"/>.</param>
+    /// <param name="path">The shader, under the asset root.</param>
+    /// <exception cref="InvalidOperationException">The app is already running.</exception>
+    /// <exception cref="BevyNativeException">
+    /// There is no such slot, or it already has a shader.
+    /// </exception>
+    /// <example>
+    /// <code>
+    /// app.UseShader(0, "shaders/ripple.wgsl");
+    /// </code>
+    /// </example>
+    public App UseShader(int slot, string path)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentException.ThrowIfNullOrEmpty(path);
+
+        if (IsRunning)
+            throw new InvalidOperationException(
+                $"Cannot point slot {slot} at {path}, because the app is already running. What "
+                + "draws a shader material is a plugin, and a plugin is added before the run.");
+
+        Native.Check(
+            Native.bcs_shader_slot(_handle, slot, path),
+            $"pointing shader slot {slot} at {path}");
+
+        return this;
+    }
+
     /// <summary>The current value of <typeparamref name="TState"/>. Only valid inside a system.</summary>
     public static TState State<TState>() where TState : struct, Enum =>
         StateRegistry.Current<TState>();

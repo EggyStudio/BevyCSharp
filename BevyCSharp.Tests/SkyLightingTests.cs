@@ -83,12 +83,38 @@ public sealed class SkyLightingTests
             $"the shaded side reads {shaded} without the map and {imageLit} with it");
     }
 
+    /// <summary>A baked pair of maps lights the shaded side the way a filtered one does.</summary>
+    /// <remarks>
+    /// The same picture for both halves, which is not what a baking tool would produce and is
+    /// exactly what the bridge has to carry. What is checked is that both maps become cubes before
+    /// the light is applied, since a map sampled while it is still a tall picture is sampled
+    /// wrongly rather than refused, and the shaded side would read as it did without one.
+    /// </remarks>
+    [Fact]
+    public void ABakedPairLightsTheShadedSide()
+    {
+        if (!App.HasRenderer) return;
+
+        var unlit = Draw(sky: false);
+        var lit = Draw(sky: false, baked: true);
+
+        Assert.NotNull(unlit);
+        Assert.NotNull(lit);
+
+        var shaded = Brightness(unlit.At(20, 40));
+        var mapped = Brightness(lit.At(20, 40));
+
+        Assert.True(
+            mapped > shaded + 4,
+            $"the shaded side reads {shaded} without the maps and {mapped} with them");
+    }
+
     /// <summary>How bright a pixel is, which is all this test needs of a color.</summary>
     private static int Brightness((byte R, byte G, byte B, byte A) pixel) =>
         pixel.R + pixel.G + pixel.B;
 
     /// <summary>Draws a sphere lit by one low sun, with or without the sky helping.</summary>
-    private static CapturedImage? Draw(bool sky, bool image = false)
+    private static CapturedImage? Draw(bool sky, bool image = false, bool baked = false)
     {
         CapturedImage? picture = null;
 
@@ -121,6 +147,13 @@ public sealed class SkyLightingTests
                         camera,
                         AssetServer.Load(AssetKind.Image, "textures/cubemap.png"),
                         intensity: 3000f);
+                }
+
+                if (baked)
+                {
+                    var cubemap = AssetServer.Load(AssetKind.Image, "textures/cubemap.png");
+
+                    Render.SetEnvironmentMap(camera, cubemap, cubemap, intensity: 3000f);
                 }
 
                 // Low and to one side, so one side of the sphere is in shadow and the sky is the

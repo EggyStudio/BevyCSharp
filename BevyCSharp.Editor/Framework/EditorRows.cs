@@ -57,7 +57,7 @@ public static class EditorRows
     /// </summary>
     /// <param name="name">What the row is called.</param>
     /// <param name="tip">What to say when the pointer rests on the name, if anything.</param>
-    public static void Line(string name, string? tip = null)
+    public static void Line(string name, string? tip = null, bool differs = false)
     {
         ArgumentNullException.ThrowIfNull(name);
 
@@ -65,9 +65,28 @@ public static class EditorRows
         ImGui.TableNextColumn();
 
         ImGui.AlignTextToFramePadding();
+
+        // Dimmed when the things selected disagree about it, because the box beside it can only
+        // show one of their values and the name is the only room left to say so.
+        if (differs) ImGui.PushStyleColor(ImGuiCol.Text, EditorTheme.Current.Dim);
+
         ImGui.TextUnformatted(name);
 
-        if (tip is { Length: > 0 } says && ImGui.IsItemHovered()) EditorWidgets.Tip(says);
+        if (differs) ImGui.PopStyleColor();
+
+        if (ImGui.IsItemHovered())
+        {
+            var says = tip is { Length: > 0 } ? tip : null;
+
+            if (differs)
+            {
+                says = says is null
+                    ? "These differ. Editing sets them all."
+                    : says + "\n\nThese differ. Editing sets them all.";
+            }
+
+            if (says is not null) EditorWidgets.Tip(says);
+        }
 
         ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(-1f);

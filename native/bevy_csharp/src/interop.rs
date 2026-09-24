@@ -468,6 +468,13 @@ pub struct BcsAtmosphereConfig {
     /// How far the scattering in front of the scene is computed for, in metres. `0` takes Bevy's
     /// own distance.
     pub haze_distance: f32,
+    /// How finely the sky is computed: `0` Bevy's own, `1` cheaper, `2` finer. Every one of them
+    /// draws the same sky, and the difference is banding in a gradient and how much of a frame it
+    /// costs.
+    pub quality: i32,
+    /// How much light the ground bounces back into the air, where earth's is `0.3` and Mars's is
+    /// `0.1`. `0` takes the one that belongs to the medium.
+    pub ground_albedo: f32,
 }
 
 /// How a sound should be played.

@@ -506,6 +506,8 @@ public static unsafe class Render
             Density = settings.Density,
             Scale = settings.Scale,
             HazeDistance = settings.HazeDistance,
+            Quality = (int)settings.Quality,
+            GroundAlbedo = settings.GroundAlbedo,
         };
 
         Native.Check(
@@ -628,6 +630,59 @@ public static unsafe class Render
         Native.Check(
             Native.bcs_render_set_image_lighting(camera.Bits, cubemap.Key, intensity, parts),
             $"lighting {camera} from an image");
+    }
+
+    /// <summary>
+    /// Lights the scene from a pair of cubemaps somebody baked earlier.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The other end of <see cref="SetImageLighting"/>, which filters one cubemap on the GPU every
+    /// time the app starts. This takes the two maps a tool produced, which costs nothing at startup
+    /// and is what a shipped game wants, especially for an environment too large to filter again.
+    /// </para>
+    /// <para>
+    /// <paramref name="diffuse"/> is the blurred map a rough surface reflects and
+    /// <paramref name="specular"/> is the sharp one a polished surface reflects. Both are a column
+    /// of six square faces like a skybox, and both are turned into cubes before the light is
+    /// applied, so a handle asked for in the same frame the camera is spawned works.
+    /// </para>
+    /// <para>
+    /// Passing <see cref="AssetHandle.None"/> for either takes the lighting off, since a baked map
+    /// is the pair and half of one is not a weaker version of it.
+    /// </para>
+    /// </remarks>
+    /// <param name="camera">The camera whose view is lit.</param>
+    /// <param name="diffuse">The blurred map.</param>
+    /// <param name="specular">The sharp one.</param>
+    /// <param name="intensity">How bright, in candelas per square metre.</param>
+    /// <param name="rotation">Which way the maps are turned, or null for not at all.</param>
+    /// <exception cref="BevyNativeException">
+    /// The entity is not a camera, or a handle names no image.
+    /// </exception>
+    public static void SetEnvironmentMap(
+        Entity camera,
+        AssetHandle diffuse,
+        AssetHandle specular,
+        float intensity = 1000f,
+        Quat? rotation = null)
+    {
+        if (rotation is not { } turn)
+        {
+            Native.Check(
+                Native.bcs_render_set_environment_map(
+                    camera.Bits, diffuse.Key, specular.Key, intensity, null),
+                $"lighting {camera} from a baked environment map");
+
+            return;
+        }
+
+        var parts = stackalloc float[4] { turn.X, turn.Y, turn.Z, turn.W };
+
+        Native.Check(
+            Native.bcs_render_set_environment_map(
+                camera.Bits, diffuse.Key, specular.Key, intensity, parts),
+            $"lighting {camera} from a baked environment map");
     }
 
     /// <summary>

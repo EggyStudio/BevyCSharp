@@ -363,6 +363,29 @@ pub struct PendingCubemap {
     pub light: Option<(bevy::ecs::entity::Entity, f32, bevy::math::Quat)>,
 }
 
+/// One camera waiting to be lit by a pair of cubemaps somebody baked.
+///
+/// Two images rather than one, so both have to be a cube before the light can be inserted, which
+/// is why this waits on its own rather than riding on [`PendingCubemap`].
+#[cfg(feature = "render")]
+pub struct PendingEnvironment {
+    /// The camera to light.
+    pub camera: bevy::ecs::entity::Entity,
+    /// The blurred map, which is what a rough surface reflects.
+    pub diffuse: bevy::asset::Handle<bevy::image::Image>,
+    /// The sharp one, which is what a polished surface reflects.
+    pub specular: bevy::asset::Handle<bevy::image::Image>,
+    /// How bright, in candelas per square metre.
+    pub intensity: f32,
+    /// Which way the map is turned.
+    pub rotation: bevy::math::Quat,
+}
+
+/// The baked environment maps waiting for both their images to become cubes.
+#[cfg(feature = "render")]
+#[derive(bevy::ecs::resource::Resource, Default)]
+pub struct PendingEnvironments(Vec<PendingEnvironment>);
+
 /// The images asked to become cubemaps, waiting for their pixels to arrive.
 ///
 /// An image loads as one tall picture and has to be told it is six square faces stacked on top of
@@ -382,6 +405,7 @@ pub struct PendingCubemaps(Vec<PendingCubemap>);
 pub fn reinterpret_cubemaps(
     mut commands: bevy::ecs::system::Commands,
     mut pending: bevy::ecs::system::ResMut<PendingCubemaps>,
+    mut environments: bevy::ecs::system::ResMut<PendingEnvironments>,
     mut images: bevy::ecs::system::ResMut<bevy::asset::Assets<bevy::image::Image>>,
 ) {
     use bevy::light::GeneratedEnvironmentMapLight;
@@ -420,6 +444,33 @@ pub fn reinterpret_cubemaps(
                 environment_map: waiting.image.clone(),
                 intensity,
                 rotation,
+                ..Default::default()
+            });
+        }
+
+        false
+    });
+
+    // A baked map is two images, and a light inserted while either is still a tall picture
+    // samples it as one. Both are pushed through the list above, so this only has to wait for
+    // the shape to change.
+    environments.0.retain(|waiting| {
+        let cube = |handle: &bevy::asset::Handle<bevy::image::Image>| {
+            images
+                .get(handle)
+                .is_some_and(|image| image.texture_descriptor.size.depth_or_array_layers == 6)
+        };
+
+        if !cube(&waiting.diffuse) || !cube(&waiting.specular) {
+            return true;
+        }
+
+        if let Ok(mut camera) = commands.get_entity(waiting.camera) {
+            camera.insert(bevy::light::EnvironmentMapLight {
+                diffuse_map: waiting.diffuse.clone(),
+                specular_map: waiting.specular.clone(),
+                intensity: waiting.intensity,
+                rotation: waiting.rotation,
                 ..Default::default()
             });
         }
@@ -1058,7 +1109,13 @@ pub unsafe extern "C" fn bcs_render_set_atmosphere(
                     return status::INVALID_STATE;
                 };
 
-                let atmosphere = Atmosphere::earth(media.add(medium));
+                let mut atmosphere = Atmosphere::earth(media.add(medium));
+
+                // How much light the ground bounces back into the air, which is what makes the
+                // underside of a cloud bright over snow and dark over sea.
+                if config.ground_albedo > 0.0 {
+                    atmosphere.ground_albedo = Vec3::splat(config.ground_albedo);
+                }
 
                 let scale = if config.scale > 0.0 { config.scale } else { 1.0 };
 
@@ -1090,9 +1147,137 @@ pub unsafe extern "C" fn bcs_render_set_atmosphere(
                     settings.aerial_view_lut_max_distance = config.haze_distance;
                 }
 
+                // One number rather than the dozen Bevy exposes, because every one of them trades
+                // the same thing and a caller setting them apart is tuning a renderer rather than
+                // describing a sky. The sky is the same either way; what changes is banding in a
+                // gradient and how much of a frame it costs.
+                match config.quality {
+                    1 => {
+                        settings.transmittance_lut_samples /= 2;
+                        settings.multiscattering_lut_dirs /= 2;
+                        settings.multiscattering_lut_samples /= 2;
+                        settings.sky_view_lut_samples /= 2;
+                        settings.aerial_view_lut_samples /= 2;
+                        settings.sky_max_samples /= 2;
+                    }
+                    2 => {
+                        settings.transmittance_lut_samples *= 2;
+                        settings.multiscattering_lut_dirs *= 2;
+                        settings.multiscattering_lut_samples *= 2;
+                        settings.sky_view_lut_samples *= 2;
+                        settings.aerial_view_lut_samples *= 2;
+                        settings.sky_max_samples *= 2;
+                    }
+                    _ => {}
+                }
+
                 // `AtmosphereSettings` requires `Hdr`, and Bevy's insert brings it, but a camera
                 // that had it removed would otherwise keep drawing without one.
                 world.entity_mut(entity).insert((Hdr, settings));
+                status::OK
+            })
+        }
+    })
+}
+
+/// Lights the scene from a pair of cubemaps somebody baked earlier.
+///
+/// The other end of [`bcs_render_set_image_lighting`], which filters one cubemap on the GPU every
+/// time the app starts. This takes the two maps a tool produced, which costs nothing at startup
+/// and is what a shipped game wants, especially for an environment too large to filter again.
+///
+/// `diffuse` is the blurred map a rough surface reflects and `specular` is the sharp one a
+/// polished surface reflects. Both are a column of six faces like a skybox, and both are
+/// reinterpreted before the light is inserted, because a map sampled while it is still a tall
+/// picture is sampled wrongly rather than refused.
+///
+/// A negative for either takes the lighting off. `rotation` turns both maps together, and is four
+/// floats or null for none.
+///
+/// Returns [`status::NOT_PRESENT`] where the entity is not a camera, and
+/// [`status::NO_COMPONENT`] where a key names no image.
+///
+/// # Safety
+/// `rotation` must be null or point to four readable floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_set_environment_map(
+    camera: u64,
+    diffuse: i32,
+    specular: i32,
+    intensity: f32,
+    rotation: *const f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, diffuse, specular, intensity, rotation);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::ecs::entity::Entity;
+            use bevy::math::Quat;
+
+            let entity = Entity::from_bits(camera);
+
+            let turn = if rotation.is_null() {
+                Quat::IDENTITY
+            } else {
+                let parts = unsafe { core::slice::from_raw_parts(rotation, 4) };
+                Quat::from_xyzw(parts[0], parts[1], parts[2], parts[3])
+            };
+
+            with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let diffuse = match crate::render::image_handle(world, diffuse) {
+                    Err(refusal) => return refusal,
+                    Ok(handle) => handle,
+                };
+
+                let specular = match crate::render::image_handle(world, specular) {
+                    Err(refusal) => return refusal,
+                    Ok(handle) => handle,
+                };
+
+                // Either one missing is a caller taking the lighting off, since a baked map is
+                // the pair and half of one is not a weaker version of it.
+                let (Some(diffuse), Some(specular)) = (diffuse, specular) else {
+                    world
+                        .entity_mut(entity)
+                        .remove::<bevy::light::EnvironmentMapLight>();
+
+                    return status::OK;
+                };
+
+                {
+                    let mut pending = world.get_resource_or_init::<PendingCubemaps>();
+
+                    pending.0.push(PendingCubemap {
+                        image: diffuse.clone(),
+                        light: None,
+                    });
+
+                    pending.0.push(PendingCubemap {
+                        image: specular.clone(),
+                        light: None,
+                    });
+                }
+
+                world
+                    .get_resource_or_init::<PendingEnvironments>()
+                    .0
+                    .push(PendingEnvironment {
+                        camera: entity,
+                        diffuse,
+                        specular,
+                        intensity,
+                        rotation: turn,
+                    });
+
                 status::OK
             })
         }

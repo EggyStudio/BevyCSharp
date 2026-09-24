@@ -78,9 +78,12 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
+      # The target directory is named as well as the workspace, because build-native.sh writes to
+      # build/target rather than to native/target and a cache pointed at the crate would save an
+      # empty directory and restore it over a build that had to start from nothing every time.
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: native
+          workspaces: native -> ../build/target
           key: ${{ matrix.target }}
 
       # The only development package a render build needs. Everything else graphical resolves at
@@ -122,9 +125,13 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
 
+      # Two directories, because this job builds the bridge through the script and then runs the
+      # crate's own tests through cargo, and those write to build/target and native/target.
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: native
+          workspaces: |
+            native -> ../build/target
+            native
           key: test-${{ matrix.os }}
 
       # The suite runs headless everywhere, so the smaller profile is enough and much faster.

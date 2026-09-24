@@ -56,8 +56,8 @@ if ((windowed || offscreen) && !App.HasRenderer)
     Console.Error.WriteLine(
         "This native bridge was built without Bevy's renderer, so it can neither open a window "
         + "nor draw into an image.");
-    Console.Error.WriteLine("  rebuild it : build/build-native.sh --render");
-    Console.Error.WriteLine("  or run     : dotnet run -- --headless --frames 120");
+    Console.Error.WriteLine("Rebuild it with build/build-native.sh --render.");
+    Console.Error.WriteLine("Or run without one: dotnet run -- --headless --frames 120");
     return 1;
 }
 

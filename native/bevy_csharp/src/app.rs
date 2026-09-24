@@ -308,6 +308,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // An image cannot be told it is a cubemap until it has loaded, so what asks for one
             // leaves the handle here and this picks it up on whichever frame the pixels arrive.
             app.init_resource::<crate::render::post::PendingCubemaps>();
+            app.init_resource::<crate::render::post::PendingEnvironments>();
             app.add_systems(
                 bevy::app::PreUpdate,
                 crate::render::post::reinterpret_cubemaps,

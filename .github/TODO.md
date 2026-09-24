@@ -54,8 +54,21 @@ compiled in but its payload formats, BCn and ASTC and ETC2, are not, and
 `CompressedImageFormatSupport` has to carry what the adapter can decode, which a windowless app
 reports as nothing. Nothing here blocks a game; it is size on disk and upload cost.
 
-`AssetKind.Shader` loads and returns a handle nothing consumes. Either give it a custom material
-path or remove the kind.
+`App.UseShader` points one of four material slots at a WGSL file and `Shaders.CreateMaterial`
+makes materials drawn by it, each carrying sixteen floats and one picture. Four because Bevy asks a
+material's type for its shader rather than the material, so a slot is a Rust type the bridge
+declares, which is the same wall the state slots hit.
+
+- **A slot's bind group is fixed.** Sixteen floats at binding zero and one texture at one and two,
+  which covers a colour, a scroll, a threshold and a mask. A shader wanting a storage buffer, a
+  second texture or a different layout would need the caller to describe a bind group, which is a
+  second language to learn rather than a shader to write.
+- **`AssetKind.Shader` still returns a handle nothing consumes.** A slot names its shader by path
+  rather than by handle, because Bevy asks for a path through a function on the type. Either the
+  kind grows a use or it goes.
+- **No vertex shader, and no depth or shadow pass.** A slot overrides the fragment shader alone, so
+  a material that displaces its own vertices, or that should cast a shadow of the shape it draws
+  rather than of its mesh, is out of reach.
 
 ### Scripts a game can load
 
@@ -82,18 +95,18 @@ code already in the binary.
   sensitivity, and `Render.SetDepthOfField` takes an aperture and a focal length of its own.
   `PhysicalCameraParameters` is one struct behind both, so a camera could be written down once and
   have the exposure and the blur read from it.
-- **A prebaked environment map.** `Render.SetImageLighting` filters a cubemap on the GPU every
-  time the app starts, which costs a moment of startup and needs the faces square and a power of
-  two. `EnvironmentMapLight` takes the diffuse and specular cubemaps a tool baked earlier instead,
-  which is what a shipped game wants and what a large environment cannot afford to redo.
+- **A light probe is the whole scene's.** `Render.SetImageLighting` and `SetEnvironmentMap` put
+  the map on a camera, so everything it draws is lit by one environment. Bevy's `LightProbe` is a
+  volume that lights what is inside it, which is what a room lit differently from the corridor
+  outside it needs, and what makes a reflection change as something walks between them.
 - **A cubemap of anything else.** The reinterpretation is a column of six faces stacked
   vertically, which is what a file holds. A cubemap rendered into, which is what a reflection probe
   or a point light's shadow would want, needs an image created with six layers rather than one
   reinterpreted after loading.
-- **The rest of the sky.** Earth's air is bridged; Mars is the other medium Bevy ships and its dust
-  phase comes from a texture. `ScatteringMedium::new` takes arbitrary scattering terms, which is
-  what an alien planet wants and what a flat config cannot describe. The LUT sizes and sample
-  counts on `AtmosphereSettings` are Bevy's defaults, and they are the quality knob.
+- **One medium, which is earth's air.** Density, ground albedo and a quality setting are bridged.
+  Mars is the other medium Bevy ships, and its dust phase comes from a texture the caller would
+  have to supply, since nothing embeds one. `ScatteringMedium::new` takes arbitrary scattering and
+  absorption terms, which is what an alien planet wants and what a flat config cannot describe.
 - **DLSS.** `bevy_anti_alias` carries it behind a `dlss` feature pulling in `dlss_wgpu`, which has
   licensing terms of its own and runs only on an NVIDIA RTX card through Vulkan on Windows or
   Linux. It also wants a `DlssProjectId` inserted before `DefaultPlugins` and a runtime check of
@@ -218,9 +231,9 @@ language.
   Neither can see a component the bridge does not name, so an entity whose components are all
   engine-side reads as plain. Naming more of them is a bridge job.
 - **The inspector draws a field as one arm of one switch**, told how by the attributes the
-  generator carried through, folds included. What is left is editing several things at once, where
-  the panel shows the last one picked with a count beside it rather than what they agree and
-  disagree about.
+  generator carried through, folds included. Editing several things at once writes to all of them
+  and dims the name of a field they disagree about. What it cannot do is show a value none of them
+  holds, so the box beside a dimmed name is the one entity's rather than blank.
 - **A selection is remembered by name**, so what a reloaded script respawns is found again. All of
   them or none, since half a selection coming back is worse than none. Two entities sharing a name
   still resolve to the first.
@@ -370,8 +383,9 @@ distribution. The minimal profile still builds with nothing but a C compiler.
   covers the step after by drawing a primitive mesh with an unlit material into an offscreen target
   and asserting on the pixels, so a mesh or material that never reaches the render world fails a
   test rather than producing an empty picture. It needs a GPU, so it skips on the headless bridge
-  the test workflow builds. Unchecked that way is everything with more than one moving part: a lit
-  surface, a glTF file's own materials, a sprite, and text.
+  the test workflow builds. A lit surface is covered by the sky and environment map tests, a sprite
+  by the overlay one, and text and the interface by the pixel tests over the layout. What is
+  unchecked that way is a glTF file's own materials, which need a file with one in it.
 - **The lens effects have not been compared.** Whether a whole scene is right is confirmed by
   running the sample, and an effect is worth checking against a second run with it turned off.
   Bloom was confirmed that way, since a halo is obvious beside the same frame without one and easy
@@ -379,11 +393,10 @@ distribution. The minimal profile still builds with nothing but a C compiler.
 
 ### Build and release
 
-- **The Rust build is not cached in CI.** `Swatinem/rust-cache` is configured with
-  `workspaces: native`, so it caches `native/target`, while `build-native.sh` writes to
-  `build/target`. The bridge is rebuilt from nothing on every run. The crate's own tests do use
-  `native/target` and are cached. Either point the script at the cached directory or the cache at
-  the script's.
+- **The portable build is not cached.** `Swatinem/rust-cache` now names the directory
+  `build-native.sh` writes to, so the bridge and the crate's own tests both come back from cache.
+  What is not cached is the container path `PORTABLE=1` takes, which writes to
+  `build/target-portable` and is what a local checkout on a newer glibc uses.
 - **Packing on one machine produces a package for one platform.** Use the CI workflow, or run
   `build-native.sh` on each target, to produce a package covering all six runtime identifiers.
 - **Publishing is manual by choice.** The workflow builds and uploads; the upload to nuget.org is

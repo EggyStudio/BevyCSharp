@@ -311,12 +311,22 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
                         }
                         Err(_) => status::NO_COMPONENT,
                     },
-                    "MeshMaterial3d" => match untyped.try_typed::<StandardMaterial>() {
+                    "MeshMaterial3d" => match untyped.clone().try_typed::<StandardMaterial>() {
                         Ok(handle) => {
                             entity_mut.insert(MeshMaterial3d(handle));
                             status::OK
                         }
-                        Err(_) => status::NO_COMPONENT,
+
+                        // Not the standard one, so it may be one of the slots drawn by a shader
+                        // the caller named. The asset table is untyped, so which it is can only
+                        // be found by asking each of them.
+                        Err(_) => {
+                            if crate::render::shaders::attach(&mut entity_mut, &untyped) {
+                                status::OK
+                            } else {
+                                status::NO_COMPONENT
+                            }
+                        }
                     },
                     _ => status::NO_COMPONENT,
                 }
