@@ -46,6 +46,11 @@ public static unsafe class Shaders
     /// The picture the shader samples, or <see cref="AssetHandle.None"/> to leave it unbound, which
     /// a shader that does not sample one does not notice.
     /// </param>
+    /// <param name="alpha">
+    /// What the renderer does where this material is not opaque. A shader writing anything but one
+    /// in its alpha channel wants <see cref="AlphaMode.Blend"/> or <see cref="AlphaMode.Add"/>,
+    /// since an opaque material's alpha is not read at all.
+    /// </param>
     /// <returns>A handle to give <see cref="Render.SetMaterial"/>.</returns>
     /// <exception cref="ArgumentException">Too many parameters were given.</exception>
     /// <exception cref="BevyNativeException">
@@ -64,7 +69,8 @@ public static unsafe class Shaders
     public static AssetHandle CreateMaterial(
         int slot,
         ReadOnlySpan<float> parameters = default,
-        AssetHandle texture = default)
+        AssetHandle texture = default,
+        AlphaMode alpha = AlphaMode.Opaque)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(slot);
 
@@ -85,7 +91,8 @@ public static unsafe class Shaders
                 slot,
                 at,
                 parameters.Length,
-                texture.Key);
+                texture.Key,
+                (int)alpha);
         }
 
         if (key < 0)

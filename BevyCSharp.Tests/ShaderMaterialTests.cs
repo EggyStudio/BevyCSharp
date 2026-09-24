@@ -36,6 +36,45 @@ public sealed class ShaderMaterialTests
             $"the quad came out {middle} rather than green");
     }
 
+    /// <summary>A vertex shader moves the mesh, which shows as the shape covering more of it.</summary>
+    /// <remarks>
+    /// The same cube drawn twice by the same slot, pushed along its own normals by the first
+    /// number the material carries. A vertex shader that never ran would leave the two pictures
+    /// the same size, which is the only thing that tells it apart from a fragment shader.
+    /// </remarks>
+    [Fact]
+    public void AVertexShaderMovesTheMesh()
+    {
+        if (!App.HasRenderer) return;
+
+        var still = Draw(vertex: true, swell: 0f);
+        var swollen = Draw(vertex: true, swell: 0.6f);
+
+        Assert.NotNull(still);
+        Assert.NotNull(swollen);
+
+        var small = Lit(still);
+        var large = Lit(swollen);
+
+        Assert.True(small > 0, "the cube was not drawn at all");
+        Assert.True(
+            large > small + 200,
+            $"the shape covered {small} pixels still and {large} pushed out");
+    }
+
+    /// <summary>How many pixels the shape reached, which is green either way.</summary>
+    private static int Lit(CapturedImage picture)
+    {
+        var drawn = 0;
+
+        for (var i = 0; i < picture.Pixels.Length; i += 4)
+        {
+            if (picture.Pixels[i + 1] > 120 && picture.Pixels[i] < 90) drawn++;
+        }
+
+        return drawn;
+    }
+
     /// <summary>A slot nothing was said about has nothing to draw with, so it is refused.</summary>
     [Fact]
     public void ASlotWithNoShaderIsRefused()
@@ -63,7 +102,7 @@ public sealed class ShaderMaterialTests
     }
 
     /// <summary>Runs an offscreen app drawing one quad with the test's own shader.</summary>
-    private static CapturedImage? Draw()
+    private static CapturedImage? Draw(bool vertex = false, float swell = 0f)
     {
         CapturedImage? picture = null;
 
@@ -73,7 +112,8 @@ public sealed class ShaderMaterialTests
         using var app = new App(config);
 
         app.AddPlugin(new EnginePlugin());
-        app.UseShader(0, "shaders/flat.wgsl");
+        if (vertex) app.UseShader(1, "shaders/ripple.wgsl", "shaders/ripple.wgsl");
+        else app.UseShader(0, "shaders/flat.wgsl");
 
         app.AddSystem(Stage.Startup, new SystemDescriptor(
             world =>
@@ -95,7 +135,12 @@ public sealed class ShaderMaterialTests
                 Render.SetMesh(ecs, quad, Render.CreateMesh(MeshShape.Cuboid, 2f, 2f, 2f));
 
                 // Green, in the first four floats, which is what the shader paints with.
-                Render.SetMaterial(ecs, quad, Shaders.CreateMaterial(0, [0f, 1f, 0f, 1f]));
+                Render.SetMaterial(
+                    ecs,
+                    quad,
+                    vertex
+                        ? Shaders.CreateMaterial(1, [swell, 0f, 0f, 0f, 0f, 1f, 0f, 1f])
+                        : Shaders.CreateMaterial(0, [0f, 1f, 0f, 1f]));
 
                 ecs.Add(quad, Transform.Identity);
             },

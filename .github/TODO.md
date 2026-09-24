@@ -66,9 +66,9 @@ declares, which is the same wall the state slots hit.
 - **`AssetKind.Shader` still returns a handle nothing consumes.** A slot names its shader by path
   rather than by handle, because Bevy asks for a path through a function on the type. Either the
   kind grows a use or it goes.
-- **No vertex shader, and no depth or shadow pass.** A slot overrides the fragment shader alone, so
-  a material that displaces its own vertices, or that should cast a shadow of the shape it draws
-  rather than of its mesh, is out of reach.
+- **No depth or shadow pass.** A slot overrides the vertex and fragment shaders, so a material can
+  move its own geometry. What it cannot override is the prepass, so a material that displaces
+  itself casts the shadow of the mesh it started from rather than of the shape it drew.
 
 ### Scripts a game can load
 
@@ -222,10 +222,11 @@ language.
   `Render.SetCameraTarget` point a camera at an image and `ImGuiTextures.Of` hands that image to a
   draw call, so a model thumbnail, a material preview and an orientation widget drawn as a small
   scene are all editor work rather than bridge work.
-- **A field can hold an asset, and the engine's own cannot.** A game's component holding an
-  `AssetHandle` is drawn by name, and pressing it offers the files under the asset root that suit
-  it. The mesh and the material on an entity are Rust components with no schema, so the editor
-  cannot point an entity at a different mesh.
+- **A mesh and a material are shown by where they came from.** They are Bevy components holding
+  typed handles, so they have no schema and the panel draws them as their own section, reading the
+  asset path and offering the files that suit. What it cannot do is name a part of a file other
+  than the first, since a glTF holds many meshes and nothing here can list them without loading it,
+  so the picker takes `Mesh0/Primitive0` and a file with several needs the label written by hand.
 - **The hierarchy names what it can see and the stats panel counts it.** Both go through
   `EditorKinds`, so a camera in the tree and a camera in the count are one question asked once.
   Neither can see a component the bridge does not name, so an entity whose components are all

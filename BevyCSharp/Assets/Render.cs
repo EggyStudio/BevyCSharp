@@ -134,6 +134,60 @@ public static unsafe class Render
         Attach(world, entity, "MeshMaterial3d", material, "a material");
 
     /// <summary>
+    /// Where an entity's mesh was loaded from, or empty when it was not loaded from anywhere.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A mesh and a material are Bevy's own components holding typed handles, so nothing on this
+    /// side can read them the way it reads a component of its own. What they can be asked is where
+    /// they came from, which is what a tool showing an entity has something to say about and what a
+    /// person can point at a different file.
+    /// </para>
+    /// <para>
+    /// Empty for anything built in memory, which is everything <see cref="CreateMesh"/> makes, and
+    /// for an entity carrying no mesh at all. The two are told apart by
+    /// <see cref="EcsWorld.Has{T}"/> on <see cref="Bevy.Mesh3d"/> where a mirror exists, and by
+    /// nothing where one does not, which is the honest limit.
+    /// </para>
+    /// </remarks>
+    /// <param name="entity">The entity to ask about.</param>
+    public static string MeshPathOf(Entity entity) => AssetPathOf(entity, 0);
+
+    /// <summary>Where an entity's material was loaded from, or empty when it was not.</summary>
+    /// <remarks>
+    /// Only a standard material answers, since a material drawn by a shader slot is a different
+    /// type and one of several. <see cref="MeshPathOf"/> covers the rest of the reasoning.
+    /// </remarks>
+    /// <param name="entity">The entity to ask about.</param>
+    public static string MaterialPathOf(Entity entity) => AssetPathOf(entity, 1);
+
+    /// <summary>
+    /// Whether an entity carries a mesh the renderer draws.
+    /// </summary>
+    /// <remarks>
+    /// The question <see cref="MeshPathOf"/> cannot answer, since a mesh made in memory has no
+    /// path and neither does an entity with no mesh at all. A tool showing what something is drawn
+    /// with has to tell those apart.
+    /// </remarks>
+    /// <param name="entity">The entity to ask about.</param>
+    public static bool IsDrawn(Entity entity) =>
+        Native.bcs_render_asset_path(entity.Bits, 0, null, 0) >= 0;
+
+    /// <summary>One of the two paths, or empty when there is nothing to say.</summary>
+    private static string AssetPathOf(Entity entity, int which)
+    {
+        // Absent rather than refused, because a tool asks this about whatever is selected and most
+        // things are not drawn at all.
+        var probe = Native.bcs_render_asset_path(entity.Bits, which, null, 0);
+        if (probe < 0) return string.Empty;
+
+        return Native.ReadText(
+            (buffer, capacity) =>
+                Native.bcs_render_asset_path(entity.Bits, which, buffer, capacity),
+            $"reading what {entity} is drawn with");
+    }
+
+    /// <summary>
     /// Spawns a 3D camera and returns it.
     /// </summary>
     /// <remarks>

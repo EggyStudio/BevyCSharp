@@ -17,6 +17,46 @@ public sealed class MaterialTests
 {
     private const string Texture = "textures/checker.png";
 
+    /// <summary>What an entity is drawn with can be asked about by where it came from.</summary>
+    /// <remarks>
+    /// A mesh and a material are Bevy's own components holding typed handles, which nothing on
+    /// this side can read the way it reads a component of its own. The path is what is left, and
+    /// the two cases worth pinning are an asset with one and an asset without.
+    /// </remarks>
+    [Fact]
+    public void WhatAnEntityIsDrawnWithIsAskedAboutByItsPath()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        if (!App.HasRenderer) return;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var made = ctx.Ecs.Spawn();
+
+            Render.SetMesh(ctx.Ecs, made, Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f));
+            Render.SetMaterial(ctx.Ecs, made, Render.CreateMaterial(1f, 1f, 1f));
+
+            // Built in memory, so there is nowhere it came from and saying so is the answer.
+            Assert.Equal(string.Empty, Render.MeshPathOf(made));
+            Assert.Equal(string.Empty, Render.MaterialPathOf(made));
+
+            // And nothing at all is the same empty answer rather than a refusal, because a tool
+            // asks this about whatever is selected and most things are not drawn.
+            Assert.Equal(string.Empty, Render.MeshPathOf(ctx.Ecs.Spawn()));
+
+            var loaded = ctx.Ecs.Spawn();
+
+            Render.SetMesh(
+                ctx.Ecs,
+                loaded,
+                AssetServer.Load(AssetKind.Mesh, "models/triangle.gltf#Mesh0/Primitive0"));
+
+            Assert.Contains("triangle.gltf", Render.MeshPathOf(loaded));
+        });
+
+        harness.Run();
+    }
+
     [Fact]
     public void TheHarnessLooksForAssetsWhereTheyWereCopied()
     {

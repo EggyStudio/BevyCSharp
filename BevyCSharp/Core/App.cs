@@ -672,8 +672,9 @@ public sealed unsafe class App : IDisposable
     /// </para>
     /// <para>
     /// Before the app runs, because what it installs is a plugin carrying a render pipeline. A slot
-    /// takes one shader for the life of the process, since a second answer would apply to
-    /// everything already made from the first.
+    /// takes one shader for the life of the process, since a different second answer would apply
+    /// to everything already made from the first. Naming the same shader again is allowed, which
+    /// is what a second app in one process does.
     /// </para>
     /// <para>
     /// The file is WGSL under the asset root. Its fragment entry point is called <c>fragment</c>,
@@ -682,7 +683,11 @@ public sealed unsafe class App : IDisposable
     /// </para>
     /// </remarks>
     /// <param name="slot">Which slot, below <see cref="Shaders.SlotCount"/>.</param>
-    /// <param name="path">The shader, under the asset root.</param>
+    /// <param name="path">The fragment shader, under the asset root.</param>
+    /// <param name="vertex">
+    /// A vertex shader as well, whose entry point is called <c>vertex</c>, or null to leave the
+    /// mesh where the mesh is. Only a material that displaces its own geometry wants one.
+    /// </param>
     /// <exception cref="InvalidOperationException">The app is already running.</exception>
     /// <exception cref="BevyNativeException">
     /// There is no such slot, or it already has a shader.
@@ -692,7 +697,7 @@ public sealed unsafe class App : IDisposable
     /// app.UseShader(0, "shaders/ripple.wgsl");
     /// </code>
     /// </example>
-    public App UseShader(int slot, string path)
+    public App UseShader(int slot, string path, string? vertex = null)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentException.ThrowIfNullOrEmpty(path);
@@ -703,7 +708,7 @@ public sealed unsafe class App : IDisposable
                 + "draws a shader material is a plugin, and a plugin is added before the run.");
 
         Native.Check(
-            Native.bcs_shader_slot(_handle, slot, path),
+            Native.bcs_shader_slot(_handle, slot, path, vertex),
             $"pointing shader slot {slot} at {path}");
 
         return this;

@@ -334,3 +334,69 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
         }
     })
 }
+
+/// Writes where an entity's mesh or material was loaded from, and returns its length in bytes.
+///
+/// `which` is `0` for the mesh and `1` for the material. The answer is the asset path, which is
+/// what an editor can show and what a person can point at a different file. An asset built in
+/// memory rather than loaded has no path and answers an empty string, which is the honest answer
+/// rather than a made-up name.
+///
+/// The usual text convention: pass null with a capacity of zero to learn the length, then call
+/// again with a buffer that size.
+///
+/// Returns [`status::NO_COMPONENT`] where the entity carries no such thing.
+///
+/// # Safety
+/// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_asset_path(
+    entity: u64,
+    which: i32,
+    out: *mut u8,
+    capacity: i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, which, out, capacity);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::asset::AssetServer;
+            use bevy::pbr::{MeshMaterial3d, StandardMaterial};
+            use bevy::render::mesh::Mesh3d;
+
+            crate::state::with_world(|world| {
+                let entity = crate::ecs::entity_from(entity);
+
+                let id = match which {
+                    0 => world.get::<Mesh3d>(entity).map(|mesh| mesh.0.id().untyped()),
+                    1 => world
+                        .get::<MeshMaterial3d<StandardMaterial>>(entity)
+                        .map(|material| material.0.id().untyped()),
+                    _ => return status::NULL_ARG,
+                };
+
+                let Some(id) = id else {
+                    return status::NO_COMPONENT;
+                };
+
+                let Some(server) = world.get_resource::<AssetServer>() else {
+                    return status::UNSUPPORTED;
+                };
+
+                // An asset made in memory has no path, which is most of what this project's own
+                // meshes and materials are, so an empty answer is ordinary rather than a failure.
+                let path = server
+                    .get_path(id)
+                    .map(|path| path.to_string())
+                    .unwrap_or_default();
+
+                unsafe { crate::interop::write_text(&path, out, capacity) }
+            })
+        }
+    })
+}

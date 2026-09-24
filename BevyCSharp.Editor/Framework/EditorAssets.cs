@@ -160,7 +160,7 @@ public static class EditorAssets
     /// </remarks>
     public static IReadOnlyList<string> ExtensionsFor(string kind) => kind switch
     {
-        AssetKind.Mesh or AssetKind.Gltf => [".gltf", ".glb", ".obj"],
+        AssetKind.Mesh or AssetKind.Gltf or AssetKind.StandardMaterial => [".gltf", ".glb", ".obj"],
         AssetKind.Image => [".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tga", ".ktx2"],
         AssetKind.Audio => [".ogg", ".wav", ".flac", ".mp3"],
         AssetKind.Scene => [".scn", ".ron", ".gltf", ".glb"],

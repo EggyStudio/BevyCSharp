@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 111;
+    internal const int ExpectedAbiVersion = 113;
 
     static Native() => NativeLoader.Initialize();
 
@@ -401,6 +401,12 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_material_create(NativeMaterialConfig* config);
 
+    /// <summary>Writes where an entity's mesh or material was loaded from.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_asset_path(
+        ulong entity, int which, byte* buffer, int capacity);
+
     /// <summary>Reports how many shader material slots this bridge provides.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -409,13 +415,14 @@ internal static unsafe partial class Native
     /// <summary>Points a slot at a fragment shader, and installs what draws with it.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_shader_slot(IntPtr app, int slot, string path);
+    internal static partial int bcs_shader_slot(
+        IntPtr app, int slot, string path, string? vertex);
 
     /// <summary>Makes a material drawn by one of the slots, returning its key.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_material_create(
-        int slot, float* parameters, int count, int texture);
+        int slot, float* parameters, int count, int texture, int alpha);
 
     /// <summary>Attaches an asset through a component that carries a handle.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]

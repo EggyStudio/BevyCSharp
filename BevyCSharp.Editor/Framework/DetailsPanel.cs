@@ -95,6 +95,10 @@ public static class DetailsPanel
             Component(ctx, entity, schema);
         }
 
+        // What it is drawn with, which is the engine's own components rather than this project's
+        // and so has no schema to be drawn from.
+        EditorDrawn.Draw(ctx, entity);
+
         // What the thing is, under what can be edited about it. A tag says what something carries,
         // which is worth knowing and never worth the room at the top.
         Tags(ctx, entity);

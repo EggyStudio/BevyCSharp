@@ -762,8 +762,11 @@ fn fragment(mesh: VertexOutput) -> @location(0) vec4<f32> {
 }
 ```
 
-The fragment shader is what a slot overrides, so the vertices, the depth pass and the shadow a mesh
-casts are still the engine's.
+`App.UseShader` takes a vertex shader as well, whose entry point is called `vertex`, for a material
+that moves its own geometry. `AlphaMode` is per material rather than per slot, so two things drawn
+by one shader can still be sorted differently. What a slot cannot override is the prepass, so a
+material that displaces itself casts the shadow of the mesh it started from rather than of the
+shape it drew.
 
 **Textures.** How one is sampled is decided when it loads:
 
@@ -1766,6 +1769,10 @@ somebody who shut one meant it about the component.
 Several things selected are edited together. The panel shows the last one picked, and a change
 made in it reaches everything else in the selection carrying the same component. A field they
 disagree about has its name dimmed, since the box beside it can only show one of their values.
+
+The mesh and the material an entity is drawn with are Bevy's own components holding typed handles,
+so they have no schema and are drawn as a section of their own. It shows where each came from, says
+"made here" for anything built in memory, and offers the files under the asset root that suit.
 
 A schema also carries how to add the component, how to remove it, and any method the struct has
 that takes nothing, so a panel offers those as buttons without naming a type. What the editor

@@ -53,6 +53,8 @@ macro_rules! shader_slots {
                 #[texture(1)]
                 #[sampler(2)]
                 pub texture: Option<Handle<Image>>,
+                /// How the renderer treats what this material draws where it is not opaque.
+                pub alpha: bevy::material::AlphaMode,
             }
 
             impl Material for $ty {
@@ -64,6 +66,21 @@ macro_rules! shader_slots {
                         Some(path) => ShaderRef::Path(AssetPath::from(path.clone())),
                         None => ShaderRef::Default,
                     }
+                }
+
+                fn vertex_shader() -> ShaderRef {
+                    // Optional, unlike the fragment one, because most materials want the mesh
+                    // where the mesh is and only some displace it.
+                    match VERTEX_SHADERS[$slot].get() {
+                        Some(path) => ShaderRef::Path(AssetPath::from(path.clone())),
+                        None => ShaderRef::Default,
+                    }
+                }
+
+                // Per material rather than per slot, because two things drawn by one shader can
+                // still want different answers, and Bevy asks the instance for this one.
+                fn alpha_mode(&self) -> bevy::material::AlphaMode {
+                    self.alpha
                 }
             }
         )+
@@ -79,14 +96,28 @@ macro_rules! shader_slots {
         static SHADERS: [OnceLock<String>; SLOT_COUNT as usize] =
             [const { OnceLock::new() }; SLOT_COUNT as usize];
 
+        /// Which vertex shader each slot draws with, where one was named.
+        static VERTEX_SHADERS: [OnceLock<String>; SLOT_COUNT as usize] =
+            [const { OnceLock::new() }; SLOT_COUNT as usize];
+
         /// Points a slot at a shader and installs what draws with it.
-        pub fn install(app: &mut App, slot: i32, path: String) -> i32 {
+        pub fn install(app: &mut App, slot: i32, path: String, vertex: Option<String>) -> i32 {
             match slot {
                 $($slot => {
-                    // Once, because the shader is baked into what Bevy asks the type for and a
-                    // second answer would apply to materials already made from the first.
-                    if SHADERS[$slot].set(path).is_err() {
-                        return status::ALREADY_RUNNING;
+                    // One shader for the life of the process, because it is baked into what Bevy
+                    // asks the type for and a second answer would apply to materials already made
+                    // from the first. Saying the same thing again is a caller repeating itself,
+                    // which is what a second app in one process does and is not a mistake.
+                    match SHADERS[$slot].get() {
+                        Some(already) if *already != path => return status::INVALID_STATE,
+                        Some(_) => {}
+                        None => {
+                            let _ = SHADERS[$slot].set(path);
+
+                            if let Some(vertex) = vertex {
+                                let _ = VERTEX_SHADERS[$slot].set(vertex);
+                            }
+                        }
                     }
 
                     app.add_plugins(MaterialPlugin::<$ty>::default());
@@ -102,6 +133,7 @@ macro_rules! shader_slots {
             slot: i32,
             params: ShaderParams,
             texture: Option<Handle<Image>>,
+            alpha: bevy::material::AlphaMode,
         ) -> i32 {
             match slot {
                 $($slot => {
@@ -111,7 +143,7 @@ macro_rules! shader_slots {
                         return status::INVALID_STATE;
                     }
 
-                    let material = $ty { params, texture };
+                    let material = $ty { params, texture, alpha };
 
                     let Some(mut assets) =
                         world.get_resource_mut::<bevy::asset::Assets<$ty>>()
@@ -163,23 +195,29 @@ pub extern "C" fn bcs_shader_slots() -> i32 {
 ///
 /// Must happen before the app runs, because the plugin it adds brings a render pipeline and the
 /// systems that feed it. A slot takes one shader for the life of the process, since Bevy asks the
-/// material's type rather than the material, and a second answer would apply to everything already
-/// made from the first.
+/// material's type rather than the material, and a different second answer would apply to
+/// everything already made from the first.
 ///
 /// `path` is a `.wgsl` file under the asset root. Its fragment entry point is called `fragment`,
 /// and the material's own bind group is group three, where binding zero is sixteen floats as four
 /// `vec4`, binding one is a texture and binding two its sampler.
 ///
-/// Returns [`status::ALREADY_RUNNING`] where the slot already has a shader, and
-/// [`status::NULL_ARG`] where there is no such slot.
+/// `vertex` names a vertex shader as well, or is null to leave the mesh where the mesh is, which
+/// is what all but a material that displaces its own geometry wants. Its entry point is called
+/// `vertex`.
+///
+/// Returns [`status::INVALID_STATE`] where the slot already has a different shader, and
+/// [`status::NULL_ARG`] where there is no such slot. Naming the same shader again is allowed, so
+/// a second app in one process can install the same slots.
 ///
 /// # Safety
-/// `handle` must be a live app and `path` a NUL-terminated UTF-8 string.
+/// `handle` must be a live app, `path` a NUL-terminated UTF-8 string, and `vertex` null or one.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn bcs_shader_slot(
     handle: *mut crate::state::BcsApp,
     slot: i32,
     path: *const core::ffi::c_char,
+    vertex: *const core::ffi::c_char,
 ) -> i32 {
     crate::interop::guard(|| {
         let Some(app) = (unsafe { crate::state::app_mut(handle) }) else {
@@ -194,7 +232,13 @@ pub unsafe extern "C" fn bcs_shader_slot(
             return status::NULL_ARG;
         };
 
-        install(&mut app.app, slot, path)
+        let vertex = if vertex.is_null() {
+            None
+        } else {
+            unsafe { crate::interop::cstr_to_string(vertex) }
+        };
+
+        install(&mut app.app, slot, path, vertex)
     })
 }
 
@@ -203,6 +247,10 @@ pub unsafe extern "C" fn bcs_shader_slot(
 /// `params` points at up to sixteen floats, which reach the shader as four `vec4` in the order
 /// they were given, and anything past what was passed is zero. A negative `texture` leaves the
 /// picture unbound, which a shader that does not sample one does not notice.
+///
+/// `alpha` is `0` opaque, `1` masked at half, `2` blended and sorted, `3` added to what is behind.
+/// A shader writing anything but one in its alpha channel wants one of the last two, since an
+/// opaque material's alpha is not read at all.
 ///
 /// Returns a negative where the slot has no shader, the key names no image, or there is no
 /// renderer.
@@ -215,6 +263,7 @@ pub unsafe extern "C" fn bcs_shader_material_create(
     params: *const f32,
     count: i32,
     texture: i32,
+    alpha: i32,
 ) -> i32 {
     crate::interop::guard_with(-1, || {
         if count < 0 || count as usize > PARAM_COUNT || (params.is_null() && count > 0) {
@@ -237,7 +286,14 @@ pub unsafe extern "C" fn bcs_shader_material_create(
                 Ok(handle) => handle,
             };
 
-            create(world, slot, values, texture)
+            let alpha = match alpha {
+                1 => bevy::material::AlphaMode::Mask(0.5),
+                2 => bevy::material::AlphaMode::Blend,
+                3 => bevy::material::AlphaMode::Add,
+                _ => bevy::material::AlphaMode::Opaque,
+            };
+
+            create(world, slot, values, texture, alpha)
         })
     })
 }
