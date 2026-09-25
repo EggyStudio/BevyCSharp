@@ -9,6 +9,10 @@ iteration, change detection, filters, hierarchy, scheduling, commands, input and
 thin is the engine-facing half. Bevy is compiled in far further than it is bridged, so most of what
 follows is bridge work over code already linked into the binary rather than a dependency to add.
 
+Rendering for the high end (virtualized geometry, texture streaming, GI, reflections) is planned
+in [RENDERING.md](RENDERING.md), which lists what those techniques need from the engine and the
+order it is built in. The items below are the gaps closer to hand.
+
 An item says what exists, what is missing, and what the missing part needs. Adding an export means
 bumping `ABI_VERSION` in `native/bevy_csharp/src/lib.rs` and `Native.ExpectedAbiVersion`, which is
 what stops a stale bridge loading against new managed code.

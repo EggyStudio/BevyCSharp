@@ -1,4 +1,4 @@
-# BevyCSharp
+# Bevy C# 
 
 Write [Bevy](https://bevy.org) games in C#.
 
@@ -2224,8 +2224,11 @@ run against a real Bevy app. Known gaps:
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
 - A cubemap comes from a file, as six square faces stacked into a column. One rendered into, which
   is what a reflection probe placed in a room would want, has no bridge.
-- Slang shaders compile with `slangc`, which is a separate download. A machine without it draws
-  what was compiled and cached on one that had it, and cannot compile an edit.
+- Slang shaders compile with `slangc`, which the build fetches. A machine without it draws what
+  was compiled and cached on one that had it, and cannot compile an edit.
+- The renderer is open at fewer points than virtualized geometry, texture streaming, screen-space
+  and world-space GI or reflections need. [.github/RENDERING.md](.github/RENDERING.md) lists what
+  each of those asks of an engine, what is here, what is missing, and the order it is built in.
 
 ---
 
