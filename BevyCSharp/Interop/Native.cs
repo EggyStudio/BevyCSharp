@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 115;
+    internal const int ExpectedAbiVersion = 117;
 
     static Native() => NativeLoader.Initialize();
 
@@ -546,6 +546,36 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_image_create(uint width, uint height, uint depth, int format);
+
+    /// <summary>Runs an instance's compute shader with workgroup counts read from a buffer.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_dispatch_indirect(int instance, int buffer, uint offset);
+
+    /// <summary>Gives a camera the images its shaders keep.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_view_images(ulong camera, NativeViewImage* images, int count);
+
+    /// <summary>Replaces the dispatches a camera runs every frame.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_view_dispatches(ulong camera, NativeViewDispatch* dispatches, int count);
+
+    /// <summary>Makes an image a compute shader writes, starting with the texels given.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_image_create_from(uint width, uint height, uint depth, int format, byte* texels, int length);
+
+    /// <summary>Sets the ambient light, everywhere or on one camera.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_ambient_light(ulong camera, float r, float g, float b, float brightness);
+
+    /// <summary>Turns Bevy's screen-space ambient occlusion on or off for a camera.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_ambient_occlusion(ulong camera, int quality, float thickness);
 
     /// <summary>Asks for an image to be treated as a cubemap once it has loaded.</summary>
     [LibraryImport(Library)]

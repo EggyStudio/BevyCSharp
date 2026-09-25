@@ -985,12 +985,15 @@ float4 fragment(bcs_pass::Input input) : SV_Target
 }
 ```
 
-`import bcs_pass;` gives a pass the picture, time, the view, and the camera's depth and normals,
-which the bridge binds itself. Everything else a pass declares is its own. Depth and normals come
-from a prepass the camera draws when asked, with `Shaders.SetPrepass(camera, depth: true,
-normals: true)`, which is what an outline or a fog is made of, and `bcs_pass::distance_at` turns
-depth into world units. A camera that draws neither binds the far plane and white normals, and so
-does a multisampled one, whose prepass a pass cannot bind. A pass before tonemapping sees the linear
+`import bcs_pass;` gives a pass the picture, time, the view and the previous frame's, and the
+camera's depth, normals and motion vectors, which the bridge binds itself. Everything else a pass
+declares is its own. Depth, normals and motion come from a prepass the camera draws when asked,
+with `Shaders.SetPrepass(camera, depth: true, normals: true, motion: true)`, which is what an
+outline, a fog or anything reusing the previous frame is made of. `bcs_pass::distance_at` turns
+depth into world units, `world_position` turns a pixel back into a point in the world, and
+`previous_uv_of` finds where a point was on the previous frame. A camera that draws none of them
+binds the far plane, white normals and no motion, and so does a multisampled one, whose prepass a
+pass cannot bind. A pass before tonemapping sees the linear
 picture, which may be brighter than white, and suits anything about light; one after sees what the
 screen will show, and suits anything about the picture as a picture. A pass still compiling is
 skipped rather than drawn wrong, and passes run in the order given, each over what the last wrote.
@@ -1050,6 +1053,99 @@ something drawn. A buffer's size is fixed when it is made, and `WriteBuffer` rep
 place. `BeginBufferRead` copies one back, and `TryReadBuffer<T>` hands over the elements a frame or
 two later, which is what any readback costs. A program's state stays `Compiling` until its compute
 pipeline has been built, so a dispatch made once it is `Ready` runs rather than being dropped.
+
+Atomics reach a buffer through Slang's `Atomic<T>`, as in `RWStructuredBuffer<Atomic<uint>>` and
+`counter[0].add(1)`, because that is the form Slang turns into WGSL's atomics. `InterlockedAdd` on a
+plain buffer does not compile for WGSL. `Shaders.DispatchIndirect(instance, buffer)` runs as many
+workgroups as three unsigned integers in a buffer say, read on the GPU when the dispatch runs, so
+one compute shader can count the work (the pixels that need tracing, the clusters that survived
+culling) and the next runs exactly that much without the count crossing back to the CPU.
+
+#### Compute on a camera
+
+Screen-space techniques are a chain of compute and passes over one camera's frame, each reading
+what the camera drew and what the chain left behind last frame. A camera takes that chain as data:
+images it owns, and compute shaders it runs at a point in its frame.
+
+```csharp
+ShaderInstance Compute(string file) => Shaders.CreateInstance(Shaders.CreateProgram(
+    new ShaderProgramSettings { Compute = file }));
+
+var occlusion = Compute("shaders/occlusion.slang");
+var accumulate = Compute("shaders/accumulate.slang");
+var composite = Shaders.CreateInstance(Shaders.CreateProgram(
+    new ShaderProgramSettings { Pass = "shaders/composite.slang" }));
+
+Shaders.SetPrepass(camera, depth: true, normals: true, motion: true);
+
+Shaders.SetViewImages(camera,
+    new ViewImage("occlusion", ShaderImageFormat.R16Float, Scale: 0.5f),
+    new ViewImage("accumulated", ShaderImageFormat.R16Float, History: true),
+    new ViewImage("depth_pyramid", ShaderImageFormat.R32Float, Mips: 6));
+
+Shaders.SetViewDispatches(camera,
+    ViewDispatch.PerPixel(occlusion, FramePoint.AfterPrepass, scale: 0.5f),
+    ViewDispatch.PerPixel(accumulate, FramePoint.AfterPrepass));
+
+Shaders.SetPasses(camera, composite);                       // reads "accumulated" by name
+```
+
+```slang
+import bcs_pass;
+
+[format("r16f")] RWTexture2D<float> accumulated;
+Texture2D<float> accumulated_previous;
+Texture2D<float> occlusion;
+SamplerState linear;
+
+[shader("compute")]
+[numthreads(8, 8, 1)]
+void main(uint3 id : SV_DispatchThreadID)
+{
+    let uv = bcs_pass::uv_of(int2(id.xy));
+    let before = bcs_pass::previous_uv(uv, bcs_pass::load_motion(int2(id.xy)));
+    let history = accumulated_previous.SampleLevel(linear, before, 0.0);
+    accumulated[id.xy] = lerp(history, occlusion.SampleLevel(linear, uv, 0.0), 0.1);
+}
+```
+
+An image a camera owns is made at a fraction of its picture, made again when the picture changes
+size (starting over from zeros), and bound wherever a shader on that camera declares its name, as a
+texture to read or a storage image to write. One made with `History: true` is two images that
+trade places every frame, so `name_previous` is what `name` held last frame, and one made with
+mips is reachable a level at a time as `name_mip0`, `name_mip1` and on, which is how a depth
+pyramid is built one level from the last. Every camera has its own, however many there are. A
+dispatch or a pass must not read and write the same image, which the GPU refuses, and which is what
+history is for.
+
+A shader on a camera also sees the scene's lights the way Bevy's own materials do:
+`bcs_pass::directional_light_count()` and `lights.directional_lights[i]` with each light's color,
+direction and shadow cascades, `point_light_count()` and `point_lights[i]` for point and spot lights,
+and `directional_shadow` and `point_shadow` read Bevy's shadow maps with its filtering, from zero in
+full shadow to one in full light. That is what shading the point a traced ray hit needs, without
+drawing the scene's lights a second time.
+
+A dispatch on a camera runs every frame at one of four points: `AfterPrepass`, once depth, normals,
+motion, shadows and Bevy's own ambient occlusion exist and before anything is lit; `AfterOpaque`, between opaque and transparent
+geometry; and `BeforeTonemapping` or `AfterTonemapping`, ahead of the passes on the same side. Its
+workgroups cover a fraction of the picture (`PerPixel`), are fixed (`Fixed`), or come from a buffer
+(`Indirect`). It reads the same inputs a pass does through `import bcs_pass;`, and a compute shader
+importing `bcs_compute` runs on a camera as well, reading only time.
+
+**Into Bevy's lighting.** Ambient occlusion is the one input to the lighting of Bevy's own materials
+a chain can write so far. `Render.SetAmbientOcclusion(camera, AmbientOcclusionQuality.Low)` turns
+Bevy's own on, and while it is on a compute shader on the camera sees the texture Bevy's lighting
+reads as `ambient_occlusion`, so one run at `AfterPrepass` that writes it replaces Bevy's answer
+with its own, and the ambient light (`Render.SetAmbientLight`) is darkened by it where a surface is
+hemmed in. Indirect diffuse and specular have no such input yet, so a GI result is composited by a
+pass; [.github/RENDERING.md](.github/RENDERING.md) has what is planned for that.
+
+A storage image may be declared in any format the adapter can write, `[format("r16f")]` included,
+although core WGSL has fewer: Slang writes the nearest core format and the bridge puts the declared
+one back from Slang's reflection. An image the shader only writes is bound write-only, which more
+formats allow than reading and writing at once. Slang itself refuses a `RWTexture2D` in a format
+WGSL cannot read and write, such as `rgba16f`, and its `WTexture2D`, written with `Store`, is the
+write-only image for those.
 
 #### Textures
 

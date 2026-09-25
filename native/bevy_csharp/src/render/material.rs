@@ -216,6 +216,7 @@ impl ErasedRenderAsset for BcsMaterial3d {
             buffers,
             fallback,
             stand,
+            view: None,
         };
 
         let packed = match pack(&layout, &material.values, &context) {
@@ -713,7 +714,10 @@ pub fn install(app: &mut bevy::app::App, root: std::path::PathBuf) {
             First,
             (programs::update, refresh_materials_of_changed_programs).chain(),
         )
-        .add_systems(PostUpdate, super::shaders::sync_passes)
+        .add_systems(
+            PostUpdate,
+            (super::shaders::sync_passes, super::shaders::sync_view_dispatches),
+        )
         .add_systems(
             PostUpdate,
             (
@@ -744,6 +748,7 @@ pub fn install(app: &mut bevy::app::App, root: std::path::PathBuf) {
             );
     }
 
+    super::views::install(app);
     super::passes::install(app);
     super::compute::install(app);
 }

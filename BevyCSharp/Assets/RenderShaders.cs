@@ -401,14 +401,17 @@ public static unsafe class Shaders
     }
 
     /// <summary>
-    /// Asks a camera to draw its depth, its normals or both before the scene, for its passes to
-    /// read. Only valid inside a system.
+    /// Asks a camera to draw its depth, its normals, its motion vectors or any of them before the
+    /// scene, for its passes and its compute shaders to read. Only valid inside a system.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// A pass reads them with <c>bcs_pass::depth_at</c> and <c>normal_at</c>, which is what an
-    /// outline, a fog or an edge detector is made of. A camera that draws neither binds depth zero,
-    /// which is the far plane, and white normals, so a pass reading them runs either way.
+    /// A pass reads them with <c>bcs_pass::depth_at</c>, <c>normal_at</c> and <c>motion_at</c>, and
+    /// a compute shader on the camera with <c>load_depth</c>, <c>load_normal</c> and
+    /// <c>load_motion</c>. Depth and normals are what an outline, a fog or ambient occlusion is made
+    /// of, and motion is what anything reusing the previous frame needs to find where a surface was.
+    /// A camera that draws none of them binds depth zero, which is the far plane, white normals and
+    /// no motion, so a shader reading them runs either way.
     /// </para>
     /// <para>
     /// A prepass draws the scene a second time, so it is worth asking for only when something reads
@@ -419,10 +422,174 @@ public static unsafe class Shaders
     /// <param name="camera">The camera.</param>
     /// <param name="depth">Whether to draw depth.</param>
     /// <param name="normals">Whether to draw normals.</param>
-    public static void SetPrepass(Entity camera, bool depth, bool normals = false) =>
+    /// <param name="motion">
+    /// Whether to draw motion vectors, which temporal antialiasing and motion blur also ask for on
+    /// their own.
+    /// </param>
+    public static void SetPrepass(Entity camera, bool depth, bool normals = false, bool motion = false) =>
         Native.Check(
-            Native.bcs_render_set_prepass(camera.Bits, (depth ? 1u : 0u) | (normals ? 2u : 0u)),
+            Native.bcs_render_set_prepass(
+                camera.Bits,
+                (depth ? 1u : 0u) | (normals ? 2u : 0u) | (motion ? 4u : 0u)),
             "asking a camera for a prepass");
+
+    /// <summary>
+    /// Gives a camera images that its passes and compute shaders keep from frame to frame,
+    /// replacing any it had. None takes them all away. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The engine makes each image at a fraction of the camera's picture, makes it again when the
+    /// picture changes size (which starts it over from zeros), and binds it wherever a shader
+    /// running on this camera declares its name, as a <c>Texture2D</c> to read or an
+    /// <c>RWTexture2D</c> to write. A compute shader on the camera can write one that a pass later
+    /// in the same frame reads, which is how ambient occlusion computed at half size is put onto the
+    /// picture.
+    /// </para>
+    /// <para>
+    /// One marked as history is two images that trade places every frame, so a shader reads last
+    /// frame's under the name with <c>_previous</c> after it while writing this frame's under the
+    /// name itself. One with more than one mip level is reachable a level at a time as
+    /// <c>name_mip0</c>, <c>name_mip1</c> and so on, which is how a depth pyramid is built one level
+    /// from the last, reading one level while writing the next. Every camera has its own, however many cameras there are.
+    /// </para>
+    /// <para>
+    /// A shader must not read and write the same image in one dispatch or pass, which the GPU
+    /// refuses, and which is what history is for.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// Shaders.SetViewImages(camera,
+    ///     new ViewImage("occlusion", ShaderImageFormat.R16Float, Scale: 0.5f),
+    ///     new ViewImage("accumulated", ShaderImageFormat.Rgba16Float, History: true));
+    /// </code>
+    /// </example>
+    /// <exception cref="ArgumentException">A name is empty or repeated, or a scale is not positive.</exception>
+    public static void SetViewImages(Entity camera, params ViewImage[] images)
+    {
+        ArgumentNullException.ThrowIfNull(images);
+
+        var names = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var image in images)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(image.Name, nameof(images));
+
+            if (!names.Add(image.Name))
+            {
+                throw new ArgumentException($"A camera owns one image called {image.Name}.", nameof(images));
+            }
+
+            if (!(image.Scale > 0f) || image.Scale > 16f)
+            {
+                throw new ArgumentException(
+                    $"{image.Name} is {image.Scale} of the picture, and a scale is above zero and at most sixteen.",
+                    nameof(images));
+            }
+        }
+
+        var native = new NativeViewImage[images.Length];
+        var strings = new List<IntPtr>();
+
+        try
+        {
+            for (var i = 0; i < images.Length; i++)
+            {
+                var name = Marshal.StringToCoTaskMemUTF8(images[i].Name);
+                strings.Add(name);
+
+                native[i] = new NativeViewImage
+                {
+                    Name = (byte*)name,
+                    Format = (int)images[i].Format,
+                    Scale = images[i].Scale,
+                    History = images[i].History ? 1 : 0,
+                    Mips = Math.Max(1, images[i].Mips),
+                };
+            }
+
+            fixed (NativeViewImage* first = native)
+            {
+                Native.Check(
+                    Native.bcs_render_set_view_images(camera.Bits, first, native.Length),
+                    "giving a camera its images");
+            }
+        }
+        finally
+        {
+            foreach (var pointer in strings) Marshal.FreeCoTaskMem(pointer);
+        }
+    }
+
+    /// <summary>
+    /// Replaces the compute shaders a camera runs every frame, in order. None takes them all away.
+    /// Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A dispatch on a camera runs at a <see cref="FramePoint"/> of that camera's frame, with the
+    /// camera's inputs (the picture, time, the view and the previous frame's, depth, normals and
+    /// motion) through <c>import bcs_pass;</c>, and the camera's images under their names. That is
+    /// what an ambient occlusion, a screen-space GI or a temporal filter runs in: a chain of
+    /// dispatches and passes over one camera's frame, each reading what the last wrote.
+    /// </para>
+    /// <para>
+    /// Each takes its instance's values as they are every frame, so a value set on the instance
+    /// reaches the next frame. A dispatch whose program is still compiling is left out of the frame
+    /// until it is ready.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var occlusion = Shaders.CreateInstance(Shaders.CreateProgram(
+    ///     new ShaderProgramSettings { Compute = "shaders/occlusion.slang" }));
+    ///
+    /// Shaders.SetPrepass(camera, depth: true, normals: true);
+    /// Shaders.SetViewImages(camera, new ViewImage("occlusion", ShaderImageFormat.R16Float, Scale: 0.5f));
+    /// Shaders.SetViewDispatches(camera, ViewDispatch.PerPixel(occlusion, FramePoint.AfterPrepass, scale: 0.5f));
+    /// </code>
+    /// </example>
+    /// <exception cref="ArgumentException">A dispatch has no instance.</exception>
+    /// <exception cref="BevyNativeException">
+    /// The entity is not a camera, an instance or a buffer does not exist, or there is no renderer.
+    /// </exception>
+    public static void SetViewDispatches(Entity camera, params ViewDispatch[] dispatches)
+    {
+        ArgumentNullException.ThrowIfNull(dispatches);
+
+        var native = new NativeViewDispatch[dispatches.Length];
+
+        for (var i = 0; i < dispatches.Length; i++)
+        {
+            var dispatch = dispatches[i];
+
+            if (!dispatch.Instance.IsValid)
+            {
+                throw new ArgumentException(
+                    $"Dispatch {i} has no instance. Make one with Shaders.CreateInstance.",
+                    nameof(dispatches));
+            }
+
+            ref var entry = ref native[i];
+            entry.Instance = dispatch.Instance.Id;
+            entry.Point = (int)dispatch.Point;
+            entry.Mode = (int)dispatch.Mode;
+            entry.Groups[0] = dispatch.X;
+            entry.Groups[1] = dispatch.Y;
+            entry.Groups[2] = dispatch.Z;
+            entry.Scale = dispatch.Scale;
+            entry.Buffer = dispatch.Buffer.Key;
+            entry.Offset = dispatch.Offset;
+        }
+
+        fixed (NativeViewDispatch* first = native)
+        {
+            Native.Check(
+                Native.bcs_render_set_view_dispatches(camera.Bits, first, native.Length),
+                "setting the compute shaders a camera runs");
+        }
+    }
 
     /// <summary>
     /// Runs an instance's compute shader once, this frame, before any camera draws. Only valid
@@ -474,6 +641,36 @@ public static unsafe class Shaders
         Native.Check(
             Native.bcs_shader_dispatch(instance.Id, x, y, z),
             $"dispatching shader instance {instance.Id}");
+    }
+
+    /// <summary>
+    /// Runs an instance's compute shader once, this frame, before any camera draws, with as many
+    /// workgroups as the buffer says. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// The three unsigned integers at <paramref name="offset"/> bytes into <paramref name="buffer"/>
+    /// are the workgroup counts, read on the GPU when the dispatch runs. A dispatch before it can
+    /// write them, so one compute shader decides how much work the next does (compacting the pixels
+    /// or clusters that need it, say) without the count ever crossing back to the CPU.
+    /// </remarks>
+    /// <exception cref="ArgumentException">The offset is not a multiple of four.</exception>
+    public static void DispatchIndirect(ShaderInstance instance, AssetHandle buffer, uint offset = 0)
+    {
+        if (!instance.IsValid)
+        {
+            throw new ArgumentException(
+                "No instance was given. Make one with Shaders.CreateInstance.",
+                nameof(instance));
+        }
+
+        if (offset % 4 != 0)
+        {
+            throw new ArgumentException("The counts start on a multiple of four bytes.", nameof(offset));
+        }
+
+        Native.Check(
+            Native.bcs_shader_dispatch_indirect(instance.Id, buffer.Key, offset),
+            $"dispatching shader instance {instance.Id} from a buffer");
     }
 
     /// <summary>
@@ -641,6 +838,59 @@ public static unsafe class Shaders
             Native.bcs_shader_image_create(width, height, depth, (int)format),
             $"making a {width}x{height}x{depth} image for a compute shader"));
     }
+
+    /// <summary>
+    /// Makes an image as <see cref="CreateImage(uint, uint, ShaderImageFormat, uint)"/> does,
+    /// starting with <paramref name="texels"/> rather than zeros. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// The texels are in the format's own layout, row after row and slice after slice, so a
+    /// heightmap in <see cref="ShaderImageFormat.R32Float"/> is a float per texel and one in
+    /// <see cref="ShaderImageFormat.Rgba16Float"/> is four halves. That is what a picture whose
+    /// numbers are not colors wants, where eight bits a channel would lose them.
+    /// </remarks>
+    /// <exception cref="ArgumentException">
+    /// The texels are not exactly the image's size in bytes.
+    /// </exception>
+    public static AssetHandle CreateImage<T>(
+        uint width,
+        uint height,
+        ShaderImageFormat format,
+        ReadOnlySpan<T> texels,
+        uint depth = 1) where T : unmanaged
+    {
+        ArgumentOutOfRangeException.ThrowIfZero(width);
+        ArgumentOutOfRangeException.ThrowIfZero(height);
+        ArgumentOutOfRangeException.ThrowIfZero(depth);
+
+        var bytes = MemoryMarshal.AsBytes(texels);
+        var wanted = (long)width * height * depth * TexelBytes(format);
+
+        if (bytes.Length != wanted)
+        {
+            throw new ArgumentException(
+                $"A {width}x{height}x{depth} {format} image is {wanted} bytes, and {bytes.Length} were given.",
+                nameof(texels));
+        }
+
+        fixed (byte* at = bytes)
+        {
+            return new AssetHandle(Native.Check(
+                Native.bcs_shader_image_create_from(width, height, depth, (int)format, at, bytes.Length),
+                $"making a {width}x{height}x{depth} {format} image"));
+        }
+    }
+
+    /// <summary>How many bytes one texel of <paramref name="format"/> takes.</summary>
+    public static int TexelBytes(ShaderImageFormat format) => format switch
+    {
+        ShaderImageFormat.Rgba8 or ShaderImageFormat.R32Float or ShaderImageFormat.R32UInt
+            or ShaderImageFormat.R32Int or ShaderImageFormat.Rgba8UInt => 4,
+        ShaderImageFormat.Rgba16Float or ShaderImageFormat.Rg32Float => 8,
+        ShaderImageFormat.Rgba32Float or ShaderImageFormat.Rgba32UInt => 16,
+        ShaderImageFormat.R16Float => 2,
+        _ => throw new ArgumentOutOfRangeException(nameof(format)),
+    };
 
     private static void RequireProgram(ShaderProgram program, string parameter)
     {
@@ -1769,6 +2019,128 @@ public enum ShaderImageFormat
 
     /// <summary>One half float (<c>r16f</c>).</summary>
     R16Float = 9,
+}
+
+/// <summary>An image a camera owns. See <see cref="Shaders.SetViewImages"/>.</summary>
+/// <param name="Name">The name a shader on the camera reads or writes it by.</param>
+/// <param name="Format">What it holds per pixel.</param>
+/// <param name="Scale">A fraction of the camera's picture, one for the same size.</param>
+/// <param name="History">Whether last frame's is kept too, as <c>Name_previous</c>.</param>
+/// <param name="Mips">How many mip levels, each reachable as <c>Name_mip0</c> and on.</param>
+public readonly record struct ViewImage(
+    string Name,
+    ShaderImageFormat Format,
+    float Scale = 1f,
+    bool History = false,
+    int Mips = 1);
+
+/// <summary>Where in a camera's frame a compute shader on it runs.</summary>
+public enum FramePoint
+{
+    /// <summary>Once depth, normals and motion are drawn, before anything is lit.</summary>
+    AfterPrepass = 0,
+
+    /// <summary>Once opaque geometry is drawn, before transparent geometry.</summary>
+    AfterOpaque = 1,
+
+    /// <summary>On the linear picture, before the passes that run before tonemapping.</summary>
+    BeforeTonemapping = 2,
+
+    /// <summary>On the picture as the screen will show it, before the passes that run after it.</summary>
+    AfterTonemapping = 3,
+}
+
+/// <summary>How a <see cref="ViewDispatch"/> counts its workgroups.</summary>
+public enum ViewDispatchMode
+{
+    /// <summary>Enough workgroups of a size in pixels to cover a fraction of the picture.</summary>
+    PerPixel = 0,
+
+    /// <summary>A fixed number of workgroups.</summary>
+    Fixed = 1,
+
+    /// <summary>As many as a buffer says, written on the GPU.</summary>
+    Indirect = 2,
+}
+
+/// <summary>A compute shader a camera runs every frame. See <see cref="Shaders.SetViewDispatches"/>.</summary>
+/// <remarks>Made with <see cref="PerPixel"/>, <see cref="Fixed"/> or <see cref="Indirect"/>.</remarks>
+public readonly record struct ViewDispatch
+{
+    /// <summary>The instance whose program and values run.</summary>
+    public ShaderInstance Instance { get; init; }
+
+    /// <summary>Where in the camera's frame.</summary>
+    public FramePoint Point { get; init; }
+
+    /// <summary>How the workgroups are counted.</summary>
+    public ViewDispatchMode Mode { get; init; }
+
+    /// <summary>The workgroup's width in pixels, or the workgroups across.</summary>
+    public uint X { get; init; }
+
+    /// <summary>The workgroup's height in pixels, or the workgroups down.</summary>
+    public uint Y { get; init; }
+
+    /// <summary>The workgroups deep, for a fixed dispatch.</summary>
+    public uint Z { get; init; }
+
+    /// <summary>The fraction of the picture a per-pixel dispatch covers.</summary>
+    public float Scale { get; init; }
+
+    /// <summary>The buffer an indirect dispatch reads its counts from.</summary>
+    public AssetHandle Buffer { get; init; }
+
+    /// <summary>Where in the buffer the counts start, in bytes.</summary>
+    public uint Offset { get; init; }
+
+    /// <summary>
+    /// Enough workgroups of <paramref name="groupX"/> by <paramref name="groupY"/> pixels to cover
+    /// <paramref name="scale"/> of the picture, which is what a shader working a pixel at a time
+    /// wants.
+    /// </summary>
+    /// <remarks>
+    /// The workgroup size here matches the shader's <c>numthreads</c>, and the shader checks that
+    /// its pixel is inside the picture, since the last workgroups across and down reach past it.
+    /// </remarks>
+    public static ViewDispatch PerPixel(
+        ShaderInstance instance,
+        FramePoint point,
+        uint groupX = 8,
+        uint groupY = 8,
+        float scale = 1f) => new()
+    {
+        Instance = instance,
+        Point = point,
+        Mode = ViewDispatchMode.PerPixel,
+        X = groupX,
+        Y = groupY,
+        Z = 1,
+        Scale = scale,
+    };
+
+    /// <summary>Exactly this many workgroups.</summary>
+    public static ViewDispatch Fixed(ShaderInstance instance, FramePoint point, uint x, uint y = 1, uint z = 1) => new()
+    {
+        Instance = instance,
+        Point = point,
+        Mode = ViewDispatchMode.Fixed,
+        X = x,
+        Y = y,
+        Z = z,
+        Scale = 1f,
+    };
+
+    /// <summary>As many workgroups as three unsigned integers in a buffer say, when it runs.</summary>
+    public static ViewDispatch Indirect(ShaderInstance instance, FramePoint point, AssetHandle buffer, uint offset = 0) => new()
+    {
+        Instance = instance,
+        Point = point,
+        Mode = ViewDispatchMode.Indirect,
+        Buffer = buffer,
+        Offset = offset,
+        Scale = 1f,
+    };
 }
 
 /// <summary>A buffer on its way back from the GPU, from <see cref="Shaders.BeginBufferRead"/>.</summary>

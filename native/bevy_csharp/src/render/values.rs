@@ -428,6 +428,17 @@ fn sample_matches(format: TextureFormat, wanted: TextureSampleType) -> bool {
     }
 }
 
+/// An image a camera owns, as a name in a shader resolves to it (see [`super::views`]).
+#[derive(Clone, Debug)]
+pub struct ViewTexture {
+    /// Every mip level, which is what a shader sampling it reads.
+    pub view: TextureView,
+    /// The first mip level alone, which is what a shader writing it is bound to, since a storage
+    /// binding holds exactly one level.
+    pub level: TextureView,
+    pub format: TextureFormat,
+}
+
 /// Everything that turns values into GPU resources.
 pub struct PackContext<'a> {
     pub device: &'a RenderDevice,
@@ -435,6 +446,10 @@ pub struct PackContext<'a> {
     pub buffers: &'a RenderAssets<GpuShaderBuffer>,
     pub fallback: &'a FallbackImage,
     pub stand: &'a Stand,
+    /// The images of the camera this runs for, by the names a shader reads them by, where it runs
+    /// for one. A name found here wins over a value set under the same name, because the camera's
+    /// image is what the shader was written against.
+    pub view: Option<&'a HashMap<String, ViewTexture>>,
 }
 
 /// Builds what each binding of `layout` holds from `values`.
@@ -481,6 +496,46 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
                 };
 
                 packed.buffers.push((*number, buffer));
+            }
+
+            BindingKind::Texture {
+                dimension, sample, ..
+            } if binding.count.is_none()
+                && context.view.is_some_and(|view| view.contains_key(&binding.name)) =>
+            {
+                let texture = &context.view.expect("checked")[&binding.name];
+
+                let view = if *dimension == TextureViewDimension::D2
+                    && sample_matches(texture.format, *sample)
+                {
+                    texture.view.clone()
+                } else {
+                    packed.problems.push(format!(
+                        "{}: the camera's {:?} image cannot be read as a {:?} {:?} texture",
+                        binding.name, texture.format, dimension, sample
+                    ));
+                    stand_in_texture(context, *dimension, *sample, &binding.name)?
+                };
+
+                packed.views.push((*number, vec![view]));
+            }
+
+            BindingKind::StorageTexture { format, dimension, .. }
+                if binding.count.is_none()
+                    && context.view.is_some_and(|view| view.contains_key(&binding.name)) =>
+            {
+                let texture = &context.view.expect("checked")[&binding.name];
+
+                if texture.format != *format || *dimension != TextureViewDimension::D2 {
+                    return Err(PackError::Missing(format!(
+                        "{} is written as a {dimension:?} {format:?} image, and the camera's image \
+                         of that name is a 2D {:?} one. Declare it with the format the camera's \
+                         image was made in.",
+                        binding.name, texture.format
+                    )));
+                }
+
+                packed.views.push((*number, vec![texture.level.clone()]));
             }
 
             BindingKind::Texture {

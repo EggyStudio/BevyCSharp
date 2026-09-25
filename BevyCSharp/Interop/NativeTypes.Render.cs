@@ -680,6 +680,50 @@ public unsafe struct NativeSamplerConfig
     public int Anisotropy;
 }
 
+/// <summary>One image a camera owns. Mirrors <c>BcsViewImage</c>.</summary>
+public unsafe struct NativeViewImage
+{
+    /// <summary>NUL-terminated UTF-8.</summary>
+    public byte* Name;
+
+    /// <summary>A <see cref="ShaderImageFormat"/>.</summary>
+    public int Format;
+
+    /// <summary>A fraction of the picture's size.</summary>
+    public float Scale;
+
+    /// <summary>Non-zero to keep last frame's as well.</summary>
+    public int History;
+
+    /// <summary>How many mip levels.</summary>
+    public int Mips;
+}
+
+/// <summary>One dispatch a camera runs every frame. Mirrors <c>BcsViewDispatch</c>.</summary>
+public unsafe struct NativeViewDispatch
+{
+    /// <summary>The shader instance.</summary>
+    public int Instance;
+
+    /// <summary>A <see cref="FramePoint"/>.</summary>
+    public int Point;
+
+    /// <summary>0 counted from the picture, 1 fixed, 2 read from a buffer.</summary>
+    public int Mode;
+
+    /// <summary>The workgroup's size in pixels, or the workgroups themselves.</summary>
+    public fixed uint Groups[3];
+
+    /// <summary>The fraction of the picture covered.</summary>
+    public float Scale;
+
+    /// <summary>The buffer holding the counts, for mode 2.</summary>
+    public int Buffer;
+
+    /// <summary>The byte offset of the counts in it.</summary>
+    public uint Offset;
+}
+
 /// <summary>A mesh described vertex by vertex. Mirrors <c>BcsMeshData</c>.</summary>
 public unsafe struct NativeMeshData
 {

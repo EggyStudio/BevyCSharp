@@ -4,7 +4,9 @@
 // namespace. What a dispatch carries is whatever the shader declares: numbers, buffers read and
 // written, images read and written, samplers, in any number, each set from C# by its name. Time is
 // in space 101, which the bridge moves to group one after the compile, so the shader's own globals
-// keep group zero to themselves.
+// keep group zero to themselves. It is at binding two, which is where a dispatch run on a camera
+// finds it as well, so a shader importing this runs either way. One that wants the camera's depth,
+// motion or view imports `bcs_pass` instead, and runs only on a camera.
 //
 // A raw buffer (`RWByteAddressBuffer`) is packed the way C packs a struct, which is the way a C#
 // struct with sequential layout is packed, so `element` and `store` read and write the same bytes
@@ -31,7 +33,7 @@ public struct Globals
 /// Laid out as C lays it out (`ScalarDataLayout`), which is twelve bytes and what Bevy binds. The
 /// usual constant buffer rules round the struct up to sixteen, and a pipeline refuses a shader
 /// that reads more of a buffer than its layout promises.
-[[vk::binding(0, 101)]] public ConstantBuffer<Globals, ScalarDataLayout> globals;
+[[vk::binding(2, 101)]] public ConstantBuffer<Globals, ScalarDataLayout> globals;
 
 /// The element at `index` of a raw buffer, read as an array of `T`.
 public T element<T>(RWByteAddressBuffer buffer, uint index)

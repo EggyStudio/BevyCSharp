@@ -41,6 +41,12 @@ internal sealed class PictureRun
     /// <summary>What to build at startup.</summary>
     public Action<EcsWorld>? Scene { get; init; }
 
+    /// <summary>
+    /// What to do every frame, before the steps are looked at, which is how a test keeps something
+    /// moving while it waits and takes pictures.
+    /// </summary>
+    public Action<World>? EachFrame { get; init; }
+
     /// <summary>A picture taken by <see cref="Capture"/>, by name.</summary>
     public CapturedImage Picture(string name) =>
         _pictures.TryGetValue(name, out var picture)
@@ -108,6 +114,7 @@ internal sealed class PictureRun
         app.AddSystem(Stage.Update, new SystemDescriptor(
             world => Guard(() =>
             {
+                EachFrame?.Invoke(world);
                 while (_next < _steps.Count && _steps[_next].Done(world)) _next++;
                 if (_next == _steps.Count) App.RequestExit();
             }),

@@ -633,28 +633,327 @@ pub extern "C" fn bcs_shader_dispatch(instance: i32, x: u32, y: u32, z: u32) -> 
 
         #[cfg(feature = "render")]
         {
-            use super::compute::{Dispatch, queue};
-
             crate::state::with_world(|world| {
-                let Some(found) = world
-                    .get_resource::<ShaderInstances>()
-                    .and_then(|instances| instances.0.get(usize::try_from(instance).ok()?))
-                    .cloned()
-                else {
-                    return status::NO_COMPONENT;
-                };
-
-                queue(
-                    world,
-                    Dispatch {
-                        program: found.program,
-                        values: found.values,
-                        workgroups: [x.max(1), y.max(1), z.max(1)],
-                    },
-                )
+                queue_dispatch(world, instance, [x.max(1), y.max(1), z.max(1)], None)
             })
         }
     })
+}
+
+/// Runs an instance's compute shader once, this frame, before any camera draws, with as many
+/// workgroups as the three unsigned integers at `offset` bytes into `buffer` say.
+///
+/// The counts are read on the GPU when the dispatch runs, which is what lets one compute shader
+/// decide how much work the next one does without the answer crossing back to the CPU. `offset`
+/// is a multiple of four.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_dispatch_indirect(instance: i32, buffer: i32, offset: u32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (instance, buffer, offset);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if offset % 4 != 0 {
+                return status::NULL_ARG;
+            }
+
+            crate::state::with_world(|world| {
+                let Some(handle) = super::compute::buffer_handle(world, buffer) else {
+                    return status::NO_COMPONENT;
+                };
+
+                queue_dispatch(world, instance, [1, 1, 1], Some((handle, offset as u64)))
+            })
+        }
+    })
+}
+
+/// Queues a dispatch of what an instance holds now.
+#[cfg(feature = "render")]
+fn queue_dispatch(
+    world: &mut bevy::ecs::world::World,
+    instance: i32,
+    workgroups: [u32; 3],
+    indirect: Option<(bevy::asset::Handle<bevy::render::storage::ShaderBuffer>, u64)>,
+) -> i32 {
+    use super::compute::{Dispatch, queue};
+
+    let Some(found) = world
+        .get_resource::<ShaderInstances>()
+        .and_then(|instances| instances.0.get(usize::try_from(instance).ok()?))
+        .cloned()
+    else {
+        return status::NO_COMPONENT;
+    };
+
+    queue(
+        world,
+        Dispatch {
+            program: found.program,
+            values: found.values,
+            workgroups,
+            indirect,
+        },
+    )
+}
+
+/// One image a camera owns, as the managed side describes it.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsViewImage {
+    /// NUL-terminated UTF-8.
+    pub name: *const core::ffi::c_char,
+    /// An index into [`super::compute::IMAGE_FORMATS`].
+    pub format: i32,
+    /// A fraction of the picture's size.
+    pub scale: f32,
+    /// Non-zero to keep last frame's as well, under the name with `_previous` after it.
+    pub history: i32,
+    /// How many mip levels, at least one.
+    pub mips: i32,
+}
+
+/// One dispatch a camera runs every frame, as the managed side describes it.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsViewDispatch {
+    pub instance: i32,
+    /// `0` after the prepass, `1` after opaque geometry, `2` before tonemapping, `3` after it.
+    pub point: i32,
+    /// `0` counted from the picture's size, `1` fixed, `2` read from a buffer.
+    pub mode: i32,
+    /// The workgroup's size in pixels for `0`, or the workgroups themselves for `1`.
+    pub groups: [u32; 3],
+    /// For `0`, the fraction of the picture covered.
+    pub scale: f32,
+    /// For `2`, the buffer holding the counts and the byte offset into it.
+    pub buffer: i32,
+    pub offset: u32,
+}
+
+/// Gives a camera the images its shaders keep, replacing any it had. A count of zero takes them
+/// all away.
+///
+/// # Safety
+/// `images` must point at `count` readable [`BcsViewImage`]s whose names are NUL-terminated, or
+/// be null when `count` is zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_set_view_images(
+    camera: u64,
+    images: *const BcsViewImage,
+    count: i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, images, count);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use super::views::{BcsViewImages, ViewImageSpec};
+
+            if count < 0 || (images.is_null() && count > 0) {
+                return status::NULL_ARG;
+            }
+
+            let given: &[BcsViewImage] = if count > 0 {
+                unsafe { core::slice::from_raw_parts(images, count as usize) }
+            } else {
+                &[]
+            };
+
+            let mut specs = Vec::with_capacity(given.len());
+
+            for image in given {
+                let Some(name) = (unsafe { crate::interop::cstr_to_string(image.name) }) else {
+                    return status::NULL_ARG;
+                };
+
+                let Some(&(format, _)) = usize::try_from(image.format)
+                    .ok()
+                    .and_then(|index| super::compute::IMAGE_FORMATS.get(index))
+                else {
+                    return status::NULL_ARG;
+                };
+
+                if name.is_empty() || !(image.scale > 0.0) || image.scale > 16.0 {
+                    return status::NULL_ARG;
+                }
+
+                specs.push(ViewImageSpec {
+                    name,
+                    format,
+                    scale: image.scale,
+                    history: image.history != 0,
+                    mips: image.mips.max(1) as u32,
+                });
+            }
+
+            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+
+            crate::state::with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let mut camera = world.entity_mut(entity);
+
+                if specs.is_empty() {
+                    camera.remove::<BcsViewImages>();
+                } else {
+                    camera.insert(BcsViewImages(specs));
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Replaces the dispatches a camera runs every frame with `count` of them, in order. A count of
+/// zero takes them all away.
+///
+/// # Safety
+/// `dispatches` must point at `count` readable [`BcsViewDispatch`]es, or be null when `count` is
+/// zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_set_view_dispatches(
+    camera: u64,
+    dispatches: *const BcsViewDispatch,
+    count: i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, dispatches, count);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use super::views::{FramePoint, Workgroups};
+
+            if count < 0 || (dispatches.is_null() && count > 0) {
+                return status::NULL_ARG;
+            }
+
+            let given: &[BcsViewDispatch] = if count > 0 {
+                unsafe { core::slice::from_raw_parts(dispatches, count as usize) }
+            } else {
+                &[]
+            };
+
+            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+
+            crate::state::with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let known = world
+                    .get_resource::<ShaderInstances>()
+                    .map(|instances| instances.0.len())
+                    .unwrap_or(0);
+
+                let mut list = Vec::with_capacity(given.len());
+
+                for dispatch in given {
+                    if dispatch.instance < 0 || dispatch.instance as usize >= known {
+                        return status::NO_COMPONENT;
+                    }
+
+                    let Some(point) = FramePoint::from_number(dispatch.point) else {
+                        return status::NULL_ARG;
+                    };
+
+                    let workgroups = match dispatch.mode {
+                        0 => Workgroups::PerPixel {
+                            size: [dispatch.groups[0].max(1), dispatch.groups[1].max(1)],
+                            scale: if dispatch.scale > 0.0 { dispatch.scale } else { 1.0 },
+                        },
+                        1 => Workgroups::Fixed(dispatch.groups.map(|count| count.max(1))),
+                        2 => {
+                            if dispatch.offset % 4 != 0 {
+                                return status::NULL_ARG;
+                            }
+
+                            let Some(buffer) = super::compute::buffer_handle(world, dispatch.buffer)
+                            else {
+                                return status::NO_COMPONENT;
+                            };
+
+                            Workgroups::Indirect {
+                                buffer,
+                                offset: dispatch.offset as u64,
+                            }
+                        }
+                        _ => return status::NULL_ARG,
+                    };
+
+                    list.push((dispatch.instance as usize, point, workgroups));
+                }
+
+                let mut camera = world.entity_mut(entity);
+
+                if list.is_empty() {
+                    camera.remove::<(DispatchInstances, super::views::BcsViewDispatches)>();
+                } else {
+                    camera.insert(DispatchInstances(list));
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Which instances a camera dispatches every frame, where in its frame, and how many workgroups.
+#[cfg(feature = "render")]
+#[derive(bevy::ecs::component::Component, Clone)]
+pub struct DispatchInstances(
+    pub Vec<(usize, super::views::FramePoint, super::views::Workgroups)>,
+);
+
+/// Copies what each camera's dispatch instances hold onto the camera every frame, where the render
+/// world takes it from.
+///
+/// Every frame rather than when something changed, because a dispatch on a camera is rebuilt every
+/// frame anyway, since the images it writes trade places.
+#[cfg(feature = "render")]
+pub fn sync_view_dispatches(
+    mut commands: bevy::ecs::system::Commands,
+    instances: Option<bevy::ecs::system::Res<ShaderInstances>>,
+    cameras: bevy::ecs::system::Query<(bevy::ecs::entity::Entity, &DispatchInstances)>,
+) {
+    use super::views::{BcsViewDispatches, ViewDispatch};
+
+    let Some(instances) = instances else {
+        return;
+    };
+
+    for (entity, wanted) in &cameras {
+        let dispatches = wanted
+            .0
+            .iter()
+            .filter_map(|(id, point, workgroups)| {
+                let instance = instances.0.get(*id)?;
+                Some(ViewDispatch {
+                    program: instance.program,
+                    values: instance.values.clone(),
+                    point: *point,
+                    workgroups: workgroups.clone(),
+                })
+            })
+            .collect();
+
+        commands.entity(entity).insert(BcsViewDispatches(dispatches));
+    }
 }
 
 /// Replaces the passes a camera runs over its picture with `count` instances, in order.
@@ -1513,6 +1812,44 @@ pub extern "C" fn bcs_shader_image_create(width: u32, height: u32, depth: u32, f
     })
 }
 
+/// Makes an image as [`bcs_shader_image_create`] does, starting with `length` bytes of texels in
+/// the format's own layout rather than zeros.
+///
+/// Returns [`status::BUFFER_TOO_SMALL`] where `length` is not exactly the image's size in bytes.
+///
+/// # Safety
+/// `texels` must point at `length` readable bytes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_shader_image_create_from(
+    width: u32,
+    height: u32,
+    depth: u32,
+    format: i32,
+    texels: *const u8,
+    length: i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (width, height, depth, format, texels, length);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if texels.is_null() || length <= 0 {
+                return status::NULL_ARG;
+            }
+
+            let given = unsafe { core::slice::from_raw_parts(texels, length as usize) };
+
+            crate::state::with_world(|world| {
+                super::compute::create_image_from(world, width, height, depth, format, Some(given))
+            })
+        }
+    })
+}
+
 /// Reports which program draws an entity's material, or [`status::NO_COMPONENT`] where it is not
 /// drawn by one.
 #[unsafe(no_mangle)]
@@ -1538,6 +1875,17 @@ mod tests {
         assert_eq!(offset_of!(BcsShaderProgramConfig, defines), 144);
         assert_eq!(offset_of!(BcsShaderProgramConfig, define_count), 152);
         assert_eq!(size_of::<BcsShaderProgramConfig>(), 160);
+    }
+
+    #[test]
+    fn the_view_configs_have_the_layout_the_managed_side_mirrors() {
+        assert_eq!(offset_of!(BcsViewImage, format), 8);
+        assert_eq!(offset_of!(BcsViewImage, mips), 20);
+        assert_eq!(size_of::<BcsViewImage>(), 24);
+        assert_eq!(offset_of!(BcsViewDispatch, groups), 12);
+        assert_eq!(offset_of!(BcsViewDispatch, scale), 24);
+        assert_eq!(offset_of!(BcsViewDispatch, offset), 32);
+        assert_eq!(size_of::<BcsViewDispatch>(), 36);
     }
 
     #[test]

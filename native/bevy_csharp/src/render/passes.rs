@@ -6,21 +6,10 @@
 //! brighter than white, or after it, where it is what the screen will show.
 //!
 //! **What a pass reads.** Two groups. Group zero is whatever the shader declares, laid out from its
-//! reflection and filled by name, the way a material's own group is. Group one is what the bridge
-//! hands every pass, which `bcs_pass` declares:
-//!
-//! | binding | holds |
-//! |---|---|
-//! | 0, 1 | the picture so far, and a linear sampler clamped at its edges |
-//! | 2 | Bevy's globals, which is where time is |
-//! | 3 | Bevy's view uniform, with the camera's matrices and viewport |
-//! | 4 | the camera's depth, as a depth texture |
-//! | 5 | the camera's normals |
-//!
-//! Depth and normals come from the prepass, which a camera draws only when asked, through
-//! `bcs_render_set_prepass`. A camera that draws neither, or draws them multisampled, which a
-//! plain texture binding cannot take, binds a stand-in: depth zero, which is the far plane in
-//! Bevy's reversed depth, and white normals.
+//! reflection and filled by name, the way a material's own group is, with any image the camera owns
+//! bound under its own name (see [`super::views`]). Group one is what every shader running on a
+//! camera reads, the picture, time, the view, depth, normals, motion and the previous view, which
+//! [`super::views`] describes and `bcs_pass` declares.
 //!
 //! The vertex shader is Bevy's full-screen triangle, whose output is the position and a `uv` at
 //! location zero, running from the top left.
@@ -31,34 +20,43 @@ use std::collections::HashMap;
 
 use bevy::app::App;
 use bevy::camera::Camera;
-use bevy::core_pipeline::prepass::ViewPrepassTextures;
+use bevy::core_pipeline::prepass::{
+    PreviousViewUniformOffset, PreviousViewUniforms, ViewPrepassTextures,
+};
 use bevy::core_pipeline::tonemapping::tonemapping;
 use bevy::core_pipeline::{Core2d, Core2dSystems, Core3d, Core3dSystems, FullscreenShader};
 use bevy::ecs::component::Component;
 use bevy::ecs::entity::Entity;
 use bevy::ecs::query::{With, Without};
 use bevy::ecs::resource::Resource;
-use bevy::ecs::schedule::IntoScheduleConfigs;
+use bevy::ecs::schedule::{IntoScheduleConfigs, SystemSet};
 use bevy::ecs::system::{Commands, Query, Res, ResMut};
 use bevy::render::extract_component::{ExtractComponent, ExtractComponentPlugin};
-use bevy::render::globals::{GlobalsBuffer, GlobalsUniform};
+use bevy::render::globals::GlobalsBuffer;
 use bevy::render::render_asset::RenderAssets;
 use bevy::render::render_resource::{
-    BindGroup, BindGroupEntry, BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingResource,
-    BindingType, BufferBindingType, CachedRenderPipelineId, ColorTargetState, ColorWrites,
-    FilterMode, FragmentState, Operations, PipelineCache, RenderPassColorAttachment,
-    RenderPassDescriptor, RenderPipelineDescriptor, Sampler, SamplerBindingType, SamplerDescriptor,
-    ShaderStages, ShaderType, TextureFormat, TextureSampleType, TextureView, TextureViewDimension,
+    BindGroup, BindGroupLayoutDescriptor, CachedRenderPipelineId, ColorTargetState, ColorWrites,
+    FragmentState, Operations, PipelineCache, RenderPassColorAttachment, RenderPassDescriptor,
+    RenderPipelineDescriptor, ShaderStages, TextureFormat,
 };
 use bevy::render::renderer::{RenderContext, RenderDevice, ViewQuery};
 use bevy::render::storage::GpuShaderBuffer;
 use bevy::render::texture::{FallbackImage, GpuImage};
-use bevy::render::view::{ViewTarget, ViewUniform, ViewUniformOffset, ViewUniforms};
+use bevy::render::view::{ViewTarget, ViewUniformOffset, ViewUniforms};
 use bevy::render::{Render, RenderApp, RenderStartup, RenderSystems};
 
 use super::material::say_once;
 use super::programs::{self, Role};
 use super::values::{PackContext, PackError, Stand, Values, pack};
+use super::views::{SceneLights, ViewImageTextures, ViewInputSources, ViewInputs, ViewLights};
+
+/// Where the passes that run before tonemapping are, so a dispatch on a camera can run before them.
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct BeforeTonemappingPasses;
+
+/// Where the passes that run after tonemapping are.
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct AfterTonemappingPasses;
 
 /// One pass as the camera holds it.
 #[derive(Clone, Debug)]
@@ -81,12 +79,7 @@ pub struct BcsShaderPasses {
 /// What every pass is built from.
 #[derive(Resource)]
 pub struct ShaderPassPipelines {
-    /// Group one, which is the same for every pass.
-    inputs: BindGroupLayoutDescriptor,
-    sampler: Sampler,
     fullscreen: FullscreenShader,
-    /// Bound at the depth binding when the camera has no depth to give.
-    empty_depth: TextureView,
     /// One pipeline per program, version of it and picture format, because a pipeline names the
     /// format it writes and a camera drawing in HDR writes a different one before tonemapping than
     /// after.
@@ -125,9 +118,11 @@ pub fn install(app: &mut App) {
             (
                 run_passes::<false>
                     .before(tonemapping)
+                    .in_set(BeforeTonemappingPasses)
                     .in_set(Core3dSystems::PostProcess),
                 run_passes::<true>
                     .after(tonemapping)
+                    .in_set(AfterTonemappingPasses)
                     .in_set(Core3dSystems::PostProcess),
             ),
         )
@@ -136,97 +131,19 @@ pub fn install(app: &mut App) {
             (
                 run_passes::<false>
                     .before(tonemapping)
+                    .in_set(BeforeTonemappingPasses)
                     .in_set(Core2dSystems::PostProcess),
                 run_passes::<true>
                     .after(tonemapping)
+                    .in_set(AfterTonemappingPasses)
                     .in_set(Core2dSystems::PostProcess),
             ),
         );
 }
 
-fn init_pipelines(
-    mut commands: Commands,
-    render_device: Res<RenderDevice>,
-    fullscreen: Res<FullscreenShader>,
-) {
-    let entry = |binding: u32, ty: BindingType| BindGroupLayoutEntry {
-        binding,
-        visibility: ShaderStages::FRAGMENT,
-        ty,
-        count: None,
-    };
-
-    let entries = [
-        entry(
-            0,
-            BindingType::Texture {
-                sample_type: TextureSampleType::Float { filterable: true },
-                view_dimension: TextureViewDimension::D2,
-                multisampled: false,
-            },
-        ),
-        entry(1, BindingType::Sampler(SamplerBindingType::Filtering)),
-        entry(
-            2,
-            BindingType::Buffer {
-                ty: BufferBindingType::Uniform,
-                has_dynamic_offset: false,
-                min_binding_size: Some(GlobalsUniform::min_size()),
-            },
-        ),
-        entry(
-            3,
-            BindingType::Buffer {
-                ty: BufferBindingType::Uniform,
-                has_dynamic_offset: true,
-                min_binding_size: Some(ViewUniform::min_size()),
-            },
-        ),
-        entry(
-            4,
-            BindingType::Texture {
-                sample_type: TextureSampleType::Depth,
-                view_dimension: TextureViewDimension::D2,
-                multisampled: false,
-            },
-        ),
-        entry(
-            5,
-            BindingType::Texture {
-                sample_type: TextureSampleType::Float { filterable: true },
-                view_dimension: TextureViewDimension::D2,
-                multisampled: false,
-            },
-        ),
-    ];
-
-    let empty_depth = render_device
-        .create_texture(&bevy::render::render_resource::TextureDescriptor {
-            label: Some("bcs_shader_pass_empty_depth"),
-            size: bevy::render::render_resource::Extent3d {
-                width: 1,
-                height: 1,
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: bevy::render::render_resource::TextureDimension::D2,
-            format: TextureFormat::Depth32Float,
-            usage: bevy::render::render_resource::TextureUsages::TEXTURE_BINDING,
-            view_formats: &[],
-        })
-        .create_view(&bevy::render::render_resource::TextureViewDescriptor::default());
-
+fn init_pipelines(mut commands: Commands, fullscreen: Res<FullscreenShader>) {
     commands.insert_resource(ShaderPassPipelines {
-        inputs: BindGroupLayoutDescriptor::new("bcs_shader_pass_inputs", &entries),
-        sampler: render_device.create_sampler(&SamplerDescriptor {
-            label: Some("bcs_shader_pass_sampler"),
-            mag_filter: FilterMode::Linear,
-            min_filter: FilterMode::Linear,
-            ..Default::default()
-        }),
         fullscreen: fullscreen.clone(),
-        empty_depth,
         pipelines: HashMap::new(),
     });
 }
@@ -240,6 +157,7 @@ fn own_layout(layout: &super::reflect::Layout) -> BindGroupLayoutDescriptor {
 /// for.
 fn pipeline_for(
     pipelines: &mut ShaderPassPipelines,
+    inputs: &ViewInputs,
     cache: &PipelineCache,
     program: u32,
     format: TextureFormat,
@@ -256,7 +174,7 @@ fn pipeline_for(
 
     let id = cache.queue_render_pipeline(RenderPipelineDescriptor {
         label: Some("bcs_shader_pass".into()),
-        layout: vec![own_layout(&layout), pipelines.inputs.clone()],
+        layout: vec![own_layout(&layout), inputs.layout.clone()],
         vertex: pipelines.fullscreen.to_vertex_state(),
         fragment: Some(FragmentState {
             shader: stage.shader,
@@ -280,6 +198,7 @@ fn pipeline_for(
 fn prepare_passes(
     mut commands: Commands,
     mut pipelines: ResMut<ShaderPassPipelines>,
+    inputs: Res<ViewInputs>,
     cache: Res<PipelineCache>,
     render_device: Res<RenderDevice>,
     images: Res<RenderAssets<GpuImage>>,
@@ -291,13 +210,16 @@ fn prepare_passes(
         &ViewTarget,
         &BcsShaderPasses,
         Option<&mut PreparedShaderPasses>,
+        Option<&ViewImageTextures>,
+        Option<&bevy::pbr::ScreenSpaceAmbientOcclusionResources>,
     )>,
 ) {
     let Some(stand) = stand else {
         return;
     };
 
-    for (entity, target, asked, prepared) in &mut views {
+    for (entity, target, asked, prepared, owned, occlusion) in &mut views {
+        let names = super::views::view_names(owned, occlusion);
         let format = target.main_texture_format();
 
         let kept: Vec<PreparedPass> = prepared
@@ -310,16 +232,20 @@ fn prepare_passes(
             // Still compiling, or no pass stage. Left out of this frame, so the picture goes on
             // as though the pass were not there.
             let Some((pipeline, program)) =
-                pipeline_for(&mut pipelines, &cache, pass.program, format)
+                pipeline_for(&mut pipelines, &inputs, &cache, pass.program, format)
             else {
                 continue;
             };
 
             let built_from = (program.generation, pass.version);
 
+            // Built again every frame on a camera that owns images, because a history image is a
+            // different texture from one frame to the next and a resized one is a new texture.
             let reusable = kept
                 .get(index)
-                .filter(|old| old.built_from == built_from && old.pipeline == pipeline)
+                .filter(|old| {
+                    names.is_none() && old.built_from == built_from && old.pipeline == pipeline
+                })
                 .map(|old| old.own.clone());
 
             let own = match reusable {
@@ -333,6 +259,7 @@ fn prepare_passes(
                         buffers: &buffers,
                         fallback: &fallback,
                         stand: &stand,
+                        view: names.as_deref(),
                     };
 
                     let packed = match pack(&layout, &pass.values, &context) {
@@ -392,15 +319,28 @@ fn run_passes<const AFTER_TONEMAPPING: bool>(
         &ViewUniformOffset,
         &PreparedShaderPasses,
         Option<&ViewPrepassTextures>,
+        Option<&PreviousViewUniformOffset>,
+        Option<&bevy::pbr::ViewLightsUniformOffset>,
+        Option<&bevy::pbr::ViewShadowBindings>,
     )>,
-    pipelines: Res<ShaderPassPipelines>,
+    inputs: Res<ViewInputs>,
     fallback: Res<FallbackImage>,
     cache: Res<PipelineCache>,
     globals: Res<GlobalsBuffer>,
     view_uniforms: Res<ViewUniforms>,
+    previous_uniforms: Option<Res<PreviousViewUniforms>>,
+    scene: SceneLights,
     mut ctx: RenderContext,
 ) {
-    let (target, offset, prepared, prepass) = view.into_inner();
+    let (target, offset, prepared, prepass, previous, light_offset, shadows) = view.into_inner();
+
+    if !prepared
+        .0
+        .iter()
+        .any(|pass| pass.after_tonemapping == AFTER_TONEMAPPING)
+    {
+        return;
+    }
 
     let (Some(globals), Some(view_binding)) =
         (globals.buffer.binding(), view_uniforms.uniforms.binding())
@@ -408,21 +348,12 @@ fn run_passes<const AFTER_TONEMAPPING: bool>(
         return;
     };
 
-    // Only a texture drawn once a pixel can be bound as a plain texture. A multisampled camera's
-    // prepass draws several samples a pixel, and it is left out rather than failing the pipeline.
-    let single = |texture: &bevy::render::render_resource::Texture| texture.sample_count() == 1;
-
-    let depth = prepass
-        .and_then(|prepass| prepass.depth.as_ref())
-        .filter(|depth| single(&depth.texture.texture))
-        .map(|depth| depth.texture.default_view.clone())
-        .unwrap_or_else(|| pipelines.empty_depth.clone());
-
-    let normals = prepass
-        .and_then(|prepass| prepass.normal.as_ref())
-        .filter(|normal| single(&normal.texture.texture))
-        .map(|normal| normal.texture.default_view.clone())
-        .unwrap_or_else(|| fallback.d2.texture_view.clone());
+    let sources = ViewInputSources::gather(
+        &inputs,
+        &fallback,
+        prepass,
+        previous_uniforms.as_deref().zip(previous),
+    );
 
     for pass in &prepared.0 {
         if pass.after_tonemapping != AFTER_TONEMAPPING {
@@ -435,36 +366,22 @@ fn run_passes<const AFTER_TONEMAPPING: bool>(
 
         let post = target.post_process_write();
 
-        let inputs = ctx.render_device().create_bind_group(
-            "bcs_shader_pass_inputs",
-            &cache.get_bind_group_layout(&pipelines.inputs),
-            &[
-                BindGroupEntry {
-                    binding: 0,
-                    resource: BindingResource::TextureView(post.source),
-                },
-                BindGroupEntry {
-                    binding: 1,
-                    resource: BindingResource::Sampler(&pipelines.sampler),
-                },
-                BindGroupEntry {
-                    binding: 2,
-                    resource: globals.clone(),
-                },
-                BindGroupEntry {
-                    binding: 3,
-                    resource: view_binding.clone(),
-                },
-                BindGroupEntry {
-                    binding: 4,
-                    resource: BindingResource::TextureView(&depth),
-                },
-                BindGroupEntry {
-                    binding: 5,
-                    resource: BindingResource::TextureView(&normals),
-                },
-            ],
-        );
+        let Some((group, offsets)) = sources.bind(
+            ctx.render_device(),
+            &cache,
+            &inputs,
+            post.source,
+            globals.clone(),
+            view_binding.clone(),
+            offset.offset,
+            &scene,
+            &ViewLights {
+                offset: light_offset,
+                shadows,
+            },
+        ) else {
+            return;
+        };
 
         let descriptor = RenderPassDescriptor {
             label: Some("bcs_shader_pass"),
@@ -483,7 +400,7 @@ fn run_passes<const AFTER_TONEMAPPING: bool>(
         let mut render_pass = ctx.command_encoder().begin_render_pass(&descriptor);
         render_pass.set_pipeline(pipeline);
         render_pass.set_bind_group(0, &pass.own, &[]);
-        render_pass.set_bind_group(1, &inputs, &[offset.offset]);
+        render_pass.set_bind_group(1, &group, &offsets);
         render_pass.draw(0..3, 0..1);
     }
 }

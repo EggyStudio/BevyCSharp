@@ -90,10 +90,11 @@ by name. What is left is at the edges of that:
   never wrote is caught by wgpu when the pipeline is built, which Bevy does not scope, so the error
   is the device's rather than the pipeline's, and `Shaders.KeepRenderingAfterErrors` survives it at
   the cost of every frame drawn while the broken pipeline is in use.
-- **A pass reads depth only from a camera drawn once a pixel.** A multisampled prepass is a
+- **A pass reads the prepass only from a camera drawn once a pixel.** A multisampled prepass is a
   multisampled texture, which is a different binding from the plain one the layout names, so a
-  camera with `Msaa` above one hands its passes the stand-ins. Resolving the depth first, or a
-  second layout for multisampled cameras, would lift it. Motion vectors are not bound at all.
+  camera with `Msaa` above one hands its passes the stand-ins, and the same goes for normals and
+  motion vectors. Resolving them first, or a second layout for multisampled cameras, would lift
+  it.
 - **A buffer is drawn by one mesh.** A material reads a buffer, but what it draws is still one
   entity's mesh, so ten thousand particles are a mesh of ten thousand squares, built with
   `Render.CreateMesh(MeshData)`, whose vertex shader places each from the buffer. Bevy's indirect

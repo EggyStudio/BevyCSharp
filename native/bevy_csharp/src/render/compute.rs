@@ -14,8 +14,9 @@
 //!
 //! **What a compute shader reads.** Group zero is whatever it declares: numbers, buffers read or
 //! written, images read or written in any format, samplers, arrays of any of them. It is laid out
-//! from the shader's reflection and filled by name. Group one is time, which `bcs_compute`
-//! declares.
+//! from the shader's reflection and filled by name. Group one is time, at binding two, which
+//! `bcs_compute` declares. A dispatch that runs on a camera instead reads the camera's inputs there
+//! (see [`super::views`]), which hold time at the same binding.
 //!
 //! **Reading a buffer back.** Asking copies it off the GPU after the frame's work, and the bytes
 //! arrive a frame or two later, which is the latency of any readback.
@@ -77,6 +78,9 @@ pub struct Dispatch {
     pub program: u32,
     pub values: Values,
     pub workgroups: [u32; 3],
+    /// A buffer and an offset in it holding the workgroup counts, written on the GPU, in place of
+    /// `workgroups`.
+    pub indirect: Option<(Handle<ShaderBuffer>, u64)>,
 }
 
 /// The dispatches asked for this frame, in order.
@@ -102,6 +106,7 @@ struct PreparedDispatch {
     own: BindGroup,
     inputs: BindGroup,
     workgroups: [u32; 3],
+    indirect: Option<(bevy::render::render_resource::Buffer, u64)>,
 }
 
 #[derive(Resource, Default)]
@@ -143,8 +148,10 @@ pub fn install(app: &mut App) {
 }
 
 fn init_pipelines(mut commands: Commands) {
+    // At binding two, where a dispatch on a camera reads time as well, so a shader importing
+    // `bcs_compute` runs the same either way.
     let globals = BindGroupLayoutEntry {
-        binding: 0,
+        binding: 2,
         visibility: ShaderStages::COMPUTE,
         ty: BindingType::Buffer {
             ty: BufferBindingType::Uniform,
@@ -185,6 +192,12 @@ fn pipeline_for(
     let program = programs::lookup(id)?;
     let layout = program.compute.clone()?;
     let stage = program.stages[Role::Compute as usize].clone()?;
+
+    // One reading a camera's inputs has nothing to read here, and its pipeline is built against
+    // the camera's inputs instead, by `super::views`.
+    if layout.reads_view {
+        return None;
+    }
 
     let key = (id, program.generation);
 
@@ -240,7 +253,7 @@ fn prepare_dispatches(
         "bcs_compute_inputs",
         &cache.get_bind_group_layout(&pipelines.inputs),
         &[BindGroupEntry {
-            binding: 0,
+            binding: 2,
             resource: globals,
         }],
     );
@@ -250,16 +263,23 @@ fn prepare_dispatches(
         else {
             // Silent while the program is still compiling, which is every program's first few
             // frames and says nothing wrong about the dispatch.
-            let compiled_without_one = programs::lookup(dispatch.program).is_some_and(|program| {
-                program.generation > 0 && program.stages[Role::Compute as usize].is_none()
-            });
+            let found = programs::lookup(dispatch.program).filter(|program| program.generation > 0);
 
-            if compiled_without_one {
-                say_once(format!(
-                    "A dispatch named shader program {}, which has no compute stage, so it does \
-                     nothing.",
-                    dispatch.program
-                ));
+            if let Some(program) = found {
+                if program.stages[Role::Compute as usize].is_none() {
+                    say_once(format!(
+                        "A dispatch named shader program {}, which has no compute stage, so it \
+                         does nothing.",
+                        dispatch.program
+                    ));
+                } else if program.compute.as_ref().is_some_and(|layout| layout.reads_view) {
+                    say_once(format!(
+                        "Shader program {} reads a camera's inputs through bcs_pass, so it runs \
+                         only on a camera. Give it to Shaders.SetViewDispatches rather than \
+                         Shaders.Dispatch.",
+                        dispatch.program
+                    ));
+                }
             }
 
             continue;
@@ -273,6 +293,7 @@ fn prepare_dispatches(
             buffers: &buffers,
             fallback: &fallback,
             stand: &stand,
+            view: None,
         };
 
         // A buffer or an image that has not reached the GPU yet holds the dispatch back rather
@@ -302,11 +323,22 @@ fn prepare_dispatches(
             &cache.get_bind_group_layout(&own_layout(&layout)),
         );
 
+        // A buffer of counts that has not reached the GPU holds the dispatch back, as any other
+        // buffer does.
+        let indirect = match &dispatch.indirect {
+            Some((handle, offset)) => match buffers.get(handle) {
+                Some(gpu) => Some((gpu.buffer.clone(), *offset)),
+                None => continue,
+            },
+            None => None,
+        };
+
         prepared.0.push(PreparedDispatch {
             pipeline,
             own,
             inputs: inputs.clone(),
             workgroups: dispatch.workgroups,
+            indirect,
         });
     }
 }
@@ -341,7 +373,11 @@ fn run_dispatches(
         pass.set_pipeline(pipeline);
         pass.set_bind_group(0, &dispatch.own, &[]);
         pass.set_bind_group(1, &dispatch.inputs, &[]);
-        pass.dispatch_workgroups(x, y, z);
+
+        match &dispatch.indirect {
+            Some((buffer, offset)) => pass.dispatch_workgroups_indirect(buffer, *offset),
+            None => pass.dispatch_workgroups(x, y, z),
+        }
     }
 }
 
@@ -510,6 +546,22 @@ pub const IMAGE_FORMATS: [(TextureFormat, usize); 10] = [
 /// `depth` above one makes a 3D image that many deep, which is what a shader writing a
 /// `RWTexture3D` wants. It starts as zeros.
 pub fn create_image(world: &mut World, width: u32, height: u32, depth: u32, format: i32) -> i32 {
+    create_image_from(world, width, height, depth, format, None)
+}
+
+/// Makes an image as [`create_image`] does, starting with `texels` rather than zeros.
+///
+/// `texels` is every texel in the format's own layout, row after row and slice after slice, so a
+/// heightmap of floats is `width * height` floats as they are. Anything but exactly that many bytes
+/// is refused, since a picture read with the wrong stride is noise rather than an error.
+pub fn create_image_from(
+    world: &mut World,
+    width: u32,
+    height: u32,
+    depth: u32,
+    format: i32,
+    texels: Option<&[u8]>,
+) -> i32 {
     let Some(&(format, texel_bytes)) = usize::try_from(format)
         .ok()
         .and_then(|index| IMAGE_FORMATS.get(index))
@@ -521,23 +573,36 @@ pub fn create_image(world: &mut World, width: u32, height: u32, depth: u32, form
         return status::NULL_ARG;
     }
 
-    let texel = vec![0u8; texel_bytes];
+    let size = Extent3d {
+        width,
+        height,
+        depth_or_array_layers: depth,
+    };
 
-    let mut image = Image::new_fill(
-        Extent3d {
-            width,
-            height,
-            depth_or_array_layers: depth,
-        },
-        if depth > 1 {
-            TextureDimension::D3
-        } else {
-            TextureDimension::D2
-        },
-        &texel,
-        format,
-        RenderAssetUsages::default(),
-    );
+    let dimension = if depth > 1 {
+        TextureDimension::D3
+    } else {
+        TextureDimension::D2
+    };
+
+    let mut image = match texels {
+        Some(texels) => {
+            let wanted = width as usize * height as usize * depth as usize * texel_bytes;
+
+            if texels.len() != wanted {
+                return status::BUFFER_TOO_SMALL;
+            }
+
+            Image::new(size, dimension, texels.to_vec(), format, RenderAssetUsages::default())
+        }
+        None => Image::new_fill(
+            size,
+            dimension,
+            &vec![0u8; texel_bytes],
+            format,
+            RenderAssetUsages::default(),
+        ),
+    };
 
     image.texture_descriptor.usage = TextureUsages::TEXTURE_BINDING
         | TextureUsages::STORAGE_BINDING

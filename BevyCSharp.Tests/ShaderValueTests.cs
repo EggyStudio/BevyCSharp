@@ -226,6 +226,27 @@ public sealed class ShaderValueTests
         AssertGreen(middle, "the last color");
     }
 
+    /// <summary>An image made from floats keeps numbers no eight-bit image could.</summary>
+    [Fact]
+    public void AnImageOfFloatsKeepsItsNumbers()
+    {
+        if (!CanRun) return;
+
+        var middle = Middle(_ => Shaders.CreateMaterial(Shaders.CreateProgram("shaders/load_float.slang"))
+            .SetTexture("heights", Shaders.CreateImage<float>(2, 1, ShaderImageFormat.R32Float, [0.25f, 1234.5f]))
+            .Set("expected", 1234.5f));
+
+        AssertGreen(middle, "the float image");
+    }
+
+    /// <summary>Texels of the wrong size for the image are refused rather than read as noise.</summary>
+    [Fact]
+    public void TexelsOfTheWrongSizeAreRefused()
+    {
+        Assert.Throws<ArgumentException>(
+            () => Shaders.CreateImage<float>(2, 2, ShaderImageFormat.R32Float, [1f, 2f, 3f]));
+    }
+
     /// <summary>Two materials of different layouts draw side by side in one frame.</summary>
     [Fact]
     public void MaterialsOfDifferentLayoutsDrawTogether()

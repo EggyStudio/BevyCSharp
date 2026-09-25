@@ -21,7 +21,7 @@
 
 #![cfg(feature = "render")]
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 use bevy::render::render_resource::{
     BindGroupLayoutEntry, BindingType, BufferBindingType, SamplerBindingType, ShaderStages,
@@ -224,6 +224,10 @@ impl Binding {
 pub struct Layout {
     pub group: u32,
     pub bindings: BTreeMap<u32, Binding>,
+    /// Whether the shader reads a camera's inputs (the picture, the view, depth, motion) beside
+    /// time, which is what a compute shader importing `bcs_pass` does, and what decides that it
+    /// can only run on a camera.
+    pub reads_view: bool,
 }
 
 /// The name the loose globals' uniform buffer goes by, which no global can have.
@@ -499,16 +503,6 @@ pub struct Reflected {
 pub fn reflect(wgsl: &str, reflection: &str, family: Family) -> Result<Reflected, String> {
     let wgsl = remap_groups(wgsl, family);
 
-    let module = naga::front::wgsl::parse_str(&wgsl)
-        .map_err(|error| format!("the compiled WGSL does not parse: {error}"))?;
-
-    let mut layouter = naga::proc::Layouter::default();
-    layouter
-        .update(module.to_ctx())
-        .map_err(|error| format!("the compiled WGSL could not be laid out: {error}"))?;
-
-    let sampled = sampled_images(&module);
-
     let json: Value = serde_json::from_str(reflection)
         .map_err(|error| format!("slangc's reflection does not parse: {error}"))?;
 
@@ -518,10 +512,37 @@ pub fn reflect(wgsl: &str, reflection: &str, family: Family) -> Result<Reflected
         .cloned()
         .unwrap_or_default();
 
+    let parse = |wgsl: &str| {
+        naga::front::wgsl::parse_str(wgsl)
+            .map_err(|error| format!("the compiled WGSL does not parse: {error}"))
+    };
+
+    let mut module = parse(&wgsl)?;
+    let mut info = validate(&module);
+
+    // Read again where storage images were declared differently from what Slang wrote, so what
+    // follows sees them as the shader meant them.
+    let fixed = fix_storage_images(&wgsl, &module, info.as_ref(), &parameters);
+    let wgsl = if fixed != wgsl {
+        module = parse(&fixed)?;
+        info = validate(&module);
+        fixed
+    } else {
+        wgsl
+    };
+
+    let mut layouter = naga::proc::Layouter::default();
+    layouter
+        .update(module.to_ctx())
+        .map_err(|error| format!("the compiled WGSL could not be laid out: {error}"))?;
+
+    let sampled = info.as_ref().map(|info| sampled_images(&module, info));
+
     let group = family.own_group();
     let mut layout = Layout {
         group,
         bindings: BTreeMap::new(),
+        reads_view: false,
     };
 
     for (handle, global) in module.global_variables.iter() {
@@ -539,6 +560,11 @@ pub fn reflect(wgsl: &str, reflection: &str, family: Family) -> Result<Reflected
         }
 
         if binding.group != group {
+            // Time is at binding two of a compute shader's inputs group, and anything else there
+            // is one of the camera's inputs.
+            if matches!(family, Family::Compute) && binding.group == 1 && binding.binding != 2 {
+                layout.reads_view = true;
+            }
             continue;
         }
 
@@ -676,26 +702,162 @@ pub fn numbers_in_storage(wgsl: &str, own_group: u32) -> String {
 
 /// Every texture the module reads through a sampler, or `None` where naga cannot say, in which
 /// case every texture is taken to be sampled.
-fn sampled_images(module: &naga::Module) -> Option<std::collections::HashSet<naga::Handle<naga::GlobalVariable>>> {
-    use naga::valid::{Capabilities, ValidationFlags, Validator};
-
-    let info = Validator::new(ValidationFlags::all(), Capabilities::all())
-        .validate(module)
-        .ok()?;
-
+fn sampled_images(
+    module: &naga::Module,
+    info: &naga::valid::ModuleInfo,
+) -> std::collections::HashSet<naga::Handle<naga::GlobalVariable>> {
     let mut sampled = std::collections::HashSet::new();
 
-    let functions = module
-        .functions
-        .iter()
-        .map(|(handle, _)| &info[handle])
-        .chain((0..module.entry_points.len()).map(|index| info.get_entry_point(index)));
-
-    for function in functions {
+    for function in function_infos(module, info) {
         sampled.extend(function.sampling_set.iter().map(|key| key.image));
     }
 
-    Some(sampled)
+    sampled
+}
+
+/// What naga worked out about a module, or `None` where it did not validate, in which case
+/// whatever depends on it takes the cautious answer.
+fn validate(module: &naga::Module) -> Option<naga::valid::ModuleInfo> {
+    use naga::valid::{Capabilities, ValidationFlags, Validator};
+
+    Validator::new(ValidationFlags::all(), Capabilities::all())
+        .validate(module)
+        .ok()
+}
+
+/// Every function's and every entry point's analysis.
+fn function_infos<'a>(
+    module: &'a naga::Module,
+    info: &'a naga::valid::ModuleInfo,
+) -> impl Iterator<Item = &'a naga::valid::FunctionInfo> {
+    module
+        .functions
+        .iter()
+        .map(move |(handle, _)| &info[handle])
+        .chain((0..module.entry_points.len()).map(move |index| info.get_entry_point(index)))
+}
+
+/// The WGSL name of a storage format Slang reports by its own name, as `[format(...)]` spells it.
+fn storage_format_name(slang: &str) -> Option<String> {
+    let special = match slang {
+        "r11f_g11f_b10f" => Some("rg11b10ufloat"),
+        "rgb10_a2" => Some("rgb10a2unorm"),
+        "rgb10_a2ui" => Some("rgb10a2uint"),
+        "bgra8" => Some("bgra8unorm"),
+        _ => None,
+    };
+
+    if let Some(name) = special {
+        return Some(name.to_string());
+    }
+
+    let (base, kind) = if let Some(base) = slang.strip_suffix("_snorm") {
+        (base, "snorm")
+    } else if let Some(base) = slang.strip_suffix("ui") {
+        (base, "uint")
+    } else if let Some(base) = slang.strip_suffix('i') {
+        (base, "sint")
+    } else if let Some(base) = slang.strip_suffix('f') {
+        (base, "float")
+    } else {
+        (slang, "unorm")
+    };
+
+    let channels = base.trim_end_matches(|c: char| c.is_ascii_digit());
+    let bits = &base[channels.len()..];
+
+    if !matches!(channels, "r" | "rg" | "rgba") || bits.is_empty() {
+        return None;
+    }
+
+    Some(format!("{base}{kind}"))
+}
+
+/// Puts back what Slang's WGSL output changed about a storage image.
+///
+/// Slang writes only the storage formats core WGSL has, so an image declared
+/// `[format("r16f")]` comes out as `rgba32float`, which a pipeline then refuses to bind an
+/// `R16Float` texture to. wgpu and naga take the wider set where the adapter supports it, and the
+/// reflection still says what the shader declared, so the declared format goes back in.
+///
+/// Slang also declares every `RWTexture` as read-write. Only some formats can be read and written in
+/// one binding, and a shader that never reads an image has no need to, so an image the shader only
+/// writes (or asks the size of) is declared write-only.
+fn fix_storage_images(
+    wgsl: &str,
+    module: &naga::Module,
+    info: Option<&naga::valid::ModuleInfo>,
+    parameters: &[Value],
+) -> String {
+    use naga::valid::GlobalUse;
+
+    let mut changes: HashMap<String, (Option<String>, bool)> = HashMap::new();
+
+    for (handle, global) in module.global_variables.iter() {
+        let TypeInner::Image {
+            class: ImageClass::Storage { .. },
+            ..
+        } = &module.types[global.ty].inner
+        else {
+            continue;
+        };
+
+        let Some(emitted) = global.name.clone() else {
+            continue;
+        };
+
+        let name = source_name(&emitted);
+
+        let format = parameters
+            .iter()
+            .find(|parameter| parameter.get("name").and_then(Value::as_str) == Some(name.as_str()))
+            .and_then(|parameter| parameter.get("format").and_then(Value::as_str))
+            .and_then(storage_format_name);
+
+        let read = info.is_none_or(|info| {
+            function_infos(module, info).any(|function| function[handle].contains(GlobalUse::READ))
+        });
+
+        changes.insert(emitted, (format, !read));
+    }
+
+    if changes.is_empty() {
+        return wgsl.to_string();
+    }
+
+    let mut out = String::with_capacity(wgsl.len());
+
+    for line in wgsl.split_inclusive('\n') {
+        let trimmed = line.trim_start();
+        let found = trimmed
+            .starts_with("@binding(")
+            .then(|| changes.iter().find(|(emitted, _)| line.contains(&format!("var {emitted} :"))))
+            .flatten();
+
+        let (Some((_, (format, write_only))), Some(open), Some(close)) =
+            (found, line.find("texture_storage_"), line.rfind('>'))
+        else {
+            out.push_str(line);
+            continue;
+        };
+
+        let Some(angle) = line[open..].find('<').map(|at| open + at) else {
+            out.push_str(line);
+            continue;
+        };
+
+        let inside = &line[angle + 1..close];
+        let (old_format, old_access) = inside.split_once(',').unwrap_or((inside, " read_write"));
+
+        let format = format.as_deref().unwrap_or(old_format.trim());
+        let access = if *write_only { "write" } else { old_access.trim() };
+
+        out.push_str(&line[..angle + 1]);
+        out.push_str(&format!("{format}, {access}"));
+        out.push_str(&line[close..]);
+    }
+
+    out
 }
 
 /// Changes every `@group(n)` in WGSL `slangc` wrote to where the family puts it, and spells an
@@ -917,6 +1079,45 @@ mod tests {
         assert!(wgsl.contains("var layers_0 : binding_array<texture_2d<f32>, 64>"), "{wgsl}");
         assert!(wgsl.contains("@binding(11) @group(0) var<uniform> globals_0"));
         assert!(!wgsl.contains("@group(100)"));
+    }
+
+    #[test]
+    fn slangs_format_names_become_wgsls() {
+        assert_eq!(storage_format_name("r16f").as_deref(), Some("r16float"));
+        assert_eq!(storage_format_name("rgba8").as_deref(), Some("rgba8unorm"));
+        assert_eq!(storage_format_name("rg32ui").as_deref(), Some("rg32uint"));
+        assert_eq!(storage_format_name("r32i").as_deref(), Some("r32sint"));
+        assert_eq!(storage_format_name("rgba8_snorm").as_deref(), Some("rgba8snorm"));
+        assert_eq!(storage_format_name("r11f_g11f_b10f").as_deref(), Some("rg11b10ufloat"));
+        assert_eq!(storage_format_name("unknown"), None);
+    }
+
+    /// An image declared in a format core WGSL lacks gets that format back, and one the shader
+    /// only writes is bound write-only.
+    #[test]
+    fn a_storage_image_is_declared_as_the_shader_meant_it() {
+        let wgsl = "@binding(0) @group(0) var picture_0 : texture_storage_2d<rgba32float, read_write>;\n\
+                    @compute @workgroup_size(1) fn main() { textureStore(picture_0, vec2<i32>(0), vec4<f32>(1.0)); }\n";
+        let json = r#"{"parameters":[{"name":"picture","format":"r16f","binding":{"kind":"descriptorTableSlot","index":0},"type":{"kind":"resource","baseShape":"texture2D","access":"readWrite"}}]}"#;
+
+        let reflected = reflect(wgsl, json, Family::Compute).expect("it reflects");
+
+        assert!(
+            reflected.wgsl.contains("texture_storage_2d<r16float, write>"),
+            "{}",
+            reflected.wgsl
+        );
+
+        let Some(Binding {
+            kind: BindingKind::StorageTexture { format, access, .. },
+            ..
+        }) = reflected.layout.bindings.get(&0)
+        else {
+            panic!("the image is not a storage binding");
+        };
+
+        assert_eq!(*format, TextureFormat::R16Float);
+        assert_eq!(*access, StorageTextureAccess::WriteOnly);
     }
 
     /// Bevy's own uniforms stay uniforms, and the material's become storage, which is what lets

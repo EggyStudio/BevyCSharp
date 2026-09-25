@@ -31,6 +31,19 @@ public sealed class ShaderLayoutTests
     public void TheSamplerConfigIsWhereTheBridgeReadsIt(string field, int offset) =>
         Assert.Equal(offset, Marshal.OffsetOf<NativeSamplerConfig>(field).ToInt32());
 
+    [Theory]
+    [InlineData(nameof(NativeViewImage.Format), 8)]
+    [InlineData(nameof(NativeViewImage.Mips), 20)]
+    public void TheViewImageIsWhereTheBridgeReadsIt(string field, int offset) =>
+        Assert.Equal(offset, Marshal.OffsetOf<NativeViewImage>(field).ToInt32());
+
+    [Theory]
+    [InlineData(nameof(NativeViewDispatch.Groups), 12)]
+    [InlineData(nameof(NativeViewDispatch.Scale), 24)]
+    [InlineData(nameof(NativeViewDispatch.Offset), 32)]
+    public void TheViewDispatchIsWhereTheBridgeReadsIt(string field, int offset) =>
+        Assert.Equal(offset, Marshal.OffsetOf<NativeViewDispatch>(field).ToInt32());
+
     [Fact]
     public void EachConfigIsTheSizeTheBridgeReads()
     {
@@ -39,6 +52,8 @@ public sealed class ShaderLayoutTests
         Assert.Equal(16, Marshal.OffsetOf<NativeShaderStage>(nameof(NativeShaderStage.Source)).ToInt32());
         Assert.Equal(16, Marshal.SizeOf<NativeShaderDefine>());
         Assert.Equal(28, Marshal.SizeOf<NativeSamplerConfig>());
+        Assert.Equal(24, Marshal.SizeOf<NativeViewImage>());
+        Assert.Equal(36, Marshal.SizeOf<NativeViewDispatch>());
     }
 
     /// <summary>

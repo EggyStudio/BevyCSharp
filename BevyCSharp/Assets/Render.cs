@@ -1023,6 +1023,64 @@ public static unsafe class Render
             $"sorting transparency for {camera}");
 
     /// <summary>
+    /// Sets the ambient light every camera without its own is lit by. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// Light arriving from every direction at once, which is the cheapest stand-in for all the
+    /// light bounced around a scene, and what ambient occlusion darkens where a surface is hemmed
+    /// in. <paramref name="brightness"/> is in candela per square meter, the unit Bevy's lights
+    /// use, and Bevy's own is eighty.
+    /// </remarks>
+    public static void SetAmbientLight((float R, float G, float B) color, float brightness) =>
+        Native.Check(
+            Native.bcs_render_set_ambient_light(0, color.R, color.G, color.B, Math.Max(0f, brightness)),
+            "setting the ambient light");
+
+    /// <summary>
+    /// Gives a camera an ambient light of its own, or with <see langword="null"/> takes it away so
+    /// the camera is lit by everyone's again. Only valid inside a system.
+    /// </summary>
+    public static void SetAmbientLight(Entity camera, (float R, float G, float B)? color, float brightness = 80f)
+    {
+        var (r, g, b) = color ?? (1f, 1f, 1f);
+
+        Native.Check(
+            Native.bcs_render_set_ambient_light(camera.Bits, r, g, b, color is null ? -1f : Math.Max(0f, brightness)),
+            $"setting the ambient light of {camera}");
+    }
+
+    /// <summary>
+    /// Turns Bevy's screen-space ambient occlusion on for a camera at a quality, or with
+    /// <see langword="null"/> off. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Occlusion darkens the ambient and environment light Bevy's own materials receive where a
+    /// surface is hemmed in, in corners, creases and under things, rather than darkening the
+    /// finished picture, which would take direct light with it. It needs depth and normals, which it
+    /// asks for itself, and a camera drawn once a pixel (<see cref="PostSettings.Msaa"/> of one);
+    /// on a multisampled camera Bevy leaves it off with a warning.
+    /// </para>
+    /// <para>
+    /// It is also the way in for occlusion of your own. While it is on, a compute shader on the
+    /// camera sees the texture Bevy's materials read under the name <c>ambient_occlusion</c>, and
+    /// one run at <see cref="FramePoint.AfterPrepass"/> writing it replaces Bevy's answer with its
+    /// own before anything is lit. Bevy still computes its own first, so a camera replacing it asks
+    /// for <see cref="AmbientOcclusionQuality.Low"/>.
+    /// </para>
+    /// </remarks>
+    /// <param name="camera">The camera.</param>
+    /// <param name="quality">How many samples a pixel takes, or null to turn it off.</param>
+    /// <param name="thickness">
+    /// How thick Bevy assumes what it sees to be, in world units, which decides how far behind a
+    /// surface something has to be before it stops occluding. Zero keeps Bevy's own.
+    /// </param>
+    public static void SetAmbientOcclusion(Entity camera, AmbientOcclusionQuality? quality, float thickness = 0f) =>
+        Native.Check(
+            Native.bcs_render_set_ambient_occlusion(camera.Bits, quality is { } level ? (int)level : -1, thickness),
+            $"setting the ambient occlusion of {camera}");
+
+    /// <summary>
     /// Asks for a picture to be read back into memory rather than written to a file.
     /// </summary>
     /// <remarks>
@@ -1455,4 +1513,20 @@ public static unsafe class Render
         new(NativeStatus.Unsupported,
             $"{attempted} needs a native build with the renderer compiled in. Rebuild the bridge "
             + "with build/build-native.sh --render, or guard the call with App.HasRenderer.");
+}
+
+/// <summary>How many samples a pixel of Bevy's ambient occlusion takes.</summary>
+public enum AmbientOcclusionQuality
+{
+    /// <summary>Four, plus what temporal antialiasing adds.</summary>
+    Low = 0,
+
+    /// <summary>Eight.</summary>
+    Medium = 1,
+
+    /// <summary>Eighteen, which is Bevy's own choice.</summary>
+    High = 2,
+
+    /// <summary>Fifty-four.</summary>
+    Ultra = 3,
 }

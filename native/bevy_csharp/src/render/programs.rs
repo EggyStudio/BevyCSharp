@@ -497,7 +497,7 @@ fn unit_for(
         shader: None,
         layout: Layout {
             group: role.family().own_group(),
-            bindings: Default::default(),
+            ..Default::default()
         },
         state: UnitState::Compiling,
         diagnostics: String::new(),
@@ -650,7 +650,7 @@ fn finish(programs: &mut ShaderPrograms, shaders: &mut Assets<Shader>, done: Fin
                 unit.shader = Some(shaders.add(Shader::from_wgsl(fallback, name)));
                 unit.layout = Layout {
                     group: unit.role.family().own_group(),
-                    bindings: Default::default(),
+                    ..Default::default()
                 };
             }
 

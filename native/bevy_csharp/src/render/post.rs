@@ -37,9 +37,18 @@ fn drop_temporal(entity: &mut bevy::ecs::world::EntityWorldMut) {
         entity.remove::<DepthPrepass>();
     }
 
-    if !entity.contains::<MotionBlur>() {
+    if !entity.contains::<MotionBlur>() && !asked_for_motion(entity) {
         entity.remove::<MotionVectorPrepass>();
     }
+}
+
+/// Whether the game asked for motion vectors itself, which a pass or a compute shader reading them
+/// does, so that taking an effect off does not take them away.
+#[cfg(feature = "render")]
+pub fn asked_for_motion(entity: &bevy::ecs::world::EntityWorldMut) -> bool {
+    entity
+        .get::<RequestedPrepass>()
+        .is_some_and(|requested| requested.0 & 4 != 0)
 }
 
 /// Which prepasses a game asked a camera for, as the flags it gave.
@@ -50,10 +59,12 @@ fn drop_temporal(entity: &mut bevy::ecs::world::EntityWorldMut) {
 #[derive(bevy::ecs::component::Component)]
 pub struct RequestedPrepass(pub u32);
 
-/// Asks a camera to draw depth, normals or both before the scene, for its shader passes to read.
+/// Asks a camera to draw depth, normals and motion vectors before the scene, for its shader passes
+/// and compute shaders to read.
 ///
-/// `flags` is a bit each: `1` depth, `2` normals. A bit left clear takes that prepass off again,
-/// unless something else on the camera needs it, which is temporal antialiasing for depth.
+/// `flags` is a bit each: `1` depth, `2` normals, `4` motion vectors. A bit left clear takes that
+/// prepass off again, unless something else on the camera needs it, which is temporal antialiasing
+/// for depth and motion, and motion blur for motion.
 ///
 /// A prepass draws the scene a second time, so it is only worth asking for when something reads
 /// what it draws. A multisampled camera draws them multisampled, which a pass cannot bind, so a
@@ -70,7 +81,8 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
         #[cfg(feature = "render")]
         {
             use bevy::anti_alias::taa::TemporalAntiAliasing;
-            use bevy::core_pipeline::prepass::{DepthPrepass, NormalPrepass};
+            use bevy::core_pipeline::prepass::{DepthPrepass, MotionVectorPrepass, NormalPrepass};
+            use bevy::post_process::motion_blur::MotionBlur;
 
             let entity = bevy::ecs::entity::Entity::from_bits(camera);
 
@@ -92,6 +104,12 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
                     camera.insert(NormalPrepass);
                 } else {
                     camera.remove::<NormalPrepass>();
+                }
+
+                if flags & 4 != 0 {
+                    camera.insert(MotionVectorPrepass);
+                } else if !camera.contains::<TemporalAntiAliasing>() && !camera.contains::<MotionBlur>() {
+                    camera.remove::<MotionVectorPrepass>();
                 }
 
                 status::OK
@@ -806,6 +824,145 @@ pub extern "C" fn bcs_render_set_lens_exposure(
     })
 }
 
+/// Sets the ambient light, which is what lights a surface from every direction at once and what
+/// ambient occlusion darkens.
+///
+/// `camera` names a camera to give its own, or is zero for the one every camera without its own
+/// uses. `brightness` is in candela per square meter, which is what Bevy's lights are in, and a
+/// negative one on a camera takes that camera's own away again.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_ambient_light(camera: u64, r: f32, g: f32, b: f32, brightness: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, r, g, b, brightness);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::color::Color;
+            use bevy::ecs::entity::Entity;
+            use bevy::light::{AmbientLight, GlobalAmbientLight};
+
+            let color = Color::linear_rgb(r, g, b);
+
+            with_world(|world| {
+                if camera == 0 {
+                    let Some(mut global) = world.get_resource_mut::<GlobalAmbientLight>() else {
+                        return status::UNSUPPORTED;
+                    };
+
+                    global.color = color;
+                    global.brightness = brightness.max(0.0);
+                    return status::OK;
+                }
+
+                let entity = Entity::from_bits(camera);
+
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let mut camera = world.entity_mut(entity);
+
+                if brightness < 0.0 {
+                    camera.remove::<AmbientLight>();
+                } else {
+                    camera.insert(AmbientLight {
+                        color,
+                        brightness,
+                        ..Default::default()
+                    });
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Turns Bevy's screen-space ambient occlusion on or off for a camera.
+///
+/// `quality` is `0` low, `1` medium, `2` high and `3` ultra, or below zero to take it off, and
+/// `thickness` how thick Bevy assumes what it sees to be, in world units, with zero keeping Bevy's
+/// own. The result darkens the ambient light Bevy's own materials receive, which is where occlusion
+/// belongs, rather than the finished picture.
+///
+/// It is also the way in for a package's own ambient occlusion. While it is on, a compute shader on
+/// the camera sees the texture Bevy's materials read under the name `ambient_occlusion`, and one
+/// that writes it at [`super::views::FramePoint::AfterPrepass`] replaces Bevy's answer with its
+/// own before anything is lit. Bevy computes its own first either way, so a camera replacing it
+/// sets the lowest quality.
+///
+/// It needs depth and normals, which it asks for itself, and a camera drawn once a pixel: Bevy
+/// leaves it off on a multisampled camera, with a warning.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_ambient_occlusion(camera: u64, quality: i32, thickness: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, quality, thickness);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::core_pipeline::prepass::{DepthPrepass, NormalPrepass};
+            use bevy::ecs::entity::Entity;
+            use bevy::pbr::{ScreenSpaceAmbientOcclusion, ScreenSpaceAmbientOcclusionQualityLevel};
+
+            let entity = Entity::from_bits(camera);
+
+            with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let mut camera = world.entity_mut(entity);
+
+                if quality < 0 {
+                    if camera.take::<ScreenSpaceAmbientOcclusion>().is_some() {
+                        // The prepasses it brought in go with it, unless the game asked for them,
+                        // or something else on the camera reads them.
+                        let asked = camera.get::<RequestedPrepass>().map_or(0, |asked| asked.0);
+
+                        if asked & 1 == 0
+                            && !camera.contains::<bevy::anti_alias::taa::TemporalAntiAliasing>()
+                        {
+                            camera.remove::<DepthPrepass>();
+                        }
+
+                        if asked & 2 == 0 {
+                            camera.remove::<NormalPrepass>();
+                        }
+                    }
+
+                    return status::OK;
+                }
+
+                let level = match quality {
+                    0 => ScreenSpaceAmbientOcclusionQualityLevel::Low,
+                    1 => ScreenSpaceAmbientOcclusionQualityLevel::Medium,
+                    2 => ScreenSpaceAmbientOcclusionQualityLevel::High,
+                    _ => ScreenSpaceAmbientOcclusionQualityLevel::Ultra,
+                };
+
+                camera.insert(ScreenSpaceAmbientOcclusion {
+                    quality_level: level,
+                    constant_object_thickness: if thickness > 0.0 {
+                        thickness
+                    } else {
+                        ScreenSpaceAmbientOcclusion::default().constant_object_thickness
+                    },
+                });
+
+                status::OK
+            })
+        }
+    })
+}
+
 /// Turns order-independent transparency on or off for a camera.
 ///
 /// What fixes transparent surfaces drawn in the wrong order. Ordinary alpha blending sorts whole
@@ -1031,7 +1188,7 @@ pub unsafe extern "C" fn bcs_render_set_effects(
                     // temporal antialiasing is reading it too, which is the other thing that
                     // asks for motion vectors.
                     entity_mut.remove::<MotionBlur>();
-                    if !entity_mut.contains::<TemporalAntiAliasing>() {
+                    if !entity_mut.contains::<TemporalAntiAliasing>() && !asked_for_motion(&entity_mut) {
                         entity_mut.remove::<MotionVectorPrepass>();
                     }
                 }
