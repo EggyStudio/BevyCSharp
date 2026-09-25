@@ -1,24 +1,21 @@
-//! Shader passes: full-screen fragment shaders the game wrote, run over what a camera drew.
+//! Shader passes: full-screen Slang fragment shaders the game wrote, run over what a camera drew.
 //!
-//! A pass is a program (see [`super::programs`]) whose fragment shader is run once per pixel of
-//! the camera's picture, reading the picture so far and writing the next one. A camera takes any
-//! number of them, run in order, either before tonemapping, where the picture is still linear and
-//! may be brighter than white, or after it, where it is what the screen will show. Every pass is
-//! compiled and reloaded the same way a material's shaders are, so a Slang or WGSL file edited
-//! while the game runs reaches the screen the same way.
+//! A pass is a program (see [`super::programs`]) whose pass stage is run once per pixel of the
+//! camera's picture, reading the picture so far and writing the next one. A camera takes any number
+//! of them, run in order, either before tonemapping, where the picture is still linear and may be
+//! brighter than white, or after it, where it is what the screen will show.
 //!
-//! **What a pass reads.** Group zero, laid out for every pass alike:
+//! **What a pass reads.** Two groups. Group zero is whatever the shader declares, laid out from its
+//! reflection and filled by name, the way a material's own group is. Group one is what the bridge
+//! hands every pass, which `bcs_pass` declares:
 //!
 //! | binding | holds |
 //! |---|---|
 //! | 0, 1 | the picture so far, and a linear sampler clamped at its edges |
-//! | 2 | sixty-four floats, as sixteen `vec4` in a uniform |
-//! | 3 | a read-only storage buffer of any size: the pass's own bytes, or a shared buffer |
-//! | 4 | Bevy's globals, which is where time is |
-//! | 5 | Bevy's view uniform, with the camera's matrices and viewport |
-//! | 6 to 13 | four textures, each followed by its sampler |
-//! | 14 | the camera's depth, as a depth texture |
-//! | 15 | the camera's normals, as a texture of floats |
+//! | 2 | Bevy's globals, which is where time is |
+//! | 3 | Bevy's view uniform, with the camera's matrices and viewport |
+//! | 4 | the camera's depth, as a depth texture |
+//! | 5 | the camera's normals |
 //!
 //! Depth and normals come from the prepass, which a camera draws only when asked, through
 //! `bcs_render_set_prepass`. A camera that draws neither, or draws them multisampled, which a
@@ -31,11 +28,8 @@
 #![cfg(feature = "render")]
 
 use std::collections::HashMap;
-use std::num::NonZeroU64;
-use std::sync::Arc;
 
 use bevy::app::App;
-use bevy::asset::Handle;
 use bevy::camera::Camera;
 use bevy::core_pipeline::prepass::ViewPrepassTextures;
 use bevy::core_pipeline::tonemapping::tonemapping;
@@ -46,40 +40,34 @@ use bevy::ecs::query::{With, Without};
 use bevy::ecs::resource::Resource;
 use bevy::ecs::schedule::IntoScheduleConfigs;
 use bevy::ecs::system::{Commands, Query, Res, ResMut};
-use bevy::image::Image;
 use bevy::render::extract_component::{ExtractComponent, ExtractComponentPlugin};
 use bevy::render::globals::{GlobalsBuffer, GlobalsUniform};
 use bevy::render::render_asset::RenderAssets;
 use bevy::render::render_resource::{
-    BindGroupEntry, BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingResource,
-    BindingType, Buffer, BufferBindingType, BufferInitDescriptor, BufferUsages,
-    CachedRenderPipelineId, ColorTargetState, ColorWrites, FilterMode, FragmentState, Operations,
-    PipelineCache, RenderPassColorAttachment, RenderPassDescriptor, RenderPipelineDescriptor,
-    Sampler, SamplerBindingType, SamplerDescriptor, ShaderStages, ShaderType, TextureFormat,
-    TextureSampleType, TextureView, TextureViewDimension,
+    BindGroup, BindGroupEntry, BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingResource,
+    BindingType, BufferBindingType, CachedRenderPipelineId, ColorTargetState, ColorWrites,
+    FilterMode, FragmentState, Operations, PipelineCache, RenderPassColorAttachment,
+    RenderPassDescriptor, RenderPipelineDescriptor, Sampler, SamplerBindingType, SamplerDescriptor,
+    ShaderStages, ShaderType, TextureFormat, TextureSampleType, TextureView, TextureViewDimension,
 };
-use bevy::render::renderer::{RenderContext, RenderDevice, RenderQueue, ViewQuery};
+use bevy::render::renderer::{RenderContext, RenderDevice, ViewQuery};
+use bevy::render::storage::GpuShaderBuffer;
 use bevy::render::texture::{FallbackImage, GpuImage};
 use bevy::render::view::{ViewTarget, ViewUniform, ViewUniformOffset, ViewUniforms};
 use bevy::render::{Render, RenderApp, RenderStartup, RenderSystems};
 
-use super::material::PARAMETER_COUNT;
+use super::material::say_once;
 use super::programs::{self, Role};
-
-/// How many textures a pass carries besides the picture.
-pub const PASS_TEXTURE_COUNT: usize = 4;
+use super::values::{PackContext, PackError, Stand, Values, pack};
 
 /// One pass as the camera holds it.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ShaderPass {
     pub program: u32,
-    pub parameters: [f32; PARAMETER_COUNT],
-    /// Shared, and replaced rather than changed, so the render side can tell new data from old
-    /// by the pointer rather than by comparing the bytes.
-    pub data: Arc<[u8]>,
-    /// A buffer bound at the data's binding in place of the data.
-    pub buffer: Option<Handle<bevy::render::storage::ShaderBuffer>>,
-    pub textures: [Option<Handle<Image>>; PASS_TEXTURE_COUNT],
+    pub values: Values,
+    /// Moves on whenever a value does, so the render side knows when to build the pass's own bind
+    /// group again rather than every frame.
+    pub version: u64,
     pub after_tonemapping: bool,
 }
 
@@ -93,24 +81,24 @@ pub struct BcsShaderPasses {
 /// What every pass is built from.
 #[derive(Resource)]
 pub struct ShaderPassPipelines {
-    layout: BindGroupLayoutDescriptor,
+    /// Group one, which is the same for every pass.
+    inputs: BindGroupLayoutDescriptor,
     sampler: Sampler,
     fullscreen: FullscreenShader,
     /// Bound at the depth binding when the camera has no depth to give.
     empty_depth: TextureView,
-    /// One pipeline per program and picture format, because a pipeline names the format it
-    /// writes and a camera drawing in HDR writes a different one before tonemapping than after.
-    pipelines: HashMap<(u32, TextureFormat), CachedRenderPipelineId>,
+    /// One pipeline per program, version of it and picture format, because a pipeline names the
+    /// format it writes and a camera drawing in HDR writes a different one before tonemapping than
+    /// after.
+    pipelines: HashMap<(u32, u32, TextureFormat), CachedRenderPipelineId>,
 }
 
 /// A pass as the render side keeps it between frames.
 struct PreparedPass {
-    pipeline: Option<CachedRenderPipelineId>,
-    parameters: Buffer,
-    data: Buffer,
-    /// Where the data came from, so it is uploaded again only when it is replaced.
-    data_source: (usize, usize),
-    textures: [(TextureView, Sampler); PASS_TEXTURE_COUNT],
+    pipeline: CachedRenderPipelineId,
+    own: BindGroup,
+    /// What the bind group was built from, which is what says it can be kept.
+    built_from: (u32, u64),
     after_tonemapping: bool,
 }
 
@@ -130,7 +118,7 @@ pub fn install(app: &mut App) {
         .add_systems(RenderStartup, init_pipelines)
         .add_systems(
             Render,
-            (prepare_passes, forget_passes).in_set(RenderSystems::PrepareResources),
+            (prepare_passes, forget_passes).in_set(RenderSystems::PrepareBindGroups),
         )
         .add_systems(
             Core3d,
@@ -168,35 +156,18 @@ fn init_pipelines(
         count: None,
     };
 
-    let texture = BindingType::Texture {
-        sample_type: TextureSampleType::Float { filterable: true },
-        view_dimension: TextureViewDimension::D2,
-        multisampled: false,
-    };
-
-    let sampler = BindingType::Sampler(SamplerBindingType::Filtering);
-
-    let mut entries = vec![
-        entry(0, texture),
-        entry(1, sampler),
+    let entries = [
+        entry(
+            0,
+            BindingType::Texture {
+                sample_type: TextureSampleType::Float { filterable: true },
+                view_dimension: TextureViewDimension::D2,
+                multisampled: false,
+            },
+        ),
+        entry(1, BindingType::Sampler(SamplerBindingType::Filtering)),
         entry(
             2,
-            BindingType::Buffer {
-                ty: BufferBindingType::Uniform,
-                has_dynamic_offset: false,
-                min_binding_size: NonZeroU64::new((PARAMETER_COUNT * 4) as u64),
-            },
-        ),
-        entry(
-            3,
-            BindingType::Buffer {
-                ty: BufferBindingType::Storage { read_only: true },
-                has_dynamic_offset: false,
-                min_binding_size: None,
-            },
-        ),
-        entry(
-            4,
             BindingType::Buffer {
                 ty: BufferBindingType::Uniform,
                 has_dynamic_offset: false,
@@ -204,29 +175,30 @@ fn init_pipelines(
             },
         ),
         entry(
-            5,
+            3,
             BindingType::Buffer {
                 ty: BufferBindingType::Uniform,
                 has_dynamic_offset: true,
                 min_binding_size: Some(ViewUniform::min_size()),
             },
         ),
+        entry(
+            4,
+            BindingType::Texture {
+                sample_type: TextureSampleType::Depth,
+                view_dimension: TextureViewDimension::D2,
+                multisampled: false,
+            },
+        ),
+        entry(
+            5,
+            BindingType::Texture {
+                sample_type: TextureSampleType::Float { filterable: true },
+                view_dimension: TextureViewDimension::D2,
+                multisampled: false,
+            },
+        ),
     ];
-
-    for index in 0..PASS_TEXTURE_COUNT as u32 {
-        entries.push(entry(6 + index * 2, texture));
-        entries.push(entry(7 + index * 2, sampler));
-    }
-
-    entries.push(entry(
-        14,
-        BindingType::Texture {
-            sample_type: TextureSampleType::Depth,
-            view_dimension: TextureViewDimension::D2,
-            multisampled: false,
-        },
-    ));
-    entries.push(entry(15, texture));
 
     let empty_depth = render_device
         .create_texture(&bevy::render::render_resource::TextureDescriptor {
@@ -246,7 +218,7 @@ fn init_pipelines(
         .create_view(&bevy::render::render_resource::TextureViewDescriptor::default());
 
     commands.insert_resource(ShaderPassPipelines {
-        layout: BindGroupLayoutDescriptor::new("bcs_shader_pass_layout", &entries),
+        inputs: BindGroupLayoutDescriptor::new("bcs_shader_pass_inputs", &entries),
         sampler: render_device.create_sampler(&SamplerDescriptor {
             label: Some("bcs_shader_pass_sampler"),
             mag_filter: FilterMode::Linear,
@@ -259,6 +231,11 @@ fn init_pipelines(
     });
 }
 
+/// The layout of a program's own group for a pass.
+fn own_layout(layout: &super::reflect::Layout) -> BindGroupLayoutDescriptor {
+    BindGroupLayoutDescriptor::new("bcs_shader_pass_own", &layout.entries(ShaderStages::FRAGMENT))
+}
+
 /// The pipeline for a program writing a picture of `format`, queued the first time it is asked
 /// for.
 fn pipeline_for(
@@ -266,22 +243,25 @@ fn pipeline_for(
     cache: &PipelineCache,
     program: u32,
     format: TextureFormat,
-) -> Option<CachedRenderPipelineId> {
-    if let Some(id) = pipelines.pipelines.get(&(program, format)) {
-        return Some(*id);
-    }
-
+) -> Option<(CachedRenderPipelineId, programs::PipelineProgram)> {
     let found = programs::lookup(program)?;
-    let stage = found.stages[Role::Fragment as usize].clone()?;
+    let layout = found.pass.clone()?;
+    let stage = found.stages[Role::Pass as usize].clone()?;
+
+    let key = (program, found.generation, format);
+
+    if let Some(id) = pipelines.pipelines.get(&key) {
+        return Some((*id, found));
+    }
 
     let id = cache.queue_render_pipeline(RenderPipelineDescriptor {
         label: Some("bcs_shader_pass".into()),
-        layout: vec![pipelines.layout.clone()],
+        layout: vec![own_layout(&layout), pipelines.inputs.clone()],
         vertex: pipelines.fullscreen.to_vertex_state(),
         fragment: Some(FragmentState {
             shader: stage.shader,
-            shader_defs: found.defs.clone(),
-            entry_point: Some(stage.entry),
+            shader_defs: Vec::new(),
+            entry_point: None,
             targets: vec![Some(ColorTargetState {
                 format,
                 blend: None,
@@ -291,137 +271,101 @@ fn pipeline_for(
         ..Default::default()
     });
 
-    pipelines.pipelines.insert((program, format), id);
-    Some(id)
+    pipelines.pipelines.insert(key, id);
+    Some((id, found))
 }
 
-/// The texture and sampler for one of a pass's slots, or the fallback's.
-///
-/// `None` where the image is still on its way, which holds the pass back for a frame rather than
-/// running it once with a white square where a picture belongs.
-fn pass_texture(
-    images: &RenderAssets<GpuImage>,
-    fallback: &FallbackImage,
-    handle: &Option<Handle<Image>>,
-) -> Option<(TextureView, Sampler)> {
-    let Some(handle) = handle else {
-        return Some((fallback.d2.texture_view.clone(), fallback.d2.sampler.clone()));
-    };
-
-    let image = images.get(handle)?;
-
-    let flat = image.texture_descriptor.size.depth_or_array_layers == 1
-        && image.texture_descriptor.dimension == bevy::render::render_resource::TextureDimension::D2
-        && image.texture_descriptor.format.sample_type(None, None)
-            == Some(TextureSampleType::Float { filterable: true });
-
-    if !flat {
-        bevy::log::warn_once!(
-            "A shader pass was given a texture that is not a flat picture that can be filtered, \
-             so the slot holds the fallback instead."
-        );
-        return Some((fallback.d2.texture_view.clone(), fallback.d2.sampler.clone()));
-    }
-
-    Some((image.texture_view.clone(), image.sampler.clone()))
-}
-
-/// Makes each view's buffers and pipelines match what its camera asked for.
+/// Makes each view's pipelines and own bind groups match what its camera asked for.
+#[allow(clippy::too_many_arguments)]
 fn prepare_passes(
     mut commands: Commands,
     mut pipelines: ResMut<ShaderPassPipelines>,
     cache: Res<PipelineCache>,
     render_device: Res<RenderDevice>,
-    render_queue: Res<RenderQueue>,
     images: Res<RenderAssets<GpuImage>>,
+    buffers: Res<RenderAssets<GpuShaderBuffer>>,
     fallback: Res<FallbackImage>,
-    buffers: Res<RenderAssets<bevy::render::storage::GpuShaderBuffer>>,
-    views: Query<(
+    stand: Option<Res<Stand>>,
+    mut views: Query<(
         Entity,
         &ViewTarget,
         &BcsShaderPasses,
-        Option<&PreparedShaderPasses>,
+        Option<&mut PreparedShaderPasses>,
     )>,
 ) {
-    for (entity, target, asked, prepared) in &views {
+    let Some(stand) = stand else {
+        return;
+    };
+
+    for (entity, target, asked, prepared) in &mut views {
         let format = target.main_texture_format();
 
-        // The buffers from the frame before are kept where they still fit. The numbers are
-        // written into the old uniform, which is every frame, and the data is uploaded again only
-        // when it was replaced, since it may be large.
+        let kept: Vec<PreparedPass> = prepared
+            .map(|mut prepared| std::mem::take(&mut prepared.0))
+            .unwrap_or_default();
+
         let mut built = Vec::with_capacity(asked.passes.len());
 
         for (index, pass) in asked.passes.iter().enumerate() {
-            let pipeline = pipeline_for(&mut pipelines, &cache, pass.program, format);
-
-            let mut textures = Vec::with_capacity(PASS_TEXTURE_COUNT);
-            for handle in &pass.textures {
-                match pass_texture(&images, &fallback, handle) {
-                    Some(bound) => textures.push(bound),
-                    None => break,
-                }
-            }
-
-            let Ok(textures) = <[(TextureView, Sampler); PASS_TEXTURE_COUNT]>::try_from(textures)
+            // Still compiling, or no pass stage. Left out of this frame, so the picture goes on
+            // as though the pass were not there.
+            let Some((pipeline, program)) =
+                pipeline_for(&mut pipelines, &cache, pass.program, format)
             else {
-                // An image has not arrived. The pass is left out of this frame rather than run
-                // without it, and the ones after it still run.
                 continue;
             };
 
-            let parameters: &[u8] = bytemuck::cast_slice(&pass.parameters);
-            let source = (pass.data.as_ptr() as usize, pass.data.len());
+            let built_from = (program.generation, pass.version);
 
-            let reused = prepared.and_then(|prepared| prepared.0.get(index));
+            let reusable = kept
+                .get(index)
+                .filter(|old| old.built_from == built_from && old.pipeline == pipeline)
+                .map(|old| old.own.clone());
 
-            let parameters_buffer = match &reused {
-                Some(old) => {
-                    render_queue.write_buffer(&old.parameters, 0, parameters);
-                    old.parameters.clone()
-                }
-                None => render_device.create_buffer_with_data(&BufferInitDescriptor {
-                    label: Some("bcs_shader_pass_parameters"),
-                    contents: parameters,
-                    usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST,
-                }),
-            };
+            let own = match reusable {
+                Some(own) => own,
+                None => {
+                    let layout = program.pass.clone().expect("a pass stage has a layout");
 
-            let shared = match &pass.buffer {
-                Some(handle) => match buffers.get(handle) {
-                    Some(gpu) => Some(gpu.buffer.clone()),
-                    // Not on the GPU yet, which holds the pass back the way a picture does.
-                    None => continue,
-                },
-                None => None,
-            };
+                    let context = PackContext {
+                        device: &render_device,
+                        images: &images,
+                        buffers: &buffers,
+                        fallback: &fallback,
+                        stand: &stand,
+                    };
 
-            let data_buffer = match (&reused, shared) {
-                (_, Some(buffer)) => buffer,
-                (Some(old), None) if old.data_source == source => old.data.clone(),
-                _ => {
-                    let mut bytes = pass.data.to_vec();
-                    bytes.resize(bytes.len().max(16).next_multiple_of(4), 0);
+                    let packed = match pack(&layout, &pass.values, &context) {
+                        Ok(packed) => packed,
+                        Err(PackError::NotReady) => continue,
+                        Err(PackError::Missing(message)) => {
+                            say_once(format!(
+                                "A pass of shader program {}: {message}",
+                                pass.program
+                            ));
+                            continue;
+                        }
+                    };
 
-                    render_device.create_buffer_with_data(&BufferInitDescriptor {
-                        label: Some("bcs_shader_pass_data"),
-                        contents: &bytes,
-                        usage: BufferUsages::STORAGE | BufferUsages::COPY_DST,
-                    })
+                    for problem in &packed.problems {
+                        say_once(format!(
+                            "A pass of shader program {}: {problem}",
+                            pass.program
+                        ));
+                    }
+
+                    packed.bind_group(
+                        &render_device,
+                        "bcs_shader_pass_own",
+                        &cache.get_bind_group_layout(&own_layout(&layout)),
+                    )
                 }
             };
 
             built.push(PreparedPass {
                 pipeline,
-                parameters: parameters_buffer,
-                data: data_buffer,
-                // A shared buffer is never taken for the pass's own bytes on a later frame, which
-                // an empty slice's pointer could otherwise be mistaken for.
-                data_source: if pass.buffer.is_some() {
-                    (0, usize::MAX)
-                } else {
-                    source
-                },
-                textures,
+                own,
+                built_from,
                 after_tonemapping: pass.after_tonemapping,
             });
         }
@@ -441,6 +385,7 @@ fn forget_passes(
 }
 
 /// Runs a view's passes on one side of tonemapping.
+#[allow(clippy::too_many_arguments)]
 fn run_passes<const AFTER_TONEMAPPING: bool>(
     view: ViewQuery<(
         &ViewTarget,
@@ -456,6 +401,12 @@ fn run_passes<const AFTER_TONEMAPPING: bool>(
     mut ctx: RenderContext,
 ) {
     let (target, offset, prepared, prepass) = view.into_inner();
+
+    let (Some(globals), Some(view_binding)) =
+        (globals.buffer.binding(), view_uniforms.uniforms.binding())
+    else {
+        return;
+    };
 
     // Only a texture drawn once a pixel can be bound as a plain texture. A multisampled camera's
     // prepass draws several samples a pixel, and it is left out rather than failing the pipeline.
@@ -473,79 +424,46 @@ fn run_passes<const AFTER_TONEMAPPING: bool>(
         .map(|normal| normal.texture.default_view.clone())
         .unwrap_or_else(|| fallback.d2.texture_view.clone());
 
-    let (Some(globals), Some(view_binding)) =
-        (globals.buffer.binding(), view_uniforms.uniforms.binding())
-    else {
-        return;
-    };
-
     for pass in &prepared.0 {
         if pass.after_tonemapping != AFTER_TONEMAPPING {
             continue;
         }
 
-        // Still compiling, or failed with nothing to fall back on. Skipped, so the picture goes on
-        // as though the pass were not there.
-        let Some(pipeline) = pass
-            .pipeline
-            .and_then(|id| cache.get_render_pipeline(id))
-        else {
+        let Some(pipeline) = cache.get_render_pipeline(pass.pipeline) else {
             continue;
         };
 
         let post = target.post_process_write();
 
-        let mut entries = vec![
-            BindGroupEntry {
-                binding: 0,
-                resource: BindingResource::TextureView(post.source),
-            },
-            BindGroupEntry {
-                binding: 1,
-                resource: BindingResource::Sampler(&pipelines.sampler),
-            },
-            BindGroupEntry {
-                binding: 2,
-                resource: pass.parameters.as_entire_binding(),
-            },
-            BindGroupEntry {
-                binding: 3,
-                resource: pass.data.as_entire_binding(),
-            },
-            BindGroupEntry {
-                binding: 4,
-                resource: globals.clone(),
-            },
-            BindGroupEntry {
-                binding: 5,
-                resource: view_binding.clone(),
-            },
-        ];
-
-        for (index, (texture, sampler)) in pass.textures.iter().enumerate() {
-            entries.push(BindGroupEntry {
-                binding: 6 + index as u32 * 2,
-                resource: BindingResource::TextureView(texture),
-            });
-            entries.push(BindGroupEntry {
-                binding: 7 + index as u32 * 2,
-                resource: BindingResource::Sampler(sampler),
-            });
-        }
-
-        entries.push(BindGroupEntry {
-            binding: 14,
-            resource: BindingResource::TextureView(&depth),
-        });
-        entries.push(BindGroupEntry {
-            binding: 15,
-            resource: BindingResource::TextureView(&normals),
-        });
-
-        let bind_group = ctx.render_device().create_bind_group(
-            "bcs_shader_pass",
-            &cache.get_bind_group_layout(&pipelines.layout),
-            &entries,
+        let inputs = ctx.render_device().create_bind_group(
+            "bcs_shader_pass_inputs",
+            &cache.get_bind_group_layout(&pipelines.inputs),
+            &[
+                BindGroupEntry {
+                    binding: 0,
+                    resource: BindingResource::TextureView(post.source),
+                },
+                BindGroupEntry {
+                    binding: 1,
+                    resource: BindingResource::Sampler(&pipelines.sampler),
+                },
+                BindGroupEntry {
+                    binding: 2,
+                    resource: globals.clone(),
+                },
+                BindGroupEntry {
+                    binding: 3,
+                    resource: view_binding.clone(),
+                },
+                BindGroupEntry {
+                    binding: 4,
+                    resource: BindingResource::TextureView(&depth),
+                },
+                BindGroupEntry {
+                    binding: 5,
+                    resource: BindingResource::TextureView(&normals),
+                },
+            ],
         );
 
         let descriptor = RenderPassDescriptor {
@@ -564,7 +482,8 @@ fn run_passes<const AFTER_TONEMAPPING: bool>(
 
         let mut render_pass = ctx.command_encoder().begin_render_pass(&descriptor);
         render_pass.set_pipeline(pipeline);
-        render_pass.set_bind_group(0, &bind_group, &[offset.offset]);
+        render_pass.set_bind_group(0, &pass.own, &[]);
+        render_pass.set_bind_group(1, &inputs, &[offset.offset]);
         render_pass.draw(0..3, 0..1);
     }
 }

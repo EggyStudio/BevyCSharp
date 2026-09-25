@@ -1,8 +1,16 @@
-// What a BevyCSharp shader written in Slang sees of Bevy, and of the material drawing it.
+// What a BevyCSharp material shader sees of Bevy: the view, time, the mesh's transforms, and the
+// structs Bevy's own vertex shader hands a fragment shader.
 //
 // A shader reaches it with `import bcs;`, and everything in it is under the `bcs` namespace. The
 // bridge writes this file out before every compile, so it always describes the bridge the shader
 // is about to run against rather than whichever one was installed last.
+//
+// What the material itself carries is not here, because it is whatever the shader declares. Every
+// global a shader declares without a binding of its own (numbers, arrays, structs, textures and
+// arrays of them, samplers, buffers) belongs to the material, and C# sets each one by the name it
+// has here. The bindings below are in spaces the bridge moves to Bevy's own groups after the
+// compile (100 to the view's group, 102 to the mesh's), which keeps them out of the way of the
+// material's, whatever it declares.
 //
 // Locations are given as `TEXCOORDn` semantics rather than `vk::location`, because Slang's WGSL
 // backend numbers stage inputs and outputs by semantic index and ignores the attribute. The index
@@ -17,83 +25,7 @@ module bcs;
 public namespace bcs
 {
 
-// -- The material, group three
-//
-// What a shader material carries. Every material has all of it, and a binding nobody set holds a
-// fallback: zeros for the numbers and the data, and a white or empty picture for each texture.
-
-/// The sixty-four numbers a material carries, as sixteen rows of four.
-public struct Parameters
-{
-    public float4 rows[16];
-};
-
-[[vk::binding(0, 3)]] public ConstantBuffer<Parameters> parameters;
-
-[[vk::binding(1, 3)]] public Texture2D texture0;
-[[vk::binding(2, 3)]] public SamplerState sampler0;
-
-/// Whatever bytes the material was given, read with `data.Load<T>(offset)`.
-///
-/// A raw buffer rather than a structured one, because Slang reads a raw buffer with C packing, and
-/// C packing is what a C# struct with sequential layout already has. A struct written from C# and
-/// a struct declared here with the same fields in the same order therefore agree on every offset.
-[[vk::binding(3, 3)]] public ByteAddressBuffer data;
-
-[[vk::binding(4, 3)]] public Texture2D texture1;
-[[vk::binding(5, 3)]] public SamplerState sampler1;
-[[vk::binding(6, 3)]] public Texture2D texture2;
-[[vk::binding(7, 3)]] public SamplerState sampler2;
-[[vk::binding(8, 3)]] public Texture2D texture3;
-[[vk::binding(9, 3)]] public SamplerState sampler3;
-[[vk::binding(10, 3)]] public Texture2D texture4;
-[[vk::binding(11, 3)]] public SamplerState sampler4;
-[[vk::binding(12, 3)]] public Texture2D texture5;
-[[vk::binding(13, 3)]] public SamplerState sampler5;
-[[vk::binding(14, 3)]] public Texture2D texture6;
-[[vk::binding(15, 3)]] public SamplerState sampler6;
-[[vk::binding(16, 3)]] public Texture2D texture7;
-[[vk::binding(17, 3)]] public SamplerState sampler7;
-
-// These carry no sampler of their own, because a sampler is the scarcest binding there is on some
-// backends. Any of the eight above samples them.
-[[vk::binding(18, 3)]] public TextureCube cube0;
-[[vk::binding(19, 3)]] public TextureCube cube1;
-[[vk::binding(20, 3)]] public Texture2DArray array0;
-[[vk::binding(21, 3)]] public Texture2DArray array1;
-[[vk::binding(22, 3)]] public Texture3D volume0;
-[[vk::binding(23, 3)]] public Texture3D volume1;
-
-/// One row of four numbers, in the order the material was given them.
-public float4 row(uint index)
-{
-    return parameters.rows[index];
-}
-
-/// One number, counting across the rows.
-public float number(uint index)
-{
-    return parameters.rows[index / 4][index % 4];
-}
-
-/// The element at `index` of the data, read as an array of `T`.
-public T element<T>(uint index)
-{
-    return data.Load<T>(index * sizeof(T));
-}
-
-/// How many bytes of data the material holds, rounded up to a multiple of four.
-///
-/// Never zero, because a buffer has to have a size to be bound, so a material given nothing holds
-/// sixteen bytes of zeros.
-public uint data_size()
-{
-    uint size;
-    data.GetDimensions(size);
-    return size;
-}
-
-// -- The view, group zero
+// -- The view, in Bevy's group zero
 
 /// The part of Bevy's view uniform a shader usually reads, in the order Bevy declares it.
 ///
@@ -116,7 +48,7 @@ public struct View
     public float4 main_pass_viewport;
 };
 
-[[vk::binding(0, 0)]] public ConstantBuffer<View> view;
+[[vk::binding(0, 100)]] public ConstantBuffer<View> view;
 
 /// Time, in the layout Bevy's `Globals` has.
 public struct Globals
@@ -129,10 +61,10 @@ public struct Globals
 };
 
 /// Time, as the main pass binds it.
-[[vk::binding(11, 0)]] public ConstantBuffer<Globals> globals;
+[[vk::binding(11, 100)]] public ConstantBuffer<Globals> globals;
 
 /// Time, as the prepass binds it, which is at a different binding because the prepass binds less.
-[[vk::binding(1, 0)]] public ConstantBuffer<Globals> prepass_globals;
+[[vk::binding(1, 100)]] public ConstantBuffer<Globals> prepass_globals;
 
 /// Multiplies a column-major matrix, held as four columns, by a vector.
 public float4 transform(float4 columns[4], float4 v)
@@ -158,7 +90,7 @@ public float2 screen_uv(float4 frag_position)
     return (frag_position.xy - view.viewport.xy) / view.viewport.zw;
 }
 
-// -- The mesh, group two
+// -- The mesh, in Bevy's group two
 
 /// One mesh's transforms, in the layout Bevy keeps them in.
 ///
@@ -179,7 +111,7 @@ public struct Mesh
     public uint morph_descriptor_index;
 };
 
-[[vk::binding(0, 2)]] public StructuredBuffer<Mesh> meshes;
+[[vk::binding(0, 102)]] public StructuredBuffer<Mesh> meshes;
 
 /// Where a point on the mesh drawn as `instance` is in the world.
 public float3 local_to_world(uint instance, float3 position)

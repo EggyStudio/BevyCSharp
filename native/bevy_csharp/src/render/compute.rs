@@ -1,8 +1,9 @@
-//! Compute: programs run on the GPU outside of any picture, over buffers the game made.
+//! Compute: Slang programs run on the GPU outside of any picture, over buffers and images the game
+//! made.
 //!
 //! A buffer is a `ShaderBuffer` asset, which Bevy keeps on the GPU between frames, so what one
-//! dispatch writes the next reads, and a material or a pass bound to the same buffer draws from
-//! it without anything crossing back to the CPU. That is what a particle system, a cloth, a boids
+//! dispatch writes the next reads, and a material or a pass handed the same buffer draws from it
+//! without anything crossing back to the CPU. That is what a particle system, a cloth, a boids
 //! flock or a fluid wants, because the state then lives where it is simulated and where it is
 //! drawn.
 //!
@@ -11,35 +12,22 @@
 //! than to the bridge. Dispatches run in the order they were asked for, each seeing what the one
 //! before wrote.
 //!
-//! **What a compute shader reads.** Group zero:
-//!
-//! | binding | holds |
-//! |---|---|
-//! | 0 | sixty-four floats, as sixteen `vec4` in a uniform |
-//! | 1 to 4 | four storage buffers, read and written |
-//! | 5 | Bevy's globals, which is where time is |
-//! | 6 | an image written to, eight bits a channel (`rgba8unorm`) |
-//! | 7 | an image written to, a half float a channel (`rgba16float`) |
-//! | 8, 9 | two images read, sampled like a material's textures |
-//! | 10 | a linear sampler for them |
-//!
-//! An image written to is one made by [`create_image`], because a storage texture's format is part
-//! of the binding and the image has to be made with storage usage. A material or a pass samples
-//! the same image afterwards, which is how a compute shader draws into a picture.
+//! **What a compute shader reads.** Group zero is whatever it declares: numbers, buffers read or
+//! written, images read or written in any format, samplers, arrays of any of them. It is laid out
+//! from the shader's reflection and filled by name. Group one is time, which `bcs_compute`
+//! declares.
 //!
 //! **Reading a buffer back.** Asking copies it off the GPU after the frame's work, and the bytes
-//! arrive a frame or two later, which is the latency of any readback. A test or a tool wants it;
-//! a game that wants the answer every frame wants to keep the work on the GPU instead.
+//! arrive a frame or two later, which is the latency of any readback.
 //!
 //! **A buffer's size is fixed** when it is made. Writing replaces its contents in place, and a
 //! shorter write is padded with zeros. Growing it would mean a new GPU buffer, and a material
-//! bound to the old one would go on drawing from it, since Bevy does not prepare a material again
+//! handed the old one would go on drawing from it, since Bevy does not prepare a material again
 //! when a buffer it reads is replaced.
 
 #![cfg(feature = "render")]
 
 use std::collections::HashMap;
-use std::num::NonZeroU64;
 
 use bevy::app::App;
 use bevy::asset::{Assets, Handle, RenderAssetUsages};
@@ -50,36 +38,25 @@ use bevy::ecs::resource::Resource;
 use bevy::ecs::schedule::IntoScheduleConfigs;
 use bevy::ecs::system::{Commands, Res, ResMut};
 use bevy::ecs::world::World;
+use bevy::image::Image;
 use bevy::render::globals::{GlobalsBuffer, GlobalsUniform};
 use bevy::render::gpu_readback::{Readback, ReadbackComplete};
 use bevy::render::render_asset::RenderAssets;
-use bevy::image::Image;
 use bevy::render::render_resource::{
-    BindGroup, BindGroupEntry, BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingResource,
-    BindingType, Buffer, BufferBindingType, BufferDescriptor, BufferInitDescriptor, BufferUsages,
-    CachedComputePipelineId, ComputePassDescriptor, ComputePipelineDescriptor, Extent3d,
-    FilterMode, PipelineCache, Sampler, SamplerBindingType, SamplerDescriptor, ShaderStages,
-    ShaderType, StorageTextureAccess, TextureDescriptor, TextureDimension, TextureFormat,
-    TextureSampleType, TextureUsages, TextureView, TextureViewDescriptor, TextureViewDimension,
+    BindGroup, BindGroupEntry, BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingType,
+    BufferBindingType, BufferUsages, CachedComputePipelineId, ComputePassDescriptor,
+    ComputePipelineDescriptor, Extent3d, PipelineCache, ShaderStages, ShaderType,
+    TextureDimension, TextureFormat, TextureUsages,
 };
-use bevy::render::texture::{FallbackImage, GpuImage};
 use bevy::render::renderer::{RenderContext, RenderDevice, RenderGraph, RenderGraphSystems};
 use bevy::render::storage::{GpuShaderBuffer, ShaderBuffer};
+use bevy::render::texture::{FallbackImage, GpuImage};
 use bevy::render::{ExtractSchedule, MainWorld, Render, RenderApp, RenderStartup, RenderSystems};
 
-use super::material::PARAMETER_COUNT;
+use super::material::say_once;
 use super::programs::{self, Role};
+use super::values::{PackContext, PackError, Stand, Values, pack};
 use crate::interop::status;
-
-/// How many buffers a dispatch is handed.
-pub const COMPUTE_BUFFER_COUNT: usize = 4;
-
-/// How many images a dispatch writes, and how many it reads.
-pub const COMPUTE_IMAGE_COUNT: usize = 2;
-
-/// The format of each image a dispatch writes, in binding order.
-pub const STORAGE_FORMATS: [TextureFormat; COMPUTE_IMAGE_COUNT] =
-    [TextureFormat::Rgba8Unorm, TextureFormat::Rgba16Float];
 
 /// The smallest a buffer is made, because a buffer has to have a size to be bound.
 const SMALLEST_BUFFER: u64 = 16;
@@ -98,12 +75,7 @@ pub fn buffer_usage() -> BufferUsages {
 #[derive(Clone)]
 pub struct Dispatch {
     pub program: u32,
-    pub parameters: [f32; PARAMETER_COUNT],
-    pub buffers: [Option<Handle<ShaderBuffer>>; COMPUTE_BUFFER_COUNT],
-    /// The images written, at bindings six and seven.
-    pub images: [Option<Handle<Image>>; COMPUTE_IMAGE_COUNT],
-    /// The images read, at bindings eight and nine.
-    pub textures: [Option<Handle<Image>>; COMPUTE_IMAGE_COUNT],
+    pub values: Values,
     pub workgroups: [u32; 3],
 }
 
@@ -118,23 +90,17 @@ struct ExtractedDispatches(Vec<Dispatch>);
 /// What every dispatch is built from.
 #[derive(Resource)]
 struct ComputePipelines {
-    layout: BindGroupLayoutDescriptor,
-    pipelines: HashMap<u32, CachedComputePipelineId>,
-    /// How many programs have been looked at for a compute stage. A program's stages never change,
-    /// so each is looked at once.
-    looked_at: u32,
-    /// Bound where a dispatch was handed fewer than four buffers.
-    empty: Buffer,
-    /// Bound where a dispatch writes no image, one of each format.
-    empty_images: [TextureView; COMPUTE_IMAGE_COUNT],
-    /// What the images read are sampled with.
-    sampler: Sampler,
+    /// Group one, which is time and nothing else.
+    inputs: BindGroupLayoutDescriptor,
+    /// One pipeline per program and version of it.
+    pipelines: HashMap<(u32, u32), CachedComputePipelineId>,
 }
 
 /// A dispatch ready to run.
 struct PreparedDispatch {
     pipeline: CachedComputePipelineId,
-    bind_group: BindGroup,
+    own: BindGroup,
+    inputs: BindGroup,
     workgroups: [u32; 3],
 }
 
@@ -176,296 +142,164 @@ pub fn install(app: &mut App) {
         );
 }
 
-fn init_pipelines(mut commands: Commands, render_device: Res<RenderDevice>) {
-    let entry = |binding: u32, ty: BindingType| BindGroupLayoutEntry {
-        binding,
+fn init_pipelines(mut commands: Commands) {
+    let globals = BindGroupLayoutEntry {
+        binding: 0,
         visibility: ShaderStages::COMPUTE,
-        ty,
-        count: None,
-    };
-
-    let mut entries = vec![entry(
-        0,
-        BindingType::Buffer {
-            ty: BufferBindingType::Uniform,
-            has_dynamic_offset: false,
-            min_binding_size: NonZeroU64::new((PARAMETER_COUNT * 4) as u64),
-        },
-    )];
-
-    for index in 0..COMPUTE_BUFFER_COUNT as u32 {
-        entries.push(entry(
-            1 + index,
-            BindingType::Buffer {
-                ty: BufferBindingType::Storage { read_only: false },
-                has_dynamic_offset: false,
-                min_binding_size: None,
-            },
-        ));
-    }
-
-    entries.push(entry(
-        5,
-        BindingType::Buffer {
+        ty: BindingType::Buffer {
             ty: BufferBindingType::Uniform,
             has_dynamic_offset: false,
             min_binding_size: Some(GlobalsUniform::min_size()),
         },
-    ));
-
-    for (index, format) in STORAGE_FORMATS.iter().enumerate() {
-        entries.push(entry(
-            6 + index as u32,
-            BindingType::StorageTexture {
-                access: StorageTextureAccess::WriteOnly,
-                format: *format,
-                view_dimension: TextureViewDimension::D2,
-            },
-        ));
-    }
-
-    for index in 0..COMPUTE_IMAGE_COUNT as u32 {
-        entries.push(entry(
-            8 + index,
-            BindingType::Texture {
-                sample_type: TextureSampleType::Float { filterable: true },
-                view_dimension: TextureViewDimension::D2,
-                multisampled: false,
-            },
-        ));
-    }
-
-    entries.push(entry(10, BindingType::Sampler(SamplerBindingType::Filtering)));
-
-    // One texel of each format, written to by a dispatch that names no image and read by nobody.
-    let empty_image = |format: TextureFormat| {
-        render_device
-            .create_texture(&TextureDescriptor {
-                label: Some("bcs_compute_empty_image"),
-                size: Extent3d {
-                    width: 1,
-                    height: 1,
-                    depth_or_array_layers: 1,
-                },
-                mip_level_count: 1,
-                sample_count: 1,
-                dimension: TextureDimension::D2,
-                format,
-                usage: TextureUsages::STORAGE_BINDING,
-                view_formats: &[],
-            })
-            .create_view(&TextureViewDescriptor::default())
+        count: None,
     };
 
     commands.insert_resource(ComputePipelines {
-        layout: BindGroupLayoutDescriptor::new("bcs_compute_layout", &entries),
+        inputs: BindGroupLayoutDescriptor::new("bcs_compute_inputs", &[globals]),
         pipelines: HashMap::new(),
-        looked_at: 0,
-        empty: render_device.create_buffer(&BufferDescriptor {
-            label: Some("bcs_compute_empty"),
-            size: SMALLEST_BUFFER,
-            usage: BufferUsages::STORAGE,
-            mapped_at_creation: false,
-        }),
-        empty_images: STORAGE_FORMATS.map(empty_image),
-        sampler: render_device.create_sampler(&SamplerDescriptor {
-            label: Some("bcs_compute_sampler"),
-            mag_filter: FilterMode::Linear,
-            min_filter: FilterMode::Linear,
-            ..Default::default()
-        }),
     });
 }
 
 /// Takes the frame's dispatches over from the main world, leaving its queue empty for the next.
-fn extract_dispatches(mut main_world: ResMut<MainWorld>, mut extracted: ResMut<ExtractedDispatches>) {
+fn extract_dispatches(
+    mut main_world: ResMut<MainWorld>,
+    mut extracted: ResMut<ExtractedDispatches>,
+) {
     extracted.0 = main_world
         .get_resource_mut::<DispatchQueue>()
         .map(|mut queue| std::mem::take(&mut queue.0))
         .unwrap_or_default();
 }
 
+/// The layout of a program's own group for a dispatch.
+fn own_layout(layout: &super::reflect::Layout) -> BindGroupLayoutDescriptor {
+    BindGroupLayoutDescriptor::new("bcs_compute_own", &layout.entries(ShaderStages::COMPUTE))
+}
+
+/// The compute pipeline for a program's current version, queued the first time it is asked for.
+fn pipeline_for(
+    pipelines: &mut ComputePipelines,
+    cache: &PipelineCache,
+    id: u32,
+) -> Option<(CachedComputePipelineId, programs::PipelineProgram)> {
+    let program = programs::lookup(id)?;
+    let layout = program.compute.clone()?;
+    let stage = program.stages[Role::Compute as usize].clone()?;
+
+    let key = (id, program.generation);
+
+    if let Some(pipeline) = pipelines.pipelines.get(&key) {
+        return Some((*pipeline, program));
+    }
+
+    let pipeline = cache.queue_compute_pipeline(ComputePipelineDescriptor {
+        label: Some("bcs_compute".into()),
+        layout: vec![own_layout(&layout), pipelines.inputs.clone()],
+        immediate_size: 0,
+        shader: stage.shader,
+        shader_defs: Vec::new(),
+        entry_point: None,
+        zero_initialize_workgroup_memory: true,
+    });
+
+    pipelines.pipelines.insert(key, pipeline);
+    Some((pipeline, program))
+}
+
+#[allow(clippy::too_many_arguments)]
 fn prepare_dispatches(
     mut pipelines: ResMut<ComputePipelines>,
     mut prepared: ResMut<PreparedDispatches>,
     extracted: Res<ExtractedDispatches>,
     cache: Res<PipelineCache>,
     render_device: Res<RenderDevice>,
-    buffers: Res<RenderAssets<GpuShaderBuffer>>,
     images: Res<RenderAssets<GpuImage>>,
+    buffers: Res<RenderAssets<GpuShaderBuffer>>,
     fallback: Res<FallbackImage>,
+    stand: Option<Res<Stand>>,
     globals: Res<GlobalsBuffer>,
 ) {
     prepared.0.clear();
 
-    // Every program with a compute stage has its pipeline built as soon as it exists, rather than
-    // when it is first dispatched, so a dispatch made once the program reports ready runs rather
-    // than being dropped while its pipeline compiles.
-    let known = programs::table_len();
-
-    for id in pipelines.looked_at..known {
-        queue_pipeline(&mut pipelines, &cache, id);
-    }
-
-    pipelines.looked_at = known;
-
-    for (id, pipeline) in &pipelines.pipelines {
-        if cache.get_compute_pipeline(*pipeline).is_some() {
-            programs::mark_compute_ready(*id);
+    // Every program with a compute stage has the pipeline of its current version built as soon as
+    // it exists, rather than when it is first dispatched, so a dispatch made once the program
+    // reports ready runs rather than being dropped while its pipeline compiles.
+    for id in 0..programs::table_len() {
+        if let Some((pipeline, program)) = pipeline_for(&mut pipelines, &cache, id)
+            && cache.get_compute_pipeline(pipeline).is_some()
+        {
+            programs::mark_compute_ready(id, program.generation);
         }
     }
 
-    let Some(globals) = globals.buffer.binding() else {
+    let (Some(stand), Some(globals)) = (stand, globals.buffer.binding()) else {
         return;
     };
 
-    let layout = cache.get_bind_group_layout(&pipelines.layout);
+    let inputs = render_device.create_bind_group(
+        "bcs_compute_inputs",
+        &cache.get_bind_group_layout(&pipelines.inputs),
+        &[BindGroupEntry {
+            binding: 0,
+            resource: globals,
+        }],
+    );
 
     for dispatch in &extracted.0 {
-        let Some(pipeline) = pipelines.pipelines.get(&dispatch.program).copied() else {
-            bevy::log::warn_once!(
-                "A dispatch named a shader program with no compute stage, so it does nothing."
-            );
+        let Some((pipeline, program)) = pipeline_for(&mut pipelines, &cache, dispatch.program)
+        else {
+            say_once(format!(
+                "A dispatch named shader program {}, which has no compute stage, so it does \
+                 nothing.",
+                dispatch.program
+            ));
             continue;
         };
 
-        // A buffer that has not reached the GPU yet, which is a buffer made this frame, holds the
-        // dispatch back rather than running it against the empty one in its place.
-        let mut bound = Vec::with_capacity(COMPUTE_BUFFER_COUNT);
-        let mut waiting = false;
+        let layout = program.compute.clone().expect("a compute stage has a layout");
 
-        for handle in &dispatch.buffers {
-            match handle {
-                Some(handle) => match buffers.get(handle) {
-                    Some(gpu) => bound.push(gpu.buffer.clone()),
-                    None => waiting = true,
-                },
-                None => bound.push(pipelines.empty.clone()),
+        let context = PackContext {
+            device: &render_device,
+            images: &images,
+            buffers: &buffers,
+            fallback: &fallback,
+            stand: &stand,
+        };
+
+        // A buffer or an image that has not reached the GPU yet holds the dispatch back rather
+        // than running it against a stand-in.
+        let packed = match pack(&layout, &dispatch.values, &context) {
+            Ok(packed) => packed,
+            Err(PackError::NotReady) => continue,
+            Err(PackError::Missing(message)) => {
+                say_once(format!(
+                    "A dispatch of shader program {}: {message}",
+                    dispatch.program
+                ));
+                continue;
             }
+        };
+
+        for problem in &packed.problems {
+            say_once(format!(
+                "A dispatch of shader program {}: {problem}",
+                dispatch.program
+            ));
         }
 
-        // The images written have to be the format their binding names and made to be written
-        // to, and an image that is not is a dispatch that would fail, so it is skipped with a
-        // warning rather than run.
-        let mut written = Vec::with_capacity(COMPUTE_IMAGE_COUNT);
-
-        for (index, handle) in dispatch.images.iter().enumerate() {
-            match handle {
-                None => written.push(pipelines.empty_images[index].clone()),
-                Some(handle) => match images.get(handle) {
-                    None => waiting = true,
-                    Some(image)
-                        if image.texture_descriptor.format == STORAGE_FORMATS[index]
-                            && image
-                                .texture_descriptor
-                                .usage
-                                .contains(TextureUsages::STORAGE_BINDING) =>
-                    {
-                        written.push(image.texture_view.clone());
-                    }
-                    Some(image) => {
-                        bevy::log::warn_once!(
-                            "A dispatch was handed a {:?} image to write at binding {}, which \
-                             takes a {:?} image made by Shaders.CreateImage, so it does not run.",
-                            image.texture_descriptor.format,
-                            6 + index,
-                            STORAGE_FORMATS[index]
-                        );
-                        waiting = true;
-                    }
-                },
-            }
-        }
-
-        let mut read = Vec::with_capacity(COMPUTE_IMAGE_COUNT);
-
-        for handle in &dispatch.textures {
-            match handle {
-                None => read.push(fallback.d2.texture_view.clone()),
-                Some(handle) => match images.get(handle) {
-                    Some(image) => read.push(image.texture_view.clone()),
-                    None => waiting = true,
-                },
-            }
-        }
-
-        if waiting {
-            continue;
-        }
-
-        let parameters = render_device.create_buffer_with_data(&BufferInitDescriptor {
-            label: Some("bcs_compute_parameters"),
-            contents: bytemuck::cast_slice(&dispatch.parameters),
-            usage: BufferUsages::UNIFORM,
-        });
-
-        let mut entries = vec![BindGroupEntry {
-            binding: 0,
-            resource: parameters.as_entire_binding(),
-        }];
-
-        for (index, buffer) in bound.iter().enumerate() {
-            entries.push(BindGroupEntry {
-                binding: 1 + index as u32,
-                resource: buffer.as_entire_binding(),
-            });
-        }
-
-        entries.push(BindGroupEntry {
-            binding: 5,
-            resource: globals.clone(),
-        });
-
-        for (index, view) in written.iter().enumerate() {
-            entries.push(BindGroupEntry {
-                binding: 6 + index as u32,
-                resource: BindingResource::TextureView(view),
-            });
-        }
-
-        for (index, view) in read.iter().enumerate() {
-            entries.push(BindGroupEntry {
-                binding: 8 + index as u32,
-                resource: BindingResource::TextureView(view),
-            });
-        }
-
-        entries.push(BindGroupEntry {
-            binding: 10,
-            resource: BindingResource::Sampler(&pipelines.sampler),
-        });
-
-        let bind_group = render_device.create_bind_group("bcs_compute", &layout, &entries);
+        let own = packed.bind_group(
+            &render_device,
+            "bcs_compute_own",
+            &cache.get_bind_group_layout(&own_layout(&layout)),
+        );
 
         prepared.0.push(PreparedDispatch {
             pipeline,
-            bind_group,
+            own,
+            inputs: inputs.clone(),
             workgroups: dispatch.workgroups,
         });
     }
-}
-
-/// Queues the compute pipeline of a program that has a compute stage.
-fn queue_pipeline(pipelines: &mut ComputePipelines, cache: &PipelineCache, id: u32) {
-    let Some(program) = programs::lookup(id) else {
-        return;
-    };
-
-    let Some(stage) = program.stages[Role::Compute as usize].clone() else {
-        return;
-    };
-
-    let pipeline = cache.queue_compute_pipeline(ComputePipelineDescriptor {
-        label: Some("bcs_compute".into()),
-        layout: vec![pipelines.layout.clone()],
-        immediate_size: 0,
-        shader: stage.shader,
-        shader_defs: program.defs.clone(),
-        entry_point: Some(stage.entry),
-        zero_initialize_workgroup_memory: true,
-    });
-
-    pipelines.pipelines.insert(id, pipeline);
 }
 
 /// Runs the frame's dispatches, before any camera draws, so what they write is what the frame
@@ -496,7 +330,8 @@ fn run_dispatches(
             });
 
         pass.set_pipeline(pipeline);
-        pass.set_bind_group(0, &dispatch.bind_group, &[]);
+        pass.set_bind_group(0, &dispatch.own, &[]);
+        pass.set_bind_group(1, &dispatch.inputs, &[]);
         pass.dispatch_workgroups(x, y, z);
     }
 }
@@ -555,18 +390,6 @@ pub fn buffer_handle(world: &World, key: i32) -> Option<Handle<ShaderBuffer>> {
     crate::assets::clone_handle(world, key)?
         .try_typed::<ShaderBuffer>()
         .ok()
-}
-
-/// Resolves a key the way an image key is resolved, where zero or less is no buffer and anything
-/// else has to name one.
-pub fn optional_buffer(world: &World, key: i32) -> Result<Option<Handle<ShaderBuffer>>, i32> {
-    if key <= 0 {
-        return Ok(None);
-    }
-
-    buffer_handle(world, key)
-        .map(Some)
-        .ok_or(status::NO_COMPONENT)
 }
 
 /// Replaces a buffer's contents with `bytes`, padded with zeros to its size.
@@ -656,19 +479,36 @@ pub unsafe fn take_read(world: &mut World, ticket: i32, out: *mut u8, capacity: 
     needed
 }
 
+/// The formats an image a shader writes can be made in, by the number the entry points take.
+///
+/// In the order the managed side's enum lists them, which is the order of how often they are
+/// wanted rather than of anything the GPU cares about.
+pub const IMAGE_FORMATS: [(TextureFormat, usize); 10] = [
+    (TextureFormat::Rgba8Unorm, 4),
+    (TextureFormat::Rgba16Float, 8),
+    (TextureFormat::Rgba32Float, 16),
+    (TextureFormat::R32Float, 4),
+    (TextureFormat::R32Uint, 4),
+    (TextureFormat::R32Sint, 4),
+    (TextureFormat::Rg32Float, 8),
+    (TextureFormat::Rgba32Uint, 16),
+    (TextureFormat::Rgba8Uint, 4),
+    (TextureFormat::R16Float, 2),
+];
+
 /// Makes an image a compute shader can write and anything can sample, and answers its asset key.
 ///
-/// `format` is `0` for eight bits a channel, which binding six writes, and `1` for a half float a
-/// channel, which binding seven writes and which can hold light brighter than white. It starts
-/// transparent black.
-pub fn create_image(world: &mut World, width: u32, height: u32, format: i32) -> i32 {
-    let (format, texel_bytes) = match format {
-        0 => (TextureFormat::Rgba8Unorm, 4),
-        1 => (TextureFormat::Rgba16Float, 8),
-        _ => return status::NULL_ARG,
+/// `depth` above one makes a 3D image that many deep, which is what a shader writing a
+/// `RWTexture3D` wants. It starts as zeros.
+pub fn create_image(world: &mut World, width: u32, height: u32, depth: u32, format: i32) -> i32 {
+    let Some(&(format, texel_bytes)) = usize::try_from(format)
+        .ok()
+        .and_then(|index| IMAGE_FORMATS.get(index))
+    else {
+        return status::NULL_ARG;
     };
 
-    if width == 0 || height == 0 {
+    if width == 0 || height == 0 || depth == 0 {
         return status::NULL_ARG;
     }
 
@@ -678,9 +518,13 @@ pub fn create_image(world: &mut World, width: u32, height: u32, format: i32) -> 
         Extent3d {
             width,
             height,
-            depth_or_array_layers: 1,
+            depth_or_array_layers: depth,
         },
-        TextureDimension::D2,
+        if depth > 1 {
+            TextureDimension::D3
+        } else {
+            TextureDimension::D2
+        },
         &texel,
         format,
         RenderAssetUsages::default(),

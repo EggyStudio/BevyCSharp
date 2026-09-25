@@ -1,9 +1,11 @@
-// What a Slang shader pass sees: the picture a camera has drawn so far, and what the pass carries.
+// What a Slang shader pass sees of the camera it runs on: the picture drawn so far, time, the view,
+// and the depth and normals the camera's prepass drew.
 //
 // A shader reaches it with `import bcs_pass;`, and everything in it is under the `bcs_pass`
-// namespace. It has its own copies of the few structs it shares with `bcs` rather than importing
-// that module, because a material's bindings are in the same numbers as a pass's but in other
-// groups, and Slang warns about every one that overlaps on every compile.
+// namespace. What the pass itself carries is whatever the shader declares: every global without a
+// binding of its own belongs to the pass and is set from C# by its name. The inputs below are in
+// space 101, which the bridge moves to group one after the compile, so the pass's own globals keep
+// group zero to themselves whatever they are.
 //
 // A pass's entry point is a fragment shader taking `bcs_pass::Input`, which is what Bevy's
 // full-screen triangle writes, and returning the pixel.
@@ -12,12 +14,6 @@ module bcs_pass;
 
 public namespace bcs_pass
 {
-
-/// The sixty-four numbers a pass carries, as sixteen rows of four.
-public struct Parameters
-{
-    public float4 rows[16];
-};
 
 /// Time, in the layout Bevy's `Globals` has.
 public struct Globals
@@ -46,57 +42,21 @@ public struct View
 };
 
 /// The picture so far, and the sampler it is read with, which is linear and clamped at the edges.
-[[vk::binding(0, 0)]] public Texture2D picture;
-[[vk::binding(1, 0)]] public SamplerState picture_sampler;
+[[vk::binding(0, 101)]] public Texture2D picture;
+[[vk::binding(1, 101)]] public SamplerState picture_sampler;
 
-[[vk::binding(2, 0)]] public ConstantBuffer<Parameters> parameters;
-
-/// Whatever bytes the pass was given, read the way `bcs::data` is.
-[[vk::binding(3, 0)]] public ByteAddressBuffer data;
-
-[[vk::binding(4, 0)]] public ConstantBuffer<Globals> globals;
-[[vk::binding(5, 0)]] public ConstantBuffer<View> view;
-
-[[vk::binding(6, 0)]] public Texture2D texture0;
-[[vk::binding(7, 0)]] public SamplerState sampler0;
-[[vk::binding(8, 0)]] public Texture2D texture1;
-[[vk::binding(9, 0)]] public SamplerState sampler1;
-[[vk::binding(10, 0)]] public Texture2D texture2;
-[[vk::binding(11, 0)]] public SamplerState sampler2;
-[[vk::binding(12, 0)]] public Texture2D texture3;
-[[vk::binding(13, 0)]] public SamplerState sampler3;
+[[vk::binding(2, 101)]] public ConstantBuffer<Globals> globals;
+[[vk::binding(3, 101)]] public ConstantBuffer<View> view;
 
 /// The camera's depth, from its prepass, or zero, which is the far plane, where it draws none.
 ///
 /// Bevy's depth runs backwards, from one at the near plane to zero infinitely far away, so a
-/// larger number is nearer. `Render.SetPrepass` asks a camera for it.
-[[vk::binding(14, 0)]] public DepthTexture2D depth;
+/// larger number is nearer. `Shaders.SetPrepass` asks a camera for it.
+[[vk::binding(4, 101)]] public DepthTexture2D depth;
 
 /// The camera's normals, from its prepass, each packed from minus one to one into zero to one, or
 /// white where it draws none.
-[[vk::binding(15, 0)]] public Texture2D normals;
-
-/// The depth at a pixel, given the pixel's `SV_Position`.
-public float depth_at(float4 position)
-{
-    return depth.Load(int3(int2(position.xy), 0));
-}
-
-/// How far in front of the camera the surface at a pixel is, in world units.
-///
-/// Worked out from the depth the way Bevy's own `depth_ndc_to_view_z` does for a perspective
-/// camera. Infinitely far, where nothing was drawn.
-public float distance_at(float4 position)
-{
-    let near = view.clip_from_view[3][2];
-    return near / max(depth_at(position), 1e-7);
-}
-
-/// The world-space normal of the surface at a pixel.
-public float3 normal_at(float4 position)
-{
-    return normals.Load(int3(int2(position.xy), 0)).xyz * 2.0 - 1.0;
-}
+[[vk::binding(5, 101)]] public Texture2D normals;
 
 /// What Bevy's full-screen triangle hands the fragment shader.
 public struct Input
@@ -121,22 +81,26 @@ public float2 pixel_size()
     return float2(1.0 / float(width), 1.0 / float(height));
 }
 
-/// One row of four numbers, in the order the pass was given them.
-public float4 row(uint index)
+/// The depth at a pixel, given the pixel's `SV_Position`.
+public float depth_at(float4 position)
 {
-    return parameters.rows[index];
+    return depth.Load(int3(int2(position.xy), 0));
 }
 
-/// One number, counting across the rows.
-public float number(uint index)
+/// How far in front of the camera the surface at a pixel is, in world units.
+///
+/// Worked out from the depth the way Bevy's own `depth_ndc_to_view_z` does for a perspective
+/// camera. Infinitely far, where nothing was drawn.
+public float distance_at(float4 position)
 {
-    return parameters.rows[index / 4][index % 4];
+    let near = view.clip_from_view[3][2];
+    return near / max(depth_at(position), 1e-7);
 }
 
-/// The element at `index` of the data, read as an array of `T`.
-public T element<T>(uint index)
+/// The world-space normal of the surface at a pixel.
+public float3 normal_at(float4 position)
 {
-    return data.Load<T>(index * sizeof(T));
+    return normals.Load(int3(int2(position.xy), 0)).xyz * 2.0 - 1.0;
 }
 
 }

@@ -1,130 +1,102 @@
-//! The material a shader the game wrote draws with.
+//! The material a Slang program draws with, laid out the way the program declares.
 //!
-//! One Rust type for every such material, whichever shader draws it. Bevy asks a material's type
-//! for its shaders through functions with no `self`, which would make one type one shader, but it
-//! also hands `Material::specialize` a key taken from the instance, and a pipeline descriptor it
-//! may rewrite. The key carries the number of a program (see [`super::programs`]), and
-//! `specialize` puts that program's shaders into the descriptor. Every material with the same
-//! program and the same face culling shares a pipeline, and there is no limit on how many
-//! programs there are.
+//! Bevy's `Material` trait asks a material's *type* for its bind group layout, which would make
+//! every material of one type take the same numbers and textures. Bevy's renderer below that trait
+//! does not care: what it draws from is a `MaterialProperties` per material, which carries the
+//! layout of group three and the shaders, and its bind group allocator takes a layout with every
+//! bind group. So this is a material type that skips the trait and implements the layer under it
+//! directly, the way Bevy's own `MeshMaterial3d<M>` does, and every material brings the layout
+//! its program's reflection describes (see [`super::reflect`]).
 //!
-//! **What a material carries.** The bind group is the same for every program, because Bevy lays
-//! it out per type. It is sized to cover what shaders ask for rather than a common case:
-//!
-//! | binding | holds |
-//! |---|---|
-//! | 0 | sixty-four floats, as sixteen `vec4`, in a uniform |
-//! | 1, 2 | texture zero and its sampler |
-//! | 3 | a read-only storage buffer of any size: whatever bytes the caller gave, or a shared buffer |
-//! | 4 to 17 | textures one to seven, each followed by its sampler |
-//! | 18, 19 | two cubemaps |
-//! | 20, 21 | two 2D array textures |
-//! | 22, 23 | two 3D textures |
-//!
-//! The first three bindings are where a slot's sixteen floats and one picture have always been, so
-//! a shader written for that layout reads the same values from this one.
-//!
-//! The cube, array and 3D textures have no samplers of their own. A sampler is the scarcest kind of
-//! binding on some backends (Metal allows sixteen per stage, and Bevy's view already uses up to
-//! eight), and any of the eight samplers samples them.
+//! What that takes, besides preparing the material, is what `MaterialPlugin<M>` does for a type:
+//! an allocator entry, extraction of which entity is drawn with which material, and telling the
+//! specializer which entities changed. All of it is below, over Bevy's own public resources, and
+//! Bevy's queue, specialize and draw systems then draw these materials like any other.
 //!
 //! **The prepass.** Bevy draws depth for shadows, and normals and motion for the effects that read
-//! them, in a pass of its own with shaders of its own. A program may name a prepass vertex shader,
-//! so a material that moves its own geometry casts the shadow of the shape it drew, and a prepass
-//! fragment shader, so one that discards pixels casts a shadow with the same holes.
+//! them, in a pass of its own. A program may name a prepass vertex shader, so a material that moves
+//! its own geometry casts the shadow of the shape it drew, and a prepass fragment shader, so one
+//! that discards pixels casts a shadow with the same holes.
 
 #![cfg(feature = "render")]
 
-use std::num::NonZeroU64;
-use std::sync::Arc;
+use std::any::TypeId;
+use std::collections::HashSet;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
 
-use bevy::asset::{Asset, AssetPath, Assets, Handle};
-use bevy::ecs::system::SystemParamItem;
-use bevy::ecs::system::lifetimeless::SRes;
-use bevy::ecs::world::World;
-use bevy::image::Image;
-use bevy::material::AlphaMode;
-use bevy::mesh::{Mesh, MeshVertexBufferLayoutRef};
-use bevy::pbr::{Material, MaterialPipeline, MaterialPipelineKey, MaterialPlugin};
+use bevy::asset::{AsAssetId, Asset, AssetApp, AssetId, Assets, Handle};
+use bevy::camera::visibility::ViewVisibility;
+use bevy::core_pipeline::core_3d::{AlphaMask3d, Opaque3d, Transparent3d};
+use bevy::core_pipeline::deferred::{AlphaMask3dDeferred, Opaque3dDeferred};
+use bevy::core_pipeline::prepass::{AlphaMask3dPrepass, Opaque3dPrepass};
+use bevy::ecs::change_detection::DetectChangesMut;
+use bevy::ecs::component::Component;
+use bevy::ecs::entity::Entity;
+use bevy::ecs::lifecycle::RemovedComponents;
+use bevy::ecs::query::{Changed, Or, With};
+use bevy::ecs::resource::Resource;
+use bevy::ecs::schedule::IntoScheduleConfigs;
+use bevy::ecs::system::lifetimeless::{SRes, SResMut};
+use bevy::ecs::system::{Commands, Query, Res, ResMut, SystemParamItem};
+use bevy::ecs::world::{Mut, World};
+use bevy::material::labels::{DrawFunctionLabel as _, ShaderLabel as _};
+use bevy::material::key::{ErasedMaterialKey, ErasedMaterialPipelineKey, ErasedMeshPipelineKey};
+use bevy::material::{AlphaMode, MaterialProperties, OpaqueRendererMethod, RenderPhaseType};
+use bevy::mesh::{Mesh, Mesh3d, MeshVertexBufferLayoutRef};
+use bevy::pbr::{
+    DeferredAlphaMaskDrawFunction, DeferredOpaqueDrawFunction, DrawDepthOnlyPrepass,
+    DrawMaterial, DrawPrepass, MainPassAlphaMaskDrawFunction, MainPassOpaqueDrawFunction,
+    MainPassTransmissiveDrawFunction, MainPassTransparentDrawFunction,
+    MaterialBindGroupAllocator, MaterialBindGroupAllocators, MaterialExtractionSystems,
+    MaterialFragmentShader, MaterialVertexShader, PrepassAlphaMaskDrawFunction,
+    PrepassFragmentShader, PrepassOpaqueDepthOnlyDrawFunction, PrepassOpaqueDrawFunction,
+    PrepassPipeline, PrepassPipelineSpecializer, PrepassVertexShader, PreparedMaterial,
+    RenderMaterialBindings, RenderMaterialInstance, RenderMaterialInstances, Shadow,
+    ShadowsDepthOnlyDrawFunction, ShadowsDrawFunction, Transmissive3d, base_specialize,
+    late_sweep_material_instances,
+};
+use bevy::platform::collections::hash_map::Entry;
 use bevy::reflect::TypePath;
+use bevy::render::camera::{DirtySpecializationSystems, DirtySpecializations};
+use bevy::render::erased_render_asset::{
+    ErasedRenderAsset, ErasedRenderAssetPlugin, PrepareAssetError,
+};
 use bevy::render::render_asset::RenderAssets;
+use bevy::render::render_phase::DrawFunctions;
 use bevy::render::render_resource::{
-    AsBindGroup, AsBindGroupError, BindGroupLayout, BindGroupLayoutEntry, BindingResources,
-    BindingType, BufferBindingType, BufferInitDescriptor, BufferUsages, Face, FragmentState,
-    OwnedBindingResource, RenderPipelineDescriptor, Sampler, SamplerBindingType, ShaderStages,
-    SpecializedMeshPipelineError, TextureSampleType, TextureView, TextureViewDimension,
-    UnpreparedBindGroup,
+    BindGroupLayoutDescriptor, BindingResources, CachedRenderPipelineId, Face, FragmentState,
+    PipelineCache, PreparedBindGroup, RenderPipelineDescriptor, ShaderStages,
+    SpecializedMeshPipelineError, SpecializedMeshPipelines,
 };
 use bevy::render::renderer::RenderDevice;
+use bevy::render::storage::GpuShaderBuffer;
+use bevy::render::sync_world::MainEntity;
 use bevy::render::texture::{FallbackImage, GpuImage};
-use bevy::shader::{Shader, ShaderDefVal, ShaderRef};
+use bevy::render::{Extract, ExtractSchedule, RenderApp, RenderStartup};
+use bevy::shader::ShaderDefVal;
 
 use super::programs::{self, Role};
+use super::values::{PackContext, PackError, Stand, Values, pack};
 
-/// How many floats a material carries.
-pub const PARAMETER_COUNT: usize = 64;
-
-/// How many 2D textures, each with a sampler, a material carries.
-pub const TEXTURE_COUNT: usize = 8;
-
-/// How many of each of the other kinds of texture a material carries.
-pub const EXTRA_COUNT: usize = 2;
-
-/// Where the data buffer is bound.
-const DATA_BINDING: u32 = 3;
-
-/// The size of the data buffer when the material was given nothing, because a buffer has to have
-/// a size to be bound.
-const EMPTY_DATA: usize = 16;
-
-/// Where 2D texture `index` and its sampler are bound.
-const fn texture_bindings(index: usize) -> (u32, u32) {
-    if index == 0 {
-        (1, 2)
-    } else {
-        let texture = 4 + (index as u32 - 1) * 2;
-        (texture, texture + 1)
-    }
-}
-
-const CUBE_BINDING: u32 = 18;
-const ARRAY_BINDING: u32 = 20;
-const VOLUME_BINDING: u32 = 22;
-
-/// A material drawn by a program the game named.
-#[derive(Asset, TypePath, Clone)]
-pub struct BcsShaderMaterial {
+/// A material drawn by a program the game wrote.
+#[derive(Asset, TypePath, Clone, Debug)]
+pub struct BcsMaterial {
     /// Which program draws it, as a number from [`programs`].
     pub program: u32,
-    pub parameters: [f32; PARAMETER_COUNT],
-    /// Shared rather than owned, because Bevy clones a material to hand it to the render world,
-    /// and the data may be large.
-    pub data: Arc<[u8]>,
-    /// A buffer bound at the data's binding in place of the data, which is how a material draws
-    /// what a compute shader wrote.
-    pub buffer: Option<Handle<bevy::render::storage::ShaderBuffer>>,
-    pub textures: [Option<Handle<Image>>; TEXTURE_COUNT],
-    pub cubes: [Option<Handle<Image>>; EXTRA_COUNT],
-    pub arrays: [Option<Handle<Image>>; EXTRA_COUNT],
-    pub volumes: [Option<Handle<Image>>; EXTRA_COUNT],
+    /// What the game has said about the names the program declares.
+    pub values: Values,
     pub alpha: AlphaMode,
     pub cull: Option<Face>,
     pub depth_bias: f32,
 }
 
-impl BcsShaderMaterial {
+impl BcsMaterial {
     /// A material for `program` with nothing set.
     pub fn new(program: u32) -> Self {
         Self {
             program,
-            parameters: [0.0; PARAMETER_COUNT],
-            data: Arc::from(Vec::new()),
-            buffer: None,
-            textures: Default::default(),
-            cubes: Default::default(),
-            arrays: Default::default(),
-            volumes: Default::default(),
+            values: Values::default(),
             alpha: AlphaMode::Opaque,
             cull: Some(Face::Back),
             depth_bias: 0.0,
@@ -132,368 +104,367 @@ impl BcsShaderMaterial {
     }
 }
 
-/// What decides a material's pipeline: the program, and which faces it culls.
+/// Draws an entity's mesh with a [`BcsMaterial`].
+#[derive(Component, Clone, Debug, PartialEq, Eq)]
+pub struct BcsMaterial3d(pub Handle<BcsMaterial>);
+
+impl AsAssetId for BcsMaterial3d {
+    type Asset = BcsMaterial;
+
+    fn as_asset_id(&self) -> AssetId<Self::Asset> {
+        self.0.id()
+    }
+}
+
+/// What decides a material's pipelines: the program, which version of it, and the faces culled.
 ///
-/// Everything else about a material is in its bind group, which changes without a new pipeline.
+/// The version, because a program whose shader was edited has a new layout as well as new code,
+/// and a pipeline built for the old one must not be reused for the new.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-pub struct BcsShaderKey {
+pub struct BcsMaterialKey {
     pub program: u32,
+    pub generation: u32,
     /// `0` back, `1` front, `2` neither.
     pub cull: u8,
 }
 
-/// What view dimension a GPU image is sampled with, which is what a binding has to match.
-fn view_dimension(image: &GpuImage) -> TextureViewDimension {
-    if let Some(dimension) = image
-        .texture_view_descriptor
-        .as_ref()
-        .and_then(|descriptor| descriptor.dimension)
-    {
-        return dimension;
-    }
+type DrawFunctionParams = (
+    SRes<DrawFunctions<Opaque3d>>,
+    SRes<DrawFunctions<AlphaMask3d>>,
+    SRes<DrawFunctions<Transmissive3d>>,
+    SRes<DrawFunctions<Transparent3d>>,
+    SRes<DrawFunctions<Opaque3dPrepass>>,
+    SRes<DrawFunctions<AlphaMask3dPrepass>>,
+    SRes<DrawFunctions<Opaque3dDeferred>>,
+    SRes<DrawFunctions<AlphaMask3dDeferred>>,
+    SRes<DrawFunctions<Shadow>>,
+);
 
-    // What wgpu infers when the view does not say, which is what Bevy leaves it to.
-    match image.texture_descriptor.dimension {
-        bevy::render::render_resource::TextureDimension::D1 => TextureViewDimension::D1,
-        bevy::render::render_resource::TextureDimension::D2 => {
-            if image.texture_descriptor.size.depth_or_array_layers > 1 {
-                TextureViewDimension::D2Array
-            } else {
-                TextureViewDimension::D2
-            }
-        }
-        bevy::render::render_resource::TextureDimension::D3 => TextureViewDimension::D3,
+/// Messages already logged, so a material that cannot be prepared says why once rather than every
+/// frame it is retried.
+static SAID: Mutex<Option<HashSet<String>>> = Mutex::new(None);
+
+pub(crate) fn say_once(message: String) {
+    let mut said = SAID.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+
+    if said.get_or_insert_with(HashSet::new).insert(message.clone()) {
+        bevy::log::warn!("{message}");
     }
 }
 
-/// The texture and sampler to bind for one slot.
-///
-/// An image of the wrong shape or a format that cannot be filtered is replaced by the fallback
-/// rather than bound, because binding it would be a validation error, and wgpu's answer to one of
-/// those is to stop drawing altogether.
-fn texture_for(
-    images: &RenderAssets<GpuImage>,
-    fallback: &FallbackImage,
-    handle: &Option<Handle<Image>>,
-    dimension: TextureViewDimension,
-) -> Result<(TextureView, Sampler), AsBindGroupError> {
-    let stand_in = match dimension {
-        TextureViewDimension::Cube => &fallback.cube,
-        TextureViewDimension::D2Array => &fallback.d2_array,
-        TextureViewDimension::D3 => &fallback.d3,
-        _ => &fallback.d2,
-    };
+impl ErasedRenderAsset for BcsMaterial3d {
+    type SourceAsset = BcsMaterial;
+    type ErasedAsset = PreparedMaterial;
 
-    let Some(handle) = handle else {
-        return Ok((stand_in.texture_view.clone(), stand_in.sampler.clone()));
-    };
-
-    // Not uploaded yet. Asking again next frame is what Bevy's own materials do, and it means a
-    // material never draws for a frame with a white square where its picture belongs.
-    let Some(image) = images.get(handle) else {
-        return Err(AsBindGroupError::RetryNextUpdate);
-    };
-
-    if view_dimension(image) != dimension {
-        bevy::log::warn_once!(
-            "A shader material was given a {:?} texture where it binds a {:?} one, so the slot \
-             holds the fallback instead.",
-            view_dimension(image),
-            dimension
-        );
-        return Ok((stand_in.texture_view.clone(), stand_in.sampler.clone()));
-    }
-
-    let filterable = image.texture_descriptor.format.sample_type(None, None)
-        == Some(TextureSampleType::Float { filterable: true });
-
-    if !filterable {
-        bevy::log::warn_once!(
-            "A shader material was given a {:?} texture, which cannot be filtered, so the slot \
-             holds the fallback instead.",
-            image.texture_descriptor.format
-        );
-        return Ok((stand_in.texture_view.clone(), stand_in.sampler.clone()));
-    }
-
-    Ok((image.texture_view.clone(), image.sampler.clone()))
-}
-
-impl AsBindGroup for BcsShaderMaterial {
-    type Data = BcsShaderKey;
     type Param = (
+        SRes<RenderDevice>,
+        SRes<PipelineCache>,
+        SResMut<MaterialBindGroupAllocators>,
+        SResMut<RenderMaterialBindings>,
+        DrawFunctionParams,
         SRes<RenderAssets<GpuImage>>,
+        SRes<RenderAssets<GpuShaderBuffer>>,
         SRes<FallbackImage>,
-        SRes<RenderAssets<bevy::render::storage::GpuShaderBuffer>>,
+        SRes<Stand>,
     );
 
-    fn label() -> &'static str {
-        "bcs_shader_material"
-    }
-
-    fn bind_group_data(&self) -> Self::Data {
-        BcsShaderKey {
-            program: self.program,
-            cull: match self.cull {
-                Some(Face::Back) => 0,
-                Some(Face::Front) => 1,
-                None => 2,
-            },
-        }
-    }
-
-    fn unprepared_bind_group(
-        &self,
-        _layout: &BindGroupLayout,
-        render_device: &RenderDevice,
-        (images, fallback, buffers): &mut SystemParamItem<'_, '_, Self::Param>,
-        _force_no_bindless: bool,
-    ) -> Result<UnpreparedBindGroup, AsBindGroupError> {
-        let mut bindings = Vec::with_capacity(24);
-
-        // A shared buffer that has not reached the GPU yet is waited for, like a picture.
-        let shared = match &self.buffer {
-            Some(handle) => match buffers.get(handle) {
-                Some(gpu) => Some(gpu.buffer.clone()),
-                None => return Err(AsBindGroupError::RetryNextUpdate),
-            },
-            None => None,
+    fn prepare_asset(
+        material: Self::SourceAsset,
+        material_id: AssetId<Self::SourceAsset>,
+        (
+            render_device,
+            pipeline_cache,
+            bind_group_allocators,
+            render_material_bindings,
+            draw_functions,
+            images,
+            buffers,
+            fallback,
+            stand,
+        ): &mut SystemParamItem<Self::Param>,
+    ) -> Result<Self::ErasedAsset, PrepareAssetError<Self::SourceAsset>> {
+        let Some(program) = programs::lookup(material.program) else {
+            say_once(format!(
+                "A material names shader program {}, which does not exist.",
+                material.program
+            ));
+            return Err(PrepareAssetError::RetryNextUpdate(material));
         };
 
-        // Textures before buffers, so a picture that has not arrived gives up before anything has
-        // been allocated.
-        for (index, handle) in self.textures.iter().enumerate() {
-            let (view, sampler) = texture_for(images, fallback, handle, TextureViewDimension::D2)?;
-            let (texture_binding, sampler_binding) = texture_bindings(index);
+        // Not compiled yet. A material is prepared once its program has a layout, which is the
+        // first frame after every stage has a result.
+        let Some(layout) = program.material.clone() else {
+            return Err(PrepareAssetError::RetryNextUpdate(material));
+        };
 
-            bindings.push((
-                texture_binding,
-                OwnedBindingResource::TextureView(TextureViewDimension::D2, view),
+        if program.stages[Role::Fragment as usize].is_none() {
+            say_once(format!(
+                "Shader program {} has no fragment shader, so it cannot draw a material.",
+                material.program
             ));
-            bindings.push((
-                sampler_binding,
-                OwnedBindingResource::Sampler(SamplerBindingType::Filtering, sampler),
-            ));
+            return Err(PrepareAssetError::RetryNextUpdate(material));
         }
 
-        for (first, dimension, handles) in [
-            (CUBE_BINDING, TextureViewDimension::Cube, &self.cubes),
-            (ARRAY_BINDING, TextureViewDimension::D2Array, &self.arrays),
-            (VOLUME_BINDING, TextureViewDimension::D3, &self.volumes),
-        ] {
-            for (index, handle) in handles.iter().enumerate() {
-                let (view, _) = texture_for(images, fallback, handle, dimension)?;
-                bindings.push((
-                    first + index as u32,
-                    OwnedBindingResource::TextureView(dimension, view),
+        let descriptor = BindGroupLayoutDescriptor::new(
+            "bcs_material",
+            &layout.entries(ShaderStages::VERTEX_FRAGMENT),
+        );
+
+        let context = PackContext {
+            device: render_device,
+            images,
+            buffers,
+            fallback,
+            stand,
+        };
+
+        let packed = match pack(&layout, &material.values, &context) {
+            Ok(packed) => packed,
+            Err(PackError::NotReady) => return Err(PrepareAssetError::RetryNextUpdate(material)),
+            Err(PackError::Missing(message)) => {
+                say_once(format!(
+                    "A material of shader program {}: {message}",
+                    material.program
                 ));
+                return Err(PrepareAssetError::RetryNextUpdate(material));
             }
+        };
+
+        for problem in &packed.problems {
+            say_once(format!(
+                "A material of shader program {}: {problem}",
+                material.program
+            ));
         }
 
-        let parameters = render_device.create_buffer_with_data(&BufferInitDescriptor {
-            label: Some("bcs_shader_material_parameters"),
-            contents: bytemuck::cast_slice(&self.parameters),
-            usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST,
-        });
+        let bind_group = packed.bind_group(
+            render_device,
+            "bcs_material",
+            &pipeline_cache.get_bind_group_layout(&descriptor),
+        );
 
-        bindings.push((0, OwnedBindingResource::Buffer(parameters)));
+        let prepared = PreparedBindGroup {
+            bindings: BindingResources(Vec::new()),
+            bind_group,
+        };
 
-        let storage = match shared {
-            Some(buffer) => buffer,
-            None => {
-                // Rounded up to a whole number of words, because a shader reads it as an array of
-                // them, and never empty.
-                let mut data = self.data.to_vec();
-                data.resize(data.len().max(EMPTY_DATA).next_multiple_of(4), 0);
+        let Some(allocator) = bind_group_allocators.get_mut(&TypeId::of::<BcsMaterial>()) else {
+            return Err(PrepareAssetError::RetryNextUpdate(material));
+        };
 
-                render_device.create_buffer_with_data(&BufferInitDescriptor {
-                    label: Some("bcs_shader_material_data"),
-                    contents: &data,
-                    usage: BufferUsages::STORAGE | BufferUsages::COPY_DST,
-                })
+        let binding = match render_material_bindings.entry(material_id.into()) {
+            Entry::Occupied(mut occupied) => {
+                allocator.free(*occupied.get());
+                let binding = allocator.allocate_prepared(prepared);
+                *occupied.get_mut() = binding;
+                binding
             }
+            Entry::Vacant(vacant) => *vacant.insert(allocator.allocate_prepared(prepared)),
         };
 
-        bindings.push((DATA_BINDING, OwnedBindingResource::Buffer(storage)));
+        let (
+            opaque,
+            alpha_mask,
+            transmissive,
+            transparent,
+            prepass,
+            alpha_mask_prepass,
+            deferred,
+            alpha_mask_deferred,
+            shadow,
+        ) = draw_functions;
 
-        Ok(UnpreparedBindGroup {
-            bindings: BindingResources(bindings),
-        })
-    }
-
-    fn bind_group_layout_entries(
-        _render_device: &RenderDevice,
-        _force_no_bindless: bool,
-    ) -> Vec<BindGroupLayoutEntry>
-    where
-        Self: Sized,
-    {
-        // Both stages, because a vertex shader that displaces a mesh reads the same numbers and
-        // samples the same heightmap the fragment shader colors it with.
-        let visibility = ShaderStages::VERTEX_FRAGMENT;
-
-        let entry = |binding: u32, ty: BindingType| BindGroupLayoutEntry {
-            binding,
-            visibility,
-            ty,
-            count: None,
-        };
-
-        let texture = |dimension: TextureViewDimension| BindingType::Texture {
-            sample_type: TextureSampleType::Float { filterable: true },
-            view_dimension: dimension,
-            multisampled: false,
-        };
-
-        let mut entries = vec![
-            entry(
-                0,
-                BindingType::Buffer {
-                    ty: BufferBindingType::Uniform,
-                    has_dynamic_offset: false,
-                    min_binding_size: NonZeroU64::new((PARAMETER_COUNT * 4) as u64),
-                },
+        let draw_functions = [
+            (
+                MainPassOpaqueDrawFunction.intern(),
+                opaque.read().id::<DrawMaterial>(),
             ),
-            entry(
-                DATA_BINDING,
-                BindingType::Buffer {
-                    ty: BufferBindingType::Storage { read_only: true },
-                    has_dynamic_offset: false,
-                    min_binding_size: None,
-                },
+            (
+                MainPassAlphaMaskDrawFunction.intern(),
+                alpha_mask.read().id::<DrawMaterial>(),
+            ),
+            (
+                MainPassTransmissiveDrawFunction.intern(),
+                transmissive.read().id::<DrawMaterial>(),
+            ),
+            (
+                MainPassTransparentDrawFunction.intern(),
+                transparent.read().id::<DrawMaterial>(),
+            ),
+            (
+                PrepassOpaqueDrawFunction.intern(),
+                prepass.read().id::<DrawPrepass>(),
+            ),
+            (
+                PrepassAlphaMaskDrawFunction.intern(),
+                alpha_mask_prepass.read().id::<DrawPrepass>(),
+            ),
+            (
+                PrepassOpaqueDepthOnlyDrawFunction.intern(),
+                prepass.read().id::<DrawDepthOnlyPrepass>(),
+            ),
+            (
+                DeferredOpaqueDrawFunction.intern(),
+                deferred.read().id::<DrawPrepass>(),
+            ),
+            (
+                DeferredAlphaMaskDrawFunction.intern(),
+                alpha_mask_deferred.read().id::<DrawPrepass>(),
+            ),
+            (ShadowsDrawFunction.intern(), shadow.read().id::<DrawPrepass>()),
+            (
+                ShadowsDepthOnlyDrawFunction.intern(),
+                shadow.read().id::<DrawDepthOnlyPrepass>(),
             ),
         ];
 
-        for index in 0..TEXTURE_COUNT {
-            let (texture_binding, sampler_binding) = texture_bindings(index);
-            entries.push(entry(texture_binding, texture(TextureViewDimension::D2)));
-            entries.push(entry(
-                sampler_binding,
-                BindingType::Sampler(SamplerBindingType::Filtering),
-            ));
-        }
+        let render_phase_type = match material.alpha {
+            AlphaMode::Blend | AlphaMode::Premultiplied | AlphaMode::Add | AlphaMode::Multiply => {
+                RenderPhaseType::Transparent
+            }
+            AlphaMode::Opaque | AlphaMode::AlphaToCoverage => RenderPhaseType::Opaque,
+            AlphaMode::Mask(_) => RenderPhaseType::AlphaMask,
+        };
 
-        for (first, dimension) in [
-            (CUBE_BINDING, TextureViewDimension::Cube),
-            (ARRAY_BINDING, TextureViewDimension::D2Array),
-            (VOLUME_BINDING, TextureViewDimension::D3),
+        let mut properties = MaterialProperties {
+                alpha_mode: material.alpha,
+                depth_bias: material.depth_bias,
+                reads_view_transmission_texture: false,
+                render_phase_type,
+                // Forward, whatever the camera prefers, because a program writes a color rather
+                // than the surface description a deferred lighting pass reads.
+                render_method: OpaqueRendererMethod::Forward,
+                mesh_pipeline_key_bits: ErasedMeshPipelineKey::new(
+                    bevy::pbr::MeshPipelineKey::empty(),
+                ),
+                material_layout: Some(descriptor),
+                draw_functions: Default::default(),
+                shaders: Default::default(),
+                bindless: false,
+                base_specialize: Some(base_specialize),
+                prepass_specialize: Some(prepass_specialize),
+                user_specialize: Some(user_specialize),
+                material_key: ErasedMaterialKey::new(BcsMaterialKey {
+                    program: material.program,
+                    generation: program.generation,
+                    cull: match material.cull {
+                        Some(Face::Back) => 0,
+                        Some(Face::Front) => 1,
+                        None => 2,
+                    },
+                }),
+                shadows_enabled: true,
+                prepass_enabled: true,
+        };
+
+        properties.draw_functions.extend(draw_functions);
+
+        for (role, label) in [
+            (Role::Vertex, MaterialVertexShader.intern()),
+            (Role::Fragment, MaterialFragmentShader.intern()),
+            (Role::PrepassVertex, PrepassVertexShader.intern()),
+            (Role::PrepassFragment, PrepassFragmentShader.intern()),
         ] {
-            for index in 0..EXTRA_COUNT as u32 {
-                entries.push(entry(first + index, texture(dimension)));
+            if let Some(stage) = &program.stages[role as usize] {
+                properties.shaders.push((label, stage.shader.clone()));
             }
         }
 
-        entries.sort_by_key(|entry| entry.binding);
-        entries
+        Ok(PreparedMaterial {
+            binding,
+            properties: Arc::new(properties),
+        })
+    }
+
+    fn unload_asset(
+        source_asset: AssetId<Self::SourceAsset>,
+        (_, _, bind_group_allocators, render_material_bindings, ..): &mut SystemParamItem<
+            Self::Param,
+        >,
+    ) {
+        let Some(binding) = render_material_bindings.remove(&source_asset.untyped()) else {
+            return;
+        };
+
+        if let Some(allocator) = bind_group_allocators.get_mut(&TypeId::of::<BcsMaterial>()) {
+            allocator.free(binding);
+        }
     }
 }
 
-/// Stands in for a program that does not exist, which a material cannot normally reach, since
-/// every call that names a program checks it first.
-pub const MISSING_PROGRAM: Handle<Shader> =
-    bevy::asset::uuid_handle!("6f0e8a52-3b1d-4c2e-9a47-5d8f1b0c7e31");
+/// Builds a prepass pipeline, the same way Bevy does for its own materials.
+fn prepass_specialize(
+    world: &mut World,
+    key: ErasedMaterialPipelineKey,
+    layout: &MeshVertexBufferLayoutRef,
+    properties: &Arc<MaterialProperties>,
+) -> Result<CachedRenderPipelineId, SpecializedMeshPipelineError> {
+    world.resource_scope(
+        |world, mut pipelines: Mut<SpecializedMeshPipelines<PrepassPipelineSpecializer>>| {
+            let prepass_pipeline = world.resource::<PrepassPipeline>().clone();
+            let pipeline_cache = world.resource::<PipelineCache>();
 
-impl Material for BcsShaderMaterial {
-    // Named so that the prepass binds the material at all. Bevy leaves the bind group out of a
-    // prepass whose shaders it knows do not read it, and it only knows which shaders those are
-    // from what the type answers here, which is the same for every material of the type. A
-    // program with a prepass shader of its own reads the bind group, so the type has to say that
-    // its prepass might. This is Bevy's own prepass shader, which is what draws when a program
-    // names none.
-    fn prepass_vertex_shader() -> ShaderRef {
-        ShaderRef::Path(AssetPath::from("embedded://bevy_pbr/prepass/prepass.wgsl"))
+            let specializer = PrepassPipelineSpecializer {
+                pipeline: prepass_pipeline,
+                properties: properties.clone(),
+            };
+
+            pipelines.specialize(pipeline_cache, &specializer, key, layout)
+        },
+    )
+}
+
+/// What every pipeline of a material gets on top of what Bevy builds: the faces culled, and the
+/// vertex attributes a prepass vertex shader of a program's own reads.
+fn user_specialize(
+    _pipeline: &dyn std::any::Any,
+    descriptor: &mut RenderPipelineDescriptor,
+    layout: &MeshVertexBufferLayoutRef,
+    key: ErasedMaterialPipelineKey,
+) -> Result<(), SpecializedMeshPipelineError> {
+    let material: BcsMaterialKey = key.material_key.to_key();
+
+    descriptor.primitive.cull_mode = match material.cull {
+        0 => Some(Face::Back),
+        1 => Some(Face::Front),
+        _ => None,
+    };
+
+    let prepass = descriptor
+        .vertex
+        .shader_defs
+        .iter()
+        .any(|def| matches!(def, ShaderDefVal::Bool(name, true) if name == "PREPASS_PIPELINE"));
+
+    if !prepass {
+        return Ok(());
     }
 
-    fn alpha_mode(&self) -> AlphaMode {
-        self.alpha
+    let Some(program) = programs::lookup(material.program) else {
+        return Ok(());
+    };
+
+    if program.stages[Role::PrepassVertex as usize].is_some() {
+        // Every attribute the mesh has, at the locations Bevy's prepass uses. Bevy hands a shadow
+        // pass the position alone, which is all its own shader reads, and a shader that moves the
+        // mesh along its normal needs the normal there too.
+        descriptor.vertex.buffers = vec![layout.0.get_layout(&prepass_attributes(layout))?];
     }
 
-    fn depth_bias(&self) -> f32 {
-        self.depth_bias
+    if let Some(stage) = &program.stages[Role::PrepassFragment as usize]
+        && descriptor.fragment.is_none()
+    {
+        // A depth-only pass has no fragment stage, and one that discards needs one, so it gets one
+        // that writes to no target.
+        descriptor.fragment = Some(FragmentState {
+            shader: stage.shader.clone(),
+            shader_defs: descriptor.vertex.shader_defs.clone(),
+            entry_point: None,
+            targets: Vec::new(),
+        });
     }
 
-    fn specialize(
-        _pipeline: &MaterialPipeline,
-        descriptor: &mut RenderPipelineDescriptor,
-        layout: &MeshVertexBufferLayoutRef,
-        key: MaterialPipelineKey<Self>,
-    ) -> Result<(), SpecializedMeshPipelineError> {
-        descriptor.primitive.cull_mode = match key.bind_group_data.cull {
-            0 => Some(Face::Back),
-            1 => Some(Face::Front),
-            _ => None,
-        };
-
-        let Some(program) = programs::lookup(key.bind_group_data.program) else {
-            // The fragment shader Bevy put there is the standard material's, which reads a bind
-            // group laid out differently from this one and would fail to build.
-            if let Some(fragment) = descriptor.fragment.as_mut() {
-                fragment.shader = MISSING_PROGRAM;
-                fragment.entry_point = Some("fragment".into());
-            }
-            return Ok(());
-        };
-
-        descriptor.vertex.shader_defs.extend(program.defs.iter().cloned());
-        if let Some(fragment) = descriptor.fragment.as_mut() {
-            fragment.shader_defs.extend(program.defs.iter().cloned());
-        }
-
-        let prepass = descriptor
-            .vertex
-            .shader_defs
-            .iter()
-            .any(|def| matches!(def, ShaderDefVal::Bool(name, true) if name == "PREPASS_PIPELINE"));
-
-        if prepass {
-            if let Some(stage) = &program.stages[Role::PrepassVertex as usize] {
-                descriptor.vertex.shader = stage.shader.clone();
-                descriptor.vertex.entry_point = Some(stage.entry.clone());
-
-                // Every attribute the mesh has, at the locations Bevy's prepass uses. Bevy hands a
-                // shadow pass the position alone, which is all its own shader reads, and a shader
-                // that moves the mesh along its normal needs the normal there too.
-                descriptor.vertex.buffers = vec![layout.0.get_layout(&prepass_attributes(layout))?];
-            }
-
-            if let Some(stage) = &program.stages[Role::PrepassFragment as usize] {
-                match descriptor.fragment.as_mut() {
-                    Some(fragment) => {
-                        fragment.shader = stage.shader.clone();
-                        fragment.entry_point = Some(stage.entry.clone());
-                    }
-
-                    // A depth-only pass has no fragment stage, and one that discards needs one,
-                    // so it gets one that writes to no target.
-                    None => {
-                        descriptor.fragment = Some(FragmentState {
-                            shader: stage.shader.clone(),
-                            shader_defs: descriptor.vertex.shader_defs.clone(),
-                            entry_point: Some(stage.entry.clone()),
-                            targets: Vec::new(),
-                        });
-                    }
-                }
-            }
-
-            return Ok(());
-        }
-
-        if let Some(stage) = &program.stages[Role::Vertex as usize] {
-            descriptor.vertex.shader = stage.shader.clone();
-            descriptor.vertex.entry_point = Some(stage.entry.clone());
-        }
-
-        if let (Some(stage), Some(fragment)) = (
-            &program.stages[Role::Fragment as usize],
-            descriptor.fragment.as_mut(),
-        ) {
-            fragment.shader = stage.shader.clone();
-            fragment.entry_point = Some(stage.entry.clone());
-        }
-
-        Ok(())
-    }
+    Ok(())
 }
 
 /// The attributes a prepass vertex shader of a program's own is handed, where the mesh has them.
@@ -519,13 +490,168 @@ fn prepass_attributes(
     attributes
 }
 
+// -- What MaterialPlugin would do for a material type
+
+/// Entities whose material or mesh changed, which the specializer has to look at again.
+#[derive(Resource, Default)]
+struct EntitiesNeedingSpecialization {
+    changed: Vec<Entity>,
+    removed: Vec<Entity>,
+}
+
+/// Collects the entities whose mesh or material changed this frame.
+fn check_entities_needing_specialization(
+    changed: Query<
+        Entity,
+        (
+            Or<(
+                Changed<Mesh3d>,
+                bevy::asset::prelude::AssetChanged<Mesh3d>,
+                Changed<BcsMaterial3d>,
+                bevy::asset::prelude::AssetChanged<BcsMaterial3d>,
+            )>,
+            With<BcsMaterial3d>,
+        ),
+    >,
+    mut needing: ResMut<EntitiesNeedingSpecialization>,
+    mut removed_meshes: RemovedComponents<Mesh3d>,
+    mut removed_materials: RemovedComponents<BcsMaterial3d>,
+) {
+    needing.changed.clear();
+    needing.removed.clear();
+    needing.changed.extend(changed.iter());
+    needing
+        .removed
+        .extend(removed_meshes.read().chain(removed_materials.read()));
+}
+
+/// Marks an entity's mesh changed when its material did, because that is what has Bevy extract the
+/// mesh again with the new material's bind group slot.
+fn mark_meshes_as_changed_if_their_materials_changed(
+    mut changed: Query<
+        &mut Mesh3d,
+        Or<(
+            Changed<BcsMaterial3d>,
+            bevy::asset::prelude::AssetChanged<BcsMaterial3d>,
+        )>,
+    >,
+) {
+    for mut mesh in &mut changed {
+        mesh.set_changed();
+    }
+}
+
+/// Marks every material of a program whose shaders were replaced as changed, so each builds its
+/// bind group again in the new layout, keeping its values by name.
+fn refresh_materials_of_changed_programs(
+    mut programs: ResMut<programs::ShaderPrograms>,
+    mut materials: ResMut<Assets<BcsMaterial>>,
+) {
+    let changed = programs.take_changed();
+
+    if changed.is_empty() {
+        return;
+    }
+
+    let stale: Vec<AssetId<BcsMaterial>> = materials
+        .iter()
+        .filter(|(_, material)| changed.contains(&material.program))
+        .map(|(id, _)| id)
+        .collect();
+
+    for id in stale {
+        // Asking for it mutably is what marks it changed.
+        let _ = materials.get_mut(id);
+    }
+}
+
+fn extract_materials(
+    mut instances: ResMut<RenderMaterialInstances>,
+    changed: Extract<
+        Query<
+            (Entity, &ViewVisibility, &BcsMaterial3d),
+            Or<(Changed<ViewVisibility>, Changed<BcsMaterial3d>)>,
+        >,
+    >,
+) {
+    let tick = instances.current_change_tick;
+
+    for (entity, visibility, material) in &changed {
+        if visibility.get() {
+            instances.instances.insert(
+                entity.into(),
+                RenderMaterialInstance {
+                    asset_id: material.0.id().untyped(),
+                    last_change_tick: tick,
+                },
+            );
+        } else {
+            instances.instances.remove(&MainEntity::from(entity));
+        }
+    }
+}
+
+fn early_sweep_materials(
+    mut instances: ResMut<RenderMaterialInstances>,
+    mut removed: Extract<RemovedComponents<BcsMaterial3d>>,
+) {
+    let tick = instances.current_change_tick;
+
+    for entity in removed.read() {
+        if let Entry::Occupied(occupied) = instances.instances.entry(entity.into())
+            && occupied.get().last_change_tick != tick
+        {
+            occupied.remove();
+        }
+    }
+}
+
+fn extract_entities_needing_specialization(
+    needing: Extract<Res<EntitiesNeedingSpecialization>>,
+    mut dirty: ResMut<DirtySpecializations>,
+) {
+    for entity in &needing.changed {
+        dirty.changed_renderables.insert(MainEntity::from(*entity));
+    }
+}
+
+fn extract_entities_needing_specializations_removed(
+    needing: Extract<Res<EntitiesNeedingSpecialization>>,
+    mut dirty: ResMut<DirtySpecializations>,
+) {
+    for entity in &needing.removed {
+        dirty.removed_renderables.insert(MainEntity::from(*entity));
+    }
+}
+
+fn add_bind_group_allocator(
+    render_device: Res<RenderDevice>,
+    mut allocators: ResMut<MaterialBindGroupAllocators>,
+    mut commands: Commands,
+) {
+    // Non-bindless, so each bind group is made against the layout it is given rather than one the
+    // type decides. The layout passed here is never used, for that reason.
+    allocators.insert(
+        TypeId::of::<BcsMaterial>(),
+        MaterialBindGroupAllocator::new(
+            &render_device,
+            "bcs_material",
+            None,
+            BindGroupLayoutDescriptor::new("bcs_material_unused", &[]),
+            None,
+        ),
+    );
+
+    commands.insert_resource(Stand::new(&render_device));
+}
+
 // -- Errors the renderer reports
 
 /// Whether a validation error leaves the app running rather than closing it.
 static KEEP_RENDERING: AtomicBool = AtomicBool::new(false);
 
 /// The last error the renderer reported, for whoever asks.
-static LAST_ERROR: std::sync::Mutex<String> = std::sync::Mutex::new(String::new());
+static LAST_ERROR: Mutex<String> = Mutex::new(String::new());
 
 /// Says whether a validation error closes the app, which is Bevy's answer, or is logged and
 /// survived.
@@ -540,12 +666,11 @@ pub fn last_error() -> String {
 
 /// Decides what a render error does to the app.
 ///
-/// A shader that compiles can still disagree with the pipeline it is put in, by reading a
-/// binding as a different type or an input the vertex shader never wrote. That is a validation
-/// error, and Bevy's answer to any of those is to close the app, which is right for a shipped game
-/// and wrong for one somebody is editing a shader in. Surviving means the frames that use the
-/// broken pipeline are not drawn until the shader is fixed and reloads, and every other error
-/// still closes the app.
+/// A shader that compiles can still disagree with the pipeline it is put in, by reading an input
+/// its vertex shader never wrote for instance. That is a validation error, and Bevy's answer to any
+/// of those is to close the app, which is right for a shipped game and wrong for one somebody is
+/// editing a shader in. Surviving means the frames that use the broken pipeline are not drawn until
+/// the shader is fixed and reloads, and every other error still closes the app.
 fn on_render_error(
     error: &bevy::render::error_handler::RenderError,
     main_world: &mut World,
@@ -572,37 +697,50 @@ fn on_render_error(
 /// Every app that draws gets it, because a program is made while the app runs and there is no
 /// saying beforehand whether one will be.
 pub fn install(app: &mut bevy::app::App, root: std::path::PathBuf) {
-    use bevy::app::First;
+    use bevy::app::{First, PostUpdate};
 
     programs::forget_all();
 
-    app.add_plugins(MaterialPlugin::<BcsShaderMaterial>::default());
+    app.init_asset::<BcsMaterial>()
+        .init_resource::<EntitiesNeedingSpecialization>()
+        .add_plugins(ErasedRenderAssetPlugin::<BcsMaterial3d>::default())
+        .insert_resource(programs::ShaderPrograms::new(root))
+        .init_resource::<super::shaders::ShaderInstances>()
+        .add_systems(
+            First,
+            (programs::update, refresh_materials_of_changed_programs).chain(),
+        )
+        .add_systems(PostUpdate, super::shaders::sync_passes)
+        .add_systems(
+            PostUpdate,
+            (
+                mark_meshes_as_changed_if_their_materials_changed,
+                check_entities_needing_specialization.after(bevy::asset::AssetEventSystems),
+            )
+                .after(bevy::mesh::mark_3d_meshes_as_changed_if_their_assets_changed),
+        )
+        .insert_resource(bevy::render::error_handler::RenderErrorHandler(
+            on_render_error,
+        ));
+
+    if let Some(render_app) = app.get_sub_app_mut(RenderApp) {
+        render_app
+            .add_systems(RenderStartup, add_bind_group_allocator)
+            .add_systems(
+                ExtractSchedule,
+                (
+                    extract_materials.in_set(MaterialExtractionSystems),
+                    early_sweep_materials
+                        .after(MaterialExtractionSystems)
+                        .before(late_sweep_material_instances),
+                    extract_entities_needing_specialization
+                        .in_set(DirtySpecializationSystems::CheckForChanges),
+                    extract_entities_needing_specializations_removed
+                        .in_set(DirtySpecializationSystems::CheckForRemovals),
+                ),
+            );
+    }
+
     super::passes::install(app);
     super::compute::install(app);
-    app.insert_resource(programs::ShaderPrograms::new(root));
-    app.add_systems(First, programs::update);
-    app.insert_resource(bevy::render::error_handler::RenderErrorHandler(on_render_error));
-
-    if let Some(mut shaders) = app.world_mut().get_resource_mut::<Assets<Shader>>() {
-        let _ = shaders.insert(
-            MISSING_PROGRAM.id(),
-            Shader::from_wgsl(
-                "@fragment\nfn fragment(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {\n    \
-                 return vec4<f32>(1.0, 0.0, 1.0, 1.0);\n}\n",
-                "bevy_csharp/missing_program.wgsl",
-            ),
-        );
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn the_first_texture_stays_where_a_slot_had_it() {
-        assert_eq!(texture_bindings(0), (1, 2));
-        assert_eq!(texture_bindings(1), (4, 5));
-        assert_eq!(texture_bindings(7), (16, 17));
-    }
 }

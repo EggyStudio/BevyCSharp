@@ -21,15 +21,16 @@
 //! camera.
 
 pub mod assets;
-pub mod check;
 pub mod compute;
 pub mod material;
 pub mod passes;
 pub mod post;
 pub mod programs;
+pub mod reflect;
 pub mod scene;
 pub mod shaders;
 pub mod slang;
+pub mod values;
 
 #[cfg(feature = "render")]
 use crate::interop::status;

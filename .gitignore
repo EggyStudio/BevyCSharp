@@ -29,6 +29,8 @@ msbuild.log
 /build/target-portable/
 /build/artifacts/
 /build/package/
+# The Slang compiler build/fetch-slang.sh downloads.
+/build/tools/
 
 # What an app launched by `bcs open` writes, so its output can be read after it is gone.
 /build/sessions/

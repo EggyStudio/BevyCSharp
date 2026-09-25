@@ -1,20 +1,23 @@
-//! Shaders written in Slang, compiled to WGSL so they take the same path through Bevy as a shader
-//! written in WGSL.
+//! Shaders are written in Slang and compiled to WGSL, which is what Bevy's pipeline cache takes.
 //!
-//! WGSL rather than SPIR-V, because Bevy's pipeline cache takes WGSL through naga_oil with no extra
-//! feature, runs on every backend including WebGPU, and reloads a WGSL shader in place when its
-//! asset changes. Slang's WGSL backend keeps explicit bindings, and it numbers stage inputs and
-//! outputs by semantic index, which is what lets a Slang fragment shader follow Bevy's own vertex
-//! shader.
+//! WGSL rather than SPIR-V, because Bevy takes WGSL through naga_oil with no extra feature, it runs
+//! on every backend including WebGPU, and a pipeline built from it is rebuilt when the shader asset
+//! changes. Slang's WGSL backend keeps explicit bindings, and it numbers stage inputs and outputs by
+//! semantic index, which is what lets a Slang fragment shader follow Bevy's own vertex shader.
+//!
+//! Every compile also asks `slangc` for its reflection, which names each parameter the shader
+//! declares and where in a uniform buffer each number goes. That is what lets a shader declare
+//! whatever it likes and be handed it by name (see [`super::reflect`]).
 //!
 //! The compiler is `slangc`, run as a process. Linking Slang instead would add a large C++ library
 //! to every build of the bridge for the benefit of the builds that compile shaders, and a process
 //! is also what keeps a compiler crash out of the game.
 //!
 //! **Where `slangc` comes from.** `BCS_SLANGC` names it outright, and otherwise it is looked up on
-//! the `PATH`. A machine with neither still runs a game whose shaders were compiled once, because
-//! every successful compile is written to a cache beside the assets and read back when there is no
-//! compiler. What decides whether a cached result still applies is a hash of the source and of
+//! the `PATH`, and then in `build/tools/slang/bin` above the running program or the working
+//! directory, which is where `build/fetch-slang.sh` puts it. A machine with none of those still
+//! runs a game whose shaders were compiled once, because every successful compile is written to a
+//! cache beside the assets and read back when there is no compiler. What decides whether a cached result still applies is a hash of the source and of
 //! every file it imported, so a shipped game with its cache is a game that needs no compiler, and a
 //! stale entry is never used.
 //!
@@ -62,7 +65,9 @@ fn modules_hash() -> u64 {
 pub const CACHE_DIRECTORY: &str = ".slang-cache";
 
 /// The first line of a cache entry, which also says which layout the rest of it has.
-const CACHE_HEADER: &str = "// bevy_csharp slang cache 1";
+///
+/// Two since entries carry reflection, in a file of their own beside the WGSL.
+const CACHE_HEADER: &str = "// bevy_csharp slang cache 2";
 
 /// Which stage of a pipeline an entry point is compiled for.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
@@ -100,6 +105,8 @@ pub struct Request {
 #[derive(Clone, Debug)]
 pub struct Compiled {
     pub wgsl: String,
+    /// What `slangc -reflection-json` wrote: every parameter, its binding and its layout.
+    pub reflection: String,
     /// Every file the result depends on besides the source, which is what a change to has to
     /// trigger a recompile.
     pub dependencies: Vec<PathBuf>,
@@ -122,17 +129,64 @@ pub fn compiler() -> Option<&'static Path> {
                 .filter(|value| !value.is_empty())
                 .map(PathBuf::from);
 
-            let candidate = named.unwrap_or_else(|| PathBuf::from("slangc"));
+            let candidates = named
+                .into_iter()
+                .chain(std::iter::once(PathBuf::from(executable_name("slangc"))))
+                .chain(fetched_candidates());
 
             // `-v` prints the version and exits, which is the cheapest thing that proves the
             // program starts. A binary that is there but cannot load its libraries fails here
             // rather than on the first real compile.
-            match Command::new(&candidate).arg("-v").output() {
-                Ok(output) if output.status.success() => Some(candidate),
-                _ => None,
-            }
+            candidates.into_iter().find(|candidate| {
+                Command::new(candidate)
+                    .arg("-v")
+                    .output()
+                    .is_ok_and(|output| output.status.success())
+            })
         })
         .as_deref()
+}
+
+/// A program's file name on this platform.
+fn executable_name(name: &str) -> String {
+    if cfg!(windows) {
+        format!("{name}.exe")
+    } else {
+        name.to_string()
+    }
+}
+
+/// Where `build/fetch-slang.sh` puts the compiler, looked for above the running program and above
+/// the working directory.
+///
+/// Both, because a test host runs from a project's `bin` and a tool may be run from anywhere in the
+/// checkout, and either way the checkout's `build/tools` is some number of directories up.
+fn fetched_candidates() -> Vec<PathBuf> {
+    let starts = [
+        std::env::current_exe()
+            .ok()
+            .and_then(|exe| exe.parent().map(Path::to_path_buf)),
+        std::env::current_dir().ok(),
+    ];
+
+    let mut found = Vec::new();
+
+    for start in starts.into_iter().flatten() {
+        for directory in start.ancestors() {
+            let candidate = directory
+                .join("build")
+                .join("tools")
+                .join("slang")
+                .join("bin")
+                .join(executable_name("slangc"));
+
+            if candidate.is_file() && !found.contains(&candidate) {
+                found.push(candidate);
+            }
+        }
+    }
+
+    found
 }
 
 /// Compiles one entry point, or reads it from the cache when there is no compiler.
@@ -147,9 +201,9 @@ pub fn compile(request: &Request) -> Result<Compiled, String> {
     let Some(slangc) = compiler() else {
         return read_cache(request, key, &source).ok_or_else(|| {
             format!(
-                "{} is Slang, and there is no slangc to compile it with and no cached result that \
-                 still matches it. Install Slang and put slangc on the PATH, or name it with the \
-                 BCS_SLANGC environment variable.",
+                "{} could not be compiled, because there is no slangc here and no cached result \
+                 that still matches it. In a BevyCSharp checkout build/fetch-slang.sh downloads \
+                 one; elsewhere put slangc on the PATH or name it with BCS_SLANGC.",
                 request.file.display()
             )
         });
@@ -159,6 +213,7 @@ pub fn compile(request: &Request) -> Result<Compiled, String> {
     let unique = next_unique();
     let output = scratch.join(format!("{unique}.wgsl"));
     let depfile = scratch.join(format!("{unique}.d"));
+    let reflection_file = scratch.join(format!("{unique}.json"));
 
     let mut command = Command::new(slangc);
     command
@@ -170,6 +225,8 @@ pub fn compile(request: &Request) -> Result<Compiled, String> {
         .arg(&output)
         .arg("-depfile")
         .arg(&depfile)
+        .arg("-reflection-json")
+        .arg(&reflection_file)
         // The bridge's modules first, so `import bcs;` finds the one this bridge wrote rather
         // than a stale copy somebody left in their asset folder.
         .arg("-I")
@@ -201,6 +258,7 @@ pub fn compile(request: &Request) -> Result<Compiled, String> {
     if !result.status.success() {
         let _ = std::fs::remove_file(&output);
         let _ = std::fs::remove_file(&depfile);
+        let _ = std::fs::remove_file(&reflection_file);
 
         return Err(if said.is_empty() {
             format!("slangc failed on {} and said nothing", request.file.display())
@@ -212,6 +270,10 @@ pub fn compile(request: &Request) -> Result<Compiled, String> {
     let wgsl = std::fs::read_to_string(&output)
         .map_err(|error| format!("slangc succeeded but its output could not be read: {error}"))?;
 
+    let reflection = std::fs::read_to_string(&reflection_file).map_err(|error| {
+        format!("slangc succeeded but its reflection could not be read: {error}")
+    })?;
+
     let dependencies = std::fs::read_to_string(&depfile)
         .map(|text| parse_depfile(&text))
         .unwrap_or_default()
@@ -221,11 +283,13 @@ pub fn compile(request: &Request) -> Result<Compiled, String> {
 
     let _ = std::fs::remove_file(&output);
     let _ = std::fs::remove_file(&depfile);
+    let _ = std::fs::remove_file(&reflection_file);
 
-    write_cache(request, key, &source, &dependencies, &wgsl);
+    write_cache(request, key, &source, &dependencies, &wgsl, &reflection);
 
     Ok(Compiled {
         wgsl,
+        reflection,
         dependencies,
         warnings: said,
         cached: false,
@@ -411,7 +475,14 @@ fn cache_path(request: &Request, key: u64) -> PathBuf {
 ///
 /// Failing to write is not an error, because the cache only matters to a machine without a
 /// compiler, and this one has one.
-fn write_cache(request: &Request, key: u64, source: &[u8], dependencies: &[PathBuf], wgsl: &str) {
+fn write_cache(
+    request: &Request,
+    key: u64,
+    source: &[u8],
+    dependencies: &[PathBuf],
+    wgsl: &str,
+    reflection: &str,
+) {
     let mut text = String::new();
 
     text.push_str(CACHE_HEADER);
@@ -441,12 +512,22 @@ fn write_cache(request: &Request, key: u64, source: &[u8], dependencies: &[PathB
         let _ = std::fs::create_dir_all(directory);
     }
 
-    let staging = path.with_extension(format!("wgsl.{}", next_unique()));
+    // The reflection first, so a reader that finds the WGSL finds the reflection beside it. The
+    // WGSL is what says the entry exists, and it carries the hashes both are checked by.
+    let written = [
+        (path.with_extension("json"), reflection.to_string()),
+        (path.clone(), text),
+    ];
 
-    if std::fs::write(&staging, text).is_ok() {
-        let _ = std::fs::rename(&staging, &path);
-    } else {
-        let _ = std::fs::remove_file(&staging);
+    for (target, contents) in written {
+        let staging = target.with_extension(format!("part.{}", next_unique()));
+
+        if std::fs::write(&staging, contents).is_ok() {
+            let _ = std::fs::rename(&staging, &target);
+        } else {
+            let _ = std::fs::remove_file(&staging);
+            return;
+        }
     }
 }
 
@@ -489,9 +570,11 @@ fn read_cache(request: &Request, key: u64, source: &[u8]) -> Option<Compiled> {
     }
 
     let body = text.split_once("// end\n")?.1.to_string();
+    let reflection = std::fs::read_to_string(cache_path(request, key).with_extension("json")).ok()?;
 
     Some(Compiled {
         wgsl: body,
+        reflection,
         dependencies,
         warnings: String::new(),
         cached: true,
@@ -548,10 +631,18 @@ mod tests {
         };
 
         let key = cache_key(&request);
-        write_cache(&request, key, b"one", std::slice::from_ref(&dependency), "fn f() {}");
+        write_cache(
+            &request,
+            key,
+            b"one",
+            std::slice::from_ref(&dependency),
+            "fn f() {}",
+            "{}",
+        );
 
         let read = read_cache(&request, key, b"one").expect("an unchanged entry is used");
         assert_eq!(read.wgsl, "fn f() {}");
+        assert_eq!(read.reflection, "{}");
         assert_eq!(read.dependencies.len(), 1);
 
         assert!(read_cache(&request, key, b"changed").is_none());

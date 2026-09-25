@@ -67,6 +67,9 @@ render = [
     # built with them. Bevy already depends on this version with this feature, so it adds nothing
     # to the build.
     "dep:naga",
+    # Reading the reflection slangc writes beside every compile, which is what names a shader's
+    # own parameters. Already in the tree through Bevy.
+    "dep:serde_json",
     "bevy/bevy_asset",
     "bevy/bevy_state",
     "bevy/bevy_winit",
@@ -121,6 +124,7 @@ nonmax = { version = "0.5", default-features = false }
 # version is already in the tree.
 bytemuck = { version = "1", features = ["derive"] }
 naga = { version = "29", default-features = false, features = ["wgsl-in"], optional = true }
+serde_json = { version = "1", optional = true }
 
 # Linux and the BSDs only.
 #

@@ -31,6 +31,10 @@ internal static partial class Tools
 
         Ran bridge = new(0, string.Empty);
 
+        // Reported but not fatal, because the bridge and the managed side build without it and
+        // only a shader needs it.
+        FetchSlang(echo);
+
         if (native)
         {
             // The two scripts are twins that produce identical output, and they spell their
@@ -90,6 +94,28 @@ internal static partial class Tools
     }
 
     /// <summary>
+    /// Fetches the Slang compiler into <c>build/tools</c> when it is not there yet.
+    /// </summary>
+    /// <remarks>
+    /// Every shader a game draws with is compiled by it, so a checkout has one before anything
+    /// builds or tests shaders. The bridge finds it there on its own, walking up from the running
+    /// program, so nothing is put on the PATH.
+    /// </remarks>
+    private static void FetchSlang(bool echo)
+    {
+        var fetched = OperatingSystem.IsWindows()
+            ? Shell.Run("pwsh", ["-File", Path.Combine(Repo.Root!, "build", "fetch-slang.ps1")], Repo.Root!, echo)
+            : Shell.Run(Path.Combine(Repo.Root!, "build", "fetch-slang.sh"), [], Repo.Root!, echo);
+
+        if (!fetched.Ok && echo)
+        {
+            Console.Error.WriteLine(
+                "slangc could not be fetched, so shaders will not compile in this checkout. Run "
+                + "build/fetch-slang.sh by hand, or set BCS_SLANGC.");
+        }
+    }
+
+    /// <summary>
     /// Runs the tests, and says which kind of failure it was.
     /// </summary>
     /// <remarks>
@@ -118,6 +144,10 @@ internal static partial class Tools
                 line.Add(arguments[++index]);
             }
         }
+
+        // The picture tests compile Slang, and without a compiler they would fail as though the
+        // shaders were wrong.
+        FetchSlang(!options.Json && !options.Quiet);
 
         var ran = Shell.Run("dotnet", line, Repo.Root, echo: !options.Json && !options.Quiet);
         var counted = Counts().Match(ran.Output);
