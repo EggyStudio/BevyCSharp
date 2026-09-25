@@ -52,6 +52,62 @@ Behaviors are discovered automatically, so a consuming project needs no registra
 
 ---
 
+## Contents
+
+- [What is where](#what-is-where)
+- [Install](#install)
+- [Behaviors](#behaviors)
+  - [Systems and components](#systems-and-components)
+  - [Stages](#stages)
+  - [The fixed timestep](#the-fixed-timestep)
+  - [Filters](#filters)
+  - [Conditions](#conditions)
+  - [States](#states)
+  - [Messages](#messages)
+  - [The hierarchy](#the-hierarchy)
+  - [Threading](#threading)
+- [The engine](#the-engine)
+  - [Bevy's own components](#bevys-own-components)
+  - [Visibility](#visibility)
+  - [Assets](#assets)
+  - [Models](#models)
+  - [Drawing](#drawing)
+    - [A mesh of your own](#a-mesh-of-your-own)
+    - [Materials](#materials)
+    - [A shader of your own](#a-shader-of-your-own)
+    - [The compiler](#the-compiler)
+    - [Reloading shaders](#reloading-shaders)
+    - [Passes over the picture](#passes-over-the-picture)
+    - [Compute](#compute)
+    - [Textures](#textures)
+    - [Cameras](#cameras)
+    - [Shadows](#shadows)
+    - [The picture the camera makes](#the-picture-the-camera-makes)
+    - [The lens](#the-lens)
+    - [The sky](#the-sky)
+    - [Drawing into an image](#drawing-into-an-image)
+    - [The window](#the-window)
+  - [2D](#2d)
+  - [Gizmos](#gizmos)
+  - [The interface](#the-interface)
+  - [UI](#ui)
+  - [Audio](#audio)
+  - [Text and touch](#text-and-touch)
+- [Running a game](#running-a-game)
+  - [In a window, headless, or offscreen](#in-a-window-headless-or-offscreen)
+  - [Hot reload](#hot-reload)
+- [The tools](#the-tools)
+  - [The editor](#the-editor)
+  - [The console](#the-console)
+  - [Driving a running app](#driving-a-running-app)
+- [How it works](#how-it-works)
+- [Status and limitations](#status-and-limitations)
+- [Building from source](#building-from-source)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
 ## What is where
 
 - [Install](#install), and what the package carries.
@@ -707,7 +763,9 @@ Handles are references, so one mesh and one material can be shared by any number
 Attaching a mesh goes through Bevy's own insert rather than a byte copy, which is what pulls in the
 components Bevy requires alongside it, so an entity needs nothing further to be drawn.
 
-**A mesh of your own.** A shape no primitive describes is built from its vertices, in any
+#### A mesh of your own
+
+A shape no primitive describes is built from its vertices, in any
 profile, since a mesh is data until something draws it:
 
 ```csharp
@@ -726,7 +784,9 @@ wants `Render.SetMeshFlags(ctx.Ecs, entity, MeshFlags.NoFrustumCulling)`, becaus
 the bounds it worked out from the mesh and those say nothing about where the shader put it. The
 same flags turn a mesh's shadow casting and receiving off.
 
-**Materials.** A material takes settings, and its textures are image handles:
+#### Materials
+
+A material takes settings, and its textures are image handles:
 
 ```csharp
 var crate = Render.CreateMaterial(new MaterialSettings
@@ -754,7 +814,9 @@ what foliage and fences are drawn with. `Blend` is real transparency, drawn afte
 and sorted back to front. `Add` adds to what is behind, so it never darkens it. `DoubleSided` draws
 back faces, for anything modeled as a single sheet, and `Unlit` shows the base color flat.
 
-**A shader of your own.** Shaders are written in [Slang](https://shader-slang.org), and a shader
+#### A shader of your own
+
+Shaders are written in [Slang](https://shader-slang.org), and a shader
 declares what it needs as ordinary globals, in any combination and at any size. That covers numbers
 and arrays of them, structs, constant buffers, textures of every shape and arrays of them, samplers,
 and storage buffers and images. The bridge has no table of what is allowed. It asks the compiler
@@ -864,7 +926,9 @@ new program put on the material:
 material.Program = Shaders.CreateProgram(ShaderStage.Slang(generated));
 ```
 
-**The compiler.** `slangc` compiles each stage to WGSL in the background. `./bcs build` and
+#### The compiler
+
+`slangc` compiles each stage to WGSL in the background. `./bcs build` and
 `./bcs test` fetch a pinned release into `build/tools/slang` (`build/fetch-slang.sh` does it on its
 own), and the bridge looks for it in `BCS_SLANGC`, then on the `PATH`, then there. Every successful
 compile is cached under the asset root in `.slang-cache` with its layout, keyed by the file, the
@@ -872,7 +936,9 @@ defines and a hash of everything the file imported. A machine without `slangc` r
 game shipped with it needs no compiler, and an entry whose sources have changed is never used.
 `Shaders.SlangAvailable` says whether edits can be compiled.
 
-**Reloading shaders.** An edit to a shader file, or to any file it imports, reaches the screen
+#### Reloading shaders
+
+An edit to a shader file, or to any file it imports, reaches the screen
 within a quarter of a second, in every profile. An edit that changes what the shader declares gives
 the program a new layout, and every material keeps its values by name, so a parameter the edit added
 starts at zero and the rest keep what they held. A file that fails to compile leaves the last version
@@ -882,7 +948,9 @@ shader never wrote is a validation error, which closes the app;
 `Shaders.KeepRenderingAfterErrors` logs it and drops the frames it breaks instead, and the editor
 sets it.
 
-**Passes over the picture.** A camera runs any number of passes over what it drew, each a shader run
+#### Passes over the picture
+
+A camera runs any number of passes over what it drew, each a shader run
 once per pixel, reading the picture so far and writing the next one. A pass is an instance of a
 program with a pass stage, and an instance holds values by name the way a material does, so one
 program can run twice with different values:
@@ -927,7 +995,9 @@ picture, which may be brighter than white, and suits anything about light; one a
 screen will show, and suits anything about the picture as a picture. A pass still compiling is
 skipped rather than drawn wrong, and passes run in the order given, each over what the last wrote.
 
-**Compute.** A program with a compute stage runs on the GPU outside of any picture, over buffers
+#### Compute
+
+A program with a compute stage runs on the GPU outside of any picture, over buffers
 and images that stay on the GPU between frames, so what one dispatch writes the next reads, and a
 material bound to the same buffer draws it:
 
@@ -981,7 +1051,9 @@ place. `BeginBufferRead` copies one back, and `TryReadBuffer<T>` hands over the 
 two later, which is what any readback costs. A program's state stays `Compiling` until its compute
 pipeline has been built, so a dispatch made once it is `Ready` runs rather than being dropped.
 
-**Textures.** How one is sampled is decided when it loads:
+#### Textures
+
+How one is sampled is decided when it loads:
 
 ```csharp
 var floor = AssetServer.LoadImage("textures/tiles.png", TextureSettings.Tiling);
@@ -998,7 +1070,9 @@ texture still shows one stretched copy until the material scales them with `UvSc
 PNG, JPEG, WebP, BMP and TGA decode in every build, headless included, because that is work on data
 rather than on a GPU.
 
-**Cameras.** A camera and a light take settings, and every value has a usable default:
+#### Cameras
+
+A camera and a light take settings, and every value has a usable default:
 
 ```csharp
 var camera = Render.SpawnCamera3d(new CameraSettings
@@ -1044,7 +1118,9 @@ Render.SetLayers(ctx.Ecs, player, 1u | Minimap);   // both do
 A viewport is measured in physical pixels rather than logical ones, because that is what a
 framebuffer is divided into. A camera draws an entity only where their layers overlap.
 
-**Shadows** are tuned per light and sized globally:
+#### Shadows
+
+Shadows are tuned per light and sized globally:
 
 ```csharp
 Render.SpawnLight(new LightSettings
@@ -1072,7 +1148,9 @@ light, which is what puts the shadow of a window frame on the floor without a wi
 Only the red channel is read, so the picture says how much light gets through rather than what
 color it is, and its border should be black or the light leaks past the edge of it.
 
-**The picture the camera makes** is one call, describing the whole pipeline rather than one change
+#### The picture the camera makes
+
+The picture the camera makes is one call, describing the whole pipeline rather than one change
 to it:
 
 ```csharp
@@ -1134,7 +1212,9 @@ each of the three sections has to work on. The terms inside a section are the st
 so a grade written for a film pipeline carries across unchanged. Passing `null` puts the camera back
 to the engine's own grading.
 
-**The lens** is a second call, because it is decided at a different time. The pipeline above is what
+#### The lens
+
+The lens is a second call, because it is decided at a different time. The pipeline above is what
 a settings screen owns, and these are what a scene does for a moment.
 
 ```csharp
@@ -1160,7 +1240,9 @@ its width. Auto exposure builds a histogram of the frame and moves the exposure 
 on middle gray, which is what an eye does walking out of a cave; `MeteringMask` weights where in the
 frame it looks, and `ExposureCompensation` bends the result so a night scene can stay dark.
 
-**The sky** can be scattered rather than painted:
+#### The sky
+
+The sky can be scattered rather than painted:
 
 ```csharp
 Render.SetAtmosphere(camera, new AtmosphereSettings());
@@ -1226,7 +1308,9 @@ surface reflects. It costs nothing at startup, which is what a shipped game want
 environment too large to filter again needs. Passing `AssetHandle.None` for either takes the
 lighting off, since a baked map is the pair and half of one is not a weaker version of it.
 
-**Drawing into an image.** A camera can draw into a texture instead of into the window, which is
+#### Drawing into an image
+
+A camera can draw into a texture instead of into the window, which is
 what a portal, a security monitor, a mirror or a second viewport is:
 
 ```csharp
@@ -1271,7 +1355,9 @@ same RGBA layout a capture comes back in, so a picture can be read, changed and 
 `srgb: false` for a picture whose numbers mean something other than a color, such as a normal map
 or a roughness mask.
 
-**The window** can be driven while the app runs:
+#### The window
+
+The window can be driven while the app runs:
 
 ```csharp
 Window.SetTitle("Level 2");
