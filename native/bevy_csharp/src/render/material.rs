@@ -2,9 +2,9 @@
 //!
 //! Bevy's `Material` trait asks a material's *type* for its bind group layout, which would make
 //! every material of one type take the same numbers and textures. Bevy's renderer below that trait
-//! does not care: what it draws from is a `MaterialProperties` per material, which carries the
-//! layout of group three and the shaders, and its bind group allocator takes a layout with every
-//! bind group. So this is a material type that skips the trait and implements the layer under it
+//! does not need that, because what it draws from is a `MaterialProperties` per material, which
+//! carries the layout of group three and the shaders, and its bind group allocator takes a layout
+//! with every bind group. So this is a material type that skips the trait and implements the layer under it
 //! directly, the way Bevy's own `MeshMaterial3d<M>` does, and every material brings the layout
 //! its program's reflection describes (see [`super::reflect`]).
 //!
@@ -560,8 +560,11 @@ fn refresh_materials_of_changed_programs(
         .collect();
 
     for id in stale {
-        // Asking for it mutably is what marks it changed.
-        let _ = materials.get_mut(id);
+        // `into_inner` rather than only asking for it mutably, because the guard `get_mut` hands
+        // back reports a change only when it is written through, and nothing here writes.
+        if let Some(material) = materials.get_mut(id) {
+            material.into_inner();
+        }
     }
 }
 

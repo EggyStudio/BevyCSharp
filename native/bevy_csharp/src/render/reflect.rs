@@ -342,6 +342,21 @@ impl Layout {
                         ));
                     }
 
+                    // Filterable where any stage samples it, which is the one that needs it.
+                    if let (
+                        BindingKind::Texture {
+                            sample: TextureSampleType::Float { filterable },
+                            ..
+                        },
+                        BindingKind::Texture {
+                            sample: TextureSampleType::Float { filterable: other },
+                            ..
+                        },
+                    ) = (&mut existing.kind, &binding.kind)
+                    {
+                        *filterable |= *other;
+                    }
+
                     // The larger view of a uniform buffer, since a stage may leave out the tail
                     // it does not read.
                     if let (
@@ -371,8 +386,10 @@ impl Layout {
                 binding: *number,
                 visibility: stages,
                 ty: match &binding.kind {
+                    // Storage rather than uniform, which is what `numbers_in_storage` made of
+                    // the shader's declaration. See there for why.
                     BindingKind::Uniform { size, .. } => BindingType::Buffer {
-                        ty: BufferBindingType::Uniform,
+                        ty: BufferBindingType::Storage { read_only: true },
                         has_dynamic_offset: false,
                         min_binding_size: std::num::NonZeroU64::new(*size),
                     },
@@ -491,6 +508,8 @@ pub fn reflect(wgsl: &str, reflection: &str, family: Family) -> Result<Reflected
         .update(module.to_ctx())
         .map_err(|error| format!("the compiled WGSL could not be laid out: {error}"))?;
 
+    let sampled = sampled_images(&module);
+
     let json: Value = serde_json::from_str(reflection)
         .map_err(|error| format!("slangc's reflection does not parse: {error}"))?;
 
@@ -506,7 +525,7 @@ pub fn reflect(wgsl: &str, reflection: &str, family: Family) -> Result<Reflected
         bindings: BTreeMap::new(),
     };
 
-    for (_, global) in module.global_variables.iter() {
+    for (handle, global) in module.global_variables.iter() {
         let Some(binding) = &global.binding else {
             continue;
         };
@@ -573,8 +592,11 @@ pub fn reflect(wgsl: &str, reflection: &str, family: Family) -> Result<Reflected
                         sample: match kind {
                             ScalarKind::Sint => TextureSampleType::Sint,
                             ScalarKind::Uint => TextureSampleType::Uint,
+                            // Filterable only where a sampler reads it, because a float
+                            // format of 32 bits a channel binds only where the layout says it
+                            // is not, and a texture read with `Load` alone has no reason to ask.
                             _ => TextureSampleType::Float {
-                                filterable: !*multi,
+                                filterable: !*multi && sampled.as_ref().is_none_or(|set| set.contains(&handle)),
                             },
                         },
                         multisampled: *multi,
@@ -620,7 +642,61 @@ pub fn reflect(wgsl: &str, reflection: &str, family: Family) -> Result<Reflected
         layout.bindings.insert(binding.binding, Binding { name, kind, count });
     }
 
-    Ok(Reflected { wgsl, layout })
+    Ok(Reflected {
+        wgsl: numbers_in_storage(&wgsl, group),
+        layout,
+    })
+}
+
+/// Declares every block of numbers in the shader's own group as a read-only storage buffer
+/// rather than a uniform one.
+///
+/// wgpu refuses a bind group holding both a binding array and a uniform buffer, because Vulkan
+/// cannot update one kind of descriptor after binding where the other is present. A shader with an
+/// array of textures and a single loose number would otherwise have no bind group it could be
+/// given. WGSL lays a type out the same way whichever address space holds it (a uniform only adds
+/// checks), and Slang writes its uniform structs with every alignment spelled out, so the bytes the
+/// reflection describes are the bytes the storage buffer holds, and nothing else changes.
+///
+/// Every block rather than only those beside an array of textures, because each stage is compiled
+/// on its own and one that reads no textures cannot know another stage of the same program does.
+pub fn numbers_in_storage(wgsl: &str, own_group: u32) -> String {
+    let group = format!("@group({own_group})");
+    let mut out = String::with_capacity(wgsl.len() + 64);
+
+    for line in wgsl.split_inclusive('\n') {
+        if line.trim_start().starts_with("@binding(") && line.contains(&group) {
+            out.push_str(&line.replacen("var<uniform>", "var<storage, read>", 1));
+        } else {
+            out.push_str(line);
+        }
+    }
+
+    out
+}
+
+/// Every texture the module reads through a sampler, or `None` where naga cannot say, in which
+/// case every texture is taken to be sampled.
+fn sampled_images(module: &naga::Module) -> Option<std::collections::HashSet<naga::Handle<naga::GlobalVariable>>> {
+    use naga::valid::{Capabilities, ValidationFlags, Validator};
+
+    let info = Validator::new(ValidationFlags::all(), Capabilities::all())
+        .validate(module)
+        .ok()?;
+
+    let mut sampled = std::collections::HashSet::new();
+
+    let functions = module
+        .functions
+        .iter()
+        .map(|(handle, _)| &info[handle])
+        .chain((0..module.entry_points.len()).map(|index| info.get_entry_point(index)));
+
+    for function in functions {
+        sampled.extend(function.sampling_set.iter().map(|key| key.image));
+    }
+
+    Some(sampled)
 }
 
 /// Changes every `@group(n)` in WGSL `slangc` wrote to where the family puts it, and spells an
@@ -842,6 +918,17 @@ mod tests {
         assert!(wgsl.contains("var layers_0 : binding_array<texture_2d<f32>, 64>"), "{wgsl}");
         assert!(wgsl.contains("@binding(11) @group(0) var<uniform> globals_0"));
         assert!(!wgsl.contains("@group(100)"));
+    }
+
+    /// Bevy's own uniforms stay uniforms, and the material's become storage, which is what lets
+    /// them share a bind group with its array of textures.
+    #[test]
+    fn the_materials_numbers_are_read_from_storage() {
+        let wgsl = fragment().wgsl;
+
+        assert!(wgsl.contains("@group(3) var<storage, read> globalParams_0"), "{wgsl}");
+        assert!(wgsl.contains("@group(3) var<storage, read> sun_0"));
+        assert!(!wgsl.contains("@group(3) var<uniform>"));
     }
 
     #[test]

@@ -12,11 +12,11 @@ namespace BevyCSharp.Editor.Framework;
 /// A shader being edited compiles in the background and reloads on its own, so the question while
 /// working on one is not how to reload it but whether it took. Each program is a row saying
 /// whether it compiled, and the selected one shows what the compiler said, which is the part the
-/// log scrolls away.
+/// log scrolls away, and what the shader declares, which is every name a value is set by.
 /// </para>
 /// <para>
-/// The same answers the console gives through <c>shader.list</c> and <c>shader.errors</c>, drawn
-/// where they can be watched while a file is saved.
+/// The same answers the console gives through <c>shader.list</c>, <c>shader.errors</c> and
+/// <c>shader.layout</c>, drawn where they can be watched while a file is saved.
 /// </para>
 /// </remarks>
 public static class ShadersTab
@@ -125,6 +125,17 @@ public static class ShadersTab
                     chosen.State == ShaderProgramState.Failed ? theme.Bad : theme.Warn);
                 ImGui.TextUnformatted(said);
                 ImGui.PopStyleColor();
+            }
+
+            // What the shader declares, which is every name a value can be set by, and where
+            // each is, which is what a struct set as bytes is laid out against.
+            var layout = chosen.Layout;
+
+            if (layout.Length > 0)
+            {
+                ImGui.Spacing();
+                ImGui.TextDisabled("It declares:");
+                ImGui.TextUnformatted(layout);
             }
 
             // What the renderer last complained of, which is where a shader that compiled but

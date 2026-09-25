@@ -179,11 +179,14 @@ asked about rather than guessed at:
 ./bcs command shader.list          # every program: its number, whether it compiled, its files
 ./bcs command shader.errors        # what the compiler said about every one that failed
 ./bcs command shader.errors 3      # or about one, warnings included
+./bcs command shader.layout 3      # every name it declares, with its binding and byte offset
 ./bcs command shader.reload all    # compile again without touching a file
 ./bcs command shader.status        # whether slangc was found, and the renderer's last error
 ```
 
-A magenta surface is a Slang stage that has never compiled, and `shader.errors` says why. A surface
+A magenta surface is a stage that has never compiled, and `shader.errors` says why. A surface
+drawn in zeros or a stand-in texture usually has a value set under a name the shader does not
+declare, which `shader.layout` settles, since values are set by name and the log warns once. A surface
 that stopped changing after an edit is the last version that compiled, still drawing while the new
 one fails. Edit the file and the session picks it up within a quarter of a second, so there is no
 restart to do.

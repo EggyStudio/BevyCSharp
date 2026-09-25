@@ -459,7 +459,7 @@ public static unsafe class Shaders
     /// step.SetBuffer("boids", Shaders.CreateBuffer&lt;Boid&gt;(boids));
     ///
     /// // Every frame, 64 boids to a workgroup.
-    /// step.Set("delta", ctx.Time.Delta);
+    /// step.Set("delta", (float)ctx.Time.DeltaSeconds);
     /// Shaders.Dispatch(step, (uint)(boids.Length + 63) / 64);
     /// </code>
     /// </example>
@@ -760,6 +760,39 @@ public static unsafe class ShaderValues
             target.Set(name, (ReadOnlySpan<TItem>)items);
 
         /// <summary>
+        /// Sets numbers <paramref name="components"/> to an element, for the shapes C# has no type
+        /// for: an <c>int2</c>, a <c>uint3</c>, a <c>float3x3</c>, or an array of any of them.
+        /// </summary>
+        /// <remarks>
+        /// <typeparamref name="TItem"/> is <see cref="float"/>, <see cref="int"/> or
+        /// <see cref="uint"/>, and says which kind of number the shader holds. A matrix is given by
+        /// rows, each padded to four, which is how a uniform holds it, so a <c>float3x3</c> is
+        /// twelve numbers.
+        /// </remarks>
+        public T SetNumbers<TItem>(string name, int components, ReadOnlySpan<TItem> numbers) where TItem : unmanaged
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(components, 1);
+
+            var scalar = ShapeOf<TItem>() is (var kind, 1)
+                ? kind
+                : throw new ArgumentException(
+                    $"{typeof(TItem).Name} is not a float, an int or a uint.",
+                    nameof(numbers));
+
+            if (numbers.Length % components != 0)
+            {
+                throw new ArgumentException(
+                    $"{numbers.Length} numbers are not a whole number of elements of {components}.",
+                    nameof(numbers));
+            }
+
+            fixed (TItem* at = numbers)
+            {
+                return target.Numbers(name, scalar, components, at, numbers.Length / components);
+            }
+        }
+
+        /// <summary>
         /// Copies bytes, as they are, to where a name is: a struct, an array of structs, or a whole
         /// <c>ConstantBuffer</c>.
         /// </summary>
@@ -893,36 +926,20 @@ public static unsafe class ShaderValues
         }
 
         /// <summary>
-        /// The numbers set under a name, as <typeparamref name="TItem"/>, or an empty array where
-        /// nothing was.
+        /// The floats set under a name, or an empty array where nothing was.
         /// </summary>
         /// <remarks>
         /// What was set rather than what the shader holds, so a name set as a
-        /// <see cref="Vector4"/> reads back as one <see cref="Vector4"/> or four floats alike.
+        /// <see cref="Vector4"/> reads back as four floats, and one never set reads back empty
+        /// although the shader reads zeros there.
         /// </remarks>
-        public TItem[] Get<TItem>(string name) where TItem : unmanaged
-        {
-            var (kind, id) = target.Target;
-            var named = ShaderValues.Utf8(name);
+        public float[] GetFloats(string name) => ShaderValues.Read<float>(target.Target, name);
 
-            fixed (byte* at = named)
-            {
-                var length = Native.Check(
-                    Native.bcs_shader_get_numbers(kind, id, at, null, 0),
-                    $"reading {name} from a shader");
+        /// <summary>The signed integers set under a name. See <c>GetFloats</c>.</summary>
+        public int[] GetInts(string name) => ShaderValues.Read<int>(target.Target, name);
 
-                var items = new TItem[length / sizeof(TItem)];
-
-                fixed (TItem* into = items)
-                {
-                    Native.Check(
-                        Native.bcs_shader_get_numbers(kind, id, at, (byte*)into, items.Length * sizeof(TItem)),
-                        $"reading {name} from a shader");
-                }
-
-                return items;
-            }
-        }
+        /// <summary>The unsigned integers set under a name. See <c>GetFloats</c>.</summary>
+        public uint[] GetUInts(string name) => ShaderValues.Read<uint>(target.Target, name);
 
         /// <summary>
         /// What the target's program declares, one entry per name, or none before it has compiled.
@@ -958,6 +975,30 @@ public static unsafe class ShaderValues
             }
 
             return target;
+        }
+    }
+
+    /// <summary>Reads back the four-byte numbers set under a name.</summary>
+    internal static TItem[] Read<TItem>((int Kind, long Id) target, string name) where TItem : unmanaged
+    {
+        var named = Utf8(name);
+
+        fixed (byte* at = named)
+        {
+            var length = Native.Check(
+                Native.bcs_shader_get_numbers(target.Kind, target.Id, at, null, 0),
+                $"reading {name} from a shader");
+
+            var items = new TItem[length / sizeof(TItem)];
+
+            fixed (TItem* into = items)
+            {
+                Native.Check(
+                    Native.bcs_shader_get_numbers(target.Kind, target.Id, at, (byte*)into, items.Length * sizeof(TItem)),
+                    $"reading {name} from a shader");
+            }
+
+            return items;
         }
     }
 
@@ -1521,9 +1562,9 @@ public enum ShaderProgramState
 /// <summary>The Slang that fills a stage, as a file or as text, and the entry point in it.</summary>
 /// <param name="Path">A <c>.slang</c> file under the asset root.</param>
 /// <param name="Entry">
-/// The function, or null for the usual name: <c>vertex</c> for a vertex shader, <c>fragment</c> for
-/// a fragment shader or a pass, <c>prepass_vertex</c> and <c>prepass_fragment</c> for the prepass,
-/// and <c>main</c> for compute. Naming it is what lets one file hold every stage of a program.
+/// The function, or null for the usual name: <c>vertex</c> for either vertex shader,
+/// <c>fragment</c> for either fragment shader or a pass, and <c>main</c> for compute. Naming it is
+/// what lets one file hold every stage of a program, the prepass's beside the main pass's.
 /// </param>
 public readonly record struct ShaderStage(string? Path, string? Entry = null)
 {

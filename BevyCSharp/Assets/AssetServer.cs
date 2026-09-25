@@ -123,16 +123,6 @@ public static class AssetKind
     /// <summary>A physically based material. Render builds only.</summary>
     public const string StandardMaterial = "StandardMaterial";
 
-    /// <summary>A WGSL shader. Render builds only.</summary>
-    /// <remarks>
-    /// What draws with one is a program, which names its shaders by path (see
-    /// <see cref="Shaders.CreateProgram(ShaderProgramSettings)"/>). Loading the same path here
-    /// first means it is already loaded when the program asks for it, because the asset server
-    /// hands out one handle per path. A Slang file is not loaded this way, since it is compiled per
-    /// program with that program's defines.
-    /// </remarks>
-    public const string Shader = "Shader";
-
     /// <summary>
     /// A whole glTF file: its meshes, materials and nodes. Render builds only.
     /// </summary>

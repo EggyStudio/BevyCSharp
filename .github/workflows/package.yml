@@ -145,6 +145,14 @@ jobs:
         working-directory: native
         run: cargo test
 
+      # Again with the renderer, which is where shader reflection and the packing of values by
+      # name live. Their tests read saved compiler output, so they need no slangc, but they do
+      # need the renderer's crates, which is a longer build and why this runs on Linux alone.
+      - name: Test the bridge's renderer
+        if: runner.os == 'Linux'
+        working-directory: native
+        run: cargo test --no-default-features --features render
+
       # The suite covers the library; this covers everything else in the solution. Neither the
       # sample nor the editor is reached by `dotnet test`, so without it a runnable project can
       # stop compiling without CI noticing.

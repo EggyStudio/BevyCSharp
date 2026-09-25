@@ -18,9 +18,9 @@ public sealed class ComputeShaderTests
     [Fact]
     public void AComputeShaderChangesABufferThatIsReadBack()
     {
-        if (!App.HasRenderer) return;
+        if (!ShaderMaterialTests.CanRun) return;
 
-        var program = ShaderProgram.None;
+        var scale = default(ShaderInstance);
         var buffer = AssetHandle.None;
         var read = default(BufferRead);
         float[]? numbers = null;
@@ -29,22 +29,15 @@ public sealed class ComputeShaderTests
         {
             Scene = _ =>
             {
-                program = Shaders.CreateProgram(new ShaderProgramSettings { Compute = "shaders/scale.wgsl" });
-
                 // More than one workgroup's worth, and not a multiple of one, so the shader's own
                 // bounds check is exercised as well.
                 buffer = Shaders.CreateBuffer<float>(Enumerable.Range(0, 100).Select(i => (float)i).ToArray());
+                scale = Compute("shaders/scale.slang").SetBuffer("numbers", buffer).Set("factor", 3f);
             },
         };
 
-        run.Until("compiled", _ => program.State == ShaderProgramState.Ready)
-            .Do("tripling", _ => Shaders.Dispatch(new DispatchSettings
-            {
-                Program = program,
-                X = 2,
-                Parameters = [3f],
-                Buffers = { [0] = buffer },
-            }))
+        run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Do("tripling", _ => Shaders.Dispatch(scale, 2))
             .Wait(2)
             .Do("asking for it back", _ => read = Shaders.BeginBufferRead(buffer))
             .Until("read back", _ => Shaders.TryReadBuffer(read, out numbers))
@@ -60,10 +53,9 @@ public sealed class ComputeShaderTests
     [Fact]
     public void AMaterialDrawsWhatAComputeShaderWrote()
     {
-        if (!App.HasRenderer) return;
+        if (!ShaderMaterialTests.CanRun) return;
 
-        var fill = ShaderProgram.None;
-        var colors = AssetHandle.None;
+        var fill = default(ShaderInstance);
 
         var run = new PictureRun
         {
@@ -71,28 +63,20 @@ public sealed class ComputeShaderTests
             {
                 PictureRun.Camera(ecs);
 
-                fill = Shaders.CreateProgram(new ShaderProgramSettings { Compute = "shaders/fill.wgsl" });
-
                 // Red to begin with, so a dispatch that never ran leaves the cube red.
-                colors = Shaders.CreateBuffer<float>([1f, 0f, 0f, 1f]);
+                var colors = Shaders.CreateBuffer<float>([1f, 0f, 0f, 1f]);
+                fill = Compute("shaders/fill.slang").SetBuffer("colors", colors).Set("color", ShaderMaterialTests.Green);
 
-                PictureRun.Cube(ecs, Shaders.CreateMaterial(new ShaderMaterialSettings
-                {
-                    Program = Shaders.CreateProgram("shaders/data.wgsl"),
-                    Buffer = colors,
-                }));
+                PictureRun.Cube(
+                    ecs,
+                    Shaders.CreateMaterial(Shaders.CreateProgram("shaders/data.slang")).SetBuffer("colors", colors));
             },
         };
 
         run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
             .Wait(30)
             .Capture("before")
-            .Do("painting it green", _ => Shaders.Dispatch(new DispatchSettings
-            {
-                Program = fill,
-                Parameters = [0f, 1f, 0f, 1f],
-                Buffers = { [0] = colors },
-            }))
+            .Do("painting it green", _ => Shaders.Dispatch(fill, 1))
             .Wait(10)
             .Capture("after")
             .Go();
@@ -106,11 +90,11 @@ public sealed class ComputeShaderTests
     /// field by field.
     /// </summary>
     [Fact]
-    public void ASlangComputeShaderStepsCSharpStructs()
+    public void AComputeShaderStepsCSharpStructs()
     {
-        if (!App.HasRenderer || !Shaders.SlangAvailable) return;
+        if (!ShaderMaterialTests.CanRun) return;
 
-        var program = ShaderProgram.None;
+        var step = default(ShaderInstance);
         var buffer = AssetHandle.None;
         var read = default(BufferRead);
         Particle[]? particles = null;
@@ -119,21 +103,22 @@ public sealed class ComputeShaderTests
         {
             Scene = _ =>
             {
-                program = Shaders.CreateProgram(new ShaderProgramSettings { Compute = "shaders/particles_step.slang" });
-
                 buffer = Shaders.CreateBuffer<Particle>(
                     Enumerable.Range(0, 70)
                         .Select(i => new Particle(i, 0f, 0f, 1f, i, -1f))
                         .ToArray());
+
+                step = Compute("shaders/particles_step.slang").SetBuffer("particles", buffer);
             },
         };
 
-        run.Until("compiled", _ => program.State == ShaderProgramState.Ready)
+        run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
             .Do("stepping twice", _ =>
             {
-                // Two dispatches in one frame, which run in order, each over what the last wrote.
-                Shaders.Dispatch(new DispatchSettings { Program = program, X = 2, Parameters = [0.5f], Buffers = { [0] = buffer } });
-                Shaders.Dispatch(new DispatchSettings { Program = program, X = 2, Parameters = [0.5f], Buffers = { [0] = buffer } });
+                // Two dispatches in one frame, which run in order, each over what the last wrote,
+                // and each with the value the instance held when it was asked for.
+                Shaders.Dispatch(step.Set("step", 0.25f), 2);
+                Shaders.Dispatch(step.Set("step", 0.75f), 2);
             })
             .Wait(2)
             .Do("asking for it back", _ => read = Shaders.BeginBufferRead(buffer))
@@ -161,10 +146,9 @@ public sealed class ComputeShaderTests
     [Fact]
     public void QuadsFollowTheBufferThatPlacesThem()
     {
-        if (!App.HasRenderer) return;
+        if (!ShaderMaterialTests.CanRun) return;
 
-        var shift = ShaderProgram.None;
-        var centers = AssetHandle.None;
+        var shift = default(ShaderInstance);
 
         var run = new PictureRun
         {
@@ -182,8 +166,10 @@ public sealed class ComputeShaderTests
 
                 ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 0f, 6f), Vec3.Zero, Vec3.UnitY));
 
-                shift = Shaders.CreateProgram(new ShaderProgramSettings { Compute = "shaders/shift.wgsl" });
-                centers = Shaders.CreateBuffer<float>([-2f, 0f, 0f, 0f, 2f, 0f, 0f, 0f]);
+                var centers = Shaders.CreateBuffer<float>([-2f, 0f, 0f, 0f, 2f, 0f, 0f, 0f]);
+                shift = Compute("shaders/shift.slang")
+                    .SetBuffer("centers", centers)
+                    .Set("by", new System.Numerics.Vector3(0f, 2f, 0f));
 
                 // Each quad's corners, as offsets from its center.
                 var corners = new List<Vec3>();
@@ -202,16 +188,17 @@ public sealed class ComputeShaderTests
                     Indices = [.. indices],
                 }));
 
-                Render.SetMaterial(ecs, quads, Shaders.CreateMaterial(new ShaderMaterialSettings
+                var material = Shaders.CreateMaterial(new ShaderMaterialSettings
                 {
                     Program = Shaders.CreateProgram(new ShaderProgramSettings
                     {
-                        Vertex = "shaders/quads.wgsl",
-                        Fragment = "shaders/quads.wgsl",
+                        Vertex = "shaders/quads.slang",
+                        Fragment = "shaders/quads.slang",
                     }),
-                    Buffer = centers,
                     Cull = CullMode.None,
-                }));
+                });
+
+                Render.SetMaterial(ecs, quads, material.SetBuffer("centers", centers));
 
                 ecs.Add(quads, Transform.Identity);
             },
@@ -220,12 +207,7 @@ public sealed class ComputeShaderTests
         run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
             .Wait(30)
             .Capture("before")
-            .Do("lifting them", _ => Shaders.Dispatch(new DispatchSettings
-            {
-                Program = shift,
-                Parameters = [0f, 2f, 0f],
-                Buffers = { [0] = centers },
-            }))
+            .Do("lifting them", _ => Shaders.Dispatch(shift, 1))
             .Wait(10)
             .Capture("after")
             .Go();
@@ -244,14 +226,20 @@ public sealed class ComputeShaderTests
         Assert.False(GreenAt(after, 32, 64), "a quad stayed where it was");
     }
 
-    /// <summary>A material samples what a compute shader wrote into an image.</summary>
+    /// <summary>
+    /// A material samples what a compute shader wrote into an image, and a float image beside it
+    /// holds numbers no eight-bit image could.
+    /// </summary>
     [Fact]
-    public void AMaterialSamplesAnImageAComputeShaderWrote()
+    public void AComputeShaderWritesImagesOfAnyFormat()
     {
-        if (!App.HasRenderer) return;
+        if (!ShaderMaterialTests.CanRun) return;
 
-        var paint = ShaderProgram.None;
-        var image = AssetHandle.None;
+        var paint = default(ShaderInstance);
+        var copy = default(ShaderInstance);
+        var into = AssetHandle.None;
+        var read = default(BufferRead);
+        System.Numerics.Vector4[]? copied = null;
 
         var run = new PictureRun
         {
@@ -259,29 +247,75 @@ public sealed class ComputeShaderTests
             {
                 PictureRun.Camera(ecs);
 
-                paint = Shaders.CreateProgram(new ShaderProgramSettings { Compute = "shaders/paint_image.wgsl" });
-                image = Shaders.CreateImage(16, 16);
+                var image = Shaders.CreateImage(16, 16);
+                var precise = Shaders.CreateImage(16, 16, ShaderImageFormat.Rgba32Float);
+                into = Shaders.CreateBuffer(16);
 
-                var settings = new ShaderMaterialSettings { Program = Shaders.CreateProgram("shaders/sampled.wgsl") };
-                settings.Textures[0] = image;
-                PictureRun.Cube(ecs, Shaders.CreateMaterial(settings));
+                paint = Compute("shaders/paint_image.slang")
+                    .Set("color", ShaderMaterialTests.Green)
+                    .SetTexture("image", image)
+                    .SetTexture("precise", precise);
+
+                copy = Compute("shaders/copy_image.slang")
+                    .SetTexture("source", precise)
+                    .SetBuffer("into", into);
+
+                PictureRun.Cube(
+                    ecs,
+                    Shaders.CreateMaterial(Shaders.CreateProgram("shaders/sampled.slang")).SetTexture("picture", image));
             },
         };
 
         run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
-            .Do("painting it green", _ => Shaders.Dispatch(new DispatchSettings
+            .Do("painting", _ =>
             {
-                Program = paint,
-                X = 2,
-                Y = 2,
-                Parameters = [0f, 1f, 0f, 1f],
-                Images = { [0] = image },
-            }))
+                Shaders.Dispatch(paint, 2, 2);
+                Shaders.Dispatch(copy, 1);
+            })
             .Wait(10)
             .Capture("picture")
+            .Do("asking for the copy", _ => read = Shaders.BeginBufferRead(into))
+            .Until("read back", _ => Shaders.TryReadBuffer(read, out copied))
             .Go();
 
         Assert.True(PictureRun.Green(run.Picture("picture")) > 100, "the cube did not show the painted image");
+
+        Assert.NotNull(copied);
+        Assert.Equal(new System.Numerics.Vector4(1000.5f, -2.25f, 3f, 1f), copied[0]);
+    }
+
+    /// <summary>A compute shader reads Bevy's time through the prelude.</summary>
+    [Fact]
+    public void AComputeShaderReadsTheTime()
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        var clock = default(ShaderInstance);
+        var into = AssetHandle.None;
+        var read = default(BufferRead);
+        float[]? numbers = null;
+
+        var run = new PictureRun
+        {
+            Scene = _ =>
+            {
+                into = Shaders.CreateBuffer(12);
+                clock = Compute("shaders/clock_compute.slang").SetBuffer("into", into);
+            },
+        };
+
+        run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Wait(10)
+            .Do("reading the clock", _ => Shaders.Dispatch(clock, 1))
+            .Wait(2)
+            .Do("asking for it back", _ => read = Shaders.BeginBufferRead(into))
+            .Until("read back", _ => Shaders.TryReadBuffer(read, out numbers))
+            .Go();
+
+        Assert.NotNull(numbers);
+        Assert.True(numbers[0] > 0f, $"the time read {numbers[0]}");
+        Assert.True(numbers[1] > 0f, $"the frame's length read {numbers[1]}");
+        Assert.True(numbers[2] > 10f, $"the frame count read {numbers[2]}");
     }
 
     /// <summary>A buffer's size is fixed, so writing more than it holds is refused.</summary>
@@ -309,12 +343,16 @@ public sealed class ComputeShaderTests
         Assert.IsType<ArgumentException>(refused);
     }
 
-    /// <summary>A dispatch needs a program.</summary>
+    /// <summary>A dispatch needs an instance.</summary>
     [Fact]
-    public void ADispatchWithNoProgramIsRefused()
+    public void ADispatchWithNoInstanceIsRefused()
     {
-        Assert.Throws<ArgumentException>(() => Shaders.Dispatch(new DispatchSettings()));
+        Assert.Throws<ArgumentException>(() => Shaders.Dispatch(default, 1));
     }
+
+    /// <summary>An instance of the compute shader in <paramref name="file"/>.</summary>
+    private static ShaderInstance Compute(string file) =>
+        Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Compute = file }));
 
     /// <summary>What the Slang shader calls a particle, as C# lays it out.</summary>
     [StructLayout(LayoutKind.Sequential)]

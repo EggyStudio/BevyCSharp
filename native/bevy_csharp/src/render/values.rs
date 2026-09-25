@@ -463,9 +463,9 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
                 fill_uniform(layout, *number, binding, values, &mut bytes);
 
                 let buffer = context.device.create_buffer_with_data(&BufferInitDescriptor {
-                    label: Some("bcs_shader_uniform"),
+                    label: Some("bcs_shader_numbers"),
                     contents: &bytes,
-                    usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST,
+                    usage: BufferUsages::STORAGE | BufferUsages::COPY_DST,
                 });
 
                 packed.buffers.push((*number, buffer));

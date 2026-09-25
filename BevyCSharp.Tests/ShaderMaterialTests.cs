@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+using System.Numerics;
 using Bevy;
 using Bevy.Interop;
 using Xunit;
@@ -6,23 +6,41 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers materials drawn by shaders the game wrote in WGSL.
+/// Covers materials drawn by shaders the game wrote in Slang: that they draw, reload, fail
+/// visibly, and answer for themselves.
 /// </summary>
 /// <remarks>
-/// Whether the numbers reached the shader is not a question anything but a picture can answer. A
-/// material that never compiled draws nothing, one whose bindings are laid out differently from
+/// <para>
+/// Whether a value reached the shader is not a question anything but a picture can answer. A
+/// material that never compiled draws nothing, one whose bind group is laid out differently from
 /// what the shader declares draws the wrong color, and both look the same from the managed side.
+/// </para>
+/// <para>
+/// Each test needs <c>slangc</c>, which the build fetches, and returns without asserting anything
+/// where there is none or no renderer, the way every picture test does on a headless bridge.
+/// </para>
 /// </remarks>
 [Collection("engine")]
 public sealed class ShaderMaterialTests
 {
     /// <summary>Frames to let the pipelines compile before the picture is worth reading.</summary>
-    private const uint Settled = 120;
+    internal const uint Settled = 120;
+
+    /// <summary>Whether this machine can compile and draw a shader at all.</summary>
+    internal static bool CanRun => App.HasRenderer && Shaders.SlangAvailable;
+
+    internal static readonly Vector4 Green = new(0f, 1f, 0f, 1f);
+    internal static readonly Vector4 Red = new(1f, 0f, 0f, 1f);
+    internal static readonly Vector4 Blue = new(0f, 0f, 1f, 1f);
+
+    /// <summary>A material drawn by <c>flat.slang</c> in one color.</summary>
+    internal static ShaderMaterial Flat(Vector4 color) =>
+        Shaders.CreateMaterial(Shaders.CreateProgram("shaders/flat.slang")).Set("color", color);
 
     [Fact]
     public void AShaderMaterialDrawsTheColorItWasGiven()
     {
-        if (!App.HasRenderer) return;
+        if (!CanRun) return;
 
         var run = new PictureRun
         {
@@ -30,14 +48,13 @@ public sealed class ShaderMaterialTests
             {
                 PictureRun.Camera(ecs);
 
-                // Green, in the first four floats, which is what the shader paints with. Green
-                // rather than the material's own, so nothing else could have drawn it.
-                var program = Shaders.CreateProgram("shaders/flat.wgsl");
-                PictureRun.Cube(ecs, Shaders.CreateMaterial(program, [0f, 1f, 0f, 1f]));
+                // Green rather than anything a default could be, so nothing else could have drawn
+                // it.
+                PictureRun.Cube(ecs, Flat(Green));
             },
         };
 
-        run.Wait(Settled).Capture("picture").Go();
+        run.Until("compiled", _ => ProgramsReady()).Wait(Settled).Capture("picture").Go();
 
         var middle = run.Picture("picture").At(48, 48);
 
@@ -48,17 +65,17 @@ public sealed class ShaderMaterialTests
 
     /// <summary>A vertex shader moves the mesh, which shows as the shape covering more of it.</summary>
     /// <remarks>
-    /// The same cube drawn twice by the same program, pushed along its own normals by the first
-    /// number the material carries. A vertex shader that never ran would leave the two pictures the
-    /// same size, which is the only thing that tells it apart from a fragment shader.
+    /// The same cube drawn twice by the same program, pushed along its own normals by
+    /// <c>swell</c>. A vertex shader that never ran would leave the two pictures the same size,
+    /// which is the only thing that tells it apart from a fragment shader.
     /// </remarks>
     [Fact]
     public void AVertexShaderMovesTheMesh()
     {
-        if (!App.HasRenderer) return;
+        if (!CanRun) return;
 
-        var still = Swell("shaders/ripple.wgsl", 0f);
-        var swollen = Swell("shaders/ripple.wgsl", 0.6f);
+        var still = Swell(0f);
+        var swollen = Swell(0.6f);
 
         Assert.True(still > 0, "the cube was not drawn at all");
         Assert.True(
@@ -66,11 +83,8 @@ public sealed class ShaderMaterialTests
             $"the shape covered {still} pixels still and {swollen} pushed out");
     }
 
-    /// <summary>
-    /// How many pixels a cube swollen by <paramref name="swell"/> covers, drawn by a file whose
-    /// vertex shader reads the first float and whose fragment shader paints the second row.
-    /// </summary>
-    internal static int Swell(string file, float swell)
+    /// <summary>How many green pixels a cube swollen by <paramref name="swell"/> covers.</summary>
+    private static int Swell(float swell)
     {
         var run = new PictureRun
         {
@@ -80,13 +94,13 @@ public sealed class ShaderMaterialTests
 
                 var program = Shaders.CreateProgram(new ShaderProgramSettings
                 {
-                    Vertex = file,
-                    Fragment = file,
+                    Vertex = "shaders/swell.slang",
+                    Fragment = "shaders/swell.slang",
                 });
 
                 PictureRun.Cube(
                     ecs,
-                    Shaders.CreateMaterial(program, [swell, 0f, 0f, 0f, 0f, 1f, 0f, 1f]));
+                    Shaders.CreateMaterial(program).Set("swell", swell).Set("color", Green));
             },
         };
 
@@ -94,22 +108,41 @@ public sealed class ShaderMaterialTests
         return PictureRun.Green(run.Picture("picture"));
     }
 
-    /// <summary>Whether every program the app made has finished compiling or loading.</summary>
+    /// <summary>Whether every program the app made has finished compiling.</summary>
     internal static bool ProgramsReady() =>
         Shaders.Programs.All(program => program.State == ShaderProgramState.Ready);
+
+    /// <summary>A material reads Bevy's time through the prelude.</summary>
+    [Fact]
+    public void AMaterialReadsTheTime()
+    {
+        if (!CanRun) return;
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                PictureRun.Camera(ecs);
+                PictureRun.Cube(ecs, Shaders.CreateMaterial(Shaders.CreateProgram("shaders/clock.slang")));
+            },
+        };
+
+        run.Until("compiled", _ => ProgramsReady()).Wait(Settled).Capture("picture").Go();
+
+        Assert.True(PictureRun.Green(run.Picture("picture")) > 100, "the material did not see time pass");
+    }
 
     /// <summary>
     /// Six programs drawn at once, each its own, with no limit to run into.
     /// </summary>
     /// <remarks>
-    /// One file compiled six ways by its defines, which also covers a define reaching WGSL through
-    /// naga_oil's substitution. Each cube is a different primary or secondary color, and each has
-    /// to come out that color where it stands.
+    /// One file compiled six ways by its defines. Each cube is a different primary or secondary
+    /// color, and each has to come out that color where it stands.
     /// </remarks>
     [Fact]
     public void ManyProgramsDrawAtOnce()
     {
-        if (!App.HasRenderer) return;
+        if (!CanRun) return;
 
         (int R, int G, int B)[] colors = [(1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 1, 0), (0, 1, 1), (1, 0, 1)];
         var programs = new List<ShaderProgram>();
@@ -120,21 +153,13 @@ public sealed class ShaderMaterialTests
             Height = 64,
             Scene = ecs =>
             {
-                var camera = Render.SpawnCamera3d(new CameraSettings
-                {
-                    Projection = CameraProjection.Orthographic,
-                    Height = 2f,
-                    Clear = ClearMode.Custom,
-                    ClearColor = (0f, 0f, 0f, 1f),
-                });
-
-                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 0f, 6f), Vec3.Zero, Vec3.UnitY));
+                Row(ecs);
 
                 for (var i = 0; i < colors.Length; i++)
                 {
                     var program = Shaders.CreateProgram(new ShaderProgramSettings
                     {
-                        Fragment = "shaders/defines.wgsl",
+                        Fragment = "shaders/defines.slang",
                         Defines =
                         {
                             ["RED"] = colors[i].R,
@@ -144,11 +169,7 @@ public sealed class ShaderMaterialTests
                     });
 
                     programs.Add(program);
-
-                    // Twelve units across at an orthographic height of two, so each cube sits in
-                    // the middle of its own sixth of the picture.
-                    var x = -5f + (2f * i);
-                    PictureRun.Cube(ecs, Shaders.CreateMaterial(program), 1f, new Vec3(x, 0f, 0f));
+                    PictureRun.Cube(ecs, Shaders.CreateMaterial(program), 1f, InRow(i));
                 }
             },
         };
@@ -170,6 +191,27 @@ public sealed class ShaderMaterialTests
         }
     }
 
+    /// <summary>
+    /// An orthographic camera over a row of six unit cubes, one to each sixth of a picture 384
+    /// pixels across.
+    /// </summary>
+    internal static void Row(EcsWorld ecs)
+    {
+        var camera = Render.SpawnCamera3d(new CameraSettings
+        {
+            Projection = CameraProjection.Orthographic,
+            Height = 2f,
+            Clear = ClearMode.Custom,
+            ClearColor = (0f, 0f, 0f, 1f),
+        });
+
+        ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 0f, 6f), Vec3.Zero, Vec3.UnitY));
+    }
+
+    /// <summary>Where the cube in the <paramref name="index"/>th sixth of <see cref="Row"/> stands.</summary>
+    /// <remarks>Twelve units across at an orthographic height of two.</remarks>
+    internal static Vec3 InRow(int index) => new(-5f + (2f * index), 0f, 0f);
+
     /// <summary>The same settings answer the same program, however often they are asked for.</summary>
     [Fact]
     public void TheSameSettingsAreTheSameProgram()
@@ -182,7 +224,7 @@ public sealed class ShaderMaterialTests
             // A headless run has no renderer to compile for, so this is refused rather than
             // answered, which is itself worth pinning down.
             var refused = Assert.Throws<BevyNativeException>(
-                () => Shaders.CreateProgram("shaders/flat.wgsl"));
+                () => Shaders.CreateProgram("shaders/flat.slang"));
 
             Assert.Equal(NativeStatus.Unsupported, refused.Status);
         });
@@ -197,11 +239,11 @@ public sealed class ShaderMaterialTests
         {
             Scene = _ =>
             {
-                first = Shaders.CreateProgram("shaders/flat.wgsl");
-                second = Shaders.CreateProgram("shaders/flat.wgsl");
+                first = Shaders.CreateProgram("shaders/flat.slang");
+                second = Shaders.CreateProgram("shaders/flat.slang");
                 other = Shaders.CreateProgram(new ShaderProgramSettings
                 {
-                    Fragment = "shaders/flat.wgsl",
+                    Fragment = "shaders/flat.slang",
                     Defines = { ["UNUSED"] = true },
                 });
             },
@@ -212,99 +254,50 @@ public sealed class ShaderMaterialTests
         Assert.NotEqual(first, other);
     }
 
-    /// <summary>A material needs a program, and a program needs a fragment shader.</summary>
+    /// <summary>
+    /// A material needs a program, and a program needs something to run and has to be Slang.
+    /// </summary>
     [Fact]
-    public void WhatCannotDrawIsRefusedBeforeReachingTheEngine()
+    public void WhatCannotRunIsRefusedBeforeReachingTheEngine()
     {
         Assert.Throws<ArgumentException>(
             () => Shaders.CreateMaterial(new ShaderMaterialSettings()));
 
         Assert.Throws<ArgumentException>(
-            () => Shaders.CreateProgram(new ShaderProgramSettings { Vertex = "shaders/ripple.wgsl" }));
+            () => Shaders.CreateProgram(new ShaderProgramSettings { Vertex = "shaders/swell.slang" }));
 
         Assert.Throws<ArgumentException>(
-            () => Shaders.CreateProgram("shaders/flat.glsl"));
+            () => Shaders.CreateProgram("shaders/flat.wgsl"));
+
+        Assert.Throws<ArgumentException>(
+            () => Shaders.CreateInstance(ShaderProgram.None));
     }
 
-    /// <summary>More numbers than a material carries is a mistake rather than a truncation.</summary>
+    /// <summary>A change to a material's value reaches the picture while it is being drawn.</summary>
     [Fact]
-    public void TooManyNumbersAreRefused()
+    public void AValueChangesWhileTheMaterialIsDrawn()
     {
-        Assert.Throws<ArgumentException>(
-            () => Shaders.CreateMaterial(new ShaderMaterialSettings
-            {
-                Program = default,
-                Parameters = new float[Shaders.ParameterCount + 1],
-            }));
+        if (!CanRun) return;
 
-        Assert.Throws<ArgumentException>(
-            () => Shaders.SetParameters(AssetHandle.None, new float[2], Shaders.ParameterCount - 1));
-    }
-
-    /// <summary>
-    /// The storage buffer takes as many bytes as it is given, and the shader reads the last of
-    /// them.
-    /// </summary>
-    [Fact]
-    public void TheDataBufferHoldsAsMuchAsItIsGiven()
-    {
-        if (!App.HasRenderer) return;
+        var material = default(ShaderMaterial);
 
         var run = new PictureRun
         {
             Scene = ecs =>
             {
                 PictureRun.Camera(ecs);
-
-                // A thousand colors, all red but the last, which is sixteen kilobytes and far past
-                // anything a uniform holds.
-                var colors = new Vec4F[1000];
-                Array.Fill(colors, new Vec4F(1f, 0f, 0f, 1f));
-                colors[^1] = new Vec4F(0f, 1f, 0f, 1f);
-
-                var program = Shaders.CreateProgram("shaders/data.wgsl");
-                var material = Shaders.CreateMaterial(new ShaderMaterialSettings
-                {
-                    Program = program,
-                    Data = MemoryMarshal.AsBytes(colors.AsSpan()).ToArray(),
-                });
-
+                material = Flat(Green);
                 PictureRun.Cube(ecs, material);
             },
         };
 
-        run.Until("compiled", _ => ProgramsReady()).Wait(Settled).Capture("picture").Go();
-
-        var middle = run.Picture("picture").At(48, 48);
-        Assert.True(middle.G > 120 && middle.R < 90, $"the cube came out {middle} rather than green");
-    }
-
-    /// <summary>
-    /// A change to a material's numbers reaches the picture while it is being drawn.
-    /// </summary>
-    [Fact]
-    public void ParametersChangeWhileTheMaterialIsDrawn()
-    {
-        if (!App.HasRenderer) return;
-
-        var material = AssetHandle.None;
-
-        var run = new PictureRun
-        {
-            Scene = ecs =>
-            {
-                PictureRun.Camera(ecs);
-                material = Shaders.CreateMaterial(Shaders.CreateProgram("shaders/flat.wgsl"), [0f, 1f, 0f, 1f]);
-                PictureRun.Cube(ecs, material);
-            },
-        };
-
-        run.Wait(Settled)
+        run.Until("compiled", _ => ProgramsReady())
+            .Wait(Settled)
             .Capture("before")
             .Do("turning it red", _ =>
             {
-                Shaders.SetParameters(material, [1f, 0f], 0);
-                Assert.Equal(1f, Shaders.GetParameters(material)[0]);
+                material.Set("color", Red);
+                Assert.Equal([1f, 0f, 0f, 1f], material.GetFloats("color"));
             })
             .Wait(10)
             .Capture("after")
@@ -312,59 +305,6 @@ public sealed class ShaderMaterialTests
 
         Assert.True(PictureRun.Green(run.Picture("before")) > 100, "the cube did not start green");
         Assert.True(PictureRun.Red(run.Picture("after")) > 100, "the cube did not turn red");
-    }
-
-    /// <summary>
-    /// The last 2D texture slot and the first array texture are bound where the layout says.
-    /// </summary>
-    /// <remarks>
-    /// Covers the reshaping as well, because an array texture is a tall picture told how many
-    /// layers it has, and the shader reads the second layer, which is green while the first is red.
-    /// </remarks>
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void TexturesPastTheFirstAreBound(bool array)
-    {
-        if (!App.HasRenderer) return;
-
-        var run = new PictureRun
-        {
-            Scene = ecs =>
-            {
-                PictureRun.Camera(ecs);
-
-                byte[] green = [0, 255, 0, 255];
-                byte[] redOverGreen = [255, 0, 0, 255, 0, 255, 0, 255];
-
-                var settings = new ShaderMaterialSettings
-                {
-                    Program = Shaders.CreateProgram(new ShaderProgramSettings
-                    {
-                        Fragment = "shaders/textures.wgsl",
-                        Defines = { ["ARRAY"] = array },
-                    }),
-                };
-
-                if (array)
-                {
-                    var layered = Render.CreateImage(redOverGreen, 1, 2);
-                    Render.MakeTextureArray(layered, 2);
-                    settings.TextureArrays[0] = layered;
-                }
-                else
-                {
-                    settings.Textures[Shaders.TextureCount - 1] = Render.CreateImage(green, 1, 1);
-                }
-
-                PictureRun.Cube(ecs, Shaders.CreateMaterial(settings));
-            },
-        };
-
-        run.Until("compiled", _ => ProgramsReady()).Wait(Settled).Capture("picture").Go();
-
-        var middle = run.Picture("picture").At(48, 48);
-        Assert.True(middle.G > 120 && middle.R < 90, $"the cube came out {middle} rather than green");
     }
 
     /// <summary>
@@ -379,10 +319,10 @@ public sealed class ShaderMaterialTests
     [Fact]
     public void APrepassVertexShaderMovesTheShadowToo()
     {
-        if (!App.HasRenderer) return;
+        if (!CanRun) return;
 
-        var followed = Shadow("shaders/swell.wgsl", prepass: true);
-        var left = Shadow("shaders/swell.wgsl", prepass: false);
+        var followed = Shadow(prepass: true);
+        var left = Shadow(prepass: false);
 
         Assert.True(left > 30, $"the plain ball cast a shadow of only {left} pixels");
         Assert.True(
@@ -391,7 +331,7 @@ public sealed class ShaderMaterialTests
     }
 
     /// <summary>How many floor pixels are in shadow under a swollen ball.</summary>
-    internal static int Shadow(string file, bool prepass)
+    private static int Shadow(bool prepass)
     {
         var run = new PictureRun
         {
@@ -426,23 +366,25 @@ public sealed class ShaderMaterialTests
                 }));
                 ecs.Add(floor, Transform.At(0f, -0.05f, 0f));
 
+                const string File = "shaders/swell.slang";
+
                 var program = Shaders.CreateProgram(new ShaderProgramSettings
                 {
-                    Vertex = file,
-                    Fragment = file,
-                    PrepassVertex = prepass ? new ShaderStage(file, "prepass_vertex") : default,
+                    Vertex = File,
+                    Fragment = File,
+                    PrepassVertex = prepass ? new ShaderStage(File, "prepass_vertex") : default,
                 });
 
                 // A sphere rather than a cube, because a cube pushed along its face normals from
                 // straight above still casts a square of the same size, since its sides move out
-                // edge-on to the light. A sphere pushed out is a larger sphere from every direction, and
-                // swelling it by half its radius again more than doubles the shadow's area.
+                // edge-on to the light. A sphere pushed out is a larger sphere from every direction,
+                // and swelling it by half its radius again more than doubles the shadow's area.
                 var ball = ecs.Spawn();
                 Render.SetMesh(ecs, ball, Render.CreateMesh(MeshShape.Sphere, 0.5f));
                 Render.SetMaterial(
                     ecs,
                     ball,
-                    Shaders.CreateMaterial(program, [0.25f, 0f, 0f, 0f, 0f, 1f, 0f, 1f]));
+                    Shaders.CreateMaterial(program).Set("swell", 0.25f).Set("color", Green));
                 ecs.Add(ball, Transform.At(0f, 3f, 0f));
             },
         };
@@ -461,14 +403,15 @@ public sealed class ShaderMaterialTests
     /// that, rather than closing it.
     /// </summary>
     /// <remarks>
-    /// What the editor turns on, so a shader edited into a shape the pipeline rejects is something
-    /// to read about and fix. The app is run on past the error, and ending cleanly afterwards is
-    /// what says it was survived.
+    /// The fragment shader reads an input at a location Bevy's vertex shader never writes, which
+    /// nothing sees until the pipeline is built. What the editor turns on, so a shader edited into
+    /// a shape the pipeline rejects is something to read about and fix. The app is run on past the
+    /// error, and ending cleanly afterwards is what says it was survived.
     /// </remarks>
     [Fact]
     public void AMismatchedShaderIsSurvivedWhenAsked()
     {
-        if (!App.HasRenderer) return;
+        if (!CanRun) return;
 
         var reported = string.Empty;
         Shaders.KeepRenderingAfterErrors = true;
@@ -480,7 +423,22 @@ public sealed class ShaderMaterialTests
                 Scene = ecs =>
                 {
                     PictureRun.Camera(ecs);
-                    PictureRun.Cube(ecs, Shaders.CreateMaterial(Shaders.CreateProgram("shaders/mismatch.wgsl")));
+
+                    var program = Shaders.CreateProgram(ShaderStage.Slang("""
+                        struct Unwritten
+                        {
+                            float4 position : SV_Position;
+                            float4 nowhere : TEXCOORD9;
+                        };
+
+                        [shader("fragment")]
+                        float4 fragment(Unwritten input) : SV_Target
+                        {
+                            return input.nowhere;
+                        }
+                        """));
+
+                    PictureRun.Cube(ecs, Shaders.CreateMaterial(program));
                 },
             }
                 .Until("reported", _ => (reported = Shaders.LastRenderError).Length > 0)
@@ -496,15 +454,26 @@ public sealed class ShaderMaterialTests
     }
 
     /// <summary>
-    /// A WGSL file edited while the app runs reaches the picture without anything being called.
+    /// An edit to a file a shader imports recompiles the shader, which the asset server alone could
+    /// not do, since it never sees the import.
     /// </summary>
     [Fact]
-    public void AnEditedWgslFileReloads()
+    public void AnEditToAnImportedModuleRecompilesTheShader()
     {
-        if (!App.HasRenderer) return;
+        if (!CanRun) return;
 
         using var assets = PictureRun.Temporary();
-        assets.Write("paint.wgsl", Paint("0.0, 1.0, 0.0"));
+        assets.Write("tint.slang", Tint("0.0, 1.0, 0.0"));
+        assets.Write("main.slang", """
+            import bcs;
+            import tint;
+
+            [shader("fragment")]
+            float4 fragment(bcs::VertexOutput mesh) : SV_Target
+            {
+                return tint();
+            }
+            """);
 
         var program = ShaderProgram.None;
         var seen = 0;
@@ -515,76 +484,164 @@ public sealed class ShaderMaterialTests
             Scene = ecs =>
             {
                 PictureRun.Camera(ecs);
-                program = Shaders.CreateProgram("paint.wgsl");
+                program = Shaders.CreateProgram("main.slang");
                 PictureRun.Cube(ecs, Shaders.CreateMaterial(program));
             },
         };
 
-        run.Until("loaded", _ => program.State == ShaderProgramState.Ready)
+        run.Until("compiled", _ => program.State == ShaderProgramState.Ready)
             .Wait(Settled)
             .Capture("before")
-            .Do("editing the file", _ =>
+            .Do("editing the import", _ =>
             {
                 seen = program.Generation;
-                assets.Write("paint.wgsl", Paint("1.0, 0.0, 0.0"));
+                assets.Write("tint.slang", Tint("1.0, 0.0, 0.0"));
             })
-            .Until("reloaded", _ => program.Generation > seen)
+            .Until("recompiled", _ => program.Generation > seen)
             .Wait(30)
             .Capture("after")
             .Go();
 
         Assert.True(PictureRun.Green(run.Picture("before")) > 100, "the cube did not start green");
         Assert.True(PictureRun.Red(run.Picture("after")) > 100, "the edit did not turn it red");
+
+        // Written beside the assets with its layout, so a machine without slangc could draw this
+        // next time.
+        var cache = Path.Combine(assets.Root, ".slang-cache");
+        Assert.NotEmpty(Directory.GetFiles(cache, "*.wgsl"));
+        Assert.NotEmpty(Directory.GetFiles(cache, "*.json"));
     }
 
     /// <summary>
-    /// An entity says which program draws it and hands over its numbers, which is what an
-    /// inspector reads, and an entity drawn by Bevy's own material says none.
+    /// A shader that stops compiling keeps drawing with the version that last did, and says what
+    /// is wrong.
     /// </summary>
     [Fact]
-    public void AnEntityAnswersForItsShaderMaterial()
+    public void AMistakeKeepsTheLastShaderThatCompiled()
     {
-        if (!App.HasRenderer) return;
+        if (!CanRun) return;
 
-        var made = ShaderProgram.None;
-        var asked = ShaderProgram.None;
-        var plain = ShaderProgram.None;
-        float[]? read = null;
+        using var assets = PictureRun.Temporary();
+        assets.Write("paint.slang", Paint("0.0, 1.0, 0.0"));
 
-        new PictureRun
+        var program = ShaderProgram.None;
+        var diagnostics = string.Empty;
+
+        var run = new PictureRun
         {
+            AssetRoot = assets.Root,
             Scene = ecs =>
             {
-                made = Shaders.CreateProgram("shaders/flat.wgsl");
-                var cube = PictureRun.Cube(ecs, Shaders.CreateMaterial(made, [0f, 1f, 0f, 1f]));
-                var other = PictureRun.Cube(ecs, Render.CreateMaterial(1f, 1f, 1f));
-
-                asked = Shaders.ProgramOn(cube);
-                plain = Shaders.ProgramOn(other);
-
-                Shaders.SetParameters(cube, [0.5f], 4);
-                read = Shaders.GetParameters(cube);
+                PictureRun.Camera(ecs);
+                program = Shaders.CreateProgram("paint.slang");
+                PictureRun.Cube(ecs, Shaders.CreateMaterial(program));
             },
-        }.Wait(2).Go();
+        };
 
-        Assert.Equal(made, asked);
-        Assert.False(plain.IsValid);
-        Assert.NotNull(read);
-        Assert.Equal([0f, 1f, 0f, 1f, 0.5f], read[..5]);
+        run.Until("compiled", _ => program.State == ShaderProgramState.Ready)
+            .Wait(Settled)
+            .Do("breaking it", _ => assets.Write("paint.slang", "this is not Slang"))
+            .Until("failed", _ => program.State == ShaderProgramState.Failed)
+            .Do("reading why", _ => diagnostics = program.Diagnostics)
+            .Wait(30)
+            .Capture("after")
+            .Go();
+
+        Assert.True(PictureRun.Green(run.Picture("after")) > 100, "the last good shader was not kept");
+        Assert.Contains("paint.slang", diagnostics);
     }
 
-    /// <summary>A program made from WGSL handed over as text draws like one from a file.</summary>
+    /// <summary>A shader that has never compiled draws magenta rather than nothing.</summary>
+    [Fact]
+    public void AShaderThatNeverCompiledDrawsMagenta()
+    {
+        if (!CanRun) return;
+
+        using var assets = PictureRun.Temporary();
+        assets.Write("broken.slang", "[shader(\"fragment\")] float4 fragment() : SV_Target { return nope; }");
+
+        var program = ShaderProgram.None;
+
+        var run = new PictureRun
+        {
+            AssetRoot = assets.Root,
+            Scene = ecs =>
+            {
+                PictureRun.Camera(ecs);
+                program = Shaders.CreateProgram("broken.slang");
+                PictureRun.Cube(ecs, Shaders.CreateMaterial(program));
+            },
+        };
+
+        run.Until("failed", _ => program.State == ShaderProgramState.Failed)
+            .Wait(Settled)
+            .Capture("picture")
+            .Go();
+
+        Assert.True(
+            PictureRun.Magenta(run.Picture("picture")) > 100,
+            "the cube was not drawn with the fallback");
+    }
+
+    /// <summary>
+    /// A binding placed in a group the bridge does not bind is a failed compile, named in the
+    /// diagnostics, rather than a pipeline that fails where nothing could say which shader was
+    /// wrong.
+    /// </summary>
+    [Fact]
+    public void ABindingInAGroupNothingBindsIsAFailedCompile()
+    {
+        if (!CanRun) return;
+
+        using var assets = PictureRun.Temporary();
+        assets.Write("stray.slang", """
+            [[vk::binding(0, 7)]] Texture2D stray;
+
+            [shader("fragment")]
+            float4 fragment(float4 position : SV_Position) : SV_Target
+            {
+                return stray.Load(int3(0, 0, 0));
+            }
+            """);
+
+        var program = ShaderProgram.None;
+        var diagnostics = string.Empty;
+
+        var run = new PictureRun
+        {
+            AssetRoot = assets.Root,
+            Scene = ecs =>
+            {
+                PictureRun.Camera(ecs);
+                program = Shaders.CreateProgram("stray.slang");
+                PictureRun.Cube(ecs, Shaders.CreateMaterial(program));
+            },
+        };
+
+        run.Until("failed", _ => program.State == ShaderProgramState.Failed)
+            .Do("reading why", _ => diagnostics = program.Diagnostics)
+            .Wait(Settled)
+            .Capture("picture")
+            .Go();
+
+        Assert.Contains("stray", diagnostics);
+        Assert.True(
+            PictureRun.Magenta(run.Picture("picture")) > 100,
+            "the cube was not drawn with the fallback");
+    }
+
+    /// <summary>A program made from Slang handed over as text compiles and draws like a file.</summary>
     [Fact]
     public void AProgramCanBeMadeFromText()
     {
-        if (!App.HasRenderer) return;
+        if (!CanRun) return;
 
         var run = new PictureRun
         {
             Scene = ecs =>
             {
                 PictureRun.Camera(ecs);
-                var program = Shaders.CreateProgram(ShaderStage.Wgsl(Paint("0.0, 1.0, 0.0")));
+                var program = Shaders.CreateProgram(ShaderStage.Slang(Paint("0.0, 1.0, 0.0")));
                 PictureRun.Cube(ecs, Shaders.CreateMaterial(program));
             },
         };
@@ -594,17 +651,70 @@ public sealed class ShaderMaterialTests
         Assert.True(PictureRun.Green(run.Picture("picture")) > 100, "the cube was not drawn green");
     }
 
-    /// <summary>A fragment shader that paints one color, written out as WGSL.</summary>
-    private static string Paint(string rgb) => $$"""
-        #import bevy_pbr::forward_io::VertexOutput
+    /// <summary>
+    /// An entity says which program draws it and hands over its values, which is what an inspector
+    /// reads, and an entity drawn by Bevy's own material says none.
+    /// </summary>
+    [Fact]
+    public void AnEntityAnswersForItsShaderMaterial()
+    {
+        if (!CanRun) return;
 
-        @fragment
-        fn fragment(mesh: VertexOutput) -> @location(0) vec4<f32> {
-            return vec4<f32>({{rgb}}, 1.0);
+        var made = ShaderProgram.None;
+        var asked = ShaderProgram.None;
+        var plain = ShaderProgram.None;
+        var cube = Entity.None;
+        float[]? read = null;
+        IReadOnlyList<ShaderParameter> parameters = [];
+
+        new PictureRun
+        {
+            Scene = ecs =>
+            {
+                made = Shaders.CreateProgram("shaders/flat.slang");
+                cube = PictureRun.Cube(ecs, Shaders.CreateMaterial(made).Set("color", Green));
+                var other = PictureRun.Cube(ecs, Render.CreateMaterial(1f, 1f, 1f));
+
+                asked = Shaders.ProgramOn(cube);
+                plain = Shaders.ProgramOn(other);
+            },
+        }
+            .Until("compiled", _ => ProgramsReady())
+            .Do("reading it", _ =>
+            {
+                var material = Shaders.MaterialOn(cube);
+                material.Set("color", new Vector4(0.5f, 1f, 0f, 1f));
+                read = material.GetFloats("color");
+                parameters = material.Parameters;
+            })
+            .Go();
+
+        Assert.Equal(made, asked);
+        Assert.False(plain.IsValid);
+        Assert.Equal([0.5f, 1f, 0f, 1f], read);
+        Assert.Equal(
+            [new ShaderParameter(ShaderParameterKind.Number, "color", ShaderScalar.Float, 4, 1)],
+            parameters);
+    }
+
+    /// <summary>A fragment shader that paints one color, written out as Slang.</summary>
+    private static string Paint(string rgb) => $$"""
+        import bcs;
+
+        [shader("fragment")]
+        float4 fragment(bcs::VertexOutput mesh) : SV_Target
+        {
+            return float4({{rgb}}, 1.0);
         }
         """;
 
-    /// <summary>Four floats, laid out as a <c>vec4</c> is in a storage buffer.</summary>
-    [StructLayout(LayoutKind.Sequential)]
-    private readonly record struct Vec4F(float X, float Y, float Z, float W);
+    /// <summary>A module with one function answering one color.</summary>
+    private static string Tint(string rgb) => $$"""
+        module tint;
+
+        public float4 tint()
+        {
+            return float4({{rgb}}, 1.0);
+        }
+        """;
 }

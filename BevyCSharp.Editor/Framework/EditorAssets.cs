@@ -165,7 +165,6 @@ public static class EditorAssets
         AssetKind.Audio => [".ogg", ".wav", ".flac", ".mp3"],
         AssetKind.Scene => [".scn", ".ron", ".gltf", ".glb"],
         AssetKind.Font => [".ttf", ".otf"],
-        AssetKind.Shader => [".wgsl", ".spv"],
         _ => [],
     };
 
@@ -181,7 +180,7 @@ public static class EditorAssets
         ".gltf" or ".glb" => "model",
         ".ogg" or ".wav" or ".flac" or ".mp3" => "sound",
         ".scn" or ".ron" => "scene",
-        ".wgsl" or ".slang" => "shader",
+        ".slang" => "shader",
         ".json" => "data",
         ".txt" => "text",
         "" => "file",

@@ -3,9 +3,10 @@
 // A program with different defines is a different program, compiled on its own, so a scene with
 // one of these per cube has as many programs as it has cubes.
 
-#import bevy_pbr::forward_io::VertexOutput
+import bcs;
 
-@fragment
-fn fragment(mesh: VertexOutput) -> @location(0) vec4<f32> {
-    return vec4<f32>(f32(#{RED}), f32(#{GREEN}), f32(#{BLUE}), 1.0);
+[shader("fragment")]
+float4 fragment(bcs::VertexOutput mesh) : SV_Target
+{
+    return float4(float(RED), float(GREEN), float(BLUE), 1.0);
 }

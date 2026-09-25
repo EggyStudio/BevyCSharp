@@ -61,10 +61,14 @@ public struct Globals
 };
 
 /// Time, as the main pass binds it.
-[[vk::binding(11, 100)]] public ConstantBuffer<Globals> globals;
+///
+/// Laid out as C lays it out (`ScalarDataLayout`), which is twelve bytes and what Bevy binds. The
+/// usual constant buffer rules round the struct up to sixteen, and a pipeline refuses a shader
+/// that reads more of a buffer than its layout promises.
+[[vk::binding(11, 100)]] public ConstantBuffer<Globals, ScalarDataLayout> globals;
 
 /// Time, as the prepass binds it, which is at a different binding because the prepass binds less.
-[[vk::binding(1, 100)]] public ConstantBuffer<Globals> prepass_globals;
+[[vk::binding(1, 100)]] public ConstantBuffer<Globals, ScalarDataLayout> prepass_globals;
 
 /// Multiplies a column-major matrix, held as four columns, by a vector.
 public float4 transform(float4 columns[4], float4 v)

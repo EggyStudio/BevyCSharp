@@ -68,14 +68,21 @@ internal static class EditorDrawn
     }
 
     /// <summary>
-    /// A material drawn by a shader the game wrote: which program, whether it compiled, and its
-    /// numbers, which can be dragged while it draws.
+    /// A material drawn by a shader the game wrote: which program, whether it compiled, and every
+    /// value its shaders declare, which can be dragged while it draws.
     /// </summary>
     /// <remarks>
-    /// The numbers are sixteen rows of four, as the shader reads them, and only as many rows are
-    /// shown as reach the last one that is not zero, plus one to grow into, so a material using
-    /// four floats is one row and not sixteen. What each number means is the shader's to say, so
-    /// the rows are numbered rather than named.
+    /// <para>
+    /// A row per name the shader declares, with a widget for what it is: a drag for numbers and
+    /// vectors, a color picker for a <c>float3</c> or <c>float4</c> whose name says it is a color,
+    /// a box for a <c>bool</c>. What cannot be dragged (textures, buffers, samplers, structs and
+    /// matrices) is listed with its kind, so the row still says the name exists.
+    /// </para>
+    /// <para>
+    /// An array shows its first <see cref="ArrayShown"/> elements, because a thousand drags is not
+    /// an inspector, and says how many more there are. Values are read back as they were set rather
+    /// than from the GPU, which is what an unset name reading as zero depends on.
+    /// </para>
     /// </remarks>
     private static void Shader(Entity entity, ShaderProgram program)
     {
@@ -103,32 +110,198 @@ internal static class EditorDrawn
             EditorRows.Close();
         }
 
-        var values = Shaders.GetParameters(entity);
+        var material = Shaders.MaterialOn(entity);
 
-        var last = Array.FindLastIndex(values, value => value != 0f);
-        var rows = Math.Min(Shaders.ParameterCount / 4, (last / 4) + 2);
-
-        for (var row = 0; row < rows; row++)
+        foreach (var parameter in material.Parameters)
         {
-            if (!EditorRows.Open($"##shaderRow{row}", across)) continue;
+            if (!EditorRows.Open($"##shader_{parameter.Name}", across)) continue;
 
-            EditorRows.Line($"Row {row}");
-
-            var four = new System.Numerics.Vector4(
-                values[row * 4],
-                values[(row * 4) + 1],
-                values[(row * 4) + 2],
-                values[(row * 4) + 3]);
-
+            EditorRows.Line(parameter.Count > 1 ? $"{parameter.Name}[{parameter.Count}]" : parameter.Name);
             ImGui.SetNextItemWidth(-1f);
 
-            if (ImGui.DragFloat4($"##shaderValues{row}", ref four, 0.01f))
+            if (parameter.Kind == ShaderParameterKind.Number && parameter.Components <= 4)
             {
-                Shaders.SetParameters(entity, [four.X, four.Y, four.Z, four.W], row * 4);
+                Numbers(material, parameter, theme);
+            }
+            else
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, theme.Dim);
+                ImGui.TextUnformatted(Describe(parameter));
+                ImGui.PopStyleColor();
             }
 
             EditorRows.Close();
         }
+    }
+
+    /// <summary>How many elements of an array the inspector offers to drag.</summary>
+    private const int ArrayShown = 8;
+
+    /// <summary>A drag, a color or a box per element of a number, a vector or an array of them.</summary>
+    private static void Numbers(ShaderMaterial material, ShaderParameter parameter, EditorTheme theme)
+    {
+        var shown = Math.Min(parameter.Count, ArrayShown);
+        var components = parameter.Components;
+        var width = components * shown;
+
+        if (parameter.Scalar == ShaderScalar.Float)
+        {
+            var values = Fill(material.GetFloats(parameter.Name), width);
+            var colorish = components >= 3 && LooksLikeColor(parameter.Name);
+            var changed = false;
+
+            for (var element = 0; element < shown; element++)
+            {
+                var at = element * components;
+                var id = $"##{parameter.Name}_{element}";
+
+                if (shown > 1) ImGui.SetNextItemWidth(-1f);
+
+                changed |= components switch
+                {
+                    1 => ImGui.DragFloat(id, ref values[at], 0.01f),
+                    2 => Drag2(id, values, at),
+                    3 when colorish => Color3(id, values, at),
+                    3 => Drag3(id, values, at),
+                    _ when colorish => Color4(id, values, at),
+                    _ => Drag4(id, values, at),
+                };
+            }
+
+            if (changed) material.Set(parameter.Name, Trim(values, components));
+        }
+        else if (parameter.Scalar == ShaderScalar.Bool && components == 1 && shown == 1)
+        {
+            var values = Fill(material.GetUInts(parameter.Name), 1);
+            var on = values[0] != 0;
+
+            if (ImGui.Checkbox($"##{parameter.Name}", ref on)) material.Set(parameter.Name, on);
+        }
+        else
+        {
+            var values = Fill(material.GetInts(parameter.Name), width);
+            var changed = false;
+
+            for (var element = 0; element < shown; element++)
+            {
+                var at = element * components;
+                if (shown > 1) ImGui.SetNextItemWidth(-1f);
+
+                for (var c = 0; c < components; c++)
+                {
+                    if (components > 1)
+                    {
+                        ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X / (components - c));
+                        if (c > 0) ImGui.SameLine();
+                    }
+
+                    changed |= ImGui.DragInt($"##{parameter.Name}_{element}_{c}", ref values[at + c]);
+                }
+            }
+
+            if (changed)
+            {
+                var trimmed = Trim(values, components);
+
+                if (parameter.Scalar == ShaderScalar.UInt || parameter.Scalar == ShaderScalar.Bool)
+                {
+                    var words = Array.ConvertAll(trimmed, value => unchecked((uint)Math.Max(0, value)));
+                    material.SetNumbers(parameter.Name, components, words);
+                }
+                else
+                {
+                    material.SetNumbers(parameter.Name, components, trimmed);
+                }
+            }
+        }
+
+        if (parameter.Count > shown)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, theme.Dim);
+            ImGui.TextUnformatted($"and {parameter.Count - shown} more, set from code");
+            ImGui.PopStyleColor();
+        }
+    }
+
+    /// <summary>Whether a name reads as a color, which is what earns it a color picker.</summary>
+    private static bool LooksLikeColor(string name)
+    {
+        var lower = name.ToLowerInvariant();
+        return lower.Contains("color") || lower.Contains("colour") || lower.Contains("tint")
+            || lower.Contains("albedo") || lower.Contains("glow") || lower.Contains("emissive");
+    }
+
+    /// <summary>What a name is, for one the inspector cannot drag.</summary>
+    private static string Describe(ShaderParameter parameter)
+    {
+        var what = parameter.Kind switch
+        {
+            ShaderParameterKind.Texture => "texture",
+            ShaderParameterKind.Image => "image written",
+            ShaderParameterKind.Buffer => "buffer",
+            ShaderParameterKind.Sampler => "sampler",
+            ShaderParameterKind.Number => "matrix",
+            _ => "struct",
+        };
+
+        return parameter.Count > 1 ? $"{parameter.Count} of {what}" : what;
+    }
+
+    /// <summary>What was set, padded with zeros to what is shown.</summary>
+    private static T[] Fill<T>(T[] set, int length) where T : unmanaged
+    {
+        if (set.Length >= length) return set;
+
+        var filled = new T[length];
+        set.CopyTo(filled, 0);
+        return filled;
+    }
+
+    /// <summary>
+    /// Drops what would not fit the parameter's elements, which a value set longer than the shader
+    /// now declares would otherwise have refused.
+    /// </summary>
+    private static T[] Trim<T>(T[] values, int components) where T : unmanaged =>
+        values[..(values.Length / components * components)];
+
+    private static bool Drag2(string id, float[] values, int at)
+    {
+        var v = new System.Numerics.Vector2(values[at], values[at + 1]);
+        if (!ImGui.DragFloat2(id, ref v, 0.01f)) return false;
+        (values[at], values[at + 1]) = (v.X, v.Y);
+        return true;
+    }
+
+    private static bool Drag3(string id, float[] values, int at)
+    {
+        var v = new System.Numerics.Vector3(values[at], values[at + 1], values[at + 2]);
+        if (!ImGui.DragFloat3(id, ref v, 0.01f)) return false;
+        (values[at], values[at + 1], values[at + 2]) = (v.X, v.Y, v.Z);
+        return true;
+    }
+
+    private static bool Drag4(string id, float[] values, int at)
+    {
+        var v = new System.Numerics.Vector4(values[at], values[at + 1], values[at + 2], values[at + 3]);
+        if (!ImGui.DragFloat4(id, ref v, 0.01f)) return false;
+        (values[at], values[at + 1], values[at + 2], values[at + 3]) = (v.X, v.Y, v.Z, v.W);
+        return true;
+    }
+
+    private static bool Color3(string id, float[] values, int at)
+    {
+        var v = new System.Numerics.Vector3(values[at], values[at + 1], values[at + 2]);
+        if (!ImGui.ColorEdit3(id, ref v, ImGuiColorEditFlags.Float | ImGuiColorEditFlags.HDR)) return false;
+        (values[at], values[at + 1], values[at + 2]) = (v.X, v.Y, v.Z);
+        return true;
+    }
+
+    private static bool Color4(string id, float[] values, int at)
+    {
+        var v = new System.Numerics.Vector4(values[at], values[at + 1], values[at + 2], values[at + 3]);
+        if (!ImGui.ColorEdit4(id, ref v, ImGuiColorEditFlags.Float | ImGuiColorEditFlags.HDR)) return false;
+        (values[at], values[at + 1], values[at + 2], values[at + 3]) = (v.X, v.Y, v.Z, v.W);
+        return true;
     }
 
     /// <summary>One row, showing where it came from and offering somewhere else.</summary>

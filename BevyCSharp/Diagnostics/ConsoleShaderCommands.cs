@@ -10,7 +10,8 @@ namespace Bevy;
 /// A shader being edited is compiled in the background and reported in the log, which is the
 /// right place for a line saying it worked and the wrong place to go looking for why it did not.
 /// These answer the question directly: which programs there are, which of them failed and what
-/// the compiler said, and a way to compile one again without touching its file.
+/// the compiler said, what each declares and at which offset, and a way to compile one again
+/// without touching its file.
 /// </remarks>
 internal static class ConsoleShaderCommands
 {
@@ -59,6 +60,20 @@ internal static class ConsoleShaderCommands
         }
 
         return text.ToString();
+    }
+
+    /// <summary>Says what a program's shaders declare, and where each name is.</summary>
+    [Command("shader.layout", "What a program declares, by binding and offset: shader.layout <number>")]
+    internal static string Layout(string which)
+    {
+        if (!RendererPresent()) return "no renderer, so there are no shader programs";
+        if (Find(which) is not { } program) return $"there is no shader program {which}";
+
+        var layout = program.Layout;
+
+        return layout.Length > 0
+            ? layout
+            : $"#{program.Id} has not compiled yet, so what it declares is not known";
     }
 
     /// <summary>Compiles or reloads a program, or every program, now.</summary>

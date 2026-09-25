@@ -199,8 +199,6 @@ fn load(world: &mut World, kind: &str, path: &str) -> i32 {
             .load::<bevy::pbr::StandardMaterial>(path.to_string())
             .untyped(),
         #[cfg(feature = "render")]
-        "Shader" => server.load::<bevy::shader::Shader>(path.to_string()).untyped(),
-        #[cfg(feature = "render")]
         "Gltf" => server.load::<bevy::gltf::Gltf>(path.to_string()).untyped(),
         #[cfg(feature = "render")]
         "Audio" => server

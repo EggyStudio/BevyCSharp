@@ -54,41 +54,42 @@ compiled in but its payload formats, BCn and ASTC and ETC2, are not, and
 `CompressedImageFormatSupport` has to carry what the adapter can decode, which a windowless app
 reports as nothing. Nothing here blocks a game; it is size on disk and upload cost.
 
-A program names the files that draw a material, WGSL or Slang, and a material carries sixty-four
-floats, a storage buffer of any size, eight textures with samplers, and two each of cubemaps, array
-textures and 3D textures. A camera runs any number of programs over its picture as full-screen
-passes, and a program with a compute stage runs over buffers that stay on the GPU and that a
-material or a pass can draw from. Every file is reloaded when it changes, in every profile, and a
-Slang file is recompiled when anything it imports changes. What is left is at the edges of that:
+Shaders are Slang, and a shader declares whatever it needs: numbers, arrays, structs, constant
+buffers, any number of textures of any shape, samplers, storage buffers and images. The bridge reads
+the layout the compiler reports and builds each material's, pass's and dispatch's bind group from
+it, and C# sets every value by name. A camera runs any number of programs over its picture as
+full-screen passes, and a program with a compute stage runs over buffers and images that stay on
+the GPU and that a material or a pass can draw from. Every file is reloaded when it changes or
+anything it imports does, in every profile, and a reload that changes the layout keeps each value
+by name. What is left is at the edges of that:
 
-- **The bind group is the same for every material.** Bevy lays a material's bind group out per
-  type, and there is one type, so what a shader can be handed is what the table in the README
-  lists. It is sized generously rather than described by the caller, which keeps it a shader to
-  write rather than a layout to learn, but a storage texture a shader writes to, a depth texture,
-  a comparison sampler or a ninth sampled texture has nowhere to go. A texture format that cannot
-  be filtered, such as a 32-bit float heightmap, is replaced by the fallback for the same reason.
 - **Slang cannot see the pipeline's defines.** A Slang entry point is compiled once per program,
   while Bevy compiles a pipeline per mesh layout and per pass with defines saying which vertex
   attributes and prepass outputs exist. The prelude's structs therefore name a fixed set of
-  attributes, and the prepass vertex output writes every field any prepass reads. A WGSL shader
-  reads the defines with `#ifdef` and has no such limit.
-- **A validation error stops drawing rather than one material.** A Slang shader's bindings are
-  checked against the bridge's layouts before a pipeline is built from it, so a binding of the
-  wrong kind is a failed compile with the binding named. A WGSL shader is composed by naga_oil
-  inside Bevy's pipeline cache, where nothing of the bridge's sees the result, and a stage input
-  the vertex shader never wrote is not checked in either language. Both are caught by wgpu when
-  the pipeline is built, which Bevy does not scope, so the error is the device's rather than the
-  pipeline's, and `Shaders.KeepRenderingAfterErrors` survives it at the cost of every frame drawn
-  while the broken pipeline is in use.
+  attributes, and the prepass vertex output writes every field any prepass reads. Compiling an
+  entry point per mesh layout would lift it, at the cost of a compile per layout.
+- **An array of textures needs the adapter to support one.** A shader declaring `Texture2D
+  layers[64]` is a binding array, which needs wgpu's texture binding array feature and enough of
+  the adapter's per-stage limits for its length. Desktop Vulkan, Metal and DirectX 12 adapters have
+  both, and the bridge asks for what the adapter offers, but a shader like that fails to build its
+  pipeline on one without. Separate globals (`Texture2D a; Texture2D b;`) have no such need, up to
+  the ordinary limit of sampled textures a stage may read.
+- **A shader's own numbers are read from storage.** wgpu refuses a bind group holding both an
+  array of textures and a uniform buffer, so every block of numbers a shader declares for itself is
+  bound as a read-only storage buffer with the same layout. The bytes are the same, but a backend
+  with no storage buffers, WebGL2 among them, cannot bind one.
+- **A texture is filterable where it is sampled.** Which textures a shader samples through a
+  sampler decides whether each is bound as filterable, so a 32-bit float image read with `Load`
+  binds and one sampled with a linear sampler is replaced by a stand-in with a warning. A float
+  image sampled through a nearest sampler would be valid, and is refused the same way.
+- **A validation error stops drawing rather than one material.** A stage input the vertex shader
+  never wrote is caught by wgpu when the pipeline is built, which Bevy does not scope, so the error
+  is the device's rather than the pipeline's, and `Shaders.KeepRenderingAfterErrors` survives it at
+  the cost of every frame drawn while the broken pipeline is in use.
 - **A pass reads depth only from a camera drawn once a pixel.** A multisampled prepass is a
   multisampled texture, which is a different binding from the plain one the layout names, so a
   camera with `Msaa` above one hands its passes the stand-ins. Resolving the depth first, or a
   second layout for multisampled cameras, would lift it. Motion vectors are not bound at all.
-- **A compute shader writes two image formats.** A storage texture's format is part of its
-  binding, and the layout is fixed, so a dispatch writes one eight-bit image and one half-float one,
-  write-only. Reading and writing one image in the same dispatch needs a format wgpu allows that
-  for, which is a single 32-bit channel, and a simulation that wants its last state reads it from a
-  second image instead.
 - **A buffer is drawn by one mesh.** A material reads a buffer, but what it draws is still one
   entity's mesh, so ten thousand particles are a mesh of ten thousand squares, built with
   `Render.CreateMesh(MeshData)`, whose vertex shader places each from the buffer. Bevy's indirect

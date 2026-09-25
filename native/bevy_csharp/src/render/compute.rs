@@ -248,11 +248,20 @@ fn prepare_dispatches(
     for dispatch in &extracted.0 {
         let Some((pipeline, program)) = pipeline_for(&mut pipelines, &cache, dispatch.program)
         else {
-            say_once(format!(
-                "A dispatch named shader program {}, which has no compute stage, so it does \
-                 nothing.",
-                dispatch.program
-            ));
+            // Silent while the program is still compiling, which is every program's first few
+            // frames and says nothing wrong about the dispatch.
+            let compiled_without_one = programs::lookup(dispatch.program).is_some_and(|program| {
+                program.generation > 0 && program.stages[Role::Compute as usize].is_none()
+            });
+
+            if compiled_without_one {
+                say_once(format!(
+                    "A dispatch named shader program {}, which has no compute stage, so it does \
+                     nothing.",
+                    dispatch.program
+                ));
+            }
+
             continue;
         };
 

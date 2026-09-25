@@ -66,8 +66,9 @@ pub const CACHE_DIRECTORY: &str = ".slang-cache";
 
 /// The first line of a cache entry, which also says which layout the rest of it has.
 ///
-/// Two since entries carry reflection, in a file of their own beside the WGSL.
-const CACHE_HEADER: &str = "// bevy_csharp slang cache 2";
+/// Two since entries carry reflection, in a file of their own beside the WGSL, and three since
+/// matrices are compiled row by row, which changes the WGSL a shader reading one compiles to.
+const CACHE_HEADER: &str = "// bevy_csharp slang cache 3";
 
 /// Which stage of a pipeline an entry point is compiled for.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
@@ -227,6 +228,10 @@ pub fn compile(request: &Request) -> Result<Compiled, String> {
         .arg(&depfile)
         .arg("-reflection-json")
         .arg(&reflection_file)
+        // A matrix is held row by row, which is how `System.Numerics.Matrix4x4` holds one, so the
+        // bytes C# hands over are the matrix the shader multiplies by. Slang's default holds it
+        // column by column, which reads every matrix transposed.
+        .arg("-matrix-layout-row-major")
         // The bridge's modules first, so `import bcs;` finds the one this bridge wrote rather
         // than a stale copy somebody left in their asset folder.
         .arg("-I")

@@ -45,7 +45,12 @@ public struct View
 [[vk::binding(0, 101)]] public Texture2D picture;
 [[vk::binding(1, 101)]] public SamplerState picture_sampler;
 
-[[vk::binding(2, 101)]] public ConstantBuffer<Globals> globals;
+/// Time.
+///
+/// Laid out as C lays it out (`ScalarDataLayout`), which is twelve bytes and what Bevy binds. The
+/// usual constant buffer rules round the struct up to sixteen, and a pipeline refuses a shader
+/// that reads more of a buffer than its layout promises.
+[[vk::binding(2, 101)]] public ConstantBuffer<Globals, ScalarDataLayout> globals;
 [[vk::binding(3, 101)]] public ConstantBuffer<View> view;
 
 /// The camera's depth, from its prepass, or zero, which is the far plane, where it draws none.

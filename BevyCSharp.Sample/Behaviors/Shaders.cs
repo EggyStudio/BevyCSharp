@@ -9,11 +9,11 @@ namespace BevyCSharp.Sample.Behaviors;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Everything here is a shader file under <c>assets/shaders</c>, and every one of them reloads
-/// when it is saved while the sample runs, so a change to the path in <c>fireflies_step.wgsl</c>
-/// changes how the swarm flies, and a change to the color in <c>fireflies.wgsl</c> how it glows.
-/// The same files written in Slang, with <c>import bcs_compute;</c> and <c>import bcs;</c>, work
-/// the same way on a machine with <c>slangc</c>.
+/// Everything here is a Slang file under <c>assets/shaders</c>, and every one of them reloads when
+/// it is saved while the sample runs, so a change to the path in <c>fireflies_step.slang</c>
+/// changes how the swarm flies, and a change to <c>fireflies.slang</c> how it glows. What each
+/// shader declares is set from here by name: the glow's color and size, how far a firefly strays,
+/// and how strong the old screen is.
 /// </para>
 /// <para>
 /// The positions never leave the GPU. The compute shader writes them into a buffer every frame, the
@@ -30,12 +30,12 @@ public partial struct ShaderShowcase
     /// <summary>How many a workgroup moves, which is what the compute shader says it is.</summary>
     private const int PerWorkgroup = 64;
 
-    private static ShaderProgram _step;
-    private static AssetHandle _flies;
+    private static ShaderInstance _step;
+    private static ShaderInstance _screen;
     private static Entity _camera;
-    private static bool _screen;
+    private static bool _screenOn;
 
-    /// <summary>What the compute shader and the material call a firefly, laid out as WGSL lays it.</summary>
+    /// <summary>What the compute shader and the material call a firefly, laid out as Slang lays it.</summary>
     [StructLayout(LayoutKind.Sequential)]
     private readonly record struct Firefly(Vec3 Position, float Phase, Vec3 Home, float Speed);
 
@@ -59,23 +59,36 @@ public partial struct ShaderShowcase
             flies[i] = new Firefly(home, random.NextSingle() * MathF.Tau, home, 0.3f + random.NextSingle());
         }
 
-        _flies = Shaders.CreateBuffer<Firefly>(flies);
-        _step = Shaders.CreateProgram(new ShaderProgramSettings { Compute = "shaders/fireflies_step.wgsl" });
+        var buffer = Shaders.CreateBuffer<Firefly>(flies);
+
+        _step = Shaders.CreateInstance(Shaders.CreateProgram(
+                new ShaderProgramSettings { Compute = "shaders/fireflies_step.slang" }))
+            .SetBuffer("flies", buffer)
+            .Set("reach", 0.9f);
+
+        _screen = Shaders.CreateInstance(Shaders.CreateProgram(
+                new ShaderProgramSettings { Pass = "shaders/crt.slang" }))
+            .Set("strength", 1f);
+
+        var glow = Shaders.CreateMaterial(new ShaderMaterialSettings
+            {
+                Program = Shaders.CreateProgram(new ShaderProgramSettings
+                {
+                    Vertex = "shaders/fireflies.slang",
+                    Fragment = "shaders/fireflies.slang",
+                }),
+                Alpha = AlphaMode.Add,
+                Cull = CullMode.None,
+            })
+            .SetBuffer("flies", buffer)
+            .Set("glow", new System.Numerics.Vector4(1f, 0.75f, 0.25f, 12f))
+            .Set("size", 0.05f)
+            .Set("flicker_rate", 7f);
 
         var swarm = ctx.Ecs.Spawn();
         ctx.Ecs.SetName(swarm, "Fireflies");
         Render.SetMesh(ctx.Ecs, swarm, Render.CreateMesh(Squares(Count)));
-        Render.SetMaterial(ctx.Ecs, swarm, Shaders.CreateMaterial(new ShaderMaterialSettings
-        {
-            Program = Shaders.CreateProgram(new ShaderProgramSettings
-            {
-                Vertex = "shaders/fireflies.wgsl",
-                Fragment = "shaders/fireflies.wgsl",
-            }),
-            Buffer = _flies,
-            Alpha = AlphaMode.Add,
-            Cull = CullMode.None,
-        }));
+        Render.SetMaterial(ctx.Ecs, swarm, glow);
 
         // The squares are drawn wherever the buffer says, so the mesh's own bounds, which are a
         // single square at the origin, say nothing about where they are, and culling by them
@@ -99,26 +112,15 @@ public partial struct ShaderShowcase
     {
         if (!App.HasRenderer || ctx.Res<Config>().Headless || !_step.IsValid) return;
 
-        Shaders.Dispatch(new DispatchSettings
-        {
-            Program = _step,
-            X = (Count + PerWorkgroup - 1) / PerWorkgroup,
-            Parameters = [0.9f],
-            Buffers = { [0] = _flies },
-        });
+        Shaders.Dispatch(_step, (Count + PerWorkgroup - 1) / PerWorkgroup);
 
         if (!ctx.Input.KeyPressed(Key.F4) || _camera == Entity.None) return;
 
-        _screen = !_screen;
+        _screenOn = !_screenOn;
 
-        if (_screen)
+        if (_screenOn)
         {
-            Shaders.SetPasses(_camera, new ShaderPassSettings
-            {
-                Program = Shaders.CreateProgram("shaders/crt.wgsl"),
-                Parameters = [1f],
-                AfterTonemapping = true,
-            });
+            Shaders.SetPasses(_camera, new ShaderPass(_screen, AfterTonemapping: true));
         }
         else
         {

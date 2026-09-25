@@ -26,7 +26,12 @@ public struct Globals
     public uint frame_count;
 };
 
-[[vk::binding(0, 101)]] public ConstantBuffer<Globals> globals;
+/// Time.
+///
+/// Laid out as C lays it out (`ScalarDataLayout`), which is twelve bytes and what Bevy binds. The
+/// usual constant buffer rules round the struct up to sixteen, and a pipeline refuses a shader
+/// that reads more of a buffer than its layout promises.
+[[vk::binding(0, 101)]] public ConstantBuffer<Globals, ScalarDataLayout> globals;
 
 /// The element at `index` of a raw buffer, read as an array of `T`.
 public T element<T>(RWByteAddressBuffer buffer, uint index)
