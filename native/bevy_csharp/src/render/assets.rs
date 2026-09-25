@@ -207,7 +207,7 @@ pub(crate) fn target_image(width: u32, height: u32) -> bevy::image::Image {
 
     // Opaque black rather than transparent, because a picture of a scene with nothing in front of
     // the camera should look like an empty scene rather than like a failure. The format is named
-    // outright: Bevy deprecated its default in favour of asking the view, and a target created
+    // outright: Bevy deprecated its default in favor of asking the view, and a target created
     // before there is a view to ask has to choose one.
     let mut image = Image::new_fill(
         size,

@@ -257,7 +257,7 @@ public struct NativeSpriteConfig
     /// <summary>Which frame of that layout to draw.</summary>
     public uint AtlasIndex;
 
-    /// <summary>Non-zero to move the sprite's origin off centre.</summary>
+    /// <summary>Non-zero to move the sprite's origin off center.</summary>
     public int HasAnchor;
 
     /// <summary>Where the transform sits on the sprite, horizontally.</summary>
@@ -307,13 +307,13 @@ public struct NativeGizmoConfig
     /// <summary>0 line, 1 sphere, 2 axes.</summary>
     public int Kind;
 
-    /// <summary>Start, centre or position, X.</summary>
+    /// <summary>Start, center or position, X.</summary>
     public float StartX;
 
-    /// <summary>Start, centre or position, Y.</summary>
+    /// <summary>Start, center or position, Y.</summary>
     public float StartY;
 
-    /// <summary>Start, centre or position, Z.</summary>
+    /// <summary>Start, center or position, Z.</summary>
     public float StartZ;
 
     /// <summary>Line end, X.</summary>
@@ -375,7 +375,7 @@ public struct NativePostConfig
     /// <summary>0 none, 1 Reinhard, 2 Reinhard luminance, 3 ACES, 4 AgX, 5 boring, 6 Tony, 7 filmic.</summary>
     public int Tonemapping;
 
-    /// <summary>Non-zero to dither before quantising.</summary>
+    /// <summary>Non-zero to dither before quantizing.</summary>
     public int Dither;
 
     /// <summary>Non-zero to draw into a high dynamic range target.</summary>
@@ -422,7 +422,7 @@ public struct NativeAtmosphereConfig
     /// <summary>Planet scale against the scene; 0 for one.</summary>
     public float Scale;
 
-    /// <summary>How far the haze in front of the scene is computed, in metres; 0 for Bevy's.</summary>
+    /// <summary>How far the haze in front of the scene is computed, in meters; 0 for Bevy's.</summary>
     public float HazeDistance;
 
     /// <summary>How finely the sky is computed: 0 Bevy's own, 1 cheaper, 2 finer.</summary>
@@ -442,13 +442,13 @@ public unsafe struct NativeEffectsConfig
     /// <summary>0 no depth of field, 1 gaussian, 2 bokeh.</summary>
     public int DofMode;
 
-    /// <summary>Distance in metres to what is in focus.</summary>
+    /// <summary>Distance in meters to what is in focus.</summary>
     public float FocalDistance;
 
     /// <summary>Aperture in f-stops.</summary>
     public float ApertureFStops;
 
-    /// <summary>Sensor height in metres; 0 for Bevy's own.</summary>
+    /// <summary>Sensor height in meters; 0 for Bevy's own.</summary>
     public float SensorHeight;
 
     /// <summary>Widest a blur may be, in pixels; 0 for Bevy's own.</summary>
@@ -499,16 +499,16 @@ public unsafe struct NativeEffectsConfig
     /// <summary>How much of the picture is left untouched.</summary>
     public float VignetteRadius;
 
-    /// <summary>Width of the edge between the clear centre and the dark corners.</summary>
+    /// <summary>Width of the edge between the clear center and the dark corners.</summary>
     public float VignetteSmoothness;
 
     /// <summary>Shape of that edge; 1 for a circle.</summary>
     public float VignetteRoundness;
 
-    /// <summary>Point the vignette is centred on, horizontally.</summary>
+    /// <summary>Point the vignette is centered on, horizontally.</summary>
     public float VignetteCenterX;
 
-    /// <summary>Point the vignette is centred on, vertically.</summary>
+    /// <summary>Point the vignette is centered on, vertically.</summary>
     public float VignetteCenterY;
 
     /// <summary>How far the vignette is stretched to fit a window that is not square.</summary>
@@ -563,10 +563,10 @@ public unsafe struct NativeEffectsConfig
 /// <summary>One tonal range's part of a color grade. Mirrors <c>BcsGradingSection</c>.</summary>
 public struct NativeGradingSection
 {
-    /// <summary>Below one drains color towards grey, above one spreads it out.</summary>
+    /// <summary>Below one drains color toward gray, above one spreads it out.</summary>
     public float Saturation;
 
-    /// <summary>Below one pulls towards neutral grey, above one pushes away.</summary>
+    /// <summary>Below one pulls toward neutral gray, above one pushes away.</summary>
     public float Contrast;
 
     /// <summary>The exponent, which mostly moves the top of the range.</summary>
@@ -585,10 +585,10 @@ public struct NativeGradingConfig
     /// <summary>Stops of exposure applied before anything else.</summary>
     public float Exposure;
 
-    /// <summary>White balance, towards blue below zero and towards orange above it.</summary>
+    /// <summary>White balance, toward blue below zero and toward orange above it.</summary>
     public float Temperature;
 
-    /// <summary>White balance the other way, towards green and towards magenta.</summary>
+    /// <summary>White balance the other way, toward green and toward magenta.</summary>
     public float Tint;
 
     /// <summary>Hue rotation in degrees.</summary>

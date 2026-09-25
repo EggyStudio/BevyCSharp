@@ -75,7 +75,7 @@ where this editor differs.
 
 ### Color
 
-Everything in the editor is drawn on one of a ladder of greys, and which rung says what a thing is.
+Everything in the editor is drawn on one of a ladder of grays, and which rung says what a thing is.
 This is the whole of the scheme, and the values live in `EditorTheme` and nowhere else. Anything
 drawn by hand reads the rung out of the running style rather than out of the record, so a color
 changed in the style tab changes what is drawn instead of being written over on the next frame.
@@ -104,9 +104,9 @@ Three rules follow from the ladder, and they matter more than the values:
   saying what the step and the gap already say.
 - **What floats is lighter than what it covers.** A menu and a tooltip are held up in front of the
   work rather than lying under it, so they wear the brightest plate the ladder has, which is the
-  same grey a row wears under the pointer. That is what makes a flyout read as one of those rows
+  same gray a row wears under the pointer. That is what makes a flyout read as one of those rows
   grown large enough to hold a list.
-- **A row lifts off whatever it is lying on.** A fixed grey that lifts off a card disappears into a
+- **A row lifts off whatever it is lying on.** A fixed gray that lifts off a card disappears into a
   menu's plate, so a row under the pointer is drawn as a wash of the text color instead, which is
   a step above anything. Over a card it comes out at `Hover`.
 
@@ -141,14 +141,14 @@ is beside it, and a card to the window's edge are all the same number. Two gaps 
 in one picture read as an arrangement that has slipped. A grab handle lies in one of those gaps, a
 third of it thick, which is the thickness ImGui gives a scrollbar's grab.
 
-- **Text is left aligned**, except button labels and the number in a box, which are centred, and
-  the number on a bar, which is centred until the handle comes close enough to touch it.
+- **Text is left aligned**, except button labels and the number in a box, which are centered, and
+  the number on a bar, which is centered until the handle comes close enough to touch it.
 - **Indentation carries nesting** in hierarchies, inspectors and menus.
 - The inspector must not scroll horizontally at its **300px width**, which is what the name column
   and a value beside it need without either being cut.
 - **The name is a column, not a label.** Every value in a panel starts at the same place however
   long the names are, so a column of values can be read down its own edge. Each row is a two
-  column table, weighted towards the value, because a name that runs out of room is still readable
+  column table, weighted toward the value, because a name that runs out of room is still readable
   from its first half and a number that runs out of room is a different number.
 - **A panel fills its column.** Its height never changes, so what it holds scrolls inside a frame
   that stays put. A panel that grows and shrinks as its contents change is the single thing that
@@ -230,7 +230,7 @@ What that buys:
 - **The scene is a viewport, not a hole.** Floating, the camera fills the window and the panels are
   over it. Docked, `bcs_render_set_viewport` gives the camera what is left, so the picture is the
   shape of the space rather than the shape of the window with something on top.
-- **The engine only rasterises.** The Rust side draws clipped, textured triangles in screen space
+- **The engine only rasterizes.** The Rust side draws clipped, textured triangles in screen space
   and knows nothing else. The entire interface can be rewritten without touching it.
 - **Immediate mode costs a redraw a frame.** A few thousand triangles and one buffer write, which is
   the trade ImGui makes and the reason it is the tool for a panel full of numbers that change.
@@ -325,7 +325,7 @@ and leaves the answers on the schema as `FieldHints`, so nothing reflects at run
 | `[ShowIf(nameof(Other))]` | drawn only while another field reads true, or equals a value |
 | `[HideIf(nameof(Other), Value)]` | the same, reversed; several conditions may sit on one field |
 | `[OnValueChanged(nameof(M))]` | calls the named methods once the field has been changed |
-| `[Order(n)]` | where the field or button sits among its neighbours |
+| `[Order(n)]` | where the field or button sits among its neighbors |
 | `[Button("...")]` | what a method's button says; `Line` and `Weight` share a row between buttons |
 | `[Asset(AssetKind.Mesh)]` | which files to offer for a field that holds an asset |
 
@@ -333,18 +333,18 @@ and leaves the answers on the schema as `FieldHints`, so nothing reflects at run
 own is described as those fields, named by the path they came from and folded under the name of the
 field they came from. `Front.Held.At` is a row called `At`, inside a fold called `Held`, inside one
 called `Front`. Writing one reads the whole component, changes the part and writes it back, so a
-part written does not wipe its neighbours. A vector is left alone, because it is three numbers a
+part written does not wipe its neighbors. A vector is left alone, because it is three numbers a
 drawer already draws as one thing.
 
 **The console reads and writes.** The tab along the bottom is where a log is read, and the key
 under Escape raises or puts away that tab. `ConsoleTab` draws it and `ConsoleView` decides what it
 shows, which is a search, a switch per level, and what was typed before, reached with the arrows.
-Everything either of them shows lives outside both: `ConsoleLog` is a ring of levelled lines that
+Everything either of them shows lives outside both: `ConsoleLog` is a ring of leveled lines that
 the output and error streams are teed into, and `ConsoleCommands` is the list of what can be
 typed.
 
 A command is a static method with `[Command]` on it, found at compile time by a generator and
-registered by a module initialiser, so nothing scans for them and one that does not compile is not
+registered by a module initializer, so nothing scans for them and one that does not compile is not
 a command:
 
 ```csharp
@@ -422,7 +422,7 @@ EditorMenu.Command(
 // A button in the middle of the toolbar. A picture alone is a circle, a word alone a pill, and a
 // button that is only a picture says what it is when the pointer rests on it.
 EditorToolbar.Add(new ToolbarButton(
-    ToolbarSlot.Centre,
+    ToolbarSlot.Center,
     "icons/ui/zap.png",
     () => string.Empty,
     world => Bake(world),

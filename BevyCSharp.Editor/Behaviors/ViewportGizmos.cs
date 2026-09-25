@@ -62,14 +62,14 @@ public partial struct ViewportGizmos
         var entity = EditorSelection.Current;
         if (!Render.TryGetBounds(entity, out var min, out var max)) return;
 
-        var centre = (min + max) * 0.5f;
+        var center = (min + max) * 0.5f;
         var rotation = ctx.Ecs.GetOrDefault<GlobalTransform>(entity).Rotation;
 
         // The box round it is SelectionOutline's, which draws one for every selected thing rather
         // than only for the one a tool is working on.
         Handles(
-            centre,
-            Reach(EditorSelection.Camera, centre),
+            center,
+            Reach(EditorSelection.Camera, center),
             EditorTools.AxesFor(rotation),
             Facing(ctx, EditorSelection.Camera));
     }
@@ -94,10 +94,10 @@ public partial struct ViewportGizmos
     /// <para>
     /// What tells a person where the floor is and how big things are. A scene without one is a
     /// handful of objects in a void. Nothing says which way is level, nothing says whether a cube
-    /// is a metre across or ten, and moving something is a guess about how far it went.
+    /// is a meter across or ten, and moving something is a guess about how far it went.
     /// </para>
     /// <para>
-    /// Two grids a decade apart, not one. A single grid that snaps from metres to tens as the
+    /// Two grids a decade apart, not one. A single grid that snaps from meters to tens as the
     /// camera climbs changes the whole floor in one frame, which reads as the picture breaking;
     /// drawn as a coarse grid that is always there and a fine one that fades away as its cells
     /// shrink, the change is something nobody notices happening. The fine grid leaves out the lines
@@ -132,7 +132,7 @@ public partial struct ViewportGizmos
         // One height for every spacing, worked out once. A hair above the height asked for, because
         // a grid on the same plane as a floor fights it for every pixel. A hair scaled to the
         // spacing would put each spacing on a plane of its own, and the lines two of them draw in
-        // the same place would run parallel a few millimetres apart instead of being one line.
+        // the same place would run parallel a few millimeters apart instead of being one line.
         var plane = GridHeight + (above * 0.0004f);
 
         // Under the camera, always. Following where the camera is looking sounds helpful and is
@@ -183,7 +183,7 @@ public partial struct ViewportGizmos
     /// One question asked of each spacing on its own, which is what makes the change between two of
     /// them impossible to catch happening. A spacing is at full strength when its cells are the size
     /// the height calls for, and fades away over the decade on either side of that: out below, as
-    /// the cells shrink towards nothing, and <em>in</em> from above, as they come down from being
+    /// the cells shrink toward nothing, and <em>in</em> from above, as they come down from being
     /// too large to be a grid at all.
     /// </para>
     /// <para>
@@ -199,7 +199,7 @@ public partial struct ViewportGizmos
     /// </para>
     /// <para>
     /// Nothing here knows which spacing is the fine one and which is the coarse one, so nothing
-    /// changes at the moment they swap roles, so a ten metre line is as solid at ninety metres up
+    /// changes at the moment they swap roles, so a ten meter line is as solid at ninety meters up
     /// as at a hundred and ten.
     /// </para>
     /// </remarks>
@@ -223,7 +223,7 @@ public partial struct ViewportGizmos
     /// <param name="height">
     /// What height to draw at, worked out once for every spacing. Given rather than computed here,
     /// because two spacings on two planes draw the lines they share as two parallel lines a few
-    /// millimetres apart.
+    /// millimeters apart.
     /// </param>
     /// <param name="step">How far apart the lines are.</param>
     /// <param name="reach">How far out it goes before it has faded away entirely.</param>
@@ -232,8 +232,8 @@ public partial struct ViewportGizmos
     {
         if (solid <= 0.004f) return;
 
-        var centreX = MathF.Round(look.X / step) * step;
-        var centreZ = MathF.Round(look.Z / step) * step;
+        var centerX = MathF.Round(look.X / step) * step;
+        var centerZ = MathF.Round(look.Z / step) * step;
         var count = Math.Min(Half, (int)MathF.Ceiling(reach / step));
 
         // Four halves per line through the middle, gathered and handed over once. A sheet is the
@@ -254,8 +254,8 @@ public partial struct ViewportGizmos
             var span = MathF.Sqrt((reach * reach) - (away * away));
             var strength = solid * Falloff(away / reach);
 
-            var x = centreX + offset;
-            var z = centreZ + offset;
+            var x = centerX + offset;
+            var z = centerZ + offset;
 
             // The two through the origin are drawn like any other line. In the colors of their
             // axes they read as a warm bar and a blue dot floating in the middle of the view
@@ -269,26 +269,26 @@ public partial struct ViewportGizmos
             // Two halves out from the middle, each fading to nothing, which is what makes the far
             // edge a horizon rather than a boundary.
             sheet[drawn++] = GizmoSegment.Fading(
-                new Vec3(x, height, centreZ),
-                new Vec3(x, height, centreZ - span),
+                new Vec3(x, height, centerZ),
+                new Vec3(x, height, centerZ - span),
                 onZ,
                 gone);
 
             sheet[drawn++] = GizmoSegment.Fading(
-                new Vec3(x, height, centreZ),
-                new Vec3(x, height, centreZ + span),
+                new Vec3(x, height, centerZ),
+                new Vec3(x, height, centerZ + span),
                 onZ,
                 gone);
 
             sheet[drawn++] = GizmoSegment.Fading(
-                new Vec3(centreX, height, z),
-                new Vec3(centreX - span, height, z),
+                new Vec3(centerX, height, z),
+                new Vec3(centerX - span, height, z),
                 onX,
                 gone);
 
             sheet[drawn++] = GizmoSegment.Fading(
-                new Vec3(centreX, height, z),
-                new Vec3(centreX + span, height, z),
+                new Vec3(centerX, height, z),
+                new Vec3(centerX + span, height, z),
                 onX,
                 gone);
         }
@@ -298,7 +298,7 @@ public partial struct ViewportGizmos
 
     /// <summary>
     /// What a grid line looks like at a world position: every tenth one brighter than its
-    /// neighbours, and anything else plain.
+    /// neighbors, and anything else plain.
     /// </summary>
     /// <remarks>
     /// The emphasis belongs to each grid rather than to the set of them. Letting a coarser grid
@@ -310,7 +310,7 @@ public partial struct ViewportGizmos
         float at, float step, float strength)
     {
         var tenth = MathF.Abs(MathF.IEEERemainder(at, step * 10f)) < step * 0.5f;
-        return Grey(tenth ? strength * Marked : strength);
+        return Gray(tenth ? strength * Marked : strength);
     }
 
     /// <summary>How much brighter every tenth line is, which is what gives the floor a scale.</summary>
@@ -334,11 +334,11 @@ public partial struct ViewportGizmos
         (color.R, color.G, color.B, MathF.Min(1f, color.A * strength));
 
     /// <summary>What an ordinary grid line is: white, at whatever strength it has left.</summary>
-    private static (float R, float G, float B, float A) Grey(float strength) =>
+    private static (float R, float G, float B, float A) Gray(float strength) =>
         (0.72f, 0.74f, 0.80f, strength);
 
     /// <summary>Draws the tool's handles at the selection.</summary>
-    private static void Handles(Vec3 centre, float reach, Vec3[] axes, Vec3 facing)
+    private static void Handles(Vec3 center, float reach, Vec3[] axes, Vec3 facing)
     {
         if (EditorTools.Current == EditorTool.Select) return;
 
@@ -352,11 +352,11 @@ public partial struct ViewportGizmos
         float InPixels(float world) => world / reach * Pixels;
 
         Disc(
-            centre,
+            center,
             facing,
-            reach * CentreSize,
-            InPixels(reach * CentreSize),
-            held == TransformGizmo.Centre ? Accent : Middle);
+            reach * Centersize,
+            InPixels(reach * Centersize),
+            held == TransformGizmo.Center ? Accent : Middle);
 
         for (var i = 0; i < 3; i++)
         {
@@ -366,13 +366,13 @@ public partial struct ViewportGizmos
             switch (EditorTools.Current)
             {
                 case EditorTool.Rotate:
-                    Circle(centre, axis, reach, color);
+                    Circle(center, axis, reach, color);
                     break;
 
                 case EditorTool.Scale:
-                    Gizmos.Line(centre, centre + (axis * reach), color);
+                    Gizmos.Line(center, center + (axis * reach), color);
                     Disc(
-                        centre + (axis * reach),
+                        center + (axis * reach),
                         facing,
                         reach * HeadSize,
                         InPixels(reach * HeadSize),
@@ -380,9 +380,9 @@ public partial struct ViewportGizmos
                     break;
 
                 default:
-                    Gizmos.Line(centre, centre + (axis * reach), color);
+                    Gizmos.Line(center, center + (axis * reach), color);
                     Arrow(
-                        centre + (axis * reach),
+                        center + (axis * reach),
                         axis,
                         reach * ArrowSize,
                         InPixels(reach * ArrowSize * ArrowWidth),
@@ -393,7 +393,7 @@ public partial struct ViewportGizmos
     }
 
     /// <summary>How large the middle handle is, as a fraction of a handle's reach.</summary>
-    internal const float CentreSize = 0.11f;
+    internal const float Centersize = 0.11f;
 
     /// <summary>How large the ball on the end of a stretch handle is.</summary>
     private const float HeadSize = 0.075f;
@@ -427,14 +427,14 @@ public partial struct ViewportGizmos
     /// How many of each comes from how large the disc is on screen rather than from a number that
     /// looked right once, which is why the same routine fills the ball on a stretch handle and
     /// the base of a move handle's cone without any of them being tuned separately. A spoke's
-    /// neighbours are furthest apart at the rim, so the count is whatever puts that gap under the
+    /// neighbors are furthest apart at the rim, so the count is whatever puts that gap under the
     /// width of a line; the rings do the same for the space between one ring and the next. Spokes
     /// alone leave a band of dots about two thirds of the way out, where they have spread past a
     /// line's width and the gaps between them start to show.
     /// </para>
     /// </remarks>
     private static void Disc(
-        Vec3 centre,
+        Vec3 center,
         Vec3 facing,
         float radius,
         float pixels,
@@ -446,13 +446,13 @@ public partial struct ViewportGizmos
         var rings = Math.Clamp((int)(pixels / Covered), 2, 16);
 
         Vec3 At(float angle, float from) =>
-            centre
+            center
             + (first * (MathF.Cos(angle) * from))
             + (second * (MathF.Sin(angle) * from));
 
         for (var spoke = 0; spoke < spokes; spoke++)
         {
-            Gizmos.Line(centre, At(spoke / (float)spokes * MathF.Tau, radius), color);
+            Gizmos.Line(center, At(spoke / (float)spokes * MathF.Tau, radius), color);
         }
 
         for (var ring = 1; ring <= rings; ring++)
@@ -473,17 +473,17 @@ public partial struct ViewportGizmos
 
     /// <summary>Draws a ring about an axis, which is what a turn is dragged along.</summary>
     private static void Circle(
-        Vec3 centre, Vec3 axis, float radius, (float R, float G, float B, float A) color)
+        Vec3 center, Vec3 axis, float radius, (float R, float G, float B, float A) color)
     {
         var (first, second) = Perpendiculars(axis);
         const int Steps = 32;
 
-        var previous = centre + (first * radius);
+        var previous = center + (first * radius);
 
         for (var i = 1; i <= Steps; i++)
         {
             var angle = i / (float)Steps * MathF.Tau;
-            var point = centre
+            var point = center
                 + (first * (MathF.Cos(angle) * radius))
                 + (second * (MathF.Sin(angle) * radius));
 
@@ -542,24 +542,24 @@ public partial struct ViewportGizmos
     /// <remarks>
     /// A handle is a control, not a part of the scene, and a control is the size a hand needs it
     /// to be. Sized from the object it is on, a handle on a coin is too small to grab and one on a
-    /// building fills the screen; sized in metres it shrinks to nothing as the camera backs away.
+    /// building fills the screen; sized in meters it shrinks to nothing as the camera backs away.
     /// It also has to be a size that does not change while it is being used, and the object's own
     /// bounds change with every frame of a scale drag.
     /// </remarks>
-    internal static float Reach(Entity camera, Vec3 centre)
+    internal static float Reach(Entity camera, Vec3 center)
     {
         if (camera.IsNone) return Fallback;
-        if (!Render.TryProject(camera, centre, out var screenX, out var screenY)) return Fallback;
+        if (!Render.TryProject(camera, center, out var screenX, out var screenY)) return Fallback;
         if (!Render.TryRay(camera, screenX, screenY, out var origin, out var forward))
         {
             return Fallback;
         }
 
-        var depth = Vec3.Dot(centre - origin, forward);
+        var depth = Vec3.Dot(center - origin, forward);
         if (depth <= 0f) return Fallback;
 
         // The ray through a point a fixed number of pixels away, taken to the same depth. How far
-        // that lands from the centre is what those pixels are worth in the world there, which is
+        // that lands from the center is what those pixels are worth in the world there, which is
         // the whole calculation. No field of view is assumed, so a camera set up any way at all
         // gets a handle the size it asked for.
         if (!Render.TryRay(camera, screenX + Pixels, screenY, out var edge, out var sideways))
@@ -567,7 +567,7 @@ public partial struct ViewportGizmos
             return Fallback;
         }
 
-        return (edge + (sideways * depth) - centre).Length;
+        return (edge + (sideways * depth) - center).Length;
     }
 
     /// <summary>How long a handle is on screen, in logical pixels.</summary>

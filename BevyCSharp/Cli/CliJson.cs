@@ -27,8 +27,8 @@ public readonly record struct CliError(string Code, string Message);
 /// { "success": true, "command": "command", "data": { }, "errors": [ ], "warnings": [ ] }
 /// </code>
 /// <para>
-/// Written by hand with <see cref="Utf8JsonWriter"/> rather than serialised from an object, because
-/// this library is built to be ahead-of-time compiled and a reflecting serialiser would take that
+/// Written by hand with <see cref="Utf8JsonWriter"/> rather than serialized from an object, because
+/// this library is built to be ahead-of-time compiled and a reflecting serializer would take that
 /// away from everything that references it.
 /// </para>
 /// </remarks>

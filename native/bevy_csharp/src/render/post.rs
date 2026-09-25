@@ -441,7 +441,7 @@ pub struct PendingEnvironment {
     pub diffuse: bevy::asset::Handle<bevy::image::Image>,
     /// The sharp one, which is what a polished surface reflects.
     pub specular: bevy::asset::Handle<bevy::image::Image>,
-    /// How bright, in candelas per square metre.
+    /// How bright, in candelas per square meter.
     pub intensity: f32,
     /// Which way the map is turned.
     pub rotation: bevy::math::Quat,
@@ -557,7 +557,7 @@ pub fn reinterpret_cubemaps(
 ///
 /// The image is a column of six square faces, in the order every cubemap texture uses, and it is
 /// reinterpreted as a cube once it has loaded. `brightness` scales the samples into the units the
-/// rest of the scene is lit in, which are candelas per square metre, so the useful numbers are in
+/// rest of the scene is lit in, which are candelas per square meter, so the useful numbers are in
 /// the hundreds or thousands and a brightness of `1` comes out black.
 ///
 /// A negative `image` takes the skybox off. A null `rotation` leaves the cube unturned; otherwise
@@ -1127,8 +1127,8 @@ pub unsafe extern "C" fn bcs_render_set_effects(
 /// direction and color, so moving that light moves the sun and a scene without one gets a
 /// night sky.
 ///
-/// The planet is metres across, and Bevy places it so the ground sits at the origin. A scene
-/// measured in something other than metres says so with `scale` rather than by moving anything.
+/// The planet is meters across, and Bevy places it so the ground sits at the origin. A scene
+/// measured in something other than meters says so with `scale` rather than by moving anything.
 ///
 /// # Safety
 /// `config` must point to a readable [`BcsAtmosphereConfig`].

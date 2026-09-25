@@ -162,7 +162,7 @@ public static class EditorPanes
         // always there once it is docked.
         //
         // In the middle of the gap the panel keeps to the left of its cards, which is the gap a
-        // person sees between the scene and the card. Centred on the window's own edge instead,
+        // person sees between the scene and the card. Centered on the window's own edge instead,
         // the half of it outside the window is clipped away and what is left is a pill sliced down
         // its length.
         EditorSurface.Grab(

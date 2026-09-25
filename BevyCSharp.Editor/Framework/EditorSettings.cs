@@ -207,7 +207,7 @@ public static class EditorSettings
     }
 
     /// <summary>
-    /// Puts saved values back, ignoring anything it no longer recognises.
+    /// Puts saved values back, ignoring anything it no longer recognizes.
     /// </summary>
     /// <remarks>
     /// A line naming a setting this build does not have is skipped rather than reported. A saved

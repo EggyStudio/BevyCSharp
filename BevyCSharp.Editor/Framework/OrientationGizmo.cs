@@ -10,7 +10,7 @@ namespace BevyCSharp.Editor.Framework;
 /// <remarks>
 /// <para>
 /// Drawn flat, in the interface, rather than as lines in the world. A cross put into the scene a
-/// few centimetres in front of the camera and off to one side is seen through the same perspective
+/// few centimeters in front of the camera and off to one side is seen through the same perspective
 /// as everything else, and perspective at the edge of a wide view shears it, so the arms come out
 /// at angles that say nothing about where the world is pointing. What a person reads this for is
 /// the direction of three axes, so it is drawn the way a direction is drawn, with no depth at all.

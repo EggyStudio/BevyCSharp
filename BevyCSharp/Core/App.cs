@@ -275,7 +275,7 @@ public sealed unsafe class App : IDisposable
                     bus.Send(new FileHovered(path));
                     break;
                 case 2:
-                    bus.Send(new FileHoverCancelled());
+                    bus.Send(new FileHoverCanceled());
                     break;
             }
         }
@@ -808,7 +808,7 @@ public sealed unsafe class App : IDisposable
     /// This is how you confirm which backend you really got. Asking for
     /// <see cref="GraphicsBackend.Vulkan"/> and reading "Vulkan | ..." back is the difference
     /// between believing and knowing. Only valid from inside a system, once the renderer has
-    /// initialised, so <see cref="Stage.Startup"/> at the earliest.
+    /// initialized, so <see cref="Stage.Startup"/> at the earliest.
     /// </remarks>
     public static string? DescribeAdapter()
     {

@@ -76,7 +76,7 @@ public sealed class ScaleTests
                 ticks.Add(row.Component.Ticks);
                 positions.Add(row.Component.X);
 
-                // Each invocation must have been handed its own entity, not a neighbour's.
+                // Each invocation must have been handed its own entity, not a neighbor's.
                 if (row.Component.SeenEntityIndex != row.Entity.Index)
                     entityBindingsCorrect = false;
             }
@@ -118,7 +118,7 @@ public sealed class ScaleTests
         // something to assert on.
         Assert.True(
             Interlocked.Read(ref BehaviorRunners.ParallelChunkCount) > 0,
-            $"{ParticleCount} entities should have been parallelised, but the sequential path ran");
+            $"{ParticleCount} entities should have been parallelized, but the sequential path ran");
         Assert.NotEmpty(ParticleProbe.Threads);
     }
 

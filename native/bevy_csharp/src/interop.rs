@@ -218,8 +218,8 @@ pub struct BcsConfig {
     /// build and is ignored when `headless` is set, which asks for no renderer at all. `width` and
     /// `height` size the image the way they would size the window.
     pub offscreen: u32,
-    /// How many world units a metre is, for every spatial sound that does not say otherwise. `0`
-    /// keeps Bevy's own of one, which is what a world measured in metres wants.
+    /// How many world units a meter is, for every spatial sound that does not say otherwise. `0`
+    /// keeps Bevy's own of one, which is what a world measured in meters wants.
     pub spatial_scale: f32,
 }
 
@@ -277,7 +277,7 @@ pub struct BcsMonitor {
 
 /// One video mode a monitor can be driven at.
 ///
-/// A resolution, a colour depth and a refresh rate together, which is what exclusive fullscreen
+/// A resolution, a color depth and a refresh rate together, which is what exclusive fullscreen
 /// takes the screen over with. A monitor offers a fixed list of these and can be driven at no
 /// others, so a settings screen offers what the list holds rather than a pair of number boxes.
 #[repr(C)]
@@ -335,12 +335,12 @@ pub struct BcsPostConfig {
     /// `2` Reinhard luminance, `3` ACES fitted, `4` AgX, `5` somewhat boring, `6` TonyMcMapface,
     /// `7` Blender filmic.
     pub tonemapping: i32,
-    /// Non-zero to dither before quantising, which hides banding across a gradient.
+    /// Non-zero to dither before quantizing, which hides banding across a gradient.
     pub dither: i32,
     /// Non-zero to draw into a high dynamic range target, which is what lets a highlight be
     /// brighter than white and what bloom reads.
     pub hdr: i32,
-    /// Samples per pixel taken while rasterising: `1` off, or `2`, `4`, `8`.
+    /// Samples per pixel taken while rasterizing: `1` off, or `2`, `4`, `8`.
     pub msaa: i32,
     /// The antialiasing that runs as a pass over the finished picture: `0` none, `1` FXAA,
     /// `2` SMAA, `3` temporal, which needs `msaa` off and a 3D camera.
@@ -375,16 +375,16 @@ pub struct BcsPostConfig {
 pub struct BcsEffectsConfig {
     /// How out-of-focus depths are blurred: `0` not at all, `1` gaussian, `2` bokeh.
     pub dof_mode: i32,
-    /// Distance in metres to what is in focus.
+    /// Distance in meters to what is in focus.
     pub focal_distance: f32,
     /// Aperture in f-stops. Smaller opens the lens, which is a shallower depth of field.
     pub aperture_f_stops: f32,
-    /// Height of the imaginary sensor, in metres. With the field of view this fixes the focal
+    /// Height of the imaginary sensor, in meters. With the field of view this fixes the focal
     /// length. `0` takes Bevy's own, which is the Super 35 cinema format.
     pub sensor_height: f32,
     /// Widest a blur may be, in pixels. `0` takes Bevy's own.
     pub max_blur_diameter: f32,
-    /// Distance past which nothing is blurred any further, in metres. `0` leaves it unbounded,
+    /// Distance past which nothing is blurred any further, in meters. `0` leaves it unbounded,
     /// which blurs a sky as hard as the cap allows.
     pub max_depth: f32,
     /// Fraction of a frame the shutter is open, `0` for no motion blur. `0.5` is a film camera's
@@ -413,16 +413,16 @@ pub struct BcsEffectsConfig {
     pub vignette: f32,
     /// How much of the picture is left untouched, as a fraction of the window.
     pub vignette_radius: f32,
-    /// Width of the edge between the clear centre and the dark corners.
+    /// Width of the edge between the clear center and the dark corners.
     pub vignette_smoothness: f32,
     /// Shape of that edge, `1` for a circle.
     pub vignette_roundness: f32,
-    /// Point the vignette is centred on, in fractions of the window.
+    /// Point the vignette is centered on, in fractions of the window.
     pub vignette_center: [f32; 2],
     /// How far the vignette is stretched to fit a window that is not square, `0` not at all and
     /// `1` exactly.
     pub vignette_edge_compensation: f32,
-    /// Linear color the corners are taken towards, usually black.
+    /// Linear color the corners are taken toward, usually black.
     pub vignette_color: [f32; 4],
     /// Non-zero to let the camera find its own exposure from what it can see.
     pub auto_exposure: i32,
@@ -462,10 +462,10 @@ pub struct BcsAtmosphereConfig {
     pub enabled: i32,
     /// Multiplies the density of the air, thickening or thinning the haze. `0` takes earth's.
     pub density: f32,
-    /// Scales the planet against the scene, for a world that is not measured in metres. `0`
+    /// Scales the planet against the scene, for a world that is not measured in meters. `0`
     /// takes one.
     pub scale: f32,
-    /// How far the scattering in front of the scene is computed for, in metres. `0` takes Bevy's
+    /// How far the scattering in front of the scene is computed for, in meters. `0` takes Bevy's
     /// own distance.
     pub haze_distance: f32,
     /// How finely the sky is computed: `0` Bevy's own, `1` cheaper, `2` finer. Every one of them
@@ -515,7 +515,7 @@ pub struct BcsGizmoConfig {
     /// dropped. What the fields below mean depends on this, because every shape is described by
     /// the same handful of numbers.
     pub kind: i32,
-    /// Where the shape sits: a line's start, or the centre of everything else.
+    /// Where the shape sits: a line's start, or the center of everything else.
     pub start: [f32; 3],
     /// The second set of numbers, read differently by each shape that needs one.
     ///
@@ -542,9 +542,9 @@ pub struct BcsGizmoConfig {
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct BcsGradingSection {
-    /// Below one drains color towards grey, above one spreads it out. One leaves it alone.
+    /// Below one drains color toward gray, above one spreads it out. One leaves it alone.
     pub saturation: f32,
-    /// Below one pulls towards neutral grey, above one pushes away from it.
+    /// Below one pulls toward neutral gray, above one pushes away from it.
     pub contrast: f32,
     /// The exponent, which mostly moves the top of the range.
     pub gamma: f32,
@@ -564,9 +564,9 @@ pub struct BcsGradingSection {
 pub struct BcsGradingConfig {
     /// Stops of exposure applied before anything else. `0` leaves it alone.
     pub exposure: f32,
-    /// White balance, towards blue below zero and towards orange above it.
+    /// White balance, toward blue below zero and toward orange above it.
     pub temperature: f32,
-    /// White balance the other way, towards green and towards magenta.
+    /// White balance the other way, toward green and toward magenta.
     pub tint: f32,
     /// Hue rotation in degrees.
     pub hue: f32,
@@ -611,14 +611,14 @@ pub struct BcsSpriteConfig {
     pub atlas: i32,
     /// Which frame of that layout to draw.
     pub atlas_index: u32,
-    /// Non-zero to move the sprite's origin to `anchor` rather than leaving it centred.
+    /// Non-zero to move the sprite's origin to `anchor` rather than leaving it centered.
     pub has_anchor: i32,
     /// Where the transform sits on the sprite, from `-0.5` to `0.5` on each axis.
     pub anchor: [f32; 2],
     /// How the picture meets `size`: `0` its own, `1` sliced, `2` tiled, `3` scaled to fit.
     pub mode: i32,
-    /// How a scaled picture fits: `0` fit centred, `1` fit at the start, `2` fit at the end,
-    /// `3` fill centred, `4` fill at the start, `5` fill at the end. Read only when `mode` is `3`.
+    /// How a scaled picture fits: `0` fit centered, `1` fit at the start, `2` fit at the end,
+    /// `3` fill centered, `4` fill at the start, `5` fill at the end. Read only when `mode` is `3`.
     pub scaling: i32,
     /// Left, top, right and bottom insets of the nine-slice border, in pixels.
     pub slice_border: [f32; 4],
@@ -644,7 +644,7 @@ pub struct BcsUiTextConfig {
     pub font: i32,
     /// Height of the glyphs in logical pixels.
     pub font_size: f32,
-    /// How the lines sit against each other: `0` left, `1` centred, `2` right, `3` justified,
+    /// How the lines sit against each other: `0` left, `1` centered, `2` right, `3` justified,
     /// `4` and `5` follow the writing direction.
     pub justify: i32,
     /// Where a line may be broken: `0` at word boundaries, `1` at any character, `2` at words
@@ -1087,7 +1087,7 @@ mod layout {
     /// The offsets `NativeInput` on the C# side mirrors, field by field.
     ///
     /// A managed struct that is the right *size* but has a field in the wrong place reads whatever
-    /// its neighbour wrote, and no check based on size catches it. One padding field of four bytes
+    /// its neighbor wrote, and no check based on size catches it. One padding field of four bytes
     /// in the mirror is enough to put `text_len` where `touch_count` is while both sides still
     /// measure 320 bytes, and the symptom is that typed text never arrives.
     #[test]

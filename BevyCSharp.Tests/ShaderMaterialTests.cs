@@ -391,7 +391,7 @@ public sealed class ShaderMaterialTests
 
         run.Until("compiled", _ => ProgramsReady()).Wait(Settled).Capture("picture").Go();
 
-        // The floor is lit near white. What is dark and grey, rather than black background or the
+        // The floor is lit near white. What is dark and gray, rather than black background or the
         // green ball, is shadow.
         return PictureRun.Count(
             run.Picture("picture"),

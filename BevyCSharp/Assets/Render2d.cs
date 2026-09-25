@@ -26,7 +26,7 @@ public static unsafe class Render2d
     /// </summary>
     /// <remarks>
     /// One world unit is one pixel, and the origin is the middle of the window, so a sprite at
-    /// <c>(100, 50)</c> sits a hundred pixels right and fifty up from the centre.
+    /// <c>(100, 50)</c> sits a hundred pixels right and fifty up from the center.
     /// </remarks>
     /// <param name="order">
     /// Draw order. Leave at zero for a 2D-only game. Above a 3D camera's order it draws over the
@@ -53,7 +53,7 @@ public static unsafe class Render2d
     /// <param name="tileHeight">Height of one frame, in pixels.</param>
     /// <param name="columns">How many frames across.</param>
     /// <param name="rows">How many frames down.</param>
-    /// <param name="padding">Gap between neighbouring frames, in pixels.</param>
+    /// <param name="padding">Gap between neighboring frames, in pixels.</param>
     /// <param name="offset">Margin before the first frame, in pixels.</param>
     /// <exception cref="BevyNativeException">A dimension is zero, or no app is running.</exception>
     /// <example>

@@ -64,7 +64,7 @@ impl Stage {
 
 /// Orders the C# systems Bevy cannot order for itself.
 ///
-/// Every C# system is an exclusive system, so Bevy serialises them but leaves the order
+/// Every C# system is an exclusive system, so Bevy serializes them but leaves the order
 /// unspecified. These sets pin down the three places where order actually matters:
 /// the frame-state sync must precede all user work, the command flush must follow all
 /// user `PostUpdate` work, and `Stage.Render` must precede `Stage.Last`.
@@ -286,7 +286,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
 
             // Drawing a mesh as its edges, which an editor offers as a way to outline what is
             // selected. Off unless something asks for it per entity, so it costs a pipeline that is
-            // never specialised in an app that never does.
+            // never specialized in an app that never does.
             app.add_plugins(bevy::pbr::wireframe::WireframePlugin::default());
 
             // Materials drawn by shaders the game wrote, and what compiles and reloads them. The
@@ -406,7 +406,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         ));
 
         // Materials are data as much as meshes are, so a render build that was asked for a
-        // headless app still initialises them. Otherwise building one would fail on a bridge
+        // headless app still initializes them. Otherwise building one would fail on a bridge
         // that plainly has the renderer, which reads as a bug rather than a configuration.
         #[cfg(feature = "render")]
         init_asset_once::<bevy::pbr::StandardMaterial>(&mut app);
@@ -1111,7 +1111,7 @@ pub extern "C" fn bcs_abi_version() -> i32 {
 /// Writes at most `capacity` bytes into `out` (not NUL-terminated) and returns the number of
 /// bytes the description needs. A return value greater than `capacity` means nothing usable was
 /// written; grow the buffer and call again. Returns [`status::UNSUPPORTED`] in a headless build
-/// or before the renderer has initialised.
+/// or before the renderer has initialized.
 ///
 /// # Safety
 /// `out` must be valid for `capacity` writes.

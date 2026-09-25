@@ -160,12 +160,13 @@ anything checked in, by repository-relative path.
 
 ## Spelling
 
-`behavior` rather than `behaviour`, and `color` rather than `colour`, in prose as well as in code.
-Both match the public API, and a word that is spelled one way in a type name and another in the
-sentence describing it reads as two words.
+American spelling, everywhere, in prose as well as in code: `behavior`, `color`, `center`,
+`gray`, `meter`, `neighbor`, `initialize`, `serialize`, `canceled`, `modeled`, `toward`. The public
+API is spelled that way, and so are Bevy, .NET and wgpu, and a word spelled one way in a type name
+and another in the sentence describing it reads as two words.
 
-Otherwise either British or American spelling is acceptable, provided a single file is
-internally consistent.
+A name that comes from outside is kept as it is, such as .NET's `StringMarshalling`, a file name in
+a third-party icon set, or the text of a license.
 
 ## Scope
 

@@ -58,7 +58,7 @@ public partial struct Scene
         });
 
         // The lens it is drawn through. Focus is on the cube at the origin, so the checker runs
-        // soft towards the horizon, and the vignette pulls the eye in from the corners. Judge
+        // soft toward the horizon, and the vignette pulls the eye in from the corners. Judge
         // either against a run with this call removed, which is the only way to tell an effect
         // from an imagined one.
         Render.SetEffects(camera, new EffectSettings

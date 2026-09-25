@@ -61,10 +61,10 @@ public readonly record struct FileDropped(string Path);
 /// </summary>
 /// <remarks>
 /// The chance to show what the drop would do, before it happens. Every hover ends in either a
-/// <see cref="FileDropped"/> or a <see cref="FileHoverCancelled"/>.
+/// <see cref="FileDropped"/> or a <see cref="FileHoverCanceled"/>.
 /// </remarks>
 /// <param name="Path">The absolute path of the file being dragged.</param>
 public readonly record struct FileHovered(string Path);
 
 /// <summary>The drag left the window without dropping, so any hover feedback should be cleared.</summary>
-public readonly record struct FileHoverCancelled;
+public readonly record struct FileHoverCanceled;

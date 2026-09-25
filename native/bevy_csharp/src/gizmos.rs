@@ -20,7 +20,7 @@ use crate::interop::{status, BcsGizmoConfig};
 pub struct QueuedGizmo {
     /// Which shape. See [`crate::interop::BcsGizmoConfig::kind`] for the list.
     pub kind: i32,
-    /// Where the shape sits: a line's start, or the centre of everything else.
+    /// Where the shape sits: a line's start, or the center of everything else.
     pub start: [f32; 3],
     /// A line's far end, and for the shapes that need two or three more numbers, whatever
     /// [`crate::interop::BcsGizmoConfig::end`] says they are.
@@ -252,8 +252,8 @@ pub fn drain(
 
 /// Puts every gizmo in front of the scene, once, as the app starts.
 ///
-/// `depth_bias` is how a gizmo is moved towards or away from the camera before it is depth tested;
-/// `-1` is as far towards it as the range allows, which is another way of saying that nothing in
+/// `depth_bias` is how a gizmo is moved toward or away from the camera before it is depth tested;
+/// `-1` is as far toward it as the range allows, which is another way of saying that nothing in
 /// the scene can hide it.
 #[cfg(feature = "render")]
 pub fn draw_in_front(mut store: bevy::ecs::system::ResMut<bevy::gizmos::config::GizmoConfigStore>) {
@@ -338,7 +338,7 @@ pub extern "C" fn bcs_gizmo_configure(width: f32, layers: u32, enabled: i32, whi
 /// `1` mitred, `2` round and `3` bevelled, and `joint_resolution` is how many triangles a round
 /// joint is drawn with. `perspective` at non-zero makes the width a size at the near plane rather
 /// than a size on screen, so a line further away is drawn thinner, which only a 3D camera with a
-/// perspective projection can honour.
+/// perspective projection can honor.
 ///
 /// Separate from [`bcs_gizmo_configure`] because how thick a line is and who can see it is one
 /// decision and what the line looks like is another, and the first is what most callers set.

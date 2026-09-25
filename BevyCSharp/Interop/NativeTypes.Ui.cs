@@ -269,7 +269,7 @@ public struct NativeUiTextConfig
     /// <summary>Glyph height in logical pixels.</summary>
     public float FontSize;
 
-    /// <summary>0 left, 1 centred, 2 right, 3 justified, 4 start, 5 end.</summary>
+    /// <summary>0 left, 1 centered, 2 right, 3 justified, 4 start, 5 end.</summary>
     public int Justify;
 
     /// <summary>0 word boundaries, 1 any character, 2 word then character, 3 never.</summary>

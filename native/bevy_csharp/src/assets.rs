@@ -327,7 +327,7 @@ pub unsafe extern "C" fn bcs_asset_load_image(
 
 /// Writes the path an asset was loaded from into `out`, returning the length in bytes it needs.
 ///
-/// What turns a handle back into something a person recognises. A field holding an asset shows the
+/// What turns a handle back into something a person recognizes. A field holding an asset shows the
 /// file it points at rather than a number, and something saving a world writes the path rather
 /// than a key that means nothing next time the program runs.
 ///
@@ -461,7 +461,7 @@ pub extern "C" fn bcs_scene_spawn(asset: i32) -> u64 {
 /// image it describes stays a separate asset. That is why no image is passed here, and why one
 /// layout serves every sheet cut the same way.
 ///
-/// `padding` is the gap between neighbouring tiles and `offset` the margin before the first one,
+/// `padding` is the gap between neighboring tiles and `offset` the margin before the first one,
 /// both in pixels, both zero for a sheet cut flush to its edges.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_atlas_create(

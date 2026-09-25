@@ -21,7 +21,7 @@ public sealed class NativeComponentTests
         // The whole reason NativeComponents verifies layouts. Quat is SIMD-backed and sixteen
         // byte aligned on most targets, which pads Transform to 48 rather than the 40 its three
         // fields suggest. Getting this wrong would not throw; it would silently read the wrong
-        // bytes and corrupt neighbours on write.
+        // bytes and corrupt neighbors on write.
         Assert.Equal(12, Unsafe.SizeOf<Vec3>());
         Assert.Equal(16, Unsafe.SizeOf<Quat>());
         Assert.Equal(48, Unsafe.SizeOf<Transform>());
@@ -397,7 +397,7 @@ public sealed class NativeComponentTests
     public void VisibilityMirrorsAreSingleBytes()
     {
         // Bevy stores all three in a byte: an enum with three variants, a bool, and a bool pair
-        // packed into two bits. A mirror that widened any of them would read the neighbouring
+        // packed into two bits. A mirror that widened any of them would read the neighboring
         // component. This needs no world, so it holds on a headless build too.
         Assert.Equal(1, Unsafe.SizeOf<Visibility>());
         Assert.Equal(1, Unsafe.SizeOf<InheritedVisibility>());

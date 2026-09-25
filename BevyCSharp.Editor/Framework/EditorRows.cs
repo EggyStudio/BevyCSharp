@@ -17,7 +17,7 @@ namespace BevyCSharp.Editor.Framework;
 /// widths rather than two tables that happen to agree today.
 /// </para>
 /// <para>
-/// Weighted towards the value, for the same reason a component's fields are. A name that runs out
+/// Weighted toward the value, for the same reason a component's fields are. A name that runs out
 /// of room is still readable from its first half, and a value that runs out of room is a different
 /// value.
 /// </para>

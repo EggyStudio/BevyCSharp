@@ -46,7 +46,7 @@ public static unsafe class Gizmos
     /// What draws something that has no edge: a grid that thins into the distance rather than
     /// stopping at a square boundary, a trail that dies away behind what left it. Fading a line by
     /// cutting it into pieces and coloring each is the same picture with a seam every few
-    /// centimetres and one call per piece.
+    /// centimeters and one call per piece.
     /// </remarks>
     /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
     public static void Fade(
@@ -192,9 +192,9 @@ public static unsafe class Gizmos
     /// sweep a limb is allowed. It starts where the rotation's own X axis points and runs
     /// anticlockwise, so aiming an arc is a matter of turning it.
     /// </remarks>
-    /// <param name="center">The centre the arc is struck about.</param>
+    /// <param name="center">The center the arc is struck about.</param>
     /// <param name="rotation">Where the arc starts and which plane it lies in.</param>
-    /// <param name="radius">How far from the centre.</param>
+    /// <param name="radius">How far from the center.</param>
     /// <param name="angle">How much of the circle to draw, in radians.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
@@ -453,8 +453,8 @@ public static unsafe class Gizmos
 
     /// <summary>Draws part of a circle, flat, for a 2D camera.</summary>
     /// <inheritdoc cref="Rect2d" path="/remarks"/>
-    /// <param name="center">The centre the arc is struck about.</param>
-    /// <param name="radius">How far from the centre.</param>
+    /// <param name="center">The center the arc is struck about.</param>
+    /// <param name="radius">How far from the center.</param>
     /// <param name="angle">How much of the circle to draw, in radians.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="from">Where the arc starts, as an angle about Z in radians.</param>
@@ -661,7 +661,7 @@ public static unsafe class Gizmos
     /// </param>
     /// <param name="perspective">
     /// Whether the width is a size at the camera's near plane rather than a size on screen, so a
-    /// line further away is drawn thinner. Only a perspective 3D camera can honour it.
+    /// line further away is drawn thinner. Only a perspective 3D camera can honor it.
     /// </param>
     /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
     public static void SetLineStyle(

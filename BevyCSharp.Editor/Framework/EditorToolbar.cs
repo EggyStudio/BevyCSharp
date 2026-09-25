@@ -8,8 +8,8 @@ public enum ToolbarSlot
     /// <summary>Top left: the menu, and what acts on the whole editor.</summary>
     Left,
 
-    /// <summary>Top centre: what changes the mode of the viewport.</summary>
-    Centre,
+    /// <summary>Top center: what changes the mode of the viewport.</summary>
+    Center,
 
     /// <summary>Top right: what the editor is doing.</summary>
     Right,
@@ -31,7 +31,7 @@ public enum ToolbarSlot
 /// <param name="Label">What it says beside the icon, if anything.</param>
 /// <param name="Run">What pressing it does.</param>
 /// <param name="Active">Whether it is drawn as the one in force.</param>
-/// <param name="Order">Where it sits among its neighbours. Lower is first.</param>
+/// <param name="Order">Where it sits among its neighbors. Lower is first.</param>
 /// <param name="Enabled">
 /// Whether it can be pressed at all, or nothing for one that always can. A button for something
 /// there is nothing to do is drawn dim and answers no click, which is how a person learns there is
@@ -46,7 +46,7 @@ public enum ToolbarSlot
 /// The same shape as a menu row and for the same reason, which is that a game adding a mode to the
 /// viewport should add a line rather than edit a panel. Both halves are optional and either is
 /// enough. A picture alone makes a round button, a word alone makes a pill, and both together make
-/// a labelled one.
+/// a labeled one.
 /// </remarks>
 public sealed record ToolbarButton(
     ToolbarSlot Slot,

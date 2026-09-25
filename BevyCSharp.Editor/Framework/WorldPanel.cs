@@ -427,22 +427,22 @@ public static class WorldPanel
 
             var color = ImGui.GetColorU32(
                 EditorTheme.Alpha(EditorTheme.LiveText, over || picked ? 0.9f : 0.6f));
-            var centre = arrow + new Vector2(line * 0.5f, line * 0.5f);
+            var center = arrow + new Vector2(line * 0.5f, line * 0.5f);
 
             if (folded)
             {
                 draw.AddTriangleFilled(
-                    centre + new Vector2(-mark * 0.6f, -mark),
-                    centre + new Vector2(-mark * 0.6f, mark),
-                    centre + new Vector2(mark * 0.8f, 0f),
+                    center + new Vector2(-mark * 0.6f, -mark),
+                    center + new Vector2(-mark * 0.6f, mark),
+                    center + new Vector2(mark * 0.8f, 0f),
                     color);
             }
             else
             {
                 draw.AddTriangleFilled(
-                    centre + new Vector2(-mark, -mark * 0.6f),
-                    centre + new Vector2(mark, -mark * 0.6f),
-                    centre + new Vector2(0f, mark * 0.8f),
+                    center + new Vector2(-mark, -mark * 0.6f),
+                    center + new Vector2(mark, -mark * 0.6f),
+                    center + new Vector2(0f, mark * 0.8f),
                     color);
             }
 

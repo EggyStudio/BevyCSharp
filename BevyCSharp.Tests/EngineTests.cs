@@ -395,7 +395,7 @@ public sealed class UnitTests
     {
         var writer = new SystemDescriptor(_ => { }, "w").Write<Health>();
         var reader = new SystemDescriptor(_ => { }, "r").Read<Health>();
-        var unrelated = new SystemDescriptor(_ => { }, "u").Write<Armour>();
+        var unrelated = new SystemDescriptor(_ => { }, "u").Write<Armor>();
         var unannotated = new SystemDescriptor(_ => { }, "n");
 
         Assert.True(writer.ConflictsWith(reader));

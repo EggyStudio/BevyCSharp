@@ -33,7 +33,7 @@ public readonly record struct Capture(int Id)
 public sealed record CapturedImage(uint Width, uint Height, byte[] Pixels)
 {
     /// <summary>
-    /// The colour at a point, as four bytes.
+    /// The color at a point, as four bytes.
     /// </summary>
     /// <remarks>
     /// The one thing worth having a method for, because the arithmetic is where a reader of this

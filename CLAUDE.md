@@ -60,7 +60,7 @@ done
 The suite runs real headless engines through `EngineHarness` (`BevyCSharp.Tests/EngineFixture.cs`),
 which inverts assertions into systems, because everything ECS-touching needs a world on loan from
 a running system and there is no way to assert from outside the loop. Engine tests share the
-`"engine"` collection, which disables parallelisation, because two native apps at once is not
+`"engine"` collection, which disables parallelization, because two native apps at once is not
 allowed.
 Stop any serving session before running the suite.
 
@@ -83,7 +83,7 @@ Stop any serving session before running the suite.
   them; a file here usually carries more explanation than code.
 - Public API carries XML docs with a `<remarks>` section covering the reasoning and the traps.
 - Nothing in the library reflects at runtime, because the generators emit registrations that
-  module initialisers run, so everything survives trimming and AOT.
+  module initializers run, so everything survives trimming and AOT.
 - A `[Command]` method is a console command, a CLI verb and an editor console entry all at once.
   Adding one is writing one.
 - Prose in this repository follows `.github/STYLE.md`, which governs comments, XML documentation,

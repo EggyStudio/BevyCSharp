@@ -11,14 +11,14 @@ public delegate void SystemFn(World world);
 /// <para>
 /// Every C# system reaches Bevy as an <em>exclusive</em> system, one that takes the whole
 /// world. That is the only sound option while managed code can spawn, despawn and insert at
-/// any moment, so Bevy serialises C# systems against each other rather than running them in
+/// any moment, so Bevy serializes C# systems against each other rather than running them in
 /// parallel. The parallelism that matters is still there. A behavior's per-entity loop is
 /// fanned out across worker threads by the generated code, which is where the entity counts
 /// actually are.
 /// </para>
 /// <para>
 /// <see cref="Read{T}"/> and <see cref="Write{T}"/> therefore record intent rather than drive
-/// scheduling today. They are honoured by <see cref="ConflictsWith"/>, which the diagnostics
+/// scheduling today. They are honored by <see cref="ConflictsWith"/>, which the diagnostics
 /// overlay uses to explain ordering, and they are what a future non-exclusive fast path would
 /// key off.
 /// </para>
@@ -119,7 +119,7 @@ public sealed class SystemDescriptor
         return false;
     }
 
-    /// <summary>Runs the system, honouring <see cref="RunCondition"/>.</summary>
+    /// <summary>Runs the system, honoring <see cref="RunCondition"/>.</summary>
     /// <returns><see langword="true"/> if the system ran; <see langword="false"/> if skipped.</returns>
     public bool Invoke(World world)
     {

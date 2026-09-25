@@ -33,7 +33,7 @@ public enum MenuKind
 /// <param name="Order">Where it sits among its siblings. Lower is first.</param>
 /// <param name="Icon">
 /// A picture for the row, under the asset root, or nothing for a row that goes without one. A
-/// menu keeps a column for it either way, so the labels line up whether or not their neighbours
+/// menu keeps a column for it either way, so the labels line up whether or not their neighbors
 /// have pictures.
 /// </param>
 /// <param name="Keys">

@@ -15,18 +15,18 @@ namespace BevyCSharp.Editor.Behaviors;
 /// <para>
 /// What happens then is answered in the world rather than in pixels. A move is where the cursor's
 /// ray comes closest to the axis; a turn is where the ray meets the plane the axis is normal to; a
-/// stretch is how far along the axis that closest point has travelled. Dragging in pixels and
+/// stretch is how far along the axis that closest point has traveled. Dragging in pixels and
 /// scaling by some factor is what makes a gizmo feel like it is guessing.
 /// </para>
 /// </remarks>
 [Behavior]
 public partial struct TransformGizmo
 {
-    /// <summary>Which handle is being dragged: an axis, <see cref="Centre"/>, or -1.</summary>
+    /// <summary>Which handle is being dragged: an axis, <see cref="Center"/>, or -1.</summary>
     internal static int Axis { get; private set; } = -1;
 
     /// <summary>The handle that picks no axis: a drag across the screen rather than along a line.</summary>
-    internal const int Centre = 3;
+    internal const int Center = 3;
 
     /// <summary>The frame a drag last ended on, or a frame that never happens.</summary>
     /// <remarks>
@@ -61,7 +61,7 @@ public partial struct TransformGizmo
     /// <remarks>
     /// Captured once rather than followed, so a drag applies the same change to each of them from
     /// where each of them was. Reading them every frame instead would compound, because a hand that
-    /// moved a metre would move the second thing a metre per frame.
+    /// moved a meter would move the second thing a meter per frame.
     /// </remarks>
     private static (Entity Entity, Transform Was)[] _others = [];
 
@@ -100,8 +100,8 @@ public partial struct TransformGizmo
         if (!ctx.Ecs.TryGet<Transform>(entity, out var transform)) return;
         if (!Render.TryGetBounds(entity, out var min, out var max)) return;
 
-        var centre = (min + max) * 0.5f;
-        var reach = ViewportGizmos.Reach(camera, centre);
+        var center = (min + max) * 0.5f;
+        var reach = ViewportGizmos.Reach(camera, center);
         var axes = EditorTools.AxesFor(ctx.Ecs.GetOrDefault<GlobalTransform>(entity).Rotation);
 
         var nearest = -1;
@@ -109,7 +109,7 @@ public partial struct TransformGizmo
 
         for (var i = 0; i < 3; i++)
         {
-            var distance = ToHandle(camera, centre, reach, axes[i], x, y);
+            var distance = ToHandle(camera, center, reach, axes[i], x, y);
             if (distance is not { } near || near >= closest) continue;
 
             closest = near;
@@ -118,13 +118,13 @@ public partial struct TransformGizmo
 
         // The middle handle wins ties, because it is drawn on top of where the arms begin and a
         // press on the ball is unambiguous however near an arm's root it happens to be.
-        if (Render.TryProject(camera, centre, out var centreX, out var centreY))
+        if (Render.TryProject(camera, center, out var centerX, out var centerY))
         {
-            var reachPixels = ViewportGizmos.CentreSize * PixelsPerReach(camera, centre, reach);
+            var reachPixels = ViewportGizmos.Centersize * PixelsPerReach(camera, center, reach);
             var away = MathF.Sqrt(
-                ((x - centreX) * (x - centreX)) + ((y - centreY) * (y - centreY)));
+                ((x - centerX) * (x - centerX)) + ((y - centerY) * (y - centerY)));
 
-            if (away <= MathF.Max(reachPixels, Grab)) nearest = Centre;
+            if (away <= MathF.Max(reachPixels, Grab)) nearest = Center;
         }
 
         if (nearest < 0) return;
@@ -139,16 +139,16 @@ public partial struct TransformGizmo
         // is on screen rather than the entity's own origin, and the two are not the same thing for
         // a mesh whose origin sits in a corner. Measuring a turn about one while the ring is drawn
         // about the other is a gizmo that answers to a place nobody can see.
-        _centre = centre;
+        _center = center;
         _grabbedAt = (x, y);
-        _grabbedIn = PlanePoint(ctx, camera, x, y, centre) ?? centre;
-        _grabbedPixels = MathF.Max(1f, PixelsPerReach(camera, centre, reach));
+        _grabbedIn = PlanePoint(ctx, camera, x, y, center) ?? center;
+        _grabbedPixels = MathF.Max(1f, PixelsPerReach(camera, center, reach));
 
-        _start = nearest == Centre ? 0f : Measure(ctx, camera, x, y, centre) ?? 0f;
+        _start = nearest == Center ? 0f : Measure(ctx, camera, x, y, center) ?? 0f;
     }
 
     /// <summary>Where the handles are drawn about, for as long as one is held.</summary>
-    private static Vec3 _centre;
+    private static Vec3 _center;
 
     /// <summary>
     /// The three axes as they were when the handle was taken hold of.
@@ -174,10 +174,10 @@ public partial struct TransformGizmo
     private static float _grabbedPixels;
 
     /// <summary>How many pixels one unit of reach is worth on screen.</summary>
-    private static float PixelsPerReach(Entity camera, Vec3 centre, float reach)
+    private static float PixelsPerReach(Entity camera, Vec3 center, float reach)
     {
-        if (!Render.TryProject(camera, centre, out var fromX, out var fromY)) return 0f;
-        if (!Render.TryProject(camera, centre + (Vec3.UnitY * reach), out var toX, out var toY))
+        if (!Render.TryProject(camera, center, out var fromX, out var fromY)) return 0f;
+        if (!Render.TryProject(camera, center + (Vec3.UnitY * reach), out var toX, out var toY))
         {
             return 0f;
         }
@@ -194,7 +194,7 @@ public partial struct TransformGizmo
     /// middle handle feel like dragging the object itself rather than steering it.
     /// </remarks>
     private static Vec3? PlanePoint(
-        BehaviorContext ctx, Entity camera, float x, float y, Vec3 centre)
+        BehaviorContext ctx, Entity camera, float x, float y, Vec3 center)
     {
         if (!Render.TryRay(camera, x, y, out var origin, out var direction)) return null;
 
@@ -202,7 +202,7 @@ public partial struct TransformGizmo
         var denominator = Vec3.Dot(direction, normal);
         if (MathF.Abs(denominator) < 1e-4f) return null;
 
-        var travel = Vec3.Dot(centre - origin, normal) / denominator;
+        var travel = Vec3.Dot(center - origin, normal) / denominator;
         if (travel <= 0f) return null;
 
         return origin + (direction * travel);
@@ -219,15 +219,15 @@ public partial struct TransformGizmo
     /// A handle is grabbed by what it looks like. Move and scale draw a line out along the axis
     /// and are measured against that line; a turn draws a ring in the plane the axis is normal to,
     /// and measuring that against the line as well is why a ring could only be grabbed near its
-    /// centre, where nothing is drawn, and never on the part a hand reaches for.
+    /// center, where nothing is drawn, and never on the part a hand reaches for.
     /// </remarks>
     private static float? ToHandle(
-        Entity camera, Vec3 centre, float reach, Vec3 axis, float x, float y)
+        Entity camera, Vec3 center, float reach, Vec3 axis, float x, float y)
     {
         if (EditorTools.Current != EditorTool.Rotate)
         {
-            if (!Render.TryProject(camera, centre, out var fromX, out var fromY)) return null;
-            if (!Render.TryProject(camera, centre + (axis * reach), out var toX, out var toY))
+            if (!Render.TryProject(camera, center, out var fromX, out var fromY)) return null;
+            if (!Render.TryProject(camera, center + (axis * reach), out var toX, out var toY))
             {
                 return null;
             }
@@ -242,12 +242,12 @@ public partial struct TransformGizmo
         const int Steps = 32;
 
         float? closest = null;
-        var haveLast = Render.TryProject(camera, centre + (first * reach), out var lastX, out var lastY);
+        var haveLast = Render.TryProject(camera, center + (first * reach), out var lastX, out var lastY);
 
         for (var step = 1; step <= Steps; step++)
         {
             var angle = step / (float)Steps * MathF.Tau;
-            var point = centre
+            var point = center
                 + (first * (MathF.Cos(angle) * reach))
                 + (second * (MathF.Sin(angle) * reach));
 
@@ -288,7 +288,7 @@ public partial struct TransformGizmo
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Each about its own origin by default. Turning three things about a shared centre swings two
+    /// Each about its own origin by default. Turning three things about a shared center swings two
     /// of them across the level, which is occasionally what somebody wants and never what they
     /// expect from a first drag.
     /// </para>
@@ -310,7 +310,7 @@ public partial struct TransformGizmo
             Ratio(current.Scale.Y, _before.Scale.Y),
             Ratio(current.Scale.Z, _before.Scale.Z));
 
-        var about = EditorTools.Pivot == ToolPivot.Centre;
+        var about = EditorTools.Pivot == ToolPivot.Center;
 
         foreach (var (entity, was) in _others)
         {
@@ -328,12 +328,12 @@ public partial struct TransformGizmo
             }
 
             // Where it stands relative to the point the handles are on, turned and stretched the
-            // same way the handles were, and put back. A thing at the centre does not move, which
+            // same way the handles were, and put back. A thing at the center does not move, which
             // is what makes this read as turning the arrangement.
-            var out_ = was.Translation - _centre;
+            var out_ = was.Translation - _center;
             var swung = turned * out_;
 
-            now.Translation = _centre
+            now.Translation = _center
                 + new Vec3(swung.X * grew.X, swung.Y * grew.Y, swung.Z * grew.Z)
                 + moved;
 
@@ -349,7 +349,7 @@ public partial struct TransformGizmo
     {
         if (!ctx.Ecs.TryGet<Transform>(_subject, out var current)) return;
 
-        if (Axis == Centre)
+        if (Axis == Center)
         {
             ApplyFree(ctx, camera, x, y, ref current);
             ctx.Ecs.Set(_subject, current);
@@ -357,7 +357,7 @@ public partial struct TransformGizmo
             return;
         }
 
-        if (Measure(ctx, camera, x, y, _centre) is not { } now) return;
+        if (Measure(ctx, camera, x, y, _center) is not { } now) return;
 
         var axis = _axes[Axis];
 
@@ -377,7 +377,7 @@ public partial struct TransformGizmo
                 break;
 
             case EditorTool.Scale:
-                // How far the grabbed point has travelled, as a fraction of where it started,
+                // How far the grabbed point has traveled, as a fraction of where it started,
                 // which is what makes dragging outwards grow the thing rather than move it.
                 var reference = MathF.Abs(_start) < 0.001f ? 1f : _start;
                 var factor = EditorTools.Snapped(now / reference, EditorTools.ScaleStep);
@@ -407,15 +407,15 @@ public partial struct TransformGizmo
         switch (EditorTools.Current)
         {
             case EditorTool.Move:
-                if (PlanePoint(ctx, camera, x, y, _centre) is not { } now) return;
+                if (PlanePoint(ctx, camera, x, y, _center) is not { } now) return;
 
-                var travelled = now - _grabbedIn;
+                var traveled = now - _grabbedIn;
 
                 current.Translation = _before.Translation
                     + new Vec3(
-                        EditorTools.Snapped(travelled.X, EditorTools.MoveStep),
-                        EditorTools.Snapped(travelled.Y, EditorTools.MoveStep),
-                        EditorTools.Snapped(travelled.Z, EditorTools.MoveStep));
+                        EditorTools.Snapped(traveled.X, EditorTools.MoveStep),
+                        EditorTools.Snapped(traveled.Y, EditorTools.MoveStep),
+                        EditorTools.Snapped(traveled.Z, EditorTools.MoveStep));
                 return;
 
             case EditorTool.Rotate:
@@ -517,7 +517,7 @@ public partial struct TransformGizmo
     /// what keeps a drag exact however the camera is angled.
     /// </remarks>
     private static float? Measure(
-        BehaviorContext ctx, Entity camera, float x, float y, Vec3 centre)
+        BehaviorContext ctx, Entity camera, float x, float y, Vec3 center)
     {
         if (!Render.TryRay(camera, x, y, out var origin, out var direction)) return null;
 
@@ -529,16 +529,16 @@ public partial struct TransformGizmo
             var denominator = Vec3.Dot(direction, axis);
             if (MathF.Abs(denominator) < 1e-4f) return null;
 
-            var travel = Vec3.Dot(centre - origin, axis) / denominator;
+            var travel = Vec3.Dot(center - origin, axis) / denominator;
             if (travel <= 0f) return null;
 
-            var point = origin + (direction * travel) - centre;
+            var point = origin + (direction * travel) - center;
             var (first, second) = ViewportGizmos.Perpendiculars(axis);
 
             return MathF.Atan2(Vec3.Dot(point, second), Vec3.Dot(point, first));
         }
 
-        // The point on the axis nearest the ray, as a distance from the centre. Two lines that
+        // The point on the axis nearest the ray, as a distance from the center. Two lines that
         // do not meet still have a pair of closest points, and that is the honest answer to
         // where a drag along an axis has reached.
         var u = axis;
@@ -548,7 +548,7 @@ public partial struct TransformGizmo
         var determinant = 1f - (b * b);
         if (MathF.Abs(determinant) < 1e-5f) return null;
 
-        var w = centre - origin;
+        var w = center - origin;
         var d = Vec3.Dot(u, w);
         var e = Vec3.Dot(v, w);
 

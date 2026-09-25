@@ -1710,7 +1710,7 @@ public enum CullMode
     /// <summary>The ones facing the camera, which draws the inside of a closed mesh.</summary>
     Front = 1,
 
-    /// <summary>Neither, for anything modelled as a single sheet.</summary>
+    /// <summary>Neither, for anything modeled as a single sheet.</summary>
     None = 2,
 }
 

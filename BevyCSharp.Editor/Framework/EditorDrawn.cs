@@ -23,7 +23,7 @@ internal static class EditorDrawn
     /// <summary>What a glTF file's first mesh is called inside it.</summary>
     /// <remarks>
     /// A glTF holds many assets and a path alone names none of them, so a label picks one out.
-    /// The first primitive of the first mesh is what a file exported from a modelling tool as one
+    /// The first primitive of the first mesh is what a file exported from a modeling tool as one
     /// object holds, which is most of them. A file with several needs the label written by hand.
     /// </remarks>
     private const string FirstMesh = "#Mesh0/Primitive0";
@@ -227,7 +227,7 @@ internal static class EditorDrawn
     private static bool LooksLikeColor(string name)
     {
         var lower = name.ToLowerInvariant();
-        return lower.Contains("color") || lower.Contains("colour") || lower.Contains("tint")
+        return lower.Contains("color") || lower.Contains("color") || lower.Contains("tint")
             || lower.Contains("albedo") || lower.Contains("glow") || lower.Contains("emissive");
     }
 

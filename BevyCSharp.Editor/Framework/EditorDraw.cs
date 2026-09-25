@@ -145,7 +145,7 @@ public static class EditorDraw
     /// shape with a stroke through it is the shape for something that has been put away.
     /// </remarks>
     /// <param name="draw">What to draw into.</param>
-    /// <param name="middle">Where the eye is centred.</param>
+    /// <param name="middle">Where the eye is centered.</param>
     /// <param name="size">How wide it is, corner to corner.</param>
     /// <param name="open">Whether the thing it belongs to is being drawn.</param>
     /// <param name="color">What to draw it in.</param>
@@ -156,7 +156,7 @@ public static class EditorDraw
 
         // A quarter as tall as it is wide, which is the shape of an eye and not of a circle. The
         // control points are twice that out, because a quadratic curve reaches half way to the
-        // point it is bent towards.
+        // point it is bent toward.
         var tall = size * 0.26f;
 
         var left = middle - new Vector2(across, 0f);

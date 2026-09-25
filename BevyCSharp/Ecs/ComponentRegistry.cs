@@ -117,7 +117,7 @@ public static class ComponentType<T> where T : unmanaged
     /// ordinary C# component.
     /// </summary>
     /// <remarks>
-    /// Boxed once, when the class initialiser for this closed type runs, so the interface call
+    /// Boxed once, when the class initializer for this closed type runs, so the interface call
     /// costs nothing per operation. The members are read at most once per world after that.
     /// </remarks>
     private static readonly INativeComponent? NativeHandle = (object)default(T) as INativeComponent;

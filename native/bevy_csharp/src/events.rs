@@ -130,7 +130,7 @@ pub unsafe extern "C" fn bcs_window_events(out: *mut BcsWindowEvent, capacity: i
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::resource::Resource, Default)]
 pub struct FileDrops {
-    /// `0` dropped, `1` hovering, `2` the hover was cancelled.
+    /// `0` dropped, `1` hovering, `2` the hover was canceled.
     pub kinds: Vec<i32>,
     /// The path each one names, empty for a cancellation.
     pub paths: Vec<String>,

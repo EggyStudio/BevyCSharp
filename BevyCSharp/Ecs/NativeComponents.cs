@@ -274,7 +274,7 @@ public static class NativeComponents
     /// aligned on most targets, which pads <c>Transform</c> to 48 bytes rather than the 40 its
     /// three fields suggest, and on a target without that alignment it would be 40 after all.
     /// Reading a mismatched layout would not throw; it would return plausible nonsense and
-    /// corrupt neighbouring components on write. Asking the engine for the real number costs one
+    /// corrupt neighboring components on write. Asking the engine for the real number costs one
     /// call, once, and turns the whole class of mistake into a startup error.
     /// </remarks>
     private static unsafe void VerifyLayout(string name, int id, int expectedSize)

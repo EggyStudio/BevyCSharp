@@ -12,10 +12,10 @@ namespace Bevy;
 /// </remarks>
 public sealed class GradingSection
 {
-    /// <summary>Below one drains color towards grey, above one spreads it out.</summary>
+    /// <summary>Below one drains color toward gray, above one spreads it out.</summary>
     public float Saturation { get; set; } = 1f;
 
-    /// <summary>Below one pulls colors towards neutral grey, above one pushes them away.</summary>
+    /// <summary>Below one pulls colors toward neutral gray, above one pushes them away.</summary>
     public float Contrast { get; set; } = 1f;
 
     /// <summary>The exponent, which mostly moves the top of the range.</summary>
@@ -68,10 +68,10 @@ public sealed class GradingSettings
     /// <summary>Stops of exposure applied before anything else. Zero leaves it alone.</summary>
     public float Exposure { get; set; }
 
-    /// <summary>White balance, towards blue below zero and towards orange above it.</summary>
+    /// <summary>White balance, toward blue below zero and toward orange above it.</summary>
     public float Temperature { get; set; }
 
-    /// <summary>White balance the other way, towards green and towards magenta.</summary>
+    /// <summary>White balance the other way, toward green and toward magenta.</summary>
     public float Tint { get; set; }
 
     /// <summary>Hue rotation, in degrees.</summary>

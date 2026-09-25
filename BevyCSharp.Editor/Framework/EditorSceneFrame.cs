@@ -68,7 +68,7 @@ public static class EditorSceneFrame
 
     /// <summary>One corner's worth of what a rounded rectangle leaves out.</summary>
     /// <param name="draw">What to draw into.</param>
-    /// <param name="middle">Where the corner's arc is centred.</param>
+    /// <param name="middle">Where the corner's arc is centered.</param>
     /// <param name="radius">How large the arc is.</param>
     /// <param name="from">Where the arc starts, in radians.</param>
     /// <param name="to">Where it ends.</param>

@@ -12,7 +12,7 @@ namespace Bevy.Generator;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Found at compile time and registered by a module initialiser, so a console reflects over
+/// Found at compile time and registered by a module initializer, so a console reflects over
 /// nothing at runtime, a command survives trimming, and a command that does not compile is not a
 /// command. The alternative is scanning every loaded assembly on the first keystroke, which is
 /// what a console usually does and what makes it the slowest thing in a program to open.
@@ -211,7 +211,7 @@ public sealed class CommandGenerator : IIncrementalGenerator
 
             source.Append("            })");
 
-            // A command with no arguments gets no initialiser, so the common case reads the way it
+            // A command with no arguments gets no initializer, so the common case reads the way it
             // did before there was a schema to carry.
             if (model.Parameters.Items.Count == 0)
             {

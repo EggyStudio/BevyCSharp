@@ -13,7 +13,7 @@ public enum TextJustify
     /// <summary>Lines start at the left edge.</summary>
     Left = 0,
 
-    /// <summary>Lines are centred on each other.</summary>
+    /// <summary>Lines are centered on each other.</summary>
     Center = 1,
 
     /// <summary>Lines end at the right edge.</summary>

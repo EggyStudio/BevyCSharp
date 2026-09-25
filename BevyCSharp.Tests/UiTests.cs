@@ -579,7 +579,7 @@ public sealed class UiTests
         Assert.Equal("(8px, 0px, 8px, 0px)", Sides.Horizontal(Length.Px(8f)).ToString());
 
         // Zero and Auto are not the same distance. An automatic margin takes the space the
-        // parent has left over, which is what centres a child, and a zero one leaves it.
+        // parent has left over, which is what centers a child, and a zero one leaves it.
         Assert.NotEqual(Length.Auto, Length.Zero);
     }
 

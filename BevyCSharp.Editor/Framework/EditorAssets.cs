@@ -16,7 +16,7 @@ public readonly record struct AssetEntry(string Name, string Path, bool IsDirect
 /// <para>
 /// An asset browser over the same directory the engine loads from, which is the honest thing to
 /// show, since what is listed here is exactly what a path in a document or a script would find.
-/// Nothing is imported and nothing is catalogued, because the engine does not work that way either.
+/// Nothing is imported and nothing is cataloged, because the engine does not work that way either.
 /// </para>
 /// <para>
 /// Selection is separate from the world's, because an asset is not an entity and a panel showing

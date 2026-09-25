@@ -9,7 +9,7 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// A browser over the asset directory itself, where what is listed is exactly what a path in a
-/// script or a component would find, because nothing here imports or catalogues anything. What a
+/// script or a component would find, because nothing here imports or catalogs anything. What a
 /// row shows is
 /// <see cref="EditorAssets"/>'s to answer; this draws it.
 /// </remarks>

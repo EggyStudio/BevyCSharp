@@ -9,7 +9,7 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// A headless run has no keyboard and no touchscreen, so what these check is that the mirrored
-/// state is empty rather than uninitialised, and that reading it is safe every frame. Whether a
+/// state is empty rather than uninitialized, and that reading it is safe every frame. Whether a
 /// real keypress arrives as the right character is confirmed by typing into the sample, which
 /// echoes what it was given.
 /// </remarks>

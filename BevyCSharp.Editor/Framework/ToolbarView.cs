@@ -35,7 +35,7 @@ public static class ToolbarView
     internal static void Draw(BehaviorContext ctx)
     {
         Group(ctx, ToolbarSlot.Left, new Vector2(0f, 0f), new Vector2(0f, 0f));
-        Group(ctx, ToolbarSlot.Centre, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
+        Group(ctx, ToolbarSlot.Center, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
         Group(ctx, ToolbarSlot.Right, new Vector2(1f, 0f), new Vector2(1f, 0f));
         Group(ctx, ToolbarSlot.BottomRight, new Vector2(1f, 1f), new Vector2(1f, 1f));
 

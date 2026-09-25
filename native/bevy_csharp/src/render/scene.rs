@@ -772,7 +772,7 @@ pub unsafe extern "C" fn bcs_render_set_sprite(entity: u64, config: *const BcsSp
                 entity_mut.insert(sprite);
 
                 // The anchor is its own component rather than a field on the sprite, so an
-                // entity that was never given one keeps Bevy's centred default.
+                // entity that was never given one keeps Bevy's centered default.
                 if config.has_anchor != 0 {
                     entity_mut.insert(Anchor(Vec2::new(config.anchor[0], config.anchor[1])));
                 }

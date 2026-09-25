@@ -64,10 +64,10 @@ public static class EditorCommands
         EditorSettings.Choice(
             "Editor",
             "What several things turn about",
-            ["origins", "centre"],
-            static () => EditorTools.Pivot == ToolPivot.Centre ? "centre" : "origins",
+            ["origins", "center"],
+            static () => EditorTools.Pivot == ToolPivot.Center ? "center" : "origins",
             static chosen => EditorTools.Pivot =
-                chosen == "centre" ? ToolPivot.Centre : ToolPivot.Origins,
+                chosen == "center" ? ToolPivot.Center : ToolPivot.Origins,
             2);
 
         EditorSettings.Flag(
@@ -240,7 +240,7 @@ public static class EditorCommands
             var chosen = tool;
 
             EditorToolbar.Add(new ToolbarButton(
-                ToolbarSlot.Centre,
+                ToolbarSlot.Center,
                 EditorIcons.For(tool),
                 static () => string.Empty,
                 _ => EditorTools.Current = chosen,
@@ -252,7 +252,7 @@ public static class EditorCommands
         // A word rather than a picture, because there is no picture of "the world's axes" that
         // anyone reads faster than the word for it.
         EditorToolbar.Add(new ToolbarButton(
-            ToolbarSlot.Centre,
+            ToolbarSlot.Center,
             null,
             static () => EditorTools.Space == ToolSpace.Local ? "local" : "global",
             static _ => EditorTools.Space = EditorTools.Space == ToolSpace.Local
@@ -265,18 +265,18 @@ public static class EditorCommands
         // The other thing a drag on the handles has to be told, and a word for the same reason,
         // because no picture says "about each thing's own origin" faster than the word does.
         EditorToolbar.Add(new ToolbarButton(
-            ToolbarSlot.Centre,
+            ToolbarSlot.Center,
             null,
-            static () => EditorTools.Pivot == ToolPivot.Centre ? "centre" : "origins",
-            static _ => EditorTools.Pivot = EditorTools.Pivot == ToolPivot.Centre
+            static () => EditorTools.Pivot == ToolPivot.Center ? "center" : "origins",
+            static _ => EditorTools.Pivot = EditorTools.Pivot == ToolPivot.Center
                 ? ToolPivot.Origins
-                : ToolPivot.Centre,
-            static () => EditorTools.Pivot == ToolPivot.Centre,
+                : ToolPivot.Center,
+            static () => EditorTools.Pivot == ToolPivot.Center,
             10,
             "Turn and scale about the middle of what is picked"));
 
         EditorToolbar.Add(new ToolbarButton(
-            ToolbarSlot.Centre,
+            ToolbarSlot.Center,
             EditorIcons.Snap,
             static () => string.Empty,
             static _ =>

@@ -148,7 +148,7 @@ public sealed class ComponentField
     /// <remarks>
     /// A field the attributes marked as read only answers no, whatever the generator emitted,
     /// because it is the same question from a tool's point of view, and answering it in one place
-    /// means every drawer honours the attribute without knowing about it.
+    /// means every drawer honors the attribute without knowing about it.
     /// </remarks>
     public bool IsWritable => _write is not null && !Hints.ReadOnly;
 
@@ -308,7 +308,7 @@ public sealed class ComponentSchema
 /// </summary>
 /// <remarks>
 /// <para>
-/// Filled by generated module initialisers, one per assembly, so a project that declares
+/// Filled by generated module initializers, one per assembly, so a project that declares
 /// behaviors contributes its schemas by existing rather than by registering them. Bevy's own
 /// components are added here.
 /// </para>

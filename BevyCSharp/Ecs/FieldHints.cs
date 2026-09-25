@@ -28,7 +28,7 @@ public readonly record struct FieldCondition(string Field, string? Value = null,
 /// <para>
 /// Anything that reads these is free to ignore what it does not understand, and a drawer written
 /// by a game can put its own meaning on the same hints. What is here is what the editor knows how
-/// to honour; a field with none of them is drawn the plain way.
+/// to honor; a field with none of them is drawn the plain way.
 /// </para>
 /// </remarks>
 /// <param name="Label">What to call the field, or nothing for its own name.</param>
@@ -52,7 +52,7 @@ public readonly record struct FieldCondition(string Field, string? Value = null,
 /// <param name="NoteKind">How loudly that sentence is said.</param>
 /// <param name="Conditions">What has to hold for it to be shown at all.</param>
 /// <param name="Changed">The methods to call once it has been changed.</param>
-/// <param name="Order">Where it sits among its neighbours.</param>
+/// <param name="Order">Where it sits among its neighbors.</param>
 /// <param name="Asset">Which sort of asset the field holds, when it holds one.</param>
 /// <param name="Extensions">
 /// Which files to offer for it, separated by spaces, or nothing for the ones that go with the
@@ -103,7 +103,7 @@ public sealed record FieldHints(
 /// <param name="Label">What the button says, or nothing for the method's own name.</param>
 /// <param name="Tooltip">A sentence about what pressing it does.</param>
 /// <param name="Hidden">Whether it is offered at all.</param>
-/// <param name="Line">Whether the button shares a line with its neighbours, and where in it.</param>
+/// <param name="Line">Whether the button shares a line with its neighbors, and where in it.</param>
 /// <param name="Weight">How much of that line it takes against the others on it.</param>
 /// <param name="Space">Whether a blank row goes above it.</param>
 /// <param name="Separator">Whether a line goes above it.</param>

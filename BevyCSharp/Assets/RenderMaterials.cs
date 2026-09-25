@@ -177,7 +177,7 @@ public sealed class MaterialSettings
     /// Draw back faces as well as front ones.
     /// </summary>
     /// <remarks>
-    /// For anything modelled as a single sheet: a leaf, a flag, a curtain. It doubles the work
+    /// For anything modeled as a single sheet: a leaf, a flag, a curtain. It doubles the work
     /// for that surface, and lighting on the back face uses the front face's normal.
     /// </remarks>
     public bool DoubleSided { get; set; }

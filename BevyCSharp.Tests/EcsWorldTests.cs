@@ -10,7 +10,7 @@ public struct Health
     public int Value;
 }
 
-public struct Armour
+public struct Armor
 {
     public float Rating;
 }
@@ -195,7 +195,7 @@ public sealed class EcsWorldTests
         harness.OnContext(Stage.Startup, ctx =>
         {
             for (var i = 0; i < 7; i++) ctx.Ecs.Add(ctx.Ecs.Spawn(), new Health());
-            for (var i = 0; i < 3; i++) ctx.Ecs.Add(ctx.Ecs.Spawn(), new Armour());
+            for (var i = 0; i < 3; i++) ctx.Ecs.Add(ctx.Ecs.Spawn(), new Armor());
         });
 
         harness.OnContext(Stage.Update, ctx => counted = ctx.Ecs.Count<Health>());
@@ -310,7 +310,7 @@ public sealed class EcsWorldTests
             var second = ctx.Ecs.Spawn();
 
             // Index must be a small slot number, not the handle's raw bits. Bevy packs the
-            // index through a niche-optimised type, so masking the handle yields something near
+            // index through a niche-optimized type, so masking the handle yields something near
             // uint.MaxValue, which is exactly the bug this guards against.
             Assert.True(first.Index < 1024, $"index looks like raw bits: {first.Index}");
             Assert.NotEqual((uint)(first.Bits & 0xFFFF_FFFF), first.Index);
@@ -332,18 +332,18 @@ public sealed class EcsWorldTests
     {
         using var harness = new EngineHarness(frames: 2);
         var healthId = -1;
-        var armourId = -1;
+        var armorId = -1;
 
         harness.OnContext(Stage.Startup, _ =>
         {
             healthId = EcsWorld.ComponentId<Health>();
-            armourId = EcsWorld.ComponentId<Armour>();
+            armorId = EcsWorld.ComponentId<Armor>();
         });
 
         harness.OnContext(Stage.Update, _ =>
         {
             Assert.Equal(healthId, EcsWorld.ComponentId<Health>());
-            Assert.NotEqual(healthId, armourId);
+            Assert.NotEqual(healthId, armorId);
         });
 
         harness.Run();

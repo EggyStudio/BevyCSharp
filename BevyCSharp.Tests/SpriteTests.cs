@@ -243,7 +243,7 @@ public sealed class SpriteTests
                 {
                     Size = (64f, 32f),
                     Mode = SpriteImageMode.Scaled,
-                    Scaling = SpriteScaling.FitCentre,
+                    Scaling = SpriteScaling.FitCenter,
                 });
         });
 

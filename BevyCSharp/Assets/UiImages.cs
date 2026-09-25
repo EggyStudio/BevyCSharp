@@ -119,8 +119,8 @@ public enum SliceTiling
     Sides = 1,
 
     /// <summary>The middle tiles.</summary>
-    Centre = 2,
+    Center = 2,
 
     /// <summary>Both, which is what a patterned panel wants.</summary>
-    All = Sides | Centre,
+    All = Sides | Center,
 }

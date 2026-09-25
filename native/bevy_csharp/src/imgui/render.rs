@@ -223,7 +223,7 @@ fn camera(mut commands: Commands) {
         // A layer of its own, which nothing else is on.
         //
         // Every 2D camera is a camera the gizmo renderer queues into, and a gizmo queued into this
-        // one is drawn a second time in screen space, where a line a few metres long in the world
+        // one is drawn a second time in screen space, where a line a few meters long in the world
         // becomes a mark a few pixels wide at the middle of the window, over the scene. Putting
         // this camera where the gizmos are not costs nothing, because what it draws is one pass of
         // our own, which asks about `InterfaceView` and not about layers.

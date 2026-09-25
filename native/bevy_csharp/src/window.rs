@@ -433,7 +433,7 @@ pub unsafe extern "C" fn bcs_monitor_name(index: i32, out: *mut u8, capacity: i3
 
 /// Reports how many video modes a monitor offers.
 ///
-/// A video mode is a resolution, a colour depth and a refresh rate together, which is what an
+/// A video mode is a resolution, a color depth and a refresh rate together, which is what an
 /// exclusive fullscreen window takes over the screen with. Returns [`status::NO_ENTITY`] where
 /// there is no monitor at that index.
 #[unsafe(no_mangle)]

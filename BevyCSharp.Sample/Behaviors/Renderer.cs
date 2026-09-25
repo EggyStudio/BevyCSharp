@@ -76,7 +76,7 @@ public partial struct Renderer
         foreach (var hovered in ctx.Read<FileHovered>())
             Console.WriteLine($"[Renderer] hovering {hovered.Path}");
 
-        foreach (var _ in ctx.Read<FileHoverCancelled>())
+        foreach (var _ in ctx.Read<FileHoverCanceled>())
             Console.WriteLine("[Renderer] the drag left without dropping");
 
         foreach (var dropped in ctx.Read<FileDropped>())

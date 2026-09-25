@@ -363,7 +363,7 @@ public sealed class ShaderValueTests
     {
         if (!CanRun) return;
 
-        Exception? misspelled = null;
+        Exception? unknown = null;
         Exception? scalar = null;
         Exception? texture = null;
         Exception? early = null;
@@ -379,13 +379,13 @@ public sealed class ShaderValueTests
                 image = Render.CreateImage([0, 0, 0, 255], 1, 1);
 
                 // Not compiled yet, so there is nothing to check this against.
-                early = Record.Exception(() => material.Set("colour", 1f));
+                early = Record.Exception(() => material.Set("tint", 1f));
             },
         }
             .Until("compiled", _ => Ready())
             .Do("setting what is not there", _ =>
             {
-                misspelled = Record.Exception(() => material.Set("colour", ShaderMaterialTests.Green));
+                unknown = Record.Exception(() => material.Set("tint", ShaderMaterialTests.Green));
                 scalar = Record.Exception(() => material.Set("color", 1f));
                 texture = Record.Exception(() => material.SetTexture("color", image));
             })
@@ -393,9 +393,10 @@ public sealed class ShaderValueTests
 
         Assert.Null(early);
 
-        var wrongName = Assert.IsType<ArgumentException>(misspelled);
-        Assert.Contains("colour", wrongName.Message);
-        Assert.Contains("color", wrongName.Message.Replace("colour", string.Empty));
+        // The name asked for, and the one the shader does declare.
+        var wrongName = Assert.IsType<ArgumentException>(unknown);
+        Assert.Contains("tint", wrongName.Message);
+        Assert.Contains("color", wrongName.Message);
 
         Assert.IsType<ArgumentException>(scalar);
         Assert.IsType<ArgumentException>(texture);

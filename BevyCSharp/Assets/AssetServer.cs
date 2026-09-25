@@ -378,7 +378,7 @@ public static unsafe class AssetServer
     /// The path an asset was loaded from, or <see langword="null"/> when it has none.
     /// </summary>
     /// <remarks>
-    /// What turns a handle back into something a person recognises. A field holding an asset shows
+    /// What turns a handle back into something a person recognizes. A field holding an asset shows
     /// the file it points at rather than a number, and something saving a world writes the path
     /// rather than a key that means nothing the next time the program runs. An asset built rather
     /// than loaded has no path, and answers nothing.

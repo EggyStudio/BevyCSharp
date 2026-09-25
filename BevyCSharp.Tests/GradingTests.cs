@@ -9,7 +9,7 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// A grade is a look rather than a value, so what can be asserted is the direction it moves the
-/// picture in: draining the saturation has to leave grey, and lifting the exposure has to leave
+/// picture in: draining the saturation has to leave gray, and lifting the exposure has to leave
 /// something brighter. Both are read off the pixels, because a setting that is accepted and
 /// ignored looks exactly like one that worked.
 /// </remarks>
@@ -20,7 +20,7 @@ public sealed class GradingTests
     private const ulong Settled = 120;
 
     [Fact]
-    public void DrainingTheSaturationLeavesGrey()
+    public void DrainingTheSaturationLeavesGray()
     {
         if (!App.HasRenderer) return;
 
@@ -32,7 +32,7 @@ public sealed class GradingTests
 
         // The cube is red. With no saturation left, the three channels have to agree, and what
         // they agree on is the luminance of that red rather than nothing at all.
-        Assert.True(r > 20, $"the picture went black instead of grey, at {r},{g},{b}");
+        Assert.True(r > 20, $"the picture went black instead of gray, at {r},{g},{b}");
         Assert.InRange(g, r - 12, r + 12);
         Assert.InRange(b, r - 12, r + 12);
     }

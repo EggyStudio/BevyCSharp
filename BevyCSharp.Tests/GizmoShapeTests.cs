@@ -328,7 +328,7 @@ public sealed class GizmoShapeTests
         app.AddSystem(Stage.Startup, new SystemDescriptor(
             _ =>
             {
-                // Bevy's own clear color, which is a dark grey well under the green the shapes
+                // Bevy's own clear color, which is a dark gray well under the green the shapes
                 // are drawn in, so nothing has to be said about it here.
                 Render2d.SpawnCamera2d();
                 Gizmos.Configure(width: 4f);

@@ -9,7 +9,7 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// A mirror that is the right size but has one field in the wrong place reads whatever its
-/// neighbour wrote, and nothing about the size says so. A single padding field of four bytes is
+/// neighbor wrote, and nothing about the size says so. A single padding field of four bytes is
 /// enough to put <c>TextLength</c> where <c>touch_count</c> is while both structs still measure
 /// 320 bytes, and the symptom is that typed text never arrives.
 /// <para>

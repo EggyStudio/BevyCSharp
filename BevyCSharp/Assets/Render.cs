@@ -396,7 +396,7 @@ public static unsafe class Render
     /// are stretched over more ground.
     /// </param>
     /// <param name="firstBound">
-    /// Where the first cascade ends. The ones after it are spaced out towards
+    /// Where the first cascade ends. The ones after it are spaced out toward
     /// <paramref name="maximum"/>, so this is the knob for how much detail the near ground gets.
     /// </param>
     /// <param name="overlap">
@@ -800,7 +800,7 @@ public static unsafe class Render
     /// <param name="camera">The camera whose view is lit.</param>
     /// <param name="diffuse">The blurred map.</param>
     /// <param name="specular">The sharp one.</param>
-    /// <param name="intensity">How bright, in candelas per square metre.</param>
+    /// <param name="intensity">How bright, in candelas per square meter.</param>
     /// <param name="rotation">Which way the maps are turned, or null for not at all.</param>
     /// <exception cref="BevyNativeException">
     /// The entity is not a camera, or a handle names no image.
@@ -874,7 +874,7 @@ public static unsafe class Render
     /// </para>
     /// <para>
     /// <paramref name="brightness"/> scales the samples into the units the rest of the scene is
-    /// lit in, which are candelas per square metre, so the useful numbers are in the hundreds or
+    /// lit in, which are candelas per square meter, so the useful numbers are in the hundreds or
     /// thousands. A brightness of one is a night sky and comes out black, which reads as a skybox
     /// that failed rather than one that is very dark. The skybox is what is seen behind the scene
     /// and does not light it; lighting from a sky is an environment map, which has no bridge yet.

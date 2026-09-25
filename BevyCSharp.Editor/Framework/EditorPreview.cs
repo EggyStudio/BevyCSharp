@@ -133,7 +133,7 @@ internal static class EditorPreview
                 FieldOfView = 35f,
                 Layers = Layer,
 
-                // Its own colour rather than the world's, so the picture reads as a swatch of the
+                // Its own color rather than the world's, so the picture reads as a swatch of the
                 // model rather than as a window onto the scene behind the panel.
                 Clear = ClearMode.Custom,
                 ClearColor = (0.09f, 0.09f, 0.11f, 1f),

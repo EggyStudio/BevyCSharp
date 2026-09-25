@@ -84,7 +84,7 @@ public sealed class RotationTests
     {
         // What an editor shows for a thing spinning where it stands. Y is the outermost angle, so
         // it has the whole circle to itself and the other two stay at nothing. The alternative is
-        // that a third of the way round the reading jumps to a half turn on both of its neighbours
+        // that a third of the way round the reading jumps to a half turn on both of its neighbors
         // and walks the middle angle backwards, which is the same rotation and unreadable.
         for (var degrees = -175f; degrees <= 175f; degrees += 5f)
         {

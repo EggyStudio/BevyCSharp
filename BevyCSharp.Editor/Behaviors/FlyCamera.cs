@@ -48,19 +48,19 @@ public partial struct FlyCamera
     /// <summary>Turn about the camera's own right axis, in radians. Positive looks up.</summary>
     public float Pitch;
 
-    /// <summary>Metres per second with no modifier held.</summary>
+    /// <summary>Meters per second with no modifier held.</summary>
     public float Speed;
 
-    /// <summary>How far in front of the camera an orbit swings, in metres.</summary>
+    /// <summary>How far in front of the camera an orbit swings, in meters.</summary>
     public float PivotDistance;
 
     /// <summary>Radians of turn per pixel of mouse movement.</summary>
     private const float LookSensitivity = 0.003f;
 
-    /// <summary>Metres of slide per pixel of mouse movement, at the pivot distance.</summary>
+    /// <summary>Meters of slide per pixel of mouse movement, at the pivot distance.</summary>
     private const float PanSensitivity = 0.01f;
 
-    /// <summary>Metres moved per notch of the wheel.</summary>
+    /// <summary>Meters moved per notch of the wheel.</summary>
     private const float DollyPerNotch = 1.2f;
 
     /// <summary>What Shift and Control do to the speed.</summary>
@@ -139,11 +139,11 @@ public partial struct FlyCamera
         if (EditorSelection.Any
             && Render.TryGetBounds(EditorSelection.Current, out var min, out var max))
         {
-            var centre = (min + max) * 0.5f;
+            var center = (min + max) * 0.5f;
             var extent = (max - min) * 0.5f;
             var reach = MathF.Max(MathF.Max(extent.X, extent.Y), extent.Z);
 
-            return (centre, MathF.Max(reach * 3f, 1f));
+            return (center, MathF.Max(reach * 3f, 1f));
         }
 
         return (Vec3.Zero, PivotDefault);
@@ -300,7 +300,7 @@ public partial struct FlyCamera
         if (input.AnyKeyDown([Key.ShiftLeft, Key.ShiftRight])) speed *= FastFactor;
         if (input.AnyKeyDown([Key.ControlLeft, Key.ControlRight])) speed *= SlowFactor;
 
-        // Normalised, so that going diagonally is not faster than going straight.
+        // Normalized, so that going diagonally is not faster than going straight.
         var direction = (Forward * forward) + (Right * strafe) + (Vec3.UnitY * rise);
         position += direction.Normalized * speed * ctx.Time.Delta;
         return true;

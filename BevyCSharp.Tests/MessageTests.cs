@@ -270,7 +270,7 @@ public sealed class MessageTests
         {
             foreach (var dropped in ctx.Read<FileDropped>()) paths.Add(dropped.Path);
             foreach (var hovered in ctx.Read<FileHovered>()) paths.Add(hovered.Path);
-            foreach (var _ in ctx.Read<FileHoverCancelled>()) cancellations++;
+            foreach (var _ in ctx.Read<FileHoverCanceled>()) cancellations++;
         });
 
         harness.Run();

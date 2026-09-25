@@ -41,7 +41,7 @@ public enum ToolPivot
     Origins,
 
     /// <summary>All about the middle of what is selected.</summary>
-    Centre,
+    Center,
 }
 
 /// <summary>
@@ -100,7 +100,7 @@ public static class EditorTools
     /// <summary>The world's axes, which are what a global handle is drawn along.</summary>
     private static readonly Vec3[] ViewportAxes = [Vec3.UnitX, Vec3.UnitY, Vec3.UnitZ];
 
-    /// <summary>Metres a snapped move lands on.</summary>
+    /// <summary>Meters a snapped move lands on.</summary>
     public static float MoveStep { get; set; } = 0.25f;
 
     /// <summary>Degrees a snapped turn lands on.</summary>

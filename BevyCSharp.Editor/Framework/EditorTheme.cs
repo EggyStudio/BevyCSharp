@@ -6,7 +6,7 @@ using ImGuiNET;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// What the editor looks like: a ladder of greys, one accent, and the shapes they are drawn in.
+/// What the editor looks like: a ladder of grays, one accent, and the shapes they are drawn in.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -191,7 +191,7 @@ public sealed record EditorTheme
 
         // No line round a window or a popup in either look. What they are is said by the fill and
         // the shadow of one surface over another, and ImGui's own border is a hairline that reads
-        // as an artefact at any rounding worth having.
+        // as an artifact at any rounding worth having.
         style.WindowBorderSize = 0f;
         style.ChildBorderSize = theme.Borders;
         style.PopupBorderSize = 0f;
@@ -281,7 +281,7 @@ public sealed record EditorTheme
         Set(style, ImGuiCol.ChildBg, Alpha(Card, seen));
         // A menu and a tooltip are not surfaces the eye rests on, they are things held up in front
         // of one, so they are the brightest plate the ladder has rather than another dark card. It
-        // is the grey a row under the pointer wears elsewhere, which is what makes a flyout read as
+        // is the gray a row under the pointer wears elsewhere, which is what makes a flyout read as
         // one of those rows grown large enough to hold a list.
         Set(style, ImGuiCol.PopupBg, Alpha(Hover, MathF.Min(1f, seen + 0.1f)));
         // Nothing here has a menu bar, so this slot carries the group fill instead, which puts the
@@ -312,7 +312,7 @@ public sealed record EditorTheme
         Set(style, ImGuiCol.ButtonActive, Alpha(Accent, 1f));
 
         // A header is what a component's fold wears, and what a row wears when it is chosen. The
-        // accent is the second, so the first is grey and the second is written over it where it is
+        // accent is the second, so the first is gray and the second is written over it where it is
         // drawn.
         // What a component's fold wears, which is most of what uses this color. A row that is
         // selected wears the accent instead, and says so where it is drawn.
@@ -483,10 +483,10 @@ public sealed record EditorTheme
 
     /// <summary>What a row in a list wears under the pointer.</summary>
     /// <remarks>
-    /// A wash of the text color rather than a grey of its own, because the same row is drawn on a
-    /// card in one list and on a menu's own plate in another. A fixed grey that lifts off the
+    /// A wash of the text color rather than a gray of its own, because the same row is drawn on a
+    /// card in one list and on a menu's own plate in another. A fixed gray that lifts off the
     /// first disappears into the second, while a wash is always one step above whatever it is
-    /// lying on. Over a card it comes out at the grey the rest of the editor highlights with.
+    /// lying on. Over a card it comes out at the gray the rest of the editor highlights with.
     /// </remarks>
     public static Vector4 LiveLift => Alpha(LiveText, 0.23f);
 

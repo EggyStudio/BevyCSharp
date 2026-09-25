@@ -21,7 +21,7 @@ public enum SpriteImageMode
     /// <summary>
     /// Cut into nine, so the corners keep their size while the middle stretches.
     /// </summary>
-    /// <remarks>A health bar or a dialogue box drawn at any width from one small image.</remarks>
+    /// <remarks>A health bar or a dialog box drawn at any width from one small image.</remarks>
     Sliced = 1,
 
     /// <summary>Repeated across the sprite rather than stretched.</summary>
@@ -48,8 +48,8 @@ public enum SpriteImageMode
 /// </remarks>
 public enum SpriteScaling
 {
-    /// <summary>The whole picture, centred, with empty edges where it does not reach.</summary>
-    FitCentre = 0,
+    /// <summary>The whole picture, centered, with empty edges where it does not reach.</summary>
+    FitCenter = 0,
 
     /// <summary>The whole picture, against the left and top edges.</summary>
     FitStart = 1,
@@ -57,8 +57,8 @@ public enum SpriteScaling
     /// <summary>The whole picture, against the right and bottom edges.</summary>
     FitEnd = 2,
 
-    /// <summary>Covering the size, centred, losing what hangs over.</summary>
-    FillCentre = 3,
+    /// <summary>Covering the size, centered, losing what hangs over.</summary>
+    FillCenter = 3,
 
     /// <summary>Covering the size, keeping the left and top.</summary>
     FillStart = 4,
@@ -71,7 +71,7 @@ public enum SpriteScaling
 /// Where a sprite's transform sits on the picture.
 /// </summary>
 /// <remarks>
-/// A sprite is centred on its transform unless told otherwise, which is awkward for anything
+/// A sprite is centered on its transform unless told otherwise, which is awkward for anything
 /// standing on the ground, whose feet are then half a sprite below where it was placed. The
 /// coordinates run from <c>-0.5</c> to <c>0.5</c> on each axis, with y upwards, so any point in
 /// between is expressible as well as the nine named here.
@@ -145,7 +145,7 @@ public sealed class SpriteSettings
     public uint Frame { get; set; }
 
     /// <summary>
-    /// Where the transform sits on the sprite, or null to leave it centred.
+    /// Where the transform sits on the sprite, or null to leave it centered.
     /// </summary>
     /// <remarks><see cref="SpriteAnchor"/> names the nine usual points.</remarks>
     public (float X, float Y)? Anchor { get; set; }
@@ -155,7 +155,7 @@ public sealed class SpriteSettings
 
     /// <summary>How a scaled picture is fitted.</summary>
     /// <remarks>Read only when <see cref="Mode"/> is <see cref="SpriteImageMode.Scaled"/>.</remarks>
-    public SpriteScaling Scaling { get; set; } = SpriteScaling.FitCentre;
+    public SpriteScaling Scaling { get; set; } = SpriteScaling.FitCenter;
 
     /// <summary>
     /// How far in from each edge the nine-slice cuts are, in pixels of the source image.

@@ -250,7 +250,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// <remarks>
     /// Read here, at compile time, rather than reflected over at runtime. The attributes are
     /// matched by name so that a game can declare its own with the same names if it would rather
-    /// not reference this assembly, and an attribute nothing recognises is left alone.
+    /// not reference this assembly, and an attribute nothing recognizes is left alone.
     /// </remarks>
     private static FieldHintModel HintsOf(IFieldSymbol field) => HintsOf(field.GetAttributes());
 

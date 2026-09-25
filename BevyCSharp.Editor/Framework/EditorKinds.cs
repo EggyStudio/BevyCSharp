@@ -46,7 +46,7 @@ public static class EditorKinds
         new("bevy_ui::", EditorIcons.Interface, 30),
     ];
 
-    /// <summary>What an entity with nothing recognisable on it wears.</summary>
+    /// <summary>What an entity with nothing recognizable on it wears.</summary>
     public static string Plain => EditorIcons.Entity;
 
     /// <summary>What an entity carrying a behavior of this project's own wears.</summary>

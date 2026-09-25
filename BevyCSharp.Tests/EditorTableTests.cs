@@ -136,7 +136,7 @@ public sealed class EditorTableTests
     [Fact]
     public void ACommandIsRegisteredByBeingWritten()
     {
-        // The generator found it at compile time and a module initialiser registered it, so the
+        // The generator found it at compile time and a module initializer registered it, so the
         // console has it without anything having scanned for it.
         var help = ConsoleCommands.Find("help");
 

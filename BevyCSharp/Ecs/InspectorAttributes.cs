@@ -100,7 +100,7 @@ public sealed class SpaceAttribute : Attribute;
 /// How much one pixel of a drag on the handle is worth.
 /// </summary>
 /// <remarks>
-/// The editor's own step is right for a position in metres and wrong for a count of bullets. This
+/// The editor's own step is right for a position in meters and wrong for a count of bullets. This
 /// says which scale the field is on.
 /// </remarks>
 /// <param name="amount">What a pixel is worth.</param>
@@ -237,7 +237,7 @@ public enum NoteKind
 /// <remarks>
 /// Not a tooltip. A tooltip answers somebody who already suspects there is something to know; this
 /// is for what has to be read before the field below it is touched, which is the difference
-/// between "what does this do" and "this is in metres, not centimetres".
+/// between "what does this do" and "this is in meters, not centimeters".
 /// </remarks>
 /// <param name="text">What it says.</param>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method)]
@@ -294,7 +294,7 @@ public sealed class WideAttribute : Attribute;
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public sealed class InlineAttribute : Attribute;
 
-/// <summary>Where a field or a button sits among its neighbours. Lower is first.</summary>
+/// <summary>Where a field or a button sits among its neighbors. Lower is first.</summary>
 /// <param name="order">The place.</param>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method)]
 public sealed class OrderAttribute(int order) : Attribute

@@ -77,7 +77,7 @@ public float4 sample(float2 uv)
     return picture.Sample(picture_sampler, uv);
 }
 
-/// How far apart two neighbouring pixels are in `uv`, which is what a blur steps by.
+/// How far apart two neighboring pixels are in `uv`, which is what a blur steps by.
 public float2 pixel_size()
 {
     uint width;

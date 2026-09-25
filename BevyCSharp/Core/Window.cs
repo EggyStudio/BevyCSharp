@@ -45,7 +45,7 @@ public readonly record struct MonitorInfo(
 /// One video mode a monitor can be driven at.
 /// </summary>
 /// <remarks>
-/// A resolution, a colour depth and a refresh rate together, which is what exclusive fullscreen
+/// A resolution, a color depth and a refresh rate together, which is what exclusive fullscreen
 /// takes the screen over with. A monitor offers a fixed list of these and can be driven at no
 /// others, so a settings screen offers what <see cref="Window.MonitorModes"/> returns rather than a
 /// pair of number boxes.

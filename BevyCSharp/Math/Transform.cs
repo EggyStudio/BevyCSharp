@@ -130,7 +130,7 @@ public struct Quat : IEquatable<Quat>
     /// <summary>The scalar part.</summary>
     public float W;
 
-    /// <summary>Creates a quaternion from its components, without normalising.</summary>
+    /// <summary>Creates a quaternion from its components, without normalizing.</summary>
     public Quat(float x, float y, float z, float w)
     {
         X = x;
@@ -247,7 +247,7 @@ public struct Quat : IEquatable<Quat>
     /// <para>
     /// Y outermost, which is what an editor wants and why every editor does it. One of the three
     /// angles has to be the middle one, and a middle angle only spans half a turn. Past a quarter
-    /// turn its neighbours have to jump to a half turn to describe the rest. Standing that angle
+    /// turn its neighbors have to jump to a half turn to describe the rest. Standing that angle
     /// up is the difference between a thing spinning on the spot reading 0, 120, 240 and reading
     /// 180, 60, 180, which is the same rotation and unreadable.
     /// </para>

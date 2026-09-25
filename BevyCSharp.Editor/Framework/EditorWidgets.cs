@@ -189,7 +189,7 @@ public static class EditorWidgets
         if (fill.W > 0f) EditorDraw.Capsule(at, at + size, ImGui.GetColorU32(fill), draw);
 
         // White whether it is chosen or not. What says which one is in force is the pill under it,
-        // and a grey word reads as one that cannot be pressed.
+        // and a gray word reads as one that cannot be pressed.
         draw.AddText(
             at + new Vector2(EditorSurface.Sides, (size.Y - word.Y) * 0.5f),
             ImGui.GetColorU32(EditorTheme.LiveText),

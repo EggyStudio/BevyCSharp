@@ -22,7 +22,7 @@ scene or a `.scn`/`.scn.ron` file, both of which are a `WorldAsset` in 0.19. `Lo
 needs a window, because translating a glTF material into one the renderer draws with belongs to the
 renderer, which is the arrangement rather than a limitation.
 
-The division of labour this aims at: glTF carries geometry, materials and animations, because that
+The division of labor this aims at: glTF carries geometry, materials and animations, because that
 is what Blender and every other tool exports, and composition happens after the scene is spawned by
 adding components to what the file defined.
 
@@ -176,7 +176,7 @@ layers and whether anything is drawn at all.
 ### 2D
 
 `Render2d` spawns a 2D camera and attaches sprites, and a sprite can be tinted, resized, mirrored,
-anchored off its centre, cut down to one rectangle of a sheet or one frame of an atlas layout, and
+anchored off its center, cut down to one rectangle of a sheet or one frame of an atlas layout, and
 drawn sliced, tiled or fitted inside its size the way a video player letterboxes.
 
 - **Animation is a sample, not a feature.** `SpriteAnimation` in `BevyCSharp.Sample` steps a sheet
@@ -219,7 +219,7 @@ field per frame, so there is no widget tree to keep in step with the world.
   font, which is what the native theme should use rather than the ProggyClean bitmap it has. It
   arrives when the bundle updates and needs no change here.
 - **No icon font.** The icons are PNGs the editor ships, loaded through the asset server and drawn
-  with `ImGui.Image`. More can be rasterised from SVG when they are wanted.
+  with `ImGui.Image`. More can be rasterized from SVG when they are wanted.
 - **IME is not forwarded.** Keys, characters, the pointer and the wheel are.
 - **The interface is redrawn every frame**, which is what immediate mode means. At editor scale
   that is a few thousand triangles and one buffer write; if it ever matters, a frame where nothing

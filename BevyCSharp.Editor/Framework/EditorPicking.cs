@@ -42,7 +42,7 @@ public static class EditorPicking
         // Where the click that is being answered began. Asked at the press rather than now,
         // because the pointer moves. The engine raycasts the scene and knows nothing of the panels
         // drawn over it, so what decides whether a pick belongs to the editor is where the button
-        // went down, and a hand that has since travelled over a panel has not changed that.
+        // went down, and a hand that has since traveled over a panel has not changed that.
         if (ctx.Input.MousePressed(MouseButton.Left))
         {
             _pressedOn = EditorShell.Frame;

@@ -76,7 +76,7 @@ public partial struct Showcase
     /// A property, which is read and written through itself.
     /// </summary>
     /// <remarks>
-    /// Miles an hour over metres a second, kept in one unit and shown in another. A tool that went
+    /// Miles an hour over meters a second, kept in one unit and shown in another. A tool that went
     /// round the property and wrote the field would show a number nothing else in the program
     /// agrees with, which is why a property is described rather than what is behind it.
     /// </remarks>

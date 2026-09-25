@@ -211,7 +211,7 @@ public enum UiAlignSelf
     /// <summary>The end of the cross axis, or its start when the direction is reversed.</summary>
     FlexEnd = 4,
 
-    /// <summary>Centred across the axis.</summary>
+    /// <summary>Centered across the axis.</summary>
     Center = 5,
 
     /// <summary>Lined up on the baseline of the text inside it.</summary>
@@ -345,7 +345,7 @@ public enum UiAlign
     /// <summary>The end of the cross axis, or its start when the direction is reversed.</summary>
     FlexEnd = 4,
 
-    /// <summary>Centred across the axis, which is what a row of buttons wants.</summary>
+    /// <summary>Centered across the axis, which is what a row of buttons wants.</summary>
     Center = 5,
 
     /// <summary>Lined up on the baselines of the text inside them.</summary>
@@ -431,7 +431,7 @@ public sealed class UiSettings
     /// What separates a node from its siblings. <see cref="RowGap"/> and <see cref="ColumnGap"/>
     /// say the same thing from the parent's side, and are the better place for even spacing.
     /// A side left at <see cref="Length.Auto"/> swallows the space the parent has left over,
-    /// which is how a node is pushed to one end or centred without the parent knowing.
+    /// which is how a node is pushed to one end or centered without the parent knowing.
     /// </remarks>
     public Sides Margin { get; set; } = Sides.None;
 

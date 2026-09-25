@@ -324,7 +324,7 @@ public partial struct Hinted
     /// <summary>A slider between two ends, with a name of its own.</summary>
     [Range(0d, 10d)]
     [Label("How fast")]
-    [Tooltip("Metres a second.")]
+    [Tooltip("Meters a second.")]
     [Unit("m/s")]
     public float Speed;
 
@@ -501,7 +501,7 @@ public sealed class FieldHintTests
         var speed = Assert.Single(schema.Fields, field => field.Name == "Speed");
 
         Assert.Equal("How fast", speed.Title);
-        Assert.Equal("Metres a second.", speed.Hints.Tooltip);
+        Assert.Equal("Meters a second.", speed.Hints.Tooltip);
         Assert.Equal("m/s", speed.Hints.Unit);
         Assert.True(speed.Hints.HasRange);
         Assert.Equal(0d, speed.Hints.Minimum);
@@ -587,7 +587,7 @@ public sealed class FieldHintTests
             Assert.True(damping.Write(ctx.Ecs, entity, 0.25f));
 
             // The rest of the component survives the write. A part written back through a copy of
-            // the whole is the only way to write one, and getting it wrong wipes its neighbours.
+            // the whole is the only way to write one, and getting it wrong wipes its neighbors.
             Assert.True(ctx.Ecs.TryGet<Sprung>(entity, out var read));
             Assert.Equal(0.25f, read.Front.Damping);
             Assert.Equal(5f, read.Front.Stiffness);

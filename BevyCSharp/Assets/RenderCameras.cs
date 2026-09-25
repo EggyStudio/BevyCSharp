@@ -81,7 +81,7 @@ public enum Tonemapper
 /// The antialiasing that runs as a pass over the finished picture.
 /// </summary>
 /// <remarks>
-/// Separate from <see cref="PostSettings.Msaa"/>, which works while the scene is rasterised and
+/// Separate from <see cref="PostSettings.Msaa"/>, which works while the scene is rasterized and
 /// smooths the edges of geometry only. A pass sees the picture instead, so it also catches edges
 /// that come from a texture or a shader, at the cost of some sharpness.
 /// </remarks>
@@ -160,7 +160,7 @@ public sealed class PostSettings
     public Tonemapper Tonemapper { get; set; } = Tonemapper.TonyMcMapface;
 
     /// <summary>
-    /// Dither before quantising to the display's bit depth.
+    /// Dither before quantizing to the display's bit depth.
     /// </summary>
     /// <remarks>
     /// Hides the banding a smooth gradient shows otherwise, at the cost of a little noise. Bevy
@@ -179,7 +179,7 @@ public sealed class PostSettings
     public bool Hdr { get; set; }
 
     /// <summary>
-    /// Samples per pixel taken while the scene is rasterised: 1, 2, 4 or 8.
+    /// Samples per pixel taken while the scene is rasterized: 1, 2, 4 or 8.
     /// </summary>
     /// <remarks>
     /// Smooths the edges of geometry and nothing else. Four is Bevy's own; one turns it off,
@@ -270,7 +270,7 @@ public sealed class EffectSettings
     /// <summary>How the depths that are out of focus are blurred.</summary>
     public DepthOfFieldMode DepthOfField { get; set; } = DepthOfFieldMode.None;
 
-    /// <summary>Distance in metres to what is in focus.</summary>
+    /// <summary>Distance in meters to what is in focus.</summary>
     public float FocalDistance { get; set; } = 10f;
 
     /// <summary>
@@ -283,7 +283,7 @@ public sealed class EffectSettings
     public float Aperture { get; set; } = 1f;
 
     /// <summary>
-    /// Height of the imaginary sensor, in metres.
+    /// Height of the imaginary sensor, in meters.
     /// </summary>
     /// <remarks>
     /// With the camera's field of view this fixes the focal length, so it is the other half of
@@ -298,7 +298,7 @@ public sealed class EffectSettings
     public float MaxBlurDiameter { get; set; }
 
     /// <summary>
-    /// Distance past which nothing is blurred any further, in metres.
+    /// Distance past which nothing is blurred any further, in meters.
     /// </summary>
     /// <remarks>
     /// The renderer puts a sky infinitely far away, which would blur it as hard as
@@ -342,7 +342,7 @@ public sealed class EffectSettings
     /// </summary>
     /// <remarks>
     /// Nothing here gives the usual red, green, blue. The image is sampled down its vertical
-    /// centre, so it should be one pixel tall.
+    /// center, so it should be one pixel tall.
     /// </remarks>
     public AssetHandle AberrationColors { get; set; } = AssetHandle.None;
 
@@ -379,20 +379,20 @@ public sealed class EffectSettings
     /// </summary>
     /// <remarks>
     /// What a lens does at the edges of its coverage, and what a game uses to pull the eye
-    /// towards the middle or to show that the player is hurt.
+    /// toward the middle or to show that the player is hurt.
     /// </remarks>
     public float Vignette { get; set; }
 
     /// <summary>How much of the picture is left untouched, as a fraction of the window.</summary>
     public float VignetteRadius { get; set; } = 0.75f;
 
-    /// <summary>Width of the edge between the clear centre and the dark corners.</summary>
+    /// <summary>Width of the edge between the clear center and the dark corners.</summary>
     public float VignetteSmoothness { get; set; } = 5f;
 
     /// <summary>Shape of that edge, where 1 is a circle.</summary>
     public float VignetteRoundness { get; set; } = 1f;
 
-    /// <summary>Point the vignette is centred on, in fractions of the window.</summary>
+    /// <summary>Point the vignette is centered on, in fractions of the window.</summary>
     public (float X, float Y) VignetteCenter { get; set; } = (0.5f, 0.5f);
 
     /// <summary>
@@ -401,7 +401,7 @@ public sealed class EffectSettings
     /// </summary>
     public float VignetteEdgeCompensation { get; set; } = 1f;
 
-    /// <summary>The color the corners are taken towards, linear. Black is the usual one.</summary>
+    /// <summary>The color the corners are taken toward, linear. Black is the usual one.</summary>
     public (float R, float G, float B, float A) VignetteColor { get; set; } = (0f, 0f, 0f, 1f);
 
     /// <summary>
@@ -409,7 +409,7 @@ public sealed class EffectSettings
     /// </summary>
     /// <remarks>
     /// A histogram of the frame's brightness is built and the exposure moved so that the average
-    /// lands on middle grey, which is what an eye does walking out of a cave. The camera is given
+    /// lands on middle gray, which is what an eye does walking out of a cave. The camera is given
     /// a high dynamic range target, because there is nothing to meter without one.
     /// </remarks>
     public bool AutoExposure { get; set; }
@@ -456,7 +456,7 @@ public sealed class EffectSettings
     /// </summary>
     /// <remarks>
     /// Each point pairs a measured luminance in EV-100 with the compensation to apply there in
-    /// f-stops, so a night scene can be left darker than middle grey and a desert left brighter.
+    /// f-stops, so a night scene can be left darker than middle gray and a desert left brighter.
     /// The points have to rise in luminance, and at most eight of them cross the boundary. Fewer
     /// than two is no compensation.
     /// </remarks>
@@ -489,21 +489,21 @@ public sealed class AtmosphereSettings
     public float Density { get; set; } = 1f;
 
     /// <summary>
-    /// How large the planet is against the scene, for a world not measured in metres.
+    /// How large the planet is against the scene, for a world not measured in meters.
     /// </summary>
     /// <remarks>
     /// The planet is the size of a real one and its ground sits at the origin, so a scene in
-    /// metres needs nothing here. A scene in kilometres wants a smaller number, since what
+    /// meters needs nothing here. A scene in kilometers wants a smaller number, since what
     /// matters is how far the camera moves through the air.
     /// </remarks>
     public float Scale { get; set; } = 1f;
 
     /// <summary>
-    /// How far in front of the camera the haze is computed, in metres.
+    /// How far in front of the camera the haze is computed, in meters.
     /// </summary>
     /// <remarks>
     /// What decides where distant geometry fades into the sky. Zero leaves Bevy's own distance,
-    /// which suits a scene measured in metres.
+    /// which suits a scene measured in meters.
     /// </remarks>
     public float HazeDistance { get; set; }
 

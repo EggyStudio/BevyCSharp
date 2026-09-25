@@ -211,7 +211,7 @@ internal static class Verbs
 
     /// <summary>The words as one command line, quoting the ones that need it.</summary>
     /// <remarks>
-    /// The app splits on whitespace and honours double quotes, which is the whole of the syntax, so
+    /// The app splits on whitespace and honors double quotes, which is the whole of the syntax, so
     /// a word that carries a space is quoted here to survive the trip as one word. Quotes and
     /// backslashes inside it are escaped rather than dropped, because the word may well be a
     /// fragment of C# and a string literal in it is the reason it was written.

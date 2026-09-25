@@ -129,7 +129,7 @@ public enum CellAlign
     /// <summary>In the middle.</summary>
     Center = 3,
 
-    /// <summary>Lined up with its neighbours' first line of text.</summary>
+    /// <summary>Lined up with its neighbors' first line of text.</summary>
     Baseline = 4,
 
     /// <summary>Stretched to fill the cell.</summary>

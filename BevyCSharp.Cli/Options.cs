@@ -28,7 +28,7 @@ internal sealed record Options
     /// Reads the flags out of a command line, leaving everything else in order.
     /// </summary>
     /// <remarks>
-    /// Flags are recognised anywhere until a bare <c>--</c>, and everything after that is left
+    /// Flags are recognized anywhere until a bare <c>--</c>, and everything after that is left
     /// alone. That matters for <c>bcs command</c>, whose own arguments can look like flags:
     /// <c>bcs command input.type -- --headless</c> types the word rather than reading it.
     /// </remarks>

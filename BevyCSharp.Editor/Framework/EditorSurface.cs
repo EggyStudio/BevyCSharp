@@ -214,7 +214,7 @@ public static class EditorSurface
     /// </summary>
     /// <remarks>
     /// The panel while it floats over the scene, and the ground while it is docked, where there is
-    /// no scene behind it to show through and a grey a shade off black is a frame nobody asked for.
+    /// no scene behind it to show through and a gray a shade off black is a frame nobody asked for.
     /// </remarks>
     internal static Vector4 Chrome() => EditorTheme.Alpha(
         EditorShell.Docked ? EditorTheme.Current.Ground : EditorTheme.Current.Panel,
@@ -233,7 +233,7 @@ public static class EditorSurface
     /// <param name="over">Whether the pointer is on it.</param>
     /// <param name="held">Whether it is being dragged.</param>
     /// <param name="onto">Which list to draw into, or the current window's.</param>
-    /// <param name="middleX">Where to centre it across, or the middle of the item it belongs to.</param>
+    /// <param name="middleX">Where to center it across, or the middle of the item it belongs to.</param>
     internal static void Grab(Vector2 grab, bool over, bool held, ImDrawListPtr? onto = null, float? middleX = null)
     {
         var showing = held || over || EditorShell.Docked;

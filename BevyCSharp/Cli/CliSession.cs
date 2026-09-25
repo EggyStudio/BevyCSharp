@@ -24,7 +24,7 @@ namespace Bevy;
 /// <param name="Token">What a request has to carry to be answered.</param>
 /// <param name="Project">The directory it was started from, for telling projects apart.</param>
 /// <param name="Name">The entry assembly, for telling two apps in one project apart.</param>
-/// <param name="Title">The window title, as a person would recognise it.</param>
+/// <param name="Title">The window title, as a person would recognize it.</param>
 /// <param name="Started">When it came up.</param>
 /// <param name="Abi">The native bridge version it loaded.</param>
 /// <param name="Renderer">Whether that bridge can draw, which decides whether it can be captured.</param>

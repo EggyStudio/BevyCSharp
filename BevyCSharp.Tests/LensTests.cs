@@ -15,7 +15,7 @@ namespace Bevy.Tests;
 /// <para>
 /// What each test asserts is the shape of the change rather than its exact pixels, because the
 /// numbers depend on the driver. A vignette darkens the corners and leaves the middle; a
-/// distortion moves an edge; a fringe puts colour where there was none.
+/// distortion moves an edge; a fringe puts color where there was none.
 /// </para>
 /// </remarks>
 [Collection("engine")]
@@ -51,14 +51,14 @@ public sealed class LensTests
             $"the middle read {middleBefore} plain and {middleAfter} vignetted");
     }
 
-    /// <summary>A chromatic fringe puts colour at an edge that had none.</summary>
+    /// <summary>A chromatic fringe puts color at an edge that had none.</summary>
     /// <remarks>
-    /// The scene is grey on black, so every pixel of it is neutral until something splits the
+    /// The scene is gray on black, so every pixel of it is neutral until something splits the
     /// channels apart. What is counted is pixels whose channels disagree, which is what a fringe
     /// is and what nothing else in this picture could produce.
     /// </remarks>
     [Fact]
-    public void AChromaticFringeSplitsAnEdgeIntoColours()
+    public void AChromaticFringeSplitsAnEdgeIntoColors()
     {
         if (!App.HasRenderer) return;
 
@@ -68,12 +68,12 @@ public sealed class LensTests
         Assert.NotNull(plain);
         Assert.NotNull(fringed);
 
-        var before = Coloured(plain);
-        var after = Coloured(fringed);
+        var before = Colored(plain);
+        var after = Colored(fringed);
 
         Assert.True(
             after > before + 20,
-            $"{before} pixels were coloured plain and {after} with the fringe");
+            $"{before} pixels were colored plain and {after} with the fringe");
     }
 
     /// <summary>A lens distortion moves the edges of what is drawn.</summary>
@@ -102,7 +102,7 @@ public sealed class LensTests
             $"the shape covered {before} pixels plain and {after} warped");
     }
 
-    /// <summary>How bright a pixel is, which is all these tests need of a colour.</summary>
+    /// <summary>How bright a pixel is, which is all these tests need of a color.</summary>
     private static int Brightness((byte R, byte G, byte B, byte A) pixel) =>
         pixel.R + pixel.G + pixel.B;
 
@@ -124,7 +124,7 @@ public sealed class LensTests
     }
 
     /// <summary>How many pixels have channels that disagree, which is what a fringe is.</summary>
-    private static int Coloured(CapturedImage picture)
+    private static int Colored(CapturedImage picture)
     {
         var tinted = 0;
 
@@ -139,7 +139,7 @@ public sealed class LensTests
         return tinted;
     }
 
-    /// <summary>Draws a grey scene through whatever the effects were set to.</summary>
+    /// <summary>Draws a gray scene through whatever the effects were set to.</summary>
     /// <param name="lens">What to turn on, or nothing for the picture to compare against.</param>
     private static CapturedImage? Draw(Action<EffectSettings> lens)
     {
@@ -175,7 +175,7 @@ public sealed class LensTests
 
                 Render.SetMesh(ecs, near, Render.CreateMesh(MeshShape.Cuboid, 2.4f, 2.4f, 2.4f));
 
-                // Unlit and grey, so every pixel of the shape is neutral and a colour in the
+                // Unlit and gray, so every pixel of the shape is neutral and a color in the
                 // picture came from the lens rather than from the light.
                 Render.SetMaterial(ecs, near, Render.CreateMaterial(new MaterialSettings
                 {

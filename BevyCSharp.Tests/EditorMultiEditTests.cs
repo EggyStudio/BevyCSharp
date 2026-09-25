@@ -79,7 +79,7 @@ public sealed class EditorMultiEditTests
 
             Assert.Equal(0, ComponentFields.Spread(ctx, shown, [other], speed, before));
 
-            // Which is the point: the other one keeps what it had rather than being levelled to
+            // Which is the point: the other one keeps what it had rather than being leveled to
             // whatever the panel happened to be showing.
             Assert.Equal(2f, ctx.Ecs.GetOrDefault<Tuning>(other).Speed);
         });

@@ -46,7 +46,7 @@ public static class BehaviorRunners
     /// Whether the thread pool then runs those partitions on one thread or many is its own
     /// decision, and on a machine with few cores and a cheap body it may legitimately use one.
     /// That makes an observed thread count useless for asserting that a large iteration was
-    /// parallelised, so the choice itself is recorded here instead.
+    /// parallelized, so the choice itself is recorded here instead.
     /// </remarks>
     internal static long ParallelChunkCount;
 
@@ -64,7 +64,7 @@ public static class BehaviorRunners
     /// iteration.
     /// </param>
     /// <param name="parallelThreshold">
-    /// Entity count from which to parallelise, or 0 to always run sequentially.
+    /// Entity count from which to parallelize, or 0 to always run sequentially.
     /// </param>
     public static unsafe void Run<T>(
         World world,

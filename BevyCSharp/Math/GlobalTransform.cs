@@ -145,7 +145,7 @@ public struct GlobalTransform : INativeComponent
     /// <summary>Maps a point in the entity's local space into world space.</summary>
     /// <example>
     /// <code>
-    /// // Where the muzzle of a gun modelled at (0, 0, -1) actually is.
+    /// // Where the muzzle of a gun modeled at (0, 0, -1) actually is.
     /// var muzzle = global.TransformPoint(new Vec3(0f, 0f, -1f));
     /// </code>
     /// </example>

@@ -420,7 +420,7 @@ Files dragged onto the window arrive the same way:
 foreach (var hovered in ctx.Read<FileHovered>())
     ShowDropTarget(hovered.Path);
 
-foreach (var _ in ctx.Read<FileHoverCancelled>())
+foreach (var _ in ctx.Read<FileHoverCanceled>())
     HideDropTarget();
 
 foreach (var dropped in ctx.Read<FileDropped>())
@@ -752,7 +752,7 @@ way: base color, normal, metallic-roughness, emissive and occlusion.
 deciding at `AlphaCutoff`, so the surface still writes depth and nothing has to be sorted, which is
 what foliage and fences are drawn with. `Blend` is real transparency, drawn after everything else
 and sorted back to front. `Add` adds to what is behind, so it never darkens it. `DoubleSided` draws
-back faces, for anything modelled as a single sheet, and `Unlit` shows the base color flat.
+back faces, for anything modeled as a single sheet, and `Unlit` shows the base color flat.
 
 **A shader of your own.** Shaders are written in [Slang](https://shader-slang.org), and a shader
 declares what it needs as ordinary globals, in any combination and at any size. That covers numbers
@@ -1095,7 +1095,7 @@ is the camera's render graph that reads them.
 A tonemapper is the curve from what was rendered, which has no upper bound, to what a display can
 show, which does. All eight of Bevy's are there, from `None` through `Reinhard` to `AgX` and Bevy's
 own `TonyMcMapface`; the choice is a look rather than a correctness question, and it shows most with
-`Hdr` on. `Msaa` smooths the edges of geometry while the scene is rasterised, while `AntiAlias` runs
+`Hdr` on. `Msaa` smooths the edges of geometry while the scene is rasterized, while `AntiAlias` runs
 a pass over the finished picture and so also catches edges that come from a texture or a shader.
 `Fxaa` is the cheap one and `Smaa` the sharper one; `Temporal` resolves each frame from the ones
 before it, so it sees an edge sampled many times over, at the cost of a trail behind anything whose
@@ -1157,7 +1157,7 @@ f-stops, so a smaller number is a wider lens and less of the scene in focus. Mot
 each pixel moved, which costs a second pass over the scene, and that pass goes away again when the
 shutter angle does. `AberrationColors` swaps the red, green, blue fringe for any image, read across
 its width. Auto exposure builds a histogram of the frame and moves the exposure so the average lands
-on middle grey, which is what an eye does walking out of a cave; `MeteringMask` weights where in the
+on middle gray, which is what an eye does walking out of a cave; `MeteringMask` weights where in the
 frame it looks, and `ExposureCompensation` bends the result so a night scene can stay dark.
 
 **The sky** can be scattered rather than painted:
@@ -1176,7 +1176,7 @@ sky.
 
 The sky is a planet-sized entity that the camera looks out from, and `SetAtmosphere` keeps at most
 one of them, so calling it for a second camera adds a viewer rather than a second sky. The planet is
-measured in metres with its ground at the origin, which is why a scene measured in something else
+measured in meters with its ground at the origin, which is why a scene measured in something else
 sets `Scale` rather than moving anything. `Density` thickens or thins the air, `HazeDistance`
 decides how far ahead the haze is computed, `GroundAlbedo` is how much light the ground bounces
 back into it, and `ClearAtmosphere` takes the sky off a camera again. `Quality` is one number over
@@ -1197,7 +1197,7 @@ Render.SetSkybox(camera, AssetServer.Load(AssetKind.Image, "sky.png"), brightnes
 ```
 
 The file is a column of six square faces, which is the layout cubemap textures ship in, and it is
-turned into a cube once it has decoded. `brightness` is in candelas per square metre like the rest
+turned into a cube once it has decoded. `brightness` is in candelas per square meter like the rest
 of the lighting, so the useful numbers are in the hundreds or thousands; a brightness of one is a
 night sky and comes out black. A skybox is seen behind the scene and does not light it.
 
@@ -1209,7 +1209,7 @@ Render.SetImageLighting(camera, AssetServer.Load(AssetKind.Image, "sky.png"), in
 ```
 
 The cubemap is filtered on the GPU into the blurred versions a surface reflects, so a rough material
-picks up the average color around it and a polished one picks up a recognisable reflection, with no
+picks up the average color around it and a polished one picks up a recognizable reflection, with no
 bake step and no second file. `rotation` turns the environment without touching the scene. Each face
 has to be square and a power of two, and the light waits for the image to decode before it is
 applied, so a handle asked for in the same frame the camera is spawned works.
@@ -1361,7 +1361,7 @@ inside the size or made to fill it and which edges are kept.
 
 `SliceTiling` says which parts of a sliced picture repeat rather than stretch. Stretching is wrong
 for anything with a pattern in it, since a border of dots drawn twice as wide becomes a border of
-ovals, and `SliceTiling.Sides`, `.Centre` or `.All` keep a drawn edge looking drawn at every size.
+ovals, and `SliceTiling.Sides`, `.Center` or `.All` keep a drawn edge looking drawn at every size.
 The repeat is measured by `TileStretch`, the same number a whole tiled picture uses.
 
 `Render2d.SpawnCamera2d(order: 1)` or any order above zero makes an overlay, which is how a 2D
@@ -1466,7 +1466,7 @@ public partial struct Interface
 `BevyCSharp.Sample` does exactly that, in `Behaviors/Interface.cs`. It needs a bridge with the
 interface compiled in (`build/build-native.sh --editor`) and `Config.Gui` asked for.
 
-**The engine only rasterises.** ImGui hands over vertices, indices and a list of draw calls, each
+**The engine only rasterizes.** ImGui hands over vertices, indices and a list of draw calls, each
 with a clip rectangle and a picture; `bcs_imgui_frame` takes them and a pass in Bevy's renderer
 draws them straight onto the window, over whatever the cameras drew. Nothing on the Rust side knows
 what a widget is, which is why the interface can change completely without touching it.
@@ -1520,7 +1520,7 @@ var menu = Ui.SpawnNode(new UiSettings
 ```
 
 `Direction` is that axis, `Justify` spreads the children along it and `Align` places them across
-it: a column centred with `Align` is a menu, a row spread with `UiJustify.SpaceBetween` is a
+it: a column centered with `Align` is a menu, a row spread with `UiJustify.SpaceBetween` is a
 toolbar. `RowGap` and `ColumnGap` space the children apart from the parent's side, which is
 steadier than a margin on each of them.
 
@@ -1743,7 +1743,7 @@ var engine = Audio.Play(hum, new AudioSettings
 {
     Mode = PlaybackMode.Loop,
     Spatial = true,
-    SpatialScale = 0.01f,               // a world measured in pixels rather than metres
+    SpatialScale = 0.01f,               // a world measured in pixels rather than meters
 });
 
 ctx.Ecs.Add(engine, Transform.At(4f, 0f, -2f));
@@ -1751,7 +1751,7 @@ ctx.Ecs.Add(engine, Transform.At(4f, 0f, -2f));
 
 A spatial sound is given a `Transform` to be moved by, and is heard quieter with distance and
 further to one side as it crosses the listener. `Config.SpatialScale` is what makes that work in a
-world whose units are not metres, set once for the app because what the world is measured in is a
+world whose units are not meters, set once for the app because what the world is measured in is a
 fact about the game rather than about any one sound; a sound may still say otherwise for itself.
 
 `Audio.SetListener` takes an ear gap, and an overload takes the two ear positions instead. Placing
@@ -1956,7 +1956,7 @@ foreach (var id in ctx.Ecs.ComponentsOf(entity))
 
 A field whose type is a struct with fields of its own is taken apart, so `Front.Held.At` is a row
 called `At`, in a fold called `Held`, in one called `Front`. Writing one reads the component,
-changes that part and writes it back, so a part written does not wipe its neighbours. Bevy's own
+changes that part and writes it back, so a part written does not wipe its neighbors. Bevy's own
 components are the curated list, because each needs a byte-compatible mirror written by hand.
 
 **A field says how it wants to be drawn**, in attributes the generator reads at compile time, so
@@ -2004,7 +2004,7 @@ this side.
 
 ### The console
 
-Everything written to the output and error streams is teed into `ConsoleLog`, a ring of levelled
+Everything written to the output and error streams is teed into `ConsoleLog`, a ring of leveled
 lines that collapses repeats, so a console can show it without anything that writes a line knowing
 a console exists. What can be typed into one is a static method with `[Command]` on it:
 
@@ -2013,7 +2013,7 @@ a console exists. What can be typed into one is a static method with `[Command]`
 internal static string Select(string name) { … }
 ```
 
-A generator finds them at compile time and a module initialiser registers them, so nothing reflects
+A generator finds them at compile time and a module initializer registers them, so nothing reflects
 at runtime and a command survives trimming. Parameters are read from the words after the name and
 may be strings, numbers or flags; a single string parameter takes the whole of what was typed after
 it. Returning a string writes that line back, and anything a person can get wrong is answered with
@@ -2100,7 +2100,7 @@ detection sees it.
 per-entity loop writes straight into the component column, no marshalling, no staging buffer.
 
 **C# systems are exclusive systems.** While managed code can spawn and despawn at any moment,
-that is the only sound option, so Bevy serialises C# systems against each other. The parallelism
+that is the only sound option, so Bevy serializes C# systems against each other. The parallelism
 that matters is still there, inside the per-entity loop, which is where the entity counts
 are.
 
