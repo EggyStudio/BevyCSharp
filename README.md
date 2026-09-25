@@ -755,10 +755,11 @@ and sorted back to front. `Add` adds to what is behind, so it never darkens it. 
 back faces, for anything modelled as a single sheet, and `Unlit` shows the base color flat.
 
 **A shader of your own.** Shaders are written in [Slang](https://shader-slang.org), and a shader
-declares whatever it needs: a thousand numbers, sixty-four textures, sixteen cubemaps, structs,
-constant buffers, storage buffers and images, samplers, in any combination. Nothing about its shape
-is fixed in advance. The bridge asks the compiler how the shader was laid out and builds its bind
-group from that, and C# sets each value by the name the shader gave it:
+declares what it needs as ordinary globals, in any combination and at any size. That covers numbers
+and arrays of them, structs, constant buffers, textures of every shape and arrays of them, samplers,
+and storage buffers and images. The bridge has no table of what is allowed. It asks the compiler
+how the shader was laid out and builds the bind group from that, so the only limits are the GPU's,
+and C# sets each value by the name the shader gave it.
 
 ```slang
 import bcs;
@@ -782,7 +783,7 @@ var layered = Shaders.CreateProgram("shaders/layered.slang");     // the fragmen
 
 var material = Shaders.CreateMaterial(layered)
     .Set("tint", new Vector4(1f, 0.5f, 0.2f, 1f))
-    .Set("weights", weights)                                       // a float[] of up to 1000
+    .Set("weights", weights)                                       // as long as the shader's array, or shorter
     .SetTexture("layers", rock, 7)
     .SetTexture("skies", dusk, 3)
     .SetSampler("linear", SamplerSettings.Clamped);
@@ -792,7 +793,7 @@ Render.SetMaterial(ctx.Ecs, pond, material);                      // as many as 
 
 A name is a global's own (`tint`), a field of a struct or a constant buffer (`sun.color`), or an
 element of an array of structs (`lights[3].color`), and a texture, buffer or sampler in an array is
-its name and an index. Numbers are checked for kind and shape: a `float3` takes a `Vector3`, an
+its name and an index. Numbers are checked for kind and shape, so a `float3` takes a `Vector3`, an
 `int` an `int`, a `float4x4` a `Matrix4x4`, an array a span of its elements, and `SetNumbers` covers
 the shapes C# has no type for, such as `int2` or `float3x3`. A struct can be set whole with
 `SetStruct` or `SetBytes`, laid out the way the shader lays it out. A value that does not fit is

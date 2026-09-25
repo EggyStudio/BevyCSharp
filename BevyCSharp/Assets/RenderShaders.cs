@@ -13,10 +13,9 @@ using Bevy.Interop;
 /// <para>
 /// A <see cref="ShaderProgram"/> names the Slang files that make it. A material, a pass or a
 /// dispatch runs one, and its values are set <b>by the names the shader declares</b>. A shader
-/// declares what it needs as ordinary Slang globals: a thousand floats, sixty-four textures,
-/// sixteen cubemaps, structs, constant buffers, storage buffers, storage images and samplers. The
-/// bridge asks the compiler how they were laid out and builds the bind group from that, so nothing
-/// about a shader's shape is fixed in advance.
+/// declares what it needs as ordinary Slang globals, of any kind and at any size. The bridge asks
+/// the compiler how they were laid out and builds the bind group from that, so nothing about a
+/// shader's shape is fixed in advance and the only limits are the GPU's.
 /// </para>
 /// <code>
 /// import bcs;
@@ -685,7 +684,7 @@ public interface IShaderValues
 /// shader.
 /// </para>
 /// <para>
-/// Numbers are checked for kind and shape: a <c>float3</c> is set from a <see cref="Vector3"/>, an
+/// Numbers are checked for kind and shape, so a <c>float3</c> is set from a <see cref="Vector3"/>, an
 /// <c>int</c> from an <see cref="int"/>, a <c>float4x4</c> from a <see cref="Matrix4x4"/>, and an
 /// array from a span of its elements, which may be shorter than the array. A C# matrix is laid out
 /// by rows, which is what a Slang <c>float4x4</c> is, so <c>mul(m, v)</c> in the shader is
@@ -797,7 +796,7 @@ public static unsafe class ShaderValues
         /// <c>ConstantBuffer</c>.
         /// </summary>
         /// <remarks>
-        /// A uniform is laid out with rules C# does not follow by itself: a <c>float3</c> starts on
+        /// A uniform is laid out with rules C# does not follow by itself. A <c>float3</c> starts on
         /// sixteen bytes, an array element takes a multiple of sixteen, and a struct is rounded up to
         /// sixteen. A C# struct matching it spells that padding out, and
         /// <see cref="ShaderMaterial.Program"/>'s <see cref="ShaderProgram.Layout"/> says where each

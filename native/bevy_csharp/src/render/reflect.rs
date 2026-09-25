@@ -1,8 +1,7 @@
 //! What a compiled shader declares, and the bind group layout that follows from it.
 //!
-//! A shader declares whatever it needs: a thousand numbers, sixty-four textures, sixteen cubemaps,
-//! buffers of any size. Nothing here has a table of what is allowed. The layout is read from the
-//! shader, so the only limits are the device's.
+//! A shader declares whatever it needs, of any kind and at any size. Nothing here has a table of
+//! what is allowed. The layout is read from the shader, so the only limits are the device's.
 //!
 //! Two sources, because each is right about a different thing:
 //!
