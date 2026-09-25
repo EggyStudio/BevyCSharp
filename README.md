@@ -707,6 +707,25 @@ Handles are references, so one mesh and one material can be shared by any number
 Attaching a mesh goes through Bevy's own insert rather than a byte copy, which is what pulls in the
 components Bevy requires alongside it, so an entity needs nothing further to be drawn.
 
+**A mesh of your own.** A shape no primitive describes is built from its vertices, in any
+profile, since a mesh is data until something draws it:
+
+```csharp
+var ramp = Render.CreateMesh(new MeshData
+{
+    Positions = [new(0f, 0f, 0f), new(4f, 0f, 0f), new(4f, 1f, -2f), new(0f, 1f, -2f)],
+    Uvs = [0f, 1f, 1f, 1f, 1f, 0f, 0f, 0f],             // two floats a vertex
+    Indices = [0, 1, 2, 0, 2, 3],
+});
+```
+
+A triangle mesh given no normals has them worked out, smooth where it is indexed and flat where it
+is not. `Topology` also takes lines, points and strips. A mesh whose vertices a shader moves far
+from where they were built, such as ten thousand squares a vertex shader places from a buffer,
+wants `Render.SetMeshFlags(ctx.Ecs, entity, MeshFlags.NoFrustumCulling)`, because Bevy culls by
+the bounds it worked out from the mesh and those say nothing about where the shader put it. The
+same flags turn a mesh's shadow casting and receiving off.
+
 **Materials.** A material takes settings, and its textures are image handles:
 
 ```csharp
@@ -735,38 +754,212 @@ what foliage and fences are drawn with. `Blend` is real transparency, drawn afte
 and sorted back to front. `Add` adds to what is behind, so it never darkens it. `DoubleSided` draws
 back faces, for anything modelled as a single sheet, and `Unlit` shows the base color flat.
 
-**A shader of your own.** Bevy asks a material's *type* for its shader rather than the material, so
-one type draws with one shader and C# cannot declare a type. The bridge declares four material
-slots instead, and an app says what each is for before it runs:
+**A shader of your own.** A program names the files that draw a material, and a material says
+which program draws it. There is no limit on how many programs a game has, and each is made while
+the app runs:
 
 ```csharp
-app.UseShader(0, "shaders/ripple.wgsl");           // once, before Run
+var ripple = Shaders.CreateProgram("shaders/ripple.wgsl");       // the fragment shader alone
 
-var water = Shaders.CreateMaterial(0, [0.1f, 0.4f, 0.8f, 1f, speed]);
-Render.SetMaterial(ctx.Ecs, pond, water);          // as many materials as the game wants
+var water = Shaders.CreateMaterial(ripple, [0.1f, 0.4f, 0.8f, 1f, speed]);
+Render.SetMaterial(ctx.Ecs, pond, water);                         // as many as the game wants
 ```
 
-A slot carries sixteen floats and one picture, which covers a colour, a scroll, a threshold and a
-mask. The material's own bind group is group three, where binding zero is the floats as four
-`vec4`, binding one is the texture and binding two its sampler:
+Bevy asks a material's *type* for its shaders rather than the material, and C# cannot declare a
+type, so the bridge has one material type and rewrites each pipeline it builds with the shaders of
+the program the material names. That is also what lets a material change program while it is
+drawn, with `Shaders.SetProgram`.
+
+A program can name four stages, each a file and an entry point, so one file can hold all of them:
+
+```csharp
+var grass = Shaders.CreateProgram(new ShaderProgramSettings
+{
+    Vertex = "shaders/grass.slang",                                // moves the blades
+    Fragment = "shaders/grass.slang",
+    PrepassVertex = new ShaderStage("shaders/grass.slang", "prepass_vertex"),
+    Defines = { ["BLADES"] = 3, ["WIND"] = true },
+});
+```
+
+The prepass is what draws depth for shadows, and normals and motion for the effects that read
+them. A material that moves its vertices wants a prepass vertex shader moving them the same way,
+or it casts the shadow of the mesh it started from, and one that discards pixels wants a prepass
+fragment shader discarding the same ones. A stage left out is Bevy's own, except the fragment
+shader, which is required. Defines reach WGSL through naga_oil's `#ifdef` and `#{NAME}`, and Slang
+as `-D`, and a program with different defines is a different program compiled on its own.
+
+A stage can also be code handed over as text, which is what a shader worked out at run time wants,
+whether a node graph produced it or a player typed it:
+
+```csharp
+var tint = Shaders.CreateProgram(ShaderStage.Wgsl(generated));    // or ShaderStage.Slang(text)
+Shaders.SetProgram(material, tint);                                // swap it onto a material
+```
+
+Inline WGSL may `#import` Bevy's modules like a file, and inline Slang may `import bcs;`. Different
+text is a different program, so there is nothing to reload; a change is a new program.
+
+A material carries sixty-four floats, whatever bytes the game gives it, eight textures with their
+samplers, and two each of cubemaps, array textures and 3D textures, all in group three:
+
+| binding | holds |
+|---|---|
+| 0 | the floats, as sixteen `vec4` in a uniform |
+| 1, 2 | texture zero and its sampler |
+| 3 | the bytes, as a read-only storage buffer of any size |
+| 4 to 17 | textures one to seven, each followed by its sampler |
+| 18, 19 | cubemaps, made with `Render.MakeCubemap` |
+| 20, 21 | array textures, made with `Render.MakeTextureArray` |
+| 22, 23 | 3D textures, made with `Render.MakeVolume` |
 
 ```wgsl
 #import bevy_pbr::forward_io::VertexOutput
 
-struct Params { values: array<vec4<f32>, 4> };
-@group(3) @binding(0) var<uniform> params: Params;
+struct Params { values: array<vec4<f32>, 16> };
+@group(#{MATERIAL_BIND_GROUP}) @binding(0) var<uniform> params: Params;
+@group(#{MATERIAL_BIND_GROUP}) @binding(3) var<storage, read> points: array<vec4<f32>>;
 
 @fragment
 fn fragment(mesh: VertexOutput) -> @location(0) vec4<f32> {
-    return params.values[0];
+    return params.values[0] * points[arrayLength(&points) - 1u];
 }
 ```
 
-`App.UseShader` takes a vertex shader as well, whose entry point is called `vertex`, for a material
-that moves its own geometry. `AlphaMode` is per material rather than per slot, so two things drawn
-by one shader can still be sorted differently. What a slot cannot override is the prepass, so a
-material that displaces itself casts the shadow of the mesh it started from rather than of the
-shape it drew.
+Everything is visible to both stages, so a vertex shader can raise a mesh by a heightmap the
+fragment shader colors it with. `Shaders.SetParameters`, `SetData`, `SetTexture` and `SetAlpha`
+change a material while it is drawn, and each change reaches the shader on the next frame. A WGSL
+file holding both passes is compiled whole for each pass with that pass's defines, so it keeps
+each pass's entry points behind `#ifdef PREPASS_PIPELINE`.
+
+**Slang.** A stage whose file ends in `.slang` is compiled to WGSL by
+[`slangc`](https://github.com/shader-slang/slang/releases), found through the `BCS_SLANGC`
+environment variable or on the `PATH`, and then takes the same path through Bevy a WGSL shader
+does. `import bcs;` gives it the material's bindings, Bevy's view, time and mesh transforms, and
+vertex structs that line up with Bevy's own, so a Slang fragment shader works after Bevy's vertex
+shader:
+
+```slang
+import bcs;
+
+struct Ripple { float2 center; float strength; };
+
+[shader("vertex")]
+bcs::VertexOutput vertex(bcs::Vertex v)
+{
+    v.position.y += sin(bcs::globals.time * 3.0 + v.position.x * 4.0) * bcs::number(0);
+    return bcs::standard_vertex(v);
+}
+
+[shader("fragment")]
+float4 fragment(bcs::VertexOutput mesh) : SV_Target
+{
+    let ripple = bcs::element<Ripple>(0);
+    let fade = saturate(1.0 - distance(mesh.uv, ripple.center) * ripple.strength);
+    return bcs::texture0.Sample(bcs::sampler0, mesh.uv) * bcs::row(1) * fade;
+}
+```
+
+`bcs::element<T>(index)` reads the material's bytes, and Slang reads them with the packing a C#
+struct with sequential layout already has, so the same struct declared on both sides agrees on
+every offset: `Shaders.SetData<Ripple>(material, ripples)`. WGSL aligns a `vec3` to sixteen bytes,
+so a struct shared with WGSL spells its padding out.
+
+Every successful compile is cached under the asset root in `.slang-cache`, keyed by the file, the
+defines and a hash of everything the file imported. A machine without `slangc` reads the cache
+instead, so a game shipped with it needs no compiler, and an entry whose sources have changed is
+never used. `Shaders.SlangAvailable` says whether edits can be compiled.
+
+**Reloading shaders.** An edit to a shader file, or to any file a Slang shader imports, reaches the
+screen within a quarter of a second, in every profile. A file that fails to compile leaves the last
+version that compiled in use and says why in the log, in `program.Diagnostics`, and through
+`shader.errors` in the console. One that has never compiled draws magenta. A Slang shader's bindings
+are checked against what the bridge binds before a pipeline is built from it, so a texture declared
+where a material holds its floats is a failed compile naming the binding. A WGSL shader that
+disagrees with its pipeline, or a shader of either language reading an input its vertex shader
+never wrote, is a validation error, which closes the app; `Shaders.KeepRenderingAfterErrors` logs it
+and drops the frames it breaks instead, and the editor sets it.
+
+**Passes over the picture.** A camera runs any number of programs over what it drew, each a
+fragment shader run once per pixel, reading the picture so far and writing the next one:
+
+```csharp
+var crt = Shaders.CreateProgram("shaders/crt.slang");
+Shaders.SetPasses(camera, new ShaderPassSettings
+{
+    Program = crt,
+    Parameters = [0.3f],                      // at binding two, like a material's
+    AfterTonemapping = true,                  // on the picture as the screen shows it
+});
+
+Shaders.SetPassParameters(camera, 0, [strength]);   // while it runs
+```
+
+```slang
+import bcs_pass;
+
+[shader("fragment")]
+float4 fragment(bcs_pass::Input input) : SV_Target
+{
+    let shift = bcs_pass::pixel_size() * bcs_pass::number(0) * 4.0;
+    let color = float3(
+        bcs_pass::sample(input.uv + shift).r,
+        bcs_pass::sample(input.uv).g,
+        bcs_pass::sample(input.uv - shift).b);
+    let lines = 0.85 + 0.15 * sin(input.position.y * 3.14159);
+    return float4(color * lines, 1.0);
+}
+```
+
+A pass reads group zero: the picture and a linear sampler at bindings zero and one, sixty-four
+floats at two, any number of bytes at three, Bevy's globals at four, the view at five and four
+textures with their samplers from six to thirteen. A pass before tonemapping sees the linear
+picture, which may be brighter than white, and suits anything about light; one after sees what the
+screen will show, and suits anything about the picture as a picture. A pass still compiling is
+skipped rather than drawn wrong, and passes run in the order given, each over what the last wrote.
+
+**Compute.** A program with a compute stage runs on the GPU outside of any picture, over buffers
+that stay on the GPU between frames, so what one dispatch writes the next reads and a material bound
+to the same buffer draws it:
+
+```csharp
+// Once.
+var step = Shaders.CreateProgram(new ShaderProgramSettings { Compute = "shaders/boids.slang" });
+var flock = Shaders.CreateBuffer<Boid>(boids);                   // a C# struct, as it is
+var drawn = Shaders.CreateMaterial(new ShaderMaterialSettings { Program = look, Buffer = flock });
+
+// Every frame, from a system: 64 boids to a workgroup.
+Shaders.Dispatch(step, (uint)(boids.Length + 63) / 64, flock);
+```
+
+```slang
+import bcs_compute;
+
+struct Boid { float3 position; float3 velocity; };
+
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void main(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= bcs_compute::count<Boid>(bcs_compute::buffer0)) return;
+
+    var boid = bcs_compute::element<Boid>(bcs_compute::buffer0, id.x);
+    boid.position += boid.velocity * bcs_compute::globals.delta_time;
+    bcs_compute::store(bcs_compute::buffer0, id.x, boid);
+}
+```
+
+A dispatch is asked for from a system and runs once, that frame, before any camera draws, and
+dispatches run in the order they were asked for. A compute shader reads the floats at binding zero,
+four buffers it reads and writes at one to four, and Bevy's globals at five. It writes two images,
+an eight-bit one at six and a half-float one at seven, made with `Shaders.CreateImage`, and reads two
+more at eight and nine with a linear sampler at ten. An image it writes is an ordinary texture to a
+material or a pass, which is how a compute shader paints a water surface or a noise field into
+something drawn. A buffer's size is
+fixed when it is made, and `WriteBuffer` replaces its contents in place. `BeginBufferRead` copies
+one back, and `TryReadBuffer<T>` hands over the elements a frame or two later, which is what any
+readback costs. A program's state stays `Compiling` until its compute pipeline has been built, so
+a dispatch made once it is `Ready` runs rather than being dropped.
 
 **Textures.** How one is sampled is decided when it loads:
 
@@ -1659,6 +1852,8 @@ The editor profile watches the asset directory, so a running app picks up what c
 `Config.WatchAssets` turns it on.
 
 Assets reload: a texture, a mesh or a font changed on disk is picked up by the running app.
+Shaders reload in every profile, watcher or not, including a Slang shader when a file it imports
+changes. What happens when one fails is under [Drawing](#drawing).
 
 Behavior scripts reload too. A script is an ordinary `[Behavior]` struct in a `.cs` file that is
 compiled while the app runs, with the same source generator the compiled projects use, so what it
@@ -1920,6 +2115,8 @@ run against a real Bevy app. Known gaps:
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
 - A cubemap comes from a file, as six square faces stacked into a column. One rendered into, which
   is what a reflection probe placed in a room would want, has no bridge.
+- Slang shaders compile with `slangc`, which is a separate download. A machine without it draws
+  what was compiled and cached on one that had it, and cannot compile an edit.
 
 ---
 

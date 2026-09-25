@@ -289,6 +289,19 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // never specialised in an app that never does.
             app.add_plugins(bevy::pbr::wireframe::WireframePlugin::default());
 
+            // Materials drawn by shaders the game wrote, and what compiles and reloads them. The
+            // asset root is resolved the way the asset server resolves it, because a Slang file is
+            // handed to a compiler by its path on disk rather than read through the server.
+            let shader_root = bevy::asset::io::file::FileAssetReader::new(
+                asset_root
+                    .as_deref()
+                    .filter(|path| !path.is_empty())
+                    .unwrap_or("assets"),
+            )
+            .root_path()
+            .clone();
+            crate::render::material::install(&mut app, shader_root);
+
             // HTML and CSS driven UI, when the profile carries it and the app asked for it.
             //
             // Asked for rather than assumed, because the plugin is not free to an app that never
@@ -312,6 +325,11 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             app.add_systems(
                 bevy::app::PreUpdate,
                 crate::render::post::reinterpret_cubemaps,
+            );
+            app.init_resource::<crate::render::assets::PendingReshapes>();
+            app.add_systems(
+                bevy::app::PreUpdate,
+                crate::render::assets::reshape_images,
             );
 
             // Debug drawing goes through a queue, because a `Gizmos` parameter cannot be held by an

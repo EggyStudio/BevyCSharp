@@ -612,3 +612,202 @@ public struct NativeGradingConfig
     /// <summary>The brightest range.</summary>
     public NativeGradingSection Highlights;
 }
+
+/// <summary>A file and an entry point in it. Mirrors <c>BcsShaderStage</c>.</summary>
+public unsafe struct NativeShaderStage
+{
+    /// <summary>NUL-terminated UTF-8, or null to leave the stage to Bevy.</summary>
+    public byte* Path;
+
+    /// <summary>NUL-terminated UTF-8, or null for the name Bevy's own shaders use.</summary>
+    public byte* Entry;
+
+    /// <summary>The code itself, in place of a path, or null.</summary>
+    public byte* Source;
+
+    /// <summary>What <see cref="Source"/> is written in: 1 WGSL, 2 Slang.</summary>
+    public int Language;
+}
+
+/// <summary>A name a shader is compiled with defined. Mirrors <c>BcsShaderDefine</c>.</summary>
+public unsafe struct NativeShaderDefine
+{
+    /// <summary>NUL-terminated UTF-8.</summary>
+    public byte* Name;
+
+    /// <summary>0 a boolean, 1 a signed integer, 2 an unsigned one.</summary>
+    public int Kind;
+
+    /// <summary>The value, with non-zero as true for a boolean.</summary>
+    public int Value;
+}
+
+/// <summary>Which shaders a program is made of. Mirrors <c>BcsShaderProgramConfig</c>.</summary>
+public unsafe struct NativeShaderProgramConfig
+{
+    /// <summary>The main pass's vertex shader.</summary>
+    public NativeShaderStage Vertex;
+
+    /// <summary>The main pass's fragment shader, which is required.</summary>
+    public NativeShaderStage Fragment;
+
+    /// <summary>The prepass's vertex shader.</summary>
+    public NativeShaderStage PrepassVertex;
+
+    /// <summary>The prepass's fragment shader.</summary>
+    public NativeShaderStage PrepassFragment;
+
+    /// <summary>The defines, or null.</summary>
+    public NativeShaderDefine* Defines;
+
+    /// <summary>How many defines there are.</summary>
+    public int DefineCount;
+
+    /// <summary>A compute shader, which a program may have instead of a fragment shader.</summary>
+    public NativeShaderStage Compute;
+}
+
+/// <summary>Everything a shader material is made of. Mirrors <c>BcsShaderMaterialConfig</c>.</summary>
+public unsafe struct NativeShaderMaterialConfig
+{
+    /// <summary>How many 2D textures a material carries.</summary>
+    public const int TextureCount = 8;
+
+    /// <summary>How many of each other kind of texture a material carries.</summary>
+    public const int ExtraCount = 2;
+
+    /// <summary>The program that draws it.</summary>
+    public int Program;
+
+    /// <summary>Up to sixty-four floats, or null.</summary>
+    public float* Parameters;
+
+    /// <summary>How many floats <see cref="Parameters"/> points at.</summary>
+    public int ParameterCount;
+
+    /// <summary>The storage buffer's bytes, or null.</summary>
+    public byte* Data;
+
+    /// <summary>How many bytes <see cref="Data"/> points at.</summary>
+    public int DataLength;
+
+    /// <summary>Image keys for the 2D textures, zero or less for none.</summary>
+    public fixed int Textures[TextureCount];
+
+    /// <summary>Image keys for the cubemaps.</summary>
+    public fixed int Cubes[ExtraCount];
+
+    /// <summary>Image keys for the array textures.</summary>
+    public fixed int Arrays[ExtraCount];
+
+    /// <summary>Image keys for the 3D textures.</summary>
+    public fixed int Volumes[ExtraCount];
+
+    /// <summary>An <see cref="AlphaMode"/>.</summary>
+    public int Alpha;
+
+    /// <summary>Where a masked material stops drawing.</summary>
+    public float AlphaCutoff;
+
+    /// <summary>0 back faces, 1 front faces, 2 neither.</summary>
+    public int Cull;
+
+    /// <summary>How far toward the camera the depth is pushed.</summary>
+    public float DepthBias;
+
+    /// <summary>A buffer key bound in place of <see cref="Data"/>, zero or less for none.</summary>
+    public int Buffer;
+}
+
+/// <summary>One full-screen pass a camera runs. Mirrors <c>BcsShaderPassConfig</c>.</summary>
+public unsafe struct NativeShaderPassConfig
+{
+    /// <summary>How many textures a pass carries besides the picture.</summary>
+    public const int TextureCount = 4;
+
+    /// <summary>The program whose fragment shader is run over the picture.</summary>
+    public int Program;
+
+    /// <summary>Up to sixty-four floats, or null.</summary>
+    public float* Parameters;
+
+    /// <summary>How many floats <see cref="Parameters"/> points at.</summary>
+    public int ParameterCount;
+
+    /// <summary>The storage buffer's bytes, or null.</summary>
+    public byte* Data;
+
+    /// <summary>How many bytes <see cref="Data"/> points at.</summary>
+    public int DataLength;
+
+    /// <summary>Image keys, zero or less for none.</summary>
+    public fixed int Textures[TextureCount];
+
+    /// <summary>Non-zero to run after tonemapping.</summary>
+    public int AfterTonemapping;
+
+    /// <summary>A buffer key bound in place of <see cref="Data"/>, zero or less for none.</summary>
+    public int Buffer;
+}
+
+/// <summary>One run of a compute shader. Mirrors <c>BcsShaderDispatchConfig</c>.</summary>
+public unsafe struct NativeShaderDispatchConfig
+{
+    /// <summary>How many buffers a dispatch is handed.</summary>
+    public const int BufferCount = 4;
+
+    /// <summary>A program with a compute stage.</summary>
+    public int Program;
+
+    /// <summary>Up to sixty-four floats, or null.</summary>
+    public float* Parameters;
+
+    /// <summary>How many floats <see cref="Parameters"/> points at.</summary>
+    public int ParameterCount;
+
+    /// <summary>Buffer keys, zero or less for none.</summary>
+    public fixed int Buffers[BufferCount];
+
+    /// <summary>Workgroups along the first axis.</summary>
+    public uint X;
+
+    /// <summary>Workgroups along the second axis.</summary>
+    public uint Y;
+
+    /// <summary>Workgroups along the third axis.</summary>
+    public uint Z;
+
+    /// <summary>Image keys written at bindings six and seven.</summary>
+    public fixed int Images[2];
+
+    /// <summary>Image keys read at bindings eight and nine.</summary>
+    public fixed int Textures[2];
+}
+
+/// <summary>A mesh described vertex by vertex. Mirrors <c>BcsMeshData</c>.</summary>
+public unsafe struct NativeMeshData
+{
+    /// <summary>Three floats a vertex.</summary>
+    public float* Positions;
+
+    /// <summary>How many vertices there are.</summary>
+    public int VertexCount;
+
+    /// <summary>Three floats a vertex, or null.</summary>
+    public float* Normals;
+
+    /// <summary>Two floats a vertex, or null.</summary>
+    public float* Uvs;
+
+    /// <summary>Four floats a vertex, or null.</summary>
+    public float* Colors;
+
+    /// <summary>Indices into the vertices, or null.</summary>
+    public uint* Indices;
+
+    /// <summary>How many indices there are.</summary>
+    public int IndexCount;
+
+    /// <summary>0 triangles, 1 lines, 2 points, 3 a line strip, 4 a triangle strip.</summary>
+    public int Topology;
+}

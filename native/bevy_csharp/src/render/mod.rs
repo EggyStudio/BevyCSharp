@@ -12,14 +12,24 @@
 //!   typed `Handle<T>`, which raw bytes cannot represent.
 //! - [`scene`] spawns what the picture contains: cameras, lights and sprites.
 //! - [`post`] is what a camera does to the picture once the scene has been drawn.
+//! - [`shaders`] is the boundary for shaders the game wrote: [`programs`] says which files draw a
+//!   material and keeps them compiled, [`material`] is what such a material carries, [`passes`]
+//!   runs them over a camera's picture, [`compute`] runs them over buffers outside of any picture,
+//!   and [`slang`] compiles the ones written in Slang.
 //!
 //! What the three share sits here: resolving an asset key, and refusing an entity that is not a
 //! camera.
 
 pub mod assets;
+pub mod check;
+pub mod compute;
+pub mod material;
+pub mod passes;
 pub mod post;
+pub mod programs;
 pub mod scene;
 pub mod shaders;
+pub mod slang;
 
 #[cfg(feature = "render")]
 use crate::interop::status;

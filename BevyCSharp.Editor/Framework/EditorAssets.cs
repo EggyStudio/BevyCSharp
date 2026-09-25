@@ -181,6 +181,7 @@ public static class EditorAssets
         ".gltf" or ".glb" => "model",
         ".ogg" or ".wav" or ".flac" or ".mp3" => "sound",
         ".scn" or ".ron" => "scene",
+        ".wgsl" or ".slang" => "shader",
         ".json" => "data",
         ".txt" => "text",
         "" => "file",
@@ -198,7 +199,7 @@ public static class EditorAssets
     /// </remarks>
     public static string IconOf(string relative) => KindOf(relative) switch
     {
-        "behavior script" => EditorIcons.Script,
+        "behavior script" or "shader" => EditorIcons.Script,
         "text" => EditorIcons.Text,
         "image" => EditorIcons.Image,
         "model" => EditorIcons.Mesh,

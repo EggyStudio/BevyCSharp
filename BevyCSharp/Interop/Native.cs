@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 113;
+    internal const int ExpectedAbiVersion = 114;
 
     static Native() => NativeLoader.Initialize();
 
@@ -407,22 +407,173 @@ internal static unsafe partial class Native
     internal static partial int bcs_render_asset_path(
         ulong entity, int which, byte* buffer, int capacity);
 
-    /// <summary>Reports how many shader material slots this bridge provides.</summary>
+    /// <summary>Makes a program from the shaders named and returns its number.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_shader_slots();
+    internal static partial int bcs_shader_program_create(NativeShaderProgramConfig* config);
 
-    /// <summary>Points a slot at a fragment shader, and installs what draws with it.</summary>
-    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_shader_slot(
-        IntPtr app, int slot, string path, string? vertex);
-
-    /// <summary>Makes a material drawn by one of the slots, returning its key.</summary>
+    /// <summary>Reports whether a program is compiling, ready or failed.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_shader_material_create(
-        int slot, float* parameters, int count, int texture, int alpha);
+    internal static partial int bcs_shader_program_state(int program);
+
+    /// <summary>Reports how many times a program's shaders have been replaced.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_program_generation(int program);
+
+    /// <summary>Writes what a program's compilers said.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_program_diagnostics(int program, byte* buffer, int capacity);
+
+    /// <summary>Writes which files a program is made of.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_program_describe(int program, byte* buffer, int capacity);
+
+    /// <summary>Reports how many programs the app has made.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_program_count();
+
+    /// <summary>Compiles or reloads every stage of a program now.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_program_reload(int program);
+
+    /// <summary>Reports whether there is a slangc to compile Slang with.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_slang_available();
+
+    /// <summary>Says whether a validation error closes the app or is survived.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_keep_rendering_after_errors(int keep);
+
+    /// <summary>Writes the last error the renderer reported.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_last_render_error(byte* buffer, int capacity);
+
+    /// <summary>Makes a material drawn by a program, returning its key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_material_create(NativeShaderMaterialConfig* config);
+
+    /// <summary>Overwrites some of a material's floats.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_material_set_parameters(int material, int offset, float* values, int count);
+
+    /// <summary>Reads a material's floats.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_material_get_parameters(int material, float* values, int count);
+
+    /// <summary>Replaces a material's data.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_material_set_data(int material, byte* bytes, int length);
+
+    /// <summary>Puts an image in one of a material's texture slots.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_material_set_texture(int material, int kind, int index, int image);
+
+    /// <summary>Has a different program draw a material.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_material_set_program(int material, int program);
+
+    /// <summary>Reports which program draws a material.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_material_program(int material);
+
+    /// <summary>Changes how a material treats what it draws where it is not opaque.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_material_set_alpha(int material, int alpha, float cutoff);
+
+    /// <summary>Asks for an image to be treated as a cubemap once it has loaded.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_make_cubemap(int image);
+
+    /// <summary>Asks for an image to be cut into layers or slices once it has loaded.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_reshape_image(int image, int count, int volume);
+
+    /// <summary>Replaces the passes a camera runs over its picture.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_shader_passes(
+        ulong camera, NativeShaderPassConfig* passes, int count);
+
+    /// <summary>Overwrites some of a pass's floats.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_shader_pass_parameters(
+        ulong camera, int index, int offset, float* values, int count);
+
+    /// <summary>Replaces a pass's data.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_shader_pass_data(
+        ulong camera, int index, byte* bytes, int length);
+
+    /// <summary>Makes a buffer shaders can read and write, returning its key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_buffer_create(byte* bytes, int length, int size);
+
+    /// <summary>Replaces a buffer's contents.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_buffer_write(int buffer, byte* bytes, int length);
+
+    /// <summary>Reports a buffer's size in bytes.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_buffer_size(int buffer);
+
+    /// <summary>Starts copying a buffer back from the GPU.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_buffer_read(int buffer);
+
+    /// <summary>Takes the bytes a read brought back.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_buffer_take(int ticket, byte* buffer, int capacity);
+
+    /// <summary>Runs a compute shader once, this frame.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_dispatch(NativeShaderDispatchConfig* config);
+
+    /// <summary>Binds a buffer at a material's data binding.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_material_set_buffer(int material, int buffer);
+
+    /// <summary>Builds a mesh from vertices and returns an asset key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_mesh_create_from(NativeMeshData* data);
+
+    /// <summary>Says how an entity's mesh is treated beyond what it looks like.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_mesh_flags(ulong entity, uint flags);
+
+    /// <summary>Makes an image a compute shader writes, returning its key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_image_create(uint width, uint height, int format);
 
     /// <summary>Attaches an asset through a component that carries a handle.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]

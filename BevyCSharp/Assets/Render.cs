@@ -44,6 +44,95 @@ public static unsafe class Render
     }
 
     /// <summary>
+    /// Builds a mesh from vertices and returns a handle to it.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What a shape no primitive describes wants: a terrain from a heightmap, a ribbon, a line of
+    /// points, or a mesh of ten thousand quads whose vertex shader places each one from a buffer a
+    /// compute shader writes. Built in any profile, since a mesh is data until something draws it.
+    /// </para>
+    /// <para>
+    /// A triangle mesh given no normals has them worked out, smooth where it is indexed and flat
+    /// where it is not, because every lit material and every shader reading a normal would
+    /// otherwise read zeros. The attributes land where Bevy's shaders look for them: positions at
+    /// location zero, normals at one, UVs at two and colors at five.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="ArgumentException">
+    /// There are no positions, an array is the wrong length for the vertices, or an index names
+    /// no vertex.
+    /// </exception>
+    public static AssetHandle CreateMesh(MeshData mesh)
+    {
+        ArgumentNullException.ThrowIfNull(mesh);
+
+        var count = mesh.Positions.Length;
+
+        if (count == 0)
+            throw new ArgumentException("A mesh needs at least one position.", nameof(mesh));
+
+        if (mesh.Normals is { } normals && normals.Length != count)
+            throw new ArgumentException($"{normals.Length} normals for {count} vertices.", nameof(mesh));
+
+        if (mesh.Uvs is { } uvs && uvs.Length != count * 2)
+            throw new ArgumentException($"{uvs.Length} UV floats for {count} vertices, which is two each.", nameof(mesh));
+
+        if (mesh.Colors is { } colors && colors.Length != count * 4)
+            throw new ArgumentException($"{colors.Length} color floats for {count} vertices, which is four each.", nameof(mesh));
+
+        if (mesh.Indices is { } indices && indices.Any(index => index >= count))
+            throw new ArgumentException($"An index names a vertex past the {count} there are.", nameof(mesh));
+
+        fixed (Vec3* positions = mesh.Positions)
+        fixed (Vec3* normalsAt = mesh.Normals)
+        fixed (float* uvsAt = mesh.Uvs)
+        fixed (float* colorsAt = mesh.Colors)
+        fixed (uint* indicesAt = mesh.Indices)
+        {
+            var native = new NativeMeshData
+            {
+                Positions = (float*)positions,
+                VertexCount = count,
+                Normals = (float*)normalsAt,
+                Uvs = uvsAt,
+                Colors = colorsAt,
+                Indices = indicesAt,
+                IndexCount = mesh.Indices?.Length ?? 0,
+                Topology = (int)mesh.Topology,
+            };
+
+            return new AssetHandle(Native.Check(
+                Native.bcs_mesh_create_from(&native),
+                $"building a mesh of {count} vertices"));
+        }
+    }
+
+    /// <summary>
+    /// Says how an entity's mesh is treated beyond what it looks like. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The flags are the whole answer rather than additions, so a flag left out takes that
+    /// behavior off again and <see cref="MeshFlags.None"/> puts everything back as Bevy has it.
+    /// </para>
+    /// <para>
+    /// <see cref="MeshFlags.NoFrustumCulling"/> is what a mesh drawn where its own bounds do not
+    /// say needs: one a vertex shader moves far from where it was built, or one whose vertices a
+    /// buffer places. Bevy culls by the bounds it worked out from the mesh, so such a mesh vanishes
+    /// whenever those stale bounds leave the view.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The entity does not exist, or there is no renderer.</exception>
+    public static void SetMeshFlags(EcsWorld world, Entity entity, MeshFlags flags)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        Native.Check(
+            Native.bcs_render_set_mesh_flags(entity.Bits, (uint)flags),
+            $"setting how entity {entity} is drawn");
+    }
+
+    /// <summary>
     /// Builds a physically based material and returns a handle to it.
     /// </summary>
     /// <param name="red">Linear sRGB red, from zero to one.</param>
@@ -155,8 +244,10 @@ public static unsafe class Render
 
     /// <summary>Where an entity's material was loaded from, or empty when it was not.</summary>
     /// <remarks>
-    /// Only a standard material answers, since a material drawn by a shader slot is a different
-    /// type and one of several. <see cref="MeshPathOf"/> covers the rest of the reasoning.
+    /// Only a standard material answers. A shader material is always made in memory, so it has no
+    /// path, and what describes it is the program drawing it, which
+    /// <see cref="Shaders.ProgramOf"/> gives. <see cref="MeshPathOf"/> covers the rest of the
+    /// reasoning.
     /// </remarks>
     /// <param name="entity">The entity to ask about.</param>
     public static string MaterialPathOf(Entity entity) => AssetPathOf(entity, 1);
@@ -1111,6 +1202,62 @@ public static unsafe class Render
         if (key < 0) throw NoRenderer($"Creating a {width}x{height} image");
 
         return new AssetHandle(key);
+    }
+
+    /// <summary>
+    /// Has an image of six square faces stacked from top to bottom treated as a cubemap.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What a shader material's <see cref="ShaderMaterialSettings.Cubemaps"/> want, and the layout
+    /// <see cref="SetSkybox"/> takes. The faces are in the order +X, -X, +Y, -Y, +Z, -Z.
+    /// </para>
+    /// <para>
+    /// Applied when the pixels arrive, since the shape of a picture is not known until it has been
+    /// decoded, so the handle can be passed on at once. An image that is not six squares tall is
+    /// left as it is, with a warning in the log.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The handle names no image, or there is no renderer.</exception>
+    public static void MakeCubemap(AssetHandle image) =>
+        Native.Check(Native.bcs_render_make_cubemap(image.Key), "making an image a cubemap");
+
+    /// <summary>
+    /// Has an image of <paramref name="layers"/> equal pictures stacked from top to bottom treated
+    /// as an array of them.
+    /// </summary>
+    /// <remarks>
+    /// What a shader material's <see cref="ShaderMaterialSettings.TextureArrays"/> want: many
+    /// pictures of one size behind one binding, which a terrain's ground types or a sprite's frames
+    /// are. Applied when the pixels arrive, like <see cref="MakeCubemap"/>.
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="layers"/> is less than one.</exception>
+    /// <exception cref="BevyNativeException">The handle names no image, or there is no renderer.</exception>
+    public static void MakeTextureArray(AssetHandle image, int layers)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(layers, 1);
+        Native.Check(
+            Native.bcs_render_reshape_image(image.Key, layers, 0),
+            $"cutting an image into {layers} layers");
+    }
+
+    /// <summary>
+    /// Has an image of <paramref name="slices"/> equal pictures stacked from top to bottom treated
+    /// as a 3D texture that many deep.
+    /// </summary>
+    /// <remarks>
+    /// What a shader material's <see cref="ShaderMaterialSettings.Volumes"/> want, for fog, clouds,
+    /// a color grading table or anything else sampled at a point in space. The first slice is the
+    /// front. Applied when the pixels arrive, like <see cref="MakeCubemap"/>.
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="slices"/> is less than one.</exception>
+    /// <exception cref="BevyNativeException">The handle names no image, or there is no renderer.</exception>
+    public static void MakeVolume(AssetHandle image, int slices)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(slices, 1);
+        Native.Check(
+            Native.bcs_render_reshape_image(image.Key, slices, 1),
+            $"cutting an image into {slices} slices");
     }
 
     /// <summary>

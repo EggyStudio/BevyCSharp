@@ -37,6 +37,10 @@ config.AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets");
 config.Gui = true;
 config.WatchAssets = true;
 
+// The same goes for shaders, and a shader edited into a shape the pipeline rejects is something to
+// read about in the console and fix, rather than a reason for the editor to close.
+Shaders.KeepRenderingAfterErrors = true;
+
 // Answers `bcs` while it runs: what is in the world, what a click does, what the window looks
 // like, without stopping to ask. BCS_SERVE does the same for a run that cannot be given arguments.
 config.Serve = args.Contains("--serve");

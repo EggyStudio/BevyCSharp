@@ -170,6 +170,24 @@ Only once all three are ruled out should you edit `assets/world.json` or a scene
 and say plainly that you are doing it because no live session was reachable. A hand-edited file is
 invisible to a running app, so the change silently does nothing.
 
+## When a shader is wrong
+
+Shaders compile in the background and reload on their own, so a shader that does not look right is
+asked about rather than guessed at:
+
+```bash
+./bcs command shader.list          # every program: its number, whether it compiled, its files
+./bcs command shader.errors        # what the compiler said about every one that failed
+./bcs command shader.errors 3      # or about one, warnings included
+./bcs command shader.reload all    # compile again without touching a file
+./bcs command shader.status        # whether slangc was found, and the renderer's last error
+```
+
+A magenta surface is a Slang stage that has never compiled, and `shader.errors` says why. A surface
+that stopped changing after an edit is the last version that compiled, still drawing while the new
+one fails. Edit the file and the session picks it up within a quarter of a second, so there is no
+restart to do.
+
 ## Building and testing
 
 ```bash

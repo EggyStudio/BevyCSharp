@@ -395,6 +395,14 @@ pub struct PendingEnvironments(Vec<PendingEnvironment>);
 #[derive(bevy::ecs::resource::Resource, Default)]
 pub struct PendingCubemaps(Vec<PendingCubemap>);
 
+#[cfg(feature = "render")]
+impl PendingCubemaps {
+    /// Adds an image to turn into a cubemap with nothing waiting on it.
+    pub fn push(&mut self, image: bevy::asset::Handle<bevy::image::Image>) {
+        self.0.push(PendingCubemap { image, light: None });
+    }
+}
+
 /// Turns each loaded image on the list into a cubemap, and forgets it.
 ///
 /// Six faces stacked vertically, which is the layout every cubemap texture on the web is in and the

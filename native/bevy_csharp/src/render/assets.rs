@@ -67,6 +67,127 @@ pub unsafe extern "C" fn bcs_mesh_create(
     })
 }
 
+/// A mesh described vertex by vertex.
+///
+/// Every array but `positions` may be null. Positions and normals are three floats a vertex, UVs
+/// two and colors four, in linear RGBA.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsMeshData {
+    pub positions: *const f32,
+    pub vertex_count: i32,
+    pub normals: *const f32,
+    pub uvs: *const f32,
+    pub colors: *const f32,
+    /// Indices into the vertices, or null to take them in order.
+    pub indices: *const u32,
+    pub index_count: i32,
+    /// `0` triangles, `1` lines, `2` points, `3` a line strip, `4` a triangle strip.
+    pub topology: i32,
+}
+
+/// Builds a mesh from vertices and answers its asset key.
+///
+/// A triangle mesh given no normals has them worked out, smooth where it is indexed and flat
+/// where it is not, because every lit material and every shader reading a normal would otherwise
+/// read zeros. Built in any profile, since a mesh is data until something draws it.
+///
+/// Returns [`status::NULL_ARG`] where a count is negative, a pointer the count needs is null, or
+/// an index names no vertex.
+///
+/// # Safety
+/// `data` must point to a readable [`BcsMeshData`] whose arrays hold what their counts say.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_mesh_create_from(data: *const BcsMeshData) -> i32 {
+    crate::interop::guard(|| {
+        use bevy::asset::{Assets, RenderAssetUsages};
+        use bevy::mesh::{Indices, Mesh, PrimitiveTopology};
+
+        if data.is_null() {
+            return status::NULL_ARG;
+        }
+
+        let data = unsafe { *data };
+
+        if data.vertex_count <= 0
+            || data.positions.is_null()
+            || data.index_count < 0
+            || (data.indices.is_null() && data.index_count > 0)
+        {
+            return status::NULL_ARG;
+        }
+
+        let count = data.vertex_count as usize;
+
+        let floats = |pointer: *const f32, width: usize| -> Option<&[f32]> {
+            (!pointer.is_null())
+                .then(|| unsafe { core::slice::from_raw_parts(pointer, count * width) })
+        };
+
+        let topology = match data.topology {
+            1 => PrimitiveTopology::LineList,
+            2 => PrimitiveTopology::PointList,
+            3 => PrimitiveTopology::LineStrip,
+            4 => PrimitiveTopology::TriangleStrip,
+            _ => PrimitiveTopology::TriangleList,
+        };
+
+        let positions = floats(data.positions, 3)
+            .map(|all| all.chunks_exact(3).map(|p| [p[0], p[1], p[2]]).collect::<Vec<_>>())
+            .unwrap_or_default();
+
+        let mut mesh = Mesh::new(topology, RenderAssetUsages::default())
+            .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions);
+
+        if let Some(normals) = floats(data.normals, 3) {
+            let normals: Vec<[f32; 3]> =
+                normals.chunks_exact(3).map(|n| [n[0], n[1], n[2]]).collect();
+            mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
+        }
+
+        if let Some(uvs) = floats(data.uvs, 2) {
+            let uvs: Vec<[f32; 2]> = uvs.chunks_exact(2).map(|t| [t[0], t[1]]).collect();
+            mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
+        }
+
+        if let Some(colors) = floats(data.colors, 4) {
+            let colors: Vec<[f32; 4]> =
+                colors.chunks_exact(4).map(|c| [c[0], c[1], c[2], c[3]]).collect();
+            mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
+        }
+
+        if data.index_count > 0 {
+            let indices =
+                unsafe { core::slice::from_raw_parts(data.indices, data.index_count as usize) };
+
+            if indices.iter().any(|index| *index as usize >= count) {
+                return status::NULL_ARG;
+            }
+
+            mesh.insert_indices(Indices::U32(indices.to_vec()));
+        }
+
+        if data.normals.is_null() && topology == PrimitiveTopology::TriangleList {
+            // Smooth normals need indices, and flat ones need there to be none, so the mesh is
+            // asked for whichever its shape allows.
+            if mesh.indices().is_some() {
+                mesh.compute_smooth_normals();
+            } else {
+                mesh.compute_flat_normals();
+            }
+        }
+
+        crate::state::with_world(|world| {
+            let Some(mut meshes) = world.get_resource_mut::<Assets<Mesh>>() else {
+                return status::UNSUPPORTED;
+            };
+
+            let handle = meshes.add(mesh).untyped();
+            crate::assets::insert_handle(world, handle)
+        })
+    })
+}
+
 /// Builds an empty image sized for a camera to draw into.
 ///
 /// The usages are what separate a texture that can be drawn into and copied out of from one that
@@ -204,6 +325,8 @@ pub unsafe extern "C" fn bcs_material_create(config: *const BcsMaterialConfig) -
                     1 => AlphaMode::Mask(config.alpha_cutoff),
                     2 => AlphaMode::Blend,
                     3 => AlphaMode::Add,
+                    4 => AlphaMode::Multiply,
+                    5 => AlphaMode::Premultiplied,
                     _ => AlphaMode::Opaque,
                 };
 
@@ -317,9 +440,9 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
                             status::OK
                         }
 
-                        // Not the standard one, so it may be one of the slots drawn by a shader
-                        // the caller named. The asset table is untyped, so which it is can only
-                        // be found by asking each of them.
+                        // Not the standard one, so it may be a material drawn by a shader the
+                        // caller wrote. The asset table is untyped, so which it is can only be
+                        // found by asking.
                         Err(_) => {
                             if crate::render::shaders::attach(&mut entity_mut, &untyped) {
                                 status::OK
@@ -396,6 +519,222 @@ pub unsafe extern "C" fn bcs_render_asset_path(
                     .unwrap_or_default();
 
                 unsafe { crate::interop::write_text(&path, out, capacity) }
+            })
+        }
+    })
+}
+
+// -- Reshaping images
+
+/// Images asked to become array or 3D textures, waiting for their pixels to arrive.
+///
+/// The same wait a cubemap has: an image loads as one tall picture, and how it divides into layers
+/// or slices can only be applied once it has been decoded.
+#[cfg(feature = "render")]
+#[derive(bevy::ecs::resource::Resource, Default)]
+pub struct PendingReshapes(Vec<PendingReshape>);
+
+/// One image waiting to be reshaped.
+#[cfg(feature = "render")]
+pub struct PendingReshape {
+    image: bevy::asset::Handle<bevy::image::Image>,
+    /// How many layers or slices it is stacked into.
+    count: u32,
+    /// A 3D texture rather than an array of 2D ones.
+    volume: bool,
+}
+
+/// Reshapes each loaded image on the list, and forgets it.
+///
+/// Both shapes read the picture as `count` equal parts stacked from top to bottom, which is the
+/// order their bytes are already in, so nothing is copied.
+#[cfg(feature = "render")]
+pub fn reshape_images(
+    mut pending: bevy::ecs::system::ResMut<PendingReshapes>,
+    mut images: bevy::ecs::system::ResMut<bevy::asset::Assets<bevy::image::Image>>,
+) {
+    use bevy::render::render_resource::{
+        Extent3d, TextureDimension, TextureViewDescriptor, TextureViewDimension,
+    };
+
+    pending.0.retain(|waiting| {
+        let Some(mut image) = images.get_mut(&waiting.image) else {
+            return true;
+        };
+
+        let size = image.texture_descriptor.size;
+
+        // Asked twice, which is not worth refusing.
+        let already = if waiting.volume {
+            image.texture_descriptor.dimension == TextureDimension::D3
+        } else {
+            size.depth_or_array_layers == waiting.count && waiting.count > 1
+        };
+
+        if !already {
+            if size.depth_or_array_layers != 1 || !size.height.is_multiple_of(waiting.count) {
+                bevy::log::warn!(
+                    "An image {} pixels tall cannot be cut into {} equal {}, so whatever samples \
+                     it as one will not.",
+                    size.height,
+                    waiting.count,
+                    if waiting.volume { "slices" } else { "layers" }
+                );
+                return false;
+            }
+
+            let reshaped = Extent3d {
+                width: size.width,
+                height: size.height / waiting.count,
+                depth_or_array_layers: waiting.count,
+            };
+
+            if image.reinterpret_size(reshaped).is_err() {
+                return false;
+            }
+
+            if waiting.volume {
+                image.texture_descriptor.dimension = TextureDimension::D3;
+            }
+        }
+
+        // Named outright, because an array of one layer, or of six, would otherwise be taken for a
+        // plain picture or a cube.
+        image.texture_view_descriptor = Some(TextureViewDescriptor {
+            dimension: Some(if waiting.volume {
+                TextureViewDimension::D3
+            } else {
+                TextureViewDimension::D2Array
+            }),
+            ..Default::default()
+        });
+
+        false
+    });
+}
+
+/// Asks for an image to be treated as a cubemap once it has loaded, and answers at once.
+///
+/// Six square faces stacked vertically, which is the layout the skybox takes. What a shader
+/// material's cube slots want, since a flat picture there is replaced by the fallback.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_make_cubemap(image: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = image;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_world(|world| {
+                let handle = match crate::render::image_handle(world, image) {
+                    Ok(Some(handle)) => handle,
+                    Ok(None) => return status::NULL_ARG,
+                    Err(refusal) => return refusal,
+                };
+
+                world
+                    .get_resource_or_init::<crate::render::post::PendingCubemaps>()
+                    .push(handle);
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Asks for an image to be cut into `count` layers or slices once it has loaded.
+///
+/// `volume` non-zero makes a 3D texture of `count` slices, and zero an array of `count` 2D layers.
+/// Either way the parts are stacked from top to bottom in the picture.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_reshape_image(image: i32, count: i32, volume: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (image, count, volume);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if count < 1 {
+                return status::NULL_ARG;
+            }
+
+            with_world(|world| {
+                let handle = match crate::render::image_handle(world, image) {
+                    Ok(Some(handle)) => handle,
+                    Ok(None) => return status::NULL_ARG,
+                    Err(refusal) => return refusal,
+                };
+
+                world
+                    .get_resource_or_init::<PendingReshapes>()
+                    .0
+                    .push(PendingReshape {
+                        image: handle,
+                        count: count as u32,
+                        volume: volume != 0,
+                    });
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Says how an entity's mesh is treated beyond what it looks like.
+///
+/// A bit each: `1` is never culled for being out of view, `2` casts no shadow, `4` receives none.
+/// A bit left clear takes that behavior off again, so the flags are the whole answer rather than
+/// additions to it.
+///
+/// Not being culled is what a mesh drawn somewhere its own bounds do not say needs, which is any
+/// mesh a vertex shader moves far from where it was built, and one whose vertices a buffer places.
+/// Bevy culls by the bounds it worked out from the mesh, so such a mesh vanishes whenever those
+/// stale bounds leave the view.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_mesh_flags(entity: u64, flags: u32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, flags);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::camera::visibility::NoFrustumCulling;
+            use bevy::light::{NotShadowCaster, NotShadowReceiver};
+
+            with_world(|world| {
+                let Ok(mut entity) = world.get_entity_mut(bevy::ecs::entity::Entity::from_bits(entity))
+                else {
+                    return status::NO_ENTITY;
+                };
+
+                if flags & 1 != 0 {
+                    entity.insert(NoFrustumCulling);
+                } else {
+                    entity.remove::<NoFrustumCulling>();
+                }
+
+                if flags & 2 != 0 {
+                    entity.insert(NotShadowCaster);
+                } else {
+                    entity.remove::<NotShadowCaster>();
+                }
+
+                if flags & 4 != 0 {
+                    entity.insert(NotShadowReceiver);
+                } else {
+                    entity.remove::<NotShadowReceiver>();
+                }
+
+                status::OK
             })
         }
     })

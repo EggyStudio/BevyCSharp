@@ -54,21 +54,45 @@ compiled in but its payload formats, BCn and ASTC and ETC2, are not, and
 `CompressedImageFormatSupport` has to carry what the adapter can decode, which a windowless app
 reports as nothing. Nothing here blocks a game; it is size on disk and upload cost.
 
-`App.UseShader` points one of four material slots at a WGSL file and `Shaders.CreateMaterial`
-makes materials drawn by it, each carrying sixteen floats and one picture. Four because Bevy asks a
-material's type for its shader rather than the material, so a slot is a Rust type the bridge
-declares, which is the same wall the state slots hit.
+A program names the files that draw a material, WGSL or Slang, and a material carries sixty-four
+floats, a storage buffer of any size, eight textures with samplers, and two each of cubemaps, array
+textures and 3D textures. A camera runs any number of programs over its picture as full-screen
+passes, and a program with a compute stage runs over buffers that stay on the GPU and that a
+material or a pass can draw from. Every file is reloaded when it changes, in every profile, and a
+Slang file is recompiled when anything it imports changes. What is left is at the edges of that:
 
-- **A slot's bind group is fixed.** Sixteen floats at binding zero and one texture at one and two,
-  which covers a colour, a scroll, a threshold and a mask. A shader wanting a storage buffer, a
-  second texture or a different layout would need the caller to describe a bind group, which is a
-  second language to learn rather than a shader to write.
-- **`AssetKind.Shader` still returns a handle nothing consumes.** A slot names its shader by path
-  rather than by handle, because Bevy asks for a path through a function on the type. Either the
-  kind grows a use or it goes.
-- **No depth or shadow pass.** A slot overrides the vertex and fragment shaders, so a material can
-  move its own geometry. What it cannot override is the prepass, so a material that displaces
-  itself casts the shadow of the mesh it started from rather than of the shape it drew.
+- **The bind group is the same for every material.** Bevy lays a material's bind group out per
+  type, and there is one type, so what a shader can be handed is what the table in the README
+  lists. It is sized generously rather than described by the caller, which keeps it a shader to
+  write rather than a layout to learn, but a storage texture a shader writes to, a depth texture,
+  a comparison sampler or a ninth sampled texture has nowhere to go. A texture format that cannot
+  be filtered, such as a 32-bit float heightmap, is replaced by the fallback for the same reason.
+- **Slang cannot see the pipeline's defines.** A Slang entry point is compiled once per program,
+  while Bevy compiles a pipeline per mesh layout and per pass with defines saying which vertex
+  attributes and prepass outputs exist. The prelude's structs therefore name a fixed set of
+  attributes, and the prepass vertex output writes every field any prepass reads. A WGSL shader
+  reads the defines with `#ifdef` and has no such limit.
+- **A validation error stops drawing rather than one material.** A Slang shader's bindings are
+  checked against the bridge's layouts before a pipeline is built from it, so a binding of the
+  wrong kind is a failed compile with the binding named. A WGSL shader is composed by naga_oil
+  inside Bevy's pipeline cache, where nothing of the bridge's sees the result, and a stage input
+  the vertex shader never wrote is not checked in either language. Both are caught by wgpu when
+  the pipeline is built, which Bevy does not scope, so the error is the device's rather than the
+  pipeline's, and `Shaders.KeepRenderingAfterErrors` survives it at the cost of every frame drawn
+  while the broken pipeline is in use.
+- **A pass cannot read depth.** The layout has the picture, but not the depth or normal textures
+  a camera with a prepass keeps, so an outline or fog pass has to be done in a material instead.
+  Binding them wants a fallback for the camera without a prepass, since the layout is fixed.
+- **A compute shader writes two image formats.** A storage texture's format is part of its
+  binding, and the layout is fixed, so a dispatch writes one eight-bit image and one half-float one,
+  write-only. Reading and writing one image in the same dispatch needs a format wgpu allows that
+  for, which is a single 32-bit channel, and a simulation that wants its last state reads it from a
+  second image instead.
+- **A buffer is drawn by one mesh.** A material reads a buffer, but what it draws is still one
+  entity's mesh, so ten thousand particles are a mesh of ten thousand squares, built with
+  `Render.CreateMesh(MeshData)`, whose vertex shader places each from the buffer. Bevy's indirect
+  and instanced drawing is what would let the buffer say how many there are, and buffers are made
+  with the usage it needs.
 
 ### Scripts a game can load
 

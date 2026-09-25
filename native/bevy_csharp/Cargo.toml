@@ -63,6 +63,10 @@ headless = [
 # x11-dl, which dlopens at runtime, so this profile builds with nothing but a C compiler.
 render = [
     "headless",
+    # Reading the WGSL a Slang shader compiles to, to check its bindings before a pipeline is
+    # built with them. Bevy already depends on this version with this feature, so it adds nothing
+    # to the build.
+    "dep:naga",
     "bevy/bevy_asset",
     "bevy/bevy_state",
     "bevy/bevy_winit",
@@ -116,6 +120,7 @@ nonmax = { version = "0.5", default-features = false }
 # Casting the interface's vertices to bytes for the GPU. The same crate Bevy uses for it, so the
 # version is already in the tree.
 bytemuck = { version = "1", features = ["derive"] }
+naga = { version = "29", default-features = false, features = ["wgsl-in"], optional = true }
 
 # Linux and the BSDs only.
 #

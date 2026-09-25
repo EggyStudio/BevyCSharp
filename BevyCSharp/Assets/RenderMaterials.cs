@@ -16,6 +16,64 @@ public static class MeshShape
     public const string Capsule = "Capsule";
 }
 
+/// <summary>How a mesh is treated beyond what it looks like. See <see cref="Render.SetMeshFlags"/>.</summary>
+[Flags]
+public enum MeshFlags : uint
+{
+    /// <summary>As Bevy has it: culled when out of view, casting and receiving shadows.</summary>
+    None = 0,
+
+    /// <summary>Never culled for being out of view, for a mesh its shader moves.</summary>
+    NoFrustumCulling = 1,
+
+    /// <summary>Casts no shadow.</summary>
+    NoShadowCasting = 2,
+
+    /// <summary>Has no shadow cast on it.</summary>
+    NoShadowReceiving = 4,
+}
+
+/// <summary>How a mesh's vertices join up.</summary>
+public enum MeshTopology
+{
+    /// <summary>Every three vertices, or three indices, are a triangle.</summary>
+    Triangles = 0,
+
+    /// <summary>Every two are a line.</summary>
+    Lines = 1,
+
+    /// <summary>Every one is a point.</summary>
+    Points = 2,
+
+    /// <summary>Each joins the one before it with a line.</summary>
+    LineStrip = 3,
+
+    /// <summary>Each makes a triangle with the two before it.</summary>
+    TriangleStrip = 4,
+}
+
+/// <summary>A mesh described vertex by vertex, for <see cref="Render.CreateMesh(MeshData)"/>.</summary>
+public sealed class MeshData
+{
+    /// <summary>Where each vertex is. Required.</summary>
+    public Vec3[] Positions { get; set; } = [];
+
+    /// <summary>Which way each vertex faces, or null to have them worked out for triangles.</summary>
+    public Vec3[]? Normals { get; set; }
+
+    /// <summary>Texture coordinates, two floats a vertex, or null.</summary>
+    public float[]? Uvs { get; set; }
+
+    /// <summary>Linear RGBA, four floats a vertex, or null.</summary>
+    public float[]? Colors { get; set; }
+
+    /// <summary>Which vertices make each shape, or null to take them in order.</summary>
+    public uint[]? Indices { get; set; }
+
+    /// <summary>How the vertices join up.</summary>
+    public MeshTopology Topology { get; set; } = MeshTopology.Triangles;
+}
+
 /// <summary>What a material does where it is not fully opaque.</summary>
 public enum AlphaMode
 {
@@ -41,6 +99,16 @@ public enum AlphaMode
 
     /// <summary>Add to what is behind, which never darkens it. For fire, glows and holograms.</summary>
     Add = 3,
+
+    /// <summary>Multiply what is behind, which never lightens it. For stained glass and tints.</summary>
+    Multiply = 4,
+
+    /// <summary>Blend with color that has already been multiplied by its alpha.</summary>
+    /// <remarks>
+    /// What a texture exported premultiplied wants, and what lets one material be partly additive:
+    /// a pixel with color and zero alpha adds, and one with full alpha covers.
+    /// </remarks>
+    Premultiplied = 5,
 }
 
 /// <summary>
