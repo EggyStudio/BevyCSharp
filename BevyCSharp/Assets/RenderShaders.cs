@@ -1,87 +1,82 @@
 namespace Bevy;
 
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Bevy.Interop;
 
 /// <summary>
-/// Materials drawn by shaders the game wrote, in WGSL or in Slang, reloaded while the game runs.
+/// Materials, full-screen passes and compute shaders the game writes in Slang, laid out however the
+/// shader declares, and reloaded while the game runs.
 /// </summary>
 /// <remarks>
 /// <para>
-/// A <see cref="ShaderProgram"/> names the files that draw a material, and a material says which
-/// program draws it. Bevy asks a material's type rather than the material for its shaders, so the
-/// bridge has one material type and rewrites each pipeline it builds with the shaders of the
-/// program the material names. That leaves no limit on how many programs a game has, and lets a
-/// material change program while it is drawn.
+/// A <see cref="ShaderProgram"/> names the Slang files that make it. A material, a pass or a
+/// dispatch runs one, and its values are set <b>by the names the shader declares</b>. A shader
+/// declares what it needs as ordinary Slang globals: a thousand floats, sixty-four textures,
+/// sixteen cubemaps, structs, constant buffers, storage buffers, storage images and samplers. The
+/// bridge asks the compiler how they were laid out and builds the bind group from that, so nothing
+/// about a shader's shape is fixed in advance.
+/// </para>
+/// <code>
+/// import bcs;
+///
+/// uniform float4 tint;
+/// uniform float weights[1000];
+/// Texture2D layers[64];
+/// TextureCube skies[16];
+/// SamplerState linear;
+///
+/// [shader("fragment")]
+/// float4 fragment(bcs::VertexOutput input) : SV_Target
+/// {
+///     return tint * layers[7].Sample(linear, input.uv) * weights[999];
+/// }
+/// </code>
+/// <code>
+/// var material = Shaders.CreateMaterial(Shaders.CreateProgram("shaders/layered.slang"))
+///     .Set("tint", new Vector4(1, 0.5f, 0.2f, 1))
+///     .Set("weights", weights)
+///     .SetTexture("layers", rock, 7);
+/// Render.SetMaterial(ctx.Ecs, entity, material);
+/// </code>
+/// <para>
+/// <b>What a name is.</b> A global's own name, <c>tint</c>. A field of a struct or a constant
+/// buffer, <c>sun.color</c>. An element of an array of structs, <c>lights[3].color</c>. A texture,
+/// buffer or sampler in an array is its name and an index given alongside. A value that does not
+/// fit what the name declares is refused with an <see cref="ArgumentException"/> that lists what
+/// the shader does declare. Before the program has compiled nothing can be checked, so a value set
+/// then is kept and bound once the layout is known, and one that does not fit is left out with a
+/// warning in the log.
 /// </para>
 /// <para>
-/// <b>What a material carries.</b> Sixty-four floats, whatever bytes the game gives it, eight
-/// textures each with its sampler, and two each of cubemaps, array textures and 3D textures, all
-/// in group three:
-/// </para>
-/// <list type="table">
-/// <listheader><term>binding</term><description>holds</description></listheader>
-/// <item><term>0</term><description>the floats, as <c>array&lt;vec4&lt;f32&gt;, 16&gt;</c> in a uniform</description></item>
-/// <item><term>1, 2</term><description>texture zero and its sampler</description></item>
-/// <item><term>3</term><description>the bytes, as a read-only storage buffer</description></item>
-/// <item><term>4 to 17</term><description>textures one to seven, each followed by its sampler</description></item>
-/// <item><term>18, 19</term><description>the cubemaps</description></item>
-/// <item><term>20, 21</term><description>the array textures</description></item>
-/// <item><term>22, 23</term><description>the 3D textures</description></item>
-/// </list>
-/// <para>
-/// Everything is visible to both stages, so a vertex shader can displace a mesh by a heightmap the
-/// fragment shader colors it with. A binding nobody set holds zeros or a fallback image, so a
-/// shader need not know which ones were given.
+/// <b>Reloading.</b> An edit to a shader file, or to any file it imported, reaches what is on
+/// screen within a quarter of a second, with a layout of its own if the edit changed what the
+/// shader declares. Values are kept by name, so a parameter the edit added starts at zero and the
+/// rest keep what they held. A file that fails to compile leaves the last version that compiled in
+/// use and says why in the log and in <see cref="ShaderProgram.Diagnostics"/>. One that has never
+/// compiled draws magenta.
 /// </para>
 /// <para>
-/// <b>Slang.</b> A stage whose file ends in <c>.slang</c> is compiled to WGSL by <c>slangc</c>
-/// in the background, and <c>import bcs;</c> gives it Bevy's view, globals and mesh transforms and
-/// the material's bindings, with structs that line up with Bevy's own vertex shader. Every
-/// successful compile is cached under the asset root in <c>.slang-cache</c>, and a machine without
-/// <c>slangc</c> reads the cache instead, so a game shipped with it needs no compiler. See
+/// <b>The compiler.</b> <c>slangc</c> compiles each stage in the background. The build fetches a
+/// pinned release into <c>build/tools/slang</c>, and every compile is cached under the asset root
+/// in <c>.slang-cache</c> with its layout, so a game shipped with the cache needs no compiler. See
 /// <see cref="SlangAvailable"/>.
-/// </para>
-/// <para>
-/// <b>Reloading.</b> An edit to a shader file, or to any file a Slang shader imported, reaches
-/// what is on screen within a quarter of a second. A Slang file that fails to compile leaves the
-/// last version that compiled in use and says why in the log and in
-/// <see cref="ShaderProgram.Diagnostics"/>. One that has never compiled draws magenta.
 /// </para>
 /// </remarks>
 public static unsafe class Shaders
 {
-    /// <summary>How many floats one material carries.</summary>
-    /// <remarks>
-    /// They reach the shader as sixteen <c>vec4</c> in the order they were given, because a
-    /// uniform is laid out in sixteen-byte rows and a shader reading vectors reads exactly what was
-    /// written. A shader declaring fewer rows reads the first ones, which is how a shader written
-    /// for sixteen floats works unchanged.
-    /// </remarks>
-    public const int ParameterCount = 64;
-
-    /// <summary>How many 2D textures one material carries, each with its own sampler.</summary>
-    public const int TextureCount = NativeShaderMaterialConfig.TextureCount;
-
-    /// <summary>How many cubemaps, array textures and 3D textures one material carries of each.</summary>
-    /// <remarks>
-    /// These have no samplers of their own, because a sampler is the scarcest binding on some
-    /// backends. Any of the <see cref="TextureCount"/> samplers samples them.
-    /// </remarks>
-    public const int ExtraTextureCount = NativeShaderMaterialConfig.ExtraCount;
-
     /// <summary>Whether a Slang shader can be compiled on this machine.</summary>
     /// <remarks>
     /// <para>
     /// <c>slangc</c> is found through the <c>BCS_SLANGC</c> environment variable, which names it
-    /// outright, or on the <c>PATH</c>. It is looked for once per process.
+    /// outright, then on the <c>PATH</c>, then in a <c>build/tools/slang</c> above the app or the
+    /// working directory, which is where the build fetches it. It is looked for once per process.
     /// </para>
     /// <para>
-    /// False does not mean Slang shaders fail. One compiled on a machine that had
-    /// <c>slangc</c> is read back from the cache, provided neither it nor anything it imported has
-    /// changed since, which is the situation of a shipped game. What false does mean is that an
-    /// edit cannot be compiled.
+    /// False does not mean shaders fail. One compiled on a machine that had <c>slangc</c> is read
+    /// back from the cache, provided neither it nor anything it imported has changed since, which
+    /// is the situation of a shipped game. What false does mean is that an edit cannot be compiled.
     /// </para>
     /// </remarks>
     public static bool SlangAvailable => Native.bcs_shader_slang_available() != 0;
@@ -91,10 +86,10 @@ public static unsafe class Shaders
     /// </summary>
     /// <remarks>
     /// <para>
-    /// A shader that compiles can still disagree with the pipeline it is put in, by declaring a
-    /// binding as a different type or reading an input the vertex shader never wrote. Bevy's
-    /// answer to that is to close the app, which is right for a shipped game and wrong for one
-    /// whose shaders are being edited while it runs.
+    /// A shader that compiles can still disagree with the pipeline it is put in, by reading an
+    /// input the vertex shader never wrote, for instance. Bevy's answer to that is to close the
+    /// app, which is right for a shipped game and wrong for one whose shaders are being edited while
+    /// it runs.
     /// </para>
     /// <para>
     /// Set, the error is logged and <see cref="LastRenderError"/> keeps it, and frames drawn with
@@ -132,27 +127,26 @@ public static unsafe class Shaders
 
     /// <summary>Makes a program drawn by one fragment shader, leaving the rest to Bevy.</summary>
     /// <remarks>What most materials want. See <see cref="CreateProgram(ShaderProgramSettings)"/>.</remarks>
-    /// <param name="fragment">A <c>.wgsl</c> or <c>.slang</c> file under the asset root.</param>
+    /// <param name="fragment">A <c>.slang</c> file under the asset root.</param>
     public static ShaderProgram CreateProgram(ShaderStage fragment) =>
         CreateProgram(new ShaderProgramSettings { Fragment = fragment });
 
     /// <summary>
-    /// Makes a program from the shaders named. Only valid inside a system.
+    /// Makes a program from the Slang named. Only valid inside a system.
     /// </summary>
     /// <remarks>
     /// <para>
     /// The same settings answer the same program, so a system that makes its program every frame
-    /// still makes one. A Slang stage is compiled in the background, and a material drawn by it
-    /// appears once the compile has finished, which <see cref="ShaderProgram.State"/> reports.
+    /// still makes one. Each stage is compiled in the background, and what runs it appears once the
+    /// compile has finished, which <see cref="ShaderProgram.State"/> reports.
     /// </para>
     /// <para>
-    /// Defines reach a WGSL shader through naga_oil's preprocessor, so <c>#ifdef</c> and
-    /// <c>#{NAME}</c> read them, and a Slang shader through its own, as <c>-D</c>. Different
+    /// Defines reach the shader as <c>-D</c>, so <c>#ifdef</c> and <c>#if</c> read them. Different
     /// defines make a different program, compiled separately.
     /// </para>
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// There is no fragment shader, or a file is neither WGSL nor Slang.
+    /// There is no fragment shader, pass or compute shader, or a file is not Slang.
     /// </exception>
     /// <exception cref="BevyNativeException">There is no renderer, or no world on loan.</exception>
     /// <example>
@@ -170,29 +164,28 @@ public static unsafe class Shaders
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        if (!settings.Fragment.IsSet && !settings.Compute.IsSet)
+        if (!settings.Fragment.IsSet && !settings.Compute.IsSet && !settings.Pass.IsSet)
         {
             throw new ArgumentException(
-                "A shader program needs a fragment shader to draw with, or a compute shader to "
-                + "dispatch. Bevy's own fragment shader reads a material laid out differently "
-                + "from the one these shaders are handed, so there is no default to fall back on.",
+                "A shader program needs a fragment shader to draw with, a pass to run over a "
+                + "camera's picture, or a compute shader to dispatch. Bevy's own fragment shader "
+                + "reads a material laid out differently, so there is no default to fall back on.",
                 nameof(settings));
         }
 
         foreach (var stage in settings.Stages().Where(stage => stage.Source is not { Length: > 0 }))
         {
-            if (!stage.Path!.EndsWith(".wgsl", StringComparison.OrdinalIgnoreCase)
-                && !stage.Path.EndsWith(".slang", StringComparison.OrdinalIgnoreCase))
+            if (!stage.Path!.EndsWith(".slang", StringComparison.OrdinalIgnoreCase))
             {
                 throw new ArgumentException(
-                    $"{stage.Path} is not a shader this bridge compiles. A stage is a .wgsl or a "
-                    + ".slang file under the asset root.",
+                    $"{stage.Path} is not Slang. A stage is a .slang file under the asset root, or "
+                    + "Slang source handed over with ShaderStage.Slang.",
                     nameof(settings));
             }
         }
 
-        // Every string goes into one block of unmanaged memory, freed on the way out, because the
-        // native side copies what it reads before it returns.
+        // Every string goes into unmanaged memory freed on the way out, because the native side
+        // copies what it reads before it returns.
         var strings = new List<IntPtr>();
 
         byte* Utf8(string? text)
@@ -208,7 +201,6 @@ public static unsafe class Shaders
             Path = stage.Path is { Length: > 0 } ? Utf8(stage.Path) : null,
             Entry = stage.Entry is { Length: > 0 } ? Utf8(stage.Entry) : null,
             Source = stage.Source is { Length: > 0 } ? Utf8(stage.Source) : null,
-            Language = (int)stage.Language,
         };
 
         try
@@ -234,9 +226,10 @@ public static unsafe class Shaders
                     Fragment = Stage(settings.Fragment),
                     PrepassVertex = Stage(settings.PrepassVertex),
                     PrepassFragment = Stage(settings.PrepassFragment),
+                    Compute = Stage(settings.Compute),
+                    Pass = Stage(settings.Pass),
                     Defines = defines.Length > 0 ? first : null,
                     DefineCount = defines.Length,
-                    Compute = Stage(settings.Compute),
                 };
 
                 var id = Native.bcs_shader_program_create(&config);
@@ -244,14 +237,12 @@ public static unsafe class Shaders
                 if (id == NativeStatus.NullArgument)
                 {
                     throw new ArgumentException(
-                        "A define has an empty name or one with whitespace in it, which neither "
-                        + "preprocessor accepts.",
+                        "A define has an empty name or one with whitespace in it, which the "
+                        + "preprocessor does not accept.",
                         nameof(settings));
                 }
 
-                Native.Check(
-                    id,
-                    $"making a shader program from {(settings.Fragment.IsSet ? settings.Fragment : settings.Compute).Describe()}");
+                Native.Check(id, $"making a shader program from {settings.Main().Describe()}");
                 return new ShaderProgram(id);
             }
         }
@@ -261,248 +252,62 @@ public static unsafe class Shaders
         }
     }
 
-    /// <summary>
-    /// Makes a material drawn by a program, with up to <see cref="ParameterCount"/> floats and one
-    /// picture.
-    /// </summary>
+    /// <summary>Makes a material drawn by a program. Only valid inside a system.</summary>
     /// <remarks>
-    /// The short form, for a material that is a handful of numbers and at most a texture. What
-    /// needs more takes <see cref="CreateMaterial(ShaderMaterialSettings)"/>.
+    /// Its values start at zero, its textures at a stand-in of the right shape, and its samplers
+    /// linear and repeating, so a shader draws something whatever has been set. Set them by name on
+    /// what this returns.
     /// </remarks>
     /// <param name="program">The program that draws it.</param>
-    /// <param name="parameters">Up to <see cref="ParameterCount"/> floats. The rest are zero.</param>
-    /// <param name="texture">
-    /// The picture at binding one, or <see cref="AssetHandle.None"/> to leave it unbound, which a
-    /// shader that does not sample one does not notice.
-    /// </param>
     /// <param name="alpha">
     /// What the renderer does where this material is not opaque. A shader writing anything but one
     /// in its alpha channel wants <see cref="AlphaMode.Blend"/> or another of the blending modes,
     /// since an opaque material's alpha is not read at all.
     /// </param>
-    /// <returns>A handle to give <see cref="Render.SetMaterial"/>.</returns>
-    /// <example>
-    /// <code>
-    /// var ripple = Shaders.CreateProgram("shaders/ripple.wgsl");
-    /// var water = Shaders.CreateMaterial(ripple, [0.1f, 0.4f, 0.8f, 1f, speed]);
-    /// Render.SetMaterial(ctx.Ecs, pond, water);
-    /// </code>
-    /// </example>
-    public static AssetHandle CreateMaterial(
-        ShaderProgram program,
-        ReadOnlySpan<float> parameters = default,
-        AssetHandle texture = default,
-        AlphaMode alpha = AlphaMode.Opaque)
-    {
-        var settings = new ShaderMaterialSettings
-        {
-            Program = program,
-            Parameters = parameters.ToArray(),
-            Alpha = alpha,
-        };
-
-        settings.Textures[0] = texture;
-        return CreateMaterial(settings);
-    }
+    /// <returns>The material, which converts to the handle <see cref="Render.SetMaterial"/> takes.</returns>
+    /// <exception cref="BevyNativeException">
+    /// The program does not exist, or there is no renderer.
+    /// </exception>
+    public static ShaderMaterial CreateMaterial(ShaderProgram program, AlphaMode alpha = AlphaMode.Opaque) =>
+        CreateMaterial(new ShaderMaterialSettings { Program = program, Alpha = alpha });
 
     /// <summary>Makes a material drawn by a program. Only valid inside a system.</summary>
-    /// <remarks>
-    /// A texture need not have finished loading, because the material holds a handle rather than
-    /// pixels. It draws once every texture it names has arrived. An image of the wrong shape for its
-    /// slot, or of a format that cannot be filtered, is replaced by the fallback with a warning in
-    /// the log, because binding it would stop the renderer.
-    /// </remarks>
-    /// <returns>A handle to give <see cref="Render.SetMaterial"/>.</returns>
-    /// <exception cref="ArgumentException">
-    /// Too many parameters or textures were given, or no program.
-    /// </exception>
+    /// <remarks>See <see cref="CreateMaterial(ShaderProgram, AlphaMode)"/>.</remarks>
+    /// <exception cref="ArgumentException">No program was given.</exception>
     /// <exception cref="BevyNativeException">
-    /// The program does not exist, a texture names no image, or there is no renderer.
+    /// The program does not exist, or there is no renderer.
     /// </exception>
-    public static AssetHandle CreateMaterial(ShaderMaterialSettings settings)
+    public static ShaderMaterial CreateMaterial(ShaderMaterialSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
+        RequireProgram(settings.Program, nameof(settings));
 
-        if (!settings.Program.IsValid)
-        {
-            throw new ArgumentException(
-                "A shader material needs a program to draw it. Make one with "
-                + "Shaders.CreateProgram.",
-                nameof(settings));
-        }
+        var key = Native.bcs_shader_material_create(
+            settings.Program.Id,
+            (int)settings.Alpha,
+            settings.AlphaCutoff,
+            (int)settings.Cull,
+            settings.DepthBias);
 
-        var parameters = settings.Parameters ?? [];
-
-        CheckCount(parameters.Length, ParameterCount, "floats", nameof(settings));
-        CheckCount(settings.Textures.Length, TextureCount, "textures", nameof(settings));
-        CheckCount(settings.Cubemaps.Length, ExtraTextureCount, "cubemaps", nameof(settings));
-        CheckCount(settings.TextureArrays.Length, ExtraTextureCount, "array textures", nameof(settings));
-        CheckCount(settings.Volumes.Length, ExtraTextureCount, "3D textures", nameof(settings));
-
-        var config = new NativeShaderMaterialConfig
-        {
-            Program = settings.Program.Id,
-            ParameterCount = parameters.Length,
-            DataLength = settings.Data?.Length ?? 0,
-            Alpha = (int)settings.Alpha,
-            AlphaCutoff = settings.AlphaCutoff,
-            Cull = (int)settings.Cull,
-            DepthBias = settings.DepthBias,
-            Buffer = settings.Buffer.Key,
-        };
-
-        for (var i = 0; i < settings.Textures.Length; i++) config.Textures[i] = settings.Textures[i].Key;
-        for (var i = 0; i < settings.Cubemaps.Length; i++) config.Cubes[i] = settings.Cubemaps[i].Key;
-        for (var i = 0; i < settings.TextureArrays.Length; i++) config.Arrays[i] = settings.TextureArrays[i].Key;
-        for (var i = 0; i < settings.Volumes.Length; i++) config.Volumes[i] = settings.Volumes[i].Key;
-
-        fixed (float* floats = parameters)
-        fixed (byte* bytes = settings.Data)
-        {
-            config.Parameters = floats;
-            config.Data = bytes;
-
-            var key = Native.bcs_shader_material_create(&config);
-
-            if (key == NativeStatus.InvalidState)
-            {
-                throw new BevyNativeException(
-                    NativeStatus.InvalidState,
-                    $"There is no shader program {settings.Program.Id} in the running app. A "
-                    + "program belongs to the app that made it.");
-            }
-
-            Native.Check(key, $"making a material drawn by shader program {settings.Program.Id}");
-            return new AssetHandle(key);
-        }
+        ThrowIfNoProgram(key, settings.Program);
+        Native.Check(key, $"making a material drawn by shader program {settings.Program.Id}");
+        return new ShaderMaterial(new AssetHandle(key));
     }
 
     /// <summary>
-    /// Overwrites some of a material's floats, starting at <paramref name="offset"/>, and leaves the
-    /// rest. Only valid inside a system.
-    /// </summary>
-    /// <remarks>
-    /// What animates a material from the game side. The change reaches the shader on the next
-    /// frame, and costs a new bind group rather than a new pipeline. Something that changes every
-    /// frame for every material is cheaper read from time in the shader, which needs no call at all.
-    /// </remarks>
-    public static void SetParameters(AssetHandle material, ReadOnlySpan<float> values, int offset = 0)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(offset);
-
-        if (offset + values.Length > ParameterCount)
-        {
-            throw new ArgumentException(
-                $"A shader material carries {ParameterCount} floats, and {values.Length} from "
-                + $"{offset} runs past the end.",
-                nameof(values));
-        }
-
-        fixed (float* at = values)
-        {
-            Native.Check(
-                Native.bcs_shader_material_set_parameters(material.Key, offset, at, values.Length),
-                "setting a shader material's parameters");
-        }
-    }
-
-    /// <summary>Sets one of a material's floats. Only valid inside a system.</summary>
-    public static void SetParameter(AssetHandle material, int index, float value) =>
-        SetParameters(material, [value], index);
-
-    /// <summary>Reads all of a material's floats. Only valid inside a system.</summary>
-    public static float[] GetParameters(AssetHandle material)
-    {
-        var values = new float[ParameterCount];
-
-        fixed (float* at = values)
-        {
-            Native.Check(
-                Native.bcs_shader_material_get_parameters(material.Key, at, values.Length),
-                "reading a shader material's parameters");
-        }
-
-        return values;
-    }
-
-    /// <summary>
-    /// Replaces a material's data with <paramref name="items"/>, as bytes. Only valid inside a
+    /// The shader material an entity is drawn with, to read or set its values. Only valid inside a
     /// system.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// Any number of them: this is what a material carries past its sixty-four floats, whether that
-    /// is a palette, a list of points or a whole grid.
-    /// </para>
-    /// <para>
-    /// A Slang shader reads them with <c>bcs::element&lt;T&gt;(index)</c>, and Slang reads a raw
-    /// buffer with the same packing a C# struct with sequential layout has, so a struct of floats,
-    /// integers and vectors declared the same way on both sides agrees on every offset. A WGSL
-    /// shader declares <c>@group(3) @binding(3) var&lt;storage, read&gt;</c>, where a
-    /// <c>vec3</c> is aligned to sixteen bytes, so a struct shared with WGSL spells its padding out.
-    /// </para>
+    /// By the entity rather than by the material's handle, because an inspector has the entity. The
+    /// material is shared by every entity drawn with it, so a value set here changes all of them.
     /// </remarks>
-    public static void SetData<T>(AssetHandle material, ReadOnlySpan<T> items) where T : unmanaged
-    {
-        var bytes = MemoryMarshal.AsBytes(items);
-
-        fixed (byte* at = bytes)
-        {
-            Native.Check(
-                Native.bcs_shader_material_set_data(material.Key, at, bytes.Length),
-                "setting a shader material's data");
-        }
-    }
-
-    /// <summary>Puts an image in one of a material's texture slots. Only valid inside a system.</summary>
-    /// <param name="material">The material.</param>
-    /// <param name="kind">Which kind of slot.</param>
-    /// <param name="index">
-    /// Which one, below <see cref="TextureCount"/> for 2D textures and <see cref="ExtraTextureCount"/>
-    /// for the others.
-    /// </param>
-    /// <param name="image">The image, or <see cref="AssetHandle.None"/> to empty the slot.</param>
-    public static void SetTexture(
-        AssetHandle material,
-        ShaderTextureKind kind,
-        int index,
-        AssetHandle image)
-    {
-        var limit = kind == ShaderTextureKind.Texture2D ? TextureCount : ExtraTextureCount;
-        ArgumentOutOfRangeException.ThrowIfNegative(index);
-        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(index, limit);
-
-        Native.Check(
-            Native.bcs_shader_material_set_texture(material.Key, (int)kind, index, image.Key),
-            $"setting {kind} {index} of a shader material");
-    }
-
-    /// <summary>Puts an image in one of a material's 2D texture slots.</summary>
-    public static void SetTexture(AssetHandle material, int index, AssetHandle image) =>
-        SetTexture(material, ShaderTextureKind.Texture2D, index, image);
-
-    /// <summary>Has a different program draw a material. Only valid inside a system.</summary>
-    /// <remarks>
-    /// Everything else about the material stays, so a program swapped in reads the same numbers,
-    /// data and textures the old one did.
-    /// </remarks>
-    public static void SetProgram(AssetHandle material, ShaderProgram program)
-    {
-        if (!program.IsValid) throw new ArgumentException("No program was given.", nameof(program));
-
-        Native.Check(
-            Native.bcs_shader_material_set_program(material.Key, program.Id),
-            $"having shader program {program.Id} draw a material");
-    }
+    public static ShaderMaterial MaterialOn(Entity entity) => ShaderMaterial.OnEntity(entity);
 
     /// <summary>
     /// Which program draws an entity's material, or <see cref="ShaderProgram.None"/> where the
     /// entity is not drawn by one. Only valid inside a system.
     /// </summary>
-    /// <remarks>
-    /// By the entity rather than by the material's handle, because an inspector has the entity,
-    /// and it asks every frame.
-    /// </remarks>
     public static ShaderProgram ProgramOn(Entity entity)
     {
         var id = Native.bcs_shader_entity_program(entity.Bits);
@@ -511,69 +316,27 @@ public static unsafe class Shaders
         return new ShaderProgram(Native.Check(id, $"asking what draws entity {entity}"));
     }
 
-    /// <summary>Reads all the floats of an entity's shader material. Only valid inside a system.</summary>
-    /// <exception cref="BevyNativeException">The entity is not drawn by a shader material.</exception>
-    public static float[] GetParameters(Entity entity)
-    {
-        var values = new float[ParameterCount];
-
-        fixed (float* at = values)
-        {
-            Native.Check(
-                Native.bcs_shader_entity_parameters(entity.Bits, at, values.Length),
-                $"reading the parameters entity {entity} is drawn with");
-        }
-
-        return values;
-    }
-
     /// <summary>
-    /// Overwrites some of the floats of an entity's shader material, starting at
-    /// <paramref name="offset"/>. Only valid inside a system.
+    /// Makes an instance of a program, which is what a pass over a camera's picture or a compute
+    /// dispatch runs. Only valid inside a system.
     /// </summary>
     /// <remarks>
-    /// The material is shared by every entity drawn with it, so this changes all of them, which is
-    /// what the same call on the material's handle does.
+    /// An instance holds its values by name the way a material does, and keeps them from frame to
+    /// frame, so a pass is set up once and a dispatch that runs every frame sets only what changed.
+    /// Two instances of one program are two sets of values, which is how one blur runs twice with
+    /// different radii.
     /// </remarks>
-    public static void SetParameters(Entity entity, ReadOnlySpan<float> values, int offset = 0)
+    /// <exception cref="BevyNativeException">
+    /// The program does not exist, or there is no renderer.
+    /// </exception>
+    public static ShaderInstance CreateInstance(ShaderProgram program)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(offset);
+        RequireProgram(program, nameof(program));
 
-        if (offset + values.Length > ParameterCount)
-        {
-            throw new ArgumentException(
-                $"A shader material carries {ParameterCount} floats, and {values.Length} from "
-                + $"{offset} runs past the end.",
-                nameof(values));
-        }
-
-        fixed (float* at = values)
-        {
-            Native.Check(
-                Native.bcs_shader_entity_set_parameters(entity.Bits, offset, at, values.Length),
-                $"setting the parameters entity {entity} is drawn with");
-        }
+        var id = Native.bcs_shader_instance_create(program.Id);
+        ThrowIfNoProgram(id, program);
+        return new ShaderInstance(Native.Check(id, $"making an instance of shader program {program.Id}"));
     }
-
-    /// <summary>Which program draws a material. Only valid inside a system.</summary>
-    public static ShaderProgram ProgramOf(AssetHandle material) =>
-        new(Native.Check(
-            Native.bcs_shader_material_program(material.Key),
-            "reading which program draws a shader material"));
-
-    /// <summary>
-    /// Changes what the renderer does where a material is not opaque. Only valid inside a system.
-    /// </summary>
-    /// <param name="material">The material.</param>
-    /// <param name="alpha">The mode.</param>
-    /// <param name="cutoff">Where <see cref="AlphaMode.Mask"/> stops drawing.</param>
-    public static void SetAlpha(AssetHandle material, AlphaMode alpha, float cutoff = 0.5f) =>
-        Native.Check(
-            Native.bcs_shader_material_set_alpha(material.Key, (int)alpha, cutoff),
-            "changing a shader material's alpha mode");
-
-    /// <summary>How many textures a shader pass carries besides the picture.</summary>
-    public const int PassTextureCount = NativeShaderPassConfig.TextureCount;
 
     /// <summary>
     /// Replaces the full-screen passes a camera runs over what it drew, in the order given. Only
@@ -581,106 +344,60 @@ public static unsafe class Shaders
     /// </summary>
     /// <remarks>
     /// <para>
-    /// A pass is a program's fragment shader run once for every pixel of the camera's picture,
-    /// reading the picture so far and writing the next one: a color grade, an outline, a
-    /// distortion, a scan line, anything a picture can be turned into. Passes before tonemapping
-    /// see the linear picture, which can be brighter than white, and those after it see what the
-    /// screen will show. Each one is compiled and reloaded the way a material's shaders are.
+    /// A pass is a program's pass stage run once for every pixel of the camera's picture, reading
+    /// the picture so far and writing the next one: a color grade, an outline, a distortion, a
+    /// scan line, anything a picture can be turned into. Passes before tonemapping see the linear
+    /// picture, which can be brighter than white, and those after it see what the screen will show.
     /// </para>
     /// <para>
-    /// A pass reads group zero: the picture and a linear sampler at bindings zero and one,
-    /// sixty-four floats at two, whatever bytes it was given at three, Bevy's globals at four, the
-    /// view at five, and four textures with their samplers from six to thirteen. Its input is the
-    /// position and a <c>uv</c> at location zero, which is what Bevy's full-screen triangle writes.
-    /// A Slang pass gets all of it with <c>import bcs_pass;</c>.
+    /// <c>import bcs_pass;</c> gives a pass the picture, its depth and normals, the view and the
+    /// time, which the bridge binds itself. Everything else the pass declares is its own, set by
+    /// name on the <see cref="ShaderInstance"/>, and a value set later reaches the next frame.
     /// </para>
     /// <para>
-    /// A pass whose program is still compiling is skipped, so the picture goes on as though it
-    /// were not there until it arrives.
+    /// A pass whose program is still compiling is skipped, so the picture goes on as though it were
+    /// not there until it arrives.
     /// </para>
     /// </remarks>
     /// <param name="camera">The camera.</param>
     /// <param name="passes">The passes, or none to take them all off.</param>
-    /// <exception cref="ArgumentException">A pass has no program, or too many floats or textures.</exception>
     /// <exception cref="BevyNativeException">
-    /// The entity is not a camera, a program does not exist, or there is no renderer.
+    /// The entity is not a camera, an instance does not exist, or there is no renderer.
     /// </exception>
     /// <example>
     /// <code>
-    /// var scanlines = Shaders.CreateProgram("shaders/scanlines.slang");
-    /// Shaders.SetPasses(camera, new ShaderPassSettings { Program = scanlines, Parameters = [0.3f] });
+    /// var scanlines = Shaders.CreateInstance(Shaders.CreateProgram(
+    ///     new ShaderProgramSettings { Pass = "shaders/scanlines.slang" }));
+    /// scanlines.Set("strength", 0.3f);
+    /// Shaders.SetPasses(camera, new ShaderPass(scanlines, AfterTonemapping: true));
     /// </code>
     /// </example>
-    public static void SetPasses(Entity camera, params ShaderPassSettings[] passes)
+    public static void SetPasses(Entity camera, params ShaderPass[] passes)
     {
         ArgumentNullException.ThrowIfNull(passes);
 
-        var configs = new NativeShaderPassConfig[passes.Length];
-        var pins = new List<System.Runtime.InteropServices.GCHandle>();
+        var ids = new int[passes.Length];
+        var after = new int[passes.Length];
 
-        try
+        for (var i = 0; i < passes.Length; i++)
         {
-            for (var i = 0; i < passes.Length; i++)
+            if (!passes[i].Instance.IsValid)
             {
-                var pass = passes[i] ?? throw new ArgumentNullException(nameof(passes));
-
-                if (!pass.Program.IsValid)
-                {
-                    throw new ArgumentException(
-                        $"Pass {i} has no program. Make one with Shaders.CreateProgram.",
-                        nameof(passes));
-                }
-
-                var parameters = pass.Parameters ?? [];
-                CheckCount(parameters.Length, ParameterCount, "floats", nameof(passes));
-                CheckCount(pass.Textures.Length, PassTextureCount, "textures", nameof(passes));
-
-                ref var config = ref configs[i];
-                config.Program = pass.Program.Id;
-                config.ParameterCount = parameters.Length;
-                config.DataLength = pass.Data?.Length ?? 0;
-                config.AfterTonemapping = pass.AfterTonemapping ? 1 : 0;
-                config.Buffer = pass.Buffer.Key;
-
-                for (var t = 0; t < pass.Textures.Length; t++) config.Textures[t] = pass.Textures[t].Key;
-
-                // Pinned rather than fixed, because there is one array of each per pass and a
-                // fixed statement cannot be written for a count known only at run time.
-                if (parameters.Length > 0)
-                {
-                    var pin = System.Runtime.InteropServices.GCHandle.Alloc(
-                        parameters, System.Runtime.InteropServices.GCHandleType.Pinned);
-                    pins.Add(pin);
-                    config.Parameters = (float*)pin.AddrOfPinnedObject();
-                }
-
-                if (pass.Data is { Length: > 0 } data)
-                {
-                    var pin = System.Runtime.InteropServices.GCHandle.Alloc(
-                        data, System.Runtime.InteropServices.GCHandleType.Pinned);
-                    pins.Add(pin);
-                    config.Data = (byte*)pin.AddrOfPinnedObject();
-                }
+                throw new ArgumentException(
+                    $"Pass {i} has no instance. Make one with Shaders.CreateInstance.",
+                    nameof(passes));
             }
 
-            fixed (NativeShaderPassConfig* first = configs)
-            {
-                var status = Native.bcs_render_set_shader_passes(camera.Bits, first, configs.Length);
-
-                if (status == NativeStatus.InvalidState)
-                {
-                    throw new BevyNativeException(
-                        NativeStatus.InvalidState,
-                        "A pass names a shader program that is not in the running app. A program "
-                        + "belongs to the app that made it.");
-                }
-
-                Native.Check(status, "setting a camera's shader passes");
-            }
+            ids[i] = passes[i].Instance.Id;
+            after[i] = passes[i].AfterTonemapping ? 1 : 0;
         }
-        finally
+
+        fixed (int* idsAt = ids)
+        fixed (int* afterAt = after)
         {
-            foreach (var pin in pins) pin.Free();
+            Native.Check(
+                Native.bcs_render_set_shader_passes(camera.Bits, idsAt, afterAt, ids.Length),
+                "setting a camera's shader passes");
         }
     }
 
@@ -690,9 +407,9 @@ public static unsafe class Shaders
     /// </summary>
     /// <remarks>
     /// <para>
-    /// A pass reads depth at binding fourteen and normals at fifteen, which is what an outline, a
-    /// fog or an edge detector is made of. A camera that draws neither binds depth zero, which is
-    /// the far plane, and white normals, so a pass reading them runs either way.
+    /// A pass reads them with <c>bcs_pass::depth_at</c> and <c>normal_at</c>, which is what an
+    /// outline, a fog or an edge detector is made of. A camera that draws neither binds depth zero,
+    /// which is the far plane, and white normals, so a pass reading them runs either way.
     /// </para>
     /// <para>
     /// A prepass draws the scene a second time, so it is worth asking for only when something reads
@@ -709,53 +426,56 @@ public static unsafe class Shaders
             "asking a camera for a prepass");
 
     /// <summary>
-    /// Overwrites some of a pass's floats, starting at <paramref name="offset"/>. Only valid inside
-    /// a system.
+    /// Runs an instance's compute shader once, this frame, before any camera draws. Only valid
+    /// inside a system.
     /// </summary>
-    /// <param name="camera">The camera the pass is on.</param>
-    /// <param name="pass">Which pass, counting from zero in the order they were set.</param>
-    /// <param name="values">The floats.</param>
-    /// <param name="offset">Where the first one goes.</param>
-    public static void SetPassParameters(
-        Entity camera,
-        int pass,
-        ReadOnlySpan<float> values,
-        int offset = 0)
+    /// <remarks>
+    /// <para>
+    /// A simulation dispatches every frame from a system, which leaves how often it steps to the
+    /// game. Dispatches run in the order they were asked for, each seeing what the one before
+    /// wrote, and all of them before the frame is drawn, so a material reading a buffer draws what
+    /// the frame's dispatches left in it.
+    /// </para>
+    /// <para>
+    /// The dispatch takes the instance's values as they are now, so the same instance dispatched
+    /// twice in a frame with a value changed between runs twice with different values. A dispatch
+    /// of a program still compiling does nothing that frame, which
+    /// <see cref="ShaderProgram.State"/> says in advance.
+    /// </para>
+    /// </remarks>
+    /// <param name="instance">An instance of a program with a compute stage.</param>
+    /// <param name="x">
+    /// Workgroups along the first axis. A workgroup is as many invocations as the shader's
+    /// <c>numthreads</c> says, so a thousand elements at sixty-four a workgroup is sixteen, and the
+    /// last workgroup checks that its elements exist.
+    /// </param>
+    /// <param name="y">Workgroups along the second axis.</param>
+    /// <param name="z">Workgroups along the third axis.</param>
+    /// <example>
+    /// <code>
+    /// // Once.
+    /// var step = Shaders.CreateInstance(Shaders.CreateProgram(
+    ///     new ShaderProgramSettings { Compute = "shaders/boids.slang" }));
+    /// step.SetBuffer("boids", Shaders.CreateBuffer&lt;Boid&gt;(boids));
+    ///
+    /// // Every frame, 64 boids to a workgroup.
+    /// step.Set("delta", ctx.Time.Delta);
+    /// Shaders.Dispatch(step, (uint)(boids.Length + 63) / 64);
+    /// </code>
+    /// </example>
+    public static void Dispatch(ShaderInstance instance, uint x, uint y = 1, uint z = 1)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(offset);
-
-        if (offset + values.Length > ParameterCount)
+        if (!instance.IsValid)
         {
             throw new ArgumentException(
-                $"A shader pass carries {ParameterCount} floats, and {values.Length} from "
-                + $"{offset} runs past the end.",
-                nameof(values));
+                "No instance was given. Make one with Shaders.CreateInstance.",
+                nameof(instance));
         }
 
-        fixed (float* at = values)
-        {
-            Native.Check(
-                Native.bcs_render_set_shader_pass_parameters(camera.Bits, pass, offset, at, values.Length),
-                $"setting the parameters of shader pass {pass}");
-        }
+        Native.Check(
+            Native.bcs_shader_dispatch(instance.Id, x, y, z),
+            $"dispatching shader instance {instance.Id}");
     }
-
-    /// <summary>Replaces a pass's data with <paramref name="items"/>, as bytes. Only valid inside a system.</summary>
-    /// <remarks>Read the way a material's data is. See <see cref="SetData{T}"/>.</remarks>
-    public static void SetPassData<T>(Entity camera, int pass, ReadOnlySpan<T> items) where T : unmanaged
-    {
-        var bytes = MemoryMarshal.AsBytes(items);
-
-        fixed (byte* at = bytes)
-        {
-            Native.Check(
-                Native.bcs_render_set_shader_pass_data(camera.Bits, pass, at, bytes.Length),
-                $"setting the data of shader pass {pass}");
-        }
-    }
-
-    /// <summary>How many buffers a dispatch is handed.</summary>
-    public const int DispatchBufferCount = NativeShaderDispatchConfig.BufferCount;
 
     /// <summary>
     /// Makes a buffer of <paramref name="size"/> bytes that shaders read and write, holding zeros.
@@ -766,7 +486,8 @@ public static unsafe class Shaders
     /// A buffer lives on the GPU. A compute shader writes it, the next frame's dispatch reads what
     /// the last one wrote, and a material or a pass bound to it draws from it, all without anything
     /// crossing back to the CPU. <see cref="BeginBufferRead"/> brings it back when something on the
-    /// CPU needs to know.
+    /// CPU needs to know. It is bound to any <c>StructuredBuffer</c>, <c>RWStructuredBuffer</c> or
+    /// <c>ByteAddressBuffer</c> by name.
     /// </para>
     /// <para>
     /// Its size is fixed, rounded up to a whole number of four-byte words and never less than
@@ -774,7 +495,6 @@ public static unsafe class Shaders
     /// old one would go on reading it.
     /// </para>
     /// </remarks>
-    /// <returns>A handle to hand a dispatch, a material or a pass.</returns>
     public static AssetHandle CreateBuffer(int size) => CreateBuffer<byte>([], size);
 
     /// <summary>
@@ -782,9 +502,11 @@ public static unsafe class Shaders
     /// Only valid inside a system.
     /// </summary>
     /// <remarks>
-    /// A Slang shader reads and writes it with <c>bcs_compute::element</c> and <c>store</c>, which
-    /// pack a struct the way a C# struct with sequential layout is packed, so the same struct
-    /// declared on both sides agrees on every offset.
+    /// A <c>StructuredBuffer&lt;T&gt;</c> is laid out with the storage rules, where a
+    /// <c>float3</c> takes sixteen bytes, and a <c>ByteAddressBuffer</c> read with <c>Load&lt;T&gt;</c>
+    /// packs the way a C# struct with sequential layout does. A struct shared with a structured
+    /// buffer therefore spells its padding out, and one shared with a byte address buffer needs
+    /// nothing.
     /// </remarks>
     public static AssetHandle CreateBuffer<T>(ReadOnlySpan<T> items, int size = 0) where T : unmanaged
     {
@@ -888,144 +610,782 @@ public static unsafe class Shaders
     }
 
     /// <summary>
-    /// Runs a compute shader once, this frame, before any camera draws. Only valid inside a system.
+    /// Makes an image a compute shader writes and anything samples. Only valid inside a system.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// A simulation dispatches every frame from a system, which leaves how often it steps to the
-    /// game. Dispatches run in the order they were asked for, each seeing what the one before
-    /// wrote, and all of them before the frame is drawn, so a material reading a buffer draws what
-    /// the frame's dispatches left in it.
-    /// </para>
-    /// <para>
-    /// A compute shader reads group zero: the floats at binding zero, the four buffers read and
-    /// written at bindings one to four, and Bevy's globals at five. A Slang one gets all of it with
-    /// <c>import bcs_compute;</c>. A dispatch of a program still compiling does nothing that frame,
-    /// which <see cref="ShaderProgram.State"/> says in advance.
-    /// </para>
-    /// </remarks>
-    /// <exception cref="ArgumentException">There is no program, or too many floats or buffers.</exception>
-    /// <exception cref="BevyNativeException">
-    /// The program does not exist, a buffer handle names no buffer, or there is no renderer.
-    /// </exception>
-    /// <example>
-    /// <code>
-    /// // Once.
-    /// var step = Shaders.CreateProgram(new ShaderProgramSettings { Compute = "shaders/boids.slang" });
-    /// var flock = Shaders.CreateBuffer&lt;Boid&gt;(boids);
-    ///
-    /// // Every frame, 64 boids to a workgroup.
-    /// Shaders.Dispatch(step, (uint)(boids.Length + 63) / 64, flock);
-    /// </code>
-    /// </example>
-    public static void Dispatch(DispatchSettings settings)
-    {
-        ArgumentNullException.ThrowIfNull(settings);
-
-        if (!settings.Program.IsValid)
-        {
-            throw new ArgumentException(
-                "A dispatch needs a program with a compute shader. Make one with "
-                + "Shaders.CreateProgram.",
-                nameof(settings));
-        }
-
-        var parameters = settings.Parameters ?? [];
-        CheckCount(parameters.Length, ParameterCount, "floats", nameof(settings));
-        CheckCount(settings.Buffers.Length, DispatchBufferCount, "buffers", nameof(settings));
-        CheckCount(settings.Images.Length, 2, "images written", nameof(settings));
-        CheckCount(settings.Textures.Length, 2, "images read", nameof(settings));
-
-        var config = new NativeShaderDispatchConfig
-        {
-            Program = settings.Program.Id,
-            ParameterCount = parameters.Length,
-            X = settings.X,
-            Y = settings.Y,
-            Z = settings.Z,
-        };
-
-        for (var i = 0; i < settings.Buffers.Length; i++) config.Buffers[i] = settings.Buffers[i].Key;
-        for (var i = 0; i < settings.Images.Length; i++) config.Images[i] = settings.Images[i].Key;
-        for (var i = 0; i < settings.Textures.Length; i++) config.Textures[i] = settings.Textures[i].Key;
-
-        fixed (float* floats = parameters)
-        {
-            config.Parameters = floats;
-            var status = Native.bcs_shader_dispatch(&config);
-
-            if (status == NativeStatus.InvalidState)
-            {
-                throw new BevyNativeException(
-                    NativeStatus.InvalidState,
-                    $"There is no shader program {settings.Program.Id} in the running app. A "
-                    + "program belongs to the app that made it.");
-            }
-
-            Native.Check(status, $"dispatching shader program {settings.Program.Id}");
-        }
-    }
-
-    /// <summary>
-    /// Runs a compute shader over <paramref name="workgroups"/> workgroups along one axis, handing
-    /// it <paramref name="buffers"/> in order. Only valid inside a system.
-    /// </summary>
-    public static void Dispatch(ShaderProgram program, uint workgroups, params AssetHandle[] buffers)
-    {
-        var settings = new DispatchSettings { Program = program, X = workgroups };
-        CheckCount(buffers.Length, DispatchBufferCount, "buffers", nameof(buffers));
-        buffers.CopyTo(settings.Buffers, 0);
-        Dispatch(settings);
-    }
-
-    /// <summary>
-    /// Makes an image a compute shader writes and a material or a pass samples. Only valid inside
-    /// a system.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// A dispatch writes <see cref="ShaderImageFormat.Rgba8"/> images at binding six and
-    /// <see cref="ShaderImageFormat.Rgba16Float"/> images at binding seven, because a storage
-    /// texture's format is part of its binding. The same image handed to a material as a texture
-    /// draws what the dispatch wrote, which is how a compute shader paints a water surface, a
-    /// noise field or a simulation into a picture.
+    /// A compute shader declares it as a <c>RWTexture2D</c> or <c>RWTexture3D</c> with a
+    /// <c>[format(...)]</c> matching <paramref name="format"/>, and it is bound there by name. The
+    /// same image put on a material or a pass as a texture draws what the dispatch wrote, which is
+    /// how a compute shader paints a water surface, a noise field or a simulation into a picture.
     /// </para>
     /// <para>
     /// It starts transparent black, and its pixels live on the GPU, so a dispatch that writes it
     /// every frame costs nothing crossing the boundary.
     /// </para>
     /// </remarks>
-    public static AssetHandle CreateImage(uint width, uint height, ShaderImageFormat format = ShaderImageFormat.Rgba8)
+    /// <param name="width">Its width in pixels.</param>
+    /// <param name="height">Its height in pixels.</param>
+    /// <param name="format">What it holds per pixel.</param>
+    /// <param name="depth">Above one, a 3D image this many slices deep.</param>
+    public static AssetHandle CreateImage(
+        uint width,
+        uint height,
+        ShaderImageFormat format = ShaderImageFormat.Rgba8,
+        uint depth = 1)
     {
         ArgumentOutOfRangeException.ThrowIfZero(width);
         ArgumentOutOfRangeException.ThrowIfZero(height);
+        ArgumentOutOfRangeException.ThrowIfZero(depth);
 
         return new AssetHandle(Native.Check(
-            Native.bcs_shader_image_create(width, height, (int)format),
-            $"making a {width}x{height} image for a compute shader"));
+            Native.bcs_shader_image_create(width, height, depth, (int)format),
+            $"making a {width}x{height}x{depth} image for a compute shader"));
     }
 
-    /// <summary>
-    /// Binds a buffer at a material's data binding in place of its own bytes, or takes it off with
-    /// <see cref="AssetHandle.None"/>. Only valid inside a system.
-    /// </summary>
-    public static void SetBuffer(AssetHandle material, AssetHandle buffer) =>
-        Native.Check(
-            Native.bcs_shader_material_set_buffer(material.Key, buffer.Key),
-            "binding a buffer to a shader material");
-
-    private static void CheckCount(int given, int limit, string what, string parameter)
+    private static void RequireProgram(ShaderProgram program, string parameter)
     {
-        if (given > limit)
+        if (!program.IsValid)
         {
             throw new ArgumentException(
-                $"A shader material carries {limit} {what} and {given} were given.",
+                "No shader program was given. Make one with Shaders.CreateProgram.",
                 parameter);
+        }
+    }
+
+    private static void ThrowIfNoProgram(int status, ShaderProgram program)
+    {
+        if (status == NativeStatus.InvalidState)
+        {
+            throw new BevyNativeException(
+                NativeStatus.InvalidState,
+                $"There is no shader program {program.Id} in the running app. A program belongs "
+                + "to the app that made it.");
         }
     }
 }
 
-/// <summary>A set of shaders that draws materials, made by <see cref="Shaders.CreateProgram(ShaderProgramSettings)"/>.</summary>
+/// <summary>Something a shader's values are set on by name: a material or an instance.</summary>
+/// <remarks>
+/// Implemented only by <see cref="ShaderMaterial"/> and <see cref="ShaderInstance"/>, which is
+/// what lets the setters in <see cref="ShaderValues"/> be written once for both.
+/// </remarks>
+public interface IShaderValues
+{
+    /// <summary>Which kind of target and which one, as the bridge numbers them.</summary>
+    internal (int Kind, long Id) Target { get; }
+}
+
+/// <summary>Sets and reads a shader's values by the names it declares.</summary>
+/// <remarks>
+/// <para>
+/// Every setter answers the target, so they chain. Each is only valid inside a system, and a value
+/// reaches the shader on the next frame, costing a new bind group rather than a new pipeline.
+/// Something that changes every frame for every material is cheaper computed from time in the
+/// shader.
+/// </para>
+/// <para>
+/// Numbers are checked for kind and shape: a <c>float3</c> is set from a <see cref="Vector3"/>, an
+/// <c>int</c> from an <see cref="int"/>, a <c>float4x4</c> from a <see cref="Matrix4x4"/>, and an
+/// array from a span of its elements, which may be shorter than the array. A C# matrix is laid out
+/// by rows, which is what a Slang <c>float4x4</c> is, so <c>mul(m, v)</c> in the shader is
+/// <see cref="Vector4.Transform(Vector4, Matrix4x4)"/> with the matrix transposed.
+/// </para>
+/// </remarks>
+public static unsafe class ShaderValues
+{
+    extension<T>(T target) where T : struct, IShaderValues
+    {
+        /// <summary>Sets a <c>float</c>.</summary>
+        public T Set(string name, float value) => target.Numbers(name, ShaderScalar.Float, 1, &value, 1);
+
+        /// <summary>Sets an <c>int</c>.</summary>
+        public T Set(string name, int value) => target.Numbers(name, ShaderScalar.Int, 1, &value, 1);
+
+        /// <summary>Sets a <c>uint</c>.</summary>
+        public T Set(string name, uint value) => target.Numbers(name, ShaderScalar.UInt, 1, &value, 1);
+
+        /// <summary>Sets a <c>bool</c>.</summary>
+        public T Set(string name, bool value)
+        {
+            var word = value ? 1u : 0u;
+            return target.Numbers(name, ShaderScalar.UInt, 1, &word, 1);
+        }
+
+        /// <summary>Sets a <c>float2</c>.</summary>
+        public T Set(string name, Vector2 value) => target.Numbers(name, ShaderScalar.Float, 2, &value, 1);
+
+        /// <summary>Sets a <c>float3</c>.</summary>
+        public T Set(string name, Vector3 value) => target.Numbers(name, ShaderScalar.Float, 3, &value, 1);
+
+        /// <summary>Sets a <c>float4</c>, which is also what a color is.</summary>
+        public T Set(string name, Vector4 value) => target.Numbers(name, ShaderScalar.Float, 4, &value, 1);
+
+        /// <summary>Sets a <c>float4</c> from a quaternion, as x, y, z and w.</summary>
+        public T Set(string name, Quaternion value) => target.Numbers(name, ShaderScalar.Float, 4, &value, 1);
+
+        /// <summary>Sets a <c>float4x4</c>.</summary>
+        public T Set(string name, Matrix4x4 value) => target.Numbers(name, ShaderScalar.Float, 16, &value, 1);
+
+        /// <summary>
+        /// Sets an array of numbers, vectors or matrices from its first elements.
+        /// </summary>
+        /// <remarks>
+        /// <typeparamref name="TItem"/> is <see cref="float"/>, <see cref="int"/>,
+        /// <see cref="uint"/>, one of the <see cref="Vector2"/> to <see cref="Vector4"/>,
+        /// <see cref="Quaternion"/> or <see cref="Matrix4x4"/>. A struct is set with
+        /// <c>SetBytes</c> instead, because its layout in the shader is not
+        /// necessarily its layout in C#.
+        /// </remarks>
+        /// <exception cref="ArgumentException">
+        /// <typeparamref name="TItem"/> is not a number, a vector or a matrix, or the shader declares
+        /// something else under the name.
+        /// </exception>
+        public T Set<TItem>(string name, ReadOnlySpan<TItem> items) where TItem : unmanaged
+        {
+            var (scalar, components) = ShapeOf<TItem>()
+                ?? throw new ArgumentException(
+                    $"{typeof(TItem).Name} is not a number, a vector or a matrix. A struct is set "
+                    + "with SetBytes, laid out the way the shader lays it out.",
+                    nameof(items));
+
+            fixed (TItem* at = items)
+            {
+                return target.Numbers(name, scalar, components, at, items.Length);
+            }
+        }
+
+        /// <summary>Sets an array of numbers, vectors or matrices from its first elements.</summary>
+        public T Set<TItem>(string name, TItem[] items) where TItem : unmanaged =>
+            target.Set(name, (ReadOnlySpan<TItem>)items);
+
+        /// <summary>
+        /// Copies bytes, as they are, to where a name is: a struct, an array of structs, or a whole
+        /// <c>ConstantBuffer</c>.
+        /// </summary>
+        /// <remarks>
+        /// A uniform is laid out with rules C# does not follow by itself: a <c>float3</c> starts on
+        /// sixteen bytes, an array element takes a multiple of sixteen, and a struct is rounded up to
+        /// sixteen. A C# struct matching it spells that padding out, and
+        /// <see cref="ShaderMaterial.Program"/>'s <see cref="ShaderProgram.Layout"/> says where each
+        /// field is.
+        /// </remarks>
+        public T SetBytes<TItem>(string name, ReadOnlySpan<TItem> items) where TItem : unmanaged
+        {
+            var bytes = MemoryMarshal.AsBytes(items);
+            var (kind, id) = target.Target;
+
+            fixed (byte* at = bytes)
+            fixed (byte* named = ShaderValues.Utf8(name))
+            {
+                ShaderValues.Refuse(
+                    Native.bcs_shader_set_bytes(kind, id, named, at, bytes.Length),
+                    name,
+                    target);
+            }
+
+            return target;
+        }
+
+        /// <summary>Sets a struct, as its bytes. See <c>SetBytes</c>.</summary>
+        public T SetStruct<TItem>(string name, TItem value) where TItem : unmanaged =>
+            target.SetBytes(name, new ReadOnlySpan<TItem>(&value, 1));
+
+        /// <summary>
+        /// Puts an image on a texture, at <paramref name="index"/> in an array of them, or takes it
+        /// off again with <see cref="AssetHandle.None"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The image need not have finished loading, because the target holds a handle rather than
+        /// pixels. Until it has, the texture reads a stand-in of its shape. The same goes for a
+        /// texture nothing was put on, so a shader need not know which ones were given.
+        /// </para>
+        /// <para>
+        /// An image of the wrong shape for the texture (a flat image on a <c>TextureCube</c>, say),
+        /// or of a format the texture cannot read, is replaced by the stand-in with a warning in the
+        /// log, because binding it would stop the renderer. A cubemap is made with
+        /// <see cref="Render.MakeCubemap"/>, and an array or 3D texture with
+        /// <see cref="Render.MakeTextureArray"/> and <see cref="Render.MakeVolume"/>. A
+        /// <c>RWTexture</c> takes an image from <see cref="Shaders.CreateImage"/>.
+        /// </para>
+        /// </remarks>
+        public T SetTexture(string name, AssetHandle image, int index = 0)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(index);
+            var (kind, id) = target.Target;
+
+            fixed (byte* named = ShaderValues.Utf8(name))
+            {
+                ShaderValues.Refuse(
+                    Native.bcs_shader_set_image(kind, id, named, index, image.Key),
+                    name,
+                    target);
+            }
+
+            return target;
+        }
+
+        /// <summary>
+        /// Puts a buffer from <see cref="Shaders.CreateBuffer(int)"/> on a storage buffer, or takes
+        /// it off again with <see cref="AssetHandle.None"/>.
+        /// </summary>
+        /// <remarks>
+        /// One nothing was put on reads sixteen bytes of zeros, so a shader that reads its length
+        /// sees an empty buffer rather than failing.
+        /// </remarks>
+        public T SetBuffer(string name, AssetHandle buffer)
+        {
+            var (kind, id) = target.Target;
+
+            fixed (byte* named = ShaderValues.Utf8(name))
+            {
+                ShaderValues.Refuse(
+                    Native.bcs_shader_set_buffer(kind, id, named, buffer.Key),
+                    name,
+                    target);
+            }
+
+            return target;
+        }
+
+        /// <summary>Says how a sampler reads, at <paramref name="index"/> in an array of them.</summary>
+        /// <remarks>A sampler nothing was said about reads linear and repeating.</remarks>
+        public T SetSampler(string name, SamplerSettings settings, int index = 0)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(index);
+
+            var config = new NativeSamplerConfig { Anisotropy = Math.Clamp(settings.Anisotropy, 1, 16) };
+            config.Address[0] = AddressOf(settings.AddressU);
+            config.Address[1] = AddressOf(settings.AddressV);
+            config.Address[2] = AddressOf(settings.AddressW);
+            config.Linear[0] = settings.Magnify == SamplerFilter.Linear ? 1 : 0;
+            config.Linear[1] = settings.Minify == SamplerFilter.Linear ? 1 : 0;
+            config.Linear[2] = settings.Mipmaps == SamplerFilter.Linear ? 1 : 0;
+
+            var (kind, id) = target.Target;
+
+            fixed (byte* named = ShaderValues.Utf8(name))
+            {
+                ShaderValues.Refuse(
+                    Native.bcs_shader_set_sampler(kind, id, named, index, &config),
+                    name,
+                    target);
+            }
+
+            return target;
+        }
+
+        /// <summary>
+        /// Takes the value set under a name off, so the shader reads zeros or a stand-in there
+        /// again.
+        /// </summary>
+        public T Unset(string name)
+        {
+            var (kind, id) = target.Target;
+
+            fixed (byte* named = ShaderValues.Utf8(name))
+            {
+                Native.Check(Native.bcs_shader_unset(kind, id, named), $"taking {name} off a shader");
+            }
+
+            return target;
+        }
+
+        /// <summary>
+        /// The numbers set under a name, as <typeparamref name="TItem"/>, or an empty array where
+        /// nothing was.
+        /// </summary>
+        /// <remarks>
+        /// What was set rather than what the shader holds, so a name set as a
+        /// <see cref="Vector4"/> reads back as one <see cref="Vector4"/> or four floats alike.
+        /// </remarks>
+        public TItem[] Get<TItem>(string name) where TItem : unmanaged
+        {
+            var (kind, id) = target.Target;
+            var named = ShaderValues.Utf8(name);
+
+            fixed (byte* at = named)
+            {
+                var length = Native.Check(
+                    Native.bcs_shader_get_numbers(kind, id, at, null, 0),
+                    $"reading {name} from a shader");
+
+                var items = new TItem[length / sizeof(TItem)];
+
+                fixed (TItem* into = items)
+                {
+                    Native.Check(
+                        Native.bcs_shader_get_numbers(kind, id, at, (byte*)into, items.Length * sizeof(TItem)),
+                        $"reading {name} from a shader");
+                }
+
+                return items;
+            }
+        }
+
+        /// <summary>
+        /// What the target's program declares, one entry per name, or none before it has compiled.
+        /// </summary>
+        /// <remarks>What an inspector draws a widget for each of.</remarks>
+        public IReadOnlyList<ShaderParameter> Parameters
+        {
+            get
+            {
+                var (kind, id) = target.Target;
+                var text = Native.ReadText(
+                    (buffer, capacity) => Native.bcs_shader_target_names(kind, id, buffer, capacity),
+                    "reading what a shader declares");
+
+                return ShaderParameter.Parse(text);
+            }
+        }
+
+        /// <summary>
+        /// Sets numbers under a name from memory: <paramref name="count"/> elements of
+        /// <paramref name="components"/> four-byte numbers each.
+        /// </summary>
+        internal T Numbers(string name, ShaderScalar scalar, int components, void* data, int count)
+        {
+            var (kind, id) = target.Target;
+
+            fixed (byte* named = ShaderValues.Utf8(name))
+            {
+                ShaderValues.Refuse(
+                    Native.bcs_shader_set_numbers(kind, id, named, (int)scalar, components, (byte*)data, count),
+                    name,
+                    target);
+            }
+
+            return target;
+        }
+    }
+
+    /// <summary>The number of four-byte numbers in one <typeparamref name="TItem"/>, and their kind.</summary>
+    internal static (ShaderScalar, int)? ShapeOf<TItem>() where TItem : unmanaged
+    {
+        if (typeof(TItem) == typeof(float)) return (ShaderScalar.Float, 1);
+        if (typeof(TItem) == typeof(int)) return (ShaderScalar.Int, 1);
+        if (typeof(TItem) == typeof(uint)) return (ShaderScalar.UInt, 1);
+        if (typeof(TItem) == typeof(Vector2)) return (ShaderScalar.Float, 2);
+        if (typeof(TItem) == typeof(Vector3)) return (ShaderScalar.Float, 3);
+        if (typeof(TItem) == typeof(Vector4)) return (ShaderScalar.Float, 4);
+        if (typeof(TItem) == typeof(Quaternion)) return (ShaderScalar.Float, 4);
+        if (typeof(TItem) == typeof(Matrix4x4)) return (ShaderScalar.Float, 16);
+        return null;
+    }
+
+    /// <summary>A name as NUL-terminated UTF-8.</summary>
+    internal static byte[] Utf8(string name)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+
+        var bytes = new byte[Encoding.UTF8.GetByteCount(name) + 1];
+        Encoding.UTF8.GetBytes(name, bytes);
+        return bytes;
+    }
+
+    /// <summary>
+    /// Turns a refused value into an exception that says why, in the bridge's words, and any other
+    /// failure into the usual one.
+    /// </summary>
+    internal static void Refuse<T>(int status, string name, T target) where T : IShaderValues
+    {
+        if (status == NativeStatus.InvalidState)
+        {
+            var reason = Native.ReadText(
+                (buffer, capacity) => Native.bcs_shader_last_error(buffer, capacity),
+                "reading why a shader value was refused");
+
+            throw new ArgumentException(reason.Length > 0 ? reason : $"{name} was not set.", nameof(name));
+        }
+
+        if (status == NativeStatus.NoComponent)
+        {
+            throw new BevyNativeException(
+                status,
+                target is ShaderMaterial { IsEntity: true }
+                    ? $"Setting {name} found no shader material on the entity."
+                    : $"Setting {name} found nothing to set it on. A material or an instance belongs "
+                    + "to the app that made it.");
+        }
+
+        Native.Check(status, $"setting {name} on a shader");
+    }
+
+    private static int AddressOf(SamplerAddress address) => address switch
+    {
+        SamplerAddress.Clamp => 0,
+        SamplerAddress.Mirror => 2,
+        _ => 1,
+    };
+}
+
+/// <summary>
+/// A material drawn by a <see cref="ShaderProgram"/>, made by
+/// <see cref="Shaders.CreateMaterial(ShaderProgram, AlphaMode)"/>, whose values are set by name
+/// through <see cref="ShaderValues"/>.
+/// </summary>
+/// <remarks>
+/// A handle to an asset in the engine rather than the asset itself, so copies of it name the same
+/// material, and it converts to the <see cref="AssetHandle"/> <see cref="Render.SetMaterial"/>
+/// takes. One from <see cref="Shaders.MaterialOn"/> names whatever material an entity is drawn with
+/// instead, and has no handle.
+/// </remarks>
+public readonly unsafe struct ShaderMaterial : IShaderValues, IEquatable<ShaderMaterial>
+{
+    private const int KindMaterial = 0;
+    private const int KindEntity = 2;
+
+    private readonly int _kind;
+    private readonly long _id;
+
+    /// <summary>A material by its asset handle.</summary>
+    public ShaderMaterial(AssetHandle handle)
+    {
+        _kind = KindMaterial;
+        _id = handle.Key;
+    }
+
+    private ShaderMaterial(Entity entity)
+    {
+        _kind = KindEntity;
+        _id = unchecked((long)entity.Bits);
+    }
+
+    internal static ShaderMaterial OnEntity(Entity entity) => new(entity);
+
+    (int Kind, long Id) IShaderValues.Target => (_kind, _id);
+
+    /// <summary>Whether this names an entity's material rather than a material by its handle.</summary>
+    internal bool IsEntity => _kind == KindEntity;
+
+    /// <summary>
+    /// The material's handle, or <see cref="AssetHandle.None"/> for one named by its entity.
+    /// </summary>
+    public AssetHandle Handle => _kind == KindMaterial ? new AssetHandle((int)_id) : AssetHandle.None;
+
+    /// <summary>The material's handle.</summary>
+    public static implicit operator AssetHandle(ShaderMaterial material) => material.Handle;
+
+    /// <summary>
+    /// Which program draws the material. Setting it has another program draw it, keeping every
+    /// value by name. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// A value the new program does not declare is kept, unused, so switching back finds it again.
+    /// </remarks>
+    public ShaderProgram Program
+    {
+        get => new(Native.Check(
+            Native.bcs_shader_target_program(_kind, _id),
+            "reading which program draws a shader material"));
+        set
+        {
+            if (!value.IsValid) throw new ArgumentException("No program was given.", nameof(value));
+
+            Native.Check(
+                Native.bcs_shader_material_configure(Material, value.Id, -1, 0, 0, 0),
+                $"having shader program {value.Id} draw a material");
+        }
+    }
+
+    /// <summary>
+    /// Changes what the renderer does where the material is not opaque, which faces it leaves
+    /// undrawn and how far its depth is pushed toward the camera. Only valid inside a system.
+    /// </summary>
+    public ShaderMaterial Configure(
+        AlphaMode alpha,
+        float cutoff = 0.5f,
+        CullMode cull = CullMode.Back,
+        float depthBias = 0)
+    {
+        Native.Check(
+            Native.bcs_shader_material_configure(Material, -1, (int)alpha, cutoff, (int)cull, depthBias),
+            "changing how a shader material is drawn");
+        return this;
+    }
+
+    /// <summary>The asset key, for the calls that take a material by its handle alone.</summary>
+    private int Material => _kind == KindMaterial
+        ? (int)_id
+        : throw new InvalidOperationException(
+            "A material named by its entity is changed through its values. Its program and alpha "
+            + "are changed on the material's own handle.");
+
+    /// <inheritdoc />
+    public bool Equals(ShaderMaterial other) => _kind == other._kind && _id == other._id;
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) => obj is ShaderMaterial other && Equals(other);
+
+    /// <inheritdoc />
+    public override int GetHashCode() => HashCode.Combine(_kind, _id);
+
+    /// <inheritdoc />
+    public override string ToString() =>
+        _kind == KindMaterial ? $"ShaderMaterial({_id})" : $"ShaderMaterial(entity {_id})";
+
+    /// <summary>Compares two materials.</summary>
+    public static bool operator ==(ShaderMaterial left, ShaderMaterial right) => left.Equals(right);
+
+    /// <summary>Compares two materials.</summary>
+    public static bool operator !=(ShaderMaterial left, ShaderMaterial right) => !left.Equals(right);
+}
+
+/// <summary>
+/// What a pass or a dispatch runs: a program and its values by name, made by
+/// <see cref="Shaders.CreateInstance"/>.
+/// </summary>
+/// <remarks>
+/// A number rather than an object, since it names something that lives in the engine. It belongs
+/// to the app that made it, and means nothing to another.
+/// </remarks>
+public readonly struct ShaderInstance : IShaderValues, IEquatable<ShaderInstance>
+{
+    private const int KindInstance = 1;
+
+    /// <summary>The instance's number plus one, so the default value names nothing.</summary>
+    private readonly int _idPlusOne;
+
+    internal ShaderInstance(int id) => _idPlusOne = id + 1;
+
+    (int Kind, long Id) IShaderValues.Target => (KindInstance, Id);
+
+    /// <summary>The number the engine knows this instance by.</summary>
+    public int Id => _idPlusOne - 1;
+
+    /// <summary>True when this names an instance rather than nothing.</summary>
+    public bool IsValid => _idPlusOne > 0;
+
+    /// <summary>
+    /// Which program the instance runs. Setting it runs another, keeping every value by name. Only
+    /// valid inside a system.
+    /// </summary>
+    public ShaderProgram Program
+    {
+        get => new(Native.Check(
+            Native.bcs_shader_target_program(KindInstance, Id),
+            $"reading which program shader instance {Id} runs"));
+        set
+        {
+            if (!value.IsValid) throw new ArgumentException("No program was given.", nameof(value));
+
+            Native.Check(
+                Native.bcs_shader_instance_set_program(Id, value.Id),
+                $"having shader instance {Id} run program {value.Id}");
+        }
+    }
+
+    /// <inheritdoc />
+    public bool Equals(ShaderInstance other) => _idPlusOne == other._idPlusOne;
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) => obj is ShaderInstance other && Equals(other);
+
+    /// <inheritdoc />
+    public override int GetHashCode() => _idPlusOne;
+
+    /// <inheritdoc />
+    public override string ToString() => IsValid ? $"ShaderInstance({Id})" : "ShaderInstance(None)";
+
+    /// <summary>Compares two instances.</summary>
+    public static bool operator ==(ShaderInstance left, ShaderInstance right) => left.Equals(right);
+
+    /// <summary>Compares two instances.</summary>
+    public static bool operator !=(ShaderInstance left, ShaderInstance right) => !left.Equals(right);
+}
+
+/// <summary>One full-screen pass a camera runs over what it drew. See <see cref="Shaders.SetPasses"/>.</summary>
+/// <param name="Instance">An instance of a program with a pass stage.</param>
+/// <param name="AfterTonemapping">
+/// Whether the pass runs on the picture as the screen will show it rather than on the linear one.
+/// Before is right for anything about light, such as a glow or an exposure, because the numbers
+/// are still proportional to it. After is right for anything about the picture as a picture, such
+/// as scan lines, a palette or dithering.
+/// </param>
+public readonly record struct ShaderPass(ShaderInstance Instance, bool AfterTonemapping = false)
+{
+    /// <summary>A pass that runs before tonemapping.</summary>
+    public static implicit operator ShaderPass(ShaderInstance instance) => new(instance);
+}
+
+/// <summary>Which kind of number a shader value holds.</summary>
+public enum ShaderScalar
+{
+    /// <summary>A 32-bit float.</summary>
+    Float = 0,
+
+    /// <summary>A 32-bit signed integer.</summary>
+    Int = 1,
+
+    /// <summary>A 32-bit unsigned integer.</summary>
+    UInt = 2,
+
+    /// <summary>A boolean, four bytes wide, set from any integer or a <see cref="bool"/>.</summary>
+    Bool = 3,
+}
+
+/// <summary>What a name a shader declares is.</summary>
+public enum ShaderParameterKind
+{
+    /// <summary>Numbers: a scalar, a vector, a matrix or an array of them.</summary>
+    Number,
+
+    /// <summary>A struct or an array of them, set field by field or as bytes.</summary>
+    Struct,
+
+    /// <summary>A texture the shader samples or loads from.</summary>
+    Texture,
+
+    /// <summary>An image the shader writes.</summary>
+    Image,
+
+    /// <summary>A storage buffer.</summary>
+    Buffer,
+
+    /// <summary>A sampler.</summary>
+    Sampler,
+}
+
+/// <summary>One name a shader declares, as <see cref="ShaderValues"/> reports it.</summary>
+/// <param name="Kind">What it is.</param>
+/// <param name="Name">The name its value is set by.</param>
+/// <param name="Scalar">For numbers, which kind.</param>
+/// <param name="Components">
+/// For numbers, how many make one element: one for a scalar, four for a <c>float4</c>, sixteen for
+/// a <c>float4x4</c>.
+/// </param>
+/// <param name="Count">How many elements, which is one unless it is an array.</param>
+public readonly record struct ShaderParameter(
+    ShaderParameterKind Kind,
+    string Name,
+    ShaderScalar Scalar,
+    int Components,
+    int Count)
+{
+    /// <summary>Reads the bridge's listing, one tab-separated line per name.</summary>
+    internal static IReadOnlyList<ShaderParameter> Parse(string text)
+    {
+        var parameters = new List<ShaderParameter>();
+
+        foreach (var line in text.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var parts = line.Split('\t');
+
+            static int Number(string text) =>
+                int.TryParse(text, System.Globalization.CultureInfo.InvariantCulture, out var value) ? value : 1;
+
+            switch (parts)
+            {
+                case ["number", var name, var scalar, var components, var count]:
+                    parameters.Add(new ShaderParameter(
+                        ShaderParameterKind.Number,
+                        name,
+                        scalar switch
+                        {
+                            "int" => ShaderScalar.Int,
+                            "uint" => ShaderScalar.UInt,
+                            "bool" => ShaderScalar.Bool,
+                            _ => ShaderScalar.Float,
+                        },
+                        Number(components),
+                        Number(count)));
+                    break;
+
+                case [var kind, var name, var count]:
+                    parameters.Add(new ShaderParameter(
+                        kind switch
+                        {
+                            "texture" => ShaderParameterKind.Texture,
+                            "image" => ShaderParameterKind.Image,
+                            "buffer" => ShaderParameterKind.Buffer,
+                            "sampler" => ShaderParameterKind.Sampler,
+                            _ => ShaderParameterKind.Struct,
+                        },
+                        name,
+                        ShaderScalar.Float,
+                        0,
+                        Number(count)));
+                    break;
+            }
+        }
+
+        return parameters;
+    }
+}
+
+/// <summary>How a sampler reads a texture. The default is linear and repeating.</summary>
+public readonly record struct SamplerSettings
+{
+    /// <summary>What reading past either side does across.</summary>
+    public SamplerAddress AddressU { get; init; }
+
+    /// <summary>What reading past either side does down.</summary>
+    public SamplerAddress AddressV { get; init; }
+
+    /// <summary>What reading past either side does in depth.</summary>
+    public SamplerAddress AddressW { get; init; }
+
+    /// <summary>How a texture drawn larger than it is reads between pixels.</summary>
+    public SamplerFilter Magnify { get; init; }
+
+    /// <summary>How a texture drawn smaller than it is reads between pixels.</summary>
+    public SamplerFilter Minify { get; init; }
+
+    /// <summary>How it reads between mip levels.</summary>
+    public SamplerFilter Mipmaps { get; init; }
+
+    /// <summary>
+    /// How many samples a texture seen at a slant takes, from one to sixteen. Above one every
+    /// filter has to be linear, and is made so.
+    /// </summary>
+    public int Anisotropy { get; init; }
+
+    /// <summary>Linear and repeating.</summary>
+    public static SamplerSettings Linear => default;
+
+    /// <summary>Nearest pixel and repeating, for pixel art.</summary>
+    public static SamplerSettings Nearest => new()
+    {
+        Magnify = SamplerFilter.Nearest,
+        Minify = SamplerFilter.Nearest,
+        Mipmaps = SamplerFilter.Nearest,
+    };
+
+    /// <summary>Linear and clamped to the edge, for anything not meant to tile.</summary>
+    public static SamplerSettings Clamped => new()
+    {
+        AddressU = SamplerAddress.Clamp,
+        AddressV = SamplerAddress.Clamp,
+        AddressW = SamplerAddress.Clamp,
+    };
+}
+
+/// <summary>What a sampler does reading past the edge of a texture.</summary>
+public enum SamplerAddress
+{
+    /// <summary>Starts over from the other side.</summary>
+    Repeat = 0,
+
+    /// <summary>Reads the edge pixel.</summary>
+    Clamp = 1,
+
+    /// <summary>Reads back the way it came.</summary>
+    Mirror = 2,
+}
+
+/// <summary>How a sampler reads between pixels.</summary>
+public enum SamplerFilter
+{
+    /// <summary>Blends the nearest pixels.</summary>
+    Linear = 0,
+
+    /// <summary>Takes the nearest pixel.</summary>
+    Nearest = 1,
+}
+
+/// <summary>A set of Slang shaders, made by <see cref="Shaders.CreateProgram(ShaderProgramSettings)"/>.</summary>
 /// <remarks>
 /// A number rather than an object, since it names something that lives in the engine. It belongs
 /// to the app that made it, and means nothing to another.
@@ -1049,7 +1409,7 @@ public readonly unsafe struct ShaderProgram : IEquatable<ShaderProgram>
     /// <summary>True when this names a program rather than nothing.</summary>
     public bool IsValid => _idPlusOne > 0;
 
-    /// <summary>Whether the program can draw yet. Only valid inside a system.</summary>
+    /// <summary>Whether the program can run yet. Only valid inside a system.</summary>
     /// <remarks>
     /// <see cref="ShaderProgramState.Failed"/> can still be drawing, with the last version that
     /// compiled or with a fallback. It is the answer regardless, because what is on disk is not
@@ -1062,7 +1422,7 @@ public readonly unsafe struct ShaderProgram : IEquatable<ShaderProgram>
 
     /// <summary>
     /// How many times this program's shaders have been replaced, counting the first time each
-    /// loaded. Only valid inside a system.
+    /// compiled. Only valid inside a system.
     /// </summary>
     /// <remarks>
     /// Only ever grows. Something that edits a shader file and wants to see the result reads this
@@ -1075,7 +1435,7 @@ public readonly unsafe struct ShaderProgram : IEquatable<ShaderProgram>
             $"asking about shader program {Id}");
 
     /// <summary>
-    /// What the compilers said, one paragraph per stage, or an empty string. Only valid inside a
+    /// What the compiler said, one paragraph per stage, or an empty string. Only valid inside a
     /// system.
     /// </summary>
     public string Diagnostics
@@ -1085,7 +1445,7 @@ public readonly unsafe struct ShaderProgram : IEquatable<ShaderProgram>
             var id = Id;
             return Native.ReadText(
                 (buffer, capacity) => Native.bcs_shader_program_diagnostics(id, buffer, capacity),
-                $"reading what shader program {id}'s compilers said");
+                $"reading what shader program {id}'s compiler said");
         }
     }
 
@@ -1102,8 +1462,26 @@ public readonly unsafe struct ShaderProgram : IEquatable<ShaderProgram>
     }
 
     /// <summary>
-    /// Compiles or reloads every stage now, whether a file changed or not. Only valid inside a
-    /// system.
+    /// What the program's shaders declare, a line per binding and per field with its offset, or an
+    /// empty string before they have compiled.
+    /// </summary>
+    /// <remarks>
+    /// What a struct set with <see cref="ShaderValues"/>' <c>SetBytes</c> is laid out against, and
+    /// what <c>shader.layout</c> in the console prints.
+    /// </remarks>
+    public string Layout
+    {
+        get
+        {
+            var id = Id;
+            return Native.ReadText(
+                (buffer, capacity) => Native.bcs_shader_program_layout(id, buffer, capacity),
+                $"reading what shader program {id} declares");
+        }
+    }
+
+    /// <summary>
+    /// Compiles every stage again now, whether a file changed or not. Only valid inside a system.
     /// </summary>
     public void Reload() =>
         Native.Check(Native.bcs_shader_program_reload(Id), $"reloading shader program {Id}");
@@ -1127,10 +1505,10 @@ public readonly unsafe struct ShaderProgram : IEquatable<ShaderProgram>
     public static bool operator !=(ShaderProgram left, ShaderProgram right) => !left.Equals(right);
 }
 
-/// <summary>Whether a program can draw.</summary>
+/// <summary>Whether a program can run.</summary>
 public enum ShaderProgramState
 {
-    /// <summary>A stage is still compiling or loading, and what it draws has not appeared yet.</summary>
+    /// <summary>A stage is still compiling, and what it draws has not appeared yet.</summary>
     Compiling = 0,
 
     /// <summary>Every stage is what its file says.</summary>
@@ -1140,83 +1518,59 @@ public enum ShaderProgramState
     Failed = 2,
 }
 
-/// <summary>The code that fills a stage, as a file or as text, and the entry point in it.</summary>
-/// <param name="Path">A <c>.wgsl</c> or <c>.slang</c> file under the asset root.</param>
+/// <summary>The Slang that fills a stage, as a file or as text, and the entry point in it.</summary>
+/// <param name="Path">A <c>.slang</c> file under the asset root.</param>
 /// <param name="Entry">
-/// The function, or null for the name Bevy's own shaders use for the stage, which is
-/// <c>vertex</c>, <c>fragment</c> or, for compute, <c>main</c>. Naming it is what lets one file
-/// hold every stage of a program.
+/// The function, or null for the usual name: <c>vertex</c> for a vertex shader, <c>fragment</c> for
+/// a fragment shader or a pass, <c>prepass_vertex</c> and <c>prepass_fragment</c> for the prepass,
+/// and <c>main</c> for compute. Naming it is what lets one file hold every stage of a program.
 /// </param>
 public readonly record struct ShaderStage(string? Path, string? Entry = null)
 {
-    /// <summary>The code itself, where it was handed over as text rather than named by a path.</summary>
+    /// <summary>The Slang itself, where it was handed over as text rather than named by a path.</summary>
     public string? Source { get; init; }
-
-    /// <summary>What <see cref="Source"/> is written in.</summary>
-    public ShaderLanguage Language { get; init; }
 
     /// <summary>A stage whose entry point has the usual name.</summary>
     public static implicit operator ShaderStage(string path) => new(path);
 
-    /// <summary>A stage made from WGSL handed over as text.</summary>
+    /// <summary>A stage made from Slang handed over as text.</summary>
     /// <remarks>
     /// <para>
     /// What a shader worked out at run time wants: one a node graph produced, one a player typed,
-    /// or a variant built from pieces. It may <c>#import</c> Bevy's modules like a file can.
+    /// or a variant built from pieces. It is compiled like a file, so it can <c>import bcs;</c> and
+    /// any module under the asset root, and it needs <c>slangc</c> or a cache entry the same way.
     /// </para>
     /// <para>
     /// Different text is a different program, so there is nothing to reload. A change is a new
-    /// program, and <see cref="Shaders.SetProgram"/> puts it on a material that already exists.
+    /// program, and <see cref="ShaderMaterial.Program"/> puts it on a material that already exists.
     /// </para>
-    /// </remarks>
-    public static ShaderStage Wgsl(string source, string? entry = null)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(source);
-        return new ShaderStage(null, entry) { Source = source, Language = ShaderLanguage.Wgsl };
-    }
-
-    /// <summary>A stage made from Slang handed over as text.</summary>
-    /// <remarks>
-    /// Compiled like a file, so it can <c>import bcs;</c> and any module under the asset root, and
-    /// it needs <c>slangc</c> or a cache entry the same way. See <see cref="Wgsl"/>.
     /// </remarks>
     public static ShaderStage Slang(string source, string? entry = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(source);
-        return new ShaderStage(null, entry) { Source = source, Language = ShaderLanguage.Slang };
+        return new ShaderStage(null, entry) { Source = source };
     }
 
     /// <summary>Whether a file or a source was given.</summary>
     public bool IsSet => Path is { Length: > 0 } || Source is { Length: > 0 };
 
     /// <summary>What messages call it.</summary>
-    internal string Describe() => Source is { Length: > 0 } ? $"inline {Language}" : Path ?? "nothing";
+    internal string Describe() => Source is { Length: > 0 } ? "inline Slang" : Path ?? "nothing";
 }
 
-/// <summary>What a <see cref="ShaderStage"/> handed over as text is written in.</summary>
-public enum ShaderLanguage
-{
-    /// <summary>The stage names a file, whose extension says.</summary>
-    File = 0,
-
-    /// <summary>WGSL.</summary>
-    Wgsl = 1,
-
-    /// <summary>Slang.</summary>
-    Slang = 2,
-}
-
-/// <summary>Which files a <see cref="ShaderProgram"/> is made of.</summary>
+/// <summary>Which Slang files a <see cref="ShaderProgram"/> is made of.</summary>
 /// <remarks>
 /// <para>
-/// A stage left unset is Bevy's own. A fragment shader is required to draw with the program, and a
-/// compute shader to dispatch it, so one of the two is.
+/// A program draws materials with a fragment shader, runs over a camera's picture with a pass, and
+/// is dispatched with a compute shader, and it needs at least one of the three. A vertex stage left
+/// unset draws the mesh where it is.
 /// </para>
 /// <para>
 /// The prepass is what draws depth for shadows, and normals and motion for the effects that read
 /// them. A material that moves its own vertices wants a prepass vertex shader moving them the same
 /// way, or it casts the shadow of the mesh it started from. One that discards pixels wants a
-/// prepass fragment shader discarding the same ones, or its shadow has no holes in it.
+/// prepass fragment shader discarding the same ones, or its shadow has no holes in it. Both read
+/// the material's values like the main stages do.
 /// </para>
 /// </remarks>
 public sealed class ShaderProgramSettings
@@ -1224,7 +1578,7 @@ public sealed class ShaderProgramSettings
     /// <summary>The main pass's vertex shader. Unset, the mesh is drawn where it is.</summary>
     public ShaderStage Vertex { get; init; }
 
-    /// <summary>The main pass's fragment shader. Required.</summary>
+    /// <summary>The main pass's fragment shader, which draws a material.</summary>
     public ShaderStage Fragment { get; init; }
 
     /// <summary>The prepass's vertex shader. Unset, Bevy's.</summary>
@@ -1234,30 +1588,38 @@ public sealed class ShaderProgramSettings
     public ShaderStage PrepassFragment { get; init; }
 
     /// <summary>
-    /// A compute shader, run by <see cref="Shaders.Dispatch(DispatchSettings)"/>. Its entry point
-    /// is called <c>main</c> unless it is named.
+    /// A compute shader, run by <see cref="Shaders.Dispatch"/>. Its entry point is called
+    /// <c>main</c> unless it is named.
     /// </summary>
     /// <remarks>
     /// A program with a compute shader needs no fragment shader, and one with both can be
-    /// dispatched and drawn with alike, which is what keeps a simulation and the shader drawing
-    /// it in one file.
+    /// dispatched and drawn with alike, which is what keeps a simulation and the shader drawing it
+    /// in one file.
     /// </remarks>
     public ShaderStage Compute { get; init; }
+
+    /// <summary>
+    /// A full-screen pass over a camera's picture, run by <see cref="Shaders.SetPasses"/>. Its
+    /// entry point is called <c>fragment</c> unless it is named.
+    /// </summary>
+    public ShaderStage Pass { get; init; }
 
     /// <summary>Names the shaders are compiled with defined.</summary>
     public Dictionary<string, ShaderDefine> Defines { get; init; } = new(StringComparer.Ordinal);
 
     /// <summary>The stages that were set.</summary>
     internal IEnumerable<ShaderStage> Stages() =>
-        new[] { Vertex, Fragment, PrepassVertex, PrepassFragment, Compute }.Where(stage => stage.IsSet);
+        new[] { Vertex, Fragment, PrepassVertex, PrepassFragment, Compute, Pass }.Where(stage => stage.IsSet);
+
+    /// <summary>The stage a message names the program by.</summary>
+    internal ShaderStage Main() => Fragment.IsSet ? Fragment : Pass.IsSet ? Pass : Compute;
 }
 
 /// <summary>The value a shader define has.</summary>
 /// <remarks>
-/// A boolean, a signed integer or an unsigned one, because those are the kinds naga_oil's
-/// preprocessor knows, and a define has to mean the same to a WGSL shader and a Slang one. A false
-/// boolean is left undefined rather than defined as false, because <c>#ifdef</c> asks whether a
-/// name is present rather than what it holds, so in both languages it reads as off.
+/// A boolean, a signed integer or an unsigned one. A false boolean is left undefined rather than
+/// defined as zero, because <c>#ifdef</c> asks whether a name is present rather than what it holds,
+/// so it reads as off.
 /// </remarks>
 public readonly record struct ShaderDefine
 {
@@ -1312,65 +1674,11 @@ public enum CullMode
     None = 2,
 }
 
-/// <summary>Which kind of texture slot of a shader material.</summary>
-public enum ShaderTextureKind
-{
-    /// <summary>One of the eight 2D textures, each with its sampler.</summary>
-    Texture2D = 0,
-
-    /// <summary>One of the two cubemaps.</summary>
-    Cube = 1,
-
-    /// <summary>One of the two 2D array textures.</summary>
-    Array = 2,
-
-    /// <summary>One of the two 3D textures.</summary>
-    Volume = 3,
-}
-
-/// <summary>Everything a shader material is made of.</summary>
-/// <remarks>
-/// A texture need not have loaded when the material is made. The material draws once every image
-/// it names has arrived, which is what keeps it from drawing a frame with a white square where a
-/// picture belongs.
-/// </remarks>
+/// <summary>How a shader material is drawn, apart from its values.</summary>
 public sealed class ShaderMaterialSettings
 {
     /// <summary>The program that draws it. Required.</summary>
     public ShaderProgram Program { get; set; }
-
-    /// <summary>Up to <see cref="Shaders.ParameterCount"/> floats, at binding zero.</summary>
-    public float[]? Parameters { get; set; }
-
-    /// <summary>Any number of bytes, at binding three. See <see cref="Shaders.SetData{T}"/>.</summary>
-    public byte[]? Data { get; set; }
-
-    /// <summary>
-    /// A buffer from <see cref="Shaders.CreateBuffer(int)"/> bound at binding three in place of
-    /// <see cref="Data"/>.
-    /// </summary>
-    /// <remarks>
-    /// What draws the result of a compute shader: the buffer stays on the GPU, the dispatch writes
-    /// it and the material reads it, and nothing crosses back to the CPU on the way.
-    /// </remarks>
-    public AssetHandle Buffer { get; set; }
-
-    /// <summary>The 2D textures, at bindings one and four to sixteen, each with its sampler.</summary>
-    public AssetHandle[] Textures { get; } = new AssetHandle[Shaders.TextureCount];
-
-    /// <summary>The cubemaps, at bindings eighteen and nineteen.</summary>
-    /// <remarks>
-    /// An image has to have been made a cube first, with <see cref="Render.MakeCubemap"/>. A flat
-    /// image here is replaced by the fallback rather than bound.
-    /// </remarks>
-    public AssetHandle[] Cubemaps { get; } = new AssetHandle[Shaders.ExtraTextureCount];
-
-    /// <summary>The 2D array textures, at bindings twenty and twenty-one.</summary>
-    /// <remarks>See <see cref="Render.MakeTextureArray"/>.</remarks>
-    public AssetHandle[] TextureArrays { get; } = new AssetHandle[Shaders.ExtraTextureCount];
-
-    /// <summary>The 3D textures, at bindings twenty-two and twenty-three.</summary>
-    public AssetHandle[] Volumes { get; } = new AssetHandle[Shaders.ExtraTextureCount];
 
     /// <summary>What the renderer does where the material is not opaque.</summary>
     public AlphaMode Alpha { get; set; } = AlphaMode.Opaque;
@@ -1385,82 +1693,42 @@ public sealed class ShaderMaterialSettings
     public float DepthBias { get; set; }
 }
 
-/// <summary>One full-screen pass a camera runs over what it drew.</summary>
-/// <remarks>See <see cref="Shaders.SetPasses"/>.</remarks>
-public sealed class ShaderPassSettings
-{
-    /// <summary>The program whose fragment shader is run over the picture. Required.</summary>
-    public ShaderProgram Program { get; set; }
-
-    /// <summary>Up to <see cref="Shaders.ParameterCount"/> floats, at binding two.</summary>
-    public float[]? Parameters { get; set; }
-
-    /// <summary>Any number of bytes, at binding three.</summary>
-    public byte[]? Data { get; set; }
-
-    /// <summary>A buffer bound at binding three in place of <see cref="Data"/>.</summary>
-    public AssetHandle Buffer { get; set; }
-
-    /// <summary>Pictures besides the camera's own, at bindings six to thirteen with their samplers.</summary>
-    public AssetHandle[] Textures { get; } = new AssetHandle[Shaders.PassTextureCount];
-
-    /// <summary>
-    /// Whether the pass runs after tonemapping, on the picture as the screen will show it, rather
-    /// than before, on the linear one.
-    /// </summary>
-    /// <remarks>
-    /// Before is right for anything about light, such as a glow or an exposure, because the numbers
-    /// are still proportional to it. After is right for anything about the picture as a picture,
-    /// such as scan lines, a palette or dithering.
-    /// </remarks>
-    public bool AfterTonemapping { get; set; }
-}
-
-/// <summary>One run of a compute shader. See <see cref="Shaders.Dispatch(DispatchSettings)"/>.</summary>
-public sealed class DispatchSettings
-{
-    /// <summary>A program with a compute stage. Required.</summary>
-    public ShaderProgram Program { get; set; }
-
-    /// <summary>How many workgroups along the first axis.</summary>
-    /// <remarks>
-    /// A workgroup is as many invocations as the shader's <c>numthreads</c> or
-    /// <c>@workgroup_size</c> says, so a thousand elements at sixty-four a workgroup is sixteen,
-    /// and the last workgroup checks that its elements exist.
-    /// </remarks>
-    public uint X { get; set; } = 1;
-
-    /// <summary>How many workgroups along the second axis.</summary>
-    public uint Y { get; set; } = 1;
-
-    /// <summary>How many workgroups along the third axis.</summary>
-    public uint Z { get; set; } = 1;
-
-    /// <summary>Up to <see cref="Shaders.ParameterCount"/> floats, at binding zero.</summary>
-    public float[]? Parameters { get; set; }
-
-    /// <summary>Buffers from <see cref="Shaders.CreateBuffer(int)"/>, at bindings one to four.</summary>
-    public AssetHandle[] Buffers { get; } = new AssetHandle[Shaders.DispatchBufferCount];
-
-    /// <summary>
-    /// Images from <see cref="Shaders.CreateImage"/> the shader writes: an
-    /// <see cref="ShaderImageFormat.Rgba8"/> one at binding six and an
-    /// <see cref="ShaderImageFormat.Rgba16Float"/> one at seven.
-    /// </summary>
-    public AssetHandle[] Images { get; } = new AssetHandle[2];
-
-    /// <summary>Any images the shader reads, at bindings eight and nine, with a linear sampler at ten.</summary>
-    public AssetHandle[] Textures { get; } = new AssetHandle[2];
-}
-
 /// <summary>What an image a compute shader writes holds per pixel.</summary>
+/// <remarks>
+/// The shader's <c>RWTexture</c> declares the same format with <c>[format(...)]</c>, named in
+/// brackets after each value here.
+/// </remarks>
 public enum ShaderImageFormat
 {
-    /// <summary>Eight bits a channel, from zero to one. Written at binding six.</summary>
+    /// <summary>Eight bits a channel, from zero to one (<c>rgba8</c>).</summary>
     Rgba8 = 0,
 
-    /// <summary>A half float a channel, which can hold light brighter than white. Written at binding seven.</summary>
+    /// <summary>A half float a channel, which holds light brighter than white (<c>rgba16f</c>).</summary>
     Rgba16Float = 1,
+
+    /// <summary>A float a channel (<c>rgba32f</c>).</summary>
+    Rgba32Float = 2,
+
+    /// <summary>One float (<c>r32f</c>).</summary>
+    R32Float = 3,
+
+    /// <summary>One unsigned integer (<c>r32ui</c>).</summary>
+    R32UInt = 4,
+
+    /// <summary>One signed integer (<c>r32i</c>).</summary>
+    R32Int = 5,
+
+    /// <summary>Two floats (<c>rg32f</c>).</summary>
+    Rg32Float = 6,
+
+    /// <summary>Four unsigned integers (<c>rgba32ui</c>).</summary>
+    Rgba32UInt = 7,
+
+    /// <summary>Four unsigned bytes (<c>rgba8ui</c>).</summary>
+    Rgba8UInt = 8,
+
+    /// <summary>One half float (<c>r16f</c>).</summary>
+    R16Float = 9,
 }
 
 /// <summary>A buffer on its way back from the GPU, from <see cref="Shaders.BeginBufferRead"/>.</summary>

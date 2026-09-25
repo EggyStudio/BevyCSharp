@@ -246,7 +246,7 @@ public static unsafe class Render
     /// <remarks>
     /// Only a standard material answers. A shader material is always made in memory, so it has no
     /// path, and what describes it is the program drawing it, which
-    /// <see cref="Shaders.ProgramOf"/> gives. <see cref="MeshPathOf"/> covers the rest of the
+    /// <see cref="Shaders.ProgramOn"/> gives. <see cref="MeshPathOf"/> covers the rest of the
     /// reasoning.
     /// </remarks>
     /// <param name="entity">The entity to ask about.</param>
@@ -1209,7 +1209,7 @@ public static unsafe class Render
     /// </summary>
     /// <remarks>
     /// <para>
-    /// What a shader material's <see cref="ShaderMaterialSettings.Cubemaps"/> want, and the layout
+    /// What a shader's <c>TextureCube</c> wants, and the layout
     /// <see cref="SetSkybox"/> takes. The faces are in the order +X, -X, +Y, -Y, +Z, -Z.
     /// </para>
     /// <para>
@@ -1227,7 +1227,7 @@ public static unsafe class Render
     /// as an array of them.
     /// </summary>
     /// <remarks>
-    /// What a shader material's <see cref="ShaderMaterialSettings.TextureArrays"/> want: many
+    /// What a shader's <c>Texture2DArray</c> wants: many
     /// pictures of one size behind one binding, which a terrain's ground types or a sprite's frames
     /// are. Applied when the pixels arrive, like <see cref="MakeCubemap"/>.
     /// </remarks>
@@ -1246,7 +1246,7 @@ public static unsafe class Render
     /// as a 3D texture that many deep.
     /// </summary>
     /// <remarks>
-    /// What a shader material's <see cref="ShaderMaterialSettings.Volumes"/> want, for fog, clouds,
+    /// What a shader's <c>Texture3D</c> wants, for fog, clouds,
     /// a color grading table or anything else sampled at a point in space. The first slice is the
     /// front. Applied when the pixels arrive, like <see cref="MakeCubemap"/>.
     /// </remarks>
