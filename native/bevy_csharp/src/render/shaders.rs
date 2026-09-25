@@ -776,6 +776,163 @@ pub extern "C" fn bcs_shader_material_set_alpha(material: i32, alpha: i32, cutof
     })
 }
 
+/// Runs `f` on the shader material an entity is drawn with.
+///
+/// Through the entity rather than an asset key, because what an inspector has is the entity, and
+/// asking the asset table for a key every frame would fill it with keys nobody releases.
+#[cfg(feature = "render")]
+fn with_entity_material(
+    entity: u64,
+    f: impl FnOnce(&mut super::material::BcsShaderMaterial) -> i32,
+) -> i32 {
+    use super::material::BcsShaderMaterial;
+
+    crate::state::with_world(|world| {
+        let entity = bevy::ecs::entity::Entity::from_bits(entity);
+
+        let Ok(entity_ref) = world.get_entity(entity) else {
+            return status::NO_ENTITY;
+        };
+
+        let Some(handle) = entity_ref
+            .get::<bevy::pbr::MeshMaterial3d<BcsShaderMaterial>>()
+            .map(|material| material.0.clone())
+        else {
+            return status::NO_COMPONENT;
+        };
+
+        let Some(mut assets) = world.get_resource_mut::<bevy::asset::Assets<BcsShaderMaterial>>()
+        else {
+            return status::UNSUPPORTED;
+        };
+
+        // Read through the shared reference first, so a question does not mark the material
+        // changed and have it prepared again for nothing.
+        let Some(mut current) = assets.get(&handle).cloned() else {
+            return status::NO_COMPONENT;
+        };
+
+        let answer = f(&mut current);
+
+        if answer == status::OK
+            && let Some(mut slot) = assets.get_mut(&handle)
+        {
+            *slot = current;
+        }
+
+        answer
+    })
+}
+
+/// Reports which program draws an entity's material, or [`status::NO_COMPONENT`] where it is not
+/// drawn by one.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_entity_program(entity: u64) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = entity;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            let mut program = status::NO_COMPONENT;
+
+            let answer = with_entity_material(entity, |current| {
+                program = current.program as i32;
+                status::NOT_PRESENT
+            });
+
+            if answer == status::NOT_PRESENT { program } else { answer }
+        }
+    })
+}
+
+/// Reads the floats of an entity's shader material into `out`, and returns how many were written.
+///
+/// # Safety
+/// `out` must be writable for `count` floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_shader_entity_parameters(entity: u64, out: *mut f32, count: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, out, count);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use super::material::PARAMETER_COUNT;
+
+            if out.is_null() || count < 0 {
+                return status::NULL_ARG;
+            }
+
+            let wanted = (count as usize).min(PARAMETER_COUNT);
+            let mut read = [0.0f32; PARAMETER_COUNT];
+
+            let answer = with_entity_material(entity, |current| {
+                read = current.parameters;
+                status::NOT_PRESENT
+            });
+
+            if answer != status::NOT_PRESENT {
+                return answer;
+            }
+
+            unsafe { core::ptr::copy_nonoverlapping(read.as_ptr(), out, wanted) };
+            wanted as i32
+        }
+    })
+}
+
+/// Overwrites some of the floats of an entity's shader material, starting at `offset`.
+///
+/// # Safety
+/// `values` must point at `count` readable floats, or be null when `count` is zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_shader_entity_set_parameters(
+    entity: u64,
+    offset: i32,
+    values: *const f32,
+    count: i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, offset, values, count);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use super::material::PARAMETER_COUNT;
+
+            if offset < 0
+                || count < 0
+                || (offset + count) as usize > PARAMETER_COUNT
+                || (values.is_null() && count > 0)
+            {
+                return status::NULL_ARG;
+            }
+
+            let given: Vec<f32> = if count > 0 {
+                unsafe { core::slice::from_raw_parts(values, count as usize) }.to_vec()
+            } else {
+                Vec::new()
+            };
+
+            with_entity_material(entity, |current| {
+                let start = offset as usize;
+                current.parameters[start..start + given.len()].copy_from_slice(&given);
+                status::OK
+            })
+        }
+    })
+}
+
 /// Gives an entity a shader material, if the handle names one.
 #[cfg(feature = "render")]
 pub fn attach(

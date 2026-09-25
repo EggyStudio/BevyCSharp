@@ -912,8 +912,12 @@ float4 fragment(bcs_pass::Input input) : SV_Target
 ```
 
 A pass reads group zero: the picture and a linear sampler at bindings zero and one, sixty-four
-floats at two, any number of bytes at three, Bevy's globals at four, the view at five and four
-textures with their samplers from six to thirteen. A pass before tonemapping sees the linear
+floats at two, any number of bytes at three, Bevy's globals at four, the view at five, four
+textures with their samplers from six to thirteen, and the camera's depth and normals at fourteen
+and fifteen. Those two come from a prepass the camera draws when asked, with
+`Shaders.SetPrepass(camera, depth: true, normals: true)`, which is what an outline or a fog is made
+of; `bcs_pass::distance_at` turns depth into world units. A camera that draws neither binds the far
+plane and white normals, and so does a multisampled one, whose prepass a pass cannot bind. A pass before tonemapping sees the linear
 picture, which may be brighter than white, and suits anything about light; one after sees what the
 screen will show, and suits anything about the picture as a picture. A pass still compiling is
 skipped rather than drawn wrong, and passes run in the order given, each over what the last wrote.
@@ -1907,7 +1911,10 @@ dotnet run --project BevyCSharp.Editor
 
 The scene fills the window and the panels float over it. The panel on the right holds the world
 beside the details of whatever is selected, the tools float in the scene's corners, and the tabs
-along the bottom open the console, the asset browser, the settings and the style. Docking the panel
+along the bottom open the console, the asset browser, the shaders, the settings and the style. The
+Shaders tab lists every program with whether it compiled and what the compiler said, and the details
+of an entity drawn by a shader material show its program and its numbers as rows of four, which can
+be dragged while it draws. Docking the panel
 gives the camera the rectangle that is left rather than drawing it behind. The arrangement is a
 handful of numbers that `EditorShell` owns and every part reads, saved with the settings, so the
 editor opens the way it was left. The look is one theme file, `assets/theme.txt`, which the Style

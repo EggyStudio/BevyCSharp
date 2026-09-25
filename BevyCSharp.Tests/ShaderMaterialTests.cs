@@ -537,6 +537,42 @@ public sealed class ShaderMaterialTests
         Assert.True(PictureRun.Red(run.Picture("after")) > 100, "the edit did not turn it red");
     }
 
+    /// <summary>
+    /// An entity says which program draws it and hands over its numbers, which is what an
+    /// inspector reads, and an entity drawn by Bevy's own material says none.
+    /// </summary>
+    [Fact]
+    public void AnEntityAnswersForItsShaderMaterial()
+    {
+        if (!App.HasRenderer) return;
+
+        var made = ShaderProgram.None;
+        var asked = ShaderProgram.None;
+        var plain = ShaderProgram.None;
+        float[]? read = null;
+
+        new PictureRun
+        {
+            Scene = ecs =>
+            {
+                made = Shaders.CreateProgram("shaders/flat.wgsl");
+                var cube = PictureRun.Cube(ecs, Shaders.CreateMaterial(made, [0f, 1f, 0f, 1f]));
+                var other = PictureRun.Cube(ecs, Render.CreateMaterial(1f, 1f, 1f));
+
+                asked = Shaders.ProgramOn(cube);
+                plain = Shaders.ProgramOn(other);
+
+                Shaders.SetParameters(cube, [0.5f], 4);
+                read = Shaders.GetParameters(cube);
+            },
+        }.Wait(2).Go();
+
+        Assert.Equal(made, asked);
+        Assert.False(plain.IsValid);
+        Assert.NotNull(read);
+        Assert.Equal([0f, 1f, 0f, 1f, 0.5f], read[..5]);
+    }
+
     /// <summary>A program made from WGSL handed over as text draws like one from a file.</summary>
     [Fact]
     public void AProgramCanBeMadeFromText()

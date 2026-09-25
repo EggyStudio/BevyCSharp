@@ -27,11 +27,77 @@ fn drop_temporal(entity: &mut bevy::ecs::world::EntityWorldMut) {
         return;
     }
 
-    entity.remove::<(TemporalAntiAliasing, TemporalJitter, MipBias, DepthPrepass)>();
+    entity.remove::<(TemporalAntiAliasing, TemporalJitter, MipBias)>();
+
+    // Kept where the game asked for depth itself, which a shader pass reading it does.
+    if !entity
+        .get::<RequestedPrepass>()
+        .is_some_and(|requested| requested.0 & 1 != 0)
+    {
+        entity.remove::<DepthPrepass>();
+    }
 
     if !entity.contains::<MotionBlur>() {
         entity.remove::<MotionVectorPrepass>();
     }
+}
+
+/// Which prepasses a game asked a camera for, as the flags it gave.
+///
+/// Remembered so that what something else took off with it, as temporal antialiasing does with
+/// the depth prepass when it goes, can be left where the game still wants it.
+#[cfg(feature = "render")]
+#[derive(bevy::ecs::component::Component)]
+pub struct RequestedPrepass(pub u32);
+
+/// Asks a camera to draw depth, normals or both before the scene, for its shader passes to read.
+///
+/// `flags` is a bit each: `1` depth, `2` normals. A bit left clear takes that prepass off again,
+/// unless something else on the camera needs it, which is temporal antialiasing for depth.
+///
+/// A prepass draws the scene a second time, so it is only worth asking for when something reads
+/// what it draws. A multisampled camera draws them multisampled, which a pass cannot bind, so a
+/// camera read this way wants `Msaa` of one.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, flags);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::anti_alias::taa::TemporalAntiAliasing;
+            use bevy::core_pipeline::prepass::{DepthPrepass, NormalPrepass};
+
+            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+
+            with_world(|world| {
+                if let Some(refusal) = refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let mut camera = world.entity_mut(entity);
+                camera.insert(RequestedPrepass(flags));
+
+                if flags & 1 != 0 {
+                    camera.insert(DepthPrepass);
+                } else if !camera.contains::<TemporalAntiAliasing>() {
+                    camera.remove::<DepthPrepass>();
+                }
+
+                if flags & 2 != 0 {
+                    camera.insert(NormalPrepass);
+                } else {
+                    camera.remove::<NormalPrepass>();
+                }
+
+                status::OK
+            })
+        }
+    })
 }
 
 /// Sets what a camera does to the picture after the scene has been drawn.

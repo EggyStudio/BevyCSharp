@@ -575,6 +575,26 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_image_create(uint width, uint height, int format);
 
+    /// <summary>Asks a camera to draw depth, normals or both before the scene.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_prepass(ulong camera, uint flags);
+
+    /// <summary>Reports which program draws an entity's material.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_entity_program(ulong entity);
+
+    /// <summary>Reads the floats of an entity's shader material.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_entity_parameters(ulong entity, float* values, int count);
+
+    /// <summary>Overwrites some of the floats of an entity's shader material.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_entity_set_parameters(ulong entity, int offset, float* values, int count);
+
     /// <summary>Attaches an asset through a component that carries a handle.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

@@ -17,6 +17,13 @@
 //! | 4 | Bevy's globals, which is where time is |
 //! | 5 | Bevy's view uniform, with the camera's matrices and viewport |
 //! | 6 to 13 | four textures, each followed by its sampler |
+//! | 14 | the camera's depth, as a depth texture |
+//! | 15 | the camera's normals, as a texture of floats |
+//!
+//! Depth and normals come from the prepass, which a camera draws only when asked, through
+//! `bcs_render_set_prepass`. A camera that draws neither, or draws them multisampled, which a
+//! plain texture binding cannot take, binds a stand-in: depth zero, which is the far plane in
+//! Bevy's reversed depth, and white normals.
 //!
 //! The vertex shader is Bevy's full-screen triangle, whose output is the position and a `uv` at
 //! location zero, running from the top left.
@@ -30,6 +37,7 @@ use std::sync::Arc;
 use bevy::app::App;
 use bevy::asset::Handle;
 use bevy::camera::Camera;
+use bevy::core_pipeline::prepass::ViewPrepassTextures;
 use bevy::core_pipeline::tonemapping::tonemapping;
 use bevy::core_pipeline::{Core2d, Core2dSystems, Core3d, Core3dSystems, FullscreenShader};
 use bevy::ecs::component::Component;
@@ -88,6 +96,8 @@ pub struct ShaderPassPipelines {
     layout: BindGroupLayoutDescriptor,
     sampler: Sampler,
     fullscreen: FullscreenShader,
+    /// Bound at the depth binding when the camera has no depth to give.
+    empty_depth: TextureView,
     /// One pipeline per program and picture format, because a pipeline names the format it
     /// writes and a camera drawing in HDR writes a different one before tonemapping than after.
     pipelines: HashMap<(u32, TextureFormat), CachedRenderPipelineId>,
@@ -208,6 +218,33 @@ fn init_pipelines(
         entries.push(entry(7 + index * 2, sampler));
     }
 
+    entries.push(entry(
+        14,
+        BindingType::Texture {
+            sample_type: TextureSampleType::Depth,
+            view_dimension: TextureViewDimension::D2,
+            multisampled: false,
+        },
+    ));
+    entries.push(entry(15, texture));
+
+    let empty_depth = render_device
+        .create_texture(&bevy::render::render_resource::TextureDescriptor {
+            label: Some("bcs_shader_pass_empty_depth"),
+            size: bevy::render::render_resource::Extent3d {
+                width: 1,
+                height: 1,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: bevy::render::render_resource::TextureDimension::D2,
+            format: TextureFormat::Depth32Float,
+            usage: bevy::render::render_resource::TextureUsages::TEXTURE_BINDING,
+            view_formats: &[],
+        })
+        .create_view(&bevy::render::render_resource::TextureViewDescriptor::default());
+
     commands.insert_resource(ShaderPassPipelines {
         layout: BindGroupLayoutDescriptor::new("bcs_shader_pass_layout", &entries),
         sampler: render_device.create_sampler(&SamplerDescriptor {
@@ -217,6 +254,7 @@ fn init_pipelines(
             ..Default::default()
         }),
         fullscreen: fullscreen.clone(),
+        empty_depth,
         pipelines: HashMap::new(),
     });
 }
@@ -404,14 +442,36 @@ fn forget_passes(
 
 /// Runs a view's passes on one side of tonemapping.
 fn run_passes<const AFTER_TONEMAPPING: bool>(
-    view: ViewQuery<(&ViewTarget, &ViewUniformOffset, &PreparedShaderPasses)>,
+    view: ViewQuery<(
+        &ViewTarget,
+        &ViewUniformOffset,
+        &PreparedShaderPasses,
+        Option<&ViewPrepassTextures>,
+    )>,
     pipelines: Res<ShaderPassPipelines>,
+    fallback: Res<FallbackImage>,
     cache: Res<PipelineCache>,
     globals: Res<GlobalsBuffer>,
     view_uniforms: Res<ViewUniforms>,
     mut ctx: RenderContext,
 ) {
-    let (target, offset, prepared) = view.into_inner();
+    let (target, offset, prepared, prepass) = view.into_inner();
+
+    // Only a texture drawn once a pixel can be bound as a plain texture. A multisampled camera's
+    // prepass draws several samples a pixel, and it is left out rather than failing the pipeline.
+    let single = |texture: &bevy::render::render_resource::Texture| texture.sample_count() == 1;
+
+    let depth = prepass
+        .and_then(|prepass| prepass.depth.as_ref())
+        .filter(|depth| single(&depth.texture.texture))
+        .map(|depth| depth.texture.default_view.clone())
+        .unwrap_or_else(|| pipelines.empty_depth.clone());
+
+    let normals = prepass
+        .and_then(|prepass| prepass.normal.as_ref())
+        .filter(|normal| single(&normal.texture.texture))
+        .map(|normal| normal.texture.default_view.clone())
+        .unwrap_or_else(|| fallback.d2.texture_view.clone());
 
     let (Some(globals), Some(view_binding)) =
         (globals.buffer.binding(), view_uniforms.uniforms.binding())
@@ -472,6 +532,15 @@ fn run_passes<const AFTER_TONEMAPPING: bool>(
                 resource: BindingResource::Sampler(sampler),
             });
         }
+
+        entries.push(BindGroupEntry {
+            binding: 14,
+            resource: BindingResource::TextureView(&depth),
+        });
+        entries.push(BindGroupEntry {
+            binding: 15,
+            resource: BindingResource::TextureView(&normals),
+        });
 
         let bind_group = ctx.render_device().create_bind_group(
             "bcs_shader_pass",

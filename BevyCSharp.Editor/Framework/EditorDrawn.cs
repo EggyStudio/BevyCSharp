@@ -56,7 +56,79 @@ internal static class EditorDrawn
         EditorSurface.Heading("Drawn with", DetailsPanel.Inset);
 
         Row(ctx, entity, "Mesh", mesh, AssetKind.Mesh, FirstMesh);
-        Row(ctx, entity, "Material", material, AssetKind.StandardMaterial, FirstMaterial);
+
+        if (Shaders.ProgramOn(entity) is { IsValid: true } program)
+        {
+            Shader(entity, program);
+        }
+        else
+        {
+            Row(ctx, entity, "Material", material, AssetKind.StandardMaterial, FirstMaterial);
+        }
+    }
+
+    /// <summary>
+    /// A material drawn by a shader the game wrote: which program, whether it compiled, and its
+    /// numbers, which can be dragged while it draws.
+    /// </summary>
+    /// <remarks>
+    /// The numbers are sixteen rows of four, as the shader reads them, and only as many rows are
+    /// shown as reach the last one that is not zero, plus one to grow into, so a material using
+    /// four floats is one row and not sixteen. What each number means is the shader's to say, so
+    /// the rows are numbered rather than named.
+    /// </remarks>
+    private static void Shader(Entity entity, ShaderProgram program)
+    {
+        var theme = EditorTheme.Current;
+
+        var across = new System.Numerics.Vector2(
+            MathF.Max(1f, ImGui.GetContentRegionAvail().X - DetailsPanel.Inset),
+            0f);
+
+        if (EditorRows.Open("##drawnShader", across))
+        {
+            EditorRows.Line("Shader");
+
+            var (word, color) = program.State switch
+            {
+                ShaderProgramState.Ready => ("", theme.Dim),
+                ShaderProgramState.Failed => ("failed, ", theme.Bad),
+                _ => ("compiling, ", theme.Warn),
+            };
+
+            ImGui.PushStyleColor(ImGuiCol.Text, color);
+            ImGui.TextUnformatted($"{word}#{program.Id} {program.Files}");
+            ImGui.PopStyleColor();
+
+            EditorRows.Close();
+        }
+
+        var values = Shaders.GetParameters(entity);
+
+        var last = Array.FindLastIndex(values, value => value != 0f);
+        var rows = Math.Min(Shaders.ParameterCount / 4, (last / 4) + 2);
+
+        for (var row = 0; row < rows; row++)
+        {
+            if (!EditorRows.Open($"##shaderRow{row}", across)) continue;
+
+            EditorRows.Line($"Row {row}");
+
+            var four = new System.Numerics.Vector4(
+                values[row * 4],
+                values[(row * 4) + 1],
+                values[(row * 4) + 2],
+                values[(row * 4) + 3]);
+
+            ImGui.SetNextItemWidth(-1f);
+
+            if (ImGui.DragFloat4($"##shaderValues{row}", ref four, 0.01f))
+            {
+                Shaders.SetParameters(entity, [four.X, four.Y, four.Z, four.W], row * 4);
+            }
+
+            EditorRows.Close();
+        }
     }
 
     /// <summary>One row, showing where it came from and offering somewhere else.</summary>

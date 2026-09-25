@@ -66,6 +66,38 @@ public struct View
 [[vk::binding(12, 0)]] public Texture2D texture3;
 [[vk::binding(13, 0)]] public SamplerState sampler3;
 
+/// The camera's depth, from its prepass, or zero, which is the far plane, where it draws none.
+///
+/// Bevy's depth runs backwards, from one at the near plane to zero infinitely far away, so a
+/// larger number is nearer. `Render.SetPrepass` asks a camera for it.
+[[vk::binding(14, 0)]] public DepthTexture2D depth;
+
+/// The camera's normals, from its prepass, each packed from minus one to one into zero to one, or
+/// white where it draws none.
+[[vk::binding(15, 0)]] public Texture2D normals;
+
+/// The depth at a pixel, given the pixel's `SV_Position`.
+public float depth_at(float4 position)
+{
+    return depth.Load(int3(int2(position.xy), 0));
+}
+
+/// How far in front of the camera the surface at a pixel is, in world units.
+///
+/// Worked out from the depth the way Bevy's own `depth_ndc_to_view_z` does for a perspective
+/// camera. Infinitely far, where nothing was drawn.
+public float distance_at(float4 position)
+{
+    let near = view.clip_from_view[3][2];
+    return near / max(depth_at(position), 1e-7);
+}
+
+/// The world-space normal of the surface at a pixel.
+public float3 normal_at(float4 position)
+{
+    return normals.Load(int3(int2(position.xy), 0)).xyz * 2.0 - 1.0;
+}
+
 /// What Bevy's full-screen triangle hands the fragment shader.
 public struct Input
 {

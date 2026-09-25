@@ -495,6 +495,66 @@ public static unsafe class Shaders
             $"having shader program {program.Id} draw a material");
     }
 
+    /// <summary>
+    /// Which program draws an entity's material, or <see cref="ShaderProgram.None"/> where the
+    /// entity is not drawn by one. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// By the entity rather than by the material's handle, because an inspector has the entity,
+    /// and it asks every frame.
+    /// </remarks>
+    public static ShaderProgram ProgramOn(Entity entity)
+    {
+        var id = Native.bcs_shader_entity_program(entity.Bits);
+        if (id == NativeStatus.NoComponent || id == NativeStatus.Unsupported) return ShaderProgram.None;
+
+        return new ShaderProgram(Native.Check(id, $"asking what draws entity {entity}"));
+    }
+
+    /// <summary>Reads all the floats of an entity's shader material. Only valid inside a system.</summary>
+    /// <exception cref="BevyNativeException">The entity is not drawn by a shader material.</exception>
+    public static float[] GetParameters(Entity entity)
+    {
+        var values = new float[ParameterCount];
+
+        fixed (float* at = values)
+        {
+            Native.Check(
+                Native.bcs_shader_entity_parameters(entity.Bits, at, values.Length),
+                $"reading the parameters entity {entity} is drawn with");
+        }
+
+        return values;
+    }
+
+    /// <summary>
+    /// Overwrites some of the floats of an entity's shader material, starting at
+    /// <paramref name="offset"/>. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// The material is shared by every entity drawn with it, so this changes all of them, which is
+    /// what the same call on the material's handle does.
+    /// </remarks>
+    public static void SetParameters(Entity entity, ReadOnlySpan<float> values, int offset = 0)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(offset);
+
+        if (offset + values.Length > ParameterCount)
+        {
+            throw new ArgumentException(
+                $"A shader material carries {ParameterCount} floats, and {values.Length} from "
+                + $"{offset} runs past the end.",
+                nameof(values));
+        }
+
+        fixed (float* at = values)
+        {
+            Native.Check(
+                Native.bcs_shader_entity_set_parameters(entity.Bits, offset, at, values.Length),
+                $"setting the parameters entity {entity} is drawn with");
+        }
+    }
+
     /// <summary>Which program draws a material. Only valid inside a system.</summary>
     public static ShaderProgram ProgramOf(AssetHandle material) =>
         new(Native.Check(
@@ -623,6 +683,30 @@ public static unsafe class Shaders
             foreach (var pin in pins) pin.Free();
         }
     }
+
+    /// <summary>
+    /// Asks a camera to draw its depth, its normals or both before the scene, for its passes to
+    /// read. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A pass reads depth at binding fourteen and normals at fifteen, which is what an outline, a
+    /// fog or an edge detector is made of. A camera that draws neither binds depth zero, which is
+    /// the far plane, and white normals, so a pass reading them runs either way.
+    /// </para>
+    /// <para>
+    /// A prepass draws the scene a second time, so it is worth asking for only when something reads
+    /// it. A multisampled camera draws it multisampled, which a pass cannot bind, so a camera read
+    /// this way wants <see cref="PostSettings.Msaa"/> of one, and gets the stand-ins otherwise.
+    /// </para>
+    /// </remarks>
+    /// <param name="camera">The camera.</param>
+    /// <param name="depth">Whether to draw depth.</param>
+    /// <param name="normals">Whether to draw normals.</param>
+    public static void SetPrepass(Entity camera, bool depth, bool normals = false) =>
+        Native.Check(
+            Native.bcs_render_set_prepass(camera.Bits, (depth ? 1u : 0u) | (normals ? 2u : 0u)),
+            "asking a camera for a prepass");
 
     /// <summary>
     /// Overwrites some of a pass's floats, starting at <paramref name="offset"/>. Only valid inside

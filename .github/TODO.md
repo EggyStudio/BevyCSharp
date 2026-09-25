@@ -80,9 +80,10 @@ Slang file is recompiled when anything it imports changes. What is left is at th
   the pipeline is built, which Bevy does not scope, so the error is the device's rather than the
   pipeline's, and `Shaders.KeepRenderingAfterErrors` survives it at the cost of every frame drawn
   while the broken pipeline is in use.
-- **A pass cannot read depth.** The layout has the picture, but not the depth or normal textures
-  a camera with a prepass keeps, so an outline or fog pass has to be done in a material instead.
-  Binding them wants a fallback for the camera without a prepass, since the layout is fixed.
+- **A pass reads depth only from a camera drawn once a pixel.** A multisampled prepass is a
+  multisampled texture, which is a different binding from the plain one the layout names, so a
+  camera with `Msaa` above one hands its passes the stand-ins. Resolving the depth first, or a
+  second layout for multisampled cameras, would lift it. Motion vectors are not bound at all.
 - **A compute shader writes two image formats.** A storage texture's format is part of its
   binding, and the layout is fixed, so a dispatch writes one eight-bit image and one half-float one,
   write-only. Reading and writing one image in the same dispatch needs a format wgpu allows that
