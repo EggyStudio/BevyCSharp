@@ -10,7 +10,7 @@ namespace Bevy;
 /// <para>
 /// ImGui is told what happened rather than asked to look: a position, a button, a key, a character.
 /// The engine reports the state of things once a frame instead, so this turns one into the other,
-/// which is what every ImGui backend does.
+/// as every ImGui backend does.
 /// </para>
 /// <para>
 /// The keys mapped are the ones an interface acts on. A letter reaches a text field as the
@@ -68,7 +68,7 @@ internal static class ImGuiInput
         }
     }
 
-    /// <summary>Reports a button when it changes, which is what ImGui is expecting.</summary>
+    /// <summary>Reports a button when it changes, as ImGui expects.</summary>
     private static void Button(ImGuiIOPtr io, int button, bool down, ref bool held)
     {
         if (down == held) return;

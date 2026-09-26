@@ -66,7 +66,7 @@ public sealed class EditorThemeTests
     public void TheLadderClimbsFromTheGroundToWhatIsHeldDown()
     {
         // Each surface a step above the one it sits on, in that order. Two rungs the same is a
-        // panel whose inside cannot be told from its outside, which is what the look is for.
+        // panel whose inside cannot be told from its outside, which defeats the look.
         var theme = EditorTheme.Modern;
 
         var ladder = new[]
@@ -102,8 +102,8 @@ public sealed class EditorThemeTests
         Assert.Contains(EditorTheme.Modern, EditorTheme.All);
         Assert.Contains(EditorTheme.Native, EditorTheme.All);
 
-        // One is the editor's own, the other is what ImGui says. The difference that matters is
-        // that the stock one asks ImGui for its colors rather than being written over it.
+        // One is the editor's own, the other ImGui's. The difference that matters is that the stock
+        // one asks ImGui for its colors rather than being written over it.
         Assert.False(EditorTheme.Modern.Stock);
         Assert.True(EditorTheme.Native.Stock);
         Assert.Equal(0f, EditorTheme.Modern.Borders);

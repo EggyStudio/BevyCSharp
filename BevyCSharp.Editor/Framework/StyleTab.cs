@@ -10,16 +10,16 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A theme picked, and under it every rung of the ladder it is made of. That is what the visual
-/// designers people reach for offer, without any of them. They generate C++ and cannot be part of
-/// a C# editor, but the thing they are wanted for is dialling a look in and taking it away, and
-/// that is a file.
+/// A theme picked, and under it every rung of the ladder it is made of. The visual designers people
+/// reach for offer the same, and this needs none of them. They generate C++ and cannot be part of a
+/// C# editor, but the thing they are wanted for is dialling a look in and taking it away, and that
+/// is a file.
 /// </para>
 /// <para>
-/// The rows are the theme's own fields rather than ImGui's style, which is what makes what is
-/// dragged here the same thing that is saved. ImGui's own editor offers every slot it has, most of
-/// which no theme records, and draws them with widgets that are rounded the way ImGui rounds
-/// things rather than the way this editor does.
+/// The rows are the theme's own fields rather than ImGui's style, so what is dragged here is the
+/// same thing that is saved. ImGui's own editor offers every slot it has, most of which no theme
+/// records, and draws them with widgets that are rounded the way ImGui rounds things rather than
+/// the way this editor does.
 /// </para>
 /// <para>
 /// Saved to <c>assets/theme.txt</c>, which the editor reads at startup. A look dialled in by hand
@@ -42,8 +42,8 @@ public static class StyleTab
 
         foreach (var offered in EditorTheme.All)
         {
-            // The accent, because that is what the editor says "this is the one in force" with
-            // everywhere else.
+            // The accent, because the editor uses it everywhere else to say "this is the one in
+            // force".
             if (EditorWidgets.Pill(offered.Name, offered.Name == theme.Name))
             {
                 EditorShell.Wear(offered);
@@ -214,7 +214,7 @@ public static class StyleTab
             }
         });
 
-    /// <summary>Two numbers, which is what every measure of air in here is.</summary>
+    /// <summary>Two numbers, like every measure of air in here.</summary>
     private static void Pair(string name, Vector2 held, Func<Vector2, EditorTheme> onto) =>
         Rung(name, () =>
         {

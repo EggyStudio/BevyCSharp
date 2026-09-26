@@ -1,5 +1,5 @@
-// A compute shader that writes `color` into the first element of `colors`, which is what a
-// material bound to the same buffer then paints with.
+// A compute shader that writes `color` into the first element of `colors`, which a material bound
+// to the same buffer then paints with.
 
 import bcs_compute;
 

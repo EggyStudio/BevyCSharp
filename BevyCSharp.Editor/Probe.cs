@@ -98,8 +98,8 @@ public partial struct Probe
                 break;
 
             case 145:
-                // Pressed on one frame and released on the next, because that is what a click is:
-                // the engine decides an object was clicked by matching a release to the press that
+                // Pressed on one frame and released on the next, because that makes a click. The
+                // engine decides an object was clicked by matching a release to the press that
                 // landed on it, and both in one frame is one event, not two.
                 if (script.Contains("pick")) Press(0);
                 if (script.Contains("sky")) Press(0);
@@ -229,8 +229,8 @@ public partial struct Probe
                 break;
 
             case 165:
-                // A third point, well clear of the second, for the case a click opens something
-                // and the thing worth capturing is what a click inside it does.
+                // A third point, well clear of the second, for the case a click opens something and
+                // the thing worth capturing is the result of a click inside it.
                 if (script.Contains("click")) Click(2);
                 break;
 
@@ -338,8 +338,8 @@ public partial struct Probe
     /// </summary>
     /// <remarks>
     /// Points rather than names, because an immediate mode interface has no elements to look up. A
-    /// widget is a call that happened, and where it landed is what the layout decided. Several
-    /// points separated by semicolons are clicked one after another, a few frames apart.
+    /// widget is a call that happened, and the layout decided where it landed. Several points
+    /// separated by semicolons are clicked one after another, a few frames apart.
     /// </remarks>
     private static void Click(int step)
     {
@@ -381,7 +381,7 @@ public partial struct Probe
         SyntheticInput.MoveTo(at.X, at.Y);
     }
 
-    /// <summary>And lets go of it, which is what makes the click.</summary>
+    /// <summary>And lets go of it, which makes the click.</summary>
     private static void Release(int step)
     {
         if (Point(step) is not { } at) return;

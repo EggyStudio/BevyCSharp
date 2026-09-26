@@ -7,11 +7,10 @@ namespace Bevy.Tests;
 /// Covers the shapes gizmos can draw, by drawing them and looking.
 /// </summary>
 /// <remarks>
-/// A gizmo call answers nothing, which is what makes it pleasant to write and impossible to check
-/// any other way. The queue can be asserted on, and <see cref="GizmoTests"/> does, but a shape
-/// that reaches the queue and is then drawn as a different shape, or as nothing, looks the same
-/// from there. An offscreen run draws them against a known background and the pixels say which
-/// happened.
+/// A gizmo call answers nothing, which makes it pleasant to write and impossible to check any other
+/// way. The queue can be asserted on, and <see cref="GizmoTests"/> does, but a shape that reaches
+/// the queue and is then drawn as a different shape, or as nothing, looks the same from there. An
+/// offscreen run draws them against a known background and the pixels say which happened.
 /// </remarks>
 [Collection("engine")]
 public sealed class GizmoShapeTests
@@ -100,9 +99,9 @@ public sealed class GizmoShapeTests
 
     /// <summary>Turning one group off leaves the other drawing.</summary>
     /// <remarks>
-    /// The grid is drawn behind the scene and the circle in front of it, so switching the group
-    /// the scene can hide takes one away and leaves the other. Configuring both at once, which is
-    /// what the call did before there was a group to name, would have taken both.
+    /// The grid is drawn behind the scene and the circle in front of it, so switching the group the
+    /// scene can hide takes one away and leaves the other. Configuring both at once, as the call
+    /// did before there was a group to name, would have taken both.
     /// </remarks>
     [Fact]
     public void OneGroupCanBeTurnedOffWithoutTheOther()

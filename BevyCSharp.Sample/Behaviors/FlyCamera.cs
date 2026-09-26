@@ -11,15 +11,13 @@ namespace BevyCSharp.Sample.Behaviors;
 /// have in their hands:
 /// </para>
 /// <list type="bullet">
-/// <item>Hold the right button to look around, and steer with W, A, S, D while it is held. Q
-/// lowers and E raises. Shift moves faster and Control slower, and the wheel sets how fast the
-/// unmodified speed is.</item>
-/// <item>Hold the middle button to slide the view sideways and up, which moves the camera rather
-/// than turning it.</item>
-/// <item>Roll the wheel on its own to move along the view direction.</item>
-/// <item>Hold Alt and the left button to swing around a point in front of the camera, which is
-/// what a scene view orbits about.</item>
-/// <item>Press F to frame the origin from wherever the camera is looking.</item>
+/// <item>Hold the right button to look around, and steer with W, A, S, D while it is held. Q lowers
+/// and E raises. Shift moves faster and Control slower, and the wheel sets how fast the unmodified
+/// speed is.</item> <item>Hold the middle button to slide the view sideways and up, which moves the
+/// camera rather than turning it.</item> <item>Roll the wheel on its own to move along the view
+/// direction.</item> <item>Hold Alt and the left button to swing around a point in front of the
+/// camera, as a scene view orbits.</item> <item>Press F to frame the origin from wherever the
+/// camera is looking.</item>
 /// </list>
 /// <para>
 /// Position and rotation are written to Bevy's own <see cref="Transform"/>, so nothing here is a
@@ -142,8 +140,8 @@ public partial struct FlyCamera
 
         if (flying)
         {
-            // The wheel sets how fast the camera flies rather than moving it, which is what
-            // stops a fly-through from being a series of overshoots in a small scene.
+            // The wheel sets how fast the camera flies rather than moving it, which stops a
+            // fly-through from being a series of overshoots in a small scene.
             if (wheel != 0f)
             {
                 Speed = Math.Clamp(Speed * MathF.Pow(1.2f, wheel), 0.05f, 500f);

@@ -91,11 +91,11 @@ public sealed class ComputedFromAttribute(Type source) : Attribute
 /// </summary>
 /// <remarks>
 /// <para>
-/// A Bevy state is a Rust type, and C# cannot define one, so the bridge provides a fixed number
-/// of state slots that each hold an integer and let the managed side decide what the numbers
-/// mean. An enum claims a slot the first time it is added, which is what keeps two unrelated
-/// state machines apart. Bevy keys its state resource and its transitions on the type, so two
-/// slots really are two independent state machines.
+/// A Bevy state is a Rust type, and C# cannot define one, so the bridge provides a fixed number of
+/// state slots that each hold an integer and let the managed side decide what the numbers mean. An
+/// enum claims a slot the first time it is added, which keeps two unrelated state machines apart.
+/// Bevy keys its state resource and its transitions on the type, so two slots really are two
+/// independent state machines.
 /// </para>
 /// <para>
 /// Slots are per app, so a second <see cref="App"/> starts the assignment over.
@@ -183,8 +183,8 @@ public static unsafe class StateRegistry
             Reset();
             if (Slots.TryGetValue(state, out var existing)) return existing;
 
-            // A sub-state takes one of the slots set aside for its parent's rather than one of
-            // its own, which is what makes the pairing the bridge is built around hold.
+            // A sub-state takes one of the slots set aside for its parent's rather than one of its
+            // own, so the pairing the bridge is built around holds.
             if (Describe(state) is { } sub)
             {
                 var parent = Claim(sub.Parent);
@@ -358,8 +358,8 @@ public static unsafe class StateRegistry
 
         // Not there is an answer rather than a failure. A sub-state whose parent is elsewhere does
         // not exist at all, and a state that claimed a slot when a behavior registered but was
-        // never added has none either. Both mean the system is not in that state, which is what
-        // the caller asked.
+        // never added has none either. Both mean the system is not in that state, which answers the
+        // caller.
         if (status == NativeStatus.NotPresent) return false;
 
         Native.Check(status, $"reading state {typeof(TState).Name}");
@@ -405,16 +405,15 @@ public static unsafe class StateRegistry
     /// Asks Bevy to move <typeparamref name="TState"/> to <paramref name="value"/>.
     /// </summary>
     /// <remarks>
-    /// Queued rather than immediate. Bevy applies it at the next transition point, which is what
-    /// lets every system in a frame agree on which state it is in rather than seeing the change
-    /// halfway through.
+    /// Queued rather than immediate. Bevy applies it at the next transition point, so every system
+    /// in a frame agrees on which state it is in rather than seeing the change halfway through.
     /// </remarks>
     public static void Set<TState>(TState value) where TState : struct, Enum =>
         Native.Check(
             Native.bcs_state_set(SlotOf<TState>(), ToInt(value)),
             $"setting state {typeof(TState).Name}");
 
-    /// <summary>The enum's underlying value, which is what the bridge stores.</summary>
+    /// <summary>The enum's underlying value, which the bridge stores.</summary>
     /// <remarks>
     /// Every slot holds an <see cref="int"/>, so an enum with a wider underlying type would be
     /// truncated. Refused rather than truncated, because the values would silently collide. A

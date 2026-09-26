@@ -406,7 +406,7 @@ public sealed class ShaderMaterialTests
     /// The fragment shader reads an input at a location Bevy's vertex shader never writes, which
     /// nothing sees until the pipeline is built. What the editor turns on, so a shader edited into
     /// a shape the pipeline rejects is something to read about and fix. The app is run on past the
-    /// error, and ending cleanly afterwards is what says it was survived.
+    /// error, and ending cleanly afterwards says it was survived.
     /// </remarks>
     [Fact]
     public void AMismatchedShaderIsSurvivedWhenAsked()
@@ -652,8 +652,8 @@ public sealed class ShaderMaterialTests
     }
 
     /// <summary>
-    /// An entity says which program draws it and hands over its values, which is what an inspector
-    /// reads, and an entity drawn by Bevy's own material says none.
+    /// An entity says which program draws it and hands over its values, which an inspector reads,
+    /// and an entity drawn by Bevy's own material says none.
     /// </summary>
     [Fact]
     public void AnEntityAnswersForItsShaderMaterial()

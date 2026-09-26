@@ -2,9 +2,9 @@
 // compute shader moves.
 //
 // The mesh is one square per firefly with its corners at the origin, so where each one is comes
-// entirely from the buffer. The glow is far brighter than white, which is what the camera's bloom
-// spreads into a halo. The material blends by adding, so it is never drawn in the prepass, and the
-// vertex and fragment shaders can hand each other a struct of their own.
+// entirely from the buffer. The glow is far brighter than white, so the camera's bloom spreads it
+// into a halo. The material blends by adding, so it is never drawn in the prepass, and the vertex
+// and fragment shaders can hand each other a struct of their own.
 
 import bcs;
 

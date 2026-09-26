@@ -165,8 +165,8 @@ public sealed class ScriptHost(App app, string directory)
     /// Invokes the generated registration in a freshly loaded assembly.
     /// </summary>
     /// <remarks>
-    /// The generator emits one tagged entry point per assembly. Finding it by attribute rather
-    /// than by name is what lets each generation carry its own copy without colliding.
+    /// The generator emits one tagged entry point per assembly. Finding it by attribute rather than
+    /// by name lets each generation carry its own copy without colliding.
     /// </remarks>
     private int Register(Assembly assembly)
     {

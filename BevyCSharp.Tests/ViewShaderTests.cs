@@ -282,8 +282,8 @@ public sealed class ViewShaderTests
 
     /// <summary>
     /// A compute shader on a camera reads the directional light's shadow the way Bevy's materials
-    /// do, which is what shading a ray's hit needs: the floor under a cube is shadowed, and the
-    /// floor away from it is not.
+    /// do, as shading a ray's hit needs. The floor under a cube is shadowed, and the floor away
+    /// from it is not.
     /// </summary>
     [Fact]
     public void AComputeShaderReadsTheSunsShadow()

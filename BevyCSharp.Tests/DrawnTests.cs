@@ -9,11 +9,11 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The rest of the suite asserts that a setting was accepted, which is what can go wrong quietly.
-/// A mesh handle that names nothing, a material the render world never hears about, a camera
-/// pointed at a target it cannot draw into: none of those show up as a failed call, and all of
-/// them show up as a picture with nothing in it. Until a run could draw without a display and hand
-/// its pixels back, that was not something a test could look at.
+/// The rest of the suite asserts that a setting was accepted, which can go wrong quietly. A mesh
+/// handle that names nothing, a material the render world never hears about, a camera pointed at a
+/// target it cannot draw into: none of those show up as a failed call, and all of them show up as a
+/// picture with nothing in it. Until a run could draw without a display and hand its pixels back,
+/// that was not something a test could look at.
 /// </para>
 /// <para>
 /// An unlit material, because a lit one is a question about the lighting rather than about whether
@@ -66,7 +66,7 @@ public sealed class DrawnTests
                 var cube = ecs.Spawn();
 
                 // Small enough at this distance to leave the corners of the picture alone, which
-                // is what makes the clear color worth asserting on.
+                // makes the clear color worth asserting on.
                 Render.SetMesh(ecs, cube, Render.CreateMesh(MeshShape.Cuboid, 2f, 2f, 2f));
                 Render.SetMaterial(ecs, cube, Render.CreateMaterial(new MaterialSettings
                 {

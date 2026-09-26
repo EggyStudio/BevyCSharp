@@ -22,8 +22,8 @@ if (size is { Length: > 0 } && size.Split('x') is [var wide, var tall]
 }
 
 // A window by default, and an image when asked for one. The editor is an app like any other, so
-// what lets a game be drawn on a machine with no display lets the editor be drawn there too, which
-// is what a build server checking the interface against a capture needs.
+// what lets a game be drawn on a machine with no display lets the editor be drawn there too, for a
+// build server checking the interface against a capture.
 var config = args.Contains("--offscreen")
     ? Config.OffscreenFor(across, down)
     : Config.Windowed("BevyCSharp Editor", across, down);

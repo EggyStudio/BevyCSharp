@@ -4,8 +4,8 @@ namespace Bevy;
 /// Draws a number as a slider between two ends.
 /// </summary>
 /// <remarks>
-/// What a field with a sensible range wants. A bar you can throw to one end is faster than a box
-/// you have to type into, and it says what the ends are without a word of documentation. A value
+/// Suits a field with a sensible range. A bar you can throw to one end is faster than a box you
+/// have to type into, and it says what the ends are without a word of documentation. A value
 /// outside the range is still shown, with the slider at the end it is past.
 /// </remarks>
 /// <param name="minimum">The low end.</param>
@@ -286,10 +286,10 @@ public sealed class WideAttribute : Attribute;
 /// Draws the parts of a value beside each other rather than one per row.
 /// </summary>
 /// <remarks>
-/// Three numbers on one line is what a position wants, because it is one value, it is read left to
-/// right, and three rows of it costs three times the height for no more information. Long numbers
-/// are cut rather than allowed to wrap, which is the trade, and a value whose numbers matter to
-/// five digits is one to leave stacked.
+/// Three numbers on one line suit a position, because it is one value, it is read left to right,
+/// and three rows of it costs three times the height for no more information. Long numbers are cut
+/// rather than allowed to wrap, which is the trade, and a value whose numbers matter to five digits
+/// is one to leave stacked.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public sealed class InlineAttribute : Attribute;
@@ -347,8 +347,8 @@ public sealed class ButtonAttribute(string label = "") : Attribute
     /// How much of the line it takes against the others on it.
     /// </summary>
     /// <remarks>
-    /// One each is even. Two against one is twice as wide, which is what a line reading Apply,
-    /// Cancel wants, since they are not the same size decision.
+    /// One each is even. Two against one is twice as wide, which suits a line reading Apply,
+    /// Cancel, since they are not the same size decision.
     /// </remarks>
     public double Weight { get; init; } = 1d;
 }

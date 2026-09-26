@@ -15,8 +15,8 @@ namespace Bevy.Tests;
 /// </para>
 /// <para>
 /// An exception thrown inside a system cannot unwind into Rust, so the engine catches it. The
-/// harness re-raises it here instead, which is what makes a failing assertion inside a system
-/// show up as a failing test rather than a line on stderr.
+/// harness re-raises it here instead, so a failing assertion inside a system shows up as a failing
+/// test rather than a line on stderr.
 /// </para>
 /// </remarks>
 public sealed class EngineHarness : IDisposable
@@ -57,8 +57,8 @@ public sealed class EngineHarness : IDisposable
     /// </param>
     /// <param name="fixedHz">
     /// Rate for <see cref="Stage.FixedUpdate"/>, or 0 for Bevy's default of 64. A test about the
-    /// fixed timestep sets this far above or below the frame rate, because that is what makes
-    /// the two visibly independent.
+    /// fixed timestep sets this far above or below the frame rate, because that makes the two
+    /// visibly independent.
     /// </param>
     public EngineHarness(
         uint frames = 4,

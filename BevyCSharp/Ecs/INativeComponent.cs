@@ -18,8 +18,8 @@ namespace Bevy;
 /// foreach (var row in ctx.Ecs.Query&lt;Transform&gt;()) { }
 /// </code>
 /// <para>
-/// Implement it explicitly, so the members stay off the value's own surface. They answer a
-/// question about the type, and nothing that holds one of these values wants to see them.
+/// Implement it explicitly, so the members stay off the value's own surface. They answer a question
+/// about the type, and nothing that holds one of these values needs to see them.
 /// </para>
 /// </remarks>
 /// <example>

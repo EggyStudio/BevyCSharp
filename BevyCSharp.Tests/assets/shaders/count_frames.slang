@@ -1,5 +1,5 @@
-// Counts the frames each pixel has been seen, in an image the camera keeps with its history, so
-// what it wrote last frame is what it adds one to this frame.
+// Counts the frames each pixel has been seen, in an image the camera keeps with its history, so it
+// adds one this frame to what it wrote last frame.
 
 import bcs_pass;
 

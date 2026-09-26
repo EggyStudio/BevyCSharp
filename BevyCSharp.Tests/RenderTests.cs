@@ -8,10 +8,10 @@ namespace Bevy.Tests;
 /// Covers building renderable assets and attaching them to entities.
 /// </summary>
 /// <remarks>
-/// These need a native build with the renderer compiled in. On a headless bridge, which is what
-/// CI uses for the test job, the assertions flip to checking that each call refuses cleanly and
-/// says which build would support it. Both outcomes are worth pinning, and silently doing nothing
-/// would be the bad one.
+/// These need a native build with the renderer compiled in. On a headless bridge, which CI uses for
+/// the test job, the assertions flip to checking that each call refuses cleanly and says which
+/// build would support it. Both outcomes are worth pinning, and silently doing nothing would be the
+/// bad one.
 /// </remarks>
 [Collection("engine")]
 public sealed class RenderTests

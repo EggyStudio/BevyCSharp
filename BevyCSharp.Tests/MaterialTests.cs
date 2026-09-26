@@ -19,9 +19,9 @@ public sealed class MaterialTests
 
     /// <summary>What an entity is drawn with can be asked about by where it came from.</summary>
     /// <remarks>
-    /// A mesh and a material are Bevy's own components holding typed handles, which nothing on
-    /// this side can read the way it reads a component of its own. The path is what is left, and
-    /// the two cases worth pinning are an asset with one and an asset without.
+    /// A mesh and a material are Bevy's own components holding typed handles, which nothing on this
+    /// side can read the way it reads a component of its own. The path is what remains, and the two
+    /// cases worth pinning are an asset with one and an asset without.
     /// </remarks>
     [Fact]
     public void WhatAnEntityIsDrawnWithIsAskedAboutByItsPath()
@@ -60,9 +60,10 @@ public sealed class MaterialTests
     [Fact]
     public void TheHarnessLooksForAssetsWhereTheyWereCopied()
     {
-        // Every asset test fails obscurely if this is wrong, and it is wrong under any host that
-        // is not the assembly's own directory, which is what a test runner usually is. Asserting
-        // the path directly turns that into one clear failure instead of five confusing ones.
+        // Every asset test fails obscurely if this is wrong, and it is wrong under any host running
+        // from somewhere other than the assembly's own directory, as a test runner usually does.
+        // Asserting the path directly turns that into one clear failure instead of five confusing
+        // ones.
         Assert.True(
             Directory.Exists(EngineHarness.AssetDirectory),
             $"no assets directory at {EngineHarness.AssetDirectory}");
@@ -83,10 +84,10 @@ public sealed class MaterialTests
             var image = AssetServer.Load(AssetKind.Image, Texture);
             AssetServer.Release(image);
 
-            // A released handle keeps its key, so this is what a use-after-release looks like
-            // from the bridge's side. Drawing untextured and reporting success would leave the
-            // caller with a wrong picture and nothing to go on, which is why every other call
-            // taking an asset key refuses one that names nothing.
+            // A released handle keeps its key, so this shows a use-after-release from the bridge's
+            // side. Drawing untextured and reporting success would leave the caller with a wrong
+            // picture and nothing to go on, which is why every other call taking an asset key
+            // refuses one that names nothing.
             var stale = Assert.Throws<BevyNativeException>(() => Render.CreateMaterial(
                 new MaterialSettings { BaseColorTexture = image }));
 

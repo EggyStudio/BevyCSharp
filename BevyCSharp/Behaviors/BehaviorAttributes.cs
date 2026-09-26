@@ -287,15 +287,14 @@ public sealed class RunIfAttribute : Attribute
 /// </summary>
 /// <remarks>
 /// <para>
-/// Each press of the shortcut flips the state, which lives in
-/// <see cref="SystemToggleRegistry"/>. This is what debug overlays want: one attribute instead
-/// of a resource, a run condition and a key handler.
+/// Each press of the shortcut flips the state, which lives in <see cref="SystemToggleRegistry"/>.
+/// Debug overlays use this, one attribute instead of a resource, a run condition and a key handler.
 /// </para>
 /// <para>
-/// <see cref="KeyModifier"/> is a flags enum, so a shortcut can require any number of modifiers
-/// at once. Each flag is side-agnostic, which is what a shortcut normally means; to pin one
-/// side, or to build a chord out of an ordinary key, write the check yourself with
-/// <see cref="Input.AllKeysDown"/> behind a <see cref="RunIfAttribute"/>.
+/// <see cref="KeyModifier"/> is a flags enum, so a shortcut can require any number of modifiers at
+/// once. Each flag is side-agnostic, as a shortcut normally is; to pin one side, or to build a
+/// chord out of an ordinary key, write the check yourself with <see cref="Input.AllKeysDown"/>
+/// behind a <see cref="RunIfAttribute"/>.
 /// </para>
 /// </remarks>
 /// <example>

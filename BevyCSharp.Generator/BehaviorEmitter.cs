@@ -92,9 +92,9 @@ internal static class BehaviorEmitter
                 source.Append("\n            .RunIf(").Append(ConditionExpression(model, condition)).Append(')');
             }
 
-            // Access metadata: an instance method writes its own component store, a static one
-            // only declares a read of the world. Keeping these distinct is what lets unrelated
-            // behaviors be reported as non-conflicting.
+            // Access metadata: an instance method writes its own component store, a static one only
+            // declares a read of the world. Keeping these distinct lets unrelated behaviors be
+            // reported as non-conflicting.
             source.Append(method.IsStatic
                 ? "\n            .Read<global::Bevy.EcsWorld>()"
                 : $"\n            .Write<{model.QualifiedName}>()");

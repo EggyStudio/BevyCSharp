@@ -90,8 +90,8 @@ internal static class SchemaEmitter
 
         EmitMethods(source, model);
 
-        // Adding writes a default value, which for a blittable struct is its zeroed bytes, and
-        // that is what a component the person just asked for should start as.
+        // Adding writes a default value, which for a blittable struct is its zeroed bytes, and a
+        // component the person just asked for should start as that.
         source.Append("            add: static (world, entity) =>\n")
             .Append("                world.Add(entity, default(").Append(model.QualifiedName)
             .Append(")),\n")
@@ -102,7 +102,7 @@ internal static class SchemaEmitter
     /// <summary>Emits the list of methods a tool can offer as buttons.</summary>
     /// <remarks>
     /// Read, call, write back. The method may change the component, and going through the ordinary
-    /// value API rather than a reference into storage is what makes Bevy see that it did.
+    /// value API rather than a reference into storage makes Bevy see that it did.
     /// </remarks>
     private static void EmitMethods(StringBuilder source, BehaviorModel model)
     {
@@ -140,14 +140,14 @@ internal static class SchemaEmitter
             .Append("                    \"").Append(field.Name).Append("\",\n")
             .Append("                    global::Bevy.FieldKind.").Append(field.Kind).Append(",\n")
             .Append("                    \"").Append(Display(field.Type)).Append("\",\n")
-            // Read: absent component reads as null, which is what a tool draws as a blank row
-            // rather than as a zero it might then write back.
+            // Read: absent component reads as null, which a tool draws as a blank row rather than
+            // as a zero it might then write back.
             .Append("                    static (world, entity) =>\n")
             .Append("                        world.TryGet<").Append(model.QualifiedName)
             .Append(">(entity, out var component) ? component.").Append(field.Name)
             .Append(" : null")
             // Write: read, modify, write back. Going through Set rather than a reference into
-            // storage is what makes Bevy see the change.
+            // storage makes Bevy see the change.
             .Append(Writer(model, field));
 
         var hints = field.Hints.IsEmpty ? null : field.Hints;

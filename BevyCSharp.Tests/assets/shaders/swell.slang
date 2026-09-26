@@ -1,8 +1,8 @@
 // Pushes the mesh out along its normals by `swell`, in both passes, and paints it `color`.
 //
-// The main pass draws the swollen shape and the prepass draws the same one, so the shadow it
-// casts is the shadow of what is on screen. A program without the prepass entry casts the shadow
-// of the mesh it started as, which is what the test compares.
+// The main pass draws the swollen shape and the prepass draws the same one, so the shadow it casts
+// is the shadow of what is on screen. A program without the prepass entry casts the shadow of the
+// mesh it started as, which the test compares.
 
 import bcs;
 

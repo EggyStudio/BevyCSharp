@@ -177,7 +177,7 @@ internal static class ConsoleWorldCommands
     /// Presses and releases at a point.
     /// </summary>
     /// <remarks>
-    /// Both halves in one frame, which is what a click is for an interface that reads the button's
+    /// Both halves in one frame, which makes a click for an interface that reads the button's
     /// state. Something that matches a release to the press that landed on it, such as picking a
     /// mesh, needs the two on separate frames, so it gets <c>input.press</c> and
     /// <c>input.release</c> instead.
@@ -377,8 +377,8 @@ internal static class ConsoleWorldCommands
     /// </summary>
     /// <remarks>
     /// Bevy reports its own components by a Rust path with a generic argument on the end, and a
-    /// listing of those in full is a screenful per entity. The type's own name is what somebody is
-    /// scanning for.
+    /// listing of those in full is a screenful per entity. Somebody is scanning for the type's own
+    /// name.
     /// </remarks>
     private static string Short(string name)
     {
@@ -414,8 +414,8 @@ internal static class ConsoleWorldCommands
     /// A word read into whatever the field already holds, or nothing when it will not go.
     /// </summary>
     /// <remarks>
-    /// The current value is what says what the field is, because nothing else on this side knows.
-    /// The schema describes a field's kind for an inspector to draw, and a kind is not a type.
+    /// The current value says what the field is, because nothing else on this side knows. The
+    /// schema describes a field's kind for an inspector to draw, and a kind is not a type.
     /// </remarks>
     private static object? Parse(string value, object? current) => current switch
     {

@@ -62,9 +62,9 @@ public sealed class AssetTests
         {
             var handle = AssetServer.Load(AssetKind.Mesh, "models/nothing-here.gltf");
 
-            // The path is what the handle was asked for, whether or not the file is there, because
-            // a tool showing what a field points at has to be able to say so before the load
-            // finishes, and has to say something truthful when it never does.
+            // The path is the one the handle was asked for, whether or not the file is there,
+            // because a tool showing what a field points at has to be able to say so before the
+            // load finishes, and has to say something truthful when it never does.
             Assert.Equal("models/nothing-here.gltf", AssetServer.PathOf(handle));
             Assert.Null(AssetServer.PathOf(AssetHandle.None));
         });

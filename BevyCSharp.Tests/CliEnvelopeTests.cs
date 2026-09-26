@@ -10,7 +10,7 @@ namespace Bevy.Tests;
 /// <remarks>
 /// The fields and the codes are the contract. A sentence can be reworded at any time and a payload
 /// can grow, but a caller that branches on <c>success</c> and reads <c>errors[0].code</c> has to
-/// keep working, so those are what is asserted here.
+/// keep working, so this asserts those.
 /// </remarks>
 public sealed class CliEnvelopeTests
 {

@@ -86,7 +86,7 @@ public partial struct Renderer
     /// <summary>Echoes typed text, which is the layout's answer rather than the hardware's.</summary>
     /// <remarks>
     /// Type with a non-US layout or use a dead key and this shows the character the user meant,
-    /// which is what a name field needs and what a key bitset cannot give.
+    /// which a name field needs and a key bitset cannot give.
     /// </remarks>
     [OnUpdate]
     public static void EchoTyping(BehaviorContext ctx)

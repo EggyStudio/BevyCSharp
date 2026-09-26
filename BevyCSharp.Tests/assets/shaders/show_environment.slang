@@ -1,5 +1,5 @@
 // A pass that paints what the camera's environment map sends along each pixel's ray, at the
-// camera's exposure, which is what a skybox drawn from the same cubemap shows there.
+// camera's exposure, as a skybox drawn from the same cubemap shows there.
 
 import bcs_pass;
 

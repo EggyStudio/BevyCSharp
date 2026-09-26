@@ -194,9 +194,9 @@ public sealed class NativeComponentTests
     [Fact]
     public void ParentTransformsPropagateToChildren()
     {
-        // This is what makes hierarchy worth having, and it only works because the headless app
-        // installs TransformPlugin. MinimalPlugins leaves it out, which would make Transform
-        // inert data and GlobalTransform never follow anything.
+        // This makes hierarchy worth having, and it only works because the headless app installs
+        // TransformPlugin. MinimalPlugins leaves it out, which would make Transform inert data and
+        // GlobalTransform never follow anything.
         using var harness = new EngineHarness(frames: 4);
         var parentHasGlobal = false;
         var childHasGlobal = false;
@@ -480,6 +480,6 @@ public sealed class NativeComponentTests
         harness.Run();
     }
 
-    /// <summary>Tags the one entity a test wants to read back.</summary>
+    /// <summary>Tags the one entity a test reads back.</summary>
     private struct Marker;
 }

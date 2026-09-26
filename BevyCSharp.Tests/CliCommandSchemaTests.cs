@@ -7,8 +7,8 @@ namespace Bevy.Tests;
 /// Covers what the generator says a command takes.
 /// </summary>
 /// <remarks>
-/// The schema is what lets something that has never seen a command compose a call to it, which is
-/// the difference between a command line a person reads the source to use and one a program can
+/// The schema lets something that has never seen a command compose a call to it, which is the
+/// difference between a command line a person reads the source to use and one a program can
 /// discover. The usage string is for a person; this is the same thing for a caller.
 /// </remarks>
 public sealed class CliCommandSchemaTests

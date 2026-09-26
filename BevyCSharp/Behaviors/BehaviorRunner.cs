@@ -20,11 +20,10 @@ public delegate void BehaviorRunner<T>(ref T component, Entity entity, BehaviorC
 /// </summary>
 /// <remarks>
 /// <para>
-/// This is what the generated code calls. Keeping the iteration here rather than emitting it
-/// per behavior means the pointer arithmetic, the parallel partitioning and the filtering
-/// rules are written once, live in a project that has already opted into unsafe code, and can
-/// be fixed without regenerating anything. The generated runner stays a handful of readable,
-/// safe lines.
+/// The generated code calls this. Keeping the iteration here rather than emitting it per behavior
+/// means the pointer arithmetic, the parallel partitioning and the filtering rules are written
+/// once, live in a project that has already opted into unsafe code, and can be fixed without
+/// regenerating anything. The generated runner stays a handful of readable, safe lines.
 /// </para>
 /// </remarks>
 public static class BehaviorRunners

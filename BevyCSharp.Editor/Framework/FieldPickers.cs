@@ -111,10 +111,10 @@ internal static class FieldPickers
         {
             var on = chosen.Contains(option);
 
-            // The name of the flag is part of the identifier, not only of the label. What ImGui
-            // hashes is what follows the two hashes, so every box in a set of flags sharing the
-            // field's id is a set of boxes ImGui cannot tell apart. It says so, in a window that
-            // takes the keyboard with it.
+            // The name of the flag is part of the identifier, not only of the label. ImGui hashes
+            // only what follows the two hashes, so every box in a set of flags sharing the field's
+            // id is a set of boxes ImGui cannot tell apart. It says so, in a window that takes the
+            // keyboard with it.
             if (EditorWidgets.Ticked($"{option}##{id}.{option}", ref on))
             {
                 if (on) chosen.Add(option);

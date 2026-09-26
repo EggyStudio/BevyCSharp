@@ -12,8 +12,8 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// Everything ECS-touching is ambient on the world Bevy lends the running system, so a command is
-/// only ever run from inside one. <see cref="Lend"/> is what says so, and <see cref="Ecs"/> refuses
-/// rather than returning something dead when it was called from anywhere else.
+/// only ever run from inside one. <see cref="Lend"/> says so, and <see cref="Ecs"/> refuses rather
+/// than returning something dead when it was called from anywhere else.
 /// </para>
 /// </remarks>
 public static class ConsoleHost
@@ -35,7 +35,7 @@ public static class ConsoleHost
             "This command touches the world, so it can only run inside a system. The console runs "
             + "commands from a system; something else ran this one from outside the frame.");
 
-    /// <summary>The clock, for a command that wants to say when it is.</summary>
+    /// <summary>The clock, for a command that says when it is.</summary>
     /// <exception cref="InvalidOperationException">Called from outside a running system.</exception>
     public static Time Time =>
         World?.Resource<Time>()

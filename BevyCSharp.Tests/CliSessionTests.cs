@@ -62,7 +62,7 @@ public sealed class CliSessionTests : IDisposable
     /// </summary>
     /// <remarks>
     /// The usual reason a port refuses a connection: the app died without the chance to tidy up,
-    /// and what it left behind still says "ready". Reading the process is what settles it.
+    /// and what it left behind still says "ready". Reading the process settles it.
     /// </remarks>
     [Fact]
     public void AFileWithoutAProcessIsGone()

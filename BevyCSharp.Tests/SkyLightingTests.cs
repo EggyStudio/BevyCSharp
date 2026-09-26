@@ -9,9 +9,9 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// The side of a surface a lamp does not reach is black in a scene lit only by lamps, and is the
-/// color of the sky in one lit by the sky as well. That difference is what this asserts, because
-/// an environment map that is accepted and never generated looks exactly like one that worked
-/// until something is in shadow.
+/// color of the sky in one lit by the sky as well. This asserts that difference, because an
+/// environment map that is accepted and never generated looks exactly like one that worked until
+/// something is in shadow.
 /// </remarks>
 [Collection("engine")]
 public sealed class SkyLightingTests

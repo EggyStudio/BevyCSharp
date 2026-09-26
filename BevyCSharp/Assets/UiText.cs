@@ -39,7 +39,7 @@ public enum TextJustify
 /// </remarks>
 public enum TextWrap
 {
-    /// <summary>At spaces and the like, keeping words whole. What prose wants.</summary>
+    /// <summary>At spaces and the like, keeping words whole. Suits prose.</summary>
     WordBoundary = 0,
 
     /// <summary>Anywhere at all, which is how a terminal breaks lines.</summary>
@@ -100,10 +100,10 @@ public sealed class UiTextSettings
     /// How much room is added between the letters, or zero for the fit the font asks for.
     /// </summary>
     /// <remarks>
-    /// What a heading tracked out wants, and what a line of small capitals needs to stay legible.
-    /// Read as a multiple of the font size unless <see cref="LetterSpacingInPixels"/> says
-    /// otherwise, so the useful numbers are small. Negative pulls the letters together, which a
-    /// display face set large can take and body text cannot.
+    /// Suits a heading tracked out, and keeps a line of small capitals legible. Read as a multiple
+    /// of the font size unless <see cref="LetterSpacingInPixels"/> says otherwise, so the useful
+    /// numbers are small. Negative pulls the letters together, which a display face set large can
+    /// take and body text cannot.
     /// </remarks>
     public float LetterSpacing { get; set; }
 
@@ -114,8 +114,8 @@ public sealed class UiTextSettings
     /// Whether the glyphs are smoothed at their edges.
     /// </summary>
     /// <remarks>
-    /// Off is what a pixel font wants, because smoothing a font drawn to land on whole pixels is
-    /// what makes it look blurred rather than sharp.
+    /// Turn it off for a pixel font, because smoothing a font drawn to land on whole pixels makes
+    /// it look blurred rather than sharp.
     /// </remarks>
     public bool Smooth { get; set; } = true;
 

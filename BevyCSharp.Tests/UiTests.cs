@@ -42,7 +42,7 @@ public sealed class UiTests
 
             label = Ui.SpawnText("Score: 0", new UiSettings { Color = (1f, 1f, 1f, 1f) }, 24f);
 
-            // Nesting is what lays a screen out, and it is the ECS parenting that already exists.
+            // Nesting lays a screen out, and it is the ECS parenting that already exists.
             ctx.Ecs.SetParent(label, panel);
         });
 
@@ -108,8 +108,8 @@ public sealed class UiTests
     public void ALaidOutNodeTakesEveryFieldTheLayoutHas()
     {
         // Whether the screen looks right needs a window and an eye; the sample is where that is
-        // confirmed. What is checked here is that a fully described node is accepted and comes
-        // back as an ordinary parented entity, which is what would break silently.
+        // confirmed. This checks that a fully described node is accepted and comes back as an
+        // ordinary parented entity, which would break silently.
         using var harness = new EngineHarness(frames: 3);
         if (!App.HasRenderer) return;
 
@@ -578,8 +578,8 @@ public sealed class UiTests
 
         Assert.Equal("(8px, 0px, 8px, 0px)", Sides.Horizontal(Length.Px(8f)).ToString());
 
-        // Zero and Auto are not the same distance. An automatic margin takes the space the
-        // parent has left over, which is what centers a child, and a zero one leaves it.
+        // Zero and Auto are not the same distance. An automatic margin takes the space the parent
+        // has left over, which centers a child, and a zero one leaves it.
         Assert.NotEqual(Length.Auto, Length.Zero);
     }
 
@@ -599,7 +599,7 @@ public sealed class UiTests
     /// <remarks>
     /// The same layout asset a sprite is cut by, so a sheet of icons serves the interface without
     /// being cut a second way. A layout naming nothing is refused rather than drawing the whole
-    /// sheet, which is what would otherwise appear in a 32-pixel box.
+    /// sheet, which would otherwise appear in a 32-pixel box.
     /// </remarks>
     [Fact]
     public void AnIconCanBeOneFrameOfASheet()

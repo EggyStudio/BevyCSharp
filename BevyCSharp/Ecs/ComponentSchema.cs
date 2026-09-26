@@ -75,7 +75,7 @@ public sealed class ComponentField
     private readonly Func<EcsWorld, Entity, object, bool>? _write;
 
     /// <summary>Describes one field.</summary>
-    /// <param name="name">The field's name, which is what a tool labels its row with.</param>
+    /// <param name="name">The field's name, which a tool labels its row with.</param>
     /// <param name="kind">How to draw and edit it.</param>
     /// <param name="type">The declared type, shown when there is no editor for it.</param>
     /// <param name="read">Reads the field from an entity, or <see langword="null"/> when absent.</param>
@@ -178,7 +178,7 @@ public sealed class ComponentField
 /// <summary>
 /// One thing a component can be told to do.
 /// </summary>
-/// <param name="Name">The method's name, which is what the button says.</param>
+/// <param name="Name">The method's name, which the button shows.</param>
 /// <param name="Run">Calls it on an entity's copy of the component and writes the result back.</param>
 /// <remarks>
 /// A method with no arguments on a component struct. Anything else has no obvious button, because
@@ -198,8 +198,8 @@ public sealed record ComponentMethod(string Name, Action<EcsWorld, Entity> Run)
 /// The fields of one component type, and the id the engine knows it by.
 /// </summary>
 /// <remarks>
-/// This is what turns <see cref="EcsWorld.ComponentsOf"/>, which answers in ids, into something
-/// an inspector can draw. The generator emits one of these per <c>[Behavior]</c> struct that has
+/// This turns <see cref="EcsWorld.ComponentsOf"/>, which answers in ids, into something an
+/// inspector can draw. The generator emits one of these per <c>[Behavior]</c> struct that has
 /// fields; a handful of Bevy's own components are described by hand, because a general answer for
 /// those would need a byte-compatible mirror on this side and that is written per type anyway.
 /// </remarks>
@@ -211,8 +211,8 @@ public sealed class ComponentSchema
     private readonly Action<EcsWorld, Entity>? _remove;
 
     /// <summary>Describes one component type.</summary>
-    /// <param name="name">The short name, which is what a tool puts on the header.</param>
-    /// <param name="qualifiedName">The full name, which is what the engine reports for it.</param>
+    /// <param name="name">The short name, which a tool puts on the header.</param>
+    /// <param name="qualifiedName">The full name, as the engine reports it.</param>
     /// <param name="id">Resolves the engine's component id, registering the type if needed.</param>
     /// <param name="fields">The fields, in declaration order.</param>
     /// <param name="methods">What the component can be told to do, if anything.</param>
@@ -358,9 +358,9 @@ public static class ComponentSchemas
 
     /// <summary>The schema for a component's full name, or <see langword="null"/>.</summary>
     /// <remarks>
-    /// The name route needs no world, which is what a tool listing what it could show before an
-    /// app exists has to use. It also matches on the short name, because Bevy reports its own
-    /// components by a path this side does not share.
+    /// The name route needs no world, so a tool listing what it could show before an app exists has
+    /// to use it. It also matches on the short name, because Bevy reports its own components by a
+    /// path this side does not share.
     /// </remarks>
     public static ComponentSchema? For(string name)
     {
@@ -463,8 +463,8 @@ public static class ComponentSchemas
 
     /// <summary>Builds a field description from a typed getter and setter.</summary>
     /// <remarks>
-    /// Written once here rather than at each call site, so the read-modify-write shape, which is
-    /// what makes Bevy's change detection fire, is stated in a single place.
+    /// Written once here rather than at each call site, so the read-modify-write shape, which makes
+    /// Bevy's change detection fire, is stated in a single place.
     /// </remarks>
     private static ComponentField Mirror<TComponent, TField>(
         string name,

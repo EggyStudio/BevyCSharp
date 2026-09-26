@@ -4,13 +4,13 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// The editor's tables, which are what makes it extensible rather than editable.
+/// The editor's tables, which make it extensible rather than editable.
 /// </summary>
 /// <remarks>
 /// The menu, the toolbar, the kinds an entity can be and the pages of settings are all lists of
 /// records with an order and a lookup. None of them needs a window, none of them draws anything,
-/// and all of them are what a game touches when it adds something of its own, so they are the
-/// part of the editor worth a test rather than a screenshot.
+/// and a game touches all of them when it adds something of its own, so they are the part of the
+/// editor worth a test rather than a screenshot.
 /// </remarks>
 public sealed class EditorTableTests
 {

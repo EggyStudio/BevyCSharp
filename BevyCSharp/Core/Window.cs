@@ -17,7 +17,7 @@ public enum WindowMode
     /// <remarks>
     /// Lets the display driver hand the window the screen outright, which can be worth a frame of
     /// latency. It also makes alt-tabbing heavier, because the compositor has to take the screen
-    /// back. <see cref="BorderlessFullscreen"/> is what most desktop games want.
+    /// back. Most desktop games use <see cref="BorderlessFullscreen"/>.
     /// </remarks>
     Fullscreen = 2,
 }
@@ -45,10 +45,10 @@ public readonly record struct MonitorInfo(
 /// One video mode a monitor can be driven at.
 /// </summary>
 /// <remarks>
-/// A resolution, a color depth and a refresh rate together, which is what exclusive fullscreen
-/// takes the screen over with. A monitor offers a fixed list of these and can be driven at no
-/// others, so a settings screen offers what <see cref="Window.MonitorModes"/> returns rather than a
-/// pair of number boxes.
+/// A resolution, a color depth and a refresh rate together, which exclusive fullscreen takes the
+/// screen over with. A monitor offers a fixed list of these and can be driven at no others, so a
+/// settings screen offers what <see cref="Window.MonitorModes"/> returns rather than a pair of
+/// number boxes.
 /// </remarks>
 /// <param name="Width">Width in physical pixels.</param>
 /// <param name="Height">Height in physical pixels.</param>
@@ -119,8 +119,8 @@ public static unsafe class Window
     /// How many physical pixels a logical one is.
     /// </summary>
     /// <remarks>
-    /// Everything a window reports is in logical pixels, so this is what turns one into what the
-    /// framebuffer is divided into: a viewport, a scissor rectangle, a screenshot.
+    /// Everything a window reports is in logical pixels, so this turns one into the units the
+    /// framebuffer is divided into, such as a viewport, a scissor rectangle or a screenshot.
     /// </remarks>
     public static float Scale()
     {
@@ -190,7 +190,7 @@ public static unsafe class Window
     /// </summary>
     /// <remarks>
     /// What a settings menu shows next to each screen. Empty when the platform names the monitor
-    /// nothing, which happens often enough that a menu wants a fallback such as the index and the
+    /// nothing, which happens often enough that a menu needs a fallback such as the index and the
     /// resolution.
     /// </remarks>
     /// <exception cref="BevyNativeException">There is no monitor at that index.</exception>
@@ -253,8 +253,8 @@ public static unsafe class Window
     /// <remarks>
     /// <para>
     /// <see cref="SetMode"/> with <see cref="WindowMode.Fullscreen"/> takes the mode the monitor is
-    /// already in, which is what avoids a switch the compositor has to undo on every alt-tab. This
-    /// is the other case, where a game runs at a resolution the desktop is not in.
+    /// already in, which avoids a switch the compositor has to undo on every alt-tab. This is the
+    /// other case, where a game runs at a resolution the desktop is not in.
     /// </para>
     /// <para>
     /// The mode is named by its place in <see cref="MonitorModes"/> rather than by numbers, because
@@ -281,9 +281,9 @@ public static unsafe class Window
     /// </summary>
     /// <remarks>
     /// <para>
-    /// <see cref="CursorGrab.Locked"/> is what a first-person camera needs, because it reads how
-    /// far the mouse moved rather than where it is, and a free cursor stops moving at the edge of
-    /// the screen.
+    /// A first-person camera needs <see cref="CursorGrab.Locked"/>, because it reads how far the
+    /// mouse moved rather than where it is, and a free cursor stops moving at the edge of the
+    /// screen.
     /// </para>
     /// <para>
     /// Platforms differ in which grab they support. Windows confines and macOS locks, and each

@@ -1,5 +1,5 @@
-// Paints green once time has started, from Bevy's globals, and red before, which is what says the
-// prelude's view of the globals lines up with what Bevy binds.
+// Paints green once time has started, from Bevy's globals, and red before, which says the prelude's
+// view of the globals lines up with what Bevy binds.
 
 import bcs;
 

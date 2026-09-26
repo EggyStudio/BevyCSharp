@@ -79,7 +79,7 @@ public partial struct Gravity
     /// <para>
     /// Acceleration is where a per-frame step shows up worst, because integrating gravity with a
     /// delta that varies gives a different fall on every machine, and a slow frame overshoots the
-    /// floor. The fixed timestep is what makes the answer the same everywhere.
+    /// floor. The fixed timestep makes the answer the same everywhere.
     /// </para>
     /// </remarks>
     [OnFixedUpdate]

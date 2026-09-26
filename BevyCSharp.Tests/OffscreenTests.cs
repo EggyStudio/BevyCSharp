@@ -14,8 +14,8 @@ namespace Bevy.Tests;
 /// cannot otherwise ask: was anything actually drawn.
 /// </para>
 /// <para>
-/// Skipped on a bridge with no renderer, which is what the test workflow builds, so this runs
-/// where there is something to run and is quiet where there is not.
+/// Skipped on a bridge with no renderer, which the test workflow builds, so this runs where there
+/// is something to run and is quiet where there is not.
 /// </para>
 /// </remarks>
 [Collection("engine")]

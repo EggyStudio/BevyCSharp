@@ -22,13 +22,13 @@ public readonly record struct FieldCondition(string Field, string? Value = null,
 /// <remarks>
 /// <para>
 /// A record rather than a list of attributes to reflect over. The generator has already read the
-/// attributes at compile time, and what a tool wants at runtime is the answers, not the questions:
-/// a drawer asks whether there is a range and gets two numbers or nothing.
+/// attributes at compile time, and a tool needs the answers at runtime, not the questions. A drawer
+/// asks whether there is a range and gets two numbers or nothing.
 /// </para>
 /// <para>
-/// Anything that reads these is free to ignore what it does not understand, and a drawer written
-/// by a game can put its own meaning on the same hints. What is here is what the editor knows how
-/// to honor; a field with none of them is drawn the plain way.
+/// Anything that reads these is free to ignore what it does not understand, and a drawer written by
+/// a game can put its own meaning on the same hints. This holds what the editor knows how to honor;
+/// a field with none of them is drawn the plain way.
 /// </para>
 /// </remarks>
 /// <param name="Label">What to call the field, or nothing for its own name.</param>

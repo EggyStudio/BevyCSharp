@@ -113,7 +113,7 @@ public struct Vec3 : IEquatable<Vec3>
 /// </summary>
 /// <remarks>
 /// Sixteen bytes of X, Y, Z, W. Bevy's is SIMD-backed on most targets and therefore sixteen-byte
-/// aligned, which is what pads <see cref="Transform"/> out past the size its fields suggest.
+/// aligned, which pads <see cref="Transform"/> out past the size its fields suggest.
 /// </remarks>
 [StructLayout(LayoutKind.Sequential)]
 public struct Quat : IEquatable<Quat>
@@ -220,9 +220,8 @@ public struct Quat : IEquatable<Quat>
     /// </summary>
     /// <remarks>
     /// The conjugate, which is the inverse for a rotation, since a rotation is a unit quaternion.
-    /// What it is for is asking how one orientation differs from another: <c>b * a.Conjugate</c>
-    /// is the turn that takes <c>a</c> to <c>b</c>, which is what applying somebody's drag to a
-    /// second thing needs.
+    /// It answers how one orientation differs from another. <c>b * a.Conjugate</c> is the turn that
+    /// takes <c>a</c> to <c>b</c>, which applying somebody's drag to a second thing needs.
     /// </remarks>
     public Quat Conjugate => new(-X, -Y, -Z, W);
 
@@ -245,16 +244,16 @@ public struct Quat : IEquatable<Quat>
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Y outermost, which is what an editor wants and why every editor does it. One of the three
-    /// angles has to be the middle one, and a middle angle only spans half a turn. Past a quarter
-    /// turn its neighbors have to jump to a half turn to describe the rest. Standing that angle
-    /// up is the difference between a thing spinning on the spot reading 0, 120, 240 and reading
-    /// 180, 60, 180, which is the same rotation and unreadable.
+    /// Y outermost, as an editor needs and every editor does. One of the three angles has to be the
+    /// middle one, and a middle angle only spans half a turn. Past a quarter turn its neighbors
+    /// have to jump to a half turn to describe the rest. Standing that angle up is the difference
+    /// between a thing spinning on the spot reading 0, 120, 240 and reading 180, 60, 180, which is
+    /// the same rotation and unreadable.
     /// </para>
     /// <para>
-    /// So Y, which is what a thing standing on the ground turns about, gets the full circle, and X
-    /// is the one clamped to a quarter turn either way, which is where looking straight up or down
-    /// is and where the other two stop being separable. <see cref="ToEuler"/> is the inverse.
+    /// So Y, which a thing standing on the ground turns about, gets the full circle, and X is the
+    /// one clamped to a quarter turn either way, which is where looking straight up or down is and
+    /// where the other two stop being separable. <see cref="ToEuler"/> is the inverse.
     /// </para>
     /// </remarks>
     public static Quat FromEuler(float x, float y, float z) =>
@@ -347,12 +346,12 @@ public struct Transform : INativeComponent
     public Vec3 Scale;
 
     /// <summary>
-    /// The engine's name for this component, which is what makes the ordinary generic API land on
-    /// Bevy's own <c>Transform</c> rather than register a second one that merely shares the name.
+    /// The engine's name for this component, which makes the ordinary generic API land on Bevy's
+    /// own <c>Transform</c> rather than register a second one that merely shares the name.
     /// </summary>
     /// <remarks>
     /// Implemented explicitly, because it answers a question about the type and nothing holding a
-    /// transform wants it on the value's surface.
+    /// transform needs it on the value's surface.
     /// </remarks>
     readonly string INativeComponent.NativeName => "Transform";
 
@@ -409,9 +408,9 @@ public struct Transform : INativeComponent
     /// <paramref name="target"/>.
     /// </summary>
     /// <remarks>
-    /// Forward is negative Z, matching Bevy's convention, so this is what aims a camera or a
-    /// directional light. The maths is done here rather than in the engine because it needs no
-    /// world state, and a call across the boundary for arithmetic would be waste.
+    /// Forward is negative Z, matching Bevy's convention, so this aims a camera or a directional
+    /// light. The maths is done here rather than in the engine because it needs no world state, and
+    /// a call across the boundary for arithmetic would be waste.
     /// </remarks>
     /// <param name="eye">Where the transform sits.</param>
     /// <param name="target">What it points at.</param>

@@ -11,9 +11,9 @@ namespace Bevy;
 /// top of the scene, is not lit, and cannot be selected or interacted with.
 /// </para>
 /// <para>
-/// <b>Immediate.</b> What is drawn lasts one frame, so a shape that should stay on screen has to
-/// be asked for again every frame. That is what makes a gizmo useful for a value that changes and
-/// a poor choice for anything permanent, which wants an entity instead.
+/// <b>Immediate.</b> What is drawn lasts one frame, so a shape that should stay on screen has to be
+/// asked for again every frame. That makes a gizmo useful for a value that changes and a poor
+/// choice for anything permanent, which needs an entity instead.
 /// </para>
 /// <para>
 /// Needs a window. The plugin that draws gizmos comes with one, so a windowless run reports that
@@ -110,7 +110,7 @@ public static unsafe class Gizmos
         });
 
     /// <summary>Draws the outline of a sphere.</summary>
-    /// <remarks>Three circles rather than a solid, which is what makes it readable over a scene.</remarks>
+    /// <remarks>Three circles rather than a solid, which keeps it readable over a scene.</remarks>
     /// <param name="center">Where it sits, in world space.</param>
     /// <param name="radius">How large.</param>
     /// <param name="color">Linear RGBA.</param>
@@ -244,9 +244,9 @@ public static unsafe class Gizmos
 
     /// <summary>Draws the outline of a capsule.</summary>
     /// <remarks>
-    /// The shape a character controller and most colliders are, which is what makes it the one
-    /// worth drawing beside a box. Its length is the straight part between the two caps, so the
-    /// whole thing is that plus twice the radius.
+    /// The shape a character controller and most colliders are, which makes it the one worth
+    /// drawing beside a box. Its length is the straight part between the two caps, so the whole
+    /// thing is that plus twice the radius.
     /// </remarks>
     /// <param name="center">Where the middle of it sits, in world space.</param>
     /// <param name="rotation">Which way it stands. Unrotated stands along Y.</param>
@@ -283,7 +283,7 @@ public static unsafe class Gizmos
     /// <param name="center">Where the middle of it sits, in world space.</param>
     /// <param name="rotation">Which way it stands. Unrotated stands along Y.</param>
     /// <param name="radius">How wide.</param>
-    /// <param name="halfHeight">Half its height, which is what the shape is described by.</param>
+    /// <param name="halfHeight">Half its height, which describes the shape.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
     public static void Cylinder(
@@ -609,8 +609,8 @@ public static unsafe class Gizmos
     /// the scene can hide takes the floor grid and the paths away and leaves the handles.
     /// </para>
     /// <para>
-    /// <paramref name="enabled"/> is what a debug overlay bound to a key wants, because it stops
-    /// the drawing without the systems that ask for it having to know they should stop.
+    /// <paramref name="enabled"/> suits a debug overlay bound to a key, because it stops the
+    /// drawing without the systems that ask for it having to know they should stop.
     /// </para>
     /// </remarks>
     /// <param name="width">Line thickness in pixels, or 0 to leave it as it is.</param>
@@ -640,9 +640,9 @@ public static unsafe class Gizmos
     /// reason.
     /// </para>
     /// <para>
-    /// A dotted or dashed line is what tells one meaning from another without a second color, so a
-    /// path already walked can be drawn against the one still to come. <see cref="GizmoJoint"/>
-    /// only shows on a shape whose lines meet, which is every closed shape and no single segment.
+    /// A dotted or dashed line tells one meaning from another without a second color, so a path
+    /// already walked can be drawn against the one still to come. <see cref="GizmoJoint"/> only
+    /// shows on a shape whose lines meet, which is every closed shape and no single segment.
     /// </para>
     /// </remarks>
     /// <param name="style">Whether the line is solid, dotted or dashed.</param>
@@ -797,7 +797,7 @@ public enum GizmoJoint
 /// <remarks>
 /// Its own two ends and its own color, because a run is usually a path or a wireframe where each
 /// segment is somewhere different and some of them mean something different. <see cref="Fading"/>
-/// gives it a second color, which is what a line running out to a horizon needs.
+/// gives it a second color, for a line running out to a horizon.
 /// </remarks>
 public readonly struct GizmoSegment
 {
@@ -849,7 +849,7 @@ public readonly struct GizmoSegment
     /// <param name="start">Where it begins, in world space.</param>
     /// <param name="end">Where it ends.</param>
     /// <param name="from">The color at the start, linear RGBA.</param>
-    /// <param name="to">The color at the end. Transparent is what makes a line run out.</param>
+    /// <param name="to">The color at the end. Transparent makes a line run out.</param>
     public static GizmoSegment Fading(
         Vec3 start,
         Vec3 end,
@@ -869,7 +869,7 @@ public readonly struct GizmoSegment
 /// </remarks>
 public enum GizmoGroup
 {
-    /// <summary>Both, which is what a setting meant for everything wants.</summary>
+    /// <summary>Both, for a setting meant for everything.</summary>
     Both = 0,
 
     /// <summary>The group the scene can hide, which is where a grid or a path is drawn.</summary>

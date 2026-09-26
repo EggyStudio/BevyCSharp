@@ -18,9 +18,8 @@ public delegate void SystemFn(World world);
 /// </para>
 /// <para>
 /// <see cref="Read{T}"/> and <see cref="Write{T}"/> therefore record intent rather than drive
-/// scheduling today. They are honored by <see cref="ConflictsWith"/>, which the diagnostics
-/// overlay uses to explain ordering, and they are what a future non-exclusive fast path would
-/// key off.
+/// scheduling today. They are honored by <see cref="ConflictsWith"/>, which the diagnostics overlay
+/// uses to explain ordering, and a future non-exclusive fast path would key off them.
 /// </para>
 /// </remarks>
 public sealed class SystemDescriptor

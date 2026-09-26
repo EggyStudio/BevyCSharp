@@ -34,8 +34,8 @@ public sealed class SpriteTests
             sprite = ctx.Ecs.Spawn();
             Render2d.SetSprite(ctx.Ecs, sprite, AssetServer.Load(AssetKind.Image, Texture));
 
-            // A sprite is placed by its Transform like anything else in the world, which is what
-            // makes the 2D path the same ECS as the 3D one.
+            // A sprite is placed by its Transform like anything else in the world, which makes the
+            // 2D path the same ECS as the 3D one.
             ctx.Ecs.Add(sprite, Transform.At(120f, -80f, 0f));
         });
 
@@ -201,8 +201,8 @@ public sealed class SpriteTests
     [Fact]
     public void TheTwoCamerasCoexist()
     {
-        // A 2D camera ordered above a 3D one draws over the scene without clearing it, which is
-        // what a 2D overlay on a 3D game needs.
+        // A 2D camera ordered above a 3D one draws over the scene without clearing it, as a 2D
+        // overlay on a 3D game needs.
         using var harness = new EngineHarness(frames: 3);
         if (!App.HasRenderer) return;
 

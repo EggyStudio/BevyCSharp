@@ -29,8 +29,8 @@ if (args.Contains("--headless")) windowed = false;
 
 Trace.Verbose = args.Contains("--verbose");
 
-// Three ways to run the same behaviors: onto a screen, into an image, or with no renderer at
-// all. The middle one is what a machine with no display can still see the picture from.
+// Three ways to run the same behaviors: onto a screen, into an image, or with no renderer at all. A
+// machine with no display can still see the picture from the middle one.
 var config = windowed
     ? Config.Windowed("BevyCSharp Sample", 1280, 720, ParseBackend(args, Backend))
     : offscreen
@@ -41,10 +41,10 @@ var config = windowed
 // launched it rather than the directory the assets were copied to.
 config.AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets");
 
-// Asks for the document and stylesheet interface, which is what the sample's own panel is built
-// from. A bridge without it compiled in ignores this and the panel is not opened. An offscreen run
-// leaves it off, because the panel is driven by a pointer and a keyboard that a run with no window
-// never receives.
+// Asks for the document and stylesheet interface, which the sample's own panel is built from. A
+// bridge without it compiled in ignores this and the panel is not opened. An offscreen run leaves
+// it off, because the panel is driven by a pointer and a keyboard that a run with no window never
+// receives.
 config.Gui = windowed;
 
 // Answers `bcs` while it runs. A headless run that serves is worth pairing with --frames 0, which
@@ -68,7 +68,7 @@ Console.WriteLine(windowed ? "close the window to exit" : string.Empty);
 return BevyApp.Run(config);
 
 // Reads --frames N, defaulting to a short run so a plain `dotnet run` still does something. Zero
-// runs until something asks the app to stop, which is what a session driven from `bcs` wants.
+// runs until something asks the app to stop, as a session driven from `bcs` needs.
 static uint ParseFrames(string[] arguments)
 {
     var index = Array.IndexOf(arguments, "--frames");

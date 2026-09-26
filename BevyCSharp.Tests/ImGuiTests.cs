@@ -43,8 +43,8 @@ public sealed class ImGuiTests
 
         harness.OnContext(Stage.Startup, _ =>
         {
-            // Zero is what the interface is told to mean "no picture", so a path that names
-            // nothing has to answer it rather than a name pointing at nothing.
+            // The interface is told that zero means "no picture", so a path that names nothing has
+            // to answer it rather than a name pointing at nothing.
             Assert.Equal(0uL, ImGuiTextures.Load(string.Empty.Length == 0 ? "nowhere.png" : "x"));
         });
 

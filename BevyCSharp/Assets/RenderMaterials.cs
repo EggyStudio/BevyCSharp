@@ -84,8 +84,8 @@ public enum AlphaMode
     /// Draw a pixel or skip it, deciding at <see cref="MaterialSettings.AlphaCutoff"/>.
     /// </summary>
     /// <remarks>
-    /// What foliage and chain-link fences want. It keeps the depth buffer honest, so nothing has
-    /// to be sorted, at the cost of a hard edge.
+    /// Suits foliage and chain-link fences. It keeps the depth buffer honest, so nothing has to be
+    /// sorted, at the cost of a hard edge.
     /// </remarks>
     Mask = 1,
 
@@ -105,8 +105,8 @@ public enum AlphaMode
 
     /// <summary>Blend with color that has already been multiplied by its alpha.</summary>
     /// <remarks>
-    /// What a texture exported premultiplied wants, and what lets one material be partly additive:
-    /// a pixel with color and zero alpha adds, and one with full alpha covers.
+    /// Suits a texture exported premultiplied, and lets one material be partly additive. A pixel
+    /// with color and zero alpha adds, and one with full alpha covers.
     /// </remarks>
     Premultiplied = 5,
 }
@@ -149,12 +149,11 @@ public sealed class MaterialSettings
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The three color channels are a luminance in nits, not a fraction of white, so the
-    /// numbers that read as bright are far larger than one. The alpha decides whether the
-    /// camera's exposure is applied to them, and at 1 it is. A camera left at Bevy's own
-    /// exposure divides by about a thousand, so 12 nits arrives as a hundredth of white and 12000
-    /// arrives as twelve times it. That is what it takes to blow out to white and to give bloom
-    /// something to scatter.
+    /// The three color channels are a luminance in nits, not a fraction of white, so the numbers
+    /// that read as bright are far larger than one. The alpha decides whether the camera's exposure
+    /// is applied to them, and at 1 it is. A camera left at Bevy's own exposure divides by about a
+    /// thousand, so 12 nits arrives as a hundredth of white and 12000 arrives as twelve times it.
+    /// It takes that much to blow out to white and to give bloom something to scatter.
     /// </para>
     /// <para>
     /// Set the alpha to 0 to opt out of that scaling and have the numbers mean multiples of white
@@ -184,11 +183,11 @@ public sealed class MaterialSettings
 
     /// <summary>Show the base color flat, with no lighting at all.</summary>
     /// <remarks>
-    /// For a skybox, a UI panel in the world, or anything meant to read as its own color. It
-    /// takes <see cref="Emissive"/> with it: Bevy adds the emission inside the lighting, so an
-    /// unlit material shows its base color and nothing else. A surface that should glow wants
-    /// an emissive color and no unlit flag, and <see cref="BaseColor"/> can exceed one if what
-    /// is wanted is a flat color brighter than white.
+    /// For a skybox, a UI panel in the world, or anything meant to read as its own color. It takes
+    /// <see cref="Emissive"/> with it: Bevy adds the emission inside the lighting, so an unlit
+    /// material shows its base color and nothing else. A surface that should glow needs an emissive
+    /// color and no unlit flag, and <see cref="BaseColor"/> can exceed one for a flat color
+    /// brighter than white.
     /// </remarks>
     public bool Unlit { get; set; }
 

@@ -339,8 +339,8 @@ public sealed class ShaderValueTests
             {
                 seen = program.Generation;
 
-                // Declared first, so the color moves to a different offset, which is what a value
-                // kept as bytes rather than by name would get wrong.
+                // Declared first, so the color moves to a different offset, which a value kept as
+                // bytes rather than by name would get wrong.
                 assets.Write("grow.slang", """
                     import bcs;
 

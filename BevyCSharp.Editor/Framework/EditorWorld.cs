@@ -35,7 +35,7 @@ public static class EditorWorld
     /// <summary>Indented, because the file is meant to be read and diffed.</summary>
     private static readonly JsonSerializerOptions Layout = new() { WriteIndented = true };
 
-    /// <summary>UTF-8 without a byte order mark, which nothing here wants and git shows.</summary>
+    /// <summary>UTF-8 without a byte order mark, which nothing here needs and git shows.</summary>
     private static readonly UTF8Encoding Text = new(encoderShouldEmitUTF8Identifier: false);
 
 
@@ -76,9 +76,9 @@ public static class EditorWorld
                 if (fields.Count > 0) components[schema.QualifiedName] = fields;
             }
 
-            // What it is drawn with, which is the engine's own components and has no schema. Only
-            // a mesh or a material loaded from a file can be written, because one built in memory
-            // is a set of numbers nothing here can name, and a name is what a file is made of.
+            // What it is drawn with, which is the engine's own components and has no schema. Only a
+            // mesh or a material loaded from a file can be written, because one built in memory is
+            // a set of numbers nothing here can name, and a file is made of names.
             var mesh = App.HasRenderer ? Render.MeshPathOf(entity) : string.Empty;
             var material = App.HasRenderer ? Render.MaterialPathOf(entity) : string.Empty;
 

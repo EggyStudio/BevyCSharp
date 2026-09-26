@@ -167,7 +167,8 @@ public static class Streaming
     /// <summary>Starts a new frame's budget. Called by the engine before any system runs.</summary>
     internal static void BeginFrame() => Interlocked.Exchange(ref _takenThisFrame, 0);
 
-    /// <summary>The asset directory the running app reads from, which is what paths are relative to.</summary>
+    /// <summary>The asset directory the running app reads from, which paths are relative
+    /// to.</summary>
     internal static string AssetRoot { get; set; } = string.Empty;
 
     private static string ResolvedRoot() =>

@@ -15,7 +15,7 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// A picture is not there for a frame or two after it is asked for. Nothing is drawn for it until
-/// it arrives, which is what an icon appearing a moment after a panel opens looks like.
+/// it arrives, so an icon appears a moment after a panel opens.
 /// </para>
 /// </remarks>
 public static unsafe class ImGuiTextures
@@ -40,10 +40,10 @@ public static unsafe class ImGuiTextures
     /// What to call a picture the caller already holds, such as one a camera is drawing into.
     /// </summary>
     /// <remarks>
-    /// The other half of <see cref="Load"/>, which takes a path. This takes a handle, which is
-    /// what a render target is, so a thumbnail or a preview is a small scene drawn every frame
-    /// rather than a picture somebody saved. Asked for once per handle and kept, because what it
-    /// names does not change when the picture behind it is redrawn.
+    /// The other half of <see cref="Load"/>, which takes a path. This takes a handle, and a render
+    /// target is one, so a thumbnail or a preview is a small scene drawn every frame rather than a
+    /// picture somebody saved. Asked for once per handle and kept, because what it names does not
+    /// change when the picture behind it is redrawn.
     /// </remarks>
     /// <param name="image">The image, usually from <see cref="Render.CreateTarget"/>.</param>
     /// <returns>A name ImGui can draw with, or zero when the handle names no image.</returns>
@@ -83,8 +83,8 @@ public static unsafe class ImGuiTextures
 
     /// <summary>Draws a picture, tinted.</summary>
     /// <remarks>
-    /// Tinted rather than drawn as it is, because the editor's icons are shapes cut out of white:
-    /// what color one appears in is what the interface says it means, not what the file says.
+    /// Tinted rather than drawn as it is, because the editor's icons are shapes cut out of white.
+    /// The interface picks the color one appears in by what it means, not the file.
     /// </remarks>
     public static void Draw(string path, float size, Vector4 tint)
     {

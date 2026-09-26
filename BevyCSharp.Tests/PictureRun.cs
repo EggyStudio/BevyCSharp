@@ -10,8 +10,8 @@ namespace Bevy.Tests;
 /// <para>
 /// A shader test is a sequence rather than one frame: wait for a compile, take a picture, edit a
 /// file, wait for the edit to arrive, take another. Each step is checked once a frame and the next
-/// starts when it says it is done, which is what lets a test wait on the thing it is about rather
-/// than on a number of frames somebody guessed.
+/// starts when it says it is done, so a test can wait on the thing it is about rather than on a
+/// number of frames somebody guessed.
 /// </para>
 /// <para>
 /// A step that throws ends the run and the exception is raised from <see cref="Go"/>, because an
@@ -189,7 +189,8 @@ internal sealed class PictureRun
     public static int Red(CapturedImage picture) =>
         Count(picture, (r, g, b) => r > 120 && g < 90 && b < 90);
 
-    /// <summary>How many pixels are magenta, which is what a shader that never compiled draws.</summary>
+    /// <summary>How many pixels are magenta, the color a shader that never compiled
+    /// draws.</summary>
     public static int Magenta(CapturedImage picture) =>
         Count(picture, (r, g, b) => r > 120 && b > 120 && g < 90);
 

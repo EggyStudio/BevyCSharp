@@ -9,7 +9,7 @@ namespace Bevy.Tests;
 /// <remarks>
 /// <para>
 /// An effect is a change to a picture, so the only honest check is two pictures. A setting that
-/// reached nothing draws the same frame, which is what every one of these would look like from the
+/// reached nothing draws the same frame, and every one of these would look like that from the
 /// managed side, where the call succeeded and the component was inserted.
 /// </para>
 /// <para>
@@ -54,8 +54,8 @@ public sealed class LensTests
     /// <summary>A chromatic fringe puts color at an edge that had none.</summary>
     /// <remarks>
     /// The scene is gray on black, so every pixel of it is neutral until something splits the
-    /// channels apart. What is counted is pixels whose channels disagree, which is what a fringe
-    /// is and what nothing else in this picture could produce.
+    /// channels apart. This counts pixels whose channels disagree, which is a fringe and which
+    /// nothing else in this picture could produce.
     /// </remarks>
     [Fact]
     public void AChromaticFringeSplitsAnEdgeIntoColors()
@@ -123,7 +123,7 @@ public sealed class LensTests
         return drawn;
     }
 
-    /// <summary>How many pixels have channels that disagree, which is what a fringe is.</summary>
+    /// <summary>How many pixels have channels that disagree, which marks a fringe.</summary>
     private static int Colored(CapturedImage picture)
     {
         var tinted = 0;

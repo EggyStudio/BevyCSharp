@@ -120,8 +120,8 @@ public sealed class RenderTargetTests : IDisposable
 
             Render.SetCameraTarget(camera, target);
 
-            // Nothing is what a camera starts with, and it has to be able to get back there:
-            // an editor that opens a preview into a texture has to be able to close it again.
+            // A camera starts with nothing, and it has to be able to get back there, since an
+            // editor that opens a preview into a texture has to be able to close it again.
             Render.SetCameraTarget(camera, AssetHandle.None);
         });
 
@@ -160,8 +160,8 @@ public sealed class RenderTargetTests : IDisposable
         {
             var camera = Render.SpawnCamera3d();
 
-            // A key out of any table's range, which is what a fabricated or released handle looks
-            // like from the other side. Drawing into nothing is not a default worth having.
+            // A key out of any table's range, as a fabricated or released handle looks from the
+            // other side. Drawing into nothing is not a default worth having.
             var refused = Assert.Throws<BevyNativeException>(
                 () => Render.SetCameraTarget(camera, new AssetHandle(0x7FFF_FFFF)));
 
@@ -172,7 +172,7 @@ public sealed class RenderTargetTests : IDisposable
     }
 
     /// <summary>
-    /// A target can be handed to the interface, which is what a thumbnail is made of.
+    /// A target can be handed to the interface, and a thumbnail is made of one.
     /// </summary>
     /// <remarks>
     /// The editor draws its icons from files, and a preview of a mesh or a material has no file to
@@ -185,8 +185,8 @@ public sealed class RenderTargetTests : IDisposable
         if (!App.HasRenderer || !App.HasEditor) return;
 
         // The interface has to be installed for a picture to have anywhere to be named, and it is
-        // installed only when an app asks to draw one. An offscreen run can, which is what makes
-        // this checkable without a window.
+        // installed only when an app asks to draw one. An offscreen run can, which makes this
+        // checkable without a window.
         var config = Config.OffscreenFor(64, 64, frames: 4);
         config.Gui = true;
 

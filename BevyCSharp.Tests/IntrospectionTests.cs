@@ -54,7 +54,7 @@ public sealed class IntrospectionTests
 
             Assert.Contains(NativeComponents.Transform, components);
 
-            // Names come back for every id, which is what an inspector labels its rows with.
+            // Names come back for every id, for an inspector to label its rows with.
             var names = components.Select(ctx.Ecs.ComponentName).ToArray();
             Assert.All(names, name => Assert.False(string.IsNullOrWhiteSpace(name)));
             Assert.Contains(names, name => name.Contains("Transform", StringComparison.Ordinal));

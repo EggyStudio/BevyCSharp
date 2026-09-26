@@ -83,7 +83,7 @@ public struct Sealed
 }
 
 /// <summary>
-/// Covers the field tables the generator emits, which is what turns a component id into rows.
+/// Covers the field tables the generator emits, which turn a component id into rows.
 /// </summary>
 [Collection("engine")]
 public sealed class ComponentSchemaTests
@@ -97,11 +97,10 @@ public sealed class ComponentSchemaTests
         Assert.Equal("Described", schema.Name);
 
         // The property comes last because it is declared last. A property is described alongside
-        // the fields and read through itself, so what a tool shows is what the type says rather
-        // than what is stored behind it.
-        // A struct with fields of its own is taken apart, and the path it came from is its name.
-        // A struct with nothing reachable inside it stays one row, because there is nothing better
-        // to say about it than what it is.
+        // the fields and read through itself, so a tool shows what the type says rather than what
+        // is stored behind it. A struct with fields of its own is taken apart, and the path it came
+        // from is its name. A struct with nothing reachable inside it stays one row, because there
+        // is nothing better to say about it than what it is.
         Assert.Equal(
             [
                 "Enabled", "Count", "Speed", "Offset", "When", "Unknown.Bits", "Shut", "Private",
@@ -132,8 +131,8 @@ public sealed class ComponentSchemaTests
         Assert.Equal(FieldKind.Vec3, schema.Field("Offset")!.Kind);
         Assert.Equal(FieldKind.Enum, schema.Field("When")!.Kind);
 
-        // Nothing knows how to edit the struct itself, so what is drawn is what it holds. Its own
-        // row would have been a type and no editor, which helps nobody.
+        // Nothing knows how to edit the struct itself, so its contents are drawn. Its own row would
+        // have been a type and no editor, which helps nobody.
         Assert.Equal(FieldKind.Int, schema.Field("Unknown.Bits")!.Kind);
         Assert.Equal("Unknown", schema.Field("Unknown.Bits")!.Hints.Foldout);
 
@@ -224,7 +223,7 @@ public sealed class ComponentSchemaTests
 
             var schema = ComponentSchemas.For("Bevy.Tests.Described")!;
 
-            // Half-typed input, which is what a text field hands over between keystrokes.
+            // Half-typed input, as a text field hands over between keystrokes.
             Assert.False(schema.Write(ctx.Ecs, entity, "Count", "-"));
             Assert.Equal(3, ctx.Ecs.GetOrDefault<Described>(entity).Count);
 
@@ -313,7 +312,7 @@ public sealed class ComponentSchemaTests
     }
 }
 
-/// <summary>A component whose fields say how they want to be drawn.</summary>
+/// <summary>A component whose fields say how they are drawn.</summary>
 /// <remarks>
 /// Every attribute the generator reads, on one struct, so that the emitted hints are checked
 /// against what was written rather than against what the emitter happens to do today.

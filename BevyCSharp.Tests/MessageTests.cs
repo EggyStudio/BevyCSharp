@@ -233,8 +233,8 @@ public sealed class MessageTests
     [Fact]
     public void AnEngineMessageAndAUserMessageShareAQueue()
     {
-        // Same type, two senders. Nothing distinguishes them once they are on the bus, which is
-        // what lets a test stand in for the window.
+        // Same type, two senders. Nothing distinguishes them once they are on the bus, so a test
+        // can stand in for the window.
         using var harness = new EngineHarness(frames: 5);
         var widths = new List<float>();
         var sent = false;
@@ -282,8 +282,8 @@ public sealed class MessageTests
     [Fact]
     public void ADroppedFileCarriesItsPathThroughTheBus()
     {
-        // The window is what sends these in a real run, so a test sends one itself to cover the
-        // shape a reader sees.
+        // The window sends these in a real run, so a test sends one itself to cover the shape a
+        // reader sees.
         using var harness = new EngineHarness(frames: 5);
         var paths = new List<string>();
         var sent = false;

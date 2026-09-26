@@ -41,8 +41,8 @@ public sealed class Time
     public double Fps => DeltaSeconds > 0.0 ? 1.0 / DeltaSeconds : 0.0;
 
     /// <summary>
-    /// Frames per second smoothed with an exponential moving average, which is what you want
-    /// on a HUD, because the raw value is far too jittery to read.
+    /// Frames per second smoothed with an exponential moving average, which suits a HUD, because
+    /// the raw value is far too jittery to read.
     /// </summary>
     public double SmoothedFps { get; private set; }
 

@@ -1,5 +1,5 @@
 // Copies the first channel of every texel of an eight by eight image into a buffer, for the test to
-// read back, which for a compressed image is what the GPU decoded.
+// read back, which for a compressed image is the GPU's decoding.
 
 import bcs_compute;
 

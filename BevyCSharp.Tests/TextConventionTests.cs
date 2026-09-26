@@ -83,7 +83,7 @@ public sealed unsafe class TextConventionTests
     public void TextThatGrowsBetweenCallsIsTruncatedRatherThanOverrunning()
     {
         // The two calls are not one atomic read, so the second can report more than the buffer
-        // sized from the first. Reading only what was asked for is what keeps that safe.
+        // sized from the first. Reading only what was asked for keeps that safe.
         var calls = 0;
         var text = Native.ReadText(
             (buffer, capacity) =>

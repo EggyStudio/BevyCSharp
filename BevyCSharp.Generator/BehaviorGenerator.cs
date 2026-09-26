@@ -111,10 +111,10 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// fields whose names carry the path they came from.
     /// </para>
     /// <para>
-    /// The parts land in a fold named after the field they came from, which is what makes a struct
-    /// inside a component read as one thing that opens and shuts rather than as a run of unrelated
-    /// rows. Nesting goes as deep as the types do, up to a limit, since a struct cannot contain
-    /// itself and the recursion ends on its own.
+    /// The parts land in a fold named after the field they came from, so a struct inside a
+    /// component reads as one thing that opens and shuts rather than as a run of unrelated rows.
+    /// Nesting goes as deep as the types do, up to a limit, since a struct cannot contain itself
+    /// and the recursion ends on its own.
     /// </para>
     /// <para>
     /// Fields only. A property returns a copy of what it holds, so writing one part of what a
@@ -354,7 +354,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         var argument = attribute.ConstructorArguments[index];
 
         // A boxed object argument arrives wrapped, so the declared type is object and the value it
-        // holds is what was written.
+        // holds is the one written.
         if (argument.Kind == TypedConstantKind.Type) return null;
         if (argument.Value is null) return null;
 
@@ -808,9 +808,9 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 
     /// <summary>Reads an <c>[InState]</c> attribute into the enum type and value it names.</summary>
     /// <remarks>
-    /// The argument is typed as <c>object</c> so any enum can be passed, which means the enum
-    /// type arrives on the constant rather than on the parameter. Emitting a cast back to that
-    /// type is what lets the condition infer its type parameter.
+    /// The argument is typed as <c>object</c> so any enum can be passed, which means the enum type
+    /// arrives on the constant rather than on the parameter. Emitting a cast back to that type lets
+    /// the condition infer its type parameter.
     /// </remarks>
     private static InStateInfo? GetInState(IMethodSymbol method)
     {

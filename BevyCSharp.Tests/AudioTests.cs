@@ -63,8 +63,8 @@ public sealed class AudioTests
     [Fact]
     public void APlayingSoundIsAnEntity()
     {
-        // Which is what makes it despawnable, taggable and queryable without a second API for
-        // sounds specifically.
+        // That makes it despawnable, taggable and queryable without a second API for sounds
+        // specifically.
         using var harness = new EngineHarness(frames: 6);
         if (!App.HasRenderer) return;
 
@@ -168,8 +168,8 @@ public sealed class AudioTests
             Audio.SetListener(listener, earGap: 3f);
 
             // And the long form, which places each ear rather than spacing them on one axis. The
-            // second call replaces the first, which is what a listener that has turned its head
-            // would do every frame.
+            // second call replaces the first, as a listener that has turned its head would every
+            // frame.
             Audio.SetListener(
                 listener,
                 new Vec3(-1.5f, 0f, 0.2f),
@@ -185,7 +185,7 @@ public sealed class AudioTests
                     SpatialScale = 0.01f,
                 });
 
-            // A spatial sound is given a transform to be moved by, which is what places it.
+            // A spatial sound is given a transform to be moved by, which places it.
             ctx.Ecs.Add(engine, Transform.At(4f, 0f, -2f));
         });
 
@@ -216,9 +216,9 @@ public sealed class AudioTests
     [Fact]
     public void PositionAndSeekNeedTheSinkThatArrivesWithPlayback()
     {
-        // The same rule the volume follows. The sink is what knows where a clip is, and it is
-        // attached once playback has started. A machine with no audio device never attaches one
-        // at all, which is why the answer is checked for being refused rather than for a number.
+        // The same rule the volume follows. The sink knows where a clip is, and it is attached once
+        // playback has started. A machine with no audio device never attaches one at all, which is
+        // why the answer is checked for being refused rather than for a number.
         using var harness = new EngineHarness(frames: 4);
         if (!App.HasRenderer) return;
 

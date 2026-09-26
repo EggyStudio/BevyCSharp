@@ -110,7 +110,7 @@ public sealed class ConsoleTests
         Assert.Null(view.Completion("echo"));
         Assert.Null(view.Completion("echo something"));
 
-        // What it says then is what the command takes.
+        // It then says what the command takes.
         Assert.Contains("<text>", view.Hint("echo something"));
     }
 
@@ -129,7 +129,7 @@ public sealed class ConsoleTests
         view.Run("echo one");
         view.Run("echo two");
 
-        // Newest first, which is what reaching back up a shell's history gives.
+        // Newest first, as reaching back up a shell's history gives them.
         Assert.Equal("echo two", view.Back(string.Empty));
         Assert.Equal("echo one", view.Back("echo two"));
 

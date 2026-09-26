@@ -124,7 +124,7 @@ public sealed class CliServerTests : IDisposable
         }
     }
 
-    /// <summary>The port is open to the machine; the token is what decides who is answered.</summary>
+    /// <summary>The port is open to the machine; the token decides who is answered.</summary>
     [Fact]
     public void AWrongTokenIsRefused()
     {
@@ -157,7 +157,7 @@ public sealed class CliServerTests : IDisposable
             Headless = true,
             HeadlessFps = 60,
 
-            // Until something asks it to stop, which is what a session is.
+            // Until something asks it to stop, as a session does.
             HeadlessFrames = 0,
             Serve = true,
             AssetRoot = EngineHarness.AssetDirectory,
@@ -187,7 +187,7 @@ public sealed class CliServerTests : IDisposable
         return thread;
     }
 
-    /// <summary>Waits for the app to write that it is ready, which is what the tool waits for.</summary>
+    /// <summary>Waits for the app to write that it is ready, as the tool does.</summary>
     private static CliSession Ready()
     {
         var deadline = DateTime.UtcNow.AddSeconds(30);

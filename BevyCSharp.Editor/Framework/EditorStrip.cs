@@ -37,10 +37,10 @@ public static class EditorStrip
     /// The strip along the bottom left, with whatever is open growing upwards out of it.
     /// </summary>
     /// <remarks>
-    /// The bar is drawn under its content rather than over it, which is what a console does. The
-    /// headers stay where the hand last left them and the lines rise out of the bottom of the
-    /// screen. ImGui's own tab bar either way, so hovering, ordering and the mark on the one in
-    /// force are its to draw.
+    /// The bar is drawn under its content rather than over it, as a console's is. The headers stay
+    /// where the hand last left them and the lines rise out of the bottom of the screen. ImGui's
+    /// own tab bar either way, so hovering, ordering and the mark on the one in force are its to
+    /// draw.
     /// </remarks>
     internal static void Draw(float width, float strip)
     {
@@ -109,7 +109,7 @@ public static class EditorStrip
             return;
         }
 
-        // The stock look keeps ImGui's own tabs, because that is what it is for.
+        // The stock look keeps ImGui's own tabs, since it exists to show them.
         //
         // Against the bottom of the strip rather than where the layout left the cursor. ImGui
         // draws a tab as a shape with a flat bottom, for content to join underneath it, and here

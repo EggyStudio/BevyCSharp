@@ -645,8 +645,8 @@ public static unsafe class Render
     /// Sets the lens a camera draws through.
     /// </summary>
     /// <remarks>
-    /// Beside <see cref="SetPostProcessing"/>, which is the pipeline a settings screen owns, this
-    /// is what a scene sets for a moment. The whole set in one call either way, so an effect these
+    /// Beside <see cref="SetPostProcessing"/>, which is the pipeline a settings screen owns, a
+    /// scene sets this for a moment. The whole set in one call either way, so an effect these
     /// settings leave off is taken off the camera.
     /// </remarks>
     /// <param name="camera">A camera entity from <see cref="SpawnCamera3d()"/> or

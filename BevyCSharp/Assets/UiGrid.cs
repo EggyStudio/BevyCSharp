@@ -55,8 +55,8 @@ public readonly record struct Track
 
     /// <summary>The same track, stated <paramref name="count"/> times over.</summary>
     /// <remarks>
-    /// One entry rather than a list of identical ones, which is what a stylesheet's <c>repeat()</c>
-    /// is for and what a grid of twelve equal columns wants to say.
+    /// One entry rather than a list of identical ones, like a stylesheet's <c>repeat()</c>, for a
+    /// grid of twelve equal columns.
     /// </remarks>
     public Track Repeated(int count) => new(Kind, Value, Math.Max(1, count));
 
@@ -142,7 +142,7 @@ public enum CellAlign
 /// <remarks>
 /// Grid lines are counted from one, and a negative counts back from the far edge, so a column of
 /// <c>-1</c> is the last one whatever the grid turned out to be. Zero leaves the item where the
-/// flow would have put it, which is what an item that only wants to span two columns says.
+/// flow would have put it, as an item that only spans two columns says.
 /// </remarks>
 public sealed class GridPlacement
 {
@@ -169,8 +169,8 @@ public sealed class GridPlacement
 /// <para>
 /// A second layout algorithm rather than more fields on the first. Flexbox lays a run of children
 /// out along one axis and decides the other from what they are; a grid states both axes up front
-/// and drops the children into the cells, which is what makes a column line up with the column
-/// above it. An inventory, a calendar and a table of settings are all grids.
+/// and drops the children into the cells, which makes a column line up with the column above it. An
+/// inventory, a calendar and a table of settings are all grids.
 /// </para>
 /// <para>
 /// A list left out keeps whatever the node had, so the rows and the columns can be set in separate
@@ -193,7 +193,7 @@ public sealed class GridSettings
     /// </summary>
     /// <remarks>
     /// Used in turn and then from the start again, so one entry sizes every row the grid grows.
-    /// What a list of unknown length wants, where the columns are stated and the rows are not.
+    /// Suits a list of unknown length, where the columns are stated and the rows are not.
     /// </remarks>
     public IReadOnlyList<Track>? AutoRows { get; set; }
 
@@ -269,8 +269,8 @@ public static unsafe class UiGrid
     /// </summary>
     /// <remarks>
     /// Only a child of a node that <see cref="Set"/> was called on has a grid to be placed on. A
-    /// child with no placement of its own is put wherever the flow reaches next, which is what most
-    /// of them want.
+    /// child with no placement of its own is put wherever the flow reaches next, which suits most
+    /// of them.
     /// </remarks>
     /// <param name="node">The child being placed.</param>
     /// <param name="placement">Where it sits.</param>

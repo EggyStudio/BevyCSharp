@@ -22,7 +22,7 @@ namespace Bevy;
 /// <para>
 /// This differs from Bevy's own messages, which give each reader a cursor and let it catch up
 /// within the frame. A cursor needs a stable identity per reader, and a C# system has none the
-/// engine can see, so the swap is what makes "exactly once" true here instead.
+/// engine can see, so the swap makes "exactly once" true here instead.
 /// </para>
 /// <para>
 /// <b>Threading.</b> <see cref="Send{T}"/> is safe from a parallel behavior method, like

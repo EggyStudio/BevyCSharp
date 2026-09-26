@@ -8,8 +8,8 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// Nodes are entities, so everything the ECS already does applies to them.
-/// <see cref="EcsWorld.SetParent"/> nests one inside another, which is what lays a screen out,
-/// and <see cref="EcsWorld.Despawn"/> takes one away.
+/// <see cref="EcsWorld.SetParent"/> nests one inside another, which lays a screen out, and
+/// <see cref="EcsWorld.Despawn"/> takes one away.
 /// </para>
 /// <para>
 /// Needs a render build with a window. A windowless run has nothing to draw on and says so
@@ -215,7 +215,7 @@ public static unsafe class Ui
     /// </summary>
     /// <remarks>
     /// The node keeps its layout and the picture fills what the layout gave it. A node with no
-    /// width or height of its own takes the image's, which is what an icon wants.
+    /// width or height of its own takes the image's, as an icon needs.
     /// </remarks>
     /// <exception cref="BevyNativeException">
     /// The entity is gone, the handle is not one this app is holding, or this build has no
@@ -228,9 +228,8 @@ public static unsafe class Ui
     /// Draws an image inside a node, tinted, cut down or sliced.
     /// </summary>
     /// <remarks>
-    /// <see cref="UiImageMode.Sliced"/> is what a panel that resizes is drawn with, because the
-    /// corners keep their size while the middle stretches, so one small image covers every size of
-    /// box.
+    /// A panel that resizes is drawn with <see cref="UiImageMode.Sliced"/>, because the corners
+    /// keep their size while the middle stretches, so one small image covers every size of box.
     /// </remarks>
     /// <exception cref="BevyNativeException">
     /// The entity is gone, the handle is not one this app is holding, or this build has no
@@ -287,10 +286,10 @@ public static unsafe class Ui
     /// </summary>
     /// <remarks>
     /// Only means anything on a node whose <see cref="UiSettings.OverflowX"/> or
-    /// <see cref="UiSettings.OverflowY"/> is <see cref="UiOverflow.Scroll"/>: that is what clips
-    /// the contents to the node, and this is how far they have been pushed, in logical pixels
-    /// from the top left. Bevy has no scrolling of its own, so a wheel or a drag is read like any
-    /// other input and turned into a call here.
+    /// <see cref="UiSettings.OverflowY"/> is <see cref="UiOverflow.Scroll"/>, which clips the
+    /// contents to the node, and this is how far they have been pushed, in logical pixels from the
+    /// top left. Bevy has no scrolling of its own, so a wheel or a drag is read like any other
+    /// input and turned into a call here.
     /// </remarks>
     /// <remarks>
     /// The entity has to be a node. Unlike <see cref="SetImage(Entity, UiImageSettings)"/>,

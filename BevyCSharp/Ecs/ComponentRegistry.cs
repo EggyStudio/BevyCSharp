@@ -88,7 +88,7 @@ internal static class ComponentRegistry
         }
     }
 
-    /// <summary>Contiguous columns, which is what almost every component wants.</summary>
+    /// <summary>Contiguous columns, which suit almost every component.</summary>
     private const int TableStorage = 0;
 
     /// <summary>Cheap to add and remove, at the cost of not being iterable. See <see cref="ISparseComponent"/>.</summary>
@@ -107,8 +107,8 @@ internal static class ComponentRegistry
 /// single fork is all it takes for the whole generic API to reach Bevy's components.
 /// </remarks>
 /// <typeparam name="T">
-/// A blittable struct. The <c>unmanaged</c> constraint is what makes the layout safe to hand
-/// to Bevy verbatim: no references, no GC involvement, no marshalling on the hot path.
+/// A blittable struct. The <c>unmanaged</c> constraint makes the layout safe to hand to Bevy
+/// verbatim, with no references, no GC involvement and no marshalling on the hot path.
 /// </typeparam>
 public static class ComponentType<T> where T : unmanaged
 {

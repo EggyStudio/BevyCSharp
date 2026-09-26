@@ -12,7 +12,7 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// One line of JSON in, exactly one line of JSON out, over a socket bound to the loopback interface
-/// and nothing else. A connection stays open for as many requests as the caller wants, because the
+/// and nothing else. A connection stays open for as many requests as the caller makes, because the
 /// point of serving a running app at all is that the second question costs nothing. The app is
 /// already up, the assets are already loaded, and the answer comes back on the next frame.
 /// </para>

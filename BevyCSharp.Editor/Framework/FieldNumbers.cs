@@ -41,9 +41,9 @@ internal static class FieldNumbers
     /// How a number that is open for typing is written.
     /// </summary>
     /// <remarks>
-    /// Seven figures, because that is what a single-precision number holds. ImGui fills the text
-    /// box with the value put through the format the moment the box opens, so a field written at
-    /// three places would offer 1.235 to somebody who came to correct 1.2345.
+    /// Seven figures, because a single-precision number holds that many. ImGui fills the text box
+    /// with the value put through the format the moment the box opens, so a field written at three
+    /// places would offer 1.235 to somebody who came to correct 1.2345.
     /// </remarks>
     internal const string Figures = "%.7g";
 
@@ -164,7 +164,7 @@ internal static class FieldNumbers
     }
 
     /// <summary>
-    /// Lets go of those angles, so the rotation is what the world says again.
+    /// Lets go of those angles, so the rotation shows what the world says again.
     /// </summary>
     /// <param name="id">Which field was being turned.</param>
     /// <param name="holding">Whether any of its boxes is still held.</param>

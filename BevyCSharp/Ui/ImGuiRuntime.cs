@@ -55,7 +55,7 @@ public static unsafe class ImGuiRuntime
     /// </summary>
     /// <remarks>
     /// The question a shortcut has to ask, and not the same question as
-    /// <see cref="WantsKeyboard"/>. With keyboard navigation switched on, the interface wants the
+    /// <see cref="WantsKeyboard"/>. With keyboard navigation switched on, the interface claims the
     /// keyboard whenever any of its windows is focused, which in an editor whose panels are always
     /// up is always. A shortcut that steps aside for that is a shortcut that never runs. What it
     /// has to step aside for is a field with a caret in it.
@@ -169,9 +169,9 @@ public static unsafe class ImGuiRuntime
     /// One of the loaded faces, or whatever is in force when it was not loaded.
     /// </summary>
     /// <remarks>
-    /// By name rather than by the order they were added, so the caller that wants a particular
-    /// face says which one it wants. An index would put the same piece of knowledge in two places
-    /// and one of them would eventually be wrong.
+    /// By name rather than by the order they were added, so a caller after a particular face says
+    /// which one. An index would put the same piece of knowledge in two places and one of them
+    /// would eventually be wrong.
     /// </remarks>
     /// <param name="face">The font file it was loaded from.</param>
     public static ImFontPtr Face(string face) =>
@@ -188,8 +188,8 @@ public static unsafe class ImGuiRuntime
         var window = Window.Size();
         var scale = Window.Scale();
 
-        // Logical pixels, which is what everything the bridge reports about a window is in, and
-        // what the pointer arrives in. The scale is only what a clip rectangle is turned into.
+        // Logical pixels, the unit of everything the bridge reports about a window and of the
+        // pointer. The scale is only what a clip rectangle is turned into.
         Size = new Vector2(Math.Max(1f, window.Width), Math.Max(1f, window.Height));
         Scale = scale;
 
@@ -247,9 +247,9 @@ public static unsafe class ImGuiRuntime
             {
                 var call = commands.CmdBuffer[index];
 
-                // A callback is a piece of code ImGui wants run mid-list. Nothing here asks for
-                // one, and a backend that cannot run them says so by skipping rather than by
-                // drawing something else.
+                // A callback is a piece of code ImGui runs mid-list. Nothing here asks for one, and
+                // a backend that cannot run them says so by skipping rather than by drawing
+                // something else.
                 if (call.UserCallback != IntPtr.Zero) continue;
 
                 _commands[written++] = new NativeImGuiCommand

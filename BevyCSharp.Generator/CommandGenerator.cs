@@ -12,10 +12,10 @@ namespace Bevy.Generator;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Found at compile time and registered by a module initializer, so a console reflects over
-/// nothing at runtime, a command survives trimming, and a command that does not compile is not a
-/// command. The alternative is scanning every loaded assembly on the first keystroke, which is
-/// what a console usually does and what makes it the slowest thing in a program to open.
+/// Found at compile time and registered by a module initializer, so a console reflects over nothing
+/// at runtime, a command survives trimming, and a command that does not compile is not a command.
+/// The alternative is scanning every loaded assembly on the first keystroke, which a console
+/// usually does and which makes it the slowest thing in a program to open.
 /// </para>
 /// <para>
 /// What is emitted per method is a small function that takes the words after the command's name,
@@ -135,7 +135,7 @@ public sealed class CommandGenerator : IIncrementalGenerator
         }
 
         // One string parameter takes the whole of what was typed after the name, spaces and all,
-        // which is what a command that takes a sentence wants. Anything else is words.
+        // for a command that takes a sentence. Anything else is words.
         var takesLine = parameters.Count == 1 && parameters[0].Kind == "text";
 
         return new CommandModel(

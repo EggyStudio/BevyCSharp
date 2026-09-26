@@ -56,8 +56,8 @@ internal static class CliDispatch
     /// </summary>
     /// <remarks>
     /// The parameter list is the point. A caller that has never seen this app can read the catalog
-    /// and compose a call from it, which is what makes the command line usable without reading the
-    /// source of whatever is running.
+    /// and compose a call from it, which makes the command line usable without reading the source
+    /// of whatever is running.
     /// </remarks>
     private static string List(CliRequest request) => CliJson.Ok("list", writer =>
     {
@@ -96,8 +96,8 @@ internal static class CliDispatch
     /// <remarks>
     /// The name is looked up before the line is run, so a caller that misspelled a command is told
     /// so with a code rather than with a sentence it would have to read. Everything past that is
-    /// the command's own business. What it answers is the payload, and whether that counts as a
-    /// failure is what it said through <see cref="ConsoleHost.Fail"/>.
+    /// the command's own business. Its answer is the payload, and whether that counts as a failure
+    /// depends on what it said through <see cref="ConsoleHost.Fail"/>.
     /// </remarks>
     private static string? Run(CliRequest request, World world)
     {
@@ -142,10 +142,10 @@ internal static class CliDispatch
 
         if (ConsoleHost.Held is not { } release) return envelope;
 
-        // Answered now, handed back later. The command has already done whatever it does; what is
-        // being waited for is the frames after it, which is what makes "act, settle, then look"
-        // a single call rather than a poll. The envelope is built again on the way out, so the
-        // frame it reports is the frame the caller is hearing about rather than the one it asked on.
+        // Answered now, handed back later. The command has already done whatever it does; the wait
+        // is for the frames after it, which makes "act, settle, then look" a single call rather
+        // than a poll. The envelope is built again on the way out, so the frame it reports is the
+        // frame the caller is hearing about rather than the one it asked on.
         request.Holding = name;
         request.Held = answer;
         request.Release = release;

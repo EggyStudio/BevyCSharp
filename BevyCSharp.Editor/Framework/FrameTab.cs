@@ -131,8 +131,8 @@ public static class FrameTab
             ImGui.TextUnformatted(timing.Name);
             ImGui.TableNextColumn();
 
-            // GPU time where there is one, since that is what a pass costs the frame, and the CPU's
-            // dimmed where the adapter could not say.
+            // GPU time where there is one, since a pass costs the frame that, and the CPU's dimmed
+            // where the adapter could not say.
             if (timing.GpuMilliseconds is { } gpu) ImGui.Text($"{gpu:0.000}");
             else if (timing.CpuMilliseconds is { } cpu) ImGui.TextDisabled($"{cpu:0.000}");
         }

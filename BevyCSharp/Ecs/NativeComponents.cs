@@ -75,8 +75,8 @@ public static class NativeComponents
 
     /// <summary>Bevy's <c>Interaction</c>: how the pointer stands on a UI node.</summary>
     /// <remarks>
-    /// Render builds only. The id behind <see cref="Bevy.Interaction"/>, which is what a
-    /// <c>[With]</c> filter needs to find the nodes that react. Its value comes from
+    /// Render builds only. The id behind <see cref="Bevy.Interaction"/>, which a <c>[With]</c>
+    /// filter needs to find the nodes that react. Its value comes from
     /// <see cref="Ui.InteractionOf"/>.
     /// </remarks>
     public static int Interaction => ComponentType<Bevy.Interaction>.Id;
@@ -85,7 +85,7 @@ public static class NativeComponents
     /// Resolves a component by name, verifying the layout when C# mirrors it.
     /// </summary>
     /// <remarks>
-    /// This is what <see cref="ComponentType{T}"/> calls for a type implementing
+    /// <see cref="ComponentType{T}"/> calls this for a type implementing
     /// <see cref="INativeComponent"/>, in place of registering a fresh component from its layout.
     /// </remarks>
     /// <param name="name">The Bevy type's name, as the bridge knows it.</param>

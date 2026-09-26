@@ -11,8 +11,8 @@ namespace BevyCSharp.Sample.Behaviors;
 /// <para>
 /// The whole of what a game writes to have one: start the runtime once, and between
 /// <see cref="ImGuiRuntime.Begin"/> and <see cref="ImGuiRuntime.End"/> call ImGui. There is no
-/// document to load, no binding to declare and nothing to keep in step. What is on screen is what
-/// this frame's calls said.
+/// document to load, no binding to declare and nothing to keep in step. The screen shows what this
+/// frame's calls said.
 /// </para>
 /// <para>
 /// It needs a bridge with the interface compiled in (<c>build/build-native.sh --editor</c>) and

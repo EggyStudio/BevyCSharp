@@ -16,7 +16,7 @@ public partial struct Saved
 }
 
 /// <summary>
-/// Covers the world file, which is what the editor saves of a scene.
+/// Covers the world file, which holds what the editor saves of a scene.
 /// </summary>
 /// <remarks>
 /// The file is a set of edits over a scene rather than the scene, so what is checked is that an
@@ -43,7 +43,7 @@ public sealed class EditorWorldTests
 
             Assert.True(EditorWorld.Save(ctx.Ecs, file) > 0);
 
-            // Changed under the file, which is what loading is for.
+            // Changed under the file, so loading has something to do.
             ctx.Ecs.Add(entity, new Saved { Weight = 0f, Count = 0 });
 
             Assert.True(EditorWorld.Load(ctx.Ecs, file) > 0);

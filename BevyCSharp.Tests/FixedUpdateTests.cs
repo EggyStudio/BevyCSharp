@@ -36,8 +36,8 @@ public sealed class FixedUpdateTests
     [Fact]
     public void FixedDeltaReportsTheConfiguredRate()
     {
-        // A constant, not a reading. This is the slice each step covers, which is what makes a
-        // fixed-step simulation reproduce itself on a different machine.
+        // A constant, not a reading. This is the slice each step covers, which makes a fixed-step
+        // simulation reproduce itself on a different machine.
         using var harness = new EngineHarness(frames: 3, fixedHz: 50);
         var fixedDelta = 0f;
 

@@ -138,8 +138,8 @@ public static class EditorSurface
     /// </remarks>
     /// <param name="id">What to call it.</param>
     /// <param name="size">How large, in the usual child window terms.</param>
-    /// <param name="child">Child flags, if it wants any.</param>
-    /// <param name="window">Window flags, if it wants any.</param>
+    /// <param name="child">Child flags, if it needs any.</param>
+    /// <param name="window">Window flags, if it needs any.</param>
     /// <returns>Whether it is open and worth drawing into.</returns>
     internal static bool Region(
         string id,

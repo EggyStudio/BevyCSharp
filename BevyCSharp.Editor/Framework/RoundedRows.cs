@@ -19,7 +19,7 @@ namespace BevyCSharp.Editor.Framework;
 /// <para>
 /// What fixes it without rewriting those widgets is the draw list's own channels. The row goes on
 /// the upper channel and its fill on the lower one, so a rectangle drawn after the row still ends
-/// up behind it, which is what lets the fill be measured from the row it belongs to.
+/// up behind it, so the fill can be measured from the row it belongs to.
 /// </para>
 /// </remarks>
 public static class RoundedRows
@@ -68,7 +68,7 @@ public static class RoundedRows
     private static bool _inside;
 
     /// <summary>
-    /// Draws a run of rows, with a rounded fill behind whichever of them wants one.
+    /// Draws a run of rows, with a rounded fill behind whichever of them has one.
     /// </summary>
     /// <remarks>
     /// Every list in the editor that lets ImGui draw its own rows goes through here, so they all
@@ -113,7 +113,7 @@ public static class RoundedRows
         }
     }
 
-    /// <summary>Fills behind the flyout row just drawn, when it wants a fill.</summary>
+    /// <summary>Fills behind the flyout row just drawn, when it has a fill.</summary>
     /// <param name="chosen">Whether the row is open or ticked, which wears the accent.</param>
     public static void Row(bool chosen = false)
     {
@@ -124,7 +124,7 @@ public static class RoundedRows
     }
 
     /// <summary>
-    /// What a row's fill should be, or nothing when it wants none.
+    /// What a row's fill should be, or nothing when it has none.
     /// </summary>
     /// <param name="chosen">Whether the row is the one selected.</param>
     /// <param name="over">Whether the pointer is on it.</param>

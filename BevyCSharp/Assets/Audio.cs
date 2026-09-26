@@ -15,8 +15,8 @@ public enum PlaybackMode
     /// Play through, then despawn the entity.
     /// </summary>
     /// <remarks>
-    /// What a one-shot effect wants. Nothing has to remember to clean it up, and a game firing
-    /// hundreds of them does not accumulate entities.
+    /// Suits a one-shot effect. Nothing has to remember to clean it up, and a game firing hundreds
+    /// of them does not accumulate entities.
     /// </remarks>
     Despawn = 2,
 }
@@ -34,8 +34,8 @@ public sealed class AudioSettings
     /// Playback rate. 1 is as recorded.
     /// </summary>
     /// <remarks>
-    /// Changes pitch with it, because it resamples rather than time-stretches. Slight variation
-    /// on a repeated effect is what keeps it from sounding mechanical.
+    /// Changes pitch with it, because it resamples rather than time-stretches. Slight variation on
+    /// a repeated effect keeps it from sounding mechanical.
     /// </remarks>
     public float Speed { get; set; } = 1f;
 
@@ -197,9 +197,9 @@ public static unsafe class Audio
     /// <remarks>
     /// <para>
     /// Every volume here is a multiplier, where one is unchanged and a half is half the amplitude.
-    /// Decibels are what a mixer, a settings slider and anybody who has worked with sound think
-    /// in, because loudness is heard on a logarithmic scale and a linear slider spends most of its
-    /// travel on differences nobody can hear.
+    /// A mixer, a settings slider and anybody who has worked with sound think in decibels, because
+    /// loudness is heard on a logarithmic scale and a linear slider spends most of its travel on
+    /// differences nobody can hear.
     /// </para>
     /// <para>
     /// Zero decibels is unchanged, minus six is roughly half as loud, and minus eighty is near
@@ -230,9 +230,9 @@ public static unsafe class Audio
     /// </summary>
     /// <remarks>
     /// The long form of <see cref="SetListener"/>, which puts the two ears a gap apart on the x
-    /// axis. Placing them says where a head is facing as well as how wide it is, which is what a
-    /// listener carried by a character rather than by a camera needs, and what a first-person view
-    /// with the ears behind the eyes wants.
+    /// axis. Placing them says where a head is facing as well as how wide it is, for a listener
+    /// carried by a character rather than by a camera, or a first-person view with the ears behind
+    /// the eyes.
     /// </remarks>
     /// <param name="entity">The entity to listen from. It is given a transform if it has none.</param>
     /// <param name="left">Where the left ear sits, relative to that entity.</param>
@@ -272,8 +272,8 @@ public static unsafe class Audio
     /// </summary>
     /// <remarks>
     /// <para>
-    /// With <see cref="PositionOf"/> this is what survives a pause across a scene change: read
-    /// the position, stop the sound, and seek the new one back to it.
+    /// With <see cref="PositionOf"/> this carries a pause across a scene change. Read the position,
+    /// stop the sound, and seek the new one back to it.
     /// </para>
     /// <para>
     /// A sound playing on <see cref="PlaybackMode.Loop"/> refuses to be sought. Looping keeps the
@@ -290,7 +290,7 @@ public static unsafe class Audio
             Native.bcs_audio_seek(playing.Bits, seconds), $"seeking {playing} to {seconds}s");
 
     /// <summary>
-    /// Scales every sound at once, which is what a settings screen changes.
+    /// Scales every sound at once, as a settings screen does.
     /// </summary>
     /// <remarks>
     /// Multiplied with each sound's own volume rather than replacing it, so the mix a game set up

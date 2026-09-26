@@ -178,9 +178,9 @@ public sealed class SubStateTests
     /// A behavior scoped to a sub-state runs while it holds that value and at no other time.
     /// </summary>
     /// <remarks>
-    /// The attributes are what a game actually writes, so this is the shape that matters:
-    /// <c>[InState]</c> and <c>[OnEnter]</c> know nothing about sub-states and should not have to,
-    /// because which state a sub-state belongs to is written on the enum.
+    /// A game actually writes the attributes, so this is the shape that matters. <c>[InState]</c>
+    /// and <c>[OnEnter]</c> know nothing about sub-states and should not have to, because which
+    /// state a sub-state belongs to is written on the enum.
     /// </remarks>
     [Fact]
     public void ABehaviorScopedToASubStateRunsInsideItOnly()
@@ -222,7 +222,7 @@ public sealed class SubStateTests
 
     /// <summary>Two sub-states can hang from one parent, and each keeps its own value.</summary>
     /// <remarks>
-    /// A run that can be paused and can be played at a difficulty wants both, and neither is a
+    /// A run that can be paused and can be played at a difficulty needs both, and neither is a
     /// value of the other. What is checked is that the second one is not silently given the first
     /// one's slot, which would show as the two reading the same number.
     /// </remarks>
@@ -261,7 +261,7 @@ public sealed class SubStateTests
         Assert.NotEmpty(during);
 
         // The pause was never asked to change, so it stays where it started while the difficulty
-        // moves, which is what two slots rather than one looks like.
+        // moves, as two slots rather than one would.
         Assert.All(during, row => Assert.Equal(Paused.No, row.Pause));
         Assert.Contains(during, row => row.Level == Difficulty.Brutal);
     }

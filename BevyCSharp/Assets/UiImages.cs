@@ -61,9 +61,9 @@ public sealed class UiImageSettings
     /// A layout that cuts the image into frames, or none to draw the whole picture.
     /// </summary>
     /// <remarks>
-    /// The same layout a sprite is cut by, from <see cref="Render2d.CreateAtlas"/>, so one sheet
-    /// of icons serves the world and the interface. <see cref="Frame"/> says which one to draw,
-    /// which is what an icon named by number rather than by pixel rectangle wants.
+    /// The same layout a sprite is cut by, from <see cref="Render2d.CreateAtlas"/>, so one sheet of
+    /// icons serves the world and the interface. <see cref="Frame"/> says which one to draw, for an
+    /// icon named by number rather than by pixel rectangle.
     /// </remarks>
     public AssetHandle Atlas { get; set; } = AssetHandle.None;
 
@@ -77,7 +77,7 @@ public sealed class UiImageSettings
     public (float Left, float Top, float Right, float Bottom) SliceBorder { get; set; }
 
     /// <summary>How far a sliced corner may be scaled up.</summary>
-    /// <remarks>One keeps the corners at their own size, which is usually what a panel wants.</remarks>
+    /// <remarks>One keeps the corners at their own size, which usually suits a panel.</remarks>
     public float CornerScale { get; set; } = 1f;
 
     /// <summary>Repeat horizontally when tiled.</summary>
@@ -106,7 +106,7 @@ public sealed class UiImageSettings
 /// <remarks>
 /// A nine-slice stretches by default, which is wrong for anything with a pattern in it, because a
 /// border of dots drawn twice as wide becomes a border of ovals. Tiling repeats the slice instead,
-/// which is what keeps a drawn edge looking drawn at every size. The repeat is measured by the same
+/// which keeps a drawn edge looking drawn at every size. The repeat is measured by the same
 /// <c>TileStretch</c> a whole tiled picture uses.
 /// </remarks>
 [Flags]
@@ -121,6 +121,6 @@ public enum SliceTiling
     /// <summary>The middle tiles.</summary>
     Center = 2,
 
-    /// <summary>Both, which is what a patterned panel wants.</summary>
+    /// <summary>Both, for a patterned panel.</summary>
     All = Sides | Center,
 }

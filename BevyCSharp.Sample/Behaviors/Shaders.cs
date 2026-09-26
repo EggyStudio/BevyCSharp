@@ -27,7 +27,7 @@ public partial struct ShaderShowcase
     /// <summary>How many fireflies there are.</summary>
     private const int Count = 768;
 
-    /// <summary>How many a workgroup moves, which is what the compute shader says it is.</summary>
+    /// <summary>How many a workgroup moves, as the compute shader declares.</summary>
     private const int PerWorkgroup = 64;
 
     private static ShaderInstance _step;

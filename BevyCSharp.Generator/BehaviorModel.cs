@@ -160,7 +160,7 @@ internal sealed record BehaviorInvokable(string Name, MethodHintModel Hints)
 }
 
 /// <summary>One field of a behavior, and how a tool should draw it.</summary>
-/// <param name="Name">The field's name, which is what a tool labels the row with.</param>
+/// <param name="Name">The field's name, which a tool labels the row with.</param>
 /// <param name="Kind">How to read and draw it.</param>
 /// <param name="Type">The declared type, for a row that cannot be edited.</param>
 /// <param name="Options">The names an enum field can take, empty for anything else.</param>
@@ -186,8 +186,8 @@ internal sealed record BehaviorField(
 /// </summary>
 /// <remarks>
 /// The same shape as the record the schema carries, so emitting it is writing the values out in
-/// order. Everything is a string or a number, which is what an incremental generator's model has
-/// to be for it to compare cheaply between runs.
+/// order. Everything is a string or a number, because an incremental generator's model has to be
+/// made of those to compare cheaply between runs.
 /// </remarks>
 internal sealed record FieldHintModel(
     string? Label = null,

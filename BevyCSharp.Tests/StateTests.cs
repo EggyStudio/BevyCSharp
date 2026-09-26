@@ -30,7 +30,7 @@ public enum Connection
 /// <summary>A state over a narrow signed enum, with a member below zero.</summary>
 public enum Countdown : sbyte
 {
-    /// <summary>Overrun, which is what makes this signed.</summary>
+    /// <summary>Overrun, which makes this signed.</summary>
     Late = -1,
 
     /// <summary>On time.</summary>
@@ -111,8 +111,8 @@ public sealed class StateTests
     [Fact]
     public void ATransitionIsAppliedButNotBeforeTheFrameIsOver()
     {
-        // Queued rather than immediate, which is what lets every system in a frame agree on
-        // which state it is in instead of some seeing the change halfway through.
+        // Queued rather than immediate, so every system in a frame agrees on which state it is in
+        // instead of some seeing the change halfway through.
         using var harness = new EngineHarness(frames: 4);
         harness.App.AddState(Screen.Menu);
 
@@ -294,9 +294,9 @@ public sealed class StateTests
     [Fact]
     public void StatesAreReportedAsAFiniteResource()
     {
-        // The slots exist as Rust types, so there is a fixed number of them, and running out has
-        // to say so rather than silently reusing one. Eight is what the bridge declares and what
-        // the readme promises, so a bridge offering fewer is a mismatch worth failing on.
+        // The slots exist as Rust types, so there is a fixed number of them, and running out has to
+        // say so rather than silently reusing one. The bridge declares eight and the readme
+        // promises eight, so a bridge offering fewer is a mismatch worth failing on.
         Assert.True(StateRegistry.SlotCount >= 8, $"only {StateRegistry.SlotCount} state slots");
     }
 
@@ -331,8 +331,8 @@ public sealed class StateTests
     [Fact]
     public void ANegativeMemberOfANarrowEnumSurvivesTheRoundTrip()
     {
-        // A slot holds an int, and a byte-backed -1 has to arrive as -1 rather than as 255,
-        // which is what reinterpreting the bytes rather than converting them would produce.
+        // A slot holds an int, and a byte-backed -1 has to arrive as -1 rather than as 255, which
+        // reinterpreting the bytes rather than converting them would produce.
         using var harness = new EngineHarness(frames: 4);
         harness.App.AddState(Countdown.OnTime);
 

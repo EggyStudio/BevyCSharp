@@ -10,8 +10,8 @@ namespace Bevy.Tests;
 /// <remarks>
 /// The difference between checking that a setting was accepted and checking that anything was
 /// drawn. A capture written to a PNG needs a person, or an image library, to say what is in it; a
-/// capture read into memory can be asserted on, which is what lets the color a camera was told to
-/// clear to be the thing the test actually checks.
+/// capture read into memory can be asserted on, so the color a camera was told to clear to can be
+/// the thing the test actually checks.
 /// </remarks>
 [Collection("engine")]
 public sealed class CaptureTests

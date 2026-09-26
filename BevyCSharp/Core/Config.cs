@@ -98,7 +98,7 @@ public sealed class Config
     /// What <see cref="ImGuiRuntime"/> needs. Off unless asked for, because it is not free to an
     /// app that never draws one. It brings the pass that rasterizes the interface and the buffers
     /// it draws from. The editor profile is a superset of the render one, so a game and the editor
-    /// run against the same library and this is what tells them apart.
+    /// run against the same library and this tells them apart.
     /// </para>
     /// <para>
     /// Needs a bridge built with that profile, which <see cref="App.HasEditor"/> reports. On a
@@ -123,10 +123,10 @@ public sealed class Config
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The renderer without a screen. Everything else about the run is what it would be in a
-    /// window, down to the plugins that are installed and the cameras that draw.
-    /// <see cref="Width"/> and <see cref="Height"/> size the image the way they would size the
-    /// window, and <see cref="Render.Screenshot(string)"/> captures it.
+    /// The renderer without a screen. Everything else about the run is as it would be in a window,
+    /// down to the plugins that are installed and the cameras that draw. <see cref="Width"/> and
+    /// <see cref="Height"/> size the image the way they would size the window, and
+    /// <see cref="Render.Screenshot(string)"/> captures it.
     /// </para>
     /// <para>
     /// What it is for is a machine with no display. A windowed run needs a display server to open
@@ -148,8 +148,8 @@ public sealed class Config
     /// <remarks>
     /// How far away a sound is depends on what the world is measured in, which is a fact about the
     /// game rather than about any one sound, so it is set once here. Zero keeps Bevy's own of one,
-    /// which is what a world measured in meters wants; a world measured in centimeters wants a
-    /// hundred. A sound may still say otherwise for itself.
+    /// which suits a world measured in meters; a world measured in centimeters needs a hundred. A
+    /// sound may still say otherwise for itself.
     /// </remarks>
     public float SpatialScale { get; set; }
 
@@ -291,9 +291,8 @@ public sealed class Config
 /// A graphics API the renderer can be pinned to.
 /// </summary>
 /// <remarks>
-/// These map onto wgpu's <c>Backends</c> flags, which is what Bevy's renderer is built on.
-/// Only backends the host platform supports are meaningful: Direct3D 12 is Windows-only and
-/// Metal is Apple-only.
+/// These map onto wgpu's <c>Backends</c> flags, which Bevy's renderer is built on. Only backends
+/// the host platform supports are meaningful: Direct3D 12 is Windows-only and Metal is Apple-only.
 /// </remarks>
 public enum GraphicsBackend
 {

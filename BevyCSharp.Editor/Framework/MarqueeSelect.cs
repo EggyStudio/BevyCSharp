@@ -21,8 +21,8 @@ namespace BevyCSharp.Editor.Framework;
 /// </para>
 /// <para>
 /// Drawn and decided here rather than in a behavior, because both halves need the frame the shell
-/// is in the middle of. The box goes on ImGui's background list, and what the pointer is allowed to
-/// start is a question about whether the interface wants it.
+/// is in the middle of. The box goes on ImGui's background list, and whether the pointer may start
+/// one depends on whether the interface has claimed it.
 /// </para>
 /// </remarks>
 public static class MarqueeSelect
@@ -148,7 +148,7 @@ public static class MarqueeSelect
             if (EditorEntity.IsBookkeeping(ctx.Ecs, entity)) continue;
 
             // Having a box to draw is the same test the world list uses for something nobody named,
-            // and it is the whole test here, because what a drag over the viewport can take is what
+            // and it is the whole test here, because a drag over the viewport can take only what
             // the viewport is showing.
             if (!Render.TryGetBounds(entity, out var min, out var max)) continue;
             if (!Touches(camera, min, max, low, high)) continue;

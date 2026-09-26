@@ -13,10 +13,10 @@ namespace Bevy;
 /// scan, no reflection, and nothing for a trimmer to remove by accident.
 /// </para>
 /// <para>
-/// <see cref="BehaviorsPlugin"/> still falls back to scanning for assemblies that are loaded
-/// but whose module initializer has not run, which is what happens when a behavior library is
-/// referenced but no code in it has been executed yet. The registry is what makes the common
-/// case fast and trim-safe; the scan is what makes the uncommon case still work.
+/// <see cref="BehaviorsPlugin"/> still falls back to scanning for assemblies that are loaded but
+/// whose module initializer has not run, as happens when a behavior library is referenced but no
+/// code in it has been executed yet. The registry makes the common case fast and trim-safe; the
+/// scan makes the uncommon case still work.
 /// </para>
 /// </remarks>
 public static class BehaviorRegistry

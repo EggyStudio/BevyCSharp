@@ -105,7 +105,7 @@ public partial struct Orbit
             var children = ctx.Ecs.ChildrenOf(row.Entity);
 
             // The moon's own transform is its orbit around the planet; where it actually is takes
-            // the planet's orbit into account too, which is what propagation worked out.
+            // the planet's orbit into account too, as propagation worked out.
             var world = ctx.Ecs.GetOrDefault<GlobalTransform>(row.Entity).Translation;
 
             Console.WriteLine(

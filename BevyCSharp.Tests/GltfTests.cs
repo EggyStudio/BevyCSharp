@@ -43,9 +43,9 @@ public sealed class GltfTests
     [Fact]
     public void AGltfMaterialNeedsTheRendererThatTranslatesIt()
     {
-        // The material a file describes is not the one the renderer draws with, and the plugin
-        // that translates between them comes with the window. A windowless run has to say so
-        // rather than wait, which is what a caller polling the state depends on.
+        // The material a file describes is not the one the renderer draws with, and the plugin that
+        // translates between them comes with the window. A windowless run has to say so rather than
+        // wait, since a caller polling the state depends on it.
         using var harness = new EngineHarness(frames: 60, fps: 240);
         if (!App.HasRenderer) return;
 

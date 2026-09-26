@@ -45,8 +45,8 @@ internal sealed class CliRequest(string operation, string? line, string? id)
 /// <remarks>
 /// <para>
 /// The listening thread only ever adds; the frame only ever takes. Nothing a request touches is
-/// read off the main thread, which is what makes serving an app safe while it runs. The socket
-/// never sees the world, and the world never waits on the socket.
+/// read off the main thread, which makes serving an app safe while it runs. The socket never sees
+/// the world, and the world never waits on the socket.
 /// </para>
 /// <para>
 /// A command that asked to be held keeps its place here until its frame arrives, so a caller

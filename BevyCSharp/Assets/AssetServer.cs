@@ -145,8 +145,8 @@ public static class AssetKind
     /// A font, as TrueType or OpenType. Render builds only.
     /// </summary>
     /// <remarks>
-    /// Text is set in the font Bevy compiles in unless one of these is named, so a game only
-    /// loads a font when it wants its own. See <see cref="UiTextSettings.Font"/>.
+    /// Text is set in the font Bevy compiles in unless one of these is named, so a game only loads
+    /// a font when it has its own. See <see cref="UiTextSettings.Font"/>.
     /// </remarks>
     public const string Font = "Font";
 
@@ -170,7 +170,7 @@ public static class AssetKind
 /// <summary>What happens outside a texture's zero-to-one range.</summary>
 public enum TextureWrap
 {
-    /// <summary>Hold the edge pixel. Bevy's default, and what a decal or a skybox wants.</summary>
+    /// <summary>Hold the edge pixel. Bevy's default, and suited to a decal or a skybox.</summary>
     Clamp = 0,
 
     /// <summary>Start over, so the texture tiles.</summary>
@@ -183,10 +183,10 @@ public enum TextureWrap
 /// <summary>How a texture is filtered when it does not land on pixel boundaries.</summary>
 public enum TextureFilter
 {
-    /// <summary>Take the nearest pixel. Bevy's default, and what pixel art wants.</summary>
+    /// <summary>Take the nearest pixel. Bevy's default, and suited to pixel art.</summary>
     Nearest = 0,
 
-    /// <summary>Blend between pixels, which is what everything else wants.</summary>
+    /// <summary>Blend between pixels, which suits everything else.</summary>
     Linear = 1,
 }
 
@@ -336,9 +336,9 @@ public static unsafe class AssetServer
     /// <remarks>
     /// <para>
     /// <b>Needs a window.</b> A glTF material loads as a <c>GltfMaterial</c>, which describes a
-    /// material rather than being one the renderer draws with. Bevy's PBR plugin translates it
-    /// and publishes the result under a second label, which is what this asks for, and that
-    /// plugin comes with the window. A windowless run has no such asset and the load fails.
+    /// material rather than being one the renderer draws with. Bevy's PBR plugin translates it and
+    /// publishes the result under a second label, which this asks for, and that plugin comes with
+    /// the window. A windowless run has no such asset and the load fails.
     /// </para>
     /// <para>
     /// Materials are numbered per file rather than per mesh, so this index is not the one passed

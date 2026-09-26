@@ -172,7 +172,7 @@ public sealed class EditorHistoryTests
         harness.Run();
 
         // What a component holds is the component. One put back empty is the same loss with a row
-        // drawn over it, so the values are what this is asserting rather than the row.
+        // drawn over it, so this asserts the values rather than the row.
         Assert.True(carried);
         Assert.Equal(7.5f, speed, 3);
         Assert.Equal(3, count);

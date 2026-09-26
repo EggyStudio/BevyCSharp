@@ -40,13 +40,13 @@ public partial struct Scene
             + "middle button to slide; wheel to move along the view; Alt and the left button to "
             + "orbit; F to frame the origin");
 
-        // The sky, scattered from the sun below rather than painted. It is what the camera sees
-        // where the scene does not cover, and what tints everything in the distance.
+        // The sky, scattered from the sun below rather than painted. The camera sees it where the
+        // scene does not cover, and it tints everything in the distance.
         Render.SetAtmosphere(camera, new AtmosphereSettings());
 
         // What the camera does with the picture once the scene is drawn. The high dynamic range
-        // target is what makes the rest worth having. Without it nothing is brighter than white,
-        // so the tonemapper has nothing to bring down and bloom has nothing to scatter.
+        // target makes the rest worth having. Without it nothing is brighter than white, so the
+        // tonemapper has nothing to bring down and bloom has nothing to scatter.
         Render.SetPostProcessing(camera, new PostSettings
         {
             Hdr = true,
@@ -93,11 +93,11 @@ public partial struct Scene
 
         // A lamp, emissive well past white so there is something for the bloom to scatter.
         //
-        // The numbers are luminance in nits, and the camera divides them by its exposure, which
-        // at Bevy's own setting is about a thousand. Thousands here are what arrive as the
-        // handful of multiples of white that blow the sphere out and feed the bloom. It is lit
-        // rather than unlit because Bevy adds the emission as part of the lighting, so an unlit
-        // sphere would show its base color and nothing else.
+        // The numbers are luminance in nits, and the camera divides them by its exposure, which at
+        // Bevy's own setting is about a thousand. Thousands here arrive as the handful of multiples
+        // of white that blow the sphere out and feed the bloom. It is lit rather than unlit because
+        // Bevy adds the emission as part of the lighting, so an unlit sphere would show its base
+        // color and nothing else.
         var lamp = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, lamp, Render.CreateMesh(MeshShape.Sphere, 0.6f));
         Render.SetMaterial(ctx.Ecs, lamp, Render.CreateMaterial(new MaterialSettings

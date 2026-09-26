@@ -77,7 +77,7 @@ public sealed unsafe class App : IDisposable
 
     /// <summary>True when the running app installed the interface.</summary>
     /// <remarks>
-    /// The third of the three questions, and the one an app drawing an interface actually wants
+    /// The third of the three questions, and the one an app drawing an interface actually needs
     /// answered. <see cref="HasRenderer"/> and <see cref="HasEditor"/> report what the bridge was
     /// built with; this reports what this run asked for, which is <see cref="Config.Gui"/>. A
     /// bridge carrying the surface still draws nothing without it, and telling those apart is the
@@ -392,8 +392,8 @@ public sealed unsafe class App : IDisposable
     /// <remarks>
     /// <para>
     /// A schedule cannot be added to once Bevy owns it, so this puts one dispatcher in each stage
-    /// beforehand and runs whatever has arrived since. That is what makes a behavior compiled at
-    /// runtime, from a script file that was edited while the app ran, reach the schedule at all.
+    /// beforehand and runs whatever has arrived since. That lets a behavior compiled at runtime,
+    /// from a script file that was edited while the app ran, reach the schedule at all.
     /// </para>
     /// <para>
     /// Off unless asked for, because it costs a call across the boundary per stage per frame
@@ -449,7 +449,7 @@ public sealed unsafe class App : IDisposable
     /// A startup system is the exception. It is run once, here, rather than queued. The stage
     /// already happened, so queueing it would mean it never ran at all, and what it means for
     /// something loaded at runtime is "when this arrives" rather than "when the app began". That
-    /// is what lets a reloaded script spawn what it needs.
+    /// lets a reloaded script spawn what it needs.
     /// </remarks>
     private App AddDynamicSystem(Stage stage, SystemDescriptor descriptor)
     {
@@ -544,8 +544,8 @@ public sealed unsafe class App : IDisposable
     /// <para>
     /// <paramref name="initial"/> is where it starts each time it comes into existence, which is
     /// every time the parent enters the value it lives under. A pause that is left on when a run
-    /// ends is off again when the next run starts, which is what a player expects and what a
-    /// remembered value would get wrong.
+    /// ends is off again when the next run starts, as a player expects and a remembered value would
+    /// get wrong.
     /// </para>
     /// </remarks>
     /// <exception cref="InvalidOperationException">
@@ -567,9 +567,9 @@ public sealed unsafe class App : IDisposable
                       + "[SubStateOf(typeof(Parent), Parent.Value)] on the enum, which is where a "
                       + "reader looks for what it belongs to.");
 
-        // Claiming the sub-state is what gives it the slot everything else addresses it by, and
-        // the bridge is told where it sits among the sub-states rather than among the states, so
-        // the state count comes back off again here.
+        // Claiming the sub-state gives it the slot everything else addresses it by, and the bridge
+        // is told where it sits among the sub-states rather than among the states, so the state
+        // count comes back off again here.
         var slot = StateRegistry.Claim<TState>() - StateRegistry.SlotCount;
 
         Native.Check(
@@ -695,9 +695,9 @@ public sealed unsafe class App : IDisposable
     /// <paramref name="value"/>.
     /// </summary>
     /// <remarks>
-    /// What <c>[OnEnter]</c> and <c>[OnExit]</c> emit. Unlike <see cref="AddSystem(Stage,
-    /// SystemDescriptor)"/> this runs once per transition rather than once per frame, which is
-    /// what makes it the place to build a screen or take one away.
+    /// What <c>[OnEnter]</c> and <c>[OnExit]</c> emit. Unlike
+    /// <see cref="AddSystem(Stage, SystemDescriptor)"/> this runs once per transition rather than
+    /// once per frame, which makes it the place to build a screen or take one away.
     /// </remarks>
     /// <param name="value">The state value whose edge to run on.</param>
     /// <param name="entering">True for the enter edge, false for the exit edge.</param>
@@ -784,11 +784,11 @@ public sealed unsafe class App : IDisposable
             throw new InvalidOperationException("This app has already been run.");
 
         // macOS insists the *window* event loop owns the main thread, and breaking that rule
-        // crashes inside AppKit rather than anywhere that points back here. The constraint
-        // belongs to windowing, not to the engine, because a headless run creates no window and no
-        // event loop, so it is free to run anywhere, which is what lets a test runner drive it
-        // from its own worker threads. The bridge answers yes on every platform but Apple, so
-        // this costs one call and only ever fires where it genuinely matters.
+        // crashes inside AppKit rather than anywhere that points back here. The constraint belongs
+        // to windowing, not to the engine, because a headless run creates no window and no event
+        // loop, so it is free to run anywhere, and a test runner can drive it from its own worker
+        // threads. The bridge answers yes on every platform but Apple, so this costs one call and
+        // only ever fires where it genuinely matters.
         if (WillOpenWindow && Native.bcs_is_main_thread() == 0)
             throw new InvalidOperationException(
                 "App.Run must be called from the process main thread when it opens a window. "
@@ -882,9 +882,9 @@ public sealed unsafe class App : IDisposable
     /// A registered system and the pinned handle Bevy calls back through.
     /// </summary>
     /// <remarks>
-    /// The native side stores a raw function pointer plus an opaque <c>user</c> word. A normal
-    /// GC handle is what turns that word back into a managed object; it is pinned for the life
-    /// of the app because Bevy's schedule holds the pointer for exactly that long.
+    /// The native side stores a raw function pointer plus an opaque <c>user</c> word. A normal GC
+    /// handle turns that word back into a managed object; it is pinned for the life of the app
+    /// because Bevy's schedule holds the pointer for exactly that long.
     /// </remarks>
     private sealed class RegisteredSystem : IDisposable
     {

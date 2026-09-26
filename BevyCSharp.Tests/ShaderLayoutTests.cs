@@ -65,7 +65,7 @@ public sealed class ShaderLayoutTests
 
     /// <summary>
     /// The listing the bridge hands the inspector reads back as the parameters it describes, which
-    /// is what keeps a change of format on one side from emptying the inspector without a word.
+    /// keeps a change of format on one side from emptying the inspector without a word.
     /// </summary>
     [Fact]
     public void AParameterListingReadsBackAsItsParameters()

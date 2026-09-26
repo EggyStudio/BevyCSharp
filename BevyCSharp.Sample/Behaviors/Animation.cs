@@ -65,8 +65,8 @@ public partial struct SpriteAnimation
         if (Elapsed < Hold) return;
 
         // A subtraction rather than a reset, so a frame that took longer than its hold carries the
-        // overflow into the next one instead of dropping it, which is what keeps a long animation
-        // from drifting against the clock.
+        // overflow into the next one instead of dropping it, which keeps a long animation from
+        // drifting against the clock.
         Elapsed -= Hold;
 
         if (Current >= Last)

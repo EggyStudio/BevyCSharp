@@ -146,9 +146,8 @@ public static class BehaviorConditions
     /// True when every modifier set in <paramref name="modifiers"/> is currently held.
     /// </summary>
     /// <remarks>
-    /// Flags are ANDed, so <c>Ctrl | Shift</c> requires both. Each flag is satisfied by either
-    /// side of the keyboard, which is what a shortcut normally means; to pin one side, name that
-    /// key directly instead.
+    /// Flags are ANDed, so <c>Ctrl | Shift</c> requires both. Each flag is satisfied by either side
+    /// of the keyboard, as a shortcut normally is; to pin one side, name that key directly instead.
     /// </remarks>
     public static bool ModifiersHeld(Input input, KeyModifier modifiers)
     {
@@ -176,9 +175,9 @@ public static class BehaviorConditions
 /// Tags every system registered inside the scope with a provenance string.
 /// </summary>
 /// <remarks>
-/// This is what makes hot-reload swappable. A reloaded generation of behaviors registers under
-/// its own tag, and <see cref="App.RemoveSystemsBySource"/> retires the previous one without
-/// touching systems that came from anywhere else.
+/// This makes hot-reload swappable. A reloaded generation of behaviors registers under its own tag,
+/// and <see cref="App.RemoveSystemsBySource"/> retires the previous one without touching systems
+/// that came from anywhere else.
 /// </remarks>
 public sealed class SystemRegistrationSourceScope : IDisposable
 {

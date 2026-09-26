@@ -62,7 +62,7 @@ public sealed class EcsWorldTests
             Assert.Equal(4f, sized.Width);
             Assert.Equal(9f, sized.Height);
 
-            // And adding one replaces it whole, which is what a patch is not.
+            // And adding one replaces it whole, which a patch does not.
             ctx.Ecs.Add(entity, new Sized { Height = 1f });
             Assert.Equal(0f, ctx.Ecs.GetOrDefault<Sized>(entity).Width);
         });
@@ -98,7 +98,7 @@ public sealed class EcsWorldTests
             Assert.Equal(2f, ctx.Ecs.GetOrDefault<Sized>(child).Width);
             Assert.Equal(2f, ctx.Ecs.GetOrDefault<Sized>(grandchild).Width);
 
-            // And nothing outside the tree, which is what makes it a tree rather than a query.
+            // And nothing outside the tree, which makes it a tree rather than a query.
             Assert.False(ctx.Ecs.Has<Sized>(stranger));
         });
 

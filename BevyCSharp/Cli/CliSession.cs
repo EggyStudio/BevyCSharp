@@ -10,13 +10,13 @@ namespace Bevy;
 /// <para>
 /// A serving app writes one of these beside the others and keeps its heartbeat fresh; the command
 /// line reads the directory to find what is running. Discovery by file rather than by a fixed port
-/// is what lets several apps serve at once, and what lets a tool tell a session that is up from one
-/// that was killed without getting the chance to tidy up.
+/// lets several apps serve at once, and lets a tool tell a session that is up from one that was
+/// killed without getting the chance to tidy up.
 /// </para>
 /// <para>
 /// The file carries the port's token, so it is written readable by its owner and nobody else. The
-/// permissions are the boundary that matters; the token is what stops something that already has a
-/// port number from guessing its way in.
+/// permissions are the boundary that matters; the token stops something that already has a port
+/// number from guessing its way in.
 /// </para>
 /// </remarks>
 /// <param name="Pid">The process, which is also the file's name.</param>

@@ -333,10 +333,10 @@ public sealed unsafe class EcsWorld
     /// is that read, change and write in one call.
     /// </para>
     /// <para>
-    /// An entity that does not carry the component gets one built from
-    /// <see langword="default"/> and then changed, so a patch names what it cares about whether or
-    /// not anything set the rest. <see cref="GetRef{T}"/> is the other way round, writing straight
-    /// into storage, and is what a system changing a component it knows is there should use.
+    /// An entity that does not carry the component gets one built from <see langword="default"/>
+    /// and then changed, so a patch names what it cares about whether or not anything set the rest.
+    /// <see cref="GetRef{T}"/> is the other way round, writing straight into storage, and a system
+    /// changing a component it knows is there should use it.
     /// </para>
     /// </remarks>
     /// <param name="entity">The entity to change.</param>
@@ -362,10 +362,10 @@ public sealed unsafe class EcsWorld
     /// </summary>
     /// <remarks>
     /// <para>
-    /// A glTF scene spawns as a tree, and what a game wants to say about it is usually about the
-    /// whole model rather than about the one entity the file happened to put at the root. Every
-    /// entity in the tree is patched, including ones that did not carry the component, which is
-    /// what makes this useful for adding a component as well as for changing one.
+    /// A glTF scene spawns as a tree, and a game usually has something to say about the whole model
+    /// rather than about the one entity the file happened to put at the root. Every entity in the
+    /// tree is patched, including ones that did not carry the component, which makes this useful
+    /// for adding a component as well as for changing one.
     /// </para>
     /// <para>
     /// The tree is walked before anything is written, so a patch that spawns or despawns does not

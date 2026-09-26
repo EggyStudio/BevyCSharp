@@ -24,7 +24,7 @@ public enum ToolSpace
     /// <summary>The world's own axes, whichever way the thing is facing.</summary>
     Global,
 
-    /// <summary>The thing's own axes, which is what a drag along its length means.</summary>
+    /// <summary>The thing's own axes, so a drag along its length follows the thing.</summary>
     Local,
 }
 
@@ -71,9 +71,9 @@ public static class EditorTools
     /// </summary>
     /// <remarks>
     /// Both are needed and neither is a default anyone agrees on. Moving a thing along a floor
-    /// wants the world; sliding a drawer out of a cabinet that is not square to the world wants
-    /// the cabinet's. What matters is that the handle drawn and the drag applied use the same one,
-    /// so it is asked here and nowhere else.
+    /// needs the world's axes; sliding a drawer out of a cabinet that is not square to the world
+    /// needs the cabinet's. What matters is that the handle drawn and the drag applied use the same
+    /// one, so it is asked here and nowhere else.
     /// </remarks>
     public static ToolSpace Space { get; set; } = ToolSpace.Global;
 
@@ -97,7 +97,7 @@ public static class EditorTools
         ];
     }
 
-    /// <summary>The world's axes, which are what a global handle is drawn along.</summary>
+    /// <summary>The world's axes, which a global handle is drawn along.</summary>
     private static readonly Vec3[] ViewportAxes = [Vec3.UnitX, Vec3.UnitY, Vec3.UnitZ];
 
     /// <summary>Meters a snapped move lands on.</summary>

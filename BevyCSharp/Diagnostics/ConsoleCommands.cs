@@ -16,8 +16,8 @@ namespace Bevy;
 /// <para>
 /// The parameters may be strings, whole or fractional numbers, or flags, and they are taken from
 /// the words after the command's name. A single string parameter is handed everything typed after
-/// the name, spaces and all, which is what a command that takes a sentence wants. Returning a
-/// string writes that string back to the console; returning nothing writes nothing.
+/// the name, spaces and all, for a command that takes a sentence. Returning a string writes that
+/// string back to the console; returning nothing writes nothing.
 /// </para>
 /// </remarks>
 /// <param name="name">What is typed to run it, or nothing for the method's own name, lowercased.</param>
@@ -36,9 +36,9 @@ public sealed class CommandAttribute(string name = "", string help = "") : Attri
 /// One argument a command takes.
 /// </summary>
 /// <remarks>
-/// Filled in by the generated registration, which knows what the method declared. It is what lets
-/// something that has never seen a command compose a call to it: <see cref="ConsoleCommand.Usage"/>
-/// is a sentence for a person, and this is the same thing for a program.
+/// Filled in by the generated registration, which knows what the method declared. It lets something
+/// that has never seen a command compose a call to it. <see cref="ConsoleCommand.Usage"/> is a
+/// sentence for a person, and this is the same thing for a program.
 /// </remarks>
 /// <param name="Name">The parameter's own name, as the method spelled it.</param>
 /// <param name="Kind">
@@ -79,8 +79,8 @@ public sealed record ConsoleCommand(
 /// <remarks>
 /// <para>
 /// Filled by generated registrations, one per assembly, so a game that declares a command
-/// contributes it by existing. Anything can add one at runtime as well, which is what a tool built
-/// on top of this does.
+/// contributes it by existing. Anything can add one at runtime as well, as a tool built on top of
+/// this does.
 /// </para>
 /// <para>
 /// The console is the one part of a program that is expected to reach everything, and this is the
@@ -178,13 +178,13 @@ public static class ConsoleCommands
     }
 
     /// <summary>
-    /// A line with one pair of enclosing quotes taken off, if that is what it is.
+    /// A line with one pair of enclosing quotes taken off, if it has them.
     /// </summary>
     /// <remarks>
     /// <para>
     /// For the command that takes everything after its name. Somebody typing <c>do "Spawn/Cube"</c>
     /// means the path without the quotes, and something sending a line over a socket has to quote a
-    /// value that contains spaces for it to survive as one. Both want the same thing back.
+    /// value that contains spaces for it to survive as one. Both need the same thing back.
     /// </para>
     /// <para>
     /// Only a line that is entirely one quoted run is unwrapped, so a fragment that merely contains

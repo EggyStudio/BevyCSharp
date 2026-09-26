@@ -83,7 +83,7 @@ public static class OrientationGizmo
             // pointing a little away from the camera still points the way it points, and dimming
             // it because of that is the gizmo saying the world turned over.
             //
-            // Depth decides only what is drawn over what, which is what the sort above is for.
+            // Depth decides only what is drawn over what, and the sort above handles that.
             var packed = ImGui.GetColorU32(
                 arm.Positive ? arm.Color : EditorTheme.Alpha(arm.Color, 0.4f));
 

@@ -27,10 +27,10 @@ public sealed class BehaviorsPlugin : IPlugin
     /// </summary>
     /// <remarks>
     /// Reserved. Compiling C# needs a compiler, and a game should not carry one to run, so this
-    /// library provides the two halves that are engine business and leaves the compiling to
-    /// whoever wants it: <see cref="App.EnableDynamicSystems"/> for a system that arrives after
-    /// the loop started, and <see cref="App.RemoveSystemsBySource"/> for retiring the generation
-    /// it replaces. <c>BevyCSharp.Editor</c> has a host built on those two.
+    /// library provides the two halves that are engine business and leaves the compiling to whoever
+    /// wants it. The halves are <see cref="App.EnableDynamicSystems"/> for a system that arrives
+    /// after the loop started, and <see cref="App.RemoveSystemsBySource"/> for retiring the
+    /// generation it replaces. <c>BevyCSharp.Editor</c> has a host built on those two.
     /// </remarks>
     public string? ScriptsDirectory { get; init; }
 
@@ -41,9 +41,9 @@ public sealed class BehaviorsPlugin : IPlugin
     /// Whether to scan loaded assemblies for registrations the registry has not seen.
     /// </summary>
     /// <remarks>
-    /// On by default, because it is what makes a behavior library that nothing has touched yet
-    /// still work. Turn it off for a trimmed or ahead-of-time compiled build, where the scan
-    /// cannot find anything the module initializers did not already report.
+    /// On by default, because it makes a behavior library that nothing has touched yet still work.
+    /// Turn it off for a trimmed or ahead-of-time compiled build, where the scan cannot find
+    /// anything the module initializers did not already report.
     /// </remarks>
     public bool ScanLoadedAssemblies { get; init; } = true;
 

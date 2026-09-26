@@ -133,8 +133,8 @@ public static class ToolbarView
             return;
         }
 
-        // Round enough that a square button is a circle, which is what a button with a picture in
-        // it and no words wants to be.
+        // Round enough that a square button is a circle, the usual shape of a button with a picture
+        // in it and no words.
         var size = EditorSurface.Tall;
 
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, size * 0.5f);
@@ -205,7 +205,7 @@ public static class ToolbarView
     /// <remarks>
     /// Drawn rather than asked for. ImGui rounds an image button by the smaller of its padding and
     /// the style's rounding, so a circle would need padding half the button wide, which is padding
-    /// around nothing. A circle and a picture over it is what was wanted and what this draws.
+    /// around nothing. This draws a circle and a picture over it.
     /// </remarks>
     internal static bool Circle(string id, string icon, bool on, float size)
     {
@@ -217,8 +217,8 @@ public static class ToolbarView
         var over = ImGui.IsItemHovered();
         var held = ImGui.IsItemActive();
 
-        // Out of the colors the caller pushed, which is what a button of ImGui's own would read.
-        // Reaching for the palette directly here would quietly ignore them.
+        // Out of the colors the caller pushed, as a button of ImGui's own would read them. Reaching
+        // for the palette directly here would quietly ignore them.
         var fill = held
             ? ImGuiCol.ButtonActive
             : over

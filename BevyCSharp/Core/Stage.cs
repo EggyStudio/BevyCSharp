@@ -47,7 +47,7 @@ public enum Stage
     /// <remarks>
     /// Runs between <see cref="PreUpdate"/> and <see cref="Update"/>, as many times as the time
     /// since the last frame allows: twice after a slow frame, not at all after a fast one. That
-    /// is what makes it frame-rate independent, and it is why the number to integrate with is
+    /// makes it frame-rate independent, and it is why the number to integrate with is
     /// <see cref="Time.FixedDelta"/> rather than <see cref="Time.Delta"/>.
     /// </remarks>
     FixedUpdate = 10,

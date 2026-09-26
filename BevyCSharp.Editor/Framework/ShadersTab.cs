@@ -127,8 +127,8 @@ public static class ShadersTab
                 ImGui.PopStyleColor();
             }
 
-            // What the shader declares, which is every name a value can be set by, and where
-            // each is, which is what a struct set as bytes is laid out against.
+            // What the shader declares, which is every name a value can be set by, and where each
+            // is, which a struct set as bytes is laid out against.
             var layout = chosen.Layout;
 
             if (layout.Length > 0)

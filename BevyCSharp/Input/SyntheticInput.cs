@@ -118,9 +118,9 @@ public static class SyntheticInput
     /// Presses and releases a key in the interface's own queue.
     /// </summary>
     /// <remarks>
-    /// A key that types something types it as well, because that is what a keyboard does and what
-    /// a field is waiting for. This reaches the interface only; <see cref="Press(Key, string)"/>
-    /// starts where a real key starts.
+    /// A key that types something types it as well, because a keyboard does that and a field is
+    /// waiting for it. This reaches the interface only; <see cref="Press(Key, string)"/> starts
+    /// where a real key starts.
     /// </remarks>
     public static void Key(ImGuiKey key, string? typed = null)
     {
@@ -154,8 +154,8 @@ public static class SyntheticInput
     /// <remarks>
     /// <para>
     /// Into both halves of what a pointer does, which is the interface's own event queue and the
-    /// window's messages. The second is what raycasts the scene and steers the camera, so a click
-    /// told to only one of them tests half the path a hand takes.
+    /// window's messages. The second raycasts the scene and steers the camera, so a click told to
+    /// only one of them tests half the path a hand takes.
     /// </para>
     /// <para>
     /// A pointer is a thing that happens to a window, so a run with none has nowhere to send one.

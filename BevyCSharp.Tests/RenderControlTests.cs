@@ -125,7 +125,7 @@ public sealed class RenderControlTests
                 OuterAngle = 0.6f,
             });
 
-            // Taking it off again is the same call, which is what a settings screen needs.
+            // Taking it off again is the same call, as a settings screen needs.
             Render.SetLightCookie(spot, AssetHandle.None);
 
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional });
@@ -207,8 +207,8 @@ public sealed class RenderControlTests
                 Hdr = true,
             });
 
-            // Asking again keeps the frames it has accumulated rather than throwing them away,
-            // which is what a settings screen writing the whole pipeline back would otherwise do
+            // Asking again keeps the frames it has accumulated rather than throwing them away.
+            // Otherwise a settings screen writing the whole pipeline back would throw them away
             // every time the player changed something else.
             Render.SetPostProcessing(camera, new PostSettings
             {
