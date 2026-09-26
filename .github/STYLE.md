@@ -29,10 +29,10 @@ statement followed by its reason is two sentences or one sentence with `because`
 joint it becomes a tic, because every paragraph then acquires the same shape and the reader stops
 reading the mark as anything at all.
 
-The test is what follows the mark. A list, or a phrase naming the thing just mentioned, is what
-the colon is for. A clause that could stand on its own and explains what precedes it is a joint,
-whatever it is about, so `a tag is cheap: it costs nothing to store` is wrong where `a tag is
-cheap, because it costs nothing to store` is right.
+The test is the text after the mark. The colon is for a list, or a phrase naming the thing just
+mentioned. A clause that could stand on its own and explains what precedes it is a joint, whatever
+it is about, so `a tag is cheap: it costs nothing to store` is wrong where
+`a tag is cheap, because it costs nothing to store` is right.
 
 | instead of | write |
 |---|---|
@@ -108,11 +108,32 @@ State the claim on its own:
 
 > Registration happens at assembly load.
 
-The construction is warranted where the negated alternative is what a reader would otherwise
-assume, and correcting that assumption is the point of the sentence, as in "that is Bevy's real
-`Transform`, not a copy kept in sync".
+The construction is warranted where a reader would otherwise assume the negated alternative, and
+correcting that assumption is the point of the sentence, as in "that is Bevy's real `Transform`, not
+a copy kept in sync".
 
 Limitations are stated directly. "Not implemented yet" is preferable to "coming soon".
+
+### Saying what things are for
+
+A sentence names its subject and says what it does. The cleft forms `X is what Y needs`,
+`which is what Y wants`, `that is what Y is for` and `this is what makes it work` route a plain
+statement through a relative clause and read as a mannerism once they recur, which they do, because
+every explanation can be forced into that shape. Code and features do not want things either, so
+`a camera wants Msaa of one` is written as the requirement it is.
+
+| instead of | write |
+|---|---|
+| `a prepass is what an outline is made of` | `an outline is drawn from the prepass` |
+| `which is what screen-space GI needs` | `which screen-space GI needs` |
+| `that is what the timestamp queries are for` | `the timestamp queries measure that` |
+| `this is what lets a reload keep its values` | `so a reload keeps its values` |
+| `a scene of dense meshes wants meshlets` | `a scene of dense meshes benefits from meshlets` |
+| `a camera read this way wants Msaa of one` | `a camera read this way needs Msaa of one` |
+| `what the caller wanted` | unchanged, because a person wants things |
+
+The same applies to `what X does is Y`, `the point is that`, and `the reason is that`, which delay
+the statement they introduce.
 
 ## Self-reference
 
@@ -192,6 +213,9 @@ grep -rn "^\s*\(///\|//\|//!\) .*[a-z]: [a-z]" --include=*.cs --include=*.rs .
 
 # Padded section banners.
 grep -rn "// -- .*--" --include=*.cs --include=*.rs .
+
+# Cleft sentences and things that want. People want things, so each hit is read.
+grep -rniE "\b(is|are|was|were) what\b|which is what|that is what|this is what|\bwants?\b" --include=*.cs --include=*.rs --include=*.md .
 
 # Prose about earlier revisions.
 grep -rniE "contrary to what|this (file|document|entry) (said|used to)|the (old|previous) (entry|version)|at the time .* was written" --include=*.md .

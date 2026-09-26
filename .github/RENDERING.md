@@ -1,9 +1,9 @@
 # Rendering for the high end
 
 What the engine has to offer so that virtualized geometry, texture streaming, screen-space and
-world-space global illumination, ambient occlusion and, later, reflections and radiance cascades
-can be built on it as ordinary code. The README describes what exists; this is what has to exist,
-why, and in what order.
+world-space global illumination, ambient occlusion and, later, reflections and radiance cascades can
+be built on it as ordinary code. The README describes what exists, and this document describes what
+has to exist, why, and in what order.
 
 ## What this is for
 
@@ -69,9 +69,9 @@ What it needs from an engine:
   engine has to expose as data rather than as a camera.
 
 Bevy ships an implementation of this, `MeshletPlugin` behind the `meshlet` and `meshlet_processor`
-features. It needs 64-bit texture atomics, runs on Vulkan and Metal, refuses multisampling and
-wants one opaque rendering method for the whole app. It is the first thing to offer, and the
-requirements above are what a package doing it differently would need beyond it.
+features. It needs 64-bit texture atomics, runs on Vulkan and Metal, refuses multisampling and needs
+one opaque rendering method for the whole app. It is the first thing to offer, and a package doing
+it differently would need the requirements above beyond it.
 
 Offering it is not a matter of adding the plugin. It ends the process, rather than failing
 softly, when the adapter lacks the features it needs and when any camera is multisampled, so it is
@@ -173,22 +173,22 @@ The answer has somewhere to go already. Bevy's irradiance volume is a grid of am
 image that its materials read as diffuse light, so a world-space technique that writes its radiance
 cache out into such a grid each frame lights everything drawn with a standard material, blended by
 normal and filtered between points, with no change to how those materials are drawn. It is coarser
-than a per-pixel answer, which is why screen-space GI still wants an input of its own, but it is the
-same shape a probe-based GI keeps anyway.
+than a per-pixel answer, so screen-space GI still needs an input of its own, but it is the same
+shape a probe-based GI keeps anyway.
 
 ### Reflections
 
 Screen-space reflections share the depth pyramid and the trace with screen-space GI. What screen
-space misses is answered by reflection probes, which want cube maps rendered in the engine, or by
+space misses is answered by reflection probes, which need cube maps rendered in the engine, or by
 hardware rays, which share the acceleration structure, material pool and hit shading with
-world-space GI. A reflection solution is therefore mostly the GI infrastructure with a different
-ray distribution and a specular input to lighting.
+world-space GI. A reflection solution is therefore mostly the GI infrastructure with a different ray
+distribution and a specular input to lighting.
 
 Both ends Bevy ships are bridged. Its screen-space reflections run over its deferred path, and a
 reflection probe can capture itself, rendering the room into a cube that Bevy filters on the GPU,
-live or once. What a reflection package adds is what those two leave out: a trace that reaches past
-the screen's edge through the probes and the world-space structures, and a specular input a
-package's own result can be written into, which Bevy's lighting does not have yet.
+live or once. A reflection package adds what those two leave out: a trace that reaches past the
+screen's edge through the probes and the world-space structures, and a specular input a package's
+own result can be written into, which Bevy's lighting does not have yet.
 
 ### Radiance cascades
 
@@ -386,5 +386,5 @@ Each phase unblocks a class of package, and none needs a later one.
 - **Mesh shaders in wgpu**, which would change how a cluster rasterizer is best written.
 - **64-bit atomics and subgroups**, available on some adapters now and needed as fallbacks where
   they are not.
-- **Bevy's render graph as schedules**, which is what lets a pass attach to a named point in the
-  frame, and which keeps changing shape between releases.
+- **Bevy's render graph as schedules**, which lets a pass attach to a named point in the frame, and
+  which keeps changing shape between releases.

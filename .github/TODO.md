@@ -14,8 +14,8 @@ in [RENDERING.md](RENDERING.md), which lists what those techniques need from the
 order it is built in. The items below are the gaps closer to hand.
 
 An item says what exists, what is missing, and what the missing part needs. Adding an export means
-bumping `ABI_VERSION` in `native/bevy_csharp/src/lib.rs` and `Native.ExpectedAbiVersion`, which is
-what stops a stale bridge loading against new managed code.
+bumping `ABI_VERSION` in `native/bevy_csharp/src/lib.rs` and `Native.ExpectedAbiVersion`, which
+stops a stale bridge loading against new managed code.
 
 ## Content
 
@@ -26,9 +26,9 @@ scene or a `.scn`/`.scn.ron` file, both of which are a `WorldAsset` in 0.19. `Lo
 needs a window, because translating a glTF material into one the renderer draws with belongs to the
 renderer, which is the arrangement rather than a limitation.
 
-The division of labor this aims at: glTF carries geometry, materials and animations, because that
-is what Blender and every other tool exports, and composition happens after the scene is spawned by
-adding components to what the file defined.
+The division of labor this aims at: glTF carries geometry, materials and animations, because Blender
+and every other tool exports them, and composition happens after the scene is spawned by adding
+components to what the file defined.
 
 Bevy's own answer to composition is Bevy Scene Notation, and it is **not** reachable from C#.
 `bsn!` is a compile-time Rust macro expanding into types that implement the `Scene` trait, so there
@@ -40,13 +40,13 @@ What C# has instead is spawn-then-patch through the ECS surface: spawn the scene
 That reaches the same result with the same last-write-wins rule, because both end as component
 inserts. Two things BSN has that it does not:
 
-- **Templates.** A BSN field takes a value turned into a component when the scene spawns, which is
-  what lets `image: "player.png"` stand for an `AssetServer::load`. On this side those are separate
-  calls that already exist, so what is missing is the convenience rather than the capability.
+- **Templates.** A BSN field takes a value turned into a component when the scene spawns, so
+  `image: "player.png"` can stand for an `AssetServer::load`. On this side those are separate calls
+  that already exist, so what is missing is the convenience rather than the capability.
 - **Patching is per component, not per scene.** `ctx.Ecs.Patch` and `PatchTree` change the fields
-  they name and leave the rest, which is what BSN's field-level merge does between two scenes. What
-  has no equivalent is stating the patch as data rather than as code, so a second file can overlay
-  the first without anything being compiled.
+  they name and leave the rest, as BSN's field-level merge does between two scenes. What has no
+  equivalent is stating the patch as data rather than as code, so a second file can overlay the
+  first without anything being compiled.
 
 Revisit when `.bsn` ships as a loadable asset. It would load through the same path a glTF scene
 does and be authorable without recompiling the bridge, which is the part worth having here.
@@ -73,12 +73,12 @@ by name. What is left is at the edges of that:
   attributes and prepass outputs exist. The prelude's structs therefore name a fixed set of
   attributes, and the prepass vertex output writes every field any prepass reads. Compiling an
   entry point per mesh layout would lift it, at the cost of a compile per layout.
-- **An array of textures needs the adapter to support one.** A shader declaring `Texture2D
-  layers[64]` is a binding array, which needs wgpu's texture binding array feature and enough of
-  the adapter's per-stage limits for its length. Desktop Vulkan, Metal and DirectX 12 adapters have
-  both, and the bridge asks for what the adapter offers, but a shader like that fails to build its
-  pipeline on one without. Separate globals (`Texture2D a; Texture2D b;`) have no such need, up to
-  the ordinary limit of sampled textures a stage may read.
+- **An array of textures needs the adapter to support one.** A shader declaring
+  `Texture2D layers[64]` is a binding array, which needs wgpu's texture binding array feature and
+  enough of the adapter's per-stage limits for its length. Desktop Vulkan, Metal and DirectX 12
+  adapters have both, and the bridge asks for what the adapter offers, but a shader like that fails
+  to build its pipeline on one without. Separate globals (`Texture2D a; Texture2D b;`) have no such
+  need, up to the ordinary limit of sampled textures a stage may read.
 - **A shader's own numbers are read from storage.** wgpu refuses a bind group holding both an
   array of textures and a uniform buffer, so every block of numbers a shader declares for itself is
   bound as a read-only storage buffer with the same layout. The bytes are the same, but a backend
@@ -106,8 +106,8 @@ by name. What is left is at the edges of that:
 
 `BehaviorsPlugin.ScriptsDirectory` is reserved and does nothing. The engine half exists,
 `App.EnableDynamicSystems` and `App.RemoveSystemsBySource`, and `BevyCSharp.Editor` drives Roslyn
-through them. What is left is deciding whether the core should carry a compiler at all, which is
-what a game loading a script without the editor would take.
+through them. What is left is deciding whether the core should carry a compiler at all, which a game
+loading a script without the editor would need.
 
 ## Rendering
 
@@ -127,22 +127,21 @@ code already in the binary.
   sensitivity, and `Render.SetDepthOfField` takes an aperture and a focal length of its own.
   `PhysicalCameraParameters` is one struct behind both, so a camera could be written down once and
   have the exposure and the blur read from it.
-- **A cubemap of anything else.** The reinterpretation is a column of six faces stacked
-  vertically, which is what a file holds, and a reflection probe that captures itself copies six
-  cameras' pictures into a cube of its own. A cube a game's own camera renders into, one layer at a
-  time, is what a point light's shadow drawn by a shader would want, and needs a camera target that
-  is one layer of an image rather than a whole image.
+- **A cubemap of anything else.** The reinterpretation reads a column of six faces stacked
+  vertically, as a file holds them, and a reflection probe that captures itself copies six cameras'
+  pictures into a cube of its own. A cube a game's own camera renders into, one layer at a time,
+  needs a camera target that is one layer of an image rather than a whole image.
 - **One medium, which is earth's air.** Density, ground albedo and a quality setting are bridged.
-  Mars is the other medium Bevy ships, and its dust phase comes from a texture the caller would
-  have to supply, since nothing embeds one. `ScatteringMedium::new` takes arbitrary scattering and
-  absorption terms, which is what an alien planet wants and what a flat config cannot describe.
+  Mars is the other medium Bevy ships, and its dust phase comes from a texture the caller would have
+  to supply, since nothing embeds one. `ScatteringMedium::new` takes arbitrary scattering and
+  absorption terms, which an alien planet needs and a flat config cannot describe.
 - **DLSS.** `bevy_anti_alias` carries it behind a `dlss` feature pulling in `dlss_wgpu`, which has
-  licensing terms of its own and runs only on an NVIDIA RTX card through Vulkan on Windows or
-  Linux. It also wants a `DlssProjectId` inserted before `DefaultPlugins` and a runtime check of
-  whether the machine supports it, so it is a fourth arm on `AntiAlias` that most machines have to
-  be told they cannot have.
+  licensing terms of its own and runs only on an NVIDIA RTX card through Vulkan on Windows or Linux.
+  It also needs a `DlssProjectId` inserted before `DefaultPlugins` and a runtime check of whether
+  the machine supports it, so it is a fourth arm on `AntiAlias` that most machines have to be told
+  they cannot have.
 - **Lights.** Shadow bias, map size, cascades and a spot light's cookie are all settable. What is
-  left is the experimental half of Bevy's own lighting: soft shadows sit behind the
+  left is the experimental half of Bevy's own lighting. Soft shadows sit behind the
   `experimental_pbr_pcss` feature, and contact shadows need a camera component to go with the flag
   on the light.
 - **One window.** Position, decorations, resizability, always-on-top and exclusive fullscreen are
@@ -158,23 +157,21 @@ code already in the binary.
 
 `Gizmos` draws lines, fading lines, arrows, spheres, circles, arcs, rectangles, boxes, capsules,
 cones, cylinders, tori, grids and axis markers, in either of two groups: one the scene can hide and
-one it cannot. Calls are queued
-and drained by one Bevy system each frame, because a `Gizmos` parameter cannot be held by an
-exclusive system, which is what every C# system is. `Gizmos.Configure` sets line width, render
-layers and whether anything is drawn at all.
+one it cannot. Calls are queued and drained by one Bevy system each frame, because a `Gizmos`
+parameter cannot be held by an exclusive system, and every C# system is one. `Gizmos.Configure` sets
+line width, render layers and whether anything is drawn at all.
 
 - **The rest of the primitives.** `primitive_3d` draws any shape in `bevy_math`. What the bridge
   does not reach are the ones described by a list of points rather than by numbers, which is a
   triangle, a polyline and a tetrahedron. All three are runs of lines, so `Gizmos.Lines` draws them
   today at the cost of naming the corners; a call of their own would only save that.
 - **Two groups, not many.** `Gizmos.Configure` takes a `GizmoGroup`, so the shapes the scene can
-  hide are settable apart from the ones it cannot, which is the split a game usually wants. A third
-  category needs a third `GizmoConfigGroup`, and a group is a Rust type rather than a value, so it
-  is added where the two are and rebuilt.
-- **Only lines batch.** `Gizmos.Lines` hands a whole run over at once, which is what the editor's
-  fading grid uses and what a wireframe or a path wants. Every other shape still crosses the
-  boundary on its own, and a scene drawing thousands of spheres or boxes a frame would want the
-  same treatment.
+  hide are settable apart from the ones it cannot, the split a game usually needs. A third category
+  needs a third `GizmoConfigGroup`, and a group is a Rust type rather than a value, so it is added
+  where the two are and rebuilt.
+- **Only lines batch.** `Gizmos.Lines` hands a whole run over at once, for the editor's fading grid,
+  a wireframe or a path. Every other shape still crosses the boundary on its own, and a scene
+  drawing thousands of spheres or boxes a frame would need the same treatment.
 
 ### 2D
 
@@ -183,9 +180,9 @@ anchored off its center, cut down to one rectangle of a sheet or one frame of an
 drawn sliced, tiled or fitted inside its size the way a video player letterboxes.
 
 - **Animation is a sample, not a feature.** `SpriteAnimation` in `BevyCSharp.Sample` steps a sheet
-  and is there to be copied. Frame events, a queue of clips and animation driven by the state
-  machine are what a game adds, and each would be the wrong shape shipped in the library while
-  still costing a query a frame.
+  and is there to be copied. A game adds frame events, a queue of clips and animation driven by the
+  state machine, and each would be the wrong shape shipped in the library while still costing a
+  query a frame.
 
 ## Interface
 
@@ -196,11 +193,10 @@ direction, justification, alignment, gaps, growth, wrapping, bounds, overflow, a
 its clipping falls and which camera draws it, draws an image inside one, scrolls what it clips,
 draws one frame of a sheet rather than a whole picture, breaks and aligns a run of text in a font of
 its own at a spacing and smoothing it chooses, casts a shadow behind it, rewrites it in place, and
-reports the pointer over a node asked to be interactive. Naming the camera is what lets a screen be drawn with no
-window, so the layout is asserted on pixel by pixel in an offscreen run like the rest of the
-renderer. That covers a HUD, a button,
-a menu that lays itself out, a panel that resizes, a list that scrolls and a paragraph that fits its
-box.
+reports the pointer over a node asked to be interactive. Naming the camera lets a screen be drawn
+with no window, so the layout is asserted on pixel by pixel in an offscreen run like the rest of the
+renderer. That covers a HUD, a button, a menu that lays itself out, a panel that resizes, a list
+that scrolls and a paragraph that fits its box.
 
 - **Scrollbar width.** `scrollbar_width` is the one `Node` field left unbridged, and it reserves
   room at the edge of a scrolling node for a scrollbar. Nothing here draws one, so the room would
@@ -215,18 +211,18 @@ box.
 
 The editor runs on Dear ImGui. The C# side owns the context through `Twizzle.ImGui-Bundle.NET`,
 builds the windows the way ImGui is built anywhere, and hands the triangles to `bcs_imgui_frame`,
-which draws them over what the cameras drew. Immediate mode is the point: an inspector is a call per
-field per frame, so there is no widget tree to keep in step with the world.
+which draws them over what the cameras drew. Immediate mode is the point, because an inspector is a
+call per field per frame, so there is no widget tree to keep in step with the world.
 
 - **The bundle is ImGui 1.91.5.** From 1.92 Dear ImGui embeds a scalable version of its classic
-  font, which is what the native theme should use rather than the ProggyClean bitmap it has. It
-  arrives when the bundle updates and needs no change here.
+  font, which the native theme should use rather than the ProggyClean bitmap it has. It arrives when
+  the bundle updates and needs no change here.
 - **No icon font.** The icons are PNGs the editor ships, loaded through the asset server and drawn
   with `ImGui.Image`. More can be rasterized from SVG when they are wanted.
 - **IME is not forwarded.** Keys, characters, the pointer and the wheel are.
-- **The interface is redrawn every frame**, which is what immediate mode means. At editor scale
-  that is a few thousand triangles and one buffer write; if it ever matters, a frame where nothing
-  moved can be drawn again instead of rebuilt.
+- **The interface is redrawn every frame**, as immediate mode does. At editor scale that is a few
+  thousand triangles and one buffer write; if it ever matters, a frame where nothing moved can be
+  drawn again instead of rebuilt.
 
 ### The editor
 
@@ -239,18 +235,18 @@ programs, the images the scene camera's shaders keep, the settings and the style
 drag on a handle moves, turns or stretches what is selected. [EDITOR.md](EDITOR.md) has the design
 language.
 
-- **What is saved is what can be named.** `assets/world.json` keeps every named entity's name,
-  every component with a schema, and where its mesh and material were loaded from. What it cannot
-  write is anything built in memory, since a set of numbers has no name, nor a camera's projection
-  or a light's settings, which are engine components with no schema and no path either.
+- **Only what can be named is saved.** `assets/world.json` keeps every named entity's name, every
+  component with a schema, and where its mesh and material were loaded from. What it cannot write is
+  anything built in memory, since a set of numbers has no name, nor a camera's projection or a
+  light's settings, which are engine components with no schema and no path either.
   `bevy_world_serialization` would write exactly those and can see no C# component at all, because
   those are bytes registered at runtime with no Rust type behind them. A world asset worth the name
   is both files, or one format holding both halves.
 - **One preview, not a thumbnail each.** An image tile shows itself, and a selected model is drawn
   by a camera of its own into a render target beside the tiles, framed by its bounds and kept on a
-  render layer nothing else is on. One scene rather than one per tile, because a camera drawing
-  into an image costs a pass a frame and forty tiles would cost forty. A thumbnail on every tile
-  wants a pass that draws once and is kept, which nothing here does.
+  render layer nothing else is on. One scene rather than one per tile, because a camera drawing into
+  an image costs a pass a frame and forty tiles would cost forty. A thumbnail on every tile needs a
+  pass that draws once and is kept, which nothing here does.
 - **A material has no preview.** The pieces are the same ones the model preview uses, and what is
   missing is a material to point at. The editor can name the material an entity is drawn with but
   not hand it to a second mesh, because a handle read back from an entity is a path rather than a
@@ -282,12 +278,12 @@ language.
   the project, which is the world file's gap again.
 - **The scene is the camera's viewport rather than a texture.** Docked, `Render.SetViewport` gives
   the camera the rectangle the panels left. A texture would make the scene a panel of its own,
-  dockable and tabbable, which is what a second view wants.
+  dockable and tabbable, as a second view needs.
 - **A theme is a file, and only the running build has it.** `assets/theme.txt` is written beside the
   binary, so a look dialled in has to be copied back into the project by hand to be shipped.
-- **Every row is drawn every frame.** A list is a call per row inside a scrolling region, which is
-  what immediate mode means. At editor scale that is nothing; a list of ten thousand entities would
-  want ImGui's own clipper, which asks only for the rows on screen and is a change to the loops
+- **Every row is drawn every frame.** A list is a call per row inside a scrolling region, as
+  immediate mode draws it. At editor scale that is nothing; a list of ten thousand entities would
+  need ImGui's own clipper, which asks only for the rows on screen and is a change to the loops
   rather than to what they draw.
 
 ## Simulation
@@ -374,10 +370,10 @@ plus the callback structs it requires.
   on Linux, which the current profile avoids so the bridge builds with nothing but a C compiler.
   Adding it means accepting that build dependency or gating the feature per platform.
 - **IME.** `Input.Text` covers typing, including dead keys, so a name field works. What is missing
-  is composition: Bevy's `Ime` messages report a candidate string being assembled, which is what a
-  Japanese or Chinese input method needs to show underlined text before it is committed. The text
-  convention the file drop messages use is what carries the candidate string; what is left is the
-  messages themselves and the window's `ime_enabled` and `ime_position`.
+  is composition. Bevy's `Ime` messages report a candidate string being assembled, which a Japanese
+  or Chinese input method needs to show underlined text before it is committed. The text convention
+  the file drop messages use can carry the candidate string; what is left is the messages themselves
+  and the window's `ime_enabled` and `ime_position`.
 - **A synthetic pointer needs a window.** `SyntheticInput` writes window messages, so a headless
   or offscreen run has nowhere to send one and says so. That is the one thing `bcs` cannot drive in
   an offscreen editor, where the interface is drawn and laid out but cannot be clicked. Feeding the
@@ -395,10 +391,10 @@ clip rather than all of it, places a sound in the world for a nominated listener
 moves the point a clip has reached. A playing sound is an
 entity.
 
-It is the one part of the bridge that takes a system library: cpal links against ALSA on Linux, so
-a render build needs `libasound2-dev` or the equivalent. `build-native.sh` installs it into the
-container on the portable path and checks for it before a local build, naming the package per
-distribution. The minimal profile still builds with nothing but a C compiler.
+It is the one part of the bridge that takes a system library, because cpal links against ALSA on
+Linux, so a render build needs `libasound2-dev` or the equivalent. `build-native.sh` installs it
+into the container on the portable path and checks for it before a local build, naming the package
+per distribution. The minimal profile still builds with nothing but a C compiler.
 
 - **Seeking a looping sound.** Looping is rodio's `Repeat` over a `Buffered` source, which keeps
   the decoded samples so the clip can start again and refuses to move within them, so a seek
@@ -420,22 +416,22 @@ distribution. The minimal profile still builds with nothing but a C compiler.
   the test workflow builds. A lit surface is covered by the sky and environment map tests, a sprite
   by the overlay one, and text and the interface by the pixel tests over the layout. What is
   unchecked that way is a glTF file's own materials, which need a file with one in it.
-- **Depth of field is the one lens effect with no test.** `LensTests` draws the same scene twice
-  for the vignette, the chromatic fringe and the lens distortion, and asserts the shape of the
-  change. Depth of field resists it for three reasons worth knowing before trying again. The blur
-  is capped in pixels rather than scaled, so `MaxBlurDiameter` decides it and the aperture
-  saturates against that cap. A short lens focused far away has an enormous depth of field, so
-  the physically obvious settings produce under a pixel of blur. And the pass keeps a silhouette
-  from smearing into what is behind it, which is what the depth buffer is for, so the strongest
-  edge in a simple scene is the one edge the effect is built not to touch. A test wants a textured
-  surface filling the frame at a focus it misses, measured inside the shape.
+- **Depth of field is the one lens effect with no test.** `LensTests` draws the same scene twice for
+  the vignette, the chromatic fringe and the lens distortion, and asserts the shape of the change.
+  Depth of field resists it for three reasons worth knowing before trying again. The blur is capped
+  in pixels rather than scaled, so `MaxBlurDiameter` decides it and the aperture saturates against
+  that cap. A short lens focused far away has an enormous depth of field, so the physically obvious
+  settings produce under a pixel of blur. And the pass uses the depth buffer to keep a silhouette
+  from smearing into what is behind it, so the strongest edge in a simple scene is the one edge the
+  effect is built not to touch. A test needs a textured surface filling the frame at a focus it
+  misses, measured inside the shape.
 
 ### Build and release
 
 - **The portable build is not cached.** `Swatinem/rust-cache` now names the directory
   `build-native.sh` writes to, so the bridge and the crate's own tests both come back from cache.
   What is not cached is the container path `PORTABLE=1` takes, which writes to
-  `build/target-portable` and is what a local checkout on a newer glibc uses.
+  `build/target-portable` and serves a local checkout on a newer glibc.
 - **Packing on one machine produces a package for one platform.** Use the CI workflow, or run
   `build-native.sh` on each target, to produce a package covering all six runtime identifiers.
 - **Publishing is manual by choice.** The workflow builds and uploads; the upload to nuget.org is

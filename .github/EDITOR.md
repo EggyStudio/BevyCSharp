@@ -20,9 +20,9 @@ what an entity is, and the commands the console takes are all lists something ad
 
 ## The shape of it
 
-Bevy's own words where there is one: the left column is the **world**, because that is what Bevy
-calls the thing being listed, and the right column answers what is **selected**, whether that is
-an entity, an asset or a setting. Nothing is called a hierarchy or an inspector.
+Bevy's own words are used where there is one. The left column is the **world**, because Bevy calls
+the thing being listed that, and the right column answers what is **selected**, whether that is an
+entity, an asset or a setting. Nothing is called a hierarchy or an inspector.
 
 `EditorShell` owns the arrangement and nothing else. Three numbers, the rectangles that follow from
 them, and a call to each part that draws one. The parts are:
@@ -61,8 +61,8 @@ screen moves when it is switched. What changes is the scene. Floating, it fills 
 cards lie over it; docked, it is given the rectangle they leave and the ground shows in the gaps.
 
 **There is a way out of a text field.** A shortcut asks `ImGuiRuntime.Typing`, which is true only
-while a box with a caret in it has the keyboard. Asking whether the interface wants the keyboard at
-all is a different question with a different answer: with keyboard navigation on, it wants it
+while a box with a caret in it has the keyboard. Asking whether the interface takes the keyboard at
+all is a different question with a different answer. With keyboard navigation on, it takes it
 whenever any window is focused, which in an editor whose panels are always up is always.
 
 ## Design language
@@ -104,15 +104,15 @@ Three rules follow from the ladder, and they matter more than the values:
   saying what the step and the gap already say.
 - **What floats is lighter than what it covers.** A menu and a tooltip are held up in front of the
   work rather than lying under it, so they wear the brightest plate the ladder has, which is the
-  same gray a row wears under the pointer. That is what makes a flyout read as one of those rows
-  grown large enough to hold a list.
+  same gray a row wears under the pointer. So a flyout reads as one of those rows grown large enough
+  to hold a list.
 - **A row lifts off whatever it is lying on.** A fixed gray that lifts off a card disappears into a
   menu's plate, so a row under the pointer is drawn as a wash of the text color instead, which is
   a step above anything. Over a card it comes out at `Hover`.
 
-The accent means one thing only, which is what is selected or what is in force. A color that also
-draws every component header is a color that means nothing. `Warn` and `Bad` are the exception,
-and they are for what the program has to say rather than for what it is.
+The accent means one thing only, what is selected or what is in force. A color that also draws every
+component header is a color that means nothing. `Warn` and `Bad` are the exception, and they are for
+what the program has to say rather than for what it is.
 
 **Transparency stops at the panel.** The window a panel is drawn in is the layer against the scene
 and is the most transparent thing there is, at `WindowAlpha`, which the modern look leaves at
@@ -144,8 +144,8 @@ third of it thick, which is the thickness ImGui gives a scrollbar's grab.
 - **Text is left aligned**, except button labels and the number in a box, which are centered, and
   the number on a bar, which is centered until the handle comes close enough to touch it.
 - **Indentation carries nesting** in hierarchies, inspectors and menus.
-- The inspector must not scroll horizontally at its **300px width**, which is what the name column
-  and a value beside it need without either being cut.
+- The inspector must not scroll horizontally at its **300px width**, which the name column and a
+  value beside it need without either being cut.
 - **The name is a column, not a label.** Every value in a panel starts at the same place however
   long the names are, so a column of values can be read down its own edge. Each row is a two
   column table, weighted toward the value, because a name that runs out of room is still readable
@@ -289,21 +289,21 @@ entity taken out of its parent, something hidden with its eye, and a component p
 Taking one off keeps what it held, so putting it back is the component again rather than a fresh
 empty one in its place.
 
-There is no drawer table. A field kind is one arm of one switch, so a kind that wants a different
+There is no drawer table. A field kind is one arm of one switch, so a kind drawn in a different
 shape is a branch in one method.
 
 A component's **properties are described as well as its fields**, and read and written through
-themselves. Something worked out from two fields, something clamped on the way in, something kept
-in one unit and shown in another: all of that is the property's own business, and a tool that went
-round it would show a number nothing else in the program agrees with. A property with no setter is
-a row that can be read and not changed.
+themselves. Something worked out from two fields, something clamped on the way in, or something kept
+in one unit and shown in another is the property's own business, and a tool that went round it would
+show a number nothing else in the program agrees with. A property with no setter is a row that can
+be read and not changed.
 
 A property says so, through `ComponentField.Derived`. Drawing a row does not care, but anything
 that writes a whole component back has to write the state and not the views of it, or a setter that
 changes what it was derived from runs over the value just restored.
 
-**A field says how it wants to be drawn, in attributes.** The generator reads them at compile time
-and leaves the answers on the schema as `FieldHints`, so nothing reflects at runtime:
+**A field says how it is drawn, in attributes.** The generator reads them at compile time and leaves
+the answers on the schema as `FieldHints`, so nothing reflects at runtime:
 
 | attribute | what it does |
 |---|---|
@@ -336,12 +336,11 @@ called `Front`. Writing one reads the whole component, changes the part and writ
 part written does not wipe its neighbors. A vector is left alone, because it is three numbers a
 drawer already draws as one thing.
 
-**The console reads and writes.** The tab along the bottom is where a log is read, and the key
-under Escape raises or puts away that tab. `ConsoleTab` draws it and `ConsoleView` decides what it
-shows, which is a search, a switch per level, and what was typed before, reached with the arrows.
-Everything either of them shows lives outside both: `ConsoleLog` is a ring of leveled lines that
-the output and error streams are teed into, and `ConsoleCommands` is the list of what can be
-typed.
+**The console reads and writes.** The tab along the bottom is where a log is read, and the key under
+Escape raises or puts away that tab. `ConsoleTab` draws it and `ConsoleView` decides what it shows,
+which is a search, a switch per level, and what was typed before, reached with the arrows.
+Everything either of them shows lives outside both. `ConsoleLog` is a ring of leveled lines that the
+output and error streams are teed into, and `ConsoleCommands` is the list of what can be typed.
 
 A command is a static method with `[Command]` on it, found at compile time by a generator and
 registered by a module initializer, so nothing scans for them and one that does not compile is not
@@ -372,12 +371,11 @@ What an entity is drawn with is saved as well, by the path its mesh and material
 which is the only thing about a typed handle this side can name. A mesh built in memory is a set of
 numbers with no name, so it is left out rather than written as something it is not.
 
-**A name is what the editor tells one entity from another by.** Spawning something gives it a name
-nothing else is called, because the world file matches a saved entity back up by name and a
-selection that survives a script reload is found again by it, so a second thing called Cube is a
-thing the editor confuses with the first. Wherever names are listed they are ordered by
-`EditorSort`, which reads a run of digits as the number it spells, so Cube 2 comes before Cube 10
-rather than after it.
+**The editor tells one entity from another by name.** Spawning something gives it a name nothing
+else is called, because the world file matches a saved entity back up by name and a selection that
+survives a script reload is found again by it, so a second thing called Cube is a thing the editor
+confuses with the first. Wherever names are listed they are ordered by `EditorSort`, which reads a
+run of digits as the number it spells, so Cube 2 comes before Cube 10 rather than after it.
 
 A field holding an asset shows the file it points at rather than the number a handle is, and
 pressing it offers the files under the asset root that suit it. Which those are is the field's own
@@ -401,8 +399,8 @@ Written down because the attributes and the shape of the thing suggest otherwise
   inspector draws one.
 - **Nothing puts a field back to its default.** What a freshly added component holds is known to
   the schema, and no row asks it.
-- **A duplicate is not offered**, because what the editor can read off an entity is what has a
-  schema, and the mesh and the material an entity is drawn with have none.
+- **A duplicate is not offered**, because the editor can read only what has a schema off an entity,
+  and the mesh and the material an entity is drawn with have none.
 
 ## Adding to it
 
@@ -460,25 +458,24 @@ looks like the rest.
 
 **Input is driven rather than simulated.** `SyntheticInput` writes the window's own messages: the
 `CursorMoved` and `MouseButtonInput` a real pointer produces, and the `KeyboardInput` a real key
-produces, each both as itself and inside the `WindowEvent` batch the backends read. So a click goes through the picking raycast, the
-widget that decides it was clicked, and the button state the camera reads, exactly as a hand's
-would. Calling the method a click would have called tests the method and not the path to it, and
-the path is where the failures were: a ring that could not be grabbed, a flyout that opened once, a
-selection that cleared itself on the frame it was made, a text field that could not be typed into.
-`SyntheticInput.Wheel` does the same for the wheel, which is what a list that pages and a camera
-that zooms read. What none of it can do is move the desktop's cursor, and it does not try.
+produces, each both as itself and inside the `WindowEvent` batch the backends read. So a click goes
+through the picking raycast, the widget that decides it was clicked, and the button state the camera
+reads, exactly as a hand's would. Calling the method a click would have called tests the method and
+not the path to it, and the failures were on the path: a ring that could not be grabbed, a flyout
+that opened once, a selection that cleared itself on the frame it was made, a text field that could
+not be typed into. `SyntheticInput.Wheel` does the same for the wheel, which a list that pages and a
+camera that zooms read. What none of it can do is move the desktop's cursor, and it does not try.
 
 **A running editor can be driven instead, and usually should be.** `./bcs open --editor` starts one
 that answers a socket; `./bcs command input.click 1450 700`, `./bcs command frames.wait 5` and
 `./bcs shot /tmp/after.png` then do from a terminal what a probe script does from the environment,
 against an editor that is already up. The difference is the loop. A probe is one arrangement per
 process, decided before the run starts and read afterwards, while a session is asked and answered a
-frame at a time, so what to do next can depend on what the last answer said. The probe covers what
-a session cannot, which is a fixed arrangement captured the same way every time with no session to
-keep alive. That is what a comparison of the chrome before and after a change wants, and it is one
-command rather than a session to open, drive and stop. Either works on a machine with no display,
-as long as the run is given `--offscreen`, which draws the editor into an image instead of onto a
-screen.
+frame at a time, so what to do next can depend on what the last answer said. The probe covers what a
+session cannot, which is a fixed arrangement captured the same way every time with no session to
+keep alive. A comparison of the chrome before and after a change needs that, and it is one command
+rather than a session to open, drive and stop. Either works on a machine with no display, as long as
+the run is given `--offscreen`, which draws the editor into an image instead of onto a screen.
 
 `BCS_PROBE` names what a run should do, as words separated by commas, and `BCS_SHOT` says where to
 write the picture. `select`, `several` and `many` put something in the world and choose it, `dock`,
@@ -493,7 +490,7 @@ press a row inside it. `BCS_SHOT_FRAME` says which frame to write, for anything 
 caught before a run has finished; the default of 180 is after everything a script does, and the
 pointer is still wherever it was last put, so what is under it is still under it.
 
-Nothing here is provable by a test alone. `Render.Screenshot` exists for that reason: a panel
-either lays out correctly or it does not, and only the picture says which. A change to the look is
-checked by capturing the same probe before and after and comparing the chrome pixel by pixel, so a
-refactor that was meant to change nothing can be shown to have changed nothing.
+Nothing here is provable by a test alone. `Render.Screenshot` exists for that reason, because a
+panel either lays out correctly or it does not, and only the picture says which. A change to the
+look is checked by capturing the same probe before and after and comparing the chrome pixel by
+pixel, so a refactor that was meant to change nothing can be shown to have changed nothing.

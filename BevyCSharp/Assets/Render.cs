@@ -48,15 +48,15 @@ public static unsafe class Render
     /// </summary>
     /// <remarks>
     /// <para>
-    /// What a shape no primitive describes wants: a terrain from a heightmap, a ribbon, a line of
+    /// For a shape no primitive describes, such as a terrain from a heightmap, a ribbon, a line of
     /// points, or a mesh of ten thousand quads whose vertex shader places each one from a buffer a
     /// compute shader writes. Built in any profile, since a mesh is data until something draws it.
     /// </para>
     /// <para>
     /// A triangle mesh given no normals has them worked out, smooth where it is indexed and flat
     /// where it is not, because every lit material and every shader reading a normal would
-    /// otherwise read zeros. The attributes land where Bevy's shaders look for them: positions at
-    /// location zero, normals at one, UVs at two and colors at five.
+    /// otherwise read zeros. The attributes land where Bevy's shaders look for them, with positions
+    /// at location zero, normals at one, UVs at two and colors at five.
     /// </para>
     /// </remarks>
     /// <exception cref="ArgumentException">
@@ -117,8 +117,8 @@ public static unsafe class Render
     /// behavior off again and <see cref="MeshFlags.None"/> puts everything back as Bevy has it.
     /// </para>
     /// <para>
-    /// <see cref="MeshFlags.NoFrustumCulling"/> is what a mesh drawn where its own bounds do not
-    /// say needs: one a vertex shader moves far from where it was built, or one whose vertices a
+    /// A mesh drawn where its own bounds do not say needs <see cref="MeshFlags.NoFrustumCulling"/>,
+    /// such as one a vertex shader moves far from where it was built, or one whose vertices a
     /// buffer places. Bevy culls by the bounds it worked out from the mesh, so such a mesh vanishes
     /// whenever those stale bounds leave the view.
     /// </para>
@@ -158,9 +158,9 @@ public static unsafe class Render
     /// <summary>Builds a material from <paramref name="settings"/> and returns a handle to it.</summary>
     /// <remarks>
     /// A texture the settings leave at <see cref="AssetHandle.None"/> is one the material does
-    /// without. A handle that names nothing, which is what a released one becomes, is refused
-    /// instead, because drawing the surface untextured and reporting success would leave the caller
-    /// with a wrong picture and nothing pointing at why.
+    /// without. A handle that names nothing, as a released one does, is refused instead, because
+    /// drawing the surface untextured and reporting success would leave the caller with a wrong
+    /// picture and nothing pointing at why.
     /// </remarks>
     /// <exception cref="BevyNativeException">
     /// A texture handle names nothing, or this build has no renderer.
@@ -203,7 +203,7 @@ public static unsafe class Render
         Native.Check(key, "building a material");
         return new AssetHandle(key);
 
-        // An unset handle is -1, which is what the bridge reads as "no texture here".
+        // An unset handle is -1, which the bridge reads as "no texture here".
         static int Key(AssetHandle handle) => handle.IsValid ? handle.Key : -1;
     }
 
@@ -252,7 +252,7 @@ public static unsafe class Render
     }
 
     /// <summary>
-    /// Whether Bevy's ray-traced lighting is running: the bridge was built with it
+    /// Whether Bevy's ray-traced lighting is running, meaning the bridge was built with it
     /// (<c>--solari</c>), the app asked for it with <see cref="Config.RayTracedLighting"/>, and the
     /// adapter traces rays.
     /// </summary>
@@ -266,9 +266,9 @@ public static unsafe class Render
     /// <para>
     /// Direct light from every light and every emissive surface, found by tracing rays rather than
     /// from shadow maps, and indirect light bounced off every surface taking part, which is global
-    /// illumination: a red wall tints the floor beside it, and a lamp in a room lights the corners it
-    /// cannot see. It builds up over a few frames and follows what moves, so a sudden cut shows a
-    /// moment of settling.
+    /// illumination. A red wall tints the floor beside it, and a lamp in a room lights the corners
+    /// it cannot see. It builds up over a few frames and follows what moves, so a sudden cut shows
+    /// a moment of settling.
     /// </para>
     /// <para>
     /// Only meshes given to <see cref="SetRayTraced"/> are met by rays, though every mesh is still
@@ -290,10 +290,10 @@ public static unsafe class Render
     /// Makes an entity's mesh one the rays of ray-traced lighting meet. Only valid inside a system.
     /// </summary>
     /// <remarks>
-    /// The mesh is reshaped the way ray tracing structures are built from, in place: exactly
+    /// The mesh is reshaped in place the way ray tracing structures are built from, keeping exactly
     /// positions, normals, texture coordinates and tangents, which are worked out where it has
-    /// none, and thirty-two bit indices. So the entity keeps drawing it as before, and the rays meet
-    /// the triangles the picture shows. The entity's material has to be one from
+    /// none, and thirty-two bit indices. So the entity keeps drawing it as before, and the rays
+    /// meet the triangles the picture shows. The entity's material has to be one from
     /// <see cref="CreateMaterial(MaterialSettings)"/>, and the mesh has to have loaded.
     /// </remarks>
     /// <exception cref="BevyNativeException">
@@ -304,8 +304,9 @@ public static unsafe class Render
         Native.Check(Native.bcs_render_set_ray_traced(entity.Bits, mesh.Key), $"making {entity} ray traced");
 
     /// <summary>
-    /// Whether Bevy's meshlets are running: the bridge was built with them (<c>--meshlet</c>), the
-    /// app asked for them with <see cref="Config.MeshletClusters"/>, and the GPU can draw them.
+    /// Whether Bevy's meshlets are running, meaning the bridge was built with them
+    /// (<c>--meshlet</c>), the app asked for them with <see cref="Config.MeshletClusters"/>, and
+    /// the GPU can draw them.
     /// </summary>
     public static bool MeshletsActive => Native.bcs_render_meshlets_active() != 0;
 
@@ -315,12 +316,12 @@ public static unsafe class Render
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Meshlets are virtualized geometry as Bevy ships it: a mesh of millions of triangles costs
-    /// what the few thousand covering the screen at the moment cost, because clusters out of
-    /// view, hidden behind others or too small to matter are dropped on the GPU before anything
-    /// is drawn. What that costs up front is this conversion, which takes seconds for a large mesh,
-    /// so it runs on a worker once the mesh has loaded, and the handle answered is empty until it
-    /// is done; an entity given it draws nothing until then.
+    /// Meshlets are virtualized geometry as Bevy ships it. A mesh of millions of triangles costs
+    /// what the few thousand covering the screen at the moment cost, because clusters out of view,
+    /// hidden behind others or too small to matter are dropped on the GPU before anything is drawn.
+    /// What that costs up front is this conversion, which takes seconds for a large mesh, so it
+    /// runs on a worker once the mesh has loaded, and the handle answered is empty until it is
+    /// done; an entity given it draws nothing until then.
     /// </para>
     /// <para>
     /// The mesh must be indexed triangles with texture coordinates. Normals are worked out if it
@@ -328,12 +329,12 @@ public static unsafe class Render
     /// normals and texture coordinates and works tangents out when drawn.
     /// <paramref name="quantization"/> is how finely positions are kept, as the number of halvings
     /// of a centimeter, and zero takes Bevy's default of four, a sixteenth. Two meshes meant to
-    /// meet without a crack want the same one.
+    /// meet without a crack need the same one.
     /// </para>
     /// <para>
     /// <paramref name="saveTo"/>, a path under the asset root, also writes the finished mesh as a
-    /// <c>.meshlet_mesh</c> file, which <see cref="AssetKind.MeshletMesh"/> loads. That is how a
-    /// game bakes: convert once, in a tool or on the first run, and load the file after, which
+    /// <c>.meshlet_mesh</c> file, which <see cref="AssetKind.MeshletMesh"/> loads. A game bakes
+    /// this way, converting once, in a tool or on the first run, and loading the file after, which
     /// takes as long as reading it.
     /// </para>
     /// </remarks>
@@ -364,9 +365,9 @@ public static unsafe class Render
     /// <remarks>
     /// <para>
     /// A mesh and a material are Bevy's own components holding typed handles, so nothing on this
-    /// side can read them the way it reads a component of its own. What they can be asked is where
-    /// they came from, which is what a tool showing an entity has something to say about and what a
-    /// person can point at a different file.
+    /// side can read them the way it reads a component of its own. They can be asked where they
+    /// came from, which a tool showing an entity can show and a person can point at a different
+    /// file.
     /// </para>
     /// <para>
     /// Empty for anything built in memory, which is everything <see cref="CreateMesh"/> makes, and
@@ -536,8 +537,8 @@ public static unsafe class Render
     /// <paramref name="maximum"/>, so this is the knob for how much detail the near ground gets.
     /// </param>
     /// <param name="overlap">
-    /// How much of each cascade is blended into the next, as a proportion, which is what keeps the
-    /// join between two of them from showing as a line across the ground.
+    /// How much of each cascade is blended into the next, as a proportion, which keeps the join
+    /// between two of them from showing as a line across the ground.
     /// </param>
     /// <exception cref="BevyNativeException">The entity is not a directional light.</exception>
     public static void SetShadowCascades(
@@ -644,9 +645,9 @@ public static unsafe class Render
     /// Sets the lens a camera draws through.
     /// </summary>
     /// <remarks>
-    /// Beside <see cref="SetPostProcessing"/>: that call is the pipeline a settings screen owns,
-    /// and this is what a scene does for a moment. The whole set in one call either way, so an
-    /// effect these settings leave off is taken off the camera.
+    /// Beside <see cref="SetPostProcessing"/>, which is the pipeline a settings screen owns, this
+    /// is what a scene sets for a moment. The whole set in one call either way, so an effect these
+    /// settings leave off is taken off the camera.
     /// </remarks>
     /// <param name="camera">A camera entity from <see cref="SpawnCamera3d()"/> or
     /// <see cref="Render2d.SpawnCamera2d"/>.</param>
@@ -873,8 +874,8 @@ public static unsafe class Render
     /// <remarks>
     /// <para>
     /// The other way to light a scene from its surroundings. <see cref="SetSkyLighting"/> derives
-    /// the map from the atmosphere, which covers an outdoor scene; this takes a picture, which is
-    /// what an indoor one, or a scene lit from a photograph, needs.
+    /// the map from the atmosphere, which covers an outdoor scene; this takes a picture, for an
+    /// indoor one or a scene lit from a photograph.
     /// </para>
     /// <para>
     /// One cubemap rather than the two a baked environment map carries, because Bevy filters it
@@ -920,7 +921,7 @@ public static unsafe class Render
     /// <para>
     /// The other end of <see cref="SetImageLighting"/>, which filters one cubemap on the GPU every
     /// time the app starts. This takes the two maps a tool produced, which costs nothing at startup
-    /// and is what a shipped game wants, especially for an environment too large to filter again.
+    /// and suits a shipped game, especially for an environment too large to filter again.
     /// </para>
     /// <para>
     /// <paramref name="diffuse"/> is the blurred map a rough surface reflects and
@@ -973,11 +974,11 @@ public static unsafe class Render
     /// <remarks>
     /// <para>
     /// The box is the entity's <see cref="Transform"/>, a unit cube before its scale, so a probe
-    /// covering a room is placed at the room's center and scaled to its size. The pair is what
+    /// covering a room is placed at the room's center and scaled to its size. The pair is the one
     /// <see cref="SetEnvironmentMap"/> takes, captured from inside the room, and a surface inside
-    /// the box picks it in place of what the camera is lit by, which is how a room stops reflecting
-    /// the sky outside it. Reflections are corrected for where in the box the surface is, so a
-    /// mirror near a wall shows the wall close.
+    /// the box picks it in place of what the camera is lit by, so a room stops reflecting the sky
+    /// outside it. Reflections are corrected for where in the box the surface is, so a mirror near
+    /// a wall shows the wall close.
     /// </para>
     /// <para>
     /// <paramref name="falloff"/> is how much of the box, on each axis from nothing to all of it,
@@ -1094,18 +1095,18 @@ public static unsafe class Render
     /// <see cref="SetReflectionProbe"/>, and the cameras follow the probe's center as it moves.
     /// </para>
     /// <para>
-    /// A live probe draws the scene six more times every frame, which is what a reflection of
-    /// something moving needs and what a large one cannot afford. One that is not live captures
-    /// once, over the first few frames after nothing is left compiling, so asking at startup
-    /// captures the scene as it will be drawn rather than while its materials are still missing.
+    /// A live probe draws the scene six more times every frame, which a reflection of something
+    /// moving needs and a large one cannot afford. One that is not live captures once, over the
+    /// first few frames after nothing is left compiling, so asking at startup captures the scene as
+    /// it will be drawn rather than while its materials are still missing.
     /// <see cref="RecaptureProbe"/> captures again when the room changes, or once a texture that
     /// loaded late has arrived. Either way the light is a frame behind what the cameras drew.
     /// </para>
     /// <para>
     /// The cameras see the probe's own light, so each capture reflects the one before, and light
     /// bounces a little further every frame. That settles as long as the intensity only undoes the
-    /// exposure the faces were drawn at, which is what the default does; much more makes the room
-    /// brighter each frame. A camera is refused, as for the other probes.
+    /// exposure the faces were drawn at, as the default does; much more makes the room brighter
+    /// each frame. A camera is refused, as for the other probes.
     /// </para>
     /// </remarks>
     /// <param name="probe">The entity whose transform is the box.</param>
@@ -1152,7 +1153,7 @@ public static unsafe class Render
     /// <para>
     /// What makes a surface pick up the color of what is around it rather than only what a lamp
     /// points at it. The environment map is derived from the atmosphere each frame, so it follows
-    /// the sun: a scene lit this way goes warm at dusk without anything being animated.
+    /// the sun, and a scene lit this way goes warm at dusk without anything being animated.
     /// </para>
     /// <para>
     /// Needs <see cref="SetAtmosphere"/> on the same camera, because what it filters is the sky
@@ -1188,11 +1189,11 @@ public static unsafe class Render
     /// right shape is not known until it has been decoded.
     /// </para>
     /// <para>
-    /// <paramref name="brightness"/> scales the samples into the units the rest of the scene is
-    /// lit in, which are candelas per square meter, so the useful numbers are in the hundreds or
+    /// <paramref name="brightness"/> scales the samples into the units the rest of the scene is lit
+    /// in, which are candelas per square meter, so the useful numbers are in the hundreds or
     /// thousands. A brightness of one is a night sky and comes out black, which reads as a skybox
-    /// that failed rather than one that is very dark. The skybox is what is seen behind the scene
-    /// and does not light it; lighting from a sky is an environment map, which has no bridge yet.
+    /// that failed rather than one that is very dark. The skybox is seen behind the scene and does
+    /// not light it; <see cref="SetImageLighting"/> lights a scene from the same file.
     /// </para>
     /// <para>
     /// Pass <see cref="AssetHandle.None"/> to take the skybox off.
@@ -1263,7 +1264,7 @@ public static unsafe class Render
     /// bright or far too dark rather than subtly off.
     /// </para>
     /// <para>
-    /// This is the base an auto exposure pass corrects rather than an alternative to it: with
+    /// This is the base an auto exposure pass corrects rather than an alternative to it. With
     /// <see cref="EffectSettings.AutoExposure"/> on, what is set here is where it starts from.
     /// </para>
     /// </remarks>
@@ -1400,10 +1401,11 @@ public static unsafe class Render
     /// are drawn, which is the default. Only valid inside a system.
     /// </summary>
     /// <remarks>
-    /// Deferred is what screen-space reflections read and what makes many lights cheap. It needs
-    /// cameras drawn once a pixel (<see cref="PostSettings.Msaa"/> of one), and applies to Bevy's
-    /// own materials: one a Slang program draws is always forward, since it writes a color rather
-    /// than a surface description. Every Bevy material is prepared again when it changes.
+    /// Screen-space reflections read the deferred G-buffer, and deferred makes many lights cheap.
+    /// It needs cameras drawn once a pixel (<see cref="PostSettings.Msaa"/> of one), and applies to
+    /// Bevy's own materials, since one a Slang program draws is always forward, since it writes a
+    /// color rather than a surface description. Every Bevy material is prepared again when it
+    /// changes.
     /// </remarks>
     public static void SetDeferredRendering(bool on) =>
         Native.Check(Native.bcs_render_set_deferred(on ? 1 : 0), "switching between forward and deferred");
@@ -1421,7 +1423,7 @@ public static unsafe class Render
     /// </para>
     /// <para>
     /// What leaves the screen leaves its reflection too, which is the limit of any screen-space
-    /// technique. A reflection probe or a traced reflection is what fills that in.
+    /// technique. A reflection probe or a traced reflection fills that in.
     /// </para>
     /// </remarks>
     public static void SetScreenSpaceReflections(Entity camera, ReflectionSettings? settings)
@@ -1460,14 +1462,14 @@ public static unsafe class Render
     /// <remarks>
     /// <para>
     /// The same capture <see cref="Screenshot(string)"/> takes, delivered as bytes instead of as a
-    /// PNG. A file is for a person to look at; this is for a program to inspect, which is what
-    /// asserting on what was drawn needs.
+    /// PNG. A file is for a person to look at; this is for a program to inspect, so a test can
+    /// assert on what was drawn.
     /// </para>
     /// <para>
     /// The picture arrives a frame or two later, because it has to come back off the GPU, so this
     /// answers with a ticket rather than with pixels. Poll
     /// <see cref="TryReadCapture(Capture, out CapturedImage?)"/> until it says yes, from a later
-    /// frame rather than in a loop, because the frames are what the picture is waiting on.
+    /// frame rather than in a loop, because the picture waits on the frames.
     /// </para>
     /// <para>
     /// A capture of the first frames of a run is a picture of a window that has been cleared and
@@ -1581,8 +1583,8 @@ public static unsafe class Render
     /// <remarks>
     /// <para>
     /// The other end of <see cref="TryReadCapture"/>. Reading gives back what was drawn; this takes
-    /// a picture that was never in a file, which is what a texture worked out at startup, a mask
-    /// built from a heightmap, or a capture handed on to a material needs.
+    /// a picture that was never in a file, for a texture worked out at startup, a mask built from a
+    /// heightmap, or a capture handed on to a material.
     /// </para>
     /// <para>
     /// Nothing loads, so the handle is usable on the frame it is returned, and the pixels are
@@ -1596,9 +1598,9 @@ public static unsafe class Render
     /// <param name="width">Width in pixels.</param>
     /// <param name="height">Height in pixels.</param>
     /// <param name="srgb">
-    /// Whether the numbers are a color somebody chose, which is what a picture usually is. False
-    /// reads them as they are, for a picture whose numbers mean something else, such as a normal
-    /// map or a roughness mask.
+    /// Whether the numbers are a color somebody chose, as a picture usually is. False reads them as
+    /// they are, for a picture whose numbers mean something else, such as a normal map or a
+    /// roughness mask.
     /// </param>
     /// <returns>A handle to the image.</returns>
     /// <exception cref="ArgumentException">
@@ -1641,8 +1643,8 @@ public static unsafe class Render
     /// </summary>
     /// <remarks>
     /// <para>
-    /// What a shader's <c>TextureCube</c> wants, and the layout
-    /// <see cref="SetSkybox"/> takes. The faces are in the order +X, -X, +Y, -Y, +Z, -Z.
+    /// For a shader's <c>TextureCube</c>, and the layout <see cref="SetSkybox"/> takes. The faces
+    /// are in the order +X, -X, +Y, -Y, +Z, -Z.
     /// </para>
     /// <para>
     /// Applied when the pixels arrive, since the shape of a picture is not known until it has been
@@ -1659,9 +1661,9 @@ public static unsafe class Render
     /// as an array of them.
     /// </summary>
     /// <remarks>
-    /// What a shader's <c>Texture2DArray</c> wants: many
-    /// pictures of one size behind one binding, which a terrain's ground types or a sprite's frames
-    /// are. Applied when the pixels arrive, like <see cref="MakeCubemap"/>.
+    /// For a shader's <c>Texture2DArray</c>, which holds many pictures of one size behind one
+    /// binding, such as a terrain's ground types or a sprite's frames. Applied when the pixels
+    /// arrive, like <see cref="MakeCubemap"/>.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="layers"/> is less than one.</exception>
     /// <exception cref="BevyNativeException">The handle names no image, or there is no renderer.</exception>
@@ -1678,9 +1680,9 @@ public static unsafe class Render
     /// as a 3D texture that many deep.
     /// </summary>
     /// <remarks>
-    /// What a shader's <c>Texture3D</c> wants, for fog, clouds,
-    /// a color grading table or anything else sampled at a point in space. The first slice is the
-    /// front. Applied when the pixels arrive, like <see cref="MakeCubemap"/>.
+    /// For a shader's <c>Texture3D</c>, such as fog, clouds, a color grading table or anything else
+    /// sampled at a point in space. The first slice is the front. Applied when the pixels arrive,
+    /// like <see cref="MakeCubemap"/>.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="slices"/> is less than one.</exception>
     /// <exception cref="BevyNativeException">The handle names no image, or there is no renderer.</exception>
@@ -1714,10 +1716,9 @@ public static unsafe class Render
     /// Where a world point lands on a camera's viewport, in logical pixels.
     /// </summary>
     /// <remarks>
-    /// The same coordinates the cursor is reported in, which is what lets something drawn in the
-    /// world be hit-tested against the pointer. A point behind the camera answers
-    /// <see langword="false"/> rather than a number that would be off the screen in the wrong
-    /// direction.
+    /// The same coordinates the cursor is reported in, so something drawn in the world can be
+    /// hit-tested against the pointer. A point behind the camera answers <see langword="false"/>
+    /// rather than a number that would be off the screen in the wrong direction.
     /// </remarks>
     public static bool TryProject(Entity camera, Vec3 point, out float x, out float y)
     {
@@ -1787,9 +1788,9 @@ public static unsafe class Render
     /// Draws an entity's mesh as its own edges, or stops drawing them.
     /// </summary>
     /// <remarks>
-    /// The shape itself rather than a box round it, which is what an editor outlines a selection
-    /// with when the box is not enough. The line pipeline it needs is a desktop one. Where a
-    /// backend cannot draw lines, this is accepted and nothing appears.
+    /// The shape itself rather than a box round it, which an editor outlines a selection with when
+    /// the box is not enough. The line pipeline it needs is a desktop one. Where a backend cannot
+    /// draw lines, this is accepted and nothing appears.
     /// </remarks>
     /// <param name="entity">What to draw, or stop drawing.</param>
     /// <param name="on">Whether to draw it.</param>
@@ -1835,7 +1836,7 @@ public static unsafe class Render
     /// </summary>
     /// <remarks>
     /// A camera draws an entity only where their layers overlap. Zero takes the entity back to
-    /// Bevy's default layer, which is what every camera sees unless it says otherwise.
+    /// Bevy's default layer, which every camera sees unless it says otherwise.
     /// </remarks>
     /// <example>
     /// <code>
@@ -1946,8 +1947,8 @@ public sealed class ReflectionSettings
 {
     /// <summary>
     /// The roughness at which reflections start to appear and at which they are whole. Smoother
-    /// than the first, a surface gets none, which is Bevy's choice: a mirror-smooth surface shows
-    /// the flaws of a screen-space trace most, and is left to a reflection probe.
+    /// than the first, a surface gets none, which is Bevy's choice, because a mirror-smooth surface
+    /// shows the flaws of a screen-space trace most, and is left to a reflection probe.
     /// </summary>
     public (float Start, float Full) FadeInRoughness { get; set; } = (0.08f, 0.12f);
 
@@ -1956,7 +1957,7 @@ public sealed class ReflectionSettings
 
     /// <summary>
     /// Where reflections stop at the edge of the picture and where they are whole, as fractions of
-    /// it, which is what hides the edge of what can be reflected.
+    /// it, which hides the edge of what can be reflected.
     /// </summary>
     public (float Gone, float Full) EdgeFade { get; set; } = (0f, 0f);
 

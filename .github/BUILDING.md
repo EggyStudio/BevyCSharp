@@ -45,7 +45,7 @@ The bridge builds in two profiles:
 | `editor`   | The above plus Dear ImGui, entity introspection and picking, for `BevyCSharp.Editor`. |
 
 The editor profile costs about a hundred crates and several minutes of build time over the render
-one, which is why it is a profile of its own rather than part of it: the test suite and the
+one, which is why it is a profile of its own rather than part of it, since the test suite and the
 per-platform package builds have no use for it.
 
 ```bash
@@ -58,12 +58,12 @@ The `render` profile is assembled feature by feature rather than taking Bevy's
 graphical resolves at runtime: X11 comes through `x11-dl`, Wayland through `wayland-dlopen`, and
 Vulkan through the loader. It takes several minutes to compile and produces a much larger library.
 
-Audio is the exception, and the only system dependency in the tree: Bevy's audio sits on cpal,
-which links against ALSA on Linux, so a `render` build there needs `libasound2-dev` or the
-equivalent for the distribution. `build-native.sh` checks for it and names the package if it is
-missing, and installs it into the container on the `--portable` path. The `headless` profile has
-no such dependency and builds with nothing but a C compiler. Neither affects anyone consuming the
-NuGet package, which ships the native prebuilt for each runtime identifier.
+Audio is the exception, and the only system dependency in the tree. Bevy's audio sits on cpal, which
+links against ALSA on Linux, so a `render` build there needs `libasound2-dev` or the equivalent for
+the distribution. `build-native.sh` checks for it and names the package if it is missing, and
+installs it into the container on the `--portable` path. The `headless` profile has no such
+dependency and builds with nothing but a C compiler. Neither affects anyone consuming the NuGet
+package, which ships the native prebuilt for each runtime identifier.
 
 `Config.Headless` forces the windowless path even on a render build, which is how the tests and
 a dedicated server run the same behavior code without a display.
@@ -121,11 +121,11 @@ Three platform notes worth knowing:
   It needs podman or docker, and prints the resulting floor either way. The workflow builds on
   `ubuntu-latest`, so packaged binaries are already portable; this is for local builds.
 
-- **macOS requires the window event loop to own the main thread.** `App.Run` checks this and
-  throws a clear error rather than letting it crash inside AppKit. The check applies only when
-  a window is actually going to be opened (`App.WillOpenWindow`), because the constraint belongs
-  to windowing rather than to the engine: a headless run has no event loop and works from any
-  thread, which is what lets a test runner drive it from its own worker threads.
+- **macOS requires the window event loop to own the main thread.** `App.Run` checks this and throws
+  a clear error rather than letting it crash inside AppKit. The check applies only when a window is
+  actually going to be opened (`App.WillOpenWindow`), because the constraint belongs to windowing
+  rather than to the engine. A headless run has no event loop and works from any thread, so a test
+  runner can drive it from its own worker threads.
 - **The one Linux binary serves both X11 and Wayland.** Which is used is decided at runtime, so
   there is no separate build for each.
 

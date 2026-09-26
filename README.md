@@ -149,9 +149,9 @@ slot), and a prebuilt native bridge per runtime identifier under `runtimes/`.
 
 ## Behaviors
 
-A `[Behavior]` struct is both a component and the systems that act on it. This chapter is what a
-game writes, which is what a method runs as, when it runs, which entities it sees, and what it
-may touch while it does.
+A `[Behavior]` struct is both a component and the systems that act on it. This chapter covers what a
+game writes: what a method runs as, when it runs, which entities it sees, and what it may touch
+while it does.
 
 ### Systems and components
 
@@ -202,17 +202,17 @@ public struct Position { public float X, Y; }
 public struct Falls;   // a zero-field tag costs nothing to store
 ```
 
-Components sit in contiguous columns, which is what makes iteration fast. The cost is paid on
-insertion and removal, because both move the entity to another archetype and copy its other
-components along with it. A tag that is added and removed far more often than it is read can opt out of that
-trade by implementing `ISparseComponent`:
+Components sit in contiguous columns, so iteration is fast. The cost is paid on insertion and
+removal, because both move the entity to another archetype and copy its other components along with
+it. A tag that is added and removed far more often than it is read can opt out of that trade by
+implementing `ISparseComponent`:
 
 ```csharp
 public struct Colliding : ISparseComponent;   // toggled every frame, only ever filtered on
 ```
 
 Adding or removing one costs an index write and moves nothing else. In exchange it cannot be the
-component a query iterates: Bevy exposes no way to reach a sparse set's storage in bulk, so
+component a query iterates, because Bevy exposes no way to reach a sparse set's storage in bulk, so
 `Query<Colliding>()` is refused rather than quietly returning nothing. Everything else works,
 including the thing it is for:
 
@@ -311,10 +311,10 @@ public static void DrawHud(BehaviorContext ctx) { }
 [ToggleKey(Key.F3, KeyModifier.Ctrl | KeyModifier.Shift)] // Ctrl + Shift + F3
 ```
 
-Each flag is side-agnostic, so `Ctrl` is satisfied by either Ctrl key, which is what a shortcut
-normally means, and matches winit's `ModifiersState`, the layer Bevy's own windowing sits on.
-Bevy itself has no modifier type; it exposes only the individual `KeyCode`s. To pin one side, or
-to build a chord out of an ordinary key, write the check yourself:
+Each flag is side-agnostic, so `Ctrl` is satisfied by either Ctrl key, as a shortcut normally means,
+and matches winit's `ModifiersState`, the layer Bevy's own windowing sits on. Bevy itself has no
+modifier type; it exposes only the individual `KeyCode`s. To pin one side, or to build a chord out
+of an ordinary key, write the check yourself:
 
 ```csharp
 [OnRender]
@@ -383,7 +383,7 @@ The despawn is Bevy's own, so it reaches the entity's children as well, and it h
 transition rather than inside `[OnExit]`, which means it covers every way out of the value.
 
 A mode that only means anything inside another one is a sub-state. A pause outside a run is not
-"off", it is nothing, and saying so is what keeps a pause from being held when the next run starts:
+"off", it is nothing, and saying so keeps a pause from being held when the next run starts:
 
 ```csharp
 public enum Screen { Menu, Playing }
@@ -395,18 +395,18 @@ app.AddState(Screen.Menu);
 app.AddSubState(Paused.No);      // after its parent, which it is computed from
 ```
 
-While `Screen` is anything but `Playing` the state does not exist, so `App.TryState<Paused>(out
-var held)` answers false rather than a value, and a method scoped to `[InState(Paused.Yes)]` does
-not run. Entering `Playing` brings it into existence at `Paused.No` every time, which is why a
-pause left on when a run ended is off again when the next one begins. `[OnEnter]`, `[OnExit]` and
-`DespawnOnExit` work on it exactly as they do on a plain state, because the relationship is
-written on the enum rather than at the call.
+While `Screen` is anything but `Playing` the state does not exist, so
+`App.TryState<Paused>(out var held)` answers false rather than a value, and a method scoped to
+`[InState(Paused.Yes)]` does not run. Entering `Playing` brings it into existence at `Paused.No`
+every time, which is why a pause left on when a run ended is off again when the next one begins.
+`[OnEnter]`, `[OnExit]` and `DespawnOnExit` work on it exactly as they do on a plain state, because
+the relationship is written on the enum rather than at the call.
 
-A state carries two sub-states, and a sub-state cannot itself be a parent. Both limits come from
-the same place. Bevy names a sub-state's parent as an associated type, so every pairing exists when
-the native library is built, and a third sub-state or a chain of them is refused rather than
-half-worked. Two is what a run that can be paused and played at a difficulty needs, and raising it
-is a longer list in the same place as the state slots below.
+A state carries two sub-states, and a sub-state cannot itself be a parent. Both limits come from the
+same place. Bevy names a sub-state's parent as an associated type, so every pairing exists when the
+native library is built, and a third sub-state or a chain of them is refused rather than
+half-worked. A run that can be paused and played at a difficulty needs two, and raising it is a
+longer list in the same place as the state slots below.
 
 A state whose value follows from another's is a computed state. Whether the interface is up is
 true on some screens and false on the rest, and writing that as a plain state leaves two facts to
@@ -423,8 +423,8 @@ app.AddComputedState((Screen.Playing, Hud.Shown), (Screen.Paused, Hud.Dimmed));
 The table says what it is while the source holds each value, and a value the table says nothing
 about means it does not exist at all, so `TryState<Hud>` answers false there and a method scoped to
 `[InState(Hud.Shown)]` does not run. Setting one is refused, since there is nothing to set. Its
-`[OnEnter]` and `[OnExit]` edges run like any other state's, which is what makes it useful rather
-than merely tidy.
+`[OnEnter]` and `[OnExit]` edges run like any other state's, so it is useful rather than merely
+tidy.
 
 A transition is queued rather than immediate. It lands at Bevy's next transition point, so every
 system in the frame agrees on which state it is in rather than some seeing the change halfway
@@ -461,9 +461,9 @@ order the systems happen to run in. The cost is a frame of latency, since a mess
 the frame it was sent, including by the sender.
 
 Bevy's own messages instead give each reader a cursor, which lets it catch up within the frame. A
-cursor needs a stable identity per reader, and a C# system has none the engine can see, so the
-swap is what makes "exactly once" true here. `ctx.Send` is safe from a parallel behavior method,
-like `ctx.Cmd`; reading is main-thread only.
+cursor needs a stable identity per reader, and a C# system has none the engine can see, so the swap
+makes "exactly once" true here. `ctx.Send` is safe from a parallel behavior method, like `ctx.Cmd`;
+reading is main-thread only.
 
 What the window reports arrives on the same bus, so an engine message is read exactly like one
 another system sent:
@@ -477,9 +477,9 @@ foreach (var focus in ctx.Read<WindowFocusChanged>())
 ```
 
 `WindowResized`, `WindowFocusChanged`, `WindowCloseRequested`, `WindowScaleFactorChanged`,
-`CursorEntered` and `CursorLeft`. `WindowCloseRequested` is a request rather than a fact. The
-window is still open, which is the chance to save or to ask whether the player meant it, and
-`App.RequestExit` is what actually goes.
+`CursorEntered` and `CursorLeft`. `WindowCloseRequested` is a request rather than a fact. The window
+is still open, which is the chance to save or to ask whether the player meant it, and
+`App.RequestExit` actually closes it.
 
 Files dragged onto the window arrive the same way:
 
@@ -505,7 +505,7 @@ foreach (var failed in ctx.Read<AssetLoadFailed>())
     Console.Error.WriteLine($"{failed.Kind} {failed.Path} failed, because {failed.Reason}");
 ```
 
-A handle reports that a load failed and nothing more, so this is what tells a misspelled path apart
+A handle reports that a load failed and nothing more, so this message tells a misspelled path apart
 from a file that is there and unreadable. `Kind` names the asset type the way `AssetServer.Load`
 names one, and is empty for a type the engine loaded for itself as part of something else. It
 arrives in every profile, because an asset that will not load is exactly as wrong in a headless run
@@ -524,8 +524,8 @@ ctx.Ecs.ClearParent(moon);
 ```
 
 A child's `Transform` is relative to its parent, and Bevy combines them during propagation, so a
-parented entity only has to describe its own motion. Parenting goes through Bevy's relationship
-API rather than a raw component write, which is what keeps the reverse child list correct.
+parented entity only has to describe its own motion. Parenting goes through Bevy's relationship API
+rather than a raw component write, which keeps the reverse child list correct.
 
 `GlobalTransform` is the result of that propagation: where the entity sits in world space.
 
@@ -538,7 +538,7 @@ world.TransformPoint(new Vec3(0f, 0f, -1f)); // a local point, in world space
 world.ToTransform();                         // position, rotation and scale
 ```
 
-Read it and write `Transform`: propagation overwrites `GlobalTransform` every frame, and it is a
+Read it and write `Transform`. Propagation overwrites `GlobalTransform` every frame, and it is a
 frame behind a `Transform` written during `PostUpdate` or later, which is when propagation has
 already run. It stores an affine matrix rather than a position/rotation/scale triple, because a
 chain of arbitrary transforms cannot always be expressed as one, so `Scale`, `Rotation` and
@@ -617,7 +617,7 @@ public struct Transform : INativeComponent
 Only a component C# can mirror byte for byte can be read or written, and the mirrors are checked
 against the engine the first time an id is resolved. They are easy to get subtly wrong in a way
 nothing else catches. `Transform` uses Rust's default representation, so the compiler reorders its
-fields to save padding: `Quat` is sixteen-byte aligned and moves ahead of the two vectors, giving
+fields to save padding. `Quat` is sixteen-byte aligned and moves ahead of the two vectors, giving
 offsets of 0, 16 and 28 rather than the source order. Both layouts are 48 bytes, so a size check
 passes either way and the mistake shows up as stretched geometry. The check compares every offset.
 
@@ -673,8 +673,8 @@ copied next to the DLL are not found. Naming the directory outright is the only 
 AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets")
 ```
 
-Streaming is the other way to read: parts of large files, a piece at a time, while the game runs,
-which is what texture and geometry streaming read their tiles and clusters with.
+Streaming is the other way to read. It reads parts of large files, a piece at a time, while the game
+runs, and texture and geometry streaming read their tiles and clusters with it.
 
 ```csharp
 var tile = Streaming.Read("world.pages", offset: page * PageBytes, length: PageBytes, priority: onScreen ? 1 : 0);
@@ -716,8 +716,8 @@ frame is normal rather than a failure. Wait by polling `ChildrenOf`, not on the 
 component, which marks the spawn as done but can appear a frame before the entities are
 visible.
 
-Compose on top of what a file describes by patching it after it spawns, which is what Bevy's own
-`bsn!` does at compile time in Rust and what the ECS surface here does at runtime:
+Compose on top of what a file describes by patching it after it spawns. Bevy's own `bsn!` does the
+same at compile time in Rust, and the ECS surface here does it at runtime:
 
 ```csharp
 foreach (var child in ctx.Ecs.ChildrenOf(root))
@@ -729,7 +729,7 @@ foreach (var child in ctx.Ecs.ChildrenOf(root))
 
 `Add` replaces a component whole, which is right for one the game owns and wrong for one an artist
 part-filled in. `Patch` changes the fields it names and leaves the rest, and `PatchTree` does it to
-an entity and everything under it, which is usually what a model wants said about it:
+an entity and everything under it, which usually suits a model:
 
 ```csharp
 // Keep where the artist put each part, and halve how large the whole model is.
@@ -761,7 +761,7 @@ names nothing instead, and every call that takes one refuses it rather than carr
 whatever it pointed at.
 
 `Mesh` and `Image` load in any build. `StandardMaterial`, `Gltf`, `Audio` and `Font` need a render
-build, and asking for one without it reports which build would support it. Scenes load too: `Scene`
+build, and asking for one without it reports which build would support it. Scenes load too. `Scene`
 is a trait in 0.19 and the loadable asset behind `.scn`, `.scn.ron` and a glTF file's scenes is
 `WorldAsset`, which `ctx.Ecs.SpawnScene` spawns.
 
@@ -787,7 +787,7 @@ Render.SetMaterial(ctx.Ecs, entity, material);
 ```
 
 Handles are references, so one mesh and one material can be shared by any number of entities.
-Attaching a mesh goes through Bevy's own insert rather than a byte copy, which is what pulls in the
+Attaching a mesh goes through Bevy's own insert rather than a byte copy, which pulls in the
 components Bevy requires alongside it, so an entity needs nothing further to be drawn.
 
 #### A mesh of your own
@@ -806,10 +806,10 @@ var ramp = Render.CreateMesh(new MeshData
 
 A triangle mesh given no normals has them worked out, smooth where it is indexed and flat where it
 is not. `Topology` also takes lines, points and strips. A mesh whose vertices a shader moves far
-from where they were built, such as ten thousand squares a vertex shader places from a buffer,
-wants `Render.SetMeshFlags(ctx.Ecs, entity, MeshFlags.NoFrustumCulling)`, because Bevy culls by
-the bounds it worked out from the mesh and those say nothing about where the shader put it. The
-same flags turn a mesh's shadow casting and receiving off.
+from where they were built, such as ten thousand squares a vertex shader places from a buffer, needs
+`Render.SetMeshFlags(ctx.Ecs, entity, MeshFlags.NoFrustumCulling)`, because Bevy culls by the bounds
+it worked out from the mesh and those say nothing about where the shader put it. The same flags turn
+a mesh's shadow casting and receiving off.
 
 #### Meshlets
 
@@ -869,10 +869,10 @@ finished loading, because the material holds a handle rather than pixels. Five m
 way: base color, normal, metallic-roughness, emissive and occlusion.
 
 `AlphaMode` decides what happens where a material is not opaque. `Mask` draws a pixel or skips it,
-deciding at `AlphaCutoff`, so the surface still writes depth and nothing has to be sorted, which is
-what foliage and fences are drawn with. `Blend` is real transparency, drawn after everything else
-and sorted back to front. `Add` adds to what is behind, so it never darkens it. `DoubleSided` draws
-back faces, for anything modeled as a single sheet, and `Unlit` shows the base color flat.
+deciding at `AlphaCutoff`, so the surface still writes depth and nothing has to be sorted, which
+suits foliage and fences. `Blend` is real transparency, drawn after everything else and sorted back
+to front. `Add` adds to what is behind, so it never darkens it. `DoubleSided` draws back faces, for
+anything modeled as a single sheet, and `Unlit` shows the base color flat.
 
 #### A shader of your own
 
@@ -924,9 +924,9 @@ reads as zero, a texture as a stand-in of its shape, and a sampler as linear and
 shader draws something whatever has been set. A matrix crosses row by row, which is how
 `System.Numerics` holds one, so `mul(m, v)` in the shader is `m` applied to `v`.
 
-`material.Parameters` lists what the shader declares, which is what the editor's inspector draws a
-widget for each of, and `program.Layout` (or `shader.layout` in the console) says where every name
-is, down to the byte offset.
+`material.Parameters` lists what the shader declares, and the editor's inspector draws a widget for
+each of them, and `program.Layout` (or `shader.layout` in the console) says where every name is,
+down to the byte offset.
 
 Bevy asks a material's *type* for its bind group layout, and C# cannot declare a type, so the bridge
 has one material type that gives every material the layout its program's shaders declared, and
@@ -948,7 +948,7 @@ var grass = Shaders.CreateProgram(new ShaderProgramSettings
 
 `import bcs;` gives a shader Bevy's view, time and mesh transforms, and vertex structs that line up
 with Bevy's own, so a fragment shader works after Bevy's vertex shader, and `bcs::standard_vertex`
-does what Bevy's does for a vertex shader that wants to start from it:
+does what Bevy's does for a vertex shader that starts from it:
 
 ```slang
 import bcs;
@@ -970,17 +970,17 @@ bcs::PrepassVertexOutput prepass_vertex(bcs::PrepassVertex v)
 }
 ```
 
-The prepass is what draws depth for shadows, and normals and motion for the effects that read
-them. A material that moves its vertices wants a prepass vertex shader moving them the same way,
-or it casts the shadow of the mesh it started from, and one that discards pixels wants a prepass
-fragment shader discarding the same ones. Both read the material's values like the main stages do.
-A vertex stage left out is Bevy's own. Defines reach the shader as `-D`, and a program with
-different defines is a different program compiled on its own.
+The prepass draws depth for shadows, and normals and motion for the effects that read them. A
+material that moves its vertices needs a prepass vertex shader moving them the same way, or it casts
+the shadow of the mesh it started from, and one that discards pixels needs a prepass fragment shader
+discarding the same ones. Both read the material's values like the main stages do. A vertex stage
+left out is Bevy's own. Defines reach the shader as `-D`, and a program with different defines is a
+different program compiled on its own.
 
-A stage can also be Slang handed over as text, which is what a shader worked out at run time wants,
-whether a node graph produced it or a player typed it. It may `import bcs;` and any module under the
-asset root. Different text is a different program, so there is nothing to reload, and a change is a
-new program put on the material:
+A stage can also be Slang handed over as text, for a shader worked out at run time, whether a node
+graph produced it or a player typed it. It may `import bcs;` and any module under the asset root.
+Different text is a different program, so there is nothing to reload, and a change is a new program
+put on the material:
 
 ```csharp
 material.Program = Shaders.CreateProgram(ShaderStage.Slang(generated));
@@ -1047,19 +1047,19 @@ float4 fragment(bcs_pass::Input input) : SV_Target
 
 `import bcs_pass;` gives a pass the picture, time, the view and the previous frame's, and the
 camera's depth, normals and motion vectors, which the bridge binds itself. Everything else a pass
-declares is its own. Depth, normals and motion come from a prepass the camera draws when asked,
-with `Shaders.SetPrepass(camera, depth: true, normals: true, motion: true)`, which is what an
-outline, a fog or anything reusing the previous frame is made of. `bcs_pass::distance_at` turns
-depth into world units, `world_position` turns a pixel back into a point in the world, and
-`previous_uv_of` finds where a point was on the previous frame. A camera that draws none of them
-binds the far plane, white normals and no motion, and so does a multisampled one, whose prepass a
-pass cannot bind. A pass before tonemapping sees the linear
-picture, which may be brighter than white, and suits anything about light; one after sees what the
-screen will show, and suits anything about the picture as a picture. `At: FramePoint.AfterOpaque`
-runs one on the lit opaque geometry, before transparent geometry is drawn over it, which is where
-something about the lit surfaces goes, so glass in front is not under a fog or a reflection meant for
-what is behind it; that one needs a camera drawn once a pixel. A pass still compiling is skipped
-rather than drawn wrong, and passes run in the order given, each over what the last wrote.
+declares is its own. Depth, normals and motion come from a prepass the camera draws when asked, with
+`Shaders.SetPrepass(camera, depth: true, normals: true, motion: true)`, and an outline, a fog or
+anything reusing the previous frame is built from them. `bcs_pass::distance_at` turns depth into
+world units, `world_position` turns a pixel back into a point in the world, and `previous_uv_of`
+finds where a point was on the previous frame. A camera that draws none of them binds the far plane,
+white normals and no motion, and so does a multisampled one, whose prepass a pass cannot bind. A
+pass before tonemapping sees the linear picture, which may be brighter than white, and suits
+anything about light; one after sees what the screen will show, and suits anything about the picture
+as a picture. `At: FramePoint.AfterOpaque` runs one on the lit opaque geometry, before transparent
+geometry is drawn over it. Something about the lit surfaces goes there, so glass in front is not
+under a fog or a reflection meant for what is behind it, and it needs a camera drawn once a pixel. A
+pass still compiling is skipped rather than drawn wrong, and passes run in the order given, each
+over what the last wrote.
 
 #### Compute
 
@@ -1111,28 +1111,28 @@ asked for. A compute shader declares any number of buffers, images it writes (`R
 `RWTexture3D` with a `[format(...)]`), textures it reads and samplers, all set by name.
 `Shaders.CreateImage` makes an image in eight-bit, half and full float and integer formats, from
 `Rgba8` to `Rgba32Float`, two- or three-dimensional, and an image a compute shader writes is an
-ordinary texture to a material or a pass, which is how a compute shader paints a water surface or a
-noise field into something drawn. `Shaders.WriteImage<T>(image, texels, x, y, width, height)`
-writes a region of one from memory, at any mip level and into any slices of a 3D image, before the
-frame's work runs, which is how a texture streamer uploads a tile into its cache without making the
-image again. That cache is usually block-compressed, so `ShaderImageFormat.Bc1`, `Bc4`, `Bc5`,
-`Bc7`, `Bc7Srgb` and `Bc6hFloat` make images a shader samples and never writes, whose sides are
-whole four by four blocks and whose regions are written a block at a time, at a quarter or an eighth
-of the memory the texels would take. A buffer's size is fixed when it is made, and `WriteBuffer` replaces its contents in
-place. `BeginBufferRead` copies one back, and `TryReadBuffer<T>` hands over the elements a frame or
-two later, which is what any readback costs. A program's state stays `Compiling` until its compute
+ordinary texture to a material or a pass, so a compute shader can paint a water surface or a noise
+field into something drawn. `Shaders.WriteImage<T>(image, texels, x, y, width, height)` writes a
+region of one from memory, at any mip level and into any slices of a 3D image, before the frame's
+work runs, so a texture streamer can upload a tile into its cache without making the image again.
+That cache is usually block-compressed, so `ShaderImageFormat.Bc1`, `Bc4`, `Bc5`, `Bc7`, `Bc7Srgb`
+and `Bc6hFloat` make images a shader samples and never writes, whose sides are whole four by four
+blocks and whose regions are written a block at a time, at a quarter or an eighth of the memory the
+texels would take. A buffer's size is fixed when it is made, and `WriteBuffer` replaces its contents
+in place. `BeginBufferRead` copies one back, and `TryReadBuffer<T>` hands over the elements a frame
+or two later, which any readback costs. A program's state stays `Compiling` until its compute
 pipeline has been built, so a dispatch made once it is `Ready` runs rather than being dropped.
 
 Atomics reach a buffer through Slang's `Atomic<T>`, as in `RWStructuredBuffer<Atomic<uint>>` and
 `counter[0].add(1)`, because that is the form Slang turns into WGSL's atomics. `InterlockedAdd` on a
 plain buffer does not compile for WGSL. Slang's wave operations run as WGSL subgroup operations on
-an adapter with subgroups, which every desktop one has: `WaveActiveSum`, `WavePrefixSum`,
-`WaveGetLaneIndex`, `WaveReadLaneAt` and the rest of the arithmetic and ballot family, which is what
-a fast prefix sum or stream compaction is built from. `WaveIsFirstLane` is the exception, since the
-WGSL reader Bevy uses has no subgroup election yet, and `WaveGetLaneIndex() == 0` says the same thing.
-`Shaders.DispatchIndirect(instance, buffer)` runs as many
-workgroups as three unsigned integers in a buffer say, read on the GPU when the dispatch runs, so
-one compute shader can count the work (the pixels that need tracing, the clusters that survived
+an adapter with subgroups, which every desktop one has. That covers `WaveActiveSum`,
+`WavePrefixSum`, `WaveGetLaneIndex`, `WaveReadLaneAt` and the rest of the arithmetic and ballot
+family, from which a fast prefix sum or stream compaction is built. `WaveIsFirstLane` is the
+exception, since the WGSL reader Bevy uses has no subgroup election yet, and
+`WaveGetLaneIndex() == 0` says the same thing. `Shaders.DispatchIndirect(instance, buffer)` runs as
+many workgroups as three unsigned integers in a buffer say, read on the GPU when the dispatch runs,
+so one compute shader can count the work (the pixels that need tracing, the clusters that survived
 culling) and the next runs exactly that much without the count crossing back to the CPU.
 
 A buffer's size is fixed until `Shaders.GrowBuffer` makes it larger, which copies what it held on
@@ -1142,14 +1142,14 @@ new one, so a list that outgrows its buffer does not have to be handed out again
 `Shaders.CreateInstanceBuffer(capacity)` makes a buffer the engine fills every frame with entities'
 transforms, this frame's and the previous frame's, once transforms have been worked out.
 `Shaders.SetInstance(buffer, slot, entity)` puts an entity in a slot. A shader reads it as a
-`StructuredBuffer<bcs_scene::Instance>` after `import bcs_scene;`, which is what culling instances on
-the GPU, voxelizing a scene, or giving geometry a shader placed its motion is built on.
-`Shaders.CreateMaterialBuffer(capacity)` is the same for what entities are made of: each slot holds
-the base color, emissive color, roughness, metallic and reflectance of the entity's standard
+`StructuredBuffer<bcs_scene::Instance>` after `import bcs_scene;`, and culling instances on the GPU,
+voxelizing a scene, or giving geometry a shader placed its motion all build on it.
+`Shaders.CreateMaterialBuffer(capacity)` does the same for what entities are made of. Each slot
+holds the base color, emissive color, roughness, metallic and reflectance of the entity's standard
 material, as `bcs_scene::Material`, written when they change. Put an entity in the same slot of both
-and a shader reaching it by index has where it is and what light bouncing off it looks like, which is
-what a GI ray shades its hit with. Textures are not in it; the base color is what the material
-multiplies them by.
+and a shader reaching it by index has where it is and what light bouncing off it looks like, and a
+GI ray shades its hit with that. Textures are not in it, and the base color is the factor the
+material multiplies them by.
 
 The triangles themselves go in a geometry pool, for a ray traced in a compute shader or a scene
 voxelized by one, which meets whatever mesh is there:
@@ -1219,12 +1219,11 @@ void main(uint3 id : SV_DispatchThreadID)
 
 An image a camera owns is made at a fraction of its picture, made again when the picture changes
 size (starting over from zeros), and bound wherever a shader on that camera declares its name, as a
-texture to read or a storage image to write. One made with `History: true` is two images that
-trade places every frame, so `name_previous` is what `name` held last frame, and one made with
-mips is reachable a level at a time as `name_mip0`, `name_mip1` and on, which is how a depth
-pyramid is built one level from the last. Every camera has its own, however many there are. A
-dispatch or a pass must not read and write the same image, which the GPU refuses, and which is what
-history is for.
+texture to read or a storage image to write. One made with `History: true` is two images that trade
+places every frame, so `name_previous` holds what `name` held last frame, and one made with mips is
+reachable a level at a time as `name_mip0`, `name_mip1` and on, so a depth pyramid can be built one
+level from the last. Every camera has its own, however many there are. A dispatch or a pass must not
+read and write the same image, which the GPU refuses, and history exists to avoid that.
 
 An image can also be filled from the picture itself, at a point of the frame:
 
@@ -1238,21 +1237,21 @@ with history `lit_previous` is last frame's lit picture in its own units. That i
 screen-space GI ray that hits something on screen picks up, and what a temporal filter blends
 toward, without a pass written only to copy it.
 
-A shader on a camera also sees the scene's lights the way Bevy's own materials do:
+A shader on a camera also sees the scene's lights the way Bevy's own materials do. It has
 `bcs_pass::directional_light_count()` and `lights.directional_lights[i]` with each light's color,
-direction and shadow cascades, `point_light_count()` and `point_lights[i]` for point and spot lights,
-and `directional_shadow` and `point_shadow` read Bevy's shadow maps with its filtering, from zero in
-full shadow to one in full light, a spot light's included. `point_light_radiance` is the light a
-point or spot light sends to a point before shadow, falling off with distance and, for a spot, with
-the angle from its axis. That is what shading the point a traced ray hit needs, without drawing the
-scene's lights a second time. The sky is there too: `environment_specular(direction, roughness)`
-is what the camera's environment map sends along a direction, blurred as a surface of that roughness
-blurs it, and `environment_diffuse(normal)` what it sends a surface facing a way, both black when
-`has_environment()` is false. That is what a ray that leaves the scene picks up, turned and scaled
-exactly as Bevy's own sky and lighting use the same map. And `blue_noise(pixel)` is Bevy's
+direction and shadow cascades, `point_light_count()` and `point_lights[i]` for point and spot
+lights, while `directional_shadow` and `point_shadow` read Bevy's shadow maps with its filtering,
+from zero in full shadow to one in full light, a spot light's included. `point_light_radiance` is
+the light a point or spot light sends to a point before shadow, falling off with distance and, for a
+spot, with the angle from its axis. A traced ray's hit is shaded with these, without drawing the
+scene's lights a second time. The sky is there too. `environment_specular(direction, roughness)` is
+the light the camera's environment map sends along a direction, blurred as a surface of that
+roughness blurs it, and `environment_diffuse(normal)` what it sends a surface facing a way, both
+black when `has_environment()` is false. A ray that leaves the scene picks up that light, turned and
+scaled exactly as Bevy's own sky and lighting use the same map. And `blue_noise(pixel)` is Bevy's
 spatio-temporal blue noise for this frame, four numbers from zero to one whose values are spread
-evenly across the picture and from frame to frame, which is what a technique taking a few random
-samples a pixel picks them with so its noise blurs away rather than blotching.
+evenly across the picture and from frame to frame. A technique taking a few random samples a pixel
+picks them with it, so its noise blurs away rather than blotching.
 
 What each pixel's surface is made of comes from Bevy's G-buffer. A camera asked for it with
 `Shaders.SetPrepass(camera, depth: true, deferred: true)` draws Bevy's materials deferred, and a
@@ -1294,11 +1293,10 @@ Shaders.SetViewDraws(camera,
 A draw's count is fixed or read from four unsigned integers in a buffer when it runs (vertices,
 instances, first vertex, first instance), so a dispatch at the same point, which runs first, can
 decide it. It blends as `Opaque`, `Alpha` or `Add`, and writes depth or only tests against it. It
-reads the camera's inputs through `import bcs_pass;`, all but the picture, which is what it draws
-into.
+reads the camera's inputs through `import bcs_pass;`, all but the picture, since it draws into that.
 
-A draw can go into one of the camera's images instead of the picture, which is what a visibility
-buffer is: geometry drawn into an unsigned integer image, each pixel keeping which cluster and
+A draw can go into one of the camera's images instead of the picture. A visibility buffer is made
+that way, as geometry drawn into an unsigned integer image, each pixel keeping which cluster and
 triangle is nearest, for a later pass to shade.
 
 ```csharp
@@ -1312,13 +1310,13 @@ camera draws once a pixel, so the geometry and Bevy's scene hide each other prop
 with `ClearEachFrame` starts every frame as zeros, before anything on the camera runs, so zero is
 "nothing drawn here". An integer image cannot be blended, so a draw into one replaces what is there.
 `Targets = ["ids", "barycentrics"]` draws into several of the camera's images at once, one for each
-of the fragment shader's outputs in order (`SV_Target0`, `SV_Target1` and on), which is what a
-visibility buffer with more than an id, or a G-buffer of a package's own, is written with.
-The prepass's own `motion` and `normals` can be targets too, for a draw at `AfterPrepass` on a
-camera that draws them: what resolves a visibility buffer writes the motion and normals of what it
-resolved there, and its depth through `SV_Depth`, so Bevy's temporal antialiasing and motion blur
-see that geometry move, and what Bevy draws afterward is hidden behind it. A draw writing one of
-them reads a stand-in for it, since nothing reads and writes the same texture in one pass.
+of the fragment shader's outputs in order (`SV_Target0`, `SV_Target1` and on), for a visibility
+buffer with more than an id, or a G-buffer of a package's own. The prepass's own `motion` and
+`normals` can be targets too, for a draw at `AfterPrepass` on a camera that draws them. The pass
+resolving a visibility buffer writes the motion and normals of what it resolved there, and its depth
+through `SV_Depth`, so Bevy's temporal antialiasing and motion blur see that geometry move, and what
+Bevy draws afterward is hidden behind it. A draw writing one of them reads a stand-in for it, since
+nothing reads and writes the same texture in one pass.
 
 `CastsShadows = true` draws it into the shadow maps as well, depth alone, after Bevy's own casters:
 the camera's directional cascades, every spot light's map and every face of every point light's
@@ -1365,7 +1363,7 @@ fit rather than a technique to ship: `BevyCSharp.Sample/Behaviors/ScreenSpaceLig
 times, which is how its share of the picture is told apart from the rest.
 
 A storage image may be declared in any format the adapter can write, `[format("r16f")]` included,
-although core WGSL has fewer: Slang writes the nearest core format and the bridge puts the declared
+although core WGSL has fewer. Slang writes the nearest core format and the bridge puts the declared
 one back from Slang's reflection. An image the shader only writes is bound write-only, which more
 formats allow than reading and writing at once. Slang itself refuses a `RWTexture2D` in a format
 WGSL cannot read and write, such as `rgba16f`, and its `WTexture2D`, written with `Store`, is the
@@ -1381,9 +1379,9 @@ var bumps = AssetServer.LoadImage("textures/tiles-normal.png", TextureSettings.D
 ```
 
 `Tiling` repeats and filters linearly; `Data` filters linearly and reads the file as raw values
-rather than as sRGB, which is what a normal, roughness or occlusion map needs. Individual settings
-are there for anything else, including anisotropy, which is dropped rather than refused if the
-filters are not all linear, because the graphics API treats that pair as a validation failure.
+rather than as sRGB, as a normal, roughness or occlusion map needs. Individual settings are there
+for anything else, including anisotropy, which is dropped rather than refused if the filters are not
+all linear, because the graphics API treats that pair as a validation failure.
 
 Tiling takes both halves. A mesh's UVs run from zero to one however large it is, so a repeating
 texture still shows one stretched copy until the material scales them with `UvScale = (12f, 12f)`.
@@ -1411,13 +1409,13 @@ Render.SpawnLight(new LightSettings
 });
 ```
 
-`CameraProjection.Orthographic` swaps perspective for a fixed vertical `Height`, which is what an
-isometric or top-down view is built on. `Order` decides which camera draws over which, and
-`ClearMode.Keep` layers one on another. A light is aimed by its `Transform`, since a directional or
-spot light shines down its own negative Z, which is what `Transform.LookingAt` produces.
+`CameraProjection.Orthographic` swaps perspective for a fixed vertical `Height`, for an isometric or
+top-down view. `Order` decides which camera draws over which, and `ClearMode.Keep` layers one on
+another. A light is aimed by its `Transform`, since a directional or spot light shines down its own
+negative Z, which `Transform.LookingAt` produces.
 
-`Viewport` gives a camera part of the window instead of all of it, which is what splitscreen is made
-of, and `Layers` decides what a camera can see at all, which is what a minimap is made of:
+`Viewport` gives a camera part of the window instead of all of it, for splitscreen, and `Layers`
+decides what a camera can see at all, for a minimap:
 
 ```csharp
 const uint Minimap = 1u << 1;
@@ -1435,8 +1433,8 @@ Render.SetLayers(ctx.Ecs, marker, Minimap);        // only the minimap draws it
 Render.SetLayers(ctx.Ecs, player, 1u | Minimap);   // both do
 ```
 
-A viewport is measured in physical pixels rather than logical ones, because that is what a
-framebuffer is divided into. A camera draws an entity only where their layers overlap.
+A viewport is measured in physical pixels rather than logical ones, because a framebuffer is divided
+into those. A camera draws an entity only where their layers overlap.
 
 #### Shadows
 
@@ -1464,9 +1462,9 @@ arm's length is this rather than a resolution. Every number it takes keeps Bevy'
 left at zero.
 
 `Render.SetLightCookie` shapes a spot light's beam with a picture, the way a gobo shapes a stage
-light, which is what puts the shadow of a window frame on the floor without a window being there.
-Only the red channel is read, so the picture says how much light gets through rather than what
-color it is, and its border should be black or the light leaks past the edge of it.
+light, so the shadow of a window frame falls on the floor without a window being there. Only the red
+channel is read, so the picture says how much light gets through rather than what color it is, and
+its border should be black or the light leaks past the edge of it.
 
 #### The picture the camera makes
 
@@ -1502,8 +1500,8 @@ alongside multisampling throws rather than quietly drawing nothing. Bloom scatte
 whatever is brighter than white, so it needs `Hdr` and something emissive to work on. To make one
 object glow harder, raise its material's emissive color rather than the bloom.
 
-Either side of that are two more calls. `SetExposure` is what the scene is metered at, in EV-100,
-which is the photographer's number: around 15 for sunlight, 12 for an overcast day and 7 indoors.
+Either side of that are two more calls. `SetExposure` sets the exposure the scene is metered at, in
+EV-100, the photographer's number, around 15 for sunlight, 12 for an overcast day and 7 indoors.
 `SetColorGrading` is the look applied after tonemapping, in the three tonal ranges a colorist works
 in:
 
@@ -1534,8 +1532,8 @@ to the engine's own grading.
 
 #### The lens
 
-The lens is a second call, because it is decided at a different time. The pipeline above is what
-a settings screen owns, and these are what a scene does for a moment.
+The lens is a second call, because it is decided at a different time. A settings screen owns the
+pipeline above, and a scene sets these for a moment.
 
 ```csharp
 Render.SetEffects(camera, new EffectSettings
@@ -1557,8 +1555,8 @@ f-stops, so a smaller number is a wider lens and less of the scene in focus. Mot
 each pixel moved, which costs a second pass over the scene, and that pass goes away again when the
 shutter angle does. `AberrationColors` swaps the red, green, blue fringe for any image, read across
 its width. Auto exposure builds a histogram of the frame and moves the exposure so the average lands
-on middle gray, which is what an eye does walking out of a cave; `MeteringMask` weights where in the
-frame it looks, and `ExposureCompensation` bends the result so a night scene can stay dark.
+on middle gray, as an eye adjusts walking out of a cave; `MeteringMask` weights where in the frame
+it looks, and `ExposureCompensation` bends the result so a night scene can stay dark.
 
 #### Reflections
 
@@ -1571,8 +1569,7 @@ Render.SetScreenSpaceReflections(camera, new ReflectionSettings());
 Each pixel of a shiny surface marches a ray through the depth buffer until it passes behind
 something, and takes the color already drawn there. It is cheap and it is exact where it works, but
 it can only reflect what is on screen, so a reflection fades out toward the edge of the picture and
-anything behind the camera is never in it. A reflection probe or a traced reflection is what fills
-that in.
+anything behind the camera is never in it. A reflection probe or a traced reflection fills that in.
 
 Bevy reads what a surface is from its G-buffer, so turning reflections on also turns on
 `Render.SetDeferredRendering(true)` and gives the camera the depth and deferred prepasses. Deferred
@@ -1583,10 +1580,10 @@ The camera has to draw once a pixel (`Msaa = 1`).
 Which surfaces reflect is decided by roughness. Bevy leaves a surface smoother than 0.08 without a
 reflection and fades reflections in until 0.12, because a mirror-smooth surface shows every flaw of
 a screen-space trace, and fades them out again past 0.55. `FadeInRoughness` and `FadeOutRoughness`
-move both ends, `Thickness` is how deep a surface in the depth buffer is taken to be, which is what
-decides whether a ray passing behind it hit it, and `Steps` and `RefineSteps` trade the cost of the
-march against how finely a hit is found. `null` takes reflections off, and deferred rendering stays
-on until it is asked off, since other cameras may be reading it.
+move both ends, `Thickness` is how deep a surface in the depth buffer is taken to be, which decides
+whether a ray passing behind it hit it, and `Steps` and `RefineSteps` trade the cost of the march
+against how finely a hit is found. `null` takes reflections off, and deferred rendering stays on
+until it is asked off, since other cameras may be reading it.
 
 #### The sky
 
@@ -1631,8 +1628,7 @@ turned into a cube once it has decoded. `brightness` is in candelas per square m
 of the lighting, so the useful numbers are in the hundreds or thousands; a brightness of one is a
 night sky and comes out black. A skybox is seen behind the scene and does not light it.
 
-The same file can light it, though, which is what a scene lit from a photograph of a real place
-wants:
+The same file can light it, though, for a scene lit from a photograph of a real place:
 
 ```csharp
 Render.SetImageLighting(camera, AssetServer.Load(AssetKind.Image, "sky.png"), intensity: 3000f);
@@ -1652,14 +1648,14 @@ Render.SetEnvironmentMap(camera, diffuse, specular, intensity: 3000f);
 ```
 
 The first is the blurred map a rough surface reflects and the second the sharp one a polished
-surface reflects. It costs nothing at startup, which is what a shipped game wants and what an
-environment too large to filter again needs. Passing `AssetHandle.None` for either takes the
-lighting off, since a baked map is the pair and half of one is not a weaker version of it.
+surface reflects. It costs nothing at startup, which suits a shipped game and an environment too
+large to filter again. Passing `AssetHandle.None` for either takes the lighting off, since a baked
+map is the pair and half of one is not a weaker version of it.
 
 #### Light probes
 
 A camera's environment lights everything it sees the same way, which is wrong the moment the scene
-has a room in it: a hall should reflect its own walls rather than the sky outside, and a corner by a
+has a room in it. A hall should reflect its own walls rather than the sky outside, and a corner by a
 red carpet should be warmer than the ceiling. A light probe is a box in the scene that lights what
 is inside it instead.
 
@@ -1722,11 +1718,11 @@ void main(uint3 point : SV_DispatchThreadID)
 A grid `x` by `y` by `z` points is an image `x` wide, twice `y` high and three times `z` deep, one
 region for each sign of each axis, and `irradiance_texel` finds the texel for a point and a
 direction so a shader never deals with that packing. The sides are the way a surface faces, so
-`bcs_scene::POSITIVE_Y` is what lights a floor. Bevy samples the image filtered, which is why it
-is `Rgba16Float`, and the shader says so with `[format("rgba16f")]`, since Slang would otherwise
-assume a wider format than the image has. A baked volume can come from a file instead. A camera is
-refused as a probe, since a camera is lit by `SetEnvironmentMap`, and `AssetHandle.None` takes
-either kind off.
+`bcs_scene::POSITIVE_Y` lights a floor. Bevy samples the image filtered, which is why it is
+`Rgba16Float`, and the shader says so with `[format("rgba16f")]`, since Slang would otherwise assume
+a wider format than the image has. A baked volume can come from a file instead. A camera is refused
+as a probe, since a camera is lit by `SetEnvironmentMap`, and `AssetHandle.None` takes either kind
+off.
 
 A reflection probe can also render its own maps rather than being given them:
 
@@ -1768,8 +1764,8 @@ triangles the picture shows.
 
 #### Drawing into an image
 
-A camera can draw into a texture instead of into the window, which is
-what a portal, a security monitor, a mirror or a second viewport is:
+A camera can draw into a texture instead of into the window, for a portal, a security monitor, a
+mirror or a second viewport:
 
 ```csharp
 var target = Render.CreateTarget(512, 512);
@@ -1789,8 +1785,8 @@ The image is empty until something draws into it, and the handle is usable on th
 returned, because nothing loads. `Render.SetCameraTarget(camera, AssetHandle.None)` puts the camera
 back on the window, and `Render.Screenshot(path, target)` writes out what it drew.
 
-A picture can also come back into memory rather than into a file, which is what asserting on what
-was drawn needs:
+A picture can also come back into memory rather than into a file, so a test can assert on what was
+drawn:
 
 ```csharp
 var ticket = Render.BeginCapture(target);       // or BeginCapture() for what the run is drawing
@@ -1811,11 +1807,10 @@ arrived, and drops the engine's copy when it does. `Render.ReleaseCapture(ticket
 that stopped waiting. A capture taken in the first frames of a run is a picture of a cleared window,
 because a material's pipeline is compiled the first time something asks to be drawn with it.
 
-`Render.CreateImage` goes the other way, turning bytes into an asset with no file behind it, which
-is what a texture worked out at startup or a capture handed on to a material needs. It takes the
-same RGBA layout a capture comes back in, so a picture can be read, changed and given back. Pass
-`srgb: false` for a picture whose numbers mean something other than a color, such as a normal map
-or a roughness mask.
+`Render.CreateImage` goes the other way, turning bytes into an asset with no file behind it, for a
+texture worked out at startup or a capture handed on to a material. It takes the same RGBA layout a
+capture comes back in, so a picture can be read, changed and given back. Pass `srgb: false` for a
+picture whose numbers mean something other than a color, such as a normal map or a roughness mask.
 
 #### The window
 
@@ -1831,12 +1826,12 @@ var (width, height) = Window.Size();
 ```
 
 `WindowMode.Fullscreen` takes the monitor exclusively at its current video mode, which can be worth
-a frame of latency and makes alt-tabbing heavier; `BorderlessFullscreen` is what most desktop games
-want. `CursorGrab.Locked` is what a first-person camera needs, since it reads how far the mouse
-moved rather than where it is. Platforms differ in which grab they support, Windows confining and
-macOS locking and each emulating the other, so hide the cursor while it is grabbed either way.
+a frame of latency and makes alt-tabbing heavier; most desktop games use `BorderlessFullscreen`. A
+first-person camera needs `CursorGrab.Locked`, since it reads how far the mouse moved rather than
+where it is. Platforms differ in which grab they support, Windows confining and macOS locking and
+each emulating the other, so hide the cursor while it is grabbed either way.
 
-The monitors are readable, which is what a settings screen offers a choice from:
+The monitors are readable, so a settings screen can offer a choice of them:
 
 ```csharp
 for (var i = 0; i < Window.MonitorCount(); i++)
@@ -1848,7 +1843,7 @@ for (var i = 0; i < Window.MonitorCount(); i++)
 ```
 
 A monitor's name is read separately from the rest of it, because it is text. Platforms name a
-monitor nothing often enough that a settings screen wants the fallback shown above. A headless run
+monitor nothing often enough that a settings screen needs the fallback shown above. A headless run
 has no window, and every call here says so rather than doing nothing.
 
 `Window.MonitorModes` lists the resolutions and refresh rates a monitor can actually be driven at,
@@ -1900,12 +1895,12 @@ Render2d.SetSprite(ctx.Ecs, walker, sheet, new SpriteSettings
 ```
 
 The layout takes no image, because it describes a cut rather than a picture, so one layout serves
-every sheet cut the same way. `Anchor` moves the transform off the middle of the sprite, which is
-what anything standing on the ground wants, and `SpriteAnchor` names the nine usual points.
-`Mode` decides how the picture meets `Size`: `Sliced` keeps the corners and stretches the middle,
-so one small image draws a panel at any size, `Tiled` repeats it instead, and `Scaled` keeps the
-picture's proportions and letterboxes what is left over, with `Scaling` saying whether it is fitted
-inside the size or made to fill it and which edges are kept.
+every sheet cut the same way. `Anchor` moves the transform off the middle of the sprite, for
+anything standing on the ground, and `SpriteAnchor` names the nine usual points. `Mode` decides how
+the picture meets `Size`: `Sliced` keeps the corners and stretches the middle, so one small image
+draws a panel at any size, `Tiled` repeats it instead, and `Scaled` keeps the picture's proportions
+and letterboxes what is left over, with `Scaling` saying whether it is fitted inside the size or
+made to fill it and which edges are kept.
 
 `SliceTiling` says which parts of a sliced picture repeat rather than stretch. Stretching is wrong
 for anything with a pattern in it, since a border of dots drawn twice as wide becomes a border of
@@ -1946,18 +1941,18 @@ Gizmos.Box(bounds.Center, Quat.Identity, bounds.Size, (0.2f, 1f, 0.4f, 1f));
 Gizmos.Grid(Vec3.Zero, Quat.Identity, across: 20, down: 20, spacing: 1f, (1f, 1f, 1f, 0.15f));
 ```
 
-A gizmo lasts one frame, so anything that should stay on screen is asked for again every frame.
-That is what makes them right for a value that changes and wrong for anything permanent, which
-wants an entity. `Axes` colors itself red, green and blue for X, Y and Z, which is the quickest
-way to see whether something faces where it should.
+A gizmo lasts one frame, so anything that should stay on screen is asked for again every frame. That
+makes them right for a value that changes and wrong for anything permanent, which needs an entity.
+`Axes` colors itself red, green and blue for X, Y and Z, which is the quickest way to see whether
+something faces where it should.
 
 `inFront` decides whether the scene may hide a shape, and it is true everywhere except `Grid`. A
-handle, an outline or a marker is drawn *about* the scene and has to be reachable; a grid, a path
-or a wireframe is drawn *in* it and has to be behind what is in front of it. `Gizmos.Configure`
-sets the line width, which render layers gizmos appear on, and whether they are drawn at all,
-which is what a debug overlay bound to a key wants. Its `which` names one of the two groups, so a
-floor grid and a set of handles can be turned on and off apart. The groups are the same split
-`inFront` chooses between, which is why they line up with the two kinds of drawing already.
+handle, an outline or a marker is drawn *about* the scene and has to be reachable; a grid, a path or
+a wireframe is drawn *in* it and has to be behind what is in front of it. `Gizmos.Configure` sets
+the line width, which render layers gizmos appear on, and whether they are drawn at all, for a debug
+overlay bound to a key. Its `which` names one of the two groups, so a floor grid and a set of
+handles can be turned on and off apart. The groups are the same split `inFront` chooses between,
+which is why they line up with the two kinds of drawing already.
 
 `Gizmos.SetLineStyle` decides what the line itself looks like. A dotted or dashed line tells one
 meaning from another without spending a second color on it, so a path already walked can be drawn
@@ -2024,10 +2019,10 @@ ImGui can put in a draw call, decoded by the engine like any other asset, and dr
 `ImGui.Image` tinted to whatever it means.
 
 **Input is fed, not polled.** `ImGuiRuntime.Begin` turns the engine's per-frame input into the
-events ImGui expects, and `ImGuiRuntime.WantsMouse` is what stops the camera flying, or a click
-picking something behind a panel, while the interface has the pointer. `SyntheticInput` writes into
-both halves, ImGui's queue and the window's own messages, so a test selects a mesh and drags a
-handle the way a hand does.
+events ImGui expects, and `ImGuiRuntime.WantsMouse` stops the camera flying, or a click picking
+something behind a panel, while the interface has the pointer. `SyntheticInput` writes into both
+halves, ImGui's queue and the window's own messages, so a test selects a mesh and drags a handle the
+way a hand does.
 
 ### UI
 
@@ -2049,11 +2044,11 @@ ctx.Ecs.SetParent(label, panel);
 Ui.SetText(label, $"Score: {score}");
 ```
 
-A length carries its unit, because a bare number cannot say whether it means pixels, a share of
-the parent, or "work it out": `Length.Px`, `Length.Percent`, `Length.Auto`. `Absolute` pins a node
-to its parent's edges rather than laying it out beside its siblings, which is what a HUD wants.
+A length carries its unit, because a bare number cannot say whether it means pixels, a share of the
+parent, or "work it out": `Length.Px`, `Length.Percent`, `Length.Auto`. `Absolute` pins a node to
+its parent's edges rather than laying it out beside its siblings, as a HUD does.
 
-A node stacks its children along one axis, which is what turns a pile of them into a screen:
+A node stacks its children along one axis, which turns a pile of them into a screen:
 
 ```csharp
 var menu = Ui.SpawnNode(new UiSettings
@@ -2067,10 +2062,10 @@ var menu = Ui.SpawnNode(new UiSettings
 });
 ```
 
-`Direction` is that axis, `Justify` spreads the children along it and `Align` places them across
-it: a column centered with `Align` is a menu, a row spread with `UiJustify.SpaceBetween` is a
-toolbar. `RowGap` and `ColumnGap` space the children apart from the parent's side, which is
-steadier than a margin on each of them.
+`Direction` is that axis, `Justify` spreads the children along it and `Align` places them across it.
+A column centered with `Align` is a menu, a row spread with `UiJustify.SpaceBetween` is a toolbar.
+`RowGap` and `ColumnGap` space the children apart from the parent's side, which is steadier than a
+margin on each of them.
 
 `Padding`, `Margin` and `Border` are four lengths each, and a single `Length` assigned to one of
 them means the same distance on every side:
@@ -2081,16 +2076,16 @@ Border = Sides.Vertical(Length.Px(2f)),                     // a rule above and 
 Margin = new Sides(Length.Px(8f), Length.Zero, Length.Auto, Length.Zero),
 ```
 
-A border draws only where `BorderColor` is not transparent. `Length.Auto` in a margin is not zero:
-it swallows whatever room the parent has left over, which is how the third line above pushes a
-node to the right without the parent arranging it.
+A border draws only where `BorderColor` is not transparent. `Length.Auto` in a margin is not zero.
+It swallows whatever room the parent has left over, which is how the third line above pushes a node
+to the right without the parent arranging it.
 
 Nodes are entities, so nesting is `SetParent` and removal is `Despawn`, and a node can carry your
 own components like anything else. `SetText` rewrites in place rather than respawning, because a
 score changes every frame and the entity behind it should not.
 
 Text is set in the font Bevy compiles in, so words reach the screen with no asset loaded at all. A
-game that wants its own loads it like anything else:
+game with a font of its own loads it like anything else:
 
 ```csharp
 var font = AssetServer.Load(AssetKind.Font, "fonts/inter.ttf");
@@ -2100,9 +2095,9 @@ Ui.SpawnText("Score: 0", new UiSettings { Color = (1f, 1f, 1f, 1f) },
 ```
 
 TrueType and OpenType. A handle that names nothing is refused rather than falling back quietly,
-because a game that ships a font and silently does not use it looks exactly like a font that
-failed to load. Asking for a font by family name, the way a web page asks for `sans-serif`, is not
-offered: Bevy resolves those through `system_font_discovery`, which links against fontconfig on
+because a game that ships a font and silently does not use it looks exactly like a font that failed
+to load. Asking for a font by family name, the way a web page asks for `sans-serif`, is not offered,
+because Bevy resolves those through `system_font_discovery`, which links against fontconfig on
 Linux, and the bridge builds with nothing but a C compiler.
 
 A label fits on one line; a paragraph has to be told how to break:
@@ -2129,20 +2124,19 @@ lays out correctly and draws nothing.
 `LineHeight` sets the spacing between lines, as a multiple of the font size unless
 `LineHeightInPixels` says otherwise, and `LetterSpacing` does the same between the letters, where a
 negative value pulls them together and `LetterSpacingInPixels` switches the unit the same way.
-`Smooth` turned off keeps a pixel font sharp, since smoothing
-a font drawn to land on whole pixels is what makes it look blurred. `ShadowOffset` and
-`ShadowColor` put a shadow behind the glyphs, which is what keeps light text readable over a
-picture that might be light too.
+`Smooth` turned off keeps a pixel font sharp, since smoothing a font drawn to land on whole pixels
+makes it look blurred. `ShadowOffset` and `ShadowColor` put a shadow behind the glyphs, which keeps
+light text readable over a picture that might be light too.
 
-`Ui.SpawnTextSpan` adds a run to a text that already exists, in its own font, size and color, which
-is what a bold word inside a sentence is. The spans read in the order they were added, after
-whatever the parent itself says, and the whole is broken and aligned as one block by the settings
-the parent was given. A span has no node of its own, so it takes its color as an argument where a
-whole text takes the color of the node it sits in.
+`Ui.SpawnTextSpan` adds a run to a text that already exists, in its own font, size and color, such
+as a bold word inside a sentence. The spans read in the order they were added, after whatever the
+parent itself says, and the whole is broken and aligned as one block by the settings the parent was
+given. A span has no node of its own, so it takes its color as an argument where a whole text takes
+the color of the node it sits in.
 
 **Laying out on a grid.** Flexbox lays a run of children along one axis and takes the other from
-what they are. A grid states both axes up front and drops the children into the cells, which is
-what makes a column line up with the column above it:
+what they are. A grid states both axes up front and drops the children into the cells, so a column
+lines up with the column above it:
 
 ```csharp
 UiGrid.Set(panel, new GridSettings
@@ -2155,10 +2149,10 @@ UiGrid.Set(panel, new GridSettings
 A track is sized by `Track.Px`, `Track.Percent`, `Track.Fr` (a share of whatever is left after the
 fixed tracks have taken theirs), `Track.Auto`, `Track.MinContent` or `Track.MaxContent`.
 `Repeated(n)` states the same track n times over, and `Filling()` states it as many times as the
-grid has room for, which is what a gallery that reflows with its window is. `Rows` and `Columns`
-are the tracks stated up front; `AutoRows` and `AutoColumns` are the ones made when an item lands
-past them, cycled through as often as they are needed, so a list of unknown length states its
-columns and leaves its rows to these.
+grid has room for, as a gallery that reflows with its window does. `Rows` and `Columns` are the
+tracks stated up front; `AutoRows` and `AutoColumns` are the ones made when an item lands past them,
+cycled through as often as they are needed, so a list of unknown length states its columns and
+leaves its rows to these.
 
 `UiGrid.Place` puts one child somewhere in particular. Lines are counted from one, and a negative
 counts back from the far edge, so a column of `-1` is the last one whatever the grid turned out to
@@ -2187,9 +2181,9 @@ var fixedWidth = Ui.SpawnNode(new UiSettings { Shrink = 0f, Width = Length.Px(64
 var menu = Ui.SpawnNode(new UiSettings { Display = UiDisplay.None });   // put away, not despawned
 ```
 
-`UiDisplay.None` is not `Visibility.Hidden`: the first takes the node's space back and moves its
-siblings up, the second stops it drawing and leaves the hole. A screen that is toggled wants the
-first, a health bar that blinks the second.
+`UiDisplay.None` is not `Visibility.Hidden`. The first takes the node's space back and moves its
+siblings up, and the second stops it drawing and leaves the hole. A screen that is toggled uses the
+first, and a health bar that blinks the second.
 
 `OverflowX` and `OverflowY` say what happens to contents past an edge: drawn anyway, clipped, or
 clipped and scrollable. Bevy has no scrolling of its own, so a list is moved by reading the wheel
@@ -2203,8 +2197,8 @@ width is being decided, and `AlignContent` spreads the lines a wrapped node prod
 `Justify` spreads the children within one line.
 
 `Camera` names which camera draws the screen, and carries to the node's children. Left alone, Bevy
-picks whichever camera draws to the window, which is what a game wants; a run drawing into an image
-has none, so a screen that should appear in an offscreen capture names the camera itself.
+picks whichever camera draws to the window, which suits a game; a run drawing into an image has
+none, so a screen that should appear in an offscreen capture names the camera itself.
 
 A node can hold a picture as well as a color:
 
@@ -2216,13 +2210,13 @@ Ui.SetImage(icon, AssetServer.Load(AssetKind.Image, "ui/icon.png"));
 `UiImageSettings` tints it, mirrors it, cuts one icon out of a sheet with `Rect` or by frame number
 with `Atlas` and `Frame`, and chooses how it meets the node's size. The layout `Atlas` takes is the
 one `Render2d.CreateAtlas` makes, so a sheet of icons serves the world and the interface without
-being cut a second way. `UiImageMode.Sliced` is the one worth knowing. The image is cut into
-nine, the corners keep their size and the middle stretches, so one small picture draws a panel at
-any size. `SliceTiling` makes the edges or the middle repeat rather than stretch, which is what a
-patterned border needs. `Auto` keeps the picture's own size, which is what a node with no width or
-height of its own then takes.
+being cut a second way. `UiImageMode.Sliced` is the one worth knowing. The image is cut into nine,
+the corners keep their size and the middle stretches, so one small picture draws a panel at any
+size. `SliceTiling` makes the edges or the middle repeat rather than stretch, as a patterned border
+needs. `Auto` keeps the picture's own size, which a node with no width or height of its own then
+takes.
 
-A node can be asked to report the pointer, which is what makes it a button:
+A node can be asked to report the pointer, which makes it a button:
 
 ```csharp
 var button = Ui.SpawnNode(new UiSettings
@@ -2254,9 +2248,8 @@ Audio.Stop(music);
 ```
 
 Ogg Vorbis, WAV, FLAC and MP3. A sound that is playing is an entity, so it can be despawned,
-parented, tagged with your own components and found by a query, and `Play` hands that entity
-back. `PlaybackMode.Despawn` is what a one-shot effect wants, because nothing has to remember to clean
-it up.
+parented, tagged with your own components and found by a query, and `Play` hands that entity back.
+`PlaybackMode.Despawn` suits a one-shot effect, because nothing has to remember to clean it up.
 
 `SetVolume`, `Pause` and `Resume` reach the sink Bevy attaches once playback has started, so they
 report `NotPresent` if called in the same frame the sound was started in. So do `PositionOf` and
@@ -2298,13 +2291,13 @@ ctx.Ecs.Add(engine, Transform.At(4f, 0f, -2f));
 ```
 
 A spatial sound is given a `Transform` to be moved by, and is heard quieter with distance and
-further to one side as it crosses the listener. `Config.SpatialScale` is what makes that work in a
-world whose units are not meters, set once for the app because what the world is measured in is a
-fact about the game rather than about any one sound; a sound may still say otherwise for itself.
+further to one side as it crosses the listener. `Config.SpatialScale` makes that work in a world
+whose units are not meters, set once for the app because what the world is measured in is a fact
+about the game rather than about any one sound; a sound may still say otherwise for itself.
 
 `Audio.SetListener` takes an ear gap, and an overload takes the two ear positions instead. Placing
-them says which way a head is facing as well as how wide it is, which is what a listener carried by
-a character rather than by a camera needs.
+them says which way a head is facing as well as how wide it is, for a listener carried by a
+character rather than by a camera.
 
 Sound is in the render profile rather than the minimal one, and not because it draws. It is the
 one part of the engine that needs a system library at build time. See
@@ -2312,9 +2305,9 @@ one part of the engine that needs a system library at build time. See
 
 ### Text and touch
 
-Keys tell you what the hardware did; `Input.Text` tells you what the user meant. It is this
-frame's typed characters, after the keyboard layout and any dead keys have been applied, which is
-what a name field needs:
+Keys tell you what the hardware did, and `Input.Text` tells you what the user meant. It holds this
+frame's typed characters, after the keyboard layout and any dead keys have been applied, for a name
+field:
 
 ```csharp
 name += ctx.Input.Text;
@@ -2334,7 +2327,7 @@ foreach (var touch in ctx.Input.Touches)
 ```
 
 A touch that ends is reported once, on the frame it ends, and is gone after that. Gamepads are
-deliberately excluded: `bevy_gilrs` needs libudev headers at build time on Linux, which the
+deliberately excluded, because `bevy_gilrs` needs libudev headers at build time on Linux, which the
 bridge avoids so it builds with nothing but a C compiler.
 
 ---
@@ -2366,9 +2359,9 @@ dotnet run --project BevyCSharp.Sample -- --offscreen --frames 120
 The sample opens a window by default and draws a lit cube turning in place. Escape closes it.
 
 There are three ways to run the same behaviors, and `Config` chooses between them. A window is the
-usual one. `Headless` installs no renderer, which is what a test or a dedicated server wants.
-`Offscreen` installs the renderer and draws into an image instead of onto a screen, which is the
-only one of the three that produces a picture on a machine with no display server:
+usual one. `Headless` installs no renderer, for a test or a dedicated server. `Offscreen` installs
+the renderer and draws into an image instead of onto a screen, and is the only one of the three that
+produces a picture on a machine with no display server:
 
 ```csharp
 var config = Config.OffscreenFor(1280, 720, frames: 120);
@@ -2390,8 +2383,8 @@ anywhere while trying something out:
 | Alt and left button | swing around a point in front of the camera |
 | F | frame the origin from wherever the camera is looking |
 
-`BevyCSharp.Sample/Behaviors/FlyCamera.cs` is the whole of it, and it is an ordinary behavior:
-it keeps its own yaw, pitch and speed as component fields, reads `ctx.Input`, and writes Bevy's
+`BevyCSharp.Sample/Behaviors/FlyCamera.cs` is the whole of it, and it is an ordinary behavior. It
+keeps its own yaw, pitch and speed as component fields, reads `ctx.Input`, and writes Bevy's
 `Transform`.
 
 Both modes run the identical behavior scripts. Nothing branches on whether a renderer exists;
@@ -2409,8 +2402,8 @@ silently. `App.DescribeAdapter()` reports what you actually got, which is how yo
 Ask for a backend the machine has no driver for and startup fails with a message saying so,
 rather than quietly picking something else.
 
-Cameras, lights, meshes and materials are reachable from C# through `Render`, which is what
-draws the scene in the screenshot above. See [Drawing](#drawing) for the calls.
+Cameras, lights, meshes and materials are reachable from C# through `Render`, which draws the scene
+in the screenshot above. See [Drawing](#drawing) for the calls.
 
 ---
 
@@ -2419,7 +2412,7 @@ draws the scene in the screenshot above. See [Drawing](#drawing) for the calls.
 The editor profile watches the asset directory, so a running app picks up what changed on disk.
 `Config.WatchAssets` turns it on.
 
-Assets reload: a texture, a mesh or a font changed on disk is picked up by the running app.
+Assets reload, so a texture, a mesh or a font changed on disk is picked up by the running app.
 Shaders reload in every profile, watcher or not, including a Slang shader when a file it imports
 changes. What happens when one fails is under [Drawing](#drawing).
 
@@ -2459,8 +2452,8 @@ carry one in order to run.
 
 ## The tools
 
-Both are ordinary BevyCSharp apps rather than privileged ones, which is what lets anything learned
-building them apply to building a game.
+Both are ordinary BevyCSharp apps rather than privileged ones, so anything learned building them
+applies to building a game.
 
 ### The editor
 
@@ -2484,8 +2477,8 @@ handful of numbers that `EditorShell` owns and every part reads, saved with the 
 editor opens the way it was left. The look is one theme file, `assets/theme.txt`, which the Style
 tab writes. [.github/EDITOR.md](.github/EDITOR.md) has the design language in full.
 
-Two things it is built on belong to the library rather than to the editor, and are what any tool
-would use.
+Two things it is built on belong to the library rather than to the editor, and any tool can use
+them.
 
 **Showing a component needs no reflection.** The generator emits a `ComponentSchema` for every
 `[Behavior]` struct, holding each field's name, its kind, and a pair of closures that read and write
@@ -2507,8 +2500,8 @@ called `At`, in a fold called `Held`, in one called `Front`. Writing one reads t
 changes that part and writes it back, so a part written does not wipe its neighbors. Bevy's own
 components are the curated list, because each needs a byte-compatible mirror written by hand.
 
-**A field says how it wants to be drawn**, in attributes the generator reads at compile time, so
-nothing reflects at runtime:
+**A field says how it is drawn**, in attributes the generator reads at compile time, so nothing
+reflects at runtime:
 
 ```csharp
 [Range(0, 1, Readout = SliderReadout.Number)] public float Weight;   // a bar, and the number
@@ -2544,11 +2537,10 @@ The mesh and the material an entity is drawn with are Bevy's own components hold
 so they have no schema and are drawn as a section of their own. It shows where each came from, says
 "made here" for anything built in memory, and offers the files under the asset root that suit.
 
-A schema also carries how to add the component, how to remove it, and any method the struct has
-that takes nothing, so a panel offers those as buttons without naming a type. What the editor
-changes can be taken back: `EditorHistory` records an operation only when it can be reversed
-exactly, which is why despawning is not recorded, an entity's mesh and material having no mirror on
-this side.
+A schema also carries how to add the component, how to remove it, and any method the struct has that
+takes nothing, so a panel offers those as buttons without naming a type. What the editor changes can
+be taken back. `EditorHistory` records an operation only when it can be reversed exactly, which is
+why despawning is not recorded, an entity's mesh and material having no mirror on this side.
 
 ### The console
 
@@ -2667,12 +2659,12 @@ run against a real Bevy app. Known gaps:
 
 - A locally built package contains only the platform you built it on. Use the CI workflow, or
   run `build-native.sh` on each target platform, to produce a package covering all of them.
-- A render build draws: mesh primitives, textured physically based materials, cameras, lights,
-  sprites, gizmos, UI nodes and text are reachable from a behavior script, verified on Vulkan.
-  glTF files and `.scn` scenes load and spawn, audio plays, and a camera tonemaps, blooms,
-  multisamples, antialiases, scatters a sky over what it draws, pulls focus and finds its own
-  exposure. What is thin is the layer above that. Animation has no bridge, sprites step through
-  no frames of their own, and a compressed texture a desktop GPU cannot decode is not transcoded.
+- A render build draws. Mesh primitives, textured physically based materials, cameras, lights,
+  sprites, gizmos, UI nodes and text are reachable from a behavior script, verified on Vulkan. glTF
+  files and `.scn` scenes load and spawn, audio plays, and a camera tonemaps, blooms, multisamples,
+  antialiases, scatters a sky over what it draws, pulls focus and finds its own exposure. What is
+  thin is the layer above that. Animation has no bridge, sprites step through no frames of their
+  own, and a compressed texture a desktop GPU cannot decode is not transcoded.
   [.github/TODO.md](.github/TODO.md) lists what each gap needs.
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does
   nothing yet. The editor reloads scripts through `App.EnableDynamicSystems` instead, because
@@ -2684,9 +2676,9 @@ run against a real Bevy app. Known gaps:
   than the scene.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
-- A cubemap comes from a file, as six square faces stacked into a column, or from a reflection
-  probe that captures itself. One a game renders into by its own cameras has no bridge, which is
-  what a point light's shadow drawn by a shader would want.
+- A cubemap comes from a file, as six square faces stacked into a column, or from a reflection probe
+  that captures itself. One a game renders into with its own cameras, a layer at a time, has no
+  bridge.
 - Slang shaders compile with `slangc`, which the build fetches. A machine without it draws what
   was compiled and cached on one that had it, and cannot compile an edit.
 - The renderer is open at fewer points than virtualized geometry, texture streaming, screen-space
@@ -2730,7 +2722,7 @@ padded section banners, and comments that explain why rather than restate the co
 Mozilla Public License 2.0. The full text is in [LICENSE](LICENSE), and it ships inside the
 package.
 
-MPL-2.0 is file-level copyleft: changes to files that are part of this project have to stay under
-it and be made available in source form, while anything you build *around* it, including a game
-that references the package, is yours under whatever terms you like. Bevy itself is MIT and
+MPL-2.0 is file-level copyleft, meaning changes to files that are part of this project have to stay
+under it and be made available in source form, while anything you build *around* it, including a
+game that references the package, is yours under whatever terms you like. Bevy itself is MIT and
 Apache-2.0, which this can incorporate freely.

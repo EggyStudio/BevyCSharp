@@ -52,11 +52,11 @@ What is usually there:
 | `eval <c#>` | Editor only: compile and run a fragment against the live world |
 | `do <Menu/Path>`, `select <name>`, `undo`, `redo`, `world.save`/`world.load` | Editor only |
 
-**Two keyboards.** `input.key` starts where a real key starts, at the window, which is what the
-editor reads its shortcuts from. `input.uikey` goes into the interface's own queue, which is what a
-text field being typed into reads. Letters arrive either way, but **Enter, Escape, Tab and the
-arrows inside a field only work through `input.uikey`**, because a window Enter leaves a line typed
-and never submitted. Driving the editor's own console, for example:
+**Two keyboards.** `input.key` starts where a real key starts, at the window, where the editor reads
+its shortcuts. `input.uikey` goes into the interface's own queue, which a text field being typed
+into reads. Letters arrive either way, but **Enter, Escape, Tab and the arrows inside a field only
+work through `input.uikey`**, because a window Enter leaves a line typed and never submitted.
+Driving the editor's own console, for example:
 
 ```bash
 ./bcs command input.key Backquote      # the console tab, a window shortcut
@@ -66,9 +66,9 @@ and never submitted. Driving the editor's own console, for example:
 ./bcs command log.tail 3               # what it answered
 ```
 
-Widgets are addressed by point rather than by name. The interface is immediate-mode, so a widget
-is a call that happened, and where it landed is what the layout decided. Capture, read the
-coordinates off the picture, then click.
+Widgets are addressed by point rather than by name. The interface is immediate-mode, so a widget is
+a call that happened, and the layout decided where it landed. Capture, read the coordinates off the
+picture, then click.
 
 `eval` is the escape hatch when no command covers what you need. The world is in scope as `world`;
 a fragment with no semicolon is an expression.

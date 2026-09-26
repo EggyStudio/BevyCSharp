@@ -125,7 +125,7 @@ public static unsafe class Shaders
         Enumerable.Range(0, ProgramCount).Select(index => new ShaderProgram(index));
 
     /// <summary>Makes a program drawn by one fragment shader, leaving the rest to Bevy.</summary>
-    /// <remarks>What most materials want. See <see cref="CreateProgram(ShaderProgramSettings)"/>.</remarks>
+    /// <remarks>What most materials use. See <see cref="CreateProgram(ShaderProgramSettings)"/>.</remarks>
     /// <param name="fragment">A <c>.slang</c> file under the asset root.</param>
     public static ShaderProgram CreateProgram(ShaderStage fragment) =>
         CreateProgram(new ShaderProgramSettings { Fragment = fragment });
@@ -272,7 +272,7 @@ public static unsafe class Shaders
     /// <param name="program">The program that draws it.</param>
     /// <param name="alpha">
     /// What the renderer does where this material is not opaque. A shader writing anything but one
-    /// in its alpha channel wants <see cref="AlphaMode.Blend"/> or another of the blending modes,
+    /// in its alpha channel needs <see cref="AlphaMode.Blend"/> or another of the blending modes,
     /// since an opaque material's alpha is not read at all.
     /// </param>
     /// <returns>The material, which converts to the handle <see cref="Render.SetMaterial"/> takes.</returns>
@@ -328,8 +328,8 @@ public static unsafe class Shaders
     }
 
     /// <summary>
-    /// Makes an instance of a program, which is what a pass over a camera's picture or a compute
-    /// dispatch runs. Only valid inside a system.
+    /// Makes an instance of a program, which a pass over a camera's picture or a compute dispatch
+    /// runs. Only valid inside a system.
     /// </summary>
     /// <remarks>
     /// An instance holds its values by name the way a material does, and keeps them from frame to
@@ -420,15 +420,15 @@ public static unsafe class Shaders
     /// <para>
     /// A pass reads them with <c>bcs_pass::depth_at</c>, <c>normal_at</c> and <c>motion_at</c>, and
     /// a compute shader on the camera with <c>load_depth</c>, <c>load_normal</c> and
-    /// <c>load_motion</c>. Depth and normals are what an outline, a fog or ambient occlusion is made
-    /// of, and motion is what anything reusing the previous frame needs to find where a surface was.
-    /// A camera that draws none of them binds depth zero, which is the far plane, white normals and
-    /// no motion, so a shader reading them runs either way.
+    /// <c>load_motion</c>. An outline, a fog or ambient occlusion is built from depth and normals,
+    /// and anything reusing the previous frame needs motion to find where a surface was. A camera
+    /// that draws none of them binds depth zero, which is the far plane, white normals and no
+    /// motion, so a shader reading them runs either way.
     /// </para>
     /// <para>
     /// A prepass draws the scene a second time, so it is worth asking for only when something reads
     /// it. A multisampled camera draws it multisampled, which a pass cannot bind, so a camera read
-    /// this way wants <see cref="PostSettings.Msaa"/> of one, and gets the stand-ins otherwise.
+    /// this way needs <see cref="PostSettings.Msaa"/> of one, and gets the stand-ins otherwise.
     /// </para>
     /// </remarks>
     /// <param name="camera">The camera.</param>
@@ -443,7 +443,7 @@ public static unsafe class Shaders
     /// pixel, which a shader reads as <c>gbuffer</c> and unpacks with <c>bcs_pass::surface_of</c>.
     /// It turns on <see cref="Render.SetDeferredRendering"/>, which stays on after the camera stops
     /// asking, since other cameras may read it, and brings depth with it. Only Bevy's own materials
-    /// are in it: one drawn by a Slang program is drawn forward and leaves its pixels empty.
+    /// are in it, since one drawn by a Slang program is drawn forward and leaves its pixels empty.
     /// </param>
     /// <param name="previous">
     /// Whether to keep the previous frame's depth and G-buffer as well, which a shader reads as
@@ -487,7 +487,7 @@ public static unsafe class Shaders
     /// </para>
     /// <para>
     /// A shader must not read and write the same image in one dispatch or pass, which the GPU
-    /// refuses, and which is what history is for.
+    /// refuses, and history exists to avoid that.
     /// </para>
     /// </remarks>
     /// <example>
@@ -597,7 +597,7 @@ public static unsafe class Shaders
     private static readonly Dictionary<ulong, string[]> _viewImages = [];
 
     /// <summary>
-    /// Starts watching one of a camera's images: every frame, once the camera's frame is done, it
+    /// Starts watching one of a camera's images. Every frame, once the camera's frame is done, it
     /// is drawn into an eight-bit image, each value times <paramref name="scale"/> plus
     /// <paramref name="offset"/>. Answers that image. Only valid inside a system.
     /// </summary>
@@ -663,9 +663,9 @@ public static unsafe class Shaders
     /// <para>
     /// A dispatch on a camera runs at a <see cref="FramePoint"/> of that camera's frame, with the
     /// camera's inputs (the picture, time, the view and the previous frame's, depth, normals and
-    /// motion) through <c>import bcs_pass;</c>, and the camera's images under their names. That is
-    /// what an ambient occlusion, a screen-space GI or a temporal filter runs in: a chain of
-    /// dispatches and passes over one camera's frame, each reading what the last wrote.
+    /// motion) through <c>import bcs_pass;</c>, and the camera's images under their names. An
+    /// ambient occlusion, a screen-space GI or a temporal filter runs as a chain of dispatches and
+    /// passes over one camera's frame, each reading what the last wrote.
     /// </para>
     /// <para>
     /// Each takes its instance's values as they are every frame, so a value set on the instance
@@ -785,15 +785,15 @@ public static unsafe class Shaders
     /// A draw on a camera is a program with a <see cref="ShaderProgramSettings.DrawVertex"/> and a
     /// <see cref="ShaderProgramSettings.DrawFragment"/> stage, drawn into the camera's picture and
     /// tested against its depth at a <see cref="FramePoint"/>. Its vertex shader is handed no
-    /// vertices, only their numbers, and places what is drawn from the buffers it declares. That is
-    /// how something whose shape lives on the GPU is drawn: particles a compute shader moves,
-    /// clusters a culling pass chose, any number of instances whose count a buffer holds.
+    /// vertices, only their numbers, and places what is drawn from the buffers it declares.
+    /// Something whose shape lives on the GPU is drawn this way, such as particles a compute shader
+    /// moves, clusters a culling pass chose, any number of instances whose count a buffer holds.
     /// </para>
     /// <para>
-    /// Its count is fixed, or read from a buffer when it runs (<see cref="ViewDraw.Indirect"/>),
-    /// so a compute shader earlier at the same point can decide it. Draws at a point run after that
-    /// point's dispatches, and before the passes on the same side of tonemapping. The picture is
-    /// what is drawn into, so it is not readable while drawing, and its binding holds a stand-in.
+    /// Its count is fixed, or read from a buffer when it runs (<see cref="ViewDraw.Indirect"/>), so
+    /// a compute shader earlier at the same point can decide it. Draws at a point run after that
+    /// point's dispatches, and before the passes on the same side of tonemapping. The draw writes
+    /// into the picture, so it is not readable while drawing, and its binding holds a stand-in.
     /// </para>
     /// </remarks>
     /// <example>
@@ -1043,7 +1043,7 @@ public static unsafe class Shaders
     /// <para>
     /// Put an entity's mesh in a pool, and the entity in the same slot of an instance buffer and a
     /// material buffer, and a shader has where its triangles are, how they have moved and what they
-    /// are made of, which is what shading a ray's hit takes.
+    /// are made of, which shading a ray's hit takes.
     /// </para>
     /// </remarks>
     public static GeometryPool CreateGeometryPool()
@@ -1083,17 +1083,17 @@ public static unsafe class Shaders
     /// </summary>
     /// <remarks>
     /// <para>
-    /// A ray that hits something has to know its color to bounce light off it, which is what
-    /// world-space GI and traced reflections shade their hits with. The engine reads it from each
-    /// entity's material rather than a package guessing it, and writes it only when something
-    /// changed. Slots are set with <see cref="SetInstance"/>, and putting an entity in the same slot
-    /// of an instance buffer and a material buffer gives a shader its transform and its material by
-    /// one index.
+    /// A ray that hits something has to know its color to bounce light off it, and world-space GI
+    /// and traced reflections shade their hits with it. The engine reads it from each entity's
+    /// material rather than a package guessing it, and writes it only when something changed. Slots
+    /// are set with <see cref="SetInstance"/>, and putting an entity in the same slot of an
+    /// instance buffer and a material buffer gives a shader its transform and its material by one
+    /// index.
     /// </para>
     /// <para>
-    /// A shader reads it as a <c>StructuredBuffer&lt;bcs_scene::Material&gt;</c>. Textures are not in
-    /// it: the base color is what the material multiplies its texture by, and an entity drawn by a
-    /// shader program, or with no material, holds zeros.
+    /// A shader reads it as a <c>StructuredBuffer&lt;bcs_scene::Material&gt;</c>. Textures are not
+    /// in it, since the base color is the factor the material multiplies its texture by, and an
+    /// entity drawn by a shader program, or with no material, holds zeros.
     /// </para>
     /// </remarks>
     public static AssetHandle CreateMaterialBuffer(int capacity)
@@ -1137,8 +1137,8 @@ public static unsafe class Shaders
     /// <remarks>
     /// The copy is of the buffer as it stands once this frame's dispatches have run, and it arrives
     /// a frame or two later, which <see cref="TryReadBuffer"/> is asked each frame until it says
-    /// so. That latency is what any readback costs, so work whose answer is needed every frame is
-    /// better kept on the GPU.
+    /// so. Any readback costs that latency, so work whose answer is needed every frame is better
+    /// kept on the GPU.
     /// </remarks>
     public static BufferRead BeginBufferRead(AssetHandle buffer) =>
         new(Native.Check(Native.bcs_shader_buffer_read(buffer.Key), "reading a shader buffer back"));
@@ -1239,8 +1239,8 @@ public static unsafe class Shaders
     /// <remarks>
     /// The texels are in the format's own layout, row after row and slice after slice, so a
     /// heightmap in <see cref="ShaderImageFormat.R32Float"/> is a float per texel and one in
-    /// <see cref="ShaderImageFormat.Rgba16Float"/> is four halves. That is what a picture whose
-    /// numbers are not colors wants, where eight bits a channel would lose them.
+    /// <see cref="ShaderImageFormat.Rgba16Float"/> is four halves. A picture whose numbers are not
+    /// colors needs this, where eight bits a channel would lose them.
     /// </remarks>
     /// <exception cref="ArgumentException">
     /// The texels are not exactly the image's size in bytes.
@@ -1284,9 +1284,9 @@ public static unsafe class Shaders
     /// </summary>
     /// <remarks>
     /// <para>
-    /// What a texture streamer uploads a tile into its cache with, and what an image changed a piece
-    /// at a time wants rather than being made again. The texels are in the image format's own layout,
-    /// row after row and slice after slice, as for <see cref="CreateImage{T}"/>, and
+    /// A texture streamer uploads a tile into its cache with this, and an image changed a piece at
+    /// a time uses it rather than being made again. The texels are in the image format's own
+    /// layout, row after row and slice after slice, as for <see cref="CreateImage{T}"/>, and
     /// <paramref name="depth"/> slices from <paramref name="z"/> reach into a 3D image or the
     /// layers of an array. <paramref name="mip"/> picks the level, whose size is the image's halved
     /// that many times.
@@ -1360,8 +1360,8 @@ public static unsafe class Shaders
 
 /// <summary>Something a shader's values are set on by name: a material or an instance.</summary>
 /// <remarks>
-/// Implemented only by <see cref="ShaderMaterial"/> and <see cref="ShaderInstance"/>, which is
-/// what lets the setters in <see cref="ShaderValues"/> be written once for both.
+/// Implemented only by <see cref="ShaderMaterial"/> and <see cref="ShaderInstance"/>, so the
+/// setters in <see cref="ShaderValues"/> are written once for both.
 /// </remarks>
 public interface IShaderValues
 {
@@ -1378,10 +1378,10 @@ public interface IShaderValues
 /// shader.
 /// </para>
 /// <para>
-/// Numbers are checked for kind and shape, so a <c>float3</c> is set from a <see cref="Vector3"/>, an
-/// <c>int</c> from an <see cref="int"/>, a <c>float4x4</c> from a <see cref="Matrix4x4"/>, and an
-/// array from a span of its elements, which may be shorter than the array. A C# matrix is laid out
-/// by rows, which is what a Slang <c>float4x4</c> is, so <c>mul(m, v)</c> in the shader is
+/// Numbers are checked for kind and shape, so a <c>float3</c> is set from a <see cref="Vector3"/>,
+/// an <c>int</c> from an <see cref="int"/>, a <c>float4x4</c> from a <see cref="Matrix4x4"/>, and
+/// an array from a span of its elements, which may be shorter than the array. A C# matrix is laid
+/// out by rows, as a Slang <c>float4x4</c> is, so <c>mul(m, v)</c> in the shader is
 /// <see cref="Vector4.Transform(Vector4, Matrix4x4)"/> with the matrix transposed.
 /// </para>
 /// </remarks>
@@ -1536,8 +1536,8 @@ public static unsafe class ShaderValues
         /// <c>RWTexture</c> takes an image from <see cref="Shaders.CreateImage"/>.
         /// </para>
         /// <para>
-        /// <paramref name="mip"/> binds one mip level of the image rather than all of them, which is
-        /// what a shader building a pyramid reads the level above with and writes the next with.
+        /// <paramref name="mip"/> binds one mip level of the image rather than all of them, so a
+        /// shader building a pyramid can read the level above and write the next.
         /// </para>
         /// </remarks>
         public T SetTexture(string name, AssetHandle image, int index = 0, int mip = -1)
@@ -2155,8 +2155,8 @@ public readonly unsafe struct ShaderProgram : IEquatable<ShaderProgram>
     internal ShaderProgram(int id) => _idPlusOne = id + 1;
 
     /// <summary>
-    /// The number the engine knows this program by, which is what <c>shader.list</c> and
-    /// <c>shader.errors</c> in the console call it.
+    /// The number the engine knows this program by, which <c>shader.list</c> and
+    /// <c>shader.errors</c> in the console show.
     /// </summary>
     public int Id => _idPlusOne - 1;
 
@@ -2182,7 +2182,7 @@ public readonly unsafe struct ShaderProgram : IEquatable<ShaderProgram>
     /// compiled. Only valid inside a system.
     /// </summary>
     /// <remarks>
-    /// Only ever grows. Something that edits a shader file and wants to see the result reads this
+    /// Only ever grows. Something that edits a shader file and needs to see the result reads this
     /// first and waits for it to move, which says the edit reached the pipelines rather than
     /// guessing at a number of frames.
     /// </remarks>
@@ -2268,7 +2268,7 @@ public enum ShaderProgramState
     /// <summary>A stage is still compiling, and what it draws has not appeared yet.</summary>
     Compiling = 0,
 
-    /// <summary>Every stage is what its file says.</summary>
+    /// <summary>Every stage takes the stage its file declares.</summary>
     Ready = 1,
 
     /// <summary>A stage did not compile. See <see cref="ShaderProgram.Diagnostics"/>.</summary>
@@ -2279,8 +2279,8 @@ public enum ShaderProgramState
 /// <param name="Path">A <c>.slang</c> file under the asset root.</param>
 /// <param name="Entry">
 /// The function, or null for the usual name: <c>vertex</c> for either vertex shader,
-/// <c>fragment</c> for either fragment shader or a pass, and <c>main</c> for compute. Naming it is
-/// what lets one file hold every stage of a program, the prepass's beside the main pass's.
+/// <c>fragment</c> for either fragment shader or a pass, and <c>main</c> for compute. Naming it
+/// lets one file hold every stage of a program, the prepass's beside the main pass's.
 /// </param>
 public readonly record struct ShaderStage(string? Path, string? Entry = null)
 {
@@ -2293,7 +2293,7 @@ public readonly record struct ShaderStage(string? Path, string? Entry = null)
     /// <summary>A stage made from Slang handed over as text.</summary>
     /// <remarks>
     /// <para>
-    /// What a shader worked out at run time wants: one a node graph produced, one a player typed,
+    /// For a shader worked out at run time, such as one a node graph produced, one a player typed,
     /// or a variant built from pieces. It is compiled like a file, so it can <c>import bcs;</c> and
     /// any module under the asset root, and it needs <c>slangc</c> or a cache entry the same way.
     /// </para>
@@ -2323,11 +2323,11 @@ public readonly record struct ShaderStage(string? Path, string? Entry = null)
 /// unset draws the mesh where it is.
 /// </para>
 /// <para>
-/// The prepass is what draws depth for shadows, and normals and motion for the effects that read
-/// them. A material that moves its own vertices wants a prepass vertex shader moving them the same
-/// way, or it casts the shadow of the mesh it started from. One that discards pixels wants a
-/// prepass fragment shader discarding the same ones, or its shadow has no holes in it. Both read
-/// the material's values like the main stages do.
+/// The prepass draws depth for shadows, and normals and motion for the effects that read them. A
+/// material that moves its own vertices needs a prepass vertex shader moving them the same way, or
+/// it casts the shadow of the mesh it started from. One that discards pixels needs a prepass
+/// fragment shader discarding the same ones, or its shadow has no holes in it. Both read the
+/// material's values like the main stages do.
 /// </para>
 /// </remarks>
 public sealed class ShaderProgramSettings
@@ -2350,8 +2350,8 @@ public sealed class ShaderProgramSettings
     /// </summary>
     /// <remarks>
     /// A program with a compute shader needs no fragment shader, and one with both can be
-    /// dispatched and drawn with alike, which is what keeps a simulation and the shader drawing it
-    /// in one file.
+    /// dispatched and drawn with alike, which keeps a simulation and the shader drawing it in one
+    /// file.
     /// </remarks>
     public ShaderStage Compute { get; init; }
 
@@ -2367,10 +2367,10 @@ public sealed class ShaderProgramSettings
     /// named.
     /// </summary>
     /// <remarks>
-    /// It is handed no vertices, only <c>SV_VertexID</c> and <c>SV_InstanceID</c>, and places what is
-    /// drawn from whatever buffers it declares, which is what particles, a visibility buffer or
-    /// clusters of a virtualized mesh are drawn with. It reads the camera's inputs through
-    /// <c>import bcs_pass;</c>, the view among them.
+    /// It is handed no vertices, only <c>SV_VertexID</c> and <c>SV_InstanceID</c>, and places what
+    /// is drawn from whatever buffers it declares, as particles, a visibility buffer or clusters of
+    /// a virtualized mesh are drawn. It reads the camera's inputs through <c>import bcs_pass;</c>,
+    /// the view among them.
     /// </remarks>
     public ShaderStage DrawVertex { get; init; }
 
@@ -2507,9 +2507,9 @@ public enum ShaderImageFormat
 
     /// <summary>
     /// Block-compressed color with one bit of alpha, eight bytes a four by four block. This and the
-    /// compressed formats after it are only read, through a sampler: they are made empty or from
-    /// blocks and filled a block at a time with <see cref="Shaders.WriteImage{T}"/>, which is what
-    /// a streamed texture's cache is kept in.
+    /// compressed formats after it are only read, through a sampler. They are made empty or from
+    /// blocks and filled a block at a time with <see cref="Shaders.WriteImage{T}"/>, and a streamed
+    /// texture's cache is kept in them.
     /// </summary>
     Bc1 = 10,
 
@@ -2522,7 +2522,8 @@ public enum ShaderImageFormat
     /// <summary>Block-compressed color and alpha at the best quality, sixteen bytes a block.</summary>
     Bc7 = 13,
 
-    /// <summary>As <see cref="Bc7"/>, read as sRGB, which is what a color texture is stored in.</summary>
+    /// <summary>As <see cref="Bc7"/>, read as sRGB, the space a color texture is stored
+    /// in.</summary>
     Bc7Srgb = 14,
 
     /// <summary>Block-compressed color brighter than white, sixteen bytes a block, for light and skies.</summary>
@@ -2537,15 +2538,15 @@ public enum ShaderImageFormat
 /// <param name="Mips">How many mip levels, each reachable as <c>Name_mip0</c> and on.</param>
 /// <param name="ClearEachFrame">
 /// Whether it is cleared to zero at the start of every frame, before anything on the camera runs,
-/// which is what an image draws or atomics accumulate into wants.
+/// for an image that draws or atomics accumulate into.
 /// </param>
 /// <param name="CopyAt">
 /// A point of the frame at which the camera's picture is copied into the image, scaled to it and
 /// point sampled, or null for none. With <paramref name="History"/>, <c>Name_previous</c> is then
-/// last frame's picture, which is what a technique reusing last frame's lighting reads: copied at
+/// last frame's picture, which a technique reusing last frame's lighting reads. Copied at
 /// <see cref="FramePoint.BeforeTonemapping"/> it is the lit picture in its own units, and at
-/// <see cref="FramePoint.AfterOpaque"/> the same without transparent geometry, which wants a
-/// camera drawn once a pixel. Only a float or eight-bit format can hold it, and
+/// <see cref="FramePoint.AfterOpaque"/> the same without transparent geometry, which needs a camera
+/// drawn once a pixel. Only a float or eight-bit format can hold it, and
 /// <see cref="FramePoint.AfterPrepass"/> is refused, since nothing is lit there yet.
 /// </param>
 public readonly record struct ViewImage(
@@ -2619,8 +2620,7 @@ public readonly record struct ViewDispatch
 
     /// <summary>
     /// Enough workgroups of <paramref name="groupX"/> by <paramref name="groupY"/> pixels to cover
-    /// <paramref name="scale"/> of the picture, which is what a shader working a pixel at a time
-    /// wants.
+    /// <paramref name="scale"/> of the picture, for a shader working a pixel at a time.
     /// </summary>
     /// <remarks>
     /// The workgroup size here matches the shader's <c>numthreads</c>, and the shader checks that
@@ -2675,7 +2675,7 @@ public enum DrawBlend
     /// <summary>Over what is there, by the fragment's alpha.</summary>
     Alpha = 1,
 
-    /// <summary>Added to what is there, which is what anything glowing wants.</summary>
+    /// <summary>Added to what is there, for anything glowing.</summary>
     Add = 2,
 }
 
@@ -2733,9 +2733,10 @@ public readonly record struct ViewDraw
     /// </summary>
     /// <remarks>
     /// <para>
-    /// What a visibility buffer is: geometry drawn into an <see cref="ShaderImageFormat.R32UInt"/>
-    /// image, each pixel keeping which cluster and triangle is nearest, for a later pass to shade.
-    /// The fragment shader returns what the image holds, an unsigned integer for an integer image.
+    /// A visibility buffer is made this way, as geometry drawn into an
+    /// <see cref="ShaderImageFormat.R32UInt"/> image, each pixel keeping which cluster and triangle
+    /// is nearest, for a later pass to shade. The fragment shader returns what the image holds, an
+    /// unsigned integer for an integer image.
     /// </para>
     /// <para>
     /// It is drawn once a pixel, and tested against the camera's depth, and writes it if
@@ -2752,7 +2753,7 @@ public readonly record struct ViewDraw
     /// outputs in order, instead of <see cref="Into"/>.
     /// </summary>
     /// <remarks>
-    /// What a draw writing more than one thing a pixel wants: a visibility buffer's ids and the
+    /// For a draw writing more than one thing a pixel, such as a visibility buffer's ids and the
     /// barycentrics beside them, or a G-buffer of its own. Every image is drawn once a pixel; they
     /// are tested against the camera's depth only where all of them are the picture's size, and
     /// none is blended where any is an integer image.
