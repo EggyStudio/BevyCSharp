@@ -125,7 +125,7 @@ public float3 local_to_world(uint instance, float3 position)
     return float3(dot(rows[0], p), dot(rows[1], p), dot(rows[2], p));
 }
 
-/// Where the same point was in the world on the previous frame, which is what motion vectors need.
+/// Where the same point was in the world on the previous frame, for motion vectors.
 public float3 previous_local_to_world(uint instance, float3 position)
 {
     let rows = meshes[instance].previous_world_from_local;
@@ -144,7 +144,7 @@ public float3 normal_local_to_world(uint instance, float3 normal)
     let c1 = float3(a[0].w, a[1].xy);
     let c2 = float3(a[1].zw, b);
 
-    // A zero normal stays zero rather than normalizing into a NaN, which is what Bevy does too.
+    // A zero normal stays zero rather than normalizing into a NaN, as Bevy does too.
     let n = c0 * normal.x + c1 * normal.y + c2 * normal.z;
     return any(normal != float3(0.0)) ? normalize(n) : n;
 }
@@ -189,7 +189,7 @@ public struct VertexOutput
     public float2 uv : TEXCOORD2;
 };
 
-/// Does what Bevy's own vertex shader does, for a shader that wants to start from it.
+/// Does what Bevy's own vertex shader does, for a shader that starts from it.
 public VertexOutput standard_vertex(Vertex vertex)
 {
     VertexOutput output;
@@ -203,8 +203,8 @@ public VertexOutput standard_vertex(Vertex vertex)
 
 // -- What passes between stages in the prepass
 //
-// The prepass is what draws depth for shadows, and normals and motion for the effects that read
-// them. Its vertex locations differ from the main pass, which is why it has structs of its own.
+// The prepass draws depth for shadows, and normals and motion for the effects that read them. Its
+// vertex locations differ from the main pass, which is why it has structs of its own.
 
 /// A vertex as the prepass reads it.
 ///

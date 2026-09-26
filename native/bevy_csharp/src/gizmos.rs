@@ -6,16 +6,16 @@
 //! each frame with the real parameter in hand.
 //!
 //! Gizmos are immediate, so what is drawn lasts one frame and a shape that should stay on screen
-//! has to be asked for again every frame. That is what makes them useful for watching a value
-//! change and useless for building anything.
+//! has to be asked for again every frame. That makes them useful for watching a value change and
+//! useless for building anything.
 
 use crate::interop::{status, BcsGizmoConfig};
 
 /// One recorded draw call, waiting for the frame's drain.
 ///
-/// Every shape is described by the same handful of numbers, and which of them a shape reads is
-/// what `kind` decides. A struct per shape would be a struct per arm of one match, and the
-/// managed side would need a mirror of each.
+/// Every shape is described by the same handful of numbers, and `kind` decides which of them a
+/// shape reads. A struct per shape would be a struct per arm of one match, and the managed side
+/// would need a mirror of each.
 #[derive(Clone, Copy)]
 pub struct QueuedGizmo {
     /// Which shape. See [`crate::interop::BcsGizmoConfig::kind`] for the list.
@@ -125,8 +125,8 @@ macro_rules! draw_shape {
                 );
             }
 
-            // The rest of the primitives take a radius and one more number, which is what `end.x`
-            // carries for each of them.
+            // The rest of the primitives take a radius and one more number, which `end.x` carries
+            // for each of them.
             10 => {
                 $gizmos.primitive_3d(
                     &Capsule3d::new(shape.radius, far.x),
@@ -257,8 +257,8 @@ pub fn drain(
 /// the scene can hide it.
 #[cfg(feature = "render")]
 pub fn draw_in_front(mut store: bevy::ecs::system::ResMut<bevy::gizmos::config::GizmoConfigStore>) {
-    // Only this one is touched. The default group keeps the engine's own settings, which are what
-    // anything drawn as part of the scene wants: depth tested, like the scene.
+    // Only this one is touched. The default group keeps the engine's own settings, which suit
+    // anything drawn as part of the scene, since they are depth tested like the scene.
     let (config, _) = store.config_mut::<FrontGizmos>();
     config.depth_bias = -1.0;
 }
@@ -267,13 +267,13 @@ pub fn draw_in_front(mut store: bevy::ecs::system::ResMut<bevy::gizmos::config::
 ///
 /// `width` is the line thickness in pixels, and `layers` is the render layer mask deciding which
 /// cameras see gizmos at all; a mask of `0` is Bevy's own default of layer zero. `enabled` at zero
-/// stops the drawing without the caller having to stop asking for it, which is what a debug
-/// overlay bound to a key wants.
+/// stops the drawing without the caller having to stop asking for it, for a debug overlay bound to
+/// a key.
 ///
-/// `which` picks the group: `0` both, `1` the one the scene can hide, `2` the one it cannot. The
-/// two groups are what a shape's `in_front` already chooses between, so setting them apart is what
-/// turns a floor grid off while leaving the handles drawn over it, without either side of the
-/// editor knowing about the other.
+/// `which` picks the group: `0` both, `1` the one the scene can hide, `2` the one it cannot. A
+/// shape's `in_front` already chooses between the two groups, so setting them apart turns a floor
+/// grid off while leaving the handles drawn over it, without either side of the editor knowing
+/// about the other.
 ///
 /// Returns [`status::UNSUPPORTED`] where there is nothing to draw on.
 #[unsafe(no_mangle)]
@@ -341,7 +341,7 @@ pub extern "C" fn bcs_gizmo_configure(width: f32, layers: u32, enabled: i32, whi
 /// perspective projection can honor.
 ///
 /// Separate from [`bcs_gizmo_configure`] because how thick a line is and who can see it is one
-/// decision and what the line looks like is another, and the first is what most callers set.
+/// decision and what the line looks like is another, and most callers set the first.
 ///
 /// Returns [`status::UNSUPPORTED`] where there is nothing to draw on.
 #[unsafe(no_mangle)]
@@ -437,10 +437,10 @@ pub unsafe extern "C" fn bcs_gizmo_draw(config: *const BcsGizmoConfig) -> i32 {
 
 /// Records a whole array of shapes to draw this frame.
 ///
-/// One crossing for all of them, which is what a wireframe, a path or a grid wants. A shape costs
-/// about four percent of a frame at a few hundred a frame and the same again at a few thousand, so
-/// the point of this is not the saving at the sizes drawn today. It is that the cost stops growing
-/// with the number of lines.
+/// One crossing for all of them, for a wireframe, a path or a grid. A shape costs about four
+/// percent of a frame at a few hundred a frame and the same again at a few thousand, so the point
+/// of this is not the saving at the sizes drawn today. It is that the cost stops growing with the
+/// number of lines.
 ///
 /// Returns [`status::UNSUPPORTED`] where there is nothing to draw on, and
 /// [`status::NULL_ARG`] for a null array with a count above zero.

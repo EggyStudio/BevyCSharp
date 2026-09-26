@@ -566,8 +566,8 @@ pub fn attach(
 
 // -- Shader instances, which passes and dispatches run
 
-/// Makes a shader instance for a program, which is what a pass over a camera's picture or a
-/// dispatch runs, and answers its number.
+/// Makes a shader instance for a program, which a pass over a camera's picture or a dispatch runs,
+/// and answers its number.
 ///
 /// An instance holds values by name the way a material does, and keeps them from frame to frame.
 #[unsafe(no_mangle)]
@@ -648,9 +648,9 @@ pub extern "C" fn bcs_shader_dispatch(instance: i32, x: u32, y: u32, z: u32) -> 
 /// Runs an instance's compute shader once, this frame, before any camera draws, with as many
 /// workgroups as the three unsigned integers at `offset` bytes into `buffer` say.
 ///
-/// The counts are read on the GPU when the dispatch runs, which is what lets one compute shader
-/// decide how much work the next one does without the answer crossing back to the CPU. `offset`
-/// is a multiple of four.
+/// The counts are read on the GPU when the dispatch runs, so one compute shader can decide how much
+/// work the next one does without the answer crossing back to the CPU. `offset` is a multiple of
+/// four.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_shader_dispatch_indirect(instance: i32, buffer: i32, offset: u32) -> i32 {
     crate::interop::guard(|| {
@@ -1366,7 +1366,7 @@ pub struct ShaderInstances(pub Vec<Instance>);
 pub struct Instance {
     pub program: u32,
     pub values: super::values::Values,
-    /// Moves on with every change, which is what tells a pass its bind group has to be rebuilt.
+    /// Moves on with every change, which tells a pass its bind group has to be rebuilt.
     pub version: u64,
 }
 
@@ -1459,8 +1459,8 @@ fn material_handle(
 
 /// Runs `f` on a target, and keeps what it changed when it answers [`status::OK`].
 ///
-/// A material is taken out and put back through `Assets::get_mut`, which is what marks it changed
-/// and has Bevy prepare its bind group again.
+/// A material is taken out and put back through `Assets::get_mut`, which marks it changed and has
+/// Bevy prepare its bind group again.
 #[cfg(feature = "render")]
 fn with_target(kind: i32, id: i64, f: impl FnOnce(Target<'_>) -> i32) -> i32 {
     use super::material::BcsMaterial;
@@ -1518,7 +1518,7 @@ fn with_target(kind: i32, id: i64, f: impl FnOnce(Target<'_>) -> i32) -> i32 {
 fn read_target(kind: i32, id: i64, f: impl FnOnce(&Target<'_>)) -> i32 {
     let mut f = Some(f);
 
-    // Answering something other than OK keeps the target unchanged, which is what a read wants.
+    // Answering something other than OK keeps the target unchanged, as a read should.
     let answer = with_target(kind, id, |target| {
         if let Some(f) = f.take() {
             f(&target);
@@ -1674,8 +1674,8 @@ pub unsafe extern "C" fn bcs_shader_set_bytes(
 /// Puts an image under a name, at `index` where the name is an array of textures. A key of zero
 /// or less takes it off again.
 ///
-/// `mip` below zero binds the whole image, and zero or more binds that one mip level of it, which
-/// is what a shader building a pyramid a level at a time reads one level and writes the next with.
+/// `mip` below zero binds the whole image, and zero or more binds that one mip level of it, so a
+/// shader building a pyramid a level at a time can read one level and write the next.
 ///
 /// # Safety
 /// `name` must be a NUL-terminated UTF-8 string.
@@ -1915,8 +1915,8 @@ pub unsafe extern "C" fn bcs_shader_get_numbers(
 ///
 /// Each line is tab-separated. `number`, the name, the scalar (`float`, `int`, `uint`, `bool`), how
 /// many numbers an element is and how many elements, for a number. `texture`, `image`, `buffer` or
-/// `sampler`, the name and how many, for the rest. Empty before the program has compiled. It is
-/// what an inspector draws a widget per row from.
+/// `sampler`, the name and how many, for the rest. Empty before the program has compiled. An
+/// inspector draws a widget per row from it.
 ///
 /// # Safety
 /// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.
@@ -2307,10 +2307,10 @@ pub extern "C" fn bcs_shader_image_create(
 /// Writes `length` bytes of texels into a region of an image, `width` by `height` by `depth`
 /// texels at `x`, `y`, `z` of mip level `mip`, on the GPU before this frame's work runs.
 ///
-/// What a texture streamer uploads a tile into its cache with, and what an image changed a piece
-/// at a time wants rather than being made again. The texels are in the format's own layout, row
-/// after row and slice after slice. Returns [`status::NULL_ARG`] for a region outside the level,
-/// and [`status::BUFFER_TOO_SMALL`] where `length` is not exactly the region's size in bytes.
+/// A texture streamer uploads a tile into its cache with this, and an image changed a piece at a
+/// time uses it rather than being made again. The texels are in the format's own layout, row after
+/// row and slice after slice. Returns [`status::NULL_ARG`] for a region outside the level, and
+/// [`status::BUFFER_TOO_SMALL`] where `length` is not exactly the region's size in bytes.
 ///
 /// # Safety
 /// `texels` must point at `length` readable bytes.
@@ -2401,8 +2401,8 @@ mod tests {
     use super::*;
     use core::mem::{offset_of, size_of};
 
-    /// The managed mirror is checked against these same numbers, which is what stops the two
-    /// drifting apart one field at a time.
+    /// The managed mirror is checked against these same numbers, which stops the two drifting apart
+    /// one field at a time.
     #[test]
     fn the_program_config_has_the_layout_the_managed_side_mirrors() {
         assert_eq!(size_of::<BcsShaderStage>(), 24);

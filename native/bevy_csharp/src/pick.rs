@@ -4,9 +4,9 @@
 //! [`status::UNSUPPORTED`] without it, the same as the rest of the editor surface.
 //!
 //! Bevy's picking is already compiled in, since the interface crate depends on it, but it only
-//! knows about the interface. Hitting a mesh needs `MeshPickingPlugin`, which raycasts the
-//! meshes in the scene against the pointer. Adding it here is what turns a click on the viewport
-//! into an entity, which is the half of selection a hierarchy list cannot give.
+//! knows about the interface. Hitting a mesh needs `MeshPickingPlugin`, which raycasts the meshes
+//! in the scene against the pointer. Adding it here turns a click on the viewport into an entity,
+//! which is the half of selection a hierarchy list cannot give.
 //!
 //! Clicks are queued and drained rather than observed, for the reason every other report here is:
 //! a C# system is handed the world and cannot hold an observer.

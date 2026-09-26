@@ -5,9 +5,9 @@
 //! from it for the duration of that one call and drops it again before returning, so no
 //! two mutable borrows are ever live at once.
 //!
-//! The pointer is deliberately *thread-local*: behavior methods that the generator runs
-//! on worker threads see a null world and get [`status::NO_WORLD`] back, which is what
-//! pushes users toward the thread-safe command buffer instead of racing on the world.
+//! The pointer is deliberately *thread-local*: behavior methods that the generator runs on worker
+//! threads see a null world and get [`status::NO_WORLD`] back, which pushes users toward the
+//! thread-safe command buffer instead of racing on the world.
 
 use core::cell::Cell;
 use core::ptr;
@@ -64,7 +64,7 @@ pub fn with_world_opt<T, F: FnOnce(&mut World) -> T>(f: F) -> Option<T> {
     Some(f(unsafe { &mut *ptr }))
 }
 
-/// A C# system entry point: a function pointer plus the opaque state C# wants back.
+/// A C# system entry point: a function pointer plus the opaque state C# gets back.
 #[derive(Clone, Copy)]
 pub struct SystemReg {
     /// The `extern "C"` callback into managed code.

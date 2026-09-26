@@ -1,13 +1,13 @@
 //! Bevy's Solari: lighting traced against the scene with hardware ray queries, direct light from
 //! every light and emissive surface, and indirect light bounced off everything, in real time.
 //!
-//! It is what world-space global illumination and traced reflections are when an engine ships them,
-//! and the reference a package doing either differently is weighed against. It sits behind the
-//! `solari` feature and an app's `Config.RayTracedLighting`, since adding it makes every Bevy
-//! material deferred, and it is added only where the adapter has ray queries and binding arrays,
-//! which the bridge asks first. A camera draws with it once `bcs_render_set_ray_traced_lighting`
-//! turns it on, and a mesh takes part once `bcs_render_set_ray_traced` has made it the shape the
-//! ray tracing structures are built from.
+//! It is world-space global illumination and traced reflections as an engine ships them, and the
+//! reference a package doing either differently is weighed against. It sits behind the `solari`
+//! feature and an app's `Config.RayTracedLighting`, since adding it makes every Bevy material
+//! deferred, and it is added only where the adapter has ray queries and binding arrays, which the
+//! bridge asks first. A camera draws with it once `bcs_render_set_ray_traced_lighting` turns it on,
+//! and a mesh takes part once `bcs_render_set_ray_traced` has made it the shape the ray tracing
+//! structures are built from.
 
 use crate::interop::status;
 #[cfg(feature = "solari")]

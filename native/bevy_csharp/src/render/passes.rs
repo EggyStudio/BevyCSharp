@@ -3,12 +3,12 @@
 //! A pass is a program (see [`super::programs`]) whose pass stage is run once per pixel of the
 //! camera's picture, reading the picture so far and writing the next one. A camera takes any number
 //! of them, run in order, either before tonemapping, where the picture is still linear and may be
-//! brighter than white, or after it, where it is what the screen will show.
+//! brighter than white, or after it, where it matches what the screen will show.
 //!
 //! **What a pass reads.** Two groups. Group zero is whatever the shader declares, laid out from its
 //! reflection and filled by name, the way a material's own group is, with any image the camera owns
-//! bound under its own name (see [`super::views`]). Group one is what every shader running on a
-//! camera reads, the picture, time, the view, depth, normals, motion and the previous view, which
+//! bound under its own name (see [`super::views`]). Every shader running on a camera reads group
+//! one, the picture, time, the view, depth, normals, motion and the previous view, which
 //! [`super::views`] describes and `bcs_pass` declares.
 //!
 //! The vertex shader is Bevy's full-screen triangle, whose output is the position and a `uv` at
@@ -117,7 +117,7 @@ pub struct ShaderPassPipelines {
 struct PreparedPass {
     pipeline: CachedRenderPipelineId,
     own: BindGroup,
-    /// What the bind group was built from, which is what says it can be kept.
+    /// What the bind group was built from, which says whether it can be kept.
     built_from: (u32, u64),
     place: PassPlace,
     label: std::borrow::Cow<'static, str>,

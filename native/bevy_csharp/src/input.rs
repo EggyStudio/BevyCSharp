@@ -126,9 +126,9 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
                 // for every real pointer, so writing one is writing half a pointer.
                 world.write_message(bevy::window::WindowEvent::CursorMoved(moved));
 
-                // And the window is told where the pointer now is, which is what everything asking
-                // for a cursor position reads. Not `set_cursor_position`, which moves the hand's
-                // own pointer on the desktop and fails on a compositor that will not have it.
+                // And the window is told where the pointer now is, which everything asking for a
+                // cursor position reads. Not `set_cursor_position`, which moves the hand's own
+                // pointer on the desktop and fails on a compositor that will not have it.
                 if let Some(mut held) = world.get_mut::<Window>(window) {
                     let scale = held.resolution.scale_factor();
                     held.set_physical_cursor_position(Some(
@@ -180,8 +180,8 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
 /// interesting failures are.
 ///
 /// `key` is the bit index the key table gives the key, `action` is 1 to press and 2 to release.
-/// `text` is what the keypress typed, as UTF-8, or null for a key that types nothing; it is only
-/// carried on a press, which is what a window does.
+/// `text` holds what the keypress typed, as UTF-8, or null for a key that types nothing; it is only
+/// carried on a press, as a window does.
 ///
 /// # Safety
 /// `text` must point to `len` readable bytes, or be null.

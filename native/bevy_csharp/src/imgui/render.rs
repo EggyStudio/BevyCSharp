@@ -70,8 +70,8 @@ pub struct Pictures {
 impl Pictures {
     /// Remembers a picture and answers what to call it.
     pub fn add(&mut self, image: Handle<Image>) -> u64 {
-        // From one rather than from zero, because zero is what a caller passes to mean "no
-        // picture" and a name that means both is a name that cannot be checked.
+        // From one rather than from zero, because a caller passes zero to mean "no picture" and a
+        // name that means both is a name that cannot be checked.
         self.next += 1;
 
         let name = self.next;
@@ -100,8 +100,8 @@ pub fn picture(pixels: Vec<u8>, width: u32, height: u32) -> Image {
         },
         TextureDimension::D2,
         pixels,
-        // The colors in an atlas are what somebody chose, so they are sRGB, and saying so is what
-        // makes sampling give the linear values the shader expects.
+        // Somebody chose the colors in an atlas, so they are sRGB, and saying so makes sampling
+        // give the linear values the shader expects.
         TextureFormat::Rgba8UnormSrgb,
         RenderAssetUsages::RENDER_WORLD,
     )
@@ -117,7 +117,8 @@ struct Frame {
     /// Screen space to clip space, built from the display size.
     projection: Mat4,
 
-    /// How many physical pixels a logical one is, which is what a clip rectangle is measured in.
+    /// How many physical pixels a logical one is, since a clip rectangle is measured in physical
+    /// pixels.
     scale: Vec2,
 
     /// How large the interface said it was, in logical pixels.
@@ -160,7 +161,7 @@ struct Built(HashMap<TextureFormat, CachedRenderPipelineId>);
 ///
 /// Its own rather than the scene's, because the interface covers the whole window and a scene
 /// camera may have been given only part of it. Its picture starts transparent and is blended over
-/// whatever the other cameras drew, which is what makes it an overlay rather than a replacement.
+/// whatever the other cameras drew, which makes it an overlay rather than a replacement.
 #[derive(Component, Clone, Copy, ExtractComponent)]
 pub struct InterfaceView;
 
@@ -509,8 +510,8 @@ fn descriptor(pipeline: &Pipeline, format: TextureFormat) -> RenderPipelineDescr
             entry_point: Some("fragment".into()),
             targets: vec![Some(ColorTargetState {
                 format,
-                // Straight alpha, which is what ImGui writes. Premultiplied would draw every
-                // panel's edges twice as dark as they should be.
+                // Straight alpha, as ImGui writes it. Premultiplied would draw every panel's edges
+                // twice as dark as they should be.
                 blend: Some(BlendState {
                     color: BlendComponent {
                         src_factor: BlendFactor::SrcAlpha,
@@ -557,7 +558,7 @@ mod tests {
         assert_eq!(scissor([100.0, 100.0, 100.0, 200.0], Vec2::splat(1.0), 800, 600), None);
         assert_eq!(scissor([100.0, 100.0, 90.0, 200.0], Vec2::splat(1.0), 800, 600), None);
 
-        // Entirely off the window, which is what a panel dragged past the edge produces.
+        // Entirely off the window, as a panel dragged past the edge is.
         assert_eq!(scissor([900.0, 10.0, 1000.0, 20.0], Vec2::splat(1.0), 800, 600), None);
     }
 }

@@ -93,8 +93,8 @@ struct HeadlessFrameLimit {
 
 /// The image a windowless run draws into.
 ///
-/// Present only in an offscreen run, so its absence is what says a capture should read the window
-/// instead. [`crate::render::scene::bcs_render_screenshot`] asks it that question.
+/// Present only in an offscreen run, so its absence says a capture should read the window instead.
+/// [`crate::render::scene::bcs_render_screenshot`] asks it that question.
 #[cfg(feature = "render")]
 #[derive(Resource)]
 pub struct OffscreenTarget {
@@ -201,8 +201,8 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
 
             // Drawing into an image instead of onto a screen. Everything else about the app is
             // unchanged, which is the point, because the same behavior code running against the
-            // same renderer is what makes the picture worth looking at on a machine that has no
-            // display to open a window on.
+            // same renderer makes the picture worth looking at on a machine that has no display to
+            // open a window on.
             let offscreen = config.offscreen != 0;
 
             let present_mode = if config.vsync != 0 {
@@ -472,14 +472,14 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             init_asset_once::<AutoExposureCompensationCurve>(&mut app);
         }
 
-        // Loads `.scn` and `.scn.ron`, and spawns any `WorldAsset` an entity points at, which is
-        // what a glTF scene is too. Unlike the two above, this registers its loader in `build`.
+        // Loads `.scn` and `.scn.ron`, and spawns any `WorldAsset` an entity points at, as a glTF
+        // scene is too. Unlike the two above, this registers its loader in `build`.
         app.add_plugins(bevy::world_serialization::WorldSerializationPlugin);
 
         // Registers `AudioSource`, its decoders, and the output device if there is one. Bevy
-        // tolerates having none, so it logs and plays nothing, which is what a windowless run wants
-        // anyway. Without this a sound load panics rather than failing, because Bevy refuses to
-        // hand out a handle for an asset type it was never told about.
+        // tolerates having none, so it logs and plays nothing, which suits a windowless run anyway.
+        // Without this a sound load panics rather than failing, because Bevy refuses to hand out a
+        // handle for an asset type it was never told about.
         #[cfg(feature = "render")]
         app.add_plugins(bevy::audio::AudioPlugin {
             // One answer for the app, because how far away a sound is depends on what the world
@@ -648,10 +648,10 @@ pub unsafe extern "C" fn bcs_app_destroy(handle: *mut BcsApp) {
 
 /// Translates the storage selector the managed side sends into Bevy's own.
 ///
-/// `0` is table storage, which is what almost everything wants. Components sit in contiguous
-/// columns that a query can walk without indirection. `1` is sparse-set storage, which trades
-/// that for cheap insertion and removal, because adding or removing one does not move the entity
-/// between archetypes. It suits a tag that is toggled far more often than it is iterated.
+/// `0` is table storage, which suits almost everything. Components sit in contiguous columns that a
+/// query can walk without indirection. `1` is sparse-set storage, which trades that for cheap
+/// insertion and removal, because adding or removing one does not move the entity between
+/// archetypes. It suits a tag that is toggled far more often than it is iterated.
 fn storage_from(storage: i32) -> Option<bevy::ecs::component::StorageType> {
     match storage {
         0 => Some(bevy::ecs::component::StorageType::Table),
@@ -662,9 +662,9 @@ fn storage_from(storage: i32) -> Option<bevy::ecs::component::StorageType> {
 
 /// Registers a component layout with the Bevy world, returning its `ComponentId`.
 ///
-/// The layout is padded to its alignment, which Bevy requires. `size` must therefore
-/// already be a multiple of `align` for the round-trip to be lossless, which is what
-/// `Unsafe.SizeOf<T>()` guarantees for a blittable C# struct.
+/// The layout is padded to its alignment, which Bevy requires. `size` must therefore already be a
+/// multiple of `align` for the round-trip to be lossless, which `Unsafe.SizeOf<T>()` guarantees for
+/// a blittable C# struct.
 ///
 /// `storage` selects table or sparse-set storage; see [`storage_from`].
 ///
@@ -717,9 +717,9 @@ pub unsafe extern "C" fn bcs_component_register(
 
 /// Registers a component layout while the app is already running.
 ///
-/// [`bcs_app_create`]'s handle is mutably borrowed for the whole of [`bcs_app_run`], so a
-/// system that wants a component type it has not seen before must register it through the
-/// world loan instead of through the handle.
+/// [`bcs_app_create`]'s handle is mutably borrowed for the whole of [`bcs_app_run`], so a system
+/// needing a component type it has not seen before must register it through the world loan instead
+/// of through the handle.
 ///
 /// # Safety
 /// `name` must be a NUL-terminated UTF-8 string.
@@ -1116,7 +1116,7 @@ static INTERFACE_INSTALLED: std::sync::atomic::AtomicBool =
 ///
 /// A different question again from [`bcs_has_editor`], which answers what the library was built
 /// with rather than what this app asked for. A build carrying the surface still draws no interface
-/// unless the config turned it on, and something drawing one wants to know which of the two is
+/// unless the config turned it on, and something drawing one needs to know which of the two is
 /// missing before it tells anybody to rebuild.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_has_interface() -> i32 {

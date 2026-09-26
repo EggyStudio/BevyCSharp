@@ -1,6 +1,6 @@
 //! What a shader is handed: values by name, and the bind group they become.
 //!
-//! A material, a pass and a dispatch all hold the same thing, which is whatever the game has said
+//! A material, a pass and a dispatch all hold the same thing, namely whatever the game has said
 //! about the names its shader declares. A number or a group of them goes into a uniform buffer at
 //! the offset reflection gives, an image into a texture binding or one slot of an array of them, a
 //! buffer into a storage binding, and sampler settings into a sampler. Nothing is laid out in
@@ -42,7 +42,7 @@ pub struct SamplerSettings {
 }
 
 impl Default for SamplerSettings {
-    /// Linear and repeating, which is what a texture a material samples usually wants.
+    /// Linear and repeating, which usually suits a texture a material samples.
     fn default() -> Self {
         Self {
             address: [1, 1, 1],
@@ -64,8 +64,8 @@ pub enum Value {
     },
     /// Bytes copied as they are, for a struct laid out as the shader lays it out.
     Bytes(Vec<u8>),
-    /// An image, whole, or one mip level of it, which is what building a pyramid a level at a
-    /// time reads and writes.
+    /// An image, whole, or one mip level of it, which building a pyramid a level at a time reads
+    /// and writes.
     Image(Handle<Image>, Option<u32>),
     Buffer(Handle<ShaderBuffer>),
     Sampler(SamplerSettings),
@@ -398,7 +398,7 @@ impl Stand {
     }
 }
 
-/// What a GPU image is sampled as, which is what a binding has to match.
+/// What a GPU image is sampled as, which a binding has to match.
 fn view_dimension(image: &GpuImage) -> TextureViewDimension {
     if let Some(dimension) = image
         .texture_view_descriptor
@@ -436,10 +436,10 @@ fn sample_matches(format: TextureFormat, wanted: TextureSampleType) -> bool {
 /// An image a camera owns, as a name in a shader resolves to it (see [`super::views`]).
 #[derive(Clone, Debug)]
 pub struct ViewTexture {
-    /// Every mip level, which is what a shader sampling it reads.
+    /// Every mip level, which a shader sampling it reads.
     pub view: TextureView,
-    /// The first mip level alone, which is what a shader writing it is bound to, since a storage
-    /// binding holds exactly one level.
+    /// The first mip level alone, which a shader writing it is bound to, since a storage binding
+    /// holds exactly one level.
     pub level: TextureView,
     pub format: TextureFormat,
 }
@@ -452,8 +452,8 @@ pub struct PackContext<'a> {
     pub fallback: &'a FallbackImage,
     pub stand: &'a Stand,
     /// The images of the camera this runs for, by the names a shader reads them by, where it runs
-    /// for one. A name found here wins over a value set under the same name, because the camera's
-    /// image is what the shader was written against.
+    /// for one. A name found here wins over a value set under the same name, because the shader was
+    /// written against the camera's image.
     pub view: Option<&'a HashMap<String, ViewTexture>>,
 }
 

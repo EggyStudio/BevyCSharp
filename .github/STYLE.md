@@ -38,7 +38,7 @@ it is about, so `a tag is cheap: it costs nothing to store` is wrong where
 |---|---|
 | `the wheel never moves the panel: rolling over a list hands it to whatever holds it` | `the wheel never moves the panel, because rolling over a list hands it to whatever holds it` |
 | `a click is the engine's to answer: it raycasts the scene` | `a click is the engine's to answer. It raycasts the scene` |
-| `not the world: the world is what the project is` | `not the world, which is what the project is` |
+| `not the world: the world is what the project is` | `not the world, which is the project itself` |
 | `three files, because they are edited by different hands: the first is` | `three files, because they are edited by different hands. The first is` |
 | `it offers three: a menu, a button, a key` | unchanged, because a list follows |
 | `**What is not here.** Despawning is not recorded` | unchanged, because the mark labels rather than joins |

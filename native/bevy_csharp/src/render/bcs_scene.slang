@@ -23,7 +23,7 @@ public struct Instance
 /// One slot of a material buffer: what an entity's standard material says it is made of.
 ///
 /// All zeros for a slot with no entity, or one whose entity has no standard material. Textures are
-/// not in it; `base_color` is what the material multiplies its texture by.
+/// not in it; The material multiplies its texture by `base_color`.
 public struct Material
 {
     /// Linear, with alpha.
@@ -34,7 +34,7 @@ public struct Material
     public float metallic;
     /// Specular reflectance at normal incidence.
     public float reflectance;
-    /// One for an unlit material, whose color is what it shows whatever lights it.
+    /// One for an unlit material, which shows its color whatever lights it.
     public float unlit;
 };
 
@@ -50,7 +50,7 @@ public float3 to_world(Instance instance, float3 local)
     return transform(instance.world_from_local, float4(local, 1.0)).xyz;
 }
 
-/// Where the same point was on the previous frame, which is what motion and reprojection need.
+/// Where the same point was on the previous frame, for motion and reprojection.
 public float3 to_previous_world(Instance instance, float3 local)
 {
     return transform(instance.previous_world_from_local, float4(local, 1.0)).xyz;
@@ -70,8 +70,8 @@ public float3 previous_position(Instance instance)
 
 /// The six directions an irradiance volume keeps light for, as `irradiance_texel` takes them.
 ///
-/// Each is the way a surface faces, and what is kept is the light that surface receives, so
-/// `POSITIVE_Y` is what lights a floor.
+/// Each is the way a surface faces, and it keeps the light that surface receives, so `POSITIVE_Y`
+/// lights a floor.
 public static const uint POSITIVE_X = 0;
 public static const uint NEGATIVE_X = 1;
 public static const uint POSITIVE_Y = 2;
@@ -187,12 +187,12 @@ public float4 intersect_triangle(float3 origin, float3 direction, float3 a, floa
 }
 
 /// Where a ray from `origin` along `direction` enters a box, as the distance along it, or a
-/// negative number where it misses, which is what skips a mesh whose bounds a ray does not reach.
+/// negative number where it misses, which skips a mesh whose bounds a ray does not reach.
 public float intersect_box(float3 origin, float3 direction, float3 low, float3 high)
 {
     // A ray along an axis has zeros in its direction, and WGSL leaves one over zero undefined
     // rather than infinite, so a zero is made tiny and the slab it would divide is effectively
-    // endless, which is what infinity would have said.
+    // endless, as infinity would have made it.
     let tiny = 1e-20;
     let steady = float3(
         abs(direction.x) < tiny ? tiny : direction.x,

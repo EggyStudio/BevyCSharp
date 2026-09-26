@@ -69,7 +69,7 @@ fn drop_probe_if_empty(world: &mut bevy::ecs::world::World, entity: bevy::ecs::e
 ///
 /// The entity's transform is the box, a unit cube before its scale, and everything drawn inside it
 /// reflects the pair instead of the camera's environment. Both images are a column of six square
-/// faces like a camera's baked pair, and the light waits for both to become cubes, which is what
+/// faces like a camera's baked pair, and the light waits for both to become cubes, which
 /// [`crate::render::post::reinterpret_cubemaps`] does on the frame their pixels arrive.
 ///
 /// `falloff` is three floats between zero and one, or null for a hard edge: how much of the box,

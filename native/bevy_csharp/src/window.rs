@@ -86,8 +86,8 @@ pub extern "C" fn bcs_window_set_size(width: u32, height: u32) -> i32 {
 
 /// How many physical pixels a logical one is.
 ///
-/// What the desktop's scaling is set to. Everything the bridge reports about a window is in
-/// logical pixels, so this is what turns one into what the framebuffer is actually divided into.
+/// What the desktop's scaling is set to. Everything the bridge reports about a window is in logical
+/// pixels, so this turns one into the units the framebuffer is actually divided into.
 ///
 /// # Safety
 /// `scale` must point to a writable float.
@@ -203,8 +203,8 @@ pub unsafe extern "C" fn bcs_window_size(width: *mut u32, height: *mut u32) -> i
 ///
 /// `0` windowed, `1` borderless fullscreen, `2` exclusive fullscreen. Both fullscreen modes take
 /// the monitor the window is on. Exclusive takes that monitor's current video mode rather than
-/// asking for a different resolution, which is what avoids a mode switch the compositor has to
-/// undo on every alt-tab.
+/// asking for a different resolution, which avoids a mode switch the compositor has to undo on
+/// every alt-tab.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_window_set_mode(mode: i32) -> i32 {
     crate::interop::guard(|| {
@@ -237,8 +237,8 @@ pub extern "C" fn bcs_window_set_mode(mode: i32) -> i32 {
 /// Sets whether the cursor is confined or hidden.
 ///
 /// `grab` is `0` to leave the cursor free, `1` to confine it to the window, `2` to lock it in
-/// place. Locking is what a first-person camera needs, because it reads how far the mouse moved
-/// rather than where it is, and a free cursor stops moving at the edge of the screen.
+/// place. A first-person camera needs locking, because it reads how far the mouse moved rather than
+/// where it is, and a free cursor stops moving at the edge of the screen.
 ///
 /// Platforms differ in which they support: Windows confines and macOS locks, and each emulates
 /// the other. Asking for one and getting the other is normal, and is why the cursor should be
@@ -433,9 +433,9 @@ pub unsafe extern "C" fn bcs_monitor_name(index: i32, out: *mut u8, capacity: i3
 
 /// Reports how many video modes a monitor offers.
 ///
-/// A video mode is a resolution, a color depth and a refresh rate together, which is what an
-/// exclusive fullscreen window takes over the screen with. Returns [`status::NO_ENTITY`] where
-/// there is no monitor at that index.
+/// A video mode is a resolution, a color depth and a refresh rate together, which an exclusive
+/// fullscreen window takes over the screen with. Returns [`status::NO_ENTITY`] where there is no
+/// monitor at that index.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_monitor_mode_count(index: i32) -> i32 {
     crate::interop::guard(|| {
@@ -525,11 +525,11 @@ pub unsafe extern "C" fn bcs_monitor_mode(
 
 /// Takes the screen over in exclusive fullscreen at one of a monitor's own video modes.
 ///
-/// [`bcs_window_set_mode`] takes the mode the monitor is already in, which is what avoids a switch
-/// the compositor has to undo on every alt-tab. This is the other case, where a game wants to run
-/// at a resolution the desktop is not in, and it asks for one of the modes
-/// [`bcs_monitor_mode`] described rather than for arbitrary numbers, because a monitor can only be
-/// driven at the modes it offers.
+/// [`bcs_window_set_mode`] takes the mode the monitor is already in, which avoids a switch the
+/// compositor has to undo on every alt-tab. This is the other case, where a game needs to run at a
+/// resolution the desktop is not in, and it asks for one of the modes [`bcs_monitor_mode`]
+/// described rather than for arbitrary numbers, because a monitor can only be driven at the modes
+/// it offers.
 ///
 /// Returns [`status::NO_ENTITY`] where there is no such monitor and [`status::NOT_PRESENT`] where
 /// it has no such mode.

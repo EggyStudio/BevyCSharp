@@ -1,13 +1,13 @@
-//! Shaders are written in Slang and compiled to WGSL, which is what Bevy's pipeline cache takes.
+//! Shaders are written in Slang and compiled to WGSL, which Bevy's pipeline cache takes.
 //!
 //! WGSL rather than SPIR-V, because Bevy takes WGSL through naga_oil with no extra feature, it runs
 //! on every backend including WebGPU, and a pipeline built from it is rebuilt when the shader asset
-//! changes. Slang's WGSL backend keeps explicit bindings, and it numbers stage inputs and outputs by
-//! semantic index, which is what lets a Slang fragment shader follow Bevy's own vertex shader.
+//! changes. Slang's WGSL backend keeps explicit bindings, and it numbers stage inputs and outputs
+//! by semantic index, which lets a Slang fragment shader follow Bevy's own vertex shader.
 //!
 //! Every compile also asks `slangc` for its reflection, which names each parameter the shader
-//! declares and where in a uniform buffer each number goes. That is what lets a shader declare
-//! whatever it likes and be handed it by name (see [`super::reflect`]).
+//! declares and where in a uniform buffer each number goes. That lets a shader declare whatever it
+//! likes and be handed it by name (see [`super::reflect`]).
 //!
 //! The compiler is `slangc`, run as a process. Linking Slang instead would add a large C++ library
 //! to every build of the bridge for the benefit of the builds that compile shaders, and a process
@@ -44,7 +44,7 @@ pub const COMPUTE_PRELUDE: &str = include_str!("bcs_compute.slang");
 /// scene into buffers, such as instance transforms.
 pub const SCENE_PRELUDE: &str = include_str!("bcs_scene.slang");
 
-/// Every module the bridge writes out, by file name, which is what `import` finds them by.
+/// Every module the bridge writes out, by file name, which `import` finds them by.
 const MODULES: [(&str, &str); 4] = [
     ("bcs.slang", PRELUDE),
     ("bcs_pass.slang", PASS_PRELUDE),
@@ -113,8 +113,8 @@ pub struct Compiled {
     pub wgsl: String,
     /// What `slangc -reflection-json` wrote: every parameter, its binding and its layout.
     pub reflection: String,
-    /// Every file the result depends on besides the source, which is what a change to has to
-    /// trigger a recompile.
+    /// Every file the result depends on besides the source, so that a change to any of them
+    /// triggers a recompile.
     pub dependencies: Vec<PathBuf>,
     /// What `slangc` said on the way to succeeding, which is usually nothing.
     pub warnings: String,
@@ -523,7 +523,7 @@ fn write_cache(
     }
 
     // The reflection first, so a reader that finds the WGSL finds the reflection beside it. The
-    // WGSL is what says the entry exists, and it carries the hashes both are checked by.
+    // WGSL says the entry exists, and it carries the hashes both are checked by.
     let written = [
         (path.with_extension("json"), reflection.to_string()),
         (path.clone(), text),

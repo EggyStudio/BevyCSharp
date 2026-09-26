@@ -8,8 +8,8 @@
 //! directly, the way Bevy's own `MeshMaterial3d<M>` does, and every material brings the layout
 //! its program's reflection describes (see [`super::reflect`]).
 //!
-//! What that takes, besides preparing the material, is what `MaterialPlugin<M>` does for a type:
-//! an allocator entry, extraction of which entity is drawn with which material, and telling the
+//! Besides preparing the material, that takes what `MaterialPlugin<M>` does for a type, namely an
+//! allocator entry, extraction of which entity is drawn with which material, and telling the
 //! specializer which entities changed. All of it is below, over Bevy's own public resources, and
 //! Bevy's queue, specialize and draw systems then draw these materials like any other.
 //!
@@ -526,8 +526,8 @@ fn check_entities_needing_specialization(
         .extend(removed_meshes.read().chain(removed_materials.read()));
 }
 
-/// Marks an entity's mesh changed when its material did, because that is what has Bevy extract the
-/// mesh again with the new material's bind group slot.
+/// Marks an entity's mesh changed when its material did, because that has Bevy extract the mesh
+/// again with the new material's bind group slot.
 fn mark_meshes_as_changed_if_their_materials_changed(
     mut changed: Query<
         &mut Mesh3d,

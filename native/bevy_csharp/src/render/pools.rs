@@ -12,7 +12,7 @@
 //!
 //! Put an entity's mesh in a pool and the entity in the same slot of an instance buffer and a
 //! material buffer, and a shader has where each triangle is, how it is lit and what it is made of,
-//! which is what shading a ray's hit needs.
+//! everything shading a ray's hit needs.
 
 #![cfg(feature = "render")]
 

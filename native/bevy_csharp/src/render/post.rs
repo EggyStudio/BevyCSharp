@@ -158,8 +158,8 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
 /// That keeps a settings screen honest, since turning bloom off is the same call as turning it on.
 ///
 /// Bloom reads a high dynamic range target, so asking for it without `hdr` gets a picture where
-/// nothing is bright enough to scatter. The two are left to the caller rather than forced
-/// together, because a game may want the range without the glow.
+/// nothing is bright enough to scatter. The two are left to the caller rather than forced together,
+/// because a game may need the range without the glow.
 ///
 /// Temporal antialiasing is the one arm that can be refused. It resolves the whole picture from
 /// past frames, which a multisampled target has not got, and Bevy answers the pair by warning once

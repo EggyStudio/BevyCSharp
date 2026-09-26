@@ -8,9 +8,9 @@
 // gave it. The inputs below are in space 101, which the bridge moves to group one after the
 // compile, so the shader's own globals keep group zero to themselves whatever they are.
 //
-// A pass's entry point is a fragment shader taking `bcs_pass::Input`, which is what Bevy's
-// full-screen triangle writes, and returning the pixel. A compute shader works in pixels, and the
-// helpers taking an `int2` are for it.
+// A pass's entry point is a fragment shader taking `bcs_pass::Input`, which Bevy's full-screen
+// triangle writes, and returning the pixel. A compute shader works in pixels, and the helpers
+// taking an `int2` are for it.
 
 module bcs_pass;
 
@@ -45,8 +45,7 @@ public struct View
     public float4 main_pass_viewport;
 };
 
-/// The view as it was on the previous frame, which is what a shader reprojecting last frame's
-/// results reads.
+/// The view as it was on the previous frame, for a shader reprojecting last frame's results.
 public struct PreviousView
 {
     public float4 view_from_world[4];
@@ -102,7 +101,7 @@ public struct DirectionalCascade
 public struct DirectionalLight
 {
     public DirectionalCascade cascades[4];
-    /// Its color times its brightness, which is what it lights a surface with before exposure.
+    /// Its color times its brightness, which it lights a surface with before exposure.
     public float4 color;
     /// The way to the light, from any surface, as a unit vector.
     public float3 direction_to_light;
@@ -383,7 +382,7 @@ public uint2 picture_size()
     return uint2(width, height);
 }
 
-/// How far apart two neighboring pixels are in `uv`, which is what a blur steps by.
+/// How far apart two neighboring pixels are in `uv`, which a blur steps by.
 public float2 pixel_size()
 {
     return 1.0 / float2(picture_size());
@@ -463,8 +462,8 @@ public float3 world_position(float2 uv, float depth_value)
     return world.xyz / world.w;
 }
 
-/// How far in front of the camera a point in the world is, along the way it looks, which is what
-/// picks a directional light's shadow cascade.
+/// How far in front of the camera a point in the world is, along the way it looks, which picks a
+/// directional light's shadow cascade.
 public float view_depth(float3 world)
 {
     return -transform(view.view_from_world, float4(world, 1.0)).z;
@@ -480,11 +479,11 @@ public float2 previous_uv_of(float3 world)
 
 /// What Bevy's G-buffer says about the surface at a pixel.
 ///
-/// Only there on a camera drawing deferred (`Render.SetDeferredRendering`), where a shader reads
-/// it by declaring `Texture2D<uint4> gbuffer;` and loading a texel, since the texture holds packed
+/// Only there on a camera drawing deferred (`Render.SetDeferredRendering`), where a shader reads it
+/// by declaring `Texture2D<uint4> gbuffer;` and loading a texel, since the texture holds packed
 /// bits rather than anything a sampler can blend. `surface_of` unpacks one the way Bevy's lighting
-/// does, which is what a technique needing albedo and roughness per pixel wants instead of drawing
-/// the scene again to get them.
+/// does, so a technique needing albedo and roughness per pixel need not draw the scene again to get
+/// them.
 public struct Surface
 {
     /// The surface's color, linear. Black for an unlit material, whose color is its `emissive`.
@@ -541,8 +540,8 @@ public Surface surface_of(uint4 texel)
 
     surface.emissive = unpack_rgb9e5(texel.y);
 
-    // Stored as a gamma of 2.2 for precision in eight bits, which is what Bevy undoes. An unlit
-    // material keeps its color in the emissive slot instead and leaves this black.
+    // Stored as a gamma of 2.2 for precision in eight bits, which Bevy undoes. An unlit material
+    // keeps its color in the emissive slot instead and leaves this black.
     surface.base_color = surface.unlit ? float3(0.0) : pow(base_rough.rgb, float3(2.2));
 
     let props = unpack_unorm4x8(texel.z);
@@ -575,7 +574,7 @@ float3 environment_direction(float3 direction)
 }
 
 /// The light the environment sends a surface facing `normal`, from all of the half of the sky in
-/// front of it, which is what a diffuse bounce off the sky is. Black without an environment.
+/// front of it, as a diffuse bounce off the sky gathers. Black without an environment.
 public float3 environment_diffuse(float3 normal)
 {
     if (!has_environment())
@@ -586,8 +585,8 @@ public float3 environment_diffuse(float3 normal)
 }
 
 /// The light the environment sends along `direction`, blurred as much as a surface of
-/// `perceptual_roughness` blurs it, which is what a ray that left the scene sees. Zero roughness
-/// is the sky as it is. Black without an environment.
+/// `perceptual_roughness` blurs it, as a ray that left the scene sees. Zero roughness is the sky as
+/// it is. Black without an environment.
 public float3 environment_specular(float3 direction, float perceptual_roughness)
 {
     if (!has_environment())

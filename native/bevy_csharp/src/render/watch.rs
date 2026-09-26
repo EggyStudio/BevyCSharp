@@ -61,7 +61,7 @@ pub struct Watch {
 #[extract_component_filter(With<Camera>)]
 pub struct BcsWatches(pub Vec<Watch>);
 
-/// How a watched texture is read, which is what decides the shader and its binding.
+/// How a watched texture is read, which decides the shader and its binding.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 enum Reading {
     Float,
@@ -449,8 +449,8 @@ pub fn unwatch(world: &mut bevy::ecs::world::World, camera: bevy::ecs::entity::E
 mod tests {
     use super::*;
 
-    /// Every way of reading makes a shader naga accepts, which is what a watch would otherwise
-    /// only find out when a camera first shows one.
+    /// Every way of reading makes a shader naga accepts, which a watch would otherwise only find
+    /// out when a camera first shows one.
     #[test]
     fn every_watch_shader_is_valid() {
         use naga::valid::{Capabilities, ValidationFlags, Validator};

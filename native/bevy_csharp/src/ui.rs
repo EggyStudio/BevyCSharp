@@ -142,8 +142,8 @@ fn align_items(value: i32) -> bevy::ui::AlignItems {
 /// Builds the `Node` a config describes.
 ///
 /// An unknown code for one of the three enums takes Bevy's default rather than being refused,
-/// because the managed side is what names them, and a bridge older than the assembly calling it
-/// should lay a screen out plainly rather than not at all.
+/// because the managed side names them, and a bridge older than the assembly calling it should lay
+/// a screen out plainly rather than not at all.
 #[cfg(feature = "render")]
 fn node_from(config: &BcsUiNodeConfig) -> bevy::ui::Node {
     use bevy::ui::{BoxSizing, PositionType};
@@ -199,8 +199,8 @@ fn node_from(config: &BcsUiNodeConfig) -> bevy::ui::Node {
         column_gap: length(config.column_gap, config.column_gap_unit),
         align_content: align_content(config.align_content),
 
-        // Zero leaves the two axes independent rather than asking for a node with no height,
-        // which is what a ratio of zero would otherwise mean.
+        // Zero leaves the two axes independent rather than asking for a node with no height, as a
+        // ratio of zero would otherwise mean.
         aspect_ratio: (config.aspect_ratio > 0.0).then_some(config.aspect_ratio),
         overflow_clip_margin: bevy::ui::OverflowClipMargin {
             visual_box: visual_box(config.clip_box),
@@ -247,7 +247,7 @@ fn visual_box(value: i32) -> bevy::ui::VisualBox {
 /// Translates how much room is added between the letters of a run of text.
 ///
 /// Only called for a value other than zero, because zero is both the default and no change, so a
-/// caller leaving the field alone and one asking for the fit the font already has want the same
+/// caller leaving the field alone and one asking for the fit the font already has need the same
 /// thing, which is no component at all.
 #[cfg(feature = "render")]
 fn letter_spacing(value: f32, unit: i32) -> bevy::text::LetterSpacing {
@@ -261,8 +261,8 @@ fn letter_spacing(value: f32, unit: i32) -> bevy::text::LetterSpacing {
 
 /// Translates how far apart the lines of a run of text sit.
 ///
-/// Only called for a height above zero, because zero is a caller leaving the field alone and the
-/// font's own spacing is what Bevy uses when the component is absent.
+/// Only called for a height above zero, because zero is a caller leaving the field alone and Bevy
+/// uses the font's own spacing when the component is absent.
 #[cfg(feature = "render")]
 fn line_height(value: f32, unit: i32) -> bevy::text::LineHeight {
     use bevy::text::LineHeight;
@@ -303,8 +303,8 @@ fn linebreak(value: i32) -> bevy::text::LineBreak {
 
 /// Builds the border color a config describes.
 ///
-/// Always inserted, because transparent is what a node with no border draws and the component is
-/// four floats either way. Leaving it off would make a border that is set later invisible.
+/// Always inserted, because a node with no border draws transparent and the component is four
+/// floats either way. Leaving it off would make a border that is set later invisible.
 #[cfg(feature = "render")]
 fn border_color_from(config: &BcsUiNodeConfig) -> bevy::ui::BorderColor {
     bevy::ui::BorderColor::all(bevy::color::Color::linear_rgba(
@@ -332,8 +332,8 @@ fn make_interactive(entity: &mut bevy::ecs::world::EntityWorldMut, config: &BcsU
 /// Points a node at the camera that should draw it, when it was given one.
 ///
 /// Without this, Bevy picks whichever camera draws to a window, so a run that draws into an image
-/// has no camera the interface can find and lays out nothing at all. Naming one is what lets a
-/// screen be drawn on a machine with no display, and what lets a test look at the result.
+/// has no camera the interface can find and lays out nothing at all. Naming one lets a screen be
+/// drawn on a machine with no display, and lets a test look at the result.
 ///
 /// It propagates to children, so the root of a screen is the only node that has to be told.
 #[cfg(feature = "render")]
@@ -431,9 +431,9 @@ pub unsafe extern "C" fn bcs_ui_spawn_text(
             let text_config = unsafe { *text_config };
 
             with_world_opt(|world| {
-                // A negative key is the font compiled into Bevy, which is what keeps text
-                // working with no asset at all. A key that names nothing is a mistake rather
-                // than a reason to fall back quietly, so it refuses.
+                // A negative key is the font compiled into Bevy, which keeps text working with no
+                // asset at all. A key that names nothing is a mistake rather than a reason to fall
+                // back quietly, so it refuses.
                 //
                 // `FontSource` can also name a generic family, which is not offered here, because
                 // that path needs Bevy's `system_font_discovery`, and on Linux the crate behind it
@@ -711,9 +711,9 @@ pub unsafe extern "C" fn bcs_ui_interaction(entity: u64) -> i32 {
 
 /// Draws a picture inside a node, or replaces the one it draws.
 ///
-/// The node keeps its layout, so the image fills what the layout gave it, which is what `mode` is
-/// about. `Auto` takes the picture's own size, so a node with no width or height of its own ends
-/// up the size of the image; the other three fit it to the node instead.
+/// The node keeps its layout, so the image fills what the layout gave it, and `mode` says how.
+/// `Auto` takes the picture's own size, so a node with no width or height of its own ends up the
+/// size of the image; the other three fit it to the node instead.
 ///
 /// # Safety
 /// `config` must point to a readable [`BcsUiImageConfig`].
@@ -828,10 +828,10 @@ pub unsafe extern "C" fn bcs_ui_set_image(entity: u64, config: *const BcsUiImage
 
 /// Moves a node's contents inside it, for a list that scrolls.
 ///
-/// Only means anything on a node whose overflow is set to scroll, because that is what clips the
-/// contents to the node, and this is how far they have been pushed, in logical pixels from the top
-/// left. Bevy has no scrolling input of its own, so a wheel or a drag is read like any other input
-/// and turned into a call here.
+/// Only means anything on a node whose overflow is set to scroll, because that clips the contents
+/// to the node, and this is how far they have been pushed, in logical pixels from the top left.
+/// Bevy has no scrolling input of its own, so a wheel or a drag is read like any other input and
+/// turned into a call here.
 ///
 /// A node is required, and anything else is refused. `ScrollPosition` is a bare component, unlike
 /// `ImageNode`, which brings a `Node` with it. Nothing would make the entity a node, so the

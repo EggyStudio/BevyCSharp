@@ -190,9 +190,9 @@ pub unsafe extern "C" fn bcs_mesh_create_from(data: *const BcsMeshData) -> i32 {
 
 /// Builds an empty image sized for a camera to draw into.
 ///
-/// The usages are what separate a texture that can be drawn into and copied out of from one that
-/// can only be sampled. Without `RENDER_ATTACHMENT` a camera cannot target it, and without
-/// `COPY_SRC` a capture finds nothing to read back.
+/// The usages separate a texture that can be drawn into and copied out of from one that can only be
+/// sampled. Without `RENDER_ATTACHMENT` a camera cannot target it, and without `COPY_SRC` a capture
+/// finds nothing to read back.
 #[cfg(feature = "render")]
 pub(crate) fn target_image(width: u32, height: u32) -> bevy::image::Image {
     use bevy::asset::RenderAssetUsages;
@@ -470,10 +470,10 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
 
 /// Writes where an entity's mesh or material was loaded from, and returns its length in bytes.
 ///
-/// `which` is `0` for the mesh and `1` for the material. The answer is the asset path, which is
-/// what an editor can show and what a person can point at a different file. An asset built in
-/// memory rather than loaded has no path and answers an empty string, which is the honest answer
-/// rather than a made-up name.
+/// `which` is `0` for the mesh and `1` for the material. The answer is the asset path, which an
+/// editor can show and a person can point at a different file. An asset built in memory rather than
+/// loaded has no path and answers an empty string, which is the honest answer rather than a made-up
+/// name.
 ///
 /// The usual text convention: pass null with a capacity of zero to learn the length, then call
 /// again with a buffer that size.
@@ -625,8 +625,8 @@ pub fn reshape_images(
 
 /// Asks for an image to be treated as a cubemap once it has loaded, and answers at once.
 ///
-/// Six square faces stacked vertically, which is the layout the skybox takes. What a shader
-/// material's cube slots want, since a flat picture there is replaced by the fallback.
+/// Six square faces stacked vertically, which is the layout the skybox takes. Suits a shader
+/// material's cube slots, since a flat picture there is replaced by the fallback.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_make_cubemap(image: i32) -> i32 {
     crate::interop::guard(|| {
@@ -702,10 +702,10 @@ pub extern "C" fn bcs_render_reshape_image(image: i32, count: i32, volume: i32) 
 /// A bit left clear takes that behavior off again, so the flags are the whole answer rather than
 /// additions to it.
 ///
-/// Not being culled is what a mesh drawn somewhere its own bounds do not say needs, which is any
-/// mesh a vertex shader moves far from where it was built, and one whose vertices a buffer places.
-/// Bevy culls by the bounds it worked out from the mesh, so such a mesh vanishes whenever those
-/// stale bounds leave the view.
+/// A mesh drawn somewhere its own bounds do not say needs to escape culling, which covers any mesh
+/// a vertex shader moves far from where it was built, and one whose vertices a buffer places. Bevy
+/// culls by the bounds it worked out from the mesh, so such a mesh vanishes whenever those stale
+/// bounds leave the view.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_set_mesh_flags(entity: u64, flags: u32) -> i32 {
     crate::interop::guard(|| {

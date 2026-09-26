@@ -11,13 +11,13 @@
 //!   constructed rather than described by a layout, and the components carrying them hold a
 //!   typed `Handle<T>`, which raw bytes cannot represent.
 //! - [`scene`] spawns what the picture contains: cameras, lights and sprites.
-//! - [`post`] is what a camera does to the picture once the scene has been drawn.
+//! - [`post`] covers what a camera does to the picture once the scene has been drawn.
 //! - [`probes`] places light probes, which light what is inside a box from an image, and are
 //!   the way a global illumination package's answer reaches Bevy's materials.
 //! - [`shaders`] is the boundary for shaders the game wrote: [`programs`] says which files draw a
-//!   material and keeps them compiled, [`material`] is what such a material carries, [`passes`]
-//!   runs them over a camera's picture, [`compute`] runs them over buffers outside of any picture,
-//!   and [`slang`] compiles the ones written in Slang.
+//! material and keeps them compiled, [`material`] holds what such a material carries, [`passes`]
+//! runs them over a camera's picture, [`compute`] runs them over buffers outside of any picture,
+//! and [`slang`] compiles the ones written in Slang.
 //!
 //! What the three share sits here: resolving an asset key, and refusing an entity that is not a
 //! camera.
@@ -48,18 +48,18 @@ use crate::interop::status;
 
 /// Resolves an asset key to the image it names.
 ///
-/// Zero or a negative key is the caller saying "no image", which every image on a config is
-/// allowed to be. A key that names nothing else is a mistake rather than a default, because that
-/// is what a released or fabricated handle looks like from this side, and quietly drawing without
-/// the texture that was asked for is a wrong picture nothing reports.
+/// Zero or a negative key is the caller saying "no image", which every image on a config is allowed
+/// to be. A key that names nothing else is a mistake rather than a default, because a released or
+/// fabricated handle looks like that from this side, and quietly drawing without the texture that
+/// was asked for is a wrong picture nothing reports.
 #[cfg(feature = "render")]
 pub(crate) fn image_handle(
     world: &mut bevy::ecs::world::World,
     key: i32,
 ) -> Result<Option<bevy::asset::Handle<bevy::image::Image>>, i32> {
-    // Zero as well as a negative, because the table never hands out zero and a component holding
-    // an asset starts out zeroed. A freshly added component therefore holds nothing, which is what
-    // the managed side documents and what a caller passing a default handle means.
+    // Zero as well as a negative, because the table never hands out zero and a component holding an
+    // asset starts out zeroed. A freshly added component therefore holds nothing, as the managed
+    // side documents and a caller passing a default handle means.
     if key <= 0 {
         return Ok(None);
     }

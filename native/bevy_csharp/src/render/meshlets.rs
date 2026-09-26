@@ -2,13 +2,13 @@
 //! at a time on the GPU, drawn into a visibility buffer and shaded from it.
 //!
 //! This is virtualized geometry as Bevy ships it, and the first thing a scene of dense meshes
-//! wants. It is behind the `meshlet` feature, which the build takes with `--meshlet`, because the
+//! needs. It is behind the `meshlet` feature, which the build takes with `--meshlet`, because the
 //! processor that cuts a mesh into clusters compiles C and C++ libraries every other profile does
 //! without. Even then it is off until an app asks for it with a cluster budget, since Bevy's plugin
 //! ends the process on a GPU without 64-bit texture atomics and on any camera drawing more than
 //! once a pixel. The bridge asks the GPU before adding the plugin, so a machine that cannot run it
-//! is told and carries on without it, and turns multisampling off on every camera while it runs,
-//! so no setting a game makes can reach the check that would end it.
+//! is told and carries on without it, and turns multisampling off on every camera while it runs, so
+//! no setting a game makes can reach the check that would end it.
 //!
 //! A meshlet mesh is made from an ordinary one with [`bcs_render_create_meshlet_mesh`], which
 //! takes seconds for a large mesh and so runs on a worker; the handle it answers is empty until
@@ -19,8 +19,8 @@ use crate::interop::status;
 #[cfg(feature = "meshlet")]
 use crate::state::with_world;
 
-/// Whether the meshlet plugin is running in this app, which is what the managed side asks before
-/// making meshlet meshes.
+/// Whether the meshlet plugin is running in this app, which the managed side asks before making
+/// meshlet meshes.
 #[cfg(feature = "meshlet")]
 static ACTIVE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
@@ -219,9 +219,9 @@ fn convert_meshes(
     });
 }
 
-/// A copy of `mesh` with the three attributes a meshlet mesh is made of and nothing else, since
-/// the processor refuses a mesh carrying more, and a tangent or a vertex color is what most meshes
-/// carry besides. Tangents are worked out again when a meshlet mesh is drawn.
+/// A copy of `mesh` with the three attributes a meshlet mesh is made of and nothing else, since the
+/// processor refuses a mesh carrying more, and most meshes carry a tangent or a vertex color
+/// besides. Tangents are worked out again when a meshlet mesh is drawn.
 #[cfg(feature = "meshlet")]
 fn only_what_meshlets_keep(mesh: &bevy::mesh::Mesh) -> Result<bevy::mesh::Mesh, String> {
     use bevy::mesh::Mesh;

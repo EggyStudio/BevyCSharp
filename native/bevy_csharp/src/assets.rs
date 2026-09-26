@@ -1,9 +1,9 @@
 //! Asset loading, and the table that lets C# hold on to what it loaded.
 //!
 //! Bevy's `Handle<T>` is generic and reference counted. Dropping one decrements a count, and
-//! keeping one alive is what stops the asset being unloaded. Neither survives a trip through a C
-//! ABI, so managed code never sees a handle. It gets an index into a table on this side that
-//! owns the real thing, and hands the index back when it wants to use or release it.
+//! keeping one alive stops the asset being unloaded. Neither survives a trip through a C ABI, so
+//! managed code never sees a handle. It gets an index into a table on this side that owns the real
+//! thing, and hands the index back to use or release it.
 //!
 //! The table stores `UntypedHandle` rather than one slab per asset type. An untyped handle is
 //! still a strong reference, so it keeps the asset loaded, and its load state can be queried
@@ -436,10 +436,10 @@ pub extern "C" fn bcs_asset_live_count() -> i32 {
 /// The entity comes back immediately; the scene beneath it does not. Bevy spawns the world as
 /// children of this entity once the asset has loaded, so an entity with no children yet is the
 /// normal answer on the first frame. `WorldInstance` appears on it when the spawn has happened,
-/// which is what makes the wait observable.
+/// which makes the wait observable.
 ///
-/// This is what a glTF scene and a `.scn.ron` file have in common. Both load as a `WorldAsset`,
-/// and both spawn by pointing an entity at one.
+/// A glTF scene and a `.scn.ron` file have this in common. Both load as a `WorldAsset`, and both
+/// spawn by pointing an entity at one.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_scene_spawn(asset: i32) -> u64 {
     crate::interop::guard_with(0u64, || {
@@ -560,9 +560,9 @@ mod tests {
     #[test]
     fn registering_an_asset_type_twice_through_bevy_loses_them() {
         // Pins the behavior `init_asset_once` exists to guard, so that if Bevy ever makes
-        // `init_asset` idempotent this fails and says the guard can go. Nothing reports an
-        // error here, which is what made the original failure so hard to place. The handle is
-        // valid, the call succeeded, and the mesh is gone.
+        // `init_asset` idempotent this fails and says the guard can go. Nothing reports an error
+        // here, which made the original failure so hard to place. The handle is valid, the call
+        // succeeded, and the mesh is gone.
         let mut app = asset_app();
         app.init_asset::<Mesh>();
 

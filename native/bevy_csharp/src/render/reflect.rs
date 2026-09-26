@@ -5,13 +5,12 @@
 //!
 //! Two sources, because each is right about a different thing:
 //!
-//! - The WGSL `slangc` wrote, read with naga, says which bindings exist and what they are:
-//!   uniform or storage, texture of which shape, sampler of which kind, array of how many. It is
-//!   what the pipeline will be checked against, so it is what the layout is built from, and a
-//!   binding the entry point does not use is not in it at all.
+//! - The WGSL `slangc` wrote, read with naga, says which bindings exist and what they are: uniform
+//! or storage, texture of which shape, sampler of which kind, array of how many. The pipeline will
+//! be checked against it, so the layout is built from it, and a binding the entry point does not
+//! use is not in it at all.
 //! - Slang's reflection says what each binding is called and where each number goes inside a
-//!   uniform buffer, including through structs and arrays. It is what lets C# set `lights[3].color`
-//!   by name.
+//! uniform buffer, including through structs and arrays. It lets C# set `lights[3].color` by name.
 //!
 //! **Groups.** Bevy owns groups zero to two of a material's pipeline, and the bridge owns group one
 //! of a pass's and a compute shader's. The bridge's Slang modules declare those bindings in spaces
@@ -225,8 +224,8 @@ pub struct Layout {
     pub group: u32,
     pub bindings: BTreeMap<u32, Binding>,
     /// Whether the shader reads a camera's inputs (the picture, the view, depth, motion) beside
-    /// time, which is what a compute shader importing `bcs_pass` does, and what decides that it
-    /// can only run on a camera.
+    /// time, as a compute shader importing `bcs_pass` does, which means it can only run on a
+    /// camera.
     pub reads_view: bool,
 }
 
@@ -316,8 +315,8 @@ impl Layout {
         names
     }
 
-    /// Adds another stage's view of the same group, which is what a material with a vertex and a
-    /// fragment shader has.
+    /// Adds another stage's view of the same group, as a material with a vertex and a fragment
+    /// shader has.
     ///
     /// One source compiled for two entry points numbers its globals the same way both times, so a
     /// binding the two share has to be the same thing. When it is not, the stages were written in
@@ -389,8 +388,8 @@ impl Layout {
                 binding: *number,
                 visibility: stages,
                 ty: match &binding.kind {
-                    // Storage rather than uniform, which is what `numbers_in_storage` made of
-                    // the shader's declaration. See there for why.
+                    // Storage rather than uniform, as `numbers_in_storage` made the shader's
+                    // declaration. See there for why.
                     BindingKind::Uniform { size, .. } => BindingType::Buffer {
                         ty: BufferBindingType::Storage { read_only: true },
                         has_dynamic_offset: false,
@@ -979,8 +978,8 @@ pub fn remap_groups(wgsl: &str, family: Family) -> String {
 
 /// The name a global had in the source, from what Slang called it in the WGSL.
 ///
-/// Slang adds `_` and a number to every name it writes, so the source's name is what is left when
-/// that is taken off.
+/// Slang adds `_` and a number to every name it writes, so taking that off leaves the source's
+/// name.
 fn source_name(emitted: &str) -> String {
     match emitted.rsplit_once('_') {
         Some((head, tail)) if !head.is_empty() && tail.chars().all(|c| c.is_ascii_digit()) => {
@@ -1202,8 +1201,8 @@ mod tests {
         assert_eq!(*access, StorageTextureAccess::WriteOnly);
     }
 
-    /// Bevy's own uniforms stay uniforms, and the material's become storage, which is what lets
-    /// them share a bind group with its array of textures.
+    /// Bevy's own uniforms stay uniforms, and the material's become storage, which lets them share
+    /// a bind group with its array of textures.
     #[test]
     fn the_materials_numbers_are_read_from_storage() {
         let wgsl = fragment().wgsl;

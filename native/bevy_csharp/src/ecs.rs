@@ -281,10 +281,10 @@ pub unsafe extern "C" fn bcs_ecs_chunks(
             }
             let stride = info.layout().size() as u32;
 
-            // A table-stored filter is answered once for the whole table, because every entity
-            // in one carries exactly the same set of them. A sparse-stored filter cannot be:
-            // two entities in the same table may differ, so it is asked per entity instead,
-            // which is what splits a table into runs below.
+            // A table-stored filter is answered once for the whole table, because every entity in
+            // one carries exactly the same set of them. A sparse-stored filter cannot be: two
+            // entities in the same table may differ, so it is asked per entity instead, which
+            // splits a table into runs below.
             let mut with_ids = Vec::with_capacity(with.len());
             let mut with_sparse = Vec::new();
             for raw in with {

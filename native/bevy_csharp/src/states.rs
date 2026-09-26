@@ -5,8 +5,8 @@
 //!
 //! A `States` type is a Rust type, and C# cannot define one. What it can do is choose a value, so
 //! the bridge provides a fixed set of state types that each hold an `i32` and let the managed side
-//! decide what the numbers mean. Each C# enum claims one of these slots on registration, which is
-//! what keeps two unrelated state machines from treading on each other.
+//! decide what the numbers mean. Each C# enum claims one of these slots on registration, which
+//! keeps two unrelated state machines from treading on each other.
 //!
 //! The slot count is fixed because the types have to exist at compile time, and each one costs
 //! compile time rather than runtime: `insert_state` is generic, so a slot brings its own copy of
@@ -160,8 +160,8 @@ macro_rules! define_slots {
         /// Which parent value each sub-state exists under.
         ///
         /// Process-wide rather than per app, because `should_exist` is a static function. A second
-        /// app in the same process overwrites what the first wrote, which is what a test that
-        /// builds one app after another wants and the only shape this trait allows.
+        /// app in the same process overwrites what the first wrote, which suits a test that builds
+        /// one app after another and is the only shape this trait allows.
         static SUB_PARENT: [AtomicI32; SUB_COUNT as usize] =
             [const { AtomicI32::new(i32::MIN) }; SUB_COUNT as usize];
 
@@ -375,8 +375,8 @@ pub extern "C" fn bcs_state_slots() -> i32 {
 /// Creates the computed state in `slot`, working its value out from a table.
 ///
 /// A computed state is not set. It is worked out from another state whenever that one changes,
-/// which is what "the interface is up on these three screens" wants, where a plain state would
-/// leave two facts to keep in step and a sub-state would only answer whether it exists.
+/// which suits "the interface is up on these three screens", where a plain state would leave two
+/// facts to keep in step and a sub-state would only answer whether it exists.
 ///
 /// `from` and `to` are the two halves of the table, of `count` entries each: a value of the source
 /// axis and what the computed state is while the source holds it. A source value the table says
@@ -468,10 +468,10 @@ pub unsafe extern "C" fn bcs_state_add(
 
 /// Creates the sub-state in `slot`, existing only while its own axis holds `parent`.
 ///
-/// A sub-state is a state whose existence is decided by another one, which is what a pause screen
-/// inside a run is: leaving the run should take the pause with it rather than leave a menu state
-/// that means nothing. While the parent holds any other value there is no state at all, and
-/// [`bcs_state_get`] on it reports [`status::NOT_PRESENT`] rather than a value.
+/// A sub-state is a state whose existence is decided by another one, as a pause screen inside a run
+/// is. Leaving the run should take the pause with it rather than leave a menu state that means
+/// nothing. While the parent holds any other value there is no state at all, and [`bcs_state_get`]
+/// on it reports [`status::NOT_PRESENT`] rather than a value.
 ///
 /// `slot` here counts sub-states rather than axes. The sub-states of axis `n` are the block
 /// starting at `n * `[`bcs_state_subs_per_slot`]`()`, and everywhere else the same sub-state is
@@ -529,8 +529,8 @@ pub unsafe extern "C" fn bcs_state_get(slot: i32, out: *mut i32) -> i32 {
 
 /// Queues a transition of `slot` to `value`.
 ///
-/// Bevy applies it at the next transition point rather than immediately, which is what lets every
-/// system in a frame agree on which state it is in.
+/// Bevy applies it at the next transition point rather than immediately, so every system in a frame
+/// agrees on which state it is in.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_state_set(slot: i32, value: i32) -> i32 {
     crate::interop::guard(|| with_world(|world| queue(world, slot, value)))
@@ -539,7 +539,7 @@ pub extern "C" fn bcs_state_set(slot: i32, value: i32) -> i32 {
 /// Registers a C# system to run when `slot` enters or leaves `value`.
 ///
 /// `edge` is `0` for entering and `1` for leaving. Unlike a stage, this runs once per transition
-/// rather than once per frame, which is what makes it the place to build a level or tear one down.
+/// rather than once per frame, which makes it the place to build a level or tear one down.
 ///
 /// # Safety
 /// `handle` must be a live app; `func` must remain callable until the app is destroyed.

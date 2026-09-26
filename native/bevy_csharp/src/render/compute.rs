@@ -3,9 +3,8 @@
 //!
 //! A buffer is a `ShaderBuffer` asset, which Bevy keeps on the GPU between frames, so what one
 //! dispatch writes the next reads, and a material or a pass handed the same buffer draws from it
-//! without anything crossing back to the CPU. That is what a particle system, a cloth, a boids
-//! flock or a fluid wants, because the state then lives where it is simulated and where it is
-//! drawn.
+//! without anything crossing back to the CPU. That suits a particle system, a cloth, a boids flock
+//! or a fluid, because the state then lives where it is simulated and where it is drawn.
 //!
 //! **Dispatching.** A dispatch is asked for from a system and runs once, that frame, before any
 //! camera draws. A simulation asks every frame, which leaves how often it steps to the game rather
@@ -477,8 +476,7 @@ fn prepare_dispatches(
     }
 }
 
-/// Runs the frame's dispatches, before any camera draws, so what they write is what the frame
-/// shows.
+/// Runs the frame's dispatches, before any camera draws, so the frame shows what they write.
 fn run_dispatches(
     prepared: Res<PreparedDispatches>,
     cache: Res<PipelineCache>,
@@ -534,8 +532,7 @@ fn on_readback(event: On<ReadbackComplete>, mut reads: ResMut<BufferReads>, mut 
 
     reads.done.insert(ticket, event.data.clone());
 
-    // A readback component reads again every frame it is there, and one answer is what was asked
-    // for.
+    // A readback component reads again every frame it is there, and only one answer was asked for.
     if let Ok(mut entity) = commands.get_entity(entity) {
         entity.despawn();
     }
@@ -606,11 +603,11 @@ pub fn write_buffer(world: &mut World, key: i32, bytes: &[u8]) -> i32 {
 
 /// Makes a buffer at least `size` bytes, keeping what it holds, and answers its new size.
 ///
-/// The GPU buffer is a new one, with the old one's contents copied to its start on the GPU, since
-/// a buffer cannot grow in place. Whatever was built against the old one is built again: every
+/// The GPU buffer is a new one, with the old one's contents copied to its start on the GPU, since a
+/// buffer cannot grow in place. Whatever was built against the old one is built again: every
 /// material holding it is prepared again and every shader instance holding it moves on a version,
-/// which is what makes a grown buffer safe to keep handing to what already had it. A size no larger
-/// than the buffer's leaves it as it is.
+/// which makes a grown buffer safe to keep handing to what already had it. A size no larger than
+/// the buffer's leaves it as it is.
 pub fn grow_buffer(world: &mut World, key: i32, size: u64) -> i32 {
     let Some(handle) = buffer_handle(world, key) else {
         return status::NO_COMPONENT;
@@ -816,16 +813,16 @@ fn create_compressed(
 
 /// Makes an image a compute shader can write and anything can sample, and answers its asset key.
 ///
-/// `depth` above one makes a 3D image that many deep, which is what a shader writing a
-/// `RWTexture3D` wants. It starts as zeros.
+/// `depth` above one makes a 3D image that many deep, for a shader writing a `RWTexture3D`. It
+/// starts as zeros.
 pub fn create_image(world: &mut World, width: u32, height: u32, depth: u32, format: i32) -> i32 {
     create_image_from(world, width, height, depth, format, None)
 }
 
 /// Makes an image as [`create_image`] does, with `mips` mip levels, as many as its size allows.
 ///
-/// Every level starts as zeros, which is what wgpu gives a texture made without contents, since
-/// contents for one level would leave the rest to be supplied and a pyramid is built on the GPU.
+/// Every level starts as zeros, as wgpu gives a texture made without contents, since contents for
+/// one level would leave the rest to be supplied and a pyramid is built on the GPU.
 pub fn create_image_with_mips(
     world: &mut World,
     width: u32,

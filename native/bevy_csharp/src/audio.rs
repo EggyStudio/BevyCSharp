@@ -1,8 +1,8 @@
 //! Sound, reachable from C#.
 //!
 //! A sound that is playing is an entity carrying an `AudioPlayer` and the settings it was started
-//! with, so it is despawned like anything else and can be parented, tagged or queried. Bevy adds
-//! an `AudioSink` to it once playback begins, which is what volume and pausing go through.
+//! with, so it is despawned like anything else and can be parented, tagged or queried. Bevy adds an
+//! `AudioSink` to it once playback begins, and volume and pausing go through it.
 //!
 //! Everything here needs a render build, because that is the profile Bevy's audio is compiled
 //! into, which is the one that takes a system library.
@@ -45,8 +45,8 @@ pub unsafe extern "C" fn bcs_audio_play(clip: i32, config: *const BcsAudioConfig
                 let settings = PlaybackSettings {
                     mode: match config.mode {
                         1 => PlaybackMode::Loop,
-                        // Cleans up after itself, which is what a one-shot sound effect wants:
-                        // nothing has to remember to despawn it.
+                        // Cleans up after itself, as a one-shot sound effect should, so nothing has
+                        // to remember to despawn it.
                         2 => PlaybackMode::Despawn,
                         _ => PlaybackMode::Once,
                     },
@@ -172,9 +172,9 @@ pub extern "C" fn bcs_audio_stop(entity: u64) -> i32 {
 
 /// Makes an entity the ear spatial sound is heard from.
 ///
-/// Usually the camera, so what is heard follows what is seen. Only one entity should carry it at
-/// a time; Bevy takes the first it finds otherwise. `gap` is the distance between the two ears in
-/// world units, which is what decides how pronounced the stereo is; `0` takes Bevy's own.
+/// Usually the camera, so what is heard follows what is seen. Only one entity should carry it at a
+/// time; Bevy takes the first it finds otherwise. `gap` is the distance between the two ears in
+/// world units, which decides how pronounced the stereo is; `0` takes Bevy's own.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_audio_listener(entity: u64, gap: f32) -> i32 {
     crate::interop::guard(|| {
@@ -213,7 +213,7 @@ pub extern "C" fn bcs_audio_listener(entity: u64, gap: f32) -> i32 {
 ///
 /// The long form of [`bcs_audio_listener`], which puts the two ears on the x axis a gap apart.
 /// `left` and `right` each point at three floats, a position relative to the entity's own
-/// transform, which is what a listener attached to a head rather than to a camera needs.
+/// transform, for a listener attached to a head rather than to a camera.
 ///
 /// # Safety
 /// `left` and `right` must each point at three readable floats.
@@ -346,7 +346,7 @@ pub extern "C" fn bcs_audio_seek(entity: u64, seconds: f32) -> i32 {
     })
 }
 
-/// Scales every sound at once, which is what a settings screen changes.
+/// Scales every sound at once, as a settings screen does.
 ///
 /// Multiplied with each sound's own volume rather than replacing it, so the mix a game set up
 /// survives the master slider being moved.

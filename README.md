@@ -2,13 +2,7 @@
 
 Write [Bevy](https://bevy.org) games in C#.
 
-![Render](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/screenshot-8.png)
-
-![Render](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/screenshot-9.png)
-
-![Render](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/screenshot-10.png)
-
-![Render](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/screenshot-11.png)
+![Showcase](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/refs/heads/main/.github/assets/showcase.gif)
 
 <sup>`BevyCSharp.Sample`, running on Bevy's PBR renderer through the bridge:
 `dotnet run --project BevyCSharp.Sample`</sup>

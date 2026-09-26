@@ -12,15 +12,13 @@ namespace BevyCSharp.Editor.Behaviors;
 /// have in their hands:
 /// </para>
 /// <list type="bullet">
-/// <item>Hold the right button to look around, and steer with W, A, S, D while it is held. Q
-/// lowers and E raises. Shift moves faster and Control slower, and the wheel sets how fast the
-/// unmodified speed is.</item>
-/// <item>Hold the middle button to slide the view sideways and up, which moves the camera rather
-/// than turning it.</item>
-/// <item>Roll the wheel on its own to move along the view direction.</item>
-/// <item>Hold Alt and the left button to swing around a point in front of the camera, which is
-/// what a scene view orbits about.</item>
-/// <item>Press F to frame the origin from wherever the camera is looking.</item>
+/// <item>Hold the right button to look around, and steer with W, A, S, D while it is held. Q lowers
+/// and E raises. Shift moves faster and Control slower, and the wheel sets how fast the unmodified
+/// speed is.</item> <item>Hold the middle button to slide the view sideways and up, which moves the
+/// camera rather than turning it.</item> <item>Roll the wheel on its own to move along the view
+/// direction.</item> <item>Hold Alt and the left button to swing around a point in front of the
+/// camera, as a scene view orbits.</item> <item>Press F to frame the origin from wherever the
+/// camera is looking.</item>
 /// </list>
 /// <para>
 /// Position and rotation are written to Bevy's own <see cref="Transform"/>, so nothing here is a
@@ -153,7 +151,7 @@ public partial struct FlyCamera
     private const float PivotDefault = 8f;
 
     /// <summary>
-    /// Set by anything that wants the camera to frame the selection.
+    /// Set by anything asking the camera to frame the selection.
     /// </summary>
     /// <remarks>
     /// A request rather than a move, because where the camera is is this behavior's business and
@@ -162,7 +160,7 @@ public partial struct FlyCamera
     public static bool FrameWanted { get; set; }
 
     /// <summary>
-    /// Set by anything that wants the camera's horizon put back level.
+    /// Set by anything asking for the camera's horizon to be put back level.
     /// </summary>
     /// <remarks>
     /// What the orientation cross is for. After flying about, the quickest way to know which way
