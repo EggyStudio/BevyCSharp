@@ -425,8 +425,10 @@ fn sample_matches(format: TextureFormat, wanted: TextureSampleType) -> bool {
     };
 
     match (actual, wanted) {
-        // A filterable texture can be read where an unfilterable one is expected.
+        // A filterable texture can be read where an unfilterable one is expected, and so can a
+        // depth texture, which is how a shader reads last frame's depth as plain numbers.
         (TextureSampleType::Float { .. }, TextureSampleType::Float { filterable: false }) => true,
+        (TextureSampleType::Depth, TextureSampleType::Float { filterable: false }) => true,
         (actual, wanted) => actual == wanted,
     }
 }

@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 120;
+    internal const int ExpectedAbiVersion = 126;
 
     static Native() => NativeLoader.Initialize();
 
@@ -607,6 +607,16 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_unwatch_view_image(ulong camera, byte* name);
 
+    /// <summary>Draws Bevy's own materials deferred or forward.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_deferred(int on);
+
+    /// <summary>Turns screen-space reflections on or off for a camera.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_screen_space_reflections(ulong camera, NativeReflectionConfig* config);
+
     /// <summary>Asks for an image to be treated as a cubemap once it has loaded.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -922,6 +932,39 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_environment_map(
         ulong camera, int diffuse, int specular, float intensity, float* rotation);
+
+    /// <summary>Whether Bevy's meshlets are running in this app.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_meshlets_active();
+
+    /// <summary>Starts making a meshlet mesh from a mesh, answering its key at once.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_create_meshlet_mesh(int mesh, uint quantization);
+
+    /// <summary>Makes an entity a reflection probe lit by a pair of baked cubemaps.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_reflection_probe(
+        ulong entity, int diffuse, int specular, float intensity, float* falloff);
+
+    /// <summary>Makes an entity an irradiance volume lit from a 3D image.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_irradiance_volume(
+        ulong entity, int voxels, float intensity, float* falloff);
+
+    /// <summary>Makes an entity a reflection probe that renders what is around it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_probe_capture(
+        ulong entity, uint size, float intensity, float* falloff, int live, float near);
+
+    /// <summary>Captures a probe that is not live again.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_recapture_probe(ulong entity);
 
     /// <summary>Sets a camera's exposure from the lens it stands in for.</summary>
     [LibraryImport(Library)]

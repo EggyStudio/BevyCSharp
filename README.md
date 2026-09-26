@@ -73,18 +73,22 @@ Behaviors are discovered automatically, so a consuming project needs no registra
   - [Models](#models)
   - [Drawing](#drawing)
     - [A mesh of your own](#a-mesh-of-your-own)
+    - [Meshlets](#meshlets)
     - [Materials](#materials)
     - [A shader of your own](#a-shader-of-your-own)
     - [The compiler](#the-compiler)
     - [Reloading shaders](#reloading-shaders)
     - [Passes over the picture](#passes-over-the-picture)
     - [Compute](#compute)
+    - [Compute on a camera](#compute-on-a-camera)
     - [Textures](#textures)
     - [Cameras](#cameras)
     - [Shadows](#shadows)
     - [The picture the camera makes](#the-picture-the-camera-makes)
     - [The lens](#the-lens)
+    - [Reflections](#reflections)
     - [The sky](#the-sky)
+    - [Light probes](#light-probes)
     - [Drawing into an image](#drawing-into-an-image)
     - [The window](#the-window)
   - [2D](#2d)
@@ -784,6 +788,30 @@ wants `Render.SetMeshFlags(ctx.Ecs, entity, MeshFlags.NoFrustumCulling)`, becaus
 the bounds it worked out from the mesh and those say nothing about where the shader put it. The
 same flags turn a mesh's shadow casting and receiving off.
 
+#### Meshlets
+
+A mesh of millions of triangles can be drawn as Bevy's meshlets instead, which cut it into small
+clusters that the GPU culls and picks a level of detail for, so it costs what the triangles
+covering the screen cost rather than what the mesh holds:
+
+```csharp
+var config = Config.Default;
+config.MeshletClusters = 1 << 22;                   // room for this many clusters at once
+
+// Later, in a system:
+var statue = Render.CreateMeshletMesh(AssetServer.Load(AssetKind.Mesh, "statue.glb#Mesh0/Primitive0"));
+Render.SetMeshletMesh(ctx.Ecs, entity, statue);
+Render.SetMaterial(ctx.Ecs, entity, marble);
+```
+
+They need a bridge built with them (`./bcs build --editor --meshlet`) and a GPU with 64-bit texture
+atomics on Vulkan or Metal. The bridge asks the GPU before turning them on and runs without them
+where it cannot, which `Render.MeshletsActive` reports. Cutting a mesh into clusters takes seconds
+for a large one, so `CreateMeshletMesh` does it on a worker once the mesh has loaded, and the
+handle it answers draws nothing until then. The mesh has to be indexed triangles with texture
+coordinates. A meshlet mesh is drawn with a standard material, and while meshlets run every camera
+draws once a pixel, since Bevy's meshlet renderer cannot draw a multisampled picture.
+
 #### Materials
 
 A material takes settings, and its textures are image handles:
@@ -1128,12 +1156,42 @@ pyramid is built one level from the last. Every camera has its own, however many
 dispatch or a pass must not read and write the same image, which the GPU refuses, and which is what
 history is for.
 
+An image can also be filled from the picture itself, at a point of the frame:
+
+```csharp
+Shaders.SetViewImages(camera, new ViewImage("lit", ShaderImageFormat.Rgba16Float, Scale: 0.5f,
+    History: true, CopyAt: FramePoint.BeforeTonemapping));
+```
+
+The picture is drawn into it, scaled and point sampled, before that point's dispatches run, so
+with history `lit_previous` is last frame's lit picture in its own units. That is the light a
+screen-space GI ray that hits something on screen picks up, and what a temporal filter blends
+toward, without a pass written only to copy it.
+
 A shader on a camera also sees the scene's lights the way Bevy's own materials do:
 `bcs_pass::directional_light_count()` and `lights.directional_lights[i]` with each light's color,
 direction and shadow cascades, `point_light_count()` and `point_lights[i]` for point and spot lights,
 and `directional_shadow` and `point_shadow` read Bevy's shadow maps with its filtering, from zero in
-full shadow to one in full light. That is what shading the point a traced ray hit needs, without
-drawing the scene's lights a second time.
+full shadow to one in full light, a spot light's included. `point_light_radiance` is the light a
+point or spot light sends to a point before shadow, falling off with distance and, for a spot, with
+the angle from its axis. That is what shading the point a traced ray hit needs, without drawing the
+scene's lights a second time. The sky is there too: `environment_specular(direction, roughness)`
+is what the camera's environment map sends along a direction, blurred as a surface of that roughness
+blurs it, and `environment_diffuse(normal)` what it sends a surface facing a way, both black when
+`has_environment()` is false. That is what a ray that leaves the scene picks up, turned and scaled
+exactly as Bevy's own sky and lighting use the same map.
+
+What each pixel's surface is made of comes from Bevy's G-buffer. A camera asked for it with
+`Shaders.SetPrepass(camera, depth: true, deferred: true)` draws Bevy's materials deferred, and a
+shader on it declares `Texture2D<uint4> gbuffer;` and unpacks a texel with
+`bcs_pass::surface_of`, which gives the base color, roughness, metallic, reflectance, emissive and
+normal the way Bevy's own lighting reads them. That is the albedo a GI result is multiplied by and
+the roughness a reflection trace chooses its rays from, without drawing the scene again to get
+them. Only Bevy's materials are in it; one drawn by a Slang program is drawn forward and leaves its
+pixels empty. With `previous: true` the camera keeps last frame's depth and G-buffer as well, as
+`depth_previous` and `gbuffer_previous`, and comparing a pixel's surface now with what stood at the
+same place last frame is how a temporal technique tells history it can reuse from a pixel that was
+hidden until now.
 
 A dispatch on a camera runs every frame at one of four points: `AfterPrepass`, once depth, normals,
 motion, shadows and Bevy's own ambient occlusion exist and before anything is lit; `AfterOpaque`, between opaque and transparent
@@ -1166,13 +1224,38 @@ decide it. It blends as `Opaque`, `Alpha` or `Add`, and writes depth or only tes
 reads the camera's inputs through `import bcs_pass;`, all but the picture, which is what it draws
 into.
 
+A draw can go into one of the camera's images instead of the picture, which is what a visibility
+buffer is: geometry drawn into an unsigned integer image, each pixel keeping which cluster and
+triangle is nearest, for a later pass to shade.
+
+```csharp
+Shaders.SetViewImages(camera, new ViewImage("visibility", ShaderImageFormat.R32UInt, ClearEachFrame: true));
+Shaders.SetViewDraws(camera, ViewDraw.Indirect(clusters, FramePoint.AfterPrepass, counts) with { Into = "visibility" });
+```
+
+The fragment shader returns what the image holds, a `uint` for an integer image. The draw is tested
+against the camera's depth, and writes it if asked, where the image is the picture's size and the
+camera draws once a pixel, so the geometry and Bevy's scene hide each other properly. An image made
+with `ClearEachFrame` starts every frame as zeros, before anything on the camera runs, so zero is
+"nothing drawn here". An integer image cannot be blended, so a draw into one replaces what is there.
+
+**Watching what a camera keeps.** The images a chain writes live on the GPU in formats a picture
+cannot show, so `Shaders.Watch(camera, "occlusion", 320, 180, scale: 1f)` draws one, every frame
+once the camera is done, into an ordinary eight-bit image, each value times a scale plus an offset:
+one channel as gray, two as red and green, more as color. Anything a shader on the camera reads by
+name can be watched, and the prepass's `depth`, `normals` and `motion`, and the `gbuffer`, whose
+packed bits show as noise but show where it was drawn. The editor's Frame tab lists
+the scene camera's names and watches the one picked, which is where a broken link in a chain shows.
+
 **Into Bevy's lighting.** Ambient occlusion is the one input to the lighting of Bevy's own materials
 a chain can write so far. `Render.SetAmbientOcclusion(camera, AmbientOcclusionQuality.Low)` turns
 Bevy's own on, and while it is on a compute shader on the camera sees the texture Bevy's lighting
 reads as `ambient_occlusion`, so one run at `AfterPrepass` that writes it replaces Bevy's answer
 with its own, and the ambient light (`Render.SetAmbientLight`) is darkened by it where a surface is
-hemmed in. Indirect diffuse and specular have no such input yet, so a GI result is composited by a
-pass; [.github/RENDERING.md](.github/RENDERING.md) has what is planned for that.
+hemmed in. Diffuse light that varies through space goes in through an irradiance volume a compute
+shader writes (see [Light probes](#light-probes)). A per-pixel indirect diffuse or specular input
+does not exist yet, so a screen-space GI result is composited by a pass;
+[.github/RENDERING.md](.github/RENDERING.md) has what is planned for that.
 
 A storage image may be declared in any format the adapter can write, `[format("r16f")]` included,
 although core WGSL has fewer: Slang writes the nearest core format and the bridge puts the declared
@@ -1370,6 +1453,34 @@ its width. Auto exposure builds a histogram of the frame and moves the exposure 
 on middle gray, which is what an eye does walking out of a cave; `MeteringMask` weights where in the
 frame it looks, and `ExposureCompensation` bends the result so a night scene can stay dark.
 
+#### Reflections
+
+A camera can reflect what it sees in the surfaces it draws:
+
+```csharp
+Render.SetScreenSpaceReflections(camera, new ReflectionSettings());
+```
+
+Each pixel of a shiny surface marches a ray through the depth buffer until it passes behind
+something, and takes the color already drawn there. It is cheap and it is exact where it works, but
+it can only reflect what is on screen, so a reflection fades out toward the edge of the picture and
+anything behind the camera is never in it. A reflection probe or a traced reflection is what fills
+that in.
+
+Bevy reads what a surface is from its G-buffer, so turning reflections on also turns on
+`Render.SetDeferredRendering(true)` and gives the camera the depth and deferred prepasses. Deferred
+rendering applies to Bevy's own materials; one drawn by a Slang program writes a color rather than a
+description of its surface, so it is drawn forward either way and is reflected without reflecting.
+The camera has to draw once a pixel (`Msaa = 1`).
+
+Which surfaces reflect is decided by roughness. Bevy leaves a surface smoother than 0.08 without a
+reflection and fades reflections in until 0.12, because a mirror-smooth surface shows every flaw of
+a screen-space trace, and fades them out again past 0.55. `FadeInRoughness` and `FadeOutRoughness`
+move both ends, `Thickness` is how deep a surface in the depth buffer is taken to be, which is what
+decides whether a ray passing behind it hit it, and `Steps` and `RefineSteps` trade the cost of the
+march against how finely a hit is found. `null` takes reflections off, and deferred rendering stays
+on until it is asked off, since other cameras may be reading it.
+
 #### The sky
 
 The sky can be scattered rather than painted:
@@ -1438,6 +1549,93 @@ surface reflects. It costs nothing at startup, which is what a shipped game want
 environment too large to filter again needs. Passing `AssetHandle.None` for either takes the
 lighting off, since a baked map is the pair and half of one is not a weaker version of it.
 
+#### Light probes
+
+A camera's environment lights everything it sees the same way, which is wrong the moment the scene
+has a room in it: a hall should reflect its own walls rather than the sky outside, and a corner by a
+red carpet should be warmer than the ceiling. A light probe is a box in the scene that lights what
+is inside it instead.
+
+```csharp
+var hall = ecs.Spawn();
+ecs.Add(hall, new Transform { Translation = new Vec3(0f, 2f, 0f), Rotation = Quat.Identity, Scale = new Vec3(12f, 4f, 20f) });
+
+Render.SetReflectionProbe(hall, diffuse, specular, intensity: 3000f, falloff: new Vec3(0.2f));
+```
+
+The box is the entity's transform, a unit cube before its scale. A reflection probe takes the pair
+of maps `SetEnvironmentMap` takes, captured from inside the room, and a surface inside the box
+reflects them, corrected for where in the box it stands so a wall close by looks close. `falloff`
+fades the probe's influence across that fraction of the box on each axis, so overlapping probes
+blend into each other as something walks from one room to the next.
+
+An irradiance volume is the other kind, and the one global illumination is built on:
+
+```csharp
+const uint grid = 16;
+var light = Shaders.CreateImage(grid, grid * 2, ShaderImageFormat.Rgba16Float, depth: grid * 3);
+
+Render.SetIrradianceVolume(hall, light, intensity: 1000f);
+```
+
+It holds, for a grid of points across the box, the light a surface facing each of the six axis
+directions receives there, and a surface blends the points around it by its normal. That is light
+that varies through space, which a map the same everywhere cannot be, and Bevy's materials take it
+as their diffuse light in place of the environment's. The image is an ordinary 3D image, so a
+compute shader can write it every frame and whatever it works out lights everything drawn with a
+material from `Render.CreateMaterial`, with no change to those materials:
+
+```slang
+import bcs_compute;
+import bcs_scene;
+
+uniform uint3 grid;
+uniform float3 box_center;
+uniform float3 box_size;
+[format("rgba16f")] WTexture3D<float4> light;
+
+// The technique itself: the light a surface at `world` facing `side` receives.
+float4 trace(float3 world, uint side);
+
+[shader("compute")]
+[numthreads(4, 4, 4)]
+void main(uint3 point : SV_DispatchThreadID)
+{
+    if (any(point >= grid)) return;
+
+    let world = box_center + bcs_scene::irradiance_point_in_box(point, grid) * box_size;
+
+    for (uint side = 0; side < 6; side++)
+    {
+        light.Store(bcs_scene::irradiance_texel(point, side, grid), trace(world, side));
+    }
+}
+```
+
+A grid `x` by `y` by `z` points is an image `x` wide, twice `y` high and three times `z` deep, one
+region for each sign of each axis, and `irradiance_texel` finds the texel for a point and a
+direction so a shader never deals with that packing. The sides are the way a surface faces, so
+`bcs_scene::POSITIVE_Y` is what lights a floor. Bevy samples the image filtered, which is why it
+is `Rgba16Float`, and the shader says so with `[format("rgba16f")]`, since Slang would otherwise
+assume a wider format than the image has. A baked volume can come from a file instead. A camera is
+refused as a probe, since a camera is lit by `SetEnvironmentMap`, and `AssetHandle.None` takes
+either kind off.
+
+A reflection probe can also render its own maps rather than being given them:
+
+```csharp
+Render.SetProbeCapture(hall, new ProbeCaptureSettings { Size = 256, Live = true });
+```
+
+Six cameras at the probe's center draw the scene into the faces of a cube, and Bevy filters the
+cube into the probe's light on the GPU, so a mirror in the hall shows the hall as it is now,
+including whatever walks through it. That costs six more drawings of the scene a frame, which is
+why `Live = false` captures once instead, over the first frames after the scene has finished
+compiling, and `Render.RecaptureProbe` takes it again when the room changes. The faces are drawn at
+Bevy's default exposure and the default `Intensity` undoes it. The cameras see the probe's own
+light, so each capture reflects the last one and light bounces further each frame, which settles
+at that intensity and brightens without end well above it.
+
 #### Drawing into an image
 
 A camera can draw into a texture instead of into the window, which is
@@ -1473,6 +1671,10 @@ if (Render.TryReadCapture(ticket, out var picture))
     var (r, g, b, a) = picture.At(16, 8);       // four bytes a pixel, rows top to bottom
 }
 ```
+
+An image no camera draws into, such as one a compute shader wrote or a watch, is read back from
+the GPU as it is, and turned into eight-bit color the same way where its format allows (a float
+image does, an integer one does not, and says so in the log).
 
 `TryReadCapture` answers false while the picture is still on its way, hands it over once it has
 arrived, and drops the engine's copy when it does. `Render.ReleaseCapture(ticket)` is for a caller
@@ -2352,8 +2554,9 @@ run against a real Bevy app. Known gaps:
   than the scene.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
-- A cubemap comes from a file, as six square faces stacked into a column. One rendered into, which
-  is what a reflection probe placed in a room would want, has no bridge.
+- A cubemap comes from a file, as six square faces stacked into a column, or from a reflection
+  probe that captures itself. One a game renders into by its own cameras has no bridge, which is
+  what a point light's shadow drawn by a shader would want.
 - Slang shaders compile with `slangc`, which the build fetches. A machine without it draws what
   was compiled and cached on one that had it, and cannot compile an edit.
 - The renderer is open at fewer points than virtualized geometry, texture streaming, screen-space

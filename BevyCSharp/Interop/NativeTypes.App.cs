@@ -47,6 +47,9 @@ public unsafe struct NativeConfig
 
     /// <summary>How many world units a meter is, for spatial sound. Zero keeps Bevy's own.</summary>
     public float SpatialScale;
+
+    /// <summary>Meshlet clusters the GPU keeps room for, or zero for no meshlets.</summary>
+    public uint MeshletClusters;
 }
 
 /// <summary>One video mode a monitor can be driven at.</summary>

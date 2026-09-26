@@ -68,6 +68,19 @@ NuGet package, which ships the native prebuilt for each runtime identifier.
 `Config.Headless` forces the windowless path even on a render build, which is how the tests and
 a dedicated server run the same behavior code without a display.
 
+Bevy's meshlets are an addition to a profile rather than one of their own:
+
+```bash
+build/build-native.sh --editor --meshlet    # bash
+build/build-native.ps1 -Editor -Meshlet     # PowerShell
+./bcs build --editor --meshlet              # the bridge, then the managed side
+```
+
+They compile meshoptimizer and METIS, a C++ and a C library that cut a mesh into clusters, which
+nothing else in the tree needs, so no profile carries them by default. A build with them behaves
+as one without until an app sets `Config.MeshletClusters`, and even then only on a GPU with 64-bit
+texture atomics, which the bridge checks before turning them on.
+
 ## Platforms
 
 The managed assembly is portable. The bridge is a cdylib, so it has to be compiled once per

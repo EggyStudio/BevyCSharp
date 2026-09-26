@@ -12,6 +12,8 @@
 //!   typed `Handle<T>`, which raw bytes cannot represent.
 //! - [`scene`] spawns what the picture contains: cameras, lights and sprites.
 //! - [`post`] is what a camera does to the picture once the scene has been drawn.
+//! - [`probes`] places light probes, which light what is inside a box from an image, and are
+//!   the way a global illumination package's answer reaches Bevy's materials.
 //! - [`shaders`] is the boundary for shaders the game wrote: [`programs`] says which files draw a
 //!   material and keeps them compiled, [`material`] is what such a material carries, [`passes`]
 //!   runs them over a camera's picture, [`compute`] runs them over buffers outside of any picture,
@@ -24,8 +26,10 @@ pub mod assets;
 pub mod compute;
 pub mod instances;
 pub mod material;
+pub mod meshlets;
 pub mod passes;
 pub mod post;
+pub mod probes;
 pub mod programs;
 pub mod reflect;
 pub mod scene;

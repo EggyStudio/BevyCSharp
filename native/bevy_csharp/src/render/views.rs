@@ -118,6 +118,83 @@ pub struct ViewInputs {
     empty_directional_shadows: TextureView,
     empty_point_shadows: TextureView,
     comparison: Sampler,
+    /// Black in every direction, for a camera lit by no environment map.
+    empty_environment: TextureView,
+}
+
+/// A camera's environment map as the main world gave it, extracted for the view.
+#[derive(Component, Clone)]
+pub struct ViewEnvironment {
+    diffuse: bevy::asset::AssetId<bevy::image::Image>,
+    specular: bevy::asset::AssetId<bevy::image::Image>,
+    intensity: f32,
+    rotation: bevy::math::Quat,
+}
+
+/// A view's environment map, once both cubes are on the GPU.
+#[derive(Component, Clone)]
+pub struct ViewEnvironmentTextures {
+    diffuse: TextureView,
+    specular: TextureView,
+    /// How many mip levels the specular cube has, which roughness picks between.
+    mips: u32,
+    intensity: f32,
+    /// The rotation undone, which is what turns a world direction into one to sample by.
+    inverse_rotation: bevy::math::Quat,
+}
+
+/// Copies each camera's environment map, which is what every other kind of light a shader can
+/// read is lit alongside, so a ray that leaves the scene can pick up the sky.
+fn extract_view_environments(
+    mut commands: Commands,
+    cameras: bevy::render::Extract<
+        Query<(
+            bevy::render::sync_world::RenderEntity,
+            Option<&bevy::light::EnvironmentMapLight>,
+        ), With<Camera>>,
+    >,
+) {
+    for (render, environment) in &cameras {
+        let Ok(mut view) = commands.get_entity(render) else { continue };
+
+        match environment {
+            Some(environment) => {
+                view.insert(ViewEnvironment {
+                    diffuse: environment.diffuse_map.id(),
+                    specular: environment.specular_map.id(),
+                    intensity: environment.intensity,
+                    rotation: environment.rotation,
+                });
+            }
+            None => {
+                view.remove::<(ViewEnvironment, ViewEnvironmentTextures)>();
+            }
+        }
+    }
+}
+
+/// Finds each view's environment cubes on the GPU, leaving a view whose cubes are still loading
+/// with none.
+fn prepare_view_environments(
+    mut commands: Commands,
+    images: Res<RenderAssets<GpuImage>>,
+    views: Query<(Entity, &ViewEnvironment)>,
+) {
+    for (entity, environment) in &views {
+        let (Some(diffuse), Some(specular)) = (images.get(environment.diffuse), images.get(environment.specular))
+        else {
+            commands.entity(entity).remove::<ViewEnvironmentTextures>();
+            continue;
+        };
+
+        commands.entity(entity).insert(ViewEnvironmentTextures {
+            diffuse: diffuse.texture_view.clone(),
+            specular: specular.texture_view.clone(),
+            mips: specular.texture.mip_level_count(),
+            intensity: environment.intensity,
+            inverse_rotation: environment.rotation.inverse(),
+        });
+    }
 }
 
 /// The scene's lights, as the render world holds them for Bevy's own materials.
@@ -145,6 +222,12 @@ fn init_inputs(mut commands: Commands, render_device: Res<RenderDevice>) {
     let float = |filterable: bool| BindingType::Texture {
         sample_type: TextureSampleType::Float { filterable },
         view_dimension: TextureViewDimension::D2,
+        multisampled: false,
+    };
+
+    let cube = || BindingType::Texture {
+        sample_type: TextureSampleType::Float { filterable: true },
+        view_dimension: TextureViewDimension::Cube,
         multisampled: false,
     };
 
@@ -223,9 +306,11 @@ fn init_inputs(mut commands: Commands, render_device: Res<RenderDevice>) {
             BindingType::Buffer {
                 ty: BufferBindingType::Uniform,
                 has_dynamic_offset: false,
-                min_binding_size: std::num::NonZeroU64::new(16),
+                min_binding_size: std::num::NonZeroU64::new(SCENE_INFO_BYTES),
             },
         ),
+        entry(14, cube()),
+        entry(15, cube()),
     ];
 
     let texture = |label: &'static str, format: TextureFormat| {
@@ -280,10 +365,13 @@ fn init_inputs(mut commands: Commands, render_device: Res<RenderDevice>) {
 
     commands.insert_resource(ViewInputs {
         layout: BindGroupLayoutDescriptor::new("bcs_view_inputs", &entries),
+        // Linear between mip levels as well, since the environment's specular cube is read at a
+        // level roughness picks, which is rarely a whole one.
         sampler: render_device.create_sampler(&SamplerDescriptor {
             label: Some("bcs_view_sampler"),
             mag_filter: FilterMode::Linear,
             min_filter: FilterMode::Linear,
+            mipmap_filter: bevy::render::render_resource::MipmapFilterMode::Linear,
             ..Default::default()
         }),
         empty_depth: texture("bcs_view_empty_depth", TextureFormat::Depth32Float),
@@ -312,6 +400,25 @@ fn init_inputs(mut commands: Commands, render_device: Res<RenderDevice>) {
             6,
             TextureViewDimension::CubeArray,
         ),
+        empty_environment: render_device
+            .create_texture(&TextureDescriptor {
+                label: Some("bcs_view_empty_environment"),
+                size: Extent3d {
+                    width: 1,
+                    height: 1,
+                    depth_or_array_layers: 6,
+                },
+                mip_level_count: 1,
+                sample_count: 1,
+                dimension: TextureDimension::D2,
+                format: TextureFormat::Rgba16Float,
+                usage: TextureUsages::TEXTURE_BINDING,
+                view_formats: &[],
+            })
+            .create_view(&TextureViewDescriptor {
+                dimension: Some(TextureViewDimension::Cube),
+                ..Default::default()
+            }),
         comparison: render_device.create_sampler(&SamplerDescriptor {
             label: Some("bcs_view_comparison"),
             mag_filter: FilterMode::Linear,
@@ -329,7 +436,12 @@ pub struct ViewInputSources<'a> {
     pub normals: TextureView,
     pub motion: TextureView,
     pub previous: Option<(&'a PreviousViewUniforms, u32)>,
+    pub environment: Option<&'a ViewEnvironmentTextures>,
 }
+
+/// The size of what binding thirteen holds: counts of the scene's lights, and the environment's
+/// intensity, rotation and mip count, which `bcs_pass::SceneInfo` mirrors.
+const SCENE_INFO_BYTES: u64 = 32;
 
 impl<'a> ViewInputSources<'a> {
     /// Collects a view's prepass textures, with a stand-in for each it does not have.
@@ -338,6 +450,7 @@ impl<'a> ViewInputSources<'a> {
         fallback: &FallbackImage,
         prepass: Option<&ViewPrepassTextures>,
         previous: Option<(&'a PreviousViewUniforms, &PreviousViewUniformOffset)>,
+        environment: Option<&'a ViewEnvironmentTextures>,
     ) -> Self {
         // Only a texture drawn once a pixel can be bound as a plain texture. A multisampled
         // camera's prepass draws several samples a pixel, and it is left out rather than failing
@@ -367,6 +480,7 @@ impl<'a> ViewInputSources<'a> {
             normals,
             motion,
             previous: previous.map(|(uniforms, offset)| (uniforms, offset.offset)),
+            environment,
         }
     }
 
@@ -416,11 +530,27 @@ impl<'a> ViewInputSources<'a> {
             .as_deref()
             .map_or(0, |clustered| clustered.entity_to_index.len() as u32);
 
+        // No mip levels is how a shader tells there is no environment, since a cube always has one.
+        let (mips, intensity, rotation) = self.environment.map_or((0, 0.0, bevy::math::Quat::IDENTITY), |environment| {
+            (environment.mips, environment.intensity, environment.inverse_rotation)
+        });
+
+        let mut info = [0u32; 8];
+        info[0] = point_lights;
+        info[1] = mips;
+        info[2] = intensity.to_bits();
+        info[4..8].copy_from_slice(&rotation.to_array().map(f32::to_bits));
+
         let counts = device.create_buffer_with_data(&bevy::render::render_resource::BufferInitDescriptor {
-            label: Some("bcs_view_light_counts"),
-            contents: bytemuck::cast_slice(&[point_lights, 0u32, 0u32, 0u32]),
+            label: Some("bcs_view_scene_info"),
+            contents: bytemuck::cast_slice(&info),
             usage: BufferUsages::UNIFORM,
         });
+
+        let (environment_diffuse, environment_specular) = match self.environment {
+            Some(environment) => (&environment.diffuse, &environment.specular),
+            None => (&inputs.empty_environment, &inputs.empty_environment),
+        };
 
         let (directional_shadows, point_shadows) = match lights.shadows {
             Some(shadows) => (
@@ -495,6 +625,14 @@ impl<'a> ViewInputSources<'a> {
                     binding: 13,
                     resource: counts.as_entire_binding(),
                 },
+                BindGroupEntry {
+                    binding: 14,
+                    resource: BindingResource::TextureView(environment_diffuse),
+                },
+                BindGroupEntry {
+                    binding: 15,
+                    resource: BindingResource::TextureView(environment_specular),
+                },
             ],
         );
 
@@ -524,6 +662,12 @@ pub struct ViewImageSpec {
     /// Two images that trade places every frame, so last frame's is readable as `name_previous`.
     pub history: bool,
     pub mips: u32,
+    /// Filled from the picture at this point of every frame, which with history is how last
+    /// frame's lit picture is kept.
+    pub copy: Option<FramePoint>,
+    /// Cleared to zero at the start of every frame, which is what an image draws accumulate into
+    /// wants, a visibility buffer's "nothing here" among them.
+    pub clear: bool,
 }
 
 /// The images a camera owns.
@@ -611,10 +755,14 @@ fn prepare_view_images(
                                 sample_count: 1,
                                 dimension: TextureDimension::D2,
                                 format: spec.format,
+                                // Drawn into as well, by a draw on the camera that targets it, by
+                                // the copy of the picture and by the clear at the start of a
+                                // frame. Every format a camera image takes can be.
                                 usage: TextureUsages::TEXTURE_BINDING
                                     | TextureUsages::STORAGE_BINDING
                                     | TextureUsages::COPY_SRC
-                                    | TextureUsages::COPY_DST,
+                                    | TextureUsages::COPY_DST
+                                    | TextureUsages::RENDER_ATTACHMENT,
                                 view_formats: &[],
                             })
                         })
@@ -680,32 +828,157 @@ fn level_view(texture: &Texture, mip: u32) -> TextureView {
     })
 }
 
-/// Every name a shader on a view can read an image by: the camera's own images, and the engine's
-/// images a shader may replace, which is Bevy's ambient occlusion where the camera has it on.
+/// Every name a shader on a view can read an image by: the camera's own images, and the engine's.
 ///
-/// The engine's go under names of their own, so a camera's image can never shadow one.
+/// The engine's are Bevy's ambient occlusion where the camera has it on, which a shader may
+/// replace, and the G-buffer where the camera draws deferred, which a shader reads a surface's
+/// material from. Where the camera keeps the previous frame's prepass, last frame's depth and
+/// G-buffer are there too, which is what tells a temporal technique that a pixel was hidden
+/// before. They go under names of their own, so a camera's image can never shadow one.
 pub fn view_names<'a>(
     owned: Option<&'a ViewImageTextures>,
     occlusion: Option<&ScreenSpaceAmbientOcclusionResources>,
+    prepass: Option<&ViewPrepassTextures>,
 ) -> Option<std::borrow::Cow<'a, HashMap<String, ViewTexture>>> {
-    match (owned, occlusion) {
-        (owned, Some(occlusion)) => {
-            let mut names = owned.map(|owned| owned.names.clone()).unwrap_or_default();
-            let texture = &occlusion.screen_space_ambient_occlusion_texture;
+    let gbuffer = prepass.and_then(|prepass| prepass.deferred.as_ref());
+    let previous_depth = prepass
+        .and_then(|prepass| prepass.depth.as_ref())
+        .and_then(|depth| depth.previous_frame_texture.as_ref());
 
-            names.insert(
-                "ambient_occlusion".into(),
-                ViewTexture {
-                    view: texture.default_view.clone(),
-                    level: texture.default_view.clone(),
-                    format: texture.texture.format(),
-                },
-            );
+    if occlusion.is_none() && gbuffer.is_none() && previous_depth.is_none() {
+        return owned.map(|owned| std::borrow::Cow::Borrowed(&owned.names));
+    }
 
-            Some(std::borrow::Cow::Owned(names))
+    let mut names = owned.map(|owned| owned.names.clone()).unwrap_or_default();
+
+    let mut engine = |name: &str, texture: &bevy::render::texture::CachedTexture| {
+        names.insert(
+            name.into(),
+            ViewTexture {
+                view: texture.default_view.clone(),
+                level: texture.default_view.clone(),
+                format: texture.texture.format(),
+            },
+        );
+    };
+
+    if let Some(occlusion) = occlusion {
+        engine("ambient_occlusion", &occlusion.screen_space_ambient_occlusion_texture);
+    }
+
+    if let Some(gbuffer) = gbuffer {
+        engine("gbuffer", &gbuffer.texture);
+
+        if let Some(previous) = &gbuffer.previous_frame_texture {
+            engine("gbuffer_previous", previous);
         }
-        (Some(owned), None) => Some(std::borrow::Cow::Borrowed(&owned.names)),
-        (None, None) => None,
+    }
+
+    if let Some(previous) = previous_depth {
+        engine("depth_previous", previous);
+    }
+
+    Some(std::borrow::Cow::Owned(names))
+}
+
+/// The draws that copy a picture into a camera's image, by the image's format.
+#[derive(Resource, Default)]
+struct PictureCopyPipelines(HashMap<TextureFormat, bevy::render::render_resource::CachedRenderPipelineId>);
+
+/// Asks for a copy pipeline for every format a camera copies its picture into.
+///
+/// Bevy's own blit, which draws one texture over the whole of another, so the copy can be smaller
+/// than the picture and in another format: a half-sized, half-float history of the lit picture is
+/// what a screen-space technique reads, not the picture as it is.
+fn prepare_picture_copies(
+    mut copies: ResMut<PictureCopyPipelines>,
+    mut specialized: ResMut<
+        bevy::render::render_resource::SpecializedRenderPipelines<bevy::core_pipeline::blit::BlitPipeline>,
+    >,
+    blit: Option<Res<bevy::core_pipeline::blit::BlitPipeline>>,
+    cache: Res<PipelineCache>,
+    views: Query<&BcsViewImages>,
+) {
+    let Some(blit) = blit else { return };
+
+    for spec in views.iter().flat_map(|asked| &asked.0) {
+        if spec.copy.is_none() || copies.0.contains_key(&spec.format) {
+            continue;
+        }
+
+        let pipeline = specialized.specialize(
+            &cache,
+            &blit,
+            bevy::core_pipeline::blit::BlitPipelineKey {
+                target_format: spec.format,
+                blend_state: None,
+                samples: 1,
+                source_space: None,
+            },
+        );
+
+        copies.0.insert(spec.format, pipeline);
+    }
+}
+
+/// Copies the picture into each of a view's images that asked for it at this point.
+///
+/// Before the point's dispatches, so they read the picture as the frame reached them. Into this
+/// frame's image, so with history the image's `_previous` is the picture of the frame before, which
+/// a dispatch at any point reads.
+fn copy_pictures<const POINT: u8>(
+    view: ViewQuery<(&ViewTarget, &ViewImageTextures)>,
+    copies: Res<PictureCopyPipelines>,
+    blit: Option<Res<bevy::core_pipeline::blit::BlitPipeline>>,
+    cache: Res<PipelineCache>,
+    mut ctx: RenderContext,
+) {
+    use bevy::render::render_resource::{
+        LoadOp, Operations, RenderPassColorAttachment, RenderPassDescriptor, StoreOp,
+    };
+
+    let (target, owned) = view.into_inner();
+    let Some(blit) = blit else { return };
+    let mut group = None;
+
+    for slot in &owned.slots {
+        if slot.spec.copy.map(|point| point as u8) != Some(POINT) {
+            continue;
+        }
+
+        let Some(pipeline) = copies
+            .0
+            .get(&slot.spec.format)
+            .and_then(|id| cache.get_render_pipeline(*id))
+        else {
+            continue;
+        };
+
+        let group = group.get_or_insert_with(|| {
+            blit.create_bind_group(ctx.render_device(), target.main_texture_view(), &cache)
+        });
+
+        let into = level_view(&slot.textures[slot.current], 0);
+        let mut pass = ctx.command_encoder().begin_render_pass(&RenderPassDescriptor {
+            label: Some("bcs_picture_copy"),
+            color_attachments: &[Some(RenderPassColorAttachment {
+                view: &into,
+                depth_slice: None,
+                resolve_target: None,
+                ops: Operations {
+                    load: LoadOp::Clear(Default::default()),
+                    store: StoreOp::Store,
+                },
+            })],
+            depth_stencil_attachment: None,
+            timestamp_writes: None,
+            occlusion_query_set: None,
+            multiview_mask: None,
+        });
+
+        pass.set_pipeline(pipeline);
+        pass.set_bind_group(0, &*group, &[]);
+        pass.draw(0..3, 0..1);
     }
 }
 
@@ -849,6 +1122,7 @@ fn prepare_view_dispatches(
         &BcsViewDispatches,
         Option<&ViewImageTextures>,
         Option<&ScreenSpaceAmbientOcclusionResources>,
+        Option<&ViewPrepassTextures>,
     )>,
 ) {
     let Some(stand) = stand else {
@@ -871,8 +1145,8 @@ fn prepare_view_dispatches(
         }
     }
 
-    for (entity, target, asked, owned, occlusion) in &views {
-        let names = view_names(owned, occlusion);
+    for (entity, target, asked, owned, occlusion, prepass) in &views {
+        let names = view_names(owned, occlusion, prepass);
         let mut prepared = Vec::with_capacity(asked.0.len());
 
         for dispatch in &asked.0 {
@@ -975,6 +1249,7 @@ fn run_view_dispatches<const POINT: u8>(
         Option<&PreviousViewUniformOffset>,
         Option<&ViewLightsUniformOffset>,
         Option<&ViewShadowBindings>,
+        Option<&super::views::ViewEnvironmentTextures>,
     )>,
     inputs: Res<ViewInputs>,
     fallback: Res<FallbackImage>,
@@ -985,7 +1260,7 @@ fn run_view_dispatches<const POINT: u8>(
     scene: SceneLights,
     mut ctx: RenderContext,
 ) {
-    let (target, offset, prepared, prepass, previous, light_offset, shadows) = view.into_inner();
+    let (target, offset, prepared, prepass, previous, light_offset, shadows, environment) = view.into_inner();
 
     if !prepared.0.iter().any(|dispatch| dispatch.point as u8 == POINT) {
         return;
@@ -1002,6 +1277,7 @@ fn run_view_dispatches<const POINT: u8>(
         &fallback,
         prepass,
         previous_uniforms.as_deref().zip(previous),
+        environment,
     );
 
     let Some((group, offsets)) = sources.bind(
@@ -1087,6 +1363,8 @@ pub struct ViewDraw {
     /// Whether it writes depth, as opaque geometry does, or only tests against it, as anything
     /// see-through does.
     pub depth_write: bool,
+    /// One of the camera's own images to draw into instead of the picture.
+    pub target: Option<String>,
 }
 
 /// The draws a camera makes every frame, in order.
@@ -1094,11 +1372,15 @@ pub struct ViewDraw {
 #[extract_component_filter(With<Camera>)]
 pub struct BcsViewDraws(pub Vec<ViewDraw>);
 
-/// One render pipeline per program, version, picture format, sample count, blend and depth write,
-/// since a pipeline names all of them.
+/// One render pipeline per program, version, target format, sample count, blend, depth write and
+/// whether there is depth at all, since a pipeline names all of them.
 #[derive(Resource, Default)]
+#[allow(clippy::type_complexity)]
 struct ViewDrawPipelines(
-    HashMap<(u32, u32, TextureFormat, u32, DrawBlend, bool), bevy::render::render_resource::CachedRenderPipelineId>,
+    HashMap<
+        (u32, u32, TextureFormat, u32, DrawBlend, bool, bool),
+        bevy::render::render_resource::CachedRenderPipelineId,
+    >,
 );
 
 /// A draw ready to run on a view.
@@ -1107,6 +1389,9 @@ struct PreparedViewDraw {
     pipeline: bevy::render::render_resource::CachedRenderPipelineId,
     own: BindGroup,
     count: PreparedDrawCount,
+    /// The camera image it draws into instead of the picture, and whether it is tested against
+    /// the camera's depth there.
+    target: Option<(TextureView, bool)>,
 }
 
 enum PreparedDrawCount {
@@ -1144,6 +1429,7 @@ fn prepare_view_draws(
         Option<&bevy::render::view::Msaa>,
         Option<&ViewImageTextures>,
         Option<&ScreenSpaceAmbientOcclusionResources>,
+        Option<&ViewPrepassTextures>,
     )>,
 ) {
     use bevy::render::render_resource::{
@@ -1156,8 +1442,8 @@ fn prepare_view_draws(
         return;
     };
 
-    for (entity, target, asked, msaa, owned, occlusion) in &views {
-        let names = view_names(owned, occlusion);
+    for (entity, target, asked, msaa, owned, occlusion, prepass) in &views {
+        let names = view_names(owned, occlusion, prepass);
         let format = target.main_texture_format();
         let samples = msaa.map_or(1, |msaa| msaa.samples());
         let mut prepared = Vec::with_capacity(asked.0.len());
@@ -1182,13 +1468,51 @@ fn prepare_view_draws(
                 continue;
             };
 
+            // A camera image as the target is drawn once a pixel, and against the camera's depth
+            // only where it is the picture's size and the camera draws once a pixel too, since a
+            // depth attachment has to match the target in both.
+            let target = match &draw.target {
+                None => None,
+                Some(name) => {
+                    let Some(slot) = owned.and_then(|owned| owned.slots.iter().find(|slot| &slot.spec.name == name))
+                    else {
+                        say_once(format!(
+                            "A draw on a camera of shader program {} targets {name}, which is not \
+                             one of the camera's images, so it draws nothing.",
+                            draw.program
+                        ));
+                        continue;
+                    };
+
+                    let picture = target.main_texture();
+                    let depth = samples == 1 && slot.size == (picture.width(), picture.height());
+                    Some((slot, depth))
+                }
+            };
+
+            let (format, samples, has_depth) = match &target {
+                None => (format, samples, true),
+                Some((slot, depth)) => (slot.spec.format, 1, *depth),
+            };
+
+            // An integer target cannot be blended, which wgpu refuses as a pipeline rather than
+            // ignores, so a draw into one replaces what is there however it was asked to blend.
+            let blend = if format.sample_type(None, None).is_some_and(|sample| {
+                matches!(sample, TextureSampleType::Uint | TextureSampleType::Sint)
+            }) {
+                DrawBlend::Opaque
+            } else {
+                draw.blend
+            };
+
             let key = (
                 draw.program,
                 program.generation,
                 format,
                 samples,
-                draw.blend,
-                draw.depth_write,
+                blend,
+                draw.depth_write && has_depth,
+                has_depth,
             );
 
             let pipeline = *pipelines.0.entry(key).or_insert_with(|| {
@@ -1213,7 +1537,7 @@ fn prepare_view_draws(
                         entry_point: None,
                         targets: vec![Some(ColorTargetState {
                             format,
-                            blend: match draw.blend {
+                            blend: match blend {
                                 DrawBlend::Opaque => None,
                                 DrawBlend::Alpha => Some(BlendState::ALPHA_BLENDING),
                                 DrawBlend::Add => Some(BlendState { color: add, alpha: add }),
@@ -1221,7 +1545,7 @@ fn prepare_view_draws(
                             write_mask: ColorWrites::ALL,
                         })],
                     }),
-                    depth_stencil: Some(DepthStencilState {
+                    depth_stencil: has_depth.then(|| DepthStencilState {
                         format: bevy::core_pipeline::core_3d::CORE_3D_DEPTH_FORMAT,
                         depth_write_enabled: Some(draw.depth_write),
                         // Bevy's depth runs backwards, so nearer is greater.
@@ -1285,6 +1609,7 @@ fn prepare_view_draws(
                     &cache.get_bind_group_layout(&draw_layout(&layout)),
                 ),
                 count,
+                target: target.map(|(slot, depth)| (level_view(&slot.textures[slot.current], 0), depth)),
             });
         }
 
@@ -1314,6 +1639,7 @@ fn run_view_draws<const POINT: u8>(
         Option<&PreviousViewUniformOffset>,
         Option<&ViewLightsUniformOffset>,
         Option<&ViewShadowBindings>,
+        Option<&super::views::ViewEnvironmentTextures>,
     )>,
     inputs: Res<ViewInputs>,
     fallback: Res<FallbackImage>,
@@ -1326,7 +1652,7 @@ fn run_view_draws<const POINT: u8>(
 ) {
     use bevy::render::render_resource::{RenderPassDescriptor, StoreOp};
 
-    let (target, offset, prepared, depth, prepass, previous, light_offset, shadows) =
+    let (target, offset, prepared, depth, prepass, previous, light_offset, shadows, environment) =
         view.into_inner();
 
     if !prepared.0.iter().any(|draw| draw.point as u8 == POINT) {
@@ -1344,6 +1670,7 @@ fn run_view_draws<const POINT: u8>(
         &fallback,
         prepass,
         previous_uniforms.as_deref().zip(previous),
+        environment,
     );
 
     // The picture is what is being drawn into, so it cannot be read in the same pass, and a
@@ -1365,33 +1692,98 @@ fn run_view_draws<const POINT: u8>(
         return;
     };
 
-    let color = [Some(target.get_color_attachment())];
+    let here: Vec<&PreparedViewDraw> = prepared.0.iter().filter(|draw| draw.point as u8 == POINT).collect();
+    let same_target = |a: &PreparedViewDraw, b: &PreparedViewDraw| match (&a.target, &b.target) {
+        (None, None) => true,
+        (Some((a, _)), Some((b, _))) => a.id() == b.id(),
+        _ => false,
+    };
 
-    let mut pass = ctx.command_encoder().begin_render_pass(&RenderPassDescriptor {
-        label: Some("bcs_view_draw"),
-        color_attachments: &color,
-        depth_stencil_attachment: Some(depth.get_attachment(StoreOp::Store)),
-        timestamp_writes: None,
-        occlusion_query_set: None,
-        multiview_mask: None,
-    });
+    // One render pass for each run of draws into the same target, in the order they were asked
+    // for, so a draw into an image between two into the picture keeps its place.
+    let mut start = 0;
 
-    for draw in &prepared.0 {
-        if draw.point as u8 != POINT {
-            continue;
-        }
+    while start < here.len() {
+        let end = (start..here.len())
+            .find(|&index| !same_target(here[start], here[index]))
+            .unwrap_or(here.len());
 
-        let Some(pipeline) = cache.get_render_pipeline(draw.pipeline) else {
-            continue;
+        let image_attachment;
+        let (color, depth_attachment) = match &here[start].target {
+            None => (target.get_color_attachment(), Some(depth.get_attachment(StoreOp::Store))),
+            Some((view, tested)) => {
+                image_attachment = bevy::render::render_resource::RenderPassColorAttachment {
+                    view,
+                    depth_slice: None,
+                    resolve_target: None,
+                    ops: bevy::render::render_resource::Operations {
+                        load: bevy::render::render_resource::LoadOp::Load,
+                        store: StoreOp::Store,
+                    },
+                };
+                (image_attachment, tested.then(|| depth.get_attachment(StoreOp::Store)))
+            }
         };
 
-        pass.set_pipeline(pipeline);
-        pass.set_bind_group(0, &draw.own, &[]);
-        pass.set_bind_group(1, &group, &offsets);
+        let color = [Some(color)];
 
-        match &draw.count {
-            PreparedDrawCount::Direct(vertices, instances) => pass.draw(0..*vertices, 0..*instances),
-            PreparedDrawCount::Indirect(buffer, offset) => pass.draw_indirect(buffer, *offset),
+        let mut pass = ctx.command_encoder().begin_render_pass(&RenderPassDescriptor {
+            label: Some("bcs_view_draw"),
+            color_attachments: &color,
+            depth_stencil_attachment: depth_attachment,
+            timestamp_writes: None,
+            occlusion_query_set: None,
+            multiview_mask: None,
+        });
+
+        for draw in &here[start..end] {
+            let Some(pipeline) = cache.get_render_pipeline(draw.pipeline) else {
+                continue;
+            };
+
+            pass.set_pipeline(pipeline);
+            pass.set_bind_group(0, &draw.own, &[]);
+            pass.set_bind_group(1, &group, &offsets);
+
+            match &draw.count {
+                PreparedDrawCount::Direct(vertices, instances) => pass.draw(0..*vertices, 0..*instances),
+                PreparedDrawCount::Indirect(buffer, offset) => pass.draw_indirect(buffer, *offset),
+            }
+        }
+
+        start = end;
+    }
+}
+
+/// Clears to zero every image of a view that asked to start each frame empty, every mip level of
+/// it, before anything on the camera runs.
+fn clear_view_images(view: ViewQuery<&ViewImageTextures>, mut ctx: RenderContext) {
+    use bevy::render::render_resource::{
+        LoadOp, Operations, RenderPassColorAttachment, RenderPassDescriptor, StoreOp,
+    };
+
+    for slot in view.into_inner().slots.iter().filter(|slot| slot.spec.clear) {
+        let texture = &slot.textures[slot.current];
+
+        for mip in 0..texture.mip_level_count() {
+            let level = level_view(texture, mip);
+
+            ctx.command_encoder().begin_render_pass(&RenderPassDescriptor {
+                label: Some("bcs_view_image_clear"),
+                color_attachments: &[Some(RenderPassColorAttachment {
+                    view: &level,
+                    depth_slice: None,
+                    resolve_target: None,
+                    ops: Operations {
+                        load: LoadOp::Clear(Default::default()),
+                        store: StoreOp::Store,
+                    },
+                })],
+                depth_stencil_attachment: None,
+                timestamp_writes: None,
+                occlusion_query_set: None,
+                multiview_mask: None,
+            });
         }
     }
 }
@@ -1410,12 +1802,20 @@ pub fn install(app: &mut App) {
 
     render_app
         .init_resource::<ViewComputePipelines>()
+        .init_resource::<PictureCopyPipelines>()
         .init_resource::<ViewDrawPipelines>()
         .add_systems(RenderStartup, init_inputs)
+        .add_systems(bevy::render::ExtractSchedule, extract_view_environments)
         .add_systems(
             Render,
             (
-                (prepare_view_images, forget_view_images).in_set(RenderSystems::PrepareResources),
+                (
+                    prepare_view_images,
+                    forget_view_images,
+                    prepare_picture_copies,
+                    prepare_view_environments,
+                )
+                    .in_set(RenderSystems::PrepareResources),
                 (
                     prepare_view_dispatches,
                     forget_view_dispatches,
@@ -1431,6 +1831,11 @@ pub fn install(app: &mut App) {
                 // At the start of the main pass rather than between it and the prepass, which is
                 // where Bevy's own ambient occlusion and shadows run, so a shader here sees them
                 // done and can replace what Bevy's lighting is about to read.
+                clear_view_images
+                    .in_set(Core3dSystems::MainPass)
+                    .before(run_view_dispatches::<0>)
+                    .before(run_view_draws::<0>)
+                    .before(copy_pictures::<1>),
                 run_view_dispatches::<0>
                     .in_set(Core3dSystems::MainPass)
                     .before(deferred_lighting)
@@ -1444,6 +1849,23 @@ pub fn install(app: &mut App) {
                     .before(super::passes::BeforeTonemappingPasses)
                     .in_set(Core3dSystems::PostProcess),
                 run_view_dispatches::<3>
+                    .after(tonemapping)
+                    .before(super::passes::AfterTonemappingPasses)
+                    .in_set(Core3dSystems::PostProcess),
+                // The picture copied in before each point's dispatches, so they read it as the
+                // frame reached them. Not after the prepass, where there is no picture yet.
+                copy_pictures::<1>
+                    .before(run_view_dispatches::<1>)
+                    .after(main_opaque_pass_3d)
+                    .before(main_transparent_pass_3d)
+                    .in_set(Core3dSystems::MainPass),
+                copy_pictures::<2>
+                    .before(run_view_dispatches::<2>)
+                    .before(tonemapping)
+                    .before(super::passes::BeforeTonemappingPasses)
+                    .in_set(Core3dSystems::PostProcess),
+                copy_pictures::<3>
+                    .before(run_view_dispatches::<3>)
                     .after(tonemapping)
                     .before(super::passes::AfterTonemappingPasses)
                     .in_set(Core3dSystems::PostProcess),

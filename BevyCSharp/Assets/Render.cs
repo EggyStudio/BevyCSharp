@@ -223,6 +223,55 @@ public static unsafe class Render
         Attach(world, entity, "MeshMaterial3d", material, "a material");
 
     /// <summary>
+    /// Whether Bevy's meshlets are running: the bridge was built with them (<c>--meshlet</c>), the
+    /// app asked for them with <see cref="Config.MeshletClusters"/>, and the GPU can draw them.
+    /// </summary>
+    public static bool MeshletsActive => Native.bcs_render_meshlets_active() != 0;
+
+    /// <summary>
+    /// Starts cutting a mesh into clusters that Bevy's meshlet renderer culls and picks a level of
+    /// detail for on the GPU, and answers the meshlet mesh at once. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Meshlets are virtualized geometry as Bevy ships it: a mesh of millions of triangles costs
+    /// what the few thousand covering the screen at the moment cost, because clusters out of
+    /// view, hidden behind others or too small to matter are dropped on the GPU before anything
+    /// is drawn. What that costs up front is this conversion, which takes seconds for a large mesh,
+    /// so it runs on a worker once the mesh has loaded, and the handle answered is empty until it
+    /// is done; an entity given it draws nothing until then.
+    /// </para>
+    /// <para>
+    /// The mesh must be indexed triangles with texture coordinates. Normals are worked out if it
+    /// has none, and anything else it carries is left out, since a meshlet mesh keeps positions,
+    /// normals and texture coordinates and works tangents out when drawn.
+    /// <paramref name="quantization"/> is how finely positions are kept, as the number of halvings
+    /// of a centimeter, and zero takes Bevy's default of four, a sixteenth. Two meshes meant to
+    /// meet without a crack want the same one.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// Meshlets are not running (see <see cref="MeshletsActive"/>), or the handle names no mesh.
+    /// </exception>
+    public static AssetHandle CreateMeshletMesh(AssetHandle mesh, uint quantization = 0) =>
+        new(Native.Check(
+            Native.bcs_render_create_meshlet_mesh(mesh.Key, quantization),
+            "making a meshlet mesh"));
+
+    /// <summary>
+    /// Gives an entity a meshlet mesh to draw, in place of any ordinary mesh it had. Only valid
+    /// inside a system.
+    /// </summary>
+    /// <remarks>
+    /// Drawn with the entity's material from <see cref="CreateMaterial(MaterialSettings)"/>, like a
+    /// mesh. A material drawn by a Slang program has no meshlet path and draws nothing here. Every
+    /// camera draws once a pixel while meshlets run, since Bevy's meshlet renderer cannot draw into
+    /// a multisampled picture, so <see cref="PostSettings.Msaa"/> is set to one whatever it asks.
+    /// </remarks>
+    public static void SetMeshletMesh(EcsWorld world, Entity entity, AssetHandle meshlet) =>
+        Attach(world, entity, "MeshletMesh3d", meshlet, "a meshlet mesh");
+
+    /// <summary>
     /// Where an entity's mesh was loaded from, or empty when it was not loaded from anywhere.
     /// </summary>
     /// <remarks>
@@ -831,6 +880,185 @@ public static unsafe class Render
     }
 
     /// <summary>
+    /// Makes an entity a reflection probe: a box inside which surfaces reflect a pair of baked
+    /// cubemaps rather than the camera's environment. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The box is the entity's <see cref="Transform"/>, a unit cube before its scale, so a probe
+    /// covering a room is placed at the room's center and scaled to its size. The pair is what
+    /// <see cref="SetEnvironmentMap"/> takes, captured from inside the room, and a surface inside
+    /// the box picks it in place of what the camera is lit by, which is how a room stops reflecting
+    /// the sky outside it. Reflections are corrected for where in the box the surface is, so a
+    /// mirror near a wall shows the wall close.
+    /// </para>
+    /// <para>
+    /// <paramref name="falloff"/> is how much of the box, on each axis from nothing to all of it,
+    /// the probe's influence fades across. With none the box has a hard edge; with some, a surface
+    /// moving between two overlapping probes blends from one to the other. Bevy uses the nearest
+    /// few probes to each view, which is plenty for a building and why a city is split into
+    /// probes a street long.
+    /// </para>
+    /// <para>
+    /// <see cref="AssetHandle.None"/> for either map takes the reflection off. A camera is refused,
+    /// since a camera is lit by <see cref="SetEnvironmentMap"/>.
+    /// </para>
+    /// </remarks>
+    /// <param name="probe">The entity whose transform is the box.</param>
+    /// <param name="diffuse">The blurred map, a column of six square faces.</param>
+    /// <param name="specular">The sharp map, the same shape.</param>
+    /// <param name="intensity">How bright, in candelas per square meter.</param>
+    /// <param name="falloff">The fraction of the box faded across on each axis, or null for none.</param>
+    /// <exception cref="BevyNativeException">
+    /// The entity is a camera or is gone, or a handle names no image.
+    /// </exception>
+    public static void SetReflectionProbe(
+        Entity probe,
+        AssetHandle diffuse,
+        AssetHandle specular,
+        float intensity = 1000f,
+        Vec3? falloff = null)
+    {
+        if (falloff is not { } fade)
+        {
+            Native.Check(
+                Native.bcs_render_set_reflection_probe(probe.Bits, diffuse.Key, specular.Key, intensity, null),
+                $"making {probe} a reflection probe");
+
+            return;
+        }
+
+        var parts = stackalloc float[3] { fade.X, fade.Y, fade.Z };
+
+        Native.Check(
+            Native.bcs_render_set_reflection_probe(probe.Bits, diffuse.Key, specular.Key, intensity, parts),
+            $"making {probe} a reflection probe");
+    }
+
+    /// <summary>
+    /// Makes an entity an irradiance volume: a box inside which surfaces take their diffuse
+    /// indirect light from a grid of points held in a 3D image. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Each point of the grid holds the light a surface facing each of the six axis directions
+    /// receives there, and a surface between points blends the nearest ones by its normal. So a
+    /// wall beside a red carpet picks up red low down and less higher up, which an environment map
+    /// the same everywhere cannot do. Bevy ranks it above a reflection probe and the camera's
+    /// environment for diffuse light, and ambient light is added on top.
+    /// </para>
+    /// <para>
+    /// The image is how a global illumination technique reaches Bevy's materials. It is an
+    /// ordinary 3D image, so one made with <see cref="Shaders.CreateImage(uint, uint, ShaderImageFormat, uint, uint)"/>
+    /// and written by a compute shader every frame lights everything drawn with a
+    /// material from <see cref="CreateMaterial(MaterialSettings)"/> by whatever the shader worked out, with no change to how
+    /// those materials are drawn. A grid <c>x</c> by <c>y</c> by <c>z</c> points is an image
+    /// <c>x</c> wide, <c>2y</c> high and <c>3z</c> deep, and <c>bcs_scene</c>'s
+    /// <c>irradiance_texel</c> and <c>irradiance_point_in_box</c> address it by point and direction,
+    /// so a shader never deals with the packing. It is sampled filtered, so it is made
+    /// <see cref="ShaderImageFormat.Rgba16Float"/>. A baked one can come from a file as well.
+    /// </para>
+    /// <para>
+    /// The box is the entity's <see cref="Transform"/>, and <paramref name="falloff"/> is as for
+    /// <see cref="SetReflectionProbe"/>. <see cref="AssetHandle.None"/> takes the volume off.
+    /// </para>
+    /// </remarks>
+    /// <param name="probe">The entity whose transform is the box.</param>
+    /// <param name="voxels">The 3D image.</param>
+    /// <param name="intensity">
+    /// What the image's values are multiplied by, in candelas per square meter, so an image holding
+    /// light in its own units is brought into the scene's.
+    /// </param>
+    /// <param name="falloff">The fraction of the box faded across on each axis, or null for none.</param>
+    /// <exception cref="BevyNativeException">
+    /// The entity is a camera or is gone, the handle names no image, or the image is not 3D.
+    /// </exception>
+    public static void SetIrradianceVolume(
+        Entity probe,
+        AssetHandle voxels,
+        float intensity = 1000f,
+        Vec3? falloff = null)
+    {
+        if (falloff is not { } fade)
+        {
+            Native.Check(
+                Native.bcs_render_set_irradiance_volume(probe.Bits, voxels.Key, intensity, null),
+                $"making {probe} an irradiance volume");
+
+            return;
+        }
+
+        var parts = stackalloc float[3] { fade.X, fade.Y, fade.Z };
+
+        Native.Check(
+            Native.bcs_render_set_irradiance_volume(probe.Bits, voxels.Key, intensity, parts),
+            $"making {probe} an irradiance volume");
+    }
+
+    /// <summary>
+    /// Makes an entity a reflection probe that renders what is around it, or with
+    /// <see langword="null"/> stops. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Six cameras at the probe's center draw the scene into the faces of a cube, and Bevy filters
+    /// the cube into the probe's light on the GPU, so the room is reflected as it is rather than as
+    /// somebody baked it. The box is the entity's <see cref="Transform"/> as for
+    /// <see cref="SetReflectionProbe"/>, and the cameras follow the probe's center as it moves.
+    /// </para>
+    /// <para>
+    /// A live probe draws the scene six more times every frame, which is what a reflection of
+    /// something moving needs and what a large one cannot afford. One that is not live captures
+    /// once, over the first few frames after nothing is left compiling, so asking at startup
+    /// captures the scene as it will be drawn rather than while its materials are still missing.
+    /// <see cref="RecaptureProbe"/> captures again when the room changes, or once a texture that
+    /// loaded late has arrived. Either way the light is a frame behind what the cameras drew.
+    /// </para>
+    /// <para>
+    /// The cameras see the probe's own light, so each capture reflects the one before, and light
+    /// bounces a little further every frame. That settles as long as the intensity only undoes the
+    /// exposure the faces were drawn at, which is what the default does; much more makes the room
+    /// brighter each frame. A camera is refused, as for the other probes.
+    /// </para>
+    /// </remarks>
+    /// <param name="probe">The entity whose transform is the box.</param>
+    /// <param name="settings">How to capture, or null to stop.</param>
+    /// <exception cref="BevyNativeException">
+    /// The entity is a camera or is gone, or the size is not a power of two.
+    /// </exception>
+    public static void SetProbeCapture(Entity probe, ProbeCaptureSettings? settings)
+    {
+        if (settings is null)
+        {
+            Native.Check(
+                Native.bcs_render_set_probe_capture(probe.Bits, 0, 0f, null, 0, 0f),
+                $"stopping the capture of {probe}");
+
+            return;
+        }
+
+        var parts = stackalloc float[3] { settings.Falloff.X, settings.Falloff.Y, settings.Falloff.Z };
+
+        Native.Check(
+            Native.bcs_render_set_probe_capture(
+                probe.Bits,
+                settings.Size,
+                settings.Intensity,
+                parts,
+                settings.Live ? 1 : 0,
+                settings.Near),
+            $"capturing {probe} as a reflection probe");
+    }
+
+    /// <summary>
+    /// Captures a probe that is not live again, after what is around it has changed. Only valid
+    /// inside a system.
+    /// </summary>
+    /// <exception cref="BevyNativeException">The entity has no capture.</exception>
+    public static void RecaptureProbe(Entity probe) =>
+        Native.Check(Native.bcs_render_recapture_probe(probe.Bits), $"capturing {probe} again");
+
+    /// <summary>
     /// Lights the scene from the sky this camera is already scattering.
     /// </summary>
     /// <remarks>
@@ -1079,6 +1307,65 @@ public static unsafe class Render
         Native.Check(
             Native.bcs_render_set_ambient_occlusion(camera.Bits, quality is { } level ? (int)level : -1, thickness),
             $"setting the ambient occlusion of {camera}");
+
+    /// <summary>
+    /// Draws Bevy's own materials deferred, into a G-buffer lit afterward, or forward, lit as they
+    /// are drawn, which is the default. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// Deferred is what screen-space reflections read and what makes many lights cheap. It needs
+    /// cameras drawn once a pixel (<see cref="PostSettings.Msaa"/> of one), and applies to Bevy's
+    /// own materials: one a Slang program draws is always forward, since it writes a color rather
+    /// than a surface description. Every Bevy material is prepared again when it changes.
+    /// </remarks>
+    public static void SetDeferredRendering(bool on) =>
+        Native.Check(Native.bcs_render_set_deferred(on ? 1 : 0), "switching between forward and deferred");
+
+    /// <summary>
+    /// Turns Bevy's screen-space reflections on for a camera, or with <see langword="null"/> off.
+    /// Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Reflections are traced against the depth buffer and read the lit picture, so they show what
+    /// is on screen, fading out at its edges, on surfaces smoother than the settings' roughness
+    /// ranges. They read Bevy's G-buffer, so turning them on also turns on
+    /// <see cref="SetDeferredRendering"/> and asks the camera for the depth and deferred prepasses.
+    /// </para>
+    /// <para>
+    /// What leaves the screen leaves its reflection too, which is the limit of any screen-space
+    /// technique. A reflection probe or a traced reflection is what fills that in.
+    /// </para>
+    /// </remarks>
+    public static void SetScreenSpaceReflections(Entity camera, ReflectionSettings? settings)
+    {
+        if (settings is null)
+        {
+            Native.Check(
+                Native.bcs_render_set_screen_space_reflections(camera.Bits, null),
+                $"taking reflections off {camera}");
+            return;
+        }
+
+        var config = new NativeReflectionConfig
+        {
+            MinRoughnessStart = settings.FadeInRoughness.Start,
+            MinRoughnessFull = settings.FadeInRoughness.Full,
+            MaxRoughnessStart = settings.FadeOutRoughness.Start,
+            MaxRoughnessEnd = settings.FadeOutRoughness.Gone,
+            EdgeGone = settings.EdgeFade.Gone,
+            EdgeFull = settings.EdgeFade.Full,
+            Thickness = settings.Thickness,
+            LinearSteps = Math.Max(1u, settings.Steps),
+            LinearExponent = settings.StepExponent,
+            BisectionSteps = settings.RefineSteps,
+            UseSecant = settings.Secant ? 1 : 0,
+        };
+
+        Native.Check(
+            Native.bcs_render_set_screen_space_reflections(camera.Bits, &config),
+            $"turning reflections on for {camera}");
+    }
 
     /// <summary>
     /// Asks for a picture to be read back into memory rather than written to a file.
@@ -1529,4 +1816,70 @@ public enum AmbientOcclusionQuality
 
     /// <summary>Fifty-four.</summary>
     Ultra = 3,
+}
+
+/// <summary>How a reflection probe renders what is around it.</summary>
+public sealed class ProbeCaptureSettings
+{
+    /// <summary>
+    /// Texels along a side of each face. A power of two, since Bevy's filter needs one, and the
+    /// sharpness of what a polished surface reflects.
+    /// </summary>
+    public uint Size { get; set; } = 256;
+
+    /// <summary>
+    /// How bright the captured light is, in candelas per square meter. The faces are drawn at
+    /// Bevy's default exposure, which divides light by about a thousand, and the default undoes it.
+    /// </summary>
+    public float Intensity { get; set; } = 1000f;
+
+    /// <summary>The fraction of the box faded across on each axis, as for a baked probe.</summary>
+    public Vec3 Falloff { get; set; }
+
+    /// <summary>Whether to capture every frame, or once until asked again.</summary>
+    public bool Live { get; set; } = true;
+
+    /// <summary>
+    /// How far from the center the cameras start seeing, so a probe inside a small object does not
+    /// capture the inside of it.
+    /// </summary>
+    public float Near { get; set; } = 0.05f;
+}
+
+/// <summary>How a camera's screen-space reflections are traced. The defaults are Bevy's.</summary>
+public sealed class ReflectionSettings
+{
+    /// <summary>
+    /// The roughness at which reflections start to appear and at which they are whole. Smoother
+    /// than the first, a surface gets none, which is Bevy's choice: a mirror-smooth surface shows
+    /// the flaws of a screen-space trace most, and is left to a reflection probe.
+    /// </summary>
+    public (float Start, float Full) FadeInRoughness { get; set; } = (0.08f, 0.12f);
+
+    /// <summary>The roughness at which reflections start to fade and at which they are gone.</summary>
+    public (float Start, float Gone) FadeOutRoughness { get; set; } = (0.55f, 0.6f);
+
+    /// <summary>
+    /// Where reflections stop at the edge of the picture and where they are whole, as fractions of
+    /// it, which is what hides the edge of what can be reflected.
+    /// </summary>
+    public (float Gone, float Full) EdgeFade { get; set; } = (0f, 0f);
+
+    /// <summary>
+    /// How thick what the depth buffer holds is taken to be, in world units, since a picture's
+    /// depth says where a surface starts but not where it ends.
+    /// </summary>
+    public float Thickness { get; set; } = 0.25f;
+
+    /// <summary>Steps of the first march along the ray.</summary>
+    public uint Steps { get; set; } = 10;
+
+    /// <summary>How the steps spread out: one for even steps, more for finer ones near the start.</summary>
+    public float StepExponent { get; set; } = 1f;
+
+    /// <summary>Steps of the search that narrows a hit down.</summary>
+    public uint RefineSteps { get; set; } = 5;
+
+    /// <summary>Whether a hit is refined once more by where the ray and the surface cross.</summary>
+    public bool Secant { get; set; } = true;
 }

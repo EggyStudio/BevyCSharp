@@ -438,11 +438,31 @@ public static unsafe class Shaders
     /// Whether to draw motion vectors, which temporal antialiasing and motion blur also ask for on
     /// their own.
     /// </param>
-    public static void SetPrepass(Entity camera, bool depth, bool normals = false, bool motion = false) =>
+    /// <param name="deferred">
+    /// Whether to draw Bevy's G-buffer, the base color, roughness, metallic and normal of every
+    /// pixel, which a shader reads as <c>gbuffer</c> and unpacks with <c>bcs_pass::surface_of</c>.
+    /// It turns on <see cref="Render.SetDeferredRendering"/>, which stays on after the camera stops
+    /// asking, since other cameras may read it, and brings depth with it. Only Bevy's own materials
+    /// are in it: one drawn by a Slang program is drawn forward and leaves its pixels empty.
+    /// </param>
+    /// <param name="previous">
+    /// Whether to keep the previous frame's depth and G-buffer as well, which a shader reads as
+    /// <c>depth_previous</c> and <c>gbuffer_previous</c>. Comparing where a surface is now with
+    /// what was at the same place last frame is how a temporal technique tells a pixel it can
+    /// reuse from one that was hidden until now. Each costs a second texture of its kind.
+    /// </param>
+    public static void SetPrepass(
+        Entity camera,
+        bool depth,
+        bool normals = false,
+        bool motion = false,
+        bool deferred = false,
+        bool previous = false) =>
         Native.Check(
             Native.bcs_render_set_prepass(
                 camera.Bits,
-                (depth ? 1u : 0u) | (normals ? 2u : 0u) | (motion ? 4u : 0u)),
+                (depth ? 1u : 0u) | (normals ? 2u : 0u) | (motion ? 4u : 0u) | (deferred ? 8u : 0u)
+                    | (previous ? 16u : 0u)),
             "asking a camera for a prepass");
 
     /// <summary>
@@ -518,6 +538,8 @@ public static unsafe class Shaders
                     Scale = images[i].Scale,
                     History = images[i].History ? 1 : 0,
                     Mips = Math.Max(1, images[i].Mips),
+                    Copy = images[i].CopyAt is { } point ? (int)point : -1,
+                    Clear = images[i].ClearEachFrame ? 1 : 0,
                 };
             }
 
@@ -549,11 +571,15 @@ public static unsafe class Shaders
 
     /// <summary>The names every 3D camera's shaders can read besides the images the camera owns.</summary>
     /// <remarks>
-    /// The prepass's depth, normals and motion, where the camera draws them, and Bevy's ambient
-    /// occlusion, where it is on. A watch reads the prepass's by these names too.
+    /// The prepass's depth, normals and motion, where the camera draws them, Bevy's ambient
+    /// occlusion, where it is on, and Bevy's G-buffer, where the camera draws deferred. The G-buffer
+    /// is packed bits, which a shader declares as <c>Texture2D&lt;uint4&gt; gbuffer</c> and unpacks
+    /// with <c>bcs_pass::surface_of</c>. Last frame's depth and G-buffer are there as
+    /// <c>depth_previous</c> and <c>gbuffer_previous</c> where the camera keeps them. A watch reads
+    /// the prepass's by these names too.
     /// </remarks>
     public static IReadOnlyList<string> EngineViewImageNames { get; } =
-        ["depth", "normals", "motion", "ambient_occlusion"];
+        ["depth", "normals", "motion", "ambient_occlusion", "gbuffer", "depth_previous", "gbuffer_previous"];
 
     /// <summary>
     /// The names of the images a camera owns, as <see cref="SetViewImages"/> last gave them, with
@@ -786,37 +812,54 @@ public static unsafe class Shaders
         ArgumentNullException.ThrowIfNull(draws);
 
         var native = new NativeViewDraw[draws.Length];
+        var strings = new List<IntPtr>();
 
-        for (var i = 0; i < draws.Length; i++)
+        try
         {
-            var draw = draws[i];
-
-            if (!draw.Instance.IsValid)
+            for (var i = 0; i < draws.Length; i++)
             {
-                throw new ArgumentException(
-                    $"Draw {i} has no instance. Make one with Shaders.CreateInstance.",
-                    nameof(draws));
+                var draw = draws[i];
+
+                if (!draw.Instance.IsValid)
+                {
+                    throw new ArgumentException(
+                        $"Draw {i} has no instance. Make one with Shaders.CreateInstance.",
+                        nameof(draws));
+                }
+
+                var target = IntPtr.Zero;
+
+                if (draw.Into is { } name)
+                {
+                    target = Marshal.StringToCoTaskMemUTF8(name);
+                    strings.Add(target);
+                }
+
+                native[i] = new NativeViewDraw
+                {
+                    Instance = draw.Instance.Id,
+                    Point = (int)draw.Point,
+                    Mode = draw.FromBuffer ? 1 : 0,
+                    Vertices = draw.Vertices,
+                    Instances = draw.Instances,
+                    Buffer = draw.Buffer.Key,
+                    Offset = draw.Offset,
+                    Blend = (int)draw.Blend,
+                    DepthWrite = draw.WritesDepth ? 1 : 0,
+                    Target = (byte*)target,
+                };
             }
 
-            native[i] = new NativeViewDraw
+            fixed (NativeViewDraw* first = native)
             {
-                Instance = draw.Instance.Id,
-                Point = (int)draw.Point,
-                Mode = draw.FromBuffer ? 1 : 0,
-                Vertices = draw.Vertices,
-                Instances = draw.Instances,
-                Buffer = draw.Buffer.Key,
-                Offset = draw.Offset,
-                Blend = (int)draw.Blend,
-                DepthWrite = draw.WritesDepth ? 1 : 0,
-            };
+                Native.Check(
+                    Native.bcs_render_set_view_draws(camera.Bits, first, native.Length),
+                    "setting what a camera draws out of buffers");
+            }
         }
-
-        fixed (NativeViewDraw* first = native)
+        finally
         {
-            Native.Check(
-                Native.bcs_render_set_view_draws(camera.Bits, first, native.Length),
-                "setting what a camera draws out of buffers");
+            foreach (var pointer in strings) Marshal.FreeCoTaskMem(pointer);
         }
     }
 
@@ -2310,12 +2353,27 @@ public enum ShaderImageFormat
 /// <param name="Scale">A fraction of the camera's picture, one for the same size.</param>
 /// <param name="History">Whether last frame's is kept too, as <c>Name_previous</c>.</param>
 /// <param name="Mips">How many mip levels, each reachable as <c>Name_mip0</c> and on.</param>
+/// <param name="ClearEachFrame">
+/// Whether it is cleared to zero at the start of every frame, before anything on the camera runs,
+/// which is what an image draws or atomics accumulate into wants.
+/// </param>
+/// <param name="CopyAt">
+/// A point of the frame at which the camera's picture is copied into the image, scaled to it and
+/// point sampled, or null for none. With <paramref name="History"/>, <c>Name_previous</c> is then
+/// last frame's picture, which is what a technique reusing last frame's lighting reads: copied at
+/// <see cref="FramePoint.BeforeTonemapping"/> it is the lit picture in its own units, and at
+/// <see cref="FramePoint.AfterOpaque"/> the same without transparent geometry, which wants a
+/// camera drawn once a pixel. Only a float or eight-bit format can hold it, and
+/// <see cref="FramePoint.AfterPrepass"/> is refused, since nothing is lit there yet.
+/// </param>
 public readonly record struct ViewImage(
     string Name,
     ShaderImageFormat Format,
     float Scale = 1f,
     bool History = false,
-    int Mips = 1);
+    int Mips = 1,
+    FramePoint? CopyAt = null,
+    bool ClearEachFrame = false);
 
 /// <summary>Where in a camera's frame a compute shader on it runs.</summary>
 public enum FramePoint
@@ -2472,6 +2530,26 @@ public readonly record struct ViewDraw
     /// see-through does.
     /// </summary>
     public bool WritesDepth { get; init; }
+
+    /// <summary>
+    /// One of the camera's images (<see cref="Shaders.SetViewImages"/>) to draw into instead of the
+    /// picture, or null for the picture.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What a visibility buffer is: geometry drawn into an <see cref="ShaderImageFormat.R32UInt"/>
+    /// image, each pixel keeping which cluster and triangle is nearest, for a later pass to shade.
+    /// The fragment shader returns what the image holds, an unsigned integer for an integer image.
+    /// </para>
+    /// <para>
+    /// It is drawn once a pixel, and tested against the camera's depth, and writes it if
+    /// <see cref="WritesDepth"/> says so, where the image is the picture's size and the camera
+    /// draws once a pixel too; otherwise it draws without depth. An integer image cannot be
+    /// blended, so a draw into one replaces what is there. Consecutive draws into the same target
+    /// share one render pass.
+    /// </para>
+    /// </remarks>
+    public string? Into { get; init; }
 
     /// <summary><paramref name="vertices"/> vertices, <paramref name="instances"/> times.</summary>
     public static ViewDraw Fixed(

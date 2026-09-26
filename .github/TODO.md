@@ -127,14 +127,11 @@ code already in the binary.
   sensitivity, and `Render.SetDepthOfField` takes an aperture and a focal length of its own.
   `PhysicalCameraParameters` is one struct behind both, so a camera could be written down once and
   have the exposure and the blur read from it.
-- **A light probe is the whole scene's.** `Render.SetImageLighting` and `SetEnvironmentMap` put
-  the map on a camera, so everything it draws is lit by one environment. Bevy's `LightProbe` is a
-  volume that lights what is inside it, which is what a room lit differently from the corridor
-  outside it needs, and what makes a reflection change as something walks between them.
 - **A cubemap of anything else.** The reinterpretation is a column of six faces stacked
-  vertically, which is what a file holds. A cubemap rendered into, which is what a reflection probe
-  or a point light's shadow would want, needs an image created with six layers rather than one
-  reinterpreted after loading.
+  vertically, which is what a file holds, and a reflection probe that captures itself copies six
+  cameras' pictures into a cube of its own. A cube a game's own camera renders into, one layer at a
+  time, is what a point light's shadow drawn by a shader would want, and needs a camera target that
+  is one layer of an image rather than a whole image.
 - **One medium, which is earth's air.** Density, ground albedo and a quality setting are bridged.
   Mars is the other medium Bevy ships, and its dust phase comes from a texture the caller would
   have to supply, since nothing embeds one. `ScatteringMedium::new` takes arbitrary scattering and
@@ -237,8 +234,8 @@ field per frame, so there is no widget tree to keep in step with the world.
 details of whatever is selected, the tools float in the scene's corners, and the rest is behind a
 hamburger whose contents are a table of paths. A component is a card that opens and shuts, a field
 is a row drawn as its kind and attributes say, and a component with nothing to show is a tag. The
-bottom left is a strip of tabs opening into a card: the console, the asset browser, the settings and
-the style. Gizmos draw the selection, its handles, the ground and the camera's orientation, and a
+bottom left is a strip of tabs opening into a card: the console, the asset browser, the shader
+programs, the images the scene camera's shaders keep, the settings and the style. Gizmos draw the selection, its handles, the ground and the camera's orientation, and a
 drag on a handle moves, turns or stretches what is selected. [EDITOR.md](EDITOR.md) has the design
 language.
 

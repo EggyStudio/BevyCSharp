@@ -221,6 +221,9 @@ pub struct BcsConfig {
     /// How many world units a meter is, for every spatial sound that does not say otherwise. `0`
     /// keeps Bevy's own of one, which is what a world measured in meters wants.
     pub spatial_scale: f32,
+    /// How many meshlet clusters the GPU keeps room for at once, or `0` for no meshlets. Needs a
+    /// build with the `meshlet` feature and a GPU with 64-bit texture atomics.
+    pub meshlet_clusters: u32,
 }
 
 /// How a camera should see, passed from C# when one is spawned.
@@ -320,6 +323,29 @@ pub struct BcsWindowEvent {
     pub a: f32,
     /// Height for a resize, and nothing for the rest.
     pub b: f32,
+}
+
+/// How a camera's screen-space reflections march. Mirrors the managed `ReflectionSettings`.
+///
+/// Roughness ranges run from where reflections start to fade in to where they are whole, and from
+/// where they start to fade out to where they are gone, so a rough surface reflects nothing.
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
+pub struct BcsReflectionConfig {
+    pub min_roughness_start: f32,
+    pub min_roughness_full: f32,
+    pub max_roughness_start: f32,
+    pub max_roughness_end: f32,
+    /// Where reflections stop at the edge of the picture, and where they are whole, as fractions
+    /// of it.
+    pub edge_gone: f32,
+    pub edge_full: f32,
+    /// How thick what the depth buffer holds is taken to be, in world units.
+    pub thickness: f32,
+    pub linear_steps: u32,
+    pub linear_exponent: f32,
+    pub bisection_steps: u32,
+    pub use_secant: i32,
 }
 
 /// What a camera does to the picture after the scene has been drawn.

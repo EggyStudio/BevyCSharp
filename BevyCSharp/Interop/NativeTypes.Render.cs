@@ -703,6 +703,12 @@ public unsafe struct NativeViewImage
 
     /// <summary>How many mip levels.</summary>
     public int Mips;
+
+    /// <summary>The <see cref="FramePoint"/> the picture is copied in at, or -1 for none.</summary>
+    public int Copy;
+
+    /// <summary>Non-zero to clear it at the start of every frame.</summary>
+    public int Clear;
 }
 
 /// <summary>One dispatch a camera runs every frame. Mirrors <c>BcsViewDispatch</c>.</summary>
@@ -731,7 +737,7 @@ public unsafe struct NativeViewDispatch
 }
 
 /// <summary>One draw a camera makes every frame. Mirrors <c>BcsViewDraw</c>.</summary>
-public struct NativeViewDraw
+public unsafe struct NativeViewDraw
 {
     /// <summary>The shader instance.</summary>
     public int Instance;
@@ -759,6 +765,46 @@ public struct NativeViewDraw
 
     /// <summary>Non-zero to write depth.</summary>
     public int DepthWrite;
+
+    /// <summary>NUL-terminated UTF-8 naming a camera image to draw into, or null for the picture.</summary>
+    public byte* Target;
+}
+
+/// <summary>How screen-space reflections march. Mirrors <c>BcsReflectionConfig</c>.</summary>
+public struct NativeReflectionConfig
+{
+    /// <summary>Roughness where reflections start to fade in.</summary>
+    public float MinRoughnessStart;
+
+    /// <summary>Roughness where they are whole.</summary>
+    public float MinRoughnessFull;
+
+    /// <summary>Roughness where they start to fade out.</summary>
+    public float MaxRoughnessStart;
+
+    /// <summary>Roughness where they are gone.</summary>
+    public float MaxRoughnessEnd;
+
+    /// <summary>Where they stop at the edge of the picture.</summary>
+    public float EdgeGone;
+
+    /// <summary>Where they are whole at the edge of the picture.</summary>
+    public float EdgeFull;
+
+    /// <summary>How thick what the depth buffer holds is taken to be.</summary>
+    public float Thickness;
+
+    /// <summary>Steps of the first march.</summary>
+    public uint LinearSteps;
+
+    /// <summary>How the steps spread out.</summary>
+    public float LinearExponent;
+
+    /// <summary>Steps of the bisection after a hit.</summary>
+    public uint BisectionSteps;
+
+    /// <summary>Non-zero to refine the hit with the secant method.</summary>
+    public int UseSecant;
 }
 
 /// <summary>A mesh described vertex by vertex. Mirrors <c>BcsMeshData</c>.</summary>

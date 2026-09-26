@@ -41,6 +41,9 @@ internal sealed class PictureRun
     /// <summary>What to build at startup.</summary>
     public Action<EcsWorld>? Scene { get; init; }
 
+    /// <summary>Changes to the app's configuration before it is made, for a run needing more.</summary>
+    public Action<Config>? Configure { get; init; }
+
     /// <summary>
     /// What to do every frame, before the steps are looked at, which is how a test keeps something
     /// moving while it waits and takes pictures.
@@ -103,6 +106,7 @@ internal sealed class PictureRun
     {
         var config = Config.OffscreenFor(Width, Height, frames: Frames);
         config.AssetRoot = AssetRoot;
+        Configure?.Invoke(config);
 
         using var app = new App(config);
         app.AddPlugin(new EnginePlugin());

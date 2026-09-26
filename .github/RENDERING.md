@@ -74,11 +74,13 @@ wants one opaque rendering method for the whole app. It is the first thing to of
 requirements above are what a package doing it differently would need beyond it.
 
 Offering it is not a matter of adding the plugin. It ends the process, rather than failing
-softly, when the adapter lacks the features it needs and when any 3D camera is multisampled, so it
-has to be something a game asks for before the app starts, with the bridge checking the adapter
-and turning multisampling off on every camera first. The processor that turns a mesh into a
-meshlet mesh links meshoptimizer and METIS, which are C and C++ built with the bridge, so it
-belongs in a profile of its own rather than in the render profile every game gets.
+softly, when the adapter lacks the features it needs and when any camera is multisampled, so it is
+something a game asks for before the app starts (`Config.MeshletClusters`), with the bridge asking
+the GPU first and turning multisampling off on every camera while it runs. The processor that turns
+a mesh into a meshlet mesh links meshoptimizer and METIS, which are C and C++ built with the bridge,
+so it is an addition to a profile (`--meshlet`) rather than part of the render profile every game
+gets. `Render.CreateMeshletMesh` converts on a worker and `Render.SetMeshletMesh` draws the result
+with a standard material.
 
 ### Texture streaming
 
@@ -167,6 +169,13 @@ What it needs:
   material data at a hit, which means geometry and material pools addressable by instance.
 - **Large hash tables in storage buffers**, with atomics and a frame budget.
 
+The answer has somewhere to go already. Bevy's irradiance volume is a grid of ambient cubes in a 3D
+image that its materials read as diffuse light, so a world-space technique that writes its radiance
+cache out into such a grid each frame lights everything drawn with a standard material, blended by
+normal and filtered between points, with no change to how those materials are drawn. It is coarser
+than a per-pixel answer, which is why screen-space GI still wants an input of its own, but it is the
+same shape a probe-based GI keeps anyway.
+
 ### Reflections
 
 Screen-space reflections share the depth pyramid and the trace with screen-space GI. What screen
@@ -174,6 +183,12 @@ space misses is answered by reflection probes, which want cube maps rendered in 
 hardware rays, which share the acceleration structure, material pool and hit shading with
 world-space GI. A reflection solution is therefore mostly the GI infrastructure with a different
 ray distribution and a specular input to lighting.
+
+Both ends Bevy ships are bridged. Its screen-space reflections run over its deferred path, and a
+reflection probe can capture itself, rendering the room into a cube that Bevy filters on the GPU,
+live or once. What a reflection package adds is what those two leave out: a trace that reaches past
+the screen's edge through the probes and the world-space structures, and a specular input a
+package's own result can be written into, which Bevy's lighting does not have yet.
 
 ### Radiance cascades
 
@@ -216,7 +231,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | Compute before any camera draws | Has (`render/compute.rs`) |
 | Compute per camera, with the view, at a chosen point in the frame | Has (`render/views.rs`, `Shaders.SetViewDispatches`) |
 | Points after the prepass, between opaque and transparent geometry, and before and after tonemapping | Has, for compute (`FramePoint`). Passes still run only around tonemapping |
-| Passes writing several targets, or depth | Draws on a camera write the picture and depth. Several targets for a pass are still missing |
+| Passes writing several targets, or depth | Draws on a camera write the picture, or one of the camera's images, and depth. Several targets at once are still missing |
 | Async compute | Missing. wgpu has one queue per device, so this waits on wgpu |
 
 ### Per view
@@ -225,8 +240,10 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 |---|---|
 | Depth and normals for passes | Has, single-sampled cameras only |
 | Motion vectors for passes | Has (`Shaders.SetPrepass(camera, motion: true)`, `bcs_pass::motion_at`) |
+| Albedo, roughness and metallic per pixel | Has, from Bevy's G-buffer on a camera drawing deferred (`gbuffer`, `bcs_pass::surface_of`) |
+| Last frame's depth and G-buffer | Has (`Shaders.SetPrepass(..., previous: true)`, `depth_previous`, `gbuffer_previous`) |
 | Previous view matrices for passes and compute | Has, on 3D cameras (`bcs_pass::previous_view`) |
-| Last frame's lit color | Buildable. A pass copying the picture into a history image the camera owns keeps it, and a built-in copy would save the pass |
+| Last frame's lit color | Has (`ViewImage(..., History: true, CopyAt: FramePoint.BeforeTonemapping)`, read as `name_previous`), scaled to the image and point sampled |
 | History images owned by the camera | Has (`Shaders.SetViewImages`, `History: true`) |
 | The view uniform in compute | Has, for compute on a camera |
 | A depth pyramid | Buildable, since a camera's images have mip levels reachable one at a time. Not a service yet |
@@ -237,8 +254,8 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | need | status |
 |---|---|
 | Transforms per instance, current and previous | Has (`Shaders.CreateInstanceBuffer`, `bcs_scene::Instance`) for the entities put in its slots |
-| Lights and shadow maps readable from compute | Has, for compute and passes on a camera (`bcs_pass::lights`, `point_lights`, `directional_shadow`, `point_shadow`). Spot light shadows are not sampled yet |
-| The sky as a cube map or spherical harmonics | Bevy generates environment maps; not exposed to compute |
+| Lights and shadow maps readable from compute | Has, for compute and passes on a camera (`bcs_pass::lights`, `point_lights`, `directional_shadow`, `point_shadow` for point and spot lights, `point_light_radiance`) |
+| The sky as a cube map or spherical harmonics | Has, as the camera's environment map, for compute and passes on a camera (`bcs_pass::environment_specular`, `environment_diffuse`) |
 | Material data by object | Missing |
 | Geometry and material pools addressable at a ray hit | Missing |
 
@@ -249,6 +266,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | Storage buffers of any size, read back to the CPU | Has |
 | Indirect dispatch | Has (`Shaders.DispatchIndirect`, `ViewDispatch.Indirect`) |
 | Indirect draws whose count the GPU decides | Has, for geometry drawn on a camera out of buffers (`Shaders.SetViewDraws`, `ViewDraw.Indirect`) |
+| Draws into integer targets, for a visibility buffer | Has (`ViewDraw.Into`, a camera image made with `ClearEachFrame`), tested against the camera's depth |
 | Buffers that grow keeping their contents | Has (`Shaders.GrowBuffer`), rebinding everything that held them |
 | Atomics | Has, on buffers through Slang's `Atomic<T>`, which is the form Slang turns into WGSL atomics. 64-bit and texture atomics depend on the adapter and on Slang's WGSL output reaching them |
 | Subgroup operations | Same |
@@ -258,10 +276,10 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | need | status |
 |---|---|
 | Ambient occlusion applied by the renderer | Has (`Render.SetAmbientOcclusion`), and replaceable by a package's own through the `ambient_occlusion` texture a compute shader on the camera writes |
-| Indirect diffuse and specular inputs | Missing. Bevy's PBR has no screen-space indirect input, so this is a change to its lighting or a fork point |
-| Screen-space reflections | Bevy (`ScreenSpaceReflections`, deferred only), not bridged |
-| Light probes and irradiance volumes | Bevy (`LightProbe`), not bridged |
-| Deferred rendering and a G-buffer | Bevy, not bridged, and BevyCSharp materials draw forward |
+| Indirect diffuse and specular inputs | In part. A world-space technique answers into an irradiance volume a compute shader writes (`Render.SetIrradianceVolume`, `bcs_scene::irradiance_texel`), which Bevy's materials read as their diffuse light. A per-pixel input, which is what screen-space GI produces, is missing, since Bevy's PBR has none, so it is a change to its lighting or a fork point |
+| Screen-space reflections | Has (`Render.SetScreenSpaceReflections`), Bevy's, over its G-buffer |
+| Light probes and irradiance volumes | Has (`Render.SetReflectionProbe`, `Render.SetIrradianceVolume`, and `Render.SetProbeCapture` for a reflection probe that renders itself), with the volume an ordinary 3D image a compute shader can write every frame |
+| Deferred rendering and a G-buffer | Has for Bevy's materials (`Render.SetDeferredRendering`), and readable by a camera's passes and compute as `gbuffer`, unpacked by `bcs_pass::surface_of` (`Shaders.SetPrepass(..., deferred: true)`). Materials a Slang program draws are forward and leave it empty |
 | Ray-traced lighting | Bevy (`bevy_solari`), not compiled |
 
 ### Resources and formats
@@ -272,7 +290,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | Images from data in formats other than eight-bit RGBA | Has (`Shaders.CreateImage<T>(..., texels)`). Render targets are still eight-bit RGBA |
 | A storage view of one mip level | Has, for a camera's images (`name_mip1`) and for images made with `Shaders.CreateImage(..., mips:)` (`SetTexture(name, image, mip: 1)`) |
 | Arrays of textures of any length | Has, where the adapter supports binding arrays |
-| Cube maps rendered into | Missing |
+| Cube maps rendered into | Has, for a reflection probe capturing itself (`Render.SetProbeCapture`). A camera of the game's own targeting one layer is missing |
 | Block-compressed textures | Missing (`ktx2` is in, its payload formats are not) |
 | Writing a region of a texture from bytes | Missing |
 
@@ -283,7 +301,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | Meshes from vertices | Has |
 | A processing step at import that writes a derived asset | Missing. Bevy has asset processors, off in this build |
 | Streaming reads on a worker thread with a frame budget | Missing as a service |
-| Bevy's meshlet asset and processor | Bevy, not compiled |
+| Bevy's meshlet asset and processor | Has, in a bridge built with `--meshlet` and an app that sets `Config.MeshletClusters` (`Render.CreateMeshletMesh`, `SetMeshletMesh`). Loading a baked `.meshlet_mesh` file is not bridged yet |
 
 ### Ray tracing
 
@@ -298,7 +316,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 |---|---|
 | Hot reload of every shader, with the last good version kept | Has |
 | What a program declares, by name and offset | Has (`shader.layout`) |
-| Buffers and images shown in the editor | Missing. A package wants to show its intermediate textures and counters in a panel |
+| Buffers and images shown in the editor | Images, yes (`Shaders.Watch`, the editor's Frame tab). Buffers and counters are not shown yet, and are read back with `Shaders.BeginBufferRead` |
 | GPU timings per pass | Missing. wgpu has timestamp queries where the adapter has them |
 
 ### C# and Slang
@@ -317,21 +335,24 @@ Each phase unblocks a class of package, and none needs a later one.
 1. **Foundations for screen-space work.** Motion vectors and the previous view for passes, history
    images owned by the camera, compute per camera at named points with the view, indirect dispatch,
    image formats and mip views. These are in, so an ambient occlusion or screen-space GI package can
-   be written now, composited over the picture by a pass. What is left of this phase is a pass at
-   more points than tonemapping and several targets for a pass.
+   be written now, composited over the picture by a pass, reading the G-buffer, last frame's depth
+   and last frame's lit picture. What is left of this phase is a pass at more points than
+   tonemapping and several targets for a pass.
 2. **Lighting inputs.** Bevy's own ambient occlusion is bridged and a package can supply its own
-   through it. Reflections and light probes are next, then indirect diffuse and specular inputs,
+   through it. Bevy's screen-space reflections are bridged over its deferred path, and its light
+   probes, including an irradiance volume a compute shader writes, which is how a world-space GI
+   package lights Bevy's materials today. A per-pixel indirect diffuse and specular input is next,
    which is where a change inside Bevy's lighting is weighed against keeping a fork.
 3. **GPU-driven geometry.** Indirect draws on a camera, instance data with previous transforms and
-   buffers that grow are in. Next are Bevy's meshlets as a profile of their own, then what a
-   different virtualized geometry package needs beyond Bevy's: draws into integer targets for a
-   visibility buffer, a material pass reading it that writes depth and motion, and shadow views as
-   views, so the same draws render into a light's shadow map.
+   buffers that grow are in, and so are draws into integer targets for a visibility buffer and
+   Bevy's meshlets as an opt-in. Next is what a different virtualized geometry package needs
+   beyond Bevy's: a material pass reading the visibility buffer that writes depth and
+   motion, and shadow views as views, so the same draws render into a light's shadow map.
 4. **Streaming.** Import-time processing, worker-thread IO with a budget, region uploads and
    compressed formats. Texture streaming and geometry streaming share all of it.
-5. **World space.** Scene data readable from compute (lights and shadow maps are, the sky and
-   materials are not yet), 3D images with scrolling, then hardware ray tracing once shaders can
-   reach it.
+5. **World space.** Scene data readable from compute (lights, shadow maps and the sky are, and
+   materials per pixel through the G-buffer; materials by object are not yet), 3D images with
+   scrolling, then hardware ray tracing once shaders can reach it.
 6. **Reflections and radiance cascades**, built on what the phases before provide.
 
 ## What to watch

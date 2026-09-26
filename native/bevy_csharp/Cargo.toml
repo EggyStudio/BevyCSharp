@@ -28,6 +28,21 @@ editor = [
     "bevy/mesh_picking",
 ]
 
+# Bevy's meshlets, on top of whichever profile is built: meshes cut into clusters that the GPU
+# culls and picks a level of detail for, which is virtualized geometry as Bevy ships it.
+#
+# An addition rather than a profile of its own, and off in every profile, because the processor
+# that cuts a mesh into clusters compiles two C and C++ libraries (meshoptimizer and METIS) that
+# nothing else needs, and because the plugin wants a GPU with 64-bit texture atomics. Even built
+# in, an app turns it on with a cluster budget in its config. wgpu is named to ask the GPU what it
+# has before the plugin is added, at the version Bevy already builds, so it adds nothing.
+meshlet = [
+    "render",
+    "bevy/meshlet",
+    "bevy/meshlet_processor",
+    "dep:wgpu",
+]
+
 # Minimal profile: app + ECS + time + input + transform + math.
 # No window, no GPU, no audio. Drives the loop with ScheduleRunnerPlugin.
 # This is what CI, unit tests and dedicated servers build.
@@ -125,6 +140,7 @@ nonmax = { version = "0.5", default-features = false }
 bytemuck = { version = "1", features = ["derive"] }
 naga = { version = "29", default-features = false, features = ["wgsl-in"], optional = true }
 serde_json = { version = "1", optional = true }
+wgpu = { version = "29", default-features = false, optional = true }
 
 # Linux and the BSDs only.
 #

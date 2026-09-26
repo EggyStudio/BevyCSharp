@@ -212,14 +212,15 @@ fn prepare_passes(
         Option<&mut PreparedShaderPasses>,
         Option<&ViewImageTextures>,
         Option<&bevy::pbr::ScreenSpaceAmbientOcclusionResources>,
+        Option<&bevy::core_pipeline::prepass::ViewPrepassTextures>,
     )>,
 ) {
     let Some(stand) = stand else {
         return;
     };
 
-    for (entity, target, asked, prepared, owned, occlusion) in &mut views {
-        let names = super::views::view_names(owned, occlusion);
+    for (entity, target, asked, prepared, owned, occlusion, prepass) in &mut views {
+        let names = super::views::view_names(owned, occlusion, prepass);
         let format = target.main_texture_format();
 
         let kept: Vec<PreparedPass> = prepared
@@ -322,6 +323,7 @@ fn run_passes<const AFTER_TONEMAPPING: bool>(
         Option<&PreviousViewUniformOffset>,
         Option<&bevy::pbr::ViewLightsUniformOffset>,
         Option<&bevy::pbr::ViewShadowBindings>,
+        Option<&super::views::ViewEnvironmentTextures>,
     )>,
     inputs: Res<ViewInputs>,
     fallback: Res<FallbackImage>,
@@ -332,7 +334,7 @@ fn run_passes<const AFTER_TONEMAPPING: bool>(
     scene: SceneLights,
     mut ctx: RenderContext,
 ) {
-    let (target, offset, prepared, prepass, previous, light_offset, shadows) = view.into_inner();
+    let (target, offset, prepared, prepass, previous, light_offset, shadows, environment) = view.into_inner();
 
     if !prepared
         .0
@@ -353,6 +355,7 @@ fn run_passes<const AFTER_TONEMAPPING: bool>(
         &fallback,
         prepass,
         previous_uniforms.as_deref().zip(previous),
+        environment,
     );
 
     for pass in &prepared.0 {

@@ -34,6 +34,8 @@ public sealed class ShaderLayoutTests
     [Theory]
     [InlineData(nameof(NativeViewImage.Format), 8)]
     [InlineData(nameof(NativeViewImage.Mips), 20)]
+    [InlineData(nameof(NativeViewImage.Copy), 24)]
+    [InlineData(nameof(NativeViewImage.Clear), 28)]
     public void TheViewImageIsWhereTheBridgeReadsIt(string field, int offset) =>
         Assert.Equal(offset, Marshal.OffsetOf<NativeViewImage>(field).ToInt32());
 
@@ -50,13 +52,14 @@ public sealed class ShaderLayoutTests
         Assert.Equal(208, Marshal.SizeOf<NativeShaderProgramConfig>());
         Assert.Equal(160, Marshal.OffsetOf<NativeShaderProgramConfig>(nameof(NativeShaderProgramConfig.DrawVertex)).ToInt32());
         Assert.Equal(184, Marshal.OffsetOf<NativeShaderProgramConfig>(nameof(NativeShaderProgramConfig.DrawFragment)).ToInt32());
-        Assert.Equal(36, Marshal.SizeOf<NativeViewDraw>());
+        Assert.Equal(48, Marshal.SizeOf<NativeViewDraw>());
         Assert.Equal(32, Marshal.OffsetOf<NativeViewDraw>(nameof(NativeViewDraw.DepthWrite)).ToInt32());
+        Assert.Equal(40, Marshal.OffsetOf<NativeViewDraw>(nameof(NativeViewDraw.Target)).ToInt32());
         Assert.Equal(24, Marshal.SizeOf<NativeShaderStage>());
         Assert.Equal(16, Marshal.OffsetOf<NativeShaderStage>(nameof(NativeShaderStage.Source)).ToInt32());
         Assert.Equal(16, Marshal.SizeOf<NativeShaderDefine>());
         Assert.Equal(28, Marshal.SizeOf<NativeSamplerConfig>());
-        Assert.Equal(24, Marshal.SizeOf<NativeViewImage>());
+        Assert.Equal(32, Marshal.SizeOf<NativeViewImage>());
         Assert.Equal(36, Marshal.SizeOf<NativeViewDispatch>());
     }
 

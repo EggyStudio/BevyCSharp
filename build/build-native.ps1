@@ -18,6 +18,10 @@
     Build the render profile plus the HTML and CSS user interface, which is what
     BevyCSharp.Editor needs. Costs about a hundred crates over -Render.
 
+.PARAMETER Meshlet
+    Add Bevy's meshlets to whichever profile is built, or to the render profile when none is
+    named. Compiles meshoptimizer and METIS, which no profile needs otherwise.
+
 .PARAMETER Target
     Rust target triple to build for. Defaults to the host.
 
@@ -28,12 +32,14 @@
     build/build-native.ps1
     build/build-native.ps1 -Render
     build/build-native.ps1 -Editor
+    build/build-native.ps1 -Editor -Meshlet
     build/build-native.ps1 -Target aarch64-pc-windows-msvc -Render
 #>
 [CmdletBinding()]
 param(
     [switch] $Render,
     [switch] $Editor,
+    [switch] $Meshlet,
     [string] $Target = '',
     [switch] $Clean
 )
@@ -50,7 +56,10 @@ $NativeDir = Join-Path $RepoRoot 'native'
 $TargetDir = Join-Path $BuildDir 'target'
 $ArtifactDir = Join-Path $BuildDir 'artifacts'
 # -Editor implies the renderer, so it wins when both are given rather than being refused.
-$Features = if ($Editor) { 'editor' } elseif ($Render) { 'render' } else { 'headless' }
+$Features = if ($Editor) { 'editor' } elseif ($Render -or $Meshlet) { 'render' } else { 'headless' }
+
+# Meshlets sit on top of a profile rather than replacing one.
+if ($Meshlet) { $Features = "$Features,meshlet" }
 
 if (-not (Test-Path (Join-Path $NativeDir 'Cargo.toml'))) {
     throw "No Rust workspace at '$NativeDir'. This script expects to live in <repo>/build/ with the sources in <repo>/native/."

@@ -114,6 +114,12 @@ pub extern "C" fn bcs_render_capture(target: i32) -> i32 {
             with_world(|world| {
                 let capture = match crate::render::image_handle(world, target) {
                     Err(refusal) => return refusal,
+                    // Bevy's screenshot of an image copies what a camera draws into it, so an
+                    // image no camera draws into (what a compute shader wrote, a watch) is read
+                    // back from the GPU as it is instead.
+                    Ok(Some(image)) if !drawn_by_a_camera(world, &image) => {
+                        return read_image_back(world, image);
+                    }
                     Ok(Some(image)) => Screenshot::image(image),
                     Ok(None) => match world.get_resource::<crate::app::OffscreenTarget>() {
                         Some(target) => Screenshot::image(target.image.clone()),
@@ -130,8 +136,25 @@ pub extern "C" fn bcs_render_capture(target: i32) -> i32 {
                     move |captured: bevy::ecs::observer::On<ScreenshotCaptured>,
                           mut captures: ResMut<Captures>| {
                         // Converted here, once, while there is still something that knows what
-                        // format the picture arrived in.
-                        let Ok(image) = captured.image.clone().try_into_dynamic() else {
+                        // format the picture arrived in. Linear eight-bit pixels are the same
+                        // bytes as sRGB ones, and Bevy's conversion knows only the second, so
+                        // they are relabeled rather than refused.
+                        let mut picture = captured.image.clone();
+
+                        if picture.texture_descriptor.format
+                            == bevy::render::render_resource::TextureFormat::Rgba8Unorm
+                        {
+                            picture.texture_descriptor.format =
+                                bevy::render::render_resource::TextureFormat::Rgba8UnormSrgb;
+                        }
+
+                        let format = picture.texture_descriptor.format;
+
+                        let Ok(image) = picture.try_into_dynamic() else {
+                            bevy::log::warn!(
+                                "Capture {id} came back as a {format:?} picture, which cannot be \
+                                 read as colors, so it never arrives."
+                            );
                             return;
                         };
 
@@ -152,6 +175,117 @@ pub extern "C" fn bcs_render_capture(target: i32) -> i32 {
             })
         }
     })
+}
+
+/// Whether a camera draws into an image, which is what Bevy's screenshot of an image captures.
+#[cfg(feature = "render")]
+fn drawn_by_a_camera(
+    world: &mut bevy::ecs::world::World,
+    image: &bevy::asset::Handle<bevy::image::Image>,
+) -> bool {
+    use bevy::camera::RenderTarget;
+
+    let offscreen = world
+        .get_resource::<crate::app::OffscreenTarget>()
+        .is_some_and(|target| target.image.id() == image.id());
+
+    offscreen
+        || world
+            .query::<&RenderTarget>()
+            .iter(world)
+            .any(|target| matches!(target, RenderTarget::Image(target) if target.handle.id() == image.id()))
+}
+
+/// Reads an image back from the GPU as it is, and answers the capture's number.
+///
+/// The bytes arrive with each row padded to what a copy out of a texture needs, and in the image's
+/// own format, so they are unpadded and turned into eight-bit color the way a screenshot's are.
+#[cfg(feature = "render")]
+fn read_image_back(
+    world: &mut bevy::ecs::world::World,
+    image: bevy::asset::Handle<bevy::image::Image>,
+) -> i32 {
+    use bevy::asset::Assets;
+    use bevy::ecs::system::{Commands, Res, ResMut};
+    use bevy::image::{Image, TextureFormatPixelInfo};
+    use bevy::render::gpu_readback::{Readback, ReadbackComplete};
+    use bevy::render::render_resource::{TextureDimension, TextureFormat};
+
+    let mut captures = world.get_resource_or_init::<Captures>();
+    captures.last += 1;
+    let id = captures.last;
+
+    let wanted = image.clone();
+
+    world.spawn(Readback::texture(image)).observe(
+        move |done: bevy::ecs::observer::On<ReadbackComplete>,
+              images: Res<Assets<Image>>,
+              mut captures: ResMut<Captures>,
+              mut commands: Commands| {
+            // A readback reads again every frame it is there, and one answer is what was asked
+            // for.
+            commands.entity(done.entity).despawn();
+
+            let Some(source) = images.get(&wanted) else {
+                return;
+            };
+
+            let size = source.texture_descriptor.size;
+            let mut format = source.texture_descriptor.format;
+
+            let Ok(texel) = format.pixel_size() else {
+                bevy::log::warn!("Capture {id} is of a {format:?} image, which cannot be read back.");
+                return;
+            };
+
+            let row = size.width as usize * texel;
+            let padded = if size.height > 1 { row.next_multiple_of(256) } else { row };
+            let mut bytes = Vec::with_capacity(row * size.height as usize);
+
+            for line in done.data.chunks(padded).take(size.height as usize) {
+                bytes.extend_from_slice(&line[..row.min(line.len())]);
+            }
+
+            // The same bytes as sRGB, which is the eight-bit format Bevy's conversion knows.
+            if format == TextureFormat::Rgba8Unorm {
+                format = TextureFormat::Rgba8UnormSrgb;
+            }
+
+            let flat = bevy::render::render_resource::Extent3d {
+                depth_or_array_layers: 1,
+                ..size
+            };
+
+            let picture = Image::new(
+                flat,
+                TextureDimension::D2,
+                bytes,
+                format,
+                bevy::asset::RenderAssetUsages::default(),
+            );
+
+            let Ok(converted) = picture.try_into_dynamic() else {
+                bevy::log::warn!(
+                    "Capture {id} is of a {format:?} image, which cannot be read as colors, so it \
+                     never arrives."
+                );
+                return;
+            };
+
+            let rgba = converted.to_rgba8();
+
+            captures.ready.insert(
+                id,
+                CapturedPixels {
+                    width: rgba.width(),
+                    height: rgba.height(),
+                    rgba: rgba.into_raw(),
+                },
+            );
+        },
+    );
+
+    id
 }
 
 /// Reads a capture, and forgets it.

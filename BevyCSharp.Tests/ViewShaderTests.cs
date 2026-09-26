@@ -343,6 +343,79 @@ public sealed class ViewShaderTests
         Assert.True(lit > shadowed, $"{lit} pixels came out lit against {shadowed} shadowed, under one small block");
     }
 
+    /// <summary>
+    /// A spot light shining down past a block onto a floor is blocked behind the block, read from
+    /// its layer of the directional shadow maps, and reaches the floor around it inside its cone.
+    /// </summary>
+    [Fact]
+    public void AComputeShaderReadsASpotLightsShadow()
+    {
+        if (!CanRun) return;
+
+        var run = new PictureRun
+        {
+            Width = 128,
+            Height = 128,
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings
+                {
+                    Clear = ClearMode.Custom,
+                    ClearColor = (0f, 0f, 0f, 1f),
+                });
+
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 9f, 9f), new Vec3(0f, 0f, 1.5f), Vec3.UnitY));
+                Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
+                Shaders.SetPrepass(camera, depth: true, normals: true);
+
+                var spot = Render.SpawnLight(new LightSettings
+                {
+                    Kind = LightKind.Spot,
+                    Intensity = 400_000f,
+                    Range = 30f,
+                    OuterAngle = 0.7f,
+                    InnerAngle = 0.5f,
+                    Shadows = true,
+                });
+
+                ecs.Add(spot, Transform.LookingAt(new Vec3(0f, 8f, -3f), new Vec3(0f, 0f, 1.5f), Vec3.UnitY));
+
+                var floor = ecs.Spawn();
+                Render.SetMesh(ecs, floor, Render.CreateMesh(MeshShape.Cuboid, 12f, 0.1f, 12f));
+                Render.SetMaterial(ecs, floor, Render.CreateMaterial(1f, 1f, 1f));
+                ecs.Add(floor, Transform.At(0f, -0.05f, 0f));
+
+                var block = ecs.Spawn();
+                Render.SetMesh(ecs, block, Render.CreateMesh(MeshShape.Cuboid, 2f, 2f, 2f));
+                Render.SetMaterial(ecs, block, Render.CreateMaterial(1f, 1f, 1f));
+                ecs.Add(block, Transform.At(0f, 3f, 0f));
+
+                Shaders.SetViewImages(camera, new ViewImage("sunlit", ShaderImageFormat.R32Float));
+                Shaders.SetViewDispatches(
+                    camera,
+                    ViewDispatch.PerPixel(Compute("shaders/spot_shadow.slang"), FramePoint.AfterPrepass));
+                Shaders.SetPasses(camera, new ShaderPass(Pass("shaders/show_sunlit.slang"), AfterTonemapping: true));
+            },
+        };
+
+        run.Until("compiled", _ => Ready()).Wait(Settled).Capture("picture").Go();
+
+        var picture = run.Picture("picture");
+        var shadowed = PictureRun.Green(picture);
+        var lit = PictureRun.Red(picture);
+
+        Assert.True(shadowed > 50, $"only {shadowed} pixels came out shadowed");
+        Assert.True(lit > 50, $"only {lit} pixels came out lit");
+
+        // The light is behind the block, so its shadow falls on the floor in front of it, toward
+        // the camera, and the floor to either side of the shadow is lit.
+        var inShadow = picture.At(64, 95);
+        var beside = picture.At(15, 95);
+
+        Assert.True(inShadow.G > 200 && inShadow.R < 60, $"the floor in front of the block was {inShadow}");
+        Assert.True(beside.R > 200 && beside.G < 60, $"the floor beside the shadow was {beside}");
+    }
+
     private static ShaderInstance Draw(string file) =>
         Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
         {
@@ -474,6 +547,147 @@ public sealed class ViewShaderTests
 
         Assert.True(middle.B > 120 && middle.G < 90, $"the middle came out {middle}, so the square was drawn over the cube");
         Assert.True(GreenAt(picture, 64, 40), "the square around the cube was not drawn");
+    }
+
+    /// <summary>
+    /// Squares drawn into an unsigned integer image the camera clears every frame keep which
+    /// instance is nearest at each pixel, a visibility buffer, and the scene in front hides them
+    /// there through the camera's depth.
+    /// </summary>
+    [Fact]
+    public void ACameraDrawsIdsIntoAVisibilityBuffer()
+    {
+        if (!CanRun) return;
+
+        var run = new PictureRun
+        {
+            Width = 128,
+            Height = 128,
+            Scene = ecs =>
+            {
+                var camera = Ortho(ecs);
+                Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
+                Shaders.SetViewImages(camera, new ViewImage("visibility", ShaderImageFormat.R32UInt, ClearEachFrame: true));
+
+                // Two squares behind a cube, each reaching in behind it.
+                var centers = Shaders.CreateBuffer<Vector4>([new(-2f, 0f, -3f, 1f), new(2f, 0f, -3f, 1f)]);
+                var squares = Draw("shaders/draw_ids.slang")
+                    .SetBuffer("centers", centers)
+                    .Set("size", 1.5f);
+
+                PictureRun.Cube(ecs, ShaderMaterialTests.Flat(ShaderMaterialTests.Blue), 2f);
+
+                Shaders.SetViewDraws(camera, ViewDraw.Fixed(squares, FramePoint.AfterOpaque, 6, 2) with { Into = "visibility" });
+                Shaders.SetPasses(camera, new ShaderPass(Pass("shaders/show_ids.slang"), AfterTonemapping: true));
+            },
+        };
+
+        run.Until("compiled", _ => Ready()).Wait(Settled).Capture("picture").Go();
+
+        var picture = run.Picture("picture");
+        var left = picture.At(32, 64);
+        var right = picture.At(96, 64);
+        var hidden = picture.At(56, 64);
+        var empty = picture.At(64, 20);
+
+        Assert.True(left.R > 200 && left.G < 60, $"the first square's pixel was {left}");
+        Assert.True(right.G > 200 && right.R < 60, $"the second square's pixel was {right}");
+        Assert.True(hidden is { R: < 60, G: < 60 }, $"the first square showed through the cube: {hidden}");
+        Assert.True(empty is { R: < 60, G: < 60 }, $"a pixel no square covers held an id: {empty}");
+    }
+
+    /// <summary>
+    /// A square jumping between the left and the right every frame is only where it is this frame
+    /// in an image cleared every frame, and leaves its other place behind in one that is not.
+    /// </summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void AnImageClearedEachFrameForgetsLastFramesDraws(bool cleared)
+    {
+        if (!CanRun) return;
+
+        var centers = AssetHandle.None;
+        var left = false;
+
+        var run = new PictureRun
+        {
+            Width = 128,
+            Height = 128,
+            Scene = ecs =>
+            {
+                var camera = Ortho(ecs);
+                Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
+                Shaders.SetViewImages(camera, new ViewImage("visibility", ShaderImageFormat.R32UInt, ClearEachFrame: cleared));
+
+                centers = Shaders.CreateBuffer<Vector4>([new(2f, 0f, 0f, 1f)]);
+                var square = Draw("shaders/draw_ids.slang").SetBuffer("centers", centers).Set("size", 1f);
+
+                Shaders.SetViewDraws(camera, ViewDraw.Fixed(square, FramePoint.AfterOpaque, 6) with { Into = "visibility" });
+                Shaders.SetPasses(camera, new ShaderPass(Pass("shaders/show_ids.slang"), AfterTonemapping: true));
+            },
+
+            EachFrame = _ =>
+            {
+                if (!centers.IsValid) return;
+
+                left = !left;
+                Shaders.WriteBuffer<Vector4>(centers, [new(left ? -2f : 2f, 0f, 0f, 1f)]);
+            },
+        };
+
+        run.Until("compiled", _ => Ready()).Wait(Settled).Capture("picture").Go();
+
+        var picture = run.Picture("picture");
+        var marked = (picture.At(32, 64).R > 200 ? 1 : 0) + (picture.At(96, 64).R > 200 ? 1 : 0);
+
+        Assert.Equal(cleared ? 1 : 2, marked);
+    }
+
+    /// <summary>
+    /// A watch draws a camera's single-channel float image, scaled, into an image anything can show
+    /// and a capture can read.
+    /// </summary>
+    [Fact]
+    public void AWatchShowsACamerasImage()
+    {
+        if (!CanRun) return;
+
+        var watched = AssetHandle.None;
+        var capture = default(Capture);
+        CapturedImage? shown = null;
+        IReadOnlyList<string> names = [];
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                var camera = PictureRun.Camera(ecs);
+
+                Shaders.SetViewImages(camera, new ViewImage("amount", ShaderImageFormat.R32Float));
+                Shaders.SetViewDispatches(
+                    camera,
+                    ViewDispatch.PerPixel(Compute("shaders/fill_gradient.slang"), FramePoint.AfterPrepass));
+
+                // A quarter doubled, so a half, which shows as middle gray.
+                watched = Shaders.Watch(camera, "amount", 16, 16, scale: 2f);
+                names = Shaders.ViewImageNames(camera);
+            },
+        };
+
+        run.Until("compiled", _ => Ready())
+            .Wait(Settled)
+            .Do("capturing the watch", _ => capture = Render.BeginCapture(watched))
+            .Until("captured", _ => Render.TryReadCapture(capture, out shown))
+            .Go();
+
+        Assert.Contains("amount", names);
+        Assert.NotNull(shown);
+        var middle = shown.At(8, 8);
+
+        Assert.InRange(middle.R, 120, 136);
+        Assert.Equal(middle.R, middle.G);
+        Assert.Equal(middle.R, middle.B);
     }
 
     /// <summary>What cannot be a camera's image or dispatch is refused before reaching the engine.</summary>

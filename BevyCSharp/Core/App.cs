@@ -125,6 +125,7 @@ public sealed unsafe class App : IDisposable
                 Gui = Config.Gui ? 1u : 0u,
                 Offscreen = Config.Offscreen ? 1u : 0u,
                 SpatialScale = Config.SpatialScale,
+                MeshletClusters = Config.MeshletClusters,
             };
             _handle = Native.bcs_app_create(&native);
         }

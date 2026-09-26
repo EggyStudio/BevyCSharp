@@ -434,6 +434,16 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
                         }
                         Err(_) => status::NO_COMPONENT,
                     },
+                    #[cfg(feature = "meshlet")]
+                    "MeshletMesh3d" => match untyped
+                        .try_typed::<bevy::pbr::experimental::meshlet::MeshletMesh>()
+                    {
+                        Ok(handle) => {
+                            crate::render::meshlets::attach(entity_mut.into_world_mut(), entity, handle);
+                            status::OK
+                        }
+                        Err(_) => status::NO_COMPONENT,
+                    },
                     "MeshMaterial3d" => match untyped.clone().try_typed::<StandardMaterial>() {
                         Ok(handle) => {
                             entity_mut.insert(MeshMaterial3d(handle));

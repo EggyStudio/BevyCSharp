@@ -1,6 +1,6 @@
 //! What a camera does to the picture once the scene has been drawn.
 
-use crate::interop::{status, BcsAtmosphereConfig, BcsEffectsConfig, BcsPostConfig};
+use crate::interop::{status, BcsAtmosphereConfig, BcsEffectsConfig, BcsPostConfig, BcsReflectionConfig};
 
 #[cfg(feature = "render")]
 use super::{image_handle, refuse_unless_camera};
@@ -62,9 +62,11 @@ pub struct RequestedPrepass(pub u32);
 /// Asks a camera to draw depth, normals and motion vectors before the scene, for its shader passes
 /// and compute shaders to read.
 ///
-/// `flags` is a bit each: `1` depth, `2` normals, `4` motion vectors. A bit left clear takes that
-/// prepass off again, unless something else on the camera needs it, which is temporal antialiasing
-/// for depth and motion, and motion blur for motion.
+/// `flags` is a bit each: `1` depth, `2` normals, `4` motion vectors, `8` Bevy's G-buffer, which
+/// also turns deferred rendering on, and `16` keeping the previous frame's depth and G-buffer beside
+/// this frame's, which does nothing without one of them. A bit left clear takes that prepass off again, unless
+/// something else on the camera needs it, which is temporal antialiasing for depth and motion,
+/// motion blur for motion, and screen-space reflections for depth and the G-buffer.
 ///
 /// A prepass draws the scene a second time, so it is only worth asking for when something reads
 /// what it draws. A multisampled camera draws them multisampled, which a pass cannot bind, so a
@@ -81,7 +83,11 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
         #[cfg(feature = "render")]
         {
             use bevy::anti_alias::taa::TemporalAntiAliasing;
-            use bevy::core_pipeline::prepass::{DepthPrepass, MotionVectorPrepass, NormalPrepass};
+            use bevy::core_pipeline::prepass::{
+                DeferredPrepass, DeferredPrepassDoubleBuffer, DepthPrepass,
+                DepthPrepassDoubleBuffer, MotionVectorPrepass, NormalPrepass,
+            };
+            use bevy::pbr::ScreenSpaceReflections;
             use bevy::post_process::motion_blur::MotionBlur;
 
             let entity = bevy::ecs::entity::Entity::from_bits(camera);
@@ -91,13 +97,39 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
                     return refusal;
                 }
 
+                // Deferred is a switch for every camera's materials as well as a prepass on this
+                // one, and is left on when this camera stops asking, since others may be reading it.
+                if flags & 8 != 0 {
+                    set_deferred(world, true);
+                }
+
                 let mut camera = world.entity_mut(entity);
                 camera.insert(RequestedPrepass(flags));
+                let reflecting = camera.contains::<ScreenSpaceReflections>();
 
-                if flags & 1 != 0 {
+                // The G-buffer is drawn over the depth the depth prepass leaves, so it brings that.
+                if flags & (1 | 8) != 0 {
                     camera.insert(DepthPrepass);
-                } else if !camera.contains::<TemporalAntiAliasing>() {
+                } else if !camera.contains::<TemporalAntiAliasing>() && !reflecting {
                     camera.remove::<DepthPrepass>();
+                }
+
+                if flags & 8 != 0 {
+                    camera.insert(DeferredPrepass);
+                } else if !reflecting {
+                    camera.remove::<DeferredPrepass>();
+                }
+
+                // Last frame's depth, and G-buffer where there is one, kept beside this frame's.
+                // Removed first either way, since each requires its prepass and would put it back.
+                camera.remove::<(DepthPrepassDoubleBuffer, DeferredPrepassDoubleBuffer)>();
+
+                if flags & 16 != 0 && flags & (1 | 8) != 0 {
+                    camera.insert(DepthPrepassDoubleBuffer);
+
+                    if flags & 8 != 0 {
+                        camera.insert(DeferredPrepassDoubleBuffer);
+                    }
                 }
 
                 if flags & 2 != 0 {
@@ -447,14 +479,16 @@ pub struct PendingCubemap {
     pub light: Option<(bevy::ecs::entity::Entity, f32, bevy::math::Quat)>,
 }
 
-/// One camera waiting to be lit by a pair of cubemaps somebody baked.
+/// One camera or light probe waiting to be lit by a pair of cubemaps somebody baked.
 ///
 /// Two images rather than one, so both have to be a cube before the light can be inserted, which
-/// is why this waits on its own rather than riding on [`PendingCubemap`].
+/// is why this waits on its own rather than riding on [`PendingCubemap`]. On a camera the pair
+/// lights everything it sees; on a light probe it lights what is inside the probe's box, which is
+/// what Bevy calls a reflection probe.
 #[cfg(feature = "render")]
 pub struct PendingEnvironment {
-    /// The camera to light.
-    pub camera: bevy::ecs::entity::Entity,
+    /// The camera or light probe to light.
+    pub target: bevy::ecs::entity::Entity,
     /// The blurred map, which is what a rough surface reflects.
     pub diffuse: bevy::asset::Handle<bevy::image::Image>,
     /// The sharp one, which is what a polished surface reflects.
@@ -468,7 +502,7 @@ pub struct PendingEnvironment {
 /// The baked environment maps waiting for both their images to become cubes.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::resource::Resource, Default)]
-pub struct PendingEnvironments(Vec<PendingEnvironment>);
+pub struct PendingEnvironments(pub(crate) Vec<PendingEnvironment>);
 
 /// The images asked to become cubemaps, waiting for their pixels to arrive.
 ///
@@ -557,8 +591,8 @@ pub fn reinterpret_cubemaps(
             return true;
         }
 
-        if let Ok(mut camera) = commands.get_entity(waiting.camera) {
-            camera.insert(bevy::light::EnvironmentMapLight {
+        if let Ok(mut target) = commands.get_entity(waiting.target) {
+            target.insert(bevy::light::EnvironmentMapLight {
                 diffuse_map: waiting.diffuse.clone(),
                 specular_map: waiting.specular.clone(),
                 intensity: waiting.intensity,
@@ -816,6 +850,143 @@ pub extern "C" fn bcs_render_set_lens_exposure(
 
                 world.entity_mut(entity).insert(Exposure {
                     ev100: lens.ev100(),
+                });
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Draws Bevy's own opaque materials deferred, into a G-buffer lit afterward, or forward, lit as they
+/// are drawn, which is the default.
+///
+/// Deferred is what screen-space reflections read, and what makes many lights cheap. It needs a
+/// camera drawn once a pixel, and it applies to Bevy's own materials only: a material a Slang
+/// program draws is always forward, since it writes its color rather than a surface description.
+/// Every Bevy material is prepared again, which is what moves one already drawn to the other method.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_deferred(on: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = on;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_world(|world| {
+                set_deferred(world, on != 0);
+                status::OK
+            })
+        }
+    })
+}
+
+/// Whether Bevy's own materials are drawn deferred, as last asked.
+#[cfg(feature = "render")]
+#[derive(bevy::ecs::resource::Resource)]
+struct Deferred(bool);
+
+/// Switches Bevy's own materials to deferred or forward, preparing every one of them again.
+#[cfg(feature = "render")]
+fn set_deferred(world: &mut bevy::ecs::world::World, on: bool) {
+    use bevy::pbr::{DefaultOpaqueRendererMethod, StandardMaterial};
+
+    // Kept beside Bevy's resource, whose value cannot be read back, and forward until asked
+    // otherwise, which is Bevy's own default.
+    if world.get_resource::<Deferred>().is_some_and(|deferred| deferred.0 == on)
+        || (!on && world.get_resource::<Deferred>().is_none())
+    {
+        return;
+    }
+
+    world.insert_resource(Deferred(on));
+    world.insert_resource(if on {
+        DefaultOpaqueRendererMethod::deferred()
+    } else {
+        DefaultOpaqueRendererMethod::forward()
+    });
+
+    if let Some(mut materials) = world.get_resource_mut::<bevy::asset::Assets<StandardMaterial>>() {
+        let ids: Vec<_> = materials.ids().collect();
+
+        for id in ids {
+            if let Some(material) = materials.get_mut(id) {
+                material.into_inner();
+            }
+        }
+    }
+}
+
+/// Turns Bevy's screen-space reflections on a camera on, with `config`, or off where it is null.
+///
+/// Reflections are traced against the depth buffer and read the lit picture, so they show only what
+/// is on screen, fading out at its edges, on surfaces smoother than the roughness ranges say. They
+/// read Bevy's deferred G-buffer, so turning them on also draws Bevy's own materials deferred (see
+/// [`bcs_render_set_deferred`]), and asks the camera for the depth and deferred prepasses. A camera
+/// drawn once a pixel is what they work on.
+///
+/// # Safety
+/// `config` must point to a readable [`BcsReflectionConfig`] or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_set_screen_space_reflections(
+    camera: u64,
+    config: *const BcsReflectionConfig,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, config);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::core_pipeline::prepass::{DeferredPrepass, DepthPrepass};
+            use bevy::ecs::entity::Entity;
+            use bevy::pbr::ScreenSpaceReflections;
+
+            let entity = Entity::from_bits(camera);
+            let config = (!config.is_null()).then(|| unsafe { *config });
+
+            with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let Some(config) = config else {
+                    let mut camera = world.entity_mut(entity);
+
+                    if camera.take::<ScreenSpaceReflections>().is_some() {
+                        let asked = camera.get::<RequestedPrepass>().map_or(0, |asked| asked.0);
+
+                        if asked & 8 == 0 {
+                            camera.remove::<DeferredPrepass>();
+                        }
+
+                        if asked & (1 | 8) == 0
+                            && !camera.contains::<bevy::anti_alias::taa::TemporalAntiAliasing>()
+                        {
+                            camera.remove::<DepthPrepass>();
+                        }
+                    }
+
+                    return status::OK;
+                };
+
+                set_deferred(world, true);
+
+                world.entity_mut(entity).insert(ScreenSpaceReflections {
+                    min_perceptual_roughness: config.min_roughness_start..config.min_roughness_full,
+                    max_perceptual_roughness: config.max_roughness_start..config.max_roughness_end,
+                    thickness: config.thickness,
+                    linear_steps: config.linear_steps.max(1),
+                    linear_march_exponent: config.linear_exponent,
+                    edge_fadeout: config.edge_gone..config.edge_full,
+                    bisection_steps: config.bisection_steps,
+                    use_secant: config.use_secant != 0,
                 });
 
                 status::OK
@@ -1502,7 +1673,7 @@ pub unsafe extern "C" fn bcs_render_set_environment_map(
                     .get_resource_or_init::<PendingEnvironments>()
                     .0
                     .push(PendingEnvironment {
-                        camera: entity,
+                        target: entity,
                         diffuse,
                         specular,
                         intensity,

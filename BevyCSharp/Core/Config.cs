@@ -154,6 +154,26 @@ public sealed class Config
     public float SpatialScale { get; set; }
 
     /// <summary>
+    /// How many meshlet clusters the GPU keeps room for at once, which turns Bevy's meshlets on.
+    /// Zero, the default, leaves them off.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Meshlets need a bridge built with them (<c>build/build-native.sh --editor --meshlet</c>) and a
+    /// GPU with 64-bit texture atomics on Vulkan or Metal. The bridge asks the GPU before turning
+    /// them on, and on one that lacks them says so and runs without, which
+    /// <see cref="Render.MeshletsActive"/> reports.
+    /// </para>
+    /// <para>
+    /// Each cluster costs four bytes of GPU memory, and too few shows as meshes flickering or
+    /// missing parts where more clusters are in view than there is room for. A few million is room
+    /// for a dense scene, and Bevy's limit is two to the twenty-fifth. While meshlets run every
+    /// camera draws once a pixel, since Bevy's meshlet renderer cannot draw a multisampled picture.
+    /// </para>
+    /// </remarks>
+    public uint MeshletClusters { get; set; }
+
+    /// <summary>
     /// Answer the command line while this app runs.
     /// </summary>
     /// <remarks>

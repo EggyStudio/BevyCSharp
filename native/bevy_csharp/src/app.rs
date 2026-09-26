@@ -279,6 +279,23 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 app.add_plugins(plugins);
             }
 
+            // Meshlets, if the app asked for them and the bridge was built with them. Added beside
+            // the default plugins rather than inside them, because the plugin has to be told its
+            // cluster budget and has to be kept out entirely on a GPU that cannot run it.
+            #[cfg(feature = "meshlet")]
+            if config.meshlet_clusters > 0 {
+                let backends = backends.map(|backends| wgpu::Backends::from_bits_truncate(backends.bits()));
+                crate::render::meshlets::install(&mut app, config.meshlet_clusters, backends);
+            }
+
+            #[cfg(not(feature = "meshlet"))]
+            if config.meshlet_clusters > 0 {
+                bevy::log::warn!(
+                    "Meshlets were asked for, but this bridge was built without them. Build it \
+                     with --meshlet."
+                );
+            }
+
             // Auto exposure is the one post-processing effect `DefaultPlugins` leaves out, since
             // it needs compute shaders and so cannot run everywhere the rest can. Every desktop
             // backend the bridge builds for has them.
@@ -325,6 +342,11 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             app.add_systems(
                 bevy::app::PreUpdate,
                 crate::render::post::reinterpret_cubemaps,
+            );
+            // An irradiance volume's image is only known to be 3D once it has loaded.
+            app.add_systems(
+                bevy::app::PreUpdate,
+                crate::render::probes::drop_flat_volumes,
             );
             app.init_resource::<crate::render::assets::PendingReshapes>();
             app.add_systems(

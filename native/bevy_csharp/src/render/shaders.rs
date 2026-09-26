@@ -720,6 +720,27 @@ pub struct BcsViewImage {
     pub history: i32,
     /// How many mip levels, at least one.
     pub mips: i32,
+    /// The frame point at which the picture is copied in, `1` to `3` as for a dispatch, or `-1`
+    /// for none. Only into a format a draw can write numbers to, which is a float or eight-bit one.
+    pub copy: i32,
+    /// Non-zero to clear it to zero at the start of every frame.
+    pub clear: i32,
+}
+
+/// Whether the picture can be copied into an image of `format`, which a draw writing floats does.
+#[cfg(feature = "render")]
+fn copy_target(format: bevy::render::render_resource::TextureFormat) -> bool {
+    use bevy::render::render_resource::TextureFormat;
+
+    matches!(
+        format,
+        TextureFormat::Rgba8Unorm
+            | TextureFormat::Rgba16Float
+            | TextureFormat::Rgba32Float
+            | TextureFormat::R32Float
+            | TextureFormat::Rg32Float
+            | TextureFormat::R16Float
+    )
 }
 
 /// One dispatch a camera runs every frame, as the managed side describes it.
@@ -791,12 +812,26 @@ pub unsafe extern "C" fn bcs_render_set_view_images(
                     return status::NULL_ARG;
                 }
 
+                // After the prepass there is no picture yet to copy, and an integer image cannot
+                // hold one, so both are refused rather than copied as zeros.
+                let copy = match image.copy {
+                    -1 => None,
+                    1..=3 => super::views::FramePoint::from_number(image.copy),
+                    _ => return status::NULL_ARG,
+                };
+
+                if copy.is_some() && !copy_target(format) {
+                    return status::NULL_ARG;
+                }
+
                 specs.push(ViewImageSpec {
                     name,
                     format,
                     scale: image.scale,
                     history: image.history != 0,
                     mips: image.mips.max(1) as u32,
+                    copy,
+                    clear: image.clear != 0,
                 });
             }
 
@@ -936,6 +971,9 @@ pub struct BcsViewDraw {
     pub blend: i32,
     /// Non-zero to write depth as well as test against it.
     pub depth_write: i32,
+    /// NUL-terminated UTF-8 naming one of the camera's images to draw into, or null for the
+    /// picture.
+    pub target: *const core::ffi::c_char,
 }
 
 /// Replaces the draws a camera makes every frame with `count` of them, in order. A count of zero
@@ -1022,7 +1060,16 @@ pub unsafe extern "C" fn bcs_render_set_view_draws(
                         _ => DrawBlend::Opaque,
                     };
 
-                    list.push((draw.instance as usize, point, count, blend, draw.depth_write != 0));
+                    let target = if draw.target.is_null() {
+                        None
+                    } else {
+                        match unsafe { crate::interop::cstr_to_string(draw.target) } {
+                            Some(name) if !name.is_empty() => Some(name),
+                            _ => return status::NULL_ARG,
+                        }
+                    };
+
+                    list.push((draw.instance as usize, point, count, blend, draw.depth_write != 0, target));
                 }
 
                 let mut camera = world.entity_mut(entity);
@@ -1050,6 +1097,7 @@ pub struct DrawInstances(
         super::views::DrawCount,
         super::views::DrawBlend,
         bool,
+        Option<String>,
     )>,
 );
 
@@ -1071,7 +1119,7 @@ pub fn sync_view_draws(
         let draws = wanted
             .0
             .iter()
-            .filter_map(|(id, point, count, blend, depth_write)| {
+            .filter_map(|(id, point, count, blend, depth_write, target)| {
                 let instance = instances.0.get(*id)?;
                 Some(ViewDraw {
                     program: instance.program,
@@ -1080,6 +1128,7 @@ pub fn sync_view_draws(
                     count: count.clone(),
                     blend: *blend,
                     depth_write: *depth_write,
+                    target: target.clone(),
                 })
             })
             .collect();
@@ -2228,7 +2277,9 @@ mod tests {
     fn the_view_configs_have_the_layout_the_managed_side_mirrors() {
         assert_eq!(offset_of!(BcsViewImage, format), 8);
         assert_eq!(offset_of!(BcsViewImage, mips), 20);
-        assert_eq!(size_of::<BcsViewImage>(), 24);
+        assert_eq!(offset_of!(BcsViewImage, copy), 24);
+        assert_eq!(offset_of!(BcsViewImage, clear), 28);
+        assert_eq!(size_of::<BcsViewImage>(), 32);
         assert_eq!(offset_of!(BcsViewDispatch, groups), 12);
         assert_eq!(offset_of!(BcsViewDispatch, scale), 24);
         assert_eq!(offset_of!(BcsViewDispatch, offset), 32);
@@ -2240,7 +2291,8 @@ mod tests {
         assert_eq!(offset_of!(BcsViewDraw, vertices), 12);
         assert_eq!(offset_of!(BcsViewDraw, offset), 24);
         assert_eq!(offset_of!(BcsViewDraw, depth_write), 32);
-        assert_eq!(size_of::<BcsViewDraw>(), 36);
+        assert_eq!(offset_of!(BcsViewDraw, target), 40);
+        assert_eq!(size_of::<BcsViewDraw>(), 48);
     }
 
     #[test]

@@ -221,11 +221,12 @@ fn draw_watches(
     mut ctx: RenderContext,
 ) {
     let Some(pipelines) = pipelines else {
+        super::material::say_once("Watches cannot draw, because their pipelines were never made.".into());
         return;
     };
 
     let (watches, owned, occlusion, prepass) = view.into_inner();
-    let names = view_names(owned, occlusion);
+    let names = view_names(owned, occlusion, prepass);
 
     let single = |texture: &bevy::render::render_resource::Texture| texture.sample_count() == 1;
 
@@ -252,11 +253,25 @@ fn draw_watches(
                 })
             });
 
-        let (Some((source, format)), Some(target)) = (found, images.get(&watch.image)) else {
+        let Some((source, format)) = found else {
+            super::material::say_once(format!(
+                "A watch names {}, which this camera does not have this frame, so it shows nothing.",
+                watch.name
+            ));
+            continue;
+        };
+
+        // The image a watch draws into is made on the frame it is asked for, and reaches the GPU a
+        // frame later.
+        let Some(target) = images.get(&watch.image) else {
             continue;
         };
 
         let Some(reading) = Reading::of(format) else {
+            super::material::say_once(format!(
+                "A watch names {}, a {format:?} image, which cannot be read to be shown.",
+                watch.name
+            ));
             continue;
         };
 
@@ -264,6 +279,7 @@ fn draw_watches(
             continue;
         };
 
+        // Still compiling.
         let Some(pipeline) = cache.get_render_pipeline(*pipeline) else {
             continue;
         };
