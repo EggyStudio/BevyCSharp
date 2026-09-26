@@ -24,7 +24,7 @@ public static class ComponentFields
         field.Hints.Step is { } step and > 0d ? (float)step : 0.01f;
 
     /// <summary>
-    /// Whether a field is drawn at all, which is what its conditions say.
+    /// Whether a field is drawn at all, as its conditions say.
     /// </summary>
     /// <remarks>
     /// A condition names another field of the same component and either a value it has to have or,
@@ -113,8 +113,8 @@ public static class ComponentFields
     /// </para>
     /// <para>
     /// Under the field's own name as the key, so a drag along a handle or a number typed one
-    /// character at a time is one edit rather than one per frame. That is what the key on an edit
-    /// is for.
+    /// character at a time is one edit rather than one per frame. The key on an edit exists for
+    /// that.
     /// </para>
     /// </remarks>
     /// <param name="ctx">This frame.</param>
@@ -189,9 +189,9 @@ public static class ComponentFields
             MathF.Max(1f, ImGui.GetContentRegionAvail().X - DetailsPanel.Inset),
             0f);
 
-        // A field that asked for the whole row gets it, with its name on the line above rather
-        // than in a column beside it. What wants that is anything a name column would leave no
-        // room for: a sentence, a path, a color.
+        // A field that asked for the whole row gets it, with its name on the line above rather than
+        // in a column beside it. Anything a name column would leave no room for needs that, such as
+        // a sentence, a path or a color.
         var wide = field.Hints.Wide;
 
         if (wide)
@@ -421,8 +421,8 @@ public static class ComponentFields
                             degrees.Z * FieldNumbers.Radians));
                 }
 
-                // Let go of the angles the moment the box is let go of, so the rotation is what the
-                // world says again rather than what was last typed.
+                // Let go of the angles the moment the box is let go of, so the rotation shows what
+                // the world says again rather than what was last typed.
                 FieldNumbers.Settle(id, holding);
 
                 break;

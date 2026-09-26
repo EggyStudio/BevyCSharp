@@ -13,8 +13,8 @@ namespace BevyCSharp.Editor;
 /// paragraph somebody typed and then forgot to change.
 /// </para>
 /// <para>
-/// A key that runs a menu command runs the menu's own row rather than a copy of it, which is what
-/// keeps the two from drifting apart.
+/// A key that runs a menu command runs the menu's own row rather than a copy of it, which keeps the
+/// two from drifting apart.
 /// </para>
 /// </remarks>
 [Behavior]
@@ -45,8 +45,8 @@ public partial struct EditorKeys
                 : ToolSpace.Local;
         }
 
-        // Held rather than pressed, because snapping while a handle is being dragged is what a
-        // person reaches for mid-drag, and a toggle would be the wrong shape for that.
+        // Held rather than pressed, because a person reaches for snapping mid-drag, and a toggle
+        // would be the wrong shape for that.
         if (ctx.Input.AnyKeyDown([Key.ControlLeft, Key.ControlRight])
             && !ctx.Input.KeyDown(Key.ShiftLeft))
         {

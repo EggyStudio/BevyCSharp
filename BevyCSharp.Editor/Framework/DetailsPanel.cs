@@ -259,10 +259,10 @@ public static class DetailsPanel
     /// </summary>
     /// <remarks>
     /// <para>
-    /// A fold is written on each field rather than around a group of them, because an attribute
-    /// can only be put on the thing it is about. Consecutive fields naming the same fold share it,
-    /// which means the run of fields is what says where a fold begins and ends, and something has
-    /// to keep that as it walks them.
+    /// A fold is written on each field rather than around a group of them, because an attribute can
+    /// only be put on the thing it is about. Consecutive fields naming the same fold share it,
+    /// which means the run of fields says where a fold begins and ends, and something has to keep
+    /// that as it walks them.
     /// </para>
     /// <para>
     /// Whether a fold is open is remembered per component rather than per entity, because somebody
@@ -292,8 +292,8 @@ public static class DetailsPanel
         {
             var wanted = path is { Length: > 0 } ? path.Split('/') : [];
 
-            // Everything the two have in common stays as it is, which is what lets consecutive
-            // fields share a fold rather than closing and reopening it each time.
+            // Everything the two have in common stays as it is, so consecutive fields share a fold
+            // rather than closing and reopening it each time.
             var shared = 0;
 
             while (shared < wanted.Length
@@ -336,7 +336,7 @@ public static class DetailsPanel
                     _visible = false;
                 }
 
-                // ImGui reports the state it drew, and a click on the arrow is what changes it.
+                // ImGui reports the state it drew, and a click on the arrow changes it.
                 if (ImGui.IsItemToggledOpen()) Shown[key] = !open;
             }
 
@@ -506,9 +506,9 @@ public static class DetailsPanel
 
             var draw = ImGui.GetWindowDrawList();
 
-            // The shape a pill is, since that is what a word on a plate is everywhere else here,
-            // in the fill a field wears rather than the one a button does, because this is a
-            // label and not something to press.
+            // The shape of a pill, since a word on a plate is drawn that way everywhere else here,
+            // in the fill a field wears rather than the one a button does, because this is a label
+            // and not something to press.
             EditorDraw.Capsule(at, at + size, ImGui.GetColorU32(ImGuiCol.FrameBg), draw);
 
             draw.AddText(

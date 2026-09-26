@@ -82,8 +82,8 @@ internal static class EditorConsoleCommands
     /// <summary>Opens a folder under the asset root in the assets panel.</summary>
     /// <remarks>
     /// What a person does by clicking a tile, reachable from the console and so from <c>bcs</c>.
-    /// Driving the editor to a particular folder is what checking a tile looks like from outside
-    /// the window, and it is the same call the tile makes.
+    /// Checking a tile from outside the window means driving the editor to a particular folder, and
+    /// it is the same call the tile makes.
     /// </remarks>
     [Command("assets.open", "Opens a folder in the assets panel: assets.open <folder>")]
     internal static string OpenAssets(string folder)
@@ -168,7 +168,7 @@ internal static class EditorConsoleCommands
 
     /// <summary>Writes the world to a file.</summary>
     /// <remarks>
-    /// The named entities and their described components, which is what an edit is. Loading it back
+    /// The named entities and their described components, which make up an edit. Loading it back
     /// puts those values onto the entities of the same names, so it is a file of changes over a
     /// scene rather than the scene itself.
     /// </remarks>

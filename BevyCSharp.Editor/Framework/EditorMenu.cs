@@ -77,11 +77,10 @@ public sealed record MenuItem(
 /// </summary>
 /// <remarks>
 /// <para>
-/// A menu is data, for the same reason a layout is. A hamburger menu, a right-click on the world,
-/// a right-click on an entity and a dropdown on a field are the same mechanism pointed at
-/// different paths, and anything that wants to add a command adds a row rather than editing a
-/// panel. A game's own code can add to it as readily as the editor does, which is what makes the
-/// shipped editor a starting point.
+/// A menu is data, for the same reason a layout is. A hamburger menu, a right-click on the world, a
+/// right-click on an entity and a dropdown on a field are the same mechanism pointed at different
+/// paths, and anything adding a command adds a row rather than editing a panel. A game's own code
+/// can add to it as readily as the editor does, so the shipped editor is a starting point.
 /// </para>
 /// <para>
 /// Paths build the structure. Adding <c>Panels/Rendering</c> makes <c>Panels</c> a submenu without

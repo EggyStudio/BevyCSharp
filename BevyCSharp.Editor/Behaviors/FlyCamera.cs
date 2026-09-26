@@ -199,8 +199,8 @@ public partial struct FlyCamera
 
         if (flying)
         {
-            // The wheel sets how fast the camera flies rather than moving it, which is what
-            // stops a fly-through from being a series of overshoots in a small scene.
+            // The wheel sets how fast the camera flies rather than moving it, which stops a
+            // fly-through from being a series of overshoots in a small scene.
             if (wheel != 0f)
             {
                 Speed = Math.Clamp(Speed * MathF.Pow(1.2f, wheel), 0.05f, 500f);
@@ -250,8 +250,8 @@ public partial struct FlyCamera
 
         // Not while the interface has the keyboard. A letter typed into a name or a command is a
         // letter, and an editor that also reads it as a shortcut moves the camera out from under
-        // somebody in the middle of a word. The button on the toolbar still asks for it, which is
-        // what `FrameWanted` is.
+        // somebody in the middle of a word. The button on the toolbar still asks for it through
+        // `FrameWanted`.
         if ((input.KeyPressed(Key.F) && !ImGuiRuntime.Typing) || FrameWanted)
         {
             FrameWanted = false;

@@ -49,9 +49,9 @@ public static class EditorDraw
     /// </summary>
     /// <remarks>
     /// Untinted, unlike <see cref="Icon"/>, because the editor's icons are shapes cut out of white
-    /// and a file's own picture is what it is. The shape comes back only once the file has loaded,
-    /// so a picture asked for on the frame a folder is opened is drawn square for that one frame
-    /// and correctly from the next.
+    /// and a file's own picture is shown as it is. The shape comes back only once the file has
+    /// loaded, so a picture asked for on the frame a folder is opened is drawn square for that one
+    /// frame and correctly from the next.
     /// </remarks>
     /// <param name="draw">The list to draw into.</param>
     /// <param name="path">The picture, under the asset root.</param>

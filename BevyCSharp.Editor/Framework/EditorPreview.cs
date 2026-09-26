@@ -202,9 +202,8 @@ internal static class EditorPreview
     /// <summary>Sets the layer on an entity and everything under it, and claims it.</summary>
     private static void Walk(BehaviorContext ctx, Entity entity)
     {
-        // Written every frame rather than once, because the same call is what puts a child on the
-        // layer the frame it appears and writing it again costs a component insert on a handful of
-        // entities.
+        // Written every frame rather than once, because the same call puts a child on the layer the
+        // frame it appears and writing it again costs a component insert on a handful of entities.
         Render.SetLayers(ctx.Ecs, entity, Layer);
         Owned.Add(entity);
 

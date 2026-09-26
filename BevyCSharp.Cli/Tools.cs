@@ -228,9 +228,9 @@ internal static partial class Tools
 
     /// <summary>Runs an app once, cold, and passes its output straight through.</summary>
     /// <remarks>
-    /// For when a fresh world really is what is wanted: a headless run of a fixed number of frames,
-    /// which is what a test or a capture of a first frame needs. Driving a running app is cheaper
-    /// for everything else.
+    /// For when a fresh world really is wanted, a headless run of a fixed number of frames, as a
+    /// test or a capture of a first frame needs. Driving a running app is cheaper for everything
+    /// else.
     /// </remarks>
     public static int Run(Options options, string[] arguments)
     {
@@ -347,7 +347,7 @@ internal static partial class Tools
         "--render" => windows ? ["-Render"] : ["--render"],
         "--editor" => windows ? ["-Editor"] : ["--editor"],
 
-        // Neither script takes a flag for the headless profile, which is what it builds by default.
+        // Neither script takes a flag for the headless profile, which it builds by default.
         _ => [],
     };
 

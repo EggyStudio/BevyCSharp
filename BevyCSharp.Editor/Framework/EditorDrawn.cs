@@ -9,9 +9,9 @@ namespace BevyCSharp.Editor.Framework;
 /// <remarks>
 /// <para>
 /// A mesh and a material are Bevy components holding typed handles, so they have no schema and the
-/// inspector cannot draw them the way it draws everything else. What they can be asked is where
-/// they came from, and what they can be told is to point somewhere different, which is enough for
-/// the thing a person actually wants from a panel.
+/// inspector cannot draw them the way it draws everything else. They can be asked where they came
+/// from, and told to point somewhere different, which is enough for the thing a person actually
+/// wants from a panel.
 /// </para>
 /// <para>
 /// Anything built in memory has no path, which is every mesh <c>Render.CreateMesh</c> makes, so the
@@ -22,9 +22,10 @@ internal static class EditorDrawn
 {
     /// <summary>What a glTF file's first mesh is called inside it.</summary>
     /// <remarks>
-    /// A glTF holds many assets and a path alone names none of them, so a label picks one out.
-    /// The first primitive of the first mesh is what a file exported from a modeling tool as one
-    /// object holds, which is most of them. A file with several needs the label written by hand.
+    /// A glTF holds many assets and a path alone names none of them, so a label picks one out. A
+    /// file exported from a modeling tool as one object holds its first primitive of the first
+    /// mesh, and most files are exported that way. A file with several needs the label written by
+    /// hand.
     /// </remarks>
     private const string FirstMesh = "#Mesh0/Primitive0";
 
@@ -81,7 +82,7 @@ internal static class EditorDrawn
     /// <para>
     /// An array shows its first <see cref="ArrayShown"/> elements, because a thousand drags is not
     /// an inspector, and says how many more there are. Values are read back as they were set rather
-    /// than from the GPU, which is what an unset name reading as zero depends on.
+    /// than from the GPU, so an unset name reads as zero.
     /// </para>
     /// </remarks>
     private static void Shader(Entity entity, ShaderProgram program)
@@ -223,7 +224,7 @@ internal static class EditorDrawn
         }
     }
 
-    /// <summary>Whether a name reads as a color, which is what earns it a color picker.</summary>
+    /// <summary>Whether a name reads as a color, which earns it a color picker.</summary>
     private static bool LooksLikeColor(string name)
     {
         var lower = name.ToLowerInvariant();

@@ -53,7 +53,8 @@ public static class EditorSort
         return string.CompareOrdinal(a, b);
     }
 
-    /// <summary>Comparing by this, for the calls that want a comparer rather than a method.</summary>
+    /// <summary>Comparing by this, for the calls that take a comparer rather than a
+    /// method.</summary>
     public static IComparer<string> Comparer { get; } = Comparer<string>.Create(Naturally!);
 
     /// <summary>

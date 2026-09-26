@@ -10,12 +10,12 @@ namespace BevyCSharp.Cli;
 /// <para>
 /// Everything goes to the standard output stream, success and failure alike, so a caller reads one
 /// place and branches on one field. The error stream carries only what a person would want while
-/// watching, which is why nothing should ever be parsed off it.
+/// watching, so nothing should ever be parsed off it.
 /// </para>
 /// <para>
-/// Under <c>--json</c> the envelope the app produced is what gets printed, pretty-printed and
-/// otherwise untouched. The human rendering is a reading of that same document, never a second
-/// source of truth.
+/// Under <c>--json</c> the envelope the app produced gets printed, pretty-printed and otherwise
+/// untouched. The human rendering is a reading of that same document, never a second source of
+/// truth.
 /// </para>
 /// </remarks>
 internal static class Output

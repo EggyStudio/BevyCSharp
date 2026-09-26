@@ -8,9 +8,9 @@ namespace BevyCSharp.Editor;
 /// Brings the editor up and drives it, as an ordinary behavior.
 /// </summary>
 /// <remarks>
-/// Nothing here is privileged. The editor is a BevyCSharp app like any other, which is what lets a
-/// panel bind straight to engine state rather than through an adapter, and what means anything
-/// learned building the editor applies to building a game.
+/// Nothing here is privileged. The editor is a BevyCSharp app like any other, so a panel binds
+/// straight to engine state rather than through an adapter, and anything learned building the
+/// editor applies to building a game.
 /// </remarks>
 [Behavior]
 public partial struct EditorBoot
@@ -166,9 +166,8 @@ public partial struct EditorBoot
     {
         if (!ctx.Input.KeyPressed(Key.Escape)) return;
 
-        // Whatever is being typed into keeps Escape, because it is what somebody reaches for when
-        // they have changed their mind about a value, and quitting instead throws away more than
-        // that.
+        // Whatever is being typed into keeps Escape, because somebody reaches for it when they have
+        // changed their mind about a value, and quitting instead throws away more than that.
         if (ImGuiRuntime.Typing) return;
 
         // A menu closes on Escape as well, which ImGui does for itself. What this does is not quit

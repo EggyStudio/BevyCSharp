@@ -78,7 +78,7 @@ public static class EditorFlyout
 
         if (!EditorWidgets.Flyout(Name))
         {
-            // Dismissed by a click somewhere else, which is what a menu is for.
+            // Dismissed by a click somewhere else, as a menu is.
             _menu = null;
             return;
         }

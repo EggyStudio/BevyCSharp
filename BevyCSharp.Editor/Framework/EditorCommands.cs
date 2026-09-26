@@ -15,9 +15,9 @@ namespace BevyCSharp.Editor.Framework;
 /// each other.
 /// </para>
 /// <para>
-/// A game using this editor adds its own rows the same way, which is what makes the shipped set a
-/// starting point rather than the product: <c>EditorMenu.Command("Spawn/Enemy", …)</c> is the
-/// whole of adding one, and it appears in the menu, in the right click and in the search.
+/// A game using this editor adds its own rows the same way, so the shipped set is a starting point
+/// rather than the product. <c>EditorMenu.Command("Spawn/Enemy", …)</c> is the whole of adding one,
+/// and it appears in the menu, in the right click and in the search.
 /// </para>
 /// </remarks>
 public static class EditorCommands
@@ -579,7 +579,7 @@ public static class EditorCommands
         return transform.Translation + (transform.Rotation * new Vec3(0f, 0f, -5f));
     }
 
-    /// <summary>Points the camera at the selection, which is what F does.</summary>
+    /// <summary>Points the camera at the selection, as F does.</summary>
     /// <remarks>
     /// The camera reads this on its next update rather than being moved from here, because where
     /// the camera is is the fly camera's business and two things writing one transform is how a

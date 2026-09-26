@@ -170,8 +170,8 @@ public static class EditorAssets
 
     /// <summary>What a file is, as far as the engine is concerned.</summary>
     /// <remarks>
-    /// By extension, because that is what the engine's own loaders go on. A kind nothing here
-    /// knows is reported as what it is rather than guessed at.
+    /// By extension, because the engine's own loaders go on that. A kind nothing here knows is
+    /// reported as what it is rather than guessed at.
     /// </remarks>
     public static string KindOf(string relative) => Path.GetExtension(relative).ToLowerInvariant() switch
     {

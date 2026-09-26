@@ -52,10 +52,10 @@ public static class EditorSceneFrame
             draw.AddRectFilled(new Vector2(right, 0f), new Vector2(EditorShell.Panel.X, ImGuiRuntime.Size.Y), color);
         }
 
-        // The bottom right only. That is the one corner of a docked scene with chrome on both
-        // sides of it. The strip runs under it and the panel stands beside it, so taking it off is
-        // what joins the two. The other three meet the window's own edges, where there is nothing
-        // to round against.
+        // The bottom right only. That is the one corner of a docked scene with chrome on both sides
+        // of it. The strip runs under it and the panel stands beside it, so taking it off joins the
+        // two. The other three meet the window's own edges, where there is nothing to round
+        // against.
         Wedge(
             draw,
             new Vector2(right - radius, bottom - radius),
@@ -133,9 +133,9 @@ public static class EditorSceneFrame
 
             // Never in the accent, because the accent says what is in force in the scene, and a
             // bright blue disc in the corner of the panel reads as a close button somebody has to
-            // think about. Which way it is set is what the picture in it says.
-            // The pin as it stands. Pushed in while the panel is docked, and lying loose while it
-            // floats, so the picture says what the panel is rather than what the button does.
+            // think about. The picture in it says which way it is set. The pin as it stands. Pushed
+            // in while the panel is docked, and lying loose while it floats, so the picture says
+            // what the panel is rather than what the button does.
             var pin = EditorShell.Docked ? EditorIcons.Pinned : EditorIcons.Loose;
 
             if (ToolbarView.Circle($"dock{EditorShell.Docked}", pin, false, Size))

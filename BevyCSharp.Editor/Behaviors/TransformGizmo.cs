@@ -16,7 +16,7 @@ namespace BevyCSharp.Editor.Behaviors;
 /// What happens then is answered in the world rather than in pixels. A move is where the cursor's
 /// ray comes closest to the axis; a turn is where the ray meets the plane the axis is normal to; a
 /// stretch is how far along the axis that closest point has traveled. Dragging in pixels and
-/// scaling by some factor is what makes a gizmo feel like it is guessing.
+/// scaling by some factor makes a gizmo feel like it is guessing.
 /// </para>
 /// </remarks>
 [Behavior]
@@ -40,9 +40,9 @@ public partial struct TransformGizmo
     /// Whether a handle is being dragged, or was let go on this frame.
     /// </summary>
     /// <remarks>
-    /// The frame matters. A drag ends on a release, and the same release is what everything else
-    /// reads as a click; whoever asks may run before or after the drag has finished, so the answer
-    /// has to outlast the moment the axis is given up.
+    /// The frame matters. A drag ends on a release, and everything else reads the same release as a
+    /// click; whoever asks may run before or after the drag has finished, so the answer has to
+    /// outlast the moment the axis is given up.
     /// </remarks>
     internal static bool DraggingOn(ulong frame) => Axis >= 0 || _released == frame;
 
@@ -190,8 +190,8 @@ public partial struct TransformGizmo
     /// </summary>
     /// <remarks>
     /// What a drag across the screen means in the world. The plane faces the camera so that the
-    /// thing follows the pointer exactly however the view is angled, which is what makes the
-    /// middle handle feel like dragging the object itself rather than steering it.
+    /// thing follows the pointer exactly however the view is angled, which makes the middle handle
+    /// feel like dragging the object itself rather than steering it.
     /// </remarks>
     private static Vec3? PlanePoint(
         BehaviorContext ctx, Entity camera, float x, float y, Vec3 center)
@@ -289,14 +289,14 @@ public partial struct TransformGizmo
     /// <remarks>
     /// <para>
     /// Each about its own origin by default. Turning three things about a shared center swings two
-    /// of them across the level, which is occasionally what somebody wants and never what they
-    /// expect from a first drag.
+    /// of them across the level, which somebody occasionally wants and never expects from a first
+    /// drag.
     /// </para>
     /// <para>
-    /// It is what somebody wants often enough to be a toggle, though. Arranging a row of lamps
-    /// about a point is turning the arrangement rather than the lamps. In that mode the change is
-    /// applied to where each thing is as well as to how it is facing, about the point the handles
-    /// are drawn at.
+    /// Somebody wants it often enough for a toggle, though. Arranging a row of lamps about a point
+    /// is turning the arrangement rather than the lamps. In that mode the change is applied to
+    /// where each thing is as well as to how it is facing, about the point the handles are drawn
+    /// at.
     /// </para>
     /// </remarks>
     private static void Share(BehaviorContext ctx, Transform current)
@@ -328,8 +328,8 @@ public partial struct TransformGizmo
             }
 
             // Where it stands relative to the point the handles are on, turned and stretched the
-            // same way the handles were, and put back. A thing at the center does not move, which
-            // is what makes this read as turning the arrangement.
+            // same way the handles were, and put back. A thing at the center does not move, so this
+            // reads as turning the arrangement.
             var out_ = was.Translation - _center;
             var swung = turned * out_;
 
@@ -377,8 +377,8 @@ public partial struct TransformGizmo
                 break;
 
             case EditorTool.Scale:
-                // How far the grabbed point has traveled, as a fraction of where it started,
-                // which is what makes dragging outwards grow the thing rather than move it.
+                // How far the grabbed point has traveled, as a fraction of where it started, so
+                // dragging outwards grows the thing rather than move it.
                 var reference = MathF.Abs(_start) < 0.001f ? 1f : _start;
                 var factor = EditorTools.Snapped(now / reference, EditorTools.ScaleStep);
 
@@ -512,9 +512,9 @@ public partial struct TransformGizmo
     /// Where the pointer is, in whatever the current tool measures in.
     /// </summary>
     /// <remarks>
-    /// Distance along the axis for a move and a stretch, and an angle about it for a turn. Both
-    /// are answered against the cursor's ray in the world rather than against pixels, which is
-    /// what keeps a drag exact however the camera is angled.
+    /// Distance along the axis for a move and a stretch, and an angle about it for a turn. Both are
+    /// answered against the cursor's ray in the world rather than against pixels, which keeps a
+    /// drag exact however the camera is angled.
     /// </remarks>
     private static float? Measure(
         BehaviorContext ctx, Entity camera, float x, float y, Vec3 center)

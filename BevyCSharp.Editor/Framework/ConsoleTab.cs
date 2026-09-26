@@ -152,9 +152,9 @@ public static class ConsoleTab
     /// </summary>
     /// <remarks>
     /// Read here rather than through ImGui's own history callback, which needs an unmanaged
-    /// function to rewrite the buffer it is editing. Asking for the focus again is what makes the
-    /// box take up the new text, because ImGui reads the string it was given when a box becomes
-    /// active and not while it is.
+    /// function to rewrite the buffer it is editing. Asking for the focus again makes the box take
+    /// up the new text, because ImGui reads the string it was given when a box becomes active and
+    /// not while it is.
     /// </remarks>
     private static void Recall()
     {

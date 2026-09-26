@@ -11,7 +11,7 @@ namespace BevyCSharp.Editor.Behaviors;
 /// <para>
 /// Without this, selecting something changes two lines of text in a panel and nothing where the
 /// person is looking. The box is the whole point of clicking a thing rather than a row in a list,
-/// and the handles are what makes a tool visible before it is used.
+/// and the handles make a tool visible before it is used.
 /// </para>
 /// <para>
 /// Everything here is lines in the world. There is no overlay to draw into, so the orientation
@@ -30,7 +30,7 @@ public partial struct ViewportGizmos
     private static (float R, float G, float B, float A) Accent =>
         EditorTheme.Linear(EditorTheme.LiveAccent);
 
-    /// <summary>Red, green and blue for X, Y and Z, as the scene wants them.</summary>
+    /// <summary>Red, green and blue for X, Y and Z, as the scene takes them.</summary>
     /// <remarks>
     /// <see cref="EditorTheme.Axes"/>, which the cross in the corner draws with as well, put
     /// through the conversion everything drawn in the scene needs.
@@ -159,9 +159,9 @@ public partial struct ViewportGizmos
     /// How far a grid reaches before it has faded away entirely.
     /// </summary>
     /// <remarks>
-    /// The smaller of what the spacing wants and what the height allows. A grid sized only by its
-    /// own spacing puts the coarsest one a hundred times further out than the finest, which is a
-    /// haze of lines running to the horizon long after they have stopped saying anything about
+    /// The smaller of what the spacing asks for and what the height allows. A grid sized only by
+    /// its own spacing puts the coarsest one a hundred times further out than the finest, which is
+    /// a haze of lines running to the horizon long after they have stopped saying anything about
     /// where things are. How far somebody can usefully see is a question about how high they are,
     /// and the answer is the same for every spacing.
     /// </remarks>
@@ -180,11 +180,11 @@ public partial struct ViewportGizmos
     /// </summary>
     /// <remarks>
     /// <para>
-    /// One question asked of each spacing on its own, which is what makes the change between two of
-    /// them impossible to catch happening. A spacing is at full strength when its cells are the size
-    /// the height calls for, and fades away over the decade on either side of that: out below, as
-    /// the cells shrink toward nothing, and <em>in</em> from above, as they come down from being
-    /// too large to be a grid at all.
+    /// One question asked of each spacing on its own, which makes the change between two of them
+    /// impossible to catch happening. A spacing is at full strength when its cells are the size the
+    /// height calls for, and fades away over the decade on either side of that: out below, as the
+    /// cells shrink toward nothing, and <em>in</em> from above, as they come down from being too
+    /// large to be a grid at all.
     /// </para>
     /// <para>
     /// Both halves matter and only one of them is obvious. A grid written without thinking about
@@ -193,7 +193,7 @@ public partial struct ViewportGizmos
     /// </para>
     /// <para>
     /// Coming in takes twice as long as going, and eases rather than ramping. Something arriving is
-    /// noticed and something leaving is not, so the two want different lengths to feel like the
+    /// noticed and something leaving is not, so the two need different lengths to feel like the
     /// same speed. Over one decade each, the way down is invisible and the way up is a spacing
     /// appearing.
     /// </para>
@@ -266,8 +266,8 @@ public partial struct ViewportGizmos
 
             var gone = (0f, 0f, 0f, 0f);
 
-            // Two halves out from the middle, each fading to nothing, which is what makes the far
-            // edge a horizon rather than a boundary.
+            // Two halves out from the middle, each fading to nothing, which makes the far edge a
+            // horizon rather than a boundary.
             sheet[drawn++] = GizmoSegment.Fading(
                 new Vec3(x, height, centerZ),
                 new Vec3(x, height, centerZ - span),
@@ -313,7 +313,7 @@ public partial struct ViewportGizmos
         return Gray(tenth ? strength * Marked : strength);
     }
 
-    /// <summary>How much brighter every tenth line is, which is what gives the floor a scale.</summary>
+    /// <summary>How much brighter every tenth line is, which gives the floor a scale.</summary>
     private const float Marked = 2f;
 
     /// <summary>
@@ -471,7 +471,7 @@ public partial struct ViewportGizmos
         }
     }
 
-    /// <summary>Draws a ring about an axis, which is what a turn is dragged along.</summary>
+    /// <summary>Draws a ring about an axis, which a turn is dragged along.</summary>
     private static void Circle(
         Vec3 center, Vec3 axis, float radius, (float R, float G, float B, float A) color)
     {
@@ -559,9 +559,9 @@ public partial struct ViewportGizmos
         if (depth <= 0f) return Fallback;
 
         // The ray through a point a fixed number of pixels away, taken to the same depth. How far
-        // that lands from the center is what those pixels are worth in the world there, which is
-        // the whole calculation. No field of view is assumed, so a camera set up any way at all
-        // gets a handle the size it asked for.
+        // that lands from the center is the worth of those pixels in the world there, which is the
+        // whole calculation. No field of view is assumed, so a camera set up any way at all gets a
+        // handle the size it asked for.
         if (!Render.TryRay(camera, screenX + Pixels, screenY, out var edge, out var sideways))
         {
             return Fallback;

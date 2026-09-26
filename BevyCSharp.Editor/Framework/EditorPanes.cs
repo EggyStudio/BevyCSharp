@@ -28,8 +28,8 @@ public static class EditorPanes
         ImGui.SetNextWindowBgAlpha(EditorShell.Docked ? 1f : EditorTheme.Current.WindowAlpha);
         ImGui.PushStyleColor(ImGuiCol.WindowBg, EditorSurface.Chrome());
 
-        // Square against the window's edge when it is docked. A rounded corner is what says a
-        // thing is floating, and a docked panel is not.
+        // Square against the window's edge when it is docked. A rounded corner says a thing is
+        // floating, and a docked panel is not.
         //
         // Floating, whatever the style says. A value taken from the theme would be written over
         // the style editor's every frame, and nothing dragged there would ever hold.
@@ -116,7 +116,7 @@ public static class EditorPanes
     /// A short pill in the middle rather than a line across, so that it says where to take hold
     /// without drawing a border, which is the one thing this look does not do.
     /// </remarks>
-    /// <param name="body">The room the two cards share, which is what a drag divides.</param>
+    /// <param name="body">The room the two cards share, which a drag divides.</param>
     internal static void Splitter(Vector2 body)
     {
         ImGui.InvisibleButton("##split", new Vector2(body.X, EditorSurface.Gutter));

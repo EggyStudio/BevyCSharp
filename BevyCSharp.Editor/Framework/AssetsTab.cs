@@ -117,7 +117,7 @@ public static class AssetsTab
         RoundedRows.Row(here);
 
         // The arrow folds, the word walks. Clicking a folder's name is how somebody says they want
-        // to look inside it, and folding is what the arrow is for.
+        // to look inside it, and the arrow folds it.
         if (ImGui.IsItemClicked() && !ImGui.IsItemToggledOpen())
         {
             EditorAssets.Enter(path);
