@@ -400,7 +400,7 @@ public static unsafe class Shaders
             }
 
             ids[i] = passes[i].Instance.Id;
-            after[i] = passes[i].AfterTonemapping ? 1 : 0;
+            after[i] = passes[i].Place;
         }
 
         fixed (int* idsAt = ids)
@@ -1015,9 +1015,44 @@ public static unsafe class Shaders
             $"making an instance buffer of {capacity} slots"));
     }
 
+    /// <summary>How many bytes one slot of a material buffer takes.</summary>
+    /// <remarks>
+    /// Base color and emissive color, four floats each, then roughness, metallic, reflectance and
+    /// one for unlit.
+    /// </remarks>
+    public const int MaterialSlotBytes = 48;
+
     /// <summary>
-    /// Puts an entity in a slot of an instance buffer, or with <see cref="Entity.None"/> empties the
-    /// slot. Only valid inside a system.
+    /// Makes a buffer with <paramref name="capacity"/> slots that the engine fills every frame with
+    /// what the entities put in them are made of, from their standard materials. Only valid inside a
+    /// system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A ray that hits something has to know its color to bounce light off it, which is what
+    /// world-space GI and traced reflections shade their hits with. The engine reads it from each
+    /// entity's material rather than a package guessing it, and writes it only when something
+    /// changed. Slots are set with <see cref="SetInstance"/>, and putting an entity in the same slot
+    /// of an instance buffer and a material buffer gives a shader its transform and its material by
+    /// one index.
+    /// </para>
+    /// <para>
+    /// A shader reads it as a <c>StructuredBuffer&lt;bcs_scene::Material&gt;</c>. Textures are not in
+    /// it: the base color is what the material multiplies its texture by, and an entity drawn by a
+    /// shader program, or with no material, holds zeros.
+    /// </para>
+    /// </remarks>
+    public static AssetHandle CreateMaterialBuffer(int capacity)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(capacity, 1);
+        return new AssetHandle(Native.Check(
+            Native.bcs_shader_material_buffer_create(capacity),
+            $"making a material buffer of {capacity} slots"));
+    }
+
+    /// <summary>
+    /// Puts an entity in a slot of an instance or material buffer, or with
+    /// <see cref="Entity.None"/> empties the slot. Only valid inside a system.
     /// </summary>
     /// <remarks>
     /// An entity put in a slot starts with no motion, so its previous transform is its current
@@ -1168,7 +1203,10 @@ public static unsafe class Shaders
         ArgumentOutOfRangeException.ThrowIfZero(depth);
 
         var bytes = MemoryMarshal.AsBytes(texels);
-        var wanted = (long)width * height * depth * TexelBytes(format);
+        // A compressed image is counted in four by four blocks, which is how its data is laid out.
+        var wanted = format >= ShaderImageFormat.Bc1
+            ? (long)(width / 4) * (height / 4) * depth * TexelBytes(format)
+            : (long)width * height * depth * TexelBytes(format);
 
         if (bytes.Length != wanted)
         {
@@ -1185,7 +1223,53 @@ public static unsafe class Shaders
         }
     }
 
-    /// <summary>How many bytes one texel of <paramref name="format"/> takes.</summary>
+    /// <summary>
+    /// Writes texels into a region of an image, <paramref name="width"/> by
+    /// <paramref name="height"/> at <paramref name="x"/>, <paramref name="y"/>, on the GPU before
+    /// this frame's work runs. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What a texture streamer uploads a tile into its cache with, and what an image changed a piece
+    /// at a time wants rather than being made again. The texels are in the image format's own layout,
+    /// row after row and slice after slice, as for <see cref="CreateImage{T}"/>, and
+    /// <paramref name="depth"/> slices from <paramref name="z"/> reach into a 3D image or the
+    /// layers of an array. <paramref name="mip"/> picks the level, whose size is the image's halved
+    /// that many times.
+    /// </para>
+    /// <para>
+    /// Only the GPU's copy changes, which is all a shader reads. Writes land in the order they are
+    /// asked for, and one made before the image is on the GPU waits for it.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// The region is outside the level, or the texels are not exactly its size in bytes.
+    /// </exception>
+    public static void WriteImage<T>(
+        AssetHandle image,
+        ReadOnlySpan<T> texels,
+        uint x,
+        uint y,
+        uint width,
+        uint height,
+        uint z = 0,
+        uint depth = 1,
+        uint mip = 0) where T : unmanaged
+    {
+        var bytes = MemoryMarshal.AsBytes(texels);
+
+        fixed (byte* at = bytes)
+        {
+            Native.Check(
+                Native.bcs_shader_image_write(image.Key, x, y, z, width, height, depth, mip, at, bytes.Length),
+                $"writing a {width}x{height}x{depth} region of an image");
+        }
+    }
+
+    /// <summary>
+    /// How many bytes one texel of <paramref name="format"/> takes, or for a block-compressed
+    /// format one four by four block.
+    /// </summary>
     public static int TexelBytes(ShaderImageFormat format) => format switch
     {
         ShaderImageFormat.Rgba8 or ShaderImageFormat.R32Float or ShaderImageFormat.R32UInt
@@ -1193,6 +1277,8 @@ public static unsafe class Shaders
         ShaderImageFormat.Rgba16Float or ShaderImageFormat.Rg32Float => 8,
         ShaderImageFormat.Rgba32Float or ShaderImageFormat.Rgba32UInt => 16,
         ShaderImageFormat.R16Float => 2,
+        ShaderImageFormat.Bc1 or ShaderImageFormat.Bc4 => 8,
+        ShaderImageFormat.Bc5 or ShaderImageFormat.Bc7 or ShaderImageFormat.Bc7Srgb or ShaderImageFormat.Bc6hFloat => 16,
         _ => throw new ArgumentOutOfRangeException(nameof(format)),
     };
 
@@ -1802,8 +1888,27 @@ public readonly struct ShaderInstance : IShaderValues, IEquatable<ShaderInstance
 /// are still proportional to it. After is right for anything about the picture as a picture, such
 /// as scan lines, a palette or dithering.
 /// </param>
-public readonly record struct ShaderPass(ShaderInstance Instance, bool AfterTonemapping = false)
+/// <param name="At">
+/// A point of the frame to run at instead, which is <see cref="FramePoint.AfterOpaque"/>: on the lit
+/// opaque geometry, before transparent geometry is drawn over it, which is where something about
+/// the lit surfaces goes (a screen-space reflection or GI composite, a fog glass should not be
+/// under). It needs a camera drawn once a pixel (<see cref="PostSettings.Msaa"/> of one), since a
+/// multisampled picture is not resolved until transparent geometry is drawn. Null runs the pass by
+/// <paramref name="AfterTonemapping"/>, and the tonemapping points may be named here as well.
+/// </param>
+public readonly record struct ShaderPass(ShaderInstance Instance, bool AfterTonemapping = false, FramePoint? At = null)
 {
+    /// <summary>Where the bridge runs it, as the number it reads.</summary>
+    internal int Place => At switch
+    {
+        null => AfterTonemapping ? 1 : 0,
+        FramePoint.BeforeTonemapping => 0,
+        FramePoint.AfterTonemapping => 1,
+        FramePoint.AfterOpaque => 2,
+        _ => throw new ArgumentException(
+            "A pass runs on the picture, which does not exist yet after the prepass.", nameof(At)),
+    };
+
     /// <summary>A pass that runs before tonemapping.</summary>
     public static implicit operator ShaderPass(ShaderInstance instance) => new(instance);
 }
@@ -2345,6 +2450,29 @@ public enum ShaderImageFormat
 
     /// <summary>One half float (<c>r16f</c>).</summary>
     R16Float = 9,
+
+    /// <summary>
+    /// Block-compressed color with one bit of alpha, eight bytes a four by four block. This and the
+    /// compressed formats after it are only read, through a sampler: they are made empty or from
+    /// blocks and filled a block at a time with <see cref="Shaders.WriteImage{T}"/>, which is what
+    /// a streamed texture's cache is kept in.
+    /// </summary>
+    Bc1 = 10,
+
+    /// <summary>One block-compressed channel, eight bytes a block: a height, a mask, a roughness.</summary>
+    Bc4 = 11,
+
+    /// <summary>Two block-compressed channels, sixteen bytes a block, which is a normal map's form.</summary>
+    Bc5 = 12,
+
+    /// <summary>Block-compressed color and alpha at the best quality, sixteen bytes a block.</summary>
+    Bc7 = 13,
+
+    /// <summary>As <see cref="Bc7"/>, read as sRGB, which is what a color texture is stored in.</summary>
+    Bc7Srgb = 14,
+
+    /// <summary>Block-compressed color brighter than white, sixteen bytes a block, for light and skies.</summary>
+    Bc6hFloat = 15,
 }
 
 /// <summary>An image a camera owns. See <see cref="Shaders.SetViewImages"/>.</summary>

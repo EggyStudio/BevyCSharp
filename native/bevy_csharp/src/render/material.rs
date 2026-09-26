@@ -713,7 +713,10 @@ pub fn install(app: &mut bevy::app::App, root: std::path::PathBuf) {
         .init_resource::<super::instances::InstanceBuffers>()
         .add_systems(
             PostUpdate,
-            super::instances::write_instances.after(bevy::transform::TransformSystems::Propagate),
+            (
+                super::instances::write_instances.after(bevy::transform::TransformSystems::Propagate),
+                super::instances::write_materials,
+            ),
         )
         .add_systems(
             First,

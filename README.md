@@ -666,6 +666,22 @@ copied next to the DLL are not found. Naming the directory outright is the only 
 AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets")
 ```
 
+Streaming is the other way to read: parts of large files, a piece at a time, while the game runs,
+which is what texture and geometry streaming read their tiles and clusters with.
+
+```csharp
+var tile = Streaming.Read("world.pages", offset: page * PageBytes, length: PageBytes, priority: onScreen ? 1 : 0);
+
+// Every frame, until it arrives:
+if (Streaming.TryTake(tile, out var bytes)) Shaders.WriteImage<byte>(cache, bytes, x, y, 128, 128);
+```
+
+Reads run on the thread pool, relative to the asset directory, and `TryTake` hands finished ones
+over until `Streaming.BytesPerFrame` bytes have gone out this frame, so a burst of reads finishing at
+once becomes uploads spread over a few frames rather than a hitch; the first read of a frame is
+always handed over, however large. A finished read of higher priority goes first, and a file that
+could not be read throws from `TryTake`.
+
 ### Models
 
 A glTF file holds many assets, so one is named with a label after the path. `LoadGltfMesh` builds
@@ -811,6 +827,15 @@ for a large one, so `CreateMeshletMesh` does it on a worker once the mesh has lo
 handle it answers draws nothing until then. The mesh has to be indexed triangles with texture
 coordinates. A meshlet mesh is drawn with a standard material, and while meshlets run every camera
 draws once a pixel, since Bevy's meshlet renderer cannot draw a multisampled picture.
+
+Converting is the slow part, so a game does it once. `saveTo:` writes the finished mesh as a file
+under the asset root, and that file loads as fast as it reads:
+
+```csharp
+Render.CreateMeshletMesh(statueMesh, saveTo: "baked/statue.meshlet_mesh");   // once, in a tool
+
+var statue = AssetServer.Load(AssetKind.MeshletMesh, "baked/statue.meshlet_mesh");   // after
+```
 
 #### Materials
 
@@ -1023,8 +1048,11 @@ depth into world units, `world_position` turns a pixel back into a point in the 
 binds the far plane, white normals and no motion, and so does a multisampled one, whose prepass a
 pass cannot bind. A pass before tonemapping sees the linear
 picture, which may be brighter than white, and suits anything about light; one after sees what the
-screen will show, and suits anything about the picture as a picture. A pass still compiling is
-skipped rather than drawn wrong, and passes run in the order given, each over what the last wrote.
+screen will show, and suits anything about the picture as a picture. `At: FramePoint.AfterOpaque`
+runs one on the lit opaque geometry, before transparent geometry is drawn over it, which is where
+something about the lit surfaces goes, so glass in front is not under a fog or a reflection meant for
+what is behind it; that one needs a camera drawn once a pixel. A pass still compiling is skipped
+rather than drawn wrong, and passes run in the order given, each over what the last wrote.
 
 #### Compute
 
@@ -1074,17 +1102,28 @@ A dispatch is asked for from a system and runs once, that frame, before any came
 instance's values as they were when it was asked for, and dispatches run in the order they were
 asked for. A compute shader declares any number of buffers, images it writes (`RWTexture2D` or
 `RWTexture3D` with a `[format(...)]`), textures it reads and samplers, all set by name.
-`Shaders.CreateImage` makes an image in any of ten formats, from `Rgba8` to `Rgba32Float` and the
-integer ones, two- or three-dimensional, and an image a compute shader writes is an ordinary texture
-to a material or a pass, which is how a compute shader paints a water surface or a noise field into
-something drawn. A buffer's size is fixed when it is made, and `WriteBuffer` replaces its contents in
+`Shaders.CreateImage` makes an image in eight-bit, half and full float and integer formats, from
+`Rgba8` to `Rgba32Float`, two- or three-dimensional, and an image a compute shader writes is an
+ordinary texture to a material or a pass, which is how a compute shader paints a water surface or a
+noise field into something drawn. `Shaders.WriteImage<T>(image, texels, x, y, width, height)`
+writes a region of one from memory, at any mip level and into any slices of a 3D image, before the
+frame's work runs, which is how a texture streamer uploads a tile into its cache without making the
+image again. That cache is usually block-compressed, so `ShaderImageFormat.Bc1`, `Bc4`, `Bc5`,
+`Bc7`, `Bc7Srgb` and `Bc6hFloat` make images a shader samples and never writes, whose sides are
+whole four by four blocks and whose regions are written a block at a time, at a quarter or an eighth
+of the memory the texels would take. A buffer's size is fixed when it is made, and `WriteBuffer` replaces its contents in
 place. `BeginBufferRead` copies one back, and `TryReadBuffer<T>` hands over the elements a frame or
 two later, which is what any readback costs. A program's state stays `Compiling` until its compute
 pipeline has been built, so a dispatch made once it is `Ready` runs rather than being dropped.
 
 Atomics reach a buffer through Slang's `Atomic<T>`, as in `RWStructuredBuffer<Atomic<uint>>` and
 `counter[0].add(1)`, because that is the form Slang turns into WGSL's atomics. `InterlockedAdd` on a
-plain buffer does not compile for WGSL. `Shaders.DispatchIndirect(instance, buffer)` runs as many
+plain buffer does not compile for WGSL. Slang's wave operations run as WGSL subgroup operations on
+an adapter with subgroups, which every desktop one has: `WaveActiveSum`, `WavePrefixSum`,
+`WaveGetLaneIndex`, `WaveReadLaneAt` and the rest of the arithmetic and ballot family, which is what
+a fast prefix sum or stream compaction is built from. `WaveIsFirstLane` is the exception, since the
+WGSL reader Bevy uses has no subgroup election yet, and `WaveGetLaneIndex() == 0` says the same thing.
+`Shaders.DispatchIndirect(instance, buffer)` runs as many
 workgroups as three unsigned integers in a buffer say, read on the GPU when the dispatch runs, so
 one compute shader can count the work (the pixels that need tracing, the clusters that survived
 culling) and the next runs exactly that much without the count crossing back to the CPU.
@@ -1098,6 +1137,12 @@ transforms, this frame's and the previous frame's, once transforms have been wor
 `Shaders.SetInstance(buffer, slot, entity)` puts an entity in a slot. A shader reads it as a
 `StructuredBuffer<bcs_scene::Instance>` after `import bcs_scene;`, which is what culling instances on
 the GPU, voxelizing a scene, or giving geometry a shader placed its motion is built on.
+`Shaders.CreateMaterialBuffer(capacity)` is the same for what entities are made of: each slot holds
+the base color, emissive color, roughness, metallic and reflectance of the entity's standard
+material, as `bcs_scene::Material`, written when they change. Put an entity in the same slot of both
+and a shader reaching it by index has where it is and what light bouncing off it looks like, which is
+what a GI ray shades its hit with. Textures are not in it; the base color is what the material
+multiplies them by.
 
 #### Compute on a camera
 
@@ -1179,7 +1224,10 @@ scene's lights a second time. The sky is there too: `environment_specular(direct
 is what the camera's environment map sends along a direction, blurred as a surface of that roughness
 blurs it, and `environment_diffuse(normal)` what it sends a surface facing a way, both black when
 `has_environment()` is false. That is what a ray that leaves the scene picks up, turned and scaled
-exactly as Bevy's own sky and lighting use the same map.
+exactly as Bevy's own sky and lighting use the same map. And `blue_noise(pixel)` is Bevy's
+spatio-temporal blue noise for this frame, four numbers from zero to one whose values are spread
+evenly across the picture and from frame to frame, which is what a technique taking a few random
+samples a pixel picks them with so its noise blurs away rather than blotching.
 
 What each pixel's surface is made of comes from Bevy's G-buffer. A camera asked for it with
 `Shaders.SetPrepass(camera, depth: true, deferred: true)` draws Bevy's materials deferred, and a
@@ -1247,15 +1295,29 @@ name can be watched, and the prepass's `depth`, `normals` and `motion`, and the 
 packed bits show as noise but show where it was drawn. The editor's Frame tab lists
 the scene camera's names and watches the one picked, which is where a broken link in a chain shows.
 
+**How long each pass takes.** An app made with `Config.GpuTimings` measures every render pass on the
+CPU that records it and the GPU that runs it, and `Render.Timings()` answers the last frames' times,
+smoothed. Bevy's own passes are there under Bevy's names, and every dispatch, pass and draw a shader
+program makes is there as `shader` and its file's name, so a technique's passes sit in the same list
+as the shadows and the tonemapping they are weighed against. The console and `./bcs` have it as
+`render.timings`, slowest first. GPU times need timestamp queries, which Vulkan and DirectX 12 have;
+elsewhere only CPU times arrive.
+
 **Into Bevy's lighting.** Ambient occlusion is the one input to the lighting of Bevy's own materials
 a chain can write so far. `Render.SetAmbientOcclusion(camera, AmbientOcclusionQuality.Low)` turns
 Bevy's own on, and while it is on a compute shader on the camera sees the texture Bevy's lighting
 reads as `ambient_occlusion`, so one run at `AfterPrepass` that writes it replaces Bevy's answer
 with its own, and the ambient light (`Render.SetAmbientLight`) is darkened by it where a surface is
 hemmed in. Diffuse light that varies through space goes in through an irradiance volume a compute
-shader writes (see [Light probes](#light-probes)). A per-pixel indirect diffuse or specular input
-does not exist yet, so a screen-space GI result is composited by a pass;
-[.github/RENDERING.md](.github/RENDERING.md) has what is planned for that.
+shader writes (see [Light probes](#light-probes)). Bevy's lighting has no per-pixel indirect input,
+so a screen-space GI result is added to the picture instead, and done this way it lands where the
+lighting would have put it: a draw of one triangle over the whole picture at `AfterOpaque`, blended
+`Add`, whose fragment shader returns the GI result times the surface's color from the `gbuffer`.
+That is after opaque geometry is lit and before transparent geometry, bloom and tonemapping, so
+glass in front is drawn over it and the tonemapper sees it as light like any other. With the
+camera's ambient light off (`Render.SetAmbientLight(camera, (0, 0, 0), 0)`) it replaces ambient
+rather than adding to it. [.github/RENDERING.md](.github/RENDERING.md) has what a true input inside
+Bevy's lighting would add.
 
 A storage image may be declared in any format the adapter can write, `[format("r16f")]` included,
 although core WGSL has fewer: Slang writes the nearest core format and the bridge puts the declared
@@ -2542,7 +2604,7 @@ run against a real Bevy app. Known gaps:
   glTF files and `.scn` scenes load and spawn, audio plays, and a camera tonemaps, blooms,
   multisamples, antialiases, scatters a sky over what it draws, pulls focus and finds its own
   exposure. What is thin is the layer above that. Animation has no bridge, sprites step through
-  no frames of their own, and the GPU-compressed texture formats are not decoded.
+  no frames of their own, and a compressed texture a desktop GPU cannot decode is not transcoded.
   [.github/TODO.md](.github/TODO.md) lists what each gap needs.
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does
   nothing yet. The editor reloads scripts through `App.EnableDynamicSystems` instead, because

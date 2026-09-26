@@ -151,6 +151,13 @@ public static class AssetKind
     public const string Font = "Font";
 
     /// <summary>
+    /// A baked meshlet mesh, a <c>.meshlet_mesh</c> file written by
+    /// <see cref="Render.CreateMeshletMesh"/>. Needs meshlets running (see
+    /// <see cref="Render.MeshletsActive"/>).
+    /// </summary>
+    public const string MeshletMesh = "MeshletMesh";
+
+    /// <summary>
     /// A saved world: the entities and components of a `.scn` or `.scn.ron` file.
     /// </summary>
     /// <remarks>

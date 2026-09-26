@@ -6,6 +6,7 @@ namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
 /// The images the scene camera's shaders keep, as a tab along the bottom: pick one and watch it.
+/// Beside them, how long each render pass takes.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -19,6 +20,10 @@ namespace BevyCSharp.Editor.Framework;
 /// between zero and one: a distance runs to hundreds, a motion vector is a hundredth. The scale and
 /// offset are applied when an edit is finished rather than on every drag, since each change makes a
 /// new watch.
+/// </para>
+/// <para>
+/// The timings are the other half of tuning a chain: which link is wrong is the picture, and which
+/// link is slow is the list, slowest first, GPU time where the adapter measures it.
 /// </para>
 /// </remarks>
 public static class FrameTab
@@ -75,6 +80,15 @@ public static class FrameTab
 
         ImGui.SameLine();
 
+        if (EditorSurface.Region("##frameTimings", new Vector2(MathF.Min(300f, room.X * 0.3f), 0f)))
+        {
+            Timings();
+        }
+
+        EditorSurface.EndRegion();
+
+        ImGui.SameLine();
+
         if (EditorSurface.Region("##framePicture", new Vector2(0f, 0f)))
         {
             if (_watching is null)
@@ -89,6 +103,41 @@ public static class FrameTab
         }
 
         EditorSurface.EndRegion();
+    }
+
+    /// <summary>How long each render pass took, slowest first.</summary>
+    private static void Timings()
+    {
+        var timings = Render.Timings();
+
+        if (timings.Count == 0)
+        {
+            ImGui.TextDisabled("No timings: the app was made without Config.GpuTimings");
+            return;
+        }
+
+        if (!ImGui.BeginTable("##timings", 2, ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+        {
+            return;
+        }
+
+        ImGui.TableSetupColumn("pass", ImGuiTableColumnFlags.WidthStretch);
+        ImGui.TableSetupColumn("ms", ImGuiTableColumnFlags.WidthFixed, 60f);
+
+        foreach (var timing in timings.OrderByDescending(timing => timing.GpuMilliseconds ?? timing.CpuMilliseconds ?? 0))
+        {
+            ImGui.TableNextRow();
+            ImGui.TableNextColumn();
+            ImGui.TextUnformatted(timing.Name);
+            ImGui.TableNextColumn();
+
+            // GPU time where there is one, since that is what a pass costs the frame, and the CPU's
+            // dimmed where the adapter could not say.
+            if (timing.GpuMilliseconds is { } gpu) ImGui.Text($"{gpu:0.000}");
+            else if (timing.CpuMilliseconds is { } cpu) ImGui.TextDisabled($"{cpu:0.000}");
+        }
+
+        ImGui.EndTable();
     }
 
     /// <summary>The scale and the offset, made a new watch once an edit is finished.</summary>

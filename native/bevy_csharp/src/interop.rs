@@ -224,6 +224,9 @@ pub struct BcsConfig {
     /// How many meshlet clusters the GPU keeps room for at once, or `0` for no meshlets. Needs a
     /// build with the `meshlet` feature and a GPU with 64-bit texture atomics.
     pub meshlet_clusters: u32,
+    /// Non-zero to measure how long every render pass takes. Costs timestamps written around each
+    /// pass and read back every frame.
+    pub gpu_timings: u32,
 }
 
 /// How a camera should see, passed from C# when one is spawned.

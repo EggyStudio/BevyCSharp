@@ -119,6 +119,10 @@ render = [
     "bevy/ktx2",
     "bevy/zstd_rust",
     "bevy/tonemapping_luts",
+    # Spatio-temporal blue noise, a hundred and twenty eight pixels square and thirty two frames
+    # deep, which every stochastic screen-space technique samples its rays with, and which a shader
+    # on a camera reads through `bcs_pass::blue_noise`. A megabyte and a half, embedded.
+    "bevy/bluenoise_texture",
     "bevy/reflect_auto_register",
     # Windowing backends. Both are harmless off-platform: winit gates its X11 and Wayland
     # dependencies to Linux and the BSDs, so on Windows and macOS these resolve to nothing and

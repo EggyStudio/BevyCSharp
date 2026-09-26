@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 126;
+    internal const int ExpectedAbiVersion = 131;
 
     static Native() => NativeLoader.Initialize();
 
@@ -567,6 +567,12 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_image_create_from(uint width, uint height, uint depth, int format, byte* texels, int length);
 
+    /// <summary>Writes texels into a region of an image on the GPU.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_image_write(
+        int image, uint x, uint y, uint z, uint width, uint height, uint depth, uint mip, byte* texels, int length);
+
     /// <summary>Sets the ambient light, everywhere or on one camera.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -933,15 +939,25 @@ internal static unsafe partial class Native
     internal static partial int bcs_render_set_environment_map(
         ulong camera, int diffuse, int specular, float intensity, float* rotation);
 
+    /// <summary>Copies the last frame's render timings out as text.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_timings(byte* output, int capacity);
+
+    /// <summary>Makes a buffer the engine fills with the materials of entities put in its slots.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_material_buffer_create(int capacity);
+
     /// <summary>Whether Bevy's meshlets are running in this app.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_meshlets_active();
 
     /// <summary>Starts making a meshlet mesh from a mesh, answering its key at once.</summary>
-    [LibraryImport(Library)]
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_render_create_meshlet_mesh(int mesh, uint quantization);
+    internal static partial int bcs_render_create_meshlet_mesh(int mesh, uint quantization, string? saveTo);
 
     /// <summary>Makes an entity a reflection probe lit by a pair of baked cubemaps.</summary>
     [LibraryImport(Library)]

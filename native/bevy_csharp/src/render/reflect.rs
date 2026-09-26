@@ -499,9 +499,26 @@ pub struct Reflected {
     pub layout: Layout,
 }
 
+/// Takes out the `enable subgroups;` Slang writes ahead of a shader using wave operations.
+///
+/// WGSL asks for the directive, and naga, which reads the text here and again in Bevy, refuses it
+/// as not yet supported while accepting every subgroup builtin and function without it, gated by
+/// the device having subgroups instead. So the line goes and the operations stay, and a device
+/// without subgroups refuses the pipeline rather than the parse.
+fn drop_subgroup_enable(wgsl: &str) -> String {
+    if !wgsl.contains("enable subgroups;") {
+        return wgsl.to_string();
+    }
+
+    wgsl.lines()
+        .filter(|line| line.trim() != "enable subgroups;")
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
 /// Renumbers the groups of WGSL `slangc` wrote, and reads the shader's own group.
 pub fn reflect(wgsl: &str, reflection: &str, family: Family) -> Result<Reflected, String> {
-    let wgsl = remap_groups(wgsl, family);
+    let wgsl = drop_subgroup_enable(&remap_groups(wgsl, family));
 
     let json: Value = serde_json::from_str(reflection)
         .map_err(|error| format!("slangc's reflection does not parse: {error}"))?;

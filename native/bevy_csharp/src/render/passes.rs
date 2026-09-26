@@ -39,6 +39,7 @@ use bevy::render::render_resource::{
     FragmentState, Operations, PipelineCache, RenderPassColorAttachment, RenderPassDescriptor,
     RenderPipelineDescriptor, ShaderStages, TextureFormat,
 };
+use bevy::render::diagnostic::RecordDiagnostics;
 use bevy::render::renderer::{RenderContext, RenderDevice, ViewQuery};
 use bevy::render::storage::GpuShaderBuffer;
 use bevy::render::texture::{FallbackImage, GpuImage};
@@ -58,6 +59,32 @@ pub struct BeforeTonemappingPasses;
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct AfterTonemappingPasses;
 
+/// Where the passes that run between opaque and transparent geometry are.
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct AfterOpaquePasses;
+
+/// Where in a camera's frame a pass runs.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PassPlace {
+    /// On the linear picture, before tonemapping.
+    BeforeTonemapping = 0,
+    /// On the picture as the screen will show it.
+    AfterTonemapping = 1,
+    /// On the lit opaque geometry, before transparent geometry is drawn over it.
+    AfterOpaque = 2,
+}
+
+impl PassPlace {
+    pub fn from_number(number: i32) -> Option<Self> {
+        Some(match number {
+            0 => Self::BeforeTonemapping,
+            1 => Self::AfterTonemapping,
+            2 => Self::AfterOpaque,
+            _ => return None,
+        })
+    }
+}
+
 /// One pass as the camera holds it.
 #[derive(Clone, Debug)]
 pub struct ShaderPass {
@@ -66,7 +93,7 @@ pub struct ShaderPass {
     /// Moves on whenever a value does, so the render side knows when to build the pass's own bind
     /// group again rather than every frame.
     pub version: u64,
-    pub after_tonemapping: bool,
+    pub place: PassPlace,
 }
 
 /// The passes a camera runs over its picture, in order.
@@ -92,7 +119,8 @@ struct PreparedPass {
     own: BindGroup,
     /// What the bind group was built from, which is what says it can be kept.
     built_from: (u32, u64),
-    after_tonemapping: bool,
+    place: PassPlace,
+    label: std::borrow::Cow<'static, str>,
 }
 
 /// The passes of one view, ready to run.
@@ -116,24 +144,31 @@ pub fn install(app: &mut App) {
         .add_systems(
             Core3d,
             (
-                run_passes::<false>
+                run_passes::<0>
                     .before(tonemapping)
                     .in_set(BeforeTonemappingPasses)
                     .in_set(Core3dSystems::PostProcess),
-                run_passes::<true>
+                run_passes::<1>
                     .after(tonemapping)
                     .in_set(AfterTonemappingPasses)
                     .in_set(Core3dSystems::PostProcess),
+                // Between opaque and transparent geometry, so glass is drawn over what a pass did to
+                // the lit opaque picture, and the tonemapper sees it as light.
+                run_passes::<2>
+                    .after(bevy::core_pipeline::core_3d::main_opaque_pass_3d)
+                    .before(bevy::core_pipeline::core_3d::main_transparent_pass_3d)
+                    .in_set(AfterOpaquePasses)
+                    .in_set(Core3dSystems::MainPass),
             ),
         )
         .add_systems(
             Core2d,
             (
-                run_passes::<false>
+                run_passes::<0>
                     .before(tonemapping)
                     .in_set(BeforeTonemappingPasses)
                     .in_set(Core2dSystems::PostProcess),
-                run_passes::<true>
+                run_passes::<1>
                     .after(tonemapping)
                     .in_set(AfterTonemappingPasses)
                     .in_set(Core2dSystems::PostProcess),
@@ -294,7 +329,8 @@ fn prepare_passes(
                 pipeline,
                 own,
                 built_from,
-                after_tonemapping: pass.after_tonemapping,
+                place: pass.place,
+                label: super::programs::label(pass.program),
             });
         }
 
@@ -314,7 +350,7 @@ fn forget_passes(
 
 /// Runs a view's passes on one side of tonemapping.
 #[allow(clippy::too_many_arguments)]
-fn run_passes<const AFTER_TONEMAPPING: bool>(
+fn run_passes<const PLACE: u8>(
     view: ViewQuery<(
         &ViewTarget,
         &ViewUniformOffset,
@@ -339,8 +375,20 @@ fn run_passes<const AFTER_TONEMAPPING: bool>(
     if !prepared
         .0
         .iter()
-        .any(|pass| pass.after_tonemapping == AFTER_TONEMAPPING)
+        .any(|pass| pass.place as u8 == PLACE)
     {
+        return;
+    }
+
+    // Between opaque and transparent geometry a multisampled camera's picture is still its
+    // samples, resolved only once transparent geometry is drawn, which would draw over whatever a
+    // pass did to the picture beside it.
+    if PLACE == PassPlace::AfterOpaque as u8 && target.sampled_main_texture().is_some() {
+        super::material::say_once(
+            "A camera drawing several samples a pixel runs passes after opaque geometry, which \
+             needs one sample a pixel (PostSettings.Msaa of one), so they do not run."
+                .to_string(),
+        );
         return;
     }
 
@@ -359,7 +407,7 @@ fn run_passes<const AFTER_TONEMAPPING: bool>(
     );
 
     for pass in &prepared.0 {
-        if pass.after_tonemapping != AFTER_TONEMAPPING {
+        if pass.place as u8 != PLACE {
             continue;
         }
 
@@ -400,10 +448,15 @@ fn run_passes<const AFTER_TONEMAPPING: bool>(
             multiview_mask: None,
         };
 
+        let diagnostics = ctx.diagnostic_recorder();
+        let diagnostics = diagnostics.as_deref();
+
         let mut render_pass = ctx.command_encoder().begin_render_pass(&descriptor);
+        let span = diagnostics.pass_span(&mut render_pass, pass.label.clone());
         render_pass.set_pipeline(pipeline);
         render_pass.set_bind_group(0, &pass.own, &[]);
         render_pass.set_bind_group(1, &group, &offsets);
         render_pass.draw(0..3, 0..1);
+        span.end(&mut render_pass);
     }
 }

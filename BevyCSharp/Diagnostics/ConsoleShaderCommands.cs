@@ -15,6 +15,26 @@ namespace Bevy;
 /// </remarks>
 internal static class ConsoleShaderCommands
 {
+    /// <summary>Says how long each render pass takes.</summary>
+    [Command("render.timings", "How long each render pass takes, on the CPU and the GPU, in milliseconds")]
+    internal static string Timings()
+    {
+        if (!RendererPresent()) return "no renderer, so there are no render passes";
+
+        var timings = Render.Timings();
+        if (timings.Count == 0) return "no timings; run with Config.GpuTimings to measure them";
+
+        static string Milliseconds(double? value) =>
+            value is { } number ? number.ToString("0.000", CultureInfo.InvariantCulture) : "-";
+
+        return string.Join(
+            "\n",
+            timings
+                .OrderByDescending(timing => timing.GpuMilliseconds ?? timing.CpuMilliseconds ?? 0)
+                .Select(timing =>
+                    $"{Milliseconds(timing.GpuMilliseconds),8} gpu {Milliseconds(timing.CpuMilliseconds),8} cpu  {timing.Name}"));
+    }
+
     /// <summary>Lists the programs the app has made.</summary>
     [Command("shader.list", "Lists the shader programs: number, state and files")]
     internal static string List()

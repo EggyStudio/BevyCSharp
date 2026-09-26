@@ -53,10 +53,11 @@ does and be authorable without recompiling the bridge, which is the part worth h
 
 ### Textures and shaders
 
-PNG, JPEG, WebP, BMP and TGA decode in every build. The GPU-compressed formats do not: `ktx2` is
-compiled in but its payload formats, BCn and ASTC and ETC2, are not, and
-`CompressedImageFormatSupport` has to carry what the adapter can decode, which a windowless app
-reports as nothing. Nothing here blocks a game; it is size on disk and upload cost.
+PNG, JPEG, WebP, BMP and TGA decode in every build. A drawing app reads BCn files through `ktx2` where
+the adapter decodes them, and a shader image can be made in BCn and filled a block at a time, but a
+windowless app reports no compressed format as decodable, and ASTC and ETC2, which desktop adapters
+do not decode, would need transcoding on load. Nothing here blocks a game; it is size on disk and
+upload cost.
 
 Shaders are Slang, and a shader declares whatever it needs: numbers, arrays, structs, constant
 buffers, any number of textures of any shape, samplers, storage buffers and images. The bridge reads

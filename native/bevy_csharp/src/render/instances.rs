@@ -11,6 +11,14 @@
 //! The previous transform is what the slot held last frame, so an entity put in a slot starts with
 //! both the same, and one teleported shows the jump as motion for a frame, which is what anything
 //! reprojecting it would want to know.
+//!
+//! A material buffer is the same thing for what an entity is made of: each slot holds its standard
+//! material's base color, emissive color, roughness, metallic, reflectance and whether it is unlit,
+//! as `bcs_scene::Material`, 48 bytes. A ray that hits something in world-space GI has to know its
+//! color to bounce light off it, and reading it from the material is what an engine can do and a
+//! package guessing from property names cannot. Put the same entity in the same slot of both
+//! buffers and a shader has transform and material by one index. Textures are not in it, since a
+//! texture's average color is work on the GPU; the base color is what the material multiplies them by.
 
 #![cfg(feature = "render")]
 
@@ -27,11 +35,22 @@ use bevy::transform::components::GlobalTransform;
 
 use crate::interop::status;
 
-/// How many bytes one slot takes.
+/// How many bytes one slot of transforms takes.
 pub const SLOT_BYTES: usize = 128;
+
+/// How many bytes one slot of a material buffer takes.
+pub const MATERIAL_SLOT_BYTES: usize = 48;
+
+/// What a kept buffer's slots hold.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Kind {
+    Transforms,
+    Materials,
+}
 
 /// One buffer the engine keeps filled.
 struct Tracked {
+    kind: Kind,
     handle: Handle<ShaderBuffer>,
     slots: Vec<Option<Entity>>,
     /// What each slot held on the frame before, which is this frame's previous transform.
@@ -44,13 +63,27 @@ struct Tracked {
 #[derive(Resource, Default)]
 pub struct InstanceBuffers(HashMap<AssetId<ShaderBuffer>, Tracked>);
 
-/// Makes a buffer with `capacity` slots and answers its asset key.
+/// Makes a buffer with `capacity` slots of transforms and answers its asset key.
 pub fn create(world: &mut World, capacity: u32) -> i32 {
+    create_kind(world, capacity, Kind::Transforms)
+}
+
+/// Makes a buffer with `capacity` slots of materials and answers its asset key.
+pub fn create_materials(world: &mut World, capacity: u32) -> i32 {
+    create_kind(world, capacity, Kind::Materials)
+}
+
+fn create_kind(world: &mut World, capacity: u32, kind: Kind) -> i32 {
     if capacity == 0 {
         return status::NULL_ARG;
     }
 
-    let key = super::compute::create_buffer(world, &[], capacity as u64 * SLOT_BYTES as u64);
+    let slot_bytes = match kind {
+        Kind::Transforms => SLOT_BYTES,
+        Kind::Materials => MATERIAL_SLOT_BYTES,
+    };
+
+    let key = super::compute::create_buffer(world, &[], capacity as u64 * slot_bytes as u64);
 
     if key <= 0 {
         return key;
@@ -65,6 +98,7 @@ pub fn create(world: &mut World, capacity: u32) -> i32 {
     world.get_resource_or_init::<InstanceBuffers>().0.insert(
         handle.id(),
         Tracked {
+            kind,
             handle,
             slots: vec![None; slots],
             previous: vec![Mat4::ZERO; slots],
@@ -112,7 +146,7 @@ pub fn write_instances(
         return;
     };
 
-    for tracked in buffers.0.values_mut() {
+    for tracked in buffers.0.values_mut().filter(|tracked| tracked.kind == Kind::Transforms) {
         let mut bytes = Vec::with_capacity(tracked.slots.len() * SLOT_BYTES);
 
         for (slot, entity) in tracked.slots.iter().enumerate() {
@@ -127,23 +161,79 @@ pub fn write_instances(
             tracked.previous[slot] = current;
         }
 
-        if bytes == tracked.written {
-            continue;
+        upload(tracked, bytes, &mut assets);
+    }
+}
+
+/// Writes every material buffer's slots from its entities' standard materials. A slot whose entity
+/// has none, or is drawn by a shader program, holds zeros.
+pub fn write_materials(
+    buffers: Option<ResMut<InstanceBuffers>>,
+    carried: Query<&bevy::pbr::MeshMaterial3d<bevy::pbr::StandardMaterial>>,
+    materials: bevy::ecs::system::Res<Assets<bevy::pbr::StandardMaterial>>,
+    mut assets: ResMut<Assets<ShaderBuffer>>,
+) {
+    let Some(mut buffers) = buffers else {
+        return;
+    };
+
+    for tracked in buffers.0.values_mut().filter(|tracked| tracked.kind == Kind::Materials) {
+        let mut bytes = Vec::with_capacity(tracked.slots.len() * MATERIAL_SLOT_BYTES);
+
+        for entity in &tracked.slots {
+            let material = entity
+                .and_then(|entity| carried.get(entity).ok())
+                .and_then(|carried| materials.get(&carried.0));
+
+            let slot: [f32; 12] = match material {
+                None => [0.0; 12],
+                Some(material) => {
+                    let base = material.base_color.to_linear();
+                    let emissive = material.emissive;
+                    let reflectance = material.reflectance;
+
+                    [
+                        base.red,
+                        base.green,
+                        base.blue,
+                        base.alpha,
+                        emissive.red,
+                        emissive.green,
+                        emissive.blue,
+                        emissive.alpha,
+                        material.perceptual_roughness,
+                        material.metallic,
+                        reflectance,
+                        if material.unlit { 1.0 } else { 0.0 },
+                    ]
+                }
+            };
+
+            bytes.extend_from_slice(bytemuck::cast_slice(&slot));
         }
 
-        let Some(mut buffer) = assets.get_mut(&tracked.handle) else {
-            continue;
-        };
-
-        // The buffer may have been grown since, in which case the slots past the first are zeros.
-        let size = buffer.buffer_description.size as usize;
-        let mut data = bytes.clone();
-        data.resize(size.max(data.len()), 0);
-        data.truncate(size);
-        buffer.data = Some(data);
-
-        tracked.written = bytes;
+        upload(tracked, bytes, &mut assets);
     }
+}
+
+/// Hands a buffer's new contents to the GPU, if they changed.
+fn upload(tracked: &mut Tracked, bytes: Vec<u8>, assets: &mut Assets<ShaderBuffer>) {
+    if bytes == tracked.written {
+        return;
+    }
+
+    let Some(mut buffer) = assets.get_mut(&tracked.handle) else {
+        return;
+    };
+
+    // The buffer may have been grown since, in which case the slots past the first are zeros.
+    let size = buffer.buffer_description.size as usize;
+    let mut data = bytes.clone();
+    data.resize(size.max(data.len()), 0);
+    data.truncate(size);
+    buffer.data = Some(data);
+
+    tracked.written = bytes;
 }
 
 #[cfg(test)]

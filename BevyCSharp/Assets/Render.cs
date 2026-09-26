@@ -223,6 +223,35 @@ public static unsafe class Render
         Attach(world, entity, "MeshMaterial3d", material, "a material");
 
     /// <summary>
+    /// How long each render pass took, smoothed over the last frames, where the app asked for it
+    /// with <see cref="Config.GpuTimings"/>. Empty otherwise. Callable at any time.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's passes are named as Bevy names them, and each dispatch, pass and draw a shader
+    /// program makes is <c>shader</c> followed by the name of its first stage's file. Draws on a
+    /// camera sharing one render pass share one timing, named after the first of them.
+    /// </remarks>
+    public static IReadOnlyList<PassTiming> Timings()
+    {
+        if (!App.HasRenderer) return [];
+
+        var text = Native.ReadText((buffer, capacity) => Native.bcs_render_timings(buffer, capacity), "reading render timings");
+        var timings = new List<PassTiming>();
+
+        foreach (var line in text.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var parts = line.Split('\t');
+            if (parts.Length != 3) continue;
+
+            var cpu = double.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture);
+            var gpu = double.Parse(parts[2], System.Globalization.CultureInfo.InvariantCulture);
+            timings.Add(new PassTiming(parts[0], cpu < 0 ? null : cpu, gpu < 0 ? null : gpu));
+        }
+
+        return timings;
+    }
+
+    /// <summary>
     /// Whether Bevy's meshlets are running: the bridge was built with them (<c>--meshlet</c>), the
     /// app asked for them with <see cref="Config.MeshletClusters"/>, and the GPU can draw them.
     /// </summary>
@@ -249,13 +278,19 @@ public static unsafe class Render
     /// of a centimeter, and zero takes Bevy's default of four, a sixteenth. Two meshes meant to
     /// meet without a crack want the same one.
     /// </para>
+    /// <para>
+    /// <paramref name="saveTo"/>, a path under the asset root, also writes the finished mesh as a
+    /// <c>.meshlet_mesh</c> file, which <see cref="AssetKind.MeshletMesh"/> loads. That is how a
+    /// game bakes: convert once, in a tool or on the first run, and load the file after, which
+    /// takes as long as reading it.
+    /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">
     /// Meshlets are not running (see <see cref="MeshletsActive"/>), or the handle names no mesh.
     /// </exception>
-    public static AssetHandle CreateMeshletMesh(AssetHandle mesh, uint quantization = 0) =>
+    public static AssetHandle CreateMeshletMesh(AssetHandle mesh, uint quantization = 0, string? saveTo = null) =>
         new(Native.Check(
-            Native.bcs_render_create_meshlet_mesh(mesh.Key, quantization),
+            Native.bcs_render_create_meshlet_mesh(mesh.Key, quantization, saveTo),
             "making a meshlet mesh"));
 
     /// <summary>
@@ -1817,6 +1852,14 @@ public enum AmbientOcclusionQuality
     /// <summary>Fifty-four.</summary>
     Ultra = 3,
 }
+
+/// <summary>How long one render pass took. See <see cref="Render.Timings"/>.</summary>
+/// <param name="Name">The pass, as Bevy names it, or <c>shader</c> and a program's file name.</param>
+/// <param name="CpuMilliseconds">How long recording it took, or null where it was not measured.</param>
+/// <param name="GpuMilliseconds">
+/// How long the GPU spent running it, or null where the adapter has no timestamp queries.
+/// </param>
+public readonly record struct PassTiming(string Name, double? CpuMilliseconds, double? GpuMilliseconds);
 
 /// <summary>How a reflection probe renders what is around it.</summary>
 public sealed class ProbeCaptureSettings

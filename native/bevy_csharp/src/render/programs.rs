@@ -153,6 +153,8 @@ pub struct PipelineProgram {
     /// Moves on every time a stage is replaced, which is what a pipeline or a bind group made from
     /// an older version checks itself against.
     pub generation: u32,
+    /// What its GPU time is recorded under: the name of its first stage's file.
+    pub name: Arc<str>,
 }
 
 /// Every program the running app has made, by number.
@@ -165,6 +167,15 @@ static TABLE: RwLock<Vec<PipelineProgram>> = RwLock::new(Vec::new());
 /// Looks a program up.
 pub fn lookup(id: u32) -> Option<PipelineProgram> {
     TABLE.read().ok()?.get(id as usize).cloned()
+}
+
+/// What a program's GPU time is recorded under, `shader` and its file's name, or its number where
+/// it has not compiled yet.
+pub fn label(id: u32) -> std::borrow::Cow<'static, str> {
+    match lookup(id).filter(|program| !program.name.is_empty()) {
+        Some(program) => format!("shader {}", program.name).into(),
+        None => format!("shader {id}").into(),
+    }
 }
 
 /// How many programs there are, which is where the render side's look through them stops.
@@ -337,6 +348,11 @@ pub struct ShaderPrograms {
 }
 
 impl ShaderPrograms {
+    /// The directory assets are found under, which files a shader names are relative to.
+    pub fn root(&self) -> &Path {
+        &self.root
+    }
+
     /// Programs whose files are found under `root`.
     pub fn new(root: PathBuf) -> Self {
         let (sender, receiver) = channel();
@@ -712,6 +728,13 @@ fn rebuild(programs: &mut ShaderPrograms, id: usize) {
         let Some(unit) = program.stages[role as usize].map(|unit| &programs.units[unit]) else {
             continue;
         };
+
+        if entry.name.is_empty() {
+            // The file's name alone, since a diagnostic's name is split at every slash and a path
+            // would become a tree of nested timings.
+            let stem = Path::new(&unit.path).file_stem().and_then(|stem| stem.to_str()).unwrap_or("inline");
+            entry.name = stem.into();
+        }
 
         entry.stages[role as usize] = Some(StageBinding {
             shader: unit.shader.clone().expect("every stage has a shader"),

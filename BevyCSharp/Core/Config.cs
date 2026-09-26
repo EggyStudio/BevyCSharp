@@ -174,6 +174,19 @@ public sealed class Config
     public uint MeshletClusters { get; set; }
 
     /// <summary>
+    /// Measure how long every render pass takes, on the CPU and the GPU, for
+    /// <see cref="Render.Timings"/>.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's own passes are measured, and so is every dispatch, pass and draw a shader program
+    /// makes, under the program's file name, which is how a technique made of many passes is tuned
+    /// one pass at a time. Off by default, since every measured pass writes timestamps and every
+    /// frame reads them back. GPU times need an adapter with timestamp queries, which Vulkan and
+    /// DirectX 12 have; elsewhere only CPU times arrive.
+    /// </remarks>
+    public bool GpuTimings { get; set; }
+
+    /// <summary>
     /// Answer the command line while this app runs.
     /// </summary>
     /// <remarks>

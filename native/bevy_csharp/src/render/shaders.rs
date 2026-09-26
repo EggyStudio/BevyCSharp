@@ -808,7 +808,8 @@ pub unsafe extern "C" fn bcs_render_set_view_images(
                     return status::NULL_ARG;
                 };
 
-                if name.is_empty() || !(image.scale > 0.0) || image.scale > 16.0 {
+                // A camera's images are written by shaders, which a compressed format cannot be.
+                if name.is_empty() || !(image.scale > 0.0) || image.scale > 16.0 || format.is_compressed() {
                     return status::NULL_ARG;
                 }
 
@@ -1263,8 +1264,9 @@ pub fn sync_view_dispatches(
 
 /// Replaces the passes a camera runs over its picture with `count` instances, in order.
 ///
-/// `after_tonemapping` holds a flag per instance: non-zero runs it on the picture as the screen
-/// will show it, zero on the linear one. A count of zero takes every pass off.
+/// `after_tonemapping` holds a place per instance: `0` on the linear picture before tonemapping,
+/// `1` on the picture as the screen will show it, and `2` on the lit opaque geometry before
+/// transparent geometry is drawn. A count of zero takes every pass off.
 ///
 /// # Safety
 /// `instances` and `after_tonemapping` must each point at `count` readable integers, or be null
@@ -1316,11 +1318,15 @@ pub unsafe extern "C" fn bcs_render_set_shader_passes(
                     return status::NO_COMPONENT;
                 }
 
-                let list = ids
-                    .iter()
-                    .zip(afters)
-                    .map(|(id, after)| (*id as usize, *after != 0))
-                    .collect::<Vec<_>>();
+                let mut list = Vec::with_capacity(ids.len());
+
+                for (id, place) in ids.iter().zip(afters) {
+                    let Some(place) = super::passes::PassPlace::from_number(*place) else {
+                        return status::NULL_ARG;
+                    };
+
+                    list.push((*id as usize, place));
+                }
 
                 let mut camera = world.entity_mut(entity);
 
@@ -1351,10 +1357,10 @@ pub struct Instance {
     pub version: u64,
 }
 
-/// Which instances a camera runs as passes, and on which side of tonemapping.
+/// Which instances a camera runs as passes, and where in its frame.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::component::Component, Clone)]
-pub struct PassInstances(pub Vec<(usize, bool)>);
+pub struct PassInstances(pub Vec<(usize, super::passes::PassPlace)>);
 
 /// Copies what each camera's pass instances hold onto the camera, where the render world takes it
 /// from, whenever an instance has changed.
@@ -1378,13 +1384,13 @@ pub fn sync_passes(
         let passes: Vec<ShaderPass> = wanted
             .0
             .iter()
-            .filter_map(|(id, after)| {
+            .filter_map(|(id, place)| {
                 let instance = instances.0.get(*id)?;
                 Some(ShaderPass {
                     program: instance.program,
                     values: instance.values.clone(),
                     version: instance.version,
-                    after_tonemapping: *after,
+                    place: *place,
                 })
             })
             .collect();
@@ -1394,7 +1400,7 @@ pub fn sync_passes(
                 && current.passes.iter().zip(&passes).all(|(a, b)| {
                     a.program == b.program
                         && a.version == b.version
-                        && a.after_tonemapping == b.after_tonemapping
+                        && a.place == b.place
                 })
         });
 
@@ -2086,7 +2092,32 @@ pub extern "C" fn bcs_shader_instance_buffer_create(capacity: i32) -> i32 {
     })
 }
 
-/// Puts an entity in a slot of an instance buffer, or empties the slot where `entity` is zero.
+/// Makes a buffer with `capacity` slots the engine fills every frame with the standard materials of
+/// the entities put in them, and answers its asset key. Slots are set as an instance buffer's are.
+///
+/// See [`super::instances`] for the layout.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_material_buffer_create(capacity: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = capacity;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if capacity <= 0 {
+                return status::NULL_ARG;
+            }
+
+            crate::state::with_world(|world| super::instances::create_materials(world, capacity as u32))
+        }
+    })
+}
+
+/// Puts an entity in a slot of an instance or material buffer, or empties the slot where `entity`
+/// is zero.
 ///
 /// Returns [`status::NOT_PRESENT`] where the slot is past the buffer's capacity, and
 /// [`status::NO_COMPONENT`] where the key is not an instance buffer.
@@ -2201,6 +2232,53 @@ pub extern "C" fn bcs_shader_image_create(
         {
             crate::state::with_world(|world| {
                 super::compute::create_image_with_mips(world, width, height, depth, format, mips)
+            })
+        }
+    })
+}
+
+/// Writes `length` bytes of texels into a region of an image, `width` by `height` by `depth`
+/// texels at `x`, `y`, `z` of mip level `mip`, on the GPU before this frame's work runs.
+///
+/// What a texture streamer uploads a tile into its cache with, and what an image changed a piece
+/// at a time wants rather than being made again. The texels are in the format's own layout, row
+/// after row and slice after slice. Returns [`status::NULL_ARG`] for a region outside the level,
+/// and [`status::BUFFER_TOO_SMALL`] where `length` is not exactly the region's size in bytes.
+///
+/// # Safety
+/// `texels` must point at `length` readable bytes.
+#[unsafe(no_mangle)]
+#[allow(clippy::too_many_arguments)]
+pub unsafe extern "C" fn bcs_shader_image_write(
+    image: i32,
+    x: u32,
+    y: u32,
+    z: u32,
+    width: u32,
+    height: u32,
+    depth: u32,
+    mip: u32,
+    texels: *const u8,
+    length: i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (image, x, y, z, width, height, depth, mip, texels, length);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if texels.is_null() || length < 0 {
+                return status::NULL_ARG;
+            }
+
+            // SAFETY: the caller promised `length` readable bytes.
+            let bytes = unsafe { core::slice::from_raw_parts(texels, length as usize) };
+
+            crate::state::with_world(|world| {
+                super::compute::write_image(world, image, [x, y, z], [width, height, depth], mip, bytes)
             })
         }
     })

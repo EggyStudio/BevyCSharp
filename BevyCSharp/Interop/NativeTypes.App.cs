@@ -50,6 +50,9 @@ public unsafe struct NativeConfig
 
     /// <summary>Meshlet clusters the GPU keeps room for, or zero for no meshlets.</summary>
     public uint MeshletClusters;
+
+    /// <summary>Non-zero to measure how long every render pass takes.</summary>
+    public uint GpuTimings;
 }
 
 /// <summary>One video mode a monitor can be driven at.</summary>

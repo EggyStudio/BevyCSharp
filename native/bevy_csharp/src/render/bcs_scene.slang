@@ -20,6 +20,24 @@ public struct Instance
     public float4 previous_world_from_local[4];
 };
 
+/// One slot of a material buffer: what an entity's standard material says it is made of.
+///
+/// All zeros for a slot with no entity, or one whose entity has no standard material. Textures are
+/// not in it; `base_color` is what the material multiplies its texture by.
+public struct Material
+{
+    /// Linear, with alpha.
+    public float4 base_color;
+    /// Linear, in the material's own units.
+    public float4 emissive;
+    public float perceptual_roughness;
+    public float metallic;
+    /// Specular reflectance at normal incidence.
+    public float reflectance;
+    /// One for an unlit material, whose color is what it shows whatever lights it.
+    public float unlit;
+};
+
 /// Multiplies a matrix held as four columns by a vector.
 public float4 transform(float4 columns[4], float4 v)
 {

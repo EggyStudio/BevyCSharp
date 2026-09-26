@@ -275,6 +275,110 @@ public sealed class GBufferTests
         return run.Picture("picture");
     }
 
+    /// <summary>
+    /// A pass sees Bevy's blue noise: many different values across the picture rather than the
+    /// gray that stands in for it, and a different layer on the next frame.
+    /// </summary>
+    [Fact]
+    public void APassSeesBlueNoiseThatMovesEachFrame()
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                var camera = PictureRun.Camera(ecs);
+                var pass = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
+                {
+                    Pass = "shaders/show_blue_noise.slang",
+                }));
+
+                Shaders.SetPasses(camera, new ShaderPass(pass, AfterTonemapping: true));
+            },
+        };
+
+        run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Wait(ShaderMaterialTests.Settled)
+            .Capture("first")
+            .Capture("second")
+            .Go();
+
+        var first = run.Picture("first");
+        var second = run.Picture("second");
+
+        var values = new HashSet<byte>();
+        var changed = 0;
+
+        for (var y = 0u; y < first.Height; y++)
+        {
+            for (var x = 0u; x < first.Width; x++)
+            {
+                values.Add(first.At(x, y).R);
+                if (first.At(x, y).R != second.At(x, y).R) changed++;
+            }
+        }
+
+        Assert.True(values.Count > 100, $"the noise had only {values.Count} different values");
+        Assert.True(changed > first.Width * first.Height / 2, $"only {changed} pixels changed from one frame to the next");
+    }
+
+    /// <summary>
+    /// Light added over the whole picture after opaque geometry, times each pixel's color from the
+    /// G-buffer, lights the surfaces and nothing else, which is how a screen-space GI result goes
+    /// into the picture before transparency and tonemapping.
+    /// </summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void IndirectLightIsAddedTimesEachSurfacesColor(bool added)
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                var camera = PictureRun.Camera(ecs);
+
+                Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
+                Render.SetAmbientLight(camera, (0f, 0f, 0f), 0f);
+                Shaders.SetPrepass(camera, depth: true, deferred: true);
+
+                PictureRun.Cube(ecs, Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f) }), size: 2f);
+
+                if (added)
+                {
+                    var indirect = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
+                    {
+                        DrawVertex = "shaders/add_indirect.slang",
+                        DrawFragment = "shaders/add_indirect.slang",
+                    })).Set("light", new System.Numerics.Vector4(0f, 0.5f, 0f, 0f));
+
+                    Shaders.SetViewDraws(
+                        camera,
+                        ViewDraw.Fixed(indirect, FramePoint.AfterOpaque, 3, blend: DrawBlend.Add, writesDepth: false));
+                }
+            },
+        };
+
+        run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Wait(ShaderMaterialTests.Settled)
+            .Capture("picture")
+            .Go();
+
+        var picture = run.Picture("picture");
+        var cube = picture.At(48, 48);
+        var empty = picture.At(4, 4);
+
+        Assert.True(empty is { R: < 20, G: < 20, B: < 20 }, $"the empty corner was {empty}");
+
+        if (added)
+            Assert.True(cube.G > 80 && cube.R < 30 && cube.B < 30, $"the cube was {cube}");
+        else
+            Assert.True(cube is { R: < 20, G: < 20, B: < 20 }, $"with nothing added the cube was {cube}");
+    }
+
     private static bool Near(byte value, int expected) => Math.Abs(value - expected) <= 12;
 
     /// <summary>Two cubes seen from a little above, painted by <c>show_gbuffer.slang</c>.</summary>

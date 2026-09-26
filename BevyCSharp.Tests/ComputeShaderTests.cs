@@ -1,6 +1,7 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Bevy;
+using Bevy.Interop;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -462,6 +463,272 @@ public sealed class ComputeShaderTests
         // and the previous one a tenth short of it.
         Assert.Equal(frozenAt, copied[0].X, 3);
         Assert.Equal(frozenAt - 0.1f, copied[1].X, 3);
+    }
+
+    /// <summary>
+    /// A material buffer holds what each entity in it is made of, read from its standard material,
+    /// and a shader reads it through <c>bcs_scene::Material</c>.
+    /// </summary>
+    [Fact]
+    public void AMaterialBufferHoldsWhatEachEntityIsMadeOf()
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        AssetHandle into = default;
+        ShaderInstance copy = default;
+        BufferRead read = default;
+        Vector4[]? copied = null;
+
+        new PictureRun
+        {
+            Scene = ecs =>
+            {
+                var red = ecs.Spawn();
+                Render.SetMesh(ecs, red, Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f));
+                Render.SetMaterial(ecs, red, Render.CreateMaterial(new MaterialSettings
+                {
+                    BaseColor = (1f, 0f, 0f, 1f),
+                    Roughness = 0.25f,
+                    Metallic = 0f,
+                }));
+
+                var shiny = ecs.Spawn();
+                Render.SetMesh(ecs, shiny, Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f));
+                Render.SetMaterial(ecs, shiny, Render.CreateMaterial(new MaterialSettings
+                {
+                    BaseColor = (0f, 0f, 1f, 1f),
+                    Emissive = (0f, 2f, 0f, 1f),
+                    Roughness = 0.75f,
+                    Metallic = 1f,
+                }));
+
+                var materials = Shaders.CreateMaterialBuffer(2);
+                Shaders.SetInstance(materials, 0, red);
+                Shaders.SetInstance(materials, 1, shiny);
+
+                into = Shaders.CreateBuffer(6 * 16);
+                copy = Compute("shaders/read_materials.slang").SetBuffer("materials", materials).SetBuffer("into", into);
+            },
+        }
+            .Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Wait(5)
+            .Do("copying the slots", _ => Shaders.Dispatch(copy, 1))
+            .Wait(2)
+            .Do("asking for the copy", _ => read = Shaders.BeginBufferRead(into))
+            .Until("read back", _ => Shaders.TryReadBuffer(read, out copied))
+            .Go();
+
+        Assert.NotNull(copied);
+
+        Assert.Equal(new Vector4(1f, 0f, 0f, 1f), copied[0]);
+        Assert.Equal(0.25f, copied[2].X, 3);
+        Assert.Equal(0f, copied[2].Y, 3);
+
+        Assert.Equal(new Vector4(0f, 0f, 1f, 1f), copied[3]);
+        Assert.Equal(2f, copied[4].Y, 3);
+        Assert.Equal(0.75f, copied[5].X, 3);
+        Assert.Equal(1f, copied[5].Y, 3);
+        Assert.Equal(0f, copied[5].W, 3);
+    }
+
+    /// <summary>
+    /// Writing a region of an image changes those texels and no others, at the level asked for,
+    /// and a region outside the image is refused.
+    /// </summary>
+    [Fact]
+    public void ARegionOfAnImageIsWritten()
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        AssetHandle into = default;
+        ShaderInstance copy = default;
+        BufferRead read = default;
+        float[]? copied = null;
+        Exception? outside = null;
+
+        new PictureRun
+        {
+            Scene = _ =>
+            {
+                var image = Shaders.CreateImage(8, 8, ShaderImageFormat.R32Float, mips: 2);
+
+                // Two by two at three, four, and one texel of the second level.
+                Shaders.WriteImage<float>(image, [1f, 2f, 3f, 4f], x: 3, y: 4, width: 2, height: 2);
+                Shaders.WriteImage<float>(image, [9f], x: 0, y: 0, width: 1, height: 1, mip: 1);
+
+                outside = Record.Exception(() => Shaders.WriteImage<float>(image, [1f, 2f], x: 7, y: 0, width: 2, height: 1));
+
+                into = Shaders.CreateBuffer(65 * 4);
+                copy = Compute("shaders/read_image.slang").SetTexture("image", image).SetBuffer("into", into);
+            },
+        }
+            .Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Wait(3)
+            .Do("copying the image", _ => Shaders.Dispatch(copy, 1))
+            .Wait(2)
+            .Do("asking for the copy", _ => read = Shaders.BeginBufferRead(into))
+            .Until("read back", _ => Shaders.TryReadBuffer(read, out copied))
+            .Go();
+
+        Assert.NotNull(copied);
+        Assert.IsType<BevyNativeException>(outside);
+
+        Assert.Equal(1f, copied[4 * 8 + 3]);
+        Assert.Equal(2f, copied[4 * 8 + 4]);
+        Assert.Equal(3f, copied[5 * 8 + 3]);
+        Assert.Equal(4f, copied[5 * 8 + 4]);
+        Assert.Equal(9f, copied[64]);
+
+        // Everything else is as it was made.
+        Assert.Equal(60, copied.Take(64).Count(value => value == 0f));
+    }
+
+    /// <summary>
+    /// A block-compressed image made empty takes one four by four block written into it, which the
+    /// GPU decodes where the block is and nowhere else, and a region off the block grid is refused.
+    /// </summary>
+    [Fact]
+    public void ABlockIsWrittenIntoACompressedImage()
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        AssetHandle into = default;
+        ShaderInstance copy = default;
+        BufferRead read = default;
+        float[]? copied = null;
+        Exception? offGrid = null;
+
+        new PictureRun
+        {
+            Scene = _ =>
+            {
+                var image = Shaders.CreateImage(8, 8, ShaderImageFormat.Bc4);
+
+                // A BC4 block whose two end values are both 200 and whose sixteen indices all pick
+                // the first, so every texel of it decodes to 200 out of 255.
+                byte[] block = [200, 200, 0, 0, 0, 0, 0, 0];
+                Shaders.WriteImage<byte>(image, block, x: 4, y: 4, width: 4, height: 4);
+
+                offGrid = Record.Exception(() => Shaders.WriteImage<byte>(image, block, x: 2, y: 0, width: 4, height: 4));
+
+                into = Shaders.CreateBuffer(64 * 4);
+                copy = Compute("shaders/read_block.slang").SetTexture("image", image).SetBuffer("into", into);
+            },
+        }
+            .Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Wait(3)
+            .Do("copying the image", _ => Shaders.Dispatch(copy, 1))
+            .Wait(2)
+            .Do("asking for the copy", _ => read = Shaders.BeginBufferRead(into))
+            .Until("read back", _ => Shaders.TryReadBuffer(read, out copied))
+            .Go();
+
+        Assert.NotNull(copied);
+        Assert.IsType<BevyNativeException>(offGrid);
+
+        for (var y = 0; y < 8; y++)
+        {
+            for (var x = 0; x < 8; x++)
+            {
+                var expected = x >= 4 && y >= 4 ? 200f / 255f : 0f;
+                Assert.Equal(expected, copied[y * 8 + x], 2);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Slang's wave operations reach the GPU as subgroup operations: a sum over a subgroup is its
+    /// size, and one thread in each is its first.
+    /// </summary>
+    [Fact]
+    public void WaveOperationsRunAsSubgroups()
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        AssetHandle into = default;
+        ShaderInstance wave = default;
+        BufferRead read = default;
+        uint[]? copied = null;
+
+        new PictureRun
+        {
+            Scene = _ =>
+            {
+                into = Shaders.CreateBuffer(64 * 4);
+                wave = Compute("shaders/wave_sum.slang").SetBuffer("into", into);
+            },
+        }
+            .Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Wait(3)
+            .Do("summing", _ => Shaders.Dispatch(wave, 1))
+            .Wait(2)
+            .Do("asking for the sums", _ => read = Shaders.BeginBufferRead(into))
+            .Until("read back", _ => Shaders.TryReadBuffer(read, out copied))
+            .Go();
+
+        Assert.NotNull(copied);
+
+        var lanes = copied[0] % 100000 / 1000;
+        Assert.True(lanes is > 0 and <= 64, $"a subgroup had {lanes} threads");
+
+        foreach (var value in copied)
+        {
+            var rest = value % 100000;
+            Assert.Equal(lanes, rest / 1000);
+            Assert.Equal(lanes, rest % 1000);
+        }
+
+        Assert.Equal(64 / (int)lanes, copied.Count(value => value >= 100000));
+    }
+
+    /// <summary>
+    /// A prefix sum, a read from another lane and a ballot over a subgroup give what they promise:
+    /// each thread's count of those before it is its index, the first lane's value reaches every
+    /// lane, and a unanimous vote sets a bit for every lane.
+    /// </summary>
+    [Fact]
+    public void WavePrefixSumsReadsAndBallotsWork()
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        AssetHandle into = default;
+        ShaderInstance wave = default;
+        BufferRead read = default;
+        uint[]? copied = null;
+
+        new PictureRun
+        {
+            Scene = _ =>
+            {
+                into = Shaders.CreateBuffer(64 * 16);
+                wave = Compute("shaders/wave_prefix.slang").SetBuffer("into", into);
+            },
+        }
+            .Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Wait(3)
+            .Do("running", _ => Shaders.Dispatch(wave, 1))
+            .Wait(2)
+            .Do("asking for the results", _ => read = Shaders.BeginBufferRead(into))
+            .Until("read back", _ => Shaders.TryReadBuffer(read, out copied))
+            .Go();
+
+        Assert.NotNull(copied);
+
+        for (var thread = 0; thread < 64; thread++)
+        {
+            var before = copied[thread * 4];
+            var lane = copied[thread * 4 + 1];
+            var first = copied[thread * 4 + 2];
+            var votes = copied[thread * 4 + 3];
+
+            Assert.Equal(lane, before);
+            Assert.Equal((uint)thread - lane, first);
+
+            // Thirty two or more lanes fill the low word; fewer set one bit a lane.
+            var expected = lane >= 31 || votes == uint.MaxValue ? uint.MaxValue : votes;
+            Assert.Equal(expected, votes);
+            Assert.True((votes & 1) == 1, $"thread {thread} saw no vote from the first lane");
+        }
     }
 
     /// <summary>A buffer's size is fixed, so writing more than it holds is refused.</summary>

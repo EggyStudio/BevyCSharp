@@ -263,6 +263,54 @@ public sealed class ShaderPassTests
     }
 
     /// <summary>An instance of the program in <paramref name="file"/> as a pass.</summary>
+    /// <summary>
+    /// A pass after opaque geometry runs before transparent geometry is drawn, so a see-through pane
+    /// in front shows over what it painted; the same pass before tonemapping paints over the pane.
+    /// </summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void APassAfterOpaqueGeometryIsUnderTransparentGeometry(bool afterOpaque)
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                var camera = PictureRun.Camera(ecs);
+                Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
+
+                var pane = ecs.Spawn();
+                Render.SetMesh(ecs, pane, Render.CreateMesh(MeshShape.Cuboid, 2f, 2f, 0.1f));
+                Render.SetMaterial(ecs, pane, Render.CreateMaterial(new MaterialSettings
+                {
+                    BaseColor = (0f, 0f, 1f, 0.6f),
+                    AlphaMode = AlphaMode.Blend,
+                    Unlit = true,
+                }));
+                ecs.Add(pane, Transform.At(0f, 0f, 1f));
+
+                Shaders.SetPasses(
+                    camera,
+                    new ShaderPass(Pass("shaders/paint_red.slang"), At: afterOpaque ? FramePoint.AfterOpaque : FramePoint.BeforeTonemapping));
+            },
+        };
+
+        run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady()).Wait(Settled).Capture("picture").Go();
+
+        var picture = run.Picture("picture");
+        var behindPane = picture.At(48, 48);
+        var aside = picture.At(4, 4);
+
+        Assert.True(aside.R > 200 && aside.B < 60, $"the picture beside the pane was {aside}");
+
+        if (afterOpaque)
+            Assert.True(behindPane.B > 100, $"the pane did not show over the pass: {behindPane}");
+        else
+            Assert.True(behindPane.R > 200 && behindPane.B < 60, $"the pass did not paint over the pane: {behindPane}");
+    }
+
     private static ShaderInstance Pass(string file) =>
         Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Pass = file }));
 

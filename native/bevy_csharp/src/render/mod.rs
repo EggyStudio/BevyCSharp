@@ -35,6 +35,7 @@ pub mod reflect;
 pub mod scene;
 pub mod shaders;
 pub mod slang;
+pub mod timings;
 pub mod values;
 pub mod views;
 pub mod watch;

@@ -37,6 +37,10 @@ config.AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets");
 config.Gui = true;
 config.WatchAssets = true;
 
+// What each render pass costs, which the Frame tab lists beside the images a camera keeps. An
+// editor is where a technique is tuned, so the timestamps it costs are worth paying here.
+config.GpuTimings = true;
+
 // The same goes for shaders, and a shader edited into a shape the pipeline rejects is something to
 // read about in the console and fix, rather than a reason for the editor to close.
 Shaders.KeepRenderingAfterErrors = true;

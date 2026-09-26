@@ -188,6 +188,9 @@ public static const uint DIRECTIONAL_LIGHT_SHADOWS = 1u << 0u;
 [[vk::binding(14, 101)]] public TextureCube environment_diffuse_map;
 /// The same, sharp in its first level and rougher in each after it.
 [[vk::binding(15, 101)]] public TextureCube environment_specular_map;
+/// Bevy's spatio-temporal blue noise: layers of noise whose values are spread evenly both across a
+/// layer and from one layer to the next. Gray until it arrives.
+[[vk::binding(16, 101)]] public Texture2DArray blue_noise_layers;
 
 /// How many directional lights the camera sees.
 public uint directional_light_count()
@@ -586,6 +589,23 @@ public float3 environment_specular(float3 direction, float perceptual_roughness)
     let level = perceptual_roughness * float(scene_info.environment_mips - 1);
     let sample = environment_specular_map.SampleLevel(picture_sampler, environment_direction(direction), level);
     return sample.rgb * scene_info.environment_intensity;
+}
+
+/// Blue noise at a pixel for this frame, four numbers from zero to one.
+///
+/// What a stochastic technique picks its ray directions or sample offsets with instead of white
+/// noise: neighboring pixels get values far apart, so the error a few samples leave looks like
+/// fine grain a blur removes rather than blotches, and each frame takes the next layer, so an
+/// accumulation over frames sees values spread evenly in time as well. The pattern repeats every
+/// hundred and twenty eight pixels and every thirty two frames.
+public float4 blue_noise(int2 pixel)
+{
+    uint width, height, layers;
+    blue_noise_layers.GetDimensions(width, height, layers);
+
+    let at = int2(uint2(pixel) % uint2(width, height));
+    let layer = int(globals.frame_count % layers);
+    return blue_noise_layers.Load(int4(at, layer, 0));
 }
 
 }

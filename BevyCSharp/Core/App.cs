@@ -126,6 +126,7 @@ public sealed unsafe class App : IDisposable
                 Offscreen = Config.Offscreen ? 1u : 0u,
                 SpatialScale = Config.SpatialScale,
                 MeshletClusters = Config.MeshletClusters,
+                GpuTimings = Config.GpuTimings ? 1u : 0u,
             };
             _handle = Native.bcs_app_create(&native);
         }
@@ -133,6 +134,12 @@ public sealed unsafe class App : IDisposable
         if (_handle == IntPtr.Zero) throw CreationFailed();
 
         ComponentRegistry.BeginApp(_handle);
+
+        // Where Bevy reads assets from, which is where a streamed read's path starts too: the
+        // directory asked for, or `assets` beside the executable, which is Bevy's own default.
+        Streaming.AssetRoot = string.IsNullOrEmpty(Config.AssetRoot)
+            ? Path.Combine(AppContext.BaseDirectory, "assets")
+            : Path.GetFullPath(Config.AssetRoot);
 
         World.InsertResource(Config);
         World.InsertResource(new Time());
@@ -178,6 +185,9 @@ public sealed unsafe class App : IDisposable
             Native.Check(Native.bcs_frame_state(&state), "bcs_frame_state");
             world.Resource<Time>().Update(state.Time);
             world.Resource<Input>().Update(state.Input);
+
+            // A new frame's worth of streamed bytes to hand over.
+            Streaming.BeginFrame();
 
             // Posted before the swap, so what the window reported at the top of this frame is
             // readable during it rather than during the next one.

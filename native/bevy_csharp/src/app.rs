@@ -296,6 +296,14 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 );
             }
 
+            // Only when asked, since measuring writes timestamps around every pass and reads them
+            // back every frame.
+            crate::render::timings::forget();
+
+            if config.gpu_timings != 0 {
+                crate::render::timings::install(&mut app);
+            }
+
             // Auto exposure is the one post-processing effect `DefaultPlugins` leaves out, since
             // it needs compute shaders and so cannot run everywhere the rest can. Every desktop
             // backend the bridge builds for has them.

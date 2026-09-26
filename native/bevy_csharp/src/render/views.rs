@@ -87,6 +87,7 @@ use bevy::render::render_resource::{
     ShaderType, Texture, TextureDescriptor, TextureDimension, TextureFormat, TextureSampleType,
     TextureUsages, TextureView, TextureViewDescriptor, TextureViewDimension,
 };
+use bevy::render::diagnostic::RecordDiagnostics;
 use bevy::render::renderer::{RenderContext, RenderDevice, ViewQuery};
 use bevy::render::storage::{GpuShaderBuffer, ShaderBuffer};
 use bevy::render::texture::{FallbackImage, GpuImage};
@@ -120,6 +121,30 @@ pub struct ViewInputs {
     comparison: Sampler,
     /// Black in every direction, for a camera lit by no environment map.
     empty_environment: TextureView,
+    /// Bevy's blue noise as layers of one array, once it is on the GPU, and a single gray layer
+    /// until then.
+    blue_noise: Option<TextureView>,
+    empty_blue_noise: TextureView,
+}
+
+/// Finds Bevy's blue noise on the GPU once, for every shader on a camera to read.
+fn prepare_blue_noise(
+    mut inputs: ResMut<ViewInputs>,
+    noise: Option<Res<bevy::pbr::Bluenoise>>,
+    images: Res<RenderAssets<GpuImage>>,
+) {
+    if inputs.blue_noise.is_some() {
+        return;
+    }
+
+    let Some(image) = noise.and_then(|noise| images.get(&noise.texture)) else {
+        return;
+    };
+
+    inputs.blue_noise = Some(image.texture.create_view(&TextureViewDescriptor {
+        dimension: Some(TextureViewDimension::D2Array),
+        ..Default::default()
+    }));
 }
 
 /// A camera's environment map as the main world gave it, extracted for the view.
@@ -211,7 +236,11 @@ pub struct ViewLights<'a> {
     pub shadows: Option<&'a ViewShadowBindings>,
 }
 
-fn init_inputs(mut commands: Commands, render_device: Res<RenderDevice>) {
+fn init_inputs(
+    mut commands: Commands,
+    render_device: Res<RenderDevice>,
+    queue: Res<bevy::render::renderer::RenderQueue>,
+) {
     let entry = |binding: u32, ty: BindingType| BindGroupLayoutEntry {
         binding,
         visibility: ShaderStages::VERTEX | ShaderStages::FRAGMENT | ShaderStages::COMPUTE,
@@ -311,6 +340,14 @@ fn init_inputs(mut commands: Commands, render_device: Res<RenderDevice>) {
         ),
         entry(14, cube()),
         entry(15, cube()),
+        entry(
+            16,
+            BindingType::Texture {
+                sample_type: TextureSampleType::Float { filterable: true },
+                view_dimension: TextureViewDimension::D2Array,
+                multisampled: false,
+            },
+        ),
     ];
 
     let texture = |label: &'static str, format: TextureFormat| {
@@ -419,6 +456,31 @@ fn init_inputs(mut commands: Commands, render_device: Res<RenderDevice>) {
                 dimension: Some(TextureViewDimension::Cube),
                 ..Default::default()
             }),
+        blue_noise: None,
+        // Gray, a half everywhere, which is what noise averages to, so a shader running before the
+        // real one arrives gets no pattern rather than a wrong one.
+        empty_blue_noise: {
+            let texture = render_device.create_texture_with_data(
+                &bevy::render::renderer::RenderQueue::clone(&queue),
+                &TextureDescriptor {
+                    label: Some("bcs_view_empty_blue_noise"),
+                    size: Extent3d { width: 1, height: 1, depth_or_array_layers: 1 },
+                    mip_level_count: 1,
+                    sample_count: 1,
+                    dimension: TextureDimension::D2,
+                    format: TextureFormat::Rgba8Unorm,
+                    usage: TextureUsages::TEXTURE_BINDING,
+                    view_formats: &[],
+                },
+                bevy::render::render_resource::TextureDataOrder::default(),
+                &[128, 128, 128, 128],
+            );
+
+            texture.create_view(&TextureViewDescriptor {
+                dimension: Some(TextureViewDimension::D2Array),
+                ..Default::default()
+            })
+        },
         comparison: render_device.create_sampler(&SamplerDescriptor {
             label: Some("bcs_view_comparison"),
             mag_filter: FilterMode::Linear,
@@ -632,6 +694,12 @@ impl<'a> ViewInputSources<'a> {
                 BindGroupEntry {
                     binding: 15,
                     resource: BindingResource::TextureView(environment_specular),
+                },
+                BindGroupEntry {
+                    binding: 16,
+                    resource: BindingResource::TextureView(
+                        inputs.blue_noise.as_ref().unwrap_or(&inputs.empty_blue_noise),
+                    ),
                 },
             ],
         );
@@ -1055,6 +1123,7 @@ struct PreparedViewDispatch {
     pipeline: CachedComputePipelineId,
     own: BindGroup,
     workgroups: PreparedWorkgroups,
+    label: std::borrow::Cow<'static, str>,
 }
 
 enum PreparedWorkgroups {
@@ -1221,6 +1290,7 @@ fn prepare_view_dispatches(
                     &cache.get_bind_group_layout(&own_layout(&layout)),
                 ),
                 workgroups,
+                label: programs::label(dispatch.program),
             });
         }
 
@@ -1307,12 +1377,17 @@ fn run_view_dispatches<const POINT: u8>(
             continue;
         };
 
+        let diagnostics = ctx.diagnostic_recorder();
+        let diagnostics = diagnostics.as_deref();
+
         let mut pass = ctx
             .command_encoder()
             .begin_compute_pass(&ComputePassDescriptor {
                 label: Some("bcs_view_compute"),
                 timestamp_writes: None,
             });
+
+        let span = diagnostics.pass_span(&mut pass, dispatch.label.clone());
 
         pass.set_pipeline(pipeline);
         pass.set_bind_group(0, &dispatch.own, &[]);
@@ -1324,6 +1399,8 @@ fn run_view_dispatches<const POINT: u8>(
                 pass.dispatch_workgroups_indirect(buffer, *offset)
             }
         }
+
+        span.end(&mut pass);
     }
 }
 
@@ -1392,6 +1469,7 @@ struct PreparedViewDraw {
     /// The camera image it draws into instead of the picture, and whether it is tested against
     /// the camera's depth there.
     target: Option<(TextureView, bool)>,
+    label: std::borrow::Cow<'static, str>,
 }
 
 enum PreparedDrawCount {
@@ -1610,6 +1688,7 @@ fn prepare_view_draws(
                 ),
                 count,
                 target: target.map(|(slot, depth)| (level_view(&slot.textures[slot.current], 0), depth)),
+                label: programs::label(draw.program),
             });
         }
 
@@ -1727,6 +1806,9 @@ fn run_view_draws<const POINT: u8>(
 
         let color = [Some(color)];
 
+        let diagnostics = ctx.diagnostic_recorder();
+        let diagnostics = diagnostics.as_deref();
+
         let mut pass = ctx.command_encoder().begin_render_pass(&RenderPassDescriptor {
             label: Some("bcs_view_draw"),
             color_attachments: &color,
@@ -1735,6 +1817,10 @@ fn run_view_draws<const POINT: u8>(
             occlusion_query_set: None,
             multiview_mask: None,
         });
+
+        // One span for the run, named after its first draw, since draws sharing a pass share its
+        // timing.
+        let span = diagnostics.pass_span(&mut pass, here[start].label.clone());
 
         for draw in &here[start..end] {
             let Some(pipeline) = cache.get_render_pipeline(draw.pipeline) else {
@@ -1751,6 +1837,7 @@ fn run_view_draws<const POINT: u8>(
             }
         }
 
+        span.end(&mut pass);
         start = end;
     }
 }
@@ -1814,6 +1901,7 @@ pub fn install(app: &mut App) {
                     forget_view_images,
                     prepare_picture_copies,
                     prepare_view_environments,
+                    prepare_blue_noise,
                 )
                     .in_set(RenderSystems::PrepareResources),
                 (
@@ -1878,6 +1966,7 @@ pub fn install(app: &mut App) {
                     .before(main_opaque_pass_3d),
                 run_view_draws::<1>
                     .after(run_view_dispatches::<1>)
+                    .before(super::passes::AfterOpaquePasses)
                     .before(main_transparent_pass_3d)
                     .in_set(Core3dSystems::MainPass),
                 run_view_draws::<2>
