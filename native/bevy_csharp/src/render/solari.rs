@@ -22,6 +22,20 @@ static ACTIVE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::ne
 #[cfg(feature = "solari")]
 pub type SceneBindings = bevy::solari::scene::RaytracingSceneBindings;
 
+/// Whether Solari is running in this app, which makes every Bevy material deferred.
+#[cfg(feature = "render")]
+pub fn running() -> bool {
+    #[cfg(feature = "solari")]
+    {
+        ACTIVE.load(std::sync::atomic::Ordering::Relaxed)
+    }
+
+    #[cfg(not(feature = "solari"))]
+    {
+        false
+    }
+}
+
 /// The layout of Solari's scene group, or `None` where this app has no Solari to bind it.
 ///
 /// Solari describes its group the same way every time it is made, so a fresh one's description is

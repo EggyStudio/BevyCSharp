@@ -431,6 +431,12 @@ public static unsafe class Shaders
     /// it. A multisampled camera draws it multisampled, which a pass cannot bind, so a camera read
     /// this way needs <see cref="PostSettings.Msaa"/> of one, and gets the stand-ins otherwise.
     /// </para>
+    /// <para>
+    /// Where Bevy's materials are drawn deferred, because some camera asked for the G-buffer or
+    /// because ray-traced lighting is running, any prepass brings the G-buffer with it. Bevy draws
+    /// a deferred material into the G-buffer of every camera with a prepass, and a camera with no
+    /// G-buffer to draw into stops the app.
+    /// </para>
     /// </remarks>
     /// <param name="camera">The camera.</param>
     /// <param name="depth">Whether to draw depth.</param>

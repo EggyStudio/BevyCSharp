@@ -309,26 +309,21 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 
 | need | status |
 |---|---|
-| Ray queries in shaders | Missing. wgpu has experimental ray queries, and naga's WGSL accepts them behind an `enable wgpu_ray_query` extension. Slang writes ray queries for SPIR-V and not for WGSL, so the gap is between the two, and closing it is either a Slang change or a SPIR-V path |
-| An acceleration structure kept current with the scene | Bevy's Solari keeps one for its own lighting, over the meshes given to `SetRayTraced`. A package's shaders cannot trace against it until they can express ray queries |
+| Ray queries in shaders | Has, in compute shaders compiled to SPIR-V (`ShaderTarget.SpirV`), through `bcs_ray::trace` and `visible`, in a bridge built with `--solari` and an app running Solari |
+| An acceleration structure kept current with the scene | Has, Solari's, over the meshes given to `SetRayTraced`, with their vertices, transforms, materials and lights, which `bcs_ray` declares as group two of a dispatch and `bcs_ray::surface_at` shades a hit from |
 
-The route to a package's own shaders tracing rays is known, and each step of it has been checked
-against the versions this engine builds with:
+The route runs around what each tool lacks. Slang writes ray queries only for SPIR-V, and naga's
+SPIR-V reader has no ray query instructions, so a shader of this kind never passes through naga.
+The bridge compiles it to SPIR-V, renumbers its descriptor sets in the binary, and hands it to
+Bevy, which gives it to the Vulkan driver untouched (`spirv_shader_passthrough`). Nothing reads
+the binary on the way, so its layout comes from Slang's reflection, which names every binding and
+says whether the entry point uses it. The scene is Solari's `RaytracingSceneBindings`, whose layout
+the `bcs_ray` module declares in the same order, so the bind group Solari builds each frame is the
+one the dispatch binds.
 
-- **Slang writes ray queries only for SPIR-V.** Its WGSL output refuses `TraceRayInline` as a
-  feature the target lacks, as of Slang 2026.18.
-- **naga cannot read them from SPIR-V.** Its SPIR-V reader has no ray query instructions, so a
-  shader cannot go from Slang's SPIR-V through naga the way every other shader goes through WGSL.
-- **wgpu can take SPIR-V untouched.** Bevy's `spirv_shader_passthrough` feature hands a SPIR-V
-  shader to the driver as it is, on Vulkan, which is where ray queries run anyway.
-- **So the layout has to come from Slang.** A shader passed through is never read by naga, which is
-  where this bridge learns what a shader declares today. Slang's reflection, which the bridge
-  already reads for storage formats, carries every binding, type and struct offset, and building
-  a layout from it is the main piece of work.
-- **The scene to trace against exists.** Solari's `RaytracingSceneBindings` holds a bind group of
-  its acceleration structure, vertex and index buffers, materials and textures, and it is public.
-  A Slang module declaring the same layout in a group of its own, which the bridge binds that group
-  to, gives a package's compute shader the whole scene Solari traces, kept current by Solari.
+What is left belongs to the package: a scene of its own that Solari does not keep, such as
+proxies or a lower level of detail for rays, would need an acceleration structure the bridge
+builds from a geometry pool, which it does not yet do.
 
 ### Debugging and tooling
 
@@ -346,7 +341,7 @@ against the versions this engine builds with:
 | Values set by name, any layout | Has |
 | One shader source for every backend | Has, through Slang |
 | Slang modules a package ships and a material imports | Has, anything under the asset root can be imported |
-| SPIR-V output for what Slang's WGSL cannot express | Missing. Needed for ray queries and some atomics, and a large change to how the bridge hands shaders to Bevy |
+| SPIR-V output for what Slang's WGSL cannot express | Has, for compute stages (`ShaderProgramSettings.ComputeTarget`), passed through to Vulkan untouched and translated by naga elsewhere |
 
 ## Order of work
 
@@ -374,7 +369,9 @@ Each phase unblocks a class of package, and none needs a later one.
    share all of it.
 5. **World space.** Scene data readable from compute (lights, shadow maps and the sky are, and
    materials, per pixel through the G-buffer and by object as constants), 3D images with
-   scrolling, then hardware ray tracing once shaders can reach it.
+   scrolling, and hardware ray queries against the scene Solari keeps, which a compute shader
+   compiled to SPIR-V reaches through `bcs_ray`. An acceleration structure the package builds
+   over geometry of its own is next.
 6. **Reflections and radiance cascades**, built on what the phases before provide.
 
 ## What to watch

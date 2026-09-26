@@ -103,18 +103,23 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
                     set_deferred(world, true);
                 }
 
+                // Where materials are deferred, Bevy queues each one into the deferred phase of
+                // every camera drawing a prepass, and a camera with a prepass but no G-buffer has
+                // no such phase, which ends the app. So any prepass brings the G-buffer then.
+                let gbuffer = flags & 8 != 0 || (flags & (1 | 2 | 4) != 0 && materials_deferred(world));
+
                 let mut camera = world.entity_mut(entity);
                 camera.insert(RequestedPrepass(flags));
                 let reflecting = camera.contains::<ScreenSpaceReflections>();
 
                 // The G-buffer is drawn over the depth the depth prepass leaves, so it brings that.
-                if flags & (1 | 8) != 0 {
+                if flags & 1 != 0 || gbuffer {
                     camera.insert(DepthPrepass);
                 } else if !camera.contains::<TemporalAntiAliasing>() && !reflecting {
                     camera.remove::<DepthPrepass>();
                 }
 
-                if flags & 8 != 0 {
+                if gbuffer {
                     camera.insert(DeferredPrepass);
                 } else if !reflecting {
                     camera.remove::<DeferredPrepass>();
@@ -891,6 +896,12 @@ struct Deferred(bool);
 
 /// Switches Bevy's own materials to deferred or forward, preparing every one of them again.
 #[cfg(feature = "render")]
+/// Whether Bevy's materials are drawn deferred in this app, because a camera asked for the G-buffer
+/// or because Solari, which draws every material that way, is running.
+pub fn materials_deferred(world: &bevy::ecs::world::World) -> bool {
+    world.get_resource::<Deferred>().is_some_and(|deferred| deferred.0) || super::solari::running()
+}
+
 fn set_deferred(world: &mut bevy::ecs::world::World, on: bool) {
     use bevy::pbr::{DefaultOpaqueRendererMethod, StandardMaterial};
 
