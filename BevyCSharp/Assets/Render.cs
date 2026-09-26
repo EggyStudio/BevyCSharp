@@ -370,10 +370,11 @@ public static unsafe class Render
     /// file.
     /// </para>
     /// <para>
-    /// Empty for anything built in memory, which is everything <see cref="CreateMesh"/> makes, and
-    /// for an entity carrying no mesh at all. The two are told apart by
-    /// <see cref="EcsWorld.Has{T}"/> on <see cref="Bevy.Mesh3d"/> where a mirror exists, and by
-    /// nothing where one does not, which is the honest limit.
+    /// Empty for anything built in memory, which is everything
+    /// <see cref="CreateMesh(string, float, float, float)"/> and <see cref="CreateMesh(MeshData)"/>
+    /// make, and for an entity carrying no mesh at all. Nothing on this side tells those two apart,
+    /// because Bevy's <c>Mesh3d</c> has no managed mirror to ask <see cref="EcsWorld.Has{T}"/>
+    /// about.
     /// </para>
     /// </remarks>
     /// <param name="entity">The entity to ask about.</param>

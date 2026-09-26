@@ -33,8 +33,7 @@ public partial struct Described
     public Sealed Shut;
 
     /// <summary>Left out, because a tool has no business with a behavior's own state.</summary>
-# pragma warning disable CS0649 // Never assigned, because only its absence from the schema is under
-# test.
+#pragma warning disable CS0649 // Never assigned, because only its absence from the schema is tested.
     private int _private;
 #pragma warning restore CS0649
 
@@ -78,7 +77,7 @@ public struct Mystery
 /// <summary>A value that keeps what it holds to itself.</summary>
 public struct Sealed
 {
-# pragma warning disable CS0169 // Never used, because its absence from the schema is the point.
+#pragma warning disable CS0169 // Never used, because its absence from the schema is the point.
     private readonly long _bits;
 #pragma warning restore CS0169
 }

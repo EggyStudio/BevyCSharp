@@ -145,8 +145,8 @@ internal static class NativeLoader
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(
         "SingleFile", "IL3000:AvoidAssemblyLocationInSingleFile",
         Justification =
-            "An empty result is handled: AppContext.BaseDirectory is probed first and is what a "
-            + "single-file app actually needs.")]
+            "An empty result is handled, because AppContext.BaseDirectory is probed first and a "
+            + "single-file app needs only that.")]
     private static string GetAssemblyLocation() => Assembly.GetExecutingAssembly().Location;
 
     /// <summary>Resolves <see cref="Native.Library"/> against the candidate directories.</summary>

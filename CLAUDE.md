@@ -30,7 +30,7 @@ until a managed build copies the library into each project's `bin`**:
 
 ```bash
 build/build-native.sh --editor    # or --render, or nothing for headless
-dotnet build                      # this is what moves the .so where apps will find it
+dotnet build                      # this moves the .so where apps will find it
 ```
 
 `./bcs build --editor` does both in that order, and [.github/BUILDING.md](.github/BUILDING.md) has

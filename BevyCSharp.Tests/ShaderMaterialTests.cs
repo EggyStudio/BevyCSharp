@@ -691,6 +691,7 @@ public sealed class ShaderMaterialTests
 
         Assert.Equal(made, asked);
         Assert.False(plain.IsValid);
+        Assert.NotNull(read);
         Assert.Equal([0.5f, 1f, 0f, 1f], read);
         Assert.Equal(
             [new ShaderParameter(ShaderParameterKind.Number, "color", ShaderScalar.Float, 4, 1)],

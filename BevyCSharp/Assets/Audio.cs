@@ -48,7 +48,7 @@ public sealed class AudioSettings
     /// <remarks>
     /// A spatial sound is heard from where its entity's <see cref="Transform"/> is, quieter with
     /// distance and further to one side as it moves across. It takes two things: this, and an
-    /// entity to hear from, which <see cref="Audio.SetListener"/> nominates.
+    /// entity to hear from, which <see cref="Audio.SetListener(Entity, float)"/> nominates.
     /// </remarks>
     public bool Spatial { get; set; }
 
@@ -191,6 +191,10 @@ public static unsafe class Audio
     /// ctx.Ecs.Add(engine, Transform.At(4f, 0f, -2f));
     /// </code>
     /// </example>
+    public static void SetListener(Entity entity, float earGap = 0f) =>
+        Native.Check(
+            Native.bcs_audio_listener(entity.Bits, earGap), $"listening from {entity}");
+
     /// <summary>
     /// A volume multiplier from a number of decibels.
     /// </summary>
@@ -221,15 +225,11 @@ public static unsafe class Audio
     public static float DecibelsFromVolume(float volume) =>
         volume > 0f ? 20f * MathF.Log10(volume) : float.NegativeInfinity;
 
-    public static void SetListener(Entity entity, float earGap = 0f) =>
-        Native.Check(
-            Native.bcs_audio_listener(entity.Bits, earGap), $"listening from {entity}");
-
     /// <summary>
     /// Makes an entity the ear, with each ear placed exactly.
     /// </summary>
     /// <remarks>
-    /// The long form of <see cref="SetListener"/>, which puts the two ears a gap apart on the x
+    /// The long form of <see cref="SetListener(Entity, float)"/>, which puts the two ears a gap apart on the x
     /// axis. Placing them says where a head is facing as well as how wide it is, for a listener
     /// carried by a character rather than by a camera, or a first-person view with the ears behind
     /// the eyes.

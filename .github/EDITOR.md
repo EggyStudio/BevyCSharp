@@ -41,7 +41,7 @@ What they draw with is five more, which nothing else in the editor duplicates:
 | class | what it is |
 |---|---|
 | `EditorSurface` | the gaps and the plates: gutters, cards, regions, grab handles, what a thing lying on the scene wears |
-| `EditorWidgets` | the controls ImGui does not draw the way this look wants: a round box to tick, a slider, a pill, a list to choose from, a flyout, a tooltip |
+| `EditorWidgets` | the controls ImGui does not draw the way this look needs: a round box to tick, a slider, a pill, a list to choose from, a flyout, a tooltip |
 | `EditorDraw` | the shapes drawn by hand: an exactly rounded rectangle, a capsule, an icon, an eye |
 | `EditorSort` | the order names are listed in, which reads a run of digits as the number it spells |
 | `EditorText` | names as a panel shows them: a component without its path, a file cut to the room it has |
@@ -320,7 +320,7 @@ the answers on the schema as `FieldHints`, so nothing reflects at runtime:
 | `[Info("...", Kind = ...)]` | a sentence in the panel above the field: something to know, a warning, an error |
 | `[Foldout("A/B")]` | puts the field in a fold, which opens and shuts; slashes nest them. **Not drawn yet** |
 | `[Color]` | three numbers that are a color, as a swatch the width of the row that opens a picker |
-| `[Inline]` | three numbers beside each other rather than one per row, which is what a vector already does |
+| `[Inline]` | three numbers beside each other rather than one per row, as a vector already is |
 | `[Wide]` | drawn across the panel, with no name column beside it |
 | `[ShowIf(nameof(Other))]` | drawn only while another field reads true, or equals a value |
 | `[HideIf(nameof(Other), Value)]` | the same, reversed; several conditions may sit on one field |

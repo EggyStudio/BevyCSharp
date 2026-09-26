@@ -57,6 +57,9 @@ public static class EditorRows
     /// </summary>
     /// <param name="name">What the row is called.</param>
     /// <param name="tip">What to say when the pointer rests on the name, if anything.</param>
+    /// <param name="differs">
+    /// Whether the things selected hold different values here, which dims the name.
+    /// </param>
     public static void Line(string name, string? tip = null, bool differs = false)
     {
         ArgumentNullException.ThrowIfNull(name);

@@ -270,7 +270,7 @@ public static unsafe class AssetServer
     /// </para>
     /// <para>
     /// What comes back is an ordinary mesh handle, indistinguishable from one
-    /// <see cref="Render.CreateMesh"/> built, so <see cref="Render.SetMesh"/> takes it as it is.
+    /// <see cref="Render.CreateMesh(MeshData)"/> built, so <see cref="Render.SetMesh"/> takes it as it is.
     /// </para>
     /// <para>
     /// The file's own material comes from <see cref="LoadGltfMaterial"/>, which needs a window.

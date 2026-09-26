@@ -311,8 +311,10 @@ public static class ComponentFields
     {
         if (others.Count == 0 || !field.IsWritable) return 0;
 
+        // Nothing to spread when the shown entity no longer carries the component, since a read
+        // of an absent component is null and null is not a value any field can be written with.
         var now = field.Read(ctx.Ecs, entity);
-        if (Same(now, before)) return 0;
+        if (now is null || Same(now, before)) return 0;
 
         var written = 0;
 

@@ -112,7 +112,7 @@ public static class FrameTab
 
         if (timings.Count == 0)
         {
-            ImGui.TextDisabled("No timings: the app was made without Config.GpuTimings");
+            ImGui.TextDisabled("No timings, because the app was made without Config.GpuTimings");
             return;
         }
 

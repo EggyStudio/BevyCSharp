@@ -1502,7 +1502,7 @@ in:
 ```csharp
 Render.SetExposure(camera, 12f);
 
-// Or the same thing as a lens, which is what a real camera is written down as.
+// Or the same thing as a lens, the way a real camera is written down.
 Render.SetLensExposure(camera, aperture: 2.8f, shutter: 1f / 250f, sensitivity: 400f);
 
 Render.SetColorGrading(camera, new GradingSettings
