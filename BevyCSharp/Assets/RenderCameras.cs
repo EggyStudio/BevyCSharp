@@ -7,8 +7,8 @@ public enum CameraProjection
     Perspective = 0,
 
     /// <summary>
-    /// Parallel lines stay parallel and distance does not shrink anything, which is what an
-    /// isometric or a top-down view is built on.
+    /// Parallel lines stay parallel and distance does not shrink anything, as an isometric or a
+    /// top-down view needs.
     /// </summary>
     Orthographic = 1,
 }
@@ -52,7 +52,7 @@ public enum ClearMode
 /// </remarks>
 public enum Tonemapper
 {
-    /// <summary>Clip anything brighter than white, which is what no tonemapping means.</summary>
+    /// <summary>Clip anything brighter than white, as no tonemapping does.</summary>
     None = 0,
 
     /// <summary>The classic curve. Colors shift hue as they brighten.</summary>
@@ -149,10 +149,10 @@ public enum BloomMode
 /// </summary>
 /// <remarks>
 /// One settings object for the whole pipeline rather than a call per effect, because these are
-/// decided together. Bloom wants a high dynamic range target, and multisampling and an
-/// antialiasing pass are two answers to the same question. Every field is applied on every call,
-/// so an effect this object leaves off is taken off the camera. Turning bloom off is the same
-/// call as turning it on, which is what a settings screen wants.
+/// decided together. Bloom needs a high dynamic range target, and multisampling and an antialiasing
+/// pass are two answers to the same question. Every field is applied on every call, so an effect
+/// this object leaves off is taken off the camera. Turning bloom off is the same call as turning it
+/// on, which suits a settings screen.
 /// </remarks>
 public sealed class PostSettings
 {
@@ -182,9 +182,9 @@ public sealed class PostSettings
     /// Samples per pixel taken while the scene is rasterized: 1, 2, 4 or 8.
     /// </summary>
     /// <remarks>
-    /// Smooths the edges of geometry and nothing else. Four is Bevy's own; one turns it off,
-    /// which is what a game leaning on <see cref="AntiAlias"/> does, and what
-    /// <see cref="AntiAliasPass.Temporal"/> requires.
+    /// Smooths the edges of geometry and nothing else. Four is Bevy's own; one turns it off, as a
+    /// game leaning on <see cref="AntiAlias"/> does, and <see cref="AntiAliasPass.Temporal"/>
+    /// requires it.
     /// </remarks>
     public int Msaa { get; set; } = 4;
 
@@ -244,8 +244,8 @@ public enum DepthOfFieldMode
     Gaussian = 1,
 
     /// <summary>
-    /// Each point of light spreads into a disc, which is what a lens does and what makes a
-    /// highlight behind the subject into a circle.
+    /// Each point of light spreads into a disc, as a lens spreads it, which makes a highlight
+    /// behind the subject into a circle.
     /// </summary>
     Bokeh = 2,
 }
@@ -256,9 +256,9 @@ public enum DepthOfFieldMode
 /// <remarks>
 /// <para>
 /// Beside <see cref="PostSettings"/> rather than part of it, because the two are decided at
-/// different times. The pipeline is what a settings screen owns, and these are what a scene does
-/// for a moment, a hit, a dream, a shot pulling focus. The rule is the same, so every field is
-/// applied on every call and an effect these settings leave off is taken off the camera.
+/// different times. A settings screen owns the pipeline, and a scene sets these for a moment, a
+/// hit, a dream, a shot pulling focus. The rule is the same, so every field is applied on every
+/// call and an effect these settings leave off is taken off the camera.
 /// </para>
 /// <para>
 /// Depth of field needs a perspective camera, since focus has no meaning without one. Auto
@@ -278,7 +278,7 @@ public sealed class EffectSettings
     /// </summary>
     /// <remarks>
     /// Smaller opens the lens wider, which leaves less of the scene in focus. Bevy's own is 1,
-    /// which is wide, so a scene that should be mostly sharp wants a larger number.
+    /// which is wide, so a scene that should be mostly sharp needs a larger number.
     /// </remarks>
     public float Aperture { get; set; } = 1f;
 
@@ -294,7 +294,8 @@ public sealed class EffectSettings
     /// <summary>
     /// Widest a single blur may be, in pixels. Zero takes Bevy's own.
     /// </summary>
-    /// <remarks>Not physical: a cap on how slow a very out-of-focus frame is allowed to be.</remarks>
+    /// <remarks>Not physical. It caps how slow a very out-of-focus frame is allowed to
+    /// be.</remarks>
     public float MaxBlurDiameter { get; set; }
 
     /// <summary>
@@ -310,9 +311,9 @@ public sealed class EffectSettings
     /// Fraction of a frame the shutter is open, and so how far a moving thing smears.
     /// </summary>
     /// <remarks>
-    /// Zero is no motion blur. A film camera's 180 degree shutter is 0.5, which is what a
-    /// cinematic look wants at 24 frames a second; at 60 the same look is about 1.25. Above 1 a
-    /// thing smears further than it moved, which is a choice rather than a mistake.
+    /// Zero is no motion blur. A film camera's 180 degree shutter is 0.5, which gives a cinematic
+    /// look at 24 frames a second; at 60 the same look is about 1.25. Above 1 a thing smears
+    /// further than it moved, which is a choice rather than a mistake.
     /// </remarks>
     public float ShutterAngle { get; set; }
 
@@ -330,7 +331,7 @@ public sealed class EffectSettings
     /// </summary>
     /// <remarks>
     /// What a lens does when it fails to focus every color at one point. Bevy's own strength is
-    /// 0.02, and a horror game reaching for it on a hit wants more.
+    /// 0.02, and a horror game reaching for it on a hit needs more.
     /// </remarks>
     public float Aberration { get; set; }
 
@@ -350,8 +351,8 @@ public sealed class EffectSettings
     /// Strength of the lens warp. Zero leaves straight lines straight.
     /// </summary>
     /// <remarks>
-    /// Positive bulges the picture outwards, which is what a wide lens does; negative pinches it
-    /// inwards. Bevy's own strength is 0.5.
+    /// Positive bulges the picture outwards, as a wide lens does; negative pinches it inwards.
+    /// Bevy's own strength is 0.5.
     /// </remarks>
     public float Distortion { get; set; }
 
@@ -409,8 +410,8 @@ public sealed class EffectSettings
     /// </summary>
     /// <remarks>
     /// A histogram of the frame's brightness is built and the exposure moved so that the average
-    /// lands on middle gray, which is what an eye does walking out of a cave. The camera is given
-    /// a high dynamic range target, because there is nothing to meter without one.
+    /// lands on middle gray, as an eye adjusts walking out of a cave. The camera is given a high
+    /// dynamic range target, because there is nothing to meter without one.
     /// </remarks>
     public bool AutoExposure { get; set; }
 
@@ -437,8 +438,8 @@ public sealed class EffectSettings
     /// How near the target the adaptation stops being linear, in f-stops. Zero takes Bevy's own.
     /// </summary>
     /// <remarks>
-    /// Inside this distance the exposure eases in rather than tracking straight, which is what
-    /// stops it jittering while the scene changes slightly from frame to frame.
+    /// Inside this distance the exposure eases in rather than tracking straight, which stops it
+    /// jittering while the scene changes slightly from frame to frame.
     /// </remarks>
     public float ExposureTransition { get; set; }
 
@@ -474,8 +475,8 @@ public sealed class EffectSettings
 /// same haze.
 /// </para>
 /// <para>
-/// The sun is whichever directional light is in the scene, so its direction and color are what
-/// move the sky. A scene with no directional light gets a night sky.
+/// The sun is whichever directional light is in the scene, so its direction and color move the sky.
+/// A scene with no directional light gets a night sky.
 /// </para>
 /// </remarks>
 public sealed class AtmosphereSettings
@@ -492,9 +493,9 @@ public sealed class AtmosphereSettings
     /// How large the planet is against the scene, for a world not measured in meters.
     /// </summary>
     /// <remarks>
-    /// The planet is the size of a real one and its ground sits at the origin, so a scene in
-    /// meters needs nothing here. A scene in kilometers wants a smaller number, since what
-    /// matters is how far the camera moves through the air.
+    /// The planet is the size of a real one and its ground sits at the origin, so a scene in meters
+    /// needs nothing here. A scene in kilometers needs a smaller number, since what matters is how
+    /// far the camera moves through the air.
     /// </remarks>
     public float Scale { get; set; } = 1f;
 
@@ -563,8 +564,8 @@ public sealed class CameraSettings
 
     /// <summary>Nearest visible distance.</summary>
     /// <remarks>
-    /// Depth precision is spent between here and <see cref="Far"/>, and mostly near this end, so
-    /// a very small value is what makes distant surfaces flicker against each other.
+    /// Depth precision is spent between here and <see cref="Far"/>, and mostly near this end, so a
+    /// very small value makes distant surfaces flicker against each other.
     /// </remarks>
     public float Near { get; set; } = 0.1f;
 
@@ -585,9 +586,9 @@ public sealed class CameraSettings
     /// The part of the window to draw into, in physical pixels, or null for all of it.
     /// </summary>
     /// <remarks>
-    /// What splitscreen is made of: two cameras, each given half the window. Physical pixels
-    /// rather than logical ones, because that is what a framebuffer is divided into, so half a
-    /// window is half its physical width whatever the display scaling.
+    /// Splitscreen is two cameras, each given half the window. Physical pixels rather than logical
+    /// ones, because a framebuffer is divided into those, so half a window is half its physical
+    /// width whatever the display scaling.
     /// </remarks>
     public (uint X, uint Y, uint Width, uint Height)? Viewport { get; set; }
 

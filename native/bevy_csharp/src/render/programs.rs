@@ -6,20 +6,20 @@
 //! camera's picture, and a compute shader. A program is a number, and a material, a pass or a
 //! dispatch says which number it runs, so there is no limit on how many a game has.
 //!
-//! **What a shader declares is what it is handed.** Every compile is read back (see
-//! [`super::reflect`]) into the layout of the shader's own globals, and that layout, not a table
-//! fixed in advance, is what a material's bind group is built in. A program's material stages share
-//! one layout, merged from each stage's view of it.
+//! **A shader is handed what it declares.** Every compile is read back (see [`super::reflect`])
+//! into the layout of the shader's own globals, and a material's bind group is built in that
+//! layout, not a table fixed in advance. A program's material stages share one layout, merged from
+//! each stage's view of it.
 //!
 //! **Why a table outside the world.** The render side builds pipelines and bind groups from a
-//! program, and it has no main world to look in. [`TABLE`] is what it reads. The world keeps the
-//! rest ([`ShaderPrograms`]): the compile jobs, the files to watch and what went wrong.
+//! program, and it has no main world to look in, so it reads [`TABLE`]. The world keeps the rest
+//! ([`ShaderPrograms`]): the compile jobs, the files to watch and what went wrong.
 //!
 //! **Hot reload.** A Slang file is recompiled here, off the main thread, whenever it or anything it
 //! imported changes. A successful compile is a new shader asset and a new layout, and the program's
-//! generation moves on, which is what makes materials build their bind groups again, by name, and
-//! pipelines be built from the new shader. A new asset rather than a replaced one, because an old
-//! pipeline recompiled from new code against an old layout would be a pipeline that fails.
+//! generation moves on, which makes materials build their bind groups again, by name, and pipelines
+//! be built from the new shader. A new asset rather than a replaced one, because an old pipeline
+//! recompiled from new code against an old layout would be a pipeline that fails.
 //!
 //! **When a file fails.** The last version that compiled stays, so a typo in a running game
 //! changes nothing on screen and says what is wrong in the log. A stage that has never compiled
@@ -85,8 +85,8 @@ impl Role {
         Role::PrepassFragment,
     ];
 
-    /// The entry point a stage has when the program does not name one, which is what Bevy's own
-    /// shaders call theirs.
+    /// The entry point a stage has when the program does not name one, the name Bevy's own shaders
+    /// use.
     fn default_entry(self) -> &'static str {
         match self {
             Role::Vertex | Role::PrepassVertex | Role::DrawVertex => "vertex",
@@ -150,8 +150,8 @@ pub struct PipelineProgram {
     pub compute: Option<Arc<Layout>>,
     /// The layout of what a program drawing on a camera declares, merged from both of its stages.
     pub draw: Option<Arc<Layout>>,
-    /// Moves on every time a stage is replaced, which is what a pipeline or a bind group made from
-    /// an older version checks itself against.
+    /// Moves on every time a stage is replaced, and a pipeline or a bind group made from an older
+    /// version checks itself against it.
     pub generation: u32,
     /// What its GPU time is recorded under: the name of its first stage's file.
     pub name: Arc<str>,
@@ -210,7 +210,7 @@ fn compute_ready(id: usize, generation: u32) -> bool {
         .unwrap_or(false)
 }
 
-/// Forgets every program, which is what a new app starts from.
+/// Forgets every program, so a new app starts from none.
 pub fn forget_all() {
     if let Ok(mut table) = TABLE.write() {
         table.clear();
@@ -297,7 +297,7 @@ enum UnitState {
     Failed,
 }
 
-/// One entry point of one Slang file under one set of defines, which is what `slangc` compiles.
+/// One entry point of one Slang file under one set of defines, the unit `slangc` compiles.
 ///
 /// Shared between programs that ask for the same thing, so ten programs naming one shader cost one
 /// compile rather than ten.
@@ -990,7 +990,7 @@ pub fn state(world: &World, id: i32) -> i32 {
     }
 
     // A compute stage whose pipeline has not been built counts as compiling, however the shader
-    // itself stands, because that is what a dispatch sees.
+    // itself stands, because a dispatch sees it that way.
     if program.stages[Role::Compute as usize].is_some()
         && !compute_ready(id as usize, program.generation)
     {
@@ -1088,7 +1088,7 @@ pub fn count(world: &World) -> i32 {
 
 /// How many times the program's shaders have been replaced, counting the first time.
 ///
-/// Only ever grows, so a caller that wants to know when an edit has reached the pipelines reads it
+/// Only ever grows, so a caller that needs to know when an edit has reached the pipelines reads it
 /// before the edit and waits for it to move.
 pub fn generation(world: &World, id: i32) -> i32 {
     match program(world, id) {

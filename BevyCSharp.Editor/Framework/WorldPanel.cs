@@ -9,8 +9,8 @@ namespace BevyCSharp.Editor.Framework;
 /// What is in the world, as a tree.
 /// </summary>
 /// <remarks>
-/// Bevy's own word for the thing being listed, so that is what the panel is called. The tree is
-/// walked again only when the population changes or enough frames have gone by that a rename would
+/// Bevy's own word for the thing being listed, so the panel is called that. The tree is walked
+/// again only when the population changes or enough frames have gone by that a rename would
 /// otherwise never show, because a query and a sort per frame for a list that is the same list is
 /// work for nothing, even in immediate mode.
 /// </remarks>
@@ -36,7 +36,7 @@ public static class WorldPanel
     /// <summary>Which rename has already been given the keyboard.</summary>
     private static ulong _started;
 
-    /// <summary>The last row picked, which is what a range is measured from.</summary>
+    /// <summary>The last row picked, which a range is measured from.</summary>
     private static ulong _anchor;
 
     /// <summary>How wide the eye's end of a row is.</summary>
@@ -50,9 +50,9 @@ public static class WorldPanel
     /// The room a row's fold arrow takes, whether or not the row has one.
     /// </summary>
     /// <remarks>
-    /// One number, because it decides three things that have to agree: how far the arrow is drawn,
-    /// how far a row without one indents so the names still line up, and how much of the front of a
-    /// row a click folds rather than selects.
+    /// One number, because it decides three things that have to agree, which are how far the arrow
+    /// is drawn, how far a row without one indents so the names still line up, and how much of the
+    /// front of a row a click folds rather than selects.
     /// </remarks>
     private static float Arrow => ImGui.GetTextLineHeight() + 2f;
 
@@ -71,14 +71,14 @@ public static class WorldPanel
     /// started by pointing at it are the same thing happening.
     /// </remarks>
     /// <param name="entity">Which row.</param>
-    /// <param name="name">What it is called now, which is what the box opens holding.</param>
+    /// <param name="name">What it is called now, which the box opens holding.</param>
     public static void Rename(Entity entity, string name)
     {
         _renaming = entity.Bits;
         _typed = name;
     }
 
-    /// <summary>How far in a row's picture sits, which is what makes the list a tree.</summary>
+    /// <summary>How far in a row's picture sits, which makes the list a tree.</summary>
     private static float Indent(Row row) =>
         EditorSurface.Air + (row.Depth * ImGui.GetStyle().IndentSpacing);
 
@@ -112,7 +112,7 @@ public static class WorldPanel
     /// <summary>One line of the list.</summary>
     /// <param name="Entity">What the row stands for.</param>
     /// <param name="Name">What it is called.</param>
-    /// <param name="Depth">How far in it sits, which is what makes a list read as a tree.</param>
+    /// <param name="Depth">How far in it sits, which makes a list read as a tree.</param>
     /// <param name="HasChildren">Whether anything hangs under it.</param>
     /// <param name="Icon">The picture it wears, under the asset root.</param>
     private readonly record struct Row(
@@ -136,7 +136,7 @@ public static class WorldPanel
 
         if (!EditorSurface.Region("##rows", new Vector2(0f, 0f)))
         {
-            // Ended whether or not it opened, which is what a child window asks for.
+            // Ended whether or not it opened, as a child window requires.
             EditorSurface.EndRegion();
             return;
         }
@@ -210,7 +210,7 @@ public static class WorldPanel
             _renaming = 0;
             _started = 0;
 
-            // Walked again, because a name is what the list is sorted by.
+            // Walked again, because the list is sorted by name.
             _built = 0;
         }
 
@@ -228,9 +228,9 @@ public static class WorldPanel
     /// </summary>
     /// <remarks>
     /// Drawn rather than asked for, because a selectable is a rectangle with square corners in this
-    /// version of ImGui and everything else in the editor is rounded. What that buys besides the
-    /// shape is the fill running the whole width behind the indent, which is what makes a list of
-    /// nested things read as rows rather than as ragged text.
+    /// version of ImGui and everything else in the editor is rounded. Besides the shape, that buys
+    /// the fill running the whole width behind the indent, which makes a list of nested things read
+    /// as rows rather than as ragged text.
     /// </remarks>
     private static void Line(BehaviorContext ctx, Row row)
     {
@@ -269,9 +269,9 @@ public static class WorldPanel
 
         if (ImGui.IsItemClicked())
         {
-            // The eye takes the click that lands on it, so putting something away never also
-            // picks it. Back to inherited rather than to visible, because what a thing was before
-            // it was hidden is what its parent says, and forcing it on outlives the hierarchy.
+            // The eye takes the click that lands on it, so putting something away never also picks
+            // it. Back to inherited rather than to visible, because its parent says what a thing
+            // was before it was hidden, and forcing it on outlives the hierarchy.
             if (onEye)
             {
                 var was = sight;
@@ -303,7 +303,7 @@ public static class WorldPanel
             }
 
             // Control adds one, shift takes everything between this and the last one picked, and
-            // neither replaces what was chosen. Which is what every list of things anywhere does.
+            // neither replaces what was chosen, as every list of things anywhere behaves.
             else if (ctx.Input.AnyKeyDown([Key.ControlLeft, Key.ControlRight]))
             {
                 EditorSelection.Toggle(row.Entity);
@@ -326,11 +326,10 @@ public static class WorldPanel
 
             RoundedRows.Rows(() =>
             {
-                // What a row itself offers, which is what a double click and a key are otherwise
-                // the only way to reach. Copying one is not among them, because what the editor
-                // can read off an entity is what has a schema, and the mesh and the material an
-                // entity is drawn with have none, so the copy would be an invisible thing with
-                // the right name.
+                // What a row itself offers, which a double click and a key are otherwise the only
+                // way to reach. Copying one is not among them, because the editor can read only
+                // what has a schema off an entity, and the mesh and the material an entity is drawn
+                // with have none, so the copy would be an invisible thing with the right name.
                 if (ImGui.MenuItem("Rename")) Rename(row.Entity, row.Name);
 
                 RoundedRows.Row();
@@ -475,8 +474,8 @@ public static class WorldPanel
     /// Chooses everything between the last row picked and this one.
     /// </summary>
     /// <remarks>
-    /// Measured down the list as it is drawn rather than through the tree, because what somebody
-    /// means by "everything between these two" is what they can see between them.
+    /// Measured down the list as it is drawn rather than through the tree, because "everything
+    /// between these two" means what somebody can see between them.
     /// </remarks>
     private static void Range(Entity to)
     {

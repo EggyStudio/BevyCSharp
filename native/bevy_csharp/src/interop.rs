@@ -219,7 +219,7 @@ pub struct BcsConfig {
     /// `height` size the image the way they would size the window.
     pub offscreen: u32,
     /// How many world units a meter is, for every spatial sound that does not say otherwise. `0`
-    /// keeps Bevy's own of one, which is what a world measured in meters wants.
+    /// keeps Bevy's own of one, for a world measured in meters.
     pub spatial_scale: f32,
     /// How many meshlet clusters the GPU keeps room for at once, or `0` for no meshlets. Needs a
     /// build with the `meshlet` feature and a GPU with 64-bit texture atomics.
@@ -286,9 +286,9 @@ pub struct BcsMonitor {
 
 /// One video mode a monitor can be driven at.
 ///
-/// A resolution, a color depth and a refresh rate together, which is what exclusive fullscreen
-/// takes the screen over with. A monitor offers a fixed list of these and can be driven at no
-/// others, so a settings screen offers what the list holds rather than a pair of number boxes.
+/// A resolution, a color depth and a refresh rate together, which exclusive fullscreen takes the
+/// screen over with. A monitor offers a fixed list of these and can be driven at no others, so a
+/// settings screen offers what the list holds rather than a pair of number boxes.
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct BcsVideoMode {
@@ -356,10 +356,10 @@ pub struct BcsReflectionConfig {
 
 /// What a camera does to the picture after the scene has been drawn.
 ///
-/// One config rather than a component per effect, because these are decided together. Bloom wants
-/// a high dynamic range target, and an antialiasing pass and multisampling are two answers to the
-/// same question. Every field is applied on every call, so a setting left alone is a setting
-/// turned off, and one call describes the whole pipeline.
+/// One config rather than a component per effect, because these are decided together. Bloom needs a
+/// high dynamic range target, and an antialiasing pass and multisampling are two answers to the
+/// same question. Every field is applied on every call, so a setting left alone is a setting turned
+/// off, and one call describes the whole pipeline.
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct BcsPostConfig {
@@ -369,8 +369,8 @@ pub struct BcsPostConfig {
     pub tonemapping: i32,
     /// Non-zero to dither before quantizing, which hides banding across a gradient.
     pub dither: i32,
-    /// Non-zero to draw into a high dynamic range target, which is what lets a highlight be
-    /// brighter than white and what bloom reads.
+    /// Non-zero to draw into a high dynamic range target, so a highlight can be brighter than
+    /// white, and bloom reads it.
     pub hdr: i32,
     /// Samples per pixel taken while rasterizing: `1` off, or `2`, `4`, `8`.
     pub msaa: i32,
@@ -395,10 +395,10 @@ pub struct BcsPostConfig {
 
 /// The lens effects a camera can be given, beside the ones on [`BcsPostConfig`].
 ///
-/// A second config rather than more fields on the first, because the two are decided at
-/// different times. The pipeline is a settings screen, while these are what a scene does for a
-/// moment, a hit, a dream, a shot pulling focus. Both share the rule that every field is applied
-/// on every call, so an effect a config leaves off is taken off the camera.
+/// A second config rather than more fields on the first, because the two are decided at different
+/// times. The pipeline is a settings screen, while a scene sets these for a moment, a hit, a dream,
+/// a shot pulling focus. Both share the rule that every field is applied on every call, so an
+/// effect a config leaves off is taken off the camera.
 ///
 /// Depth of field, lens distortion and the vignette are switched by a mode or an intensity
 /// rather than by a flag of their own, since each carries a value that means nothing happens.
@@ -478,8 +478,8 @@ pub struct BcsEffectsConfig {
     /// How many of [`Self::compensation_curve`] are used, `0` for no compensation. Two or more
     /// points make a curve.
     pub compensation_points: u32,
-    /// Pairs of measured luminance in EV-100 and the compensation to apply there in f-stops,
-    /// rising in luminance. Eight points is what the flat config carries.
+    /// Pairs of measured luminance in EV-100 and the compensation to apply there in f-stops, rising
+    /// in luminance. The flat config carries eight points.
     pub compensation_curve: [f32; 16],
 }
 
@@ -691,7 +691,7 @@ pub struct BcsUiTextConfig {
     pub letter_spacing: f32,
     /// What `letter_spacing` is measured in: `0` multiples of the font size, `1` logical pixels.
     pub letter_spacing_unit: i32,
-    /// Whether the glyphs are smoothed: `0` antialiased, `1` not, which is what a pixel font wants.
+    /// Whether the glyphs are smoothed: `0` antialiased, `1` not, for a pixel font.
     pub font_smoothing: i32,
     /// How far a shadow is cast behind the text, in logical pixels: across, then down.
     pub shadow_offset: [f32; 2],
@@ -882,9 +882,9 @@ pub struct BcsImageConfig {
 
 /// Everything a physically based material is made of.
 ///
-/// Texture fields are asset keys, or `-1` for none. An image bound here is used as-is; combining
-/// one with the matching factor is what the renderer already does, so a white base color with a
-/// base color map shows the map unchanged.
+/// Texture fields are asset keys, or `-1` for none. An image bound here is used as-is; the renderer
+/// combines one with the matching factor, so a white base color with a base color map shows the map
+/// unchanged.
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct BcsMaterialConfig {
@@ -1098,8 +1098,8 @@ mod tests {
 
     #[test]
     fn a_panic_becomes_a_status_rather_than_an_unwind() {
-        // Unwinding into the .NET runtime is undefined behavior, so the guard is what stands
-        // between a bug on this side and a process that dies without saying why.
+        // Unwinding into the .NET runtime is undefined behavior, so the guard stands between a bug
+        // on this side and a process that dies without saying why.
         assert_eq!(status::OK, guard(|| status::OK));
         assert_eq!(-42, guard_with(-42, || panic!("a bug on this side")));
 
@@ -1142,15 +1142,15 @@ mod layout {
 
 /// One track of a grid, and how many times it repeats.
 ///
-/// A row or a column, described the way a stylesheet describes one. The list of them is what a
-/// grid is, and a list is what a flat config has no room for, which is why a grid arrives through
-/// its own call with a pointer to an array rather than as more fields on the node.
+/// A row or a column, described the way a stylesheet describes one. A grid is a list of them, and a
+/// flat config has no room for a list, which is why a grid arrives through its own call with a
+/// pointer to an array rather than as more fields on the node.
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct BcsGridTrack {
     /// How the track is sized: `0` to what it holds, `1` logical pixels, `2` a percentage of the
     /// grid, `3` a share of whatever is left over, `4` the smallest its contents can be, `5` the
-    /// largest they want to be.
+    /// largest they can be.
     pub kind: i32,
     /// The number `kind` reads, where it reads one.
     pub value: f32,

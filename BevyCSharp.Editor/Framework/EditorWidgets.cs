@@ -4,7 +4,7 @@ using ImGuiNET;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// The controls the editor draws that ImGui does not, or does not draw the way this look wants.
+/// The controls the editor draws that ImGui does not, or does not draw the way this look needs.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -93,7 +93,7 @@ public static class EditorWidgets
     /// other value is read in rather than the accent.
     /// </para>
     /// </remarks>
-    /// <param name="label">What to call it, which is what ImGui hashes it by.</param>
+    /// <param name="label">What to call it, which ImGui hashes it by.</param>
     /// <param name="on">What it holds, and what it is left holding.</param>
     internal static bool Ticked(string label, ref bool on)
     {
@@ -128,7 +128,7 @@ public static class EditorWidgets
         return changed;
     }
 
-    /// <summary>How wide a pill saying this is, which is what a row of them measures with.</summary>
+    /// <summary>How wide a pill saying this is, which a row of them measures with.</summary>
     /// <param name="name">What the pill says.</param>
     internal static float PillWidth(string name) =>
         ImGui.CalcTextSize(name).X + (EditorSurface.Sides * 2f);
@@ -206,8 +206,8 @@ public static class EditorWidgets
     /// it, so the name under the pointer is a rounded row like the one in every other list and the
     /// list keeps the air every other flyout keeps.
     /// </remarks>
-    /// <param name="id">What to call it, which is what ImGui hashes it by.</param>
-    /// <param name="held">What it holds now, which is what the row says while the list is shut.</param>
+    /// <param name="id">What to call it, which ImGui hashes it by.</param>
+    /// <param name="held">What it holds now, which the row says while the list is shut.</param>
     /// <param name="list">
     /// The rows to offer, drawn only while the list is open, each followed by
     /// <see cref="RoundedRows.Row"/>.
@@ -235,7 +235,7 @@ public static class EditorWidgets
     /// outright. Anything whose list has to be gathered, such as the files in a project, builds its
     /// own rows through <see cref="Picking"/> instead.
     /// </remarks>
-    /// <param name="id">What to call it, which is what ImGui hashes it by.</param>
+    /// <param name="id">What to call it, which ImGui hashes it by.</param>
     /// <param name="held">What it holds now.</param>
     /// <param name="options">What it could hold instead.</param>
     /// <param name="onto">What to do with the one chosen.</param>
@@ -273,7 +273,7 @@ public static class EditorWidgets
     /// A button rather than ImGui's own color field, which draws its swatch as a square of one
     /// row's height however wide the row is and leaves the rest of it empty.
     /// </remarks>
-    /// <param name="id">What to call it, which is what ImGui hashes it by.</param>
+    /// <param name="id">What to call it, which ImGui hashes it by.</param>
     /// <param name="color">The color, changed in place when the picker is used.</param>
     /// <returns>Whether it changed.</returns>
     public static bool Swatch(string id, ref Vector4 color)
@@ -309,8 +309,8 @@ public static class EditorWidgets
     /// <param name="slide">The slider to call, once its own colors are out of the way.</param>
     /// <param name="readout">
     /// What to write on the bar, clear of the handle, or nothing at all for a bar that says
-    /// nothing. Left out entirely to keep whatever ImGui writes on it, which is what a bar with a
-    /// word rather than a number in it wants.
+    /// nothing. Left out entirely to keep whatever ImGui writes on it, for a bar with a word rather
+    /// than a number in it.
     /// </param>
     internal static bool Sliding(string id, float fraction, Func<bool> slide, string? readout = null)
     {
@@ -325,9 +325,9 @@ public static class EditorWidgets
         var min = ImGui.GetCursorScreenPos();
         var max = min + new Vector2(ImGui.CalcItemWidth(), ImGui.GetFrameHeight());
 
-        // Held is what ImGui said last frame, because the answer for this one arrives after the
-        // call that draws it. A drag reads as held from its second frame, which is the frame the
-        // handle first moves.
+        // Held repeats what ImGui said last frame, because the answer for this one arrives after
+        // the call that draws it. A drag reads as held from its second frame, which is the frame
+        // the handle first moves.
         var held = _sliding == id;
         var groove = held || ImGui.IsMouseHoveringRect(min, max)
             ? ImGuiCol.FrameBgHovered

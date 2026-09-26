@@ -11,11 +11,11 @@ use crate::state::{with_world, with_world_opt};
 /// image an offscreen run draws into instead. Which of those it is is not the caller's to decide,
 /// because a run has one thing it is drawing and a capture is a picture of that.
 ///
-/// An asset key instead captures that image, which is how the view of a camera pointed at a
-/// texture is read back: a minimap, a portal, or the second viewport an editor draws.
+/// An asset key instead captures that image, which reads back the view of a camera pointed at a
+/// texture, such as a minimap, a portal, or the second viewport an editor draws.
 ///
 /// The capture happens on the frame after this call, because the picture has to come back off the
-/// GPU, and the file appears once it has. A caller that wants to know it arrived watches for the
+/// GPU, and the file appears once it has. A caller that needs to know it arrived watches for the
 /// file rather than for this returning.
 ///
 /// This is how a change to the picture is checked without a person looking at it, which is
@@ -76,8 +76,8 @@ struct CapturedPixels {
 /// The captures asked for and not yet read.
 ///
 /// A capture is answered frames after it is asked for, so it cannot be a return value. Each one is
-/// given a number when it is asked for, and the number is what the managed side holds on to until
-/// the picture arrives.
+/// given a number when it is asked for, and the managed side holds on to the number until the
+/// picture arrives.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::resource::Resource, Default)]
 struct Captures {
@@ -92,8 +92,8 @@ struct Captures {
 ///
 /// A negative `target` captures whatever this run is drawing into, and an asset key captures that
 /// image, exactly as [`bcs_render_screenshot`] does. What differs is where the picture goes. A file
-/// is for a person to look at, and this is for a program to inspect, which is what asserting on a
-/// pixel needs.
+/// is for a person to look at, and this is for a program to inspect, so a test can assert on a
+/// pixel.
 ///
 /// Returns a positive number naming the capture. The picture arrives a frame or two later, because
 /// it has to come back off the GPU, and [`bcs_render_capture_read`] says when.
@@ -177,7 +177,7 @@ pub extern "C" fn bcs_render_capture(target: i32) -> i32 {
     })
 }
 
-/// Whether a camera draws into an image, which is what Bevy's screenshot of an image captures.
+/// Whether a camera draws into an image, which Bevy's screenshot of an image captures.
 #[cfg(feature = "render")]
 fn drawn_by_a_camera(
     world: &mut bevy::ecs::world::World,
@@ -222,8 +222,7 @@ fn read_image_back(
               images: Res<Assets<Image>>,
               mut captures: ResMut<Captures>,
               mut commands: Commands| {
-            // A readback reads again every frame it is there, and one answer is what was asked
-            // for.
+            // A readback reads again every frame it is there, and only one answer was asked for.
             commands.entity(done.entity).despawn();
 
             let Some(source) = images.get(&wanted) else {
@@ -290,7 +289,7 @@ fn read_image_back(
 
 /// Reads a capture, and forgets it.
 ///
-/// Follows the same shape as [`crate::app::bcs_render_adapter`]: a null `buffer` answers with the
+/// Follows the same shape as [`crate::app::bcs_render_adapter`]. A null `buffer` answers with the
 /// number of bytes the picture needs, and a second call with a buffer that size copies it out. The
 /// picture is dropped once it has been copied, because it is a megabyte or two and nothing here
 /// knows when the caller would otherwise be done with it.
@@ -474,8 +473,8 @@ pub unsafe extern "C" fn bcs_render_spawn_camera_3d(config: *const BcsCameraConf
                 };
 
                 let projection = if config.projection == 1 {
-                    // The height is what C# asked for; the width follows from the window, which
-                    // is what keeps the picture from stretching when the window is resized.
+                    // C# asked for the height; the width follows from the window, which keeps the
+                    // picture from stretching when the window is resized.
                     Projection::Orthographic(OrthographicProjection {
                         scaling_mode: ScalingMode::FixedVertical {
                             viewport_height: config.ortho_height,
@@ -531,8 +530,8 @@ pub unsafe extern "C" fn bcs_render_spawn_camera_3d(config: *const BcsCameraConf
 
 /// Builds the viewport a camera config asks for, if it asks for one.
 ///
-/// Measured in physical pixels rather than logical ones, because that is what a framebuffer is
-/// divided into, so half of a window is half its physical width whatever the display scaling.
+/// Measured in physical pixels rather than logical ones, because a framebuffer is divided into
+/// those, so half of a window is half its physical width whatever the display scaling.
 #[cfg(feature = "render")]
 fn viewport_from(config: &BcsCameraConfig) -> Option<bevy::camera::Viewport> {
     if config.has_viewport == 0 {
@@ -562,8 +561,8 @@ pub(crate) fn layers_from(mask: u32) -> Option<bevy::camera::visibility::RenderL
 
 /// Puts an entity on a set of render layers, or takes it back to the default.
 ///
-/// A camera draws an entity only when their layers overlap, which is what separates a minimap's
-/// contents from the world's, or one player's view from another's in splitscreen.
+/// A camera draws an entity only when their layers overlap, which separates a minimap's contents
+/// from the world's, or one player's view from another's in splitscreen.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_set_layers(entity: u64, mask: u32) -> i32 {
     crate::interop::guard(|| {
@@ -603,7 +602,7 @@ pub extern "C" fn bcs_render_set_layers(entity: u64, mask: u32) -> i32 {
 /// draw into what is left, so the picture is the shape of the space rather than the shape of the
 /// window with something over it. A width or height of zero means the whole window again.
 ///
-/// In physical pixels, because that is what a framebuffer is divided into.
+/// In physical pixels, because a framebuffer is divided into those.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_set_viewport(
     camera: u64,
@@ -650,8 +649,8 @@ pub extern "C" fn bcs_render_set_viewport(
 
 /// Spawns a light and returns its entity, or `0` on a headless build.
 ///
-/// Position and aim it by writing its `Transform`; a directional or spot light shines down its
-/// own negative Z, which is what `Transform.LookingAt` produces.
+/// Position and aim it by writing its `Transform`; a directional or spot light shines down its own
+/// negative Z, which `Transform.LookingAt` produces.
 ///
 /// # Safety
 /// `config` must point to a readable [`BcsLightConfig`].
@@ -734,9 +733,9 @@ pub unsafe extern "C" fn bcs_render_spawn_light(config: *const BcsLightConfig) -
 
 /// Spawns a 2D camera and returns its entity, or `0` on a headless build.
 ///
-/// A 2D camera looks down negative Z with one world unit to a pixel, which is what makes a sprite
-/// placed at `(100, 50)` land a hundred pixels right and fifty up from the middle of the window.
-/// Give it an `order` above a 3D camera's to draw over the top of one.
+/// A 2D camera looks down negative Z with one world unit to a pixel, which makes a sprite placed at
+/// `(100, 50)` land a hundred pixels right and fifty up from the middle of the window. Give it an
+/// `order` above a 3D camera's to draw over the top of one.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_spawn_camera_2d(order: i32) -> u64 {
     crate::interop::guard_with(0u64, || {
@@ -753,12 +752,12 @@ pub extern "C" fn bcs_render_spawn_camera_2d(order: i32) -> u64 {
             use bevy::render::render_resource::BlendState;
             use bevy::transform::components::Transform;
 
-            // An overlay is not simply a second camera with a higher order. A camera renders into
-            // a view texture of its own and then writes that over the target, so one left alone
-            // replaces whatever the camera below it drew, and one told not to clear accumulates
-            // its own output frame after frame instead. Both have to be said: clear the camera's
-            // own view to nothing, and blend the result over the target rather than overwriting
-            // it.
+            // An overlay is not simply a second camera with a higher order. A camera renders into a
+            // view texture of its own and then writes that over the target, so one left alone
+            // replaces whatever the camera below it drew, and one told not to clear accumulates its
+            // own output frame after frame instead. Both have to be said, which means clearing the
+            // camera's own view to nothing, and blending the result over the target rather than
+            // overwriting it.
             let (clear_color, output_mode) = if order == 0 {
                 (ClearColorConfig::Default, CameraOutputMode::default())
             } else {
@@ -956,11 +955,11 @@ pub extern "C" fn bcs_render_set_shadow_maps(directional: u32, point: u32) -> i3
 
 /// Writes an entity's world-space bounds into `out`: min x, y, z then max x, y, z.
 ///
-/// What a tool needs to draw a box around what is selected, and what a camera needs to frame it.
-/// Bevy computes an `Aabb` for every mesh it draws, in the mesh's own space, so the eight corners
-/// are put through the entity's global transform here and the box around those is what comes back.
-/// Doing it on this side keeps a rotated object's box honest, because transforming the two corners
-/// alone would give a box that shrinks as the object turns.
+/// A tool needs this to draw a box around what is selected, and a camera needs it to frame it. Bevy
+/// computes an `Aabb` for every mesh it draws, in the mesh's own space, so the eight corners are
+/// put through the entity's global transform here and the box around those comes back. Doing it on
+/// this side keeps a rotated object's box honest, because transforming the two corners alone would
+/// give a box that shrinks as the object turns.
 ///
 /// Reports [`status::NOT_PRESENT`] for an entity Bevy has computed no bounds for, which is
 /// anything that is not drawn.
@@ -1032,8 +1031,8 @@ pub unsafe extern "C" fn bcs_render_bounds(entity: u64, out: *mut f32) -> i32 {
 
 /// Draws an entity's mesh as a wireframe, or stops.
 ///
-/// What an editor outlines a selection with when a box round it is not enough: the shape itself,
-/// edge by edge, which says what was picked rather than roughly where it is.
+/// An editor outlines a selection with this when a box round it is not enough. It draws the shape
+/// itself, edge by edge, which says what was picked rather than roughly where it is.
 ///
 /// Reports [`status::UNSUPPORTED`] where there is no renderer. The wireframe pipeline itself needs
 /// a backend that can draw lines, which is every desktop one and neither of the web ones; where it
@@ -1341,12 +1340,12 @@ pub extern "C" fn bcs_render_set_light_cookie(light: u64, image: i32) -> i32 {
 /// Makes an image out of pixels the caller already holds, and returns its asset key.
 ///
 /// The other half of [`bcs_render_read_capture`]. Reading gives back what was drawn; this takes a
-/// picture that was never in a file, which is what a texture worked out at startup, a mask built
-/// from a heightmap, or a capture handed back to a material needs.
+/// picture that was never in a file, for a texture worked out at startup, a mask built from a
+/// heightmap, or a capture handed back to a material.
 ///
-/// `pixels` is `width * height * 4` bytes of RGBA, read as sRGB, which is what a color somebody
-/// chose is. `srgb` at zero reads them as linear instead, for a picture whose numbers mean
-/// something other than a color, such as a normal map or a roughness mask.
+/// `pixels` is `width * height * 4` bytes of RGBA, read as sRGB, as a color somebody chose is.
+/// `srgb` at zero reads them as linear instead, for a picture whose numbers mean something other
+/// than a color, such as a normal map or a roughness mask.
 ///
 /// Returns a negative where the size is zero, the pointer is null, or there is no renderer.
 ///
@@ -1413,9 +1412,9 @@ pub unsafe extern "C" fn bcs_render_create_image(
 
 /// How one part of a sliced picture meets the size it is drawn at.
 ///
-/// Stretching is what a nine-slice does by default, and it is wrong for anything with a pattern in
-/// it, because a border of dots drawn twice as wide becomes a border of ovals. Tiling repeats the
-/// slice instead, which is what keeps a drawn edge looking drawn at every size.
+/// A nine-slice stretches by default, and it is wrong for anything with a pattern in it, because a
+/// border of dots drawn twice as wide becomes a border of ovals. Tiling repeats the slice instead,
+/// which keeps a drawn edge looking drawn at every size.
 #[cfg(feature = "render")]
 pub fn slice_scale(tiling: i32, stretch: f32) -> bevy::sprite::SliceScaleMode {
     use bevy::sprite::SliceScaleMode;

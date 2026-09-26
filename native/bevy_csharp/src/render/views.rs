@@ -9,17 +9,16 @@
 //!
 //! **Images a camera owns.** A camera is given images by name, format and scale of its picture. The
 //! engine makes them, makes them again when the picture changes size (which starts them over from
-//! zeros), and binds them wherever a shader running on that camera declares the name. One marked
-//! as history is two images that trade places every frame, so `name` is this frame's and
-//! `name_previous` is what `name` held last frame. One made with more than one mip level is also
+//! zeros), and binds them wherever a shader running on that camera declares the name. One marked as
+//! history is two images that trade places every frame, so `name` is this frame's and
+//! `name_previous` holds what `name` held last frame. One made with more than one mip level is also
 //! reachable a level at a time as `name_mip0`, `name_mip1` and so on, which is how a depth pyramid
 //! is built one level from the last, reading one level while writing the next.
 //!
 //! **Compute on a camera.** A dispatch attached to a camera runs every frame at one of four points:
 //! after the prepass, after opaque geometry and before transparent, before tonemapping, or after
 //! it. Its workgroups are either counted from the picture's size, a fixed number, or read from a
-//! buffer another dispatch wrote, which is what lets a shader decide on the GPU how much work
-//! follows.
+//! buffer another dispatch wrote, so a shader can decide on the GPU how much work follows.
 //!
 //! **The inputs.** Every pass and every dispatch on a camera reads the same second group, which
 //! `bcs_pass` declares:
@@ -41,9 +40,9 @@
 //! | 13 | how many point and spot lights binding nine holds |
 //!
 //! The lights are Bevy's own, laid out as Bevy lays them out, so a shader running on a camera
-//! lights and shadows what it finds the way Bevy's materials do, which is what a global
-//! illumination shading a ray's hit needs, and what it could otherwise only get by drawing the
-//! scene's lights again itself.
+//! lights and shadows what it finds the way Bevy's materials do. Global illumination shading a
+//! ray's hit needs that, and could otherwise only get it by drawing the scene's lights again
+//! itself.
 //!
 //! Depth, normals and motion come from the prepass, which a camera draws only when asked. What a
 //! camera does not draw, or draws multisampled (which a plain texture binding cannot take), is a
@@ -164,12 +163,12 @@ pub struct ViewEnvironmentTextures {
     /// How many mip levels the specular cube has, which roughness picks between.
     mips: u32,
     intensity: f32,
-    /// The rotation undone, which is what turns a world direction into one to sample by.
+    /// The rotation undone, which turns a world direction into one to sample by.
     inverse_rotation: bevy::math::Quat,
 }
 
-/// Copies each camera's environment map, which is what every other kind of light a shader can
-/// read is lit alongside, so a ray that leaves the scene can pick up the sky.
+/// Copies each camera's environment map, which lights a scene alongside every other kind of light a
+/// shader can read, so a ray that leaves the scene can pick up the sky.
 fn extract_view_environments(
     mut commands: Commands,
     cameras: bevy::render::Extract<
@@ -457,8 +456,8 @@ fn init_inputs(
                 ..Default::default()
             }),
         blue_noise: None,
-        // Gray, a half everywhere, which is what noise averages to, so a shader running before the
-        // real one arrives gets no pattern rather than a wrong one.
+        // Gray, a half everywhere, the average of noise, so a shader running before the real one
+        // arrives gets no pattern rather than a wrong one.
         empty_blue_noise: {
             let texture = render_device.create_texture_with_data(
                 &bevy::render::renderer::RenderQueue::clone(&queue),
@@ -707,8 +706,8 @@ impl<'a> ViewInputSources<'a> {
         Some((group, [view_offset, previous_offset, light_offset]))
     }
 
-    /// The start of a stand-in buffer, as long as one element of what it stands in for, which is
-    /// what a binding with a dynamic offset takes.
+    /// The start of a stand-in buffer, as long as one element of what it stands in for, as a
+    /// binding with a dynamic offset takes.
     fn whole(buffer: &Buffer, size: std::num::NonZeroU64) -> BindingResource<'_> {
         BindingResource::Buffer(BufferBinding {
             buffer,
@@ -733,8 +732,8 @@ pub struct ViewImageSpec {
     /// Filled from the picture at this point of every frame, which with history is how last
     /// frame's lit picture is kept.
     pub copy: Option<FramePoint>,
-    /// Cleared to zero at the start of every frame, which is what an image draws accumulate into
-    /// wants, a visibility buffer's "nothing here" among them.
+    /// Cleared to zero at the start of every frame, for an image draws accumulate into, a
+    /// visibility buffer's "nothing here" among them.
     pub clear: bool,
 }
 
@@ -887,7 +886,7 @@ fn prepare_view_images(
     }
 }
 
-/// A view of one mip level of `texture`, which is what a storage binding takes.
+/// A view of one mip level of `texture`, as a storage binding takes.
 fn level_view(texture: &Texture, mip: u32) -> TextureView {
     texture.create_view(&TextureViewDescriptor {
         base_mip_level: mip,
@@ -901,8 +900,8 @@ fn level_view(texture: &Texture, mip: u32) -> TextureView {
 /// The engine's are Bevy's ambient occlusion where the camera has it on, which a shader may
 /// replace, and the G-buffer where the camera draws deferred, which a shader reads a surface's
 /// material from. Where the camera keeps the previous frame's prepass, last frame's depth and
-/// G-buffer are there too, which is what tells a temporal technique that a pixel was hidden
-/// before. They go under names of their own, so a camera's image can never shadow one.
+/// G-buffer are there too, which tell a temporal technique that a pixel was hidden before. They go
+/// under names of their own, so a camera's image can never shadow one.
 pub fn view_names<'a>(
     owned: Option<&'a ViewImageTextures>,
     occlusion: Option<&ScreenSpaceAmbientOcclusionResources>,
@@ -956,8 +955,8 @@ struct PictureCopyPipelines(HashMap<TextureFormat, bevy::render::render_resource
 /// Asks for a copy pipeline for every format a camera copies its picture into.
 ///
 /// Bevy's own blit, which draws one texture over the whole of another, so the copy can be smaller
-/// than the picture and in another format: a half-sized, half-float history of the lit picture is
-/// what a screen-space technique reads, not the picture as it is.
+/// than the picture and in another format. A screen-space technique reads a half-sized, half-float
+/// history of the lit picture, not the picture as it is.
 fn prepare_picture_copies(
     mut copies: ResMut<PictureCopyPipelines>,
     mut specialized: ResMut<
@@ -1091,8 +1090,7 @@ impl FramePoint {
 /// How many workgroups a dispatch on a camera runs.
 #[derive(Clone, Debug)]
 pub enum Workgroups {
-    /// Enough of `size` to cover `scale` of the picture, which is what a shader working a pixel at
-    /// a time wants.
+    /// Enough of `size` to cover `scale` of the picture, for a shader working a pixel at a time.
     PerPixel { size: [u32; 2], scale: f32 },
     /// Exactly these.
     Fixed([u32; 3]),
@@ -1413,7 +1411,7 @@ pub enum DrawBlend {
     Opaque,
     /// Over it, by the fragment's alpha.
     Alpha,
-    /// Added to it, which is what anything glowing wants.
+    /// Added to it, for anything glowing.
     Add,
 }
 
@@ -1678,10 +1676,10 @@ fn prepare_view_draws(
                 })
             });
 
-            // Depth alone into a shadow map, from the vertex stage, keyed apart from every draw into
-            // a picture by having no color targets. Unclipped where the adapter allows, since a
-            // directional light's cascades are boxes and a caster in front of one still shadows
-            // what is inside it, which is what Bevy's own shadow pipelines do.
+            // Depth alone into a shadow map, from the vertex stage, keyed apart from every draw
+            // into a picture by having no color targets. Unclipped where the adapter allows, since
+            // a directional light's cascades are boxes and a caster in front of one still shadows
+            // what is inside it, as Bevy's own shadow pipelines do.
             let shadow_pipeline = draw.casts_shadows.then(|| {
                 let key = (draw.program, program.generation, Vec::new(), 1, DrawBlend::Opaque, true, true);
                 let unclipped = render_device
@@ -1834,9 +1832,9 @@ fn run_view_draws<const POINT: u8>(
         environment,
     );
 
-    // The picture is what is being drawn into, so it cannot be read in the same pass, and a
-    // stand-in is bound where it would be. The same goes for a prepass input a draw writes, which
-    // gets a group of its own with that input stood in for.
+    // The draw writes into the picture, so it cannot be read in the same pass, and a stand-in is
+    // bound where it would be. The same goes for a prepass input a draw writes, which gets a group
+    // of its own with that input stood in for.
     let lights = ViewLights {
         offset: light_offset,
         shadows,

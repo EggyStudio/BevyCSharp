@@ -17,8 +17,8 @@ namespace BevyCSharp.Editor.Framework;
 /// <para>
 /// Everything here is worked out from three numbers a person can change (whether it is docked, how
 /// wide the panel is, and which tab is open), and nothing is remembered between frames beyond
-/// those. That is what immediate mode buys. The arrangement is a calculation rather than a tree of
-/// widgets that has to be kept in step with itself.
+/// those. Immediate mode buys that. The arrangement is a calculation rather than a tree of widgets
+/// that has to be kept in step with itself.
 /// </para>
 /// </remarks>
 public static class EditorShell
@@ -34,9 +34,9 @@ public static class EditorShell
     /// How narrow the panel has to be before the world sits above the data rather than beside it.
     /// </summary>
     /// <remarks>
-    /// Beside is the normal arrangement, because two columns of a tree and its details is what an
-    /// editor looks like. Stacking is what happens when there is no room for two columns, which is
-    /// the panel at its narrowest and nowhere else.
+    /// Beside is the normal arrangement, because an editor looks like two columns of a tree and its
+    /// details. It stacks when there is no room for two columns, which is the panel at its
+    /// narrowest and nowhere else.
     /// </remarks>
     public const float Stacks = 460f;
 
@@ -60,8 +60,8 @@ public static class EditorShell
     /// <summary>How wide the panel is, in logical pixels.</summary>
     /// <remarks>
     /// As narrow as it goes, which is the stacked arrangement. An editor opens with the scene
-    /// taking the room and the panel taking what it needs, and widening it is a thing somebody
-    /// does when they want two columns.
+    /// taking the room and the panel taking what it needs, and somebody widens it when they want
+    /// two columns.
     /// </remarks>
     public static float PanelWidth { get; set; } = Narrowest;
 
@@ -92,8 +92,8 @@ public static class EditorShell
 
     /// <summary>Whether the pointer is over the interface rather than over the scene.</summary>
     /// <remarks>
-    /// ImGui answers it, having hit tested every window this frame, and a click it wants is a
-    /// click the scene must not also act on. No position is asked for because none is needed, and a
+    /// ImGui answers it, having hit tested every window this frame, and a click it takes is a click
+    /// the scene must not also act on. No position is asked for because none is needed, and a
     /// parameter that is ignored reads as one that is not.
     /// </remarks>
     public static bool PointerOverPanel => ImGuiRuntime.WantsMouse;
@@ -124,9 +124,9 @@ public static class EditorShell
 
     /// <summary>Opens a tab by name, leaving an already open one open.</summary>
     /// <remarks>
-    /// Apart from <see cref="Show"/>, which toggles, because a button in the strip wants the
-    /// second press to put the panel away and anything asking to be taken to a place wants to
-    /// arrive whether or not it was already there.
+    /// Apart from <see cref="Show"/>, which toggles, because the second press on a button in the
+    /// strip puts the panel away, and anything asking to be taken to a place arrives whether or not
+    /// it was already there.
     /// </remarks>
     public static void Open(string name)
     {
@@ -214,8 +214,8 @@ public static class EditorShell
             ? (0f, 0f, Math.Max(1f, panelX), Math.Max(1f, window.Y - strip))
             : (0f, 0f, window.X, window.Y);
 
-        // Where the scene is still visible, which is what anything drawn over the scene has to
-        // stay inside. The same rectangle either way, because the panels are.
+        // Where the scene is still visible, which anything drawn over the scene has to stay inside.
+        // The same rectangle either way, because the panels are.
         Free = (panelX, window.Y - strip);
 
         EditorSceneFrame.Round();
@@ -254,9 +254,9 @@ public static class EditorShell
     {
         var half = OrientationGizmo.Size * 0.5f;
 
-        // Above the buttons pinned to the same corner rather than beside them. Both want the
-        // bottom right, and a cross laid over a row of buttons is a cross with a button through
-        // one of its arms.
+        // Above the buttons pinned to the same corner rather than beside them. Both belong in the
+        // bottom right, and a cross laid over a row of buttons is a cross with a button through one
+        // of its arms.
         var side = Free.Right - ToolbarView.Inset - half;
         var up = ToolbarView.Inset + EditorSurface.Tall + EditorSurface.Air + half;
 
@@ -275,7 +275,7 @@ public static class EditorShell
         var scale = ImGuiRuntime.Scale;
 
         // Floating, the scene is the whole window and there is nothing to say. Docked, it is the
-        // rectangle the panels left, in physical pixels because that is what a framebuffer is.
+        // rectangle the panels left, in physical pixels because a framebuffer is measured in them.
         if (!Docked)
         {
             Render.SetViewport(camera, 0, 0, 0, 0);

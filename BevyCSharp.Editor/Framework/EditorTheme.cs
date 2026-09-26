@@ -16,8 +16,8 @@ namespace BevyCSharp.Editor.Framework;
 /// lines saying what one gap says better.
 /// </para>
 /// <para>
-/// The accent means one thing only, which is what is selected or what is in force. A color that
-/// means two things means neither.
+/// The accent means one thing only, what is selected or what is in force. A color that means two
+/// things means neither.
 /// </para>
 /// <para>
 /// Every value lives here and nowhere else, so the whole editor changes by changing this, and a
@@ -26,7 +26,7 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 public sealed record EditorTheme
 {
-    /// <summary>What the theme is called, which is what a picker shows.</summary>
+    /// <summary>What the theme is called, which a picker shows.</summary>
     public string Name { get; init; } = "Modern";
 
     /// <summary>The window behind everything.</summary>
@@ -204,11 +204,10 @@ public sealed record EditorTheme
         style.AntiAliasedLinesUseTex = true;
         style.AntiAliasedFill = true;
 
-        // How far a drawn arc may stray from the circle it stands for, which is what decides how
-        // many segments it is cut into. ImGui's own number is tuned for the corner of a square
-        // window; a capsule the height of a row is mostly corner, and at that radius the default
-        // leaves four segments to a quarter turn, which reads as two flat sides on what should be
-        // a circle.
+        // How far a drawn arc may stray from the circle it stands for, which decides how many
+        // segments it is cut into. ImGui's own number is tuned for the corner of a square window; a
+        // capsule the height of a row is mostly corner, and at that radius the default leaves four
+        // segments to a quarter turn, which reads as two flat sides on what should be a circle.
         style.CircleTessellationMaxError = 0.1f;
 
         style.WindowPadding = theme.WindowPadding;
@@ -281,14 +280,14 @@ public sealed record EditorTheme
         Set(style, ImGuiCol.ChildBg, Alpha(Card, seen));
         // A menu and a tooltip are not surfaces the eye rests on, they are things held up in front
         // of one, so they are the brightest plate the ladder has rather than another dark card. It
-        // is the gray a row under the pointer wears elsewhere, which is what makes a flyout read as
-        // one of those rows grown large enough to hold a list.
+        // is the gray a row under the pointer wears elsewhere, so a flyout reads as one of those
+        // rows grown large enough to hold a list.
         Set(style, ImGuiCol.PopupBg, Alpha(Hover, MathF.Min(1f, seen + 0.1f)));
         // Nothing here has a menu bar, so this slot carries the group fill instead, which puts the
         // rung in the style editor beside the others rather than leaving one color unreachable.
         //
-        // Solid, because a component's card is what its fields are read against, and the two have
-        // to keep their step whatever the scene behind the panel is doing.
+        // Solid, because a component's fields are read against its card, and the two have to keep
+        // their step whatever the scene behind the panel is doing.
         Set(style, ImGuiCol.MenuBarBg, Alpha(Group, 1f));
 
         Set(style, ImGuiCol.Border, Line);
@@ -311,11 +310,8 @@ public sealed record EditorTheme
         Set(style, ImGuiCol.ButtonHovered, Alpha(Hover, 1f));
         Set(style, ImGuiCol.ButtonActive, Alpha(Accent, 1f));
 
-        // A header is what a component's fold wears, and what a row wears when it is chosen. The
-        // accent is the second, so the first is gray and the second is written over it where it is
-        // drawn.
-        // What a component's fold wears, which is most of what uses this color. A row that is
-        // selected wears the accent instead, and says so where it is drawn.
+        // ImGui's header color is worn by a component's fold and by a chosen row. The chosen row
+        // wears the accent, written over this where it is drawn, so the header itself is gray.
         Set(style, ImGuiCol.Header, Alpha(Field, 1f));
         Set(style, ImGuiCol.HeaderHovered, Alpha(Hover, 1f));
         Set(style, ImGuiCol.HeaderActive, Alpha(Active, 1f));
@@ -494,7 +490,7 @@ public sealed record EditorTheme
     public static Vector4 LiveText => ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
 
     /// <summary>
-    /// Red, green and blue for X, Y and Z, which is what every editor uses.
+    /// Red, green and blue for X, Y and Z, as every editor colors them.
     /// </summary>
     /// <remarks>
     /// Not part of a theme, because which arm is which is not a matter of taste. Somebody reading
@@ -532,7 +528,7 @@ public sealed record EditorTheme
         active ? LiveText : Alpha(LiveText, 0.72f);
 
     /// <summary>
-    /// A theme color as the scene wants it: linear, and as four numbers rather than a vector.
+    /// A theme color as the scene takes it, linear, and as four numbers rather than a vector.
     /// </summary>
     /// <remarks>
     /// The palette is written the way colors are written down, which is sRGB, and gizmos are drawn
@@ -553,7 +549,7 @@ public sealed record EditorTheme
     /// <remarks>
     /// A gap, where the look is the editor's own, because hierarchy comes from fill and spacing and
     /// a rule across a panel is the border it does without. A line, where the look is ImGui's,
-    /// because that is what ImGui's own look does and it is taken whole.
+    /// because ImGui's own look draws one and it is taken whole.
     /// </remarks>
     public static void Divide()
     {
@@ -566,7 +562,7 @@ public sealed record EditorTheme
         ImGui.Dummy(new Vector2(0f, ImGui.GetStyle().ItemSpacing.Y));
     }
 
-    /// <summary>Nothing at all, which is what a surface with no fill is.</summary>
+    /// <summary>Nothing at all, for a surface with no fill.</summary>
     private static Vector4 Clear => new(0f, 0f, 0f, 0f);
 
     /// <summary>A color from the bytes a palette is written in.</summary>

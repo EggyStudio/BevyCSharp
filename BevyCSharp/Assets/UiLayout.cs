@@ -54,8 +54,8 @@ public readonly record struct Length(float Value, LengthUnit Unit)
 /// </summary>
 /// <remarks>
 /// Padding, margin and border are each four lengths. One value is the common case, so a
-/// <see cref="Length"/> converts to the same distance on every side and only a node that wants
-/// its sides to differ has to name them.
+/// <see cref="Length"/> converts to the same distance on every side and only a node whose sides
+/// differ has to name them.
 /// </remarks>
 /// <param name="Left">The left side.</param>
 /// <param name="Top">The top side.</param>
@@ -108,7 +108,7 @@ public readonly record struct Corners(
     /// <summary>The same radius on every corner.</summary>
     public static Corners All(Length value) => new(value, value, value, value);
 
-    /// <summary>Rounded along the top edge only, which is what a tab is.</summary>
+    /// <summary>Rounded along the top edge only, like a tab.</summary>
     public static Corners Top(Length value) =>
         new(value, value, Length.Zero, Length.Zero);
 
@@ -136,7 +136,8 @@ public enum BoxSizing
     /// <summary>The size includes the padding and the border.</summary>
     BorderBox = 0,
 
-    /// <summary>The size is what is left for the contents, with padding and border outside it.</summary>
+    /// <summary>The size is the room left for the contents, with padding and border outside
+    /// it.</summary>
     ContentBox = 1,
 }
 
@@ -145,7 +146,7 @@ public enum BoxSizing
 /// </summary>
 public enum UiDisplay
 {
-    /// <summary>Flexbox, which is what every other layout field here describes.</summary>
+    /// <summary>Flexbox, which every other layout field here describes.</summary>
     Flex = 0,
 
     /// <summary>Children stacked as blocks, each on its own line.</summary>
@@ -254,7 +255,7 @@ public enum UiDirection
     /// <summary>Left to right, which is the default.</summary>
     Row = 0,
 
-    /// <summary>Top to bottom, which is what a menu or a list wants.</summary>
+    /// <summary>Top to bottom, for a menu or a list.</summary>
     Column = 1,
 
     /// <summary>Right to left.</summary>
@@ -345,7 +346,7 @@ public enum UiAlign
     /// <summary>The end of the cross axis, or its start when the direction is reversed.</summary>
     FlexEnd = 4,
 
-    /// <summary>Centered across the axis, which is what a row of buttons wants.</summary>
+    /// <summary>Centered across the axis, for a row of buttons.</summary>
     Center = 5,
 
     /// <summary>Lined up on the baselines of the text inside them.</summary>
@@ -388,13 +389,13 @@ public sealed class UiSettings
     /// Place the node against its parent's edges rather than in the flow of its siblings.
     /// </summary>
     /// <remarks>
-    /// What a HUD wants: pinned to a corner, ignoring whatever else is on screen. A node left
-    /// relative is laid out beside its siblings instead.
+    /// Pinned to a corner, ignoring whatever else is on screen, as a HUD is. A node left relative
+    /// is laid out beside its siblings instead.
     /// </remarks>
     public bool Absolute { get; set; }
 
     /// <summary>
-    /// Report the pointer over this node, which is what makes it a button.
+    /// Report the pointer over this node, which makes it a button.
     /// </summary>
     /// <remarks>
     /// An interactive node also captures the pointer, so nothing behind it is hovered through it.
@@ -477,7 +478,7 @@ public sealed class UiSettings
     /// </summary>
     /// <remarks>
     /// Only matters when <see cref="OverflowX"/> or <see cref="OverflowY"/> is clipping. A
-    /// scrolling list with a border wants <see cref="UiClipBox.Padding"/> or
+    /// scrolling list with a border needs <see cref="UiClipBox.Padding"/> or
     /// <see cref="UiClipBox.Border"/>, or its rows are cut off inside the border rather than at it.
     /// </remarks>
     public UiClipBox ClipBox { get; set; } = UiClipBox.Padding;
@@ -502,10 +503,9 @@ public sealed class UiSettings
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Left alone, Bevy picks the camera whose target is the window, which is what a game wants
-    /// and what a run drawing into an image does not have. Naming one is what lets a screen be
-    /// drawn with no window at all, which is how a screen is captured on a machine with no
-    /// display.
+    /// Left alone, Bevy picks the camera whose target is the window, which suits a game, and a run
+    /// drawing into an image has none. Naming one lets a screen be drawn with no window at all, so
+    /// a screen can be captured on a machine with no display.
     /// </para>
     /// <para>
     /// It carries to the node's children, so the root of a screen is the only one that has to be

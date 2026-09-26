@@ -14,8 +14,8 @@ use crate::state::with_world;
 /// the projection every frame with nothing to resolve it, which reads as a shimmer, and the
 /// prepasses keep drawing the scene again for nobody.
 ///
-/// The motion vector prepass is the one piece that is not exclusively temporal antialiasing's:
-/// motion blur asks for it too, so it stays while a camera is still smearing.
+/// The motion vector prepass is the one piece that is not exclusively temporal antialiasing's,
+/// because motion blur asks for it too, so it stays while a camera is still smearing.
 #[cfg(feature = "render")]
 fn drop_temporal(entity: &mut bevy::ecs::world::EntityWorldMut) {
     use bevy::anti_alias::taa::TemporalAntiAliasing;
@@ -53,8 +53,8 @@ pub fn asked_for_motion(entity: &bevy::ecs::world::EntityWorldMut) -> bool {
 
 /// Which prepasses a game asked a camera for, as the flags it gave.
 ///
-/// Remembered so that what something else took off with it, as temporal antialiasing does with
-/// the depth prepass when it goes, can be left where the game still wants it.
+/// Remembered so that what something else took off with it, as temporal antialiasing does with the
+/// depth prepass when it goes, can be left where the game still asked for it.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::component::Component)]
 pub struct RequestedPrepass(pub u32);
@@ -70,7 +70,7 @@ pub struct RequestedPrepass(pub u32);
 ///
 /// A prepass draws the scene a second time, so it is only worth asking for when something reads
 /// what it draws. A multisampled camera draws them multisampled, which a pass cannot bind, so a
-/// camera read this way wants `Msaa` of one.
+/// camera read this way needs `Msaa` of one.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
     crate::interop::guard(|| {
@@ -164,7 +164,7 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
 /// Temporal antialiasing is the one arm that can be refused. It resolves the whole picture from
 /// past frames, which a multisampled target has not got, and Bevy answers the pair by warning once
 /// a frame and drawing nothing, so a config asking for both is reported as
-/// [`status::INVALID_STATE`] and the camera is left as it was. It also wants a 3D camera, because
+/// [`status::INVALID_STATE`] and the camera is left as it was. It also needs a 3D camera, because
 /// the jitter it reads back is only applied to one, and on a 2D camera the pass finds nothing to
 /// resolve.
 ///
@@ -329,10 +329,10 @@ pub unsafe extern "C" fn bcs_render_set_post(entity: u64, config: *const BcsPost
 
 /// Lights the scene from the sky the camera is already scattering.
 ///
-/// An environment map is what makes a surface pick up the color of what is around it rather than
-/// only what a lamp points at it, and this derives one from the atmosphere instead of from a file
-/// somebody baked. It needs [`bcs_render_set_atmosphere`] on the same camera, because what it
-/// filters is the sky that is being drawn.
+/// An environment map makes a surface pick up the color of what is around it rather than only what
+/// a lamp points at it, and this derives one from the atmosphere instead of from a file somebody
+/// baked. It needs [`bcs_render_set_atmosphere`] on the same camera, because what it filters is the
+/// sky that is being drawn.
 ///
 /// `intensity` scales the result, `size` is the square resolution of the cubemap it generates and
 /// has to be a power of two, and `on` at zero takes it off again.
@@ -394,8 +394,8 @@ pub extern "C" fn bcs_render_set_sky_lighting(
 /// Lights the scene from a cubemap, filtered on the GPU.
 ///
 /// The other way to light a scene from its surroundings. [`bcs_render_set_sky_lighting`] derives
-/// the map from the atmosphere, which covers an outdoor scene; this takes a picture, which is what
-/// an indoor one or a scene lit from a photograph needs.
+/// the map from the atmosphere, which covers an outdoor scene; this takes a picture, for an indoor
+/// one or a scene lit from a photograph.
 ///
 /// One cubemap rather than the two a baked environment map carries, because Bevy filters it into
 /// the diffuse and specular halves itself. It is the same column of six faces a skybox takes, and
@@ -481,17 +481,17 @@ pub struct PendingCubemap {
 
 /// One camera or light probe waiting to be lit by a pair of cubemaps somebody baked.
 ///
-/// Two images rather than one, so both have to be a cube before the light can be inserted, which
-/// is why this waits on its own rather than riding on [`PendingCubemap`]. On a camera the pair
-/// lights everything it sees; on a light probe it lights what is inside the probe's box, which is
-/// what Bevy calls a reflection probe.
+/// Two images rather than one, so both have to be a cube before the light can be inserted, which is
+/// why this waits on its own rather than riding on [`PendingCubemap`]. On a camera the pair lights
+/// everything it sees; on a light probe it lights what is inside the probe's box, which Bevy calls
+/// a reflection probe.
 #[cfg(feature = "render")]
 pub struct PendingEnvironment {
     /// The camera or light probe to light.
     pub target: bevy::ecs::entity::Entity,
-    /// The blurred map, which is what a rough surface reflects.
+    /// The blurred map, which a rough surface reflects.
     pub diffuse: bevy::asset::Handle<bevy::image::Image>,
-    /// The sharp one, which is what a polished surface reflects.
+    /// The sharp one, which a polished surface reflects.
     pub specular: bevy::asset::Handle<bevy::image::Image>,
     /// How bright, in candelas per square meter.
     pub intensity: f32,
@@ -523,10 +523,10 @@ impl PendingCubemaps {
 
 /// Turns each loaded image on the list into a cubemap, and forgets it.
 ///
-/// Six faces stacked vertically, which is the layout every cubemap texture on the web is in and the
-/// one Bevy's own examples use. An image that is not six times as tall as it is wide is refused by
-/// Bevy rather than by this, and stays on the list doing nothing, which is what a loud failure
-/// would cost a frame instead of once.
+/// Six faces stacked vertically, the layout every cubemap texture on the web is in and the one
+/// Bevy's own examples use. An image that is not six times as tall as it is wide is refused by Bevy
+/// rather than by this, and stays on the list doing nothing, since a loud failure would cost a
+/// frame instead of once.
 #[cfg(feature = "render")]
 pub fn reinterpret_cubemaps(
     mut commands: bevy::ecs::system::Commands,
@@ -543,8 +543,8 @@ pub fn reinterpret_cubemaps(
             return true;
         };
 
-        // Six layers is what makes it a cube, and an image that already has them was asked for
-        // twice, which is not worth refusing.
+        // Six layers make it a cube, and an image that already has them was asked for twice, which
+        // is not worth refusing.
         if image.texture_descriptor.size.depth_or_array_layers == 1
             && image.reinterpret_stacked_2d_as_array(6).is_err()
         {
@@ -613,8 +613,7 @@ pub fn reinterpret_cubemaps(
 /// the hundreds or thousands and a brightness of `1` comes out black.
 ///
 /// A negative `image` takes the skybox off. A null `rotation` leaves the cube unturned; otherwise
-/// it is four floats, `x, y, z, w`, which is what puts a Z-up cubemap the right way round in a
-/// Y-up world.
+/// it is four floats, `x, y, z, w`, which puts a Z-up cubemap the right way round in a Y-up world.
 ///
 /// # Safety
 /// `camera` must be a live camera entity; `rotation` must be null or point to four readable floats.
@@ -756,8 +755,8 @@ pub unsafe extern "C" fn bcs_render_set_grading(
 /// Sets the exposure a camera meters the scene at, in EV-100.
 ///
 /// The number a photographer would set, and the base an auto exposure pass corrects rather than an
-/// alternative to it. Bevy's own default is what a Blender scene assumes; sunlight is around 15,
-/// an overcast day around 12 and an interior around 7, so a scene lit in physical units and
+/// alternative to it. Bevy's own default matches what a Blender scene assumes; sunlight is around
+/// 15, an overcast day around 12 and an interior around 7, so a scene lit in physical units and
 /// metered wrongly is far too bright or far too dark rather than subtly off.
 ///
 /// # Safety
@@ -792,10 +791,10 @@ pub extern "C" fn bcs_render_set_exposure(camera: u64, ev100: f32) -> i32 {
 
 /// Sets a camera's exposure from the lens it is standing in for.
 ///
-/// The same three numbers a photographer sets, which is what a scene lit in real units wants to be
-/// metered by. `aperture` is the f-stop, `shutter` the shutter speed in seconds, and `sensitivity`
-/// the ISO. Bevy works the EV-100 out from them, so this and [`bcs_render_set_exposure`] set the
-/// same thing two ways, and the same numbers are what a lens's depth of field is described by.
+/// The same three numbers a photographer sets, which suit a scene lit in real units. `aperture` is
+/// the f-stop, `shutter` the shutter speed in seconds, and `sensitivity` the ISO. Bevy works the
+/// EV-100 out from them, so this and [`bcs_render_set_exposure`] set the same thing two ways, and a
+/// lens's depth of field is described by the same numbers.
 ///
 /// A zero or negative in any of them keeps Bevy's own value for it, which is f/1, 1/125 and ISO
 /// 100.
@@ -861,10 +860,11 @@ pub extern "C" fn bcs_render_set_lens_exposure(
 /// Draws Bevy's own opaque materials deferred, into a G-buffer lit afterward, or forward, lit as they
 /// are drawn, which is the default.
 ///
-/// Deferred is what screen-space reflections read, and what makes many lights cheap. It needs a
-/// camera drawn once a pixel, and it applies to Bevy's own materials only: a material a Slang
-/// program draws is always forward, since it writes its color rather than a surface description.
-/// Every Bevy material is prepared again, which is what moves one already drawn to the other method.
+/// Screen-space reflections read the deferred G-buffer, and deferred makes many lights cheap. It
+/// needs a camera drawn once a pixel, and it applies to Bevy's own materials only, since a material
+/// a Slang program draws is always forward, since it writes its color rather than a surface
+/// description. Every Bevy material is prepared again, which moves one already drawn to the other
+/// method.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_set_deferred(on: i32) -> i32 {
     crate::interop::guard(|| {
@@ -925,8 +925,8 @@ fn set_deferred(world: &mut bevy::ecs::world::World, on: bool) {
 /// Reflections are traced against the depth buffer and read the lit picture, so they show only what
 /// is on screen, fading out at its edges, on surfaces smoother than the roughness ranges say. They
 /// read Bevy's deferred G-buffer, so turning them on also draws Bevy's own materials deferred (see
-/// [`bcs_render_set_deferred`]), and asks the camera for the depth and deferred prepasses. A camera
-/// drawn once a pixel is what they work on.
+/// [`bcs_render_set_deferred`]), and asks the camera for the depth and deferred prepasses. They
+/// work on a camera drawn once a pixel.
 ///
 /// # Safety
 /// `config` must point to a readable [`BcsReflectionConfig`] or be null.
@@ -995,12 +995,12 @@ pub unsafe extern "C" fn bcs_render_set_screen_space_reflections(
     })
 }
 
-/// Sets the ambient light, which is what lights a surface from every direction at once and what
-/// ambient occlusion darkens.
+/// Sets the ambient light, which lights a surface from every direction at once and which ambient
+/// occlusion darkens.
 ///
 /// `camera` names a camera to give its own, or is zero for the one every camera without its own
-/// uses. `brightness` is in candela per square meter, which is what Bevy's lights are in, and a
-/// negative one on a camera takes that camera's own away again.
+/// uses. `brightness` is in candela per square meter, the unit of Bevy's lights, and a negative one
+/// on a camera takes that camera's own away again.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_set_ambient_light(camera: u64, r: f32, g: f32, b: f32, brightness: f32) -> i32 {
     crate::interop::guard(|| {
@@ -1066,8 +1066,8 @@ pub extern "C" fn bcs_render_set_ambient_light(camera: u64, r: f32, g: f32, b: f
 /// own before anything is lit. Bevy computes its own first either way, so a camera replacing it
 /// sets the lowest quality.
 ///
-/// It needs depth and normals, which it asks for itself, and a camera drawn once a pixel: Bevy
-/// leaves it off on a multisampled camera, with a warning.
+/// It needs depth and normals, which it asks for itself, and a camera drawn once a pixel, since
+/// Bevy leaves it off on a multisampled camera, with a warning.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_set_ambient_occlusion(camera: u64, quality: i32, thickness: f32) -> i32 {
     crate::interop::guard(|| {
@@ -1213,9 +1213,8 @@ pub extern "C" fn bcs_render_set_sorted_transparency(
 /// Sets the lens effects a camera draws through.
 ///
 /// Beside [`bcs_render_set_post`] rather than part of it, because that call is the pipeline a
-/// settings screen owns, and these are what a scene does for a moment. The same rule holds, so a
-/// config is the whole set rather than one change to it and an effect left off is taken off the
-/// camera.
+/// settings screen owns, and a scene sets these for a moment. The same rule holds, so a config is
+/// the whole set rather than one change to it and an effect left off is taken off the camera.
 ///
 /// Depth of field needs a perspective camera, because focus has no meaning without one, and Bevy
 /// drops the effect rather than reporting it. Auto exposure needs compute shaders, which every
@@ -1501,9 +1500,9 @@ pub unsafe extern "C" fn bcs_render_set_atmosphere(
                     return status::OK;
                 }
 
-                // Earth's air. Mars is the other medium Bevy ships and it is not offered here:
-                // its dust phase comes from a texture the caller would have to supply, and one
-                // that is not supplied leaves a sky that cannot be built at all.
+                // Earth's air. Mars is the other medium Bevy ships and it is not offered here,
+                // because its dust phase comes from a texture the caller would have to supply, and
+                // one that is not supplied leaves a sky that cannot be built at all.
                 let density = if config.density > 0.0 { config.density } else { 1.0 };
                 let medium = ScatteringMedium::earth(256, 256).with_density_multiplier(density);
 
@@ -1513,8 +1512,8 @@ pub unsafe extern "C" fn bcs_render_set_atmosphere(
 
                 let mut atmosphere = Atmosphere::earth(media.add(medium));
 
-                // How much light the ground bounces back into the air, which is what makes the
-                // underside of a cloud bright over snow and dark over sea.
+                // How much light the ground bounces back into the air, which makes the underside of
+                // a cloud bright over snow and dark over sea.
                 if config.ground_albedo > 0.0 {
                     atmosphere.ground_albedo = Vec3::splat(config.ground_albedo);
                 }
@@ -1585,8 +1584,8 @@ pub unsafe extern "C" fn bcs_render_set_atmosphere(
 /// Lights the scene from a pair of cubemaps somebody baked earlier.
 ///
 /// The other end of [`bcs_render_set_image_lighting`], which filters one cubemap on the GPU every
-/// time the app starts. This takes the two maps a tool produced, which costs nothing at startup
-/// and is what a shipped game wants, especially for an environment too large to filter again.
+/// time the app starts. This takes the two maps a tool produced, which costs nothing at startup and
+/// suits a shipped game, especially for an environment too large to filter again.
 ///
 /// `diffuse` is the blurred map a rough surface reflects and `specular` is the sharp one a
 /// polished surface reflects. Both are a column of six faces like a skybox, and both are
