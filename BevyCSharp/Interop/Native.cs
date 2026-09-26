@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 134;
+    internal const int ExpectedAbiVersion = 135;
 
     static Native() => NativeLoader.Initialize();
 
@@ -952,6 +952,26 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_geometry_pool_add(int pool, int mesh);
+
+    /// <summary>Whether the device can build ray scenes and trace rays through them.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_ray_queries_supported();
+
+    /// <summary>Makes a ray scene over a geometry pool, answering its key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_ray_scene_create(int pool, int capacity);
+
+    /// <summary>Puts an entity made of a pool mesh in a slot of a ray scene, or empties the slot.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_ray_scene_set(int scene, int slot, ulong entity, int mesh);
+
+    /// <summary>Puts a ray scene under a name, or takes it off with a key of zero.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_set_ray_scene(int kind, long id, byte* name, int scene);
 
     /// <summary>Makes a buffer the engine fills with the materials of entities put in its slots.</summary>
     [LibraryImport(Library)]

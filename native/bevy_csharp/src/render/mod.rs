@@ -17,7 +17,8 @@
 //! - [`shaders`] is the boundary for shaders the game wrote: [`programs`] says which files draw a
 //! material and keeps them compiled, [`material`] holds what such a material carries, [`passes`]
 //! runs them over a camera's picture, [`compute`] runs them over buffers outside of any picture,
-//! and [`slang`] compiles the ones written in Slang.
+//! [`slang`] compiles the ones written in Slang, and [`rays`] builds the acceleration structures
+//! the ones tracing rays of their own trace against.
 //!
 //! What the three share sits here: resolving an asset key, and refusing an entity that is not a
 //! camera.
@@ -33,6 +34,7 @@ pub mod pools;
 pub mod post;
 pub mod probes;
 pub mod programs;
+pub mod rays;
 pub mod reflect;
 pub mod scene;
 pub mod shaders;

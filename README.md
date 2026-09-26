@@ -1807,6 +1807,25 @@ a copy. It runs where ray-traced lighting runs, in a bridge built with `--solari
 `Config.RayTracedLighting`, and on meshes given to `SetRayTraced`. A camera's own Solari lighting
 stays off unless `SetRayTracedLighting` turns it on, so the rays can be the package's alone.
 
+A ray scene of the game's own needs no Solari. It is built over a [geometry pool](#compute), each
+pool mesh once, with entities in numbered slots placed where their transforms are every frame:
+
+```csharp
+var pool = Shaders.CreateGeometryPool();
+var rock = Shaders.AddToGeometryPool(pool, rockProxyMesh);    // what the rays meet, not what is drawn
+
+var scene = Shaders.CreateRayScene(pool, capacity: 1024);
+Shaders.SetRaySceneInstance(scene, slot: 0, boulder, rock);   // follows the entity as it moves
+
+occlusion.SetRayScene("scene", scene);
+```
+
+The shader declares `RaytracingAccelerationStructure scene;` and traces it with
+`bcs_ray::trace_in(scene, ...)` or `visible_in`. A hit's `instance` is the slot and its `mesh` is
+the pool mesh, so an instance buffer or a material buffer with the same entities in the same slots
+describes what was hit, and `bcs_scene::pool_corner` reads the triangle. `Shaders.SupportsRayQueries`
+says whether the device can build one, which takes ray tracing hardware on Vulkan.
+
 SPIR-V passed through reaches the driver without the checks WGSL gets, so a shader reading past a
 buffer's end reads whatever is there. The bridge builds the layout from Slang's reflection, so
 values are still set by name. The target works for any compute shader, whether or not it traces

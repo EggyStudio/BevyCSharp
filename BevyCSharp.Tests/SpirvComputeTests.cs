@@ -92,6 +92,123 @@ public sealed class SpirvComputeTests
     }
 
     /// <summary>
+    /// A ray scene over a geometry pool, with no Solari at all, reports which slot and which pool
+    /// mesh each ray met and how far away, and follows an entity that moves.
+    /// </summary>
+    /// <remarks>Runs only on a device with ray queries, and returns early anywhere else.</remarks>
+    [Fact]
+    public void ARaySceneOfItsOwnIsTracedAndFollowsWhatMoves()
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        var supported = false;
+        var trace = default(ShaderInstance);
+        var hits = AssetHandle.None;
+        var lifted = Entity.None;
+        var read = default(BufferRead);
+        Vector4[]? before = null;
+        Vector4[]? after = null;
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                supported = Shaders.SupportsRayQueries;
+                if (!supported) return;
+
+                // A unit cube with its top at a half, and a slab two across with its top at a tenth,
+                // placed so that no ray lands on an edge.
+                var pool = Shaders.CreateGeometryPool();
+                var cube = Shaders.AddToGeometryPool(pool, Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f));
+                var slab = Shaders.AddToGeometryPool(pool, Render.CreateMesh(MeshShape.Cuboid, 2f, 0.2f, 2f));
+
+                lifted = ecs.Spawn();
+                ecs.Add(lifted, Transform.At(-2f, 0f, 0f));
+
+                var flat = ecs.Spawn();
+                ecs.Add(flat, Transform.At(2.5f, 0f, 0f));
+
+                var scene = Shaders.CreateRayScene(pool, 4);
+                Shaders.SetRaySceneInstance(scene, 0, lifted, cube);
+                Shaders.SetRaySceneInstance(scene, 3, flat, slab);
+
+                // Nine rays a unit apart, from four to the left to four to the right.
+                hits = Shaders.CreateBuffer<Vector4>(new Vector4[9]);
+                trace = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
+                    {
+                        Compute = "shaders/trace_pool.slang",
+                        ComputeTarget = ShaderTarget.SpirV,
+                    }))
+                    .SetRayScene("scene", scene)
+                    .SetBuffer("hits", hits)
+                    .Set("height", 10f)
+                    .Set("spacing", 1f);
+            },
+        };
+
+        void Trace(PictureRun steps, string name, Action<Vector4[]?> keep)
+        {
+            Vector4[]? found = null;
+
+            steps.Do($"tracing {name}", _ =>
+                {
+                    if (supported) Shaders.Dispatch(trace, 1);
+                })
+                .Wait(2)
+                .Do($"asking for {name}", _ =>
+                {
+                    if (supported) read = Shaders.BeginBufferRead(hits);
+                })
+                .Until($"reading {name}", _ =>
+                {
+                    if (!supported) return true;
+                    if (!Shaders.TryReadBuffer(read, out found)) return false;
+                    keep(found);
+                    return true;
+                });
+        }
+
+        run.Until("compiled", _ => !supported || ShaderMaterialTests.ProgramsReady()).Wait(10);
+        Trace(run, "before", found => before = found);
+
+        run.Do("lifting the cube", world =>
+            {
+                if (supported) world.Resource<EcsWorld>().Set(lifted, Transform.At(-2f, 1f, 0f));
+            })
+            .Wait(3);
+        Trace(run, "after", found => after = found);
+        run.Go();
+
+        if (!supported) return;
+
+        Assert.NotNull(before);
+        Assert.NotNull(after);
+
+        foreach (var index in new[] { 0, 1, 3, 4, 5, 8 })
+        {
+            Assert.True(before[index].W < 0f, $"ray {index} met something ({before[index]}) where nothing is");
+        }
+
+        // The cube is in slot zero and is pool mesh zero, and the slab slot three and mesh one,
+        // with the empty slots between them leaving the slab's slot as it was.
+        Assert.Equal(new Vector4(0f, 0f, 9.5f, 1f), before[2], new ApproximateComparer());
+        Assert.Equal(new Vector4(3f, 1f, 9.9f, 1f), before[6], new ApproximateComparer());
+        Assert.Equal(new Vector4(3f, 1f, 9.9f, 1f), before[7], new ApproximateComparer());
+
+        // A unit higher, so a unit sooner.
+        Assert.InRange(after[2].Z, 8.49f, 8.51f);
+        Assert.InRange(after[6].Z, 9.89f, 9.91f);
+    }
+
+    /// <summary>Equal to within a thousandth in every component.</summary>
+    private sealed class ApproximateComparer : IEqualityComparer<Vector4>
+    {
+        public bool Equals(Vector4 a, Vector4 b) => Vector4.Distance(a, b) < 1e-3f;
+
+        public int GetHashCode(Vector4 value) => 0;
+    }
+
+    /// <summary>
     /// A dispatch on a camera, compiled to SPIR-V, reads the camera's depth and normals through
     /// <c>bcs_pass</c> and traces a ray toward the sun from every surface, which shadows the floor
     /// under a cube and nowhere else.

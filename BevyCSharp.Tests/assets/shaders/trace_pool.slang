@@ -1,41 +1,27 @@
-// Traces a ray from five units in front of the first mesh of a pool straight at it, through every
-// triangle, and writes the nearest hit's distance and the normal there, where its box is entered,
-// and how many triangles each of the first two meshes has.
+// Traces one ray a thread straight down from `height` through `scene`, a ray scene over a geometry
+// pool, along a row of points `spacing` apart centered on the origin, and writes what each met into
+// `hits`: the slot it hit, the pool mesh, the distance, and one, or all -1 where it met nothing.
 
-import bcs_compute;
-import bcs_scene;
+import bcs_ray;
 
-StructuredBuffer<bcs_scene::PoolVertex> vertices;
-StructuredBuffer<uint> indices;
-StructuredBuffer<bcs_scene::PoolMesh> meshes;
-RWStructuredBuffer<float4> into;
+uniform float height;
+uniform float spacing;
+RaytracingAccelerationStructure scene;
+RWStructuredBuffer<float4> hits;
 
 [shader("compute")]
-[numthreads(1, 1, 1)]
-void main()
+[numthreads(16, 1, 1)]
+void main(uint3 id : SV_DispatchThreadID)
 {
-    let mesh = meshes[0];
-    let origin = float3(0.0, 0.0, 5.0);
-    let direction = float3(0.0, 0.0, -1.0);
+    uint count;
+    uint stride;
+    hits.GetDimensions(count, stride);
 
-    var nearest = 1e30;
-    var normal = float3(0.0);
+    if (id.x >= count)
+        return;
 
-    for (uint triangle = 0; triangle < bcs_scene::triangle_count(mesh); triangle++)
-    {
-        let a = bcs_scene::pool_corner(vertices, indices, mesh, triangle, 0);
-        let b = bcs_scene::pool_corner(vertices, indices, mesh, triangle, 1);
-        let c = bcs_scene::pool_corner(vertices, indices, mesh, triangle, 2);
-        let hit = bcs_scene::intersect_triangle(origin, direction, a.position.xyz, b.position.xyz, c.position.xyz);
+    let x = (float(id.x) - float(count - 1) * 0.5) * spacing;
+    let hit = bcs_ray::trace_in(scene, float3(x, height, 0.0), float3(0.0, -1.0, 0.0), 0.001, 1000.0);
 
-        if (hit.w > 0.0 && hit.x < nearest)
-        {
-            nearest = hit.x;
-            normal = a.normal.xyz * (1.0 - hit.y - hit.z) + b.normal.xyz * hit.y + c.normal.xyz * hit.z;
-        }
-    }
-
-    into[0] = float4(nearest, normal);
-    into[1] = float4(bcs_scene::intersect_box(origin, direction, mesh.bounds_min.xyz, mesh.bounds_max.xyz), 0.0, 0.0, 0.0);
-    into[2] = float4(float(bcs_scene::triangle_count(meshes[0])), float(bcs_scene::triangle_count(meshes[1])), float(meshes[1].first_vertex), 0.0);
+    hits[id.x] = hit.hit ? float4(float(hit.instance), float(hit.mesh), hit.t, 1.0) : float4(-1.0);
 }

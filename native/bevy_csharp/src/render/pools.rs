@@ -62,6 +62,18 @@ pub fn create(world: &mut World) -> Result<[i32; 3], i32> {
     let handle = |key: i32| super::compute::buffer_handle(world, key).ok_or(status::NO_COMPONENT);
     let (vertices, indices, meshes) = (handle(keys[0])?, handle(keys[1])?, handle(keys[2])?);
 
+    // Vertices and triangles a ray scene can build its structures from, where the device traces
+    // rays, since one that cannot refuses a buffer asking to be used that way.
+    if super::rays::supported(world) {
+        let mut assets = world.resource_mut::<Assets<ShaderBuffer>>();
+
+        for buffer in [&vertices, &indices] {
+            if let Some(mut buffer) = assets.get_mut(buffer) {
+                buffer.buffer_description.usage |= bevy::render::render_resource::BufferUsages::BLAS_INPUT;
+            }
+        }
+    }
+
     world.get_resource_or_init::<GeometryPools>().0.insert(
         keys[2],
         Pool {
@@ -78,6 +90,23 @@ pub fn create(world: &mut World) -> Result<[i32; 3], i32> {
     );
 
     Ok(keys)
+}
+
+/// A pool's vertex and index buffers, and where each of its meshes' vertices and indices start and
+/// how many there are, or `None` where `pool` names no pool.
+pub fn geometry(world: &World, pool: i32) -> Option<(Handle<ShaderBuffer>, Handle<ShaderBuffer>, Vec<[u32; 4]>)> {
+    let entry = world.get_resource::<GeometryPools>()?.0.get(&pool)?;
+
+    let meshes = entry
+        .mesh_bytes
+        .chunks_exact(MESH_BYTES)
+        .map(|mesh| {
+            let counts: &[u32] = bytemuck::cast_slice(&mesh[..16]);
+            [counts[0], counts[1], counts[2], counts[3]]
+        })
+        .collect();
+
+    Some((entry.vertices.clone(), entry.indices.clone(), meshes))
 }
 
 /// Adds the mesh `mesh` names to the pool whose mesh table is `pool`, and answers its number in

@@ -69,6 +69,8 @@ pub enum Value {
     Image(Handle<Image>, Option<u32>),
     Buffer(Handle<ShaderBuffer>),
     Sampler(SamplerSettings),
+    /// A ray scene, by its key (see [`super::rays`]).
+    RayScene(i32),
 }
 
 impl Value {
@@ -96,6 +98,7 @@ impl Value {
             Value::Image(_, Some(mip)) => format!("mip level {mip} of an image"),
             Value::Buffer(_) => "a buffer".into(),
             Value::Sampler(_) => "sampler settings".into(),
+            Value::RayScene(_) => "a ray scene".into(),
         }
     }
 }
@@ -159,7 +162,8 @@ pub fn check(layout: &Layout, name: &str, value: &Value) -> Result<(), String> {
             let wanted = match (&info.kind, value) {
                 (BindingKind::Texture { .. } | BindingKind::StorageTexture { .. }, Value::Image(..))
                 | (BindingKind::Storage { .. }, Value::Buffer(_))
-                | (BindingKind::Sampler { .. }, Value::Sampler(_)) => true,
+                | (BindingKind::Sampler { .. }, Value::Sampler(_))
+                | (BindingKind::AccelerationStructure, Value::RayScene(_)) => true,
                 _ => false,
             };
 
@@ -293,6 +297,7 @@ fn write_numbers(buffer: &mut [u8], offset: u32, ty: &FieldType, components: u32
 #[derive(Default)]
 pub struct Packed {
     buffers: Vec<(u32, Buffer)>,
+    structures: Vec<(u32, bevy::render::render_resource::Tlas)>,
     views: Vec<(u32, Vec<TextureView>)>,
     samplers: Vec<(u32, Vec<Sampler>)>,
     /// The bindings that are arrays, which are bound as arrays even when they hold one.
@@ -658,6 +663,24 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
 
                 packed.samplers.push((*number, samplers));
             }
+
+            BindingKind::AccelerationStructure => {
+                let Some(Value::RayScene(key)) = values.entries.get(&binding.name) else {
+                    return Err(PackError::Missing(format!(
+                        "{} is an acceleration structure the shader traces, and no ray scene was \
+                         given. Make one with Shaders.CreateRayScene.",
+                        binding.name
+                    )));
+                };
+
+                // Built by the render world during this frame's preparation, which a scene made
+                // this frame has not had yet.
+                let Some(tlas) = super::rays::tlas(*key) else {
+                    return Err(PackError::NotReady);
+                };
+
+                packed.structures.push((*number, tlas));
+            }
         }
     }
 
@@ -796,6 +819,13 @@ impl Packed {
                 } else {
                     BindingResource::TextureViewArray(list)
                 },
+            });
+        }
+
+        for (number, tlas) in &self.structures {
+            entries.push(BindGroupEntry {
+                binding: *number,
+                resource: BindingResource::AccelerationStructure(tlas),
             });
         }
 

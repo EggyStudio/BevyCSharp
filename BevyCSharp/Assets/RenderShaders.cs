@@ -1076,6 +1076,56 @@ public static unsafe class Shaders
     public static int AddToGeometryPool(GeometryPool pool, AssetHandle mesh) =>
         Native.Check(Native.bcs_shader_geometry_pool_add(pool.Meshes.Key, mesh.Key), "adding a mesh to a geometry pool");
 
+    /// <summary>
+    /// Whether this device can build a <see cref="RayScene"/> and trace rays through one, which
+    /// takes hardware ray tracing and a Vulkan backend. Only valid inside a system.
+    /// </summary>
+    public static bool SupportsRayQueries => Native.bcs_shader_ray_queries_supported() != 0;
+
+    /// <summary>
+    /// Makes a scene rays are traced through, over the meshes of a geometry pool, with
+    /// <paramref name="capacity"/> slots for the entities in it. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A compute shader compiled to SPIR-V (<see cref="ShaderProgramSettings.ComputeTarget"/>)
+    /// declares a <c>RaytracingAccelerationStructure</c>, is handed the scene by name with
+    /// <c>SetRayScene</c>, and traces it with <c>bcs_ray::trace_in</c> and <c>visible_in</c>. It is
+    /// independent of the scene Solari keeps, so it runs without ray-traced lighting, and it can
+    /// hold whatever a technique wants its rays to meet: simpler stand-ins for what is drawn, a
+    /// coarser level of detail, or only what should cast a shadow.
+    /// </para>
+    /// <para>
+    /// Each pool mesh is built into a structure of its own once, the first frame the pool's
+    /// buffers hold it, and the scene is built again every frame from where its entities are, so
+    /// moving an entity moves what rays meet with nothing else to do. A hit's
+    /// <c>instance</c> is the slot, which an instance buffer or a material buffer with the same
+    /// entities in the same slots describes, and its <c>mesh</c> is the pool mesh, whose triangle
+    /// <c>bcs_scene::pool_corner</c> reads.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// The device cannot trace rays (see <see cref="SupportsRayQueries"/>), or the pool is gone.
+    /// </exception>
+    public static RayScene CreateRayScene(GeometryPool pool, int capacity) =>
+        new(Native.Check(
+            Native.bcs_shader_ray_scene_create(pool.Meshes.Key, capacity),
+            $"making a ray scene of {capacity} slots"));
+
+    /// <summary>
+    /// Puts an entity made of pool mesh <paramref name="mesh"/> in a slot of a ray scene, where
+    /// rays meet it at its transform every frame, or empties the slot with
+    /// <see cref="Entity.None"/>. Only valid inside a system.
+    /// </summary>
+    /// <param name="scene">The scene.</param>
+    /// <param name="slot">Which slot, which a hit on it reports as its instance.</param>
+    /// <param name="entity">The entity whose transform places it.</param>
+    /// <param name="mesh">What <see cref="AddToGeometryPool"/> answered for its mesh.</param>
+    public static void SetRaySceneInstance(RayScene scene, int slot, Entity entity, int mesh) =>
+        Native.Check(
+            Native.bcs_shader_ray_scene_set(scene.Key, slot, entity.Bits, entity == Entity.None ? -1 : mesh),
+            $"putting {entity} in slot {slot} of a ray scene");
+
     /// <summary>How many bytes one slot of a material buffer takes.</summary>
     /// <remarks>
     /// Base color and emissive color, four floats each, then roughness, metallic, reflectance and
@@ -1564,6 +1614,25 @@ public static unsafe class ShaderValues
         }
 
         /// <summary>
+        /// Puts a <see cref="RayScene"/> on an acceleration structure the shader traces, or takes it
+        /// off again with <c>default</c>.
+        /// </summary>
+        public T SetRayScene(string name, RayScene scene)
+        {
+            var (kind, id) = target.Target;
+
+            fixed (byte* named = ShaderValues.Utf8(name))
+            {
+                ShaderValues.Refuse(
+                    Native.bcs_shader_set_ray_scene(kind, id, named, scene.Key),
+                    name,
+                    target);
+            }
+
+            return target;
+        }
+
+        /// <summary>
         /// Puts a buffer from <see cref="Shaders.CreateBuffer(int)"/> on a storage buffer, or takes
         /// it off again with <see cref="AssetHandle.None"/>.
         /// </summary>
@@ -2010,6 +2079,12 @@ public enum ShaderParameterKind
 
     /// <summary>A sampler.</summary>
     Sampler,
+
+    /// <summary>
+    /// An acceleration structure rays are traced through, which a <see cref="RayScene"/> is
+    /// handed to. Only a compute shader compiled to SPIR-V declares one.
+    /// </summary>
+    RayScene,
 }
 
 /// <summary>One name a shader declares, as <see cref="ShaderValues"/> reports it.</summary>
@@ -2065,6 +2140,7 @@ public readonly record struct ShaderParameter(
                             "image" => ShaderParameterKind.Image,
                             "buffer" => ShaderParameterKind.Buffer,
                             "sampler" => ShaderParameterKind.Sampler,
+                            "scene" => ShaderParameterKind.RayScene,
                             _ => ShaderParameterKind.Struct,
                         },
                         name,
@@ -2846,6 +2922,14 @@ public readonly record struct ViewDraw
 /// <param name="Indices">Every triangle's three vertex numbers, counted from its mesh's first vertex.</param>
 /// <param name="Meshes">The meshes, as <c>bcs_scene::PoolMesh</c>, in the order they were added.</param>
 public readonly record struct GeometryPool(AssetHandle Vertices, AssetHandle Indices, AssetHandle Meshes);
+
+/// <summary>A scene rays are traced through. See <see cref="Shaders.CreateRayScene"/>.</summary>
+/// <param name="Key">What the scene is known by.</param>
+public readonly record struct RayScene(int Key)
+{
+    /// <summary>Whether this names a scene rather than being the default.</summary>
+    public bool IsValid => Key > 0;
+}
 
 /// <summary>A buffer on its way back from the GPU, from <see cref="Shaders.BeginBufferRead"/>.</summary>
 public readonly record struct BufferRead(int Ticket);

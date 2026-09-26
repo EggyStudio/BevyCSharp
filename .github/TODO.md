@@ -100,8 +100,8 @@ by name. What is left is at the edges of that:
   driver untouched, so a declaration that differs from what the bridge binds, or a read past a
   buffer's end, is undefined behavior rather than an error. The layout comes from Slang's
   reflection, which cannot tell a comparison sampler from a plain one, so a shader of this kind
-  binds only plain samplers. Rays meet only the scene Solari keeps, since the bridge builds no
-  acceleration structure of its own.
+  binds only plain samplers. A ray scene builds each pool mesh once, so a mesh that deforms is
+  traced as it was when it was added.
 - **Geometry drawn out of buffers is lit by its own shader.** A draw casts shadows into every
   light's shadow map and writes the prepass's motion and normals, but Bevy's lighting shades only
   materials on meshes, so something drawn out of buffers and lit the way Bevy lights things is

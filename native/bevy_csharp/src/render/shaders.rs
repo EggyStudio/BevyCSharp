@@ -1980,6 +1980,7 @@ pub unsafe extern "C" fn bcs_shader_target_names(
                                 BindingKind::StorageTexture { .. } => "image",
                                 BindingKind::Storage { .. } => "buffer",
                                 BindingKind::Sampler { .. } => "sampler",
+                                BindingKind::AccelerationStructure => "scene",
                                 BindingKind::Uniform { .. } => unreachable!(),
                             };
 
@@ -2158,6 +2159,107 @@ pub extern "C" fn bcs_shader_geometry_pool_add(pool: i32, mesh: i32) -> i32 {
         #[cfg(feature = "render")]
         {
             crate::state::with_world(|world| super::pools::add(world, pool, mesh))
+        }
+    })
+}
+
+/// Whether this device can build ray scenes and trace rays through them. `1` or `0`.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_ray_queries_supported() -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            0
+        }
+
+        #[cfg(feature = "render")]
+        {
+            crate::state::with_world_opt(|world| super::rays::supported(world) as i32).unwrap_or(0)
+        }
+    })
+}
+
+/// Makes a ray scene over the geometry pool whose mesh table is `pool`, with `capacity` slots for
+/// instances, and answers its key.
+///
+/// See [`super::rays`]. Returns [`status::UNSUPPORTED`] on a device without ray queries and
+/// [`status::NO_COMPONENT`] where `pool` names no pool.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_ray_scene_create(pool: i32, capacity: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (pool, capacity);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if capacity <= 0 {
+                return status::NULL_ARG;
+            }
+
+            crate::state::with_world(|world| super::rays::create(world, pool, capacity as u32))
+        }
+    })
+}
+
+/// Puts an entity made of pool mesh `mesh` in a slot of a ray scene, where it is traced at its
+/// transform every frame. An entity of zero bits, or a negative mesh, empties the slot.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_ray_scene_set(scene: i32, slot: i32, entity: u64, mesh: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (scene, slot, entity, mesh);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if slot < 0 {
+                return status::NULL_ARG;
+            }
+
+            let entity = (entity != 0 && mesh >= 0).then(|| bevy::ecs::entity::Entity::from_bits(entity));
+
+            crate::state::with_world(|world| {
+                super::rays::set(world, scene, slot as u32, entity, mesh.max(0) as u32)
+            })
+        }
+    })
+}
+
+/// Puts a ray scene from [`bcs_shader_ray_scene_create`] under a name. A key of zero or less takes
+/// it off again.
+///
+/// # Safety
+/// `name` must be a NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_shader_set_ray_scene(
+    kind: i32,
+    id: i64,
+    name: *const core::ffi::c_char,
+    scene: i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (kind, id, name, scene);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            let Some(name) = (unsafe { crate::interop::cstr_to_string(name) }) else {
+                return status::NULL_ARG;
+            };
+
+            if scene <= 0 {
+                return unset(kind, id, name);
+            }
+
+            put(kind, id, name, super::values::Value::RayScene(scene))
         }
     })
 }

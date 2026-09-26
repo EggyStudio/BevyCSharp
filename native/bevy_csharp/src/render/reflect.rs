@@ -187,6 +187,8 @@ pub enum BindingKind {
         access: StorageTextureAccess,
     },
     Sampler { comparison: bool },
+    /// A ray scene's top-level acceleration structure, which only SPIR-V can declare.
+    AccelerationStructure,
 }
 
 /// One binding in a shader's own group.
@@ -212,6 +214,7 @@ impl Binding {
             } => format!("{dimension:?} {format:?} image written"),
             BindingKind::Sampler { comparison: true } => "comparison sampler".to_string(),
             BindingKind::Sampler { comparison: false } => "sampler".to_string(),
+            BindingKind::AccelerationStructure => "acceleration structure".to_string(),
         };
 
         match self.count {
@@ -439,6 +442,9 @@ impl Layout {
                     } else {
                         SamplerBindingType::Filtering
                     }),
+                    BindingKind::AccelerationStructure => BindingType::AccelerationStructure {
+                        vertex_return: false,
+                    },
                 },
                 count: binding.count.and_then(std::num::NonZeroU32::new),
             })
@@ -959,12 +965,8 @@ fn spirv_binding_kind(name: &str, parameter: &Value, ty: &Value) -> Result<Bindi
         "structuredBuffer" | "byteAddressBuffer" => {
             return Ok(BindingKind::Storage { read_only: !written });
         }
-        "accelerationStructure" => {
-            return Err(format!(
-                "{name} is an acceleration structure of the shader's own, which nothing builds. \
-                 Import bcs_ray and trace bcs_ray::tlas, the scene Solari keeps."
-            ));
-        }
+        // A ray scene the game builds (see `super::rays`), handed over by name.
+        "accelerationStructure" => return Ok(BindingKind::AccelerationStructure),
         _ => {}
     }
 
@@ -1588,16 +1590,19 @@ mod tests {
         assert!(layout.find("tint").is_some());
     }
 
-    /// An acceleration structure of the shader's own has nothing to build it, and says what to use.
+    /// An acceleration structure of the shader's own is a binding a ray scene is handed to.
     #[test]
-    fn an_acceleration_structure_of_its_own_is_refused() {
+    fn an_acceleration_structure_of_its_own_is_a_binding() {
         let reflection = r#"{"parameters": [
             {"name": "mine", "binding": {"kind": "descriptorTableSlot", "index": 0},
              "type": {"kind": "resource", "baseShape": "accelerationStructure"}}
         ]}"#;
 
-        let error = super::reflect_spirv(&decorated(0, 0), reflection, super::Family::Compute).unwrap_err();
-        assert!(error.contains("bcs_ray"), "{error}");
+        let layout = super::reflect_spirv(&decorated(0, 0), reflection, super::Family::Compute)
+            .unwrap()
+            .layout;
+        assert_eq!(layout.bindings[&0].kind, super::BindingKind::AccelerationStructure);
+        assert!(!layout.traces_scene, "a scene of its own is not Solari's");
     }
 
     #[test]

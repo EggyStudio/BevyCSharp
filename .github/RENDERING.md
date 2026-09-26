@@ -310,7 +310,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | need | status |
 |---|---|
 | Ray queries in shaders | Has, in compute shaders compiled to SPIR-V (`ShaderTarget.SpirV`), through `bcs_ray::trace` and `visible`, in a bridge built with `--solari` and an app running Solari |
-| An acceleration structure kept current with the scene | Has, Solari's, over the meshes given to `SetRayTraced`, with their vertices, transforms, materials and lights, which `bcs_ray` declares as group two of a dispatch and `bcs_ray::surface_at` shades a hit from |
+| An acceleration structure kept current with the scene | Has, Solari's, over the meshes given to `SetRayTraced`, with their vertices, transforms, materials and lights, which `bcs_ray` declares as group two of a dispatch and `bcs_ray::surface_at` shades a hit from. A package's own is a ray scene over a geometry pool (`Shaders.CreateRayScene`), traced with `bcs_ray::trace_in`, which needs no Solari |
 
 The route runs around what each tool lacks. Slang writes ray queries only for SPIR-V, and naga's
 SPIR-V reader has no ray query instructions, so a shader of this kind never passes through naga.
@@ -321,9 +321,11 @@ says whether the entry point uses it. The scene is Solari's `RaytracingSceneBind
 the `bcs_ray` module declares in the same order, so the bind group Solari builds each frame is the
 one the dispatch binds.
 
-What is left belongs to the package: a scene of its own that Solari does not keep, such as
-proxies or a lower level of detail for rays, would need an acceleration structure the bridge
-builds from a geometry pool, which it does not yet do.
+A scene Solari does not keep, such as stand-ins or a lower level of detail for rays, is a ray
+scene over a geometry pool. The render world builds each pool mesh into a bottom-level structure
+once and the top-level structure every frame from where the entities are, and the dispatch binds
+it by name like any other value. Every slot holds an instance, an empty one masked so no ray meets
+it, because wgpu packs the instances it builds and a gap would shift every slot after it.
 
 ### Debugging and tooling
 
@@ -369,9 +371,9 @@ Each phase unblocks a class of package, and none needs a later one.
    share all of it.
 5. **World space.** Scene data readable from compute (lights, shadow maps and the sky are, and
    materials, per pixel through the G-buffer and by object as constants), 3D images with
-   scrolling, and hardware ray queries against the scene Solari keeps, which a compute shader
-   compiled to SPIR-V reaches through `bcs_ray`. An acceleration structure the package builds
-   over geometry of its own is next.
+   scrolling, and hardware ray queries, which a compute shader compiled to SPIR-V makes through
+   `bcs_ray` against the scene Solari keeps or a ray scene of its own over a geometry pool.
+   Refitting a scene's meshes as they deform, rather than building them once, is next.
 6. **Reflections and radiance cascades**, built on what the phases before provide.
 
 ## What to watch

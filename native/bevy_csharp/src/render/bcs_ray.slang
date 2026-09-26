@@ -1,5 +1,5 @@
-// The scene Bevy's Solari traces, for a compute shader of the game's own to trace rays against,
-// which it reaches with `import bcs_ray;`.
+// Rays for a compute shader of the game's own, which it reaches with `import bcs_ray;`: against the
+// scene Bevy's Solari traces, or against a ray scene the game built over a geometry pool.
 //
 // Solari keeps an acceleration structure over every mesh given to `Render.SetRayTraced`, and
 // beside it the vertices, indices, transforms and materials a hit is shaded from. This declares
@@ -15,6 +15,12 @@
 //
 // The layout below follows Bevy's `bevy_solari::scene_bindings` for the Bevy version this bridge
 // builds against, since a declaration that differs from what Solari binds reads the wrong bytes.
+//
+// A ray scene of the game's own (`Shaders.CreateRayScene`) needs none of that. A shader declares a
+// `RaytracingAccelerationStructure` of its own, is handed the scene by name, and traces it with
+// `trace_in` and `visible_in`, which run anywhere the device has ray queries, Solari or not. Only
+// the functions a shader calls bind anything, so importing this for them binds nothing of
+// Solari's.
 
 module bcs_ray;
 
@@ -106,8 +112,11 @@ public struct Hit
     public bool hit;
     /// How far along the ray, in units of its direction's length.
     public float t;
-    /// Which instance, which is the slot every per-instance buffer above is read at.
+    /// Which instance, which is the slot every per-instance buffer above is read at, and the slot an
+    /// entity was put in for a ray scene of the game's own.
     public uint instance;
+    /// The instance's own number: the pool mesh it is made of, for a ray scene of the game's own.
+    public uint mesh;
     /// Which triangle of that instance's mesh.
     public uint triangle;
     /// How far toward the triangle's second and third corners the hit is.
@@ -116,10 +125,16 @@ public struct Hit
     public bool front_face;
 };
 
-/// Traces a ray against the scene, and answers the nearest triangle it meets.
+/// Traces a ray against Solari's scene, and answers the nearest triangle it meets.
 ///
 /// Every instance is considered and nothing is culled by facing, which is how Solari traces.
 public Hit trace(float3 origin, float3 direction, float t_min, float t_max)
+{
+    return trace_in(tlas, origin, direction, t_min, t_max);
+}
+
+/// Traces a ray against `scene`, and answers the nearest triangle it meets.
+public Hit trace_in(RaytracingAccelerationStructure scene, float3 origin, float3 direction, float t_min, float t_max)
 {
     RayDesc ray;
     ray.Origin = origin;
@@ -128,26 +143,33 @@ public Hit trace(float3 origin, float3 direction, float t_min, float t_max)
     ray.TMax = t_max;
 
     RayQuery<RAY_FLAG_NONE> query;
-    query.TraceRayInline(tlas, RAY_FLAG_NONE, 0xFF, ray);
+    query.TraceRayInline(scene, RAY_FLAG_NONE, 0xFF, ray);
 
-    // Every candidate is a triangle Solari marked opaque, which the query commits on its own.
+    // Every candidate is a triangle built opaque, which the query commits on its own.
     while (query.Proceed()) {}
 
     Hit found;
     found.hit = query.CommittedStatus() == COMMITTED_TRIANGLE_HIT;
     found.t = found.hit ? query.CommittedRayT() : t_max;
     found.instance = found.hit ? query.CommittedInstanceIndex() : 0;
+    found.mesh = found.hit ? query.CommittedInstanceID() : 0;
     found.triangle = found.hit ? query.CommittedPrimitiveIndex() : 0;
     found.barycentrics = found.hit ? query.CommittedTriangleBarycentrics() : float2(0.0);
     found.front_face = found.hit ? query.CommittedTriangleFrontFace() : false;
     return found;
 }
 
-/// Whether nothing is in the way between two points, for a shadow ray.
+/// Whether nothing in Solari's scene is in the way between two points, for a shadow ray.
+public bool visible(float3 from, float3 to)
+{
+    return visible_in(tlas, from, to);
+}
+
+/// Whether nothing in `scene` is in the way between two points, for a shadow ray.
 ///
 /// Stops at the first triangle met rather than looking for the nearest, since any one of them
 /// answers the question.
-public bool visible(float3 from, float3 to)
+public bool visible_in(RaytracingAccelerationStructure scene, float3 from, float3 to)
 {
     let offset = to - from;
     let distance = length(offset);
@@ -164,7 +186,7 @@ public bool visible(float3 from, float3 to)
     ray.TMax = distance * 0.999;
 
     RayQuery<RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH> query;
-    query.TraceRayInline(tlas, RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH, 0xFF, ray);
+    query.TraceRayInline(scene, RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH, 0xFF, ray);
 
     while (query.Proceed()) {}
 
