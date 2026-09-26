@@ -241,6 +241,7 @@ public static unsafe class Shaders
                     DefineCount = defines.Length,
                     DrawVertex = Stage(settings.DrawVertex),
                     DrawFragment = Stage(settings.DrawFragment),
+                    Flags = settings.ComputeTarget == ShaderTarget.SpirV ? 1 : 0,
                 };
 
                 var id = Native.bcs_shader_program_create(&config);
@@ -2380,6 +2381,30 @@ public sealed class ShaderProgramSettings
     /// <summary>Names the shaders are compiled with defined.</summary>
     public Dictionary<string, ShaderDefine> Defines { get; init; } = new(StringComparer.Ordinal);
 
+    /// <summary>
+    /// What <see cref="Compute"/> is compiled to. <see cref="ShaderTarget.Wgsl"/> unless set.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Every other stage is WGSL, which Bevy reads on every backend and checks against the layout
+    /// the bridge builds. A compute shader may need what WGSL cannot say, a ray query above all,
+    /// since Slang writes ray queries only as SPIR-V. <see cref="ShaderTarget.SpirV"/> compiles it
+    /// to SPIR-V and hands the binary to the driver untouched, which is how a shader importing
+    /// <c>bcs_ray</c> traces rays against the scene Solari keeps.
+    /// </para>
+    /// <para>
+    /// Nothing checks SPIR-V passed through this way before the GPU runs it. A shader reading
+    /// past a buffer's end reads whatever is there rather than zero, and a declaration that does not
+    /// match what the bridge binds is undefined behavior rather than an error. The layout is built
+    /// from Slang's reflection, so what the shader declares is still set by name as it is for WGSL,
+    /// with two differences: a comparison sampler is bound as a plain one, and a texture of floats
+    /// is bound as filterable, which a 32-bit float image is not, so such an image is read with
+    /// <c>Load</c>. On a backend other than Vulkan the SPIR-V is translated by naga instead, which
+    /// works for ordinary compute and not for ray queries.
+    /// </para>
+    /// </remarks>
+    public ShaderTarget ComputeTarget { get; init; }
+
     /// <summary>The stages that were set.</summary>
     internal IEnumerable<ShaderStage> Stages() =>
         new[] { Vertex, Fragment, PrepassVertex, PrepassFragment, Compute, Pass, DrawVertex, DrawFragment }
@@ -2388,6 +2413,18 @@ public sealed class ShaderProgramSettings
     /// <summary>The stage a message names the program by.</summary>
     internal ShaderStage Main() =>
         Fragment.IsSet ? Fragment : Pass.IsSet ? Pass : Compute.IsSet ? Compute : DrawFragment;
+}
+
+/// <summary>What a Slang stage is compiled to.</summary>
+public enum ShaderTarget
+{
+    /// <summary>WGSL, which Bevy reads on every backend and checks before it runs.</summary>
+    Wgsl,
+
+    /// <summary>
+    /// SPIR-V, handed to the driver untouched, for what WGSL cannot say. Compute stages only.
+    /// </summary>
+    SpirV,
 }
 
 /// <summary>The value a shader define has.</summary>

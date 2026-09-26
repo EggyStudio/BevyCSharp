@@ -67,6 +67,9 @@ impl Family {
     }
 
     /// The groups a shader of this family may use, and nothing else binds.
+    ///
+    /// A compute shader in SPIR-V may use group two as well, for Solari's scene, which
+    /// [`reflect_spirv`] checks before asking this.
     fn allowed(self) -> &'static [u32] {
         match self {
             Family::Material => &[0, 1, 2, 3],
@@ -227,6 +230,13 @@ pub struct Layout {
     /// time, as a compute shader importing `bcs_pass` does, which means it can only run on a
     /// camera.
     pub reads_view: bool,
+    /// Whether the shader was compiled to SPIR-V and is handed over untouched. Its blocks of numbers
+    /// are then uniform buffers as Slang declared them, since nothing rewrites the declaration the
+    /// way [`numbers_in_storage`] rewrites WGSL.
+    pub spirv: bool,
+    /// Whether the shader reads Solari's scene through `bcs_ray`, in group two, which only a
+    /// dispatch in an app running Solari can bind.
+    pub traces_scene: bool,
 }
 
 /// The name the loose globals' uniform buffer goes by, which no global can have.
@@ -389,9 +399,13 @@ impl Layout {
                 visibility: stages,
                 ty: match &binding.kind {
                     // Storage rather than uniform, as `numbers_in_storage` made the shader's
-                    // declaration. See there for why.
+                    // declaration, except in SPIR-V, which nothing rewrites. See there for why.
                     BindingKind::Uniform { size, .. } => BindingType::Buffer {
-                        ty: BufferBindingType::Storage { read_only: true },
+                        ty: if self.spirv {
+                            BufferBindingType::Uniform
+                        } else {
+                            BufferBindingType::Storage { read_only: true }
+                        },
                         has_dynamic_offset: false,
                         min_binding_size: std::num::NonZeroU64::new(*size),
                     },
@@ -490,11 +504,14 @@ fn find_field<'a>(fields: &'a [Field], path: &str) -> Option<(u32, &'a FieldType
 
 // -- Reading what slangc wrote
 
-/// What reading a compile produced: the WGSL with its groups where they belong, and the layout of
-/// the shader's own group.
+/// What reading a compile produced: the WGSL or the SPIR-V with its groups where they belong, and
+/// the layout of the shader's own group.
 #[derive(Clone, Debug)]
 pub struct Reflected {
+    /// Empty where the compile was to SPIR-V.
     pub wgsl: String,
+    /// Empty where the compile was to WGSL.
+    pub spirv: Vec<u8>,
     pub layout: Layout,
 }
 
@@ -606,8 +623,7 @@ pub fn reflect(wgsl: &str, reflection: &str, family: Family) -> Result<Reflected
     let group = family.own_group();
     let mut layout = Layout {
         group,
-        bindings: BTreeMap::new(),
-        reads_view: false,
+        ..Default::default()
     };
 
     for (handle, global) in module.global_variables.iter() {
@@ -734,8 +750,344 @@ pub fn reflect(wgsl: &str, reflection: &str, family: Family) -> Result<Reflected
 
     Ok(Reflected {
         wgsl: numbers_in_storage(&wgsl, group),
+        spirv: Vec::new(),
         layout,
     })
+}
+
+// -- Reading what slangc wrote as SPIR-V
+
+/// The group `bcs_ray` declares Solari's scene in, in SPIR-V and in a pipeline alike.
+pub const SCENE_GROUP: u32 = 2;
+
+/// Renumbers the groups of SPIR-V `slangc` wrote, and reads the shader's own group from Slang's
+/// reflection alone.
+///
+/// naga cannot read what SPIR-V is used for here (it has no ray query instructions), and the
+/// binary goes to the driver untouched, so nothing checks it against a layout the way a WGSL
+/// shader is checked. The layout comes from the reflection instead, which names every binding,
+/// its kind, its format and whether the entry point uses it, and a binding the entry point does not
+/// use is left out, as naga leaves it out of WGSL.
+///
+/// Two things the reflection cannot say are settled the usual way. A comparison sampler reads as a
+/// plain one, so it is bound as a filtering sampler. A texture of floats is taken to be
+/// filterable, which a 32-bit float format is not, so such a texture is read with `Load` by a
+/// shader that declares it here.
+pub fn reflect_spirv(spirv: &[u8], reflection: &str, family: Family) -> Result<Reflected, String> {
+    let json: Value = serde_json::from_str(reflection)
+        .map_err(|error| format!("slangc's reflection does not parse: {error}"))?;
+
+    let parameters = json
+        .get("parameters")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+
+    // Which parameters the entry point uses, by name. A parameter the entry point list does not
+    // mention at all is kept, since leaving out something used would be the worse mistake.
+    let used: HashMap<String, bool> = json
+        .pointer("/entryPoints/0/bindings")
+        .and_then(Value::as_array)
+        .map(|bindings| {
+            bindings
+                .iter()
+                .filter_map(|binding| {
+                    let name = binding.get("name")?.as_str()?.to_string();
+                    let used = binding
+                        .pointer("/binding/used")
+                        .and_then(Value::as_u64)
+                        .is_none_or(|used| used != 0);
+                    Some((name, used))
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+
+    let group = family.own_group();
+    let mut layout = Layout {
+        group,
+        spirv: true,
+        ..Default::default()
+    };
+
+    // The loose globals, which Slang gathers into one uniform buffer of its own in space zero.
+    let loose = loose_fields(&parameters);
+
+    if !loose.is_empty() {
+        let binding = json
+            .pointer("/globalScope/binding/index")
+            .and_then(Value::as_u64)
+            .unwrap_or(0) as u32;
+
+        let size = parameters
+            .iter()
+            .filter(|parameter| {
+                parameter.pointer("/binding/kind").and_then(Value::as_str) == Some("uniform")
+            })
+            .filter_map(|parameter| {
+                let offset = parameter.pointer("/binding/offset")?.as_u64()?;
+                let size = parameter.pointer("/binding/size")?.as_u64()?;
+                Some(offset + size)
+            })
+            .max()
+            .unwrap_or(0);
+
+        layout.bindings.insert(
+            binding,
+            Binding {
+                name: LOOSE.to_string(),
+                kind: BindingKind::Uniform {
+                    size: size.div_ceil(16) * 16,
+                    fields: loose,
+                },
+                count: None,
+            },
+        );
+    }
+
+    for parameter in &parameters {
+        let Some(name) = parameter.get("name").and_then(Value::as_str) else {
+            continue;
+        };
+
+        if parameter.pointer("/binding/kind").and_then(Value::as_str) != Some("descriptorTableSlot") {
+            continue;
+        }
+
+        let space = parameter.pointer("/binding/space").and_then(Value::as_u64).unwrap_or(0) as u32;
+        let index = parameter.pointer("/binding/index").and_then(Value::as_u64).unwrap_or(0) as u32;
+        let target = family.remap(space);
+
+        if target == SCENE_GROUP && matches!(family, Family::Compute) {
+            if used.get(name).copied().unwrap_or(true) {
+                layout.traces_scene = true;
+            }
+            continue;
+        }
+
+        if !family.allowed().contains(&target) {
+            return Err(format!(
+                "{name} is bound to group {target}, which nothing binds. Leave a shader's own globals \
+                 without a binding and the bridge puts them where they belong."
+            ));
+        }
+
+        if target != group {
+            if matches!(family, Family::Compute)
+                && target == 1
+                && index != 2
+                && used.get(name).copied().unwrap_or(true)
+            {
+                layout.reads_view = true;
+            }
+            continue;
+        }
+
+        if !used.get(name).copied().unwrap_or(true) {
+            continue;
+        }
+
+        let ty = parameter.get("type").cloned().unwrap_or(Value::Null);
+        let (ty, count) = match ty.get("kind").and_then(Value::as_str) {
+            Some("array") => (
+                ty.get("elementType").cloned().unwrap_or(Value::Null),
+                Some(ty.get("elementCount").and_then(Value::as_u64).unwrap_or(0) as u32),
+            ),
+            _ => (ty, None),
+        };
+
+        if count == Some(0) {
+            return Err(format!(
+                "{name} is an array of unknown length. Give it a length, as in \
+                 `Texture2D {name}[64]`."
+            ));
+        }
+
+        let kind = spirv_binding_kind(name, parameter, &ty)?;
+        layout.bindings.insert(index, Binding { name: name.to_string(), kind, count });
+    }
+
+    Ok(Reflected {
+        wgsl: String::new(),
+        spirv: remap_descriptor_sets(spirv, family)?,
+        layout,
+    })
+}
+
+/// What one binding of a SPIR-V shader's own group is, from its reflected type.
+fn spirv_binding_kind(name: &str, parameter: &Value, ty: &Value) -> Result<BindingKind, String> {
+    let kind = ty.get("kind").and_then(Value::as_str).unwrap_or("");
+
+    if kind == "constantBuffer" {
+        let size = ty
+            .pointer("/elementType/sizes")
+            .and_then(Value::as_array)
+            .and_then(|sizes| {
+                sizes
+                    .iter()
+                    .find(|size| size.get("kind").and_then(Value::as_str) == Some("uniform"))
+            })
+            .and_then(|size| size.get("value"))
+            .and_then(Value::as_u64)
+            .unwrap_or(16);
+
+        let fields = ty
+            .pointer("/elementType/fields")
+            .and_then(Value::as_array)
+            .map(|fields| fields.iter().filter_map(field_from).collect())
+            .unwrap_or_default();
+
+        return Ok(BindingKind::Uniform {
+            size: size.div_ceil(16) * 16,
+            fields,
+        });
+    }
+
+    if kind == "samplerState" {
+        return Ok(BindingKind::Sampler { comparison: false });
+    }
+
+    if kind != "resource" {
+        return Err(format!("{name} is a kind of global the bridge cannot bind ({kind})"));
+    }
+
+    let shape = ty.get("baseShape").and_then(Value::as_str).unwrap_or("");
+    let written = ty.get("access").and_then(Value::as_str).is_some_and(|access| access != "read");
+
+    match shape {
+        "structuredBuffer" | "byteAddressBuffer" => {
+            return Ok(BindingKind::Storage { read_only: !written });
+        }
+        "accelerationStructure" => {
+            return Err(format!(
+                "{name} is an acceleration structure of the shader's own, which nothing builds. \
+                 Import bcs_ray and trace bcs_ray::tlas, the scene Solari keeps."
+            ));
+        }
+        _ => {}
+    }
+
+    let arrayed = ty.get("array").and_then(Value::as_bool).unwrap_or(false);
+    let dimension = match (shape, arrayed) {
+        ("texture1D", _) => TextureViewDimension::D1,
+        ("texture2D", false) => TextureViewDimension::D2,
+        ("texture2D", true) => TextureViewDimension::D2Array,
+        ("texture3D", _) => TextureViewDimension::D3,
+        ("textureCube", false) => TextureViewDimension::Cube,
+        ("textureCube", true) => TextureViewDimension::CubeArray,
+        _ => return Err(format!("{name} is a kind of resource the bridge cannot bind ({shape})")),
+    };
+
+    // What one texel holds, which picks the sample type and an unformatted image's format.
+    let result = ty.get("resultType").cloned().unwrap_or(Value::Null);
+    let (scalar, channels) = match result.get("kind").and_then(Value::as_str) {
+        Some("vector") => (
+            result.pointer("/elementType/scalarType").and_then(Value::as_str).unwrap_or("float32"),
+            result.get("elementCount").and_then(Value::as_u64).unwrap_or(4),
+        ),
+        _ => (result.get("scalarType").and_then(Value::as_str).unwrap_or("float32"), 1),
+    };
+
+    if written {
+        let declared = parameter
+            .get("format")
+            .and_then(Value::as_str)
+            .and_then(storage_format_name);
+
+        // Slang writes an image with no `[format]` in the format its texel type suggests, which
+        // is the widest of each kind.
+        let format = match declared {
+            Some(format) => wgsl_storage_format(&format)
+                .ok_or_else(|| format!("{name} is an image in {format}, which the bridge cannot bind"))?,
+            None => match (scalar, channels) {
+                ("uint32", 1) => TextureFormat::R32Uint,
+                ("uint32", 2) => TextureFormat::Rg32Uint,
+                ("uint32", _) => TextureFormat::Rgba32Uint,
+                ("int32", 1) => TextureFormat::R32Sint,
+                ("int32", 2) => TextureFormat::Rg32Sint,
+                ("int32", _) => TextureFormat::Rgba32Sint,
+                (_, 1) => TextureFormat::R32Float,
+                (_, 2) => TextureFormat::Rg32Float,
+                _ => TextureFormat::Rgba32Float,
+            },
+        };
+
+        return Ok(BindingKind::StorageTexture {
+            dimension,
+            format,
+            access: StorageTextureAccess::ReadWrite,
+        });
+    }
+
+    let multisampled = ty.get("multisample").and_then(Value::as_bool).unwrap_or(false);
+
+    Ok(BindingKind::Texture {
+        dimension,
+        sample: match scalar {
+            "uint32" => TextureSampleType::Uint,
+            "int32" => TextureSampleType::Sint,
+            _ => TextureSampleType::Float { filterable: !multisampled },
+        },
+        multisampled,
+    })
+}
+
+/// A storage format by the name WGSL spells it, as [`storage_format_name`] answers it.
+fn wgsl_storage_format(name: &str) -> Option<TextureFormat> {
+    let wgsl = format!("@group(0) @binding(0) var image: texture_storage_2d<{name}, write>;");
+    let module = naga::front::wgsl::parse_str(&wgsl).ok()?;
+
+    module.global_variables.iter().find_map(|(_, global)| match module.types[global.ty].inner {
+        TypeInner::Image {
+            class: ImageClass::Storage { format, .. },
+            ..
+        } => texture_format(format),
+        _ => None,
+    })
+}
+
+/// Moves every descriptor set in SPIR-V to the group the family puts it in.
+///
+/// A set is a decoration on a variable, `OpDecorate %variable DescriptorSet n`, one word for `n`,
+/// so the binary is walked instruction by instruction and that one word changed. Nothing else
+/// moves, which keeps the rest exactly as Slang wrote it.
+pub fn remap_descriptor_sets(spirv: &[u8], family: Family) -> Result<Vec<u8>, String> {
+    const MAGIC: u32 = 0x0723_0203;
+    const OP_DECORATE: u32 = 71;
+    const DESCRIPTOR_SET: u32 = 34;
+
+    if spirv.len() % 4 != 0 || spirv.len() < 20 {
+        return Err("slangc's SPIR-V is not a whole number of words".into());
+    }
+
+    let mut words: Vec<u32> = spirv
+        .chunks_exact(4)
+        .map(|word| u32::from_le_bytes([word[0], word[1], word[2], word[3]]))
+        .collect();
+
+    if words[0] != MAGIC {
+        return Err("slangc's output is not SPIR-V".into());
+    }
+
+    // Five words of header, then instructions, each with its length in its first word's high half.
+    let mut at = 5;
+
+    while at < words.len() {
+        let length = (words[at] >> 16) as usize;
+        let opcode = words[at] & 0xFFFF;
+
+        if length == 0 || at + length > words.len() {
+            return Err("slangc's SPIR-V has an instruction that runs past its end".into());
+        }
+
+        if opcode == OP_DECORATE && length == 4 && words[at + 2] == DESCRIPTOR_SET {
+            words[at + 3] = family.remap(words[at + 3]);
+        }
+
+        at += length;
+    }
+
+    Ok(words.iter().flat_map(|word| word.to_le_bytes()).collect())
 }
 
 /// Declares every block of numbers in the shader's own group as a read-only storage buffer
@@ -1125,6 +1477,127 @@ fn field_type(ty: &Value) -> Option<FieldType> {
 
 #[cfg(test)]
 mod tests {
+
+    /// SPIR-V of one decoration naming set `set` and one naming binding `binding`, behind a header.
+    fn decorated(set: u32, binding: u32) -> Vec<u8> {
+        let words: [u32; 13] = [
+            0x0723_0203, 0x0001_0500, 0, 16, 0,
+            (4 << 16) | 71, 7, 34, set,
+            (4 << 16) | 71, 7, 33, binding,
+        ];
+        words.iter().flat_map(|word| word.to_le_bytes()).collect()
+    }
+
+    fn word(bytes: &[u8], index: usize) -> u32 {
+        u32::from_le_bytes(bytes[index * 4..index * 4 + 4].try_into().unwrap())
+    }
+
+    /// The bridge's inputs move from space 101 to group one, and a binding number stays as it was.
+    #[test]
+    fn a_descriptor_set_moves_where_the_family_puts_it() {
+        let moved = super::remap_descriptor_sets(&decorated(101, 2), super::Family::Compute).unwrap();
+        assert_eq!(word(&moved, 8), 1);
+        assert_eq!(word(&moved, 12), 2);
+
+        let own = super::remap_descriptor_sets(&decorated(0, 5), super::Family::Material).unwrap();
+        assert_eq!(word(&own, 8), 3);
+    }
+
+    #[test]
+    fn something_that_is_not_spirv_is_refused() {
+        assert!(super::remap_descriptor_sets(&[0u8; 20], super::Family::Compute).is_err());
+        assert!(super::remap_descriptor_sets(&[1, 2, 3], super::Family::Compute).is_err());
+    }
+
+    /// Everything a SPIR-V compute shader's own group holds is read from the reflection alone,
+    /// with loose numbers in a uniform buffer, the entry point's unused bindings left out, and the
+    /// bridge's inputs and Solari's scene noted rather than laid out.
+    #[test]
+    fn a_spirv_layout_comes_from_the_reflection() {
+        use super::{BindingKind, LOOSE};
+        use bevy::render::render_resource::{StorageTextureAccess, TextureFormat, TextureSampleType, TextureViewDimension};
+
+        let reflection = r#"{
+            "parameters": [
+                {"name": "height", "binding": {"kind": "uniform", "offset": 0, "size": 4},
+                 "type": {"kind": "scalar", "scalarType": "float32"}},
+                {"name": "tint", "binding": {"kind": "uniform", "offset": 16, "size": 16},
+                 "type": {"kind": "vector", "elementCount": 4, "elementType": {"kind": "scalar", "scalarType": "float32"}}},
+                {"name": "hits", "binding": {"kind": "descriptorTableSlot", "index": 1},
+                 "type": {"kind": "resource", "baseShape": "structuredBuffer", "access": "readWrite"}},
+                {"name": "pic", "binding": {"kind": "descriptorTableSlot", "index": 2},
+                 "type": {"kind": "resource", "baseShape": "texture2D",
+                          "resultType": {"kind": "vector", "elementCount": 4, "elementType": {"kind": "scalar", "scalarType": "float32"}}}},
+                {"name": "counts", "binding": {"kind": "descriptorTableSlot", "index": 3}, "format": "r32ui",
+                 "type": {"kind": "resource", "baseShape": "texture2D", "access": "readWrite",
+                          "resultType": {"kind": "scalar", "scalarType": "uint32"}}},
+                {"name": "many", "binding": {"kind": "descriptorTableSlot", "index": 4},
+                 "type": {"kind": "array", "elementCount": 8, "elementType": {"kind": "samplerState"}}},
+                {"name": "unused", "binding": {"kind": "descriptorTableSlot", "index": 5},
+                 "type": {"kind": "resource", "baseShape": "structuredBuffer"}},
+                {"name": "tlas", "binding": {"kind": "descriptorTableSlot", "space": 2, "index": 5},
+                 "type": {"kind": "resource", "baseShape": "accelerationStructure"}},
+                {"name": "globals", "binding": {"kind": "descriptorTableSlot", "space": 101, "index": 2},
+                 "type": {"kind": "constantBuffer"}}
+            ],
+            "globalScope": {"kind": "constantBuffer", "binding": {"kind": "descriptorTableSlot", "index": 0}},
+            "entryPoints": [{"name": "main", "bindings": [
+                {"name": "hits", "binding": {"used": 1}},
+                {"name": "pic", "binding": {"used": 1}},
+                {"name": "counts", "binding": {"used": 1}},
+                {"name": "many", "binding": {"used": 1}},
+                {"name": "unused", "binding": {"used": 0}},
+                {"name": "tlas", "binding": {"used": 1}},
+                {"name": "globals", "binding": {"used": 1}}
+            ]}]
+        }"#;
+
+        let reflected =
+            super::reflect_spirv(&decorated(101, 2), reflection, super::Family::Compute).unwrap();
+        let layout = reflected.layout;
+
+        assert!(layout.spirv);
+        assert!(layout.traces_scene);
+        assert!(!layout.reads_view, "time alone is not a camera's inputs");
+        assert_eq!(word(&reflected.spirv, 8), 1);
+
+        let loose = &layout.bindings[&0];
+        assert_eq!(loose.name, LOOSE);
+        assert!(matches!(&loose.kind, BindingKind::Uniform { size: 32, fields } if fields.len() == 2));
+
+        assert_eq!(layout.bindings[&1].kind, BindingKind::Storage { read_only: false });
+        assert_eq!(
+            layout.bindings[&2].kind,
+            BindingKind::Texture {
+                dimension: TextureViewDimension::D2,
+                sample: TextureSampleType::Float { filterable: true },
+                multisampled: false,
+            }
+        );
+        assert_eq!(
+            layout.bindings[&3].kind,
+            BindingKind::StorageTexture {
+                dimension: TextureViewDimension::D2,
+                format: TextureFormat::R32Uint,
+                access: StorageTextureAccess::ReadWrite,
+            }
+        );
+        assert_eq!(layout.bindings[&4].count, Some(8));
+        assert!(!layout.bindings.contains_key(&5), "a binding the entry point never uses is left out");
+        assert!(layout.find("tint").is_some());
+    }
+
+    /// An acceleration structure of the shader's own has nothing to build it, and says what to use.
+    #[test]
+    fn an_acceleration_structure_of_its_own_is_refused() {
+        let reflection = r#"{"parameters": [
+            {"name": "mine", "binding": {"kind": "descriptorTableSlot", "index": 0},
+             "type": {"kind": "resource", "baseShape": "accelerationStructure"}}
+        ]}"#;
+
+        let error = super::reflect_spirv(&decorated(0, 0), reflection, super::Family::Compute).unwrap_err();
+        assert!(error.contains("bcs_ray"), "{error}");
+    }
 
     #[test]
     fn a_shuffle_lane_written_signed_is_made_unsigned() {

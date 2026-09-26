@@ -5,6 +5,10 @@
 //! changes. Slang's WGSL backend keeps explicit bindings, and it numbers stage inputs and outputs
 //! by semantic index, which lets a Slang fragment shader follow Bevy's own vertex shader.
 //!
+//! A compute shader can ask for SPIR-V instead, for what WGSL cannot say, such as a ray query.
+//! That is compiled the same way with a different target, and the binary is handed to the driver
+//! as it is (see [`super::reflect::reflect_spirv`]).
+//!
 //! Every compile also asks `slangc` for its reflection, which names each parameter the shader
 //! declares and where in a uniform buffer each number goes. That lets a shader declare whatever it
 //! likes and be handed it by name (see [`super::reflect`]).
@@ -17,9 +21,9 @@
 //! the `PATH`, and then in `build/tools/slang/bin` above the running program or the working
 //! directory, which is where `build/fetch-slang.sh` puts it. A machine with none of those still
 //! runs a game whose shaders were compiled once, because every successful compile is written to a
-//! cache beside the assets and read back when there is no compiler. What decides whether a cached result still applies is a hash of the source and of
-//! every file it imported, so a shipped game with its cache is a game that needs no compiler, and a
-//! stale entry is never used.
+//! cache beside the assets and read back when there is no compiler. A hash of the source and of
+//! every file it imported decides whether a cached result still applies, so a shipped game with
+//! its cache needs no compiler, and a stale entry is never used.
 //!
 //! Built in every profile, although only a render build compiles shaders, because it needs nothing
 //! but the standard library and its tests are then run by the test job, which builds headless.
@@ -44,12 +48,17 @@ pub const COMPUTE_PRELUDE: &str = include_str!("bcs_compute.slang");
 /// scene into buffers, such as instance transforms.
 pub const SCENE_PRELUDE: &str = include_str!("bcs_scene.slang");
 
+/// What a compute shader compiled to SPIR-V can import as `bcs_ray`: Solari's scene, to trace rays
+/// against.
+pub const RAY_PRELUDE: &str = include_str!("bcs_ray.slang");
+
 /// Every module the bridge writes out, by file name, which `import` finds them by.
-const MODULES: [(&str, &str); 4] = [
+const MODULES: [(&str, &str); 5] = [
     ("bcs.slang", PRELUDE),
     ("bcs_pass.slang", PASS_PRELUDE),
     ("bcs_compute.slang", COMPUTE_PRELUDE),
     ("bcs_scene.slang", SCENE_PRELUDE),
+    ("bcs_ray.slang", RAY_PRELUDE),
 ];
 
 /// A hash of every module the bridge writes, which a cache entry and the scratch directory are
@@ -105,12 +114,17 @@ pub struct Request {
     pub entry: String,
     /// Name and value pairs, handed to `slangc` as `-D`.
     pub defines: Vec<(String, String)>,
+    /// Compiled to SPIR-V rather than WGSL.
+    pub spirv: bool,
 }
 
 /// What a successful compile produced.
 #[derive(Clone, Debug)]
 pub struct Compiled {
+    /// The WGSL, or empty where the compile was to SPIR-V.
     pub wgsl: String,
+    /// The SPIR-V, or empty where the compile was to WGSL.
+    pub spirv: Vec<u8>,
     /// What `slangc -reflection-json` wrote: every parameter, its binding and its layout.
     pub reflection: String,
     /// Every file the result depends on besides the source, so that a change to any of them
@@ -217,14 +231,14 @@ pub fn compile(request: &Request) -> Result<Compiled, String> {
 
     let scratch = scratch_directory()?;
     let unique = next_unique();
-    let output = scratch.join(format!("{unique}.wgsl"));
+    let output = scratch.join(format!("{unique}.{}", if request.spirv { "spv" } else { "wgsl" }));
     let depfile = scratch.join(format!("{unique}.d"));
     let reflection_file = scratch.join(format!("{unique}.json"));
 
     let mut command = Command::new(slangc);
     command
         .arg(&request.file)
-        .args(["-target", "wgsl"])
+        .args(["-target", if request.spirv { "spirv" } else { "wgsl" }])
         .args(["-stage", request.stage.slang_name()])
         .args(["-entry", &request.entry])
         .arg("-o")
@@ -252,6 +266,12 @@ pub fn compile(request: &Request) -> Result<Compiled, String> {
         command.arg(format!("-D{name}={value}"));
     }
 
+    // SPIR-V names its entry point `main` unless told to keep the one written, and a pipeline
+    // handed SPIR-V untouched names the entry point it runs.
+    if request.spirv {
+        command.arg("-fvk-use-entrypoint-name");
+    }
+
     let result = command
         .output()
         .map_err(|error| format!("slangc could not be started: {error}"))?;
@@ -277,8 +297,17 @@ pub fn compile(request: &Request) -> Result<Compiled, String> {
         });
     }
 
-    let wgsl = std::fs::read_to_string(&output)
-        .map_err(|error| format!("slangc succeeded but its output could not be read: {error}"))?;
+    let (wgsl, spirv) = if request.spirv {
+        let bytes = std::fs::read(&output).map_err(|error| {
+            format!("slangc succeeded but its output could not be read: {error}")
+        })?;
+        (String::new(), bytes)
+    } else {
+        let text = std::fs::read_to_string(&output).map_err(|error| {
+            format!("slangc succeeded but its output could not be read: {error}")
+        })?;
+        (text, Vec::new())
+    };
 
     let reflection = std::fs::read_to_string(&reflection_file).map_err(|error| {
         format!("slangc succeeded but its reflection could not be read: {error}")
@@ -295,10 +324,11 @@ pub fn compile(request: &Request) -> Result<Compiled, String> {
     let _ = std::fs::remove_file(&depfile);
     let _ = std::fs::remove_file(&reflection_file);
 
-    write_cache(request, key, &source, &dependencies, &wgsl, &reflection);
+    write_cache(request, key, &source, &dependencies, &wgsl, &spirv, &reflection);
 
     Ok(Compiled {
         wgsl,
+        spirv,
         reflection,
         dependencies,
         warnings: said,
@@ -451,6 +481,11 @@ fn cache_key(request: &Request) -> u64 {
     text.push('\n');
     text.push_str(&request.entry);
 
+    // Only where it is set, so every entry a WGSL compile wrote before SPIR-V existed keeps its key.
+    if request.spirv {
+        text.push_str("\nspirv");
+    }
+
     for (name, value) in &request.defines {
         text.push('\n');
         text.push_str(name);
@@ -491,6 +526,7 @@ fn write_cache(
     source: &[u8],
     dependencies: &[PathBuf],
     wgsl: &str,
+    spirv: &[u8],
     reflection: &str,
 ) {
     let mut text = String::new();
@@ -522,12 +558,16 @@ fn write_cache(
         let _ = std::fs::create_dir_all(directory);
     }
 
-    // The reflection first, so a reader that finds the WGSL finds the reflection beside it. The
-    // WGSL says the entry exists, and it carries the hashes both are checked by.
-    let written = [
-        (path.with_extension("json"), reflection.to_string()),
-        (path.clone(), text),
-    ];
+    // The reflection and any SPIR-V first, so a reader that finds the WGSL finds both beside it.
+    // The WGSL file says the entry exists, and it carries the hashes all of them are checked by.
+    // For a SPIR-V compile its body is empty and the binary sits beside it.
+    let mut written = vec![(path.with_extension("json"), reflection.as_bytes().to_vec())];
+
+    if !spirv.is_empty() {
+        written.push((path.with_extension("spv"), spirv.to_vec()));
+    }
+
+    written.push((path.clone(), text.into_bytes()));
 
     for (target, contents) in written {
         let staging = target.with_extension(format!("part.{}", next_unique()));
@@ -582,8 +622,15 @@ fn read_cache(request: &Request, key: u64, source: &[u8]) -> Option<Compiled> {
     let body = text.split_once("// end\n")?.1.to_string();
     let reflection = std::fs::read_to_string(cache_path(request, key).with_extension("json")).ok()?;
 
+    let spirv = if request.spirv {
+        std::fs::read(cache_path(request, key).with_extension("spv")).ok()?
+    } else {
+        Vec::new()
+    };
+
     Some(Compiled {
         wgsl: body,
+        spirv,
         reflection,
         dependencies,
         warnings: String::new(),
@@ -638,6 +685,7 @@ mod tests {
             stage: Stage::Fragment,
             entry: "fragment".into(),
             defines: vec![("A".into(), "1".into())],
+            spirv: false,
         };
 
         let key = cache_key(&request);
@@ -647,6 +695,7 @@ mod tests {
             b"one",
             std::slice::from_ref(&dependency),
             "fn f() {}",
+            &[],
             "{}",
         );
 
@@ -659,6 +708,43 @@ mod tests {
 
         std::fs::write(&dependency, "changed").unwrap();
         assert!(read_cache(&request, key, b"one").is_none());
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// A SPIR-V compile comes back as the bytes it was written with, under a key of its own, so the
+    /// same entry point compiled both ways is two entries.
+    #[test]
+    fn a_spirv_entry_keeps_its_bytes_and_its_own_key() {
+        let root = std::env::temp_dir().join(format!("bcs_slang_spirv_test_{}", next_unique()));
+        std::fs::create_dir_all(&root).unwrap();
+
+        let file = root.join("a.slang");
+        std::fs::write(&file, "one").unwrap();
+
+        let wgsl = Request {
+            file: file.clone(),
+            root: root.clone(),
+            stage: Stage::Compute,
+            entry: "main".into(),
+            defines: Vec::new(),
+            spirv: false,
+        };
+
+        let spirv = Request {
+            spirv: true,
+            ..wgsl.clone()
+        };
+
+        assert_ne!(cache_key(&wgsl), cache_key(&spirv));
+
+        let key = cache_key(&spirv);
+        let bytes = [0x03, 0x02, 0x23, 0x07, 1, 2, 3, 4];
+        write_cache(&spirv, key, b"one", &[], "", &bytes, "{}");
+
+        let read = read_cache(&spirv, key, b"one").expect("an unchanged entry is used");
+        assert_eq!(read.spirv, bytes);
+        assert!(read.wgsl.is_empty());
 
         let _ = std::fs::remove_dir_all(&root);
     }

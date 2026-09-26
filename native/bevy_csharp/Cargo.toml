@@ -95,9 +95,14 @@ render = [
     # built with them. Bevy already depends on this version with this feature, so it adds nothing
     # to the build.
     "dep:naga",
-    # Reading the reflection slangc writes beside every compile, which is what names a shader's
-    # own parameters. Already in the tree through Bevy.
+    # Reading the reflection slangc writes beside every compile, which names a shader's own
+    # parameters. Already in the tree through Bevy.
     "dep:serde_json",
+    # A compute shader compiled to SPIR-V, for what WGSL cannot say, such as a ray query. The first
+    # lets Bevy take SPIR-V at all, and the second hands it to a Vulkan driver untouched rather than
+    # through naga, whose SPIR-V reader has no ray queries. Both are Rust already in the tree.
+    "bevy/shader_format_spirv",
+    "bevy/spirv_shader_passthrough",
     "bevy/bevy_asset",
     "bevy/bevy_state",
     "bevy/bevy_winit",

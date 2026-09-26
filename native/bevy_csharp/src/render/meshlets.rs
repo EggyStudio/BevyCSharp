@@ -24,6 +24,15 @@ use crate::state::with_world;
 #[cfg(feature = "meshlet")]
 static ACTIVE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
+/// Says the meshlet plugin is not running, before an app decides whether to add it.
+///
+/// Called for every app a process builds, since a flag left on by an earlier app with it would
+/// otherwise answer for a later one without it.
+#[cfg(feature = "meshlet")]
+pub fn forget() {
+    ACTIVE.store(false, std::sync::atomic::Ordering::Relaxed);
+}
+
 /// Adds the meshlet plugin with room for `clusters` clusters at once, if the GPU can run it.
 ///
 /// `clusters` is capped at Bevy's own limit of two to the twenty-fifth, since the plugin ends the

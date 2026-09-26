@@ -1121,6 +1121,8 @@ struct PreparedViewDispatch {
     pipeline: CachedComputePipelineId,
     own: BindGroup,
     workgroups: PreparedWorkgroups,
+    /// Whether it binds Solari's scene as group two, taken when it runs.
+    traces_scene: bool,
     label: std::borrow::Cow<'static, str>,
 }
 
@@ -1154,21 +1156,32 @@ fn view_pipeline_for(
     let layout = program.compute.clone()?;
     let stage = program.stages[Role::Compute as usize].clone()?;
 
-    let pipeline = *pipelines
-        .0
-        .entry((id, program.generation))
-        .or_insert_with(|| {
-            cache.queue_compute_pipeline(ComputePipelineDescriptor {
-                label: Some("bcs_view_compute".into()),
-                layout: vec![own_layout(&layout), inputs.layout.clone()],
-                immediate_size: 0,
-                shader: stage.shader,
-                shader_defs: Vec::new(),
-                entry_point: None,
-                zero_initialize_workgroup_memory: true,
-            })
-        });
+    let key = (id, program.generation);
 
+    if let Some(pipeline) = pipelines.0.get(&key) {
+        return Some((*pipeline, program));
+    }
+
+    let mut groups = vec![own_layout(&layout), inputs.layout.clone()];
+
+    // Solari's scene, for a shader tracing rays through `bcs_ray`, where this app runs Solari.
+    if layout.traces_scene {
+        groups.push(super::solari::scene_layout()?);
+    }
+
+    let pipeline = cache.queue_compute_pipeline(ComputePipelineDescriptor {
+        label: Some("bcs_view_compute".into()),
+        layout: groups,
+        immediate_size: 0,
+        shader: stage.shader,
+        shader_defs: Vec::new(),
+        // A shader handed over as SPIR-V is not read on the way in, so nothing finds its entry
+        // point for it.
+        entry_point: layout.spirv.then(|| stage.entry.clone()),
+        zero_initialize_workgroup_memory: true,
+    });
+
+    pipelines.0.insert(key, pipeline);
     Some((pipeline, program))
 }
 
@@ -1220,14 +1233,20 @@ fn prepare_view_dispatches(
             let Some((pipeline, program)) =
                 view_pipeline_for(&mut pipelines, &inputs, &cache, dispatch.program)
             else {
-                if programs::lookup(dispatch.program).is_some_and(|program| {
-                    program.generation > 0 && program.stages[Role::Compute as usize].is_none()
-                }) {
+                let found = programs::lookup(dispatch.program).filter(|program| program.generation > 0);
+
+                if found.as_ref().is_some_and(|program| program.stages[Role::Compute as usize].is_none()) {
                     say_once(format!(
                         "A camera runs shader program {}, which has no compute stage, so it does \
                          nothing.",
                         dispatch.program
                     ));
+                } else if found
+                    .as_ref()
+                    .and_then(|program| program.compute.as_ref())
+                    .is_some_and(|layout| layout.traces_scene)
+                {
+                    say_once(super::compute::no_scene(dispatch.program));
                 }
                 continue;
             };
@@ -1288,6 +1307,7 @@ fn prepare_view_dispatches(
                     &cache.get_bind_group_layout(&own_layout(&layout)),
                 ),
                 workgroups,
+                traces_scene: layout.traces_scene,
                 label: programs::label(dispatch.program),
             });
         }
@@ -1326,9 +1346,15 @@ fn run_view_dispatches<const POINT: u8>(
     view_uniforms: Res<ViewUniforms>,
     previous_uniforms: Option<Res<PreviousViewUniforms>>,
     scene: SceneLights,
+    #[cfg(feature = "solari")] traced: Option<Res<super::solari::SceneBindings>>,
     mut ctx: RenderContext,
 ) {
     let (target, offset, prepared, prepass, previous, light_offset, shadows, environment) = view.into_inner();
+
+    #[cfg(feature = "solari")]
+    let traced = super::compute::scene_group(&traced);
+    #[cfg(not(feature = "solari"))]
+    let traced: Option<BindGroup> = None;
 
     if !prepared.0.iter().any(|dispatch| dispatch.point as u8 == POINT) {
         return;
@@ -1375,6 +1401,11 @@ fn run_view_dispatches<const POINT: u8>(
             continue;
         };
 
+        // Solari has not built its scene's bind group yet, which it does once a mesh is traced.
+        if dispatch.traces_scene && traced.is_none() {
+            continue;
+        }
+
         let diagnostics = ctx.diagnostic_recorder();
         let diagnostics = diagnostics.as_deref();
 
@@ -1390,6 +1421,12 @@ fn run_view_dispatches<const POINT: u8>(
         pass.set_pipeline(pipeline);
         pass.set_bind_group(0, &dispatch.own, &[]);
         pass.set_bind_group(1, &group, &offsets);
+
+        if dispatch.traces_scene
+            && let Some(traced) = &traced
+        {
+            pass.set_bind_group(super::reflect::SCENE_GROUP, traced, &[]);
+        }
 
         match &dispatch.workgroups {
             PreparedWorkgroups::Direct([x, y, z]) => pass.dispatch_workgroups(*x, *y, *z),

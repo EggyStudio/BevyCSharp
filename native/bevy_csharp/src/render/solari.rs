@@ -17,6 +17,34 @@ use crate::state::with_world;
 #[cfg(feature = "solari")]
 static ACTIVE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
+/// Solari's scene in the render world, which a dispatch of a shader importing `bcs_ray` binds as
+/// its group two.
+#[cfg(feature = "solari")]
+pub type SceneBindings = bevy::solari::scene::RaytracingSceneBindings;
+
+/// The layout of Solari's scene group, or `None` where this app has no Solari to bind it.
+///
+/// Solari describes its group the same way every time it is made, so a fresh one's description is
+/// the one the running Solari binds.
+#[cfg(feature = "render")]
+pub fn scene_layout() -> Option<bevy::render::render_resource::BindGroupLayoutDescriptor> {
+    #[cfg(feature = "solari")]
+    if ACTIVE.load(std::sync::atomic::Ordering::Relaxed) {
+        return Some(SceneBindings::new().bind_group_layout);
+    }
+
+    None
+}
+
+/// Says Solari is not running, before an app decides whether to add it.
+///
+/// Called for every app a process builds, since a flag left on by an earlier app with it would
+/// otherwise answer for a later one without it.
+#[cfg(feature = "solari")]
+pub fn forget() {
+    ACTIVE.store(false, std::sync::atomic::Ordering::Relaxed);
+}
+
 /// Adds Solari, if the adapter Bevy would choose can run it.
 #[cfg(feature = "solari")]
 pub fn install(app: &mut bevy::app::App, backends: Option<wgpu::Backends>) {

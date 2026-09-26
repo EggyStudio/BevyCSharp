@@ -57,6 +57,8 @@ pub struct BcsShaderProgramConfig {
     /// The vertex and fragment shaders of geometry drawn on a camera out of buffers.
     pub draw_vertex: BcsShaderStage,
     pub draw_fragment: BcsShaderStage,
+    /// Bit zero compiles the compute stage to SPIR-V rather than WGSL.
+    pub flags: i32,
 }
 
 /// How a sampler reads. Mirrors [`super::values::SamplerSettings`].
@@ -160,6 +162,7 @@ pub unsafe extern "C" fn bcs_shader_program_create(config: *const BcsShaderProgr
                     stage(config.draw_fragment),
                 ],
                 defines: Vec::new(),
+                compute_spirv: config.flags & 1 != 0,
             };
 
             if config.define_count > 0 {
@@ -2415,7 +2418,8 @@ mod tests {
         assert_eq!(offset_of!(BcsShaderProgramConfig, define_count), 152);
         assert_eq!(offset_of!(BcsShaderProgramConfig, draw_vertex), 160);
         assert_eq!(offset_of!(BcsShaderProgramConfig, draw_fragment), 184);
-        assert_eq!(size_of::<BcsShaderProgramConfig>(), 208);
+        assert_eq!(offset_of!(BcsShaderProgramConfig, flags), 208);
+        assert_eq!(size_of::<BcsShaderProgramConfig>(), 216);
     }
 
     #[test]

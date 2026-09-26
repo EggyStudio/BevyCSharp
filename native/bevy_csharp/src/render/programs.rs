@@ -42,7 +42,7 @@ use bevy::ecs::system::ResMut;
 use bevy::ecs::world::World;
 use bevy::shader::Shader;
 
-use super::reflect::{Family, Layout, Reflected, reflect};
+use super::reflect::{Family, Layout, Reflected, reflect, reflect_spirv};
 use super::slang;
 use crate::interop::status;
 
@@ -277,6 +277,9 @@ pub struct ProgramDescription {
     /// Where the code is and the entry point in it, per role, where the program has one.
     pub stages: [Option<(StageFile, Option<String>)>; ROLE_COUNT],
     pub defines: Vec<Define>,
+    /// Whether the compute stage is compiled to SPIR-V and handed to the driver untouched, for
+    /// what WGSL cannot say, such as a ray query.
+    pub compute_spirv: bool,
 }
 
 /// What the world remembers of one program.
@@ -337,7 +340,7 @@ pub struct ShaderPrograms {
     programs: Vec<Program>,
     by_description: HashMap<ProgramDescription, i32>,
     units: Vec<Unit>,
-    unit_by_key: HashMap<(PathBuf, Role, String, Vec<Define>), usize>,
+    unit_by_key: HashMap<(PathBuf, Role, String, Vec<Define>, bool), usize>,
     root: PathBuf,
     sender: Sender<Finished>,
     receiver: Mutex<Receiver<Finished>>,
@@ -458,7 +461,8 @@ fn create_in(programs: &mut ShaderPrograms, description: ProgramDescription) -> 
             },
         };
 
-        let unit = unit_for(programs, role, path, file.describe(), &entry, &description.defines);
+        let spirv = role == Role::Compute && description.compute_spirv;
+        let unit = unit_for(programs, role, path, file.describe(), &entry, &description.defines, spirv);
         programs.units[unit].programs.push(id);
         stages[role as usize] = Some(unit);
     }
@@ -504,8 +508,9 @@ fn unit_for(
     path: String,
     entry: &str,
     defines: &[Define],
+    spirv: bool,
 ) -> usize {
-    let key = (file.clone(), role, entry.to_string(), defines.to_vec());
+    let key = (file.clone(), role, entry.to_string(), defines.to_vec(), spirv);
 
     if let Some(&unit) = programs.unit_by_key.get(&key) {
         return unit;
@@ -517,6 +522,7 @@ fn unit_for(
         stage: role.stage(),
         entry: entry.to_string(),
         defines: defines.iter().filter_map(Define::to_slang).collect(),
+        spirv,
     };
 
     let index = programs.units.len();
@@ -570,7 +576,11 @@ fn start(programs: &mut ShaderPrograms, index: usize) {
         .name("bcs-slangc".into())
         .spawn(move || {
             let result = slang::compile(&request).and_then(|compiled| {
-                let reflected = reflect(&compiled.wgsl, &compiled.reflection, family)?;
+                let reflected = if request.spirv {
+                    reflect_spirv(&compiled.spirv, &compiled.reflection, family)?
+                } else {
+                    reflect(&compiled.wgsl, &compiled.reflection, family)?
+                };
                 Ok((compiled, reflected))
             });
 
@@ -629,7 +639,13 @@ fn finish(programs: &mut ShaderPrograms, shaders: &mut Assets<Shader>, done: Fin
 
     match done.result {
         Ok((compiled, reflected)) => {
-            unit.shader = Some(shaders.add(Shader::from_wgsl(reflected.wgsl, name)));
+            let shader = if reflected.spirv.is_empty() {
+                Shader::from_wgsl(reflected.wgsl, name)
+            } else {
+                Shader::from_spirv(reflected.spirv, name)
+            };
+
+            unit.shader = Some(shaders.add(shader));
             unit.layout = reflected.layout;
 
             if unit.compiled {

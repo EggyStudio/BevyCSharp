@@ -671,6 +671,9 @@ public unsafe struct NativeShaderProgramConfig
 
     /// <summary>The fragment shader of the same.</summary>
     public NativeShaderStage DrawFragment;
+
+    /// <summary>Bit zero compiles the compute stage to SPIR-V rather than WGSL.</summary>
+    public int Flags;
 }
 
 /// <summary>How a sampler reads. Mirrors <c>BcsSamplerConfig</c>.</summary>

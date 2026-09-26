@@ -485,7 +485,9 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
                 let buffer = context.device.create_buffer_with_data(&BufferInitDescriptor {
                     label: Some("bcs_shader_numbers"),
                     contents: &bytes,
-                    usage: BufferUsages::STORAGE | BufferUsages::COPY_DST,
+                    // Uniform as well, for a shader handed over as SPIR-V, which keeps its blocks
+                    // of numbers as the uniform buffers Slang declared.
+                    usage: BufferUsages::STORAGE | BufferUsages::UNIFORM | BufferUsages::COPY_DST,
                 });
 
                 packed.buffers.push((*number, buffer));

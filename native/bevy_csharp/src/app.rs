@@ -283,6 +283,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // the default plugins rather than inside them, because the plugin has to be told its
             // cluster budget and has to be kept out entirely on a GPU that cannot run it.
             #[cfg(feature = "meshlet")]
+            crate::render::meshlets::forget();
+
+            #[cfg(feature = "meshlet")]
             if config.meshlet_clusters > 0 {
                 let backends = backends.map(|backends| wgpu::Backends::from_bits_truncate(backends.bits()));
                 crate::render::meshlets::install(&mut app, config.meshlet_clusters, backends);
@@ -290,6 +293,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
 
             // Ray-traced lighting, likewise asked for and likewise kept out where the adapter
             // cannot trace rays, since adding it makes every material deferred.
+            #[cfg(feature = "solari")]
+            crate::render::solari::forget();
+
             #[cfg(feature = "solari")]
             if config.ray_traced_lighting != 0 {
                 let backends = backends.map(|backends| wgpu::Backends::from_bits_truncate(backends.bits()));

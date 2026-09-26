@@ -232,6 +232,9 @@ struct PreparedDispatch {
     pipeline: CachedComputePipelineId,
     own: BindGroup,
     inputs: BindGroup,
+    /// Whether it binds Solari's scene as group two, which is taken when it runs, since Solari
+    /// builds that bind group again every frame.
+    traces_scene: bool,
     workgroups: [u32; 3],
     indirect: Option<(bevy::render::render_resource::Buffer, u64)>,
     /// What its GPU time is recorded under.
@@ -337,13 +340,22 @@ fn pipeline_for(
         return Some((*pipeline, program));
     }
 
+    let mut groups = vec![own_layout(&layout), pipelines.inputs.clone()];
+
+    // Solari's scene, for a shader tracing rays through `bcs_ray`, where this app runs Solari.
+    if layout.traces_scene {
+        groups.push(super::solari::scene_layout()?);
+    }
+
     let pipeline = cache.queue_compute_pipeline(ComputePipelineDescriptor {
         label: Some("bcs_compute".into()),
-        layout: vec![own_layout(&layout), pipelines.inputs.clone()],
+        layout: groups,
         immediate_size: 0,
         shader: stage.shader,
         shader_defs: Vec::new(),
-        entry_point: None,
+        // A shader handed over as SPIR-V is not read on the way in, so nothing finds its entry
+        // point for it.
+        entry_point: layout.spirv.then(|| stage.entry.clone()),
         zero_initialize_workgroup_memory: true,
     });
 
@@ -411,6 +423,8 @@ fn prepare_dispatches(
                          Shaders.Dispatch.",
                         dispatch.program
                     ));
+                } else if program.compute.as_ref().is_some_and(|layout| layout.traces_scene) {
+                    say_once(no_scene(dispatch.program));
                 }
             }
 
@@ -469,6 +483,7 @@ fn prepare_dispatches(
             pipeline,
             own,
             inputs: inputs.clone(),
+            traces_scene: layout.traces_scene,
             workgroups: dispatch.workgroups,
             indirect,
             label: super::programs::label(dispatch.program),
@@ -476,15 +491,39 @@ fn prepare_dispatches(
     }
 }
 
+/// Why a dispatch tracing rays through `bcs_ray` does nothing in this app.
+pub(crate) fn no_scene(program: u32) -> String {
+    format!(
+        "Shader program {program} traces rays through bcs_ray, which reads the scene Solari keeps, \
+         and this app runs no Solari. Build the bridge with --solari and set \
+         Config.RayTracedLighting, on a GPU with ray queries."
+    )
+}
+
+/// Solari's scene bind group as it stands this frame, or `None` before Solari has built one or in
+/// an app without it.
+#[cfg(feature = "solari")]
+pub(crate) fn scene_group(
+    scene: &Option<Res<super::solari::SceneBindings>>,
+) -> Option<BindGroup> {
+    scene.as_ref().and_then(|scene| scene.bind_group.clone())
+}
+
 /// Runs the frame's dispatches, before any camera draws, so the frame shows what they write.
 fn run_dispatches(
     prepared: Res<PreparedDispatches>,
     cache: Res<PipelineCache>,
+    #[cfg(feature = "solari")] scene: Option<Res<super::solari::SceneBindings>>,
     mut ctx: RenderContext,
 ) {
     if prepared.0.is_empty() {
         return;
     }
+
+    #[cfg(feature = "solari")]
+    let scene = scene_group(&scene);
+    #[cfg(not(feature = "solari"))]
+    let scene: Option<BindGroup> = None;
 
     for dispatch in &prepared.0 {
         // Still compiling. Dropped rather than kept for later, because a dispatch is about the
@@ -492,6 +531,12 @@ fn run_dispatches(
         let Some(pipeline) = cache.get_compute_pipeline(dispatch.pipeline) else {
             continue;
         };
+
+        // Solari builds its scene's bind group once there is something in it, so a shader tracing
+        // rays waits for the first mesh given to ray tracing.
+        if dispatch.traces_scene && scene.is_none() {
+            continue;
+        }
 
         let [x, y, z] = dispatch.workgroups;
 
@@ -510,6 +555,12 @@ fn run_dispatches(
         pass.set_pipeline(pipeline);
         pass.set_bind_group(0, &dispatch.own, &[]);
         pass.set_bind_group(1, &dispatch.inputs, &[]);
+
+        if dispatch.traces_scene
+            && let Some(scene) = &scene
+        {
+            pass.set_bind_group(super::reflect::SCENE_GROUP, scene, &[]);
+        }
 
         let span = diagnostics.pass_span(&mut pass, dispatch.label.clone());
 
