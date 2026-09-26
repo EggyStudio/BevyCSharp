@@ -136,7 +136,7 @@ public sealed class SpirvComputeTests
                 hits = Shaders.CreateBuffer<Vector4>(new Vector4[9]);
                 trace = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
                     {
-                        Compute = "shaders/trace_pool.slang",
+                        Compute = "shaders/trace_ray_scene.slang",
                         ComputeTarget = ShaderTarget.SpirV,
                     }))
                     .SetRayScene("scene", scene)

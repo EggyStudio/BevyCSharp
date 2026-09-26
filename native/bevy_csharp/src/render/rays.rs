@@ -2,7 +2,7 @@
 //! rays a compute shader of its own traces.
 //!
 //! Solari keeps one acceleration structure, over the meshes given to ray-traced lighting, and a
-//! shader reaches it through `bcs_ray`. A package tracing rays for its own purposes often wants a
+//! shader reaches it through `bcs_ray`. A package tracing rays for its own purposes often needs a
 //! different scene: stand-ins simpler than what is drawn, a level of detail meant for rays, or no
 //! Solari at all. A ray scene is that. Its meshes are a pool's (see [`super::pools`]), each built
 //! once into a bottom-level structure, and its instances are entities in numbered slots, each with
@@ -233,7 +233,7 @@ fn extract_scenes(mut main_world: ResMut<MainWorld>, mut extracted: ResMut<Extra
     }
 }
 
-/// The first three rows of a matrix, which is what an instance of a top-level structure holds.
+/// The first three rows of a matrix, as an instance of a top-level structure holds them.
 fn rows(matrix: &Mat4) -> [f32; 12] {
     matrix.transpose().to_cols_array()[..12]
         .try_into()

@@ -1092,7 +1092,7 @@ public static unsafe class Shaders
     /// declares a <c>RaytracingAccelerationStructure</c>, is handed the scene by name with
     /// <c>SetRayScene</c>, and traces it with <c>bcs_ray::trace_in</c> and <c>visible_in</c>. It is
     /// independent of the scene Solari keeps, so it runs without ray-traced lighting, and it can
-    /// hold whatever a technique wants its rays to meet: simpler stand-ins for what is drawn, a
+    /// hold whatever a technique needs its rays to meet: simpler stand-ins for what is drawn, a
     /// coarser level of detail, or only what should cast a shadow.
     /// </para>
     /// <para>

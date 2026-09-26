@@ -289,7 +289,7 @@ public Surface surface_at(Hit hit)
 
     if (material.normal_map_texture != NO_TEXTURE)
     {
-        // Neither normalized nor made orthogonal, which is what mikktspace baking assumes.
+        // Neither normalized nor made orthogonal, as mikktspace baking assumes.
         let n = surface.geometric_normal;
         let t = surface.tangent.xyz;
         let b = surface.tangent.w * cross(n, t);
