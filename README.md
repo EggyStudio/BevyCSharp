@@ -26,7 +26,8 @@ public partial struct Spin
     [Range(0f, 5f)] public float Speed;
     private float _angle;
 
-    [OnStartup]                                    // static: one plain system
+    // static: one plain system
+    [OnStartup]
     public static void Scene(BehaviorContext ctx)
     {
         ctx.Ecs.Add(Render.SpawnCamera3d(), Transform.LookingAt(new Vec3(3f, 3f, 5f), Vec3.Zero, Vec3.UnitY));
@@ -38,7 +39,8 @@ public partial struct Spin
         Render.SetMaterial(ctx.Ecs, cube, Render.CreateMaterial(0.25f, 0.55f, 0.85f));
     }
 
-    [OnUpdate]                                     // instance: once per entity that has one
+    // instance: once per entity that has one
+    [OnUpdate]
     public void Tick(BehaviorContext ctx)
     {
         _angle += Speed * ctx.Time.Delta;
