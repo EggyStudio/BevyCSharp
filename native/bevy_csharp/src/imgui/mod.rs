@@ -164,8 +164,8 @@ pub unsafe extern "C" fn bcs_imgui_frame(frame: *const BcsImGuiFrame) -> i32 {
 
 /// Takes a picture the interface draws with, and answers what to call it.
 ///
-/// The font atlas arrives this way like anything else: ImGui gives it as pixels and asks for a
-/// name to put in its draw calls, and nothing about it is special to this side.
+/// The font atlas arrives this way like anything else. ImGui gives it as pixels and asks for a name
+/// to put in its draw calls, and nothing about it is special to this side.
 ///
 /// # Safety
 /// `pixels` must point to `width * height * 4` bytes of RGBA.

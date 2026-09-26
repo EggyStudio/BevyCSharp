@@ -28,9 +28,9 @@ use crate::state::{app_mut, loan_world, with_world, BcsApp, SystemReg};
 
 /// Declares the state slots and the dispatch that reaches them by index.
 ///
-/// Every slot is the same type with a different identity, which is the point: Bevy keys its state
-/// resources, its transitions and its run conditions on the type, so two slots are two independent
-/// state machines rather than two names for one.
+/// Every slot is the same type with a different identity, because Bevy keys its state resources,
+/// its transitions and its run conditions on the type, so two slots are two independent state
+/// machines rather than two names for one.
 macro_rules! define_slots {
     (
         states { $($ty:ident = $slot:literal),+ $(,)? }

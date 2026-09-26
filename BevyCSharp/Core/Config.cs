@@ -292,7 +292,8 @@ public sealed class Config
 /// </summary>
 /// <remarks>
 /// These map onto wgpu's <c>Backends</c> flags, which Bevy's renderer is built on. Only backends
-/// the host platform supports are meaningful: Direct3D 12 is Windows-only and Metal is Apple-only.
+/// the host platform supports are meaningful, since Direct3D 12 is Windows-only and Metal is
+/// Apple-only.
 /// </remarks>
 public enum GraphicsBackend
 {

@@ -21,9 +21,9 @@ public static class EditorFlyout
 
     /// <summary>Whether a menu is up, for anything asking outside the interface's own frame.</summary>
     /// <remarks>
-    /// Asked rather than looked up: ImGui answers questions about its windows only between the
-    /// beginning and the end of a frame, and a system that runs before the interface does would be
-    /// asking a context that is not in one.
+    /// Asked rather than looked up, because ImGui answers questions about its windows only between
+    /// the beginning and the end of a frame, and a system that runs before the interface does would
+    /// be asking a context that is not in one.
     /// </remarks>
     public static bool MenuOpen => _menu is not null;
 

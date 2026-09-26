@@ -240,9 +240,9 @@ pub extern "C" fn bcs_window_set_mode(mode: i32) -> i32 {
 /// place. A first-person camera needs locking, because it reads how far the mouse moved rather than
 /// where it is, and a free cursor stops moving at the edge of the screen.
 ///
-/// Platforms differ in which they support: Windows confines and macOS locks, and each emulates
-/// the other. Asking for one and getting the other is normal, and is why the cursor should be
-/// hidden while it is grabbed either way.
+/// Platforms differ in which they support. Windows confines and macOS locks, and each emulates the
+/// other. Asking for one and getting the other is normal, and is why the cursor should be hidden
+/// while it is grabbed either way.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_window_set_cursor(grab: i32, visible: i32) -> i32 {
     crate::interop::guard(|| {

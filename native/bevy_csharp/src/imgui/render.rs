@@ -58,8 +58,8 @@ pub struct Drawn {
 
 /// The pictures the interface draws with, by the name it knows them under.
 ///
-/// The font atlas is one of these and nothing about it is special: ImGui hands over pixels and asks
-/// for a name to put in its draw calls.
+/// The font atlas is one of these and nothing about it is special, since ImGui hands over pixels
+/// and asks for a name to put in its draw calls.
 #[derive(Resource, Default)]
 pub struct Pictures {
     next: u64,

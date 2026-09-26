@@ -184,10 +184,10 @@ public sealed class MaterialSettings
     /// <summary>Show the base color flat, with no lighting at all.</summary>
     /// <remarks>
     /// For a skybox, a UI panel in the world, or anything meant to read as its own color. It takes
-    /// <see cref="Emissive"/> with it: Bevy adds the emission inside the lighting, so an unlit
-    /// material shows its base color and nothing else. A surface that should glow needs an emissive
-    /// color and no unlit flag, and <see cref="BaseColor"/> can exceed one for a flat color
-    /// brighter than white.
+    /// <see cref="Emissive"/> with it, because Bevy adds the emission inside the lighting, so an
+    /// unlit material shows its base color and nothing else. A surface that should glow needs an
+    /// emissive color and no unlit flag, and <see cref="BaseColor"/> can exceed one for a flat
+    /// color brighter than white.
     /// </remarks>
     public bool Unlit { get; set; }
 

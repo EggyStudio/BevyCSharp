@@ -130,9 +130,9 @@ pub unsafe extern "C" fn bcs_frame_state(out: *mut BcsFrameState) -> i32 {
 /// Copies this frame's typed text into `input`.
 ///
 /// Read through a cursor rather than by draining, so the messages stay available to anything else
-/// that reads them, and so nothing is seen twice. Control characters are left out: Backspace and
-/// Enter arrive here as text on some platforms, and a field that inserted them as characters
-/// would be wrong on all of them. Read those as keys instead.
+/// that reads them, and so nothing is seen twice. Control characters are left out, because
+/// Backspace and Enter arrive here as text on some platforms, and a field that inserted them as
+/// characters would be wrong on all of them. Read those as keys instead.
 fn collect_text(world: &mut bevy::ecs::world::World, input: &mut crate::interop::BcsInput) {
     use bevy::ecs::message::Messages;
     use bevy::input::keyboard::KeyboardInput;

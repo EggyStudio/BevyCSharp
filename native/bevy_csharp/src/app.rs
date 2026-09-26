@@ -799,8 +799,9 @@ pub unsafe extern "C" fn bcs_component_id_of(name: *const core::ffi::c_char) -> 
                 "WorldInstance" => {
                     world.register_component::<bevy::world_serialization::WorldInstance>()
                 }
-                // Reached through the prelude rather than its defining crate: Visibility moved
-                // from bevy_render to bevy_camera in 0.19, and the prelude survives such moves.
+                // Reached through the prelude rather than its defining crate, because Visibility
+                // moved from bevy_render to bevy_camera in 0.19, and the prelude survives such
+                // moves.
                 #[cfg(feature = "render")]
                 "Visibility" => world.register_component::<bevy::prelude::Visibility>(),
                 #[cfg(feature = "render")]

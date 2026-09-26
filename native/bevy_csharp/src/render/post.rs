@@ -894,14 +894,15 @@ pub extern "C" fn bcs_render_set_deferred(on: i32) -> i32 {
 #[derive(bevy::ecs::resource::Resource)]
 struct Deferred(bool);
 
-/// Switches Bevy's own materials to deferred or forward, preparing every one of them again.
-#[cfg(feature = "render")]
 /// Whether Bevy's materials are drawn deferred in this app, because a camera asked for the G-buffer
 /// or because Solari, which draws every material that way, is running.
+#[cfg(feature = "render")]
 pub fn materials_deferred(world: &bevy::ecs::world::World) -> bool {
     world.get_resource::<Deferred>().is_some_and(|deferred| deferred.0) || super::solari::running()
 }
 
+/// Switches Bevy's own materials to deferred or forward, preparing every one of them again.
+#[cfg(feature = "render")]
 fn set_deferred(world: &mut bevy::ecs::world::World, on: bool) {
     use bevy::pbr::{DefaultOpaqueRendererMethod, StandardMaterial};
 

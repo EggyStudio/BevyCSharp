@@ -5,7 +5,7 @@ namespace Bevy.Interop;
 /// </summary>
 /// <remarks>
 /// Matches <c>ImDrawVert</c> and <c>BcsImGuiVertex</c> in
-/// <c>native/bevy_csharp/src/imgui/mod.rs</c>. It is never built here: ImGui's own buffers are
+/// <c>native/bevy_csharp/src/imgui/mod.rs</c>. It is never built here. ImGui's own buffers are
 /// handed straight over, and this says what is in them.
 /// </remarks>
 [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
