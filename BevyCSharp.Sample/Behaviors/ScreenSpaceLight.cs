@@ -68,14 +68,23 @@ public partial struct ScreenSpaceLight
     }
 
     /// <summary>Sets the camera up to run the three steps, or takes them off it.</summary>
-    [Command("sample.gi", "Screen-space global illumination on the sample's camera: sample.gi <on|off>")]
+    [Command("sample.gi", "Screen-space global illumination on the sample's camera: sample.gi <on|off> [strength]")]
     internal static string Command(string state)
     {
         if (!_trace.IsValid || Camera(ConsoleHost.Ecs) is not { } camera) return "there is no camera to light";
 
-        _on = state.Trim() is "on" or "1" or "true";
+        // A strength after the state exaggerates or tones down the bounce, which is how its
+        // contribution is told apart from the rest of the lighting.
+        var words = state.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        _on = words.Length > 0 && words[0] is "on" or "1" or "true";
+
+        var strength = words.Length > 1 && float.TryParse(words[1], System.Globalization.CultureInfo.InvariantCulture, out var given)
+            ? given
+            : 1f;
+
+        _composite.Set("strength", strength);
         Apply(camera, _on);
-        return $"screen-space global illumination is {(_on ? "on" : "off")}";
+        return $"screen-space global illumination is {(_on ? $"on at {strength}" : "off")}";
     }
 
     /// <summary>

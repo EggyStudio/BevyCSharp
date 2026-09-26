@@ -1358,6 +1358,12 @@ camera's ambient light off (`Render.SetAmbientLight(camera, (0, 0, 0), 0)`) it r
 rather than adding to it. [.github/RENDERING.md](.github/RENDERING.md) has what a true input inside
 Bevy's lighting would add.
 
+The sample carries a small screen-space GI written this way, as a reference for how the pieces
+fit rather than a technique to ship: `BevyCSharp.Sample/Behaviors/ScreenSpaceLight.cs` and the three
+`gi_*.slang` files beside the sample's other shaders. F5 turns it on in a window, and
+`./bcs command sample.gi "on 4"` on a running sample turns it on with the bounce exaggerated four
+times, which is how its share of the picture is told apart from the rest.
+
 A storage image may be declared in any format the adapter can write, `[format("r16f")]` included,
 although core WGSL has fewer: Slang writes the nearest core format and the bridge puts the declared
 one back from Slang's reflection. An image the shader only writes is bound write-only, which more

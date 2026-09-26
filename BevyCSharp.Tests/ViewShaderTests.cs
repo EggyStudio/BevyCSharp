@@ -888,6 +888,34 @@ public sealed class ViewShaderTests
     }
 
     /// <summary>
+    /// A draw reads one of the camera's images that a dispatch at the same point wrote.
+    /// </summary>
+    [Fact]
+    public void ADrawReadsAnImageADispatchWrote()
+    {
+        if (!CanRun) return;
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                var camera = PictureRun.Camera(ecs);
+                Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
+                Shaders.SetViewImages(camera, new ViewImage("level", ShaderImageFormat.R32Float));
+
+                var fill = Compute("shaders/fill_image_level.slang").Set("value", 1f);
+                Shaders.SetViewDispatches(camera, ViewDispatch.PerPixel(fill, FramePoint.AfterOpaque));
+                Shaders.SetViewDraws(camera, ViewDraw.Fixed(Draw("shaders/draw_reads_image.slang"), FramePoint.AfterOpaque, 3, writesDepth: false));
+            },
+        };
+
+        run.Until("compiled", _ => Ready()).Wait(Settled).Capture("picture").Go();
+
+        var middle = run.Picture("picture").At(48, 48);
+        Assert.True(middle.R > 200 && middle.B < 60, $"the draw read {middle}, not the image the dispatch filled");
+    }
+
+    /// <summary>
     /// A watch draws a camera's single-channel float image, scaled, into an image anything can show
     /// and a capture can read.
     /// </summary>

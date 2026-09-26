@@ -368,11 +368,18 @@ public float4 sample(float2 uv)
 }
 
 /// How large the picture is, in pixels.
+///
+/// A draw on a camera draws into the picture, so it cannot read it, and a texel stands in for it;
+/// there the size is the view's, so `uv_of` and `pixel_size` mean the same in a draw as in a pass.
 public uint2 picture_size()
 {
     uint width;
     uint height;
     picture.GetDimensions(width, height);
+
+    if (width <= 1 && height <= 1)
+        return uint2(view.viewport.zw);
+
     return uint2(width, height);
 }
 
