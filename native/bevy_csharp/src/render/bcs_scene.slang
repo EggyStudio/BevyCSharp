@@ -157,7 +157,7 @@ public PoolVertex pool_corner(
 /// `c` in `y` and `z`, with one in `w` for a hit and zero for a miss.
 ///
 /// Both faces count, since a ray gathering light should see a thin wall from either side. The
-/// weights interpolate anything the corners carry: the normal at the hit is
+/// weights interpolate anything the corners carry, so the normal at the hit is
 /// `a * (1 - y - z) + b * y + c * z`.
 public float4 intersect_triangle(float3 origin, float3 direction, float3 a, float3 b, float3 c)
 {

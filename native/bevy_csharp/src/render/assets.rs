@@ -538,8 +538,8 @@ pub unsafe extern "C" fn bcs_render_asset_path(
 
 /// Images asked to become array or 3D textures, waiting for their pixels to arrive.
 ///
-/// The same wait a cubemap has: an image loads as one tall picture, and how it divides into layers
-/// or slices can only be applied once it has been decoded.
+/// The same wait a cubemap has, because an image loads as one tall picture, and how it divides into
+/// layers or slices can only be applied once it has been decoded.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::resource::Resource, Default)]
 pub struct PendingReshapes(Vec<PendingReshape>);

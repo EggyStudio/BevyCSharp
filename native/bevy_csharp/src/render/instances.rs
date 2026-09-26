@@ -2,17 +2,17 @@
 //! for shaders that work over the scene rather than over one mesh.
 //!
 //! Culling instances on the GPU, voxelizing a scene, writing motion for geometry a shader placed
-//! itself: each needs every instance's transform in a buffer, and the previous frame's beside it.
-//! The engine knows both, so a buffer is made with room for some number of instances, entities are
-//! put in its slots, and every frame after transforms are propagated the slots are written again.
-//! A shader reads it as a `StructuredBuffer<bcs_scene::Instance>`, whose layout `bcs_scene`
-//! declares: two matrices a slot, each four columns, which is 128 bytes.
+//! itself each need every instance's transform in a buffer, and the previous frame's beside it. The
+//! engine knows both, so a buffer is made with room for some number of instances, entities are put
+//! in its slots, and every frame after transforms are propagated the slots are written again. A
+//! shader reads it as a `StructuredBuffer<bcs_scene::Instance>`, whose layout `bcs_scene` declares:
+//! two matrices a slot, each four columns, which is 128 bytes.
 //!
 //! The previous transform is the one the slot held last frame, so an entity put in a slot starts
 //! with both the same, and one teleported shows the jump as motion for a frame, which anything
 //! reprojecting it needs to know.
 //!
-//! A material buffer is the same thing for what an entity is made of: each slot holds its standard
+//! A material buffer is the same thing for what an entity is made of. Each slot holds its standard
 //! material's base color, emissive color, roughness, metallic, reflectance and whether it is unlit,
 //! as `bcs_scene::Material`, 48 bytes. A ray that hits something in world-space GI has to know its
 //! color to bounce light off it, and an engine can read it from the material where a package

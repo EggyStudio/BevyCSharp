@@ -2,11 +2,11 @@
 // previous frame's, and the depth, normals and motion the camera's prepass drew.
 //
 // A full-screen pass and a compute shader dispatched on a camera both reach it with
-// `import bcs_pass;`, and everything in it is under the `bcs_pass` namespace. What the shader
-// itself carries is whatever it declares: every global without a binding of its own belongs to it
-// and is set from C# by its name, and an image the camera owns is bound by the name the camera
-// gave it. The inputs below are in space 101, which the bridge moves to group one after the
-// compile, so the shader's own globals keep group zero to themselves whatever they are.
+// `import bcs_pass;`, and everything in it is under the `bcs_pass` namespace. The shader itself
+// carries whatever it declares. Every global without a binding of its own belongs to it and is set
+// from C# by its name, and an image the camera owns is bound by the name the camera gave it. The
+// inputs below are in space 101, which the bridge moves to group one after the compile, so the
+// shader's own globals keep group zero to themselves whatever they are.
 //
 // A pass's entry point is a fragment shader taking `bcs_pass::Input`, which Bevy's full-screen
 // triangle writes, and returning the pixel. A compute shader works in pixels, and the helpers
@@ -600,8 +600,8 @@ public float3 environment_specular(float3 direction, float perceptual_roughness)
 /// Blue noise at a pixel for this frame, four numbers from zero to one.
 ///
 /// What a stochastic technique picks its ray directions or sample offsets with instead of white
-/// noise: neighboring pixels get values far apart, so the error a few samples leave looks like
-/// fine grain a blur removes rather than blotches, and each frame takes the next layer, so an
+/// noise. Neighboring pixels get values far apart, so the error a few samples leave looks like fine
+/// grain a blur removes rather than blotches, and each frame takes the next layer, so an
 /// accumulation over frames sees values spread evenly in time as well. The pattern repeats every
 /// hundred and twenty eight pixels and every thirty two frames.
 public float4 blue_noise(int2 pixel)

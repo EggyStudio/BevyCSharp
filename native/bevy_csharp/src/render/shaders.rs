@@ -1151,7 +1151,7 @@ pub fn sync_view_draws(
     }
 }
 
-/// Starts watching one of a camera's images: every frame, once the camera's frame is done, it is
+/// Starts watching one of a camera's images. Every frame, once the camera's frame is done, it is
 /// drawn into an eight-bit image of `width` by `height`, each value times `scale` plus `offset`.
 /// Answers that image's asset key, which anything that draws images can show.
 ///

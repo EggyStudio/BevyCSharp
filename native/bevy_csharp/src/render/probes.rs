@@ -7,13 +7,12 @@
 //! each of the six axis directions receives there, which is diffuse indirect light that varies
 //! through space.
 //!
-//! The volume is the one a global illumination package cares about. It is an ordinary 3D image,
-//! so a compute shader can write it every frame, and Bevy's own materials then read it as their
+//! The volume is the one a global illumination package cares about. It is an ordinary 3D image, so
+//! a compute shader can write it every frame, and Bevy's own materials then read it as their
 //! indirect diffuse light, ranked above a reflection probe and the camera's environment map. That
-//! is a way into Bevy's lighting that needs no change to Bevy: a world-space technique answers
-//! into a grid, and everything drawn with a standard material is lit by the answer. `bcs_scene`
-//! carries the layout, so a shader addresses the image by voxel and direction rather than by the
-//! packing.
+//! is a way into Bevy's lighting that needs no change to Bevy. A world-space technique answers into
+//! a grid, and everything drawn with a standard material is lit by the answer. `bcs_scene` carries
+//! the layout, so a shader addresses the image by voxel and direction rather than by the packing.
 //!
 //! Both are components on an entity whose transform places, turns and sizes the box, which is a
 //! unit cube before its scale. A probe on a camera is refused, because a camera is lit by

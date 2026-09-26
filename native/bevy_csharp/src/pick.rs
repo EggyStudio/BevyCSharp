@@ -8,8 +8,8 @@
 //! in the scene against the pointer. Adding it here turns a click on the viewport into an entity,
 //! which is the half of selection a hierarchy list cannot give.
 //!
-//! Clicks are queued and drained rather than observed, for the reason every other report here is:
-//! a C# system is handed the world and cannot hold an observer.
+//! Clicks are queued and drained rather than observed, for the same reason as every other report
+//! here, because a C# system is handed the world and cannot hold an observer.
 
 use crate::interop::status;
 

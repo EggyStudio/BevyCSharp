@@ -604,7 +604,7 @@ pub fn write_buffer(world: &mut World, key: i32, bytes: &[u8]) -> i32 {
 /// Makes a buffer at least `size` bytes, keeping what it holds, and answers its new size.
 ///
 /// The GPU buffer is a new one, with the old one's contents copied to its start on the GPU, since a
-/// buffer cannot grow in place. Whatever was built against the old one is built again: every
+/// buffer cannot grow in place. Whatever was built against the old one is built again. Every
 /// material holding it is prepared again and every shader instance holding it moves on a version,
 /// which makes a grown buffer safe to keep handing to what already had it. A size no larger than
 /// the buffer's leaves it as it is.
