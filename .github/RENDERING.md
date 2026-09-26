@@ -312,6 +312,24 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | Ray queries in shaders | Missing. wgpu has experimental ray queries, and naga's WGSL accepts them behind an `enable wgpu_ray_query` extension. Slang writes ray queries for SPIR-V and not for WGSL, so the gap is between the two, and closing it is either a Slang change or a SPIR-V path |
 | An acceleration structure kept current with the scene | Bevy's Solari keeps one for its own lighting, over the meshes given to `SetRayTraced`. A package's shaders cannot trace against it until they can express ray queries |
 
+The route to a package's own shaders tracing rays is known, and each step of it has been checked
+against the versions this engine builds with:
+
+- **Slang writes ray queries only for SPIR-V.** Its WGSL output refuses `TraceRayInline` as a
+  feature the target lacks, as of Slang 2026.18.
+- **naga cannot read them from SPIR-V.** Its SPIR-V reader has no ray query instructions, so a
+  shader cannot go from Slang's SPIR-V through naga the way every other shader goes through WGSL.
+- **wgpu can take SPIR-V untouched.** Bevy's `spirv_shader_passthrough` feature hands a SPIR-V
+  shader to the driver as it is, on Vulkan, which is where ray queries run anyway.
+- **So the layout has to come from Slang.** A shader passed through is never read by naga, which is
+  where this bridge learns what a shader declares today. Slang's reflection, which the bridge
+  already reads for storage formats, carries every binding, type and struct offset, and building
+  a layout from it is the main piece of work.
+- **The scene to trace against exists.** Solari's `RaytracingSceneBindings` holds a bind group of
+  its acceleration structure, vertex and index buffers, materials and textures, and it is public.
+  A Slang module declaring the same layout in a group of its own, which the bridge binds that group
+  to, gives a package's compute shader the whole scene Solari traces, kept current by Solari.
+
 ### Debugging and tooling
 
 | need | status |
