@@ -163,12 +163,22 @@ public static unsafe class Shaders
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        if (!settings.Fragment.IsSet && !settings.Compute.IsSet && !settings.Pass.IsSet)
+        if (!settings.Fragment.IsSet && !settings.Compute.IsSet && !settings.Pass.IsSet
+            && !settings.DrawFragment.IsSet)
         {
             throw new ArgumentException(
                 "A shader program needs a fragment shader to draw with, a pass to run over a "
-                + "camera's picture, or a compute shader to dispatch. Bevy's own fragment shader "
-                + "reads a material laid out differently, so there is no default to fall back on.",
+                + "camera's picture, a compute shader to dispatch, or a draw fragment shader to draw "
+                + "on a camera with. Bevy's own fragment shader reads a material laid out "
+                + "differently, so there is no default to fall back on.",
+                nameof(settings));
+        }
+
+        if (settings.DrawFragment.IsSet != settings.DrawVertex.IsSet)
+        {
+            throw new ArgumentException(
+                "Drawing on a camera takes both a draw vertex shader, which places what is drawn "
+                + "out of buffers, and a draw fragment shader, which colors it.",
                 nameof(settings));
         }
 
@@ -229,6 +239,8 @@ public static unsafe class Shaders
                     Pass = Stage(settings.Pass),
                     Defines = defines.Length > 0 ? first : null,
                     DefineCount = defines.Length,
+                    DrawVertex = Stage(settings.DrawVertex),
+                    DrawFragment = Stage(settings.DrawFragment),
                 };
 
                 var id = Native.bcs_shader_program_create(&config);
@@ -515,10 +527,105 @@ public static unsafe class Shaders
                     Native.bcs_render_set_view_images(camera.Bits, first, native.Length),
                     "giving a camera its images");
             }
+
+            // Kept here for whatever lists them, which the render world cannot be asked.
+            var listed = images.SelectMany(image =>
+                    new[] { image.Name }
+                        .Concat(image.History ? [image.Name + "_previous"] : [])
+                        .Concat(image.Mips > 1 ? Enumerable.Range(0, image.Mips).Select(mip => $"{image.Name}_mip{mip}") : []))
+                .ToArray();
+
+            lock (_viewImages)
+            {
+                if (listed.Length == 0) _viewImages.Remove(camera.Bits);
+                else _viewImages[camera.Bits] = listed;
+            }
         }
         finally
         {
             foreach (var pointer in strings) Marshal.FreeCoTaskMem(pointer);
+        }
+    }
+
+    /// <summary>The names every 3D camera's shaders can read besides the images the camera owns.</summary>
+    /// <remarks>
+    /// The prepass's depth, normals and motion, where the camera draws them, and Bevy's ambient
+    /// occlusion, where it is on. A watch reads the prepass's by these names too.
+    /// </remarks>
+    public static IReadOnlyList<string> EngineViewImageNames { get; } =
+        ["depth", "normals", "motion", "ambient_occlusion"];
+
+    /// <summary>
+    /// The names of the images a camera owns, as <see cref="SetViewImages"/> last gave them, with
+    /// their <c>_previous</c> and <c>_mip</c> names. Empty for a camera that owns none.
+    /// </summary>
+    /// <remarks>What an inspector or a debug view offers to <see cref="Watch"/>.</remarks>
+    public static IReadOnlyList<string> ViewImageNames(Entity camera)
+    {
+        lock (_viewImages)
+        {
+            return _viewImages.TryGetValue(camera.Bits, out var names) ? names : [];
+        }
+    }
+
+    private static readonly Dictionary<ulong, string[]> _viewImages = [];
+
+    /// <summary>
+    /// Starts watching one of a camera's images: every frame, once the camera's frame is done, it
+    /// is drawn into an eight-bit image, each value times <paramref name="scale"/> plus
+    /// <paramref name="offset"/>. Answers that image. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A screen-space technique is a chain of images nobody looks at, and when its result is wrong
+    /// the question is which link broke. The images a camera owns live on the GPU in formats a
+    /// picture cannot show, so a watch draws one into an image anything can show: the editor's
+    /// Frame tab, a material, a UI node. One channel shows as gray, two as red and green, and more
+    /// as color.
+    /// </para>
+    /// <para>
+    /// Anything a shader on the camera reads by name can be watched, and the prepass's
+    /// <c>depth</c>, <c>normals</c> and <c>motion</c>. Watching the same name again replaces the
+    /// watch, with a new image. A watch costs a small draw a frame until <see cref="Unwatch"/>.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Occlusion runs from zero to one, which is already the range an image shows.
+    /// var picture = Shaders.Watch(camera, "occlusion", 320, 180);
+    ///
+    /// // Distances of a few hundred units, brought into range.
+    /// var distances = Shaders.Watch(camera, "hit_distance", 320, 180, scale: 1f / 200f);
+    /// </code>
+    /// </example>
+    public static AssetHandle Watch(
+        Entity camera,
+        string name,
+        uint width = 320,
+        uint height = 180,
+        float scale = 1f,
+        float offset = 0f)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+        ArgumentOutOfRangeException.ThrowIfZero(width);
+        ArgumentOutOfRangeException.ThrowIfZero(height);
+
+        fixed (byte* named = ShaderValues.Utf8(name))
+        {
+            return new AssetHandle(Native.Check(
+                Native.bcs_render_watch_view_image(camera.Bits, named, width, height, scale, offset),
+                $"watching {name} on {camera}"));
+        }
+    }
+
+    /// <summary>Stops watching one of a camera's images. Only valid inside a system.</summary>
+    public static void Unwatch(Entity camera, string name)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+
+        fixed (byte* named = ShaderValues.Utf8(name))
+        {
+            Native.Check(Native.bcs_render_unwatch_view_image(camera.Bits, named), $"unwatching {name} on {camera}");
         }
     }
 
@@ -644,6 +751,76 @@ public static unsafe class Shaders
     }
 
     /// <summary>
+    /// Replaces the geometry a camera draws every frame out of buffers, in order. None takes it all
+    /// away. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A draw on a camera is a program with a <see cref="ShaderProgramSettings.DrawVertex"/> and a
+    /// <see cref="ShaderProgramSettings.DrawFragment"/> stage, drawn into the camera's picture and
+    /// tested against its depth at a <see cref="FramePoint"/>. Its vertex shader is handed no
+    /// vertices, only their numbers, and places what is drawn from the buffers it declares. That is
+    /// how something whose shape lives on the GPU is drawn: particles a compute shader moves,
+    /// clusters a culling pass chose, any number of instances whose count a buffer holds.
+    /// </para>
+    /// <para>
+    /// Its count is fixed, or read from a buffer when it runs (<see cref="ViewDraw.Indirect"/>),
+    /// so a compute shader earlier at the same point can decide it. Draws at a point run after that
+    /// point's dispatches, and before the passes on the same side of tonemapping. The picture is
+    /// what is drawn into, so it is not readable while drawing, and its binding holds a stand-in.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var sparks = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
+    /// {
+    ///     DrawVertex = new ShaderStage("shaders/sparks.slang", "vertex"),
+    ///     DrawFragment = new ShaderStage("shaders/sparks.slang", "fragment"),
+    /// })).SetBuffer("sparks", buffer);
+    ///
+    /// Shaders.SetViewDraws(camera, ViewDraw.Fixed(sparks, FramePoint.AfterOpaque, 6, count, DrawBlend.Add));
+    /// </code>
+    /// </example>
+    public static void SetViewDraws(Entity camera, params ViewDraw[] draws)
+    {
+        ArgumentNullException.ThrowIfNull(draws);
+
+        var native = new NativeViewDraw[draws.Length];
+
+        for (var i = 0; i < draws.Length; i++)
+        {
+            var draw = draws[i];
+
+            if (!draw.Instance.IsValid)
+            {
+                throw new ArgumentException(
+                    $"Draw {i} has no instance. Make one with Shaders.CreateInstance.",
+                    nameof(draws));
+            }
+
+            native[i] = new NativeViewDraw
+            {
+                Instance = draw.Instance.Id,
+                Point = (int)draw.Point,
+                Mode = draw.FromBuffer ? 1 : 0,
+                Vertices = draw.Vertices,
+                Instances = draw.Instances,
+                Buffer = draw.Buffer.Key,
+                Offset = draw.Offset,
+                Blend = (int)draw.Blend,
+                DepthWrite = draw.WritesDepth ? 1 : 0,
+            };
+        }
+
+        fixed (NativeViewDraw* first = native)
+        {
+            Native.Check(
+                Native.bcs_render_set_view_draws(camera.Bits, first, native.Length),
+                "setting what a camera draws out of buffers");
+        }
+    }
+
+    /// <summary>
     /// Runs an instance's compute shader once, this frame, before any camera draws, with as many
     /// workgroups as the buffer says. Only valid inside a system.
     /// </summary>
@@ -743,6 +920,81 @@ public static unsafe class Shaders
         Native.Check(status, "writing a shader buffer");
     }
 
+    /// <summary>
+    /// Makes a buffer at least <paramref name="size"/> bytes, keeping what it holds, and answers
+    /// its size. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A GPU buffer cannot grow in place, so this is a new one with the old one's contents copied
+    /// to its start on the GPU, and the rest zeros. What the GPU wrote since the last
+    /// <see cref="WriteBuffer{T}"/> is kept, since the copy is made there rather than from here.
+    /// </para>
+    /// <para>
+    /// Every material and every shader instance holding the buffer is built against the new one, so
+    /// there is nothing to hand out again. A size no larger than the buffer's leaves it as it is,
+    /// since a buffer never shrinks.
+    /// </para>
+    /// </remarks>
+    public static int GrowBuffer(AssetHandle buffer, int size)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(size);
+        return Native.Check(Native.bcs_shader_buffer_grow(buffer.Key, size), "growing a shader buffer");
+    }
+
+    /// <summary>How many bytes one slot of an instance buffer takes.</summary>
+    /// <remarks>Two matrices of four columns: this frame's transform, then the previous frame's.</remarks>
+    public const int InstanceSlotBytes = 128;
+
+    /// <summary>
+    /// Makes a buffer with <paramref name="capacity"/> slots that the engine fills every frame with
+    /// the transforms of the entities put in them, this frame's and the previous frame's. Only
+    /// valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Culling instances on the GPU, voxelizing a scene, drawing geometry a shader places and giving
+    /// it motion: each needs every instance's transform in a buffer, with last frame's beside it.
+    /// The engine writes both once transforms have been worked out each frame, and only when
+    /// something moved.
+    /// </para>
+    /// <para>
+    /// A shader reads it as a <c>StructuredBuffer&lt;bcs_scene::Instance&gt;</c> after
+    /// <c>import bcs_scene;</c>, with <c>to_world</c>, <c>to_previous_world</c> and
+    /// <c>position</c> to read a slot. It is bound by name like any other buffer.
+    /// </para>
+    /// </remarks>
+    public static AssetHandle CreateInstanceBuffer(int capacity)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(capacity, 1);
+        return new AssetHandle(Native.Check(
+            Native.bcs_shader_instance_buffer_create(capacity),
+            $"making an instance buffer of {capacity} slots"));
+    }
+
+    /// <summary>
+    /// Puts an entity in a slot of an instance buffer, or with <see cref="Entity.None"/> empties the
+    /// slot. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// An entity put in a slot starts with no motion, so its previous transform is its current
+    /// one, rather than wherever the slot's last entity was. An empty slot holds zeros.
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">The slot is past the buffer's capacity.</exception>
+    public static void SetInstance(AssetHandle buffer, int slot, Entity entity)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(slot);
+
+        var status = Native.bcs_shader_instance_buffer_set(buffer.Key, slot, entity == Entity.None ? 0 : entity.Bits);
+
+        if (status == NativeStatus.NotPresent)
+        {
+            throw new ArgumentOutOfRangeException(nameof(slot), $"Slot {slot} is past the instance buffer's capacity.");
+        }
+
+        Native.Check(status, $"putting entity {entity} in slot {slot} of an instance buffer");
+    }
+
     /// <summary>A buffer's size in bytes. Only valid inside a system.</summary>
     public static int BufferSize(AssetHandle buffer) =>
         Native.Check(Native.bcs_shader_buffer_size(buffer.Key), "reading a shader buffer's size");
@@ -819,28 +1071,37 @@ public static unsafe class Shaders
     /// It starts transparent black, and its pixels live on the GPU, so a dispatch that writes it
     /// every frame costs nothing crossing the boundary.
     /// </para>
+    /// <para>
+    /// With <paramref name="mips"/> above one it has that many mip levels, as many as its size
+    /// allows, and a level is bound on its own by the <c>mip</c> of <c>SetTexture</c>, so one
+    /// dispatch reads a level while the next writes the level below, which is how a depth pyramid
+    /// or a blur chain is built. Bound without a level, a texture reads every level and a storage
+    /// image writes the first.
+    /// </para>
     /// </remarks>
     /// <param name="width">Its width in pixels.</param>
     /// <param name="height">Its height in pixels.</param>
     /// <param name="format">What it holds per pixel.</param>
     /// <param name="depth">Above one, a 3D image this many slices deep.</param>
+    /// <param name="mips">How many mip levels, one for just the image.</param>
     public static AssetHandle CreateImage(
         uint width,
         uint height,
         ShaderImageFormat format = ShaderImageFormat.Rgba8,
-        uint depth = 1)
+        uint depth = 1,
+        uint mips = 1)
     {
         ArgumentOutOfRangeException.ThrowIfZero(width);
         ArgumentOutOfRangeException.ThrowIfZero(height);
         ArgumentOutOfRangeException.ThrowIfZero(depth);
 
         return new AssetHandle(Native.Check(
-            Native.bcs_shader_image_create(width, height, depth, (int)format),
+            Native.bcs_shader_image_create(width, height, depth, (int)format, Math.Max(1u, mips)),
             $"making a {width}x{height}x{depth} image for a compute shader"));
     }
 
     /// <summary>
-    /// Makes an image as <see cref="CreateImage(uint, uint, ShaderImageFormat, uint)"/> does,
+    /// Makes an image as <see cref="CreateImage(uint, uint, ShaderImageFormat, uint, uint)"/> does,
     /// starting with <paramref name="texels"/> rather than zeros. Only valid inside a system.
     /// </summary>
     /// <remarks>
@@ -1091,8 +1352,12 @@ public static unsafe class ShaderValues
         /// <see cref="Render.MakeTextureArray"/> and <see cref="Render.MakeVolume"/>. A
         /// <c>RWTexture</c> takes an image from <see cref="Shaders.CreateImage"/>.
         /// </para>
+        /// <para>
+        /// <paramref name="mip"/> binds one mip level of the image rather than all of them, which is
+        /// what a shader building a pyramid reads the level above with and writes the next with.
+        /// </para>
         /// </remarks>
-        public T SetTexture(string name, AssetHandle image, int index = 0)
+        public T SetTexture(string name, AssetHandle image, int index = 0, int mip = -1)
         {
             ArgumentOutOfRangeException.ThrowIfNegative(index);
             var (kind, id) = target.Target;
@@ -1100,7 +1365,7 @@ public static unsafe class ShaderValues
             fixed (byte* named = ShaderValues.Utf8(name))
             {
                 ShaderValues.Refuse(
-                    Native.bcs_shader_set_image(kind, id, named, index, image.Key),
+                    Native.bcs_shader_set_image(kind, id, named, index, image.Key, mip),
                     name,
                     target);
             }
@@ -1894,15 +2159,33 @@ public sealed class ShaderProgramSettings
     /// </summary>
     public ShaderStage Pass { get; init; }
 
+    /// <summary>
+    /// The vertex shader of geometry drawn on a camera by <see cref="Shaders.SetViewDraws"/>, out of
+    /// buffers it reads rather than a mesh. Its entry point is called <c>vertex</c> unless it is
+    /// named.
+    /// </summary>
+    /// <remarks>
+    /// It is handed no vertices, only <c>SV_VertexID</c> and <c>SV_InstanceID</c>, and places what is
+    /// drawn from whatever buffers it declares, which is what particles, a visibility buffer or
+    /// clusters of a virtualized mesh are drawn with. It reads the camera's inputs through
+    /// <c>import bcs_pass;</c>, the view among them.
+    /// </remarks>
+    public ShaderStage DrawVertex { get; init; }
+
+    /// <summary>The fragment shader of geometry drawn on a camera. Required with <see cref="DrawVertex"/>.</summary>
+    public ShaderStage DrawFragment { get; init; }
+
     /// <summary>Names the shaders are compiled with defined.</summary>
     public Dictionary<string, ShaderDefine> Defines { get; init; } = new(StringComparer.Ordinal);
 
     /// <summary>The stages that were set.</summary>
     internal IEnumerable<ShaderStage> Stages() =>
-        new[] { Vertex, Fragment, PrepassVertex, PrepassFragment, Compute, Pass }.Where(stage => stage.IsSet);
+        new[] { Vertex, Fragment, PrepassVertex, PrepassFragment, Compute, Pass, DrawVertex, DrawFragment }
+            .Where(stage => stage.IsSet);
 
     /// <summary>The stage a message names the program by.</summary>
-    internal ShaderStage Main() => Fragment.IsSet ? Fragment : Pass.IsSet ? Pass : Compute;
+    internal ShaderStage Main() =>
+        Fragment.IsSet ? Fragment : Pass.IsSet ? Pass : Compute.IsSet ? Compute : DrawFragment;
 }
 
 /// <summary>The value a shader define has.</summary>
@@ -2140,6 +2423,92 @@ public readonly record struct ViewDispatch
         Buffer = buffer,
         Offset = offset,
         Scale = 1f,
+    };
+}
+
+/// <summary>How geometry drawn on a camera combines with the picture.</summary>
+public enum DrawBlend
+{
+    /// <summary>Replaces what is there.</summary>
+    Opaque = 0,
+
+    /// <summary>Over what is there, by the fragment's alpha.</summary>
+    Alpha = 1,
+
+    /// <summary>Added to what is there, which is what anything glowing wants.</summary>
+    Add = 2,
+}
+
+/// <summary>Geometry a camera draws every frame out of buffers. See <see cref="Shaders.SetViewDraws"/>.</summary>
+/// <remarks>Made with <see cref="Fixed"/> or <see cref="Indirect"/>.</remarks>
+public readonly record struct ViewDraw
+{
+    /// <summary>The instance whose program and values draw.</summary>
+    public ShaderInstance Instance { get; init; }
+
+    /// <summary>Where in the camera's frame.</summary>
+    public FramePoint Point { get; init; }
+
+    /// <summary>Whether the counts are read from <see cref="Buffer"/> when it runs.</summary>
+    public bool FromBuffer { get; init; }
+
+    /// <summary>How many vertices each instance has, for a fixed draw.</summary>
+    public uint Vertices { get; init; }
+
+    /// <summary>How many instances, for a fixed draw.</summary>
+    public uint Instances { get; init; }
+
+    /// <summary>The buffer an indirect draw reads its counts from.</summary>
+    public AssetHandle Buffer { get; init; }
+
+    /// <summary>Where in the buffer the counts start, in bytes.</summary>
+    public uint Offset { get; init; }
+
+    /// <summary>How it combines with the picture.</summary>
+    public DrawBlend Blend { get; init; }
+
+    /// <summary>
+    /// Whether it writes depth, as opaque geometry does, or only tests against it, as anything
+    /// see-through does.
+    /// </summary>
+    public bool WritesDepth { get; init; }
+
+    /// <summary><paramref name="vertices"/> vertices, <paramref name="instances"/> times.</summary>
+    public static ViewDraw Fixed(
+        ShaderInstance instance,
+        FramePoint point,
+        uint vertices,
+        uint instances = 1,
+        DrawBlend blend = DrawBlend.Opaque,
+        bool writesDepth = true) => new()
+    {
+        Instance = instance,
+        Point = point,
+        Vertices = vertices,
+        Instances = instances,
+        Blend = blend,
+        WritesDepth = writesDepth,
+    };
+
+    /// <summary>
+    /// As many vertices and instances as four unsigned integers in a buffer say when it runs:
+    /// vertices, instances, the first vertex and the first instance.
+    /// </summary>
+    public static ViewDraw Indirect(
+        ShaderInstance instance,
+        FramePoint point,
+        AssetHandle buffer,
+        uint offset = 0,
+        DrawBlend blend = DrawBlend.Opaque,
+        bool writesDepth = true) => new()
+    {
+        Instance = instance,
+        Point = point,
+        FromBuffer = true,
+        Buffer = buffer,
+        Offset = offset,
+        Blend = blend,
+        WritesDepth = writesDepth,
     };
 }
 

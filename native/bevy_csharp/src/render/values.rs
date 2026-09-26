@@ -64,7 +64,9 @@ pub enum Value {
     },
     /// Bytes copied as they are, for a struct laid out as the shader lays it out.
     Bytes(Vec<u8>),
-    Image(Handle<Image>),
+    /// An image, whole, or one mip level of it, which is what building a pyramid a level at a
+    /// time reads and writes.
+    Image(Handle<Image>, Option<u32>),
     Buffer(Handle<ShaderBuffer>),
     Sampler(SamplerSettings),
 }
@@ -90,7 +92,8 @@ impl Value {
                 }
             }
             Value::Bytes(bytes) => format!("{} bytes", bytes.len()),
-            Value::Image(_) => "an image".into(),
+            Value::Image(_, None) => "an image".into(),
+            Value::Image(_, Some(mip)) => format!("mip level {mip} of an image"),
             Value::Buffer(_) => "a buffer".into(),
             Value::Sampler(_) => "sampler settings".into(),
         }
@@ -131,7 +134,7 @@ fn split_index(key: &str) -> (&str, u32) {
 /// where the call was made rather than found later on the render side.
 pub fn check(layout: &Layout, name: &str, value: &Value) -> Result<(), String> {
     let (base, index) = match value {
-        Value::Image(_) | Value::Sampler(_) | Value::Buffer(_) => split_index(name),
+        Value::Image(..) | Value::Sampler(_) | Value::Buffer(_) => split_index(name),
         _ => (name, 0),
     };
 
@@ -154,7 +157,7 @@ pub fn check(layout: &Layout, name: &str, value: &Value) -> Result<(), String> {
         }
         (Target::Resource { info, .. }, value) => {
             let wanted = match (&info.kind, value) {
-                (BindingKind::Texture { .. } | BindingKind::StorageTexture { .. }, Value::Image(_))
+                (BindingKind::Texture { .. } | BindingKind::StorageTexture { .. }, Value::Image(..))
                 | (BindingKind::Storage { .. }, Value::Buffer(_))
                 | (BindingKind::Sampler { .. }, Value::Sampler(_)) => true,
                 _ => false,
@@ -546,7 +549,7 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
 
                 for index in 0..count {
                     let view = match values.entries.get(&element_name(&binding.name, index)) {
-                        Some(Value::Image(handle)) => {
+                        Some(Value::Image(handle, mip)) => {
                             let Some(image) = context.images.get(handle) else {
                                 return Err(PackError::NotReady);
                             };
@@ -554,7 +557,10 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
                             if view_dimension(image) == *dimension
                                 && sample_matches(image.texture_descriptor.format, *sample)
                             {
-                                Some(image.texture_view.clone())
+                                match mip {
+                                    None => Some(image.texture_view.clone()),
+                                    Some(mip) => level_of(image, *mip, &mut packed.problems, &binding.name),
+                                }
                             } else {
                                 packed.problems.push(format!(
                                     "{}: a {:?} {:?} image cannot be read as a {:?} texture",
@@ -585,7 +591,7 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
                 for index in 0..count {
                     let key = element_name(&binding.name, index);
 
-                    let Some(Value::Image(handle)) = values.entries.get(&key) else {
+                    let Some(Value::Image(handle, mip)) = values.entries.get(&key) else {
                         return Err(PackError::Missing(format!(
                             "{key} is a {format:?} image the shader writes, and none was given"
                         )));
@@ -614,7 +620,20 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
                         )));
                     }
 
-                    views.push(image.texture_view.clone());
+                    // A storage binding holds exactly one level, so an image with several is bound
+                    // at the level asked for, or its first.
+                    let level = match (mip, image.texture_descriptor.mip_level_count) {
+                        (None, 1) => Some(image.texture_view.clone()),
+                        (mip, _) => level_of(image, mip.unwrap_or(0), &mut packed.problems, &key),
+                    };
+
+                    let Some(level) = level else {
+                        return Err(PackError::Missing(format!(
+                            "{key} is written at a mip level the image does not have"
+                        )));
+                    };
+
+                    views.push(level);
                 }
 
                 packed.views.push((*number, views));
@@ -639,6 +658,26 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
     }
 
     Ok(packed)
+}
+
+/// A view of one mip level of an image, or `None` with a problem noted where it has no such level.
+fn level_of(image: &GpuImage, mip: u32, problems: &mut Vec<String>, name: &str) -> Option<TextureView> {
+    if mip >= image.texture_descriptor.mip_level_count {
+        problems.push(format!(
+            "{name}: mip level {mip} was asked for, and the image has {}",
+            image.texture_descriptor.mip_level_count
+        ));
+        return None;
+    }
+
+    Some(image.texture.create_view(&TextureViewDescriptor {
+        base_mip_level: mip,
+        mip_level_count: Some(1),
+        ..image
+            .texture_view_descriptor
+            .clone()
+            .unwrap_or_default()
+    }))
 }
 
 /// What stands in for a texture nobody set.

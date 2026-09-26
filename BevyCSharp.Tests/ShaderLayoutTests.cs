@@ -47,7 +47,11 @@ public sealed class ShaderLayoutTests
     [Fact]
     public void EachConfigIsTheSizeTheBridgeReads()
     {
-        Assert.Equal(160, Marshal.SizeOf<NativeShaderProgramConfig>());
+        Assert.Equal(208, Marshal.SizeOf<NativeShaderProgramConfig>());
+        Assert.Equal(160, Marshal.OffsetOf<NativeShaderProgramConfig>(nameof(NativeShaderProgramConfig.DrawVertex)).ToInt32());
+        Assert.Equal(184, Marshal.OffsetOf<NativeShaderProgramConfig>(nameof(NativeShaderProgramConfig.DrawFragment)).ToInt32());
+        Assert.Equal(36, Marshal.SizeOf<NativeViewDraw>());
+        Assert.Equal(32, Marshal.OffsetOf<NativeViewDraw>(nameof(NativeViewDraw.DepthWrite)).ToInt32());
         Assert.Equal(24, Marshal.SizeOf<NativeShaderStage>());
         Assert.Equal(16, Marshal.OffsetOf<NativeShaderStage>(nameof(NativeShaderStage.Source)).ToInt32());
         Assert.Equal(16, Marshal.SizeOf<NativeShaderDefine>());

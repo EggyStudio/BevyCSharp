@@ -216,7 +216,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | Compute before any camera draws | Has (`render/compute.rs`) |
 | Compute per camera, with the view, at a chosen point in the frame | Has (`render/views.rs`, `Shaders.SetViewDispatches`) |
 | Points after the prepass, between opaque and transparent geometry, and before and after tonemapping | Has, for compute (`FramePoint`). Passes still run only around tonemapping |
-| Passes writing several targets, or depth | Missing |
+| Passes writing several targets, or depth | Draws on a camera write the picture and depth. Several targets for a pass are still missing |
 | Async compute | Missing. wgpu has one queue per device, so this waits on wgpu |
 
 ### Per view
@@ -236,7 +236,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 
 | need | status |
 |---|---|
-| Transforms per instance, current and previous | Bevy keeps both per mesh; not exposed as a buffer a package reads |
+| Transforms per instance, current and previous | Has (`Shaders.CreateInstanceBuffer`, `bcs_scene::Instance`) for the entities put in its slots |
 | Lights and shadow maps readable from compute | Has, for compute and passes on a camera (`bcs_pass::lights`, `point_lights`, `directional_shadow`, `point_shadow`). Spot light shadows are not sampled yet |
 | The sky as a cube map or spherical harmonics | Bevy generates environment maps; not exposed to compute |
 | Material data by object | Missing |
@@ -248,8 +248,8 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 |---|---|
 | Storage buffers of any size, read back to the CPU | Has |
 | Indirect dispatch | Has (`Shaders.DispatchIndirect`, `ViewDispatch.Indirect`) |
-| Indirect draws whose count the GPU decides | Missing |
-| Buffers that grow keeping their contents | Missing |
+| Indirect draws whose count the GPU decides | Has, for geometry drawn on a camera out of buffers (`Shaders.SetViewDraws`, `ViewDraw.Indirect`) |
+| Buffers that grow keeping their contents | Has (`Shaders.GrowBuffer`), rebinding everything that held them |
 | Atomics | Has, on buffers through Slang's `Atomic<T>`, which is the form Slang turns into WGSL atomics. 64-bit and texture atomics depend on the adapter and on Slang's WGSL output reaching them |
 | Subgroup operations | Same |
 
@@ -270,7 +270,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 |---|---|
 | Storage images, 2D and 3D, in float and integer formats | Has (`Shaders.CreateImage`) |
 | Images from data in formats other than eight-bit RGBA | Has (`Shaders.CreateImage<T>(..., texels)`). Render targets are still eight-bit RGBA |
-| A storage view of one mip level | Has, for a camera's images (`name_mip1`). Not yet for images made with `Shaders.CreateImage` |
+| A storage view of one mip level | Has, for a camera's images (`name_mip1`) and for images made with `Shaders.CreateImage(..., mips:)` (`SetTexture(name, image, mip: 1)`) |
 | Arrays of textures of any length | Has, where the adapter supports binding arrays |
 | Cube maps rendered into | Missing |
 | Block-compressed textures | Missing (`ktx2` is in, its payload formats are not) |
@@ -318,13 +318,15 @@ Each phase unblocks a class of package, and none needs a later one.
    images owned by the camera, compute per camera at named points with the view, indirect dispatch,
    image formats and mip views. These are in, so an ambient occlusion or screen-space GI package can
    be written now, composited over the picture by a pass. What is left of this phase is a pass at
-   more points than tonemapping, several targets for a pass, and mip views of any image.
+   more points than tonemapping and several targets for a pass.
 2. **Lighting inputs.** Bevy's own ambient occlusion is bridged and a package can supply its own
    through it. Reflections and light probes are next, then indirect diffuse and specular inputs,
    which is where a change inside Bevy's lighting is weighed against keeping a fork.
-3. **GPU-driven geometry.** Indirect draws, instance data with previous transforms, buffers that
-   grow, and Bevy's meshlets as a profile of their own. Then what a different virtualized geometry
-   package needs beyond Bevy's: a visibility buffer material pass and shadow views as views.
+3. **GPU-driven geometry.** Indirect draws on a camera, instance data with previous transforms and
+   buffers that grow are in. Next are Bevy's meshlets as a profile of their own, then what a
+   different virtualized geometry package needs beyond Bevy's: draws into integer targets for a
+   visibility buffer, a material pass reading it that writes depth and motion, and shadow views as
+   views, so the same draws render into a light's shadow map.
 4. **Streaming.** Import-time processing, worker-thread IO with a budget, region uploads and
    compressed formats. Texture streaming and geometry streaming share all of it.
 5. **World space.** Scene data readable from compute (lights and shadow maps are, the sky and

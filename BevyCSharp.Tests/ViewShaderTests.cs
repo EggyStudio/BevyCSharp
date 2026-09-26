@@ -343,6 +343,139 @@ public sealed class ViewShaderTests
         Assert.True(lit > shadowed, $"{lit} pixels came out lit against {shadowed} shadowed, under one small block");
     }
 
+    private static ShaderInstance Draw(string file) =>
+        Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
+        {
+            DrawVertex = file,
+            DrawFragment = file,
+        }));
+
+    /// <summary>
+    /// An orthographic camera eight units across over black, looking down the z axis from six
+    /// units away, which puts a world unit sixteen pixels across a picture of 128.
+    /// </summary>
+    private static Entity Ortho(EcsWorld ecs)
+    {
+        var camera = Render.SpawnCamera3d(new CameraSettings
+        {
+            Projection = CameraProjection.Orthographic,
+            Height = 8f,
+            Clear = ClearMode.Custom,
+            ClearColor = (0f, 0f, 0f, 1f),
+        });
+
+        ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 0f, 6f), Vec3.Zero, Vec3.UnitY));
+        return camera;
+    }
+
+    private static bool GreenAt(CapturedImage picture, uint x, uint y) =>
+        picture.At(x, y) is var pixel && pixel.G > 120 && pixel.R < 90 && pixel.B < 90;
+
+    /// <summary>A camera draws squares placed from a buffer, one instance a square.</summary>
+    [Fact]
+    public void ACameraDrawsWhatABufferPlaces()
+    {
+        if (!CanRun) return;
+
+        var run = new PictureRun
+        {
+            Width = 128,
+            Height = 128,
+            Scene = ecs =>
+            {
+                var camera = Ortho(ecs);
+                var centers = Shaders.CreateBuffer<Vector4>([new(-2f, 0f, 0f, 1f), new(2f, 0f, 0f, 1f)]);
+
+                var squares = Draw("shaders/draw_quads.slang")
+                    .SetBuffer("centers", centers)
+                    .Set("size", 0.5f)
+                    .Set("color", ShaderMaterialTests.Green);
+
+                Shaders.SetViewDraws(camera, ViewDraw.Fixed(squares, FramePoint.AfterOpaque, 6, 2));
+            },
+        };
+
+        run.Until("compiled", _ => Ready()).Wait(Settled).Capture("picture").Go();
+
+        var picture = run.Picture("picture");
+
+        Assert.True(GreenAt(picture, 32, 64) && GreenAt(picture, 96, 64), "the squares were not where the buffer put them");
+        Assert.False(GreenAt(picture, 64, 64), "a square was drawn in the middle, where no center puts one");
+    }
+
+    /// <summary>
+    /// A compute shader writes how many squares a draw draws, and the draw reads the count when it
+    /// runs.
+    /// </summary>
+    [Fact]
+    public void AComputeShaderDecidesHowManyAreDrawn()
+    {
+        if (!CanRun) return;
+
+        var run = new PictureRun
+        {
+            Width = 128,
+            Height = 128,
+            Scene = ecs =>
+            {
+                var camera = Ortho(ecs);
+                var centers = Shaders.CreateBuffer<Vector4>([new(-2f, 0f, 0f, 1f), new(2f, 0f, 0f, 1f)]);
+                var counts = Shaders.CreateBuffer(16);
+
+                var count = Compute("shaders/write_draw_counts.slang").SetBuffer("counts", counts).Set("squares", 1u);
+                var squares = Draw("shaders/draw_quads.slang")
+                    .SetBuffer("centers", centers)
+                    .Set("size", 0.5f)
+                    .Set("color", ShaderMaterialTests.Green);
+
+                Shaders.SetViewDispatches(camera, ViewDispatch.Fixed(count, FramePoint.AfterOpaque, 1));
+                Shaders.SetViewDraws(camera, ViewDraw.Indirect(squares, FramePoint.AfterOpaque, counts));
+            },
+        };
+
+        run.Until("compiled", _ => Ready()).Wait(Settled).Capture("picture").Go();
+
+        var picture = run.Picture("picture");
+
+        Assert.True(GreenAt(picture, 32, 64), "the one square counted was not drawn");
+        Assert.False(GreenAt(picture, 96, 64), "the square past the count was drawn");
+    }
+
+    /// <summary>What a camera draws is hidden by the scene in front of it, through the depth it shares.</summary>
+    [Fact]
+    public void WhatACameraDrawsIsHiddenBehindTheScene()
+    {
+        if (!CanRun) return;
+
+        var run = new PictureRun
+        {
+            Width = 128,
+            Height = 128,
+            Scene = ecs =>
+            {
+                var camera = Ortho(ecs);
+
+                // A large square behind a cube in front of it.
+                var centers = Shaders.CreateBuffer<Vector4>([new(0f, 0f, -3f, 1f)]);
+                var square = Draw("shaders/draw_quads.slang")
+                    .SetBuffer("centers", centers)
+                    .Set("size", 2f)
+                    .Set("color", ShaderMaterialTests.Green);
+
+                PictureRun.Cube(ecs, ShaderMaterialTests.Flat(ShaderMaterialTests.Blue), 2f);
+                Shaders.SetViewDraws(camera, ViewDraw.Fixed(square, FramePoint.AfterOpaque, 6));
+            },
+        };
+
+        run.Until("compiled", _ => Ready()).Wait(Settled).Capture("picture").Go();
+
+        var picture = run.Picture("picture");
+        var middle = picture.At(64, 64);
+
+        Assert.True(middle.B > 120 && middle.G < 90, $"the middle came out {middle}, so the square was drawn over the cube");
+        Assert.True(GreenAt(picture, 64, 40), "the square around the cube was not drawn");
+    }
+
     /// <summary>What cannot be a camera's image or dispatch is refused before reaching the engine.</summary>
     [Fact]
     public void AMalformedImageOrDispatchIsRefused()

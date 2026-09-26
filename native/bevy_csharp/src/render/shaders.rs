@@ -54,6 +54,9 @@ pub struct BcsShaderProgramConfig {
     pub pass: BcsShaderStage,
     pub defines: *const BcsShaderDefine,
     pub define_count: i32,
+    /// The vertex and fragment shaders of geometry drawn on a camera out of buffers.
+    pub draw_vertex: BcsShaderStage,
+    pub draw_fragment: BcsShaderStage,
 }
 
 /// How a sampler reads. Mirrors [`super::values::SamplerSettings`].
@@ -153,6 +156,8 @@ pub unsafe extern "C" fn bcs_shader_program_create(config: *const BcsShaderProgr
                     stage(config.prepass_fragment),
                     stage(config.compute),
                     stage(config.pass),
+                    stage(config.draw_vertex),
+                    stage(config.draw_fragment),
                 ],
                 defines: Vec::new(),
             };
@@ -913,6 +918,257 @@ pub unsafe extern "C" fn bcs_render_set_view_dispatches(
     })
 }
 
+/// One draw a camera makes every frame, as the managed side describes it.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsViewDraw {
+    pub instance: i32,
+    /// As [`BcsViewDispatch::point`].
+    pub point: i32,
+    /// `0` a fixed count, `1` counts read from a buffer.
+    pub mode: i32,
+    pub vertices: u32,
+    pub instances: u32,
+    /// For `1`, the buffer holding the counts and the byte offset into it.
+    pub buffer: i32,
+    pub offset: u32,
+    /// `0` opaque, `1` alpha blended, `2` added.
+    pub blend: i32,
+    /// Non-zero to write depth as well as test against it.
+    pub depth_write: i32,
+}
+
+/// Replaces the draws a camera makes every frame with `count` of them, in order. A count of zero
+/// takes them all away.
+///
+/// # Safety
+/// `draws` must point at `count` readable [`BcsViewDraw`]s, or be null when `count` is zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_set_view_draws(
+    camera: u64,
+    draws: *const BcsViewDraw,
+    count: i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, draws, count);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use super::views::{DrawBlend, DrawCount, FramePoint};
+
+            if count < 0 || (draws.is_null() && count > 0) {
+                return status::NULL_ARG;
+            }
+
+            let given: &[BcsViewDraw] = if count > 0 {
+                unsafe { core::slice::from_raw_parts(draws, count as usize) }
+            } else {
+                &[]
+            };
+
+            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+
+            crate::state::with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let known = world
+                    .get_resource::<ShaderInstances>()
+                    .map(|instances| instances.0.len())
+                    .unwrap_or(0);
+
+                let mut list = Vec::with_capacity(given.len());
+
+                for draw in given {
+                    if draw.instance < 0 || draw.instance as usize >= known {
+                        return status::NO_COMPONENT;
+                    }
+
+                    let Some(point) = FramePoint::from_number(draw.point) else {
+                        return status::NULL_ARG;
+                    };
+
+                    let count = match draw.mode {
+                        0 => DrawCount::Fixed {
+                            vertices: draw.vertices,
+                            instances: draw.instances.max(1),
+                        },
+                        1 => {
+                            if draw.offset % 4 != 0 {
+                                return status::NULL_ARG;
+                            }
+
+                            let Some(buffer) = super::compute::buffer_handle(world, draw.buffer)
+                            else {
+                                return status::NO_COMPONENT;
+                            };
+
+                            DrawCount::Indirect {
+                                buffer,
+                                offset: draw.offset as u64,
+                            }
+                        }
+                        _ => return status::NULL_ARG,
+                    };
+
+                    let blend = match draw.blend {
+                        1 => DrawBlend::Alpha,
+                        2 => DrawBlend::Add,
+                        _ => DrawBlend::Opaque,
+                    };
+
+                    list.push((draw.instance as usize, point, count, blend, draw.depth_write != 0));
+                }
+
+                let mut camera = world.entity_mut(entity);
+
+                if list.is_empty() {
+                    camera.remove::<(DrawInstances, super::views::BcsViewDraws)>();
+                } else {
+                    camera.insert(DrawInstances(list));
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Which instances a camera draws every frame, where in its frame, how many vertices, and how.
+#[cfg(feature = "render")]
+#[derive(bevy::ecs::component::Component, Clone)]
+#[allow(clippy::type_complexity)]
+pub struct DrawInstances(
+    pub  Vec<(
+        usize,
+        super::views::FramePoint,
+        super::views::DrawCount,
+        super::views::DrawBlend,
+        bool,
+    )>,
+);
+
+/// Copies what each camera's draw instances hold onto the camera every frame, where the render
+/// world takes it from.
+#[cfg(feature = "render")]
+pub fn sync_view_draws(
+    mut commands: bevy::ecs::system::Commands,
+    instances: Option<bevy::ecs::system::Res<ShaderInstances>>,
+    cameras: bevy::ecs::system::Query<(bevy::ecs::entity::Entity, &DrawInstances)>,
+) {
+    use super::views::{BcsViewDraws, ViewDraw};
+
+    let Some(instances) = instances else {
+        return;
+    };
+
+    for (entity, wanted) in &cameras {
+        let draws = wanted
+            .0
+            .iter()
+            .filter_map(|(id, point, count, blend, depth_write)| {
+                let instance = instances.0.get(*id)?;
+                Some(ViewDraw {
+                    program: instance.program,
+                    values: instance.values.clone(),
+                    point: *point,
+                    count: count.clone(),
+                    blend: *blend,
+                    depth_write: *depth_write,
+                })
+            })
+            .collect();
+
+        commands.entity(entity).insert(BcsViewDraws(draws));
+    }
+}
+
+/// Starts watching one of a camera's images: every frame, once the camera's frame is done, it is
+/// drawn into an eight-bit image of `width` by `height`, each value times `scale` plus `offset`.
+/// Answers that image's asset key, which anything that draws images can show.
+///
+/// The name is any a shader on the camera reads an image by, or `depth`, `normals` or `motion`
+/// for the prepass's. See [`super::watch`].
+///
+/// # Safety
+/// `name` must be a NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_watch_view_image(
+    camera: u64,
+    name: *const core::ffi::c_char,
+    width: u32,
+    height: u32,
+    scale: f32,
+    offset: f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, name, width, height, scale, offset);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            let Some(name) = (unsafe { crate::interop::cstr_to_string(name) }) else {
+                return status::NULL_ARG;
+            };
+
+            if name.is_empty() || width == 0 || height == 0 {
+                return status::NULL_ARG;
+            }
+
+            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+
+            crate::state::with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                super::watch::watch(world, entity, name, width, height, scale, offset)
+            })
+        }
+    })
+}
+
+/// Stops watching one of a camera's images.
+///
+/// # Safety
+/// `name` must be a NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_unwatch_view_image(camera: u64, name: *const core::ffi::c_char) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, name);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            let Some(name) = (unsafe { crate::interop::cstr_to_string(name) }) else {
+                return status::NULL_ARG;
+            };
+
+            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+
+            crate::state::with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                super::watch::unwatch(world, entity, &name);
+                status::OK
+            })
+        }
+    })
+}
+
 /// Which instances a camera dispatches every frame, where in its frame, and how many workgroups.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::component::Component, Clone)]
@@ -1350,6 +1606,9 @@ pub unsafe extern "C" fn bcs_shader_set_bytes(
 /// Puts an image under a name, at `index` where the name is an array of textures. A key of zero
 /// or less takes it off again.
 ///
+/// `mip` below zero binds the whole image, and zero or more binds that one mip level of it, which
+/// is what a shader building a pyramid a level at a time reads one level and writes the next with.
+///
 /// # Safety
 /// `name` must be a NUL-terminated UTF-8 string.
 #[unsafe(no_mangle)]
@@ -1359,11 +1618,12 @@ pub unsafe extern "C" fn bcs_shader_set_image(
     name: *const core::ffi::c_char,
     index: i32,
     image: i32,
+    mip: i32,
 ) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (kind, id, name, index, image);
+            let _ = (kind, id, name, index, image, mip);
             status::UNSUPPORTED
         }
 
@@ -1378,6 +1638,7 @@ pub unsafe extern "C" fn bcs_shader_set_image(
             }
 
             let key = super::values::element_name(&name, index as u32);
+            let level = u32::try_from(mip).ok();
 
             if image <= 0 {
                 return unset(kind, id, key);
@@ -1388,7 +1649,9 @@ pub unsafe extern "C" fn bcs_shader_set_image(
             });
 
             match handle {
-                Some(Ok(Some(handle))) => put(kind, id, key, super::values::Value::Image(handle)),
+                Some(Ok(Some(handle))) => {
+                    put(kind, id, key, super::values::Value::Image(handle, level))
+                }
                 Some(Err(refusal)) => refusal,
                 _ => status::NO_WORLD,
             }
@@ -1750,6 +2013,81 @@ pub extern "C" fn bcs_shader_buffer_size(buffer: i32) -> i32 {
     })
 }
 
+/// Makes a buffer with `capacity` slots the engine fills every frame with the transforms of the
+/// entities put in them, this frame's and the previous one's, and answers its asset key.
+///
+/// See [`super::instances`] for the layout.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_instance_buffer_create(capacity: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = capacity;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if capacity <= 0 {
+                return status::NULL_ARG;
+            }
+
+            crate::state::with_world(|world| super::instances::create(world, capacity as u32))
+        }
+    })
+}
+
+/// Puts an entity in a slot of an instance buffer, or empties the slot where `entity` is zero.
+///
+/// Returns [`status::NOT_PRESENT`] where the slot is past the buffer's capacity, and
+/// [`status::NO_COMPONENT`] where the key is not an instance buffer.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_instance_buffer_set(buffer: i32, slot: i32, entity: u64) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (buffer, slot, entity);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if slot < 0 {
+                return status::NOT_PRESENT;
+            }
+
+            let entity = (entity != 0).then(|| bevy::ecs::entity::Entity::from_bits(entity));
+
+            crate::state::with_world(|world| {
+                super::instances::set(world, buffer, slot as u32, entity)
+            })
+        }
+    })
+}
+
+/// Makes a buffer at least `size` bytes, keeping what it holds, and returns its new size.
+///
+/// See [`super::compute::grow_buffer`] for what happens to what already had it.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_buffer_grow(buffer: i32, size: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (buffer, size);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if size < 0 {
+                return status::NULL_ARG;
+            }
+
+            crate::state::with_world(|world| super::compute::grow_buffer(world, buffer, size as u64))
+        }
+    })
+}
+
 /// Starts copying a buffer back from the GPU, and answers the ticket its bytes arrive under.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_shader_buffer_read(buffer: i32) -> i32 {
@@ -1793,20 +2131,27 @@ pub unsafe extern "C" fn bcs_shader_buffer_take(ticket: i32, out: *mut u8, capac
 
 /// Makes an image a compute shader writes and anything samples, and answers its asset key.
 ///
-/// `depth` above one makes a 3D image. `format` indexes [`super::compute::IMAGE_FORMATS`].
+/// `depth` above one makes a 3D image. `format` indexes [`super::compute::IMAGE_FORMATS`]. `mips`
+/// above one gives it that many mip levels, as many as its size allows, all starting as zeros.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_shader_image_create(width: u32, height: u32, depth: u32, format: i32) -> i32 {
+pub extern "C" fn bcs_shader_image_create(
+    width: u32,
+    height: u32,
+    depth: u32,
+    format: i32,
+    mips: u32,
+) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (width, height, depth, format);
+            let _ = (width, height, depth, format, mips);
             status::UNSUPPORTED
         }
 
         #[cfg(feature = "render")]
         {
             crate::state::with_world(|world| {
-                super::compute::create_image(world, width, height, depth, format)
+                super::compute::create_image_with_mips(world, width, height, depth, format, mips)
             })
         }
     })
@@ -1874,7 +2219,9 @@ mod tests {
         assert_eq!(offset_of!(BcsShaderProgramConfig, pass), 120);
         assert_eq!(offset_of!(BcsShaderProgramConfig, defines), 144);
         assert_eq!(offset_of!(BcsShaderProgramConfig, define_count), 152);
-        assert_eq!(size_of::<BcsShaderProgramConfig>(), 160);
+        assert_eq!(offset_of!(BcsShaderProgramConfig, draw_vertex), 160);
+        assert_eq!(offset_of!(BcsShaderProgramConfig, draw_fragment), 184);
+        assert_eq!(size_of::<BcsShaderProgramConfig>(), 208);
     }
 
     #[test]
@@ -1886,6 +2233,14 @@ mod tests {
         assert_eq!(offset_of!(BcsViewDispatch, scale), 24);
         assert_eq!(offset_of!(BcsViewDispatch, offset), 32);
         assert_eq!(size_of::<BcsViewDispatch>(), 36);
+    }
+
+    #[test]
+    fn the_view_draw_has_the_layout_the_managed_side_mirrors() {
+        assert_eq!(offset_of!(BcsViewDraw, vertices), 12);
+        assert_eq!(offset_of!(BcsViewDraw, offset), 24);
+        assert_eq!(offset_of!(BcsViewDraw, depth_write), 32);
+        assert_eq!(size_of::<BcsViewDraw>(), 36);
     }
 
     #[test]

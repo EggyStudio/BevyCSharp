@@ -461,6 +461,80 @@ pub fn write_buffer(world: &mut World, key: i32, bytes: &[u8]) -> i32 {
     status::OK
 }
 
+/// Makes a buffer at least `size` bytes, keeping what it holds, and answers its new size.
+///
+/// The GPU buffer is a new one, with the old one's contents copied to its start on the GPU, since
+/// a buffer cannot grow in place. Whatever was built against the old one is built again: every
+/// material holding it is prepared again and every shader instance holding it moves on a version,
+/// which is what makes a grown buffer safe to keep handing to what already had it. A size no larger
+/// than the buffer's leaves it as it is.
+pub fn grow_buffer(world: &mut World, key: i32, size: u64) -> i32 {
+    let Some(handle) = buffer_handle(world, key) else {
+        return status::NO_COMPONENT;
+    };
+
+    let wanted = buffer_size(size);
+
+    {
+        let Some(mut assets) = world.get_resource_mut::<Assets<ShaderBuffer>>() else {
+            return status::UNSUPPORTED;
+        };
+
+        let Some(current) = assets.get(&handle) else {
+            return status::NO_COMPONENT;
+        };
+
+        if current.buffer_description.size >= wanted {
+            return current.buffer_description.size.min(i32::MAX as u64) as i32;
+        }
+
+        let Some(mut buffer) = assets.get_mut(&handle) else {
+            return status::NO_COMPONENT;
+        };
+
+        // No data, so the new buffer takes the old one's contents rather than bytes from here,
+        // which would be what the CPU last wrote rather than what the GPU has since.
+        buffer.data = None;
+        buffer.copy_on_resize = true;
+        buffer.buffer_description.size = wanted;
+    }
+
+    rebind_buffer(world, &handle);
+    wanted.min(i32::MAX as u64) as i32
+}
+
+/// Has everything holding `handle` built against it again.
+fn rebind_buffer(world: &mut World, handle: &Handle<ShaderBuffer>) {
+    use super::values::Value;
+
+    let holds = |values: &Values| {
+        values
+            .entries
+            .values()
+            .any(|value| matches!(value, Value::Buffer(held) if held == handle))
+    };
+
+    if let Some(mut materials) = world.get_resource_mut::<Assets<super::material::BcsMaterial>>() {
+        let stale: Vec<_> = materials
+            .iter()
+            .filter(|(_, material)| holds(&material.values))
+            .map(|(id, _)| id)
+            .collect();
+
+        for id in stale {
+            if let Some(material) = materials.get_mut(id) {
+                material.into_inner();
+            }
+        }
+    }
+
+    if let Some(mut instances) = world.get_resource_mut::<super::shaders::ShaderInstances>() {
+        for instance in instances.0.iter_mut().filter(|instance| holds(&instance.values)) {
+            instance.version += 1;
+        }
+    }
+}
+
 /// A buffer's size in bytes.
 pub fn size_of_buffer(world: &World, key: i32) -> i32 {
     let Some(handle) = buffer_handle(world, key) else {
@@ -547,6 +621,49 @@ pub const IMAGE_FORMATS: [(TextureFormat, usize); 10] = [
 /// `RWTexture3D` wants. It starts as zeros.
 pub fn create_image(world: &mut World, width: u32, height: u32, depth: u32, format: i32) -> i32 {
     create_image_from(world, width, height, depth, format, None)
+}
+
+/// Makes an image as [`create_image`] does, with `mips` mip levels, as many as its size allows.
+///
+/// Every level starts as zeros, which is what wgpu gives a texture made without contents, since
+/// contents for one level would leave the rest to be supplied and a pyramid is built on the GPU.
+pub fn create_image_with_mips(
+    world: &mut World,
+    width: u32,
+    height: u32,
+    depth: u32,
+    format: i32,
+    mips: u32,
+) -> i32 {
+    if mips <= 1 {
+        return create_image(world, width, height, depth, format);
+    }
+
+    let key = create_image(world, width, height, depth, format);
+
+    if key <= 0 {
+        return key;
+    }
+
+    let Some(handle) = crate::assets::clone_handle(world, key).and_then(|handle| handle.try_typed::<Image>().ok()) else {
+        return status::NO_COMPONENT;
+    };
+
+    let Some(mut images) = world.get_resource_mut::<Assets<Image>>() else {
+        return status::UNSUPPORTED;
+    };
+
+    let Some(mut image) = images.get_mut(&handle) else {
+        return status::NO_COMPONENT;
+    };
+
+    let largest = width.max(height).max(if depth > 1 { depth } else { 1 });
+    let possible = 32 - largest.leading_zeros();
+
+    image.texture_descriptor.mip_level_count = mips.min(possible);
+    image.data = None;
+
+    key
 }
 
 /// Makes an image as [`create_image`] does, starting with `texels` rather than zeros.

@@ -1061,6 +1061,16 @@ workgroups as three unsigned integers in a buffer say, read on the GPU when the 
 one compute shader can count the work (the pixels that need tracing, the clusters that survived
 culling) and the next runs exactly that much without the count crossing back to the CPU.
 
+A buffer's size is fixed until `Shaders.GrowBuffer` makes it larger, which copies what it held on
+the GPU into the start of a new one and has every material and shader instance holding it bind the
+new one, so a list that outgrows its buffer does not have to be handed out again.
+
+`Shaders.CreateInstanceBuffer(capacity)` makes a buffer the engine fills every frame with entities'
+transforms, this frame's and the previous frame's, once transforms have been worked out.
+`Shaders.SetInstance(buffer, slot, entity)` puts an entity in a slot. A shader reads it as a
+`StructuredBuffer<bcs_scene::Instance>` after `import bcs_scene;`, which is what culling instances on
+the GPU, voxelizing a scene, or giving geometry a shader placed its motion is built on.
+
 #### Compute on a camera
 
 Screen-space techniques are a chain of compute and passes over one camera's frame, each reading
@@ -1131,6 +1141,30 @@ geometry; and `BeforeTonemapping` or `AfterTonemapping`, ahead of the passes on 
 workgroups cover a fraction of the picture (`PerPixel`), are fixed (`Fixed`), or come from a buffer
 (`Indirect`). It reads the same inputs a pass does through `import bcs_pass;`, and a compute shader
 importing `bcs_compute` runs on a camera as well, reading only time.
+
+**Drawing on a camera.** A program with a `DrawVertex` and a `DrawFragment` stage draws into a
+camera's picture at a frame point, tested against its depth, out of buffers rather than a mesh.
+Its vertex shader is handed no vertices, only `SV_VertexID` and `SV_InstanceID`, and places what is
+drawn from what it declares, which is how particles a compute shader moves, clusters a culling pass
+chose, or any number of instances whose count a buffer holds are drawn:
+
+```csharp
+var sparks = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
+{
+    DrawVertex = "shaders/sparks.slang",
+    DrawFragment = "shaders/sparks.slang",
+})).SetBuffer("sparks", positions);
+
+Shaders.SetViewDraws(camera,
+    ViewDraw.Fixed(sparks, FramePoint.AfterOpaque, vertices: 6, instances: 1000, DrawBlend.Add),
+    ViewDraw.Indirect(clusters, FramePoint.AfterOpaque, counts));   // counts a dispatch wrote
+```
+
+A draw's count is fixed or read from four unsigned integers in a buffer when it runs (vertices,
+instances, first vertex, first instance), so a dispatch at the same point, which runs first, can
+decide it. It blends as `Opaque`, `Alpha` or `Add`, and writes depth or only tests against it. It
+reads the camera's inputs through `import bcs_pass;`, all but the picture, which is what it draws
+into.
 
 **Into Bevy's lighting.** Ambient occlusion is the one input to the lighting of Bevy's own materials
 a chain can write so far. `Render.SetAmbientOcclusion(camera, AmbientOcclusionQuality.Low)` turns

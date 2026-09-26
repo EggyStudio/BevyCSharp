@@ -37,6 +37,7 @@ public partial struct EditorBoot
         EditorShell.Tabs.Add(new EditorTab("Console", ConsoleTab.Draw));
         EditorShell.Tabs.Add(new EditorTab("Assets", AssetsTab.Draw));
         EditorShell.Tabs.Add(new EditorTab("Shaders", ShadersTab.Draw));
+        EditorShell.Tabs.Add(new EditorTab("Frame", FrameTab.Draw));
         EditorShell.Tabs.Add(new EditorTab("Settings", SettingsTab.Draw));
         EditorShell.Tabs.Add(new EditorTab("Style", StyleTab.Draw));
 

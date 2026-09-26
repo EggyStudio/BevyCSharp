@@ -55,10 +55,15 @@ pub enum Role {
     PrepassFragment = 3,
     Compute = 4,
     Pass = 5,
+    /// The vertex shader of geometry a program draws on a camera itself, out of buffers, rather
+    /// than a mesh Bevy draws with a material.
+    DrawVertex = 6,
+    /// The fragment shader of the same.
+    DrawFragment = 7,
 }
 
 /// How many roles a program has.
-pub const ROLE_COUNT: usize = 6;
+pub const ROLE_COUNT: usize = 8;
 
 impl Role {
     pub const ALL: [Role; ROLE_COUNT] = [
@@ -68,6 +73,8 @@ impl Role {
         Role::PrepassFragment,
         Role::Compute,
         Role::Pass,
+        Role::DrawVertex,
+        Role::DrawFragment,
     ];
 
     /// The roles a material is drawn with.
@@ -82,16 +89,18 @@ impl Role {
     /// shaders call theirs.
     fn default_entry(self) -> &'static str {
         match self {
-            Role::Vertex | Role::PrepassVertex => "vertex",
-            Role::Fragment | Role::PrepassFragment | Role::Pass => "fragment",
+            Role::Vertex | Role::PrepassVertex | Role::DrawVertex => "vertex",
+            Role::Fragment | Role::PrepassFragment | Role::Pass | Role::DrawFragment => "fragment",
             Role::Compute => "main",
         }
     }
 
     fn stage(self) -> slang::Stage {
         match self {
-            Role::Vertex | Role::PrepassVertex => slang::Stage::Vertex,
-            Role::Fragment | Role::PrepassFragment | Role::Pass => slang::Stage::Fragment,
+            Role::Vertex | Role::PrepassVertex | Role::DrawVertex => slang::Stage::Vertex,
+            Role::Fragment | Role::PrepassFragment | Role::Pass | Role::DrawFragment => {
+                slang::Stage::Fragment
+            }
             Role::Compute => slang::Stage::Compute,
         }
     }
@@ -102,7 +111,9 @@ impl Role {
             Role::Vertex | Role::Fragment | Role::PrepassVertex | Role::PrepassFragment => {
                 Family::Material
             }
-            Role::Pass => Family::Pass,
+            // Drawing on a camera reads what a pass does, the camera's inputs in group one and its
+            // own values in group zero, so it is laid out the way a pass is.
+            Role::Pass | Role::DrawVertex | Role::DrawFragment => Family::Pass,
             Role::Compute => Family::Compute,
         }
     }
@@ -115,6 +126,8 @@ impl Role {
             Role::PrepassFragment => "prepass fragment",
             Role::Compute => "compute",
             Role::Pass => "pass",
+            Role::DrawVertex => "draw vertex",
+            Role::DrawFragment => "draw fragment",
         }
     }
 }
@@ -135,6 +148,8 @@ pub struct PipelineProgram {
     pub material: Option<Arc<Layout>>,
     pub pass: Option<Arc<Layout>>,
     pub compute: Option<Arc<Layout>>,
+    /// The layout of what a program drawing on a camera declares, merged from both of its stages.
+    pub draw: Option<Arc<Layout>>,
     /// Moves on every time a stage is replaced, which is what a pipeline or a bind group made from
     /// an older version checks itself against.
     pub generation: u32,
@@ -365,7 +380,7 @@ fn fingerprint(path: &Path) -> Option<u64> {
 /// Returns the program's number, or a negative status where the description names none of a
 /// fragment shader, a pass or a compute shader, or names a file that is not Slang.
 pub fn create(world: &mut World, description: ProgramDescription) -> i32 {
-    let usable = [Role::Fragment, Role::Compute, Role::Pass]
+    let usable = [Role::Fragment, Role::Compute, Role::Pass, Role::DrawFragment]
         .iter()
         .any(|role| description.stages[*role as usize].is_some());
 
@@ -690,6 +705,7 @@ fn rebuild(programs: &mut ShaderPrograms, id: usize) {
 
     let mut entry = PipelineProgram::default();
     let mut material: Option<Layout> = None;
+    let mut draw: Option<Layout> = None;
     let mut problem = String::new();
 
     for role in Role::ALL {
@@ -702,22 +718,32 @@ fn rebuild(programs: &mut ShaderPrograms, id: usize) {
             entry: Cow::Owned(unit.request.entry.clone()),
         });
 
-        match role.family() {
-            Family::Material => match material.as_mut() {
-                None => material = Some(unit.layout.clone()),
+        // Both stages of a material, and both of a draw, share one group, so their layouts merge.
+        let merged_into = match role {
+            Role::DrawVertex | Role::DrawFragment => Some(&mut draw),
+            _ if role.family() == Family::Material => Some(&mut material),
+            _ => None,
+        };
+
+        match merged_into {
+            Some(slot) => match slot.as_mut() {
+                None => *slot = Some(unit.layout.clone()),
                 Some(merged) => {
                     if let Err(message) = merged.merge(&unit.layout) {
                         problem = message;
                     }
                 }
             },
-            Family::Pass => entry.pass = Some(Arc::new(unit.layout.clone())),
-            Family::Compute => entry.compute = Some(Arc::new(unit.layout.clone())),
+            None if role.family() == Family::Pass => {
+                entry.pass = Some(Arc::new(unit.layout.clone()))
+            }
+            None => entry.compute = Some(Arc::new(unit.layout.clone())),
         }
     }
 
     if problem.is_empty() {
         entry.material = material.map(Arc::new);
+        entry.draw = draw.map(Arc::new);
     } else {
         bevy::log::error!("{}: {problem}", program.description);
     }
@@ -767,7 +793,7 @@ fn fallback_source(role: Role, entry: &str) -> String {
     match role {
         // Magenta, reading nothing but the position, so it is valid after any vertex shader and
         // in a pass as well as in a material.
-        Role::Fragment | Role::Pass => format!(
+        Role::Fragment | Role::Pass | Role::DrawFragment => format!(
             "@fragment\nfn {entry}(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {{\n    \
              let checker = (u32(position.x / 8.0) + u32(position.y / 8.0)) % 2u;\n    \
              return select(vec4<f32>(1.0, 0.0, 1.0, 1.0), vec4<f32>(0.1, 0.0, 0.1, 1.0), checker == 1u);\n}}\n"
@@ -850,6 +876,13 @@ fn {entry}(vertex: Vertex) -> VertexOutput {{
     return out;
 }}
 "#
+        ),
+
+        // Every vertex at one point, which draws nothing, since what a draw's vertex shader reads
+        // to place its geometry is not known here.
+        Role::DrawVertex => format!(
+            "@vertex\nfn {entry}(@builtin(vertex_index) index: u32) -> @builtin(position) vec4<f32> {{\n    \
+             return vec4<f32>(0.0, 0.0, 0.0, 1.0);\n}}\n"
         ),
 
         // Does nothing, which is the only thing a compute shader can safely do without knowing

@@ -137,7 +137,7 @@ pub struct ViewLights<'a> {
 fn init_inputs(mut commands: Commands, render_device: Res<RenderDevice>) {
     let entry = |binding: u32, ty: BindingType| BindGroupLayoutEntry {
         binding,
-        visibility: ShaderStages::FRAGMENT | ShaderStages::COMPUTE,
+        visibility: ShaderStages::VERTEX | ShaderStages::FRAGMENT | ShaderStages::COMPUTE,
         ty,
         count: None,
     };
@@ -1051,11 +1051,357 @@ fn run_view_dispatches<const POINT: u8>(
     }
 }
 
+// -- Drawing on a camera
+
+/// How what a draw writes combines with what is already in the picture.
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+pub enum DrawBlend {
+    /// Replaces it.
+    Opaque,
+    /// Over it, by the fragment's alpha.
+    Alpha,
+    /// Added to it, which is what anything glowing wants.
+    Add,
+}
+
+/// How many vertices and instances a draw on a camera draws.
+#[derive(Clone, Debug)]
+pub enum DrawCount {
+    Fixed { vertices: u32, instances: u32 },
+    /// Four unsigned integers at `offset` in a buffer, written on the GPU: vertices, instances,
+    /// the first vertex and the first instance.
+    Indirect {
+        buffer: Handle<ShaderBuffer>,
+        offset: u64,
+    },
+}
+
+/// Geometry a program draws on a camera every frame, out of buffers its vertex shader reads.
+#[derive(Clone, Debug)]
+pub struct ViewDraw {
+    pub program: u32,
+    pub values: Values,
+    pub point: FramePoint,
+    pub count: DrawCount,
+    pub blend: DrawBlend,
+    /// Whether it writes depth, as opaque geometry does, or only tests against it, as anything
+    /// see-through does.
+    pub depth_write: bool,
+}
+
+/// The draws a camera makes every frame, in order.
+#[derive(Component, Clone, ExtractComponent)]
+#[extract_component_filter(With<Camera>)]
+pub struct BcsViewDraws(pub Vec<ViewDraw>);
+
+/// One render pipeline per program, version, picture format, sample count, blend and depth write,
+/// since a pipeline names all of them.
+#[derive(Resource, Default)]
+struct ViewDrawPipelines(
+    HashMap<(u32, u32, TextureFormat, u32, DrawBlend, bool), bevy::render::render_resource::CachedRenderPipelineId>,
+);
+
+/// A draw ready to run on a view.
+struct PreparedViewDraw {
+    point: FramePoint,
+    pipeline: bevy::render::render_resource::CachedRenderPipelineId,
+    own: BindGroup,
+    count: PreparedDrawCount,
+}
+
+enum PreparedDrawCount {
+    Direct(u32, u32),
+    Indirect(Buffer, u64),
+}
+
+/// A view's draws, ready to run.
+#[derive(Component)]
+pub struct PreparedViewDraws(Vec<PreparedViewDraw>);
+
+/// The layout of a program's own group for a draw on a camera.
+fn draw_layout(layout: &super::reflect::Layout) -> BindGroupLayoutDescriptor {
+    BindGroupLayoutDescriptor::new(
+        "bcs_view_draw_own",
+        &layout.entries(ShaderStages::VERTEX_FRAGMENT),
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn prepare_view_draws(
+    mut commands: Commands,
+    mut pipelines: ResMut<ViewDrawPipelines>,
+    inputs: Res<ViewInputs>,
+    cache: Res<PipelineCache>,
+    render_device: Res<RenderDevice>,
+    images: Res<RenderAssets<GpuImage>>,
+    buffers: Res<RenderAssets<GpuShaderBuffer>>,
+    fallback: Res<FallbackImage>,
+    stand: Option<Res<Stand>>,
+    views: Query<(
+        Entity,
+        &ViewTarget,
+        &BcsViewDraws,
+        Option<&bevy::render::view::Msaa>,
+        Option<&ViewImageTextures>,
+        Option<&ScreenSpaceAmbientOcclusionResources>,
+    )>,
+) {
+    use bevy::render::render_resource::{
+        BlendComponent, BlendFactor, BlendOperation, BlendState, ColorTargetState, ColorWrites,
+        CompareFunction, DepthStencilState, FragmentState, MultisampleState,
+        RenderPipelineDescriptor, VertexState,
+    };
+
+    let Some(stand) = stand else {
+        return;
+    };
+
+    for (entity, target, asked, msaa, owned, occlusion) in &views {
+        let names = view_names(owned, occlusion);
+        let format = target.main_texture_format();
+        let samples = msaa.map_or(1, |msaa| msaa.samples());
+        let mut prepared = Vec::with_capacity(asked.0.len());
+
+        for draw in &asked.0 {
+            let Some(program) = programs::lookup(draw.program) else {
+                continue;
+            };
+
+            let (Some(layout), Some(vertex), Some(fragment)) = (
+                program.draw.clone(),
+                program.stages[Role::DrawVertex as usize].clone(),
+                program.stages[Role::DrawFragment as usize].clone(),
+            ) else {
+                if program.generation > 0 {
+                    say_once(format!(
+                        "A camera draws shader program {}, which needs both a draw vertex and a \
+                         draw fragment stage, so it draws nothing.",
+                        draw.program
+                    ));
+                }
+                continue;
+            };
+
+            let key = (
+                draw.program,
+                program.generation,
+                format,
+                samples,
+                draw.blend,
+                draw.depth_write,
+            );
+
+            let pipeline = *pipelines.0.entry(key).or_insert_with(|| {
+                let add = BlendComponent {
+                    src_factor: BlendFactor::One,
+                    dst_factor: BlendFactor::One,
+                    operation: BlendOperation::Add,
+                };
+
+                cache.queue_render_pipeline(RenderPipelineDescriptor {
+                    label: Some("bcs_view_draw".into()),
+                    layout: vec![draw_layout(&layout), inputs.layout.clone()],
+                    vertex: VertexState {
+                        shader: vertex.shader,
+                        shader_defs: Vec::new(),
+                        entry_point: None,
+                        buffers: Vec::new(),
+                    },
+                    fragment: Some(FragmentState {
+                        shader: fragment.shader,
+                        shader_defs: Vec::new(),
+                        entry_point: None,
+                        targets: vec![Some(ColorTargetState {
+                            format,
+                            blend: match draw.blend {
+                                DrawBlend::Opaque => None,
+                                DrawBlend::Alpha => Some(BlendState::ALPHA_BLENDING),
+                                DrawBlend::Add => Some(BlendState { color: add, alpha: add }),
+                            },
+                            write_mask: ColorWrites::ALL,
+                        })],
+                    }),
+                    depth_stencil: Some(DepthStencilState {
+                        format: bevy::core_pipeline::core_3d::CORE_3D_DEPTH_FORMAT,
+                        depth_write_enabled: Some(draw.depth_write),
+                        // Bevy's depth runs backwards, so nearer is greater.
+                        depth_compare: Some(CompareFunction::GreaterEqual),
+                        stencil: Default::default(),
+                        bias: Default::default(),
+                    }),
+                    multisample: MultisampleState {
+                        count: samples,
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                })
+            });
+
+            let context = PackContext {
+                device: &render_device,
+                images: &images,
+                buffers: &buffers,
+                fallback: &fallback,
+                stand: &stand,
+                view: names.as_deref(),
+            };
+
+            let packed = match pack(&layout, &draw.values, &context) {
+                Ok(packed) => packed,
+                Err(PackError::NotReady) => continue,
+                Err(PackError::Missing(message)) => {
+                    say_once(format!(
+                        "A draw on a camera of shader program {}: {message}",
+                        draw.program
+                    ));
+                    continue;
+                }
+            };
+
+            for problem in &packed.problems {
+                say_once(format!(
+                    "A draw on a camera of shader program {}: {problem}",
+                    draw.program
+                ));
+            }
+
+            let count = match &draw.count {
+                DrawCount::Fixed {
+                    vertices,
+                    instances,
+                } => PreparedDrawCount::Direct(*vertices, *instances),
+                DrawCount::Indirect { buffer, offset } => match buffers.get(buffer) {
+                    Some(gpu) => PreparedDrawCount::Indirect(gpu.buffer.clone(), *offset),
+                    None => continue,
+                },
+            };
+
+            prepared.push(PreparedViewDraw {
+                point: draw.point,
+                pipeline,
+                own: packed.bind_group(
+                    &render_device,
+                    "bcs_view_draw_own",
+                    &cache.get_bind_group_layout(&draw_layout(&layout)),
+                ),
+                count,
+            });
+        }
+
+        commands.entity(entity).insert(PreparedViewDraws(prepared));
+    }
+}
+
+/// Drops what a view kept for draws its camera no longer has.
+fn forget_view_draws(
+    mut commands: Commands,
+    views: Query<Entity, (With<PreparedViewDraws>, Without<BcsViewDraws>)>,
+) {
+    for entity in &views {
+        commands.entity(entity).remove::<PreparedViewDraws>();
+    }
+}
+
+/// Runs a view's draws for one point of its frame, into its picture and against its depth.
+#[allow(clippy::too_many_arguments)]
+fn run_view_draws<const POINT: u8>(
+    view: ViewQuery<(
+        &ViewTarget,
+        &ViewUniformOffset,
+        &PreparedViewDraws,
+        &bevy::render::view::ViewDepthTexture,
+        Option<&ViewPrepassTextures>,
+        Option<&PreviousViewUniformOffset>,
+        Option<&ViewLightsUniformOffset>,
+        Option<&ViewShadowBindings>,
+    )>,
+    inputs: Res<ViewInputs>,
+    fallback: Res<FallbackImage>,
+    cache: Res<PipelineCache>,
+    globals: Res<GlobalsBuffer>,
+    view_uniforms: Res<ViewUniforms>,
+    previous_uniforms: Option<Res<PreviousViewUniforms>>,
+    scene: SceneLights,
+    mut ctx: RenderContext,
+) {
+    use bevy::render::render_resource::{RenderPassDescriptor, StoreOp};
+
+    let (target, offset, prepared, depth, prepass, previous, light_offset, shadows) =
+        view.into_inner();
+
+    if !prepared.0.iter().any(|draw| draw.point as u8 == POINT) {
+        return;
+    }
+
+    let (Some(globals), Some(view_binding)) =
+        (globals.buffer.binding(), view_uniforms.uniforms.binding())
+    else {
+        return;
+    };
+
+    let sources = ViewInputSources::gather(
+        &inputs,
+        &fallback,
+        prepass,
+        previous_uniforms.as_deref().zip(previous),
+    );
+
+    // The picture is what is being drawn into, so it cannot be read in the same pass, and a
+    // stand-in is bound where it would be.
+    let Some((group, offsets)) = sources.bind(
+        ctx.render_device(),
+        &cache,
+        &inputs,
+        &fallback.d2.texture_view,
+        globals,
+        view_binding,
+        offset.offset,
+        &scene,
+        &ViewLights {
+            offset: light_offset,
+            shadows,
+        },
+    ) else {
+        return;
+    };
+
+    let color = [Some(target.get_color_attachment())];
+
+    let mut pass = ctx.command_encoder().begin_render_pass(&RenderPassDescriptor {
+        label: Some("bcs_view_draw"),
+        color_attachments: &color,
+        depth_stencil_attachment: Some(depth.get_attachment(StoreOp::Store)),
+        timestamp_writes: None,
+        occlusion_query_set: None,
+        multiview_mask: None,
+    });
+
+    for draw in &prepared.0 {
+        if draw.point as u8 != POINT {
+            continue;
+        }
+
+        let Some(pipeline) = cache.get_render_pipeline(draw.pipeline) else {
+            continue;
+        };
+
+        pass.set_pipeline(pipeline);
+        pass.set_bind_group(0, &draw.own, &[]);
+        pass.set_bind_group(1, &group, &offsets);
+
+        match &draw.count {
+            PreparedDrawCount::Direct(vertices, instances) => pass.draw(0..*vertices, 0..*instances),
+            PreparedDrawCount::Indirect(buffer, offset) => pass.draw_indirect(buffer, *offset),
+        }
+    }
+}
+
 /// Adds what gives cameras their images, their dispatches and the inputs their shaders read.
 pub fn install(app: &mut App) {
     app.add_plugins((
         ExtractComponentPlugin::<BcsViewImages>::default(),
         ExtractComponentPlugin::<BcsViewDispatches>::default(),
+        ExtractComponentPlugin::<BcsViewDraws>::default(),
     ));
 
     let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
@@ -1064,12 +1410,18 @@ pub fn install(app: &mut App) {
 
     render_app
         .init_resource::<ViewComputePipelines>()
+        .init_resource::<ViewDrawPipelines>()
         .add_systems(RenderStartup, init_inputs)
         .add_systems(
             Render,
             (
                 (prepare_view_images, forget_view_images).in_set(RenderSystems::PrepareResources),
-                (prepare_view_dispatches, forget_view_dispatches)
+                (
+                    prepare_view_dispatches,
+                    forget_view_dispatches,
+                    prepare_view_draws,
+                    forget_view_draws,
+                )
                     .in_set(RenderSystems::PrepareBindGroups),
             ),
         )
@@ -1092,6 +1444,27 @@ pub fn install(app: &mut App) {
                     .before(super::passes::BeforeTonemappingPasses)
                     .in_set(Core3dSystems::PostProcess),
                 run_view_dispatches::<3>
+                    .after(tonemapping)
+                    .before(super::passes::AfterTonemappingPasses)
+                    .in_set(Core3dSystems::PostProcess),
+                // Each point's draws after its dispatches, so what a dispatch wrote (the counts
+                // of an indirect draw, a buffer of positions) is there to draw.
+                run_view_draws::<0>
+                    .after(run_view_dispatches::<0>)
+                    .in_set(Core3dSystems::MainPass)
+                    .before(deferred_lighting)
+                    .before(main_opaque_pass_3d),
+                run_view_draws::<1>
+                    .after(run_view_dispatches::<1>)
+                    .before(main_transparent_pass_3d)
+                    .in_set(Core3dSystems::MainPass),
+                run_view_draws::<2>
+                    .after(run_view_dispatches::<2>)
+                    .before(tonemapping)
+                    .before(super::passes::BeforeTonemappingPasses)
+                    .in_set(Core3dSystems::PostProcess),
+                run_view_draws::<3>
+                    .after(run_view_dispatches::<3>)
                     .after(tonemapping)
                     .before(super::passes::AfterTonemappingPasses)
                     .in_set(Core3dSystems::PostProcess),

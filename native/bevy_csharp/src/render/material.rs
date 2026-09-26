@@ -710,13 +710,22 @@ pub fn install(app: &mut bevy::app::App, root: std::path::PathBuf) {
         .add_plugins(ErasedRenderAssetPlugin::<BcsMaterial3d>::default())
         .insert_resource(programs::ShaderPrograms::new(root))
         .init_resource::<super::shaders::ShaderInstances>()
+        .init_resource::<super::instances::InstanceBuffers>()
+        .add_systems(
+            PostUpdate,
+            super::instances::write_instances.after(bevy::transform::TransformSystems::Propagate),
+        )
         .add_systems(
             First,
             (programs::update, refresh_materials_of_changed_programs).chain(),
         )
         .add_systems(
             PostUpdate,
-            (super::shaders::sync_passes, super::shaders::sync_view_dispatches),
+            (
+                super::shaders::sync_passes,
+                super::shaders::sync_view_dispatches,
+                super::shaders::sync_view_draws,
+            ),
         )
         .add_systems(
             PostUpdate,
@@ -749,6 +758,7 @@ pub fn install(app: &mut bevy::app::App, root: std::path::PathBuf) {
     }
 
     super::views::install(app);
+    super::watch::install(app);
     super::passes::install(app);
     super::compute::install(app);
 }

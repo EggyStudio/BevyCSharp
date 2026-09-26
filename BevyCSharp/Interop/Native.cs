@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 117;
+    internal const int ExpectedAbiVersion = 120;
 
     static Native() => NativeLoader.Initialize();
 
@@ -515,7 +515,7 @@ internal static unsafe partial class Native
     /// <summary>Puts an image under a name.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_shader_set_image(int kind, long id, byte* name, int index, int image);
+    internal static partial int bcs_shader_set_image(int kind, long id, byte* name, int index, int image, int mip);
 
     /// <summary>Puts a buffer under a name.</summary>
     [LibraryImport(Library)]
@@ -545,7 +545,7 @@ internal static unsafe partial class Native
     /// <summary>Makes an image a compute shader writes, returning its key.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_shader_image_create(uint width, uint height, uint depth, int format);
+    internal static partial int bcs_shader_image_create(uint width, uint height, uint depth, int format, uint mips);
 
     /// <summary>Runs an instance's compute shader with workgroup counts read from a buffer.</summary>
     [LibraryImport(Library)]
@@ -576,6 +576,36 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_ambient_occlusion(ulong camera, int quality, float thickness);
+
+    /// <summary>Makes a buffer bigger, keeping what it holds.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_buffer_grow(int buffer, int size);
+
+    /// <summary>Makes a buffer the engine fills with entities' transforms.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_instance_buffer_create(int capacity);
+
+    /// <summary>Puts an entity in a slot of an instance buffer.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_instance_buffer_set(int buffer, int slot, ulong entity);
+
+    /// <summary>Replaces the draws a camera makes every frame.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_view_draws(ulong camera, NativeViewDraw* draws, int count);
+
+    /// <summary>Starts drawing one of a camera's images into an image every frame.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_watch_view_image(ulong camera, byte* name, uint width, uint height, float scale, float offset);
+
+    /// <summary>Stops watching one of a camera's images.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_unwatch_view_image(ulong camera, byte* name);
 
     /// <summary>Asks for an image to be treated as a cubemap once it has loaded.</summary>
     [LibraryImport(Library)]

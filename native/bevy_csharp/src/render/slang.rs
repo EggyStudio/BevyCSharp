@@ -40,11 +40,16 @@ pub const PASS_PRELUDE: &str = include_str!("bcs_pass.slang");
 /// What a Slang compute shader can import as `bcs_compute`.
 pub const COMPUTE_PRELUDE: &str = include_str!("bcs_compute.slang");
 
+/// What any Slang shader can import as `bcs_scene`: the layout of what the engine writes about the
+/// scene into buffers, such as instance transforms.
+pub const SCENE_PRELUDE: &str = include_str!("bcs_scene.slang");
+
 /// Every module the bridge writes out, by file name, which is what `import` finds them by.
-const MODULES: [(&str, &str); 3] = [
+const MODULES: [(&str, &str); 4] = [
     ("bcs.slang", PRELUDE),
     ("bcs_pass.slang", PASS_PRELUDE),
     ("bcs_compute.slang", COMPUTE_PRELUDE),
+    ("bcs_scene.slang", SCENE_PRELUDE),
 ];
 
 /// A hash of every module the bridge writes, which a cache entry and the scratch directory are

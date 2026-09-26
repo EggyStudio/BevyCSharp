@@ -22,6 +22,7 @@
 
 pub mod assets;
 pub mod compute;
+pub mod instances;
 pub mod material;
 pub mod passes;
 pub mod post;
@@ -32,6 +33,7 @@ pub mod shaders;
 pub mod slang;
 pub mod values;
 pub mod views;
+pub mod watch;
 
 #[cfg(feature = "render")]
 use crate::interop::status;

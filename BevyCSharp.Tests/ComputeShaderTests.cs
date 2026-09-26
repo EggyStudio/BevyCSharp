@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Runtime.InteropServices;
 using Bevy;
 using Xunit;
@@ -316,6 +317,151 @@ public sealed class ComputeShaderTests
         Assert.True(numbers[0] > 0f, $"the time read {numbers[0]}");
         Assert.True(numbers[1] > 0f, $"the frame's length read {numbers[1]}");
         Assert.True(numbers[2] > 10f, $"the frame count read {numbers[2]}");
+    }
+
+    /// <summary>
+    /// An image's mip levels are bound one at a time, so one dispatch reads a level while the next
+    /// writes the level below, and the whole image is read afterwards.
+    /// </summary>
+    [Fact]
+    public void AnImagePyramidIsBuiltALevelAtATime()
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        var fill = default(ShaderInstance);
+        var halve = default(ShaderInstance);
+        var readLevels = default(ShaderInstance);
+        var into = AssetHandle.None;
+        var read = default(BufferRead);
+        float[]? levels = null;
+
+        var run = new PictureRun
+        {
+            Scene = _ =>
+            {
+                var pyramid = Shaders.CreateImage(16, 16, ShaderImageFormat.R32Float, mips: 3);
+                into = Shaders.CreateBuffer(16);
+
+                fill = Compute("shaders/fill_image_level.slang").Set("value", 0.75f).SetTexture("level", pyramid, mip: 0);
+                halve = Compute("shaders/halve_level.slang")
+                    .SetTexture("above", pyramid, mip: 0)
+                    .SetTexture("below", pyramid, mip: 1);
+                readLevels = Compute("shaders/read_level.slang").SetTexture("pyramid", pyramid).SetBuffer("into", into);
+            },
+        };
+
+        run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Do("building", _ =>
+            {
+                Shaders.Dispatch(fill, 2, 2);
+                Shaders.Dispatch(halve, 1, 1);
+                Shaders.Dispatch(readLevels, 1);
+            })
+            .Wait(2)
+            .Do("asking for the levels", _ => read = Shaders.BeginBufferRead(into))
+            .Until("read back", _ => Shaders.TryReadBuffer(read, out levels))
+            .Go();
+
+        Assert.NotNull(levels);
+        Assert.Equal(0.75f, levels[0]);
+        Assert.Equal(1.5f, levels[1]);
+    }
+
+    /// <summary>A buffer grows keeping what it held, and the rest is zeros.</summary>
+    [Fact]
+    public void ABufferGrowsKeepingItsContents()
+    {
+        if (!App.HasRenderer) return;
+
+        var buffer = AssetHandle.None;
+        var size = 0;
+        var read = default(BufferRead);
+        float[]? numbers = null;
+
+        new PictureRun
+        {
+            Scene = _ =>
+            {
+                buffer = Shaders.CreateBuffer<float>([1f, 2f, 3f, 4f]);
+            },
+        }
+            .Wait(3)
+            .Do("growing it", _ => size = Shaders.GrowBuffer(buffer, 64))
+            .Wait(3)
+            .Do("asking for it back", _ => read = Shaders.BeginBufferRead(buffer))
+            .Until("read back", _ => Shaders.TryReadBuffer(read, out numbers))
+            .Go();
+
+        Assert.Equal(64, size);
+        Assert.NotNull(numbers);
+        Assert.Equal(16, numbers.Length);
+        Assert.Equal([1f, 2f, 3f, 4f], numbers[..4]);
+        Assert.All(numbers[4..], number => Assert.Equal(0f, number));
+    }
+
+    /// <summary>
+    /// An instance buffer holds an entity's transform this frame and on the previous one, which a
+    /// compute shader reads through <c>bcs_scene</c>.
+    /// </summary>
+    [Fact]
+    public void AnInstanceBufferHoldsThisFrameAndTheLast()
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        var mover = Entity.None;
+        var x = 0f;
+        var read = default(BufferRead);
+        var copy = default(ShaderInstance);
+        var into = AssetHandle.None;
+        Vector4[]? copied = null;
+        var frozenAt = 0f;
+        var moving = true;
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                mover = ecs.Spawn();
+                ecs.Add(mover, Transform.At(0f, 0f, 0f));
+
+                var instances = Shaders.CreateInstanceBuffer(4);
+                Shaders.SetInstance(instances, 0, mover);
+
+                into = Shaders.CreateBuffer(32);
+                copy = Compute("shaders/read_instance.slang")
+                    .SetBuffer("instances", instances)
+                    .SetBuffer("into", into);
+            },
+
+            // A tenth of a unit a frame along x, until the copy has been asked for.
+            EachFrame = world =>
+            {
+                if (mover == Entity.None || !moving) return;
+
+                x += 0.1f;
+                world.Resource<EcsWorld>().Set(mover, Transform.At(x, 0f, 0f));
+            },
+        };
+
+        run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Wait(10)
+            .Do("copying the slot", _ =>
+            {
+                moving = false;
+                frozenAt = x;
+                Shaders.Dispatch(copy, 1);
+            })
+            .Wait(2)
+            .Do("asking for the copy", _ => read = Shaders.BeginBufferRead(into))
+            .Until("read back", _ => Shaders.TryReadBuffer(read, out copied))
+            .Go();
+
+        Assert.NotNull(copied);
+
+        // The copy ran on the frame the mover was last moved, so this frame is where it was left
+        // and the previous one a tenth short of it.
+        Assert.Equal(frozenAt, copied[0].X, 3);
+        Assert.Equal(frozenAt - 0.1f, copied[1].X, 3);
     }
 
     /// <summary>A buffer's size is fixed, so writing more than it holds is refused.</summary>
