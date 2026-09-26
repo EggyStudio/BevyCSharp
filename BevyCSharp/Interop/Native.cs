@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 131;
+    internal const int ExpectedAbiVersion = 132;
 
     static Native() => NativeLoader.Initialize();
 
@@ -943,6 +943,16 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_timings(byte* output, int capacity);
+
+    /// <summary>Makes an empty geometry pool, writing its three buffer keys.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_geometry_pool_create(int* keys);
+
+    /// <summary>Adds a mesh to a geometry pool, answering its number there.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_geometry_pool_add(int pool, int mesh);
 
     /// <summary>Makes a buffer the engine fills with the materials of entities put in its slots.</summary>
     [LibraryImport(Library)]

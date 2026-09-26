@@ -231,7 +231,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | Compute before any camera draws | Has (`render/compute.rs`) |
 | Compute per camera, with the view, at a chosen point in the frame | Has (`render/views.rs`, `Shaders.SetViewDispatches`) |
 | Points after the prepass, between opaque and transparent geometry, and before and after tonemapping | Has, for compute and draws (`FramePoint`), and for passes at every point with a picture (`ShaderPass.At`) |
-| Passes writing several targets, or depth | Draws on a camera write the picture, or one of the camera's images, and depth. Several targets at once are still missing |
+| Passes writing several targets, or depth | Has for draws on a camera: the picture, or any number of the camera's images at once (`ViewDraw.Targets`), with depth. A full-screen pass writes the picture alone, and a draw of one triangle over the picture into several images does the rest |
 | Async compute | Missing. wgpu has one queue per device, so this waits on wgpu |
 
 ### Per view
@@ -257,7 +257,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | Lights and shadow maps readable from compute | Has, for compute and passes on a camera (`bcs_pass::lights`, `point_lights`, `directional_shadow`, `point_shadow` for point and spot lights, `point_light_radiance`) |
 | The sky as a cube map or spherical harmonics | Has, as the camera's environment map, for compute and passes on a camera (`bcs_pass::environment_specular`, `environment_diffuse`) |
 | Material data by object | Has, as constants from each entity's standard material (`Shaders.CreateMaterialBuffer`, `bcs_scene::Material`). Textures and per-triangle data are missing |
-| Geometry and material pools addressable at a ray hit | Missing |
+| Geometry and material pools addressable at a ray hit | Has (`Shaders.CreateGeometryPool`, `AddToGeometryPool`, `bcs_scene::PoolVertex`, `intersect_triangle`), with material constants by slot. An acceleration structure over the pool is left to the package, in compute |
 
 ### GPU-driven work
 
@@ -336,7 +336,7 @@ Each phase unblocks a class of package, and none needs a later one.
    images owned by the camera, compute per camera at named points with the view, indirect dispatch,
    image formats and mip views. These are in, so an ambient occlusion or screen-space GI package can
    be written now, composited over the picture by a pass, reading the G-buffer, last frame's depth
-   and last frame's lit picture. What is left of this phase is several targets for one pass.
+   and last frame's lit picture. The phase is complete.
 2. **Lighting inputs.** Bevy's own ambient occlusion is bridged and a package can supply its own
    through it. Bevy's screen-space reflections are bridged over its deferred path, and its light
    probes, including an irradiance volume a compute shader writes, which is how a world-space GI

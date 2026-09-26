@@ -829,9 +829,19 @@ public static unsafe class Shaders
 
                 var target = IntPtr.Zero;
 
-                if (draw.Into is { } name)
+                if (draw.Into is not null && draw.Targets is not null)
                 {
-                    target = Marshal.StringToCoTaskMemUTF8(name);
+                    throw new ArgumentException(
+                        $"Draw {i} names both Into and Targets. Into is one image, Targets several.",
+                        nameof(draws));
+                }
+
+                // One name to a line, which is how the bridge reads several.
+                var names = draw.Targets is { } several ? string.Join('\n', several) : draw.Into;
+
+                if (names is not null)
+                {
+                    target = Marshal.StringToCoTaskMemUTF8(names);
                     strings.Add(target);
                 }
 
@@ -1014,6 +1024,50 @@ public static unsafe class Shaders
             Native.bcs_shader_instance_buffer_create(capacity),
             $"making an instance buffer of {capacity} slots"));
     }
+
+    /// <summary>
+    /// Makes an empty geometry pool: buffers holding the vertices and triangles of every mesh added
+    /// to it, which any shader reaches by a mesh's number and a triangle's. Only valid inside a
+    /// system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A ray traced in a compute shader, or a scene voxelized by one, meets triangles of whatever
+    /// mesh is there, so every mesh it might meet has to be in buffers it can index rather than in
+    /// the vertex buffers only a draw of that mesh binds. A shader reads
+    /// <see cref="GeometryPool.Vertices"/> as a <c>StructuredBuffer&lt;bcs_scene::PoolVertex&gt;</c>,
+    /// <see cref="GeometryPool.Indices"/> as a <c>StructuredBuffer&lt;uint&gt;</c> and
+    /// <see cref="GeometryPool.Meshes"/> as a <c>StructuredBuffer&lt;bcs_scene::PoolMesh&gt;</c>, and
+    /// <c>bcs_scene::pool_corner</c>, <c>intersect_triangle</c> and <c>intersect_box</c> do the rest.
+    /// </para>
+    /// <para>
+    /// Put an entity's mesh in a pool, and the entity in the same slot of an instance buffer and a
+    /// material buffer, and a shader has where its triangles are, how they have moved and what they
+    /// are made of, which is what shading a ray's hit takes.
+    /// </para>
+    /// </remarks>
+    public static GeometryPool CreateGeometryPool()
+    {
+        var keys = stackalloc int[3];
+        Native.Check(Native.bcs_shader_geometry_pool_create(keys), "making a geometry pool");
+        return new GeometryPool(new AssetHandle(keys[0]), new AssetHandle(keys[1]), new AssetHandle(keys[2]));
+    }
+
+    /// <summary>
+    /// Adds a mesh to a geometry pool and answers its number there, counted from zero, which is the
+    /// index of its <c>bcs_scene::PoolMesh</c>. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// The mesh has to be triangles and has to have loaded; one still loading is refused rather than
+    /// waited for, so a mesh from a file is added once <see cref="AssetServer"/> says it has loaded.
+    /// Its normals and texture coordinates come along where it has them. The pool's buffers grow as
+    /// meshes are added, and everything holding them is built against the grown ones.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// The mesh has not loaded, is not triangles, or the handle names no mesh.
+    /// </exception>
+    public static int AddToGeometryPool(GeometryPool pool, AssetHandle mesh) =>
+        Native.Check(Native.bcs_shader_geometry_pool_add(pool.Meshes.Key, mesh.Key), "adding a mesh to a geometry pool");
 
     /// <summary>How many bytes one slot of a material buffer takes.</summary>
     /// <remarks>
@@ -2679,6 +2733,18 @@ public readonly record struct ViewDraw
     /// </remarks>
     public string? Into { get; init; }
 
+    /// <summary>
+    /// Several of the camera's images to draw into at once, one for each of the fragment shader's
+    /// outputs in order, instead of <see cref="Into"/>.
+    /// </summary>
+    /// <remarks>
+    /// What a draw writing more than one thing a pixel wants: a visibility buffer's ids and the
+    /// barycentrics beside them, or a G-buffer of its own. Every image is drawn once a pixel; they
+    /// are tested against the camera's depth only where all of them are the picture's size, and
+    /// none is blended where any is an integer image.
+    /// </remarks>
+    public IReadOnlyList<string>? Targets { get; init; }
+
     /// <summary><paramref name="vertices"/> vertices, <paramref name="instances"/> times.</summary>
     public static ViewDraw Fixed(
         ShaderInstance instance,
@@ -2717,6 +2783,12 @@ public readonly record struct ViewDraw
         WritesDepth = writesDepth,
     };
 }
+
+/// <summary>The buffers of a geometry pool. See <see cref="Shaders.CreateGeometryPool"/>.</summary>
+/// <param name="Vertices">Every vertex, as <c>bcs_scene::PoolVertex</c>.</param>
+/// <param name="Indices">Every triangle's three vertex numbers, counted from its mesh's first vertex.</param>
+/// <param name="Meshes">The meshes, as <c>bcs_scene::PoolMesh</c>, in the order they were added.</param>
+public readonly record struct GeometryPool(AssetHandle Vertices, AssetHandle Indices, AssetHandle Meshes);
 
 /// <summary>A buffer on its way back from the GPU, from <see cref="Shaders.BeginBufferRead"/>.</summary>
 public readonly record struct BufferRead(int Ticket);

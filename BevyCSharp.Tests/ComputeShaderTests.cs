@@ -714,6 +714,10 @@ public sealed class ComputeShaderTests
 
         Assert.NotNull(copied);
 
+        // Every lane votes, so the low word has a bit for each of the first thirty two lanes.
+        var lanes = Enumerable.Range(0, 64).Max(thread => copied[thread * 4 + 1]) + 1;
+        var everyone = lanes >= 32 ? uint.MaxValue : (1u << (int)lanes) - 1;
+
         for (var thread = 0; thread < 64; thread++)
         {
             var before = copied[thread * 4];
@@ -723,12 +727,63 @@ public sealed class ComputeShaderTests
 
             Assert.Equal(lane, before);
             Assert.Equal((uint)thread - lane, first);
-
-            // Thirty two or more lanes fill the low word; fewer set one bit a lane.
-            var expected = lane >= 31 || votes == uint.MaxValue ? uint.MaxValue : votes;
-            Assert.Equal(expected, votes);
-            Assert.True((votes & 1) == 1, $"thread {thread} saw no vote from the first lane");
+            Assert.Equal(everyone, votes);
         }
+    }
+
+    /// <summary>
+    /// A ray traced through every triangle of a cube in a geometry pool hits its front face where
+    /// it is, facing the ray, and the cube's box and the second mesh's counts are in the table.
+    /// </summary>
+    [Fact]
+    public void ARayIsTracedThroughAGeometryPool()
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        AssetHandle into = default;
+        ShaderInstance trace = default;
+        BufferRead read = default;
+        Vector4[]? copied = null;
+        var first = -1;
+        var second = -1;
+
+        new PictureRun
+        {
+            Scene = _ =>
+            {
+                var pool = Shaders.CreateGeometryPool();
+                first = Shaders.AddToGeometryPool(pool, Render.CreateMesh(MeshShape.Cuboid, 2f, 2f, 2f));
+                second = Shaders.AddToGeometryPool(pool, Render.CreateMesh(MeshShape.Sphere, 1f));
+
+                into = Shaders.CreateBuffer(3 * 16);
+                trace = Compute("shaders/trace_pool.slang")
+                    .SetBuffer("vertices", pool.Vertices)
+                    .SetBuffer("indices", pool.Indices)
+                    .SetBuffer("meshes", pool.Meshes)
+                    .SetBuffer("into", into);
+            },
+        }
+            .Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Wait(3)
+            .Do("tracing", _ => Shaders.Dispatch(trace, 1))
+            .Wait(2)
+            .Do("asking for the hit", _ => read = Shaders.BeginBufferRead(into))
+            .Until("read back", _ => Shaders.TryReadBuffer(read, out copied))
+            .Go();
+
+        Assert.Equal(0, first);
+        Assert.Equal(1, second);
+        Assert.NotNull(copied);
+
+        // The front face is at z = 1, four units from the ray's start, and faces back along it.
+        Assert.Equal(4f, copied[0].X, 3);
+        Assert.Equal(1f, copied[0].W, 3);
+        Assert.Equal(4f, copied[1].X, 3);
+
+        // A cube is twelve triangles, and the sphere's vertices start after the cube's.
+        Assert.Equal(12f, copied[2].X);
+        Assert.True(copied[2].Y > 12f, $"the sphere had {copied[2].Y} triangles");
+        Assert.True(copied[2].Z >= 8f, $"the sphere's vertices started at {copied[2].Z}");
     }
 
     /// <summary>A buffer's size is fixed, so writing more than it holds is refused.</summary>

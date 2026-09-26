@@ -1440,8 +1440,9 @@ pub struct ViewDraw {
     /// Whether it writes depth, as opaque geometry does, or only tests against it, as anything
     /// see-through does.
     pub depth_write: bool,
-    /// One of the camera's own images to draw into instead of the picture.
-    pub target: Option<String>,
+    /// The camera's own images to draw into instead of the picture, one a fragment shader output
+    /// in order, or none for the picture.
+    pub targets: Vec<String>,
 }
 
 /// The draws a camera makes every frame, in order.
@@ -1455,7 +1456,7 @@ pub struct BcsViewDraws(pub Vec<ViewDraw>);
 #[allow(clippy::type_complexity)]
 struct ViewDrawPipelines(
     HashMap<
-        (u32, u32, TextureFormat, u32, DrawBlend, bool, bool),
+        (u32, u32, Vec<TextureFormat>, u32, DrawBlend, bool, bool),
         bevy::render::render_resource::CachedRenderPipelineId,
     >,
 );
@@ -1466,9 +1467,9 @@ struct PreparedViewDraw {
     pipeline: bevy::render::render_resource::CachedRenderPipelineId,
     own: BindGroup,
     count: PreparedDrawCount,
-    /// The camera image it draws into instead of the picture, and whether it is tested against
+    /// The camera images it draws into instead of the picture, and whether it is tested against
     /// the camera's depth there.
-    target: Option<(TextureView, bool)>,
+    target: Option<(Vec<TextureView>, bool)>,
     label: std::borrow::Cow<'static, str>,
 }
 
@@ -1546,47 +1547,71 @@ fn prepare_view_draws(
                 continue;
             };
 
-            // A camera image as the target is drawn once a pixel, and against the camera's depth
-            // only where it is the picture's size and the camera draws once a pixel too, since a
-            // depth attachment has to match the target in both.
-            let target = match &draw.target {
-                None => None,
-                Some(name) => {
-                    let Some(slot) = owned.and_then(|owned| owned.slots.iter().find(|slot| &slot.spec.name == name))
-                    else {
+            // Camera images as the targets are drawn once a pixel, and against the camera's depth
+            // only where they are all the picture's size and the camera draws once a pixel too,
+            // since a depth attachment has to match every target in both. The prepass's motion
+            // and normals are targets as well, which is how geometry drawn out of buffers gives
+            // Bevy's temporal effects the motion they read.
+            let mut slots: Vec<(TextureView, TextureFormat, (u32, u32))> = Vec::with_capacity(draw.targets.len());
+
+            for name in &draw.targets {
+                let own = owned.and_then(|owned| owned.slots.iter().find(|slot| &slot.spec.name == name)).map(|slot| {
+                    (level_view(&slot.textures[slot.current], 0), slot.spec.format, slot.size)
+                });
+
+                let engine = || {
+                    let attachment = match name.as_str() {
+                        "motion" => prepass.and_then(|prepass| prepass.motion_vectors.as_ref()),
+                        "normals" => prepass.and_then(|prepass| prepass.normal.as_ref()),
+                        _ => None,
+                    }?;
+
+                    let texture = &attachment.texture.texture;
+                    (texture.sample_count() == 1).then(|| {
+                        (attachment.texture.default_view.clone(), texture.format(), (texture.width(), texture.height()))
+                    })
+                };
+
+                match own.or_else(engine) {
+                    Some(found) => slots.push(found),
+                    None => {
                         say_once(format!(
-                            "A draw on a camera of shader program {} targets {name}, which is not \
-                             one of the camera's images, so it draws nothing.",
+                            "A draw on a camera of shader program {} targets {name}, which is \
+                             neither one of the camera's images nor a prepass it draws once a \
+                             pixel, so it draws nothing.",
                             draw.program
                         ));
-                        continue;
-                    };
-
-                    let picture = target.main_texture();
-                    let depth = samples == 1 && slot.size == (picture.width(), picture.height());
-                    Some((slot, depth))
+                    }
                 }
-            };
+            }
 
-            let (format, samples, has_depth) = match &target {
-                None => (format, samples, true),
-                Some((slot, depth)) => (slot.spec.format, 1, *depth),
+            if slots.len() != draw.targets.len() {
+                continue;
+            }
+
+            let picture = target.main_texture();
+            let (formats, samples, has_depth) = if slots.is_empty() {
+                (vec![format], samples, true)
+            } else {
+                let depth = samples == 1
+                    && slots.iter().all(|slot| slot.2 == (picture.width(), picture.height()));
+                (slots.iter().map(|slot| slot.1).collect::<Vec<_>>(), 1, depth)
             };
 
             // An integer target cannot be blended, which wgpu refuses as a pipeline rather than
             // ignores, so a draw into one replaces what is there however it was asked to blend.
-            let blend = if format.sample_type(None, None).is_some_and(|sample| {
-                matches!(sample, TextureSampleType::Uint | TextureSampleType::Sint)
-            }) {
-                DrawBlend::Opaque
-            } else {
-                draw.blend
+            let integer = |format: &TextureFormat| {
+                format.sample_type(None, None).is_some_and(|sample| {
+                    matches!(sample, TextureSampleType::Uint | TextureSampleType::Sint)
+                })
             };
+
+            let blend = if formats.iter().any(integer) { DrawBlend::Opaque } else { draw.blend };
 
             let key = (
                 draw.program,
                 program.generation,
-                format,
+                formats.clone(),
                 samples,
                 blend,
                 draw.depth_write && has_depth,
@@ -1613,15 +1638,20 @@ fn prepare_view_draws(
                         shader: fragment.shader,
                         shader_defs: Vec::new(),
                         entry_point: None,
-                        targets: vec![Some(ColorTargetState {
-                            format,
-                            blend: match blend {
-                                DrawBlend::Opaque => None,
-                                DrawBlend::Alpha => Some(BlendState::ALPHA_BLENDING),
-                                DrawBlend::Add => Some(BlendState { color: add, alpha: add }),
-                            },
-                            write_mask: ColorWrites::ALL,
-                        })],
+                        targets: formats
+                            .iter()
+                            .map(|format| {
+                                Some(ColorTargetState {
+                                    format: *format,
+                                    blend: match blend {
+                                        DrawBlend::Opaque => None,
+                                        DrawBlend::Alpha => Some(BlendState::ALPHA_BLENDING),
+                                        DrawBlend::Add => Some(BlendState { color: add, alpha: add }),
+                                    },
+                                    write_mask: ColorWrites::ALL,
+                                })
+                            })
+                            .collect(),
                     }),
                     depth_stencil: has_depth.then(|| DepthStencilState {
                         format: bevy::core_pipeline::core_3d::CORE_3D_DEPTH_FORMAT,
@@ -1687,7 +1717,7 @@ fn prepare_view_draws(
                     &cache.get_bind_group_layout(&draw_layout(&layout)),
                 ),
                 count,
-                target: target.map(|(slot, depth)| (level_view(&slot.textures[slot.current], 0), depth)),
+                target: (!slots.is_empty()).then(|| (slots.iter().map(|slot| slot.0.clone()).collect(), has_depth)),
                 label: programs::label(draw.program),
             });
         }
@@ -1774,7 +1804,9 @@ fn run_view_draws<const POINT: u8>(
     let here: Vec<&PreparedViewDraw> = prepared.0.iter().filter(|draw| draw.point as u8 == POINT).collect();
     let same_target = |a: &PreparedViewDraw, b: &PreparedViewDraw| match (&a.target, &b.target) {
         (None, None) => true,
-        (Some((a, _)), Some((b, _))) => a.id() == b.id(),
+        (Some((a, _)), Some((b, _))) => {
+            a.len() == b.len() && a.iter().zip(b).all(|(a, b)| a.id() == b.id())
+        }
         _ => false,
     };
 
@@ -1787,24 +1819,29 @@ fn run_view_draws<const POINT: u8>(
             .find(|&index| !same_target(here[start], here[index]))
             .unwrap_or(here.len());
 
-        let image_attachment;
-        let (color, depth_attachment) = match &here[start].target {
-            None => (target.get_color_attachment(), Some(depth.get_attachment(StoreOp::Store))),
-            Some((view, tested)) => {
-                image_attachment = bevy::render::render_resource::RenderPassColorAttachment {
-                    view,
-                    depth_slice: None,
-                    resolve_target: None,
-                    ops: bevy::render::render_resource::Operations {
-                        load: bevy::render::render_resource::LoadOp::Load,
-                        store: StoreOp::Store,
-                    },
-                };
-                (image_attachment, tested.then(|| depth.get_attachment(StoreOp::Store)))
-            }
+        let (color, depth_attachment): (Vec<_>, _) = match &here[start].target {
+            None => (
+                vec![Some(target.get_color_attachment())],
+                Some(depth.get_attachment(StoreOp::Store)),
+            ),
+            Some((views, tested)) => (
+                views
+                    .iter()
+                    .map(|view| {
+                        Some(bevy::render::render_resource::RenderPassColorAttachment {
+                            view,
+                            depth_slice: None,
+                            resolve_target: None,
+                            ops: bevy::render::render_resource::Operations {
+                                load: bevy::render::render_resource::LoadOp::Load,
+                                store: StoreOp::Store,
+                            },
+                        })
+                    })
+                    .collect(),
+                tested.then(|| depth.get_attachment(StoreOp::Store)),
+            ),
         };
-
-        let color = [Some(color)];
 
         let diagnostics = ctx.diagnostic_recorder();
         let diagnostics = diagnostics.as_deref();

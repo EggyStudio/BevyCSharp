@@ -21,24 +21,28 @@ underneath, with its ECS, its scheduler, its timing, its input and its renderer.
 using Bevy;
 
 [Behavior]
-public partial struct Bouncer
+public partial struct Spin
 {
-    public float Height;
-    public float Velocity;
+    [Range(0f, 5f)] public float Speed;
+    private float _angle;
 
-    [OnStartup]
-    public static void Spawn(BehaviorContext ctx) => 
-        ctx.Ecs.Add(ctx.Ecs.Spawn(), new Bouncer { Height = 5f });
+    [OnStartup]                                    // static: one plain system
+    public static void Scene(BehaviorContext ctx)
+    {
+        ctx.Ecs.Add(Render.SpawnCamera3d(), Transform.LookingAt(new Vec3(3f, 3f, 5f), Vec3.Zero, Vec3.UnitY));
+        Render.SpawnLight(LightKind.Directional, 10_000f);
 
-    [OnUpdate]
+        var cube = ctx.Ecs.Spawn();
+        ctx.Ecs.Add(cube, new Spin { Speed = 1.2f });
+        Render.SetMesh(ctx.Ecs, cube, Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f));
+        Render.SetMaterial(ctx.Ecs, cube, Render.CreateMaterial(0.25f, 0.55f, 0.85f));
+    }
+
+    [OnUpdate]                                     // instance: once per entity that has one
     public void Tick(BehaviorContext ctx)
     {
-        Velocity -= 9.81f * ctx.Time.Delta;
-        Height += Velocity * ctx.Time.Delta;
-
-        if (Height > 0f) return;
-        Height = 0f;
-        Velocity = -Velocity * 0.8f;
+        _angle += Speed * ctx.Time.Delta;
+        ctx.Ecs.GetRef<Transform>(ctx.Entity).Rotation = Quat.FromAxisAngle(Vec3.UnitY, _angle);
     }
 }
 ```
@@ -1144,6 +1148,24 @@ and a shader reaching it by index has where it is and what light bouncing off it
 what a GI ray shades its hit with. Textures are not in it; the base color is what the material
 multiplies them by.
 
+The triangles themselves go in a geometry pool, for a ray traced in a compute shader or a scene
+voxelized by one, which meets whatever mesh is there:
+
+```csharp
+var pool = Shaders.CreateGeometryPool();
+var rock = Shaders.AddToGeometryPool(pool, rockMesh);            // 0, its number in the pool
+
+trace.SetBuffer("vertices", pool.Vertices).SetBuffer("indices", pool.Indices).SetBuffer("meshes", pool.Meshes);
+```
+
+Every mesh added is appended to the same three buffers: its vertices as `bcs_scene::PoolVertex`,
+its triangles' vertex numbers, and an entry in the mesh table, `bcs_scene::PoolMesh`, with where
+they start, how many there are, and its bounds. `bcs_scene::pool_corner` reads a triangle's corner,
+`intersect_triangle` finds where a ray meets it with the weights that interpolate the corners'
+normals and texture coordinates, and `intersect_box` skips a mesh whose bounds the ray misses.
+With the mesh's number in the same slot as the entity's transform and material, a hit has
+everything shading it takes.
+
 #### Compute on a camera
 
 Screen-space techniques are a chain of compute and passes over one camera's frame, each reading
@@ -1286,6 +1308,9 @@ against the camera's depth, and writes it if asked, where the image is the pictu
 camera draws once a pixel, so the geometry and Bevy's scene hide each other properly. An image made
 with `ClearEachFrame` starts every frame as zeros, before anything on the camera runs, so zero is
 "nothing drawn here". An integer image cannot be blended, so a draw into one replaces what is there.
+`Targets = ["ids", "barycentrics"]` draws into several of the camera's images at once, one for each
+of the fragment shader's outputs in order (`SV_Target0`, `SV_Target1` and on), which is what a
+visibility buffer with more than an id, or a G-buffer of a package's own, is written with.
 
 **Watching what a camera keeps.** The images a chain writes live on the GPU in formats a picture
 cannot show, so `Shaders.Watch(camera, "occlusion", 320, 180, scale: 1f)` draws one, every frame

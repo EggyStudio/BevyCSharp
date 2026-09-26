@@ -516,9 +516,58 @@ fn drop_subgroup_enable(wgsl: &str) -> String {
         .join("\n")
 }
 
+/// Makes the lane of every subgroup shuffle unsigned where Slang wrote it signed.
+///
+/// WGSL takes either for the lane, and Slang writes `i32(...)`, which naga refuses, since it takes
+/// only `u32`. So in a call to one of the shuffles, a second argument that starts with `i32(` is
+/// made `u32(` instead, found by counting brackets so the first argument can be any expression.
+fn unsigned_shuffle_lanes(wgsl: &str) -> String {
+    const CALLS: [&str; 4] = ["subgroupShuffle(", "subgroupShuffleXor(", "subgroupShuffleUp(", "subgroupShuffleDown("];
+
+    if !CALLS.iter().any(|call| wgsl.contains(call)) {
+        return wgsl.to_string();
+    }
+
+    let mut text = wgsl.to_string();
+
+    for call in CALLS {
+        let mut from = 0;
+
+        while let Some(found) = text[from..].find(call) {
+            let open = from + found + call.len();
+            let bytes = text.as_bytes();
+            let mut depth = 1;
+            let mut at = open;
+
+            // The comma between the value and the lane, at the call's own depth.
+            while at < bytes.len() && depth > 0 {
+                match bytes[at] {
+                    b'(' => depth += 1,
+                    b')' => depth -= 1,
+                    b',' if depth == 1 => break,
+                    _ => {}
+                }
+                at += 1;
+            }
+
+            if at < bytes.len() && bytes[at] == b',' {
+                let lane = at + 1 + (text[at + 1..].len() - text[at + 1..].trim_start().len());
+
+                if text[lane..].starts_with("i32(") {
+                    text.replace_range(lane..lane + 3, "u32");
+                }
+            }
+
+            from = open;
+        }
+    }
+
+    text
+}
+
 /// Renumbers the groups of WGSL `slangc` wrote, and reads the shader's own group.
 pub fn reflect(wgsl: &str, reflection: &str, family: Family) -> Result<Reflected, String> {
-    let wgsl = drop_subgroup_enable(&remap_groups(wgsl, family));
+    let wgsl = unsigned_shuffle_lanes(&drop_subgroup_enable(&remap_groups(wgsl, family)));
 
     let json: Value = serde_json::from_str(reflection)
         .map_err(|error| format!("slangc's reflection does not parse: {error}"))?;
@@ -1077,6 +1126,22 @@ fn field_type(ty: &Value) -> Option<FieldType> {
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn a_shuffle_lane_written_signed_is_made_unsigned() {
+        let wgsl = "var a : u32 = subgroupShuffle(f(x, y), i32(0));\nvar b : u32 = subgroupShuffleXor(z, u32(1));";
+        let fixed = unsigned_shuffle_lanes(wgsl);
+
+        assert!(fixed.contains("subgroupShuffle(f(x, y), u32(0))"));
+        assert!(fixed.contains("subgroupShuffleXor(z, u32(1))"));
+    }
+
+    #[test]
+    fn the_subgroups_enable_is_taken_out_and_nothing_else() {
+        let fixed = drop_subgroup_enable("enable subgroups;\nfn main() {}");
+        assert_eq!(fixed, "fn main() {}");
+    }
+
     use super::*;
 
     const FRAGMENT_WGSL: &str = include_str!("fixtures/material_fragment.wgsl");

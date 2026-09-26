@@ -28,6 +28,7 @@ pub mod instances;
 pub mod material;
 pub mod meshlets;
 pub mod passes;
+pub mod pools;
 pub mod post;
 pub mod probes;
 pub mod programs;

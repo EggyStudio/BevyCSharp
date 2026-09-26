@@ -645,6 +645,83 @@ public sealed class ViewShaderTests
     }
 
     /// <summary>
+    /// One draw writes two of the camera's images at once, one for each of its fragment shader's
+    /// outputs, an integer one and a float one.
+    /// </summary>
+    [Fact]
+    public void ADrawWritesSeveralImagesAtOnce()
+    {
+        if (!CanRun) return;
+
+        var run = new PictureRun
+        {
+            Width = 128,
+            Height = 128,
+            Scene = ecs =>
+            {
+                var camera = Ortho(ecs);
+                Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
+                Shaders.SetViewImages(
+                    camera,
+                    new ViewImage("ids", ShaderImageFormat.R32UInt, ClearEachFrame: true),
+                    new ViewImage("values", ShaderImageFormat.R32Float, ClearEachFrame: true));
+
+                var centers = Shaders.CreateBuffer<Vector4>([new(-2f, 0f, 0f, 1f)]);
+                var square = Draw("shaders/draw_two_targets.slang").SetBuffer("centers", centers).Set("size", 1f);
+
+                Shaders.SetViewDraws(camera, ViewDraw.Fixed(square, FramePoint.AfterOpaque, 6) with { Targets = ["ids", "values"] });
+                Shaders.SetPasses(camera, new ShaderPass(Pass("shaders/show_two_targets.slang"), AfterTonemapping: true));
+            },
+        };
+
+        run.Until("compiled", _ => Ready()).Wait(Settled).Capture("picture").Go();
+
+        var picture = run.Picture("picture");
+        var drawn = picture.At(32, 64);
+        var empty = picture.At(96, 64);
+
+        // A half written linear into a picture stored as sRGB comes back as 188.
+        Assert.True(drawn.R > 200 && drawn.G is > 170 and < 205, $"the square's pixel was {drawn}");
+        Assert.True(empty is { R: < 30, G: < 30 }, $"a pixel no square covers was {empty}");
+    }
+
+    /// <summary>
+    /// A draw after the prepass writes motion into the prepass's own motion texture, which a pass
+    /// reading motion then sees where the draw covered and nowhere else, so geometry drawn out of
+    /// buffers can give Bevy's temporal effects its motion.
+    /// </summary>
+    [Fact]
+    public void ADrawWritesThePrepassMotion()
+    {
+        if (!CanRun) return;
+
+        var run = new PictureRun
+        {
+            Width = 128,
+            Height = 128,
+            Scene = ecs =>
+            {
+                var camera = Ortho(ecs);
+                Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
+                Shaders.SetPrepass(camera, depth: true, motion: true);
+
+                var centers = Shaders.CreateBuffer<Vector4>([new(-2f, 0f, 0f, 1f)]);
+                var square = Draw("shaders/draw_motion.slang").SetBuffer("centers", centers).Set("size", 1f);
+
+                Shaders.SetViewDraws(camera, ViewDraw.Fixed(square, FramePoint.AfterPrepass, 6) with { Into = "motion" });
+                Shaders.SetPasses(camera, new ShaderPass(Pass("shaders/motion_mask.slang"), AfterTonemapping: true));
+            },
+        };
+
+        run.Until("compiled", _ => Ready()).Wait(Settled).Capture("picture").Go();
+
+        var picture = run.Picture("picture");
+
+        Assert.True(GreenAt(picture, 32, 64), $"the square's pixel was {picture.At(32, 64)}, with no motion");
+        Assert.False(GreenAt(picture, 96, 64), $"a pixel the draw did not cover had motion: {picture.At(96, 64)}");
+    }
+
+    /// <summary>
     /// A watch draws a camera's single-channel float image, scaled, into an image anything can show
     /// and a capture can read.
     /// </summary>

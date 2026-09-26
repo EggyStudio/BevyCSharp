@@ -647,7 +647,7 @@ pub fn grow_buffer(world: &mut World, key: i32, size: u64) -> i32 {
 }
 
 /// Has everything holding `handle` built against it again.
-fn rebind_buffer(world: &mut World, handle: &Handle<ShaderBuffer>) {
+pub(crate) fn rebind_buffer(world: &mut World, handle: &Handle<ShaderBuffer>) {
     use super::values::Value;
 
     let holds = |values: &Values| {

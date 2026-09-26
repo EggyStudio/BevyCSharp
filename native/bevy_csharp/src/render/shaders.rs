@@ -972,8 +972,8 @@ pub struct BcsViewDraw {
     pub blend: i32,
     /// Non-zero to write depth as well as test against it.
     pub depth_write: i32,
-    /// NUL-terminated UTF-8 naming one of the camera's images to draw into, or null for the
-    /// picture.
+    /// NUL-terminated UTF-8 naming the camera's images to draw into, one to a line in the order of
+    /// the fragment shader's outputs, or null for the picture.
     pub target: *const core::ffi::c_char,
 }
 
@@ -1061,11 +1061,15 @@ pub unsafe extern "C" fn bcs_render_set_view_draws(
                         _ => DrawBlend::Opaque,
                     };
 
-                    let target = if draw.target.is_null() {
-                        None
+                    // Several names are one to a line, in the order of the fragment shader's
+                    // outputs.
+                    let target: Vec<String> = if draw.target.is_null() {
+                        Vec::new()
                     } else {
                         match unsafe { crate::interop::cstr_to_string(draw.target) } {
-                            Some(name) if !name.is_empty() => Some(name),
+                            Some(names) if !names.trim().is_empty() => {
+                                names.lines().map(str::trim).filter(|name| !name.is_empty()).map(String::from).collect()
+                            }
                             _ => return status::NULL_ARG,
                         }
                     };
@@ -1098,7 +1102,7 @@ pub struct DrawInstances(
         super::views::DrawCount,
         super::views::DrawBlend,
         bool,
-        Option<String>,
+        Vec<String>,
     )>,
 );
 
@@ -1129,7 +1133,7 @@ pub fn sync_view_draws(
                     count: count.clone(),
                     blend: *blend,
                     depth_write: *depth_write,
-                    target: target.clone(),
+                    targets: target.clone(),
                 })
             })
             .collect();
@@ -2088,6 +2092,60 @@ pub extern "C" fn bcs_shader_instance_buffer_create(capacity: i32) -> i32 {
             }
 
             crate::state::with_world(|world| super::instances::create(world, capacity as u32))
+        }
+    })
+}
+
+/// Makes an empty geometry pool and writes the asset keys of its vertex, index and mesh buffers to
+/// `keys`, in that order. The mesh buffer's key is the pool's.
+///
+/// See [`super::pools`] for the layout.
+///
+/// # Safety
+/// `keys` must point at three writable integers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_shader_geometry_pool_create(keys: *mut i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = keys;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if keys.is_null() {
+                return status::NULL_ARG;
+            }
+
+            crate::state::with_world(|world| match super::pools::create(world) {
+                Ok(made) => {
+                    // SAFETY: the caller promised three writable integers.
+                    unsafe { core::ptr::copy_nonoverlapping(made.as_ptr(), keys, 3) };
+                    status::OK
+                }
+                Err(refusal) => refusal,
+            })
+        }
+    })
+}
+
+/// Adds a mesh to a geometry pool and answers its number there, counted from zero.
+///
+/// Returns [`status::NOT_PRESENT`] where the mesh has not loaded yet, and [`status::NULL_ARG`]
+/// for a mesh that is not triangles or has no positions.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_geometry_pool_add(pool: i32, mesh: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (pool, mesh);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            crate::state::with_world(|world| super::pools::add(world, pool, mesh))
         }
     })
 }

@@ -111,4 +111,99 @@ public float3 irradiance_point_in_box(uint3 point, uint3 grid)
     return (float3(point) + 0.5) / float3(grid) - 0.5;
 }
 
+/// One vertex of a geometry pool.
+public struct PoolVertex
+{
+    /// Where it is on its mesh, with one in `w`.
+    public float4 position;
+    /// Which way its surface faces, with zero in `w`; all zero for a mesh that had no normals.
+    public float4 normal;
+    /// Its texture coordinates in `xy`.
+    public float4 uv;
+};
+
+/// One mesh of a geometry pool: where its vertices and indices start in the pool's buffers, how
+/// many there are, and the box it fits in, on the mesh before any transform.
+public struct PoolMesh
+{
+    public uint first_vertex;
+    public uint vertex_count;
+    public uint first_index;
+    public uint index_count;
+    public float4 bounds_min;
+    public float4 bounds_max;
+};
+
+/// How many triangles a pool's mesh has.
+public uint triangle_count(PoolMesh mesh)
+{
+    return mesh.index_count / 3;
+}
+
+/// Corner `corner`, from zero to two, of triangle `triangle` of a pool's mesh.
+public PoolVertex pool_corner(
+    StructuredBuffer<PoolVertex> vertices,
+    StructuredBuffer<uint> indices,
+    PoolMesh mesh,
+    uint triangle,
+    uint corner)
+{
+    let index = indices[mesh.first_index + triangle * 3 + corner];
+    return vertices[mesh.first_vertex + index];
+}
+
+/// Where a ray from `origin` along `direction` meets the triangle `a`, `b`, `c`, as its distance
+/// along the ray in `x` (in units of `direction`'s length) and the barycentric weights of `b` and
+/// `c` in `y` and `z`, with one in `w` for a hit and zero for a miss.
+///
+/// Both faces count, since a ray gathering light should see a thin wall from either side. The
+/// weights interpolate anything the corners carry: the normal at the hit is
+/// `a * (1 - y - z) + b * y + c * z`.
+public float4 intersect_triangle(float3 origin, float3 direction, float3 a, float3 b, float3 c)
+{
+    let edge1 = b - a;
+    let edge2 = c - a;
+    let p = cross(direction, edge2);
+    let determinant = dot(edge1, p);
+
+    if (abs(determinant) < 1e-9)
+        return float4(0.0);
+
+    let inverse = 1.0 / determinant;
+    let offset = origin - a;
+    let u = dot(offset, p) * inverse;
+
+    if (u < 0.0 || u > 1.0)
+        return float4(0.0);
+
+    let q = cross(offset, edge1);
+    let v = dot(direction, q) * inverse;
+
+    if (v < 0.0 || u + v > 1.0)
+        return float4(0.0);
+
+    let t = dot(edge2, q) * inverse;
+    return t > 0.0 ? float4(t, u, v, 1.0) : float4(0.0);
+}
+
+/// Where a ray from `origin` along `direction` enters a box, as the distance along it, or a
+/// negative number where it misses, which is what skips a mesh whose bounds a ray does not reach.
+public float intersect_box(float3 origin, float3 direction, float3 low, float3 high)
+{
+    // A ray along an axis has zeros in its direction, and WGSL leaves one over zero undefined
+    // rather than infinite, so a zero is made tiny and the slab it would divide is effectively
+    // endless, which is what infinity would have said.
+    let tiny = 1e-20;
+    let steady = float3(
+        abs(direction.x) < tiny ? tiny : direction.x,
+        abs(direction.y) < tiny ? tiny : direction.y,
+        abs(direction.z) < tiny ? tiny : direction.z);
+    let inverse = 1.0 / steady;
+    let near = (low - origin) * inverse;
+    let far = (high - origin) * inverse;
+    let enter = max(max(min(near.x, far.x), min(near.y, far.y)), min(near.z, far.z));
+    let leave = min(min(max(near.x, far.x), max(near.y, far.y)), max(near.z, far.z));
+    return leave >= max(enter, 0.0) ? max(enter, 0.0) : -1.0;
+}
+
 }
