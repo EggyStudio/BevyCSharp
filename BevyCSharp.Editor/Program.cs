@@ -7,8 +7,8 @@ using BevyCSharp.Editor;
 // surface on top of the renderer:
 //     build/build-native.sh --editor
 
-// How large to draw, which matters more without a window than with one: a window can be resized
-// by hand and an image cannot, so a panel taller than the picture has no way to be seen.
+// How large to draw, which matters more without a window than with one, because a window can be
+// resized by hand and an image cannot, so a panel taller than the picture has no way to be seen.
 var size = args.SkipWhile(argument => argument != "--size").Skip(1).FirstOrDefault();
 var across = 1600u;
 var down = 900u;

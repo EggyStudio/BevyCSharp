@@ -1,4 +1,4 @@
-// The smallest material worth checking: it paints the color it was given.
+// The smallest material worth checking, which paints the color it was given.
 //
 // A picture of it says a number crossed the boundary, was put where the reflection says `color`
 // is, and was read there.

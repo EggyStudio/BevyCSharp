@@ -7,7 +7,7 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// The terms are the standard ASC CDL ones, so a grade written for a film pipeline carries across
-/// unchanged: the picture leaves as <c>(in * Gain + Lift) ^ Gamma</c>, with saturation applied
+/// unchanged. The picture leaves as <c>(in * Gain + Lift) ^ Gamma</c>, with saturation applied
 /// around it. The defaults are the identity, so a section nobody touched changes nothing.
 /// </remarks>
 public sealed class GradingSection

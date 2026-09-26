@@ -1006,9 +1006,9 @@ public static unsafe class Shaders
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Culling instances on the GPU, voxelizing a scene, drawing geometry a shader places and giving
-    /// it motion: each needs every instance's transform in a buffer, with last frame's beside it.
-    /// The engine writes both once transforms have been worked out each frame, and only when
+    /// Culling instances on the GPU, voxelizing a scene, drawing geometry a shader places and
+    /// giving it motion each need every instance's transform in a buffer, with last frame's beside
+    /// it. The engine writes both once transforms have been worked out each frame, and only when
     /// something moved.
     /// </para>
     /// <para>

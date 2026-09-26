@@ -5,7 +5,7 @@
 
 import bcs_compute;
 
-/// One firefly, laid out as the C# record is: a `float3` followed by a `float` fills sixteen bytes
+/// One firefly, laid out as the C# record is. A `float3` followed by a `float` fills sixteen bytes
 /// under either set of rules, so the two agree without padding.
 struct Firefly
 {

@@ -61,8 +61,8 @@ public sealed class CliSessionTests : IDisposable
     /// A file whose process is gone is reported as gone rather than as ready.
     /// </summary>
     /// <remarks>
-    /// The usual reason a port refuses a connection: the app died without the chance to tidy up,
-    /// and what it left behind still says "ready". Reading the process settles it.
+    /// A port usually refuses a connection because the app died without the chance to tidy up, and
+    /// what it left behind still says "ready". Reading the process settles it.
     /// </remarks>
     [Fact]
     public void AFileWithoutAProcessIsGone()

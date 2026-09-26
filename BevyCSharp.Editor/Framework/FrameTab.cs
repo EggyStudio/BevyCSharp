@@ -5,8 +5,8 @@ using ImGuiNET;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// The images the scene camera's shaders keep, as a tab along the bottom: pick one and watch it.
-/// Beside them, how long each render pass takes.
+/// The images the scene camera's shaders keep, as a tab along the bottom, where one can be picked
+/// and watched. Beside them, how long each render pass takes.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -17,13 +17,13 @@ namespace BevyCSharp.Editor.Framework;
 /// </para>
 /// <para>
 /// Values are shown times a scale plus an offset, because the numbers in these images are rarely
-/// between zero and one: a distance runs to hundreds, a motion vector is a hundredth. The scale and
-/// offset are applied when an edit is finished rather than on every drag, since each change makes a
-/// new watch.
+/// between zero and one. A distance runs to hundreds, and a motion vector is a hundredth. The scale
+/// and offset are applied when an edit is finished rather than on every drag, since each change
+/// makes a new watch.
 /// </para>
 /// <para>
-/// The timings are the other half of tuning a chain: which link is wrong is the picture, and which
-/// link is slow is the list, slowest first, GPU time where the adapter measures it.
+/// The timings are the other half of tuning a chain. The picture shows which link is wrong, and the
+/// list shows which link is slow, slowest first, with GPU time where the adapter measures it.
 /// </para>
 /// </remarks>
 public static class FrameTab

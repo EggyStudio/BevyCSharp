@@ -137,7 +137,7 @@ public static unsafe class Gizmos
 
     /// <summary>Draws a line with a head on its far end.</summary>
     /// <remarks>
-    /// What a line cannot say. A velocity, a normal, a direction to a target: all of them are a
+    /// What a line cannot say. A velocity, a normal, a direction to a target. All of them are a
     /// line plus which way along it, and a line drawn for one of those leaves the reader working
     /// out the direction from what they already believe.
     /// </remarks>
@@ -170,7 +170,7 @@ public static unsafe class Gizmos
     /// <summary>Draws the outline of a circle.</summary>
     /// <remarks>
     /// Flat, facing the way <paramref name="rotation"/> points, which is the difference between
-    /// this and <see cref="Sphere"/>: a circle says where a plane is, and a sphere says where a
+    /// this and <see cref="Sphere"/>. A circle says where a plane is, and a sphere says where a
     /// point is and how far its influence reaches.
     /// </remarks>
     /// <param name="center">Where it sits, in world space.</param>

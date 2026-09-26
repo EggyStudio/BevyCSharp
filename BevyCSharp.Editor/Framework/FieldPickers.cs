@@ -13,9 +13,9 @@ namespace BevyCSharp.Editor.Framework;
 /// the entities in the world, the names the flags were declared with.
 /// </para>
 /// <para>
-/// Apart from <see cref="ComponentFields"/> for the same reason <see cref="FieldNumbers"/> is:
-/// gathering what can be chosen is a different job from drawing a row, and a row that reads the
-/// disk should be easy to find.
+/// Apart from <see cref="ComponentFields"/> for the same reason <see cref="FieldNumbers"/> is,
+/// because gathering what can be chosen is a different job from drawing a row, and a row that reads
+/// the disk should be easy to find.
 /// </para>
 /// </remarks>
 internal static class FieldPickers

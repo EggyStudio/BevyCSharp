@@ -33,9 +33,8 @@ use super::{BcsImGuiCommand, BcsImGuiVertex};
 
 /// What the managed side asked to be drawn this frame.
 ///
-/// Replaced wholesale once a frame. Immediate mode means there is no state to keep between frames:
-/// what is on screen is whatever the last frame said, and nothing here has to work out what
-/// changed.
+/// Replaced wholesale once a frame. Immediate mode means there is no state to keep between frames.
+/// The screen shows whatever the last frame said, and nothing here has to work out what changed.
 #[derive(Resource, Default)]
 pub struct Drawn {
     /// Every vertex of every window, in one run.

@@ -1100,9 +1100,9 @@ pub extern "C" fn bcs_has_render() -> i32 {
 /// Reports which UI profile this library was built with: `1` if the HTML and CSS surface is
 /// compiled in, `0` otherwise.
 ///
-/// Separate from [`bcs_has_render`] because the editor profile is a superset of the render one:
-/// a build can draw without carrying the document surface, and the managed side has to be able
-/// to tell those apart before it opens a panel.
+/// Separate from [`bcs_has_render`] because the editor profile is a superset of the render one. A
+/// build can draw without carrying the document surface, and the managed side has to be able to
+/// tell those apart before it opens a panel.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_has_editor() -> i32 {
     if cfg!(feature = "editor") { 1 } else { 0 }

@@ -79,8 +79,8 @@ public sealed class CliPlugin : IPlugin
     /// <remarks>
     /// A heartbeat that cannot be written is swallowed, because the app is running whether or not
     /// its file says so, and an exception out of a system on a transient filesystem error would
-    /// stop a session over bookkeeping. The first write, in <see cref="Build"/>, is not swallowed:
-    /// a directory that cannot be written to at all means nothing will ever find this app.
+    /// stop a session over bookkeeping. The first write, in <see cref="Build"/>, is not swallowed,
+    /// because a directory that cannot be written to at all means nothing will ever find this app.
     /// </remarks>
     private void Tick(App app, World world)
     {

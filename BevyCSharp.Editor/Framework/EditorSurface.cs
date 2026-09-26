@@ -36,8 +36,8 @@ public static class EditorSurface
     /// </summary>
     /// <remarks>
     /// The wheel never moves one of these. Without that, rolling over a list that has reached its
-    /// end hands the wheel to whatever holds it and the whole panel slides up under its own edge:
-    /// the world shrinks away, the split appears to climb, and nothing put it there but a scroll
+    /// end hands the wheel to whatever holds it and the whole panel slides up under its own edge.
+    /// The world shrinks away, the split appears to climb, and nothing put it there but a scroll
     /// that had nowhere else to go.
     /// </remarks>
     internal const ImGuiWindowFlags Panel = Placed | ImGuiWindowFlags.NoScrollWithMouse;

@@ -109,8 +109,8 @@ public readonly struct AssetHandle : IEquatable<AssetHandle>
 /// </summary>
 /// <remarks>
 /// An asset type is named rather than passed as a generic parameter, because these are Rust types
-/// that C# cannot name. Which ones are accepted depends on how the native bridge was compiled:
-/// the first two are data and work in any build, the rest need a render build.
+/// that C# cannot name. Which ones are accepted depends on how the native bridge was compiled. The
+/// first two are data and work in any build, and the rest need a render build.
 /// </remarks>
 public static class AssetKind
 {

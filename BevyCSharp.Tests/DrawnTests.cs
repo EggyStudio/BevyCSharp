@@ -11,7 +11,7 @@ namespace Bevy.Tests;
 /// <para>
 /// The rest of the suite asserts that a setting was accepted, which can go wrong quietly. A mesh
 /// handle that names nothing, a material the render world never hears about, a camera pointed at a
-/// target it cannot draw into: none of those show up as a failed call, and all of them show up as a
+/// target it cannot draw into. None of those show up as a failed call, and all of them show up as a
 /// picture with nothing in it. Until a run could draw without a display and hand its pixels back,
 /// that was not something a test could look at.
 /// </para>

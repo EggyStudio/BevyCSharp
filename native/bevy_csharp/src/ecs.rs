@@ -282,8 +282,8 @@ pub unsafe extern "C" fn bcs_ecs_chunks(
             let stride = info.layout().size() as u32;
 
             // A table-stored filter is answered once for the whole table, because every entity in
-            // one carries exactly the same set of them. A sparse-stored filter cannot be: two
-            // entities in the same table may differ, so it is asked per entity instead, which
+            // one carries exactly the same set of them. A sparse-stored filter cannot be, because
+            // two entities in the same table may differ, so it is asked per entity instead, which
             // splits a table into runs below.
             let mut with_ids = Vec::with_capacity(with.len());
             let mut with_sparse = Vec::new();
@@ -520,8 +520,8 @@ pub unsafe extern "C" fn bcs_ecs_children(entity: u64, out: *mut u64, capacity: 
 /// A return value greater than `capacity` means the buffer was too small and nothing usable was
 /// written; grow it and call again.
 ///
-/// Every entity, including the ones Bevy spawned for itself: windows, monitors, cameras and the
-/// observers hung off them are all entities. Deciding which of those are worth showing is a
+/// Every entity, including the ones Bevy spawned for itself, since windows, monitors, cameras and
+/// the observers hung off them are all entities. Deciding which of those are worth showing is a
 /// question about the editor rather than about the world, so it is answered on the managed side.
 ///
 /// # Safety
@@ -589,9 +589,9 @@ pub unsafe extern "C" fn bcs_ecs_components_of(entity: u64, out: *mut i32, capac
 
 /// Writes a component's name into `out`, returning the length in bytes it needs.
 ///
-/// The other direction of [`crate::app::bcs_component_id_of`], and the one an inspector needs:
-/// asking by name requires knowing the name already, while showing an entity means being handed
-/// ids and having to label them.
+/// The other direction of [`crate::app::bcs_component_id_of`], and the one an inspector needs,
+/// because asking by name requires knowing the name already, while showing an entity means being
+/// handed ids and having to label them.
 ///
 /// The name is whatever registered the component. A C# component carries the name its layout was
 /// registered under, which is the managed type's full name; one of Bevy's own carries the Rust
@@ -645,9 +645,9 @@ pub unsafe extern "C" fn bcs_ecs_entity_name(entity: u64, out: *mut u8, capacity
 
 /// Gives an entity a `Name`, replacing any it had.
 ///
-/// The write half of [`bcs_ecs_entity_name`]. A name is the one thing about an entity that is
-/// for people rather than for the program, so it is the one an editor has to be able to set:
-/// a list of "Entity(42v0)" is a list nobody can work in.
+/// The write half of [`bcs_ecs_entity_name`]. A name is the one thing about an entity that is for
+/// people rather than for the program, so it is the one an editor has to be able to set, because a
+/// list of "Entity(42v0)" is a list nobody can work in.
 ///
 /// An empty name removes the component, which is how an entity goes back to being unnamed.
 ///

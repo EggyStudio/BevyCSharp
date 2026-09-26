@@ -637,8 +637,8 @@ public sealed class ComputeShaderTests
     }
 
     /// <summary>
-    /// Slang's wave operations reach the GPU as subgroup operations: a sum over a subgroup is its
-    /// size, and one thread in each is its first.
+    /// Slang's wave operations reach the GPU as subgroup operations, so a sum over a subgroup is
+    /// its size, and one thread in each is its first.
     /// </summary>
     [Fact]
     public void WaveOperationsRunAsSubgroups()
@@ -682,8 +682,8 @@ public sealed class ComputeShaderTests
     }
 
     /// <summary>
-    /// A prefix sum, a read from another lane and a ballot over a subgroup give what they promise:
-    /// each thread's count of those before it is its index, the first lane's value reaches every
+    /// A prefix sum, a read from another lane and a ballot over a subgroup give what they promise.
+    /// Each thread's count of those before it is its index, the first lane's value reaches every
     /// lane, and a unanimous vote sets a bit for every lane.
     /// </summary>
     [Fact]

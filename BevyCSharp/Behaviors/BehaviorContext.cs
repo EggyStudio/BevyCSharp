@@ -89,7 +89,7 @@ public sealed class BehaviorContext
     /// The current value of <typeparamref name="TState"/>.
     /// </summary>
     /// <remarks>
-    /// Main thread only, like <see cref="Ecs"/>: it reads the live value out of the world.
+    /// Main thread only, like <see cref="Ecs"/>, because it reads the live value out of the world.
     /// </remarks>
     public TState State<TState>() where TState : struct, Enum => StateRegistry.Current<TState>();
 

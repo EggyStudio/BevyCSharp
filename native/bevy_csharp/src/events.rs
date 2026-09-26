@@ -240,7 +240,7 @@ pub unsafe extern "C" fn bcs_file_drop_path(
 
 /// Assets that failed to load, waiting to be read out.
 ///
-/// The same shape as [`FileDrops`], and for the same reason: a path and a reason are both text, and
+/// The same shape as [`FileDrops`], and for the same reason. A path and a reason are both text, and
 /// text crosses the boundary one call at a time.
 ///
 /// Registered in every profile, unlike the window's messages, because an asset that will not load
@@ -264,9 +264,9 @@ pub struct AssetFailures {
 /// One queue for every kind of asset, because Bevy reports failures untyped as well as typed. The
 /// path and the reason are read afterwards with [`bcs_asset_failure`].
 ///
-/// What this is for is the silence otherwise: a handle whose file is missing reports that it
-/// failed and nothing about why, so a misspelled path and an unreadable file look the same from
-/// the managed side.
+/// This ends the silence there would otherwise be. A handle whose file is missing reports that it
+/// failed and nothing about why, so a misspelled path and an unreadable file look the same from the
+/// managed side.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_asset_failures_drain() -> i32 {
     crate::interop::guard(|| {

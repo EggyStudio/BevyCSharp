@@ -3,7 +3,7 @@ using Bevy;
 namespace BevyCSharp.Sample.Behaviors;
 
 /// <summary>
-/// Drives a camera the way an editor's scene view does: hold a mouse button and steer.
+/// Drives a camera the way an editor's scene view does, steered while a mouse button is held.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -21,9 +21,9 @@ namespace BevyCSharp.Sample.Behaviors;
 /// </list>
 /// <para>
 /// Position and rotation are written to Bevy's own <see cref="Transform"/>, so nothing here is a
-/// parallel camera model: the engine's propagation and the renderer read exactly what this
-/// writes. The transform is only written on a frame where something actually moved, so a camera
-/// nobody is steering does not report a change to Bevy every frame.
+/// parallel camera model. The engine's propagation and the renderer read exactly what this writes.
+/// The transform is only written on a frame where something actually moved, so a camera nobody is
+/// steering does not report a change to Bevy every frame.
 /// </para>
 /// <para>
 /// Yaw and pitch are kept here rather than read back out of the rotation each frame. A
@@ -184,8 +184,8 @@ public partial struct FlyCamera
 
         if (input.KeyPressed(Key.F))
         {
-            // What F does in an editor, with the world origin standing in for a selection: keep
-            // looking the way the camera already is, and back off far enough to see it.
+            // Does what F does in an editor, with the world origin standing in for a selection,
+            // which keeps looking the way the camera already is and backs off far enough to see it.
             position = Vec3.Zero - (Forward * PivotDistance);
             moved = true;
         }

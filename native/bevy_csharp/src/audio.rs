@@ -302,9 +302,9 @@ pub unsafe extern "C" fn bcs_audio_position(entity: u64, seconds: *mut f32) -> i
 
 /// Moves playback to a point in the clip, in seconds from its start.
 ///
-/// A looping sound cannot be sought and reports [`status::INVALID_STATE`]: looping is rodio's
-/// `Repeat` over a `Buffered` source, which keeps the decoded samples so the clip can start again
-/// and refuses to move within them. Nothing here can work around that.
+/// A looping sound cannot be sought and reports [`status::INVALID_STATE`], because looping is
+/// rodio's `Repeat` over a `Buffered` source, which keeps the decoded samples so the clip can start
+/// again and refuses to move within them. Nothing here can work around that.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_audio_seek(entity: u64, seconds: f32) -> i32 {
     crate::interop::guard(|| {

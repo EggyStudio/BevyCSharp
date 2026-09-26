@@ -13,7 +13,7 @@ namespace Bevy.Tests;
 /// inside one.
 ///
 /// In the engine collection, because it runs a real app and two of those at once is not something
-/// the native side allows: the component registry belongs to whichever app is current, so a test
+/// the native side allows. The component registry belongs to whichever app is current, so a test
 /// building one while another is being torn down fails on a registration that has nowhere to go.
 /// </remarks>
 [Collection("engine")]

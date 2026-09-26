@@ -62,7 +62,7 @@ public sealed record CliSession(
 
     /// <summary>True when a process with this id is still there.</summary>
     /// <remarks>
-    /// Asked separately from <see cref="Stale"/>, because the two say different things: a process
+    /// Asked separately from <see cref="Stale"/>, because the two say different things. A process
     /// that is gone leaves a file that will never be touched again, while one that is merely busy
     /// leaves a file that will be.
     /// </remarks>

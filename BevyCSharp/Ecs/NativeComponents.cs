@@ -36,7 +36,7 @@ public static class NativeComponents
     /// </summary>
     /// <remarks>
     /// The id behind <see cref="Bevy.GlobalTransform"/>. Read it and write
-    /// <see cref="Bevy.Transform"/>: propagation overwrites this one every frame.
+    /// <see cref="Bevy.Transform"/>, because propagation overwrites this one every frame.
     /// </remarks>
     public static int GlobalTransform => ComponentType<Bevy.GlobalTransform>.Id;
 
@@ -299,10 +299,9 @@ public static class NativeComponents
 /// Bevy's <c>ChildOf</c> relationship, naming an entity's parent.
 /// </summary>
 /// <remarks>
-/// A name-only handle, for filtering on "has a parent". Use
-/// <see cref="EcsWorld.SetParent"/> to change it and <see cref="EcsWorld.ParentOf"/> to read it:
-/// writing the bytes directly would set the field without maintaining the matching
-/// <see cref="Children"/> list.
+/// A name-only handle, for filtering on "has a parent". Use <see cref="EcsWorld.SetParent"/> to
+/// change it and <see cref="EcsWorld.ParentOf"/> to read it, because writing the bytes directly
+/// would set the field without maintaining the matching <see cref="Children"/> list.
 /// </remarks>
 public readonly struct ChildOf : INativeComponent
 {

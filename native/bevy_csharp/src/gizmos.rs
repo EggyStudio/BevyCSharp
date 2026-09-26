@@ -109,7 +109,7 @@ macro_rules! draw_shape {
             8 => {
                 // Counts rather than a size, because a grid is described by how many cells it has
                 // and how large one is. Negative or absurd counts would be a caller's mistake, so
-                // they are clamped rather than refused: a gizmo call answers nothing.
+                // they are clamped rather than refused, since a gizmo call answers nothing.
                 let cells = UVec2::new(
                     far.x.clamp(0.0, 4096.0) as u32,
                     far.y.clamp(0.0, 4096.0) as u32,

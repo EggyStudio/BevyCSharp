@@ -123,7 +123,7 @@ public sealed class GBufferTests
 
     /// <summary>
     /// A camera image filled from the picture before tonemapping, with history, holds last frame's
-    /// picture as <c>_previous</c>: a cube flipping between red and green every frame is one color
+    /// picture as <c>_previous</c>. A cube flipping between red and green every frame is one color
     /// in the picture and the other in the copy.
     /// </summary>
     [Fact]

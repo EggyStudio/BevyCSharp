@@ -198,9 +198,9 @@ public static class ComponentType<T> where T : unmanaged
     /// The id, for walking the entities carrying <typeparamref name="T"/> without reading it.
     /// </summary>
     /// <remarks>
-    /// Looser than <see cref="ChunkId"/>: a name-only handle such as <see cref="Bevy.ChildOf"/>
-    /// is fine here, because the value is never touched. A sparse-stored component is still
-    /// refused, since the entity list beside its dense storage is not reachable either.
+    /// Looser than <see cref="ChunkId"/>. A name-only handle such as <see cref="Bevy.ChildOf"/> is
+    /// fine here, because the value is never touched. A sparse-stored component is still refused,
+    /// since the entity list beside its dense storage is not reachable either.
     /// </remarks>
     /// <exception cref="BevyNativeException"><typeparamref name="T"/> is sparse-stored.</exception>
     internal static int EntityId => IsSparse ? throw SparseIteration() : Id;

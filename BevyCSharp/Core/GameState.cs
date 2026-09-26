@@ -9,10 +9,10 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A pause that only means anything during a run is a sub-state of the run: leaving the run should
-/// take the pause with it rather than leave a state nothing is looking at. While the parent holds
-/// any other value the sub-state does not exist at all, and <see cref="App.TryState{TState}"/>
-/// says so rather than answering with a default.
+/// A pause that only means anything during a run is a sub-state of the run, because leaving the run
+/// should take the pause with it rather than leave a state nothing is looking at. While the parent
+/// holds any other value the sub-state does not exist at all, and
+/// <see cref="App.TryState{TState}"/> says so rather than answering with a default.
 /// </para>
 /// <para>
 /// On the type rather than on the call that adds it, because which state a sub-state belongs to is

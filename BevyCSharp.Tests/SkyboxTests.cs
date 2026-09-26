@@ -11,8 +11,8 @@ namespace Bevy.Tests;
 /// A skybox is the first thing the bridge does with a cubemap, and a cubemap is an ordinary image
 /// told that it is six square faces stacked on top of each other. The telling can only happen once
 /// the file has decoded, which is a frame or more after the handle is handed over, so what is worth
-/// pinning down is that the waiting works: the picture ends up with the sky in it rather than with
-/// the camera's clear color.
+/// pinning down is that the waiting works, so the picture ends up with the sky in it rather than
+/// with the camera's clear color.
 /// </remarks>
 [Collection("engine")]
 public sealed class SkyboxTests

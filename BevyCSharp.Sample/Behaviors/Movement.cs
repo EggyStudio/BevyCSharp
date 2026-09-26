@@ -37,8 +37,8 @@ public partial struct Movement
     /// <c>row.Component</c> writes the real component rather than a copy.
     /// </para>
     /// <para>
-    /// On the fixed timestep rather than the frame, so where these entities end up does not
-    /// depend on how fast the machine drew. It has to match <see cref="Gravity"/>: integrating
+    /// On the fixed timestep rather than the frame, so where these entities end up does not depend
+    /// on how fast the machine drew. It has to match <see cref="Gravity"/>, because integrating
     /// position per frame while accelerating per step would be half a simulation.
     /// </para>
     /// </remarks>

@@ -8,11 +8,11 @@ namespace Bevy.Interop;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Every entry point that touches the ECS is <em>ambient</em>: it takes no world handle and instead
-/// operates on the world Bevy has loaned to the currently running system callback on this thread.
-/// That is why they are only valid from inside a system, on the main thread. Calls from anywhere
-/// else fail with <see cref="NativeStatus.NoWorld"/> rather than corrupting state, which steers
-/// parallel behavior methods onto <see cref="EcsCommands"/> instead.
+/// Every entry point that touches the ECS is <em>ambient</em>, meaning it takes no world handle and
+/// instead operates on the world Bevy has loaned to the currently running system callback on this
+/// thread. That is why they are only valid from inside a system, on the main thread. Calls from
+/// anywhere else fail with <see cref="NativeStatus.NoWorld"/> rather than corrupting state, which
+/// steers parallel behavior methods onto <see cref="EcsCommands"/> instead.
 /// </para>
 /// <para>
 /// These are deliberately not public. <see cref="EcsWorld"/> and <see cref="App"/> are the

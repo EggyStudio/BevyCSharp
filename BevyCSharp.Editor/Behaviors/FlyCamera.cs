@@ -4,7 +4,7 @@ using BevyCSharp.Editor.Framework;
 namespace BevyCSharp.Editor.Behaviors;
 
 /// <summary>
-/// Drives a camera the way an editor's scene view does: hold a mouse button and steer.
+/// Drives a camera the way an editor's scene view does, steered while a mouse button is held.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -32,9 +32,9 @@ namespace BevyCSharp.Editor.Behaviors;
 /// to keep the horizon level, which is a decision this needs to remember rather than rediscover.
 /// </para>
 /// <para>
-/// The same behavior the sample carries, and deliberately a copy rather than something shared:
-/// both are applications, and a camera with opinions about which button orbits does not belong in
-/// the library, where it would join the schedule of every app that referenced it.
+/// The same behavior the sample carries, and deliberately a copy rather than something shared. Both
+/// are applications, and a camera with opinions about which button orbits does not belong in the
+/// library, where it would join the schedule of every app that referenced it.
 /// </para>
 /// </remarks>
 [Behavior]
@@ -254,9 +254,9 @@ public partial struct FlyCamera
         {
             FrameWanted = false;
 
-            // What F does in an editor: keep looking the way the camera already is, and back off
-            // far enough to see what is selected. The distance comes from the thing's own size,
-            // so framing a cube and framing a landscape both end up with it filling the view.
+            // Does what F does in an editor, which keeps looking the way the camera already is and
+            // backs off far enough to see what is selected. The distance comes from the thing's own
+            // size, so framing a cube and framing a landscape both end up with it filling the view.
             var (target, size) = Framed();
 
             PivotDistance = size;

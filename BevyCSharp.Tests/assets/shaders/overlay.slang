@@ -1,4 +1,4 @@
-// A pass with textures and a buffer of its own: it paints the picture over with the texture
+// A pass with textures and a buffer of its own, which paints the picture over with the texture
 // `stamp`, tinted by the last color in `tints`.
 
 import bcs_pass;

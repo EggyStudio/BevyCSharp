@@ -66,7 +66,7 @@ public sealed class AudioSettings
     /// Where in the clip to start, in seconds. Zero starts at the beginning.
     /// </summary>
     /// <remarks>
-    /// With <see cref="Play"/> this is how one file holds several effects: a sheet of footsteps or
+    /// With <see cref="Play"/> this is how one file holds several effects. A sheet of footsteps or
     /// gunshots is cut by naming where each one begins and how long it runs, which costs one decode
     /// rather than one file each.
     /// </remarks>
@@ -173,8 +173,8 @@ public static unsafe class Audio
     /// Makes an entity the ear spatial sound is heard from.
     /// </summary>
     /// <remarks>
-    /// Usually the camera, so that what is heard follows what is seen. One entity at a time:
-    /// with several, Bevy hears from whichever it finds first.
+    /// Usually the camera, so that what is heard follows what is seen. One entity at a time,
+    /// because with several, Bevy hears from whichever it finds first.
     /// </remarks>
     /// <param name="entity">The entity to listen from. It is given a transform if it has none.</param>
     /// <param name="earGap">

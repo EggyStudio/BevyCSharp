@@ -9,9 +9,9 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// A grade is a look rather than a value, so what can be asserted is the direction it moves the
-/// picture in: draining the saturation has to leave gray, and lifting the exposure has to leave
-/// something brighter. Both are read off the pixels, because a setting that is accepted and
-/// ignored looks exactly like one that worked.
+/// picture in. Draining the saturation has to leave gray, and lifting the exposure has to leave
+/// something brighter. Both are read off the pixels, because a setting that is accepted and ignored
+/// looks exactly like one that worked.
 /// </remarks>
 [Collection("engine")]
 public sealed class GradingTests

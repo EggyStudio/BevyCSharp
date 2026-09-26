@@ -196,8 +196,8 @@ public static class EditorStrip
     /// The tabs as a row of pills, which is the shape the rest of this look is drawn in.
     /// </summary>
     /// <remarks>
-    /// A click on the one already open closes it, which is why these are buttons rather than tabs:
-    /// what a header means here is ours to say, and a tab bar has its own idea about which of its
+    /// A click on the one already open closes it, which is why these are buttons rather than tabs.
+    /// What a header means here is ours to say, and a tab bar has its own idea about which of its
     /// tabs is selected.
     /// </remarks>
     internal static void Pills()
