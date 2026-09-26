@@ -763,7 +763,7 @@ public unsafe struct NativeViewDraw
     /// <summary>A <see cref="DrawBlend"/>.</summary>
     public int Blend;
 
-    /// <summary>Non-zero to write depth.</summary>
+    /// <summary>One to write depth, and two to cast shadows as well.</summary>
     public int DepthWrite;
 
     /// <summary>NUL-terminated UTF-8 naming a camera image to draw into, or null for the picture.</summary>

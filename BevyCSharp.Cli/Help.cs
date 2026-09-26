@@ -23,7 +23,7 @@ internal static class Help
               stop                       Ask it to close
 
             Cold
-              build [--render|--editor] [--meshlet]
+              build [--render|--editor] [--meshlet] [--solari]
                                          The native bridge, then the managed side, in that order
               test [--filter F]          The test suite; exit 8 means tests failed, 6 means it never ran
               run [-- args]              One headless run of the sample

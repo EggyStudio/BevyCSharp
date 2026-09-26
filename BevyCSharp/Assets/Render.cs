@@ -252,6 +252,58 @@ public static unsafe class Render
     }
 
     /// <summary>
+    /// Whether Bevy's ray-traced lighting is running: the bridge was built with it
+    /// (<c>--solari</c>), the app asked for it with <see cref="Config.RayTracedLighting"/>, and the
+    /// adapter traces rays.
+    /// </summary>
+    public static bool RayTracingActive => Native.bcs_render_ray_tracing_active() != 0;
+
+    /// <summary>
+    /// Lights a camera with Bevy's ray tracing, or with <see langword="false"/> the usual way again.
+    /// Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Direct light from every light and every emissive surface, found by tracing rays rather than
+    /// from shadow maps, and indirect light bounced off every surface taking part, which is global
+    /// illumination: a red wall tints the floor beside it, and a lamp in a room lights the corners it
+    /// cannot see. It builds up over a few frames and follows what moves, so a sudden cut shows a
+    /// moment of settling.
+    /// </para>
+    /// <para>
+    /// Only meshes given to <see cref="SetRayTraced"/> are met by rays, though every mesh is still
+    /// drawn and lit. The camera draws in high dynamic range and once a pixel, and asks for the
+    /// prepasses Solari reads itself. Turning shadows off on every light is Bevy's advice, since the
+    /// rays do their work.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// Ray-traced lighting is not running (see <see cref="RayTracingActive"/>), or the entity is not
+    /// a camera.
+    /// </exception>
+    public static void SetRayTracedLighting(Entity camera, bool on) =>
+        Native.Check(
+            Native.bcs_render_set_ray_traced_lighting(camera.Bits, on ? 1 : 0),
+            $"setting ray-traced lighting on {camera}");
+
+    /// <summary>
+    /// Makes an entity's mesh one the rays of ray-traced lighting meet. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// The mesh is reshaped the way ray tracing structures are built from, in place: exactly
+    /// positions, normals, texture coordinates and tangents, which are worked out where it has
+    /// none, and thirty-two bit indices. So the entity keeps drawing it as before, and the rays meet
+    /// the triangles the picture shows. The entity's material has to be one from
+    /// <see cref="CreateMaterial(MaterialSettings)"/>, and the mesh has to have loaded.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// Ray-traced lighting is not running, the mesh has not loaded, or it is not indexed triangles
+    /// with normals and texture coordinates.
+    /// </exception>
+    public static void SetRayTraced(Entity entity, AssetHandle mesh) =>
+        Native.Check(Native.bcs_render_set_ray_traced(entity.Bits, mesh.Key), $"making {entity} ray traced");
+
+    /// <summary>
     /// Whether Bevy's meshlets are running: the bridge was built with them (<c>--meshlet</c>), the
     /// app asked for them with <see cref="Config.MeshletClusters"/>, and the GPU can draw them.
     /// </summary>

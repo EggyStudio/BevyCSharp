@@ -95,6 +95,7 @@ Behaviors are discovered automatically, so a consuming project needs no registra
     - [Reflections](#reflections)
     - [The sky](#the-sky)
     - [Light probes](#light-probes)
+    - [Ray-traced lighting](#ray-traced-lighting)
     - [Drawing into an image](#drawing-into-an-image)
     - [The window](#the-window)
   - [2D](#2d)
@@ -1313,6 +1314,17 @@ with `ClearEachFrame` starts every frame as zeros, before anything on the camera
 `Targets = ["ids", "barycentrics"]` draws into several of the camera's images at once, one for each
 of the fragment shader's outputs in order (`SV_Target0`, `SV_Target1` and on), which is what a
 visibility buffer with more than an id, or a G-buffer of a package's own, is written with.
+The prepass's own `motion` and `normals` can be targets too, for a draw at `AfterPrepass` on a
+camera that draws them: what resolves a visibility buffer writes the motion and normals of what it
+resolved there, and its depth through `SV_Depth`, so Bevy's temporal antialiasing and motion blur
+see that geometry move, and what Bevy draws afterward is hidden behind it. A draw writing one of
+them reads a stand-in for it, since nothing reads and writes the same texture in one pass.
+
+`CastsShadows = true` draws it into the shadow maps as well, depth alone, after Bevy's own casters:
+the camera's directional cascades, every spot light's map and every face of every point light's
+cube, so it shadows Bevy's geometry and its own. Its vertex shader runs once for each of those views
+with that view in `bcs_pass::view`, so a shader placing geometry from the view places it as the
+light sees it without knowing it is drawing a shadow.
 
 **Watching what a camera keeps.** The images a chain writes live on the GPU in formats a picture
 cannot show, so `Shaders.Watch(camera, "occlusion", 320, 180, scale: 1f)` draws one, every frame
@@ -1724,6 +1736,29 @@ compiling, and `Render.RecaptureProbe` takes it again when the room changes. The
 Bevy's default exposure and the default `Intensity` undoes it. The cameras see the probe's own
 light, so each capture reflects the last one and light bounces further each frame, which settles
 at that intensity and brightens without end well above it.
+
+#### Ray-traced lighting
+
+On a GPU with ray tracing hardware, Bevy's Solari lights the scene by tracing rays instead:
+
+```csharp
+config.RayTracedLighting = true;                  // when the app is made
+
+Render.SetRayTracedLighting(camera, true);
+Render.SetRayTraced(floor, floorMesh);            // every mesh the rays should meet
+Render.SetRayTraced(wall, wallMesh);
+```
+
+Direct light comes from every light and every emissive surface, found by rays rather than shadow
+maps, so a glowing screen lights the face in front of it, and indirect light is bounced off every
+surface taking part, so a red wall tints the floor beside it and a lamp lights the corners it
+cannot see. It builds up over a few frames and follows what moves. It needs a bridge built with it
+(`./bcs build --editor --solari`) and an adapter with ray queries, which the bridge asks about
+before turning it on and `Render.RayTracingActive` reports; turning it on makes every one of Bevy's
+materials deferred for the whole app, which is why it is asked for when the app is made.
+`SetRayTraced` reshapes the mesh in place the way ray tracing structures are built from, working out
+tangents where it has none, so the entity keeps drawing it as before and the rays meet the
+triangles the picture shows.
 
 #### Drawing into an image
 

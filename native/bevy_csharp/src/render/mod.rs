@@ -22,6 +22,7 @@
 //! What the three share sits here: resolving an asset key, and refusing an entity that is not a
 //! camera.
 
+pub mod adapter;
 pub mod assets;
 pub mod compute;
 pub mod instances;
@@ -36,6 +37,7 @@ pub mod reflect;
 pub mod scene;
 pub mod shaders;
 pub mod slang;
+pub mod solari;
 pub mod timings;
 pub mod values;
 pub mod views;

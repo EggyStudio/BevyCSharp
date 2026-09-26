@@ -722,6 +722,172 @@ public sealed class ViewShaderTests
     }
 
     /// <summary>
+    /// A draw after the prepass writing the nearest depth through <c>SV_Depth</c> hides what Bevy
+    /// draws afterward where it wrote, and nowhere else.
+    /// </summary>
+    [Fact]
+    public void ADrawWritesDepthThatHidesTheSceneBehindIt()
+    {
+        if (!CanRun) return;
+
+        var run = new PictureRun
+        {
+            Width = 128,
+            Height = 128,
+            Scene = ecs =>
+            {
+                var camera = Ortho(ecs);
+                Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
+                Shaders.SetPrepass(camera, depth: true, motion: true);
+
+                PictureRun.Cube(ecs, ShaderMaterialTests.Flat(ShaderMaterialTests.Blue), 4f);
+
+                // Over the left half of the cube only.
+                var centers = Shaders.CreateBuffer<Vector4>([new(-2f, 0f, 3f, 1f)]);
+                var cover = Draw("shaders/draw_depth.slang").SetBuffer("centers", centers).Set("size", 1.5f);
+
+                Shaders.SetViewDraws(camera, ViewDraw.Fixed(cover, FramePoint.AfterPrepass, 6) with { Into = "motion" });
+            },
+        };
+
+        run.Until("compiled", _ => Ready()).Wait(Settled).Capture("picture").Go();
+
+        var picture = run.Picture("picture");
+        var covered = picture.At(40, 64);
+        var open = picture.At(88, 64);
+
+        Assert.True(covered is { B: < 60 }, $"the cube showed where the draw wrote the nearest depth: {covered}");
+        Assert.True(open.B > 150, $"the cube was hidden where the draw did not reach: {open}");
+    }
+
+    /// <summary>
+    /// A square drawn out of a buffer above a floor shadows it under a sun when it casts shadows,
+    /// and not when it does not.
+    /// </summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ADrawOutOfABufferCastsShadows(bool casts)
+    {
+        if (!CanRun) return;
+
+        var run = new PictureRun
+        {
+            Width = 128,
+            Height = 128,
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings
+                {
+                    Clear = ClearMode.Custom,
+                    ClearColor = (0f, 0f, 0f, 1f),
+                });
+
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 9f, 9f), new Vec3(0f, 0f, 1.5f), Vec3.UnitY));
+                Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
+                Shaders.SetPrepass(camera, depth: true, normals: true);
+
+                var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 8000f, Shadows = true });
+                ecs.Add(sun, Transform.LookingAt(Vec3.Zero, new Vec3(0f, -1f, 0f), Vec3.UnitZ));
+
+                var floor = ecs.Spawn();
+                Render.SetMesh(ecs, floor, Render.CreateMesh(MeshShape.Cuboid, 12f, 0.1f, 12f));
+                Render.SetMaterial(ecs, floor, Render.CreateMaterial(1f, 1f, 1f));
+                ecs.Add(floor, Transform.At(0f, -0.05f, 0f));
+
+                var centers = Shaders.CreateBuffer<Vector4>([new(0f, 3f, 0f, 1f)]);
+                var square = Draw("shaders/draw_flat_square.slang").SetBuffer("centers", centers).Set("size", 1f);
+
+                Shaders.SetViewDraws(camera, ViewDraw.Fixed(square, FramePoint.AfterOpaque, 6) with { CastsShadows = casts });
+
+                Shaders.SetViewImages(camera, new ViewImage("sunlit", ShaderImageFormat.R32Float));
+                Shaders.SetViewDispatches(
+                    camera,
+                    ViewDispatch.PerPixel(Compute("shaders/sun_shadow.slang"), FramePoint.AfterPrepass));
+                Shaders.SetPasses(camera, new ShaderPass(Pass("shaders/show_sunlit.slang"), AfterTonemapping: true));
+            },
+        };
+
+        run.Until("compiled", _ => Ready()).Wait(Settled).Capture("picture").Go();
+
+        var shadowed = PictureRun.Green(run.Picture("picture"));
+
+        if (casts)
+            Assert.True(shadowed > 50, $"only {shadowed} pixels were shadowed by a square that casts shadows");
+        else
+            Assert.True(shadowed < 10, $"{shadowed} pixels were shadowed by a square that casts none");
+    }
+
+    /// <summary>
+    /// A square drawn out of a buffer casts a spot or point light's shadow as well, through the
+    /// light's shadow map, which is shared between cameras rather than owned by one, and for a
+    /// point light is six views, one a face of its cube.
+    /// </summary>
+    [Theory]
+    [InlineData(true, LightKind.Spot)]
+    [InlineData(false, LightKind.Spot)]
+    [InlineData(true, LightKind.Point)]
+    [InlineData(false, LightKind.Point)]
+    public void ADrawOutOfABufferCastsASpotOrPointLightsShadow(bool casts, LightKind kind)
+    {
+        if (!CanRun) return;
+
+        var run = new PictureRun
+        {
+            Width = 128,
+            Height = 128,
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings
+                {
+                    Clear = ClearMode.Custom,
+                    ClearColor = (0f, 0f, 0f, 1f),
+                });
+
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 9f, 9f), new Vec3(0f, 0f, 1.5f), Vec3.UnitY));
+                Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
+                Shaders.SetPrepass(camera, depth: true, normals: true);
+
+                var light = Render.SpawnLight(new LightSettings
+                {
+                    Kind = kind,
+                    Intensity = 400_000f,
+                    Range = 30f,
+                    OuterAngle = 0.7f,
+                    InnerAngle = 0.5f,
+                    Shadows = true,
+                });
+                ecs.Add(light, Transform.LookingAt(new Vec3(0f, 8f, -3f), new Vec3(0f, 0f, 1.5f), Vec3.UnitY));
+
+                var floor = ecs.Spawn();
+                Render.SetMesh(ecs, floor, Render.CreateMesh(MeshShape.Cuboid, 12f, 0.1f, 12f));
+                Render.SetMaterial(ecs, floor, Render.CreateMaterial(1f, 1f, 1f));
+                ecs.Add(floor, Transform.At(0f, -0.05f, 0f));
+
+                var centers = Shaders.CreateBuffer<Vector4>([new(0f, 3f, 0f, 1f)]);
+                var square = Draw("shaders/draw_flat_square.slang").SetBuffer("centers", centers).Set("size", 1f);
+
+                Shaders.SetViewDraws(camera, ViewDraw.Fixed(square, FramePoint.AfterOpaque, 6) with { CastsShadows = casts });
+
+                Shaders.SetViewImages(camera, new ViewImage("sunlit", ShaderImageFormat.R32Float));
+                Shaders.SetViewDispatches(
+                    camera,
+                    ViewDispatch.PerPixel(Compute("shaders/spot_shadow.slang"), FramePoint.AfterPrepass));
+                Shaders.SetPasses(camera, new ShaderPass(Pass("shaders/show_sunlit.slang"), AfterTonemapping: true));
+            },
+        };
+
+        run.Until("compiled", _ => Ready()).Wait(Settled).Capture("picture").Go();
+
+        var shadowed = PictureRun.Green(run.Picture("picture"));
+
+        if (casts)
+            Assert.True(shadowed > 50, $"only {shadowed} pixels were shadowed by a square that casts shadows");
+        else
+            Assert.True(shadowed < 10, $"{shadowed} pixels were shadowed by a square that casts none");
+    }
+
+    /// <summary>
     /// A watch draws a camera's single-channel float image, scaled, into an image anything can show
     /// and a capture can read.
     /// </summary>

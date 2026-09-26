@@ -187,6 +187,26 @@ public sealed class Config
     public bool GpuTimings { get; set; }
 
     /// <summary>
+    /// Make Bevy's ray-traced lighting available, which a camera then turns on with
+    /// <see cref="Render.SetRayTracedLighting"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy's Solari traces rays against the scene with the GPU's ray tracing hardware: direct light
+    /// from every light and every emissive surface, and indirect light bounced off everything, in
+    /// real time. It needs a bridge built with it (<c>./bcs build --editor --solari</c>) and an
+    /// adapter with ray queries, which the bridge asks about before turning it on and which
+    /// <see cref="Render.RayTracingActive"/> reports.
+    /// </para>
+    /// <para>
+    /// Turning it on makes every one of Bevy's materials deferred for the whole app, since Solari
+    /// reads the G-buffer, which is why it is asked for here rather than per camera. Materials a
+    /// Slang program draws are not lit by it.
+    /// </para>
+    /// </remarks>
+    public bool RayTracedLighting { get; set; }
+
+    /// <summary>
     /// Answer the command line while this app runs.
     /// </summary>
     /// <remarks>

@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 132;
+    internal const int ExpectedAbiVersion = 133;
 
     static Native() => NativeLoader.Initialize();
 
@@ -958,6 +958,21 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_material_buffer_create(int capacity);
+
+    /// <summary>Whether Bevy's ray-traced lighting is running in this app.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_ray_tracing_active();
+
+    /// <summary>Lights a camera with Bevy's ray tracing, or the usual way again.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_ray_traced_lighting(ulong camera, int on);
+
+    /// <summary>Makes an entity's mesh take part in ray tracing.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_ray_traced(ulong entity, int mesh);
 
     /// <summary>Whether Bevy's meshlets are running in this app.</summary>
     [LibraryImport(Library)]

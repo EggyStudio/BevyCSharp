@@ -288,6 +288,22 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 crate::render::meshlets::install(&mut app, config.meshlet_clusters, backends);
             }
 
+            // Ray-traced lighting, likewise asked for and likewise kept out where the adapter
+            // cannot trace rays, since adding it makes every material deferred.
+            #[cfg(feature = "solari")]
+            if config.ray_traced_lighting != 0 {
+                let backends = backends.map(|backends| wgpu::Backends::from_bits_truncate(backends.bits()));
+                crate::render::solari::install(&mut app, backends);
+            }
+
+            #[cfg(not(feature = "solari"))]
+            if config.ray_traced_lighting != 0 {
+                bevy::log::warn!(
+                    "Ray-traced lighting was asked for, but this bridge was built without it. \
+                     Build it with --solari."
+                );
+            }
+
             #[cfg(not(feature = "meshlet"))]
             if config.meshlet_clusters > 0 {
                 bevy::log::warn!(

@@ -24,38 +24,6 @@ use crate::state::with_world;
 #[cfg(feature = "meshlet")]
 static ACTIVE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
-/// Asks the GPU the renderer is about to pick whether it has what the meshlet plugin needs, and
-/// answers what it lacks.
-///
-/// The same choice Bevy makes, by power preference and the environment variables it honors, on an
-/// instance of its own, because the renderer is not there yet when plugins are added, and the
-/// plugin's own check ends the process rather than reporting.
-#[cfg(feature = "meshlet")]
-fn missing_features(backends: Option<wgpu::Backends>) -> Result<(), String> {
-    let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle_from_env();
-
-    if let Some(backends) = backends {
-        descriptor.backends = backends;
-    }
-
-    let instance = wgpu::Instance::new(descriptor);
-    let options = wgpu::RequestAdapterOptions {
-        power_preference: wgpu::PowerPreference::from_env().unwrap_or(wgpu::PowerPreference::HighPerformance),
-        compatible_surface: None,
-        force_fallback_adapter: false,
-    };
-
-    let adapter = bevy::tasks::block_on(instance.request_adapter(&options)).map_err(|error| error.to_string())?;
-    let needed = bevy::pbr::experimental::meshlet::MeshletPlugin::required_wgpu_features();
-    let lacking = needed - adapter.features();
-
-    if lacking.is_empty() {
-        Ok(())
-    } else {
-        Err(format!("{} lacks {lacking:?}", adapter.get_info().name))
-    }
-}
-
 /// Adds the meshlet plugin with room for `clusters` clusters at once, if the GPU can run it.
 ///
 /// `clusters` is capped at Bevy's own limit of two to the twenty-fifth, since the plugin ends the
@@ -70,7 +38,9 @@ pub fn install(app: &mut bevy::app::App, clusters: u32, backends: Option<wgpu::B
     use bevy::ecs::system::Query;
     use bevy::render::view::Msaa;
 
-    if let Err(lacking) = missing_features(backends) {
+    let needed = bevy::pbr::experimental::meshlet::MeshletPlugin::required_wgpu_features();
+
+    if let Err(lacking) = super::adapter::lacking(backends, needed) {
         bevy::log::warn!(
             "Meshlets were asked for, but the GPU cannot draw them ({lacking}), so meshlet meshes \
              draw nothing in this run."

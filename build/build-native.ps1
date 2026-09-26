@@ -22,6 +22,10 @@
     Add Bevy's meshlets to whichever profile is built, or to the render profile when none is
     named. Compiles meshoptimizer and METIS, which no profile needs otherwise.
 
+.PARAMETER Solari
+    Add Bevy's ray-traced lighting to whichever profile is built, or to the render profile when
+    none is named.
+
 .PARAMETER Target
     Rust target triple to build for. Defaults to the host.
 
@@ -40,6 +44,7 @@ param(
     [switch] $Render,
     [switch] $Editor,
     [switch] $Meshlet,
+    [switch] $Solari,
     [string] $Target = '',
     [switch] $Clean
 )
@@ -56,10 +61,11 @@ $NativeDir = Join-Path $RepoRoot 'native'
 $TargetDir = Join-Path $BuildDir 'target'
 $ArtifactDir = Join-Path $BuildDir 'artifacts'
 # -Editor implies the renderer, so it wins when both are given rather than being refused.
-$Features = if ($Editor) { 'editor' } elseif ($Render -or $Meshlet) { 'render' } else { 'headless' }
+$Features = if ($Editor) { 'editor' } elseif ($Render -or $Meshlet -or $Solari) { 'render' } else { 'headless' }
 
-# Meshlets sit on top of a profile rather than replacing one.
+# Meshlets and ray-traced lighting sit on top of a profile rather than replacing one.
 if ($Meshlet) { $Features = "$Features,meshlet" }
+if ($Solari) { $Features = "$Features,solari" }
 
 if (-not (Test-Path (Join-Path $NativeDir 'Cargo.toml'))) {
     throw "No Rust workspace at '$NativeDir'. This script expects to live in <repo>/build/ with the sources in <repo>/native/."

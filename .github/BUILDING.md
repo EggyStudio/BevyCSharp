@@ -68,18 +68,21 @@ NuGet package, which ships the native prebuilt for each runtime identifier.
 `Config.Headless` forces the windowless path even on a render build, which is how the tests and
 a dedicated server run the same behavior code without a display.
 
-Bevy's meshlets are an addition to a profile rather than one of their own:
+Bevy's meshlets and its ray-traced lighting are additions to a profile rather than profiles of their
+own:
 
 ```bash
-build/build-native.sh --editor --meshlet    # bash
-build/build-native.ps1 -Editor -Meshlet     # PowerShell
-./bcs build --editor --meshlet              # the bridge, then the managed side
+build/build-native.sh --editor --meshlet --solari    # bash
+build/build-native.ps1 -Editor -Meshlet -Solari      # PowerShell
+./bcs build --editor --meshlet --solari              # the bridge, then the managed side
 ```
 
 They compile meshoptimizer and METIS, a C++ and a C library that cut a mesh into clusters, which
 nothing else in the tree needs, so no profile carries them by default. A build with them behaves
 as one without until an app sets `Config.MeshletClusters`, and even then only on a GPU with 64-bit
-texture atomics, which the bridge checks before turning them on.
+texture atomics, which the bridge checks before turning them on. Ray-traced lighting adds no build
+dependency, and is kept out of the profiles because adding it makes every material deferred; an
+app turns it on with `Config.RayTracedLighting`, on an adapter with ray queries.
 
 ## Platforms
 

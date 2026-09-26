@@ -855,7 +855,7 @@ public static unsafe class Shaders
                     Buffer = draw.Buffer.Key,
                     Offset = draw.Offset,
                     Blend = (int)draw.Blend,
-                    DepthWrite = draw.WritesDepth ? 1 : 0,
+                    DepthWrite = (draw.WritesDepth ? 1 : 0) | (draw.CastsShadows ? 2 : 0),
                     Target = (byte*)target,
                 };
             }
@@ -2712,6 +2712,20 @@ public readonly record struct ViewDraw
     /// see-through does.
     /// </summary>
     public bool WritesDepth { get; init; }
+
+    /// <summary>
+    /// Whether it is drawn into the shadow maps of the lights that cast shadows as well, so it
+    /// shadows everything they light, Bevy's own geometry included.
+    /// </summary>
+    /// <remarks>
+    /// Drawn again for each shadow view, depth alone, after Bevy has drawn its own casters there:
+    /// each of the camera's directional cascades, each spot light, and each face of each point
+    /// light's cube. Its vertex shader runs with that view in <c>bcs_pass::view</c>, so placing
+    /// geometry from the view as it always does places it as the light sees it, and its fragment
+    /// shader does not run. A spot or point light's map is shared by every camera, so every camera's
+    /// casting draws are drawn into it.
+    /// </remarks>
+    public bool CastsShadows { get; init; }
 
     /// <summary>
     /// One of the camera's images (<see cref="Shaders.SetViewImages"/>) to draw into instead of the

@@ -1440,6 +1440,8 @@ pub struct ViewDraw {
     /// Whether it writes depth, as opaque geometry does, or only tests against it, as anything
     /// see-through does.
     pub depth_write: bool,
+    /// Drawn into the camera's directional shadow maps as well, depth alone, so it casts shadows.
+    pub casts_shadows: bool,
     /// The camera's own images to draw into instead of the picture, one a fragment shader output
     /// in order, or none for the picture.
     pub targets: Vec<String>,
@@ -1470,6 +1472,11 @@ struct PreparedViewDraw {
     /// The camera images it draws into instead of the picture, and whether it is tested against
     /// the camera's depth there.
     target: Option<(Vec<TextureView>, bool)>,
+    /// Which prepass inputs it writes, normals in the first bit and motion in the second, which
+    /// its inputs bind a stand-in for, since a pass cannot read what it draws into.
+    writes_prepass: u8,
+    /// Its pipeline for drawing depth alone into a shadow map, where it casts shadows.
+    shadow_pipeline: Option<bevy::render::render_resource::CachedRenderPipelineId>,
     label: std::borrow::Cow<'static, str>,
 }
 
@@ -1546,6 +1553,8 @@ fn prepare_view_draws(
                 }
                 continue;
             };
+
+            let vertex_shader = vertex.shader.clone();
 
             // Camera images as the targets are drawn once a pixel, and against the camera's depth
             // only where they are all the picture's size and the camera draws once a pixel too,
@@ -1669,6 +1678,43 @@ fn prepare_view_draws(
                 })
             });
 
+            // Depth alone into a shadow map, from the vertex stage, keyed apart from every draw into
+            // a picture by having no color targets. Unclipped where the adapter allows, since a
+            // directional light's cascades are boxes and a caster in front of one still shadows
+            // what is inside it, which is what Bevy's own shadow pipelines do.
+            let shadow_pipeline = draw.casts_shadows.then(|| {
+                let key = (draw.program, program.generation, Vec::new(), 1, DrawBlend::Opaque, true, true);
+                let unclipped = render_device
+                    .features()
+                    .contains(bevy::render::settings::WgpuFeatures::DEPTH_CLIP_CONTROL);
+
+                *pipelines.0.entry(key).or_insert_with(|| {
+                    cache.queue_render_pipeline(RenderPipelineDescriptor {
+                        label: Some("bcs_view_draw_shadow".into()),
+                        layout: vec![draw_layout(&layout), inputs.layout.clone()],
+                        vertex: VertexState {
+                            shader: vertex_shader.clone(),
+                            shader_defs: Vec::new(),
+                            entry_point: None,
+                            buffers: Vec::new(),
+                        },
+                        fragment: None,
+                        primitive: bevy::render::render_resource::PrimitiveState {
+                            unclipped_depth: unclipped,
+                            ..Default::default()
+                        },
+                        depth_stencil: Some(DepthStencilState {
+                            format: bevy::core_pipeline::core_3d::CORE_3D_DEPTH_FORMAT,
+                            depth_write_enabled: Some(true),
+                            depth_compare: Some(CompareFunction::GreaterEqual),
+                            stencil: Default::default(),
+                            bias: Default::default(),
+                        }),
+                        ..Default::default()
+                    })
+                })
+            });
+
             let context = PackContext {
                 device: &render_device,
                 images: &images,
@@ -1718,6 +1764,12 @@ fn prepare_view_draws(
                 ),
                 count,
                 target: (!slots.is_empty()).then(|| (slots.iter().map(|slot| slot.0.clone()).collect(), has_depth)),
+                shadow_pipeline,
+                writes_prepass: draw.targets.iter().fold(0, |bits, name| match name.as_str() {
+                    "normals" => bits | 1,
+                    "motion" => bits | 2,
+                    _ => bits,
+                }),
                 label: programs::label(draw.program),
             });
         }
@@ -1783,21 +1835,44 @@ fn run_view_draws<const POINT: u8>(
     );
 
     // The picture is what is being drawn into, so it cannot be read in the same pass, and a
-    // stand-in is bound where it would be.
-    let Some((group, offsets)) = sources.bind(
-        ctx.render_device(),
-        &cache,
-        &inputs,
-        &fallback.d2.texture_view,
-        globals,
-        view_binding,
-        offset.offset,
-        &scene,
-        &ViewLights {
-            offset: light_offset,
-            shadows,
-        },
-    ) else {
+    // stand-in is bound where it would be. The same goes for a prepass input a draw writes, which
+    // gets a group of its own with that input stood in for.
+    let lights = ViewLights {
+        offset: light_offset,
+        shadows,
+    };
+
+    let bind = |ctx: &RenderContext, writes_prepass: u8| {
+        let mut sources = ViewInputSources {
+            depth: sources.depth.clone(),
+            normals: sources.normals.clone(),
+            motion: sources.motion.clone(),
+            previous: sources.previous,
+            environment: sources.environment,
+        };
+
+        if writes_prepass & 1 != 0 {
+            sources.normals = fallback.d2.texture_view.clone();
+        }
+
+        if writes_prepass & 2 != 0 {
+            sources.motion = inputs.empty_motion.clone();
+        }
+
+        sources.bind(
+            ctx.render_device(),
+            &cache,
+            &inputs,
+            &fallback.d2.texture_view,
+            globals.clone(),
+            view_binding.clone(),
+            offset.offset,
+            &scene,
+            &lights,
+        )
+    };
+
+    let Some((group, offsets)) = bind(&ctx, 0) else {
         return;
     };
 
@@ -1843,6 +1918,12 @@ fn run_view_draws<const POINT: u8>(
             ),
         };
 
+        let written_group = match here[start].writes_prepass {
+            0 => None,
+            bits => bind(&ctx, bits).map(|(group, _)| group),
+        };
+        let group = written_group.as_ref().unwrap_or(&group);
+
         let diagnostics = ctx.diagnostic_recorder();
         let diagnostics = diagnostics.as_deref();
 
@@ -1866,7 +1947,7 @@ fn run_view_draws<const POINT: u8>(
 
             pass.set_pipeline(pipeline);
             pass.set_bind_group(0, &draw.own, &[]);
-            pass.set_bind_group(1, &group, &offsets);
+            pass.set_bind_group(1, group, &offsets);
 
             match &draw.count {
                 PreparedDrawCount::Direct(vertices, instances) => pass.draw(0..*vertices, 0..*instances),
@@ -1876,6 +1957,174 @@ fn run_view_draws<const POINT: u8>(
 
         span.end(&mut pass);
         start = end;
+    }
+}
+
+/// Draws every draw that casts shadows into each of the camera's directional shadow cascades,
+/// depth alone, once Bevy has drawn its own casters there.
+///
+/// Each cascade is a view with its own matrices, so the draw's vertex shader, reading the view as
+/// it always does, places its geometry as that cascade sees it. The shadow maps it writes are among
+/// the camera's inputs, so its inputs bind the stand-ins for lights and shadows instead.
+#[allow(clippy::too_many_arguments)]
+fn run_view_draw_shadows(
+    view: ViewQuery<(
+        &PreparedViewDraws,
+        Option<&bevy::pbr::ViewLightEntities>,
+        Option<&ViewPrepassTextures>,
+        Option<&PreviousViewUniformOffset>,
+        Option<&ViewEnvironmentTextures>,
+    )>,
+    light_views: Query<(&bevy::pbr::ShadowView, &ViewUniformOffset)>,
+    inputs: Res<ViewInputs>,
+    fallback: Res<FallbackImage>,
+    cache: Res<PipelineCache>,
+    globals: Res<GlobalsBuffer>,
+    view_uniforms: Res<ViewUniforms>,
+    previous_uniforms: Option<Res<PreviousViewUniforms>>,
+    scene: SceneLights,
+    mut ctx: RenderContext,
+) {
+    use bevy::render::render_resource::{RenderPassDescriptor, StoreOp};
+
+    let (prepared, lights, prepass, previous, environment) = view.into_inner();
+
+    if !prepared.0.iter().any(|draw| draw.shadow_pipeline.is_some()) {
+        return;
+    }
+
+    let (Some(lights), Some(globals), Some(view_binding)) =
+        (lights, globals.buffer.binding(), view_uniforms.uniforms.binding())
+    else {
+        return;
+    };
+
+    let sources = ViewInputSources::gather(
+        &inputs,
+        &fallback,
+        prepass,
+        previous_uniforms.as_deref().zip(previous),
+        environment,
+    );
+
+    for light in &lights.lights {
+        let Ok((shadow, offset)) = light_views.get(*light) else {
+            continue;
+        };
+
+        let Some((group, offsets)) = sources.bind(
+            ctx.render_device(),
+            &cache,
+            &inputs,
+            &fallback.d2.texture_view,
+            globals.clone(),
+            view_binding.clone(),
+            offset.offset,
+            &scene,
+            &ViewLights {
+                offset: None,
+                shadows: None,
+            },
+        ) else {
+            continue;
+        };
+
+        let mut pass = ctx.command_encoder().begin_render_pass(&RenderPassDescriptor {
+            label: Some("bcs_view_draw_shadow"),
+            color_attachments: &[],
+            depth_stencil_attachment: Some(shadow.depth_attachment.get_attachment(StoreOp::Store)),
+            timestamp_writes: None,
+            occlusion_query_set: None,
+            multiview_mask: None,
+        });
+
+        for draw in &prepared.0 {
+            let Some(pipeline) = draw.shadow_pipeline.and_then(|id| cache.get_render_pipeline(id)) else {
+                continue;
+            };
+
+            pass.set_pipeline(pipeline);
+            pass.set_bind_group(0, &draw.own, &[]);
+            pass.set_bind_group(1, &group, &offsets);
+
+            match &draw.count {
+                PreparedDrawCount::Direct(vertices, instances) => pass.draw(0..*vertices, 0..*instances),
+                PreparedDrawCount::Indirect(buffer, offset) => pass.draw_indirect(buffer, *offset),
+            }
+        }
+    }
+}
+
+/// Draws every camera's shadow-casting draws into a point or spot light's shadow map, which is a
+/// view of its own that Bevy runs this schedule for, shared by every camera.
+///
+/// A point light's map is six views, one a face of its cube, and a spot light's is one; each runs
+/// this once, with its own matrices in the view the draw's vertex shader reads.
+#[allow(clippy::too_many_arguments)]
+fn run_shared_draw_shadows(
+    view: ViewQuery<(&bevy::pbr::ShadowView, &ViewUniformOffset)>,
+    cameras: Query<&PreparedViewDraws>,
+    inputs: Res<ViewInputs>,
+    fallback: Res<FallbackImage>,
+    cache: Res<PipelineCache>,
+    globals: Res<GlobalsBuffer>,
+    view_uniforms: Res<ViewUniforms>,
+    scene: SceneLights,
+    mut ctx: RenderContext,
+) {
+    use bevy::render::render_resource::{RenderPassDescriptor, StoreOp};
+
+    let (shadow, offset) = view.into_inner();
+
+    if !cameras.iter().flat_map(|prepared| &prepared.0).any(|draw| draw.shadow_pipeline.is_some()) {
+        return;
+    }
+
+    let (Some(globals), Some(view_binding)) = (globals.buffer.binding(), view_uniforms.uniforms.binding()) else {
+        return;
+    };
+
+    let sources = ViewInputSources::gather(&inputs, &fallback, None, None, None);
+
+    let Some((group, offsets)) = sources.bind(
+        ctx.render_device(),
+        &cache,
+        &inputs,
+        &fallback.d2.texture_view,
+        globals,
+        view_binding,
+        offset.offset,
+        &scene,
+        &ViewLights {
+            offset: None,
+            shadows: None,
+        },
+    ) else {
+        return;
+    };
+
+    let mut pass = ctx.command_encoder().begin_render_pass(&RenderPassDescriptor {
+        label: Some("bcs_view_draw_shared_shadow"),
+        color_attachments: &[],
+        depth_stencil_attachment: Some(shadow.depth_attachment.get_attachment(StoreOp::Store)),
+        timestamp_writes: None,
+        occlusion_query_set: None,
+        multiview_mask: None,
+    });
+
+    for draw in cameras.iter().flat_map(|prepared| &prepared.0) {
+        let Some(pipeline) = draw.shadow_pipeline.and_then(|id| cache.get_render_pipeline(id)) else {
+            continue;
+        };
+
+        pass.set_pipeline(pipeline);
+        pass.set_bind_group(0, &draw.own, &[]);
+        pass.set_bind_group(1, &group, &offsets);
+
+        match &draw.count {
+            PreparedDrawCount::Direct(vertices, instances) => pass.draw(0..*vertices, 0..*instances),
+            PreparedDrawCount::Indirect(buffer, offset) => pass.draw_indirect(buffer, *offset),
+        }
     }
 }
 
@@ -1956,6 +2205,14 @@ pub fn install(app: &mut App) {
                 // At the start of the main pass rather than between it and the prepass, which is
                 // where Bevy's own ambient occlusion and shadows run, so a shader here sees them
                 // done and can replace what Bevy's lighting is about to read.
+                // Into the shadow maps once Bevy's own casters are in them, and before anything
+                // reads them.
+                run_view_draw_shadows
+                    .after(bevy::pbr::per_view_shadow_pass::<{ bevy::pbr::LATE_SHADOW_PASS }>)
+                    .before(Core3dSystems::MainPass),
+                run_shared_draw_shadows
+                    .after(bevy::pbr::shared_shadow_pass::<{ bevy::pbr::LATE_SHADOW_PASS }>)
+                    .before(Core3dSystems::MainPass),
                 clear_view_images
                     .in_set(Core3dSystems::MainPass)
                     .before(run_view_dispatches::<0>)

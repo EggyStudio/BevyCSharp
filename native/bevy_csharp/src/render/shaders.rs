@@ -970,7 +970,8 @@ pub struct BcsViewDraw {
     pub offset: u32,
     /// `0` opaque, `1` alpha blended, `2` added.
     pub blend: i32,
-    /// Non-zero to write depth as well as test against it.
+    /// `1` to write depth as well as test against it, and `2` to be drawn into the camera's
+    /// directional shadow maps as well, so it casts shadows.
     pub depth_write: i32,
     /// NUL-terminated UTF-8 naming the camera's images to draw into, one to a line in the order of
     /// the fragment shader's outputs, or null for the picture.
@@ -1074,7 +1075,14 @@ pub unsafe extern "C" fn bcs_render_set_view_draws(
                         }
                     };
 
-                    list.push((draw.instance as usize, point, count, blend, draw.depth_write != 0, target));
+                    list.push((
+                        draw.instance as usize,
+                        point,
+                        count,
+                        blend,
+                        (draw.depth_write & 1 != 0, draw.depth_write & 2 != 0),
+                        target,
+                    ));
                 }
 
                 let mut camera = world.entity_mut(entity);
@@ -1101,7 +1109,7 @@ pub struct DrawInstances(
         super::views::FramePoint,
         super::views::DrawCount,
         super::views::DrawBlend,
-        bool,
+        (bool, bool),
         Vec<String>,
     )>,
 );
@@ -1124,7 +1132,7 @@ pub fn sync_view_draws(
         let draws = wanted
             .0
             .iter()
-            .filter_map(|(id, point, count, blend, depth_write, target)| {
+            .filter_map(|(id, point, count, blend, (depth_write, casts_shadows), target)| {
                 let instance = instances.0.get(*id)?;
                 Some(ViewDraw {
                     program: instance.program,
@@ -1133,6 +1141,7 @@ pub fn sync_view_draws(
                     count: count.clone(),
                     blend: *blend,
                     depth_write: *depth_write,
+                    casts_shadows: *casts_shadows,
                     targets: target.clone(),
                 })
             })

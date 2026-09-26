@@ -96,12 +96,11 @@ by name. What is left is at the edges of that:
   camera with `Msaa` above one hands its passes the stand-ins, and the same goes for normals and
   motion vectors. Resolving them first, or a second layout for multisampled cameras, would lift
   it.
-- **Geometry drawn out of buffers does not cast shadows.** `Shaders.SetViewDraws` draws into a
-  camera's picture and depth, with a count a buffer can hold, but a light's shadow map is drawn by
-  Bevy from meshes alone, so what a draw places neither casts a shadow nor appears in the prepass.
-  Shadow views exposed as views, which a draw could be asked to render into as well, would lift it.
-  A material still draws one entity's mesh, so something drawn with Bevy's lighting rather than a
-  shader's own is a mesh of as many squares as there are particles.
+- **Geometry drawn out of buffers is lit by its own shader.** A draw casts shadows into every
+  light's shadow map and writes the prepass's motion and normals, but Bevy's lighting shades only
+  materials on meshes, so something drawn out of buffers and lit the way Bevy lights things is
+  still a mesh of as many squares as there are particles, or a visibility buffer resolved by a pass
+  that does its own lighting with `bcs_pass`'s lights.
 
 ### Scripts a game can load
 

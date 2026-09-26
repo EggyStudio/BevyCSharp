@@ -127,6 +127,7 @@ public sealed unsafe class App : IDisposable
                 SpatialScale = Config.SpatialScale,
                 MeshletClusters = Config.MeshletClusters,
                 GpuTimings = Config.GpuTimings ? 1u : 0u,
+                RayTracedLighting = Config.RayTracedLighting ? 1u : 0u,
             };
             _handle = Native.bcs_app_create(&native);
         }

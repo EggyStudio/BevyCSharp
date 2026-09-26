@@ -15,6 +15,7 @@
 #   build/build-native.sh --render             # host, with Bevy's renderer
 #   build/build-native.sh --editor             # the above plus the HTML and CSS UI
 #   build/build-native.sh --editor --meshlet   # any profile plus Bevy's meshlets
+#   build/build-native.sh --editor --solari    # any profile plus Bevy's ray-traced lighting
 #   build/build-native.sh --render --portable  # build in a container, for older machines
 #   build/build-native.sh --local              # override a PORTABLE=1 in build-native.local
 #   build/build-native.sh --clean              # remove build/target and build/artifacts first
@@ -38,6 +39,7 @@ ARTIFACT_DIR="$BUILD_DIR/artifacts"
 
 FEATURES="headless"
 MESHLET=0
+SOLARI=0
 TARGET=""
 CLEAN=0
 PORTABLE=0
@@ -63,20 +65,21 @@ while [[ $# -gt 0 ]]; do
         --editor)   FEATURES="editor"; shift ;;
         --headless) FEATURES="headless"; shift ;;
         --meshlet)  MESHLET=1; shift ;;
+        --solari)   SOLARI=1; shift ;;
         --target)   TARGET="$2"; shift 2 ;;
         --clean)    CLEAN=1; shift ;;
         --portable) PORTABLE=1; shift ;;
         --local)    PORTABLE=0; shift ;;
         -h|--help)
-            sed -n '2,19p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+            sed -n '2,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
             exit 0 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
 done
 
-# Meshlets sit on top of a profile rather than replacing one, and bring the renderer with them, so
-# a headless build asked for them becomes a render build.
-if [[ "$MESHLET" == 1 && "$FEATURES" == "headless" ]]; then
+# Meshlets and ray-traced lighting sit on top of a profile rather than replacing one, and bring the
+# renderer with them, so a headless build asked for either becomes a render build.
+if [[ ( "$MESHLET" == 1 || "$SOLARI" == 1 ) && "$FEATURES" == "headless" ]]; then
     FEATURES="render"
 fi
 
@@ -85,6 +88,10 @@ PROFILE="$FEATURES"
 
 if [[ "$MESHLET" == 1 ]]; then
     FEATURES="$FEATURES,meshlet"
+fi
+
+if [[ "$SOLARI" == 1 ]]; then
+    FEATURES="$FEATURES,solari"
 fi
 
 if [[ ! -f "$NATIVE_DIR/Cargo.toml" ]]; then

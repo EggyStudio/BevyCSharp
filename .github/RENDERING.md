@@ -210,7 +210,7 @@ voxel or distance representation to trace against, and an indirect diffuse input
 | Hidden volumes and renderer features per pass, rewritten for each pipeline and each engine version | One frame with named points (after the prepass, before the main pass, before transparency, before and after tonemapping) that passes and compute attach to |
 | Matching lights by position against the engine's light buffer | The light list and shadow maps readable from compute |
 | Guessing albedo from shader property names | Material data the engine writes, by object |
-| Hidden cameras to approximate shadow frusta | Shadow views exposed as views |
+| Hidden cameras to approximate shadow frusta | Shadow views exposed as views, which draws render into |
 | Quads in front of each camera so the pipeline's lighting shades a visibility buffer | A material pass over a visibility buffer, writing depth and motion |
 | Integer ids in a float render target | Integer render targets and storage images |
 | Buffers that cannot grow, copied in chunks | Buffers the engine grows, keeping their contents |
@@ -267,6 +267,8 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | Indirect dispatch | Has (`Shaders.DispatchIndirect`, `ViewDispatch.Indirect`) |
 | Indirect draws whose count the GPU decides | Has, for geometry drawn on a camera out of buffers (`Shaders.SetViewDraws`, `ViewDraw.Indirect`) |
 | Draws into integer targets, for a visibility buffer | Has (`ViewDraw.Into`, a camera image made with `ClearEachFrame`), tested against the camera's depth |
+| Shadows from geometry drawn out of buffers | Has (`ViewDraw.CastsShadows`), into every directional cascade, spot light map and point light face, each drawn with its own view |
+| A visibility buffer's resolve writing depth, motion and normals | Has (`SV_Depth`, and the prepass's `motion` and `normals` as draw targets) |
 | Buffers that grow keeping their contents | Has (`Shaders.GrowBuffer`), rebinding everything that held them |
 | Atomics | Has, on buffers through Slang's `Atomic<T>`, which is the form Slang turns into WGSL atomics. 64-bit and texture atomics depend on the adapter and on Slang's WGSL output reaching them |
 | Subgroup operations | Has, through Slang's wave operations, on adapters with subgroups. naga has no subgroup election, so `WaveIsFirstLane` is written as `WaveGetLaneIndex() == 0` |
@@ -280,7 +282,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | Screen-space reflections | Has (`Render.SetScreenSpaceReflections`), Bevy's, over its G-buffer |
 | Light probes and irradiance volumes | Has (`Render.SetReflectionProbe`, `Render.SetIrradianceVolume`, and `Render.SetProbeCapture` for a reflection probe that renders itself), with the volume an ordinary 3D image a compute shader can write every frame |
 | Deferred rendering and a G-buffer | Has for Bevy's materials (`Render.SetDeferredRendering`), and readable by a camera's passes and compute as `gbuffer`, unpacked by `bcs_pass::surface_of` (`Shaders.SetPrepass(..., deferred: true)`). Materials a Slang program draws are forward and leave it empty |
-| Ray-traced lighting | Bevy (`bevy_solari`), not compiled |
+| Ray-traced lighting | Has, Bevy's Solari, in a bridge built with `--solari` and an app that sets `Config.RayTracedLighting` (`Render.SetRayTracedLighting`, `SetRayTraced`). A package's own shaders tracing rays is the ray query row above |
 
 ### Resources and formats
 
@@ -308,7 +310,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | need | status |
 |---|---|
 | Ray queries in shaders | Missing. wgpu has experimental ray queries, and naga's WGSL accepts them behind an `enable wgpu_ray_query` extension. Slang writes ray queries for SPIR-V and not for WGSL, so the gap is between the two, and closing it is either a Slang change or a SPIR-V path |
-| An acceleration structure kept current with the scene | Missing. Bevy's Solari manages one |
+| An acceleration structure kept current with the scene | Bevy's Solari keeps one for its own lighting, over the meshes given to `SetRayTraced`. A package's shaders cannot trace against it until they can express ray queries |
 
 ### Debugging and tooling
 
@@ -344,12 +346,14 @@ Each phase unblocks a class of package, and none needs a later one.
    which is where a change inside Bevy's lighting is weighed against keeping a fork.
 3. **GPU-driven geometry.** Indirect draws on a camera, instance data with previous transforms and
    buffers that grow are in, and so are draws into integer targets for a visibility buffer and
-   Bevy's meshlets as an opt-in. Next is what a different virtualized geometry package needs
-   beyond Bevy's: a material pass reading the visibility buffer that writes depth and
-   motion, and shadow views as views, so the same draws render into a light's shadow map.
-4. **Streaming.** Region uploads into an image and worker-thread reads with a budget are in.
-   Import-time processing and compressed formats are next. Texture streaming and geometry streaming share
-   all of it.
+   Bevy's meshlets as an opt-in. A pass resolving a visibility buffer can write depth, motion and
+   normals, since a draw after the prepass targets the prepass's motion and normals and writes
+   depth, and a draw casts shadows by being drawn into every shadow view: each directional
+   cascade, spot light map and point light face, so shadow views are views. The phase's
+   foundations are in.
+4. **Streaming.** Region uploads into an image, block-compressed images and worker-thread reads
+   with a budget are in. Import-time processing is next. Texture streaming and geometry streaming
+   share all of it.
 5. **World space.** Scene data readable from compute (lights, shadow maps and the sky are, and
    materials, per pixel through the G-buffer and by object as constants), 3D images with
    scrolling, then hardware ray tracing once shaders can reach it.

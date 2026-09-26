@@ -43,6 +43,19 @@ meshlet = [
     "dep:wgpu",
 ]
 
+# Bevy's Solari: direct and indirect lighting traced against the scene with hardware ray queries,
+# which is world-space GI and reflections as Bevy ships them.
+#
+# An addition to a profile like meshlets, and off until an app asks (`Config.RayTracedLighting`),
+# because adding it switches every Bevy material to deferred and it runs only on an adapter with
+# ray queries, which the bridge asks about before adding it. Pure Rust and shaders, so it adds no
+# build dependency; wgpu is named for the same question meshlets ask.
+solari = [
+    "render",
+    "bevy/bevy_solari",
+    "dep:wgpu",
+]
+
 # Minimal profile: app + ECS + time + input + transform + math.
 # No window, no GPU, no audio. Drives the loop with ScheduleRunnerPlugin.
 # This is what CI, unit tests and dedicated servers build.

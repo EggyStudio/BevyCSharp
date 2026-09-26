@@ -227,6 +227,9 @@ pub struct BcsConfig {
     /// Non-zero to measure how long every render pass takes. Costs timestamps written around each
     /// pass and read back every frame.
     pub gpu_timings: u32,
+    /// Non-zero to light with Bevy's Solari where a camera asks, which needs a build with the
+    /// `solari` feature and an adapter that traces rays.
+    pub ray_traced_lighting: u32,
 }
 
 /// How a camera should see, passed from C# when one is spawned.

@@ -26,6 +26,7 @@ internal static partial class Tools
             argument => argument is "--render" or "--editor" or "--headless");
 
         var meshlet = arguments.Contains("--meshlet");
+        var solari = arguments.Contains("--solari");
 
         var managed = !arguments.Contains("--no-managed");
         var native = !arguments.Contains("--no-native");
@@ -49,12 +50,17 @@ internal static partial class Tools
                         "-File", Path.Combine(Repo.Root, "build", "build-native.ps1"),
                         .. Profile(profile, windows: true),
                         .. (meshlet ? ["-Meshlet"] : Array.Empty<string>()),
+                        .. (solari ? ["-Solari"] : Array.Empty<string>()),
                     ],
                     Repo.Root,
                     echo)
                 : Shell.Run(
                     Path.Combine(Repo.Root, "build", "build-native.sh"),
-                    [.. Profile(profile, windows: false), .. (meshlet ? ["--meshlet"] : Array.Empty<string>())],
+                    [
+                        .. Profile(profile, windows: false),
+                        .. (meshlet ? ["--meshlet"] : Array.Empty<string>()),
+                        .. (solari ? ["--solari"] : Array.Empty<string>()),
+                    ],
                     Repo.Root,
                     echo);
 

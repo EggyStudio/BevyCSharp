@@ -53,6 +53,9 @@ public unsafe struct NativeConfig
 
     /// <summary>Non-zero to measure how long every render pass takes.</summary>
     public uint GpuTimings;
+
+    /// <summary>Non-zero to light with Bevy's ray tracing where a camera asks.</summary>
+    public uint RayTracedLighting;
 }
 
 /// <summary>One video mode a monitor can be driven at.</summary>
