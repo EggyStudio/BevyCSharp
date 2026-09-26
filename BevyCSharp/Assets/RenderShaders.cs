@@ -2396,11 +2396,10 @@ public sealed class ShaderProgramSettings
     /// Nothing checks SPIR-V passed through this way before the GPU runs it. A shader reading
     /// past a buffer's end reads whatever is there rather than zero, and a declaration that does not
     /// match what the bridge binds is undefined behavior rather than an error. The layout is built
-    /// from Slang's reflection, so what the shader declares is still set by name as it is for WGSL,
-    /// with two differences: a comparison sampler is bound as a plain one, and a texture of floats
-    /// is bound as filterable, which a 32-bit float image is not, so such an image is read with
-    /// <c>Load</c>. On a backend other than Vulkan the SPIR-V is translated by naga instead, which
-    /// works for ordinary compute and not for ray queries.
+    /// from Slang's reflection, so what the shader declares is still set by name as it is for WGSL.
+    /// The one difference is that a comparison sampler is bound as a plain one, since the reflection
+    /// does not tell the two apart. On a backend other than Vulkan the SPIR-V is translated by naga
+    /// instead, which works for ordinary compute and not for ray queries.
     /// </para>
     /// </remarks>
     public ShaderTarget ComputeTarget { get; init; }

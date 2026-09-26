@@ -769,10 +769,11 @@ pub const SCENE_GROUP: u32 = 2;
 /// its kind, its format and whether the entry point uses it, and a binding the entry point does not
 /// use is left out, as naga leaves it out of WGSL.
 ///
-/// Two things the reflection cannot say are settled the usual way. A comparison sampler reads as a
-/// plain one, so it is bound as a filtering sampler. A texture of floats is taken to be
-/// filterable, which a 32-bit float format is not, so such a texture is read with `Load` by a
-/// shader that declares it here.
+/// Two things the reflection cannot say are settled the safe way. A comparison sampler reads as a
+/// plain one, so it is bound as a filtering sampler. Whether a texture of floats is sampled with
+/// filtering is not said either, so it is bound as unfilterable, which takes an image of any float
+/// format. Nothing checks a sampler against the texture it samples in SPIR-V passed through, and
+/// the driver filters whatever the format allows.
 pub fn reflect_spirv(spirv: &[u8], reflection: &str, family: Family) -> Result<Reflected, String> {
     let json: Value = serde_json::from_str(reflection)
         .map_err(|error| format!("slangc's reflection does not parse: {error}"))?;
@@ -1026,7 +1027,7 @@ fn spirv_binding_kind(name: &str, parameter: &Value, ty: &Value) -> Result<Bindi
         sample: match scalar {
             "uint32" => TextureSampleType::Uint,
             "int32" => TextureSampleType::Sint,
-            _ => TextureSampleType::Float { filterable: !multisampled },
+            _ => TextureSampleType::Float { filterable: false },
         },
         multisampled,
     })
@@ -1570,7 +1571,7 @@ mod tests {
             layout.bindings[&2].kind,
             BindingKind::Texture {
                 dimension: TextureViewDimension::D2,
-                sample: TextureSampleType::Float { filterable: true },
+                sample: TextureSampleType::Float { filterable: false },
                 multisampled: false,
             }
         );
