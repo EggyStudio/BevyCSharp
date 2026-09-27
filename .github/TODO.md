@@ -167,17 +167,15 @@ one it cannot. Calls are queued and drained by one Bevy system each frame, becau
 parameter cannot be held by an exclusive system, and every C# system is one. `Gizmos.Configure` sets
 line width, render layers and whether anything is drawn at all.
 
-- **The rest of the primitives.** `primitive_3d` draws any shape in `bevy_math`. What the bridge
-  does not reach are the ones described by a list of points rather than by numbers, which is a
-  triangle, a polyline and a tetrahedron. All three are runs of lines, so `Gizmos.Lines` draws them
-  today at the cost of naming the corners; a call of their own would only save that.
+- **A tetrahedron has no call of its own.** `Gizmos.Triangle` and `Gizmos.Polyline` draw the
+  shapes described by points, and a tetrahedron is four triangles through `Gizmos.Lines`.
 - **Two groups, not many.** `Gizmos.Configure` takes a `GizmoGroup`, so the shapes the scene can
   hide are settable apart from the ones it cannot, the split a game usually needs. A third category
   needs a third `GizmoConfigGroup`, and a group is a Rust type rather than a value, so it is added
   where the two are and rebuilt.
-- **Only lines batch.** `Gizmos.Lines` hands a whole run over at once, for the editor's fading grid,
-  a wireframe or a path. Every other shape still crosses the boundary on its own, and a scene
-  drawing thousands of spheres or boxes a frame would need the same treatment.
+- **A batch is one call, not one buffer.** `Gizmos.Batch` gathers every shape and hands them over
+  together, and the bridge still records each into its queue and draws it with its own Bevy call.
+  That is what Bevy's gizmos cost anyway, so the saving is the crossing and not the drawing.
 
 ### 2D
 
@@ -225,7 +223,11 @@ call per field per frame, so there is no widget tree to keep in step with the wo
   the bundle updates and needs no change here.
 - **No icon font.** The icons are PNGs the editor ships, loaded through the asset server and drawn
   with `ImGui.Image`. More can be rasterized from SVG when they are wanted.
-- **IME is not forwarded.** Keys, characters, the pointer and the wheel are.
+- **Composed text arrives whole.** The input method is turned on while a field has the focus, with
+  its candidate list at the caret ImGui reports, and committed text is typed into the field. What
+  ImGui 1.91 cannot do is show a candidate inside the field before it is committed, so the
+  platform's own window shows it instead. This path runs only with a window, and no test covers it,
+  since an offscreen run has no input method to turn on.
 - **The interface is redrawn every frame**, as immediate mode does. At editor scale that is a few
   thousand triangles and one buffer write; if it ever matters, a frame where nothing moved can be
   drawn again instead of rebuilt.
@@ -345,28 +347,20 @@ operations of the kind `Render` provides, or name-only handles if filtering on t
 
 ### Physics
 
-Not a priority.
+`BevyCSharp.Physics` simulates rigid bodies with BepuPhysics v2 on the managed side, as a package of
+its own so the core takes no dependency. `PhysicsWorld` is the whole surface, with bodies by entity
+and no Bepu type in it, so the engine underneath can be replaced without a game changing. It owns
+the simulation, its buffer pool and thread dispatcher, and the callbacks Bepu requires, steps once
+per fixed step, and writes each dynamic body back through `Transform`. What is left:
 
-Bevy ships no physics engine, and the answer is **not** to bridge Avian or Rapier. Use
-[BepuPhysics v2](https://github.com/bepu/bepuphysics2), which is C#, so the simulation lives on the
-managed side and needs no bridge surface at all. Nothing new crosses the ABI, no Cargo feature is
-added, and the only thing that has to reach Bevy is the pose each body ends up with, which is one
-`Transform` write through the API that already exists.
-
-Two layers, so that no Bepu type reaches user code and the backend can be replaced. A façade
-carrying settings, a body handle that forwards to the world owning it, and a body kind for dynamic,
-kinematic and static; and a backend owning Bepu's `Simulation`, `BufferPool` and `ThreadDispatcher`
-plus the callback structs it requires.
-
-- **Stepping.** A physics integration usually carries its own accumulator and a guard against the
-  spiral of death. Neither is needed here, because `[OnFixedUpdate]` means one step per fixed step
-  with Bevy owning the accumulation.
-- **Write-back is a `Transform` write.** Propagation carries it to `GlobalTransform` and the
-  renderer for free.
-- **It belongs in its own package**, so the core does not take the dependency. `BepuPhysics` and
-  `BepuUtilities` are separate NuGet packages on a 2.5.0-beta line.
-- **Teardown matters.** Bepu is pool-based, and its `BufferPool` and `ThreadDispatcher` are
-  disposable, so they have to be torn down with the app rather than left to the GC.
+- **Not published yet.** The workflow packs the core alone, so the package is reached by project
+  reference inside this repository. Packing it is adding it to the pack step.
+- **One material for everything.** Friction and springiness are the same for every pair of bodies.
+  Per-body materials are a table the contact callback reads by the two handles.
+- **No shapes from meshes.** Boxes, spheres, capsules and cylinders cover characters and props; a
+  level's own geometry needs a mesh or convex hull shape, built from the vertices a mesh holds.
+- **No joints and no contact messages.** Bepu has both, and neither is bridged: a hinge or a
+  ragdoll needs constraints, and a trigger volume needs contacts reported onto the message bus.
 
 ## Platform
 
@@ -375,11 +369,10 @@ plus the callback structs it requires.
 - **Gamepad.** Excluded deliberately. `bevy_gilrs` needs libudev development headers at build time
   on Linux, which the current profile avoids so the bridge builds with nothing but a C compiler.
   Adding it means accepting that build dependency or gating the feature per platform.
-- **IME.** `Input.Text` covers typing, including dead keys, so a name field works. What is missing
-  is composition. Bevy's `Ime` messages report a candidate string being assembled, which a Japanese
-  or Chinese input method needs to show underlined text before it is committed. The text convention
-  the file drop messages use can carry the candidate string; what is left is the messages themselves
-  and the window's `ime_enabled` and `ime_position`.
+- **IME reaches the bus and the editor, not Bevy's UI.** `Window.SetIme` turns the input method on,
+  and `ImeComposing` and `ImeCommit` arrive as messages, so a field of the game's own can show a
+  candidate before it is committed, and the editor's fields take what is committed. Bevy's UI has
+  no text field of its own to hand them to.
 - **A synthetic pointer needs a window.** `SyntheticInput` writes window messages, so a headless
   or offscreen run has nowhere to send one and says so. That is the one thing `bcs` cannot drive in
   an offscreen editor, where the interface is drawn and laid out but cannot be clicked. Feeding the

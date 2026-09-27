@@ -98,6 +98,7 @@ Behaviors are discovered automatically, so a consuming project needs no registra
   - [The interface](#the-interface)
   - [UI](#ui)
   - [Audio](#audio)
+  - [Physics](#physics)
   - [Text and touch](#text-and-touch)
 - [Running a game](#running-a-game)
   - [In a window, headless, or offscreen](#in-a-window-headless-or-offscreen)
@@ -120,7 +121,7 @@ Behaviors are discovered automatically, so a consuming project needs no registra
 - [Behaviors](#behaviors): what a game writes. Systems and components, stages, the fixed timestep,
   filters, conditions, states, messages, the hierarchy, and what may touch the world from a worker.
 - [The engine](#the-engine): what a behavior can reach. Bevy's own components, assets and models,
-  drawing, 2D, gizmos, the interface, audio and input.
+  drawing, 2D, gizmos, the interface, audio, physics and input.
 - [Running a game](#running-a-game): in a window, with no renderer, or into an image, and reloading
   behavior scripts while it runs.
 - [The tools](#the-tools): the editor, its console, and driving a running app from a terminal.
@@ -2088,9 +2089,21 @@ overlay meant to be read at a glance uses. `perspective` makes the width a size 
 near plane rather than a size on screen, so a line further away is drawn thinner.
 
 `Gizmos.Lines` draws a whole run of segments in one crossing, each with its own two ends and color,
-and `GizmoSegment.Fading` gives one a second color so it can run out to nothing. What that is for is
-a wireframe, a path or a grid, where the cost otherwise grows with the number of lines rather than
-with the call. The editor's own floor grid is one of these.
+and `GizmoSegment.Fading` gives one a second color so it can run out to nothing. It serves a
+wireframe, a path or a grid, where the cost otherwise grows with the number of lines rather than
+with the call. The editor's own floor grid is one of these. `Gizmos.Polyline` and `Gizmos.Triangle`
+draw through a run of points the same way.
+
+Any other shape crosses on its own, which adds up for a scene drawing thousands of them a frame.
+Inside a batch they are gathered and handed over together:
+
+```csharp
+using (Gizmos.Batch())
+{
+    foreach (var row in ctx.Ecs.Query<Collider>())
+        Gizmos.Sphere(row.Position, row.Radius, (0f, 1f, 0f, 1f));
+}
+```
 
 `Rect2d`, `Circle2d`, `Line2d`, `Arrow2d`, `Arc2d` and `Grid2d` are the same shapes for a 2D
 camera. They take a point on the XY plane and an angle about Z, because that is all a flat shape
@@ -2444,6 +2457,35 @@ Sound is in the render profile rather than the minimal one, and not because it d
 one part of the engine that needs a system library at build time. See
 [.github/BUILDING.md](.github/BUILDING.md).
 
+### Physics
+
+Rigid bodies come from a package of their own, `BevyCSharp.Physics`, which simulates them with
+[BepuPhysics v2](https://github.com/bepu/bepuphysics2) on the managed side. The core takes no
+dependency on it, and nothing new crosses to the engine: a body's pose reaches Bevy as the
+`Transform` write any system makes.
+
+```csharp
+app.AddPlugin(new PhysicsPlugin());
+
+// In a behavior:
+var physics = ctx.Res<PhysicsWorld>();
+physics.Add(floor, PhysicsShape.Box(new Vec3(20f, 1f, 20f)), BodyKind.Static, floorTransform);
+physics.Add(crate, PhysicsShape.Box(new Vec3(1f)), BodyKind.Dynamic, crateTransform, mass: 5f);
+
+physics.ApplyImpulse(crate, new Vec3(0f, 20f, 0f));
+if (physics.Raycast(eye, forward, 50f) is { } hit) Select(hit.Entity);
+```
+
+The simulation steps once per `FixedUpdate`, so Bevy's fixed timestep does the accumulating and a
+slow frame is caught up in whole steps, which keeps a run the same on every machine. A dynamic body
+is written back to its entity every step. A kinematic one follows its entity's transform, with the
+velocity of how far it moved, so a moving platform pushes what stands on it. A static one never
+moves. Boxes, spheres, capsules and cylinders are the shapes, sized in world units and not scaled
+with the entity. A body belongs to its entity, so despawning the entity removes it, and the
+simulation's memory and threads are released with the app. F7 in the sample drops crates onto its
+ground, around the turning cube as a kinematic body, and `./bcs command sample.crates 12` does the
+same on a running sample.
+
 ### Text and touch
 
 Keys tell you what the hardware did, and `Input.Text` tells you what the user meant. It holds this
@@ -2459,6 +2501,20 @@ if (ctx.Input.KeyPressed(Key.Backspace) && name.Length > 0)
 Control characters are left out, because Backspace and Enter arrive as text on some platforms and
 a field that inserted them would be wrong on all of them. Read those as keys, as above. `Text` is
 empty on most frames and never null.
+
+Japanese, Chinese and Korean are typed through the platform's input method, which composes a
+candidate before it becomes text. A field turns it on while it has the focus, and shows what is
+being composed until it is committed:
+
+```csharp
+Window.SetIme(true, caretX, caretY + lineHeight);   // the candidate list sits under the caret
+
+foreach (var composing in ctx.Read<ImeComposing>()) preview = composing.Text;
+foreach (var commit in ctx.Read<ImeCommit>()) { name += commit.Text; preview = ""; }
+```
+
+It is off unless asked for, since the keys it takes stop reaching the game. A test says what a real
+input method would through `SyntheticInput.Compose` and `Commit`.
 
 Touches arrive the same way, as this frame's list:
 

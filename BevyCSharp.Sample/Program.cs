@@ -65,7 +65,8 @@ Console.WriteLine($"BevyCSharp sample: {config}");
 Console.WriteLine($"renderer compiled in: {App.HasRenderer}");
 Console.WriteLine(windowed ? "close the window to exit" : string.Empty);
 
-return BevyApp.Run(config);
+// Rigid bodies, from the physics package, for the crates F7 drops (see Behaviors/Crates.cs).
+return BevyApp.Run(app => app.AddPlugin(new Bevy.Physics.PhysicsPlugin()), config);
 
 // Reads --frames N, defaulting to a short run so a plain `dotnet run` still does something. Zero
 // runs until something asks the app to stop, as a session driven from `bcs` needs.

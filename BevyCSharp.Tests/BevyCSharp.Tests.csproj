@@ -19,6 +19,7 @@
 
     <ItemGroup>
         <ProjectReference Include="../BevyCSharp/BevyCSharp.csproj"/>
+        <ProjectReference Include="../BevyCSharp.Physics/BevyCSharp.Physics.csproj"/>
 
         <!--
           The editor, for the tables under it: what is on the menu, what an entity looks like in a
