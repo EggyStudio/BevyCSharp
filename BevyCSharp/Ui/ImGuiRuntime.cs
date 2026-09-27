@@ -124,6 +124,10 @@ public static unsafe class ImGuiRuntime
         // one buffer instead of splitting it every sixty-five thousand vertices.
         io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
 
+        // Told where a field being typed into has its caret, so the platform's input method can
+        // put its candidate list there (see `ImGuiInput.Ime`).
+        ImGui.GetPlatformIO().Platform_SetImeDataFn = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, IntPtr, ImGuiInput.ImeData*, void>)&ImGuiInput.OnImeData;
+
         if (fonts is { Length: > 0 } && faces.Length > 0)
         {
             foreach (var face in faces)
@@ -197,7 +201,7 @@ public static unsafe class ImGuiRuntime
         io.DisplayFramebufferScale = new Vector2(scale, scale);
         io.DeltaTime = ctx.Time.Delta > 0f ? ctx.Time.Delta : 1f / 60f;
 
-        ImGuiInput.Feed(io, ctx.Input, scale);
+        ImGuiInput.Feed(io, ctx.Input, scale, ctx.Read<ImeCommit>());
 
         ImGui.NewFrame();
     }
@@ -208,6 +212,8 @@ public static unsafe class ImGuiRuntime
         if (!IsRunning) return;
 
         ImGui.Render();
+
+        ImGuiInput.Ime();
 
         var data = ImGui.GetDrawData();
         if (data.NativePtr is null || data.CmdListsCount == 0) return;

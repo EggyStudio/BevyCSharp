@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Numerics;
 using ImGuiNET;
 
@@ -23,8 +24,64 @@ internal static class ImGuiInput
     private static bool _right;
     private static bool _middle;
 
+    /// <summary>What ImGui says about a field being typed into, as <c>ImGuiPlatformImeData</c> lays it out.</summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct ImeData
+    {
+        public byte WantVisible;
+        public Vector2 InputPos;
+        public float InputLineHeight;
+    }
+
+    /// <summary>What ImGui last said about the caret of the field being typed into.</summary>
+    private static ImeData _wanted;
+
+    /// <summary>What the window was last told, so it is told again only when that changes.</summary>
+    private static ImeData _told;
+
+    /// <summary>Whether the window turned the input method down, so it is not asked every frame.</summary>
+    private static bool _noWindow;
+
+    /// <summary>
+    /// ImGui's callback for where a field being typed into has its caret, which it calls while it
+    /// renders.
+    /// </summary>
+    [UnmanagedCallersOnly(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static unsafe void OnImeData(IntPtr context, IntPtr viewport, ImeData* data)
+    {
+        if (data is not null) _wanted = *data;
+    }
+
+    /// <summary>
+    /// Turns the window's input method on while a field has the focus, with its candidate list
+    /// under the caret, and off again once no field does.
+    /// </summary>
+    /// <remarks>
+    /// Only while a field is being typed into, because with the input method on the keys it takes
+    /// stop reaching the editor's shortcuts and the camera. Composed text reaches the field once it
+    /// is committed, through <see cref="Feed"/>.
+    /// </remarks>
+    internal static void Ime()
+    {
+        if (_noWindow) return;
+
+        var wanted = _wanted;
+        if (wanted.WantVisible == _told.WantVisible && (wanted.WantVisible == 0 || wanted.InputPos == _told.InputPos)) return;
+
+        try
+        {
+            Window.SetIme(wanted.WantVisible != 0, wanted.InputPos.X, wanted.InputPos.Y + wanted.InputLineHeight);
+            _told = wanted;
+        }
+        catch (Bevy.Interop.BevyNativeException)
+        {
+            // An offscreen run has no window to turn one on in, and never will.
+            _noWindow = true;
+        }
+    }
+
     /// <summary>Tells the interface what the pointer and the keyboard did.</summary>
-    internal static void Feed(ImGuiIOPtr io, Input input, float scale)
+    internal static void Feed(ImGuiIOPtr io, Input input, float scale, ReadOnlySpan<ImeCommit> committed = default)
     {
         _ = scale;
 
@@ -65,6 +122,13 @@ internal static class ImGuiInput
         foreach (var character in input.Text)
         {
             io.AddInputCharacter(character);
+        }
+
+        // What an input method composed, once it is chosen, which arrives in place of the text a
+        // key would have typed.
+        foreach (var commit in committed)
+        {
+            io.AddInputCharactersUTF8(commit.Text);
         }
     }
 
