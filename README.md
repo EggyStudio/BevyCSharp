@@ -1333,8 +1333,11 @@ cannot show, so `Shaders.Watch(camera, "occlusion", 320, 180, scale: 1f)` draws 
 once the camera is done, into an ordinary eight-bit image, each value times a scale plus an offset:
 one channel as gray, two as red and green, more as color. Anything a shader on the camera reads by
 name can be watched, and the prepass's `depth`, `normals` and `motion`, and the `gbuffer`, whose
-packed bits show as noise but show where it was drawn. The editor's Frame tab lists
-the scene camera's names and watches the one picked, which is where a broken link in a chain shows.
+packed bits show as noise but show where it was drawn. Which of those a camera has depends on
+settings made in several places, so `Shaders.DrawnViewImageNames(camera)` asks the renderer and
+answers the names a watch would find, as of the last frame drawn. The editor's Frame tab lists the
+scene camera's names, dims the ones it does not draw with what turns each on, and watches the one
+picked, which is where a broken link in a chain shows.
 
 **How long each pass takes.** An app made with `Config.GpuTimings` measures every render pass on the
 CPU that records it and the GPU that runs it, and `Render.Timings()` answers the last frames' times,
