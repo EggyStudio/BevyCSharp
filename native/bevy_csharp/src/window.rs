@@ -442,10 +442,16 @@ pub extern "C" fn bcs_window_start_drag_move() -> i32 {
 
         #[cfg(feature = "render")]
         {
-            with_window(|window, _| {
+            let started = with_window(|window, _| {
                 window.start_drag_move();
                 status::OK
-            })
+            });
+
+            if started == status::OK {
+                release_after_drag();
+            }
+
+            started
         }
     })
 }
@@ -482,12 +488,57 @@ pub extern "C" fn bcs_window_start_drag_resize(edge: i32) -> i32 {
                 _ => return status::NULL_ARG,
             };
 
-            with_window(|window, _| {
+            let started = with_window(|window, _| {
                 window.start_drag_resize(direction);
                 status::OK
-            })
+            });
+
+            if started == status::OK {
+                release_after_drag();
+            }
+
+            started
         }
     })
+}
+
+/// Lets the left button go, as far as the app is concerned, once the platform has taken a drag.
+///
+/// The platform moves or resizes the window with the button that started it, and on most of them
+/// the button's release goes to the platform and never reaches the app. Without this the app
+/// believes the button is still held, so the next press on the window is not a press at all,
+/// since a button already down cannot go down again, and every second click on a title bar does
+/// nothing. Whatever was being hovered when the drag began also stays active, which keeps its
+/// pointer shape after the drag is over. A release the platform does deliver later lands on a
+/// button already up and changes nothing.
+#[cfg(feature = "render")]
+fn release_after_drag() {
+    use bevy::input::ButtonState;
+    use bevy::input::mouse::{MouseButton, MouseButtonInput};
+    use bevy::prelude::ButtonInput;
+
+    with_world(|world| {
+        let mut windows = world.query_filtered::<bevy::ecs::entity::Entity, With<PrimaryWindow>>();
+
+        let Ok(window) = windows.single(world) else {
+            return status::NOT_PRESENT;
+        };
+
+        let released = MouseButtonInput {
+            button: MouseButton::Left,
+            state: ButtonState::Released,
+            window,
+        };
+
+        world.write_message(released.clone());
+        world.write_message(bevy::window::WindowEvent::MouseButtonInput(released));
+
+        if let Some(mut buttons) = world.get_resource_mut::<ButtonInput<MouseButton>>() {
+            buttons.release(MouseButton::Left);
+        }
+
+        status::OK
+    });
 }
 
 /// Turns the platform's input method on or off for the window, and says where the text being

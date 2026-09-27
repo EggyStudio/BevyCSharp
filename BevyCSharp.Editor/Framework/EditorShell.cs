@@ -93,10 +93,11 @@ public static class EditorShell
     /// <summary>Whether the pointer is over the interface rather than over the scene.</summary>
     /// <remarks>
     /// ImGui answers it, having hit tested every window this frame, and a click it takes is a click
-    /// the scene must not also act on. No position is asked for because none is needed, and a
-    /// parameter that is ignored reads as one that is not.
+    /// the scene must not also act on. The few pixels along the window's own edge count as well,
+    /// since a press there resizes the window. No position is asked for because none is needed,
+    /// and a parameter that is ignored reads as one that is not.
     /// </remarks>
-    public static bool PointerOverPanel => ImGuiRuntime.WantsMouse;
+    public static bool PointerOverPanel => ImGuiRuntime.WantsMouse || EditorWindowFrame.OnEdge is not null;
 
     /// <summary>The tabs along the bottom, in the order they are listed.</summary>
     /// <remarks>
@@ -187,6 +188,10 @@ public static class EditorShell
 
         ImGuiRuntime.Begin(ctx);
 
+        // Before anything asks whether the pointer is on the scene, since a press on the window's
+        // edge resizes it and is nobody else's.
+        EditorWindowFrame.Sense();
+
         EditorPicking.Tick(ctx);
 
         // A selection whose entity is gone is worse than none, because the details panel would
@@ -235,9 +240,16 @@ public static class EditorShell
         // First, so the strip is the first window ImGui makes and stays under everything after it.
         EditorWindowFrame.DrawGrip();
 
+        // Docked, the cards are solid. Floating they let a little of the scene through, which says
+        // they lie over it, but docked there is no scene behind them, only whatever is behind the
+        // window, and a card that lets the desktop through is a card that is hard to read.
+        if (Docked) ImGui.PushStyleColor(ImGuiCol.ChildBg, EditorTheme.Alpha(EditorTheme.LiveCard, 1f));
+
         EditorPanes.Draw();
         DrawOrientation(ctx);
         EditorStrip.Draw(tabsWidth, strip);
+
+        if (Docked) ImGui.PopStyleColor();
         ToolbarView.Draw(ctx);
 
         // After the panels, because what decides whether the asset preview is still wanted is

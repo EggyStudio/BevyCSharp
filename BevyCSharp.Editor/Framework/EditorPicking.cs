@@ -46,7 +46,7 @@ public static class EditorPicking
         if (ctx.Input.MousePressed(MouseButton.Left))
         {
             _pressedOn = EditorShell.Frame;
-            _onScene = !ImGuiRuntime.WantsMouse;
+            _onScene = !EditorShell.PointerOverPanel;
             _onHandle = false;
         }
 

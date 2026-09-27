@@ -118,7 +118,8 @@ public static class EditorWindowFrame
         {
             ImGui.InvisibleButton("##move", new Vector2(window.X, Grip));
 
-            if (ImGui.IsItemActivated())
+            // A press on the top edge is the edge's, which resizes rather than moves.
+            if (ImGui.IsItemActivated() && OnEdge is null)
             {
                 if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) ToggleMaximized();
                 else Window.StartDragMove();
@@ -129,74 +130,76 @@ public static class EditorWindowFrame
         ImGui.PopStyleVar();
     }
 
+    /// <summary>The edge or corner the pointer is on, where pressing resizes the window, or none.</summary>
+    /// <remarks>
+    /// Worked out at the start of the interface's frame, so what would otherwise take the press
+    /// (the title row, a panel, the scene) can ask and leave it alone.
+    /// </remarks>
+    public static WindowEdge? OnEdge { get; private set; }
+
+    /// <summary>Works out whether the pointer is on an edge, before anything is drawn.</summary>
+    internal static void Sense()
+    {
+        OnEdge = null;
+
+        if (!Borderless || Maximized) return;
+
+        var at = ImGui.GetIO().MousePos;
+        var window = ImGuiRuntime.Size;
+
+        // Off the window, which is how ImGui says the pointer is somewhere else entirely.
+        if (at.X < 0f || at.Y < 0f || at.X >= window.X || at.Y >= window.Y) return;
+
+        var near = at.X < Edge || at.Y < Edge || at.X >= window.X - Edge || at.Y >= window.Y - Edge;
+
+        if (near) OnEdge = Which(at);
+    }
+
     /// <summary>
-    /// The edges the window is resized from, as thin windows over everything else.
+    /// The edges the window is resized from: the pointer's shape over them, and a press on one.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Windows rather than a check of where the pointer is, so a press on an edge is the edge's
-    /// and not also a click on the panel or the scene under it. Drawn last, so on the first frame
-    /// they are the last windows ImGui makes and sit over the panels, which are never raised.
+    /// Asked of where the pointer is rather than drawn as windows of their own. Windows along the
+    /// edges lost to whatever window lay over the same pixels, which is a panel on the right, the
+    /// tab strip along the bottom and the title row along the top, so only the left edge, with
+    /// nothing over it, ever resized. A few pixels at the very edge are inside every surface's own
+    /// padding, so nothing there has anything to press, and the scene and the title row ask
+    /// <see cref="OnEdge"/> before they act on a press.
     /// </para>
     /// <para>
-    /// The top edge is the first few pixels of the title row, and the rest of the row moves the
-    /// window, as a platform's title bar is resized from its top and moved from its middle.
+    /// Last in the frame, so the shape it sets is the one the frame ends with, over whatever a
+    /// panel under the pointer asked for. The top edge is the first few pixels of the title row,
+    /// and the rest of the row moves the window, as a platform's title bar is resized from its top
+    /// and moved from its middle.
     /// </para>
     /// </remarks>
     internal static void DrawEdges()
     {
-        if (!Borderless || Maximized) return;
+        if (OnEdge is not { } edge) return;
 
-        var window = ImGuiRuntime.Size;
+        // Not while something is being dragged or a menu is up. A drag that runs off the edge
+        // keeps the shape it started with, and a menu over the edge is what the pointer is on.
+        if (ImGui.IsAnyItemActive() || ImGui.IsPopupOpen(string.Empty, ImGuiPopupFlags.AnyPopupId)) return;
 
-        Side("##edgeTop", Vector2.Zero, new Vector2(window.X, Edge));
-        Side("##edgeBottom", new Vector2(0f, window.Y - Edge), new Vector2(window.X, Edge));
-        Side("##edgeLeft", new Vector2(0f, Edge), new Vector2(Edge, window.Y - (Edge * 2f)));
-        Side("##edgeRight", new Vector2(window.X - Edge, Edge), new Vector2(Edge, window.Y - (Edge * 2f)));
+        ImGui.SetMouseCursor(edge switch
+        {
+            WindowEdge.Top or WindowEdge.Bottom => ImGuiMouseCursor.ResizeNS,
+            WindowEdge.Left or WindowEdge.Right => ImGuiMouseCursor.ResizeEW,
+            WindowEdge.TopRight or WindowEdge.BottomLeft => ImGuiMouseCursor.ResizeNESW,
+            _ => ImGuiMouseCursor.ResizeNWSE,
+        });
+
+        if (ImGui.IsMouseClicked(ImGuiMouseButton.Left)) Window.StartDragResize(edge);
     }
 
-    /// <summary>What every window of the frame is, which is a place to press and nothing to see.</summary>
+    /// <summary>What the title row is, which is a place to press and nothing to see.</summary>
     private const ImGuiWindowFlags Hitbox =
         EditorSurface.Placed
         | ImGuiWindowFlags.NoBackground
         | ImGuiWindowFlags.NoFocusOnAppearing
         | ImGuiWindowFlags.NoBringToFrontOnFocus
         | ImGuiWindowFlags.NoNav;
-
-    /// <summary>One edge, which resizes from itself or from the corner at either end of it.</summary>
-    /// <param name="id">What to call its window.</param>
-    /// <param name="at">Its top left, in logical pixels.</param>
-    /// <param name="size">How large it is.</param>
-    private static void Side(string id, Vector2 at, Vector2 size)
-    {
-        ImGui.SetNextWindowPos(at);
-        ImGui.SetNextWindowSize(size);
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowMinSize, Vector2.One);
-
-        if (ImGui.Begin(id, Hitbox))
-        {
-            ImGui.InvisibleButton("##resize", size);
-
-            if (ImGui.IsItemHovered() || ImGui.IsItemActive())
-            {
-                var edge = Which(ImGui.GetIO().MousePos);
-
-                ImGui.SetMouseCursor(edge switch
-                {
-                    WindowEdge.Top or WindowEdge.Bottom => ImGuiMouseCursor.ResizeNS,
-                    WindowEdge.Left or WindowEdge.Right => ImGuiMouseCursor.ResizeEW,
-                    WindowEdge.TopRight or WindowEdge.BottomLeft => ImGuiMouseCursor.ResizeNESW,
-                    _ => ImGuiMouseCursor.ResizeNWSE,
-                });
-
-                if (ImGui.IsItemActivated()) Window.StartDragResize(edge);
-            }
-        }
-
-        ImGui.End();
-        ImGui.PopStyleVar(2);
-    }
 
     /// <summary>Which edge or corner a point near the border is on.</summary>
     /// <param name="at">The point, in logical pixels.</param>

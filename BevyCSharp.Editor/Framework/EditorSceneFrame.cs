@@ -96,49 +96,52 @@ public static class EditorSceneFrame
             // says which way it is set. The pin as it stands. Pushed in while the panel is docked,
             // and lying loose while it floats, so the picture says what the panel is rather than
             // what the button does.
-            var pin = EditorShell.Docked ? EditorIcons.Pinned : EditorIcons.Loose;
-
-            if (ToolbarView.Circle($"dock{EditorShell.Docked}", pin, false, Size))
+            EditorSurface.Backed(() =>
             {
-                EditorShell.Docked = !EditorShell.Docked;
-            }
+                var pin = EditorShell.Docked ? EditorIcons.Pinned : EditorIcons.Loose;
 
-            if (ImGui.IsItemHovered())
-            {
-                EditorWidgets.Tip(EditorShell.Docked ? "Undock the panel" : "Dock the panel");
-            }
-
-
-            if (EditorWindowFrame.Borderless)
-            {
-                ImGui.SameLine();
-
-                if (Marked("minimize", WindowMarks.Minimize, "Minimize", Size)) EditorWindowFrame.Minimize();
-
-                ImGui.SameLine();
-
-                var maximized = EditorWindowFrame.Maximized;
-
-                if (Marked(
-                    "maximize",
-                    maximized ? WindowMarks.Restore : WindowMarks.Maximize,
-                    maximized ? "Restore" : "Maximize",
-                    Size))
+                if (ToolbarView.Circle($"dock{EditorShell.Docked}", pin, false, Size))
                 {
-                    EditorWindowFrame.ToggleMaximized();
+                    EditorShell.Docked = !EditorShell.Docked;
                 }
 
-                ImGui.SameLine();
+                if (ImGui.IsItemHovered())
+                {
+                    EditorWidgets.Tip(EditorShell.Docked ? "Undock the panel" : "Dock the panel");
+                }
 
-                // The one button that ends something, so it says so under the pointer in the color
-                // a failure is written in, as a title bar's close button turns red.
-                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, EditorTheme.Current.Bad);
-                ImGui.PushStyleColor(ImGuiCol.ButtonActive, EditorTheme.Current.Bad);
 
-                if (Marked("close", WindowMarks.Close, "Close the editor", Size)) EditorWindowFrame.Close();
+                if (EditorWindowFrame.Borderless)
+                {
+                    ImGui.SameLine();
 
-                ImGui.PopStyleColor(2);
-            }
+                    if (Marked("minimize", WindowMarks.Minimize, "Minimize", Size)) EditorWindowFrame.Minimize();
+
+                    ImGui.SameLine();
+
+                    var maximized = EditorWindowFrame.Maximized;
+
+                    if (Marked(
+                        "maximize",
+                        maximized ? WindowMarks.Restore : WindowMarks.Maximize,
+                        maximized ? "Restore" : "Maximize",
+                        Size))
+                    {
+                        EditorWindowFrame.ToggleMaximized();
+                    }
+
+                    ImGui.SameLine();
+
+                    // The one button that ends something, so it says so under the pointer in the color
+                    // a failure is written in, as a title bar's close button turns red.
+                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, EditorTheme.Current.Bad);
+                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, EditorTheme.Current.Bad);
+
+                    if (Marked("close", WindowMarks.Close, "Close the editor", Size)) EditorWindowFrame.Close();
+
+                    ImGui.PopStyleColor(2);
+                }
+            });
 
             ImGui.PopStyleColor(2);
             ImGui.PopStyleVar();

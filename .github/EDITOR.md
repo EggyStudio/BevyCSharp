@@ -135,7 +135,7 @@ taken from the scene and the panels. What this editor settled on, and where each
 | anything lying on the scene | 28px tall | `EditorSurface.Tall` |
 | a word on something pressable | 10px of air at each end of it | `EditorSurface.Sides` |
 | a menu or a tooltip's own air | `8, 6` | `EditorSurface.Around` |
-| the strip along the top the window is moved by | 8px | `EditorWindowFrame` |
+| the title row the window's buttons sit in | the toolbars' inset plus a button, 36px | `EditorWindowFrame.Grip` |
 | the narrowest the panel goes | 320px | `EditorShell.Narrowest` |
 | where it stops being two columns | 460px | `EditorShell.Stacks` |
 
@@ -171,23 +171,26 @@ third of it thick, which is the thickness ImGui gives a scrollbar's grab.
 ### The window's own frame
 
 The editor asks for a window without the platform's title bar and border, and draws its own in
-their place. The strip along the top is a gap above the panels that moves the window when pressed
-and maximizes it when pressed twice, and the few pixels round every edge resize it, with the
-pointer changing shape to say so. None of it is drawn. The window's minimize, maximize and close
-buttons sit at the top right as round buttons like the rest of what floats, after the pin that
-docks the panel. Drawn into an image there is no window, so there is no frame, and the panels
-start at the top.
+their place. A title row runs across the top, above the panels. The window's pin, minimize,
+maximize and close buttons sit at its right as round buttons like the rest of what floats, and
+while the panel floats the toolbars sit at its left, level with them. Anywhere else in the row
+moves the window when pressed and maximizes it when pressed twice, and the few pixels round every
+edge resize it, with the pointer changing shape to say so. None of that is drawn. Drawn into an
+image there is no window to move, but the row is still there, so nothing shifts between the two.
 
-Docked, the scene is a card among the others. It keeps the same gap from the window's edges as
-every other surface, is rounded on all four corners, and carries a one pixel line in the card
-color along its edge, which covers the steps where a corner drawn by the engine meets the rounding
-drawn over it.
+The window is see-through (`Config.Transparent`) where the platform allows. Docked, the panel and
+the strip have no backing, so only their cards are drawn, and the gaps between them and round the
+scene are the desktop. The scene keeps its gray, because its camera clears to it while the world
+clears to nothing. It is rounded on all four corners by the renderer, which takes the corners off
+to nothing with an antialiased edge, and floating the scene is the whole window and the window's
+own corners are rounded the same way. Maximized, the corners are square. Where the platform cannot
+composite a window with alpha, what is clear is black, which is how the editor looked before.
 
 ### Adding and arranging entities
 
-The `+` beside the world's search box, `Ctrl+A` and `Entity/Add` open a window in the middle of
-the screen listing every row under `Spawn/` in the menu, with a search box that has the keyboard
-from the moment it opens. The arrows move the choice and Enter adds it, as Godot's node window
+The Add Entity button at the bottom of the world list, `Ctrl+A` and `Entity/Add` open a window in
+the middle of the screen listing every row under `Spawn/` in the menu, with a search box that has
+the keyboard from the moment it opens and says in its hint where the new entity will go. The arrows move the choice and Enter adds it, as Godot's node window
 does. What is added goes under the entity selected when the window opened, or at the top of the
 world when nothing was, and undoing it takes it away as one step. A game's own
 `EditorMenu.Command("Spawn/Enemy", …)` appears in the window without anything else.
@@ -310,9 +313,11 @@ carries a closure that reads and writes the real struct instead.
 `DetailsPanel` draws the cards, `ComponentFields` draws the rows in them and `FieldNumbers` decides
 how a number in one is written and dragged. What a field is drawn as follows from its kind and from
 the hints its attributes declared: a round box to tick for a flag, a box for a number, a bar for a
-number with two ends, three boxes across for a vector, a list to choose from for a choice, a swatch
-for three numbers that are a color, and a dimmed box for anything that cannot be edited. A
-heading, a rule, a sentence and a unit are the field's own declaration too. A unit is written after
+number with two ends, three boxes across for a vector, a list to choose from for a choice (a field
+whose bottom corners go square while its list is open, meeting a list whose top corners are square,
+so the two read as one shape grown downward), a swatch for three numbers that are a color, and a
+dimmed box for anything that cannot be edited. A heading, a rule, a sentence and a unit are the
+field's own declaration too. A unit is written after
 the field's name, dimmed and in parentheses, as `Speed (m/s)`, so every box in a column ends at the
 same edge and the unit is read with the name it qualifies.
 
@@ -399,8 +404,9 @@ stays a short list and the menu stays the one place the editor's commands are wr
 **More than one thing can be selected.** Control and a click in the world list adds to the
 selection or takes something out of it, shift takes everything between. A drag on the handles
 moves, turns or stretches all of them, each about its own origin or all about the middle, and
-undoes as one change. What the details panel shows is the last one picked, with a count beside its
-heading saying how many others there are.
+undoes as one change. What the details panel shows is the last one picked, with a line over it
+saying how many are selected. The panels have no headings otherwise, since a list of names and a
+name at the top of a card say what they are.
 
 What an entity is drawn with is saved as well, by the path its mesh and material were loaded from,
 which is the only thing about a typed handle this side can name. A mesh built in memory is a set of
