@@ -146,6 +146,12 @@ jobs:
         working-directory: native
         run: cargo test
 
+      # The renderer brings audio, and cpal links against ALSA, so the next step cannot build
+      # without its headers. The native job installs the same package for the same reason.
+      - name: Install ALSA headers
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libasound2-dev pkg-config
+
       # Again with the renderer, which is where shader reflection and the packing of values by
       # name live. Their tests read saved compiler output, so they need no slangc, but they do
       # need the renderer's crates, which is a longer build and why this runs on Linux alone.
