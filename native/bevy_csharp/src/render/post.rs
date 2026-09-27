@@ -1751,3 +1751,59 @@ pub unsafe extern "C" fn bcs_render_set_environment_map(
         }
     })
 }
+
+/// Gives every camera drawing to the same target the fewest samples any of them asked for.
+///
+/// Bevy keeps one picture per target that each camera drawing there renders into in turn, and a
+/// camera's depth is made at its own sample count. So a camera multisampled four times after one
+/// drawn once a pixel meets a picture of the wrong count, and wgpu refuses the pass, which ends the
+/// app. The fewest rather than the most, since a camera asks for one sample because something
+/// needs it to (a pass reading its prepass, deferred rendering, temporal antialiasing, Solari, the
+/// interface's overlay), and none of those works multisampled. Said once per camera, so a game that
+/// asked for four samples learns why it has one.
+#[cfg(feature = "render")]
+pub fn match_samples_per_target(
+    mut cameras: bevy::ecs::system::Query<(
+        bevy::ecs::entity::Entity,
+        &bevy::camera::RenderTarget,
+        &mut bevy::render::view::Msaa,
+    )>,
+    primary: bevy::ecs::system::Query<bevy::ecs::entity::Entity, bevy::ecs::query::With<bevy::window::PrimaryWindow>>,
+    mut told: bevy::ecs::system::Local<std::collections::HashSet<bevy::ecs::entity::Entity>>,
+) {
+    use bevy::render::view::Msaa;
+
+    let primary = primary.single().ok();
+    let mut fewest: std::collections::HashMap<bevy::camera::NormalizedRenderTarget, Msaa> = Default::default();
+
+    for (_, target, msaa) in &cameras {
+        let Some(key) = target.normalize(primary) else { continue };
+        let entry = fewest.entry(key).or_insert(*msaa);
+        if msaa.samples() < entry.samples() {
+            *entry = *msaa;
+        }
+    }
+
+    for (entity, target, mut msaa) in &mut cameras {
+        let Some(wanted) = target.normalize(primary).and_then(|key| fewest.get(&key).copied()) else {
+            continue;
+        };
+
+        if msaa.samples() == wanted.samples() {
+            continue;
+        }
+
+        if told.insert(entity) {
+            bevy::log::info!(
+                "Camera {entity} asked for {} samples a pixel and draws with {}, since another camera \
+                 drawing to the same target draws with {} and cameras sharing a target have to match.",
+                msaa.samples(),
+                wanted.samples(),
+                wanted.samples()
+            );
+        }
+
+        *msaa = wanted;
+    }
+}
+

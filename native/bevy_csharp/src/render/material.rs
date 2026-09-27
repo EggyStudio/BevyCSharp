@@ -722,6 +722,7 @@ pub fn install(app: &mut bevy::app::App, root: std::path::PathBuf) {
             First,
             (programs::update, refresh_materials_of_changed_programs).chain(),
         )
+        .add_systems(PostUpdate, super::post::match_samples_per_target)
         .add_systems(
             PostUpdate,
             (
