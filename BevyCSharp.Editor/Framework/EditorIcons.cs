@@ -23,9 +23,6 @@ public static class EditorIcons
     /// <summary>Run the game in a window of its own.</summary>
     public static string Play { get; set; } = "icons/ui/play.png";
 
-    /// <summary>Stop the game that is running.</summary>
-    public static string Stop { get; set; } = "icons/ui/stop.png";
-
     /// <summary>Take back the last change.</summary>
     public static string Undo { get; set; } = "icons/ui/undo.png";
 

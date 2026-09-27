@@ -19,6 +19,15 @@ stops a stale bridge loading against new managed code.
 
 ## Content
 
+### Scenes are edits, not files
+
+The editor's `world.json` keeps named entities, the components with a schema, and where a mesh and
+material came from, and loading it writes those over entities that already exist by name. It keeps
+no hierarchy, no unnamed entity, no camera or light settings, nothing built in memory, and no asset
+or entity reference that survives a restart, and there is no way to place a model or another scene
+in a scene with edits of its own, keep data in a file of its own, or save a player's progress.
+[SCENES.md](SCENES.md) designs all of it over the component schemas, in the order it can be built.
+
 ### Composing what a glTF file describes
 
 A glTF file's geometry, scenes and materials load, and `ctx.Ecs.SpawnScene` spawns either a glTF

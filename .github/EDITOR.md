@@ -228,10 +228,11 @@ editor's preferences, on a page of its own in the settings, and Reset puts it ba
 
 ### Playing
 
-The play button in the middle of the scene's toolbars, `F5` and `Project/Play` run the game in a
-window of its own, as Godot does, and the same button stops it. It runs the sample unless the
-settings name another project under Playing. What the game writes appears in the console marked
-`[game]`. The game is a process of its own, so one that crashes leaves the editor running.
+The Play tab, `F5` and `Project/Play` run the game in a window of its own, as Godot does, and the
+same places stop it. The tab also builds the project without running it, and shows what the game or
+the build wrote, which the console also shows marked `[game]`. It runs the sample unless the tab's
+field names another project. It is a tab rather than a button on the scene's toolbar, so the
+viewport holds the scene and the tools that act on it, and nothing about running the project. The game is a process of its own, so one that crashes leaves the editor running.
 [PLAY.md](PLAY.md) has what is planned past that: playing the scene being edited, seeing the
 running game's world, and a tab that builds a game to ship.
 
@@ -497,7 +498,8 @@ numbers with no name, so it is left out rather than written as something it is n
 **The editor tells one entity from another by name.** Spawning something gives it a name nothing
 else is called, because the world file matches a saved entity back up by name and a selection that
 survives a script reload is found again by it, so a second thing called Cube is a thing the editor
-confuses with the first. Wherever names are listed they are ordered by `EditorSort`, which reads a
+confuses with the first. The scene format planned in [SCENES.md](SCENES.md) gives every entity an
+id of its own in the file, so names there are for people. Wherever names are listed they are ordered by `EditorSort`, which reads a
 run of digits as the number it spells, so Cube 2 comes before Cube 10 rather than after it.
 
 A field holding an asset shows the file it points at rather than the number a handle is, and

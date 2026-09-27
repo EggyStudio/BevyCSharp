@@ -2769,8 +2769,8 @@ handful of numbers that `EditorShell` owns and every part reads, saved with the 
 editor opens the way it was left. The look is one theme file, `assets/theme.txt`, which the Style
 tab writes. [.github/EDITOR.md](.github/EDITOR.md) has the design language in full.
 
-The play button, `F5` or `Project/Play` runs the game in a window of its own and stops it again,
-and what it writes appears in the console. [.github/PLAY.md](.github/PLAY.md) has the plan past
+The Play tab, `F5` or `Project/Play` runs the game in a window of its own and stops it again, and
+the tab builds it without running it and shows what either wrote. [.github/PLAY.md](.github/PLAY.md) has the plan past
 that, from playing the scene being edited to a tab that builds a game to ship.
 
 Two things it is built on belong to the library rather than to the editor, and any tool can use
@@ -2975,7 +2975,7 @@ run against a real Bevy app. Known gaps:
   component with a schema, and where its mesh and material were loaded from. Anything built in
   memory has no name to write, and a camera's projection or a light's settings are engine
   components with neither a schema nor a path, so the file is a set of edits over a scene rather
-  than the scene.
+  than the scene. [.github/SCENES.md](.github/SCENES.md) designs the scene format that replaces it.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
 - A cubemap comes from a file, as six square faces stacked into a column, or from a reflection probe
