@@ -1807,3 +1807,34 @@ pub fn match_samples_per_target(
     }
 }
 
+
+#[cfg(all(test, feature = "render"))]
+mod tests {
+    use bevy::asset::Handle;
+    use bevy::camera::RenderTarget;
+    use bevy::ecs::system::RunSystemOnce;
+    use bevy::image::Image;
+    use bevy::prelude::World;
+    use bevy::render::view::Msaa;
+    use bevy::window::{PrimaryWindow, Window, WindowRef};
+
+    #[test]
+    fn cameras_sharing_a_target_draw_with_the_fewest_samples() {
+        let mut world = World::new();
+        world.spawn((Window::default(), PrimaryWindow));
+
+        // Two cameras on the window, one named by reference and one as the primary window, to
+        // show both spellings count as the same target, and one on an image of its own that
+        // nothing else draws to and so keeps what it asked for.
+        let overlay = world.spawn((RenderTarget::Window(WindowRef::Primary), Msaa::Off)).id();
+        let scene = world.spawn((RenderTarget::Window(WindowRef::Primary), Msaa::Sample4)).id();
+        let image: Handle<Image> = Handle::default();
+        let alone = world.spawn((RenderTarget::Image(image.into()), Msaa::Sample8)).id();
+
+        world.run_system_once(super::match_samples_per_target).unwrap();
+
+        assert_eq!(*world.get::<Msaa>(overlay).unwrap(), Msaa::Off);
+        assert_eq!(*world.get::<Msaa>(scene).unwrap(), Msaa::Off);
+        assert_eq!(*world.get::<Msaa>(alone).unwrap(), Msaa::Sample8);
+    }
+}

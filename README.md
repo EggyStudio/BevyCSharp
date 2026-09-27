@@ -1518,7 +1518,10 @@ a pass over the finished picture and so also catches edges that come from a text
 `Fxaa` is the cheap one and `Smaa` the sharper one; `Temporal` resolves each frame from the ones
 before it, so it sees an edge sampled many times over, at the cost of a trail behind anything whose
 motion the renderer reports wrongly. It needs a 3D camera and `Msaa = 1`, and asking for it
-alongside multisampling throws rather than quietly drawing nothing. Bloom scatters light out of
+alongside multisampling throws rather than quietly drawing nothing. Cameras drawing to the same
+target draw into one picture and have to agree on `Msaa`, so each is given the fewest samples any of
+them asked for, with a line in the log for each camera lowered. The interface's overlay draws with
+one, so a game with an interface draws its window with one too. Bloom scatters light out of
 whatever is brighter than white, so it needs `Hdr` and something emissive to work on. To make one
 object glow harder, raise its material's emissive color rather than the bloom.
 

@@ -185,6 +185,13 @@ public sealed class PostSettings
     /// Smooths the edges of geometry and nothing else. Four is Bevy's own; one turns it off, as a
     /// game leaning on <see cref="AntiAlias"/> does, and <see cref="AntiAliasPass.Temporal"/>
     /// requires it.
+    /// <para>
+    /// Cameras drawing to the same window or image draw into one picture, so they have to agree,
+    /// and a mismatch is a validation error that ends the app. The bridge settles it each frame
+    /// by giving them all the fewest samples any of them asks for, and logs once for each camera it
+    /// lowers. A game that sets four here and sees one has another camera on the same target,
+    /// often the interface's overlay, which always draws with one.
+    /// </para>
     /// </remarks>
     public int Msaa { get; set; } = 4;
 
