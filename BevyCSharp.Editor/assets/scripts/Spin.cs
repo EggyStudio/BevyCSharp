@@ -9,7 +9,7 @@ public partial struct Spin
     // static: one plain system. In a script, startup means whenever the script is loaded, so this
     // runs again on every save, and the cube the last save made is taken away first.
     [OnStartup]
-    public static void Scene(BehaviorContext ctx)
+    public static void Spawn(BehaviorContext ctx)
     {
         // Found by its name rather than by Spin, because every reload is a new Spin type as far
         // as the engine is concerned, and the last one's cube does not carry this one's.
