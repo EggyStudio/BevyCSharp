@@ -4,8 +4,7 @@ Write [Bevy](https://bevy.org) games in C#.
 
 ![Showcase](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/refs/heads/main/.github/assets/showcase_3.gif)
 
-<sup>`BevyCSharp.Sample`, running on Bevy's PBR renderer through the bridge:
-`dotnet run --project BevyCSharp.Sample`</sup>
+<sup>`BevyCSharp.Sample`, `dotnet run --project BevyCSharp.Sample`</sup>
 
 Mark a struct `[Behavior]`, give it methods with stage attributes, and a Roslyn source generator
 wires it into Bevy's schedule, as a component and a system at the same time. Bevy is the engine
