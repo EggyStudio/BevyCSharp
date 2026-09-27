@@ -60,7 +60,7 @@ public sealed record EditorTheme
     public Vector4 Active { get; init; } = Rgb(0x66, 0x66, 0x66);
 
     /// <summary>A separator, for the rare place a gap will not do.</summary>
-    public Vector4 Line { get; init; } = Rgb(0x3C, 0x3C, 0x40);
+    public Vector4 Line { get; init; } = Rgb(0x3C, 0x3C, 0x3C);
 
     /// <summary>What is being read.</summary>
     public Vector4 Text { get; init; } = Rgb(0xF2, 0xF2, 0xF2);
@@ -117,7 +117,7 @@ public sealed record EditorTheme
     public float TabRounding { get; init; } = 12f;
 
     /// <summary>How much air a panel keeps inside its edge.</summary>
-    public Vector2 WindowPadding { get; init; } = new(10f, 8f);
+    public Vector2 WindowPadding { get; init; } = new(6f, 6f);
 
     /// <summary>How much air a box keeps around what it holds.</summary>
     /// <remarks>
@@ -128,7 +128,7 @@ public sealed record EditorTheme
     public Vector2 FramePadding { get; init; } = new(6f, 3f);
 
     /// <summary>How far apart two things on a row are, and two rows.</summary>
-    public Vector2 ItemSpacing { get; init; } = new(8f, 5f);
+    public Vector2 ItemSpacing { get; init; } = new(6f, 4f);
 
     /// <summary>How wide a line is, where there is one at all.</summary>
     public float Borders { get; init; }
@@ -278,11 +278,11 @@ public sealed record EditorTheme
 
         Set(style, ImGuiCol.WindowBg, Alpha(Panel, WindowAlpha));
         Set(style, ImGuiCol.ChildBg, Alpha(Card, seen));
-        // A menu and a tooltip are not surfaces the eye rests on, they are things held up in front
-        // of one, so they are the brightest plate the ladder has rather than another dark card. It
-        // is the gray a row under the pointer wears elsewhere, so a flyout reads as one of those
-        // rows grown large enough to hold a list.
-        Set(style, ImGuiCol.PopupBg, Alpha(Hover, MathF.Min(1f, seen + 0.1f)));
+        // A menu and a tooltip wear the field gray, the plate every box and button in a panel is
+        // drawn on, so a flyout reads as part of the same family as the controls that opened it.
+        // A step brighter than that stood apart from everything round it, and the row under the
+        // pointer inside one, which wears the hover gray, lost its step against the plate.
+        Set(style, ImGuiCol.PopupBg, Alpha(Field, 1f));
         // Nothing here has a menu bar, so this slot carries the group fill instead, which puts the
         // rung in the style editor beside the others rather than leaving one color unreachable.
         //

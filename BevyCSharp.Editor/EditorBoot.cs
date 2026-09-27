@@ -32,6 +32,9 @@ public partial struct EditorBoot
         // The interface: one ImGui context, the editor's style, and the panels that make it.
         EditorShell.Load(EditorPaths.Assets);
 
+        // The window's own frame in place of the platform's, where there is a window.
+        EditorWindowFrame.Start(ctx.Res<Config>());
+
         // Before the commands are registered, because the menu offers a row for each of these and
         // builds that list from this one.
         EditorShell.Tabs.Add(new EditorTab("Console", ConsoleTab.Draw));

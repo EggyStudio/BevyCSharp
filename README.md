@@ -1979,6 +1979,25 @@ A monitor's name is read separately from the rest of it, because it is text. Pla
 monitor nothing often enough that a settings screen needs the fallback shown above. A headless run
 has no window, and every call here says so rather than doing nothing.
 
+A window made without the platform's frame (`SetStyle(decorations: false)`) has no title bar to be
+moved by and no border to be resized from, so an app drawing its own asks the platform to do both
+on its behalf:
+
+```csharp
+Window.StartDragMove();                          // on the press over a title bar of its own
+Window.StartDragResize(WindowEdge.BottomRight);  // on the press over an edge or corner
+Window.Minimize();
+Window.SetMaximized(true);
+Window.SetCursorShape(CursorShape.ResizeFalling);
+```
+
+The two drags are called when the button goes down and last until it is let go, since the
+platform moves the window rather than the app. On Wayland an app is never told where its window
+is, so this is the only way a borderless window moves there at all. Bevy does not say whether a
+window is maximized, so a button that toggles it keeps that itself. The ImGui runtime sets the
+cursor shape as the pointer crosses a field or an edge, whenever the shape it wants changes, and
+the editor draws its own frame this way.
+
 `Window.MonitorModes` lists the resolutions and refresh rates a monitor can actually be driven at,
 and `Window.SetVideoMode(monitor, mode)` takes the screen over at one of them. That is the case
 `WindowMode.Fullscreen` does not cover, where a game runs at a resolution the desktop is not in. The

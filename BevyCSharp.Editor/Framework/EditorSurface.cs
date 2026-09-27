@@ -64,11 +64,16 @@ public static class EditorSurface
     /// next, the scene to whatever is beside it. What tells two surfaces apart is the step in
     /// their fill, and the gap only has to be wide enough to be read as deliberate. Two gaps of
     /// different widths in one picture read as an arrangement that has slipped.
+    /// <para>
+    /// Narrow, the way Blender keeps its areas apart, since every pixel of gap is taken from the
+    /// scene and the panels on both sides of it, and a step in fill says where one surface ends
+    /// as clearly at a few pixels as at a dozen.
+    /// </para>
     /// </remarks>
-    internal const float Gutter = 14f;
+    internal const float Gutter = 6f;
 
     /// <summary>How much air a card keeps inside its own edge.</summary>
-    internal const float Air = 6f;
+    internal const float Air = 4f;
 
     /// <summary>
     /// A panel's own heading, and what it has to say about itself beside it.
@@ -105,7 +110,7 @@ public static class EditorSurface
     /// opened while something else has the window padding pushed would otherwise wear that
     /// instead. What a menu looks like should not depend on what was on screen when it opened.
     /// </remarks>
-    internal static readonly Vector2 Around = new(10f, 8f);
+    internal static readonly Vector2 Around = new(8f, 6f);
 
     /// <summary>
     /// How tall a button that floats over the scene is, and how tall a tab is.

@@ -78,6 +78,32 @@ public static class WorldPanel
         _typed = name;
     }
 
+    /// <summary>Walks the world again on the next frame, after something changed where things sit.</summary>
+    /// <remarks>
+    /// The list is walked again when the number of entities changes, and a change of parent leaves
+    /// that alone, so whatever moves one says so here. Marked rather than cleared, since the move
+    /// usually comes from a drop on a row while the list is being drawn, and clearing it then pulls
+    /// the rows out from under the loop drawing them.
+    /// </remarks>
+    public static void Invalidate() => _stale = true;
+
+    /// <summary>Whether the list has to be walked again whatever the count says.</summary>
+    private static bool _stale;
+
+    /// <summary>Opens a row that was folded away, so what was just put under it can be seen.</summary>
+    /// <param name="entity">Which row.</param>
+    public static void Unfold(Entity entity) => Folded.Remove(entity.Bits);
+
+    /// <summary>What is being dragged, fixed when the drag began.</summary>
+    /// <remarks>
+    /// The row under the pointer, and with it the rest of the selection when that row is part of
+    /// it, as dragging one of several chosen files drags them all.
+    /// </remarks>
+    private static Entity[] _dragging = [];
+
+    /// <summary>What ImGui calls a drag of rows, which only a row accepts.</summary>
+    private const string Dragged = "bcs.entities";
+
     /// <summary>How far in a row's picture sits, which makes the list a tree.</summary>
     private static float Indent(Row row) =>
         EditorSurface.Air + (row.Depth * ImGui.GetStyle().IndentSpacing);
@@ -125,8 +151,21 @@ public static class WorldPanel
 
         EditorSurface.Title("WORLD", $"({Rows.Count})");
 
-        EditorSurface.FullWidth();
+        // The search box, then the button that adds something, at the end of the row as every
+        // list with a way to add to it has one.
+        var button = ImGui.GetFrameHeight();
+        var spacing = ImGui.GetStyle().ItemSpacing.X;
+
+        ImGui.SetNextItemWidth(MathF.Max(
+            1f,
+            ImGui.GetContentRegionAvail().X - EditorSceneFrame.DockRoom() - button - spacing));
         ImGui.InputTextWithHint("##search", "Search", ref _search, 128);
+
+        ImGui.SameLine(0f, spacing);
+
+        if (ToolbarView.Circle("addEntity", EditorIcons.Add, false, button)) AddEntityWindow.Open();
+
+        if (ImGui.IsItemHovered()) EditorWidgets.Tip("Add an entity (Ctrl+A)");
 
         ImGui.Spacing();
 
@@ -175,6 +214,10 @@ public static class WorldPanel
             ImGui.InvisibleButton("##empty", new Vector2(MathF.Max(1f, rest.X), rest.Y));
 
             if (ImGui.IsItemClicked()) EditorSelection.Clear();
+
+            // And dropping a row there takes it out from under whatever it was in, which is the
+            // one place in the list that stands for the top of the world.
+            _ = Target(ctx, Entity.None);
         }
 
         EditorSurface.EndRegion();
@@ -248,6 +291,11 @@ public static class WorldPanel
         }
 
         ImGui.InvisibleButton($"##row{row.Entity.Bits}", new Vector2(width, height));
+
+        // Picked up and put down on another row to go under it, before anything else asks about
+        // the row, since a drag and a drop both belong to the button just made.
+        Source(row);
+        var dropping = Target(ctx, row.Entity);
 
         var over = ImGui.IsItemHovered();
 
@@ -343,6 +391,18 @@ public static class WorldPanel
         }
 
         Paint(row, at, width, height, picked, over, eyed);
+
+        // Over the fill, so a row that is also selected still shows it would take the drop.
+        if (dropping)
+        {
+            ImGui.GetWindowDrawList().AddRect(
+                at,
+                at + new Vector2(width, height),
+                ImGui.GetColorU32(EditorTheme.LiveAccent),
+                ImGui.GetStyle().FrameRounding,
+                ImDrawFlags.None,
+                1.5f);
+        }
 
         // On the row while the pointer is on it, and on a hidden one whether or not, because what
         // says a thing has been put away has to still be there once the hand has moved on.
@@ -470,6 +530,82 @@ public static class WorldPanel
         draw.PopClipRect();
     }
 
+    /// <summary>Starts dragging a row, and with it the rest of the selection if it is part of it.</summary>
+    /// <remarks>
+    /// The payload is empty and says only that rows are being dragged. Which rows is kept here,
+    /// since the thing dropped on is always this list and a pointer to managed memory handed
+    /// through ImGui would be one that outlives what it points at.
+    /// </remarks>
+    private static void Source(Row row)
+    {
+        if (!ImGui.BeginDragDropSource()) return;
+
+        // Every frame of the drag, which gives the same answer each time, since nothing changes
+        // the selection while the button is held on a row.
+        _dragging = EditorSelection.All.Contains(row.Entity)
+            ? [.. EditorSelection.All]
+            : [row.Entity];
+
+        ImGui.SetDragDropPayload(Dragged, IntPtr.Zero, 0);
+
+        ImGui.TextUnformatted(_dragging.Length > 1 ? $"{row.Name} and {_dragging.Length - 1} more" : row.Name);
+
+        ImGui.EndDragDropSource();
+    }
+
+    /// <summary>
+    /// Takes rows dropped on the item just made, which puts them under
+    /// <paramref name="parent"/>, or at the top of the world for none.
+    /// </summary>
+    /// <remarks>
+    /// A row that cannot go there, because it is the row dropped on or above it, is refused
+    /// before the drop, so the row under the pointer does not light up for a drop that would do
+    /// nothing. The row is lit with the accent round its edge rather than ImGui's square box,
+    /// since every other row here is rounded.
+    /// </remarks>
+    /// <returns>Whether rows are held over it that it would take, which lights it.</returns>
+    private static bool Target(BehaviorContext ctx, Entity parent)
+    {
+        if (_dragging.Length == 0 || !ImGui.BeginDragDropTarget()) return false;
+
+        var lit = false;
+        var fits = _dragging.Any(child => child != parent && EditorHierarchy.CanParent(ctx.Ecs, child, parent));
+
+        if (fits)
+        {
+            // Before the button is let go as well as on it, which is what lights the row while
+            // the rows are held over it rather than only once they have landed.
+            var payload = ImGui.AcceptDragDropPayload(
+                Dragged,
+                ImGuiDragDropFlags.AcceptNoDrawDefaultRect | ImGuiDragDropFlags.AcceptBeforeDelivery);
+
+            if (Held(payload))
+            {
+                lit = true;
+
+                if (payload.IsDelivery())
+                {
+                    EditorHierarchy.Reparent(ctx.Ecs, _dragging, parent);
+                    if (!parent.IsNone) Unfold(parent);
+
+                    _dragging = [];
+                }
+            }
+        }
+
+        ImGui.EndDragDropTarget();
+
+        return lit;
+    }
+
+    /// <summary>Whether ImGui handed a payload back rather than none.</summary>
+    /// <remarks>
+    /// The wrapper is a pointer and nothing else, read as one here so the editor needs no unsafe
+    /// code to ask whether it is null.
+    /// </remarks>
+    private static bool Held(ImGuiPayloadPtr payload) =>
+        System.Runtime.CompilerServices.Unsafe.As<ImGuiPayloadPtr, IntPtr>(ref payload) != IntPtr.Zero;
+
     /// <summary>
     /// Chooses everything between the last row picked and this one.
     /// </summary>
@@ -499,8 +635,9 @@ public static class WorldPanel
     {
         var all = ctx.Ecs.All();
 
-        if (Rows.Count > 0 && all.Length == _population && EditorShell.Frame - _built < 30) return;
+        if (!_stale && Rows.Count > 0 && all.Length == _population && EditorShell.Frame - _built < 30) return;
 
+        _stale = false;
         _built = EditorShell.Frame;
         _population = all.Length;
 

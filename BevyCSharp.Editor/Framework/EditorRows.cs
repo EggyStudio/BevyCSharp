@@ -60,7 +60,12 @@ public static class EditorRows
     /// <param name="differs">
     /// Whether the things selected hold different values here, which dims the name.
     /// </param>
-    public static void Line(string name, string? tip = null, bool differs = false)
+    /// <param name="unit">
+    /// What the value is measured in, written after the name in parentheses and dimmed. Beside the
+    /// name rather than after the value, so every box in a column ends at the same edge and the
+    /// unit is read with the name it qualifies.
+    /// </param>
+    public static void Line(string name, string? tip = null, bool differs = false, string? unit = null)
     {
         ArgumentNullException.ThrowIfNull(name);
 
@@ -77,7 +82,15 @@ public static class EditorRows
 
         if (differs) ImGui.PopStyleColor();
 
-        if (ImGui.IsItemHovered())
+        var hovered = ImGui.IsItemHovered();
+
+        if (unit is { Length: > 0 })
+        {
+            Unit(unit);
+            hovered |= ImGui.IsItemHovered();
+        }
+
+        if (hovered)
         {
             var says = tip is { Length: > 0 } ? tip : null;
 
@@ -93,6 +106,22 @@ public static class EditorRows
 
         ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(-1f);
+    }
+
+    /// <summary>A unit after the name just written, in parentheses and dimmed.</summary>
+    /// <remarks>
+    /// Its own call, since a field whose name sits on a line of its own writes the name itself and
+    /// wants the same suffix after it.
+    /// </remarks>
+    /// <param name="unit">What the value is measured in.</param>
+    public static void Unit(string unit)
+    {
+        ArgumentNullException.ThrowIfNull(unit);
+
+        ImGui.SameLine(0f, ImGui.CalcTextSize(" ").X);
+        ImGui.PushStyleColor(ImGuiCol.Text, EditorTheme.Current.Dim);
+        ImGui.TextUnformatted($"({unit})");
+        ImGui.PopStyleColor();
     }
 
     /// <summary>The whole width of a value's column, for something drawn rather than laid out.</summary>

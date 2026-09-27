@@ -260,7 +260,7 @@ public static class EditorWidgets
         });
     }
 
-    /// <summary>What a color swatch offers, which is the color and a way through to a picker.</summary>
+    /// <summary>What the picker behind a swatch offers, which is no number boxes and an alpha bar.</summary>
     private const ImGuiColorEditFlags Coloring =
         ImGuiColorEditFlags.NoInputs
         | ImGuiColorEditFlags.AlphaPreviewHalf
@@ -270,17 +270,56 @@ public static class EditorWidgets
     /// A color, as a swatch the width of its row with a picker behind it.
     /// </summary>
     /// <remarks>
-    /// A button rather than ImGui's own color field, which draws its swatch as a square of one
-    /// row's height however wide the row is and leaves the rest of it empty.
+    /// <para>
+    /// Drawn rather than ImGui's own color button, for two reasons. Its color field draws the
+    /// swatch as a square of one row's height however wide the row is. Its color button takes a
+    /// width, but caps its rounding at a sixth of its height, so beside a row of pills it is the
+    /// one control with corners.
+    /// </para>
+    /// <para>
+    /// A color that is partly clear shows as itself on the left half and laid over light gray on
+    /// the right, which is what ImGui's half preview says with a checker. A checker cannot be cut
+    /// to a round end without drawing it square by square, and the step against gray says the same.
+    /// </para>
     /// </remarks>
     /// <param name="id">What to call it, which ImGui hashes it by.</param>
     /// <param name="color">The color, changed in place when the picker is used.</param>
     /// <returns>Whether it changed.</returns>
     public static bool Swatch(string id, ref Vector4 color)
     {
-        var across = new Vector2(ImGui.GetContentRegionAvail().X, 0f);
+        var across = new Vector2(MathF.Max(1f, ImGui.GetContentRegionAvail().X), ImGui.GetFrameHeight());
 
-        if (ImGui.ColorButton(id, color, Coloring, across)) ImGui.OpenPopup($"##pick{id}");
+        if (ImGui.InvisibleButton(id, across)) ImGui.OpenPopup($"##pick{id}");
+
+        var min = ImGui.GetItemRectMin();
+        var max = ImGui.GetItemRectMax();
+        var draw = ImGui.GetWindowDrawList();
+
+        EditorDraw.Capsule(min, max, ImGui.GetColorU32(color with { W = 1f }), draw);
+
+        if (color.W < 1f)
+        {
+            var half = new Vector2((min.X + max.X) * 0.5f, min.Y);
+
+            draw.PushClipRect(half, max, true);
+            EditorDraw.Capsule(min, max, ImGui.GetColorU32(new Vector4(0.8f, 0.8f, 0.8f, 1f)), draw);
+            EditorDraw.Capsule(min, max, ImGui.GetColorU32(color), draw);
+            draw.PopClipRect();
+        }
+
+        // A ring while it is under a hand, since the fill is the value and cannot change to say so.
+        if (ImGui.IsItemHovered() || ImGui.IsItemActive())
+        {
+            var radius = (max.Y - min.Y) * 0.5f;
+
+            draw.AddRect(
+                min,
+                max,
+                ImGui.GetColorU32(EditorTheme.Alpha(EditorTheme.LiveText, ImGui.IsItemActive() ? 0.9f : 0.5f)),
+                radius,
+                ImDrawFlags.None,
+                1.5f);
+        }
 
         if (!Flyout($"##pick{id}")) return false;
 

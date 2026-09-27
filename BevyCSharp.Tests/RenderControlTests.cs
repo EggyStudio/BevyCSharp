@@ -833,6 +833,37 @@ public sealed class RenderControlTests
     }
 
     [Fact]
+    public void AWindowsOwnFrameReportsItsAbsence()
+    {
+        // What an app drawing its own title bar calls, and the same contract as the rest: a run
+        // with no window says so, rather than minimizing nothing.
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Update, _ =>
+        {
+            var calls = new Action[]
+            {
+                Window.Minimize,
+                () => Window.SetMaximized(true),
+                Window.StartDragMove,
+                () => Window.StartDragResize(WindowEdge.BottomRight),
+                () => Window.SetCursorShape(CursorShape.Text),
+            };
+
+            foreach (var call in calls)
+            {
+                var refused = Assert.Throws<BevyNativeException>(call);
+
+                Assert.True(
+                    refused.Status is NativeStatus.Unsupported or NativeStatus.NotPresent,
+                    $"unexpected status {refused.Status}");
+            }
+        });
+
+        harness.Run();
+    }
+
+    [Fact]
     public void CursorAndModeRejectValuesTheyDoNotUnderstand()
     {
         using var harness = new EngineHarness(frames: 2);

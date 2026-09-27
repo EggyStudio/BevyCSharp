@@ -86,9 +86,12 @@ public partial struct EditorKeys
         // is on.
         if (control && input.KeyPressed(Key.Comma)) EditorShell.Show("Settings");
 
-        // Where every editor keeps its settings, and one of the few key bindings people carry
-        // between programs.
+        // The key every program deletes with, and one of the few bindings people carry between
+        // programs.
         if (input.KeyPressed(Key.Delete)) Run(ctx, "Entity/Delete");
+
+        // Godot's key for adding a node, which is the editor this window is modeled on.
+        if (control && input.KeyPressed(Key.A)) Run(ctx, "Entity/Add");
 
         // The menu, which is otherwise only reachable through a button on a panel that can be
         // closed. A person who closes everything should still have a way back.

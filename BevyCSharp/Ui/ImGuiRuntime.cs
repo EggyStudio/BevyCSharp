@@ -206,6 +206,47 @@ public static unsafe class ImGuiRuntime
         ImGui.NewFrame();
     }
 
+    /// <summary>The pointer shape last handed to the window, so it is handed over only on a change.</summary>
+    private static ImGuiMouseCursor _cursor = ImGuiMouseCursor.Arrow;
+
+    /// <summary>
+    /// Gives the window the pointer shape the interface asked for this frame, when it changed.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// ImGui works out a shape as the pointer crosses what it drew (a caret over a field, arrows
+    /// over an edge that resizes) and leaves showing it to the platform. Without this every one of
+    /// those is the arrow, and a field does not read as one to type in until it is clicked.
+    /// </para>
+    /// <para>
+    /// Only on a change, so a game that sets a shape of its own over the scene keeps it while the
+    /// interface goes on asking for the same arrow. A run with no window answers that there is
+    /// none, which is not a failure here, so the answer is not checked.
+    /// </para>
+    /// </remarks>
+    private static void Cursor()
+    {
+        var wanted = ImGui.GetMouseCursor();
+        if (wanted == _cursor) return;
+
+        _cursor = wanted;
+
+        var shape = wanted switch
+        {
+            ImGuiMouseCursor.TextInput => CursorShape.Text,
+            ImGuiMouseCursor.Hand => CursorShape.Pointer,
+            ImGuiMouseCursor.ResizeAll => CursorShape.Move,
+            ImGuiMouseCursor.NotAllowed => CursorShape.NotAllowed,
+            ImGuiMouseCursor.ResizeEW => CursorShape.ResizeHorizontal,
+            ImGuiMouseCursor.ResizeNS => CursorShape.ResizeVertical,
+            ImGuiMouseCursor.ResizeNESW => CursorShape.ResizeRising,
+            ImGuiMouseCursor.ResizeNWSE => CursorShape.ResizeFalling,
+            _ => CursorShape.Default,
+        };
+
+        _ = Native.bcs_window_set_cursor_shape((int)shape);
+    }
+
     /// <summary>Ends the frame and hands the engine what came of it.</summary>
     public static void End()
     {
@@ -214,6 +255,7 @@ public static unsafe class ImGuiRuntime
         ImGui.Render();
 
         ImGuiInput.Ime();
+        Cursor();
 
         var data = ImGui.GetDrawData();
         if (data.NativePtr is null || data.CmdListsCount == 0) return;

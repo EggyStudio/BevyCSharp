@@ -86,10 +86,10 @@ changed in the style tab changes what is drawn instead of being written over on 
 | `Panel` | `#0C0C0C` | the window a panel is drawn in, seen through at `WindowAlpha` |
 | `Card` | `#1A1A1A` | a card inside one, and the plate on anything lying on the scene |
 | `Group` | `#262626` | a component's card inside a card |
-| `Field` | `#3E3E3E` | a box that is typed in, and the groove of a bar |
-| `Hover` | `#525252` | a control under the pointer, and the plate of a menu or a tooltip |
+| `Field` | `#3E3E3E` | a box that is typed in, the groove of a bar, and the plate of a menu or a tooltip |
+| `Hover` | `#525252` | a control under the pointer |
 | `Active` | `#666666` | one being held down |
-| `Line` | `#3C3C40` | the rare rule, where a gap will not do |
+| `Line` | `#3C3C3C` | the rare rule, where a gap will not do, gray like the rest of the ladder |
 | `Text` | `#F2F2F2` | what is being read |
 | `Dim` | `#9A9A9A` | a label, a unit, a shortcut beside a menu row |
 | `Faint` | `#666666` | what is switched off |
@@ -102,10 +102,11 @@ Three rules follow from the ladder, and they matter more than the values:
 - **Separation is a step on the ladder first and a line second.** A component's card is a step
   above the card holding it, a field a step above that. A border round each would be a third thing
   saying what the step and the gap already say.
-- **What floats is lighter than what it covers.** A menu and a tooltip are held up in front of the
-  work rather than lying under it, so they wear the brightest plate the ladder has, which is the
-  same gray a row wears under the pointer. So a flyout reads as one of those rows grown large enough
-  to hold a list.
+- **What floats wears the field gray.** A menu and a tooltip are held up in front of the work, and
+  they wear the plate every box and button in a panel is drawn on, so a flyout reads as one of the
+  controls that opened it grown large enough to hold a list. A step brighter than that stood apart
+  from everything round it. A window with fields of its own in it, such as the one that adds an
+  entity, is a card instead, since a box on the field gray is the color of what it sits on.
 - **A row lifts off whatever it is lying on.** A fixed gray that lifts off a card disappears into a
   menu's plate, so a row under the pointer is drawn as a wash of the text color instead, which is
   a step above anything. Over a card it comes out at `Hover`.
@@ -122,17 +123,19 @@ whatever passes behind it is a box with no reliable contrast.
 
 ### Density
 
-Unity's numbers are the reference. What this editor settled on, and where each lives:
+Blender's density is the reference, where areas sit a few pixels apart and every pixel of gap is
+taken from the scene and the panels. What this editor settled on, and where each lives:
 
 | number | value | where |
 |---|---|---|
 | text | 15px, one face for words and one for figures | `EditorShell.Lettering` |
 | a row | the text plus `FramePadding` of `6, 3`, which is 21px | `EditorTheme` |
-| the gap between any two surfaces | 14px | `EditorSurface.Gutter` |
-| the air a card keeps inside its own edge | 6px | `EditorSurface.Air` |
+| the gap between any two surfaces | 6px | `EditorSurface.Gutter` |
+| the air a card keeps inside its own edge | 4px | `EditorSurface.Air` |
 | anything lying on the scene | 28px tall | `EditorSurface.Tall` |
 | a word on something pressable | 10px of air at each end of it | `EditorSurface.Sides` |
-| a menu or a tooltip's own air | `10, 8` | `EditorSurface.Around` |
+| a menu or a tooltip's own air | `8, 6` | `EditorSurface.Around` |
+| the strip along the top the window is moved by | 8px | `EditorWindowFrame` |
 | the narrowest the panel goes | 320px | `EditorShell.Narrowest` |
 | where it stops being two columns | 460px | `EditorShell.Stacks` |
 
@@ -164,6 +167,36 @@ third of it thick, which is the thickness ImGui gives a scrollbar's grab.
   given what is left rather than being covered, so nothing is hidden behind what was opened. The
   card can be dragged taller by the handle in the gap above it, and the height it is left at is the
   height the next one opens at.
+
+### The window's own frame
+
+The editor asks for a window without the platform's title bar and border, and draws its own in
+their place. The strip along the top is a gap above the panels that moves the window when pressed
+and maximizes it when pressed twice, and the few pixels round every edge resize it, with the
+pointer changing shape to say so. None of it is drawn. The window's minimize, maximize and close
+buttons sit at the top right as round buttons like the rest of what floats, after the pin that
+docks the panel. Drawn into an image there is no window, so there is no frame, and the panels
+start at the top.
+
+Docked, the scene is a card among the others. It keeps the same gap from the window's edges as
+every other surface, is rounded on all four corners, and carries a one pixel line in the card
+color along its edge, which covers the steps where a corner drawn by the engine meets the rounding
+drawn over it.
+
+### Adding and arranging entities
+
+The `+` beside the world's search box, `Ctrl+A` and `Entity/Add` open a window in the middle of
+the screen listing every row under `Spawn/` in the menu, with a search box that has the keyboard
+from the moment it opens. The arrows move the choice and Enter adds it, as Godot's node window
+does. What is added goes under the entity selected when the window opened, or at the top of the
+world when nothing was, and undoing it takes it away as one step. A game's own
+`EditorMenu.Command("Spawn/Enemy", …)` appears in the window without anything else.
+
+A row in the world list can be dragged onto another to go under it, and onto the empty space
+below the rows to go back to the top of the world. Dragging a selected row drags the selection,
+and a branch moves whole. A row that would end up under itself is refused before the drop, so it
+does not light up. Whatever moves keeps its place in the world, because its transform is worked
+out again against the new parent (`EditorHierarchy.Reparent`), and the move is one step to undo.
 
 ### Windows
 
@@ -279,7 +312,9 @@ how a number in one is written and dragged. What a field is drawn as follows fro
 the hints its attributes declared: a round box to tick for a flag, a box for a number, a bar for a
 number with two ends, three boxes across for a vector, a list to choose from for a choice, a swatch
 for three numbers that are a color, and a dimmed box for anything that cannot be edited. A
-heading, a rule, a sentence and a unit are the field's own declaration too.
+heading, a rule, a sentence and a unit are the field's own declaration too. A unit is written after
+the field's name, dimmed and in parentheses, as `Speed (m/s)`, so every box in a column ends at the
+same edge and the unit is read with the name it qualifies.
 
 **Every edit is undoable, and a run of them is one edit.** A row compares what the field held
 before its widget was drawn with what it holds after, and records the difference under the field's

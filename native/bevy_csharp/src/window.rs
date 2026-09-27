@@ -324,6 +324,172 @@ pub extern "C" fn bcs_window_set_style(decorations: i32, resizable: i32, always_
     })
 }
 
+/// Sets the shape of the pointer while it is over the window.
+///
+/// `0` the platform's arrow, `1` a text caret, `2` a hand for something to press, `3` four arrows
+/// for moving, `4` a no-entry sign, `5` left and right, `6` up and down, `7` the diagonal from the
+/// bottom left to the top right, `8` the other diagonal, `9` an open hand, `10` a closed one. The
+/// shapes an interface asks for as the pointer crosses what it draws, which is what makes a
+/// field read as one to type in and an edge as one to drag.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_window_set_cursor_shape(shape: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = shape;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::window::{CursorIcon, SystemCursorIcon};
+
+            let icon = match shape {
+                0 => SystemCursorIcon::Default,
+                1 => SystemCursorIcon::Text,
+                2 => SystemCursorIcon::Pointer,
+                3 => SystemCursorIcon::Move,
+                4 => SystemCursorIcon::NotAllowed,
+                5 => SystemCursorIcon::EwResize,
+                6 => SystemCursorIcon::NsResize,
+                7 => SystemCursorIcon::NeswResize,
+                8 => SystemCursorIcon::NwseResize,
+                9 => SystemCursorIcon::Grab,
+                10 => SystemCursorIcon::Grabbing,
+                _ => return status::NULL_ARG,
+            };
+
+            with_world(|world| {
+                let mut windows = world.query_filtered::<bevy::ecs::entity::Entity, With<PrimaryWindow>>();
+
+                let Ok(window) = windows.single(world) else {
+                    return status::NOT_PRESENT;
+                };
+
+                let wanted = CursorIcon::System(icon);
+
+                // Only when it differs, since an interface asks every frame and an insert marks the
+                // component changed, which winit answers by setting the platform's cursor again.
+                if world.get::<CursorIcon>(window) != Some(&wanted) {
+                    world.entity_mut(window).insert(wanted);
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Minimizes the window to the taskbar or dock.
+///
+/// A window without the platform's title bar has no button of its own for this, so an app that
+/// draws its own title bar calls this from one.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_window_minimize() -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_window(|window, _| {
+                window.set_minimized(true);
+                status::OK
+            })
+        }
+    })
+}
+
+/// Maximizes the window to fill the screen less the taskbar, or with `0` puts it back to the size
+/// it had before.
+///
+/// Apart from borderless fullscreen, which covers the taskbar too and is a mode rather than a size.
+/// The platform does the work and remembers the size to go back to, so nothing here keeps one.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_window_set_maximized(maximized: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = maximized;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_window(|window, _| {
+                window.set_maximized(maximized != 0);
+                status::OK
+            })
+        }
+    })
+}
+
+/// Hands the window to the platform to be moved by the pointer, from a button that is held now
+/// until it is let go.
+///
+/// How a window without a title bar is dragged. The platform moves it rather than the app, since
+/// only the platform knows where the window may go, and on Wayland an app is not told where its
+/// window is at all. Called on the press, while the button is down, or the platform ignores it.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_window_start_drag_move() -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_window(|window, _| {
+                window.start_drag_move();
+                status::OK
+            })
+        }
+    })
+}
+
+/// Hands the window to the platform to be resized by the pointer from one edge or corner, from a
+/// button that is held now until it is let go.
+///
+/// `edge` counts clockwise from the top: `0` north, `1` north-east, `2` east, `3` south-east,
+/// `4` south, `5` south-west, `6` west, `7` north-west. A window without the platform's border
+/// has no edge the platform will resize it by, so an app that draws its own frame calls this from
+/// the edges of it. Called on the press, like a drag move.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_window_start_drag_resize(edge: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = edge;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::math::CompassOctant;
+
+            let direction = match edge {
+                0 => CompassOctant::North,
+                1 => CompassOctant::NorthEast,
+                2 => CompassOctant::East,
+                3 => CompassOctant::SouthEast,
+                4 => CompassOctant::South,
+                5 => CompassOctant::SouthWest,
+                6 => CompassOctant::West,
+                7 => CompassOctant::NorthWest,
+                _ => return status::NULL_ARG,
+            };
+
+            with_window(|window, _| {
+                window.start_drag_resize(direction);
+                status::OK
+            })
+        }
+    })
+}
+
 /// Turns the platform's input method on or off for the window, and says where the text being
 /// composed is, in logical pixels from the window's top left.
 ///

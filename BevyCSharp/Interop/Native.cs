@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 143;
+    internal const int ExpectedAbiVersion = 144;
 
     static Native() => NativeLoader.Initialize();
 
@@ -200,6 +200,31 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_window_set_style(int decorations, int resizable, int alwaysOnTop);
+
+    /// <summary>Sets the shape of the pointer over the window.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_cursor_shape(int shape);
+
+    /// <summary>Minimizes the window.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_minimize();
+
+    /// <summary>Maximizes the window, or puts it back.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_maximized(int maximized);
+
+    /// <summary>Hands the window to the platform to be moved by the pointer.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_start_drag_move();
+
+    /// <summary>Hands the window to the platform to be resized from an edge.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_start_drag_resize(int edge);
 
     /// <summary>Counts the monitors the platform reports.</summary>
     [LibraryImport(Library)]

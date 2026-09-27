@@ -73,6 +73,73 @@ public enum CursorGrab
     Locked = 2,
 }
 
+/// <summary>The shape of the pointer while it is over the window.</summary>
+/// <remarks>The shapes an interface asks for, taken from the platform's own set.</remarks>
+public enum CursorShape
+{
+    /// <summary>The platform's arrow.</summary>
+    Default = 0,
+
+    /// <summary>A text caret, over something to type in.</summary>
+    Text = 1,
+
+    /// <summary>A hand, over something to press.</summary>
+    Pointer = 2,
+
+    /// <summary>Four arrows, over something to move.</summary>
+    Move = 3,
+
+    /// <summary>A no-entry sign, over something that cannot be used now.</summary>
+    NotAllowed = 4,
+
+    /// <summary>Left and right, over a vertical edge to drag.</summary>
+    ResizeHorizontal = 5,
+
+    /// <summary>Up and down, over a horizontal edge to drag.</summary>
+    ResizeVertical = 6,
+
+    /// <summary>From the bottom left to the top right, over that pair of corners.</summary>
+    ResizeRising = 7,
+
+    /// <summary>From the top left to the bottom right, over that pair of corners.</summary>
+    ResizeFalling = 8,
+
+    /// <summary>An open hand, over something to grab.</summary>
+    Grab = 9,
+
+    /// <summary>A closed hand, while something is held.</summary>
+    Grabbing = 10,
+}
+
+/// <summary>An edge or corner of the window, counted clockwise from the top.</summary>
+/// <remarks>What <see cref="Window.StartDragResize"/> resizes from.</remarks>
+public enum WindowEdge
+{
+    /// <summary>The top edge.</summary>
+    Top = 0,
+
+    /// <summary>The top right corner.</summary>
+    TopRight = 1,
+
+    /// <summary>The right edge.</summary>
+    Right = 2,
+
+    /// <summary>The bottom right corner.</summary>
+    BottomRight = 3,
+
+    /// <summary>The bottom edge.</summary>
+    Bottom = 4,
+
+    /// <summary>The bottom left corner.</summary>
+    BottomLeft = 5,
+
+    /// <summary>The left edge.</summary>
+    Left = 6,
+
+    /// <summary>The top left corner.</summary>
+    TopLeft = 7,
+}
+
 /// <summary>
 /// The window, after it has opened.
 /// </summary>
@@ -172,6 +239,73 @@ public static unsafe class Window
         Native.Check(
             Native.bcs_window_set_style(decorations ? 1 : 0, resizable ? 1 : 0, alwaysOnTop ? 1 : 0),
             "Window.SetStyle");
+
+    /// <summary>Sets the shape of the pointer while it is over the window.</summary>
+    /// <remarks>
+    /// The interface sets this itself as the pointer crosses a field or an edge, whenever the shape
+    /// it wants changes, so a shape set here holds until the pointer next moves onto something of
+    /// the interface's that wants another.
+    /// </remarks>
+    /// <param name="shape">Which shape.</param>
+    /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
+    public static void SetCursorShape(CursorShape shape) =>
+        Native.Check(Native.bcs_window_set_cursor_shape((int)shape), "Window.SetCursorShape");
+
+    /// <summary>Minimizes the window to the taskbar or dock.</summary>
+    /// <remarks>
+    /// A window made without the platform's title bar (<see cref="SetStyle"/> with
+    /// <c>decorations</c> off) has no button of its own for this, so an app that draws its own
+    /// title bar calls this from one.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
+    public static void Minimize() =>
+        Native.Check(Native.bcs_window_minimize(), "Window.Minimize");
+
+    /// <summary>
+    /// Maximizes the window to fill the screen less the taskbar, or puts it back to the size it had.
+    /// </summary>
+    /// <remarks>
+    /// Apart from <see cref="WindowMode.BorderlessFullscreen"/>, which covers the taskbar too and is
+    /// a mode rather than a size. The platform remembers the size to go back to. Bevy does not report
+    /// whether a window is maximized, so an app with a button that toggles it keeps that itself.
+    /// </remarks>
+    /// <param name="maximized">Whether to maximize, or put it back.</param>
+    /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
+    public static void SetMaximized(bool maximized) =>
+        Native.Check(Native.bcs_window_set_maximized(maximized ? 1 : 0), "Window.SetMaximized");
+
+    /// <summary>
+    /// Hands the window to the platform to be moved by the pointer, until the button held now is
+    /// let go.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// How a window without a title bar is dragged, called when the button goes down over
+    /// whatever stands in for one. The platform moves the window rather than the app, since only
+    /// the platform knows where it may go, and on Wayland an app is never told where its window is.
+    /// </para>
+    /// <para>
+    /// Called on the press, while the button is still down. Called later, the platform has no drag
+    /// to hand over and ignores it.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
+    public static void StartDragMove() =>
+        Native.Check(Native.bcs_window_start_drag_move(), "Window.StartDragMove");
+
+    /// <summary>
+    /// Hands the window to the platform to be resized by the pointer from one edge or corner, until
+    /// the button held now is let go.
+    /// </summary>
+    /// <remarks>
+    /// A window without the platform's border has no edge the platform resizes it by, so an app
+    /// drawing its own frame calls this when the button goes down along the edges of it. Called on
+    /// the press, like <see cref="StartDragMove"/>.
+    /// </remarks>
+    /// <param name="edge">Which edge or corner moves.</param>
+    /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
+    public static void StartDragResize(WindowEdge edge) =>
+        Native.Check(Native.bcs_window_start_drag_resize((int)edge), "Window.StartDragResize");
 
     /// <summary>How many monitors the platform reports.</summary>
     /// <returns>Zero on a windowless run, which has no monitors to report.</returns>

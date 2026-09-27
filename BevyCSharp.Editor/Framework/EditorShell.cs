@@ -202,25 +202,38 @@ public static class EditorShell
         // drawn in but the cards inside them, which the padding holds a gap in from every edge.
         // Docking changes what is behind those cards rather than where they are, so nothing on
         // screen moves when it is switched.
+        // Below the strip the window is moved by, where the editor draws its own frame. The strip
+        // is a gap to grab, and the panel starting under it is what leaves it clear.
+        var grip = EditorWindowFrame.Grip;
+
         var panelX = window.X - PanelWidth;
-        Panel = (panelX, 0f, PanelWidth, window.Y);
+        Panel = (panelX, grip, PanelWidth, window.Y - grip);
 
         var strip = EditorStrip.Shut + (OpenTab >= 0 ? TabHeight + 1f : 0f);
         var tabsWidth = panelX;
 
-        // Docked, the scene keeps the top left corner and the tabs sit under it. Floating, the
-        // scene is the whole window and everything else is over it.
+        // Docked, the scene keeps the top left and the tabs sit under it. Floating, the scene is
+        // the whole window and everything else is over it.
         //
-        // Docked it runs right up to the panel's own edge, so the only gap between the picture and
-        // the cards beside it is the one the panel keeps inside itself, which is the same gap
-        // every other pair of surfaces has between them.
+        // Docked it is a card like the rest, so it keeps the gap every surface keeps from the
+        // window's edge and from the grip above it. On its right it runs up to the panel's own
+        // edge, and below it up to the strip's, because the gap there is the one those keep inside
+        // themselves, and a second one would double it.
+        var inset = EditorSurface.Gutter;
+
         Scene = Docked
-            ? (0f, 0f, Math.Max(1f, panelX), Math.Max(1f, window.Y - strip))
+            ? (inset,
+                grip + inset,
+                Math.Max(1f, panelX - inset),
+                Math.Max(1f, window.Y - strip - grip - inset))
             : (0f, 0f, window.X, window.Y);
 
         // Where the scene is still visible, which anything drawn over the scene has to stay inside.
         // The same rectangle either way, because the panels are.
         Free = (panelX, window.Y - strip);
+
+        // First, so the strip is the first window ImGui makes and stays under everything after it.
+        EditorWindowFrame.DrawGrip();
 
         EditorSceneFrame.Round();
         EditorPanes.Draw();
@@ -235,6 +248,12 @@ public static class EditorShell
         // Last, so it floats over every panel rather than under whichever was drawn after it.
         EditorSceneFrame.DockButton();
         EditorFlyout.Draw(ctx);
+        AddEntityWindow.Draw(ctx);
+
+        // Over everything, so a press at the window's edge resizes it rather than reaching the
+        // panel under it.
+        EditorWindowFrame.DrawEdges();
+
         Apply(ctx);
     }
 
@@ -266,6 +285,17 @@ public static class EditorShell
 
         OrientationGizmo.Draw(ctx, new Vector2(side, Free.Bottom - up));
     }
+
+    /// <summary>
+    /// Where anything pinned to the top of the scene starts, which is below the strip the window is
+    /// moved by.
+    /// </summary>
+    /// <remarks>
+    /// The scene's own top when it is docked, which is under the strip already. Floating, the scene
+    /// is the whole window and runs behind the strip, so a row of buttons pinned to its top edge
+    /// would sit on the strip and be pressed by somebody reaching to move the window.
+    /// </remarks>
+    public static float SceneTop => MathF.Max(Scene.Y, EditorWindowFrame.Grip);
 
     /// <summary>What the scene has to itself, which is the part of it no panel is over.</summary>
     public static (float Right, float Bottom) Free { get; private set; }

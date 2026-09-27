@@ -308,7 +308,7 @@ public static class EditorCommands
     /// </remarks>
     private static (float X, float Y) MenuAt =>
         (EditorShell.Scene.X + ToolbarView.Inset,
-            EditorShell.Scene.Y + ToolbarView.Inset + EditorSurface.Tall + EditorSurface.Air);
+            EditorShell.SceneTop + ToolbarView.Inset + EditorSurface.Tall + EditorSurface.Air);
 
     /// <summary>What the open panel reads as when there is none.</summary>
     private const string Shut = "none";
@@ -379,6 +379,15 @@ public static class EditorCommands
     /// </remarks>
     private static void Entities()
     {
+        // The one row here that needs no selection, since what it adds goes at the top of the
+        // world when nothing is chosen.
+        EditorMenu.Command(
+            "Entity/Add",
+            static _ => AddEntityWindow.Open(),
+            -1,
+            EditorIcons.Add,
+            "Ctrl+A");
+
         EditorMenu.Command(
             "Entity/Focus",
             static _ => FlyCameraFocus(),
@@ -392,19 +401,12 @@ public static class EditorCommands
             static world =>
             {
                 // Everything selected, because a menu opened over three chosen things is about
-                // the three. One selected is the ordinary case and behaves as it always did.
+                // the three. Each stays where it stands in the world, as it does when dragged out
+                // of the hierarchy, rather than jumping by however far its parent was from the
+                // origin.
                 foreach (var entity in EditorSelection.All.ToArray())
                 {
-                    var previous = world.ParentOf(entity);
-                    if (previous.IsNone) continue;
-
-                    var moved = entity;
-
-                    world.ClearParent(moved);
-                    EditorHistory.Record(
-                        "unparent",
-                        undo => undo.SetParent(moved, previous),
-                        redo => redo.ClearParent(moved));
+                    EditorHierarchy.Reparent(world, entity, Entity.None);
                 }
             },
             1,

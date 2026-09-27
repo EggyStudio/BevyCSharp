@@ -199,7 +199,15 @@ public static class ComponentFields
             ImGui.AlignTextToFramePadding();
             ImGui.TextUnformatted(field.Title);
 
-            if (field.Hints.Tooltip is { Length: > 0 } says && ImGui.IsItemHovered())
+            var hovered = ImGui.IsItemHovered();
+
+            if (field.Hints.Unit is { Length: > 0 } measured)
+            {
+                EditorRows.Unit(measured);
+                hovered |= ImGui.IsItemHovered();
+            }
+
+            if (field.Hints.Tooltip is { Length: > 0 } says && hovered)
             {
                 EditorWidgets.Tip(says);
             }
@@ -214,7 +222,7 @@ public static class ComponentFields
                 return;
             }
 
-            EditorRows.Line(field.Title, field.Hints.Tooltip, differs);
+            EditorRows.Line(field.Title, field.Hints.Tooltip, differs, field.Hints.Unit);
         }
 
         var editable = field.IsWritable;
@@ -232,12 +240,6 @@ public static class ComponentFields
         if (editable) Spread(ctx, entity, others, field, value);
 
         if (!editable) ImGui.EndDisabled();
-
-        if (field.Hints.Unit is { Length: > 0 } unit)
-        {
-            ImGui.SameLine();
-            ImGui.TextDisabled(unit);
-        }
 
         if (!wide) EditorRows.Close();
 

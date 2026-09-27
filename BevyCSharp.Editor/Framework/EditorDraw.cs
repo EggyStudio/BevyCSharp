@@ -136,6 +136,58 @@ public static class EditorDraw
         Rounded(min, max, MathF.Max(max.X - min.X, max.Y - min.Y), color, onto);
 
     /// <summary>
+    /// One of the three marks a window's own buttons carry: a bar to minimize, a square to
+    /// maximize, two squares to put back, and a cross to close.
+    /// </summary>
+    /// <remarks>
+    /// Drawn rather than loaded, because these are four strokes each and a picture of four strokes
+    /// scaled to a button blurs them. Drawn as lines they stay one clean pixel at any scale, and
+    /// they are the shapes every platform puts in a title bar, so they are read without a word.
+    /// </remarks>
+    /// <param name="draw">What to draw into.</param>
+    /// <param name="middle">Where the mark is centered.</param>
+    /// <param name="size">How wide it is.</param>
+    /// <param name="mark">Which mark.</param>
+    /// <param name="color">What to draw it in.</param>
+    internal static void WindowMark(
+        ImDrawListPtr draw, Vector2 middle, float size, WindowMarks mark, uint color)
+    {
+        var half = size * 0.5f;
+        var line = MathF.Max(1f, size * 0.12f);
+
+        switch (mark)
+        {
+            case WindowMarks.Minimize:
+                draw.AddLine(middle + new Vector2(-half, 0f), middle + new Vector2(half, 0f), color, line);
+                break;
+
+            case WindowMarks.Maximize:
+                draw.AddRect(middle - new Vector2(half, half), middle + new Vector2(half, half), color, size * 0.15f, ImDrawFlags.None, line);
+                break;
+
+            case WindowMarks.Restore:
+            {
+                // The one behind, up and to the right, shows only the two sides the one in front
+                // does not cover, which is the platforms' own picture of a window put back.
+                var small = half * 0.8f;
+                var shift = half * 0.35f;
+                var front = middle + new Vector2(-shift * 0.5f, shift * 0.5f);
+                var back = middle + new Vector2(shift * 0.5f, -shift * 0.5f);
+
+                draw.AddLine(back + new Vector2(-small, -small), back + new Vector2(small, -small), color, line);
+                draw.AddLine(back + new Vector2(small, -small), back + new Vector2(small, small), color, line);
+                draw.AddRect(front - new Vector2(small, small), front + new Vector2(small, small), color, size * 0.12f, ImDrawFlags.None, line);
+                break;
+            }
+
+            case WindowMarks.Close:
+                draw.AddLine(middle + new Vector2(-half, -half), middle + new Vector2(half, half), color, line);
+                draw.AddLine(middle + new Vector2(-half, half), middle + new Vector2(half, -half), color, line);
+                break;
+        }
+    }
+
+    /// <summary>
     /// The eye that says whether a thing is drawn.
     /// </summary>
     /// <remarks>
@@ -183,4 +235,20 @@ public static class EditorDraw
             color,
             line);
     }
+}
+
+/// <summary>The marks a window's own buttons carry.</summary>
+internal enum WindowMarks
+{
+    /// <summary>A bar, which minimizes.</summary>
+    Minimize,
+
+    /// <summary>A square, which maximizes.</summary>
+    Maximize,
+
+    /// <summary>Two squares, which put a maximized window back.</summary>
+    Restore,
+
+    /// <summary>A cross, which closes.</summary>
+    Close,
 }
