@@ -75,7 +75,7 @@ public sealed class RayTracingTests
 
         if (!active) return null;
 
-        // The floor just right of the wall, below the middle of the picture.
+        // The floor right beside the wall, below the middle of the picture.
         return run.Picture("picture").At(52, 70);
     }
 }

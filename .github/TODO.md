@@ -100,8 +100,8 @@ by name. What is left is at the edges of that:
   driver untouched, so a declaration that differs from what the bridge binds, or a read past a
   buffer's end, is undefined behavior rather than an error. The layout comes from Slang's
   reflection, which cannot tell a comparison sampler from a plain one, so a shader of this kind
-  binds only plain samplers. A ray scene builds each pool mesh once, so a mesh that deforms is
-  traced as it was when it was added.
+  binds only plain samplers. A ray scene builds a pool mesh again only when asked, and builds
+  rather than refits it, which costs more for a mesh that deforms every frame.
 - **Geometry drawn out of buffers is lit by its own shader.** A draw casts shadows into every
   light's shadow map and writes the prepass's motion and normals, but Bevy's lighting shades only
   materials on meshes, so something drawn out of buffers and lit the way Bevy lights things is
@@ -133,10 +133,9 @@ code already in the binary.
   sensitivity, and `Render.SetDepthOfField` takes an aperture and a focal length of its own.
   `PhysicalCameraParameters` is one struct behind both, so a camera could be written down once and
   have the exposure and the blur read from it.
-- **A cubemap of anything else.** The reinterpretation reads a column of six faces stacked
-  vertically, as a file holds them, and a reflection probe that captures itself copies six cameras'
-  pictures into a cube of its own. A cube a game's own camera renders into, one layer at a time,
-  needs a camera target that is one layer of an image rather than a whole image.
+- **A cubemap file in another layout.** The reinterpretation reads a column of six faces stacked
+  vertically, as a file holds them. A cross, or six files, would need a layout to be a parameter.
+  A cube cameras draw into, a layer each, is a target made with six layers.
 - **One medium, which is earth's air.** Density, ground albedo and a quality setting are bridged.
   Mars is the other medium Bevy ships, and its dust phase comes from a texture the caller would have
   to supply, since nothing embeds one. `ScatteringMedium::new` takes arbitrary scattering and
@@ -146,18 +145,19 @@ code already in the binary.
   It also needs a `DlssProjectId` inserted before `DefaultPlugins` and a runtime check of whether
   the machine supports it, so it is a fourth arm on `AntiAlias` that most machines have to be told
   they cannot have.
-- **Lights.** Shadow bias, map size, cascades and a spot light's cookie are all settable. What is
-  left is the experimental half of Bevy's own lighting. Soft shadows sit behind the
-  `experimental_pbr_pcss` feature, and contact shadows need a camera component to go with the flag
-  on the light.
+- **A directional light's soft shadow is unconfirmed.** `Render.SetSoftShadows` widens a spot
+  light's penumbra visibly, but a directional light showed none in a small test scene at any size
+  tried, since its penumbra is worked out in the depth of a shadow map covering far more than the
+  scene. Whether it shows at the scale of Bevy's own example has not been checked here.
 - **One window.** Position, decorations, resizability, always-on-top and exclusive fullscreen are
   bridged, the monitors are readable by size, name and video mode, and `Window.SetVideoMode` takes
   the screen over at one of them. What is left is more than one window, since every entry point
   addresses the primary one.
-- **A picture is always RGBA and always eight bits a channel.** `Render.CreateImage` takes bytes
-  and `Render.BeginCapture` hands them back, both in that one format. A heightmap of floats, a
-  single-channel mask or a compressed texture would each need the format to be a parameter rather
-  than an assumption.
+- **A capture is always eight bits a channel.** `Render.BeginCapture` hands a picture back as
+  eight-bit sRGB, clamping a half-float target at white, and `Render.CreateImage` takes bytes in
+  that one format. Images of other formats, from floats to block-compressed ones, are made with
+  `Shaders.CreateImage`, and a render target can be half floats, but reading those back as they
+  are would need a capture that keeps its format.
 
 ### Gizmos
 

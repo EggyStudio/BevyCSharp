@@ -16,7 +16,7 @@ public static class EditorText
     /// What a component is called, without the path it lives at.
     /// </summary>
     /// <remarks>
-    /// Every part of the name loses its path, not just the last one, because a component's name is
+    /// Every part of the name loses its path, not only the last one, because a component's name is
     /// often another component's name inside it, so cutting at the last <c>::</c> of
     /// <c>MeshMaterial3d&lt;StandardMaterial&gt;</c> leaves <c>StandardMaterial&gt;</c>.
     /// </remarks>

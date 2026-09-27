@@ -230,4 +230,122 @@ public sealed class RenderTargetTests : IDisposable
             System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(bytes.AsSpan(16, 4)),
             System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(bytes.AsSpan(20, 4)));
     }
+
+    /// <summary>
+    /// A camera drawing an unlit color brighter than white into a half-float target keeps it
+    /// brighter than white for a shader reading the target, while a capture of the same target
+    /// reads it as white.
+    /// </summary>
+    [Fact]
+    public void AFloatTargetKeepsWhatIsBrighterThanWhite()
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        var target = AssetHandle.None;
+        var into = AssetHandle.None;
+        var read = default(ShaderInstance);
+        var reading = default(BufferRead);
+        var capture = default(Capture);
+        System.Numerics.Vector4[]? found = null;
+        CapturedImage? picture = null;
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                target = Render.CreateTarget(32, 32, TargetFormat.Rgba16Float);
+
+                var camera = PictureRun.Camera(ecs);
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Tonemapper = Tonemapper.None, Msaa = 1 });
+                Render.SetCameraTarget(camera, target);
+
+                PictureRun.Cube(ecs, Render.CreateMaterial(new MaterialSettings
+                {
+                    BaseColor = (3f, 1.5f, 0.25f, 1f),
+                    Unlit = true,
+                }));
+
+                into = Shaders.CreateBuffer<System.Numerics.Vector4>(new System.Numerics.Vector4[1]);
+                read = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Compute = "shaders/read_middle.slang" }))
+                    .SetTexture("picture", target)
+                    .SetBuffer("into", into);
+            },
+        };
+
+        run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Wait(ShaderMaterialTests.Settled)
+            .Do("reading the middle", _ => Shaders.Dispatch(read, 1))
+            .Wait(2)
+            .Do("asking for it back", _ =>
+            {
+                reading = Shaders.BeginBufferRead(into);
+                capture = Render.BeginCapture(target);
+            })
+            .Until("read back", _ =>
+                (found is not null || Shaders.TryReadBuffer(reading, out found))
+                && (picture is not null || Render.TryReadCapture(capture, out picture)))
+            .Go();
+
+        Assert.NotNull(found);
+        Assert.NotNull(picture);
+
+        var middle = found[0];
+        Assert.InRange(middle.X, 2.9f, 3.1f);
+        Assert.InRange(middle.Y, 1.45f, 1.55f);
+        Assert.InRange(middle.Z, 0.24f, 0.26f);
+
+        // A quarter linear is a little over half in sRGB, and the two above one clamp to white.
+        var captured = picture.At(16, 16);
+        Assert.Equal(255, captured.R);
+        Assert.Equal(255, captured.G);
+        Assert.InRange(captured.B, 130, 140);
+    }
+
+    /// <summary>
+    /// Cameras pointed at single layers of a cube target fill those faces and no others: plus X
+    /// with one camera's clear color, minus Y with the other's, and plus Z left black.
+    /// </summary>
+    [Fact]
+    public void CamerasFillTheFacesOfACubeTheyArePointedAt()
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        var into = AssetHandle.None;
+        var read = default(ShaderInstance);
+        var reading = default(BufferRead);
+        System.Numerics.Vector4[]? found = null;
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                var cube = Render.CreateTarget(16, 16, layers: 6);
+
+                var red = Render.SpawnCamera3d(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (1f, 0f, 0f, 1f) });
+                Render.SetCameraTarget(red, cube, 0);
+
+                var blue = Render.SpawnCamera3d(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 1f, 1f) });
+                Render.SetCameraTarget(blue, cube, 3);
+
+                into = Shaders.CreateBuffer<System.Numerics.Vector4>(new System.Numerics.Vector4[3]);
+                read = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Compute = "shaders/read_cube_faces.slang" }))
+                    .SetTexture("cube", cube)
+                    .SetBuffer("into", into);
+            },
+        };
+
+        run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Wait(10)
+            .Do("reading the faces", _ => Shaders.Dispatch(read, 1))
+            .Wait(2)
+            .Do("asking for them back", _ => reading = Shaders.BeginBufferRead(into))
+            .Until("read back", _ => Shaders.TryReadBuffer(reading, out found))
+            .Go();
+
+        Assert.NotNull(found);
+
+        Assert.True(found[0].X > 0.9f && found[0].Z < 0.1f, $"plus X came out {found[0]} rather than red");
+        Assert.True(found[1].Z > 0.9f && found[1].X < 0.1f, $"minus Y came out {found[1]} rather than blue");
+        Assert.True(found[2].X < 0.1f && found[2].Z < 0.1f, $"plus Z came out {found[2]}, though no camera draws it");
+    }
 }

@@ -63,10 +63,12 @@ pub struct RequestedPrepass(pub u32);
 /// and compute shaders to read.
 ///
 /// `flags` is a bit each: `1` depth, `2` normals, `4` motion vectors, `8` Bevy's G-buffer, which
-/// also turns deferred rendering on, and `16` keeping the previous frame's depth and G-buffer beside
-/// this frame's, which does nothing without one of them. A bit left clear takes that prepass off again, unless
-/// something else on the camera needs it, which is temporal antialiasing for depth and motion,
-/// motion blur for motion, and screen-space reflections for depth and the G-buffer.
+/// also turns deferred rendering on, `16` keeping the previous frame's depth and G-buffer beside
+/// this frame's, which does nothing without one of them, and `32` Bevy's depth pyramid, which turns
+/// its GPU occlusion culling on for the camera, and brings depth. A bit left clear takes that
+/// prepass off again, unless something else on the camera needs it, which is temporal antialiasing
+/// for depth and motion, motion blur for motion, and screen-space reflections for depth and the
+/// G-buffer.
 ///
 /// A prepass draws the scene a second time, so it is only worth asking for when something reads
 /// what it draws. A multisampled camera draws them multisampled, which a pass cannot bind, so a
@@ -112,8 +114,16 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
                 camera.insert(RequestedPrepass(flags));
                 let reflecting = camera.contains::<ScreenSpaceReflections>();
 
+                // The pyramid is built from the depth prepass, by Bevy's occlusion culling, without
+                // which it does not exist.
+                if flags & 32 != 0 {
+                    camera.insert(bevy::render::occlusion_culling::OcclusionCulling);
+                } else {
+                    camera.remove::<bevy::render::occlusion_culling::OcclusionCulling>();
+                }
+
                 // The G-buffer is drawn over the depth the depth prepass leaves, so it brings that.
-                if flags & 1 != 0 || gbuffer {
+                if flags & (1 | 32) != 0 || gbuffer {
                     camera.insert(DepthPrepass);
                 } else if !camera.contains::<TemporalAntiAliasing>() && !reflecting {
                     camera.remove::<DepthPrepass>();
@@ -930,6 +940,51 @@ fn set_deferred(world: &mut bevy::ecs::world::World, on: bool) {
             }
         }
     }
+}
+
+/// Turns contact shadows on a camera on, or off where `steps` is zero.
+///
+/// A contact shadow is traced from each pixel toward a light through the depth buffer, a short
+/// way, for the shadow a shadow map is too coarse to hold where two things touch. Only lights
+/// spawned with contact shadows cast them. The camera draws depth before the scene for it, which
+/// the component asks for itself. `thickness` is how thick a surface in the depth buffer is taken
+/// to be, and `length` how far a ray goes, both in world units.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_contact_shadows(camera: u64, steps: u32, thickness: f32, length: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, steps, thickness, length);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::pbr::ContactShadows;
+
+            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+
+            with_world(|world| {
+                if let Some(refusal) = refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let mut camera = world.entity_mut(entity);
+
+                if steps == 0 {
+                    camera.remove::<ContactShadows>();
+                } else {
+                    camera.insert(ContactShadows {
+                        linear_steps: steps,
+                        thickness: thickness.max(0.0),
+                        length: length.max(0.0),
+                    });
+                }
+
+                status::OK
+            })
+        }
+    })
 }
 
 /// Turns Bevy's screen-space reflections on a camera on, with `config`, or off where it is null.

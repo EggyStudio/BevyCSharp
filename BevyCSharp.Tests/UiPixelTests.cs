@@ -318,7 +318,7 @@ public sealed class UiPixelTests
         Assert.True(square.At(10, 10).G > 120, "the square node did not reach its own corner");
         Assert.True(rounded.At(10, 10).G < 90, "the corner was not rounded off");
 
-        // And the middle of the node is filled either way, so nothing simply failed to draw.
+        // And the middle of the node is filled either way, so nothing failed to draw outright.
         Assert.True(rounded.At(28, 28).G > 120, "the rounded node drew nothing at all");
     }
 

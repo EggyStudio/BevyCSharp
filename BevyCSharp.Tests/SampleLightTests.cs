@@ -42,6 +42,82 @@ public sealed class SampleLightTests
         Assert.True(tinted > 200, $"the bounce tinted {tinted} pixels of the floor red");
     }
 
+    /// <summary>
+    /// The sample's ray-traced occlusion, painted in place of the picture, is dark where a box
+    /// hangs just above the floor and open far from it.
+    /// </summary>
+    [Fact]
+    public void TheSamplesTracedOcclusionDarkensTheFloorUnderABox()
+    {
+        if (!ShaderMaterialTests.CanRun || !Directory.Exists(SampleAssets)) return;
+
+        var supported = false;
+
+        var run = new PictureRun
+        {
+            AssetRoot = SampleAssets,
+            Scene = ecs =>
+            {
+                supported = Shaders.SupportsRayQueries;
+                if (!supported) return;
+
+                var camera = PictureRun.Camera(ecs, new Vec3(0f, 5f, 3f));
+                Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
+
+                var floor = ecs.Spawn();
+                Render.SetMesh(ecs, floor, Render.CreateMesh(MeshShape.Cuboid, 8f, 0.1f, 8f));
+                Render.SetMaterial(ecs, floor, Render.CreateMaterial(1f, 1f, 1f));
+                ecs.Add(floor, Transform.At(0f, -0.05f, 0f));
+
+                // Held a little above the floor, so the camera sees the floor right under its edge.
+                var box = ecs.Spawn();
+                ecs.Add(box, Transform.At(0f, 0.7f, 0f));
+
+                var pool = Shaders.CreateGeometryPool();
+                var plane = Shaders.AddToGeometryPool(pool, Render.CreateMesh(MeshShape.Cuboid, 8f, 0.1f, 8f));
+                var cube = Shaders.AddToGeometryPool(pool, Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f));
+
+                var scene = Shaders.CreateRayScene(pool, 2);
+                Shaders.SetRaySceneInstance(scene, 0, floor, plane);
+                Shaders.SetRaySceneInstance(scene, 1, box, cube);
+
+                var trace = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
+                    {
+                        Compute = "shaders/rtao.slang",
+                        ComputeTarget = ShaderTarget.SpirV,
+                    }))
+                    .SetRayScene("scene", scene)
+                    .Set("radius", 1.5f)
+                    .Set("strength", 1f);
+
+                Render.SetAmbientOcclusion(camera, AmbientOcclusionQuality.Low);
+                Shaders.SetPrepass(camera, depth: true, normals: true);
+                Shaders.SetViewDispatches(camera, ViewDispatch.PerPixel(trace, FramePoint.AfterPrepass));
+                Shaders.SetPasses(
+                    camera,
+                    new ShaderPass(
+                        Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Pass = "shaders/rtao_show.slang" })),
+                        AfterTonemapping: true));
+            },
+        };
+
+        run.Until("compiled", _ => !supported || ShaderMaterialTests.ProgramsReady())
+            .Wait(ShaderMaterialTests.Settled)
+            .Capture("picture")
+            .Go();
+
+        if (!supported) return;
+
+        var picture = run.Picture("picture");
+
+        // Where the box meets the floor it hangs over, and a corner of the floor far from anything.
+        var near = picture.At(48, 48);
+        var far = picture.At(8, 90);
+
+        Assert.True(far.R > 230, $"open floor came out {far}, not unoccluded");
+        Assert.True(near.R < far.R - 40, $"the floor by the box came out {near} against {far} in the open");
+    }
+
     /// <summary>The picture of the wall and the floor.</summary>
     private static CapturedImage Floor(bool bounce)
     {

@@ -246,7 +246,7 @@ fn prepare_passes(
         &BcsShaderPasses,
         Option<&mut PreparedShaderPasses>,
         Option<&ViewImageTextures>,
-        Option<&bevy::pbr::ScreenSpaceAmbientOcclusionResources>,
+        (Option<&bevy::pbr::ScreenSpaceAmbientOcclusionResources>, Option<&bevy::core_pipeline::mip_generation::experimental::depth::ViewDepthPyramid>),
         Option<&bevy::core_pipeline::prepass::ViewPrepassTextures>,
     )>,
 ) {

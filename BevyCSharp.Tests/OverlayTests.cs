@@ -7,7 +7,7 @@ namespace Bevy.Tests;
 /// Covers a 2D camera drawing over a 3D one, by drawing both and looking.
 /// </summary>
 /// <remarks>
-/// An overlay is not simply a second camera with a higher order, and the two ways of getting it
+/// An overlay is more than a second camera with a higher order, and the two ways of getting it
 /// wrong both look like something else. A camera that writes its own view over the target replaces
 /// the scene, which reads as the scene having failed to draw; a camera told not to clear
 /// accumulates its own output instead, which reads as smearing. Only a picture of both together

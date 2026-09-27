@@ -173,10 +173,10 @@ macro_rules! define_slots {
         fn insert_sub(app: &mut App, slot: i32, parent: i32, initial: i32) -> i32 {
             match slot {
                 $($subslot => {
-                    // The parent has to be there first. Bevy computes a sub-state from its
-                    // source whenever that source changes, and a sub-state added under an axis
-                    // that holds no state would simply never come into existence, which is a
-                    // silence rather than an answer.
+                    // The parent has to be there first. Bevy computes a sub-state from its source
+                    // whenever that source changes, and a sub-state added under an axis that holds
+                    // no state would never come into existence, which is a silence rather than an
+                    // answer.
                     if !app.world().contains_resource::<State<$parent>>() {
                         return status::INVALID_STATE;
                     }

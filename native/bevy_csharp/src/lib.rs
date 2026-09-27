@@ -2,9 +2,9 @@
 //!
 //! # What this is
 //!
-//! Bevy owns the engine: the ECS world, the scheduler, timing, input, windowing and the
-//! renderer. This crate adds no engine of its own. It exposes just enough of Bevy through
-//! a stable, flat C interface for .NET to drive it:
+//! Bevy owns the engine: the ECS world, the scheduler, timing, input, windowing and the renderer.
+//! This crate adds no engine of its own. It exposes enough of Bevy through a stable, flat C
+//! interface for .NET to drive it:
 //!
 //! **Components** are registered at runtime from C# struct layouts, using Bevy's
 //!   dynamic [`ComponentDescriptor`] support. A `[Behavior]` struct becomes a real Bevy
@@ -44,4 +44,4 @@ pub mod imgui;
 
 /// Version of the C ABI. C# checks this at load time and refuses a mismatch, so a stale
 /// native library next to a newer managed assembly fails loudly instead of corrupting memory.
-pub const ABI_VERSION: i32 = 135;
+pub const ABI_VERSION: i32 = 139;

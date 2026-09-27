@@ -140,6 +140,16 @@ internal static class CliDispatch
         var envelope = CliJson.Ok(
             "command", writer => Payload(writer, name, answer, frame), request.Id);
 
+        // Not ready yet, so asked again each frame until it is (see `ConsoleHost.Later`).
+        if (ConsoleHost.Pending is { } poll)
+        {
+            request.Holding = name;
+            request.Held = answer;
+            request.Poll = poll;
+            request.Release = frame + ConsoleHost.LaterFrames;
+            return null;
+        }
+
         if (ConsoleHost.Held is not { } release) return envelope;
 
         // Answered now, handed back later. The command has already done whatever it does; the wait

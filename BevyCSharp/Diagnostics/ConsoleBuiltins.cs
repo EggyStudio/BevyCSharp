@@ -22,7 +22,7 @@ internal static class ConsoleBuiltins
         if (ConsoleCommands.Find(name) is not { } found) return $"unknown command: {name}";
 
         var usage = found.Usage.Length > 0 ? $"{found.Name} {found.Usage}" : found.Name;
-        return found.Help.Length > 0 ? $"{usage} - {found.Help}" : usage;
+        return found.Help.Length > 0 ? $"{usage}: {found.Help}" : usage;
     }
 
     /// <summary>Empties the log.</summary>

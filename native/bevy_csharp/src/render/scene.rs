@@ -150,6 +150,19 @@ pub extern "C" fn bcs_render_capture(target: i32) -> i32 {
 
                         let format = picture.texture_descriptor.format;
 
+                        if let Some(rgba) = picture.data.as_deref().and_then(|data| floats_to_rgba8(format, data)) {
+                            let size = picture.texture_descriptor.size;
+                            captures.ready.insert(
+                                id,
+                                CapturedPixels {
+                                    width: size.width,
+                                    height: size.height,
+                                    rgba,
+                                },
+                            );
+                            return;
+                        }
+
                         let Ok(image) = picture.try_into_dynamic() else {
                             bevy::log::warn!(
                                 "Capture {id} came back as a {format:?} picture, which cannot be \
@@ -175,6 +188,63 @@ pub extern "C" fn bcs_render_capture(target: i32) -> i32 {
             })
         }
     })
+}
+
+/// A picture of linear floats as eight-bit sRGB, clamped at white, or `None` for a format that is
+/// not four channels of floats.
+///
+/// Bevy's own conversion reads only eight-bit formats, and a capture is a picture for a program to
+/// inspect the way a person would see it, so light brighter than white reads as white here while
+/// a shader sampling the image still reads it as it is.
+#[cfg(feature = "render")]
+fn floats_to_rgba8(format: bevy::render::render_resource::TextureFormat, bytes: &[u8]) -> Option<Vec<u8>> {
+    use bevy::render::render_resource::TextureFormat;
+
+    let linear: Vec<f32> = match format {
+        TextureFormat::Rgba16Float => bytes
+            .chunks_exact(2)
+            .map(|half| half_to_f32(u16::from_le_bytes([half[0], half[1]])))
+            .collect(),
+        TextureFormat::Rgba32Float => bytes
+            .chunks_exact(4)
+            .map(|word| f32::from_le_bytes([word[0], word[1], word[2], word[3]]))
+            .collect(),
+        _ => return None,
+    };
+
+    Some(
+        linear
+            .chunks_exact(4)
+            .flat_map(|pixel| {
+                let encode = |value: f32| {
+                    let value = value.clamp(0.0, 1.0);
+                    let srgb = if value <= 0.003_130_8 {
+                        value * 12.92
+                    } else {
+                        1.055 * value.powf(1.0 / 2.4) - 0.055
+                    };
+                    (srgb * 255.0 + 0.5) as u8
+                };
+
+                [encode(pixel[0]), encode(pixel[1]), encode(pixel[2]), (pixel[3].clamp(0.0, 1.0) * 255.0 + 0.5) as u8]
+            })
+            .collect(),
+    )
+}
+
+/// A half float's value.
+#[cfg(feature = "render")]
+fn half_to_f32(half: u16) -> f32 {
+    let sign = if half & 0x8000 != 0 { -1.0 } else { 1.0 };
+    let exponent = ((half >> 10) & 0x1F) as i32;
+    let fraction = (half & 0x3FF) as f32;
+
+    sign * match exponent {
+        0 => fraction * 2f32.powi(-24),
+        31 if fraction == 0.0 => f32::INFINITY,
+        31 => f32::NAN,
+        _ => (1.0 + fraction / 1024.0) * 2f32.powi(exponent - 15),
+    }
 }
 
 /// Whether a camera draws into an image, which Bevy's screenshot of an image captures.
@@ -248,6 +318,18 @@ fn read_image_back(
             // The same bytes as sRGB, which is the eight-bit format Bevy's conversion knows.
             if format == TextureFormat::Rgba8Unorm {
                 format = TextureFormat::Rgba8UnormSrgb;
+            }
+
+            if let Some(rgba) = floats_to_rgba8(format, &bytes) {
+                captures.ready.insert(
+                    id,
+                    CapturedPixels {
+                        width: size.width,
+                        height: size.height,
+                        rgba,
+                    },
+                );
+                return;
             }
 
             let flat = bevy::render::render_resource::Extent3d {
@@ -399,12 +481,15 @@ pub extern "C" fn bcs_render_capture_release(id: i32) -> i32 {
 ///
 /// The camera keeps everything else it was given. Its projection, its layers, its order and its
 /// post-processing are about what it draws rather than about where the result goes.
+///
+/// A `layer` of zero or more draws into that layer of an image with several, such as a face of a
+/// cube, through the companion [`crate::render::layers`] keeps. Below zero draws into the whole.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_render_set_camera_target(entity: u64, image: i32) -> i32 {
+pub extern "C" fn bcs_render_set_camera_target(entity: u64, image: i32, layer: i32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (entity, image);
+            let _ = (entity, image, layer);
             status::UNSUPPORTED
         }
 
@@ -423,10 +508,15 @@ pub extern "C" fn bcs_render_set_camera_target(entity: u64, image: i32) -> i32 {
 
                 let target = match crate::render::image_handle(world, image) {
                     Err(refusal) => return refusal,
+                    // One layer of an image with several, drawn through a companion.
+                    Ok(Some(image)) if layer >= 0 => {
+                        return crate::render::layers::set(world, entity, image, layer as u32);
+                    }
                     Ok(Some(image)) => RenderTarget::Image(image.into()),
                     Ok(None) => RenderTarget::Window(WindowRef::Primary),
                 };
 
+                crate::render::layers::clear(world, entity);
                 world.entity_mut(entity).insert(target);
                 status::OK
             })
@@ -674,7 +764,10 @@ pub unsafe extern "C" fn bcs_render_spawn_light(config: *const BcsLightConfig) -
             }
             let config = unsafe { *config };
             let color = Color::linear_rgb(config.color[0], config.color[1], config.color[2]);
-            let shadows = config.shadows != 0;
+            let shadows = config.shadows & 1 != 0;
+            // Traced a short way through the depth buffer, for the small shadows a map misses where
+            // things touch, on a camera that asks for them with `bcs_render_set_contact_shadows`.
+            let contact = config.shadows & 2 != 0;
 
             with_world_opt(|world| match config.kind {
                 0 => world
@@ -683,6 +776,7 @@ pub unsafe extern "C" fn bcs_render_spawn_light(config: *const BcsLightConfig) -
                             color,
                             illuminance: config.intensity,
                             shadow_maps_enabled: shadows,
+                            contact_shadows_enabled: contact,
                             shadow_depth_bias: config.shadow_depth_bias,
                             shadow_normal_bias: config.shadow_normal_bias,
                             ..Default::default()
@@ -699,6 +793,7 @@ pub unsafe extern "C" fn bcs_render_spawn_light(config: *const BcsLightConfig) -
                             range: config.range,
                             radius: config.radius,
                             shadow_maps_enabled: shadows,
+                            contact_shadows_enabled: contact,
                             shadow_depth_bias: config.shadow_depth_bias,
                             shadow_normal_bias: config.shadow_normal_bias,
                             inner_angle: config.inner_angle,
@@ -717,6 +812,7 @@ pub unsafe extern "C" fn bcs_render_spawn_light(config: *const BcsLightConfig) -
                             range: config.range,
                             radius: config.radius,
                             shadow_maps_enabled: shadows,
+                            contact_shadows_enabled: contact,
                             shadow_depth_bias: config.shadow_depth_bias,
                             shadow_normal_bias: config.shadow_normal_bias,
                             ..Default::default()
@@ -752,7 +848,7 @@ pub extern "C" fn bcs_render_spawn_camera_2d(order: i32) -> u64 {
             use bevy::render::render_resource::BlendState;
             use bevy::transform::components::Transform;
 
-            // An overlay is not simply a second camera with a higher order. A camera renders into a
+            // An overlay is more than a second camera with a higher order. A camera renders into a
             // view texture of its own and then writes that over the target, so one left alone
             // replaces whatever the camera below it drew, and one told not to clear accumulates its
             // own output frame after frame instead. Both have to be said, which means clearing the
@@ -1337,6 +1433,96 @@ pub extern "C" fn bcs_render_set_light_cookie(light: u64, image: i32) -> i32 {
     })
 }
 
+/// Softens a light's shadow the farther it falls from what casts it, as a light of `size` world
+/// units across does, or with a size of zero or less makes it hard again.
+///
+/// Percentage-closer soft shadows: the penumbra grows with the distance between the caster and the
+/// surface, which a blur of fixed width cannot do. For a point or a spot light the size is its
+/// radius, which this sets. It is noisy, so it suits a camera filtering its shadows temporally
+/// with temporal antialiasing on (see [`bcs_render_set_shadow_filtering`]), and it costs a good
+/// deal more than a hard shadow.
+///
+/// Returns [`status::NO_COMPONENT`] where the entity is not a light.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_soft_shadows(light: u64, size: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (light, size);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::light::{DirectionalLight, PointLight, SpotLight};
+
+            let soft = size > 0.0;
+
+            crate::state::with_world(|world| {
+                let entity = bevy::ecs::entity::Entity::from_bits(light);
+                let Ok(mut light) = world.get_entity_mut(entity) else {
+                    return status::NO_COMPONENT;
+                };
+
+                if let Some(mut directional) = light.get_mut::<DirectionalLight>() {
+                    directional.soft_shadow_size = soft.then_some(size);
+                } else if let Some(mut point) = light.get_mut::<PointLight>() {
+                    point.soft_shadows_enabled = soft;
+                    if soft {
+                        point.radius = size;
+                    }
+                } else if let Some(mut spot) = light.get_mut::<SpotLight>() {
+                    spot.soft_shadows_enabled = soft;
+                    if soft {
+                        spot.radius = size;
+                    }
+                } else {
+                    return status::NO_COMPONENT;
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Sets how a camera filters the shadow maps it reads: `0` a hardware two-by-two, `1` a Gaussian,
+/// which is Bevy's default, and `2` temporal, which varies the pattern each frame for temporal
+/// antialiasing to average, and which soft shadows need to be quiet.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_shadow_filtering(camera: u64, method: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, method);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::light::ShadowFilteringMethod;
+
+            let method = match method {
+                0 => ShadowFilteringMethod::Hardware2x2,
+                1 => ShadowFilteringMethod::Gaussian,
+                2 => ShadowFilteringMethod::Temporal,
+                _ => return status::NULL_ARG,
+            };
+
+            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+
+            with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                world.entity_mut(entity).insert(method);
+                status::OK
+            })
+        }
+    })
+}
+
 /// Makes an image out of pixels the caller already holds, and returns its asset key.
 ///
 /// The other half of [`bcs_render_read_capture`]. Reading gives back what was drawn; this takes a
@@ -1427,5 +1613,33 @@ pub fn slice_scale(tiling: i32, stretch: f32) -> bevy::sprite::SliceScaleMode {
         // The same number a tiled picture measures its repeat by, since both answer how much of
         // the source is laid down before it starts again.
         stretch_value: if stretch > 0.0 { stretch } else { 1.0 },
+    }
+}
+
+#[cfg(all(test, feature = "render"))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_half_float_reads_as_its_value() {
+        assert_eq!(half_to_f32(0x3C00), 1.0);
+        assert_eq!(half_to_f32(0x4000), 2.0);
+        assert_eq!(half_to_f32(0x3800), 0.5);
+        assert_eq!(half_to_f32(0xC000), -2.0);
+        assert_eq!(half_to_f32(0x0000), 0.0);
+    }
+
+    /// Brighter than white reads as white, linear middle gray as sRGB's, and alpha as it is.
+    #[test]
+    fn a_float_picture_becomes_eight_bit_srgb() {
+        use bevy::render::render_resource::TextureFormat;
+
+        let halves: [u16; 4] = [0x4000, 0x3800, 0x0000, 0x3C00];
+        let bytes: Vec<u8> = halves.iter().flat_map(|half| half.to_le_bytes()).collect();
+
+        let rgba = floats_to_rgba8(TextureFormat::Rgba16Float, &bytes).unwrap();
+        assert_eq!(rgba, vec![255, 188, 0, 255]);
+
+        assert!(floats_to_rgba8(TextureFormat::Rgba8Unorm, &[0; 4]).is_none());
     }
 }

@@ -182,6 +182,7 @@ asked about rather than guessed at:
 ./bcs command shader.layout 3      # every name it declares, with its binding and byte offset
 ./bcs command shader.reload all    # compile again without touching a file
 ./bcs command shader.status        # whether slangc was found, and the renderer's last error
+./bcs command shader.buffer 12 float 16   # what a buffer holds, by asset key, once it is back
 ```
 
 A magenta surface is a stage that has never compiled, and `shader.errors` says why. A surface
@@ -189,7 +190,8 @@ drawn in zeros or a stand-in texture usually has a value set under a name the sh
 declare, which `shader.layout` settles, since values are set by name and the log warns once. A surface
 that stopped changing after an edit is the last version that compiled, still drawing while the new
 one fails. Edit the file and the session picks it up within a quarter of a second, so there is no
-restart to do.
+restart to do. `shader.buffer` reads a buffer back from the GPU, so its answer is held until the
+bytes arrive, a frame or two later, and a caller waits on one call rather than polling.
 
 ## Building and testing
 

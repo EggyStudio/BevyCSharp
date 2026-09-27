@@ -940,7 +940,7 @@ pub struct BcsLightConfig {
     pub range: f32,
     /// Radius of the emitting sphere, which softens the shadow edge. Point and spot only.
     pub radius: f32,
-    /// Non-zero to cast shadows.
+    /// Bit one casts shadows into a shadow map, and bit two casts contact shadows as well.
     pub shadows: i32,
     /// Radians from the axis within which a spot light is at full brightness.
     pub inner_angle: f32,

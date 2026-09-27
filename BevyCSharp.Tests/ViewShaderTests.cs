@@ -202,6 +202,53 @@ public sealed class ViewShaderTests
     }
 
     /// <summary>
+    /// A camera asked for the depth pyramid hands it to its shaders whole: a power of two across,
+    /// every level down to one texel, the cube's depth at its middle, and the farthest depth of all
+    /// at the top, which is the empty background's.
+    /// </summary>
+    [Fact]
+    public void TheDepthPyramidIsReadEveryLevelAtOnce()
+    {
+        if (!CanRun) return;
+
+        var into = AssetHandle.None;
+        var read = default(BufferRead);
+        float[]? found = null;
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                var camera = PictureRun.Camera(ecs);
+                Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
+                Shaders.SetPrepass(camera, depth: true, pyramid: true);
+
+                into = Shaders.CreateBuffer<float>(new float[5]);
+                Shaders.SetViewDispatches(
+                    camera,
+                    ViewDispatch.Fixed(Compute("shaders/read_pyramid.slang").SetBuffer("into", into), FramePoint.AfterPrepass, 1));
+
+                PictureRun.Cube(ecs, Render.CreateMaterial(1f, 1f, 1f));
+            },
+        };
+
+        run.Until("compiled", _ => Ready())
+            .Wait(Settled)
+            .Do("asking for it back", _ => read = Shaders.BeginBufferRead(into))
+            .Until("read back", _ => Shaders.TryReadBuffer(read, out found))
+            .Go();
+
+        Assert.NotNull(found);
+
+        // The picture is 96 across, so the pyramid starts at 64 and halves six times.
+        Assert.Equal(7f, found[0]);
+        Assert.Equal(64f, found[1]);
+        Assert.Equal(64f, found[2]);
+        Assert.True(found[3] > 0f, $"the middle of the pyramid held {found[3]}, not the cube's depth");
+        Assert.Equal(0f, found[4]);
+    }
+
+    /// <summary>
     /// How bright a white cube lit by ambient light alone comes out with Bevy's occlusion replaced
     /// by <paramref name="occlusion"/> everywhere.
     /// </summary>

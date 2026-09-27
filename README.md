@@ -1260,6 +1260,13 @@ pixels empty. With `previous: true` the camera keeps last frame's depth and G-bu
 same place last frame is how a temporal technique tells history it can reuse from a pixel that was
 hidden until now.
 
+With `pyramid: true` the camera builds Bevy's hierarchical depth, and a shader on it declares
+`Texture2D<float> depth_pyramid;` and reads any level with `Load`. Each texel holds the farthest
+depth of the ones under it, starting from the depth rounded down to a power of two, which is what a
+GPU culling instances or clusters tests a box against. It turns Bevy's occlusion culling on for the
+camera as well, since that builds it. A screen-space trace wants the nearest depth instead, which a
+camera image with mip levels, built a level at a time, gives.
+
 A dispatch on a camera runs every frame at one of four points: `AfterPrepass`, once depth, normals,
 motion, shadows and Bevy's own ambient occlusion exist and before anything is lit; `AfterOpaque`, between opaque and transparent
 geometry; and `BeforeTonemapping` or `AfterTonemapping`, ahead of the passes on the same side. Its
@@ -1460,6 +1467,24 @@ left at zero.
 light, so the shadow of a window frame falls on the floor without a window being there. Only the red
 channel is read, so the picture says how much light gets through rather than what color it is, and
 its border should be black or the light leaks past the edge of it.
+
+A shadow map is drawn at a resolution of its own, so the shadow right where a foot meets the floor
+is lost in a texel or two. Contact shadows fill that in, traced from each pixel toward the light a
+short way through the depth buffer:
+
+```csharp
+Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, ContactShadows = true });
+Render.SetContactShadows(camera, new ContactShadowSettings(Steps: 16, Thickness: 0.1f, Length: 0.3f));
+```
+
+Only lights that cast them and cameras that draw them take part, and only what is on screen casts
+one.
+
+A real light has a size, so its shadow is sharp where an object touches the ground and blurs as it
+stretches away. `Render.SetSoftShadows(light, size)` gives a light that size, the radius of a point
+or spot light in world units, and Bevy widens each shadow's penumbra with the distance to what casts
+it. It is noisy on its own, so it suits a camera given
+`Render.SetShadowFiltering(camera, ShadowFiltering.Temporal)` with temporal antialiasing on.
 
 #### The picture the camera makes
 
@@ -1823,7 +1848,9 @@ occlusion.SetRayScene("scene", scene);
 The shader declares `RaytracingAccelerationStructure scene;` and traces it with
 `bcs_ray::trace_in(scene, ...)` or `visible_in`. A hit's `instance` is the slot and its `mesh` is
 the pool mesh, so an instance buffer or a material buffer with the same entities in the same slots
-describes what was hit, and `bcs_scene::pool_corner` reads the triangle. `Shaders.SupportsRayQueries`
+describes what was hit, and `bcs_scene::pool_corner` reads the triangle. A mesh a compute shader
+deforms in the pool is traced as it was until `Shaders.RebuildRayScene(scene, mesh)` builds it
+again. `Shaders.SupportsRayQueries`
 says whether the device can build one, which takes ray tracing hardware on Vulkan.
 
 SPIR-V passed through reaches the driver without the checks WGSL gets, so a shader reading past a
@@ -1831,6 +1858,12 @@ buffer's end reads whatever is there. The bridge builds the layout from Slang's 
 values are still set by name. The target works for any compute shader, whether or not it traces
 rays, and on a backend other than Vulkan the SPIR-V is translated by naga, which reads ordinary
 compute and not ray queries.
+
+The sample carries ray-traced ambient occlusion built this way, with no Solari: a plane, a box and
+a sphere standing in for its ground, cube and lamp in a ray scene, a compute shader tracing four
+short rays from every surface on screen (`BevyCSharp.Sample/assets/shaders/rtao.slang`), and the
+answer written into the occlusion Bevy's own lighting reads. F6 turns it on in a window, and
+`./bcs command sample.rtao show` on a running sample paints the occlusion in place of the picture.
 
 #### Drawing into an image
 
@@ -1854,6 +1887,28 @@ Render.SetMaterial(ctx.Ecs, screen, Render.CreateMaterial(new MaterialSettings
 The image is empty until something draws into it, and the handle is usable on the frame it is
 returned, because nothing loads. `Render.SetCameraTarget(camera, AssetHandle.None)` puts the camera
 back on the window, and `Render.Screenshot(path, target)` writes out what it drew.
+
+`Render.CreateTarget(512, 512, TargetFormat.Rgba16Float)` holds half floats instead, so a camera
+with `Hdr` and no tonemapper draws light brighter than white into it as it is, which a reflection
+or a shader reading the picture on needs. A capture of it reads as eight-bit sRGB clamped at white.
+
+A target can have layers, and a camera can draw into one of them, which is how a cube map of the
+game's own is captured:
+
+```csharp
+var cube = Render.CreateTarget(256, 256, TargetFormat.Rgba16Float, layers: 6);
+
+for (var face = 0; face < 6; face++)
+{
+    var eye = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 90f });
+    ctx.Ecs.Add(eye, Transform.LookingAt(center, center + Faces[face].Forward, Faces[face].Up));
+    Render.SetCameraTarget(eye, cube, face);    // plus and minus X, Y and Z, in that order
+}
+```
+
+Six square layers read as a cube, in a material's cube slot or a shader's `TextureCube`, and any
+other count as an array. Each camera draws into an image of its own that is copied into its layer
+once the cameras have drawn, since Bevy draws a camera into a whole image.
 
 A picture can also come back into memory rather than into a file, so a test can assert on what was
 drawn:
@@ -1977,11 +2032,11 @@ for anything with a pattern in it, since a border of dots drawn twice as wide be
 ovals, and `SliceTiling.Sides`, `.Center` or `.All` keep a drawn edge looking drawn at every size.
 The repeat is measured by `TileStretch`, the same number a whole tiled picture uses.
 
-`Render2d.SpawnCamera2d(order: 1)` or any order above zero makes an overlay, which is how a 2D
-layer sits on a 3D game. An overlay is not simply a second camera with a higher order, since a
-camera draws into a view of its own and then writes that over the target, so the bridge clears the
-overlay's own view to nothing each frame and blends the result rather than overwriting. Left to
-itself a second camera replaces the scene under it, which reads as the scene having failed to draw.
+`Render2d.SpawnCamera2d(order: 1)` or any order above zero makes an overlay, which is how a 2D layer
+sits on a 3D game. An overlay is more than a second camera with a higher order, since a camera draws
+into a view of its own and then writes that over the target, so the bridge clears the overlay's own
+view to nothing each frame and blends the result rather than overwriting. Left to itself a second
+camera replaces the scene under it, which reads as the scene having failed to draw.
 
 Stepping a sprite through the frames of a sheet needs no engine support, since `Frame` names a
 frame by number. `SpriteAnimation` in `BevyCSharp.Sample` is the whole of it, a timer and a
@@ -2656,6 +2711,11 @@ point, because a fresh process per question costs a second of startup, a new wor
 about which frame to look at. What arrives over the socket is queued and run by a system at the top
 of the frame, because everything ECS-touching is ambient on the world Bevy lends the running
 system. The socket thread never touches an entity.
+
+A command whose answer is not ready on the frame it runs, such as `shader.buffer`, which reads a
+buffer back from the GPU, calls `ConsoleHost.Later` with a question to ask each frame. The command
+line holds the call until the question answers, and a console prints the answer as a line of its
+own once it arrives.
 
 Every verb writes one envelope to the standard output stream under `--json`, whether it worked or
 not, with a stable token in `errors[0].code` and an exit code that separates *it failed* from

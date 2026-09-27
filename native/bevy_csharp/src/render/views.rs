@@ -904,7 +904,7 @@ fn level_view(texture: &Texture, mip: u32) -> TextureView {
 /// under names of their own, so a camera's image can never shadow one.
 pub fn view_names<'a>(
     owned: Option<&'a ViewImageTextures>,
-    occlusion: Option<&ScreenSpaceAmbientOcclusionResources>,
+    (occlusion, pyramid): (Option<&ScreenSpaceAmbientOcclusionResources>, Option<&bevy::core_pipeline::mip_generation::experimental::depth::ViewDepthPyramid>),
     prepass: Option<&ViewPrepassTextures>,
 ) -> Option<std::borrow::Cow<'a, HashMap<String, ViewTexture>>> {
     let gbuffer = prepass.and_then(|prepass| prepass.deferred.as_ref());
@@ -912,7 +912,7 @@ pub fn view_names<'a>(
         .and_then(|prepass| prepass.depth.as_ref())
         .and_then(|depth| depth.previous_frame_texture.as_ref());
 
-    if occlusion.is_none() && gbuffer.is_none() && previous_depth.is_none() {
+    if occlusion.is_none() && pyramid.is_none() && gbuffer.is_none() && previous_depth.is_none() {
         return owned.map(|owned| std::borrow::Cow::Borrowed(&owned.names));
     }
 
@@ -943,6 +943,19 @@ pub fn view_names<'a>(
 
     if let Some(previous) = previous_depth {
         engine("depth_previous", previous);
+    }
+
+    // Bevy's hierarchical depth, built for its occlusion culling: every level at once, each texel
+    // the farthest depth of the texels under it, which is what a culling test against it needs.
+    if let Some(pyramid) = pyramid {
+        names.insert(
+            "depth_pyramid".into(),
+            ViewTexture {
+                view: pyramid.all_mips.clone(),
+                level: pyramid.mips[0].clone(),
+                format: TextureFormat::R32Float,
+            },
+        );
     }
 
     Some(std::borrow::Cow::Owned(names))
@@ -1201,7 +1214,7 @@ fn prepare_view_dispatches(
         &ViewTarget,
         &BcsViewDispatches,
         Option<&ViewImageTextures>,
-        Option<&ScreenSpaceAmbientOcclusionResources>,
+        (Option<&ScreenSpaceAmbientOcclusionResources>, Option<&bevy::core_pipeline::mip_generation::experimental::depth::ViewDepthPyramid>),
         Option<&ViewPrepassTextures>,
     )>,
 ) {
@@ -1549,7 +1562,7 @@ fn prepare_view_draws(
         &BcsViewDraws,
         Option<&bevy::render::view::Msaa>,
         Option<&ViewImageTextures>,
-        Option<&ScreenSpaceAmbientOcclusionResources>,
+        (Option<&ScreenSpaceAmbientOcclusionResources>, Option<&bevy::core_pipeline::mip_generation::experimental::depth::ViewDepthPyramid>),
         Option<&ViewPrepassTextures>,
     )>,
 ) {

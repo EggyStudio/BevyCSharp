@@ -49,6 +49,14 @@ public sealed class LightSettings
     /// <remarks>Shadows cost a render pass per light, so this is the first thing to turn off.</remarks>
     public bool Shadows { get; set; } = true;
 
+    /// <summary>Whether the light casts contact shadows as well, on cameras that draw them.</summary>
+    /// <remarks>
+    /// A contact shadow is traced a short way through the depth buffer toward the light, for the
+    /// shadow a shadow map is too coarse to hold where two things touch. It is drawn only by a
+    /// camera given <see cref="Render.SetContactShadows"/>, and needs no shadow map of its own.
+    /// </remarks>
+    public bool ContactShadows { get; set; }
+
     /// <summary>Radians from the axis within which a spot light is at full brightness.</summary>
     public float InnerAngle { get; set; }
 
@@ -75,4 +83,26 @@ public sealed class LightSettings
     /// and 0.6 for the others.
     /// </remarks>
     public float ShadowNormalBias { get; set; } = 0.6f;
+}
+
+/// <summary>How a camera traces contact shadows. See <see cref="Render.SetContactShadows"/>.</summary>
+/// <param name="Steps">How many steps a ray takes. More finds thinner gaps and costs more.</param>
+/// <param name="Thickness">How thick, in world units, a surface in the depth buffer is taken to be.</param>
+/// <param name="Length">How far, in world units, a ray goes toward the light.</param>
+public sealed record ContactShadowSettings(uint Steps = 16, float Thickness = 0.1f, float Length = 0.3f);
+
+/// <summary>How a camera filters the shadow maps it reads. See <see cref="Render.SetShadowFiltering"/>.</summary>
+public enum ShadowFiltering
+{
+    /// <summary>Two by two texels, filtered by the hardware. Cheapest and blockiest.</summary>
+    Hardware2x2 = 0,
+
+    /// <summary>A Gaussian over a wider area, which is Bevy's default.</summary>
+    Gaussian = 1,
+
+    /// <summary>
+    /// A pattern that changes every frame, for temporal antialiasing to average into a smooth
+    /// edge. The quietest with soft shadows, and noisy without temporal antialiasing.
+    /// </summary>
+    Temporal = 2,
 }

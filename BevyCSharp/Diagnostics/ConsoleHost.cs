@@ -27,6 +27,18 @@ public static class ConsoleHost
     /// <summary>The frame the last command's answer should be held until, or null for now.</summary>
     internal static ulong? Held { get; private set; }
 
+    /// <summary>What the last command said to ask each frame for its real answer, or null.</summary>
+    /// <remarks>
+    /// For whatever runs commands. One that has frames to wait through asks this once a frame, with
+    /// the world lent, until it answers, as <see cref="Later"/> describes.
+    /// </remarks>
+    public static Func<string?>? Pending { get; private set; }
+
+    /// <summary>
+    /// How many frames a runner asks <see cref="Later"/>'s question before answering that it gave up.
+    /// </summary>
+    public const ulong LaterFrames = 600;
+
     /// <summary>The entities, for a command that reads or changes the world.</summary>
     /// <exception cref="InvalidOperationException">Called from outside a running system.</exception>
     public static EcsWorld Ecs =>
@@ -66,6 +78,24 @@ public static class ConsoleHost
     public static void Hold(ulong frame) => Held = frame;
 
     /// <summary>
+    /// Says this command's answer is not ready yet, and how to ask for it.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// For a command whose answer comes back from the GPU a few frames later, such as a buffer read
+    /// back. The command returns what it has now, which a console shows at once, and
+    /// <paramref name="poll"/> is asked once a frame, with the world lent, until it answers with
+    /// something other than null. That is then handed back as the command's answer: in place of the
+    /// first one to a caller of <c>bcs command</c>, and as a line of its own in a console.
+    /// </para>
+    /// <para>
+    /// A runner gives up after <see cref="LaterFrames"/> frames and says so, and one with no
+    /// frames to ask it in ignores it, so the answer returned now should stand on its own.
+    /// </para>
+    /// </remarks>
+    public static void Later(Func<string?> poll) => Pending = poll ?? throw new ArgumentNullException(nameof(poll));
+
+    /// <summary>
     /// Lends the world to commands run inside the returned scope.
     /// </summary>
     /// <example>
@@ -80,6 +110,7 @@ public static class ConsoleHost
     {
         Failure = null;
         Held = null;
+        Pending = null;
     }
 
     /// <summary>The loan, which ends when it is disposed.</summary>

@@ -2230,6 +2230,25 @@ pub extern "C" fn bcs_shader_ray_scene_set(scene: i32, slot: i32, entity: u64, m
     })
 }
 
+/// Builds pool mesh `mesh` of a ray scene again from what the pool holds now, or every mesh where
+/// `mesh` is negative, for geometry a compute shader has moved. See [`super::rays::rebuild`].
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_ray_scene_rebuild(scene: i32, mesh: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (scene, mesh);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            let mesh = (mesh >= 0).then_some(mesh as u32);
+            crate::state::with_world(|world| super::rays::rebuild(world, scene, mesh))
+        }
+    })
+}
+
 /// Puts a ray scene from [`bcs_shader_ray_scene_create`] under a name. A key of zero or less takes
 /// it off again.
 ///

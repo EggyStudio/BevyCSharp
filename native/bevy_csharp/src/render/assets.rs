@@ -195,6 +195,22 @@ pub unsafe extern "C" fn bcs_mesh_create_from(data: *const BcsMeshData) -> i32 {
 /// finds nothing to read back.
 #[cfg(feature = "render")]
 pub(crate) fn target_image(width: u32, height: u32) -> bevy::image::Image {
+    target_image_in(width, height, false)
+}
+
+/// The same, in half floats where `float` is set, which keeps what a camera draws brighter than
+/// white as it is rather than clamping it to one, for a reflection or a picture a shader reads on.
+#[cfg(feature = "render")]
+pub(crate) fn target_image_in(width: u32, height: u32, float: bool) -> bevy::image::Image {
+    target_image_layers(width, height, float, 1)
+}
+
+/// The same with `layers` layers, which cameras draw into one at a time (see [`super::layers`]).
+///
+/// Six square layers are viewed as a cube, as a material's or a probe's cube slot reads them, and
+/// any other count as an array.
+#[cfg(feature = "render")]
+pub(crate) fn target_image_layers(width: u32, height: u32, float: bool, layers: u32) -> bevy::image::Image {
     use bevy::asset::RenderAssetUsages;
     use bevy::image::Image;
     use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat, TextureUsages};
@@ -202,23 +218,41 @@ pub(crate) fn target_image(width: u32, height: u32) -> bevy::image::Image {
     let size = Extent3d {
         width: width.max(1),
         height: height.max(1),
-        depth_or_array_layers: 1,
+        depth_or_array_layers: layers.max(1),
     };
 
     // Opaque black rather than transparent, because a picture of a scene with nothing in front of
     // the camera should look like an empty scene rather than like a failure. The format is named
     // outright, because Bevy deprecated its default in favor of asking the view, and a target
     // created before there is a view to ask has to choose one.
-    let mut image = Image::new_fill(
-        size,
-        TextureDimension::D2,
-        &[0, 0, 0, 255],
-        TextureFormat::Rgba8UnormSrgb,
-        RenderAssetUsages::default(),
-    );
+    // Half-float one, for the opaque black.
+    const HALF_ONE: [u8; 2] = 0x3C00u16.to_le_bytes();
+
+    let (black, format): (&[u8], TextureFormat) = if float {
+        (&[0, 0, 0, 0, 0, 0, HALF_ONE[0], HALF_ONE[1]], TextureFormat::Rgba16Float)
+    } else {
+        (&[0, 0, 0, 255], TextureFormat::Rgba8UnormSrgb)
+    };
+
+    let mut image = Image::new_fill(size, TextureDimension::D2, black, format, RenderAssetUsages::default());
 
     image.texture_descriptor.usage =
         TextureUsages::COPY_SRC | TextureUsages::RENDER_ATTACHMENT | TextureUsages::TEXTURE_BINDING;
+
+    if layers > 1 {
+        use bevy::render::render_resource::{TextureViewDescriptor, TextureViewDimension};
+
+        // Written by copies from the cameras' companions rather than drawn into.
+        image.texture_descriptor.usage |= TextureUsages::COPY_DST;
+        image.texture_view_descriptor = Some(TextureViewDescriptor {
+            dimension: Some(if layers == 6 && width == height {
+                TextureViewDimension::Cube
+            } else {
+                TextureViewDimension::D2Array
+            }),
+            ..Default::default()
+        });
+    }
 
     image
 }
@@ -230,13 +264,15 @@ pub(crate) fn target_image(width: u32, height: u32) -> bevy::image::Image {
 /// material sampling the same handle shows what that camera sees.
 ///
 /// The image is empty until something draws into it. Nothing loads, so the handle is usable on the
-/// frame it is returned.
+/// frame it is returned. `format` is `0` for eight-bit sRGB and `1` for half floats, which keep
+/// light brighter than white as it was drawn. `layers` above one makes an image cameras draw into a
+/// layer at a time, viewed as a cube where there are six square layers and as an array otherwise.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_render_create_target(width: u32, height: u32) -> i32 {
+pub extern "C" fn bcs_render_create_target(width: u32, height: u32, format: i32, layers: u32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (width, height);
+            let _ = (width, height, format, layers);
             status::UNSUPPORTED
         }
 
@@ -245,8 +281,12 @@ pub extern "C" fn bcs_render_create_target(width: u32, height: u32) -> i32 {
             use bevy::asset::Assets;
             use bevy::image::Image;
 
+            if !(0..=1).contains(&format) || layers == 0 {
+                return status::NULL_ARG;
+            }
+
             with_world(|world| {
-                let image = target_image(width, height);
+                let image = target_image_layers(width, height, format == 1, layers);
 
                 let Some(mut images) = world.get_resource_mut::<Assets<Image>>() else {
                     return status::UNSUPPORTED;

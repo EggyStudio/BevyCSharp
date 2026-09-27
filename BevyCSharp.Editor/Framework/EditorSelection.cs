@@ -41,7 +41,7 @@ public static class EditorSelection
     /// <summary>Which kind of thing was picked last.</summary>
     /// <remarks>
     /// The data panel shows one thing, and this is how it knows which. Picking a file does not
-    /// deselect an entity, it just becomes the more recent answer to "what am I looking at".
+    /// deselect an entity, it becomes the more recent answer to "what am I looking at".
     /// </remarks>
     public static SelectionKind Latest { get; internal set; } = SelectionKind.None;
 

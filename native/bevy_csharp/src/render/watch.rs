@@ -212,7 +212,7 @@ fn draw_watches(
     view: ViewQuery<(
         &BcsWatches,
         Option<&ViewImageTextures>,
-        Option<&ScreenSpaceAmbientOcclusionResources>,
+        (Option<&ScreenSpaceAmbientOcclusionResources>, Option<&bevy::core_pipeline::mip_generation::experimental::depth::ViewDepthPyramid>),
         Option<&ViewPrepassTextures>,
     )>,
     pipelines: Option<Res<WatchPipelines>>,

@@ -819,6 +819,49 @@ public sealed class ComputeShaderTests
     }
 
     /// <summary>An instance of the compute shader in <paramref name="file"/>.</summary>
+    /// <summary>
+    /// <c>shader.buffer</c> run through the command line answers once the buffer is back from the
+    /// GPU, a frame or more after it was asked, with the numbers the buffer holds.
+    /// </summary>
+    [Fact]
+    public void ABufferIsReadThroughTheCommandLineOnceItArrives()
+    {
+        if (!App.HasRenderer) return;
+
+        var queue = new CliQueue();
+        var request = default(CliRequest);
+        var asked = 0UL;
+
+        var run = new PictureRun
+        {
+            Scene = _ =>
+            {
+                var buffer = Shaders.CreateBuffer<float>([1.5f, -2f, 3.25f]);
+                request = new CliRequest("run", $"shader.buffer {buffer.Key} float", "one");
+            },
+        };
+
+        run.Wait(3)
+            .Do("asking", world =>
+            {
+                asked = world.Resource<Time>().FrameCount;
+                queue.Add(request!);
+                queue.Pump(world);
+            })
+            .Until("answered", world =>
+            {
+                queue.Pump(world);
+                return request!.Answer.IsCompleted;
+            })
+            .Go();
+
+        var envelope = request!.Answer.Result;
+
+        Assert.Contains("\"success\":true", envelope);
+        Assert.Contains("1.5 -2 3.25", envelope);
+        Assert.DoesNotContain("reading buffer", envelope);
+    }
+
     private static ShaderInstance Compute(string file) =>
         Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Compute = file }));
 

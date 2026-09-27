@@ -246,7 +246,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | Last frame's lit color | Has (`ViewImage(..., History: true, CopyAt: FramePoint.BeforeTonemapping)`, read as `name_previous`), scaled to the image and point sampled |
 | History images owned by the camera | Has (`Shaders.SetViewImages`, `History: true`) |
 | The view uniform in compute | Has, for compute on a camera |
-| A depth pyramid | Buildable, since a camera's images have mip levels reachable one at a time. Not a service yet |
+| A depth pyramid | Has, Bevy's farthest-depth pyramid for culling (`Shaders.SetPrepass(..., pyramid: true)`, `depth_pyramid`). A nearest-depth one for tracing is built by the package, since a camera's images have mip levels reachable one at a time |
 | Blue noise | Has, Bevy's spatio-temporal blue noise, for shaders on a camera (`bcs_pass::blue_noise`) |
 
 ### Scene data on the GPU
@@ -289,10 +289,10 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | need | status |
 |---|---|
 | Storage images, 2D and 3D, in float and integer formats | Has (`Shaders.CreateImage`) |
-| Images from data in formats other than eight-bit RGBA | Has (`Shaders.CreateImage<T>(..., texels)`). Render targets are still eight-bit RGBA |
+| Images from data in formats other than eight-bit RGBA | Has (`Shaders.CreateImage<T>(..., texels)`). Render targets are eight-bit sRGB or half floats (`Render.CreateTarget(..., TargetFormat.Rgba16Float)`), which keep light brighter than white |
 | A storage view of one mip level | Has, for a camera's images (`name_mip1`) and for images made with `Shaders.CreateImage(..., mips:)` (`SetTexture(name, image, mip: 1)`) |
 | Arrays of textures of any length | Has, where the adapter supports binding arrays |
-| Cube maps rendered into | Has, for a reflection probe capturing itself (`Render.SetProbeCapture`). A camera of the game's own targeting one layer is missing |
+| Cube maps rendered into | Has, for a reflection probe capturing itself (`Render.SetProbeCapture`), and for cameras of the game's own, each pointed at one layer of a cube or array target (`Render.CreateTarget(..., layers: 6)`, `SetCameraTarget(camera, target, layer)`) |
 | Block-compressed textures | Has, for images filled from memory (`ShaderImageFormat.Bc1` to `Bc6hFloat`, written a block at a time). Files in those formats load through `ktx2` where the adapter decodes them |
 | Writing a region of a texture from bytes | Has (`Shaders.WriteImage<T>`), at any mip level and into slices of a 3D image |
 
@@ -333,7 +333,7 @@ it, because wgpu packs the instances it builds and a gap would shift every slot 
 |---|---|
 | Hot reload of every shader, with the last good version kept | Has |
 | What a program declares, by name and offset | Has (`shader.layout`) |
-| Buffers and images shown in the editor | Images, yes (`Shaders.Watch`, the editor's Frame tab). Buffers and counters are not shown yet, and are read back with `Shaders.BeginBufferRead` |
+| Buffers and images shown in the editor | Images, yes (`Shaders.Watch`, the editor's Frame tab). Buffers are read as numbers by `shader.buffer`, in the console and from the command line, and in code with `Shaders.BeginBufferRead` |
 | GPU timings per pass | Has (`Config.GpuTimings`, `Render.Timings`, `render.timings`), Bevy's passes and every shader program's dispatches, passes and draws by file name |
 
 ### C# and Slang
@@ -373,7 +373,8 @@ Each phase unblocks a class of package, and none needs a later one.
    materials, per pixel through the G-buffer and by object as constants), 3D images with
    scrolling, and hardware ray queries, which a compute shader compiled to SPIR-V makes through
    `bcs_ray` against the scene Solari keeps or a ray scene of its own over a geometry pool.
-   Refitting a scene's meshes as they deform, rather than building them once, is next.
+   A mesh a compute shader deforms in the pool is built again when asked
+   (`Shaders.RebuildRayScene`).
 6. **Reflections and radiance cascades**, built on what the phases before provide.
 
 ## What to watch

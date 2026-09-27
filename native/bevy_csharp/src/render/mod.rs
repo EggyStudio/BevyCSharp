@@ -27,6 +27,7 @@ pub mod adapter;
 pub mod assets;
 pub mod compute;
 pub mod instances;
+pub mod layers;
 pub mod material;
 pub mod meshlets;
 pub mod passes;

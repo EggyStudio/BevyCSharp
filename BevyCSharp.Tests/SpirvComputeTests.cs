@@ -200,6 +200,101 @@ public sealed class SpirvComputeTests
         Assert.InRange(after[6].Z, 9.89f, 9.91f);
     }
 
+    /// <summary>
+    /// A mesh a compute shader raises in the pool is traced where it was until the scene is asked
+    /// to build it again, and where it is afterward.
+    /// </summary>
+    [Fact]
+    public void ARaySceneSeesAMovedMeshOnceItIsBuiltAgain()
+    {
+        if (!ShaderMaterialTests.CanRun) return;
+
+        var supported = false;
+        var trace = default(ShaderInstance);
+        var raise = default(ShaderInstance);
+        var scene = default(RayScene);
+        var hits = AssetHandle.None;
+        var read = default(BufferRead);
+        var found = new List<Vector4[]>();
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                supported = Shaders.SupportsRayQueries;
+                if (!supported) return;
+
+                var pool = Shaders.CreateGeometryPool();
+                var cube = Shaders.AddToGeometryPool(pool, Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f));
+
+                var entity = ecs.Spawn();
+                ecs.Add(entity, Transform.At(0f, 0f, 0f));
+
+                scene = Shaders.CreateRayScene(pool, 1);
+                Shaders.SetRaySceneInstance(scene, 0, entity, cube);
+
+                raise = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Compute = "shaders/raise_pool.slang" }))
+                    .SetBuffer("vertices", pool.Vertices)
+                    .Set("by", 1f);
+
+                // One ray, straight down the middle.
+                hits = Shaders.CreateBuffer<Vector4>(new Vector4[1]);
+                trace = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
+                    {
+                        Compute = "shaders/trace_ray_scene.slang",
+                        ComputeTarget = ShaderTarget.SpirV,
+                    }))
+                    .SetRayScene("scene", scene)
+                    .SetBuffer("hits", hits)
+                    .Set("height", 10f)
+                    .Set("spacing", 1f);
+            },
+        };
+
+        void Trace(string name) =>
+            run.Do($"tracing {name}", _ =>
+                {
+                    if (supported) Shaders.Dispatch(trace, 1);
+                })
+                .Wait(2)
+                .Do($"asking for {name}", _ =>
+                {
+                    if (supported) read = Shaders.BeginBufferRead(hits);
+                })
+                .Until($"reading {name}", _ =>
+                {
+                    if (!supported) return true;
+                    if (!Shaders.TryReadBuffer(read, out Vector4[]? got)) return false;
+                    found.Add(got!);
+                    return true;
+                });
+
+        run.Until("compiled", _ => !supported || ShaderMaterialTests.ProgramsReady()).Wait(10);
+        Trace("before");
+
+        run.Do("raising the mesh in the pool", _ =>
+            {
+                if (supported) Shaders.Dispatch(raise, 1);
+            })
+            .Wait(3);
+        Trace("before building again");
+
+        run.Do("building it again", _ =>
+            {
+                if (supported) Shaders.RebuildRayScene(scene);
+            })
+            .Wait(3);
+        Trace("after");
+        run.Go();
+
+        if (!supported) return;
+
+        Assert.Equal(3, found.Count);
+        Assert.InRange(found[0][0].Z, 9.49f, 9.51f);
+        Assert.InRange(found[1][0].Z, 9.49f, 9.51f);
+        Assert.InRange(found[2][0].Z, 8.49f, 8.51f);
+    }
+
     /// <summary>Equal to within a thousandth in every component.</summary>
     private sealed class ApproximateComparer : IEqualityComparer<Vector4>
     {

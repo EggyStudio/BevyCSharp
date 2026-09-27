@@ -179,6 +179,10 @@ public static class EditorShell
         Context = ctx;
         Frame = ctx.Time.FrameCount;
 
+        // Before anything is drawn, and whether or not the console is open, so an answer that
+        // arrives while it is shut is there when it opens.
+        ConsoleView.AnswerLater(ctx.World, Frame);
+
         if (!ImGuiRuntime.IsRunning) return;
 
         ImGuiRuntime.Begin(ctx);

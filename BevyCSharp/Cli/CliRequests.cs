@@ -35,6 +35,12 @@ internal sealed class CliRequest(string operation, string? line, string? id)
     /// <summary>The frame that releases it.</summary>
     public ulong Release { get; set; }
 
+    /// <summary>
+    /// What to ask each frame for a command's answer that was not ready, which releases it once it
+    /// answers. <see cref="Release"/> is then the frame it gives up at.
+    /// </summary>
+    public Func<string?>? Poll { get; set; }
+
     /// <summary>Hands the answer back to whoever is waiting.</summary>
     public void Complete(string envelope) => _answer.TrySetResult(envelope);
 }
@@ -84,6 +90,31 @@ internal sealed class CliQueue
         for (var index = _held.Count - 1; index >= 0; index--)
         {
             var request = _held[index];
+
+            if (request.Poll is { } poll)
+            {
+                string? answer;
+                using (ConsoleHost.Lend(world)) answer = poll();
+
+                if (answer is not null)
+                {
+                    request.Held = answer;
+                    request.Complete(CliDispatch.Release(request, frame));
+                    _held.RemoveAt(index);
+                }
+                else if (frame >= request.Release)
+                {
+                    request.Complete(CliJson.Fail(
+                        request.Operation,
+                        "TIMEOUT",
+                        $"'{request.Holding}' had no answer after {ConsoleHost.LaterFrames} frames.",
+                        request.Id));
+                    _held.RemoveAt(index);
+                }
+
+                continue;
+            }
+
             if (frame < request.Release) continue;
 
             request.Complete(CliDispatch.Release(request, frame));

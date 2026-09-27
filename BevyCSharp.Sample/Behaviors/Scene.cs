@@ -23,6 +23,9 @@ public partial struct Scene
     /// <summary>Current pitch in radians.</summary>
     public float Pitch;
 
+    /// <summary>The ground, the cube and the lamp, for a behavior that builds on the scene.</summary>
+    internal static (Entity Ground, Entity Cube, Entity Lamp) Parts { get; private set; }
+
     [OnStartup]
     public static void Build(BehaviorContext ctx)
     {
@@ -129,6 +132,8 @@ public partial struct Scene
         // Turning about two axes rather than one, so the cube reads as a solid rather than a
         // flat outline.
         ctx.Ecs.Add(cube, new Scene { YawSpeed = 0.9f, PitchSpeed = 0.35f });
+
+        Parts = (ground, cube, lamp);
 
         // A HUD: a panel pinned to a corner with a line of text inside it. Nesting is ordinary
         // parenting, so the text moves with the panel.

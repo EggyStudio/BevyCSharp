@@ -52,3 +52,13 @@ public sealed record CapturedImage(uint Width, uint Height, byte[] Pixels)
         return (Pixels[offset], Pixels[offset + 1], Pixels[offset + 2], Pixels[offset + 3]);
     }
 }
+
+/// <summary>What a render target from <see cref="Render.CreateTarget"/> holds a pixel as.</summary>
+public enum TargetFormat
+{
+    /// <summary>Eight bits a channel, sRGB, which is what a screen shows.</summary>
+    Rgba8,
+
+    /// <summary>A half float a channel, linear, with room above white.</summary>
+    Rgba16Float,
+}

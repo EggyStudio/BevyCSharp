@@ -501,7 +501,7 @@ public static unsafe class Render
             ColorB = settings.Color.B,
             Range = settings.Range,
             Radius = settings.Radius,
-            Shadows = settings.Shadows ? 1 : 0,
+            Shadows = (settings.Shadows ? 1 : 0) | (settings.ContactShadows ? 2 : 0),
             InnerAngle = settings.InnerAngle,
             OuterAngle = settings.OuterAngle,
             ShadowDepthBias = settings.ShadowDepthBias,
@@ -573,6 +573,38 @@ public static unsafe class Render
         Native.Check(
             Native.bcs_render_set_light_cookie(light.Bits, cookie.Key),
             $"shaping the beam of {light}");
+
+    /// <summary>
+    /// Softens a light's shadow the farther it falls from what casts it, as a light
+    /// <paramref name="size"/> world units across does. Zero makes it hard again. Only valid inside
+    /// a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A real light has a size, so its shadow is sharp where an object touches the ground and
+    /// blurs as it stretches away, which a blur of one fixed width cannot do. This is Bevy's
+    /// percentage-closer soft shadows, which search the shadow map around each point for how far
+    /// the casters are and widen the penumbra to match.
+    /// </para>
+    /// <para>
+    /// For a point or a spot light the size is its <see cref="LightSettings.Radius"/>, which this
+    /// sets, and a penumbra shows from a few units up. A directional light's penumbra is worked
+    /// out in its shadow map's depth, and Bevy's own example gives one a size of ten. It is noisy
+    /// with the default filtering, so it suits a camera given
+    /// <see cref="ShadowFiltering.Temporal"/> with temporal antialiasing on, and it costs a good
+    /// deal more than a hard shadow.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The entity is not a light.</exception>
+    public static void SetSoftShadows(Entity light, float size) =>
+        Native.Check(Native.bcs_render_set_soft_shadows(light.Bits, size), $"softening {light}'s shadows");
+
+    /// <summary>
+    /// Sets how a camera filters the shadow maps it reads. Only valid inside a system.
+    /// </summary>
+    /// <exception cref="BevyNativeException">The entity is not a camera.</exception>
+    public static void SetShadowFiltering(Entity camera, ShadowFiltering filtering) =>
+        Native.Check(Native.bcs_render_set_shadow_filtering(camera.Bits, (int)filtering), $"filtering {camera}'s shadows");
 
     /// <summary>
     /// Sets what a camera does to the picture after the scene has been drawn.
@@ -1412,6 +1444,32 @@ public static unsafe class Render
         Native.Check(Native.bcs_render_set_deferred(on ? 1 : 0), "switching between forward and deferred");
 
     /// <summary>
+    /// Draws contact shadows on a camera, or with <see langword="null"/> stops. Only valid inside a
+    /// system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A shadow map is drawn from the light at a resolution of its own, so the shadow right where
+    /// a foot meets a floor or a cup meets a table is lost in a texel or two. A contact shadow is
+    /// traced from each pixel toward each light that casts one
+    /// (<see cref="LightSettings.ContactShadows"/>), a short way through the depth buffer, and
+    /// fills in exactly that.
+    /// </para>
+    /// <para>
+    /// The camera draws depth before the scene for it. Only what is on screen can cast one, and a
+    /// thin object seen edge on casts less than it should, since the depth buffer has no idea how
+    /// thick anything is.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The entity is not a camera.</exception>
+    public static void SetContactShadows(Entity camera, ContactShadowSettings? settings) =>
+        Native.Check(
+            settings is { } given
+                ? Native.bcs_render_set_contact_shadows(camera.Bits, Math.Max(1u, given.Steps), given.Thickness, given.Length)
+                : Native.bcs_render_set_contact_shadows(camera.Bits, 0, 0f, 0f),
+            $"setting contact shadows on {camera}");
+
+    /// <summary>
     /// Turns Bevy's screen-space reflections on for a camera, or with <see langword="null"/> off.
     /// Only valid inside a system.
     /// </summary>
@@ -1555,7 +1613,7 @@ public static unsafe class Render
     /// <remarks>
     /// <para>
     /// What a portal, a security monitor, a minimap or a second viewport is built from. Point a
-    /// camera at it with <see cref="SetCameraTarget"/>, and give the same handle to a material as
+    /// camera at it with <see cref="SetCameraTarget(Entity, AssetHandle)"/>, and give the same handle to a material as
     /// its <see cref="MaterialSettings.BaseColorTexture"/>, and the surface carrying that material
     /// shows what the camera sees.
     /// </para>
@@ -1567,11 +1625,27 @@ public static unsafe class Render
     /// </remarks>
     /// <param name="width">Width in pixels.</param>
     /// <param name="height">Height in pixels.</param>
+    /// <param name="format">
+    /// Eight-bit sRGB unless set. <see cref="TargetFormat.Rgba16Float"/> keeps light brighter than
+    /// white as it was drawn, for a reflection or a picture a shader reads on, which a camera with
+    /// <see cref="PostSettings.Hdr"/> and no tonemapping draws into as it is. A capture of it reads
+    /// as eight-bit sRGB clamped at white, while a shader sampling it reads the full range.
+    /// </param>
+    /// <param name="layers">
+    /// One unless set. More makes an image cameras draw into a layer at a time with
+    /// <see cref="SetCameraTarget(Entity, AssetHandle, int)"/>. Six layers of a square image are
+    /// read as a cube, which a probe or a material's cube slot takes, and any other count as an
+    /// array.
+    /// </param>
     /// <returns>A handle to the image.</returns>
     /// <exception cref="BevyNativeException">This build has no renderer.</exception>
-    public static AssetHandle CreateTarget(uint width, uint height)
+    public static AssetHandle CreateTarget(
+        uint width,
+        uint height,
+        TargetFormat format = TargetFormat.Rgba8,
+        uint layers = 1)
     {
-        var key = Native.bcs_render_create_target(width, height);
+        var key = Native.bcs_render_create_target(width, height, (int)format, layers);
         if (key == NativeStatus.Unsupported) throw NoRenderer("Creating a render target");
 
         Native.Check(key, $"creating a {width}x{height} render target");
@@ -1709,8 +1783,33 @@ public static unsafe class Render
     /// <exception cref="BevyNativeException">
     /// The entity is not a camera, or the handle names no image.
     /// </exception>
-    public static void SetCameraTarget(Entity camera, AssetHandle target) => Native.Check(
-        Native.bcs_render_set_camera_target(camera.Bits, target.Key),
+    public static void SetCameraTarget(Entity camera, AssetHandle target) => SetCameraTarget(camera, target, -1);
+
+    /// <summary>
+    /// Points a camera at one layer of an image with several, such as a face of a cube.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy draws a camera into a whole image, so the camera draws into an ordinary image of the
+    /// layer's size and format, and that is copied into the layer after the cameras have drawn.
+    /// Six cameras at one point, each a quarter turn apart with a field of view of ninety degrees
+    /// and a square picture, pointed at the six layers of a cube target, capture a cube map: a
+    /// probe of a package's own, a sky, or what a light sees. The layers are in the order a cube
+    /// is: plus and minus X, plus and minus Y, plus and minus Z.
+    /// </para>
+    /// <para>
+    /// A negative <paramref name="layer"/> draws into the whole image, as the overload without one
+    /// does.
+    /// </para>
+    /// </remarks>
+    /// <param name="camera">The camera.</param>
+    /// <param name="target">An image from <see cref="CreateTarget"/> with layers.</param>
+    /// <param name="layer">Which layer, counted from zero.</param>
+    /// <exception cref="BevyNativeException">
+    /// The entity is not a camera, the handle names no image, or the image has no such layer.
+    /// </exception>
+    public static void SetCameraTarget(Entity camera, AssetHandle target, int layer) => Native.Check(
+        Native.bcs_render_set_camera_target(camera.Bits, target.Key, layer),
         $"pointing {camera} at {target}");
 
     /// <summary>

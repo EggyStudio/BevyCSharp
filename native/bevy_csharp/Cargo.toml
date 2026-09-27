@@ -116,6 +116,9 @@ render = [
     "bevy/bevy_anti_alias",
     "bevy/smaa_luts",
     "bevy/bevy_pbr",
+    # Soft shadows, whose penumbra widens with distance from the caster. Shader code behind a
+    # define, used only by a light given a size, so a scene without one draws as before.
+    "bevy/experimental_pbr_pcss",
     "bevy/bevy_gltf",
     "bevy/bevy_sprite",
     "bevy/bevy_sprite_render",

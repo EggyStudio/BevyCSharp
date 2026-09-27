@@ -458,18 +458,28 @@ public static unsafe class Shaders
     /// what was at the same place last frame is how a temporal technique tells a pixel it can
     /// reuse from one that was hidden until now. Each costs a second texture of its kind.
     /// </param>
+    /// <param name="pyramid">
+    /// Whether to build Bevy's hierarchical depth, which a shader reads as <c>depth_pyramid</c>,
+    /// every level at once. Each texel holds the farthest depth of those under it, with the first
+    /// level the depth rounded down to a power of two, so a box whose nearest depth is farther
+    /// than the texels it covers is hidden, which is the test a GPU culling instances or clusters
+    /// makes. It turns Bevy's own occlusion culling on for the camera, which builds the pyramid,
+    /// and brings depth. A screen-space trace wants the nearest depth instead, which a camera image
+    /// with mip levels built a level at a time gives.
+    /// </param>
     public static void SetPrepass(
         Entity camera,
         bool depth,
         bool normals = false,
         bool motion = false,
         bool deferred = false,
-        bool previous = false) =>
+        bool previous = false,
+        bool pyramid = false) =>
         Native.Check(
             Native.bcs_render_set_prepass(
                 camera.Bits,
                 (depth ? 1u : 0u) | (normals ? 2u : 0u) | (motion ? 4u : 0u) | (deferred ? 8u : 0u)
-                    | (previous ? 16u : 0u)),
+                    | (previous ? 16u : 0u) | (pyramid ? 32u : 0u)),
             "asking a camera for a prepass");
 
     /// <summary>
@@ -1126,6 +1136,24 @@ public static unsafe class Shaders
             Native.bcs_shader_ray_scene_set(scene.Key, slot, entity.Bits, entity == Entity.None ? -1 : mesh),
             $"putting {entity} in slot {slot} of a ray scene");
 
+    /// <summary>
+    /// Builds a ray scene's pool mesh again from what the pool's buffers hold now, or every mesh
+    /// with <see langword="null"/>. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// Each mesh is built into a structure of its own once, and that structure keeps its own copy of
+    /// the triangles, so a mesh a compute shader deforms in the pool is traced as it was until this
+    /// is asked. It happens while the next frame is prepared, before that frame's dispatches, so it
+    /// takes in what the dispatches of the frame it was asked in wrote. Building is the slow part of
+    /// a ray scene, so a mesh that moves every frame is worth asking for only as often as its rays
+    /// need to see it move.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The scene is gone, or the pool has no such mesh.</exception>
+    public static void RebuildRayScene(RayScene scene, int? mesh = null) =>
+        Native.Check(
+            Native.bcs_shader_ray_scene_rebuild(scene.Key, mesh ?? -1),
+            "building a ray scene's meshes again");
+
     /// <summary>How many bytes one slot of a material buffer takes.</summary>
     /// <remarks>
     /// Base color and emissive color, four floats each, then roughness, metallic, reflectance and
@@ -1272,7 +1300,7 @@ public static unsafe class Shaders
     /// <param name="height">Its height in pixels.</param>
     /// <param name="format">What it holds per pixel.</param>
     /// <param name="depth">Above one, a 3D image this many slices deep.</param>
-    /// <param name="mips">How many mip levels, one for just the image.</param>
+    /// <param name="mips">How many mip levels, one for the image alone.</param>
     public static AssetHandle CreateImage(
         uint width,
         uint height,

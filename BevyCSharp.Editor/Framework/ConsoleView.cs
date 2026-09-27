@@ -117,6 +117,47 @@ public sealed class ConsoleView
         }
 
         if (answer is { Length: > 0 }) ConsoleLog.Write(LogLevel.Echo, answer);
+
+        if (ConsoleHost.Pending is { } poll)
+        {
+            var name = typed.Split(' ', 2)[0];
+            Waiting.Add((name, poll, EditorShell.Frame + ConsoleHost.LaterFrames));
+        }
+    }
+
+    /// <summary>
+    /// The commands whose answers are not ready yet: what each is called, what to ask, and the
+    /// frame it is given up at. Shared by every console view, since an answer belongs to the log.
+    /// </summary>
+    private static readonly List<(string Name, Func<string?> Poll, ulong GiveUp)> Waiting = [];
+
+    /// <summary>
+    /// Asks each command waiting on an answer for it, and writes any that arrive into the log.
+    /// </summary>
+    /// <remarks>
+    /// Called once a frame by <see cref="EditorShell.Tick"/>, with the world lent, since what a
+    /// command waits on is usually the GPU and the answer is read inside a frame.
+    /// </remarks>
+    internal static void AnswerLater(World world, ulong frame)
+    {
+        for (var index = Waiting.Count - 1; index >= 0; index--)
+        {
+            var (name, poll, giveUp) = Waiting[index];
+
+            string? answer;
+            using (ConsoleHost.Lend(world)) answer = poll();
+
+            if (answer is not null)
+            {
+                ConsoleLog.Write(LogLevel.Echo, answer);
+                Waiting.RemoveAt(index);
+            }
+            else if (frame >= giveUp)
+            {
+                ConsoleLog.Write(LogLevel.Warning, $"{name} had no answer after {ConsoleHost.LaterFrames} frames");
+                Waiting.RemoveAt(index);
+            }
+        }
     }
 
     /// <summary>What was typed before this, or what is already there at the end of the list.</summary>
@@ -170,7 +211,7 @@ public sealed class ConsoleView
         if (Completion(typed) is { } completion)
         {
             var found = ConsoleCommands.Find(completion);
-            return found is { Help.Length: > 0 } ? $"{completion} - {found.Help}" : completion;
+            return found is { Help.Length: > 0 } ? $"{completion}: {found.Help}" : completion;
         }
 
         var word = typed.Trim();
@@ -180,8 +221,8 @@ public sealed class ConsoleView
         if (name.Length == 0 || ConsoleCommands.Find(name) is not { } command) return string.Empty;
 
         return command.Usage.Length > 0
-            ? $"{command.Name} {command.Usage} - {command.Help}"
-            : $"{command.Name} - {command.Help}";
+            ? $"{command.Name} {command.Usage}: {command.Help}"
+            : $"{command.Name}: {command.Help}";
     }
 
     /// <summary>

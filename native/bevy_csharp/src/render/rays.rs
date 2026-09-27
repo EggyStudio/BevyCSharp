@@ -62,6 +62,8 @@ struct Scene {
     pool: i32,
     /// An entity and the pool mesh it is made of, per slot.
     slots: Vec<Option<(Entity, u32)>>,
+    /// Pool meshes to build again from what the pool holds now, since the last extraction.
+    rebuild: Vec<u32>,
 }
 
 /// Every ray scene, by its key.
@@ -108,6 +110,7 @@ pub fn create(world: &mut World, pool: i32, capacity: u32) -> i32 {
         Scene {
             pool,
             slots: vec![None; capacity.max(1) as usize],
+            rebuild: Vec::new(),
         },
     );
 
@@ -136,6 +139,42 @@ pub fn set(world: &mut World, key: i32, slot: u32, entity: Option<Entity>, mesh:
     status::OK
 }
 
+/// Builds pool mesh `mesh` of scene `key` again from what the pool's buffers hold, or every mesh
+/// where `mesh` is `None`, for geometry a compute shader has moved.
+///
+/// A built structure keeps its own copy of the triangles, so a mesh a shader deforms in the pool
+/// is traced as it was until this is asked. It happens while the next frame is prepared, which is
+/// before that frame's dispatches, so it reads what the dispatches of the frame it was asked in
+/// wrote.
+pub fn rebuild(world: &mut World, key: i32, mesh: Option<u32>) -> i32 {
+    let Some(pool) = world
+        .get_resource::<RayScenes>()
+        .and_then(|scenes| scenes.scenes.get(&key))
+        .map(|scene| scene.pool)
+    else {
+        return status::NO_COMPONENT;
+    };
+
+    let count = super::pools::geometry(world, pool).map_or(0, |(_, _, meshes)| meshes.len() as u32);
+
+    let wanted: Vec<u32> = match mesh {
+        Some(mesh) if mesh >= count => return status::NULL_ARG,
+        Some(mesh) => vec![mesh],
+        None => (0..count).collect(),
+    };
+
+    let mut scenes = world.resource_mut::<RayScenes>();
+    let scene = scenes.scenes.get_mut(&key).expect("found above");
+
+    for mesh in wanted {
+        if !scene.rebuild.contains(&mesh) {
+            scene.rebuild.push(mesh);
+        }
+    }
+
+    status::OK
+}
+
 // -- The render world's half
 
 /// One scene as the render world receives it.
@@ -148,6 +187,8 @@ struct Extracted {
     capacity: u32,
     /// A slot, the pool mesh in it, and its transform as the first three rows of its matrix.
     instances: Vec<(u32, u32, [f32; 12])>,
+    /// Pool meshes to build again.
+    rebuild: Vec<u32>,
 }
 
 #[derive(Resource, Default)]
@@ -188,19 +229,19 @@ fn extract_scenes(mut main_world: ResMut<MainWorld>, mut extracted: ResMut<Extra
 
     let world: &mut World = &mut main_world;
 
-    let Some(scenes) = world.get_resource::<RayScenes>() else {
+    let Some(mut scenes) = world.get_resource_mut::<RayScenes>() else {
         return;
     };
 
-    let described: Vec<(i32, i32, Vec<Option<(Entity, u32)>>)> = scenes
+    let described: Vec<(i32, i32, Vec<Option<(Entity, u32)>>, Vec<u32>)> = scenes
         .scenes
-        .iter()
-        .map(|(key, scene)| (*key, scene.pool, scene.slots.clone()))
+        .iter_mut()
+        .map(|(key, scene)| (*key, scene.pool, scene.slots.clone(), std::mem::take(&mut scene.rebuild)))
         .collect();
 
     let mut transforms = world.query::<&GlobalTransform>();
 
-    for (key, pool, slots) in described {
+    for (key, pool, slots, rebuild) in described {
         let Some((vertices, indices, meshes)) = super::pools::geometry(world, pool) else {
             continue;
         };
@@ -229,6 +270,7 @@ fn extract_scenes(mut main_world: ResMut<MainWorld>, mut extracted: ResMut<Extra
             meshes,
             capacity: slots.len() as u32,
             instances,
+            rebuild,
         });
     }
 }
@@ -272,6 +314,13 @@ fn build_scenes(
         if entry.capacity < scene.capacity {
             entry.tlas = make_tlas(&device, scene.capacity);
             entry.capacity = scene.capacity;
+        }
+
+        // Dropped, so the loop below builds them again as if they were new.
+        for mesh in &scene.rebuild {
+            if let Some(slot) = entry.blas.get_mut(*mesh as usize) {
+                *slot = None;
+            }
         }
 
         // Each mesh is built once, from whichever buffers hold it when it is first seen, since a

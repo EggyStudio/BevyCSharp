@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 135;
+    internal const int ExpectedAbiVersion = 139;
 
     static Native() => NativeLoader.Initialize();
 
@@ -617,6 +617,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_deferred(int on);
 
+    /// <summary>Draws contact shadows on a camera, or with zero steps stops.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_contact_shadows(ulong camera, uint steps, float thickness, float length);
+
     /// <summary>Turns screen-space reflections on or off for a camera.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -708,6 +713,16 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_light_cookie(ulong light, int image);
+
+    /// <summary>Softens a light's shadows as a light of a size, or hardens them with zero.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_soft_shadows(ulong light, float size);
+
+    /// <summary>Sets how a camera filters the shadow maps it reads.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_shadow_filtering(ulong camera, int method);
 
     /// <summary>Drains what the window has reported since the last call.</summary>
     [LibraryImport(Library)]
@@ -968,6 +983,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_ray_scene_set(int scene, int slot, ulong entity, int mesh);
 
+    /// <summary>Builds a ray scene's pool mesh again from what the pool holds, or all with a negative mesh.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_ray_scene_rebuild(int scene, int mesh);
+
     /// <summary>Puts a ray scene under a name, or takes it off with a key of zero.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -1046,7 +1066,7 @@ internal static unsafe partial class Native
     /// <summary>Creates an empty image a camera can draw into.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_render_create_target(uint width, uint height);
+    internal static partial int bcs_render_create_target(uint width, uint height, int format, uint layers);
 
     /// <summary>Asks for a picture to be read back into memory.</summary>
     [LibraryImport(Library)]
@@ -1067,7 +1087,7 @@ internal static unsafe partial class Native
     /// <summary>Points a camera at an image, or back at the window.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_render_set_camera_target(ulong entity, int image);
+    internal static partial int bcs_render_set_camera_target(ulong entity, int image, int layer);
 
     /// <summary>Sets the shadow map size for each kind of light.</summary>
     [LibraryImport(Library)]
