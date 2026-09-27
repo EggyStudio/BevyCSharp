@@ -42,12 +42,12 @@ public static class SettingsTab
         // picker offering one choice is a row that says nothing.
         if (pages.Count > 1)
         {
-            ImGui.AlignTextToFramePadding();
-            ImGui.TextDisabled("PAGE");
-
-            foreach (var page in pages)
+            // No label before the row, since a row of page names says what it is.
+            for (var index = 0; index < pages.Count; index++)
             {
-                ImGui.SameLine();
+                var page = pages[index];
+
+                if (index > 0) ImGui.SameLine();
 
                 if (EditorWidgets.Pill(page, page == _page)) _page = page;
             }

@@ -14,7 +14,6 @@
     -->
     <ItemGroup>
         <ProjectReference Include="../BevyCSharp/BevyCSharp.csproj"/>
-        <ProjectReference Include="../BevyCSharp.Physics/BevyCSharp.Physics.csproj"/>
         <ProjectReference Include="../BevyCSharp.Generator/BevyCSharp.Generator.csproj"
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"/>

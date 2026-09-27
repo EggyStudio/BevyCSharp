@@ -350,12 +350,6 @@ public static class EditorWidgets
         });
     }
 
-    /// <summary>What the picker behind a swatch offers, which is no number boxes and an alpha bar.</summary>
-    private const ImGuiColorEditFlags Coloring =
-        ImGuiColorEditFlags.NoInputs
-        | ImGuiColorEditFlags.AlphaPreviewHalf
-        | ImGuiColorEditFlags.AlphaBar;
-
     /// <summary>
     /// A color, as a swatch the width of its row with a picker behind it.
     /// </summary>
@@ -375,8 +369,9 @@ public static class EditorWidgets
     /// </remarks>
     /// <param name="id">What to call it, which ImGui hashes it by.</param>
     /// <param name="color">The color, changed in place when the picker is used.</param>
+    /// <param name="alpha">Whether the color has a clearness the picker should offer to set.</param>
     /// <returns>Whether it changed.</returns>
-    public static bool Swatch(string id, ref Vector4 color)
+    public static bool Swatch(string id, ref Vector4 color, bool alpha = true)
     {
         var across = new Vector2(MathF.Max(1f, ImGui.GetContentRegionAvail().X), ImGui.GetFrameHeight());
 
@@ -415,11 +410,20 @@ public static class EditorWidgets
             ImDrawFlags.None,
             ring > 0.2f ? 1.5f : 1f);
 
-        if (!Flyout($"##pick{id}")) return false;
+        // On a panel's color rather than a flyout's field gray, since it holds a hex box and number
+        // boxes, which are the field gray and would be the color of what they sit on.
+        ImGui.PushStyleColor(ImGuiCol.PopupBg, EditorTheme.LivePanel);
 
-        var changed = ImGui.ColorPicker4($"##picker{id}", ref color, Coloring);
+        if (!Flyout($"##pick{id}"))
+        {
+            ImGui.PopStyleColor();
+            return false;
+        }
+
+        var changed = ColorPicker.Draw(id, ref color, alpha);
 
         EndFlyout();
+        ImGui.PopStyleColor();
 
         return changed;
     }

@@ -110,13 +110,39 @@ public static class EditorWindowFrame
 
         var window = ImGuiRuntime.Size;
 
-        ImGui.SetNextWindowPos(Vector2.Zero);
-        ImGui.SetNextWindowSize(new Vector2(window.X, Grip));
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
-
-        if (ImGui.Begin("##grip", Hitbox))
+        // Floating, the whole title row, since the scene under it is the whole window and the row
+        // is where a title bar would be. Docked, the scene runs to the top beside the panel's
+        // column, so the row is only above that column, with the gap along the top of the window
+        // besides, and a press on the scene is the scene's.
+        if (EditorShell.Docked)
         {
-            ImGui.InvisibleButton("##move", new Vector2(window.X, Grip));
+            var column = EditorShell.Panel.X;
+
+            Move("##grip", new Vector2(column, 0f), new Vector2(window.X - column, Grip));
+            Move("##gripTop", Vector2.Zero, new Vector2(column, EditorSurface.Gutter));
+        }
+        else
+        {
+            Move("##grip", Vector2.Zero, new Vector2(window.X, Grip));
+        }
+    }
+
+    /// <summary>One place to press that moves the window, and maximizes it when pressed twice.</summary>
+    /// <param name="id">What to call its window.</param>
+    /// <param name="at">Its top left, in logical pixels.</param>
+    /// <param name="size">How large it is.</param>
+    private static void Move(string id, Vector2 at, Vector2 size)
+    {
+        if (size.X < 1f || size.Y < 1f) return;
+
+        ImGui.SetNextWindowPos(at);
+        ImGui.SetNextWindowSize(size);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowMinSize, Vector2.One);
+
+        if (ImGui.Begin(id, Hitbox))
+        {
+            ImGui.InvisibleButton("##move", size);
 
             // A press on the top edge is the edge's, which resizes rather than moves.
             if (ImGui.IsItemActivated() && OnEdge is null)
@@ -127,7 +153,7 @@ public static class EditorWindowFrame
         }
 
         ImGui.End();
-        ImGui.PopStyleVar();
+        ImGui.PopStyleVar(2);
     }
 
     /// <summary>The edge or corner the pointer is on, where pressing resizes the window, or none.</summary>

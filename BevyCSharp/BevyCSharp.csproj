@@ -31,6 +31,14 @@
           and nothing else.
         -->
         <PackageReference Include="Twizzle.ImGui-Bundle.NET" Version="1.91.5.2"/>
+
+        <!--
+          BepuPhysics, which rigid bodies are simulated with, beside the interface in the same way:
+          C# on this side, so a game gets physics by referencing this one and nothing new crosses
+          to the native bridge. It is on a beta line, and the version is pinned rather than floating
+          so an update is a decision.
+        -->
+        <PackageReference Include="BepuPhysics" Version="2.5.0-beta.29"/>
     </ItemGroup>
 
     <!--

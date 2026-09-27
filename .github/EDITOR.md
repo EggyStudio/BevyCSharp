@@ -173,27 +173,33 @@ third of it thick, which is the thickness ImGui gives a scrollbar's grab.
 ### The window's own frame
 
 The editor asks for a window without the platform's title bar and border, and draws its own in
-their place. A title row runs across the top, above the panels. The window's pin, minimize,
-maximize and close buttons sit at its right as round buttons like the rest of what floats, and
-while the panel floats the toolbars sit at its left, level with them. Anywhere else in the row
-moves the window when pressed and maximizes it when pressed twice, and the few pixels round every
-edge resize it, with the pointer changing shape to say so. None of that is drawn. Drawn into an
-image there is no window to move, but the row is still there, so nothing shifts between the two.
+their place. A title row runs across the top. The window's pin, minimize, maximize and close
+buttons sit at its right as round buttons like the rest of what floats, above the panel's column.
+While the panel floats the row runs the whole width, with the toolbars at its left, level with
+the buttons. Docked the scene runs to the top beside the panel's column, and the row is only above
+that column and the gap along the window's top. Pressing the row where nothing else is moves the
+window, pressing it twice maximizes it, and the few pixels round every edge resize it, with the
+pointer changing shape to say so. None of that is drawn. Drawn into an image there is no window to
+move, but the row is still there, so nothing shifts between the two.
 
-The window is see-through (`Config.Transparent`) where the platform allows. Docked, the panel and
-the strip have no backing, so only their cards are drawn, and the gaps between them and round the
-scene are the desktop. The scene keeps its gray, because its camera clears to it while the world
-clears to nothing. It is rounded on all four corners by the renderer, which takes the corners off
-to nothing with an antialiased edge, and floating the scene is the whole window and the window's
-own corners are rounded the same way. Maximized, the corners are square. Where the platform cannot
-composite a window with alpha, what is clear is black, which is how the editor looked before.
+The window is see-through (`Config.Transparent`) where the platform allows. Docked, what lies
+between the panels and round the scene is the ground, black at 60%, so the desktop shows dimmed
+through it. The ground is a camera of its own behind the scene, which draws nothing and clears the
+window to the ground color with the window's corners rounded off to clear, so docked the window is
+as round as it is floating. The scene keeps its gray, because its camera clears to it, and its
+corners are rounded by the renderer and filled with the ground, so they meet what surrounds them.
+Floating, the scene is the whole window and its corners are the window's, rounded to clear.
+Maximized, the window's corners are square. Where the platform cannot composite a window with
+alpha, what is clear is black, which is how the editor looked before.
 
 ### Adding and arranging entities
 
 The Add Entity button at the bottom of the world list, `Ctrl+A` and `Entity/Add` open a window in
 the middle of the screen listing every row under `Spawn/` in the menu, with a search box that has
-the keyboard from the moment it opens and says in its hint where the new entity will go. The arrows move the choice and Enter adds it, as Godot's node window
-does. What is added goes under the entity selected when the window opened, or at the top of the
+the keyboard from the moment it opens and says in its hint where the new entity will go. The
+arrows move the choice and Enter adds it, as Godot's node window does. Add Component at the bottom
+of the details opens the same window (`PickerWindow`) over what can be put on the entity, so the
+two ways of adding something read as one. What is added goes under the entity selected when the window opened, or at the top of the
 world when nothing was, and undoing it takes it away as one step. A game's own
 `EditorMenu.Command("Spawn/Enemy", …)` appears in the window without anything else.
 
@@ -317,10 +323,12 @@ how a number in one is written and dragged. What a field is drawn as follows fro
 the hints its attributes declared: a round box to tick for a flag, a box for a number, a bar for a
 number with two ends, three boxes across for a vector, a list to choose from for a choice (a field
 whose bottom corners go square while its list is open, meeting a list whose top corners are square,
-so the two read as one shape grown downward), a swatch for three numbers that are a color, and a
-dimmed box for anything that cannot be edited. A heading, a rule, a sentence and a unit are the
-field's own declaration too. A unit is written after
-the field's name, dimmed and in parentheses, as `Speed (m/s)`, so every box in a column ends at the
+so the two read as one shape grown downward), a swatch for three numbers that are a color (whose
+picker, `ColorPicker`, is laid out as WinUI's is, with a rounded spectrum, a hue bar and a
+clearness bar as pills, the color as it was beside the color as it is, a hex box, and RGB or HSV
+numbers), and a dimmed box for anything that cannot be edited. A heading, a rule, a sentence and
+a unit are the field's own declaration too. A unit is written after the field's name, dimmed and
+in parentheses, as `Speed (m/s)`, so every box in a column ends at the
 same edge and the unit is read with the name it qualifies.
 
 **Every edit is undoable, and a run of them is one edit.** A row compares what the field held

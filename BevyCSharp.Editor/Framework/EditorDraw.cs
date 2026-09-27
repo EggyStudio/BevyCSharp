@@ -126,6 +126,46 @@ public static class EditorDraw
         draw.PathFillConvex(color);
     }
 
+    /// <summary>
+    /// Rounds the corners of something already drawn, by laying the color behind it over them.
+    /// </summary>
+    /// <remarks>
+    /// A draw list cannot clip to a rounded shape, and a gradient ImGui draws is a rectangle, so a
+    /// rounded one is the rectangle with each corner covered by a wedge of whatever it lies on.
+    /// The wedge's arc is antialiased like any other filled path, so the corner reads as round
+    /// rather than stepped. Only right on a surface of one solid color, which is what a flyout is.
+    /// </remarks>
+    /// <param name="draw">What to draw into.</param>
+    /// <param name="min">The top left of what is being rounded.</param>
+    /// <param name="max">Its bottom right.</param>
+    /// <param name="radius">How round, at most half the shortest side.</param>
+    /// <param name="behind">The color of what it lies on.</param>
+    internal static void RoundOff(ImDrawListPtr draw, Vector2 min, Vector2 max, float radius, uint behind)
+    {
+        var round = MathF.Min(radius, MathF.Min(max.X - min.X, max.Y - min.Y) * 0.5f);
+        if (round < 0.5f) return;
+
+        var quarter = MathF.PI * 0.5f;
+
+        // A hair past the corner on the outside, so the rectangle's own antialiased edge is
+        // covered too rather than showing as a line round the arc.
+        var grow = 0.5f;
+        var segments = Math.Max(8, (int)(round * 1.5f));
+
+        void Wedge(Vector2 middle, float from, float to, Vector2 corner)
+        {
+            draw.PathClear();
+            draw.PathLineTo(corner);
+            draw.PathArcTo(middle, round + grow, from, to, segments);
+            draw.PathFillConvex(behind);
+        }
+
+        Wedge(new Vector2(max.X - round, min.Y + round), -quarter, 0f, new Vector2(max.X + grow, min.Y - grow));
+        Wedge(new Vector2(max.X - round, max.Y - round), 0f, quarter, new Vector2(max.X + grow, max.Y + grow));
+        Wedge(new Vector2(min.X + round, max.Y - round), quarter, quarter * 2f, new Vector2(min.X - grow, max.Y + grow));
+        Wedge(new Vector2(min.X + round, min.Y + round), quarter * 2f, quarter * 3f, new Vector2(min.X - grow, min.Y - grow));
+    }
+
     /// <summary>A rectangle as round as its shortest side allows, which is a pill.</summary>
     /// <param name="min">The top left corner.</param>
     /// <param name="max">The bottom right.</param>

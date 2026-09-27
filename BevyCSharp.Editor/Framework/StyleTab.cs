@@ -36,10 +36,7 @@ public static class StyleTab
     {
         var theme = EditorTheme.Current;
 
-        ImGui.AlignTextToFramePadding();
-        ImGui.TextDisabled("THEME");
-        ImGui.SameLine();
-
+        // No label before the row, since a row of theme names beside Save and Reset says what it is.
         foreach (var offered in EditorTheme.All)
         {
             // The accent, because the editor uses it everywhere else to say "this is the one in

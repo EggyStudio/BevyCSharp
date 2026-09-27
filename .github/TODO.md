@@ -347,8 +347,8 @@ operations of the kind `Render` provides, or name-only handles if filtering on t
 
 ### Physics
 
-`BevyCSharp.Physics` simulates rigid bodies with BepuPhysics v2 on the managed side, as a package of
-its own so the core takes no dependency. `PhysicsWorld` is the whole surface, with bodies by entity
+`Bevy.Physics` simulates rigid bodies with BepuPhysics v2 on the managed side, in the library
+beside the interface. `PhysicsWorld` is the whole surface, with bodies by entity
 and no Bepu type in it, so the engine underneath can be replaced without a game changing. It owns
 the simulation, its buffer pool and thread dispatcher, and the callbacks Bepu requires, steps once
 per fixed step, and writes each dynamic body back through `Transform`. What is left:

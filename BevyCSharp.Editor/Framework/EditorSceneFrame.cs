@@ -9,49 +9,91 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 public static class EditorSceneFrame
 {
-    /// <summary>What the camera and the world were last told, so they are only told again on a change.</summary>
-    private static (float Radius, (float, float, float, float) Fill, (float, float, float, float) Ground) _told =
-        (-1f, default, default);
+    /// <summary>What the cameras were last told, so they are only told again on a change.</summary>
+    private static (float Scene, float Window, (float, float, float, float) Ground) _told = (-1f, -1f, default);
+
+    /// <summary>The camera behind the scene that paints the ground, rounded at the window's corners.</summary>
+    private static Entity _frame = Entity.None;
 
     /// <summary>
-    /// Rounds the scene's corners, the viewport's while docked and the window's while floating, and
-    /// clears the rest of the window to the ground.
+    /// Rounds the scene's corners and the window's, and paints the ground round the scene.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Both are the renderer's to do rather than painted here, because anything the interface
+    /// All of it is the renderer's to do rather than painted here, because anything the interface
     /// draws lies over the scene, so a ground painted round the viewport would darken its corners
-    /// as well, and nothing drawn over a pixel can make it clearer than it is. The window is
-    /// cleared to the ground round the viewport, and the viewport's corners are taken off and
-    /// filled with the ground, antialiased, so they match what surrounds them.
+    /// as well, and nothing drawn over a pixel can make it clearer than it is.
     /// </para>
     /// <para>
-    /// Docked the scene is a surface among the panels and takes a panel's rounding. Floating it is
-    /// the whole window and takes a window's, which makes the window itself round, with its corners
-    /// clear rather than ground, since there is nothing of the editor's beyond them. Maximized it
-    /// is square, since a window against the screen's edges has no corners to show.
+    /// The ground is a camera of its own, behind the scene, that draws nothing and clears the whole
+    /// window to the ground color with its own corners rounded off to clear, so docked the window is
+    /// as round as it is floating. The scene's camera then puts its viewport over that, with its
+    /// corners rounded and filled with the ground, so they match what surrounds them. Floating the
+    /// scene is the whole window, with its corners rounded to clear over the frame's, so the frame
+    /// is there but never seen. Maximized the window's corners are square, since a window against
+    /// the screen's edges has none to show, and a docked viewport keeps its own.
+    /// </para>
+    /// <para>
+    /// A camera's clear color is fixed when it is made, so a ground changed in the style tab makes
+    /// the frame again.
     /// </para>
     /// </remarks>
+    /// <param name="ctx">This frame.</param>
     /// <param name="camera">The scene's camera.</param>
-    internal static void Round(Entity camera)
+    internal static void Round(BehaviorContext ctx, Entity camera)
     {
         if (camera.IsNone) return;
 
         var theme = EditorTheme.Current;
-        var logical = EditorWindowFrame.Maximized
-            ? 0f
-            : EditorShell.Docked ? theme.ChildRounding : theme.WindowRounding;
+        var scale = ImGuiRuntime.Scale;
 
-        var radius = logical * ImGuiRuntime.Scale;
+        var window = EditorWindowFrame.Maximized ? 0f : theme.WindowRounding * scale;
+        var scene = EditorShell.Docked ? theme.ChildRounding * scale : window;
         var ground = EditorTheme.Linear(theme.Ground);
-        var fill = EditorShell.Docked ? ground : default;
 
-        if (_told == (radius, fill, ground)) return;
+        if (_told == (scene, window, ground)) return;
 
-        _told = (radius, fill, ground);
+        var remade = _told.Ground != ground || _frame.IsNone || !ctx.Ecs.IsAlive(_frame);
 
-        Render.SetClearColor(ground);
-        Render.SetRoundedCorners(camera, radius, fill);
+        _told = (scene, window, ground);
+
+        if (remade)
+        {
+            if (!_frame.IsNone && ctx.Ecs.IsAlive(_frame)) ctx.Ecs.Despawn(_frame);
+
+            _frame = Frame(ground);
+
+            // Nothing round the viewport but what the frame drew, so the window's own clear is
+            // clear, which is what shows past the frame's rounded corners.
+            Render.SetClearColor((0f, 0f, 0f, 0f));
+        }
+
+        Render.SetRoundedCorners(_frame, window);
+        Render.SetRoundedCorners(camera, scene, EditorShell.Docked ? ground : default);
+    }
+
+    /// <summary>
+    /// Makes the camera that paints the ground: first to draw, over the whole window, seeing
+    /// nothing, and cleared to the ground color.
+    /// </summary>
+    /// <remarks>
+    /// On a layer nothing is on, so it draws no entity and no gizmo. No tonemapping and one sample
+    /// a pixel, so the ground comes out the color the theme says and the camera matches the scene
+    /// it shares the window with.
+    /// </remarks>
+    private static Entity Frame((float R, float G, float B, float A) ground)
+    {
+        var frame = Render.SpawnCamera3d(new CameraSettings
+        {
+            Order = -1,
+            Layers = 1u << 30,
+            Clear = ClearMode.Custom,
+            ClearColor = ground,
+        });
+
+        Render.SetPostProcessing(frame, new PostSettings { Tonemapper = Tonemapper.None, Msaa = 1 });
+
+        return frame;
     }
 
     /// <summary>

@@ -38,7 +38,17 @@ public static class DetailsPanel
 
         if (!EditorSelection.Any)
         {
-            ImGui.TextDisabled("Nothing selected");
+            // In the middle of the panel, where the eye goes to an empty panel, rather than tucked
+            // into its corner where it reads as a heading.
+            const string Empty = "Nothing selected";
+
+            var space = ImGui.GetContentRegionAvail();
+            var size = ImGui.CalcTextSize(Empty);
+
+            ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(
+                MathF.Max(0f, (space.X - size.X) * 0.5f),
+                MathF.Max(0f, (space.Y - size.Y) * 0.5f)));
+            ImGui.TextDisabled(Empty);
             return;
         }
 
@@ -414,10 +424,28 @@ public static class DetailsPanel
 
         if (ImGui.Button("Add Component", new Vector2(room, ImGui.GetFrameHeight())))
         {
-            ImGui.OpenPopup("##add");
-        }
+            var name = ctx.Ecs.NameOf(entity) is { Length: > 0 } called ? called : $"Entity {entity.Index}";
 
-        if (!EditorWidgets.Flyout("##add")) return;
+            // The same window that adds an entity, so adding either reads as the same thing. What
+            // it offers is worked out while it is up, so a component added from somewhere else
+            // drops out of the list.
+            PickerWindow.Open(
+                $"Search, adds to {name}",
+                () => Addable(entity),
+                "Nothing left to add");
+        }
+    }
+
+    /// <summary>What can be put on the entity that is not on it already, as rows to choose from.</summary>
+    /// <remarks>
+    /// Said rather than left blank when there is none, since an empty list reads as one that
+    /// failed to open. Everything this project generates a way to add is then already on it.
+    /// </remarks>
+    private static List<PickerItem> Addable(Entity entity)
+    {
+        var rows = new List<PickerItem>();
+
+        if (EditorShell.Context is not { } ctx || !ctx.Ecs.IsAlive(entity)) return rows;
 
         var carried = new HashSet<string>();
 
@@ -426,26 +454,15 @@ public static class DetailsPanel
             if (ComponentSchemas.For(id) is { } schema) carried.Add(schema.Name);
         }
 
-        RoundedRows.Rows(() =>
+        foreach (var schema in ComponentSchemas.All)
         {
-            var any = false;
+            if (!schema.CanAdd || carried.Contains(schema.Name)) continue;
 
-            foreach (var schema in ComponentSchemas.All)
-            {
-                if (!schema.CanAdd || carried.Contains(schema.Name)) continue;
+            var adding = schema;
+            rows.Add(new PickerItem(schema.Name, EditorIcons.Data, picked => EditorEntity.Carry(picked.Ecs, entity, adding)));
+        }
 
-                if (ImGui.MenuItem(schema.Name)) EditorEntity.Carry(ctx.Ecs, entity, schema);
-
-                RoundedRows.Row();
-                any = true;
-            }
-
-            // Said rather than left blank, because an empty flyout reads as one that failed to
-            // open. Everything this project generates a way to add is already on the entity.
-            if (!any) ImGui.TextDisabled("Nothing left to add");
-        });
-
-        EditorWidgets.EndFlyout();
+        return rows;
     }
 
     /// <summary>

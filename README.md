@@ -2506,10 +2506,10 @@ one part of the engine that needs a system library at build time. See
 
 ### Physics
 
-Rigid bodies come from a package of their own, `BevyCSharp.Physics`, which simulates them with
-[BepuPhysics v2](https://github.com/bepu/bepuphysics2) on the managed side. The core takes no
-dependency on it, and nothing new crosses to the engine: a body's pose reaches Bevy as the
-`Transform` write any system makes.
+Rigid bodies are simulated with [BepuPhysics v2](https://github.com/bepu/bepuphysics2) on the
+managed side, in `Bevy.Physics`, which comes with the library in the way the interface does, so a
+game has physics by referencing BevyCSharp and nothing else. Nothing new crosses to the engine for
+it, since a body's pose reaches Bevy as the `Transform` write any system makes.
 
 ```csharp
 app.AddPlugin(new PhysicsPlugin());

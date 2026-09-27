@@ -554,7 +554,7 @@ public sealed record EditorTheme
     /// With its alpha after it where it has one, as <c>#RRGGBBAA</c>, and without where it is
     /// solid, so a file written before colors carried alpha still reads the same.
     /// </remarks>
-    private static string Hex(Vector4 color)
+    internal static string Hex(Vector4 color)
     {
         static int Byte(float channel) => (int)MathF.Round(Math.Clamp(channel, 0f, 1f) * 255f);
 

@@ -220,17 +220,18 @@ public static class EditorShell
         // Docked, the scene keeps the top left and the tabs sit under it. Floating, the scene is
         // the whole window and everything else is over it.
         //
-        // Docked it is a card like the rest, so it keeps the gap every surface keeps from the
-        // window's edge and from the grip above it. On its right it runs up to the panel's own
-        // edge, and below it up to the strip's, because the gap there is the one those keep inside
-        // themselves, and a second one would double it.
+        // Docked it is a surface like the panels, so it keeps the gap every surface keeps from the
+        // window's edges, the top included. The title row is above the panel's column only, where
+        // the window's buttons are, and the scene beside it runs to the top as it does floating. On
+        // its right it runs up to the panel's own edge, and below it up to the strip's, because the
+        // gap there is the one those keep inside themselves, and a second one would double it.
         var inset = EditorSurface.Gutter;
 
         Scene = Docked
             ? (inset,
-                grip + inset,
+                inset,
                 Math.Max(1f, panelX - inset),
-                Math.Max(1f, window.Y - strip - grip - inset))
+                Math.Max(1f, window.Y - strip - inset))
             : (0f, 0f, window.X, window.Y);
 
         // Where the scene is still visible, which anything drawn over the scene has to stay inside.
@@ -252,7 +253,7 @@ public static class EditorShell
         // Last, so it floats over every panel rather than under whichever was drawn after it.
         EditorSceneFrame.WindowButtons();
         EditorFlyout.Draw(ctx);
-        AddEntityWindow.Draw(ctx);
+        PickerWindow.Draw(ctx);
 
         // Over everything, so a press at the window's edge resizes it rather than reaching the
         // panel under it.
@@ -308,7 +309,7 @@ public static class EditorShell
         var camera = EditorSelection.Camera;
         if (camera.IsNone) return;
 
-        EditorSceneFrame.Round(camera);
+        EditorSceneFrame.Round(ctx, camera);
 
         var scale = ImGuiRuntime.Scale;
 

@@ -375,7 +375,7 @@ public static class ComponentFields
                 {
                     var shade = new Vector4(three, 1f);
 
-                    if (EditorWidgets.Swatch(id, ref shade))
+                    if (EditorWidgets.Swatch(id, ref shade, alpha: false))
                     {
                         field.Write(ctx.Ecs, entity, new Vec3(shade.X, shade.Y, shade.Z));
                     }

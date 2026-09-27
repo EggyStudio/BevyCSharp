@@ -72,10 +72,10 @@ Stop any serving session before running the suite.
 | `BevyCSharp/Core` | `App`, `Config`, `World`, stages, plugins |
 | `BevyCSharp/Ecs` | `EcsWorld`, the component registry, `ComponentSchemas` (generated, reflection-free) |
 | `BevyCSharp/Interop` | `Native` (the `bcs_*` entry points), the loader and the ABI check |
+| `BevyCSharp/Physics` | Rigid bodies over BepuPhysics, simulated on the managed side |
 | `BevyCSharp/Diagnostics` | The console log ring and the `[Command]` catalog |
 | `BevyCSharp/Cli` | The server side of `./bcs`: session file, socket, request queue |
 | `BevyCSharp.Generator` | Behavior, schema and command generators |
-| `BevyCSharp.Physics` | Rigid bodies over BepuPhysics, a package of its own |
 | `BevyCSharp.Editor/Framework` | The editor's panels, history, theming and script host |
 | `native/bevy_csharp/src` | The Rust bridge, one module per subsystem |
 
