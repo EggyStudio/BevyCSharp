@@ -22,7 +22,7 @@
         <RepositoryUrl>https://github.com/EggyStudio/BevyCSharp</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageProjectUrl>https://github.com/EggyStudio/BevyCSharp</PackageProjectUrl>
-        <VersionPrefix>0.1.0</VersionPrefix>
+        <VersionPrefix>0.2.0</VersionPrefix>
         <IsPackable>false</IsPackable>
         <PackageIcon>icon.png</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
