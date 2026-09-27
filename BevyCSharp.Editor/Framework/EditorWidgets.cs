@@ -211,7 +211,9 @@ public static class EditorWidgets
         // corners of its letters standing past the curve.
         var radius = size.Y * 0.5f;
         var half = MathF.Min(word.Y * 0.5f, radius);
-        var curve = MathF.Ceiling(radius - MathF.Sqrt((radius * radius) - (half * half)));
+        // Rounded down, since the curve crosses the word's height part way into a pixel and that
+        // pixel is still mostly pill. Rounded up, the word stopped a pixel short of the edge.
+        var curve = MathF.Floor(radius - MathF.Sqrt((radius * radius) - (half * half)));
         var textFrom = new Vector2(from.X > at.X ? from.X + curve : from.X, at.Y);
         var textTo = new Vector2(to.X < at.X + size.X ? to.X - curve : to.X, at.Y + size.Y);
 
