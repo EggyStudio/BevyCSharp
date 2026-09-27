@@ -176,7 +176,9 @@ the pointer is on it or it is being dragged, docked or floating.
 The editor asks for a window without the platform's title bar and border, and draws its own in
 their place. The window's pin, minimize, maximize and close buttons lie at its top right as round
 buttons like the rest of what floats, over the top of the panel's column, since the panels and
-the scene run up to the window's top. While the panel floats, a title row runs across the scene
+the scene run up to the window's top, with the same gap there as at every other edge. The field
+in the row under them stops short of them (`EditorSurface.FullWidth`), which is the world's search
+box when the world is above the details and the entity's name when the two are side by side. While the panel floats, a title row runs across the scene
 with the toolbars at its left, and pressing it where nothing else is moves the window and pressing
 it twice maximizes it. Docked, the band along the top above the panels and the scene does the
 same. The few pixels round every edge resize the window, with the pointer changing shape to say

@@ -75,13 +75,30 @@ public static class EditorSurface
     /// <summary>How much air a card keeps inside its own edge.</summary>
     internal const float Air = 4f;
 
-    /// <summary>Gives the next widget the whole row.</summary>
+    /// <summary>
+    /// Gives the next widget the whole row, less whatever the window's buttons lie over.
+    /// </summary>
     /// <remarks>
-    /// The whole of it, since nothing floats over a panel's rows. The window's buttons have a row
-    /// of their own above the panels.
+    /// The buttons lie over the top of the panel's column, and a field under them is a field of the
+    /// same gray with buttons of that gray on it. Which field that is depends on the split, the
+    /// world's search box when the world is above the details and the entity's name when the two
+    /// are side by side, so it is asked of the row rather than written into either panel. The
+    /// buttons' place is the one they were drawn at last frame, since they are drawn after the
+    /// panels, and they do not move between frames.
     /// </remarks>
-    internal static void FullWidth() =>
-        ImGui.SetNextItemWidth(-1f);
+    internal static void FullWidth()
+    {
+        var at = ImGui.GetCursorScreenPos();
+        var right = at.X + ImGui.GetContentRegionAvail().X;
+        var (min, max) = EditorSceneFrame.Buttons;
+
+        var under = max.X > min.X
+            && at.Y < max.Y
+            && at.Y + ImGui.GetFrameHeight() > min.Y
+            && right > min.X;
+
+        ImGui.SetNextItemWidth(under ? -(right - min.X + Air) : -1f);
+    }
 
     /// <summary>How much air a menu or a tooltip keeps inside its own edge.</summary>
     /// <remarks>

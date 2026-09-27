@@ -211,9 +211,9 @@ public static class EditorShell
         // drawn in but the cards inside them, which the padding holds a gap in from every edge.
         // Docking changes what is behind those cards rather than where they are, so nothing on
         // screen moves when it is switched.
-        // Up to the top of the window, less the few pixels along it that resize the window when
-        // the frame is the editor's own. The window's buttons lie over the panel's top.
-        var top = EditorWindowFrame.Top;
+        // Up to the top of the window, with the same gap there as at every other edge, which is the
+        // panel's own padding. The window's buttons lie over the panel's top.
+        const float top = 0f;
 
         var panelX = window.X - PanelWidth;
         Panel = (panelX, top, PanelWidth, window.Y - top);

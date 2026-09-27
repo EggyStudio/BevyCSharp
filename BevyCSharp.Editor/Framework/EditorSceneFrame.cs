@@ -203,6 +203,9 @@ public static class EditorSceneFrame
     /// <summary>Where the window's buttons were last drawn.</summary>
     private static (Vector2 Min, Vector2 Max) _buttons;
 
+    /// <summary>Where the window's buttons were last drawn, which a field under them stops short of.</summary>
+    internal static (Vector2 Min, Vector2 Max) Buttons => _buttons;
+
     /// <summary>Whether a point is on the window's buttons.</summary>
     internal static bool OverButtons(Vector2 at) =>
         at.X >= _buttons.Min.X && at.X < _buttons.Max.X && at.Y >= _buttons.Min.Y && at.Y < _buttons.Max.Y;

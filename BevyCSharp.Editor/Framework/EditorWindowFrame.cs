@@ -31,6 +31,17 @@ public static class EditorWindowFrame
     /// <summary>How far in from each edge the pointer resizes rather than reaches what is under it.</summary>
     internal const float Edge = 4f;
 
+    /// <summary>
+    /// How far in from the top edge the pointer resizes, which is less than the other edges.
+    /// </summary>
+    /// <remarks>
+    /// The top of a docked window is the gap above the panels and the scene, the same gap every
+    /// other edge keeps, and it is also the band that moves the window. Resizing takes the outer
+    /// part of it and moving the rest, and the window is resized from the top far less often than
+    /// it is moved.
+    /// </remarks>
+    private const float TopEdge = 2f;
+
     /// <summary>How far along an edge from a corner the pointer resizes from the corner instead.</summary>
     private const float Corner = 14f;
 
@@ -119,8 +130,8 @@ public static class EditorWindowFrame
     /// </remarks>
     public static bool OnBand { get; private set; }
 
-    /// <summary>The top of the panels and of a docked scene's gap, under the edge that resizes.</summary>
-    internal static float Top => Borderless ? Edge : 0f;
+    /// <summary>Where the band that moves a docked window begins, under the edge that resizes it.</summary>
+    internal static float Top => Borderless ? TopEdge : 0f;
 
     /// <summary>One place to press that moves the window, and maximizes it when pressed twice.</summary>
     /// <param name="id">What to call its window.</param>
@@ -170,7 +181,7 @@ public static class EditorWindowFrame
 
         OnBand = EditorShell.Docked
             && pointer.Y >= Top
-            && pointer.Y < Top + EditorSurface.Gutter
+            && pointer.Y < EditorSurface.Gutter
             && pointer.X >= 0f
             && pointer.X < ImGuiRuntime.Size.X
             && !EditorSceneFrame.OverButtons(pointer);
@@ -183,7 +194,7 @@ public static class EditorWindowFrame
         // Off the window, which is how ImGui says the pointer is somewhere else entirely.
         if (at.X < 0f || at.Y < 0f || at.X >= window.X || at.Y >= window.Y) return;
 
-        var near = at.X < Edge || at.Y < Edge || at.X >= window.X - Edge || at.Y >= window.Y - Edge;
+        var near = at.X < Edge || at.Y < TopEdge || at.X >= window.X - Edge || at.Y >= window.Y - Edge;
 
         if (near) OnEdge = Which(at);
     }
@@ -258,7 +269,7 @@ public static class EditorWindowFrame
             (true, _, _, true) => WindowEdge.TopRight,
             (_, true, true, _) => WindowEdge.BottomLeft,
             (_, true, _, true) => WindowEdge.BottomRight,
-            _ when at.Y < Edge => WindowEdge.Top,
+            _ when at.Y < TopEdge => WindowEdge.Top,
             _ when at.Y > window.Y - Edge => WindowEdge.Bottom,
             _ when at.X < Edge => WindowEdge.Left,
             _ => WindowEdge.Right,
