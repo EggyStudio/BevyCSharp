@@ -119,6 +119,32 @@ public static class EditorDraw
         var quarter = MathF.PI * 0.5f;
 
         draw.PathClear();
+
+        // As round as the height allows, which is a pill lying down, as two half circles. Four
+        // quarter arcs would put the end of one on the start of the next at each end, and a point
+        // twice in a row is an edge of no length, which the antialiased fill draws as slivers
+        // sticking out of the shape, seen as marks along a translucent one.
+        if (round >= (down * 0.5f) - 0.01f)
+        {
+            var middle = (min.Y + max.Y) * 0.5f;
+
+            draw.PathArcTo(new Vector2(max.X - round, middle), round, -quarter, quarter, 0);
+            draw.PathArcTo(new Vector2(min.X + round, middle), round, quarter, quarter * 3f, 0);
+            draw.PathFillConvex(color);
+            return;
+        }
+
+        // And standing up, as two half circles the other way.
+        if (round >= (across * 0.5f) - 0.01f)
+        {
+            var middle = (min.X + max.X) * 0.5f;
+
+            draw.PathArcTo(new Vector2(middle, max.Y - round), round, 0f, quarter * 2f, 0);
+            draw.PathArcTo(new Vector2(middle, min.Y + round), round, quarter * 2f, quarter * 4f, 0);
+            draw.PathFillConvex(color);
+            return;
+        }
+
         draw.PathArcTo(new Vector2(max.X - round, min.Y + round), round, -quarter, 0f, 0);
         draw.PathArcTo(new Vector2(max.X - round, max.Y - round), round, 0f, quarter, 0);
         draw.PathArcTo(new Vector2(min.X + round, max.Y - round), round, quarter, quarter * 2f, 0);

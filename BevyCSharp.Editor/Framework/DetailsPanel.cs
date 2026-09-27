@@ -122,6 +122,16 @@ public static class DetailsPanel
     /// <remarks>The air every card keeps, because a component's card is one.</remarks>
     internal const float Inset = EditorSurface.Air;
 
+    /// <summary>How many folds deep the rows being drawn are.</summary>
+    internal static int FoldDepth { get; private set; }
+
+    /// <summary>
+    /// How far short of the right the rows being drawn stop, which is the card's air and the same
+    /// again for every fold they are inside, so each fold's card keeps air on its right as it does
+    /// on its left.
+    /// </summary>
+    internal static float RightInset => Inset * (1 + FoldDepth);
+
     /// <summary>
     /// What this panel leaves to something else to draw.
     /// </summary>
@@ -144,8 +154,10 @@ public static class DetailsPanel
         var theme = EditorTheme.Current;
         var draw = ImGui.GetWindowDrawList();
 
-        draw.ChannelsSplit(2);
-        draw.ChannelsSetCurrent(1);
+        // Three layers: the component's card at the bottom, the cards its folds make over that, and
+        // the rows on top, since each card's size is only known once what is on it has been drawn.
+        draw.ChannelsSplit(3);
+        draw.ChannelsSetCurrent(2);
 
         ImGui.BeginGroup();
 
@@ -190,7 +202,7 @@ public static class DetailsPanel
 
             // In the order the fields asked for, which is declaration order for anything that
             // did not ask, and inside whatever fold each one named.
-            var fold = new FoldStack(schema.Name);
+            var fold = new FoldStack(schema.Name, draw);
 
             foreach (var field in Ordered(schema))
             {
@@ -280,15 +292,41 @@ public static class DetailsPanel
     /// entering <c>Advanced/Debug</c> from <c>Advanced</c> opens one level and entering it from
     /// nothing opens two.
     /// </para>
+    /// <para>
+    /// What is inside an open fold is set in by one step, and a fold inside that by another, so a
+    /// field's depth says which fold it is in without the header being on screen. The header of a
+    /// fold sits at the depth of what it is inside, so it lines up with the fields beside it and
+    /// its own fields sit one step further in.
+    /// </para>
     /// </remarks>
     /// <param name="component">Which component's folds these are.</param>
-    private sealed class FoldStack(string component)
+    /// <param name="draw">The component's draw list, already split, whose middle layer the fold cards go on.</param>
+    private sealed class FoldStack(string component, ImDrawListPtr draw)
     {
+        /// <summary>
+        /// A level entered with its header drawn: where the header began, how far right its card
+        /// runs, and whether it is open.
+        /// </summary>
+        private readonly List<(Vector2 From, float Right, bool Open)?> _cards = [];
+
+        /// <summary>
+        /// Every fold card worked out so far, laid once the component is done, outermost first,
+        /// since a fold inside another is known before the one around it and would otherwise be
+        /// laid under it.
+        /// </summary>
+        private readonly List<(int Level, Vector2 From, Vector2 To)> _laid = [];
+
         /// <summary>Which folds are open, by component and path, for as long as the editor runs.</summary>
         private static readonly Dictionary<string, bool> Shown = [];
 
         /// <summary>The levels currently entered, outermost first.</summary>
         private readonly List<string> _open = [];
+
+        /// <summary>Whether each level entered was set in, which it is when its header was drawn open.</summary>
+        private readonly List<bool> _indented = [];
+
+        /// <summary>How far each open fold sets what it holds in.</summary>
+        private static float Step => ImGui.GetStyle().IndentSpacing * 0.6f;
 
         /// <summary>Whether every level entered so far is open, so the fields inside show.</summary>
         private bool _visible = true;
@@ -318,6 +356,7 @@ public static class DetailsPanel
             for (var level = shared; level < wanted.Length; level++)
             {
                 _open.Add(wanted[level]);
+                _indented.Add(false);
 
                 // Named by the whole path, so two folds called Debug under different parents are
                 // two folds rather than one remembered in both places.
@@ -331,35 +370,156 @@ public static class DetailsPanel
 
                 // A shut fold still has its levels pushed, so the next field's path is compared
                 // against where it actually is rather than against where it would have been.
-                if (!_visible) continue;
+                if (!_visible)
+                {
+                    _cards.Add(null);
+                    continue;
+                }
 
-                ImGui.SetNextItemOpen(open, ImGuiCond.Always);
+                // A header of the editor's own rather than ImGui's tree node, whose highlight is
+                // square and runs to the region's right edge while the fields stop short of it. As
+                // wide as the rows at this depth, so a fold's card keeps the same air on its right
+                // as on its left.
+                var at = ImGui.GetCursorScreenPos();
+                var width = MathF.Max(1f, ImGui.GetContentRegionAvail().X - RightInset);
+                var height = ImGui.GetFrameHeight();
 
-                if (ImGui.TreeNodeEx(
-                        wanted[level],
-                        ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.NoTreePushOnOpen))
+                if (ImGui.InvisibleButton($"##fold{key}", new Vector2(width, height)))
+                {
+                    open = !open;
+                    Shown[key] = open;
+                }
+
+                var over = ImGui.IsItemHovered();
+
+                if (over)
+                {
+                    var lit = at;
+                    var litTo = at + new Vector2(width, height);
+
+                    if (EditorSurface.Clipped(ref lit, ref litTo))
+                    {
+                        EditorDraw.Rounded(lit, litTo, height * 0.5f, ImGui.GetColorU32(EditorTheme.LiveLift));
+                    }
+                }
+
+                // The arrow, down while open and across while shut, then the name.
+                var line = ImGui.GetTextLineHeight();
+                var mark = line * 0.3f;
+                var arrow = at + new Vector2(EditorSurface.Air + (line * 0.5f), height * 0.5f);
+                var ink = ImGui.GetColorU32(EditorTheme.LiveText);
+                var list = ImGui.GetWindowDrawList();
+
+                if (open)
+                {
+                    list.AddTriangleFilled(
+                        arrow + new Vector2(-mark, -mark * 0.6f),
+                        arrow + new Vector2(mark, -mark * 0.6f),
+                        arrow + new Vector2(0f, mark * 0.8f),
+                        ink);
+                }
+                else
+                {
+                    list.AddTriangleFilled(
+                        arrow + new Vector2(-mark * 0.6f, -mark),
+                        arrow + new Vector2(-mark * 0.6f, mark),
+                        arrow + new Vector2(mark * 0.8f, 0f),
+                        ink);
+                }
+
+                list.AddText(
+                    at + new Vector2(EditorSurface.Air + line + ImGui.GetStyle().ItemSpacing.X, (height - line) * 0.5f),
+                    ink,
+                    wanted[level]);
+
+                _cards.Add((at, at.X + width, open));
+
+                if (open)
                 {
                     _visible = true;
+
+                    // Everything under an open header one step in, which is undone as the level
+                    // is left, and one fold deeper, which the rows' right edge follows.
+                    ImGui.Indent(Step);
+                    _indented[^1] = true;
+                    FoldDepth++;
                 }
                 else
                 {
                     _visible = false;
-                }
 
-                // ImGui reports the state it drew, and a click on the arrow changes it.
-                if (ImGui.IsItemToggledOpen()) Shown[key] = !open;
+                    // A shut fold is its header's card and nothing under it.
+                    Card(_cards.Count, at, at.X + width, at.Y + height);
+                    _cards[^1] = null;
+                }
             }
 
             return _visible;
         }
 
-        /// <summary>Closes everything still open, at the end of a component.</summary>
-        internal void Leave() => Close(0);
+        /// <summary>
+        /// Notes a fold's card, laid on the layer between the component's card and the rows once
+        /// the component is done, a step darker for every level it is deep, so how deep a row is
+        /// reads from the surface it lies on.
+        /// </summary>
+        /// <param name="level">How many folds deep, the outermost being one.</param>
+        /// <param name="from">The top left of its header.</param>
+        /// <param name="right">How far right it runs.</param>
+        /// <param name="bottom">Where it ends.</param>
+        private void Card(int level, Vector2 from, float right, float bottom) =>
+            _laid.Add((level, from, new Vector2(right, MathF.Max(bottom, from.Y + ImGui.GetFrameHeight()))));
+
+        /// <summary>Closes everything still open, at the end of a component, and lays the fold cards.</summary>
+        internal void Leave()
+        {
+            Close(0);
+
+            if (EditorTheme.Current.Stock) return;
+
+            draw.ChannelsSetCurrent(1);
+
+            foreach (var (level, from, to) in _laid.OrderBy(card => card.Level))
+            {
+                var top = from;
+                var bottom = to;
+
+                if (!EditorSurface.Clipped(ref top, ref bottom)) continue;
+
+                var group = EditorTheme.LiveGroup;
+                var shade = Vector4.Lerp(group, new Vector4(0f, 0f, 0f, 1f), MathF.Min(0.6f, 0.16f * level));
+
+                EditorDraw.Rounded(top, bottom, ImGui.GetFrameHeight() * 0.5f, ImGui.GetColorU32(shade with { W = 1f }), draw);
+            }
+
+            draw.ChannelsSetCurrent(2);
+        }
 
         /// <summary>Leaves every level past <paramref name="depth"/>.</summary>
         private void Close(int depth)
         {
-            while (_open.Count > depth) _open.RemoveAt(_open.Count - 1);
+            while (_open.Count > depth)
+            {
+                if (_indented[^1])
+                {
+                    ImGui.Unindent(Step);
+                    FoldDepth--;
+                }
+
+                // An open fold's card, from its header down to the last row in it, now that the
+                // rows are drawn and where they end is known.
+                if (_cards[^1] is { Open: true } card)
+                {
+                    Card(_cards.Count, card.From, card.Right, ImGui.GetCursorScreenPos().Y - ImGui.GetStyle().ItemSpacing.Y + EditorSurface.Air);
+
+                    // The card reaches a little past its last row, so what comes next keeps the
+                    // same gap from it that it would from a row, rather than meeting its edge.
+                    ImGui.Dummy(new Vector2(0f, EditorSurface.Air));
+                }
+
+                _open.RemoveAt(_open.Count - 1);
+                _indented.RemoveAt(_indented.Count - 1);
+                _cards.RemoveAt(_cards.Count - 1);
+            }
 
             // Visibility is a property of what is left open, so it is worked out again rather than
             // remembered, and leaving every level puts it back to showing. The key is the whole

@@ -173,7 +173,7 @@ public static class ComponentFields
 
         if (field.Hints.Header is { Length: > 0 } heading)
         {
-            EditorSurface.Heading(heading, DetailsPanel.Inset);
+            EditorSurface.Heading(heading, DetailsPanel.RightInset);
         }
 
         // What the field asked for above itself, in the order a person reads them.
@@ -186,7 +186,7 @@ public static class ComponentFields
         // Short of the card's edge on the right by the same air it keeps on the left, or the last
         // field in every row runs into the side of the card it is drawn in.
         var across = new Vector2(
-            MathF.Max(1f, ImGui.GetContentRegionAvail().X - DetailsPanel.Inset),
+            MathF.Max(1f, ImGui.GetContentRegionAvail().X - DetailsPanel.RightInset),
             0f);
 
         // A field that asked for the whole row gets it, with its name on the line above rather than

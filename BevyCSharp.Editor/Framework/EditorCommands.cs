@@ -307,8 +307,8 @@ public static class EditorCommands
     /// the button that opened it reads as one tall panel instead of two things.
     /// </remarks>
     private static (float X, float Y) MenuAt =>
-        (EditorShell.Scene.X + ToolbarView.Inset,
-            EditorShell.SceneTop + ToolbarView.Inset + EditorSurface.Tall + EditorSurface.Air);
+        (ToolbarView.Origin.X + ToolbarView.Inset,
+            ToolbarView.Origin.Y + ToolbarView.Inset + EditorSurface.Tall + EditorSurface.Air);
 
     /// <summary>What the open panel reads as when there is none.</summary>
     private const string Shut = "none";

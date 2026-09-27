@@ -49,11 +49,28 @@ public static class ToolbarView
         EditorStats.Draw(ctx);
     }
 
+    /// <summary>
+    /// Where the groups are measured from: the scene's top left while docked, and the same point
+    /// while floating, where the scene is the whole window, so docking or floating the panel does
+    /// not move a button.
+    /// </summary>
+    /// <remarks>
+    /// Docked, the scene keeps a gap from the window's edge, and a group inset from the scene sits
+    /// that much further in than one inset from the window. Floating, the groups keep the gap
+    /// themselves, so they are where they were.
+    /// </remarks>
+    internal static Vector2 Origin => EditorShell.Docked
+        ? new Vector2(EditorShell.Scene.X, EditorShell.SceneTop)
+        : new Vector2(EditorSurface.Gutter, EditorShell.SceneTop + EditorSurface.Gutter);
+
     /// <summary>Which line the top right group is on, which what hangs under it is placed by.</summary>
     internal static int RightRow { get; private set; }
 
     /// <summary>How wide each group came to last frame, which decides whether they share a line.</summary>
     private static readonly Dictionary<ToolbarSlot, float> Widths = [];
+
+    /// <summary>How tall each group came to last frame, which a group placed by its middle needs.</summary>
+    private static readonly Dictionary<ToolbarSlot, float> Heights = [];
 
     /// <summary>
     /// Which line the center and the right groups go on, so no two groups overlap however narrow
@@ -69,7 +86,7 @@ public static class ToolbarView
     /// </remarks>
     private static (int Center, int Right) Rows()
     {
-        var room = EditorShell.Free.Right - EditorShell.Scene.X - (Inset * 2f);
+        var room = EditorShell.Free.Right - Origin.X - (Inset * 2f);
         var gap = EditorSurface.Air * 2f;
 
         var left = Widths.GetValueOrDefault(ToolbarSlot.Left);
@@ -111,21 +128,44 @@ public static class ToolbarView
         // rectangle. Floating, the scene is the whole window and the panels lie over it, so a
         // group placed by the window's middle ends up under the panel, which then draws a row of
         // buttons across its own top edge.
-        var top = EditorShell.SceneTop;
-        var width = EditorShell.Free.Right - EditorShell.Scene.X;
-        var height = EditorShell.Free.Bottom - top;
+        var origin = Origin;
+        var width = EditorShell.Free.Right - origin.X;
+        var height = EditorShell.Free.Bottom - origin.Y;
 
         var at = new Vector2(
-            EditorShell.Scene.X + (width * corner.X) + (corner.X > 0.5f ? -inset : corner.X > 0f ? 0f : inset),
-            top + (height * corner.Y) + (corner.Y > 0.5f ? -inset : inset) + (row * (EditorSurface.Tall + EditorSurface.Air)));
+            origin.X + (width * corner.X) + (corner.X > 0.5f ? -inset : corner.X > 0f ? 0f : inset),
+            origin.Y + (height * corner.Y) + (corner.Y > 0.5f ? -inset : inset) + (row * (EditorSurface.Tall + EditorSurface.Air)));
 
-        ImGui.SetNextWindowPos(at, ImGuiCond.Always, pivot);
+        // No wider than the room the scene has for it, and no taller than what is left of the
+        // scene below it, so a group longer than a small window is clipped at the scene's edge and
+        // scrolled with the wheel, and one with no scene left to lie on is not drawn at all.
+        var room = MathF.Floor(width - (inset * 2f));
+        var below = MathF.Floor(corner.Y > 0.5f ? at.Y - origin.Y : EditorShell.Free.Bottom - at.Y);
+
+        if (room < 1f || below < 1f) return;
+
+        // Placed on whole pixels from its own width, rather than handed to ImGui with a pivot. A
+        // centered group half a pixel wide of even lands on a half pixel, and a window being
+        // resized is a fraction of a pixel wide from one frame to the next, so a group placed from
+        // either shifts by a pixel and back as the window moves.
+        var wide = MathF.Min(Widths.GetValueOrDefault(slot), room);
+        var tall = MathF.Min(Heights.GetValueOrDefault(slot, EditorSurface.Tall), below);
+
+        var place = new Vector2(
+            MathF.Round(at.X - (wide * pivot.X)),
+            MathF.Round(at.Y - (tall * pivot.Y)));
+
+        ImGui.SetNextWindowPos(place, ImGuiCond.Always);
+        ImGui.SetNextWindowSizeConstraints(Vector2.Zero, new Vector2(room, below));
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0f, 0f));
 
         var began = ImGui.Begin($"##bar{slot}", EditorSurface.Bare);
 
-        Widths[slot] = ImGui.GetWindowSize().X;
+        // The width the buttons came to rather than the width the window was allowed, so the
+        // lines are decided by what the group needs.
+        Widths[slot] = ImGui.GetWindowSize().X + ImGui.GetScrollMaxX();
+        Heights[slot] = ImGui.GetWindowSize().Y;
 
         if (!began)
         {
@@ -133,6 +173,11 @@ public static class ToolbarView
             ImGui.PopStyleVar();
             return;
         }
+
+        // Either way the wheel turns, since a row has only the one direction to go.
+        var wheel = ImGui.GetIO().MouseWheel + ImGui.GetIO().MouseWheelH;
+
+        if (wheel != 0f && ImGui.IsWindowHovered()) ImGui.SetScrollX(ImGui.GetScrollX() - (wheel * 40f));
 
         // Round enough that a square button is a circle, the usual shape of a button with a picture
         // in it and no words.
@@ -172,11 +217,11 @@ public static class ToolbarView
 
             if (!can) ImGui.BeginDisabled();
 
+            // A word on a pill of the editor's own rather than ImGui's button, so one cut by the
+            // group's edge keeps its round end as every other pill does.
             var pressed = button.Icon is { Length: > 0 } icon && label.Length == 0
                 ? Circle($"{slot}{index}", icon, on, size)
-                : ImGui.Button(
-                    $"{(label.Length == 0 ? Icon(button.Icon) : label)}##{slot}{index}",
-                    new Vector2(0f, size));
+                : EditorWidgets.Pill(label.Length == 0 ? Icon(button.Icon) : label, on, EditorSurface.Lying(), size);
 
             if (pressed) button.Run(ctx.Ecs);
 
@@ -229,7 +274,25 @@ public static class ToolbarView
         var draw = ImGui.GetWindowDrawList();
         var middle = at + new Vector2(size * 0.5f, size * 0.5f);
 
-        draw.AddCircleFilled(middle, size * 0.5f, ImGui.GetColorU32(fill));
+        // Whole where it can be seen whole, and where the group's edge cuts it, a pill of the part
+        // that shows, so the cut is round like everything else rather than a straight slice off
+        // the circle.
+        var from = at;
+        var to = at + new Vector2(size, size);
+        var clipMin = draw.GetClipRectMin();
+        var clipMax = draw.GetClipRectMax();
+
+        from.X = MathF.Max(from.X, clipMin.X);
+        to.X = MathF.Min(to.X, clipMax.X);
+
+        if (from.X <= at.X && to.X >= at.X + size)
+        {
+            draw.AddCircleFilled(middle, size * 0.5f, ImGui.GetColorU32(fill));
+        }
+        else if (to.X - from.X >= 1f)
+        {
+            EditorDraw.Capsule(from, to, ImGui.GetColorU32(fill), draw);
+        }
 
         // A share of the circle rather than a number of pixels, so the picture keeps its margin
         // whatever the button is sized to.

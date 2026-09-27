@@ -204,10 +204,26 @@ public static class EditorWidgets
 
         // White whether it is chosen or not. What says which one is in force is the pill under it,
         // and a gray word reads as one that cannot be pressed.
-        draw.AddText(
-            at + new Vector2(EditorSurface.Sides, (size.Y - word.Y) * 0.5f),
-            ImGui.GetColorU32(EditorTheme.LiveText),
-            name);
+        //
+        // Cut where the pill is cut, and on a side that is cut, as far in as the round end curves
+        // at the top and bottom of the word, so the word runs to the curve and no further. A whole
+        // radius in would stop it well short of an edge that is still pill; none at all leaves the
+        // corners of its letters standing past the curve.
+        var radius = size.Y * 0.5f;
+        var half = MathF.Min(word.Y * 0.5f, radius);
+        var curve = MathF.Ceiling(radius - MathF.Sqrt((radius * radius) - (half * half)));
+        var textFrom = new Vector2(from.X > at.X ? from.X + curve : from.X, at.Y);
+        var textTo = new Vector2(to.X < at.X + size.X ? to.X - curve : to.X, at.Y + size.Y);
+
+        if (textTo.X > textFrom.X)
+        {
+            draw.PushClipRect(textFrom, textTo, true);
+            draw.AddText(
+                at + new Vector2(EditorSurface.Sides, (size.Y - word.Y) * 0.5f),
+                ImGui.GetColorU32(EditorTheme.LiveText),
+                name);
+            draw.PopClipRect();
+        }
 
         return pressed;
     }

@@ -2803,7 +2803,8 @@ reflects at runtime:
 A component with twenty fields is unreadable however well it is ordered, so `[Foldout]` puts the
 rest away under a name. Consecutive fields naming the same fold share it, folds nest as deep as the
 slashes go, and whether one is open is remembered per component rather than per entity, because
-somebody who shut one meant it about the component.
+somebody who shut one meant it about the component. What a fold holds is set in one step, and a
+fold inside it another, so a field's depth says which fold it is in.
 
 Several things selected are edited together. The panel shows the last one picked, and a change
 made in it reaches everything else in the selection carrying the same component. A field they

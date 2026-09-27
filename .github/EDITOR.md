@@ -241,11 +241,23 @@ an empty pane is usually one somebody has not yet learned how to fill.
 
 Nothing overlaps and nothing is cut square. The toolbars share the top line of the scene while they
 fit, and when the scene is too narrow the tools drop to a line of their own under the menu and the
-statistics button, and past that every group has a line of its own. The tabs along the bottom
-scroll sideways under the wheel when there are more than fit, with no scrollbar, and a tab half out
-of the row is drawn as a pill of the part that shows. A list that runs past its edge has that
-edge's corners rounded and fades what runs past into the panel over the last few pixels, while a
-component's group keeps its own rounded corners where it is cut.
+statistics button, and past that every group has a line of its own. A group wider than the scene
+itself is clipped at the scene's edge and scrolled with the wheel, and the tabs along the bottom
+scroll the same way, with no scrollbar. A button or tab half out of its row is drawn as a pill of
+the part that shows, with its word running to the curve and no further. A group with no scene
+left to lie on is not drawn, and every group is placed on whole pixels, so none shifts while the
+window is resized. A list that runs past its edge has
+that edge's corners rounded, and a component's group keeps its own rounded corners where it is cut.
+
+The toolbars are measured from the same point docked and floating, the scene's corner while docked
+and the same gap in from the window's while floating, so docking the panel moves no button.
+
+### Folds
+
+A field that asks for a fold (`[Foldout("Advanced/Debug")]`) is drawn under a header of the
+editor's own, as wide as the fields beside it. Each open fold is a card a step darker than what it
+lies on, and what it holds is set one step further in, so a field's depth and the surface it lies
+on both say which fold it is in.
 
 ### Windows
 
@@ -408,7 +420,7 @@ the answers on the schema as `FieldHints`, so nothing reflects at runtime:
 | `[Space]` | a blank row above the field |
 | `[Separator]` | a line across the panel above the field |
 | `[Info("...", Kind = ...)]` | a sentence in the panel above the field: something to know, a warning, an error |
-| `[Foldout("A/B")]` | puts the field in a fold, which opens and shuts; slashes nest them. **Not drawn yet** |
+| `[Foldout("A/B")]` | puts the field in a fold, which opens and shuts; slashes nest them, and each level sets what it holds one step further in |
 | `[Color]` | three numbers that are a color, as a swatch the width of the row that opens a picker |
 | `[Inline]` | three numbers beside each other rather than one per row, as a vector already is |
 | `[Wide]` | drawn across the panel, with no name column beside it |
@@ -483,7 +495,6 @@ Nothing rounds the value itself.
 
 Written down because the attributes and the shape of the thing suggest otherwise:
 
-- **`[Foldout]` is carried but not drawn.** A field that asks for a fold is drawn in place.
 - **A selection of several things shows the last one**, not what they agree and disagree about.
 - **There is no pass system and no list drawer.** What an entity hangs from and what hangs from it
   are not shown as rows, and a component cannot hold a list to begin with, so nothing in the
