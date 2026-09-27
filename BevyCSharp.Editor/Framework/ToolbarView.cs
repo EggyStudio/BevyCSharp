@@ -47,6 +47,7 @@ public static class ToolbarView
 
         // Under the buttons at the top right, where the button that opens it is.
         EditorStats.Draw(ctx);
+        SceneCamera.Draw(ctx);
     }
 
     /// <summary>

@@ -97,8 +97,8 @@ public static class EditorSceneFrame
     }
 
     /// <summary>
-    /// The buttons at the window's top right: the pin that docks the panel, then minimize,
-    /// maximize and close where the editor draws its own frame.
+    /// The buttons at the window's top right: the pin that docks the panel, then, where the editor
+    /// draws its own frame, an empty one that moves the window, and minimize, maximize and close.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -164,6 +164,27 @@ public static class EditorSceneFrame
 
             if (EditorWindowFrame.Borderless)
             {
+                ImGui.SameLine();
+
+                // A button with nothing on it, to take hold of. The band along the top moves the
+                // window too, but it is a few pixels tall and has no edge to aim for, and this is
+                // a button's size where the hand already goes for the window's own buttons. Pressed,
+                // it hands the window to the platform to move, and pressed twice it maximizes, as
+                // a title bar does.
+                ToolbarView.Circle("move", string.Empty, false, Size);
+
+                if (ImGui.IsItemActivated())
+                {
+                    if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) EditorWindowFrame.ToggleMaximized();
+                    else Window.StartDragMove();
+                }
+
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
+                    EditorWidgets.Tip("Move the window");
+                }
+
                 ImGui.SameLine();
 
                 if (Marked("minimize", WindowMarks.Minimize, "Minimize", Size)) EditorWindowFrame.Minimize();

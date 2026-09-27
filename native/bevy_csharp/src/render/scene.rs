@@ -1699,3 +1699,66 @@ pub extern "C" fn bcs_render_set_clear_color(r: f32, g: f32, b: f32, a: f32) -> 
     })
 }
 
+/// Sets a camera's field of view, in degrees across its height, and how near and how far it sees,
+/// making it a perspective camera if it was not one.
+///
+/// For a camera being tuned while it runs, such as an editor's view of the scene, where the
+/// projection it was spawned with is a starting point rather than a decision.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_perspective(camera: u64, fov_degrees: f32, near: f32, far: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, fov_degrees, near, far);
+            crate::interop::status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::camera::{PerspectiveProjection, Projection};
+
+            if !(fov_degrees > 0.0 && fov_degrees < 180.0) || !(near > 0.0) || !(far > near) {
+                return crate::interop::status::NULL_ARG;
+            }
+
+            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+
+            crate::state::with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let mut target = world.entity_mut(entity);
+
+                match target.get_mut::<Projection>() {
+                    Some(mut projection) => match projection.as_mut() {
+                        Projection::Perspective(perspective) => {
+                            perspective.fov = fov_degrees.to_radians();
+                            perspective.near = near;
+                            perspective.far = far;
+                        }
+                        other => {
+                            *other = Projection::Perspective(PerspectiveProjection {
+                                fov: fov_degrees.to_radians(),
+                                near,
+                                far,
+                                ..Default::default()
+                            });
+                        }
+                    },
+                    None => {
+                        target.insert(Projection::Perspective(PerspectiveProjection {
+                            fov: fov_degrees.to_radians(),
+                            near,
+                            far,
+                            ..Default::default()
+                        }));
+                    }
+                }
+
+                crate::interop::status::OK
+            })
+        }
+    })
+}
+

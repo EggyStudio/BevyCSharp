@@ -490,6 +490,30 @@ public static unsafe class Render
             "Render.SetViewport");
 
     /// <summary>
+    /// Sets a camera's field of view and how near and how far it sees, making it a perspective
+    /// camera if it was not one. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// For a camera tuned while it runs, such as an editor's view of the scene, since
+    /// <see cref="CameraSettings"/> only decides these when the camera is made. The near distance is
+    /// where depth precision is spent, mostly close to it, so a very small one makes far surfaces
+    /// flicker against each other; raise it before lowering the far one.
+    /// </remarks>
+    /// <param name="camera">The camera.</param>
+    /// <param name="fieldOfView">Degrees across the picture's height, above nothing and below 180.</param>
+    /// <param name="near">The nearest distance seen, above nothing.</param>
+    /// <param name="far">The furthest distance seen, beyond the nearest.</param>
+    /// <exception cref="ArgumentOutOfRangeException">A value outside those ranges.</exception>
+    public static void SetPerspective(Entity camera, float fieldOfView, float near, float far)
+    {
+        if (!(fieldOfView > 0f && fieldOfView < 180f)) throw new ArgumentOutOfRangeException(nameof(fieldOfView), fieldOfView, "A field of view is above nothing and below 180 degrees.");
+        if (!(near > 0f)) throw new ArgumentOutOfRangeException(nameof(near), near, "The near distance has to be above nothing.");
+        if (!(far > near)) throw new ArgumentOutOfRangeException(nameof(far), far, "The far distance has to be beyond the near one.");
+
+        Native.Check(Native.bcs_render_set_perspective(camera.Bits, fieldOfView, near, far), "Render.SetPerspective");
+    }
+
+    /// <summary>
     /// Rounds the corners of a camera's picture, showing <paramref name="fill"/> outside them, which
     /// is clear unless given. A radius of nothing squares them again. Only valid inside a system.
     /// </summary>

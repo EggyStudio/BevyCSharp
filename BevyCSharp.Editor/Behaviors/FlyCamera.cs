@@ -84,6 +84,24 @@ public partial struct FlyCamera
     private static bool _holdingCursor;
 
     /// <summary>
+    /// How long the camera takes to come up to speed and to come to a stop, in seconds. Nothing
+    /// is instant.
+    /// </summary>
+    /// <remarks>
+    /// Eased, because a camera that starts and stops the frame a key goes down or up reads as a
+    /// jolt, and a moment of acceleration makes a fly-through something to watch. Short, because
+    /// a camera that drifts on well after the key is let go is a camera that overshoots what it
+    /// was stopping at. Set from the scene camera's settings.
+    /// </remarks>
+    public static float Easing { get; set; } = 0.08f;
+
+    /// <summary>What the mouse's turn is multiplied by, where one is as it was made.</summary>
+    public static float LookScale { get; set; } = 1f;
+
+    /// <summary>How fast the camera is moving now, which eases toward what the keys ask for.</summary>
+    private static Vec3 _velocity;
+
+    /// <summary>
     /// A camera at <paramref name="eye"/> already looking at <paramref name="target"/>.
     /// </summary>
     /// <remarks>
@@ -206,7 +224,6 @@ public partial struct FlyCamera
             }
 
             moved |= Look(dx, dy);
-            moved |= Walk(ctx, ref position);
         }
         else if (orbiting)
         {
@@ -264,6 +281,9 @@ public partial struct FlyCamera
             moved = true;
         }
 
+        // Every frame, flying or not, since a camera let go of is still coming to a stop.
+        moved |= Walk(ctx, ref position, flying);
+
         if (!moved) return;
 
         // Only on a frame that moved. Writing every frame would tell Bevy the transform changed
@@ -278,29 +298,56 @@ public partial struct FlyCamera
     {
         if (dx == 0f && dy == 0f) return false;
 
-        Yaw -= dx * LookSensitivity;
-        Pitch = Math.Clamp(Pitch - (dy * LookSensitivity), -PitchLimit, PitchLimit);
+        Yaw -= dx * LookSensitivity * LookScale;
+        Pitch = Math.Clamp(Pitch - (dy * LookSensitivity * LookScale), -PitchLimit, PitchLimit);
         return true;
     }
 
-    /// <summary>Walks the camera along its own axes, and says whether it moved at all.</summary>
-    private readonly bool Walk(BehaviorContext ctx, ref Vec3 position)
+    /// <summary>
+    /// Walks the camera along its own axes while it flies, easing toward the speed the keys ask
+    /// for and back to a stop once they let go, and says whether it moved at all.
+    /// </summary>
+    /// <param name="ctx">This frame.</param>
+    /// <param name="position">Where the camera is, moved in place.</param>
+    /// <param name="flying">Whether the keys steer it, which they do only while it flies.</param>
+    private readonly bool Walk(BehaviorContext ctx, ref Vec3 position, bool flying)
     {
         var input = ctx.Input;
+        var wanted = default(Vec3);
 
-        var forward = Held(input, Key.W) - Held(input, Key.S);
-        var strafe = Held(input, Key.D) - Held(input, Key.A);
-        var rise = Held(input, Key.E) - Held(input, Key.Q);
+        if (flying)
+        {
+            var forward = Held(input, Key.W) - Held(input, Key.S);
+            var strafe = Held(input, Key.D) - Held(input, Key.A);
+            var rise = Held(input, Key.E) - Held(input, Key.Q);
 
-        if (forward == 0f && strafe == 0f && rise == 0f) return false;
+            if (forward != 0f || strafe != 0f || rise != 0f)
+            {
+                var speed = Speed;
+                if (input.AnyKeyDown([Key.ShiftLeft, Key.ShiftRight])) speed *= FastFactor;
+                if (input.AnyKeyDown([Key.ControlLeft, Key.ControlRight])) speed *= SlowFactor;
 
-        var speed = Speed;
-        if (input.AnyKeyDown([Key.ShiftLeft, Key.ShiftRight])) speed *= FastFactor;
-        if (input.AnyKeyDown([Key.ControlLeft, Key.ControlRight])) speed *= SlowFactor;
+                // Normalized, so that going diagonally is not faster than going straight.
+                var direction = (Forward * forward) + (Right * strafe) + (Vec3.UnitY * rise);
+                wanted = direction.Normalized * speed;
+            }
+        }
 
-        // Normalized, so that going diagonally is not faster than going straight.
-        var direction = (Forward * forward) + (Right * strafe) + (Vec3.UnitY * rise);
-        position += direction.Normalized * speed * ctx.Time.Delta;
+        // Toward what is wanted by the share of the way an exponential ease covers in this frame,
+        // so the feel is the same at any frame rate.
+        var delta = ctx.Time.Delta;
+
+        _velocity = Easing <= 0f
+            ? wanted
+            : _velocity + ((wanted - _velocity) * (1f - MathF.Exp(-delta / Easing)));
+
+        if (_velocity.Length < 1e-3f)
+        {
+            _velocity = default;
+            return false;
+        }
+
+        position += _velocity * delta;
         return true;
 
         static float Held(Input input, Key key) => input.KeyDown(key) ? 1f : 0f;

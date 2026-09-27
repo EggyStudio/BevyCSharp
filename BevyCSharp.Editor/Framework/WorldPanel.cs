@@ -657,6 +657,10 @@ public static class WorldPanel
         foreach (var entity in all)
         {
             if (EditorEntity.IsInterface(ctx.Ecs, entity)) continue;
+
+            // The scene view's camera is the editor's, not the world's, and is set from its own
+            // button in the scene's corner, so it is not listed with what the world holds.
+            if (entity == EditorSelection.Camera) continue;
             if (EditorEntity.IsBookkeeping(ctx.Ecs, entity)) continue;
 
             // Named, or drawn. A thing with a mesh is in the world whether or not anybody called

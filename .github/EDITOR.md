@@ -174,8 +174,8 @@ the pointer is on it or it is being dragged, docked or floating.
 ### The window's own frame
 
 The editor asks for a window without the platform's title bar and border, and draws its own in
-their place. The window's pin, minimize, maximize and close buttons lie at its top right as round
-buttons like the rest of what floats, over the top of the panel's column, since the panels and
+their place. The window's pin, an empty button to take hold of it by, and its minimize, maximize
+and close buttons lie at its top right as round buttons like the rest of what floats, over the top of the panel's column, since the panels and
 the scene run up to the window's top, with the same gap there as at every other edge. The field
 in the row under them stops short of them (`EditorSurface.FullWidth`), which is the world's search
 box when the world is above the details and the entity's name when the two are side by side. While the panel floats, a title row runs across the scene
@@ -214,6 +214,16 @@ below the rows to go back to the top of the world. Dragging a selected row drags
 and a branch moves whole. A row that would end up under itself is refused before the drop, so it
 does not light up. Whatever moves keeps its place in the world, because its transform is worked
 out again against the new parent (`EditorHierarchy.Reparent`), and the move is one step to undo.
+
+### The scene view's camera
+
+The camera button beside the statistics opens a card of the scene view's own camera, which is the
+editor's rather than the world's and so is not listed in the world. Its lens (the field of view and
+the near and far distances, through `Render.SetPerspective`), how it flies (its speed, how long it
+eases up to speed and back to a stop, and how far the mouse turns it), and how it draws. The view
+is the editor's plain one unless overridden, when it takes a tonemapper, bloom, an antialiasing
+pass, and an exposure that follows the light or one of its own. Everything is saved with the
+editor's preferences, on a page of its own in the settings, and Reset puts it back.
 
 ### Statistics
 

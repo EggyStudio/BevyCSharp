@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 146;
+    internal const int ExpectedAbiVersion = 147;
 
     static Native() => NativeLoader.Initialize();
 
@@ -1317,6 +1317,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_imgui_drop_texture(ulong texture);
+
+    /// <summary>Sets a camera's field of view and clip distances.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_perspective(ulong camera, float fovDegrees, float near, float far);
 
     /// <summary>Rounds the corners of a camera's picture, showing a fill outside them, or squares them.</summary>
     [LibraryImport(Library)]

@@ -320,6 +320,7 @@ public static class EditorShell
         if (camera.IsNone) return;
 
         EditorSceneFrame.Round(ctx, camera);
+        SceneCamera.Apply(ctx, camera);
 
         var scale = ImGuiRuntime.Scale;
 

@@ -1443,6 +1443,9 @@ Render.SetLayers(ctx.Ecs, player, 1u | Minimap);   // both do
 A viewport is measured in physical pixels rather than logical ones, because a framebuffer is divided
 into those. A camera draws an entity only where their layers overlap.
 
+`Render.SetPerspective(camera, fieldOfView, near, far)` changes a camera's lens while it runs,
+since `CameraSettings` only decides it when the camera is made.
+
 The part of the window no viewport covers is the world's clear color, which `Render.SetClearColor`
 sets, since Bevy clears the whole window before putting each camera's picture on its part of it.
 `Render.SetRoundedCorners(camera, radius, fill)` takes a camera's corners off, antialiased, the

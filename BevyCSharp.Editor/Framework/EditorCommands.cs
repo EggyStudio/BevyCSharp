@@ -294,10 +294,31 @@ public static class EditorCommands
             ToolbarSlot.Right,
             EditorIcons.Info,
             static () => string.Empty,
-            static _ => EditorStats.Showing = !EditorStats.Showing,
+            static _ =>
+            {
+                EditorStats.Showing = !EditorStats.Showing;
+                if (EditorStats.Showing) SceneCamera.Showing = false;
+            },
             static () => EditorStats.Showing,
-            0,
+            1,
             "Statistics, performance and keys"));
+
+        // The scene view's own camera: its lens, how it flies, and how it draws, beside the
+        // statistics, and in the same place, so only one of the two cards is up at a time.
+        EditorToolbar.Add(new ToolbarButton(
+            ToolbarSlot.Right,
+            EditorIcons.Camera,
+            static () => string.Empty,
+            static _ =>
+            {
+                SceneCamera.Showing = !SceneCamera.Showing;
+                if (SceneCamera.Showing) EditorStats.Showing = false;
+            },
+            static () => SceneCamera.Showing,
+            0,
+            "The scene view's camera"));
+
+        SceneCamera.Register();
 
     }
 
