@@ -190,7 +190,17 @@ public static class EditorWidgets
             ? over ? EditorTheme.Alpha(EditorTheme.LiveAccent, 0.85f) : EditorTheme.LiveAccent
             : over ? EditorTheme.LiveHover : idle ?? EditorSurface.Lying();
 
-        if (fill.W > 0f) EditorDraw.Capsule(at, at + size, ImGui.GetColorU32(fill), draw);
+        // Cut to what can be seen across, and drawn as a pill of its own, so a pill half scrolled
+        // out of a row keeps round ends rather than ending in the row's straight edge.
+        var from = at;
+        var to = at + size;
+        var clipMin = draw.GetClipRectMin();
+        var clipMax = draw.GetClipRectMax();
+
+        from.X = MathF.Max(from.X, clipMin.X);
+        to.X = MathF.Min(to.X, clipMax.X);
+
+        if (fill.W > 0f && to.X - from.X >= 1f) EditorDraw.Capsule(from, to, ImGui.GetColorU32(fill), draw);
 
         // White whether it is chosen or not. What says which one is in force is the pill under it,
         // and a gray word reads as one that cannot be pressed.

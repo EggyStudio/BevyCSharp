@@ -34,9 +34,12 @@ public static class ToolbarView
     /// </remarks>
     internal static void Draw(BehaviorContext ctx)
     {
+        var (center, right) = Rows();
+
         Group(ctx, ToolbarSlot.Left, new Vector2(0f, 0f), new Vector2(0f, 0f));
-        Group(ctx, ToolbarSlot.Center, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
-        Group(ctx, ToolbarSlot.Right, new Vector2(1f, 0f), new Vector2(1f, 0f));
+        Group(ctx, ToolbarSlot.Center, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), row: center);
+        Group(ctx, ToolbarSlot.Right, new Vector2(1f, 0f), new Vector2(1f, 0f), row: right);
+        RightRow = right;
         Group(ctx, ToolbarSlot.BottomRight, new Vector2(1f, 1f), new Vector2(1f, 1f));
 
         // Down the left edge rather than across the top, for the groups that are a list of modes.
@@ -46,18 +49,58 @@ public static class ToolbarView
         EditorStats.Draw(ctx);
     }
 
+    /// <summary>Which line the top right group is on, which what hangs under it is placed by.</summary>
+    internal static int RightRow { get; private set; }
+
+    /// <summary>How wide each group came to last frame, which decides whether they share a line.</summary>
+    private static readonly Dictionary<ToolbarSlot, float> Widths = [];
+
+    /// <summary>
+    /// Which line the center and the right groups go on, so no two groups overlap however narrow
+    /// the scene is.
+    /// </summary>
+    /// <remarks>
+    /// All three on the top line where they fit, as a title bar holds them. Where they do not, the
+    /// center group goes on a line of its own under them, since it is the one in the middle of
+    /// both, and where even the left and the right groups would meet, every group has a line of
+    /// its own, in order. Worked out from the widths the groups came to last frame, since a group
+    /// knows its width only once it has been laid out, and a group is as wide from one frame to
+    /// the next as the buttons in it.
+    /// </remarks>
+    private static (int Center, int Right) Rows()
+    {
+        var room = EditorShell.Free.Right - EditorShell.Scene.X - (Inset * 2f);
+        var gap = EditorSurface.Air * 2f;
+
+        var left = Widths.GetValueOrDefault(ToolbarSlot.Left);
+        var center = Widths.GetValueOrDefault(ToolbarSlot.Center);
+        var right = Widths.GetValueOrDefault(ToolbarSlot.Right);
+
+        // The center group is centered, so it needs the half of the room either side of the
+        // middle to clear whichever of the other two is wider.
+        var sides = MathF.Max(left, right);
+
+        if ((sides * 2f) + center + (gap * 2f) <= room) return (0, 0);
+
+        if (left + right + gap <= room) return (1, 0);
+
+        return (1, 2);
+    }
+
     /// <summary>One corner's worth of buttons, in a row.</summary>
     /// <param name="ctx">This frame.</param>
     /// <param name="slot">Which corner.</param>
     /// <param name="corner">Which corner of the scene it hangs from, as a fraction.</param>
     /// <param name="pivot">Which corner of the group meets it.</param>
     /// <param name="down">Whether the buttons stack downwards rather than running across.</param>
+    /// <param name="row">Which line of groups down from the top it is on, where they do not all fit on one.</param>
     internal static void Group(
         BehaviorContext ctx,
         ToolbarSlot slot,
         Vector2 corner,
         Vector2 pivot,
-        bool down = false)
+        bool down = false,
+        int row = 0)
     {
         var buttons = EditorToolbar.Slot(slot);
         if (buttons.Count == 0) return;
@@ -74,13 +117,17 @@ public static class ToolbarView
 
         var at = new Vector2(
             EditorShell.Scene.X + (width * corner.X) + (corner.X > 0.5f ? -inset : corner.X > 0f ? 0f : inset),
-            top + (height * corner.Y) + (corner.Y > 0.5f ? -inset : inset));
+            top + (height * corner.Y) + (corner.Y > 0.5f ? -inset : inset) + (row * (EditorSurface.Tall + EditorSurface.Air)));
 
         ImGui.SetNextWindowPos(at, ImGuiCond.Always, pivot);
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0f, 0f));
 
-        if (!ImGui.Begin($"##bar{slot}", EditorSurface.Bare))
+        var began = ImGui.Begin($"##bar{slot}", EditorSurface.Bare);
+
+        Widths[slot] = ImGui.GetWindowSize().X;
+
+        if (!began)
         {
             ImGui.End();
             ImGui.PopStyleVar();

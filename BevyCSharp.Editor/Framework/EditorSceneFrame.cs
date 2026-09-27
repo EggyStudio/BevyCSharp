@@ -115,9 +115,10 @@ public static class EditorSceneFrame
     /// </remarks>
     internal static void WindowButtons()
     {
-        // The size everything else that floats over the scene is, so the buttons in the corner are
-        // of that family rather than discs of their own.
-        const float Size = EditorSurface.Tall;
+        // A little under the size everything else that floats over the scene is, since these lie
+        // over the top of the panel's first row rather than on the scene, and at full size they
+        // stood taller than the field beside them by more than reads as deliberate.
+        const float Size = EditorSurface.Tall - 2f;
 
         // As far in from the window's top right as the toolbars are from its top left, so the two
         // ends of the row line up, and over the panel's top when it reaches up there, which it may.

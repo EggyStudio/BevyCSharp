@@ -103,7 +103,8 @@ public static class FrameTab
 
                 if (!has && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
                 {
-                    ImGui.SetTooltip(Missing(name));
+                    // The editor's own tooltip, rounded like every other, rather than ImGui's.
+                    EditorWidgets.Tip(Missing(name));
                 }
             }
         }));

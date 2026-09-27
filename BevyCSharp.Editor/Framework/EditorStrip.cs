@@ -196,11 +196,52 @@ public static class EditorStrip
     /// The tabs as a row of pills, which is the shape the rest of this look is drawn in.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// A click on the one already open closes it, which is why these are buttons rather than tabs.
     /// What a header means here is ours to say, and a tab bar has its own idea about which of its
     /// tabs is selected.
+    /// </para>
+    /// <para>
+    /// In a row of its own that scrolls sideways when there are more tabs than room, which the
+    /// wheel scrolls since the row is too short for a scrollbar. A tab half out of the row is drawn
+    /// as a pill of the part that shows (see <see cref="EditorWidgets.Pill"/>), so the row's edge
+    /// does not cut it square.
+    /// </para>
     /// </remarks>
     internal static void Pills()
+    {
+        var height = ImGui.GetFrameHeight();
+
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0u);
+
+        // No scrollbar at all, since the row is too short for one and ImGui asserts on one sized to
+        // nothing. How far it can scroll comes from what is in it either way.
+        var open = ImGui.BeginChild(
+            "##pillRow",
+            new Vector2(ImGui.GetContentRegionAvail().X, height),
+            ImGuiChildFlags.None,
+            ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+
+        ImGui.PopStyleColor();
+
+        if (open)
+        {
+            // Either way the wheel turns, since a row has only the one direction to go.
+            var wheel = ImGui.GetIO().MouseWheel + ImGui.GetIO().MouseWheelH;
+
+            if (wheel != 0f && ImGui.IsWindowHovered())
+            {
+                ImGui.SetScrollX(ImGui.GetScrollX() - (wheel * 40f));
+            }
+
+            Row();
+        }
+
+        ImGui.EndChild();
+    }
+
+    /// <summary>The tabs themselves, one pill each.</summary>
+    private static void Row()
     {
         for (var index = 0; index < EditorShell.Tabs.Count; index++)
         {

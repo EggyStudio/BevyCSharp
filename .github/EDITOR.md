@@ -237,6 +237,16 @@ Shaders tab is the programs beside what the compiler said about the chosen one. 
 in its middle what is not there and, dimmer, how it comes to be (`EditorSurface.Empty`), since
 an empty pane is usually one somebody has not yet learned how to fill.
 
+### When there is not room
+
+Nothing overlaps and nothing is cut square. The toolbars share the top line of the scene while they
+fit, and when the scene is too narrow the tools drop to a line of their own under the menu and the
+statistics button, and past that every group has a line of its own. The tabs along the bottom
+scroll sideways under the wheel when there are more than fit, with no scrollbar, and a tab half out
+of the row is drawn as a pill of the part that shows. A list that runs past its edge has that
+edge's corners rounded and fades what runs past into the panel over the last few pixels, while a
+component's group keeps its own rounded corners where it is cut.
+
 ### Windows
 
 Unity separates window kinds by how they dismiss, which is the distinction worth copying:

@@ -140,7 +140,10 @@ public static class EditorDraw
     /// <param name="max">Its bottom right.</param>
     /// <param name="radius">How round, at most half the shortest side.</param>
     /// <param name="behind">The color of what it lies on.</param>
-    internal static void RoundOff(ImDrawListPtr draw, Vector2 min, Vector2 max, float radius, uint behind)
+    /// <param name="top">Whether to round the top two corners.</param>
+    /// <param name="bottom">Whether to round the bottom two.</param>
+    internal static void RoundOff(
+        ImDrawListPtr draw, Vector2 min, Vector2 max, float radius, uint behind, bool top = true, bool bottom = true)
     {
         var round = MathF.Min(radius, MathF.Min(max.X - min.X, max.Y - min.Y) * 0.5f);
         if (round < 0.5f) return;
@@ -160,10 +163,17 @@ public static class EditorDraw
             draw.PathFillConvex(behind);
         }
 
-        Wedge(new Vector2(max.X - round, min.Y + round), -quarter, 0f, new Vector2(max.X + grow, min.Y - grow));
-        Wedge(new Vector2(max.X - round, max.Y - round), 0f, quarter, new Vector2(max.X + grow, max.Y + grow));
-        Wedge(new Vector2(min.X + round, max.Y - round), quarter, quarter * 2f, new Vector2(min.X - grow, max.Y + grow));
-        Wedge(new Vector2(min.X + round, min.Y + round), quarter * 2f, quarter * 3f, new Vector2(min.X - grow, min.Y - grow));
+        if (top)
+        {
+            Wedge(new Vector2(max.X - round, min.Y + round), -quarter, 0f, new Vector2(max.X + grow, min.Y - grow));
+            Wedge(new Vector2(min.X + round, min.Y + round), quarter * 2f, quarter * 3f, new Vector2(min.X - grow, min.Y - grow));
+        }
+
+        if (bottom)
+        {
+            Wedge(new Vector2(max.X - round, max.Y - round), 0f, quarter, new Vector2(max.X + grow, max.Y + grow));
+            Wedge(new Vector2(min.X + round, max.Y - round), quarter, quarter * 2f, new Vector2(min.X - grow, max.Y + grow));
+        }
     }
 
     /// <summary>A rectangle as round as its shortest side allows, which is a pill.</summary>

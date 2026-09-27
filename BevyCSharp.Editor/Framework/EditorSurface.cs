@@ -161,10 +161,54 @@ public static class EditorSurface
     /// Ends a region, whether or not it opened.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// The pair to <see cref="Region"/>, so that a region is begun and ended by name rather than
     /// by remembering that a child window has to be ended even when it is closed.
+    /// </para>
+    /// <para>
+    /// Where what it holds runs past an edge, that edge's corners are rounded off by laying the
+    /// panel's color over them (<see cref="EditorDraw.RoundOff"/>), and what runs past fades into
+    /// the panel over the last few pixels. A region clips with a rectangle, so what scrolls under
+    /// its edge is cut straight across, and the one square corner in a look made of round ones is
+    /// the one at the end of every long list. A group keeps its own rounded corners where it is
+    /// cut (see <see cref="Clipped"/>), and a field, which cannot be reshaped, fades out instead of
+    /// stopping on a line, so the region reads as a rounded card that what it holds slides under. Only where something runs past, since a region with its corners taken off and
+    /// nothing under them would take a nick out of a first row sitting in its corner.
+    /// </para>
     /// </remarks>
-    internal static void EndRegion() => ImGui.EndChild();
+    internal static void EndRegion()
+    {
+        var scroll = ImGui.GetScrollY();
+        var above = scroll > 0.5f;
+        var below = scroll < ImGui.GetScrollMaxY() - 0.5f;
+
+        if (above || below)
+        {
+            var min = ImGui.GetWindowPos();
+            var max = min + ImGui.GetWindowSize();
+            var draw = ImGui.GetWindowDrawList();
+            var solid = ImGui.GetColorU32(EditorTheme.LivePanel);
+            var clear = ImGui.GetColorU32(EditorTheme.Alpha(EditorTheme.LivePanel, 0f));
+
+            // What runs past fades into the panel over the last few pixels, so a field cut across
+            // by the edge dissolves into it rather than stopping on a line.
+            const float Fade = 12f;
+
+            if (above) draw.AddRectFilledMultiColor(min, new Vector2(max.X, min.Y + Fade), solid, solid, clear, clear);
+            if (below) draw.AddRectFilledMultiColor(new Vector2(min.X, max.Y - Fade), max, clear, clear, solid, solid);
+
+            EditorDraw.RoundOff(
+                draw,
+                min,
+                max,
+                EditorTheme.Current.ChildRounding,
+                solid,
+                top: above,
+                bottom: below);
+        }
+
+        ImGui.EndChild();
+    }
 
     /// <summary>
     /// A fill cut to the region it is drawn in, so that what is clipped keeps its corners.

@@ -72,7 +72,7 @@ public static class EditorStats
 
         var at = new Vector2(
             EditorShell.Free.Right - ToolbarView.Inset,
-            EditorShell.SceneTop + ToolbarView.Inset + EditorSurface.Tall + EditorSurface.Air);
+            EditorShell.SceneTop + ToolbarView.Inset + ((ToolbarView.RightRow + 1) * (EditorSurface.Tall + EditorSurface.Air)));
 
         ImGui.SetNextWindowPos(at, ImGuiCond.Always, new Vector2(1f, 0f));
         ImGui.SetNextWindowSizeConstraints(
