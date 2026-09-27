@@ -241,6 +241,69 @@ public sealed class AudioTests
         harness.Run();
     }
 
+    /// <summary>
+    /// A sound on a bus is heard at its own volume times the bus's, a bus change reaches it while
+    /// it plays, and neither a bus change nor a volume change undoes a pause.
+    /// </summary>
+    /// <remarks>
+    /// Silent throughout, since the global volume is zero and the volumes read back are each
+    /// sound's own. Needs a sound device for the sink, so it returns early without one.
+    /// </remarks>
+    [Fact]
+    public void ABusScalesItsSoundsAndKeepsTheirPauses()
+    {
+        using var harness = new EngineHarness(frames: 400, fps: 240);
+        if (!App.HasRenderer) return;
+
+        var music = Entity.None;
+        var effect = Entity.None;
+        var step = 0;
+        var readings = new List<(float Music, float Effect, bool Paused)>();
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            Audio.SetGlobalVolume(0f);
+
+            var clip = AssetServer.Load(AssetKind.Audio, Clip);
+            music = Audio.Play(clip, new AudioSettings { Mode = PlaybackMode.Loop, Volume = 0.5f, Bus = "music" });
+            effect = Audio.Play(clip, new AudioSettings { Mode = PlaybackMode.Loop, Volume = 0.8f, Bus = "effects" });
+        });
+
+        harness.OnContext(Stage.Update, _ =>
+        {
+            if (step > 4) return;
+
+            try
+            {
+                readings.Add((Audio.VolumeOf(music), Audio.VolumeOf(effect), Audio.IsPaused(music)));
+            }
+            catch (BevyNativeException)
+            {
+                // The sink arrives with playback, and only if there is a device to play on.
+                return;
+            }
+
+            switch (step++)
+            {
+                case 0: Audio.SetBusVolume("music", 0.5f); break;
+                case 1: Audio.SetVolume(music, 0.8f); break;
+                case 2: Audio.Pause(music, 0.8f); break;
+                case 3: Audio.SetBusVolume("music", 1f); break;
+            }
+        });
+
+        harness.Run();
+
+        if (readings.Count == 0) return;
+
+        Assert.Equal(5, readings.Count);
+        Assert.Equal((0.5f, 0.8f, false), readings[0]);
+        Assert.Equal((0.25f, 0.8f, false), readings[1]);
+        Assert.Equal((0.4f, 0.8f, false), readings[2]);
+        Assert.Equal((0.4f, 0.8f, true), readings[3]);
+        Assert.Equal((0.8f, 0.8f, true), readings[4]);
+    }
+
     [Fact]
     public void TheMasterVolumeScalesEverythingAtOnce()
     {

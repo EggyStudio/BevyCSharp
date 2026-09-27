@@ -11,6 +11,23 @@ use crate::interop::{status, BcsAudioConfig};
 #[cfg(feature = "render")]
 use crate::state::{with_world, with_world_opt};
 
+/// A sound's own volume, before the global volume.
+///
+/// Bevy multiplies the global volume in once, when a sink is made, so a sink's volume holds both
+/// and neither can be read back apart. Kept here, a changed global volume reaches every sound
+/// playing, and a sound's own volume changed later still carries the global one with it.
+#[cfg(feature = "render")]
+#[derive(bevy::ecs::component::Component, Clone, Copy)]
+pub struct OwnVolume(pub f32);
+
+/// The global volume, as a multiplier.
+#[cfg(feature = "render")]
+fn global_volume(world: &bevy::ecs::world::World) -> f32 {
+    world
+        .get_resource::<bevy::audio::GlobalVolume>()
+        .map_or(1.0, |global| global.volume.to_linear())
+}
+
 /// Starts a sound and returns the entity playing it, or `0`.
 ///
 /// The sound need not have finished loading; playback begins when it has.
@@ -69,7 +86,11 @@ pub unsafe extern "C" fn bcs_audio_play(clip: i32, config: *const BcsAudioConfig
                     ..Default::default()
                 };
 
-                let mut entity = world.spawn((AudioPlayer(handle.typed::<AudioSource>()), settings));
+                let mut entity = world.spawn((
+                    AudioPlayer(handle.typed::<AudioSource>()),
+                    settings,
+                    OwnVolume(config.volume),
+                ));
 
                 // A spatial sound is placed by its transform, so it is given one to write into.
                 // A plain sound has no position and is not burdened with a component that would
@@ -103,14 +124,19 @@ pub extern "C" fn bcs_audio_control(entity: u64, volume: f32, paused: i32) -> i3
             use bevy::audio::{AudioSink, AudioSinkPlayback, SpatialAudioSink, Volume};
 
             with_world(|world| {
+                let global = global_volume(world);
+
                 let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity))
                 else {
                     return status::NO_ENTITY;
                 };
 
+                let own = volume;
+                let volume = own * global;
+
                 // A spatial sound gets a different component carrying the same trait, so both
                 // are tried rather than only the one a plain sound has.
-                if let Some(mut sink) = entity_mut.get_mut::<AudioSink>() {
+                let answer = if let Some(mut sink) = entity_mut.get_mut::<AudioSink>() {
                     sink.set_volume(Volume::Linear(volume));
                     if paused != 0 {
                         sink.pause();
@@ -128,7 +154,13 @@ pub extern "C" fn bcs_audio_control(entity: u64, volume: f32, paused: i32) -> i3
                     status::OK
                 } else {
                     status::NOT_PRESENT
+                };
+
+                if answer == status::OK {
+                    entity_mut.insert(OwnVolume(own));
                 }
+
+                answer
             })
         }
     })
@@ -300,6 +332,55 @@ pub unsafe extern "C" fn bcs_audio_position(entity: u64, seconds: *mut f32) -> i
     })
 }
 
+/// Writes a playing sound's own volume and whether it is paused.
+///
+/// The volume is the sound's own, after anything a mixer multiplied in on the managed side and
+/// before the global volume, which the sink holds both of. Answers [`status::NOT_PRESENT`] before
+/// the sink exists, which is the frame the sound was started in.
+///
+/// # Safety
+/// `volume` and `paused` must each be writable or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_audio_state(entity: u64, volume: *mut f32, paused: *mut i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, volume, paused);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::audio::{AudioSink, AudioSinkPlayback, SpatialAudioSink};
+
+            with_world(|world| {
+                let Ok(entity_ref) = world.get_entity(crate::ecs::entity_from(entity)) else {
+                    return status::NO_ENTITY;
+                };
+
+                let held = if let Some(sink) = entity_ref.get::<AudioSink>() {
+                    sink.is_paused()
+                } else if let Some(sink) = entity_ref.get::<SpatialAudioSink>() {
+                    sink.is_paused()
+                } else {
+                    return status::NOT_PRESENT;
+                };
+
+                let heard = entity_ref.get::<OwnVolume>().map_or(1.0, |own| own.0);
+
+                if !volume.is_null() {
+                    unsafe { *volume = heard };
+                }
+                if !paused.is_null() {
+                    unsafe { *paused = held as i32 };
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
 /// Moves playback to a point in the clip, in seconds from its start.
 ///
 /// A looping sound cannot be sought and reports [`status::INVALID_STATE`], because looping is
@@ -368,7 +449,22 @@ pub extern "C" fn bcs_audio_global_volume(volume: f32) -> i32 {
             }
 
             with_world(|world| {
+                use bevy::audio::{AudioSink, AudioSinkPlayback, SpatialAudioSink};
+
                 world.insert_resource(GlobalVolume::new(Volume::Linear(volume)));
+
+                // Bevy reads the global volume only when a sink is made, so the sounds already
+                // playing are set here, each from its own volume.
+                let mut plain = world.query::<(&OwnVolume, &mut AudioSink)>();
+                for (own, mut sink) in plain.iter_mut(world) {
+                    sink.set_volume(Volume::Linear(own.0 * volume));
+                }
+
+                let mut spatial = world.query::<(&OwnVolume, &mut SpatialAudioSink)>();
+                for (own, mut sink) in spatial.iter_mut(world) {
+                    sink.set_volume(Volume::Linear(own.0 * volume));
+                }
+
                 status::OK
             })
         }

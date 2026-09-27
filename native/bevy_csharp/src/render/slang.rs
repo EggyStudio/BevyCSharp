@@ -78,11 +78,18 @@ fn modules_hash() -> u64 {
 /// The name of the cache directory, under the asset root.
 pub const CACHE_DIRECTORY: &str = ".slang-cache";
 
-/// The first line of a cache entry, which also says which layout the rest of it has.
+/// The first line of a cache entry, which says which layout the rest of it has, before the hash
+/// of the bridge's modules it was compiled against.
 ///
-/// Two since entries carry reflection, in a file of their own beside the WGSL, and three since
-/// matrices are compiled row by row, which changes the WGSL a shader reading one compiles to.
-const CACHE_HEADER: &str = "// bevy_csharp slang cache 3";
+/// Two since entries carry reflection, in a file of their own beside the WGSL, three since
+/// matrices are compiled row by row, which changes the WGSL a shader reading one compiles to, and
+/// four since the modules' hash is on the first line, where clearing out stale entries reads it.
+const CACHE_HEADER: &str = "// bevy_csharp slang cache 4";
+
+/// The whole first line of an entry this bridge writes and reads.
+fn cache_header() -> String {
+    format!("{CACHE_HEADER} {:016x}", modules_hash())
+}
 
 /// Which stage of a pipeline an entry point is compiled for.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
@@ -531,7 +538,7 @@ fn write_cache(
 ) {
     let mut text = String::new();
 
-    text.push_str(CACHE_HEADER);
+    text.push_str(&cache_header());
     text.push('\n');
     text.push_str(&format!("// source {:016x}\n", fnv(source)));
 
@@ -556,6 +563,7 @@ fn write_cache(
 
     if let Some(directory) = path.parent() {
         let _ = std::fs::create_dir_all(directory);
+        clear_stale_entries(directory);
     }
 
     // The reflection and any SPIR-V first, so a reader that finds the WGSL finds both beside it.
@@ -581,12 +589,73 @@ fn write_cache(
     }
 }
 
+/// Deletes the entries in a cache directory that no bridge of this version can use, once per
+/// directory per run.
+///
+/// An entry's key includes the hash of the bridge's modules, so every change to them leaves every
+/// entry before it unreachable, and nothing else would ever remove one. Only a machine that
+/// compiles clears them, since it is the one that writes the entries that replace them; a
+/// machine without a compiler leaves a shipped cache exactly as it came. What is removed is an
+/// entry written for other modules or in an older layout, and the reflection or SPIR-V beside an
+/// entry that is gone.
+fn clear_stale_entries(directory: &Path) {
+    static CLEARED: std::sync::Mutex<Vec<PathBuf>> = std::sync::Mutex::new(Vec::new());
+
+    {
+        let Ok(mut cleared) = CLEARED.lock() else { return };
+        if cleared.iter().any(|done| done == directory) {
+            return;
+        }
+        cleared.push(directory.to_path_buf());
+    }
+
+    let Ok(entries) = std::fs::read_dir(directory) else { return };
+    let header = cache_header();
+    let mut kept = std::collections::HashSet::new();
+    let mut others = Vec::new();
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+
+        match path.extension().and_then(|extension| extension.to_str()) {
+            Some("wgsl") => {
+                let current = std::fs::read_to_string(&path)
+                    .is_ok_and(|text| text.lines().next() == Some(header.as_str()));
+
+                if current {
+                    kept.insert(path.with_extension(""));
+                } else {
+                    let _ = std::fs::remove_file(&path);
+                }
+            }
+            Some("json" | "spv") => others.push(path),
+            _ => {}
+        }
+    }
+
+    // A compile on another thread writes an entry's reflection and SPIR-V before its WGSL, so one
+    // written a moment ago may be waiting for its WGSL rather than left behind by a stale one.
+    let recent = |path: &Path| {
+        std::fs::metadata(path)
+            .and_then(|metadata| metadata.modified())
+            .ok()
+            .and_then(|modified| modified.elapsed().ok())
+            .is_some_and(|age| age.as_secs() < 60)
+    };
+
+    for path in others {
+        if !kept.contains(&path.with_extension("")) && !recent(&path) {
+            let _ = std::fs::remove_file(&path);
+        }
+    }
+}
+
 /// Reads a cache entry back, if there is one and everything it was made from is unchanged.
 fn read_cache(request: &Request, key: u64, source: &[u8]) -> Option<Compiled> {
     let text = std::fs::read_to_string(cache_path(request, key)).ok()?;
     let mut lines = text.lines();
 
-    if lines.next()? != CACHE_HEADER {
+    if lines.next()? != cache_header() {
         return None;
     }
 
@@ -708,6 +777,42 @@ mod tests {
 
         std::fs::write(&dependency, "changed").unwrap();
         assert!(read_cache(&request, key, b"one").is_none());
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// An entry written for other modules, and what sat beside it, is cleared the first time this
+    /// run writes to the directory, and an entry of this bridge's is kept.
+    #[test]
+    fn stale_entries_are_cleared_and_current_ones_kept() {
+        let root = std::env::temp_dir().join(format!("bcs_slang_clear_test_{}", next_unique()));
+        let directory = root.join(CACHE_DIRECTORY);
+        std::fs::create_dir_all(&directory).unwrap();
+
+        let old = std::time::SystemTime::now() - std::time::Duration::from_secs(3600);
+        let written = |name: &str, bytes: &[u8]| {
+            let path = directory.join(name);
+            std::fs::write(&path, bytes).unwrap();
+            std::fs::File::options().write(true).open(&path).unwrap().set_modified(old).unwrap();
+        };
+
+        written("aaaa.wgsl", b"// bevy_csharp slang cache 3\n");
+        written("aaaa.json", b"{}");
+        written("bbbb.wgsl", format!("{}\n", cache_header()).as_bytes());
+        written("bbbb.json", b"{}");
+        written("cccc.spv", &[1, 2, 3, 4]);
+
+        // Written a moment ago, as by a compile still on its way to writing the WGSL.
+        std::fs::write(directory.join("dddd.json"), "{}").unwrap();
+
+        clear_stale_entries(&directory);
+
+        assert!(!directory.join("aaaa.wgsl").exists());
+        assert!(!directory.join("aaaa.json").exists());
+        assert!(!directory.join("cccc.spv").exists());
+        assert!(directory.join("dddd.json").exists());
+        assert!(directory.join("bbbb.wgsl").exists());
+        assert!(directory.join("bbbb.json").exists());
 
         let _ = std::fs::remove_dir_all(&root);
     }

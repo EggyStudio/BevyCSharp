@@ -987,9 +987,10 @@ material.Program = Shaders.CreateProgram(ShaderStage.Slang(generated));
 `./bcs test` fetch a pinned release into `build/tools/slang` (`build/fetch-slang.sh` does it on its
 own), and the bridge looks for it in `BCS_SLANGC`, then on the `PATH`, then there. Every successful
 compile is cached under the asset root in `.slang-cache` with its layout, keyed by the file, the
-defines and a hash of everything the file imported. A machine without `slangc` reads the cache instead, so a
-game shipped with it needs no compiler, and an entry whose sources have changed is never used.
-`Shaders.SlangAvailable` says whether edits can be compiled.
+defines and a hash of everything the file imported. A machine without `slangc` reads the cache
+instead, so a game shipped with it needs no compiler, and an entry whose sources have changed is
+never used. The cache is ignored by git in this repository, since every checkout fetches `slangc`
+and fills it again on its first run. `Shaders.SlangAvailable` says whether edits can be compiled.
 
 #### Reloading shaders
 

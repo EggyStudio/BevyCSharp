@@ -32,6 +32,12 @@ msbuild.log
 # The Slang compiler build/fetch-slang.sh downloads.
 /build/tools/
 
+# Compiled Slang, written beside the assets of whatever ran a shader. Every checkout fetches
+# slangc on its first build and fills this again, and each entry is keyed by a hash of the
+# bridge's own modules, so a copy in git would go stale with every prelude edit. A game that ships
+# without a compiler carries its cache in its own build, not in this repository.
+.slang-cache/
+
 # What an app launched by `bcs open` writes, so its output can be read after it is gone.
 /build/sessions/
 

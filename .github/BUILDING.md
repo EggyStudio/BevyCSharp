@@ -153,8 +153,14 @@ per-platform bridges and does not pack, since neither is used unless a package i
 things change that.
 
 **Changed the readme, the icon or the project metadata.** None of that affects the binaries, so
-pushing to the default branch republishes on its own. It reuses the native binaries from the last
-full build and only repacks around them, which takes a couple of minutes instead of an hour.
+there is nothing to build. Put `[repack]` in the commit message when the change is ready to go
+out, and the package is republished around the native binaries of the last full build, which
+takes a couple of minutes instead of an hour. Without the marker nothing is published, so a run of
+small edits costs nothing until the one that says so:
+
+```bash
+git commit -m "reword the install section [repack]"
+```
 
 **Changed the code.** Put `[publish]` anywhere in a commit message. That builds all six platforms,
 tests on all three operating systems, and publishes:
@@ -163,8 +169,10 @@ tests on all three operating systems, and publishes:
 git commit -m "add the thing [publish]"
 ```
 
-The marker is a plain substring, so it works alongside any other text and in any commit of the
-push, not only the last one. Either route can also be started by hand from the Actions tab.
+Each marker is a plain substring, so it works alongside any other text and in any commit of the
+push, not only the last one. A push carrying both takes the full build, which packs anyway. Either
+route can also be started by hand from the Actions tab. The tests run on every push that changes
+more than Markdown, whether or not it carries a marker.
 
 Versions are `MAJOR.MINOR.<commit count>`: the first two from `VersionPrefix` in
 `Directory.Build.props`, the last from `git rev-list --count HEAD`. One counter that only grows,

@@ -13,6 +13,9 @@ name: build
 #
 # macOS runners bill at ten times the Linux rate and Windows at twice, so a full run costs
 # roughly ten times an ordinary one. Marking the commits worth that keeps the decision yours.
+#
+# A change to the readme or the package's metadata alone needs no build at all. [repack] in the
+# commit message republishes it around the last full build's binaries (see republish.yml).
 
 on:
   push:

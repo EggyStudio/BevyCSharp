@@ -7,19 +7,18 @@ name: republish
 # prose would cost an hour for nothing. This reuses the binaries from the last full build and
 # repacks around them.
 #
-# Anything touching the Rust sources or the managed library needs a real build instead. Put
-# [publish] in the commit message for that.
+# It runs only when asked. Put [repack] in the commit message, or start it by hand from the
+# Actions tab:
+#
+#     git commit -m "reword the readme [repack]"
+#
+# A push without the marker publishes nothing, so a run of readme edits costs nothing until the
+# one that says it is ready. Anything touching the Rust sources or the managed library needs a
+# real build instead, which [publish] asks for, and a push carrying both takes the real build.
 
 on:
   push:
     branches: [main, master]
-    paths:
-      - 'README.md'
-      - 'LICENSE'
-      - '.github/assets/**'
-      - 'Directory.Build.props'
-      - 'BevyCSharp/BevyCSharp.csproj'
-      - 'BevyCSharp/build/**'
   workflow_dispatch:
 
 concurrency:
@@ -39,6 +38,12 @@ env:
 jobs:
   republish:
     name: republish
+    # Every commit in the push, as build.yml reads them, so a marked commit followed by a tidy-up
+    # still repacks. A push that also says [publish] is left to the full build, which packs anyway.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (contains(join(github.event.commits.*.message, ' '), '[repack]') &&
+       !contains(join(github.event.commits.*.message, ' '), '[publish]'))
     runs-on: ubuntu-latest
     timeout-minutes: 20
 

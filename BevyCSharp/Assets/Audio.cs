@@ -31,6 +31,17 @@ public sealed class AudioSettings
     public float Volume { get; set; } = 1f;
 
     /// <summary>
+    /// The bus it plays on, such as <c>"music"</c> or <c>"effects"</c>, or none. See
+    /// <see cref="Audio.SetBusVolume"/>.
+    /// </summary>
+    /// <remarks>
+    /// A bus is a name and a volume, and a sound on one is heard at its own volume times the bus's,
+    /// so a settings screen's music slider is one call rather than a walk over every sound playing.
+    /// A bus nobody has set is at one.
+    /// </remarks>
+    public string? Bus { get; set; }
+
+    /// <summary>
     /// Playback rate. 1 is as recorded.
     /// </summary>
     /// <remarks>
@@ -108,6 +119,64 @@ public sealed class AudioSettings
 /// </example>
 public static unsafe class Audio
 {
+    /// <summary>What the mixer knows of a sound: its bus, its own volume, and whether it is paused.</summary>
+    private sealed record Mixed(string? Bus, float Volume, bool Paused);
+
+    /// <summary>Every sound played since the app was made, by its entity's bits.</summary>
+    /// <remarks>
+    /// Kept so a bus can reach its sounds. A sound that ends on its own is not reported, so one is
+    /// forgotten the first time reaching it finds its entity gone.
+    /// </remarks>
+    private static readonly Dictionary<ulong, Mixed> Sounds = [];
+
+    /// <summary>Every bus somebody has set, by name.</summary>
+    private static readonly Dictionary<string, float> Buses = new(StringComparer.Ordinal);
+
+    /// <summary>Forgets every sound and bus, for an app starting from none.</summary>
+    internal static void ResetMixer()
+    {
+        Sounds.Clear();
+        Buses.Clear();
+    }
+
+    /// <summary>A bus's volume, which is one for a bus nobody has set and for no bus at all.</summary>
+    public static float BusVolume(string? bus) =>
+        bus is not null && Buses.TryGetValue(bus, out var volume) ? volume : 1f;
+
+    /// <summary>
+    /// Sets a bus's volume, which every sound on it is heard at times its own. Only valid inside a
+    /// system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy has no mixer, so a bus is kept here: a name and a volume, and the sounds played on it
+    /// through <see cref="AudioSettings.Bus"/>. Setting it reaches every sound on it now and every
+    /// one played later, and a sound's own volume from <see cref="SetVolume"/> is kept apart, so a
+    /// music slider and a fade on one track multiply rather than overwrite each other.
+    /// <see cref="SetGlobalVolume"/> is over all of it.
+    /// </para>
+    /// <para>
+    /// A sound started this frame has no sink yet to set, and is left at the volume it started at,
+    /// which already took the bus into account.
+    /// </para>
+    /// </remarks>
+    /// <param name="bus">Its name, such as <c>"music"</c>.</param>
+    /// <param name="volume">1 leaves its sounds as mixed, 0 silences them.</param>
+    public static void SetBusVolume(string bus, float volume)
+    {
+        ArgumentNullException.ThrowIfNull(bus);
+        ArgumentOutOfRangeException.ThrowIfNegative(volume);
+
+        Buses[bus] = volume;
+
+        foreach (var (bits, mixed) in Sounds.Where(sound => sound.Value.Bus == bus).ToList())
+        {
+            var answer = Native.bcs_audio_control(bits, mixed.Volume * volume, mixed.Paused ? 1 : 0);
+
+            if (answer == NativeStatus.NoEntity) Sounds.Remove(bits);
+        }
+    }
+
     /// <summary>Plays a sound and returns the entity playing it.</summary>
     /// <exception cref="BevyNativeException">The handle names no sound, or this build has no audio.</exception>
     public static Entity Play(AssetHandle clip) => Play(clip, new AudioSettings());
@@ -124,7 +193,7 @@ public static unsafe class Audio
         var native = new NativeAudioConfig
         {
             Mode = (int)settings.Mode,
-            Volume = settings.Volume,
+            Volume = settings.Volume * BusVolume(settings.Bus),
             Speed = settings.Speed,
             Paused = settings.Paused ? 1 : 0,
             Spatial = settings.Spatial ? 1 : 0,
@@ -140,34 +209,77 @@ public static unsafe class Audio
                 $"Playing {clip} failed, because either it names no loaded sound or this native build "
                 + "has no audio. Rebuild the bridge with build/build-native.sh --render.");
 
+        Sounds[bits] = new Mixed(settings.Bus, settings.Volume, settings.Paused);
         return new Entity(bits);
     }
 
     /// <summary>Sets a playing sound's volume.</summary>
     /// <remarks>
     /// Reaches the sink Bevy attaches once playback has started, so this does nothing in the same
-    /// frame the sound was started in.
+    /// frame the sound was started in. The sound is heard at this times its bus's volume.
     /// </remarks>
     public static void SetVolume(Entity playing, float volume) =>
-        Native.Check(
-            Native.bcs_audio_control(playing.Bits, volume, 0),
-            $"setting the volume of {playing}");
+        Control(playing, volume, paused: null, $"setting the volume of {playing}");
 
     /// <summary>Pauses a playing sound, keeping its place.</summary>
     public static void Pause(Entity playing, float volume = 1f) =>
-        Native.Check(
-            Native.bcs_audio_control(playing.Bits, volume, 1),
-            $"pausing {playing}");
+        Control(playing, volume, paused: true, $"pausing {playing}");
 
     /// <summary>Resumes a paused sound.</summary>
     public static void Resume(Entity playing, float volume = 1f) =>
+        Control(playing, volume, paused: false, $"resuming {playing}");
+
+    /// <summary>
+    /// Sets a sound's own volume and, where asked, whether it is paused, heard through its bus.
+    /// </summary>
+    /// <remarks>
+    /// The bridge sets both at once, so a volume change keeps whatever the sound was last told
+    /// about pausing rather than starting it again.
+    /// </remarks>
+    private static void Control(Entity playing, float volume, bool? paused, string doing)
+    {
+        var known = Sounds.GetValueOrDefault(playing.Bits) ?? new Mixed(null, volume, false);
+        var now = known with { Volume = volume, Paused = paused ?? known.Paused };
+
         Native.Check(
-            Native.bcs_audio_control(playing.Bits, volume, 0),
-            $"resuming {playing}");
+            Native.bcs_audio_control(playing.Bits, volume * BusVolume(now.Bus), now.Paused ? 1 : 0),
+            doing);
+
+        Sounds[playing.Bits] = now;
+    }
+
+    /// <summary>A sound's volume, its own times its bus's, before the global volume.</summary>
+    /// <remarks>
+    /// Read once playback has started and Bevy has attached a sink, so a sound asked about in the
+    /// frame it was started in reports that it carries none yet.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// The entity is gone, is not playing yet, or this build has no audio.
+    /// </exception>
+    public static float VolumeOf(Entity playing)
+    {
+        float volume;
+        Native.Check(Native.bcs_audio_state(playing.Bits, &volume, null), $"reading the volume of {playing}");
+        return volume;
+    }
+
+    /// <summary>Whether a sound is paused.</summary>
+    /// <exception cref="BevyNativeException">
+    /// The entity is gone, is not playing yet, or this build has no audio.
+    /// </exception>
+    public static bool IsPaused(Entity playing)
+    {
+        int paused;
+        Native.Check(Native.bcs_audio_state(playing.Bits, null, &paused), $"asking whether {playing} is paused");
+        return paused != 0;
+    }
 
     /// <summary>Stops a sound and despawns the entity playing it.</summary>
-    public static void Stop(Entity playing) =>
+    public static void Stop(Entity playing)
+    {
+        Sounds.Remove(playing.Bits);
         Native.Check(Native.bcs_audio_stop(playing.Bits), $"stopping {playing}");
+    }
 
     /// <summary>
     /// Makes an entity the ear spatial sound is heard from.
@@ -294,7 +406,8 @@ public static unsafe class Audio
     /// </summary>
     /// <remarks>
     /// Multiplied with each sound's own volume rather than replacing it, so the mix a game set up
-    /// survives the master slider being moved.
+    /// survives the master slider being moved. It reaches the sounds already playing as well as
+    /// the ones started later.
     /// </remarks>
     /// <param name="volume">1 leaves everything as mixed, 0 is silence.</param>
     /// <exception cref="BevyNativeException">

@@ -142,6 +142,9 @@ public sealed unsafe class App : IDisposable
             ? Path.Combine(AppContext.BaseDirectory, "assets")
             : Path.GetFullPath(Config.AssetRoot);
 
+        // Sounds and buses belong to the app that played them.
+        Audio.ResetMixer();
+
         World.InsertResource(Config);
         World.InsertResource(new Time());
         World.InsertResource(new Input());

@@ -769,6 +769,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial ulong bcs_audio_play(int clip, NativeAudioConfig* config);
 
+    /// <summary>Reads a playing sound's volume and whether it is paused.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_audio_state(ulong entity, float* volume, int* paused);
+
     /// <summary>Sets a playing sound's volume and pause state.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
