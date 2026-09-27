@@ -122,4 +122,14 @@ public sealed class RenderCornerTests
         Assert.Throws<ArgumentOutOfRangeException>(() => Render.SetRoundedCorners(Entity.None, -1f));
         Assert.Throws<ArgumentOutOfRangeException>(() => Render.SetRoundedCorners(Entity.None, float.NaN));
     }
+
+    /// <summary>A lens that cannot be is refused before it reaches the engine.</summary>
+    [Fact]
+    public void AnImpossibleLensIsRefused()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => Render.SetPerspective(Entity.None, 0f, 0.1f, 100f));
+        Assert.Throws<ArgumentOutOfRangeException>(() => Render.SetPerspective(Entity.None, 180f, 0.1f, 100f));
+        Assert.Throws<ArgumentOutOfRangeException>(() => Render.SetPerspective(Entity.None, 60f, 0f, 100f));
+        Assert.Throws<ArgumentOutOfRangeException>(() => Render.SetPerspective(Entity.None, 60f, 10f, 5f));
+    }
 }
