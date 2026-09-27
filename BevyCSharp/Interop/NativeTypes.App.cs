@@ -59,6 +59,9 @@ public unsafe struct NativeConfig
 
     /// <summary>Non-zero to make the window see-through where what is drawn has no alpha.</summary>
     public uint Transparent;
+
+    /// <summary>Non-zero to have the desktop draw the title bar where it only does for X11 windows.</summary>
+    public uint DesktopTitleBar;
 }
 
 /// <summary>One video mode a monitor can be driven at.</summary>

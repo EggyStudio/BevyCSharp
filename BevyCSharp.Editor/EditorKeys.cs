@@ -90,6 +90,9 @@ public partial struct EditorKeys
         // programs.
         if (input.KeyPressed(Key.Delete)) Run(ctx, "Entity/Delete");
 
+        // Where Godot, Visual Studio and most engines put running the game.
+        if (input.KeyPressed(Key.F5)) Run(ctx, "Project/Play");
+
         // Godot's key for adding a node, which is the editor this window is modeled on.
         if (control && input.KeyPressed(Key.A)) Run(ctx, "Entity/Add");
 

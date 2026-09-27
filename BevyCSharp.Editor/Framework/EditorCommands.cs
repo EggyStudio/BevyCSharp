@@ -320,6 +320,27 @@ public static class EditorCommands
 
         SceneCamera.Register();
 
+        // Plays the game in a window of its own, as Godot does, and stops it from the same place.
+        // At the end of the tools across the top, where every editor puts it.
+        EditorToolbar.Add(new ToolbarButton(
+            ToolbarSlot.Center,
+            EditorIcons.Play,
+            static () => string.Empty,
+            static _ => EditorPlay.Toggle(),
+            static () => EditorPlay.Running,
+            100,
+            "Play the game in its own window, or stop it"));
+
+        EditorMenu.Command("Project/Play", static _ => EditorPlay.Toggle(), 3, EditorIcons.Play, "F5");
+
+        EditorSettings.Heading("Editor", "Playing", 30);
+        EditorSettings.Text(
+            "Editor",
+            "Project to play",
+            static () => EditorPlay.Project,
+            static path => EditorPlay.Project = path.Trim(),
+            31);
+
     }
 
     /// <summary>Where a menu opened from the toolbar goes: under the viewport's top left.</summary>

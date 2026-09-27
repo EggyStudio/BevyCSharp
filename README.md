@@ -2022,6 +2022,16 @@ window is maximized, so a button that toggles it keeps that itself. The ImGui ru
 cursor shape as the pointer crosses a field or an edge, whenever the shape it wants changes, and
 the editor draws its own frame this way.
 
+On GNOME under Wayland, winit draws a title bar of its own that imitates an older GNOME rather than
+the libadwaita one the desktop's other windows have, because GNOME leaves drawing it to the app.
+`Config.DesktopTitleBar` opens the window through XWayland there instead, where GNOME draws its
+own. An XWayland window is softer on a display at a fractional scale, so it is off unless asked
+for, and it does nothing on another desktop or platform.
+
+```csharp
+config.DesktopTitleBar = true;                    // before the app is built
+```
+
 `Window.MonitorModes` lists the resolutions and refresh rates a monitor can actually be driven at,
 and `Window.SetVideoMode(monitor, mode)` takes the screen over at one of them. That is the case
 `WindowMode.Fullscreen` does not cover, where a game runs at a resolution the desktop is not in. The
@@ -2758,6 +2768,10 @@ gives the camera the rectangle that is left rather than drawing it behind. The a
 handful of numbers that `EditorShell` owns and every part reads, saved with the settings, so the
 editor opens the way it was left. The look is one theme file, `assets/theme.txt`, which the Style
 tab writes. [.github/EDITOR.md](.github/EDITOR.md) has the design language in full.
+
+The play button, `F5` or `Project/Play` runs the game in a window of its own and stops it again,
+and what it writes appears in the console. [.github/PLAY.md](.github/PLAY.md) has the plan past
+that, from playing the scene being edited to a tab that builds a game to ship.
 
 Two things it is built on belong to the library rather than to the editor, and any tool can use
 them.

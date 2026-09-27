@@ -207,6 +207,27 @@ public sealed class Config
     public bool Transparent { get; set; }
 
     /// <summary>
+    /// Have the desktop draw the window's title bar and border in its own current style, on the
+    /// Linux desktops that draw them only for X11 windows.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// GNOME does not draw a frame for a Wayland window, so on Wayland the window draws its own,
+    /// and the one it has is a re-creation of an older GNOME look that no longer matches the rest
+    /// of the desktop. GNOME does draw a frame for an X11 window, in the theme everything else
+    /// wears. With this on, a window opened under GNOME on Wayland is opened through XWayland, and
+    /// its title bar and buttons are the desktop's own.
+    /// </para>
+    /// <para>
+    /// Off unless asked for, since a window through XWayland is scaled by the desktop rather than
+    /// drawn at the screen's own resolution, which looks soft at a fractional scale such as 125%.
+    /// Does nothing on a desktop that draws Wayland frames itself (KDE, most tiling compositors),
+    /// off Linux, where there is no X11 server to go through, or for a window without a frame.
+    /// </para>
+    /// </remarks>
+    public bool DesktopTitleBar { get; set; }
+
+    /// <summary>
     /// Make Bevy's ray-traced lighting available, which a camera then turns on with
     /// <see cref="Render.SetRayTracedLighting"/>.
     /// </summary>

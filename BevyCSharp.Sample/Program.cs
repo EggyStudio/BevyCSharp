@@ -51,6 +51,10 @@ config.Gui = windowed;
 // runs until something asks it to stop rather than counting down to an exit.
 config.Serve = args.Contains("--serve");
 
+// The desktop's own title bar where it draws one only for X11 windows, which is GNOME on Wayland,
+// so the sample's window wears the frame every other window on the desktop does.
+config.DesktopTitleBar = true;
+
 if ((windowed || offscreen) && !App.HasRenderer)
 {
     Console.Error.WriteLine(

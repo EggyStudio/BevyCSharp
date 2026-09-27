@@ -129,6 +129,7 @@ public sealed unsafe class App : IDisposable
                 GpuTimings = Config.GpuTimings ? 1u : 0u,
                 RayTracedLighting = Config.RayTracedLighting ? 1u : 0u,
                 Transparent = Config.Transparent ? 1u : 0u,
+                DesktopTitleBar = Config.DesktopTitleBar ? 1u : 0u,
             };
             _handle = Native.bcs_app_create(&native);
         }

@@ -205,7 +205,8 @@ the middle of the screen listing every row under `Spawn/` in the menu, with a se
 the keyboard from the moment it opens and says in its hint where the new entity will go. The
 arrows move the choice and Enter adds it, as Godot's node window does. Add Component at the bottom
 of the details opens the same window (`PickerWindow`) over what can be put on the entity, so the
-two ways of adding something read as one. What is added goes under the entity selected when the window opened, or at the top of the
+two ways of adding something read as one. While it is open the rest of the editor is dimmed, with the dim rounded
+to the window's corners, so they stay clear. What is added goes under the entity selected when the window opened, or at the top of the
 world when nothing was, and undoing it takes it away as one step. A game's own
 `EditorMenu.Command("Spawn/Enemy", …)` appears in the window without anything else.
 
@@ -224,6 +225,15 @@ eases up to speed and back to a stop, and how far the mouse turns it), and how i
 is the editor's plain one unless overridden, when it takes a tonemapper, bloom, an antialiasing
 pass, and an exposure that follows the light or one of its own. Everything is saved with the
 editor's preferences, on a page of its own in the settings, and Reset puts it back.
+
+### Playing
+
+The play button in the middle of the scene's toolbars, `F5` and `Project/Play` run the game in a
+window of its own, as Godot does, and the same button stops it. It runs the sample unless the
+settings name another project under Playing. What the game writes appears in the console marked
+`[game]`. The game is a process of its own, so one that crashes leaves the editor running.
+[PLAY.md](PLAY.md) has what is planned past that: playing the scene being edited, seeing the
+running game's world, and a tab that builds a game to ship.
 
 ### Statistics
 

@@ -82,6 +82,12 @@ public static class PickerWindow
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, EditorSurface.Around);
 
+        // The dim behind the modal, drawn here rather than by ImGui, which dims the whole display
+        // with a square rectangle and so darkens the window's transparent corners and gaps as well.
+        // This one is the window's own shape, rounded as its corners are, so what is clear stays
+        // clear.
+        if (ImGui.IsPopupOpen(Name)) Dim();
+
         // A panel's color rather than a flyout's field gray. It holds a box to type in and a list,
         // and those are drawn on a panel everywhere else, so on the field gray the box would be the
         // color of what it sits on and could not be seen.
@@ -90,9 +96,13 @@ public static class PickerWindow
         // A modal, so the scene and the panels wait while it is up, and a press outside closes it
         // rather than reaching what is under it. No title bar, since ImGui's is a band of another
         // color across a rounded card, and a box to type in says what the window is for.
+        ImGui.PushStyleColor(ImGuiCol.ModalWindowDimBg, 0u);
+
         IsOpen = ImGui.BeginPopupModal(
             Name,
             ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar);
+
+        ImGui.PopStyleColor();
 
         if (!IsOpen)
         {
@@ -247,6 +257,40 @@ public static class PickerWindow
         if (!any) ImGui.EndDisabled();
 
         return add;
+    }
+
+    /// <summary>
+    /// Dims everything behind the modal, in a window of its own laid over the panels, rounded at
+    /// the window's corners as the renderer rounds them.
+    /// </summary>
+    /// <remarks>
+    /// Square where the window is maximized, since its corners are square then too. Takes no input,
+    /// since the modal already keeps every press to itself.
+    /// </remarks>
+    private static void Dim()
+    {
+        var size = ImGuiRuntime.Size;
+
+        ImGui.SetNextWindowPos(Vector2.Zero);
+        ImGui.SetNextWindowSize(size);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
+
+        var flags = EditorSurface.Placed
+            | ImGuiWindowFlags.NoBackground
+            | ImGuiWindowFlags.NoInputs
+            | ImGuiWindowFlags.NoFocusOnAppearing
+            | ImGuiWindowFlags.NoNav;
+
+        if (ImGui.Begin("##modalDim", flags))
+        {
+            var radius = EditorWindowFrame.Maximized ? 0f : EditorTheme.Current.WindowRounding;
+            var shade = EditorTheme.Alpha(EditorTheme.Current.Ground with { W = 1f }, 0.55f);
+
+            EditorDraw.Rounded(Vector2.Zero, size, radius, ImGui.GetColorU32(shade), ImGui.GetWindowDrawList());
+        }
+
+        ImGui.End();
+        ImGui.PopStyleVar();
     }
 
     /// <summary>What matches the search, in the order it was offered.</summary>
