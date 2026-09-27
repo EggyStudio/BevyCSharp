@@ -60,7 +60,9 @@ public static class EditorPanes
 
         if (EditorShell.Stacked)
         {
-            var world = MathF.Max(120f, body.Y * EditorShell.WorldShare);
+            // Whole pixels, since ImGui cuts a card's size down to one, and a world a fraction of a
+            // pixel tall leaves the details under it that fraction short of the panel's bottom.
+            var world = MathF.Round(MathF.Max(120f, body.Y * EditorShell.WorldShare));
 
             // Placed rather than flowed, so the gap the two cards have between them is the one gap
             // this editor spaces everything by and not that plus a row's worth of ImGui's own at
@@ -78,29 +80,20 @@ public static class EditorPanes
         }
         else
         {
-            // ImGui's own columns, which come with the grip between them. Dragging one edge is
-            // something the table already knows how to do, and nothing here has to work out where
-            // the pointer went.
-            var table = ImGuiTableFlags.Resizable
-                | ImGuiTableFlags.NoBordersInBody
-                | ImGuiTableFlags.SizingStretchProp
-                | ImGuiTableFlags.NoSavedSettings;
+            // Placed by hand, as the stacked arrangement is, so the two cards start at the same
+            // height as they do stacked and end at the same place. A table puts padding and
+            // spacing of its own above a row, which lowered both cards a couple of pixels and
+            // pushed their bottoms the same distance past the panel's.
+            var start = ImGui.GetCursorPos();
+            var world = MathF.Round(MathF.Max(120f, (body.X - EditorSurface.Gutter) * EditorShell.WorldShare));
 
-            if (ImGui.BeginTable("##split", 2, table, body))
-            {
-                ImGui.TableSetupColumn("##worldcol", ImGuiTableColumnFlags.WidthStretch, EditorShell.WorldShare);
-                ImGui.TableSetupColumn("##datacol", ImGuiTableColumnFlags.WidthStretch, 1f - EditorShell.WorldShare);
+            EditorSurface.Card("##world", new Vector2(world, body.Y), WorldPanel.Draw);
 
-                ImGui.TableNextRow();
+            ImGui.SetCursorPos(start + new Vector2(world, 0f));
+            Beside(body);
 
-                ImGui.TableNextColumn();
-                EditorSurface.Card("##world", new Vector2(0f, body.Y), WorldPanel.Draw);
-
-                ImGui.TableNextColumn();
-                EditorSurface.Card("##data", new Vector2(0f, body.Y), DetailsPanel.Draw);
-
-                ImGui.EndTable();
-            }
+            ImGui.SetCursorPos(start + new Vector2(world + EditorSurface.Gutter, 0f));
+            EditorSurface.Card("##data", new Vector2(body.X - world - EditorSurface.Gutter, body.Y), DetailsPanel.Draw);
         }
 
         ImGui.End();
@@ -132,6 +125,27 @@ public static class EditorPanes
         }
 
         EditorSurface.Grab(EditorSurface.Pill, over, held);
+    }
+
+    /// <summary>The bar between the world and the data when they are side by side, which a drag moves.</summary>
+    /// <remarks>The stacked bar stood up, the same pill, found and shown the same way.</remarks>
+    /// <param name="body">The room the two cards share, which a drag divides.</param>
+    internal static void Beside(Vector2 body)
+    {
+        ImGui.InvisibleButton("##beside", new Vector2(EditorSurface.Gutter, body.Y));
+
+        var held = ImGui.IsItemActive();
+        var over = ImGui.IsItemHovered();
+
+        if (over || held) ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
+
+        if (held && body.X > 1f)
+        {
+            EditorShell.WorldShare = Math.Clamp(
+                EditorShell.WorldShare + (ImGui.GetIO().MouseDelta.X / body.X), 0.15f, 0.85f);
+        }
+
+        EditorSurface.Grab(new Vector2(EditorSurface.Pill.Y, EditorSurface.Pill.X), over, held);
     }
 
     /// <summary>The panel's left edge, which a drag widens.</summary>
