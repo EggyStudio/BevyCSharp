@@ -102,8 +102,8 @@ public static class EditorSceneFrame
     /// </summary>
     /// <remarks>
     /// <para>
-    /// A row of their own above the panels rather than a corner of one, so they stay where a title
-    /// bar's are whatever the panels are doing, and no panel has to leave room for them. Round with
+    /// A window of their own over everything, so they stay where a title bar's are whatever the
+    /// panels are doing, lying over the top of the panel's column rather than taking a row from it. Round with
     /// a picture in each, like the rest of what floats over the scene, and in the order a title bar
     /// has them, with the pin before them because it belongs to the editor and they belong to the
     /// window.
@@ -119,8 +119,8 @@ public static class EditorSceneFrame
         // of that family rather than discs of their own.
         const float Size = EditorSurface.Tall;
 
-        // In the title row above the panels, as far in from the window's top right as the
-        // toolbars are from its top left, so the two ends of the row line up.
+        // As far in from the window's top right as the toolbars are from its top left, so the two
+        // ends of the row line up, and over the panel's top when it reaches up there, which it may.
         var window = ImGuiRuntime.Size;
         var inset = ToolbarView.Inset;
 
@@ -134,6 +134,9 @@ public static class EditorSceneFrame
 
         if (ImGui.Begin("##dock", EditorSurface.Bare))
         {
+            // Where the row is, so the band along the top that moves the window can leave it be.
+            _buttons = (ImGui.GetWindowPos(), ImGui.GetWindowPos() + ImGui.GetWindowSize());
+
             ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, Size * 0.5f);
 
             // The plate everything lying on the scene wears, so these match the buttons in the
@@ -196,6 +199,13 @@ public static class EditorSceneFrame
         ImGui.End();
         ImGui.PopStyleVar(2);
     }
+
+    /// <summary>Where the window's buttons were last drawn.</summary>
+    private static (Vector2 Min, Vector2 Max) _buttons;
+
+    /// <summary>Whether a point is on the window's buttons.</summary>
+    internal static bool OverButtons(Vector2 at) =>
+        at.X >= _buttons.Min.X && at.X < _buttons.Max.X && at.Y >= _buttons.Min.Y && at.Y < _buttons.Max.Y;
 
     /// <summary>A round button carrying one of the window's marks, with a word under the pointer.</summary>
     /// <param name="id">What to call it.</param>

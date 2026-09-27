@@ -42,6 +42,11 @@ config.WatchAssets = true;
 // back to, which looks as the editor always did.
 config.Transparent = !args.Contains("--offscreen");
 
+// As many frames as the machine can draw rather than as many as the display shows, so the
+// statistics card measures what a scene costs rather than the refresh rate, and a change that
+// makes a scene slower shows as a smaller number instead of hiding under a cap.
+config.Vsync = false;
+
 // What each render pass costs, which the Frame tab lists beside the images a camera keeps. An
 // editor is where a technique is tuned, so the timestamps it costs are worth paying here.
 config.GpuTimings = true;

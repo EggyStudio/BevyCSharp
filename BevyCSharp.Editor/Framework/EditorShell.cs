@@ -97,7 +97,8 @@ public static class EditorShell
     /// since a press there resizes the window. No position is asked for because none is needed,
     /// and a parameter that is ignored reads as one that is not.
     /// </remarks>
-    public static bool PointerOverPanel => ImGuiRuntime.WantsMouse || EditorWindowFrame.OnEdge is not null;
+    public static bool PointerOverPanel =>
+        ImGuiRuntime.WantsMouse || EditorWindowFrame.OnEdge is not null || EditorWindowFrame.OnBand;
 
     /// <summary>The tabs along the bottom, in the order they are listed.</summary>
     /// <remarks>
@@ -210,12 +211,12 @@ public static class EditorShell
         // drawn in but the cards inside them, which the padding holds a gap in from every edge.
         // Docking changes what is behind those cards rather than where they are, so nothing on
         // screen moves when it is switched.
-        // Below the strip the window is moved by, where the editor draws its own frame. The strip
-        // is a gap to grab, and the panel starting under it is what leaves it clear.
-        var grip = EditorWindowFrame.Grip;
+        // Up to the top of the window, less the few pixels along it that resize the window when
+        // the frame is the editor's own. The window's buttons lie over the panel's top.
+        var top = EditorWindowFrame.Top;
 
         var panelX = window.X - PanelWidth;
-        Panel = (panelX, grip, PanelWidth, window.Y - grip);
+        Panel = (panelX, top, PanelWidth, window.Y - top);
 
         var strip = EditorStrip.Shut + (OpenTab >= 0 ? TabHeight + 1f : 0f);
         var tabsWidth = panelX;
@@ -224,17 +225,16 @@ public static class EditorShell
         // the whole window and everything else is over it.
         //
         // Docked it is a surface like the panels, so it keeps the gap every surface keeps from the
-        // window's edges, the top included. The title row is above the panel's column only, where
-        // the window's buttons are, and the scene beside it runs to the top as it does floating. On
-        // its right it runs up to the panel's own edge, and below it up to the strip's, because the
-        // gap there is the one those keep inside themselves, and a second one would double it.
+        // window's edges, and its top is level with the panel's cards. On its right it runs up to
+        // the panel's own edge, and below it up to the strip's, because the gap there is the one
+        // those keep inside themselves, and a second one would double it.
         var inset = EditorSurface.Gutter;
 
         Scene = Docked
             ? (inset,
-                inset,
+                top + inset,
                 Math.Max(1f, panelX - inset),
-                Math.Max(1f, window.Y - strip - inset))
+                Math.Max(1f, window.Y - strip - top - inset))
             : (0f, 0f, window.X, window.Y);
 
         // Where the scene is still visible, which anything drawn over the scene has to stay inside.

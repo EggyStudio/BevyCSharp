@@ -25,13 +25,13 @@ public static class EditorStrip
 
     /// <summary>How tall the strip is with no tab open.</summary>
     /// <remarks>
-    /// A tab is one of the things that lie on the scene, so it is as tall as the buttons in the
-    /// corners are, and the strip is that plus the air it keeps above and below it. The stock look
-    /// keeps none below, because ImGui draws a tab with a flat bottom for the content to join, and
-    /// a flat bottom with a gap under it is a tab hanging in the air.
+    /// A tab is a pill with a word on it, as tall as every other, and the strip is that plus the
+    /// air it keeps above and below it. The stock look keeps none below, because ImGui draws a tab
+    /// with a flat bottom for the content to join, and a flat bottom with a gap under it is a tab
+    /// hanging in the air.
     /// </remarks>
     internal static float Shut =>
-        EditorSurface.Tall + (Padding * (EditorTheme.Current.Stock ? 1f : 2f));
+        ImGui.GetFrameHeight() + (Padding * (EditorTheme.Current.Stock ? 1f : 2f));
 
     /// <summary>
     /// The strip along the bottom left, with whatever is open growing upwards out of it.
@@ -79,7 +79,7 @@ public static class EditorStrip
 
             var room = ImGui.GetContentRegionAvail();
 
-            var bar = EditorSurface.Tall + ImGui.GetStyle().ItemSpacing.Y;
+            var bar = ImGui.GetFrameHeight() + ImGui.GetStyle().ItemSpacing.Y;
 
             // A card like the ones in the panel, with the same gap outside it and the same air
             // inside it, rather than a rectangle pushed against its own edges.
@@ -213,9 +213,9 @@ public static class EditorStrip
             // window is the desktop, and a word on either needs something under it to sit on.
             var idle = EditorSurface.Lying();
 
-            // As tall as a button floating in the scene's corner, because a tab is one of those
-            // lying along the bottom edge.
-            if (EditorWidgets.Pill(EditorShell.Tabs[index].Name, open, idle, EditorSurface.Tall))
+            // As tall as every other pill with a word on it, the ones along the top of the style
+            // tab among them, so a button with a word in it is one size wherever it is.
+            if (EditorWidgets.Pill(EditorShell.Tabs[index].Name, open, idle))
             {
                 EditorShell.OpenTab = open ? -1 : index;
             }

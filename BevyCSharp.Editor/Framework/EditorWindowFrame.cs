@@ -29,7 +29,7 @@ namespace BevyCSharp.Editor.Framework;
 public static class EditorWindowFrame
 {
     /// <summary>How far in from each edge the pointer resizes rather than reaches what is under it.</summary>
-    private const float Edge = 4f;
+    internal const float Edge = 4f;
 
     /// <summary>How far along an edge from a corner the pointer resizes from the corner instead.</summary>
     private const float Corner = 14f;
@@ -46,19 +46,13 @@ public static class EditorWindowFrame
     public static bool Maximized { get; private set; }
 
     /// <summary>
-    /// How tall the title row across the top of the window is, which the panels start below.
+    /// How tall the title row across the top of the window is, while the panel floats.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// The row the window's buttons sit in at the right, and the toolbars at the left while the
-    /// panel floats: a button's height, and the same inset above it the toolbars keep from the
-    /// window's edge. Whatever in it is not a button moves the window, where the frame is the
-    /// editor's own.
-    /// </para>
-    /// <para>
-    /// There whether or not the frame is the editor's own, so the pin that docks the panel always
-    /// has a place and nothing moves when the same editor is drawn into an image.
-    /// </para>
+    /// The row the toolbars sit in at the left and the window's buttons at the right: a button's
+    /// height, and the same inset above it the toolbars keep from the window's edge. Whatever in it
+    /// is not a button, and is not the panel lying over its right end, moves the window, where the
+    /// frame is the editor's own.
     /// </remarks>
     public static float Grip => ToolbarView.Inset + EditorSurface.Tall;
 
@@ -106,26 +100,27 @@ public static class EditorWindowFrame
     /// </remarks>
     internal static void DrawGrip()
     {
-        if (!Borderless) return;
+        if (!Borderless || EditorShell.Docked) return;
 
-        var window = ImGuiRuntime.Size;
-
-        // Floating, the whole title row, since the scene under it is the whole window and the row
-        // is where a title bar would be. Docked, the scene runs to the top beside the panel's
-        // column, so the row is only above that column, with the gap along the top of the window
-        // besides, and a press on the scene is the scene's.
-        if (EditorShell.Docked)
-        {
-            var column = EditorShell.Panel.X;
-
-            Move("##grip", new Vector2(column, 0f), new Vector2(window.X - column, Grip));
-            Move("##gripTop", Vector2.Zero, new Vector2(column, EditorSurface.Gutter));
-        }
-        else
-        {
-            Move("##grip", Vector2.Zero, new Vector2(window.X, Grip));
-        }
+        // Floating, the title row across the scene, since the scene under it is the whole window
+        // and the row is where a title bar would be. The panel lies over its right end. Docked,
+        // the panels and the scene run to the top and the band along it is found by where the
+        // pointer is instead (see OnBand), since no window drawn first could lie under them all.
+        Move("##grip", Vector2.Zero, new Vector2(ImGuiRuntime.Size.X, Grip));
     }
+
+    /// <summary>
+    /// Whether the pointer is on the band along the top of a docked window, which moves it.
+    /// </summary>
+    /// <remarks>
+    /// The gap above the panels and the scene, under the few pixels that resize and outside the
+    /// window's buttons. Nothing there has anything of its own to press, since it is the padding
+    /// round the panels' cards, so the band takes a press there wherever ImGui thinks it landed.
+    /// </remarks>
+    public static bool OnBand { get; private set; }
+
+    /// <summary>The top of the panels and of a docked scene's gap, under the edge that resizes.</summary>
+    internal static float Top => Borderless ? Edge : 0f;
 
     /// <summary>One place to press that moves the window, and maximizes it when pressed twice.</summary>
     /// <param name="id">What to call its window.</param>
@@ -167,8 +162,20 @@ public static class EditorWindowFrame
     internal static void Sense()
     {
         OnEdge = null;
+        OnBand = false;
 
-        if (!Borderless || Maximized) return;
+        if (!Borderless) return;
+
+        var pointer = ImGui.GetIO().MousePos;
+
+        OnBand = EditorShell.Docked
+            && pointer.Y >= Top
+            && pointer.Y < Top + EditorSurface.Gutter
+            && pointer.X >= 0f
+            && pointer.X < ImGuiRuntime.Size.X
+            && !EditorSceneFrame.OverButtons(pointer);
+
+        if (Maximized) return;
 
         var at = ImGui.GetIO().MousePos;
         var window = ImGuiRuntime.Size;
@@ -202,6 +209,13 @@ public static class EditorWindowFrame
     /// </remarks>
     internal static void DrawEdges()
     {
+        // The band first, which moves the window as the title row does.
+        if (OnBand && OnEdge is null && !ImGui.IsAnyItemActive() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+        {
+            if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) ToggleMaximized();
+            else Window.StartDragMove();
+        }
+
         if (OnEdge is not { } edge) return;
 
         // Not while something is being dragged or a menu is up. A drag that runs off the edge

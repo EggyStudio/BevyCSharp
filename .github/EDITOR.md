@@ -137,7 +137,7 @@ taken from the scene and the panels. What this editor settled on, and where each
 | anything lying on the scene | 28px tall | `EditorSurface.Tall` |
 | a word on something pressable | 10px of air at each end of it | `EditorSurface.Sides` |
 | a menu or a tooltip's own air | `8, 6` | `EditorSurface.Around` |
-| the title row the window's buttons sit in | the toolbars' inset plus a button, 36px | `EditorWindowFrame.Grip` |
+| the title row a floating panel's toolbars sit in | the toolbars' inset plus a button, 36px | `EditorWindowFrame.Grip` |
 | the narrowest the panel goes | 320px | `EditorShell.Narrowest` |
 | where it stops being two columns | 460px | `EditorShell.Stacks` |
 
@@ -174,14 +174,15 @@ the pointer is on it or it is being dragged, docked or floating.
 ### The window's own frame
 
 The editor asks for a window without the platform's title bar and border, and draws its own in
-their place. A title row runs across the top. The window's pin, minimize, maximize and close
-buttons sit at its right as round buttons like the rest of what floats, above the panel's column.
-While the panel floats the row runs the whole width, with the toolbars at its left, level with
-the buttons. Docked the scene runs to the top beside the panel's column, and the row is only above
-that column and the gap along the window's top. Pressing the row where nothing else is moves the
-window, pressing it twice maximizes it, and the few pixels round every edge resize it, with the
-pointer changing shape to say so. None of that is drawn. Drawn into an image there is no window to
-move, but the row is still there, so nothing shifts between the two.
+their place. The window's pin, minimize, maximize and close buttons lie at its top right as round
+buttons like the rest of what floats, over the top of the panel's column, since the panels and
+the scene run up to the window's top. While the panel floats, a title row runs across the scene
+with the toolbars at its left, and pressing it where nothing else is moves the window and pressing
+it twice maximizes it. Docked, the band along the top above the panels and the scene does the
+same. The few pixels round every edge resize the window, with the pointer changing shape to say
+so. None of that is drawn. The editor draws every frame it can rather than waiting for the display
+(`Config.Vsync` off), so the statistics card measures what a scene costs rather than the refresh
+rate.
 
 The window is see-through (`Config.Transparent`) where the platform allows. Docked, what lies
 between the panels and round the scene is the ground, solid black unless its alpha is lowered, and
