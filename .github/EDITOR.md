@@ -82,8 +82,8 @@ changed in the style tab changes what is drawn instead of being written over on 
 
 | rung | value | what it is |
 |---|---|---|
-| `Ground` | `#000000` at 60% | what lies between the panels and round the scene while docked, so the desktop shows dimmed through a see-through window |
-| `Panel` | `#0C0C0C` | a panel: the world list, the details, an open tab and the window that adds an entity |
+| `Ground` | `#000000` | what lies between the panels and round the scene while docked, solid unless its alpha is lowered to let the desktop through |
+| `Panel` | `#1A1A1A` | a panel: the world list, the details, an open tab and the window that adds an entity |
 | `Group` | `#262626` | a component's rows inside a panel |
 | `Field` | `#3E3E3E` | a box that is typed in, a button, the groove of a bar, the plate of a menu or a tooltip, and the plate of the toolbars, the tabs and the window's buttons |
 | `Hover` | `#525252` | a control under the pointer |
@@ -114,10 +114,10 @@ The accent means one thing only, what is selected or what is in force. A color t
 component header is a color that means nothing. `Warn` and `Bad` are the exception, and they are for
 what the program has to say rather than for what it is.
 
-**Every color carries its own alpha, and that is the only transparency.** The ground is black at
-60%, so the desktop shows dimmed between the docked panels and round the scene, and the frame reads
-as one thing laid over it. Everything else is solid, docked or floating: a panel whose tone drifts
-with whatever passes behind it is a panel with no reliable contrast. The style tab edits the alpha
+**Every color carries its own alpha, and that is the only transparency.** Every surface is solid
+by default, docked or floating, since a panel whose tone drifts with whatever passes behind it is a
+panel with no reliable contrast. Lowering the ground's alpha lets the desktop show dimmed between
+the docked panels on a see-through window. The style tab edits the alpha
 under each color's picker, and a theme file writes a color with alpha as `#RRGGBBAA`. The ground
 is painted by the renderer rather than by the interface, as the window's clear color round the
 viewport and as the fill of the viewport's rounded corners, since anything the interface paints
@@ -144,7 +144,8 @@ taken from the scene and the panels. What this editor settled on, and where each
 **One gap, everywhere.** A panel's edge to its cards, one card to the next, the scene to whatever
 is beside it, and a card to the window's edge are all the same number. Two gaps of different widths
 in one picture read as an arrangement that has slipped. A grab handle lies in one of those gaps, a
-third of it thick, which is the thickness ImGui gives a scrollbar's grab.
+third of it thick, which is the thickness ImGui gives a scrollbar's grab, and is drawn only while
+the pointer is on it or it is being dragged, docked or floating.
 
 - **Text is left aligned**, except button labels and the number in a box, which are centered, and
   the number on a bar, which is centered until the handle comes close enough to touch it.
@@ -183,8 +184,8 @@ pointer changing shape to say so. None of that is drawn. Drawn into an image the
 move, but the row is still there, so nothing shifts between the two.
 
 The window is see-through (`Config.Transparent`) where the platform allows. Docked, what lies
-between the panels and round the scene is the ground, black at 60%, so the desktop shows dimmed
-through it. The ground is a camera of its own behind the scene, which draws nothing and clears the
+between the panels and round the scene is the ground, solid black unless its alpha is lowered, and
+only the window's rounded corners show the desktop. The ground is a camera of its own behind the scene, which draws nothing and clears the
 window to the ground color with the window's corners rounded off to clear, so docked the window is
 as round as it is floating. The scene keeps its gray, because its camera clears to it, and its
 corners are rounded by the renderer and filled with the ground, so they meet what surrounds them.
@@ -208,6 +209,28 @@ below the rows to go back to the top of the world. Dragging a selected row drags
 and a branch moves whole. A row that would end up under itself is refused before the drop, so it
 does not light up. Whatever moves keeps its place in the world, because its transform is worked
 out again against the new parent (`EditorHierarchy.Reparent`), and the move is one step to undo.
+
+### Statistics
+
+The round button at the scene's top right opens a card of what the engine is doing, the one every
+engine's viewport has. First comes a line of the last four seconds of frames, with a rule at a
+sixtieth of a second and hitches past a thirtieth drawn in the warning color, and under it frames a
+second, the frame at its best, typical and worst, and how long the app has run. Then the GPU (the
+frame's render time, the time spent recording it, and the slowest passes), the world (entities,
+named ones, ones in a hierarchy, the selection and the last undo step), memory (the process, the
+managed heap, what is allocated a frame, collections and the last pause), and the renderer (the
+API, the device, the window, vsync, the bridge's profile and the runtime). The keys come last,
+which is what the button used to show on its own. Everything is read from what the engine already
+reports, and the card scrolls where the scene is too short for it.
+
+### Tabs
+
+A tab lays its parts out on panes, rounded surfaces a step lighter than the tab with air of their
+own (`EditorSurface.Pane`), as a component's rows lie on a group in the details. The Frame tab is
+the images, the passes with a bar for each one's share of the slowest, and the picture; the
+Shaders tab is the programs beside what the compiler said about the chosen one. An empty pane says
+in its middle what is not there and, dimmer, how it comes to be (`EditorSurface.Empty`), since
+an empty pane is usually one somebody has not yet learned how to fill.
 
 ### Windows
 
@@ -325,8 +348,8 @@ number with two ends, three boxes across for a vector, a list to choose from for
 whose bottom corners go square while its list is open, meeting a list whose top corners are square,
 so the two read as one shape grown downward), a swatch for three numbers that are a color (whose
 picker, `ColorPicker`, is laid out as WinUI's is, with a rounded spectrum, a hue bar and a
-clearness bar as pills, the color as it was beside the color as it is, a hex box, and RGB or HSV
-numbers), and a dimmed box for anything that cannot be edited. A heading, a rule, a sentence and
+clearness bar as pills, the color as it was beside the color as it is, a hex box, and numbers in
+RGB, HSV, HSL, OKLCH or OKLab), and a dimmed box for anything that cannot be edited. A heading, a rule, a sentence and
 a unit are the field's own declaration too. A unit is written after the field's name, dimmed and
 in parentheses, as `Speed (m/s)`, so every box in a column ends at the
 same edge and the unit is read with the name it qualifies.

@@ -31,19 +31,19 @@ public sealed record EditorTheme
 
     /// <summary>What lies between the panels while they are docked, seen through at its own alpha.</summary>
     /// <remarks>
-    /// Black and partly clear, so on a see-through window the desktop shows dimmed between the
-    /// panels rather than at full strength, and the frame reads as one thing laid over it. Its
-    /// alpha is how much of the desktop is kept out, and a solid ground is an opaque editor.
+    /// Black and solid, so the editor is one dark frame round the scene and its rounded corners
+    /// are the only place the desktop shows. Its alpha is how much of the desktop is kept out, so
+    /// lowering it lets the desktop show dimmed between the panels on a see-through window.
     /// Floating, the scene is behind the panels and nothing is drawn between them.
     /// </remarks>
-    public Vector4 Ground { get; init; } = new(0f, 0f, 0f, 0.6f);
+    public Vector4 Ground { get; init; } = Rgb(0x00, 0x00, 0x00);
 
     /// <summary>A panel, the world list, the details and an open tab, each a rounded surface of its own.</summary>
     /// <remarks>
     /// Solid unless its alpha says otherwise, docked or floating. A panel that let the scene through
     /// was a panel whose contrast changed with whatever drifted past behind it.
     /// </remarks>
-    public Vector4 Panel { get; init; } = Rgb(0x0C, 0x0C, 0x0C);
+    public Vector4 Panel { get; init; } = Rgb(0x1A, 0x1A, 0x1A);
 
     /// <summary>One component's worth of rows inside a panel, which is a step above it.</summary>
     public Vector4 Group { get; init; } = Rgb(0x26, 0x26, 0x26);

@@ -15,8 +15,8 @@ namespace BevyCSharp.Editor.Framework;
 /// settle on. The large square is saturation across and brightness down at the hue the bar under
 /// it sets, and the bar under that is how clear the color is. Below those, the color the swatch had
 /// when it was opened beside the color it has now, so a change can be judged against where it
-/// started, and a box that takes a hex code. Last, the numbers, as red, green and blue or as hue,
-/// saturation and brightness, with a pill to switch between them.
+/// started, and a box that takes a hex code. Last, the numbers, in RGB, HSV, HSL, OKLCH or OKLab,
+/// with a list to switch between them.
 /// </para>
 /// <para>
 /// Drawn here rather than by ImGui's own picker, which draws its square and its bars square
@@ -43,6 +43,12 @@ internal static class ColorPicker
     /// <summary>How tall a bar is.</summary>
     private const float Bar = 14f;
 
+    /// <summary>
+    /// How much air the flyout keeps round the picker: more than a menu's, so a handle pulled to
+    /// the end of a bar or the corner of the square still has room round it before the edge.
+    /// </summary>
+    internal static readonly Vector2 Air = new(14f, 14f);
+
     /// <summary>Which picker the kept state below belongs to.</summary>
     private static string _for = string.Empty;
 
@@ -54,8 +60,11 @@ internal static class ColorPicker
     private static float _saturation;
     private static float _value;
 
-    /// <summary>Whether the numbers are hue, saturation and brightness rather than red, green and blue.</summary>
-    private static bool _hsv;
+    /// <summary>The ways the numbers can be written, in the order the list offers them.</summary>
+    private static readonly string[] Formats = ["RGB", "HSV", "HSL", "OKLCH", "OKLab"];
+
+    /// <summary>Which of them the numbers are written in.</summary>
+    private static string _format = "RGB";
 
     /// <summary>What the hex box holds while it is being typed into.</summary>
     private static string _hex = string.Empty;
@@ -265,17 +274,15 @@ internal static class ColorPicker
         ImGui.SameLine(0f, 0f);
         ImGui.Dummy(size with { X = size.X * 0.5f });
 
-        var middle = at.X + (size.X * 0.5f);
+        var middle = new Vector2(at.X + (size.X * 0.5f), at.Y + size.Y);
 
-        Checker(draw, at, at + size);
+        // Two plain halves, then rounded as a whole. Two pills cut in half each leave their soft
+        // edge over whatever is under them, which over a checker is a pale line round the shape.
+        // The checker only where there is something clear to see through.
+        if (_was.W < 1f || color.W < 1f) Checker(draw, at, at + size);
 
-        draw.PushClipRect(at, new Vector2(middle, at.Y + size.Y), true);
-        EditorDraw.Capsule(at, at + size, ImGui.GetColorU32(_was), draw);
-        draw.PopClipRect();
-
-        draw.PushClipRect(new Vector2(middle, at.Y), at + size, true);
-        EditorDraw.Capsule(at, at + size, ImGui.GetColorU32(color), draw);
-        draw.PopClipRect();
+        draw.AddRectFilled(at, middle, ImGui.GetColorU32(_was));
+        draw.AddRectFilled(middle with { Y = at.Y }, at + size, ImGui.GetColorU32(color));
 
         EditorDraw.RoundOff(draw, at, at + size, size.Y * 0.5f, ImGui.GetColorU32(ImGuiCol.PopupBg));
 
@@ -303,77 +310,39 @@ internal static class ColorPicker
         return changed;
     }
 
-    /// <summary>The numbers, as red, green and blue or as hue, saturation and brightness, and the clearness.</summary>
+    /// <summary>
+    /// The numbers, in whichever format is chosen, and the clearness, with the list that chooses
+    /// the format.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// RGB, HSV and HSL are the ones a color is usually typed in. OKLCH and OKLab are Björn
+    /// Ottosson's perceptual spaces, where a step in lightness looks like the same step whatever
+    /// the hue, which makes them the ones to pick a set of colors in that belong together, such as
+    /// a theme's ladder of grays or a palette. CSS takes them as they are.
+    /// </para>
+    /// <para>
+    /// A color set in OKLCH or OKLab that falls outside what the screen can show is brought back
+    /// inside it, each channel clamped, which is what a browser does as well.
+    /// </para>
+    /// </remarks>
     private static bool Numbers(ref Vector4 color, bool alpha)
     {
         var changed = false;
-
-        if (EditorWidgets.Pill("RGB", !_hsv)) _hsv = false;
-
-        ImGui.SameLine();
-
-        if (EditorWidgets.Pill("HSV", _hsv)) _hsv = true;
-
         var spacing = ImGui.GetStyle().ItemSpacing.X;
-        var boxes = alpha ? 4f : 3f;
-        var box = (Width - (spacing * (boxes - 1f))) / boxes;
+
+        ImGui.SetNextItemWidth(alpha ? 96f : Width);
+        EditorWidgets.Choice("##format", _format, Formats, chosen => _format = chosen);
 
         ImGui.PushFont(ImGuiRuntime.Face(EditorShell.Figures));
 
-        if (_hsv)
-        {
-            var hue = (int)MathF.Round(_hue * 360f);
-            var saturation = (int)MathF.Round(_saturation * 100f);
-            var value = (int)MathF.Round(_value * 100f);
-
-            ImGui.SetNextItemWidth(box);
-            var moved = ImGui.DragInt("##h", ref hue, 1f, 0, 359, "H %d");
-            ImGui.SameLine();
-            ImGui.SetNextItemWidth(box);
-            moved |= ImGui.DragInt("##s", ref saturation, 0.5f, 0, 100, "S %d");
-            ImGui.SameLine();
-            ImGui.SetNextItemWidth(box);
-            moved |= ImGui.DragInt("##v", ref value, 0.5f, 0, 100, "V %d");
-
-            if (moved)
-            {
-                _hue = Math.Clamp(hue / 360f, 0f, 0.9999f);
-                _saturation = saturation / 100f;
-                _value = value / 100f;
-                Give(ref color);
-                changed = true;
-            }
-        }
-        else
-        {
-            var red = (int)MathF.Round(color.X * 255f);
-            var green = (int)MathF.Round(color.Y * 255f);
-            var blue = (int)MathF.Round(color.Z * 255f);
-
-            ImGui.SetNextItemWidth(box);
-            var moved = ImGui.DragInt("##r", ref red, 1f, 0, 255, "R %d");
-            ImGui.SameLine();
-            ImGui.SetNextItemWidth(box);
-            moved |= ImGui.DragInt("##g", ref green, 1f, 0, 255, "G %d");
-            ImGui.SameLine();
-            ImGui.SetNextItemWidth(box);
-            moved |= ImGui.DragInt("##b", ref blue, 1f, 0, 255, "B %d");
-
-            if (moved)
-            {
-                color = new Vector4(red / 255f, green / 255f, blue / 255f, color.W);
-                Take(color, keepHue: true);
-                changed = true;
-            }
-        }
-
-        // How clear, in percent, which is how somebody says it.
+        // How clear, in percent, which is how somebody says it, beside the list.
         if (alpha)
         {
             var percent = (int)MathF.Round(color.W * 100f);
 
             ImGui.SameLine();
-            ImGui.SetNextItemWidth(box);
+            ImGui.SetNextItemWidth(Width - 96f - spacing);
 
             if (ImGui.DragInt("##a", ref percent, 0.5f, 0, 100, "A %d%%"))
             {
@@ -383,9 +352,187 @@ internal static class ColorPicker
             }
         }
 
+        var box = (Width - (spacing * 2f)) / 3f;
+
+        bool Three(ref float x, ref float y, ref float z, (float Min, float Max, float Speed, string Format) a, (float Min, float Max, float Speed, string Format) b, (float Min, float Max, float Speed, string Format) c)
+        {
+            ImGui.SetNextItemWidth(box);
+            var moved = ImGui.DragFloat("##x", ref x, a.Speed, a.Min, a.Max, a.Format, ImGuiSliderFlags.AlwaysClamp);
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(box);
+            moved |= ImGui.DragFloat("##y", ref y, b.Speed, b.Min, b.Max, b.Format, ImGuiSliderFlags.AlwaysClamp);
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(box);
+            moved |= ImGui.DragFloat("##z", ref z, c.Speed, c.Min, c.Max, c.Format, ImGuiSliderFlags.AlwaysClamp);
+            return moved;
+        }
+
+        var rgb = new Vector3(color.X, color.Y, color.Z);
+
+        switch (_format)
+        {
+            case "HSV":
+            {
+                var h = _hue * 360f;
+                var sat = _saturation * 100f;
+                var val = _value * 100f;
+
+                if (Three(ref h, ref sat, ref val, (0f, 359.9f, 1f, "H %.0f"), (0f, 100f, 0.5f, "S %.0f"), (0f, 100f, 0.5f, "V %.0f")))
+                {
+                    _hue = Math.Clamp(h / 360f, 0f, 0.9999f);
+                    _saturation = sat / 100f;
+                    _value = val / 100f;
+                    Give(ref color);
+                    changed = true;
+                }
+
+                break;
+            }
+
+            case "HSL":
+            {
+                var (h, sat, light) = ToHsl(rgb);
+                h = _saturation > 0f && _value > 0f ? h : _hue * 360f;
+
+                var sPercent = sat * 100f;
+                var lPercent = light * 100f;
+
+                if (Three(ref h, ref sPercent, ref lPercent, (0f, 359.9f, 1f, "H %.0f"), (0f, 100f, 0.5f, "S %.0f"), (0f, 100f, 0.5f, "L %.0f")))
+                {
+                    changed |= Set(ref color, FromHsl(h, sPercent / 100f, lPercent / 100f), h / 360f);
+                }
+
+                break;
+            }
+
+            case "OKLCH":
+            {
+                var (l, a, b) = ToOklab(rgb);
+                var chroma = MathF.Sqrt((a * a) + (b * b));
+                var hue = chroma > 1e-4f ? (MathF.Atan2(b, a) * 180f / MathF.PI + 360f) % 360f : _hue * 360f;
+                var lPercent = l * 100f;
+
+                if (Three(ref lPercent, ref chroma, ref hue, (0f, 100f, 0.5f, "L %.1f"), (0f, 0.4f, 0.002f, "C %.3f"), (0f, 359.9f, 1f, "H %.0f")))
+                {
+                    var angle = hue * MathF.PI / 180f;
+                    changed |= Set(ref color, FromOklab(lPercent / 100f, chroma * MathF.Cos(angle), chroma * MathF.Sin(angle)), null);
+                }
+
+                break;
+            }
+
+            case "OKLab":
+            {
+                var (l, a, b) = ToOklab(rgb);
+                var lPercent = l * 100f;
+
+                if (Three(ref lPercent, ref a, ref b, (0f, 100f, 0.5f, "L %.1f"), (-0.4f, 0.4f, 0.002f, "a %.3f"), (-0.4f, 0.4f, 0.002f, "b %.3f")))
+                {
+                    changed |= Set(ref color, FromOklab(lPercent / 100f, a, b), null);
+                }
+
+                break;
+            }
+
+            default:
+            {
+                var red = color.X * 255f;
+                var green = color.Y * 255f;
+                var blue = color.Z * 255f;
+
+                if (Three(ref red, ref green, ref blue, (0f, 255f, 1f, "R %.0f"), (0f, 255f, 1f, "G %.0f"), (0f, 255f, 1f, "B %.0f")))
+                {
+                    changed |= Set(ref color, new Vector3(red, green, blue) / 255f, null);
+                }
+
+                break;
+            }
+        }
+
         ImGui.PopFont();
 
         return changed;
+    }
+
+    /// <summary>
+    /// Takes a color worked out from the numbers, keeping the hue the numbers named where the color
+    /// itself has none.
+    /// </summary>
+    private static bool Set(ref Vector4 color, Vector3 rgb, float? hue)
+    {
+        color = new Vector4(Vector3.Clamp(rgb, Vector3.Zero, Vector3.One), color.W);
+        Take(color, keepHue: true);
+
+        if (hue is { } kept && (_saturation <= 0f || _value <= 0f)) _hue = Math.Clamp(kept, 0f, 0.9999f);
+
+        return true;
+    }
+
+    /// <summary>Hue in degrees, saturation and lightness, from sRGB.</summary>
+    internal static (float Hue, float Saturation, float Lightness) ToHsl(Vector3 rgb)
+    {
+        var max = MathF.Max(rgb.X, MathF.Max(rgb.Y, rgb.Z));
+        var min = MathF.Min(rgb.X, MathF.Min(rgb.Y, rgb.Z));
+        var light = (max + min) * 0.5f;
+        var spread = max - min;
+
+        if (spread <= 0f) return (0f, 0f, light);
+
+        var sat = spread / (1f - MathF.Abs((2f * light) - 1f));
+
+        ImGui.ColorConvertRGBtoHSV(rgb.X, rgb.Y, rgb.Z, out var h, out _, out _);
+
+        return (h * 360f, Math.Clamp(sat, 0f, 1f), light);
+    }
+
+    /// <summary>sRGB from hue in degrees, saturation and lightness.</summary>
+    internal static Vector3 FromHsl(float hue, float saturation, float lightness)
+    {
+        var chroma = (1f - MathF.Abs((2f * lightness) - 1f)) * saturation;
+        var value = lightness + (chroma * 0.5f);
+        var sat = value <= 0f ? 0f : chroma / value;
+
+        return ToRgb(Math.Clamp(hue / 360f, 0f, 0.9999f), sat, value);
+    }
+
+    /// <summary>OKLab from sRGB, through linear light, as Ottosson defines it.</summary>
+    internal static (float L, float A, float B) ToOklab(Vector3 rgb)
+    {
+        var (r, g, b, _) = EditorTheme.Linear(new Vector4(rgb, 1f));
+
+        var l = MathF.Cbrt((0.4122214708f * r) + (0.5363325363f * g) + (0.0514459929f * b));
+        var m = MathF.Cbrt((0.2119034982f * r) + (0.6806995451f * g) + (0.1073969566f * b));
+        var s = MathF.Cbrt((0.0883024619f * r) + (0.2817188376f * g) + (0.6299787005f * b));
+
+        return (
+            (0.2104542553f * l) + (0.7936177850f * m) - (0.0040720468f * s),
+            (1.9779984951f * l) - (2.4285922050f * m) + (0.4505937099f * s),
+            (0.0259040371f * l) + (0.7827717662f * m) - (0.8086757660f * s));
+    }
+
+    /// <summary>sRGB from OKLab, clamped into what a screen shows.</summary>
+    internal static Vector3 FromOklab(float lightness, float a, float b)
+    {
+        var l = lightness + (0.3963377774f * a) + (0.2158037573f * b);
+        var m = lightness - (0.1055613458f * a) - (0.0638541728f * b);
+        var s = lightness - (0.0894841775f * a) - (1.2914855480f * b);
+
+        l *= l * l;
+        m *= m * m;
+        s *= s * s;
+
+        var linear = new Vector3(
+            (4.0767416621f * l) - (3.3077115913f * m) + (0.2309699292f * s),
+            (-1.2684380046f * l) + (2.6097574011f * m) - (0.3413193965f * s),
+            (-0.0041960863f * l) - (0.7034186147f * m) + (1.7076147010f * s));
+
+        static float Encode(float channel)
+        {
+            channel = Math.Clamp(channel, 0f, 1f);
+            return channel <= 0.0031308f ? channel * 12.92f : (1.055f * MathF.Pow(channel, 1f / 2.4f)) - 0.055f;
+        }
+
+        return new Vector3(Encode(linear.X), Encode(linear.Y), Encode(linear.Z));
     }
 
     /// <summary>

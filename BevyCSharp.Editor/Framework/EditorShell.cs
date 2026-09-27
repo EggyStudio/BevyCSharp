@@ -194,6 +194,9 @@ public static class EditorShell
 
         EditorPicking.Tick(ctx);
 
+        // Every frame, open or not, so the graph is full when it is opened.
+        EditorStats.Tick(ctx);
+
         // A selection whose entity is gone is worse than none, because the details panel would
         // read whatever took its place in storage.
         EditorSelection.Prune(ctx.Ecs);

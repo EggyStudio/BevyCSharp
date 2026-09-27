@@ -42,55 +42,8 @@ public static class ToolbarView
         // Down the left edge rather than across the top, for the groups that are a list of modes.
         Group(ctx, ToolbarSlot.LeftEdge, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), down: true);
 
-        Keys();
-    }
-
-    /// <summary>Whether the list of keys is pinned open.</summary>
-    public static bool ShowKeys { get; set; }
-
-    /// <summary>
-    /// What the keys do here, as a card over the scene's bottom right.
-    /// </summary>
-    /// <remarks>
-    /// What <see cref="EditorHints"/> has to say, which follows the tool rather than listing every
-    /// key there is. Shown only while it is asked for, because a list nobody is reading is a list
-    /// lying over the thing they are looking at.
-    /// </remarks>
-    internal static void Keys()
-    {
-        if (!ShowKeys) return;
-
-        var at = new Vector2(
-            EditorShell.Free.Right - EditorShell.Margin,
-            EditorShell.Free.Bottom - EditorShell.Margin - EditorSurface.Tall - EditorSurface.Air);
-
-        ImGui.SetNextWindowPos(at, ImGuiCond.Always, new Vector2(1f, 1f));
-
-        // The plate everything else lying on the scene wears.
-        ImGui.PushStyleColor(ImGuiCol.WindowBg, EditorSurface.Lying());
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, EditorSurface.Around);
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, EditorTheme.Current.ChildRounding);
-
-        var flags = EditorSurface.Placed
-            | ImGuiWindowFlags.AlwaysAutoResize
-            | ImGuiWindowFlags.NoFocusOnAppearing
-            | ImGuiWindowFlags.NoNav;
-
-        if (ImGui.Begin("##keys", flags) && EditorRows.Open("##hints"))
-        {
-            foreach (var (key, does) in EditorHints.Current())
-            {
-                EditorRows.Line(key);
-                ImGui.TextDisabled(does);
-            }
-
-            EditorRows.Close();
-        }
-
-        ImGui.End();
-
-        ImGui.PopStyleVar(2);
-        ImGui.PopStyleColor();
+        // Under the buttons at the top right, where the button that opens it is.
+        EditorStats.Draw(ctx);
     }
 
     /// <summary>One corner's worth of buttons, in a row.</summary>

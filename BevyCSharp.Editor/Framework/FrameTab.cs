@@ -63,7 +63,7 @@ public static class FrameTab
 
         if (camera.IsNone)
         {
-            ImGui.TextDisabled("No camera");
+            EditorSurface.Empty("No camera", "The scene's camera is what this watches.");
             return;
         }
 
@@ -71,7 +71,7 @@ public static class FrameTab
         var drawn = Shaders.DrawnViewImageNames(camera).ToHashSet();
         var room = ImGui.GetContentRegionAvail();
 
-        if (EditorSurface.Region("##frameNames", new Vector2(MathF.Min(220f, room.X * 0.3f), 0f)))
+        EditorSurface.Pane("##frameNames", new Vector2(MathF.Min(220f, room.X * 0.25f), 0f), () => RoundedRows.Rows(() =>
         {
             // Every name is listed, so what a camera could have is in front of whoever is looking,
             // and the ones it does not draw are dimmed with what turns them on. Picking one of those
@@ -93,6 +93,8 @@ public static class FrameTab
                     Watch(camera, name == _watching ? null : name);
                 }
 
+                RoundedRows.Row(_watching == name);
+
                 if (!has)
                 {
                     ImGui.PopStyleColor();
@@ -104,35 +106,28 @@ public static class FrameTab
                     ImGui.SetTooltip(Missing(name));
                 }
             }
-        }
-
-        EditorSurface.EndRegion();
+        }));
 
         ImGui.SameLine();
 
-        if (EditorSurface.Region("##frameTimings", new Vector2(MathF.Min(300f, room.X * 0.3f), 0f)))
-        {
-            Timings();
-        }
-
-        EditorSurface.EndRegion();
+        EditorSurface.Pane("##frameTimings", new Vector2(MathF.Min(340f, room.X * 0.3f), 0f), Timings);
 
         ImGui.SameLine();
 
-        if (EditorSurface.Region("##framePicture", new Vector2(0f, 0f)))
+        EditorSurface.Pane("##framePicture", new Vector2(0f, 0f), () =>
         {
             if (_watching is null)
             {
-                ImGui.TextDisabled("Pick an image to watch it");
+                EditorSurface.Empty(
+                    "Nothing watched",
+                    "Pick an image on the left to see it as it is this frame.");
             }
             else
             {
                 Settings(camera);
                 Picture();
             }
-        }
-
-        EditorSurface.EndRegion();
+        });
     }
 
     /// <summary>How long each render pass took, slowest first.</summary>
@@ -142,27 +137,64 @@ public static class FrameTab
 
         if (timings.Count == 0)
         {
-            ImGui.TextDisabled("No timings, because the app was made without Config.GpuTimings");
+            EditorSurface.Empty("No timings", "An app made with Config.GpuTimings measures its passes.");
             return;
         }
 
-        if (!ImGui.BeginTable("##timings", 2, ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
-        {
-            return;
-        }
+        var flags = ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.PadOuterX;
 
-        ImGui.TableSetupColumn("pass", ImGuiTableColumnFlags.WidthStretch);
-        ImGui.TableSetupColumn("ms", ImGuiTableColumnFlags.WidthFixed, 60f);
+        if (!ImGui.BeginTable("##timings", 3, flags)) return;
 
-        foreach (var timing in timings.OrderByDescending(timing => timing.GpuMilliseconds ?? timing.CpuMilliseconds ?? 0))
+        ImGui.TableSetupColumn("pass", ImGuiTableColumnFlags.WidthStretch, 1f);
+        ImGui.TableSetupColumn("share", ImGuiTableColumnFlags.WidthStretch, 0.6f);
+        ImGui.TableSetupColumn("ms", ImGuiTableColumnFlags.WidthFixed, 52f);
+
+        // The column names, dimmed, which are what the numbers under them are rather than a title.
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.TextDisabled("pass");
+        ImGui.TableNextColumn();
+        ImGui.TableNextColumn();
+        ImGui.TextDisabled("ms");
+
+        var ordered = timings
+            .OrderByDescending(timing => timing.GpuMilliseconds ?? timing.CpuMilliseconds ?? 0)
+            .ToList();
+
+        var longest = MathF.Max(0.001f, (float)(ordered[0].GpuMilliseconds ?? ordered[0].CpuMilliseconds ?? 0));
+
+        foreach (var timing in ordered)
         {
+            var took = (float)(timing.GpuMilliseconds ?? timing.CpuMilliseconds ?? 0);
+
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
             ImGui.TextUnformatted(timing.Name);
+
+            // A bar as long as its share of the slowest pass, so where the time goes is seen before
+            // any number is read.
             ImGui.TableNextColumn();
+
+            var at = ImGui.GetCursorScreenPos();
+            var width = ImGui.GetContentRegionAvail().X;
+            var line = ImGui.GetTextLineHeight();
+            var tall = 6f;
+            var top = at.Y + ((line - tall) * 0.5f);
+            var draw = ImGui.GetWindowDrawList();
+
+            EditorDraw.Capsule(new Vector2(at.X, top), new Vector2(at.X + width, top + tall), ImGui.GetColorU32(EditorTheme.Alpha(EditorTheme.LiveText, 0.08f)), draw);
+            EditorDraw.Capsule(
+                new Vector2(at.X, top),
+                new Vector2(at.X + MathF.Max(tall, width * (took / longest)), top + tall),
+                ImGui.GetColorU32(timing.GpuMilliseconds is null ? EditorTheme.Current.Dim : EditorTheme.LiveAccent),
+                draw);
+
+            ImGui.Dummy(new Vector2(width, line));
 
             // GPU time where there is one, since a pass costs the frame that, and the CPU's dimmed
             // where the adapter could not say.
+            ImGui.TableNextColumn();
+
             if (timing.GpuMilliseconds is { } gpu) ImGui.Text($"{gpu:0.000}");
             else if (timing.CpuMilliseconds is { } cpu) ImGui.TextDisabled($"{cpu:0.000}");
         }

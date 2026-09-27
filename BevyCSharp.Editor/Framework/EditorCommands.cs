@@ -288,16 +288,16 @@ public static class EditorCommands
             11,
             "Snap to a grid, which holding Control does as well"));
 
-        // What the keys do here, kept out of the way until it is asked for. In the corner that is
-        // for what describes the view rather than for what acts on it.
+        // What the engine is doing, and what the keys do here, kept out of the way until it is
+        // asked for. At the top right, where every engine's viewport keeps its statistics.
         EditorToolbar.Add(new ToolbarButton(
-            ToolbarSlot.BottomRight,
+            ToolbarSlot.Right,
             EditorIcons.Info,
             static () => string.Empty,
-            static _ => ToolbarView.ShowKeys = !ToolbarView.ShowKeys,
-            static () => ToolbarView.ShowKeys,
+            static _ => EditorStats.Showing = !EditorStats.Showing,
+            static () => EditorStats.Showing,
             0,
-            "What the keys do here"));
+            "Statistics, performance and keys"));
 
     }
 

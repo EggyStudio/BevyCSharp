@@ -207,10 +207,9 @@ public static class EditorSurface
     /// The short pill that says a thing can be taken hold of and dragged.
     /// </summary>
     /// <remarks>
-    /// Out of the way until it is wanted, when the panel is floating. A handle laid over a lit
-    /// scene is one more mark on a picture somebody is trying to look at, and the edge it sits on
-    /// already says where to reach; docked there is no picture under it and a handle nobody can
-    /// see is a handle nobody finds.
+    /// Out of the way until it is wanted, docked or floating. A handle drawn all the time is one
+    /// more mark on the screen that says nothing until somebody reaches for it, and the gap it
+    /// sits in already says where to reach. The pointer finds it, and it shows then.
     /// </remarks>
     /// <param name="grab">Half the pill's width and height.</param>
     /// <param name="over">Whether the pointer is on it.</param>
@@ -219,8 +218,7 @@ public static class EditorSurface
     /// <param name="middleX">Where to center it across, or the middle of the item it belongs to.</param>
     internal static void Grab(Vector2 grab, bool over, bool held, ImDrawListPtr? onto = null, float? middleX = null)
     {
-        var showing = held || over || EditorShell.Docked;
-        if (!showing) return;
+        if (!held && !over) return;
 
         var at = ImGui.GetItemRectMin();
         var to = ImGui.GetItemRectMax();
@@ -276,6 +274,79 @@ public static class EditorSurface
         if (open) draw();
 
         ImGui.EndChild();
+    }
+
+    /// <summary>
+    /// A pane inside a tab: a surface a step lighter than the tab, rounded, with air of its own,
+    /// that scrolls what it holds.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What a tab lays its parts out on, the way a component's rows lie on a group in the details.
+    /// Text set straight on the tab runs from one edge of it to the other and reads as a log, and a
+    /// tab with a little text in one corner reads as one that has not finished loading. A pane
+    /// says where each part begins and ends, and gives what is in it room from the edge.
+    /// </para>
+    /// <para>
+    /// No heading, since what is in a pane says what it is, as the panels do.
+    /// </para>
+    /// </remarks>
+    /// <param name="id">What to call it.</param>
+    /// <param name="size">How large, in the usual child window terms.</param>
+    /// <param name="draw">What it holds.</param>
+    internal static void Pane(string id, Vector2 size, Action draw)
+    {
+        ArgumentNullException.ThrowIfNull(draw);
+
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, EditorTheme.LiveGroup);
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, EditorTheme.Current.ChildRounding);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10f, 8f));
+
+        var open = ImGui.BeginChild(id, size, ImGuiChildFlags.AlwaysUseWindowPadding);
+
+        ImGui.PopStyleVar(2);
+        ImGui.PopStyleColor();
+
+        if (open) draw();
+
+        ImGui.EndChild();
+    }
+
+    /// <summary>
+    /// What an empty pane says, in its middle: what is not there, and under it, dimmer, how it
+    /// comes to be.
+    /// </summary>
+    /// <remarks>
+    /// In the middle, where the eye goes to an empty space, rather than in a corner where it reads
+    /// as a line of a log. The second line is the useful one, since an empty pane is usually one
+    /// somebody has not yet learned how to fill.
+    /// </remarks>
+    /// <param name="what">What is not there.</param>
+    /// <param name="how">How it comes to be there, or nothing.</param>
+    internal static void Empty(string what, string? how = null)
+    {
+        ArgumentNullException.ThrowIfNull(what);
+
+        var room = ImGui.GetContentRegionAvail();
+        var line = ImGui.GetTextLineHeightWithSpacing();
+        var tall = how is null ? line : line * 2f;
+        var start = ImGui.GetCursorPos();
+
+        void Centered(string text, bool dim, float y)
+        {
+            var width = ImGui.CalcTextSize(text).X;
+
+            ImGui.SetCursorPos(new Vector2(start.X + MathF.Max(0f, (room.X - width) * 0.5f), y));
+
+            if (dim) ImGui.TextDisabled(text);
+            else ImGui.TextUnformatted(text);
+        }
+
+        var top = start.Y + MathF.Max(0f, (room.Y - tall) * 0.5f);
+
+        Centered(what, false, top);
+
+        if (how is not null) Centered(how, true, top + line);
     }
 
     /// <summary>

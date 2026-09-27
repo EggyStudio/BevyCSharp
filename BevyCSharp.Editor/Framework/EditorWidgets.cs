@@ -28,9 +28,13 @@ public static class EditorWidgets
     /// popups take.
     /// </remarks>
     /// <param name="id">What the popup is called.</param>
-    internal static bool Flyout(string id)
+    /// <param name="air">
+    /// How much air it keeps inside its edge, where it holds something that needs more than a
+    /// menu's, such as a picker whose round handles would otherwise meet the edge.
+    /// </param>
+    internal static bool Flyout(string id, Vector2? air = null)
     {
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, EditorSurface.Around);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, air ?? EditorSurface.Around);
 
         var open = ImGui.BeginPopup(id);
 
@@ -414,7 +418,7 @@ public static class EditorWidgets
         // boxes, which are the field gray and would be the color of what they sit on.
         ImGui.PushStyleColor(ImGuiCol.PopupBg, EditorTheme.LivePanel);
 
-        if (!Flyout($"##pick{id}"))
+        if (!Flyout($"##pick{id}", ColorPicker.Air))
         {
             ImGui.PopStyleColor();
             return false;
