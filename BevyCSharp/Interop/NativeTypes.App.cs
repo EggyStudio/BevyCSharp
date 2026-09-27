@@ -56,6 +56,9 @@ public unsafe struct NativeConfig
 
     /// <summary>Non-zero to light with Bevy's ray tracing where a camera asks.</summary>
     public uint RayTracedLighting;
+
+    /// <summary>Non-zero to make the window see-through where what is drawn has no alpha.</summary>
+    public uint Transparent;
 }
 
 /// <summary>One video mode a monitor can be driven at.</summary>

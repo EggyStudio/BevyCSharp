@@ -202,9 +202,18 @@ public static class EditorWidgets
     /// A row holding one thing, which opens a list of what it could hold instead.
     /// </summary>
     /// <remarks>
-    /// ImGui's own combo for the arrow and the keyboard it brings, with this editor's rows inside
-    /// it, so the name under the pointer is a rounded row like the one in every other list and the
-    /// list keeps the air every other flyout keeps.
+    /// <para>
+    /// Drawn here rather than by ImGui's combo, for the shape. While the list is shut the field is
+    /// a pill like every other. Open, the field loses its bottom corners and the list below it
+    /// loses its top ones, and the two are the same field gray, so the field reads as having grown
+    /// downward into the list rather than as a box with a second box hung under it. ImGui rounds
+    /// every corner of both and leaves a gap between them.
+    /// </para>
+    /// <para>
+    /// Pressed on the button going down rather than up. A press on the field while its list is up
+    /// is a press outside the list, which ImGui answers by closing it before this runs, so the
+    /// field has to remember that the list was up a moment ago or it would open again at once.
+    /// </para>
     /// </remarks>
     /// <param name="id">What to call it, which ImGui hashes it by.</param>
     /// <param name="held">What it holds now, which the row says while the list is shut.</param>
@@ -216,16 +225,97 @@ public static class EditorWidgets
     {
         ArgumentNullException.ThrowIfNull(list);
 
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, EditorSurface.Around);
+        var popup = $"{id}##list";
+        var wasOpen = _listUp == popup;
 
-        if (ImGui.BeginCombo(id, held))
+        var width = MathF.Max(1f, ImGui.CalcItemWidth());
+        var height = ImGui.GetFrameHeight();
+        var at = ImGui.GetCursorScreenPos();
+
+        ImGui.InvisibleButton(id, new Vector2(width, height));
+
+        var pressed = ImGui.IsItemActivated();
+        var over = ImGui.IsItemHovered();
+
+        if (pressed && !wasOpen) ImGui.OpenPopup(popup);
+
+        var open = ImGui.IsPopupOpen(popup);
+        var draw = ImGui.GetWindowDrawList();
+        var style = ImGui.GetStyle();
+        var radius = MathF.Min(style.FrameRounding, height * 0.5f);
+
+        // The field. Open, it is the list's gray whatever the pointer is doing, since the two are
+        // one shape and a shade apart would draw the seam this is here to hide.
+        var fill = ImGui.GetColorU32(open ? ImGuiCol.FrameBg : over ? ImGuiCol.FrameBgHovered : ImGuiCol.FrameBg);
+
+        draw.AddRectFilled(
+            at,
+            at + new Vector2(width, height),
+            fill,
+            radius,
+            open ? ImDrawFlags.RoundCornersTop : ImDrawFlags.RoundCornersAll);
+
+        // What it holds, cut short of the arrow, and the arrow at the right, pointing down.
+        var arrow = height * 0.5f;
+        var line = ImGui.GetTextLineHeight();
+
+        draw.PushClipRect(at, at + new Vector2(width - arrow - style.FramePadding.X, height), true);
+        draw.AddText(
+            at + new Vector2(style.FramePadding.X + (radius * 0.4f), (height - line) * 0.5f),
+            ImGui.GetColorU32(ImGuiCol.Text),
+            held);
+        draw.PopClipRect();
+
+        var tip = at + new Vector2(width - (arrow * 0.5f) - style.FramePadding.X, height * 0.5f);
+        var mark = line * 0.28f;
+
+        draw.AddTriangleFilled(
+            tip + new Vector2(-mark, -mark * 0.5f),
+            tip + new Vector2(mark, -mark * 0.5f),
+            tip + new Vector2(0f, mark * 0.7f),
+            ImGui.GetColorU32(ImGuiCol.Text));
+
+        if (open)
         {
-            RoundedRows.Rows(list);
-            ImGui.EndCombo();
+            // Hung from the field's bottom edge, at least as wide as the field, so the two meet
+            // along the whole of it.
+            ImGui.SetNextWindowPos(at + new Vector2(0f, height));
+            ImGui.SetNextWindowSizeConstraints(new Vector2(width, 0f), new Vector2(float.MaxValue, float.MaxValue));
+
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, EditorSurface.Around);
+            ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, 0f);
+            ImGui.PushStyleVar(ImGuiStyleVar.PopupBorderSize, 0f);
+            ImGui.PushStyleColor(ImGuiCol.PopupBg, new Vector4(0f, 0f, 0f, 0f));
+
+            if (ImGui.BeginPopup(popup, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings))
+            {
+                // Its own plate, square at the top where it meets the field and round at the
+                // bottom, laid before anything in it so the rows are drawn over it.
+                var from = ImGui.GetWindowPos();
+
+                ImGui.GetWindowDrawList().AddRectFilled(
+                    from,
+                    from + ImGui.GetWindowSize(),
+                    ImGui.GetColorU32(ImGuiCol.FrameBg),
+                    MathF.Min(EditorTheme.Current.ChildRounding, height * 0.5f),
+                    ImDrawFlags.RoundCornersBottom);
+
+                RoundedRows.Rows(list);
+
+                ImGui.EndPopup();
+            }
+
+            ImGui.PopStyleColor();
+            ImGui.PopStyleVar(3);
         }
 
-        ImGui.PopStyleVar();
+        // Whether this list is up as the frame ends, which the next press on the field asks.
+        if (ImGui.IsPopupOpen(popup)) _listUp = popup;
+        else if (wasOpen) _listUp = null;
     }
+
+    /// <summary>The list of a <see cref="Picking"/> row that is up, by its popup's name.</summary>
+    private static string? _listUp;
 
     /// <summary>
     /// One of a list of names, chosen from a flyout.

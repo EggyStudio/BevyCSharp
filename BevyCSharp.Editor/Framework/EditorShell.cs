@@ -235,7 +235,6 @@ public static class EditorShell
         // First, so the strip is the first window ImGui makes and stays under everything after it.
         EditorWindowFrame.DrawGrip();
 
-        EditorSceneFrame.Round();
         EditorPanes.Draw();
         DrawOrientation(ctx);
         EditorStrip.Draw(tabsWidth, strip);
@@ -246,7 +245,7 @@ public static class EditorShell
         EditorPreview.Keep(ctx);
 
         // Last, so it floats over every panel rather than under whichever was drawn after it.
-        EditorSceneFrame.DockButton();
+        EditorSceneFrame.WindowButtons();
         EditorFlyout.Draw(ctx);
         AddEntityWindow.Draw(ctx);
 
@@ -286,25 +285,25 @@ public static class EditorShell
         OrientationGizmo.Draw(ctx, new Vector2(side, Free.Bottom - up));
     }
 
-    /// <summary>
-    /// Where anything pinned to the top of the scene starts, which is below the strip the window is
-    /// moved by.
-    /// </summary>
+    /// <summary>Where anything pinned to the top of the scene starts.</summary>
     /// <remarks>
-    /// The scene's own top when it is docked, which is under the strip already. Floating, the scene
-    /// is the whole window and runs behind the strip, so a row of buttons pinned to its top edge
-    /// would sit on the strip and be pressed by somebody reaching to move the window.
+    /// The scene's own top. Docked that is below the title row. Floating it is the window's top, so
+    /// the toolbars pinned there sit in the title row, level with the window's buttons at the other
+    /// end of it, the way a title bar holds a menu at one end and the window's buttons at the
+    /// other. The row moves the window only where neither is.
     /// </remarks>
-    public static float SceneTop => MathF.Max(Scene.Y, EditorWindowFrame.Grip);
+    public static float SceneTop => Scene.Y;
 
     /// <summary>What the scene has to itself, which is the part of it no panel is over.</summary>
     public static (float Right, float Bottom) Free { get; private set; }
 
-    /// <summary>Tells the camera which part of the window it has.</summary>
+    /// <summary>Tells the camera which part of the window it has, and how round its corners are.</summary>
     private static void Apply(BehaviorContext ctx)
     {
         var camera = EditorSelection.Camera;
         if (camera.IsNone) return;
+
+        EditorSceneFrame.Round(camera);
 
         var scale = ImGuiRuntime.Scale;
 

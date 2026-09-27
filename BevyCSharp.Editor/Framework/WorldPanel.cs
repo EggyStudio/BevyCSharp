@@ -149,23 +149,9 @@ public static class WorldPanel
     {
         if (EditorShell.Context is not { } ctx) return;
 
-        EditorSurface.Title("WORLD", $"({Rows.Count})");
-
-        // The search box, then the button that adds something, at the end of the row as every
-        // list with a way to add to it has one.
-        var button = ImGui.GetFrameHeight();
-        var spacing = ImGui.GetStyle().ItemSpacing.X;
-
-        ImGui.SetNextItemWidth(MathF.Max(
-            1f,
-            ImGui.GetContentRegionAvail().X - EditorSceneFrame.DockRoom() - button - spacing));
+        // No heading, since a list of names says what it is. The search box takes the whole row.
+        EditorSurface.FullWidth();
         ImGui.InputTextWithHint("##search", "Search", ref _search, 128);
-
-        ImGui.SameLine(0f, spacing);
-
-        if (ToolbarView.Circle("addEntity", EditorIcons.Add, false, button)) AddEntityWindow.Open();
-
-        if (ImGui.IsItemHovered()) EditorWidgets.Tip("Add an entity (Ctrl+A)");
 
         ImGui.Spacing();
 
@@ -173,10 +159,17 @@ public static class WorldPanel
 
         var wanted = _search.Trim();
 
-        if (!EditorSurface.Region("##rows", new Vector2(0f, 0f)))
+        // The room the button at the bottom keeps for itself, taken out of the scrolling list rather
+        // than scrolled with it, as the button that adds a component keeps its row in the panel
+        // below. Adding something is not a thing to go looking for past everything already there.
+        var button = ImGui.GetFrameHeight() + (ImGui.GetStyle().ItemSpacing.Y * 2f);
+        var room = ImGui.GetContentRegionAvail().Y - button;
+
+        if (!EditorSurface.Region("##rows", new Vector2(0f, MathF.Max(1f, room))))
         {
             // Ended whether or not it opened, as a child window requires.
             EditorSurface.EndRegion();
+            Add();
             return;
         }
 
@@ -221,6 +214,21 @@ public static class WorldPanel
         }
 
         EditorSurface.EndRegion();
+
+        Add();
+    }
+
+    /// <summary>The button that opens the window that adds an entity, across the bottom.</summary>
+    private static void Add()
+    {
+        ImGui.Spacing();
+
+        if (ImGui.Button("Add Entity", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetFrameHeight())))
+        {
+            AddEntityWindow.Open();
+        }
+
+        if (ImGui.IsItemHovered()) EditorWidgets.Tip("Ctrl+A");
     }
 
     /// <summary>

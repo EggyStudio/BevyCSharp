@@ -56,7 +56,17 @@ public partial struct EditorBoot
     /// <summary>Puts something in front of the camera, so the viewport is a scene.</summary>
     private static Entity Scene(BehaviorContext ctx)
     {
-        var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 50f });
+        // The scene's own background, which is Bevy's default gray, so it looks as it did when it
+        // cleared to the world's color. The world's color is clear instead, which is what fills
+        // the window round a docked scene, and on a see-through window that is the desktop.
+        var camera = Render.SpawnCamera3d(new CameraSettings
+        {
+            FieldOfView = 50f,
+            Clear = ClearMode.Custom,
+            ClearColor = (0.02416f, 0.02519f, 0.02843f, 1f),
+        });
+
+        Render.SetClearColor((0f, 0f, 0f, 0f));
         ctx.Ecs.Add(camera, Transform.LookingAt(new Vec3(4f, 3f, 7f), Vec3.Zero, Vec3.UnitY));
         Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
 

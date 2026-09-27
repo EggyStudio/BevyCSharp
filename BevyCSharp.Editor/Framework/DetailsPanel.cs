@@ -27,14 +27,14 @@ public static class DetailsPanel
     {
         if (EditorShell.Context is not { } ctx) return;
 
-        // How many were picked, when it is more than one. The rest of the panel is about the last
-        // of them, and without this a drag that took a dozen things looks like a click that took
-        // one, since the other eleven are only visible in the list, which may not be on screen.
-        EditorSurface.Title(
-            "DETAILS",
-            EditorSelection.Count > 1 ? $"({EditorSelection.Count} selected)" : null);
-
-        ImGui.Spacing();
+        // No heading, since what the panel is about is the name at its top. How many were picked
+        // is said when it is more than one, though. The rest of the panel is about the last of
+        // them, and without this a drag that took a dozen things looks like a click that took one,
+        // since the other eleven are only visible in the list, which may not be on screen.
+        if (EditorSelection.Count > 1)
+        {
+            ImGui.TextDisabled($"{EditorSelection.Count} selected");
+        }
 
         if (!EditorSelection.Any)
         {

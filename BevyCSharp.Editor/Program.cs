@@ -37,6 +37,11 @@ config.AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets");
 config.Gui = true;
 config.WatchAssets = true;
 
+// See-through where nothing is drawn, so the editor is the shape of its panels and its scene rather
+// than a black rectangle round them. The platform decides, and an opaque window is what it falls
+// back to, which looks as the editor always did.
+config.Transparent = !args.Contains("--offscreen");
+
 // What each render pass costs, which the Frame tab lists beside the images a camera keeps. An
 // editor is where a technique is tuned, so the timestamps it costs are worth paying here.
 config.GpuTimings = true;

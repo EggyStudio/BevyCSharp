@@ -5,108 +5,45 @@ using ImGuiNET;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// The chrome round the scene: its rounded corners, and the buttons at the window's top right.
+/// The frame round the scene: its rounded corners, and the buttons at the window's top right.
 /// </summary>
 public static class EditorSceneFrame
 {
+    /// <summary>The radius last given to the camera, so it is only told again on a change.</summary>
+    private static float _radius = -1f;
+
     /// <summary>
-    /// Takes the corners off the scene, so that docked it reads as a card like everything else.
+    /// Rounds the scene's corners: the viewport's while docked, the window's while floating.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The scene is drawn by the engine into a rectangle, and a rectangle has square corners. What
-    /// rounds it is four wedges of the ground color laid over those corners, on the list that
-    /// draws under every window, so the panels still cover what they cover.
+    /// Taken off by the renderer rather than painted over here, because what is outside a corner
+    /// is meant to be clear, and nothing an interface draws on top can make a pixel clear. The
+    /// renderer multiplies the scene's corners down to nothing, antialiased, and on a see-through
+    /// window the desktop shows there.
     /// </para>
     /// <para>
-    /// A wedge filled with ImGui's antialiasing still meets the scene along a curve the engine
-    /// drew square, so the arc steps where the two meet. A one pixel line in the card color along
-    /// the whole edge is antialiased on both sides and covers the steps, and it gives the scene the
-    /// same edge a card has against the ground.
-    /// </para>
-    /// <para>
-    /// Only when docked. Floating, the scene is the whole window and a window with its corners
-    /// taken off is a window with four notches of nothing in it.
+    /// Docked the scene is a card among the others and takes a card's rounding. Floating it is the
+    /// whole window and takes a window's, which makes the window itself round. Maximized it is
+    /// square, since a window against the screen's edges has no corners to show.
     /// </para>
     /// </remarks>
-    internal static void Round()
+    /// <param name="camera">The scene's camera.</param>
+    internal static void Round(Entity camera)
     {
-        if (!EditorShell.Docked) return;
+        if (camera.IsNone) return;
 
-        // The rounding a card takes, not a window's, because what the scene sits among docked is
-        // the cards in the panel and the strip, and a corner rounder than theirs is a corner that
-        // does not match the ones beside it.
         var theme = EditorTheme.Current;
-        var radius = theme.ChildRounding;
+        var logical = EditorWindowFrame.Maximized
+            ? 0f
+            : EditorShell.Docked ? theme.ChildRounding : theme.WindowRounding;
 
-        var draw = ImGui.GetBackgroundDrawList();
+        var radius = logical * ImGuiRuntime.Scale;
 
-        // One coat, opaque. Two of them put the feathered edge an antialiased fill draws down
-        // twice, and the second one over the first is a seam along the arc.
-        var color = ImGui.GetColorU32(EditorTheme.Alpha(theme.Ground, 1f));
+        if (radius == _radius) return;
 
-        var left = EditorShell.Scene.X;
-        var top = EditorShell.Scene.Y;
-        var right = left + EditorShell.Scene.Width;
-        var bottom = top + EditorShell.Scene.Height;
-
-        // The gap the scene keeps from the window's left and top edges, filled in. What is under it
-        // otherwise is whatever the camera clears the window to, which is a band of sky round the
-        // viewport. The gap is chrome and has to be the color the rest of the chrome is. The panel
-        // and the strip paint their own, beside and below, but the top runs the window's whole
-        // width, since the strip the window is moved by is above the panel as well.
-        draw.AddRectFilled(Vector2.Zero, new Vector2(ImGuiRuntime.Size.X, top), color);
-        draw.AddRectFilled(new Vector2(0f, top), new Vector2(left, bottom), color);
-
-        if (EditorShell.Panel.X > right)
-        {
-            draw.AddRectFilled(new Vector2(right, top), new Vector2(EditorShell.Panel.X, bottom), color);
-        }
-
-        if (radius < 1f) return;
-
-        // All four, now that the scene is a card with chrome on every side of it.
-        var quarter = MathF.PI * 0.5f;
-
-        Wedge(draw, new Vector2(right - radius, bottom - radius), radius, 0f, quarter, new Vector2(right, bottom), color);
-        Wedge(draw, new Vector2(left + radius, bottom - radius), radius, quarter, quarter * 2f, new Vector2(left, bottom), color);
-        Wedge(draw, new Vector2(left + radius, top + radius), radius, quarter * 2f, quarter * 3f, new Vector2(left, top), color);
-        Wedge(draw, new Vector2(right - radius, top + radius), radius, quarter * 3f, quarter * 4f, new Vector2(right, top), color);
-
-        // Half a pixel in, so the one pixel line lies on the edge rather than half off it.
-        draw.AddRect(
-            new Vector2(left + 0.5f, top + 0.5f),
-            new Vector2(right - 0.5f, bottom - 0.5f),
-            ImGui.GetColorU32(EditorTheme.Alpha(theme.Card, 1f)),
-            radius,
-            ImDrawFlags.None,
-            1f);
-    }
-
-    /// <summary>One corner's worth of what a rounded rectangle leaves out.</summary>
-    /// <param name="draw">What to draw into.</param>
-    /// <param name="middle">Where the corner's arc is centered.</param>
-    /// <param name="radius">How large the arc is.</param>
-    /// <param name="from">Where the arc starts, in radians.</param>
-    /// <param name="to">Where it ends.</param>
-    /// <param name="corner">The square corner the arc cuts off.</param>
-    /// <param name="color">What to fill it with.</param>
-    internal static void Wedge(
-        ImDrawListPtr draw,
-        Vector2 middle,
-        float radius,
-        float from,
-        float to,
-        Vector2 corner,
-        uint color)
-    {
-        // Segments enough that the arc has no steps in it at the sizes a window rounding takes.
-        // What ImGui works out for itself is tuned for a whole circle of this radius and leaves a
-        // quarter of one with four or five, which is a visible staircase.
-        draw.PathClear();
-        draw.PathLineTo(corner);
-        draw.PathArcTo(middle, radius, from, to, Math.Max(8, (int)(radius * 1.5f)));
-        draw.PathFillConvex(color);
+        _radius = radius;
+        Render.SetRoundedCorners(camera, radius);
     }
 
     /// <summary>
@@ -115,32 +52,30 @@ public static class EditorSceneFrame
     /// </summary>
     /// <remarks>
     /// <para>
-    /// One window of their own rather than a corner of the panel, so they stay reachable and in the
-    /// same place whatever the panel is doing underneath. Round with a picture in each, like the
-    /// rest of what floats over the scene, and in the order a title bar has them, with the pin
-    /// before them because it belongs to the editor and they belong to the window.
+    /// A row of their own above the panels rather than a corner of one, so they stay where a title
+    /// bar's are whatever the panels are doing, and no panel has to leave room for them. Round with
+    /// a picture in each, like the rest of what floats over the scene, and in the order a title bar
+    /// has them, with the pin before them because it belongs to the editor and they belong to the
+    /// window.
     /// </para>
     /// <para>
     /// The window's three are there only when <see cref="EditorWindowFrame.Borderless"/>, since a
     /// platform frame has its own, and a picture drawn into an image has no window to act on.
     /// </para>
     /// </remarks>
-    internal static void DockButton()
+    internal static void WindowButtons()
     {
         // The size everything else that floats over the scene is, so the buttons in the corner are
-        // of that family rather than discs of their own. They sit in the empty right end of a
-        // panel's title row, which is the one row under them with nothing in it.
+        // of that family rather than discs of their own.
         const float Size = EditorSurface.Tall;
 
-        // The window's top right corner, below the strip the window is moved by, and as far into
-        // it as the panel's own first row is: the gap the panel keeps round its cards, then the air
-        // a card keeps inside its edge. That lines the row up with the panel's title in either
-        // arrangement, since the panel is laid out the same way docked and floating.
+        // In the title row above the panels, as far in from the window's top right as the
+        // toolbars are from its top left, so the two ends of the row line up.
         var window = ImGuiRuntime.Size;
-        var inset = EditorSurface.Gutter + EditorSurface.Air;
+        var inset = ToolbarView.Inset;
 
         ImGui.SetNextWindowPos(
-            new Vector2(window.X - inset, EditorWindowFrame.Grip + inset),
+            new Vector2(window.X - inset, inset),
             ImGuiCond.Always,
             new Vector2(1f, 0f));
 
@@ -173,7 +108,6 @@ public static class EditorSceneFrame
                 EditorWidgets.Tip(EditorShell.Docked ? "Undock the panel" : "Dock the panel");
             }
 
-            var first = ImGui.GetItemRectMin();
 
             if (EditorWindowFrame.Borderless)
             {
@@ -206,9 +140,6 @@ public static class EditorSceneFrame
                 ImGui.PopStyleColor(2);
             }
 
-            // Where the whole row ended up, so a panel underneath can leave the corner alone.
-            DockRect = (first, ImGui.GetItemRectMax());
-
             ImGui.PopStyleColor(2);
             ImGui.PopStyleVar();
         }
@@ -239,32 +170,6 @@ public static class EditorSceneFrame
         if (ImGui.IsItemHovered()) EditorWidgets.Tip(tip);
 
         return pressed;
-    }
-
-    /// <summary>Where the dock button is on the screen.</summary>
-    public static (Vector2 Min, Vector2 Max) DockRect { get; private set; }
-
-    /// <summary>
-    /// How much width to leave free on the row about to be drawn, so it stays clear of the dock
-    /// button floating over it.
-    /// </summary>
-    /// <remarks>
-    /// Asked of the row rather than worked out per panel, because which card is under the corner
-    /// depends on whether the panel is split beside or above, and a rule written per panel is a
-    /// rule that is wrong in one of them.
-    /// </remarks>
-    public static float DockRoom()
-    {
-        if (DockRect.Max.X <= DockRect.Min.X) return 0f;
-
-        var at = ImGui.GetCursorScreenPos();
-        var right = ImGui.GetWindowPos().X + ImGui.GetWindowWidth();
-        var line = ImGui.GetFrameHeight();
-
-        if (at.Y > DockRect.Max.Y || at.Y + line < DockRect.Min.Y) return 0f;
-        if (right <= DockRect.Min.X) return 0f;
-
-        return right - DockRect.Min.X + EditorSurface.Air;
     }
 
 }

@@ -5,7 +5,7 @@ using ImGuiNET;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// The window's own frame, which the editor draws instead of the platform: a strip along the top to
+/// The window's own frame, which the editor draws instead of the platform, made of a title row to
 /// move it by, edges to resize it from, and the buttons that minimize, maximize and close it.
 /// </summary>
 /// <remarks>
@@ -16,8 +16,8 @@ namespace BevyCSharp.Editor.Framework;
 /// every platform do.
 /// </para>
 /// <para>
-/// None of it is visible. The strip along the top is a gap above the panels that is there to be
-/// grabbed, and the edges are a few pixels inside the window's own border, so a person finds them
+/// None of it is visible. The title row along the top is a gap above the panels that is there to
+/// be grabbed, and the edges are a few pixels inside the window's own border, so a person finds them
 /// where a title bar and a border would have been and nothing is drawn to say so. The pointer
 /// changes shape over an edge, which is how every window says one can be dragged.
 /// </para>
@@ -28,13 +28,6 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 public static class EditorWindowFrame
 {
-    /// <summary>How tall the strip along the top is when the frame is the editor's own.</summary>
-    /// <remarks>
-    /// Tall enough to find with the pointer without aiming, which is all it has to be, since it is
-    /// a gap and every pixel of it is taken from what the panels could show.
-    /// </remarks>
-    private const float Strip = 8f;
-
     /// <summary>How far in from each edge the pointer resizes rather than reaches what is under it.</summary>
     private const float Edge = 4f;
 
@@ -52,8 +45,22 @@ public static class EditorWindowFrame
     /// </remarks>
     public static bool Maximized { get; private set; }
 
-    /// <summary>How much of the top of the window the strip takes, or nothing when it is not there.</summary>
-    public static float Grip => Borderless ? Strip : 0f;
+    /// <summary>
+    /// How tall the title row across the top of the window is, which the panels start below.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The row the window's buttons sit in at the right, and the toolbars at the left while the
+    /// panel floats: a button's height, and the same inset above it the toolbars keep from the
+    /// window's edge. Whatever in it is not a button moves the window, where the frame is the
+    /// editor's own.
+    /// </para>
+    /// <para>
+    /// There whether or not the frame is the editor's own, so the pin that docks the panel always
+    /// has a place and nothing moves when the same editor is drawn into an image.
+    /// </para>
+    /// </remarks>
+    public static float Grip => ToolbarView.Inset + EditorSurface.Tall;
 
     /// <summary>Takes the platform's frame off the window, where there is a window.</summary>
     /// <param name="config">How this run was made, which says whether there is one.</param>
@@ -89,12 +96,13 @@ public static class EditorWindowFrame
     public static void Close() => EditorShell.Context?.Exit();
 
     /// <summary>
-    /// The strip along the top, as a window of its own under every other.
+    /// The title row, as a window of its own under every other.
     /// </summary>
     /// <remarks>
     /// Drawn before anything else, so on the first frame it is the first window ImGui makes, and
-    /// since the panels are never raised it stays under them. Pressing it hands the window to the
-    /// platform to move, and pressing it twice maximizes, as a title bar does.
+    /// since the panels are never raised it stays under them, and under the buttons and toolbars
+    /// in the row, which take their own presses. Pressing anywhere else in it hands the window to
+    /// the platform to move, and pressing it twice maximizes, as a title bar does.
     /// </remarks>
     internal static void DrawGrip()
     {
@@ -103,12 +111,12 @@ public static class EditorWindowFrame
         var window = ImGuiRuntime.Size;
 
         ImGui.SetNextWindowPos(Vector2.Zero);
-        ImGui.SetNextWindowSize(new Vector2(window.X, Strip));
+        ImGui.SetNextWindowSize(new Vector2(window.X, Grip));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
 
         if (ImGui.Begin("##grip", Hitbox))
         {
-            ImGui.InvisibleButton("##move", new Vector2(window.X, Strip));
+            ImGui.InvisibleButton("##move", new Vector2(window.X, Grip));
 
             if (ImGui.IsItemActivated())
             {
@@ -131,7 +139,7 @@ public static class EditorWindowFrame
     /// they are the last windows ImGui makes and sit over the panels, which are never raised.
     /// </para>
     /// <para>
-    /// The top edge is the first few pixels of the strip, and the rest of the strip moves the
+    /// The top edge is the first few pixels of the title row, and the rest of the row moves the
     /// window, as a platform's title bar is resized from its top and moved from its middle.
     /// </para>
     /// </remarks>

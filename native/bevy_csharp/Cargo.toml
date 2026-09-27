@@ -91,6 +91,9 @@ headless = [
 # x11-dl, which dlopens at runtime, so this profile builds with nothing but a C compiler.
 render = [
     "headless",
+    # Asking a window's surface what it can be composited as, before Bevy configures it with
+    # something it cannot. The version Bevy builds, so it adds nothing.
+    "dep:wgpu",
     # Reading the WGSL a Slang shader compiles to, to check its bindings before a pipeline is
     # built with them. Bevy already depends on this version with this feature, so it adds nothing
     # to the build.

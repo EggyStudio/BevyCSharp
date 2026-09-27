@@ -489,6 +489,58 @@ public static unsafe class Render
             Native.bcs_render_set_viewport(camera.Bits, x, y, width, height),
             "Render.SetViewport");
 
+    /// <summary>
+    /// Rounds the corners of a camera's picture, leaving what is outside them clear rather than
+    /// colored. A radius of nothing squares them again. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The corners of the camera's viewport where it has one (<see cref="SetViewport"/>), and of
+    /// its whole picture otherwise. What the camera drew is multiplied by how much of each pixel
+    /// lies inside the rounded rectangle, color and alpha alike, after the camera's own passes and
+    /// before its picture reaches the window, so the edge is antialiased and the corner is clear.
+    /// </para>
+    /// <para>
+    /// Clear is only seen through where the window is (<see cref="Config.Transparent"/>). In an
+    /// opaque window a clear corner is black, and a corner that should show some other color is
+    /// better painted over by whatever draws on top.
+    /// </para>
+    /// </remarks>
+    /// <param name="camera">The camera.</param>
+    /// <param name="radius">How round, in physical pixels.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The radius is negative or not a number.</exception>
+    public static void SetRoundedCorners(Entity camera, float radius)
+    {
+        if (!float.IsFinite(radius) || radius < 0f)
+        {
+            throw new ArgumentOutOfRangeException(nameof(radius), radius, "A radius is a length, so it cannot be negative.");
+        }
+
+        Native.Check(
+            Native.bcs_render_set_rounded_corners(camera.Bits, radius),
+            "Render.SetRoundedCorners");
+    }
+
+    /// <summary>
+    /// Sets the world's clear color, in linear RGBA, which a camera clearing to
+    /// <see cref="ClearMode.World"/> clears to. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// It also fills the part of a window no camera's viewport covers, since Bevy clears the whole
+    /// window before putting a camera's picture on its part of it. An editor whose scene is given
+    /// part of the window (<see cref="SetViewport"/>) and whose window is see-through
+    /// (<see cref="Config.Transparent"/>) clears to nothing here, and gives the scene camera a
+    /// color of its own (<see cref="ClearMode.Custom"/>), so the scene has a background and the
+    /// rest of the window does not.
+    /// </para>
+    /// </remarks>
+    /// <param name="color">The color, straight rather than premultiplied.</param>
+    public static void SetClearColor((float R, float G, float B, float A) color) =>
+        Native.Check(
+            Native.bcs_render_set_clear_color(color.R, color.G, color.B, color.A),
+            "Render.SetClearColor");
+
 
     /// <summary>Spawns a 3D camera set up by <paramref name="settings"/>.</summary>
     /// <returns><see cref="Entity.None"/> on a build with no renderer.</returns>

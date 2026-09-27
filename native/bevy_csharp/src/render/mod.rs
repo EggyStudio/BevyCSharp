@@ -45,6 +45,7 @@ pub mod timings;
 pub mod values;
 pub mod views;
 pub mod watch;
+pub mod corners;
 
 #[cfg(feature = "render")]
 use crate::interop::status;

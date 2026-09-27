@@ -80,7 +80,7 @@ public static class AddEntityWindow
 
         // A modal, so the scene and the panels wait while it is up, and a press outside closes it
         // rather than reaching what is under it. No title bar, since ImGui's is a band of another
-        // color across a rounded card, and the title is written the way a panel's is instead.
+        // color across a rounded card, and a box to type in says what the window is for.
         IsOpen = ImGui.BeginPopupModal(
             Name,
             ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar);
@@ -94,7 +94,6 @@ public static class AddEntityWindow
 
         var kinds = Kinds();
 
-        Heading();
         Search(kinds.Count);
 
         if (ImGui.IsKeyPressed(ImGuiKey.Escape))
@@ -130,16 +129,6 @@ public static class AddEntityWindow
         ImGui.PopStyleVar();
     }
 
-    /// <summary>The title, written as a panel's is, with what the new one goes under beside it.</summary>
-    private static void Heading()
-    {
-        var under = !_parent.IsNone && EditorShell.Context is { } ctx && ctx.Ecs.IsAlive(_parent)
-            ? ctx.Ecs.NameOf(_parent)
-            : null;
-
-        EditorSurface.Title("ADD ENTITY", under is { Length: > 0 } ? $"under {under}" : "at the top of the world");
-    }
-
     /// <summary>The box that narrows the list, which has the keyboard from the moment it opens.</summary>
     private static void Search(int count)
     {
@@ -147,7 +136,15 @@ public static class AddEntityWindow
 
         ImGui.SetNextItemWidth(-1f);
 
-        if (ImGui.InputTextWithHint("##search", "Search", ref _search, 128)) _chosen = 0;
+        // Where the new one goes, said in the box's hint rather than in a heading over it, which is
+        // the one line of the window that has room for it while nothing is typed.
+        var under = !_parent.IsNone && EditorShell.Context is { } ctx && ctx.Ecs.IsAlive(_parent)
+            ? ctx.Ecs.NameOf(_parent)
+            : null;
+
+        var hint = under is { Length: > 0 } ? $"Search, adds under {under}" : "Search, adds at the top level";
+
+        if (ImGui.InputTextWithHint("##search", hint, ref _search, 128)) _chosen = 0;
 
         // The arrows move the choice while the box keeps the keyboard, so the hand that is typing
         // can pick without reaching for the pointer.

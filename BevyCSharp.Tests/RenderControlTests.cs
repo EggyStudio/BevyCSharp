@@ -835,8 +835,8 @@ public sealed class RenderControlTests
     [Fact]
     public void AWindowsOwnFrameReportsItsAbsence()
     {
-        // What an app drawing its own title bar calls, and the same contract as the rest: a run
-        // with no window says so, rather than minimizing nothing.
+        // What an app drawing its own title bar calls, and the same contract as the rest, in which
+        // a run with no window says so rather than minimizing nothing.
         using var harness = new EngineHarness(frames: 2);
 
         harness.OnContext(Stage.Update, _ =>

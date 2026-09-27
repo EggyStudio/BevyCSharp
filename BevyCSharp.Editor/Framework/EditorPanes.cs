@@ -20,12 +20,9 @@ public static class EditorPanes
         ImGui.SetNextWindowSize(new Vector2(EditorShell.Panel.Width, EditorShell.Panel.Height));
 
         // Seen through, so the scene is behind the panel rather than cut off by it. Thinner than
-        // the cards inside it, because this is the layer against the scene.
-        //
-        // Docked there is no scene behind it at all, so it is solid whatever the alpha says, and
-        // what it is solid in is the ground, the darkest there is and the same thing the corners
-        // taken off the viewport are painted in, so the frame round the scene is one color.
-        ImGui.SetNextWindowBgAlpha(EditorShell.Docked ? 1f : EditorTheme.Current.WindowAlpha);
+        // the cards inside it, because this is the layer against the scene. Docked it is clear, so
+        // only the cards are drawn and the window behind shows between them.
+        ImGui.SetNextWindowBgAlpha(EditorSurface.Chrome().W);
         ImGui.PushStyleColor(ImGuiCol.WindowBg, EditorSurface.Chrome());
 
         // Square against the window's edge when it is docked. A rounded corner says a thing is

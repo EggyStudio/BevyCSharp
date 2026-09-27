@@ -51,7 +51,7 @@ public static class EditorStrip
 
         ImGui.SetNextWindowPos(new Vector2(0f, top));
         ImGui.SetNextWindowSize(new Vector2(width, strip));
-        ImGui.SetNextWindowBgAlpha(EditorShell.Docked ? 1f : EditorTheme.Current.WindowAlpha);
+        ImGui.SetNextWindowBgAlpha(EditorSurface.Chrome().W);
         ImGui.PushStyleColor(ImGuiCol.WindowBg, EditorSurface.Chrome());
 
         ImGui.PushStyleVar(
@@ -208,10 +208,10 @@ public static class EditorStrip
 
             var open = index == EditorShell.OpenTab;
 
-            // Docked, a tab that is neither open nor under the hand wears nothing, because the
-            // strip is black behind it and the word carries on its own. Floating, the strip is the
-            // lit scene seen through, and a word on that needs something under it to sit on.
-            var idle = EditorShell.Docked ? new Vector4(0f, 0f, 0f, 0f) : EditorSurface.Lying();
+            // Every tab wears the plate, docked or not. Floating, the strip is the lit scene seen
+            // through, and docked it is whatever is behind the window, which on a see-through
+            // window is the desktop, and a word on either needs something under it to sit on.
+            var idle = EditorSurface.Lying();
 
             // As tall as a button floating in the scene's corner, because a tab is one of those
             // lying along the bottom edge.

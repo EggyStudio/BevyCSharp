@@ -75,34 +75,13 @@ public static class EditorSurface
     /// <summary>How much air a card keeps inside its own edge.</summary>
     internal const float Air = 4f;
 
-    /// <summary>
-    /// A panel's own heading, and what it has to say about itself beside it.
-    /// </summary>
+    /// <summary>Gives the next widget the whole row.</summary>
     /// <remarks>
-    /// Every panel opens with one of these, so they are written in one place and read as one row
-    /// rather than as two panels that happen to agree.
-    /// </remarks>
-    /// <param name="name">What the panel is called, which is written in small capitals.</param>
-    /// <param name="note">What it has to add, such as how many things it is listing.</param>
-    internal static void Title(string name, string? note = null)
-    {
-        ImGui.TextDisabled(name);
-
-        if (note is not { Length: > 0 }) return;
-
-        ImGui.SameLine();
-        ImGui.TextDisabled(note);
-    }
-
-    /// <summary>
-    /// Gives the next widget the whole row, less whatever the dock button is floating over.
-    /// </summary>
-    /// <remarks>
-    /// The button is its own window over the panel's top right corner, so a field on the first row
-    /// has to stop short of it or the two overlap.
+    /// The whole of it, since nothing floats over a panel's rows. The window's buttons have a row
+    /// of their own above the panels.
     /// </remarks>
     internal static void FullWidth() =>
-        ImGui.SetNextItemWidth(-1f - EditorSceneFrame.DockRoom());
+        ImGui.SetNextItemWidth(-1f);
 
     /// <summary>How much air a menu or a tooltip keeps inside its own edge.</summary>
     /// <remarks>
@@ -218,12 +197,14 @@ public static class EditorSurface
     /// What a floating window's background is painted in.
     /// </summary>
     /// <remarks>
-    /// The panel while it floats over the scene, and the ground while it is docked, where there is
-    /// no scene behind it to show through and a gray a shade off black is a frame nobody asked for.
+    /// The panel while it floats over the scene. Docked there is no scene behind it, so it is
+    /// nothing at all, and what shows between the cards is whatever is behind the window: the
+    /// desktop where the window is see-through, and black where it is not, which is the ground the
+    /// editor used to paint there by hand.
     /// </remarks>
     internal static Vector4 Chrome() => EditorTheme.Alpha(
         EditorShell.Docked ? EditorTheme.Current.Ground : EditorTheme.Current.Panel,
-        EditorShell.Docked ? 1f : EditorTheme.Current.WindowAlpha);
+        EditorShell.Docked ? 0f : EditorTheme.Current.WindowAlpha);
 
     /// <summary>
     /// The short pill that says a thing can be taken hold of and dragged.

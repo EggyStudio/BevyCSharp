@@ -230,6 +230,9 @@ pub struct BcsConfig {
     /// Non-zero to light with Bevy's Solari where a camera asks, which needs a build with the
     /// `solari` feature and an adapter that traces rays.
     pub ray_traced_lighting: u32,
+    /// Non-zero to make the window see-through where what is drawn has no alpha, where the
+    /// platform allows it. Ignored without a window.
+    pub transparent: u32,
 }
 
 /// How a camera should see, passed from C# when one is spawned.

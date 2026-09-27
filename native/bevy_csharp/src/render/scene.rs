@@ -1643,3 +1643,58 @@ mod tests {
         assert!(floats_to_rgba8(TextureFormat::Rgba8Unorm, &[0; 4]).is_none());
     }
 }
+
+/// Rounds the corners of a camera's picture by `radius` physical pixels, leaving what is outside
+/// them clear rather than colored, or with `0` squares them again.
+///
+/// The corners of the camera's viewport where it has one, and of its whole picture otherwise. See
+/// [`super::corners`].
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_rounded_corners(camera: u64, radius: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, radius);
+            crate::interop::status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if !radius.is_finite() || radius < 0.0 {
+                return crate::interop::status::NULL_ARG;
+            }
+
+            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+
+            crate::state::with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                super::corners::set(world, entity, radius)
+            })
+        }
+    })
+}
+
+/// Sets the world's clear color, in linear RGBA, which every camera clearing to the world's color
+/// clears to, and which fills the part of a window a camera's viewport leaves out.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_clear_color(r: f32, g: f32, b: f32, a: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (r, g, b, a);
+            crate::interop::status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            crate::state::with_world(|world| {
+                world.insert_resource(bevy::camera::ClearColor(bevy::color::Color::linear_rgba(r, g, b, a)));
+                crate::interop::status::OK
+            })
+        }
+    })
+}
+

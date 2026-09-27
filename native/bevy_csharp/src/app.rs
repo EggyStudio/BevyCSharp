@@ -239,6 +239,16 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                             title: title.clone().unwrap_or_else(|| "BevyCSharp".to_string()),
                             resolution: (config.width, config.height).into(),
                             present_mode,
+                            // Composited with alpha, where asked for, which the platform has to
+                            // know before the window exists. Premultiplied, since that is what a
+                            // camera and the interface write. Where the surface cannot, the window
+                            // module falls back before the surface is made.
+                            transparent: config.transparent != 0,
+                            composite_alpha_mode: if config.transparent != 0 {
+                                bevy::window::CompositeAlphaMode::PreMultiplied
+                            } else {
+                                bevy::window::CompositeAlphaMode::Auto
+                            },
                             ..default()
                         })
                     },
@@ -328,6 +338,12 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
 
             if config.gpu_timings != 0 {
                 crate::render::timings::install(&mut app);
+            }
+
+            // Only where a see-through window was asked for, which is the one case where the mode
+            // the window asks to be composited in might be one its surface cannot do.
+            if config.transparent != 0 && !offscreen {
+                crate::window::install(&mut app);
             }
 
             // Auto exposure is the one post-processing effect `DefaultPlugins` leaves out, since

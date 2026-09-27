@@ -187,6 +187,26 @@ public sealed class Config
     public bool GpuTimings { get; set; }
 
     /// <summary>
+    /// Make the window see-through wherever what is drawn into it has no alpha, so the desktop
+    /// shows behind it there.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Decided when the window is made, since the platform builds a see-through window
+    /// differently from an opaque one. What is left clear is then clear: the world's clear color
+    /// where it has no alpha (<see cref="Render.SetClearColor"/>), the part of a window a camera's
+    /// viewport leaves out, and the corners <see cref="Render.SetRoundedCorners"/> takes off. A
+    /// window without a frame (<see cref="Window.SetStyle"/>) and with this on can be any shape.
+    /// </para>
+    /// <para>
+    /// Not every platform can. Where the window's surface cannot be composited with alpha, which
+    /// is often so under DirectX 12, the window is made opaque instead and what would have been
+    /// clear is black, and the log says which it got. Ignored without a window.
+    /// </para>
+    /// </remarks>
+    public bool Transparent { get; set; }
+
+    /// <summary>
     /// Make Bevy's ray-traced lighting available, which a camera then turns on with
     /// <see cref="Render.SetRayTracedLighting"/>.
     /// </summary>
