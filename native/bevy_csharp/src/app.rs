@@ -318,6 +318,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 );
             }
 
+            // What the app before this one drew, which would otherwise answer for a camera of
+            // this one that happens to reuse its entity number.
+            crate::render::watch::forget();
+
             // Only when asked, since measuring writes timestamps around every pass and reads them
             // back every frame.
             crate::render::timings::forget();

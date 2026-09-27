@@ -1008,6 +1008,42 @@ public sealed class ViewShaderTests
         Assert.Equal(middle.R, middle.B);
     }
 
+    /// <summary>
+    /// The renderer says which names a camera drew, so an inspector can offer only what a watch
+    /// would show: the camera's own image and the prepass it asked for, and not the ambient
+    /// occlusion or G-buffer it did not.
+    /// </summary>
+    [Fact]
+    public void TheRendererSaysWhichImagesACameraDrew()
+    {
+        if (!CanRun) return;
+
+        var camera = Entity.None;
+        IReadOnlyList<string> drawn = [];
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                camera = PictureRun.Camera(ecs);
+
+                // Once a pixel, since a multisampled prepass cannot be shown and is left out.
+                Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
+                Shaders.SetPrepass(camera, depth: true, normals: true);
+                Shaders.SetViewImages(camera, new ViewImage("amount", ShaderImageFormat.R32Float));
+            },
+        };
+
+        run.Wait(Settled).Do("asking what was drawn", _ => drawn = Shaders.DrawnViewImageNames(camera)).Go();
+
+        Assert.Contains("amount", drawn);
+        Assert.Contains("depth", drawn);
+        Assert.Contains("normals", drawn);
+        Assert.DoesNotContain("motion", drawn);
+        Assert.DoesNotContain("ambient_occlusion", drawn);
+        Assert.DoesNotContain("gbuffer", drawn);
+    }
+
     /// <summary>What cannot be a camera's image or dispatch is refused before reaching the engine.</summary>
     [Fact]
     public void AMalformedImageOrDispatchIsRefused()

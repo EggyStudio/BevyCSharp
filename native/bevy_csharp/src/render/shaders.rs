@@ -1202,6 +1202,29 @@ pub unsafe extern "C" fn bcs_render_watch_view_image(
     })
 }
 
+/// Copies out the names a watch on the camera would find, as of the last frame drawn, one a line,
+/// by the text convention. What an inspector lists as watchable, since the names a camera has
+/// depend on settings made in several places and only the render world knows the answer.
+///
+/// # Safety
+/// `out` must be writable for `capacity` bytes, or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_drawn_view_image_names(camera: u64, out: *mut u8, capacity: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, out, capacity);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            let text = super::watch::drawn_names(camera);
+            unsafe { crate::interop::write_text(&text, out, capacity) }
+        }
+    })
+}
+
 /// Stops watching one of a camera's images.
 ///
 /// # Safety

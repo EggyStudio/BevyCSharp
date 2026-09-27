@@ -592,11 +592,42 @@ public static unsafe class Shaders
     /// occlusion, where it is on, and Bevy's G-buffer, where the camera draws deferred. The G-buffer
     /// is packed bits, which a shader declares as <c>Texture2D&lt;uint4&gt; gbuffer</c> and unpacks
     /// with <c>bcs_pass::surface_of</c>. Last frame's depth and G-buffer are there as
-    /// <c>depth_previous</c> and <c>gbuffer_previous</c> where the camera keeps them. A watch reads
-    /// the prepass's by these names too.
+    /// <c>depth_previous</c> and <c>gbuffer_previous</c> where the camera keeps them, and Bevy's
+    /// hierarchical depth as <c>depth_pyramid</c> where the camera builds it. A watch reads the
+    /// prepass's by these names too. Which of them a camera has is
+    /// <see cref="DrawnViewImageNames"/>.
     /// </remarks>
     public static IReadOnlyList<string> EngineViewImageNames { get; } =
-        ["depth", "normals", "motion", "ambient_occlusion", "gbuffer", "depth_previous", "gbuffer_previous"];
+        ["depth", "normals", "motion", "ambient_occlusion", "gbuffer", "depth_previous", "gbuffer_previous", "depth_pyramid"];
+
+    /// <summary>
+    /// The names a <see cref="Watch"/> on the camera would find, as of the last frame it drew: its
+    /// own images and those of <see cref="EngineViewImageNames"/> it has.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Whether a camera has an image depends on settings made in several places (a prepass, Bevy's
+    /// ambient occlusion, deferred rendering, the images it was given), and on whether the frame
+    /// drew them at all, since a prepass drawn several samples a pixel cannot be shown. So this is
+    /// asked of the renderer rather than worked out from the settings, and a name listed here is
+    /// one a watch shows.
+    /// </para>
+    /// <para>
+    /// A frame behind, since the renderer answers once it has drawn, so a setting just changed
+    /// shows here on the frame after next. Empty before the camera's first frame, and in a run
+    /// with no renderer.
+    /// </para>
+    /// </remarks>
+    public static IReadOnlyList<string> DrawnViewImageNames(Entity camera)
+    {
+        if (!App.HasRenderer) return [];
+
+        var text = Native.ReadText(
+            (buffer, capacity) => Native.bcs_render_drawn_view_image_names(camera.Bits, buffer, capacity),
+            "reading the images a camera drew");
+
+        return text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+    }
 
     /// <summary>
     /// The names of the images a camera owns, as <see cref="SetViewImages"/> last gave them, with

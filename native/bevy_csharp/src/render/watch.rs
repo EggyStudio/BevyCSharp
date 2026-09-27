@@ -378,6 +378,10 @@ pub fn install(app: &mut App) {
         .insert_resource(WatchShaders(made))
         .add_systems(RenderStartup, init_pipelines)
         .add_systems(
+            bevy::render::Render,
+            record_drawn_names.in_set(bevy::render::RenderSystems::PrepareBindGroups),
+        )
+        .add_systems(
             Core3d,
             draw_watches
                 .after(super::passes::AfterTonemappingPasses)
@@ -464,4 +468,69 @@ mod tests {
                 .unwrap_or_else(|error| panic!("{reading:?}: {error:?}"));
         }
     }
+}
+
+/// The names each camera drew last frame, by its main-world entity, which the entry point hands
+/// out at any time. A camera's images exist only in the render world, and whether one is there
+/// depends on settings several calls apart (a prepass, Bevy's occlusion, deferred rendering, a
+/// camera image of the program's own), so asking the render world what it has is the only
+/// answer that cannot drift from what a watch will find.
+static DRAWN: std::sync::Mutex<Option<HashMap<u64, Vec<String>>>> = std::sync::Mutex::new(None);
+
+/// Forgets what an app before this one drew, which is called for every app built, since the map
+/// outlives the app that wrote it and entity numbers are reused.
+pub fn forget() {
+    if let Ok(mut drawn) = DRAWN.lock() {
+        *drawn = None;
+    }
+}
+
+/// Writes down, for every camera, the names a watch on it would find this frame. The same lookup
+/// `draw_watches` makes, so a name listed here is one a watch shows.
+#[allow(clippy::type_complexity)]
+fn record_drawn_names(
+    views: bevy::ecs::system::Query<(
+        &bevy::render::sync_world::MainEntity,
+        Option<&ViewImageTextures>,
+        (Option<&ScreenSpaceAmbientOcclusionResources>, Option<&bevy::core_pipeline::mip_generation::experimental::depth::ViewDepthPyramid>),
+        Option<&ViewPrepassTextures>,
+    ), With<bevy::render::view::ExtractedView>>,
+) {
+    let mut drawn: HashMap<u64, Vec<String>> = HashMap::new();
+
+    for (main, owned, occlusion, prepass) in &views {
+        let mut names: Vec<String> = view_names(owned, occlusion, prepass)
+            .map(|names| names.keys().cloned().collect())
+            .unwrap_or_default();
+
+        // The prepass's own, which a watch can only show drawn once a pixel, as it checks too.
+        if let Some(prepass) = prepass {
+            for (name, attachment) in [
+                ("depth", prepass.depth.as_ref()),
+                ("normals", prepass.normal.as_ref()),
+                ("motion", prepass.motion_vectors.as_ref()),
+            ] {
+                if attachment.is_some_and(|attachment| attachment.texture.texture.sample_count() == 1) {
+                    names.push(name.into());
+                }
+            }
+        }
+
+        names.sort();
+        drawn.insert(main.id().to_bits(), names);
+    }
+
+    if let Ok(mut shared) = DRAWN.lock() {
+        *shared = Some(drawn);
+    }
+}
+
+/// The names a watch on the camera would find, as of the last frame drawn, one a line. Empty for a
+/// camera that drew nothing, or before its first frame.
+pub fn drawn_names(camera: u64) -> String {
+    DRAWN
+        .lock()
+        .ok()
+        .and_then(|drawn| drawn.as_ref()?.get(&camera).map(|names| names.join("\n")))
+        .unwrap_or_default()
 }

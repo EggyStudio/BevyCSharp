@@ -16,6 +16,11 @@ namespace BevyCSharp.Editor.Framework;
 /// shows the chosen one as it is this frame, through <see cref="Shaders.Watch"/>.
 /// </para>
 /// <para>
+/// The names the camera does not draw are dimmed, from <see cref="Shaders.DrawnViewImageNames"/>,
+/// which asks the renderer rather than guessing from the settings. Hovering one says what turns it
+/// on.
+/// </para>
+/// <para>
 /// Values are shown times a scale plus an offset, because the numbers in these images are rarely
 /// between zero and one. A distance runs to hundreds, and a motion vector is a hundredth. The scale
 /// and offset are applied when an edit is finished rather than on every drag, since each change
@@ -62,16 +67,41 @@ public static class FrameTab
             return;
         }
 
-        var names = Shaders.ViewImageNames(camera).Concat(Shaders.EngineViewImageNames).ToList();
+        var names = Shaders.ViewImageNames(camera).Concat(Shaders.EngineViewImageNames).Distinct().ToList();
+        var drawn = Shaders.DrawnViewImageNames(camera).ToHashSet();
         var room = ImGui.GetContentRegionAvail();
 
         if (EditorSurface.Region("##frameNames", new Vector2(MathF.Min(220f, room.X * 0.3f), 0f)))
         {
+            // Every name is listed, so what a camera could have is in front of whoever is looking,
+            // and the ones it does not draw are dimmed with what turns them on. Picking one of those
+            // would only show an empty picture and leave a warning in the log.
             foreach (var name in names)
             {
-                if (ImGui.Selectable(name, _watching == name))
+                var has = drawn.Contains(name);
+
+                // In the faint color the editor's hints use, at full strength, since ImGui's own
+                // disabled look only takes a little off the text and reads as a list of choices.
+                if (!has)
+                {
+                    ImGui.PushStyleVar(ImGuiStyleVar.DisabledAlpha, 1f);
+                    ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(ImGuiCol.TextDisabled));
+                }
+
+                if (ImGui.Selectable(name, _watching == name, has ? ImGuiSelectableFlags.None : ImGuiSelectableFlags.Disabled))
                 {
                     Watch(camera, name == _watching ? null : name);
+                }
+
+                if (!has)
+                {
+                    ImGui.PopStyleColor();
+                    ImGui.PopStyleVar();
+                }
+
+                if (!has && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                {
+                    ImGui.SetTooltip(Missing(name));
                 }
             }
         }
@@ -171,8 +201,32 @@ public static class FrameTab
         var size = new Vector2(Width, Height) * MathF.Max(0.1f, MathF.Min(1f, fit));
 
         ImGui.Image((IntPtr)texture, size);
-        ImGui.TextDisabled("A name the camera does not draw this frame shows nothing");
+
+        if (_watching is { } name && !Shaders.DrawnViewImageNames(_camera).Contains(name))
+        {
+            ImGui.TextDisabled($"The camera stopped drawing {name}, so this is the last of it. {Missing(name)}");
+        }
     }
+
+    /// <summary>Why a camera has no image by this name, and what gives it one.</summary>
+    /// <remarks>
+    /// The engine's names each come from one setting, so the sentence can name it. A camera image
+    /// of the game's own is missing because nothing has asked for it yet or its first frame has not
+    /// been drawn.
+    /// </remarks>
+    private static string Missing(string name) => name switch
+    {
+        "depth" or "normals" or "motion" =>
+            $"The camera draws no {name} of its own. Shaders.SetPrepass(camera, ...) with {name} on draws it, "
+            + "once a pixel (PostSettings.Msaa = 1), since a multisampled one cannot be shown.",
+        "ambient_occlusion" => "Bevy's ambient occlusion is off. Render.SetAmbientOcclusion turns it on.",
+        "gbuffer" => "The camera draws forward. Shaders.SetPrepass(camera, ..., deferred: true) draws the G-buffer.",
+        "depth_previous" or "gbuffer_previous" =>
+            "The camera keeps no last frame. Shaders.SetPrepass(camera, ..., previous: true) keeps it, "
+            + "with depth or the G-buffer asked for as well.",
+        "depth_pyramid" => "The camera builds no pyramid. Shaders.SetPrepass(camera, ..., pyramid: true) builds it.",
+        _ => "The camera has not drawn this image yet.",
+    };
 
     /// <summary>Watches a name on the camera, or with null stops watching.</summary>
     private static void Watch(Entity camera, string? name)
