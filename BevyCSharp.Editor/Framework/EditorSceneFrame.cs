@@ -9,23 +9,27 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 public static class EditorSceneFrame
 {
-    /// <summary>The radius last given to the camera, so it is only told again on a change.</summary>
-    private static float _radius = -1f;
+    /// <summary>What the camera and the world were last told, so they are only told again on a change.</summary>
+    private static (float Radius, (float, float, float, float) Fill, (float, float, float, float) Ground) _told =
+        (-1f, default, default);
 
     /// <summary>
-    /// Rounds the scene's corners: the viewport's while docked, the window's while floating.
+    /// Rounds the scene's corners, the viewport's while docked and the window's while floating, and
+    /// clears the rest of the window to the ground.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Taken off by the renderer rather than painted over here, because what is outside a corner
-    /// is meant to be clear, and nothing an interface draws on top can make a pixel clear. The
-    /// renderer multiplies the scene's corners down to nothing, antialiased, and on a see-through
-    /// window the desktop shows there.
+    /// Both are the renderer's to do rather than painted here, because anything the interface
+    /// draws lies over the scene, so a ground painted round the viewport would darken its corners
+    /// as well, and nothing drawn over a pixel can make it clearer than it is. The window is
+    /// cleared to the ground round the viewport, and the viewport's corners are taken off and
+    /// filled with the ground, antialiased, so they match what surrounds them.
     /// </para>
     /// <para>
-    /// Docked the scene is a card among the others and takes a card's rounding. Floating it is the
-    /// whole window and takes a window's, which makes the window itself round. Maximized it is
-    /// square, since a window against the screen's edges has no corners to show.
+    /// Docked the scene is a surface among the panels and takes a panel's rounding. Floating it is
+    /// the whole window and takes a window's, which makes the window itself round, with its corners
+    /// clear rather than ground, since there is nothing of the editor's beyond them. Maximized it
+    /// is square, since a window against the screen's edges has no corners to show.
     /// </para>
     /// </remarks>
     /// <param name="camera">The scene's camera.</param>
@@ -39,11 +43,15 @@ public static class EditorSceneFrame
             : EditorShell.Docked ? theme.ChildRounding : theme.WindowRounding;
 
         var radius = logical * ImGuiRuntime.Scale;
+        var ground = EditorTheme.Linear(theme.Ground);
+        var fill = EditorShell.Docked ? ground : default;
 
-        if (radius == _radius) return;
+        if (_told == (radius, fill, ground)) return;
 
-        _radius = radius;
-        Render.SetRoundedCorners(camera, radius);
+        _told = (radius, fill, ground);
+
+        Render.SetClearColor(ground);
+        Render.SetRoundedCorners(camera, radius, fill);
     }
 
     /// <summary>
@@ -96,52 +104,48 @@ public static class EditorSceneFrame
             // says which way it is set. The pin as it stands. Pushed in while the panel is docked,
             // and lying loose while it floats, so the picture says what the panel is rather than
             // what the button does.
-            EditorSurface.Backed(() =>
+            var pin = EditorShell.Docked ? EditorIcons.Pinned : EditorIcons.Loose;
+
+            if (ToolbarView.Circle($"dock{EditorShell.Docked}", pin, false, Size))
             {
-                var pin = EditorShell.Docked ? EditorIcons.Pinned : EditorIcons.Loose;
+                EditorShell.Docked = !EditorShell.Docked;
+            }
 
-                if (ToolbarView.Circle($"dock{EditorShell.Docked}", pin, false, Size))
+            if (ImGui.IsItemHovered())
+            {
+                EditorWidgets.Tip(EditorShell.Docked ? "Undock the panel" : "Dock the panel");
+            }
+
+            if (EditorWindowFrame.Borderless)
+            {
+                ImGui.SameLine();
+
+                if (Marked("minimize", WindowMarks.Minimize, "Minimize", Size)) EditorWindowFrame.Minimize();
+
+                ImGui.SameLine();
+
+                var maximized = EditorWindowFrame.Maximized;
+
+                if (Marked(
+                    "maximize",
+                    maximized ? WindowMarks.Restore : WindowMarks.Maximize,
+                    maximized ? "Restore" : "Maximize",
+                    Size))
                 {
-                    EditorShell.Docked = !EditorShell.Docked;
+                    EditorWindowFrame.ToggleMaximized();
                 }
 
-                if (ImGui.IsItemHovered())
-                {
-                    EditorWidgets.Tip(EditorShell.Docked ? "Undock the panel" : "Dock the panel");
-                }
+                ImGui.SameLine();
 
+                // The one button that ends something, so it says so under the pointer in the color
+                // a failure is written in, as a title bar's close button turns red.
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, EditorTheme.Current.Bad);
+                ImGui.PushStyleColor(ImGuiCol.ButtonActive, EditorTheme.Current.Bad);
 
-                if (EditorWindowFrame.Borderless)
-                {
-                    ImGui.SameLine();
+                if (Marked("close", WindowMarks.Close, "Close the editor", Size)) EditorWindowFrame.Close();
 
-                    if (Marked("minimize", WindowMarks.Minimize, "Minimize", Size)) EditorWindowFrame.Minimize();
-
-                    ImGui.SameLine();
-
-                    var maximized = EditorWindowFrame.Maximized;
-
-                    if (Marked(
-                        "maximize",
-                        maximized ? WindowMarks.Restore : WindowMarks.Maximize,
-                        maximized ? "Restore" : "Maximize",
-                        Size))
-                    {
-                        EditorWindowFrame.ToggleMaximized();
-                    }
-
-                    ImGui.SameLine();
-
-                    // The one button that ends something, so it says so under the pointer in the color
-                    // a failure is written in, as a title bar's close button turns red.
-                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, EditorTheme.Current.Bad);
-                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, EditorTheme.Current.Bad);
-
-                    if (Marked("close", WindowMarks.Close, "Close the editor", Size)) EditorWindowFrame.Close();
-
-                    ImGui.PopStyleColor(2);
-                }
-            });
+                ImGui.PopStyleColor(2);
+            }
 
             ImGui.PopStyleColor(2);
             ImGui.PopStyleVar();

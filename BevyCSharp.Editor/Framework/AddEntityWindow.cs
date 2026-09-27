@@ -73,10 +73,10 @@ public static class AddEntityWindow
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, EditorSurface.Around);
 
-        // A card, as the panels are made of, rather than a flyout's field gray. It holds a box to
-        // type in and a list, and those are drawn on a card everywhere else, so on the field gray
-        // the box would be the color of what it sits on and could not be seen.
-        ImGui.PushStyleColor(ImGuiCol.PopupBg, EditorTheme.Alpha(EditorTheme.Current.Card, 1f));
+        // A panel's color rather than a flyout's field gray. It holds a box to type in and a list,
+        // and those are drawn on a panel everywhere else, so on the field gray the box would be the
+        // color of what it sits on and could not be seen.
+        ImGui.PushStyleColor(ImGuiCol.PopupBg, EditorTheme.LivePanel);
 
         // A modal, so the scene and the panels wait while it is up, and a press outside closes it
         // rather than reaching what is under it. No title bar, since ImGui's is a band of another

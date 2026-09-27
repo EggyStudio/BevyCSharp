@@ -52,36 +52,6 @@ public static class StyleTab
             ImGui.SameLine();
         }
 
-        // How much of the scene shows through a panel, which is a decision about the look and so
-        // belongs beside the rest of them. In whole percent, because that is how somebody says it.
-        var behind = theme.WindowAlpha * 100f;
-
-        ImGui.SetNextItemWidth(150f);
-
-        var moved = EditorWidgets.Sliding(
-            "##behind",
-            behind / 100f,
-            () => ImGui.SliderFloat("##behind", ref behind, 0f, 100f, "panel %.0f%%"),
-            Percent("panel", behind));
-
-        if (moved) EditorShell.Wear(theme with { WindowAlpha = behind / 100f });
-
-        ImGui.SameLine();
-
-        var alpha = theme.PanelAlpha * 100f;
-
-        ImGui.SetNextItemWidth(150f);
-
-        var faded = EditorWidgets.Sliding(
-            "##alpha",
-            alpha / 100f,
-            () => ImGui.SliderFloat("##alpha", ref alpha, 0f, 100f, "cards %.0f%%"),
-            Percent("cards", alpha));
-
-        if (faded) EditorShell.Wear(theme with { PanelAlpha = alpha / 100f });
-
-        ImGui.SameLine();
-
         if (EditorWidgets.Pill("Save", false)) Save();
 
         ImGui.SameLine();
@@ -113,10 +83,11 @@ public static class StyleTab
     {
         var theme = EditorTheme.Current;
 
+        // How clear each surface is lives in its color, in the alpha under the picker, rather than
+        // in a share of its own beside it, so one thing in one place says how a surface looks.
         EditorSurface.Heading("Surfaces");
         Color("Ground", theme.Ground, c => theme with { Ground = c });
         Color("Panel", theme.Panel, c => theme with { Panel = c });
-        Color("Card", theme.Card, c => theme with { Card = c });
         Color("Group", theme.Group, c => theme with { Group = c });
         Color("Field", theme.Field, c => theme with { Field = c });
         Color("Hover", theme.Hover, c => theme with { Hover = c });
@@ -130,10 +101,6 @@ public static class StyleTab
         Color("Accent", theme.Accent, c => theme with { Accent = c });
         Color("Warn", theme.Warn, c => theme with { Warn = c });
         Color("Bad", theme.Bad, c => theme with { Bad = c });
-
-        EditorSurface.Heading("Seen through");
-        Share("Panel", theme.WindowAlpha, a => theme with { WindowAlpha = a });
-        Share("Cards", theme.PanelAlpha, a => theme with { PanelAlpha = a });
 
         EditorSurface.Heading("Shape");
         Number("Window rounding", theme.WindowRounding, n => theme with { WindowRounding = n });
@@ -187,21 +154,6 @@ public static class StyleTab
             if (EditorWidgets.Swatch($"##{name}", ref value)) EditorShell.Wear(onto(value));
         });
 
-    /// <summary>How far through something is seen, in whole percent, which is how somebody says it.</summary>
-    private static void Share(string name, float held, Func<float, EditorTheme> onto) =>
-        Rung(name, () =>
-        {
-            var value = held * 100f;
-
-            var moved = EditorWidgets.Sliding(
-                $"##{name}",
-                value / 100f,
-                () => ImGui.SliderFloat($"##{name}", ref value, 0f, 100f, "%.0f%%"),
-                Percent(string.Empty, value));
-
-            if (moved) EditorShell.Wear(onto(value / 100f));
-        });
-
     /// <summary>One number, dragged rather than slid, because it has no end to run to.</summary>
     private static void Number(string name, float held, Func<float, EditorTheme> onto) =>
         Rung(name, () =>
@@ -225,16 +177,6 @@ public static class StyleTab
                 EditorShell.Wear(onto(value));
             }
         });
-
-    /// <summary>A share written the way the bars here write one, in whole percent.</summary>
-    /// <param name="what">What the number is about, or nothing for the number alone.</param>
-    /// <param name="value">The share, from nothing to a hundred.</param>
-    private static string Percent(string what, float value)
-    {
-        var number = MathF.Round(value).ToString("0", CultureInfo.InvariantCulture);
-
-        return what.Length == 0 ? $"{number}%" : $"{what} {number}%";
-    }
 
     /// <summary>Writes what is in force to the file the editor reads at startup.</summary>
     private static void Save()

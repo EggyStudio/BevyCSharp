@@ -82,11 +82,10 @@ changed in the style tab changes what is drawn instead of being written over on 
 
 | rung | value | what it is |
 |---|---|---|
-| `Ground` | `#000000` | the window behind everything, and the frame round a docked scene |
-| `Panel` | `#0C0C0C` | the window a panel is drawn in, seen through at `WindowAlpha` |
-| `Card` | `#1A1A1A` | a card inside one, and the plate on anything lying on the scene |
-| `Group` | `#262626` | a component's card inside a card |
-| `Field` | `#3E3E3E` | a box that is typed in, the groove of a bar, and the plate of a menu or a tooltip |
+| `Ground` | `#000000` at 60% | what lies between the panels and round the scene while docked, so the desktop shows dimmed through a see-through window |
+| `Panel` | `#0C0C0C` | a panel: the world list, the details, an open tab and the window that adds an entity |
+| `Group` | `#262626` | a component's rows inside a panel |
+| `Field` | `#3E3E3E` | a box that is typed in, a button, the groove of a bar, the plate of a menu or a tooltip, and the plate of the toolbars, the tabs and the window's buttons |
 | `Hover` | `#525252` | a control under the pointer |
 | `Active` | `#666666` | one being held down |
 | `Line` | `#3C3C3C` | the rare rule, where a gap will not do, gray like the rest of the ladder |
@@ -115,11 +114,14 @@ The accent means one thing only, what is selected or what is in force. A color t
 component header is a color that means nothing. `Warn` and `Bad` are the exception, and they are for
 what the program has to say rather than for what it is.
 
-**Transparency stops at the panel.** The window a panel is drawn in is the layer against the scene
-and is the most transparent thing there is, at `WindowAlpha`, which the modern look leaves at
-nothing at all. The cards in it are `PanelAlpha` solid, and everything from a component's card
-inwards is solid outright. A box somebody is about to type a number into whose tone drifts with
-whatever passes behind it is a box with no reliable contrast.
+**Every color carries its own alpha, and that is the only transparency.** The ground is black at
+60%, so the desktop shows dimmed between the docked panels and round the scene, and the frame reads
+as one thing laid over it. Everything else is solid, docked or floating: a panel whose tone drifts
+with whatever passes behind it is a panel with no reliable contrast. The style tab edits the alpha
+under each color's picker, and a theme file writes a color with alpha as `#RRGGBBAA`. The ground
+is painted by the renderer rather than by the interface, as the window's clear color round the
+viewport and as the fill of the viewport's rounded corners, since anything the interface paints
+lies over the scene as well as round it.
 
 ### Density
 

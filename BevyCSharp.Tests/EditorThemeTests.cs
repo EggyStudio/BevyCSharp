@@ -18,8 +18,7 @@ public sealed class EditorThemeTests
         {
             Name = "Mine",
             Accent = new Vector4(0.2f, 0.7f, 0.4f, 1f),
-            PanelAlpha = 0.73f,
-            WindowAlpha = 0.41f,
+            Ground = new Vector4(0.1f, 0.1f, 0.1f, 0.41f),
             WindowRounding = 14f,
             FramePadding = new Vector2(9f, 6f),
             Borders = 1f,
@@ -28,8 +27,6 @@ public sealed class EditorThemeTests
         var read = EditorTheme.Restore(dialled.Describe());
 
         Assert.Equal("Mine", read.Name);
-        Assert.Equal(dialled.PanelAlpha, read.PanelAlpha, 3);
-        Assert.Equal(dialled.WindowAlpha, read.WindowAlpha, 3);
         Assert.Equal(dialled.WindowRounding, read.WindowRounding, 3);
         Assert.Equal(dialled.FramePadding, read.FramePadding);
         Assert.Equal(dialled.Borders, read.Borders, 3);
@@ -38,6 +35,11 @@ public sealed class EditorThemeTests
         Assert.Equal(dialled.Accent.X, read.Accent.X, 2);
         Assert.Equal(dialled.Accent.Y, read.Accent.Y, 2);
         Assert.Equal(dialled.Accent.Z, read.Accent.Z, 2);
+
+        // And a color that is partly clear keeps how clear it is, which is the only transparency
+        // a theme has.
+        Assert.Equal(dialled.Ground.W, read.Ground.W, 2);
+        Assert.Equal(1f, read.Accent.W, 3);
     }
 
     [Fact]
@@ -71,7 +73,7 @@ public sealed class EditorThemeTests
 
         var ladder = new[]
         {
-            theme.Ground.X, theme.Panel.X, theme.Card.X, theme.Group.X,
+            theme.Ground.X, theme.Panel.X, theme.Group.X,
             theme.Field.X, theme.Hover.X, theme.Active.X,
         };
 

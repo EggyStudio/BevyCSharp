@@ -490,26 +490,33 @@ public static unsafe class Render
             "Render.SetViewport");
 
     /// <summary>
-    /// Rounds the corners of a camera's picture, leaving what is outside them clear rather than
-    /// colored. A radius of nothing squares them again. Only valid inside a system.
+    /// Rounds the corners of a camera's picture, showing <paramref name="fill"/> outside them, which
+    /// is clear unless given. A radius of nothing squares them again. Only valid inside a system.
     /// </summary>
     /// <remarks>
     /// <para>
     /// The corners of the camera's viewport where it has one (<see cref="SetViewport"/>), and of
     /// its whole picture otherwise. What the camera drew is multiplied by how much of each pixel
-    /// lies inside the rounded rectangle, color and alpha alike, after the camera's own passes and
-    /// before its picture reaches the window, so the edge is antialiased and the corner is clear.
+    /// lies inside the rounded rectangle, color and alpha alike, and the fill is added by how much
+    /// lies outside, after the camera's own passes and before its picture reaches the window. So
+    /// the edge is antialiased, and what the corner shows can be clear or partly clear, which
+    /// nothing drawn over the picture can make it.
     /// </para>
     /// <para>
-    /// Clear is only seen through where the window is (<see cref="Config.Transparent"/>). In an
-    /// opaque window a clear corner is black, and a corner that should show some other color is
-    /// better painted over by whatever draws on top.
+    /// A camera given part of a window wants the fill to be the window's clear color round it
+    /// (<see cref="SetClearColor"/>), so its corners match what surrounds them. A camera filling a
+    /// window whose own corners are being rounded wants them clear, which is only seen through on
+    /// a window made with <see cref="Config.Transparent"/> and is black on any other.
     /// </para>
     /// </remarks>
     /// <param name="camera">The camera.</param>
     /// <param name="radius">How round, in physical pixels.</param>
+    /// <param name="fill">What shows outside the corners, in straight linear RGBA.</param>
     /// <exception cref="ArgumentOutOfRangeException">The radius is negative or not a number.</exception>
-    public static void SetRoundedCorners(Entity camera, float radius)
+    public static void SetRoundedCorners(
+        Entity camera,
+        float radius,
+        (float R, float G, float B, float A) fill = default)
     {
         if (!float.IsFinite(radius) || radius < 0f)
         {
@@ -517,7 +524,7 @@ public static unsafe class Render
         }
 
         Native.Check(
-            Native.bcs_render_set_rounded_corners(camera.Bits, radius),
+            Native.bcs_render_set_rounded_corners(camera.Bits, radius, fill.R, fill.G, fill.B, fill.A),
             "Render.SetRoundedCorners");
     }
 

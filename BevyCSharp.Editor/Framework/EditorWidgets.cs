@@ -367,9 +367,10 @@ public static class EditorWidgets
     /// one control with corners.
     /// </para>
     /// <para>
-    /// A color that is partly clear shows as itself on the left half and laid over light gray on
-    /// the right, which is what ImGui's half preview says with a checker. A checker cannot be cut
-    /// to a round end without drawing it square by square, and the step against gray says the same.
+    /// A color that is partly clear shows as itself on the left half and as it would look over
+    /// light gray on the right, which is what ImGui's half preview says with a checker. A checker
+    /// cannot be cut to a round end without drawing it square by square, and the step against gray
+    /// says the same.
     /// </para>
     /// </remarks>
     /// <param name="id">What to call it, which ImGui hashes it by.</param>
@@ -389,27 +390,30 @@ public static class EditorWidgets
 
         if (color.W < 1f)
         {
+            // Worked out here and laid down solid, rather than the color drawn over gray at its own
+            // alpha, since two translucent shapes stacked leave their soft edges stacked too, and
+            // those show as marks along the swatch.
+            var over = Vector4.Lerp(new Vector4(0.8f, 0.8f, 0.8f, 1f), color with { W = 1f }, color.W);
             var half = new Vector2((min.X + max.X) * 0.5f, min.Y);
 
             draw.PushClipRect(half, max, true);
-            EditorDraw.Capsule(min, max, ImGui.GetColorU32(new Vector4(0.8f, 0.8f, 0.8f, 1f)), draw);
-            EditorDraw.Capsule(min, max, ImGui.GetColorU32(color), draw);
+            EditorDraw.Capsule(min, max, ImGui.GetColorU32(over), draw);
             draw.PopClipRect();
         }
 
-        // A ring while it is under a hand, since the fill is the value and cannot change to say so.
-        if (ImGui.IsItemHovered() || ImGui.IsItemActive())
-        {
-            var radius = (max.Y - min.Y) * 0.5f;
+        // A faint ring always, since a swatch the color of the panel it lies on is otherwise not
+        // there at all, and a brighter one while it is under a hand, since the fill is the value
+        // and cannot change to say so.
+        var held = ImGui.IsItemActive();
+        var ring = held ? 0.9f : ImGui.IsItemHovered() ? 0.5f : 0.15f;
 
-            draw.AddRect(
-                min,
-                max,
-                ImGui.GetColorU32(EditorTheme.Alpha(EditorTheme.LiveText, ImGui.IsItemActive() ? 0.9f : 0.5f)),
-                radius,
-                ImDrawFlags.None,
-                1.5f);
-        }
+        draw.AddRect(
+            min,
+            max,
+            ImGui.GetColorU32(EditorTheme.Alpha(EditorTheme.LiveText, ring)),
+            (max.Y - min.Y) * 0.5f,
+            ImDrawFlags.None,
+            ring > 0.2f ? 1.5f : 1f);
 
         if (!Flyout($"##pick{id}")) return false;
 

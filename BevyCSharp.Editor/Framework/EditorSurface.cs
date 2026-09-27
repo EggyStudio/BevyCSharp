@@ -75,54 +75,6 @@ public static class EditorSurface
     /// <summary>How much air a card keeps inside its own edge.</summary>
     internal const float Air = 4f;
 
-    /// <summary>
-    /// Draws a row of buttons on a pill of the panel's black, when the panel is docked.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// Docked on a see-through window, the buttons lying along the top and the bottom are lying
-    /// on the desktop, and a desktop can be any color, so each group of them sits on a plate of
-    /// the panel's own black instead. The groups then read as pieces of one frame laid out round
-    /// the scene rather than as buttons scattered over somebody's wallpaper. Floating they lie on
-    /// the scene, as everything else does, and wear nothing.
-    /// </para>
-    /// <para>
-    /// The plate is laid after the buttons, on a channel under them, since its size is the size
-    /// they came to. It is drawn unclipped, so the air it keeps round them can reach past the
-    /// window's own padding.
-    /// </para>
-    /// </remarks>
-    /// <param name="draw">The buttons.</param>
-    internal static void Backed(Action draw)
-    {
-        ArgumentNullException.ThrowIfNull(draw);
-
-        if (!EditorShell.Docked)
-        {
-            draw();
-            return;
-        }
-
-        var list = ImGui.GetWindowDrawList();
-
-        list.ChannelsSplit(2);
-        list.ChannelsSetCurrent(1);
-
-        ImGui.BeginGroup();
-        draw();
-        ImGui.EndGroup();
-
-        var min = ImGui.GetItemRectMin() - new Vector2(Air, Air);
-        var max = ImGui.GetItemRectMax() + new Vector2(Air, Air);
-
-        list.ChannelsSetCurrent(0);
-        list.PushClipRectFullScreen();
-        EditorDraw.Capsule(min, max, ImGui.GetColorU32(EditorTheme.Alpha(EditorTheme.Current.Panel, 1f)), list);
-        list.PopClipRect();
-
-        list.ChannelsMerge();
-    }
-
     /// <summary>Gives the next widget the whole row.</summary>
     /// <remarks>
     /// The whole of it, since nothing floats over a panel's rows. The window's buttons have a row
@@ -235,24 +187,21 @@ public static class EditorSurface
     /// What something pressed that lies on the scene wears when it is neither held nor in force.
     /// </summary>
     /// <remarks>
-    /// One color for the buttons floating in the scene's corners and the tabs along its bottom,
-    /// because they are the same kind of thing and two of them at two shades read as two kinds.
+    /// The field gray, which every button in a panel wears, so the toolbars, the tabs and the
+    /// window's buttons are the same kind of thing as Add Component and a box to type in, rather
+    /// than a kind of their own at a shade of their own.
     /// </remarks>
-    internal static Vector4 Lying() =>
-        EditorTheme.Alpha(EditorTheme.LiveCard, EditorTheme.Current.PanelAlpha);
+    internal static Vector4 Lying() => EditorTheme.LiveField;
 
     /// <summary>
-    /// What a floating window's background is painted in.
+    /// What a window the panels are laid out in is painted in, which is nothing.
     /// </summary>
     /// <remarks>
-    /// The panel while it floats over the scene. Docked there is no scene behind it, so it is
-    /// nothing at all, and what shows between the cards is whatever is behind the window: the
-    /// desktop where the window is see-through, and black where it is not, which is the ground the
-    /// editor used to paint there by hand.
+    /// Floating, what is between the panels is the scene. Docked, it is the ground, which the
+    /// renderer clears the window to round the scene rather than this painting it, since anything
+    /// painted here lies over the scene's rounded corners as well as round them.
     /// </remarks>
-    internal static Vector4 Chrome() => EditorTheme.Alpha(
-        EditorShell.Docked ? EditorTheme.Current.Ground : EditorTheme.Current.Panel,
-        EditorShell.Docked ? 0f : EditorTheme.Current.WindowAlpha);
+    internal static Vector4 Chrome() => Vector4.Zero;
 
     /// <summary>
     /// The short pill that says a thing can be taken hold of and dragged.

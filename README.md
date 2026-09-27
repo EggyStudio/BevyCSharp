@@ -1445,20 +1445,22 @@ into those. A camera draws an entity only where their layers overlap.
 
 The part of the window no viewport covers is the world's clear color, which `Render.SetClearColor`
 sets, since Bevy clears the whole window before putting each camera's picture on its part of it.
-`Render.SetRoundedCorners(camera, radius)` takes a camera's corners off to nothing, antialiased,
-the viewport's where it has one and the whole picture's where it does not. Both reach the desktop
+`Render.SetRoundedCorners(camera, radius, fill)` takes a camera's corners off, antialiased, the
+viewport's where it has one and the whole picture's where it does not. Both reach the desktop
 on a window made with `Config.Transparent`, which is see-through wherever what is drawn has no
 alpha:
 
 ```csharp
 config.Transparent = true;                        // before the app is built
 
-Render.SetClearColor((0f, 0f, 0f, 0f));           // round the viewport, clear
-Render.SetRoundedCorners(camera, 16f);            // in physical pixels
+Render.SetClearColor((0f, 0f, 0f, 0.6f));                      // round the viewport, dimmed
+Render.SetRoundedCorners(camera, 16f, (0f, 0f, 0f, 0.6f));     // corners showing the same
+Render.SetRoundedCorners(fullWindowCamera, 16f);               // or clear, for a round window
 ```
 
-A camera keeping a background of its own there clears to it (`ClearMode.Custom`) rather than to the
-world's color. Not every platform can composite a window with alpha, DirectX 12 often among them,
+The fill is what a rounded corner shows, clear unless given, so a viewport's corners can match the
+clear color round them rather than being clear notches in it. A camera keeping a background of its
+own there clears to it (`ClearMode.Custom`) rather than to the world's color. Not every platform can composite a window with alpha, DirectX 12 often among them,
 and there the window is made opaque, what would have been clear is black, and the log says which it
 got. A clear corner on an opaque window is black too, so a corner meant to show some other color is
 better painted by whatever draws over it.

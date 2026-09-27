@@ -240,16 +240,9 @@ public static class EditorShell
         // First, so the strip is the first window ImGui makes and stays under everything after it.
         EditorWindowFrame.DrawGrip();
 
-        // Docked, the cards are solid. Floating they let a little of the scene through, which says
-        // they lie over it, but docked there is no scene behind them, only whatever is behind the
-        // window, and a card that lets the desktop through is a card that is hard to read.
-        if (Docked) ImGui.PushStyleColor(ImGuiCol.ChildBg, EditorTheme.Alpha(EditorTheme.LiveCard, 1f));
-
         EditorPanes.Draw();
         DrawOrientation(ctx);
         EditorStrip.Draw(tabsWidth, strip);
-
-        if (Docked) ImGui.PopStyleColor();
         ToolbarView.Draw(ctx);
 
         // After the panels, because what decides whether the asset preview is still wanted is

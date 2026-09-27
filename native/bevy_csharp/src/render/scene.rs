@@ -1644,17 +1644,18 @@ mod tests {
     }
 }
 
-/// Rounds the corners of a camera's picture by `radius` physical pixels, leaving what is outside
-/// them clear rather than colored, or with `0` squares them again.
+/// Rounds the corners of a camera's picture by `radius` physical pixels, showing `r`, `g`, `b`, `a`
+/// outside them in straight linear RGBA, which is clear at all zeros, or with a radius of `0`
+/// squares them again.
 ///
 /// The corners of the camera's viewport where it has one, and of its whole picture otherwise. See
 /// [`super::corners`].
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_render_set_rounded_corners(camera: u64, radius: f32) -> i32 {
+pub extern "C" fn bcs_render_set_rounded_corners(camera: u64, radius: f32, r: f32, g: f32, b: f32, a: f32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (camera, radius);
+            let _ = (camera, radius, r, g, b, a);
             crate::interop::status::UNSUPPORTED
         }
 
@@ -1671,7 +1672,7 @@ pub extern "C" fn bcs_render_set_rounded_corners(camera: u64, radius: f32) -> i3
                     return refusal;
                 }
 
-                super::corners::set(world, entity, radius)
+                super::corners::set(world, entity, radius, [r, g, b, a])
             })
         }
     })

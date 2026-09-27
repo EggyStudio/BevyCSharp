@@ -10,9 +10,9 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Hierarchy comes from fill and from how bright the text is, not from lines. A panel is a shade
-/// above the ground, a card a shade above the panel, and what is under the pointer a shade above
-/// that; nothing is outlined. A bordered box inside a bordered box inside a bordered panel is three
+/// Hierarchy comes from fill and from how bright the text is, not from lines. A panel is a step
+/// above the ground, a component's group a step above the panel, a field a step above that, and
+/// what is under the pointer a step above whatever it lies on. Nothing is outlined. A bordered box inside a bordered box inside a bordered panel is three
 /// lines saying what one gap says better.
 /// </para>
 /// <para>
@@ -29,28 +29,29 @@ public sealed record EditorTheme
     /// <summary>What the theme is called, which a picker shows.</summary>
     public string Name { get; init; } = "Modern";
 
-    /// <summary>The window behind everything.</summary>
-    public Vector4 Ground { get; init; } = Rgb(0x00, 0x00, 0x00);
+    /// <summary>What lies between the panels while they are docked, seen through at its own alpha.</summary>
+    /// <remarks>
+    /// Black and partly clear, so on a see-through window the desktop shows dimmed between the
+    /// panels rather than at full strength, and the frame reads as one thing laid over it. Its
+    /// alpha is how much of the desktop is kept out, and a solid ground is an opaque editor.
+    /// Floating, the scene is behind the panels and nothing is drawn between them.
+    /// </remarks>
+    public Vector4 Ground { get; init; } = new(0f, 0f, 0f, 0.6f);
 
-    /// <summary>A floating panel, seen through at <see cref="PanelAlpha"/>.</summary>
+    /// <summary>A panel, the world list, the details and an open tab, each a rounded surface of its own.</summary>
+    /// <remarks>
+    /// Solid unless its alpha says otherwise, docked or floating. A panel that let the scene through
+    /// was a panel whose contrast changed with whatever drifted past behind it.
+    /// </remarks>
     public Vector4 Panel { get; init; } = Rgb(0x0C, 0x0C, 0x0C);
 
-    /// <summary>A group inside a panel.</summary>
-    /// <remarks>
-    /// Far enough above the panel that the step survives the scene showing through both, because
-    /// what a person sees is the difference between two blended colors rather than between two
-    /// written ones.
-    /// </remarks>
-    public Vector4 Card { get; init; } = Rgb(0x1A, 0x1A, 0x1A);
-
-    /// <summary>One component's worth of rows inside a card, which is a step above it again.</summary>
-    /// <remarks>
-    /// The rung the old ladder was missing. A panel holding a card holding fields is three surfaces
-    /// and was drawn in two colors, which is why the inside of a panel read as flat.
-    /// </remarks>
+    /// <summary>One component's worth of rows inside a panel, which is a step above it.</summary>
     public Vector4 Group { get; init; } = Rgb(0x26, 0x26, 0x26);
 
-    /// <summary>A box to type in or a button, which sits above the card holding it.</summary>
+    /// <summary>
+    /// A box to type in, a button, and the plate of everything pressed that lies on the scene or
+    /// between the panels: the toolbars, the tabs and the window's buttons.
+    /// </summary>
     public Vector4 Field { get; init; } = Rgb(0x3E, 0x3E, 0x3E);
 
     /// <summary>Under the pointer.</summary>
@@ -79,19 +80,6 @@ public sealed record EditorTheme
 
     /// <summary>Something that went wrong.</summary>
     public Vector4 Bad { get; init; } = Rgb(0xE0, 0x6C, 0x63);
-
-    /// <summary>How solid a card inside a panel is over what is behind it.</summary>
-    public float PanelAlpha { get; init; } = 0.92f;
-
-    /// <summary>
-    /// How solid the panel the cards are laid out in is over the scene.
-    /// </summary>
-    /// <remarks>
-    /// Thinner than the cards it holds, because it is the layer nearest the scene and the one that
-    /// says the panel is floating over a world rather than covering it. The cards keep their own
-    /// weight so that what is being read stays readable whatever is behind them.
-    /// </remarks>
-    public float WindowAlpha { get; init; } = 0f;
 
     /// <summary>How round a floating panel is.</summary>
     public float WindowRounding { get; init; } = 16f;
@@ -148,8 +136,6 @@ public sealed record EditorTheme
     {
         Name = "Native",
         Stock = true,
-        PanelAlpha = 0.94f,
-        WindowAlpha = 0.94f,
         WindowRounding = 6f,
         ChildRounding = 4f,
         FrameRounding = 4f,
@@ -265,56 +251,49 @@ public sealed record EditorTheme
 
     /// <summary>Writes the ladder into every color ImGui asks about.</summary>
     /// <remarks>
-    /// Every surface carries the same transparency, so the steps between them hold however bright
-    /// the scene behind is. One opaque surface among transparent ones is a surface that reads as
-    /// lighter over a dark scene and darker over a bright one, which is worse than no step at all.
+    /// Every color carries its own alpha, which is the only transparency there is. A surface is as
+    /// solid as its color says, so a person dialing the look changes one thing in one place rather
+    /// than a color here and a share of it somewhere else.
     /// </remarks>
     private void Paint(ImGuiStylePtr style)
     {
-        var seen = PanelAlpha;
-
         Set(style, ImGuiCol.Text, Text);
         Set(style, ImGuiCol.TextDisabled, Faint);
 
-        Set(style, ImGuiCol.WindowBg, Alpha(Panel, WindowAlpha));
-        Set(style, ImGuiCol.ChildBg, Alpha(Card, seen));
+        // A window the editor places has no backing of its own. What shows between the panels is
+        // the ground while docked and the scene while floating, and the shell paints the first.
+        Set(style, ImGuiCol.WindowBg, Clear);
+        Set(style, ImGuiCol.ChildBg, Panel);
         // A menu and a tooltip wear the field gray, the plate every box and button in a panel is
         // drawn on, so a flyout reads as part of the same family as the controls that opened it.
         // A step brighter than that stood apart from everything round it, and the row under the
         // pointer inside one, which wears the hover gray, lost its step against the plate.
-        Set(style, ImGuiCol.PopupBg, Alpha(Field, 1f));
+        Set(style, ImGuiCol.PopupBg, Field);
         // Nothing here has a menu bar, so this slot carries the group fill instead, which puts the
         // rung in the style editor beside the others rather than leaving one color unreachable.
-        //
-        // Solid, because a component's fields are read against its card, and the two have to keep
-        // their step whatever the scene behind the panel is doing.
-        Set(style, ImGuiCol.MenuBarBg, Alpha(Group, 1f));
+        Set(style, ImGuiCol.MenuBarBg, Group);
 
         Set(style, ImGuiCol.Border, Line);
         Set(style, ImGuiCol.BorderShadow, Clear);
 
         // A box to type in, and what it does under a hand.
-        //
-        // Solid, like everything from here inwards. A panel is seen through because it is laid over
-        // a world; a box somebody is about to type a number into is not, and one that changes tone
-        // with whatever drifts past behind it is a box whose contrast cannot be relied on.
-        Set(style, ImGuiCol.FrameBg, Alpha(Field, 1f));
-        Set(style, ImGuiCol.FrameBgHovered, Alpha(Hover, 1f));
-        Set(style, ImGuiCol.FrameBgActive, Alpha(Active, 1f));
+        Set(style, ImGuiCol.FrameBg, Field);
+        Set(style, ImGuiCol.FrameBgHovered, Hover);
+        Set(style, ImGuiCol.FrameBgActive, Active);
 
-        Set(style, ImGuiCol.TitleBg, Alpha(Panel, seen));
-        Set(style, ImGuiCol.TitleBgActive, Alpha(Panel, seen));
-        Set(style, ImGuiCol.TitleBgCollapsed, Alpha(Panel, seen));
+        Set(style, ImGuiCol.TitleBg, Panel);
+        Set(style, ImGuiCol.TitleBgActive, Panel);
+        Set(style, ImGuiCol.TitleBgCollapsed, Panel);
 
-        Set(style, ImGuiCol.Button, Alpha(Field, 1f));
-        Set(style, ImGuiCol.ButtonHovered, Alpha(Hover, 1f));
-        Set(style, ImGuiCol.ButtonActive, Alpha(Accent, 1f));
+        Set(style, ImGuiCol.Button, Field);
+        Set(style, ImGuiCol.ButtonHovered, Hover);
+        Set(style, ImGuiCol.ButtonActive, Accent);
 
         // ImGui's header color is worn by a component's fold and by a chosen row. The chosen row
         // wears the accent, written over this where it is drawn, so the header itself is gray.
-        Set(style, ImGuiCol.Header, Alpha(Field, 1f));
-        Set(style, ImGuiCol.HeaderHovered, Alpha(Hover, 1f));
-        Set(style, ImGuiCol.HeaderActive, Alpha(Active, 1f));
+        Set(style, ImGuiCol.Header, Field);
+        Set(style, ImGuiCol.HeaderHovered, Hover);
+        Set(style, ImGuiCol.HeaderActive, Active);
 
         Set(style, ImGuiCol.Separator, Line);
         Set(style, ImGuiCol.SeparatorHovered, Accent);
@@ -331,18 +310,18 @@ public sealed record EditorTheme
         Set(style, ImGuiCol.ResizeGripActive, Accent);
 
         Set(style, ImGuiCol.Tab, Clear);
-        Set(style, ImGuiCol.TabHovered, Alpha(Hover, seen));
-        Set(style, ImGuiCol.TabSelected, Alpha(Card, seen));
+        Set(style, ImGuiCol.TabHovered, Hover);
+        Set(style, ImGuiCol.TabSelected, Panel);
         Set(style, ImGuiCol.TabSelectedOverline, Accent);
         Set(style, ImGuiCol.TabDimmed, Clear);
-        Set(style, ImGuiCol.TabDimmedSelected, Alpha(Card, seen));
+        Set(style, ImGuiCol.TabDimmedSelected, Panel);
 
         Set(style, ImGuiCol.ScrollbarBg, Clear);
-        Set(style, ImGuiCol.ScrollbarGrab, Alpha(Field, seen));
-        Set(style, ImGuiCol.ScrollbarGrabHovered, Alpha(Hover, seen));
-        Set(style, ImGuiCol.ScrollbarGrabActive, Alpha(Dim, seen));
+        Set(style, ImGuiCol.ScrollbarGrab, Field);
+        Set(style, ImGuiCol.ScrollbarGrabHovered, Hover);
+        Set(style, ImGuiCol.ScrollbarGrabActive, Dim);
 
-        Set(style, ImGuiCol.TableHeaderBg, Alpha(Card, seen));
+        Set(style, ImGuiCol.TableHeaderBg, Panel);
         Set(style, ImGuiCol.TableBorderStrong, Line);
         Set(style, ImGuiCol.TableBorderLight, Line);
         Set(style, ImGuiCol.TableRowBg, Clear);
@@ -374,7 +353,6 @@ public sealed record EditorTheme
             $"name\t{Name}",
             $"ground\t{Hex(Ground)}",
             $"panel\t{Hex(Panel)}",
-            $"card\t{Hex(Card)}",
             $"group\t{Hex(Group)}",
             $"field\t{Hex(Field)}",
             $"hover\t{Hex(Hover)}",
@@ -386,8 +364,6 @@ public sealed record EditorTheme
             $"accent\t{Hex(Accent)}",
             $"warn\t{Hex(Warn)}",
             $"bad\t{Hex(Bad)}",
-            $"alpha\t{Say(PanelAlpha)}",
-            $"window-alpha\t{Say(WindowAlpha)}",
             $"window-rounding\t{Say(WindowRounding)}",
             $"child-rounding\t{Say(ChildRounding)}",
             $"frame-rounding\t{Say(FrameRounding)}",
@@ -427,7 +403,6 @@ public sealed record EditorTheme
                 "name" => theme with { Name = value },
                 "ground" => theme with { Ground = Read(value, theme.Ground) },
                 "panel" => theme with { Panel = Read(value, theme.Panel) },
-                "card" => theme with { Card = Read(value, theme.Card) },
                 "group" => theme with { Group = Read(value, theme.Group) },
                 "field" => theme with { Field = Read(value, theme.Field) },
                 "hover" => theme with { Hover = Read(value, theme.Hover) },
@@ -439,8 +414,6 @@ public sealed record EditorTheme
                 "accent" => theme with { Accent = Read(value, theme.Accent) },
                 "warn" => theme with { Warn = Read(value, theme.Warn) },
                 "bad" => theme with { Bad = Read(value, theme.Bad) },
-                "alpha" => theme with { PanelAlpha = Number(value, theme.PanelAlpha) },
-                "window-alpha" => theme with { WindowAlpha = Number(value, theme.WindowAlpha) },
                 "window-rounding" => theme with { WindowRounding = Number(value, theme.WindowRounding) },
                 "child-rounding" => theme with { ChildRounding = Number(value, theme.ChildRounding) },
                 "frame-rounding" => theme with { FrameRounding = Number(value, theme.FrameRounding) },
@@ -468,8 +441,11 @@ public sealed record EditorTheme
     /// </remarks>
     public static Vector4 LiveAccent => ImGui.GetStyle().Colors[(int)ImGuiCol.DragDropTarget];
 
-    /// <summary>The card color as it stands in the running style.</summary>
-    public static Vector4 LiveCard => ImGui.GetStyle().Colors[(int)ImGuiCol.ChildBg];
+    /// <summary>The panel color as it stands in the running style.</summary>
+    public static Vector4 LivePanel => ImGui.GetStyle().Colors[(int)ImGuiCol.ChildBg];
+
+    /// <summary>The field color as it stands in the running style, which a pressable plate wears.</summary>
+    public static Vector4 LiveField => ImGui.GetStyle().Colors[(int)ImGuiCol.Button];
 
     /// <summary>The group fill as it stands in the running style.</summary>
     public static Vector4 LiveGroup => ImGui.GetStyle().Colors[(int)ImGuiCol.MenuBarBg];
@@ -574,9 +550,20 @@ public sealed record EditorTheme
         new(color.X, color.Y, color.Z, alpha);
 
     /// <summary>How a color is written down.</summary>
-    private static string Hex(Vector4 color) => string.Create(
-        CultureInfo.InvariantCulture,
-        $"#{(int)MathF.Round(color.X * 255f):X2}{(int)MathF.Round(color.Y * 255f):X2}{(int)MathF.Round(color.Z * 255f):X2}");
+    /// <remarks>
+    /// With its alpha after it where it has one, as <c>#RRGGBBAA</c>, and without where it is
+    /// solid, so a file written before colors carried alpha still reads the same.
+    /// </remarks>
+    private static string Hex(Vector4 color)
+    {
+        static int Byte(float channel) => (int)MathF.Round(Math.Clamp(channel, 0f, 1f) * 255f);
+
+        var rgb = string.Create(
+            CultureInfo.InvariantCulture,
+            $"#{Byte(color.X):X2}{Byte(color.Y):X2}{Byte(color.Z):X2}");
+
+        return Byte(color.W) == 255 ? rgb : string.Create(CultureInfo.InvariantCulture, $"{rgb}{Byte(color.W):X2}");
+    }
 
     /// <summary>And how one is read.</summary>
     private static Vector4 Read(string text, Vector4 fallback)
@@ -591,7 +578,15 @@ public sealed record EditorTheme
             return fallback;
         }
 
-        return Rgb(red, green, blue);
+        var alpha = 255;
+
+        if (hex.Length >= 8
+            && !int.TryParse(hex[6..8], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out alpha))
+        {
+            return fallback;
+        }
+
+        return Rgb(red, green, blue) with { W = alpha / 255f };
     }
 
     private static string Say(float value) => value.ToString("0.###", CultureInfo.InvariantCulture);

@@ -101,7 +101,7 @@ public static class EditorStrip
         // pill under the word says which one is open without any of that.
         if (!EditorTheme.Current.Stock)
         {
-            EditorSurface.Backed(Pills);
+            Pills();
 
             ImGui.End();
             ImGui.PopStyleVar(2);
