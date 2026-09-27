@@ -121,12 +121,13 @@ public static class EditorWindowFrame
     }
 
     /// <summary>
-    /// Whether the pointer is on the band along the top of a docked window, which moves it.
+    /// Whether the pointer is on the band along the top of the window, which moves it.
     /// </summary>
     /// <remarks>
-    /// The gap above the panels and the scene, under the few pixels that resize and outside the
-    /// window's buttons. Nothing there has anything of its own to press, since it is the padding
-    /// round the panels' cards, so the band takes a press there wherever ImGui thinks it landed.
+    /// Nothing drawn, and as tall as it can be without taking anything's press: the gap above the
+    /// panels and the scene and whatever lies under it with nothing to press, under the few pixels
+    /// that resize and outside the window's buttons. It takes a press there wherever ImGui thinks
+    /// it landed, so the window can be taken hold of without aiming for a line a few pixels tall.
     /// </remarks>
     public static bool OnBand { get; private set; }
 
@@ -179,12 +180,23 @@ public static class EditorWindowFrame
 
         var pointer = ImGui.GetIO().MousePos;
 
-        OnBand = EditorShell.Docked
+        // Over the scene, down to where the toolbars pinned to its top begin, since the scene has
+        // nothing of the interface's to press there. Over the panel, down to where its fields
+        // begin, which is the gap round its cards and the air inside them, since a press on a field
+        // is the field's. Floating, the title row moves the window beside the panel, so the band is
+        // over the panel's column alone.
+        var overPanel = pointer.X >= EditorShell.Panel.X;
+        var bottom = overPanel
+            ? EditorSurface.Gutter + EditorSurface.Air
+            : EditorShell.SceneTop + ToolbarView.Inset;
+
+        OnBand = (EditorShell.Docked || overPanel)
             && pointer.Y >= Top
-            && pointer.Y < EditorSurface.Gutter
+            && pointer.Y < bottom
             && pointer.X >= 0f
             && pointer.X < ImGuiRuntime.Size.X
-            && !EditorSceneFrame.OverButtons(pointer);
+            && !EditorSceneFrame.OverButtons(pointer)
+            && !ImGui.IsPopupOpen(string.Empty, ImGuiPopupFlags.AnyPopupId);
 
         if (Maximized) return;
 

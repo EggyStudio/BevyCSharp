@@ -55,7 +55,11 @@ public static class EditorShell
     public const string Figures = "PaperMono-Regular.ttf";
 
     /// <summary>Whether the panel is against the window's edge, with the scene beside it.</summary>
-    public static bool Docked { get; set; }
+    /// <remarks>
+    /// Docked unless set otherwise, since the scene beside the panel is the arrangement the editor
+    /// opens in. A saved preference says otherwise where somebody has chosen to float it.
+    /// </remarks>
+    public static bool Docked { get; set; } = true;
 
     /// <summary>How wide the panel is, in logical pixels.</summary>
     /// <remarks>
@@ -285,11 +289,14 @@ public static class EditorShell
     {
         var half = OrientationGizmo.Size * 0.5f;
 
-        // Above the buttons pinned to the same corner rather than beside them. Both belong in the
-        // bottom right, and a cross laid over a row of buttons is a cross with a button through one
-        // of its arms.
+        // In the corner, as far in as the toolbars are from theirs. Above the buttons pinned to the
+        // same corner where a game has put any, since a cross laid over a row of buttons is a cross
+        // with a button through one of its arms, and the editor's own sit at the top now.
         var side = Free.Right - ToolbarView.Inset - half;
-        var up = ToolbarView.Inset + EditorSurface.Tall + EditorSurface.Air + half;
+        var above = EditorToolbar.Slot(ToolbarSlot.BottomRight).Count > 0
+            ? EditorSurface.Tall + EditorSurface.Air
+            : 0f;
+        var up = ToolbarView.Inset + above + half;
 
         OrientationGizmo.Draw(ctx, new Vector2(side, Free.Bottom - up));
     }

@@ -180,8 +180,10 @@ the scene run up to the window's top, with the same gap there as at every other 
 in the row under them stops short of them (`EditorSurface.FullWidth`), which is the world's search
 box when the world is above the details and the entity's name when the two are side by side. While the panel floats, a title row runs across the scene
 with the toolbars at its left, and pressing it where nothing else is moves the window and pressing
-it twice maximizes it. Docked, the band along the top above the panels and the scene does the
-same. The few pixels round every edge resize the window, with the pointer changing shape to say
+it twice maximizes it. Along the top of the window runs a band that does the same and draws
+nothing: over the scene down to where its toolbars begin, and over the panel down to where its
+fields begin, so the window is taken hold of without aiming for a line a few pixels tall. The
+editor opens docked, and the arrangement it was left in is saved with its preferences. The few pixels round every edge resize the window, with the pointer changing shape to say
 so. None of that is drawn. The editor draws every frame it can rather than waiting for the display
 (`Config.Vsync` off), so the statistics card measures what a scene costs rather than the refresh
 rate.
