@@ -19,6 +19,22 @@ stops a stale bridge loading against new managed code.
 
 ## Content
 
+### Bevy's components are mirrored by hand
+
+Five of Bevy's components can be read and written from C# (`Transform`, `GlobalTransform` and the
+three visibility types), each through a mirror, a match arm and a layout export written by hand.
+Cameras, lights, meshes and materials are set through exports of their own and mostly cannot be
+read back, and every other component is invisible to C# and to the editor.
+[COMPONENTS.md](COMPONENTS.md) reads Bevy's reflection instead, so every reflected component and
+every future one is reachable with no code per type.
+
+### No collections in components
+
+A component is unmanaged, so it cannot hold a list or a dictionary, and the generator draws any
+field it does not know as a name with nothing to edit. [COMPONENTS.md](COMPONENTS.md) adds inline
+lists, lists and maps held in a managed store and freed with their entity, and data assets that
+hold collections freely.
+
 ### Scenes are edits, not files
 
 The editor's `world.json` keeps named entities, the components with a schema, and where a mesh and
@@ -198,6 +214,14 @@ drawn sliced, tiled or fitted inside its size the way a video player letterboxes
   query a frame.
 
 ## Interface
+
+### Meshes and materials are picked from a list of files
+
+The details show an entity's mesh and material as two dropdowns of model files, with no preview,
+no statistics, none of Bevy's primitives and no way to read a material's settings. The asset
+browser shows an icon for everything but an image. [ASSETS.md](ASSETS.md) plans Mesh and Material
+cards with live previews, a picker that is the asset browser's grid, rendered tiles, and meshes and
+materials made in place that are saved inside the scene.
 
 ### Layout and text
 

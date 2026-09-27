@@ -109,9 +109,9 @@ a GUID in a `.meta` file beside it, and Godot 4.4 a `uid://` in a `.uid` file be
 - **Loading spawns everything.** Unnamed entities are kept, and names need not be unique.
 - **What the editor spawns for itself is left out** by a marker component (`EditorOnly`) rather than
   by the names it skips today, so a game's entity called Ground is saved.
-- **A mesh or material built in memory** is saved as the shape or settings it was built from where
-  the bridge can say (a primitive's shape and size, a `MaterialSettings`), and otherwise as an
-  asset written beside the scene on save (`<scene>.assets/`), so nothing on screen is lost.
+- **A mesh or material built in memory** is a sub-resource of the scene, saved inside the file as
+  how to make it again (a primitive and its parameters, a `MaterialSettings`, raw geometry) and
+  shared by an id within the scene ([ASSETS.md](ASSETS.md), §5), so nothing on screen is lost.
 
 Loading is `ctx.Ecs.LoadScene("assets://levels/one.scene.json")`, returning the root it spawned
 under, and the editor's `world.save` and `world.load` take a scene path.
@@ -127,10 +127,9 @@ The schemas carry each field's `FieldKind`, which decides how it is written.
   `Utf8JsonReader`. A vector is an array of numbers, a color is linear RGBA, an enum is its name,
   flags are a list of names, and an asset or entity is the object above. So nothing goes through
   `ToString()` and back, and nothing reflects, which keeps it working under trimming and AOT.
-- **Bevy's components get hand-written schemas,** as `Transform` has, for those worth saving: the
-  camera and its projection, the lights, the mesh and material an entity is drawn with, visibility,
-  and the render layers. Each is a byte-compatible mirror, which has to match field offsets and not
-  only size.
+- **Bevy's components get their schemas from Bevy's reflection** ([COMPONENTS.md](COMPONENTS.md),
+  §1), so the camera and its projection, the lights, the mesh and material an entity is drawn with,
+  visibility and every other reflected component are saved with no schema written by hand.
 - **A field the schema marks `Derived`** (computed from others) is not written.
 
 ## 5. Instances and overrides
@@ -191,6 +190,9 @@ public partial struct Weapon
 var stats = DataAssets.Get(weapon.Stats);   // cached, and reloaded when its file changes
 ```
 
+- **A class or a struct,** which may hold lists, dictionaries and nested classes, since it lives on
+  the managed side rather than in Bevy's storage. [COMPONENTS.md](COMPONENTS.md) §3 has the type
+  and the drawer that folds it open under the field referring to it.
 - **The generator emits the same schema** a component gets, so a data asset is written by the
   writers of §4, drawn by the inspector with its attributes, and needs no code of its own.
 - **Stored as `*.data.json`**, with the type's `QualifiedName` in the file, so an asset is opened
@@ -256,8 +258,8 @@ Each step is usable on its own and is tested before the next.
 2. **The scene file** (§3) with the hierarchy, spawning and entity references, replacing
    `world.json`. Tested by a scene saved from an `EngineHarness` world, loaded into a fresh one,
    and compared field by field.
-3. **Bevy's components** (§4, the camera, lights, mesh and material mirrors). Tested by the same
-   round trip, drawing both worlds and comparing the pictures.
+3. **Bevy's components** (§4), once [COMPONENTS.md](COMPONENTS.md) tier 1 reflects them. Tested by
+   the same round trip, drawing both worlds and comparing the pictures.
 4. **Ids** (§2), with the index and the asset browser keeping the sidecars.
 5. **Data assets** (§6). Tested by a component referring to one, saved, reloaded and edited.
 6. **glTF instances with overrides** (§5, with `WorldInstanceReady` bridged). Tested by an

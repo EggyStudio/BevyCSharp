@@ -2976,6 +2976,9 @@ run against a real Bevy app. Known gaps:
   memory has no name to write, and a camera's projection or a light's settings are engine
   components with neither a schema nor a path, so the file is a set of edits over a scene rather
   than the scene. [.github/SCENES.md](.github/SCENES.md) designs the scene format that replaces it.
+- Five of Bevy's components are mirrored by hand and the rest are unreachable from C#, and a
+  component cannot hold a list or a dictionary. [.github/COMPONENTS.md](.github/COMPONENTS.md)
+  plans both, through Bevy's reflection and a managed store freed with the entity.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
 - A cubemap comes from a file, as six square faces stacked into a column, or from a reflection probe

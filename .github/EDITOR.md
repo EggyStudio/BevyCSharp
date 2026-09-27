@@ -216,6 +216,14 @@ and a branch moves whole. A row that would end up under itself is refused before
 does not light up. Whatever moves keeps its place in the world, because its transform is worked
 out again against the new parent (`EditorHierarchy.Reparent`), and the move is one step to undo.
 
+### What an entity is drawn with
+
+The details show an entity's mesh and material under its components, each as a dropdown of the
+model files under the asset root, or "made here" for one built in code.
+[ASSETS.md](ASSETS.md) plans what replaces them: a Mesh card and a Material card with a live
+preview and what the mesh is made of, a picker that is the asset browser's grid, and tiles that
+show the asset rather than its kind.
+
 ### The scene view's camera
 
 The camera button beside the statistics opens a card of the scene view's own camera, which is the
