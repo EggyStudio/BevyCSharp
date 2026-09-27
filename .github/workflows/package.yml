@@ -13,14 +13,14 @@ on:
       version:
         description: >-
           Package version to stamp. Empty keeps the version from Directory.Build.props, which is
-          what continuous integration wants; a release passes the tag.
+          what continuous integration needs; a release passes the tag.
         type: string
         required: false
         default: ''
       pack:
         description: >-
           Whether to build the per-platform native bridges and pack them. False runs the test
-          suite alone, which is what an ordinary push needs, since the bridges are only used to
+          suite alone, as an ordinary push needs, since the bridges are only used to
           assemble a package.
         type: boolean
         required: false
@@ -87,7 +87,8 @@ jobs:
           key: ${{ matrix.target }}
 
       # The only development package a render build needs. Everything else graphical resolves at
-      # runtime: winit reaches X11 and Wayland through dlopen, and wgpu loads Vulkan the same way.
+      # runtime, since winit reaches X11 and Wayland through dlopen, and wgpu loads Vulkan the
+      # same way.
       # Audio is the exception, because cpal links against ALSA. Windows and macOS reach their
       # audio APIs through the system SDK, so this is Linux only.
       - name: Install ALSA headers

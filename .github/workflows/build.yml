@@ -32,8 +32,8 @@ on:
         default: false
 
 # A quick run is disposable, so a newer push supersedes it. A publishing run has to finish, and
-# its own group is what guarantees that: cancellation is decided by the arriving run, so sharing
-# one group would let an ordinary push kill a publish already halfway through.
+# its own group guarantees that. Cancellation is decided by the arriving run, so sharing one group
+# would let an ordinary push kill a publish already halfway through.
 concurrency:
   group: build-${{ github.ref }}-${{ contains(join(github.event.commits.*.message, ' '), '[publish]') && 'publish' || 'quick' }}
   cancel-in-progress: ${{ !contains(join(github.event.commits.*.message, ' '), '[publish]') }}
@@ -67,7 +67,7 @@ jobs:
         id: decide
         shell: bash
         env:
-          # Every commit in the push, not just the last. Pushing a marked commit and then a
+          # Every commit in the push, not only the last. Pushing a marked commit and then a
           # tidy-up on top is normal, and it would be a nasty surprise if that skipped the
           # publish. Other event types leave this empty and take the quick path.
           COMMIT_MESSAGES: ${{ join(github.event.commits.*.message, ' ~~ ') }}
