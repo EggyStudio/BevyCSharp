@@ -9,6 +9,26 @@ using BepuUtilities;
 namespace Bevy.Physics;
 
 /// <summary>
+/// The pairs of collidables found touching during a step, and which collidables are sensors.
+/// </summary>
+/// <remarks>
+/// Written from Bepu's worker threads while a step runs, so adding takes a lock; the sensors are
+/// only read then, and changed between steps.
+/// </remarks>
+internal sealed class ContactLog
+{
+    public readonly HashSet<(uint A, uint B)> Touching = [];
+    public readonly HashSet<uint> Sensors = [];
+
+    public void Add(CollidableReference a, CollidableReference b)
+    {
+        // In one order, so a pair is the same pair whichever way Bepu names it.
+        var pair = a.Packed < b.Packed ? (a.Packed, b.Packed) : (b.Packed, a.Packed);
+        lock (Touching) Touching.Add(pair);
+    }
+}
+
+/// <summary>
 /// How any two bodies touching behave: one friction and one springiness for every pair.
 /// </summary>
 /// <remarks>
@@ -21,6 +41,7 @@ internal struct ContactCallbacks : INarrowPhaseCallbacks
     public SpringSettings Spring;
     public float Friction;
     public float MaxRecoveryVelocity;
+    public ContactLog Log;
 
     public void Initialize(Simulation simulation)
     {
@@ -41,7 +62,19 @@ internal struct ContactCallbacks : INarrowPhaseCallbacks
         material.FrictionCoefficient = Friction;
         material.MaximumRecoveryVelocity = MaxRecoveryVelocity;
         material.SpringSettings = Spring;
-        return true;
+
+        // Bepu also reports contacts that are only about to happen, with a negative depth, so a
+        // pair counts as touching only where some contact is within a centimeter of it.
+        for (var i = 0; i < manifold.Count; i++)
+        {
+            if (manifold.GetDepth(i) < -0.01f) continue;
+
+            Log.Add(pair.A, pair.B);
+            break;
+        }
+
+        // A sensor reports what it touches and pushes nothing, so no constraint is made for it.
+        return !Log.Sensors.Contains(pair.A.Packed) && !Log.Sensors.Contains(pair.B.Packed);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

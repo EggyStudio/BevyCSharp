@@ -24,7 +24,8 @@ public sealed class PhysicsPlugin(PhysicsSettings? settings = null) : IPlugin
         app.World.InsertResource(new PhysicsWorld(settings));
 
         app.AddSystem(Stage.FixedUpdate, new SystemDescriptor(
-            world => world.Resource<PhysicsWorld>().Step(world.Resource<EcsWorld>(), world.Resource<Time>().FixedDelta),
+            world => world.Resource<PhysicsWorld>().Step(
+                world.Resource<EcsWorld>(), world.Resource<Time>().FixedDelta, world.Resource<MessageBus>()),
             "Physics.Step"));
     }
 }

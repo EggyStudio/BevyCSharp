@@ -142,6 +142,178 @@ public sealed class PhysicsTests
         Assert.Equal(0, countAfter);
     }
 
+    /// <summary>
+    /// A ball falling through a sensor reports entering and leaving it without being slowed by it,
+    /// and then reports landing on the floor, which it rests on.
+    /// </summary>
+    [Fact]
+    public void ASensorReportsWhatPassesThroughWithoutStoppingIt()
+    {
+        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120);
+        harness.App.AddPlugin(new PhysicsPlugin());
+
+        var ball = Entity.None;
+        var sensor = Entity.None;
+        var floor = Entity.None;
+        var events = new List<string>();
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var physics = ctx.Res<PhysicsWorld>();
+
+            floor = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(floor, Transform.At(0f, -0.5f, 0f));
+            physics.Add(floor, PhysicsShape.Box(new Vec3(10f, 1f, 10f)), BodyKind.Static, Transform.At(0f, -0.5f, 0f));
+
+            // A slab of air a unit above the floor, which the ball has to pass through.
+            sensor = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(sensor, Transform.At(0f, 2f, 0f));
+            physics.Add(sensor, PhysicsShape.Box(new Vec3(4f, 0.5f, 4f)), BodyKind.Static, Transform.At(0f, 2f, 0f), sensor: true);
+
+            ball = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(ball, Transform.At(0f, 4f, 0f));
+            physics.Add(ball, PhysicsShape.Sphere(0.25f), BodyKind.Dynamic, Transform.At(0f, 4f, 0f));
+        });
+
+        string Name(Entity entity) => entity == sensor ? "sensor" : entity == floor ? "floor" : "ball";
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            foreach (var started in ctx.Read<ContactStarted>())
+                events.Add($"start {Name(started.A)}+{Name(started.B)}".Replace("ball+", "").Replace("+ball", ""));
+
+            foreach (var ended in ctx.Read<ContactEnded>())
+                events.Add($"end {Name(ended.A)}+{Name(ended.B)}".Replace("ball+", "").Replace("+ball", ""));
+        });
+
+        harness.Run();
+
+        Assert.Equal(["start sensor", "end sensor", "start floor"], events);
+    }
+
+    /// <summary>
+    /// A ball joined to a still pivot swings down under gravity while staying the joint's length
+    /// from it, and removing the ball takes the joint with it.
+    /// </summary>
+    [Fact]
+    public void APendulumSwingsOnItsJointAndTheJointGoesWithTheBall()
+    {
+        using var harness = new EngineHarness(frames: 240, fps: 240, fixedHz: 120);
+        harness.App.AddPlugin(new PhysicsPlugin());
+
+        var pivot = Entity.None;
+        var ball = Entity.None;
+        var joint = default(JointHandle);
+        var lowest = float.MaxValue;
+        var longest = 0f;
+        var shortest = float.MaxValue;
+        var frame = 0;
+        var stillJoined = true;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var physics = ctx.Res<PhysicsWorld>();
+
+            pivot = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(pivot, Transform.At(0f, 5f, 0f));
+            physics.Add(pivot, PhysicsShape.Sphere(0.1f), BodyKind.Kinematic, Transform.At(0f, 5f, 0f));
+
+            // Two units out to the side, level with the pivot, so it starts from horizontal.
+            ball = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(ball, Transform.At(2f, 5f, 0f));
+            physics.Add(ball, PhysicsShape.Sphere(0.2f), BodyKind.Dynamic, Transform.At(2f, 5f, 0f));
+
+            joint = physics.Connect(pivot, ball, Joint.Ball(Vec3.Zero, new Vec3(-2f, 0f, 0f)));
+        });
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            var physics = ctx.Res<PhysicsWorld>();
+            frame++;
+
+            if (frame < 200)
+            {
+                var at = ctx.Ecs.GetOrDefault<Transform>(ball).Translation;
+                var length = (at - new Vec3(0f, 5f, 0f)).Length;
+
+                lowest = Math.Min(lowest, at.Y);
+                if (frame > 10)
+                {
+                    longest = Math.Max(longest, length);
+                    shortest = Math.Min(shortest, length);
+                }
+            }
+            else if (frame == 200)
+            {
+                physics.Remove(ball);
+                stillJoined = physics.Disconnect(joint);
+            }
+        });
+
+        harness.Run();
+
+        // It fell most of the way to the bottom of its swing, two units below the pivot.
+        Assert.True(lowest < 3.3f, $"the ball only fell to {lowest}");
+        Assert.InRange(shortest, 1.95f, 2.05f);
+        Assert.InRange(longest, 1.95f, 2.05f);
+        Assert.False(stillJoined);
+    }
+
+    /// <summary>
+    /// A floor made from a plane mesh read back from the engine holds up a ball dropped on it from
+    /// above, which is the side Bevy draws the plane's face on.
+    /// </summary>
+    [Fact]
+    public void AMeshReadFromTheEngineIsAFloor()
+    {
+        if (!App.HasRenderer) return;
+
+        using var physics = new PhysicsWorld();
+        using var app = new App(Config.OffscreenFor(64, 64, frames: 200));
+        app.AddPlugin(new EnginePlugin());
+
+        var plane = AssetHandle.None;
+        var ball = Entity.None;
+        var read = false;
+        var triangles = 0;
+        var final = float.NaN;
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(_ => plane = Render.CreateMesh(MeshShape.Plane, 10f, 10f), "Test.Plane"));
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(
+            world =>
+            {
+                var ecs = world.Resource<EcsWorld>();
+
+                if (!read)
+                {
+                    if (!Render.TryReadMesh(plane, out var mesh)) return;
+                    read = true;
+                    triangles = mesh!.Indices!.Length / 3;
+
+                    var floor = ecs.Spawn();
+                    ecs.Add(floor, Transform.Identity);
+                    physics.Add(floor, PhysicsShape.Mesh(mesh), BodyKind.Static, Transform.Identity);
+
+                    ball = ecs.Spawn();
+                    ecs.Add(ball, Transform.At(0.3f, 2f, -0.2f));
+                    physics.Add(ball, PhysicsShape.Sphere(0.25f), BodyKind.Dynamic, Transform.At(0.3f, 2f, -0.2f));
+                    return;
+                }
+
+                // Stepped here by hand, a sixtieth of a second a frame, since an offscreen run is
+                // not paced and the fixed timestep would take few steps.
+                physics.Step(ecs, 1f / 60f);
+                final = ecs.GetOrDefault<Transform>(ball).Translation.Y;
+            },
+            "Test.Step"));
+
+        app.Run();
+
+        Assert.True(triangles >= 2, $"the plane read back as {triangles} triangles");
+        Assert.InRange(final, 0.2f, 0.3f);
+    }
+
     /// <summary>A body is the entity's once, and asking for a second is refused.</summary>
     [Fact]
     public void AnEntityHasOneBody()

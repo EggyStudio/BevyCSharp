@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 141;
+    internal const int ExpectedAbiVersion = 142;
 
     static Native() => NativeLoader.Initialize();
 
@@ -1087,6 +1087,12 @@ internal static unsafe partial class Native
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_screenshot(string path, int target);
+
+    /// <summary>Copies a mesh's positions and triangle indices out, or answers their counts.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_mesh_triangles(
+        int mesh, float* positions, int positionCapacity, uint* indices, int indexCapacity, int* counts);
 
     /// <summary>Creates an empty image a camera can draw into.</summary>
     [LibraryImport(Library)]

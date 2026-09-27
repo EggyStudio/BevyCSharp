@@ -109,6 +109,51 @@ public static unsafe class Render
     }
 
     /// <summary>
+    /// Reads a mesh's triangles back: where each vertex is, and which three make each triangle.
+    /// Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// For whatever needs the shape rather than the picture, such as a collision shape built from a
+    /// level loaded from a glTF file. The answer is a <see cref="MeshData"/> with
+    /// <see cref="MeshData.Positions"/> and <see cref="MeshData.Indices"/> filled, in the mesh's own
+    /// space, and nothing else.
+    /// </para>
+    /// <para>
+    /// A mesh from a file is read once it has loaded, so this answers false until then, the way a
+    /// capture answers false until it has arrived.
+    /// </para>
+    /// </remarks>
+    /// <returns>True with the triangles once the mesh has loaded.</returns>
+    /// <exception cref="BevyNativeException">
+    /// The handle names no mesh, the mesh is not triangles, or this build has no renderer.
+    /// </exception>
+    public static bool TryReadMesh(AssetHandle mesh, out MeshData? triangles)
+    {
+        triangles = null;
+
+        var counts = stackalloc int[2];
+        var answer = Native.bcs_render_mesh_triangles(mesh.Key, null, 0, null, 0, counts);
+
+        if (answer == NativeStatus.NotPresent) return false;
+        Native.Check(answer, $"reading the triangles of {mesh}");
+
+        var positions = new Vec3[counts[0]];
+        var indices = new uint[counts[1]];
+
+        fixed (Vec3* corners = positions)
+        fixed (uint* order = indices)
+        {
+            Native.Check(
+                Native.bcs_render_mesh_triangles(mesh.Key, (float*)corners, positions.Length * 3, order, indices.Length, counts),
+                $"reading the triangles of {mesh}");
+        }
+
+        triangles = new MeshData { Positions = positions, Indices = indices };
+        return true;
+    }
+
+    /// <summary>
     /// Says how an entity's mesh is treated beyond what it looks like. Only valid inside a system.
     /// </summary>
     /// <remarks>

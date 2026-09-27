@@ -188,6 +188,94 @@ pub unsafe extern "C" fn bcs_mesh_create_from(data: *const BcsMeshData) -> i32 {
     })
 }
 
+/// Copies a mesh's triangles out: its positions, three floats each, and its indices, three a
+/// triangle.
+///
+/// For whatever needs the shape rather than the picture, a physics engine building a collision
+/// shape from a level above all. `counts` receives the number of positions and of indices first,
+/// so a call with null buffers learns the sizes and a second copies. A mesh with no indices is
+/// answered with its vertices taken in order.
+///
+/// Returns [`status::NOT_PRESENT`] while the mesh is still loading, [`status::NULL_ARG`] for one
+/// that is not a list of triangles or has no positions, and [`status::BUFFER_TOO_SMALL`] where a
+/// buffer is given that cannot hold it.
+///
+/// # Safety
+/// `counts` must be writable for two integers. `positions` must be null or writable for
+/// `position_capacity` floats, and `indices` null or writable for `index_capacity` integers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_mesh_triangles(
+    mesh: i32,
+    positions: *mut f32,
+    position_capacity: i32,
+    indices: *mut u32,
+    index_capacity: i32,
+    counts: *mut i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (mesh, positions, position_capacity, indices, index_capacity, counts);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::asset::Assets;
+            use bevy::mesh::{Indices, Mesh, PrimitiveTopology, VertexAttributeValues};
+
+            if counts.is_null() {
+                return status::NULL_ARG;
+            }
+
+            with_world(|world| {
+                let Some(handle) = crate::assets::clone_handle(world, mesh).and_then(|handle| handle.try_typed::<Mesh>().ok())
+                else {
+                    return status::NO_COMPONENT;
+                };
+
+                let Some(found) = world.resource::<Assets<Mesh>>().get(&handle) else {
+                    return status::NOT_PRESENT;
+                };
+
+                if found.primitive_topology() != PrimitiveTopology::TriangleList {
+                    return status::NULL_ARG;
+                }
+
+                let Some(VertexAttributeValues::Float32x3(corners)) = found.attribute(Mesh::ATTRIBUTE_POSITION) else {
+                    return status::NULL_ARG;
+                };
+
+                let order: Vec<u32> = match found.indices() {
+                    Some(Indices::U16(list)) => list.iter().map(|index| *index as u32).collect(),
+                    Some(Indices::U32(list)) => list.clone(),
+                    None => (0..corners.len() as u32).collect(),
+                };
+
+                unsafe {
+                    counts.write(corners.len() as i32);
+                    counts.add(1).write(order.len() as i32);
+                }
+
+                if positions.is_null() && indices.is_null() {
+                    return status::OK;
+                }
+
+                if (position_capacity as usize) < corners.len() * 3 || (index_capacity as usize) < order.len() {
+                    return status::BUFFER_TOO_SMALL;
+                }
+
+                unsafe {
+                    core::ptr::copy_nonoverlapping(corners.as_ptr() as *const f32, positions, corners.len() * 3);
+                    core::ptr::copy_nonoverlapping(order.as_ptr(), indices, order.len());
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
 /// Builds an empty image sized for a camera to draw into.
 ///
 /// The usages separate a texture that can be drawn into and copied out of from one that can only be

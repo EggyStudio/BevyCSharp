@@ -2481,10 +2481,46 @@ slow frame is caught up in whole steps, which keeps a run the same on every mach
 is written back to its entity every step. A kinematic one follows its entity's transform, with the
 velocity of how far it moved, so a moving platform pushes what stands on it. A static one never
 moves. Boxes, spheres, capsules and cylinders are the shapes, sized in world units and not scaled
-with the entity. A body belongs to its entity, so despawning the entity removes it, and the
+with the entity, and a level's floors and walls are a mesh shape made from triangles, such as a
+mesh `Render.TryReadMesh` reads back once it has loaded:
+
+```csharp
+if (Render.TryReadMesh(levelMesh, out var triangles))
+    physics.Add(level, PhysicsShape.Mesh(triangles!), BodyKind.Static, levelTransform);
+```
+
+A triangle collides from the side Bevy draws its face on. A body belongs to its entity, so despawning the entity removes it, and the
 simulation's memory and threads are released with the app. F7 in the sample drops crates onto its
 ground, around the turning cube as a kinematic body, and `./bcs command sample.crates 12` does the
 same on a running sample.
+
+Bodies that start or stop touching are reported on the message bus, and a body added as a sensor
+reports what enters it without pushing it, which is a trigger volume:
+
+```csharp
+physics.Add(door, PhysicsShape.Box(new Vec3(2f, 3f, 1f)), BodyKind.Static, doorway, sensor: true);
+
+foreach (var contact in ctx.Read<ContactStarted>())
+    if (contact.A == door || contact.B == door) Open();
+```
+
+A pair counts as separated once it has gone a few steps without touching, so a body settling onto
+another, which hops clear of it by a millimeter as it lands, is not reported as leaving and landing
+again.
+
+Joints hold two moving bodies together: a ball joint for a shoulder or a pendulum, a hinge for a
+door or a wheel, a weld for a part bolted on, and a distance range for a rope or a rod.
+
+```csharp
+var hinge = physics.Connect(frame, door, Joint.Hinge(
+    anchorA: new Vec3(0.5f, 0f, 0f), axisA: Vec3.UnitY,
+    anchorB: new Vec3(-0.5f, 0f, 0f), axisB: Vec3.UnitY));
+
+physics.Disconnect(hinge);            // or remove either body, which takes its joints with it
+```
+
+A joint is solved between two velocities, so both bodies move, and a body pinned to the world is
+joined to a kinematic one that stays put.
 
 ### Text and touch
 
