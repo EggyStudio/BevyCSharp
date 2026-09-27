@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Bevy.Interop;
 
 namespace Bevy;
@@ -578,20 +579,55 @@ public static unsafe class Gizmos
             configs[i].EndColorA = line.EndColor.A;
         }
 
-        fixed (NativeGizmoConfig* at = configs)
+        // Inside a batch the run joins it, so the whole frame's shapes still cross once.
+        if (_batch is { } gathering)
         {
-            var status = Native.bcs_gizmo_draw_many(at, lines.Length);
-
-            if (status == NativeStatus.Unsupported)
-                throw new BevyNativeException(
-                    NativeStatus.Unsupported,
-                    "Drawing gizmos failed, because gizmos are drawn by a plugin that comes with "
-                    + "the window, so a windowless run has nothing to draw on. Guard with "
-                    + "App.HasRenderer and Config.Headless.");
-
-            Native.Check(status, "drawing a run of gizmo lines");
+            foreach (var config in configs) gathering.Add(config);
+            return;
         }
+
+        DrawMany(configs, "drawing a run of gizmo lines");
     }
+
+    /// <summary>
+    /// Draws a line through a run of points, joining the last back to the first where
+    /// <paramref name="closed"/> is set.
+    /// </summary>
+    /// <remarks>
+    /// A path, an outline or a polygon, handed over as one run through <see cref="Lines"/>. A
+    /// triangle is three points, closed, which <see cref="Triangle"/> says outright.
+    /// </remarks>
+    /// <param name="points">The points in order, at least two.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="closed">Whether the last point joins the first.</param>
+    /// <param name="inFront">Whether the scene can hide it, as for <see cref="Lines"/>.</param>
+    public static void Polyline(
+        ReadOnlySpan<Vec3> points,
+        (float R, float G, float B, float A) color,
+        bool closed = false,
+        bool inFront = false)
+    {
+        if (points.Length < 2) return;
+
+        var count = closed && points.Length > 2 ? points.Length : points.Length - 1;
+        var segments = count <= 64 ? stackalloc GizmoSegment[count] : new GizmoSegment[count];
+
+        for (var i = 0; i < count; i++)
+        {
+            segments[i] = new GizmoSegment(points[i], points[(i + 1) % points.Length], color);
+        }
+
+        Lines(segments, inFront);
+    }
+
+    /// <summary>Draws the outline of a triangle through three points.</summary>
+    public static void Triangle(
+        Vec3 a,
+        Vec3 b,
+        Vec3 c,
+        (float R, float G, float B, float A) color,
+        bool inFront = false) =>
+        Polyline([a, b, c], color, closed: true, inFront);
 
     /// <summary>
     /// Sets how every gizmo is drawn.
@@ -739,8 +775,84 @@ public static unsafe class Gizmos
             ColorA = 1f,
         });
 
+    /// <summary>The shapes gathered by the batch that is open, or null where none is.</summary>
+    private static List<NativeGizmoConfig>? _batch;
+
+    /// <summary>
+    /// Gathers every shape drawn until the returned scope ends, and hands them over in one call.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Each shape otherwise crosses to the engine on its own, which is nothing for a handful and
+    /// adds up for a scene drawing thousands of spheres or boxes a frame. Inside a batch every
+    /// shape call is kept here instead, and the lot is handed over when the scope is disposed,
+    /// as <see cref="Lines"/> hands over its run.
+    /// </para>
+    /// <para>
+    /// Batches do not nest; a batch opened inside another joins it. A shape drawn in a batch whose
+    /// scope is never disposed is never drawn, so the scope belongs in a <c>using</c>.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// using (Gizmos.Batch())
+    /// {
+    ///     foreach (var row in ctx.Ecs.Query&lt;Collider&gt;())
+    ///         Gizmos.Sphere(row.Position, row.Radius, (0f, 1f, 0f, 1f));
+    /// }
+    /// </code>
+    /// </example>
+    public static BatchScope Batch()
+    {
+        if (_batch is not null) return default;
+
+        _batch = [];
+        return new BatchScope(owns: true);
+    }
+
+    /// <summary>An open batch, which hands its shapes over when disposed.</summary>
+    public readonly struct BatchScope : IDisposable
+    {
+        private readonly bool _owns;
+
+        internal BatchScope(bool owns) => _owns = owns;
+
+        /// <summary>Hands the gathered shapes to the engine.</summary>
+        public void Dispose()
+        {
+            if (!_owns || _batch is not { } gathered) return;
+
+            _batch = null;
+            if (gathered.Count > 0) DrawMany(CollectionsMarshal.AsSpan(gathered), "drawing a batch of gizmos");
+        }
+    }
+
+    /// <summary>Hands a run of shapes over in one call.</summary>
+    private static void DrawMany(ReadOnlySpan<NativeGizmoConfig> configs, string doing)
+    {
+        fixed (NativeGizmoConfig* at = configs)
+        {
+            var status = Native.bcs_gizmo_draw_many(at, configs.Length);
+
+            if (status == NativeStatus.Unsupported)
+                throw new BevyNativeException(
+                    NativeStatus.Unsupported,
+                    "Drawing gizmos failed, because gizmos are drawn by a plugin that comes with "
+                    + "the window, so a windowless run has nothing to draw on. Guard with "
+                    + "App.HasRenderer and Config.Headless.");
+
+            Native.Check(status, doing);
+        }
+    }
+
     private static void Draw(NativeGizmoConfig config)
     {
+        if (_batch is { } gathering)
+        {
+            gathering.Add(config);
+            return;
+        }
+
         var status = Native.bcs_gizmo_draw(&config);
         if (status == NativeStatus.Unsupported)
             throw new BevyNativeException(

@@ -824,7 +824,7 @@ public sealed class ComputeShaderTests
     /// GPU, a frame or more after it was asked, with the numbers the buffer holds.
     /// </summary>
     [Fact]
-    public void ABufferIsReadThroughTheCommandLineOnceItArrives()
+    public async Task ABufferIsReadThroughTheCommandLineOnceItArrives()
     {
         if (!App.HasRenderer) return;
 
@@ -855,7 +855,7 @@ public sealed class ComputeShaderTests
             })
             .Go();
 
-        var envelope = request!.Answer.Result;
+        var envelope = await request!.Answer;
 
         Assert.Contains("\"success\":true", envelope);
         Assert.Contains("1.5 -2 3.25", envelope);
