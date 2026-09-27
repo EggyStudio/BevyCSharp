@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 139;
+    internal const int ExpectedAbiVersion = 140;
 
     static Native() => NativeLoader.Initialize();
 
@@ -738,6 +738,26 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_file_drops_drain();
+
+    /// <summary>Collects what the input method said since the last call, and reports how many.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ime_drain();
+
+    /// <summary>Reads one drained input method message: its kind, its caret and its text.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ime_read(int index, int* kind, int* caret, byte* output, int capacity);
+
+    /// <summary>Turns the input method on or off, and places its candidate list.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_ime(int enabled, float x, float y);
+
+    /// <summary>Says something as the input method would.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_input_ime(int kind, byte* text, uint length, int start, int end);
 
     /// <summary>Collects the assets that failed to load, and reports how many.</summary>
     [LibraryImport(Library)]

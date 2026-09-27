@@ -197,6 +197,7 @@ public sealed unsafe class App : IDisposable
             // readable during it rather than during the next one.
             PostWindowMessages(world.Resource<MessageBus>());
             PostFileDrops(world.Resource<MessageBus>());
+            PostIme(world.Resource<MessageBus>());
             PostAssetFailures(world.Resource<MessageBus>());
 
             // Swapped here so the whole frame reads one complete, unchanging set.
@@ -291,6 +292,48 @@ public sealed unsafe class App : IDisposable
                     break;
                 case 2:
                     bus.Send(new FileHoverCanceled());
+                    break;
+            }
+        }
+    }
+
+    /// <summary>Moves what the platform's input method said onto the message bus.</summary>
+    /// <remarks>The same drain and read by index as the dropped files, since each carries text.</remarks>
+    private static void PostIme(MessageBus bus)
+    {
+        var count = Native.bcs_ime_drain();
+        if (count <= 0) return;
+
+        for (var i = 0; i < count; i++)
+        {
+            var index = i;
+
+            // Arrays rather than locals, because a lambda cannot take the address of a local but
+            // can pin an array inside itself.
+            var kind = new int[1];
+            var caret = new int[2];
+            var text = Native.ReadText(
+                (buffer, capacity) =>
+                {
+                    fixed (int* kindAt = kind)
+                    fixed (int* caretAt = caret)
+                        return Native.bcs_ime_read(index, kindAt, caretAt, buffer, capacity);
+                },
+                "reading what the input method said");
+
+            switch (kind[0])
+            {
+                case 0:
+                    bus.Send(new ImeComposing(text, caret[0], caret[1]));
+                    break;
+                case 1:
+                    bus.Send(new ImeCommit(text));
+                    break;
+                case 2:
+                    bus.Send(new ImeEnabled());
+                    break;
+                case 3:
+                    bus.Send(new ImeDisabled());
                     break;
             }
         }

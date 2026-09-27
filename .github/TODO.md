@@ -392,10 +392,9 @@ plus the callback structs it requires.
 ### Audio
 
 `bevy_audio` is compiled into the render profile with Ogg Vorbis, WAV, FLAC and MP3, and `Audio`
-plays, stops, pauses, sets volume per sound and over everything at once, plays a window out of a
-clip rather than all of it, places a sound in the world for a nominated listener, and reads and
-moves the point a clip has reached. A playing sound is an
-entity.
+plays, stops, pauses, sets volume per sound, per bus, and over everything at once, plays a window
+out of a clip rather than all of it, places a sound in the world for a nominated listener, and reads
+and moves the point a clip has reached. A playing sound is an entity.
 
 It is the one part of the bridge that takes a system library, because cpal links against ALSA on
 Linux, so a render build needs `libasound2-dev` or the equivalent. `build-native.sh` installs it
@@ -406,9 +405,10 @@ per distribution. The minimal profile still builds with nothing but a C compiler
   the decoded samples so the clip can start again and refuses to move within them, so a seek
   reports `INVALID_STATE`. Nothing here can work around it, so music that has to resume where it
   left off is played once and restarted. Revisit if rodio makes a buffered source seekable.
-- **No mixer.** Every sound carries its own volume, so a music and an effects slider are a
-  multiplication the game does itself before it plays anything. Bevy has no bus to hang them off
-  either, so a mixer would be a managed layer over the volumes rather than a bridge.
+- **A bus is only a volume.** `AudioSettings.Bus` and `Audio.SetBusVolume` group sounds under a
+  volume, kept on the managed side since Bevy has no mixer. A bus carries no effects, since rodio
+  mixes each sink straight to the device and there is nowhere between the two to put a filter or a
+  reverb.
 
 ## Project
 

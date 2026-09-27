@@ -173,6 +173,63 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
     })
 }
 
+/// Says something as the platform's input method would: `0` composing `text` with the caret over
+/// `start` to `end` (bytes of the UTF-8, or `-1` to hide it), `1` committing `text`, `2` turned on,
+/// `3` turned off.
+///
+/// For a test or a tool driving a text field that takes composed input, which no key press can
+/// produce. The message names the primary window where there is one, and no window otherwise, since
+/// nothing reading it here asks which.
+///
+/// # Safety
+/// `text` must point to `len` readable bytes, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_input_ime(kind: i32, text: *const u8, len: u32, start: i32, end: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (kind, text, len, start, end);
+            crate::interop::status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::prelude::*;
+            use bevy::window::{Ime, PrimaryWindow};
+
+            let value = if text.is_null() || len == 0 {
+                String::new()
+            } else {
+                let bytes = unsafe { core::slice::from_raw_parts(text, len as usize) };
+                match core::str::from_utf8(bytes) {
+                    Ok(text) => text.to_string(),
+                    Err(_) => return crate::interop::status::NULL_ARG,
+                }
+            };
+
+            crate::state::with_world(|world| {
+                let mut windows = world.query_filtered::<Entity, With<PrimaryWindow>>();
+                let window = windows.single(world).unwrap_or(Entity::PLACEHOLDER);
+
+                let message = match kind {
+                    0 => Ime::Preedit {
+                        window,
+                        value,
+                        cursor: (start >= 0 && end >= 0).then_some((start as usize, end as usize)),
+                    },
+                    1 => Ime::Commit { window, value },
+                    2 => Ime::Enabled { window },
+                    3 => Ime::Disabled { window },
+                    _ => return crate::interop::status::NULL_ARG,
+                };
+
+                world.write_message(message);
+                crate::interop::status::OK
+            })
+        }
+    })
+}
+
 /// Presses or releases a key, as though a hand had, with whatever text it produced.
 ///
 /// The other half of [`bcs_input_pointer`]. A test that can move a pointer but not press a key

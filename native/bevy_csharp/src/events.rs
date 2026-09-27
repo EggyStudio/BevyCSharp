@@ -238,6 +238,132 @@ pub unsafe extern "C" fn bcs_file_drop_path(
     })
 }
 
+/// What the platform's input method said since the last drain, waiting to be read out.
+///
+/// The same shape as [`FileDrops`]: the text being composed or committed is read afterwards, one
+/// call at a time, by index.
+#[cfg(feature = "render")]
+#[derive(bevy::ecs::resource::Resource, Default)]
+pub struct ImeMessages {
+    /// `0` composing, `1` committed, `2` turned on, `3` turned off.
+    pub kinds: Vec<i32>,
+    pub texts: Vec<String>,
+    /// Where the caret's selection starts and ends in the composed text, counted in UTF-16 units
+    /// as a C# string counts them, or `-1` for both where the caret is hidden.
+    pub carets: Vec<(i32, i32)>,
+    pub cursor: bevy::ecs::message::MessageCursor<bevy::window::Ime>,
+}
+
+/// Collects what the input method has said since the last call, and reports how many.
+///
+/// Each is read afterwards with [`bcs_ime_read`].
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_ime_drain() -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            0
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::ecs::message::Messages;
+            use bevy::window::Ime;
+
+            crate::state::with_world(|world| {
+                if !world.contains_resource::<ImeMessages>() {
+                    return 0;
+                }
+
+                world.resource_scope(|world, mut ime: bevy::ecs::world::Mut<ImeMessages>| {
+                    ime.kinds.clear();
+                    ime.texts.clear();
+                    ime.carets.clear();
+
+                    let Some(messages) = world.get_resource::<Messages<Ime>>() else {
+                        return 0;
+                    };
+
+                    let read: Vec<_> = ime.cursor.read(messages).cloned().collect();
+
+                    for message in read {
+                        let (kind, text, caret) = match message {
+                            Ime::Preedit { value, cursor, .. } => {
+                                // winit counts the caret in bytes of UTF-8, and a C# string in
+                                // UTF-16 units, which differ for every character past ASCII.
+                                let units = |at: usize| value.get(..at).map_or(0, |head| head.encode_utf16().count() as i32);
+                                let caret = cursor.map_or((-1, -1), |(start, end)| (units(start), units(end)));
+                                (0, value, caret)
+                            }
+                            Ime::Commit { value, .. } => (1, value, (-1, -1)),
+                            Ime::Enabled { .. } => (2, String::new(), (-1, -1)),
+                            Ime::Disabled { .. } => (3, String::new(), (-1, -1)),
+                        };
+
+                        ime.kinds.push(kind);
+                        ime.texts.push(text);
+                        ime.carets.push(caret);
+                    }
+
+                    ime.kinds.len() as i32
+                })
+            })
+        }
+    })
+}
+
+/// Writes the text of one drained input method message into `out`, its kind into `kind` and its
+/// caret into `caret`, two integers, and returns the text's length in bytes.
+///
+/// # Safety
+/// `kind` must be writable, `caret` must be writable for two integers, and `out` must be writable
+/// for `capacity` bytes, or null when `capacity` is zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_ime_read(
+    index: i32,
+    kind: *mut i32,
+    caret: *mut i32,
+    out: *mut u8,
+    capacity: i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (index, kind, caret, out, capacity);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if kind.is_null() || caret.is_null() {
+                return status::NULL_ARG;
+            }
+            let Ok(index) = usize::try_from(index) else {
+                return status::NULL_ARG;
+            };
+
+            crate::state::with_world(|world| {
+                let Some(ime) = world.get_resource::<ImeMessages>() else {
+                    return status::UNSUPPORTED;
+                };
+                let (Some(&found), Some(text), Some(&(start, end))) =
+                    (ime.kinds.get(index), ime.texts.get(index), ime.carets.get(index))
+                else {
+                    return status::NO_ENTITY;
+                };
+
+                unsafe {
+                    kind.write(found);
+                    caret.write(start);
+                    caret.add(1).write(end);
+                }
+
+                unsafe { crate::interop::write_text(text, out, capacity) }
+            })
+        }
+    })
+}
+
 /// Assets that failed to load, waiting to be read out.
 ///
 /// The same shape as [`FileDrops`], and for the same reason. A path and a reason are both text, and

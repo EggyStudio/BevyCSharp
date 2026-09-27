@@ -304,4 +304,38 @@ public sealed class MessageTests
 
         Assert.Equal(["/home/player/levels/arena.gltf"], paths);
     }
+
+    /// <summary>
+    /// What the input method composes and commits reaches the bus as text, with a caret counted in
+    /// the string's own indices, however many bytes each character takes.
+    /// </summary>
+    [Fact]
+    public void WhatTheInputMethodComposesArrivesOnTheBus()
+    {
+        if (!App.HasRenderer) return;
+
+        var composing = new List<ImeComposing>();
+        var committed = new List<ImeCommit>();
+
+        var run = new PictureRun();
+
+        run.Wait(3)
+            .Do("composing", _ =>
+            {
+                // Two characters of three bytes each, with the caret over the second.
+                SyntheticInput.Compose("日本", 1, 2);
+                SyntheticInput.Commit("日本語");
+            })
+            .Until("heard", world =>
+            {
+                var bus = world.Resource<MessageBus>();
+                composing.AddRange(bus.Read<ImeComposing>().ToArray());
+                committed.AddRange(bus.Read<ImeCommit>().ToArray());
+                return committed.Count > 0;
+            })
+            .Go();
+
+        Assert.Equal([new ImeComposing("日本", 1, 2)], composing);
+        Assert.Equal([new ImeCommit("日本語")], committed);
+    }
 }

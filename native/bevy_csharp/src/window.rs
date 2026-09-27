@@ -324,6 +324,33 @@ pub extern "C" fn bcs_window_set_style(decorations: i32, resizable: i32, always_
     })
 }
 
+/// Turns the platform's input method on or off for the window, and says where the text being
+/// composed is, in logical pixels from the window's top left.
+///
+/// An input method (IME) is how Japanese, Chinese or Korean is typed: keys build up a candidate
+/// that is shown and chosen from before it becomes text. It is off unless asked for, because with
+/// it on the keys a game reads as movement are taken by the input method instead. The position
+/// places the platform's candidate list beside the field being typed into rather than in a corner.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_window_set_ime(enabled: i32, x: f32, y: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (enabled, x, y);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_window(|window, _| {
+                window.ime_enabled = enabled != 0;
+                window.ime_position = bevy::math::Vec2::new(x, y);
+                status::OK
+            })
+        }
+    })
+}
+
 /// Reports how many monitors the platform knows about.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_monitor_count() -> i32 {

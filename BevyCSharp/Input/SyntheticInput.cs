@@ -138,6 +138,37 @@ public static class SyntheticInput
         io.AddKeyEvent(key, false);
     }
 
+    /// <summary>
+    /// Composes text as the platform's input method would, with the caret over
+    /// <paramref name="caretStart"/> to <paramref name="caretEnd"/>, or hidden at -1.
+    /// </summary>
+    /// <remarks>
+    /// For driving a field that takes composed input, which no key can produce. It arrives as an
+    /// <see cref="ImeComposing"/> on the next frame, with or without a window, since what reads it
+    /// does not ask which window it came from.
+    /// </remarks>
+    public static void Compose(string text, int caretStart = -1, int caretEnd = -1) =>
+        Ime(0, text, caretStart, caretEnd);
+
+    /// <summary>Commits text as the platform's input method would, arriving as an <see cref="ImeCommit"/>.</summary>
+    public static void Commit(string text) => Ime(1, text, -1, -1);
+
+    private static unsafe void Ime(int kind, string text, int caretStart, int caretEnd)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+
+        // The caret in bytes of UTF-8, as the platform reports it, from indices into the string.
+        var bytes = System.Text.Encoding.UTF8.GetBytes(text);
+        int Bytes(int index) => index < 0 ? -1 : System.Text.Encoding.UTF8.GetByteCount(text.AsSpan(0, Math.Min(index, text.Length)));
+
+        fixed (byte* at = bytes)
+        {
+            Native.Check(
+                Native.bcs_input_ime(kind, at, (uint)bytes.Length, Bytes(caretStart), Bytes(caretEnd)),
+                "composing as an input method");
+        }
+    }
+
     /// <summary>Types a run of characters.</summary>
     public static void Type(string text)
     {

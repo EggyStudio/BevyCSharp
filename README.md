@@ -2391,6 +2391,21 @@ A looping sound refuses to be sought, because looping keeps the decoded samples 
 start again and what holds them has no way to move within them. Music that has to resume where it left
 off is played once and restarted rather than looped.
 
+A sound can play on a bus, which is a name and a volume, so a settings screen's music and effects
+sliders are one call each rather than a walk over every sound playing:
+
+```csharp
+Audio.Play(theme, new AudioSettings { Mode = PlaybackMode.Loop, Bus = "music" });
+Audio.Play(hit, new AudioSettings { Mode = PlaybackMode.Despawn, Bus = "effects" });
+
+Audio.SetBusVolume("music", 0.3f);      // every music track, now and later
+```
+
+A sound is heard at its own volume times its bus's times the global one, and each is kept apart,
+so a fade on one track and the music slider multiply rather than overwrite each other. Bevy has no
+mixer, so the buses are kept on the managed side over each sound's volume. `Audio.VolumeOf` and
+`Audio.IsPaused` read a sound back.
+
 `Start` and `Play` cut a window out of a clip, which is how one file holds several effects:
 
 ```csharp

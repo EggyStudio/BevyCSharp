@@ -68,3 +68,36 @@ public readonly record struct FileHovered(string Path);
 
 /// <summary>The drag left the window without dropping, so any hover feedback should be cleared.</summary>
 public readonly record struct FileHoverCanceled;
+
+/// <summary>
+/// The platform's input method is composing text that has not been committed yet.
+/// </summary>
+/// <remarks>
+/// <para>
+/// An input method (IME) is how Japanese, Chinese or Korean is typed: keys build a candidate that is
+/// shown, usually underlined, and chosen from before it becomes text. A text field shows
+/// <see cref="Text"/> at its caret while composing, replaces it with each new one, and drops it when
+/// an <see cref="ImeCommit"/> arrives with what was chosen. An empty one ends the composition
+/// without committing anything.
+/// </para>
+/// <para>
+/// Only sent while the input method is on, which <see cref="Window.SetIme"/> does.
+/// </para>
+/// </remarks>
+/// <param name="Text">What is being composed.</param>
+/// <param name="CaretStart">
+/// Where the caret's selection starts in <paramref name="Text"/>, as an index into the string, or
+/// -1 where the caret is hidden.
+/// </param>
+/// <param name="CaretEnd">Where it ends, or -1 where the caret is hidden.</param>
+public readonly record struct ImeComposing(string Text, int CaretStart, int CaretEnd);
+
+/// <summary>The input method committed text, which is inserted where the caret is.</summary>
+/// <param name="Text">What was chosen.</param>
+public readonly record struct ImeCommit(string Text);
+
+/// <summary>The input method was turned on, and composing and committing may follow.</summary>
+public readonly record struct ImeEnabled;
+
+/// <summary>The input method was turned off.</summary>
+public readonly record struct ImeDisabled;

@@ -141,6 +141,26 @@ public static unsafe class Window
         Native.Check(Native.bcs_window_set_position(x, y), "Window.SetPosition");
 
     /// <summary>
+    /// Turns the platform's input method on or off, and says where the text being composed is.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// An input method (IME) is how Japanese, Chinese or Korean is typed, by composing a candidate
+    /// and choosing it. With it on, <see cref="ImeComposing"/> and <see cref="ImeCommit"/> arrive on
+    /// the message bus, and the keys it takes stop reaching the game, so it is turned on when a text
+    /// field takes the focus and off when it lets go. <see cref="Input.Text"/> covers typing that
+    /// needs no composing, dead keys included.
+    /// </para>
+    /// <para>
+    /// The position, in logical pixels from the window's top left, is where the platform shows its
+    /// candidate list, which belongs beside the field's caret rather than in a corner.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
+    public static void SetIme(bool enabled, float x = 0f, float y = 0f) =>
+        Native.Check(Native.bcs_window_set_ime(enabled ? 1 : 0, x, y), "Window.SetIme");
+
+    /// <summary>
     /// Sets whether the window has a title bar and border, whether it can be resized by dragging,
     /// and whether it stays above other windows.
     /// </summary>
