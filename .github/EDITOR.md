@@ -364,7 +364,9 @@ whose bottom corners go square while its list is open, meeting a list whose top 
 so the two read as one shape grown downward), a swatch for three numbers that are a color (whose
 picker, `ColorPicker`, is laid out as WinUI's is, with a rounded spectrum, a hue bar and a
 clearness bar as pills, the color as it was beside the color as it is, a hex box, and numbers in
-RGB, HSV, HSL, OKLCH or OKLab), and a dimmed box for anything that cannot be edited. A heading, a rule, a sentence and
+RGB, HSV, HSL, OKLCH or OKLab, where the square and the bar change with the space, so OKLCH picks
+chroma across and lightness down at a hue from an evenly bright hue strip, OKLab picks its two color
+axes at a lightness, and colors a screen cannot show are dimmed past a soft edge), and a dimmed box for anything that cannot be edited. A heading, a rule, a sentence and
 a unit are the field's own declaration too. A unit is written after the field's name, dimmed and
 in parentheses, as `Speed (m/s)`, so every box in a column ends at the
 same edge and the unit is read with the name it qualifies.

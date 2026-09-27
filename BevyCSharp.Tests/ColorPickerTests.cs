@@ -49,4 +49,16 @@ public sealed class ColorPickerTests
         Assert.InRange(back.Y, 0f, 1f);
         Assert.InRange(back.Z, 0f, 1f);
     }
+
+    [Fact]
+    public void WhatAScreenCanShowIsToldFromWhatItCannot()
+    {
+        // Mid gray is shown as it is, and a green far more vivid than sRGB reaches is not.
+        Assert.True(ColorPicker.InGamut(0.6f, 0f, 0f));
+        Assert.False(ColorPicker.InGamut(0.8f, -0.4f, 0.4f));
+
+        // And every color that came from the screen is one it can show.
+        var (l, a, b) = ColorPicker.ToOklab(new Vector3(0.9f, 0.1f, 0.3f));
+        Assert.True(ColorPicker.InGamut(l, a, b));
+    }
 }
