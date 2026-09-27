@@ -152,7 +152,7 @@ public partial struct Scene
 
         Console.WriteLine(
             "[Scene] a rotating cube. Escape closes the window, F11 toggles fullscreen, "
-            + "Tab locks the cursor, F2 draws the orbits, F3 plays a chime.");
+            + "Tab locks the cursor, F2 draws the orbits, F3 plays a chime, Enter types a line.");
     }
 
     /// <summary>Keeps the HUD's readout current.</summary>

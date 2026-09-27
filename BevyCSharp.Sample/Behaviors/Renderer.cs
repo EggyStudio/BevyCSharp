@@ -47,8 +47,8 @@ public partial struct Renderer
         if (ctx.Input.KeyPressed(Key.Escape)) ctx.Exit();
     }
 
-    /// <summary>What has been typed so far, to show that text arrives as characters.</summary>
-    private static string _typed = string.Empty;
+    /// <summary>The line being typed, or null while nothing is being typed.</summary>
+    private static string? _typed;
 
     /// <summary>Whether the window is currently borderless fullscreen.</summary>
     private static bool _fullscreen;
@@ -83,24 +83,46 @@ public partial struct Renderer
             Console.WriteLine($"[Renderer] dropped {dropped.Path}");
     }
 
-    /// <summary>Echoes typed text, which is the layout's answer rather than the hardware's.</summary>
+    /// <summary>
+    /// Enter starts a line and Enter again prints it, to show that text arrives as characters.
+    /// </summary>
     /// <remarks>
+    /// <para>
     /// Type with a non-US layout or use a dead key and this shows the character the user meant,
     /// which a name field needs and a key bitset cannot give.
+    /// </para>
+    /// <para>
+    /// Only between the two presses, because every key that makes a character makes it whether
+    /// or not anything is listening. The WASD that flies the camera is text too, and a held key
+    /// repeats it, so a demo that always listened would fill the console with the flying.
+    /// A game does the same with a chat box or a name field, which takes text only while it has
+    /// focus.
+    /// </para>
     /// </remarks>
     [OnUpdate]
     public static void EchoTyping(BehaviorContext ctx)
     {
-        if (ctx.Input.Text.Length > 0)
+        var enter = ctx.Input.KeyPressed(Key.Enter) || ctx.Input.KeyPressed(Key.NumpadEnter);
+
+        if (_typed is null)
         {
-            _typed += ctx.Input.Text;
-            Console.WriteLine($"[Renderer] typed: {_typed}");
+            if (!enter) return;
+
+            _typed = string.Empty;
+            enter = false;
+            Console.WriteLine("[Renderer] typing a line; Enter prints it");
         }
 
-        if (ctx.Input.KeyPressed(Key.Backspace) && _typed.Length > 0)
+        // The frame's text is kept even when Enter came in the same frame, since a fast typist or
+        // a paste can land both at once, and dropping it would lose the first or last characters.
+        _typed += ctx.Input.Text;
+
+        if (ctx.Input.KeyPressed(Key.Backspace) && _typed.Length > 0) _typed = _typed[..^1];
+
+        if (enter)
         {
-            _typed = _typed[..^1];
             Console.WriteLine($"[Renderer] typed: {_typed}");
+            _typed = null;
         }
     }
 

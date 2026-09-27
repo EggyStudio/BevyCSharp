@@ -215,10 +215,24 @@ internal static class ConsoleWorldCommands
     }
 
     /// <summary>Types text.</summary>
+    /// <remarks>
+    /// Into the interface's own queue, which is where a field being typed into reads. An app with
+    /// no interface has no such queue, and saying it typed there would be saying something that
+    /// did not happen, so it refuses and points at <c>input.key</c>, which starts at the window and
+    /// types each letter it taps.
+    /// </remarks>
     [Command("input.type", "Types text where the focus is: input.type <text>")]
     internal static string Type(string text)
     {
         if (text.Length == 0) return "nothing to type";
+
+        if (!ImGuiRuntime.IsRunning)
+        {
+            ConsoleHost.Fail(
+                "NO_INTERFACE",
+                "This app has no interface to type into. input.key taps a key at the window and types its letter.");
+            return "there is no interface to type into";
+        }
 
         SyntheticInput.Type(text);
         return $"typed {text}";

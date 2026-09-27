@@ -56,6 +56,8 @@ What is usually there:
 its shortcuts. `input.uikey` goes into the interface's own queue, which a text field being typed
 into reads. Letters arrive either way, but **Enter, Escape, Tab and the arrows inside a field only
 work through `input.uikey`**, because a window Enter leaves a line typed and never submitted.
+`input.type` writes into the interface alone, so an app without one answers `NO_INTERFACE`; there,
+tap letters with `input.key`, which types each one at the window.
 Driving the editor's own console, for example:
 
 ```bash
