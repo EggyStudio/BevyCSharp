@@ -102,10 +102,11 @@ public static class EditorKinds
 
         if (best != int.MaxValue) return icon;
 
-        // Nothing said what it is, so say what it does.
+        // Nothing said what it is, so say what it does. Only a component the project declared
+        // counts, because Bevy's own components have schemas too and are on nearly everything.
         foreach (var id in world.ComponentsOf(entity))
         {
-            if (ComponentSchemas.For(id) is not null) return Scripted;
+            if (ComponentSchemas.For(id) is { Origin: SchemaOrigin.Declared }) return Scripted;
         }
 
         return Plain;

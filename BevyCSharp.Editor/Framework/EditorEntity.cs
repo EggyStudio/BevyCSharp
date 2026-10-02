@@ -219,6 +219,21 @@ public static class EditorEntity
         // What picking leaves on anything it has raycast, which is every mesh in the scene.
         "PickingInteraction",
         "Pickable",
+
+        // What a camera and a light work out every frame from where they are and what they see.
+        // Each is reflected and so has a schema, and each is pages of numbers that the next frame
+        // overwrites.
+        "Frustum",
+        "VisibleEntities",
+        "Clusters",
+        "PreviousViewData",
+        "CameraRenderGraph",
+        "Cascades",
+        "CascadesFrusta",
+        "CascadesVisibleEntities",
+        "CubemapFrusta",
+        "CubemapVisibleEntities",
+        "VisibleMeshEntities",
     ];
 
     /// <summary>Whether a component is one the engine keeps for itself.</summary>

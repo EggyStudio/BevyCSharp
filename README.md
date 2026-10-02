@@ -67,6 +67,7 @@ Behaviors are discovered automatically, so a consuming project needs no registra
   - [Threading](#threading)
 - [The engine](#the-engine)
   - [Bevy's own components](#bevys-own-components)
+  - [Every other Bevy component](#every-other-bevy-component)
   - [Visibility](#visibility)
   - [Assets](#assets)
   - [Models](#models)
@@ -624,7 +625,44 @@ filters work, while reading or writing one is refused rather than corrupting the
 The list is curated rather than general, because each entry needs a mirror written by hand as
 well as a name the bridge resolves. It holds `Transform`, `GlobalTransform`, `ChildOf`,
 `Children`, `Visibility`, `InheritedVisibility`, `ViewVisibility`, `WorldInstance`, `Interaction`
-and `Atmosphere`.
+and `Atmosphere`. Any other component Bevy reflects resolves to an id by its full type path, so
+`HasById` and the rest reach it as well.
+
+### Every other Bevy component
+
+A component with no mirror is reached through Bevy's reflection, which describes Bevy's types at
+runtime. It is named by its full Rust type path, a field by Bevy's reflect path, and a value is
+JSON:
+
+```csharp
+const string Light = "bevy_light::point_light::PointLight";
+
+var lamp = ctx.Ecs.Spawn();
+ctx.Ecs.InsertReflected(lamp, Light);                        // at Bevy's default
+ctx.Ecs.SetReflected(lamp, Light, ".intensity", "5000");
+ctx.Ecs.SetReflected(lamp, Light, ".shadow_maps_enabled", "true");
+
+string? range = ctx.Ecs.GetReflected(lamp, Light, ".range");  // "20.0", or null if absent
+ctx.Ecs.SetVariant(lamp, Light, ".color", "LinearRgba");      // an enum, by variant name
+ctx.Ecs.RemoveReflected(lamp, Light);
+```
+
+That reaches nearly everything Bevy has (cameras, lights, projections, the hierarchy), and a
+component a later Bevy or a plugin adds is reachable the day it exists, with nothing written on
+this side. Inserting goes through Bevy's own insert, so a light arrives with the transform and
+visibility it requires.
+
+It costs a serialization per call. That suits setting a light once, an inspector or a save, and a
+system reading many entities a frame needs a mirror instead. A path is checked when it is used
+rather than when it is compiled, so a refusal throws `BevyNativeException` with Bevy's account of
+where the path stopped or why the value did not fit.
+
+The same description gives every reflected component a `ComponentSchema`, built the first time
+one is asked for inside a system, so the editor's inspector and `./bcs entity.get` and `entity.set`
+show and change them like any C# component. A nested struct becomes rows in a fold, and an enum
+that carries data, such as a light's color, is a row choosing the variant with that variant's
+fields under it. `ComponentSchema.Origin` says whether a schema is the project's own, a mirror, or
+reflected.
 
 ### Visibility
 
@@ -2971,14 +3009,16 @@ run against a real Bevy app. Known gaps:
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does
   nothing yet. The editor reloads scripts through `App.EnableDynamicSystems` instead, because
   the compiler lives there.
-- The editor's world file keeps what this side can name, which is an entity's name, every
-  component with a schema, and where its mesh and material were loaded from. Anything built in
-  memory has no name to write, and a camera's projection or a light's settings are engine
-  components with neither a schema nor a path, so the file is a set of edits over a scene rather
-  than the scene. [.github/SCENES.md](.github/SCENES.md) designs the scene format that replaces it.
-- Five of Bevy's components are mirrored by hand and the rest are unreachable from C#, and a
-  component cannot hold a list or a dictionary. [.github/COMPONENTS.md](.github/COMPONENTS.md)
-  plans both, through Bevy's reflection and a managed store freed with the entity.
+- The editor's world file keeps what this side can name, which is an entity's name, every C#
+  component and mirrored Bevy component, and where its mesh and material were loaded from.
+  Anything built in memory has no name to write, and a camera's projection or a light's settings
+  are edited in the inspector but not written to the file, so the file is a set of edits over a
+  scene rather than the scene. [.github/SCENES.md](.github/SCENES.md) designs the scene format that replaces it.
+- Five of Bevy's components are mirrored by hand, and the rest are reached through Bevy's
+  reflection by type path and JSON, which is checked at runtime rather than compiled, and a handle
+  inside one reads as its type name. A component cannot hold a list or a dictionary.
+  [.github/COMPONENTS.md](.github/COMPONENTS.md) plans typed wrappers, generated mirrors and a
+  managed store for collections that is freed with the entity.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
 - A cubemap comes from a file, as six square faces stacked into a column, or from a reflection probe

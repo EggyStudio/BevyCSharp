@@ -322,7 +322,7 @@ is bridged except the last.
 | a component's name | `ComponentInfo::name` | every label in the inspector | `bcs_component_name` |
 | an entity's name | Bevy's `Name`, which holds a `String` | hierarchy labels | `bcs_ecs_entity_name` |
 | naming an entity | the same, written | a list nobody can work in | `bcs_ecs_set_entity_name` |
-| a field's name and type | the source generator, not the bridge | editing a value | none needed |
+| a field's name and type | the generator for C#, Bevy's type registry for Bevy's | editing a value | `bcs_reflect_types` |
 | where a panel ended up | ImGui's own layout | the viewport, the orientation cross | none needed |
 | the entity under the cursor | `bevy_picking`, already compiled in | selection in the viewport | `bcs_pick_events` |
 | what an entity fills | `Aabb` through the global transform | outlining and framing a selection | `bcs_render_bounds` |
@@ -334,8 +334,9 @@ names, types and a pair of accessors beside the runner it emits today. That turn
 which the bridge already hands over, into a list of editable fields, with no reflection crossing
 the ABI.
 
-Bevy's own components stay a curated list, because a general answer needs a byte-compatible mirror
-on this side and that is written by hand per type.
+Bevy's own components are described from Bevy's type registry instead, and their fields are read
+and written as JSON by Bevy's reflect path, so a light or a camera is drawn with no code per type.
+The few with a mirror on this side keep a schema written by hand, which writes the bytes in place.
 
 ## The interface
 
@@ -532,7 +533,8 @@ Written down because the attributes and the shape of the thing suggest otherwise
 - **Nothing puts a field back to its default.** What a freshly added component holds is known to
   the schema, and no row asks it.
 - **A duplicate is not offered**, because the editor can read only what has a schema off an entity,
-  and the mesh and the material an entity is drawn with have none.
+  and the mesh and the material an entity is drawn with are handles, which have no JSON form to
+  copy.
 
 ## Adding to it
 

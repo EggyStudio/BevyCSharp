@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 148;
+    internal const int ExpectedAbiVersion = 149;
 
     static Native() => NativeLoader.Initialize();
 
@@ -917,6 +917,56 @@ internal static unsafe partial class Native
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ecs_set_entity_name(ulong entity, string name);
+
+    // -- Bevy's components through its reflection
+    //
+    // A component is named by its full Rust type path and a field by Bevy's reflect path, and
+    // values cross as JSON. Every failure leaves its reason for bcs_reflect_error.
+
+    /// <summary>Describes every reflected component and the types its fields reach, as JSON.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_types(byte* buffer, int capacity);
+
+    /// <summary>Writes a component, or one field of it, as JSON.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_get(
+        ulong entity, string typePath, string path, byte* buffer, int capacity);
+
+    /// <summary>Writes the name of the variant an enum field holds.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_variant(
+        ulong entity, string typePath, string path, byte* buffer, int capacity);
+
+    /// <summary>Writes a value read from JSON over a component or one field of it.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_set(
+        ulong entity, string typePath, string path, byte* json, int length);
+
+    /// <summary>Switches an enum field to a variant, its fields at their defaults.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_set_variant(
+        ulong entity, string typePath, string path, string variant);
+
+    /// <summary>Inserts a component from JSON, or at its default when the length is zero.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_insert(
+        ulong entity, string typePath, byte* json, int length);
+
+    /// <summary>Removes a reflected component.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_remove(ulong entity, string typePath);
+
+    /// <summary>Writes why the last reflected call on this thread failed.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_error(byte* buffer, int capacity);
 
     // -- HTML and CSS UI (editor builds only)
 

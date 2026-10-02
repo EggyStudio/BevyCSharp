@@ -2,8 +2,8 @@
 
 How every component Bevy has becomes usable from C# without a mirror written by hand, how a
 component holds a list or a dictionary, and how data kept in a file of its own (Unity's
-ScriptableObject) is declared, referred to and edited. None of this is built yet. This file is the
-design, in the order it can be built. [SCENES.md](SCENES.md) covers how all of it is written to a
+ScriptableObject) is declared, referred to and edited. Tier 1 of §1 is built, and the rest of this
+file is the design, in the order it can be built. [SCENES.md](SCENES.md) covers how all of it is written to a
 file, and [ASSETS.md](ASSETS.md) how meshes, materials and textures are seen and picked.
 
 ## What exists
@@ -12,17 +12,15 @@ file, and [ASSETS.md](ASSETS.md) how meshes, materials and textures are seen and
   `InheritedVisibility` and `ViewVisibility` are C# structs with the same bytes as the Rust types
   (`INativeComponent`, `BevyCSharp/Ecs/NativeComponents.cs`). A system reads them straight out of
   Bevy's storage through `bcs_ecs_get_ptr` and `bcs_ecs_chunks`, with nothing copied.
-- **Each is found by a hand-written match.** `bcs_component_id_of` (`native/bevy_csharp/src/app.rs`)
-  turns a name into a component id with one arm per type, and a `bcs_*_layout` export per type
-  reports field offsets, which the managed side checks against its mirror before trusting it.
-- **Some are named and never read.** `ChildOf`, `Children` and a few others can be filtered on and
-  counted, and their contents are out of reach.
-- **Everything else goes through an export of its own.** A camera, a light, a mesh and a material
-  are set through calls such as `bcs_render_spawn_light` and `bcs_ecs_insert_asset`, and most of
-  them cannot be read back.
-- **Nothing uses Bevy's reflection.** The bridge never reads `AppTypeRegistry`, although
-  `bevy_reflect` is compiled into every profile (`bevy_world_serialization` needs it) and the
-  render profile turns on `reflect_auto_register`, which registers every reflected type Bevy has.
+- **Each mirror is found by a hand-written match.** `bcs_component_id_of`
+  (`native/bevy_csharp/src/app.rs`) turns a short name into a component id with one arm per
+  mirrored type, and a `bcs_*_layout` export per type reports field offsets, which the managed side
+  checks against its mirror before trusting it. Any other name is looked up as a full type path in
+  Bevy's registry.
+- **Every reflected component is reachable through tier 1** (`native/bevy_csharp/src/reflected.rs`),
+  by JSON and by schema, which covers cameras, lights, the hierarchy and nearly everything else.
+  The camera, light, mesh and material exports remain as helpers that set several components at
+  once.
 - **C# components are real Bevy components,** registered from their size and alignment
   (`bcs_component_register`) with no drop hook. `ComponentType<T>` requires `unmanaged`, and the
   generator refuses a stored behavior with a reference in it (BCS006), so a component cannot hold
@@ -30,8 +28,8 @@ file, and [ASSETS.md](ASSETS.md) how meshes, materials and textures are seen and
 - **`FieldKind` has no kind for a collection.** The generator maps anything it does not know to
   `Opaque`, which the inspector shows as a name and a type with nothing to edit.
 
-Adding a Bevy component today means a mirror, a match arm, a layout export, a schema and a test,
-and most of Bevy is not worth that, so most of Bevy is invisible to C# and to the editor.
+A mirror is still a match arm, a layout export, a schema and a test, so it is written only where a
+system needs to read the bytes in place every frame. Everything else goes through tier 1.
 
 ## 1. Every Bevy component, in three tiers
 
@@ -43,25 +41,51 @@ to keep mirrors only where their speed matters.
 
 ### Tier 1: reflected access to everything
 
-- **The registry, dumped.** A new export (`bcs_reflect_types`) walks `AppTypeRegistry` and returns
-  each type that has `ReflectComponent`, with its type path (`bevy_light::point_light::PointLight`),
-  its short name, and its fields: name, type path, and kind (struct, tuple, enum with its variants,
-  list, map, value). Defaults come from `ReflectDefault` where Bevy has one, and documentation
-  where the `reflect_documentation` feature is on.
-- **Schemas from the dump.** `ComponentSchemas` builds a `ComponentSchema` for each, so the editor,
-  the scene format and `./bcs entity.get` and `entity.set` cover every reflected component with no
-  code per type. A field's `Read` and `Write` go through the next two exports.
+- **The registry, described.** `bcs_reflect_types` walks `AppTypeRegistry` and returns each type
+  that has `ReflectComponent`, with its type path (`bevy_light::point_light::PointLight`), its
+  short name, its component id, whether it has a default (`ReflectDefault` or `ReflectFromWorld`)
+  and whether it is mutable. Every type a field reaches is described once beside them: struct,
+  tuple struct, enum with its variants and their fields, or a list, map, set, tuple or opaque
+  value. Every component is registered with the world as it is described, so its id is fixed for
+  the run.
 - **Values as JSON.** `bcs_reflect_get(entity, type, path)` serializes a component or one field of
-  it through `TypedReflectSerializer`, and `bcs_reflect_set(entity, type, path, json)` applies a
-  value through `TypedReflectDeserializer`. A path is Bevy's reflect path (`intensity`, `color.0`,
-  `transform.translation.x`), so one field is changed without writing the rest.
+  it through `TypedReflectSerializer`, and `bcs_reflect_set(entity, type, path, json)` reads a value
+  against the field's own type through `TypedReflectDeserializer` and applies it through Bevy's
+  `Mut`, so change detection sees it. A path is Bevy's reflect path (`.intensity`, `.color.0.red`),
+  so one field is changed without writing the rest. An immutable component is refused rather than
+  written, because `reflect_mut` panics on one.
+- **Variants by name.** `bcs_reflect_variant` reads which variant an enum holds, since Bevy writes
+  an `Option` as `null` or the bare value and its JSON is no record of the variant.
+  `bcs_reflect_set_variant` switches to another, with that variant's fields at their defaults.
 - **Insert and remove** go through `ReflectComponent::insert` and `remove`, from a JSON value or
   from the type's default.
-- **The registry in every profile.** `reflect_auto_register` moves from the render profile to the
-  headless one, so a headless run and the test suite see the same types a window does.
+- **Reasons.** Every failure leaves a sentence for `bcs_reflect_error`, so a path that leads nowhere
+  says where it stopped.
+- **The C# surface** is `EcsWorld.GetReflected`, `SetReflected`, `GetVariant`, `SetVariant`,
+  `InsertReflected` and `RemoveReflected`, naming a component by its full type path.
+- **Schemas from the description** (`BevyCSharp/Ecs/ReflectedSchemas.cs`). `ComponentSchemas`
+  builds a `ComponentSchema` for each reflected component the first time it is asked inside a
+  system, and drops them when a new app starts, since ids belong to a world. A mirrored component
+  keeps its hand-written schema. A nested struct is taken apart into rows in a fold, as the
+  generator does it, and an enum that carries data is a row choosing the variant, with each
+  variant's fields as rows shown only while it is chosen, through the same `FieldCondition` a
+  `[ShowIf]` produces. A field with no editor (a string, a list, a handle) is a read-only row
+  showing its JSON. So the editor and `./bcs entity.get` and `entity.set` cover every reflected
+  component with no code per type, and `ComponentSchema.Origin` tells them apart from a project's
+  own.
+- **The registry in every profile.** `reflect_auto_register` is in the headless profile, so a
+  headless run and the test suite see the same types a window does.
 
-It costs a serialization a call, which suits the inspector, saving, loading and a script setting a
-light once. A system reading a thousand entities a frame uses tier 3.
+It costs a serialization a call, which suits the inspector, the CLI and a script setting a light
+once. A system reading a thousand entities a frame uses tier 3. What tier 1 does not do yet:
+
+- **A handle reads as JSON or as its type name.** `Mesh3d` and `MeshMaterial3d` hold a typed
+  handle, which has no JSON form, so the inspector leaves both to "Drawn with". Mapping a handle to
+  the bridge's `AssetHandle` by its type would make it a field like any other.
+- **No documentation.** `reflect_documentation` is not turned on, so a reflected field has no
+  tooltip. Turning it on carries every doc comment Bevy has into the binary.
+- **A color is four numbers.** `FieldKind` has no color, so a `Color` is a variant choice over rows
+  of floats rather than a swatch, until [SCENES.md](SCENES.md) §4 adds the kind.
 
 ### Tier 2: typed C# over tier 1
 
@@ -91,25 +115,23 @@ them where it can.
   reports `size_of`, `align_of` and `offset_of!` for every field, and the managed side checks the
   mirror against it at startup, as it checks the hand mirrors today. The hand `bcs_*_layout`
   functions become generated ones.
-- **Lookup by type path.** `bcs_component_id_of` looks the path up in the registry
-  (`TypeRegistry::get_with_type_path`, then the component id of its `TypeId`) rather than matching
-  names, so a new mirror needs no arm.
+- **Lookup by type path.** `bcs_component_id_of` resolves any reflected type path through the
+  registry, and keeps its arms only for the short names the hand mirrors use. A generated
+  mirror names its type by path, so it needs no arm, and the arms go with the hand mirrors.
 
 The camera, light and mesh exports stay as helpers that set several components at once, and read
 back through tier 1.
 
 ### Traps
 
-- **A type Bevy does not reflect is invisible.** A few render-world and internal components are not
-  registered. The dump says which components exist without `ReflectComponent`, so the editor can
-  list them by name, as it lists `ChildOf` today.
-- **A handle in a component** (`Mesh3d`, `MeshMaterial3d`) reflects as an opaque value, so it is
-  mapped to `AssetHandle` by type rather than serialized.
+- **A type Bevy does not reflect has no schema.** A few render-world and internal components are not
+  registered with `ReflectComponent`. `./bcs entity.get` names one as having no schema, and the
+  inspector leaves it out, as it leaves out the engine's other bookkeeping.
+- **A short name is not unique.** Bevy's crates reuse names, so a schema takes the full type path
+  as its name wherever two components share a short one.
 - **`#[reflect(ignore)]` fields** are neither read nor written.
-- **An enum with data** is a variant name plus that variant's fields, and the inspector draws it as
-  a choice with the chosen variant's rows under it.
 - **Order of registration.** A type registered by a plugin exists only after that plugin is added,
-  so the dump is taken after startup.
+  so the description is taken from inside a system, once the app is running.
 
 ## 2. Lists and dictionaries in components
 
@@ -190,9 +212,9 @@ A `DataRef<T>` field in the inspector is a row with the asset's name, a fold arr
 
 Each step is usable on its own and tested before the next.
 
-1. **Tier 1**: the registry dump, get and set, insert and remove, schemas from the dump, and the
-   inspector drawing every reflected component. Tested by setting a `PointLight` field through
-   tier 1 and reading it back through Bevy.
+1. **The rest of tier 1**: handles mapped to `AssetHandle`, and documentation as tooltips. Tested
+   by reading an entity's mesh through its `Mesh3d` field and getting the handle `Render.SetMesh`
+   was given.
 2. **Tier 2**: `./bcs schema dump`, the checked-in file, and the generated wrappers. Tested by a
    wrapper and the hand mirror agreeing on a `Transform`.
 3. **Collections**: `InlineList`, `EcsList` and `EcsMap`, the remove hook, the kinds and the

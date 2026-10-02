@@ -18,7 +18,9 @@ The editor's `assets/world.json` (`BevyCSharp.Editor/Framework/EditorWorld.cs`, 
   are written over. Nothing is spawned and nothing is despawned.
 - **What it loses.**
   - Unnamed entities, and the hierarchy.
-  - Engine components with no schema, such as a camera's projection and a light's settings.
+  - Bevy's reflected components, such as a camera's projection and a light's settings, which have
+    schemas but are left out, because the file writes values as text and loads over entities
+    that already exist.
   - Meshes and materials built in memory, which have no path.
   - `Asset` and `Entity` fields, which are written as `"Asset(3)"`, a key valid for one run.
   - A component the file names and the live entity lacks, which is skipped without a word.
@@ -28,7 +30,9 @@ Around it:
 
 - `ComponentSchema` (`BevyCSharp/Ecs/ComponentSchema.cs`) describes every C# component field by
   field without reflection, because the generator emits it (`BevyCSharp.Generator/SchemaEmitter.cs`).
-  Of Bevy's components only `Transform` and `Visibility` have one.
+  `Transform` and `Visibility` have one written by hand over their mirrors, and every other
+  component Bevy reflects has one built from Bevy's reflection ([COMPONENTS.md](COMPONENTS.md),
+  §1), whose fields read and write JSON by reflect path.
 - An asset is identified by its path under the asset root and a `#label`
   (`AssetServer.PathOf`). An `AssetHandle` is a key into a table on the native side and means
   nothing in another run. There are no ids that survive a rename.
@@ -258,8 +262,9 @@ Each step is usable on its own and is tested before the next.
 2. **The scene file** (§3) with the hierarchy, spawning and entity references, replacing
    `world.json`. Tested by a scene saved from an `EngineHarness` world, loaded into a fresh one,
    and compared field by field.
-3. **Bevy's components** (§4), once [COMPONENTS.md](COMPONENTS.md) tier 1 reflects them. Tested by
-   the same round trip, drawing both worlds and comparing the pictures.
+3. **Bevy's components** (§4), through the reflected schemas of [COMPONENTS.md](COMPONENTS.md) tier
+   1, written as the JSON Bevy's own serializer produces. Tested by the same round trip, drawing
+   both worlds and comparing the pictures.
 4. **Ids** (§2), with the index and the asset browser keeping the sidecars.
 5. **Data assets** (§6). Tested by a component referring to one, saved, reloaded and edited.
 6. **glTF instances with overrides** (§5, with `WorldInstanceReady` bridged). Tested by an

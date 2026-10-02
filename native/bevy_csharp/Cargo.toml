@@ -81,6 +81,10 @@ headless = [
     "bevy/tga",
     "bevy/bevy_state",
     "bevy/bevy_world_serialization",
+    # Every reflected type Bevy has, registered at startup without a plugin naming it. The bridge
+    # reads components through that registry, so a headless run and the test suite see the same
+    # types a window does rather than only the ones some plugin happened to register.
+    "bevy/reflect_auto_register",
 ]
 
 # Full desktop profile: a real window, Bevy's renderer and the winit input backend.
@@ -98,9 +102,6 @@ render = [
     # built with them. Bevy already depends on this version with this feature, so it adds nothing
     # to the build.
     "dep:naga",
-    # Reading the reflection slangc writes beside every compile, which names a shader's own
-    # parameters. Already in the tree through Bevy.
-    "dep:serde_json",
     # A compute shader compiled to SPIR-V, for what WGSL cannot say, such as a ray query. The first
     # lets Bevy take SPIR-V at all, and the second hands it to a Vulkan driver untouched rather than
     # through naga, whose SPIR-V reader has no ray queries. Both are Rust already in the tree.
@@ -147,7 +148,6 @@ render = [
     # deep, which every stochastic screen-space technique samples its rays with, and which a shader
     # on a camera reads through `bcs_pass::blue_noise`. A megabyte and a half, embedded.
     "bevy/bluenoise_texture",
-    "bevy/reflect_auto_register",
     # Windowing backends. Both are harmless off-platform: winit gates its X11 and Wayland
     # dependencies to Linux and the BSDs, so on Windows and macOS these resolve to nothing and
     # the native window system is used instead.
@@ -167,7 +167,13 @@ nonmax = { version = "0.5", default-features = false }
 # version is already in the tree.
 bytemuck = { version = "1", features = ["derive"] }
 naga = { version = "29", default-features = false, features = ["wgsl-in"], optional = true }
-serde_json = { version = "1", optional = true }
+# Components read and written through Bevy's reflection cross the boundary as JSON, in every
+# profile, and the render profile also reads the reflection slangc writes beside every compile.
+# Already in the tree through Bevy.
+serde_json = "1"
+# The trait a reflected value is deserialized through. Already in the tree through Bevy, which
+# re-exports the reflect serializers but not the trait their seed implements.
+serde = "1"
 wgpu = { version = "29", default-features = false, optional = true }
 
 # Linux and the BSDs only.

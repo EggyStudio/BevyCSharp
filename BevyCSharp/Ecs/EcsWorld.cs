@@ -23,7 +23,7 @@ namespace Bevy;
 /// corrupting the world.
 /// </para>
 /// </remarks>
-public sealed unsafe class EcsWorld
+public sealed unsafe partial class EcsWorld
 {
     /// <summary>Spawns an entity with no components.</summary>
     public Entity Spawn()

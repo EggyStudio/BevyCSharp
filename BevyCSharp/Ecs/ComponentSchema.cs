@@ -55,6 +55,27 @@ public enum FieldKind
 }
 
 /// <summary>
+/// Where a component's description came from, which says what kind of component it is.
+/// </summary>
+/// <remarks>
+/// A tool sometimes has to tell a game's own components from the engine's: an icon that marks an
+/// entity as scripted, or a file that saves what a project wrote and leaves the engine's own state
+/// to the engine. The schema knows which it is, so it says so rather than each tool
+/// guessing from a name.
+/// </remarks>
+public enum SchemaOrigin
+{
+    /// <summary>A C# component, described by the generator.</summary>
+    Declared,
+
+    /// <summary>One of Bevy's components with a mirror on this side, described by hand.</summary>
+    Mirrored,
+
+    /// <summary>One of Bevy's components, described from Bevy's own reflection.</summary>
+    Reflected,
+}
+
+/// <summary>
 /// One field of a component, and how to read and write it on a live entity.
 /// </summary>
 /// <remarks>
@@ -200,8 +221,9 @@ public sealed record ComponentMethod(string Name, Action<EcsWorld, Entity> Run)
 /// <remarks>
 /// This turns <see cref="EcsWorld.ComponentsOf"/>, which answers in ids, into something an
 /// inspector can draw. The generator emits one of these per <c>[Behavior]</c> struct that has
-/// fields; a handful of Bevy's own components are described by hand, because a general answer for
-/// those would need a byte-compatible mirror on this side and that is written per type anyway.
+/// fields. Bevy's own components are described from Bevy's reflection once an app is running,
+/// except the few with a mirror on this side, which are described by hand so the inspector writes
+/// them through the mirror. <see cref="Origin"/> says which of the three a schema is.
 /// </remarks>
 public sealed class ComponentSchema
 {
@@ -279,6 +301,13 @@ public sealed class ComponentSchema
     /// <summary>The fields, in declaration order.</summary>
     public IReadOnlyList<ComponentField> Fields { get; }
 
+    /// <summary>Where the description came from.</summary>
+    /// <remarks>
+    /// <see cref="SchemaOrigin.Declared"/> unless set, since the generator writes every schema a
+    /// project contributes and has no reason to name the default.
+    /// </remarks>
+    public SchemaOrigin Origin { get; init; }
+
     /// <summary>The engine's component id, resolved on demand.</summary>
     /// <remarks>Resolving registers the component with the world if it was not known yet.</remarks>
     public int Id => _id();
@@ -309,8 +338,15 @@ public sealed class ComponentSchema
 /// <remarks>
 /// <para>
 /// Filled by generated module initializers, one per assembly, so a project that declares
-/// behaviors contributes its schemas by existing rather than by registering them. Bevy's own
-/// components are added here.
+/// behaviors contributes its schemas by existing rather than by registering them. The Bevy
+/// components with a mirror are added here by hand.
+/// </para>
+/// <para>
+/// Every other component Bevy reflects is described from Bevy's registry, the first time this is
+/// asked while a system has the world on loan. Those schemas belong to one app, because their ids
+/// and the types a build registers are the app's, so a new <see cref="App"/> drops them and the
+/// next question inside a system describes the new one. Until then they are absent, and a tool
+/// asking before the first frame sees only the C# components and the mirrors.
 /// </para>
 /// <para>
 /// The id map is rebuilt whenever a new <see cref="App"/> invalidates component ids, since an id
@@ -325,12 +361,27 @@ public static class ComponentSchemas
     private static Dictionary<int, ComponentSchema> _byId = [];
     private static int _generation = -1;
 
+    // Kept apart from Registered so that Add, which replaces by qualified name, and the reflected
+    // set, which is replaced whole for each app, never evict each other.
+    private static List<ComponentSchema> _reflected = [];
+    private static int _reflectedGeneration = -1;
+
     static ComponentSchemas() => AddBuiltIn();
 
-    /// <summary>Every registered schema, in registration order.</summary>
+    /// <summary>
+    /// Every schema: the registered ones in registration order, then the reflected ones by type
+    /// path.
+    /// </summary>
     public static IReadOnlyList<ComponentSchema> All
     {
-        get { lock (Gate) return Registered.ToArray(); }
+        get
+        {
+            lock (Gate)
+            {
+                Reflect();
+                return [.. Registered, .. _reflected];
+            }
+        }
     }
 
     /// <summary>Registers a schema, replacing any earlier one for the same type.</summary>
@@ -351,6 +402,7 @@ public static class ComponentSchemas
     {
         lock (Gate)
         {
+            Reflect();
             Refresh();
             return _byId.TryGetValue(componentId, out var schema) ? schema : null;
         }
@@ -368,10 +420,13 @@ public static class ComponentSchemas
 
         lock (Gate)
         {
+            Reflect();
             return Registered.FirstOrDefault(schema => schema.QualifiedName == name)
+                ?? _reflected.FirstOrDefault(schema => schema.QualifiedName == name)
                 ?? Registered.FirstOrDefault(schema =>
                     name.EndsWith("::" + schema.Name, StringComparison.Ordinal)
-                    || name == schema.Name);
+                    || name == schema.Name)
+                ?? _reflected.FirstOrDefault(schema => name == schema.Name);
         }
     }
 
@@ -381,7 +436,7 @@ public static class ComponentSchemas
         if (_generation == ComponentRegistry.Generation) return;
 
         var map = new Dictionary<int, ComponentSchema>();
-        foreach (var schema in Registered)
+        foreach (var schema in Registered.Concat(_reflected))
         {
             // A schema for a component this build has none of, such as a render component in a
             // headless run, cannot resolve an id. That is a fact about the build rather than a
@@ -402,6 +457,69 @@ public static class ComponentSchemas
 
         _byId = map;
         _generation = ComponentRegistry.Generation;
+    }
+
+    /// <summary>
+    /// Describes the running app's reflected components, once per app, when a world is on loan.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Asked on every lookup, and cheap once answered, because the generation matches. Before that,
+    /// and outside a system, the bridge answers that no world is lent, and the attempt is made again
+    /// on the next lookup.
+    /// </para>
+    /// <para>
+    /// The previous app's schemas are dropped before the attempt rather than after it succeeds.
+    /// Their ids belong to a world that is gone, and a lookup between the two apps would otherwise
+    /// map a new component to an old description.
+    /// </para>
+    /// </remarks>
+    private static void Reflect()
+    {
+        var generation = ComponentRegistry.Generation;
+
+        // No app has been created, so the bridge may not even be loaded, and there is nothing to
+        // describe anyway.
+        if (generation == 0 || _reflectedGeneration == generation) return;
+
+        if (_reflected.Count > 0)
+        {
+            _reflected = [];
+            _generation = -1;
+        }
+
+        string? description;
+        try
+        {
+            description = EcsWorld.DescribeReflected();
+        }
+        catch (BevyNativeException)
+        {
+            return;
+        }
+
+        if (description is null) return;
+
+        // The ids the mirrors resolve to stay theirs, so a light's transform is still written
+        // through the Transform mirror rather than through reflection.
+        var taken = new HashSet<int>();
+        foreach (var schema in Registered)
+        {
+            try
+            {
+                taken.Add(schema.Id);
+            }
+            catch (Exception error) when (error is BevyNativeException or InvalidOperationException)
+            {
+            }
+        }
+
+        _reflected = ReflectedSchemas.Build(
+            description,
+            taken,
+            Registered.Select(schema => schema.Name).ToHashSet(StringComparer.Ordinal));
+        _reflectedGeneration = generation;
+        _generation = -1;
     }
 
     /// <summary>What a value of three numbers drawn beside each other asked for.</summary>
@@ -436,7 +554,10 @@ public static class ComponentSchemas
                     hints: Across),
             ],
             add: static (world, entity) => world.Add(entity, Transform.Identity),
-            remove: static (world, entity) => world.Remove<Transform>(entity)));
+            remove: static (world, entity) => world.Remove<Transform>(entity))
+        {
+            Origin = SchemaOrigin.Mirrored,
+        });
 
         Registered.Add(new ComponentSchema(
             "Visibility",
@@ -450,7 +571,10 @@ public static class ComponentSchemas
                     Enum.GetNames<VisibilityMode>()),
             ],
             add: static (world, entity) => world.Add(entity, Visibility.Inherited),
-            remove: static (world, entity) => world.Remove<Visibility>(entity)));
+            remove: static (world, entity) => world.Remove<Visibility>(entity))
+        {
+            Origin = SchemaOrigin.Mirrored,
+        });
     }
 
     /// <summary>Reads a field out of a component value.</summary>

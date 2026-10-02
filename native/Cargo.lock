@@ -609,6 +609,7 @@ dependencies = [
  "bytemuck",
  "naga",
  "nonmax",
+ "serde",
  "serde_json",
  "wgpu",
  "winit",

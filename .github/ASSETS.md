@@ -63,8 +63,9 @@ An entity that draws shows two cards in the details, in the place "Drawn with" h
     circle, annulus, rectangle, triangle, tetrahedron, with the parameters a primitive was made
     from kept beside its handle, so it can be edited and saved as what it is.
 
-Once [COMPONENTS.md](COMPONENTS.md) tier 1 is in, the handle reads are reflected reads of
-`Mesh3d` and `MeshMaterial3d` rather than exports of their own.
+[COMPONENTS.md](COMPONENTS.md) tier 1 reads `Mesh3d` and `MeshMaterial3d` only as their type
+names, because a handle has no JSON form. Once it maps a handle to `AssetHandle`, the handle reads
+are reflected reads rather than exports of their own.
 
 ## 2. One preview renderer
 

@@ -108,7 +108,14 @@ internal static class ConsoleWorldCommands
 
             foreach (var field in schema.Fields)
             {
-                rows.Add($"{schema.Name}.{field.Name} = {Show(field.Read(world, entity))}");
+                var value = field.Read(world, entity);
+
+                // A row shown only under a condition reads nothing while the condition fails, as
+                // the fields of an enum variant other than the chosen one do. Listing every such
+                // row as "none" would bury the few that hold something.
+                if (value is null && field.Hints.Conditions.Count > 0) continue;
+
+                rows.Add($"{schema.Name}.{field.Name} = {Shortened(Show(value))}");
             }
         }
 
@@ -117,8 +124,17 @@ internal static class ConsoleWorldCommands
 
     /// <summary>Changes one field on one entity.</summary>
     /// <remarks>
+    /// <para>
     /// The value is read into whatever the field already holds, so a number goes in as a number and
     /// a name of an enum goes in as that enum. Three numbers separated by commas make a vector.
+    /// </para>
+    /// <para>
+    /// The component is the longest name on the entity that the argument starts with, and the rest
+    /// is the field. Splitting at the last dot instead would break a field inside a nested struct,
+    /// whose name has dots of its own (<c>PointLight.color.Srgba.red</c>), and a component named
+    /// by its full path, whose name has none to split at. Bevy names fields in lower case and C# in
+    /// Pascal case, so a field that does not match exactly is matched ignoring case.
+    /// </para>
     /// </remarks>
     [Command("entity.set", "Changes a field: entity.set <name|#index> <Component.Field> <value>")]
     internal static string Set(string which, string field, string value)
@@ -127,22 +143,34 @@ internal static class ConsoleWorldCommands
 
         if (Find(world, which) is not { } entity) return Missing(which);
 
-        var dot = field.LastIndexOf('.');
-        if (dot <= 0 || dot == field.Length - 1)
+        var schema = world.ComponentsOf(entity)
+            .Select(ComponentSchemas.For)
+            .OfType<ComponentSchema>()
+            .Where(schema =>
+                field.Length > schema.Name.Length + 1
+                && field[schema.Name.Length] == '.'
+                && field.StartsWith(schema.Name, StringComparison.OrdinalIgnoreCase))
+            .MaxBy(schema => schema.Name.Length);
+
+        if (schema is null)
         {
-            ConsoleHost.Fail("BAD_ARGUMENT", $"'{field}' is not a Component.Field.");
-            return $"'{field}' is not a Component.Field";
+            if (!field.Contains('.'))
+            {
+                ConsoleHost.Fail("BAD_ARGUMENT", $"'{field}' is not a Component.Field.");
+                return $"'{field}' is not a Component.Field";
+            }
+
+            ConsoleHost.Fail("NO_SUCH_FIELD", $"{which} carries no {field}.");
+            return $"{which} carries no {field}";
         }
 
-        var componentName = field[..dot];
-        var fieldName = field[(dot + 1)..];
+        var fieldName = field[(schema.Name.Length + 1)..];
+        var found = schema.Field(fieldName)
+            ?? schema.Fields.FirstOrDefault(candidate =>
+                candidate.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase));
 
-        foreach (var id in world.ComponentsOf(entity))
+        if (found is not null)
         {
-            if (ComponentSchemas.For(id) is not { } schema) continue;
-            if (!schema.Name.Equals(componentName, StringComparison.OrdinalIgnoreCase)) continue;
-            if (schema.Field(fieldName) is not { } found) break;
-
             var was = found.Read(world, entity);
 
             if (Parse(value, was) is not { } parsed)
@@ -408,6 +436,20 @@ internal static class ConsoleWorldCommands
         if (dot >= 0 && dot < head.Length - 1) head = head[(dot + 1)..];
 
         return head;
+    }
+
+    /// <summary>
+    /// A value cut down to a line, for a value Bevy reflects as pages of JSON.
+    /// </summary>
+    /// <remarks>
+    /// A light's shadow cascades are a matrix per cascade per camera, and listing them whole would
+    /// push every other row off the screen. The whole value is still there to ask for through
+    /// <c>eval</c> and <c>GetReflected</c>.
+    /// </remarks>
+    private static string Shortened(string shown)
+    {
+        const int Line = 160;
+        return shown.Length <= Line ? shown : $"{shown[..Line]}... ({shown.Length} characters)";
     }
 
     /// <summary>A field's value as one line, in a form the setter reads back.</summary>

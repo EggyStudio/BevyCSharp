@@ -19,14 +19,24 @@ stops a stale bridge loading against new managed code.
 
 ## Content
 
-### Bevy's components are mirrored by hand
+### Bevy's components are reached by string
 
-Five of Bevy's components can be read and written from C# (`Transform`, `GlobalTransform` and the
-three visibility types), each through a mirror, a match arm and a layout export written by hand.
-Cameras, lights, meshes and materials are set through exports of their own and mostly cannot be
-read back, and every other component is invisible to C# and to the editor.
-[COMPONENTS.md](COMPONENTS.md) reads Bevy's reflection instead, so every reflected component and
-every future one is reachable with no code per type.
+Every component Bevy reflects is read and written through Bevy's reflection, by its type path and
+JSON (`ctx.Ecs.GetReflected`, `SetReflected`), and has a schema built from Bevy's own description,
+so the inspector and `./bcs entity.get` and `entity.set` cover cameras, lights and the rest with no
+code per type. What [COMPONENTS.md](COMPONENTS.md) has left:
+
+- **A handle is shown, not used.** `Mesh3d` and `MeshMaterial3d` hold typed handles, which have no
+  JSON form, so a handle field reads as its type name. Mapping it to `AssetHandle` by type would
+  make it a field like any other.
+- **A path is checked when it is used.** A field Bevy renames fails at runtime with the reason
+  rather than at compile time. Typed wrappers generated from a checked-in copy of the registry are
+  tier 2.
+- **Bytes in place need a mirror.** Five components (`Transform`, `GlobalTransform` and the three
+  visibility types) are mirrored by hand, for systems that read them every frame. Generating
+  mirrors and their layout checks is tier 3.
+- **A color is four numbers.** `FieldKind` has no color, so a reflected `Color` is a variant choice
+  over rows of floats rather than a swatch.
 
 ### No collections in components
 
@@ -277,12 +287,12 @@ drag on a handle moves, turns or stretches what is selected. [EDITOR.md](EDITOR.
 language.
 
 - **Only what can be named is saved.** `assets/world.json` keeps every named entity's name, every
-  component with a schema, and where its mesh and material were loaded from. What it cannot write is
-  anything built in memory, since a set of numbers has no name, nor a camera's projection or a
-  light's settings, which are engine components with no schema and no path either.
-  `bevy_world_serialization` would write exactly those and can see no C# component at all, because
-  those are bytes registered at runtime with no Rust type behind them. A world asset worth the name
-  is both files, or one format holding both halves.
+  C# component and mirrored Bevy component, and where its mesh and material were loaded from. What
+  it cannot write is anything built in memory, since a set of numbers has no name, nor a camera's
+  projection or a light's settings. Those have reflected schemas, and the inspector edits them, but
+  this file writes every value as text and loads by writing over entities code already made, which
+  neither an enum carrying data nor a camera code did not make survives. The scene format in
+  [SCENES.md](SCENES.md) writes them.
 - **One preview, not a thumbnail each.** An image tile shows itself, and a selected model is drawn
   by a camera of its own into a render target beside the tiles, framed by its bounds and kept on a
   render layer nothing else is on. One scene rather than one per tile, because a camera drawing into
@@ -293,8 +303,8 @@ language.
   not hand it to a second mesh, because a handle read back from an entity is a path rather than a
   handle.
 - **A mesh and a material are shown by where they came from.** They are Bevy components holding
-  typed handles, so they have no schema and the panel draws them as their own section, reading the
-  asset path and offering the files that suit. What it cannot do is name a part of a file other
+  typed handles, which have no JSON form, so the panel leaves their reflected schemas out and draws
+  them as their own section, reading the asset path and offering the files that suit. What it cannot do is name a part of a file other
   than the first, since a glTF holds many meshes and nothing here can list them without loading it,
   so the picker takes `Mesh0/Primitive0` and a file with several needs the label written by hand.
 - **The hierarchy names what it can see and the stats panel counts it.** Both go through
@@ -302,7 +312,7 @@ language.
   Neither can see a component the bridge does not name, so an entity whose components are all
   engine-side reads as plain. Naming more of them is a bridge job.
 - **The inspector draws a field as one arm of one switch**, told how by the attributes the
-  generator carried through, folds included. Editing several things at once writes to all of them
+  generator carried through, or by Bevy's reflection for an engine component, folds included. Editing several things at once writes to all of them
   and dims the name of a field they disagree about. What it cannot do is show a value none of them
   holds, so the box beside a dimmed name is the one entity's rather than blank.
 - **A selection is remembered by name**, so what a reloaded script respawns is found again. All of
@@ -365,18 +375,14 @@ not fit.
   itself as part of something else answers an empty string. A general answer needs Bevy's registry
   to carry every asset type's name, which it does not.
 
-### Components Bevy owns
+### Components Bevy owns, by id
 
-`bcs_component_id_of` resolves nine names by hand: `Transform`, `GlobalTransform`, `ChildOf`,
-`Children`, `Visibility`, `InheritedVisibility`, `ViewVisibility`, `WorldInstance` and
-`Interaction`. Anything else is unreachable. A general lookup is not possible through the type
-registry alone, since the managed side also needs a byte-compatible mirror, so this stays a curated
-list that grows as mirrors are written.
-
-Each candidate is blocked on being mirrorable rather than on the lookup. `Name` holds a `String`,
-and the render components (`Camera`, `PointLight`, `DirectionalLight`, `Mesh3d`, `MeshMaterial3d`)
-hold typed asset handles or projection data that raw bytes cannot represent. Those need named
-operations of the kind `Render` provides, or name-only handles if filtering on them is enough.
+`bcs_component_id_of` resolves the short names of the mirrored and name-only components by hand,
+and any other component Bevy reflects by its full type path through the registry. So any reflected
+component can be filtered on, counted and removed by id. Reading its bytes in place still needs a
+mirror, which only a type of plain numbers can have. `Name` holds a `String`, and the render
+components (`Camera`, `PointLight`, `DirectionalLight`, `Mesh3d`, `MeshMaterial3d`) hold handles
+or projection data, so those stay on reflection.
 
 ### Physics
 

@@ -66,6 +66,14 @@ public static class EditorWorld
             {
                 if (ComponentSchemas.For(id) is not { } schema) continue;
 
+                // Bevy's reflected components are left to the engine. This file writes every value
+                // through ToString and reads it back as a number, a flag or text, which an enum
+                // that carries data or a value shown as JSON does not survive, and loading writes
+                // over entities rather than spawning them, so a camera's settings would land on
+                // whatever camera code had already made. The scene format replaces this file and
+                // writes them properly.
+                if (schema.Origin == SchemaOrigin.Reflected) continue;
+
                 var fields = new JsonObject();
                 foreach (var field in schema.Fields)
                 {

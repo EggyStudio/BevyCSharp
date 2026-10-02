@@ -841,7 +841,13 @@ pub unsafe extern "C" fn bcs_component_id_of(name: *const core::ffi::c_char) -> 
                 "Atmosphere" => {
                     world.register_component::<bevy::light::atmosphere::Atmosphere>()
                 }
-                _ => return status::NO_COMPONENT,
+                // Anything else is looked up by its full type path in Bevy's registry, so every
+                // reflected component resolves without an arm here. The arms above stay, because
+                // the mirrors name their components by short name.
+                path => match crate::reflected::component_id(world, path) {
+                    Some(id) => id,
+                    None => return status::NO_COMPONENT,
+                },
             };
             id.index() as i32
         })

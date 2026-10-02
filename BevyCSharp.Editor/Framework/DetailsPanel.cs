@@ -100,7 +100,7 @@ public static class DetailsPanel
             if (EditorEntity.IsDerived(ctx.Ecs, id)) continue;
             if (ComponentSchemas.For(id) is not { } schema) continue;
             if (schema.Fields.Count == 0) continue;
-            if (Elsewhere.Contains(schema.Name)) continue;
+            if (Elsewhere.Contains(Unparameterized(schema.Name))) continue;
 
             Component(ctx, entity, schema);
         }
@@ -140,8 +140,19 @@ public static class DetailsPanel
     /// where things are shown and hidden while looking at the list of them. A card here as well
     /// would be a second place to set one value, and the list is the better of the two. It is
     /// still on the list of what can be added, so an entity that has no eye can be given one.
+    /// The mesh and the material an entity is drawn with are shown under "Drawn with", by the file
+    /// each came from, which says more than the handle Bevy's reflection would show.
     /// </remarks>
-    private static readonly HashSet<string> Elsewhere = ["Visibility"];
+    private static readonly HashSet<string> Elsewhere = ["Visibility", "Mesh3d", "MeshMaterial3d"];
+
+    /// <summary>A component's name without its type arguments.</summary>
+    /// <remarks>
+    /// A material component is generic over the material, so Bevy calls it
+    /// <c>MeshMaterial3d&lt;StandardMaterial&gt;</c>, and a shader material another name again. What
+    /// is left to "Drawn with" is every one of them.
+    /// </remarks>
+    private static string Unparameterized(string name) =>
+        name.IndexOf('<') is var open and > 0 ? name[..open] : name;
 
     /// <summary>One component, as a card with its fields in it.</summary>
     /// <remarks>
@@ -618,6 +629,11 @@ public static class DetailsPanel
         {
             if (!schema.CanAdd || carried.Contains(schema.Name)) continue;
 
+            // What the engine works out for itself is not something to put on by hand, and Bevy
+            // reflects a great deal of it.
+            if (schema.Origin == SchemaOrigin.Reflected && EditorEntity.IsDerived(ctx.Ecs, schema.Id))
+                continue;
+
             var adding = schema;
             rows.Add(new PickerItem(schema.Name, EditorIcons.Data, picked => EditorEntity.Carry(picked.Ecs, entity, adding)));
         }
@@ -647,8 +663,10 @@ public static class DetailsPanel
 
             // Something of this project's own with no fields to edit. Not the engine's, because
             // a mesh, a material and a visibility are on everything that is drawn, so naming them
-            // says nothing about the thing being looked at and crowds out what does.
-            if (schema is null) continue;
+            // says nothing about the thing being looked at and crowds out what does. Bevy's marker
+            // components are reflected and so have a schema with no fields, which is why the
+            // origin is asked rather than whether there is a schema.
+            if (schema is not { Origin: SchemaOrigin.Declared }) continue;
             if (schema.Fields.Count > 0) continue;
 
             var label = schema.Name;
