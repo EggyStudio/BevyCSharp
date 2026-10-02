@@ -2,8 +2,8 @@
 
 How every component Bevy has becomes usable from C# without a mirror written by hand, how a
 component holds a list or a dictionary, and how data kept in a file of its own (Unity's
-ScriptableObject) is declared, referred to and edited. Tier 1 of §1 is built, and the rest of this
-file is the design, in the order it can be built. [SCENES.md](SCENES.md) covers how all of it is written to a
+ScriptableObject) is declared, referred to and edited. Tiers 1 and 2 of §1 are built, and the rest
+of this file is the design, in the order it can be built. [SCENES.md](SCENES.md) covers how all of it is written to a
 file, and [ASSETS.md](ASSETS.md) how meshes, materials and textures are seen and picked.
 
 ## What exists
@@ -61,29 +61,38 @@ to keep mirrors only where their speed matters.
   from the type's default.
 - **Reasons.** Every failure leaves a sentence for `bcs_reflect_error`, so a path that leads nowhere
   says where it stopped.
+- **Handles as asset keys.** A handle has no JSON form, so `bcs_reflect_get_asset` turns one into
+  the key the bridge's asset table knows it by, through the `ReflectHandle` Bevy registers on every
+  `Handle<A>`, and `bcs_reflect_set_asset` retypes a key back into the field's own handle type,
+  refusing an asset of another kind. A read finds the slot already holding the asset, so a field
+  read every frame takes no slot of its own. The description names each handle's asset kind with
+  the same list `AssetServer.Load` takes.
+- **Documentation in the editor.** The editor profile turns on `reflect_documentation`, so the
+  description carries Bevy's doc comment for every field and the inspector shows its first
+  paragraph as the row's tooltip. A game's profile leaves it off, since nobody reads a tooltip in a
+  shipped game and the comments would be carried in its library.
 - **The C# surface** is `EcsWorld.GetReflected`, `SetReflected`, `GetVariant`, `SetVariant`,
-  `InsertReflected` and `RemoveReflected`, naming a component by its full type path.
+  `GetReflectedAsset`, `SetReflectedAsset`, `InsertReflected` and `RemoveReflected`, naming a
+  component by its full type path.
 - **Schemas from the description** (`BevyCSharp/Ecs/ReflectedSchemas.cs`). `ComponentSchemas`
   builds a `ComponentSchema` for each reflected component the first time it is asked inside a
   system, and drops them when a new app starts, since ids belong to a world. A mirrored component
   keeps its hand-written schema. A nested struct is taken apart into rows in a fold, as the
   generator does it, and an enum that carries data is a row choosing the variant, with each
   variant's fields as rows shown only while it is chosen, through the same `FieldCondition` a
-  `[ShowIf]` produces. A field with no editor (a string, a list, a handle) is a read-only row
-  showing its JSON. So the editor and `./bcs entity.get` and `entity.set` cover every reflected
+  `[ShowIf]` produces. A handle is an asset field picked from the files of its kind, as a C#
+  `AssetHandle` field is. A field with no editor (a string, a list) is a read-only row showing its
+  JSON. So the editor and `./bcs entity.get` and `entity.set` cover every reflected
   component with no code per type, and `ComponentSchema.Origin` tells them apart from a project's
   own.
 - **The registry in every profile.** `reflect_auto_register` is in the headless profile, so a
   headless run and the test suite see the same types a window does.
 
 It costs a serialization a call, which suits the inspector, the CLI and a script setting a light
-once. A system reading a thousand entities a frame uses tier 3. What tier 1 does not do yet:
+once. A system reading a thousand entities a frame uses tier 3. What tier 1 does not do:
 
-- **A handle reads as JSON or as its type name.** `Mesh3d` and `MeshMaterial3d` hold a typed
-  handle, which has no JSON form, so the inspector leaves both to "Drawn with". Mapping a handle to
-  the bridge's `AssetHandle` by its type would make it a field like any other.
-- **No documentation.** `reflect_documentation` is not turned on, so a reflected field has no
-  tooltip. Turning it on carries every doc comment Bevy has into the binary.
+- **A handle of a kind the bridge does not load is only shown.** Its kind has no name in the list
+  `AssetServer.Load` takes, so there are no files to offer for it.
 - **A color is four numbers.** `FieldKind` has no color, so a `Color` is a variant choice over rows
   of floats rather than a swatch, until [SCENES.md](SCENES.md) §4 adds the kind.
 
@@ -92,15 +101,27 @@ once. A system reading a thousand entities a frame uses tier 3. What tier 1 does
 Reading a string path at runtime is easy to get subtly wrong, and a rename in Bevy turns into a
 silent failure rather than a compile error.
 
-- **A checked-in schema.** `./bcs schema dump` writes the registry to
-  `BevyCSharp/Generated/bevy-schema.json`, and the file is committed. It changes when Bevy is
-  upgraded, and its diff is the list of what Bevy changed in its components.
-- **Generated wrappers.** The source generator reads the file and emits a typed handle per
-  component, such as `PointLightRef` with `Intensity`, `Range` and `Color` properties over tier 1,
-  and an `ctx.Ecs.Get<PointLightRef>(entity)` that finds it. A field Bevy renamed is then a compile
-  error in the code that used it.
+- **A checked-in description.** `./bcs command schema.dump <path>`
+  (`BevyCSharp/Diagnostics/ConsoleSchemaCommands.cs`) writes every reflected component and the
+  fields a wrapper can type to `BevyCSharp/Generated/bevy-components.tsv`, and the file is
+  committed. It is written from an editor build, the profile that reflects the most, and again
+  whenever Bevy is upgraded ([BUILDING.md](BUILDING.md)), and its diff is the list of what Bevy
+  changed in its components. It is sorted tab-separated lines rather than JSON, because the
+  generator runs inside the compiler on netstandard2.0, where a JSON reader would have to ship with
+  the analyzer, and because a line per field diffs as exactly the fields that changed. The fields
+  come from the same schemas the inspector draws, so a wrapper and a row name everything alike.
+- **Generated wrappers.** `BevyCSharp.Generator/ReflectedGenerator.cs` reads the file, which only
+  the library names as an additional file, and emits `Bevy.Reflected.PointLightRef` and the rest:
+  a readonly struct over an entity with a typed property per field (`float Intensity`,
+  `bool ShadowMapsEnabled`, a nested enum for an enum's variants, `AssetHandle` for a handle) and a
+  `Remove()`. `ctx.Ecs.Get<PointLightRef>(entity)` returns one, or null when the entity has no
+  light, and `ctx.Ecs.Insert<PointLightRef>(entity)` adds the component at its default. A field
+  Bevy renamed is then a compile error in the code that used it.
 - **No reflection on this side.** The wrappers are generated code, so trimming and AOT are
   unaffected, as for every other schema the generator emits.
+- **What a wrapper leaves out.** A field shown only as JSON, and the fields inside an enum's
+  variants, which are there only while that variant is held, have no property. Those stay on the
+  string paths of tier 1.
 
 ### Tier 3: byte mirrors, generated
 
@@ -212,14 +233,9 @@ A `DataRef<T>` field in the inspector is a row with the asset's name, a fold arr
 
 Each step is usable on its own and tested before the next.
 
-1. **The rest of tier 1**: handles mapped to `AssetHandle`, and documentation as tooltips. Tested
-   by reading an entity's mesh through its `Mesh3d` field and getting the handle `Render.SetMesh`
-   was given.
-2. **Tier 2**: `./bcs schema dump`, the checked-in file, and the generated wrappers. Tested by a
-   wrapper and the hand mirror agreeing on a `Transform`.
-3. **Collections**: `InlineList`, `EcsList` and `EcsMap`, the remove hook, the kinds and the
+1. **Collections**: `InlineList`, `EcsList` and `EcsMap`, the remove hook, the kinds and the
    drawers. Tested by a list freed on despawn, with the store's count back where it started.
-4. **Data assets** with the drawer. Tested by a round trip through the file, an edit through the
+2. **Data assets** with the drawer. Tested by a round trip through the file, an edit through the
    drawer undone, and a reference that survives the file being renamed.
-5. **Tier 3**: generated mirrors and layout probes replacing the hand ones, with the existing
+3. **Tier 3**: generated mirrors and layout probes replacing the hand ones, with the existing
    mirror tests passing unchanged.

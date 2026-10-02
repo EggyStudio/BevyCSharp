@@ -647,6 +647,28 @@ ctx.Ecs.SetVariant(lamp, Light, ".color", "LinearRgba");      // an enum, by var
 ctx.Ecs.RemoveReflected(lamp, Light);
 ```
 
+A handle inside a component, such as the image a sprite draws, has no JSON form and crosses as an
+`AssetHandle` instead, through `GetReflectedAsset` and `SetReflectedAsset`. Reading one the program
+already holds returns that same handle.
+
+The same components have typed wrappers in `Bevy.Reflected`, generated from a description of
+Bevy's components checked in beside the library, with a property per field:
+
+```csharp
+using Bevy.Reflected;
+
+var light = ctx.Ecs.Insert<PointLightRef>(lamp);
+light.Intensity = 5000f;
+light.ShadowMapsEnabled = true;
+
+if (ctx.Ecs.Get<PointLightRef>(lamp) is { } found)
+    Console.WriteLine($"range {found.Range}");
+```
+
+A wrapper reads and writes through the same reflection, so it costs what a string path costs. What
+it adds is the compiler, because a field Bevy renames stops compiling once the description is
+regenerated after an upgrade, rather than failing on the day the line runs.
+
 That reaches nearly everything Bevy has (cameras, lights, projections, the hierarchy), and a
 component a later Bevy or a plugin adds is reachable the day it exists, with nothing written on
 this side. Inserting goes through Bevy's own insert, so a light arrives with the transform and
@@ -2832,7 +2854,9 @@ foreach (var id in ctx.Ecs.ComponentsOf(entity))
 A field whose type is a struct with fields of its own is taken apart, so `Front.Held.At` is a row
 called `At`, in a fold called `Held`, in one called `Front`. Writing one reads the component,
 changes that part and writes it back, so a part written does not wipe its neighbors. Bevy's own
-components are the curated list, because each needs a byte-compatible mirror written by hand.
+components have schemas too, described from Bevy's reflection once the app is running, so the
+same loop lists a light's fields beside a behavior's, and `ComponentSchema.Origin` says which is
+which.
 
 **A field says how it is drawn**, in attributes the generator reads at compile time, so nothing
 reflects at runtime:
@@ -3015,10 +3039,10 @@ run against a real Bevy app. Known gaps:
   are edited in the inspector but not written to the file, so the file is a set of edits over a
   scene rather than the scene. [.github/SCENES.md](.github/SCENES.md) designs the scene format that replaces it.
 - Five of Bevy's components are mirrored by hand, and the rest are reached through Bevy's
-  reflection by type path and JSON, which is checked at runtime rather than compiled, and a handle
-  inside one reads as its type name. A component cannot hold a list or a dictionary.
-  [.github/COMPONENTS.md](.github/COMPONENTS.md) plans typed wrappers, generated mirrors and a
-  managed store for collections that is freed with the entity.
+  reflection, by type path and JSON or through generated typed wrappers, at the cost of a
+  serialization a call. A component cannot hold a list or a dictionary.
+  [.github/COMPONENTS.md](.github/COMPONENTS.md) plans generated mirrors and a managed store for
+  collections that is freed with the entity.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
 - A cubemap comes from a file, as six square faces stacked into a column, or from a reflection probe

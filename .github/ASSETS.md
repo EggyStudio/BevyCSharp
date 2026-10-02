@@ -14,9 +14,9 @@ components in general and [SCENES.md](SCENES.md) how all of it is saved.
   files, because there are none.
 - **Four primitives** (`MeshShape`: cuboid, sphere, plane, capsule) are made with
   `Render.CreateMesh`, and a material with `Render.CreateMaterial(MaterialSettings)`.
-- **Little comes back.** `Render.TryReadMesh(handle)` returns a mesh's triangles and
-  `Render.TryGetBounds(entity)` its bounds, but nothing goes from an entity to its mesh or material
-  handle, and a material's settings cannot be read at all.
+- **Little comes back.** `Render.TryReadMesh(handle)` returns a mesh's triangles,
+  `Render.TryGetBounds(entity)` its bounds, and `EcsWorld.GetReflectedAsset` the mesh or material
+  handle an entity holds, but a material's settings cannot be read at all.
 - **The asset browser** (`AssetsTab`) shows 96 pixel tiles, an image as itself and everything else
   as an icon for its kind, with no search.
 - **One preview** (`EditorPreview`) draws a selected glTF file into a 256 pixel image, with a camera
@@ -54,7 +54,6 @@ An entity that draws shows two cards in the details, in the place "Drawn with" h
     unlit, and the texture slots as small thumbnails, each a picker filtered to textures.
   - **A shader material** keeps the parameter rows it has today.
 - **What the bridge adds** (an ABI bump):
-  - `bcs_render_mesh_of(entity)` and `bcs_render_material_of(entity)`, the handles an entity holds.
   - `bcs_render_mesh_info(handle)`, the counts, attributes and index format, without copying the
     vertices across.
   - `bcs_render_material_read(handle)`, a `MaterialSettings` back from a `StandardMaterial`.
@@ -63,9 +62,9 @@ An entity that draws shows two cards in the details, in the place "Drawn with" h
     circle, annulus, rectangle, triangle, tetrahedron, with the parameters a primitive was made
     from kept beside its handle, so it can be edited and saved as what it is.
 
-[COMPONENTS.md](COMPONENTS.md) tier 1 reads `Mesh3d` and `MeshMaterial3d` only as their type
-names, because a handle has no JSON form. Once it maps a handle to `AssetHandle`, the handle reads
-are reflected reads rather than exports of their own.
+The handles an entity holds are reflected reads of `Mesh3d` and `MeshMaterial3d`
+(`EcsWorld.GetReflectedAsset`, [COMPONENTS.md](COMPONENTS.md) tier 1), which return the key the
+program already holds, so they need no exports of their own.
 
 ## 2. One preview renderer
 
@@ -137,8 +136,8 @@ no file, as `Render.CreateMesh` makes it today. Godot's answer fits both, and is
 
 Each step is usable on its own and tested before the next.
 
-1. **What the bridge reads:** `mesh_of`, `material_of`, `mesh_info`, `material_read`, and the
-   primitives with their parameters. Tested by `mesh_info` on a cuboid (24 vertices, 12 triangles)
+1. **What the bridge reads:** `mesh_info`, `material_read`, and the primitives with their
+   parameters. Tested by `mesh_info` on a cuboid (24 vertices, 12 triangles)
    and a material read back as it was made.
 2. **`PreviewRenderer` and the two cards.** Tested by an offscreen picture run where a preview
    target holds something other than its clear color.

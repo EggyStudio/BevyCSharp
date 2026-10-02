@@ -151,6 +151,19 @@ impl AssetHandles {
         true
     }
 
+    /// The key of a slot already holding the asset `handle` points at, if any.
+    ///
+    /// A scan rather than an index kept beside the slots, because it is asked only when a handle
+    /// is read back off a component, a few times a frame at most, and an index would have to be
+    /// kept right through every insert and release for that.
+    fn find(&self, handle: &UntypedHandle) -> Option<i32> {
+        let id = handle.id();
+        self.slots.iter().enumerate().find_map(|(index, slot)| {
+            let held = slot.handle.as_ref()?;
+            (held.id() == id).then(|| pack(index as u32, slot.generation))
+        })
+    }
+
     /// How many handles C# is holding.
     fn live(&self) -> i32 {
         self.slots.iter().filter(|s| s.handle.is_some()).count() as i32
@@ -163,6 +176,20 @@ impl AssetHandles {
 /// layout.
 pub(crate) fn insert_handle(world: &mut World, handle: UntypedHandle) -> i32 {
     world.get_resource_or_init::<AssetHandles>().insert(handle)
+}
+
+/// The key C# knows an asset by, reusing a slot that already holds it.
+///
+/// For a handle read back off a component rather than one C# asked for. Reading the same field
+/// every frame would otherwise take a slot every frame. A handle the table did not hold yet takes
+/// one slot and keeps the asset alive until C# releases the key, which bounds what reading costs
+/// at one slot per asset ever read.
+pub(crate) fn key_for(world: &mut World, handle: UntypedHandle) -> i32 {
+    let mut handles = world.get_resource_or_init::<AssetHandles>();
+    match handles.find(&handle) {
+        Some(key) => key,
+        None => handles.insert(handle),
+    }
 }
 
 /// Clones the handle behind a key, or returns `None` if the key names nothing.
@@ -541,6 +568,20 @@ mod tests {
         // handle is a caller that did not check rather than a slot to look up.
         assert_eq!(None, unpack(-1));
         assert_eq!(None, unpack(status::NO_COMPONENT));
+    }
+
+    #[test]
+    fn a_handle_read_twice_is_given_the_key_it_already_has() {
+        let mut app = asset_app();
+        init_asset_once::<Mesh>(&mut app);
+        let handle = app.world_mut().resource_mut::<Assets<Mesh>>().add(a_mesh()).untyped();
+
+        let first = key_for(app.world_mut(), handle.clone());
+        let second = key_for(app.world_mut(), handle);
+
+        assert!(first >= 0);
+        assert_eq!(first, second, "a second read took a slot of its own");
+        assert_eq!(1, app.world().resource::<AssetHandles>().live());
     }
 
     #[test]

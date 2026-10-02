@@ -26,6 +26,10 @@ editor = [
     # Clicking a mesh to select it, which is the other half of what a hierarchy list does.
     "bevy/bevy_picking",
     "bevy/mesh_picking",
+    # Bevy's doc comments, kept with its reflected types, so the inspector can show what a field of
+    # a light or a camera is for. Here rather than in the render profile because a game shipping on
+    # that profile has nobody to show them to and would carry every comment in its library.
+    "bevy/reflect_documentation",
 ]
 
 # Bevy's meshlets, on top of whichever profile is built: meshes cut into clusters that the GPU

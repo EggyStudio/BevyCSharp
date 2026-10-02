@@ -122,6 +122,52 @@ public sealed unsafe partial class EcsWorld
     }
 
     /// <summary>
+    /// Reads an asset handle inside one of Bevy's components, such as the image a material or a
+    /// sprite draws with.
+    /// </summary>
+    /// <returns>The asset, or <see langword="null"/> when the entity does not carry the
+    /// component.</returns>
+    /// <remarks>
+    /// A handle has no JSON form, because what it holds is a reference to an asset rather than a
+    /// value, so it is read here rather than through <see cref="GetReflected"/>. The handle comes
+    /// back as the same kind of <see cref="AssetHandle"/> <see cref="AssetServer.Load"/> returns,
+    /// and reading one the program already holds returns that one, so reading a field every frame
+    /// costs nothing to keep. A handle the program never held is kept from then on, until
+    /// <see cref="AssetServer.Release"/> lets it go.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The path does not lead to a handle.</exception>
+    public AssetHandle? GetReflectedAsset(Entity entity, string typePath, string path)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(typePath);
+
+        var key = Native.bcs_reflect_get_asset(entity.Bits, typePath, path ?? string.Empty);
+        if (key == NativeStatus.NotPresent) return null;
+
+        ReflectedCheck(key, $"Reading the asset at {Described(typePath, path)} on {entity}");
+        return new AssetHandle(key);
+    }
+
+    /// <summary>
+    /// Points an asset handle inside one of Bevy's components at another asset.
+    /// </summary>
+    /// <remarks>
+    /// The asset has to be of the kind the field holds, so a mesh offered to an image is refused
+    /// rather than drawn as garbage.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// The path does not lead to a handle, the asset is of another kind, or the handle names no
+    /// asset.
+    /// </exception>
+    public void SetReflectedAsset(Entity entity, string typePath, string path, AssetHandle asset)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(typePath);
+
+        ReflectedCheck(
+            Native.bcs_reflect_set_asset(entity.Bits, typePath, path ?? string.Empty, asset.Key),
+            $"Writing the asset at {Described(typePath, path)} on {entity}");
+    }
+
+    /// <summary>
     /// Puts one of Bevy's components on an entity, from JSON or at its default.
     /// </summary>
     /// <param name="entity">The entity to add it to.</param>
@@ -162,6 +208,39 @@ public sealed unsafe partial class EcsWorld
 
         ReflectedCheck(status, $"Removing {typePath} from {entity}");
         return true;
+    }
+
+    /// <summary>
+    /// A typed wrapper over one of Bevy's components on an entity, or <see langword="null"/> when
+    /// the entity does not carry it.
+    /// </summary>
+    /// <typeparam name="T">The wrapper, such as <c>Bevy.Reflected.PointLightRef</c>.</typeparam>
+    /// <remarks>
+    /// The wrapper reads and writes the component in place through Bevy's reflection, with a
+    /// property per field, so <c>ctx.Ecs.Get&lt;PointLightRef&gt;(lamp)?.Intensity</c> is the light's
+    /// intensity as it is now.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// This build of the bridge has no such component, as a headless build has no light.
+    /// </exception>
+    public T? Get<T>(Entity entity) where T : struct, IReflectedComponent<T>
+    {
+        var id = NativeComponents.Resolve(T.TypePath, 0);
+        return HasById(entity, id) ? T.Create(this, entity) : null;
+    }
+
+    /// <summary>
+    /// Puts one of Bevy's components on an entity, from JSON or at its default, and returns a typed
+    /// wrapper over it.
+    /// </summary>
+    /// <typeparam name="T">The wrapper, such as <c>Bevy.Reflected.PointLightRef</c>.</typeparam>
+    /// <param name="entity">The entity to add it to.</param>
+    /// <param name="json">The whole component as JSON, or <see langword="null"/> for its default.</param>
+    /// <exception cref="BevyNativeException">As <see cref="InsertReflected"/>.</exception>
+    public T Insert<T>(Entity entity, string? json = null) where T : struct, IReflectedComponent<T>
+    {
+        InsertReflected(entity, T.TypePath, json);
+        return T.Create(this, entity);
     }
 
     /// <summary>Describes every reflected component and the types its fields reach, as JSON.</summary>

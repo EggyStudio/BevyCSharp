@@ -1,6 +1,4 @@
-using System.Buffers;
 using System.Globalization;
-using System.Text;
 using System.Text.Json;
 using Bevy.Interop;
 
@@ -118,6 +116,7 @@ internal static class ReflectedSchemas
         /// <param name="Fold">The fold it sits in, with slashes between levels.</param>
         /// <param name="Shown">What has to hold for it to be shown.</param>
         /// <param name="Within">The enum variants it belongs to, by the enum's reflect path.</param>
+        /// <param name="Docs">Bevy's documentation of the field, which an editor build carries.</param>
         /// <param name="Depth">How many structs deep it is.</param>
         private sealed record At(
             string Name,
@@ -125,11 +124,12 @@ internal static class ReflectedSchemas
             string? Fold,
             FieldCondition[] Shown,
             Variant[] Within,
+            string? Docs,
             int Depth);
 
         /// <summary>Adds a row for each field of the type at <paramref name="type"/>.</summary>
         public void Members(string type) =>
-            Members(type, new At(string.Empty, string.Empty, null, [], [], 0));
+            Members(type, new At(string.Empty, string.Empty, null, [], [], null, 0));
 
         private void Members(string type, At at)
         {
@@ -146,6 +146,7 @@ internal static class ReflectedSchemas
                     {
                         Name = Join(at.Name, name),
                         Reflect = at.Reflect + "." + name,
+                        Docs = Documented(member),
                     });
             }
         }
@@ -163,6 +164,19 @@ internal static class ReflectedSchemas
             }
 
             var described = types.TryGetProperty(type, out var found) ? found : default;
+
+            // A handle is a reference to an asset, picked from the files of its kind. One whose
+            // kind the bridge cannot load has no files to offer, so it is only shown.
+            if (described.ValueKind == JsonValueKind.Object
+                && described.TryGetProperty("asset", out var asset))
+            {
+                var held = asset.GetString();
+                fields.Add(held is { Length: > 0 }
+                    ? Handle(at, label, Short(type), held)
+                    : Opaque(at, label, Short(type)));
+                return;
+            }
+
             var registered = described.ValueKind == JsonValueKind.Object
                 && described.GetProperty("registered").GetBoolean();
             var kind = registered ? described.GetProperty("kind").GetString() : null;
@@ -242,6 +256,7 @@ internal static class ReflectedSchemas
                     {
                         Name = Join(within.Name, field),
                         Reflect = at.Reflect + "." + field,
+                        Docs = Documented(member),
                     });
                 }
             }
@@ -285,9 +300,31 @@ internal static class ReflectedSchemas
                 ? described.GetProperty("short").GetString() ?? type
                 : type;
 
-        /// <summary>The hints every reflected row carries: its label, its fold and its conditions.</summary>
+        /// <summary>
+        /// The hints every reflected row carries: its label, its tooltip, its fold and its
+        /// conditions.
+        /// </summary>
         private static FieldHints Hints(At at, string label) =>
-            new(Label: label, Foldout: at.Fold, Conditions: at.Shown);
+            new(Label: label, Tooltip: at.Docs, Foldout: at.Fold, Conditions: at.Shown);
+
+        /// <summary>
+        /// The first paragraph of a field's documentation, or nothing when the build carries none.
+        /// </summary>
+        /// <remarks>
+        /// The first paragraph says what the field is, and the rest of Bevy's comment is usually
+        /// examples and links, which a tooltip has no room for and cannot follow.
+        /// </remarks>
+        private static string? Documented(JsonElement member)
+        {
+            if (!member.TryGetProperty("docs", out var docs)) return null;
+
+            var text = docs.GetString()?.Trim();
+            if (string.IsNullOrEmpty(text)) return null;
+
+            var end = text.IndexOf("\n\n", StringComparison.Ordinal);
+            var first = end < 0 ? text : text[..end];
+            return string.Join(' ', first.Split('\n', StringSplitOptions.TrimEntries));
+        }
 
         // Each row's closures copy the component's path into a local, so a schema kept for the run
         // holds strings rather than the walk and the parsed document it points into.
@@ -305,7 +342,32 @@ internal static class ReflectedSchemas
                     : null,
                 (world, entity, value) => Holds(world, entity, owner, within)
                     && Write(world, entity, owner, path, kind, value),
-                hints: Hints(at, label));
+                hints: Hints(at, label))
+            {
+                ReflectPath = path,
+            };
+        }
+
+        /// <summary>A row holding an asset handle, picked from the files of its kind.</summary>
+        private ComponentField Handle(At at, string label, string type, string kind)
+        {
+            var (owner, path, within) = (component, at.Reflect, at.Within);
+            return new ComponentField(
+                at.Name,
+                FieldKind.Asset,
+                type,
+                (world, entity) => Holds(world, entity, owner, within)
+                    ? Attempted(() => world.GetReflectedAsset(entity, owner, path))
+                    : null,
+                // Nothing is not a value a handle can hold, since Bevy's handle has no empty state
+                // to write, so choosing "Nothing" in the picker is refused rather than faked.
+                (world, entity, value) => value is AssetHandle { IsValid: true } asset
+                    && Holds(world, entity, owner, within)
+                    && Sent(() => world.SetReflectedAsset(entity, owner, path, asset)),
+                hints: Hints(at, label) with { Asset = kind })
+            {
+                ReflectPath = path,
+            };
         }
 
         /// <summary>A row choosing one of an enum's variants by name.</summary>
@@ -322,7 +384,10 @@ internal static class ReflectedSchemas
                 (world, entity, value) => Holds(world, entity, owner, within)
                     && Sent(() => world.SetVariant(entity, owner, path, value.ToString()!)),
                 options,
-                Hints(at, label));
+                Hints(at, label))
+            {
+                ReflectPath = path,
+            };
         }
 
         /// <summary>A row showing a value the inspector has no editor for, as its JSON.</summary>
@@ -387,96 +452,21 @@ internal static class ReflectedSchemas
         EcsWorld world, Entity entity, string component, string path, FieldKind kind)
     {
         var json = Guarded(() => world.GetReflected(entity, component, path));
-        if (json is null) return null;
-
-        using var document = JsonDocument.Parse(json);
-        var value = document.RootElement;
-
-        // Bevy writes a non-finite float as null, which is the one place null means a value.
-        if (value.ValueKind == JsonValueKind.Null)
-            return kind is FieldKind.Double ? double.NaN : kind is FieldKind.Float ? float.NaN : null;
-
-        return kind switch
-        {
-            FieldKind.Float => value.GetSingle(),
-            FieldKind.Double => value.GetDouble(),
-            FieldKind.Bool => value.GetBoolean(),
-            // An int where it fits, which every drawer expects, and a long where a u64 does not.
-            FieldKind.Int => value.TryGetInt32(out var small) ? small : value.GetInt64(),
-            FieldKind.Vec3 => new Vec3(Part(value, 0, "x"), Part(value, 1, "y"), Part(value, 2, "z")),
-            FieldKind.Quat => new Quat(
-                Part(value, 0, "x"), Part(value, 1, "y"), Part(value, 2, "z"), Part(value, 3, "w")),
-            FieldKind.Entity => new Entity(value.GetUInt64()),
-            _ => json,
-        };
+        return json is null ? null : ReflectedValue.Decode(json, kind);
     }
-
-    /// <summary>One number of a vector, which glam writes as an array and reflection as an object.</summary>
-    /// <remarks>
-    /// glam's serde support is a feature of its own, and without it Bevy serializes a vector
-    /// through its reflected fields instead. Reading both keeps a build that differs in that one
-    /// feature from showing every vector as absent.
-    /// </remarks>
-    private static float Part(JsonElement value, int index, string name) =>
-        value.ValueKind == JsonValueKind.Array
-            ? value[index].GetSingle()
-            : value.GetProperty(name).GetSingle();
 
     /// <summary>
     /// Writes a value a tool handed over, reporting whether it landed.
     /// </summary>
     /// <remarks>
     /// The value is coerced first, as a generated setter does, because a slider hands a float field
-    /// a double and a text box hands it a string. JSON is written with <see cref="Utf8JsonWriter"/>,
-    /// which formats a number in the invariant culture and refuses one JSON cannot hold.
+    /// a double and a text box hands it a string.
     /// </remarks>
     private static bool Write(
         EcsWorld world, Entity entity, string component, string path, FieldKind kind, object value)
     {
-        var buffer = new ArrayBufferWriter<byte>(64);
-        using (var json = new Utf8JsonWriter(buffer))
-        {
-            switch (kind)
-            {
-                case FieldKind.Float when ComponentSchemas.TryCoerce<float>(value, out var number)
-                    && float.IsFinite(number):
-                    json.WriteNumberValue(number);
-                    break;
-                case FieldKind.Double when ComponentSchemas.TryCoerce<double>(value, out var number)
-                    && double.IsFinite(number):
-                    json.WriteNumberValue(number);
-                    break;
-                case FieldKind.Int when ComponentSchemas.TryCoerce<long>(value, out var whole):
-                    json.WriteNumberValue(whole);
-                    break;
-                case FieldKind.Bool when ComponentSchemas.TryCoerce<bool>(value, out var on):
-                    json.WriteBooleanValue(on);
-                    break;
-                case FieldKind.Vec3 when value is Vec3 v:
-                    json.WriteStartArray();
-                    json.WriteNumberValue(v.X);
-                    json.WriteNumberValue(v.Y);
-                    json.WriteNumberValue(v.Z);
-                    json.WriteEndArray();
-                    break;
-                case FieldKind.Quat when value is Quat q:
-                    json.WriteStartArray();
-                    json.WriteNumberValue(q.X);
-                    json.WriteNumberValue(q.Y);
-                    json.WriteNumberValue(q.Z);
-                    json.WriteNumberValue(q.W);
-                    json.WriteEndArray();
-                    break;
-                case FieldKind.Entity when value is Entity e:
-                    json.WriteNumberValue(e.Bits);
-                    break;
-                default:
-                    return false;
-            }
-        }
-
-        var text = Encoding.UTF8.GetString(buffer.WrittenSpan);
-        return Sent(() => world.SetReflected(entity, component, path, text));
+        var text = ReflectedValue.Encode(kind, value);
+        return text is not null && Sent(() => world.SetReflected(entity, component, path, text));
     }
 
     /// <summary>
@@ -488,6 +478,22 @@ internal static class ReflectedSchemas
     /// for <see cref="EcsWorld.GetReflected"/> to give to a caller who asks directly.
     /// </remarks>
     private static string? Guarded(Func<string?> read)
+    {
+        try
+        {
+            return read();
+        }
+        catch (BevyNativeException error) when (error.Status != NativeStatus.NoWorld)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Runs a read of a value, answering <see langword="null"/> where the bridge refused it, for
+    /// the reason <see cref="Guarded"/> gives.
+    /// </summary>
+    private static object? Attempted<T>(Func<T?> read) where T : struct
     {
         try
         {

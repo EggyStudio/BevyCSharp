@@ -262,6 +262,81 @@ public sealed class ReflectedComponentTests
         if (App.HasRenderer) Assert.True(ran);
     }
 
+    [Fact]
+    public void AMeshHandleIsReadAsTheKeyItWasGivenAndWrittenAsAnother()
+    {
+        using var harness = new EngineHarness(frames: 2);
+        var ran = false;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            if (!App.HasRenderer) return;
+
+            var entity = ctx.Ecs.Spawn();
+            var cube = Render.CreateMesh(MeshShape.Cuboid, 1f);
+            var ball = Render.CreateMesh(MeshShape.Sphere, 0.5f);
+            Render.SetMesh(ctx.Ecs, entity, cube);
+
+            var schema = ctx.Ecs.ComponentsOf(entity)
+                .Select(ComponentSchemas.For)
+                .Single(schema => schema?.Name == "Mesh3d")!;
+
+            // A newtype over a handle, so its one row is the handle, picked from meshes.
+            var mesh = Assert.Single(schema.Fields);
+            Assert.Equal(FieldKind.Asset, mesh.Kind);
+            Assert.Equal(AssetKind.Mesh, mesh.Hints.Asset);
+
+            // The key the program already holds comes back, rather than a second one for the same
+            // mesh, which would leave the table growing a slot a frame under an inspector.
+            Assert.Equal(cube, mesh.Read(ctx.Ecs, entity));
+            Assert.Equal(cube, mesh.Read(ctx.Ecs, entity));
+
+            Assert.True(mesh.Write(ctx.Ecs, entity, ball));
+            Assert.Equal(ball, ctx.Ecs.GetReflectedAsset(entity, schema.QualifiedName, ".0"));
+
+            // A handle has no empty state to write, and an image is not a mesh.
+            Assert.False(mesh.Write(ctx.Ecs, entity, AssetHandle.None));
+            var image = Render.CreateImage([255, 255, 255, 255], 1, 1);
+            Assert.False(mesh.Write(ctx.Ecs, entity, image));
+            Assert.Equal(ball, mesh.Read(ctx.Ecs, entity));
+            ran = true;
+        });
+
+        harness.Run();
+
+        if (App.HasRenderer) Assert.True(ran);
+    }
+
+    [Fact]
+    public void AnEditorBuildCarriesBevysDocumentationAsTooltips()
+    {
+        using var harness = new EngineHarness(frames: 2);
+        string? tooltip = "unread";
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            if (!App.HasRenderer) return;
+
+            tooltip = ComponentSchemas.For(PointLightPath)!.Field("intensity")!.Hints.Tooltip;
+        });
+
+        harness.Run();
+
+        if (!App.HasRenderer) return;
+
+        // Only the editor profile keeps Bevy's doc comments, so a game's library is no larger for
+        // them and its rows have no tooltip to show.
+        if (App.HasEditor)
+        {
+            Assert.False(string.IsNullOrWhiteSpace(tooltip));
+            Assert.DoesNotContain("\n", tooltip);
+        }
+        else
+        {
+            Assert.Null(tooltip);
+        }
+    }
+
     /// <summary>The numbers of a JSON array, read without a serializer.</summary>
     private static float[] Numbers(string? json) =>
         json!.Trim('[', ']')

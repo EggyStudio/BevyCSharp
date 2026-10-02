@@ -27,6 +27,7 @@ use core::any::TypeId;
 use core::cell::RefCell;
 use core::ffi::c_char;
 
+use bevy::asset::ReflectHandle;
 use bevy::ecs::component::ComponentId;
 use bevy::ecs::reflect::{AppTypeRegistry, ReflectComponent, ReflectFromWorld};
 use bevy::ecs::world::World;
@@ -170,6 +171,26 @@ pub(crate) fn component_id(world: &mut World, path: &str) -> Option<ComponentId>
 
 // -- The registry
 
+/// A field's or type's documentation, which only an editor build carries.
+///
+/// `docs()` exists only when `bevy_reflect` keeps doc comments, which the editor profile turns on
+/// and a game's profile leaves off, since a player has no tooltip to read them in and the comments
+/// would make every shipped library larger.
+#[cfg(feature = "editor")]
+macro_rules! docs {
+    ($described:expr) => {
+        $described.docs()
+    };
+}
+
+#[cfg(not(feature = "editor"))]
+macro_rules! docs {
+    ($described:expr) => {{
+        let _ = &$described;
+        None::<&'static str>
+    }};
+}
+
 /// Describes a type and everything its fields hold, once each, into `types`.
 ///
 /// The description is closed over what is reachable, so the managed side can flatten a nested
@@ -192,18 +213,34 @@ fn describe(registry: &TypeRegistry, info: &'static TypeInfo, types: &mut Map<St
         "default": registration.is_some_and(|r| r.data::<ReflectDefault>().is_some()),
     });
 
-    let mut field = |name: String, ty: &'static str, nested: Option<&'static TypeInfo>| {
+    if let Some(text) = docs!(info) {
+        entry["docs"] = Value::from(text);
+    }
+
+    // A handle names the kind of asset it holds, so the managed side can offer files of that kind.
+    // An asset type the bridge does not load gets an empty kind, which still says it is a handle.
+    if let Some(handle) = registration.and_then(|r| r.data::<ReflectHandle>()) {
+        entry["asset"] = Value::from(crate::events::kind_of(handle.asset_type_id()));
+    }
+
+    let mut field = |name: String,
+                     ty: &'static str,
+                     nested: Option<&'static TypeInfo>,
+                     text: Option<&'static str>| {
         if let Some(nested) = nested {
             describe(registry, nested, types);
         }
-        json!({ "name": name, "type": ty })
+        match text {
+            Some(text) => json!({ "name": name, "type": ty, "docs": text }),
+            None => json!({ "name": name, "type": ty }),
+        }
     };
 
     let kind = match info {
         TypeInfo::Struct(info) => {
             let fields: Vec<Value> = info
                 .iter()
-                .map(|f| field(f.name().to_owned(), f.type_path(), f.type_info()))
+                .map(|f| field(f.name().to_owned(), f.type_path(), f.type_info(), docs!(f)))
                 .collect();
             entry["fields"] = Value::Array(fields);
             "struct"
@@ -211,7 +248,7 @@ fn describe(registry: &TypeRegistry, info: &'static TypeInfo, types: &mut Map<St
         TypeInfo::TupleStruct(info) => {
             let fields: Vec<Value> = info
                 .iter()
-                .map(|f| field(f.index().to_string(), f.type_path(), f.type_info()))
+                .map(|f| field(f.index().to_string(), f.type_path(), f.type_info(), docs!(f)))
                 .collect();
             entry["fields"] = Value::Array(fields);
             "tuple_struct"
@@ -225,14 +262,20 @@ fn describe(registry: &TypeRegistry, info: &'static TypeInfo, types: &mut Map<St
                         "name": tuple.name(),
                         "kind": "tuple",
                         "fields": tuple.iter()
-                            .map(|f| field(f.index().to_string(), f.type_path(), f.type_info()))
+                            .map(|f| {
+                                let name = f.index().to_string();
+                                field(name, f.type_path(), f.type_info(), docs!(f))
+                            })
                             .collect::<Vec<_>>(),
                     }),
                     VariantInfo::Struct(named) => json!({
                         "name": named.name(),
                         "kind": "struct",
                         "fields": named.iter()
-                            .map(|f| field(f.name().to_owned(), f.type_path(), f.type_info()))
+                            .map(|f| {
+                                let name = f.name().to_owned();
+                                field(name, f.type_path(), f.type_info(), docs!(f))
+                            })
                             .collect::<Vec<_>>(),
                     }),
                 })
@@ -713,6 +756,141 @@ pub unsafe extern "C" fn bcs_reflect_remove(entity: u64, type_path: *const c_cha
     })
 }
 
+// -- Asset handles
+
+/// The `ReflectHandle` of the handle a field holds, which moves it in and out of the key table.
+fn handle_data<'r>(
+    registry: &'r TypeRegistry,
+    value: &dyn PartialReflect,
+    path: &str,
+) -> Result<&'r ReflectHandle, i32> {
+    value
+        .get_represented_type_info()
+        .and_then(|info| registry.get_type_data::<ReflectHandle>(info.type_id()))
+        .ok_or_else(|| fail(status::INVALID_STATE, format!("'{path}' is not an asset handle.")))
+}
+
+/// Reads an asset handle a component holds, as the key C# knows assets by.
+///
+/// A handle has no JSON form, since what it holds is a reference count rather than a value, so it
+/// crosses as the same key `AssetServer.Load` returns. A handle already in the table comes back
+/// with the key it has, so a field read every frame does not take a slot every frame.
+///
+/// # Safety
+/// `type_path` must be a NUL-terminated string, and `path` one or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_reflect_get_asset(
+    entity: u64,
+    type_path: *const c_char,
+    path: *const c_char,
+) -> i32 {
+    crate::interop::guard(|| {
+        let Some(type_path) = (unsafe { cstr_to_string(type_path) }) else {
+            return status::NULL_ARG;
+        };
+        let path = unsafe { cstr_to_string(path) }.unwrap_or_default();
+
+        with_world(|world| {
+            let registry = world.resource::<AppTypeRegistry>().clone();
+            let registry = registry.read();
+            let (_, reflect) = match component_of(&registry, &type_path) {
+                Ok(found) => found,
+                Err(code) => return code,
+            };
+
+            let handle = {
+                let Ok(found) = world.get_entity(entity_from(entity)) else {
+                    return fail(status::NO_ENTITY, "The entity does not exist.");
+                };
+                let Some(component) = reflect.reflect(found) else {
+                    return fail(status::NOT_PRESENT, format!("The entity has no '{type_path}'."));
+                };
+                let value = match at(component.as_partial_reflect(), &path) {
+                    Ok(value) => value,
+                    Err(code) => return code,
+                };
+                let data = match handle_data(&registry, value, &path) {
+                    Ok(data) => data,
+                    Err(code) => return code,
+                };
+                let held = value.try_as_reflect().map(|value| value.as_any());
+                match held.and_then(|held| data.downcast_handle_untyped(held)) {
+                    Some(handle) => handle,
+                    None => {
+                        return fail(status::INVALID_STATE, format!("'{path}' holds no handle."));
+                    }
+                }
+            };
+
+            crate::assets::key_for(world, handle)
+        })
+    })
+}
+
+/// Points an asset handle a component holds at the asset behind a key.
+///
+/// The handle is retyped to the field's own asset type, which refuses a key naming an asset of
+/// another kind, as a mesh offered to a material's image would be.
+///
+/// # Safety
+/// `type_path` must be a NUL-terminated string, and `path` one or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_reflect_set_asset(
+    entity: u64,
+    type_path: *const c_char,
+    path: *const c_char,
+    key: i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        let Some(type_path) = (unsafe { cstr_to_string(type_path) }) else {
+            return status::NULL_ARG;
+        };
+        let path = unsafe { cstr_to_string(path) }.unwrap_or_default();
+
+        with_world(|world| {
+            let registry = world.resource::<AppTypeRegistry>().clone();
+            let registry = registry.read();
+            let (_, reflect) = match component_of(&registry, &type_path) {
+                Ok(found) => found,
+                Err(code) => return code,
+            };
+            if let Err(code) = writable(world, reflect, &type_path) {
+                return code;
+            }
+            let Some(handle) = crate::assets::clone_handle(world, key) else {
+                return fail(status::INVALID_STATE, format!("The key {key} names no asset."));
+            };
+
+            let entity = entity_from(entity);
+            let typed = {
+                let Ok(found) = world.get_entity(entity) else {
+                    return fail(status::NO_ENTITY, "The entity does not exist.");
+                };
+                let Some(component) = reflect.reflect(found) else {
+                    return fail(status::NOT_PRESENT, format!("The entity has no '{type_path}'."));
+                };
+                let value = match at(component.as_partial_reflect(), &path) {
+                    Ok(value) => value,
+                    Err(code) => return code,
+                };
+                let data = match handle_data(&registry, value, &path) {
+                    Ok(data) => data,
+                    Err(code) => return code,
+                };
+                if handle.type_id() != data.asset_type_id() {
+                    return fail(
+                        status::INVALID_STATE,
+                        format!("The key {key} names an asset of another kind than '{path}' holds."),
+                    );
+                }
+                data.typed(handle)
+            };
+
+            apply(world, reflect, entity, &type_path, &path, typed.as_partial_reflect())
+        })
+    })
+}
+
 /// Reports why the last reflected call on this thread failed.
 ///
 /// # Safety
@@ -766,7 +944,14 @@ mod tests {
     #[reflect(Component, Default)]
     struct Frozen(f32);
 
+    #[derive(Component, Reflect, Default)]
+    #[reflect(Component, Default)]
+    struct Textured {
+        image: bevy::asset::Handle<bevy::image::Image>,
+    }
+
     const PROBE: &str = "bevy_csharp::reflected::tests::Probe";
+    const TEXTURED: &str = "bevy_csharp::reflected::tests::Textured";
     const FROZEN: &str = "bevy_csharp::reflected::tests::Frozen";
 
     fn probe_app() -> (App, Entity) {
@@ -912,6 +1097,49 @@ mod tests {
             assert_eq!(Err(status::NO_COMPONENT), get(entity, "no::such::Type", ""));
         });
         assert_eq!(2.0, app.world().get::<Probe>(entity).unwrap().speed);
+    }
+
+    #[test]
+    fn a_handle_crosses_as_the_key_the_asset_table_gives_it() {
+        use bevy::asset::{AssetApp, Assets};
+        use bevy::image::Image;
+        use bevy::mesh::{Mesh, MeshBuilder, Meshable};
+
+        let mut app = App::new();
+        app.add_plugins(bevy::app::TaskPoolPlugin::default());
+        app.add_plugins(bevy::asset::AssetPlugin::default());
+        app.init_asset::<Image>().init_asset::<Mesh>();
+        app.register_type::<Textured>();
+
+        let first = app.world_mut().resource_mut::<Assets<Image>>().add(Image::default());
+        let second = app.world_mut().resource_mut::<Assets<Image>>().add(Image::default());
+        let mesh = bevy::math::primitives::Cuboid::new(1.0, 1.0, 1.0).mesh().build();
+        let mesh = app.world_mut().resource_mut::<Assets<Mesh>>().add(mesh);
+        let entity = app.world_mut().spawn(Textured { image: first.clone() }).id();
+
+        loan_world(app.world_mut(), || {
+            let (type_path, path) = (c(TEXTURED), c(".image"));
+            let bits = entity.to_bits();
+            let read = || unsafe { bcs_reflect_get_asset(bits, type_path.as_ptr(), path.as_ptr()) };
+            let write =
+                |key| unsafe { bcs_reflect_set_asset(bits, type_path.as_ptr(), path.as_ptr(), key) };
+
+            // Read every frame by an inspector, so the second read has to find the first's slot.
+            let key = read();
+            assert!(key >= 0, "the read failed with {key}");
+            assert_eq!(key, read(), "a second read took a slot of its own");
+
+            let key_of = |handle: bevy::asset::UntypedHandle| {
+                crate::state::with_world(|world| crate::assets::key_for(world, handle))
+            };
+            assert_eq!(status::OK, write(key_of(second.clone().untyped())));
+
+            // A mesh offered to an image field is refused rather than retyped into nonsense.
+            assert_eq!(status::INVALID_STATE, write(key_of(mesh.clone().untyped())));
+            assert!(last_error().contains("another kind"), "{}", last_error());
+        });
+
+        assert_eq!(second.id(), app.world().get::<Textured>(entity).unwrap().image.id());
     }
 
     #[test]

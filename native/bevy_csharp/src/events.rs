@@ -478,7 +478,7 @@ enum Text {
 /// The same curated list [`crate::assets::bcs_asset_load`] matches on, read the other way round.
 /// A general answer would need Bevy's type registry to carry every asset type's name, which it
 /// does not, so this grows as the load list does.
-fn kind_of(id: core::any::TypeId) -> &'static str {
+pub(crate) fn kind_of(id: core::any::TypeId) -> &'static str {
     use core::any::TypeId;
 
     if id == TypeId::of::<bevy::mesh::Mesh>() {

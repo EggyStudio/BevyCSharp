@@ -19,19 +19,17 @@ stops a stale bridge loading against new managed code.
 
 ## Content
 
-### Bevy's components are reached by string
+### Bevy's components through reflection
 
 Every component Bevy reflects is read and written through Bevy's reflection, by its type path and
-JSON (`ctx.Ecs.GetReflected`, `SetReflected`), and has a schema built from Bevy's own description,
-so the inspector and `./bcs entity.get` and `entity.set` cover cameras, lights and the rest with no
+JSON (`ctx.Ecs.GetReflected`, `SetReflected`) or through a typed wrapper generated from a checked-in
+description (`ctx.Ecs.Get<PointLightRef>`), and has a schema built from Bevy's own description, so
+the inspector and `./bcs entity.get` and `entity.set` cover cameras, lights and the rest with no
 code per type. What [COMPONENTS.md](COMPONENTS.md) has left:
 
-- **A handle is shown, not used.** `Mesh3d` and `MeshMaterial3d` hold typed handles, which have no
-  JSON form, so a handle field reads as its type name. Mapping it to `AssetHandle` by type would
-  make it a field like any other.
-- **A path is checked when it is used.** A field Bevy renames fails at runtime with the reason
-  rather than at compile time. Typed wrappers generated from a checked-in copy of the registry are
-  tier 2.
+- **A variant's fields have no typed property.** The generated wrappers (`Bevy.Reflected`) type
+  every field that is not shown as JSON, but a field inside an enum variant, such as a color's red,
+  is there only while that variant is held, so it stays on a string path checked when it runs.
 - **Bytes in place need a mirror.** Five components (`Transform`, `GlobalTransform` and the three
   visibility types) are mirrored by hand, for systems that read them every frame. Generating
   mirrors and their layout checks is tier 3.

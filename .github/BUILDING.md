@@ -84,6 +84,25 @@ texture atomics, which the bridge checks before turning them on. Ray-traced ligh
 dependency, and is kept out of the profiles because adding it makes every material deferred; an
 app turns it on with `Config.RayTracedLighting`, on an adapter with ray queries.
 
+## Bevy's components after an upgrade
+
+`BevyCSharp/Generated/bevy-components.tsv` describes every component Bevy reflects, and the
+generator turns it into the typed wrappers in `Bevy.Reflected` (`PointLightRef` and the rest). It
+is read out of Bevy's registry in a running app, an editor build because that profile reflects the
+most, so it is written again whenever Bevy is upgraded:
+
+```bash
+./bcs build --editor
+./bcs open --editor --offscreen
+./bcs command schema.dump "$PWD/BevyCSharp/Generated/bevy-components.tsv"
+./bcs stop
+dotnet build
+```
+
+The file's diff is the list of what Bevy changed in its components. A field a game used that Bevy
+renamed or removed stops compiling at the property that named it, rather than failing on the day
+the line runs.
+
 ## Platforms
 
 The managed assembly is portable. The bridge is a cdylib, so it has to be compiled once per

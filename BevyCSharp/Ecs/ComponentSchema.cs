@@ -152,6 +152,16 @@ public sealed class ComponentField
     public bool Derived { get; init; }
 
     /// <summary>
+    /// Bevy's reflect path to the field, for a field of a component described from Bevy's
+    /// reflection, and <see langword="null"/> for every other.
+    /// </summary>
+    /// <remarks>
+    /// What the field reads and writes through, kept so the description of Bevy's components the
+    /// generator turns into typed wrappers names each field the way its row does.
+    /// </remarks>
+    internal string? ReflectPath { get; init; }
+
+    /// <summary>
     /// The component this field belongs to, once one has claimed it.
     /// </summary>
     /// <remarks>
