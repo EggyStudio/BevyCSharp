@@ -199,7 +199,10 @@ internal static class FieldNumbers
         null => "-",
         float number => Digits(number),
         double number => Digits((float)number),
+        Vec2 flat => $"{Digits(flat.X)}, {Digits(flat.Y)}",
         Vec3 vector => $"{Digits(vector.X)}, {Digits(vector.Y)}, {Digits(vector.Z)}",
+        Vec4 four => $"{Digits(four.X)}, {Digits(four.Y)}, {Digits(four.Z)}, {Digits(four.W)}",
+        Color shade => $"{Digits(shade.R)}, {Digits(shade.G)}, {Digits(shade.B)}, {Digits(shade.A)}",
         Quat turn => Say(turn.ToEuler() * (1f / Radians)),
         _ => value.ToString() ?? "-",
     };
@@ -231,11 +234,30 @@ internal static class FieldNumbers
     /// <returns>Whether any of them changed.</returns>
     internal static bool Vector(string id, ref Vector3 value, float speed, out bool active)
     {
+        Span<float> numbers = [value.X, value.Y, value.Z];
+        var changed = Vector(id, numbers, speed, out active);
+
+        value = new Vector3(numbers[0], numbers[1], numbers[2]);
+        return changed;
+    }
+
+    /// <summary>
+    /// Any number of boxes on one row, each written to its own number of places, for the reason the
+    /// three-number form gives.
+    /// </summary>
+    /// <param name="id">What the row is called, which each box takes a name under.</param>
+    /// <param name="values">The numbers, written back as they are dragged.</param>
+    /// <param name="speed">How far a pixel of drag moves one of them.</param>
+    /// <param name="active">Whether any of them is being dragged or typed into.</param>
+    /// <returns>Whether any of them changed.</returns>
+    internal static bool Vector(string id, Span<float> values, float speed, out bool active)
+    {
+        var count = values.Length;
         var inner = ImGui.GetStyle().ItemInnerSpacing.X;
         var full = ImGui.CalcItemWidth();
 
-        var one = MathF.Max(1f, MathF.Floor((full - (inner * 2f)) / 3f));
-        var last = MathF.Max(1f, MathF.Floor(full - ((one + inner) * 2f)));
+        var one = MathF.Max(1f, MathF.Floor((full - (inner * (count - 1))) / count));
+        var last = MathF.Max(1f, MathF.Floor(full - ((one + inner) * (count - 1))));
 
         var changed = false;
 
@@ -244,22 +266,19 @@ internal static class FieldNumbers
         ImGui.BeginGroup();
         ImGui.PushID(id);
 
-        for (var axis = 0; axis < 3; axis++)
+        for (var axis = 0; axis < count; axis++)
         {
             if (axis > 0) ImGui.SameLine(0f, inner);
 
             ImGui.PushID(axis);
-            ImGui.SetNextItemWidth(axis == 2 ? last : one);
+            ImGui.SetNextItemWidth(axis == count - 1 ? last : one);
 
-            var number = axis switch { 0 => value.X, 1 => value.Y, _ => value.Z };
+            var number = values[axis];
             var key = $"{id}.{axis}";
 
             if (ImGui.DragFloat("##n", ref number, speed, 0f, 0f, Written(key, number), Whole))
             {
-                if (axis == 0) value.X = number;
-                else if (axis == 1) value.Y = number;
-                else value.Z = number;
-
+                values[axis] = number;
                 changed = true;
             }
 

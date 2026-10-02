@@ -595,7 +595,10 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
             => FieldKind.Int,
         _ => type.ToDisplayString() switch
         {
+            "Bevy.Vec2" => FieldKind.Vec2,
             "Bevy.Vec3" => FieldKind.Vec3,
+            "Bevy.Vec4" => FieldKind.Vec4,
+            "Bevy.Color" => FieldKind.Color,
             "Bevy.Quat" => FieldKind.Quat,
             "Bevy.Entity" => FieldKind.Entity,
             "Bevy.AssetHandle" => FieldKind.Asset,

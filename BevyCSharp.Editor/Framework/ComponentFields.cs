@@ -432,6 +432,66 @@ public static class ComponentFields
                 break;
             }
 
+            case FieldKind.Vec2:
+            {
+                var flat = value as Vec2? ?? default;
+                Span<float> numbers = [flat.X, flat.Y];
+
+                ImGui.PushFont(ImGuiRuntime.Face(EditorShell.Figures));
+                var moved = FieldNumbers.Vector(id, numbers, Pixel(field), out _);
+                ImGui.PopFont();
+
+                if (moved) field.Write(ctx.Ecs, entity, new Vec2(numbers[0], numbers[1]));
+
+                break;
+            }
+
+            case FieldKind.Vec4:
+            {
+                var four = value as Vec4? ?? default;
+                Span<float> numbers = [four.X, four.Y, four.Z, four.W];
+
+                ImGui.PushFont(ImGuiRuntime.Face(EditorShell.Figures));
+                var moved = FieldNumbers.Vector(id, numbers, Pixel(field), out _);
+                ImGui.PopFont();
+
+                if (moved)
+                {
+                    field.Write(
+                        ctx.Ecs, entity, new Vec4(numbers[0], numbers[1], numbers[2], numbers[3]));
+                }
+
+                break;
+            }
+
+            case FieldKind.Color:
+            {
+                // Shown as sRGB, which is what a screen and a color picker mean by a color, and
+                // written back as the linear color the field holds.
+                var held = value as Color? ?? Color.White;
+                var srgb = held.ToSrgb();
+                var shade = new Vector4(srgb.X, srgb.Y, srgb.Z, srgb.W);
+
+                if (EditorWidgets.Swatch(id, ref shade))
+                    field.Write(ctx.Ecs, entity, Color.FromSrgb(shade.X, shade.Y, shade.Z, shade.W));
+
+                break;
+            }
+
+            case FieldKind.String:
+            {
+                // Written when the box is left or Enter is pressed rather than on every keystroke,
+                // so a name being typed is one step in the history and not one per letter.
+                var text = value as string ?? string.Empty;
+
+                ImGui.SetNextItemWidth(-1f);
+                ImGui.InputText(id, ref text, 1024);
+
+                if (ImGui.IsItemDeactivatedAfterEdit()) field.Write(ctx.Ecs, entity, text);
+
+                break;
+            }
+
             case FieldKind.Enum:
             {
                 var options = field.Options;

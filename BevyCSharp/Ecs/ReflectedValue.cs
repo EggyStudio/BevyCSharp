@@ -41,7 +41,11 @@ internal static class ReflectedValue
             FieldKind.Bool => value.GetBoolean(),
             // An int where it fits, which every drawer expects, and a long where a u64 does not.
             FieldKind.Int => value.TryGetInt32(out var small) ? small : value.GetInt64(),
+            FieldKind.String => value.GetString(),
+            FieldKind.Vec2 => new Vec2(Part(value, 0, "x"), Part(value, 1, "y")),
             FieldKind.Vec3 => new Vec3(Part(value, 0, "x"), Part(value, 1, "y"), Part(value, 2, "z")),
+            FieldKind.Vec4 => new Vec4(
+                Part(value, 0, "x"), Part(value, 1, "y"), Part(value, 2, "z"), Part(value, 3, "w")),
             FieldKind.Quat => new Quat(
                 Part(value, 0, "x"), Part(value, 1, "y"), Part(value, 2, "z"), Part(value, 3, "w")),
             FieldKind.Entity => new Entity(value.GetUInt64()),
@@ -89,6 +93,23 @@ internal static class ReflectedValue
                     break;
                 case FieldKind.Bool when ComponentSchemas.TryCoerce<bool>(value, out var on):
                     json.WriteBooleanValue(on);
+                    break;
+                case FieldKind.String when value is string text:
+                    json.WriteStringValue(text);
+                    break;
+                case FieldKind.Vec2 when value is Vec2 flat:
+                    json.WriteStartArray();
+                    json.WriteNumberValue(flat.X);
+                    json.WriteNumberValue(flat.Y);
+                    json.WriteEndArray();
+                    break;
+                case FieldKind.Vec4 when value is Vec4 four:
+                    json.WriteStartArray();
+                    json.WriteNumberValue(four.X);
+                    json.WriteNumberValue(four.Y);
+                    json.WriteNumberValue(four.Z);
+                    json.WriteNumberValue(four.W);
+                    json.WriteEndArray();
                     break;
                 case FieldKind.Vec3 when value is Vec3 v:
                     json.WriteStartArray();
@@ -150,6 +171,10 @@ internal static class ReflectedValue
     /// <summary>Reads an asset handle a wrapper names.</summary>
     internal static AssetHandle Asset(EcsWorld world, Entity entity, string type, string path) =>
         world.GetReflectedAsset(entity, type, path) ?? throw Absent(type, entity);
+
+    /// <summary>Reads a color a wrapper names, as linear RGBA.</summary>
+    internal static Color Color(EcsWorld world, Entity entity, string type, string path) =>
+        world.GetReflectedColor(entity, type, path) ?? throw Absent(type, entity);
 
     /// <summary>The failure for a wrapper over a component the entity no longer carries.</summary>
     private static BevyNativeException Absent(string type, Entity entity) =>

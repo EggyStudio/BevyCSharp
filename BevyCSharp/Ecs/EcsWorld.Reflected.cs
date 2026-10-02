@@ -168,6 +168,48 @@ public sealed unsafe partial class EcsWorld
     }
 
     /// <summary>
+    /// Reads a color inside one of Bevy's components as linear RGBA.
+    /// </summary>
+    /// <returns>The color, or <see langword="null"/> when the entity does not carry the
+    /// component.</returns>
+    /// <remarks>
+    /// Bevy's <c>Color</c> holds a color in any of ten spaces, and its JSON is the space it happens
+    /// to be in. This asks Bevy to convert it, so the answer is the same <see cref="Color"/>
+    /// whichever space the code that made it chose. A <c>LinearRgba</c> or <c>Srgba</c> field reads
+    /// the same way.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The path does not lead to a color.</exception>
+    public Color? GetReflectedColor(Entity entity, string typePath, string path)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(typePath);
+
+        var parts = stackalloc float[4];
+        var status = Native.bcs_reflect_get_color(entity.Bits, typePath, path ?? string.Empty, parts);
+        if (status == NativeStatus.NotPresent) return null;
+
+        ReflectedCheck(status, $"Reading the color at {Described(typePath, path)} on {entity}");
+        return new Color(parts[0], parts[1], parts[2], parts[3]);
+    }
+
+    /// <summary>
+    /// Writes a color inside one of Bevy's components from linear RGBA.
+    /// </summary>
+    /// <remarks>
+    /// A <c>Color</c> keeps the space it was held in, so a color given in sRGB stays sRGB, holding
+    /// the color written.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The path does not lead to a color.</exception>
+    public void SetReflectedColor(Entity entity, string typePath, string path, Color color)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(typePath);
+
+        ReflectedCheck(
+            Native.bcs_reflect_set_color(
+                entity.Bits, typePath, path ?? string.Empty, color.R, color.G, color.B, color.A),
+            $"Writing the color at {Described(typePath, path)} on {entity}");
+    }
+
+    /// <summary>
     /// Puts one of Bevy's components on an entity, from JSON or at its default.
     /// </summary>
     /// <param name="entity">The entity to add it to.</param>

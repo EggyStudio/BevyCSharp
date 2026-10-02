@@ -168,7 +168,11 @@ public sealed class ReflectedGenerator : IIncrementalGenerator
         "Float" => "float",
         "Double" => "double",
         "Bool" => "bool",
+        "String" => "string",
+        "Vec2" => "global::Bevy.Vec2",
         "Vec3" => "global::Bevy.Vec3",
+        "Vec4" => "global::Bevy.Vec4",
+        "Color" => "global::Bevy.Color",
         "Quat" => "global::Bevy.Quat",
         "Entity" => "global::Bevy.Entity",
         "Asset" => "global::Bevy.AssetHandle",
@@ -277,6 +281,17 @@ public sealed class ReflectedGenerator : IIncrementalGenerator
                             public enum {{named}}
                             {
                                 {{string.Join(",\n        ", variants)}},
+                            }
+
+                        """);
+                    break;
+
+                case "Color":
+                    text.Append($$"""
+                            public global::Bevy.Color {{unique}}
+                            {
+                                get => global::Bevy.ReflectedValue.Color(_world, Entity, TypePath, "{{path}}");
+                                set => _world.SetReflectedColor(Entity, TypePath, "{{path}}", value);
                             }
 
                         """);

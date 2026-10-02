@@ -165,6 +165,14 @@ internal static class ReflectedSchemas
 
             var described = types.TryGetProperty(type, out var found) ? found : default;
 
+            // A color is one swatch whatever space Bevy holds it in, converted by Bevy, rather than a
+            // choice of space over rows of numbers that mean something different in each.
+            if (described.ValueKind == JsonValueKind.Object && described.TryGetProperty("color", out _))
+            {
+                fields.Add(Shade(at, label, Short(type)));
+                return;
+            }
+
             // A handle is a reference to an asset, picked from the files of its kind. One whose
             // kind the bridge cannot load has no files to offer, so it is only shown.
             if (described.ValueKind == JsonValueKind.Object
@@ -370,6 +378,26 @@ internal static class ReflectedSchemas
             };
         }
 
+        /// <summary>A row holding a color, drawn as a swatch.</summary>
+        private ComponentField Shade(At at, string label, string type)
+        {
+            var (owner, path, within) = (component, at.Reflect, at.Within);
+            return new ComponentField(
+                at.Name,
+                FieldKind.Color,
+                type,
+                (world, entity) => Holds(world, entity, owner, within)
+                    ? Attempted(() => world.GetReflectedColor(entity, owner, path))
+                    : null,
+                (world, entity, value) => value is Color color
+                    && Holds(world, entity, owner, within)
+                    && Sent(() => world.SetReflectedColor(entity, owner, path, color)),
+                hints: Hints(at, label))
+            {
+                ReflectPath = path,
+            };
+        }
+
         /// <summary>A row choosing one of an enum's variants by name.</summary>
         private ComponentField Choice(At at, string label, string type, string[] options)
         {
@@ -438,7 +466,10 @@ internal static class ReflectedSchemas
         "bool" => FieldKind.Bool,
         "u8" or "u16" or "u32" or "u64" or "usize"
             or "i8" or "i16" or "i32" or "i64" or "isize" => FieldKind.Int,
+        "alloc::string::String" => FieldKind.String,
+        "glam::Vec2" => FieldKind.Vec2,
         "glam::Vec3" or "glam::Vec3A" => FieldKind.Vec3,
+        "glam::Vec4" => FieldKind.Vec4,
         "glam::Quat" => FieldKind.Quat,
         "bevy_ecs::entity::Entity" => FieldKind.Entity,
         _ => null,

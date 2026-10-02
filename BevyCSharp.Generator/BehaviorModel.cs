@@ -145,6 +145,13 @@ internal enum FieldKind
 
     /// <summary>Any number of a fixed set of names at once.</summary>
     Flags,
+
+    /// <summary>Text. Never a C# component's, which is unmanaged, but named so the kinds agree.</summary>
+    String,
+
+    Vec2,
+    Vec4,
+    Color,
 }
 
 /// <summary>A method on a behavior that takes nothing, so anything can be told to call it.</summary>

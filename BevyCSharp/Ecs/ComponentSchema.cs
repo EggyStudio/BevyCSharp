@@ -52,6 +52,28 @@ public enum FieldKind
     /// several that are each on or off.
     /// </remarks>
     Flags,
+
+    /// <summary>Text, which only a component of Bevy's reflected through it can hold.</summary>
+    /// <remarks>
+    /// A C# component is unmanaged and so has no string to hold, but a reflected one of Bevy's can,
+    /// and a data asset will.
+    /// </remarks>
+    String,
+
+    /// <summary>Two numbers, drawn as one row.</summary>
+    Vec2,
+
+    /// <summary>Four numbers, drawn as one row.</summary>
+    Vec4,
+
+    /// <summary>
+    /// A <see cref="Bevy.Color"/>, linear, drawn as a swatch.
+    /// </summary>
+    /// <remarks>
+    /// One of Bevy's <c>Color</c>, <c>LinearRgba</c> or <c>Srgba</c> fields is this kind too, read
+    /// and written as linear whatever space it holds.
+    /// </remarks>
+    Color,
 }
 
 /// <summary>

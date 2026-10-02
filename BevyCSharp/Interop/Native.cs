@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 150;
+    internal const int ExpectedAbiVersion = 151;
 
     static Native() => NativeLoader.Initialize();
 
@@ -973,6 +973,18 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_reflect_set_asset(
         ulong entity, string typePath, string path, int key);
+
+    /// <summary>Reads a color field as four linear floats, whatever space it holds.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_get_color(
+        ulong entity, string typePath, string path, float* rgba);
+
+    /// <summary>Writes a color field from linear floats, in the space it already holds.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_set_color(
+        ulong entity, string typePath, string path, float red, float green, float blue, float alpha);
 
     /// <summary>Writes why the last reflected call on this thread failed.</summary>
     [LibraryImport(Library)]

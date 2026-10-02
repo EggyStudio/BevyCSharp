@@ -28,6 +28,7 @@ use core::cell::RefCell;
 use core::ffi::c_char;
 
 use bevy::asset::ReflectHandle;
+use bevy::color::{Color, LinearRgba, Srgba};
 use bevy::ecs::component::ComponentId;
 use bevy::ecs::reflect::{AppTypeRegistry, ReflectComponent, ReflectFromWorld};
 use bevy::ecs::world::World;
@@ -215,6 +216,12 @@ fn describe(registry: &TypeRegistry, info: &'static TypeInfo, types: &mut Map<St
 
     if let Some(text) = docs!(info) {
         entry["docs"] = Value::from(text);
+    }
+
+    // A color is one value to the managed side, a swatch, whatever space it is held in, so the
+    // three types Bevy keeps colors in are marked rather than walked into their fields.
+    if is_color(info.type_id()) {
+        entry["color"] = Value::Bool(true);
     }
 
     // A handle names the kind of asset it holds, so the managed side can offer files of that kind.
@@ -880,13 +887,166 @@ pub unsafe extern "C" fn bcs_reflect_set_asset(
                 if handle.type_id() != data.asset_type_id() {
                     return fail(
                         status::INVALID_STATE,
-                        format!("The key {key} names an asset of another kind than '{path}' holds."),
+                        format!("The key {key} names another kind of asset than '{path}' holds."),
                     );
                 }
                 data.typed(handle)
             };
 
             apply(world, reflect, entity, &type_path, &path, typed.as_partial_reflect())
+        })
+    })
+}
+
+// -- Colors
+
+/// Whether a type is one of the three Bevy holds a color in.
+fn is_color(id: TypeId) -> bool {
+    id == TypeId::of::<Color>() || id == TypeId::of::<LinearRgba>() || id == TypeId::of::<Srgba>()
+}
+
+/// A color field's value as linear RGBA, whatever space it holds, converted by Bevy.
+fn linear_of(value: &dyn PartialReflect) -> Option<LinearRgba> {
+    let value = value.try_as_reflect()?;
+    if let Some(color) = value.downcast_ref::<Color>() {
+        return Some(color.to_linear());
+    }
+    if let Some(linear) = value.downcast_ref::<LinearRgba>() {
+        return Some(*linear);
+    }
+    value.downcast_ref::<Srgba>().map(|srgb| LinearRgba::from(*srgb))
+}
+
+/// A linear color as a value of the type `held` is, keeping the space a `Color` was in.
+///
+/// A light whose color was given in sRGB stays sRGB after the inspector changes it, rather than
+/// coming back as a different variant than the code that made it wrote.
+fn retyped(held: &dyn PartialReflect, linear: LinearRgba) -> Option<Box<dyn PartialReflect>> {
+    let held = held.try_as_reflect()?;
+    if let Some(color) = held.downcast_ref::<Color>() {
+        let color = match color {
+            Color::Srgba(_) => Color::Srgba(linear.into()),
+            Color::LinearRgba(_) => Color::LinearRgba(linear),
+            Color::Hsla(_) => Color::Hsla(linear.into()),
+            Color::Hsva(_) => Color::Hsva(linear.into()),
+            Color::Hwba(_) => Color::Hwba(linear.into()),
+            Color::Laba(_) => Color::Laba(linear.into()),
+            Color::Lcha(_) => Color::Lcha(linear.into()),
+            Color::Oklaba(_) => Color::Oklaba(linear.into()),
+            Color::Oklcha(_) => Color::Oklcha(linear.into()),
+            Color::Xyza(_) => Color::Xyza(linear.into()),
+        };
+        return Some(Box::new(color));
+    }
+    if held.is::<LinearRgba>() {
+        return Some(Box::new(linear));
+    }
+    held.is::<Srgba>().then(|| Box::new(Srgba::from(linear)) as Box<dyn PartialReflect>)
+}
+
+/// Reads a color field as linear red, green, blue and alpha.
+///
+/// A `Color` holds a color in any of ten spaces, and the managed side has one color type, so the
+/// conversion is Bevy's own rather than a second copy of it there.
+///
+/// # Safety
+/// `type_path` must be a NUL-terminated string, `path` one or null, and `out` writable for four
+/// floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_reflect_get_color(
+    entity: u64,
+    type_path: *const c_char,
+    path: *const c_char,
+    out: *mut f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        let Some(type_path) = (unsafe { cstr_to_string(type_path) }) else {
+            return status::NULL_ARG;
+        };
+        if out.is_null() {
+            return status::NULL_ARG;
+        }
+        let path = unsafe { cstr_to_string(path) }.unwrap_or_default();
+
+        with_world(|world| {
+            let registry = world.resource::<AppTypeRegistry>().clone();
+            let registry = registry.read();
+            let (_, reflect) = match component_of(&registry, &type_path) {
+                Ok(found) => found,
+                Err(code) => return code,
+            };
+
+            let Ok(found) = world.get_entity(entity_from(entity)) else {
+                return fail(status::NO_ENTITY, "The entity does not exist.");
+            };
+            let Some(component) = reflect.reflect(found) else {
+                return fail(status::NOT_PRESENT, format!("The entity has no '{type_path}'."));
+            };
+            let value = match at(component.as_partial_reflect(), &path) {
+                Ok(value) => value,
+                Err(code) => return code,
+            };
+            let Some(linear) = linear_of(value) else {
+                return fail(status::INVALID_STATE, format!("'{path}' is not a color."));
+            };
+
+            let parts = [linear.red, linear.green, linear.blue, linear.alpha];
+            unsafe { core::ptr::copy_nonoverlapping(parts.as_ptr(), out, 4) };
+            status::OK
+        })
+    })
+}
+
+/// Writes a color field from linear red, green, blue and alpha, in the space it already holds.
+///
+/// # Safety
+/// `type_path` must be a NUL-terminated string, and `path` one or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_reflect_set_color(
+    entity: u64,
+    type_path: *const c_char,
+    path: *const c_char,
+    red: f32,
+    green: f32,
+    blue: f32,
+    alpha: f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        let Some(type_path) = (unsafe { cstr_to_string(type_path) }) else {
+            return status::NULL_ARG;
+        };
+        let path = unsafe { cstr_to_string(path) }.unwrap_or_default();
+
+        with_world(|world| {
+            let registry = world.resource::<AppTypeRegistry>().clone();
+            let registry = registry.read();
+            let (_, reflect) = match component_of(&registry, &type_path) {
+                Ok(found) => found,
+                Err(code) => return code,
+            };
+            if let Err(code) = writable(world, reflect, &type_path) {
+                return code;
+            }
+
+            let entity = entity_from(entity);
+            let value = {
+                let Ok(found) = world.get_entity(entity) else {
+                    return fail(status::NO_ENTITY, "The entity does not exist.");
+                };
+                let Some(component) = reflect.reflect(found) else {
+                    return fail(status::NOT_PRESENT, format!("The entity has no '{type_path}'."));
+                };
+                let held = match at(component.as_partial_reflect(), &path) {
+                    Ok(held) => held,
+                    Err(code) => return code,
+                };
+                match retyped(held, LinearRgba::new(red, green, blue, alpha)) {
+                    Some(value) => value,
+                    None => return fail(status::INVALID_STATE, format!("'{path}' is not a color.")),
+                }
+            };
+
+            apply(world, reflect, entity, &type_path, &path, value.as_ref())
         })
     })
 }
@@ -946,12 +1106,20 @@ mod tests {
 
     #[derive(Component, Reflect, Default)]
     #[reflect(Component, Default)]
+    struct Tinted {
+        tint: Color,
+        glow: LinearRgba,
+    }
+
+    #[derive(Component, Reflect, Default)]
+    #[reflect(Component, Default)]
     struct Textured {
         image: bevy::asset::Handle<bevy::image::Image>,
     }
 
     const PROBE: &str = "bevy_csharp::reflected::tests::Probe";
     const TEXTURED: &str = "bevy_csharp::reflected::tests::Textured";
+    const TINTED: &str = "bevy_csharp::reflected::tests::Tinted";
     const FROZEN: &str = "bevy_csharp::reflected::tests::Frozen";
 
     fn probe_app() -> (App, Entity) {
@@ -1121,8 +1289,9 @@ mod tests {
             let (type_path, path) = (c(TEXTURED), c(".image"));
             let bits = entity.to_bits();
             let read = || unsafe { bcs_reflect_get_asset(bits, type_path.as_ptr(), path.as_ptr()) };
-            let write =
-                |key| unsafe { bcs_reflect_set_asset(bits, type_path.as_ptr(), path.as_ptr(), key) };
+            let write = |key| unsafe {
+                bcs_reflect_set_asset(bits, type_path.as_ptr(), path.as_ptr(), key)
+            };
 
             // Read every frame by an inspector, so the second read has to find the first's slot.
             let key = read();
@@ -1140,6 +1309,39 @@ mod tests {
         });
 
         assert_eq!(second.id(), app.world().get::<Textured>(entity).unwrap().image.id());
+    }
+
+    #[test]
+    fn a_color_crosses_as_linear_and_keeps_the_space_it_was_held_in() {
+        let mut app = App::new();
+        app.register_type::<Tinted>();
+        let tinted = Tinted { tint: Color::srgb(1.0, 0.5, 0.0), glow: LinearRgba::BLACK };
+        let entity = app.world_mut().spawn(tinted).id();
+
+        loan_world(app.world_mut(), || {
+            let (type_path, tint, glow) = (c(TINTED), c(".tint"), c(".glow"));
+            let bits = entity.to_bits();
+
+            let mut read = [0f32; 4];
+            let (owner, into) = (type_path.as_ptr(), read.as_mut_ptr());
+            let code = unsafe { bcs_reflect_get_color(bits, owner, tint.as_ptr(), into) };
+            assert_eq!(status::OK, code);
+
+            // sRGB one half is about a fifth in linear, which says the conversion ran.
+            assert!((read[1] - 0.214).abs() < 0.01, "green read as {}", read[1]);
+            assert_eq!(1.0, read[0]);
+
+            let write = |path: &CString| unsafe {
+                bcs_reflect_set_color(bits, type_path.as_ptr(), path.as_ptr(), 0.0, 1.0, 0.0, 1.0)
+            };
+            assert_eq!(status::OK, write(&tint));
+            assert_eq!(status::OK, write(&glow));
+        });
+
+        let tinted = app.world().get::<Tinted>(entity).unwrap();
+        assert!(matches!(tinted.tint, Color::Srgba(_)), "the color changed space");
+        assert_eq!(LinearRgba::GREEN, tinted.glow);
+        assert_eq!(LinearRgba::GREEN, tinted.tint.to_linear());
     }
 
     #[test]
