@@ -152,13 +152,33 @@ public static class AssetsTab
             1,
             (int)(ImGui.GetContentRegionAvail().X / (_size + ImGui.GetStyle().ItemSpacing.X)));
 
-        for (var index = 0; index < entries.Count; index++)
+        // Only the rows on screen are drawn, through ImGui's clipper, as the world panel's are. A
+        // row is as tall as a tile and the spacing under it, the same for every row, so the
+        // clipper knows where each is without drawing those above it. A tile out of
+        // view asks for no thumbnail either, so a folder of models is pictured from where it is
+        // being looked at.
+        var rows = (entries.Count + across - 1) / across;
+
+        unsafe
         {
-            var entry = entries[index];
+            var clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+            clipper.Begin(rows, _size + ImGui.GetStyle().ItemSpacing.Y);
 
-            if (index % across != 0) ImGui.SameLine();
+            while (clipper.Step())
+            {
+                for (var row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
+                {
+                    for (var index = row * across; index < Math.Min(entries.Count, (row + 1) * across); index++)
+                    {
+                        if (index % across != 0) ImGui.SameLine();
 
-            Tile(entry, _size);
+                        Tile(entries[index], _size);
+                    }
+                }
+            }
+
+            clipper.End();
+            clipper.Destroy();
         }
 
         if (_refused is { } why) ImGui.TextDisabled(why);

@@ -23,6 +23,110 @@ public static class ConsoleTab
     /// <summary>How many times an earlier command has been put back in the box.</summary>
     private static int _recalls;
 
+    /// <summary>
+    /// How tall each line is once wrapped, by the line and how many times it was said, since the
+    /// count is part of what is drawn. Kept for one width, and measured again when it changes.
+    /// </summary>
+    private static readonly Dictionary<(int Index, int Count), float> Heights = [];
+
+    /// <summary>The width the heights were measured at.</summary>
+    private static float _measuredAt;
+
+    /// <summary>
+    /// Draws the lines in view, and leaves the room the others would take above and below them.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A log keeps two thousand lines, each wrapped at the edge of the region, and drawing all of
+    /// them every frame is laying out text nobody sees. ImGui's list clipper does this for rows of
+    /// one height, and a wrapped line is as tall as its wrapping makes it, so each line's height is
+    /// measured once for the region's width and kept, and the lines between the top and the bottom
+    /// of the view are drawn, with blank room for the rest so the scroll bar measures the whole log.
+    /// </para>
+    /// <para>
+    /// A line advances the cursor by its height and the item spacing below it, and so does the room
+    /// left for a run of lines, so a line scrolled into view lands exactly where it would have been
+    /// drawn among all the others.
+    /// </para>
+    /// </remarks>
+    private static void Visible(LogLine[] lines)
+    {
+        var width = ImGui.GetContentRegionAvail().X;
+        if (width != _measuredAt || Heights.Count > ConsoleLog.Depth * 2)
+        {
+            Heights.Clear();
+            _measuredAt = width;
+        }
+
+        var spacing = ImGui.GetStyle().ItemSpacing.Y;
+        var top = ImGui.GetScrollY();
+        var bottom = top + ImGui.GetWindowHeight();
+        var y = 0f;
+        var skipped = 0f;
+        var index = 0;
+
+        // Above the view.
+        for (; index < lines.Length; index++)
+        {
+            var step = HeightOf(lines[index], width) + spacing;
+            if (y + step > top) break;
+
+            y += step;
+        }
+
+        Room(y, spacing);
+
+        // In view.
+        for (; index < lines.Length && y < bottom; index++)
+        {
+            Line(lines[index]);
+            y += HeightOf(lines[index], width) + spacing;
+        }
+
+        // Below it, measured all the same, since the room has to be the whole of their height.
+        for (; index < lines.Length; index++) skipped += HeightOf(lines[index], width) + spacing;
+
+        Room(skipped, spacing);
+    }
+
+    /// <summary>Leaves room a run of lines would take, which advances by the spacing after it too.</summary>
+    private static void Room(float height, float spacing)
+    {
+        if (height > 0f) ImGui.Dummy(new Vector2(0f, MathF.Max(0f, height - spacing)));
+    }
+
+    /// <summary>A line's height once wrapped at a width, measured the first time it is asked.</summary>
+    private static float HeightOf(LogLine line, float width)
+    {
+        if (!Heights.TryGetValue((line.Index, line.Count), out var height))
+        {
+            height = ImGui.CalcTextSize(ConsoleView.Written(line), false, width).Y;
+            Heights[(line.Index, line.Count)] = height;
+        }
+
+        return height;
+    }
+
+    /// <summary>Draws one line in its level's color.</summary>
+    private static void Line(LogLine line)
+    {
+        var theme = EditorTheme.Current;
+
+        // Out of the theme, so a look dialed in reaches the log as well. Written here in four
+        // colors the palette already has rather than four of this file's own.
+        var color = line.Level switch
+        {
+            LogLevel.Warning => theme.Warn,
+            LogLevel.Error => theme.Bad,
+            LogLevel.Echo => EditorTheme.LiveText,
+            _ => theme.Dim,
+        };
+
+        ImGui.PushStyleColor(ImGuiCol.Text, color);
+        ImGui.TextUnformatted(ConsoleView.Written(line));
+        ImGui.PopStyleColor();
+    }
+
     /// <summary>Draws it.</summary>
     public static void Draw()
     {
@@ -42,24 +146,7 @@ public static class ConsoleTab
             // longer than any panel, and the half of it past the edge is the half worth reading.
             ImGui.PushTextWrapPos(0f);
 
-            foreach (var line in lines)
-            {
-                var theme = EditorTheme.Current;
-
-                // Out of the theme, so a look dialed in reaches the log as well. Written here in
-                // four colors the palette already has rather than four of this file's own.
-                var color = line.Level switch
-                {
-                    LogLevel.Warning => theme.Warn,
-                    LogLevel.Error => theme.Bad,
-                    LogLevel.Echo => EditorTheme.LiveText,
-                    _ => theme.Dim,
-                };
-
-                ImGui.PushStyleColor(ImGuiCol.Text, color);
-                ImGui.TextUnformatted(ConsoleView.Written(line));
-                ImGui.PopStyleColor();
-            }
+            Visible(lines);
 
             // Follows what is written, unless somebody has scrolled up to read something.
             if (_seen != ConsoleLog.Written && ImGui.GetScrollY() >= ImGui.GetScrollMaxY() - 4f)
