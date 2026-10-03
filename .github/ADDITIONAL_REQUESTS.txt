@@ -1,5 +1,0 @@
-should an asset be selected deselect the entity that may be selected in world and display the asset details in the details panel. there is only one selection active either in world or asset. that way we dont need to render the interactive mesh in the assets tab showing onb the right but have the detail panel to display its detail and selecting other assets then those.
-
-the rendered background from the thumbnails should be transparent but be settable colors too.
-
-right clicking on the areas not in the viewport still triggers the viewport fly controller and we cant right click on the panels in imgui because of that.
