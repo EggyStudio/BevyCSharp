@@ -228,25 +228,24 @@ public static class AssetIds
         var root = Root;
         _indexed = root;
 
-        // What the game's assembly carries first, so a file beside the game wins over it, as a
-        // file on disk wins in every other read (AssetFiles).
-        foreach (var sidecar in AssetFiles.Embedded(Extension))
+        // What the game carries first, so a file beside the game wins over it, as a file on disk
+        // wins in every other read (AssetFiles).
+        foreach (var sidecar in AssetFiles.Carried(Extension))
         {
-            if (Parse(AssetFiles.ReadAllText(sidecar)) is { } id)
-            {
-                Paths[id] = sidecar[..^Extension.Length];
-                Carried.Add(id);
-            }
+            if (Parse(AssetFiles.ReadAllText(sidecar)) is { } id) Paths[id] = sidecar[..^Extension.Length];
         }
 
-        if (!Directory.Exists(root)) return;
-
-        ReadIndex(Path.Combine(root, IndexName));
+        // The index an export writes in place of the sidecars, which a pack carries and a game
+        // with no asset folder at all reads from there.
+        ReadIndex(IndexName);
         Scan(root, Paths);
 
-        // An id a file on disk answered for is the disk's, and checked like any other.
-        var embedded = AssetFiles.Embedded(Extension).ToHashSet(StringComparer.Ordinal);
-        Carried.RemoveWhere(id => !embedded.Contains(Paths[id] + Extension));
+        // An id whose file is carried and not on disk is trusted as it is, since there is no file
+        // to check it against. Every other is the disk's, and checked like any other.
+        foreach (var (id, path) in Paths)
+        {
+            if (AssetFiles.IsCarried(path)) Carried.Add(id);
+        }
     }
 
     /// <summary>Adds the id of every sidecar under a folder whose file is there, by the file's path from the folder.</summary>
@@ -278,11 +277,11 @@ public static class AssetIds
     /// </remarks>
     private static void ReadIndex(string index)
     {
-        if (!File.Exists(index)) return;
+        if (!AssetFiles.Exists(index)) return;
 
         try
         {
-            using var document = JsonDocument.Parse(File.ReadAllText(index));
+            using var document = JsonDocument.Parse(AssetFiles.ReadAllText(index));
             var root = document.RootElement;
             if (!root.TryGetProperty("format", out var format) || format.GetString() != IndexFormat) return;
             if (!root.TryGetProperty("ids", out var ids) || ids.ValueKind != JsonValueKind.Object) return;
@@ -291,7 +290,7 @@ public static class AssetIds
             {
                 if (Parse(entry.Name) is { } id
                     && entry.Value.GetString() is { Length: > 0 } file
-                    && File.Exists(Full(file)))
+                    && AssetFiles.Exists(file))
                     Paths[id] = Normalized(file);
             }
         }

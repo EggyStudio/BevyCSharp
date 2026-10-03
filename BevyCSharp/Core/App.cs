@@ -132,7 +132,7 @@ public sealed unsafe class App : IDisposable
 
         // The files the game's assembly carries, found before the native app is built and handed to
         // the bridge, since Bevy builds its asset sources as the app is built and never again.
-        AssetFiles.Use(Config.AssetAssembly ?? System.Reflection.Assembly.GetEntryAssembly());
+        AssetFiles.Use(Config.AssetAssembly ?? System.Reflection.Assembly.GetEntryAssembly(), OpenPack(Config));
         AssetFiles.Serve();
 
         // Where the window was left, read before it opens, so it opens there.
@@ -202,6 +202,29 @@ public sealed unsafe class App : IDisposable
         World.InsertResource(new MessageBus());
 
         RegisterEngineSystems();
+    }
+
+    /// <summary>
+    /// The pack <see cref="Config.AssetPack"/> names, or the one beside the executable, or nothing.
+    /// </summary>
+    /// <exception cref="InvalidDataException">The pack named cannot be read as one.</exception>
+    /// <exception cref="FileNotFoundException">The pack named is not there.</exception>
+    private static AssetPack? OpenPack(Config config)
+    {
+        if (config.AssetPack is { Length: 0 }) return null;
+
+        if (config.AssetPack is { } named)
+        {
+            var full = Path.GetFullPath(named);
+            if (!File.Exists(full)) throw new FileNotFoundException($"No asset pack at {full}.", full);
+
+            return AssetPack.Open(full);
+        }
+
+        // Beside the executable, which is where an export puts it. One there that does not open is
+        // as much a broken install as one named outright, so it fails the same way.
+        var beside = Path.Combine(AppContext.BaseDirectory, AssetPack.DefaultName);
+        return File.Exists(beside) ? AssetPack.Open(beside) : null;
     }
 
     /// <summary>Explains, as specifically as possible, why the engine would not start.</summary>

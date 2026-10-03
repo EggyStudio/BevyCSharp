@@ -59,11 +59,14 @@ The managed side resolves both (`SceneFile.Resolve`, `UserData`), and `user://` 
 Bevy as an asset source named `user` (ABI 156), with the directory made as an app starts, so a
 texture or a glTF file under `user://` loads as one under `assets://` does. The managed files under
 `assets://` (scenes, data assets, material and mesh files, the ids beside them) are read through
-`AssetFiles`, which takes a file in the asset folder first and the game's own assembly after,
-where an export that embeds compiles the whole folder (`BevyCSharp.Embed.targets`). Bevy reads the
-same resources through a reader `AssetFiles` hands the bridge, so one copy of the assets feeds both
-sides ([PLAY.md](PLAY.md) §4). A pack file, the third place a shipped game's assets could be, is not
-built.
+`AssetFiles`, which takes a file in the asset folder first, then one in a pack beside the game
+(`AssetPack`, `assets.pack`), then one in the game's own assembly, where an export that embeds
+compiles the whole folder (`BevyCSharp.Embed.targets`). Bevy reads the same pack and resources
+through a reader `AssetFiles` hands the bridge, so one copy of the assets feeds both sides
+([PLAY.md](PLAY.md) §4). A pack is an index of paths, offsets and lengths followed by the files'
+bytes, uncompressed and read by position on one shared handle, so any part of a file is read
+without the rest and Bevy's loading threads read at once. The ids an export indexes in place of
+the sidecars are read from the pack too, so a packed game runs with no asset folder at all.
 
 A path with no prefix is under `assets://`, so every path written today keeps working.
 
@@ -367,7 +370,4 @@ remembers which saved entities they hold, `SaveGame.Save` writes the difference 
 
 ## Order
 
-Each step is usable on its own and is tested before the next.
-
-1. **A pack file** (§1), as a third place `AssetFiles` and the bridge read from, for a game whose
-   assets are too large to compile into its binaries.
+Every step of this plan is built.

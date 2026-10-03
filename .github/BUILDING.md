@@ -91,6 +91,10 @@ them, so the shared bridge serves them to Bevy and what a player is given is the
 the library with no folder beside them beyond the scripts and shaders the game compiles from their
 files ([PLAY.md](PLAY.md) §4).
 
+A game too large to hold in its assembly ships its assets in one pack file, `assets.pack` beside
+the executable, which the Play tab's export writes when asked to pack and which an app reads after
+the folder and before its assembly (`AssetPack`, [SCENES.md](SCENES.md) §1).
+
 They can be compiled into the bridge instead, which then serves one game:
 
 ```bash

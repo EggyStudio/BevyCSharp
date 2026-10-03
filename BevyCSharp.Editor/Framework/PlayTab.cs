@@ -1,4 +1,5 @@
 using System.Numerics;
+using Bevy;
 using ImGuiNET;
 
 namespace BevyCSharp.Editor.Framework;
@@ -25,7 +26,7 @@ public static class PlayTab
     private static int _seen;
 
     private static int _target;
-    private static bool _embed;
+    private static ShippedAssets _shipped;
 
     /// <summary>Draws it.</summary>
     public static void Draw()
@@ -199,12 +200,32 @@ public static class PlayTab
     }
 
     /// <summary>
-    /// The second row: which platform to export for, whether to embed the assets, and Export.
+    /// The second row: which platform to export for, how its assets ship, and Export.
     /// </summary>
     /// <remarks>
     /// Under the row that plays and builds rather than in it, since an export is asked for far less
     /// often and takes its own two choices, and the row above is already as wide as the tab.
     /// </remarks>
+    /// <summary>How a way of shipping the assets reads in the export row.</summary>
+    private static string ShippedLabel(ShippedAssets way) => way switch
+    {
+        ShippedAssets.Assembly => "In the assembly",
+        ShippedAssets.Pack => "In a pack",
+        _ => "As files",
+    };
+
+    /// <summary>What a way of shipping the assets gives a player, for its tooltip.</summary>
+    private static string ShippedTip(ShippedAssets way) => way switch
+    {
+        ShippedAssets.Assembly =>
+            "Compiles the assets into the game's own assembly, so a player gets no asset folder beyond "
+            + "scripts and shaders. Held in memory once the game starts, so for a game of modest size.",
+        ShippedAssets.Pack =>
+            $"Writes the assets into {AssetPack.DefaultName} beside the game, so a player gets no asset "
+            + "folder beyond scripts and shaders. Read a part at a time, so for a game of any size.",
+        _ => "Ships the asset folder beside the game, which a player can open and change.",
+    };
+
     private static void Export()
     {
         var targets = EditorPlay.Targets;
@@ -226,18 +247,23 @@ public static class PlayTab
         }
 
         ImGui.SameLine();
-        ImGui.Checkbox("Embed assets", ref _embed);
-
-        if (ImGui.IsItemHovered())
+        ImGui.SetNextItemWidth(EditorWidgets.PillWidth("In the assembly") + ImGui.GetFrameHeight());
+        if (ImGui.BeginCombo("##assets", ShippedLabel(_shipped)))
         {
-            EditorWidgets.Tip(
-                "Compiles the assets into the game's own assembly, so a player gets no asset folder "
-                + "beyond scripts and shaders, and the bridge is the one every game shares.");
+            foreach (var way in Enum.GetValues<ShippedAssets>())
+            {
+                if (ImGui.Selectable(ShippedLabel(way), way == _shipped)) _shipped = way;
+                if (ImGui.IsItemHovered()) EditorWidgets.Tip(ShippedTip(way));
+            }
+
+            ImGui.EndCombo();
         }
+
+        if (ImGui.IsItemHovered()) EditorWidgets.Tip(ShippedTip(_shipped));
 
         ImGui.SameLine();
         if (EditorWidgets.Pill("Export", EditorPlay.Busy && EditorPlay.Job == PlayJob.Exporting)
-            && EditorPlay.Export(targets[_target], _embed) is { } refused)
+            && EditorPlay.Export(targets[_target], _shipped) is { } refused)
         {
             Console.WriteLine($"[play] {refused}");
         }

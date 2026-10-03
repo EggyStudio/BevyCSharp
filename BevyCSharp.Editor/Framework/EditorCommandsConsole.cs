@@ -53,16 +53,16 @@ internal static class EditorConsoleCommands
         EditorPlay.PlayScene() ?? (EditorPlay.Running ? $"playing {EditorPlay.PlayedScene}" : "stopped");
 
     /// <summary>Exports the project as the Play tab's Export does, for a runtime identifier.</summary>
-    [Command("project.export", "Exports the project for a platform, with its assets in the game's assembly if asked: project.export <rid> [embed]")]
+    [Command("project.export", "Exports the project for a platform, with its assets as files, in the game's assembly or in a pack: project.export <rid> [embed|pack]")]
     internal static string Export(string line)
     {
         // One line rather than two arguments, so both words may be left out. A bare export is for
         // this machine, with the assets as files.
         var words = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var target = words.FirstOrDefault(word => word != "embed") ?? EditorPlay.Targets[0];
-        var embedding = words.Contains("embed");
+        var target = words.FirstOrDefault(word => word is not ("embed" or "pack")) ?? EditorPlay.Targets[0];
+        var assets = words.Contains("pack") ? ShippedAssets.Pack : words.Contains("embed") ? ShippedAssets.Assembly : ShippedAssets.Files;
 
-        return EditorPlay.Export(target, embedding)
+        return EditorPlay.Export(target, assets)
                ?? $"exporting to {EditorPlay.ExportFolder(target)}; the Play tab follows it";
     }
 

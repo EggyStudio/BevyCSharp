@@ -185,11 +185,14 @@ public static class EditorPlay
     /// than it and put over the one the publish copied after.
     /// </para>
     /// <para>
-    /// With <paramref name="embed"/>, the project's <c>assets</c> folder is compiled into the game's
-    /// assembly by the same publish (<c>BevyCSharpEmbedAssets</c>), and the asset folder is left out
-    /// of what ships, apart from the scripts and shaders the game compiles from their files. <see cref="AssetFiles"/> reads the managed side's files from the
-    /// assembly and hands Bevy a reader over the rest, so the bridge is the same shared one an export
-    /// that does not embed carries, and embedding costs no build of its own.
+    /// The assets ship as a folder beside the game, inside its assembly, or in a pack beside it
+    /// (<see cref="ShippedAssets"/>). Inside the assembly, the project's <c>assets</c> folder is
+    /// compiled in by the same publish (<c>BevyCSharpEmbedAssets</c>). In a pack, the published
+    /// folder is written into <see cref="AssetPack.DefaultName"/> after the publish. Either way the
+    /// asset folder is left out of what ships, apart from the scripts and shaders the game compiles
+    /// from their files, and <see cref="AssetFiles"/> reads the managed side's files from what the
+    /// game carries and hands Bevy a reader over the rest, so the bridge is the same shared one in
+    /// all three and no way of shipping costs a build of its own.
     /// </para>
     /// <para>
     /// Not trimmed, and not compiled ahead of time, since the script host the editor shares with a
@@ -197,9 +200,9 @@ public static class EditorPlay
     /// </para>
     /// </remarks>
     /// <param name="rid">The runtime identifier, such as <c>linux-x64</c>.</param>
-    /// <param name="embed">Whether to compile the assets into the game's assembly.</param>
+    /// <param name="assets">How the assets ship.</param>
     /// <returns>Why it could not start, or nothing once it has.</returns>
-    public static string? Export(string rid, bool embed)
+    public static string? Export(string rid, ShippedAssets assets)
     {
         Stop();
 
@@ -211,8 +214,8 @@ public static class EditorPlay
         var name = Path.GetFileNameWithoutExtension(project);
         var steps = new List<Step>();
 
-        if (embed && !Directory.Exists(Path.Combine(Path.GetDirectoryName(project)!, "assets")))
-            return $"{name} has no assets folder to embed";
+        if (assets != ShippedAssets.Files && !Directory.Exists(Path.Combine(Path.GetDirectoryName(project)!, "assets")))
+            return $"{name} has no assets folder to carry";
 
         if (Script() is { } script && Triple(rid) is { } triple && !Current(GameBridge(rid)))
         {
@@ -228,19 +231,30 @@ public static class EditorPlay
 
                 // The asset folder compiled into the game's assembly, where both sides read it
                 // (BevyCSharp.Embed.targets).
-                .. embed ? new[] { "-p:BevyCSharpEmbedAssets=true" } : [],
+                .. assets == ShippedAssets.Assembly ? new[] { "-p:BevyCSharpEmbedAssets=true" } : [],
             ],
             $"[play] publishing {name} for {rid}",
             () =>
             {
                 // Ids in one index rather than a sidecar beside every file, so the folder a player
                 // gets holds what the game loads.
-                var assets = Path.Combine(folder, "assets");
-                if (Directory.Exists(assets) && AssetIds.IndexForShipping(assets) is > 0 and var ids)
+                var published = Path.Combine(folder, "assets");
+                if (Directory.Exists(published) && AssetIds.IndexForShipping(published) is > 0 and var ids)
                     Say($"[play] {ids} asset ids written to {AssetIds.IndexName} in place of their sidecars");
 
                 Game(folder, rid);
-                if (embed) Embedded(folder);
+
+                // A pack left by an earlier export would be read over the files this one ships.
+                var pack = Path.Combine(folder, AssetPack.DefaultName);
+                if (assets != ShippedAssets.Pack && File.Exists(pack)) File.Delete(pack);
+
+                if (assets == ShippedAssets.Pack && Directory.Exists(published))
+                {
+                    var packed = AssetPack.Write(published, pack, file => !ReadHere(file));
+                    Say($"[play] {packed} files written to {AssetPack.DefaultName}");
+                }
+
+                if (assets != ShippedAssets.Files) Carried(folder, assets);
                 Say($"[play] exported {name} to {folder}, {Megabytes(folder)}");
             }));
 
@@ -248,8 +262,8 @@ public static class EditorPlay
         return null;
     }
 
-    /// <summary>Cuts the published assets down to the scripts and shaders, which the game's assembly does not carry.</summary>
-    private static void Embedded(string folder)
+    /// <summary>Cuts the published assets down to the scripts and shaders, which the game does not carry.</summary>
+    private static void Carried(string folder, ShippedAssets way)
     {
         var assets = Path.Combine(folder, "assets");
         if (!Directory.Exists(assets)) return;
@@ -273,9 +287,10 @@ public static class EditorPlay
             if (!Directory.EnumerateFileSystemEntries(directory).Any()) Directory.Delete(directory);
         }
 
+        var carrier = way == ShippedAssets.Pack ? "the pack" : "the game's assembly";
         Say(kept == 0
-            ? "[play] the game's assembly carries the assets, so the export has no asset folder"
-            : $"[play] the game's assembly carries the assets, and {kept} scripts and shaders stay beside them");
+            ? $"[play] {carrier} carries the assets, so the export has no asset folder"
+            : $"[play] {carrier} carries the assets, and {kept} scripts and shaders stay beside them");
     }
 
     /// <summary>The render bridge built for exports to <paramref name="rid"/>, or nothing outside a checkout.</summary>
@@ -596,4 +611,17 @@ public enum PlayJob
 
     /// <summary>An export, which is a publish and sometimes a bridge built before it.</summary>
     Exporting,
+}
+
+/// <summary>How an export ships the project's assets.</summary>
+public enum ShippedAssets
+{
+    /// <summary>As the asset folder beside the game, which a player can open and change.</summary>
+    Files,
+
+    /// <summary>Compiled into the game's assembly, for a game of modest size.</summary>
+    Assembly,
+
+    /// <summary>In one pack file beside the game, read a part at a time, for a game of any size.</summary>
+    Pack,
 }

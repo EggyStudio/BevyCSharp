@@ -294,9 +294,9 @@ the build wrote, which the console also shows marked `[game]` or `[build]`. It r
 unless the tab's field names another project. It is a tab rather than a button on the scene's
 toolbar, so the viewport holds the scene and the tools that act on it, and nothing about running the
 project. The game is a process of its own, so one that crashes leaves the editor running. A second
-row exports the project for a chosen platform, self-contained and with its assets compiled into its
-assembly if asked, into the project's `bin/Export/<rid>/`, which `project.export` does from the
-console too. While a game plays, the tab lists the running game's named entities and the fields of
+row exports the project for a chosen platform, self-contained, with its assets as files, compiled
+into its assembly or in a pack beside it, into the project's `bin/Export/<rid>/`, which
+`project.export` does from the console too. While a game plays, the tab lists the running game's named entities and the fields of
 the one picked, which can be changed for as long as it runs, with buttons that pause it and step it
 a frame at a time ([PLAY.md](PLAY.md) §2).
 

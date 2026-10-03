@@ -37,7 +37,7 @@ public sealed class AssetFilesTests : IDisposable
     [Fact]
     public void AFileNotOnDiskIsReadFromTheAssemblyAndOneOnDiskWins()
     {
-        Assert.True(AssetFiles.HasResources);
+        Assert.True(AssetFiles.CarriesFiles);
         Assert.True(AssetFiles.Exists("carried/note.json"));
         Assert.Contains("from the assembly", AssetFiles.ReadAllText("carried/note.json"));
 

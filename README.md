@@ -943,6 +943,15 @@ none, by Bevy and by the managed side's own reads alike, since the app hands the
 over the same resources as it starts. The assembly looked in is the entry one, or
 `Config.AssetAssembly` where something else starts the process, such as a test runner.
 
+A game too large for that ships a pack, one file of its assets that is read a part at a time:
+
+```csharp
+AssetPack.Write("assets", "bin/Export/linux-x64/assets.pack", file => !file.EndsWith(".cs"));
+```
+
+An app reads `assets.pack` beside its executable, or the one `Config.AssetPack` names, after the
+folder and before the assembly, on both sides of the bridge.
+
 Streaming is the other way to read. It reads parts of large files, a piece at a time, while the game
 runs, and texture and geometry streaming read their tiles and clusters with it.
 

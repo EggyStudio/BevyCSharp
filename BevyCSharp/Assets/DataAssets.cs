@@ -351,7 +351,7 @@ public static class DataAssets
                 found.Add(Path.GetRelativePath(root, file).Replace('\\', '/'));
         }
 
-        foreach (var file in AssetFiles.Embedded(Extension)) found.Add(file);
+        foreach (var file in AssetFiles.Carried(Extension)) found.Add(file);
 
         return [.. found.Where(file => type is null || TypeOf(file) == type)];
     }

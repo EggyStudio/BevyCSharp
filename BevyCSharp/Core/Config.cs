@@ -91,6 +91,25 @@ public sealed class Config
     public System.Reflection.Assembly? AssetAssembly { get; set; }
 
     /// <summary>
+    /// A pack the game's assets are read from after <see cref="AssetRoot"/>, or nothing for
+    /// <see cref="AssetPack.DefaultName"/> beside the executable when there is one.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A file is read from the folder first, then from the pack, then from
+    /// <see cref="AssetAssembly"/>, by the managed side's own reads and by Bevy's alike. A pack is
+    /// one file read a part at a time, for a game whose assets are too large to compile into its
+    /// assembly, and the Play tab's export writes one when asked to pack.
+    /// </para>
+    /// <para>
+    /// An empty string reads no pack, which a test or a tool reading only the folder sets. A pack
+    /// named here that cannot be opened stops the app from starting, since a game missing its
+    /// assets would start into a scene with nothing in it.
+    /// </para>
+    /// </remarks>
+    public string? AssetPack { get; set; }
+
+    /// <summary>
     /// The name the game's own files are kept under, in the platform's data directory.
     /// </summary>
     /// <remarks>

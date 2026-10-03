@@ -73,12 +73,14 @@ public sealed class EngineHarness : IDisposable
     /// The assembly whose resources carry asset files, as an exported game's does, or nothing for
     /// the entry assembly, which under the test runner is its host and carries none.
     /// </param>
+    /// <param name="pack">A pack to read assets from after the folder, or nothing for none.</param>
     public EngineHarness(
         uint frames = 4,
         bool discoverBehaviors = false,
         uint fps = 0,
         double fixedHz = 0,
-        System.Reflection.Assembly? carried = null)
+        System.Reflection.Assembly? carried = null,
+        string? pack = null)
     {
         _app = new App(new Config
         {
@@ -89,6 +91,7 @@ public sealed class EngineHarness : IDisposable
 
             AssetRoot = AssetDirectory,
             AssetAssembly = carried,
+            AssetPack = pack,
         });
 
         _app.AddPlugin(new EnginePlugin());

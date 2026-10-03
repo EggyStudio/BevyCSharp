@@ -167,6 +167,11 @@ beside a shipped game still replaces the one it carries. `Config.AssetAssembly` 
 assembly than the entry one, which a test runner needs, and a bridge built with `--embed` keeps its
 own source and ignores the managed one.
 
+A pack is the third way to ship, for a game too large to hold in its assembly. The export writes
+the published asset folder into `assets.pack` beside the game, scripts and shaders apart, and an
+app opens one there as it starts (or the one `Config.AssetPack` names), so the bridge reads it
+through the same reader, ahead of the assembly and behind the disk ([SCENES.md](SCENES.md) §1).
+
 ## 5. Saving settings and progress
 
 `bevy-persistent` 0.11 also targets Bevy 0.19. It wraps a resource in `Persistent<R>`, which loads
