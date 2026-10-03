@@ -738,13 +738,20 @@ fn standard_material(
 
     // Resolved before the material is built, because each one needs the world and
     // building it needs the world back to insert the result.
-    let mut textures: [Option<Handle<Image>>; 5] = Default::default();
+    let mut textures: [Option<Handle<Image>>; 12] = Default::default();
     let keys = [
         config.base_color_texture,
         config.normal_map,
         config.metallic_roughness_texture,
         config.emissive_texture,
         config.occlusion_texture,
+        config.clearcoat_texture,
+        config.clearcoat_roughness_texture,
+        config.clearcoat_normal_texture,
+        config.specular_transmission_texture,
+        config.diffuse_transmission_texture,
+        config.thickness_texture,
+        config.anisotropy_texture,
     ];
 
     for (slot, key) in keys.iter().enumerate() {
@@ -760,6 +767,13 @@ fn standard_material(
         metallic_roughness_texture,
         emissive_texture,
         occlusion_texture,
+        clearcoat_texture,
+        clearcoat_roughness_texture,
+        clearcoat_normal_texture,
+        specular_transmission_texture,
+        diffuse_transmission_texture,
+        thickness_texture,
+        anisotropy_texture,
     ] = textures;
 
     let alpha_mode = match config.alpha_mode {
@@ -815,6 +829,22 @@ fn standard_material(
         diffuse_transmission: config.diffuse_transmission,
         thickness: config.thickness,
         ior: config.ior,
+        attenuation_distance: config.attenuation_distance,
+        attenuation_color: Color::linear_rgba(
+            config.attenuation_color[0],
+            config.attenuation_color[1],
+            config.attenuation_color[2],
+            config.attenuation_color[3],
+        ),
+        anisotropy_strength: config.anisotropy_strength,
+        anisotropy_rotation: config.anisotropy_rotation,
+        clearcoat_texture,
+        clearcoat_roughness_texture,
+        clearcoat_normal_texture,
+        specular_transmission_texture,
+        diffuse_transmission_texture,
+        thickness_texture,
+        anisotropy_texture,
         ..Default::default()
     };
 
@@ -964,6 +994,20 @@ pub unsafe extern "C" fn bcs_render_material_read(handle: i32, out: *mut BcsMate
                     diffuse_transmission: material.diffuse_transmission,
                     thickness: material.thickness,
                     ior: material.ior,
+                    attenuation_distance: material.attenuation_distance,
+                    attenuation_color: {
+                        let color = material.attenuation_color.to_linear();
+                        [color.red, color.green, color.blue, color.alpha]
+                    },
+                    anisotropy_strength: material.anisotropy_strength,
+                    anisotropy_rotation: material.anisotropy_rotation,
+                    clearcoat_texture: key(material.clearcoat_texture),
+                    clearcoat_roughness_texture: key(material.clearcoat_roughness_texture),
+                    clearcoat_normal_texture: key(material.clearcoat_normal_texture),
+                    specular_transmission_texture: key(material.specular_transmission_texture),
+                    diffuse_transmission_texture: key(material.diffuse_transmission_texture),
+                    thickness_texture: key(material.thickness_texture),
+                    anisotropy_texture: key(material.anisotropy_texture),
                 };
 
                 unsafe { out.write(config) };
@@ -1531,6 +1575,17 @@ mod tests {
             diffuse_transmission: 0.1,
             thickness: 0.05,
             ior: 1.33,
+            attenuation_distance: 2.5,
+            attenuation_color: [0.9, 0.5, 0.25, 1.0],
+            anisotropy_strength: 0.7,
+            anisotropy_rotation: 0.3,
+            clearcoat_texture: -1,
+            clearcoat_roughness_texture: -1,
+            clearcoat_normal_texture: -1,
+            specular_transmission_texture: -1,
+            diffuse_transmission_texture: -1,
+            thickness_texture: -1,
+            anisotropy_texture: -1,
         };
 
         loan_world(app.world_mut(), || {
@@ -1549,6 +1604,11 @@ mod tests {
             assert_eq!(made.diffuse_transmission, read.diffuse_transmission);
             assert_eq!(made.thickness, read.thickness);
             assert_eq!(made.ior, read.ior);
+            assert_eq!(made.attenuation_distance, read.attenuation_distance);
+            assert_eq!(made.attenuation_color, read.attenuation_color);
+            assert_eq!(made.anisotropy_strength, read.anisotropy_strength);
+            assert_eq!(made.anisotropy_rotation, read.anisotropy_rotation);
+            assert_eq!(-1, read.clearcoat_normal_texture);
             assert_eq!(made.reflectance, read.reflectance);
             assert_eq!(made.roughness, read.roughness);
             assert_eq!(made.emissive, read.emissive);

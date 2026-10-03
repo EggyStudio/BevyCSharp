@@ -296,9 +296,11 @@ language.
   holding every entity, its components and its mesh and material, by file or, made in memory, as a
   primitive's recipe, a mesh's geometry or a material's settings, and either can be saved as a file
   of its own (`*.mesh.json`, `*.material.json`). The cards edit a primitive's measures and a
-  material's colors, surface, clearcoat, transmission and texture slots, and leave out what a
-  standard material has beyond `MaterialSettings`, such as anisotropy, attenuation and the maps
-  for clearcoat and transmission.
+  material's colors, surface, clearcoat, transmission, attenuation, anisotropy and every map those
+  have. What a standard material has beyond that is the specular tint and its maps, which UV set
+  each map reads, the depth map for parallax, the lightmap's exposure and a few switches (fog, a
+  normal map's green, depth bias, forward or deferred), which are left out until a card or a game
+  asks for one.
 - **A mesh and a material are shown by where they came from.** They are Bevy components holding
   typed handles, so the panel draws them as their own section with a card each, and a picker of
   shapes, what the scene uses and each mesh or material of each model file. An OBJ lists no parts,

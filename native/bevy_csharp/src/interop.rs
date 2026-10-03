@@ -977,6 +977,30 @@ pub struct BcsMaterialConfig {
     pub thickness: f32,
     /// How much light bends passing in, `1.5` for glass and Bevy's default.
     pub ior: f32,
+    /// How far light travels inside before it takes on `attenuation_color`, in world units, or
+    /// infinity for a clear material.
+    pub attenuation_distance: f32,
+    /// The color light takes on inside, linear RGBA.
+    pub attenuation_color: [f32; 4],
+    /// How much the highlight stretches along the surface, as brushed metal's does, from none at
+    /// zero to one.
+    pub anisotropy_strength: f32,
+    /// Radians the stretch is turned by, from the tangent.
+    pub anisotropy_rotation: f32,
+    /// Asset key of the clearcoat strength map, or `-1`.
+    pub clearcoat_texture: i32,
+    /// Asset key of the clearcoat roughness map, or `-1`.
+    pub clearcoat_roughness_texture: i32,
+    /// Asset key of the clearcoat's own normal map, or `-1`.
+    pub clearcoat_normal_texture: i32,
+    /// Asset key of the straight transmission map, or `-1`.
+    pub specular_transmission_texture: i32,
+    /// Asset key of the scattered transmission map, or `-1`.
+    pub diffuse_transmission_texture: i32,
+    /// Asset key of the thickness map, or `-1`.
+    pub thickness_texture: i32,
+    /// Asset key of the anisotropy direction and strength map, or `-1`.
+    pub anisotropy_texture: i32,
 }
 
 /// What kind of light to spawn and how it behaves.

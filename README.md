@@ -1166,11 +1166,20 @@ var water = Render.CreateMaterial(new MaterialSettings
     Transmission = 0.9f,
     Thickness = 0.5f,
     RefractiveIndex = 1.33f,
+    AttenuationDistance = 2f,               // a ray this far inside has taken on the color
+    AttenuationColor = (0.2f, 0.6f, 0.7f, 1f),
 });
 ```
 
+`AttenuationDistance` and `AttenuationColor` tint light on its way through, so thick glass is
+greener at its edge than its face. `AnisotropyStrength` and `AnisotropyRotation` stretch the
+highlight along the mesh's tangents, as brushed metal's is stretched. Each of these has a map
+beside it (`ClearcoatTexture`, `ClearcoatRoughnessTexture`, `ClearcoatNormalTexture`,
+`TransmissionTexture`, `DiffuseTransmissionTexture`, `ThicknessTexture`, `AnisotropyTexture`), and a
+glTF file's clearcoat, transmission and anisotropy extensions fill them as it loads.
+
 A material file and a scene write these only where they differ from a plain material's, and the
-editor's Material card keeps them in a Surface fold.
+editor's Material card keeps them in a Surface fold, with their maps in a Surface maps fold.
 
 #### A shader of your own
 

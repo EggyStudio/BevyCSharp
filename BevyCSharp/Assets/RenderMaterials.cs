@@ -367,4 +367,55 @@ public sealed class MaterialSettings
 
     /// <summary>How much light bends passing in, 1.5 for glass and 1.33 for water.</summary>
     public float RefractiveIndex { get; set; } = 1.5f;
+
+    /// <summary>
+    /// How far light travels inside before it has taken on <see cref="AttenuationColor"/>, in world
+    /// units, or infinity for a material that tints nothing.
+    /// </summary>
+    /// <remarks>
+    /// What makes thick glass greener at its edge than its face, or a deep pool bluer than a
+    /// shallow one. Read with <see cref="Thickness"/>, since a ray's path inside is worked out from
+    /// it, and seen only through a material that transmits.
+    /// </remarks>
+    public float AttenuationDistance { get; set; } = float.PositiveInfinity;
+
+    /// <summary>The color light takes on inside, linear RGBA. White tints nothing.</summary>
+    public (float R, float G, float B, float A) AttenuationColor { get; set; } = (1f, 1f, 1f, 1f);
+
+    /// <summary>
+    /// How much the highlight stretches along the surface, as brushed metal's and hair's do, from
+    /// none at zero to one.
+    /// </summary>
+    /// <remarks>
+    /// Stretched along the mesh's tangents, so a mesh needs them, which a glTF file exported with
+    /// tangents has and a primitive generates.
+    /// </remarks>
+    public float AnisotropyStrength { get; set; }
+
+    /// <summary>Radians the stretch is turned by, from the tangent.</summary>
+    public float AnisotropyRotation { get; set; }
+
+    /// <summary>Where the clearcoat is, in the red channel, multiplied by <see cref="Clearcoat"/>.</summary>
+    public AssetHandle ClearcoatTexture { get; set; } = AssetHandle.None;
+
+    /// <summary>How rough the clearcoat is, in the green channel, multiplied by <see cref="ClearcoatRoughness"/>.</summary>
+    public AssetHandle ClearcoatRoughnessTexture { get; set; } = AssetHandle.None;
+
+    /// <summary>The clearcoat's own normal map, so the varnish can be smooth over a bumpy surface or the other way round.</summary>
+    public AssetHandle ClearcoatNormalTexture { get; set; } = AssetHandle.None;
+
+    /// <summary>Where light passes straight through, in the red channel, multiplied by <see cref="Transmission"/>.</summary>
+    public AssetHandle TransmissionTexture { get; set; } = AssetHandle.None;
+
+    /// <summary>Where light passes through and scatters, in the alpha channel, multiplied by <see cref="DiffuseTransmission"/>.</summary>
+    public AssetHandle DiffuseTransmissionTexture { get; set; } = AssetHandle.None;
+
+    /// <summary>How thick the material is, in the green channel, multiplied by <see cref="Thickness"/>.</summary>
+    public AssetHandle ThicknessTexture { get; set; } = AssetHandle.None;
+
+    /// <summary>
+    /// The stretch's direction in red and green and its strength in blue, turned by
+    /// <see cref="AnisotropyRotation"/> and multiplied by <see cref="AnisotropyStrength"/>.
+    /// </summary>
+    public AssetHandle AnisotropyTexture { get; set; } = AssetHandle.None;
 }

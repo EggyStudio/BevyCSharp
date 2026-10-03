@@ -206,6 +206,17 @@ public static unsafe class Render
             DiffuseTransmission = read.DiffuseTransmission,
             Thickness = read.Thickness,
             RefractiveIndex = read.Ior,
+            AttenuationDistance = read.AttenuationDistance,
+            AttenuationColor = (read.AttenuationR, read.AttenuationG, read.AttenuationB, read.AttenuationA),
+            AnisotropyStrength = read.AnisotropyStrength,
+            AnisotropyRotation = read.AnisotropyRotation,
+            ClearcoatTexture = Texture(read.ClearcoatTexture),
+            ClearcoatRoughnessTexture = Texture(read.ClearcoatRoughnessTexture),
+            ClearcoatNormalTexture = Texture(read.ClearcoatNormalTexture),
+            TransmissionTexture = Texture(read.SpecularTransmissionTexture),
+            DiffuseTransmissionTexture = Texture(read.DiffuseTransmissionTexture),
+            ThicknessTexture = Texture(read.ThicknessTexture),
+            AnisotropyTexture = Texture(read.AnisotropyTexture),
         };
         return true;
 
@@ -500,6 +511,20 @@ public static unsafe class Render
             DiffuseTransmission = settings.DiffuseTransmission,
             Thickness = settings.Thickness,
             Ior = settings.RefractiveIndex,
+            AttenuationDistance = settings.AttenuationDistance,
+            AttenuationR = settings.AttenuationColor.R,
+            AttenuationG = settings.AttenuationColor.G,
+            AttenuationB = settings.AttenuationColor.B,
+            AttenuationA = settings.AttenuationColor.A,
+            AnisotropyStrength = settings.AnisotropyStrength,
+            AnisotropyRotation = settings.AnisotropyRotation,
+            ClearcoatTexture = Key(settings.ClearcoatTexture),
+            ClearcoatRoughnessTexture = Key(settings.ClearcoatRoughnessTexture),
+            ClearcoatNormalTexture = Key(settings.ClearcoatNormalTexture),
+            SpecularTransmissionTexture = Key(settings.TransmissionTexture),
+            DiffuseTransmissionTexture = Key(settings.DiffuseTransmissionTexture),
+            ThicknessTexture = Key(settings.ThicknessTexture),
+            AnisotropyTexture = Key(settings.AnisotropyTexture),
         };
 
         // An unset handle is -1, which the bridge reads as "no texture here".

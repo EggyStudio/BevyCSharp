@@ -221,6 +221,48 @@ public struct NativeMaterialConfig
 
     /// <summary>How much light bends passing in.</summary>
     public float Ior;
+
+    /// <summary>How far light travels inside before it takes on the attenuation color.</summary>
+    public float AttenuationDistance;
+
+    /// <summary>Attenuation color red, linear.</summary>
+    public float AttenuationR;
+
+    /// <summary>Attenuation color green, linear.</summary>
+    public float AttenuationG;
+
+    /// <summary>Attenuation color blue, linear.</summary>
+    public float AttenuationB;
+
+    /// <summary>Attenuation color alpha.</summary>
+    public float AttenuationA;
+
+    /// <summary>How much the highlight stretches.</summary>
+    public float AnisotropyStrength;
+
+    /// <summary>Radians the stretch is turned by.</summary>
+    public float AnisotropyRotation;
+
+    /// <summary>Asset key of the clearcoat map, or -1.</summary>
+    public int ClearcoatTexture;
+
+    /// <summary>Asset key of the clearcoat roughness map, or -1.</summary>
+    public int ClearcoatRoughnessTexture;
+
+    /// <summary>Asset key of the clearcoat normal map, or -1.</summary>
+    public int ClearcoatNormalTexture;
+
+    /// <summary>Asset key of the transmission map, or -1.</summary>
+    public int SpecularTransmissionTexture;
+
+    /// <summary>Asset key of the diffuse transmission map, or -1.</summary>
+    public int DiffuseTransmissionTexture;
+
+    /// <summary>Asset key of the thickness map, or -1.</summary>
+    public int ThicknessTexture;
+
+    /// <summary>Asset key of the anisotropy map, or -1.</summary>
+    public int AnisotropyTexture;
 }
 
 /// <summary>How an image should be sampled, and how its bytes should be read.</summary>

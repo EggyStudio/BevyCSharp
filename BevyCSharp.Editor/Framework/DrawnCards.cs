@@ -376,9 +376,9 @@ internal static class DrawnCards
                 Folded("How much a non-metal reflects head on. Half is four percent, which most things are.")),
             Field("Clearcoat", FieldKind.Float, settings => settings.Clearcoat, (settings, value) => Number(value, number => settings.Clearcoat = number),
                 Folded("A clear varnish over the surface, as a car's paint has.")),
-            Field("Coat roughness", FieldKind.Float, settings => settings.ClearcoatRoughness, (settings, value) => Number(value, number => settings.ClearcoatRoughness = number),
+            Field("Coat rough", FieldKind.Float, settings => settings.ClearcoatRoughness, (settings, value) => Number(value, number => settings.ClearcoatRoughness = number),
                 Folded("How rough the varnish is.")),
-            Field("Transmission", FieldKind.Float, settings => settings.Transmission, (settings, value) => Number(value, number => settings.Transmission = number),
+            Field("Transmit", FieldKind.Float, settings => settings.Transmission, (settings, value) => Number(value, number => settings.Transmission = number),
                 Folded("Light passing straight through, as through glass.")),
             Field("Diffuse", FieldKind.Float, settings => settings.DiffuseTransmission, (settings, value) => Number(value, number => settings.DiffuseTransmission = number),
                 Folded("Light passing through and scattering, as through a leaf or wax.")),
@@ -386,6 +386,23 @@ internal static class DrawnCards
                 new FieldHints(Tooltip: "How thick it is where light passes through, in world units.", Minimum: 0d, Maximum: 10d, Foldout: "Surface", FoldoutOpen: false)),
             Field("Refraction", FieldKind.Float, settings => settings.RefractiveIndex, (settings, value) => Number(value, number => settings.RefractiveIndex = number),
                 new FieldHints(Tooltip: "How much light bends passing in, 1.5 for glass and 1.33 for water.", Minimum: 1d, Maximum: 3d, Foldout: "Surface", FoldoutOpen: false)),
+
+            // Infinity, which tints nothing, shown as zero, since a number to drag cannot hold it
+            // and no distance a ray travels inside is zero.
+            Field("Absorb at", FieldKind.Float,
+                settings => float.IsFinite(settings.AttenuationDistance) ? settings.AttenuationDistance : 0f,
+                (settings, value) => Number(value, number => settings.AttenuationDistance = number > 0f ? number : float.PositiveInfinity),
+                new FieldHints(Tooltip: "How far light travels inside before it takes on the absorbed color, in world units. Zero tints nothing.", Minimum: 0d, Maximum: 100d, Foldout: "Surface", FoldoutOpen: false)),
+            Field("Absorbed", FieldKind.Color, settings => Linear(settings.AttenuationColor), (settings, value) =>
+            {
+                if (value is not Color color) return false;
+                settings.AttenuationColor = (color.R, color.G, color.B, color.A);
+                return true;
+            }, new FieldHints(Tooltip: "The color light takes on inside, as thick glass is greener at its edge.", Foldout: "Surface", FoldoutOpen: false)),
+            Field("Anisotropy", FieldKind.Float, settings => settings.AnisotropyStrength, (settings, value) => Number(value, number => settings.AnisotropyStrength = number),
+                Folded("How much the highlight stretches along the surface, as brushed metal's does.")),
+            Field("Stretch turn", FieldKind.Float, settings => settings.AnisotropyRotation, (settings, value) => Number(value, number => settings.AnisotropyRotation = number),
+                new FieldHints(Tooltip: "Radians the stretch is turned by, from the mesh's tangent.", Minimum: -3.1416d, Maximum: 3.1416d, Foldout: "Surface", FoldoutOpen: false)),
 
             // The texture slots, each picked in the grid from the images under the asset root and
             // inside models, named short enough for the name column, with what each is in full on
@@ -395,6 +412,15 @@ internal static class DrawnCards
             Texture("Metal map", "Metallic in the blue channel and roughness in the green, as glTF packs them.", settings => settings.MetallicRoughnessTexture, (settings, map) => settings.MetallicRoughnessTexture = map),
             Texture("Glow map", "The emissive texture, multiplied by the emissive color.", settings => settings.EmissiveTexture, (settings, map) => settings.EmissiveTexture = map),
             Texture("AO map", "Ambient occlusion, darkening the creases light reaches least.", settings => settings.OcclusionTexture, (settings, map) => settings.OcclusionTexture = map),
+
+            // The finer surface's maps, folded shut together for the same reason its numbers are.
+            Texture("Coat map", "Where the clearcoat is, in the red channel.", settings => settings.ClearcoatTexture, (settings, map) => settings.ClearcoatTexture = map, "Surface maps"),
+            Texture("Coat r. map", "How rough the clearcoat is, in the green channel.", settings => settings.ClearcoatRoughnessTexture, (settings, map) => settings.ClearcoatRoughnessTexture = map, "Surface maps"),
+            Texture("Coat normal", "The clearcoat's own normal map, apart from the surface's under it.", settings => settings.ClearcoatNormalTexture, (settings, map) => settings.ClearcoatNormalTexture = map, "Surface maps"),
+            Texture("Trans. map", "Where light passes straight through, in the red channel.", settings => settings.TransmissionTexture, (settings, map) => settings.TransmissionTexture = map, "Surface maps"),
+            Texture("Scatter map", "Where light passes through and scatters, in the alpha channel.", settings => settings.DiffuseTransmissionTexture, (settings, map) => settings.DiffuseTransmissionTexture = map, "Surface maps"),
+            Texture("Thick map", "How thick the material is, in the green channel.", settings => settings.ThicknessTexture, (settings, map) => settings.ThicknessTexture = map, "Surface maps"),
+            Texture("Stretch map", "The stretch's direction in red and green and its strength in blue.", settings => settings.AnisotropyTexture, (settings, map) => settings.AnisotropyTexture = map, "Surface maps"),
         };
 
         var schema = new ComponentSchema("Material", "Bevy.StandardMaterial", static () => -1, fields);
@@ -402,13 +428,13 @@ internal static class DrawnCards
         return schema;
 
         // A slot holding an image, or no image at all.
-        ComponentField Texture(string name, string says, Func<MaterialSettings, AssetHandle> read, Action<MaterialSettings, AssetHandle> write) =>
+        ComponentField Texture(string name, string says, Func<MaterialSettings, AssetHandle> read, Action<MaterialSettings, AssetHandle> write, string? fold = null) =>
             Field(name, FieldKind.Asset, settings => read(settings), (settings, value) =>
             {
                 if (value is not AssetHandle map) return false;
                 write(settings, map);
                 return true;
-            }, new FieldHints(Tooltip: says, Asset: AssetKind.Image));
+            }, new FieldHints(Tooltip: says, Asset: AssetKind.Image, Foldout: fold, FoldoutOpen: false));
 
         // Each field reads the material whole and writes it back whole, since the bridge takes a
         // material's settings together, and a write changes the one setting it names.
