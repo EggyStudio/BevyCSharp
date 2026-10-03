@@ -333,7 +333,7 @@ public static class AssetsTab
                 if (System.Runtime.CompilerServices.Unsafe.As<ImGuiPayloadPtr, IntPtr>(ref payload) != IntPtr.Zero)
                 {
                     var (pointerX, pointerY) = ctx.Input.MousePosition;
-                    EditorCommands.Place(ctx.Ecs, dragged, Ground(pointerX, pointerY));
+                    EditorCommands.Place(ctx.Ecs, dragged, Under(pointerX, pointerY));
                     _dragging = null;
                 }
 
@@ -344,11 +344,26 @@ public static class AssetsTab
         ImGui.End();
     }
 
-    /// <summary>Where the pointer's ray meets the ground, or nothing when it points above the horizon.</summary>
-    private static Vec3? Ground(float x, float y)
+    /// <summary>
+    /// Where a model dropped at a point on the scene goes: on the surface under the pointer, or on
+    /// the ground plane where the pointer is over nothing, or nowhere in particular above the horizon.
+    /// </summary>
+    /// <remarks>
+    /// On what is under the pointer, as Unity and Godot place a dragged model, so a lamp dropped on
+    /// a table stands on the table rather than under it on the floor. The surface is met by its
+    /// triangles (<see cref="Picking.TryCast"/>), and the model's own origin is put there.
+    /// </remarks>
+    private static Vec3? Under(float x, float y)
     {
         var camera = EditorSelection.Camera;
         if (camera.IsNone || !Render.TryRay(camera, x, y, out var origin, out var direction)) return null;
+
+        return Picking.TryCast(origin, direction, out _, out var point, out _) ? point : Ground(origin, direction);
+    }
+
+    /// <summary>Where a ray meets the ground, or nothing when it points above the horizon.</summary>
+    private static Vec3? Ground(Vec3 origin, Vec3 direction)
+    {
         if (direction.Y >= -1e-4f) return null;
 
         var along = -origin.Y / direction.Y;

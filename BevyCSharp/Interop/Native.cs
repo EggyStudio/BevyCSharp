@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 162;
+    internal const int ExpectedAbiVersion = 163;
 
     static Native() => NativeLoader.Initialize();
 
@@ -1075,6 +1075,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_pick_events(ulong* buffer, int capacity);
+
+    /// <summary>Casts a ray at the scene's meshes and writes the nearest it meets.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_pick_ray(float* origin, float* direction, ulong* entity, float* point, float* normal);
 
     /// <summary>Projects a world point onto a camera's viewport, in logical pixels.</summary>
     [LibraryImport(Library)]

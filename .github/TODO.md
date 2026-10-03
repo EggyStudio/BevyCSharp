@@ -50,12 +50,11 @@ entities, entity references, data references, ids kept across saves, and Bevy's 
 console. A type or field renamed with `[FormerName]` or reshaped behind `[DataVersion]` still
 reads its old files, and what a build cannot read is kept and written back. Every file a scene
 refers to is named by an id that survives a rename in the asset browser. The editor's document is `assets/world.scene.json`, opened at start and written by
-Project/Save. What [SCENES.md](SCENES.md) has left:
-
-- **A model dropped on the viewport lands on the ground, not on what is under the pointer.**
-  `SceneInstances` places a glTF scene or another scene file with overrides a scene file keeps,
-  one inside another, with children added under its nodes and renames kept, and the editor
-  records what is edited on one of its nodes, marks a changed field and reverts it (SCENES.md §5).
+Project/Save. `SceneInstances` places a glTF scene or another scene file with overrides a scene
+file keeps, one inside another, with children added under its nodes and renames kept, and the
+editor records what is edited on one of its nodes, marks a changed field and reverts it, and puts
+a model dropped on the view on whatever is under the pointer (SCENES.md §5). What
+[SCENES.md](SCENES.md) has left:
 - **Saves are JSON and diff whole components.** `SaveGame` saves and loads what play changed over
   the scenes a game started from, with the `Persistent<T>` values a slot carries, and `user://`
   reaches both sides of the bridge. A component changed in one field is written whole, and a save

@@ -86,3 +86,87 @@ pub unsafe extern "C" fn bcs_pick_events(out: *mut u64, capacity: i32) -> i32 {
         }
     })
 }
+
+/// Casts a ray at the scene's meshes and writes the nearest one it meets, where, and which way the
+/// surface there faces.
+///
+/// What a model dropped on the viewport is put on, rather than the ground plane under the
+/// pointer. Bevy's `MeshRayCast` tests the ray against every mesh's triangles, nearest first.
+/// Only meshes on the default render layer are met, so the editor's previews, which are drawn on
+/// layers of their own, are never in the way.
+///
+/// Returns [`status::NOT_PRESENT`] when the ray meets nothing.
+///
+/// # Safety
+/// `origin` and `direction` must hold three floats each. `entity` must be writable, and `point`
+/// and `normal` writable for three floats each, or null to skip them.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_pick_ray(
+    origin: *const f32,
+    direction: *const f32,
+    entity: *mut u64,
+    point: *mut f32,
+    normal: *mut f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        if origin.is_null() || direction.is_null() || entity.is_null() {
+            return status::NULL_ARG;
+        }
+
+        #[cfg(not(feature = "editor"))]
+        {
+            let _ = (point, normal);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "editor")]
+        {
+            use bevy::camera::visibility::RenderLayers;
+            use bevy::ecs::system::SystemState;
+            use bevy::math::{Dir3, Ray3d, Vec3};
+            use bevy::picking::mesh_picking::ray_cast::{MeshRayCast, MeshRayCastSettings};
+
+            let from = unsafe { Vec3::from_slice(std::slice::from_raw_parts(origin, 3)) };
+            let towards = unsafe { Vec3::from_slice(std::slice::from_raw_parts(direction, 3)) };
+            let Ok(towards) = Dir3::new(towards) else {
+                return status::NULL_ARG;
+            };
+
+            crate::state::with_world(|world| {
+                // Which entities sit off the default layer, gathered before the cast borrows the
+                // world, since the filter it takes cannot ask the world itself.
+                let mut layered = world.query::<(bevy::ecs::entity::Entity, &RenderLayers)>();
+                let elsewhere: std::collections::HashSet<_> = layered
+                    .iter(world)
+                    .filter(|(_, layers)| !layers.intersects(&RenderLayers::layer(0)))
+                    .map(|(found, _)| found)
+                    .collect();
+
+                let mut state = SystemState::<MeshRayCast>::new(world);
+                let Ok(mut cast) = state.get_mut(world) else {
+                    return status::NOT_PRESENT;
+                };
+
+                let keep = |found: bevy::ecs::entity::Entity| !elsewhere.contains(&found);
+                let settings = MeshRayCastSettings::default().with_filter(&keep);
+
+                let Some((hit, at)) = cast.cast_ray(Ray3d::new(from, towards), &settings).first().cloned() else {
+                    return status::NOT_PRESENT;
+                };
+
+                unsafe {
+                    entity.write(hit.to_bits());
+
+                    if !point.is_null() {
+                        std::ptr::copy_nonoverlapping(at.point.to_array().as_ptr(), point, 3);
+                    }
+                    if !normal.is_null() {
+                        std::ptr::copy_nonoverlapping(at.normal.normalize_or_zero().to_array().as_ptr(), normal, 3);
+                    }
+                }
+
+                status::OK
+            })
+        }
+    })
+}

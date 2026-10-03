@@ -251,20 +251,19 @@ Bevy spawns a glTF scene's nodes a frame or more after `SpawnScene` returns, whe
 loaded, and overrides are applied when Bevy reports the instance ready. A `.scene.json` instance
 is spawned on the managed side and applied in the same frame.
 
+A child added under a node belongs to the placing scene. An instance takes note of what its scene
+spawned when its overrides are first applied (`SceneInstances.IsFromModel`), and an entity under
+one of its nodes that is not among them is the placing scene's own, written there as an ordinary
+entity under the instance's root, with `{ "at": "Main/Hull", "child": 8 }` naming the node it goes
+under once the instance has spawned. It can be edited, renamed and deleted as any entity of the
+scene, and records no override. A model dropped on the view is placed on whatever is under the
+pointer, met by its triangles (`Picking.TryCast`), and on the ground where nothing is.
+
 Not built:
 
-- **A child added under a node** is built. An instance takes note of what its scene spawned when
-  its overrides are first applied (`SceneInstances.IsFromModel`), and an entity under one of its
-  nodes that is not among them is the placing scene's own: written there as an ordinary entity,
-  under the instance's root, with `{ "at": "Main/Hull", "child": 8 }` naming the node it goes
-  under once the instance has spawned. It can be edited, renamed and deleted as any entity of
-  the scene, and records no override.
 - **One of Bevy's reflected components** is recorded whole and is neither marked field by field
   nor reverted, and removing a model's component and undoing it leaves an add holding its values
   rather than no override.
-- **Dropping a model or a scene on the viewport** places it where the pointer meets the ground
-  (`AssetsTab.SceneDrop`), with nothing under the pointer taken into account, so a model dropped
-  on a table lands at the table's feet.
 
 ## 6. Data assets
 

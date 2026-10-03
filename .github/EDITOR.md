@@ -251,7 +251,8 @@ in the scene" for a model or a scene, and its path, size, last change and id.
 
 A model or scene tile's "Place in the scene" puts it in the scene being edited as an instance
 ([SCENES.md](SCENES.md), §5), named after its file, in front of the camera, and dragging the tile
-onto the scene puts it where the pointer meets the ground. An edit in the details
+onto the scene puts it on whatever is under the pointer, met by its triangles
+(`Picking.TryCast`, `bcs_pick_ray`), or on the ground where nothing is. An edit in the details
 panel or with the gizmo to one of its nodes is kept as an override, so the scene file holds the change rather than
 a copy of the model, and the field's name turns the accent color. Right-clicking the name puts the
 model's value back, as one step to undo. Setting a field back to the model's value, by hand or by
