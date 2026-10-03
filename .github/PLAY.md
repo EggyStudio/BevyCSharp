@@ -93,8 +93,9 @@ Built: a row under Play and Build with a choice of runtime identifier (this mach
 "Embed assets" box and Export, which runs `dotnet publish -c Release -r <rid> --self-contained` into
 the project's own `bin/Export/<rid>/`, where version control already looks away. With the box
 ticked, the project's assets are first compiled into a bridge of its own (§4), which replaces the
-one the publish copied, and the asset folder is cut down to the JSON files and ids the managed side
-reads for itself. `EditorPlay` runs the steps as a chain of processes, each started when the one
+one the publish copied, and the asset folder is cut down to the JSON files the managed side reads
+for itself. Either way the ids beside the files become one `uids.json`, and the sidecars are
+left out of what ships. `EditorPlay` runs the steps as a chain of processes, each started when the one
 before it ends well, and the tab names the step that failed. The exported sample starts and draws
 as the debug build does.
 

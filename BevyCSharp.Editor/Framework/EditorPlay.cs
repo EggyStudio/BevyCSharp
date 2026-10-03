@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Bevy;
 
 namespace BevyCSharp.Editor.Framework;
 
@@ -186,6 +187,12 @@ public static class EditorPlay
             $"[play] publishing {name} for {rid}",
             () =>
             {
+                // Ids in one index rather than a sidecar beside every file, so the folder a player
+                // gets holds what the game loads.
+                var assets = Path.Combine(folder, "assets");
+                if (Directory.Exists(assets) && AssetIds.IndexForShipping(assets) is > 0 and var ids)
+                    Say($"[play] {ids} asset ids written to {AssetIds.IndexName} in place of their sidecars");
+
                 if (embed) Embedded(folder, rid);
                 else Game(folder, rid);
                 Say($"[play] exported {name} to {folder}, {Megabytes(folder)}");

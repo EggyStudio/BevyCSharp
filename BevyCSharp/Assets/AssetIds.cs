@@ -150,8 +150,9 @@ public static class AssetIds
     /// <param name="path">Where to write it, or nothing for <see cref="IndexName"/> at the root.</param>
     /// <returns>How many ids were written.</returns>
     /// <remarks>
-    /// Sorted by id, so an index written twice from the same files is the same file. For the export
-    /// in PLAY.md to call once it has copied the assets.
+    /// Sorted by id, so an index written twice from the same files is the same file. The sidecars
+    /// stay, since this root is the one being edited. An export writes its index over its own copy
+    /// with <see cref="IndexForShipping"/> instead, which also takes the sidecars out.
     /// </remarks>
     public static int WriteIndex(string? path = null)
     {
@@ -162,7 +163,41 @@ public static class AssetIds
             entries = [.. Paths.OrderBy(entry => entry.Key)];
         }
 
-        var target = path ?? Path.Combine(Root, IndexName);
+        return Write(path ?? Path.Combine(Root, IndexName), entries);
+    }
+
+    /// <summary>
+    /// Turns the sidecars under a folder into the one index a shipped game carries, writing
+    /// <see cref="IndexName"/> at its root and deleting the sidecars.
+    /// </summary>
+    /// <param name="root">The asset folder of an export, which is a copy and not the project's own.</param>
+    /// <returns>How many ids the index holds, or zero when there were none and no index was written.</returns>
+    /// <remarks>
+    /// For a folder other than the root this app reads, since an export copies a project's assets
+    /// somewhere of its own and the editor that runs it reads another project's. Nothing this app
+    /// has indexed is touched. Deleting the sidecars makes a copy fit to ship and would leave a
+    /// project being edited without its ids, so the root this app reads is refused.
+    /// </remarks>
+    public static int IndexForShipping(string root)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(root);
+        if (Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar) == Path.GetFullPath(Root).TrimEnd(Path.DirectorySeparatorChar))
+            throw new InvalidOperationException("The sidecars of the folder this app reads assets from are its ids, and are not removed.");
+
+        var found = new Dictionary<ulong, string>();
+        Scan(root, found);
+
+        // A project that never gave a file an id ships no index, rather than one that names nothing.
+        var written = found.Count == 0 ? 0 : Write(Path.Combine(root, IndexName), [.. found.OrderBy(entry => entry.Key)]);
+
+        foreach (var sidecar in Directory.EnumerateFiles(root, "*" + Extension, SearchOption.AllDirectories).ToArray())
+            File.Delete(sidecar);
+
+        return written;
+    }
+
+    private static int Write(string target, KeyValuePair<ulong, string>[] entries)
+    {
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(target))!);
 
         using (var stream = File.Create(target))
@@ -188,6 +223,13 @@ public static class AssetIds
         if (!Directory.Exists(root)) return;
 
         ReadIndex(Path.Combine(root, IndexName));
+        Scan(root, Paths);
+    }
+
+    /// <summary>Adds the id of every sidecar under a folder whose file is there, by the file's path from the folder.</summary>
+    private static void Scan(string root, Dictionary<ulong, string> into)
+    {
+        if (!Directory.Exists(root)) return;
 
         foreach (var sidecar in Directory.EnumerateFiles(root, "*" + Extension, SearchOption.AllDirectories))
         {
@@ -197,7 +239,7 @@ public static class AssetIds
             try
             {
                 if (Parse(File.ReadAllText(sidecar)) is { } id)
-                    Paths[id] = Normalized(Path.GetRelativePath(root, asset));
+                    into[id] = Normalized(Path.GetRelativePath(root, asset));
             }
             catch (IOException)
             {

@@ -104,6 +104,39 @@ public sealed class AssetIdTests : IDisposable
         Assert.Null(AssetIds.PathOf(id));
     }
 
+    [Fact]
+    public void AnExportsCopyIsIndexedAndLosesItsSidecarsWhileTheProjectKeepsThem()
+    {
+        File.WriteAllText(Path.Combine(_root, "models/ship.glb"), "not really a model");
+        var id = AssetIds.IdOf("models/ship.glb", create: true);
+
+        // The folder an export copies the assets to, which is not the root this app reads.
+        var copy = _root + "-export";
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(copy, "models"));
+            File.Copy(Path.Combine(_root, "models/ship.glb"), Path.Combine(copy, "models/ship.glb"));
+            File.Copy(Path.Combine(_root, "models/ship.glb.uid"), Path.Combine(copy, "models/ship.glb.uid"));
+
+            // A sidecar whose file is not shipped names nothing.
+            File.WriteAllText(Path.Combine(copy, "models/gone.glb.uid"), "00000000000000bb");
+
+            Assert.Equal(1, AssetIds.IndexForShipping(copy));
+            Assert.Empty(Directory.GetFiles(copy, "*.uid", SearchOption.AllDirectories));
+
+            using var index = JsonDocument.Parse(File.ReadAllText(Path.Combine(copy, AssetIds.IndexName)));
+            Assert.Equal("models/ship.glb", index.RootElement.GetProperty("ids").GetProperty(id.ToString("x16")).GetString());
+
+            // The project keeps its own, and its own root is never stripped.
+            Assert.True(File.Exists(Path.Combine(_root, "models/ship.glb.uid")));
+            Assert.Throws<InvalidOperationException>(() => AssetIds.IndexForShipping(_root));
+        }
+        finally
+        {
+            if (Directory.Exists(copy)) Directory.Delete(copy, recursive: true);
+        }
+    }
+
     /// <summary>A file reference as a scene would write it.</summary>
     private static JsonDocument Written(SceneReferences references, string path)
     {

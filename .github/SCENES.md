@@ -96,12 +96,12 @@ Built in `BevyCSharp/Assets/AssetIds.cs`, and used by data assets (§6).
   sidecar along or away with it.
 - **A shipped game carries an index**, `uids.json` at the asset root (`AssetIds.WriteIndex`, format
   `bevycsharp.uids.1`), instead of the sidecars. It is read before them, a sidecar wins over it,
-  and an entry naming a file that is not there is passed over.
+  and an entry naming a file that is not there is passed over. The Play tab's export writes it
+  over its own copy of the assets and takes the sidecars out (`AssetIds.IndexForShipping`), and
+  writes none for a project that never gave a file an id.
 
 Not built:
 
-- **Nothing writes the index for a shipped game,** since the export in [PLAY.md](PLAY.md) that
-  calls `AssetIds.WriteIndex` is not built.
 - **A file renamed outside the editor without its sidecar** loses its id, and a reference to it
   falls back to the old path, which is gone. Watching for the rename and moving the sidecar after
   it would cover a rename made in a file manager.
@@ -368,5 +368,6 @@ remembers which saved entities they hold, `SaveGame.Save` writes the difference 
 
 Each step is usable on its own and is tested before the next.
 
-1. **Embedded and packed `assets://`** (§1), with the export in [PLAY.md](PLAY.md), which writes
-   the id index.
+1. **Embedded and packed `assets://`** (§1). The managed reads (scenes, data assets, material and
+   mesh files) go through one reader over a folder, the game's embedded resources or a pack, so an
+   export that embeds its assets ships no folder at all.
