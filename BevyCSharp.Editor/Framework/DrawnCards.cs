@@ -371,8 +371,9 @@ internal static class DrawnCards
                 return true;
             }),
 
-            // The texture slots, each picked from the images under the asset root, named short enough
-            // for the name column, with what each is in full on the name's tooltip.
+            // The texture slots, each picked in the grid from the images under the asset root and
+            // inside models, named short enough for the name column, with what each is in full on
+            // the name's tooltip.
             Texture("Color map", "The base color texture, multiplied by the base color.", settings => settings.BaseColorTexture, (settings, map) => settings.BaseColorTexture = map),
             Texture("Normal map", "Bends the lighting across the surface without changing its shape.", settings => settings.NormalMap, (settings, map) => settings.NormalMap = map),
             Texture("Metal map", "Metallic in the blue channel and roughness in the green, as glTF packs them.", settings => settings.MetallicRoughnessTexture, (settings, map) => settings.MetallicRoughnessTexture = map),

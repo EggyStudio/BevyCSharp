@@ -29,9 +29,10 @@ internal static class FieldPickers
     internal static void Asset(
         BehaviorContext ctx, Entity entity, ComponentField field, string id, object? value)
     {
-        // What it holds, and a list of what it could hold instead. The files are asked for when
-        // the list opens rather than when the row is drawn, because a field that listed the
-        // project every frame would read the disk sixty times a second.
+        // What the picker chose since the last frame, written here, inside the row, so the row
+        // records it as an edit it made and puts it in the history like any other.
+        if (Take(entity, field) is AssetHandle picked) field.Write(ctx.Ecs, entity, picked);
+
         var handle = value as AssetHandle? ?? AssetHandle.None;
         var held = Called(handle);
         var kind = field.Hints.Asset ?? AssetKind.Mesh;
@@ -47,27 +48,90 @@ internal static class FieldPickers
             if (ImGui.IsItemHovered()) EditorWidgets.Tip(picture);
 
             ImGui.SameLine(0f, ImGui.GetStyle().ItemInnerSpacing.X);
-            ImGui.SetNextItemWidth(MathF.Max(1f, ImGui.GetContentRegionAvail().X));
         }
 
-        EditorWidgets.Picking(id, held, () =>
+        // The grid the mesh and material rows open, so every asset is picked one way, by its
+        // picture where it has one. The files are read when the window opens rather than each
+        // frame it is up, since a texture slot also offers the images inside every model, and
+        // reading every model sixty times a second to offer them is a cost for nothing.
+        if (ImGui.Button($"{held}##{id}", new System.Numerics.Vector2(-1f, 0f)))
         {
-            if (ImGui.Selectable("Nothing")) field.Write(ctx.Ecs, entity, AssetHandle.None);
-
-            RoundedRows.Row();
-
-            foreach (var file in EditorAssets.Every(Suits(field, kind)))
-            {
-                var chosen = ImGui.Selectable(file, file == held);
-
-                RoundedRows.Row(file == held);
-
-                // Loaded when it is chosen rather than when the list was built. A list that
-                // loaded everything it offered would load the project to ask a question.
-                if (chosen) field.Write(ctx.Ecs, entity, AssetServer.Load(kind, file));
-            }
-        });
+            var offered = new Lazy<IReadOnlyList<PickerItem>>(() => Offered(entity, field, kind));
+            PickerWindow.Open(Hint(kind), () => offered.Value, "Nothing to pick", "Pick", grid: true);
+        }
     }
+
+    /// <summary>What an asset field can be given: nothing, then the files that suit it.</summary>
+    private static IReadOnlyList<PickerItem> Offered(Entity entity, ComponentField field, string kind)
+    {
+        var items = new List<PickerItem>
+        {
+            new("Nothing", EditorIcons.File, _ => Give(entity, field, AssetHandle.None)),
+        };
+
+        foreach (var file in EditorAssets.Every(Suits(field, kind)))
+        {
+            // Loaded when it is chosen rather than when the list was built. A list that loaded
+            // everything it offered would load the project to ask a question.
+            items.Add(new PickerItem(
+                EditorAssets.NameOf(file),
+                EditorAssets.IconOf(file),
+                _ => Give(entity, field, AssetServer.Load(kind, file)),
+                "Files",
+                file));
+        }
+
+        // An image a model carries inside it is an image like any other, and the browser shows it
+        // among the model's parts, so a texture slot offers it as well.
+        if (kind == AssetKind.Image && field.Hints.Extensions is not { Length: > 0 })
+        {
+            foreach (var model in EditorAssets.Every(EditorAssets.ExtensionsFor(AssetKind.Gltf)))
+            {
+                foreach (var part in GltfContents.Read(model) ?? [])
+                {
+                    if (part.Kind != AssetKind.Image || part.File is not null) continue;
+
+                    var path = part.PathIn(model);
+                    items.Add(new PickerItem(
+                        EditorAssets.NameOf(path),
+                        EditorIcons.Image,
+                        _ => Give(entity, field, AssetServer.Load(kind, path)),
+                        "Inside models",
+                        path));
+                }
+            }
+        }
+
+        return items;
+    }
+
+    /// <summary>What the picker's search box says while it waits, by what is being picked.</summary>
+    private static string Hint(string kind) => kind switch
+    {
+        AssetKind.Image => "Pick an image",
+        AssetKind.Audio => "Pick a sound",
+        AssetKind.Font => "Pick a font",
+        AssetKind.Scene or AssetKind.Gltf => "Pick a scene",
+        _ => "Pick a file",
+    };
+
+    /// <summary>
+    /// Holds what the picker chose for a field until the field's row is next drawn, which writes it.
+    /// </summary>
+    /// <remarks>
+    /// The picker is a window drawn apart from the details, after them, so a value it wrote itself
+    /// would land outside the row and never be seen changing by it. The row records an edit in the
+    /// history, marks an instance's override and runs what the field asked to have run when it
+    /// changes, and a value it never saw change gets none of that. Held by the entity and the field, so a value picked for one entity is not
+    /// written to another selected in the meantime.
+    /// </remarks>
+    internal static void Give(Entity entity, ComponentField field, object value) => Picked[(entity, field)] = value;
+
+    /// <summary>What the picker chose for a field, once, or nothing.</summary>
+    internal static object? Take(Entity entity, ComponentField field) =>
+        Picked.Remove((entity, field), out var value) ? value : null;
+
+    private static readonly Dictionary<(Entity, ComponentField), object> Picked = [];
 
     /// <summary>A link to another entity, chosen from the ones with names.</summary>
     /// <param name="ctx">This frame.</param>

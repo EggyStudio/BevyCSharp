@@ -248,9 +248,9 @@ var table = chest.Loot.Value;   // or DataAssets.Get(chest.Loot)
 
 ### The drawer
 
-- **Picking.** A `DataRef<T>` field in the inspector is a row with the file's path, offering the
-  data files whose type is `T`, and "Nothing". A file is given an id as it is picked, so the
-  reference keeps working when the file is renamed.
+- **Picking.** A `DataRef<T>` field in the inspector is a button with the file's path, which opens
+  the grid every asset field opens, offering the data files whose type is `T`, and "Nothing". A
+  file is given an id as it is picked, so the reference keeps working when the file is renamed.
 - **Selecting a data asset** in the asset browser shows its fields in the details panel, as a
   component's are, and an edit writes the file at the end of the frame, so a slider dragged across
   a field writes once a frame. Each edit is one step in `EditorHistory`.

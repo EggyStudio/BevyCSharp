@@ -158,8 +158,12 @@ Built: the Mesh and Material rows open `PickerWindow` in its grid mode, with "Bu
 scene" and "Files" as below, each a heading over a row of tiles. A tile is the browser's
 (`AssetGrid.Face`), wearing the thumbnail of the file or model part it stands for
 (`PickerItem.Path`), and the arrows move a row at a time. Every mesh and material of every model is
-offered. Not built: pictures for the built-in shapes and for what the scene uses, which have no
-file to draw, and the same window for textures, sounds and data assets.
+offered. Every other asset field opens the same window: a texture slot offers the images under the
+asset root and those inside models, a sound field the sounds, and a `DataRef<T>` the data files of
+its type. What is picked is held until the field's row is next drawn and written there
+(`FieldPickers.Give`), so the row records it in the history as it records an edit typed into it.
+Not built: pictures for the built-in shapes and for what the scene uses, which have no file to
+draw.
 
 - **`AssetGrid`** comes out of `AssetsTab`: the tiles, the search, the kind chips and the
   thumbnails. The tab draws it, and `PickerWindow` gains a grid mode that draws it too, with
@@ -205,9 +209,7 @@ no file, as `Render.CreateMesh` makes it today. Godot's answer fits both, and is
 
 Each step is usable on its own and tested before the next.
 
-1. **One picker for every asset field.** Texture slots, sounds and `DataRef<T>` data assets open
-   the grid `PickerWindow` the mesh and material rows open, rather than a list of paths.
-2. **Pictures for what has no file.** The picker's built-in shapes and the meshes and materials the
+1. **Pictures for what has no file.** The picker's built-in shapes and the meshes and materials the
    scene already uses are drawn by `PreviewRenderer` like a file's thumbnail, keyed by the shape
    or the handle rather than a path.
-3. **Sub-meshes** on the Mesh card, each primitive of a model's mesh with its own material slot.
+2. **Sub-meshes** on the Mesh card, each primitive of a model's mesh with its own material slot.

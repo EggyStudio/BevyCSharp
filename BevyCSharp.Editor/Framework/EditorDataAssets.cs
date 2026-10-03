@@ -60,30 +60,44 @@ public static class EditorDataAssets
     /// <summary>
     /// A field holding a reference to a data asset, chosen from the files of its type.
     /// </summary>
+    /// <remarks>
+    /// In the grid every asset field opens, with a tile per file. A data asset has no picture, so
+    /// its tile wears the data icon and its name. Read when the window opens, since knowing a
+    /// file's type means opening it.
+    /// </remarks>
     internal static void Picker(
         BehaviorContext ctx, Entity entity, ComponentField field, string id, object? value)
     {
+        // Written inside the row, as an asset field's pick is, so the row records it.
+        if (FieldPickers.Take(entity, field) is ulong picked) field.Write(ctx.Ecs, entity, picked);
+
         var held = value is IDataRef { Id: not 0 } reference
             ? AssetIds.PathOf(reference.Id) ?? "missing file"
             : "Nothing";
 
-        EditorWidgets.Picking(id, held, () =>
-        {
-            if (ImGui.Selectable("Nothing")) field.Write(ctx.Ecs, entity, 0UL);
+        if (!ImGui.Button($"{held}##{id}", new System.Numerics.Vector2(-1f, 0f))) return;
 
-            RoundedRows.Row();
+        var type = field.Hints.Asset;
+        var offered = new Lazy<IReadOnlyList<PickerItem>>(() =>
+        [
+            new PickerItem("Nothing", EditorIcons.File, _ => FieldPickers.Give(entity, field, 0UL)),
 
-            foreach (var file in Of(field.Hints.Asset))
-            {
-                var chosen = ImGui.Selectable(file, file == held);
+            // Given an id as it is chosen, so a file never referred to before is referred to by
+            // the id that keeps the reference through a rename.
+            .. Of(type).Select(file => new PickerItem(
+                EditorAssets.NameOf(file),
+                EditorIcons.Data,
+                _ => FieldPickers.Give(entity, field, AssetIds.IdOf(file, create: true)),
+                "Files",
+                file)),
+        ]);
 
-                RoundedRows.Row(file == held);
-
-                // Given an id as it is chosen, so a file never referred to before is referred to
-                // by the id that keeps the reference through a rename.
-                if (chosen) field.Write(ctx.Ecs, entity, AssetIds.IdOf(file, create: true));
-            }
-        });
+        PickerWindow.Open(
+            type is null ? "Pick a data asset" : $"Pick a {Short(type)}",
+            () => offered.Value,
+            "No data assets of this type",
+            "Pick",
+            grid: true);
     }
 
     /// <summary>
