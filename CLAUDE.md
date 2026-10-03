@@ -90,3 +90,6 @@ Stop any serving session before running the suite.
   Adding one is writing one.
 - Prose in this repository follows `.github/STYLE.md`, which governs comments, XML documentation,
   messages and Markdown. Read it before writing any of them.
+- Each finished batch of work is committed on `main` and never pushed, with a message whose subject
+  is three invisible marks and whose description is one plain sentence. `.github/COMMITS.md` has
+  the exact form and how to split a batch that shares a file with another.
