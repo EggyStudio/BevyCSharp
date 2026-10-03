@@ -409,11 +409,11 @@ are reported, a sensor making a trigger volume. What is left:
   and `ImeComposing` and `ImeCommit` arrive as messages, so a field of the game's own can show a
   candidate before it is committed, and the editor's fields take what is committed. Bevy's UI has
   no text field of its own to hand them to.
-- **A synthetic pointer needs a window.** `SyntheticInput` writes window messages, so a headless
-  or offscreen run has nowhere to send one and says so. That is the one thing `bcs` cannot drive in
-  an offscreen editor, where the interface is drawn and laid out but cannot be clicked. Feeding the
-  interface's own queue without a window would cover the panels and still leave picking and the
-  camera untouched, which is half the path a hand takes.
+- **A synthetic pointer clicks only the interface without a window.** `SyntheticInput` writes a
+  window message and the interface's own event, and an offscreen run, which has no window, takes
+  the interface's half, so `bcs` clicks an offscreen editor's panels, buttons and fields. Picking
+  and the camera read the window's pointer, so the scene is not clicked there, which is the other
+  half of the path a hand takes.
 - **Touch.** Bridged as this frame's list, up to eight at once, and untested, because this machine
   has no touchscreen and only the empty case is covered. Gestures are not derived, and a touch that
   ends is reported once rather than lingering for a frame.

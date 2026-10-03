@@ -132,11 +132,13 @@ in it.
 draws into an image instead of a window, so `shot` produces a real picture of the scene, panels and
 all, where a windowed session could not start at all.
 
-One thing is not the same. Every `input.*` verb writes a window message, so an offscreen session
-has nowhere to send one and refuses with a sentence saying why. The interface is drawn and laid out
-there, and it cannot be clicked. Drive what the click would have done instead, which is usually a
-command of its own (`assets.open`, `assets.move`, `assets.delete`, `select`, `do <menu path>`), and
-take the picture afterwards.
+One thing is not the same. A pointer verb (`input.click`, `input.press`, `input.release`,
+`input.move`) reaches the interface alone there, since there is no window to write the other half
+to, so panels, buttons and fields can be clicked and the picture shows what the click did, while
+the scene is not picked and the camera is not steered. `input.key` writes a window message and is
+refused, and `input.uikey` and `input.type` reach the interface as they do anywhere. For the scene,
+drive what the click would have done instead, which is usually a command of its own (`select`,
+`assets.open`, `do <menu path>`), and take the picture afterwards.
 
 ## More than one app serving
 

@@ -189,26 +189,27 @@ public static class SyntheticInput
     /// only one of them tests half the path a hand takes.
     /// </para>
     /// <para>
-    /// A pointer is a thing that happens to a window, so a run with none has nowhere to send one.
-    /// That is every headless run and every offscreen one, including an editor opened with
-    /// <c>--offscreen</c>, where the interface is drawn and laid out but cannot be clicked.
+    /// A run with no window, such as an editor opened with <c>--offscreen</c>, takes the
+    /// interface's half alone, so its panels, buttons and fields can be clicked, while the scene
+    /// is not picked and the camera is not steered, since those read the window's pointer. A run
+    /// with neither a window nor an interface has nowhere to send a pointer and refuses.
     /// </para>
     /// </remarks>
-    /// <exception cref="BevyNativeException">This run has no window.</exception>
+    /// <exception cref="BevyNativeException">This run has neither a window nor an interface.</exception>
     public static void Send(
         float x, float y, PointerAction action, MouseButton button = MouseButton.Left)
     {
         var status = Native.bcs_input_pointer(x, y, (int)action, (int)button);
+        var windowless = status == NativeStatus.InvalidState;
 
-        if (status == NativeStatus.InvalidState)
+        if (windowless && !ImGuiRuntime.IsRunning)
             throw new BevyNativeException(
                 NativeStatus.InvalidState,
-                $"Sending a pointer {action} at {x},{y} failed, because this run has no window to "
-                + "send it to. A synthetic pointer is a window message, so a headless or offscreen "
-                + "run cannot be clicked even where it draws an interface. Run with a window, or "
+                $"Sending a pointer {action} at {x},{y} failed, because this run has no window and "
+                + "no interface to send it to. A headless run draws neither. Run with a window, or "
                 + "drive what the click would have done directly.");
 
-        Native.Check(status, $"sending a pointer {action} at {x},{y}");
+        if (!windowless) Native.Check(status, $"sending a pointer {action} at {x},{y}");
 
         if (!ImGuiRuntime.IsRunning) return;
 
