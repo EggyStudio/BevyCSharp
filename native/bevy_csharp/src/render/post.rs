@@ -542,6 +542,74 @@ impl PendingCubemaps {
 /// Bevy's own examples use. An image that is not six times as tall as it is wide is refused by Bevy
 /// rather than by this, and stays on the list doing nothing, since a loud failure would cost a
 /// frame instead of once.
+/// Lays a cubemap drawn as a cross or a row of faces out as the column Bevy reads, in place.
+///
+/// Three layouts besides the column are common in the files a game is given. A horizontal cross,
+/// four faces wide and three tall, with +Y over +Z, -Y under it, and -X, +Z, +X and -Z across the
+/// middle. A vertical cross, three wide and four tall, the same with -Z under -Y, turned half a
+/// turn as it is drawn there. And a row of six in the column's order, +X, -X, +Y, -Y, +Z, -Z. The
+/// shape says which, since each has its own proportion. Answers false for a shape that is none of
+/// them, or a format whose pixels are not whole bytes each, such as a compressed one, which would
+/// have to be rearranged block by block.
+#[cfg(feature = "render")]
+fn restack(image: &mut bevy::image::Image) -> bool {
+    let size = image.texture_descriptor.size;
+    let (width, height) = (size.width as usize, size.height as usize);
+
+    if height == width * 6 {
+        return true;
+    }
+
+    // Where each face is in the picture, in faces, in the column's order, and whether it is drawn
+    // turned half a turn.
+    let (face, places): (usize, [(usize, usize, bool); 6]) = if width == height * 6 {
+        (height, [(0, 0, false), (1, 0, false), (2, 0, false), (3, 0, false), (4, 0, false), (5, 0, false)])
+    } else if width * 3 == height * 4 {
+        (width / 4, [(2, 1, false), (0, 1, false), (1, 0, false), (1, 2, false), (1, 1, false), (3, 1, false)])
+    } else if width * 4 == height * 3 {
+        (width / 3, [(2, 1, false), (0, 1, false), (1, 0, false), (1, 2, false), (1, 1, false), (1, 3, true)])
+    } else {
+        return false;
+    };
+
+    let format = image.texture_descriptor.format;
+    if format.block_dimensions() != (1, 1) {
+        return false;
+    }
+
+    let Some(bytes) = format.block_copy_size(None) else {
+        return false;
+    };
+    let pixel = bytes as usize;
+
+    let Some(data) = image.data.as_ref() else {
+        return false;
+    };
+
+    let mut column = vec![0u8; face * face * 6 * pixel];
+
+    for (index, (across, down, turned)) in places.into_iter().enumerate() {
+        for y in 0..face {
+            for x in 0..face {
+                // A face drawn half a turn round is read from its far corner back.
+                let (from_x, from_y) = if turned { (face - 1 - x, face - 1 - y) } else { (x, y) };
+                let from = (((down * face + from_y) * width) + (across * face + from_x)) * pixel;
+                let to = (((index * face + y) * face) + x) * pixel;
+                column[to..to + pixel].copy_from_slice(&data[from..from + pixel]);
+            }
+        }
+    }
+
+    image.data = Some(column);
+    image.texture_descriptor.size = bevy::render::render_resource::Extent3d {
+        width: face as u32,
+        height: (face * 6) as u32,
+        depth_or_array_layers: 1,
+    };
+
+    true
+}
+
 #[cfg(feature = "render")]
 pub fn reinterpret_cubemaps(
     mut commands: bevy::ecs::system::Commands,
@@ -559,13 +627,13 @@ pub fn reinterpret_cubemaps(
         };
 
         // Six layers make it a cube, and an image that already has them was asked for twice, which
-        // is not worth refusing.
+        // is not worth refusing. A cross or a row of faces is laid out as a column first.
         if image.texture_descriptor.size.depth_or_array_layers == 1
-            && image.reinterpret_stacked_2d_as_array(6).is_err()
+            && (!restack(&mut image) || image.reinterpret_stacked_2d_as_array(6).is_err())
         {
             bevy::log::warn!(
-                "An image asked to be a cubemap is not six square faces stacked vertically, so \
-                 whatever asked for it will not draw."
+                "An image asked to be a cubemap is not six square faces in a column, a row or a \
+                 cross, so whatever asked for it will not draw."
             );
 
             return false;

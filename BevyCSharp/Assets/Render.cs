@@ -2150,17 +2150,21 @@ public static unsafe class Render
     }
 
     /// <summary>
-    /// Has an image of six square faces stacked from top to bottom treated as a cubemap.
+    /// Has an image of six square faces treated as a cubemap.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// For a shader's <c>TextureCube</c>, and the layout <see cref="SetSkybox"/> takes. The faces
-    /// are in the order +X, -X, +Y, -Y, +Z, -Z.
+    /// For a shader's <c>TextureCube</c>, and what <see cref="SetSkybox"/> takes. The faces are a
+    /// column, top to bottom in the order +X, -X, +Y, -Y, +Z, -Z, or the same six in a row, or a
+    /// cross: four wide and three tall with +Y over +Z, -Y under it and -X, +Z, +X, -Z across the
+    /// middle, or three wide and four tall with -Z under -Y, drawn half a turn round. The shape says
+    /// which, and a cross or a row is laid out as a column when its pixels arrive. A compressed
+    /// image is taken as a column only.
     /// </para>
     /// <para>
     /// Applied when the pixels arrive, since the shape of a picture is not known until it has been
-    /// decoded, so the handle can be passed on at once. An image that is not six squares tall is
-    /// left as it is, with a warning in the log.
+    /// decoded, so the handle can be passed on at once. An image of any other shape is left as it
+    /// is, with a warning in the log.
     /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">The handle names no image, or there is no renderer.</exception>

@@ -1955,8 +1955,9 @@ A painted sky is a cubemap instead:
 Render.SetSkybox(camera, AssetServer.Load(AssetKind.Image, "sky.png"), brightness: 1500f);
 ```
 
-The file is a column of six square faces, which is the layout cubemap textures ship in, and it is
-turned into a cube once it has decoded. `brightness` is in candelas per square meter like the rest
+The file is six square faces, in a column, which is the layout most cubemap textures ship in, in a
+row, or in a horizontal or vertical cross, as cubemaps exported from a painting tool often are. The
+shape says which, and it is turned into a cube once it has decoded. `brightness` is in candelas per square meter like the rest
 of the lighting, so the useful numbers are in the hundreds or thousands; a brightness of one is a
 night sky and comes out black. A skybox is seen behind the scene and does not light it.
 
@@ -3304,8 +3305,8 @@ run against a real Bevy app. Known gaps:
   [.github/COMPONENTS.md](.github/COMPONENTS.md) plans generated mirrors.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
-- A cubemap comes from a file, as six square faces stacked into a column, or from a reflection probe
-  that captures itself. One a game renders into with its own cameras, a layer at a time, has no
+- A cubemap comes from a file, as six square faces in a column, a row or a cross, or from a
+  reflection probe that captures itself. One a game renders into with its own cameras, a layer at a time, has no
   bridge.
 - Slang shaders compile with `slangc`, which the build fetches. A machine without it draws what
   was compiled and cached on one that had it, and cannot compile an edit.
