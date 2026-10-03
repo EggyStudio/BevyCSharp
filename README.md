@@ -439,6 +439,22 @@ app.AddComputedState<Music, Level>(level => level > Level.Ten ? Music.Boss : Mus
 Bevy asks it from inside a transition with the source's value alone, so it reads no world, and one
 that throws is taken as answering nothing.
 
+A fact that follows from two facts together names both, and its rule takes both values:
+
+```csharp
+[ComputedFrom(typeof(Level), typeof(Pause))]
+public enum Music { Calm, Boss, Quiet }
+
+app.AddComputedState<Music, Level, Pause>((level, pause) =>
+    pause == Pause.On ? Music.Quiet : level == Level.Last ? Music.Boss : Music.Calm);
+```
+
+Three sources take the same form with a third type. Bevy works it out again whenever any source
+changes, and a value worked out again to what it already was runs no `[OnEnter]`. While any source
+holds no state, it does not exist. The bridge keeps a fixed set of these joint states beside the
+slots, each fed every slot, so which states one reads is chosen by the game rather than when the
+bridge is built.
+
 A transition is queued rather than immediate. It lands at Bevy's next transition point, so every
 system in the frame agrees on which state it is in rather than some seeing the change halfway
 through.

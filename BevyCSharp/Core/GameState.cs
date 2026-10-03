@@ -79,11 +79,21 @@ public sealed class SubStateOfAttribute(Type parent, object whileIn) : Attribute
 /// </code>
 /// </example>
 /// <param name="source">The state enum this one is worked out from.</param>
+/// <param name="more">
+/// Further states it is worked out from at once, which makes it a joint state, worked out by a
+/// rule of the game's own over all of them (<c>app.AddComputedState&lt;T, A, B&gt;(rule)</c>).
+/// </param>
 [AttributeUsage(AttributeTargets.Enum)]
-public sealed class ComputedFromAttribute(Type source) : Attribute
+public sealed class ComputedFromAttribute(Type source, params Type[] more) : Attribute
 {
-    /// <summary>The state enum this one is worked out from.</summary>
+    /// <summary>The state enum this one is worked out from, the first of several for a joint.</summary>
     public Type Source { get; } = source;
+
+    /// <summary>Every state enum this one is worked out from, in the order they were named.</summary>
+    public IReadOnlyList<Type> Sources { get; } = [source, .. more];
+
+    /// <summary>Whether this is worked out from more than one state, as a joint state is.</summary>
+    public bool IsJoint => Sources.Count > 1;
 }
 
 /// <summary>
@@ -125,6 +135,19 @@ public static unsafe class StateRegistry
 
     /// <summary>How many sub-states exist in total, which is where computed slots start.</summary>
     internal static int SubCount => Native.bcs_state_sub_count();
+
+    /// <summary>How many computed states exist in total, which is where joint slots start.</summary>
+    internal static int ComputedCount => Native.bcs_state_computed_count();
+
+    /// <summary>How many joint states this bridge has, each worked out from several states at once.</summary>
+    /// <remarks>
+    /// Fixed by the bridge as every other count is, though a joint's sources are not, since a joint
+    /// is worked out from every state slot and its rule reads the ones it was given.
+    /// </remarks>
+    public static int JointCount => Native.bcs_state_joint_count();
+
+    /// <summary>Where joint slots start, past every state, sub-state and computed state.</summary>
+    internal static int FirstJoint => SlotCount + SubCount + ComputedCount;
 
     /// <summary>The slot <typeparamref name="TState"/> was added under.</summary>
     /// <exception cref="InvalidOperationException">It was never added.</exception>
@@ -203,6 +226,28 @@ public static unsafe class StateRegistry
                     $"{sub.Parent.Name} already carries {room} sub-states, so {state.Name} "
                     + "cannot be another. Bevy names a sub-state's parent as a type, so how many "
                     + "a state can carry is fixed when the bridge is built.");
+            }
+
+            // A joint takes one of the joint slots, past every computed state, whichever states
+            // it is worked out from, since a joint is fed every state slot and reads its own.
+            if (DescribeComputed(state) is { IsJoint: true } joint)
+            {
+                foreach (var source in joint.Sources) Claim(source);
+
+                var joints = JointCount;
+                var first = FirstJoint;
+
+                for (var offset = 0; offset < joints; offset++)
+                {
+                    if (Slots.ContainsValue(first + offset)) continue;
+
+                    Slots[state] = first + offset;
+                    return first + offset;
+                }
+
+                throw new InvalidOperationException(
+                    $"All {joints} joint states are in use, so {state.Name} cannot be another. A "
+                    + "joint is a Rust type, so how many there are is fixed when the bridge is built.");
             }
 
             // A computed state takes one of the slots set aside for its source, past every
@@ -286,16 +331,29 @@ public static unsafe class StateRegistry
 
         if (computed is null) return null;
 
-        if (!computed.Source.IsEnum)
-            throw new InvalidOperationException(
-                $"{state.Name} names {computed.Source.Name} as its source, which is not an enum. "
-                + "A state is an enum, so what one is computed from is one too.");
+        foreach (var source in computed.Sources)
+        {
+            if (!source.IsEnum)
+                throw new InvalidOperationException(
+                    $"{state.Name} names {source.Name} as its source, which is not an enum. "
+                    + "A state is an enum, so what one is computed from is one too.");
 
-        if (Attribute.IsDefined(computed.Source, typeof(ComputedFromAttribute)))
+            if (Attribute.IsDefined(source, typeof(ComputedFromAttribute)))
+                throw new InvalidOperationException(
+                    $"{state.Name} is computed from {source.Name}, which is itself computed. "
+                    + "The bridge sets a computed state's source aside when it is built, so a chain "
+                    + "of them has nowhere to live.");
+
+            // A joint is fed the state slots, and a sub-state lives in a slot of its parent's.
+            if (computed.IsJoint && Attribute.IsDefined(source, typeof(SubStateOfAttribute)))
+                throw new InvalidOperationException(
+                    $"{state.Name} is worked out from {source.Name}, which is a sub-state. A state "
+                    + "worked out from several reads states of their own, and a sub-state is not one.");
+        }
+
+        if (computed.Sources.Distinct().Count() != computed.Sources.Count)
             throw new InvalidOperationException(
-                $"{state.Name} is computed from {computed.Source.Name}, which is itself computed. "
-                + "The bridge sets a computed state's source aside when it is built, so a chain "
-                + "of them has nowhere to live.");
+                $"{state.Name} names the same state twice among what it is worked out from.");
 
         return computed;
     }

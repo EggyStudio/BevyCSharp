@@ -766,11 +766,11 @@ public sealed unsafe class App : IDisposable
                            + "[ComputedFrom(typeof(Source))] on the enum, which is where a reader "
                            + "looks for what it follows from.");
 
-        if (computed.Source != typeof(TSource))
+        if (computed.IsJoint || computed.Source != typeof(TSource))
             throw new InvalidOperationException(
-                $"{typeof(TState).Name} is computed from {computed.Source.Name}, and the table "
-                + $"was written in terms of {typeof(TSource).Name}. The two have to be the same "
-                + "state, or the table says nothing about when it applies.");
+                $"{typeof(TState).Name} is computed from {Named(computed)}, and the table was "
+                + $"written in terms of {typeof(TSource).Name}. The two have to be the same, or "
+                + "the table says nothing about when it applies.");
 
         // Past the states and every sub-state, which is where the computed block begins.
         var slot = StateRegistry.Claim<TState>()
@@ -844,10 +844,10 @@ public sealed unsafe class App : IDisposable
                            + "[ComputedFrom(typeof(Source))] on the enum, which is where a reader "
                            + "looks for what it follows from.");
 
-        if (computed.Source != typeof(TSource))
+        if (computed.IsJoint || computed.Source != typeof(TSource))
             throw new InvalidOperationException(
-                $"{typeof(TState).Name} is computed from {computed.Source.Name}, and the rule was "
-                + $"written in terms of {typeof(TSource).Name}. The two have to be the same state.");
+                $"{typeof(TState).Name} is computed from {Named(computed)}, and the rule was "
+                + $"written in terms of {typeof(TSource).Name}. The two have to be the same.");
 
         var slot = StateRegistry.Claim<TState>()
                    - StateRegistry.SlotCount
@@ -862,6 +862,128 @@ public sealed unsafe class App : IDisposable
 
         return this;
     }
+
+    /// <summary>
+    /// Adds a state worked out from two others at once, by a rule of the game's own.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A joint state, for a fact that follows from two facts together, such as the music, which is
+    /// the boss theme on the last level unless the game is paused. The enum names both sources,
+    /// <c>[ComputedFrom(typeof(A), typeof(B))]</c>, and both are added as states first. The rule
+    /// answers what the state is, or nothing for values it does not exist under, and is asked
+    /// whenever either source changes. While either source holds no state the joint does not
+    /// exist.
+    /// </para>
+    /// <para>
+    /// The bridge has a fixed number of joints (<see cref="StateRegistry.JointCount"/>), each fed
+    /// every state slot, so a joint can be worked out from any of them. The rule is asked from
+    /// inside Bevy's transition, so it reads no world, and one that throws is taken as answering
+    /// nothing, as a computed state's rule is.
+    /// </para>
+    /// </remarks>
+    /// <typeparam name="TState">The enum being worked out, carrying <see cref="ComputedFromAttribute"/>.</typeparam>
+    /// <typeparam name="TFirst">The first state it is worked out from.</typeparam>
+    /// <typeparam name="TSecond">The second.</typeparam>
+    /// <param name="rule">What the state is while the two hold their values, or nothing.</param>
+    /// <exception cref="InvalidOperationException">
+    /// The app is running, the enum does not name these two as its sources, or every joint is in use.
+    /// </exception>
+    /// <example>
+    /// <code>
+    /// [ComputedFrom(typeof(Level), typeof(Pause))]
+    /// public enum Music { Calm, Boss, Quiet }
+    ///
+    /// app.AddComputedState&lt;Music, Level, Pause&gt;((level, pause) =>
+    ///     pause == Pause.On ? Music.Quiet : level == Level.Last ? Music.Boss : Music.Calm);
+    /// </code>
+    /// </example>
+    public App AddComputedState<TState, TFirst, TSecond>(Func<TFirst, TSecond, TState?> rule)
+        where TState : struct, Enum
+        where TFirst : struct, Enum
+        where TSecond : struct, Enum
+    {
+        ArgumentNullException.ThrowIfNull(rule);
+
+        return AddJoint<TState>([typeof(TFirst), typeof(TSecond)], slots => (values, present) =>
+            Holds(present, slots) && rule(As<TFirst>(values[slots[0]]), As<TSecond>(values[slots[1]])) is { } value
+                ? StateRegistry.ToInt(value)
+                : null);
+    }
+
+    /// <summary>Adds a state worked out from three others at once, by a rule of the game's own.</summary>
+    /// <remarks>The same as the form with two, with a third source.</remarks>
+    /// <typeparam name="TState">The enum being worked out, carrying <see cref="ComputedFromAttribute"/>.</typeparam>
+    /// <typeparam name="TFirst">The first state it is worked out from.</typeparam>
+    /// <typeparam name="TSecond">The second.</typeparam>
+    /// <typeparam name="TThird">The third.</typeparam>
+    /// <param name="rule">What the state is while the three hold their values, or nothing.</param>
+    /// <exception cref="InvalidOperationException">
+    /// The app is running, the enum does not name these three as its sources, or every joint is in use.
+    /// </exception>
+    public App AddComputedState<TState, TFirst, TSecond, TThird>(Func<TFirst, TSecond, TThird, TState?> rule)
+        where TState : struct, Enum
+        where TFirst : struct, Enum
+        where TSecond : struct, Enum
+        where TThird : struct, Enum
+    {
+        ArgumentNullException.ThrowIfNull(rule);
+
+        return AddJoint<TState>([typeof(TFirst), typeof(TSecond), typeof(TThird)], slots => (values, present) =>
+            Holds(present, slots)
+            && rule(As<TFirst>(values[slots[0]]), As<TSecond>(values[slots[1]]), As<TThird>(values[slots[2]])) is { } value
+                ? StateRegistry.ToInt(value)
+                : null);
+    }
+
+    /// <summary>
+    /// Claims a joint for <typeparamref name="TState"/> and gives the bridge its rule, made from
+    /// the slots its sources hold.
+    /// </summary>
+    private App AddJoint<TState>(Type[] sources, Func<int[], Func<int[], uint, int?>> rule)
+        where TState : struct, Enum
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (IsRunning)
+            throw new InvalidOperationException(
+                $"Cannot add computed state {typeof(TState).Name}, because the app is already "
+                + "running. Add states from a plugin's Build method or before calling Run.");
+
+        var computed = StateRegistry.DescribeComputed(typeof(TState))
+                       ?? throw new InvalidOperationException(
+                           $"{typeof(TState).Name} is not computed from anything. Put "
+                           + "[ComputedFrom(typeof(A), typeof(B))] on the enum, which is where a "
+                           + "reader looks for what it follows from.");
+
+        if (!computed.Sources.SequenceEqual(sources))
+            throw new InvalidOperationException(
+                $"{typeof(TState).Name} is computed from {Named(computed)}, and the rule was "
+                + $"written in terms of {string.Join(" and ", sources.Select(source => source.Name))}. "
+                + "The two have to name the same states in the same order.");
+
+        // Each source by the slot it holds, which is where the bridge puts its value.
+        var slots = sources.Select(StateRegistry.Claim).ToArray();
+        var joint = StateRegistry.Claim<TState>() - StateRegistry.FirstJoint;
+
+        ComputedRules.SetJoint(joint, rule(slots));
+
+        Native.Check(
+            Native.bcs_joint_add(_handle, joint),
+            $"adding computed state {typeof(TState).Name} from {Named(computed)}");
+
+        return this;
+    }
+
+    /// <summary>Whether every one of the slots holds a state, by the bits the bridge sets.</summary>
+    private static bool Holds(uint present, int[] slots) => slots.All(slot => (present & (1u << slot)) != 0);
+
+    /// <summary>A raw state value as the enum it is.</summary>
+    private static T As<T>(int raw) where T : struct, Enum => (T)Enum.ToObject(typeof(T), raw);
+
+    /// <summary>What a computed state is worked out from, by name.</summary>
+    private static string Named(ComputedFromAttribute computed) =>
+        string.Join(" and ", computed.Sources.Select(source => source.Name));
 
     /// <summary>The current value of <typeparamref name="TState"/>. Only valid inside a system.</summary>
     public static TState State<TState>() where TState : struct, Enum =>
@@ -1059,6 +1181,9 @@ public sealed unsafe class App : IDisposable
         _systems.Clear();
 
         World.Dispose();
+
+        // The rules this app's computed states were worked out by, and what they captured.
+        ComputedRules.Forget();
 
         if (_handle != IntPtr.Zero)
         {

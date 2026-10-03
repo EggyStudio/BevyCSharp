@@ -33,9 +33,10 @@ use crate::state::{app_mut, loan_world, with_world, BcsApp, SystemReg};
 /// machines rather than two names for one.
 macro_rules! define_slots {
     (
-        states { $($ty:ident = $slot:literal),+ $(,)? }
+        states { $($ty:ident = $slot:literal as $axis:ident),+ $(,)? }
         subs { $($sub:ident of $parent:ident at $subslot:literal),+ $(,)? }
         computed { $($derived:ident from $source:ident at $cslot:literal),+ $(,)? }
+        joints { $($joint:ident at $jslot:literal),+ $(,)? }
     ) => {
         $(
             /// One state axis, whose values are given meaning by the managed side.
@@ -100,6 +101,60 @@ macro_rules! define_slots {
                 }
             }
         )+
+
+        $(
+            /// One joint state, worked out from any of the axes at once by the managed side's
+            /// rule, where a computed state reads one.
+            ///
+            /// Its source is every axis, each optional, since Bevy builds a computed state's
+            /// systems from the types it names and a joint's sources are chosen at runtime. Bevy
+            /// works it out again whenever any axis changes, and the rule reads only the ones it
+            /// was given, so an axis it ignores changes nothing, and the same value worked out
+            /// again runs no transition.
+            #[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+            pub struct $joint(pub i32);
+
+            impl bevy::state::state::ComputedStates for $joint {
+                type SourceStates = EveryAxis;
+
+                fn compute(sources: EveryAxis) -> Option<Self> {
+                    by_joint_rule($jslot, &axis_values(sources)).map($joint)
+                }
+            }
+        )+
+
+        /// Every axis, each optional, the source a joint state is worked out from.
+        pub type EveryAxis = ($(Option<$ty>,)+);
+
+        /// What each axis holds, in slot order, or `None` for one that holds no state.
+        ///
+        /// Each axis is unpacked under the name the list gives it, since a tuple's fields cannot
+        /// be counted off in a macro.
+        fn axis_values(sources: EveryAxis) -> [Option<i32>; SLOT_COUNT as usize] {
+            let ($($axis,)+) = sources;
+            [$($axis.map(|state| state.0)),+]
+        }
+
+        /// How many joint states exist, each able to read any of the axes.
+        pub const JOINT_COUNT: i32 = 0 $(+ { let _ = $jslot; 1 })+;
+
+        /// Registers the transition messages of every axis, which a joint reads whether or not the
+        /// app has added that axis, and which Bevy registers only as an axis is added.
+        fn every_axis_message(app: &mut App) {
+            $(app.add_message::<bevy::state::state::StateTransitionEvent<$ty>>();)+
+        }
+
+        /// Adds the joint state in `slot`, worked out by the managed side's joint rule.
+        fn insert_joint(app: &mut App, slot: i32) -> i32 {
+            match slot {
+                $($jslot => {
+                    every_axis_message(app);
+                    app.add_computed_state::<$joint>();
+                    status::OK
+                })+
+                _ => status::NULL_ARG,
+            }
+        }
 
         /// How many slots exist, for the error the managed side reports when they run out.
         pub const SLOT_COUNT: i32 = 0 $(+ { let _ = $slot; 1 })+;
@@ -226,6 +281,8 @@ macro_rules! define_slots {
                 // value the source holds, which is the same silence a sub-state answers with.
                 $(_ if slot == SLOT_COUNT + SUB_COUNT + $cslot =>
                     world.get_resource::<State<$derived>>().map(|s| s.get().0),)+
+                $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + $jslot =>
+                    world.get_resource::<State<$joint>>().map(|s| s.get().0),)+
                 _ => None,
             }
         }
@@ -262,6 +319,14 @@ macro_rules! define_slots {
                     }
                     status::OK
                 })+
+                $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + $jslot => {
+                    if entering {
+                        app.add_systems(OnEnter($joint(value)), run);
+                    } else {
+                        app.add_systems(OnExit($joint(value)), run);
+                    }
+                    status::OK
+                })+
                 _ => status::NULL_ARG,
             }
         }
@@ -289,6 +354,10 @@ macro_rules! define_slots {
                 })+
                 $(_ if slot == SLOT_COUNT + SUB_COUNT + $cslot => {
                     entity_mut.insert(DespawnOnExit($derived(value)));
+                    status::OK
+                })+
+                $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + $jslot => {
+                    entity_mut.insert(DespawnOnExit($joint(value)));
                     status::OK
                 })+
                 _ => status::NULL_ARG,
@@ -323,6 +392,10 @@ macro_rules! define_slots {
                     let _ = value;
                     status::INVALID_STATE
                 })+
+                $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + $jslot => {
+                    let _ = value;
+                    status::INVALID_STATE
+                })+
                 _ => status::NULL_ARG,
             }
         }
@@ -331,14 +404,14 @@ macro_rules! define_slots {
 
 define_slots!(
     states {
-        BcsState0 = 0,
-        BcsState1 = 1,
-        BcsState2 = 2,
-        BcsState3 = 3,
-        BcsState4 = 4,
-        BcsState5 = 5,
-        BcsState6 = 6,
-        BcsState7 = 7,
+        BcsState0 = 0 as axis0,
+        BcsState1 = 1 as axis1,
+        BcsState2 = 2 as axis2,
+        BcsState3 = 3 as axis3,
+        BcsState4 = 4 as axis4,
+        BcsState5 = 5 as axis5,
+        BcsState6 = 6 as axis6,
+        BcsState7 = 7 as axis7,
     }
     subs {
         BcsSub0_0 of BcsState0 at 0,
@@ -375,6 +448,16 @@ define_slots!(
         BcsComputed6_1 from BcsState6 at 13,
         BcsComputed7_0 from BcsState7 at 14,
         BcsComputed7_1 from BcsState7 at 15,
+    }
+    joints {
+        BcsJoint0 at 0,
+        BcsJoint1 at 1,
+        BcsJoint2 at 2,
+        BcsJoint3 at 3,
+        BcsJoint4 at 4,
+        BcsJoint5 at 5,
+        BcsJoint6 at 6,
+        BcsJoint7 at 7,
     }
 );
 
@@ -430,6 +513,21 @@ pub unsafe extern "C" fn bcs_computed_add(
 
         insert_computed(&mut app.app, slot, from, to, false)
     })
+}
+
+/// Reports how many joint states exist, each worked out from any of the axes at once.
+///
+/// They are addressed past every computed state, as [`bcs_state_slots`]`()` plus the total number
+/// of sub-states plus the total number of computed states plus the joint's own number.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_state_joint_count() -> i32 {
+    JOINT_COUNT
+}
+
+/// Reports how many computed states exist in total, which is where joint slots start counting.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_state_computed_count() -> i32 {
+    COMPUTED_COUNT
 }
 
 /// Reports how many computed states one state slot can carry.
@@ -614,6 +712,75 @@ fn by_rule(slot: usize, source: i32) -> Option<i32> {
     let rule: ComputeRule = unsafe { core::mem::transmute::<usize, ComputeRule>(rule) };
     let mut result = 0;
     (unsafe { rule(slot as i32, source, &mut result) } != 0).then_some(result)
+}
+
+/// What the managed side's rule for joint states is called through, with the joint's number, the
+/// value of every axis in slot order, a bit for each axis that holds a state, and where to write
+/// the result, answering non-zero when the joint exists for those values.
+type JointRule =
+    unsafe extern "C" fn(slot: i32, values: *const i32, present: u32, result: *mut i32) -> i32;
+
+/// The managed side's joint rule, set once, or zero for none.
+static JOINT_RULE: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+
+/// Asks the managed side's joint rule what a joint state is while the axes hold `values`, an axis
+/// with no state being `None`.
+fn by_joint_rule(slot: i32, values: &[Option<i32>]) -> Option<i32> {
+    let rule = JOINT_RULE.load(Ordering::Relaxed);
+    if rule == 0 {
+        return None;
+    }
+
+    let mut numbers = [0i32; 32];
+    let mut present = 0u32;
+
+    for (axis, value) in values.iter().enumerate().take(numbers.len()) {
+        if let Some(value) = value {
+            numbers[axis] = *value;
+            present |= 1 << axis;
+        }
+    }
+
+    let rule: JointRule = unsafe { core::mem::transmute::<usize, JointRule>(rule) };
+    let mut result = 0;
+    (unsafe { rule(slot, numbers.as_ptr(), present, &mut result) } != 0).then_some(result)
+}
+
+/// Sets the function joint states are worked out by.
+///
+/// One function for every joint, told which by its number, as [`bcs_computed_rule`] is for
+/// computed states.
+///
+/// # Safety
+/// `rule` must be a function of the [`JointRule`] shape that stays callable while any app runs,
+/// and never unwinds.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_joint_rule(rule: Option<JointRule>) -> i32 {
+    crate::interop::guard(|| {
+        JOINT_RULE.store(rule.map_or(0, |rule| rule as usize), Ordering::Relaxed);
+        status::OK
+    })
+}
+
+/// Creates the joint state in `slot`, counted among joints alone, worked out by the rule
+/// [`bcs_joint_rule`] set from whichever axes it reads.
+///
+/// Must happen before the app runs, for the same reason a state must.
+///
+/// # Safety
+/// `handle` must be a live app.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_joint_add(handle: *mut BcsApp, slot: i32) -> i32 {
+    crate::interop::guard(|| {
+        let Some(app) = (unsafe { app_mut(handle) }) else {
+            return status::NULL_ARG;
+        };
+        if app.running {
+            return status::ALREADY_RUNNING;
+        }
+
+        insert_joint(&mut app.app, slot)
+    })
 }
 
 /// Sets the function computed states added with [`bcs_computed_add_rule`] are worked out by.

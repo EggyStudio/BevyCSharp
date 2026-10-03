@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 169;
+    internal const int ExpectedAbiVersion = 170;
 
     static Native() => NativeLoader.Initialize();
 
@@ -319,6 +319,26 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_assets_carried(delegate* unmanaged[Cdecl]<byte*, nuint, byte*, nuint, long> read, byte* paths, nuint pathsLength);
+
+    /// <summary>How many joint states the bridge has.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_state_joint_count();
+
+    /// <summary>How many computed states the bridge has in total, which is where joints start.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_state_computed_count();
+
+    /// <summary>Sets the function joint states are worked out by.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_joint_rule(delegate* unmanaged[Cdecl]<int, int*, uint, int*, int> rule);
+
+    /// <summary>Creates a joint state, by its number among joints.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_joint_add(IntPtr handle, int slot);
 
     /// <summary>Sets the function computed states added with a rule are worked out by.</summary>
     [LibraryImport(Library)]
