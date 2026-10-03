@@ -495,8 +495,10 @@ per distribution. The minimal profile still builds with nothing but a C compiler
   `build/target-portable` and serves a local checkout on a newer glibc.
 - **Packing on one machine produces a package for one platform.** Use the CI workflow, or run
   `build-native.sh` on each target, to produce a package covering all six runtime identifiers.
-- **No way to ship a game from the editor.** Play runs a project with `dotnet run` and nothing
-  builds one for a player. [PLAY.md](PLAY.md) plans the rest: a Build tab over `dotnet publish`,
-  embedded assets, and playing the scene being edited.
+- **An export ships the bridge last built here.** The Play tab exports a project with
+  `dotnet publish`, self-contained, for a chosen platform, and compiles its assets into a bridge of
+  its own when asked. Without that, it carries whichever bridge the checkout last built, the
+  editor's on a machine that builds the editor. [PLAY.md](PLAY.md) plans the rest, with playing the
+  scene being edited.
 - **Publishing is manual by choice.** The workflow builds and uploads; the upload to nuget.org is
   done by hand.

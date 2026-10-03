@@ -13,10 +13,11 @@ unless the tab's field or the settings name another project file. The scene's to
 button, so the viewport holds the scene and the tools that act on it, and the game, which changes
 nothing in the view, is started from the tab where its output is read. `dotnet run` builds the
 project first when it is out of date, so the first press takes as long as a build. What the game
-writes appears in the editor's console, each line marked `[game]`, and in the tab, which keeps the
-last lines of the game or the build on their own, with the terminal's color codes taken out.
+writes appears in the editor's console, each line marked `[game]`, or `[build]` for a build's, and
+in the tab, which keeps the last lines of the game or the build on their own, with the terminal's
+color codes taken out.
 Stopping kills the whole process tree, since `dotnet run` starts the game as a child of its own, and
-closing the editor stops the game with it.
+closing the editor stops the game with it. Export, in a row of its own, publishes the project for a player (§3).
 
 A separate process rather than a mode of the editor's own world, as Godot does it, because a game
 that runs inside the editor shares its state, its crashes and its frame. Its window is the one it
@@ -85,8 +86,25 @@ and Build only run and compile it on this machine.
 - **Settings per target,** saved with the project rather than the editor: the name, the icon,
   the window's title, whether to embed assets, and `DesktopTitleBar`.
 
-The same build is a `[Command]` (`project.build <rid>`), so `./bcs` and CI build a game the way the
-tab does.
+The same build is a `[Command]` (`project.export <rid> [embed]`), so `./bcs` and CI build a game the
+way the tab does.
+
+Built: a row under Play and Build with a choice of runtime identifier (this machine's first), an
+"Embed assets" box and Export, which runs `dotnet publish -c Release -r <rid> --self-contained` into
+the project's own `bin/Export/<rid>/`, where version control already looks away. With the box
+ticked, the project's assets are first compiled into a bridge of its own (§4), which replaces the
+one the publish copied, and the asset folder is cut down to the JSON files and ids the managed side
+reads for itself. `EditorPlay` runs the steps as a chain of processes, each started when the one
+before it ends well, and the tab names the step that failed. The exported sample starts and draws
+as the debug build does. Not built:
+
+- **The bridge's profile.** Without embedding, the publish copies the bridge last built in the
+  checkout, which on a machine that builds the editor is the editor's, carrying the interface and
+  the asset watcher a game does not need. A render bridge per target, staged apart from the
+  editor's as an embedded one is, would fix that.
+- **Whether a target has a bridge,** and trimming, which the library allows and ImGui.NET has not
+  been checked for.
+- **Settings per target** and offering to run the result.
 
 ## 4. Embedding assets
 
@@ -164,7 +182,7 @@ For what C# owns, the same design on the managed side:
 
 ## Order
 
-1. Export in the Play tab over `dotnet publish`, with embedding as an option.
+1. A render bridge per export target, so a game never ships the editor's.
 2. Scene files, as [SCENES.md](SCENES.md) orders them, which the player loads.
 3. The player and playing the edited scene.
 4. The remote view.

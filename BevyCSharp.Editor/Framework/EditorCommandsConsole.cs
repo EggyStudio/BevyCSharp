@@ -47,6 +47,20 @@ internal static class EditorConsoleCommands
         return $"ran {path}";
     }
 
+    /// <summary>Exports the project as the Play tab's Export does, for a runtime identifier.</summary>
+    [Command("project.export", "Exports the project for a platform, with its assets in the bridge if asked: project.export <rid> [embed]")]
+    internal static string Export(string line)
+    {
+        // One line rather than two arguments, so both words may be left out. A bare export is for
+        // this machine, with the assets as files.
+        var words = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var target = words.FirstOrDefault(word => word != "embed") ?? EditorPlay.Targets[0];
+        var embedding = words.Contains("embed");
+
+        return EditorPlay.Export(target, embedding)
+               ?? $"exporting to {EditorPlay.ExportFolder(target)}; the Play tab follows it";
+    }
+
     /// <summary>Says what is selected.</summary>
     [Command("selection", "Says what is selected")]
     internal static string Selection()

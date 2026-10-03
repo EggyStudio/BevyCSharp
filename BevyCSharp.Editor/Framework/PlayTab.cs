@@ -23,10 +23,14 @@ public static class PlayTab
 {
     private static int _seen;
 
+    private static int _target;
+    private static bool _embed;
+
     /// <summary>Draws it.</summary>
     public static void Draw()
     {
         Actions();
+        Export();
 
         EditorSurface.Pane("##played", Vector2.Zero, Output);
     }
@@ -55,6 +59,7 @@ public static class PlayTab
         {
             (true, PlayJob.Playing) => "Playing",
             (true, PlayJob.Building) => "Building",
+            (true, PlayJob.Exporting) => "Exporting",
             _ => "Stopped",
         };
 
@@ -85,6 +90,60 @@ public static class PlayTab
         ImGui.Spacing();
     }
 
+    /// <summary>
+    /// The second row: which platform to export for, whether to embed the assets, and Export.
+    /// </summary>
+    /// <remarks>
+    /// Under the row that plays and builds rather than in it, since an export is asked for far less
+    /// often and takes its own two choices, and the row above is already as wide as the tab.
+    /// </remarks>
+    private static void Export()
+    {
+        var targets = EditorPlay.Targets;
+        _target = Math.Clamp(_target, 0, targets.Count - 1);
+
+        ImGui.AlignTextToFramePadding();
+        ImGui.TextDisabled("Export for");
+        ImGui.SameLine();
+
+        ImGui.SetNextItemWidth(EditorWidgets.PillWidth("linux-arm64") + ImGui.GetFrameHeight());
+        if (ImGui.BeginCombo("##target", targets[_target]))
+        {
+            for (var index = 0; index < targets.Count; index++)
+            {
+                if (ImGui.Selectable(targets[index], index == _target)) _target = index;
+            }
+
+            ImGui.EndCombo();
+        }
+
+        ImGui.SameLine();
+        ImGui.Checkbox("Embed assets", ref _embed);
+
+        if (ImGui.IsItemHovered())
+        {
+            EditorWidgets.Tip(
+                "Compiles the assets into a bridge of the game's own, so the folder a player gets holds "
+                + "only the files the game reads itself. Costs a native build.");
+        }
+
+        ImGui.SameLine();
+        if (EditorWidgets.Pill("Export", EditorPlay.Busy && EditorPlay.Job == PlayJob.Exporting)
+            && EditorPlay.Export(targets[_target], _embed) is { } refused)
+        {
+            Console.WriteLine($"[play] {refused}");
+        }
+
+        if (EditorPlay.ExportFolder(targets[_target]) is { } folder)
+        {
+            ImGui.SameLine();
+            ImGui.TextDisabled(EditorText.Fit(folder, MathF.Max(1f, ImGui.GetContentRegionAvail().X)));
+            if (ImGui.IsItemHovered()) EditorWidgets.Tip(folder);
+        }
+
+        ImGui.Spacing();
+    }
+
     /// <summary>What the game or the last build wrote, following the end unless scrolled up.</summary>
     private static void Output()
     {
@@ -94,7 +153,7 @@ public static class PlayTab
         {
             EditorSurface.Empty(
                 "Nothing has run yet",
-                "Play opens the game in a window of its own, and Build says whether it compiles.");
+                "Play opens the game in a window of its own, Build says whether it compiles, and Export makes a folder to give a player.");
             return;
         }
 
