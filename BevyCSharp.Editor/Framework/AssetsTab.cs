@@ -495,7 +495,8 @@ public static class AssetsTab
             entry.IsDirectory ? null : AssetGrid.PictureOf(entry.Path),
             entry.IsDirectory ? EditorIcons.Folder : EditorAssets.IconOf(entry.Path),
             picked,
-            over);
+            over,
+            entry.IsDirectory ? null : AssetGrid.BadgeOf(entry.Path));
 
         ImGui.EndGroup();
 

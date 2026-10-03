@@ -101,20 +101,21 @@ public static class EditorAssets
         && File.Exists(Absolute(relative));
 
     /// <summary>
-    /// A model's meshes and materials as entries of their own, after one leading back out to the
-    /// folder the model is in.
+    /// A model's meshes, materials and textures as entries of their own, after one leading back out
+    /// to the folder the model is in.
     /// </summary>
     /// <remarks>
     /// Each part's path is the model's with the label Bevy loads the part by after a <c>#</c>, so
-    /// selecting, previewing and picking one goes through the same paths a file does. Read from
-    /// the file's JSON (<see cref="GltfContents"/>), so nothing is loaded to list them.
+    /// selecting, previewing and picking one goes through the same paths a file does. A texture
+    /// the model keeps in a file beside it is that file's path, since Bevy loads it from there.
+    /// Read from the file's JSON (<see cref="GltfContents"/>), so nothing is loaded to list them.
     /// </remarks>
     private static IReadOnlyList<AssetEntry> Parts(string model)
     {
         var entries = new List<AssetEntry> { new("..", Parent(model), true, 0) };
 
         foreach (var part in GltfContents.Read(model) ?? [])
-            entries.Add(new AssetEntry(part.Name, model + "#" + part.Label, false, 0));
+            entries.Add(new AssetEntry(part.Name, part.PathIn(model), false, 0));
 
         return entries;
     }
@@ -260,7 +261,12 @@ public static class EditorAssets
     /// </remarks>
     public static string KindOf(string relative) =>
         relative.IndexOf('#') is var hash and >= 0
-            ? relative[(hash + 1)..].StartsWith("Material", StringComparison.Ordinal) ? "material" : "mesh"
+            ? relative[(hash + 1)..] switch
+            {
+                var label when label.StartsWith("Material", StringComparison.Ordinal) => "material",
+                var label when label.StartsWith("Texture", StringComparison.Ordinal) => "image",
+                _ => "mesh",
+            }
         : relative.EndsWith(".scene.json", StringComparison.OrdinalIgnoreCase) ? "scene"
         : MaterialFiles.IsMaterialFile(relative) ? "material"
         : MeshFiles.IsMeshFile(relative) ? "mesh"

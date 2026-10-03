@@ -129,14 +129,16 @@ a thumbnail goes through a capture instead.
 
 ## 3. The asset browser
 
-Built: model, mesh and material tiles show their thumbnails, and a search box, a chip per kind and a
-tile size slider sit over the tiles. A picked file is shown in the details panel rather than in a
-column beside the tiles, since picking a file lets go of any entity and one panel shows the one
-selection (`DetailsPanel.AssetDetails`). A model file opens into its meshes and materials, read
+Built, all of it. Model, mesh and material tiles show their thumbnails, an image is itself, and
+every file's tile names its kind on a small badge in its corner (`AssetGrid.BadgeOf`), since a
+model and a mesh of it look alike at a glance. A search box, a chip per kind and a tile size slider
+sit over the tiles. A picked file is shown in the details panel rather than in a column beside the
+tiles, since picking a file lets go of any entity and one panel shows the one selection
+(`DetailsPanel.AssetDetails`). A model file opens into its meshes, materials and textures, read
 from its JSON by `GltfContents` without loading it: twice on its tile, or `assets.open` with its
-path, goes into it as into a folder, where each part is a tile with its own thumbnail and its own
-details, its path the model's with the part's label after `#`. Not built: textures among the
-parts, and badges.
+path, goes into it as into a folder, where each part is a tile with its own picture and its own
+details. A part's path is the model's with the part's label after `#`, except a texture the model
+keeps in a file beside it, which Bevy loads from that file and the browser names by it.
 
 - **Tiles show the asset.** A model or mesh is rendered, a material is a sphere in it, a texture is
   itself, and a scene, a data asset or a sound is its icon with a small badge naming its kind.
@@ -203,5 +205,9 @@ no file, as `Render.CreateMesh` makes it today. Godot's answer fits both, and is
 
 Each step is usable on its own and tested before the next.
 
-1. **Badges and textures among a model's parts**, so a model's images are tiles of their own and a
-   tile says its kind without its icon.
+1. **One picker for every asset field.** Texture slots, sounds and `DataRef<T>` data assets open
+   the grid `PickerWindow` the mesh and material rows open, rather than a list of paths.
+2. **Pictures for what has no file.** The picker's built-in shapes and the meshes and materials the
+   scene already uses are drawn by `PreviewRenderer` like a file's thumbnail, keyed by the shape
+   or the handle rather than a path.
+3. **Sub-meshes** on the Mesh card, each primitive of a model's mesh with its own material slot.

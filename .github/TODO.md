@@ -246,14 +246,20 @@ drawn sliced, tiled or fitted inside its size the way a video player letterboxes
 
 ## Interface
 
-### A model's images are not among its parts
+### Texture, sound and data fields pick from a list
 
 The details pick an entity's mesh and material from a grid of Bevy's primitives, what the scene
 already uses and every part of every model, each with a card under it: the mesh turned in a
 preview, lit, in a UV checker or with its normals drawn, and the material on a sphere with its
-settings and texture slots as rows that write it in place. The asset browser draws a thumbnail of
-each model, mesh and material, with search and a chip per kind, and a model opens into its meshes
-and materials, though not its textures, which [ASSETS.md](ASSETS.md) plans.
+settings and texture slots as rows that write it in place. The asset browser draws a picture of
+each model, mesh, material and image with a badge naming its kind, with search and a chip per kind,
+and a model opens into its meshes, materials and textures. What [ASSETS.md](ASSETS.md) has left:
+
+- Texture slots, sounds and data asset references still pick from a list of paths rather than the
+  grid the mesh and material rows open.
+- The grid's built-in shapes and what the scene already uses wear an icon, since a picture is drawn
+  only of a file.
+- A model's mesh with several primitives is one mesh on the card, with one material slot.
 
 ### Layout and text
 

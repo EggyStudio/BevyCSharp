@@ -435,7 +435,7 @@ internal static class EditorDrawn
 
         foreach (var part in parts)
         {
-            var path = file + "#" + part.Label;
+            var path = part.PathIn(file);
             yield return new PickerItem(
                 $"{part.Name} in {file}",
                 title == "Mesh" ? EditorIcons.Mesh : EditorIcons.Image,

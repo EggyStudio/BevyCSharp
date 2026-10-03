@@ -78,4 +78,35 @@ public sealed class GltfContentsTests : IDisposable
         Assert.Null(GltfContents.Read("broken.gltf"));
         Assert.Null(GltfContents.Read("missing.gltf"));
     }
+
+    [Fact]
+    public void ATextureInsideTheFileIsLabeledAndOneBesideItIsItsOwnFile()
+    {
+        Directory.CreateDirectory(Path.Combine(_root, "ships"));
+        File.WriteAllText(Path.Combine(_root, "ships", "ship.gltf"), """
+            { "asset": { "version": "2.0" },
+              "images": [ { "uri": "data:image/png;base64,AAAA" },
+                          { "uri": "paint/hull%20color.png" },
+                          { "name": "Decal", "bufferView": 0, "mimeType": "image/png" },
+                          { "uri": "../../outside.png" } ],
+              "textures": [ { "source": 0 }, { "source": 1 }, { "name": "Stripes", "source": 2 },
+                            { "source": 3 }, { "extensions": { "EXT_texture_webp": { "source": 2 } } } ] }
+            """);
+
+        var parts = GltfContents.Read("ships/ship.gltf");
+
+        Assert.NotNull(parts);
+        Assert.Equal(
+            [
+                new GltfPart("Texture0", "Texture 0", AssetKind.Image),
+                new GltfPart("Texture1", "hull color", AssetKind.Image, "ships/paint/hull color.png"),
+                new GltfPart("Texture2", "Stripes", AssetKind.Image),
+                new GltfPart("Texture4", "Decal", AssetKind.Image),
+            ],
+            parts);
+
+        // Bytes inside the file load by their label, and a file beside it loads as itself.
+        Assert.Equal("ships/ship.gltf#Texture0", parts[0].PathIn("ships/ship.gltf"));
+        Assert.Equal("ships/paint/hull color.png", parts[1].PathIn("ships/ship.gltf"));
+    }
 }
