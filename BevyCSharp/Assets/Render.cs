@@ -87,6 +87,31 @@ public static unsafe class Render
     private static readonly Dictionary<int, MeshData> Built = [];
 
     /// <summary>
+    /// Builds a primitive again with other measures, in place, so everything drawn with the mesh
+    /// changes and keeps its handle.
+    /// </summary>
+    /// <remarks>
+    /// The mesh is replaced whole and its recipe with it, so <see cref="RecipeOf"/> and a scene
+    /// written afterward give the new measures. A mesh from a <see cref="MeshFiles">mesh file</see>
+    /// is written back to it.
+    /// </remarks>
+    /// <returns>Whether the handle named a mesh and the shape is one of Bevy's primitives.</returns>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static bool RebuildMesh(AssetHandle mesh, string shape, float a = 1f, float b = 1f, float c = 1f)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(shape);
+
+        var status = Native.bcs_mesh_rebuild(mesh.Key, shape, a, b, c);
+        if (status == NativeStatus.Unsupported) throw NoRenderer("Rebuilding a mesh");
+        if (status != NativeStatus.Ok) return false;
+
+        lock (Recipes) Recipes[mesh.Key] = new MeshRecipe(shape, a, b, c);
+        lock (Built) Built.Remove(mesh.Key);
+        MeshFiles.Save(mesh);
+        return true;
+    }
+
+    /// <summary>
     /// The geometry a mesh was built from, or <see langword="null"/> for one that was not made by
     /// <see cref="CreateMesh(MeshData)"/>.
     /// </summary>

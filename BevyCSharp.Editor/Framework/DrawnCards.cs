@@ -51,6 +51,10 @@ internal static class DrawnCards
 
             MeshActions(ctx.Ecs, entity, mesh);
 
+            // A primitive's measures, which rebuild it in place, so everything sharing it changes.
+            if (MeasuresOf(mesh) is { } measures)
+                foreach (var field in measures.Fields) ComponentFields.Row(ctx, entity, measures, field);
+
             Facts(entity, mesh);
             ImGui.TreePop();
         }
@@ -142,7 +146,8 @@ internal static class DrawnCards
         var made = Render.RecipeOf(mesh) is not null || Render.DataOf(mesh) is not null;
         if (!made) return;
 
-        var users = world.All().Count(other => Render.IsDrawn(other) && Render.MeshOf(world, other) == mesh);
+        var users = world.All().Count(other =>
+            !PreviewRenderer.Owns(other) && Render.IsDrawn(other) && Render.MeshOf(world, other) == mesh);
         var any = false;
 
         if (users > 1)
@@ -282,9 +287,10 @@ internal static class DrawnCards
         return "built in code";
     }
 
-    /// <summary>How many entities are drawn with a material.</summary>
+    /// <summary>How many entities of the scene are drawn with a material, the cards' own pictures left out.</summary>
     private static int Users(EcsWorld world, AssetHandle material) =>
-        world.All().Count(entity => Render.IsDrawn(entity) && Render.MaterialOf(world, entity) == material);
+        world.All().Count(entity =>
+            !PreviewRenderer.Owns(entity) && Render.IsDrawn(entity) && Render.MaterialOf(world, entity) == material);
 
     /// <summary>The fields of a material's settings, over the material itself.</summary>
     private static ComponentSchema SchemaOf(AssetHandle material)
@@ -325,11 +331,28 @@ internal static class DrawnCards
                 settings.Unlit = on;
                 return true;
             }),
+
+            // The texture slots, each picked from the images under the asset root, named short enough
+            // for the name column, with what each is in full on the name's tooltip.
+            Texture("Color map", "The base color texture, multiplied by the base color.", settings => settings.BaseColorTexture, (settings, map) => settings.BaseColorTexture = map),
+            Texture("Normal map", "Bends the lighting across the surface without changing its shape.", settings => settings.NormalMap, (settings, map) => settings.NormalMap = map),
+            Texture("Metal map", "Metallic in the blue channel and roughness in the green, as glTF packs them.", settings => settings.MetallicRoughnessTexture, (settings, map) => settings.MetallicRoughnessTexture = map),
+            Texture("Glow map", "The emissive texture, multiplied by the emissive color.", settings => settings.EmissiveTexture, (settings, map) => settings.EmissiveTexture = map),
+            Texture("AO map", "Ambient occlusion, darkening the creases light reaches least.", settings => settings.OcclusionTexture, (settings, map) => settings.OcclusionTexture = map),
         };
 
         var schema = new ComponentSchema("Material", "Bevy.StandardMaterial", static () => -1, fields);
         Materials[material] = schema;
         return schema;
+
+        // A slot holding an image, or no image at all.
+        ComponentField Texture(string name, string says, Func<MaterialSettings, AssetHandle> read, Action<MaterialSettings, AssetHandle> write) =>
+            Field(name, FieldKind.Asset, settings => read(settings), (settings, value) =>
+            {
+                if (value is not AssetHandle map) return false;
+                write(settings, map);
+                return true;
+            }, new FieldHints(Tooltip: says, Asset: AssetKind.Image));
 
         // Each field reads the material whole and writes it back whole, since the bridge takes a
         // material's settings together, and a write changes the one setting it names.
@@ -357,6 +380,67 @@ internal static class DrawnCards
                 },
                 options,
                 hints);
+    }
+
+    /// <summary>The measures of each primitive, by handle, kept so one schema is not made a frame.</summary>
+    private static readonly Dictionary<AssetHandle, (string Shape, ComponentSchema Schema)> Measures = [];
+
+    /// <summary>What each primitive calls its measures, in the order the bridge takes them.</summary>
+    private static readonly Dictionary<string, string[]> MeasureNames = new(StringComparer.Ordinal)
+    {
+        [MeshShape.Cuboid] = ["Width", "Height", "Depth"],
+        [MeshShape.Sphere] = ["Radius"],
+        [MeshShape.Plane] = ["Width", "Depth"],
+        [MeshShape.Capsule] = ["Radius", "Length"],
+        [MeshShape.Cylinder] = ["Radius", "Height"],
+        [MeshShape.Cone] = ["Radius", "Height"],
+        [MeshShape.ConicalFrustum] = ["Top radius", "Bottom radius", "Height"],
+        [MeshShape.Torus] = ["Inner radius", "Outer radius"],
+        [MeshShape.Circle] = ["Radius"],
+        [MeshShape.Annulus] = ["Inner radius", "Outer radius"],
+        [MeshShape.Rectangle] = ["Width", "Height"],
+        [MeshShape.Triangle] = ["Size"],
+        [MeshShape.Tetrahedron] = ["Size"],
+    };
+
+    /// <summary>
+    /// A primitive's measures as fields, each rebuilding the mesh in place when written, or nothing
+    /// for a mesh that is not a primitive.
+    /// </summary>
+    /// <remarks>
+    /// Fields over the mesh's recipe, so they are drawn, dragged and undone as a component's are.
+    /// Kept per handle and shape, since a mesh picked as another shape needs other names.
+    /// </remarks>
+    private static ComponentSchema? MeasuresOf(AssetHandle mesh)
+    {
+        if (Render.RecipeOf(mesh) is not { } recipe || !MeasureNames.TryGetValue(recipe.Shape, out var names)) return null;
+        if (Measures.TryGetValue(mesh, out var known) && known.Shape == recipe.Shape) return known.Schema;
+
+        var fields = names.Select((name, index) => new ComponentField(
+            name,
+            FieldKind.Float,
+            "float",
+            (_, _) => Render.RecipeOf(mesh) is { } held ? index switch { 0 => held.A, 1 => held.B, _ => held.C } : null,
+            (_, _, value) =>
+            {
+                if (Render.RecipeOf(mesh) is not { } held || !ComponentSchemas.TryCoerce<float>(value, out var number)) return false;
+
+                // Kept above nothing, since a shape with no size has no faces to draw.
+                number = MathF.Max(0.001f, number);
+                var (a, b, c) = index switch
+                {
+                    0 => (number, held.B, held.C),
+                    1 => (held.A, number, held.C),
+                    _ => (held.A, held.B, number),
+                };
+
+                return Render.RebuildMesh(mesh, held.Shape, a, b, c);
+            },
+            hints: new FieldHints(Minimum: 0.001d, Step: 0.01d))).ToList();
+
+        var schema = new ComponentSchema("Measures", "Bevy.MeshMeasures", static () => -1, fields);
+        Measures[mesh] = (recipe.Shape, schema);
+        return schema;
     }
 
     /// <summary>A slider from nothing to all, as metallic and roughness are.</summary>

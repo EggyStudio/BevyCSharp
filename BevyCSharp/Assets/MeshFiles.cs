@@ -97,10 +97,36 @@ public static class MeshFiles
         var full = Path.Combine(AssetIds.Root, path);
         if (File.Exists(full)) throw new IOException($"{path} is already there.");
 
+        if (Render.RecipeOf(mesh) is null && Render.DataOf(mesh) is null)
+            throw new ArgumentException($"{mesh} was not made in memory, so there is nothing to write.", nameof(mesh));
+
+        Write(mesh, full);
+        AssetIds.IdOf(path, create: true);
+
+        lock (Gate)
+        {
+            if (PathByHandle.TryGetValue(mesh, out var earlier)) ByPath.Remove(earlier);
+            ByPath[path] = mesh;
+            PathByHandle[mesh] = path;
+        }
+    }
+
+    /// <summary>Writes a mesh loaded from a file back to that file, as it is now.</summary>
+    /// <returns>Whether the mesh had a file to write.</returns>
+    public static bool Save(AssetHandle mesh)
+    {
+        if (PathOf(mesh) is not { } path) return false;
+
+        Write(mesh, Path.Combine(AssetIds.Root, path));
+        return true;
+    }
+
+    /// <summary>Writes a mesh's recipe or geometry to a file, through a temporary one.</summary>
+    private static void Write(AssetHandle mesh, string full)
+    {
         var recipe = Render.RecipeOf(mesh);
         var data = recipe is null ? Render.DataOf(mesh) : null;
-        if (recipe is null && data is null)
-            throw new ArgumentException($"{mesh} was not made in memory, so there is nothing to write.", nameof(mesh));
+        if (recipe is null && data is null) return;
 
         var buffer = new ArrayBufferWriter<byte>();
         using (var json = new Utf8JsonWriter(buffer, new JsonWriterOptions { Indented = true }))
@@ -122,14 +148,6 @@ public static class MeshFiles
         }
 
         UserData.WriteAtomically(full, buffer.WrittenSpan);
-        AssetIds.IdOf(path, create: true);
-
-        lock (Gate)
-        {
-            if (PathByHandle.TryGetValue(mesh, out var earlier)) ByPath.Remove(earlier);
-            ByPath[path] = mesh;
-            PathByHandle[mesh] = path;
-        }
     }
 
     /// <summary>Forgets every loaded mesh file, for an app starting, whose handles are its own.</summary>

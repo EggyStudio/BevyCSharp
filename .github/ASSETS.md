@@ -60,8 +60,12 @@ Built in `BevyCSharp.Editor/Framework/DrawnCards.cs`, as an open fold under each
   ABI 157), which writes the settings over the material in place, so the fold says how many
   entities are drawn with it.
 
-Not built: normals and the UV checker on the preview, a primitive's measures edited in place, the
-texture slots as thumbnails, sub-meshes and the actions of §5. The design, all of it:
+A primitive's measures are rows on the Mesh card, named for its shape (a cuboid's width, height and
+depth, a torus's two radii), which rebuild the mesh in place through `Render.RebuildMesh`
+(`bcs_mesh_rebuild`, ABI 158), so everything sharing it changes and keeps its handle, and a mesh
+file is written again. The Material card's texture slots are rows too, each picked from the images
+under the asset root. Not built: normals and the UV checker on the preview, a thumbnail beside each
+texture slot, and sub-meshes. The design, all of it:
 
 - **The Mesh card.**
   - **A live preview** of the mesh alone, turned by dragging, with toggles for wireframe, normals
@@ -190,5 +194,5 @@ Each step is usable on its own and tested before the next.
 
 1. **Sub-assets and `AssetGrid`:** a glTF file opening into its meshes, materials and textures, and
    the picker's grid mode drawing the browser's tiles.
-2. **A primitive's measures edited on its card**, rebuilding the mesh, and written back to its mesh
-   file when it has one.
+2. **Normals and the UV checker on the Mesh card's preview**, and a thumbnail beside each texture
+   slot.

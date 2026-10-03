@@ -308,11 +308,11 @@ programs, the images the scene camera's shaders keep, the settings and the style
 drag on a handle moves, turns or stretches what is selected. [EDITOR.md](EDITOR.md) has the design
 language.
 
-- **A primitive's measures cannot be changed after it is made.** The editor saves a scene file
-  holding every entity, its components and its mesh and material, by file or, made in memory, as a
-  primitive's recipe, a mesh's geometry or a material's settings, and either can be saved as a file
-  of its own (`*.mesh.json`, `*.material.json`). The Mesh card shows a primitive's measures without
-  offering to edit them.
+- **A texture slot is a path, not a picture.** The editor saves a scene file holding every entity,
+  its components and its mesh and material, by file or, made in memory, as a primitive's recipe, a
+  mesh's geometry or a material's settings, and either can be saved as a file of its own
+  (`*.mesh.json`, `*.material.json`). The cards edit a primitive's measures and a material's
+  settings and texture slots, and a slot names its image without showing it.
 - **A mesh and a material are shown by where they came from.** They are Bevy components holding
   typed handles, so the panel draws them as their own section with a card each, and a picker of
   shapes, what the scene uses and files. What it cannot do is name a part of a model file other

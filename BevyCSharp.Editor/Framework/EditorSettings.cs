@@ -233,6 +233,33 @@ public static class EditorSettings
         }
     }
 
+    /// <summary>Every value a person can change, by its page and label joined with a slash.</summary>
+    /// <remarks>What <see cref="EditorProject"/> keeps between runs, read back with <see cref="Restore(IReadOnlyDictionary{string, string})"/>.</remarks>
+    public static Dictionary<string, string> Snapshot()
+    {
+        var values = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        foreach (var entry in Entries)
+        {
+            if (entry.Read is not { } read || entry.Write is null) continue;
+            values[entry.Page + "/" + entry.Label] = read();
+        }
+
+        return values;
+    }
+
+    /// <summary>Puts saved values back, ignoring anything it no longer recognizes, as the text form does.</summary>
+    public static void Restore(IReadOnlyDictionary<string, string> values)
+    {
+        ArgumentNullException.ThrowIfNull(values);
+
+        foreach (var entry in Entries)
+        {
+            if (entry.Write is { } write && values.TryGetValue(entry.Page + "/" + entry.Label, out var value))
+                write(value);
+        }
+    }
+
     /// <summary>Forgets everything, which a second editor in one process would need.</summary>
     public static void Clear()
     {

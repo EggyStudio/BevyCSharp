@@ -37,11 +37,7 @@ pub unsafe extern "C" fn bcs_mesh_create(
         #[cfg(feature = "render")]
         {
             use bevy::asset::Assets;
-            use bevy::math::primitives::{
-                Annulus, Capsule3d, Circle, Cone, ConicalFrustum, Cuboid, Cylinder, Plane3d,
-                Rectangle, Sphere, Tetrahedron, Torus, Triangle3d,
-            };
-            use bevy::mesh::{Mesh, Meshable};
+            use bevy::mesh::Mesh;
 
             let Some(kind) = (unsafe { crate::interop::cstr_to_string(kind) }) else {
                 return status::NULL_ARG;
@@ -1293,6 +1289,31 @@ mod tests {
         assert_eq!(1 | 4, info.attributes & (1 | 4), "normals and UVs");
         assert_eq!([-0.5, -1.0, -1.5], info.min);
         assert_eq!([0.5, 1.0, 1.5], info.max);
+    }
+
+    #[cfg(feature = "render")]
+    #[test]
+    fn a_primitive_rebuilt_in_place_keeps_its_key() {
+        let mut app = app();
+        let mesh = bevy::math::primitives::Cuboid::new(1.0, 1.0, 1.0).mesh().build();
+        let handle = app.world_mut().resource_mut::<Assets<Mesh>>().add(mesh).untyped();
+        let key = crate::assets::key_for(app.world_mut(), handle);
+
+        let mut info = BcsMeshInfo::default();
+        let code = loan_world(app.world_mut(), || unsafe {
+            let shape = c"Cuboid";
+            let rebuilt = bcs_mesh_rebuild(key, shape.as_ptr(), 4.0, 2.0, 6.0);
+            assert_eq!(status::OK, rebuilt);
+
+            // A shape that is not one of Bevy's is refused and leaves the mesh as it was.
+            assert_eq!(status::NO_COMPONENT, bcs_mesh_rebuild(key, c"Blob".as_ptr(), 1.0, 1.0, 1.0));
+
+            bcs_render_mesh_info(key, &mut info)
+        });
+
+        assert_eq!(status::OK, code);
+        assert_eq!([-2.0, -1.0, -3.0], info.min);
+        assert_eq!([2.0, 1.0, 3.0], info.max);
     }
 
     #[cfg(feature = "render")]

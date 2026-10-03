@@ -221,8 +221,9 @@ out again against the new parent (`EditorHierarchy.Reparent`), and the move is o
 The details show an entity's mesh and material under its components, each as a button naming its
 file, or "made here" for one built in code, that opens the picker with Bevy's shapes (or a new
 material), what the scene already draws with, and the model files, with a card folded under each
-(`DrawnCards`). The Mesh card turns the mesh in a preview, draws it as edges on request, and
-lists what it is made of and where it came from. The Material card turns a sphere in the material
+(`DrawnCards`). The Mesh card turns the mesh in a preview, draws it as edges on request, edits
+a primitive's measures as rows that rebuild it in place, and lists what it is made of and where it
+came from. The Material card turns a sphere in the material
 and lists its settings as rows, which write the material itself, so the card says how many entities
 share it. Each card offers "Make unique" while something else shares what it shows, and "Save as
 asset" for a mesh or a material made here, which writes a `*.mesh.json` or `*.material.json` named

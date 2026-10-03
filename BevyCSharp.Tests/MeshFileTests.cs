@@ -97,4 +97,34 @@ public sealed class MeshFileTests : IDisposable
         loading.Run();
         Assert.True(ran);
     }
+
+    [Fact]
+    public void APrimitiveRebuiltWithOtherMeasuresKeepsItsHandleAndItsFile()
+    {
+        var ran = false;
+
+        using var harness = new EngineHarness(frames: 2);
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            if (!App.HasRenderer) return;
+            Streaming.AssetRoot = _root;
+
+            var box = Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f);
+            MeshFiles.SaveAs(box, "box.mesh.json");
+
+            Assert.True(Render.RebuildMesh(box, MeshShape.Cuboid, 4f, 2f, 6f));
+            Assert.Equal(new MeshRecipe(MeshShape.Cuboid, 4f, 2f, 6f), Render.RecipeOf(box));
+            Assert.True(Render.TryGetMeshInfo(box, out var info));
+            Assert.Equal(new Vec3(4f, 2f, 6f), info.Size);
+
+            // Written back to the file it came from.
+            Assert.Contains("\"a\": 4", File.ReadAllText(Path.Combine(_root, "box.mesh.json")));
+
+            Assert.False(Render.RebuildMesh(box, "Blob"));
+            ran = true;
+        });
+
+        harness.Run();
+        if (App.HasRenderer) Assert.True(ran);
+    }
 }
