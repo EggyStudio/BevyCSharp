@@ -56,6 +56,9 @@ public static class EditorPlay
     /// <summary>The project file that is run, or empty for the sample's, found from where the editor runs.</summary>
     public static string Project { get; set; } = string.Empty;
 
+    /// <summary>When the game was last started, which tells its session from any that ran before.</summary>
+    public static DateTimeOffset StartedAt { get; private set; } = DateTimeOffset.MaxValue;
+
     /// <summary>What is running: the game, a build, or nothing.</summary>
     public static PlayJob Job { get; private set; }
 
@@ -444,6 +447,15 @@ public static class EditorPlay
         };
 
         foreach (var argument in step.Arguments) start.ArgumentList.Add(argument);
+
+        // A game answers the bcs socket, so the Play tab can show its world while it runs. Set in
+        // the environment rather than as an argument, since every app built on the library reads
+        // it and a project's own Main need not know.
+        if (Job == PlayJob.Playing)
+        {
+            start.Environment["BCS_SERVE"] = "1";
+            StartedAt = DateTimeOffset.Now.AddSeconds(-1);
+        }
 
         Process? process;
         try

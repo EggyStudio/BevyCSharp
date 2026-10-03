@@ -60,7 +60,7 @@ internal static class Verbs
 
         return Output.Print(
             options,
-            Client.Send(session, "list", seconds: options.Timeout),
+            CliClient.Send(session, "list", seconds: options.Timeout),
             data =>
             {
                 foreach (var command in data.GetProperty("commands").EnumerateArray())
@@ -93,7 +93,7 @@ internal static class Verbs
         }
 
         return Output.Print(
-            options, Client.Send(session, "run", Line(arguments), options.Timeout));
+            options, CliClient.Send(session, "run", Line(arguments), options.Timeout));
     }
 
     /// <summary>Captures the window, and waits for the file to appear.</summary>
@@ -118,7 +118,7 @@ internal static class Verbs
         var path = Path.GetFullPath(arguments[0]);
         var was = File.Exists(path) ? File.GetLastWriteTimeUtc(path) : DateTime.MinValue;
 
-        var answer = Client.Send(session, "run", $"shot \"{path}\"", options.Timeout);
+        var answer = CliClient.Send(session, "run", $"shot \"{path}\"", options.Timeout);
 
         using (var document = JsonDocument.Parse(answer))
         {
@@ -172,7 +172,7 @@ internal static class Verbs
             return Output.Print(options, refusal);
         }
 
-        var answer = Client.Send(session, "run", "app.quit", options.Timeout);
+        var answer = CliClient.Send(session, "run", "app.quit", options.Timeout);
 
         // Waited for rather than assumed, because "asked to close" and "closed" are different
         // answers to "can I start another one".

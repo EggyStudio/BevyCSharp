@@ -57,16 +57,21 @@ change made there is seen without being written into code. Built, all of it:
 
 Godot's remote scene tree shows the running game's world in the editor, beside the edited one. The
 `./bcs` socket already answers `entity.list`, `entity.get` and `entity.set` from a running app, so
-the editor can be the client.
+the editor can be the client. Built, in `EditorRemote` over `CliClient`, the socket's client, which
+moved from the tool into the library for it.
 
-- The game is started with `config.Serve` on, and the editor reads the session file it writes to
-  find it, as `./bcs` does, by process id.
-- A Remote view in the world panel lists the running game's entities by asking `entity.list` a few
-  times a second, and the details show `entity.get` for the one picked. A field changed there is an
-  `entity.set`, which lasts until the game stops and is not recorded in the editor's history.
-- Pausing and stepping the game are commands of their own, built: `app.pause [on|off]`,
-  `app.step [frames]` and `app.speed <times>`, over `Time.Pause`, `Time.Step`, `Time.Resume` and
-  `Time.SetSpeed`, which set Bevy's `Time<Virtual>` (`bcs_time_set_virtual`, ABI 162). A paused
+- The game is started with `BCS_SERVE` in its environment, which any app on the library reads, and
+  the editor finds it by the session file it writes, the one that started after Play and is not
+  the editor's own.
+- While it plays, the Play tab lists its named entities by asking `entity.list` a few times a
+  second on a thread of its own, and the fields of the one picked from `entity.get`, each a box
+  that sends an `entity.set` on Enter, which lasts until the game stops and is not recorded in the
+  editor's history. In the Play tab rather than the world panel, so the running game's world and
+  the edited one are never one list a change could be made in by mistake.
+- Pausing and stepping the game are buttons over the tab's lists and commands of their own,
+  `app.pause [on|off]`, `app.step [frames]` and `app.speed <times>`, over `Time.Pause`,
+  `Time.Step`, `Time.Resume` and `Time.SetSpeed`, which set Bevy's `Time<Virtual>`
+  (`bcs_time_set_virtual`, ABI 162). A paused
   game reads a delta of zero and runs no fixed step, while its window, its interface and the
   socket go on, and a step runs the frames it asks for with the delta each would have had.
 - The game's picture can be shown in a tab through `shot`, but a capture a frame is too slow for
@@ -196,5 +201,4 @@ For what C# owns, the same design on the managed side:
 
 ## Order
 
-1. The remote view.
-2. Embedding through a shared bridge, so the managed reads come from the same bytes.
+1. Embedding through a shared bridge, so the managed reads come from the same bytes.

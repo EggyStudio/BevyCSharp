@@ -3,10 +3,15 @@ using System.Text;
 using System.Text.Json;
 using Bevy;
 
-namespace BevyCSharp.Cli;
+namespace Bevy;
 
 /// <summary>Asks a running app something, over its loopback port.</summary>
-internal static class Client
+/// <remarks>
+/// The other end of <see cref="CliServer"/>, in the library so anything can be a client: the
+/// <c>bcs</c> tool, and the editor watching a game it started. The answer is the envelope
+/// <see cref="CliJson"/> describes, as text, and <see cref="Run"/> reads a command's out of it.
+/// </remarks>
+public static class CliClient
 {
     /// <summary>
     /// Sends one request and reads the one answer.
@@ -81,4 +86,47 @@ internal static class Client
 
         return Encoding.UTF8.GetString(buffer.ToArray());
     }
+
+    /// <summary>
+    /// Runs a console command in a running app and reads what it answered.
+    /// </summary>
+    /// <param name="session">Which app to ask.</param>
+    /// <param name="line">The command line, as it would be typed in the app's console.</param>
+    /// <param name="seconds">How long to wait before giving up.</param>
+    /// <returns>Whether it worked, and the command's answer or why it failed.</returns>
+    public static CliAnswer Run(CliSession session, string line, double seconds = 5)
+    {
+        ArgumentNullException.ThrowIfNull(line);
+
+        var envelope = Send(session, "run", line, seconds);
+
+        try
+        {
+            using var document = JsonDocument.Parse(envelope);
+            var root = document.RootElement;
+            var success = root.TryGetProperty("success", out var said) && said.ValueKind == JsonValueKind.True;
+
+            var result = root.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.Object
+                         && data.TryGetProperty("result", out var answered) && answered.ValueKind == JsonValueKind.String
+                ? answered.GetString()
+                : null;
+
+            var error = root.TryGetProperty("errors", out var errors) && errors.ValueKind == JsonValueKind.Array
+                        && errors.GetArrayLength() > 0 && errors[0].TryGetProperty("message", out var message)
+                ? message.GetString()
+                : null;
+
+            return new CliAnswer(success, result, error);
+        }
+        catch (JsonException)
+        {
+            return new CliAnswer(false, null, "The app answered with something that is not an envelope.");
+        }
+    }
 }
+
+/// <summary>What a console command run in another app answered.</summary>
+/// <param name="Success">Whether it worked.</param>
+/// <param name="Result">What it said, or nothing.</param>
+/// <param name="Error">Why it failed, when it did.</param>
+public sealed record CliAnswer(bool Success, string? Result, string? Error);

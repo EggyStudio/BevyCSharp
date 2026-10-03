@@ -33,8 +33,111 @@ public static class PlayTab
         Actions();
         Export();
 
+        if (!EditorPlay.Running)
+        {
+            EditorSurface.Pane("##played", Vector2.Zero, Output);
+            return;
+        }
+
+        // While the game runs, its world beside what it writes: what it holds, the fields of the
+        // one picked, and the output, each a pane, with the clock's buttons over them.
+        EditorRemote.Watch();
+        Clock();
+
+        var gap = ImGui.GetStyle().ItemSpacing.X;
+        var across = ImGui.GetContentRegionAvail().X - (gap * 2f);
+
+        EditorSurface.Pane("##remote", new Vector2(across * 0.25f, 0f), RemoteList);
+        ImGui.SameLine();
+        EditorSurface.Pane("##fields", new Vector2(across * 0.35f, 0f), RemoteFields);
+        ImGui.SameLine();
         EditorSurface.Pane("##played", Vector2.Zero, Output);
     }
+
+    /// <summary>What the running game is doing, with its clock's pause and step.</summary>
+    private static void Clock()
+    {
+        ImGui.AlignTextToFramePadding();
+
+        if (EditorRemote.Session is not { } session)
+        {
+            ImGui.TextDisabled("Waiting for the game to answer");
+            ImGui.Spacing();
+            return;
+        }
+
+        if (EditorWidgets.Pill(EditorRemote.Paused ? "Resume" : "Pause", EditorRemote.Paused)) EditorRemote.TogglePause();
+
+        ImGui.SameLine();
+        if (EditorWidgets.Pill("Step", false)) EditorRemote.Step();
+
+        ImGui.SameLine();
+        ImGui.AlignTextToFramePadding();
+        ImGui.TextDisabled(EditorRemote.Problem is { } problem
+            ? problem
+            : $"{session.Name}, {EditorRemote.Entities.Count} named entities. A change here lasts until it stops.");
+
+        ImGui.Spacing();
+    }
+
+    /// <summary>The running game's named entities, one to pick.</summary>
+    private static void RemoteList()
+    {
+        var entities = EditorRemote.Entities;
+
+        if (entities.Count == 0)
+        {
+            EditorSurface.Empty("Nothing named yet", "The game's named entities appear here as it answers.");
+            return;
+        }
+
+        foreach (var entity in entities)
+        {
+            if (ImGui.Selectable($"{entity.Name}##{entity.Id}", entity.Id == EditorRemote.Picked)) EditorRemote.Pick(entity.Id);
+            if (ImGui.IsItemHovered()) EditorWidgets.Tip($"{entity.Id}, carrying {entity.Components}");
+        }
+    }
+
+    /// <summary>The picked entity's fields, each a box that sets it in the game when Enter is pressed.</summary>
+    private static void RemoteFields()
+    {
+        if (EditorRemote.Picked is null)
+        {
+            EditorSurface.Empty("Nothing picked", "Pick one of the game's entities to see what it holds.");
+            return;
+        }
+
+        foreach (var field in EditorRemote.Fields)
+        {
+            ImGui.PushID(field.Field);
+            ImGui.AlignTextToFramePadding();
+            ImGui.TextUnformatted(field.Field);
+            ImGui.SameLine(MathF.Max(ImGui.GetContentRegionAvail().X * 0.45f, ImGui.CalcTextSize(field.Field).X + 12f));
+            ImGui.SetNextItemWidth(-1f);
+
+            // What is being typed is kept while the box has the keyboard, since the game's answer
+            // arrives a few times a second and would otherwise write over it.
+            var text = Typed.TryGetValue(field.Field, out var typing) ? typing : field.Value;
+            if (ImGui.InputText("##value", ref text, 256, ImGuiInputTextFlags.EnterReturnsTrue))
+            {
+                EditorRemote.Set(field.Field, text);
+                Typed.Remove(field.Field);
+            }
+            else if (ImGui.IsItemActive())
+            {
+                Typed[field.Field] = text;
+            }
+            else
+            {
+                Typed.Remove(field.Field);
+            }
+
+            ImGui.PopID();
+        }
+    }
+
+    /// <summary>What is being typed into a field of the game's, by the field.</summary>
+    private static readonly Dictionary<string, string> Typed = new(StringComparer.Ordinal);
 
     /// <summary>The state, the project, and play, build, stop and clear at the end of the row.</summary>
     private static void Actions()

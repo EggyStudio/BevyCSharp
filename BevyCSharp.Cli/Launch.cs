@@ -171,7 +171,7 @@ internal static class Launch
             }
 
             return Output.Print(
-                options, Client.Send(session, "run", $"log.tail {count}", options.Timeout));
+                options, CliClient.Send(session, "run", $"log.tail {count}", options.Timeout));
         }
 
         if (!follow)

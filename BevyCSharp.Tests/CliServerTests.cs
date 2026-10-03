@@ -93,6 +93,36 @@ public sealed class CliServerTests : IDisposable
         Assert.Empty(CliSessionFile.All());
     }
 
+    [Fact]
+    public void TheLibrarysClientRunsACommandAndReadsItsAnswer()
+    {
+        using var app = Serving();
+
+        var running = Start(app);
+        var session = Ready();
+
+        try
+        {
+            // What the editor asks a game it started, and how it reads what came back.
+            var listed = CliClient.Run(session, "entity.list");
+            Assert.True(listed.Success);
+            Assert.NotNull(listed.Result);
+
+            // The clock stopped from outside, as the Play tab's Pause does, and started again.
+            Assert.Equal("paused", CliClient.Run(session, "app.pause on").Result);
+            Assert.Equal("running", CliClient.Run(session, "app.pause off").Result);
+
+            // A command that is not there fails with why.
+            var missing = CliClient.Run(session, "no.such.command");
+            Assert.False(missing.Success);
+            Assert.False(string.IsNullOrEmpty(missing.Error));
+        }
+        finally
+        {
+            Stop(session, running);
+        }
+    }
+
     /// <summary>
     /// A misspelled command is a code, not a sentence.
     /// </summary>
