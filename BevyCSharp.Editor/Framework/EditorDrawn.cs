@@ -387,7 +387,7 @@ internal static class EditorDrawn
             items.Add(new PickerItem(file, EditorIcons.Mesh, pick => Give(pick.Ecs, entity, "Mesh", MeshFiles.Load(file)), "Files"));
 
         foreach (var file in EditorAssets.Every(EditorAssets.ExtensionsFor(kind).ToArray()))
-            items.Add(new PickerItem(file, EditorIcons.File, pick => Point(pick, entity, "Mesh", file, kind, label), "Files"));
+            items.AddRange(Parts(entity, "Mesh", file, kind, label));
 
         return items;
     }
@@ -412,9 +412,35 @@ internal static class EditorDrawn
             items.Add(new PickerItem(file, EditorIcons.Data, pick => Give(pick.Ecs, entity, "Material", MaterialFiles.Load(file)), "Files"));
 
         foreach (var file in EditorAssets.Every(EditorAssets.ExtensionsFor(kind).ToArray()))
-            items.Add(new PickerItem(file, EditorIcons.File, pick => Point(pick, entity, "Material", file, kind, label), "Files"));
+            items.AddRange(Parts(entity, "Material", file, kind, label));
 
         return items;
+    }
+
+    /// <summary>
+    /// What a model file offers a mesh or a material row: each of its meshes or materials by the
+    /// name the file gives it, or the file alone when it lists none, such as an OBJ.
+    /// </summary>
+    private static IEnumerable<PickerItem> Parts(Entity entity, string title, string file, string kind, string label)
+    {
+        var wanted = title == "Mesh" ? AssetKind.Mesh : AssetKind.StandardMaterial;
+        var parts = GltfContents.Read(file)?.Where(part => part.Kind == wanted).ToList() ?? [];
+
+        if (parts.Count == 0)
+        {
+            yield return new PickerItem(file, EditorIcons.File, pick => Point(pick, entity, title, file, kind, label), "Files");
+            yield break;
+        }
+
+        foreach (var part in parts)
+        {
+            var path = file + "#" + part.Label;
+            yield return new PickerItem(
+                $"{part.Name} in {file}",
+                title == "Mesh" ? EditorIcons.Mesh : EditorIcons.Image,
+                pick => Give(pick.Ecs, entity, title, AssetServer.Load(kind, path)),
+                "Files");
+        }
     }
 
     /// <summary>

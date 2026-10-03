@@ -65,6 +65,8 @@ public static class EditorAssets
     /// </remarks>
     public static IReadOnlyList<AssetEntry> List()
     {
+        if (IsModel(Directory)) return Parts(Directory);
+
         var root = EditorPaths.Assets;
         var here = Directory.Length == 0 ? root : Path.Combine(root, Directory.Replace('/', Path.DirectorySeparatorChar));
 
@@ -89,6 +91,77 @@ public static class EditorAssets
         }
 
         return entries;
+    }
+
+    /// <summary>Whether a path names a model file, which the browser can go into as a folder of its parts.</summary>
+    public static bool IsModel(string relative) =>
+        relative.Length > 0
+        && !relative.Contains('#', StringComparison.Ordinal)
+        && KindOf(relative) == "model"
+        && File.Exists(Absolute(relative));
+
+    /// <summary>
+    /// A model's meshes and materials as entries of their own, after one leading back out to the
+    /// folder the model is in.
+    /// </summary>
+    /// <remarks>
+    /// Each part's path is the model's with the label Bevy loads the part by after a <c>#</c>, so
+    /// selecting, previewing and picking one goes through the same paths a file does. Read from
+    /// the file's JSON (<see cref="GltfContents"/>), so nothing is loaded to list them.
+    /// </remarks>
+    private static IReadOnlyList<AssetEntry> Parts(string model)
+    {
+        var entries = new List<AssetEntry> { new("..", Parent(model), true, 0) };
+
+        foreach (var part in GltfContents.Read(model) ?? [])
+            entries.Add(new AssetEntry(part.Name, model + "#" + part.Label, false, 0));
+
+        return entries;
+    }
+
+    /// <summary>
+    /// The mesh a path names: a mesh file read on this side, a part of a model by its label, or a
+    /// model's first mesh.
+    /// </summary>
+    internal static AssetHandle LoadMesh(string path) =>
+        MeshFiles.IsMeshFile(path) ? MeshFiles.Load(path) : Held(AssetKind.Mesh, Labeled(path, "Mesh0/Primitive0"));
+
+    /// <summary>
+    /// The material a path names: a material file read on this side, a part of a model by its
+    /// label, or a model's first material.
+    /// </summary>
+    internal static AssetHandle LoadMaterial(string path) =>
+        MaterialFiles.IsMaterialFile(path)
+            ? MaterialFiles.Load(path)
+            : Held(AssetKind.StandardMaterial, Labeled(path, "Material0/std"));
+
+    private static string Labeled(string path, string first) => path.Contains('#', StringComparison.Ordinal) ? path : path + "#" + first;
+
+    /// <summary>The handle loading a path gave, loaded once and kept for every frame that asks.</summary>
+    /// <remarks>
+    /// Each load is a handle of its own, so a panel loading what it shows every frame would be
+    /// showing a different handle every frame, and a picture of it would start again each time.
+    /// </remarks>
+    private static AssetHandle Held(string kind, string path)
+    {
+        var key = kind + "\n" + path;
+        if (Loaded.TryGetValue(key, out var held) && held.State != AssetLoadState.Unknown) return held;
+
+        return Loaded[key] = AssetServer.Load(kind, path);
+    }
+
+    private static readonly Dictionary<string, AssetHandle> Loaded = new(StringComparer.Ordinal);
+
+    /// <summary>What a path is called in the browser: a part of a model by the name the model gives it, a file by its name.</summary>
+    public static string NameOf(string relative)
+    {
+        var hash = relative.IndexOf('#');
+        if (hash < 0) return Path.GetFileName(relative);
+
+        var label = relative[(hash + 1)..];
+        var model = relative[..hash];
+        var part = GltfContents.Read(model)?.FirstOrDefault(found => found.Label == label);
+        return $"{part?.Name ?? label} in {Path.GetFileName(model)}";
     }
 
     /// <summary>
@@ -186,7 +259,9 @@ public static class EditorAssets
     /// reported as what it is rather than guessed at.
     /// </remarks>
     public static string KindOf(string relative) =>
-        relative.EndsWith(".scene.json", StringComparison.OrdinalIgnoreCase) ? "scene"
+        relative.IndexOf('#') is var hash and >= 0
+            ? relative[(hash + 1)..].StartsWith("Material", StringComparison.Ordinal) ? "material" : "mesh"
+        : relative.EndsWith(".scene.json", StringComparison.OrdinalIgnoreCase) ? "scene"
         : MaterialFiles.IsMaterialFile(relative) ? "material"
         : MeshFiles.IsMeshFile(relative) ? "mesh"
         : KindByExtension(relative);

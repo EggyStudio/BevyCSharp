@@ -486,6 +486,11 @@ public static class AssetsTab
             else EditorAssets.Select(picked ? null : entry.Path);
         }
 
+        // Twice on a model goes into it, as into a folder, where its meshes and materials are
+        // tiles of their own to pick, preview and place one at a time.
+        if (over && !entry.IsDirectory && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left) && EditorAssets.IsModel(entry.Path))
+            EditorAssets.Enter(entry.Path);
+
         var draw = ImGui.GetWindowDrawList();
 
         // Cut to the region rather than run under its edge, so a tile scrolled half out of sight

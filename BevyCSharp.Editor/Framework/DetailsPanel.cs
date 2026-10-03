@@ -215,7 +215,7 @@ public static class DetailsPanel
         var kind = EditorAssets.KindOf(file);
 
         EditorSurface.FullWidth();
-        ImGui.TextUnformatted(Path.GetFileName(file));
+        ImGui.TextUnformatted(EditorAssets.NameOf(file));
         ImGui.TextDisabled(kind);
         ImGui.Spacing();
 
@@ -256,12 +256,12 @@ public static class DetailsPanel
                 break;
 
             case "mesh":
-                DrawnCards.MeshBody(ctx, MeshFiles.Load(file), Entity.None);
+                DrawnCards.MeshBody(ctx, EditorAssets.LoadMesh(file), Entity.None);
                 break;
 
             case "material":
             {
-                var material = MaterialFiles.Load(file);
+                var material = EditorAssets.LoadMaterial(file);
                 var users = DrawnCards.UsersOf(ctx.Ecs, material);
                 if (users > 0) ImGui.TextDisabled(users == 1 ? "Used by one entity" : $"Used by {users} entities");
                 DrawnCards.MaterialBody(ctx, material, Entity.None, users);
@@ -312,8 +312,12 @@ public static class DetailsPanel
     private static readonly Dictionary<string, (DateTime Stamp, string Said)> SceneSizes = [];
 
     /// <summary>Where a file is, how large, when it changed and the id a scene refers to it by.</summary>
-    private static void AssetFacts(string file)
+    private static void AssetFacts(string path)
     {
+        // A part of a model is the model's file, with its label as a fact of its own.
+        var hash = path.IndexOf('#');
+        var file = hash < 0 ? path : path[..hash];
+
         var full = EditorAssets.Absolute(file);
         if (!File.Exists(full)) return;
 
@@ -323,6 +327,7 @@ public static class DetailsPanel
         if (!EditorRows.Open("##facts", across)) return;
 
         Fact("Path", file);
+        if (hash >= 0) Fact("Label", path[(hash + 1)..]);
         Fact("Size", info.Length < 1024 ? $"{info.Length} B" : $"{info.Length / 1024f:0.#} KB");
         Fact("Changed", info.LastWriteTime.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture));
         Fact("Id", id == 0 ? "none yet" : id.ToString("x16", CultureInfo.InvariantCulture));

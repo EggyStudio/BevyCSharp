@@ -85,13 +85,13 @@ internal static class EditorConsoleCommands
     /// Checking a tile from outside the window means driving the editor to a particular folder, and
     /// it is the same call the tile makes.
     /// </remarks>
-    [Command("assets.open", "Opens a folder in the assets panel: assets.open <folder>")]
+    [Command("assets.open", "Opens a folder, or a model's parts, in the assets panel: assets.open <folder or model>")]
     internal static string OpenAssets(string folder)
     {
         var path = folder.Trim();
 
-        if (path.Length > 0 && !Directory.Exists(EditorAssets.Absolute(path)))
-            return $"no folder called {path} under the asset root";
+        if (path.Length > 0 && !Directory.Exists(EditorAssets.Absolute(path)) && !EditorAssets.IsModel(path))
+            return $"no folder or model called {path} under the asset root";
 
         EditorAssets.Enter(path);
         EditorShell.Open("Assets");

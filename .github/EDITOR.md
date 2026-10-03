@@ -236,6 +236,8 @@ thumbnail drawn once and kept under `user://thumbnails/` (`Thumbnails`), and any
 kind's icon. A search box narrows the tiles by name, a chip narrows them to one kind, and a slider
 sizes them. A model's thumbnail is drawn on a transparent background, so the tile's own color shows
 round it, or on the color the setting "Thumbnail background" under Assets gives as hex with alpha.
+Twice on a model's tile goes into it, as into a folder, where its meshes and materials are tiles of
+their own, and ".." leads back out.
 
 Picking a file selects it and lets go of any entity, since there is one selection, of entities or
 of a file, and picking an entity lets go of the file. The details panel then shows the file: its

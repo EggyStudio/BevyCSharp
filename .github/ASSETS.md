@@ -129,7 +129,11 @@ a thumbnail goes through a capture instead.
 Built: model, mesh and material tiles show their thumbnails, and a search box, a chip per kind and a
 tile size slider sit over the tiles. A picked file is shown in the details panel rather than in a
 column beside the tiles, since picking a file lets go of any entity and one panel shows the one
-selection (`DetailsPanel.AssetDetails`). Not built: sub-assets and badges.
+selection (`DetailsPanel.AssetDetails`). A model file opens into its meshes and materials, read
+from its JSON by `GltfContents` without loading it: twice on its tile, or `assets.open` with its
+path, goes into it as into a folder, where each part is a tile with its own thumbnail and its own
+details, its path the model's with the part's label after `#`. Not built: textures among the
+parts, and badges.
 
 - **Tiles show the asset.** A model or mesh is rendered, a material is a sphere in it, a texture is
   itself, and a scene, a data asset or a sound is its icon with a small badge naming its kind.
@@ -195,7 +199,7 @@ no file, as `Render.CreateMesh` makes it today. Godot's answer fits both, and is
 
 Each step is usable on its own and tested before the next.
 
-1. **Sub-assets and `AssetGrid`:** a glTF file opening into its meshes, materials and textures, and
-   the picker's grid mode drawing the browser's tiles.
+1. **`AssetGrid`:** the picker's grid mode drawing the browser's tiles, a model's parts among
+   them.
 2. **Normals and the UV checker on the Mesh card's preview**, and a thumbnail beside each texture
    slot.

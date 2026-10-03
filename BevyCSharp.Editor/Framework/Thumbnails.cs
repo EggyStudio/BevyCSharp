@@ -169,13 +169,14 @@ internal static class Thumbnails
     /// <summary>What a file is drawn as: a model as its scene, a mesh file alone, a material file on a sphere.</summary>
     private static PreviewSubject? Subject(string file)
     {
-        if (!MaterialFiles.IsMaterialFile(file) && !MeshFiles.IsMeshFile(file)) return new PreviewSubject.Scene(file);
-
         try
         {
-            return MeshFiles.IsMeshFile(file)
-                ? new PreviewSubject.Mesh(MeshFiles.Load(file))
-                : new PreviewSubject.Material(MaterialFiles.Load(file));
+            return EditorAssets.KindOf(file) switch
+            {
+                "mesh" => new PreviewSubject.Mesh(EditorAssets.LoadMesh(file)),
+                "material" => new PreviewSubject.Material(EditorAssets.LoadMaterial(file)),
+                _ => new PreviewSubject.Scene(file),
+            };
         }
         catch (Exception error) when (error is IOException or System.Text.Json.JsonException or InvalidDataException)
         {
@@ -187,7 +188,8 @@ internal static class Thumbnails
     /// <summary>The <c>user://</c> path a file's picture has, from its path and when it was last written.</summary>
     private static string? PictureOf(string file)
     {
-        var full = EditorAssets.Absolute(file);
+        // A part of a model is drawn again when the model is written again.
+        var full = EditorAssets.Absolute(file.Split('#')[0]);
         if (!File.Exists(full)) return null;
 
         var stamp = File.GetLastWriteTimeUtc(full).Ticks;

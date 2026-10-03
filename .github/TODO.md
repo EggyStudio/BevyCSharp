@@ -246,14 +246,14 @@ drawn sliced, tiled or fitted inside its size the way a video player letterboxes
 
 ## Interface
 
-### A model file is one tile
+### The picker is a list
 
 The details pick an entity's mesh and material from Bevy's primitives, what the scene already
 uses and model files, each with a card under it: the mesh turned in a preview with what it is made
 of, and the material on a sphere with its settings as rows that write it in place. The asset
-browser draws a thumbnail of each model, with search and a chip per kind. A glTF file does not open
-into its meshes and materials, and the picker is a list rather than the browser's grid.
-[ASSETS.md](ASSETS.md) plans both, and a primitive's measures edited on its card.
+browser draws a thumbnail of each model, mesh and material, with search and a chip per kind, and a
+model opens into its meshes and materials. The picker is a list rather than the browser's grid,
+which [ASSETS.md](ASSETS.md) plans.
 
 ### Layout and text
 
@@ -315,9 +315,8 @@ language.
   settings and texture slots, and a slot names its image without showing it.
 - **A mesh and a material are shown by where they came from.** They are Bevy components holding
   typed handles, so the panel draws them as their own section with a card each, and a picker of
-  shapes, what the scene uses and files. What it cannot do is name a part of a model file other
-  than the first, since a glTF holds many meshes and nothing here lists them without loading it, so
-  the picker takes `Mesh0/Primitive0` and a file with several needs the label written by hand.
+  shapes, what the scene uses and each mesh or material of each model file. An OBJ lists no parts,
+  so the picker offers it whole.
 - **The hierarchy names what it can see and the stats panel counts it.** Both go through
   `EditorKinds`, so a camera in the tree and a camera in the count are one question asked once.
   Neither can see a component the bridge does not name, so an entity whose components are all
