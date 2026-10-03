@@ -56,13 +56,13 @@ Everything is read from one of two places, named in a path by its prefix.
   the same one `Persistent<T>` writes to.
 
 The managed side resolves both (`SceneFile.Resolve`, `UserData`), and `user://` is registered with
-Bevy as an asset source named `user` (ABI 156), with the directory made as an app starts. The
-managed `AssetSource` below is not built. Both are registered with Bevy as named asset sources,
-which 0.19 supports, so a texture or a glTF
-file under `user://` loads as one under `assets://` does. The managed files (scenes, data assets,
-saves) go through one managed `AssetSource` with three backends (a folder, embedded resources, a
-pack), which is the reader [PLAY.md](PLAY.md) plans for embedding, so both sides read the same bytes
-from the same place.
+Bevy as an asset source named `user` (ABI 156), with the directory made as an app starts, so a
+texture or a glTF file under `user://` loads as one under `assets://` does. The managed files under
+`assets://` (scenes, data assets, material and mesh files, the ids beside them) are read through
+`AssetFiles`, which takes a file in the asset folder first and the game's own assembly after,
+where an export that embeds compiles them (`BevyCSharp.Embed.targets`). A pack file, the third
+place a shipped game's assets could be, is not built, and neither is one copy of the assets read
+by both sides, which [PLAY.md](PLAY.md) leaves to a shared bridge.
 
 A path with no prefix is under `assets://`, so every path written today keeps working.
 
@@ -368,6 +368,5 @@ remembers which saved entities they hold, `SaveGame.Save` writes the difference 
 
 Each step is usable on its own and is tested before the next.
 
-1. **Embedded and packed `assets://`** (§1). The managed reads (scenes, data assets, material and
-   mesh files) go through one reader over a folder, the game's embedded resources or a pack, so an
-   export that embeds its assets ships no folder at all.
+1. **A pack file** (§1), as a third place `AssetFiles` and the bridge read from, for a game whose
+   assets are too large to compile into its binaries.

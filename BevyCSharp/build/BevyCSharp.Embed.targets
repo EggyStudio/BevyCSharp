@@ -1,0 +1,22 @@
+<Project>
+
+    <!--
+      Compiles the files the managed side reads (scenes, data assets, material and mesh files, and
+      the id sidecars beside them) into the game's assembly, named under assets/, where AssetFiles
+      finds them when no file on disk answers first. Off unless BevyCSharpEmbedAssets is true,
+      which the editor's export passes when it embeds, together with a bridge carrying the rest of
+      the assets, so the game ships with no asset folder at all.
+
+      A folder whose name starts with a dot, such as the shader compiler's cache, is a tool's and
+      is left out. Named by hand rather than by MSBuild's own resource naming, which turns folders into dots and
+      cannot be told apart from a dot in a file name.
+    -->
+
+    <ItemGroup Condition="'$(BevyCSharpEmbedAssets)' == 'true' And Exists('$(MSBuildProjectDirectory)/assets')">
+        <EmbeddedResource Include="$(MSBuildProjectDirectory)/assets/**/*.json;$(MSBuildProjectDirectory)/assets/**/*.uid"
+                          Exclude="$(MSBuildProjectDirectory)/assets/**/.*/**"
+                          LogicalName="assets/%(RecursiveDir)%(Filename)%(Extension)"
+                          WithCulture="false"/>
+    </ItemGroup>
+
+</Project>

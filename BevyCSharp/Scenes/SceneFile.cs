@@ -455,7 +455,7 @@ public static class SceneFile
     {
         ArgumentNullException.ThrowIfNull(world);
 
-        using var document = JsonDocument.Parse(File.ReadAllText(Resolve(path)));
+        using var document = JsonDocument.Parse(AssetFiles.ReadAllText(Resolve(path)));
         return Read(world, document.RootElement, parent);
     }
 

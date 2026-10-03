@@ -49,9 +49,9 @@ public static class MeshFiles
         }
 
         var full = Path.Combine(AssetIds.Root, path);
-        if (!File.Exists(full)) throw new FileNotFoundException($"No mesh file at {path}.", full);
+        if (!AssetFiles.Exists(full)) throw new FileNotFoundException($"No mesh file at {path}.", full);
 
-        using var document = JsonDocument.Parse(File.ReadAllText(full));
+        using var document = JsonDocument.Parse(AssetFiles.ReadAllText(full));
         var root = document.RootElement;
         if (!root.TryGetProperty("format", out var format) || format.GetString() != Format)
             throw new InvalidDataException($"{path} is not a mesh in the {Format} format.");

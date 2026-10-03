@@ -339,7 +339,7 @@ public static class DataAssets
     {
         try
         {
-            using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(AssetIds.Root, path)));
+            using var document = JsonDocument.Parse(AssetFiles.ReadAllText(path));
             var name = document.RootElement.TryGetProperty("type", out var type) ? type.GetString() : null;
             return KindNamed(name)?.Name ?? name;
         }
@@ -453,7 +453,7 @@ public static class DataAssets
 
         var path = AssetIds.PathOf(id) ?? throw new FileNotFoundException($"No data asset has the id {id:x16}.");
 
-        using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(AssetIds.Root, path)));
+        using var document = JsonDocument.Parse(AssetFiles.ReadAllText(path));
         var root = document.RootElement;
 
         var name = root.TryGetProperty("type", out var type) ? type.GetString() : null;

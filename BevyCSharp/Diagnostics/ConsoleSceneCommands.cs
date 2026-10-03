@@ -21,7 +21,7 @@ internal static class ConsoleSceneCommands
     [Command("scene.load", "Spawns a scene file: scene.load <path>")]
     internal static string Load(string path)
     {
-        if (!File.Exists(SceneFile.Resolve(path)))
+        if (!AssetFiles.Exists(SceneFile.Resolve(path)))
         {
             ConsoleHost.Fail("NO_SUCH_FILE", $"There is no scene at {path}.");
             return $"there is no scene at {path}";

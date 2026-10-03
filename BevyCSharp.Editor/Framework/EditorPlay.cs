@@ -136,10 +136,11 @@ public static class EditorPlay
     /// <para>
     /// With <paramref name="embed"/>, the project's <c>assets</c> folder is first compiled into a
     /// bridge of the game's own (<c>build-native.sh --render --embed</c>), which then replaces the one
-    /// the publish copied, and the asset folder is cut down to what the managed side reads for
-    /// itself: scenes, data assets, material and mesh files and the ids beside them. Bevy reads
-    /// everything else from the bridge. That needs the checkout's build script, so it is offered
-    /// only where the editor runs from a checkout.
+    /// the publish copied. The files the managed side reads for itself (scenes, data assets,
+    /// material and mesh files and the ids beside them) are compiled into the game's assembly by
+    /// the same publish (<c>BevyCSharpEmbedAssets</c>), and <see cref="AssetFiles"/> reads them
+    /// there, so the asset folder is left out of what ships, scripts apart. That needs the
+    /// checkout's build script, so it is offered only where the editor runs from a checkout.
     /// </para>
     /// <para>
     /// Not trimmed, and not compiled ahead of time, since the script host the editor shares with a
@@ -183,7 +184,13 @@ public static class EditorPlay
 
         steps.Add(new Step(
             "dotnet",
-            ["publish", project, "-c", "Release", "-r", rid, "--self-contained", "-o", folder],
+            [
+                "publish", project, "-c", "Release", "-r", rid, "--self-contained", "-o", folder,
+
+                // The files the managed side reads, compiled into the game's assembly beside the
+                // bridge carrying the rest (BevyCSharp.Embed.targets).
+                .. embed ? new[] { "-p:BevyCSharpEmbedAssets=true" } : [],
+            ],
             $"[play] publishing {name} for {rid}",
             () =>
             {
@@ -234,13 +241,16 @@ public static class EditorPlay
             File.Delete(file);
         }
 
-        // Folders the files left behind, deepest first, so a parent is empty by the time it is asked.
-        foreach (var directory in Directory.GetDirectories(assets, "*", SearchOption.AllDirectories).OrderByDescending(path => path.Length))
+        // Folders the files left behind, deepest first, so a parent is empty by the time it is asked,
+        // and the asset folder itself when nothing is left in it.
+        foreach (var directory in Directory.GetDirectories(assets, "*", SearchOption.AllDirectories).OrderByDescending(path => path.Length).Append(assets))
         {
             if (!Directory.EnumerateFileSystemEntries(directory).Any()) Directory.Delete(directory);
         }
 
-        Say($"[play] the bridge carries the assets, and {kept} files the game reads itself stay beside it");
+        Say(kept == 0
+            ? "[play] the bridge and the game's assembly carry the assets, so the export has no asset folder"
+            : $"[play] the bridge and the game's assembly carry the assets, and {kept} scripts stay beside them");
     }
 
     /// <summary>The render bridge built for exports to <paramref name="rid"/>, or nothing outside a checkout.</summary>
@@ -280,14 +290,8 @@ public static class EditorPlay
         Say($"[play] the export carries the render bridge from {built}");
     }
 
-    /// <summary>Whether a file in the assets is one the managed side reads from disk, which embedding leaves.</summary>
-    private static bool ReadHere(string path)
-    {
-        var name = Path.GetFileName(path);
-        return name.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
-               || name.EndsWith(".uid", StringComparison.OrdinalIgnoreCase)
-               || name.EndsWith(".cs", StringComparison.OrdinalIgnoreCase);
-    }
+    /// <summary>Whether a file in the assets is one embedding leaves on disk, which is a script the game compiles as it runs.</summary>
+    private static bool ReadHere(string path) => path.EndsWith(".cs", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>How large a folder is, in the units a person reads.</summary>
     private static string Megabytes(string folder)

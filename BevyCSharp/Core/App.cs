@@ -176,6 +176,11 @@ public sealed unsafe class App : IDisposable
             ? Path.Combine(AppContext.BaseDirectory, "assets")
             : Path.GetFullPath(Config.AssetRoot);
 
+        // The scenes, data assets and other files the managed side reads, from the folder or, for a
+        // game that compiled them into itself, from its own assembly, with the ids they carry.
+        AssetFiles.Use(System.Reflection.Assembly.GetEntryAssembly());
+        AssetIds.Reindex();
+
         // A data file changed on disk is read again when assets are, and not in a shipped game.
         DataAssets.Watching = Config.WatchAssets;
 

@@ -95,9 +95,10 @@ build/build-native.ps1 -Render -Embed BevyCSharp.Sample/assets      # PowerShell
 `bevy_embedded_assets` reads the folder as the library compiles and serves it in place of the asset
 root, so every path loads as before and `App.HasEmbeddedAssets` says so. A bridge built so serves
 one game, so it is staged under `build/embedded/<rid>/` rather than where the projects here copy
-the bridge from. Scenes, data assets and the other files the managed side reads for itself still
-come from the folder on disk, which a game shipped this way carries until those reads go through
-the same bytes ([PLAY.md](PLAY.md) §4).
+the bridge from. Scenes, data assets and the other files the managed side reads for itself are
+compiled into the game's assembly when the build is given `-p:BevyCSharpEmbedAssets=true`
+(`BevyCSharp/build/BevyCSharp.Embed.targets`), as the Play tab's export does when it embeds
+([PLAY.md](PLAY.md) §4).
 
 `--game` (`-Game`) stages a bridge apart in the same way, under `build/game/<rid>/`, which is the
 render bridge the Play tab's export ships when it is not embedding, so a checkout whose projects

@@ -253,11 +253,11 @@ public static class SceneInstances
 
         var full = Path.GetFullPath(SceneFile.Resolve(scene));
         if (string.Equals(full, target, StringComparison.Ordinal)) return true;
-        if (!File.Exists(full)) return false;
+        if (!AssetFiles.Exists(full)) return false;
 
         try
         {
-            using var document = JsonDocument.Parse(File.ReadAllText(full));
+            using var document = JsonDocument.Parse(AssetFiles.ReadAllText(full));
             if (!document.RootElement.TryGetProperty("entities", out var entities)) return false;
 
             foreach (var entry in entities.EnumerateArray())

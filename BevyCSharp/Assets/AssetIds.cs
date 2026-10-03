@@ -45,6 +45,12 @@ public static class AssetIds
 
     private static readonly object Gate = new();
     private static readonly Dictionary<ulong, string> Paths = [];
+
+    /// <summary>
+    /// The ids read from the game's assembly rather than the folder, which are trusted without
+    /// looking for their file, since a file the bridge carries is not one the managed side can see.
+    /// </summary>
+    private static readonly HashSet<ulong> Carried = [];
     private static string? _indexed;
 
     /// <summary>The directory asset paths are relative to.</summary>
@@ -104,7 +110,7 @@ public static class AssetIds
         {
             if (_indexed != Root) Rebuild();
 
-            if (Paths.TryGetValue(id, out var known) && File.Exists(Full(known))) return known;
+            if (Paths.TryGetValue(id, out var known) && (Carried.Contains(id) || File.Exists(Full(known)))) return known;
 
             Rebuild();
             return Paths.TryGetValue(id, out var found) ? found : null;
@@ -218,12 +224,29 @@ public static class AssetIds
     private static void Rebuild()
     {
         Paths.Clear();
+        Carried.Clear();
         var root = Root;
         _indexed = root;
+
+        // What the game's assembly carries first, so a file beside the game wins over it, as a
+        // file on disk wins in every other read (AssetFiles).
+        foreach (var sidecar in AssetFiles.Embedded(Extension))
+        {
+            if (Parse(AssetFiles.ReadAllText(sidecar)) is { } id)
+            {
+                Paths[id] = sidecar[..^Extension.Length];
+                Carried.Add(id);
+            }
+        }
+
         if (!Directory.Exists(root)) return;
 
         ReadIndex(Path.Combine(root, IndexName));
         Scan(root, Paths);
+
+        // An id a file on disk answered for is the disk's, and checked like any other.
+        var embedded = AssetFiles.Embedded(Extension).ToHashSet(StringComparer.Ordinal);
+        Carried.RemoveWhere(id => !embedded.Contains(Paths[id] + Extension));
     }
 
     /// <summary>Adds the id of every sidecar under a folder whose file is there, by the file's path from the folder.</summary>

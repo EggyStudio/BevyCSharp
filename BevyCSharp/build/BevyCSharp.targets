@@ -1,5 +1,8 @@
 <Project>
 
+    <!-- The asset files the managed side reads, compiled in when a game embeds its assets. -->
+    <Import Project="$(MSBuildThisFileDirectory)BevyCSharp.Embed.targets"/>
+
     <!--
       Imported into every project that references the BevyCSharp package.
 

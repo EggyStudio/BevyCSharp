@@ -55,11 +55,11 @@ public static class GltfContents
         ArgumentException.ThrowIfNullOrEmpty(path);
 
         var full = Path.Combine(AssetIds.Root, path.Split('#')[0]);
-        if (!File.Exists(full)) return null;
+        if (!AssetFiles.Exists(full)) return null;
 
         try
         {
-            var bytes = File.ReadAllBytes(full);
+            var bytes = AssetFiles.ReadAllBytes(full);
             using var document = JsonDocument.Parse(Json(bytes));
             return Parts(document.RootElement, path.Split('#')[0]);
         }

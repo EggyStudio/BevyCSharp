@@ -93,10 +93,10 @@ Built: a row under Play and Build with a choice of runtime identifier (this mach
 "Embed assets" box and Export, which runs `dotnet publish -c Release -r <rid> --self-contained` into
 the project's own `bin/Export/<rid>/`, where version control already looks away. With the box
 ticked, the project's assets are first compiled into a bridge of its own (§4), which replaces the
-one the publish copied, and the asset folder is cut down to the JSON files the managed side reads
-for itself. Either way the ids beside the files become one `uids.json`, and the sidecars are
-left out of what ships. `EditorPlay` runs the steps as a chain of processes, each started when the one
-before it ends well, and the tab names the step that failed. The exported sample starts and draws
+one the publish copied, and the files the managed side reads are compiled into the game's
+assembly, so the export carries no asset folder beside scripts. Unticked, the ids beside the files
+become one `uids.json`, and the sidecars are left out of what ships. `EditorPlay` runs the steps
+as a chain of processes, each started when the one before it ends well, and the tab names the step that failed. The exported sample starts and draws
 as the debug build does.
 
 Without embedding, the bridge a game ships is a render one built for exports
@@ -141,8 +141,12 @@ Built: the first. `build-native.sh --embed <dir>` (`-Embed` in PowerShell) turns
 `embed` feature over that folder, which adds `EmbeddedAssetPlugin` in `ReplaceDefault` mode before
 the asset plugin, and stages the library under `build/embedded/<rid>/` so the editor and the tests
 keep the ordinary bridge. `App.HasEmbeddedAssets` (`bcs_has_embedded_assets`, ABI 161) reports it.
-What the managed side reads for itself, scenes and data assets among it, still comes from the
-asset root on disk, which the second part is for.
+What the managed side reads for itself, scenes and data assets among it, is compiled into the
+game's assembly instead when `BevyCSharpEmbedAssets` is set (`BevyCSharp.Embed.targets`, which the
+export sets when it embeds), and read through `AssetFiles`, which takes a file on disk first and
+the assembly's copy after. So the two sides carry two copies of nothing and the export ships no
+asset folder, at the cost the first part already pays, a bridge built per game. The second part,
+one copy served to both sides by a shared bridge, is not built.
 
 ## 5. Saving settings and progress
 

@@ -45,4 +45,12 @@
               Link="assets/%(RecursiveDir)%(Filename)%(Extension)"/>
     </ItemGroup>
 
+    <!--
+      Files compiled into the test assembly under assets/, as an export that embeds a game's asset
+      files does, for the tests that read through AssetFiles with no file on disk.
+    -->
+    <ItemGroup>
+        <EmbeddedResource Include="embedded/**" LogicalName="assets/%(RecursiveDir)%(Filename)%(Extension)" WithCulture="false"/>
+    </ItemGroup>
+
 </Project>

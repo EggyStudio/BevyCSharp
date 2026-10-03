@@ -73,6 +73,7 @@
     <ItemGroup>
         <None Include="build/BevyCSharp.targets" Pack="true" PackagePath="build/" Visible="false"/>
         <None Include="build/BevyCSharp.props" Pack="true" PackagePath="build/" Visible="false"/>
+        <None Include="build/BevyCSharp.Embed.targets" Pack="true" PackagePath="build/" Visible="false"/>
     </ItemGroup>
 
     <!--

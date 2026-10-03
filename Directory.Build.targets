@@ -1,0 +1,11 @@
+<Project>
+
+    <!--
+      The projects here reference the library as a project rather than as the package, so the
+      package's build files are not imported for them. This brings in the one that matters to an
+      export, which embeds a game's asset files in its assembly when asked and does nothing
+      otherwise.
+    -->
+    <Import Project="$(MSBuildThisFileDirectory)BevyCSharp/build/BevyCSharp.Embed.targets"/>
+
+</Project>
