@@ -8,8 +8,8 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `06c8c71`. The console and the asset browser drawing only what is in view was read
-and raised nothing.
+Reviewed up to `1a589cc`. The material's attenuation, anisotropy and extra maps were read and
+raised nothing.
 
 ## Now
 

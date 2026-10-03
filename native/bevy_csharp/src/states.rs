@@ -37,6 +37,7 @@ macro_rules! define_slots {
         subs { $($sub:ident of $parent:ident at $subslot:literal),+ $(,)? }
         computed { $($derived:ident from $source:ident at $cslot:literal),+ $(,)? }
         joints { $($joint:ident at $jslot:literal),+ $(,)? }
+        joint_subs { $($jsub:ident at $jsslot:literal),+ $(,)? }
     ) => {
         $(
             /// One state axis, whose values are given meaning by the managed side.
@@ -133,6 +134,83 @@ macro_rules! define_slots {
         fn axis_values(sources: EveryAxis) -> [Option<i32>; SLOT_COUNT as usize] {
             let ($($axis,)+) = sources;
             [$($axis.map(|state| state.0)),+]
+        }
+
+        $(
+            /// One sub-state over several axes, which exists only while each of them holds the
+            /// value [`bcs_joint_substate_add`] gave it, and is set like any sub-state otherwise.
+            ///
+            /// Fed every axis as a joint state is, for the same reason. Bevy asks again whenever
+            /// any axis changes, and keeps the value this holds while it should still exist, so a
+            /// change to an axis it does not name leaves it as it was.
+            #[derive(States, Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+            pub struct $jsub(pub i32);
+
+            impl bevy::state::state::SubStates for $jsub {
+                type SourceStates = EveryAxis;
+
+                fn should_exist(sources: EveryAxis) -> Option<Self> {
+                    let values = axis_values(sources);
+
+                    for (axis, value) in values.iter().enumerate() {
+                        let wanted = JOINT_SUB_WANT[$jsslot][axis].load(Ordering::Relaxed);
+                        if wanted != i32::MIN && *value != Some(wanted) {
+                            return None;
+                        }
+                    }
+
+                    Some($jsub(JOINT_SUB_INITIAL[$jsslot].load(Ordering::Relaxed)))
+                }
+            }
+        )+
+
+        /// How many sub-states over several axes exist.
+        pub const JOINT_SUB_COUNT: i32 = 0 $(+ { let _ = $jsslot; 1 })+;
+
+        /// The value each sub-state over several axes needs of each axis, or `i32::MIN` for an
+        /// axis it does not name. Process-wide, as a sub-state's parent value is.
+        static JOINT_SUB_WANT: [[AtomicI32; SLOT_COUNT as usize]; JOINT_SUB_COUNT as usize] =
+            [const { [const { AtomicI32::new(i32::MIN) }; SLOT_COUNT as usize] }; JOINT_SUB_COUNT as usize];
+
+        /// What each sub-state over several axes starts at when it comes into existence.
+        static JOINT_SUB_INITIAL: [AtomicI32; JOINT_SUB_COUNT as usize] =
+            [const { AtomicI32::new(0) }; JOINT_SUB_COUNT as usize];
+
+        /// Whether an axis holds a state in this app.
+        fn axis_added(app: &App, axis: usize) -> bool {
+            match axis {
+                $($slot => app.world().contains_resource::<State<$ty>>(),)+
+                _ => false,
+            }
+        }
+
+        /// Adds the sub-state over several axes in `slot`, existing while each axis `wants` names
+        /// (by a value other than `i32::MIN`) holds that value.
+        fn insert_joint_sub(app: &mut App, slot: i32, wants: &[i32], initial: i32) -> i32 {
+            if wants.len() != SLOT_COUNT as usize {
+                return status::NULL_ARG;
+            }
+
+            // Every axis it names has to be there first, as a sub-state's one parent does.
+            for (axis, wanted) in wants.iter().enumerate() {
+                if *wanted != i32::MIN && !axis_added(app, axis) {
+                    return status::INVALID_STATE;
+                }
+            }
+
+            match slot {
+                $($jsslot => {
+                    for (axis, wanted) in wants.iter().enumerate() {
+                        JOINT_SUB_WANT[$jsslot][axis].store(*wanted, Ordering::Relaxed);
+                    }
+
+                    JOINT_SUB_INITIAL[$jsslot].store(initial, Ordering::Relaxed);
+                    every_axis_message(app);
+                    app.add_sub_state::<$jsub>();
+                    status::OK
+                })+
+                _ => status::NULL_ARG,
+            }
         }
 
         /// How many joint states exist, each able to read any of the axes.
@@ -283,6 +361,8 @@ macro_rules! define_slots {
                     world.get_resource::<State<$derived>>().map(|s| s.get().0),)+
                 $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + $jslot =>
                     world.get_resource::<State<$joint>>().map(|s| s.get().0),)+
+                $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + JOINT_COUNT + $jsslot =>
+                    world.get_resource::<State<$jsub>>().map(|s| s.get().0),)+
                 _ => None,
             }
         }
@@ -327,6 +407,14 @@ macro_rules! define_slots {
                     }
                     status::OK
                 })+
+                $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + JOINT_COUNT + $jsslot => {
+                    if entering {
+                        app.add_systems(OnEnter($jsub(value)), run);
+                    } else {
+                        app.add_systems(OnExit($jsub(value)), run);
+                    }
+                    status::OK
+                })+
                 _ => status::NULL_ARG,
             }
         }
@@ -358,6 +446,10 @@ macro_rules! define_slots {
                 })+
                 $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + $jslot => {
                     entity_mut.insert(DespawnOnExit($joint(value)));
+                    status::OK
+                })+
+                $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + JOINT_COUNT + $jsslot => {
+                    entity_mut.insert(DespawnOnExit($jsub(value)));
                     status::OK
                 })+
                 _ => status::NULL_ARG,
@@ -396,6 +488,16 @@ macro_rules! define_slots {
                     let _ = value;
                     status::INVALID_STATE
                 })+
+
+                // Set as any sub-state is, while it exists.
+                $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + JOINT_COUNT + $jsslot =>
+                    match world.get_resource_mut::<NextState<$jsub>>() {
+                        Some(mut next) => {
+                            next.set($jsub(value));
+                            status::OK
+                        }
+                        None => status::NOT_PRESENT,
+                    },)+
                 _ => status::NULL_ARG,
             }
         }
@@ -458,6 +560,16 @@ define_slots!(
         BcsJoint5 at 5,
         BcsJoint6 at 6,
         BcsJoint7 at 7,
+    }
+    joint_subs {
+        BcsJointSub0 at 0,
+        BcsJointSub1 at 1,
+        BcsJointSub2 at 2,
+        BcsJointSub3 at 3,
+        BcsJointSub4 at 4,
+        BcsJointSub5 at 5,
+        BcsJointSub6 at 6,
+        BcsJointSub7 at 7,
     }
 );
 
@@ -522,6 +634,52 @@ pub unsafe extern "C" fn bcs_computed_add(
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_state_joint_count() -> i32 {
     JOINT_COUNT
+}
+
+/// Reports how many sub-states over several axes exist.
+///
+/// They are addressed past every joint state, as the joint states' first number plus
+/// [`bcs_state_joint_count`]`()` plus the sub-state's own number.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_state_joint_sub_count() -> i32 {
+    JOINT_SUB_COUNT
+}
+
+/// Creates the sub-state over several axes in `slot`, counted among such sub-states alone, which
+/// exists while each axis holds the value `wants` gives it and starts at `initial` each time it
+/// comes into existence.
+///
+/// `wants` is one value an axis, in slot order, `count` of them, with `i32::MIN` for an axis the
+/// sub-state does not name. A pause that means something only while playing online is a sub-state
+/// of both the screen and the mode. Every axis named has to have been added, and this must happen
+/// before the app runs, as for any sub-state.
+///
+/// # Safety
+/// `handle` must be a live app, and `wants` must point at `count` readable integers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_joint_substate_add(
+    handle: *mut BcsApp,
+    slot: i32,
+    wants: *const i32,
+    count: i32,
+    initial: i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        if wants.is_null() || count < 0 {
+            return status::NULL_ARG;
+        }
+
+        let Some(app) = (unsafe { app_mut(handle) }) else {
+            return status::NULL_ARG;
+        };
+        if app.running {
+            return status::ALREADY_RUNNING;
+        }
+
+        // SAFETY: the caller promises `count` readable integers at `wants`.
+        let wants = unsafe { core::slice::from_raw_parts(wants, count as usize) };
+        insert_joint_sub(&mut app.app, slot, wants, initial)
+    })
 }
 
 /// Reports how many computed states exist in total, which is where joint slots start counting.

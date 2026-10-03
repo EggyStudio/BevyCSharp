@@ -56,8 +56,21 @@ public enum Overlay
     Shown,
 }
 
+/// <summary>The boss fight, which exists only at the top while play is not held.</summary>
+[SubStateOf(typeof(Floor), Floor.Top)]
+[SubStateOf(typeof(Hold), Hold.Off)]
+public enum Fight
+{
+    /// <summary>The boss has not moved yet.</summary>
+    Waiting,
+
+    /// <summary>The boss is fighting.</summary>
+    Fighting,
+}
+
 /// <summary>
-/// Covers a state worked out from several others at once by a rule of the game's own.
+/// Covers a state worked out from several others at once by a rule of the game's own, and a
+/// sub-state living inside several states at once.
 /// </summary>
 /// <remarks>
 /// A fact that follows from two facts is the case a computed state over one cannot state, so a
@@ -185,5 +198,74 @@ public sealed class JointStateTests
 
         Assert.Throws<InvalidOperationException>(() =>
             harness.App.AddComputedState<Theme, Floor>(floor => Theme.Calm));
+    }
+
+    /// <summary>
+    /// A sub-state of two states exists only while both hold their values, is set like any other
+    /// while it does, keeps its value through a change to a state it does not name, and starts
+    /// over each time it comes back.
+    /// </summary>
+    [Fact]
+    public void ASubStateOfTwoLivesWhileBothHoldTheirValues()
+    {
+        var seen = new Dictionary<ulong, Fight?>();
+
+        using var harness = new EngineHarness(frames: 14);
+
+        harness.App.AddState(Floor.Lower);
+        harness.App.AddState(Hold.Off);
+        harness.App.AddState(Watch.Playing);
+        harness.App.AddSubState(Fight.Waiting);
+
+        harness.On(Stage.Update, world =>
+        {
+            var frame = world.Resource<Time>().FrameCount;
+
+            switch (frame)
+            {
+                case 2:
+                    App.SetState(Floor.Top);
+                    break;
+
+                case 4:
+                    App.SetState(Fight.Fighting);
+                    break;
+
+                case 6:
+                    // Named by nothing the fight lives inside, so it stays as it was.
+                    App.SetState(Watch.Watching);
+                    break;
+
+                case 8:
+                    App.SetState(Hold.On);
+                    break;
+
+                case 10:
+                    App.SetState(Hold.Off);
+                    break;
+            }
+
+            seen[frame] = App.TryState<Fight>(out var fight) ? fight : null;
+        });
+
+        harness.Run();
+
+        Assert.Null(seen[1]);
+        Assert.Equal(Fight.Waiting, seen[3]);
+        Assert.Equal(Fight.Fighting, seen[5]);
+        Assert.Equal(Fight.Fighting, seen[7]);
+        Assert.Null(seen[9]);
+        Assert.Equal(Fight.Waiting, seen[11]);
+    }
+
+    /// <summary>A sub-state of two is refused while one of the states it lives inside is not added.</summary>
+    [Fact]
+    public void ASubStateOfTwoNeedsBothAdded()
+    {
+        using var harness = new EngineHarness(frames: 1);
+
+        harness.App.AddState(Floor.Lower);
+
+        Assert.Throws<BevyNativeException>(() => harness.App.AddSubState(Fight.Waiting));
     }
 }

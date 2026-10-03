@@ -672,6 +672,10 @@ public sealed unsafe class App : IDisposable
     /// ends is off again when the next run starts, as a player expects and a remembered value would
     /// get wrong.
     /// </para>
+    /// <para>
+    /// An enum naming several parents exists while every one of them holds its value, and every
+    /// parent has to have been added first.
+    /// </para>
     /// </remarks>
     /// <exception cref="InvalidOperationException">
     /// The app is running, the enum carries no <see cref="SubStateOfAttribute"/>, or its parent
@@ -685,6 +689,28 @@ public sealed unsafe class App : IDisposable
             throw new InvalidOperationException(
                 $"Cannot add sub-state {typeof(TState).Name}, because the app is already "
                 + "running. Add states from a plugin's Build method or before calling Run.");
+
+        // A sub-state of several states is handed one wanted value a state slot, the slots it
+        // does not live inside wanting nothing.
+        if (StateRegistry.DescribeAll(typeof(TState)) is { Length: > 1 } parents)
+        {
+            var wants = new int[StateRegistry.SlotCount];
+            Array.Fill(wants, int.MinValue);
+
+            foreach (var parent in parents)
+                wants[StateRegistry.Claim(parent.Parent)] = Convert.ToInt32(parent.WhileIn, System.Globalization.CultureInfo.InvariantCulture);
+
+            var joint = StateRegistry.Claim<TState>() - StateRegistry.FirstJointSub;
+
+            fixed (int* wanted = wants)
+            {
+                Native.Check(
+                    Native.bcs_joint_substate_add(_handle, joint, wanted, wants.Length, StateRegistry.ToInt(initial)),
+                    $"adding sub-state {typeof(TState).Name} under {string.Join(" and ", parents.Select(parent => parent.Parent.Name))}");
+            }
+
+            return this;
+        }
 
         var sub = StateRegistry.Describe(typeof(TState))
                   ?? throw new InvalidOperationException(

@@ -25,6 +25,13 @@ namespace Bevy;
 /// type and the types exist when the bridge is built. <see cref="StateRegistry.SubsPerSlot"/>
 /// reports how many, and one past that is refused rather than half-worked.
 /// </para>
+/// <para>
+/// Put on an enum more than once, it makes a sub-state of every state it names, which exists only
+/// while each of them holds the value named, such as a pause that means something only while
+/// playing online. Those are kept apart from the sub-states of one state, in a fixed set of their
+/// own (<see cref="StateRegistry.JointSubCount"/>), each fed every state, so which states one
+/// lives inside is chosen by the game.
+/// </para>
 /// </remarks>
 /// <example>
 /// <code>
@@ -36,7 +43,7 @@ namespace Bevy;
 /// </example>
 /// <param name="parent">The state enum this one lives inside.</param>
 /// <param name="whileIn">The value of that state which this one exists under.</param>
-[AttributeUsage(AttributeTargets.Enum)]
+[AttributeUsage(AttributeTargets.Enum, AllowMultiple = true)]
 public sealed class SubStateOfAttribute(Type parent, object whileIn) : Attribute
 {
     /// <summary>The state enum this one lives inside.</summary>
@@ -149,6 +156,13 @@ public static unsafe class StateRegistry
     /// <summary>Where joint slots start, past every state, sub-state and computed state.</summary>
     internal static int FirstJoint => SlotCount + SubCount + ComputedCount;
 
+    /// <summary>How many sub-states of several states at once this bridge has.</summary>
+    /// <remarks>Fixed by the bridge, though which states each lives inside is not, as for joints.</remarks>
+    public static int JointSubCount => Native.bcs_state_joint_sub_count();
+
+    /// <summary>Where the slots of sub-states of several states start, past every joint.</summary>
+    internal static int FirstJointSub => FirstJoint + JointCount;
+
     /// <summary>The slot <typeparamref name="TState"/> was added under.</summary>
     /// <exception cref="InvalidOperationException">It was never added.</exception>
     internal static int SlotOf<TState>() where TState : struct, Enum
@@ -205,6 +219,29 @@ public static unsafe class StateRegistry
         {
             Reset();
             if (Slots.TryGetValue(state, out var existing)) return existing;
+
+            // A sub-state of several states takes one of the slots set aside for those, whichever
+            // states they are, since each is fed every state slot and checks the ones it names.
+            if (DescribeAll(state) is { Length: > 1 } parents)
+            {
+                foreach (var parent in parents) Claim(parent.Parent);
+
+                var room = JointSubCount;
+                var first = FirstJointSub;
+
+                for (var offset = 0; offset < room; offset++)
+                {
+                    if (Slots.ContainsValue(first + offset)) continue;
+
+                    Slots[state] = first + offset;
+                    return first + offset;
+                }
+
+                throw new InvalidOperationException(
+                    $"All {room} sub-states of several states are in use, so {state.Name} cannot be "
+                    + "another. Each is a Rust type, so how many there are is fixed when the bridge "
+                    + "is built.");
+            }
 
             // A sub-state takes one of the slots set aside for its parent's rather than one of its
             // own, so the pairing the bridge is built around holds.
@@ -295,25 +332,45 @@ public static unsafe class StateRegistry
     /// second is a chain of sub-states, which Bevy allows and this bridge's fixed pairing does
     /// not.
     /// </remarks>
-    internal static SubStateOfAttribute? Describe(Type state)
+    internal static SubStateOfAttribute? Describe(Type state) =>
+        DescribeAll(state) is { Length: 1 } one ? one[0] : null;
+
+    /// <summary>
+    /// Every parent an enum names as a sub-state, empty when it names none, with each checked as
+    /// <see cref="Describe"/> checks one.
+    /// </summary>
+    /// <remarks>
+    /// Several parents also refuse one that is computed, since a sub-state of several states is fed
+    /// the state slots and a computed state has none of its own, and the same parent named twice.
+    /// </remarks>
+    internal static SubStateOfAttribute[] DescribeAll(Type state)
     {
-        var sub = (SubStateOfAttribute?)Attribute.GetCustomAttribute(
-            state, typeof(SubStateOfAttribute));
+        var subs = (SubStateOfAttribute[])Attribute.GetCustomAttributes(state, typeof(SubStateOfAttribute));
 
-        if (sub is null) return null;
+        foreach (var sub in subs)
+        {
+            if (!sub.Parent.IsEnum)
+                throw new InvalidOperationException(
+                    $"{state.Name} names {sub.Parent.Name} as its parent state, which is not an "
+                    + "enum. A state is an enum, so a sub-state's parent is one too.");
 
-        if (!sub.Parent.IsEnum)
-            throw new InvalidOperationException(
-                $"{state.Name} names {sub.Parent.Name} as its parent state, which is not an "
-                + "enum. A state is an enum, so a sub-state's parent is one too.");
+            if (Attribute.IsDefined(sub.Parent, typeof(SubStateOfAttribute)))
+                throw new InvalidOperationException(
+                    $"{state.Name} is a sub-state of {sub.Parent.Name}, which is itself a sub-state. "
+                    + "The bridge pairs one sub-state with one state, so a chain of them has nowhere "
+                    + "to live.");
 
-        if (Attribute.IsDefined(sub.Parent, typeof(SubStateOfAttribute)))
-            throw new InvalidOperationException(
-                $"{state.Name} is a sub-state of {sub.Parent.Name}, which is itself a sub-state. "
-                + "The bridge pairs one sub-state with one state, so a chain of them has nowhere "
-                + "to live.");
+            if (subs.Length > 1 && Attribute.IsDefined(sub.Parent, typeof(ComputedFromAttribute)))
+                throw new InvalidOperationException(
+                    $"{state.Name} is a sub-state of {sub.Parent.Name}, which is computed. A "
+                    + "sub-state of several states lives inside states of their own, and a computed "
+                    + "state is not one.");
+        }
 
-        return sub;
+        if (subs.Select(sub => sub.Parent).Distinct().Count() != subs.Length)
+            throw new InvalidOperationException($"{state.Name} names the same parent state twice.");
+
+        return subs;
     }
 
     /// <summary>

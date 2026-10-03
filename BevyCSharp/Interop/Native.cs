@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 170;
+    internal const int ExpectedAbiVersion = 171;
 
     static Native() => NativeLoader.Initialize();
 
@@ -319,6 +319,16 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_assets_carried(delegate* unmanaged[Cdecl]<byte*, nuint, byte*, nuint, long> read, byte* paths, nuint pathsLength);
+
+    /// <summary>How many sub-states of several states the bridge has.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_state_joint_sub_count();
+
+    /// <summary>Creates a sub-state of several states, by its number among those, with one wanted value a state slot.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_joint_substate_add(IntPtr handle, int slot, int* wants, int count, int initial);
 
     /// <summary>How many joint states the bridge has.</summary>
     [LibraryImport(Library)]

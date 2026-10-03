@@ -358,9 +358,10 @@ associated type and the types exist when the crate is built.
   through a joint state the bridge feeds every slot. A joint reads plain states only, since a
   sub-state or a computed one has no slot of its own to be fed from, and a table over two states
   is written as the rule's switch.
-- **A sub-state over more than one parent.** `SourceStates` can be a tuple, so a state can exist
-  only while two others hold values. The pairing is per parent slot, so this needs a different
-  arrangement rather than another pair.
+- **A sub-state of several parents names one value of each.** `[SubStateOf]` on an enum more
+  than once makes it exist while every parent holds the value named, through a sub-state the
+  bridge feeds every slot. Existing under any of several values of one parent, or under a rule, is
+  not stated, and the parents are plain states, as a joint's sources are.
 
 ### Engine messages
 

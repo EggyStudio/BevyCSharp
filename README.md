@@ -411,6 +411,23 @@ native library is built, and a third sub-state or a chain of them is refused rat
 half-worked. A run that can be paused and played at a difficulty needs two, and raising it is a
 longer list in the same place as the state slots below.
 
+A mode that means something only inside two others names both, and exists only while each holds
+its value:
+
+```csharp
+[SubStateOf(typeof(Screen), Screen.Playing)]
+[SubStateOf(typeof(Mode), Mode.Online)]
+public enum Lobby { Browsing, Ready }
+
+app.AddState(Screen.Menu);
+app.AddState(Mode.Offline);
+app.AddSubState(Lobby.Browsing);   // after both
+```
+
+It is set like any sub-state while it exists, keeps its value through a change to a state it does
+not name, and starts over each time it comes back. These are kept apart from the sub-states of one
+state, each fed every state slot, so which states one lives inside is the game's choice.
+
 A state whose value follows from another's is a computed state. Whether the interface is up is
 true on some screens and false on the rest, and writing that as a plain state leaves two facts to
 keep in step until one of them lies:
