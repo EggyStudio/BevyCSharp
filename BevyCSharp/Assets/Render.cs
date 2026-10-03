@@ -2035,6 +2035,59 @@ public static unsafe class Render
         return true;
     }
 
+    /// <summary>
+    /// Reads a capture once it has arrived, in the format it was drawn in, and forgets it.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <see cref="TryReadCapture(Capture, out CapturedImage?)"/> reads every picture as eight-bit
+    /// sRGB, which is how a person would see it, so a half-float target's light brighter than white
+    /// reads as white. This hands the pixels over as they are, a half-float target as half floats,
+    /// for a program measuring light rather than looking at it, such as an exposure meter or a test
+    /// of a bloom's threshold.
+    /// </para>
+    /// <para>
+    /// The picture's format is one a shader image is made in (<see cref="ShaderImageFormat"/>). An
+    /// eight-bit picture is <see cref="ShaderImageFormat.Rgba8"/>, red, green, blue then alpha,
+    /// whichever order the GPU held it in, and its bytes are the encoded colors. A capture is read
+    /// once, either way.
+    /// </para>
+    /// </remarks>
+    /// <param name="capture">The ticket from <see cref="BeginCapture(AssetHandle)"/>.</param>
+    /// <param name="picture">The pixels, when this returns true.</param>
+    /// <returns>Whether the picture had arrived.</returns>
+    /// <exception cref="BevyNativeException">
+    /// The ticket names no capture, or the picture is in a format no shader image is made in, which
+    /// leaves it for the eight-bit read.
+    /// </exception>
+    public static bool TryReadCaptureAsItIs(Capture capture, out CapturedTexels? picture)
+    {
+        picture = null;
+
+        uint width;
+        uint height;
+        int format;
+
+        var needed = Native.bcs_render_capture_read_raw(capture.Id, &width, &height, &format, null, 0);
+
+        if (needed == NativeStatus.InvalidState) return false;
+        if (needed == NativeStatus.Unsupported) throw NoRenderer("Reading a capture");
+
+        Native.Check(needed, $"asking how large {capture} is as it was drawn");
+
+        var bytes = new byte[needed];
+
+        fixed (byte* buffer = bytes)
+        {
+            Native.Check(
+                Native.bcs_render_capture_read_raw(capture.Id, &width, &height, &format, buffer, needed),
+                $"reading {capture} as it was drawn");
+        }
+
+        picture = new CapturedTexels(width, height, (ShaderImageFormat)format, bytes);
+        return true;
+    }
+
     /// <summary>Forgets a capture that will not be read.</summary>
     /// <remarks>
     /// For a caller that stopped waiting. A capture that has arrived holds its pixels until

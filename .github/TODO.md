@@ -204,11 +204,11 @@ code already in the binary.
   left, at its size and maximized if it was. What is left is more than one window, since every
   entry point addresses the primary one, and the monitor a window was on, which on Wayland is the
   one part of its place an app could still be told.
-- **A capture is always eight bits a channel.** `Render.BeginCapture` hands a picture back as
-  eight-bit sRGB, clamping a half-float target at white, and `Render.CreateImage` takes bytes in
-  that one format. Images of other formats, from floats to block-compressed ones, are made with
-  `Shaders.CreateImage`, and a render target can be half floats, but reading those back as they
-  are would need a capture that keeps its format.
+- **A capture reads back only what a shader image can be.** `Render.TryReadCaptureAsItIs` hands a
+  picture over in the format it was drawn in, a half-float target as half floats, where
+  `TryReadCapture` clamps it to eight-bit sRGB. An image in a format no shader image is made in,
+  such as a one-channel picture loaded from a file, is refused that way and read only as eight
+  bits, where its format allows.
 
 ### Gizmos
 

@@ -302,6 +302,72 @@ public sealed class RenderTargetTests : IDisposable
     }
 
     /// <summary>
+    /// A capture of a half-float target read as it is keeps what is brighter than white, and one
+    /// of the run's own eight-bit picture comes back as eight-bit color in red-green-blue order.
+    /// </summary>
+    [SkippableFact]
+    public void ACaptureReadAsItIsKeepsAFloatTargetsLight()
+    {
+        Needs.Renderer();
+
+        var target = AssetHandle.None;
+        var floats = default(Capture);
+        var bytes = default(Capture);
+        CapturedTexels? light = null;
+        CapturedTexels? seen = null;
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                target = Render.CreateTarget(32, 32, TargetFormat.Rgba16Float);
+
+                var camera = PictureRun.Camera(ecs);
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Tonemapper = Tonemapper.None, Msaa = 1 });
+                Render.SetCameraTarget(camera, target);
+
+                // A second camera draws the same cube into the run's own picture.
+                PictureRun.Camera(ecs);
+
+                PictureRun.Cube(ecs, Render.CreateMaterial(new MaterialSettings
+                {
+                    BaseColor = (3f, 1.5f, 0.25f, 1f),
+                    Unlit = true,
+                }));
+            },
+        };
+
+        run.Wait(ShaderMaterialTests.Settled)
+            .Do("asking for both", _ =>
+            {
+                floats = Render.BeginCapture(target);
+                bytes = Render.BeginCapture();
+            })
+            .Until("read back", _ =>
+                (light is not null || Render.TryReadCaptureAsItIs(floats, out light))
+                && (seen is not null || Render.TryReadCaptureAsItIs(bytes, out seen)))
+            .Go();
+
+        Assert.NotNull(light);
+        Assert.Equal(ShaderImageFormat.Rgba16Float, light.Format);
+        Assert.Equal(32u * 32u * 8u, (uint)light.Bytes.Length);
+
+        var middle = light.ColorAt(16, 16);
+        Assert.InRange(middle.X, 2.9f, 3.1f);
+        Assert.InRange(middle.Y, 1.45f, 1.55f);
+        Assert.InRange(middle.Z, 0.24f, 0.26f);
+
+        Assert.NotNull(seen);
+        Assert.Equal(ShaderImageFormat.Rgba8, seen.Format);
+        Assert.Equal(seen.Width * seen.Height * 4, (uint)seen.Bytes.Length);
+
+        // Tonemapped and clamped, the cube is still more red than blue, which a picture left in
+        // blue-green-red order would read the other way round.
+        var color = seen.ColorAt(seen.Width / 2, seen.Height / 2);
+        Assert.True(color.X > color.Z, $"the middle of the run's picture read {color}");
+    }
+
+    /// <summary>
     /// Cameras pointed at single layers of a cube target fill those faces and no others: plus X
     /// with one camera's clear color, minus Y with the other's, and plus Z left black.
     /// </summary>

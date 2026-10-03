@@ -2268,6 +2268,20 @@ An image no camera draws into, such as one a compute shader wrote or a watch, is
 the GPU as it is, and turned into eight-bit color the same way where its format allows (a float
 image does, an integer one does not, and says so in the log).
 
+Eight-bit color is the picture as a person sees it, so a half-float target's light brighter than
+white reads as white. `TryReadCaptureAsItIs` reads the same capture in the format it was drawn in,
+for a program measuring light rather than looking at it:
+
+```csharp
+if (Render.TryReadCaptureAsItIs(ticket, out var drawn))
+{
+    var light = drawn.ColorAt(16, 8);           // (3, 1.5, 0.25, 1) where the material said so
+}
+```
+
+Its format is one a shader image is made in (`ShaderImageFormat`), and an eight-bit picture comes
+back as `Rgba8`, red first, whatever order the GPU held it in. A capture is read once, either way.
+
 `TryReadCapture` answers false while the picture is still on its way, hands it over once it has
 arrived, and drops the engine's copy when it does. `Render.ReleaseCapture(ticket)` is for a caller
 that stopped waiting. A capture taken in the first frames of a run is a picture of a cleared window,
