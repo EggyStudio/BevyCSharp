@@ -467,9 +467,9 @@ as the reason, so a run's summary counts what did not run there rather than pass
 - **Packing on one machine produces a package for one platform.** Use the CI workflow, or run
   `build-native.sh` on each target, to produce a package covering all six runtime identifiers.
 - **An export is built for one platform at a time, on that platform.** The Play tab exports a
-  project with `dotnet publish`, self-contained, for a chosen platform, with a render bridge built
-  for exports or one carrying its assets. The bridge is built on this machine, so an export for
-  another platform needs that platform's toolchain, as packing does. [PLAY.md](PLAY.md) plans the
-  rest, with playing the scene being edited.
+  project with `dotnet publish`, self-contained, for a chosen platform, with the render bridge
+  built for exports and its assets as files, in its assembly or in a pack. The bridge is built on
+  this machine, so an export for another platform needs that platform's toolchain, as packing
+  does.
 - **Publishing is manual by choice.** The workflow builds and uploads; the upload to nuget.org is
   done by hand.
