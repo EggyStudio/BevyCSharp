@@ -213,3 +213,56 @@ fn collect_touches(world: &bevy::ecs::world::World, input: &mut crate::interop::
 /// Where the text reader's place in the keyboard message queue is kept between frames.
 #[derive(bevy::ecs::resource::Resource, Default)]
 pub struct TextCursor(pub bevy::ecs::message::MessageCursor<bevy::input::keyboard::KeyboardInput>);
+
+/// Pauses or resumes the game's clock, and sets how fast it runs against the wall's.
+///
+/// Bevy's `Time<Virtual>`, which every system's delta comes from and the fixed timestep spends,
+/// so a paused game stops moving and stepping in `FixedUpdate` both, while the window, the
+/// interface and anything reading `Time<Real>` go on. `speed` is how many seconds of game time
+/// pass for each of the wall's, and a negative one leaves the speed as it is.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_time_set_virtual(paused: i32, speed: f32) -> i32 {
+    crate::interop::guard(|| {
+        with_world(|world| {
+            let Some(mut time) = world.get_resource_mut::<bevy::time::Time<bevy::time::Virtual>>() else {
+                return status::NOT_PRESENT;
+            };
+
+            if paused != 0 {
+                time.pause();
+            } else {
+                time.unpause();
+            }
+
+            if speed >= 0.0 {
+                time.set_relative_speed(speed);
+            }
+
+            status::OK
+        })
+    })
+}
+
+/// Writes whether the game's clock is paused and how fast it runs, as `bcs_time_set_virtual` sets them.
+///
+/// # Safety
+/// `paused` and `speed` must each be writable or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_time_virtual(paused: *mut i32, speed: *mut f32) -> i32 {
+    crate::interop::guard(|| {
+        with_world(|world| {
+            let Some(time) = world.get_resource::<bevy::time::Time<bevy::time::Virtual>>() else {
+                return status::NOT_PRESENT;
+            };
+
+            if !paused.is_null() {
+                unsafe { paused.write(time.is_paused() as i32) };
+            }
+            if !speed.is_null() {
+                unsafe { speed.write(time.relative_speed()) };
+            }
+
+            status::OK
+        })
+    })
+}

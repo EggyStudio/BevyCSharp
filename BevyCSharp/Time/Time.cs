@@ -10,9 +10,12 @@ namespace Bevy;
 /// <see cref="DeltaSeconds"/> so a stalled frame cannot tunnel your physics; the unclamped
 /// value is available as <see cref="RawDeltaSeconds"/> if you need wall-clock time.
 /// </remarks>
-public sealed class Time
+public sealed unsafe class Time
 {
     private const double FpsSmoothing = 0.1;
+
+    /// <summary>How many more frames a step runs before the clock stops again, or zero.</summary>
+    private int _stepping;
 
     /// <summary>Seconds since the app started.</summary>
     public double ElapsedSeconds { get; private set; }
@@ -68,6 +71,81 @@ public sealed class Time
         SmoothedFps = SmoothedFps <= 0.0
             ? instantaneous
             : SmoothedFps + (instantaneous - SmoothedFps) * FpsSmoothing;
+
+        // Read after Bevy has advanced the clock for this frame, so the frame a step was asked for
+        // in is followed by exactly the frames it asked for, each with a delta, and then a stop.
+        if (_stepping > 0 && --_stepping == 0) Pause();
+    }
+
+    /// <summary>Whether the game's clock is stopped.</summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy's virtual clock, which <see cref="DeltaSeconds"/> and the fixed timestep both come
+    /// from, so a paused game reads a delta of zero and runs no <see cref="Stage.FixedUpdate"/>,
+    /// while everything else, the window, the interface and the frame counter, goes on. A game's
+    /// pause screen and a debugger stopping the world are the same switch.
+    /// </para>
+    /// <para>
+    /// Read from the engine when asked rather than mirrored each frame, since most frames nobody
+    /// asks. False where there is no engine to ask.
+    /// </para>
+    /// </remarks>
+    public bool Paused
+    {
+        get
+        {
+            int paused;
+            return Native.bcs_time_virtual(&paused, null) == 0 && paused != 0;
+        }
+    }
+
+    /// <summary>How many seconds of game time pass for each second of the wall's, one by default.</summary>
+    public float Speed
+    {
+        get
+        {
+            float speed;
+            return Native.bcs_time_virtual(null, &speed) == 0 ? speed : 1f;
+        }
+    }
+
+    /// <summary>Stops the game's clock, from the next frame.</summary>
+    public void Pause()
+    {
+        _stepping = 0;
+        Native.Check(Native.bcs_time_set_virtual(1, -1f), "Time.Pause");
+    }
+
+    /// <summary>Starts the game's clock again, from the next frame.</summary>
+    public void Resume()
+    {
+        _stepping = 0;
+        Native.Check(Native.bcs_time_set_virtual(0, -1f), "Time.Resume");
+    }
+
+    /// <summary>
+    /// Runs the clock for a number of frames and stops it again, to watch a paused game move a
+    /// frame at a time.
+    /// </summary>
+    /// <param name="frames">How many frames to run, at least one.</param>
+    /// <remarks>
+    /// Each frame stepped through has the delta it would have had, at <see cref="Speed"/>, so a
+    /// step is the game as it plays, slowed to the pace of whoever presses it.
+    /// </remarks>
+    public void Step(int frames = 1)
+    {
+        Native.Check(Native.bcs_time_set_virtual(0, -1f), "Time.Step");
+        _stepping = Math.Max(1, frames);
+    }
+
+    /// <summary>Sets how fast the game's clock runs against the wall's.</summary>
+    /// <param name="speed">Seconds of game time a second, zero or more. Two is double speed.</param>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="speed"/> is negative or not a number.</exception>
+    public void SetSpeed(float speed)
+    {
+        if (!(speed >= 0f)) throw new ArgumentOutOfRangeException(nameof(speed), speed, "A clock runs forward, at zero or more.");
+
+        Native.Check(Native.bcs_time_set_virtual(Paused ? 1 : 0, speed), "Time.SetSpeed");
     }
 
     /// <inheritdoc/>

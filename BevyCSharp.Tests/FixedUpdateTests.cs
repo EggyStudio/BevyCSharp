@@ -136,4 +136,53 @@ public sealed class FixedUpdateTests
 
         Assert.Equal(steps * (1f / 500f), simulated, 4);
     }
+
+    [Fact]
+    public void APausedClockReadsNoDeltaAndAStepRunsTheFramesItAsksFor()
+    {
+        using var harness = new EngineHarness(frames: 14, fps: 60, fixedHz: 500);
+        var deltas = new List<double>();
+        var steps = new List<int>();
+        var fixedSteps = 0;
+        var paused = new List<bool>();
+
+        harness.On(Stage.FixedUpdate, _ => fixedSteps++);
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            var frame = deltas.Count;
+            deltas.Add(ctx.Time.DeltaSeconds);
+            steps.Add(fixedSteps);
+            paused.Add(ctx.Time.Paused);
+
+            // Stopped on the third frame, stepped two frames on the seventh, and started again on
+            // the eleventh.
+            if (frame == 2) ctx.Time.Pause();
+            if (frame == 6) ctx.Time.Step(2);
+            if (frame == 10) ctx.Time.Resume();
+        });
+
+        harness.Run();
+
+        // Running, then stopped from the frame after the pause, with no delta and no fixed step.
+        Assert.True(deltas[2] > 0);
+        Assert.False(paused[2]);
+        for (var frame = 3; frame <= 6; frame++)
+        {
+            Assert.Equal(0d, deltas[frame]);
+            Assert.True(paused[frame]);
+        }
+
+        Assert.Equal(steps[3], steps[6]);
+
+        // The step, two frames of time and then a stop again.
+        Assert.True(deltas[7] > 0);
+        Assert.True(deltas[8] > 0);
+        Assert.Equal(0d, deltas[9]);
+        Assert.Equal(0d, deltas[10]);
+        Assert.True(steps[8] > steps[6]);
+
+        // And going again once resumed.
+        Assert.True(deltas[11] > 0);
+        Assert.False(paused[12]);
+    }
 }

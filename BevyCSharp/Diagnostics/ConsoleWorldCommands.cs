@@ -364,6 +364,54 @@ internal static class ConsoleWorldCommands
         return $"waited {wanted} frames, from {now}";
     }
 
+    /// <summary>Stops or starts the game's clock.</summary>
+    /// <remarks>
+    /// The window, the interface and this console go on while the game is paused, so a stopped
+    /// world can be looked at, changed with <c>entity.set</c> and stepped a frame at a time.
+    /// </remarks>
+    [Command("app.pause", "Stops the game's clock, or starts it again: app.pause [on|off]")]
+    internal static string Pause(string line)
+    {
+        var time = ConsoleHost.Time;
+        var wanted = line.Trim() switch
+        {
+            "on" or "true" or "1" => true,
+            "off" or "false" or "0" => false,
+            _ => !time.Paused,
+        };
+
+        if (wanted) time.Pause();
+        else time.Resume();
+
+        return wanted ? "paused" : "running";
+    }
+
+    /// <summary>Runs a paused game's clock for a few frames and stops it again.</summary>
+    [Command("app.step", "Runs the game's clock for some frames, then stops it: app.step [frames]")]
+    internal static string Step(string line)
+    {
+        var frames = int.TryParse(line.Trim(), out var asked) ? Math.Clamp(asked, 1, 10_000) : 1;
+        ConsoleHost.Time.Step(frames);
+        return frames == 1 ? "stepping a frame" : $"stepping {frames} frames";
+    }
+
+    /// <summary>Sets how fast the game's clock runs.</summary>
+    [Command("app.speed", "How fast the game's clock runs, one being real time: app.speed <times>")]
+    internal static string Speed(string line)
+    {
+        var time = ConsoleHost.Time;
+        if (line.Trim().Length == 0) return $"speed {time.Speed:0.###}";
+
+        if (!float.TryParse(line.Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var speed) || speed < 0f)
+        {
+            ConsoleHost.Fail("BAD_ARGUMENT", $"'{line.Trim()}' is not a speed of zero or more.");
+            return $"'{line.Trim()}' is not a speed";
+        }
+
+        time.SetSpeed(speed);
+        return $"speed {speed:0.###}";
+    }
+
     /// <summary>Closes the app.</summary>
     [Command("app.quit", "Asks the app to close after this frame")]
     internal static string Quit()

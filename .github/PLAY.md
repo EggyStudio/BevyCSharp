@@ -64,8 +64,11 @@ the editor can be the client.
 - A Remote view in the world panel lists the running game's entities by asking `entity.list` a few
   times a second, and the details show `entity.get` for the one picked. A field changed there is an
   `entity.set`, which lasts until the game stops and is not recorded in the editor's history.
-- Pausing and stepping the game need commands of their own (`app.pause`, `app.step`), which are
-  `[Command]` methods over Bevy's `Time<Virtual>`.
+- Pausing and stepping the game are commands of their own, built: `app.pause [on|off]`,
+  `app.step [frames]` and `app.speed <times>`, over `Time.Pause`, `Time.Step`, `Time.Resume` and
+  `Time.SetSpeed`, which set Bevy's `Time<Virtual>` (`bcs_time_set_virtual`, ABI 162). A paused
+  game reads a delta of zero and runs no fixed step, while its window, its interface and the
+  socket go on, and a step runs the frames it asks for with the delta each would have had.
 - The game's picture can be shown in a tab through `shot`, but a capture a frame is too slow for
   anything past a thumbnail, so the game keeps its own window.
 
