@@ -68,7 +68,12 @@ internal static class AssetGrid
     /// <param name="picked">Whether it is the chosen one, which lights it.</param>
     /// <param name="over">Whether the pointer is on it.</param>
     /// <param name="badge">The kind named in its corner, or nothing for a tile that says none.</param>
-    internal static void Face(Vector2 at, float size, string name, string? picture, string icon, bool picked, bool over, string? badge = null)
+    /// <param name="drawn">
+    /// A picture ImGui already has a name for, worn when <paramref name="picture"/> is nothing,
+    /// such as one <see cref="Thumbnails"/> drew in memory of something with no file.
+    /// </param>
+    internal static void Face(
+        Vector2 at, float size, string name, string? picture, string icon, bool picked, bool over, string? badge = null, ulong drawn = 0)
     {
         var draw = ImGui.GetWindowDrawList();
         var line = ImGui.GetTextLineHeight();
@@ -90,12 +95,11 @@ internal static class AssetGrid
                 draw);
         }
 
+        var inside = at + new Vector2(EditorSurface.Air, EditorSurface.Air);
+        var room = size - (EditorSurface.Air * 2f) - line;
         var shown = picture is not null
-                    && EditorDraw.Picture(
-                        draw,
-                        picture,
-                        at + new Vector2(EditorSurface.Air, EditorSurface.Air),
-                        size - (EditorSurface.Air * 2f) - line);
+            ? EditorDraw.Picture(draw, picture, inside, room)
+            : EditorDraw.Picture(draw, drawn, inside, room);
 
         if (!shown)
         {

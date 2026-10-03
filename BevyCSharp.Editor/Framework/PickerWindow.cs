@@ -14,10 +14,19 @@ namespace BevyCSharp.Editor.Framework;
 /// </param>
 /// <param name="Path">
 /// The asset it stands for, under the asset root, whose picture its tile wears in a grid, or
-/// nothing for one with no file, which wears its icon.
+/// nothing for one with no file.
+/// </param>
+/// <param name="Drawn">
+/// For one with no file, the picture drawn of it in memory, asked for each frame its tile is drawn
+/// and zero until it is there (<see cref="Thumbnails"/>), or nothing for one that wears its icon.
 /// </param>
 public sealed record PickerItem(
-    string Label, string? Icon, Action<BehaviorContext> Pick, string? Group = null, string? Path = null);
+    string Label,
+    string? Icon,
+    Action<BehaviorContext> Pick,
+    string? Group = null,
+    string? Path = null,
+    Func<ulong>? Drawn = null);
 
 /// <summary>
 /// A window in the middle of the screen that offers a list to choose one thing from, with a box to
@@ -338,7 +347,8 @@ public static class PickerWindow
                 kind.Path is { } path ? AssetGrid.PictureOf(path) : null,
                 kind.Icon ?? EditorIcons.File,
                 chosen,
-                over);
+                over,
+                drawn: kind.Drawn?.Invoke() ?? 0);
 
             if (over) EditorWidgets.Tip(kind.Label);
         }

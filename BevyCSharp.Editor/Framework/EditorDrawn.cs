@@ -371,17 +371,29 @@ internal static class EditorDrawn
     {
         var items = new List<PickerItem>();
 
+        // Pictured as a file is, though none of these has one, so the grid shows a shape rather than
+        // the same icon thirteen times. A shape is made once to be pictured, when its turn comes.
         foreach (var (shape, a, b, c) in Shapes)
         {
             items.Add(new PickerItem(
-                Spaced(shape), EditorIcons.Mesh, pick => Give(pick.Ecs, entity, "Mesh", Render.CreateMesh(shape, a, b, c)), "Built in"));
+                Spaced(shape),
+                EditorIcons.Mesh,
+                pick => Give(pick.Ecs, entity, "Mesh", Render.CreateMesh(shape, a, b, c)),
+                "Built in",
+                Drawn: () => Thumbnails.Drawn($"shape:{shape}", () => new PreviewSubject.Mesh(Render.CreateMesh(shape, a, b, c)))));
         }
 
         foreach (var (handle, name) in InScene(ctx.Ecs, entity, Render.MeshOf, mesh => Render.RecipeOf(mesh) is { } recipe
             ? Spaced(recipe.Shape)
             : null))
         {
-            items.Add(new PickerItem(name, EditorIcons.Mesh, pick => Give(pick.Ecs, entity, "Mesh", handle), "In this scene"));
+            // Named with its measures, so a shape resized in its card is pictured again.
+            items.Add(new PickerItem(
+                name,
+                EditorIcons.Mesh,
+                pick => Give(pick.Ecs, entity, "Mesh", handle),
+                "In this scene",
+                Drawn: () => Thumbnails.Drawn($"mesh:{handle}:{Render.RecipeOf(handle)}", () => new PreviewSubject.Mesh(handle))));
         }
 
         foreach (var file in EditorAssets.Every([".json"]).Where(MeshFiles.IsMeshFile))
@@ -398,7 +410,12 @@ internal static class EditorDrawn
     {
         var items = new List<PickerItem>
         {
-            new("New material", EditorIcons.Add, pick => Give(pick.Ecs, entity, "Material", Render.CreateMaterial(new MaterialSettings())), "Built in"),
+            new(
+                "New material",
+                EditorIcons.Add,
+                pick => Give(pick.Ecs, entity, "Material", Render.CreateMaterial(new MaterialSettings())),
+                "Built in",
+                Drawn: () => Thumbnails.Drawn("material:new", () => new PreviewSubject.Material(Render.CreateMaterial(new MaterialSettings())))),
         };
 
         foreach (var (handle, name) in InScene(ctx.Ecs, entity, Render.MaterialOf, material =>
@@ -406,7 +423,13 @@ internal static class EditorDrawn
                 ? Hex(settings.BaseColor)
                 : null))
         {
-            items.Add(new PickerItem(name, EditorIcons.Data, pick => Give(pick.Ecs, entity, "Material", handle), "In this scene"));
+            // Named with what it looks like, so a material changed in its card is pictured again.
+            items.Add(new PickerItem(
+                name,
+                EditorIcons.Data,
+                pick => Give(pick.Ecs, entity, "Material", handle),
+                "In this scene",
+                Drawn: () => Thumbnails.Drawn($"material:{handle}:{Look(handle)}", () => new PreviewSubject.Material(handle))));
         }
 
         foreach (var file in EditorAssets.Every([".json"]).Where(MaterialFiles.IsMaterialFile))
@@ -483,6 +506,13 @@ internal static class EditorDrawn
             else Render.SetMaterial(on, entity, to);
         }
     }
+
+    /// <summary>What a material looks like in a few words, which changes when its picture would.</summary>
+    private static string Look(AssetHandle material) =>
+        Render.TryReadMaterial(material, out var settings) && settings is not null
+            ? $"{settings.BaseColor}{settings.Metallic}{settings.Roughness}{settings.Emissive}{settings.AlphaMode}{settings.Unlit}"
+              + $"{settings.BaseColorTexture}{settings.NormalMap}{settings.EmissiveTexture}"
+            : string.Empty;
 
     /// <summary>A linear color as the sRGB hex a color picker shows, to tell materials apart by.</summary>
     private static string Hex((float R, float G, float B, float A) linear)

@@ -3,7 +3,8 @@ using Bevy;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// Pictures of model files for the asset browser's tiles, rendered once and kept as files.
+/// Pictures for tiles, rendered once and kept, as files for the asset browser's models, meshes and
+/// materials, and in memory for what the picker offers with no file.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -19,6 +20,12 @@ namespace BevyCSharp.Editor.Framework;
 /// again is drawn again, and an old picture is never shown for a new file. One model is drawn at a
 /// time, a few frames each, so a folder of models fills its tiles one after another rather than
 /// stalling a frame on all of them.
+/// </para>
+/// <para>
+/// Something with no file, such as one of Bevy's shapes in the picker or a mesh the scene made in
+/// code, is drawn the same way but kept as an image in memory rather than written (<see cref="Drawn"/>),
+/// since there is no file whose time says when to draw it again and a picture of a mesh that
+/// lives only in this run means nothing to the next.
 /// </para>
 /// </remarks>
 internal static class Thumbnails
@@ -56,17 +63,29 @@ internal static class Thumbnails
         }
     }
 
-    /// <summary>Models waiting for a picture, oldest first.</summary>
-    private static readonly List<string> Waiting = [];
+    /// <summary>
+    /// One picture to draw, named by a file or a key, with what to draw and where it goes, a
+    /// <c>user://</c> path for a file's and nothing for one kept in memory.
+    /// </summary>
+    private sealed record Job(string Name, Func<PreviewSubject?> Subject, string? Picture);
+
+    /// <summary>Pictures waiting to be drawn, oldest first.</summary>
+    private static readonly List<Job> Waiting = [];
 
     /// <summary>Thumbnails known to be whole on disk, by the asset path they picture.</summary>
     private static readonly Dictionary<string, string> Ready = [];
 
-    /// <summary>The model being drawn, the frames it has been shown, and where its picture goes.</summary>
-    private static (string File, int Frames, string Picture)? _drawing;
+    /// <summary>Pictures kept in memory, by the key they were asked for under.</summary>
+    private static readonly Dictionary<string, AssetHandle> Kept = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// The picture being drawn, what it shows, and the frames it has been shown. The subject is
+    /// asked for once, so a shape made to be pictured is made once rather than every frame.
+    /// </summary>
+    private static (Job Job, PreviewSubject? Subject, int Frames)? _drawing;
 
     /// <summary>A capture asked for and not yet back, with how many frames it has waited.</summary>
-    private static (string File, string Picture, int Frames, Capture Capture)? _writing;
+    private static (Job Job, int Frames, Capture Capture)? _writing;
 
     /// <summary>
     /// The picture of a model file to draw on its tile, or nothing yet, asking for one when there
@@ -84,14 +103,44 @@ internal static class Thumbnails
         if (Ready.TryGetValue(file, out var known) && known == picture) return picture;
 
         // From an earlier run, whole since it was written then.
-        if (File.Exists(UserData.Resolve(picture)) && _writing?.Picture != picture)
+        if (File.Exists(UserData.Resolve(picture)) && _writing?.Job.Picture != picture)
         {
             Ready[file] = picture;
             return picture;
         }
 
-        if (!Waiting.Contains(file) && _drawing?.File != file && _writing?.File != file) Waiting.Add(file);
+        Ask(new Job(file, () => Subject(file), picture));
         return null;
+    }
+
+    /// <summary>
+    /// The picture of something with no file, kept in memory, or zero while it is being drawn,
+    /// asking for one the first time.
+    /// </summary>
+    /// <param name="key">
+    /// What it is called, which changes when what it shows does, such as a material's key with its
+    /// color in it, so a changed one is drawn again.
+    /// </param>
+    /// <param name="subject">What to draw, asked for once when its turn comes.</param>
+    /// <returns>A name ImGui draws with, or zero.</returns>
+    internal static ulong Drawn(string key, Func<PreviewSubject?> subject)
+    {
+        if (!App.HasRenderer) return 0;
+
+        var named = key + "\n" + Background.Trim().ToLowerInvariant();
+        if (Kept.TryGetValue(named, out var image)) return ImGuiTextures.Of(image);
+
+        Ask(new Job(named, subject, null));
+        return 0;
+    }
+
+    /// <summary>Puts a picture in the queue unless it is in it, being drawn or being written.</summary>
+    private static void Ask(Job job)
+    {
+        if (Waiting.Any(waiting => waiting.Name == job.Name)) return;
+        if (_drawing?.Job.Name == job.Name || _writing?.Job.Name == job.Name) return;
+
+        Waiting.Add(job);
     }
 
     /// <summary>Draws the next waiting model, or captures the one being drawn once it has settled.</summary>
@@ -106,12 +155,19 @@ internal static class Thumbnails
         {
             var next = Waiting[0];
             Waiting.RemoveAt(0);
-            if (PictureOf(next) is { } picture) _drawing = (next, 0, picture);
+            _drawing = (next, next.Subject(), 0);
         }
 
         if (_drawing is not { } drawing) return;
 
-        PreviewRenderer.Show(ctx, Key, Subject(drawing.File), Clear);
+        // Nothing to draw, such as a material file that did not read, keeps its icon.
+        if (drawing.Subject is null)
+        {
+            _drawing = null;
+            return;
+        }
+
+        PreviewRenderer.Show(ctx, Key, drawing.Subject, Clear);
         _drawing = drawing with { Frames = drawing.Frames + 1 };
         if (drawing.Frames < Settle) return;
 
@@ -119,12 +175,12 @@ internal static class Thumbnails
         {
             // Read back into memory rather than saved by the engine, whose PNG drops the alpha a
             // transparent background needs.
-            _writing = (drawing.File, drawing.Picture, 0, Render.BeginCapture(PreviewRenderer.TargetOf(Key)));
+            _writing = (drawing.Job, 0, Render.BeginCapture(PreviewRenderer.TargetOf(Key)));
         }
         catch (Bevy.Interop.BevyNativeException error)
         {
             // A picture that cannot be taken leaves the tile wearing its icon, which it did anyway.
-            Console.Error.WriteLine($"[editor] no thumbnail for {drawing.File}: {error.Message}");
+            Console.Error.WriteLine($"[editor] no thumbnail for {drawing.Job.Name}: {error.Message}");
         }
 
         _drawing = null;
@@ -143,12 +199,19 @@ internal static class Thumbnails
         {
             try
             {
-                UserData.WriteAtomically(UserData.Resolve(writing.Picture), picture.ToPng());
-                Ready[writing.File] = writing.Picture;
+                if (writing.Job.Picture is { } file)
+                {
+                    UserData.WriteAtomically(UserData.Resolve(file), picture.ToPng());
+                    Ready[writing.Job.Name] = file;
+                }
+                else
+                {
+                    Kept[writing.Job.Name] = Render.CreateImage(picture.Pixels, picture.Width, picture.Height);
+                }
             }
-            catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException or ArgumentException)
             {
-                Console.Error.WriteLine($"[editor] no thumbnail for {writing.File}: {error.Message}");
+                Console.Error.WriteLine($"[editor] no thumbnail for {writing.Job.Name}: {error.Message}");
             }
 
             Render.ReleaseCapture(writing.Capture);

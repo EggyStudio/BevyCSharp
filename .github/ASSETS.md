@@ -162,8 +162,10 @@ offered. Every other asset field opens the same window: a texture slot offers th
 asset root and those inside models, a sound field the sounds, and a `DataRef<T>` the data files of
 its type. What is picked is held until the field's row is next drawn and written there
 (`FieldPickers.Give`), so the row records it in the history as it records an edit typed into it.
-Not built: pictures for the built-in shapes and for what the scene uses, which have no file to
-draw.
+The built-in shapes, a new material and the meshes and materials the scene already uses have no
+file, and are pictured all the same by `Thumbnails.Drawn`, which draws one as a file's thumbnail is
+drawn and keeps the capture as an image in memory, named by the shape or the handle with what it
+looks like, so a material recolored in its card is pictured again.
 
 - **`AssetGrid`** comes out of `AssetsTab`: the tiles, the search, the kind chips and the
   thumbnails. The tab draws it, and `PickerWindow` gains a grid mode that draws it too, with
@@ -209,7 +211,4 @@ no file, as `Render.CreateMesh` makes it today. Godot's answer fits both, and is
 
 Each step is usable on its own and tested before the next.
 
-1. **Pictures for what has no file.** The picker's built-in shapes and the meshes and materials the
-   scene already uses are drawn by `PreviewRenderer` like a file's thumbnail, keyed by the shape
-   or the handle rather than a path.
-2. **Sub-meshes** on the Mesh card, each primitive of a model's mesh with its own material slot.
+1. **Sub-meshes** on the Mesh card, each primitive of a model's mesh with its own material slot.

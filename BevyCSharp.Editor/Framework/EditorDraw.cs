@@ -58,9 +58,17 @@ public static class EditorDraw
     /// <param name="at">The top left of the square it is fitted into.</param>
     /// <param name="size">How large that square is.</param>
     /// <returns>True when something was drawn.</returns>
-    internal static bool Picture(ImDrawListPtr draw, string path, Vector2 at, float size)
+    internal static bool Picture(ImDrawListPtr draw, string path, Vector2 at, float size) =>
+        Picture(draw, ImGuiTextures.Load(path), at, size);
+
+    /// <summary>A picture ImGui already has a name for, fitted into a square, keeping its shape.</summary>
+    /// <param name="draw">The list to draw into.</param>
+    /// <param name="picture">A name from <see cref="ImGuiTextures"/>, or zero for none.</param>
+    /// <param name="at">The top left of the square it is fitted into.</param>
+    /// <param name="size">How large that square is.</param>
+    /// <returns>True when something was drawn.</returns>
+    internal static bool Picture(ImDrawListPtr draw, ulong picture, Vector2 at, float size)
     {
-        var picture = ImGuiTextures.Load(path);
         if (picture == 0) return false;
 
         var (width, height) = ImGuiTextures.SizeOf(picture);
