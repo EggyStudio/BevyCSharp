@@ -253,6 +253,10 @@ public static class EditorShell
 
         // While a model is dragged from the assets, so it can be dropped on the scene.
         AssetsTab.SceneDrop(ctx);
+
+        // A file's thumbnail at a time, for whichever tiles asked for one, in the browser or in
+        // the picker.
+        Thumbnails.Tick(ctx);
         EditorStrip.Draw(tabsWidth, strip);
         ToolbarView.Draw(ctx);
 

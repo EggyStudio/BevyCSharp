@@ -50,9 +50,6 @@ public static class AssetsTab
     /// </remarks>
     public static void Draw()
     {
-        // A model's tile at a time, while the tab is open to show them.
-        if (EditorShell.Context is { } ctx) Thumbnails.Tick(ctx);
-
         var split = ImGuiTableFlags.Resizable
             | ImGuiTableFlags.NoBordersInBody
             | ImGuiTableFlags.NoSavedSettings;
@@ -491,64 +488,14 @@ public static class AssetsTab
         if (over && !entry.IsDirectory && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left) && EditorAssets.IsModel(entry.Path))
             EditorAssets.Enter(entry.Path);
 
-        var draw = ImGui.GetWindowDrawList();
-
-        // Cut to the region rather than run under its edge, so a tile scrolled half out of sight
-        // ends in a rounded corner instead of a square one.
-        var top = at;
-        var bottom = at + new Vector2(size, size);
-
-        if (EditorSurface.Clipped(ref top, ref bottom))
-        {
-            EditorDraw.Rounded(
-                top,
-                bottom,
-                ImGui.GetStyle().ChildRounding,
-                ImGui.GetColorU32(picked
-                    ? EditorTheme.LiveAccent
-                    : over ? EditorTheme.LiveLift : EditorTheme.LiveGroup),
-                draw);
-        }
-
-        const float Mark = 34f;
-
-        var middle = at + new Vector2((size - Mark) * 0.5f, (size - Mark) * 0.5f - (line * 0.6f));
-
-        // An image tile wears the image, because the interface loads a picture from a path and
-        // that is all it takes. A model wears the picture drawn of it once (Thumbnails), which a
-        // tile asks for by being drawn, and wears its icon until the picture is there. Everything
-        // else wears the picture of its kind, since a sound or a script has nothing to look at.
-        var picture = entry.IsDirectory
-            ? null
-            : EditorAssets.KindOf(entry.Path) switch
-            {
-                "image" => entry.Path,
-                "model" or "material" or "mesh" => Thumbnails.Of(entry.Path),
-                _ => null,
-            };
-
-        var shown = picture is not null
-                    && EditorDraw.Picture(
-                        draw,
-                        picture,
-                        at + new Vector2(EditorSurface.Air, EditorSurface.Air),
-                        size - (EditorSurface.Air * 2f) - line);
-
-        if (!shown)
-        {
-            var icon = entry.IsDirectory ? EditorIcons.Folder : EditorAssets.IconOf(entry.Path);
-
-            EditorDraw.Icon(draw, icon, middle, Mark, picked);
-        }
-
-        // And its name under it, cut to what fits rather than spilling into the next tile.
-        var name = EditorText.Fit(entry.Name, size - EditorSurface.Sides);
-        var width = ImGui.CalcTextSize(name).X;
-
-        draw.AddText(
-            at + new Vector2((size - width) * 0.5f, size - line - EditorSurface.Air),
-            ImGui.GetColorU32(EditorTheme.Ink(picked)),
-            name);
+        AssetGrid.Face(
+            at,
+            size,
+            entry.Name,
+            entry.IsDirectory ? null : AssetGrid.PictureOf(entry.Path),
+            entry.IsDirectory ? EditorIcons.Folder : EditorAssets.IconOf(entry.Path),
+            picked,
+            over);
 
         ImGui.EndGroup();
 

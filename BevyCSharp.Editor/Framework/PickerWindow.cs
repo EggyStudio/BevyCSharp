@@ -12,7 +12,12 @@ namespace BevyCSharp.Editor.Framework;
 /// The heading it is listed under, or nothing. Items of one group are given together, and a heading
 /// is drawn where the group changes.
 /// </param>
-public sealed record PickerItem(string Label, string? Icon, Action<BehaviorContext> Pick, string? Group = null);
+/// <param name="Path">
+/// The asset it stands for, under the asset root, whose picture its tile wears in a grid, or
+/// nothing for one with no file, which wears its icon.
+/// </param>
+public sealed record PickerItem(
+    string Label, string? Icon, Action<BehaviorContext> Pick, string? Group = null, string? Path = null);
 
 /// <summary>
 /// A window in the middle of the screen that offers a list to choose one thing from, with a box to
@@ -44,6 +49,10 @@ public static class PickerWindow
     private static string _hint = "Search";
     private static string _empty = "Nothing matches";
     private static string _verb = "Add";
+    private static bool _grid;
+
+    /// <summary>How many tiles the grid fitted across last frame, which the arrows move by.</summary>
+    private static int _across = 1;
     private static Func<IReadOnlyList<PickerItem>> _items = static () => [];
 
     /// <summary>Whether it is up.</summary>
@@ -58,8 +67,16 @@ public static class PickerWindow
     /// <param name="items">What it offers, asked for every frame it is up.</param>
     /// <param name="empty">What it says when there is nothing to offer at all.</param>
     /// <param name="verb">What the button that takes the chosen one says.</param>
+    /// <param name="grid">
+    /// Whether to show the items as tiles, each wearing its asset's picture, as the asset browser
+    /// does, rather than as rows. For picking an asset, which is found by how it looks.
+    /// </param>
     public static void Open(
-        string hint, Func<IReadOnlyList<PickerItem>> items, string empty = "Nothing matches", string verb = "Add")
+        string hint,
+        Func<IReadOnlyList<PickerItem>> items,
+        string empty = "Nothing matches",
+        string verb = "Add",
+        bool grid = false)
     {
         ArgumentNullException.ThrowIfNull(hint);
         ArgumentNullException.ThrowIfNull(items);
@@ -71,6 +88,7 @@ public static class PickerWindow
         _items = items;
         _empty = empty;
         _verb = verb;
+        _grid = grid;
     }
 
     /// <summary>Draws it while it is up.</summary>
@@ -83,7 +101,9 @@ public static class PickerWindow
         }
 
         var window = ImGuiRuntime.Size;
-        var size = new Vector2(MathF.Min(420f, window.X - 40f), MathF.Min(460f, window.Y - 40f));
+        var size = _grid
+            ? new Vector2(MathF.Min(640f, window.X - 40f), MathF.Min(560f, window.Y - 40f))
+            : new Vector2(MathF.Min(420f, window.X - 40f), MathF.Min(460f, window.Y - 40f));
 
         // The dim behind the modal, drawn here rather than by ImGui, which dims the whole display
         // with a square rectangle and so darkens the window's transparent corners and gaps as well.
@@ -169,8 +189,10 @@ public static class PickerWindow
 
         // The arrows move the choice while the box keeps the keyboard, so the hand that is typing
         // can pick without reaching for the pointer.
-        if (ImGui.IsKeyPressed(ImGuiKey.DownArrow)) _chosen = Math.Min(_chosen + 1, Math.Max(0, count - 1));
-        if (ImGui.IsKeyPressed(ImGuiKey.UpArrow)) _chosen = Math.Max(_chosen - 1, 0);
+        // A row of tiles at a time in a grid, which is where down goes on a grid.
+        var step = _grid ? Math.Max(1, _across) : 1;
+        if (ImGui.IsKeyPressed(ImGuiKey.DownArrow)) _chosen = Math.Min(_chosen + step, Math.Max(0, count - 1));
+        if (ImGui.IsKeyPressed(ImGuiKey.UpArrow)) _chosen = Math.Max(_chosen - step, 0);
     }
 
     /// <summary>What matches, one row each, and whether one was asked to be taken.</summary>
@@ -188,6 +210,13 @@ public static class PickerWindow
         }
 
         if (kinds.Count == 0) ImGui.TextDisabled(_search.Trim().Length > 0 ? "Nothing matches" : _empty);
+
+        if (_grid)
+        {
+            add |= Grid(kinds);
+            EditorSurface.EndRegion();
+            return add;
+        }
 
         var line = ImGui.GetTextLineHeight();
         var height = ImGui.GetFrameHeight();
@@ -249,6 +278,70 @@ public static class PickerWindow
         }
 
         EditorSurface.EndRegion();
+
+        return add;
+    }
+
+    /// <summary>How wide and tall a tile is in the grid.</summary>
+    private const float Tile = 88f;
+
+    /// <summary>
+    /// What matches, as tiles in rows under their groups' headings, and whether one was taken with
+    /// a double click.
+    /// </summary>
+    /// <remarks>
+    /// The asset browser's tiles (<see cref="AssetGrid"/>), so a mesh is found by the picture it is
+    /// browsed by. A group starts a row of its own under its heading.
+    /// </remarks>
+    private static bool Grid(IReadOnlyList<PickerItem> kinds)
+    {
+        var add = false;
+        var gap = ImGui.GetStyle().ItemSpacing.X;
+        _across = Math.Max(1, (int)((ImGui.GetContentRegionAvail().X + gap) / (Tile + gap)));
+
+        var column = 0;
+        for (var index = 0; index < kinds.Count; index++)
+        {
+            var kind = kinds[index];
+
+            if (kind.Group is { Length: > 0 } group && (index == 0 || kinds[index - 1].Group != group))
+            {
+                if (index > 0) ImGui.Spacing();
+                ImGui.TextDisabled(group);
+                column = 0;
+            }
+
+            if (column > 0) ImGui.SameLine();
+            column = (column + 1) % _across;
+
+            var chosen = index == _chosen;
+            var at = ImGui.GetCursorScreenPos();
+
+            ImGui.InvisibleButton($"##tile{index}", new Vector2(Tile, Tile));
+            var over = ImGui.IsItemHovered();
+
+            if (ImGui.IsItemClicked()) _chosen = index;
+
+            if (over && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+            {
+                _chosen = index;
+                add = true;
+            }
+
+            if (chosen && (ImGui.IsKeyPressed(ImGuiKey.DownArrow) || ImGui.IsKeyPressed(ImGuiKey.UpArrow)))
+                ImGui.SetScrollHereY();
+
+            AssetGrid.Face(
+                at,
+                Tile,
+                kind.Label,
+                kind.Path is { } path ? AssetGrid.PictureOf(path) : null,
+                kind.Icon ?? EditorIcons.File,
+                chosen,
+                over);
+
+            if (over) EditorWidgets.Tip(kind.Label);
+        }
 
         return add;
     }

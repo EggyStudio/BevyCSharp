@@ -219,8 +219,8 @@ out again against the new parent (`EditorHierarchy.Reparent`), and the move is o
 ### What an entity is drawn with
 
 The details show an entity's mesh and material under its components, each as a button naming its
-file, or "made here" for one built in code, that opens the picker with Bevy's shapes (or a new
-material), what the scene already draws with, and the model files, with a card folded under each
+file, or "made here" for one built in code, that opens the picker as a grid of tiles with Bevy's
+shapes (or a new material), what the scene already draws with, and every part of every model file, with a card folded under each
 (`DrawnCards`). The Mesh card turns the mesh in a preview, draws it as edges on request, edits
 a primitive's measures as rows that rebuild it in place, and lists what it is made of and where it
 came from. The Material card turns a sphere in the material

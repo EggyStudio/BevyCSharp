@@ -246,14 +246,15 @@ drawn sliced, tiled or fitted inside its size the way a video player letterboxes
 
 ## Interface
 
-### The picker is a list
+### A preview shows the surface and nothing under it
 
-The details pick an entity's mesh and material from Bevy's primitives, what the scene already
-uses and model files, each with a card under it: the mesh turned in a preview with what it is made
-of, and the material on a sphere with its settings as rows that write it in place. The asset
-browser draws a thumbnail of each model, mesh and material, with search and a chip per kind, and a
-model opens into its meshes and materials. The picker is a list rather than the browser's grid,
-which [ASSETS.md](ASSETS.md) plans.
+The details pick an entity's mesh and material from a grid of Bevy's primitives, what the scene
+already uses and every part of every model, each with a card under it: the mesh turned in a
+preview with what it is made of, and the material on a sphere with its settings as rows that write
+it in place. The asset browser draws a thumbnail of each model, mesh and material, with search and
+a chip per kind, and a model opens into its meshes and materials. The Mesh card cannot show a
+mesh's normals or its UVs, and a texture slot is a path rather than a picture, which
+[ASSETS.md](ASSETS.md) plans.
 
 ### Layout and text
 

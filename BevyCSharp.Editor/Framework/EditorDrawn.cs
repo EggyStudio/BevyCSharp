@@ -349,7 +349,8 @@ internal static class EditorDrawn
                 mesh ? "Pick a mesh" : "Pick a material",
                 () => mesh ? Meshes(ctx, entity, kind, label) : Materials(ctx, entity, kind, label),
                 "Nothing to pick",
-                "Pick");
+                "Pick",
+                grid: true);
         }
 
         ImGui.PopID();
@@ -384,7 +385,7 @@ internal static class EditorDrawn
         }
 
         foreach (var file in EditorAssets.Every([".json"]).Where(MeshFiles.IsMeshFile))
-            items.Add(new PickerItem(file, EditorIcons.Mesh, pick => Give(pick.Ecs, entity, "Mesh", MeshFiles.Load(file)), "Files"));
+            items.Add(new PickerItem(file, EditorIcons.Mesh, pick => Give(pick.Ecs, entity, "Mesh", MeshFiles.Load(file)), "Files", file));
 
         foreach (var file in EditorAssets.Every(EditorAssets.ExtensionsFor(kind).ToArray()))
             items.AddRange(Parts(entity, "Mesh", file, kind, label));
@@ -409,7 +410,7 @@ internal static class EditorDrawn
         }
 
         foreach (var file in EditorAssets.Every([".json"]).Where(MaterialFiles.IsMaterialFile))
-            items.Add(new PickerItem(file, EditorIcons.Data, pick => Give(pick.Ecs, entity, "Material", MaterialFiles.Load(file)), "Files"));
+            items.Add(new PickerItem(file, EditorIcons.Image, pick => Give(pick.Ecs, entity, "Material", MaterialFiles.Load(file)), "Files", file));
 
         foreach (var file in EditorAssets.Every(EditorAssets.ExtensionsFor(kind).ToArray()))
             items.AddRange(Parts(entity, "Material", file, kind, label));
@@ -439,7 +440,8 @@ internal static class EditorDrawn
                 $"{part.Name} in {file}",
                 title == "Mesh" ? EditorIcons.Mesh : EditorIcons.Image,
                 pick => Give(pick.Ecs, entity, title, AssetServer.Load(kind, path)),
-                "Files");
+                "Files",
+                path);
         }
     }
 

@@ -149,11 +149,12 @@ parts, and badges.
 Picking a mesh is finding one among the assets, which the browser does, so the picker is
 the browser's grid in a window rather than a dropdown of paths.
 
-Built as a list rather than a grid: the Mesh and Material rows open `PickerWindow`, which gained
-group headings (`PickerItem.Group`) and a label for its button, with "Built in", "In this scene" and
-"Files" as below, each row an icon rather than a picture, since thumbnails are the next step. Not
-built: `AssetGrid`, a glTF file's other meshes, and the same window for textures, sounds and data
-assets.
+Built: the Mesh and Material rows open `PickerWindow` in its grid mode, with "Built in", "In this
+scene" and "Files" as below, each a heading over a row of tiles. A tile is the browser's
+(`AssetGrid.Face`), wearing the thumbnail of the file or model part it stands for
+(`PickerItem.Path`), and the arrows move a row at a time. Every mesh and material of every model is
+offered. Not built: pictures for the built-in shapes and for what the scene uses, which have no
+file to draw, and the same window for textures, sounds and data assets.
 
 - **`AssetGrid`** comes out of `AssetsTab`: the tiles, the search, the kind chips and the
   thumbnails. The tab draws it, and `PickerWindow` gains a grid mode that draws it too, with
@@ -199,7 +200,5 @@ no file, as `Render.CreateMesh` makes it today. Godot's answer fits both, and is
 
 Each step is usable on its own and tested before the next.
 
-1. **`AssetGrid`:** the picker's grid mode drawing the browser's tiles, a model's parts among
-   them.
-2. **Normals and the UV checker on the Mesh card's preview**, and a thumbnail beside each texture
+1. **Normals and the UV checker on the Mesh card's preview**, and a thumbnail beside each texture
    slot.
