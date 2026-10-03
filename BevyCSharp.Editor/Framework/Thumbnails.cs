@@ -29,6 +29,33 @@ internal static class Thumbnails
     /// <summary>How many frames a model is shown before it is captured, for its meshes to arrive and be framed.</summary>
     private const int Settle = 30;
 
+    /// <summary>
+    /// What a thumbnail is drawn on, as hex with alpha, transparent by default so a tile's own
+    /// color shows round the model.
+    /// </summary>
+    /// <remarks>
+    /// A setting under Assets. Part of every thumbnail's name, so changing it draws them all again
+    /// rather than leaving pictures on the old background.
+    /// </remarks>
+    internal static string Background { get; set; } = "#00000000";
+
+    /// <summary>The background as a linear color, or transparent for text that is not a color.</summary>
+    private static (float R, float G, float B, float A) Clear
+    {
+        get
+        {
+            try
+            {
+                var color = Color.FromHex(Background.Trim());
+                return (color.R, color.G, color.B, color.A);
+            }
+            catch (FormatException)
+            {
+                return (0f, 0f, 0f, 0f);
+            }
+        }
+    }
+
     /// <summary>Models waiting for a picture, oldest first.</summary>
     private static readonly List<string> Waiting = [];
 
@@ -38,11 +65,8 @@ internal static class Thumbnails
     /// <summary>The model being drawn, the frames it has been shown, and where its picture goes.</summary>
     private static (string File, int Frames, string Picture)? _drawing;
 
-    /// <summary>
-    /// A capture asked for and not yet usable, with how many frames it has waited and whether its
-    /// file has been seen.
-    /// </summary>
-    private static (string File, string Picture, int Frames, bool Seen)? _writing;
+    /// <summary>A capture asked for and not yet back, with how many frames it has waited.</summary>
+    private static (string File, string Picture, int Frames, Capture Capture)? _writing;
 
     /// <summary>
     /// The picture of a model file to draw on its tile, or nothing yet, asking for one when there
@@ -87,54 +111,59 @@ internal static class Thumbnails
 
         if (_drawing is not { } drawing) return;
 
-        PreviewRenderer.Show(ctx, Key, Subject(drawing.File));
+        PreviewRenderer.Show(ctx, Key, Subject(drawing.File), Clear);
         _drawing = drawing with { Frames = drawing.Frames + 1 };
         if (drawing.Frames < Settle) return;
 
-        var full = UserData.Resolve(drawing.Picture);
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(full)!);
-            Render.Screenshot(full, PreviewRenderer.TargetOf(Key));
-            _writing = (drawing.File, drawing.Picture, 0, false);
+            // Read back into memory rather than saved by the engine, whose PNG drops the alpha a
+            // transparent background needs.
+            _writing = (drawing.File, drawing.Picture, 0, Render.BeginCapture(PreviewRenderer.TargetOf(Key)));
         }
-        catch (Exception error) when (error is IOException or UnauthorizedAccessException or Bevy.Interop.BevyNativeException)
+        catch (Bevy.Interop.BevyNativeException error)
         {
-            // A picture that cannot be written leaves the tile wearing its icon, which it did anyway.
+            // A picture that cannot be taken leaves the tile wearing its icon, which it did anyway.
             Console.Error.WriteLine($"[editor] no thumbnail for {drawing.File}: {error.Message}");
         }
 
         _drawing = null;
     }
 
-    /// <summary>Marks a capture usable once its file has been on disk for a frame.</summary>
+    /// <summary>Writes a capture to its file once it has come back off the GPU.</summary>
     /// <remarks>
-    /// The capture is written by the engine in the background a frame or more after it is asked for,
-    /// so the file appears, and is only loaded once it has been there a frame, rather than read
-    /// half written. One that never appears is given up on after a few seconds, so a model that
-    /// cannot be drawn does not hold up the rest.
+    /// A capture is answered a frame or more after it is asked for. One that never is gets given up
+    /// on after a few seconds, so a model that cannot be drawn does not hold up the rest.
     /// </remarks>
     private static void Written()
     {
         if (_writing is not { } writing) return;
 
-        var full = UserData.Resolve(writing.Picture);
-        if (File.Exists(full) && new FileInfo(full).Length > 0)
+        if (Render.TryReadCapture(writing.Capture, out var picture) && picture is not null)
         {
-            if (writing.Seen)
+            try
             {
+                UserData.WriteAtomically(UserData.Resolve(writing.Picture), picture.ToPng());
                 Ready[writing.File] = writing.Picture;
-                _writing = null;
             }
-            else
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException)
             {
-                _writing = writing with { Seen = true };
+                Console.Error.WriteLine($"[editor] no thumbnail for {writing.File}: {error.Message}");
             }
 
+            Render.ReleaseCapture(writing.Capture);
+            _writing = null;
             return;
         }
 
-        _writing = writing.Frames > 300 ? null : writing with { Frames = writing.Frames + 1 };
+        if (writing.Frames > 300)
+        {
+            Render.ReleaseCapture(writing.Capture);
+            _writing = null;
+            return;
+        }
+
+        _writing = writing with { Frames = writing.Frames + 1 };
     }
 
     /// <summary>What a file is drawn as: a model as its scene, a mesh file alone, a material file on a sphere.</summary>
@@ -163,7 +192,7 @@ internal static class Thumbnails
 
         var stamp = File.GetLastWriteTimeUtc(full).Ticks;
         var name = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
-            System.Text.Encoding.UTF8.GetBytes($"{file}\n{stamp}")))[..16].ToLowerInvariant();
+            System.Text.Encoding.UTF8.GetBytes($"{file}\n{stamp}\n{Background.Trim().ToLowerInvariant()}")))[..16].ToLowerInvariant();
 
         return $"user://thumbnails/{name}.png";
     }

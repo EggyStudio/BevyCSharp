@@ -1,3 +1,6 @@
+using System.Buffers.Binary;
+using System.IO.Compression;
+
 namespace Bevy;
 
 /// <summary>
@@ -50,6 +53,90 @@ public sealed record CapturedImage(uint Width, uint Height, byte[] Pixels)
         var offset = (int)(((y * Width) + x) * 4);
 
         return (Pixels[offset], Pixels[offset + 1], Pixels[offset + 2], Pixels[offset + 3]);
+    }
+
+    /// <summary>The picture as a PNG file's bytes, alpha included.</summary>
+    /// <remarks>
+    /// <para>
+    /// Written here rather than through <see cref="Render.Screenshot(string, AssetHandle)"/>, whose
+    /// PNG has no alpha, so a picture drawn on a clear background keeps the background clear, as a
+    /// thumbnail laid over a tile needs.
+    /// </para>
+    /// <para>
+    /// The plainest PNG there is: eight bits a channel, red, green, blue and alpha, every row
+    /// stored as it is and the whole compressed once. The bytes are the GPU's, which for an sRGB
+    /// target are already the encoded colors a PNG holds.
+    /// </para>
+    /// </remarks>
+    public byte[] ToPng()
+    {
+        var rows = new MemoryStream();
+        using (var packed = new ZLibStream(rows, CompressionLevel.Optimal, leaveOpen: true))
+        {
+            var stride = (int)Width * 4;
+            for (var y = 0; y < Height; y++)
+            {
+                // Each row starts with the filter it was stored with, which is none.
+                packed.WriteByte(0);
+                packed.Write(Pixels, y * stride, stride);
+            }
+        }
+
+        var file = new MemoryStream();
+        file.Write([0x89, (byte)'P', (byte)'N', (byte)'G', 0x0D, 0x0A, 0x1A, 0x0A]);
+
+        Span<byte> header = stackalloc byte[13];
+        BinaryPrimitives.WriteUInt32BigEndian(header, Width);
+        BinaryPrimitives.WriteUInt32BigEndian(header[4..], Height);
+        header[8] = 8; // bits a channel
+        header[9] = 6; // red, green, blue and alpha
+        Chunk(file, "IHDR", header);
+        Chunk(file, "IDAT", rows.GetBuffer().AsSpan(0, (int)rows.Length));
+        Chunk(file, "IEND", []);
+
+        return file.ToArray();
+    }
+
+    /// <summary>Writes one chunk: its length, its name, its data and the check over the last two.</summary>
+    private static void Chunk(Stream file, string name, ReadOnlySpan<byte> data)
+    {
+        Span<byte> number = stackalloc byte[4];
+        BinaryPrimitives.WriteUInt32BigEndian(number, (uint)data.Length);
+        file.Write(number);
+
+        Span<byte> named = stackalloc byte[4];
+        for (var i = 0; i < 4; i++) named[i] = (byte)name[i];
+        file.Write(named);
+        file.Write(data);
+
+        var check = Crc.Update(Crc.Update(0xFFFFFFFFu, named), data) ^ 0xFFFFFFFFu;
+        BinaryPrimitives.WriteUInt32BigEndian(number, check);
+        file.Write(number);
+    }
+
+    /// <summary>The CRC a PNG chunk ends with, by the table every PNG writer keeps.</summary>
+    private static class Crc
+    {
+        private static readonly uint[] Table = Build();
+
+        private static uint[] Build()
+        {
+            var table = new uint[256];
+            for (uint n = 0; n < 256; n++)
+            {
+                var c = n;
+                for (var k = 0; k < 8; k++) c = (c & 1) != 0 ? 0xEDB88320u ^ (c >> 1) : c >> 1;
+                table[n] = c;
+            }
+
+            return table;
+        }
+
+        public static uint Update(uint crc, ReadOnlySpan<byte> data)
+        {
+            foreach (var value in data) crc = Table[(crc ^ value) & 0xFF] ^ (crc >> 8);
+            return crc;
+        }
     }
 }
 

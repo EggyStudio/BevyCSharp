@@ -82,6 +82,12 @@ public static class EditorCommands
             },
             2);
 
+        // Transparent unless set, so a tile's own color shows round a model. Any hex color, with an
+        // alpha of its own for one that should show.
+        EditorSettings.Text(
+            "Assets", "Thumbnail background (hex)", static () => Thumbnails.Background,
+            static value => Thumbnails.Background = value.Trim().Length > 0 ? value.Trim() : "#00000000", 0);
+
         EditorSettings.Number(
             "Editor", "Move step (m)", static () => EditorTools.MoveStep,
             static value => EditorTools.MoveStep = MathF.Max(0.001f, value), 3);

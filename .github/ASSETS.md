@@ -101,18 +101,21 @@ Built as `PreviewRenderer` (`BevyCSharp.Editor/Framework/PreviewRenderer.cs`): f
 layer bits 12 to 15, each asked for by a key every frame it is wanted, drawing a glTF scene, a mesh
 in gray or a material on a sphere, framed so a ball round the subject fits from any angle, turned
 by a drag, and put away after the panels draw when nothing asked for it. More keys than slots take
-over the one asked for least recently. `EditorPreview`, the browser's picture, is one key of it.
+over the one asked for least recently. The details panel's picture of a selected file is one key of
+it.
 
 Thumbnails are built in `BevyCSharp.Editor/Framework/Thumbnails.cs`: a model tile asks for one by
-being drawn, one model is shown in a slot of its own for thirty frames and captured with
-`Render.Screenshot` to `user://thumbnails/`, named by a hash of its path and the time it was last
-written, and the tile draws the PNG once it has been on disk a frame. Under the player's directory
-rather than `build/`, since `user://` loads through Bevy (SCENES.md §1) and a thumbnail is this
-machine's cache. Only models have them so far.
+being drawn, one file is shown in a slot of its own for thirty frames on a transparent background,
+or the color the "Thumbnail background" setting gives, read back with `Render.BeginCapture` and
+written with its alpha by `CapturedImage.ToPng` to `user://thumbnails/`, named by a hash of its
+path, the time it was last written and the background. Under the player's directory rather than
+`build/`, since `user://` loads through Bevy (SCENES.md §1) and a thumbnail is this machine's cache.
+Models, mesh files and material files have them. `Render.Screenshot` writes no alpha, which is why
+a thumbnail goes through a capture instead.
 
-- **`PreviewRenderer`** grows out of `EditorPreview`: a small pool of render targets, each on a
-  render layer bit of its own with its own camera and light. A request names what to draw (a mesh
-  handle, a material on a sphere, a glTF scene, a texture) and gets an image back.
+- **`PreviewRenderer`** is a small pool of render targets, each on a render layer bit of its own
+  with its own camera and light. A request names what to draw (a mesh handle, a material on a
+  sphere, a glTF scene, a texture) and gets an image back.
 - **Live previews** (the cards, the selected tile) render every frame and turn with the mouse.
 - **Thumbnails** render once, are captured to PNG in `build/thumbnails/`, keyed by the file's path
   and modification time, and are drawn from there through `ImGuiTextures.Load`. A few are rendered

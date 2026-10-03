@@ -56,6 +56,9 @@ internal static class PreviewRenderer
     /// </remarks>
     private const int FirstLayer = 12;
 
+    /// <summary>The dark gray a card's picture is drawn on, linear.</summary>
+    private static readonly (float R, float G, float B, float A) Swatch = (0.09f, 0.09f, 0.11f, 1f);
+
     /// <summary>How wide each camera sees, in degrees, which the framing works back from.</summary>
     private const float FieldOfView = 35f;
 
@@ -95,6 +98,9 @@ internal static class PreviewRenderer
 
         public bool Wireframe { get; set; }
 
+        /// <summary>What the camera clears to, which a different one asked for makes it again.</summary>
+        public (float R, float G, float B, float A) Clear { get; set; } = Swatch;
+
         /// <summary>Whether the edges were turned off since the last frame, which every entity has to be told once.</summary>
         public bool Unwire { get; set; }
 
@@ -107,13 +113,32 @@ internal static class PreviewRenderer
     /// <param name="ctx">This frame.</param>
     /// <param name="key">Who is asking, which keeps one picture per place it is shown.</param>
     /// <param name="subject">What to draw, or nothing to show nothing.</param>
+    /// <param name="clear">
+    /// What the picture's background is, linear with alpha, or nothing for the dark swatch a card
+    /// shows. A thumbnail asks for its own, transparent unless a person set one.
+    /// </param>
     /// <returns>Whether there is a picture to show.</returns>
-    internal static bool Show(BehaviorContext ctx, string key, PreviewSubject? subject)
+    internal static bool Show(
+        BehaviorContext ctx, string key, PreviewSubject? subject, (float R, float G, float B, float A)? clear = null)
     {
         if (!App.HasRenderer || subject is null) return false;
 
         var slot = Take(ctx, key);
         slot.Asked = EditorShell.Frame;
+
+        // A camera's background is set when it is made, so another one is a camera made again.
+        var wanted = clear ?? Swatch;
+        if (slot.Clear != wanted)
+        {
+            if (!slot.Camera.IsNone)
+            {
+                slot.Owned.Remove(slot.Camera);
+                ctx.Ecs.Despawn(slot.Camera);
+                slot.Camera = Entity.None;
+            }
+
+            slot.Clear = wanted;
+        }
 
         if (slot.Showing != subject)
         {
@@ -302,7 +327,7 @@ internal static class PreviewRenderer
                 // Its own color rather than the world's, so the picture reads as a swatch of the
                 // subject rather than as a window onto the scene behind the panel.
                 Clear = ClearMode.Custom,
-                ClearColor = (0.09f, 0.09f, 0.11f, 1f),
+                ClearColor = slot.Clear,
 
                 // After the main view, so nothing about the order it is drawn in can disturb it.
                 Order = 8,
