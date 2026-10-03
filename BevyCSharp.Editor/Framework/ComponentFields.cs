@@ -296,8 +296,9 @@ public static class ComponentFields
         if (!wide) EditorRows.Close();
 
         // The asset a reference names, foldable under its row, so it is read and changed where it
-        // is used rather than by finding its file.
-        if (field.Kind == FieldKind.Data && value is IDataRef { Id: not 0 } reference && !entity.IsNone)
+        // is used rather than by finding its file. Under a data asset's own rows too, which are
+        // drawn with no entity, so a weapon's ammunition opens under the weapon.
+        if (field.Kind == FieldKind.Data && value is IDataRef { Id: not 0 } reference)
             EditorDataAssets.Opened(ctx, entity, field, reference.Id);
 
         ImGui.PopID();

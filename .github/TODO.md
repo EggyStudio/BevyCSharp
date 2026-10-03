@@ -70,10 +70,11 @@ A `[DataAsset]` class or struct lives in a `*.data.json` file of its own, with a
 sidecar beside it, and a component refers to it through a `DataRef<T>`, which keeps working when
 the file is renamed. It holds strings, lists and dictionaries, lists of structs and classes among
 them, is loaded once and shared, is read again when its file changes while assets are watched,
-and is made and edited in the editor. What [COMPONENTS.md](COMPONENTS.md) §3 has left:
+and is made and edited in the editor, where a reference folds open into the asset it names with
+how many entities and data assets share it. What [COMPONENTS.md](COMPONENTS.md) §3 has left:
 
-- **A reference held by a data asset** has no fold showing the asset it names, as a component's
-  reference has, and the count of what shares an asset leaves out other data assets.
+- **A reference inside a list's item** has no fold under it, and is left out of the count of what
+  shares the asset it names.
 
 ### Composing what a glTF file describes
 

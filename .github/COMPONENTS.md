@@ -266,24 +266,25 @@ var table = chest.Loot.Value;   // or DataAssets.Get(chest.Loot)
   front, and a map's values as their fields under their key. Items go
   three types deep, since a class can hold a list of itself.
 - **Opened in place.** A set `DataRef` row has a fold under it named for the asset's type and how
-  many entities share it ("shared with 2 others"), holding the asset's own rows, and "Make unique"
-  in it copies the asset to a file of its own beside it (`DataAssets.Copy`) and points the field at
-  the copy, for the one chest whose loot differs.
+  much shares it ("shared with 2 others"), holding the asset's own rows, and "Make unique" in it
+  copies the asset to a file of its own beside it (`DataAssets.Copy`) and points the field at the
+  copy, for the one chest whose loot differs. The count takes in the entities and the other data
+  assets that refer to it, which its tip tells apart, and a reference a data asset holds folds
+  open as a component's does, so a weapon's ammunition is edited under the weapon.
 - **Reloaded on its own.** With `Config.WatchAssets` on, as the editor has it, a data file changed
   on disk is dropped from the cache at the top of the next frame and `DataAssetChanged` posted,
   while a write this side made is told apart by its time and passed over (`DataAssets.Watching`).
 
 What is not built:
 
-- **A fold under a reference row in a data asset.** A reference held by a data asset, rather than
-  by a component, has no fold of its own, since the asset is drawn without an entity to count
-  users from.
+- **References inside items.** A `DataRef` held in a list's item is picked like any other but has
+  no fold under it, since an item's rows are drawn by `ListRows.Fields` rather than as a field's
+  row, and the count of what shares an asset reads only the fields of an entity's components and
+  of a data asset, so it leaves such a reference out.
 
 ## Order
 
 Each step is usable on its own and tested before the next.
 
-1. **The fold under a reference a data asset holds**, counting the other data assets that refer
-   to it as well as the entities.
-2. **Tier 3**: generated mirrors and layout probes replacing the hand ones, with the existing
+1. **Tier 3**: generated mirrors and layout probes replacing the hand ones, with the existing
    mirror tests passing unchanged.

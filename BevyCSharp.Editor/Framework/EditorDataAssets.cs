@@ -88,13 +88,19 @@ public static class EditorDataAssets
 
     /// <summary>
     /// The asset a reference field names, as a fold under the field's row holding the asset's own
-    /// fields, with how many entities share it and a way to stop sharing it.
+    /// fields, with how many entities and data assets share it and a way to stop sharing it.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Shut by default, because the fields are shared, and an edit here changes every entity that
+    /// Shut by default, because the fields are shared, and an edit here changes everything that
     /// refers to the asset, which the fold's name says by counting them. Open, the rows are the
     /// asset's, drawn and recorded as when its file is selected in the asset browser.
+    /// </para>
+    /// <para>
+    /// The field may be a component's, on <paramref name="entity"/>, or a data asset's, drawn with
+    /// no entity, since a data asset can refer to another as a component can. Its fields write the
+    /// asset they belong to whatever entity they are given, so the fold and "Make unique" work the
+    /// same under either, and a reference two assets deep opens under the first.
     /// </para>
     /// <para>
     /// "Make unique" copies the asset to a file of its own beside it and points this field at the
@@ -106,7 +112,9 @@ public static class EditorDataAssets
     {
         if (DataAssets.SchemaOf(id) is not { } schema) return;
 
-        var users = Users(ctx.Ecs, id);
+        var entities = Users(ctx.Ecs, id);
+        var assets = Holders(ctx.Ecs, id);
+        var users = entities + assets;
         var shared = users switch
         {
             0 or 1 => "used here only",
@@ -120,7 +128,11 @@ public static class EditorDataAssets
             ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.FramePadding);
 
         if (ImGui.IsItemHovered())
-            EditorWidgets.Tip("The asset's own fields. A change here reaches everything that refers to it.");
+        {
+            EditorWidgets.Tip(
+                $"The asset's own fields. A change here reaches {Count(entities, "entity", "entities")} and "
+                + $"{Count(assets, "data asset", "data assets")} that refer to it.");
+        }
 
         if (open)
         {
@@ -128,6 +140,7 @@ public static class EditorDataAssets
             {
                 var copy = DataAssets.Copy(id, Unused(path));
                 field.Write(ctx.Ecs, entity, copy);
+                Counted.Clear();
                 Console.WriteLine($"[editor] copied {path} to {AssetIds.PathOf(copy)} for this one");
             }
 
@@ -137,6 +150,8 @@ public static class EditorDataAssets
 
         ImGui.Unindent();
     }
+
+    private static string Count(int count, string one, string many) => count == 1 ? $"1 {one}" : $"{count} {many}";
 
     /// <summary>How many entities have a field referring to a data asset.</summary>
     private static int Users(EcsWorld world, ulong id)
@@ -155,6 +170,43 @@ public static class EditorDataAssets
 
         return users;
     }
+
+    /// <summary>How many data assets have a field referring to a data asset, itself left out.</summary>
+    /// <remarks>
+    /// <para>
+    /// Every data file under the asset root is loaded to answer, since which asset a file refers to
+    /// is in its fields. A loaded asset stays loaded and shared, so the cost after the first time is
+    /// reading the folder and the fields, but a fold drawn every frame would still walk the asset
+    /// tree every frame. The answer is kept for a second instead, which is sooner than anybody
+    /// changes another file's reference and looks back, and "Make unique" forgets it at once.
+    /// </para>
+    /// <para>
+    /// The asset is left out of its own count, so one referring to itself is used here only, as a
+    /// component naming it once is.
+    /// </para>
+    /// </remarks>
+    internal static int Holders(EcsWorld world, ulong id)
+    {
+        var now = Environment.TickCount64;
+        if (Counted.TryGetValue(id, out var kept) && now - kept.At < 1000) return kept.Count;
+
+        var holders = 0;
+        foreach (var file in Of(null))
+        {
+            var holder = AssetIds.IdOf(file);
+            if (holder == 0 || holder == id || DataAssets.SchemaOf(holder) is not { } schema) continue;
+
+            var refers = schema.Fields.Any(field =>
+                field.Kind == FieldKind.Data && field.Read(world, Entity.None) is IDataRef reference && reference.Id == id);
+
+            if (refers) holders++;
+        }
+
+        Counted[id] = (now, holders);
+        return holders;
+    }
+
+    private static readonly Dictionary<ulong, (long At, int Count)> Counted = [];
 
     /// <summary>A file name beside a data file that nothing is called, for its copy.</summary>
     private static string Unused(string path)
