@@ -196,9 +196,18 @@ public partial struct FlyCamera
         var input = ctx.Input;
         var alt = input.AnyKeyDown([Key.AltLeft, Key.AltRight]);
 
-        var flying = input.MouseDown(MouseButton.Right);
-        var panning = input.MouseDown(MouseButton.Middle);
-        var orbiting = alt && input.MouseDown(MouseButton.Left);
+        // A gesture is the scene's only when its button went down over the scene. A right click on a
+        // panel is the panel's, for a flyout or a revert, and flying the camera from it would also
+        // grab the cursor away from the menu it opened. Once begun over the scene, a drag keeps
+        // working wherever the pointer goes, over a panel included.
+        var onScene = !EditorShell.PointerOverPanel;
+        if (input.MousePressed(MouseButton.Right)) _flyBegun = onScene;
+        if (input.MousePressed(MouseButton.Middle)) _panBegun = onScene;
+        if (input.MousePressed(MouseButton.Left)) _orbitBegun = onScene && alt;
+
+        var flying = _flyBegun && input.MouseDown(MouseButton.Right);
+        var panning = _panBegun && input.MouseDown(MouseButton.Middle);
+        var orbiting = _orbitBegun && alt && input.MouseDown(MouseButton.Left);
 
         HoldCursor(flying || panning || orbiting);
 
@@ -354,6 +363,15 @@ public partial struct FlyCamera
     }
 
     /// <summary>Takes or gives back the cursor, doing nothing if it is already where it should be.</summary>
+    /// <summary>Whether the right button went down over the scene, which a fly needs.</summary>
+    private static bool _flyBegun;
+
+    /// <summary>Whether the middle button went down over the scene, which a pan needs.</summary>
+    private static bool _panBegun;
+
+    /// <summary>Whether Alt and the left button went down over the scene, which an orbit needs.</summary>
+    private static bool _orbitBegun;
+
     private static void HoldCursor(bool wanted)
     {
         if (wanted == _holdingCursor) return;

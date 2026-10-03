@@ -264,7 +264,10 @@ since it changes files rather than the scene.
 The camera button beside the statistics opens a card of the scene view's own camera, which is the
 editor's rather than the world's and so is not listed in the world. Its lens (the field of view and
 the near and far distances, through `Render.SetPerspective`), how it flies (its speed, how long it
-eases up to speed and back to a stop, and how far the mouse turns it), and how it draws. The view
+eases up to speed and back to a stop, and how far the mouse turns it), and how it draws. A fly,
+a pan or an orbit begins only when its button goes down over the scene, so a right click on a
+panel opens that panel's flyout rather than turning the camera, and a drag begun over the scene
+keeps going over a panel. The view
 is the editor's plain one unless overridden, when it takes a tonemapper, bloom, an antialiasing
 pass, and an exposure that follows the light or one of its own. Everything is saved with the
 editor's preferences, on a page of its own in the settings, and Reset puts it back.
