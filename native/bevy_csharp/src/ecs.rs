@@ -71,6 +71,24 @@ pub extern "C" fn bcs_ecs_spawn() -> u64 {
     })
 }
 
+/// Spawns a copy of an entity with every component it carries, returning the copy, or `0` when the
+/// entity does not exist or there is no world loan.
+///
+/// Bevy's own components are copied through `Clone` or reflection, and C# components through the
+/// clone behavior each is registered with ([`crate::lifecycle::cloned`]). The copy is placed under
+/// the same parent, and the entity's own children are not copied, which is Bevy's default for a
+/// relationship and what duplicating one thing in an editor means.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_ecs_clone(entity: u64) -> u64 {
+    crate::interop::guard_with(0u64, || {
+        with_world_opt(|world| match world.get_entity_mut(entity_from(entity)) {
+            Ok(mut found) => found.clone_and_spawn().to_bits(),
+            Err(_) => 0,
+        })
+        .unwrap_or(0)
+    })
+}
+
 /// Despawns an entity and everything on it.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_ecs_despawn(entity: u64) -> i32 {

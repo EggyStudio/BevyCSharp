@@ -236,6 +236,9 @@ pub struct BcsConfig {
     /// Non-zero to have the desktop draw the window's title bar where it only does so for X11
     /// windows, which is GNOME on Wayland. See `app::prefer_desktop_title_bar`.
     pub desktop_title_bar: u32,
+    /// The player's own directory, registered with Bevy as the `user` asset source so a texture or
+    /// a model the game wrote there loads as `user://…`, or null for no such source.
+    pub user_root: *const c_char,
 }
 
 /// How a camera should see, passed from C# when one is spawned.

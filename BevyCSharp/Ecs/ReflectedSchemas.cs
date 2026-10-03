@@ -165,6 +165,16 @@ internal static class ReflectedSchemas
 
             var described = types.TryGetProperty(type, out var found) ? found : default;
 
+            // A list or an array of values the inspector can edit is a list field, read and written
+            // as one JSON array. One of anything else stays JSON.
+            if (described.ValueKind == JsonValueKind.Object
+                && described.TryGetProperty("item", out var item)
+                && Scalar(item.GetString()!) is { } itemKind)
+            {
+                fields.Add(Listed(at, label, Short(type), itemKind));
+                return;
+            }
+
             // A color is one swatch whatever space Bevy holds it in, converted by Bevy, rather than a
             // choice of space over rows of numbers that mean something different in each.
             if (described.ValueKind == JsonValueKind.Object && described.TryGetProperty("color", out _))
@@ -375,6 +385,29 @@ internal static class ReflectedSchemas
                 hints: Hints(at, label) with { Asset = kind })
             {
                 ReflectPath = path,
+            };
+        }
+
+        /// <summary>A row holding a list of values of one kind.</summary>
+        private ComponentField Listed(At at, string label, string type, FieldKind item)
+        {
+            var (owner, path, within) = (component, at.Reflect, at.Within);
+            return new ComponentField(
+                at.Name,
+                FieldKind.List,
+                type,
+                (world, entity) => Holds(world, entity, owner, within)
+                    && Guarded(() => world.GetReflected(entity, owner, path)) is { } json
+                    ? ReflectedValue.DecodeList(json, item)
+                    : null,
+                (world, entity, value) => value is ListValue list
+                    && Holds(world, entity, owner, within)
+                    && ReflectedValue.EncodeList(list, item) is { } json
+                    && Sent(() => world.SetReflected(entity, owner, path, json)),
+                hints: Hints(at, label))
+            {
+                ReflectPath = path,
+                ElementKind = item,
             };
         }
 

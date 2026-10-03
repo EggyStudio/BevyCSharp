@@ -186,6 +186,10 @@ internal static class ConsoleWorldCommands
                 return $"{field} did not take the value";
             }
 
+            // Kept as an override when the entity is a node of an instance, as the inspector keeps
+            // it, so a scene saved afterward holds the change.
+            SceneInstances.Mark(world, entity, schema.QualifiedName, found.Name, was);
+
             return $"{field} = {Show(found.Read(world, entity))}";
         }
 

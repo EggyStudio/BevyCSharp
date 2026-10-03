@@ -57,6 +57,7 @@ public static class EditorHints
 
         yield return ("F", "frame the selection");
         yield return ("Del", "delete it");
+        yield return ("Ctrl D", "duplicate it");
         yield return ("Ctrl Z", "undo");
         yield return ("Ctrl ,", "settings");
         yield return ("F1", "menu");

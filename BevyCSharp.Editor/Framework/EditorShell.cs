@@ -250,6 +250,9 @@ public static class EditorShell
 
         EditorPanes.Draw();
         DrawOrientation(ctx);
+
+        // While a model is dragged from the assets, so it can be dropped on the scene.
+        AssetsTab.SceneDrop(ctx);
         EditorStrip.Draw(tabsWidth, strip);
         ToolbarView.Draw(ctx);
 

@@ -546,3 +546,55 @@ fn read_failure(index: i32, out: *mut u8, capacity: i32, which: Text) -> i32 {
         unsafe { crate::interop::write_text(text, out, capacity) }
     })
 }
+
+/// The world instances Bevy has reported ready since the managed side last asked, as entity bits.
+///
+/// Bevy announces a spawned scene as an observer event (`WorldInstanceReady`) on the entity it was
+/// spawned under rather than as a buffered message, so there is no queue to keep a cursor in. The
+/// observer below writes each one here, and [`bcs_world_instances_ready`] hands them over. Every
+/// profile has it, since a headless app spawns scenes as well.
+#[derive(bevy::ecs::resource::Resource, Default)]
+pub struct ReadyInstances {
+    /// The entities each instance was spawned under, oldest first.
+    pub entities: Vec<u64>,
+}
+
+/// Records an instance Bevy reports ready, for the managed side to collect.
+pub(crate) fn instance_ready(
+    ready: bevy::ecs::observer::On<bevy::world_serialization::WorldInstanceReady>,
+    mut list: bevy::ecs::system::ResMut<ReadyInstances>,
+) {
+    list.entities.push(ready.entity.to_bits());
+}
+
+/// Moves up to `capacity` ready instances into `out`, oldest first, and returns how many it moved.
+///
+/// Called in a loop until it answers fewer than `capacity`, so a frame that spawned a great many
+/// scenes is read in as many calls as it takes. A null `out` with a capacity of zero answers how
+/// many are waiting and moves none.
+///
+/// # Safety
+/// `out` must be writable for `capacity` values, or null when `capacity` is zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_world_instances_ready(out: *mut u64, capacity: i32) -> i32 {
+    crate::interop::guard(|| {
+        crate::state::with_world(|world| {
+            let Some(mut list) = world.get_resource_mut::<ReadyInstances>() else {
+                return 0;
+            };
+
+            if out.is_null() || capacity <= 0 {
+                return list.entities.len() as i32;
+            }
+
+            let taken = list.entities.len().min(capacity as usize);
+            for (index, bits) in list.entities.drain(..taken).enumerate() {
+                // SAFETY: the caller promised `capacity` writable values, and `index` stays below
+                // `taken`, which is at most `capacity`.
+                unsafe { *out.add(index) = bits };
+            }
+
+            taken as i32
+        })
+    })
+}

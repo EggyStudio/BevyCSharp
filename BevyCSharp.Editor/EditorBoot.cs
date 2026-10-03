@@ -47,6 +47,10 @@ public partial struct EditorBoot
 
         EditorCommands.Register(camera);
 
+        // A scene saved from inside the editor holds the scene, not the editor's own cameras and
+        // previews, whatever saves it.
+        SceneFile.Excluded = EditorScene.IsEditors;
+
         EditorProject.RestoreLayout();
 
         Console.WriteLine("[editor] the interface is up");
@@ -54,7 +58,10 @@ public partial struct EditorBoot
         if (Host is { } app) EditorScripts.Start(app);
     }
 
-    /// <summary>Puts something in front of the camera, so the viewport is a scene.</summary>
+    /// <summary>
+    /// Makes the editor's camera and puts the project's scene in front of it, or a starting scene
+    /// for a project that has not saved one.
+    /// </summary>
     private static Entity Scene(BehaviorContext ctx)
     {
         // The scene's own background, which is Bevy's default gray, so it looks as it did when it
@@ -73,6 +80,19 @@ public partial struct EditorBoot
         // person can move around in rather than a fixed picture with panels over it.
         ctx.Ecs.Add(camera, FlyCamera.LookingAt(new Vec3(4f, 3f, 7f), Vec3.Zero));
         ctx.Ecs.SetName(camera, "Scene camera");
+
+        // The editor's view, not the scene's camera, so a save leaves it out and a load keeps it.
+        ctx.Ecs.Add(camera, new EditorOnly());
+
+        // The project's own scene when it has been saved, so the editor opens where it was left,
+        // and the starting scene below only for a project that has none yet.
+        if (File.Exists(EditorPaths.Scene))
+        {
+            var loaded = SceneFile.Load(ctx.Ecs, EditorPaths.Scene);
+            Console.WriteLine($"[editor] opened {loaded.Entities.Count} entities from {EditorPaths.Scene}");
+            foreach (var reason in loaded.Refused) Console.WriteLine($"[editor] Bevy refused {reason}");
+            return camera;
+        }
 
         var sun = Render.SpawnLight(new LightSettings
         {

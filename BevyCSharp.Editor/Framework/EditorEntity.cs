@@ -31,13 +31,122 @@ public static class EditorEntity
         var was = world.NameOf(entity) ?? string.Empty;
         if (was == name) return;
 
-        world.SetName(entity, name);
+        // A node of an instance is renamed as an override, so the scene's next load names it the
+        // same, and its path keeps the model's name so the other overrides still find it.
+        var node = SceneInstances.IsFromModel(world, entity);
+        Rename(world, entity, name, node);
 
         EditorHistory.Record(
             $"rename to {name}",
-            undo => undo.SetName(entity, was),
-            redo => redo.SetName(entity, name),
+            undo => Rename(undo, entity, was, node),
+            redo => Rename(redo, entity, name, node),
             $"name{entity.Bits}");
+    }
+
+    /// <summary>Names an entity, through its instance when it is a node of one.</summary>
+    private static void Rename(EcsWorld world, Entity entity, string name, bool node)
+    {
+        if (node && name.Length > 0 && SceneInstances.Rename(world, entity, name)) return;
+        world.SetName(entity, name);
+    }
+
+    /// <summary>
+    /// Spawns a copy of each entity given, selects the copies, and puts the change on the undo
+    /// stack.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The copy is the engine's own clone, so it carries everything the original does, including
+    /// the mesh and material it is drawn with and Bevy's components with no schema, rather than
+    /// only what the editor can read off an entity. It sits under the same parent, and the
+    /// original's children are not copied with it.
+    /// </para>
+    /// <para>
+    /// A named entity's copy is given the next free name in the same style, "Cube 2" for "Cube", so
+    /// the world list tells the two apart and a selection remembered by name finds the right one.
+    /// Undoing despawns the copies and redoing makes them again from the originals, which are new
+    /// entities each time, as a new entity always is.
+    /// </para>
+    /// </remarks>
+    /// <param name="world">The world the entities are in.</param>
+    /// <param name="sources">What to copy.</param>
+    /// <returns>The copies, in the order of the sources, skipping any that no longer exist.</returns>
+    public static IReadOnlyList<Entity> Duplicate(EcsWorld world, IReadOnlyList<Entity> sources)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(sources);
+
+        var made = Copies(world, sources);
+        if (made.Count == 0) return made;
+
+        Choose(made);
+
+        var held = made.ToArray();
+        EditorHistory.Record(
+            made.Count == 1 ? "duplicate" : $"duplicate {made.Count}",
+            undo =>
+            {
+                foreach (var copy in held) undo.Despawn(copy);
+                EditorSelection.Clear();
+            },
+            redo =>
+            {
+                held = [.. Copies(redo, sources)];
+                Choose(held);
+            });
+
+        return made;
+    }
+
+    /// <summary>Clones each source that still exists and names the copies.</summary>
+    private static List<Entity> Copies(EcsWorld world, IReadOnlyList<Entity> sources)
+    {
+        var made = new List<Entity>();
+        foreach (var source in sources)
+        {
+            var copy = world.Clone(source);
+            if (copy.IsNone) continue;
+
+            if (world.NameOf(source) is { Length: > 0 } name) world.SetName(copy, NextName(world, name));
+            made.Add(copy);
+        }
+
+        return made;
+    }
+
+    /// <summary>Selects exactly the entities given.</summary>
+    private static void Choose(IReadOnlyList<Entity> chosen)
+    {
+        EditorSelection.Select(chosen.Count > 0 ? chosen[0] : Entity.None);
+        foreach (var also in chosen.Skip(1)) EditorSelection.Toggle(also);
+    }
+
+    /// <summary>
+    /// The first name of the form "Cube 2", "Cube 3" that no entity has, counting on from a number
+    /// the name already ends in.
+    /// </summary>
+    private static string NextName(EcsWorld world, string name)
+    {
+        var taken = world.All()
+            .Select(world.NameOf)
+            .OfType<string>()
+            .ToHashSet(StringComparer.Ordinal);
+
+        var space = name.LastIndexOf(' ');
+        var stem = name;
+        var number = 1;
+
+        if (space > 0 && int.TryParse(name[(space + 1)..], out var counted))
+        {
+            stem = name[..space];
+            number = counted;
+        }
+
+        string next;
+        do next = $"{stem} {++number}";
+        while (taken.Contains(next));
+
+        return next;
     }
 
     /// <summary>
@@ -53,10 +162,21 @@ public static class EditorEntity
 
         if (!schema.Add(world, entity)) return;
 
+        // Kept as an override on a node of an instance, and taken back out by the undo.
+        SceneInstances.MarkAdded(world, entity, schema.QualifiedName);
+
         EditorHistory.Record(
             $"add {schema.Name}",
-            undo => schema.Remove(undo, entity),
-            redo => schema.Add(redo, entity));
+            undo =>
+            {
+                schema.Remove(undo, entity);
+                SceneInstances.MarkRemoved(undo, entity, schema.QualifiedName);
+            },
+            redo =>
+            {
+                schema.Add(redo, entity);
+                SceneInstances.MarkAdded(redo, entity, schema.QualifiedName);
+            });
     }
 
     /// <summary>
@@ -94,6 +214,8 @@ public static class EditorEntity
 
         if (!schema.Remove(world, entity)) return;
 
+        SceneInstances.MarkRemoved(world, entity, schema.QualifiedName);
+
         EditorHistory.Record(
             $"remove {schema.Name}",
             undo =>
@@ -101,8 +223,13 @@ public static class EditorEntity
                 if (!schema.Add(undo, entity)) return;
 
                 foreach (var (field, value) in held) field.Write(undo, entity, value);
+                SceneInstances.MarkAdded(undo, entity, schema.QualifiedName);
             },
-            redo => schema.Remove(redo, entity));
+            redo =>
+            {
+                schema.Remove(redo, entity);
+                SceneInstances.MarkRemoved(redo, entity, schema.QualifiedName);
+            });
     }
 
     /// <summary>What a component of the interface is called, in part.</summary>
@@ -197,44 +324,12 @@ public static class EditorEntity
     /// is a wall between somebody and the two or three components they came to read.
     /// </para>
     /// <para>
-    /// A table rather than a constant, so a plugin that adds bookkeeping of its own can say so.
+    /// Started from <see cref="SceneFile.Computed"/>, the components a scene leaves out for the same
+    /// reason, so what the inspector hides and what a save skips are one list. A table rather than
+    /// a constant, so a plugin that adds bookkeeping of its own can say so.
     /// </para>
     /// </remarks>
-    public static readonly HashSet<string> Derived =
-    [
-        "GlobalTransform",
-        "PreviousGlobalTransform",
-        "TransformTreeChanged",
-        "InheritedVisibility",
-        "ViewVisibility",
-        "VisibilityClass",
-        "Aabb",
-        "Name",
-        "SyncToRenderWorld",
-        "MainEntity",
-        "RenderEntity",
-        "Children",
-        "ChildOf",
-
-        // What picking leaves on anything it has raycast, which is every mesh in the scene.
-        "PickingInteraction",
-        "Pickable",
-
-        // What a camera and a light work out every frame from where they are and what they see.
-        // Each is reflected and so has a schema, and each is pages of numbers that the next frame
-        // overwrites.
-        "Frustum",
-        "VisibleEntities",
-        "Clusters",
-        "PreviousViewData",
-        "CameraRenderGraph",
-        "Cascades",
-        "CascadesFrusta",
-        "CascadesVisibleEntities",
-        "CubemapFrusta",
-        "CubemapVisibleEntities",
-        "VisibleMeshEntities",
-    ];
+    public static readonly HashSet<string> Derived = [.. SceneFile.Computed];
 
     /// <summary>Whether a component is one the engine keeps for itself.</summary>
     /// <remarks>

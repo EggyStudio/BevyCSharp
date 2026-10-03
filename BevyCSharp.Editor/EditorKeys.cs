@@ -96,6 +96,9 @@ public partial struct EditorKeys
         // Godot's key for adding a node, which is the editor this window is modeled on.
         if (control && input.KeyPressed(Key.A)) Run(ctx, "Entity/Add");
 
+        // The key Godot, Unity and Unreal all duplicate with.
+        if (control && input.KeyPressed(Key.D)) Run(ctx, "Entity/Duplicate");
+
         // The menu, which is otherwise only reachable through a button on a panel that can be
         // closed. A person who closes everything should still have a way back.
         if (input.KeyPressed(Key.F1))

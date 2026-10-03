@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -30,6 +31,8 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 {
     private const string AttributeNamespace = "Bevy";
     private const string BehaviorAttribute = "Bevy.BehaviorAttribute";
+    private const string DataAssetAttribute = "Bevy.DataAssetAttribute";
+    private const string DataVersionAttribute = "Bevy.DataVersionAttribute";
 
     /// <inheritdoc/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -73,6 +76,60 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
             if (SchemaEmitter.Emit(described) is { } schemas)
                 spc.AddSource("ComponentSchemaRegistration.g.cs", schemas);
         });
+
+        // Data assets are described the same way, with strings, lists and dictionaries counted as
+        // fields, since they live on the managed side, and registered so a file can be read as the
+        // type it names.
+        var assets = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                DataAssetAttribute,
+                predicate: static (node, _) => node is StructDeclarationSyntax or ClassDeclarationSyntax,
+                transform: static (ctx, _) => ctx.TargetSymbol is INamedTypeSymbol type
+                    ? new BehaviorModel
+                    {
+                        Namespace = type.ContainingNamespace.IsGlobalNamespace
+                            ? null
+                            : type.ContainingNamespace.ToDisplayString(),
+                        Name = type.Name,
+                        QualifiedName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                        Fields = ReadFields(type, managed: true),
+                        FormerNames = FormerNamesOf(type),
+                        Version = VersionOf(type),
+                        Migrates = Migration(type) is not null,
+                    }
+                    : null)
+            .Where(static model => model is not null)
+            .Collect();
+
+        context.RegisterSourceOutput(assets, static (spc, found) =>
+        {
+            if (SchemaEmitter.EmitDataAssets([.. found.OfType<BehaviorModel>()]) is { } registration)
+                spc.AddSource("DataAssetRegistration.g.cs", registration);
+        });
+
+        // A version past the first with no Migrate method reads an older file as if it were the new
+        // shape, which is the mistake the version was there to prevent, so it is said where the
+        // attribute is rather than found in a save that loaded wrong. Its own pass, because a
+        // component and a data asset both carry the attribute.
+        var versions = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                DataVersionAttribute,
+                predicate: static (node, _) => node is StructDeclarationSyntax or ClassDeclarationSyntax,
+                transform: static (ctx, _) =>
+                    ctx.TargetSymbol is INamedTypeSymbol type
+                    && VersionOf(type) is var version and > 1
+                    && Migration(type) is null
+                        ? Diagnostic.Create(
+                            BehaviorDiagnostics.VersionWithoutMigrate,
+                            ctx.TargetNode is TypeDeclarationSyntax declaration
+                                ? declaration.Identifier.GetLocation()
+                                : ctx.TargetNode.GetLocation(),
+                            type.Name,
+                            version)
+                        : null)
+            .Where(static diagnostic => diagnostic is not null);
+
+        context.RegisterSourceOutput(versions, static (spc, diagnostic) => spc.ReportDiagnostic(diagnostic!));
     }
 
     /// <summary>
@@ -93,11 +150,16 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// agrees with. One without a setter is described as read only, which is exactly what it is.
     /// </para>
     /// </remarks>
-    private static IReadOnlyList<BehaviorField> ReadFields(INamedTypeSymbol type) =>
+    /// <param name="type">The type whose members are described.</param>
+    /// <param name="managed">
+    /// Whether the type lives on the managed side, as a data asset does, so a string, a
+    /// <c>List</c> and a <c>Dictionary</c> are fields a tool can edit rather than ones it cannot.
+    /// </param>
+    internal static IReadOnlyList<BehaviorField> ReadFields(INamedTypeSymbol type, bool managed = false) =>
     [
         .. type.GetMembers()
             .Where(member => member is IFieldSymbol or IPropertySymbol)
-            .SelectMany(member => Expand(member, string.Empty, null, 0)),
+            .SelectMany(member => Expand(member, string.Empty, [], null, 0, managed)),
     ];
 
     /// <summary>
@@ -120,14 +182,26 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// Fields only. A property returns a copy of what it holds, so writing one part of what a
     /// property answered with writes to the copy and nothing happens.
     /// </para>
+    /// <para>
+    /// A <c>[FormerName]</c> on a struct field renames every path under it, so each part carries
+    /// every whole path it had before, made of its own names under every name each struct above it
+    /// had. A reader then looks each one up as it is, without knowing which level was renamed.
+    /// </para>
     /// </remarks>
     private static IEnumerable<BehaviorField> Expand(
-        ISymbol member, string prefix, string? fold, int depth)
+        ISymbol member, string prefix, IReadOnlyList<string> formerPrefixes, string? fold, int depth, bool managed)
     {
-        if (Described(member) is not { } described) yield break;
+        if (Described(member, managed) is not { } described) yield break;
 
         var named = prefix + described.Name;
         var inside = Inside(fold, described.Hints.Foldout);
+
+        string[] names = [described.Name, .. described.Hints.FormerNames.Items];
+        var former = new[] { prefix }.Concat(formerPrefixes)
+            .SelectMany(above => names.Select(name => above + name))
+            .Where(path => path != named)
+            .Distinct()
+            .ToArray();
 
         if (member is IFieldSymbol field
             && depth < Depth
@@ -138,7 +212,8 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 
             foreach (var part in parts)
             {
-                foreach (var expanded in Expand(part, named + ".", under, depth + 1))
+                var formerAbove = former.Select(path => path + ".").ToArray();
+                foreach (var expanded in Expand(part, named + ".", formerAbove, under, depth + 1, managed))
                 {
                     yield return expanded;
                 }
@@ -157,6 +232,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
                 // same word four times down a column.
                 Label = described.Hints.Label ?? described.Name,
                 Foldout = inside,
+                FormerNames = new EquatableArray<string>(former),
             },
         };
     }
@@ -204,19 +280,14 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     }
 
     /// <summary>How one member is described, or nothing when it is not shown at all.</summary>
-    private static BehaviorField? Described(ISymbol member) => member switch
+    private static BehaviorField? Described(ISymbol member, bool managed) => member switch
     {
         IFieldSymbol field
             when !field.IsStatic
                 && !field.IsConst
                 && !field.IsImplicitlyDeclared
                 && field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal
-            => new BehaviorField(
-                field.Name,
-                KindOf(field.Type),
-                field.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                OptionsOf(field.Type),
-                HintsOf(field)),
+            => Field(field.Name, field.Type, HintsOf(field), managed),
 
         IPropertySymbol property
             when !property.IsStatic
@@ -235,6 +306,133 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 
         _ => null,
     };
+
+    /// <summary>One field, described by its type, with a list's or a map's item kinds.</summary>
+    private static BehaviorField Field(string name, ITypeSymbol type, FieldHintModel hints, bool managed)
+    {
+        var (key, item, held) = Collection(type, managed);
+        var kind = KindOf(type, managed);
+
+        // Items with fields of their own are described as a data asset is, a few levels deep at
+        // most, since a class can hold a list of itself and the description would never end.
+        var itemKind = item is null ? FieldKind.Opaque : ItemKindOf(item);
+        var itemFields = EquatableArray<BehaviorField>.Empty;
+        if (itemKind == FieldKind.Struct && item is INamedTypeSymbol named)
+        {
+            if (_itemDepth >= 3)
+            {
+                itemKind = FieldKind.Opaque;
+            }
+            else
+            {
+                _itemDepth++;
+                try
+                {
+                    itemFields = new EquatableArray<BehaviorField>([.. ReadFields(named, managed: true)]);
+                }
+                finally
+                {
+                    _itemDepth--;
+                }
+            }
+        }
+
+        // A data reference offers the files of its own type, which the hint carries to the drawer.
+        if (kind == FieldKind.Data && DataTarget(type) is { } target)
+            hints = hints with { Asset = target.ToDisplayString() };
+
+        return new BehaviorField(
+            name,
+            kind,
+            type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            OptionsOf(item ?? type),
+            hints,
+            ElementKind: itemKind,
+            ElementType: item?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            IsHandle: IsStored(type),
+            KeyKind: key is null ? FieldKind.Opaque : ItemKindOf(key),
+            KeyType: key?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            Collection: held,
+            ItemFields: itemFields,
+            ItemIsClass: item?.IsReferenceType == true,
+            ItemName: item?.Name);
+    }
+
+    /// <summary>How many item types deep the description of a field's items has gone, on this thread.</summary>
+    [ThreadStatic]
+    private static int _itemDepth;
+
+    /// <summary>
+    /// Whether a type is a struct or a class made of fields of its own, which a list can hold as
+    /// items with an editor and a JSON form.
+    /// </summary>
+    /// <remarks>
+    /// A class needs a constructor with no parameters, since a new item is made at its defaults,
+    /// and a field or a property to set, since one with nothing to set has nothing to show.
+    /// </remarks>
+    private static bool IsItemRecord(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol named || type.SpecialType != SpecialType.None) return false;
+        if (KindOf(type) != FieldKind.Opaque) return false;
+
+        if (type.TypeKind == TypeKind.Struct) return Parts(type) is not null;
+        if (type.TypeKind != TypeKind.Class || named.IsAbstract || named.IsGenericType) return false;
+
+        var constructed = named.InstanceConstructors.Any(constructor =>
+            constructor.Parameters.Length == 0
+            && constructor.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal);
+
+        return constructed && named.GetMembers().Any(member => member switch
+        {
+            IFieldSymbol field => !field.IsStatic && !field.IsConst && !field.IsImplicitlyDeclared
+                && !field.IsReadOnly && field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal,
+            IPropertySymbol property => !property.IsStatic && property.SetMethod is { IsInitOnly: false }
+                && property.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal,
+            _ => false,
+        });
+    }
+
+    /// <summary>
+    /// The key and item types of a list or a map, and how it is held, or nothing for any other
+    /// type.
+    /// </summary>
+    private static (ITypeSymbol? Key, ITypeSymbol? Item, string? Held) Collection(ITypeSymbol type, bool managed)
+    {
+        if (ListItem(type) is { } item) return (null, item, IsStored(type) ? "stored" : "inline");
+        if (MapTypes(type) is { } map) return (map.Key, map.Value, "stored");
+
+        if (managed && type is INamedTypeSymbol { IsGenericType: true } named
+            && named.ContainingNamespace?.ToDisplayString() == "System.Collections.Generic")
+        {
+            if (named.Name == "List" && named.TypeArguments.Length == 1)
+                return (null, named.TypeArguments[0], "managed");
+            if (named.Name == "Dictionary" && named.TypeArguments.Length == 2)
+                return (named.TypeArguments[0], named.TypeArguments[1], "managed");
+        }
+
+        return (null, null, null);
+    }
+
+    /// <summary>The data asset type a <c>DataRef</c> refers to, or nothing for any other type.</summary>
+    private static ITypeSymbol? DataTarget(ITypeSymbol type) =>
+        type is INamedTypeSymbol { Name: "DataRef", TypeArguments.Length: 1 } named
+        && named.ContainingNamespace?.ToDisplayString() == "Bevy"
+            ? named.TypeArguments[0]
+            : null;
+
+    /// <summary>
+    /// How a tool reads a field of this type, counting a string, a list and a dictionary on a type
+    /// that lives on the managed side.
+    /// </summary>
+    private static FieldKind KindOf(ITypeSymbol type, bool managed)
+    {
+        if (managed && type.SpecialType == SpecialType.System_String) return FieldKind.String;
+
+        var (key, _, held) = Collection(type, managed);
+        if (held == "managed") return key is null ? FieldKind.List : FieldKind.Map;
+
+        return KindOf(type);
+    }
 
     /// <summary>Whether a property can be written from outside the type.</summary>
     private static bool Settable(IPropertySymbol property) =>
@@ -263,6 +461,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         // can sit on one field, and the last one written is not the only one meant.
         var conditions = new List<ConditionModel>();
         var changed = new List<string>();
+        var former = new List<string>();
 
         foreach (var attribute in attributes)
         {
@@ -285,6 +484,10 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 
                 case "OnValueChangedAttribute":
                     foreach (var method in Names(attribute)) changed.Add(method);
+                    continue;
+
+                case "FormerNameAttribute":
+                    if (Text(attribute, 0) is { Length: > 0 } was) former.Add(was);
                     continue;
             }
 
@@ -334,6 +537,9 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 
         if (changed.Count > 0)
             hints = hints with { Changed = new EquatableArray<string>([.. changed]) };
+
+        if (former.Count > 0)
+            hints = hints with { FormerNames = new EquatableArray<string>([.. former]) };
 
         return hints;
     }
@@ -578,8 +784,53 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         _ => false,
     };
 
+    /// <summary>
+    /// The item type of one of the library's lists, inline or stored, or nothing for any other
+    /// type.
+    /// </summary>
+    /// <remarks>
+    /// Matched by name and namespace, as the attributes are, and every inline capacity at once,
+    /// since the capacity is part of the type's name rather than an argument of it.
+    /// </remarks>
+    private static ITypeSymbol? ListItem(ITypeSymbol type) =>
+        type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } named
+        && (named.Name.StartsWith("InlineList", StringComparison.Ordinal) || named.Name == "EcsList")
+        && named.ContainingNamespace?.ToDisplayString() == "Bevy"
+            ? named.TypeArguments[0]
+            : null;
+
+    /// <summary>The key and value types of the library's stored map, or nothing for any other type.</summary>
+    private static (ITypeSymbol Key, ITypeSymbol Value)? MapTypes(ITypeSymbol type) =>
+        type is INamedTypeSymbol { Name: "EcsMap", TypeArguments.Length: 2 } named
+        && named.ContainingNamespace?.ToDisplayString() == "Bevy"
+            ? (named.TypeArguments[0], named.TypeArguments[1])
+            : null;
+
+    /// <summary>
+    /// Whether a type is a handle into the managed store, which has to be freed when the component
+    /// holding it goes.
+    /// </summary>
+    private static bool IsStored(ITypeSymbol type) =>
+        type is INamedTypeSymbol { Name: "EcsList" or "EcsMap" } named
+        && named.ContainingNamespace?.ToDisplayString() == "Bevy";
+
+    /// <summary>
+    /// The kind of a list's items, which may be text, as no field of a component can be, since a
+    /// stored list lives on the managed side.
+    /// </summary>
+    private static FieldKind ItemKindOf(ITypeSymbol item) =>
+        item.SpecialType == SpecialType.System_String ? FieldKind.String
+        : IsItemRecord(item) ? FieldKind.Struct
+        : KindOf(item);
+
     /// <summary>How a tool should read and draw a field of this type.</summary>
-    private static FieldKind KindOf(ITypeSymbol type) => type.TypeKind == TypeKind.Enum
+    private static FieldKind KindOf(ITypeSymbol type) => ListItem(type) is not null
+        ? FieldKind.List
+        : MapTypes(type) is not null
+        ? FieldKind.Map
+        : DataTarget(type) is not null
+        ? FieldKind.Data
+        : type.TypeKind == TypeKind.Enum
         ? IsFlags(type) ? FieldKind.Flags : FieldKind.Enum
         : type.SpecialType switch
     {
@@ -699,11 +950,53 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
             QualifiedName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             Methods = methods,
             Fields = fields,
+            FormerNames = FormerNamesOf(type),
+            Version = VersionOf(type),
+            Migrates = Migration(type) is not null,
+            Persisted = type.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "PersistAttribute"),
             Invokables = ReadInvokables(type),
         };
 
         return new ExtractResult(model, diagnostics.ToImmutable());
     }
+
+    /// <summary>The version a type's <c>[DataVersion]</c> gives it, or zero for none.</summary>
+    private static int VersionOf(INamedTypeSymbol type) =>
+        type.GetAttributes()
+            .Where(attribute => attribute.AttributeClass?.Name == "DataVersionAttribute")
+            .Select(attribute => attribute.ConstructorArguments.FirstOrDefault().Value)
+            .OfType<int>()
+            .FirstOrDefault();
+
+    /// <summary>
+    /// A type's <c>static JsonObject Migrate(int from, JsonObject value)</c>, or nothing when it has
+    /// none of that shape.
+    /// </summary>
+    /// <remarks>
+    /// Public or internal, because the schema that calls it is registered from a class of the
+    /// generator's own, outside the type.
+    /// </remarks>
+    private static IMethodSymbol? Migration(INamedTypeSymbol type) =>
+        type.GetMembers("Migrate").OfType<IMethodSymbol>().FirstOrDefault(method =>
+            method.IsStatic
+            && method.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal
+            && method.Parameters.Length == 2
+            && method.Parameters[0].Type.SpecialType == SpecialType.System_Int32
+            && IsJsonObject(method.Parameters[1].Type)
+            && IsJsonObject(method.ReturnType));
+
+    /// <summary>Whether a type is <c>System.Text.Json.Nodes.JsonObject</c>.</summary>
+    private static bool IsJsonObject(ITypeSymbol type) =>
+        type.Name == "JsonObject" && type.ContainingNamespace?.ToDisplayString() == "System.Text.Json.Nodes";
+
+    /// <summary>The names a type's <c>[FormerName]</c> attributes say it had.</summary>
+    private static IReadOnlyList<string> FormerNamesOf(INamedTypeSymbol type) =>
+    [
+        .. type.GetAttributes()
+            .Where(attribute => attribute.AttributeClass?.Name == "FormerNameAttribute")
+            .Select(attribute => Text(attribute, 0))
+            .OfType<string>(),
+    ];
 
     /// <summary>The stages named by a method's attributes.</summary>
     private static List<BehaviorStage> GetStages(IMethodSymbol method)

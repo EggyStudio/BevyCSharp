@@ -63,6 +63,9 @@ public static class EditorSceneFrame
 
             _frame = Frame(ground);
 
+            // The editor's own, which a saved scene leaves out.
+            ctx.Ecs.Add(_frame, new EditorOnly());
+
             // Nothing round the viewport but what the frame drew, so the window's own clear is
             // clear, which is what shows past the frame's rounded corners.
             Render.SetClearColor((0f, 0f, 0f, 0f));

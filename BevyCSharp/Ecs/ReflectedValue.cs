@@ -137,6 +137,34 @@ internal static class ReflectedValue
         return Encoding.UTF8.GetString(buffer.WrittenSpan);
     }
 
+    /// <summary>Reads a JSON array as a list of values of one kind, or nothing when it is not one.</summary>
+    internal static ListValue? DecodeList(string json, FieldKind item)
+    {
+        using var document = JsonDocument.Parse(json);
+        if (document.RootElement.ValueKind != JsonValueKind.Array) return null;
+
+        var items = new List<object?>();
+        foreach (var element in document.RootElement.EnumerateArray())
+            items.Add(Decode(element.GetRawText(), item));
+        return new ListValue(items);
+    }
+
+    /// <summary>
+    /// Writes a list of values of one kind as a JSON array, or <see langword="null"/> when an item
+    /// does not fit the kind.
+    /// </summary>
+    internal static string? EncodeList(ListValue list, FieldKind item)
+    {
+        var parts = new List<string>(list.Count);
+        foreach (var value in list)
+        {
+            if (value is null || Encode(item, value) is not { } part) return null;
+            parts.Add(part);
+        }
+
+        return "[" + string.Join(",", parts) + "]";
+    }
+
     // -- What the generated wrappers call
 
     /// <summary>Reads a field a wrapper names, throwing when the component is absent.</summary>

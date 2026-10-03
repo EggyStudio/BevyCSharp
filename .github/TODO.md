@@ -33,24 +33,49 @@ code per type. What [COMPONENTS.md](COMPONENTS.md) has left:
 - **Bytes in place need a mirror.** Five components (`Transform`, `GlobalTransform` and the three
   visibility types) are mirrored by hand, for systems that read them every frame. Generating
   mirrors and their layout checks is tier 3.
-- **A color is four numbers.** `FieldKind` has no color, so a reflected `Color` is a variant choice
-  over rows of floats rather than a swatch.
 
-### No collections in components
+### Collections in components
 
-A component is unmanaged, so it cannot hold a list or a dictionary, and the generator draws any
-field it does not know as a name with nothing to edit. [COMPONENTS.md](COMPONENTS.md) adds inline
-lists, lists and maps held in a managed store and freed with their entity, and data assets that
-hold collections freely.
+A component holds a list either inside its own bytes (`InlineList8<T>` and its siblings) or as a
+handle into a managed store (`EcsList<T>`), and a dictionary as a handle into the same store
+(`EcsMap<K, V>`), which a remove hook frees with the entity. The inspector, the scene writer and
+the schemas treat them as lists and maps. What [COMPONENTS.md](COMPONENTS.md) has left:
 
-### Scenes are edits, not files
 
-The editor's `world.json` keeps named entities, the components with a schema, and where a mesh and
-material came from, and loading it writes those over entities that already exist by name. It keeps
-no hierarchy, no unnamed entity, no camera or light settings, nothing built in memory, and no asset
-or entity reference that survives a restart, and there is no way to place a model or another scene
-in a scene with edits of its own, keep data in a file of its own, or save a player's progress.
-[SCENES.md](SCENES.md) designs all of it over the component schemas, in the order it can be built.
+### Scenes
+
+`SceneFile` writes entities to a `*.scene.json` and spawns them again, with the hierarchy, unnamed
+entities, entity references, data references, ids kept across saves, and Bevy's own components
+(cameras, lights, tonemapping) as Bevy's JSON, and `scene.save` and `scene.load` reach it from the
+console. A type or field renamed with `[FormerName]` or reshaped behind `[DataVersion]` still
+reads its old files, and what a build cannot read is kept and written back. Every file a scene
+refers to is named by an id that survives a rename in the asset browser. The editor's document is `assets/world.scene.json`, opened at start and written by
+Project/Save. What [SCENES.md](SCENES.md) has left:
+
+- **A mesh built vertex by vertex** is not written to a scene, since it has neither a file nor a
+  recipe. A primitive and a standard material made in memory are written as how to make them again.
+- **A model dropped on the viewport lands on the ground, not on what is under the pointer.**
+  `SceneInstances` places a glTF scene or another scene file with overrides a scene file keeps,
+  one inside another, with children added under its nodes and renames kept, and the editor
+  records what is edited on one of its nodes, marks a changed field and reverts it (SCENES.md §5).
+- **Saves are JSON and diff whole components.** `SaveGame` saves and loads what play changed over
+  the scenes a game started from, with the `Persistent<T>` values a slot carries, and `user://`
+  reaches both sides of the bridge. A component changed in one field is written whole, and a save
+  has no binary form for when one grows large (SCENES.md §8).
+- **A newer file in an older build** is read as far as its fields match and written back at the
+  older version, with what was not read kept, so the newer build migrates it a second time
+  (SCENES.md §7). Bevy's own components have neither former names nor versions.
+
+### Data assets
+
+A `[DataAsset]` class or struct lives in a `*.data.json` file of its own, with an id in a `.uid`
+sidecar beside it, and a component refers to it through a `DataRef<T>`, which keeps working when
+the file is renamed. It holds strings, lists and dictionaries, lists of structs and classes among
+them, is loaded once and shared, is read again when its file changes while assets are watched,
+and is made and edited in the editor. What [COMPONENTS.md](COMPONENTS.md) §3 has left:
+
+- **A map's struct values** are written and read but have no editor, and a reference held by a
+  data asset has no fold showing the asset it names, as a component's reference has.
 
 ### Composing what a glTF file describes
 
@@ -225,11 +250,12 @@ drawn sliced, tiled or fitted inside its size the way a video player letterboxes
 
 ### Meshes and materials are picked from a list of files
 
-The details show an entity's mesh and material as two dropdowns of model files, with no preview,
-no statistics, none of Bevy's primitives and no way to read a material's settings. The asset
-browser shows an icon for everything but an image. [ASSETS.md](ASSETS.md) plans Mesh and Material
-cards with live previews, a picker that is the asset browser's grid, rendered tiles, and meshes and
-materials made in place that are saved inside the scene.
+The details show an entity's mesh and material as two dropdowns of model files, with no preview
+and none of Bevy's primitives to choose. The library reads what a mesh holds, how a primitive was
+made and a material's settings (`Render.TryGetMeshInfo`, `RecipeOf`, `TryReadMaterial`), and a
+scene keeps the ones made in place, but the editor shows none of it yet. The asset browser shows an
+icon for everything but an image. [ASSETS.md](ASSETS.md) plans Mesh and Material cards with live
+previews, a picker that is the asset browser's grid, and rendered tiles.
 
 ### Layout and text
 
@@ -284,13 +310,9 @@ programs, the images the scene camera's shaders keep, the settings and the style
 drag on a handle moves, turns or stretches what is selected. [EDITOR.md](EDITOR.md) has the design
 language.
 
-- **Only what can be named is saved.** `assets/world.json` keeps every named entity's name, every
-  C# component and mirrored Bevy component, and where its mesh and material were loaded from. What
-  it cannot write is anything built in memory, since a set of numbers has no name, nor a camera's
-  projection or a light's settings. Those have reflected schemas, and the inspector edits them, but
-  this file writes every value as text and loads by writing over entities code already made, which
-  neither an enum carrying data nor a camera code did not make survives. The scene format in
-  [SCENES.md](SCENES.md) writes them.
+- **A mesh built vertex by vertex is not saved.** The editor saves a scene file holding every
+  entity, named or not, its components, Bevy's own included, and its mesh and material, by file or
+  as how to make a primitive or a standard material again. A mesh built from vertices has neither.
 - **One preview, not a thumbnail each.** An image tile shows itself, and a selected model is drawn
   by a camera of its own into a render target beside the tiles, framed by its bounds and kept on a
   render layer nothing else is on. One scene rather than one per tile, because a camera drawing into
@@ -317,14 +339,15 @@ language.
   them or none, since half a selection coming back is worse than none. Two entities sharing a name
   still resolve to the first.
 - **Undo covers what can be reversed exactly**, which is a field edited in the inspector, a
-  rename, a new entity, something hidden with its eye, and a component put on or taken off, keeping
-  what it held. Despawning is deliberately not recorded. An entity's mesh and material can now be
-  named where they were loaded from, so a despawn could be reversed for one drawn with files, and
-  not for one drawn with a mesh built in memory. Half a despawn coming back is worse than none.
+  rename, a new entity, a duplicate, something hidden with its eye, and a component put on or taken
+  off, keeping what it held. Despawning is deliberately not recorded. An entity's mesh and material
+  can be named where they were loaded from, so a despawn could be reversed for one drawn with
+  files, and not for one drawn with a mesh built in memory. Half a despawn coming back is worse than
+  none.
 - **Settings are the editor's, not the project's.** `EditorSettings` saves to `assets/settings.txt`
   beside the layout, and everything on it belongs to this editor build. A project setting worth the
   name (a startup scene, a physics step, a build target) needs somewhere to live that is part of
-  the project, which is the world file's gap again.
+  the project, which the scene file could carry and does not yet.
 - **The scene is the camera's viewport rather than a texture.** Docked, `Render.SetViewport` gives
   the camera the rectangle the panels left. A texture would make the scene a panel of its own,
   dockable and tabbable, as a second view needs.

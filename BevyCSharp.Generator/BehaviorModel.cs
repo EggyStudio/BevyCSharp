@@ -152,6 +152,18 @@ internal enum FieldKind
     Vec2,
     Vec4,
     Color,
+
+    /// <summary>One of the inline lists, whose items are another kind.</summary>
+    List,
+
+    /// <summary>A stored map, whose keys and values are other kinds.</summary>
+    Map,
+
+    /// <summary>A reference to a data asset.</summary>
+    Data,
+
+    /// <summary>A value with fields of its own, as a list's items can be.</summary>
+    Struct,
 }
 
 /// <summary>A method on a behavior that takes nothing, so anything can be told to call it.</summary>
@@ -173,13 +185,36 @@ internal sealed record BehaviorInvokable(string Name, MethodHintModel Hints)
 /// <param name="Options">The names an enum field can take, empty for anything else.</param>
 /// <param name="Hints">What its attributes asked for.</param>
 /// <param name="IsProperty">Whether it is a property, which is read and written through itself.</param>
+/// <param name="ElementKind">The kind of a list's items, and nothing for any other field.</param>
+/// <param name="ElementType">The C# type of a list's items, as the setter coerces to it.</param>
+/// <param name="IsHandle">
+/// Whether it is a handle into the managed store, which the component's remove hook frees.
+/// </param>
+/// <param name="KeyKind">The kind of a map's keys, and nothing for any other field.</param>
+/// <param name="KeyType">The C# type of a map's keys.</param>
+/// <param name="Collection">
+/// How a list or map is held: <c>inline</c>, <c>stored</c> in the managed store, or <c>managed</c> as
+/// a .NET collection, which only a data asset can hold. Nothing for any other field.
+/// </param>
+/// <param name="ItemFields">The fields of each item, for items with fields of their own.</param>
+/// <param name="ItemIsClass">Whether such an item is a class, which is copied before it is written.</param>
+/// <param name="ItemName">The item type's own name, as a tool shows it.</param>
 internal sealed record BehaviorField(
     string Name,
     FieldKind Kind,
     string Type,
     EquatableArray<string> Options,
     FieldHintModel Hints,
-    bool IsProperty = false)
+    bool IsProperty = false,
+    FieldKind ElementKind = FieldKind.Opaque,
+    string? ElementType = null,
+    bool IsHandle = false,
+    FieldKind KeyKind = FieldKind.Opaque,
+    string? KeyType = null,
+    string? Collection = null,
+    EquatableArray<BehaviorField> ItemFields = default,
+    bool ItemIsClass = false,
+    string? ItemName = null)
 {
     /// <summary>A field of a type with no fixed set of values.</summary>
     internal BehaviorField(string name, FieldKind kind, string type)
@@ -220,7 +255,8 @@ internal sealed record FieldHintModel(
     EquatableArray<string> Changed = default,
     int Order = 0,
     string? Asset = null,
-    string? Extensions = null)
+    string? Extensions = null,
+    EquatableArray<string> FormerNames = default)
 {
     /// <summary>A field with no attributes on it.</summary>
     internal static readonly FieldHintModel None = new();
@@ -305,6 +341,18 @@ internal sealed record BehaviorModel
 
     /// <summary>The stage methods found on the struct.</summary>
     public IReadOnlyList<StageMethod> Methods { get; init; } = [];
+
+    /// <summary>The names a <c>[FormerName]</c> says the type had, which an old file may use.</summary>
+    public IReadOnlyList<string> FormerNames { get; init; } = [];
+
+    /// <summary>The version a <c>[DataVersion]</c> gives the type, or zero for none.</summary>
+    public int Version { get; init; }
+
+    /// <summary>Whether the type has the <c>Migrate</c> method that brings an older file up to that version.</summary>
+    public bool Migrates { get; init; }
+
+    /// <summary>Whether <c>[Persist]</c> puts the type's fields in a save game.</summary>
+    public bool Persisted { get; init; }
 
     /// <summary>
     /// The struct's instance fields, in declaration order.

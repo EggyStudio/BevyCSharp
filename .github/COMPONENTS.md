@@ -2,8 +2,9 @@
 
 How every component Bevy has becomes usable from C# without a mirror written by hand, how a
 component holds a list or a dictionary, and how data kept in a file of its own (Unity's
-ScriptableObject) is declared, referred to and edited. Tiers 1 and 2 of §1 are built, and the rest
-of this file is the design, in the order it can be built. [SCENES.md](SCENES.md) covers how all of it is written to a
+ScriptableObject) is declared, referred to and edited. Tiers 1 and 2 of §1, the collections of §2
+and the data assets of §3 are built, and the rest of this file is the design, in the order it can
+be built. [SCENES.md](SCENES.md) covers how all of it is written to a
 file, and [ASSETS.md](ASSETS.md) how meshes, materials and textures are seen and picked.
 
 ## What exists
@@ -22,11 +23,9 @@ file, and [ASSETS.md](ASSETS.md) how meshes, materials and textures are seen and
   The camera, light, mesh and material exports remain as helpers that set several components at
   once.
 - **C# components are real Bevy components,** registered from their size and alignment
-  (`bcs_component_register`) with no drop hook. `ComponentType<T>` requires `unmanaged`, and the
-  generator refuses a stored behavior with a reference in it (BCS006), so a component cannot hold
-  a list.
-- **`FieldKind` has no kind for a collection.** The generator maps anything it does not know to
-  `Opaque`, which the inspector shows as a name and a type with nothing to edit.
+  (`bcs_component_register`). `ComponentType<T>` requires `unmanaged`, and the generator refuses a
+  stored behavior with a reference in it (BCS006), so a component holds a list through §2 rather
+  than as a `List<T>`.
 
 A mirror is still a match arm, a layout export, a schema and a test, so it is written only where a
 system needs to read the bytes in place every frame. Everything else goes through tier 1.
@@ -61,6 +60,11 @@ to keep mirrors only where their speed matters.
   from the type's default.
 - **Reasons.** Every failure leaves a sentence for `bcs_reflect_error`, so a path that leads nowhere
   says where it stopped.
+- **Colors as one value.** Bevy's `Color` holds a color in any of ten spaces, so its JSON is
+  whichever space it is in. `bcs_reflect_get_color` and `bcs_reflect_set_color` read any `Color`,
+  `LinearRgba` or `Srgba` as linear RGBA through Bevy's own conversions, and write one back in the
+  space it was held in, so the field is a single `Bevy.Color` swatch rather than a choice of space
+  over rows of numbers that mean something different in each.
 - **Handles as asset keys.** A handle has no JSON form, so `bcs_reflect_get_asset` turns one into
   the key the bridge's asset table knows it by, through the `ReflectHandle` Bevy registers on every
   `Handle<A>`, and `bcs_reflect_set_asset` retypes a key back into the field's own handle type,
@@ -93,8 +97,6 @@ once. A system reading a thousand entities a frame uses tier 3. What tier 1 does
 
 - **A handle of a kind the bridge does not load is only shown.** Its kind has no name in the list
   `AssetServer.Load` takes, so there are no files to offer for it.
-- **A color is four numbers.** `FieldKind` has no color, so a `Color` is a variant choice over rows
-  of floats rather than a swatch, until [SCENES.md](SCENES.md) §4 adds the kind.
 
 ### Tier 2: typed C# over tier 1
 
@@ -157,40 +159,67 @@ back through tier 1.
 ## 2. Lists and dictionaries in components
 
 A component lives in Bevy's storage as bytes, so it cannot hold a managed `List<T>`, whose memory
-the garbage collector moves and frees. Two kinds fill the gap.
+the garbage collector moves and frees. Two kinds of list fill the gap, and both are built.
 
-- **`InlineList<T, N>`** holds up to `N` unmanaged items inline, with a count, over C#'s
-  `[InlineArray]`. It is the component's own bytes, so it iterates in chunks with everything else
-  and costs nothing to keep. Suited to small bounded lists: waypoints, slots, the last few hits.
-- **`EcsList<T>` and `EcsMap<K, V>`** are unmanaged handles (a slot and a generation) into a store
-  on the managed side, so they grow without bound and hold `string` as well as unmanaged values.
-  - **Freed with the entity.** The generator marks a component that holds one, and the bridge
-    registers an `on_remove` hook for it through `World::register_component_hooks_by_id`, which
-    calls back into the store to free the slot. C# components have no hook today, so this is the
-    first.
-  - **Cloned deeply.** Cloning an entity copies the list, rather than sharing a slot two entities
-    would both free.
-  - **A stale handle is caught.** The generation makes a handle to a freed and reused slot fail
-    loudly instead of reading someone else's list.
-- **The generator** adds `FieldKind.List` and `FieldKind.Map` with an element schema, maps these
-  types to them, and accepts them past BCS006.
-- **The inspector** draws a list as a fold card of rows with a drag handle to reorder, a remove
-  button per row and an add button under them, and a map as a table of key and value. Both record
-  their edits in `EditorHistory`.
-- **Scene files** write a list as a JSON array and a map as an object ([SCENES.md](SCENES.md), §4).
+- **Inline lists** (`BevyCSharp/Ecs/InlineList.cs`) hold a count and a fixed run of unmanaged
+  items over C#'s `[InlineArray]`. They are the component's own bytes, so they iterate in chunks
+  with everything else and cost nothing to keep, which suits small bounded lists: waypoints, slots,
+  the last few hits. The capacity is part of the type, `InlineList4<T>` through `InlineList64<T>`,
+  because C# fixes an inline array's length at compile time and cannot take it as a type parameter.
+  A freed slot is cleared, so two lists of the same items are the same bytes.
+- **`EcsList<T>` and `EcsMap<K, V>`** (`BevyCSharp/Ecs/EcsList.cs`, `EcsMap.cs`) are unmanaged
+  handles (a slot and a generation) into a store on the managed side, so they grow without bound
+  and hold `string` as well as unmanaged values. Each is made on its first write.
+  - **Freed with the entity.** The generator registers a remove hook for every component holding
+    either, from the module initializer that registers its schema. The bridge attaches it with
+    `World::register_component_hooks_by_id` (`bcs_component_on_remove`,
+    `native/bevy_csharp/src/lifecycle.rs`) when the component is first registered, since Bevy
+    takes a hook only before any entity carries the component, and Bevy calls it on removal and on
+    despawn with the component's bytes, from which the hook frees each list. `on_remove` alone,
+    because the read, modify, write of a component writes back the handle it read, and freeing on
+    a replace would free the list the new value still holds.
+  - **A stale handle is caught.** The generation makes a handle to a freed and reused slot throw
+    `ObjectDisposedException` instead of reading someone else's list.
+- **The generator** gives every list `FieldKind.List`, with `ComponentField.ElementKind` naming the
+  items' kind, and a map `FieldKind.Map`, with `KeyKind` beside it. It reads one as a `ListValue`
+  or a `MapValue` (equal by their entries, so a tool comparing two reads sees no change) and writes
+  one whole, refusing a map with two entries under one key. All of them pass BCS006, being
+  unmanaged.
+- **The inspector** draws a list (`ListRows`) as a row per item, through the same switch as any
+  field, with a grip to drag it to another place, a button to take it out and one under them to add
+  one, and a map (`MapRows`) as a row per entry with its key and its value side by side. Every
+  change is a write of the whole collection, recorded as one step in `EditorHistory`.
+- **Scene files** write a list as a JSON array, and a map as an object, or as an array of pairs
+  where its keys cannot be property names ([SCENES.md](SCENES.md), §4).
+- **Bevy's lists are lists too.** A reflected `Vec` or array of an editable kind is a list field,
+  read and written as one JSON array.
+- **Cloned deeply.** Bevy clones only components that implement `Clone` or `Reflect`, which a C#
+  component's bytes do not, so every C# component is registered with a clone behavior of the
+  bridge's own (`lifecycle::cloned`) that copies its bytes. For a component holding a stored list
+  or map, the generator registers a clone hook beside the remove hook, which the copy passes
+  through first and which gives it copies of its own (`EcsList.Copy`), so the first of the two to
+  go frees only its own. `EcsWorld.Clone` copies an entity, and the editor's Duplicate is built on
+  it.
+
+What is not built:
+
+- **A collection replaced in a component is not freed.** Writing a component over one holding a
+  different list replaces the handle and leaves the old one to `Free`.
 
 ## 3. Data assets
 
 Data kept in a file of its own and shared by whatever refers to it: an enemy's stats, a weapon, a
 dialogue, a loot table. Unity calls it a ScriptableObject and Godot a Resource. [SCENES.md](SCENES.md)
-(§6) covers the file and the reference, and this section the type and how it is edited.
+(§6) covers the file and the reference, and this section the type and how it is edited. Built in
+`BevyCSharp/Assets/DataAssets.cs` and `BevyCSharp.Editor/Framework/EditorDataAssets.cs`.
 
 ```csharp
 [DataAsset]
-public sealed partial class LootTable
+public sealed class LootTable
 {
     public string Title = "Chest";
-    public List<LootEntry> Entries = [];
+    [Range(0, 1)] public float Chance = 0.25f;
+    public List<string> Items = [];
     public Dictionary<string, float> Weights = [];
 }
 
@@ -199,43 +228,62 @@ public partial struct Chest
 {
     public DataRef<LootTable> Loot;
 }
+
+var table = chest.Loot.Value;   // or DataAssets.Get(chest.Loot)
 ```
 
 - **A class or a struct, with collections.** A data asset lives on the managed side, not in Bevy's
-  storage, so it may hold lists, dictionaries, strings and nested classes, which a component
-  cannot.
-- **The generator emits its schema,** including those kinds, and a `Create/Data/Loot Table` entry
-  in the asset browser's menu, which writes a new `*.data.json` with the type's defaults.
-- **`DataRef<T>` is a reference** (the asset's id, [SCENES.md](SCENES.md) §2), unmanaged, so it
-  sits in a component. `DataAssets.Get(chest.Loot)` returns the loaded value, cached and shared, and
-  read-only through the reference, because a value shared by every chest is not one chest's to
-  change.
-- **Reloaded when its file changes,** through the editor profile's asset watcher, with a message on
+  storage, so it may hold strings, `List<T>` and `Dictionary<K, V>`, which a component cannot. A
+  class needs a constructor with no parameters, which gives a new file its defaults.
+- **The generator emits its fields,** with the attributes a component's carry, counting a string,
+  a list and a dictionary as fields since the type is managed, and registers the type from a
+  module initializer. The fields read and write a box holding the asset's value, so a struct asset
+  is written back as a class one is, and they are the same `ComponentField` rows a component has,
+  which the inspector draws and `SceneValue` writes with no code of their own.
+- **`DataRef<T>` is a reference** by the file's id ([SCENES.md](SCENES.md) §2), eight unmanaged
+  bytes, so it sits in a component. `DataAssets.Get(chest.Loot)` returns the loaded value, cached
+  and shared, which is not one chest's to change. `DataAssets.Save` and the editor write the file.
+  `DataAssets.Reload` drops the cached value, and every write or reload posts `DataAssetChanged` on
   the bus for a system that caches something derived from it.
 
 ### The drawer
 
-A `DataRef<T>` field in the inspector is a row with the asset's name, a fold arrow and a picker.
+- **Picking.** A `DataRef<T>` field in the inspector is a row with the file's path, offering the
+  data files whose type is `T`, and "Nothing". A file is given an id as it is picked, so the
+  reference keeps working when the file is renamed.
+- **Selecting a data asset** in the asset browser shows its fields in the details panel, as a
+  component's are, and an edit writes the file at the end of the frame, so a slider dragged across
+  a field writes once a frame. Each edit is one step in `EditorHistory`.
+- **Making one.** `Project/New data asset` offers every registered type and writes a new file at
+  the type's defaults in the directory the asset browser is looking at.
 
-- **Picking** opens the asset grid ([ASSETS.md](ASSETS.md), §4) filtered to files of type `T`, with
-  a "New" entry that creates one beside the scene.
-- **Opened,** the fold shows the asset's own fields under the row, one step in, on a card a step
-  darker, as a `[Foldout]` does (`FoldStack` in `DetailsPanel`). A nested `DataRef` folds open the
-  same way, a step further in.
-- **Editing writes the asset,** not the entity, so every entity referring to it changes, and the
-  row says how many do. Each edit is one step in `EditorHistory`.
-- **Duplicate** copies the asset to a new file and points this field at the copy, for the one chest
-  that differs.
-- **Selecting a data asset** in the asset browser shows the same fields in the details panel, so it
-  is edited without an entity that refers to it.
+- **Items with fields of their own.** A list or a map whose items are a struct or a class (a
+  `List<LootEntry>`, an `InlineList8<Waypoint>`) has `FieldKind.Struct` items, and the generator
+  describes the item type in an `ItemFields` on the field, as it describes a data asset: rows over
+  a box holding one item, a class item copied first so an edit never changes the one the list
+  holds. A scene or a data file writes each item as an object of its fields, and the editor draws
+  each as a fold named by its first text, with the grip and the remove button in front. Items go
+  three types deep, since a class can hold a list of itself.
+- **Opened in place.** A set `DataRef` row has a fold under it named for the asset's type and how
+  many entities share it ("shared with 2 others"), holding the asset's own rows, and "Make unique"
+  in it copies the asset to a file of its own beside it (`DataAssets.Copy`) and points the field at
+  the copy, for the one chest whose loot differs.
+- **Reloaded on its own.** With `Config.WatchAssets` on, as the editor has it, a data file changed
+  on disk is dropped from the cache at the top of the next frame and `DataAssetChanged` posted,
+  while a write this side made is told apart by its time and passed over (`DataAssets.Watching`).
+
+What is not built:
+
+- **A map's struct values in the editor.** They are written and read, and drawn as their type
+  with no editor.
+- **A fold under a reference row in a data asset.** A reference held by a data asset, rather than
+  by a component, has no fold of its own, since the asset is drawn without an entity to count
+  users from.
 
 ## Order
 
 Each step is usable on its own and tested before the next.
 
-1. **Collections**: `InlineList`, `EcsList` and `EcsMap`, the remove hook, the kinds and the
-   drawers. Tested by a list freed on despawn, with the store's count back where it started.
-2. **Data assets** with the drawer. Tested by a round trip through the file, an edit through the
-   drawer undone, and a reference that survives the file being renamed.
-3. **Tier 3**: generated mirrors and layout probes replacing the hand ones, with the existing
+1. **A map's struct values in the editor**, and the fold under a reference a data asset holds.
+2. **Tier 3**: generated mirrors and layout probes replacing the hand ones, with the existing
    mirror tests passing unchanged.

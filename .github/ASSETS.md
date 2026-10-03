@@ -1,8 +1,9 @@
 # Seeing and picking meshes, materials and textures
 
 How the editor shows what an entity is drawn with, how a mesh or a material is picked, what the
-asset browser's tiles show, and where a mesh or material made in place lives. None of this is built
-yet. This file is the design, in the order it can be built. [COMPONENTS.md](COMPONENTS.md) covers
+asset browser's tiles show, and where a mesh or material made in place lives. What the bridge reads
+back (step 1 of the order) and a scene's resources (part of step 5) are built, and the rest of this
+file is the design, in the order it can be built. [COMPONENTS.md](COMPONENTS.md) covers
 components in general and [SCENES.md](SCENES.md) how all of it is saved.
 
 ## What exists
@@ -12,11 +13,17 @@ components in general and [SCENES.md](SCENES.md) how all of it is saved.
   `.gltf`, `.glb` and `.obj` files under the asset root, up to two hundred, or "made here" for one
   built in memory. It offers none of Bevy's primitives, nothing already in memory, and no material
   files, because there are none.
-- **Four primitives** (`MeshShape`: cuboid, sphere, plane, capsule) are made with
-  `Render.CreateMesh`, and a material with `Render.CreateMaterial(MaterialSettings)`.
-- **Little comes back.** `Render.TryReadMesh(handle)` returns a mesh's triangles,
-  `Render.TryGetBounds(entity)` its bounds, and `EcsWorld.GetReflectedAsset` the mesh or material
-  handle an entity holds, but a material's settings cannot be read at all.
+- **Thirteen of Bevy's primitives** (`MeshShape`: cuboid, sphere, plane, capsule, cylinder, cone,
+  conical frustum, torus, circle, annulus, rectangle, triangle, tetrahedron) are made with
+  `Render.CreateMesh`, which keeps the shape and measures beside the handle (`Render.RecipeOf`),
+  and a material with `Render.CreateMaterial(MaterialSettings)`.
+- **What comes back.** `Render.TryGetMeshInfo` gives a mesh's vertex and index counts, index width,
+  topology, attributes and bounds without copying its vertices, `Render.TryReadMaterial` a standard
+  material's settings whoever made it, `Render.MeshOf` and `MaterialOf` the handles an entity is
+  drawn with, `Render.TryReadMesh` a mesh's triangles and `Render.TryGetBounds` an entity's bounds.
+- **A scene keeps what was made in place.** A primitive and a standard material made in memory are
+  written into a scene as resources saying how to make them again, shared by an id within the file
+  ([SCENES.md](SCENES.md), §3).
 - **The asset browser** (`AssetsTab`) shows 96 pixel tiles, an image as itself and everything else
   as an icon for its kind, with no search.
 - **One preview** (`EditorPreview`) draws a selected glTF file into a 256 pixel image, with a camera
@@ -53,14 +60,11 @@ An entity that draws shows two cards in the details, in the place "Drawn with" h
   - **Its settings as rows:** base color, metallic, roughness, emissive, alpha mode, double-sided,
     unlit, and the texture slots as small thumbnails, each a picker filtered to textures.
   - **A shader material** keeps the parameter rows it has today.
-- **What the bridge adds** (an ABI bump):
-  - `bcs_render_mesh_info(handle)`, the counts, attributes and index format, without copying the
-    vertices across.
-  - `bcs_render_material_read(handle)`, a `MaterialSettings` back from a `StandardMaterial`.
-  - Wireframe through Bevy's `WireframePlugin`, on the preview's layer only.
-  - The rest of Bevy's primitive meshes in `MeshShape`: cylinder, cone, conical frustum, torus,
-    circle, annulus, rectangle, triangle, tetrahedron, with the parameters a primitive was made
-    from kept beside its handle, so it can be edited and saved as what it is.
+- **What the bridge reads** (built): `bcs_render_mesh_info` for the counts, attributes, index
+  format and bounds, `bcs_render_material_read` for a `MaterialSettings` back from a
+  `StandardMaterial`, and the rest of Bevy's primitives, with each primitive's measures kept on the
+  managed side beside its handle so it can be edited and saved as what it is. Still to add is a
+  wireframe through Bevy's `WireframePlugin`, on the preview's layer only.
 
 The handles an entity holds are reflected reads of `Mesh3d` and `MeshMaterial3d`
 (`EcsWorld.GetReflectedAsset`, [COMPONENTS.md](COMPONENTS.md) tier 1), which return the key the
@@ -118,10 +122,10 @@ Unity makes every mesh and material a file, and code that builds a cube has to s
 before a scene can keep it. Bevy does not ask for that, and a cube built in a script is a mesh with
 no file, as `Render.CreateMesh` makes it today. Godot's answer fits both, and is taken here.
 
-- **A sub-resource belongs to the scene.** A mesh or material made in place (in code, or with New
-  in the picker) is saved inside the scene file as how to make it again: a primitive and its
-  parameters, a `MaterialSettings`, or the raw `MeshData` for geometry a script generated. Two
-  entities using one share it by an id within the scene.
+- **A sub-resource belongs to the scene** (built for primitives and standard materials). A mesh or
+  material made in place is saved inside the scene file as how to make it again: a primitive and
+  its parameters, a `MaterialSettings`, or, not yet, the raw `MeshData` for geometry a script
+  generated. Two entities using one share it by an id within the scene.
 - **Save as asset** writes it to a file (`*.material.json`, `*.mesh.json` for a primitive, `.glb` for
   generated geometry) and points every entity that used it at the file.
 - **Make unique** copies a shared one for this entity alone, so changing its color leaves the
@@ -136,12 +140,8 @@ no file, as `Render.CreateMesh` makes it today. Godot's answer fits both, and is
 
 Each step is usable on its own and tested before the next.
 
-1. **What the bridge reads:** `mesh_info`, `material_read`, and the primitives with their
-   parameters. Tested by `mesh_info` on a cuboid (24 vertices, 12 triangles)
-   and a material read back as it was made.
-2. **`PreviewRenderer` and the two cards.** Tested by an offscreen picture run where a preview
+1. **`PreviewRenderer` and the two cards,** with the preview's wireframe. Tested by an offscreen picture run where a preview
    target holds something other than its clear color.
-3. **`AssetGrid` and the picker's grid mode,** replacing the mesh and material dropdowns.
-4. **Thumbnails and the browser:** tiles, sub-assets, search and kinds.
-5. **Sub-resources, Save as asset, Make unique and material files,** with the scene format. Tested
-   by a scene with a shared sub-resource saved, loaded, and still shared.
+2. **`AssetGrid` and the picker's grid mode,** replacing the mesh and material dropdowns.
+3. **Thumbnails and the browser:** tiles, sub-assets, search and kinds.
+4. **Raw geometry as a sub-resource, Save as asset, Make unique and material files.**

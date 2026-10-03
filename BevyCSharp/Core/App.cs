@@ -106,8 +106,23 @@ public sealed unsafe class App : IDisposable
             ? null
             : Encoding.UTF8.GetBytes(Config.AssetRoot + "\0");
 
+        // The player's directory, made before Bevy is told of it so the source it builds over the
+        // directory finds one there. Named first, so a game's files go under its own name.
+        UserData.Name = Config.GameName ?? Config.Title;
+        var userRootBytes = Encoding.UTF8.GetBytes(UserData.Root + "\0");
+        try
+        {
+            Directory.CreateDirectory(UserData.Root);
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            // A directory that cannot be made leaves user:// reads failing as a missing file does,
+            // which is no reason to refuse to start.
+        }
+
         fixed (byte* title = titleBytes)
         fixed (byte* assetRoot = assetRootBytes)
+        fixed (byte* userRoot = userRootBytes)
         {
             var native = new NativeConfig
             {
@@ -130,6 +145,7 @@ public sealed unsafe class App : IDisposable
                 RayTracedLighting = Config.RayTracedLighting ? 1u : 0u,
                 Transparent = Config.Transparent ? 1u : 0u,
                 DesktopTitleBar = Config.DesktopTitleBar ? 1u : 0u,
+                UserRoot = userRoot,
             };
             _handle = Native.bcs_app_create(&native);
         }
@@ -143,6 +159,9 @@ public sealed unsafe class App : IDisposable
         Streaming.AssetRoot = string.IsNullOrEmpty(Config.AssetRoot)
             ? Path.Combine(AppContext.BaseDirectory, "assets")
             : Path.GetFullPath(Config.AssetRoot);
+
+        // A data file changed on disk is read again when assets are, and not in a shipped game.
+        DataAssets.Watching = Config.WatchAssets;
 
         // Sounds and buses belong to the app that played them.
         Audio.ResetMixer();
@@ -201,6 +220,11 @@ public sealed unsafe class App : IDisposable
             PostFileDrops(world.Resource<MessageBus>());
             PostIme(world.Resource<MessageBus>());
             PostAssetFailures(world.Resource<MessageBus>());
+            DataAssets.PostChanges(world.Resource<MessageBus>());
+
+            // After the scenes Bevy spawned last frame are in the world, so an instance's overrides
+            // find their nodes, and before anything reads that the instance is ready.
+            SceneInstances.PostReady(world.Resource<EcsWorld>(), world.Resource<MessageBus>());
 
             // Swapped here so the whole frame reads one complete, unchanging set.
             world.Resource<MessageBus>().Swap();

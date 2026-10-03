@@ -496,16 +496,57 @@ public partial struct TransformGizmo
             moved.Add((other, was, now));
         }
 
+        // A node of an instance keeps the move as an override, as an edit in the details panel
+        // does, and undo and redo keep it in step.
+        foreach (var (which, was, _) in moved) Kept(ctx.Ecs, which, was);
+
         EditorHistory.Record(
             EditorTools.Current.ToString().ToLowerInvariant(),
             world =>
             {
-                foreach (var (which, was, _) in moved) world.Set(which, was);
+                foreach (var (which, was, _) in moved)
+                {
+                    world.Set(which, was);
+                    Kept(world, which, null);
+                }
             },
             world =>
             {
-                foreach (var (which, _, now) in moved) world.Set(which, now);
+                foreach (var (which, _, now) in moved)
+                {
+                    world.Set(which, now);
+                    Kept(world, which, null);
+                }
             });
+    }
+
+    /// <summary>
+    /// Records a moved node of an instance as an override of each part of its transform.
+    /// </summary>
+    /// <remarks>
+    /// The transform's fields are read through its schema, which boxes them as the override is
+    /// written, so the value before the drag is read the same way by putting it back for the read
+    /// and the moved one after. A part the drag left alone matches the model and records nothing.
+    /// </remarks>
+    /// <param name="world">The world it is in.</param>
+    /// <param name="entity">What moved.</param>
+    /// <param name="was">Where it was before the drag, or nothing when the model's value is known.</param>
+    private static void Kept(EcsWorld world, Entity entity, Transform? was)
+    {
+        var root = SceneInstances.OuterRootOf(world, entity);
+        if (root.IsNone || root == entity || ComponentSchemas.For("Bevy.Transform") is not { } schema) return;
+
+        var before = new object?[schema.Fields.Count];
+        if (was is { } then)
+        {
+            var now = world.GetRef<Transform>(entity);
+            world.Set(entity, then);
+            for (var i = 0; i < before.Length; i++) before[i] = schema.Fields[i].Read(world, entity);
+            world.Set(entity, now);
+        }
+
+        for (var i = 0; i < before.Length; i++)
+            SceneInstances.Mark(world, entity, schema.QualifiedName, schema.Fields[i].Name, before[i]);
     }
 
     /// <summary>

@@ -7,18 +7,18 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// Three files, because they answer different questions and are edited by different hands. The
-/// world is the thing being made, the layout is how one person likes to look at it, and the
+/// scene is the thing being made, the layout is how one person likes to look at it, and the
 /// settings are how they like it to behave. Anything that saves saves all three, since a person
 /// pressing save means "keep what I have done".
 /// </remarks>
 public static class EditorProject
 {
-    /// <summary>Writes the world's edits and the arrangement of the panels.</summary>
+    /// <summary>Writes the scene and the arrangement of the panels.</summary>
     public static void Save(EcsWorld world)
     {
         ArgumentNullException.ThrowIfNull(world);
 
-        var written = EditorWorld.Save(world, EditorPaths.World);
+        var written = EditorScene.Save(world, EditorPaths.Scene);
 
         File.WriteAllText(EditorPaths.Settings, EditorSettings.Describe());
 
@@ -26,15 +26,30 @@ public static class EditorProject
             $"[editor] saved {written} entities and the settings to {EditorPaths.Assets}");
     }
 
-    /// <summary>Puts the saved edits and the saved arrangement back.</summary>
+    /// <summary>Puts the saved scene and the saved arrangement back.</summary>
+    /// <remarks>
+    /// A project saved before the scene file existed has only a <c>world.json</c> of edits by name,
+    /// which is applied the old way, and the next save writes the scene file in its place.
+    /// </remarks>
     public static void Load(EcsWorld world)
     {
         ArgumentNullException.ThrowIfNull(world);
 
-        var applied = EditorWorld.Load(world, EditorPaths.World);
+        if (File.Exists(EditorPaths.Scene))
+        {
+            var loaded = EditorScene.Load(world, EditorPaths.Scene);
+            RestoreLayout();
+
+            Console.WriteLine($"[editor] loaded {loaded.Entities.Count} entities");
+            foreach (var type in loaded.Unknown) Console.WriteLine($"[editor] kept {type} as written, since this build has no schema for it");
+            foreach (var reason in loaded.Refused) Console.WriteLine($"[editor] Bevy refused {reason}");
+            return;
+        }
+
+        var applied = File.Exists(EditorPaths.World) ? EditorWorld.Load(world, EditorPaths.World) : 0;
         RestoreLayout();
 
-        Console.WriteLine($"[editor] applied {applied} entities");
+        Console.WriteLine($"[editor] applied {applied} entities from the old world file");
     }
 
     /// <summary>

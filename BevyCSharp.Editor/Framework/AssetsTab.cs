@@ -18,6 +18,24 @@ public static class AssetsTab
     /// <summary>Which folders are unfolded in the tree.</summary>
     private static readonly HashSet<string> Unfolded = [string.Empty];
 
+    /// <summary>What a drag carries, by name, so a drop target takes only tiles.</summary>
+    private const string Dragged = "asset";
+
+    /// <summary>The tile being dragged, kept here rather than handed through ImGui as a pointer.</summary>
+    private static string? _dragging;
+
+    /// <summary>The file or folder whose name is being typed, or nothing.</summary>
+    private static string? _renaming;
+
+    /// <summary>The name typed so far.</summary>
+    private static string _typed = string.Empty;
+
+    /// <summary>The file or folder a delete is waiting on an answer for, or nothing.</summary>
+    private static string? _deleting;
+
+    /// <summary>What the last move or delete was refused for, said under the tiles until the next.</summary>
+    private static string? _refused;
+
     /// <summary>
     /// Draws the folders down the left, and what is in the chosen one as tiles on the right.
     /// </summary>
@@ -115,6 +133,7 @@ public static class AssetsTab
         var shown = ImGui.TreeNodeEx($"{name}##{path}", flags);
 
         RoundedRows.Row(here);
+        Target(path);
 
         // The arrow folds, the word walks. Clicking a folder's name is how somebody says they want
         // to look inside it, and the arrow folds it.
@@ -169,7 +188,238 @@ public static class AssetsTab
             Tile(entry, Size);
         }
 
+        if (_refused is { } why) ImGui.TextDisabled(why);
+
+        Renaming();
+        Deleting();
+
         EditorSurface.EndRegion();
+    }
+
+    /// <summary>
+    /// Offers what a tile can have done to it: renamed, or deleted.
+    /// </summary>
+    /// <remarks>
+    /// Both open a small box of their own rather than acting from the menu, because a rename needs
+    /// a name typed and a delete cannot be taken back, so each asks before it does anything.
+    /// </remarks>
+    private static void Menu(AssetEntry entry)
+    {
+        if (!EditorWidgets.FlyoutHere($"##asset{entry.Path}")) return;
+
+        RoundedRows.Rows(() =>
+        {
+            // A model or a scene goes into the scene as an instance, which keeps the edits made over it.
+            if (!entry.IsDirectory && EditorAssets.KindOf(entry.Path) is "model" or "scene" && EditorShell.Context is { } ctx)
+            {
+                if (ImGui.MenuItem("Place in the scene")) EditorCommands.Place(ctx.Ecs, entry.Path);
+                RoundedRows.Row();
+            }
+
+            if (ImGui.MenuItem("Rename"))
+            {
+                _renaming = entry.Path;
+                _typed = entry.Name;
+                _refused = null;
+            }
+
+            RoundedRows.Row();
+
+            if (ImGui.MenuItem("Delete"))
+            {
+                _deleting = entry.Path;
+                _refused = null;
+            }
+
+            RoundedRows.Row();
+        });
+
+        EditorWidgets.EndFlyout();
+    }
+
+    /// <summary>The box a new name is typed into, open while a rename waits for one.</summary>
+    /// <remarks>
+    /// The name only, kept in the same folder, since moving somewhere else is a drag onto that
+    /// folder. Enter renames, and Escape or a click elsewhere leaves it as it was.
+    /// </remarks>
+    private static void Renaming()
+    {
+        const string Box = "##rename-asset";
+
+        if (_renaming is not null && !ImGui.IsPopupOpen(Box)) ImGui.OpenPopup(Box);
+        if (!EditorWidgets.Flyout(Box))
+        {
+            _renaming = null;
+            return;
+        }
+
+        ImGui.TextUnformatted("Rename to");
+        ImGui.SetNextItemWidth(240f);
+        if (ImGui.IsWindowAppearing()) ImGui.SetKeyboardFocusHere();
+
+        var done = ImGui.InputText(
+            "##asset-name",
+            ref _typed,
+            256,
+            ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll);
+
+        if (done && _renaming is { } from && _typed.Trim() is { Length: > 0 } name)
+        {
+            var folder = EditorAssets.Parent(from);
+            _refused = EditorAssets.Move(from, folder.Length == 0 ? name : folder + "/" + name);
+            _renaming = null;
+            ImGui.CloseCurrentPopup();
+        }
+
+        if (ImGui.IsKeyPressed(ImGuiKey.Escape))
+        {
+            _renaming = null;
+            ImGui.CloseCurrentPopup();
+        }
+
+        EditorWidgets.EndFlyout();
+    }
+
+    /// <summary>The question a delete asks before it deletes, open while it waits for an answer.</summary>
+    private static void Deleting()
+    {
+        const string Box = "##delete-asset";
+
+        if (_deleting is not null && !ImGui.IsPopupOpen(Box)) ImGui.OpenPopup(Box);
+        if (!EditorWidgets.Flyout(Box))
+        {
+            _deleting = null;
+            return;
+        }
+
+        var name = _deleting is { } path ? path[(path.LastIndexOf('/') + 1)..] : string.Empty;
+        ImGui.TextUnformatted($"Delete {name}? It cannot be undone.");
+
+        if (ImGui.Button("Delete") && _deleting is { } doomed)
+        {
+            _refused = EditorAssets.Delete(doomed);
+            _deleting = null;
+            ImGui.CloseCurrentPopup();
+        }
+
+        ImGui.SameLine();
+
+        if (ImGui.Button("Keep") || ImGui.IsKeyPressed(ImGuiKey.Escape))
+        {
+            _deleting = null;
+            ImGui.CloseCurrentPopup();
+        }
+
+        EditorWidgets.EndFlyout();
+    }
+
+    /// <summary>
+    /// Takes a model or a scene dropped on the scene view, placing it as an instance where the
+    /// pointer meets the ground.
+    /// </summary>
+    /// <remarks>
+    /// The scene view is the engine's picture with nothing of ImGui's over it, so there is no item
+    /// there to drop on. While a tile that can be placed is held, a bare window the size of the
+    /// part of the scene the panels leave free is put over it to take the drop, and it is gone
+    /// again when the drag ends, so it never takes a click meant for the scene.
+    /// </remarks>
+    internal static void SceneDrop(BehaviorContext ctx)
+    {
+        if (_dragging is not { } dragged || EditorAssets.KindOf(dragged) is not ("model" or "scene")) return;
+
+        // ImGui's own word on whether a drag is under way, since the tile last picked up is still
+        // remembered after a drag ends somewhere that took nothing.
+        var held = ImGui.GetDragDropPayload();
+        if (System.Runtime.CompilerServices.Unsafe.As<ImGuiPayloadPtr, IntPtr>(ref held) == IntPtr.Zero)
+        {
+            _dragging = null;
+            return;
+        }
+
+        var (x, y, width, height) = EditorShell.Docked
+            ? EditorShell.Scene
+            : (0f, 0f, EditorShell.Free.Right, EditorShell.Free.Bottom);
+
+        ImGui.SetNextWindowPos(new Vector2(x, y));
+        ImGui.SetNextWindowSize(new Vector2(width, height));
+
+        var flags = ImGuiWindowFlags.NoDecoration
+            | ImGuiWindowFlags.NoBackground
+            | ImGuiWindowFlags.NoMove
+            | ImGuiWindowFlags.NoSavedSettings
+            | ImGuiWindowFlags.NoFocusOnAppearing
+            | ImGuiWindowFlags.NoNav;
+
+        if (ImGui.Begin("##scene-drop", flags))
+        {
+            ImGui.InvisibleButton("##drop", new Vector2(width, height));
+
+            if (ImGui.BeginDragDropTarget())
+            {
+                var payload = ImGui.AcceptDragDropPayload(Dragged);
+                if (System.Runtime.CompilerServices.Unsafe.As<ImGuiPayloadPtr, IntPtr>(ref payload) != IntPtr.Zero)
+                {
+                    var (pointerX, pointerY) = ctx.Input.MousePosition;
+                    EditorCommands.Place(ctx.Ecs, dragged, Ground(pointerX, pointerY));
+                    _dragging = null;
+                }
+
+                ImGui.EndDragDropTarget();
+            }
+        }
+
+        ImGui.End();
+    }
+
+    /// <summary>Where the pointer's ray meets the ground, or nothing when it points above the horizon.</summary>
+    private static Vec3? Ground(float x, float y)
+    {
+        var camera = EditorSelection.Camera;
+        if (camera.IsNone || !Render.TryRay(camera, x, y, out var origin, out var direction)) return null;
+        if (direction.Y >= -1e-4f) return null;
+
+        var along = -origin.Y / direction.Y;
+        return origin + (direction * along);
+    }
+
+    /// <summary>Lets the tile drawn last be picked up and dropped on a folder.</summary>
+    private static void Source(AssetEntry entry)
+    {
+        if (!ImGui.BeginDragDropSource()) return;
+
+        _dragging = entry.Path;
+        ImGui.SetDragDropPayload(Dragged, IntPtr.Zero, 0);
+        ImGui.TextUnformatted(entry.Name);
+
+        ImGui.EndDragDropSource();
+    }
+
+    /// <summary>Takes a tile dropped on the item drawn last, moving it into <paramref name="folder"/>.</summary>
+    /// <remarks>
+    /// A tile dropped where it already is, or a folder dropped into itself, is refused before the
+    /// drop, so nothing lights up for a move that would do nothing.
+    /// </remarks>
+    private static void Target(string folder)
+    {
+        if (_dragging is not { } dragged || !ImGui.BeginDragDropTarget()) return;
+
+        var fits = EditorAssets.Parent(dragged) != folder
+            && dragged != folder
+            && !folder.StartsWith(dragged + "/", StringComparison.Ordinal);
+
+        if (fits)
+        {
+            var payload = ImGui.AcceptDragDropPayload(Dragged);
+
+            if (System.Runtime.CompilerServices.Unsafe.As<ImGuiPayloadPtr, IntPtr>(ref payload) != IntPtr.Zero)
+            {
+                var name = dragged[(dragged.LastIndexOf('/') + 1)..];
+                _refused = EditorAssets.Move(dragged, folder.Length == 0 ? name : folder + "/" + name);
+                _dragging = null;
+            }
+        }
+
+        ImGui.EndDragDropTarget();
     }
 
     /// <summary>How wide and how tall one tile is.</summary>
@@ -187,6 +437,10 @@ public static class AssetsTab
 
         var pressed = ImGui.InvisibleButton($"##tile{entry.Path}", new Vector2(size, size));
         var over = ImGui.IsItemHovered();
+
+        Source(entry);
+        if (entry.IsDirectory) Target(entry.Path);
+        Menu(entry);
 
         if (pressed)
         {

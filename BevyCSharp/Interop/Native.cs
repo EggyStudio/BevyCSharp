@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 151;
+    internal const int ExpectedAbiVersion = 156;
 
     static Native() => NativeLoader.Initialize();
 
@@ -90,6 +90,29 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_component_register_live(
         string name, uint size, uint align, int storage);
+
+    /// <summary>
+    /// Calls back whenever a component leaves an entity. Through the app handle before the run, or
+    /// with a null handle through the loaned world during it.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_component_on_remove(
+        IntPtr app, int component, delegate* unmanaged[Cdecl]<ulong, int, byte*, void> callback);
+
+    /// <summary>
+    /// Calls back with the copy of a component an entity clone is about to receive, so its handles
+    /// can be replaced before it is written.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_component_on_clone(
+        int component, delegate* unmanaged[Cdecl]<int, byte*, void> callback);
+
+    /// <summary>Spawns a copy of an entity with everything on it, returning the copy or zero.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial ulong bcs_ecs_clone(ulong entity);
 
     /// <summary>Resolves one of Bevy's own components to an id, by name.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
@@ -424,6 +447,16 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_material_create(NativeMaterialConfig* config);
+
+    /// <summary>Reads a mesh's counts, attributes and bounds.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_mesh_info(int handle, NativeMeshInfo* info);
+
+    /// <summary>Reads a standard material's settings back.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_material_read(int handle, NativeMaterialConfig* config);
 
     /// <summary>Writes where an entity's mesh or material was loaded from.</summary>
     [LibraryImport(Library)]
@@ -783,6 +816,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_input_ime(int kind, byte* text, uint length, int start, int end);
+
+    /// <summary>Moves up to <paramref name="capacity"/> world instances Bevy reported ready into a buffer.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_world_instances_ready(ulong* entities, int capacity);
 
     /// <summary>Collects the assets that failed to load, and reports how many.</summary>
     [LibraryImport(Library)]

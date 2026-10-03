@@ -137,12 +137,25 @@ public static class ComponentFields
 
         // Only what can be put back. A field that reads as nothing has no value to write, and an
         // undo that writes nothing is one that says it did something and did not.
+        // A node of an instance keeps the change as an override, or the next load of the scene
+        // would put the model's value back. Undo and redo keep it in step, so an edit taken back
+        // to the model's value leaves no override behind.
+        SceneInstances.Mark(ctx.Ecs, entity, schema.QualifiedName, field.Name, before);
+
         if (before is { } was && after is { } now)
         {
             EditorHistory.Record(
                 $"{schema.Name}.{field.Title}",
-                world => field.Write(world, entity, was),
-                world => field.Write(world, entity, now),
+                world =>
+                {
+                    field.Write(world, entity, was);
+                    SceneInstances.Mark(world, entity, schema.QualifiedName, field.Name);
+                },
+                world =>
+                {
+                    field.Write(world, entity, now);
+                    SceneInstances.Mark(world, entity, schema.QualifiedName, field.Name);
+                },
                 id);
         }
 
@@ -155,6 +168,36 @@ public static class ComponentFields
                 if (method.Name == wanted) method.Run(ctx.Ecs, entity);
             }
         }
+    }
+
+    /// <summary>
+    /// Puts the model's value back in a field an instance overrides, as one step to undo.
+    /// </summary>
+    /// <remarks>
+    /// The undo writes the instance's value again and records it again, so taking the revert back
+    /// leaves the override as it was.
+    /// </remarks>
+    private static void Reverted(Entity entity, ComponentSchema schema, ComponentField field)
+    {
+        var world = EditorShell.Ecs;
+        var was = field.Read(world, entity);
+        if (!SceneInstances.Revert(world, entity, schema.QualifiedName, field.Name) || was is null) return;
+
+        var now = field.Read(world, entity);
+        if (now is null) return;
+
+        EditorHistory.Record(
+            $"Revert {schema.Name}.{field.Title}",
+            undo =>
+            {
+                field.Write(undo, entity, was);
+                SceneInstances.Mark(undo, entity, schema.QualifiedName, field.Name, now);
+            },
+            redo =>
+            {
+                field.Write(redo, entity, now);
+                SceneInstances.Mark(redo, entity, schema.QualifiedName, field.Name);
+            });
     }
 
     /// <summary>One field, drawn as what it is.</summary>
@@ -192,12 +235,21 @@ public static class ComponentFields
         // A field that asked for the whole row gets it, with its name on the line above rather than
         // in a column beside it. Anything a name column would leave no room for needs that, such as
         // a sentence, a path or a color.
-        var wide = field.Hints.Wide;
+        // A list or a map is a column of rows of its own, which a value column beside a name has no
+        // room for.
+        var wide = field.Hints.Wide || field.Kind is FieldKind.List or FieldKind.Map;
+
+        // An instance's own value rather than its model's, said by the name's color, with the
+        // model's value a right-click away when it is known.
+        var overridden = SceneInstances.IsOverridden(ctx.Ecs, entity, schema.QualifiedName, field.Name);
+        Action? revert = overridden && SceneInstances.CanRevert(ctx.Ecs, entity, schema.QualifiedName, field.Name)
+            ? () => Reverted(entity, schema, field)
+            : null;
 
         if (wide)
         {
             ImGui.AlignTextToFramePadding();
-            ImGui.TextUnformatted(field.Title);
+            EditorRows.Name(field.Title, overridden: overridden, revert: revert);
 
             var hovered = ImGui.IsItemHovered();
 
@@ -222,7 +274,7 @@ public static class ComponentFields
                 return;
             }
 
-            EditorRows.Line(field.Title, field.Hints.Tooltip, differs, field.Hints.Unit);
+            EditorRows.Line(field.Title, field.Hints.Tooltip, differs, field.Hints.Unit, overridden, revert);
         }
 
         var editable = field.IsWritable;
@@ -242,6 +294,11 @@ public static class ComponentFields
         if (!editable) ImGui.EndDisabled();
 
         if (!wide) EditorRows.Close();
+
+        // The asset a reference names, foldable under its row, so it is read and changed where it
+        // is used rather than by finding its file.
+        if (field.Kind == FieldKind.Data && value is IDataRef { Id: not 0 } reference && !entity.IsNone)
+            EditorDataAssets.Opened(ctx, entity, field, reference.Id);
 
         ImGui.PopID();
     }
@@ -325,6 +382,7 @@ public static class ComponentFields
             if (!ctx.Ecs.IsAlive(other)) continue;
 
             field.Write(ctx.Ecs, other, now);
+            if (field.Schema is { } schema) SceneInstances.Mark(ctx.Ecs, other, schema.QualifiedName, field.Name, before);
             written++;
         }
 
@@ -337,6 +395,13 @@ public static class ComponentFields
     /// holds here, since each is a struct or a string and compares by value.
     /// </remarks>
     private static bool Same(object? left, object? right) => Equals(left, right);
+
+    /// <summary>
+    /// Draws the editor for one item of a list, through the same switch as a field.
+    /// </summary>
+    internal static void Item(
+        BehaviorContext ctx, Entity entity, ComponentField field, string id, object? value) =>
+        Edit(ctx, entity, field, id, value);
 
     /// <summary>
     /// The widget one field is edited through, chosen by what kind of value it holds.
@@ -432,6 +497,20 @@ public static class ComponentFields
                 break;
             }
 
+            case FieldKind.List:
+            {
+                ListRows.Draw(ctx, entity, field, id, value);
+
+                break;
+            }
+
+            case FieldKind.Map:
+            {
+                MapRows.Draw(ctx, entity, field, id, value);
+
+                break;
+            }
+
             case FieldKind.Vec2:
             {
                 var flat = value as Vec2? ?? default;
@@ -484,7 +563,6 @@ public static class ComponentFields
                 // so a name being typed is one step in the history and not one per letter.
                 var text = value as string ?? string.Empty;
 
-                ImGui.SetNextItemWidth(-1f);
                 ImGui.InputText(id, ref text, 1024);
 
                 if (ImGui.IsItemDeactivatedAfterEdit()) field.Write(ctx.Ecs, entity, text);
@@ -617,6 +695,10 @@ public static class ComponentFields
 
             case FieldKind.Asset:
                 FieldPickers.Asset(ctx, entity, field, id, value);
+                break;
+
+            case FieldKind.Data:
+                EditorDataAssets.Picker(ctx, entity, field, id, value);
                 break;
 
             case FieldKind.Entity:

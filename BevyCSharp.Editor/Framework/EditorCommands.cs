@@ -36,6 +36,7 @@ public static class EditorCommands
         Entities();
         View();
         Project();
+        EditorDataAssets.Register();
         Toolbar();
         Settings();
     }
@@ -450,17 +451,30 @@ public static class EditorCommands
             EditorIcons.Remove,
             enabled: static () => EditorSelection.Any);
 
-        EditorMenu.Separator("Entity/-", 2);
+        EditorMenu.Command(
+            "Entity/Duplicate",
+            static world => EditorEntity.Duplicate(world, EditorSelection.All.ToArray()),
+            2,
+            EditorIcons.Add,
+            "Ctrl+D",
+            static () => EditorSelection.Any);
+
+        EditorMenu.Separator("Entity/-", 3);
 
         EditorMenu.Command(
             "Entity/Delete",
             static world =>
             {
-                foreach (var entity in EditorSelection.All.ToArray()) world.Despawn(entity);
+                // A node of an instance is deleted as an override, so the next load of the scene
+                // does not bring it back with the model.
+                foreach (var entity in EditorSelection.All.ToArray())
+                {
+                    if (world.IsAlive(entity) && !SceneInstances.Delete(world, entity)) world.Despawn(entity);
+                }
 
                 EditorSelection.Clear();
             },
-            3,
+            4,
             EditorIcons.Delete,
             "Del",
             static () => EditorSelection.Any);
@@ -558,6 +572,37 @@ public static class EditorCommands
         build?.Invoke(entity);
 
         Finish(world, entity, called);
+    }
+
+    /// <summary>
+    /// Places a model in the scene as an instance, named after its file, in front of the camera.
+    /// </summary>
+    /// <remarks>
+    /// An instance rather than a copy of the model's entities, so the scene file refers to the model
+    /// and an edit made to one of its nodes is kept as an override (<see cref="SceneInstances"/>).
+    /// The model's entities arrive a frame or more later, when its file has loaded.
+    /// </remarks>
+    /// <param name="world">The world to place it in.</param>
+    /// <param name="path">The model, relative to the asset root.</param>
+    /// <param name="at">Where to put it, or nothing for in front of the camera.</param>
+    /// <returns>The instance's root, which is selected.</returns>
+    internal static Entity Place(EcsWorld world, string path, Vec3? at = null)
+    {
+        var root = SceneInstances.Spawn(world, path);
+
+        // A scene file's name ends in .scene.json, and the name it is placed under is the part
+        // before both.
+        var file = Path.GetFileName(path.Split('#')[0]);
+        var stem = file.EndsWith(".scene.json", StringComparison.OrdinalIgnoreCase)
+            ? file[..^".scene.json".Length]
+            : Path.GetFileNameWithoutExtension(file);
+        var called = Unused(world, stem);
+
+        world.GetRef<Transform>(root).Translation = at ?? Ahead(world);
+        world.SetName(root, called);
+
+        Finish(world, root, called);
+        return root;
     }
 
     /// <summary>

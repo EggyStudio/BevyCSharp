@@ -37,7 +37,10 @@ pub unsafe extern "C" fn bcs_mesh_create(
         #[cfg(feature = "render")]
         {
             use bevy::asset::Assets;
-            use bevy::math::primitives::{Capsule3d, Cuboid, Plane3d, Sphere};
+            use bevy::math::primitives::{
+                Annulus, Capsule3d, Circle, Cone, ConicalFrustum, Cuboid, Cylinder, Plane3d,
+                Rectangle, Sphere, Tetrahedron, Torus, Triangle3d,
+            };
             use bevy::mesh::{Mesh, Meshable};
 
             let Some(kind) = (unsafe { crate::interop::cstr_to_string(kind) }) else {
@@ -53,6 +56,36 @@ pub unsafe extern "C" fn bcs_mesh_create(
                         .size(a, b)
                         .into(),
                     "Capsule" => Capsule3d::new(a, b).mesh().into(),
+                    "Cylinder" => Cylinder::new(a, b).mesh().into(),
+                    "Cone" => Cone::new(a, b).mesh().into(),
+                    "ConicalFrustum" => ConicalFrustum {
+                        radius_top: a,
+                        radius_bottom: b,
+                        height: c,
+                    }
+                    .mesh()
+                    .into(),
+                    "Torus" => Torus::new(a, b).mesh().into(),
+                    "Circle" => Circle::new(a).mesh().into(),
+                    "Annulus" => Annulus::new(a, b).mesh().into(),
+                    "Rectangle" => Rectangle::new(a, b).mesh().into(),
+                    // The two shapes made of points rather than measures are the default ones, a
+                    // unit across, scaled by the first number.
+                    "Triangle" => {
+                        let [first, second, third] = Triangle3d::default().vertices;
+                        Triangle3d::new(first * a, second * a, third * a).mesh().into()
+                    }
+                    "Tetrahedron" => {
+                        let unit = Tetrahedron::default();
+                        Tetrahedron::new(
+                            unit.vertices[0] * a,
+                            unit.vertices[1] * a,
+                            unit.vertices[2] * a,
+                            unit.vertices[3] * a,
+                        )
+                        .mesh()
+                        .into()
+                    }
                     _ => return status::NO_COMPONENT,
                 };
 
@@ -64,6 +97,115 @@ pub unsafe extern "C" fn bcs_mesh_create(
                 crate::assets::insert_handle(world, handle)
             })
         }
+    })
+}
+
+/// What a mesh holds, without its vertices.
+///
+/// The counts a tool shows and the attributes a shader can rely on, read in one call rather than
+/// by copying every vertex across to count them.
+#[repr(C)]
+#[derive(Clone, Copy, Default)]
+pub struct BcsMeshInfo {
+    /// How many vertices.
+    pub vertices: u32,
+    /// How many indices, or `0` for a mesh drawn without them.
+    pub indices: u32,
+    /// `16` or `32` for the width of an index, or `0` for none.
+    pub index_bits: u32,
+    /// `0` triangles, `1` a triangle strip, `2` lines, `3` a line strip, `4` points.
+    pub topology: u32,
+    /// Which attributes it has, one bit each: `1` normals, `2` tangents, `4` UVs, `8` a second UV
+    /// set, `16` vertex colors, `32` joint indices, `64` joint weights.
+    pub attributes: u32,
+    /// The corner of its bounds with the smallest coordinates.
+    pub min: [f32; 3],
+    /// The corner with the largest.
+    pub max: [f32; 3],
+}
+
+/// Reads what a mesh holds: its counts, its attributes and its bounds.
+///
+/// # Safety
+/// `out` must be writable for one [`BcsMeshInfo`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_mesh_info(handle: i32, out: *mut BcsMeshInfo) -> i32 {
+    crate::interop::guard(|| {
+        if out.is_null() {
+            return status::NULL_ARG;
+        }
+
+        // Every profile has meshes, so this is not behind the renderer as the rest of the file is.
+        crate::state::with_world(|world| {
+            use bevy::asset::Assets;
+            use bevy::mesh::{Indices, Mesh, PrimitiveTopology};
+
+            let Some(handle) = crate::assets::clone_handle(world, handle) else {
+                return status::NOT_PRESENT;
+            };
+            let Ok(handle) = handle.try_typed::<Mesh>() else {
+                return status::INVALID_STATE;
+            };
+            let Some(meshes) = world.get_resource::<Assets<Mesh>>() else {
+                return status::UNSUPPORTED;
+            };
+            // A mesh still loading, or one kept only in the render world, has nothing to read here.
+            let Some(mesh) = meshes.get(&handle) else {
+                return status::NOT_PRESENT;
+            };
+
+            let mut info = BcsMeshInfo {
+                vertices: mesh.count_vertices() as u32,
+                ..Default::default()
+            };
+
+            (info.indices, info.index_bits) = match mesh.indices() {
+                Some(Indices::U16(indices)) => (indices.len() as u32, 16),
+                Some(Indices::U32(indices)) => (indices.len() as u32, 32),
+                None => (0, 0),
+            };
+
+            info.topology = match mesh.primitive_topology() {
+                PrimitiveTopology::TriangleList => 0,
+                PrimitiveTopology::TriangleStrip => 1,
+                PrimitiveTopology::LineList => 2,
+                PrimitiveTopology::LineStrip => 3,
+                PrimitiveTopology::PointList => 4,
+            };
+
+            let attributes = [
+                (Mesh::ATTRIBUTE_NORMAL, 1),
+                (Mesh::ATTRIBUTE_TANGENT, 2),
+                (Mesh::ATTRIBUTE_UV_0, 4),
+                (Mesh::ATTRIBUTE_UV_1, 8),
+                (Mesh::ATTRIBUTE_COLOR, 16),
+                (Mesh::ATTRIBUTE_JOINT_INDEX, 32),
+                (Mesh::ATTRIBUTE_JOINT_WEIGHT, 64),
+            ];
+            for (attribute, bit) in attributes {
+                if mesh.contains_attribute(attribute) {
+                    info.attributes |= bit;
+                }
+            }
+
+            let positions = mesh.attribute(Mesh::ATTRIBUTE_POSITION).and_then(|p| p.as_float3());
+            if let Some(positions) = positions {
+                let mut min = [f32::MAX; 3];
+                let mut max = [f32::MIN; 3];
+                for position in positions {
+                    for axis in 0..3 {
+                        min[axis] = min[axis].min(position[axis]);
+                        max[axis] = max[axis].max(position[axis]);
+                    }
+                }
+                if !positions.is_empty() {
+                    (info.min, info.max) = (min, max);
+                }
+            }
+
+            unsafe { out.write(info) };
+            status::OK
+        })
     })
 }
 
@@ -510,6 +652,97 @@ pub unsafe extern "C" fn bcs_material_create(config: *const BcsMaterialConfig) -
     })
 }
 
+/// Reads a standard material's settings back, in the form [`bcs_material_create`] takes them.
+///
+/// The inverse of making one, so a tool can show what a material is, whether code built it or a
+/// glTF file brought it, and a scene can write it down as how to make it again. Each texture
+/// comes back as the key the program already holds for it, or a new one.
+///
+/// # Safety
+/// `out` must be writable for one [`BcsMaterialConfig`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_material_read(handle: i32, out: *mut BcsMaterialConfig) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (handle, out);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::asset::{Assets, Handle};
+            use bevy::image::Image;
+            use bevy::material::AlphaMode;
+            use bevy::pbr::StandardMaterial;
+
+            if out.is_null() {
+                return status::NULL_ARG;
+            }
+
+            with_world(|world| {
+                let Some(handle) = crate::assets::clone_handle(world, handle) else {
+                    return status::NOT_PRESENT;
+                };
+                let Ok(handle) = handle.try_typed::<StandardMaterial>() else {
+                    return status::INVALID_STATE;
+                };
+                let Some(material) = world
+                    .get_resource::<Assets<StandardMaterial>>()
+                    .and_then(|materials| materials.get(&handle))
+                    .cloned()
+                else {
+                    return status::NOT_PRESENT;
+                };
+
+                let mut key = |texture: Option<Handle<Image>>| match texture {
+                    Some(texture) => crate::assets::key_for(world, texture.untyped()),
+                    None => -1,
+                };
+
+                let (alpha_mode, alpha_cutoff) = match material.alpha_mode {
+                    AlphaMode::Mask(cutoff) => (1, cutoff),
+                    AlphaMode::Blend => (2, 0.5),
+                    AlphaMode::Add => (3, 0.5),
+                    AlphaMode::Multiply => (4, 0.5),
+                    AlphaMode::Premultiplied => (5, 0.5),
+                    _ => (0, 0.5),
+                };
+
+                let base = material.base_color.to_linear();
+                let (scale, rotation, offset) = material.uv_transform.to_scale_angle_translation();
+
+                let config = BcsMaterialConfig {
+                    base_color: [base.red, base.green, base.blue, base.alpha],
+                    metallic: material.metallic,
+                    roughness: material.perceptual_roughness,
+                    emissive: [
+                        material.emissive.red,
+                        material.emissive.green,
+                        material.emissive.blue,
+                        material.emissive.alpha,
+                    ],
+                    alpha_mode,
+                    alpha_cutoff,
+                    double_sided: i32::from(material.double_sided),
+                    unlit: i32::from(material.unlit),
+                    base_color_texture: key(material.base_color_texture),
+                    normal_map: key(material.normal_map_texture),
+                    metallic_roughness_texture: key(material.metallic_roughness_texture),
+                    emissive_texture: key(material.emissive_texture),
+                    occlusion_texture: key(material.occlusion_texture),
+                    uv_scale: [scale.x, scale.y],
+                    uv_rotation: rotation,
+                    uv_offset: [offset.x, offset.y],
+                };
+
+                unsafe { out.write(config) };
+                status::OK
+            })
+        }
+    })
+}
+
 /// Attaches an asset to an entity through one of the components that carry a handle.
 ///
 /// `component` is `Mesh3d` or `MeshMaterial3d`. These go through Bevy's own insert rather than a
@@ -876,4 +1109,94 @@ pub extern "C" fn bcs_render_set_mesh_flags(entity: u64, flags: u32) -> i32 {
             })
         }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bevy::app::App;
+    use bevy::asset::Assets;
+    use bevy::mesh::{Mesh, MeshBuilder, Meshable};
+
+    use crate::state::loan_world;
+
+    fn app() -> App {
+        let mut app = App::new();
+        app.add_plugins(bevy::app::TaskPoolPlugin::default());
+        app.add_plugins(bevy::asset::AssetPlugin::default());
+        crate::assets::init_asset_once::<Mesh>(&mut app);
+        app
+    }
+
+    #[test]
+    fn a_cuboid_is_twenty_four_vertices_and_twelve_triangles() {
+        // Four corners a face rather than eight a box, because each face has normals of its own.
+        let mut app = app();
+        let mesh = bevy::math::primitives::Cuboid::new(1.0, 2.0, 3.0).mesh().build();
+        let handle = app.world_mut().resource_mut::<Assets<Mesh>>().add(mesh).untyped();
+        let key = crate::assets::key_for(app.world_mut(), handle);
+
+        let mut info = BcsMeshInfo::default();
+        let read = || unsafe { bcs_render_mesh_info(key, &mut info) };
+        let code = loan_world(app.world_mut(), read);
+
+        assert_eq!(status::OK, code);
+        assert_eq!(24, info.vertices);
+        assert_eq!(36, info.indices);
+        assert_eq!(0, info.topology);
+        assert_eq!(1 | 4, info.attributes & (1 | 4), "normals and UVs");
+        assert_eq!([-0.5, -1.0, -1.5], info.min);
+        assert_eq!([0.5, 1.0, 1.5], info.max);
+    }
+
+    #[cfg(feature = "render")]
+    #[test]
+    fn a_material_is_read_back_as_it_was_made() {
+        use bevy::pbr::StandardMaterial;
+
+        let mut app = app();
+        crate::assets::init_asset_once::<StandardMaterial>(&mut app);
+        crate::assets::init_asset_once::<bevy::image::Image>(&mut app);
+
+        let made = BcsMaterialConfig {
+            base_color: [0.25, 0.5, 0.75, 1.0],
+            metallic: 0.8,
+            roughness: 0.3,
+            emissive: [2.0, 1.0, 0.0, 1.0],
+            alpha_mode: 1,
+            alpha_cutoff: 0.4,
+            double_sided: 1,
+            unlit: 0,
+            base_color_texture: -1,
+            normal_map: -1,
+            metallic_roughness_texture: -1,
+            emissive_texture: -1,
+            occlusion_texture: -1,
+            uv_scale: [4.0, 2.0],
+            uv_rotation: 0.5,
+            uv_offset: [0.25, 0.0],
+        };
+
+        loan_world(app.world_mut(), || {
+            let key = unsafe { bcs_material_create(&made) };
+            assert!(key >= 0, "making the material failed with {key}");
+
+            let mut read = made;
+            read.metallic = 0.0;
+            assert_eq!(status::OK, unsafe { bcs_render_material_read(key, &mut read) });
+
+            assert_eq!(made.base_color, read.base_color);
+            assert_eq!(made.metallic, read.metallic);
+            assert_eq!(made.roughness, read.roughness);
+            assert_eq!(made.emissive, read.emissive);
+            assert_eq!((1, 0.4), (read.alpha_mode, read.alpha_cutoff));
+            assert_eq!(1, read.double_sided);
+            assert_eq!(-1, read.base_color_texture);
+            let close = |a: f32, b: f32| (a - b).abs() < 1e-5;
+            for (made, read) in [(made.uv_scale, read.uv_scale), (made.uv_offset, read.uv_offset)] {
+                assert!(close(made[0], read[0]) && close(made[1], read[1]));
+            }
+            assert!((made.uv_rotation - read.uv_rotation).abs() < 1e-5);
+        });
+    }
 }

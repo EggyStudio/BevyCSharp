@@ -99,6 +99,30 @@ internal static class EditorConsoleCommands
         return path.Length > 0 ? $"opened {path}" : "opened the asset root";
     }
 
+    /// <summary>Renames or moves a file or a folder under the asset root, with its id.</summary>
+    /// <remarks>What dragging a tile onto a folder and the tile's Rename do, as the same call.</remarks>
+    [Command("assets.move", "Renames or moves a file or folder with its id: assets.move <from> <to>")]
+    internal static string MoveAsset(string from, string to) =>
+        EditorAssets.Move(from, to) ?? $"moved {from.Trim()} to {to.Trim()}";
+
+    /// <summary>Deletes a file and its id, or a folder and what is in it.</summary>
+    /// <remarks>The tile's Delete, without the question it asks first, since a command is asked on purpose.</remarks>
+    [Command("assets.delete", "Deletes a file with its id, or a folder: assets.delete <path>")]
+    internal static string DeleteAsset(string path) =>
+        EditorAssets.Delete(path) ?? $"deleted {path.Trim()}";
+
+    /// <summary>Places a model in the scene as an instance.</summary>
+    /// <remarks>What a model tile's Place in the scene does, as the same call.</remarks>
+    [Command("scene.place", "Places a model as an instance: scene.place <path under assets>")]
+    internal static string PlaceModel(string path)
+    {
+        var file = path.Trim();
+        if (!File.Exists(EditorAssets.Absolute(file.Split('#')[0]))) return $"no file called {file} under the asset root";
+
+        var root = EditorCommands.Place(EditorShell.Ecs, file);
+        return $"placed {EditorShell.Ecs.NameOf(root)} from {file}";
+    }
+
     /// <summary>Counts what is in the world.</summary>
     [Command("entities", "Counts the entities in the world")]
     internal static string Entities()
@@ -166,35 +190,34 @@ internal static class EditorConsoleCommands
     [Command("eval.file", "Runs a file of C# here: eval.file <path>")]
     internal static string EvalFile(string path) => EditorEval.RunFile(path);
 
-    /// <summary>Writes the world to a file.</summary>
+    /// <summary>Writes the scene being edited to a scene file.</summary>
     /// <remarks>
-    /// The named entities and their described components, which make up an edit. Loading it back
-    /// puts those values onto the entities of the same names, so it is a file of changes over a
-    /// scene rather than the scene itself.
+    /// The scene and not the editor, so the editor's own cameras and previews are left out, as
+    /// Project/Save leaves them out.
     /// </remarks>
-    [Command("world.save", "Writes the named entities to a file: world.save <path>")]
+    [Command("world.save", "Writes the scene being edited to a scene file: world.save <path>")]
     internal static string WorldSave(string path)
     {
         if (path.Length == 0) return "world.save <path>";
 
-        var written = EditorWorld.Save(EditorShell.Ecs, path);
+        var written = EditorScene.Save(EditorShell.Ecs, path);
         return $"wrote {written} entities to {path}";
     }
 
-    /// <summary>Reads one back.</summary>
-    [Command("world.load", "Reads entity values back from a file: world.load <path>")]
+    /// <summary>Replaces the scene being edited with the one in a scene file.</summary>
+    [Command("world.load", "Replaces the scene being edited with a scene file: world.load <path>")]
     internal static string WorldLoad(string path)
     {
         if (path.Length == 0) return "world.load <path>";
 
-        if (!File.Exists(path))
+        if (!File.Exists(SceneFile.Resolve(path)))
         {
             ConsoleHost.Fail("NO_SUCH_FILE", $"There is no file at {path}.");
             return $"no file at {path}";
         }
 
-        var read = EditorWorld.Load(EditorShell.Ecs, path);
-        return $"applied {read} entities from {path}";
+        var loaded = EditorScene.Load(EditorShell.Ecs, path);
+        return $"loaded {loaded.Entities.Count} entities from {path}";
     }
 
     /// <summary>Closes the editor.</summary>

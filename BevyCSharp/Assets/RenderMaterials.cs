@@ -14,6 +14,103 @@ public static class MeshShape
 
     /// <summary>A capsule, sized by radius and length.</summary>
     public const string Capsule = "Capsule";
+
+    /// <summary>A cylinder, sized by radius and height.</summary>
+    public const string Cylinder = "Cylinder";
+
+    /// <summary>A cone, sized by the radius of its base and its height.</summary>
+    public const string Cone = "Cone";
+
+    /// <summary>A cone with its top cut off, sized by the top radius, the bottom radius and the height.</summary>
+    public const string ConicalFrustum = "ConicalFrustum";
+
+    /// <summary>A ring with a round cross-section, sized by its inner and outer radius.</summary>
+    public const string Torus = "Torus";
+
+    /// <summary>A flat disc facing the viewer, sized by radius.</summary>
+    public const string Circle = "Circle";
+
+    /// <summary>A flat ring facing the viewer, sized by its inner and outer radius.</summary>
+    public const string Annulus = "Annulus";
+
+    /// <summary>A flat rectangle facing the viewer, sized by width and height.</summary>
+    public const string Rectangle = "Rectangle";
+
+    /// <summary>A flat triangle, Bevy's default one scaled by the first number.</summary>
+    public const string Triangle = "Triangle";
+
+    /// <summary>A four-sided solid, Bevy's default one scaled by the first number.</summary>
+    public const string Tetrahedron = "Tetrahedron";
+}
+
+/// <summary>How a primitive mesh was made, which is enough to make it again.</summary>
+/// <param name="Shape">One of the constants on <see cref="MeshShape"/>.</param>
+/// <param name="A">The first measure, as <see cref="Render.CreateMesh(string, float, float, float)"/> takes it.</param>
+/// <param name="B">The second.</param>
+/// <param name="C">The third.</param>
+/// <remarks>
+/// Kept beside the handle when the mesh is made, so a tool can show a cylinder as a cylinder with a
+/// radius and a height rather than as a list of vertices, change one and build it again, and a scene
+/// can write it down as what it is.
+/// </remarks>
+public readonly record struct MeshRecipe(string Shape, float A, float B, float C);
+
+/// <summary>Which vertex attributes a mesh has, beyond its positions.</summary>
+[Flags]
+public enum MeshAttributes : uint
+{
+    /// <summary>Positions alone.</summary>
+    None = 0,
+
+    /// <summary>A normal a vertex, which lighting needs.</summary>
+    Normals = 1,
+
+    /// <summary>A tangent a vertex, which a normal map needs.</summary>
+    Tangents = 2,
+
+    /// <summary>Texture coordinates, which a texture needs.</summary>
+    Uvs = 4,
+
+    /// <summary>A second set of texture coordinates, usually for a light map.</summary>
+    SecondUvs = 8,
+
+    /// <summary>A color a vertex.</summary>
+    Colors = 16,
+
+    /// <summary>Which joints of a skeleton move a vertex.</summary>
+    Joints = 32,
+
+    /// <summary>How much each of those joints does.</summary>
+    Weights = 64,
+}
+
+/// <summary>What a mesh is made of, read without copying its vertices.</summary>
+/// <param name="Vertices">How many vertices.</param>
+/// <param name="Indices">How many indices, or zero for a mesh drawn without them.</param>
+/// <param name="IndexBits">16 or 32, the width of an index, or zero for none.</param>
+/// <param name="Topology">What the vertices are joined into.</param>
+/// <param name="Attributes">Which attributes it has beyond positions.</param>
+/// <param name="Min">The corner of its bounds with the smallest coordinates.</param>
+/// <param name="Max">The corner with the largest.</param>
+public readonly record struct MeshInfo(
+    int Vertices,
+    int Indices,
+    int IndexBits,
+    MeshTopology Topology,
+    MeshAttributes Attributes,
+    Vec3 Min,
+    Vec3 Max)
+{
+    /// <summary>How many triangles it draws, or zero for a mesh of lines or points.</summary>
+    public int Triangles => Topology switch
+    {
+        MeshTopology.Triangles => (Indices > 0 ? Indices : Vertices) / 3,
+        MeshTopology.TriangleStrip => Math.Max(0, (Indices > 0 ? Indices : Vertices) - 2),
+        _ => 0,
+    };
+
+    /// <summary>How large its bounds are along each axis.</summary>
+    public Vec3 Size => Max - Min;
 }
 
 /// <summary>How a mesh is treated beyond what it looks like. See <see cref="Render.SetMeshFlags"/>.</summary>

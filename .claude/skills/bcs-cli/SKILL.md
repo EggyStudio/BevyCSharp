@@ -1,6 +1,6 @@
 ---
 name: bcs-cli
-description: Use when working in the BevyCSharp repository, to drive a running BevyCSharp app or editor from the terminal (inspect entities, change components, click and type, capture the window, read the log, evaluate C#), or to build the native bridge, run the tests, or work out why nothing is starting. Prefer it over launching an app per question, and over editing world.json or assets by hand while an app is running.
+description: Use when working in the BevyCSharp repository, to drive a running BevyCSharp app or editor from the terminal (inspect entities, change components, click and type, capture the window, read the log, evaluate C#), or to build the native bridge, run the tests, or work out why nothing is starting. Prefer it over launching an app per question, and over editing a scene file or assets by hand while an app is running.
 allowed-tools:
   - Bash
 ---
@@ -135,7 +135,8 @@ all, where a windowed session could not start at all.
 One thing is not the same. Every `input.*` verb writes a window message, so an offscreen session
 has nowhere to send one and refuses with a sentence saying why. The interface is drawn and laid out
 there, and it cannot be clicked. Drive what the click would have done instead, which is usually a
-command of its own (`assets.open`, `select`, `do <menu path>`), and take the picture afterwards.
+command of its own (`assets.open`, `assets.move`, `assets.delete`, `select`, `do <menu path>`), and
+take the picture afterwards.
 
 ## More than one app serving
 
@@ -168,7 +169,7 @@ and before falling back to editing files by hand.
    be out of reach. Say so and ask, rather than concluding the app is down and rewriting files
    blindly.
 
-Only once all three are ruled out should you edit `assets/world.json` or a scene file directly,
+Only once all three are ruled out should you edit `assets/world.scene.json` or another scene file directly,
 and say plainly that you are doing it because no live session was reachable. A hand-edited file is
 invisible to a running app, so the change silently does nothing.
 

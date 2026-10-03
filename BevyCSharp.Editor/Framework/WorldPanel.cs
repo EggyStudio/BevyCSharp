@@ -383,10 +383,13 @@ public static class WorldPanel
             RoundedRows.Rows(() =>
             {
                 // What a row itself offers, which a double click and a key are otherwise the only
-                // way to reach. Copying one is not among them, because the editor can read only
-                // what has a schema off an entity, and the mesh and the material an entity is drawn
-                // with have none, so the copy would be an invisible thing with the right name.
+                // way to reach.
                 if (ImGui.MenuItem("Rename")) Rename(row.Entity, row.Name);
+
+                RoundedRows.Row();
+
+                if (ImGui.MenuItem("Duplicate", "Ctrl+D"))
+                    EditorMenu.Find("Entity/Duplicate")?.Run?.Invoke(ctx.Ecs);
 
                 RoundedRows.Row();
 

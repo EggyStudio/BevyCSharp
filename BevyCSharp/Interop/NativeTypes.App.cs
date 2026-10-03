@@ -62,6 +62,9 @@ public unsafe struct NativeConfig
 
     /// <summary>Non-zero to have the desktop draw the title bar where it only does for X11 windows.</summary>
     public uint DesktopTitleBar;
+
+    /// <summary>UTF-8 path of the player's directory, registered as Bevy's <c>user</c> asset source.</summary>
+    public byte* UserRoot;
 }
 
 /// <summary>One video mode a monitor can be driven at.</summary>

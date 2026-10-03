@@ -73,6 +73,10 @@ public static class EditorAssets
 
         foreach (var path in System.IO.Directory.GetFiles(here).OrderBy(p => p, EditorSort.Comparer))
         {
+            // A sidecar holds a file's id and belongs to the file beside it, so it is not a thing to
+            // open, and it moves with its file when the file is moved.
+            if (AssetIds.IsSidecar(path)) continue;
+
             var name = Path.GetFileName(path);
             entries.Add(new AssetEntry(name, Join(Directory, name), false, new FileInfo(path).Length));
         }
@@ -137,6 +141,7 @@ public static class EditorAssets
             root, "*", SearchOption.AllDirectories))
         {
             if (found.Count >= most) break;
+            if (AssetIds.IsSidecar(path)) continue;
 
             if (extensions is { Count: > 0 }
                 && !extensions.Contains(Path.GetExtension(path).ToLowerInvariant()))
@@ -173,7 +178,12 @@ public static class EditorAssets
     /// By extension, because the engine's own loaders go on that. A kind nothing here knows is
     /// reported as what it is rather than guessed at.
     /// </remarks>
-    public static string KindOf(string relative) => Path.GetExtension(relative).ToLowerInvariant() switch
+    public static string KindOf(string relative) =>
+        relative.EndsWith(".scene.json", StringComparison.OrdinalIgnoreCase) ? "scene" : KindByExtension(relative);
+
+    /// <summary>What sort of file it is by its last extension alone.</summary>
+    /// <remarks>A scene file ends in <c>.json</c> as a data asset does, so the two are told apart before this.</remarks>
+    private static string KindByExtension(string relative) => Path.GetExtension(relative).ToLowerInvariant() switch
     {
         ".cs" => "behavior script",
         ".png" or ".jpg" or ".jpeg" or ".webp" or ".bmp" or ".tga" or ".ktx2" => "image",
@@ -207,6 +217,120 @@ public static class EditorAssets
         "data" => EditorIcons.Data,
         _ => EditorIcons.File,
     };
+
+    /// <summary>
+    /// Renames or moves a file or a folder under the asset root, taking each file's id along.
+    /// </summary>
+    /// <param name="from">What to move, relative to the asset root.</param>
+    /// <param name="to">Where it goes, relative to the asset root.</param>
+    /// <returns>Why it was refused, or <see langword="null"/> once it has moved.</returns>
+    /// <remarks>
+    /// <para>
+    /// A file goes through <see cref="AssetIds.Move"/>, which carries its sidecar, so a scene or a
+    /// data asset referring to it by id still finds it. A folder moves whole, sidecars inside it,
+    /// and the index is read again so every id under it answers with where it is.
+    /// </para>
+    /// <para>
+    /// Nothing is overwritten, and a folder cannot go inside itself. A selection or an open folder
+    /// under what moved follows it, so the panel goes on showing the same thing.
+    /// </para>
+    /// </remarks>
+    public static string? Move(string from, string to)
+    {
+        from = Clean(from);
+        to = Clean(to);
+
+        if (from.Length == 0 || to.Length == 0) return "a move needs both where from and where to";
+        if (from == to) return null;
+
+        var source = Absolute(from);
+        var target = Absolute(to);
+        var isFolder = System.IO.Directory.Exists(source);
+
+        if (!isFolder && !File.Exists(source)) return $"nothing called {from} under the asset root";
+        if (File.Exists(target) || System.IO.Directory.Exists(target)) return $"{to} is already there";
+        if (isFolder && Under(to, from)) return $"{from} cannot go inside itself";
+
+        try
+        {
+            if (isFolder)
+            {
+                System.IO.Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+                System.IO.Directory.Move(source, target);
+                AssetIds.Reindex();
+            }
+            else
+            {
+                AssetIds.Move(from, to);
+            }
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            return error.Message;
+        }
+
+        if (Selected is { } selected && Under(selected, from)) Select(to + selected[from.Length..]);
+        if (Under(Directory, from)) Directory = to + Directory[from.Length..];
+        return null;
+    }
+
+    /// <summary>
+    /// Deletes a file and its id, or a folder and everything in it.
+    /// </summary>
+    /// <param name="relative">What to delete, relative to the asset root.</param>
+    /// <returns>Why it was refused, or <see langword="null"/> once it is gone.</returns>
+    /// <remarks>
+    /// The sidecar goes with its file, since an id naming nothing would only be found by a reference
+    /// that then fails to load. The root itself is refused. A selection or an open folder under what
+    /// was deleted is let go.
+    /// </remarks>
+    public static string? Delete(string relative)
+    {
+        relative = Clean(relative);
+        if (relative.Length == 0) return "the asset root itself cannot be deleted";
+
+        var full = Absolute(relative);
+
+        try
+        {
+            if (System.IO.Directory.Exists(full))
+            {
+                System.IO.Directory.Delete(full, recursive: true);
+            }
+            else if (File.Exists(full))
+            {
+                File.Delete(full);
+                if (File.Exists(full + ".uid")) File.Delete(full + ".uid");
+            }
+            else
+            {
+                return $"nothing called {relative} under the asset root";
+            }
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            return error.Message;
+        }
+
+        AssetIds.Reindex();
+        if (Selected is { } selected && Under(selected, relative)) Select(null);
+        if (Under(Directory, relative)) Directory = Parent(relative);
+        return null;
+    }
+
+    /// <summary>The folder something is in, relative to the asset root.</summary>
+    public static string Parent(string relative)
+    {
+        var cut = relative.LastIndexOf('/');
+        return cut < 0 ? string.Empty : relative[..cut];
+    }
+
+    /// <summary>Whether a path is another or inside it.</summary>
+    private static bool Under(string path, string folder) =>
+        path == folder || path.StartsWith(folder + "/", StringComparison.Ordinal);
+
+    /// <summary>A path as the panel keeps them: forward slashes, none at either end.</summary>
+    private static string Clean(string path) => path.Trim().Replace('\\', '/').Trim('/');
 
     /// <summary>The absolute path of something in the asset directory.</summary>
     public static string Absolute(string relative) =>

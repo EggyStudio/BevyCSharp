@@ -79,15 +79,14 @@ public sealed class ReflectedWrapperTests
 
             light.Intensity = 5000f;
             light.ShadowMapsEnabled = true;
-            light.Color = PointLightRef.ColorVariant.LinearRgba;
+            light.Color = Color.FromHex("#ff8800");
 
             // Read back through the string paths, which the wrapper's properties stand for.
             Assert.Equal("5000.0", ctx.Ecs.GetReflected(lamp, PointLightRef.TypePath, ".intensity"));
             Assert.Equal("true", ctx.Ecs.GetReflected(lamp, PointLightRef.TypePath, ".shadow_maps_enabled"));
-            Assert.Equal("LinearRgba", ctx.Ecs.GetVariant(lamp, PointLightRef.TypePath, ".color"));
 
             Assert.Equal(5000f, light.Intensity);
-            Assert.Equal(PointLightRef.ColorVariant.LinearRgba, light.Color);
+            Assert.Equal(Color.FromHex("#ff8800").G, light.Color.G, 4);
             ran = true;
         });
 

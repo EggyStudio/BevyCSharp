@@ -24,9 +24,20 @@ public static unsafe class Render
     /// Builds a mesh primitive and returns a handle to it.
     /// </summary>
     /// <param name="shape">One of the constants on <see cref="MeshShape"/>.</param>
-    /// <param name="a">Width for a cuboid or plane, radius for a sphere or capsule.</param>
-    /// <param name="b">Height for a cuboid, depth for a plane, length for a capsule.</param>
-    /// <param name="c">Depth, for a cuboid.</param>
+    /// <param name="a">
+    /// Width for a cuboid, plane or rectangle, radius for a sphere, capsule, cylinder, cone or
+    /// circle, top radius for a conical frustum, inner radius for a torus or annulus, and the scale
+    /// for a triangle or tetrahedron.
+    /// </param>
+    /// <param name="b">
+    /// Height for a cuboid, cylinder, cone or rectangle, depth for a plane, length for a capsule,
+    /// bottom radius for a conical frustum, and outer radius for a torus or annulus.
+    /// </param>
+    /// <param name="c">Depth for a cuboid, height for a conical frustum.</param>
+    /// <remarks>
+    /// The shape and its measures are kept beside the handle (<see cref="RecipeOf"/>), so the mesh
+    /// can be shown and saved as the shape it is.
+    /// </remarks>
     public static AssetHandle CreateMesh(string shape, float a = 1f, float b = 1f, float c = 1f)
     {
         ArgumentException.ThrowIfNullOrEmpty(shape);
@@ -40,7 +51,101 @@ public static unsafe class Render
                 + "constants on MeshShape.");
 
         Native.Check(key, $"building a {shape} mesh");
+
+        lock (Recipes) Recipes[key] = new MeshRecipe(shape, a, b, c);
         return new AssetHandle(key);
+    }
+
+    /// <summary>How each primitive mesh was made, by its key.</summary>
+    private static readonly Dictionary<int, MeshRecipe> Recipes = [];
+
+    /// <summary>
+    /// The shape and measures a mesh was made from, or <see langword="null"/> for one that was not
+    /// made by <see cref="CreateMesh(string, float, float, float)"/>.
+    /// </summary>
+    public static MeshRecipe? RecipeOf(AssetHandle mesh)
+    {
+        lock (Recipes) return Recipes.TryGetValue(mesh.Key, out var recipe) ? recipe : null;
+    }
+
+    /// <summary>
+    /// What a mesh is made of: its counts, its attributes and its bounds, read without copying
+    /// its vertices.
+    /// </summary>
+    /// <returns>Whether the mesh could be read, which one still loading cannot.</returns>
+    public static bool TryGetMeshInfo(AssetHandle mesh, out MeshInfo info)
+    {
+        info = default;
+        if (!mesh.IsValid) return false;
+
+        NativeMeshInfo read;
+        var answer = Native.bcs_render_mesh_info(mesh.Key, &read);
+        if (answer is NativeStatus.NotPresent or NativeStatus.InvalidState or NativeStatus.Unsupported)
+            return false;
+        Native.Check(answer, $"reading what {mesh} holds");
+
+        info = new MeshInfo(
+            (int)read.Vertices,
+            (int)read.Indices,
+            (int)read.IndexBits,
+            // The bridge numbers these as wgpu lists them, which is not the order this enum has.
+            read.Topology switch
+            {
+                1 => MeshTopology.TriangleStrip,
+                2 => MeshTopology.Lines,
+                3 => MeshTopology.LineStrip,
+                4 => MeshTopology.Points,
+                _ => MeshTopology.Triangles,
+            },
+            (MeshAttributes)read.Attributes,
+            new Vec3(read.MinX, read.MinY, read.MinZ),
+            new Vec3(read.MaxX, read.MaxY, read.MaxZ));
+        return true;
+    }
+
+    /// <summary>
+    /// A standard material's settings, read back from the engine, whether code made the material or
+    /// a glTF file brought it.
+    /// </summary>
+    /// <remarks>
+    /// The inverse of <see cref="CreateMaterial(MaterialSettings)"/>, so what comes back makes the
+    /// same material again. Each texture comes back as the handle the program already holds for it,
+    /// or a new one.
+    /// </remarks>
+    /// <returns>Whether there was a standard material to read.</returns>
+    public static bool TryReadMaterial(AssetHandle material, out MaterialSettings? settings)
+    {
+        settings = null;
+        if (!material.IsValid) return false;
+
+        NativeMaterialConfig read;
+        var answer = Native.bcs_render_material_read(material.Key, &read);
+        if (answer is NativeStatus.NotPresent or NativeStatus.InvalidState) return false;
+        if (answer == NativeStatus.Unsupported) throw NoRenderer("Reading a material");
+        Native.Check(answer, $"reading {material}");
+
+        settings = new MaterialSettings
+        {
+            BaseColor = (read.BaseR, read.BaseG, read.BaseB, read.BaseA),
+            Metallic = read.Metallic,
+            Roughness = read.Roughness,
+            Emissive = (read.EmissiveR, read.EmissiveG, read.EmissiveB, read.EmissiveA),
+            AlphaMode = (AlphaMode)read.AlphaMode,
+            AlphaCutoff = read.AlphaCutoff,
+            DoubleSided = read.DoubleSided != 0,
+            Unlit = read.Unlit != 0,
+            BaseColorTexture = Texture(read.BaseColorTexture),
+            NormalMap = Texture(read.NormalMap),
+            MetallicRoughnessTexture = Texture(read.MetallicRoughnessTexture),
+            EmissiveTexture = Texture(read.EmissiveTexture),
+            OcclusionTexture = Texture(read.OcclusionTexture),
+            UvScale = (read.UvScaleX, read.UvScaleY),
+            UvRotation = read.UvRotation,
+            UvOffset = (read.UvOffsetX, read.UvOffsetY),
+        };
+        return true;
+
+        static AssetHandle Texture(int key) => key >= 0 ? new AssetHandle(key) : AssetHandle.None;
     }
 
     /// <summary>
@@ -434,6 +539,46 @@ public static unsafe class Render
     /// </remarks>
     /// <param name="entity">The entity to ask about.</param>
     public static string MaterialPathOf(Entity entity) => AssetPathOf(entity, 1);
+
+    /// <summary>The type path of the component holding an entity's mesh.</summary>
+    internal const string MeshComponent = "bevy_mesh::components::Mesh3d";
+
+    /// <summary>The type path of the component holding an entity's standard material.</summary>
+    internal const string MaterialComponent =
+        "bevy_pbr::mesh_material::MeshMaterial3d<bevy_pbr::pbr_material::StandardMaterial>";
+
+    /// <summary>
+    /// The mesh an entity is drawn with, or <see cref="AssetHandle.None"/> when it has none.
+    /// </summary>
+    /// <remarks>
+    /// Read off Bevy's <c>Mesh3d</c> through its reflection, so it answers for a mesh made in memory
+    /// as well as one loaded from a file, and the handle is the one the program already holds when it
+    /// holds one. <see cref="RecipeOf"/> says how a primitive was made, and <see cref="TryGetMeshInfo"/>
+    /// what any mesh holds.
+    /// </remarks>
+    public static AssetHandle MeshOf(EcsWorld world, Entity entity) => Held(world, entity, MeshComponent);
+
+    /// <summary>
+    /// The standard material an entity is drawn with, or <see cref="AssetHandle.None"/> when it has
+    /// none, as <see cref="MeshOf"/> reads the mesh.
+    /// </summary>
+    public static AssetHandle MaterialOf(EcsWorld world, Entity entity) => Held(world, entity, MaterialComponent);
+
+    /// <summary>The handle a component of Bevy's holds in its one field, or none.</summary>
+    private static AssetHandle Held(EcsWorld world, Entity entity, string component)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+
+        try
+        {
+            return world.GetReflectedAsset(entity, component, ".0") ?? AssetHandle.None;
+        }
+        catch (BevyNativeException)
+        {
+            // A build with no renderer has no such component, which is an entity with no mesh.
+            return AssetHandle.None;
+        }
+    }
 
     /// <summary>
     /// Whether an entity carries a mesh the renderer draws.

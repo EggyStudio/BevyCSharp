@@ -15,9 +15,14 @@ namespace BevyCSharp.Editor.Framework;
 /// hints its attributes declared.
 /// </para>
 /// <para>
-/// Bevy's own components are not shown as rows, because an entity carries a dozen of them and not
-/// one is something a person edits. The ones worth knowing about are named as tags under the
-/// entity, which is also where a component of this project's own with no fields at all ends up.
+/// Bevy's own components are shown as rows too, described from Bevy's reflection, except what the
+/// engine works out for itself (<see cref="EditorEntity.Derived"/>), which is on nearly every entity
+/// and would stand between a person and the components they came to read. A component of this
+/// project's own with no fields is named as a tag under the entity.
+/// </para>
+/// <para>
+/// When a data asset file was chosen in the asset browser after the last entity, the panel shows
+/// the asset instead, its fields drawn as a component's are.
 /// </para>
 /// </remarks>
 public static class DetailsPanel
@@ -26,6 +31,14 @@ public static class DetailsPanel
     public static void Draw()
     {
         if (EditorShell.Context is not { } ctx) return;
+
+        if (EditorSelection.Latest == SelectionKind.Asset
+            && EditorAssets.Selected is { } file
+            && file.EndsWith(DataAssets.Extension, StringComparison.OrdinalIgnoreCase))
+        {
+            DataAsset(ctx, file);
+            return;
+        }
 
         // No heading, since what the panel is about is the name at its top. How many were picked
         // is said when it is more than one, though. The rest of the panel is about the last of
@@ -153,6 +166,35 @@ public static class DetailsPanel
     /// </remarks>
     private static string Unparameterized(string name) =>
         name.IndexOf('<') is var open and > 0 ? name[..open] : name;
+
+    /// <summary>
+    /// A data asset, as one card of its fields under its file's name, in the same scrolling region
+    /// an entity's components have.
+    /// </summary>
+    private static void DataAsset(BehaviorContext ctx, string file)
+    {
+        EditorSurface.FullWidth();
+        ImGui.TextUnformatted(Path.GetFileName(file));
+
+        var id = AssetIds.IdOf(file, create: true);
+        if (DataAssets.SchemaOf(id) is not { } schema)
+        {
+            ImGui.TextDisabled("Not a data asset this build has a type for.");
+            return;
+        }
+
+        ImGui.TextDisabled(schema.QualifiedName);
+        ImGui.Spacing();
+
+        var open = EditorSurface.Region(
+            "##data",
+            new System.Numerics.Vector2(0f, MathF.Max(1f, ImGui.GetContentRegionAvail().Y)),
+            ImGuiChildFlags.NavFlattened);
+
+        if (open) Component(ctx, Entity.None, schema);
+
+        EditorSurface.EndRegion();
+    }
 
     /// <summary>One component, as a card with its fields in it.</summary>
     /// <remarks>

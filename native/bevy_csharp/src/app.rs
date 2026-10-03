@@ -182,6 +182,17 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     };
     let asset_root = unsafe { crate::interop::cstr_to_string(config.asset_root) };
 
+    // The player's directory as a second root beside the assets, named `user`, so `user://` reads
+    // the same files the managed side writes there. Bevy builds its sources when the asset plugin
+    // is added, so it is registered before either branch below adds one.
+    let user_root = unsafe { crate::interop::cstr_to_string(config.user_root) };
+    if let Some(root) = user_root.as_deref().filter(|root| !root.is_empty()) {
+        use bevy::asset::io::AssetSourceBuilder;
+        use bevy::asset::AssetApp;
+
+        app.register_asset_source("user", AssetSourceBuilder::platform_default(root, None));
+    }
+
     // Whether the renderer is installed at all. A window is one way to draw and an image is the
     // other, and both take Bevy's full plugin set, so everything below asks this rather than
     // asking about the window. Only a run with no renderer takes the minimal set.
@@ -488,6 +499,13 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         #[cfg(feature = "render")]
         init_asset_once::<bevy::pbr::StandardMaterial>(&mut app);
 
+        // The component a standard material is attached by, registered for reflection, which
+        // `PbrPlugin` does on the windowed path. It is generic over the material, and a generic type
+        // is not one the automatic registration covers, so without this an entity's material could
+        // be set here and not read back through reflection.
+        #[cfg(feature = "render")]
+        app.register_type::<bevy::pbr::MeshMaterial3d<bevy::pbr::StandardMaterial>>();
+
         // The same for the air a sky is scattered through. The medium is a description rather
         // than a picture, so it is buildable without a window even though nothing draws it.
         // `LightPlugin` registers it on the windowed path.
@@ -592,6 +610,11 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     // An asset that will not load is as wrong in a headless run as in a windowed one, and harder
     // to notice there, so the queue exists in every profile.
     app.init_resource::<crate::events::AssetFailures>();
+
+    // A spawned scene is announced to an observer rather than in a queue, so one is kept here to
+    // turn each announcement into an entry the managed side collects once a frame.
+    app.init_resource::<crate::events::ReadyInstances>();
+    app.add_observer(crate::events::instance_ready);
 
     if config.headless_frames > 0 {
         app.insert_resource(HeadlessFrameLimit {
@@ -736,7 +759,9 @@ pub unsafe extern "C" fn bcs_component_register(
                 layout.pad_to_align(),
                 None,
                 true,
-                bevy::ecs::component::ComponentCloneBehavior::Default,
+                // Bevy clones only what implements Clone or Reflect, which bytes from C# do not, so
+                // every C# component is cloned by copying its bytes, through C# for its handles.
+                bevy::ecs::component::ComponentCloneBehavior::Custom(crate::lifecycle::cloned),
                 None,
             )
         };
@@ -784,7 +809,9 @@ pub unsafe extern "C" fn bcs_component_register_live(
                     layout.pad_to_align(),
                     None,
                     true,
-                    bevy::ecs::component::ComponentCloneBehavior::Default,
+                    // Bevy clones only what implements Clone or Reflect, which bytes from C# do not, so
+                // every C# component is cloned by copying its bytes, through C# for its handles.
+                bevy::ecs::component::ComponentCloneBehavior::Custom(crate::lifecycle::cloned),
                     None,
                 )
             };

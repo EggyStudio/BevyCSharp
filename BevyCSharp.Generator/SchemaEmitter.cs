@@ -57,6 +57,42 @@ internal static class SchemaEmitter
                 .Append(SchemaMethodName(model)).Append("());\n");
         }
 
+        // A component holding a stored list frees it as it leaves its entity, or every despawn
+        // leaks the list. The value the hook is handed is read-only, so each handle is copied out
+        // before it is freed.
+        foreach (var model in described)
+        {
+            var held = model.Fields.Where(field => field.IsHandle && !field.IsProperty).ToList();
+            if (held.Count == 0) continue;
+
+            source.Append("        global::Bevy.ComponentHooks.OnRemove<").Append(model.QualifiedName)
+                .Append(">(static (in ").Append(model.QualifiedName).Append(" component) =>\n")
+                .Append("        {\n");
+
+            for (var i = 0; i < held.Count; i++)
+            {
+                source.Append("            var held").Append(i).Append(" = component.")
+                    .Append(held[i].Name).Append(";\n")
+                    .Append("            held").Append(i).Append(".Free();\n");
+            }
+
+            source.Append("        });\n");
+
+            // And a clone gets copies of its own, or the clone and the original would share a
+            // list the first of them to go frees for both.
+            source.Append("        global::Bevy.ComponentHooks.OnClone<").Append(model.QualifiedName)
+                .Append(">(static (ref ").Append(model.QualifiedName).Append(" component) =>\n")
+                .Append("        {\n");
+
+            foreach (var field in held)
+            {
+                source.Append("            component.").Append(field.Name).Append(" = component.")
+                    .Append(field.Name).Append(".Copy();\n");
+            }
+
+            source.Append("        });\n");
+        }
+
         source.Append("    }\n");
 
         foreach (var model in described)
@@ -96,8 +132,38 @@ internal static class SchemaEmitter
             .Append("                world.Add(entity, default(").Append(model.QualifiedName)
             .Append(")),\n")
             .Append("            remove: static (world, entity) =>\n")
-            .Append("                world.Remove<").Append(model.QualifiedName).Append(">(entity));\n");
+            .Append("                world.Remove<").Append(model.QualifiedName).Append(">(entity))");
+
+        // The names an old file may know the type by, and the version a file of it is written at
+        // with what brings an older one up to it, so a scene or a data file outlives the type
+        // changing.
+        if (model.FormerNames.Count > 0 || model.Version > 0 || model.Persisted)
+        {
+            source.Append("\n        {\n");
+            if (model.FormerNames.Count > 0)
+            {
+                source.Append("            FormerNames = [")
+                    .Append(string.Join(", ", FormerNames(model).Select(Quote)))
+                    .Append("],\n");
+            }
+
+            if (model.Version > 0)
+                source.Append("            Version = ").Append(model.Version).Append(",\n");
+
+            if (model.Migrates)
+                source.Append("            Migrate = ").Append(Migration(model)).Append(",\n");
+
+            if (model.Persisted) source.Append("            Persisted = true,\n");
+
+            source.Append("        }");
+        }
+
+        source.Append(";\n");
     }
+
+    /// <summary>A lambda calling a type's <c>Migrate</c> method, which a schema keeps to call on a load.</summary>
+    private static string Migration(BehaviorModel model) =>
+        "static (from, value) => " + model.QualifiedName + ".Migrate(from, value)";
 
     /// <summary>Emits the list of methods a tool can offer as buttons.</summary>
     /// <remarks>
@@ -144,7 +210,15 @@ internal static class SchemaEmitter
             // as a zero it might then write back.
             .Append("                    static (world, entity) =>\n")
             .Append("                        world.TryGet<").Append(model.QualifiedName)
-            .Append(">(entity, out var component) ? component.").Append(field.Name)
+            .Append(">(entity, out var component) ? ")
+            // An inline list is read as its items, boxed, rather than as the struct holding them,
+            // which a tool could do nothing with.
+            .Append(field.Kind switch
+            {
+                FieldKind.List => "global::Bevy.ListValue.From(component." + field.Name + ".Items)",
+                FieldKind.Map => "global::Bevy.MapValue.From(component." + field.Name + ".Entries)",
+                _ => "component." + field.Name,
+            })
             .Append(" : null")
             // Write: read, modify, write back. Going through Set rather than a reference into
             // storage makes Bevy see the change.
@@ -169,8 +243,84 @@ internal static class SchemaEmitter
         if (hints is not null) EmitHints(source, hints);
 
         // A property stands for something else, and anything putting a component back has to know
-        // which rows are the state and which are a view of it.
-        source.Append(field.IsProperty ? ") { Derived = true },\n" : "),\n");
+        // which rows are the state and which are a view of it. A list says what its items are.
+        var set = new List<string>();
+        if (field.IsProperty) set.Add("Derived = true");
+        if (field.Kind is FieldKind.List or FieldKind.Map)
+            set.Add("ElementKind = global::Bevy.FieldKind." + field.ElementKind);
+        if (field.Kind == FieldKind.Map)
+            set.Add("KeyKind = global::Bevy.FieldKind." + field.KeyKind);
+        if (field.ElementKind == FieldKind.Struct)
+            set.Add("Items = " + ItemFieldsOf(field, 1));
+
+        source.Append(set.Count == 0 ? "),\n" : ") { " + string.Join(", ", set) + " },\n");
+    }
+
+    /// <summary>
+    /// The description of a list's or a map's items that have fields of their own, as an
+    /// expression building it.
+    /// </summary>
+    /// <remarks>
+    /// The fields are emitted as a data asset's are, over a box holding one item, and the names
+    /// declared carry the depth, since an item can hold a list of items of its own and a lambda
+    /// inside another may not reuse a name the outer one declared. A class item is copied into the
+    /// box field by field, so writing the box never changes the item the list holds.
+    /// </remarks>
+    private static string ItemFieldsOf(BehaviorField field, int depth)
+    {
+        var type = field.ElementType!;
+        var item = "item" + depth;
+        var box = "box" + depth;
+        var source = "source" + depth;
+        var copy = "copy" + depth;
+
+        var text = new StringBuilder()
+            .Append("new global::Bevy.ItemFields(\n")
+            .Append("                \"").Append(field.ItemName).Append("\",\n")
+            .Append("                static () => new ").Append(type).Append("(),\n")
+            .Append("                static ").Append(item).Append(" =>\n")
+            .Append("                {\n")
+            .Append("                    var ").Append(source).Append(" = (").Append(type).Append(')').Append(item).Append(";\n");
+
+        if (field.ItemIsClass)
+        {
+            text.Append("                    var ").Append(copy).Append(" = new ").Append(type).Append("();\n");
+            foreach (var part in field.ItemFields.Items.Where(part => !part.IsProperty || !part.Hints.ReadOnly))
+            {
+                // A struct taken apart is copied whole by its top-level name, once.
+                if (part.Name.Contains('.')) continue;
+                text.Append("                    ").Append(copy).Append('.').Append(part.Name)
+                    .Append(" = ").Append(source).Append('.').Append(part.Name).Append(";\n");
+            }
+
+            foreach (var top in field.ItemFields.Items.Where(part => part.Name.Contains('.'))
+                .Select(part => part.Name.Substring(0, part.Name.IndexOf('.'))).Distinct())
+            {
+                text.Append("                    ").Append(copy).Append('.').Append(top)
+                    .Append(" = ").Append(source).Append('.').Append(top).Append(";\n");
+            }
+        }
+        else
+        {
+            text.Append("                    var ").Append(copy).Append(" = ").Append(source).Append(";\n");
+        }
+
+        text.Append("                    var ").Append(box).Append(" = new global::Bevy.DataBox<").Append(type)
+            .Append("> { Value = ").Append(copy).Append(" };\n")
+            .Append("                    return new global::Bevy.ItemFields.Bound(\n")
+            .Append("                        new global::Bevy.ComponentSchema(\n")
+            .Append("                            \"").Append(field.ItemName).Append("\",\n")
+            .Append("                            \"").Append(Display(type)).Append("\",\n")
+            .Append("                            static () => -1,\n")
+            .Append("                            [\n");
+
+        foreach (var part in field.ItemFields.Items) EmitDataField(text, part, box, depth);
+
+        text.Append("                            ]),\n")
+            .Append("                        () => ").Append(box).Append(".Value!);\n")
+            .Append("                })");
+
+        return text.ToString();
     }
 
     /// <summary>Emits what a field's attributes asked for, as the record a tool reads.</summary>
@@ -213,6 +363,8 @@ internal static class SchemaEmitter
         if (hints.Changed.Items.Count > 0) parts.Add(Changed(hints.Changed));
         if (hints.Order != 0) parts.Add("Order: " + hints.Order.ToString(Invariant));
         if (hints.Asset is not null) parts.Add("Asset: " + Quote(hints.Asset));
+        if (hints.FormerNames.Items.Count > 0)
+            parts.Add("FormerNames: [" + string.Join(", ", hints.FormerNames.Items.Select(Quote)) + "]");
         if (hints.Extensions is not null) parts.Add("Extensions: " + Quote(hints.Extensions));
 
         for (var i = 0; i < parts.Count; i++)
@@ -296,6 +448,106 @@ internal static class SchemaEmitter
     {
         if (field.IsProperty && field.Hints.ReadOnly) return ",\n                    null";
 
+        // A list is written whole, emptied and then refilled item by item. An item that does not fit
+        // the element type, or one past the capacity, refuses the write and leaves the component
+        // as it was, since the copy it was being written into is never set.
+        if (field.Kind == FieldKind.Data)
+        {
+            // A reference is written from a reference, or from a file's id, since a tool that
+            // offers files has an id to give.
+            return ",\n"
+                + "                    static (world, entity, value) =>\n"
+                + "                    {\n"
+                + "                        if (!world.TryGet<" + model.QualifiedName
+                + ">(entity, out var component)) return false;\n\n"
+                + DataCoerce(field.Type, "                        ")
+                + "                        component." + field.Name + " = coerced;\n"
+                + "                        world.Set(entity, component);\n"
+                + "                        return true;\n"
+                + "                    }";
+        }
+
+        if (field.Kind == FieldKind.Map)
+        {
+            // Every entry is checked into a fresh dictionary first, which also refuses two entries
+            // under one key, for the reason a stored list gives.
+            return ",\n"
+                + "                    static (world, entity, value) =>\n"
+                + "                    {\n"
+                + "                        if (value is not global::Bevy.MapValue entries) return false;\n"
+                + "                        if (!world.TryGet<" + model.QualifiedName
+                + ">(entity, out var component)) return false;\n\n"
+                + "                        var fresh = new global::System.Collections.Generic.List<"
+                + "global::System.Collections.Generic.KeyValuePair<" + field.KeyType + ", " + field.ElementType + ">>();\n"
+                + "                        var seen = new global::System.Collections.Generic.HashSet<" + field.KeyType + ">();\n"
+                + "                        foreach (var entry in entries)\n"
+                + "                        {\n"
+                + "                            if (entry.Value is null) return false;\n"
+                + Coerce(field.KeyKind, field.KeyType!, "entry.Key", "key")
+                + Coerce(field.ElementKind, field.ElementType!, "entry.Value", "held")
+                + "                            if (!seen.Add(key)) return false;\n"
+                + "                            fresh.Add(new(key, held));\n"
+                + "                        }\n\n"
+                + "                        component." + field.Name + ".Clear();\n"
+                + "                        foreach (var entry in fresh) component." + field.Name + ".Set(entry.Key, entry.Value);\n"
+                + "                        world.Set(entity, component);\n"
+                + "                        return true;\n"
+                + "                    }";
+        }
+
+        if (field.Kind == FieldKind.List && field.IsHandle)
+        {
+            // A stored list is shared by every copy of its handle, so the items are checked into a
+            // fresh list before the stored one is touched. Refusing halfway would otherwise leave
+            // the list half rewritten with nothing to set back.
+            var coerce = field.ElementKind is FieldKind.String or FieldKind.Struct
+                ? "                            if (item is not " + (field.ElementKind == FieldKind.String ? "string" : field.ElementType)
+                    + " coerced) return false;\n"
+                : "                            if (!global::Bevy.ComponentSchemas.TryCoerce<"
+                    + field.ElementType + ">(item, out var coerced)) return false;\n";
+
+            return ",\n"
+                + "                    static (world, entity, value) =>\n"
+                + "                    {\n"
+                + "                        if (value is not global::Bevy.ListValue items) return false;\n"
+                + "                        if (!world.TryGet<" + model.QualifiedName
+                + ">(entity, out var component)) return false;\n\n"
+                + "                        var fresh = new global::System.Collections.Generic.List<"
+                + field.ElementType + ">();\n"
+                + "                        foreach (var item in items)\n"
+                + "                        {\n"
+                + "                            if (item is null) return false;\n"
+                + coerce
+                + "                            fresh.Add(coerced);\n"
+                + "                        }\n\n"
+                + "                        component." + field.Name + ".Clear();\n"
+                + "                        foreach (var item in fresh) component." + field.Name + ".Add(item);\n"
+                + "                        world.Set(entity, component);\n"
+                + "                        return true;\n"
+                + "                    }";
+        }
+
+        if (field.Kind == FieldKind.List)
+        {
+            return ",\n"
+                + "                    static (world, entity, value) =>\n"
+                + "                    {\n"
+                + "                        if (value is not global::Bevy.ListValue items) return false;\n"
+                + "                        if (!world.TryGet<" + model.QualifiedName
+                + ">(entity, out var component)) return false;\n\n"
+                + "                        component." + field.Name + ".Clear();\n"
+                + "                        foreach (var item in items)\n"
+                + "                        {\n"
+                + "                            if (item is null) return false;\n"
+                + "                            if (!global::Bevy.ComponentSchemas.TryCoerce<"
+                + field.ElementType + ">(item, out var coerced)) return false;\n"
+                + "                            if (!component." + field.Name + ".TryAdd(coerced)) return false;\n"
+                + "                        }\n\n"
+                + "                        world.Set(entity, component);\n"
+                + "                        return true;\n"
+                + "                    }";
+        }
+
         return ",\n"
             + "                    static (world, entity, value) =>\n"
             + "                    {\n"
@@ -309,9 +561,223 @@ internal static class SchemaEmitter
             + "                    }";
     }
 
+    /// <summary>
+    /// The line that turns one boxed value into the type a stored collection holds, or refuses the
+    /// write, as text rather than through the coercion a struct gets, since text is no struct.
+    /// </summary>
+    private static string Coerce(FieldKind kind, string type, string from, string into) =>
+        kind is FieldKind.String or FieldKind.Struct
+            ? "                            if (" + from + " is not " + (kind == FieldKind.String ? "string" : type) + " " + into + ") return false;\n"
+            : "                            if (!global::Bevy.ComponentSchemas.TryCoerce<" + type + ">("
+                + from + ", out var " + into + ")) return false;\n";
+
+    /// <summary>The lines turning <c>value</c> into the data reference type given, or refusing.</summary>
+    private static string DataCoerce(string type, string indent) =>
+        indent + type + " coerced;\n"
+        + indent + "if (value is " + type + " exact) coerced = exact;\n"
+        + indent + "else if (value is ulong id) coerced = new " + type + "(id);\n"
+        + indent + "else return false;\n";
+
+    /// <summary>
+    /// Emits the registration of this assembly's data assets, or null when it has none.
+    /// </summary>
+    /// <remarks>
+    /// Each asset's fields read and write a box holding its value rather than a component on an
+    /// entity, so the same rows, hints and scene writer serve both. The world and entity a field is
+    /// called with are ignored.
+    /// </remarks>
+    internal static string? EmitDataAssets(IReadOnlyList<BehaviorModel> models)
+    {
+        if (models.Count == 0) return null;
+
+        var source = new StringBuilder(Header)
+            .Append("\nnamespace Bevy.Generated;\n\n")
+            .Append("/// <summary>Registers this assembly's data asset types.</summary>\n")
+            .Append("internal static class DataAssetRegistration\n")
+            .Append("{\n")
+            .Append("    /// <summary>Runs when the assembly loads, so a file names its type to a registered one.</summary>\n")
+            .Append("    [global::System.Runtime.CompilerServices.ModuleInitializer]\n")
+            .Append("    internal static void Initialize()\n")
+            .Append("    {\n");
+
+        foreach (var model in models.OrderBy(model => model.QualifiedName, System.StringComparer.Ordinal))
+        {
+            source.Append("        global::Bevy.DataAssets.Register<").Append(model.QualifiedName).Append(">(\n")
+                .Append("            \"").Append(FullName(model)).Append("\",\n")
+                .Append("            static () => new ").Append(model.QualifiedName).Append("(),\n")
+                .Append("            static box =>\n")
+                .Append("            [\n");
+
+            foreach (var field in model.Fields) EmitDataField(source, field);
+
+            source.Append("            ]");
+            if (model.FormerNames.Count > 0)
+            {
+                source.Append(",\n            formerNames: [")
+                    .Append(string.Join(", ", FormerNames(model).Select(Quote)))
+                    .Append(']');
+            }
+
+            if (model.Version > 0) source.Append(",\n            version: ").Append(model.Version);
+            if (model.Migrates) source.Append(",\n            migrate: ").Append(Migration(model));
+
+            source.Append(");\n");
+        }
+
+        source.Append("    }\n}\n");
+        return source.ToString();
+    }
+
+    /// <summary>Emits one field of a data asset, reading and writing the box its value is in.</summary>
+    private static void EmitDataField(StringBuilder source, BehaviorField field, string box = "box", int depth = 0)
+    {
+        var at = box + ".Value." + field.Name;
+        var read = (field.Kind, field.Collection) switch
+        {
+            (FieldKind.List, "managed") =>
+                at + " is { } items ? global::Bevy.ListValue.From(items) : global::Bevy.ListValue.Empty",
+            (FieldKind.List, _) => "global::Bevy.ListValue.From(" + at + ".Items)",
+            (FieldKind.Map, "managed") =>
+                at + " is { } entries ? global::Bevy.MapValue.From(entries) : global::Bevy.MapValue.Empty",
+            (FieldKind.Map, _) => "global::Bevy.MapValue.From(" + at + ".Entries)",
+            _ => at,
+        };
+
+        source.Append("                new(\n")
+            .Append("                    \"").Append(field.Name).Append("\",\n")
+            .Append("                    global::Bevy.FieldKind.").Append(field.Kind).Append(",\n")
+            .Append("                    \"").Append(Display(field.Type)).Append("\",\n")
+            .Append("                    (world, entity) => ").Append(read);
+
+        if (field.IsProperty && field.Hints.ReadOnly)
+        {
+            source.Append(",\n                    null");
+        }
+        else
+        {
+            const string In = "                        ";
+            source.Append(",\n                    (world, entity, value) =>\n                    {\n")
+                .Append(In).Append("var current = ").Append(box).Append(".Value;\n")
+                .Append(DataAssignment(field, In))
+                .Append(In).Append(box).Append(".Value = current;\n")
+                .Append(In).Append("return true;\n")
+                .Append("                    }");
+        }
+
+        var hints = field.Hints.IsEmpty ? null : field.Hints;
+        if (field.Options.Items.Count > 0 || hints is not null)
+        {
+            source.Append(",\n                    [")
+                .Append(string.Join(", ", field.Options.Items.Select(option => "\"" + option + "\"")))
+                .Append(']');
+        }
+
+        if (hints is not null) EmitHints(source, hints);
+
+        var set = new List<string>();
+        if (field.IsProperty) set.Add("Derived = true");
+        if (field.Kind is FieldKind.List or FieldKind.Map)
+            set.Add("ElementKind = global::Bevy.FieldKind." + field.ElementKind);
+        if (field.Kind == FieldKind.Map)
+            set.Add("KeyKind = global::Bevy.FieldKind." + field.KeyKind);
+        if (field.ElementKind == FieldKind.Struct)
+            set.Add("Items = " + ItemFieldsOf(field, depth + 1));
+
+        source.Append(set.Count == 0 ? "),\n" : ") { " + string.Join(", ", set) + " },\n");
+    }
+
+    /// <summary>
+    /// The lines that turn <c>value</c> into what a data asset's field holds and put it in
+    /// <c>current</c>, or refuse.
+    /// </summary>
+    private static string DataAssignment(BehaviorField field, string indent)
+    {
+        var target = "current." + field.Name;
+        var text = new StringBuilder();
+
+        switch (field.Kind, field.Collection)
+        {
+            case (FieldKind.String, _):
+                text.Append(indent).Append("if (value is not string coerced) return false;\n")
+                    .Append(indent).Append(target).Append(" = coerced;\n");
+                break;
+
+            case (FieldKind.Data, _):
+                text.Append(DataCoerce(field.Type, indent))
+                    .Append(indent).Append(target).Append(" = coerced;\n");
+                break;
+
+            case (FieldKind.List, var held):
+                text.Append(indent).Append("if (value is not global::Bevy.ListValue items) return false;\n")
+                    .Append(indent).Append("var fresh = new global::System.Collections.Generic.List<")
+                    .Append(field.ElementType).Append(">();\n")
+                    .Append(indent).Append("foreach (var item in items)\n")
+                    .Append(indent).Append("{\n")
+                    .Append(indent).Append("    if (item is null) return false;\n")
+                    .Append(Coerce(field.ElementKind, field.ElementType!, "item", "held"))
+                    .Append(indent).Append("    fresh.Add(held);\n")
+                    .Append(indent).Append("}\n");
+
+                if (held == "managed")
+                {
+                    text.Append(indent).Append(target).Append(" = fresh;\n");
+                }
+                else
+                {
+                    var add = held == "inline" ? "TryAdd" : "Add";
+                    text.Append(indent).Append(target).Append(".Clear();\n")
+                        .Append(indent).Append("foreach (var item in fresh) ");
+                    text.Append(held == "inline"
+                        ? "if (!" + target + ".TryAdd(item)) return false;\n"
+                        : target + "." + add + "(item);\n");
+                }
+
+                break;
+
+            case (FieldKind.Map, var held):
+                text.Append(indent).Append("if (value is not global::Bevy.MapValue entries) return false;\n")
+                    .Append(indent).Append("var fresh = new global::System.Collections.Generic.Dictionary<")
+                    .Append(field.KeyType).Append(", ").Append(field.ElementType).Append(">();\n")
+                    .Append(indent).Append("foreach (var entry in entries)\n")
+                    .Append(indent).Append("{\n")
+                    .Append(indent).Append("    if (entry.Value is null) return false;\n")
+                    .Append(Coerce(field.KeyKind, field.KeyType!, "entry.Key", "key"))
+                    .Append(Coerce(field.ElementKind, field.ElementType!, "entry.Value", "held"))
+                    .Append(indent).Append("    if (!fresh.TryAdd(key, held)) return false;\n")
+                    .Append(indent).Append("}\n");
+
+                text.Append(held == "managed"
+                    ? indent + target + " = fresh;\n"
+                    : indent + target + ".Clear();\n"
+                        + indent + "foreach (var entry in fresh) " + target + ".Set(entry.Key, entry.Value);\n");
+                break;
+
+            default:
+                text.Append(indent).Append("if (!global::Bevy.ComponentSchemas.TryCoerce<").Append(field.Type)
+                    .Append(">(value, out var coerced)) return false;\n")
+                    .Append(indent).Append(target).Append(" = coerced;\n");
+                break;
+        }
+
+        return text.ToString();
+    }
+
     /// <summary>The name Bevy knows the component by, which is its CLR full name.</summary>
     private static string FullName(BehaviorModel model) =>
         model.Namespace is null ? model.Name : model.Namespace + "." + model.Name;
+
+    /// <summary>
+    /// The full names a type's <c>[FormerName]</c> attributes give, with a name given alone placed in
+    /// the type's namespace.
+    /// </summary>
+    /// <remarks>
+    /// A rename inside a namespace is the common one, and writing the namespace out again on every
+    /// attribute would be one more thing to get wrong. A name holding a dot is taken as full, for a
+    /// type that moved.
+    /// </remarks>
+    private static IEnumerable<string> FormerNames(BehaviorModel model) =>
+        model.FormerNames.Select(name =>
+            name.IndexOf('.') >= 0 || model.Namespace is null ? name : model.Namespace + "." + name);
 
     /// <summary>The type as a tool should show it: no <c>global::</c>, no namespace.</summary>
     private static string Display(string qualified)

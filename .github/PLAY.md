@@ -136,7 +136,10 @@ For what C# owns, the same design on the managed side:
   platform's directory, `Get`, `Update`, `Persist`, `Revert`), over `System.Text.Json` with a
   source-generated context, so it stays reflection-free and survives trimming and AOT. The directory
   is `$XDG_DATA_HOME` or `~/.local/share` on Linux, `%APPDATA%` on Windows and
-  `~/Library/Application Support` on macOS, under the game's name.
+  `~/Library/Application Support` on macOS, under the game's name. Built in
+  `BevyCSharp/Scenes/Persistent.cs`, as `Persistent<T>` (`Value`, `Set`, `Update`, `Persist`,
+  `Revert`, `Reset`, and `Problem` for a file that would not read) over `UserData`, whose name is
+  `Config.GameName` or the title.
 - **Writes are atomic,** to a file beside the target and then renamed over it, so a crash while
   saving leaves the last save rather than half of one.
 - **Save games are built on it** as a diff over the scenes they name, which [SCENES.md](SCENES.md)
@@ -147,7 +150,7 @@ For what C# owns, the same design on the managed side:
 ## Order
 
 1. Per-game embedding (`--embed`), since it is a feature flag and a plugin.
-2. `Persistent<T>` in the library, and the window's place over `bevy-persistent`.
+2. The window's place over `bevy-persistent`, and `EditorSettings` moved onto `Persistent<T>`.
 3. Export in the Play tab over `dotnet publish`, with embedding as an option.
 4. Scene files, as [SCENES.md](SCENES.md) orders them, which the player loads.
 5. The player and playing the edited scene.

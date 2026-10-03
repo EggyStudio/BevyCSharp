@@ -21,6 +21,15 @@ namespace Bevy.Tests;
 /// </remarks>
 public sealed class EngineHarness : IDisposable
 {
+    /// <summary>
+    /// Points the player's directory at a temporary one, since an app makes its directory as it
+    /// starts and a test run would otherwise leave one in the home directory of whoever ran it.
+    /// </summary>
+    /// <remarks>A test that wants a directory of its own sets <see cref="UserData.Root"/> and puts this back.</remarks>
+    public static readonly string UserDirectory = Path.Combine(Path.GetTempPath(), "bcs-tests-user");
+
+    static EngineHarness() => UserData.Root = UserDirectory;
+
     private readonly App _app;
     private readonly List<Exception> _failures = [];
     private bool _ran;

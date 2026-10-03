@@ -224,6 +224,29 @@ model files under the asset root, or "made here" for one built in code.
 preview and what the mesh is made of, a picker that is the asset browser's grid, and tiles that
 show the asset rather than its kind.
 
+### Instances
+
+A model or scene tile's "Place in the scene" puts it in the scene being edited as an instance
+([SCENES.md](SCENES.md), §5), named after its file, in front of the camera, and dragging the tile
+onto the scene puts it where the pointer meets the ground. An edit in the details
+panel or with the gizmo to one of its nodes is kept as an override, so the scene file holds the change rather than
+a copy of the model, and the field's name turns the accent color. Right-clicking the name puts the
+model's value back, as one step to undo. Setting a field back to the model's value, by hand or by
+undoing, leaves no override behind. A component added or removed and a node deleted are kept the
+same way. Renaming a node inside an instance is kept as an override too, and its path keeps the model's
+name, so the overrides made on it still find it. An entity dragged under one of its nodes in the world list is the
+scene's own and is saved with it, under that node.
+
+### Moving files
+
+A tile's right-click menu renames it in place or deletes it, after asking, and a tile dropped on a
+folder, in the tree or among the tiles, moves into it. Each goes through `EditorAssets.Move` and
+`EditorAssets.Delete`, which carry a file's `.uid` sidecar along or take it away with the file, so
+a scene or a data asset referring to the file by id still finds it after a rename. A folder moves
+whole, and a folder dropped into itself is refused before the drop. `assets.move` and
+`assets.delete` do the same from the console and `./bcs`. None of it is a step in the history,
+since it changes files rather than the scene.
+
 ### The scene view's camera
 
 The camera button beside the statistics opens a card of the scene view's own camera, which is the
@@ -501,14 +524,14 @@ saying how many are selected. The panels have no headings otherwise, since a lis
 name at the top of a card say what they are.
 
 What an entity is drawn with is saved as well, by the path its mesh and material were loaded from,
-which is the only thing about a typed handle this side can name. A mesh built in memory is a set of
-numbers with no name, so it is left out rather than written as something it is not.
+or, for one made in memory, as how to make it again: a primitive as its shape and measures, a
+standard material as its settings. A mesh built vertex by vertex has neither, so it is left out
+rather than written as something it is not.
 
 **The editor tells one entity from another by name.** Spawning something gives it a name nothing
-else is called, because the world file matches a saved entity back up by name and a selection that
-survives a script reload is found again by it, so a second thing called Cube is a thing the editor
-confuses with the first. The scene format planned in [SCENES.md](SCENES.md) gives every entity an
-id of its own in the file, so names there are for people. Wherever names are listed they are ordered by `EditorSort`, which reads a
+else is called, because a selection that survives a script reload is found again by it, so a
+second thing called Cube is a thing the editor confuses with the first. A scene file gives every
+entity an id of its own, so names there are for people. Wherever names are listed they are ordered by `EditorSort`, which reads a
 run of digits as the number it spells, so Cube 2 comes before Cube 10 rather than after it.
 
 A field holding an asset shows the file it points at rather than the number a handle is, and
@@ -522,6 +545,16 @@ is as few decimal places as say the value, up to three; what it opens holding is
 because a box that opened at three places would offer 1.235 to somebody who came to correct 1.2345.
 Nothing rounds the value itself.
 
+### Data assets
+
+A data asset is edited in the details panel when its file was the last thing chosen in the asset
+browser, as one card of its fields under the file's name. The rows are the ones a component has,
+so its attributes are honored the same way, and an edit is written to the file at the end of the
+frame and is a step in the history like any other. `Project/New data asset` makes one of any
+registered type in the directory being browsed, and a `DataRef` field picks from the files of its
+type. Under a set `DataRef` row, a fold named for how many entities share the asset holds its
+fields, and "Make unique" there copies it for the one entity being edited.
+
 ### What the inspector does not do
 
 Written down because the attributes and the shape of the thing suggest otherwise:
@@ -532,9 +565,10 @@ Written down because the attributes and the shape of the thing suggest otherwise
   inspector draws one.
 - **Nothing puts a field back to its default.** What a freshly added component holds is known to
   the schema, and no row asks it.
-- **A duplicate is not offered**, because the editor can read only what has a schema off an entity,
-  and the mesh and the material an entity is drawn with are handles, which have no JSON form to
-  copy.
+- **A duplicate copies the entity, not its children.** Duplicate (`Ctrl+D`, the world list's
+  menu, `Entity/Duplicate`) is the engine's own clone, so the copy carries everything the original
+  does, its mesh and material included, under the same parent and with the next free name ("Cube
+  2"). The original's children stay with the original, which is Bevy's default for a relationship.
 
 ## Adding to it
 

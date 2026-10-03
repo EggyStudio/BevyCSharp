@@ -64,10 +64,17 @@ Behaviors are discovered automatically, so a consuming project needs no registra
   - [States](#states)
   - [Messages](#messages)
   - [The hierarchy](#the-hierarchy)
+  - [Copying an entity](#copying-an-entity)
   - [Threading](#threading)
 - [The engine](#the-engine)
   - [Bevy's own components](#bevys-own-components)
   - [Every other Bevy component](#every-other-bevy-component)
+  - [Lists and maps in a component](#lists-and-maps-in-a-component)
+  - [Data assets](#data-assets)
+  - [Scene files](#scene-files)
+  - [Placing a model as an instance](#placing-a-model-as-an-instance)
+  - [Saving a game](#saving-a-game)
+  - [Changing a type without breaking its files](#changing-a-type-without-breaking-its-files)
   - [Visibility](#visibility)
   - [Assets](#assets)
   - [Models](#models)
@@ -542,6 +549,18 @@ chain of arbitrary transforms cannot always be expressed as one, so `Scale`, `Ro
 
 Parenting is a structural change, so queue it on `ctx.Cmd` when calling from inside a loop.
 
+### Copying an entity
+
+```csharp
+var copy = ctx.Ecs.Clone(crate);
+```
+
+The copy carries every component the original does, Bevy's and C#'s alike, so it draws with the
+same mesh and material and sits under the same parent, and the original's children stay where they
+are. A C# component is copied byte for byte, except that a stored list or map is copied rather
+than shared, so the two entities never free each other's. A component Bevy can neither clone nor
+reflect is left off the copy, as Bevy leaves it. It is a structural change, like spawning.
+
 ### Threading
 
 A system runs on Bevy's main thread with the world loaned to it. When the generator fans a
@@ -643,9 +662,13 @@ ctx.Ecs.SetReflected(lamp, Light, ".intensity", "5000");
 ctx.Ecs.SetReflected(lamp, Light, ".shadow_maps_enabled", "true");
 
 string? range = ctx.Ecs.GetReflected(lamp, Light, ".range");  // "20.0", or null if absent
-ctx.Ecs.SetVariant(lamp, Light, ".color", "LinearRgba");      // an enum, by variant name
+ctx.Ecs.SetReflectedColor(lamp, Light, ".color", Color.FromHex("#ffcc88"));
 ctx.Ecs.RemoveReflected(lamp, Light);
 ```
+
+An enum is set by naming its variant (`SetVariant`), and a color, which Bevy can hold in any of ten
+spaces, is read and written as a linear `Color` whatever space it is in (`GetReflectedColor`,
+`SetReflectedColor`), with Bevy doing the conversion.
 
 A handle inside a component, such as the image a sprite draws, has no JSON form and crosses as an
 `AssetHandle` instead, through `GetReflectedAsset` and `SetReflectedAsset`. Reading one the program
@@ -685,6 +708,181 @@ show and change them like any C# component. A nested struct becomes rows in a fo
 that carries data, such as a light's color, is a row choosing the variant with that variant's
 fields under it. `ComponentSchema.Origin` says whether a schema is the project's own, a mirror, or
 reflected.
+
+### Lists and maps in a component
+
+A component is bytes in Bevy's storage, so it cannot hold a `List<T>`. It holds a list one of two
+ways instead:
+
+```csharp
+[Behavior]
+public partial struct Patrol
+{
+    public InlineList8<Vec3> Waypoints;   // up to eight, inside the component's own bytes
+    public EcsList<string> Visited;       // as many as there are, in a store on the managed side
+    public EcsMap<string, int> Counts;    // a dictionary, in the same store
+
+    [OnUpdate]
+    public void Tick(BehaviorContext ctx)
+    {
+        if (Waypoints.Count == 0) Waypoints.Add(new Vec3(1f, 0f, 2f));
+        if (!Visited.Contains("gate")) Visited.Add("gate");
+    }
+}
+```
+
+An inline list costs nothing to keep and iterates with everything else, and its capacity is part
+of its type, from `InlineList4<T>` to `InlineList64<T>`. An `EcsList<T>` or `EcsMap<K, V>` grows
+without bound and holds any type, and is made on its first write. The component holds a handle to it, which a hook
+frees when the component leaves its entity, by removal or despawn, and a handle used after that
+throws rather than reading a list that has since gone to another entity. Cloning the entity
+(`ctx.Ecs.Clone(entity)`) gives the copy lists of its own. Both are drawn by the
+inspector as rows, a list with a grip to reorder each item and a map with its keys beside its
+values, and written to a scene as an array or an object.
+
+An item can be a struct or a class with fields of its own, such as an `InlineList8<Waypoint>`, or a
+`List<LootEntry>` in a data asset. Each is drawn as a fold of its fields, named by its first text,
+and written as an object.
+
+### Data assets
+
+Values many entities share, edited in one place and changed without recompiling, such as a
+weapon's stats or a loot table. Unity calls this a ScriptableObject and Godot a Resource:
+
+```csharp
+[DataAsset]
+public sealed class WeaponStats
+{
+    [Range(0, 200)] public float Damage = 10f;
+    public string Title = "Sword";
+    public List<string> Tags = [];
+}
+
+[Behavior]
+public partial struct Armed
+{
+    public DataRef<WeaponStats> Weapon;
+
+    [OnUpdate]
+    public void Tick(BehaviorContext ctx)
+    {
+        if (Weapon.IsSet) Console.WriteLine(Weapon.Value.Damage);
+    }
+}
+
+var sword = DataAssets.Create<WeaponStats>("weapons/sword.data.json");
+```
+
+A data asset lives on the managed side, so it holds strings, lists and dictionaries, which a
+component cannot. Its file is JSON naming its type, and a `.uid` sidecar beside it holds an id. A
+`DataRef` holds that id, so renaming or moving the file keeps every reference to it. It is
+loaded once and shared, and the editor makes one (`Project/New data asset`), edits one when its
+file is selected in the asset browser, and offers the files of the right type to a `DataRef` field.
+
+### Scene files
+
+```csharp
+SceneFile.Save(ctx.Ecs, "assets://levels/one.scene.json");
+var loaded = SceneFile.Load(ctx.Ecs, "assets://levels/one.scene.json");
+```
+
+A scene file holds every entity it is given, named or not, with its parent, its components and the
+files its mesh and material came from, and loading spawns all of it. A field referring to another
+entity in the scene is written as that entity's id in the file and read back as whichever entity
+the id spawned as, and each entity keeps its id across saves, so a scene under version control
+diffs as what changed. Bevy's own components, a camera's projection or a light's settings, are
+written as the JSON Bevy's serializer makes for them, less what the engine works out every frame.
+A primitive mesh or a standard material made in memory is written once as how to make it again,
+and a mesh built vertex by vertex, which has neither a file nor a recipe, is not written. A file
+the scene refers to is written as its id and its path, and the editor gives every such file an id
+in a `.uid` sidecar as it saves, so renaming a model in the asset browser, which carries the
+sidecar along, leaves the scene pointing at it.
+`scene.save` and `scene.load` do the same from the console and from `./bcs`.
+
+### Placing a model as an instance
+
+```csharp
+var ship = SceneInstances.Spawn(ctx.Ecs, "models/ship.gltf");
+
+// Once WorldInstanceReady has been read for it:
+var turret = SceneInstances.Find(ctx.Ecs, ship, "Main/Hull/Turret");
+SceneInstances.Set(ctx.Ecs, turret, "Bevy.Transform", "Translation", new Vec3(0f, 2f, 0f));
+SceneInstances.Delete(ctx.Ecs, SceneInstances.Find(ctx.Ecs, ship, "Main/Hull/Antenna"));
+```
+
+In the editor, a model or scene tile's "Place in the scene" does the first line, and an edit in
+the details panel or with the gizmo to a node of the instance is kept as an override, with the
+field's name in the accent color and a right-click to put the model's value back.
+
+An instance is a glTF scene, or another scene file, placed with the changes made over it kept as
+overrides, each naming a node by its path of names from the instance (Bevy puts a glTF scene's
+nodes under an entity named after the scene, so the path starts there). A scene file placed this
+way is read at once, its overrides applied in the same frame, and instances nest, with a scene
+that would contain itself refused on load and on save. A scene file writes the reference and the overrides
+and leaves the model's own entities out, so a model exported again reaches every place it is used
+with the edits still on it. Loading spawns the model and applies the overrides once Bevy reports
+it ready, before `WorldInstanceReady` is read, and an override whose node has gone is kept and
+reported by `SceneInstances.Missed`.
+
+### Saving a game
+
+```csharp
+[Behavior, Persist]
+public partial struct Wallet { public int Coins; }
+
+SaveGame.Start(ctx.Ecs, "levels/one.scene.json");    // the scenes the game begins from
+SaveGame.Save(ctx.Ecs);                              // user://saves/slot.save.json
+SaveGame.Load(ctx.Ecs);                              // the scenes again, with the save laid over
+```
+
+A save holds what play changed and nothing a scene already says. An entity is saved when it
+carries a `SaveId`, which the editor gives it with Add Component and code with `SaveId.New()`: its
+components marked `[Persist]` (or named in `SaveGame.Persisted`, for one such as `Bevy.Transform`)
+are written, an entity spawned during play is written whole, and one of the scene's that was
+despawned is written as deleted. `user://` is the platform's data directory under
+`Config.GameName`, which Bevy loads from as well (`AssetServer.Load(AssetKind.Image,
+"user://shots/one.png")`), and a save is written through a temporary file renamed over the old
+one.
+
+Settings that outlive a run go in a `Persistent<T>`, read from `user://` when made and written
+when asked, through a `System.Text.Json` source-generated context so nothing reflects:
+
+```csharp
+var settings = new Persistent<Settings>("settings", GameJson.Default.Settings, () => new Settings());
+settings.Update(value => value with { Volume = 0.5f });
+settings.Persist();
+```
+
+A `Persistent<T>` given to `SaveGame.Carry` belongs to the save slot instead, copied into each save
+and put back on a load, for a playthrough's own state such as its quests.
+
+### Changing a type without breaking its files
+
+```csharp
+[Behavior, FormerName("Hitpoints"), DataVersion(2)]
+public partial struct Health
+{
+    [FormerName("Max")] public float Most;
+    public float Current;
+
+    public static JsonObject Migrate(int from, JsonObject value)
+    {
+        if (from < 2) value["Current"] = (float?)value["Current"] * 10; // 2 counts in tenths
+        return value;
+    }
+}
+```
+
+A scene or a data asset written before a rename still loads, because `[FormerName]` keeps the old
+name of a type or a field on its schema, and the next save writes the new one. A name given alone
+is in the type's own namespace. A change a rename cannot say goes in `Migrate`, which a load calls
+with the version the file was written at, and a type at a later version with no such method is
+warned about (BCS008).
+
+What a build cannot read is kept rather than dropped: a component whose type it lacks, one Bevy
+refuses, and a value no field reads all ride along on the entity as the JSON the file had and are
+written back where they were. A branch that deletes a type, or an older build opening a newer
+scene, then leaves that type's data in the file for the build that knows it.
 
 ### Visibility
 
@@ -767,9 +965,9 @@ var root = ctx.Ecs.SpawnScene(AssetServer.LoadGltfScene("models/ship.gltf"));
 ```
 
 The root comes back at once and fills in when the asset has loaded, so no children on the first
-frame is normal rather than a failure. Wait by polling `ChildrenOf`, not on the `WorldInstance`
-component, which marks the spawn as done but can appear a frame before the entities are
-visible.
+frame is normal rather than a failure. Wait for the `WorldInstanceReady` message naming the root,
+posted once the entities are in the world, not for the `WorldInstance` component, which marks the
+spawn as done but can appear a frame before the entities are visible.
 
 Compose on top of what a file describes by patching it after it spawns. Bevy's own `bsn!` does the
 same at compile time in Rust, and the ECS surface here does it at runtime:
@@ -3033,16 +3231,15 @@ run against a real Bevy app. Known gaps:
 - `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does
   nothing yet. The editor reloads scripts through `App.EnableDynamicSystems` instead, because
   the compiler lives there.
-- The editor's world file keeps what this side can name, which is an entity's name, every C#
-  component and mirrored Bevy component, and where its mesh and material were loaded from.
-  Anything built in memory has no name to write, and a camera's projection or a light's settings
-  are edited in the inspector but not written to the file, so the file is a set of edits over a
-  scene rather than the scene. [.github/SCENES.md](.github/SCENES.md) designs the scene format that replaces it.
+- The editor's document is a scene file, with the hierarchy, entity references and Bevy's own
+  components kept, and primitives and materials made in memory written as how to make them again.
+  A mesh built vertex by vertex is not written. [.github/SCENES.md](.github/SCENES.md) plans the
+  rest, through instances and saves.
 - Five of Bevy's components are mirrored by hand, and the rest are reached through Bevy's
   reflection, by type path and JSON or through generated typed wrappers, at the cost of a
-  serialization a call. A component cannot hold a list or a dictionary.
-  [.github/COMPONENTS.md](.github/COMPONENTS.md) plans generated mirrors and a managed store for
-  collections that is freed with the entity.
+  serialization a call. A component holds a list, inline or in a managed store, and a dictionary
+  in the same store, and shared values live in data assets of their own.
+  [.github/COMPONENTS.md](.github/COMPONENTS.md) plans generated mirrors.
 - Component filters must be table-stored components, which is everything C# registers. A filter
   naming a Bevy-side sparse-set component is rejected rather than silently wrong.
 - A cubemap comes from a file, as six square faces stacked into a column, or from a reflection probe

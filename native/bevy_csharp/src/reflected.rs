@@ -291,8 +291,23 @@ fn describe(registry: &TypeRegistry, info: &'static TypeInfo, types: &mut Map<St
             "enum"
         }
         TypeInfo::Tuple(_) => "tuple",
-        TypeInfo::List(_) => "list",
-        TypeInfo::Array(_) => "array",
+        // A list or an array says what it holds, so one of numbers or vectors can be edited as a
+        // list rather than shown as JSON. An array's length is fixed, which the managed side keeps.
+        TypeInfo::List(info) => {
+            entry["item"] = Value::from(info.item_ty().path());
+            if let Some(item) = info.item_info() {
+                describe(registry, item, types);
+            }
+            "list"
+        }
+        TypeInfo::Array(info) => {
+            entry["item"] = Value::from(info.item_ty().path());
+            entry["capacity"] = Value::from(info.capacity());
+            if let Some(item) = info.item_info() {
+                describe(registry, item, types);
+            }
+            "array"
+        }
         TypeInfo::Map(_) => "map",
         TypeInfo::Set(_) => "set",
         TypeInfo::Opaque(_) => "opaque",
@@ -1093,6 +1108,7 @@ mod tests {
     #[derive(Component, Reflect, Default)]
     #[reflect(Component, Default)]
     struct Probe {
+        speeds: Vec<f32>,
         speed: f32,
         at: Vec3,
         inner: Inner,
@@ -1188,6 +1204,10 @@ mod tests {
         // without asking again.
         let types = &dump["types"];
         assert_eq!("struct", types[PROBE]["kind"]);
+        let speeds = &types["alloc::vec::Vec<f32>"];
+        assert_eq!("list", speeds["kind"]);
+        assert_eq!("f32", speeds["item"]);
+
         let mode = &types["bevy_csharp::reflected::tests::Mode"];
         assert_eq!("enum", mode["kind"]);
         assert_eq!(3, mode["variants"].as_array().unwrap().len());

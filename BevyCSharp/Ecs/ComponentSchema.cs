@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json.Nodes;
 using Bevy.Interop;
 
 namespace Bevy;
@@ -74,6 +75,46 @@ public enum FieldKind
     /// and written as linear whatever space it holds.
     /// </remarks>
     Color,
+
+    /// <summary>
+    /// Any number of values of one kind, which <see cref="ComponentField.ElementKind"/> names.
+    /// </summary>
+    /// <remarks>
+    /// Read as a <see cref="ListValue"/> of the items and written back as one, so an edit to one
+    /// item is a write of the whole list. A C# component holds one as an inline list
+    /// (<see cref="InlineList8{T}"/> and its siblings).
+    /// </remarks>
+    List,
+
+    /// <summary>
+    /// Entries found by key, the keys of the kind <see cref="ComponentField.KeyKind"/> names and the
+    /// values of the kind <see cref="ComponentField.ElementKind"/> does.
+    /// </summary>
+    /// <remarks>
+    /// Read as a <see cref="MapValue"/> and written back as one. A C# component holds one as an
+    /// <see cref="EcsMap{TKey, TValue}"/>.
+    /// </remarks>
+    Map,
+
+    /// <summary>
+    /// A <see cref="DataRef{T}"/>, a reference to a data asset, whose type
+    /// <see cref="FieldHints.Asset"/> names.
+    /// </summary>
+    /// <remarks>
+    /// Read as the reference, boxed, which says its file's id through <see cref="IDataRef"/>, and
+    /// written from a reference or from a file's id.
+    /// </remarks>
+    Data,
+
+    /// <summary>
+    /// A value made of fields of its own, a struct or a class, as the items of a list can be. Its
+    /// fields are described by <see cref="ComponentField.Items"/>.
+    /// </summary>
+    /// <remarks>
+    /// Only as the kind of an item or a map's value. A struct that is a field of a component is
+    /// taken apart into fields of the component's own instead, which a tool draws in a fold.
+    /// </remarks>
+    Struct,
 }
 
 /// <summary>
@@ -160,6 +201,28 @@ public sealed class ComponentField
 
     /// <summary>What the field's attributes asked for.</summary>
     public FieldHints Hints { get; }
+
+    /// <summary>
+    /// The kind of each item, for a <see cref="FieldKind.List"/> field, and
+    /// <see cref="FieldKind.Opaque"/> for every other.
+    /// </summary>
+    /// <remarks>
+    /// An item of a list of enums takes its names from <see cref="Options"/>, and the field's hints
+    /// (a range, a unit) apply to every item, as an attribute on the list is read to mean.
+    /// </remarks>
+    public FieldKind ElementKind { get; init; }
+
+    /// <summary>
+    /// The kind of each key, for a <see cref="FieldKind.Map"/> field, and
+    /// <see cref="FieldKind.Opaque"/> for every other.
+    /// </summary>
+    public FieldKind KeyKind { get; init; }
+
+    /// <summary>
+    /// The fields of each item, for a list or a map whose <see cref="ElementKind"/> is
+    /// <see cref="FieldKind.Struct"/>, and nothing for every other.
+    /// </summary>
+    public ItemFields? Items { get; init; }
 
     /// <summary>
     /// Whether the row is a view of other state rather than state of its own.
@@ -340,6 +403,32 @@ public sealed class ComponentSchema
     /// </remarks>
     public SchemaOrigin Origin { get; init; }
 
+    /// <summary>The full names the type had before, which an old file may still use.</summary>
+    /// <remarks>
+    /// Filled from <see cref="FormerNameAttribute"/>, with a name given alone placed in the type's
+    /// own namespace. A file naming one of these is read as this type and written back under its
+    /// current name.
+    /// </remarks>
+    public IReadOnlyList<string> FormerNames { get; init; } = [];
+
+    /// <summary>The version a file of the type is written at, from <see cref="DataVersionAttribute"/>.</summary>
+    /// <remarks>Zero for a type with none, which writes no version and reads every file as it is.</remarks>
+    public int Version { get; init; }
+
+    /// <summary>
+    /// Brings the JSON of a file written at an earlier <see cref="Version"/> up to the current one,
+    /// or nothing for a type with no migration.
+    /// </summary>
+    /// <remarks>The type's own <c>Migrate</c> method, which the generator finds and wraps.</remarks>
+    public Func<int, JsonObject, JsonObject>? Migrate { get; init; }
+
+    /// <summary>Whether a save game writes this component's fields, from <see cref="PersistAttribute"/>.</summary>
+    /// <remarks>
+    /// <see cref="SaveGame.Persisted"/> opts in a component this side did not declare, such as
+    /// Bevy's transform.
+    /// </remarks>
+    public bool Persisted { get; init; }
+
     /// <summary>The engine's component id, resolved on demand.</summary>
     /// <remarks>Resolving registers the component with the world if it was not known yet.</remarks>
     public int Id => _id();
@@ -444,7 +533,9 @@ public static class ComponentSchemas
     /// <remarks>
     /// The name route needs no world, so a tool listing what it could show before an app exists has
     /// to use it. It also matches on the short name, because Bevy reports its own components by a
-    /// path this side does not share.
+    /// path this side does not share. A name a type had before, kept on it with
+    /// <see cref="FormerNameAttribute"/>, is tried last, so a type that has since taken that name
+    /// wins over the one that gave it up.
     /// </remarks>
     public static ComponentSchema? For(string name)
     {
@@ -458,7 +549,8 @@ public static class ComponentSchemas
                 ?? Registered.FirstOrDefault(schema =>
                     name.EndsWith("::" + schema.Name, StringComparison.Ordinal)
                     || name == schema.Name)
-                ?? _reflected.FirstOrDefault(schema => name == schema.Name);
+                ?? _reflected.FirstOrDefault(schema => name == schema.Name)
+                ?? Registered.FirstOrDefault(schema => schema.FormerNames.Contains(name));
         }
     }
 
@@ -607,6 +699,31 @@ public static class ComponentSchemas
         {
             Origin = SchemaOrigin.Mirrored,
         });
+
+        // Written as sixteen hex digits, as a file's id is, since a 64-bit number is past what a
+        // JSON reader is sure to keep exact.
+        Registered.Add(new ComponentSchema(
+            "SaveId",
+            "Bevy.SaveId",
+            static () => ComponentType<SaveId>.Id,
+            [
+                new ComponentField(
+                    "Id",
+                    FieldKind.String,
+                    "string",
+                    static (world, entity) => world.TryGet<SaveId>(entity, out var id) ? id.ToString() : null,
+                    static (world, entity, value) =>
+                    {
+                        if (!world.Has<SaveId>(entity) || value is not string text || SaveId.Parse(text) is not { } id)
+                            return false;
+
+                        world.Set(entity, id);
+                        return true;
+                    },
+                    hints: new FieldHints(Tooltip: "What a save game finds this entity by, unique in the game.")),
+            ],
+            add: static (world, entity) => world.Add(entity, SaveId.New()),
+            remove: static (world, entity) => world.Remove<SaveId>(entity)));
     }
 
     /// <summary>Reads a field out of a component value.</summary>

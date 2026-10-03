@@ -65,7 +65,20 @@ public static class EditorRows
     /// name rather than after the value, so every box in a column ends at the same edge and the
     /// unit is read with the name it qualifies.
     /// </param>
-    public static void Line(string name, string? tip = null, bool differs = false, string? unit = null)
+    /// <param name="overridden">
+    /// Whether the value is an instance's own rather than its model's, which colors the name.
+    /// </param>
+    /// <param name="revert">
+    /// What puts the model's value back, offered when the name is right-clicked, or nothing when
+    /// there is nothing to put back.
+    /// </param>
+    public static void Line(
+        string name,
+        string? tip = null,
+        bool differs = false,
+        string? unit = null,
+        bool overridden = false,
+        Action? revert = null)
     {
         ArgumentNullException.ThrowIfNull(name);
 
@@ -74,13 +87,7 @@ public static class EditorRows
 
         ImGui.AlignTextToFramePadding();
 
-        // Dimmed when the things selected disagree about it, because the box beside it can only
-        // show one of their values and the name is the only room left to say so.
-        if (differs) ImGui.PushStyleColor(ImGuiCol.Text, EditorTheme.Current.Dim);
-
-        ImGui.TextUnformatted(name);
-
-        if (differs) ImGui.PopStyleColor();
+        Name(name, differs, overridden, revert);
 
         var hovered = ImGui.IsItemHovered();
 
@@ -101,11 +108,51 @@ public static class EditorRows
                     : says + "\n\nThese differ. Editing sets them all.";
             }
 
+            if (overridden)
+            {
+                var changed = revert is null
+                    ? "Changed on this instance."
+                    : "Changed on this instance. Right-click to put the model's value back.";
+                says = says is null ? changed : says + "\n\n" + changed;
+            }
+
             if (says is not null) EditorWidgets.Tip(says);
         }
 
         ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(-1f);
+    }
+
+    /// <summary>
+    /// A field's name: dimmed when the selection disagrees about it, in the accent when an instance
+    /// overrides it, with a revert on a right-click when there is one.
+    /// </summary>
+    /// <remarks>
+    /// The accent rather than a mark beside the name, because the name column is narrow and a
+    /// colored name is read at a glance down a column of plain ones, as Unity's bold override
+    /// names are.
+    /// </remarks>
+    public static void Name(string name, bool differs = false, bool overridden = false, Action? revert = null)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+
+        var colored = differs || overridden;
+        if (colored)
+            ImGui.PushStyleColor(ImGuiCol.Text, differs ? EditorTheme.Current.Dim : EditorTheme.Current.Accent);
+
+        ImGui.TextUnformatted(name);
+
+        if (colored) ImGui.PopStyleColor();
+
+        if (revert is null || !EditorWidgets.FlyoutHere("##revert")) return;
+
+        RoundedRows.Rows(() =>
+        {
+            if (ImGui.MenuItem("Revert to the model's value")) revert();
+            RoundedRows.Row();
+        });
+
+        EditorWidgets.EndFlyout();
     }
 
     /// <summary>A unit after the name just written, in parentheses and dimmed.</summary>

@@ -70,16 +70,18 @@ public sealed unsafe partial class EcsWorld
     /// answer rather than a failure.
     /// </para>
     /// <para>
-    /// <b>Wait for the children, not for <see cref="Bevy.WorldInstance"/>.</b> That component
-    /// marks the spawn as done, but it can appear a frame before the entities it produced are
-    /// visible, so treating it as "the scene is ready" is a race that fails about one run in
-    /// three. Poll <see cref="ChildrenOf"/> until it returns something.
+    /// <b>Wait for <see cref="WorldInstanceReady"/>, not for <see cref="Bevy.WorldInstance"/>.</b>
+    /// That component marks the spawn as done, but it can appear a frame before the entities it
+    /// produced are visible, so treating it as "the scene is ready" is a race that fails about one
+    /// run in three. The message is posted at the top of the frame after Bevy announces the
+    /// instance, once its entities are in the world.
     /// </para>
     /// <para>
     /// Takes a glTF scene from <see cref="AssetServer.LoadGltfScene"/> or a <c>.scn.ron</c> world
     /// from <see cref="AssetKind.Scene"/>; both load as the same asset, so one call spawns
     /// either. Compose on top of what it produced the ordinary way, by walking
-    /// <see cref="ChildrenOf"/> and adding components to the entities you find.
+    /// <see cref="ChildrenOf"/> and adding components to the entities you find, or place it with
+    /// <see cref="SceneInstances.Spawn"/> to have the changes kept as overrides a scene file saves.
     /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">The handle names no scene, or no world is loaned.</exception>
@@ -91,6 +93,37 @@ public sealed unsafe partial class EcsWorld
                 NativeStatus.NoComponent,
                 $"SpawnScene failed: {scene} does not name a loaded scene asset, or no world is "
                 + "loaned to this thread.");
+
+        return new Entity(bits);
+    }
+
+    /// <summary>
+    /// Spawns a copy of an entity with every component it carries.
+    /// </summary>
+    /// <returns>The copy, or <see cref="Entity.None"/> when the entity does not exist.</returns>
+    /// <remarks>
+    /// <para>
+    /// Bevy's own components are copied as Bevy copies them, so the copy draws with the same mesh
+    /// and material and sits under the same parent. A C# component is copied byte for byte, and one
+    /// holding an <see cref="EcsList{T}"/> or an <see cref="EcsMap{TKey, TValue}"/> is given copies
+    /// of them, so freeing the original's leaves the copy's alone.
+    /// </para>
+    /// <para>
+    /// The entity's children are not copied, which is Bevy's default for a relationship and what
+    /// duplicating one thing means. A component Bevy can neither clone nor reflect is left off the
+    /// copy, as Bevy leaves it.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">No world is on loan.</exception>
+    public Entity Clone(Entity entity)
+    {
+        if (!IsAlive(entity)) return Entity.None;
+
+        var bits = Native.bcs_ecs_clone(entity.Bits);
+        if (bits == 0)
+            throw new BevyNativeException(
+                NativeStatus.NoWorld,
+                $"Cloning {entity} failed: " + NativeStatus.Describe(NativeStatus.NoWorld) + ".");
 
         return new Entity(bits);
     }

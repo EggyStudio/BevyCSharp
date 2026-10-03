@@ -58,6 +58,7 @@ public readonly record struct FieldCondition(string Field, string? Value = null,
 /// Which files to offer for it, separated by spaces, or nothing for the ones that go with the
 /// asset type.
 /// </param>
+/// <param name="FormerNames">The names the field had before, which an old file may still use.</param>
 public sealed record FieldHints(
     string? Label = null,
     string? Tooltip = null,
@@ -82,7 +83,8 @@ public sealed record FieldHints(
     IReadOnlyList<string>? Changed = null,
     int Order = 0,
     string? Asset = null,
-    string? Extensions = null)
+    string? Extensions = null,
+    IReadOnlyList<string>? FormerNames = null)
 {
     /// <summary>What a field with no attributes on it asked for, which is nothing.</summary>
     public static readonly FieldHints None = new();
@@ -95,6 +97,9 @@ public sealed record FieldHints(
 
     /// <summary>The methods to call once it has been changed.</summary>
     public IReadOnlyList<string> Changed { get; init; } = Changed ?? [];
+
+    /// <summary>The names the field had before, which an old file may still use.</summary>
+    public IReadOnlyList<string> FormerNames { get; init; } = FormerNames ?? [];
 }
 
 /// <summary>

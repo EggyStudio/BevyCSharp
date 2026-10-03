@@ -20,6 +20,9 @@ public static class EditorPaths
     /// <summary>The edits made to the world.</summary>
     public static string World => Asset("world.json");
 
+    /// <summary>The scene the editor saves and loads, which is the project's document.</summary>
+    public static string Scene => Asset("world.scene.json");
+
     /// <summary>Where the editor's own preferences are kept.</summary>
     public static string Settings => Asset("settings.txt");
 }

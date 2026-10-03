@@ -73,6 +73,16 @@ public sealed class Config
     public string? AssetRoot { get; set; }
 
     /// <summary>
+    /// The name the game's own files are kept under, in the platform's data directory.
+    /// </summary>
+    /// <remarks>
+    /// What <c>user://</c> paths, settings and saves resolve under (<see cref="UserData"/>), or
+    /// <see langword="null"/> for <see cref="Title"/>. Worth setting, because a title is changed
+    /// for a sequel or a translation, and every player's saves are under the old name.
+    /// </remarks>
+    public string? GameName { get; set; }
+
+    /// <summary>
     /// Reload an asset when its file changes on disk.
     /// </summary>
     /// <remarks>

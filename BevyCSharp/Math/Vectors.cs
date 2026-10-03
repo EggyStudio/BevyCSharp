@@ -114,8 +114,8 @@ public struct Vec4 : IEquatable<Vec4>
 /// </summary>
 /// <remarks>
 /// <para>
-/// Linear rather than sRGB, because linear is what light adds up in and what the renderer works in,
-/// so a value held here is the one Bevy draws with, unconverted. A color somebody picked from a
+/// Linear rather than sRGB, because light adds up in linear and the renderer works in it, so a value
+/// held here is the one Bevy draws with, unconverted. A color somebody picked from a
 /// palette or typed as hex is sRGB, which <see cref="FromSrgb"/> converts, and
 /// <see cref="ToSrgb"/> converts back for showing it.
 /// </para>

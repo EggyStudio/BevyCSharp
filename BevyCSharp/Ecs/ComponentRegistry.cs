@@ -28,6 +28,15 @@ internal static class ComponentRegistry
     /// <summary>Bumped whenever a new app is created, invalidating cached ids.</summary>
     internal static int Generation { get; private set; }
 
+    /// <summary>
+    /// The handle to register through, or zero while the app runs, when an entry point has to go
+    /// through the loaned world instead, for the reason <see cref="Register"/> gives.
+    /// </summary>
+    internal static IntPtr AppHandle
+    {
+        get { lock (Gate) return _running ? IntPtr.Zero : _appHandle; }
+    }
+
     /// <summary>Binds the registry to a newly created app.</summary>
     internal static void BeginApp(IntPtr handle)
     {
@@ -154,17 +163,25 @@ public static class ComponentType<T> where T : unmanaged
         {
             if (_generation == ComponentRegistry.Generation) return _id;
 
-            _id = NativeHandle is null
-                ? ComponentRegistry.Register(
+            if (NativeHandle is null)
+            {
+                _id = ComponentRegistry.Register(
                     typeof(T).FullName ?? typeof(T).Name,
                     (uint)Size,
                     (uint)Alignment,
-                    IsSparse)
-                : NativeComponents.Resolve(
-                    NativeHandle.NativeName,
-                    // A handle that mirrors nothing has no layout worth checking, because its size
-                    // is whatever an empty C# struct happens to be, not the engine type's.
-                    NativeHandle.MirrorsLayout ? Size : 0);
+                    IsSparse);
+
+                // Before anything can be spawned with it, which is the only time Bevy takes a hook.
+                ComponentHooks.Attach<T>(_id);
+                _generation = ComponentRegistry.Generation;
+                return _id;
+            }
+
+            _id = NativeComponents.Resolve(
+                NativeHandle.NativeName,
+                // A handle that mirrors nothing has no layout worth checking, because its size
+                // is whatever an empty C# struct happens to be, not the engine type's.
+                NativeHandle.MirrorsLayout ? Size : 0);
             _generation = ComponentRegistry.Generation;
             return _id;
         }

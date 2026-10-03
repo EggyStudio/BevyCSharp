@@ -92,4 +92,15 @@ internal static class BehaviorDiagnostics
         category: Category,
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    /// <summary>BCS008: a version with nothing to bring an older file up to it.</summary>
+    internal static readonly DiagnosticDescriptor VersionWithoutMigrate = new(
+        id: "BCS008",
+        title: "A [DataVersion] type has no Migrate method",
+        messageFormat:
+        "'{0}' has [DataVersion({1})] but no public or internal 'static JsonObject Migrate(int from, "
+        + "JsonObject value)', so a file written at an earlier version is read as it is",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
 }

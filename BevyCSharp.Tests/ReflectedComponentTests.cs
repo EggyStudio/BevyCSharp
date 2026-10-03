@@ -222,28 +222,18 @@ public sealed class ReflectedComponentTests
             Assert.True(intensity.Write(ecs, entity, 100.0));
             Assert.Equal(100f, intensity.Read(ecs, entity));
 
-            // Color is an enum that carries data. Choosing a variant is one row, and the variant's
-            // own numbers are rows shown only while it is the one chosen.
+            // Bevy's Color holds a color in any of ten spaces. It is one swatch row, read as linear
+            // whatever space it is in, and written back in the space it was in.
             var color = schema.Field("color")!;
-            Assert.Equal(FieldKind.Enum, color.Kind);
-            Assert.Contains("LinearRgba", color.Options);
+            Assert.Equal(FieldKind.Color, color.Kind);
+            Assert.DoesNotContain(schema.Fields, field => field.Name.StartsWith("color.", StringComparison.Ordinal));
 
-            var red = schema.Field("color.LinearRgba.red")!;
-            Assert.Equal(FieldKind.Float, red.Kind);
-            Assert.Contains(new FieldCondition("color", "LinearRgba"), red.Hints.Conditions);
-
-            Assert.True(color.Write(ecs, entity, "LinearRgba"));
-            Assert.Equal("LinearRgba", color.Read(ecs, entity));
-            Assert.True(red.Write(ecs, entity, 0.25f));
-            Assert.Equal(0.25f, red.Read(ecs, entity));
-
-            // Bevy's path to the red of an Srgba is the same as to the red of a LinearRgba, since it
-            // does not name the variant. The row of the variant not held reads nothing rather than
-            // the other one's red, and refuses a write rather than landing on it.
-            var srgbRed = schema.Field("color.Srgba.red")!;
-            Assert.Null(srgbRed.Read(ecs, entity));
-            Assert.False(srgbRed.Write(ecs, entity, 1f));
-            Assert.Equal(0.25f, red.Read(ecs, entity));
+            var orange = Color.FromHex("#ff8800");
+            Assert.True(color.Write(ecs, entity, orange));
+            var read = (Color)color.Read(ecs, entity)!;
+            Assert.Equal(orange.R, read.R, 4);
+            Assert.Equal(orange.G, read.G, 4);
+            Assert.Equal(orange.B, read.B, 4);
 
             // The command line goes through the same schema, by Bevy's own lower-case name or the
             // Pascal case a C# field would have.
@@ -335,6 +325,49 @@ public sealed class ReflectedComponentTests
         {
             Assert.Null(tooltip);
         }
+    }
+
+    [Fact]
+    public void ARowOfAVariantNotHeldReadsNothingAndRefusesAWrite()
+    {
+        using var harness = new EngineHarness(frames: 2);
+        var ran = false;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            if (!App.HasRenderer) return;
+
+            const string Sun = "bevy_light::directional_light::DirectionalLight";
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.InsertReflected(entity, Sun);
+
+            var schema = ComponentSchemas.For(Sun)!;
+            var size = schema.Field("soft_shadow_size")!;
+            var some = schema.Field("soft_shadow_size.Some")!;
+
+            // An Option is an enum with data: a row choosing the variant, and the variant's value
+            // as a row shown only while it is the one held.
+            Assert.Equal(FieldKind.Enum, size.Kind);
+            Assert.Equal(["None", "Some"], size.Options);
+            Assert.Contains(new FieldCondition("soft_shadow_size", "Some"), some.Hints.Conditions);
+
+            // Bevy's path to the value does not name the variant, so without a guard the row would
+            // read whatever the path happened to reach. While the option is None it reads nothing
+            // and refuses a write rather than landing anywhere.
+            Assert.Equal("None", size.Read(ctx.Ecs, entity));
+            Assert.Null(some.Read(ctx.Ecs, entity));
+            Assert.False(some.Write(ctx.Ecs, entity, 2.5f));
+
+            Assert.True(size.Write(ctx.Ecs, entity, "Some"));
+            Assert.Equal(0f, some.Read(ctx.Ecs, entity));
+            Assert.True(some.Write(ctx.Ecs, entity, 2.5f));
+            Assert.Equal(2.5f, some.Read(ctx.Ecs, entity));
+            ran = true;
+        });
+
+        harness.Run();
+
+        if (App.HasRenderer) Assert.True(ran);
     }
 
     /// <summary>The numbers of a JSON array, read without a serializer.</summary>
