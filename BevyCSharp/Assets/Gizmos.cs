@@ -629,6 +629,53 @@ public static unsafe class Gizmos
         bool inFront = false) =>
         Polyline([a, b, c], color, closed: true, inFront);
 
+    /// <summary>Draws the six edges of a tetrahedron through four points.</summary>
+    /// <remarks>
+    /// The simplest solid, and the shape of a <see cref="MeshShape.Tetrahedron"/>, a trigger volume
+    /// with four corners or a debug marker that reads as a solid from any side. Six segments in one
+    /// call, each edge drawn once rather than twice as four triangles would draw it.
+    /// </remarks>
+    public static void Tetrahedron(
+        Vec3 a,
+        Vec3 b,
+        Vec3 c,
+        Vec3 d,
+        (float R, float G, float B, float A) color,
+        bool inFront = false)
+    {
+        ReadOnlySpan<GizmoSegment> edges =
+        [
+            new(a, b, color), new(b, c, color), new(c, a, color),
+            new(a, d, color), new(b, d, color), new(c, d, color),
+        ];
+
+        Lines(edges, inFront);
+    }
+
+    /// <summary>Draws a regular tetrahedron standing on its base, centered on a point.</summary>
+    /// <param name="center">Its middle, which is a quarter of the way up from its base.</param>
+    /// <param name="size">How long each edge is.</param>
+    /// <param name="color">Its color.</param>
+    /// <param name="inFront">Whether it draws over what is in front of it.</param>
+    public static void Tetrahedron(Vec3 center, float size, (float R, float G, float B, float A) color, bool inFront = false)
+    {
+        // A regular tetrahedron's corners are a quarter of its height below the middle for the
+        // base and three quarters above for the apex, with the base's corners round a circle.
+        var height = size * MathF.Sqrt(2f / 3f);
+        var radius = size / MathF.Sqrt(3f);
+        var floor = center.Y - (height / 4f);
+
+        Vec3 Corner(float turn) => new(center.X + (radius * MathF.Cos(turn)), floor, center.Z + (radius * MathF.Sin(turn)));
+
+        Tetrahedron(
+            Corner(0f),
+            Corner(MathF.Tau / 3f),
+            Corner(MathF.Tau * 2f / 3f),
+            new Vec3(center.X, floor + height, center.Z),
+            color,
+            inFront);
+    }
+
     /// <summary>
     /// Sets how every gizmo is drawn.
     /// </summary>

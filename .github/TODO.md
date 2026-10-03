@@ -218,13 +218,11 @@ code already in the binary.
 ### Gizmos
 
 `Gizmos` draws lines, fading lines, arrows, spheres, circles, arcs, rectangles, boxes, capsules,
-cones, cylinders, tori, grids and axis markers, in either of two groups: one the scene can hide and
-one it cannot. Calls are queued and drained by one Bevy system each frame, because a `Gizmos`
-parameter cannot be held by an exclusive system, and every C# system is one. `Gizmos.Configure` sets
-line width, render layers and whether anything is drawn at all.
+cones, cylinders, tori, tetrahedra, grids and axis markers, in either of two groups: one the scene
+can hide and one it cannot. Calls are queued and drained by one Bevy system each frame, because a
+`Gizmos` parameter cannot be held by an exclusive system, and every C# system is one.
+`Gizmos.Configure` sets line width, render layers and whether anything is drawn at all.
 
-- **A tetrahedron has no call of its own.** `Gizmos.Triangle` and `Gizmos.Polyline` draw the
-  shapes described by points, and a tetrahedron is four triangles through `Gizmos.Lines`.
 - **Two groups, not many.** `Gizmos.Configure` takes a `GizmoGroup`, so the shapes the scene can
   hide are settable apart from the ones it cannot, the split a game usually needs. A third category
   needs a third `GizmoConfigGroup`, and a group is a Rust type rather than a value, so it is added

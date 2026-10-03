@@ -31,6 +31,7 @@ public sealed class GizmoShapeTests
     [InlineData("cylinder")]
     [InlineData("torus")]
     [InlineData("frustum")]
+    [InlineData("tetrahedron")]
     public void AShapeIsDrawn(string shape)
     {
         if (!App.HasRenderer) return;
@@ -286,6 +287,10 @@ public sealed class GizmoShapeTests
 
                     case "frustum":
                         Gizmos.Frustum(Vec3.Zero, Quat.Identity, 1.6f, 0.6f, 2.4f, green);
+                        break;
+
+                    case "tetrahedron":
+                        Gizmos.Tetrahedron(Vec3.Zero, 2f, green);
                         break;
 
                     default:

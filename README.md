@@ -2408,8 +2408,9 @@ near plane rather than a size on screen, so a line further away is drawn thinner
 `Gizmos.Lines` draws a whole run of segments in one crossing, each with its own two ends and color,
 and `GizmoSegment.Fading` gives one a second color so it can run out to nothing. It serves a
 wireframe, a path or a grid, where the cost otherwise grows with the number of lines rather than
-with the call. The editor's own floor grid is one of these. `Gizmos.Polyline` and `Gizmos.Triangle`
-draw through a run of points the same way.
+with the call. The editor's own floor grid is one of these. `Gizmos.Polyline`, `Gizmos.Triangle`
+and `Gizmos.Tetrahedron` draw through a run of points the same way, a tetrahedron's six edges in one
+call, from four corners or from a center and an edge's length.
 
 Any other shape crosses on its own, which adds up for a scene drawing thousands of them a frame.
 Inside a batch they are gathered and handed over together:
