@@ -64,17 +64,11 @@ public sealed class PluginOrderException : Exception
 /// </remarks>
 public sealed class DefaultPlugins : IPluginGroup
 {
-    /// <summary>
-    /// Directory scanned for hot-reloadable behavior scripts, or <see langword="null"/> to
-    /// use only the behaviors compiled into loaded assemblies.
-    /// </summary>
-    public string? ScriptsDirectory { get; init; }
-
     /// <inheritdoc/>
     public IEnumerable<(IPlugin Plugin, int Order)> GetPlugins()
     {
         yield return (new EnginePlugin(), 0);
-        yield return (new BehaviorsPlugin { ScriptsDirectory = ScriptsDirectory }, 100);
+        yield return (new BehaviorsPlugin(), 100);
 
         // Inert unless Config.Serve or BCS_SERVE asks for it, so every app can be driven from a
         // terminal and none pays for the possibility. Last, so the commands it serves are the ones

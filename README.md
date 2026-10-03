@@ -3267,9 +3267,10 @@ run against a real Bevy app. Known gaps:
   thin is the layer above that. Animation has no bridge, sprites step through no frames of their
   own, and a compressed texture a desktop GPU cannot decode is not transcoded.
   [.github/TODO.md](.github/TODO.md) lists what each gap needs.
-- `BehaviorsPlugin.ScriptsDirectory` is reserved for hot-reloading behavior scripts and does
-  nothing yet. The editor reloads scripts through `App.EnableDynamicSystems` instead, because
-  the compiler lives there.
+- The library compiles no C# at runtime, so a game carries no compiler. Behavior scripts loaded
+  while an app runs go through `BevyCSharp.Scripting`, which the editor and the player reference
+  and a game references only if it loads scripts itself, over `App.EnableDynamicSystems` and
+  `App.RemoveSystemsBySource`.
 - The editor's document is a scene file, with the hierarchy, entity references and Bevy's own
   components kept, and primitives and materials made in memory written as how to make them again.
   A mesh built vertex by vertex is written as its geometry, and a material can be kept in a

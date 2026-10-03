@@ -39,7 +39,8 @@ code per type. What [COMPONENTS.md](COMPONENTS.md) has left:
 A component holds a list either inside its own bytes (`InlineList8<T>` and its siblings) or as a
 handle into a managed store (`EcsList<T>`), and a dictionary as a handle into the same store
 (`EcsMap<K, V>`), which a remove hook frees with the entity. The inspector, the scene writer and
-the schemas treat them as lists and maps. What [COMPONENTS.md](COMPONENTS.md) has left:
+the schemas treat them as lists and maps, and [COMPONENTS.md](COMPONENTS.md) has nothing left of
+them.
 
 
 ### Scenes
@@ -161,13 +162,6 @@ by name. What is left is at the edges of that:
   materials on meshes, so something drawn out of buffers and lit the way Bevy lights things is
   still a mesh of as many squares as there are particles, or a visibility buffer resolved by a pass
   that does its own lighting with `bcs_pass`'s lights.
-
-### Scripts a game can load
-
-`BehaviorsPlugin.ScriptsDirectory` is reserved and does nothing. The engine half exists,
-`App.EnableDynamicSystems` and `App.RemoveSystemsBySource`, and `BevyCSharp.Editor` drives Roslyn
-through them. What is left is deciding whether the core should carry a compiler at all, which a game
-loading a script without the editor would need.
 
 ## Rendering
 
