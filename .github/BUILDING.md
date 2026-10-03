@@ -84,6 +84,21 @@ texture atomics, which the bridge checks before turning them on. Ray-traced ligh
 dependency, and is kept out of the profiles because adding it makes every material deferred; an
 app turns it on with `Config.RayTracedLighting`, on an adapter with ray queries.
 
+A game's assets can be compiled into the bridge, so what a player is given is the executable and
+the library with no folder beside them:
+
+```bash
+build/build-native.sh --render --embed BevyCSharp.Sample/assets    # bash
+build/build-native.ps1 -Render -Embed BevyCSharp.Sample/assets      # PowerShell
+```
+
+`bevy_embedded_assets` reads the folder as the library compiles and serves it in place of the asset
+root, so every path loads as before and `App.HasEmbeddedAssets` says so. A bridge built so serves
+one game, so it is staged under `build/embedded/<rid>/` rather than where the projects here copy
+the bridge from. Scenes, data assets and the other files the managed side reads for itself still
+come from the folder on disk, which a game shipped this way carries until those reads go through
+the same bytes ([PLAY.md](PLAY.md) §4).
+
 ## Bevy's components after an upgrade
 
 `BevyCSharp/Generated/bevy-components.tsv` describes every component Bevy reflects, and the

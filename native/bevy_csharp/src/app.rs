@@ -193,6 +193,15 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         app.register_asset_source("user", AssetSourceBuilder::platform_default(root, None));
     }
 
+    // A game's own assets compiled in, read in place of the asset root, so every load finds the
+    // embedded file under the path it always had. Added here for the same reason the player's
+    // source is, before the asset plugin builds the sources, and only by a bridge built for one
+    // game (`build-native.sh --embed`).
+    #[cfg(feature = "embed")]
+    app.add_plugins(bevy_embedded_assets::EmbeddedAssetPlugin {
+        mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
+    });
+
     // Whether the renderer is installed at all. A window is one way to draw and an image is the
     // other, and both take Bevy's full plugin set, so everything below asks this rather than
     // asking about the window. Only a run with no renderer takes the minimal set.
@@ -1178,6 +1187,16 @@ pub extern "C" fn bcs_has_render() -> i32 {
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_has_editor() -> i32 {
     if cfg!(feature = "editor") { 1 } else { 0 }
+}
+
+/// Reports whether this library carries a game's assets compiled in: `1` when it was built with
+/// `--embed`, `0` otherwise.
+///
+/// A library built so reads every asset from what it carries, whatever asset root an app names,
+/// which an app reading its own files from that root has to know.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_has_embedded_assets() -> i32 {
+    if cfg!(feature = "embed") { 1 } else { 0 }
 }
 
 /// Whether this app installed the interface, as [`bcs_has_interface`] reports.

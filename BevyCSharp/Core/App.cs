@@ -75,6 +75,16 @@ public sealed unsafe class App : IDisposable
     /// </remarks>
     public static bool HasEditor => Native.bcs_has_editor() != 0;
 
+    /// <summary>True when the loaded native bridge carries a game's assets compiled in.</summary>
+    /// <remarks>
+    /// A bridge built with <c>build-native.sh --embed</c> reads every asset Bevy loads from the
+    /// folder it was built with, whatever <see cref="Config.AssetRoot"/> says. What the managed
+    /// side reads for itself, such as a scene file or a data asset, still comes from the asset
+    /// root on disk, so a game shipped this way ships that folder too until the managed reads go
+    /// through the same bytes.
+    /// </remarks>
+    public static bool HasEmbeddedAssets => Native.bcs_has_embedded_assets() != 0;
+
     /// <summary>True when the running app installed the interface.</summary>
     /// <remarks>
     /// The third of the three questions, and the one an app drawing an interface actually needs

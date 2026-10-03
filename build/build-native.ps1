@@ -26,6 +26,11 @@
     Add Bevy's ray-traced lighting to whichever profile is built, or to the render profile when
     none is named.
 
+.PARAMETER Embed
+    A game's asset folder to compile into the library, which then reads every asset from it. Staged
+    under build/embedded/<rid>/ rather than where the projects here pick the bridge up, since a
+    bridge built so serves that one game.
+
 .PARAMETER Target
     Rust target triple to build for. Defaults to the host.
 
@@ -45,6 +50,7 @@ param(
     [switch] $Editor,
     [switch] $Meshlet,
     [switch] $Solari,
+    [string] $Embed = '',
     [string] $Target = '',
     [switch] $Clean
 )
@@ -66,6 +72,15 @@ $Features = if ($Editor) { 'editor' } elseif ($Render -or $Meshlet -or $Solari) 
 # Meshlets and ray-traced lighting sit on top of a profile rather than replacing one.
 if ($Meshlet) { $Features = "$Features,meshlet" }
 if ($Solari) { $Features = "$Features,solari" }
+
+# The folder is read when the library is compiled, through the variable bevy_embedded_assets looks
+# for, so it is made absolute here, where the caller's relative path still means something.
+if ($Embed) {
+    if (-not (Test-Path -PathType Container $Embed)) { throw "-Embed names '$Embed', which is not a directory." }
+    $Embed = (Resolve-Path $Embed).Path
+    $Features = "$Features,embed"
+    $env:BEVY_ASSET_PATH = $Embed
+}
 
 if (-not (Test-Path (Join-Path $NativeDir 'Cargo.toml'))) {
     throw "No Rust workspace at '$NativeDir'. This script expects to live in <repo>/build/ with the sources in <repo>/native/."
@@ -129,6 +144,16 @@ if ($LASTEXITCODE -ne 0) { throw "cargo build failed with exit code $LASTEXITCOD
 $Built = Join-Path $TargetDir (Join-Path $Target (Join-Path 'release' $LibName))
 if (-not (Test-Path $Built)) {
     throw "cargo reported success but '$Built' is missing."
+}
+
+# A game's own bridge goes beside the others rather than over them, since every project here
+# copies the staged one and would read that game's assets in place of its own.
+if ($Embed) {
+    $EmbeddedDir = Join-Path $BuildDir (Join-Path 'embedded' $Rid)
+    New-Item -ItemType Directory -Force -Path $EmbeddedDir | Out-Null
+    Copy-Item -Force $Built (Join-Path $EmbeddedDir $LibName)
+    Write-Host "==> staged $(Join-Path $EmbeddedDir $LibName), carrying $Embed"
+    return
 }
 
 # The per-RID slot the NuGet package picks up at pack time.

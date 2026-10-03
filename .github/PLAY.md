@@ -115,6 +115,13 @@ That fits a build step that already builds the bridge per target, so the plan ta
 
 The first is enough to ship; the second removes the per-game bridge build.
 
+Built: the first. `build-native.sh --embed <dir>` (`-Embed` in PowerShell) turns on the bridge's
+`embed` feature over that folder, which adds `EmbeddedAssetPlugin` in `ReplaceDefault` mode before
+the asset plugin, and stages the library under `build/embedded/<rid>/` so the editor and the tests
+keep the ordinary bridge. `App.HasEmbeddedAssets` (`bcs_has_embedded_assets`, ABI 161) reports it.
+What the managed side reads for itself, scenes and data assets among it, still comes from the
+asset root on disk, which the second part is for.
+
 ## 5. Saving settings and progress
 
 `bevy-persistent` 0.11 also targets Bevy 0.19. It wraps a resource in `Persistent<R>`, which loads
@@ -157,10 +164,8 @@ For what C# owns, the same design on the managed side:
 
 ## Order
 
-1. Per-game embedding (`--embed`), since it is a feature flag and a plugin.
-2. The window's place over `bevy-persistent`, and `EditorSettings` moved onto `Persistent<T>`.
-3. Export in the Play tab over `dotnet publish`, with embedding as an option.
-4. Scene files, as [SCENES.md](SCENES.md) orders them, which the player loads.
-5. The player and playing the edited scene.
-6. The remote view.
-7. Embedding through a shared bridge.
+1. Export in the Play tab over `dotnet publish`, with embedding as an option.
+2. Scene files, as [SCENES.md](SCENES.md) orders them, which the player loads.
+3. The player and playing the edited scene.
+4. The remote view.
+5. Embedding through a shared bridge, so the managed reads come from the same bytes.

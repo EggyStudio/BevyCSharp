@@ -16,9 +16,14 @@
 #   build/build-native.sh --editor             # the above plus the HTML and CSS UI
 #   build/build-native.sh --editor --meshlet   # any profile plus Bevy's meshlets
 #   build/build-native.sh --editor --solari    # any profile plus Bevy's ray-traced lighting
+#   build/build-native.sh --render --embed dir # one game's bridge, its assets compiled in
 #   build/build-native.sh --render --portable  # build in a container, for older machines
 #   build/build-native.sh --local              # override a PORTABLE=1 in build-native.local
 #   build/build-native.sh --clean              # remove build/target and build/artifacts first
+#
+# A bridge built with --embed carries one game's asset folder and reads every asset from it, so it
+# is staged under build/embedded/<rid>/ rather than where every project here picks the bridge up,
+# and the editor and the tests keep the ordinary one.
 #
 # On Linux a binary runs only where glibc is at least as new as the one it was built against, so
 # building on a current distribution produces something that will not load on an older one. The
@@ -40,6 +45,7 @@ ARTIFACT_DIR="$BUILD_DIR/artifacts"
 FEATURES="headless"
 MESHLET=0
 SOLARI=0
+EMBED=""
 TARGET=""
 CLEAN=0
 PORTABLE=0
@@ -66,12 +72,13 @@ while [[ $# -gt 0 ]]; do
         --headless) FEATURES="headless"; shift ;;
         --meshlet)  MESHLET=1; shift ;;
         --solari)   SOLARI=1; shift ;;
+        --embed)    EMBED="${2:-}"; shift 2 || { echo "--embed needs a directory" >&2; exit 2; } ;;
         --target)   TARGET="$2"; shift 2 ;;
         --clean)    CLEAN=1; shift ;;
         --portable) PORTABLE=1; shift ;;
         --local)    PORTABLE=0; shift ;;
         -h|--help)
-            sed -n '2,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+            sed -n '2,26p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
             exit 0 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
@@ -92,6 +99,17 @@ fi
 
 if [[ "$SOLARI" == 1 ]]; then
     FEATURES="$FEATURES,solari"
+fi
+
+# The folder is read when the library is compiled, through the variable bevy_embedded_assets
+# looks for, so it is made absolute here, where the caller's relative path still means something.
+if [[ -n "$EMBED" ]]; then
+    if [[ ! -d "$EMBED" ]]; then
+        echo "error: --embed names '$EMBED', which is not a directory." >&2
+        exit 2
+    fi
+    EMBED="$(cd "$EMBED" && pwd)"
+    FEATURES="$FEATURES,embed"
 fi
 
 if [[ ! -f "$NATIVE_DIR/Cargo.toml" ]]; then
@@ -179,6 +197,9 @@ echo "    output   : $TARGET_DIR"
 echo "    target   : $TARGET"
 echo "    rid      : $RID"
 echo "    features : $FEATURES"
+if [[ -n "$EMBED" ]]; then
+    echo "    embeds   : $EMBED"
+fi
 
 if [[ "$PROFILE" == "render" || "$PROFILE" == "editor" ]]; then
     echo "    note     : builds Bevy's renderer, winit and wgpu. This takes several minutes"
@@ -201,7 +222,19 @@ if [[ $PORTABLE -eq 1 ]]; then
         SETUP="apt-get update -qq && apt-get install -y -qq --no-install-recommends libasound2-dev >/dev/null && "
     fi
 
+    # The folder to embed, mounted where the container can read it, unless it is inside the
+    # repository, which is mounted already.
+    EMBED_ARGS=()
+    if [[ -n "$EMBED" ]]; then
+        if [[ "$EMBED" == "$REPO_ROOT"/* ]]; then
+            EMBED_ARGS=(-e "BEVY_ASSET_PATH=/src/${EMBED#"$REPO_ROOT"/}")
+        else
+            EMBED_ARGS=(-v "$EMBED:/embed:ro,z" -e "BEVY_ASSET_PATH=/embed")
+        fi
+    fi
+
     "$CONTAINER" run --rm \
+        "${EMBED_ARGS[@]}" \
         -v "$REPO_ROOT:/src:z" \
         -v "${CARGO_HOME:-$HOME/.cargo}/registry:/usr/local/cargo/registry:z" \
         -w /src \
@@ -216,6 +249,8 @@ if [[ $PORTABLE -eq 1 ]]; then
     # No --target inside the container, so cargo writes to the plain release directory.
     BUILT="$TARGET_DIR/release/$LIBNAME"
 else
+    if [[ -n "$EMBED" ]]; then export BEVY_ASSET_PATH="$EMBED"; fi
+
     cargo build \
         --release \
         --manifest-path "$NATIVE_DIR/Cargo.toml" \
@@ -230,6 +265,15 @@ fi
 if [[ ! -f "$BUILT" ]]; then
     echo "error: cargo reported success but '$BUILT' is missing." >&2
     exit 1
+fi
+
+# A game's own bridge goes beside the others rather than over them, since every project here
+# copies the staged one and would read that game's assets in place of its own.
+if [[ -n "$EMBED" ]]; then
+    mkdir -p "$BUILD_DIR/embedded/$RID"
+    cp "$BUILT" "$BUILD_DIR/embedded/$RID/$LIBNAME"
+    echo "==> staged $BUILD_DIR/embedded/$RID/$LIBNAME, carrying $EMBED"
+    exit 0
 fi
 
 # The per-RID slot the NuGet package picks up at pack time.

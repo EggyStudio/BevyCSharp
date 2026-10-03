@@ -60,6 +60,14 @@ solari = [
     "dep:wgpu",
 ]
 
+# A game's assets compiled into the library, so a shipped game is its executable and this, with no
+# folder beside them to lose or change. The folder is the one `BEVY_ASSET_PATH` names when the
+# library is built, which `build-native.sh --embed <dir>` sets, so this is a build per game rather
+# than a profile, and the bridge built with it serves that game alone. Any profile takes it.
+embed = [
+    "dep:bevy_embedded_assets",
+]
+
 # Minimal profile: app + ECS + time + input + transform + math.
 # No window, no GPU, no audio. Drives the loop with ScheduleRunnerPlugin.
 # This is what CI, unit tests and dedicated servers build.
@@ -179,6 +187,8 @@ serde_json = "1"
 # re-exports the reflect serializers but not the trait their seed implements.
 serde = "1"
 wgpu = { version = "29", default-features = false, optional = true }
+# The embedding behind the `embed` feature, at the release that targets Bevy 0.19.
+bevy_embedded_assets = { version = "0.16", optional = true }
 
 # Linux and the BSDs only.
 #

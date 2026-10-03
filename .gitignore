@@ -29,6 +29,8 @@ msbuild.log
 /build/target-portable/
 /build/artifacts/
 /build/package/
+# A bridge built for one game with --embed, which carries that game's assets.
+/build/embedded/
 # The Slang compiler build/fetch-slang.sh downloads.
 /build/tools/
 
