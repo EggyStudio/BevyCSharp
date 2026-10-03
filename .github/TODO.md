@@ -189,10 +189,14 @@ code already in the binary.
   It also needs a `DlssProjectId` inserted before `DefaultPlugins` and a runtime check of whether
   the machine supports it, so it is a fourth arm on `AntiAlias` that most machines have to be told
   they cannot have.
-- **A directional light's soft shadow is unconfirmed.** `Render.SetSoftShadows` widens a spot
-  light's penumbra visibly, but a directional light showed none in a small test scene at any size
-  tried, since its penumbra is worked out in the depth of a shadow map covering far more than the
-  scene. Whether it shows at the scale of Bevy's own example has not been checked here.
+- **A directional light's soft shadow shows no penumbra here.** `Render.SetSoftShadows` widens a
+  spot light's penumbra visibly. A directional light's showed none over a
+  slab hanging above a floor, a few units across, at any size tried from 0.05 to a hundred
+  thousand, with temporal shadow filtering, temporal antialiasing and the depth bias Bevy's own
+  example uses. Bevy's blocker search divides the size by the cascade's texel size, so the size
+  that searches the right distance depends on the cascade, and the example's ten suits a scene
+  the size of its palm tree. What is left is reading the cascade a slab like this one falls in
+  and the depth range it covers, which decide both the search and the blur.
 - **One window.** Position, decorations, resizability, always-on-top and exclusive fullscreen are
   bridged, the monitors are readable by size, name and video mode, `Window.SetVideoMode` takes
   the screen over at one of them, and `Config.RememberWindow` reopens the window where it was
