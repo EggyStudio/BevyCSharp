@@ -397,10 +397,8 @@ material of its own, friction and a bounce Bepu's stiff contacts do not give, wh
 gives back after the step, and a body that tumbles in an odd shape is a convex hull of its points,
 turning about the hull's center while its entity keeps its origin. Ball joints, hinges, welds and
 distance ranges hold bodies together, a hinge can turn itself and stop at an angle, and contacts
-are reported, a sensor making a trigger volume. What is left:
-
-- **Not published yet.** The workflow packs the core alone, so the package is reached by project
-  reference inside this repository. Packing it is adding it to the pack step.
+are reported, a sensor making a trigger volume. It is part of the core library, so the package the
+workflow packs carries it, with BepuPhysics as a dependency, and nothing is left of it here.
 
 ## Platform
 
