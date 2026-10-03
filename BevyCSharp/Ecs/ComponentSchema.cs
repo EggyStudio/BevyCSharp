@@ -14,7 +14,7 @@ namespace Bevy;
 /// </remarks>
 public enum FieldKind
 {
-    /// <summary>Something with no editor: shown by name and type only.</summary>
+    /// <summary>Something with no editor, shown by name and type only.</summary>
     Opaque,
 
     /// <summary>A checkbox.</summary>
@@ -49,7 +49,7 @@ public enum FieldKind
     /// </summary>
     /// <remarks>
     /// An enum whose values are bits. It is a different kind rather than a flag on
-    /// <see cref="Enum"/> because it is drawn differently: one row that offers a choice against
+    /// <see cref="Enum"/> because it is drawn differently, as one row that offers a choice against
     /// several that are each on or off.
     /// </remarks>
     Flags,

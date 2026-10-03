@@ -1,4 +1,4 @@
-//! Watching what a camera's shaders keep: a copy of one of its images, made visible, written into
+//! Watching what a camera's shaders keep, a copy of one of its images, made visible, written into
 //! an ordinary image every frame so an interface can show it.
 //!
 //! A screen-space technique is a chain of images nobody looks at, and when the result is wrong the

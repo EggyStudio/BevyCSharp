@@ -1,4 +1,4 @@
-//! Bevy's Solari: lighting traced against the scene with hardware ray queries, direct light from
+//! Bevy's Solari, lighting traced against the scene with hardware ray queries, direct light from
 //! every light and emissive surface, and indirect light bounced off everything, in real time.
 //!
 //! It is world-space global illumination and traced reflections as an engine ships them, and the

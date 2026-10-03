@@ -1,7 +1,7 @@
 namespace Bevy;
 
 /// <summary>
-/// Marks a struct as a behavior: a component and its systems declared as one type.
+/// Marks a struct as a behavior, a component and its systems declared as one type.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -89,7 +89,7 @@ public sealed class OnPreUpdateAttribute : Attribute;
 public sealed class OnUpdateAttribute : Attribute;
 
 /// <summary>
-/// Runs on Bevy's fixed timestep: zero or more times a frame, each covering the same slice of time.
+/// Runs on Bevy's fixed timestep, zero or more times a frame, each covering the same slice of time.
 /// </summary>
 /// <remarks>
 /// For anything whose results should not depend on the frame rate, which is most physical

@@ -8,8 +8,8 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// What <see cref="ComponentField.Read"/> returns for a <see cref="FieldKind.List"/> field and what
-/// its <see cref="ComponentField.Write"/> takes: every item, boxed, in order. A copy rather than a
-/// view, because the list it was read from lives in a component that the next write replaces.
+/// its <see cref="ComponentField.Write"/> takes, every item boxed and in order. A copy rather than
+/// a view, because the list it was read from lives in a component that the next write replaces.
 /// </para>
 /// <para>
 /// Two values with the same items are equal. A tool that reads a field twice and asks whether it

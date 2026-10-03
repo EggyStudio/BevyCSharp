@@ -32,7 +32,7 @@ pub struct BcsImGuiVertex {
     pub color: u32,
 }
 
-/// One draw call: a run of indices, clipped to a rectangle, reading from one texture.
+/// One draw call, a run of indices clipped to a rectangle and reading from one texture.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
 pub struct BcsImGuiCommand {
@@ -204,7 +204,7 @@ pub unsafe extern "C" fn bcs_imgui_texture(pixels: *const u8, width: u32, height
 
 /// Takes a picture from a file under the asset root, and answers what to call it.
 ///
-/// What an icon is: a file the editor ships, loaded the way every other asset is, so it is decoded
+/// An icon is a file the editor ships, loaded the way every other asset is, so it is decoded
 /// by the engine rather than by the managed side. It is not there for a frame or two, and a draw
 /// call naming a picture that has not arrived draws nothing rather than something wrong.
 ///

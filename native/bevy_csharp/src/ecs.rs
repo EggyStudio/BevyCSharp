@@ -529,7 +529,7 @@ pub unsafe extern "C" fn bcs_ecs_children(entity: u64, out: *mut u64, capacity: 
 
 // -- Introspection
 //
-// What an editor needs and a game does not: not "read this component off that entity", which the
+// What an editor needs and a game does not. Not "read this component off that entity", which the
 // calls above already do, but "what is here at all". A hierarchy has nothing to list and an
 // inspector cannot label a row without these.
 

@@ -117,7 +117,7 @@ public readonly record struct MeshInfo(
 [Flags]
 public enum MeshFlags : uint
 {
-    /// <summary>As Bevy has it: culled when out of view, casting and receiving shadows.</summary>
+    /// <summary>As Bevy has it, culled when out of view and casting and receiving shadows.</summary>
     None = 0,
 
     /// <summary>Never culled for being out of view, for a mesh its shader moves.</summary>

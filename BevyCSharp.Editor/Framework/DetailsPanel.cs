@@ -834,7 +834,7 @@ public static class DetailsPanel
     /// </summary>
     /// <remarks>
     /// A component with nothing to edit still says something about the thing carrying it, and a row
-    /// with no value in it says it badly. A tag is the shape that fits: a word, wrapped into as many
+    /// with no value in it says it badly. A tag is the shape that fits, a word wrapped into as many
     /// lines as it takes.
     /// </remarks>
     private static void Tags(BehaviorContext ctx, Entity entity)

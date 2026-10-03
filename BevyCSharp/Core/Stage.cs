@@ -42,7 +42,7 @@ public enum Stage
     CommandFlush = 9,
 
     /// <summary>
-    /// Bevy's fixed timestep: zero or more times a frame, each covering the same slice of time.
+    /// Bevy's fixed timestep, run zero or more times a frame, each covering the same slice of time.
     /// </summary>
     /// <remarks>
     /// Runs between <see cref="PreUpdate"/> and <see cref="Update"/>, as many times as the time

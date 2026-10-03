@@ -70,8 +70,8 @@ public sealed class RotationTests
     [Fact]
     public void LookingStraightUpStillAnswers()
     {
-        // The pole: pitch at a right angle, where the other two angles stop being separable. It
-        // has to answer with something usable rather than a not-a-number.
+        // At the pole, pitch is at a right angle, where the other two angles stop being separable.
+        // It has to answer with something usable rather than a not-a-number.
         var up = Quat.FromEuler(MathF.PI / 2f, 0f, 0f);
         var read = up.ToEuler();
 
@@ -119,7 +119,7 @@ public sealed class ConjugateTests
         var from = Quat.FromEuler(0.2f, 0.5f, 0f);
         var to = Quat.FromEuler(-0.1f, 1.2f, 0.3f);
 
-        // What the gizmo does with a drag: work out how the thing being dragged turned, and give
+        // The gizmo works out from a drag how the thing being dragged turned, and gives
         // everything else the same turn.
         var difference = to * from.Conjugate;
         var applied = difference * from;

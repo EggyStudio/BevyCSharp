@@ -345,7 +345,7 @@ public static class EditorCommands
 
     }
 
-    /// <summary>Where a menu opened from the toolbar goes: under the viewport's top left.</summary>
+    /// <summary>Where a menu opened from the toolbar goes, under the viewport's top left.</summary>
     /// <remarks>
     /// Clear of the toolbar rather than against it. A flyout whose top edge meets the bottom edge of
     /// the button that opened it reads as one tall panel instead of two things.

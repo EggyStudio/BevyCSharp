@@ -136,7 +136,7 @@ public static class EditorEval
 
     private static int _generation;
 
-    /// <summary>What a fragment is compiled against: everything this process already loaded.</summary>
+    /// <summary>What a fragment is compiled against, everything this process already loaded.</summary>
     private static MetadataReference[] References() => _references ??=
     [
         .. AppDomain.CurrentDomain

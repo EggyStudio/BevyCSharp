@@ -46,7 +46,7 @@ public sealed class CliServerTests : IDisposable
 
         try
         {
-            // What it is: the state a caller checks before sending anything else.
+            // What it is, the state a caller checks before sending anything else.
             var status = Ask(session, "status");
 
             Assert.True(status.GetProperty("success").GetBoolean());
@@ -54,7 +54,7 @@ public sealed class CliServerTests : IDisposable
             Assert.Equal(
                 Environment.ProcessId, status.GetProperty("data").GetProperty("pid").GetInt32());
 
-            // What it can do: the catalog, with the schema that makes it callable unseen.
+            // What it can do, the catalog with the schema that makes it callable unseen.
             var list = Ask(session, "list");
             var commands = list.GetProperty("data").GetProperty("commands").EnumerateArray()
                 .ToDictionary(command => command.GetProperty("name").GetString()!);

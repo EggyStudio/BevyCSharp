@@ -1,4 +1,4 @@
-//! Shader passes: full-screen Slang fragment shaders the game wrote, run over what a camera drew.
+//! Shader passes, full-screen Slang fragment shaders the game wrote, run over what a camera drew.
 //!
 //! A pass is a program (see [`super::programs`]) whose pass stage is run once per pixel of the
 //! camera's picture, reading the picture so far and writing the next one. A camera takes any number

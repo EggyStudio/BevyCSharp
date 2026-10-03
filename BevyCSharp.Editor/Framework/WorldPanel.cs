@@ -173,7 +173,7 @@ public static class WorldPanel
             return;
         }
 
-        // How deep a fold reaches: everything under a folded row, until something at its own
+        // A fold reaches everything under a folded row, until something at its own
         // depth or shallower comes along.
         var hidden = -1;
 
@@ -232,7 +232,7 @@ public static class WorldPanel
     }
 
     /// <summary>
-    /// A row that is being renamed: a box to type in and nothing else, until Enter or Escape.
+    /// A row that is being renamed, a box to type in and nothing else until Enter or Escape.
     /// </summary>
     /// <param name="ctx">This frame.</param>
     /// <param name="row">Which row is being renamed.</param>
@@ -275,7 +275,7 @@ public static class WorldPanel
     }
 
     /// <summary>
-    /// One row: a pill the width of the list, with a picture and a name in it.
+    /// One row, a pill the width of the list with a picture and a name in it.
     /// </summary>
     /// <remarks>
     /// Drawn rather than asked for, because a selectable is a rectangle with square corners in this

@@ -1,7 +1,7 @@
 namespace Bevy;
 
 /// <summary>
-/// The one-line entry point: build a fully wired app and run it.
+/// The one-line entry point, which builds a fully wired app and runs it.
 /// </summary>
 /// <remarks>
 /// This is the whole of the setup a normal project needs. Every <c>[Behavior]</c> struct in

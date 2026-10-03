@@ -304,7 +304,7 @@ public sealed class Config
     /// </remarks>
     public bool FailFastOnSystemException { get; set; }
 
-    /// <summary>A sensible default: a 1280x720 vsynced window.</summary>
+    /// <summary>A sensible default, a 1280x720 vsynced window.</summary>
     public static Config Default => new();
 
     /// <summary>A windowless configuration that runs <paramref name="frames"/> ticks and exits.</summary>

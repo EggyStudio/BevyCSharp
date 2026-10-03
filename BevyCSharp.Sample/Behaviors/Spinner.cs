@@ -3,7 +3,7 @@ using Bevy;
 namespace BevyCSharp.Sample.Behaviors;
 
 /// <summary>
-/// A behavior that is its own component: per-entity state plus the logic that drives it.
+/// A behavior that is its own component, per-entity state plus the logic that drives it.
 /// </summary>
 /// <remarks>
 /// This is the shape the whole package exists for. <see cref="Angle"/> and <see cref="Speed"/>

@@ -5,7 +5,7 @@ using Bevy.Interop;
 namespace Bevy;
 
 /// <summary>
-/// The engine handle: build it up with plugins and systems, then <see cref="Run"/> it.
+/// The engine handle, built up with plugins and systems and then started with <see cref="Run"/>.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -170,7 +170,7 @@ public sealed unsafe class App : IDisposable
 
         ComponentRegistry.BeginApp(_handle);
 
-        // Where Bevy reads assets from, which is where a streamed read's path starts too: the
+        // Where Bevy reads assets from, and where a streamed read's path starts too, is the
         // directory asked for, or `assets` beside the executable, which is Bevy's own default.
         Streaming.AssetRoot = string.IsNullOrEmpty(Config.AssetRoot)
             ? Path.Combine(AppContext.BaseDirectory, "assets")

@@ -1,7 +1,7 @@
 using Bevy;
 using BevyCSharp.Editor;
 
-// Opens the editor: a scene filling the window, with panels floating over it.
+// Opens the editor, a scene filling the window with panels floating over it.
 //
 // The panels need a bridge built with the editor profile, which carries the HTML and CSS
 // surface on top of the renderer:

@@ -64,7 +64,7 @@ pub fn with_world_opt<T, F: FnOnce(&mut World) -> T>(f: F) -> Option<T> {
     Some(f(unsafe { &mut *ptr }))
 }
 
-/// A C# system entry point: a function pointer plus the opaque state C# gets back.
+/// A C# system entry point, a function pointer plus the opaque state C# gets back.
 #[derive(Clone, Copy)]
 pub struct SystemReg {
     /// The `extern "C"` callback into managed code.

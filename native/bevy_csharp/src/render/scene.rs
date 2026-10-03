@@ -1436,7 +1436,7 @@ pub extern "C" fn bcs_render_set_light_cookie(light: u64, image: i32) -> i32 {
 /// Softens a light's shadow the farther it falls from what casts it, as a light of `size` world
 /// units across does, or with a size of zero or less makes it hard again.
 ///
-/// Percentage-closer soft shadows: the penumbra grows with the distance between the caster and the
+/// Percentage-closer soft shadows. The penumbra grows with the distance between the caster and the
 /// surface, which a blur of fixed width cannot do. For a point or a spot light the size is its
 /// radius, which this sets. It is noisy, so it suits a camera filtering its shadows temporally
 /// with temporal antialiasing on (see [`bcs_render_set_shadow_filtering`]), and it costs a good

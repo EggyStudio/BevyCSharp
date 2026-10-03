@@ -4,8 +4,8 @@ using Bevy;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// Plays the game in a window of its own, as Godot does, and builds it: the project is built and run
-/// as a process beside the editor, driven from the Play tab.
+/// Plays the game in a window of its own, as Godot does, and builds it. The project is built and
+/// run as a process beside the editor, driven from the Play tab.
 /// </summary>
 /// <remarks>
 /// <para>

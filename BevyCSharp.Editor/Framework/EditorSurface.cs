@@ -329,7 +329,7 @@ public static class EditorSurface
     }
 
     /// <summary>
-    /// A pane inside a tab: a surface a step lighter than the tab, rounded, with air of its own,
+    /// A pane inside a tab, a surface a step lighter than the tab, rounded, with air of its own,
     /// that scrolls what it holds.
     /// </summary>
     /// <remarks>

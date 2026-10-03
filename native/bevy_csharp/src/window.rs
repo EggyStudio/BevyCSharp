@@ -603,7 +603,7 @@ fn release_after_drag() {
 /// Turns the platform's input method on or off for the window, and says where the text being
 /// composed is, in logical pixels from the window's top left.
 ///
-/// An input method (IME) is how Japanese, Chinese or Korean is typed: keys build up a candidate
+/// An input method (IME) is how Japanese, Chinese or Korean is typed. Keys build up a candidate
 /// that is shown and chosen from before it becomes text. It is off unless asked for, because with
 /// it on the keys a game reads as movement are taken by the input method instead. The position
 /// places the platform's candidate list beside the field being typed into rather than in a corner.

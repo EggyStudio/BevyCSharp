@@ -10,7 +10,7 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// The wrappers are compiled into the library, so these exercise the generator through what it
-/// emitted: a property that read the wrong path, or had the wrong type, fails here against a real
+/// emitted. A property that read the wrong path, or had the wrong type, fails here against a real
 /// world rather than in a snapshot of the generated text.
 /// </remarks>
 [Collection("engine")]

@@ -142,7 +142,7 @@ public static class EditorWidgets
     /// </summary>
     /// <remarks>
     /// The tabs along the bottom, the pages of the settings, the themes in the style tab and the
-    /// levels a console shows are the same thing four times over: a row of words, one or more of
+    /// levels a console shows are the same thing four times over, a row of words, one or more of
     /// which is in force. Drawn here rather than as a button per caller, so they are one size, one
     /// shape and one set of colors, and so the shape is a capsule, which ImGui's own button cannot
     /// quite be however far its rounding is pushed.

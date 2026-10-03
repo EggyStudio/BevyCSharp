@@ -5,7 +5,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers the editor's previews: a mesh and a material drawn into pictures of their own, read back
+/// Covers the editor's previews, a mesh and a material drawn into pictures of their own, read back
 /// to see that something other than the background was drawn.
 /// </summary>
 /// <remarks>

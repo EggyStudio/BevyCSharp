@@ -1052,7 +1052,7 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
 /// loaded has no path and answers an empty string, which is the honest answer rather than a made-up
 /// name.
 ///
-/// The usual text convention: pass null with a capacity of zero to learn the length, then call
+/// The usual text convention. Pass null with a capacity of zero to learn the length, then call
 /// again with a buffer that size.
 ///
 /// Returns [`status::NO_COMPONENT`] where the entity carries no such thing.

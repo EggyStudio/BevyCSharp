@@ -120,7 +120,7 @@ public sealed class SpriteSettings
     /// The part of the image to draw, in pixels, or null for all of it.
     /// </summary>
     /// <remarks>
-    /// What a sprite sheet needs: one image holding many frames, each drawn by naming its
+    /// For a sprite sheet, one image holding many frames, each drawn by naming its
     /// rectangle rather than by loading a separate file.
     /// </remarks>
     public (float Left, float Top, float Right, float Bottom)? Rect { get; set; }

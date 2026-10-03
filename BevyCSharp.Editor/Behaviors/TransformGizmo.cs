@@ -25,7 +25,7 @@ public partial struct TransformGizmo
     /// <summary>Which handle is being dragged: an axis, <see cref="Center"/>, or -1.</summary>
     internal static int Axis { get; private set; } = -1;
 
-    /// <summary>The handle that picks no axis: a drag across the screen rather than along a line.</summary>
+    /// <summary>The handle that picks no axis, for a drag across the screen rather than along a line.</summary>
     internal const int Center = 3;
 
     /// <summary>The frame a drag last ended on, or a frame that never happens.</summary>
@@ -235,7 +235,7 @@ public partial struct TransformGizmo
             return ToSegment(x, y, fromX, fromY, toX, toY);
         }
 
-        // The ring, as the line the eye follows: a few dozen points around it, each pair a
+        // The ring, as the line the eye follows, a few dozen points around it, each pair a
         // segment. The projection is not a circle on screen unless the camera is looking straight
         // down the axis, so walking it is both simpler and truer than solving for an ellipse.
         var (first, second) = ViewportGizmos.Perpendiculars(axis);

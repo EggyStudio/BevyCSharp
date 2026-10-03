@@ -24,7 +24,7 @@ public partial struct ScoreKeeper
 }
 
 /// <summary>
-/// Covers the message bus: broadcast between systems that know nothing about each other.
+/// Covers the message bus, broadcast between systems that know nothing about each other.
 /// </summary>
 [Collection("engine")]
 public sealed class MessageTests

@@ -430,7 +430,7 @@ pub extern "C" fn bcs_asset_failures_drain() -> i32 {
 
 /// Writes the path of one drained failure into `out`, and returns its length in bytes.
 ///
-/// The usual text convention: pass null with a capacity of zero to learn the length, then call
+/// The usual text convention. Pass null with a capacity of zero to learn the length, then call
 /// again with a buffer that size.
 ///
 /// # Safety

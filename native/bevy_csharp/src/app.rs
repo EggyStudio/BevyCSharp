@@ -34,7 +34,7 @@ pub enum Stage {
     Last = 6,
     /// Once, after the loop exits.
     Cleanup = 7,
-    /// Bevy's fixed timestep: zero or more times a frame, each covering the same slice of time.
+    /// Bevy's fixed timestep, run zero or more times a frame, each covering the same slice of time.
     FixedUpdate = 10,
     /// Internal: mirrors Bevy's time and input into C#, ahead of every user system.
     FrameSync = 8,

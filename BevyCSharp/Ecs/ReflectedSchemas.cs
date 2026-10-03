@@ -110,7 +110,7 @@ internal static class ReflectedSchemas
     /// <param name="fields">Where the rows go, in the order Bevy declares them.</param>
     private sealed class Walk(string component, JsonElement types, List<ComponentField> fields)
     {
-        /// <summary>A place in the walk: where a row is named, read, folded and shown.</summary>
+        /// <summary>A place in the walk, where a row is named, read, folded and shown.</summary>
         /// <param name="Name">The row's name, a path of the Rust names joined by dots.</param>
         /// <param name="Reflect">Bevy's reflect path from the component's root.</param>
         /// <param name="Fold">The fold it sits in, with slashes between levels.</param>

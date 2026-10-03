@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Bevy.Tests;
 
-/// <summary>The state a game is in: what a menu, a run and a pause screen are told apart by.</summary>
+/// <summary>The state a game is in, which tells a menu, a run and a pause screen apart.</summary>
 public enum Screen
 {
     /// <summary>The title screen.</summary>
@@ -90,7 +90,7 @@ public partial struct PlayingAndEnabled
 }
 
 /// <summary>
-/// Covers Bevy's app states: the menu/playing/paused axis systems are scoped to.
+/// Covers Bevy's app states, the menu, playing and paused axis that systems are scoped to.
 /// </summary>
 [Collection("engine")]
 public sealed class StateTests

@@ -945,7 +945,7 @@ pub fn view_names<'a>(
         engine("depth_previous", previous);
     }
 
-    // Bevy's hierarchical depth, built for its occlusion culling: every level at once, each texel
+    // Bevy's hierarchical depth, built for its occlusion culling, every level at once, each texel
     // the farthest depth of the texels under it, which a culling test against it needs.
     if let Some(pyramid) = pyramid {
         names.insert(

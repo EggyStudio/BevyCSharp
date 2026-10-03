@@ -39,7 +39,7 @@ public sealed class SparseComponentTests
         public float X;
     }
 
-    /// <summary>The tag under test: cheap to add and remove, never iterated.</summary>
+    /// <summary>The tag under test, cheap to add and remove and never iterated.</summary>
     private struct Stunned : ISparseComponent;
 
     /// <summary>A second one, carried by a contiguous stretch rather than every other row.</summary>

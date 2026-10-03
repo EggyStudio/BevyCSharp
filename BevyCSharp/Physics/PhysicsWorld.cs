@@ -12,7 +12,7 @@ namespace Bevy.Physics;
 /// <summary>How a body moves.</summary>
 public enum BodyKind
 {
-    /// <summary>Moved by the simulation: falls, collides and is pushed.</summary>
+    /// <summary>Moved by the simulation, so it falls, collides and is pushed.</summary>
     Dynamic,
 
     /// <summary>
@@ -173,7 +173,7 @@ public readonly record struct PhysicsHit(Entity Entity, Vec3 Point, Vec3 Normal,
 /// <para>
 /// A resource, put in the world by <see cref="PhysicsPlugin"/> and reached from a behavior as
 /// <c>ctx.Res&lt;PhysicsWorld&gt;()</c>. The simulation runs on the managed side, so nothing new
-/// crosses to the engine: a body's pose reaches Bevy as the <see cref="Transform"/> write any
+/// crosses to the engine. A body's pose reaches Bevy as the <see cref="Transform"/> write any
 /// system makes, and propagation and the renderer take it from there.
 /// </para>
 /// <para>
@@ -648,7 +648,7 @@ public sealed class PhysicsWorld : IDisposable
         return _simulation.Bodies[body.Moving];
     }
 
-    /// <summary>How a moving body collides: contacts generated up to a tenth of a unit ahead.</summary>
+    /// <summary>How a moving body collides, with contacts generated up to a tenth of a unit ahead.</summary>
     private static CollidableDescription Collidable(TypedIndex shape) => new(shape, 0.1f);
 
     private (TypedIndex Index, BodyInertia Inertia) AddShape(PhysicsShape shape, float mass)

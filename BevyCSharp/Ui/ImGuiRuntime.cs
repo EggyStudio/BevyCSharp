@@ -10,9 +10,9 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The interface is built here, in C#, the way ImGui is built anywhere: a call per widget, every
-/// frame, with no state kept between them. What crosses to the engine is the triangles ImGui asked
-/// for, which Bevy draws over whatever the scene drew.
+/// The interface is built here, in C#, the way ImGui is built anywhere, with a call per widget
+/// every frame and no state kept between them. What crosses to the engine is the triangles ImGui
+/// asked for, which Bevy draws over whatever the scene drew.
 /// </para>
 /// <para>
 /// Three calls make a frame: <see cref="Start"/> once, then <see cref="Begin"/> and

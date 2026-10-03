@@ -146,7 +146,7 @@ public sealed class GltfTests
     [Fact]
     public void AGltfSceneSpawnsTheEntitiesTheFileDescribes()
     {
-        // The other half of a glTF file: not one mesh, but the arrangement an artist laid out.
+        // The other half of a glTF file, not one mesh but the arrangement an artist laid out.
         // The scene entity comes back at once and fills in when the asset has loaded, so the
         // test waits on WorldInstance rather than on a frame count.
         using var harness = new EngineHarness(frames: 300, fps: 240);
@@ -188,7 +188,7 @@ public sealed class GltfTests
     [Fact]
     public void ASpawnedSceneCanBeComposedOnTopOf()
     {
-        // What replaces bsn! on this side: spawn what the file describes, then patch it through
+        // In place of bsn!, this side spawns what the file describes, then patches it through
         // the ordinary ECS surface. Here the artist's placement is overwritten and a component
         // the file knows nothing about is added.
         using var harness = new EngineHarness(frames: 300, fps: 240);

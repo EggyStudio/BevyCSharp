@@ -164,7 +164,7 @@ public sealed class ShaderPassTests
 
     /// <summary>
     /// The prelude turns depth into a distance in world units, which is the front of a cube two
-    /// units across seen from six units away: five.
+    /// units across seen from six units away, which is five.
     /// </summary>
     [Fact]
     public void APassMeasuresDistance()

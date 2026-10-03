@@ -28,8 +28,8 @@ internal static class WindowMemory
     private static int _frames;
 
     /// <summary>
-    /// Where the window opens and how large: the place kept from the last run when the app asks to
-    /// remember it and there is one, otherwise the size the config asks for.
+    /// Where the window opens and how large, taken from the last run when the app asks to remember
+    /// it and there is one, and from the config otherwise.
     /// </summary>
     internal static WindowPlace Open(Config config)
     {

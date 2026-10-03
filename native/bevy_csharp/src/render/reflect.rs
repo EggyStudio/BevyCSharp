@@ -1402,7 +1402,7 @@ pub fn texture_format(format: StorageFormat) -> Option<TextureFormat> {
     })
 }
 
-/// The loose globals' fields: every parameter whose binding is an offset in the shared buffer.
+/// The loose globals' fields, every parameter whose binding is an offset in the shared buffer.
 fn loose_fields(parameters: &[Value]) -> Vec<Field> {
     parameters
         .iter()

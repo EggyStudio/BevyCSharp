@@ -3,8 +3,8 @@ using Bevy;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// Adds an entity: every kind there is, in a <see cref="PickerWindow"/>, with the new one put under
-/// whatever is selected.
+/// Adds an entity, offering every kind there is in a <see cref="PickerWindow"/> and putting the new
+/// one under whatever is selected.
 /// </summary>
 /// <remarks>
 /// <para>

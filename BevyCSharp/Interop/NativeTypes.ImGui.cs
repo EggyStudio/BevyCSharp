@@ -27,7 +27,7 @@ public struct NativeImGuiVertex
     public uint Color;
 }
 
-/// <summary>One draw call: a run of indices, clipped to a rectangle, reading from one picture.</summary>
+/// <summary>One draw call, a run of indices clipped to a rectangle and reading from one picture.</summary>
 [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
 public struct NativeImGuiCommand
 {

@@ -25,7 +25,7 @@ macro_rules! key_table {
             None
         }
 
-        /// The other way round: a bit index back to the key that owns it.
+        /// The other way round, a bit index back to the key that owns it.
         ///
         /// What a synthetic keypress needs. The table is the shared truth about which key is
         /// which, so reading it backwards is the only way to send one without the two sides

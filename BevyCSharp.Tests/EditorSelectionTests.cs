@@ -79,7 +79,7 @@ public sealed class EditorSelectionTests
                 case 2:
                     EditorSelection.Prune(ctx.Ecs);
 
-                    // What the script made again: a new id with the same name.
+                    // The script made it again, with a new id and the same name.
                     again = ctx.Ecs.Spawn();
                     ctx.Ecs.SetName(again, "Reloaded");
                     break;

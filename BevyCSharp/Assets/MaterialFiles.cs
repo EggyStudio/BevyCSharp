@@ -110,9 +110,9 @@ internal static class MaterialJson
 /// <remarks>
 /// <para>
 /// A material made in code or in the editor lives in the scene that uses it, written there as its
-/// settings. One wanted by several scenes, or edited by an artist on its own, goes in a file: a
-/// <see cref="MaterialSettings"/> as JSON, its textures referred to by id and path. Loading a file
-/// makes one material, kept for the file's path, so every entity and every scene loading it
+/// settings. One wanted by several scenes, or edited by an artist on its own, goes in a file, a
+/// <see cref="MaterialSettings"/> as JSON with its textures referred to by id and path. Loading a
+/// file makes one material, kept for the file's path, so every entity and every scene loading it
 /// shares it, and a scene refers to the file rather than writing the settings again.
 /// </para>
 /// <para>

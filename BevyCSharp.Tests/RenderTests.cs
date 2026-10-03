@@ -147,7 +147,7 @@ public sealed class RenderTests
     [Fact]
     public void CombiningRotationsStaysAUnitQuaternion()
     {
-        // What the sample's cube does: a turn about each of two axes, composed. Pure arithmetic,
+        // The sample's cube turns about each of two axes, composed. Pure arithmetic,
         // so it holds on any build.
         var yaw = Quat.FromRotationY(0.9f);
         var pitch = Quat.FromRotationX(0.35f);

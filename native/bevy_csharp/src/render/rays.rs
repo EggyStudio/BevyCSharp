@@ -1,4 +1,4 @@
-//! Ray scenes: acceleration structures the game builds over the meshes of a geometry pool, for
+//! Ray scenes, acceleration structures the game builds over the meshes of a geometry pool, for
 //! rays a compute shader of its own traces.
 //!
 //! Solari keeps one acceleration structure, over the meshes given to ray-traced lighting, and a

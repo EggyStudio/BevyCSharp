@@ -70,7 +70,7 @@ public static class SyntheticInput
     }
 
     /// <summary>
-    /// Presses a key where a real one is reported: the window.
+    /// Presses a key where a real one is reported, at the window.
     /// </summary>
     /// <remarks>
     /// The keyboard's half of <see cref="Send"/>. Everything between the window and a text field

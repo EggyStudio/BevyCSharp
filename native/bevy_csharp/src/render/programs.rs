@@ -1,4 +1,4 @@
-//! Shader programs: which Slang files draw a material, run over a camera's picture or run over
+//! Shader programs, which Slang files draw a material, run over a camera's picture or run over
 //! buffers, compiled and kept current while the app runs.
 //!
 //! A program names up to six stages, each a file (or source text) and an entry point: the vertex
@@ -132,7 +132,7 @@ impl Role {
     }
 }
 
-/// One stage as a pipeline sees it: a shader and the entry point in it.
+/// One stage as a pipeline sees it, a shader and the entry point in it.
 #[derive(Clone, Debug)]
 pub struct StageBinding {
     pub shader: Handle<Shader>,
@@ -153,7 +153,7 @@ pub struct PipelineProgram {
     /// Moves on every time a stage is replaced, and a pipeline or a bind group made from an older
     /// version checks itself against it.
     pub generation: u32,
-    /// What its GPU time is recorded under: the name of its first stage's file.
+    /// Its first stage's file name, which its GPU time is recorded under.
     pub name: Arc<str>,
 }
 

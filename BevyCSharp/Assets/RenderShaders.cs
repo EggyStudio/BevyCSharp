@@ -1074,7 +1074,7 @@ public static unsafe class Shaders
     }
 
     /// <summary>
-    /// Makes an empty geometry pool: buffers holding the vertices and triangles of every mesh added
+    /// Makes an empty geometry pool, buffers holding the vertices and triangles of every mesh added
     /// to it, which any shader reaches by a mesh's number and a triangle's. Only valid inside a
     /// system.
     /// </summary>
@@ -2007,7 +2007,7 @@ public readonly unsafe struct ShaderMaterial : IShaderValues, IEquatable<ShaderM
 }
 
 /// <summary>
-/// What a pass or a dispatch runs: a program and its values by name, made by
+/// What a pass or a dispatch runs, a program and its values by name, made by
 /// <see cref="Shaders.CreateInstance"/>.
 /// </summary>
 /// <remarks>

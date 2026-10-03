@@ -158,7 +158,7 @@ public static class AssetKind
     public const string MeshletMesh = "MeshletMesh";
 
     /// <summary>
-    /// A saved world: the entities and components of a `.scn` or `.scn.ron` file.
+    /// A saved world, the entities and components of a `.scn` or `.scn.ron` file.
     /// </summary>
     /// <remarks>
     /// The same asset a glTF file's scenes are, which is why one call spawns either. Available in
@@ -194,7 +194,7 @@ public enum TextureFilter
 /// How an image should be sampled, and how its bytes should be read.
 /// </summary>
 /// <remarks>
-/// The defaults match Bevy's: clamped and nearest-filtered, read as sRGB. Both are worth changing
+/// The defaults match Bevy's, clamped, nearest-filtered and read as sRGB. Both are worth changing
 /// for most textures, which is why this exists.
 /// </remarks>
 public sealed class TextureSettings
@@ -367,7 +367,7 @@ public static unsafe class AssetServer
     /// Starts loading one scene out of a glTF file.
     /// </summary>
     /// <remarks>
-    /// A scene is the file's own arrangement of its meshes: what an artist laid out, with the
+    /// A scene is the file's own arrangement of its meshes, as an artist laid them out, with the
     /// nodes and the parenting they gave it. Spawn it with
     /// <see cref="EcsWorld.SpawnScene"/>, which produces those entities under one of yours.
     /// </remarks>

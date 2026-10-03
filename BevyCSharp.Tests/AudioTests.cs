@@ -449,7 +449,7 @@ public sealed class AudioTests
                 }
             }
 
-            // A third of a second in: past the window the first was given and well short of the
+            // A third of a second in, past the window the first was given and well short of the
             // second's whole tone.
             if (ctx.Time.FrameCount != 30) return;
 

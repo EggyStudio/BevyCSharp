@@ -45,7 +45,7 @@ internal static class ColorPicker
     private const float Bar = 14f;
 
     /// <summary>
-    /// How much air the flyout keeps round the picker: more than a menu's, so a handle pulled to
+    /// How much air the flyout keeps round the picker, more than a menu's, so a handle pulled to
     /// the end of a bar or the corner of the square still has room round it before the edge.
     /// </summary>
     internal static readonly Vector2 Air = new(14f, 14f);
@@ -801,8 +801,8 @@ internal static class ColorPicker
     }
 
     /// <summary>
-    /// The round handle on the square and the bars: the color it points at, ringed in white and
-    /// then in a hair of black, so it can be seen on any color under it.
+    /// The round handle on the square and the bars, showing the color it points at, ringed in white
+    /// and then in a hair of black, so it can be seen on any color under it.
     /// </summary>
     private static void Handle(ImDrawListPtr draw, Vector2 middle, Vector4 color)
     {

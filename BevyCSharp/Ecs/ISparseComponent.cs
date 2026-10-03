@@ -12,7 +12,7 @@ namespace Bevy;
 /// <para>
 /// A sparse set inverts that trade. Adding or removing costs nothing but an index write, and
 /// nothing else about the entity moves; in exchange the values are not laid out for a fast walk.
-/// It suits a tag that is toggled far more often than it is iterated: a per-frame
+/// It suits a tag that is toggled far more often than it is iterated, such as a per-frame
 /// <c>Stunned</c> or <c>Colliding</c> that is filtered on rather than read.
 /// </para>
 /// <para>

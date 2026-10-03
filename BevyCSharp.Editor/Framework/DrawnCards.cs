@@ -262,7 +262,7 @@ internal static class DrawnCards
     /// <summary>What the Mesh card's view choice offers, in the order of <see cref="PreviewView"/>.</summary>
     private static readonly string[] Views = ["Surface", "UV checker", "Normals"];
 
-    /// <summary>How large a card's picture is: the width there is, up to a size that still reads as a swatch.</summary>
+    /// <summary>How large a card's picture is, the width there is up to a size that still reads as a swatch.</summary>
     private static float Side() => MathF.Min(200f, MathF.Max(64f, ImGui.GetContentRegionAvail().X - DetailsPanel.RightInset));
 
     /// <summary>A labeled tick box.</summary>

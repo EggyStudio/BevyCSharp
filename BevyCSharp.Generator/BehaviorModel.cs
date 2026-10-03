@@ -370,8 +370,8 @@ internal sealed record BehaviorModel
     /// </summary>
     /// <remarks>
     /// What a tool can offer as a button. A stage method takes a context and is a system rather
-    /// than something a person presses; a method that needs arguments needs a form. What is left
-    /// is the useful case: a thing the component knows how to do to itself.
+    /// than something a person presses; a method that needs arguments needs a form. The useful
+    /// case is left, a thing the component knows how to do to itself.
     /// </remarks>
     public IReadOnlyList<BehaviorInvokable> Invokables { get; init; } = [];
 

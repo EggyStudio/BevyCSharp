@@ -134,7 +134,7 @@ public sealed class ColorAttribute : Attribute;
 /// <remarks>
 /// <para>
 /// What keeps a component with three modes from showing the settings of all three at once. With a
-/// value it compares: a field shown only while a mode is one particular one. Without, it asks
+/// value it compares, so a field is shown only while a mode is one particular one. Without, it asks
 /// whether the other field is on, which is the same question of a flag.
 /// </para>
 /// <para>
@@ -187,7 +187,7 @@ public sealed class HideIfAttribute(string field, object? value = null) : Attrib
 /// <remarks>
 /// <para>
 /// A component with twenty fields is unreadable however well it is ordered, and the answer every
-/// editor arrives at is the same: put the eight that are wanted at the top and fold the rest away.
+/// editor arrives at is the same. The eight that are wanted go at the top and the rest fold away.
 /// Consecutive fields naming the same fold share it.
 /// </para>
 /// <para>

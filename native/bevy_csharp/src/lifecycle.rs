@@ -43,14 +43,14 @@ pub type RemoveCallback = unsafe extern "C" fn(entity: u64, component: i32, data
 /// the old entry, which only the old world's hooks could have reached.
 static CALLBACKS: Mutex<Option<HashMap<usize, RemoveCallback>>> = Mutex::new(None);
 
-/// What C# is called with when a component is cloned: the clone's bytes, to rewrite in place before
+/// What C# is called with when a component is cloned, the clone's bytes, to rewrite in place before
 /// they are written to the new entity.
 pub type CloneCallback = unsafe extern "C" fn(component: i32, data: *mut u8);
 
 /// The clone callback for each component id that has one, kept as [`CALLBACKS`] is.
 static CLONERS: Mutex<Option<HashMap<usize, CloneCallback>>> = Mutex::new(None);
 
-/// How every C# component is cloned: its bytes copied, after C# has rewritten the handles in them.
+/// How every C# component is cloned, its bytes copied after C# has rewritten the handles in them.
 ///
 /// The bytes are copied into a buffer of the component's own layout first, because the callback
 /// rewrites them and the source has to stay as it was.

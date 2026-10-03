@@ -66,7 +66,7 @@ public struct Visibility : INativeComponent
 }
 
 /// <summary>
-/// Whether the hierarchy leaves this entity visible: the propagated half of
+/// Whether the hierarchy leaves this entity visible, the propagated half of
 /// <see cref="Visibility"/>.
 /// </summary>
 /// <remarks>
@@ -92,7 +92,7 @@ public struct InheritedVisibility : INativeComponent
 }
 
 /// <summary>
-/// Whether any camera actually saw this entity last frame: the culled half of
+/// Whether any camera actually saw this entity last frame, the culled half of
 /// <see cref="Visibility"/>.
 /// </summary>
 /// <remarks>
@@ -102,7 +102,7 @@ public struct InheritedVisibility : INativeComponent
 /// this the one to read before doing work that only matters when something is on screen.
 /// </para>
 /// <para>
-/// The byte packs two frames: bit 0 is this frame and bit 1 the previous one. Bevy keeps the
+/// The byte packs two frames, bit 0 for this one and bit 1 for the one before. Bevy keeps the
 /// older bit as scratch space so it can tell "no longer seen by anything" from "was never seen",
 /// and only then trip change detection.
 /// </para>

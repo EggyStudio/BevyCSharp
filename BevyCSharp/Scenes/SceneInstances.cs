@@ -57,7 +57,7 @@ public enum OverrideKind
 /// </param>
 /// <param name="Fields">
 /// The fields written, as the JSON object a scene file holds for the component, or nothing where
-/// the kind writes none. For <see cref="OverrideKind.Child"/>, the child: its id in the file as
+/// the kind writes none. For <see cref="OverrideKind.Child"/>, the child, by its id in the file as
 /// <c>#8</c> until the file's entities are spawned, then the entity's bits.
 /// </param>
 public sealed record InstanceOverride(string At, OverrideKind Kind, string? Component = null, string? Fields = null);
@@ -1006,7 +1006,7 @@ public static class SceneInstances
         lock (ModelNames) ModelNames.TryAdd(node, world.NameOf(node));
     }
 
-    /// <summary>One step of a path: a node's name, numbered after the earlier siblings sharing it.</summary>
+    /// <summary>One step of a path, a node's name numbered after the earlier siblings sharing it.</summary>
     private static string Step(EcsWorld world, Entity node)
     {
         var siblings = world.ChildrenOf(world.ParentOf(node));

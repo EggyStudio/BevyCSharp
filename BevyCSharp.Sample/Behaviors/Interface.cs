@@ -9,7 +9,7 @@ namespace BevyCSharp.Sample.Behaviors;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The whole of what a game writes to have one: start the runtime once, and between
+/// The whole of what a game writes to have one. Start the runtime once, and between
 /// <see cref="ImGuiRuntime.Begin"/> and <see cref="ImGuiRuntime.End"/> call ImGui. There is no
 /// document to load, no binding to declare and nothing to keep in step. The screen shows what this
 /// frame's calls said.

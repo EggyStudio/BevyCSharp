@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 namespace Bevy;
 
 /// <summary>
-/// Where an entity actually is: the world-space result of transform propagation.
+/// Where an entity actually is, the world-space result of transform propagation.
 /// </summary>
 /// <remarks>
 /// <para>

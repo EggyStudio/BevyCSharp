@@ -1,4 +1,4 @@
-//! Light probes: boxes in the scene that light what is inside them from an image rather than from
+//! Light probes, boxes in the scene that light what is inside them from an image rather than from
 //! a lamp.
 //!
 //! Bevy has two kinds. A reflection probe is the pair of cubemaps a camera can be lit by, placed
@@ -71,9 +71,9 @@ fn drop_probe_if_empty(world: &mut bevy::ecs::world::World, entity: bevy::ecs::e
 /// faces like a camera's baked pair, and the light waits for both to become cubes, which
 /// [`crate::render::post::reinterpret_cubemaps`] does on the frame their pixels arrive.
 ///
-/// `falloff` is three floats between zero and one, or null for a hard edge: how much of the box,
-/// on each axis, the probe's influence fades across, so a room with several probes blends from one
-/// to the next. A negative for either image takes the reflection off.
+/// `falloff` is three floats between zero and one, or null for a hard edge, saying how much of the
+/// box, on each axis, the probe's influence fades across, so a room with several probes blends from
+/// one to the next. A negative for either image takes the reflection off.
 ///
 /// Returns [`status::INVALID_STATE`] for a camera, and [`status::NO_COMPONENT`] where a key names
 /// no image.
@@ -163,7 +163,7 @@ pub unsafe extern "C" fn bcs_render_set_reflection_probe(
 /// Makes an entity an irradiance volume lit from a 3D image, or takes it off.
 ///
 /// The image holds a grid of `x` by `y` by `z` points as a texture `x` wide, `2y` high and `3z`
-/// deep: the light a surface facing each axis direction receives at each point, in a layout
+/// deep, holding the light a surface facing each axis direction receives at each point, in a layout
 /// `bcs_scene::irradiance_texel` addresses. Bevy samples it filtered, so its format has to be one
 /// that filters, which among the formats a compute shader writes is `Rgba16Float`. It can come
 /// from a file or be made by `bcs_shader_image_create` and written every frame.
@@ -306,7 +306,7 @@ const CAPTURE_FRAMES: u32 = 4;
 #[cfg(feature = "render")]
 static PIPELINES_BUSY: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(true);
 
-/// A light probe that renders its own reflection: six cameras at its center, one per face of a
+/// A light probe that renders its own reflection, with six cameras at its center, one per face of a
 /// cube, whose pictures are copied into the cube Bevy filters into the probe's light.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::component::Component)]
@@ -627,7 +627,7 @@ pub fn drop_orphan_faces(
     }
 }
 
-/// What the render world copies each frame: six face images into the layers of a cube.
+/// The six face images the render world copies into the layers of a cube each frame.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::resource::Resource, Default)]
 struct ProbeCopies(Vec<ProbeCopy>);

@@ -78,7 +78,7 @@ public sealed class LightSettings
     /// The same, measured along the surface normal.
     /// </summary>
     /// <remarks>
-    /// Handles the case depth bias alone does not: a surface lit at a glancing angle, where a
+    /// Handles what depth bias alone does not, a surface lit at a glancing angle, where a
     /// small depth error covers a long distance. Bevy's default is 0.6 for a directional light
     /// and 0.6 for the others.
     /// </remarks>

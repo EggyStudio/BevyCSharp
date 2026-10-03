@@ -22,7 +22,7 @@ public partial struct FixedStepper
 }
 
 /// <summary>
-/// Covers Bevy's fixed timestep: a schedule that runs on simulated time rather than per frame.
+/// Covers Bevy's fixed timestep, a schedule that runs on simulated time rather than per frame.
 /// </summary>
 /// <remarks>
 /// The assertions are about the relationship between fixed steps and frames rather than about
@@ -80,7 +80,7 @@ public sealed class FixedUpdateTests
     [Fact]
     public void SimulatedTimeNeverRunsAheadOfRealTime()
     {
-        // What the fixed loop is actually doing: spending accumulated time, a slice at a time.
+        // The fixed loop spends accumulated time, a slice at a time.
         // It may lag real time by up to one slice, but it must never invent time it has not been
         // given, which is the invariant a physics step depends on.
         using var harness = new EngineHarness(frames: 8, fps: 60, fixedHz: 120);

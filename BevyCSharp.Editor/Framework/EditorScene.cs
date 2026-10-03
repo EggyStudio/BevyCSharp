@@ -13,7 +13,7 @@ namespace BevyCSharp.Editor.Framework;
 public struct EditorOnly;
 
 /// <summary>
-/// The scene the editor is editing: written to a scene file and spawned from one.
+/// The scene the editor is editing, written to a scene file and spawned from one.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -66,8 +66,8 @@ public static class EditorScene
     }
 
     /// <summary>
-    /// Whether an entity is part of the scene: one carrying a component of the project's own or a
-    /// mirrored one of Bevy's, such as a transform, and not the editor's.
+    /// Whether an entity is part of the scene, meaning it carries a component of the project's own
+    /// or a mirrored one of Bevy's, such as a transform, and not the editor's.
     /// </summary>
     /// <remarks>
     /// Bevy's reflected components alone do not make an entity part of the scene, because the engine

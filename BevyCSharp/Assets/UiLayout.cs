@@ -326,7 +326,7 @@ public enum UiJustify
 /// How a node places its children across its axis.
 /// </summary>
 /// <remarks>
-/// The cross axis: for a <see cref="UiDirection.Row"/> this is the vertical, for a
+/// The cross axis, which for a <see cref="UiDirection.Row"/> is the vertical and for a
 /// <see cref="UiDirection.Column"/> the horizontal.
 /// </remarks>
 public enum UiAlign

@@ -1,7 +1,7 @@
 namespace Bevy;
 
 /// <summary>
-/// A unit of engine composition: registers resources and systems on an <see cref="App"/>.
+/// A unit of engine composition, which registers resources and systems on an <see cref="App"/>.
 /// </summary>
 /// <example>
 /// <code>
@@ -54,7 +54,8 @@ public sealed class PluginOrderException : Exception
 }
 
 /// <summary>
-/// The plugins every BevyCSharp app needs: engine resource wiring plus behavior discovery.
+/// The plugins every BevyCSharp app needs, which wire the engine's resources and discover
+/// behaviors.
 /// </summary>
 /// <remarks>
 /// Unlike Bevy's own <c>DefaultPlugins</c>, this group is small. Windowing, rendering, assets

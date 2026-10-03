@@ -1,4 +1,4 @@
-//! Bevy's meshlets: meshes cut into small clusters that are culled and chosen a level of detail
+//! Bevy's meshlets, meshes cut into small clusters that are culled and chosen a level of detail
 //! at a time on the GPU, drawn into a visibility buffer and shaded from it.
 //!
 //! This is virtualized geometry as Bevy ships it, and the first thing a scene of dense meshes

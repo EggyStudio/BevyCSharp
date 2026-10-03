@@ -1,4 +1,4 @@
-//! Geometry pools: the vertices and triangles of many meshes in shared buffers, reachable from any
+//! Geometry pools, the vertices and triangles of many meshes in shared buffers, reachable from any
 //! shader by a mesh's number and a triangle's.
 //!
 //! A ray traced in a compute shader, or a scene voxelized by one, meets triangles of whatever mesh

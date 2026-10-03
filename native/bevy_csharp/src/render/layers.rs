@@ -84,7 +84,7 @@ pub fn clear(world: &mut World, camera: Entity) {
     world.entity_mut(camera).remove::<LayerTarget>();
 }
 
-/// The copies the render world makes this frame: a companion into a layer.
+/// The copies the render world makes this frame, each a companion into a layer.
 #[derive(Resource, Default)]
 struct LayerCopies(Vec<(AssetId<Image>, AssetId<Image>, u32)>);
 

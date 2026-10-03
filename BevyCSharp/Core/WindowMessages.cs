@@ -74,11 +74,11 @@ public readonly record struct FileHoverCanceled;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An input method (IME) is how Japanese, Chinese or Korean is typed: keys build a candidate that is
-/// shown, usually underlined, and chosen from before it becomes text. A text field shows
-/// <see cref="Text"/> at its caret while composing, replaces it with each new one, and drops it when
-/// an <see cref="ImeCommit"/> arrives with what was chosen. An empty one ends the composition
-/// without committing anything.
+/// An input method (IME) is how Japanese, Chinese or Korean is typed. Keys build a candidate that
+/// is shown, usually underlined, and chosen from before it becomes text. A text field shows
+/// <see cref="Text"/> at its caret while composing, replaces it with each new one, and drops it
+/// when an <see cref="ImeCommit"/> arrives with what was chosen. An empty one ends the composition without
+/// committing anything.
 /// </para>
 /// <para>
 /// Only sent while the input method is on, which <see cref="Window.SetIme"/> does.

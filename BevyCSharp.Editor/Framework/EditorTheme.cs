@@ -343,7 +343,7 @@ public sealed record EditorTheme
 
     /// <summary>The theme as text, one value a line.</summary>
     /// <remarks>
-    /// The shape <see cref="EditorSettings.Describe"/> uses, for the same reason: a file somebody
+    /// The shape <see cref="EditorSettings.Describe"/> uses, for the same reason, a file somebody
     /// can read, diff and ship, rather than a format that needs a tool to look at.
     /// </remarks>
     public string Describe()

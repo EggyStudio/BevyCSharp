@@ -37,7 +37,7 @@ public static class UserData
     public static string Name { get; set; } = "BevyCSharp";
 
     /// <summary>
-    /// The directory itself: the platform's data directory and the game's name, unless set.
+    /// The directory itself, the platform's data directory under the game's name unless set.
     /// </summary>
     /// <remarks>Set to <see langword="null"/> to go back to the platform's.</remarks>
     public static string Root

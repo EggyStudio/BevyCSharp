@@ -70,7 +70,7 @@ public enum Tonemapper
     /// <summary>A plain transform, useful as a reference to judge the others against.</summary>
     SomewhatBoring = 5,
 
-    /// <summary>Bevy's own: neutral, and keeps saturation in the highlights.</summary>
+    /// <summary>Bevy's own, neutral and keeping saturation in the highlights.</summary>
     TonyMcMapface = 6,
 
     /// <summary>Blender's filmic curve, for matching a render done there.</summary>

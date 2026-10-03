@@ -142,10 +142,11 @@ public static class EditorWindowFrame
     /// Whether the pointer is on the band along the top of the window, which moves it.
     /// </summary>
     /// <remarks>
-    /// Nothing drawn, and as tall as it can be without taking anything's press: the gap above the
-    /// panels and the scene and whatever lies under it with nothing to press, under the few pixels
-    /// that resize and outside the window's buttons. It takes a press there wherever ImGui thinks
-    /// it landed, so the window can be taken hold of without aiming for a line a few pixels tall.
+    /// Nothing drawn, and as tall as it can be without taking anything's press, covering the gap
+    /// above the panels and the scene and whatever lies under it with nothing to press, under the
+    /// few pixels that resize and outside the window's buttons. It takes a press there wherever
+    /// ImGui thinks it landed, so the window can be taken hold of without aiming for a line a few
+    /// pixels tall.
     /// </remarks>
     public static bool OnBand { get; private set; }
 

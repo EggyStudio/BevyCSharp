@@ -3,7 +3,7 @@ using Bevy;
 namespace BevyCSharp.Sample.Behaviors;
 
 /// <summary>
-/// The default scene: a cube turning in place, lit, above a ground plane.
+/// The default scene, a cube turning in place, lit, above a ground plane.
 /// </summary>
 /// <remarks>
 /// Skipped on a build without a renderer, so the rest of the sample runs unchanged either way.
