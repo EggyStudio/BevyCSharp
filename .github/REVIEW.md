@@ -8,23 +8,16 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `1a589cc`. The material's attenuation, anisotropy and extra maps were read and
-raised nothing.
+Reviewed up to `5c98e7d`. States computed from several others, and rules forgotten with their
+app (`5c98e7d`), were read and settle the verdict on computed rules.
 
 ## Now
 
-1. **Continue TODO.md in its own order.** Nothing read so far argues for changing it. The
-   verdict is minor and goes in with whatever next touches states.
+1. **Continue TODO.md in its own order.** Nothing read so far argues for changing it.
 
 ## Verdicts
 
-1. **A computed state's rule outlives its app** (`ea35b3c`, `BevyCSharp/Core/ComputedRules.cs`).
-   `Rules` is a static dictionary keyed by slot and never cleared, so the function given to
-   `AddComputedState` and whatever it captured stay reachable after the app is disposed, and a
-   later app in the same process that claims the same slot without a rule inherits the earlier
-   one if the bridge asks for it. Whether the bridge can ask is to be checked in `states.rs`. If
-   it can, the app clears its slots on dispose. If it cannot, the remarks on `ComputedRules` say
-   why. This is minor and goes in with whatever next touches states.
+None open.
 
 ## Decisions
 

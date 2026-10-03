@@ -32,6 +32,30 @@ public static class EditorPicking
     private const ulong Patience = 3;
 
 
+    /// <summary>
+    /// Answers the clicks given to an editor with no window, which Bevy's picking cannot see, by
+    /// casting a ray from the scene camera through each.
+    /// </summary>
+    /// <remarks>
+    /// An editor opened with <c>--offscreen</c> and driven by <c>bcs</c> takes clicks on its
+    /// panels from the interface and these from nothing else, so a click on the scene there
+    /// selects what is under it and a click on nothing clears the selection, as it does in a
+    /// window. The triangles the ray meets are the meshes', as a pick's are.
+    /// </remarks>
+    private static void Unwindowed()
+    {
+        while (SyntheticInput.TryTakeClickWithoutWindow(out var x, out var y))
+        {
+            if (EditorShell.PointerOverPanel) continue;
+
+            var camera = EditorSelection.Camera;
+            if (camera.IsNone || !Render.TryRay(camera, x, y, out var origin, out var direction)) continue;
+
+            if (Picking.TryCast(origin, direction, out var hit, out _, out _)) EditorSelection.Select(hit);
+            else EditorSelection.Clear();
+        }
+    }
+
     /// <summary>Takes this frame's clicks on the scene.</summary>
     public static void Tick(BehaviorContext ctx)
     {
@@ -84,6 +108,8 @@ public static class EditorPicking
 
             EditorSelection.Select(picked);
         }
+
+        Unwindowed();
 
         if (_emptyClick != 0 && EditorShell.Frame - _emptyClick >= Patience)
         {

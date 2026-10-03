@@ -133,11 +133,13 @@ draws into an image instead of a window, so `shot` produces a real picture of th
 all, where a windowed session could not start at all.
 
 One thing is not the same. A pointer verb (`input.click`, `input.press`, `input.release`,
-`input.move`) reaches the interface alone there, since there is no window to write the other half
-to, so panels, buttons and fields can be clicked and the picture shows what the click did, while
-the scene is not picked and the camera is not steered. `input.key` writes a window message and is
-refused, and `input.uikey` and `input.type` reach the interface as they do anywhere. For the scene,
-drive what the click would have done instead, which is usually a command of its own (`select`,
+`input.move`) reaches the interface there, since there is no window to write the other half to, so
+panels, buttons and fields can be clicked and the picture shows what the click did. A left click
+on the scene selects what is under it, or clears the selection over nothing, which the editor
+answers by casting a ray from its camera since Bevy's picking needs a window. A drag on a handle
+and the camera's steering still read the window's pointer, so they do nothing there. `input.key`
+writes a window message and is refused, and `input.uikey` and `input.type` reach the interface as
+they do anywhere. For what a click cannot do there, drive it with a command of its own (`select`,
 `assets.open`, `do <menu path>`), and take the picture afterwards.
 
 ## More than one app serving

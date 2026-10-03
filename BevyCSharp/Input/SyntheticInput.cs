@@ -190,9 +190,12 @@ public static class SyntheticInput
     /// </para>
     /// <para>
     /// A run with no window, such as an editor opened with <c>--offscreen</c>, takes the
-    /// interface's half alone, so its panels, buttons and fields can be clicked, while the scene
-    /// is not picked and the camera is not steered, since those read the window's pointer. A run
-    /// with neither a window nor an interface has nowhere to send a pointer and refuses.
+    /// interface's half alone, so its panels, buttons and fields can be clicked, while the camera
+    /// is not steered and Bevy's picking hits nothing, since those read the window's pointer. A
+    /// left press and release in one place there is also kept as a click
+    /// (<see cref="TryTakeClickWithoutWindow"/>), for a tool to answer by casting a ray, as the
+    /// editor selects what is under it. A run with neither a window nor an interface has nowhere
+    /// to send a pointer and refuses.
     /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">This run has neither a window nor an interface.</exception>
@@ -210,6 +213,7 @@ public static class SyntheticInput
                 + "drive what the click would have done directly.");
 
         if (!windowless) Native.Check(status, $"sending a pointer {action} at {x},{y}");
+        else if (button == MouseButton.Left) Unwindowed(x, y, action);
 
         if (!ImGuiRuntime.IsRunning) return;
 
@@ -239,4 +243,65 @@ public static class SyntheticInput
 
     /// <summary>Gives the pointer back to the hand on the desk.</summary>
     public static void Forget() => Pretend = null;
+
+    /// <summary>How far a release may land from its press and still be a click, in pixels.</summary>
+    private const float ClickSlop = 4f;
+
+    private static readonly Lock Gate = new();
+    private static readonly Queue<(float X, float Y)> ClicksWithoutWindow = new();
+    private static (float X, float Y)? _pressedWithoutWindow;
+
+    /// <summary>
+    /// Takes the oldest left click given to a run with no window that nothing has answered yet.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy's picking finds what a pointer is over only on a window, so a click given to an
+    /// offscreen run reaches the interface and nothing in the scene. This hands such a click to
+    /// whoever answers clicks on the scene, which casts a ray from its camera through the point
+    /// (<see cref="Render.TryRay"/>, <see cref="Picking.TryCast"/>), as the editor does to select
+    /// what is under it.
+    /// </para>
+    /// <para>
+    /// A click is a press and a release no more than a few pixels apart, so a drag is not one.
+    /// </para>
+    /// </remarks>
+    /// <param name="x">Where, in logical pixels from the top left.</param>
+    /// <param name="y">Where, in logical pixels from the top left.</param>
+    /// <returns>Whether there was a click to take.</returns>
+    public static bool TryTakeClickWithoutWindow(out float x, out float y)
+    {
+        lock (Gate)
+        {
+            if (ClicksWithoutWindow.TryDequeue(out var click))
+            {
+                (x, y) = click;
+                return true;
+            }
+        }
+
+        x = y = 0f;
+        return false;
+    }
+
+    /// <summary>Keeps a left press, and turns a release near it into a click.</summary>
+    private static void Unwindowed(float x, float y, PointerAction action)
+    {
+        lock (Gate)
+        {
+            switch (action)
+            {
+                case PointerAction.Press:
+                    _pressedWithoutWindow = (x, y);
+                    break;
+
+                case PointerAction.Release when _pressedWithoutWindow is { } pressed:
+                    if (MathF.Abs(pressed.X - x) <= ClickSlop && MathF.Abs(pressed.Y - y) <= ClickSlop)
+                        ClicksWithoutWindow.Enqueue((x, y));
+
+                    _pressedWithoutWindow = null;
+                    break;
+            }
+        }
+    }
 }
