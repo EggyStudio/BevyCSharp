@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 165;
+    internal const int ExpectedAbiVersion = 166;
 
     static Native() => NativeLoader.Initialize();
 
@@ -311,6 +311,16 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_computed_add(
         IntPtr app, int slot, int* from, int* to, int count);
+
+    /// <summary>Sets the function computed states added with a rule are worked out by.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_computed_rule(delegate* unmanaged[Cdecl]<int, int, int*, int> rule);
+
+    /// <summary>Creates a computed state worked out by that function rather than a table.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_computed_add_rule(IntPtr handle, int slot);
 
     /// <summary>Creates a state machine in a slot, before the app runs.</summary>
     [LibraryImport(Library)]

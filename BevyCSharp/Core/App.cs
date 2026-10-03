@@ -770,6 +770,72 @@ public sealed unsafe class App : IDisposable
         return this;
     }
 
+    /// <summary>
+    /// Adds a state worked out from another by a rule, for what a table cannot state.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The same as the table form, with the table replaced by a function of the source's value,
+    /// answering what the state is or nothing for a value it does not exist under. "The boss music
+    /// plays on every level past the tenth" is a rule, and a table of it would be as long as the
+    /// levels.
+    /// </para>
+    /// <para>
+    /// Bevy asks whenever the source changes, from whichever thread runs the transition, with the
+    /// source's value and nothing else, so the rule is a function of that value alone and reads no
+    /// world. One that throws is taken as answering nothing, with the exception written to the
+    /// console, since an exception has nowhere to go from inside Bevy's transition.
+    /// </para>
+    /// </remarks>
+    /// <typeparam name="TState">The enum being computed, carrying <see cref="ComputedFromAttribute"/>.</typeparam>
+    /// <typeparam name="TSource">The enum it is computed from.</typeparam>
+    /// <param name="rule">What the state is while the source holds a value, or nothing.</param>
+    /// <exception cref="InvalidOperationException">
+    /// The app is running, or the enum says nothing about what it is computed from.
+    /// </exception>
+    /// <example>
+    /// <code>
+    /// app.AddState(Level.One);
+    /// app.AddComputedState&lt;Music, Level&gt;(level => level > Level.Ten ? Music.Boss : Music.Calm);
+    /// </code>
+    /// </example>
+    public App AddComputedState<TState, TSource>(Func<TSource, TState?> rule)
+        where TState : struct, Enum
+        where TSource : struct, Enum
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(rule);
+
+        if (IsRunning)
+            throw new InvalidOperationException(
+                $"Cannot add computed state {typeof(TState).Name}, because the app is already "
+                + "running. Add states from a plugin's Build method or before calling Run.");
+
+        var computed = StateRegistry.DescribeComputed(typeof(TState))
+                       ?? throw new InvalidOperationException(
+                           $"{typeof(TState).Name} is not computed from anything. Put "
+                           + "[ComputedFrom(typeof(Source))] on the enum, which is where a reader "
+                           + "looks for what it follows from.");
+
+        if (computed.Source != typeof(TSource))
+            throw new InvalidOperationException(
+                $"{typeof(TState).Name} is computed from {computed.Source.Name}, and the rule was "
+                + $"written in terms of {typeof(TSource).Name}. The two have to be the same state.");
+
+        var slot = StateRegistry.Claim<TState>()
+                   - StateRegistry.SlotCount
+                   - StateRegistry.SubCount;
+
+        ComputedRules.Set(slot, raw =>
+            rule((TSource)Enum.ToObject(typeof(TSource), raw)) is { } value ? StateRegistry.ToInt(value) : null);
+
+        Native.Check(
+            Native.bcs_computed_add_rule(_handle, slot),
+            $"adding computed state {typeof(TState).Name} from {computed.Source.Name} by a rule");
+
+        return this;
+    }
+
     /// <summary>The current value of <typeparamref name="TState"/>. Only valid inside a system.</summary>
     public static TState State<TState>() where TState : struct, Enum =>
         StateRegistry.Current<TState>();

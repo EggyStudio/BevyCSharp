@@ -95,6 +95,57 @@ public sealed class ComputedStateTests
         Assert.False(seen.Single(step => step.Frame == 6).Exists);
     }
 
+    /// <summary>
+    /// A rule works it out where a table cannot say it, and a rule that answers nothing or throws
+    /// leaves the state absent.
+    /// </summary>
+    [Fact]
+    public void ARuleWorksItOutWhereATableCannot()
+    {
+        var seen = new List<(ulong Frame, bool Exists, Hud Value)>();
+
+        using var harness = new EngineHarness(frames: 10);
+
+        harness.App.AddState(Stage3.Menu);
+
+        // Every state past the menu but the cutscene, which would be three table lines, and throws
+        // for the cutscene to show a rule that fails is taken as answering nothing.
+        harness.App.AddComputedState<Hud, Stage3>(stage => stage switch
+        {
+            Stage3.Menu => null,
+            Stage3.Cutscene => throw new InvalidOperationException("no interface in a cutscene"),
+            Stage3.Paused => Hud.Dimmed,
+            _ => Hud.Shown,
+        });
+
+        harness.On(Stage.Update, world =>
+        {
+            switch (world.Resource<Time>().FrameCount)
+            {
+                case 1:
+                    App.SetState(Stage3.Playing);
+                    break;
+
+                case 3:
+                    App.SetState(Stage3.Paused);
+                    break;
+
+                case 5:
+                    App.SetState(Stage3.Cutscene);
+                    break;
+            }
+
+            seen.Add((world.Resource<Time>().FrameCount, App.TryState<Hud>(out var value), value));
+        });
+
+        harness.Run();
+
+        Assert.False(seen[0].Exists);
+        Assert.Equal((true, Hud.Shown), (seen.Single(step => step.Frame == 3).Exists, seen.Single(step => step.Frame == 3).Value));
+        Assert.Equal((true, Hud.Dimmed), (seen.Single(step => step.Frame == 4).Exists, seen.Single(step => step.Frame == 4).Value));
+        Assert.False(seen.Single(step => step.Frame == 6).Exists);
+    }
+
     /// <summary>Its edges run like any other state's.</summary>
     [Fact]
     public void ItsTransitionsRun()

@@ -75,6 +75,12 @@ macro_rules! define_slots {
                 type SourceStates = $source;
 
                 fn compute(sources: $source) -> Option<Self> {
+                    // A rule of the managed side's, where one was given in place of a table, for
+                    // what a table cannot state, such as a range of a source's values.
+                    if COMPUTED_BY_RULE[$cslot].load(Ordering::Relaxed) {
+                        return by_rule($cslot, sources.0).map($derived);
+                    }
+
                     // A linear scan, because the table is a handful of entries and a caller
                     // writing one long enough for that to matter is describing a lookup rather
                     // than a state.
@@ -120,8 +126,13 @@ macro_rules! define_slots {
         static COMPUTED_LEN: [AtomicI32; COMPUTED_COUNT as usize] =
             [const { AtomicI32::new(0) }; COMPUTED_COUNT as usize];
 
-        /// Adds the computed state in `slot`, working its value out from the table given.
-        fn insert_computed(app: &mut App, slot: i32, from: &[i32], to: &[i32]) -> i32 {
+        /// Which computed states are worked out by the managed side's rule rather than a table.
+        static COMPUTED_BY_RULE: [core::sync::atomic::AtomicBool; COMPUTED_COUNT as usize] =
+            [const { core::sync::atomic::AtomicBool::new(false) }; COMPUTED_COUNT as usize];
+
+        /// Adds the computed state in `slot`, working its value out from the table given, or from
+        /// the managed side's rule where `ruled` is set and the table is empty.
+        fn insert_computed(app: &mut App, slot: i32, from: &[i32], to: &[i32], ruled: bool) -> i32 {
             if from.len() != to.len() || from.len() > COMPUTED_PAIRS {
                 return status::NULL_ARG;
             }
@@ -141,6 +152,7 @@ macro_rules! define_slots {
                     }
 
                     COMPUTED_LEN[$cslot].store(from.len() as i32, Ordering::Relaxed);
+                    COMPUTED_BY_RULE[$cslot].store(ruled, Ordering::Relaxed);
                     app.add_computed_state::<$derived>();
                     status::OK
                 })+
@@ -416,7 +428,7 @@ pub unsafe extern "C" fn bcs_computed_add(
         let from = unsafe { core::slice::from_raw_parts(from, count) };
         let to = unsafe { core::slice::from_raw_parts(to, count) };
 
-        insert_computed(&mut app.app, slot, from, to)
+        insert_computed(&mut app.app, slot, from, to, false)
     })
 }
 
@@ -578,5 +590,67 @@ pub unsafe extern "C" fn bcs_state_add_system(
 pub extern "C" fn bcs_state_despawn_on_exit(entity: u64, slot: i32, value: i32) -> i32 {
     crate::interop::guard(|| {
         with_world(|world| scope(world, crate::ecs::entity_from(entity), slot, value))
+    })
+}
+
+/// What the managed side's rule for computed states is called through, with the computed state's
+/// number, the source's value, and where to write the result, answering non-zero when the state
+/// exists for that value.
+type ComputeRule = unsafe extern "C" fn(slot: i32, source: i32, result: *mut i32) -> i32;
+
+/// The managed side's rule, set once, or zero for none.
+static RULE: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+
+/// Asks the managed side's rule what a computed state is while its source holds a value.
+///
+/// Bevy asks through a plain function with the source's value and nothing else, from whichever
+/// thread runs the transition, so the rule is a function of that value alone and keeps no world.
+fn by_rule(slot: usize, source: i32) -> Option<i32> {
+    let rule = RULE.load(Ordering::Relaxed);
+    if rule == 0 {
+        return None;
+    }
+
+    let rule: ComputeRule = unsafe { core::mem::transmute::<usize, ComputeRule>(rule) };
+    let mut result = 0;
+    (unsafe { rule(slot as i32, source, &mut result) } != 0).then_some(result)
+}
+
+/// Sets the function computed states added with [`bcs_computed_add_rule`] are worked out by.
+///
+/// One function for every such state, told which by its number, so the managed side keeps a
+/// rule per state and the bridge keeps one pointer. Set before any of them is computed.
+///
+/// # Safety
+/// `rule` must be a function of the [`ComputeRule`] shape that stays callable while any app runs,
+/// and never unwinds.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_computed_rule(rule: Option<ComputeRule>) -> i32 {
+    crate::interop::guard(|| {
+        RULE.store(rule.map_or(0, |rule| rule as usize), Ordering::Relaxed);
+        status::OK
+    })
+}
+
+/// Creates the computed state in `slot`, working its value out from the rule
+/// [`bcs_computed_rule`] set rather than from a table.
+///
+/// For what a table cannot state, such as "every level past the tenth", which would be a table
+/// as long as the levels. The rule answers whether the state exists and what it is, given the
+/// source's value. Otherwise the same as [`bcs_computed_add`].
+///
+/// # Safety
+/// `handle` must be a live app.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_computed_add_rule(handle: *mut BcsApp, slot: i32) -> i32 {
+    crate::interop::guard(|| {
+        let Some(app) = (unsafe { app_mut(handle) }) else {
+            return status::NULL_ARG;
+        };
+        if app.running {
+            return status::ALREADY_RUNNING;
+        }
+
+        insert_computed(&mut app.app, slot, &[], &[], true)
     })
 }

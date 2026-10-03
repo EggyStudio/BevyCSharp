@@ -350,11 +350,10 @@ associated type and the types exist when the crate is built.
   every axis is given the same fixed block of them when the bridge is built. A chain is the harder
   one, since a sub-state of a sub-state has nowhere to live in a layout that is one block per
   axis.
-- **A computed state reads one source, and by a table.** `app.AddComputedState` maps values of one
-  state onto values of another, which covers "the interface is up on these three screens". Bevy's
-  `compute` is an arbitrary function over a `StateSet`, so deriving from two states at once, or by
-  any rule a table cannot state, needs a way to call back into managed code from a static function
-  with no world in hand.
+- **A computed state reads one source.** `app.AddComputedState` maps values of one state onto
+  values of another, by a table or by a rule of the game's own, which the bridge calls back into
+  through one function pointer with the computed state's number. Deriving from two states at once
+  needs a computed state whose source is a pair, which is a slot type per pair of axes.
 - **A sub-state over more than one parent.** `SourceStates` can be a tuple, so a state can exist
   only while two others hold values. The pairing is per parent slot, so this needs a different
   arrangement rather than another pair.

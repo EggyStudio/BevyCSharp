@@ -429,6 +429,16 @@ about means it does not exist at all, so `TryState<Hud>` answers false there and
 `[OnEnter]` and `[OnExit]` edges run like any other state's, so it is useful rather than merely
 tidy.
 
+Where a table cannot say it, a rule can, as a function of the source's value answering what the
+state is or nothing:
+
+```csharp
+app.AddComputedState<Music, Level>(level => level > Level.Ten ? Music.Boss : Music.Calm);
+```
+
+Bevy asks it from inside a transition with the source's value alone, so it reads no world, and one
+that throws is taken as answering nothing.
+
 A transition is queued rather than immediate. It lands at Bevy's next transition point, so every
 system in the frame agrees on which state it is in rather than some seeing the change halfway
 through.
