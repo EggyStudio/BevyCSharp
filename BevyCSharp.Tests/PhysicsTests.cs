@@ -401,4 +401,51 @@ public sealed class PhysicsTests
 
         Assert.True(slid > stopped + 3f, $"the icy box slid to {slid} and the rough one to {stopped}");
     }
+
+    /// <summary>
+    /// A hull whose points sit above the entity's origin falls and rests with the origin on the
+    /// floor, so the pose written back is where the origin went rather than the hull's center.
+    /// </summary>
+    [Fact]
+    public void AHullRestsOnItsPointsAndKeepsItsEntitysOrigin()
+    {
+        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120);
+        harness.App.AddPlugin(new PhysicsPlugin());
+
+        var crate = Entity.None;
+        var final = Vec3.Zero;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var physics = ctx.Res<PhysicsWorld>();
+
+            var floor = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(floor, Transform.At(0f, -0.5f, 0f));
+            physics.Add(floor, PhysicsShape.Box(new Vec3(20f, 1f, 20f)), BodyKind.Static, Transform.At(0f, -0.5f, 0f));
+
+            // A unit cube's corners, with the origin in the middle of its bottom face, as a model
+            // exported standing on the ground is, and a point inside that the hull leaves out.
+            Vec3[] points =
+            [
+                new(-0.5f, 0f, -0.5f), new(0.5f, 0f, -0.5f), new(-0.5f, 0f, 0.5f), new(0.5f, 0f, 0.5f),
+                new(-0.5f, 1f, -0.5f), new(0.5f, 1f, -0.5f), new(-0.5f, 1f, 0.5f), new(0.5f, 1f, 0.5f),
+                new(0f, 0.5f, 0f),
+            ];
+
+            crate = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(crate, Transform.At(2f, 3f, 0f));
+            physics.Add(crate, PhysicsShape.Hull(points), BodyKind.Dynamic, Transform.At(2f, 3f, 0f));
+        });
+
+        harness.OnContext(Stage.Update, ctx => final = ctx.Ecs.GetOrDefault<Transform>(crate).Translation);
+
+        harness.Run();
+
+        // Its bottom on the floor's top, which puts the origin there too, and where it was let go.
+        Assert.InRange(final.Y, -0.05f, 0.05f);
+        Assert.InRange(final.X, 1.95f, 2.05f);
+
+        // Fewer than four points hold no volume.
+        Assert.Throws<ArgumentException>(() => PhysicsShape.Hull([Vec3.Zero, Vec3.UnitX, Vec3.UnitY]));
+    }
 }

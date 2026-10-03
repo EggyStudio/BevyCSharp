@@ -76,6 +76,36 @@ public readonly record struct PhysicsShape
         var order = mesh.Indices ?? Enumerable.Range(0, mesh.Positions.Length).Select(index => (uint)index).ToArray();
         return Mesh(mesh.Positions, order);
     }
+
+    /// <summary>
+    /// The smallest convex shape holding every point, as a rock or an odd crate tumbles.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// For a dynamic body whose shape is none of the simple ones, where a mesh shape would be
+    /// slow to collide and wrong to tumble, since a mesh is a surface and a hull is a solid. The
+    /// points are in the entity's own space, from its origin, and need not be on the hull, so a
+    /// model's vertices serve as they are. Bepu builds the hull around its own center, and the
+    /// body turns about that center while the entity keeps its origin, so the transform written
+    /// back is where the entity's origin went. A joint's anchors on such a body are from the
+    /// hull's center.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="ArgumentException">Fewer than four points, which hold no volume.</exception>
+    public static PhysicsShape Hull(ReadOnlySpan<Vec3> points)
+    {
+        if (points.Length < 4)
+            throw new ArgumentException("A hull needs at least four points, which is the fewest that hold a volume.", nameof(points));
+
+        return new() { Kind = 5, Positions = points.ToArray() };
+    }
+
+    /// <summary>The same, around the vertices of a mesh read back with <see cref="Render.TryReadMesh"/>.</summary>
+    public static PhysicsShape Hull(MeshData mesh)
+    {
+        ArgumentNullException.ThrowIfNull(mesh);
+        return Hull(mesh.Positions);
+    }
 }
 
 /// <summary>How a body's surface behaves where it touches another.</summary>
@@ -215,8 +245,11 @@ public sealed class PhysicsWorld : IDisposable
     private readonly ThreadDispatcher _threads;
     private readonly Simulation _simulation;
 
-    /// <summary>A body, whichever kind of handle Bepu gave it.</summary>
-    private readonly record struct Body(BodyKind Kind, BodyHandle Moving, StaticHandle Fixed, TypedIndex Shape);
+    /// <summary>
+    /// A body, whichever kind of handle Bepu gave it, and where its shape's center is from the
+    /// entity's origin, which is nothing but for a hull.
+    /// </summary>
+    private readonly record struct Body(BodyKind Kind, BodyHandle Moving, StaticHandle Fixed, TypedIndex Shape, Vector3 Center = default);
 
     private readonly Dictionary<Entity, Body> _bodies = [];
     private readonly Dictionary<BodyHandle, Entity> _byBody = [];
@@ -304,15 +337,16 @@ public sealed class PhysicsWorld : IDisposable
         if (_bodies.ContainsKey(entity))
             throw new InvalidOperationException($"{entity} already has a body. Remove it first to give it another.");
 
-        var pose = new RigidPose(ToBepu(at.Translation), ToBepu(at.Rotation));
-        var (index, inertia) = AddShape(shape, Math.Max(mass, 1e-4f));
+        var (index, inertia, center) = AddShape(shape, Math.Max(mass, 1e-4f));
+        var orientation = ToBepu(at.Rotation);
+        var pose = new RigidPose(ToBepu(at.Translation) + Vector3.Transform(center, orientation), orientation);
 
         switch (kind)
         {
             case BodyKind.Static:
             {
                 var handle = _simulation.Statics.Add(new StaticDescription(pose, index));
-                _bodies[entity] = new Body(kind, default, handle, index);
+                _bodies[entity] = new Body(kind, default, handle, index, center);
                 _byStatic[handle] = entity;
                 if (sensor) _contacts.Sensors.Add(new CollidableReference(handle).Packed);
                 break;
@@ -321,7 +355,7 @@ public sealed class PhysicsWorld : IDisposable
             case BodyKind.Kinematic:
             {
                 var handle = _simulation.Bodies.Add(BodyDescription.CreateKinematic(pose, Collidable(index), new BodyActivityDescription(-1f)));
-                _bodies[entity] = new Body(kind, handle, default, index);
+                _bodies[entity] = new Body(kind, handle, default, index, center);
                 _byBody[handle] = entity;
                 _kinematicWas[entity] = at.Translation;
                 if (sensor) _contacts.Sensors.Add(new CollidableReference(CollidableMobility.Kinematic, handle).Packed);
@@ -331,7 +365,7 @@ public sealed class PhysicsWorld : IDisposable
             default:
             {
                 var handle = _simulation.Bodies.Add(BodyDescription.CreateDynamic(pose, inertia, Collidable(index), new BodyActivityDescription(0.01f)));
-                _bodies[entity] = new Body(kind, handle, default, index);
+                _bodies[entity] = new Body(kind, handle, default, index, center);
                 _byBody[handle] = entity;
                 if (sensor) _contacts.Sensors.Add(new CollidableReference(CollidableMobility.Dynamic, handle).Packed);
                 break;
@@ -568,8 +602,8 @@ public sealed class PhysicsWorld : IDisposable
             var reference = _simulation.Bodies[body.Moving];
             var was = _kinematicWas[entity];
 
-            reference.Pose.Position = ToBepu(transform.Translation);
             reference.Pose.Orientation = ToBepu(transform.Rotation);
+            reference.Pose.Position = ToBepu(transform.Translation) + Vector3.Transform(body.Center, reference.Pose.Orientation);
             reference.Velocity.Linear = ToBepu((transform.Translation - was) * (1f / seconds));
             reference.Awake = true;
 
@@ -610,7 +644,8 @@ public sealed class PhysicsWorld : IDisposable
 
             // The scale is the entity's own, and the pose is the simulation's.
             var transform = ecs.TryGet<Transform>(entity, out var current) ? current : Transform.Identity;
-            transform.Translation = FromBepu(reference.Pose.Position);
+            // The entity's origin, which for a hull is not the center the body turns about.
+            transform.Translation = FromBepu(reference.Pose.Position - Vector3.Transform(body.Center, reference.Pose.Orientation));
             transform.Rotation = FromBepu(reference.Pose.Orientation);
             ecs.Set(entity, transform);
         }
@@ -759,7 +794,7 @@ public sealed class PhysicsWorld : IDisposable
     /// <summary>How a moving body collides, with contacts generated up to a tenth of a unit ahead.</summary>
     private static CollidableDescription Collidable(TypedIndex shape) => new(shape, 0.1f);
 
-    private (TypedIndex Index, BodyInertia Inertia) AddShape(PhysicsShape shape, float mass)
+    private (TypedIndex Index, BodyInertia Inertia, Vector3 Center) AddShape(PhysicsShape shape, float mass)
     {
         var size = ToBepu(shape.Size);
 
@@ -768,17 +803,23 @@ public sealed class PhysicsWorld : IDisposable
             case 1:
             {
                 var sphere = new BepuShapes.Sphere(size.X);
-                return (_simulation.Shapes.Add(sphere), sphere.ComputeInertia(mass));
+                return (_simulation.Shapes.Add(sphere), sphere.ComputeInertia(mass), default);
             }
             case 2:
             {
                 var capsule = new BepuShapes.Capsule(size.X, size.Y);
-                return (_simulation.Shapes.Add(capsule), capsule.ComputeInertia(mass));
+                return (_simulation.Shapes.Add(capsule), capsule.ComputeInertia(mass), default);
             }
             case 3:
             {
                 var cylinder = new BepuShapes.Cylinder(size.X, size.Y);
-                return (_simulation.Shapes.Add(cylinder), cylinder.ComputeInertia(mass));
+                return (_simulation.Shapes.Add(cylinder), cylinder.ComputeInertia(mass), default);
+            }
+            case 5:
+            {
+                var points = shape.Positions!.Select(ToBepu).ToArray();
+                var hull = new ConvexHull(points, _pool, out var center);
+                return (_simulation.Shapes.Add(hull), hull.ComputeInertia(mass), center);
             }
             case 4:
             {
@@ -798,12 +839,12 @@ public sealed class PhysicsWorld : IDisposable
                 }
 
                 var mesh = new BepuShapes.Mesh(triangles, Vector3.One, _pool);
-                return (_simulation.Shapes.Add(mesh), mesh.ComputeClosedInertia(mass));
+                return (_simulation.Shapes.Add(mesh), mesh.ComputeClosedInertia(mass), default);
             }
             default:
             {
                 var box = new BepuShapes.Box(size.X, size.Y, size.Z);
-                return (_simulation.Shapes.Add(box), box.ComputeInertia(mass));
+                return (_simulation.Shapes.Add(box), box.ComputeInertia(mass), default);
             }
         }
     }

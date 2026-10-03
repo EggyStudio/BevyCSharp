@@ -398,14 +398,11 @@ and no Bepu type in it, so the engine underneath can be replaced without a game 
 the simulation, its buffer pool and thread dispatcher, and the callbacks Bepu requires, steps once
 per fixed step, and writes each dynamic body back through `Transform`. Each body can have a
 material of its own, friction and a bounce Bepu's stiff contacts do not give, which the world
-gives back after the step. What is left:
+gives back after the step, and a body that tumbles in an odd shape is a convex hull of its points,
+turning about the hull's center while its entity keeps its origin. What is left:
 
 - **Not published yet.** The workflow packs the core alone, so the package is reached by project
   reference inside this repository. Packing it is adding it to the pack step.
-- **No convex hulls.** Boxes, spheres, capsules and cylinders cover characters and props, and a
-  mesh shape covers a level, from triangles `Render.TryReadMesh` reads back. A rock or a crate of
-  odd shape that has to tumble needs a convex hull, which Bepu builds from points and which shifts
-  the body's center to the hull's, so the pose written back has to allow for it.
 - **Joints without motors or limits.** Ball joints, hinges, welds and distance ranges hold bodies
   together, and contacts are reported, a sensor making a trigger volume. A hinge that turns itself
   or stops at an angle needs Bepu's motors and angular limits, which the joint kinds do not reach.

@@ -2806,7 +2806,17 @@ if (Render.TryReadMesh(levelMesh, out var triangles))
     physics.Add(level, PhysicsShape.Mesh(triangles!), BodyKind.Static, levelTransform);
 ```
 
-A triangle collides from the side Bevy draws its face on. A body belongs to its entity, so despawning the entity removes it, and the
+A triangle collides from the side Bevy draws its face on. A rock or an odd crate that has to tumble
+is a convex hull of its points instead, such as a model's own vertices, solid where a mesh shape is
+a surface:
+
+```csharp
+if (Render.TryReadMesh(rockMesh, out var rock))
+    physics.Add(boulder, PhysicsShape.Hull(rock!), BodyKind.Dynamic, boulderTransform, mass: 40f);
+```
+
+The hull turns about its own center while its entity keeps its origin, so a model exported standing
+on its base rests with its base on the ground. A body belongs to its entity, so despawning the entity removes it, and the
 simulation's memory and threads are released with the app. F7 in the sample drops crates onto its
 ground, around the turning cube as a kinematic body, and `./bcs command sample.crates 12` does the
 same on a running sample.
