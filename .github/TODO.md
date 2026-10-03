@@ -447,23 +447,16 @@ per distribution. The minimal profile still builds with nothing but a C compiler
 
 ### Testing
 
-- **What reaches the render world is checked for one shape.** Every registration goes through
-  `assets::init_asset_once`, and the crate's own tests pin both halves of that guard. `DrawnTests`
-  covers the step after by drawing a primitive mesh with an unlit material into an offscreen target
-  and asserting on the pixels, so a mesh or material that never reaches the render world fails a
-  test rather than producing an empty picture. It needs a GPU, so it skips on the headless bridge
-  the test workflow builds. A lit surface is covered by the sky and environment map tests, a sprite
-  by the overlay one, and text and the interface by the pixel tests over the layout. What is
-  unchecked that way is a glTF file's own materials, which need a file with one in it.
-- **Depth of field is the one lens effect with no test.** `LensTests` draws the same scene twice for
-  the vignette, the chromatic fringe and the lens distortion, and asserts the shape of the change.
-  Depth of field resists it for three reasons worth knowing before trying again. The blur is capped
-  in pixels rather than scaled, so `MaxBlurDiameter` decides it and the aperture saturates against
-  that cap. A short lens focused far away has an enormous depth of field, so the physically obvious
-  settings produce under a pixel of blur. And the pass uses the depth buffer to keep a silhouette
-  from smearing into what is behind it, so the strongest edge in a simple scene is the one edge the
-  effect is built not to touch. A test needs a textured surface filling the frame at a focus it
-  misses, measured inside the shape.
+What reaches the render world is drawn and looked at rather than taken on trust. Every registration
+goes through `assets::init_asset_once`, whose two halves the crate's own tests pin, and the step
+after is covered by drawing into an offscreen target and asserting on the pixels: a mesh with an
+unlit material made in code (`DrawnTests`), a glTF file's own material (`GltfMaterialDrawnTests`), a
+lit surface through the sky and environment map tests, a sprite through the overlay one, and text
+and the interface through the layout's pixel tests. Every lens effect is checked by the shape of
+its change, depth of field included (`DepthOfFieldTests`), which measures a checkered surface
+focused far past, since its blur is capped in pixels, needs a lens far out of focus to show at all,
+and leaves silhouettes alone. These need a GPU, so they skip on the headless bridge the test
+workflow builds.
 
 ### Build and release
 
