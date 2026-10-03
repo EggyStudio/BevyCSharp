@@ -39,11 +39,11 @@ public sealed class AudioTests
         Assert.Equal(float.NegativeInfinity, Audio.DecibelsFromVolume(0f));
     }
 
-    [Fact]
+    [SkippableFact]
     public void AClipLoads()
     {
         using var harness = new EngineHarness(frames: 40, fps: 240);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var state = AssetLoadState.Loading;
 
@@ -60,13 +60,13 @@ public sealed class AudioTests
         Assert.Equal(AssetLoadState.Loaded, state);
     }
 
-    [Fact]
+    [SkippableFact]
     public void APlayingSoundIsAnEntity()
     {
         // That makes it despawnable, taggable and queryable without a second API for sounds
         // specifically.
         using var harness = new EngineHarness(frames: 6);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var playing = Entity.None;
         var alive = false;
@@ -89,11 +89,11 @@ public sealed class AudioTests
         Assert.True(alive);
     }
 
-    [Fact]
+    [SkippableFact]
     public void StoppingDespawnsWhatWasPlaying()
     {
         using var harness = new EngineHarness(frames: 8);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var playing = Entity.None;
         var goneAfterStop = false;
@@ -115,11 +115,11 @@ public sealed class AudioTests
         Assert.True(goneAfterStop, "the entity survived being stopped");
     }
 
-    [Fact]
+    [SkippableFact]
     public void PlayingSomethingThatIsNotASoundIsRefused()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -130,14 +130,14 @@ public sealed class AudioTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void ControlNeedsTheSinkThatArrivesWithPlayback()
     {
         // Bevy attaches the sink once playback has started, so a call in the same frame reports
         // that rather than silently doing nothing. Worth pinning down, because it reads as a bug
         // otherwise.
         using var harness = new EngineHarness(frames: 4);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -152,11 +152,11 @@ public sealed class AudioTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void ASpatialSoundIsPlacedByItsTransform()
     {
         using var harness = new EngineHarness(frames: 6);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var engine = Entity.None;
         var placed = false;
@@ -198,11 +198,11 @@ public sealed class AudioTests
         Assert.True(placed, "the spatial sound did not keep the place it was put");
     }
 
-    [Fact]
+    [SkippableFact]
     public void ListeningFromSomethingThatIsGoneIsRefused()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -213,14 +213,14 @@ public sealed class AudioTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void PositionAndSeekNeedTheSinkThatArrivesWithPlayback()
     {
         // The same rule the volume follows. The sink knows where a clip is, and it is attached once
         // playback has started. A machine with no audio device never attaches one at all, which is
         // why the answer is checked for being refused rather than for a number.
         using var harness = new EngineHarness(frames: 4);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -247,13 +247,13 @@ public sealed class AudioTests
     /// </summary>
     /// <remarks>
     /// Silent throughout, since the global volume is zero and the volumes read back are each
-    /// sound's own. Needs a sound device for the sink, so it returns early without one.
+    /// sound's own. Needs a sound device for the sink, so it is skipped without one.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void ABusScalesItsSoundsAndKeepsTheirPauses()
     {
         using var harness = new EngineHarness(frames: 400, fps: 240);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var music = Entity.None;
         var effect = Entity.None;
@@ -294,7 +294,7 @@ public sealed class AudioTests
 
         harness.Run();
 
-        if (readings.Count == 0) return;
+        Needs.SoundDevice(readings.Count > 0);
 
         Assert.Equal(5, readings.Count);
         Assert.Equal((0.5f, 0.8f, false), readings[0]);
@@ -304,11 +304,11 @@ public sealed class AudioTests
         Assert.Equal((0.8f, 0.8f, true), readings[4]);
     }
 
-    [Fact]
+    [SkippableFact]
     public void TheMasterVolumeScalesEverythingAtOnce()
     {
         using var harness = new EngineHarness(frames: 4);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -324,13 +324,13 @@ public sealed class AudioTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void ASoundReportsWhereItIsUntilItIsAskedToLoop()
     {
         // Both halves need a sound device, because without one Bevy attaches no sink and there is
         // nothing to ask, which is why the assertions are guarded on having got an answer.
         using var harness = new EngineHarness(frames: 400, fps: 240);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var playing = Entity.None;
         var looping = Entity.None;
@@ -368,9 +368,8 @@ public sealed class AudioTests
 
         harness.Run();
 
-        if (position < 0f) return;
+        Needs.SoundDevice(position >= 0f);
 
-        Assert.True(position >= 0f);
         Assert.Equal(NativeStatus.Ok, plainSeek);
 
         // Looping keeps the decoded samples so the clip can start again, and what holds them
@@ -405,10 +404,10 @@ public sealed class AudioTests
     /// the window is obeyed, by playing a second of tone twice and letting both clean up after
     /// themselves. The one given a fifth of a second is gone long before the one given all of it.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void ASoundCanPlayPartOfAClip()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         using var harness = new EngineHarness(frames: 40, fps: 60);
 
@@ -459,11 +458,11 @@ public sealed class AudioTests
 
         harness.Run();
 
-        // No device on this machine, so there was nothing to play.
-        if (clippedGone is not { } clippedEnded || wholeGone is not { } wholeEnded) return;
+        // No device on this machine leaves nothing to play.
+        Needs.SoundDevice(clippedGone is not null && wholeGone is not null);
 
-        Assert.True(clippedEnded, "the sound given a fifth of a second was still playing");
-        Assert.False(wholeEnded, "the sound given the whole tone ended early");
+        Assert.True(clippedGone!.Value, "the sound given a fifth of a second was still playing");
+        Assert.False(wholeGone!.Value, "the sound given the whole tone ended early");
     }
 
 }

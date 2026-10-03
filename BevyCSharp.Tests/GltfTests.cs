@@ -17,11 +17,11 @@ public sealed class GltfTests
 {
     private const string Model = "models/triangle.gltf";
 
-    [Fact]
+    [SkippableFact]
     public void AMeshLoadsOutOfAGltfFile()
     {
         using var harness = new EngineHarness(frames: 40, fps: 120);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var handle = AssetHandle.None;
         var state = AssetLoadState.Loading;
@@ -40,14 +40,14 @@ public sealed class GltfTests
         Assert.Equal(AssetLoadState.Loaded, state);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AGltfMaterialNeedsTheRendererThatTranslatesIt()
     {
         // The material a file describes is not the one the renderer draws with, and the plugin that
         // translates between them comes with the window. A windowless run has to say so rather than
         // wait, since a caller polling the state depends on it.
         using var harness = new EngineHarness(frames: 60, fps: 240);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var state = AssetLoadState.Loading;
 
@@ -66,13 +66,13 @@ public sealed class GltfTests
         Assert.Equal(AssetLoadState.Failed, state);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AGltfMeshIsAnOrdinaryMeshHandle()
     {
         // The point of loading the part rather than the file. What comes back is the same kind of
         // handle Render.CreateMesh produces, so nothing downstream needs a glTF-shaped path.
         using var harness = new EngineHarness(frames: 40, fps: 120);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var entity = Entity.None;
         var attached = false;
@@ -99,13 +99,13 @@ public sealed class GltfTests
         Assert.True(attached);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AskingForAPartThatIsNotThereFailsRatherThanHangs()
     {
         // A label naming a mesh the file does not define is a load failure, not a load that never
         // finishes, so a caller polling the state gets an answer.
         using var harness = new EngineHarness(frames: 40, fps: 120);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var state = AssetLoadState.Loading;
 
@@ -122,11 +122,11 @@ public sealed class GltfTests
         Assert.Equal(AssetLoadState.Failed, state);
     }
 
-    [Fact]
+    [SkippableFact]
     public void TheGltfKindLoadsTheWholeFile()
     {
         using var harness = new EngineHarness(frames: 40, fps: 120);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var state = AssetLoadState.Loading;
 
@@ -143,14 +143,14 @@ public sealed class GltfTests
         Assert.Equal(AssetLoadState.Loaded, state);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AGltfSceneSpawnsTheEntitiesTheFileDescribes()
     {
         // The other half of a glTF file, not one mesh but the arrangement an artist laid out.
         // The scene entity comes back at once and fills in when the asset has loaded, so the
         // test waits on WorldInstance rather than on a frame count.
         using var harness = new EngineHarness(frames: 300, fps: 240);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var root = Entity.None;
         var ready = false;
@@ -185,14 +185,14 @@ public sealed class GltfTests
         Assert.True(children > 0, $"the scene spawned nothing beneath its root (raced: {readyBeforeChildren})");
     }
 
-    [Fact]
+    [SkippableFact]
     public void ASpawnedSceneCanBeComposedOnTopOf()
     {
         // In place of bsn!, this side spawns what the file describes, then patches it through
         // the ordinary ECS surface. Here the artist's placement is overwritten and a component
         // the file knows nothing about is added.
         using var harness = new EngineHarness(frames: 300, fps: 240);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var root = Entity.None;
         var patched = 0;

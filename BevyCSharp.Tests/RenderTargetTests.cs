@@ -26,10 +26,10 @@ public sealed class RenderTargetTests : IDisposable
         if (Directory.Exists(_directory)) Directory.Delete(_directory, recursive: true);
     }
 
-    [Fact]
+    [SkippableFact]
     public void ATargetIsAHandleLikeAnyOther()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         using var harness = new EngineHarness(frames: 2);
 
@@ -57,10 +57,10 @@ public sealed class RenderTargetTests : IDisposable
     /// another, so a capture that comes back at the target's size can only have come from the
     /// image the camera was pointed at.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void WhatACameraDrawsIntoATargetCanBeReadBack()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var path = Path.Combine(_directory, "target.png");
 
@@ -106,10 +106,10 @@ public sealed class RenderTargetTests : IDisposable
         Assert.Equal(48u, height);
     }
 
-    [Fact]
+    [SkippableFact]
     public void ACameraCanBePutBackOnTheWindow()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         using var harness = new EngineHarness(frames: 3);
 
@@ -128,10 +128,10 @@ public sealed class RenderTargetTests : IDisposable
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void AnEntityThatIsNotACameraIsRefused()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         using var harness = new EngineHarness(frames: 2);
 
@@ -149,10 +149,10 @@ public sealed class RenderTargetTests : IDisposable
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void AHandleThatNamesNoImageIsRefused()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         using var harness = new EngineHarness(frames: 2);
 
@@ -179,10 +179,10 @@ public sealed class RenderTargetTests : IDisposable
     /// draw from. What it has is a camera pointed at an image, and this is the seam between that
     /// image and a draw call.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void ATargetCanBeDrawnByTheInterface()
     {
-        if (!App.HasRenderer || !App.HasEditor) return;
+        Needs.Editor();
 
         // The interface has to be installed for a picture to have anywhere to be named, and it is
         // installed only when an app asks to draw one. An offscreen run can, which makes this
@@ -236,10 +236,10 @@ public sealed class RenderTargetTests : IDisposable
     /// brighter than white for a shader reading the target, while a capture of the same target
     /// reads it as white.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AFloatTargetKeepsWhatIsBrighterThanWhite()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var target = AssetHandle.None;
         var into = AssetHandle.None;
@@ -305,10 +305,10 @@ public sealed class RenderTargetTests : IDisposable
     /// Cameras pointed at single layers of a cube target fill those faces and no others: plus X
     /// with one camera's clear color, minus Y with the other's, and plus Z left black.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void CamerasFillTheFacesOfACubeTheyArePointedAt()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var into = AssetHandle.None;
         var read = default(ShaderInstance);

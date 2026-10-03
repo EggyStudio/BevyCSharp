@@ -17,10 +17,10 @@ public sealed class ShaderPassTests
     /// <summary>Frames to let the pipelines compile before the picture is worth reading.</summary>
     private const uint Settled = 120;
 
-    [Fact]
+    [SkippableFact]
     public void APassChangesThePictureAndItsNumbersChangeThePass()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var camera = Entity.None;
         var invert = default(ShaderInstance);
@@ -61,10 +61,10 @@ public sealed class ShaderPassTests
     }
 
     /// <summary>A pass that declares nothing of its own runs before tonemapping.</summary>
-    [Fact]
+    [SkippableFact]
     public void APassWithNothingOfItsOwnChangesThePicture()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -91,10 +91,10 @@ public sealed class ShaderPassTests
     /// Inverting twice is the picture unchanged, and inverting once is not, so a second pass that
     /// read the camera's picture rather than the first pass's would give it away.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void PassesRunInOrderOverEachOther()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -123,12 +123,12 @@ public sealed class ShaderPassTests
     /// A pass reads the camera's depth where the camera draws it, and the far plane where it does
     /// not.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [InlineData(true)]
     [InlineData(false)]
     public void APassReadsTheCamerasDepth(bool drawn)
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -166,10 +166,10 @@ public sealed class ShaderPassTests
     /// The prelude turns depth into a distance in world units, which is the front of a cube two
     /// units across seen from six units away, which is five.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void APassMeasuresDistance()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -198,10 +198,10 @@ public sealed class ShaderPassTests
     /// <summary>
     /// A pass binds textures and buffers of its own by name, beside the picture the bridge binds.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void APassHasTexturesAndBuffersOfItsOwn()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -231,10 +231,10 @@ public sealed class ShaderPassTests
     }
 
     /// <summary>A pass reads Bevy's time through the prelude.</summary>
-    [Fact]
+    [SkippableFact]
     public void APassReadsTheTime()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -267,12 +267,12 @@ public sealed class ShaderPassTests
     /// A pass after opaque geometry runs before transparent geometry is drawn, so a see-through pane
     /// in front shows over what it painted; the same pass before tonemapping paints over the pane.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [InlineData(true)]
     [InlineData(false)]
     public void APassAfterOpaqueGeometryIsUnderTransparentGeometry(bool afterOpaque)
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {

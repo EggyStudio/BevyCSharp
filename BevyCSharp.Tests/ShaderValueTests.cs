@@ -45,10 +45,10 @@ public sealed class ShaderValueTests
     private static void AssertGreen((byte R, byte G, byte B) pixel, string what) =>
         Assert.True(pixel.G > 120 && pixel.R < 90 && pixel.B < 90, $"{what} came out {pixel} rather than green");
 
-    [Fact]
+    [SkippableFact]
     public void AThousandNumbersReachTheShader()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var middle = Middle(_ =>
         {
@@ -65,10 +65,10 @@ public sealed class ShaderValueTests
     }
 
     /// <summary>Sixty-four textures in one material, sampled by index.</summary>
-    [Fact]
+    [SkippableFact]
     public void SixtyFourTexturesAreBound()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var middle = Middle(_ =>
         {
@@ -87,10 +87,10 @@ public sealed class ShaderValueTests
     }
 
     /// <summary>Sixteen cubemaps in one material, of which the last is sampled.</summary>
-    [Fact]
+    [SkippableFact]
     public void SixteenCubemapsAreBound()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var middle = Middle(_ =>
         {
@@ -113,10 +113,10 @@ public sealed class ShaderValueTests
     }
 
     /// <summary>A 3D texture and an array texture, each bound as the shape the shader declares.</summary>
-    [Fact]
+    [SkippableFact]
     public void VolumesAndArraysAreBoundByShape()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var middle = Middle(_ =>
         {
@@ -141,10 +141,10 @@ public sealed class ShaderValueTests
     /// A field of a struct in an array in a constant buffer is found by its path, and a whole
     /// struct is set as its bytes.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AFieldIsFoundByItsPath()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var middle = Middle(_ => Shaders.CreateMaterial(Shaders.CreateProgram("shaders/lights.slang"))
             .Set("lighting.count", 4)
@@ -156,10 +156,10 @@ public sealed class ShaderValueTests
     }
 
     /// <summary>A C# matrix is read by the shader the way <c>mul</c> reads it.</summary>
-    [Fact]
+    [SkippableFact]
     public void AMatrixArrivesTheRightWayRound()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         // A rotation taking x to y, written row by row as C# writes a matrix. `mul(m, v)` dots each
         // row with v, so the first column is where x goes, and a matrix that arrived transposed
@@ -180,10 +180,10 @@ public sealed class ShaderValueTests
     /// A C# struct in a raw buffer is read back field by field by the same struct declared in
     /// Slang.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ACSharpStructIsReadByTheSameStructInSlang()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var middle = Middle(_ =>
         {
@@ -207,10 +207,10 @@ public sealed class ShaderValueTests
     /// <summary>
     /// A buffer takes as many elements as it is given, and the shader reads the last of them.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ABufferHoldsAsMuchAsItIsGiven()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var middle = Middle(_ =>
         {
@@ -227,10 +227,10 @@ public sealed class ShaderValueTests
     }
 
     /// <summary>An image made from floats keeps numbers no eight-bit image could.</summary>
-    [Fact]
+    [SkippableFact]
     public void AnImageOfFloatsKeepsItsNumbers()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var middle = Middle(_ => Shaders.CreateMaterial(Shaders.CreateProgram("shaders/load_float.slang"))
             .SetTexture("heights", Shaders.CreateImage<float>(2, 1, ShaderImageFormat.R32Float, [0.25f, 1234.5f]))
@@ -248,10 +248,10 @@ public sealed class ShaderValueTests
     }
 
     /// <summary>Two materials of different layouts draw side by side in one frame.</summary>
-    [Fact]
+    [SkippableFact]
     public void MaterialsOfDifferentLayoutsDrawTogether()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -297,10 +297,10 @@ public sealed class ShaderValueTests
     /// An edit that adds a parameter gives the material a layout with it, and every value set
     /// before the edit is kept by name.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AnEditThatAddsAParameterKeepsTheValuesByName()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         using var assets = PictureRun.Temporary();
         assets.Write("grow.slang", """
@@ -379,10 +379,10 @@ public sealed class ShaderValueTests
     /// names it does declare, once the program has compiled, and kept before, when nothing can be
     /// checked.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AWrongNameOrShapeIsRefusedWithWhatThereIs()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         Exception? unknown = null;
         Exception? scalar = null;

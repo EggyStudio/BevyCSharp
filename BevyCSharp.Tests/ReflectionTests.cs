@@ -11,10 +11,10 @@ public sealed class ReflectionTests
     /// A glowing green cube over a smooth dark floor shows in the floor with reflections on, and not
     /// with them off.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ASmoothFloorReflectsWhatStandsOnIt()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var without = GreenInTheFloor(reflect: false);
         var with = GreenInTheFloor(reflect: true);

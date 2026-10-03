@@ -450,8 +450,9 @@ lit surface through the sky and environment map tests, a sprite through the over
 and the interface through the layout's pixel tests. Every lens effect is checked by the shape of
 its change, depth of field included (`DepthOfFieldTests`), which measures a checkered surface
 focused far past, since its blur is capped in pixels, needs a lens far out of focus to show at all,
-and leaves silhouettes alone. These need a GPU, so they skip on the headless bridge the test
-workflow builds.
+and leaves silhouettes alone. These need a GPU, so they are skipped on the headless bridge the
+test workflow builds, each through `Needs` in the tests with the profile, tool or device it lacks
+as the reason, so a run's summary counts what did not run there rather than passing it.
 
 ### Build and release
 

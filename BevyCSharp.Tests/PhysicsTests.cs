@@ -263,10 +263,10 @@ public sealed class PhysicsTests
     /// A floor made from a plane mesh read back from the engine holds up a ball dropped on it from
     /// above, which is the side Bevy draws the plane's face on.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AMeshReadFromTheEngineIsAFloor()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         using var physics = new PhysicsWorld();
         using var app = new App(Config.OffscreenFor(64, 64, frames: 200));

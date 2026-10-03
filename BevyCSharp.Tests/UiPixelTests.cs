@@ -23,10 +23,10 @@ public sealed class UiPixelTests
     /// <summary>Frames to let the pipelines compile before the picture is worth reading.</summary>
     private const ulong Settled = 120;
 
-    [Fact]
+    [SkippableFact]
     public void AnAspectRatioDecidesTheSideTheLayoutWasNotTold()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var picture = Draw(ratio: 1f);
 
@@ -40,10 +40,10 @@ public sealed class UiPixelTests
         Assert.InRange(height, width - 4, width + 4);
     }
 
-    [Fact]
+    [SkippableFact]
     public void ANodeWithNoRatioTakesTheHeightItWasGiven()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var picture = Draw(ratio: 0f);
 
@@ -62,10 +62,10 @@ public sealed class UiPixelTests
     /// Two lines of the same words in the same font, so the only thing that can move the second
     /// line is the spacing asked for.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void LineHeightMovesTheLinesApart()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var packed = DrawText(lineHeight: 1f);
         var spread = DrawText(lineHeight: 2.5f);
@@ -86,10 +86,10 @@ public sealed class UiPixelTests
     /// The same words in the same font at the same size, so the only thing that can widen them is
     /// the room asked for between the letters.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void LetterSpacingMovesTheLettersApart()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var normal = DrawText(lineHeight: 1f);
         var tracked = DrawText(lineHeight: 1f, letterSpacing: 0.5f);
@@ -111,10 +111,10 @@ public sealed class UiPixelTests
     /// wide bands when the slice is stretched and a row of thin ones when it is tiled, so counting
     /// the changes across the top edge tells the two apart without knowing where any of them fell.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void ASlicedEdgeCanTileRatherThanStretch()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var stretched = DrawStripes(SliceTiling.None);
         var tiled = DrawStripes(SliceTiling.Sides);
@@ -198,10 +198,10 @@ public sealed class UiPixelTests
     /// bytes crossed the bridge, became an asset, took a key the table knows, and reached the
     /// renderer through the same path a loaded picture does.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void AnImageMadeFromBytesIsDrawn()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var picture = Capture((camera, _) =>
         {
@@ -239,10 +239,10 @@ public sealed class UiPixelTests
     /// the first column ends. Laid out by the flexbox the node would otherwise use, the two would
     /// be packed against each other at their own widths instead.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void AGridPutsItsChildrenInItsCells()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var picture = Capture((camera, world) =>
         {
@@ -302,10 +302,10 @@ public sealed class UiPixelTests
     /// The same node twice, so the corner going dark while the middle stays lit is the radius and
     /// nothing else. A radius that never reached the layout would leave the two pictures equal.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void RoundedCornersCutTheCornerOffANode()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var square = DrawBox(radius: 0f);
         var rounded = DrawBox(radius: 16f);
@@ -342,10 +342,10 @@ public sealed class UiPixelTests
     /// is the whole assertion, and the line growing wider says the words were laid out rather than
     /// drawn on top of the ones already there.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void ASpanSetsPartOfALineInItsOwnColor()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var plain = DrawSpan(span: false);
         var mixed = DrawSpan(span: true);
@@ -424,10 +424,10 @@ public sealed class UiPixelTests
         });
 
     /// <summary>A shadow puts something behind the glyphs that was not there before.</summary>
-    [Fact]
+    [SkippableFact]
     public void AShadowIsDrawnBehindTheText()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var plain = DrawText(lineHeight: 1f);
         var shadowed = DrawText(lineHeight: 1f, shadow: true);

@@ -64,16 +64,16 @@ public sealed class ReflectedWrapperTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void APointLightIsWrittenThroughItsWrapper()
     {
+        Needs.Renderer();
+
         using var harness = new EngineHarness(frames: 2);
         var ran = false;
 
         harness.OnContext(Stage.Startup, ctx =>
         {
-            if (!App.HasRenderer) return;
-
             var lamp = ctx.Ecs.Spawn();
             var light = ctx.Ecs.Insert<PointLightRef>(lamp);
 
@@ -92,6 +92,6 @@ public sealed class ReflectedWrapperTests
 
         harness.Run();
 
-        if (App.HasRenderer) Assert.True(ran);
+        Assert.True(ran);
     }
 }

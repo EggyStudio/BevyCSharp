@@ -24,22 +24,21 @@ public sealed class MaterialSurfaceTests
         RefractiveIndex = 1.33f,
     };
 
-    [Fact]
+    [SkippableFact]
     public void TheFinerSurfaceComesBackFromTheEngine()
     {
+        Needs.Renderer();
+
         using var harness = new EngineHarness(frames: 2);
         MaterialSettings? read = null;
 
         harness.OnContext(Stage.Startup, _ =>
         {
-            if (!App.HasRenderer) return;
-
             var material = Render.CreateMaterial(Glassy());
             Assert.True(Render.TryReadMaterial(material, out read));
         });
 
         harness.Run();
-        if (!App.HasRenderer) return;
 
         Assert.NotNull(read);
         var made = Glassy();

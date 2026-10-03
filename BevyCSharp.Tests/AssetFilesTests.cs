@@ -56,13 +56,13 @@ public sealed class AssetFilesTests : IDisposable
         Assert.False(AssetFiles.Exists(Path.Combine(Path.GetTempPath(), "carried", "note.json")));
     }
 
-    [Fact]
+    [SkippableFact]
     public void BevyReadsAModelTheAssemblyCarriesThroughTheSharedBridge()
     {
         // The model is nowhere on disk, under the harness's asset root or this one, so Bevy can
         // only have read it through the reader the managed side hands the bridge.
         using var harness = new EngineHarness(frames: 60, fps: 120, carried: typeof(AssetFilesTests).Assembly);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var carried = AssetHandle.None;
         var absent = AssetHandle.None;

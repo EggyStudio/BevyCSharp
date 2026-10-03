@@ -37,10 +37,10 @@ public sealed class ShaderMaterialTests
     internal static ShaderMaterial Flat(Vector4 color) =>
         Shaders.CreateMaterial(Shaders.CreateProgram("shaders/flat.slang")).Set("color", color);
 
-    [Fact]
+    [SkippableFact]
     public void AShaderMaterialDrawsTheColorItWasGiven()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -69,10 +69,10 @@ public sealed class ShaderMaterialTests
     /// <c>swell</c>. A vertex shader that never ran would leave the two pictures the same size,
     /// which is the only thing that tells it apart from a fragment shader.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void AVertexShaderMovesTheMesh()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var still = Swell(0f);
         var swollen = Swell(0.6f);
@@ -113,10 +113,10 @@ public sealed class ShaderMaterialTests
         Shaders.Programs.All(program => program.State == ShaderProgramState.Ready);
 
     /// <summary>A material reads Bevy's time through the prelude.</summary>
-    [Fact]
+    [SkippableFact]
     public void AMaterialReadsTheTime()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -139,10 +139,10 @@ public sealed class ShaderMaterialTests
     /// One file compiled six ways by its defines. Each cube is a different primary or secondary
     /// color, and each has to come out that color where it stands.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void ManyProgramsDrawAtOnce()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         (int R, int G, int B)[] colors = [(1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 1, 0), (0, 1, 1), (1, 0, 1)];
         var programs = new List<ShaderProgram>();
@@ -213,11 +213,11 @@ public sealed class ShaderMaterialTests
     internal static Vec3 InRow(int index) => new(-5f + (2f * index), 0f, 0f);
 
     /// <summary>The same settings answer the same program, however often they are asked for.</summary>
-    [Fact]
+    [SkippableFact]
     public void TheSameSettingsAreTheSameProgram()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -274,10 +274,10 @@ public sealed class ShaderMaterialTests
     }
 
     /// <summary>A change to a material's value reaches the picture while it is being drawn.</summary>
-    [Fact]
+    [SkippableFact]
     public void AValueChangesWhileTheMaterialIsDrawn()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var material = default(ShaderMaterial);
 
@@ -316,10 +316,10 @@ public sealed class ShaderMaterialTests
     /// a program whose prepass moves the vertices the same way, and once by one that leaves the
     /// prepass to Bevy. What is counted is the dark floor, which is the shadow.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void APrepassVertexShaderMovesTheShadowToo()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var followed = Shadow(prepass: true);
         var left = Shadow(prepass: false);
@@ -408,10 +408,10 @@ public sealed class ShaderMaterialTests
     /// a shape the pipeline rejects is something to read about and fix. The app is run on past the
     /// error, and ending cleanly afterwards says it was survived.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void AMismatchedShaderIsSurvivedWhenAsked()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var reported = string.Empty;
         Shaders.KeepRenderingAfterErrors = true;
@@ -457,10 +457,10 @@ public sealed class ShaderMaterialTests
     /// An edit to a file a shader imports recompiles the shader, which the asset server alone could
     /// not do, since it never sees the import.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AnEditToAnImportedModuleRecompilesTheShader()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         using var assets = PictureRun.Temporary();
         assets.Write("tint.slang", Tint("0.0, 1.0, 0.0"));
@@ -516,10 +516,10 @@ public sealed class ShaderMaterialTests
     /// A shader that stops compiling keeps drawing with the version that last did, and says what
     /// is wrong.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AMistakeKeepsTheLastShaderThatCompiled()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         using var assets = PictureRun.Temporary();
         assets.Write("paint.slang", Paint("0.0, 1.0, 0.0"));
@@ -552,10 +552,10 @@ public sealed class ShaderMaterialTests
     }
 
     /// <summary>A shader that has never compiled draws magenta rather than nothing.</summary>
-    [Fact]
+    [SkippableFact]
     public void AShaderThatNeverCompiledDrawsMagenta()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         using var assets = PictureRun.Temporary();
         assets.Write("broken.slang", "[shader(\"fragment\")] float4 fragment() : SV_Target { return nope; }");
@@ -588,10 +588,10 @@ public sealed class ShaderMaterialTests
     /// diagnostics, rather than a pipeline that fails where nothing could say which shader was
     /// wrong.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ABindingInAGroupNothingBindsIsAFailedCompile()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         using var assets = PictureRun.Temporary();
         assets.Write("stray.slang", """
@@ -631,10 +631,10 @@ public sealed class ShaderMaterialTests
     }
 
     /// <summary>A program made from Slang handed over as text compiles and draws like a file.</summary>
-    [Fact]
+    [SkippableFact]
     public void AProgramCanBeMadeFromText()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -655,10 +655,10 @@ public sealed class ShaderMaterialTests
     /// An entity says which program draws it and hands over its values, which an inspector reads,
     /// and an entity drawn by Bevy's own material says none.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AnEntityAnswersForItsShaderMaterial()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var made = ShaderProgram.None;
         var asked = ShaderProgram.None;

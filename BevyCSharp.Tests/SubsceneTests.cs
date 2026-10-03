@@ -11,7 +11,7 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// A subscene is read on the managed side, so most of these run on a headless bridge. The one with
-/// a glTF scene nested inside returns early there, as the glTF tests do.
+/// a glTF scene nested inside is skipped there, as the glTF tests are.
 /// </remarks>
 [Collection("engine")]
 public sealed class SubsceneTests : IDisposable
@@ -126,7 +126,7 @@ public sealed class SubsceneTests : IDisposable
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void AnOverrideReachesIntoAModelNestedInASubscene()
     {
         var dock = Path.Combine(_root, "dock.scene.json");
@@ -146,7 +146,7 @@ public sealed class SubsceneTests : IDisposable
             """);
 
         using var harness = new EngineHarness(frames: 300, fps: 240);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var root = Entity.None;
         var turret = Vec3.Zero;

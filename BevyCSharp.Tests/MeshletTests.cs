@@ -14,10 +14,10 @@ public sealed class MeshletTests
     /// A sphere cut into clusters on a worker draws where an ordinary sphere would, lit by a light,
     /// once the conversion is done.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AMeshletMeshDrawsLikeTheMeshItWasMadeFrom()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var active = false;
 
@@ -45,7 +45,7 @@ public sealed class MeshletTests
 
         run.Wait(ShaderMaterialTests.Settled + 60).Capture("picture").Go();
 
-        if (!active) return;
+        Needs.Meshlets(active);
 
         var picture = run.Picture("picture");
         var middle = picture.At(48, 48);
@@ -59,10 +59,10 @@ public sealed class MeshletTests
     /// A meshlet mesh saved while it is made is a file the asset server loads back, and the loaded
     /// one draws as the converted one did.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AMeshletMeshBakedToAFileLoadsBack()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var file = $"baked/sphere-{Guid.NewGuid():N}.meshlet_mesh";
         var path = Path.Combine(EngineHarness.AssetDirectory, file);
@@ -81,7 +81,7 @@ public sealed class MeshletTests
                 },
             }.Until("the file is written", _ => !active || File.Exists(path)).Wait(5).Go();
 
-            if (!active) return;
+            Needs.Meshlets(active);
 
             // Loads it in a run that never converts anything.
             var run = new PictureRun

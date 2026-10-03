@@ -15,6 +15,11 @@
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
         <PackageReference Include="xunit" Version="2.9.3"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5"/>
+        <!--
+          A test the bridge or the machine cannot run reports itself skipped rather than passing by
+          returning early, which xunit 2 has no way of its own to say once a test has started.
+        -->
+        <PackageReference Include="Xunit.SkippableFact" Version="1.5.85"/>
     </ItemGroup>
 
     <ItemGroup>

@@ -88,7 +88,7 @@ public sealed class PersistentTests : IDisposable
         UserData.Root = _root;
     }
 
-    [Fact]
+    [SkippableFact]
     public void BevyLoadsAFileTheGameWroteUnderUser()
     {
         // A picture the game wrote, as a screenshot or a painted decal would be.
@@ -98,7 +98,7 @@ public sealed class PersistentTests : IDisposable
             Path.Combine(_root, "shots", "checker.png"));
 
         using var harness = new EngineHarness(frames: 120, fps: 240);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var image = AssetHandle.None;
         var state = AssetLoadState.Unknown;

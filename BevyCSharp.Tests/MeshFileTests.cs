@@ -27,9 +27,11 @@ public sealed class MeshFileTests : IDisposable
         Directory.Delete(_root, recursive: true);
     }
 
-    [Fact]
+    [SkippableFact]
     public void APrimitiveAndABuiltMeshAreSavedAsFilesAndSharedByTheScene()
     {
+        Needs.Renderer();
+
         var scene = Path.Combine(_root, "yard.scene.json");
         var ran = false;
 
@@ -44,7 +46,6 @@ public sealed class MeshFileTests : IDisposable
         {
             saving.OnContext(Stage.Startup, ctx =>
             {
-                if (!App.HasRenderer) return;
                 Streaming.AssetRoot = _root;
 
                 var post = Render.CreateMesh(MeshShape.Cylinder, 0.1f, 2f);
@@ -68,8 +69,6 @@ public sealed class MeshFileTests : IDisposable
 
             saving.Run();
         }
-
-        if (!App.HasRenderer) return;
 
         var text = File.ReadAllText(scene);
         Assert.Contains("props/post.mesh.json", text);
@@ -98,15 +97,16 @@ public sealed class MeshFileTests : IDisposable
         Assert.True(ran);
     }
 
-    [Fact]
+    [SkippableFact]
     public void APrimitiveRebuiltWithOtherMeasuresKeepsItsHandleAndItsFile()
     {
+        Needs.Renderer();
+
         var ran = false;
 
         using var harness = new EngineHarness(frames: 2);
         harness.OnContext(Stage.Startup, ctx =>
         {
-            if (!App.HasRenderer) return;
             Streaming.AssetRoot = _root;
 
             var box = Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f);
@@ -125,6 +125,6 @@ public sealed class MeshFileTests : IDisposable
         });
 
         harness.Run();
-        if (App.HasRenderer) Assert.True(ran);
+        Assert.True(ran);
     }
 }

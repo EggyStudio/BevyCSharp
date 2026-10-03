@@ -31,10 +31,10 @@ public sealed class OffscreenTests : IDisposable
         if (Directory.Exists(_directory)) Directory.Delete(_directory, recursive: true);
     }
 
-    [Fact]
+    [SkippableFact]
     public void ARunWithNoWindowDrawsAndIsCaptured()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var path = Path.Combine(_directory, "capture.png");
 

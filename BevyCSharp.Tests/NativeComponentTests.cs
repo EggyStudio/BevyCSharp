@@ -411,7 +411,7 @@ public sealed class NativeComponentTests
         Assert.True(new ViewVisibility { Bits = 0b10 }.WasVisible);
     }
 
-    [Fact]
+    [SkippableFact]
     public void VisibilityRoundTripsOnARenderBuild()
     {
         using var harness = new EngineHarness(frames: 3);
@@ -452,7 +452,7 @@ public sealed class NativeComponentTests
 
         harness.Run();
 
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         // Resolving the id ran the variant check, and the value came back out of Bevy's own
         // component rather than one that merely shares its name.

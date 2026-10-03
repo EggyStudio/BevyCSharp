@@ -19,10 +19,10 @@ public sealed class SkyLightingTests
     /// <summary>Frames to let the pipelines compile and the map be generated.</summary>
     private const ulong Settled = 160;
 
-    [Fact]
+    [SkippableFact]
     public void TheSkyLightsWhatTheSunDoesNot()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var unlit = Draw(sky: false);
         var lit = Draw(sky: true);
@@ -38,10 +38,10 @@ public sealed class SkyLightingTests
             $"the shaded side reads {shaded} without the sky and {skylit} with it");
     }
 
-    [Fact]
+    [SkippableFact]
     public void ASizeThatIsNotAPowerOfTwoIsRefused()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         using var harness = new EngineHarness(frames: 2);
 
@@ -64,10 +64,10 @@ public sealed class SkyLightingTests
     /// carries. What is asserted is the same thing the sky test asserts, that the side no lamp
     /// reaches is no longer black.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void AnImageLightsWhatTheSunDoesNot()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var unlit = Draw(sky: false);
         var lit = Draw(sky: false, image: true);
@@ -90,10 +90,10 @@ public sealed class SkyLightingTests
     /// the light is applied, since a map sampled while it is still a tall picture is sampled
     /// wrongly rather than refused, and the shaded side would read as it did without one.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void ABakedPairLightsTheShadedSide()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var unlit = Draw(sky: false);
         var lit = Draw(sky: false, baked: true);

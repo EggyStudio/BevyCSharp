@@ -20,10 +20,10 @@ public sealed class OverlayTests
     private const ulong Settled = 120;
 
     /// <summary>A sprite drawn over a scene leaves the scene visible around it.</summary>
-    [Fact]
+    [SkippableFact]
     public void AnOverlaidSpriteKeepsTheSceneUnderIt()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var picture = Draw();
 

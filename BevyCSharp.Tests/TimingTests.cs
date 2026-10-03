@@ -12,10 +12,10 @@ public sealed class TimingTests
     /// With timings asked for, a compute shader dispatched every frame is measured under its file's
     /// name, beside Bevy's own passes.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ADispatchIsTimedUnderItsFilesName()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         ShaderInstance fill = default;
         IReadOnlyList<PassTiming> timings = [];
@@ -49,10 +49,10 @@ public sealed class TimingTests
     }
 
     /// <summary>Without asking, nothing is measured.</summary>
-    [Fact]
+    [SkippableFact]
     public void NothingIsTimedUnlessAsked()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         IReadOnlyList<PassTiming> timings = [new("unset", null, null)];
 

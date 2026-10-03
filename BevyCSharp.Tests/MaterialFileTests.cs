@@ -8,7 +8,7 @@ namespace Bevy.Tests;
 /// when the file changes.
 /// </summary>
 /// <remarks>
-/// A material is the renderer's asset, so these return early on a headless bridge. The asset root
+/// A material is the renderer's asset, so these are skipped on a headless bridge. The asset root
 /// points at a directory of the test's own.
 /// </remarks>
 [Collection("engine")]
@@ -32,9 +32,11 @@ public sealed class MaterialFileTests : IDisposable
         Directory.Delete(_root, recursive: true);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AMaterialSavedToAFileIsSharedByTheSceneThatUsesIt()
     {
+        Needs.Renderer();
+
         var scene = Path.Combine(_root, "room.scene.json");
         var ran = false;
 
@@ -42,8 +44,6 @@ public sealed class MaterialFileTests : IDisposable
         {
             saving.OnContext(Stage.Startup, ctx =>
             {
-                if (!App.HasRenderer) return;
-
                 // The harness points the root at its own assets, and these files go in the test's.
                 Streaming.AssetRoot = _root;
 
@@ -65,8 +65,6 @@ public sealed class MaterialFileTests : IDisposable
 
             saving.Run();
         }
-
-        if (!App.HasRenderer) return;
 
         // The scene names the file rather than writing the settings out again.
         var text = File.ReadAllText(scene);
@@ -93,13 +91,13 @@ public sealed class MaterialFileTests : IDisposable
         Assert.True(ran);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AMaterialFileChangedOnDiskChangesTheMaterialInPlace()
     {
         var seen = 0f;
 
         using var harness = new EngineHarness(frames: 200, fps: 120);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var material = AssetHandle.None;
         var file = Path.Combine(_root, "blue.material.json");

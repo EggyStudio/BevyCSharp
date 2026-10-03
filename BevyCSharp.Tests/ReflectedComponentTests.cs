@@ -189,15 +189,17 @@ public sealed class ReflectedComponentTests
         Assert.Equal(0.5f, damping);
     }
 
-    [Fact]
+    [SkippableFact]
     public void APointLightIsSetThroughReflectionAndReadBackThroughBevy()
     {
+        Needs.Renderer();
+
         using var harness = new EngineHarness(frames: 2);
         var ran = false;
 
         harness.On(Stage.Update, world =>
         {
-            if (!App.HasRenderer || ran) return;
+            if (ran) return;
 
             var ecs = world.Resource<EcsWorld>();
             var entity = ecs.Spawn();
@@ -249,19 +251,19 @@ public sealed class ReflectedComponentTests
 
         harness.Run();
 
-        if (App.HasRenderer) Assert.True(ran);
+        Assert.True(ran);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AMeshHandleIsReadAsTheKeyItWasGivenAndWrittenAsAnother()
     {
+        Needs.Renderer();
+
         using var harness = new EngineHarness(frames: 2);
         var ran = false;
 
         harness.OnContext(Stage.Startup, ctx =>
         {
-            if (!App.HasRenderer) return;
-
             var entity = ctx.Ecs.Spawn();
             var cube = Render.CreateMesh(MeshShape.Cuboid, 1f);
             var ball = Render.CreateMesh(MeshShape.Sphere, 0.5f);
@@ -294,25 +296,23 @@ public sealed class ReflectedComponentTests
 
         harness.Run();
 
-        if (App.HasRenderer) Assert.True(ran);
+        Assert.True(ran);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AnEditorBuildCarriesBevysDocumentationAsTooltips()
     {
+        Needs.Renderer();
+
         using var harness = new EngineHarness(frames: 2);
         string? tooltip = "unread";
 
         harness.OnContext(Stage.Startup, ctx =>
         {
-            if (!App.HasRenderer) return;
-
             tooltip = ComponentSchemas.For(PointLightPath)!.Field("intensity")!.Hints.Tooltip;
         });
 
         harness.Run();
-
-        if (!App.HasRenderer) return;
 
         // Only the editor profile keeps Bevy's doc comments, so a game's library is no larger for
         // them and its rows have no tooltip to show.
@@ -327,16 +327,16 @@ public sealed class ReflectedComponentTests
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public void ARowOfAVariantNotHeldReadsNothingAndRefusesAWrite()
     {
+        Needs.Renderer();
+
         using var harness = new EngineHarness(frames: 2);
         var ran = false;
 
         harness.OnContext(Stage.Startup, ctx =>
         {
-            if (!App.HasRenderer) return;
-
             const string Sun = "bevy_light::directional_light::DirectionalLight";
             var entity = ctx.Ecs.Spawn();
             ctx.Ecs.InsertReflected(entity, Sun);
@@ -367,7 +367,7 @@ public sealed class ReflectedComponentTests
 
         harness.Run();
 
-        if (App.HasRenderer) Assert.True(ran);
+        Assert.True(ran);
     }
 
     /// <summary>The numbers of a JSON array, read without a serializer.</summary>

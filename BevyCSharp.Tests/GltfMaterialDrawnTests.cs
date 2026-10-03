@@ -36,10 +36,10 @@ public sealed class GltfMaterialDrawnTests : IDisposable
 
     public void Dispose() => Directory.Delete(_root, recursive: true);
 
-    [Fact]
+    [SkippableFact]
     public void AModelIsDrawnWithItsOwnMaterial()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         CapturedImage? picture = null;
         Capture? ticket = null;

@@ -25,10 +25,10 @@ public sealed class LensTests
     private const ulong Settled = 120;
 
     /// <summary>A vignette darkens the corners and leaves the middle where it was.</summary>
-    [Fact]
+    [SkippableFact]
     public void AVignetteDarkensTheCornersOnly()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var plain = Draw(_ => { });
         var shaded = Draw(effects => effects.Vignette = 0.9f);
@@ -57,10 +57,10 @@ public sealed class LensTests
     /// channels apart. This counts pixels whose channels disagree, which is a fringe and which
     /// nothing else in this picture could produce.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void AChromaticFringeSplitsAnEdgeIntoColors()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var plain = Draw(_ => { });
         var fringed = Draw(effects => effects.Aberration = 0.4f);
@@ -77,10 +77,10 @@ public sealed class LensTests
     }
 
     /// <summary>A lens distortion moves the edges of what is drawn.</summary>
-    [Fact]
+    [SkippableFact]
     public void ADistortionMovesTheEdgesOfTheShape()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var plain = Draw(_ => { });
 

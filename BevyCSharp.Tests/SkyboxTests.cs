@@ -20,10 +20,10 @@ public sealed class SkyboxTests
     /// <summary>Frames to let the image load and the pipelines compile.</summary>
     private const ulong Settled = 140;
 
-    [Fact]
+    [SkippableFact]
     public void ASkyboxDrawsWhereTheSceneDoesNot()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         CapturedImage? picture = null;
 
@@ -95,10 +95,10 @@ public sealed class SkyboxTests
             $"only {lit} of {picture.Width * picture.Height} pixels have anything in them");
     }
 
-    [Fact]
+    [SkippableFact]
     public void ASkyboxOnSomethingThatIsNotACameraIsRefused()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         using var harness = new EngineHarness(frames: 2);
 
@@ -125,10 +125,10 @@ public sealed class SkyboxTests
     /// the wrong place or turned the wrong way changes the picture. Three views, along -Z, along +Z
     /// and along +X, see three of the faces between them, the one a vertical cross turns among them.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void ACrossARowAndSixImagesDrawTheSameSkyAsAColumn()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         const int Face = 8;
 

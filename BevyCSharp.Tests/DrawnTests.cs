@@ -35,10 +35,10 @@ public sealed class DrawnTests
     /// </remarks>
     private const ulong Settled = 120;
 
-    [Fact]
+    [SkippableFact]
     public void AMeshAndItsMaterialReachTheRenderWorld()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         CapturedImage? picture = null;
 

@@ -17,11 +17,11 @@ public sealed class SpriteTests
 {
     private const string Texture = "textures/checker.png";
 
-    [Fact]
+    [SkippableFact]
     public void ASpriteIsAnOrdinaryEntity()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var camera = Entity.None;
         var sprite = Entity.None;
@@ -49,11 +49,11 @@ public sealed class SpriteTests
         Assert.True(placed);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AFrameIsNamedByNumberOnceThereIsAnAtlas()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var frames = AssetHandle.None;
         var walker = Entity.None;
@@ -89,11 +89,11 @@ public sealed class SpriteTests
         Assert.NotEqual(Entity.None, walker);
     }
 
-    [Fact]
+    [SkippableFact]
     public void APanelIsDrawnAtAnySizeFromOneSmallImage()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -125,11 +125,11 @@ public sealed class SpriteTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void AnAtlasWithNoTilesIsRefused()
     {
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -147,11 +147,11 @@ public sealed class SpriteTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void EverySpriteSettingIsAccepted()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -175,11 +175,11 @@ public sealed class SpriteTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void ASpriteNeedsAnImageThatExists()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -198,13 +198,13 @@ public sealed class SpriteTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void TheTwoCamerasCoexist()
     {
         // A 2D camera ordered above a 3D one draws over the scene without clearing it, as a 2D
         // overlay on a 3D game needs.
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -224,10 +224,10 @@ public sealed class SpriteTests
     /// letterboxing is where it should be needs an eye; what is checked is that the mode and the
     /// fitting are accepted together, which is the part that would fail silently.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void ASpriteCanBeFittedInsideItsSize()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         using var harness = new EngineHarness(frames: 3);
 

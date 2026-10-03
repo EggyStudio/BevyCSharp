@@ -17,10 +17,10 @@ public sealed class LightProbeTests
     /// the direction that face looks, so the packing the shader wrote through <c>bcs_scene</c> is
     /// the one Bevy reads.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AComputedVolumeLightsEachFaceFromItsOwnDirection()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var picture = VolumeScene(filled: true);
 
@@ -35,10 +35,10 @@ public sealed class LightProbeTests
     }
 
     /// <summary>The same scene with the volume never written is dark, so the light came from it.</summary>
-    [Fact]
+    [SkippableFact]
     public void AnEmptyVolumeLightsNothing()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var picture = VolumeScene(filled: false);
         var top = picture.At(48, 30);
@@ -52,10 +52,10 @@ public sealed class LightProbeTests
     /// A flat image cannot be a volume and a camera cannot be a probe, and both are refused at the
     /// call rather than failing a frame later.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AFlatImageOrACameraIsRefused()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         Exception? flat = null;
         Exception? camera = null;
@@ -84,10 +84,10 @@ public sealed class LightProbeTests
     /// A smooth sphere inside a reflection probe reflects the probe's cubemap, and one outside it
     /// reflects nothing, since the camera has no environment of its own.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AReflectionProbeLightsOnlyWhatIsInsideIt()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var picture = new PictureRun
         {
@@ -145,12 +145,12 @@ public sealed class LightProbeTests
     /// A mirror sphere inside a probe that captures its surroundings reflects each glowing block on
     /// the side it stands, so every face camera drew into the layer Bevy reads for that direction.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [InlineData(true)]
     [InlineData(false)]
     public void ACapturedProbeReflectsEachSideWhereItIs(bool live)
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var picture = CaptureScene(live);
 
@@ -166,10 +166,10 @@ public sealed class LightProbeTests
     }
 
     /// <summary>A probe capture needs a size Bevy can filter, so anything else is refused.</summary>
-    [Fact]
+    [SkippableFact]
     public void ACaptureSizeThatIsNotAPowerOfTwoIsRefused()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         Exception? refused = null;
 

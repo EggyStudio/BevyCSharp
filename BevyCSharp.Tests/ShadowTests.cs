@@ -18,10 +18,10 @@ public sealed class ShadowTests
     /// The light casts no shadow map, so every pixel darker with contact shadows on than off can
     /// only have been darkened by one.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void AContactShadowDarkensTheFloorBesideACube()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var with = Picture(contact: true);
         var without = Picture(contact: false);
@@ -93,10 +93,10 @@ public sealed class ShadowTests
     /// light's penumbra is worked out in its shadow map's depth and showed none in a scene this
     /// small at any size tried.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void ASoftShadowFadesWhereAHardOneCuts()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var hard = Grays(PictureOfAHangingSlab(softness: 0f));
         var soft = Grays(PictureOfAHangingSlab(softness: 5f));

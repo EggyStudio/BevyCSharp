@@ -16,11 +16,12 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class ImGuiTests
 {
-    [Fact]
+    [SkippableFact]
     public void ABuildWithoutTheInterfaceDrawsNothingRatherThanCrashing()
     {
+        Needs.NoEditor();
+
         using var harness = new EngineHarness(frames: 3);
-        if (App.HasEditor) return;
 
         harness.OnContext(Stage.Startup, _ =>
         {

@@ -17,10 +17,10 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class ComputeShaderTests
 {
-    [Fact]
+    [SkippableFact]
     public void AComputeShaderChangesABufferThatIsReadBack()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var scale = default(ShaderInstance);
         var buffer = AssetHandle.None;
@@ -52,10 +52,10 @@ public sealed class ComputeShaderTests
     }
 
     /// <summary>A material bound to a buffer draws what a compute shader wrote into it.</summary>
-    [Fact]
+    [SkippableFact]
     public void AMaterialDrawsWhatAComputeShaderWrote()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var fill = default(ShaderInstance);
 
@@ -91,10 +91,10 @@ public sealed class ComputeShaderTests
     /// A C# struct written into a buffer is stepped by the same struct in Slang and read back
     /// field by field.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AComputeShaderStepsCSharpStructs()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var step = default(ShaderInstance);
         var buffer = AssetHandle.None;
@@ -145,10 +145,10 @@ public sealed class ComputeShaderTests
     /// green is: at the sides before, above them after, and never in the middle, which is where
     /// both quads would be if the buffer were not read at all.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void QuadsFollowTheBufferThatPlacesThem()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var shift = default(ShaderInstance);
 
@@ -232,10 +232,10 @@ public sealed class ComputeShaderTests
     /// A material samples what a compute shader wrote into an image, and a float image beside it
     /// holds numbers no eight-bit image could.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AComputeShaderWritesImagesOfAnyFormat()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var paint = default(ShaderInstance);
         var copy = default(ShaderInstance);
@@ -287,10 +287,10 @@ public sealed class ComputeShaderTests
     }
 
     /// <summary>A compute shader reads Bevy's time through the prelude.</summary>
-    [Fact]
+    [SkippableFact]
     public void AComputeShaderReadsTheTime()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var clock = default(ShaderInstance);
         var into = AssetHandle.None;
@@ -324,10 +324,10 @@ public sealed class ComputeShaderTests
     /// An image's mip levels are bound one at a time, so one dispatch reads a level while the next
     /// writes the level below, and the whole image is read afterwards.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AnImagePyramidIsBuiltALevelAtATime()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var fill = default(ShaderInstance);
         var halve = default(ShaderInstance);
@@ -369,10 +369,10 @@ public sealed class ComputeShaderTests
     }
 
     /// <summary>A buffer grows keeping what it held, and the rest is zeros.</summary>
-    [Fact]
+    [SkippableFact]
     public void ABufferGrowsKeepingItsContents()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var buffer = AssetHandle.None;
         var size = 0;
@@ -404,10 +404,10 @@ public sealed class ComputeShaderTests
     /// An instance buffer holds an entity's transform this frame and on the previous one, which a
     /// compute shader reads through <c>bcs_scene</c>.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AnInstanceBufferHoldsThisFrameAndTheLast()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var mover = Entity.None;
         var x = 0f;
@@ -469,10 +469,10 @@ public sealed class ComputeShaderTests
     /// A material buffer holds what each entity in it is made of, read from its standard material,
     /// and a shader reads it through <c>bcs_scene::Material</c>.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AMaterialBufferHoldsWhatEachEntityIsMadeOf()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         AssetHandle into = default;
         ShaderInstance copy = default;
@@ -535,10 +535,10 @@ public sealed class ComputeShaderTests
     /// Writing a region of an image changes those texels and no others, at the level asked for,
     /// and a region outside the image is refused.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ARegionOfAnImageIsWritten()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         AssetHandle into = default;
         ShaderInstance copy = default;
@@ -587,10 +587,10 @@ public sealed class ComputeShaderTests
     /// A block-compressed image made empty takes one four by four block written into it, which the
     /// GPU decodes where the block is and nowhere else, and a region off the block grid is refused.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ABlockIsWrittenIntoACompressedImage()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         AssetHandle into = default;
         ShaderInstance copy = default;
@@ -640,10 +640,10 @@ public sealed class ComputeShaderTests
     /// Slang's wave operations reach the GPU as subgroup operations, so a sum over a subgroup is
     /// its size, and one thread in each is its first.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void WaveOperationsRunAsSubgroups()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         AssetHandle into = default;
         ShaderInstance wave = default;
@@ -686,10 +686,10 @@ public sealed class ComputeShaderTests
     /// Each thread's count of those before it is its index, the first lane's value reaches every
     /// lane, and a unanimous vote sets a bit for every lane.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void WavePrefixSumsReadsAndBallotsWork()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         AssetHandle into = default;
         ShaderInstance wave = default;
@@ -735,10 +735,10 @@ public sealed class ComputeShaderTests
     /// A ray traced through every triangle of a cube in a geometry pool hits its front face where
     /// it is, facing the ray, and the cube's box and the second mesh's counts are in the table.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ARayIsTracedThroughAGeometryPool()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         AssetHandle into = default;
         ShaderInstance trace = default;
@@ -787,10 +787,10 @@ public sealed class ComputeShaderTests
     }
 
     /// <summary>A buffer's size is fixed, so writing more than it holds is refused.</summary>
-    [Fact]
+    [SkippableFact]
     public void ABufferDoesNotGrow()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var size = 0;
         Exception? refused = null;
@@ -823,10 +823,10 @@ public sealed class ComputeShaderTests
     /// <c>shader.buffer</c> run through the command line answers once the buffer is back from the
     /// GPU, a frame or more after it was asked, with the numbers the buffer holds.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task ABufferIsReadThroughTheCommandLineOnceItArrives()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var queue = new CliQueue();
         var request = default(CliRequest);

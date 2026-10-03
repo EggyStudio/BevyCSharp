@@ -16,10 +16,10 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class PreviewRendererTests
 {
-    [Fact]
+    [SkippableFact]
     public void AMeshAndAMaterialAreDrawnIntoTheirPictures()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var pictures = new Dictionary<string, CapturedImage>();
         var tickets = new Dictionary<string, Capture>();

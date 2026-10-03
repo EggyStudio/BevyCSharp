@@ -65,10 +65,10 @@ public sealed class EditorWorldTests
     /// be written, because a set of numbers has no name, and the test says so by leaving the
     /// material out of what it expects back.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void AMeshLoadedFromAFileSurvivesTheRoundTrip()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var file = Path.Combine(Path.GetTempPath(), $"bcs-world-{Guid.NewGuid():N}.json");
 
@@ -105,10 +105,10 @@ public sealed class EditorWorldTests
     /// Before the mesh was written, an entity with no component of this project's own was skipped
     /// entirely, because there was nothing to say about it. What it is drawn with is something.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void AnEntityWithNothingButAMeshIsStillSaved()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var file = Path.Combine(Path.GetTempPath(), $"bcs-world-{Guid.NewGuid():N}.json");
 

@@ -8,22 +8,22 @@ namespace Bevy.Tests;
 /// made, and a material's settings.
 /// </summary>
 /// <remarks>
-/// A mesh and a material are made by the renderer's asset types, so these return early on a
+/// A mesh and a material are made by the renderer's asset types, so these are skipped on a
 /// headless bridge, as the other drawing tests do.
 /// </remarks>
 [Collection("engine")]
 public sealed class RenderReadTests
 {
-    [Fact]
+    [SkippableFact]
     public void ACuboidIsTwentyFourVerticesAndTwelveTriangles()
     {
+        Needs.Renderer();
+
         using var harness = new EngineHarness(frames: 2);
         var ran = false;
 
         harness.OnContext(Stage.Startup, ctx =>
         {
-            if (!App.HasRenderer) return;
-
             var cube = Render.CreateMesh(MeshShape.Cuboid, 1f, 2f, 3f);
 
             // Four corners a face rather than eight a box, because each face has normals of its own.
@@ -40,19 +40,19 @@ public sealed class RenderReadTests
         });
 
         harness.Run();
-        if (App.HasRenderer) Assert.True(ran);
+        Assert.True(ran);
     }
 
-    [Fact]
+    [SkippableFact]
     public void EveryPrimitiveBuildsAndRemembersHowItWasMade()
     {
+        Needs.Renderer();
+
         using var harness = new EngineHarness(frames: 2);
         var ran = false;
 
         harness.OnContext(Stage.Startup, ctx =>
         {
-            if (!App.HasRenderer) return;
-
             string[] shapes =
             [
                 MeshShape.Cuboid, MeshShape.Sphere, MeshShape.Plane, MeshShape.Capsule, MeshShape.Cylinder,
@@ -72,19 +72,19 @@ public sealed class RenderReadTests
         });
 
         harness.Run();
-        if (App.HasRenderer) Assert.True(ran);
+        Assert.True(ran);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AMaterialIsReadBackAsItWasMade()
     {
+        Needs.Renderer();
+
         using var harness = new EngineHarness(frames: 2);
         var ran = false;
 
         harness.OnContext(Stage.Startup, ctx =>
         {
-            if (!App.HasRenderer) return;
-
             var made = new MaterialSettings
             {
                 BaseColor = (0.25f, 0.5f, 0.75f, 1f),
@@ -117,19 +117,19 @@ public sealed class RenderReadTests
         });
 
         harness.Run();
-        if (App.HasRenderer) Assert.True(ran);
+        Assert.True(ran);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AMeshsNormalsComeBackWithItsPositions()
     {
+        Needs.Renderer();
+
         using var harness = new EngineHarness(frames: 2);
         var ran = false;
 
         harness.OnContext(Stage.Startup, ctx =>
         {
-            if (!App.HasRenderer) return;
-
             var cube = Render.CreateMesh(MeshShape.Cuboid, 2f, 2f, 2f);
             Assert.True(Render.TryReadNormals(cube, out var positions, out var normals));
 
@@ -145,6 +145,6 @@ public sealed class RenderReadTests
         });
 
         harness.Run();
-        if (App.HasRenderer) Assert.True(ran);
+        Assert.True(ran);
     }
 }

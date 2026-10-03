@@ -18,10 +18,10 @@ public sealed class RenderCornerTests
     private const uint Settled = 60;
 
     /// <summary>Corners taken off leave them clear, and the middle as it was.</summary>
-    [Fact]
+    [SkippableFact]
     public void ARoundedCameraLeavesItsCornersClear()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var run = new PictureRun
         {
@@ -50,10 +50,10 @@ public sealed class RenderCornerTests
     /// <summary>
     /// A world cleared to nothing leaves the window clear where a camera's viewport does not reach.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AViewportOverAClearWorldLeavesTheRestClear()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var run = new PictureRun
         {
@@ -83,10 +83,10 @@ public sealed class RenderCornerTests
     /// <summary>
     /// A viewport's corners filled with what surrounds it match it, rather than being clear notches.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AViewportsCornersShowTheirFill()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var run = new PictureRun
         {

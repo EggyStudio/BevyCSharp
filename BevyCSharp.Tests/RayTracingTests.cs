@@ -15,13 +15,14 @@ public sealed class RayTracingTests
     /// red when the camera traces rays, since an emissive surface is a light to them, and leaves it
     /// dark when it does not.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AGlowingWallLightsTheFloorWhenRaysAreTraced()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var traced = Floor(traced: true);
-        if (traced is not { } lit) return;
+        Needs.RayTracing(traced is not null);
+        var lit = traced!.Value;
 
         var raster = Floor(traced: false)!.Value;
 

@@ -18,10 +18,11 @@ public sealed class SampleLightTests
     /// A sunlit red wall beside a white floor tints the floor near it red once the bounce is
     /// traced, gathered and added, and leaves it white without.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void TheSamplesBounceTintsTheFloorBesideARedWall()
     {
-        if (!ShaderMaterialTests.CanRun || !Directory.Exists(SampleAssets)) return;
+        Needs.Shaders();
+        Needs.Folder(SampleAssets, "the sample's assets");
 
         var bounced = Floor(bounce: true);
         var plain = Floor(bounce: false);
@@ -46,10 +47,11 @@ public sealed class SampleLightTests
     /// The sample's ray-traced occlusion, painted in place of the picture, is dark where a box
     /// hangs just above the floor and open far from it.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void TheSamplesTracedOcclusionDarkensTheFloorUnderABox()
     {
-        if (!ShaderMaterialTests.CanRun || !Directory.Exists(SampleAssets)) return;
+        Needs.Shaders();
+        Needs.Folder(SampleAssets, "the sample's assets");
 
         var supported = false;
 
@@ -106,7 +108,7 @@ public sealed class SampleLightTests
             .Capture("picture")
             .Go();
 
-        if (!supported) return;
+        Needs.RayQueries(supported);
 
         var picture = run.Picture("picture");
 

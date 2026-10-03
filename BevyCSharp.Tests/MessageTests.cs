@@ -309,10 +309,10 @@ public sealed class MessageTests
     /// What the input method composes and commits reaches the bus as text, with a caret counted in
     /// the string's own indices, however many bytes each character takes.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void WhatTheInputMethodComposesArrivesOnTheBus()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var composing = new List<ImeComposing>();
         var committed = new List<ImeCommit>();

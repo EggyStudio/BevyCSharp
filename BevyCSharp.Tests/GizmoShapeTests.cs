@@ -19,7 +19,7 @@ public sealed class GizmoShapeTests
     private const ulong Settled = 120;
 
     /// <summary>Each shape, drawn alone, covers some of the picture and leaves the rest alone.</summary>
-    [Theory]
+    [SkippableTheory]
     [InlineData("rect")]
     [InlineData("circle")]
     [InlineData("arc")]
@@ -34,7 +34,7 @@ public sealed class GizmoShapeTests
     [InlineData("tetrahedron")]
     public void AShapeIsDrawn(string shape)
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var picture = Draw(shape);
 
@@ -56,10 +56,10 @@ public sealed class GizmoShapeTests
     }
 
     /// <summary>Turning gizmos off stops the drawing without the caller stopping asking.</summary>
-    [Fact]
+    [SkippableFact]
     public void ConfiguringThemOffDrawsNothing()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var picture = Draw("circle", enabled: false);
 
@@ -75,7 +75,7 @@ public sealed class GizmoShapeTests
     /// shape reaches Bevy through its own call and a kind that fell through to the default arm
     /// would draw a line instead of the shape asked for.
     /// </remarks>
-    [Theory]
+    [SkippableTheory]
     [InlineData("rect")]
     [InlineData("circle")]
     [InlineData("line")]
@@ -84,7 +84,7 @@ public sealed class GizmoShapeTests
     [InlineData("grid")]
     public void AFlatShapeIsDrawn(string shape)
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var picture = DrawFlat(shape);
 
@@ -104,10 +104,10 @@ public sealed class GizmoShapeTests
     /// scene can hide takes one away and leaves the other. Configuring both at once, as the call
     /// did before there was a group to name, would have taken both.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void OneGroupCanBeTurnedOffWithoutTheOther()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var both = Draw("pair");
         var front = Draw("pair", behind: false);
@@ -129,10 +129,10 @@ public sealed class GizmoShapeTests
     /// Three segments making a triangle, so what is checked is that every one of them arrived
     /// rather than only the first, which is the way a batched call goes wrong.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void ARunOfLinesIsDrawnInOneCall()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var one = Draw("line");
         var run = Draw("run");
@@ -154,10 +154,10 @@ public sealed class GizmoShapeTests
     /// The same shape at the same width, so the gaps are the only thing that can take pixels away,
     /// and a style that never reached the renderer would leave the two counts equal.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void ADashedLineLeavesGapsInItself()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var solid = Draw("rect");
         var dashed = Draw("rect", style: GizmoLine.Dashed);

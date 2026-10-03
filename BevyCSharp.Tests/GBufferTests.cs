@@ -14,10 +14,10 @@ public sealed class GBufferTests
     /// Two cubes of different materials come out of the G-buffer with their own base color,
     /// metallic and roughness, as <c>bcs_pass::surface_of</c> unpacks them.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void APassReadsEachSurfacesMaterial()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var picture = Draw(show: 0);
 
@@ -35,10 +35,10 @@ public sealed class GBufferTests
     /// The faces the camera sees come out of the G-buffer with the normals they have: the fronts
     /// facing it, and the tops facing up.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void APassReadsEachSurfacesNormal()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var picture = Draw(show: 1);
 
@@ -64,10 +64,10 @@ public sealed class GBufferTests
     /// A cube jumping between left and right every frame is on one side in this frame's depth and
     /// on the other in <c>depth_previous</c>, so the previous frame's really is the previous one.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void APassReadsLastFramesDepth()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         Entity cube = default;
         var left = false;
@@ -126,10 +126,10 @@ public sealed class GBufferTests
     /// picture as <c>_previous</c>. A cube flipping between red and green every frame is one color
     /// in the picture and the other in the copy.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ACopyOfThePictureKeepsLastFrames()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         ShaderMaterial flat = default;
         var red = false;
@@ -180,10 +180,10 @@ public sealed class GBufferTests
     }
 
     /// <summary>After the prepass there is nothing to copy, so a copy asked for there is refused.</summary>
-    [Fact]
+    [SkippableFact]
     public void ACopyAfterThePrepassIsRefused()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         Exception? refused = null;
 
@@ -205,10 +205,10 @@ public sealed class GBufferTests
     /// the same cubemap draws, turned the same way, so the direction a shader samples by is the one
     /// Bevy's own sky uses.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void APassSeesTheCamerasEnvironment()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var sky = Environment(painted: false);
         var painted = Environment(painted: true);
@@ -279,10 +279,10 @@ public sealed class GBufferTests
     /// A pass sees Bevy's blue noise: many different values across the picture rather than the
     /// gray that stands in for it, and a different layer on the next frame.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void APassSeesBlueNoiseThatMovesEachFrame()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -328,12 +328,12 @@ public sealed class GBufferTests
     /// G-buffer, lights the surfaces and nothing else, which is how a screen-space GI result goes
     /// into the picture before transparency and tonemapping.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [InlineData(true)]
     [InlineData(false)]
     public void IndirectLightIsAddedTimesEachSurfacesColor(bool added)
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {

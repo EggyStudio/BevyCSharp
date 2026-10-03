@@ -35,7 +35,7 @@ dotnet build                      # this moves the .so where apps will find it
 
 `./bcs build --editor` does both in that order, and [.github/BUILDING.md](.github/BUILDING.md) has
 the rest. `--meshlet` and `--solari` add Bevy's meshlets and ray-traced lighting to any profile; without
-them their tests return early, so a green suite says nothing about them. The three profiles are cumulative: `headless` < `render` (window, audio) < `editor`
+them their tests are skipped, and a run's summary counts them. The three profiles are cumulative: `headless` < `render` (window, audio) < `editor`
 (asset watcher, picking). `App.HasRenderer` and `App.HasEditor`
 report which one is loaded; `Native.ExpectedAbiVersion` must match what the bridge reports, and a
 mismatch means the bridge needs rebuilding.
@@ -97,3 +97,7 @@ Stop any serving session before running the suite.
   `.github/STYLE.md` is read and applied to what is staged, the message included.
   `.github/COMMITS.md` has the exact form, that pass, and how to split a batch that shares a file
   with another.
+- `.github/REVIEW.md` is read before a batch is started and before each commit. A second session
+  writes it after reading the code and the history, and its Now list comes before TODO.md's order.
+  Only its Replies section is edited here, for an item that is disputed or blocked, and the file is
+  committed with whichever batch comes next.

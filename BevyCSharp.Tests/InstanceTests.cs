@@ -24,11 +24,11 @@ public sealed class InstanceTests : IDisposable
 
     public void Dispose() => Directory.Delete(_root, recursive: true);
 
-    [Fact]
+    [SkippableFact]
     public void AnInstanceIsReportedReadyAndItsNodesAreFoundByPath()
     {
         using var harness = new EngineHarness(frames: 300, fps: 240);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var root = Entity.None;
         var ready = false;
@@ -61,14 +61,14 @@ public sealed class InstanceTests : IDisposable
         Assert.Equal(new Vec3(0f, 1f, 0f), turret);
     }
 
-    [Fact]
+    [SkippableFact]
     public void OverridesAreSavedAsChangesAndAppliedAgainAfterALoad()
     {
         var file = Path.Combine(_root, "fleet.scene.json");
 
         using (var saving = new EngineHarness(frames: 300, fps: 240))
         {
-            if (!App.HasRenderer) return;
+            Needs.Renderer();
 
             var root = Entity.None;
 
@@ -141,7 +141,7 @@ public sealed class InstanceTests : IDisposable
         Assert.True(applied, "the loaded instance was never reported ready");
     }
 
-    [Fact]
+    [SkippableFact]
     public void AnOverrideWhoseNodeIsGoneIsReportedAndKept()
     {
         var file = Path.Combine(_root, "renamed.scene.json");
@@ -156,7 +156,7 @@ public sealed class InstanceTests : IDisposable
             """);
 
         using var harness = new EngineHarness(frames: 300, fps: 240);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var root = Entity.None;
         IReadOnlyList<string> missed = [];
@@ -183,11 +183,11 @@ public sealed class InstanceTests : IDisposable
         Assert.Contains("Main/Hull/Cannon", File.ReadAllText(file));
     }
 
-    [Fact]
+    [SkippableFact]
     public void AFieldPutBackToTheModelsValueLeavesNoOverride()
     {
         using var harness = new EngineHarness(frames: 300, fps: 240);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var root = Entity.None;
         var checkedIt = false;
@@ -235,14 +235,14 @@ public sealed class InstanceTests : IDisposable
         Assert.True(checkedIt, "the instance was never reported ready");
     }
 
-    [Fact]
+    [SkippableFact]
     public void AChildAddedUnderAModelsNodeGoesBackUnderItOnceTheModelSpawns()
     {
         var file = Path.Combine(_root, "flagged.scene.json");
 
         using (var saving = new EngineHarness(frames: 300, fps: 240))
         {
-            if (!App.HasRenderer) return;
+            Needs.Renderer();
 
             var root = Entity.None;
             saving.OnContext(Stage.Startup, ctx => root = SceneInstances.Spawn(ctx.Ecs, Rig));
@@ -283,14 +283,14 @@ public sealed class InstanceTests : IDisposable
         Assert.True(found, "the flag was not put back under the turret");
     }
 
-    [Fact]
+    [SkippableFact]
     public void ARenamedNodeKeepsItsPathAndItsNewNameAfterALoad()
     {
         var file = Path.Combine(_root, "renamed-node.scene.json");
 
         using (var saving = new EngineHarness(frames: 300, fps: 240))
         {
-            if (!App.HasRenderer) return;
+            Needs.Renderer();
 
             var root = Entity.None;
             saving.OnContext(Stage.Startup, ctx => root = SceneInstances.Spawn(ctx.Ecs, Rig));

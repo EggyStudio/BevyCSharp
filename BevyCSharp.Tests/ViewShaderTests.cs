@@ -32,10 +32,10 @@ public sealed class ViewShaderTests
     /// A pass reads the camera's motion vectors, which are there where something moves and zero
     /// where nothing does.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void APassSeesWhatMoved()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var cube = Entity.None;
         var angle = 0f;
@@ -79,10 +79,10 @@ public sealed class ViewShaderTests
     /// A compute shader on a camera adds to what it wrote last frame, through an image the camera
     /// keeps with its history, and a pass later in the same frame reads this frame's.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void HistoryCarriesFromFrameToFrame()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -116,10 +116,10 @@ public sealed class ViewShaderTests
     /// A camera's image with mip levels is written a level at a time, each from the one before,
     /// and read whole by a pass sampling its second level.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void APyramidIsBuiltALevelAtATime()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -147,10 +147,10 @@ public sealed class ViewShaderTests
     /// One dispatch writes how many workgroups the next runs, and the next runs exactly that many,
     /// which is read back as a count.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void TheGpuDecidesHowManyWorkgroupsRun()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var write = default(ShaderInstance);
         var count = default(ShaderInstance);
@@ -189,10 +189,10 @@ public sealed class ViewShaderTests
     /// Occlusion a compute shader writes into the texture Bevy's lighting reads darkens the ambient
     /// light on Bevy's own materials, which is the way in for a package's own ambient occlusion.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void OcclusionOfYourOwnReachesBevysLighting()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var open = AmbientlyLit(1f);
         var hemmed = AmbientlyLit(0f);
@@ -206,10 +206,10 @@ public sealed class ViewShaderTests
     /// every level down to one texel, the cube's depth at its middle, and the farthest depth of all
     /// at the top, which is the empty background's.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void TheDepthPyramidIsReadEveryLevelAtOnce()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var into = AssetHandle.None;
         var read = default(BufferRead);
@@ -280,10 +280,10 @@ public sealed class ViewShaderTests
     }
 
     /// <summary>A compute shader on a camera sees the scene's lights and counts them.</summary>
-    [Fact]
+    [SkippableFact]
     public void AComputeShaderSeesTheLights()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var counts = AssetHandle.None;
         var read = default(BufferRead);
@@ -332,10 +332,10 @@ public sealed class ViewShaderTests
     /// do, as shading a ray's hit needs. The floor under a cube is shadowed, and the floor away
     /// from it is not.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AComputeShaderReadsTheSunsShadow()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -394,10 +394,10 @@ public sealed class ViewShaderTests
     /// A spot light shining down past a block onto a floor is blocked behind the block, read from
     /// its layer of the directional shadow maps, and reaches the floor around it inside its cone.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AComputeShaderReadsASpotLightsShadow()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -492,10 +492,10 @@ public sealed class ViewShaderTests
         picture.At(x, y) is var pixel && pixel.G > 120 && pixel.R < 90 && pixel.B < 90;
 
     /// <summary>A camera draws squares placed from a buffer, one instance a square.</summary>
-    [Fact]
+    [SkippableFact]
     public void ACameraDrawsWhatABufferPlaces()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -527,10 +527,10 @@ public sealed class ViewShaderTests
     /// A compute shader writes how many squares a draw draws, and the draw reads the count when it
     /// runs.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AComputeShaderDecidesHowManyAreDrawn()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -562,10 +562,10 @@ public sealed class ViewShaderTests
     }
 
     /// <summary>What a camera draws is hidden by the scene in front of it, through the depth it shares.</summary>
-    [Fact]
+    [SkippableFact]
     public void WhatACameraDrawsIsHiddenBehindTheScene()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -601,10 +601,10 @@ public sealed class ViewShaderTests
     /// instance is nearest at each pixel, a visibility buffer, and the scene in front hides them
     /// there through the camera's depth.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ACameraDrawsIdsIntoAVisibilityBuffer()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -647,12 +647,12 @@ public sealed class ViewShaderTests
     /// A square jumping between the left and the right every frame is only where it is this frame
     /// in an image cleared every frame, and leaves its other place behind in one that is not.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [InlineData(true)]
     [InlineData(false)]
     public void AnImageClearedEachFrameForgetsLastFramesDraws(bool cleared)
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var centers = AssetHandle.None;
         var left = false;
@@ -695,10 +695,10 @@ public sealed class ViewShaderTests
     /// One draw writes two of the camera's images at once, one for each of its fragment shader's
     /// outputs, an integer one and a float one.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ADrawWritesSeveralImagesAtOnce()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -737,10 +737,10 @@ public sealed class ViewShaderTests
     /// reading motion then sees where the draw covered and nowhere else, so geometry drawn out of
     /// buffers can give Bevy's temporal effects its motion.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ADrawWritesThePrepassMotion()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -772,10 +772,10 @@ public sealed class ViewShaderTests
     /// A draw after the prepass writing the nearest depth through <c>SV_Depth</c> hides what Bevy
     /// draws afterward where it wrote, and nowhere else.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ADrawWritesDepthThatHidesTheSceneBehindIt()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -811,12 +811,12 @@ public sealed class ViewShaderTests
     /// A square drawn out of a buffer above a floor shadows it under a sun when it casts shadows,
     /// and not when it does not.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [InlineData(true)]
     [InlineData(false)]
     public void ADrawOutOfABufferCastsShadows(bool casts)
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -870,14 +870,14 @@ public sealed class ViewShaderTests
     /// light's shadow map, which is shared between cameras rather than owned by one, and for a
     /// point light is six views, one a face of its cube.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [InlineData(true, LightKind.Spot)]
     [InlineData(false, LightKind.Spot)]
     [InlineData(true, LightKind.Point)]
     [InlineData(false, LightKind.Point)]
     public void ADrawOutOfABufferCastsASpotOrPointLightsShadow(bool casts, LightKind kind)
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -937,10 +937,10 @@ public sealed class ViewShaderTests
     /// <summary>
     /// A draw reads one of the camera's images that a dispatch at the same point wrote.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ADrawReadsAnImageADispatchWrote()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var run = new PictureRun
         {
@@ -966,10 +966,10 @@ public sealed class ViewShaderTests
     /// A watch draws a camera's single-channel float image, scaled, into an image anything can show
     /// and a capture can read.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AWatchShowsACamerasImage()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var watched = AssetHandle.None;
         var capture = default(Capture);
@@ -1013,10 +1013,10 @@ public sealed class ViewShaderTests
     /// would show: the camera's own image and the prepass it asked for, and not the ambient
     /// occlusion or G-buffer it did not.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void TheRendererSaysWhichImagesACameraDrew()
     {
-        if (!CanRun) return;
+        Needs.Shaders();
 
         var camera = Entity.None;
         IReadOnlyList<string> drawn = [];

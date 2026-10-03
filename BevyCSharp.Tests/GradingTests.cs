@@ -19,10 +19,10 @@ public sealed class GradingTests
     /// <summary>Frames to let the pipelines compile before the picture is worth reading.</summary>
     private const ulong Settled = 120;
 
-    [Fact]
+    [SkippableFact]
     public void DrainingTheSaturationLeavesGray()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var graded = Draw(new GradingSettings { Saturation = 0f });
 
@@ -37,10 +37,10 @@ public sealed class GradingTests
         Assert.InRange(b, r - 12, r + 12);
     }
 
-    [Fact]
+    [SkippableFact]
     public void ExposureMovesTheWholePicture()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var dark = Draw(new GradingSettings { Exposure = -2f });
         var bright = Draw(new GradingSettings { Exposure = 2f });
@@ -54,10 +54,10 @@ public sealed class GradingTests
     }
 
     /// <summary>A grade of nothing is the picture the camera would have drawn anyway.</summary>
-    [Fact]
+    [SkippableFact]
     public void ClearingItPutsThePictureBack()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var plain = Draw(null);
         var cleared = Draw(new GradingSettings { Saturation = 0f }, thenClear: true);
@@ -73,10 +73,10 @@ public sealed class GradingTests
         Assert.InRange(clearedB, b - 6, b + 6);
     }
 
-    [Fact]
+    [SkippableFact]
     public void GradingSomethingThatIsNotACameraIsRefused()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         using var harness = new EngineHarness(frames: 2);
 

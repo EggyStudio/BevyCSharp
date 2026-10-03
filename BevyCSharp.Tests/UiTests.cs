@@ -17,11 +17,11 @@ public sealed class UiTests
 {
     private const string Texture = "textures/checker.png";
 
-    [Fact]
+    [SkippableFact]
     public void ANodeAndSomeTextAreOrdinaryEntities()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var panel = Entity.None;
         var label = Entity.None;
@@ -59,13 +59,13 @@ public sealed class UiTests
         Assert.True(alive, "the nodes did not survive as parented entities");
     }
 
-    [Fact]
+    [SkippableFact]
     public void TextIsRewrittenInPlace()
     {
         // A score changes every frame; the entity behind it should not, or everything holding a
         // reference to it would have to be told.
         using var harness = new EngineHarness(frames: 4);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var label = Entity.None;
         var sameEntity = false;
@@ -84,11 +84,11 @@ public sealed class UiTests
         Assert.True(sameEntity);
     }
 
-    [Fact]
+    [SkippableFact]
     public void SettingTextOnSomethingThatIsNotTextIsRefused()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -104,14 +104,14 @@ public sealed class UiTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void ALaidOutNodeTakesEveryFieldTheLayoutHas()
     {
         // Whether the screen looks right needs a window and an eye; the sample is where that is
         // confirmed. This checks that a fully described node is accepted and comes back as an
         // ordinary parented entity, which would break silently.
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var menu = Entity.None;
         var children = 0;
@@ -161,14 +161,14 @@ public sealed class UiTests
         Assert.Equal(3, children);
     }
 
-    [Fact]
+    [SkippableFact]
     public void ALongStringIsBrokenToTheWidthItIsGiven()
     {
         // Whether the lines land where they should needs an eye; the sample is where that is
         // confirmed. What is checked here is that a text node takes every way of being set and
         // stays an ordinary entity, and that rewriting it in place still works afterwards.
         using var harness = new EngineHarness(frames: 4);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         const string Paragraph =
             "A sentence long enough that it cannot sit on one line inside a narrow panel.";
@@ -216,11 +216,11 @@ public sealed class UiTests
         Assert.NotEqual(Entity.None, wrapped);
     }
 
-    [Fact]
+    [SkippableFact]
     public void TextIsSetInBevysOwnFontUntilAnotherIsNamed()
     {
         using var harness = new EngineHarness(frames: 30, fps: 240);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var font = AssetHandle.None;
         var state = AssetLoadState.Loading;
@@ -250,13 +250,13 @@ public sealed class UiTests
         Assert.Equal(AssetLoadState.Failed, state);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AnUnknownLayoutCodeFallsBackRatherThanFailing()
     {
         // The managed side names the enums, so a bridge older than the assembly calling it can be
         // handed a code it has never heard of. A plainly laid out screen beats no screen.
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -280,11 +280,11 @@ public sealed class UiTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void AnInteractiveNodeCarriesTheComponentThePointerUpdates()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var button = Entity.None;
         var plain = Entity.None;
@@ -319,13 +319,13 @@ public sealed class UiTests
         Assert.Equal(UiInteraction.None, state);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AskingANodeThatDoesNotReactIsRefused()
     {
         // A button that quietly never fires is the harder mistake to find, so "it was never set
         // up to notice" is a different answer from "nothing is touching it".
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -345,11 +345,11 @@ public sealed class UiTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void ANodeDrawsAnImageInWhicheverModeItIsGiven()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var icon = Entity.None;
 
@@ -399,11 +399,11 @@ public sealed class UiTests
         Assert.NotEqual(Entity.None, icon);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AnImageThatNamesNothingIsRefused()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -421,11 +421,12 @@ public sealed class UiTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void ABuildWithoutARendererSaysSoRatherThanReturningNothing()
     {
+        Needs.NoRenderer();
+
         using var harness = new EngineHarness(frames: 3);
-        if (App.HasRenderer) return;
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -449,11 +450,11 @@ public sealed class UiTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void ScrollingBelongsToANodeAndNothingElse()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -473,11 +474,11 @@ public sealed class UiTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void EachSideOfANodeCanDifferFromTheOthers()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -496,11 +497,11 @@ public sealed class UiTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void AChildCanAnswerBackToTheLayoutItIsIn()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var list = Entity.None;
 
@@ -545,11 +546,11 @@ public sealed class UiTests
         Assert.NotEqual(Entity.None, list);
     }
 
-    [Fact]
+    [SkippableFact]
     public void ScrollingSomethingThatIsGoneIsRefused()
     {
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -601,10 +602,10 @@ public sealed class UiTests
     /// being cut a second way. A layout naming nothing is refused rather than drawing the whole
     /// sheet, which would otherwise appear in a 32-pixel box.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void AnIconCanBeOneFrameOfASheet()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         using var harness = new EngineHarness(frames: 3);
 

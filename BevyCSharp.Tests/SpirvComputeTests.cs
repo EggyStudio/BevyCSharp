@@ -20,10 +20,10 @@ public sealed class SpirvComputeTests
     /// same, which puts its loose number in a uniform buffer, its buffer at the binding Slang gave
     /// it, and the time it imports in group one.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ASpirvComputeShaderChangesABufferThatIsReadBack()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var scale = default(ShaderInstance);
         var buffer = AssetHandle.None;
@@ -62,10 +62,10 @@ public sealed class SpirvComputeTests
     /// A program compiled both ways is two programs, each with the layout its own compile says,
     /// and both declare the same number by name.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void BothTargetsOfOneFileAreSeparatePrograms()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var wgsl = default(ShaderProgram);
         var spirv = default(ShaderProgram);
@@ -95,11 +95,11 @@ public sealed class SpirvComputeTests
     /// A ray scene over a geometry pool, with no Solari at all, reports which slot and which pool
     /// mesh each ray met and how far away, and follows an entity that moves.
     /// </summary>
-    /// <remarks>Runs only on a device with ray queries, and returns early anywhere else.</remarks>
-    [Fact]
+    /// <remarks>Runs only on a device with ray queries, and is skipped anywhere else.</remarks>
+    [SkippableFact]
     public void ARaySceneOfItsOwnIsTracedAndFollowsWhatMoves()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var supported = false;
         var trace = default(ShaderInstance);
@@ -179,7 +179,7 @@ public sealed class SpirvComputeTests
         Trace(run, "after", found => after = found);
         run.Go();
 
-        if (!supported) return;
+        Needs.RayQueries(supported);
 
         Assert.NotNull(before);
         Assert.NotNull(after);
@@ -204,10 +204,10 @@ public sealed class SpirvComputeTests
     /// A mesh a compute shader raises in the pool is traced where it was until the scene is asked
     /// to build it again, and where it is afterward.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void ARaySceneSeesAMovedMeshOnceItIsBuiltAgain()
     {
-        if (!ShaderMaterialTests.CanRun) return;
+        Needs.Shaders();
 
         var supported = false;
         var trace = default(ShaderInstance);
@@ -287,7 +287,7 @@ public sealed class SpirvComputeTests
         Trace("after");
         run.Go();
 
-        if (!supported) return;
+        Needs.RayQueries(supported);
 
         Assert.Equal(3, found.Count);
         Assert.InRange(found[0][0].Z, 9.49f, 9.51f);
@@ -312,10 +312,10 @@ public sealed class SpirvComputeTests
     /// Shadows traced this way need no shadow map, so the floor under the cube is dark here with
     /// no light in the scene at all. Runs only where Solari runs.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void ShadowsAreTracedPerPixelOnACamera()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var active = false;
 
@@ -372,7 +372,7 @@ public sealed class SpirvComputeTests
             .Capture("picture")
             .Go();
 
-        if (!active) return;
+        Needs.RayTracing(active);
 
         var picture = run.Picture("picture");
 
@@ -391,12 +391,12 @@ public sealed class SpirvComputeTests
     /// </summary>
     /// <remarks>
     /// Runs only where Solari runs, in a bridge built with <c>--solari</c> on an adapter with ray
-    /// queries, and returns early anywhere else.
+    /// queries, and is skipped anywhere else.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void RaysTracedByAComputeShaderMeetTheSceneSolariKeeps()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var active = false;
         var trace = default(ShaderInstance);
@@ -450,7 +450,7 @@ public sealed class SpirvComputeTests
             .Until("read back", _ => !active || Shaders.TryReadBuffer(read, out found))
             .Go();
 
-        if (!active) return;
+        Needs.RayTracing(active);
 
         Assert.NotNull(found);
 

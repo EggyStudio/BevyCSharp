@@ -157,9 +157,11 @@ public sealed class SceneFileTests : IDisposable
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void BevysOwnComponentsAreWrittenAsBevysJsonAndReadBack()
     {
+        Needs.Renderer();
+
         const string Light = "bevy_light::point_light::PointLight";
         var file = Path.Combine(_root, "lit.scene.json");
         var ran = false;
@@ -168,8 +170,6 @@ public sealed class SceneFileTests : IDisposable
         {
             saving.OnContext(Stage.Startup, ctx =>
             {
-                if (!App.HasRenderer) return;
-
                 var lamp = ctx.Ecs.Spawn();
                 ctx.Ecs.SetName(lamp, "Lamp");
                 ctx.Ecs.Add(lamp, Transform.At(0f, 3f, 0f));
@@ -182,8 +182,6 @@ public sealed class SceneFileTests : IDisposable
 
             saving.Run();
         }
-
-        if (!App.HasRenderer) return;
 
         // What the engine works out for itself is left for it to work out again.
         var text = File.ReadAllText(file);
@@ -209,9 +207,11 @@ public sealed class SceneFileTests : IDisposable
         Assert.True(ran);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AMeshAndMaterialMadeInMemoryAreWrittenAsHowToMakeThemAndStayShared()
     {
+        Needs.Renderer();
+
         var file = Path.Combine(_root, "made.scene.json");
         var ran = false;
 
@@ -219,8 +219,6 @@ public sealed class SceneFileTests : IDisposable
         {
             saving.OnContext(Stage.Startup, ctx =>
             {
-                if (!App.HasRenderer) return;
-
                 var box = Render.CreateMesh(MeshShape.Cuboid, 1f, 2f, 3f);
                 var paint = Render.CreateMaterial(new MaterialSettings { BaseColor = (0.2f, 0.4f, 0.6f, 1f), Roughness = 0.7f });
 
@@ -238,8 +236,6 @@ public sealed class SceneFileTests : IDisposable
 
             saving.Run();
         }
-
-        if (!App.HasRenderer) return;
 
         // One resource each, however many entities use it.
         var written = File.ReadAllText(file);
@@ -272,9 +268,11 @@ public sealed class SceneFileTests : IDisposable
         Assert.True(ran);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AMeshBuiltVertexByVertexIsWrittenAsItsGeometry()
     {
+        Needs.Renderer();
+
         var file = Path.Combine(_root, "built.scene.json");
         var ran = false;
 
@@ -290,8 +288,6 @@ public sealed class SceneFileTests : IDisposable
         {
             saving.OnContext(Stage.Startup, ctx =>
             {
-                if (!App.HasRenderer) return;
-
                 var tile = ctx.Ecs.Spawn();
                 ctx.Ecs.SetName(tile, "Tile");
                 ctx.Ecs.Add(tile, Transform.Identity);
@@ -303,7 +299,6 @@ public sealed class SceneFileTests : IDisposable
             saving.Run();
         }
 
-        if (!App.HasRenderer) return;
         var written = File.ReadAllText(file);
         Assert.True(written.Contains("\"geometry\"", StringComparison.Ordinal), written);
 

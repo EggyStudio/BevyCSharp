@@ -16,11 +16,11 @@ namespace Bevy.Tests;
 public sealed class RenderControlTests
 {
     /// <summary>A lens meters a camera the way an exposure value does, and both are refused elsewhere.</summary>
-    [Fact]
+    [SkippableFact]
     public void ACameraCanBeMeteredByANumberOrByALens()
     {
         using var harness = new EngineHarness(frames: 4);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -49,11 +49,11 @@ public sealed class RenderControlTests
     /// is checked here is that a camera takes it, that turning it off is the same call, and that
     /// anything else is refused rather than quietly given a component nothing reads.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void SortedTransparencyIsACameraSetting()
     {
         using var harness = new EngineHarness(frames: 4);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -79,11 +79,11 @@ public sealed class RenderControlTests
     /// and an eye, but a point light quietly given a component nothing reads would look exactly
     /// like a setting that did nothing.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void ShadowCascadesBelongToADirectionalLight()
     {
         using var harness = new EngineHarness(frames: 4);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -110,11 +110,11 @@ public sealed class RenderControlTests
     }
 
     /// <summary>A cookie shapes a spot light's beam, and no other light has a beam to shape.</summary>
-    [Fact]
+    [SkippableFact]
     public void ALightCookieBelongsToASpotLight()
     {
         using var harness = new EngineHarness(frames: 4);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -139,14 +139,14 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void ACameraTakesAWholePostProcessingPipeline()
     {
         // Whether the picture looks right needs a GPU and an eye; the sample is where that is
         // judged. What is checked here is that every effect is accepted and that turning one off
         // is the same call as turning it on, which is the part a settings screen depends on.
         using var harness = new EngineHarness(frames: 4);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -190,11 +190,11 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void TemporalAntialiasingResolvesFromFramesRatherThanSamples()
     {
         using var harness = new EngineHarness(frames: 6);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -236,11 +236,11 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void TemporalAntialiasingAndMultisamplingAreRefusedTogether()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -273,13 +273,13 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void ACameraTakesAWholeLens()
     {
         // The same shape as the pipeline above. Every effect is accepted, and a settings object
         // that asks for none of them has to take off the ones a previous call put on.
         using var harness = new EngineHarness(frames: 4);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -331,11 +331,11 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void AnExposureCurveIsReadByLookingBrightnessUpInIt()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -364,11 +364,11 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void AnEffectDrawsWithTheImageItWasGiven()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -389,11 +389,11 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void EffectsBelongToACameraAndNothingElse()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -410,11 +410,11 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void TheSkyIsOnePlanetHoweverManyCamerasLookAtIt()
     {
         using var harness = new EngineHarness(frames: 4);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -449,11 +449,11 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void TheSkyBelongsToACameraAndNothingElse()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -470,11 +470,11 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void PostProcessingBelongsToACameraAndNothingElse()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -493,11 +493,11 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void ACameraAcceptsEveryProjection()
     {
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -530,23 +530,23 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void TheDefaultCameraStillTakesNoArguments()
     {
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ => Assert.NotEqual(Entity.None, Render.SpawnCamera3d()));
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void TwoCamerasCanSplitTheWindow()
     {
         // Splitscreen: the same scene drawn twice, each into half the framebuffer. The second
         // camera must not clear, or it would wipe out the first one's half.
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -570,13 +570,13 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void RenderLayersSeparateWhatEachCameraSees()
     {
         const uint Minimap = 1u << 1;
 
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -608,11 +608,11 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void SettingLayersOnSomethingThatIsGoneIsRefused()
     {
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -625,11 +625,11 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void EveryLightKindSpawns()
     {
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -666,11 +666,11 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void ShadowsCanBeTuned()
     {
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -693,11 +693,11 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void TheShortLightOverloadStillWorks()
     {
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
             Assert.NotEqual(Entity.None, Render.SpawnLight(LightKind.Directional, 10_000f)));

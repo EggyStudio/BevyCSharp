@@ -23,11 +23,11 @@ public sealed class MaterialTests
     /// side can read the way it reads a component of its own. The path remains, and the two
     /// cases worth pinning are an asset with one and an asset without.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void WhatAnEntityIsDrawnWithIsAskedAboutByItsPath()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -73,11 +73,11 @@ public sealed class MaterialTests
             $"the texture fixture is missing from {EngineHarness.AssetDirectory}");
     }
 
-    [Fact]
+    [SkippableFact]
     public void AMaterialRefusesATextureHandleThatNamesNothing()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -125,11 +125,11 @@ public sealed class MaterialTests
         Assert.Equal(AssetLoadState.Loaded, state);
     }
 
-    [Fact]
+    [SkippableFact]
     public void ATextureLoadsAndCanBeBoundToAMaterial()
     {
         using var harness = new EngineHarness(frames: 40, fps: 120);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var image = AssetHandle.None;
         var material = AssetHandle.None;
@@ -160,11 +160,11 @@ public sealed class MaterialTests
         Assert.Equal(AssetLoadState.Loaded, imageState);
     }
 
-    [Fact]
+    [SkippableFact]
     public void EverySettingIsAccepted()
     {
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -198,14 +198,14 @@ public sealed class MaterialTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void EveryTextureSlotTakesAHandle()
     {
         // All five maps at once, to check the keys are read into the right slots rather than one
         // being dropped or two being swapped. Nothing here can see the result, so this is a
         // check that the call is accepted, not that the shading is right.
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -258,11 +258,11 @@ public sealed class MaterialTests
         Assert.NotEqual(_tiling, _data);
     }
 
-    [Fact]
+    [SkippableFact]
     public void AMaterialCanTileItsTexture()
     {
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {
@@ -302,12 +302,12 @@ public sealed class MaterialTests
         Assert.Equal(AssetLoadState.Loaded, state);
     }
 
-    [Fact]
+    [SkippableFact]
     public void TheShortColorOverloadStillWorks()
     {
         // The old argument list, kept so existing code and the simple case stay one line.
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
             Assert.True(Render.CreateMaterial(0.25f, 0.55f, 0.85f).IsValid));
@@ -315,12 +315,12 @@ public sealed class MaterialTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void AMaterialWithNoTexturesIsStillAMaterial()
     {
         // The unset handles have to read as "no texture" rather than as a bad key.
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
             Assert.True(Render.CreateMaterial(new MaterialSettings()).IsValid));

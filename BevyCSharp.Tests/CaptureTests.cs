@@ -25,10 +25,10 @@ public sealed class CaptureTests
     /// given to the camera is linear, so the bytes that come back are the encoded form rather than
     /// the numbers that went in.
     /// </remarks>
-    [Fact]
+    [SkippableFact]
     public void WhatWasDrawnCanBeReadBack()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         CapturedImage? picture = null;
 
@@ -87,10 +87,10 @@ public sealed class CaptureTests
     }
 
     /// <summary>A capture that has not arrived says so rather than answering with nothing.</summary>
-    [Fact]
+    [SkippableFact]
     public void ACaptureIsNotReadableBeforeItArrives()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         using var harness = new EngineHarness(frames: 2);
 
@@ -108,10 +108,10 @@ public sealed class CaptureTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void ATicketThatNamesNothingIsRefused()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         using var harness = new EngineHarness(frames: 2);
 

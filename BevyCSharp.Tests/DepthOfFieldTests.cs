@@ -28,10 +28,10 @@ public sealed class DepthOfFieldTests
 {
     private const ulong Settled = 150;
 
-    [Fact]
+    [SkippableFact]
     public void ASurfaceOutOfFocusIsSofterThanTheSameSurfaceInFocus()
     {
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var sharp = Draw(_ => { });
         var soft = Draw(effects =>

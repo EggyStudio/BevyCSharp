@@ -47,11 +47,11 @@ public sealed class RenderTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void AttachingAMeshMakesAnEntityDrawable()
     {
         using var harness = new EngineHarness(frames: 3);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         var entity = Entity.None;
 
@@ -73,11 +73,11 @@ public sealed class RenderTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void AHandleOfTheWrongTypeIsRefused()
     {
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -95,11 +95,11 @@ public sealed class RenderTests
         harness.Run();
     }
 
-    [Fact]
+    [SkippableFact]
     public void AnUnknownShapeNamesWhatIsAvailable()
     {
         using var harness = new EngineHarness(frames: 2);
-        if (!App.HasRenderer) return;
+        Needs.Renderer();
 
         harness.OnContext(Stage.Startup, _ =>
         {

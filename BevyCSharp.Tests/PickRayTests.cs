@@ -14,10 +14,10 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class PickRayTests
 {
-    [Fact]
+    [SkippableFact]
     public void ARayMeetsTheTopOfACubeAndPassesWhatIsOffTheDefaultLayer()
     {
-        if (!App.HasEditor) return;
+        Needs.Editor();
 
         using var app = new App(Config.OffscreenFor(320, 180, frames: 90));
         app.AddPlugin(new EnginePlugin());
