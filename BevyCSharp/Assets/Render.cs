@@ -199,6 +199,13 @@ public static unsafe class Render
             UvScale = (read.UvScaleX, read.UvScaleY),
             UvRotation = read.UvRotation,
             UvOffset = (read.UvOffsetX, read.UvOffsetY),
+            Reflectance = read.Reflectance,
+            Clearcoat = read.Clearcoat,
+            ClearcoatRoughness = read.ClearcoatRoughness,
+            Transmission = read.SpecularTransmission,
+            DiffuseTransmission = read.DiffuseTransmission,
+            Thickness = read.Thickness,
+            RefractiveIndex = read.Ior,
         };
         return true;
 
@@ -486,6 +493,13 @@ public static unsafe class Render
             UvRotation = settings.UvRotation,
             UvOffsetX = settings.UvOffset.U,
             UvOffsetY = settings.UvOffset.V,
+            Reflectance = settings.Reflectance,
+            Clearcoat = settings.Clearcoat,
+            ClearcoatRoughness = settings.ClearcoatRoughness,
+            SpecularTransmission = settings.Transmission,
+            DiffuseTransmission = settings.DiffuseTransmission,
+            Thickness = settings.Thickness,
+            Ior = settings.RefractiveIndex,
         };
 
         // An unset handle is -1, which the bridge reads as "no texture here".

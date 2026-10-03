@@ -808,6 +808,13 @@ fn standard_material(
         metallic_roughness_texture,
         emissive_texture,
         occlusion_texture,
+        reflectance: config.reflectance,
+        clearcoat: config.clearcoat,
+        clearcoat_perceptual_roughness: config.clearcoat_roughness,
+        specular_transmission: config.specular_transmission,
+        diffuse_transmission: config.diffuse_transmission,
+        thickness: config.thickness,
+        ior: config.ior,
         ..Default::default()
     };
 
@@ -950,6 +957,13 @@ pub unsafe extern "C" fn bcs_render_material_read(handle: i32, out: *mut BcsMate
                     uv_scale: [scale.x, scale.y],
                     uv_rotation: rotation,
                     uv_offset: [offset.x, offset.y],
+                    reflectance: material.reflectance,
+                    clearcoat: material.clearcoat,
+                    clearcoat_roughness: material.clearcoat_perceptual_roughness,
+                    specular_transmission: material.specular_transmission,
+                    diffuse_transmission: material.diffuse_transmission,
+                    thickness: material.thickness,
+                    ior: material.ior,
                 };
 
                 unsafe { out.write(config) };
@@ -1442,6 +1456,13 @@ mod tests {
             uv_scale: [4.0, 2.0],
             uv_rotation: 0.5,
             uv_offset: [0.25, 0.0],
+            reflectance: 0.3,
+            clearcoat: 0.9,
+            clearcoat_roughness: 0.2,
+            specular_transmission: 0.6,
+            diffuse_transmission: 0.1,
+            thickness: 0.05,
+            ior: 1.33,
         };
 
         loan_world(app.world_mut(), || {
@@ -1454,6 +1475,13 @@ mod tests {
 
             assert_eq!(made.base_color, read.base_color);
             assert_eq!(made.metallic, read.metallic);
+            assert_eq!(made.clearcoat, read.clearcoat);
+            assert_eq!(made.clearcoat_roughness, read.clearcoat_roughness);
+            assert_eq!(made.specular_transmission, read.specular_transmission);
+            assert_eq!(made.diffuse_transmission, read.diffuse_transmission);
+            assert_eq!(made.thickness, read.thickness);
+            assert_eq!(made.ior, read.ior);
+            assert_eq!(made.reflectance, read.reflectance);
             assert_eq!(made.roughness, read.roughness);
             assert_eq!(made.emissive, read.emissive);
             assert_eq!((1, 0.4), (read.alpha_mode, read.alpha_cutoff));

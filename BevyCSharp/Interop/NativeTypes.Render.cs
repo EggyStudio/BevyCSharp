@@ -200,6 +200,27 @@ public struct NativeMaterialConfig
 
     /// <summary>Texture shift, in V.</summary>
     public float UvOffsetY;
+
+    /// <summary>How much light a dielectric reflects head on.</summary>
+    public float Reflectance;
+
+    /// <summary>How strong a clear varnish over the surface is.</summary>
+    public float Clearcoat;
+
+    /// <summary>How rough that varnish is.</summary>
+    public float ClearcoatRoughness;
+
+    /// <summary>How much light passes straight through.</summary>
+    public float SpecularTransmission;
+
+    /// <summary>How much light passes through and scatters.</summary>
+    public float DiffuseTransmission;
+
+    /// <summary>How thick the material is where light passes through.</summary>
+    public float Thickness;
+
+    /// <summary>How much light bends passing in.</summary>
+    public float Ior;
 }
 
 /// <summary>How an image should be sampled, and how its bytes should be read.</summary>

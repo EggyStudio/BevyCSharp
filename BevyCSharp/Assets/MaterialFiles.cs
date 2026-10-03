@@ -43,6 +43,17 @@ internal static class MaterialJson
         json.WriteNumberValue(settings.UvOffset.U);
         json.WriteNumberValue(settings.UvOffset.V);
         json.WriteEndArray();
+
+        // The surface's finer settings, written only where they differ from a plain material's,
+        // so a file of one says nothing of them and one written before they existed reads the same.
+        var plain = new MaterialSettings();
+        if (settings.Reflectance != plain.Reflectance) json.WriteNumber("reflectance", settings.Reflectance);
+        if (settings.Clearcoat != plain.Clearcoat) json.WriteNumber("clearcoat", settings.Clearcoat);
+        if (settings.ClearcoatRoughness != plain.ClearcoatRoughness) json.WriteNumber("clearcoatRoughness", settings.ClearcoatRoughness);
+        if (settings.Transmission != plain.Transmission) json.WriteNumber("transmission", settings.Transmission);
+        if (settings.DiffuseTransmission != plain.DiffuseTransmission) json.WriteNumber("diffuseTransmission", settings.DiffuseTransmission);
+        if (settings.Thickness != plain.Thickness) json.WriteNumber("thickness", settings.Thickness);
+        if (settings.RefractiveIndex != plain.RefractiveIndex) json.WriteNumber("refractiveIndex", settings.RefractiveIndex);
         json.WriteEndObject();
     }
 
@@ -69,6 +80,14 @@ internal static class MaterialJson
         if (Floats(json, "uvScale", 2) is { } scale) settings.UvScale = (scale[0], scale[1]);
         if (json.TryGetProperty("uvRotation", out var rotation)) settings.UvRotation = rotation.GetSingle();
         if (Floats(json, "uvOffset", 2) is { } offset) settings.UvOffset = (offset[0], offset[1]);
+
+        if (json.TryGetProperty("reflectance", out var reflectance)) settings.Reflectance = reflectance.GetSingle();
+        if (json.TryGetProperty("clearcoat", out var clearcoat)) settings.Clearcoat = clearcoat.GetSingle();
+        if (json.TryGetProperty("clearcoatRoughness", out var coatRoughness)) settings.ClearcoatRoughness = coatRoughness.GetSingle();
+        if (json.TryGetProperty("transmission", out var transmission)) settings.Transmission = transmission.GetSingle();
+        if (json.TryGetProperty("diffuseTransmission", out var diffuse)) settings.DiffuseTransmission = diffuse.GetSingle();
+        if (json.TryGetProperty("thickness", out var thickness)) settings.Thickness = thickness.GetSingle();
+        if (json.TryGetProperty("refractiveIndex", out var ior)) settings.RefractiveIndex = ior.GetSingle();
         return settings;
     }
 

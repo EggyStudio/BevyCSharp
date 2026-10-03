@@ -961,6 +961,22 @@ pub struct BcsMaterialConfig {
     pub uv_rotation: f32,
     /// How far the texture is shifted, in UV units.
     pub uv_offset: [f32; 2],
+    /// How much light a dielectric reflects head on, where `0.5` is Bevy's default and four
+    /// percent, which most materials are.
+    pub reflectance: f32,
+    /// How strong a clear varnish over the surface is, from none at zero.
+    pub clearcoat: f32,
+    /// How rough that varnish is, from a mirror near zero.
+    pub clearcoat_roughness: f32,
+    /// How much light passes straight through, as through glass, from none at zero. A camera
+    /// draws it only with screen-space transmission steps set.
+    pub specular_transmission: f32,
+    /// How much light passes through and scatters, as through a leaf or wax, from none at zero.
+    pub diffuse_transmission: f32,
+    /// How thick the material is where light passes through, in world units.
+    pub thickness: f32,
+    /// How much light bends passing in, `1.5` for glass and Bevy's default.
+    pub ior: f32,
 }
 
 /// What kind of light to spawn and how it behaves.

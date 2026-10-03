@@ -1127,6 +1127,25 @@ suits foliage and fences. `Blend` is real transparency, drawn after everything e
 to front. `Add` adds to what is behind, so it never darkens it. `DoubleSided` draws back faces, for
 anything modeled as a single sheet, and `Unlit` shows the base color flat.
 
+The finer surface is there as well. `Reflectance` is how much a non-metal reflects head on,
+`Clearcoat` and `ClearcoatRoughness` lay a glossy varnish over the base, as on a car's paint, and
+`Transmission`, `DiffuseTransmission`, `Thickness` and `RefractiveIndex` let light through, straight
+as through glass or scattered as through a leaf:
+
+```csharp
+var water = Render.CreateMaterial(new MaterialSettings
+{
+    BaseColor = (0.6f, 0.8f, 0.9f, 1f),
+    Roughness = 0.05f,
+    Transmission = 0.9f,
+    Thickness = 0.5f,
+    RefractiveIndex = 1.33f,
+});
+```
+
+A material file and a scene write these only where they differ from a plain material's, and the
+editor's Material card keeps them in a Surface fold.
+
 #### A shader of your own
 
 Shaders are written in [Slang](https://shader-slang.org), and a shader

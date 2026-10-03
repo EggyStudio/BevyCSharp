@@ -357,8 +357,9 @@ remembers which saved entities they hold, `SaveGame.Save` writes the difference 
   with no scene file starts from a scene the editor's code builds. An old `world.json` is applied
   the old way when there is no scene file, and deleting that reader once no project needs it is
   not built.
-- **Play** ([PLAY.md](PLAY.md), the player) writes the scene being edited to `build/play/` and
-  passes it to the player, which loads it through the same `LoadScene`.
+- **Play** ([PLAY.md](PLAY.md), the player) writes the scene being edited to
+  `user://play/scene.scene.json` and passes it to `BevyCSharp.Player`, which loads it through
+  the same `SceneFile.Load` after compiling the asset folder's scripts (built).
 - **The asset browser** shows scenes, data assets and models with their sidecars hidden, and
   dragging a model or a scene into the world makes an instance of it (§5). Built, with a tile's
   "Place in the scene" doing the same in front of the camera.

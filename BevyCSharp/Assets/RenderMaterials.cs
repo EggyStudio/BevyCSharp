@@ -324,4 +324,47 @@ public sealed class MaterialSettings
 
     /// <summary>How far the texture is shifted, in UV units.</summary>
     public (float U, float V) UvOffset { get; set; }
+
+    /// <summary>
+    /// How much light a non-metal reflects when seen head on, from zero to one, half by default.
+    /// </summary>
+    /// <remarks>
+    /// Half is four percent, which water, plastic and most other things a scene is made of reflect.
+    /// Raise it for a gemstone. Metals take their reflection from their color instead.
+    /// </remarks>
+    public float Reflectance { get; set; } = 0.5f;
+
+    /// <summary>How strong a clear varnish over the surface is, from none at zero to one.</summary>
+    /// <remarks>
+    /// A second, glossy layer over the first, as a car's paint or a lacquered table has, which
+    /// keeps a sharp highlight over a rough or colored base.
+    /// </remarks>
+    public float Clearcoat { get; set; }
+
+    /// <summary>How rough that varnish is, from a mirror near zero to one.</summary>
+    public float ClearcoatRoughness { get; set; } = 0.5f;
+
+    /// <summary>
+    /// How much light passes straight through, as through glass or water, from none at zero.
+    /// </summary>
+    /// <remarks>
+    /// Drawn by sampling the picture of what is behind the surface, bent by
+    /// <see cref="RefractiveIndex"/> through <see cref="Thickness"/>. Bevy's camera takes one such
+    /// step by default, which shows what is behind one pane of glass and not a second pane through
+    /// the first. Leave the material opaque, since the light it lets through is drawn by the
+    /// transmission rather than by alpha.
+    /// </remarks>
+    public float Transmission { get; set; }
+
+    /// <summary>
+    /// How much light passes through and scatters on the way, as through a leaf, paper or wax,
+    /// from none at zero.
+    /// </summary>
+    public float DiffuseTransmission { get; set; }
+
+    /// <summary>How thick the material is where light passes through, in world units.</summary>
+    public float Thickness { get; set; }
+
+    /// <summary>How much light bends passing in, 1.5 for glass and 1.33 for water.</summary>
+    public float RefractiveIndex { get; set; } = 1.5f;
 }

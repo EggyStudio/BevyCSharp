@@ -128,8 +128,7 @@ internal static class DrawnCards
 
         if (!entity.IsNone) Actions(ctx, entity, material, MaterialFiles.PathOf(material), users);
 
-        var schema = SchemaOf(material);
-        foreach (var field in schema.Fields) ComponentFields.Row(ctx, entity, schema, field);
+        DetailsPanel.FoldedRows(ctx, entity, SchemaOf(material));
     }
 
     /// <summary>How many entities of the scene are drawn with a material, for a file picked in the browser.</summary>
@@ -371,6 +370,23 @@ internal static class DrawnCards
                 return true;
             }),
 
+            // The finer surface, folded shut under its own name, since most materials leave every
+            // one of these alone and a card listing them all buries the ones that matter.
+            Field("Reflectance", FieldKind.Float, settings => settings.Reflectance, (settings, value) => Number(value, number => settings.Reflectance = number),
+                Folded("How much a non-metal reflects head on. Half is four percent, which most things are.")),
+            Field("Clearcoat", FieldKind.Float, settings => settings.Clearcoat, (settings, value) => Number(value, number => settings.Clearcoat = number),
+                Folded("A clear varnish over the surface, as a car's paint has.")),
+            Field("Coat roughness", FieldKind.Float, settings => settings.ClearcoatRoughness, (settings, value) => Number(value, number => settings.ClearcoatRoughness = number),
+                Folded("How rough the varnish is.")),
+            Field("Transmission", FieldKind.Float, settings => settings.Transmission, (settings, value) => Number(value, number => settings.Transmission = number),
+                Folded("Light passing straight through, as through glass.")),
+            Field("Diffuse", FieldKind.Float, settings => settings.DiffuseTransmission, (settings, value) => Number(value, number => settings.DiffuseTransmission = number),
+                Folded("Light passing through and scattering, as through a leaf or wax.")),
+            Field("Thickness", FieldKind.Float, settings => settings.Thickness, (settings, value) => Number(value, number => settings.Thickness = number),
+                new FieldHints(Tooltip: "How thick it is where light passes through, in world units.", Minimum: 0d, Maximum: 10d, Foldout: "Surface", FoldoutOpen: false)),
+            Field("Refraction", FieldKind.Float, settings => settings.RefractiveIndex, (settings, value) => Number(value, number => settings.RefractiveIndex = number),
+                new FieldHints(Tooltip: "How much light bends passing in, 1.5 for glass and 1.33 for water.", Minimum: 1d, Maximum: 3d, Foldout: "Surface", FoldoutOpen: false)),
+
             // The texture slots, each picked in the grid from the images under the asset root and
             // inside models, named short enough for the name column, with what each is in full on
             // the name's tooltip.
@@ -485,6 +501,10 @@ internal static class DrawnCards
 
     /// <summary>A slider from nothing to all, as metallic and roughness are.</summary>
     private static readonly FieldHints Unit = new(Minimum: 0d, Maximum: 1d);
+
+    /// <summary>A setting from zero to one in the Surface fold, which starts shut.</summary>
+    private static FieldHints Folded(string says) =>
+        new(Tooltip: says, Minimum: 0d, Maximum: 1d, Foldout: "Surface", FoldoutOpen: false);
 
     private static Color Linear((float R, float G, float B, float A) color) => new(color.R, color.G, color.B, color.A);
 

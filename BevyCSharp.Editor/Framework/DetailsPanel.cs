@@ -342,6 +342,31 @@ public static class DetailsPanel
         }
     }
 
+    /// <summary>
+    /// A schema's rows inside the folds they name, for a card drawn outside a component's own,
+    /// such as the Material card.
+    /// </summary>
+    /// <remarks>
+    /// The folds draw their cards under the rows through a split of the draw list, as a
+    /// component's do, so this makes the split itself and merges it after.
+    /// </remarks>
+    internal static void FoldedRows(BehaviorContext ctx, Entity entity, ComponentSchema schema)
+    {
+        var draw = ImGui.GetWindowDrawList();
+        draw.ChannelsSplit(3);
+        draw.ChannelsSetCurrent(2);
+
+        var fold = new FoldStack(schema.Name, draw);
+
+        foreach (var field in Ordered(schema))
+        {
+            if (fold.Enter(field.Hints.Foldout, field.Hints.FoldoutOpen)) ComponentFields.Row(ctx, entity, schema, field);
+        }
+
+        fold.Leave();
+        draw.ChannelsMerge();
+    }
+
     /// <summary>One component, as a card with its fields in it.</summary>
     /// <remarks>
     /// The fill is drawn behind the group rather than around it, through a split in the draw list:
