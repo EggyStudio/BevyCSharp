@@ -46,7 +46,7 @@ public static class ConsoleTab
             {
                 var theme = EditorTheme.Current;
 
-                // Out of the theme, so a look dialled in reaches the log as well. Written here in
+                // Out of the theme, so a look dialed in reaches the log as well. Written here in
                 // four colors the palette already has rather than four of this file's own.
                 var color = line.Level switch
                 {

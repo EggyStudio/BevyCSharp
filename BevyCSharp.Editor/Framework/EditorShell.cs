@@ -165,7 +165,7 @@ public static class EditorShell
             "Inter-Regular.ttf",
             Figures);
 
-        // Whatever was dialled in and saved, or the editor's own look when there is no file. A
+        // Whatever was dialed in and saved, or the editor's own look when there is no file. A
         // theme is an asset like any other, read at startup and edited by hand or in the style tab.
         var saved = Path.Combine(assets, "theme.txt");
 

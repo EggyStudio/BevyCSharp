@@ -21,7 +21,7 @@ namespace BevyCSharp.Editor.Framework;
 /// </para>
 /// <para>
 /// Every value lives here and nowhere else, so the whole editor changes by changing this, and a
-/// theme dialled in by hand can be written to a file and read back.
+/// theme dialed in by hand can be written to a file and read back.
 /// </para>
 /// </remarks>
 public sealed record EditorTheme

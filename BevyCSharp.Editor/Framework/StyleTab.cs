@@ -22,7 +22,7 @@ namespace BevyCSharp.Editor.Framework;
 /// the way this editor does.
 /// </para>
 /// <para>
-/// Saved to <c>assets/theme.txt</c>, which the editor reads at startup. A look dialled in by hand
+/// Saved to <c>assets/theme.txt</c>, which the editor reads at startup. A look dialed in by hand
 /// survives a restart and can be shipped with the project.
 /// </para>
 /// </remarks>

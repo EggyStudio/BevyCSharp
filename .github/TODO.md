@@ -328,15 +328,16 @@ language.
   can be named where they were loaded from, so a despawn could be reversed for one drawn with
   files, and not for one drawn with a mesh built in memory. Half a despawn coming back is worse than
   none.
-- **Settings are the editor's, not the project's.** `EditorSettings` saves to `assets/settings.txt`
-  beside the layout, and everything on it belongs to this editor build. A project setting worth the
+- **Settings are the editor's, not the project's.** `EditorSettings` saves to
+  `user://settings.json` with the layout, in the editor's own directory, and everything on it
+  belongs to the person using this editor. A project setting worth the
   name (a startup scene, a physics step, a build target) needs somewhere to live that is part of
   the project, which the scene file could carry and does not yet.
 - **The scene is the camera's viewport rather than a texture.** Docked, `Render.SetViewport` gives
   the camera the rectangle the panels left. A texture would make the scene a panel of its own,
   dockable and tabbable, as a second view needs.
 - **A theme is a file, and only the running build has it.** `assets/theme.txt` is written beside the
-  binary, so a look dialled in has to be copied back into the project by hand to be shipped.
+  binary, so a look dialed in has to be copied back into the project by hand to be shipped.
 - **Every row is drawn every frame.** A list is a call per row inside a scrolling region, as
   immediate mode draws it. At editor scale that is nothing; a list of ten thousand entities would
   need ImGui's own clipper, which asks only for the rows on screen and is a change to the loops

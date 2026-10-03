@@ -6,7 +6,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// A theme is a file. What it says has to come back as what it was, or a look dialled in by hand is
+/// A theme is a file. What it says has to come back as what it was, or a look dialed in by hand is
 /// a look that changes every time the editor is opened.
 /// </summary>
 public sealed class EditorThemeTests
@@ -14,7 +14,7 @@ public sealed class EditorThemeTests
     [Fact]
     public void AThemeSurvivesBeingWrittenDownAndReadBack()
     {
-        var dialled = EditorTheme.Modern with
+        var dialed = EditorTheme.Modern with
         {
             Name = "Mine",
             Accent = new Vector4(0.2f, 0.7f, 0.4f, 1f),
@@ -24,21 +24,21 @@ public sealed class EditorThemeTests
             Borders = 1f,
         };
 
-        var read = EditorTheme.Restore(dialled.Describe());
+        var read = EditorTheme.Restore(dialed.Describe());
 
         Assert.Equal("Mine", read.Name);
-        Assert.Equal(dialled.WindowRounding, read.WindowRounding, 3);
-        Assert.Equal(dialled.FramePadding, read.FramePadding);
-        Assert.Equal(dialled.Borders, read.Borders, 3);
+        Assert.Equal(dialed.WindowRounding, read.WindowRounding, 3);
+        Assert.Equal(dialed.FramePadding, read.FramePadding);
+        Assert.Equal(dialed.Borders, read.Borders, 3);
 
         // Colors go through hex, so they come back to the nearest byte rather than exactly.
-        Assert.Equal(dialled.Accent.X, read.Accent.X, 2);
-        Assert.Equal(dialled.Accent.Y, read.Accent.Y, 2);
-        Assert.Equal(dialled.Accent.Z, read.Accent.Z, 2);
+        Assert.Equal(dialed.Accent.X, read.Accent.X, 2);
+        Assert.Equal(dialed.Accent.Y, read.Accent.Y, 2);
+        Assert.Equal(dialed.Accent.Z, read.Accent.Z, 2);
 
         // And a color that is partly clear keeps how clear it is, which is the only transparency
         // a theme has.
-        Assert.Equal(dialled.Ground.W, read.Ground.W, 2);
+        Assert.Equal(dialed.Ground.W, read.Ground.W, 2);
         Assert.Equal(1f, read.Accent.W, 3);
     }
 
