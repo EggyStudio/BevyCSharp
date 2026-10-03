@@ -448,4 +448,78 @@ public sealed class PhysicsTests
         // Fewer than four points hold no volume.
         Assert.Throws<ArgumentException>(() => PhysicsShape.Hull([Vec3.Zero, Vec3.UnitX, Vec3.UnitY]));
     }
+
+    /// <summary>
+    /// A hinge with a motor turns its wheel at the speed asked for, until told to stop, and a
+    /// hinge with limits stops its door at the angle it is allowed however hard it is pushed.
+    /// </summary>
+    [Fact]
+    public void AMotorTurnsItsHingeAndALimitStopsOne()
+    {
+        // Two seconds of steps, the motor turned off after the first.
+        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120);
+        harness.App.AddPlugin(new PhysicsPlugin(new PhysicsSettings { Gravity = Vec3.Zero }));
+
+        Entity wheel = default, door = default;
+        JointHandle motor = default;
+        var frame = 0;
+        float turnedAtStop = 0f, turnedAtEnd = 0f, widest = 0f;
+
+        // How far a body is turned about up, in degrees, the right-handed way.
+        static float Yaw(Quat rotation) => 2f * MathF.Atan2(rotation.Y, rotation.W) * 180f / MathF.PI;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var physics = ctx.Res<PhysicsWorld>();
+
+            Entity Post(float x)
+            {
+                var post = ctx.Ecs.Spawn();
+                ctx.Ecs.Add(post, Transform.At(x, 0f, 0f));
+                physics.Add(post, PhysicsShape.Sphere(0.1f), BodyKind.Kinematic, Transform.At(x, 0f, 0f));
+                return post;
+            }
+
+            wheel = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(wheel, Transform.At(0f, 0f, 0f));
+            physics.Add(wheel, PhysicsShape.Cylinder(1f, 0.2f), BodyKind.Dynamic, Transform.At(0f, 0f, 0f));
+            motor = physics.Connect(Post(0f), wheel, Joint.Hinge(Vec3.Zero, Vec3.UnitY, Vec3.Zero, Vec3.UnitY).WithMotor(90f, 100f));
+
+            // A door hung from a post at its edge, free to open up to forty-five degrees, and
+            // shoved hard enough to swing far past that.
+            door = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(door, Transform.At(6f, 0f, 0f));
+            physics.Add(door, PhysicsShape.Box(new Vec3(2f, 2f, 0.1f)), BodyKind.Dynamic, Transform.At(6f, 0f, 0f));
+            physics.Connect(Post(5f), door, Joint.Hinge(Vec3.Zero, Vec3.UnitY, new Vec3(-1f, 0f, 0f), Vec3.UnitY).WithLimits(0f, 45f));
+            physics.SetVelocity(door, Vec3.Zero, new Vec3(0f, 12f, 0f));
+        });
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            frame++;
+            var physics = ctx.Res<PhysicsWorld>();
+
+            widest = Math.Max(widest, Yaw(ctx.Ecs.GetOrDefault<Transform>(door).Rotation));
+
+            if (frame == 240)
+            {
+                turnedAtStop = Yaw(ctx.Ecs.GetOrDefault<Transform>(wheel).Rotation);
+                physics.SetMotor(motor, 0f, 100f);
+            }
+
+            turnedAtEnd = Yaw(ctx.Ecs.GetOrDefault<Transform>(wheel).Rotation);
+        });
+
+        harness.Run();
+
+        // A second at ninety degrees a second, held there once the motor is set to stand still.
+        Assert.InRange(turnedAtStop, 75f, 105f);
+        Assert.InRange(turnedAtEnd, turnedAtStop - 5f, turnedAtStop + 5f);
+
+        // Open to its limit and no further, give or take the give of a soft constraint.
+        Assert.InRange(widest, 40f, 50f);
+
+        // Only a hinge turns or stops.
+        Assert.Throws<InvalidOperationException>(() => Joint.Ball(Vec3.Zero, Vec3.Zero).WithMotor(10f, 1f));
+    }
 }

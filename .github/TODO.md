@@ -399,13 +399,12 @@ the simulation, its buffer pool and thread dispatcher, and the callbacks Bepu re
 per fixed step, and writes each dynamic body back through `Transform`. Each body can have a
 material of its own, friction and a bounce Bepu's stiff contacts do not give, which the world
 gives back after the step, and a body that tumbles in an odd shape is a convex hull of its points,
-turning about the hull's center while its entity keeps its origin. What is left:
+turning about the hull's center while its entity keeps its origin. Ball joints, hinges, welds and
+distance ranges hold bodies together, a hinge can turn itself and stop at an angle, and contacts
+are reported, a sensor making a trigger volume. What is left:
 
 - **Not published yet.** The workflow packs the core alone, so the package is reached by project
   reference inside this repository. Packing it is adding it to the pack step.
-- **Joints without motors or limits.** Ball joints, hinges, welds and distance ranges hold bodies
-  together, and contacts are reported, a sensor making a trigger volume. A hinge that turns itself
-  or stops at an angle needs Bepu's motors and angular limits, which the joint kinds do not reach.
 
 ## Platform
 

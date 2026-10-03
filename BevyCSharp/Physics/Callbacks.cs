@@ -20,6 +20,15 @@ internal sealed class ContactLog
     public readonly HashSet<(uint A, uint B)> Touching = [];
     public readonly HashSet<uint> Sensors = [];
 
+    /// <summary>
+    /// The pairs of collidables held by a joint, by how many joints hold each, which do not collide
+    /// with each other.
+    /// </summary>
+    public readonly Dictionary<(uint A, uint B), int> Joined = [];
+
+    /// <summary>A pair in one order, whichever way it is named.</summary>
+    public static (uint A, uint B) Pair(uint a, uint b) => a < b ? (a, b) : (b, a);
+
     /// <summary>Each body's own material, by its packed collidable, for the bodies given one.</summary>
     public readonly Dictionary<uint, Bevy.Physics.PhysicsMaterial> Materials = [];
 
@@ -63,8 +72,10 @@ internal struct ContactCallbacks : INarrowPhaseCallbacks
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b, ref float speculativeMargin) =>
-        // Two things that cannot move have nothing to say to each other.
-        a.Mobility == CollidableMobility.Dynamic || b.Mobility == CollidableMobility.Dynamic;
+        // Two things that cannot move have nothing to say to each other, and two a joint holds
+        // are held as the joint says, which a hinge's pin passing through its wheel would fight.
+        (a.Mobility == CollidableMobility.Dynamic || b.Mobility == CollidableMobility.Dynamic)
+        && (Log.Joined.Count == 0 || !Log.Joined.ContainsKey(ContactLog.Pair(a.Packed, b.Packed)));
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

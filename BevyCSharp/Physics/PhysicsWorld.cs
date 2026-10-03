@@ -162,6 +162,8 @@ public readonly record struct Joint
     internal Vec3 AxisB { get; private init; }
     internal float Minimum { get; private init; }
     internal float Maximum { get; private init; }
+    internal (float Speed, float Torque)? Motor { get; private init; }
+    internal (float Lowest, float Highest)? Limits { get; private init; }
 
     /// <summary>
     /// A point on one body held to a point on the other, free to turn any way about it: a
@@ -188,6 +190,42 @@ public readonly record struct Joint
     /// </summary>
     public static Joint Distance(Vec3 anchorA, Vec3 anchorB, float minimum, float maximum) =>
         new() { Kind = 3, AnchorA = anchorA, AnchorB = anchorB, Minimum = minimum, Maximum = maximum };
+
+    /// <summary>
+    /// A hinge that turns itself, a fan or a wheel driven at a speed, pushing with no more than a
+    /// torque.
+    /// </summary>
+    /// <param name="degreesPerSecond">
+    /// How fast the second body turns against the first, about the first's axis, the right-handed
+    /// way round, so a positive speed about up turns counterclockwise seen from above.
+    /// </param>
+    /// <param name="torque">
+    /// The most it pushes with, so a motor meeting something heavier stalls rather than flinging it.
+    /// </param>
+    /// <exception cref="InvalidOperationException">The joint is not a hinge.</exception>
+    public Joint WithMotor(float degreesPerSecond, float torque) =>
+        Kind == 1
+            ? this with { Motor = (degreesPerSecond, Math.Max(0f, torque)) }
+            : throw new InvalidOperationException("A motor turns a hinge, which has one axis to turn about.");
+
+    /// <summary>
+    /// A hinge that stops at an angle each way, a door that opens to ninety degrees and no further.
+    /// </summary>
+    /// <param name="lowestDegrees">How far it turns the negative way, as a negative angle or zero.</param>
+    /// <param name="highestDegrees">How far it turns the positive way.</param>
+    /// <remarks>
+    /// Measured from how the two bodies are turned to each other when they are joined, which is
+    /// zero, so a door joined closed opens from closed.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">The joint is not a hinge.</exception>
+    /// <exception cref="ArgumentException">The lowest angle is above the highest.</exception>
+    public Joint WithLimits(float lowestDegrees, float highestDegrees)
+    {
+        if (Kind != 1) throw new InvalidOperationException("Limits stop a hinge, which has one angle to limit.");
+        if (lowestDegrees > highestDegrees) throw new ArgumentException("The lowest angle is above the highest.", nameof(lowestDegrees));
+
+        return this with { Limits = (lowestDegrees, highestDegrees) };
+    }
 }
 
 /// <summary>A joint between two bodies, from <see cref="PhysicsWorld.Connect"/>.</summary>
@@ -265,7 +303,14 @@ public sealed class PhysicsWorld : IDisposable
     private HashSet<(Entity A, Entity B)> _touching = [];
 
     /// <summary>Every joint, by its handle's number, with the two entities it holds.</summary>
-    private readonly Dictionary<int, (ConstraintHandle Constraint, Entity A, Entity B)> _joints = [];
+    /// <remarks>
+    /// A joint can be several of Bepu's constraints between the same two bodies, a hinge with its
+    /// motor and its limit, all taken away together.
+    /// </remarks>
+    private readonly Dictionary<int, (ConstraintHandle[] Constraints, Entity A, Entity B)> _joints = [];
+
+    /// <summary>The motor of each joint that has one, by the joint's number.</summary>
+    private readonly Dictionary<int, (ConstraintHandle Constraint, Vector3 Axis)> _motors = [];
 
     private int _nextJoint;
 
@@ -408,7 +453,9 @@ public sealed class PhysicsWorld : IDisposable
     /// <remarks>
     /// Both bodies have to move, dynamic or kinematic, because a joint is solved between two
     /// velocities. To pin a body to the world, join it to a kinematic body that stays where it is.
-    /// A joint goes when either of its bodies does.
+    /// A joint goes when either of its bodies does. Two bodies a joint holds do not collide with
+    /// each other, as in most engines, since a hinge's pin passing through its wheel is usual and
+    /// the contact between them would hold the wheel still.
     /// </remarks>
     /// <exception cref="KeyNotFoundException">Either entity has no body that moves.</exception>
     public JointHandle Connect(Entity a, Entity b, Joint joint)
@@ -448,8 +495,90 @@ public sealed class PhysicsWorld : IDisposable
         second.Awake = true;
 
         var id = ++_nextJoint;
-        _joints[id] = (constraint, a, b);
+        var constraints = new List<ConstraintHandle> { constraint };
+
+        if (joint.Motor is { } motor)
+        {
+            var axis = Vector3.Normalize(ToBepu(joint.AxisA));
+            var driven = _simulation.Solver.Add(first.Handle, second.Handle, new AngularAxisMotor
+            {
+                LocalAxisA = axis,
+                // Bepu's target is the first body's turn against the second, the other way round
+                // from how a speed is given here.
+                TargetVelocity = -motor.Speed * MathF.PI / 180f,
+                Settings = new MotorSettings(motor.Torque, 1e-4f),
+            });
+
+            constraints.Add(driven);
+            _motors[id] = (driven, axis);
+        }
+
+        if (joint.Limits is { } limits)
+        {
+            // A basis on each body whose Z is the hinge's axis, the second's chosen so the two
+            // agree as the bodies are turned now, which makes the angle the joint starts at zero.
+            var basisA = Toward(Vector3.Normalize(ToBepu(joint.AxisA)));
+            var world = Quaternion.Concatenate(basisA, first.Pose.Orientation);
+            var basisB = Quaternion.Concatenate(world, Quaternion.Conjugate(second.Pose.Orientation));
+
+            constraints.Add(_simulation.Solver.Add(first.Handle, second.Handle, new TwistLimit
+            {
+                LocalBasisA = basisA,
+                LocalBasisB = Quaternion.Normalize(basisB),
+                MinimumAngle = limits.Lowest * MathF.PI / 180f,
+                MaximumAngle = limits.Highest * MathF.PI / 180f,
+                SpringSettings = spring,
+            }));
+        }
+
+        _joints[id] = ([.. constraints], a, b);
+
+        var pair = ContactLog.Pair(Packed(_bodies[a]), Packed(_bodies[b]));
+        _contacts.Joined[pair] = _contacts.Joined.GetValueOrDefault(pair) + 1;
+
         return new JointHandle(id);
+    }
+
+    /// <summary>
+    /// Changes a hinge's motor while it runs, to open a door on command or stop a fan.
+    /// </summary>
+    /// <param name="joint">A hinge made with <see cref="Joint.WithMotor"/>.</param>
+    /// <param name="degreesPerSecond">How fast it turns from the next step, zero holding it where it is.</param>
+    /// <param name="torque">The most it pushes with.</param>
+    /// <returns>Whether the joint has a motor to change.</returns>
+    public bool SetMotor(JointHandle joint, float degreesPerSecond, float torque)
+    {
+        if (_disposed || !_motors.TryGetValue(joint.Id, out var motor) || !_joints.TryGetValue(joint.Id, out var held)) return false;
+
+        _simulation.Solver.ApplyDescription(motor.Constraint, new AngularAxisMotor
+        {
+            LocalAxisA = motor.Axis,
+            TargetVelocity = -degreesPerSecond * MathF.PI / 180f,
+            Settings = new MotorSettings(Math.Max(0f, torque), 1e-4f),
+        });
+
+        // Both woken, since a motor told to turn a sleeping door has to wake it to.
+        foreach (var entity in new[] { held.A, held.B })
+        {
+            if (_bodies.TryGetValue(entity, out var body) && body.Kind != BodyKind.Static)
+            {
+                var reference = _simulation.Bodies[body.Moving];
+                reference.Awake = true;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>The turn that takes Z onto a direction, the shortest one.</summary>
+    private static Quaternion Toward(Vector3 direction)
+    {
+        var dot = Vector3.Dot(Vector3.UnitZ, direction);
+        if (dot > 0.9999f) return Quaternion.Identity;
+        if (dot < -0.9999f) return Quaternion.CreateFromAxisAngle(Vector3.UnitX, MathF.PI);
+
+        var axis = Vector3.Normalize(Vector3.Cross(Vector3.UnitZ, direction));
+        return Quaternion.CreateFromAxisAngle(axis, MathF.Acos(dot));
     }
 
     /// <summary>Takes a joint away, leaving both bodies free.</summary>
@@ -458,7 +587,16 @@ public sealed class PhysicsWorld : IDisposable
     {
         if (_disposed || !_joints.Remove(joint.Id, out var held)) return false;
 
-        _simulation.Solver.Remove(held.Constraint);
+        foreach (var constraint in held.Constraints) _simulation.Solver.Remove(constraint);
+        _motors.Remove(joint.Id);
+
+        // Colliding again once nothing holds them, the bodies still being there.
+        if (_bodies.TryGetValue(held.A, out var first) && _bodies.TryGetValue(held.B, out var second))
+        {
+            var pair = ContactLog.Pair(Packed(first), Packed(second));
+            if (_contacts.Joined.TryGetValue(pair, out var count) && count > 1) _contacts.Joined[pair] = count - 1;
+            else _contacts.Joined.Remove(pair);
+        }
 
         foreach (var entity in new[] { held.A, held.B })
         {

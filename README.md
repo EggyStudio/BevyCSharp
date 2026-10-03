@@ -2860,7 +2860,21 @@ physics.Disconnect(hinge);            // or remove either body, which takes its 
 ```
 
 A joint is solved between two velocities, so both bodies move, and a body pinned to the world is
-joined to a kinematic one that stays put.
+joined to a kinematic one that stays put. Two bodies a joint holds do not collide with each other,
+so a hinge's pin can pass through its wheel. A hinge can turn itself, as a fan or a driven wheel
+does, and stop at an angle each way, as a door does:
+
+```csharp
+var fan = physics.Connect(mount, blades, Joint.Hinge(Vec3.Zero, Vec3.UnitY, Vec3.Zero, Vec3.UnitY)
+    .WithMotor(degreesPerSecond: 360f, torque: 50f));
+physics.SetMotor(fan, 0f, 50f);       // stops it, holding it where it is
+
+physics.Connect(frame, door, Joint.Hinge(hingeOnFrame, Vec3.UnitY, hingeOnDoor, Vec3.UnitY)
+    .WithLimits(lowestDegrees: 0f, highestDegrees: 100f));
+```
+
+A limit is measured from how the two are turned when they are joined, so a door joined closed opens
+from closed.
 
 ### Text and touch
 
