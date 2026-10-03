@@ -329,10 +329,10 @@ language.
   dockable and tabbable, as a second view needs.
 - **A theme is a file, and only the running build has it.** `assets/theme.txt` is written beside the
   binary, so a look dialed in has to be copied back into the project by hand to be shipped.
-- **Every row is drawn every frame.** A list is a call per row inside a scrolling region, as
-  immediate mode draws it. At editor scale that is nothing; a list of ten thousand entities would
-  need ImGui's own clipper, which asks only for the rows on screen and is a change to the loops
-  rather than to what they draw.
+- **Most lists draw every row every frame.** The world panel draws only the rows on screen,
+  through ImGui's list clipper, so a world of thousands of named entities costs what the few dozen
+  in view cost. The asset browser's tiles, the console and the inspector's rows still draw all of
+  theirs, which at editor scale is nothing, and each would take the same change to its loop.
 
 ## Simulation
 

@@ -18,6 +18,9 @@ public static class WorldPanel
 {
     private static readonly List<Row> Rows = [];
 
+    /// <summary>The rows the folds and the search leave, which the clipper draws a window of.</summary>
+    private static readonly List<Row> Shown = [];
+
     /// <summary>What has been folded away, by the entity that holds it.</summary>
     /// <remarks>
     /// What is folded rather than what is open, so a thing spawned into the world arrives visible.
@@ -176,6 +179,7 @@ public static class WorldPanel
         // A fold reaches everything under a folded row, until something at its own
         // depth or shallower comes along.
         var hidden = -1;
+        Shown.Clear();
 
         foreach (var row in Rows)
         {
@@ -188,13 +192,30 @@ public static class WorldPanel
                 continue;
             }
 
-            Line(ctx, row);
+            Shown.Add(row);
 
             // A search shows what matches wherever it is, so nothing is folded while one is on.
             if (wanted.Length == 0 && row.HasChildren && Folded.Contains(row.Entity.Bits))
             {
                 hidden = row.Depth;
             }
+        }
+
+        // Only the rows on screen are drawn, through ImGui's clipper, which keeps the room the
+        // others would take and asks for the ones the scroll shows. Every row is one height, so a
+        // world of ten thousand entities costs what the few dozen in view cost.
+        unsafe
+        {
+            var clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+            clipper.Begin(Shown.Count);
+
+            while (clipper.Step())
+            {
+                for (var index = clipper.DisplayStart; index < clipper.DisplayEnd; index++) Line(ctx, Shown[index]);
+            }
+
+            clipper.End();
+            clipper.Destroy();
         }
 
         // The room under the last row, which is part of the list and means nothing is chosen. A
