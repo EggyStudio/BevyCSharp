@@ -238,6 +238,25 @@ public sealed class Config
     public bool DesktopTitleBar { get; set; }
 
     /// <summary>
+    /// Reopen the window where it was last closed, at the size it had and maximized if it was.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A desktop app is expected to come back where it was left. The window's place is kept in
+    /// <c>user://window.json</c> through <see cref="Persistent{T}"/>, read before the window opens
+    /// so it opens there rather than opening elsewhere and jumping, and written when the place
+    /// changes, checked a few times a second. A maximized window keeps the size it had before, so
+    /// putting it back after the next start goes back to that size rather than to a full screen.
+    /// </para>
+    /// <para>
+    /// Wayland never tells an app where its window is, so there the size and whether it was
+    /// maximized come back and the compositor chooses the place. Off unless asked for, since a test
+    /// or a tool that opens a window wants the same window every time, and ignored without one.
+    /// </para>
+    /// </remarks>
+    public bool RememberWindow { get; set; }
+
+    /// <summary>
     /// Make Bevy's ray-traced lighting available, which a camera then turns on with
     /// <see cref="Render.SetRayTracedLighting"/>.
     /// </summary>

@@ -239,6 +239,34 @@ pub struct BcsConfig {
     /// The player's own directory, registered with Bevy as the `user` asset source so a texture or
     /// a model the game wrote there loads as `user://…`, or null for no such source.
     pub user_root: *const c_char,
+    /// Non-zero to open the window at `x` and `y` rather than where the platform puts it, which a
+    /// game reopening where it was closed asks for. Wayland places every window itself and
+    /// ignores it.
+    pub has_position: u32,
+    /// Where the window's top left corner opens, in physical pixels from the desktop's.
+    pub x: i32,
+    /// See `x`.
+    pub y: i32,
+}
+
+/// Where the window is and how large, as `bcs_window_place` reads it back.
+///
+/// One struct for what a game keeps between runs, so it is read in one call rather than three.
+#[repr(C)]
+#[derive(Clone, Copy, Default)]
+pub struct BcsWindowPlace {
+    /// Non-zero when the platform has said where the window is, which Wayland never does.
+    pub has_position: i32,
+    /// The window's top left corner in physical pixels from the desktop's, when `has_position`.
+    pub x: i32,
+    /// See `x`.
+    pub y: i32,
+    /// The window's size in logical pixels.
+    pub width: u32,
+    /// See `width`.
+    pub height: u32,
+    /// Non-zero while the window is maximized.
+    pub maximized: i32,
 }
 
 /// How a camera should see, passed from C# when one is spawned.

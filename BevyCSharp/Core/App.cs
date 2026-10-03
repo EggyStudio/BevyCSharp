@@ -120,6 +120,9 @@ public sealed unsafe class App : IDisposable
             // which is no reason to refuse to start.
         }
 
+        // Where the window was left, read before it opens, so it opens there.
+        var opening = WindowMemory.Open(Config);
+
         fixed (byte* title = titleBytes)
         fixed (byte* assetRoot = assetRootBytes)
         fixed (byte* userRoot = userRootBytes)
@@ -127,8 +130,8 @@ public sealed unsafe class App : IDisposable
             var native = new NativeConfig
             {
                 Title = title,
-                Width = Config.Width,
-                Height = Config.Height,
+                Width = opening.Width,
+                Height = opening.Height,
                 Vsync = Config.Vsync ? 1u : 0u,
                 Headless = Config.Headless ? 1u : 0u,
                 HeadlessFps = Config.HeadlessFps,
@@ -146,6 +149,9 @@ public sealed unsafe class App : IDisposable
                 Transparent = Config.Transparent ? 1u : 0u,
                 DesktopTitleBar = Config.DesktopTitleBar ? 1u : 0u,
                 UserRoot = userRoot,
+                HasPosition = opening.HasPosition ? 1u : 0u,
+                X = opening.X,
+                Y = opening.Y,
             };
             _handle = Native.bcs_app_create(&native);
         }
@@ -225,6 +231,7 @@ public sealed unsafe class App : IDisposable
             PostAssetFailures(world.Resource<MessageBus>());
             DataAssets.PostChanges(world.Resource<MessageBus>());
             MaterialFiles.ReloadTouched();
+            WindowMemory.Tick();
 
             // After the scenes Bevy spawned last frame are in the world, so an instance's overrides
             // find their nodes, and before anything reads that the instance is ready.

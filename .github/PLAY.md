@@ -122,13 +122,19 @@ it from a file under the platform's data or config directory, writes it back whe
 back to a default when the file is missing or unreadable, in JSON, TOML, RON, YAML, INI or bincode.
 
 The resource it persists is a Rust type that implements `serde`, and a game's settings and save
-data are C# types the bridge cannot name. So it fits what the bridge owns and C# does not:
+data are C# types the bridge cannot name. So it would fit only what the bridge owns and C# does
+not, and the one such thing, the window's place, needs so little from the bridge that it is kept
+on the managed side as well:
 
 - **The window's size, place and monitor.** A game reopening where it was closed is expected on
   the desktop. `bevy-persistent-windows` does this over `bevy-persistent`, but its 0.9 release is
-  on Bevy 0.17, so the bridge writes the small part it needs over `bevy-persistent` directly rather
-  than waiting for it. Wayland never tells an app where its window is, so there it keeps the size
-  and the monitor and not the place.
+  on Bevy 0.17. Built instead on the managed side, which needs no crate: `Config.RememberWindow`
+  keeps a `WindowPlace` in `user://window.json` through `Persistent<T>`, read before the window
+  opens and passed to the bridge as where to open it, and written when `Window.Place`
+  (`bcs_window_place`, ABI 160) says the window has moved, been resized or been maximized. A
+  maximized window keeps the size it goes back to. Wayland never tells an app where its window is,
+  so there it keeps the size and not the place. Not built: the monitor, which matters on Wayland,
+  where it is the one part of the place a compositor takes.
 
 For what C# owns, the same design on the managed side:
 
@@ -144,8 +150,10 @@ For what C# owns, the same design on the managed side:
   saving leaves the last save rather than half of one.
 - **Save games are built on it** as a diff over the scenes they name, which [SCENES.md](SCENES.md)
   sets out with the rest of the scene format.
-- **`EditorSettings` moves onto it,** since it is the same thing with a format of its own, and a
-  game's settings screen and the editor's then store their values the same way.
+- **`EditorSettings` is kept in it,** since it is the same thing with a format of its own, so a
+  game's settings screen and the editor's store their values the same way. Built:
+  `EditorProject` writes the settings to `user://settings.json` as a `Persistent<T>`, and reads a
+  `settings.txt` left in the assets by an older build when there is no such file yet.
 
 ## Order
 

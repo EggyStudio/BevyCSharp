@@ -59,6 +59,10 @@ config.GpuTimings = true;
 // read about in the console and fix, rather than a reason for the editor to close.
 Shaders.KeepRenderingAfterErrors = true;
 
+// Reopens where it was closed, at the size it had, unless a size was asked for, which wins, since a
+// run given one is usually a check that wants the same window every time.
+config.RememberWindow = size is null;
+
 // Answers `bcs` while it runs: what is in the world, what a click does, what the window looks
 // like, without stopping to ask. BCS_SERVE does the same for a run that cannot be given arguments.
 config.Serve = args.Contains("--serve");

@@ -426,6 +426,65 @@ pub extern "C" fn bcs_window_set_maximized(maximized: i32) -> i32 {
     })
 }
 
+/// Writes where the window is, how large, and whether it is maximized.
+///
+/// What a game keeps to reopen where it was closed. The position is Bevy's, which it updates as
+/// the platform reports a move, so on Wayland, which never reports one, `has_position` stays zero.
+/// Bevy does not keep whether a window is maximized, so that is asked of winit, which is reachable
+/// only from the main thread, where a system callback runs.
+///
+/// # Safety
+/// `place` must be writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_window_place(place: *mut crate::interop::BcsWindowPlace) -> i32 {
+    crate::interop::guard(|| {
+        if place.is_null() {
+            return status::NULL_ARG;
+        }
+
+        #[cfg(not(feature = "render"))]
+        {
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::window::WindowPosition;
+
+            with_world(|world| {
+                // Read without `mut`, so asking every frame does not mark the window changed and
+                // send it back through Bevy's window sync for nothing.
+                let mut query = world.query_filtered::<(bevy::ecs::entity::Entity, &Window), With<PrimaryWindow>>();
+                let Ok((entity, window)) = query.single(world) else {
+                    return status::NOT_PRESENT;
+                };
+
+                let (has_position, x, y) = match window.position {
+                    WindowPosition::At(at) => (1, at.x, at.y),
+                    _ => (0, 0, 0),
+                };
+
+                let maximized = bevy::winit::WINIT_WINDOWS.with_borrow(|windows| {
+                    windows.get_window(entity).is_some_and(|window| window.is_maximized())
+                });
+
+                unsafe {
+                    place.write(crate::interop::BcsWindowPlace {
+                        has_position,
+                        x,
+                        y,
+                        width: window.resolution.width() as u32,
+                        height: window.resolution.height() as u32,
+                        maximized: maximized as i32,
+                    })
+                };
+
+                status::OK
+            })
+        }
+    })
+}
+
 /// Hands the window to the platform to be moved by the pointer, from a button that is held now
 /// until it is let go.
 ///

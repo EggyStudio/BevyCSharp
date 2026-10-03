@@ -65,6 +65,15 @@ public unsafe struct NativeConfig
 
     /// <summary>UTF-8 path of the player's directory, registered as Bevy's <c>user</c> asset source.</summary>
     public byte* UserRoot;
+
+    /// <summary>Non-zero to open the window at <see cref="X"/> and <see cref="Y"/>.</summary>
+    public uint HasPosition;
+
+    /// <summary>Where the window's top left corner opens, in physical pixels.</summary>
+    public int X;
+
+    /// <summary>See <see cref="X"/>.</summary>
+    public int Y;
 }
 
 /// <summary>One video mode a monitor can be driven at.</summary>

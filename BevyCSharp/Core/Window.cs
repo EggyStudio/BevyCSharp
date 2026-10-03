@@ -41,6 +41,20 @@ public readonly record struct MonitorInfo(
     float RefreshHz,
     float ScaleFactor);
 
+/// <summary>Where the window is, how large, and whether it is maximized.</summary>
+/// <remarks>
+/// What a game keeps to reopen where it was closed (<see cref="Config.RememberWindow"/>), read
+/// with <see cref="Window.Place"/>. Wayland never tells an app where its window is, so there
+/// <see cref="HasPosition"/> is false and the place is the size alone.
+/// </remarks>
+/// <param name="HasPosition">Whether <see cref="X"/> and <see cref="Y"/> say anything.</param>
+/// <param name="X">The window's left edge, in physical pixels in the desktop's coordinate space.</param>
+/// <param name="Y">Its top edge, the same way.</param>
+/// <param name="Width">Width in logical pixels.</param>
+/// <param name="Height">Height in logical pixels.</param>
+/// <param name="Maximized">Whether it fills the screen less the taskbar.</param>
+public readonly record struct WindowPlace(bool HasPosition, int X, int Y, uint Width, uint Height, bool Maximized);
+
 /// <summary>
 /// One video mode a monitor can be driven at.
 /// </summary>
@@ -266,13 +280,27 @@ public static unsafe class Window
     /// </summary>
     /// <remarks>
     /// Apart from <see cref="WindowMode.BorderlessFullscreen"/>, which covers the taskbar too and is
-    /// a mode rather than a size. The platform remembers the size to go back to. Bevy does not report
-    /// whether a window is maximized, so an app with a button that toggles it keeps that itself.
+    /// a mode rather than a size. The platform remembers the size to go back to, and
+    /// <see cref="Place"/> says whether the window is maximized now.
     /// </remarks>
     /// <param name="maximized">Whether to maximize, or put it back.</param>
     /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
     public static void SetMaximized(bool maximized) =>
         Native.Check(Native.bcs_window_set_maximized(maximized ? 1 : 0), "Window.SetMaximized");
+
+    /// <summary>Where the window is, how large, and whether it is maximized.</summary>
+    /// <remarks>
+    /// The position is the one the platform last reported, so it is missing on Wayland, which
+    /// reports none, and missing everywhere until the window has been moved or placed once.
+    /// Whether the window is maximized is read from the platform, since Bevy keeps no record of it.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
+    public static WindowPlace Place()
+    {
+        NativeWindowPlace place;
+        Native.Check(Native.bcs_window_place(&place), "Window.Place");
+        return new WindowPlace(place.HasPosition != 0, place.X, place.Y, place.Width, place.Height, place.Maximized != 0);
+    }
 
     /// <summary>
     /// Hands the window to the platform to be moved by the pointer, until the button held now is

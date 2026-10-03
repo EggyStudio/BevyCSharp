@@ -246,6 +246,7 @@ public static class EditorShell
         Free = (panelX, window.Y - strip);
 
         // First, so the strip is the first window ImGui makes and stays under everything after it.
+        EditorWindowFrame.Sync();
         EditorWindowFrame.DrawGrip();
 
         EditorPanes.Draw();

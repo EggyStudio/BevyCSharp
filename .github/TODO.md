@@ -207,9 +207,11 @@ code already in the binary.
   tried, since its penumbra is worked out in the depth of a shadow map covering far more than the
   scene. Whether it shows at the scale of Bevy's own example has not been checked here.
 - **One window.** Position, decorations, resizability, always-on-top and exclusive fullscreen are
-  bridged, the monitors are readable by size, name and video mode, and `Window.SetVideoMode` takes
-  the screen over at one of them. What is left is more than one window, since every entry point
-  addresses the primary one.
+  bridged, the monitors are readable by size, name and video mode, `Window.SetVideoMode` takes
+  the screen over at one of them, and `Config.RememberWindow` reopens the window where it was
+  left, at its size and maximized if it was. What is left is more than one window, since every
+  entry point addresses the primary one, and the monitor a window was on, which on Wayland is the
+  one part of its place an app could still be told.
 - **A capture is always eight bits a channel.** `Render.BeginCapture` hands a picture back as
   eight-bit sRGB, clamping a half-float target at white, and `Render.CreateImage` takes bytes in
   that one format. Images of other formats, from floats to block-compressed ones, are made with
@@ -496,6 +498,6 @@ per distribution. The minimal profile still builds with nothing but a C compiler
   `build-native.sh` on each target, to produce a package covering all six runtime identifiers.
 - **No way to ship a game from the editor.** Play runs a project with `dotnet run` and nothing
   builds one for a player. [PLAY.md](PLAY.md) plans the rest: a Build tab over `dotnet publish`,
-  embedded assets, persisted settings and saves, and playing the scene being edited.
+  embedded assets, and playing the scene being edited.
 - **Publishing is manual by choice.** The workflow builds and uploads; the upload to nuget.org is
   done by hand.

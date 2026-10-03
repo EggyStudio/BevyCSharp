@@ -1,5 +1,6 @@
 using System.Numerics;
 using Bevy;
+using Bevy.Interop;
 using ImGuiNET;
 
 namespace BevyCSharp.Editor.Framework;
@@ -48,13 +49,30 @@ public static class EditorWindowFrame
     /// <summary>Whether the frame is the editor's own, which is whether the window was made without one.</summary>
     public static bool Borderless { get; private set; }
 
-    /// <summary>Whether the window was last asked to be maximized.</summary>
+    /// <summary>Whether the window is maximized.</summary>
     /// <remarks>
-    /// Kept here, because Bevy does not say whether a window is maximized, and a button that
-    /// toggles it has to know which way it is going. A window maximized some other way, with a
-    /// key the platform owns, is one this does not hear about, and the next press puts it back.
+    /// Read from the platform each frame (<see cref="Window.Place"/>), so a window maximized with
+    /// a key the platform owns, or by the editor reopening as it was left, squares its corners and
+    /// turns its button the right way as one maximized from the title row does. Set at once when
+    /// the button is pressed, since the platform answers a frame or two later, and a corner that
+    /// waited for it would be seen to lag.
     /// </remarks>
     public static bool Maximized { get; private set; }
+
+    /// <summary>Reads whether the window is maximized, once a frame.</summary>
+    internal static void Sync()
+    {
+        if (!Borderless) return;
+
+        try
+        {
+            Maximized = Window.Place().Maximized;
+        }
+        catch (BevyNativeException)
+        {
+            // Closing between frames. What was read last stays.
+        }
+    }
 
     /// <summary>
     /// How tall the title row across the top of the window is, while the panel floats.

@@ -253,6 +253,13 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                         Some(Window {
                             title: title.clone().unwrap_or_else(|| "BevyCSharp".to_string()),
                             resolution: (config.width, config.height).into(),
+                            // Where it was last closed, when the game asks for that, so it does
+                            // not open where the platform chooses and then jump.
+                            position: if config.has_position != 0 {
+                                bevy::window::WindowPosition::At(bevy::math::IVec2::new(config.x, config.y))
+                            } else {
+                                bevy::window::WindowPosition::Automatic
+                            },
                             present_mode,
                             // Composited with alpha, where asked for, which the platform has to
                             // know before the window exists. Premultiplied, since that is what a
