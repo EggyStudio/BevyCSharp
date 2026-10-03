@@ -17,13 +17,15 @@
 #   build/build-native.sh --editor --meshlet   # any profile plus Bevy's meshlets
 #   build/build-native.sh --editor --solari    # any profile plus Bevy's ray-traced lighting
 #   build/build-native.sh --render --embed dir # one game's bridge, its assets compiled in
+#   build/build-native.sh --render --game      # a bridge for exported games, kept apart
 #   build/build-native.sh --render --portable  # build in a container, for older machines
 #   build/build-native.sh --local              # override a PORTABLE=1 in build-native.local
 #   build/build-native.sh --clean              # remove build/target and build/artifacts first
 #
 # A bridge built with --embed carries one game's asset folder and reads every asset from it, so it
 # is staged under build/embedded/<rid>/ rather than where every project here picks the bridge up,
-# and the editor and the tests keep the ordinary one.
+# and the editor and the tests keep the ordinary one. --game stages under build/game/<rid>/ for the
+# same reason, so an export can ship a render bridge on a machine whose projects use the editor's.
 #
 # On Linux a binary runs only where glibc is at least as new as the one it was built against, so
 # building on a current distribution produces something that will not load on an older one. The
@@ -46,6 +48,7 @@ FEATURES="headless"
 MESHLET=0
 SOLARI=0
 EMBED=""
+GAME=0
 TARGET=""
 CLEAN=0
 PORTABLE=0
@@ -73,12 +76,13 @@ while [[ $# -gt 0 ]]; do
         --meshlet)  MESHLET=1; shift ;;
         --solari)   SOLARI=1; shift ;;
         --embed)    EMBED="${2:-}"; shift 2 || { echo "--embed needs a directory" >&2; exit 2; } ;;
+        --game)     GAME=1; shift ;;
         --target)   TARGET="$2"; shift 2 ;;
         --clean)    CLEAN=1; shift ;;
         --portable) PORTABLE=1; shift ;;
         --local)    PORTABLE=0; shift ;;
         -h|--help)
-            sed -n '2,26p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+            sed -n '2,29p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
             exit 0 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
@@ -273,6 +277,14 @@ if [[ -n "$EMBED" ]]; then
     mkdir -p "$BUILD_DIR/embedded/$RID"
     cp "$BUILT" "$BUILD_DIR/embedded/$RID/$LIBNAME"
     echo "==> staged $BUILD_DIR/embedded/$RID/$LIBNAME, carrying $EMBED"
+    exit 0
+fi
+
+# A bridge for exported games, beside the shared one for the same reason.
+if [[ $GAME -eq 1 ]]; then
+    mkdir -p "$BUILD_DIR/game/$RID"
+    cp "$BUILT" "$BUILD_DIR/game/$RID/$LIBNAME"
+    echo "==> staged $BUILD_DIR/game/$RID/$LIBNAME, for exported games"
     exit 0
 fi
 

@@ -31,6 +31,8 @@ msbuild.log
 /build/package/
 # A bridge built for one game with --embed, which carries that game's assets.
 /build/embedded/
+# A render bridge for exported games, built with --game.
+/build/game/
 # The Slang compiler build/fetch-slang.sh downloads.
 /build/tools/
 

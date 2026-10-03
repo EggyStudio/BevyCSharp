@@ -126,7 +126,11 @@ public static class EditorPlay
     /// <para>
     /// <c>dotnet publish</c> in Release, self-contained, so the player needs no .NET of their own,
     /// into <see cref="ExportFolder"/>. The publish carries the bridge and the assets the project's
-    /// build copies beside it, which in this checkout is the bridge last built here.
+    /// build copies beside it, which in this checkout is the bridge last built here, often the
+    /// editor's. So the bridge a game ships is a render one built for exports
+    /// (<c>build-native.sh --render --game</c>), kept under <c>build/game/&lt;rid&gt;/</c> apart from
+    /// the one the projects here use, built before the publish when the Rust sources are newer
+    /// than it and put over the one the publish copied after.
     /// </para>
     /// <para>
     /// With <paramref name="embed"/>, the project's <c>assets</c> folder is first compiled into a
@@ -169,6 +173,12 @@ public static class EditorPlay
 
             steps.Add(native);
         }
+        else if (Script() is { } script && Triple(rid) is { } triple && !Current(GameBridge(rid)))
+        {
+            steps.Add(script.EndsWith(".ps1", StringComparison.Ordinal)
+                ? new Step("pwsh", ["-NoProfile", "-File", script, "-Render", "-Game", "-Target", triple], $"[play] building a render bridge for {rid}")
+                : new Step("bash", [script, "--render", "--game", "--target", triple], $"[play] building a render bridge for {rid}"));
+        }
 
         steps.Add(new Step(
             "dotnet",
@@ -177,6 +187,7 @@ public static class EditorPlay
             () =>
             {
                 if (embed) Embedded(folder, rid);
+                else Game(folder, rid);
                 Say($"[play] exported {name} to {folder}, {Megabytes(folder)}");
             }));
 
@@ -223,6 +234,43 @@ public static class EditorPlay
         }
 
         Say($"[play] the bridge carries the assets, and {kept} files the game reads itself stay beside it");
+    }
+
+    /// <summary>The render bridge built for exports to <paramref name="rid"/>, or nothing outside a checkout.</summary>
+    private static string? GameBridge(string rid) =>
+        Script() is { } script ? Path.Combine(Path.GetDirectoryName(script)!, "game", rid) : null;
+
+    /// <summary>
+    /// Whether the bridge in a folder is newer than every Rust source, so building it again would
+    /// make the same library.
+    /// </summary>
+    private static bool Current(string? folder)
+    {
+        if (folder is null || !Directory.Exists(folder)) return false;
+        if (Directory.GetFiles(folder).FirstOrDefault() is not { } library) return false;
+
+        var sources = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(Script()!)!)!, "native", "bevy_csharp");
+        if (!Directory.Exists(sources)) return true;
+
+        var newest = Directory.GetFiles(sources, "*.rs", SearchOption.AllDirectories)
+            .Append(Path.Combine(sources, "Cargo.toml"))
+            .Where(File.Exists)
+            .Max(File.GetLastWriteTimeUtc);
+
+        return File.GetLastWriteTimeUtc(library) >= newest;
+    }
+
+    /// <summary>Puts the render bridge built for exports over the one the publish copied, where there is one.</summary>
+    private static void Game(string folder, string rid)
+    {
+        if (GameBridge(rid) is not { } built || !Directory.Exists(built) || Directory.GetFiles(built).FirstOrDefault() is not { } library)
+        {
+            Say($"[play] no render bridge for {rid} was built here, so the export carries the one the project builds with");
+            return;
+        }
+
+        File.Copy(library, Path.Combine(folder, Path.GetFileName(library)), overwrite: true);
+        Say($"[play] the export carries the render bridge from {built}");
     }
 
     /// <summary>Whether a file in the assets is one the managed side reads from disk, which embedding leaves.</summary>

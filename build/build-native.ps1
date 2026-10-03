@@ -31,6 +31,10 @@
     under build/embedded/<rid>/ rather than where the projects here pick the bridge up, since a
     bridge built so serves that one game.
 
+.PARAMETER Game
+    Stage the bridge under build/game/<rid>/ for exported games, rather than where the projects
+    here pick the bridge up.
+
 .PARAMETER Target
     Rust target triple to build for. Defaults to the host.
 
@@ -51,6 +55,7 @@ param(
     [switch] $Meshlet,
     [switch] $Solari,
     [string] $Embed = '',
+    [switch] $Game,
     [string] $Target = '',
     [switch] $Clean
 )
@@ -153,6 +158,15 @@ if ($Embed) {
     New-Item -ItemType Directory -Force -Path $EmbeddedDir | Out-Null
     Copy-Item -Force $Built (Join-Path $EmbeddedDir $LibName)
     Write-Host "==> staged $(Join-Path $EmbeddedDir $LibName), carrying $Embed"
+    return
+}
+
+# A bridge for exported games, beside the shared one for the same reason.
+if ($Game) {
+    $GameDir = Join-Path $BuildDir (Join-Path 'game' $Rid)
+    New-Item -ItemType Directory -Force -Path $GameDir | Out-Null
+    Copy-Item -Force $Built (Join-Path $GameDir $LibName)
+    Write-Host "==> staged $(Join-Path $GameDir $LibName), for exported games"
     return
 }
 

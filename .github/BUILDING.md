@@ -99,6 +99,10 @@ the bridge from. Scenes, data assets and the other files the managed side reads 
 come from the folder on disk, which a game shipped this way carries until those reads go through
 the same bytes ([PLAY.md](PLAY.md) §4).
 
+`--game` (`-Game`) stages a bridge apart in the same way, under `build/game/<rid>/`, which is the
+render bridge the Play tab's export ships when it is not embedding, so a checkout whose projects
+run on the editor's bridge still exports a game without one.
+
 ## Bevy's components after an upgrade
 
 `BevyCSharp/Generated/bevy-components.tsv` describes every component Bevy reflects, and the

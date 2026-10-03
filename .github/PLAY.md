@@ -96,13 +96,16 @@ ticked, the project's assets are first compiled into a bridge of its own (§4), 
 one the publish copied, and the asset folder is cut down to the JSON files and ids the managed side
 reads for itself. `EditorPlay` runs the steps as a chain of processes, each started when the one
 before it ends well, and the tab names the step that failed. The exported sample starts and draws
-as the debug build does. Not built:
+as the debug build does.
 
-- **The bridge's profile.** Without embedding, the publish copies the bridge last built in the
-  checkout, which on a machine that builds the editor is the editor's, carrying the interface and
-  the asset watcher a game does not need. A render bridge per target, staged apart from the
-  editor's as an embedded one is, would fix that.
-- **Whether a target has a bridge,** and trimming, which the library allows and ImGui.NET has not
+Without embedding, the bridge a game ships is a render one built for exports
+(`build-native.sh --render --game`), staged under `build/game/<rid>/` apart from the one the
+projects here copy, which on a machine that builds the editor is the editor's and carries an
+interface and an asset watcher a game does not need. The export builds it first when the Rust
+sources are newer than it, and puts it over the one the publish copied. Not built:
+
+- **Whether a target can be built for** on this machine, said before the export starts rather
+  than by the native build failing, and trimming, which the library allows and ImGui.NET has not
   been checked for.
 - **Settings per target** and offering to run the result.
 
@@ -182,8 +185,7 @@ For what C# owns, the same design on the managed side:
 
 ## Order
 
-1. A render bridge per export target, so a game never ships the editor's.
-2. Scene files, as [SCENES.md](SCENES.md) orders them, which the player loads.
-3. The player and playing the edited scene.
-4. The remote view.
-5. Embedding through a shared bridge, so the managed reads come from the same bytes.
+1. Scene files, as [SCENES.md](SCENES.md) orders them, which the player loads.
+2. The player and playing the edited scene.
+3. The remote view.
+4. Embedding through a shared bridge, so the managed reads come from the same bytes.
