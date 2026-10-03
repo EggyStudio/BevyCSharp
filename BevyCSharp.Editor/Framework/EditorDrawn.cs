@@ -59,7 +59,11 @@ internal static class EditorDrawn
         // the panel is missing something rather than that the entity is not a model. An entity
         // drawn with something made here has no path either, so what decides is whether the
         // engine answered at all rather than what it answered.
-        if (!Render.IsDrawn(entity)) return;
+        if (!Render.IsDrawn(entity))
+        {
+            Parts(ctx, entity);
+            return;
+        }
 
         EditorSurface.Heading("Drawn with", DetailsPanel.Inset);
 
@@ -314,14 +318,53 @@ internal static class EditorDrawn
         return true;
     }
 
+    /// <summary>
+    /// The material of each part of a mesh with several, for an entity that is not drawn itself
+    /// but whose children are, as a glTF node's are.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy spawns a glTF mesh as an entity for the node and a child for each of its primitives,
+    /// each drawn with its own mesh and material and named after them, so a model whose hull and
+    /// glass are one mesh in the modeling tool is two entities here. Selecting the node showed
+    /// nothing drawn, and changing the glass meant finding the right child in the hierarchy. This
+    /// lists the children that are drawn, a material row each under the child's name, as a
+    /// renderer with several materials lists them in Unity.
+    /// </para>
+    /// <para>
+    /// The material differs from part to part, so it is the row. A part's mesh and its card
+    /// are the child's, shown when the child is selected.
+    /// </para>
+    /// </remarks>
+    private static void Parts(BehaviorContext ctx, Entity entity)
+    {
+        var parts = ctx.Ecs.ChildrenOf(entity).Where(Render.IsDrawn).ToArray();
+        if (parts.Length == 0) return;
+
+        EditorSurface.Heading(parts.Length == 1 ? "Drawn with, in its part" : $"Drawn with, in {parts.Length} parts", DetailsPanel.Inset);
+
+        foreach (var part in parts)
+        {
+            var material = Render.MaterialPathOf(part) is { Length: > 0 } loaded
+                ? loaded
+                : MaterialFiles.PathOf(Render.MaterialOf(ctx.Ecs, part)) ?? string.Empty;
+
+            ImGui.PushID((int)part.Index);
+            Row(ctx, part, "Material", material, AssetKind.StandardMaterial, FirstMaterial, ctx.Ecs.NameOf(part) ?? $"Part {part.Index}");
+            ImGui.PopID();
+        }
+    }
+
     /// <summary>One row, showing where it came from and offering somewhere else.</summary>
+    /// <param name="named">What the row is called, where that is not its title, such as a part's name.</param>
     private static void Row(
         BehaviorContext ctx,
         Entity entity,
         string title,
         string path,
         string kind,
-        string label)
+        string label,
+        string? named = null)
     {
         var across = new System.Numerics.Vector2(
             MathF.Max(1f, ImGui.GetContentRegionAvail().X - DetailsPanel.Inset),
@@ -329,14 +372,14 @@ internal static class EditorDrawn
 
         if (!EditorRows.Open($"##drawn{title}", across)) return;
 
-        EditorRows.Line(title);
+        EditorRows.Line(named ?? title);
 
-        // The label is dropped from what is shown, because a person reading a row wants to know
-        // which file it is and the part after the hash is how the file is addressed rather than
-        // what it is called.
+        // A part of a model is shown by the name the model gives it and the file, since the label
+        // after the hash is how the part is addressed rather than what it is called, and two parts
+        // of one file would otherwise read the same.
         var shown = path.Length == 0
             ? "made here"
-            : path.Split('#')[0];
+            : path.Contains('#', StringComparison.Ordinal) ? EditorAssets.NameOf(path) : path;
 
         ImGui.PushID($"##drawn{title}");
 

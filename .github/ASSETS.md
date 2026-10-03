@@ -2,9 +2,9 @@
 
 How the editor shows what an entity is drawn with, how a mesh or a material is picked, what the
 asset browser's tiles show, and where a mesh or material made in place lives. What the bridge reads
-back, the preview renderer, the two cards and the picker (§1, §2, §4), thumbnails (§3), and a
-scene's resources, material and mesh files and Make unique (§5) are built, and the rest of this file is the
-design, in the order it can be built. [COMPONENTS.md](COMPONENTS.md) covers
+back, the preview renderer, the two cards and the picker (§1, §2, §4), the asset browser (§3), and
+a scene's resources, material and mesh files and Make unique (§5) are built, and each section keeps
+the design it was built from. [COMPONENTS.md](COMPONENTS.md) covers
 components in general and [SCENES.md](SCENES.md) how all of it is saved.
 
 ## What exists
@@ -67,8 +67,11 @@ file is written again. The Material card's texture slots are rows too, each pick
 under the asset root and showing its image beside its path. The Mesh card's preview shows the mesh
 lit, in a checker whose red corner shows which way its UVs run, or with a line out of every vertex
 along its normal (`Render.TryReadNormals`, `bcs_render_mesh_normals`, ABI 159), drawn as a mesh of
-lines on the preview's own layer, since gizmos take one set of layers for all of them. Not built:
-sub-meshes. The design, all of it:
+lines on the preview's own layer, since gizmos take one set of layers for all of them. A model's
+mesh with several primitives is spawned by Bevy as a node with a drawn child for each, so a
+selected node that is not drawn itself lists its drawn children under "Drawn with, in 2 parts", a
+material row each under the part's name, which writes that child alone (`EditorDrawn.Parts`). The
+design, all of it:
 
 - **The Mesh card.**
   - **A live preview** of the mesh alone, turned by dragging, with toggles for wireframe, normals
@@ -209,6 +212,4 @@ no file, as `Render.CreateMesh` makes it today. Godot's answer fits both, and is
 
 ## Order
 
-Each step is usable on its own and tested before the next.
-
-1. **Sub-meshes** on the Mesh card, each primitive of a model's mesh with its own material slot.
+Every step of this plan is built.

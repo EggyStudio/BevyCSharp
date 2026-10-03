@@ -227,7 +227,9 @@ came from. The Material card turns a sphere in the material
 and lists its settings as rows, which write the material itself, so the card says how many entities
 share it. Each card offers "Make unique" while something else shares what it shows, and "Save as
 asset" for a mesh or a material made here, which writes a `*.mesh.json` or `*.material.json` named
-after the entity into the folder the browser shows. [ASSETS.md](ASSETS.md) plans a picker that is the asset browser's grid.
+after the entity into the folder the browser shows. Every asset field picks from the asset
+browser's grid, with a picture of everything offered ([ASSETS.md](ASSETS.md)), and a model's node
+lists the material of each of its parts.
 
 ### The asset browser
 
