@@ -70,10 +70,8 @@ sidecar beside it, and a component refers to it through a `DataRef<T>`, which ke
 the file is renamed. It holds strings, lists and dictionaries, lists of structs and classes among
 them, is loaded once and shared, is read again when its file changes while assets are watched,
 and is made and edited in the editor, where a reference folds open into the asset it names with
-how many entities and data assets share it. What [COMPONENTS.md](COMPONENTS.md) §3 has left:
-
-- **A reference inside a list's item** has no fold under it, and is left out of the count of what
-  shares the asset it names.
+how many entities and data assets share it, a reference inside a list's item among them.
+[COMPONENTS.md](COMPONENTS.md) §3 has nothing left.
 
 ### Composing what a glTF file describes
 

@@ -275,12 +275,10 @@ var table = chest.Loot.Value;   // or DataAssets.Get(chest.Loot)
   on disk is dropped from the cache at the top of the next frame and `DataAssetChanged` posted,
   while a write this side made is told apart by its time and passed over (`DataAssets.Watching`).
 
-What is not built:
-
-- **References inside items.** A `DataRef` held in a list's item is picked like any other but has
-  no fold under it, since an item's rows are drawn by `ListRows.Fields` rather than as a field's
-  row, and the count of what shares an asset reads only the fields of an entity's components and
-  of a data asset, so it leaves such a reference out.
+A `DataRef` held in a list's item or a map's value folds open under the item's rows as one held by a
+field does, and counts among what shares the asset, items being searched three levels down
+(`EditorDataAssets.Refers`), so a sword three loot tables list is shared with two others.
+`DataAssets.Files` lists the data files, of a type or all, wherever they are read from.
 
 ## Order
 

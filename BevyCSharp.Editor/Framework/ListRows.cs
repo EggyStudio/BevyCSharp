@@ -179,6 +179,17 @@ internal static class ListRows
             EditorRows.Close();
         }
 
+        // The asset each reference among the item's fields names, folded under the item's rows as
+        // under a component's, so a loot entry's item is read and changed where the entry is.
+        for (var k = 0; k < parts.Length; k++)
+        {
+            if (parts[k].Kind != FieldKind.Data || before[k] is not IDataRef { Id: not 0 } reference) continue;
+
+            ImGui.PushID($"{id}.{parts[k].Name}.asset");
+            EditorDataAssets.Opened(ctx, entity, parts[k], reference.Id);
+            ImGui.PopID();
+        }
+
         for (var k = 0; k < parts.Length; k++)
         {
             if (Equals(before[k], parts[k].Read(ctx.Ecs, entity))) continue;

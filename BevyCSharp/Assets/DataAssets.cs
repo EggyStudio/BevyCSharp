@@ -330,6 +330,32 @@ public static class DataAssets
         }
     }
 
+    /// <summary>
+    /// The data asset files under the asset root, as paths from it, holding one type or any.
+    /// </summary>
+    /// <remarks>
+    /// Read from the folder each time it is asked, since files are added and renamed while a tool
+    /// runs, and knowing a file's type means opening it, so a filtered list costs a read of each
+    /// file. Files compiled into the game's assembly (<see cref="AssetFiles"/>) are listed as well,
+    /// under the paths they had.
+    /// </remarks>
+    /// <param name="type">The full name of the type to keep, or nothing for every data asset.</param>
+    public static IReadOnlyList<string> Files(string? type = null)
+    {
+        var root = AssetIds.Root;
+        var found = new SortedSet<string>(StringComparer.Ordinal);
+
+        if (Directory.Exists(root))
+        {
+            foreach (var file in Directory.EnumerateFiles(root, "*" + Extension, SearchOption.AllDirectories))
+                found.Add(Path.GetRelativePath(root, file).Replace('\\', '/'));
+        }
+
+        foreach (var file in AssetFiles.Embedded(Extension)) found.Add(file);
+
+        return [.. found.Where(file => type is null || TypeOf(file) == type)];
+    }
+
     /// <summary>The full name of the type a data asset file holds, or nothing for a file that holds none.</summary>
     /// <remarks>
     /// A file recording a name its type has since given up answers with the current name, so a

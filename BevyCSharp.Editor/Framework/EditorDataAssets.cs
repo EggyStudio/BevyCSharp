@@ -177,7 +177,7 @@ public static class EditorDataAssets
                 .Select(ComponentSchemas.For)
                 .OfType<ComponentSchema>()
                 .SelectMany(schema => schema.Fields)
-                .Any(field => field.Kind == FieldKind.Data && field.Read(world, entity) is IDataRef reference && reference.Id == id);
+                .Any(field => Refers(world, field, field.Read(world, entity), id));
 
             if (uses) users++;
         }
@@ -210,8 +210,7 @@ public static class EditorDataAssets
             var holder = AssetIds.IdOf(file);
             if (holder == 0 || holder == id || DataAssets.SchemaOf(holder) is not { } schema) continue;
 
-            var refers = schema.Fields.Any(field =>
-                field.Kind == FieldKind.Data && field.Read(world, Entity.None) is IDataRef reference && reference.Id == id);
+            var refers = schema.Fields.Any(field => Refers(world, field, field.Read(world, Entity.None), id));
 
             if (refers) holders++;
         }
@@ -221,6 +220,47 @@ public static class EditorDataAssets
     }
 
     private static readonly Dictionary<ulong, (long At, int Count)> Counted = [];
+
+    /// <summary>
+    /// Whether a field's value refers to a data asset, itself or through the items of a list or
+    /// the values of a map it holds, a few levels down.
+    /// </summary>
+    /// <remarks>
+    /// A loot table's entries are a list of structs, each with a reference to an item, so a sword
+    /// shared by three tables is shared through their items rather than any field of theirs. Items
+    /// nest no deeper than three, as the inspector draws them, which also ends a class whose items
+    /// hold a list of itself.
+    /// </remarks>
+    internal static bool Refers(EcsWorld world, ComponentField field, object? value, ulong id, int depth = 0)
+    {
+        if (depth > 3) return false;
+
+        switch (field.Kind)
+        {
+            case FieldKind.Data:
+                return value is IDataRef { Id: not 0 } reference && reference.Id == id;
+
+            case FieldKind.List when value is ListValue list:
+                return list.Any(item => Within(world, field, item, id, depth));
+
+            case FieldKind.Map when value is MapValue map:
+                return map.Any(entry => Within(world, field, entry.Value, id, depth));
+
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>Whether one item of a list or a map refers to a data asset.</summary>
+    private static bool Within(EcsWorld world, ComponentField field, object? item, ulong id, int depth)
+    {
+        if (item is null) return false;
+        if (item is IDataRef reference) return reference.Id == id;
+        if (field.Items is not { } items) return false;
+
+        var bound = items.Bind(item);
+        return bound.Schema.Fields.Any(part => Refers(world, part, part.Read(world, Entity.None), id, depth + 1));
+    }
 
     /// <summary>A file name beside a data file that nothing is called, for its copy.</summary>
     private static string Unused(string path)
@@ -236,10 +276,7 @@ public static class EditorDataAssets
     }
 
     /// <summary>The data asset files holding a type, or every one when no type is named.</summary>
-    private static IEnumerable<string> Of(string? type) =>
-        EditorAssets.Every([".json"])
-            .Where(file => file.EndsWith(DataAssets.Extension, StringComparison.OrdinalIgnoreCase))
-            .Where(file => type is null || DataAssets.TypeOf(file) == type);
+    private static IEnumerable<string> Of(string? type) => DataAssets.Files(type);
 
     private static string Short(string type) => type[(type.LastIndexOf('.') + 1)..];
 
