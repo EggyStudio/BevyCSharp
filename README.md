@@ -2811,6 +2811,19 @@ simulation's memory and threads are released with the app. F7 in the sample drop
 ground, around the turning cube as a kinematic body, and `./bcs command sample.crates 12` does the
 same on a running sample.
 
+Each body can have a material of its own, how hard it is to slide and how much it bounces, given as
+it is added or changed later:
+
+```csharp
+physics.Add(ball, PhysicsShape.Sphere(0.5f), BodyKind.Dynamic, ballTransform, material: new PhysicsMaterial(Friction: 0.6f, Bounce: 0.8f));
+physics.SetMaterial(floor, new PhysicsMaterial(Friction: 0.05f));   // ice
+```
+
+Two bodies touching slide with the geometric mean of their frictions and bounce as the bouncier
+does. Bepu's contacts are stiff springs that take a bounce's speed out, so a bounce is given back
+after the step, along the surface's normal, to a body that struck it faster than a fifth of a unit
+a second.
+
 Bodies that start or stop touching are reported on the message bus, and a body added as a sensor
 reports what enters it without pushing it, which is a trigger volume:
 

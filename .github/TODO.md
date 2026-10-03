@@ -396,12 +396,12 @@ or projection data, so those stay on reflection.
 beside the interface. `PhysicsWorld` is the whole surface, with bodies by entity
 and no Bepu type in it, so the engine underneath can be replaced without a game changing. It owns
 the simulation, its buffer pool and thread dispatcher, and the callbacks Bepu requires, steps once
-per fixed step, and writes each dynamic body back through `Transform`. What is left:
+per fixed step, and writes each dynamic body back through `Transform`. Each body can have a
+material of its own, friction and a bounce Bepu's stiff contacts do not give, which the world
+gives back after the step. What is left:
 
 - **Not published yet.** The workflow packs the core alone, so the package is reached by project
   reference inside this repository. Packing it is adding it to the pack step.
-- **One material for everything.** Friction and springiness are the same for every pair of bodies.
-  Per-body materials are a table the contact callback reads by the two handles.
 - **No convex hulls.** Boxes, spheres, capsules and cylinders cover characters and props, and a
   mesh shape covers a level, from triangles `Render.TryReadMesh` reads back. A rock or a crate of
   odd shape that has to tumble needs a convex hull, which Bepu builds from points and which shifts

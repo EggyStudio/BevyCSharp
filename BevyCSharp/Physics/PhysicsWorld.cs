@@ -78,6 +78,26 @@ public readonly record struct PhysicsShape
     }
 }
 
+/// <summary>How a body's surface behaves where it touches another.</summary>
+/// <param name="Friction">
+/// How hard it is to slide, from zero for ice upward. Two bodies touching slide against each other
+/// with the geometric mean of their frictions, so ice on rubber is still slippery.
+/// </param>
+/// <param name="Bounce">
+/// How much of its speed into a surface it keeps coming back out, from zero, which lands and stays,
+/// to one, which bounces about as high as it fell. Two bodies touching bounce as the bouncier does.
+/// </param>
+/// <remarks>
+/// Bepu has no restitution coefficient, and its contacts are springs integrated stiffly enough to
+/// stay stable, which takes nearly all of a bounce's speed out at a game's step rate. So a bounce
+/// is given after the step instead. A bouncy body that met a surface moving into it faster than a
+/// fifth of a unit a second leaves it at <paramref name="Bounce"/> times that speed, along the
+/// surface's normal, keeping the speed it has along the surface. Measured against the surface as
+/// though it held still, which is right for a floor or a wall and close for anything slower than
+/// the body.
+/// </remarks>
+public readonly record struct PhysicsMaterial(float Friction = 1f, float Bounce = 0f);
+
 /// <summary>Settings for the simulation as a whole.</summary>
 public sealed class PhysicsSettings
 {
@@ -90,7 +110,7 @@ public sealed class PhysicsSettings
     /// <summary>How much of its spin a body loses a second, from zero to one.</summary>
     public float AngularDamping { get; set; } = 0.03f;
 
-    /// <summary>Friction between any two bodies in contact.</summary>
+    /// <summary>Friction for a body given no material of its own (<see cref="PhysicsMaterial"/>).</summary>
     public float Friction { get; set; } = 1f;
 
     /// <summary>
@@ -216,6 +236,11 @@ public sealed class PhysicsWorld : IDisposable
 
     private int _nextJoint;
 
+    /// <summary>Each bouncy body's velocity before the last step, and what struck something in it.</summary>
+    private Dictionary<Entity, Vector3>? _beforeLast;
+
+    private HashSet<uint> _struckLast = [];
+
     /// <summary>How many steps in a row each touching pair has gone unreported.</summary>
     private readonly Dictionary<(Entity A, Entity B), int> _missing = [];
 
@@ -268,8 +293,12 @@ public sealed class PhysicsWorld : IDisposable
     /// Whether it only reports what it touches, through <see cref="ContactStarted"/> and
     /// <see cref="ContactEnded"/>, and pushes nothing. A trigger volume is a static sensor.
     /// </param>
+    /// <param name="material">
+    /// How its surface slides and bounces, or nothing for the settings' friction and no bounce.
+    /// </param>
     /// <exception cref="InvalidOperationException">The entity already has a body.</exception>
-    public void Add(Entity entity, PhysicsShape shape, BodyKind kind, Transform at, float mass = 1f, bool sensor = false)
+    public void Add(
+        Entity entity, PhysicsShape shape, BodyKind kind, Transform at, float mass = 1f, bool sensor = false, PhysicsMaterial? material = null)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         if (_bodies.ContainsKey(entity))
@@ -308,7 +337,36 @@ public sealed class PhysicsWorld : IDisposable
                 break;
             }
         }
+
+        if (material is { } surface) SetMaterial(entity, surface);
     }
+
+    /// <summary>Changes how a body's surface slides and bounces, from the next step.</summary>
+    /// <remarks>
+    /// Kept in a table the contact callback reads by the two bodies' handles, which Bepu asks on
+    /// worker threads during a step. So it is changed between steps, as everything else here is,
+    /// and never while one runs.
+    /// </remarks>
+    /// <exception cref="KeyNotFoundException">The entity has no body.</exception>
+    public void SetMaterial(Entity entity, PhysicsMaterial material)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (!_bodies.TryGetValue(entity, out var body)) throw new KeyNotFoundException($"{entity} has no body.");
+
+        _contacts.Materials[Packed(body)] = material with
+        {
+            Friction = Math.Max(0f, material.Friction),
+            Bounce = Math.Clamp(material.Bounce, 0f, 1f),
+        };
+    }
+
+    /// <summary>A body's collidable as the contact callback names it.</summary>
+    private static uint Packed(Body body) => body.Kind switch
+    {
+        BodyKind.Static => new CollidableReference(body.Fixed).Packed,
+        BodyKind.Kinematic => new CollidableReference(CollidableMobility.Kinematic, body.Moving).Packed,
+        _ => new CollidableReference(CollidableMobility.Dynamic, body.Moving).Packed,
+    };
 
     /// <summary>
     /// Joins two bodies with a joint, which holds from the next step on.
@@ -393,6 +451,7 @@ public sealed class PhysicsWorld : IDisposable
         }
 
         _bodies.Remove(entity, out var body);
+        _contacts.Materials.Remove(Packed(body));
 
         if (body.Kind == BodyKind.Static)
         {
@@ -522,9 +581,25 @@ public sealed class PhysicsWorld : IDisposable
             foreach (var entity in gone) Remove(entity);
         }
 
+        // How fast each bouncy body was going before the step, which with the step before is the
+        // speed it hit with.
+        Dictionary<Entity, Vector3>? before = null;
+        foreach (var (packed, material) in _contacts.Materials)
+        {
+            if (material.Bounce <= 0f || Entity(packed) is not { } bouncy || !_bodies.TryGetValue(bouncy, out var body)) continue;
+            if (body.Kind != BodyKind.Dynamic) continue;
+
+            (before ??= [])[bouncy] = _simulation.Bodies[body.Moving].Velocity.Linear;
+        }
+
         _contacts.Touching.Clear();
+        _contacts.Struck.Clear();
         _simulation.Timestep(seconds, _threads);
         Report(messages);
+        Bounce(before);
+
+        _beforeLast = before;
+        _struckLast = [.. _contacts.Struck.Keys];
 
         foreach (var (entity, body) in _bodies)
         {
@@ -538,6 +613,39 @@ public sealed class PhysicsWorld : IDisposable
             transform.Translation = FromBepu(reference.Pose.Position);
             transform.Rotation = FromBepu(reference.Pose.Orientation);
             ecs.Set(entity, transform);
+        }
+    }
+
+    /// <summary>
+    /// Gives each bouncy body that struck something this step its speed back out of the surface.
+    /// </summary>
+    /// <remarks>
+    /// A body already resting on the surface struck it at no speed, which is under the threshold,
+    /// so it rests rather than buzzing on the spot.
+    /// </remarks>
+    private void Bounce(Dictionary<Entity, Vector3>? before)
+    {
+        if (before is null) return;
+
+        foreach (var (packed, outward) in _contacts.Struck)
+        {
+            // Once a contact, on the step it began. One that goes on is a body resting or rolling.
+            if (_struckLast.Contains(packed)) continue;
+
+            if (Entity(packed) is not { } entity || !before.TryGetValue(entity, out var hit)) continue;
+            if (!_bodies.TryGetValue(entity, out var body) || !_contacts.Materials.TryGetValue(packed, out var material)) continue;
+
+            // A speculative contact slows a body the step before it touches, closing the gap
+            // exactly, so the speed it hit with may be the one it had a step earlier.
+            var normal = Vector3.Normalize(outward);
+            var into = Vector3.Dot(hit, normal);
+            if (_beforeLast?.TryGetValue(entity, out var earlier) == true) into = MathF.Min(into, Vector3.Dot(earlier, normal));
+            if (into > -0.2f) continue;
+
+            var reference = _simulation.Bodies[body.Moving];
+            var now = reference.Velocity.Linear;
+            reference.Velocity.Linear = now - (Vector3.Dot(now, normal) * normal) - (material.Bounce * into * normal);
+            reference.Awake = true;
         }
     }
 

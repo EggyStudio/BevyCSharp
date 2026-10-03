@@ -330,4 +330,75 @@ public sealed class PhysicsTests
         Assert.False(physics.Remove(entity));
         Assert.Equal(0, physics.Count);
     }
+
+    /// <summary>
+    /// A bouncy ball comes back up off the floor and a dull one stays down, and a box with no
+    /// friction slides far further than one with plenty, each by a material of its own.
+    /// </summary>
+    [Fact]
+    public void EachBodysMaterialDecidesHowItBouncesAndSlides()
+    {
+        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120);
+        harness.App.AddPlugin(new PhysicsPlugin());
+
+        Entity bouncy = default, dull = default, icy = default, rough = default;
+        var landed = new Dictionary<Entity, bool>();
+        var rebound = new Dictionary<Entity, float>();
+        float slid = 0f, stopped = 0f;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var physics = ctx.Res<PhysicsWorld>();
+
+            var floor = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(floor, Transform.At(0f, -0.5f, 0f));
+            physics.Add(floor, PhysicsShape.Box(new Vec3(60f, 1f, 60f)), BodyKind.Static, Transform.At(0f, -0.5f, 0f), material: new PhysicsMaterial(1f));
+
+            Entity Ball(float x, float bounce)
+            {
+                var ball = ctx.Ecs.Spawn();
+                ctx.Ecs.Add(ball, Transform.At(x, 3f, 0f));
+                physics.Add(ball, PhysicsShape.Sphere(0.5f), BodyKind.Dynamic, Transform.At(x, 3f, 0f), material: new PhysicsMaterial(1f, bounce));
+                return ball;
+            }
+
+            Entity Slider(float z, float friction)
+            {
+                var box = ctx.Ecs.Spawn();
+                ctx.Ecs.Add(box, Transform.At(0f, 0.5f, z));
+                physics.Add(box, PhysicsShape.Box(new Vec3(1f)), BodyKind.Dynamic, Transform.At(0f, 0.5f, z), material: new PhysicsMaterial(friction));
+                physics.SetVelocity(box, new Vec3(4f, 0f, 0f));
+                return box;
+            }
+
+            bouncy = Ball(-10f, 0.9f);
+            dull = Ball(-14f, 0f);
+            icy = Slider(10f, 0f);
+            rough = Slider(14f, 1f);
+        });
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            foreach (var ball in new[] { bouncy, dull })
+            {
+                var y = ctx.Ecs.GetOrDefault<Transform>(ball).Translation.Y;
+
+                // Highest point after first reaching the floor.
+                if (y < 0.6f) landed[ball] = true;
+                if (landed.GetValueOrDefault(ball)) rebound[ball] = Math.Max(rebound.GetValueOrDefault(ball), y);
+            }
+
+            slid = ctx.Ecs.GetOrDefault<Transform>(icy).Translation.X;
+            stopped = ctx.Ecs.GetOrDefault<Transform>(rough).Translation.X;
+        });
+
+        harness.Run();
+
+        // Dropped from two and a half units above where it rests, a bounce of 0.9 keeps 0.81 of the
+        // height, back up to a little over two and a half, less what the air's damping takes.
+        Assert.True(rebound[bouncy] > 2.1f, $"the bouncy ball came back up only to {rebound[bouncy]}");
+        Assert.True(rebound[dull] < 0.8f, $"the dull ball bounced to {rebound[dull]}");
+
+        Assert.True(slid > stopped + 3f, $"the icy box slid to {slid} and the rough one to {stopped}");
+    }
 }

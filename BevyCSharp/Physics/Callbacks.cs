@@ -20,6 +20,20 @@ internal sealed class ContactLog
     public readonly HashSet<(uint A, uint B)> Touching = [];
     public readonly HashSet<uint> Sensors = [];
 
+    /// <summary>Each body's own material, by its packed collidable, for the bodies given one.</summary>
+    public readonly Dictionary<uint, Bevy.Physics.PhysicsMaterial> Materials = [];
+
+    /// <summary>
+    /// For each bouncy collidable touching something this step, which way the surface it touched
+    /// faces, out toward it.
+    /// </summary>
+    public readonly Dictionary<uint, Vector3> Struck = [];
+
+    public void Strike(CollidableReference body, Vector3 outward)
+    {
+        lock (Struck) Struck[body.Packed] = outward;
+    }
+
     public void Add(CollidableReference a, CollidableReference b)
     {
         // In one order, so a pair is the same pair whichever way Bepu names it.
@@ -29,12 +43,12 @@ internal sealed class ContactLog
 }
 
 /// <summary>
-/// How any two bodies touching behave: one friction and one springiness for every pair.
+/// How two bodies touching behave, from each one's material or the settings' friction.
 /// </summary>
 /// <remarks>
 /// Bepu asks this for every pair its broad phase finds and every contact it generates, so it is a
-/// struct with nothing in it that allocates. Per-body materials would be a table read here, keyed
-/// by the two handles, which is where they go when they are wanted.
+/// struct with nothing in it that allocates, and the materials are a table read by the two
+/// handles, which is only written between steps.
 /// </remarks>
 internal struct ContactCallbacks : INarrowPhaseCallbacks
 {
@@ -52,6 +66,7 @@ internal struct ContactCallbacks : INarrowPhaseCallbacks
         // Two things that cannot move have nothing to say to each other.
         a.Mobility == CollidableMobility.Dynamic || b.Mobility == CollidableMobility.Dynamic;
 
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly bool AllowContactGeneration(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB) => true;
 
@@ -59,7 +74,10 @@ internal struct ContactCallbacks : INarrowPhaseCallbacks
     public readonly bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold, out PairMaterialProperties material)
         where TManifold : unmanaged, IContactManifold<TManifold>
     {
-        material.FrictionCoefficient = Friction;
+        var first = Log.Materials.TryGetValue(pair.A.Packed, out var a) ? a : new Bevy.Physics.PhysicsMaterial(Friction);
+        var second = Log.Materials.TryGetValue(pair.B.Packed, out var b) ? b : new Bevy.Physics.PhysicsMaterial(Friction);
+
+        material.FrictionCoefficient = MathF.Sqrt(first.Friction * second.Friction);
         material.MaximumRecoveryVelocity = MaxRecoveryVelocity;
         material.SpringSettings = Spring;
 
@@ -70,6 +88,13 @@ internal struct ContactCallbacks : INarrowPhaseCallbacks
             if (manifold.GetDepth(i) < -0.01f) continue;
 
             Log.Add(pair.A, pair.B);
+
+            // Which way the surface faces, for the bounce the world gives a bouncy body after the
+            // step. Bepu's normal points from the second collidable to the first, so out of the
+            // second's surface toward the first.
+            var normal = manifold.GetNormal(i);
+            if (first.Bounce > 0f && pair.A.Mobility == CollidableMobility.Dynamic) Log.Strike(pair.A, normal);
+            if (second.Bounce > 0f && pair.B.Mobility == CollidableMobility.Dynamic) Log.Strike(pair.B, -normal);
             break;
         }
 
