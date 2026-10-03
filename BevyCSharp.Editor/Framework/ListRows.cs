@@ -119,7 +119,9 @@ internal static class ListRows
 
             if (open)
             {
-                if (bound is not null) Fields(ctx, entity, field, list, i, bound);
+                var at = i;
+                if (bound is not null)
+                    Fields(ctx, entity, bound, $"##{i}", item => field.Write(ctx.Ecs, entity, list.With(at, item)));
                 ImGui.TreePop();
             }
 
@@ -145,19 +147,19 @@ internal static class ListRows
     }
 
     /// <summary>
-    /// One item's fields as rows, written back into the list as a whole when any of them changed.
+    /// One item's fields as rows, handed back as a whole when any of them changed.
     /// </summary>
     /// <remarks>
-    /// The rows edit a copy of the item, which is put in the list in place of the old one, so the
-    /// row around the list records the change as one step, as it records every list edit.
+    /// The rows edit a copy of the item, which <paramref name="changed"/> puts in the list or the
+    /// map in place of the old one, so the row around it records the change as one step, as it
+    /// records every edit of a list or a map.
     /// </remarks>
-    private static void Fields(
+    internal static void Fields(
         BehaviorContext ctx,
         Entity entity,
-        ComponentField field,
-        ListValue list,
-        int index,
-        ItemFields.Bound bound)
+        ItemFields.Bound bound,
+        string id,
+        Action<object> changed)
     {
         var parts = bound.Schema.Fields.Where(part => !part.Hints.Hidden).ToArray();
         var before = parts.Select(part => part.Read(ctx.Ecs, entity)).ToArray();
@@ -171,7 +173,7 @@ internal static class ListRows
             {
                 var part = parts[k];
                 EditorRows.Line(part.Title, part.Hints.Tooltip, unit: part.Hints.Unit);
-                ComponentFields.Item(ctx, entity, part, $"##{index}.{part.Name}", before[k]);
+                ComponentFields.Item(ctx, entity, part, $"{id}.{part.Name}", before[k]);
             }
 
             EditorRows.Close();
@@ -181,7 +183,7 @@ internal static class ListRows
         {
             if (Equals(before[k], parts[k].Read(ctx.Ecs, entity))) continue;
 
-            field.Write(ctx.Ecs, entity, list.With(index, bound.Value()));
+            changed(bound.Value());
             return;
         }
     }

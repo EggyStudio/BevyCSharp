@@ -41,10 +41,39 @@ internal static class MapRows
 
         ImGui.PushID(id);
 
+        // A value with fields of its own takes rows of its own, under its key, since it has no one
+        // widget to sit beside the key in.
+        var fields = field.ElementKind == FieldKind.Struct ? field.Items : null;
+
         for (var i = 0; i < map.Count; i++)
         {
             ImGui.PushID(i);
             var (key, held) = Entry(field, i);
+
+            if (fields is not null)
+            {
+                ImGui.SetNextItemWidth(MathF.Max(1f, room - size - gap));
+                ComponentFields.Item(ctx, entity, key, $"{id}[{i}].key", map[i].Key);
+
+                ImGui.SameLine(0f, gap);
+                if (ListRows.Button("##remove", EditorIcons.Remove, size))
+                {
+                    field.Write(ctx.Ecs, entity, map.Without(i));
+                    ImGui.PopID();
+                    break;
+                }
+
+                if (map[i].Value is { } entryValue)
+                {
+                    var at = i;
+                    ImGui.Indent();
+                    ListRows.Fields(ctx, entity, fields.Bind(entryValue), $"{id}[{i}]", item => field.Write(ctx.Ecs, entity, map.With(at, item)));
+                    ImGui.Unindent();
+                }
+
+                ImGui.PopID();
+                continue;
+            }
 
             ImGui.SetNextItemWidth(keyWidth);
             ComponentFields.Item(ctx, entity, key, $"{id}[{i}].key", map[i].Key);
@@ -65,7 +94,7 @@ internal static class MapRows
             field.Write(
                 ctx.Ecs,
                 entity,
-                map.Adding(Unused(field, map), ListRows.Blank(field.ElementKind, field.Options)));
+                map.Adding(Unused(field, map), fields?.Create() ?? ListRows.Blank(field.ElementKind, field.Options)));
         }
 
         ImGui.PopID();

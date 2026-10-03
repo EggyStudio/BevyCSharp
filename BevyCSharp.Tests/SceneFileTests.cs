@@ -272,6 +272,60 @@ public sealed class SceneFileTests : IDisposable
         Assert.True(ran);
     }
 
+    [Fact]
+    public void AMeshBuiltVertexByVertexIsWrittenAsItsGeometry()
+    {
+        var file = Path.Combine(_root, "built.scene.json");
+        var ran = false;
+
+        var quad = new MeshData
+        {
+            Positions = [new Vec3(0f, 0f, 0f), new Vec3(1f, 0f, 0f), new Vec3(1f, 1f, 0f), new Vec3(0f, 1f, 0f)],
+            Uvs = [0f, 0f, 1f, 0f, 1f, 1f, 0f, 1f],
+            Colors = [1f, 0f, 0f, 1f, 0f, 1f, 0f, 1f, 0f, 0f, 1f, 1f, 1f, 1f, 1f, 1f],
+            Indices = [0, 1, 2, 0, 2, 3],
+        };
+
+        using (var saving = new EngineHarness(frames: 2))
+        {
+            saving.OnContext(Stage.Startup, ctx =>
+            {
+                if (!App.HasRenderer) return;
+
+                var tile = ctx.Ecs.Spawn();
+                ctx.Ecs.SetName(tile, "Tile");
+                ctx.Ecs.Add(tile, Transform.Identity);
+                Render.SetMesh(ctx.Ecs, tile, Render.CreateMesh(quad));
+
+                SceneFile.Save(ctx.Ecs, file);
+            });
+
+            saving.Run();
+        }
+
+        if (!App.HasRenderer) return;
+        var written = File.ReadAllText(file);
+        Assert.True(written.Contains("\"geometry\"", StringComparison.Ordinal), written);
+
+        using var loading = new EngineHarness(frames: 2);
+
+        loading.OnContext(Stage.Startup, ctx =>
+        {
+            var tile = Assert.Single(SceneFile.Load(ctx.Ecs, file).Entities);
+            var built = Render.DataOf(Render.MeshOf(ctx.Ecs, tile));
+
+            Assert.NotNull(built);
+            Assert.Equal(quad.Positions, built.Positions);
+            Assert.Equal(quad.Uvs, built.Uvs);
+            Assert.Equal(quad.Colors, built.Colors);
+            Assert.Equal(quad.Indices, built.Indices);
+            ran = true;
+        });
+
+        loading.Run();
+        Assert.True(ran);
+    }
+
     /// <summary>Each entity's id in a scene file, by its name.</summary>
     private static Dictionary<string, int> Ids(string file)
     {

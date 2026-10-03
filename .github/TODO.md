@@ -52,8 +52,6 @@ reads its old files, and what a build cannot read is kept and written back. Ever
 refers to is named by an id that survives a rename in the asset browser. The editor's document is `assets/world.scene.json`, opened at start and written by
 Project/Save. What [SCENES.md](SCENES.md) has left:
 
-- **A mesh built vertex by vertex** is not written to a scene, since it has neither a file nor a
-  recipe. A primitive and a standard material made in memory are written as how to make them again.
 - **A model dropped on the viewport lands on the ground, not on what is under the pointer.**
   `SceneInstances` places a glTF scene or another scene file with overrides a scene file keeps,
   one inside another, with children added under its nodes and renames kept, and the editor
@@ -74,8 +72,8 @@ the file is renamed. It holds strings, lists and dictionaries, lists of structs 
 them, is loaded once and shared, is read again when its file changes while assets are watched,
 and is made and edited in the editor. What [COMPONENTS.md](COMPONENTS.md) §3 has left:
 
-- **A map's struct values** are written and read but have no editor, and a reference held by a
-  data asset has no fold showing the asset it names, as a component's reference has.
+- **A reference held by a data asset** has no fold showing the asset it names, as a component's
+  reference has, and the count of what shares an asset leaves out other data assets.
 
 ### Composing what a glTF file describes
 
@@ -248,14 +246,14 @@ drawn sliced, tiled or fitted inside its size the way a video player letterboxes
 
 ## Interface
 
-### Meshes and materials are picked from a list of files
+### A model file is one tile
 
-The details show an entity's mesh and material as two dropdowns of model files, with no preview
-and none of Bevy's primitives to choose. The library reads what a mesh holds, how a primitive was
-made and a material's settings (`Render.TryGetMeshInfo`, `RecipeOf`, `TryReadMaterial`), and a
-scene keeps the ones made in place, but the editor shows none of it yet. The asset browser shows an
-icon for everything but an image. [ASSETS.md](ASSETS.md) plans Mesh and Material cards with live
-previews, a picker that is the asset browser's grid, and rendered tiles.
+The details pick an entity's mesh and material from Bevy's primitives, what the scene already
+uses and model files, each with a card under it: the mesh turned in a preview with what it is made
+of, and the material on a sphere with its settings as rows that write it in place. The asset
+browser draws a thumbnail of each model, with search and a chip per kind. A glTF file does not open
+into its meshes and materials, and the picker is a list rather than the browser's grid.
+[ASSETS.md](ASSETS.md) plans both, and a primitive's measures edited on its card.
 
 ### Layout and text
 
@@ -310,23 +308,16 @@ programs, the images the scene camera's shaders keep, the settings and the style
 drag on a handle moves, turns or stretches what is selected. [EDITOR.md](EDITOR.md) has the design
 language.
 
-- **A mesh built vertex by vertex is not saved.** The editor saves a scene file holding every
-  entity, named or not, its components, Bevy's own included, and its mesh and material, by file or
-  as how to make a primitive or a standard material again. A mesh built from vertices has neither.
-- **One preview, not a thumbnail each.** An image tile shows itself, and a selected model is drawn
-  by a camera of its own into a render target beside the tiles, framed by its bounds and kept on a
-  render layer nothing else is on. One scene rather than one per tile, because a camera drawing into
-  an image costs a pass a frame and forty tiles would cost forty. A thumbnail on every tile needs a
-  pass that draws once and is kept, which nothing here does.
-- **A material has no preview.** The pieces are the same ones the model preview uses, and what is
-  missing is a material to point at. The editor can name the material an entity is drawn with but
-  not hand it to a second mesh, because a handle read back from an entity is a path rather than a
-  handle.
+- **A primitive's measures cannot be changed after it is made.** The editor saves a scene file
+  holding every entity, its components and its mesh and material, by file or, made in memory, as a
+  primitive's recipe, a mesh's geometry or a material's settings, and either can be saved as a file
+  of its own (`*.mesh.json`, `*.material.json`). The Mesh card shows a primitive's measures without
+  offering to edit them.
 - **A mesh and a material are shown by where they came from.** They are Bevy components holding
-  typed handles, which have no JSON form, so the panel leaves their reflected schemas out and draws
-  them as their own section, reading the asset path and offering the files that suit. What it cannot do is name a part of a file other
-  than the first, since a glTF holds many meshes and nothing here can list them without loading it,
-  so the picker takes `Mesh0/Primitive0` and a file with several needs the label written by hand.
+  typed handles, so the panel draws them as their own section with a card each, and a picker of
+  shapes, what the scene uses and files. What it cannot do is name a part of a model file other
+  than the first, since a glTF holds many meshes and nothing here lists them without loading it, so
+  the picker takes `Mesh0/Primitive0` and a file with several needs the label written by hand.
 - **The hierarchy names what it can see and the stats panel counts it.** Both go through
   `EditorKinds`, so a camera in the tree and a camera in the count are one question asked once.
   Neither can see a component the bridge does not name, so an entity whose components are all

@@ -48,45 +48,8 @@ pub unsafe extern "C" fn bcs_mesh_create(
             };
 
             with_world(|world| {
-                let mesh: Mesh = match kind.as_str() {
-                    "Cuboid" => Cuboid::new(a, b, c).mesh().into(),
-                    "Sphere" => Sphere::new(a).mesh().into(),
-                    "Plane" => Plane3d::default()
-                        .mesh()
-                        .size(a, b)
-                        .into(),
-                    "Capsule" => Capsule3d::new(a, b).mesh().into(),
-                    "Cylinder" => Cylinder::new(a, b).mesh().into(),
-                    "Cone" => Cone::new(a, b).mesh().into(),
-                    "ConicalFrustum" => ConicalFrustum {
-                        radius_top: a,
-                        radius_bottom: b,
-                        height: c,
-                    }
-                    .mesh()
-                    .into(),
-                    "Torus" => Torus::new(a, b).mesh().into(),
-                    "Circle" => Circle::new(a).mesh().into(),
-                    "Annulus" => Annulus::new(a, b).mesh().into(),
-                    "Rectangle" => Rectangle::new(a, b).mesh().into(),
-                    // The two shapes made of points rather than measures are the default ones, a
-                    // unit across, scaled by the first number.
-                    "Triangle" => {
-                        let [first, second, third] = Triangle3d::default().vertices;
-                        Triangle3d::new(first * a, second * a, third * a).mesh().into()
-                    }
-                    "Tetrahedron" => {
-                        let unit = Tetrahedron::default();
-                        Tetrahedron::new(
-                            unit.vertices[0] * a,
-                            unit.vertices[1] * a,
-                            unit.vertices[2] * a,
-                            unit.vertices[3] * a,
-                        )
-                        .mesh()
-                        .into()
-                    }
-                    _ => return status::NO_COMPONENT,
+                let Some(mesh) = primitive(&kind, a, b, c) else {
+                    return status::NO_COMPONENT;
                 };
 
                 let Some(mut meshes) = world.get_resource_mut::<Assets<Mesh>>() else {
@@ -95,6 +58,117 @@ pub unsafe extern "C" fn bcs_mesh_create(
                 let handle = meshes.add(mesh).untyped();
 
                 crate::assets::insert_handle(world, handle)
+            })
+        }
+    })
+}
+
+/// One of Bevy's primitives as a mesh, by its name and up to three measures, or nothing for a name
+/// that is none of them.
+#[cfg(feature = "render")]
+fn primitive(kind: &str, a: f32, b: f32, c: f32) -> Option<bevy::mesh::Mesh> {
+    use bevy::math::primitives::{
+        Annulus, Capsule3d, Circle, Cone, ConicalFrustum, Cuboid, Cylinder, Plane3d, Rectangle,
+        Sphere, Tetrahedron, Torus, Triangle3d,
+    };
+    use bevy::mesh::{Mesh, Meshable};
+
+    let mesh: Mesh = match kind {
+        "Cuboid" => Cuboid::new(a, b, c).mesh().into(),
+        "Sphere" => Sphere::new(a).mesh().into(),
+        "Plane" => Plane3d::default()
+            .mesh()
+            .size(a, b)
+            .into(),
+        "Capsule" => Capsule3d::new(a, b).mesh().into(),
+        "Cylinder" => Cylinder::new(a, b).mesh().into(),
+        "Cone" => Cone::new(a, b).mesh().into(),
+        "ConicalFrustum" => ConicalFrustum {
+            radius_top: a,
+            radius_bottom: b,
+            height: c,
+        }
+        .mesh()
+        .into(),
+        "Torus" => Torus::new(a, b).mesh().into(),
+        "Circle" => Circle::new(a).mesh().into(),
+        "Annulus" => Annulus::new(a, b).mesh().into(),
+        "Rectangle" => Rectangle::new(a, b).mesh().into(),
+        // The two shapes made of points rather than measures are the default ones, a
+        // unit across, scaled by the first number.
+        "Triangle" => {
+            let [first, second, third] = Triangle3d::default().vertices;
+            Triangle3d::new(first * a, second * a, third * a).mesh().into()
+        }
+        "Tetrahedron" => {
+            let unit = Tetrahedron::default();
+            Tetrahedron::new(
+                unit.vertices[0] * a,
+                unit.vertices[1] * a,
+                unit.vertices[2] * a,
+                unit.vertices[3] * a,
+            )
+            .mesh()
+            .into()
+        }
+        _ => return None,
+    };
+
+    Some(mesh)
+}
+
+/// Builds a primitive again with new measures in place of the mesh a handle names, so everything
+/// drawn with it changes without being pointed at a new one.
+///
+/// Reports [`status::NO_COMPONENT`] for a shape that is not one of Bevy's primitives, and
+/// [`status::INVALID_STATE`] for a handle to something other than a mesh.
+///
+/// # Safety
+/// `kind` must be a NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_mesh_rebuild(
+    handle: i32,
+    kind: *const core::ffi::c_char,
+    a: f32,
+    b: f32,
+    c: f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (handle, kind, a, b, c);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::asset::Assets;
+            use bevy::mesh::Mesh;
+
+            let Some(kind) = (unsafe { crate::interop::cstr_to_string(kind) }) else {
+                return status::NULL_ARG;
+            };
+
+            with_world(|world| {
+                let Some(handle) = crate::assets::clone_handle(world, handle) else {
+                    return status::NOT_PRESENT;
+                };
+                let Ok(handle) = handle.try_typed::<Mesh>() else {
+                    return status::INVALID_STATE;
+                };
+                let Some(mesh) = primitive(&kind, a, b, c) else {
+                    return status::NO_COMPONENT;
+                };
+
+                let Some(mut meshes) = world.get_resource_mut::<Assets<Mesh>>() else {
+                    return status::UNSUPPORTED;
+                };
+                // Written through the guard, which is what marks the mesh changed for the renderer.
+                let Some(mut held) = meshes.get_mut(&handle) else {
+                    return status::NOT_PRESENT;
+                };
+                *held = mesh;
+                status::OK
             })
         }
     })
@@ -553,10 +627,7 @@ pub unsafe extern "C" fn bcs_material_create(config: *const BcsMaterialConfig) -
 
         #[cfg(feature = "render")]
         {
-            use bevy::asset::{Assets, Handle};
-            use bevy::color::{Color, LinearRgba};
-            use bevy::image::Image;
-            use bevy::material::AlphaMode;
+            use bevy::asset::Assets;
             use bevy::pbr::StandardMaterial;
 
             if config.is_null() {
@@ -565,79 +636,9 @@ pub unsafe extern "C" fn bcs_material_create(config: *const BcsMaterialConfig) -
             let config = unsafe { *config };
 
             with_world(|world| {
-                // Resolved before the material is built, because each one needs the world and
-                // building it needs the world back to insert the result.
-                let mut textures: [Option<Handle<Image>>; 5] = Default::default();
-                let keys = [
-                    config.base_color_texture,
-                    config.normal_map,
-                    config.metallic_roughness_texture,
-                    config.emissive_texture,
-                    config.occlusion_texture,
-                ];
-
-                for (slot, key) in keys.iter().enumerate() {
-                    match image_handle(world, *key) {
-                        Ok(handle) => textures[slot] = handle,
-                        Err(status) => return status,
-                    }
-                }
-
-                let [
-                    base_color_texture,
-                    normal_map_texture,
-                    metallic_roughness_texture,
-                    emissive_texture,
-                    occlusion_texture,
-                ] = textures;
-
-                let alpha_mode = match config.alpha_mode {
-                    1 => AlphaMode::Mask(config.alpha_cutoff),
-                    2 => AlphaMode::Blend,
-                    3 => AlphaMode::Add,
-                    4 => AlphaMode::Multiply,
-                    5 => AlphaMode::Premultiplied,
-                    _ => AlphaMode::Opaque,
-                };
-
-                let material = StandardMaterial {
-                    base_color: Color::linear_rgba(
-                        config.base_color[0],
-                        config.base_color[1],
-                        config.base_color[2],
-                        config.base_color[3],
-                    ),
-                    metallic: config.metallic,
-                    perceptual_roughness: config.roughness,
-                    emissive: LinearRgba::new(
-                        config.emissive[0],
-                        config.emissive[1],
-                        config.emissive[2],
-                        config.emissive[3],
-                    ),
-                    alpha_mode,
-                    double_sided: config.double_sided != 0,
-                    // A double-sided material still culls unless the back faces are kept, which
-                    // is a separate field and the one people actually mean.
-                    cull_mode: if config.double_sided != 0 {
-                        None
-                    } else {
-                        Some(bevy::render::render_resource::Face::Back)
-                    },
-                    unlit: config.unlit != 0,
-                    // Scale first, then rotate, then shift, which is the order that makes a
-                    // scale of eight mean "eight tiles" whatever the other two are set to.
-                    uv_transform: bevy::math::Affine2::from_scale_angle_translation(
-                        bevy::math::Vec2::new(config.uv_scale[0], config.uv_scale[1]),
-                        config.uv_rotation,
-                        bevy::math::Vec2::new(config.uv_offset[0], config.uv_offset[1]),
-                    ),
-                    base_color_texture,
-                    normal_map_texture,
-                    metallic_roughness_texture,
-                    emissive_texture,
-                    occlusion_texture,
-                    ..Default::default()
+                let material = match standard_material(world, &config) {
+                    Ok(material) => material,
+                    Err(status) => return status,
                 };
 
                 let Some(mut materials) = world.get_resource_mut::<Assets<StandardMaterial>>()
@@ -647,6 +648,151 @@ pub unsafe extern "C" fn bcs_material_create(config: *const BcsMaterialConfig) -
                 let handle = materials.add(material).untyped();
 
                 crate::assets::insert_handle(world, handle)
+            })
+        }
+    })
+}
+
+/// A standard material built from the settings a material is made with, its textures resolved
+/// from the keys the program holds, or the status a key that names no image gives.
+#[cfg(feature = "render")]
+fn standard_material(
+    world: &mut bevy::ecs::world::World,
+    config: &BcsMaterialConfig,
+) -> Result<bevy::pbr::StandardMaterial, i32> {
+    use bevy::asset::Handle;
+    use bevy::color::{Color, LinearRgba};
+    use bevy::image::Image;
+    use bevy::material::AlphaMode;
+    use bevy::pbr::StandardMaterial;
+
+    // Resolved before the material is built, because each one needs the world and
+    // building it needs the world back to insert the result.
+    let mut textures: [Option<Handle<Image>>; 5] = Default::default();
+    let keys = [
+        config.base_color_texture,
+        config.normal_map,
+        config.metallic_roughness_texture,
+        config.emissive_texture,
+        config.occlusion_texture,
+    ];
+
+    for (slot, key) in keys.iter().enumerate() {
+        match image_handle(world, *key) {
+            Ok(handle) => textures[slot] = handle,
+            Err(status) => return Err(status),
+        }
+    }
+
+    let [
+        base_color_texture,
+        normal_map_texture,
+        metallic_roughness_texture,
+        emissive_texture,
+        occlusion_texture,
+    ] = textures;
+
+    let alpha_mode = match config.alpha_mode {
+        1 => AlphaMode::Mask(config.alpha_cutoff),
+        2 => AlphaMode::Blend,
+        3 => AlphaMode::Add,
+        4 => AlphaMode::Multiply,
+        5 => AlphaMode::Premultiplied,
+        _ => AlphaMode::Opaque,
+    };
+
+    let material = StandardMaterial {
+        base_color: Color::linear_rgba(
+            config.base_color[0],
+            config.base_color[1],
+            config.base_color[2],
+            config.base_color[3],
+        ),
+        metallic: config.metallic,
+        perceptual_roughness: config.roughness,
+        emissive: LinearRgba::new(
+            config.emissive[0],
+            config.emissive[1],
+            config.emissive[2],
+            config.emissive[3],
+        ),
+        alpha_mode,
+        double_sided: config.double_sided != 0,
+        // A double-sided material still culls unless the back faces are kept, which
+        // is a separate field and the one people actually mean.
+        cull_mode: if config.double_sided != 0 {
+            None
+        } else {
+            Some(bevy::render::render_resource::Face::Back)
+        },
+        unlit: config.unlit != 0,
+        // Scale first, then rotate, then shift, which is the order that makes a
+        // scale of eight mean "eight tiles" whatever the other two are set to.
+        uv_transform: bevy::math::Affine2::from_scale_angle_translation(
+            bevy::math::Vec2::new(config.uv_scale[0], config.uv_scale[1]),
+            config.uv_rotation,
+            bevy::math::Vec2::new(config.uv_offset[0], config.uv_offset[1]),
+        ),
+        base_color_texture,
+        normal_map_texture,
+        metallic_roughness_texture,
+        emissive_texture,
+        occlusion_texture,
+        ..Default::default()
+    };
+
+    Ok(material)
+}
+
+/// Writes settings over an existing standard material, so everything drawn with it changes.
+///
+/// The settings [`bcs_material_create`] takes, laid over the asset in place rather than made into
+/// a new one, which is how a tool edits a material that a scene or a file already shares. Reports
+/// [`status::INVALID_STATE`] for a handle to something other than a standard material.
+///
+/// # Safety
+/// `config` must point at one readable [`BcsMaterialConfig`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_material_write(handle: i32, config: *const BcsMaterialConfig) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (handle, config);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::asset::Assets;
+            use bevy::pbr::StandardMaterial;
+
+            if config.is_null() {
+                return status::NULL_ARG;
+            }
+            let config = unsafe { *config };
+
+            with_world(|world| {
+                let Some(handle) = crate::assets::clone_handle(world, handle) else {
+                    return status::NOT_PRESENT;
+                };
+                let Ok(handle) = handle.try_typed::<StandardMaterial>() else {
+                    return status::INVALID_STATE;
+                };
+                let material = match standard_material(world, &config) {
+                    Ok(material) => material,
+                    Err(status) => return status,
+                };
+
+                let Some(mut materials) = world.get_resource_mut::<Assets<StandardMaterial>>() else {
+                    return status::UNSUPPORTED;
+                };
+                // Written through the asset's guard, since a write through it marks the asset
+                // changed for the renderer, and a guard taken and dropped without one marks nothing.
+                let Some(mut held) = materials.get_mut(&handle) else {
+                    return status::NOT_PRESENT;
+                };
+                *held = material;
+                status::OK
             })
         }
     })
@@ -1197,6 +1343,18 @@ mod tests {
                 assert!(close(made[0], read[0]) && close(made[1], read[1]));
             }
             assert!((made.uv_rotation - read.uv_rotation).abs() < 1e-5);
+
+            // Written over in place, so the same key reads back the new settings.
+            let mut changed = made;
+            changed.base_color = [1.0, 0.0, 0.0, 1.0];
+            changed.roughness = 0.9;
+            assert_eq!(status::OK, unsafe { bcs_render_material_write(key, &changed) });
+            assert_eq!(status::OK, unsafe { bcs_render_material_read(key, &mut read) });
+            assert_eq!([1.0, 0.0, 0.0, 1.0], read.base_color);
+            assert_eq!(0.9, read.roughness);
+
+            // Something other than a material is refused rather than overwritten.
+            assert_eq!(status::NOT_PRESENT, unsafe { bcs_render_material_write(9999, &changed) });
         });
     }
 }

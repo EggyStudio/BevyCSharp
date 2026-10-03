@@ -163,8 +163,11 @@ public sealed unsafe class App : IDisposable
         // A data file changed on disk is read again when assets are, and not in a shipped game.
         DataAssets.Watching = Config.WatchAssets;
 
-        // Sounds and buses belong to the app that played them.
+        // Sounds and buses belong to the app that played them, and meshes to the app that made them.
         Audio.ResetMixer();
+        Render.ForgetMade();
+        MaterialFiles.Forget();
+        MeshFiles.Forget();
 
         World.InsertResource(Config);
         World.InsertResource(new Time());
@@ -221,6 +224,7 @@ public sealed unsafe class App : IDisposable
             PostIme(world.Resource<MessageBus>());
             PostAssetFailures(world.Resource<MessageBus>());
             DataAssets.PostChanges(world.Resource<MessageBus>());
+            MaterialFiles.ReloadTouched();
 
             // After the scenes Bevy spawned last frame are in the world, so an instance's overrides
             // find their nodes, and before anything reads that the instance is ready.

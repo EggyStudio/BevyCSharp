@@ -218,11 +218,22 @@ out again against the new parent (`EditorHierarchy.Reparent`), and the move is o
 
 ### What an entity is drawn with
 
-The details show an entity's mesh and material under its components, each as a dropdown of the
-model files under the asset root, or "made here" for one built in code.
-[ASSETS.md](ASSETS.md) plans what replaces them: a Mesh card and a Material card with a live
-preview and what the mesh is made of, a picker that is the asset browser's grid, and tiles that
-show the asset rather than its kind.
+The details show an entity's mesh and material under its components, each as a button naming its
+file, or "made here" for one built in code, that opens the picker with Bevy's shapes (or a new
+material), what the scene already draws with, and the model files, with a card folded under each
+(`DrawnCards`). The Mesh card turns the mesh in a preview, draws it as edges on request, and
+lists what it is made of and where it came from. The Material card turns a sphere in the material
+and lists its settings as rows, which write the material itself, so the card says how many entities
+share it. Each card offers "Make unique" while something else shares what it shows, and "Save as
+asset" for a mesh or a material made here, which writes a `*.mesh.json` or `*.material.json` named
+after the entity into the folder the browser shows. [ASSETS.md](ASSETS.md) plans a picker that is the asset browser's grid.
+
+### The asset browser
+
+The Assets tab shows the folder chosen in its tree as tiles: an image as itself, a model as a
+thumbnail drawn once and kept under `user://thumbnails/` (`Thumbnails`), and anything else as its
+kind's icon. A search box narrows the tiles by name, a chip narrows them to one kind, and a slider
+sizes them. The selected model is also drawn in a column beside the tiles, turned by dragging.
 
 ### Instances
 
@@ -525,8 +536,8 @@ name at the top of a card say what they are.
 
 What an entity is drawn with is saved as well, by the path its mesh and material were loaded from,
 or, for one made in memory, as how to make it again: a primitive as its shape and measures, a
-standard material as its settings. A mesh built vertex by vertex has neither, so it is left out
-rather than written as something it is not.
+standard material as its settings, a mesh built vertex by vertex as its geometry, and a material
+from a material file by the file.
 
 **The editor tells one entity from another by name.** Spawning something gives it a name nothing
 else is called, because a selection that survives a script reload is found again by it, so a

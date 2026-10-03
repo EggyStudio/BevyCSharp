@@ -32,6 +32,10 @@ var config = args.Contains("--offscreen")
 // launched it rather than the directory the assets were copied to.
 config.AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets");
 
+// Its own directory for what it keeps between runs, such as the asset browser's thumbnails, named
+// outright since an offscreen run has no window title to take it from.
+config.GameName = "BevyCSharp Editor";
+
 // The panels are HTML and CSS, and the point of describing them in files is being able to change
 // them without a rebuild.
 config.Gui = true;

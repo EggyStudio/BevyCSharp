@@ -8,7 +8,11 @@ namespace BevyCSharp.Editor.Framework;
 /// <param name="Label">What the row says, which the search is matched against.</param>
 /// <param name="Icon">The picture at the front of the row, or none.</param>
 /// <param name="Pick">What choosing it does.</param>
-public sealed record PickerItem(string Label, string? Icon, Action<BehaviorContext> Pick);
+/// <param name="Group">
+/// The heading it is listed under, or nothing. Items of one group are given together, and a heading
+/// is drawn where the group changes.
+/// </param>
+public sealed record PickerItem(string Label, string? Icon, Action<BehaviorContext> Pick, string? Group = null);
 
 /// <summary>
 /// A window in the middle of the screen that offers a list to choose one thing from, with a box to
@@ -39,6 +43,7 @@ public static class PickerWindow
     private static int _chosen;
     private static string _hint = "Search";
     private static string _empty = "Nothing matches";
+    private static string _verb = "Add";
     private static Func<IReadOnlyList<PickerItem>> _items = static () => [];
 
     /// <summary>Whether it is up.</summary>
@@ -52,7 +57,9 @@ public static class PickerWindow
     /// <param name="hint">What the search box says while nothing is typed, which is the one line of the window with room to say what it is for.</param>
     /// <param name="items">What it offers, asked for every frame it is up.</param>
     /// <param name="empty">What it says when there is nothing to offer at all.</param>
-    public static void Open(string hint, Func<IReadOnlyList<PickerItem>> items, string empty = "Nothing matches")
+    /// <param name="verb">What the button that takes the chosen one says.</param>
+    public static void Open(
+        string hint, Func<IReadOnlyList<PickerItem>> items, string empty = "Nothing matches", string verb = "Add")
     {
         ArgumentNullException.ThrowIfNull(hint);
         ArgumentNullException.ThrowIfNull(items);
@@ -63,6 +70,7 @@ public static class PickerWindow
         _hint = hint;
         _items = items;
         _empty = empty;
+        _verb = verb;
     }
 
     /// <summary>Draws it while it is up.</summary>
@@ -77,16 +85,17 @@ public static class PickerWindow
         var window = ImGuiRuntime.Size;
         var size = new Vector2(MathF.Min(420f, window.X - 40f), MathF.Min(460f, window.Y - 40f));
 
+        // The dim behind the modal, drawn here rather than by ImGui, which dims the whole display
+        // with a square rectangle and so darkens the window's transparent corners and gaps as well.
+        // This one is the window's own shape, rounded as its corners are, so what is clear stays
+        // clear. Before the modal's place and size are set, since the dim is a window of its own
+        // and would take them, leaving the modal to shrink to its first rows.
+        if (ImGui.IsPopupOpen(Name)) Dim();
+
         ImGui.SetNextWindowPos(window * 0.5f, ImGuiCond.Appearing, new Vector2(0.5f, 0.5f));
         ImGui.SetNextWindowSize(size, ImGuiCond.Appearing);
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, EditorSurface.Around);
-
-        // The dim behind the modal, drawn here rather than by ImGui, which dims the whole display
-        // with a square rectangle and so darkens the window's transparent corners and gaps as well.
-        // This one is the window's own shape, rounded as its corners are, so what is clear stays
-        // clear.
-        if (ImGui.IsPopupOpen(Name)) Dim();
 
         // A panel's color rather than a flyout's field gray. It holds a box to type in and a list,
         // and those are drawn on a panel everywhere else, so on the field gray the box would be the
@@ -186,6 +195,15 @@ public static class PickerWindow
         for (var index = 0; index < kinds.Count; index++)
         {
             var kind = kinds[index];
+
+            // A heading where a group starts, so built-in shapes, what the scene already uses and
+            // files read as three lists rather than one run of names.
+            if (kind.Group is { Length: > 0 } group && (index == 0 || kinds[index - 1].Group != group))
+            {
+                if (index > 0) ImGui.Spacing();
+                ImGui.TextDisabled(group);
+            }
+
             var chosen = index == _chosen;
             var at = ImGui.GetCursorScreenPos();
             var width = ImGui.GetContentRegionAvail().X;
@@ -251,7 +269,7 @@ public static class PickerWindow
         if (!any) ImGui.BeginDisabled();
 
         ImGui.PushStyleColor(ImGuiCol.Button, EditorTheme.LiveAccent);
-        var add = ImGui.Button("Add", new Vector2(width, 0f));
+        var add = ImGui.Button(_verb, new Vector2(width, 0f));
         ImGui.PopStyleColor();
 
         if (!any) ImGui.EndDisabled();

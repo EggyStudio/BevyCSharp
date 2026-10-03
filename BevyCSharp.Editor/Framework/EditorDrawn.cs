@@ -45,8 +45,15 @@ internal static class EditorDrawn
     {
         if (!App.HasRenderer) return;
 
-        var mesh = Render.MeshPathOf(entity);
-        var material = Render.MaterialPathOf(entity);
+        var mesh = Render.MeshPathOf(entity) is { Length: > 0 } loadedMesh
+            ? loadedMesh
+            : MeshFiles.PathOf(Render.MeshOf(ctx.Ecs, entity)) ?? string.Empty;
+
+        // A material file is read on this side, so the engine knows no path for it and the file
+        // is asked for by the material instead.
+        var material = Render.MaterialPathOf(entity) is { Length: > 0 } loaded
+            ? loaded
+            : MaterialFiles.PathOf(Render.MaterialOf(ctx.Ecs, entity)) ?? string.Empty;
 
         // Neither is not a mistake. Most entities are not drawn, and a heading over nothing says
         // the panel is missing something rather than that the entity is not a model. An entity
@@ -57,6 +64,7 @@ internal static class EditorDrawn
         EditorSurface.Heading("Drawn with", DetailsPanel.Inset);
 
         Row(ctx, entity, "Mesh", mesh, AssetKind.Mesh, FirstMesh);
+        DrawnCards.Mesh(ctx, entity);
 
         if (Shaders.ProgramOn(entity) is { IsValid: true } program)
         {
@@ -65,6 +73,7 @@ internal static class EditorDrawn
         else
         {
             Row(ctx, entity, "Material", material, AssetKind.StandardMaterial, FirstMaterial);
+            DrawnCards.Material(ctx, entity);
         }
     }
 
@@ -331,21 +340,159 @@ internal static class EditorDrawn
 
         ImGui.PushID($"##drawn{title}");
 
-        EditorWidgets.Picking($"##pick{title}", shown, () =>
+        // A window of its own rather than a dropdown, since what can be picked is three lists (the
+        // shapes the engine makes, what the scene already uses and files) and a search over them.
+        if (ImGui.Button($"{shown}##pick{title}", new System.Numerics.Vector2(-1f, 0f)))
         {
-            foreach (var file in EditorAssets.Every(EditorAssets.ExtensionsFor(kind).ToArray()))
-            {
-                var picked = path.StartsWith(file, StringComparison.Ordinal);
-
-                if (ImGui.Selectable(file, picked)) Point(ctx, entity, title, file, kind, label);
-
-                RoundedRows.Row(picked);
-            }
-        });
+            var mesh = title == "Mesh";
+            PickerWindow.Open(
+                mesh ? "Pick a mesh" : "Pick a material",
+                () => mesh ? Meshes(ctx, entity, kind, label) : Materials(ctx, entity, kind, label),
+                "Nothing to pick",
+                "Pick");
+        }
 
         ImGui.PopID();
 
         EditorRows.Close();
+    }
+
+    /// <summary>
+    /// What a mesh can be: one of the engine's shapes, a mesh the scene already draws with, or a
+    /// model file's first mesh.
+    /// </summary>
+    /// <remarks>
+    /// A shape is made fresh at a size that reads at a glance, and its card edits nothing yet.
+    /// Picking a mesh the scene already uses shares it, as a scene file writes it once for every
+    /// entity drawn with it.
+    /// </remarks>
+    private static IReadOnlyList<PickerItem> Meshes(BehaviorContext ctx, Entity entity, string kind, string label)
+    {
+        var items = new List<PickerItem>();
+
+        foreach (var (shape, a, b, c) in Shapes)
+        {
+            items.Add(new PickerItem(
+                Spaced(shape), EditorIcons.Mesh, pick => Give(pick.Ecs, entity, "Mesh", Render.CreateMesh(shape, a, b, c)), "Built in"));
+        }
+
+        foreach (var (handle, name) in InScene(ctx.Ecs, entity, Render.MeshOf, mesh => Render.RecipeOf(mesh) is { } recipe
+            ? Spaced(recipe.Shape)
+            : null))
+        {
+            items.Add(new PickerItem(name, EditorIcons.Mesh, pick => Give(pick.Ecs, entity, "Mesh", handle), "In this scene"));
+        }
+
+        foreach (var file in EditorAssets.Every([".json"]).Where(MeshFiles.IsMeshFile))
+            items.Add(new PickerItem(file, EditorIcons.Mesh, pick => Give(pick.Ecs, entity, "Mesh", MeshFiles.Load(file)), "Files"));
+
+        foreach (var file in EditorAssets.Every(EditorAssets.ExtensionsFor(kind).ToArray()))
+            items.Add(new PickerItem(file, EditorIcons.File, pick => Point(pick, entity, "Mesh", file, kind, label), "Files"));
+
+        return items;
+    }
+
+    /// <summary>What a material can be: a new one, one the scene already draws with, or a model file's first.</summary>
+    private static IReadOnlyList<PickerItem> Materials(BehaviorContext ctx, Entity entity, string kind, string label)
+    {
+        var items = new List<PickerItem>
+        {
+            new("New material", EditorIcons.Add, pick => Give(pick.Ecs, entity, "Material", Render.CreateMaterial(new MaterialSettings())), "Built in"),
+        };
+
+        foreach (var (handle, name) in InScene(ctx.Ecs, entity, Render.MaterialOf, material =>
+            Render.TryReadMaterial(material, out var settings) && settings is not null
+                ? Hex(settings.BaseColor)
+                : null))
+        {
+            items.Add(new PickerItem(name, EditorIcons.Data, pick => Give(pick.Ecs, entity, "Material", handle), "In this scene"));
+        }
+
+        foreach (var file in EditorAssets.Every([".json"]).Where(MaterialFiles.IsMaterialFile))
+            items.Add(new PickerItem(file, EditorIcons.Data, pick => Give(pick.Ecs, entity, "Material", MaterialFiles.Load(file)), "Files"));
+
+        foreach (var file in EditorAssets.Every(EditorAssets.ExtensionsFor(kind).ToArray()))
+            items.Add(new PickerItem(file, EditorIcons.File, pick => Point(pick, entity, "Material", file, kind, label), "Files"));
+
+        return items;
+    }
+
+    /// <summary>
+    /// The meshes or materials the scene draws with, other than the entity's own, each once, named
+    /// by the file it came from, by what it was made as, or by the first entity using it.
+    /// </summary>
+    private static IEnumerable<(AssetHandle Handle, string Name)> InScene(
+        EcsWorld world, Entity entity, Func<EcsWorld, Entity, AssetHandle> of, Func<AssetHandle, string?> made)
+    {
+        var own = of(world, entity);
+        var seen = new HashSet<AssetHandle>();
+
+        foreach (var user in world.All())
+        {
+            if (EditorPreview.Owns(user) || EditorEntity.IsInterface(world, user) || !Render.IsDrawn(user)) continue;
+
+            var handle = of(world, user);
+            if (!handle.IsValid || handle == own || !seen.Add(handle)) continue;
+
+            var called = AssetServer.PathOf(handle) ?? made(handle) ?? "made here";
+            yield return (handle, $"{called}, on {world.NameOf(user) ?? "an unnamed entity"}");
+        }
+    }
+
+    /// <summary>Points the entity at a mesh or a material, as one step to undo.</summary>
+    private static void Give(EcsWorld world, Entity entity, string title, AssetHandle handle)
+    {
+        var mesh = title == "Mesh";
+        var was = mesh ? Render.MeshOf(world, entity) : Render.MaterialOf(world, entity);
+
+        Set(world, handle);
+        EditorHistory.Record($"{title.ToLowerInvariant()} picked", undo => Set(undo, was), redo => Set(redo, handle));
+
+        void Set(EcsWorld on, AssetHandle to)
+        {
+            if (!to.IsValid) return;
+            if (mesh) Render.SetMesh(on, entity, to);
+            else Render.SetMaterial(on, entity, to);
+        }
+    }
+
+    /// <summary>A linear color as the sRGB hex a color picker shows, to tell materials apart by.</summary>
+    private static string Hex((float R, float G, float B, float A) linear)
+    {
+        var shown = new Color(linear.R, linear.G, linear.B, linear.A).ToSrgb();
+        static int Byte(float channel) => (int)MathF.Round(Math.Clamp(channel, 0f, 1f) * 255f);
+        return $"#{Byte(shown.X):x2}{Byte(shown.Y):x2}{Byte(shown.Z):x2}";
+    }
+
+    /// <summary>Bevy's shapes, each at a size that reads at a glance.</summary>
+    private static readonly (string Shape, float A, float B, float C)[] Shapes =
+    [
+        (MeshShape.Cuboid, 1f, 1f, 1f),
+        (MeshShape.Sphere, 0.5f, 1f, 1f),
+        (MeshShape.Plane, 1f, 1f, 1f),
+        (MeshShape.Capsule, 0.25f, 0.5f, 1f),
+        (MeshShape.Cylinder, 0.5f, 1f, 1f),
+        (MeshShape.Cone, 0.5f, 1f, 1f),
+        (MeshShape.ConicalFrustum, 0.25f, 0.5f, 1f),
+        (MeshShape.Torus, 0.25f, 0.5f, 1f),
+        (MeshShape.Circle, 0.5f, 1f, 1f),
+        (MeshShape.Annulus, 0.25f, 0.5f, 1f),
+        (MeshShape.Rectangle, 1f, 1f, 1f),
+        (MeshShape.Triangle, 1f, 1f, 1f),
+        (MeshShape.Tetrahedron, 1f, 1f, 1f),
+    ];
+
+    /// <summary>A shape's name as words, "Conical frustum" for <c>ConicalFrustum</c>.</summary>
+    private static string Spaced(string shape)
+    {
+        var words = new System.Text.StringBuilder();
+        foreach (var letter in shape)
+        {
+            if (char.IsUpper(letter) && words.Length > 0) words.Append(' ').Append(char.ToLowerInvariant(letter));
+            else words.Append(letter);
+        }
+
+        return words.ToString();
     }
 
     /// <summary>Points the entity at a file, naming a part of it where the format holds many.</summary>
@@ -360,9 +507,6 @@ internal static class EditorDrawn
         var glb = file.EndsWith(".gltf", StringComparison.OrdinalIgnoreCase)
                   || file.EndsWith(".glb", StringComparison.OrdinalIgnoreCase);
 
-        var handle = AssetServer.Load(kind, glb ? file + label : file);
-
-        if (title == "Mesh") Render.SetMesh(ctx.Ecs, entity, handle);
-        else Render.SetMaterial(ctx.Ecs, entity, handle);
+        Give(ctx.Ecs, entity, title, AssetServer.Load(kind, glb ? file + label : file));
     }
 }

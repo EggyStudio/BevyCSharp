@@ -793,7 +793,7 @@ the id spawned as, and each entity keeps its id across saves, so a scene under v
 diffs as what changed. Bevy's own components, a camera's projection or a light's settings, are
 written as the JSON Bevy's serializer makes for them, less what the engine works out every frame.
 A primitive mesh or a standard material made in memory is written once as how to make it again,
-and a mesh built vertex by vertex, which has neither a file nor a recipe, is not written. A file
+and a mesh built vertex by vertex is written as the geometry it was built from (`Render.DataOf`). A file
 the scene refers to is written as its id and its path, and the editor gives every such file an id
 in a `.uid` sidecar as it saves, so renaming a model in the asset browser, which carries the
 sidecar along, leaves the scene pointing at it.
@@ -3233,8 +3233,8 @@ run against a real Bevy app. Known gaps:
   the compiler lives there.
 - The editor's document is a scene file, with the hierarchy, entity references and Bevy's own
   components kept, and primitives and materials made in memory written as how to make them again.
-  A mesh built vertex by vertex is not written. [.github/SCENES.md](.github/SCENES.md) plans the
-  rest, through instances and saves.
+  A mesh built vertex by vertex is written as its geometry, and a material can be kept in a
+  `*.material.json` of its own. [.github/SCENES.md](.github/SCENES.md) has what is left.
 - Five of Bevy's components are mirrored by hand, and the rest are reached through Bevy's
   reflection, by type path and JSON or through generated typed wrappers, at the cost of a
   serialization a call. A component holds a list, inline or in a managed store, and a dictionary

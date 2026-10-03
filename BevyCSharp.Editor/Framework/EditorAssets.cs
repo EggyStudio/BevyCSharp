@@ -179,7 +179,10 @@ public static class EditorAssets
     /// reported as what it is rather than guessed at.
     /// </remarks>
     public static string KindOf(string relative) =>
-        relative.EndsWith(".scene.json", StringComparison.OrdinalIgnoreCase) ? "scene" : KindByExtension(relative);
+        relative.EndsWith(".scene.json", StringComparison.OrdinalIgnoreCase) ? "scene"
+        : MaterialFiles.IsMaterialFile(relative) ? "material"
+        : MeshFiles.IsMeshFile(relative) ? "mesh"
+        : KindByExtension(relative);
 
     /// <summary>What sort of file it is by its last extension alone.</summary>
     /// <remarks>A scene file ends in <c>.json</c> as a data asset does, so the two are told apart before this.</remarks>
@@ -214,6 +217,8 @@ public static class EditorAssets
         "model" => EditorIcons.Mesh,
         "sound" => EditorIcons.Sound,
         "scene" => EditorIcons.World,
+        "material" => EditorIcons.Image,
+        "mesh" => EditorIcons.Mesh,
         "data" => EditorIcons.Data,
         _ => EditorIcons.File,
     };

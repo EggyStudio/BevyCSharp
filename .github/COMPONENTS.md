@@ -262,7 +262,8 @@ var table = chest.Loot.Value;   // or DataAssets.Get(chest.Loot)
   describes the item type in an `ItemFields` on the field, as it describes a data asset: rows over
   a box holding one item, a class item copied first so an edit never changes the one the list
   holds. A scene or a data file writes each item as an object of its fields, and the editor draws
-  each as a fold named by its first text, with the grip and the remove button in front. Items go
+  a list's items each as a fold named by its first text, with the grip and the remove button in
+  front, and a map's values as their fields under their key. Items go
   three types deep, since a class can hold a list of itself.
 - **Opened in place.** A set `DataRef` row has a fold under it named for the asset's type and how
   many entities share it ("shared with 2 others"), holding the asset's own rows, and "Make unique"
@@ -274,8 +275,6 @@ var table = chest.Loot.Value;   // or DataAssets.Get(chest.Loot)
 
 What is not built:
 
-- **A map's struct values in the editor.** They are written and read, and drawn as their type
-  with no editor.
 - **A fold under a reference row in a data asset.** A reference held by a data asset, rather than
   by a component, has no fold of its own, since the asset is drawn without an entity to count
   users from.
@@ -284,6 +283,7 @@ What is not built:
 
 Each step is usable on its own and tested before the next.
 
-1. **A map's struct values in the editor**, and the fold under a reference a data asset holds.
+1. **The fold under a reference a data asset holds**, counting the other data assets that refer
+   to it as well as the entities.
 2. **Tier 3**: generated mirrors and layout probes replacing the hand ones, with the existing
    mirror tests passing unchanged.

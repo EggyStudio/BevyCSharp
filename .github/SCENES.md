@@ -151,14 +151,14 @@ it kept without knowing them (§7). `scene.save` and `scene.load` do the same fr
   of Bevy's, which leaves out the engine's bookkeeping, or whatever a caller's filter chooses, less
   `SceneFile.Excluded`, which the editor sets to its own cameras and previews.
 - **A mesh and a material** are written by the file each came from, as its id and path (§2), or,
-  made in memory, as a resource of the scene saying how to make it again: a primitive as its shape and measures
+  made in memory, as a resource of the scene saying how to make it again (a mesh built vertex by
+  vertex as its geometry, see below): a primitive as its shape and measures
   (`Render.RecipeOf`) and a standard material as its settings (`Render.TryReadMaterial`). Two
   entities sharing one share one resource, and loading makes it once, so they still share it.
 
-Not built yet:
-
-- **A mesh built vertex by vertex** is not written, having no recipe. Its raw geometry becomes a
-  resource the same way ([ASSETS.md](ASSETS.md), §5).
+A mesh built vertex by vertex is written as its geometry, the `MeshData` it was built from
+(`Render.DataOf`), positions, normals, UVs, colors and indices as flat arrays, and a material from a
+material file by that file's id and path ([ASSETS.md](ASSETS.md), §5).
 
 ## 4. Writing values without reflection
 

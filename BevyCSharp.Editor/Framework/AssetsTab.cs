@@ -51,6 +51,9 @@ public static class AssetsTab
         if (EditorShell.Context is { } ctx)
         {
             EditorPreview.Show(ctx, Previewable(EditorAssets.Selected));
+
+            // A model's tile at a time, while the tab is open to show them.
+            Thumbnails.Tick(ctx);
         }
 
         var split = ImGuiTableFlags.Resizable
@@ -164,11 +167,13 @@ public static class AssetsTab
             return;
         }
 
-        var entries = EditorAssets.List();
+        Toolbar();
+
+        var entries = Filtered(EditorAssets.List());
 
         if (entries.Count == 0)
         {
-            ImGui.TextDisabled("Nothing here");
+            ImGui.TextDisabled(_search.Length > 0 || _kind is not null ? "Nothing matches" : "Nothing here");
             EditorSurface.EndRegion();
             return;
         }
@@ -177,7 +182,7 @@ public static class AssetsTab
         // or a mesh, and a name in a column says nothing about which one it is.
         var across = Math.Max(
             1,
-            (int)(ImGui.GetContentRegionAvail().X / (Size + ImGui.GetStyle().ItemSpacing.X)));
+            (int)(ImGui.GetContentRegionAvail().X / (_size + ImGui.GetStyle().ItemSpacing.X)));
 
         for (var index = 0; index < entries.Count; index++)
         {
@@ -185,7 +190,7 @@ public static class AssetsTab
 
             if (index % across != 0) ImGui.SameLine();
 
-            Tile(entry, Size);
+            Tile(entry, _size);
         }
 
         if (_refused is { } why) ImGui.TextDisabled(why);
@@ -422,8 +427,70 @@ public static class AssetsTab
         ImGui.EndDragDropTarget();
     }
 
-    /// <summary>How wide and how tall one tile is.</summary>
-    private const float Size = 96f;
+    /// <summary>How wide and how tall one tile is, which the slider over the tiles sets.</summary>
+    private static float _size = 96f;
+
+    /// <summary>What the search box holds.</summary>
+    private static string _search = string.Empty;
+
+    /// <summary>The kind of file shown, or nothing for every kind.</summary>
+    private static string? _kind;
+
+    /// <summary>The kinds a chip narrows the tiles to, by what a chip says and the kind it means.</summary>
+    private static readonly (string Chip, string Kind)[] Kinds =
+    [
+        ("Models", "model"),
+        ("Meshes", "mesh"),
+        ("Materials", "material"),
+        ("Images", "image"),
+        ("Scenes", "scene"),
+        ("Data", "data"),
+        ("Sounds", "sound"),
+        ("Scripts", "behavior script"),
+        ("Shaders", "shader"),
+    ];
+
+    /// <summary>
+    /// The search box, a chip per kind of file and the tile size, above the tiles.
+    /// </summary>
+    /// <remarks>
+    /// A search reads the folder being looked at, as the tiles do, and folders stay listed only
+    /// while nothing narrows the tiles, since a folder is a way somewhere rather than an answer.
+    /// </remarks>
+    private static void Toolbar()
+    {
+        ImGui.SetNextItemWidth(MathF.Min(220f, ImGui.GetContentRegionAvail().X));
+        ImGui.InputTextWithHint("##asset-search", "Search", ref _search, 128);
+
+        ImGui.SameLine();
+        if (EditorWidgets.Pill("All", _kind is null)) _kind = null;
+
+        foreach (var (chip, kind) in Kinds)
+        {
+            ImGui.SameLine();
+            if (EditorWidgets.Pill(chip, _kind == kind)) _kind = _kind == kind ? null : kind;
+        }
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(110f);
+        var fraction = (_size - 64f) / (160f - 64f);
+        EditorWidgets.Sliding("##tile-size", fraction, () => ImGui.SliderFloat("##tile-size", ref _size, 64f, 160f, string.Empty));
+
+        ImGui.Spacing();
+    }
+
+    /// <summary>The entries the search and the chosen kind leave.</summary>
+    private static List<AssetEntry> Filtered(IReadOnlyList<AssetEntry> entries)
+    {
+        var wanted = _search.Trim();
+        var narrowed = wanted.Length > 0 || _kind is not null;
+
+        return [.. entries.Where(entry =>
+            entry.IsDirectory
+                ? !narrowed
+                : (wanted.Length == 0 || entry.Name.Contains(wanted, StringComparison.OrdinalIgnoreCase))
+                    && (_kind is null || EditorAssets.KindOf(entry.Path) == _kind))];
+    }
 
     /// <summary>One file or directory, as a tile.</summary>
     private static void Tile(AssetEntry entry, float size)
@@ -472,13 +539,22 @@ public static class AssetsTab
         var middle = at + new Vector2((size - Mark) * 0.5f, (size - Mark) * 0.5f - (line * 0.6f));
 
         // An image tile wears the image, because the interface loads a picture from a path and
-        // that is all it takes. Everything else wears the picture of its kind, since what a model
-        // or a sound looks like is a thumbnail somebody has to render.
-        var shown = !entry.IsDirectory
-                    && EditorAssets.KindOf(entry.Path) == "image"
+        // that is all it takes. A model wears the picture drawn of it once (Thumbnails), which a
+        // tile asks for by being drawn, and wears its icon until the picture is there. Everything
+        // else wears the picture of its kind, since a sound or a script has nothing to look at.
+        var picture = entry.IsDirectory
+            ? null
+            : EditorAssets.KindOf(entry.Path) switch
+            {
+                "image" => entry.Path,
+                "model" or "material" or "mesh" => Thumbnails.Of(entry.Path),
+                _ => null,
+            };
+
+        var shown = picture is not null
                     && EditorDraw.Picture(
                         draw,
-                        entry.Path,
+                        picture,
                         at + new Vector2(EditorSurface.Air, EditorSurface.Air),
                         size - (EditorSurface.Air * 2f) - line);
 

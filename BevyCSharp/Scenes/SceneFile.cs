@@ -318,7 +318,7 @@ public static class SceneFile
         }
 
         // Meshes and materials made in memory, written once each however many entities share them.
-        var made = new Resources();
+        var made = new Resources(references);
 
         json.WriteStartObject();
         json.WriteString("format", Format);
@@ -353,7 +353,9 @@ public static class SceneFile
             {
                 // What it is drawn with, by the file it came from, or, for one made in memory, as a
                 // resource of the scene saying how to make it again.
-                if (Render.MeshPathOf(entity) is { Length: > 0 } meshPath)
+                if ((Render.MeshPathOf(entity) is { Length: > 0 } loadedMesh
+                        ? loadedMesh
+                        : MeshFiles.PathOf(Render.MeshOf(world, entity))) is { Length: > 0 } meshPath)
                 {
                     json.WritePropertyName("mesh");
                     references.WriteFile(json, meshPath);
@@ -361,7 +363,9 @@ public static class SceneFile
                 else if (made.Mesh(Render.MeshOf(world, entity)) is var mesh and > 0)
                     Resource(json, "mesh", mesh);
 
-                if (Render.MaterialPathOf(entity) is { Length: > 0 } materialPath)
+                if ((Render.MaterialPathOf(entity) is { Length: > 0 } loaded
+                        ? loaded
+                        : MaterialFiles.PathOf(Render.MaterialOf(world, entity))) is { Length: > 0 } materialPath)
                 {
                     json.WritePropertyName("material");
                     references.WriteFile(json, materialPath);
@@ -614,9 +618,12 @@ public static class SceneFile
         if (value.ValueKind == JsonValueKind.Object && value.TryGetProperty("resource", out var id))
             return made.TryGetValue(id.GetInt32(), out var handle) ? handle : AssetHandle.None;
 
-        return SceneReferences.ReadFile(value) is { Length: > 0 } path
-            ? AssetServer.Load(kind, path)
-            : AssetHandle.None;
+        if (SceneReferences.ReadFile(value) is not { Length: > 0 } path) return AssetHandle.None;
+
+        // A material or mesh file is read on this side into one asset shared by every scene using it.
+        if (MaterialFiles.IsMaterialFile(path)) return MaterialFiles.Load(path);
+        if (MeshFiles.IsMeshFile(path)) return MeshFiles.Load(path);
+        return AssetServer.Load(kind, path);
     }
 
     /// <summary>
@@ -831,14 +838,20 @@ public static class SceneFile
     /// one resource, and loading makes it once and hands both the same handle, so they still share
     /// it. A mesh built vertex by vertex has no recipe and is not written yet.
     /// </remarks>
-    private sealed class Resources
+    private sealed class Resources(SceneReferences references)
     {
+        /// <summary>How a material's textures are named, as every other file the scene refers to is.</summary>
+        private SceneReferences References { get; } = references;
+
         private readonly Dictionary<int, int> _ids = [];
         private readonly List<object> _held = [];
 
-        /// <summary>The resource id of a primitive mesh, or zero for one with no recipe.</summary>
+        /// <summary>
+        /// The resource id of a mesh made in memory: a primitive as its recipe, one built vertex
+        /// by vertex as its geometry, or zero for one that is neither.
+        /// </summary>
         public int Mesh(AssetHandle mesh) =>
-            Add(mesh, () => Render.RecipeOf(mesh) is { } recipe ? recipe : null);
+            Add(mesh, () => Render.RecipeOf(mesh) is { } recipe ? recipe : Render.DataOf(mesh));
 
         /// <summary>The resource id of a standard material, or zero for one that cannot be read.</summary>
         public int Material(AssetHandle material) =>
@@ -868,17 +881,18 @@ public static class SceneFile
                 switch (_held[i])
                 {
                     case MeshRecipe recipe:
-                        json.WriteStartObject("mesh");
-                        json.WriteString("shape", recipe.Shape);
-                        json.WriteNumber("a", recipe.A);
-                        json.WriteNumber("b", recipe.B);
-                        json.WriteNumber("c", recipe.C);
-                        json.WriteEndObject();
+                        json.WritePropertyName("mesh");
+                        MeshJson.WriteRecipe(json, recipe);
                         break;
 
                     case MaterialSettings settings:
                         json.WritePropertyName("material");
-                        WriteMaterial(json, settings);
+                        MaterialJson.Write(json, settings, References);
+                        break;
+
+                    case MeshData geometry:
+                        json.WritePropertyName("geometry");
+                        MeshJson.WriteGeometry(json, geometry);
                         break;
                 }
 
@@ -896,104 +910,21 @@ public static class SceneFile
             {
                 if (!resource.TryGetProperty("id", out var id)) continue;
 
-                if (resource.TryGetProperty("mesh", out var mesh))
+                if (resource.TryGetProperty("mesh", out var mesh) && MeshJson.ReadRecipe(mesh) is { } recipe)
                 {
-                    made[id.GetInt32()] = Render.CreateMesh(
-                        mesh.GetProperty("shape").GetString()!,
-                        mesh.GetProperty("a").GetSingle(),
-                        mesh.GetProperty("b").GetSingle(),
-                        mesh.GetProperty("c").GetSingle());
+                    made[id.GetInt32()] = Render.CreateMesh(recipe.Shape, recipe.A, recipe.B, recipe.C);
                 }
                 else if (resource.TryGetProperty("material", out var material))
                 {
-                    made[id.GetInt32()] = Render.CreateMaterial(ReadMaterial(material));
+                    made[id.GetInt32()] = Render.CreateMaterial(MaterialJson.Read(material));
+                }
+                else if (resource.TryGetProperty("geometry", out var geometry) && MeshJson.ReadGeometry(geometry) is { } data)
+                {
+                    made[id.GetInt32()] = Render.CreateMesh(data);
                 }
             }
 
             return made;
         }
-
-        private static void WriteMaterial(Utf8JsonWriter json, MaterialSettings settings)
-        {
-            json.WriteStartObject();
-            Four(json, "baseColor", settings.BaseColor);
-            json.WriteNumber("metallic", settings.Metallic);
-            json.WriteNumber("roughness", settings.Roughness);
-            Four(json, "emissive", settings.Emissive);
-            json.WriteString("alphaMode", settings.AlphaMode.ToString());
-            json.WriteNumber("alphaCutoff", settings.AlphaCutoff);
-            json.WriteBoolean("doubleSided", settings.DoubleSided);
-            json.WriteBoolean("unlit", settings.Unlit);
-
-            // A texture by the file it came from. One made in memory has none and is left off.
-            Texture(json, "baseColorTexture", settings.BaseColorTexture);
-            Texture(json, "normalMap", settings.NormalMap);
-            Texture(json, "metallicRoughnessTexture", settings.MetallicRoughnessTexture);
-            Texture(json, "emissiveTexture", settings.EmissiveTexture);
-            Texture(json, "occlusionTexture", settings.OcclusionTexture);
-
-            json.WriteStartArray("uvScale");
-            json.WriteNumberValue(settings.UvScale.U);
-            json.WriteNumberValue(settings.UvScale.V);
-            json.WriteEndArray();
-            json.WriteNumber("uvRotation", settings.UvRotation);
-            json.WriteStartArray("uvOffset");
-            json.WriteNumberValue(settings.UvOffset.U);
-            json.WriteNumberValue(settings.UvOffset.V);
-            json.WriteEndArray();
-            json.WriteEndObject();
-        }
-
-        private static MaterialSettings ReadMaterial(JsonElement json)
-        {
-            var settings = new MaterialSettings();
-            if (Floats(json, "baseColor", 4) is { } b) settings.BaseColor = (b[0], b[1], b[2], b[3]);
-            if (json.TryGetProperty("metallic", out var metallic)) settings.Metallic = metallic.GetSingle();
-            if (json.TryGetProperty("roughness", out var roughness)) settings.Roughness = roughness.GetSingle();
-            if (Floats(json, "emissive", 4) is { } e) settings.Emissive = (e[0], e[1], e[2], e[3]);
-            if (json.TryGetProperty("alphaMode", out var mode) && Enum.TryParse<AlphaMode>(mode.GetString(), out var alpha))
-                settings.AlphaMode = alpha;
-            if (json.TryGetProperty("alphaCutoff", out var cutoff)) settings.AlphaCutoff = cutoff.GetSingle();
-            if (json.TryGetProperty("doubleSided", out var sides)) settings.DoubleSided = sides.GetBoolean();
-            if (json.TryGetProperty("unlit", out var unlit)) settings.Unlit = unlit.GetBoolean();
-
-            settings.BaseColorTexture = Image(json, "baseColorTexture");
-            settings.NormalMap = Image(json, "normalMap");
-            settings.MetallicRoughnessTexture = Image(json, "metallicRoughnessTexture");
-            settings.EmissiveTexture = Image(json, "emissiveTexture");
-            settings.OcclusionTexture = Image(json, "occlusionTexture");
-
-            if (Floats(json, "uvScale", 2) is { } scale) settings.UvScale = (scale[0], scale[1]);
-            if (json.TryGetProperty("uvRotation", out var rotation)) settings.UvRotation = rotation.GetSingle();
-            if (Floats(json, "uvOffset", 2) is { } offset) settings.UvOffset = (offset[0], offset[1]);
-            return settings;
-        }
-
-        private static void Four(Utf8JsonWriter json, string name, (float, float, float, float) value)
-        {
-            json.WriteStartArray(name);
-            json.WriteNumberValue(value.Item1);
-            json.WriteNumberValue(value.Item2);
-            json.WriteNumberValue(value.Item3);
-            json.WriteNumberValue(value.Item4);
-            json.WriteEndArray();
-        }
-
-        private static void Texture(Utf8JsonWriter json, string name, AssetHandle texture)
-        {
-            if (AssetServer.PathOf(texture) is { Length: > 0 } path) json.WriteString(name, path);
-        }
-
-        private static AssetHandle Image(JsonElement json, string name) =>
-            json.TryGetProperty(name, out var path) && path.GetString() is { Length: > 0 } file
-                ? AssetServer.Load(AssetKind.Image, file)
-                : AssetHandle.None;
-
-        private static float[]? Floats(JsonElement json, string name, int count) =>
-            json.TryGetProperty(name, out var array)
-            && array.ValueKind == JsonValueKind.Array
-            && array.GetArrayLength() == count
-                ? [.. array.EnumerateArray().Select(number => number.GetSingle())]
-                : null;
     }
 }

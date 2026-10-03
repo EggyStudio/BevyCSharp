@@ -53,6 +53,7 @@ public static unsafe class Render
         Native.Check(key, $"building a {shape} mesh");
 
         lock (Recipes) Recipes[key] = new MeshRecipe(shape, a, b, c);
+        lock (Built) Built.Remove(key);
         return new AssetHandle(key);
     }
 
@@ -66,6 +67,37 @@ public static unsafe class Render
     public static MeshRecipe? RecipeOf(AssetHandle mesh)
     {
         lock (Recipes) return Recipes.TryGetValue(mesh.Key, out var recipe) ? recipe : null;
+    }
+
+    /// <summary>
+    /// Forgets how every mesh was made, for an app starting, whose keys say nothing about the last
+    /// app's meshes.
+    /// </summary>
+    /// <remarks>
+    /// A key is a slot in a table the bridge keeps per app, so the first mesh of a new app takes a
+    /// key an old one had, and a recipe kept from before would describe the wrong mesh.
+    /// </remarks>
+    internal static void ForgetMade()
+    {
+        lock (Recipes) Recipes.Clear();
+        lock (Built) Built.Clear();
+    }
+
+    /// <summary>The geometry each mesh built vertex by vertex was made from, by its key.</summary>
+    private static readonly Dictionary<int, MeshData> Built = [];
+
+    /// <summary>
+    /// The geometry a mesh was built from, or <see langword="null"/> for one that was not made by
+    /// <see cref="CreateMesh(MeshData)"/>.
+    /// </summary>
+    /// <remarks>
+    /// A copy taken when the mesh was made, normals, UVs and colors included, so a scene can write
+    /// the mesh down as it was built, which reading it back from the GPU's copy could not, since that
+    /// gives positions and indices alone. Changing what this returns changes nothing drawn.
+    /// </remarks>
+    public static MeshData? DataOf(AssetHandle mesh)
+    {
+        lock (Built) return Built.TryGetValue(mesh.Key, out var data) ? data : null;
     }
 
     /// <summary>
@@ -207,9 +239,25 @@ public static unsafe class Render
                 Topology = (int)mesh.Topology,
             };
 
-            return new AssetHandle(Native.Check(
+            var key = Native.Check(
                 Native.bcs_mesh_create_from(&native),
-                $"building a mesh of {count} vertices"));
+                $"building a mesh of {count} vertices");
+
+            // A copy, so the caller changing its arrays afterward does not change what a scene
+            // writes for a mesh already drawn.
+            var kept = new MeshData
+            {
+                Positions = [.. mesh.Positions],
+                Normals = mesh.Normals is { } n ? [.. n] : null,
+                Uvs = mesh.Uvs is { } u ? [.. u] : null,
+                Colors = mesh.Colors is { } c ? [.. c] : null,
+                Indices = mesh.Indices is { } i ? [.. i] : null,
+                Topology = mesh.Topology,
+            };
+            lock (Built) Built[key] = kept;
+            lock (Recipes) Recipes.Remove(key);
+
+            return new AssetHandle(key);
         }
     }
 
@@ -319,7 +367,40 @@ public static unsafe class Render
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        var native = new NativeMaterialConfig
+        var native = Config(settings);
+        var key = Native.bcs_material_create(&native);
+        if (key == NativeStatus.Unsupported) throw NoRenderer("Building a material");
+
+        Native.Check(key, "building a material");
+        return new AssetHandle(key);
+    }
+
+    /// <summary>
+    /// Writes settings over a standard material in place, so everything drawn with it changes.
+    /// </summary>
+    /// <remarks>
+    /// The material keeps its handle, so every entity sharing it, and a scene or a glTF file that
+    /// brought it, sees the change. A tool editing one entity's look alone copies the material
+    /// first with <see cref="CreateMaterial(MaterialSettings)"/> from what
+    /// <see cref="TryReadMaterial"/> gives.
+    /// </remarks>
+    /// <returns>Whether the handle named a standard material that took the settings.</returns>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static bool WriteMaterial(AssetHandle material, MaterialSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var native = Config(settings);
+        var status = Native.bcs_render_material_write(material.Key, &native);
+        if (status == NativeStatus.Unsupported) throw NoRenderer("Writing a material");
+
+        return status == NativeStatus.Ok;
+    }
+
+    /// <summary>The settings as the bridge takes them, with an unset texture as no texture.</summary>
+    private static NativeMaterialConfig Config(MaterialSettings settings)
+    {
+        return new NativeMaterialConfig
         {
             BaseR = settings.BaseColor.R,
             BaseG = settings.BaseColor.G,
@@ -346,12 +427,6 @@ public static unsafe class Render
             UvOffsetX = settings.UvOffset.U,
             UvOffsetY = settings.UvOffset.V,
         };
-
-        var key = Native.bcs_material_create(&native);
-        if (key == NativeStatus.Unsupported) throw NoRenderer("Building a material");
-
-        Native.Check(key, "building a material");
-        return new AssetHandle(key);
 
         // An unset handle is -1, which the bridge reads as "no texture here".
         static int Key(AssetHandle handle) => handle.IsValid ? handle.Key : -1;
