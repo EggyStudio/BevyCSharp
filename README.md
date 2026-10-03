@@ -1837,8 +1837,11 @@ in:
 ```csharp
 Render.SetExposure(camera, 12f);
 
-// Or the same thing as a lens, the way a real camera is written down.
-Render.SetLensExposure(camera, aperture: 2.8f, shutter: 1f / 250f, sensitivity: 400f);
+// Or the same thing as a lens, the way a real camera is written down, which the depth of field
+// reads as well, so the aperture that brightens the picture is the one that blurs it.
+var lens = new PhysicalLens(Aperture: 2.8f, Shutter: 1f / 250f, Sensitivity: 400f);
+Render.SetLens(camera, lens);
+Render.SetEffects(camera, new EffectSettings { DepthOfField = DepthOfFieldMode.Bokeh, FocalDistance = 6f }.Through(lens));
 
 Render.SetColorGrading(camera, new GradingSettings
 {

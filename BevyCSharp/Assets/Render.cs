@@ -1757,6 +1757,20 @@ public static unsafe class Render
             Native.bcs_render_set_lens_exposure(camera.Bits, aperture, shutter, sensitivity),
             $"metering {camera} from a lens");
 
+    /// <summary>Meters a camera from a lens written down once (<see cref="PhysicalLens"/>).</summary>
+    /// <remarks>
+    /// Its aperture, shutter and sensitivity, as <see cref="SetLensExposure"/> takes them. Pass the
+    /// same lens to <see cref="EffectSettings.Through"/> for a depth of field through it.
+    /// </remarks>
+    /// <param name="camera">The camera to meter.</param>
+    /// <param name="lens">The lens it stands in for.</param>
+    /// <exception cref="BevyNativeException">The entity is not a camera.</exception>
+    public static void SetLens(Entity camera, PhysicalLens lens)
+    {
+        ArgumentNullException.ThrowIfNull(lens);
+        SetLensExposure(camera, lens.Aperture, lens.Shutter, lens.Sensitivity);
+    }
+
     /// <summary>
     /// Sorts transparent fragments rather than whole objects, for one camera.
     /// </summary>

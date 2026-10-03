@@ -209,4 +209,16 @@ public sealed class LensTests
 
     /// <summary>Where the run keeps what it asked for, so a later frame can pick it up.</summary>
     private sealed record Ticket(Capture Capture);
+
+    /// <summary>A lens written down once gives its depth of field the aperture and sensor it meters with.</summary>
+    [Fact]
+    public void ALensGivesTheDepthOfFieldItsApertureAndSensor()
+    {
+        var lens = new PhysicalLens(Aperture: 2.8f, Shutter: 1f / 250f, Sensitivity: 400f, SensorHeight: 0.024f);
+        var effects = new EffectSettings { FocalDistance = 6f }.Through(lens);
+
+        Assert.Equal(2.8f, effects.Aperture);
+        Assert.Equal(0.024f, effects.SensorHeight);
+        Assert.Equal(6f, effects.FocalDistance);
+    }
 }

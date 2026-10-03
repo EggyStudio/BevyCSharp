@@ -177,10 +177,6 @@ as a skybox or used to light the scene through the atmosphere. `bevy_post_proces
 `bevy_anti_alias` are compiled into the render profile, so most of what is left is bridge work over
 code already in the binary.
 
-- **A lens is described twice.** `Render.SetLensExposure` takes an aperture, a shutter speed and a
-  sensitivity, and `Render.SetDepthOfField` takes an aperture and a focal length of its own.
-  `PhysicalCameraParameters` is one struct behind both, so a camera could be written down once and
-  have the exposure and the blur read from it.
 - **A cubemap file in another layout.** The reinterpretation reads a column of six faces stacked
   vertically, as a file holds them. A cross, or six files, would need a layout to be a parameter.
   A cube cameras draw into, a layer each, is a target made with six layers.
