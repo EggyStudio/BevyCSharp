@@ -420,9 +420,14 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // leaves the handle here and this picks it up on whichever frame the pixels arrive.
             app.init_resource::<crate::render::post::PendingCubemaps>();
             app.init_resource::<crate::render::post::PendingEnvironments>();
+            app.init_resource::<crate::render::post::PendingFaces>();
             app.add_systems(
                 bevy::app::PreUpdate,
-                crate::render::post::reinterpret_cubemaps,
+                (
+                    crate::render::post::gather_faces,
+                    crate::render::post::reinterpret_cubemaps,
+                )
+                    .chain(),
             );
             // An irradiance volume's image is only known to be 3D once it has loaded.
             app.add_systems(

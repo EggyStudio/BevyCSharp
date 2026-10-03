@@ -2172,6 +2172,38 @@ public static unsafe class Render
         Native.Check(Native.bcs_render_make_cubemap(image.Key), "making an image a cubemap");
 
     /// <summary>
+    /// Makes a cubemap out of six images, one a face, as a cubemap shipped as six files is.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The handle comes back at once and can be given to <see cref="SetSkybox"/> or a material
+    /// straight away. It holds a black pixel until all six images have loaded, then their pixels
+    /// as a column, then a cube. The faces have to be square, one size and one format, or the
+    /// cubemap is dropped with a warning in the log.
+    /// </para>
+    /// </remarks>
+    /// <param name="positiveX">The face +X looks at.</param>
+    /// <param name="negativeX">The face -X looks at.</param>
+    /// <param name="positiveY">The face up looks at.</param>
+    /// <param name="negativeY">The face down looks at.</param>
+    /// <param name="positiveZ">The face +Z looks at.</param>
+    /// <param name="negativeZ">The face -Z looks at.</param>
+    /// <returns>The cubemap.</returns>
+    /// <exception cref="BevyNativeException">A handle names no image, or there is no renderer.</exception>
+    public static AssetHandle CubemapFromFaces(
+        AssetHandle positiveX,
+        AssetHandle negativeX,
+        AssetHandle positiveY,
+        AssetHandle negativeY,
+        AssetHandle positiveZ,
+        AssetHandle negativeZ)
+    {
+        var faces = stackalloc int[6] { positiveX.Key, negativeX.Key, positiveY.Key, negativeY.Key, positiveZ.Key, negativeZ.Key };
+        var key = Native.Check(Native.bcs_render_cubemap_from_faces(faces), "making a cubemap of six images");
+        return new AssetHandle(key);
+    }
+
+    /// <summary>
     /// Has an image of <paramref name="layers"/> equal pictures stacked from top to bottom treated
     /// as an array of them.
     /// </summary>

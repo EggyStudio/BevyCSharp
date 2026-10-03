@@ -1246,6 +1246,74 @@ pub extern "C" fn bcs_render_make_cubemap(image: i32) -> i32 {
     })
 }
 
+/// Makes a cubemap out of six images, one a face, and returns its asset key at once.
+///
+/// `faces` holds six image keys in the column's order, +X, -X, +Y, -Y, +Z, -Z, as six files a
+/// cubemap is often shipped as. The image handed back holds a placeholder until all six have
+/// loaded, then their pixels as a column, then becomes a cube, so it can be given to a skybox or
+/// a material at once. Returns a negative status where a key names no image.
+///
+/// # Safety
+/// `faces` must point at six readable keys.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_cubemap_from_faces(faces: *const i32) -> i32 {
+    crate::interop::guard(|| {
+        if faces.is_null() {
+            return status::NULL_ARG;
+        }
+
+        #[cfg(not(feature = "render"))]
+        {
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            let keys = unsafe { core::slice::from_raw_parts(faces, 6) };
+
+            with_world(|world| {
+                let mut handles = Vec::with_capacity(6);
+                for key in keys {
+                    match crate::render::image_handle(world, *key) {
+                        Ok(Some(handle)) => handles.push(handle),
+                        Ok(None) => return status::NULL_ARG,
+                        Err(refusal) => return refusal,
+                    }
+                }
+
+                let Ok(faces) = <[_; 6]>::try_from(handles) else {
+                    return status::NULL_ARG;
+                };
+
+                // A pixel to stand in until the faces arrive, so the handle names an image now.
+                let placeholder = bevy::image::Image::new_fill(
+                    bevy::render::render_resource::Extent3d {
+                        width: 1,
+                        height: 1,
+                        depth_or_array_layers: 1,
+                    },
+                    bevy::render::render_resource::TextureDimension::D2,
+                    &[0, 0, 0, 255],
+                    bevy::render::render_resource::TextureFormat::Rgba8UnormSrgb,
+                    bevy::asset::RenderAssetUsages::default(),
+                );
+
+                let Some(mut images) = world.get_resource_mut::<bevy::asset::Assets<bevy::image::Image>>() else {
+                    return status::NOT_PRESENT;
+                };
+                let target = images.add(placeholder);
+
+                world
+                    .get_resource_or_init::<crate::render::post::PendingFaces>()
+                    .0
+                    .push(crate::render::post::PendingFace { target: target.clone(), faces });
+
+                crate::assets::insert_handle(world, target.untyped())
+            })
+        }
+    })
+}
+
 /// Asks for an image to be cut into `count` layers or slices once it has loaded.
 ///
 /// `volume` non-zero makes a 3D texture of `count` slices, and zero an array of `count` 2D layers.

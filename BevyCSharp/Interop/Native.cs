@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 164;
+    internal const int ExpectedAbiVersion = 165;
 
     static Native() => NativeLoader.Initialize();
 
@@ -704,6 +704,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_make_cubemap(int image);
+
+    /// <summary>Makes a cubemap out of six images, one a face, returning its key at once.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_cubemap_from_faces(int* faces);
 
     /// <summary>Asks for an image to be cut into layers or slices once it has loaded.</summary>
     [LibraryImport(Library)]

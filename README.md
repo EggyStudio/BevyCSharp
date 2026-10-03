@@ -1957,7 +1957,9 @@ Render.SetSkybox(camera, AssetServer.Load(AssetKind.Image, "sky.png"), brightnes
 
 The file is six square faces, in a column, which is the layout most cubemap textures ship in, in a
 row, or in a horizontal or vertical cross, as cubemaps exported from a painting tool often are. The
-shape says which, and it is turned into a cube once it has decoded. `brightness` is in candelas per square meter like the rest
+shape says which, and it is turned into a cube once it has decoded. A cubemap shipped as six files
+is put together with `Render.CubemapFromFaces(px, nx, py, ny, pz, nz)`, whose handle can be given
+to the skybox at once. `brightness` is in candelas per square meter like the rest
 of the lighting, so the useful numbers are in the hundreds or thousands; a brightness of one is a
 night sky and comes out black. A skybox is seen behind the scene and does not light it.
 

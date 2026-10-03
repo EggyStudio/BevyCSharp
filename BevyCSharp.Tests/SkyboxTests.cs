@@ -116,9 +116,9 @@ public sealed class SkyboxTests
     }
 
     /// <summary>
-    /// The same six faces, laid out as a column, a horizontal cross, a vertical cross and a row,
-    /// draw the same sky, so each layout puts every face where the column has it and turned the
-    /// way the column has it.
+    /// The same six faces, laid out as a column, a horizontal cross, a vertical cross and a row, or
+    /// given as six images, draw the same sky, so each puts every face where the column has it and
+    /// turned the way the column has it.
     /// </summary>
     /// <remarks>
     /// Each face is its own blue with a gradient across it, red along and green down, so a face in
@@ -126,7 +126,7 @@ public sealed class SkyboxTests
     /// and along +X, see three of the faces between them, the one a vertical cross turns among them.
     /// </remarks>
     [Fact]
-    public void ACrossAndARowDrawTheSameSkyAsAColumn()
+    public void ACrossARowAndSixImagesDrawTheSameSkyAsAColumn()
     {
         if (!App.HasRenderer) return;
 
@@ -168,13 +168,36 @@ public sealed class SkyboxTests
         var vertical = (3, 4, Layout(3, 4, [(2, 1, false), (0, 1, false), (1, 0, false), (1, 2, false), (1, 1, false), (1, 3, true)]));
         var row = (6, 1, Layout(6, 1, [(0, 0, false), (1, 0, false), (2, 0, false), (3, 0, false), (4, 0, false), (5, 0, false)]));
 
+        // And the six as images of their own, as a cubemap shipped as six files is.
+        AssetHandle Separate()
+        {
+            var faces = new AssetHandle[6];
+            for (var face = 0; face < 6; face++)
+            {
+                var pixels = new byte[Face * Face * 4];
+                for (var y = 0; y < Face; y++)
+                {
+                    for (var x = 0; x < Face; x++)
+                    {
+                        var (r, g, b) = Pixel(face, x, y);
+                        var at = ((y * Face) + x) * 4;
+                        (pixels[at], pixels[at + 1], pixels[at + 2], pixels[at + 3]) = (r, g, b, 255);
+                    }
+                }
+
+                faces[face] = Render.CreateImage(pixels, Face, Face);
+            }
+
+            return Render.CubemapFromFaces(faces[0], faces[1], faces[2], faces[3], faces[4], faces[5]);
+        }
+
         foreach (var looking in new[] { -Vec3.UnitZ, Vec3.UnitZ, Vec3.UnitX })
         {
-            var expected = Sky(column, looking);
+            var expected = Sky(Image(column), looking);
 
-            foreach (var (name, layout) in new[] { ("horizontal cross", horizontal), ("vertical cross", vertical), ("row", row) })
+            foreach (var (name, make) in new[] { ("horizontal cross", Image(horizontal)), ("vertical cross", Image(vertical)), ("row", Image(row)), ("six images", Separate) })
             {
-                var drawn = Sky(layout, looking);
+                var drawn = Sky(make, looking);
                 var different = 0;
 
                 for (var i = 0; i < expected.Pixels.Length; i++)
@@ -186,7 +209,10 @@ public sealed class SkyboxTests
             }
         }
 
-        static CapturedImage Sky((int Across, int Down, byte[] Pixels) layout, Vec3 looking)
+        static Func<AssetHandle> Image((int Across, int Down, byte[] Pixels) layout) =>
+            () => Render.CreateImage(layout.Pixels, (uint)(layout.Across * Face), (uint)(layout.Down * Face));
+
+        static CapturedImage Sky(Func<AssetHandle> make, Vec3 looking)
         {
             CapturedImage? picture = null;
             Capture? ticket = null;
@@ -200,8 +226,7 @@ public sealed class SkyboxTests
                     var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 60f });
                     world.Resource<EcsWorld>().Add(camera, Transform.LookingAt(Vec3.Zero, looking, Vec3.UnitY));
 
-                    var image = Render.CreateImage(layout.Pixels, (uint)(layout.Across * Face), (uint)(layout.Down * Face));
-                    Render.SetSkybox(camera, image, brightness: 1000f);
+                    Render.SetSkybox(camera, make(), brightness: 1000f);
                 },
                 "Test.Sky"));
 

@@ -536,6 +536,79 @@ impl PendingCubemaps {
     }
 }
 
+/// Cubemaps being put together from six images of their own, each waiting for all six to load.
+#[cfg(feature = "render")]
+#[derive(bevy::ecs::resource::Resource, Default)]
+pub struct PendingFaces(pub(crate) Vec<PendingFace>);
+
+/// One cubemap made of six images: the image it becomes, and the faces in the column's order.
+#[cfg(feature = "render")]
+pub struct PendingFace {
+    /// The image handed back at once, which holds a placeholder until the faces arrive.
+    pub target: bevy::asset::Handle<bevy::image::Image>,
+    /// +X, -X, +Y, -Y, +Z, -Z.
+    pub faces: [bevy::asset::Handle<bevy::image::Image>; 6],
+}
+
+/// Fills each cubemap made of six images once all six have loaded, as a column of their pixels,
+/// and hands it on to be made a cube.
+///
+/// The faces have to be square, one size and one format, since a cube's faces are one texture's
+/// layers. A set that is not is dropped with a warning rather than drawn wrongly.
+#[cfg(feature = "render")]
+pub fn gather_faces(
+    mut pending: bevy::ecs::system::ResMut<PendingFaces>,
+    mut cubemaps: bevy::ecs::system::ResMut<PendingCubemaps>,
+    mut images: bevy::ecs::system::ResMut<bevy::asset::Assets<bevy::image::Image>>,
+) {
+    pending.0.retain(|waiting| {
+        let faces: Vec<_> = waiting.faces.iter().filter_map(|face| images.get(face)).collect();
+        if faces.len() < 6 {
+            return true;
+        }
+
+        let first = &faces[0].texture_descriptor;
+        let fits = faces.iter().all(|face| {
+            let descriptor = &face.texture_descriptor;
+            descriptor.size == first.size
+                && descriptor.format == first.format
+                && descriptor.size.width == descriptor.size.height
+                && descriptor.size.depth_or_array_layers == 1
+                && face.data.is_some()
+        });
+
+        if !fits {
+            bevy::log::warn!(
+                "The six images asked to be a cubemap are not square faces of one size and one \
+                 format, so the cubemap will not draw."
+            );
+            return false;
+        }
+
+        let mut column = Vec::new();
+        for face in &faces {
+            column.extend_from_slice(face.data.as_deref().unwrap_or_default());
+        }
+
+        let mut made = bevy::image::Image::new(
+            bevy::render::render_resource::Extent3d {
+                width: first.size.width,
+                height: first.size.height * 6,
+                depth_or_array_layers: 1,
+            },
+            bevy::render::render_resource::TextureDimension::D2,
+            column,
+            first.format,
+            faces[0].asset_usage,
+        );
+        made.sampler = faces[0].sampler.clone();
+
+        let _ = images.insert(&waiting.target, made);
+        cubemaps.push(waiting.target.clone());
+        false
+    });
+}
+
 /// Turns each loaded image on the list into a cubemap, and forgets it.
 ///
 /// Six faces stacked vertically, the layout every cubemap texture on the web is in and the one
@@ -616,11 +689,17 @@ pub fn reinterpret_cubemaps(
     mut pending: bevy::ecs::system::ResMut<PendingCubemaps>,
     mut environments: bevy::ecs::system::ResMut<PendingEnvironments>,
     mut images: bevy::ecs::system::ResMut<bevy::asset::Assets<bevy::image::Image>>,
+    faces: bevy::ecs::system::Res<PendingFaces>,
 ) {
     use bevy::light::GeneratedEnvironmentMapLight;
     use bevy::render::render_resource::{TextureViewDescriptor, TextureViewDimension};
 
     pending.0.retain(|waiting| {
+        // One made of six images holds a placeholder until all six arrive, which is not a cube.
+        if faces.0.iter().any(|gathering| gathering.target == waiting.image) {
+            return true;
+        }
+
         let Some(mut image) = images.get_mut(&waiting.image) else {
             // Still loading. Asking again next frame is the whole of the wait.
             return true;

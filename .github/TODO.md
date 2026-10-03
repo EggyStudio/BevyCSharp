@@ -177,11 +177,10 @@ as a skybox or used to light the scene through the atmosphere. `bevy_post_proces
 `bevy_anti_alias` are compiled into the render profile, so most of what is left is bridge work over
 code already in the binary.
 
-- **A cubemap of six files, or compressed in a cross.** A cubemap is read as a column of six
-  faces, a row of them, or a horizontal or vertical cross, laid out as a column when its pixels
-  arrive. Six separate files would need a call taking six images, and a compressed cross would be
-  rearranged block by block. A cube cameras draw into, a layer each, is a target made with six
-  layers.
+- **A compressed cross.** A cubemap is read as a column of six faces, a row of them, a
+  horizontal or vertical cross, laid out as a column when its pixels arrive, or six images of
+  their own (`Render.CubemapFromFaces`). A compressed cross would be rearranged block by block. A
+  cube cameras draw into, a layer each, is a target made with six layers.
 - **One medium, which is earth's air.** Density, ground albedo and a quality setting are bridged.
   Mars is the other medium Bevy ships, and its dust phase comes from a texture the caller would have
   to supply, since nothing embeds one. `ScatteringMedium::new` takes arbitrary scattering and
