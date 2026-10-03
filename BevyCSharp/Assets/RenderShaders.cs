@@ -464,7 +464,7 @@ public static unsafe class Shaders
     /// level the depth rounded down to a power of two, so a box whose nearest depth is farther
     /// than the texels it covers is hidden, which is the test a GPU culling instances or clusters
     /// makes. It turns Bevy's own occlusion culling on for the camera, which builds the pyramid,
-    /// and brings depth. A screen-space trace wants the nearest depth instead, which a camera image
+    /// and brings depth. A screen-space trace needs the nearest depth instead, which a camera image
     /// with mip levels built a level at a time gives.
     /// </param>
     public static void SetPrepass(

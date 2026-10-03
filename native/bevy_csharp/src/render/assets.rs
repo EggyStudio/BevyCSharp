@@ -159,7 +159,7 @@ pub unsafe extern "C" fn bcs_mesh_rebuild(
                 let Some(mut meshes) = world.get_resource_mut::<Assets<Mesh>>() else {
                     return status::UNSUPPORTED;
                 };
-                // Written through the guard, which is what marks the mesh changed for the renderer.
+                // Written through the guard, which marks the mesh changed for the renderer.
                 let Some(mut held) = meshes.get_mut(&handle) else {
                     return status::NOT_PRESENT;
                 };

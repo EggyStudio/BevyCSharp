@@ -546,7 +546,7 @@ public static class ComponentFields
 
             case FieldKind.Color:
             {
-                // Shown as sRGB, which is what a screen and a color picker mean by a color, and
+                // Shown in sRGB, the space a screen and a color picker mean by a color, and
                 // written back as the linear color the field holds.
                 var held = value as Color? ?? Color.White;
                 var srgb = held.ToSrgb();

@@ -584,7 +584,7 @@ public static class WorldPanel
 
         if (fits)
         {
-            // Before the button is let go as well as on it, which is what lights the row while
+            // Before the button is let go as well as on it, which lights the row while
             // the rows are held over it rather than only once they have landed.
             var payload = ImGui.AcceptDragDropPayload(
                 Dragged,

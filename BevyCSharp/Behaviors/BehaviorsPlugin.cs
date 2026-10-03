@@ -87,7 +87,7 @@ public sealed class BehaviorsPlugin : IPlugin
         "Trimming", "IL2026:RequiresUnreferencedCode",
         Justification =
             "Best-effort fallback only. Every registration is also reported by a generated "
-            + "module initializer, which is what a trimmed build relies on; finding nothing "
+            + "module initializer, which a trimmed build relies on; finding nothing "
             + "here is correct rather than a failure.")]
     private static int ScanForMissedRegistrations(App app)
     {

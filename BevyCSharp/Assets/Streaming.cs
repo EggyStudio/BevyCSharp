@@ -91,7 +91,7 @@ public static class Streaming
             }
             catch (OperationCanceledException)
             {
-                // Cancelled, so nobody is waiting for it.
+                // Canceled, so nobody is waiting for it.
             }
             catch (Exception error)
             {

@@ -117,7 +117,7 @@ internal static class ComponentRegistry
 /// </remarks>
 /// <typeparam name="T">
 /// A blittable struct. The <c>unmanaged</c> constraint makes the layout safe to hand to Bevy
-/// verbatim, with no references, no GC involvement and no marshalling on the hot path.
+/// verbatim, with no references, no GC involvement and no marshaling on the hot path.
 /// </typeparam>
 public static class ComponentType<T> where T : unmanaged
 {

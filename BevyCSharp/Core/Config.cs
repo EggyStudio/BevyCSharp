@@ -251,7 +251,7 @@ public sealed class Config
     /// <para>
     /// Wayland never tells an app where its window is, so there the size and whether it was
     /// maximized come back and the compositor chooses the place. Off unless asked for, since a test
-    /// or a tool that opens a window wants the same window every time, and ignored without one.
+    /// or a tool that opens a window needs the same window every time, and ignored without one.
     /// </para>
     /// </remarks>
     public bool RememberWindow { get; set; }

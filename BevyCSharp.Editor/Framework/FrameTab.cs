@@ -63,7 +63,7 @@ public static class FrameTab
 
         if (camera.IsNone)
         {
-            EditorSurface.Empty("No camera", "The scene's camera is what this watches.");
+            EditorSurface.Empty("No camera", "This watches the scene's camera.");
             return;
         }
 
@@ -150,7 +150,7 @@ public static class FrameTab
         ImGui.TableSetupColumn("share", ImGuiTableColumnFlags.WidthStretch, 0.6f);
         ImGui.TableSetupColumn("ms", ImGuiTableColumnFlags.WidthFixed, 52f);
 
-        // The column names, dimmed, which are what the numbers under them are rather than a title.
+        // The column names, dimmed, which name the numbers under them rather than title the table.
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
         ImGui.TextDisabled("pass");

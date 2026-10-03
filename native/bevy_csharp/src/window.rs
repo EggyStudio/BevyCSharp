@@ -329,8 +329,8 @@ pub extern "C" fn bcs_window_set_style(decorations: i32, resizable: i32, always_
 /// `0` the platform's arrow, `1` a text caret, `2` a hand for something to press, `3` four arrows
 /// for moving, `4` a no-entry sign, `5` left and right, `6` up and down, `7` the diagonal from the
 /// bottom left to the top right, `8` the other diagonal, `9` an open hand, `10` a closed one. The
-/// shapes an interface asks for as the pointer crosses what it draws, which is what makes a
-/// field read as one to type in and an edge as one to drag.
+/// shapes an interface asks for as the pointer crosses what it draws, which makes a field
+/// read as one to type in and an edge as one to drag.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_window_set_cursor_shape(shape: i32) -> i32 {
     crate::interop::guard(|| {
@@ -908,7 +908,7 @@ pub fn install(app: &mut bevy::app::App) {
 }
 
 /// The mode a see-through window is composited in, out of those its surface offers: premultiplied,
-/// since that is what a camera and the interface write, then straight, then opaque.
+/// since a camera and the interface write that, then straight, then opaque.
 ///
 /// Opaque last and always, because Bevy configures a surface with whatever mode the window asked
 /// for without asking the surface first, and a mode the surface lacks is a validation error that

@@ -580,7 +580,7 @@ internal static class ColorPicker
     /// </para>
     /// <para>
     /// A color set in OKLCH or OKLab that falls outside what the screen can show is brought back
-    /// inside it, each channel clamped, which is what a browser does as well.
+    /// inside it, each channel clamped, as a browser does as well.
     /// </para>
     /// </remarks>
     private static bool Numbers(ref Vector4 color, bool alpha)

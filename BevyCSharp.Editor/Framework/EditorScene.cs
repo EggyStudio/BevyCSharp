@@ -40,8 +40,8 @@ public static class EditorScene
     /// <summary>Writes the scene to a file.</summary>
     /// <returns>How many entities were written.</returns>
     /// <remarks>
-    /// Every file the scene refers to is given an id as it is written, since the editor is what
-    /// edits the project, so a model renamed afterward is still found by the scene.
+    /// Every file the scene refers to is given an id as it is written, since the editor edits the
+    /// project, so a model renamed afterward is still found by the scene.
     /// </remarks>
     public static int Save(EcsWorld world, string path)
     {

@@ -234,7 +234,7 @@ line width, render layers and whether anything is drawn at all.
   where the two are and rebuilt.
 - **A batch is one call, not one buffer.** `Gizmos.Batch` gathers every shape and hands them over
   together, and the bridge still records each into its queue and draws it with its own Bevy call.
-  That is what Bevy's gizmos cost anyway, so the saving is the crossing and not the drawing.
+  Bevy's gizmos cost that anyway, so the saving is the crossing and not the drawing.
 
 ### 2D
 
@@ -418,7 +418,7 @@ per fixed step, and writes each dynamic body back through `Transform`. What is l
   Per-body materials are a table the contact callback reads by the two handles.
 - **No convex hulls.** Boxes, spheres, capsules and cylinders cover characters and props, and a
   mesh shape covers a level, from triangles `Render.TryReadMesh` reads back. A rock or a crate of
-  odd shape that has to tumble wants a convex hull, which Bepu builds from points and which shifts
+  odd shape that has to tumble needs a convex hull, which Bepu builds from points and which shifts
   the body's center to the hull's, so the pose written back has to allow for it.
 - **Joints without motors or limits.** Ball joints, hinges, welds and distance ranges hold bodies
   together, and contacts are reported, a sensor making a trigger volume. A hinge that turns itself

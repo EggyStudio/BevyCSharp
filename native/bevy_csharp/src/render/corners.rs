@@ -9,7 +9,7 @@
 //! by how much lies outside. It runs after the camera's own passes and before its picture is put on
 //! the window, and the edge is antialiased because the coverage is worked out per pixel.
 //!
-//! The fill is what the corners show. Clear for a window whose own corners are being rounded, and
+//! The corners show the fill. Clear for a window whose own corners are being rounded, and
 //! whatever surrounds the viewport for one given part of a window, so the corner matches the
 //! window's clear color round it rather than being a clear notch in it.
 

@@ -260,7 +260,7 @@ public static class EditorWindowFrame
         if (OnEdge is not { } edge) return;
 
         // Not while something is being dragged or a menu is up. A drag that runs off the edge
-        // keeps the shape it started with, and a menu over the edge is what the pointer is on.
+        // keeps the shape it started with, and the pointer is on a menu over the edge.
         if (ImGui.IsAnyItemActive() || ImGui.IsPopupOpen(string.Empty, ImGuiPopupFlags.AnyPopupId)) return;
 
         ImGui.SetMouseCursor(edge switch

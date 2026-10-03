@@ -158,7 +158,7 @@ public static class EditorRows
     /// <summary>A unit after the name just written, in parentheses and dimmed.</summary>
     /// <remarks>
     /// Its own call, since a field whose name sits on a line of its own writes the name itself and
-    /// wants the same suffix after it.
+    /// needs the same suffix after it.
     /// </remarks>
     /// <param name="unit">What the value is measured in.</param>
     public static void Unit(string unit)

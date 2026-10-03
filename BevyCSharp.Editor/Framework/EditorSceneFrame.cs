@@ -67,7 +67,7 @@ public static class EditorSceneFrame
             ctx.Ecs.Add(_frame, new EditorOnly());
 
             // Nothing round the viewport but what the frame drew, so the window's own clear is
-            // clear, which is what shows past the frame's rounded corners.
+            // clear, and the frame's rounded corners show it.
             Render.SetClearColor((0f, 0f, 0f, 0f));
         }
 

@@ -394,7 +394,7 @@ public static class EditorWidgets
     /// </para>
     /// <para>
     /// A color that is partly clear shows as itself on the left half and as it would look over
-    /// light gray on the right, which is what ImGui's half preview says with a checker. A checker
+    /// light gray on the right, as ImGui's half preview says with a checker. A checker
     /// cannot be cut to a round end without drawing it square by square, and the step against gray
     /// says the same.
     /// </para>

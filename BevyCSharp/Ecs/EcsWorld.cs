@@ -10,7 +10,7 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// This type stores nothing. Every call reaches into the live Bevy world, which means there is
-/// no second copy of your game state to keep in sync and no marshalling layer between a
+/// no second copy of your game state to keep in sync and no marshaling layer between a
 /// behavior and its components.
 /// </para>
 /// <para>

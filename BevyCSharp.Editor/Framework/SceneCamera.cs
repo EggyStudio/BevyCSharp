@@ -19,7 +19,7 @@ namespace BevyCSharp.Editor.Framework;
 /// and whether the view shows the scene's effects.
 /// </para>
 /// <para>
-/// The look is the editor's own plain one unless it is overridden, since a view to work in wants
+/// The look is the editor's own plain one unless it is overridden, since a view to work in needs
 /// to show surfaces as they are rather than through a grade. Overridden, it takes a tonemapper,
 /// bloom, an antialiasing pass and either a fixed exposure or one that follows the light, so a
 /// scene can be judged under the look it will ship with. Everything is saved with the editor's

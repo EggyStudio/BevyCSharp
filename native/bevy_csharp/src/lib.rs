@@ -12,7 +12,7 @@
 //! **Systems** are C# function pointers added to Bevy's `Startup`/`First`/`PreUpdate`/
 //!   `Update`/`PostUpdate`/`Last` schedules as exclusive systems.
 //! **Iteration** hands C# raw pointers into Bevy's table storage, so a behavior's
-//!   per-entity method writes straight into the component column with no marshalling.
+//!   per-entity method writes straight into the component column with no marshaling.
 //!
 //! # Threading
 //!

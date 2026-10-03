@@ -271,8 +271,8 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                             },
                             present_mode,
                             // Composited with alpha, where asked for, which the platform has to
-                            // know before the window exists. Premultiplied, since that is what a
-                            // camera and the interface write. Where the surface cannot, the window
+                            // know before the window exists. Premultiplied, since a camera and the
+                            // interface write that. Where the surface cannot, the window
                             // module falls back before the surface is made.
                             transparent: config.transparent != 0,
                             composite_alpha_mode: if config.transparent != 0 {

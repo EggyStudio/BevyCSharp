@@ -20,7 +20,7 @@ public sealed class MaterialTests
     /// <summary>What an entity is drawn with can be asked about by where it came from.</summary>
     /// <remarks>
     /// A mesh and a material are Bevy's own components holding typed handles, which nothing on this
-    /// side can read the way it reads a component of its own. The path is what remains, and the two
+    /// side can read the way it reads a component of its own. The path remains, and the two
     /// cases worth pinning are an asset with one and an asset without.
     /// </remarks>
     [Fact]

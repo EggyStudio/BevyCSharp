@@ -257,8 +257,8 @@ public static unsafe class Window
     /// <summary>Sets the shape of the pointer while it is over the window.</summary>
     /// <remarks>
     /// The interface sets this itself as the pointer crosses a field or an edge, whenever the shape
-    /// it wants changes, so a shape set here holds until the pointer next moves onto something of
-    /// the interface's that wants another.
+    /// it asks for changes, so a shape set here holds until the pointer next moves onto something
+    /// of the interface's that asks for another.
     /// </remarks>
     /// <param name="shape">Which shape.</param>
     /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>

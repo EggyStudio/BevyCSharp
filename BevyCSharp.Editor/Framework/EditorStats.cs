@@ -274,7 +274,7 @@ public static class EditorStats
         Row("threads", Say($"{Process.GetCurrentProcess().Threads.Count}"));
     }
 
-    /// <summary>What the keys do here, which is what this button used to show on its own.</summary>
+    /// <summary>What the keys do here.</summary>
     private static void Keys()
     {
         Heading("Keys");

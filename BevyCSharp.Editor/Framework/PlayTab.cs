@@ -14,9 +14,10 @@ namespace BevyCSharp.Editor.Framework;
 /// about something else.
 /// </para>
 /// <para>
-/// The top row is the project and what can be done with it, and under it is what the game or the
-/// build wrote, which the console also shows among everything else. Kept here on its own, because
-/// the question after pressing Build is whether it built, and the answer is in the last lines.
+/// The top row is the project and what can be done with it, and under it the game or the build's
+/// output is shown, which the console also shows among everything else. Kept here on its own,
+/// because the question after pressing Build is whether it built, and the answer is in the last
+/// lines.
 /// </para>
 /// </remarks>
 public static class PlayTab

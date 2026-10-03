@@ -42,8 +42,8 @@ config.Gui = true;
 config.WatchAssets = true;
 
 // See-through where nothing is drawn, so the editor is the shape of its panels and its scene rather
-// than a black rectangle round them. The platform decides, and an opaque window is what it falls
-// back to, which looks as the editor always did.
+// than a black rectangle round them. The platform decides, and it falls back to an opaque window,
+// which looks as the editor always did.
 config.Transparent = !args.Contains("--offscreen");
 
 // As many frames as the machine can draw rather than as many as the display shows, so the
@@ -60,7 +60,7 @@ config.GpuTimings = true;
 Shaders.KeepRenderingAfterErrors = true;
 
 // Reopens where it was closed, at the size it had, unless a size was asked for, which wins, since a
-// run given one is usually a check that wants the same window every time.
+// run given one is usually a check that needs the same window every time.
 config.RememberWindow = size is null;
 
 // Answers `bcs` while it runs: what is in the world, what a click does, what the window looks

@@ -302,10 +302,10 @@ sixtieth of a second and hitches past a thirtieth drawn in the warning color, an
 second, the frame at its best, typical and worst, and how long the app has run. Then the GPU (the
 frame's render time, the time spent recording it, and the slowest passes), the world (entities,
 named ones, ones in a hierarchy, the selection and the last undo step), memory (the process, the
-managed heap, what is allocated a frame, collections and the last pause), and the renderer (the
-API, the device, the window, vsync, the bridge's profile and the runtime). The keys come last,
-which is what the button used to show on its own. Everything is read from what the engine already
-reports, and the card scrolls where the scene is too short for it.
+managed heap, what is allocated a frame, collections and the last pause), and the renderer (the API,
+the device, the window, vsync, the bridge's profile and the runtime). The keys come last. Everything
+is read from what the engine already reports, and the card scrolls where the scene is too short for
+it.
 
 ### Tabs
 

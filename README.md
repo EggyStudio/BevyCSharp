@@ -1163,7 +1163,7 @@ var material = Shaders.CreateMaterial(layered)
     .SetTexture("skies", dusk, 3)
     .SetSampler("linear", SamplerSettings.Clamped);
 
-Render.SetMaterial(ctx.Ecs, pond, material);                      // as many as the game wants
+Render.SetMaterial(ctx.Ecs, pond, material);                      // as many as the game needs
 ```
 
 A name is a global's own (`tint`), a field of a struct or a constant buffer (`sun.color`), or an
@@ -1521,9 +1521,9 @@ hidden until now.
 
 With `pyramid: true` the camera builds Bevy's hierarchical depth, and a shader on it declares
 `Texture2D<float> depth_pyramid;` and reads any level with `Load`. Each texel holds the farthest
-depth of the ones under it, starting from the depth rounded down to a power of two, which is what a
-GPU culling instances or clusters tests a box against. It turns Bevy's occlusion culling on for the
-camera as well, since that builds it. A screen-space trace wants the nearest depth instead, which a
+depth of the ones under it, starting from the depth rounded down to a power of two, which a GPU
+culling instances or clusters tests a box against. It turns Bevy's occlusion culling on for the
+camera as well, since that builds it. A screen-space trace needs the nearest depth instead, which a
 camera image with mip levels, built a level at a time, gives.
 
 A dispatch on a camera runs every frame at one of four points: `AfterPrepass`, once depth, normals,
@@ -1718,7 +1718,7 @@ Render.SetRoundedCorners(camera, 16f, (0f, 0f, 0f, 0.6f));     // corners showin
 Render.SetRoundedCorners(fullWindowCamera, 16f);               // or clear, for a round window
 ```
 
-The fill is what a rounded corner shows, clear unless given, so a viewport's corners can match the
+A rounded corner shows the fill, clear unless given, so a viewport's corners can match the
 clear color round them rather than being clear notches in it. A camera keeping a background of its
 own there clears to it (`ClearMode.Custom`) rather than to the world's color. Not every platform can composite a window with alpha, DirectX 12 often among them,
 and there the window is made opaque, what would have been clear is black, and the log says which it
@@ -2277,7 +2277,7 @@ The two drags are called when the button goes down and last until it is let go, 
 platform moves the window rather than the app. On Wayland an app is never told where its window
 is, so this is the only way a borderless window moves there at all. Bevy does not say whether a
 window is maximized, so a button that toggles it keeps that itself. The ImGui runtime sets the
-cursor shape as the pointer crosses a field or an edge, whenever the shape it wants changes, and
+cursor shape as the pointer crosses a field or an edge, whenever the shape it asks for changes, and
 the editor draws its own frame this way.
 
 On GNOME under Wayland, winit draws a title bar of its own that imitates an older GNOME rather than
@@ -3199,7 +3199,7 @@ ordinary Bevy component. It lives in tables, participates in archetypes, and Bev
 detection sees it.
 
 **Iteration is zero-copy.** A query hands C# raw pointers into Bevy's table storage. The
-per-entity loop writes straight into the component column, no marshalling, no staging buffer.
+per-entity loop writes straight into the component column, no marshaling, no staging buffer.
 
 **C# systems are exclusive systems.** While managed code can spawn and despawn at any moment,
 that is the only sound option, so Bevy serializes C# systems against each other. The parallelism

@@ -330,8 +330,8 @@ public static class SceneInstances
     /// </summary>
     /// <remarks>
     /// A node with no name is called by its place among its siblings (<c>#3</c>), and one sharing
-    /// its name with earlier siblings gets <c>#2</c>, <c>#3</c> and on after it, which is what keeps
-    /// two meshes a model calls the same apart. The root itself is the empty path.
+    /// its name with earlier siblings gets <c>#2</c>, <c>#3</c> and on after it, which keeps two
+    /// meshes a model calls the same apart. The root itself is the empty path.
     /// </remarks>
     public static string? PathOf(EcsWorld world, Entity root, Entity node)
     {

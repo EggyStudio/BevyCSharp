@@ -159,7 +159,7 @@ public static class EditorDraw
     /// A draw list cannot clip to a rounded shape, and a gradient ImGui draws is a rectangle, so a
     /// rounded one is the rectangle with each corner covered by a wedge of whatever it lies on.
     /// The wedge's arc is antialiased like any other filled path, so the corner reads as round
-    /// rather than stepped. Only right on a surface of one solid color, which is what a flyout is.
+    /// rather than stepped. Only right on a surface of one solid color, as a flyout is.
     /// </remarks>
     /// <param name="draw">What to draw into.</param>
     /// <param name="min">The top left of what is being rounded.</param>
