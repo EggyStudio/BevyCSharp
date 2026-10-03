@@ -38,10 +38,11 @@ public enum SelectionKind
 /// </remarks>
 public static class EditorSelection
 {
-    /// <summary>Which kind of thing was picked last.</summary>
+    /// <summary>Which kind of thing is selected.</summary>
     /// <remarks>
-    /// The data panel shows one thing, and this is how it knows which. Picking a file does not
-    /// deselect an entity, it becomes the more recent answer to "what am I looking at".
+    /// There is one selection, of entities or of a file, never both. Picking a file lets go of the
+    /// entities and picking an entity lets go of the file, so the details panel, the handles and
+    /// a key that acts on the selection all agree on what it is.
     /// </remarks>
     public static SelectionKind Latest { get; internal set; } = SelectionKind.None;
 
@@ -90,7 +91,11 @@ public static class EditorSelection
         // that cannot be let go of.
         if (entity.IsNone) Named.Clear();
 
-        if (!entity.IsNone) Chosen.Add(entity);
+        if (!entity.IsNone)
+        {
+            Chosen.Add(entity);
+            EditorAssets.Forget();
+        }
 
         Current = entity;
         Latest = entity.IsNone ? SelectionKind.None : SelectionKind.Entity;
@@ -120,6 +125,7 @@ public static class EditorSelection
         }
 
         Chosen.Add(entity);
+        EditorAssets.Forget();
         Current = entity;
         Latest = SelectionKind.Entity;
         ChangedOn = EditorShell.Context?.Time.FrameCount ?? 0;

@@ -429,7 +429,7 @@ internal static class EditorDrawn
 
         foreach (var user in world.All())
         {
-            if (EditorPreview.Owns(user) || EditorEntity.IsInterface(world, user) || !Render.IsDrawn(user)) continue;
+            if (PreviewRenderer.Owns(user) || EditorEntity.IsInterface(world, user) || !Render.IsDrawn(user)) continue;
 
             var handle = of(world, user);
             if (!handle.IsValid || handle == own || !seen.Add(handle)) continue;

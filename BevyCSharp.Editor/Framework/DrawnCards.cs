@@ -43,23 +43,35 @@ internal static class DrawnCards
         ImGui.Indent();
         if (ImGui.TreeNodeEx("Mesh##card", ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.DefaultOpen))
         {
-            if (PreviewRenderer.Show(ctx, MeshKey, new PreviewSubject.Mesh(mesh)))
-                PreviewRenderer.Draw(MeshKey, Side(), turnable: true);
-
-            var wire = PreviewRenderer.Wireframe(MeshKey);
-            if (Toggle("Wireframe", ref wire)) PreviewRenderer.SetWireframe(MeshKey, wire);
-
-            MeshActions(ctx.Ecs, entity, mesh);
-
-            // A primitive's measures, which rebuild it in place, so everything sharing it changes.
-            if (MeasuresOf(mesh) is { } measures)
-                foreach (var field in measures.Fields) ComponentFields.Row(ctx, entity, measures, field);
-
-            Facts(entity, mesh);
+            MeshBody(ctx, mesh, entity);
             ImGui.TreePop();
         }
 
         ImGui.Unindent();
+    }
+
+    /// <summary>
+    /// What the Mesh card holds, for a mesh an entity is drawn with or one picked as a file: the
+    /// picture, the measures of a primitive, and what it is made of.
+    /// </summary>
+    /// <param name="ctx">This frame.</param>
+    /// <param name="mesh">The mesh.</param>
+    /// <param name="entity">The entity drawn with it, which the actions for one entity need, or none.</param>
+    internal static void MeshBody(BehaviorContext ctx, AssetHandle mesh, Entity entity)
+    {
+        if (PreviewRenderer.Show(ctx, MeshKey, new PreviewSubject.Mesh(mesh)))
+            PreviewRenderer.Draw(MeshKey, Side(), turnable: true);
+
+        var wire = PreviewRenderer.Wireframe(MeshKey);
+        if (Toggle("Wireframe", ref wire)) PreviewRenderer.SetWireframe(MeshKey, wire);
+
+        if (!entity.IsNone) MeshActions(ctx.Ecs, entity, mesh);
+
+        // A primitive's measures, which rebuild it in place, so everything sharing it changes.
+        if (MeasuresOf(mesh) is { } measures)
+            foreach (var field in measures.Fields) ComponentFields.Row(ctx, entity, measures, field);
+
+        Facts(entity, mesh);
     }
 
     /// <summary>The Material card, folded under the Material row.</summary>
@@ -85,19 +97,34 @@ internal static class DrawnCards
 
         if (open)
         {
-            if (PreviewRenderer.Show(ctx, MaterialKey, new PreviewSubject.Material(material)))
-                PreviewRenderer.Draw(MaterialKey, Side(), turnable: true);
-
-            Actions(ctx, entity, material, file, users);
-
-            var schema = SchemaOf(material);
-            foreach (var field in schema.Fields) ComponentFields.Row(ctx, entity, schema, field);
-
+            MaterialBody(ctx, material, entity, users);
             ImGui.TreePop();
         }
 
         ImGui.Unindent();
     }
+
+    /// <summary>
+    /// What the Material card holds, for a material an entity is drawn with or one picked as a
+    /// file: the picture and the settings as rows.
+    /// </summary>
+    /// <param name="ctx">This frame.</param>
+    /// <param name="material">The material.</param>
+    /// <param name="entity">The entity drawn with it, which the actions for one entity need, or none.</param>
+    /// <param name="users">How many entities share it, which decides whether a copy is offered.</param>
+    internal static void MaterialBody(BehaviorContext ctx, AssetHandle material, Entity entity, int users)
+    {
+        if (PreviewRenderer.Show(ctx, MaterialKey, new PreviewSubject.Material(material)))
+            PreviewRenderer.Draw(MaterialKey, Side(), turnable: true);
+
+        if (!entity.IsNone) Actions(ctx, entity, material, MaterialFiles.PathOf(material), users);
+
+        var schema = SchemaOf(material);
+        foreach (var field in schema.Fields) ComponentFields.Row(ctx, entity, schema, field);
+    }
+
+    /// <summary>How many entities of the scene are drawn with a material, for a file picked in the browser.</summary>
+    internal static int UsersOf(EcsWorld world, AssetHandle material) => Users(world, material);
 
     /// <summary>
     /// What can be done with a material besides changing it: give this entity a copy of its own,
@@ -275,7 +302,7 @@ internal static class DrawnCards
     /// <summary>Where a mesh came from: a file, a primitive with its measures, or code.</summary>
     private static string Origin(Entity entity, AssetHandle mesh)
     {
-        if (Render.MeshPathOf(entity) is { Length: > 0 } path) return path;
+        if (!entity.IsNone && Render.MeshPathOf(entity) is { Length: > 0 } path) return path;
         if (MeshFiles.PathOf(mesh) is { } file) return file;
 
         if (Render.RecipeOf(mesh) is { } recipe)

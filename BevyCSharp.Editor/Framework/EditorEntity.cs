@@ -271,7 +271,7 @@ public static class EditorEntity
 
         // The asset preview is the editor's too. It is in this world because there is one world,
         // and nobody put it there.
-        if (EditorPreview.Owns(entity)) return true;
+        if (PreviewRenderer.Owns(entity)) return true;
 
         foreach (var id in world.ComponentsOf(entity))
         {

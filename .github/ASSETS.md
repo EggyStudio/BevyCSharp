@@ -121,15 +121,15 @@ a thumbnail goes through a capture instead.
   and modification time, and are drawn from there through `ImGuiTextures.Load`. A few are rendered
   a frame, so opening a folder of a hundred models fills its tiles over a second rather than
   stalling for one.
-- **Released when not drawn,** as `EditorPreview` does today, because every live target costs a
-  render pass each frame whether anybody looks at it or not.
+- **Released when not drawn,** because every live target costs a render pass each frame whether
+  anybody looks at it or not.
 
 ## 3. The asset browser
 
-Built: model tiles show their thumbnails, and a search box, a chip per kind (models, images,
-scenes, data, sounds, scripts, shaders) and a tile size slider sit over the tiles. Not built:
-material tiles (there are no material files yet), sub-assets, badges, and the preview column's
-facts.
+Built: model, mesh and material tiles show their thumbnails, and a search box, a chip per kind and a
+tile size slider sit over the tiles. A picked file is shown in the details panel rather than in a
+column beside the tiles, since picking a file lets go of any entity and one panel shows the one
+selection (`DetailsPanel.AssetDetails`). Not built: sub-assets and badges.
 
 - **Tiles show the asset.** A model or mesh is rendered, a material is a sphere in it, a texture is
   itself, and a scene, a data asset or a sound is its icon with a small badge naming its kind.
@@ -137,8 +137,8 @@ facts.
   them can be dragged or picked without the rest, as Unity and Godot show a model's sub-assets.
 - **Search and kinds.** A search box and a row of chips (models, meshes, materials, textures,
   scenes, data, audio, shaders) above the tiles, and a slider for the tile size.
-- **The preview column** is a live `PreviewRenderer` view of the selected asset, with the same
-  facts the Mesh card shows.
+- **The details panel** shows the selected asset with a live `PreviewRenderer` view and the same
+  facts and rows the cards show.
 
 ## 4. The picker is the browser
 

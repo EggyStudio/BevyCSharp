@@ -44,33 +44,23 @@ public static class AssetsTab
     /// back out means every move between two directories goes up through their parent, and where
     /// something is has to be held in the head instead of being on the screen.
     /// </remarks>
+    /// <remarks>
+    /// What a picked file is like is the details panel's to show, as an entity's is, so the tab is
+    /// the folders and the tiles and nothing beside them.
+    /// </remarks>
     public static void Draw()
     {
-        // A model is geometry rather than pixels, so the only way to show one is to draw it. The
-        // picture is asked for here, once a frame, and drawn in the column below once it exists.
-        if (EditorShell.Context is { } ctx)
-        {
-            EditorPreview.Show(ctx, Previewable(EditorAssets.Selected));
-
-            // A model's tile at a time, while the tab is open to show them.
-            Thumbnails.Tick(ctx);
-        }
+        // A model's tile at a time, while the tab is open to show them.
+        if (EditorShell.Context is { } ctx) Thumbnails.Tick(ctx);
 
         var split = ImGuiTableFlags.Resizable
             | ImGuiTableFlags.NoBordersInBody
             | ImGuiTableFlags.NoSavedSettings;
 
-        var columns = EditorPreview.Ready ? 3 : 2;
-
-        if (!ImGui.BeginTable("##assets", columns, split)) return;
+        if (!ImGui.BeginTable("##assets", 2, split)) return;
 
         ImGui.TableSetupColumn("##tree", ImGuiTableColumnFlags.WidthFixed, 170f);
         ImGui.TableSetupColumn("##tiles", ImGuiTableColumnFlags.WidthStretch);
-
-        if (columns == 3)
-        {
-            ImGui.TableSetupColumn("##preview", ImGuiTableColumnFlags.WidthFixed, Preview);
-        }
 
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
@@ -81,27 +71,8 @@ public static class AssetsTab
 
         Tiles();
 
-        if (columns == 3)
-        {
-            ImGui.TableNextColumn();
-            EditorPreview.Draw(Preview);
-        }
-
         ImGui.EndTable();
     }
-
-    /// <summary>How large the preview is drawn, in logical pixels.</summary>
-    private const float Preview = 220f;
-
-    /// <summary>
-    /// The file to draw a picture of, or null for one nothing can be drawn of.
-    /// </summary>
-    /// <remarks>
-    /// Models only. An image already shows itself on its tile, and a sound or a script has nothing
-    /// to look at, so drawing a scene for one would be a pass a frame spent on an empty picture.
-    /// </remarks>
-    private static string? Previewable(string? selected) =>
-        selected is { Length: > 0 } && EditorAssets.KindOf(selected) == "model" ? selected : null;
 
     /// <summary>The folders, from the asset root down.</summary>
     private static void Tree()

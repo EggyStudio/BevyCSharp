@@ -234,7 +234,14 @@ after the entity into the folder the browser shows. [ASSETS.md](ASSETS.md) plans
 The Assets tab shows the folder chosen in its tree as tiles: an image as itself, a model as a
 thumbnail drawn once and kept under `user://thumbnails/` (`Thumbnails`), and anything else as its
 kind's icon. A search box narrows the tiles by name, a chip narrows them to one kind, and a slider
-sizes them. The selected model is also drawn in a column beside the tiles, turned by dragging.
+sizes them. A model's thumbnail is drawn on a transparent background, so the tile's own color shows
+round it, or on the color the setting "Thumbnail background" under Assets gives as hex with alpha.
+
+Picking a file selects it and lets go of any entity, since there is one selection, of entities or
+of a file, and picking an entity lets go of the file. The details panel then shows the file: its
+name and kind, a look at it by kind (a model turning, a mesh or material file under the card an
+entity's mesh or material gets, an image fitted to the panel, a scene's count of entities), "Place
+in the scene" for a model or a scene, and its path, size, last change and id.
 
 ### Instances
 
@@ -562,8 +569,8 @@ Nothing rounds the value itself.
 
 ### Data assets
 
-A data asset is edited in the details panel when its file was the last thing chosen in the asset
-browser, as one card of its fields under the file's name. The rows are the ones a component has,
+A data asset is edited in the details panel when its file is selected in the asset browser, as one
+card of its fields under the file's name. The rows are the ones a component has,
 so its attributes are honored the same way, and an edit is written to the file at the end of the
 frame and is a step in the history like any other. `Project/New data asset` makes one of any
 registered type in the directory being browsed, and a `DataRef` field picks from the files of its

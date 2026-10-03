@@ -19,8 +19,9 @@ public readonly record struct AssetEntry(string Name, string Path, bool IsDirect
 /// Nothing is imported and nothing is cataloged, because the engine does not work that way either.
 /// </para>
 /// <para>
-/// Selection is separate from the world's, because an asset is not an entity and a panel showing
-/// one is answering a different question. Picking a file does not deselect an entity.
+/// The selected file and the selected entities are one selection between them. Picking a file lets
+/// go of the entities, and picking an entity lets go of the file, so the details panel always shows
+/// the one thing a person last chose.
 /// </para>
 /// </remarks>
 public static class EditorAssets
@@ -41,12 +42,18 @@ public static class EditorAssets
         Directory = cut < 0 ? string.Empty : Directory[..cut];
     }
 
-    /// <summary>Points the data panel at a file.</summary>
+    /// <summary>Selects a file, letting go of any entity, so the details panel shows the file.</summary>
     public static void Select(string? relative)
     {
+        // One selection at a time, so picking a file is picking nothing else.
+        EditorSelection.Clear();
+
         Selected = relative;
         EditorSelection.Latest = relative is null ? SelectionKind.None : SelectionKind.Asset;
     }
+
+    /// <summary>Lets go of the selected file, for an entity being picked in its place.</summary>
+    internal static void Forget() => Selected = null;
 
     /// <summary>
     /// What is in the current directory: directories first, then files, both by name.

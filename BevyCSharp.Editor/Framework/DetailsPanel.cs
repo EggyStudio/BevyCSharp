@@ -21,8 +21,10 @@ namespace BevyCSharp.Editor.Framework;
 /// project's own with no fields is named as a tag under the entity.
 /// </para>
 /// <para>
-/// When a data asset file was chosen in the asset browser after the last entity, the panel shows
-/// the asset instead, its fields drawn as a component's are.
+/// When a file is selected in the asset browser, which lets go of any entity, the panel shows the
+/// file instead: what it is and where it is, and what can be seen or changed of it. A data asset's
+/// fields are drawn as a component's are, a mesh or a material file gets the card an entity's mesh
+/// or material gets, a model is drawn turning, and an image is shown.
 /// </para>
 /// </remarks>
 public static class DetailsPanel
@@ -32,11 +34,10 @@ public static class DetailsPanel
     {
         if (EditorShell.Context is not { } ctx) return;
 
-        if (EditorSelection.Latest == SelectionKind.Asset
-            && EditorAssets.Selected is { } file
-            && file.EndsWith(DataAssets.Extension, StringComparison.OrdinalIgnoreCase))
+        if (EditorSelection.Latest == SelectionKind.Asset && EditorAssets.Selected is { } file)
         {
-            DataAsset(ctx, file);
+            if (file.EndsWith(DataAssets.Extension, StringComparison.OrdinalIgnoreCase)) DataAsset(ctx, file);
+            else AssetDetails(ctx, file);
             return;
         }
 
@@ -194,6 +195,146 @@ public static class DetailsPanel
         if (open) Component(ctx, Entity.None, schema);
 
         EditorSurface.EndRegion();
+    }
+
+    /// <summary>What the model picture is asked for under.</summary>
+    private const string AssetKey = "asset";
+
+    /// <summary>
+    /// A file selected in the asset browser: what it is, a look at it where it has one, and where
+    /// it is.
+    /// </summary>
+    /// <remarks>
+    /// The look depends on the kind. A model is drawn turning, a mesh or a material file gets the
+    /// card an entity drawn with it gets (so a material file is edited here and written as it is
+    /// changed), an image is shown, and a model or a scene can be placed from here. Every file then
+    /// gets its facts, the id included, which is how a scene refers to it.
+    /// </remarks>
+    private static void AssetDetails(BehaviorContext ctx, string file)
+    {
+        var kind = EditorAssets.KindOf(file);
+
+        EditorSurface.FullWidth();
+        ImGui.TextUnformatted(Path.GetFileName(file));
+        ImGui.TextDisabled(kind);
+        ImGui.Spacing();
+
+        var open = EditorSurface.Region(
+            "##asset",
+            new Vector2(0f, MathF.Max(1f, ImGui.GetContentRegionAvail().Y)),
+            ImGuiChildFlags.NavFlattened);
+
+        if (open)
+        {
+            try
+            {
+                Look(ctx, file, kind);
+            }
+            catch (Exception error) when (error is IOException or InvalidDataException or System.Text.Json.JsonException)
+            {
+                // A file that does not read as what its name says is shown by its facts alone.
+                ImGui.TextDisabled($"Could not be read. {error.Message}");
+            }
+
+            AssetFacts(file);
+        }
+
+        EditorSurface.EndRegion();
+    }
+
+    /// <summary>What a file looks like, by its kind, and what can be done with it here.</summary>
+    private static void Look(BehaviorContext ctx, string file, string kind)
+    {
+        var side = MathF.Min(240f, MathF.Max(64f, ImGui.GetContentRegionAvail().X - RightInset));
+
+        switch (kind)
+        {
+            case "model":
+                if (PreviewRenderer.Show(ctx, AssetKey, new PreviewSubject.Scene(file)))
+                    PreviewRenderer.Draw(AssetKey, side, turnable: true);
+                Place(ctx, file);
+                break;
+
+            case "mesh":
+                DrawnCards.MeshBody(ctx, MeshFiles.Load(file), Entity.None);
+                break;
+
+            case "material":
+            {
+                var material = MaterialFiles.Load(file);
+                var users = DrawnCards.UsersOf(ctx.Ecs, material);
+                if (users > 0) ImGui.TextDisabled(users == 1 ? "Used by one entity" : $"Used by {users} entities");
+                DrawnCards.MaterialBody(ctx, material, Entity.None, users);
+                break;
+            }
+
+            case "image":
+            {
+                var at = ImGui.GetCursorScreenPos();
+                ImGui.Dummy(new Vector2(side, side));
+                EditorDraw.Picture(ImGui.GetWindowDrawList(), file, at, side);
+
+                var (width, height) = ImGuiTextures.SizeOf(ImGuiTextures.Load(file));
+                if (width > 0) ImGui.TextDisabled($"{width} × {height} pixels");
+                break;
+            }
+
+            case "scene":
+                ImGui.TextDisabled(SceneSize(file));
+                Place(ctx, file);
+                break;
+        }
+
+        ImGui.Spacing();
+    }
+
+    /// <summary>The button that puts a model or a scene in the scene being edited, as an instance.</summary>
+    private static void Place(BehaviorContext ctx, string file)
+    {
+        if (ImGui.Button("Place in the scene")) EditorCommands.Place(ctx.Ecs, file);
+    }
+
+    /// <summary>How many entities a scene file holds, kept by the time the file was written.</summary>
+    private static string SceneSize(string file)
+    {
+        var full = EditorAssets.Absolute(file);
+        var stamp = File.GetLastWriteTimeUtc(full);
+        if (SceneSizes.TryGetValue(file, out var known) && known.Stamp == stamp) return known.Said;
+
+        using var document = System.Text.Json.JsonDocument.Parse(File.ReadAllText(full));
+        var count = document.RootElement.TryGetProperty("entities", out var entities) ? entities.GetArrayLength() : 0;
+        var said = count == 1 ? "One entity" : $"{count} entities";
+
+        SceneSizes[file] = (stamp, said);
+        return said;
+    }
+
+    private static readonly Dictionary<string, (DateTime Stamp, string Said)> SceneSizes = [];
+
+    /// <summary>Where a file is, how large, when it changed and the id a scene refers to it by.</summary>
+    private static void AssetFacts(string file)
+    {
+        var full = EditorAssets.Absolute(file);
+        if (!File.Exists(full)) return;
+
+        var info = new FileInfo(full);
+        var id = AssetIds.IdOf(file);
+        var across = new Vector2(MathF.Max(1f, ImGui.GetContentRegionAvail().X - RightInset), 0f);
+        if (!EditorRows.Open("##facts", across)) return;
+
+        Fact("Path", file);
+        Fact("Size", info.Length < 1024 ? $"{info.Length} B" : $"{info.Length / 1024f:0.#} KB");
+        Fact("Changed", info.LastWriteTime.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture));
+        Fact("Id", id == 0 ? "none yet" : id.ToString("x16", CultureInfo.InvariantCulture));
+
+        EditorRows.Close();
+
+        static void Fact(string name, string value)
+        {
+            EditorRows.Line(name);
+            ImGui.AlignTextToFramePadding();
+            ImGui.TextDisabled(value);
+        }
     }
 
     /// <summary>One component, as a card with its fields in it.</summary>
