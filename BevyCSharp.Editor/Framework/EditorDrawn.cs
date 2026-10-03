@@ -355,8 +355,10 @@ internal static class EditorDrawn
         }
     }
 
-    /// <summary>One row, showing where it came from and offering somewhere else.</summary>
-    /// <param name="named">What the row is called, where that is not its title, such as a part's name.</param>
+    /// <summary>
+    /// One row, showing where it came from and offering somewhere else, called by its title or, for
+    /// a part of a model, by <c>named</c>.
+    /// </summary>
     private static void Row(
         BehaviorContext ctx,
         Entity entity,

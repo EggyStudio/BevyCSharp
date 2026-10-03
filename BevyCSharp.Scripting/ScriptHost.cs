@@ -4,7 +4,7 @@ using Bevy;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace BevyCSharp.Editor.Framework;
+namespace Bevy.Scripting;
 
 /// <summary>
 /// Compiles behavior scripts from a directory and swaps them in while the app runs.
@@ -20,7 +20,7 @@ namespace BevyCSharp.Editor.Framework;
 /// Each build goes into a collectible load context of its own, and each generation registers under
 /// a tag of its own. Reloading is therefore three steps, which are to compile the new one, retire
 /// the old tag and drop the old context. A generation that fails to compile changes nothing, so a
-/// half-typed file leaves the running one alone rather than taking the editor down with it.
+/// half-typed file leaves the running one alone rather than taking the app down with it.
 /// </para>
 /// <para>
 /// The app has to have had <see cref="App.EnableDynamicSystems"/> called before it started, or
@@ -79,7 +79,7 @@ public sealed class ScriptHost(App app, string directory)
         }
 
         // Only once the new generation is in. Retiring the old one first would leave a frame
-        // with neither, and a failure above would leave the editor with nothing at all.
+        // with neither, and a failure above would leave the app with nothing at all.
         Retire();
 
         _loaded = context;

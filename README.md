@@ -3027,9 +3027,10 @@ handful of numbers that `EditorShell` owns and every part reads, saved with the 
 editor opens the way it was left. The look is one theme file, `assets/theme.txt`, which the Style
 tab writes. [.github/EDITOR.md](.github/EDITOR.md) has the design language in full.
 
-The Play tab, `F5` or `Project/Play` runs the game in a window of its own and stops it again, and
-the tab builds it without running it and shows what either wrote. [.github/PLAY.md](.github/PLAY.md) has the plan past
-that, from playing the scene being edited to a tab that builds a game to ship.
+The Play tab runs the game in a window of its own and stops it again, builds it without running it,
+exports it for a player and shows what each wrote. `F5` plays the scene being edited instead,
+through `BevyCSharp.Player`, so a change made in the editor is seen without being saved or written
+into code. [.github/PLAY.md](.github/PLAY.md) has the plan past that.
 
 Two things it is built on belong to the library rather than to the editor, and any tool can use
 them.

@@ -47,6 +47,11 @@ internal static class EditorConsoleCommands
         return $"ran {path}";
     }
 
+    /// <summary>Plays the scene being edited in the player, or stops what is playing.</summary>
+    [Command("play.scene", "Plays the scene being edited in a window of its own, or stops what is playing")]
+    internal static string PlayScene() =>
+        EditorPlay.PlayScene() ?? (EditorPlay.Running ? $"playing {EditorPlay.PlayedScene}" : "stopped");
+
     /// <summary>Exports the project as the Play tab's Export does, for a runtime identifier.</summary>
     [Command("project.export", "Exports the project for a platform, with its assets in the bridge if asked: project.export <rid> [embed]")]
     internal static string Export(string line)

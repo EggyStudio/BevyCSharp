@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <RootNamespace>Bevy.Scripting</RootNamespace>
+    </PropertyGroup>
+
+    <!--
+      Compiling behavior scripts while an app runs, shared by the editor and the player that plays
+      the scene being edited. Its own project rather than part of the library, because it carries
+      Roslyn, and a shipped game compiles its scripts ahead of time and has no reason to carry a
+      compiler. The editor and the player reference it, and a game does not.
+    -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../BevyCSharp/BevyCSharp.csproj"/>
+        <!--
+          Referenced for its generator type rather than loaded as an analyzer, since this project
+          declares no behaviors of its own and runs the generator over the scripts it compiles, so a
+          script becomes a behavior the same way a compiled one does.
+        -->
+        <ProjectReference Include="../BevyCSharp.Generator/BevyCSharp.Generator.csproj"
+                          ReferenceOutputAssembly="true"/>
+    </ItemGroup>
+
+</Project>

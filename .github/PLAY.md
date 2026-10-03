@@ -34,21 +34,24 @@ nothing on any other desktop or platform.
 
 ## 1. Playing the scene being edited
 
-What is played is the project's own `Main`, which builds its own world. Godot plays the scene open
-in the editor, so a change made there is seen without being written into code.
+The project's own `Main` builds its own world. Godot plays the scene open in the editor, so a
+change made there is seen without being written into code. Built, all of it:
 
-- **A player.** A small entry point the library provides (`BevyCSharp.Player`, or a `--play <file>`
-  argument any app built on the library understands) that starts an app, loads a scene file
-  ([SCENES.md](SCENES.md)) and spawns what it holds, and compiles the scripts under `assets/scripts` through the
-  script host the editor uses. The script host lives in the editor, so it moves to a package of its
-  own that the player and the editor both reference, and a shipped game leaves it out and compiles
-  its scripts ahead of time.
-- **Saving before playing.** Play writes the edited scene to a file under `build/play/` rather than
-  over the scene's own file, so playing never changes what is saved, and passes that file to the
-  player.
-- **Two ways to play,** as Godot's "Run Project" and "Run Current Scene": the project's `Main`, as
-  it is now, and the scene being edited through the player. The tab offers both, and `F5` takes
-  the second.
+- **A player.** `BevyCSharp.Player` starts an app (`--scene <file> --assets <dir>`, and
+  `--offscreen`, `--serve` and `--size` as the sample takes them), compiles the scripts under the
+  asset folder's `scripts` through the script host the editor uses, then loads the scene file
+  ([SCENES.md](SCENES.md)) and spawns what it holds, saying by name any type it did not know. A
+  scene with no camera of its own, which is every scene made in the editor, since the editor's
+  camera is its own and not saved, gets one where `--view` puts it. The script host moved out of
+  the editor into `BevyCSharp.Scripting`, which the player and the editor both reference and a
+  shipped game leaves out, since it carries Roslyn.
+- **Saving before playing.** Play writes the edited scene, unsaved changes and all, to
+  `user://play/scene.scene.json` in the editor's own directory rather than over the scene's own
+  file, so playing never changes what is saved, and passes that file, the editor's asset folder
+  and the editor camera's place to the player.
+- **Two ways to play,** as Godot's "Run Project" and "Run Current Scene". The Play tab's Play runs
+  the project's `Main`, and Play scene, `F5`, `Project/Play scene` and `play.scene` run the scene
+  being edited through the player. `Project/Play project` reaches the first from the menu.
 
 ## 2. Seeing the running game from the editor
 
@@ -190,7 +193,5 @@ For what C# owns, the same design on the managed side:
 
 ## Order
 
-1. Scene files, as [SCENES.md](SCENES.md) orders them, which the player loads.
-2. The player and playing the edited scene.
-3. The remote view.
-4. Embedding through a shared bridge, so the managed reads come from the same bytes.
+1. The remote view.
+2. Embedding through a shared bridge, so the managed reads come from the same bytes.

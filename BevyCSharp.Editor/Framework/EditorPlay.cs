@@ -108,6 +108,54 @@ public static class EditorPlay
     /// <summary>Builds the project without running it, which says whether it compiles.</summary>
     public static void Build() => Start(PlayJob.Building, ["build", "{project}"]);
 
+    /// <summary>Where the scene being played is written, a file of the editor's own.</summary>
+    /// <remarks>
+    /// Under the player's directory rather than over the scene's own file, so playing never
+    /// changes what is saved, and nothing the editor writes to play lands in the project.
+    /// </remarks>
+    public static string PlayedScene => UserData.Resolve("user://play/scene.scene.json");
+
+    /// <summary>Plays the scene being edited, or stops what is playing.</summary>
+    /// <remarks>
+    /// <para>
+    /// Godot's "Run Current Scene" beside its "Run Project". The scene is written as it is now,
+    /// unsaved changes and all, to <see cref="PlayedScene"/>, and <c>BevyCSharp.Player</c> plays it
+    /// in a window of its own against the editor's asset folder, compiling the same scripts the
+    /// editor runs. A scene with no camera of its own is seen from where the editor's camera is.
+    /// </para>
+    /// <para>
+    /// The player is found in the checkout the editor runs from, as the sample is, and run through
+    /// <c>dotnet run</c>, so the first press builds it.
+    /// </para>
+    /// </remarks>
+    /// <returns>Why it could not start, or nothing once it has.</returns>
+    public static string? PlayScene()
+    {
+        if (Running)
+        {
+            Stop();
+            return null;
+        }
+
+        if (Player() is not { } player) return "the player is found in the checkout the editor runs from, and there is none";
+
+        var world = EditorShell.Ecs;
+        var written = EditorScene.Save(world, PlayedScene);
+
+        string[] arguments = ["run", "--project", player, "--", "--scene", PlayedScene, "--assets", EditorPaths.Assets];
+
+        // The editor's view, as seven numbers, so a scene with no camera opens on what was being
+        // looked at.
+        if (EditorSelection.Camera is { IsNone: false } camera && world.TryGet<Transform>(camera, out var view))
+        {
+            var numbers = new[] { view.Translation.X, view.Translation.Y, view.Translation.Z, view.Rotation.X, view.Rotation.Y, view.Rotation.Z, view.Rotation.W };
+            arguments = [.. arguments, "--view", string.Join(',', numbers.Select(n => n.ToString(System.Globalization.CultureInfo.InvariantCulture)))];
+        }
+
+        Run(PlayJob.Playing, [new Step("dotnet", arguments, $"[play] playing the scene, {written} entities, from {PlayedScene}")]);
+        return null;
+    }
+
     /// <summary>The runtime identifiers an export can be made for, this machine's first.</summary>
     public static IReadOnlyList<string> Targets { get; } = [.. new[] { Host() }.Concat(
         ["linux-x64", "linux-arm64", "win-x64", "win-arm64", "osx-x64", "osx-arm64"]).Distinct()];
@@ -523,11 +571,17 @@ public static class EditorPlay
     /// The sample's project file, found by walking up from where the editor runs to the checkout
     /// that holds the solution, or nothing when the editor was not run from one.
     /// </summary>
-    private static string? Sample()
+    private static string? Sample() => Checkout("BevyCSharp.Sample", "BevyCSharp.Sample.csproj");
+
+    /// <summary>The player's project file, found the way the sample's is.</summary>
+    private static string? Player() => Checkout("BevyCSharp.Player", "BevyCSharp.Player.csproj");
+
+    /// <summary>A file in the checkout the editor runs from, or nothing outside one.</summary>
+    private static string? Checkout(string folder, string file)
     {
         for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
         {
-            var candidate = Path.Combine(directory.FullName, "BevyCSharp.Sample", "BevyCSharp.Sample.csproj");
+            var candidate = Path.Combine(directory.FullName, folder, file);
 
             if (File.Exists(candidate)) return candidate;
         }

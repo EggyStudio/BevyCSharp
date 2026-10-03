@@ -329,8 +329,11 @@ public static class EditorCommands
 
         // Plays the game in a window of its own, as Godot does. The Play tab is where it is started
         // and watched, and the menu and F5 reach it without opening the tab. Nothing goes on the
-        // scene's toolbar, which holds what acts on the scene.
-        EditorMenu.Command("Project/Play", static _ => EditorPlay.Toggle(), 3, EditorIcons.Play, "F5");
+        // scene's toolbar, which holds what acts on the scene. F5 plays the scene being edited,
+        // where a change made in the editor is seen, and the project's own Main is a menu row and
+        // a button.
+        EditorMenu.Command("Project/Play scene", static _ => Refused(EditorPlay.PlayScene()), 3, EditorIcons.Play, "F5");
+        EditorMenu.Command("Project/Play project", static _ => EditorPlay.Toggle(), 3);
 
         EditorMenu.Command("Project/Build", static _ => EditorPlay.Build(), 4);
 
@@ -676,4 +679,10 @@ public static class EditorCommands
     /// camera ends up fighting itself.
     /// </remarks>
     private static void FlyCameraFocus() => Behaviors.FlyCamera.FrameWanted = true;
+
+    /// <summary>Says in the console why something asked for from the menu did not start.</summary>
+    private static void Refused(string? why)
+    {
+        if (why is not null) Console.WriteLine($"[play] {why}");
+    }
 }

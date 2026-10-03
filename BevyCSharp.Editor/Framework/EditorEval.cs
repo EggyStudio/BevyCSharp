@@ -18,7 +18,7 @@ namespace BevyCSharp.Editor.Framework;
 /// </para>
 /// <para>
 /// Each fragment is compiled into its own collectible load context and dropped afterwards, the same
-/// way <see cref="ScriptHost"/> handles a generation of scripts. Nothing accumulates but the cost
+/// way <see cref="Bevy.Scripting.ScriptHost"/> handles a generation of scripts. Nothing accumulates but the cost
 /// of compiling, which is a few tens of milliseconds against a Roslyn that is already loaded.
 /// </para>
 /// <para>

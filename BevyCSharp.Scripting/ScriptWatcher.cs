@@ -1,4 +1,4 @@
-namespace BevyCSharp.Editor.Framework;
+namespace Bevy.Scripting;
 
 /// <summary>
 /// Rebuilds a <see cref="ScriptHost"/> when anything under its directory changes.

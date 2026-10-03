@@ -285,16 +285,18 @@ editor's preferences, on a page of its own in the settings, and Reset puts it ba
 
 ### Playing
 
-The Play tab, `F5` and `Project/Play` run the game in a window of its own, as Godot does, and the
-same places stop it. The tab also builds the project without running it, and shows what the game or
+The Play tab and `Project/Play project` run the game in a window of its own, as Godot does, and the
+same places stop it. Play scene, `F5` and `Project/Play scene` play the scene being edited instead,
+written as it is to a file of the editor's own and played by `BevyCSharp.Player` from where the
+editor's camera is. The tab also builds the project without running it, and shows what the game or
 the build wrote, which the console also shows marked `[game]` or `[build]`. It runs the sample
-unless the tab's field names another project. It is a tab rather than a button on the scene's toolbar, so the
-viewport holds the scene and the tools that act on it, and nothing about running the project. The
-game is a process of its own, so one that crashes leaves the editor running. A second row exports
-the project for a chosen platform, self-contained and with its assets compiled into its bridge if
-asked, into the project's `bin/Export/<rid>/`, which `project.export` does from the console too.
-[PLAY.md](PLAY.md) has what is planned past that: playing the scene being edited and seeing the
-running game's world.
+unless the tab's field names another project. It is a tab rather than a button on the scene's
+toolbar, so the viewport holds the scene and the tools that act on it, and nothing about running the
+project. The game is a process of its own, so one that crashes leaves the editor running. A second
+row exports the project for a chosen platform, self-contained and with its assets compiled into its
+bridge if asked, into the project's `bin/Export/<rid>/`, which `project.export` does from the
+console too. [PLAY.md](PLAY.md) plans seeing the running game's world from
+the editor.
 
 ### Statistics
 

@@ -67,7 +67,7 @@ public static class PlayTab
         ImGui.TextDisabled(state);
         ImGui.SameLine();
 
-        string[] labels = [EditorPlay.Running ? "Stop" : "Play", "Build", "Clear"];
+        string[] labels = [EditorPlay.Running ? "Stop" : "Play", "Play scene", "Build", "Clear"];
         var buttons = labels.Sum(EditorWidgets.PillWidth) + (ImGui.GetStyle().ItemSpacing.X * labels.Length);
 
         // The project the buttons act on, as a field filling what the buttons leave, with the sample
@@ -82,11 +82,15 @@ public static class PlayTab
         ImGui.SameLine();
         if (EditorWidgets.Pill(labels[0], EditorPlay.Running)) EditorPlay.Toggle();
 
+        // The scene being edited, through the player, beside the project's own Main.
         ImGui.SameLine();
-        if (EditorWidgets.Pill(labels[1], EditorPlay.Busy && EditorPlay.Job == PlayJob.Building)) EditorPlay.Build();
+        if (EditorWidgets.Pill(labels[1], false) && EditorPlay.PlayScene() is { } refused) Console.WriteLine($"[play] {refused}");
 
         ImGui.SameLine();
-        if (EditorWidgets.Pill(labels[2], false)) EditorPlay.Clear();
+        if (EditorWidgets.Pill(labels[2], EditorPlay.Busy && EditorPlay.Job == PlayJob.Building)) EditorPlay.Build();
+
+        ImGui.SameLine();
+        if (EditorWidgets.Pill(labels[3], false)) EditorPlay.Clear();
 
         ImGui.Spacing();
     }

@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Scripting;
 
 namespace BevyCSharp.Editor.Framework;
 

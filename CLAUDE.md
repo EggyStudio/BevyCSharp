@@ -76,7 +76,9 @@ Stop any serving session before running the suite.
 | `BevyCSharp/Diagnostics` | The console log ring and the `[Command]` catalog |
 | `BevyCSharp/Cli` | The server side of `./bcs`: session file, socket, request queue |
 | `BevyCSharp.Generator` | Behavior, schema and command generators |
-| `BevyCSharp.Editor/Framework` | The editor's panels, history, theming and script host |
+| `BevyCSharp.Editor/Framework` | The editor's panels, history and theming |
+| `BevyCSharp.Scripting` | The script host that compiles behavior scripts while an app runs |
+| `BevyCSharp.Player` | Plays a scene file with its scripts, which the editor's Play scene runs |
 | `native/bevy_csharp/src` | The Rust bridge, one module per subsystem |
 
 ## Conventions
