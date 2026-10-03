@@ -93,6 +93,36 @@ public sealed class AssetPackTests : IDisposable
 
         var refused = Assert.Throws<InvalidDataException>(() => AssetPack.Open(pack));
         Assert.Contains("big.txt", refused.Message);
+
+        // An offset so large that adding the length to it would wrap round to a small number,
+        // which a damaged index must not pass for one inside the pack.
+        bytes = File.ReadAllBytes(Pack());
+        var name = BitConverter.ToUInt16(bytes, 16);
+        BitConverter.GetBytes(long.MaxValue).CopyTo(bytes, 18 + name);
+        File.WriteAllBytes(pack, bytes);
+
+        Assert.Throws<InvalidDataException>(() => AssetPack.Open(pack));
+
+        // A count far beyond what the file could hold.
+        bytes = File.ReadAllBytes(Pack());
+        BitConverter.GetBytes(int.MaxValue).CopyTo(bytes, 12);
+        File.WriteAllBytes(pack, bytes);
+
+        Assert.Contains("claims", Assert.Throws<InvalidDataException>(() => AssetPack.Open(pack)).Message);
+    }
+
+    [Fact]
+    public void AFileThatChangesSizeWhileItIsPackedRefusesThePack()
+    {
+        // Measured at one length and found at another when copied, as a file saved during an
+        // export is, which would shift every offset after it.
+        var file = Put("grown.txt", "longer than it was when it was measured");
+        var partial = Path.Combine(_work, "grown.pack");
+
+        var refused = Assert.Throws<IOException>(() =>
+            AssetPack.WriteTo(partial, [file], [Encoding.UTF8.GetBytes("grown.txt")], [5], 64));
+
+        Assert.Contains("grown.txt", refused.Message);
     }
 
     [Fact]

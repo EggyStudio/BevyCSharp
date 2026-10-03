@@ -79,6 +79,12 @@ public sealed class AssetPack : IDisposable
 
             var count = reader.ReadInt32();
             var size = RandomAccess.GetLength(handle);
+
+            // Bounded by the smallest entry the rest of the file could hold, so a damaged count
+            // fails here rather than asking for a dictionary of billions of entries.
+            if (count < 0 || count > (size - Magic.Length - sizeof(int) * 2) / (sizeof(ushort) + sizeof(long) * 2))
+                throw new InvalidDataException($"{path} is damaged, since it claims {count} files.");
+
             var files = new Dictionary<string, (long, long)>(count, StringComparer.Ordinal);
 
             for (var index = 0; index < count; index++)
@@ -89,7 +95,7 @@ public sealed class AssetPack : IDisposable
 
                 // A pack cut short, by a copy that stopped, would otherwise read past its end as
                 // the file's last bytes rather than failing where the cause is.
-                if (offset < 0 || length < 0 || offset + length > size)
+                if (offset < 0 || length < 0 || offset > size || length > size - offset)
                     throw new InvalidDataException($"{path} is cut short, since {name} runs past its end.");
 
                 files[name] = (offset, length);
@@ -129,6 +135,9 @@ public sealed class AssetPack : IDisposable
     /// has open is never seen half written. The files go in by path, so the same folder always
     /// makes the same pack.
     /// </remarks>
+    /// <exception cref="IOException">
+    /// A file changed size while the pack was written, which leaves any pack already there as it was.
+    /// </exception>
     public static int Write(string folder, string pack, Func<string, bool>? include = null)
     {
         var files = Directory.GetFiles(folder, "*", SearchOption.AllDirectories)
@@ -147,6 +156,24 @@ public sealed class AssetPack : IDisposable
         long offset = Magic.Length + sizeof(int) * 2 + names.Sum(name => sizeof(ushort) + name.Length + sizeof(long) * 2);
 
         var partial = pack + ".partial";
+        try
+        {
+            WriteTo(partial, files.Select(file => file.Full).ToList(), names, lengths, offset);
+        }
+        catch
+        {
+            File.Delete(partial);
+            throw;
+        }
+
+        File.Move(partial, pack, overwrite: true);
+        return files.Count;
+    }
+
+    /// <summary>Writes the index and then every file's bytes, each exactly as long as the index says.</summary>
+    /// <exception cref="IOException">A file changed size between being measured and being copied.</exception>
+    internal static void WriteTo(string partial, List<string> files, List<byte[]> names, List<long> lengths, long offset)
+    {
         using (var stream = File.Create(partial))
         using (var writer = new BinaryWriter(stream, Encoding.UTF8))
         {
@@ -165,15 +192,28 @@ public sealed class AssetPack : IDisposable
 
             writer.Flush();
 
-            foreach (var file in files)
+            // Each file copied for exactly the length the index gave it. One saved while the pack
+            // was written would otherwise shift every offset after it, and the pack would read
+            // the wrong bytes for every later file with nothing to say so.
+            var buffer = new byte[81920];
+            for (var index = 0; index < files.Count; index++)
             {
-                using var source = File.OpenRead(file.Full);
-                source.CopyTo(stream);
+                using var source = File.OpenRead(files[index]);
+                var left = lengths[index];
+
+                while (left > 0)
+                {
+                    var read = source.Read(buffer, 0, (int)Math.Min(buffer.Length, left));
+                    if (read == 0) break;
+
+                    stream.Write(buffer, 0, read);
+                    left -= read;
+                }
+
+                if (left != 0 || source.ReadByte() != -1)
+                    throw new IOException($"{files[index]} changed size while it was packed, so the pack was not written.");
             }
         }
-
-        File.Move(partial, pack, overwrite: true);
-        return files.Count;
     }
 
     /// <summary>Closes the pack. A stream still open on it fails its next read.</summary>

@@ -8,44 +8,39 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `46f9ee5`, whose reader over the assets an assembly carries
-(`native/bevy_csharp/src/carried.rs`) was read whole and raised nothing.
+Reviewed up to `d70281c`. The skips (`e857326`) are settled, by `Needs` and the count the
+headless run reported. The pack file (`d70281c`) was read whole and raised verdict 2.
 
 ## Now
 
-In this order, after the batch in progress is committed.
-
-1. **Report a test that cannot run as skipped** (verdict 1). It is first because every other
-   judgment made here rests on what a green run means.
-2. **Continue TODO.md in its own order.** Nothing read so far argues for changing it.
+1. **Continue TODO.md in its own order.** Nothing read so far argues for changing it. The two
+   verdicts are minor and go in with whatever next touches their files.
 
 ## Verdicts
 
-1. **184 guards in the tests return early and none skips.** A test whose bridge lacks the
-   renderer, the editor, meshlets or Solari returns before asserting and is counted as passed, so
-   the headless run CI makes reports the render tests green without drawing anything, as CLAUDE.md
-   and TODO.md's Testing section both say. They are to report as skipped with the profile they
-   need as the reason, through one helper the guards call, so a run's summary shows how much ran
-   on that bridge. xUnit 2.9.3 is referenced, so the means of skipping at run time is chosen by
-   whoever makes the change. Verified by the skipped count of a headless run matching the number
-   of guarded tests, and an editor run with `--meshlet --solari` skipping only the tests that are
-   about a smaller build.
-2. **A computed state's rule outlives its app** (`ea35b3c`, `BevyCSharp/Core/ComputedRules.cs`).
+1. **A computed state's rule outlives its app** (`ea35b3c`, `BevyCSharp/Core/ComputedRules.cs`).
    `Rules` is a static dictionary keyed by slot and never cleared, so the function given to
    `AddComputedState` and whatever it captured stay reachable after the app is disposed, and a
    later app in the same process that claims the same slot without a rule inherits the earlier
    one if the bridge asks for it. Whether the bridge can ask is to be checked in `states.rs`. If
    it can, the app clears its slots on dispose. If it cannot, the remarks on `ComputedRules` say
    why. This is minor and goes in with whatever next touches states.
+2. **A pack is trusted further than it is checked** (`d70281c`, `BevyCSharp/Assets/AssetPack.cs`).
+   `AssetPack.Write` records each file's length from `FileInfo` and copies the file afterward, so
+   a file saved in between (the editor exports while its project is open) is written at a length
+   the table does not hold, and every file after it is read from the wrong offset with no error.
+   The copy is to be checked against the recorded length and the write refused when they differ.
+   `AssetPack.Open` checks `offset + length > size`, which a damaged table overflows past, and
+   passes a damaged count to the dictionary's constructor, so a damaged pack fails with an
+   overflow or an out-of-memory error instead of the `InvalidDataException` the other checks
+   give. The length is to be compared as `length > size - offset`, and the count bounded by what
+   the file's size could hold. Verified by a test for each: a file that grows during a write, and
+   a table with an offset near `long.MaxValue`.
 
 ## Decisions
 
-1. **Commits are pushed.** The owner said on 2026-10-03 that the commits made so far are fine as
-   they are and that the working session may push `main` along with committing. COMMITS.md and
-   CLAUDE.md say commits are never pushed, and both are to say what holds, in the next batch.
+1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
+   commits and does not push, as COMMITS.md and CLAUDE.md say. An earlier entry here that allowed
+   pushing is withdrawn by the owner.
 
 ## Replies
-
-- **Decision 1 is not acted on yet.** The owner told this session directly to commit and never
-  push, so the push and the change to COMMITS.md and CLAUDE.md wait for the owner's word here
-  rather than one relayed through another session.
