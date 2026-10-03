@@ -12,6 +12,22 @@ A batch is one thing somebody would want to read, revert or cherry-pick alone, s
 feature with its tests and its docs, or a refactor. Work that is still half done stays uncommitted
 until it is whole.
 
+## Before committing
+
+Before a commit is made, [STYLE.md](STYLE.md) is read and applied to everything the commit adds:
+comments, XML documentation, messages, Markdown and the commit message itself. The checks at the
+end of STYLE.md are run over what is staged rather than the whole tree, so a hit is in the work
+being committed and is fixed before it goes in:
+
+```bash
+# The added lines alone, read rather than counted, since arithmetic matches the spaced hyphen.
+git diff --cached | grep '^+' | grep -nE '[—–]| - |\b(is|are|was|were) what\b|which is what|\bwants?\b|\bjust\b|\bsimply\b|!$'
+```
+
+The grep finds the mechanical faults. The rest of STYLE.md (colons joining clauses, tone, prose
+about earlier revisions, American spelling) is checked by reading the staged diff, since no pattern
+tells a label from a joint. A fix found here is made and staged, and the commit follows.
+
 ## The message
 
 Three lines, of which the first reads as nothing and the third says what the commit does.
