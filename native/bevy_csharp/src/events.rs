@@ -415,11 +415,13 @@ pub extern "C" fn bcs_asset_failures_drain() -> i32 {
                 };
 
                 let read: Vec<_> = failures.cursor.read(messages).cloned().collect();
+                let registry = world.get_resource::<bevy::ecs::reflect::AppTypeRegistry>().cloned();
 
                 for failure in read {
                     failures.paths.push(failure.path.to_string());
                     failures.reasons.push(failure.error.to_string());
-                    failures.kinds.push(kind_of(failure.id.type_id()).to_string());
+
+                    failures.kinds.push(kind_named(failure.id.type_id(), registry.as_ref()));
                 }
 
                 failures.paths.len() as i32
@@ -453,7 +455,8 @@ pub unsafe extern "C" fn bcs_asset_failure_reason(index: i32, out: *mut u8, capa
 ///
 /// The same names [`crate::assets::bcs_asset_load`] takes, so a caller tells an image from a mesh
 /// by what it asked for rather than by guessing from the path. An asset type the bridge does not
-/// load under a name of its own answers an empty string rather than a made-up one.
+/// load under a name of its own answers the short name Bevy's reflection gives it, and one Bevy
+/// does not reflect answers an empty string rather than a made-up one.
 ///
 /// # Safety
 /// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.
@@ -476,8 +479,8 @@ enum Text {
 /// The name the managed side loads an asset type under, or an empty string for one it does not.
 ///
 /// The same curated list [`crate::assets::bcs_asset_load`] matches on, read the other way round.
-/// A general answer would need Bevy's type registry to carry every asset type's name, which it
-/// does not, so this grows as the load list does.
+/// A type not on it is named by Bevy's type registry where the type is reflected, which the
+/// drain asks after this answers nothing.
 pub(crate) fn kind_of(id: core::any::TypeId) -> &'static str {
     use core::any::TypeId;
 
@@ -517,6 +520,23 @@ pub(crate) fn kind_of(id: core::any::TypeId) -> &'static str {
     }
 
     ""
+}
+
+/// The name the managed side loads an asset type under, or failing that the short name Bevy's
+/// reflection gives the type, which covers an asset the engine loaded for itself as part of
+/// something else, or an empty string for a type nobody registered.
+pub(crate) fn kind_named(id: core::any::TypeId, registry: Option<&bevy::ecs::reflect::AppTypeRegistry>) -> String {
+    match kind_of(id) {
+        "" => registry
+            .and_then(|registry| {
+                registry
+                    .read()
+                    .get(id)
+                    .map(|registration| registration.type_info().type_path_table().short_path().to_string())
+            })
+            .unwrap_or_default(),
+        named => named.to_string(),
+    }
 }
 
 /// Writes one of the three texts a failure carries.
@@ -597,4 +617,33 @@ pub unsafe extern "C" fn bcs_world_instances_ready(out: *mut u64, capacity: i32)
             taken as i32
         })
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::kind_named;
+    use bevy::ecs::reflect::AppTypeRegistry;
+    use bevy::reflect::Reflect;
+
+    /// An asset type of a game's own, which the bridge has no name for.
+    #[derive(Reflect)]
+    struct Recipe;
+
+    /// One nothing registers for reflection.
+    struct Unseen;
+
+    #[test]
+    fn a_type_the_bridge_does_not_name_is_named_by_reflection() {
+        let registry = AppTypeRegistry::default();
+        registry.write().register::<Recipe>();
+
+        // Named by the curated list where it is on it, whatever the registry holds.
+        assert_eq!("Mesh", kind_named(core::any::TypeId::of::<bevy::mesh::Mesh>(), Some(&registry)));
+
+        // By its reflected short name where it is not.
+        assert_eq!("Recipe", kind_named(core::any::TypeId::of::<Recipe>(), Some(&registry)));
+
+        // And by nothing where neither knows it.
+        assert_eq!("", kind_named(core::any::TypeId::of::<Unseen>(), Some(&registry)));
+    }
 }

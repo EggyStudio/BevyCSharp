@@ -53,9 +53,10 @@ public enum AssetLoadState
 /// <param name="Path">What was asked for, as the asset server saw it.</param>
 /// <param name="Reason">Why it failed, as the engine described it.</param>
 /// <param name="Kind">
-/// What kind of asset it was, named the way <see cref="AssetServer.Load"/> names one. Empty for an
-/// asset type the bridge does not load under a name of its own, which is one the engine loaded for
-/// itself as part of something else.
+/// What kind of asset it was, named the way <see cref="AssetServer.Load"/> names one. An asset
+/// type the bridge does not load under a name of its own, such as one the engine loaded for itself
+/// as part of something else, is named as Bevy's reflection names it (<c>GltfMesh</c>), and one
+/// Bevy does not reflect is empty.
 /// </param>
 public readonly record struct AssetLoadFailed(string Path, string Reason, string Kind = "");
 

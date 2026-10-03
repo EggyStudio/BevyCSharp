@@ -368,10 +368,10 @@ path, the reason and the kind for an asset that would not load. Text crosses the
 owning the buffer, so a caller probes with a small buffer and calls again only when the answer did
 not fit.
 
-- **Only the asset types the bridge loads are named.** `AssetLoadFailed.Kind` matches the type id
-  against the same curated list `AssetServer.Load` takes, so an asset type the engine loaded for
-  itself as part of something else answers an empty string. A general answer needs Bevy's registry
-  to carry every asset type's name, which it does not.
+- **An asset type Bevy does not reflect has no name.** `AssetLoadFailed.Kind` names an asset by
+  the curated list `AssetServer.Load` takes, and any other by the short name Bevy's type registry
+  gives it, so an asset the engine loaded for itself as part of something else is named too. A
+  type nobody registered for reflection answers an empty string.
 
 ### Components Bevy owns, by id
 
