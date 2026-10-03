@@ -69,11 +69,16 @@ public sealed class EngineHarness : IDisposable
     /// fixed timestep sets this far above or below the frame rate, because that makes the two
     /// visibly independent.
     /// </param>
+    /// <param name="carried">
+    /// The assembly whose resources carry asset files, as an exported game's does, or nothing for
+    /// the entry assembly, which under the test runner is its host and carries none.
+    /// </param>
     public EngineHarness(
         uint frames = 4,
         bool discoverBehaviors = false,
         uint fps = 0,
-        double fixedHz = 0)
+        double fixedHz = 0,
+        System.Reflection.Assembly? carried = null)
     {
         _app = new App(new Config
         {
@@ -83,6 +88,7 @@ public sealed class EngineHarness : IDisposable
             FixedHz = fixedHz,
 
             AssetRoot = AssetDirectory,
+            AssetAssembly = carried,
         });
 
         _app.AddPlugin(new EnginePlugin());

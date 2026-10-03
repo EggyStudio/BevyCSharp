@@ -936,6 +936,13 @@ copied next to the DLL are not found. Naming the directory outright is the only 
 AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets")
 ```
 
+A game can carry its assets inside its own assembly instead, built with
+`-p:BevyCSharpEmbedAssets=true`, which compiles the asset folder in as resources named under
+`assets/`, apart from the scripts and shaders the game compiles from their files. A file is then read from the folder first and from the assembly when the folder has
+none, by Bevy and by the managed side's own reads alike, since the app hands the bridge a reader
+over the same resources as it starts. The assembly looked in is the entry one, or
+`Config.AssetAssembly` where something else starts the process, such as a test runner.
+
 Streaming is the other way to read. It reads parts of large files, a piece at a time, while the game
 runs, and texture and geometry streaming read their tiles and clusters with it.
 

@@ -57,6 +57,56 @@ public sealed class AssetFilesTests : IDisposable
     }
 
     [Fact]
+    public void BevyReadsAModelTheAssemblyCarriesThroughTheSharedBridge()
+    {
+        // The model is nowhere on disk, under the harness's asset root or this one, so Bevy can
+        // only have read it through the reader the managed side hands the bridge.
+        using var harness = new EngineHarness(frames: 60, fps: 120, carried: typeof(AssetFilesTests).Assembly);
+        if (!App.HasRenderer) return;
+
+        var carried = AssetHandle.None;
+        var absent = AssetHandle.None;
+        var states = (Carried: AssetLoadState.Loading, Absent: AssetLoadState.Loading);
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            carried = AssetServer.LoadGltfMesh("carried/triangle.gltf");
+            absent = AssetServer.LoadGltfMesh("carried/absent.gltf");
+        });
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            states = (carried.State, absent.State);
+            if (states.Carried != AssetLoadState.Loading && states.Absent != AssetLoadState.Loading) ctx.Exit();
+        });
+
+        harness.Run();
+
+        Assert.Equal(AssetLoadState.Loaded, states.Carried);
+        Assert.Equal(AssetLoadState.Failed, states.Absent);
+    }
+
+    [Fact]
+    public void AStreamedReadTakesItsPartOfACarriedFile()
+    {
+        var whole = AssetFiles.ReadAllBytes("carried/note.json");
+        byte[]? bytes = null;
+        var read = default(StreamRead);
+
+        using var engine = new EngineHarness(frames: 200, fps: 120, carried: typeof(AssetFilesTests).Assembly);
+        engine.On(Stage.Update, _ =>
+        {
+            if (read.Ticket == 0) read = Streaming.Read("carried/note.json", offset: 2, length: 5);
+            else if (bytes is null && Streaming.TryTake(read, out var arrived)) bytes = arrived;
+
+            if (bytes is not null) App.RequestExit();
+        });
+        engine.Run();
+
+        Assert.Equal(whole[2..7], bytes);
+    }
+
+    [Fact]
     public void AnIdTheAssemblyCarriesIsTrustedWithoutItsFile()
     {
         // The model is in the bridge, where the managed side cannot look, so its id is taken as

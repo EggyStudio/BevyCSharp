@@ -148,16 +148,24 @@ That fits a build step that already builds the bridge per target, so the plan ta
 
 The first is enough to ship; the second removes the per-game bridge build.
 
-Built: the first. `build-native.sh --embed <dir>` (`-Embed` in PowerShell) turns on the bridge's
-`embed` feature over that folder, which adds `EmbeddedAssetPlugin` in `ReplaceDefault` mode before
-the asset plugin, and stages the library under `build/embedded/<rid>/` so the editor and the tests
-keep the ordinary bridge. `App.HasEmbeddedAssets` (`bcs_has_embedded_assets`, ABI 161) reports it.
-What the managed side reads for itself, scenes and data assets among it, is compiled into the
-game's assembly instead when `BevyCSharpEmbedAssets` is set (`BevyCSharp.Embed.targets`, which the
-export sets when it embeds), and read through `AssetFiles`, which takes a file on disk first and
-the assembly's copy after. So the two sides carry two copies of nothing and the export ships no
-asset folder, at the cost the first part already pays, a bridge built per game. The second part,
-one copy served to both sides by a shared bridge, is not built.
+Built: both. `build-native.sh --embed <dir>` (`-Embed` in PowerShell) turns on the bridge's `embed`
+feature over that folder, which adds `EmbeddedAssetPlugin` in `ReplaceDefault` mode before the
+asset plugin, and stages the library under `build/embedded/<rid>/` so the editor and the tests keep
+the ordinary bridge. `App.HasEmbeddedAssets` (`bcs_has_embedded_assets`, ABI 161) reports it.
+
+The export takes the second. `BevyCSharpEmbedAssets` (`BevyCSharp.Embed.targets`) compiles the
+whole asset folder into the game's assembly, apart from scripts and shaders, which the game
+compiles from their files as it runs, and dot folders, which are tools', and `AssetFiles` reads
+the managed side's files from there after the disk. As an app is created, before the native app
+is, `AssetFiles.Serve` hands the bridge a reader and the list of paths the assembly carries
+(`bcs_assets_carried`, ABI 167), and the bridge registers a default asset source over them
+(`carried.rs`) that reads the disk first and asks the managed side for a carried file's bytes when
+the disk has none, twice a file, once for the length and once into memory the bridge owns. Whether
+a file or a folder is there is answered from the list, with no call across, and a folder partly on
+disk and partly carried is listed as both merged. The disk's writer and watcher stay, so a file
+beside a shipped game still replaces the one it carries. `Config.AssetAssembly` names another
+assembly than the entry one, which a test runner needs, and a bridge built with `--embed` keeps its
+own source and ignores the managed one.
 
 ## 5. Saving settings and progress
 
@@ -201,4 +209,4 @@ For what C# owns, the same design on the managed side:
 
 ## Order
 
-1. Embedding through a shared bridge, so the managed reads come from the same bytes.
+Every step of this plan is built.

@@ -185,13 +185,11 @@ public static class EditorPlay
     /// than it and put over the one the publish copied after.
     /// </para>
     /// <para>
-    /// With <paramref name="embed"/>, the project's <c>assets</c> folder is first compiled into a
-    /// bridge of the game's own (<c>build-native.sh --render --embed</c>), which then replaces the one
-    /// the publish copied. The files the managed side reads for itself (scenes, data assets,
-    /// material and mesh files and the ids beside them) are compiled into the game's assembly by
-    /// the same publish (<c>BevyCSharpEmbedAssets</c>), and <see cref="AssetFiles"/> reads them
-    /// there, so the asset folder is left out of what ships, scripts apart. That needs the
-    /// checkout's build script, so it is offered only where the editor runs from a checkout.
+    /// With <paramref name="embed"/>, the project's <c>assets</c> folder is compiled into the game's
+    /// assembly by the same publish (<c>BevyCSharpEmbedAssets</c>), and the asset folder is left out
+    /// of what ships, apart from the scripts and shaders the game compiles from their files. <see cref="AssetFiles"/> reads the managed side's files from the
+    /// assembly and hands Bevy a reader over the rest, so the bridge is the same shared one an export
+    /// that does not embed carries, and embedding costs no build of its own.
     /// </para>
     /// <para>
     /// Not trimmed, and not compiled ahead of time, since the script host the editor shares with a
@@ -199,7 +197,7 @@ public static class EditorPlay
     /// </para>
     /// </remarks>
     /// <param name="rid">The runtime identifier, such as <c>linux-x64</c>.</param>
-    /// <param name="embed">Whether to compile the assets into the bridge.</param>
+    /// <param name="embed">Whether to compile the assets into the game's assembly.</param>
     /// <returns>Why it could not start, or nothing once it has.</returns>
     public static string? Export(string rid, bool embed)
     {
@@ -213,20 +211,10 @@ public static class EditorPlay
         var name = Path.GetFileNameWithoutExtension(project);
         var steps = new List<Step>();
 
-        if (embed)
-        {
-            var assets = Path.Combine(Path.GetDirectoryName(project)!, "assets");
-            if (!Directory.Exists(assets)) return $"{name} has no assets folder to embed";
-            if (Script() is not { } script) return "embedding needs the checkout's build script, and the editor is not running from one";
-            if (Triple(rid) is not { } triple) return $"no Rust target is known for {rid}";
+        if (embed && !Directory.Exists(Path.Combine(Path.GetDirectoryName(project)!, "assets")))
+            return $"{name} has no assets folder to embed";
 
-            var native = script.EndsWith(".ps1", StringComparison.Ordinal)
-                ? new Step("pwsh", ["-NoProfile", "-File", script, "-Render", "-Embed", assets, "-Target", triple], $"[play] compiling {name}'s assets into a bridge for {rid}")
-                : new Step("bash", [script, "--render", "--embed", assets, "--target", triple], $"[play] compiling {name}'s assets into a bridge for {rid}");
-
-            steps.Add(native);
-        }
-        else if (Script() is { } script && Triple(rid) is { } triple && !Current(GameBridge(rid)))
+        if (Script() is { } script && Triple(rid) is { } triple && !Current(GameBridge(rid)))
         {
             steps.Add(script.EndsWith(".ps1", StringComparison.Ordinal)
                 ? new Step("pwsh", ["-NoProfile", "-File", script, "-Render", "-Game", "-Target", triple], $"[play] building a render bridge for {rid}")
@@ -238,8 +226,8 @@ public static class EditorPlay
             [
                 "publish", project, "-c", "Release", "-r", rid, "--self-contained", "-o", folder,
 
-                // The files the managed side reads, compiled into the game's assembly beside the
-                // bridge carrying the rest (BevyCSharp.Embed.targets).
+                // The asset folder compiled into the game's assembly, where both sides read it
+                // (BevyCSharp.Embed.targets).
                 .. embed ? new[] { "-p:BevyCSharpEmbedAssets=true" } : [],
             ],
             $"[play] publishing {name} for {rid}",
@@ -251,8 +239,8 @@ public static class EditorPlay
                 if (Directory.Exists(assets) && AssetIds.IndexForShipping(assets) is > 0 and var ids)
                     Say($"[play] {ids} asset ids written to {AssetIds.IndexName} in place of their sidecars");
 
-                if (embed) Embedded(folder, rid);
-                else Game(folder, rid);
+                Game(folder, rid);
+                if (embed) Embedded(folder);
                 Say($"[play] exported {name} to {folder}, {Megabytes(folder)}");
             }));
 
@@ -260,23 +248,9 @@ public static class EditorPlay
         return null;
     }
 
-    /// <summary>
-    /// Puts the game's own bridge over the one the publish copied, and cuts the assets down to
-    /// what the managed side reads.
-    /// </summary>
-    private static void Embedded(string folder, string rid)
+    /// <summary>Cuts the published assets down to the scripts and shaders, which the game's assembly does not carry.</summary>
+    private static void Embedded(string folder)
     {
-        var built = Path.Combine(Path.GetDirectoryName(Script()!)!, "embedded", rid);
-        var library = Directory.Exists(built) ? Directory.GetFiles(built).FirstOrDefault() : null;
-
-        if (library is null)
-        {
-            Say($"[play] the embedding build left no bridge in {built}");
-            return;
-        }
-
-        File.Copy(library, Path.Combine(folder, Path.GetFileName(library)), overwrite: true);
-
         var assets = Path.Combine(folder, "assets");
         if (!Directory.Exists(assets)) return;
 
@@ -300,8 +274,8 @@ public static class EditorPlay
         }
 
         Say(kept == 0
-            ? "[play] the bridge and the game's assembly carry the assets, so the export has no asset folder"
-            : $"[play] the bridge and the game's assembly carry the assets, and {kept} scripts stay beside them");
+            ? "[play] the game's assembly carries the assets, so the export has no asset folder"
+            : $"[play] the game's assembly carries the assets, and {kept} scripts and shaders stay beside them");
     }
 
     /// <summary>The render bridge built for exports to <paramref name="rid"/>, or nothing outside a checkout.</summary>
@@ -341,8 +315,14 @@ public static class EditorPlay
         Say($"[play] the export carries the render bridge from {built}");
     }
 
-    /// <summary>Whether a file in the assets is one embedding leaves on disk, which is a script the game compiles as it runs.</summary>
-    private static bool ReadHere(string path) => path.EndsWith(".cs", StringComparison.OrdinalIgnoreCase);
+    /// <summary>
+    /// Whether a file in the assets is one embedding leaves on disk, which is a script or a shader
+    /// the game compiles from its file as it runs, or a tool's file under a folder named with a dot.
+    /// </summary>
+    private static bool ReadHere(string path) =>
+        path.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)
+        || path.EndsWith(".slang", StringComparison.OrdinalIgnoreCase)
+        || path.Replace('\\', '/').Split('/').Any(part => part.Length > 1 && part[0] == '.');
 
     /// <summary>How large a folder is, in the units a person reads.</summary>
     private static string Megabytes(string folder)

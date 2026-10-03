@@ -193,6 +193,13 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         app.register_asset_source("user", AssetSourceBuilder::platform_default(root, None));
     }
 
+    // The assets the game's own assembly carries, read after the disk through the managed side,
+    // where it handed a reader over before this app was built. Registered for the same reason the
+    // player's source is, before the asset plugin builds the sources. A bridge carrying a game's
+    // assets itself has its own source below, which this would only stand in front of.
+    #[cfg(not(feature = "embed"))]
+    crate::carried::install(&mut app, asset_root.as_deref().filter(|root| !root.is_empty()).unwrap_or("assets"));
+
     // A game's own assets compiled in, read in place of the asset root, so every load finds the
     // embedded file under the path it always had. Added here for the same reason the player's
     // source is, before the asset plugin builds the sources, and only by a bridge built for one

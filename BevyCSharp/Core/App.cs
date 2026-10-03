@@ -130,6 +130,11 @@ public sealed unsafe class App : IDisposable
             // which is no reason to refuse to start.
         }
 
+        // The files the game's assembly carries, found before the native app is built and handed to
+        // the bridge, since Bevy builds its asset sources as the app is built and never again.
+        AssetFiles.Use(Config.AssetAssembly ?? System.Reflection.Assembly.GetEntryAssembly());
+        AssetFiles.Serve();
+
         // Where the window was left, read before it opens, so it opens there.
         var opening = WindowMemory.Open(Config);
 
@@ -176,9 +181,8 @@ public sealed unsafe class App : IDisposable
             ? Path.Combine(AppContext.BaseDirectory, "assets")
             : Path.GetFullPath(Config.AssetRoot);
 
-        // The scenes, data assets and other files the managed side reads, from the folder or, for a
-        // game that compiled them into itself, from its own assembly, with the ids they carry.
-        AssetFiles.Use(System.Reflection.Assembly.GetEntryAssembly());
+        // The ids the scenes, data assets and other files the managed side reads carry, from the
+        // folder or, for a game that compiled them into itself, from its own assembly.
         AssetIds.Reindex();
 
         // A data file changed on disk is read again when assets are, and not in a shipped game.

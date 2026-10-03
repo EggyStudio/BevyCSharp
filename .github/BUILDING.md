@@ -84,8 +84,14 @@ texture atomics, which the bridge checks before turning them on. Ray-traced ligh
 dependency, and is kept out of the profiles because adding it makes every material deferred; an
 app turns it on with `Config.RayTracedLighting`, on an adapter with ray queries.
 
-A game's assets can be compiled into the bridge, so what a player is given is the executable and
-the library with no folder beside them:
+A game's assets can be compiled into its own assembly, with `-p:BevyCSharpEmbedAssets=true` on the
+build or publish (`BevyCSharp/build/BevyCSharp.Embed.targets`), as the Play tab's export does when
+it embeds. The managed side reads them there after the disk and hands the bridge a reader over
+them, so the shared bridge serves them to Bevy and what a player is given is the executable and
+the library with no folder beside them beyond the scripts and shaders the game compiles from their
+files ([PLAY.md](PLAY.md) §4).
+
+They can be compiled into the bridge instead, which then serves one game:
 
 ```bash
 build/build-native.sh --render --embed BevyCSharp.Sample/assets    # bash
@@ -96,13 +102,11 @@ build/build-native.ps1 -Render -Embed BevyCSharp.Sample/assets      # PowerShell
 root, so every path loads as before and `App.HasEmbeddedAssets` says so. A bridge built so serves
 one game, so it is staged under `build/embedded/<rid>/` rather than where the projects here copy
 the bridge from. Scenes, data assets and the other files the managed side reads for itself are
-compiled into the game's assembly when the build is given `-p:BevyCSharpEmbedAssets=true`
-(`BevyCSharp/build/BevyCSharp.Embed.targets`), as the Play tab's export does when it embeds
-([PLAY.md](PLAY.md) §4).
+still read from the folder or the game's assembly, which a bridge cannot serve.
 
 `--game` (`-Game`) stages a bridge apart in the same way, under `build/game/<rid>/`, which is the
-render bridge the Play tab's export ships when it is not embedding, so a checkout whose projects
-run on the editor's bridge still exports a game without one.
+render bridge the Play tab's export ships, so a checkout whose projects run on the editor's bridge
+still exports a game without one.
 
 ## Bevy's components after an upgrade
 

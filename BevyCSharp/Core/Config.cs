@@ -73,6 +73,24 @@ public sealed class Config
     public string? AssetRoot { get; set; }
 
     /// <summary>
+    /// The assembly whose resources carry the game's asset files, or nothing for the entry assembly.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A file is read from <see cref="AssetRoot"/> first and from these resources when the folder
+    /// has none, by the managed side's own reads (<see cref="AssetFiles"/>) and by Bevy's. A resource
+    /// counts when its name starts with <c>assets/</c>, which a build gives every file under the
+    /// project's asset folder when <c>BevyCSharpEmbedAssets</c> is set, so a game published that way
+    /// ships as one assembly with the bridge every game shares.
+    /// </para>
+    /// <para>
+    /// The entry assembly is the game's whenever the game starts the process, so this is set only
+    /// where something else does, such as a test runner, whose entry assembly is its own host.
+    /// </para>
+    /// </remarks>
+    public System.Reflection.Assembly? AssetAssembly { get; set; }
+
+    /// <summary>
     /// The name the game's own files are kept under, in the platform's data directory.
     /// </summary>
     /// <remarks>

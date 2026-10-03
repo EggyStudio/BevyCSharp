@@ -73,6 +73,14 @@ public static class Streaming
         {
             try
             {
+                // A file the game's assembly carries in place of the folder, as an export that
+                // embeds its assets leaves every one but its scripts.
+                if (!File.Exists(full) && AssetFiles.OpenCarried(full) is { } carried)
+                {
+                    using (carried) Done[ticket] = new Finished(await Slice(carried, offset, length, cancel.Token), null, priority);
+                    return;
+                }
+
                 using var file = File.OpenHandle(full, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.Asynchronous);
                 var available = RandomAccess.GetLength(file) - offset;
                 var wanted = length < 0 ? available : Math.Min(length, available);
@@ -170,6 +178,19 @@ public static class Streaming
     /// <summary>The asset directory the running app reads from, which paths are relative
     /// to.</summary>
     internal static string AssetRoot { get; set; } = string.Empty;
+
+    /// <summary>Reads <paramref name="length"/> bytes at <paramref name="offset"/> of a seekable stream, or the rest of it for a negative length.</summary>
+    private static async Task<byte[]> Slice(Stream stream, long offset, int length, CancellationToken cancel)
+    {
+        var available = stream.Length - offset;
+        var bytes = new byte[Math.Max(0, length < 0 ? available : Math.Min(length, available))];
+        if (bytes.Length == 0) return bytes;
+
+        stream.Position = offset;
+        var read = await stream.ReadAtLeastAsync(bytes, bytes.Length, throwOnEndOfStream: false, cancel);
+
+        return read == bytes.Length ? bytes : bytes[..read];
+    }
 
     private static string ResolvedRoot() =>
         Root.Length > 0 ? Root : AssetRoot.Length > 0 ? AssetRoot : Directory.GetCurrentDirectory();

@@ -231,8 +231,8 @@ public static class PlayTab
         if (ImGui.IsItemHovered())
         {
             EditorWidgets.Tip(
-                "Compiles the assets into a bridge of the game's own, so the folder a player gets holds "
-                + "only the files the game reads itself. Costs a native build.");
+                "Compiles the assets into the game's own assembly, so a player gets no asset folder "
+                + "beyond scripts and shaders, and the bridge is the one every game shares.");
         }
 
         ImGui.SameLine();

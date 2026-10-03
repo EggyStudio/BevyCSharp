@@ -53,7 +53,7 @@ internal static class EditorConsoleCommands
         EditorPlay.PlayScene() ?? (EditorPlay.Running ? $"playing {EditorPlay.PlayedScene}" : "stopped");
 
     /// <summary>Exports the project as the Play tab's Export does, for a runtime identifier.</summary>
-    [Command("project.export", "Exports the project for a platform, with its assets in the bridge if asked: project.export <rid> [embed]")]
+    [Command("project.export", "Exports the project for a platform, with its assets in the game's assembly if asked: project.export <rid> [embed]")]
     internal static string Export(string line)
     {
         // One line rather than two arguments, so both words may be left out. A bare export is for

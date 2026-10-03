@@ -60,9 +60,10 @@ Bevy as an asset source named `user` (ABI 156), with the directory made as an ap
 texture or a glTF file under `user://` loads as one under `assets://` does. The managed files under
 `assets://` (scenes, data assets, material and mesh files, the ids beside them) are read through
 `AssetFiles`, which takes a file in the asset folder first and the game's own assembly after,
-where an export that embeds compiles them (`BevyCSharp.Embed.targets`). A pack file, the third
-place a shipped game's assets could be, is not built, and neither is one copy of the assets read
-by both sides, which [PLAY.md](PLAY.md) leaves to a shared bridge.
+where an export that embeds compiles the whole folder (`BevyCSharp.Embed.targets`). Bevy reads the
+same resources through a reader `AssetFiles` hands the bridge, so one copy of the assets feeds both
+sides ([PLAY.md](PLAY.md) §4). A pack file, the third place a shipped game's assets could be, is not
+built.
 
 A path with no prefix is under `assets://`, so every path written today keeps working.
 
