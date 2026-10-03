@@ -64,8 +64,11 @@ A primitive's measures are rows on the Mesh card, named for its shape (a cuboid'
 depth, a torus's two radii), which rebuild the mesh in place through `Render.RebuildMesh`
 (`bcs_mesh_rebuild`, ABI 158), so everything sharing it changes and keeps its handle, and a mesh
 file is written again. The Material card's texture slots are rows too, each picked from the images
-under the asset root. Not built: normals and the UV checker on the preview, a thumbnail beside each
-texture slot, and sub-meshes. The design, all of it:
+under the asset root and showing its image beside its path. The Mesh card's preview shows the mesh
+lit, in a checker whose red corner shows which way its UVs run, or with a line out of every vertex
+along its normal (`Render.TryReadNormals`, `bcs_render_mesh_normals`, ABI 159), drawn as a mesh of
+lines on the preview's own layer, since gizmos take one set of layers for all of them. Not built:
+sub-meshes. The design, all of it:
 
 - **The Mesh card.**
   - **A live preview** of the mesh alone, turned by dragging, with toggles for wireframe, normals
@@ -200,5 +203,5 @@ no file, as `Render.CreateMesh` makes it today. Godot's answer fits both, and is
 
 Each step is usable on its own and tested before the next.
 
-1. **Normals and the UV checker on the Mesh card's preview**, and a thumbnail beside each texture
-   slot.
+1. **Badges and textures among a model's parts**, so a model's images are tiles of their own and a
+   tile says its kind without its icon.

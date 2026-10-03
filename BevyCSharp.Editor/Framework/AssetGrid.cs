@@ -16,7 +16,7 @@ namespace BevyCSharp.Editor.Framework;
 /// </para>
 /// <para>
 /// What happens when a tile is pressed is the caller's, since the browser selects and the picker
-/// picks. This only says what a path looks like and draws it over the item just made.
+/// picks. This only says what a path looks like and draws it over the item made last.
 /// </para>
 /// </remarks>
 internal static class AssetGrid

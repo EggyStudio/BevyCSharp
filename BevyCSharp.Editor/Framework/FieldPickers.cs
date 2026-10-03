@@ -36,6 +36,20 @@ internal static class FieldPickers
         var held = Called(handle);
         var kind = field.Hints.Asset ?? AssetKind.Mesh;
 
+        // An image shows itself beside its name, at the height of the row, so a texture slot says
+        // what it holds at a glance rather than by a path to read.
+        if (kind == AssetKind.Image && AssetServer.PathOf(handle) is { Length: > 0 } picture)
+        {
+            var side = ImGui.GetFrameHeight();
+            var at = ImGui.GetCursorScreenPos();
+            ImGui.Dummy(new System.Numerics.Vector2(side, side));
+            EditorDraw.Picture(ImGui.GetWindowDrawList(), picture, at, side);
+            if (ImGui.IsItemHovered()) EditorWidgets.Tip(picture);
+
+            ImGui.SameLine(0f, ImGui.GetStyle().ItemInnerSpacing.X);
+            ImGui.SetNextItemWidth(MathF.Max(1f, ImGui.GetContentRegionAvail().X));
+        }
+
         EditorWidgets.Picking(id, held, () =>
         {
             if (ImGui.Selectable("Nothing")) field.Write(ctx.Ecs, entity, AssetHandle.None);

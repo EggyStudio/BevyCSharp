@@ -119,4 +119,32 @@ public sealed class RenderReadTests
         harness.Run();
         if (App.HasRenderer) Assert.True(ran);
     }
+
+    [Fact]
+    public void AMeshsNormalsComeBackWithItsPositions()
+    {
+        using var harness = new EngineHarness(frames: 2);
+        var ran = false;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            if (!App.HasRenderer) return;
+
+            var cube = Render.CreateMesh(MeshShape.Cuboid, 2f, 2f, 2f);
+            Assert.True(Render.TryReadNormals(cube, out var positions, out var normals));
+
+            // Four corners for each of the six faces, each normal of unit length facing out of its face.
+            Assert.Equal(24, positions.Length);
+            Assert.Equal(24, normals.Length);
+            Assert.All(normals, normal => Assert.Equal(1f, normal.Length, 4));
+
+            // Lines have no normals to read.
+            var lines = Render.CreateMesh(new MeshData { Positions = [Vec3.Zero, Vec3.UnitY], Topology = MeshTopology.Lines });
+            Assert.False(Render.TryReadNormals(lines, out _, out _));
+            ran = true;
+        });
+
+        harness.Run();
+        if (App.HasRenderer) Assert.True(ran);
+    }
 }

@@ -65,6 +65,15 @@ internal static class DrawnCards
         var wire = PreviewRenderer.Wireframe(MeshKey);
         if (Toggle("Wireframe", ref wire)) PreviewRenderer.SetWireframe(MeshKey, wire);
 
+        // How the mesh is shown: lit, in a checker that shows its UVs, or with its normals drawn.
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(MathF.Max(80f, ImGui.GetContentRegionAvail().X - DetailsPanel.RightInset));
+        EditorWidgets.Choice(
+            "##view",
+            Views[(int)PreviewRenderer.ViewOf(MeshKey)],
+            Views,
+            chosen => PreviewRenderer.SetView(MeshKey, (PreviewView)Array.IndexOf(Views, chosen)));
+
         if (!entity.IsNone) MeshActions(ctx.Ecs, entity, mesh);
 
         // A primitive's measures, which rebuild it in place, so everything sharing it changes.
@@ -249,6 +258,9 @@ internal static class DrawnCards
         MaterialFiles.SaveAs(material, path);
         Console.WriteLine($"[editor] saved the material as {path}");
     }
+
+    /// <summary>What the Mesh card's view choice offers, in the order of <see cref="PreviewView"/>.</summary>
+    private static readonly string[] Views = ["Surface", "UV checker", "Normals"];
 
     /// <summary>How large a card's picture is: the width there is, up to a size that still reads as a swatch.</summary>
     private static float Side() => MathF.Min(200f, MathF.Max(64f, ImGui.GetContentRegionAvail().X - DetailsPanel.RightInset));

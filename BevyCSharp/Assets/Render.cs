@@ -332,6 +332,41 @@ public static unsafe class Render
     }
 
     /// <summary>
+    /// Reads a mesh's positions back with the normal at each. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// For drawing which way a surface faces, a short line out of every vertex, as an editor's
+    /// preview does. A mesh from a file is read once it has loaded, so this answers false until
+    /// then, and false for a mesh with no normals, such as one of lines.
+    /// </remarks>
+    /// <returns>True with a position and a normal a vertex once the mesh has loaded.</returns>
+    /// <exception cref="BevyNativeException">The handle names no mesh, or this build has no renderer.</exception>
+    public static bool TryReadNormals(AssetHandle mesh, out Vec3[] positions, out Vec3[] normals)
+    {
+        positions = [];
+        normals = [];
+
+        var count = 0;
+        var answer = Native.bcs_render_mesh_normals(mesh.Key, null, null, 0, &count);
+        if (answer is NativeStatus.NotPresent or NativeStatus.NullArgument) return false;
+        if (answer == NativeStatus.Unsupported) throw NoRenderer("Reading a mesh's normals");
+        Native.Check(answer, $"reading the normals of {mesh}");
+
+        positions = new Vec3[count];
+        normals = new Vec3[count];
+
+        fixed (Vec3* at = positions)
+        fixed (Vec3* facing = normals)
+        {
+            Native.Check(
+                Native.bcs_render_mesh_normals(mesh.Key, (float*)at, (float*)facing, count * 3, &count),
+                $"reading the normals of {mesh}");
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Says how an entity's mesh is treated beyond what it looks like. Only valid inside a system.
     /// </summary>
     /// <remarks>

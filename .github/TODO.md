@@ -246,15 +246,14 @@ drawn sliced, tiled or fitted inside its size the way a video player letterboxes
 
 ## Interface
 
-### A preview shows the surface and nothing under it
+### A model's images are not among its parts
 
 The details pick an entity's mesh and material from a grid of Bevy's primitives, what the scene
 already uses and every part of every model, each with a card under it: the mesh turned in a
-preview with what it is made of, and the material on a sphere with its settings as rows that write
-it in place. The asset browser draws a thumbnail of each model, mesh and material, with search and
-a chip per kind, and a model opens into its meshes and materials. The Mesh card cannot show a
-mesh's normals or its UVs, and a texture slot is a path rather than a picture, which
-[ASSETS.md](ASSETS.md) plans.
+preview, lit, in a UV checker or with its normals drawn, and the material on a sphere with its
+settings and texture slots as rows that write it in place. The asset browser draws a thumbnail of
+each model, mesh and material, with search and a chip per kind, and a model opens into its meshes
+and materials, though not its textures, which [ASSETS.md](ASSETS.md) plans.
 
 ### Layout and text
 
@@ -309,11 +308,12 @@ programs, the images the scene camera's shaders keep, the settings and the style
 drag on a handle moves, turns or stretches what is selected. [EDITOR.md](EDITOR.md) has the design
 language.
 
-- **A texture slot is a path, not a picture.** The editor saves a scene file holding every entity,
-  its components and its mesh and material, by file or, made in memory, as a primitive's recipe, a
-  mesh's geometry or a material's settings, and either can be saved as a file of its own
-  (`*.mesh.json`, `*.material.json`). The cards edit a primitive's measures and a material's
-  settings and texture slots, and a slot names its image without showing it.
+- **The Material card offers the settings `MaterialSettings` has.** The editor saves a scene file
+  holding every entity, its components and its mesh and material, by file or, made in memory, as a
+  primitive's recipe, a mesh's geometry or a material's settings, and either can be saved as a file
+  of its own (`*.mesh.json`, `*.material.json`). The cards edit a primitive's measures and a
+  material's colors, surface and texture slots, and leave out what a standard material has beyond
+  `MaterialSettings`, such as clearcoat and transmission.
 - **A mesh and a material are shown by where they came from.** They are Bevy components holding
   typed handles, so the panel draws them as their own section with a card each, and a picker of
   shapes, what the scene uses and each mesh or material of each model file. An OBJ lists no parts,

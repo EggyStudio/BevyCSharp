@@ -22,6 +22,19 @@ internal abstract record PreviewSubject
     internal sealed record Material(AssetHandle Handle) : PreviewSubject;
 }
 
+/// <summary>How a mesh is shown in a preview.</summary>
+internal enum PreviewView
+{
+    /// <summary>In a plain gray, lit.</summary>
+    Surface,
+
+    /// <summary>In a checkered texture, which shows how its UVs stretch and seam.</summary>
+    UvChecker,
+
+    /// <summary>In gray with a short line out of every vertex along its normal.</summary>
+    Normals,
+}
+
 /// <summary>
 /// Pictures of assets, each drawn by a camera of its own into an image the interface shows.
 /// </summary>
@@ -98,6 +111,15 @@ internal static class PreviewRenderer
 
         public bool Wireframe { get; set; }
 
+        /// <summary>How a mesh subject is shown.</summary>
+        public PreviewView View { get; set; }
+
+        /// <summary>Whether the subject has to be spawned again, for a view changed since.</summary>
+        public bool Stale { get; set; }
+
+        /// <summary>The lines along a mesh's normals, under the subject, or none.</summary>
+        public Entity Lines { get; set; }
+
         /// <summary>What the camera clears to, which a different one asked for makes it again.</summary>
         public (float R, float G, float B, float A) Clear { get; set; } = Swatch;
 
@@ -140,12 +162,16 @@ internal static class PreviewRenderer
             slot.Clear = wanted;
         }
 
-        if (slot.Showing != subject)
+        if (slot.Showing != subject || slot.Stale)
         {
             Clear(ctx, slot);
             slot.Showing = subject;
-            slot.Subject = Spawn(ctx, subject);
+            slot.Subject = Spawn(ctx, subject, slot.View);
+            slot.Stale = false;
         }
+
+        if (slot.View == PreviewView.Normals && slot.Lines.IsNone && subject is PreviewSubject.Mesh shown)
+            slot.Lines = Normals(ctx, slot.Subject, shown.Handle);
 
         Build(ctx, slot);
         Walk(ctx, slot, slot.Subject);
@@ -202,6 +228,18 @@ internal static class PreviewRenderer
 
     /// <summary>The image a key's picture is drawn into, or no handle when it has no slot.</summary>
     internal static AssetHandle TargetOf(string key) => Find(key)?.Target ?? AssetHandle.None;
+
+    /// <summary>Shows a key's mesh another way, which spawns it again in that view.</summary>
+    internal static void SetView(string key, PreviewView view)
+    {
+        if (Find(key) is not { } slot || slot.View == view) return;
+
+        slot.View = view;
+        slot.Stale = true;
+    }
+
+    /// <summary>How a key's mesh is shown.</summary>
+    internal static PreviewView ViewOf(string key) => Find(key)?.View ?? PreviewView.Surface;
 
     /// <summary>Whether a key's subject is drawn as its edges.</summary>
     internal static bool Wireframe(string key) => Find(key)?.Wireframe ?? false;
@@ -270,14 +308,15 @@ internal static class PreviewRenderer
         if (!slot.Subject.IsNone && ctx.Ecs.IsAlive(slot.Subject)) ctx.Ecs.Despawn(slot.Subject);
 
         slot.Subject = Entity.None;
+        slot.Lines = Entity.None;
         slot.Showing = null;
         slot.Owned.Clear();
         if (!slot.Camera.IsNone) slot.Owned.Add(slot.Camera);
         if (!slot.Light.IsNone) slot.Owned.Add(slot.Light);
     }
 
-    /// <summary>Spawns what a subject is drawn as.</summary>
-    private static Entity Spawn(BehaviorContext ctx, PreviewSubject subject)
+    /// <summary>Spawns what a subject is drawn as, a mesh in the view asked for.</summary>
+    private static Entity Spawn(BehaviorContext ctx, PreviewSubject subject, PreviewView view)
     {
         switch (subject)
         {
@@ -292,7 +331,7 @@ internal static class PreviewRenderer
                 var shown = ctx.Ecs.Spawn();
                 ctx.Ecs.Add(shown, Transform.Identity);
                 Render.SetMesh(ctx.Ecs, shown, mesh.Handle);
-                Render.SetMaterial(ctx.Ecs, shown, _plain);
+                Render.SetMaterial(ctx.Ecs, shown, view == PreviewView.UvChecker ? Checker() : _plain);
                 return shown;
             }
 
@@ -310,6 +349,80 @@ internal static class PreviewRenderer
             default:
                 return Entity.None;
         }
+    }
+
+    /// <summary>What a mesh wears in the UV checker view, made the first time it is wanted.</summary>
+    private static AssetHandle _checker;
+
+    /// <summary>What the normals are drawn in, made the first time they are.</summary>
+    private static AssetHandle _normalPaint;
+
+    /// <summary>
+    /// A material of light and dark squares, eight across, with the top left square red so which way
+    /// round the UVs run can be read off it.
+    /// </summary>
+    private static AssetHandle Checker()
+    {
+        if (_checker.IsValid) return _checker;
+
+        const int Side = 128;
+        const int Square = Side / 8;
+        var pixels = new byte[Side * Side * 4];
+
+        for (var y = 0; y < Side; y++)
+        {
+            for (var x = 0; x < Side; x++)
+            {
+                var at = ((y * Side) + x) * 4;
+                var light = ((x / Square) + (y / Square)) % 2 == 0;
+                var corner = x < Square && y < Square;
+
+                pixels[at] = (byte)(corner ? 220 : light ? 210 : 70);
+                pixels[at + 1] = (byte)(corner ? 60 : light ? 210 : 70);
+                pixels[at + 2] = (byte)(corner ? 60 : light ? 215 : 80);
+                pixels[at + 3] = 255;
+            }
+        }
+
+        var image = Render.CreateImage(pixels, Side, Side);
+        _checker = Render.CreateMaterial(new MaterialSettings { BaseColorTexture = image, Roughness = 0.8f });
+        return _checker;
+    }
+
+    /// <summary>
+    /// Lines from every vertex of a mesh along its normal, under the shown mesh so they turn with it,
+    /// or none while the mesh is loading or when it has no normals.
+    /// </summary>
+    /// <remarks>
+    /// A mesh of its own rather than gizmos, because gizmos are drawn on layers set for every one
+    /// at once, and these belong to one preview's layer. A tenth of the mesh's size long, so they
+    /// read on a pebble and on a house alike.
+    /// </remarks>
+    private static Entity Normals(BehaviorContext ctx, Entity shown, AssetHandle mesh)
+    {
+        if (shown.IsNone || !Render.TryReadNormals(mesh, out var positions, out var normals) || positions.Length == 0)
+            return Entity.None;
+
+        var length = 0.1f;
+        if (Render.TryGetBounds(shown, out var low, out var high))
+            length = MathF.Max(0.01f, (high - low).Length * 0.06f);
+
+        var ends = new Vec3[positions.Length * 2];
+        for (var i = 0; i < positions.Length; i++)
+        {
+            ends[i * 2] = positions[i];
+            ends[(i * 2) + 1] = positions[i] + (normals[i] * length);
+        }
+
+        if (!_normalPaint.IsValid)
+            _normalPaint = Render.CreateMaterial(new MaterialSettings { BaseColor = (0.2f, 0.75f, 1f, 1f), Unlit = true });
+
+        var lines = ctx.Ecs.Spawn();
+        ctx.Ecs.Add(lines, Transform.Identity);
+        Render.SetMesh(ctx.Ecs, lines, Render.CreateMesh(new MeshData { Positions = ends, Topology = MeshTopology.Lines }));
+        Render.SetMaterial(ctx.Ecs, lines, _normalPaint);
+        ctx.Ecs.SetParent(lines, shown);
+        return lines;
     }
 
     /// <summary>Makes a slot's image, camera and light, the first time it is wanted.</summary>

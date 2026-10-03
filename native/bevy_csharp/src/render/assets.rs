@@ -488,6 +488,80 @@ pub unsafe extern "C" fn bcs_render_mesh_triangles(
     })
 }
 
+/// Copies a mesh's positions and the normal of each, three floats a vertex for both.
+///
+/// What a tool draws a mesh's normals from, a short line out of every vertex, which the positions
+/// alone cannot give. `count` receives the number of vertices first, so a call with null buffers
+/// learns the size and a second copies.
+///
+/// Returns [`status::NOT_PRESENT`] while the mesh is still loading, [`status::NULL_ARG`] for one
+/// with no positions or no normals, and [`status::BUFFER_TOO_SMALL`] where a buffer is given that
+/// cannot hold them.
+///
+/// # Safety
+/// `count` must be writable for one integer. `positions` and `normals` must each be null or
+/// writable for `capacity` floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_mesh_normals(
+    mesh: i32,
+    positions: *mut f32,
+    normals: *mut f32,
+    capacity: i32,
+    count: *mut i32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (mesh, positions, normals, capacity, count);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::asset::Assets;
+            use bevy::mesh::{Mesh, VertexAttributeValues};
+
+            if count.is_null() {
+                return status::NULL_ARG;
+            }
+
+            with_world(|world| {
+                let Some(handle) = crate::assets::clone_handle(world, mesh).and_then(|handle| handle.try_typed::<Mesh>().ok())
+                else {
+                    return status::NO_COMPONENT;
+                };
+
+                let Some(found) = world.resource::<Assets<Mesh>>().get(&handle) else {
+                    return status::NOT_PRESENT;
+                };
+
+                let (Some(VertexAttributeValues::Float32x3(corners)), Some(VertexAttributeValues::Float32x3(facing))) =
+                    (found.attribute(Mesh::ATTRIBUTE_POSITION), found.attribute(Mesh::ATTRIBUTE_NORMAL))
+                else {
+                    return status::NULL_ARG;
+                };
+
+                unsafe { count.write(corners.len() as i32) };
+
+                if positions.is_null() || normals.is_null() {
+                    return status::OK;
+                }
+
+                if (capacity as usize) < corners.len() * 3 || facing.len() != corners.len() {
+                    return status::BUFFER_TOO_SMALL;
+                }
+
+                unsafe {
+                    core::ptr::copy_nonoverlapping(corners.as_ptr() as *const f32, positions, corners.len() * 3);
+                    core::ptr::copy_nonoverlapping(facing.as_ptr() as *const f32, normals, facing.len() * 3);
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
 /// Builds an empty image sized for a camera to draw into.
 ///
 /// The usages separate a texture that can be drawn into and copied out of from one that can only be
@@ -1289,6 +1363,32 @@ mod tests {
         assert_eq!(1 | 4, info.attributes & (1 | 4), "normals and UVs");
         assert_eq!([-0.5, -1.0, -1.5], info.min);
         assert_eq!([0.5, 1.0, 1.5], info.max);
+    }
+
+    #[cfg(feature = "render")]
+    #[test]
+    fn a_meshes_normals_come_back_with_its_positions() {
+        let mut app = app();
+        let mesh = bevy::math::primitives::Cuboid::new(1.0, 1.0, 1.0).mesh().build();
+        let handle = app.world_mut().resource_mut::<Assets<Mesh>>().add(mesh).untyped();
+        let key = crate::assets::key_for(app.world_mut(), handle);
+
+        let mut count = 0;
+        let mut positions = vec![0.0f32; 24 * 3];
+        let mut normals = vec![0.0f32; 24 * 3];
+        let code = loan_world(app.world_mut(), || unsafe {
+            assert_eq!(status::OK, bcs_render_mesh_normals(key, core::ptr::null_mut(), core::ptr::null_mut(), 0, &mut count));
+            bcs_render_mesh_normals(key, positions.as_mut_ptr(), normals.as_mut_ptr(), 24 * 3, &mut count)
+        });
+
+        assert_eq!(status::OK, code);
+        assert_eq!(24, count);
+
+        // Every normal of a box is one unit along an axis.
+        for normal in normals.chunks(3) {
+            let length = (normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]).sqrt();
+            assert!((length - 1.0).abs() < 1e-5);
+        }
     }
 
     #[cfg(feature = "render")]
