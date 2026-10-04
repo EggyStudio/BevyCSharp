@@ -40,3 +40,4 @@ textures/basic_metering_mask.png
 textures/BlueNoise-Normal.png
 models/GolfBall/GolfBall.glb
 textures/slice_square.png
+branding/icon.png

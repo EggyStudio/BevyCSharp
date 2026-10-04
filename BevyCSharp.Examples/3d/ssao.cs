@@ -22,11 +22,11 @@ internal static class Ssao
             _camera = ecs.Camera(Transform.LookingAt(new Vec3(-2f, 2f, -2f), Vec3.Zero, Vec3.UnitY));
             Apply();
 
-            var grey = Render.CreateMaterial(new MaterialSettings { BaseColor = Scene.Srgb(0.5f, 0.5f, 0.5f), Roughness = 1f, Reflectance = 0f });
+            var gray = Render.CreateMaterial(new MaterialSettings { BaseColor = Scene.Srgb(0.5f, 0.5f, 0.5f), Roughness = 1f, Reflectance = 0f });
             var cube = Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f);
-            ecs.Mesh(cube, grey, Transform.At(0f, 0f, 1f));
-            ecs.Mesh(cube, grey, Transform.At(0f, -1f, 0f));
-            ecs.Mesh(cube, grey, Transform.At(1f, 0f, 0f));
+            ecs.Mesh(cube, gray, Transform.At(0f, 0f, 1f));
+            ecs.Mesh(cube, gray, Transform.At(0f, -1f, 0f));
+            ecs.Mesh(cube, gray, Transform.At(1f, 0f, 0f));
 
             _sphere = ecs.Mesh(
                 Render.CreateMesh(MeshShape.Sphere, 0.4f),

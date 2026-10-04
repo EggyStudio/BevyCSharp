@@ -46,6 +46,7 @@ internal static class Catalog
         new("auto_exposure", AutoExposure.Build),
         new("clearcoat", Clearcoat.Build),
         new("order_independent_transparency", OrderIndependentTransparency.Build),
+        new("motion_blur", MotionBlur.Build),
         new("orthographic", Orthographic.Build),
         new("parenting", Parenting.Build),
     ];

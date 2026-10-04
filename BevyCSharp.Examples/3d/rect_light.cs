@@ -35,8 +35,8 @@ internal static class RectLight
             var camera = ecs.Camera(Transform.LookingAt(new Vec3(-8f, 5f, 8f), Vec3.UnitY, Vec3.UnitY));
             ecs.Add(camera, new FreeCamera());
 
-            var grey = Color.FromSrgb(0.9f, 0.9f, 0.9f);
-            _text = Ui.SpawnText(Text(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f), Color = (grey.R, grey.G, grey.B, 1f) }, 18f);
+            var gray = Color.FromSrgb(0.9f, 0.9f, 0.9f);
+            _text = Ui.SpawnText(Text(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f), Color = (gray.R, gray.G, gray.B, 1f) }, 18f);
         });
 
         app.Update(ctx =>
