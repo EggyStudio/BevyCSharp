@@ -38,7 +38,7 @@ the most examples, and the largest is taken between groups of examples. The coun
   background colors.
 - **Animation built in code, seven examples.** Clips made from curves, events placed on a clip,
   graphs that blend clips by weight and their masks, and skinned meshes built joint by joint.
-- **Text gizmos, four examples**, and **gamepads, four**, which are in the Now list of REVIEW.md.
+- **Text gizmos, four examples.**
 - **Bevy's remote protocol, three examples.** `bcs` is this engine's own, so these wait on whether
   the protocol is worth carrying beside it.
 - **A second window, two examples.**
@@ -303,7 +303,7 @@ that scrolls and a paragraph that fits its box.
 - **Scrollbar width.** `scrollbar_width` is the one `Node` field left unbridged, and it reserves
   room at the edge of a scrolling node for a scrollbar. Nothing here draws one, so the room would
   be a gap.
-- **Fonts by family name.** Excluded deliberately, the way gamepads are. `FontSource` can name
+- **Fonts by family name.** Excluded deliberately. `FontSource` can name
   `SansSerif`, `Monospace` or the system interface font, but Bevy resolves those through
   `system_font_discovery`, whose Linux backend links against fontconfig at build time. Without the
   feature such text renders nothing and logs why, so the bridge offers a loaded font or Bevy's own
@@ -474,9 +474,11 @@ anything.
 
 ### Input
 
-- **Gamepad.** Excluded deliberately. `bevy_gilrs` needs libudev development headers at build time
-  on Linux, which the current profile avoids so the bridge builds with nothing but a C compiler.
-  Adding it means accepting that build dependency or gating the feature per platform.
+- **A gamepad's rumble is not felt from a pretended pad, and its own settings are Bevy's.**
+  Buttons, sticks, triggers, connection and rumble reach C#, and a pad is pretended by
+  `SyntheticInput` for a script or a test. Each pad's dead zones and the threshold a trigger counts
+  as pressed at are Bevy's defaults, which `GamepadSettings` on the pad's entity would let a game
+  change, and a pad's buttons beyond Bevy's nineteen standard ones are not read.
 - **IME reaches the bus and the editor, not Bevy's UI.** `Window.SetIme` turns the input method on,
   and `ImeComposing` and `ImeCommit` arrive as messages, so a field of the game's own can show a
   candidate before it is committed, and the editor's fields take what is committed. Bevy's UI has

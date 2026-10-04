@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself.
 
-**22 written, 268 can be written, 78 missing and 53 do not apply.** Of the 368 that apply, 290 can be written with what is bridged.
+**22 written, 272 can be written, 74 missing and 53 do not apply.** Of the 368 that apply, 294 can be written with what is bridged.
 
 | Group | Written | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|
@@ -23,7 +23,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Games](#games) | 0 | 6 | 0 | 0 |
 | [Gizmos](#gizmos) | 0 | 4 | 5 | 0 |
 | [Helpers](#helpers) | 0 | 0 | 1 | 0 |
-| [Input](#input) | 0 | 9 | 3 | 0 |
+| [Input](#input) | 0 | 12 | 0 | 0 |
 | [Math](#math) | 0 | 5 | 0 | 1 |
 | [Movement](#movement) | 0 | 1 | 0 | 0 |
 | [Picking](#picking) | 0 | 2 | 3 | 1 |
@@ -35,14 +35,14 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [State](#state) | 0 | 4 | 0 | 0 |
 | [Stress Tests](#stress-tests) | 0 | 18 | 2 | 1 |
 | [Time](#time) | 0 | 3 | 0 | 0 |
-| [Tools](#tools) | 0 | 1 | 1 | 0 |
+| [Tools](#tools) | 0 | 2 | 0 | 0 |
 | [Transforms](#transforms) | 0 | 5 | 0 | 0 |
 | [UI (User Interface)](#ui-user-interface) | 0 | 36 | 24 | 0 |
 | [Usage](#usage) | 0 | 3 | 0 | 0 |
 | [Window](#window) | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 3 | 0 | 10 |
-| **All** | **22** | **268** | **78** | **53** |
+| **All** | **22** | **272** | **74** | **53** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`.
 
@@ -349,9 +349,9 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | Example | What it shows | State |
 |---|---|---|
 | [`char_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/char_input_events.rs) | Prints out all chars as they are inputted | can be written |
-| [`gamepad_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_input.rs) | Shows handling of gamepad input, connections, and disconnections | missing, gamepads |
-| [`gamepad_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_input_events.rs) | Iterates and prints gamepad input and connection events | missing, gamepads |
-| [`gamepad_rumble`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_rumble.rs) | Shows how to rumble a gamepad using force feedback | missing, gamepads |
+| [`gamepad_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_input.rs) | Shows handling of gamepad input, connections, and disconnections | can be written |
+| [`gamepad_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_input_events.rs) | Iterates and prints gamepad input and connection events | can be written |
+| [`gamepad_rumble`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_rumble.rs) | Shows how to rumble a gamepad using force feedback | can be written |
 | [`keyboard_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/keyboard_input.rs) | Demonstrates handling a key press/release | can be written |
 | [`keyboard_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/keyboard_input_events.rs) | Prints out all keyboard events | can be written |
 | [`keyboard_modifiers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/keyboard_modifiers.rs) | Demonstrates using key modifiers (ctrl, shift) | can be written |
@@ -503,7 +503,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| `gamepad_viewer` | Shows a visualization of gamepad buttons, sticks, and triggers | missing, gamepads |
+| `gamepad_viewer` | Shows a visualization of gamepad buttons, sticks, and triggers | can be written |
 | `scene_viewer` | A simple way to view glTF models with Bevy. Just run `cargo run --release --example scene_viewer /path/to/model.gltf#Scene0`, replacing the path as appropriate. With no arguments it will load the FieldHelmet glTF model from the repository assets subdirectory | can be written |
 
 ## Transforms

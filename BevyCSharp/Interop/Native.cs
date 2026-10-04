@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 176;
+    internal const int ExpectedAbiVersion = 177;
 
     static Native() => NativeLoader.Initialize();
 
@@ -1568,6 +1568,36 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_input_pointer(float x, float y, int action, int button);
+
+    /// <summary>Copies the connected gamepads out, answering how many there are.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gamepads(NativeGamepad* gamepads, int capacity);
+
+    /// <summary>Rumbles a pad, or stops it where the seconds are zero or less.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gamepad_rumble(ulong entity, float strong, float weak, float seconds);
+
+    /// <summary>Connects a pretended pad, answering its entity.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial ulong bcs_gamepad_connect(byte* name, uint length);
+
+    /// <summary>Disconnects a pretended pad.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gamepad_disconnect(ulong entity);
+
+    /// <summary>Sets one of a pad's buttons.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gamepad_button(ulong entity, int button, float value);
+
+    /// <summary>Sets one of a pad's axes.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gamepad_axis(ulong entity, int axis, float value);
 
     /// <summary>Presses or releases a key, with whatever text it typed.</summary>
     [LibraryImport(Library)]

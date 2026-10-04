@@ -324,6 +324,143 @@ internal static class ConsoleWorldCommands
         return true;
     }
 
+    /// <summary>Lists the connected gamepads, by the number the pad commands name them by.</summary>
+    [Command("input.pads", "Lists the connected gamepads")]
+    internal static string Pads()
+    {
+        var pads = PadsNow();
+        return pads.Count == 0
+            ? "no gamepad is connected; input.button and input.axis connect a console pad"
+            : string.Join("\n", pads.Select((pad, index) => $"{index}: {pad.Name} ({pad.Entity})"));
+    }
+
+    /// <summary>
+    /// Holds a gamepad's button for a number of frames, on a console pad when none is connected.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Pads are numbered as <c>input.pads</c> lists them. Naming the number after the last, which
+    /// is 0 on a machine with none, connects a pretended pad there first, so a script presses a
+    /// button where no pad is attached. A pad connected that way is a pad from the next frame,
+    /// which is when the button goes down, and the answer comes once it is let go, as
+    /// <c>input.hold</c> answers for keys.
+    /// </para>
+    /// <para>
+    /// The button is a <see cref="GamepadButton"/> by name, South for A or Cross, and the
+    /// triggers are LeftTrigger2 and RightTrigger2.
+    /// </para>
+    /// </remarks>
+    [Command("input.button", "Holds a gamepad button for frames, on a console pad when none is connected: input.button <pad> <South|Start|...> <frames>")]
+    internal static string PadButton(string line)
+    {
+        var words = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length != 3
+            || !int.TryParse(words[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out var index)
+            || !Enum.TryParse<GamepadButton>(words[1], ignoreCase: true, out var button)
+            || !int.TryParse(words[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out var frames))
+        {
+            ConsoleHost.Fail("BAD_ARGUMENTS", "input.button takes a pad's number, a button and a number of frames, as in input.button 0 South 10.");
+            return "input.button <pad> <South|Start|...> <frames>";
+        }
+
+        if (!TryPad(index, out var pad, out var problem))
+        {
+            ConsoleHost.Fail("BAD_ARGUMENT", problem);
+            return problem;
+        }
+
+        var held = (ulong)Math.Clamp(frames, 1, (int)ConsoleHost.LaterFrames - 4);
+        ulong? until = null;
+
+        ConsoleHost.Later(() =>
+        {
+            // Down once the pad is one, which for a console pad connected by this command is the
+            // next frame.
+            if (until is null)
+            {
+                if (!PadsNow().Any(known => known.Entity == pad)) return null;
+
+                SyntheticInput.SetGamepadButton(pad, button, 1f);
+                until = ConsoleHost.Time.FrameCount + held;
+                return null;
+            }
+
+            if (ConsoleHost.Time.FrameCount < until) return null;
+
+            SyntheticInput.SetGamepadButton(pad, button, 0f);
+            return $"held {button} on pad {index} for {held} frames";
+        });
+
+        return $"holding {button} on pad {index} for {held} frames";
+    }
+
+    /// <summary>
+    /// Sets a gamepad's axis until it is set again, on a console pad when none is connected.
+    /// </summary>
+    /// <remarks>
+    /// Numbered and connected as <c>input.button</c> does it. A stick's axis is from minus one to
+    /// one, LeftX, LeftY, RightX and RightY with right and up positive, and a trigger's is from
+    /// zero to one, LeftTrigger and RightTrigger. The answer comes once the pad holds the value.
+    /// </remarks>
+    [Command("input.axis", "Sets a gamepad axis until it is set again, on a console pad when none is connected: input.axis <pad> <LeftX|LeftY|RightX|RightY|LeftTrigger|RightTrigger> <value>")]
+    internal static string PadAxis(string line)
+    {
+        var words = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length != 3
+            || !int.TryParse(words[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out var index)
+            || !Enum.TryParse<GamepadAxis>(words[1], ignoreCase: true, out var axis)
+            || !float.TryParse(words[2], NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+        {
+            ConsoleHost.Fail("BAD_ARGUMENTS", "input.axis takes a pad's number, an axis and a value, as in input.axis 0 LeftX 0.6.");
+            return "input.axis <pad> <LeftX|LeftY|RightX|RightY|LeftTrigger|RightTrigger> <value>";
+        }
+
+        if (!TryPad(index, out var pad, out var problem))
+        {
+            ConsoleHost.Fail("BAD_ARGUMENT", problem);
+            return problem;
+        }
+
+        var set = false;
+        ConsoleHost.Later(() =>
+        {
+            if (!PadsNow().Any(known => known.Entity == pad)) return null;
+            if (set) return FormattableString.Invariant($"{axis} on pad {index} at {value}");
+
+            SyntheticInput.SetGamepadAxis(pad, axis, value);
+            set = true;
+            return null;
+        });
+
+        return FormattableString.Invariant($"setting {axis} on pad {index} to {value}");
+    }
+
+    /// <summary>The pads as this frame reads them.</summary>
+    private static IReadOnlyList<Gamepad> PadsNow() => ConsoleHost.World?.Resource<Input>().Gamepads ?? [];
+
+    /// <summary>The pad a number names, connecting a console pad where it is the number after the last.</summary>
+    private static bool TryPad(int index, out Entity pad, out string problem)
+    {
+        var pads = PadsNow();
+        pad = Entity.None;
+        problem = string.Empty;
+
+        if (index >= 0 && index < pads.Count)
+        {
+            pad = pads[index].Entity;
+            return true;
+        }
+
+        if (index == pads.Count)
+        {
+            pad = SyntheticInput.ConnectGamepad();
+            return true;
+        }
+
+        problem = $"There is no pad {index}. {pads.Count} {(pads.Count == 1 ? "is" : "are")} connected, and {pads.Count} would connect a console pad.";
+        return false;
+    }
+
     /// <summary>Turns the wheel.</summary>
     [Command("input.wheel", "Turns the wheel, negative is down: input.wheel <lines>")]
     internal static string Wheel(float lines)

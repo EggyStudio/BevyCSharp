@@ -48,6 +48,7 @@ What is usually there:
 | `input.click <x> <y>`, `input.press`/`input.release`, `input.move`, `input.wheel`, `input.type`, `input.key`, `input.uikey` | Real input through the window's own path, so picking and focus behave |
 | `input.hold <W\|W,D> <frames>` | Hold keys for exactly that many frames and answer once they are let go, for a game that acts while one is down |
 | `input.drag <x> <y> <dx> <dy> <frames> [Right\|Middle]` | Press at a point, move an equal step each frame for that many frames, release the frame after, and answer then, for a swipe, a handle or a slider dragged |
+| `input.button <pad> <South\|Start\|...> <frames>`, `input.axis <pad> <LeftX\|...\|RightTrigger> <value>`, `input.pads` | Hold a gamepad's button or set its axis, on a pretended pad when the number names the one after the last (0 with none connected) |
 | `input.keydown <key>`, `input.keyup <key>` | Hold a key across calls, for as long as the calls between take; keys reach an offscreen run too |
 | `frames.wait <n>` | Answers after n more frames, so act, settle and look is one call |
 | `frame.profile [frames]` | What a frame spends: managed systems by name, calls into the bridge, Bevy's schedule, the render's phases |

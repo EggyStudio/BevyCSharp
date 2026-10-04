@@ -179,6 +179,17 @@ if [[ $PORTABLE -eq 0 && ( "$PROFILE" == "render" || "$PROFILE" == "editor" ) &&
         echo "       Or build with --portable, which installs them into a container instead." >&2
         exit 1
     fi
+
+    # Gamepads likewise, which gilrs reads through libudev.
+    if ! pkg-config --exists libudev 2>/dev/null; then
+        echo "error: a render build needs libudev's development files, which are not installed." >&2
+        echo "       Bevy's gamepads are read through them by gilrs." >&2
+        echo "         Fedora, RHEL  : sudo dnf install systemd-devel" >&2
+        echo "         Debian, Ubuntu: sudo apt install libudev-dev" >&2
+        echo "         Arch          : sudo pacman -S systemd-libs" >&2
+        echo "       Or build with --portable, which installs them into a container instead." >&2
+        exit 1
+    fi
 fi
 
 if [[ $PORTABLE -eq 1 && "$TARGET" != *linux-gnu ]]; then
@@ -218,12 +229,12 @@ if [[ $PORTABLE -eq 1 ]]; then
     TARGET_DIR="$BUILD_DIR/target-portable"
     mkdir -p "$TARGET_DIR" "${CARGO_HOME:-$HOME/.cargo}/registry"
 
-    # A render build needs ALSA's development headers, because Bevy's audio links against it.
-    # The image does not carry them, so they are installed into the container that is about to be
-    # thrown away rather than onto the machine.
+    # A render build needs ALSA's development headers, because Bevy's audio links against it, and
+    # libudev's, because its gamepads are read through it. The image carries neither, so they are
+    # installed into the container that is about to be thrown away rather than onto the machine.
     SETUP=""
     if [[ "$PROFILE" == "render" || "$PROFILE" == "editor" ]]; then
-        SETUP="apt-get update -qq && apt-get install -y -qq --no-install-recommends libasound2-dev >/dev/null && "
+        SETUP="apt-get update -qq && apt-get install -y -qq --no-install-recommends libasound2-dev libudev-dev >/dev/null && "
     fi
 
     # The folder to embed, mounted where the container can read it, unless it is inside the

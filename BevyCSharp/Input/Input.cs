@@ -31,6 +31,7 @@ public sealed class Input
     private uint _mousePressed;
     private string _text = string.Empty;
     private readonly Touch[] _touches = new Touch[NativeInput.TouchCapacity];
+    private Gamepad[] _gamepads = [];
     private int _touchCount;
     private uint _mouseReleased;
 
@@ -174,6 +175,58 @@ public sealed class Input
         }
 
         UpdateTextAndTouches(snapshot);
+    }
+
+    /// <summary>The connected gamepads, in the order Bevy found them, as they stood at the start of this frame.</summary>
+    /// <remarks>
+    /// <para>
+    /// Empty where none is connected, and never null. A pad connected or disconnected is also
+    /// sent that frame as a <see cref="GamepadConnected"/> or a <see cref="GamepadDisconnected"/>,
+    /// for a game that gives each player a pad as it arrives.
+    /// </para>
+    /// <para>
+    /// The first pad is <c>Gamepads[0]</c> where there is one, and a game read by one player
+    /// takes that and the keyboard together, as Courtyard steers its runner.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// foreach (var pad in ctx.Input.Gamepads)
+    /// {
+    ///     move += pad.LeftStick;
+    ///     if (pad.Pressed(GamepadButton.South)) Jump();
+    /// }
+    /// </code>
+    /// </example>
+    public IReadOnlyList<Gamepad> Gamepads => _gamepads;
+
+    /// <summary>Reads the connected pads and sends what connected and disconnected since the last frame.</summary>
+    /// <remarks>
+    /// One call into the bridge a frame, for every pad at once. Sixteen is more pads than any
+    /// platform connects to one machine, and a seventeenth would be read as missing rather than
+    /// overrun anything.
+    /// </remarks>
+    internal unsafe void UpdateGamepads(MessageBus messages)
+    {
+        const int Capacity = 16;
+        var natives = stackalloc NativeGamepad[Capacity];
+        var count = Native.bcs_gamepads(natives, Capacity);
+        if (count < 0) count = 0;
+
+        var now = new Gamepad[Math.Min(count, Capacity)];
+        for (var i = 0; i < now.Length; i++) now[i] = new Gamepad(natives[i]);
+
+        foreach (var pad in now)
+        {
+            if (!_gamepads.Any(was => was.Entity == pad.Entity)) messages.Send(new GamepadConnected(pad.Entity, pad.Name));
+        }
+
+        foreach (var was in _gamepads)
+        {
+            if (!now.Any(pad => pad.Entity == was.Entity)) messages.Send(new GamepadDisconnected(was.Entity));
+        }
+
+        _gamepads = now;
     }
 
     /// <inheritdoc/>

@@ -54,6 +54,51 @@ public static class SyntheticInput
     public static void Release(float x, float y, MouseButton button = MouseButton.Left) =>
         Send(x, y, PointerAction.Release, button);
 
+    /// <summary>Connects a pretended gamepad and returns its entity.</summary>
+    /// <remarks>
+    /// <para>
+    /// For a script or a test on a machine with no pad attached. The bridge writes the messages a
+    /// real pad's connection writes, so Bevy keeps it as it keeps a real one, and it is in
+    /// <see cref="Input.Gamepads"/> from the next frame, with a <see cref="GamepadConnected"/> sent
+    /// then. Every profile reads one, the headless one included, which finds no real pads.
+    /// </para>
+    /// <para>
+    /// Its buttons and axes are set with <see cref="SetGamepadButton"/> and
+    /// <see cref="SetGamepadAxis"/>, and each change is read a frame later, as a real pad's is.
+    /// </para>
+    /// </remarks>
+    /// <param name="name">What it is called, as a platform names a real pad.</param>
+    /// <exception cref="BevyNativeException">Called from outside a system.</exception>
+    public static unsafe Entity ConnectGamepad(string name = "Console pad")
+    {
+        ArgumentNullException.ThrowIfNull(name);
+
+        var bytes = System.Text.Encoding.UTF8.GetBytes(name);
+        ulong entity;
+        fixed (byte* text = bytes) entity = Native.bcs_gamepad_connect(text, (uint)bytes.Length);
+
+        if (entity == 0)
+            throw new BevyNativeException(NativeStatus.NoWorld, "Connecting a pretended gamepad needs the world, so it is done from inside a system.");
+
+        return new Entity(entity);
+    }
+
+    /// <summary>Disconnects a pretended gamepad, which leaves <see cref="Input.Gamepads"/> the next frame.</summary>
+    /// <exception cref="BevyNativeException">The entity is gone, or this was called from outside a system.</exception>
+    public static void DisconnectGamepad(Entity gamepad) =>
+        Native.Check(Native.bcs_gamepad_disconnect(gamepad.Bits), $"disconnecting gamepad {gamepad}");
+
+    /// <summary>Sets one of a pretended pad's buttons, from zero, up, to one, down.</summary>
+    /// <remarks>Down past three quarters counts as held, as Bevy reads a real pad's buttons.</remarks>
+    /// <exception cref="BevyNativeException">Called from outside a system.</exception>
+    public static void SetGamepadButton(Entity gamepad, GamepadButton button, float value = 1f) =>
+        Native.Check(Native.bcs_gamepad_button(gamepad.Bits, (int)button, value), $"setting {button} on gamepad {gamepad}");
+
+    /// <summary>Sets one of a pretended pad's axes, a stick from minus one to one and a trigger from zero to one.</summary>
+    /// <exception cref="BevyNativeException">Called from outside a system.</exception>
+    public static void SetGamepadAxis(Entity gamepad, GamepadAxis axis, float value) =>
+        Native.Check(Native.bcs_gamepad_axis(gamepad.Bits, (int)axis, value), $"setting {axis} on gamepad {gamepad}");
+
     /// <summary>
     /// Rolls the wheel, in the lines a wheel with detents reports.
     /// </summary>

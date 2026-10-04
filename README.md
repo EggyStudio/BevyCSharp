@@ -3198,9 +3198,28 @@ foreach (var touch in ctx.Input.Touches)
     if (touch.Phase == TouchPhase.Started) Aim(touch.X, touch.Y);
 ```
 
-A touch that ends is reported once, on the frame it ends, and is gone after that. Gamepads are
-deliberately excluded, because `bevy_gilrs` needs libudev headers at build time on Linux, which the
-bridge avoids so it builds with nothing but a C compiler.
+A touch that ends is reported once, on the frame it ends, and is gone after that.
+
+Gamepads are this frame's list too, each with its buttons as a key is read and its sticks and
+triggers as numbers, in the order Bevy found them:
+
+```csharp
+if (ctx.Input.Gamepads is [var pad, ..])
+{
+    move += new Vec3(pad.LeftStick.X, 0f, -pad.LeftStick.Y);
+    if (pad.Pressed(GamepadButton.South)) Jump();      // A, or Cross
+    if (pad.Axis(GamepadAxis.RightTrigger) > 0.1f) Accelerate();
+}
+
+foreach (var joined in ctx.Read<GamepadConnected>()) AddPlayer(joined.Gamepad);
+```
+
+The face buttons are named by where they sit, `South` being A on one pad and Cross on another. A
+stick at rest reads zero through Bevy's dead zones, and a trigger is both an axis and, down past
+three quarters, a button. `pad.Rumble(strong, weak, seconds)` shakes one. Real pads are found by
+gilrs in the render and editor profiles, and every profile reads a pad pretended by
+`SyntheticInput.ConnectGamepad`, which is how a test or `./bcs command input.button 0 South 10`
+presses a button on a machine with none attached.
 
 ---
 
@@ -3699,7 +3718,7 @@ Early. The behavior system, the ECS bridge and the schedule work and are covered
 run against a real Bevy app. Bevy's own examples are the measure of how much of it is reached:
 
 <!-- examples -->
-Of Bevy's 421 examples, 22 are written in C# here, 268 more can be with what is bridged, 78 wait on something the bridge lacks and 53 are about Rust itself ([EXAMPLES.md](.github/EXAMPLES.md)).
+Of Bevy's 421 examples, 22 are written in C# here, 272 more can be with what is bridged, 74 wait on something the bridge lacks and 53 are about Rust itself ([EXAMPLES.md](.github/EXAMPLES.md)).
 <!-- /examples -->
 
 <!-- example-gallery -->

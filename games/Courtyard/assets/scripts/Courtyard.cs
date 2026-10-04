@@ -54,8 +54,8 @@ public partial struct Wallet
 }
 
 /// <summary>
-/// The player, a model walked with WASD as a character, which the walls stop and the ground holds,
-/// facing the way it walks.
+/// The player, a model walked with WASD or a gamepad's left stick as a character, which the walls
+/// stop and the ground holds, facing the way it walks.
 /// </summary>
 [Behavior]
 public partial struct Runner
@@ -109,6 +109,14 @@ public partial struct Runner
     {
         var x = (ctx.Input.KeyDown(Key.D) ? 1f : 0f) - (ctx.Input.KeyDown(Key.A) ? 1f : 0f);
         var z = (ctx.Input.KeyDown(Key.S) ? 1f : 0f) - (ctx.Input.KeyDown(Key.W) ? 1f : 0f);
+
+        // The first pad's left stick beside the keys, up on the stick being away from the camera,
+        // and a key and the stick together no faster along either axis than a key alone.
+        if (ctx.Input.Gamepads is [var pad, ..])
+        {
+            x = Math.Clamp(x + pad.LeftStick.X, -1f, 1f);
+            z = Math.Clamp(z - pad.LeftStick.Y, -1f, 1f);
+        }
 
         body.Move = new Vec3(x * Speed, 0f, z * Speed);
 

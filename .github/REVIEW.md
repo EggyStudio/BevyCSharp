@@ -8,15 +8,17 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `4a7331d`. `OnTransition` (`66a5b4d`) and `input.drag` (`ce27e73`) are settled and in
-the ledger, and the hinge test counted in fixed steps (`4a7331d`) raised nothing. EXAMPLES.md was
-read as it stands uncommitted: 421 rows, 14 written, 276 that can be, 78 missing and 53 that do not
-apply, with each missing row naming what it lacks, which is what was asked for.
+Reviewed up to `661682e`. The examples project, the table and the first 22 examples (`661682e`)
+were read: the table holds 421 rows, each written example has its capture, and `3d_shapes` was
+read beside Bevy's source. The fixes the examples turned up (`5bc8e5b`) raised nothing. Counting
+Bevy's components reached through reflection as bridged is right, since an example can be
+written with them. The first batch raised the verdict below.
 
 ## Now
 
-Item 1 is the owner's request of 2026-10-04 and comes first, after the batch in progress. Items
-3, 5 and 6 are taken from [SHARED.md](SHARED.md). Items 2 and 4 are the owner's decisions.
+Item 1 is the owner's request of 2026-10-04 and goes on a group at a time, the verdict below
+taken with its next batch. Items
+4, 5 and 6 are taken from [SHARED.md](SHARED.md). Items 2 and 3 are the owner's decisions.
 
 1. **Bevy's examples, one by one, as this engine's examples and as its measure.** Bevy ships
    416 examples in 31 groups (70 in 3D rendering, 60 in UI, 36 in ECS, 28 in 2D, and so on),
@@ -62,23 +64,51 @@ Item 1 is the owner's request of 2026-10-04 and comes first, after the batch in 
    - Verified by the table holding 416 rows, by every `written` row opening by name and
      capturing a picture that is not blank, and by the counts in EXAMPLES.md and the README
      agreeing.
-2. **Gamepads** (decision 2), which the owner decided for. `bevy_gilrs` goes into the render and
+2. **The README is split into a guide under `docs/`**, which the owner decided for on 2026-10-04
+   and asked to come soon, since every commit that edits a README of 3,810 lines makes the
+   split larger. It comes after the examples batch in progress.
+   The shape is the same in both engines and is recorded in [SHARED.md](SHARED.md). Who a
+   document is for decides where it lives. `README.md` is for somebody deciding whether to use
+   the engine, about 200 lines. `docs/` at the repository's root is for somebody using it, one
+   page an area and `CHEATSHEET.md`. `.github/` is for somebody working on it.
+   - **The move, one batch.** The README's reference leaves it with nothing dropped, each major
+     heading becoming a page: `docs/behaviors.md` (systems and components, stages, the fixed
+     timestep, filters, conditions, threading), `docs/states.md`,
+     `docs/messages-and-hierarchy.md`, `docs/components.md` (Bevy's own, every other, lists and
+     maps, visibility), `docs/scenes-and-saves.md` (data assets, scene files, instances, saving,
+     changing a type), `docs/assets-and-models.md`, Drawing's 1,326 lines along its own
+     sub-headings into `docs/drawing.md`, `docs/materials.md`, `docs/shaders.md`,
+     `docs/cameras-and-light.md`, `docs/ray-tracing.md` and `docs/window.md`, then `docs/2d.md`,
+     `docs/gizmos.md`, `docs/ui.md`, `docs/audio.md`, `docs/physics.md`, `docs/input.md`,
+     `docs/running-a-game.md`, `docs/making-a-game.md`, `docs/tools.md` and
+     `docs/how-it-works.md`. README.md is rewritten in the order 3DEngine's has, which is the
+     model: what it is and a first behavior at the top, the examples with their pictures and
+     the count from EXAMPLES.md, the install, then a Guide section that is the table of
+     contents, a line a page saying what it covers, then status, building, contributing and the
+     license.
+   - **The cheatsheet, the batch after.** `docs/CHEATSHEET.md`, every public call of `App`,
+     `EcsWorld`, `Render`, `Ui`, `Audio`, `Physics` and the rest on a line of its own with what
+     it does, grouped as the guide is, and a test that holds it to the public surface as
+     3DEngine's `CheatsheetTests` does, so a call added without its line fails.
+   A page covers one area in 100 to 300 lines: what the area is for in two or three sentences,
+   then step by step with a snippet each, then links to the example that shows it, the
+   cheatsheet's section and the next page. A page past 400 lines is split. Where an example
+   exists the snippet is the example's own code, so the two cannot drift apart. Links from the
+   README are full GitHub URLs, since the README is also the package's page on nuget.org, where
+   a relative link goes nowhere, and a check in the workflow follows every link in the README
+   and `docs/`.
+   - Verified by a script that lists the headings the README had before and finds each in a
+     page under `docs/`, by the README walk still passing, by the package's readme being
+     checked if the project packs one, and by no relative link left in the README.
+3. **Gamepads** (decision 2), which the owner decided for. `bevy_gilrs` goes into the render and
    editor profiles, with buttons, sticks, triggers, connection and rumble reaching C# as the
    keyboard does, a command that presses a pad's button for `bcs`, and Courtyard's runner
    steered by a stick beside the keys.
-3. **A build with no warnings, and a warning failing the workflow.** 3DEngine's first runs on
+4. **A build with no warnings, and a warning failing the workflow.** 3DEngine's first runs on
    GitHub carried dozens of annotations nobody had seen, a `stackalloc` in a loop among them. The
    managed build passes `-warnaserror` in the workflow once it is clean, with a warning that is
    right to keep turned off where it arises and its reason beside it, and `cargo` builds deny
    warnings the same way.
-4. **The README is split**, which the owner decided for. It is about 3,400 lines and changes in
-   most commits. README.md keeps what the project is, the install, a first behavior, running and
-   driving a game, the status, building and the license, and links to the rest. The section
-   called The engine, some 2,300 lines, moves into one document an area under `.github/` or
-   `docs/`, each linked from the README's contents, with nothing dropped. The README walk still
-   takes its program from where the walk script looks, the package's readme is checked if it
-   embeds README.md, and SHARED.md's rows that name a README section are told to the reviewing
-   session with a `Shared:` line so they follow.
 5. **A contact that says how hard its pair hit, and joints with limits**, from 3DEngine's
    `c5227118`: the speed a pair closed at on `ContactStarted`, which a game turns into damage or
    the loudness of a sound, a ball joint kept within a cone, and a distance joint whose range
@@ -96,7 +126,16 @@ the README quotes is the written one, with the others beside it.
 
 ## Verdicts
 
-None open.
+1. **An example written in part counts as written** (`661682e`). Five of the 22 rows marked
+   `written` say what they leave out: `3d_shapes` has the solids and none of Bevy's segment,
+   polyline or seven extrusions, `bloom_3d` three of its six settings, `pbr` its turned label,
+   `transparency_3d` its alpha to coverage, and `wireframe` its width and topology. The rows are
+   honest and the count above them is not, since 22 of 421 says those five are done. The table
+   gains a fifth state, `written in part`, with what is left named as it is in those rows and
+   counted in a column of its own, the headline gives the two numbers apart, and each thing left
+   out is an entry in TODO.md naming the example waiting on it, as a missing example's is. A
+   difference that is not a feature, such as cubes scattered by another random generator, stays
+   `written`.
 
 ## Decisions
 
@@ -114,18 +153,9 @@ None open.
 
 ## Replies
 
+- Shared: gamepads are taken in the commit carrying this line, as `Input.Gamepads` with buttons,
+  sticks, triggers, `GamepadConnected` and `GamepadDisconnected` messages and rumble, gilrs in the
+  render and editor profiles, and a pad pretended by `SyntheticInput.ConnectGamepad` in every
+  profile, which `input.button`, `input.axis` and `input.pads` drive as 3DEngine's console pad is
+  driven. Courtyard's runner takes the first pad's left stick beside the keys.
 
-- Item 1, the count. Bevy 0.19.1's metadata has 421 examples, 408 of them in the list its
-  `examples/README.md` keeps (411 rows there, `hello_world` and the two tests among them) and 13
-  kept out of it, the testbeds and the hidden tests, so the table holds 421 rows in 35 groups, the
-  last of them the ones kept out. The script reads the metadata, so a row is never left out for
-  being hidden.
-- Item 1, the first batch. 3D Rendering holds 67 rows, so it is taken over more than one batch:
-  this one writes 22 of them, and the next ones go on with the group before 2D. Bevy's
-  components reached through reflection count as bridged, which moved 33 rows from `missing` to
-  `can be written` (fog, volumetric fog, rect lights, visibility ranges, decals, lightmaps, the
-  interface's gradients, shadows and z-index, morph weights and others), and each such row names
-  the component.
-- Shared: Bevy's examples written in C# under Bevy's names, picked by name, each captured, with a
-  row for every one of Bevy's in `.github/EXAMPLES.md`, are taken in the commit carrying this line,
-  after `3DEngine.Examples` and its capture script.

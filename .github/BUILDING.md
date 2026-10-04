@@ -55,16 +55,19 @@ build/build-native.ps1 -Render          # PowerShell, same output
 ```
 
 The `render` profile is assembled feature by feature rather than taking Bevy's
-`default_platform`, which drags in gamepad support and links Wayland at build time. Everything
-graphical resolves at runtime: X11 comes through `x11-dl`, Wayland through `wayland-dlopen`, and
-Vulkan through the loader. It takes several minutes to compile and produces a much larger library.
+`default_platform`, which links Wayland at build time. Everything graphical resolves at runtime,
+X11 through `x11-dl`, Wayland through `wayland-dlopen` and Vulkan through the loader. It takes
+several minutes to compile and produces a much larger library.
 
-Audio is the exception, and the only system dependency in the tree. Bevy's audio sits on cpal, which
-links against ALSA on Linux, so a `render` build there needs `libasound2-dev` or the equivalent for
-the distribution. `build-native.sh` checks for it and names the package if it is missing, and
-installs it into the container on the `--portable` path. The `headless` profile has no such
-dependency and builds with nothing but a C compiler. Neither affects anyone consuming the NuGet
-package, which ships the native prebuilt for each runtime identifier.
+Audio and gamepads are the exceptions, and the only system dependencies in the tree. Bevy's audio
+sits on cpal, which links against ALSA on Linux, and its gamepads on gilrs, which reads them through
+libudev, so a `render` build there needs `libasound2-dev` and `libudev-dev`, or the equivalents for
+the distribution (`alsa-lib-devel` and `systemd-devel` on Fedora). `build-native.sh` checks for
+both and names the packages if they are missing, and installs them into the container on the
+`--portable` path. The `headless` profile has neither and builds with nothing but a C compiler,
+though it carries Bevy's gamepad input, which a pad pretended by a script or a test feeds. Neither
+affects anyone consuming the NuGet package, which ships the native prebuilt for each runtime
+identifier.
 
 `Config.Headless` forces the windowless path even on a render build, which is how the tests and
 a dedicated server run the same behavior code without a display.

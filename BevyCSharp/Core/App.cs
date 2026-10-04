@@ -310,6 +310,7 @@ public sealed unsafe class App : IDisposable
             Native.Check(Native.bcs_frame_state(&state), "bcs_frame_state");
             world.Resource<Time>().Update(state.Time);
             world.Resource<Input>().Update(state.Input);
+            world.Resource<Input>().UpdateGamepads(world.Resource<MessageBus>());
 
             // A new frame's worth of streamed bytes to hand over.
             Streaming.BeginFrame();

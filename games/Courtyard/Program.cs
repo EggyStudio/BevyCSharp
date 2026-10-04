@@ -1,8 +1,8 @@
 using Bevy;
 using Bevy.Physics;
 
-// Courtyard, in which the runner is walked around a courtyard with WASD to pick up every coin
-// and bring them to the green goal. Enter starts, Escape pauses, F5 saves and F9 loads.
+// Courtyard, in which the runner is walked around a courtyard with WASD or a gamepad's left stick
+// to pick up every coin and bring them to the green goal. Enter starts, Escape pauses, F5 saves and F9 loads.
 //
 // BCS_OFFSCREEN=1 draws into an image rather than a window and BCS_SERVE=1 answers bcs, which is
 // how play.sh plays it with no display.
