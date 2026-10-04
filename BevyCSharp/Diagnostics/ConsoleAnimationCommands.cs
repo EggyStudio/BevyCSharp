@@ -27,19 +27,21 @@ internal static class ConsoleAnimationCommands
     [Command("anim.play", "Plays a model's clip: anim.play <name|#index> <clip> [loop]")]
     internal static string Play(string line)
     {
-        // One line rather than three arguments, so the last can be left out.
-        var words = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (words.Length < 2) return Usage();
+        // One line rather than three arguments, so the last can be left out, with the entity in
+        // quotes when its name has a space.
+        var split = ConsoleWorldCommands.FirstAndRest(line);
+        if (split.Length < 2) return Usage();
 
         var world = ConsoleHost.Ecs;
-        if (ConsoleWorldCommands.Find(world, words[0]) is not { } scene) return ConsoleWorldCommands.Missing(words[0]);
+        if (ConsoleWorldCommands.Find(world, split[0]) is not { } scene) return ConsoleWorldCommands.Missing(split[0]);
 
-        var looping = words.Length > 2 && words[^1] == "loop";
-        var clip = string.Join(' ', looping ? words[1..^1] : words[1..]);
+        var words = split[1].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var looping = words.Length > 1 && words[^1] == "loop";
+        var clip = string.Join(' ', looping ? words[..^1] : words);
 
         return Asked(() => Animation.Play(scene, clip, new AnimationSettings { Repeat = looping, Blend = 0.2f })
-            ? $"playing {clip} on {words[0]}{(looping ? " over and over" : string.Empty)}"
-            : $"{words[0]} has not arrived yet; ask again in a moment");
+            ? $"playing {clip} on {split[0]}{(looping ? " over and over" : string.Empty)}"
+            : $"{split[0]} has not arrived yet; ask again in a moment");
     }
 
     /// <summary>Stops what a model is playing.</summary>

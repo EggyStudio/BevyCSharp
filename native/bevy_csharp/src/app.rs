@@ -193,6 +193,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         app.register_asset_source("user", AssetSourceBuilder::platform_default(root, None));
     }
 
+    // The folders the managed side named as sources of their own, such as the editor's own icons
+    // beside a project it opens, registered for the same reason and at the same time.
+    crate::assets::install_sources(&mut app);
+
     // The assets the game's own assembly carries, read after the disk through the managed side,
     // where it handed a reader over before this app was built. Registered for the same reason the
     // player's source is, before the asset plugin builds the sources. A bridge carrying a game's

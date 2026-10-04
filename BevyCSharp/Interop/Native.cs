@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 172;
+    internal const int ExpectedAbiVersion = 173;
 
     static Native() => NativeLoader.Initialize();
 
@@ -1343,6 +1343,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_capture_read(
         int id, uint* width, uint* height, byte* buffer, int capacity);
+
+    /// <summary>Names a folder as an asset source of its own for the next app, or forgets them all with a null root.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_asset_source_add(string? name, string? root);
 
     /// <summary>The names of a scene's clips, a line each.</summary>
     [LibraryImport(Library)]

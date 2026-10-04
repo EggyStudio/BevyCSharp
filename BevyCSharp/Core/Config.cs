@@ -91,6 +91,18 @@ public sealed class Config
     public System.Reflection.Assembly? AssetAssembly { get; set; }
 
     /// <summary>
+    /// Folders Bevy reads as asset sources of their own, by name, so <c>name://path</c> loads from
+    /// the folder named.
+    /// </summary>
+    /// <remarks>
+    /// For files that belong beside the assets rather than among them, such as a tool's own icons
+    /// beside the project it opens, which the editor names <c>editor</c>. <c>user</c> is the
+    /// player's directory already and cannot be named again. Read as the app is created, since
+    /// Bevy builds its sources then and never again.
+    /// </remarks>
+    public Dictionary<string, string> AssetSources { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>
     /// A pack the game's assets are read from after <see cref="AssetRoot"/>, or nothing for
     /// <see cref="AssetPack.DefaultName"/> beside the executable when there is one.
     /// </summary>

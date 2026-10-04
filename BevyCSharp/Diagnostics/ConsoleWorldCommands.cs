@@ -420,6 +420,127 @@ internal static class ConsoleWorldCommands
         return "closing";
     }
 
+    /// <summary>Gives an entity a name.</summary>
+    [Command("entity.rename", "Names an entity: entity.rename <name|#index> <new name>")]
+    internal static string Rename(string line)
+    {
+        // One line, so a name with spaces in it is the rest of the line, and the entity is the
+        // first word, or the words in quotes when its own name has a space.
+        var words = FirstAndRest(line);
+        if (words.Length < 2)
+        {
+            ConsoleHost.Fail("BAD_ARGUMENTS", "entity.rename takes an entity and a name, as in entity.rename #12 Wall");
+            return "entity.rename <name|#index> <new name>";
+        }
+
+        var world = ConsoleHost.Ecs;
+        if (Find(world, words[0]) is not { } entity) return Missing(words[0]);
+
+        world.SetName(entity, words[1]);
+        return $"#{entity.Index} is called {words[1]}";
+    }
+
+    /// <summary>Puts a component on an entity, at its default values.</summary>
+    /// <remarks>
+    /// By the name the inspector shows it under, a game's own or Bevy's. The fields are then set
+    /// with <c>entity.set</c>, as a component added in the editor is filled in afterward.
+    /// </remarks>
+    [Command("entity.add", "Puts a component on an entity: entity.add <name|#index> <Component>")]
+    internal static string AddComponent(string which, string component)
+    {
+        var world = ConsoleHost.Ecs;
+        if (Find(world, which) is not { } entity) return Missing(which);
+
+        if (ComponentSchemas.For(component) is not { } schema)
+        {
+            ConsoleHost.Fail("NO_SUCH_COMPONENT", $"No component is called {component}.");
+            return $"no component called {component}";
+        }
+
+        return schema.Add(world, entity) ? $"#{entity.Index} carries {schema.Name}" : $"{which} already carries {schema.Name}";
+    }
+
+    /// <summary>Changes one setting of the material an entity is drawn with.</summary>
+    /// <remarks>
+    /// The material itself, which every entity drawn with it shares, as the editor's Material card
+    /// changes it. A color is hex, <c>#rrggbb</c> or with alpha, and a number is a number.
+    /// </remarks>
+    [Command("material.set", "Changes an entity's material: material.set <name|#index> <color|emissive|metallic|roughness|unlit> <value>")]
+    internal static string Material(string which, string setting, string value)
+    {
+        var world = ConsoleHost.Ecs;
+        if (Find(world, which) is not { } entity) return Missing(which);
+
+        var material = Render.MaterialOf(world, entity);
+        if (!material.IsValid || !Render.TryReadMaterial(material, out var settings) || settings is null)
+        {
+            ConsoleHost.Fail("NO_MATERIAL", $"{which} is not drawn with a standard material.");
+            return $"{which} has no standard material";
+        }
+
+        try
+        {
+            switch (setting.ToLowerInvariant())
+            {
+                case "color":
+                    var color = Color.FromHex(value);
+                    settings.BaseColor = (color.R, color.G, color.B, color.A);
+                    break;
+                case "emissive":
+                    var glow = Color.FromHex(value);
+                    settings.Emissive = (glow.R, glow.G, glow.B, 1f);
+                    break;
+                case "metallic":
+                    settings.Metallic = float.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
+                    break;
+                case "roughness":
+                    settings.Roughness = float.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
+                    break;
+                case "unlit":
+                    settings.Unlit = value is "1" or "true" or "on";
+                    break;
+                default:
+                    ConsoleHost.Fail("NO_SUCH_SETTING", $"A material has no setting called {setting} here.");
+                    return $"no setting called {setting}";
+            }
+        }
+        catch (FormatException error)
+        {
+            ConsoleHost.Fail("BAD_VALUE", error.Message);
+            return error.Message;
+        }
+
+        Render.WriteMaterial(material, settings);
+        return $"{which}'s material has {setting} {value}";
+    }
+
+    /// <summary>
+    /// A line split into its first word and the rest, the first being the words in quotes when the
+    /// line starts with one, so an entity whose name has a space can be named.
+    /// </summary>
+    internal static string[] FirstAndRest(string line)
+    {
+        var trimmed = line.Trim();
+
+        string[] split;
+        if (trimmed.StartsWith('"') && trimmed.IndexOf('"', 1) is > 0 and var close)
+        {
+            var rest = trimmed[(close + 1)..].Trim();
+            split = rest.Length > 0 ? [trimmed[1..close], rest] : [trimmed[1..close]];
+        }
+        else
+        {
+            split = trimmed.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        // The rest without the quotes a caller put round it as a whole, as bcs does for a word
+        // with a space in it.
+        if (split.Length == 2 && split[1].Length > 1 && split[1][0] == '"' && split[1][^1] == '"')
+            split[1] = split[1][1..^1];
+
+        return split;
+    }
+
     /// <summary>The entity a word names, by name or by <c>#index</c>.</summary>
     internal static Entity? Find(EcsWorld world, string which)
     {

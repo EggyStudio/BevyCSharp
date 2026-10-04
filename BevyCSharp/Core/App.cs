@@ -145,6 +145,11 @@ public sealed unsafe class App : IDisposable
         AssetFiles.Use(Config.AssetAssembly ?? System.Reflection.Assembly.GetEntryAssembly(), OpenPack(Config));
         AssetFiles.Serve();
 
+        // Any folder named as a source of its own, forgetting the last app's first.
+        Native.Check(Native.bcs_asset_source_add(null, null), "forgetting the last app's asset sources");
+        foreach (var (name, folder) in Config.AssetSources)
+            Native.Check(Native.bcs_asset_source_add(name, Path.GetFullPath(folder)), $"naming {folder} as the asset source {name}");
+
         // Where Bevy reads assets from, and where a streamed read's path starts too, is the
         // directory asked for, or `assets` beside the executable, which is Bevy's own default.
         // Known before the native app is, so the project's settings can be read from there first.

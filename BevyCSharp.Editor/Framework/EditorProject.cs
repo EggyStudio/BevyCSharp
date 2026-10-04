@@ -44,7 +44,7 @@ public static class EditorProject
         Settings.Persist();
 
         Console.WriteLine(
-            $"[editor] saved {written} entities to {EditorPaths.Assets} and the settings to {Settings.FullPath}");
+            $"[editor] saved {written} entities to {EditorPaths.Scene} and the settings to {Settings.FullPath}");
     }
 
     /// <summary>Puts the saved scene and the saved arrangement back.</summary>

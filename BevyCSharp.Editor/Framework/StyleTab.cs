@@ -184,7 +184,7 @@ public static class StyleTab
     /// <summary>Writes what is in force to the file the editor reads at startup.</summary>
     private static void Save()
     {
-        var path = EditorPaths.Asset("theme.txt");
+        var path = Path.Combine(EditorPaths.Own, "theme.txt");
 
         try
         {
@@ -210,7 +210,7 @@ public static class StyleTab
     /// <summary>Puts the saved theme back.</summary>
     private static void Reload()
     {
-        var path = EditorPaths.Asset("theme.txt");
+        var path = Path.Combine(EditorPaths.Own, "theme.txt");
 
         if (!File.Exists(path))
         {
@@ -234,7 +234,7 @@ public static class StyleTab
     {
         EditorShell.Wear(EditorTheme.Modern);
 
-        var path = EditorPaths.Asset("theme.txt");
+        var path = Path.Combine(EditorPaths.Own, "theme.txt");
 
         try
         {

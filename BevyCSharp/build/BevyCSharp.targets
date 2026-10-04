@@ -4,6 +4,16 @@
     <Import Project="$(MSBuildThisFileDirectory)BevyCSharp.Embed.targets"/>
 
     <!--
+      The game's assets folder beside its build, where an app looks for it unless Config.AssetRoot
+      names another, so a plain dotnet run finds them. Its scripts are not copied, since the SDK
+      compiles every .cs file under the project into the game already. BevyCSharpCopyAssets set to
+      false leaves the folder where it is.
+    -->
+    <ItemGroup Condition="'$(BevyCSharpCopyAssets)' != 'false'">
+        <None Update="assets/**" CopyToOutputDirectory="PreserveNewest"/>
+    </ItemGroup>
+
+    <!--
       Imported into every project that references the BevyCSharp package.
 
       NuGet already copies runtimes/<rid>/native/ for a RID-specific build or publish. This

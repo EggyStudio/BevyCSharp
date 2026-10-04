@@ -81,7 +81,13 @@ public static class EditorPlay
     public static int Written { get; private set; }
 
     /// <summary>The project that is played and built, as a path, or nothing when there is none to find.</summary>
-    public static string? Resolved => Project.Length > 0 ? Project : Sample();
+    public static string? Resolved => Project.Length > 0 ? Project : Opened() ?? Sample();
+
+    /// <summary>The project file of the folder the editor opened, when it opened one and it has one.</summary>
+    private static string? Opened() =>
+        EditorPaths.Project is { } folder && Directory.Exists(folder)
+            ? Directory.GetFiles(folder, "*.csproj").OrderBy(file => file, StringComparer.Ordinal).FirstOrDefault()
+            : null;
 
     /// <summary>The last lines the game or a build wrote, oldest first.</summary>
     public static string[] Lines()

@@ -209,10 +209,11 @@ internal static class EditorConsoleCommands
     [Command("eval.file", "Runs a file of C# here: eval.file <path>")]
     internal static string EvalFile(string path) => EditorEval.RunFile(path);
 
-    /// <summary>Writes the scene being edited to a scene file.</summary>
+    /// <summary>Writes the scene being edited to a scene file, which is the one saved from then on.</summary>
     /// <remarks>
     /// The scene and not the editor, so the editor's own cameras and previews are left out, as
-    /// Project/Save leaves them out.
+    /// Project/Save leaves them out. A save under another name, so Project/Save writes the same
+    /// file afterward rather than the one the scene was opened from.
     /// </remarks>
     [Command("world.save", "Writes the scene being edited to a scene file: world.save <path>")]
     internal static string WorldSave(string path)
@@ -220,10 +221,90 @@ internal static class EditorConsoleCommands
         if (path.Length == 0) return "world.save <path>";
 
         var written = EditorScene.Save(EditorShell.Ecs, path);
+        EditorPaths.Scene = SceneFile.Resolve(path);
         return $"wrote {written} entities to {path}";
     }
 
-    /// <summary>Replaces the scene being edited with the one in a scene file.</summary>
+    /// <summary>Reads or changes a setting by its page and label, or lists them, or presses an action.</summary>
+    /// <remarks>
+    /// <para>
+    /// Every row of the Settings tab, the project's own among them, so a script building a project
+    /// can name its startup scene or set its fixed step as a person would on the Project page.
+    /// Written as the row's own text, which the row parses as it parses what is typed into it, so a
+    /// value refused here is one the tab would refuse too.
+    /// </para>
+    /// <para>
+    /// The page and label are joined with a slash and quoted when either has a space, as in
+    /// <c>setting "Project/Startup scene" levels/first.scene.json</c>. With nothing after them the
+    /// setting is read, or pressed when it is an action.
+    /// </para>
+    /// </remarks>
+    [Command("setting", "Reads, changes or lists settings: setting [\"Page/Label\" [value]]")]
+    internal static string Setting(string line)
+    {
+        var trimmed = line.Trim();
+        if (trimmed.Length == 0)
+        {
+            var rows = new List<string>();
+            foreach (var entry in EditorSettings.All)
+            {
+                if (entry.Read is not { } read) continue;
+                rows.Add($"{entry.Page}/{entry.Label} = {read()}{(entry.Write is null ? " (read only)" : string.Empty)}");
+            }
+
+            return string.Join("\n", rows);
+        }
+
+        // The path is quoted when it has a space, and what follows is the value whole, quotes
+        // round it taken off, since bcs quotes an argument with a space in it.
+        string path, value;
+        if (trimmed.StartsWith('"') && trimmed.IndexOf('"', 1) is > 0 and var close)
+        {
+            path = trimmed[1..close];
+            value = trimmed[(close + 1)..].Trim();
+        }
+        else
+        {
+            var space = trimmed.IndexOf(' ');
+            path = space < 0 ? trimmed : trimmed[..space];
+            value = space < 0 ? string.Empty : trimmed[(space + 1)..].Trim();
+        }
+
+        if (value.Length >= 2 && value[0] == '"' && value[^1] == '"') value = value[1..^1];
+
+        foreach (var entry in EditorSettings.All)
+        {
+            if (!string.Equals(entry.Page + "/" + entry.Label, path, StringComparison.OrdinalIgnoreCase)) continue;
+
+            if (entry.Kind == SettingKind.Action)
+            {
+                entry.Write?.Invoke(string.Empty);
+                return $"pressed {path}";
+            }
+
+            if (value.Length == 0) return entry.Read?.Invoke() ?? string.Empty;
+
+            if (entry.Write is not { } write)
+            {
+                ConsoleHost.Fail("READ_ONLY", $"{path} can be read and not changed.");
+                return $"{path} is read only";
+            }
+
+            if (entry.Options is { } options && !options.Contains(value, StringComparer.Ordinal))
+            {
+                ConsoleHost.Fail("BAD_ARGUMENTS", $"{path} takes one of {string.Join(", ", options)}.");
+                return $"{path} takes one of {string.Join(", ", options)}";
+            }
+
+            write(value);
+            return $"{path} = {entry.Read?.Invoke() ?? value}";
+        }
+
+        ConsoleHost.Fail("NO_SUCH_SETTING", $"No setting is called {path}; setting with nothing after it lists them.");
+        return $"no setting called {path}";
+    }
+
+    /// <summary>Replaces the scene being edited with the one in a scene file, which is the one saved from then on.</summary>
     [Command("world.load", "Replaces the scene being edited with a scene file: world.load <path>")]
     internal static string WorldLoad(string path)
     {
@@ -236,6 +317,7 @@ internal static class EditorConsoleCommands
         }
 
         var loaded = EditorScene.Load(EditorShell.Ecs, path);
+        EditorPaths.Scene = SceneFile.Resolve(path);
         return $"loaded {loaded.Entities.Count} entities from {path}";
     }
 

@@ -30,7 +30,7 @@ public partial struct EditorBoot
         EditorSelection.Camera = camera;
 
         // The interface: one ImGui context, the editor's style, and the panels that make it.
-        EditorShell.Load(EditorPaths.Assets);
+        EditorShell.Load(EditorPaths.Own);
 
         // The window's own frame in place of the platform's, where there is a window.
         EditorWindowFrame.Start(ctx.Res<Config>());

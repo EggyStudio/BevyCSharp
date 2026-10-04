@@ -613,3 +613,55 @@ mod tests {
         assert!(app.world().resource::<Assets<Mesh>>().get(&handle).is_none());
     }
 }
+
+/// Named asset sources the managed side asked for, by name and folder, taken by the next app built.
+static SOURCES: std::sync::Mutex<Vec<(String, String)>> = std::sync::Mutex::new(Vec::new());
+
+/// Names a folder as an asset source of its own, so `name://path` loads from it, for the next app
+/// built. A name given again takes the new folder, and a null `root` forgets every source named.
+///
+/// For files that belong beside the assets rather than among them, as the editor's icons do beside
+/// a project it opens. Bevy builds its sources as an app is built and never again, so this comes
+/// before `bcs_app_create`.
+///
+/// # Safety
+/// `name` and `root` must be null or NUL-terminated UTF-8.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_asset_source_add(
+    name: *const core::ffi::c_char,
+    root: *const core::ffi::c_char,
+) -> i32 {
+    crate::interop::guard(|| {
+        let mut sources = SOURCES.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+
+        let Some(root) = (unsafe { crate::interop::cstr_to_string(root) }) else {
+            sources.clear();
+            return status::OK;
+        };
+
+        let Some(name) = (unsafe { crate::interop::cstr_to_string(name) }).filter(|name| !name.is_empty()) else {
+            return status::NULL_ARG;
+        };
+
+        // The names Bevy and the bridge already give a source of their own are not taken over.
+        if matches!(name.as_str(), "user" | "embedded") {
+            return status::INVALID_STATE;
+        }
+
+        sources.retain(|(known, _)| *known != name);
+        sources.push((name, root));
+        status::OK
+    })
+}
+
+/// Registers every source [`bcs_asset_source_add`] named, before the asset plugin builds them.
+pub fn install_sources(app: &mut bevy::app::App) {
+    use bevy::asset::io::AssetSourceBuilder;
+    use bevy::asset::AssetApp;
+
+    let sources = SOURCES.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).clone();
+
+    for (name, root) in sources {
+        app.register_asset_source(name, AssetSourceBuilder::platform_default(&root, None));
+    }
+}

@@ -17,8 +17,8 @@ public struct EditorOnly;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The editor's document is a scene file, <c>world.scene.json</c> in the project's assets, written
-/// by <see cref="SceneFile"/> with everything the editor spawned for itself left out. Loading one
+/// The editor's document is a scene file in the project's assets, <see cref="EditorPaths.Scene"/>,
+/// written by <see cref="SceneFile"/> with everything the editor spawned for itself left out. Loading one
 /// takes away the scene that is there first, so the file is the scene rather than edits laid over
 /// whatever code made.
 /// </para>

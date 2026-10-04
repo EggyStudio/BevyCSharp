@@ -1,7 +1,9 @@
 using Bevy;
 using BevyCSharp.Editor;
+using BevyCSharp.Editor.Framework;
 
-// Opens the editor, a scene filling the window with panels floating over it.
+// Opens the editor, a scene filling the window with panels floating over it, on a project of the
+// game's own when given --project <folder>, editing the assets folder in it.
 //
 // The panels need a bridge built with the editor profile, which carries the HTML and CSS
 // surface on top of the renderer:
@@ -28,9 +30,20 @@ var config = args.Contains("--offscreen")
     ? Config.OffscreenFor(across, down)
     : Config.Windowed("BevyCSharp Editor", across, down);
 
-// Bevy looks beside the running executable otherwise, which for a .NET app is whichever host
-// launched it rather than the directory the assets were copied to.
-config.AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets");
+// A project of the game's own when one is named, its assets edited, played and exported, and the
+// editor's own assets otherwise. Named outright, since Bevy looks beside the running executable
+// otherwise, which for a .NET app is whichever host launched it.
+if (args.SkipWhile(argument => argument != "--project").Skip(1).FirstOrDefault() is { } project)
+{
+    EditorPaths.Project = Path.GetFullPath(project);
+    EditorPaths.Assets = Path.Combine(EditorPaths.Project, "assets");
+    Directory.CreateDirectory(EditorPaths.Assets);
+}
+
+config.AssetRoot = EditorPaths.Assets;
+
+// The editor's own icons under a name of their own, so they load whatever project is open.
+config.AssetSources[EditorPaths.OwnSource] = EditorPaths.Own;
 
 // Its own directory for what it keeps between runs, such as the asset browser's thumbnails, named
 // outright since an offscreen run has no window title to take it from.
