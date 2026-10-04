@@ -53,6 +53,7 @@ internal static class Catalog
         new("bloom_3d", Bloom3d.Build),
         new("shadow_caster_receiver", ShadowCasterReceiver.Build),
         new("anisotropy", Anisotropy.Build),
+        new("anti_aliasing", AntiAliasing.Build),
         new("blend_modes", BlendModes.Build),
         new("camera_sub_view", CameraSubView.Build),
         new("clustered_decal_maps", ClusteredDecalMaps.Build),
