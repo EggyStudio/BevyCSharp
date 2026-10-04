@@ -149,6 +149,7 @@ internal static class Catalog
         new("anchor_layout", AnchorLayout.Build),
         new("borders", Borders.Build),
         new("button", ButtonExample.Build),
+        new("display_and_visibility", DisplayAndVisibility.Build),
         new("flex_layout", FlexLayout.Build),
         new("gradients", Gradients.Build),
         new("image_node", ImageNode.Build),
