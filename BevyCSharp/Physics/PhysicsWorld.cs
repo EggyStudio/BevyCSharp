@@ -349,6 +349,7 @@ public sealed partial class PhysicsWorld : IDisposable
         settings ??= new PhysicsSettings();
 
         _threads = new ThreadDispatcher(Math.Max(1, Environment.ProcessorCount - 1));
+        _gravity = ToBepu(settings.Gravity);
 
         _simulation = Simulation.Create(
             _pool,
@@ -645,6 +646,7 @@ public sealed partial class PhysicsWorld : IDisposable
 
         _bodies.Remove(entity, out var body);
         _contacts.Materials.Remove(Packed(body));
+        _characters.Remove(entity);
 
         if (body.Kind == BodyKind.Static)
         {
@@ -792,6 +794,10 @@ public sealed partial class PhysicsWorld : IDisposable
             (before ??= [])[bouncy] = _simulation.Bodies[body.Moving].Velocity.Linear;
         }
 
+        // Characters walked toward what their games ask, which needs the world's ground as it is
+        // before the step moves anything.
+        MoveCharacters(ecs, seconds);
+
         _contacts.Touching.Clear();
         _contacts.Struck.Clear();
         _simulation.Timestep(seconds, _threads);
@@ -812,7 +818,9 @@ public sealed partial class PhysicsWorld : IDisposable
             var transform = ecs.TryGet<Transform>(entity, out var current) ? current : Transform.Identity;
             // The entity's origin, which for a hull is not the center the body turns about.
             transform.Translation = FromBepu(reference.Pose.Position - Vector3.Transform(body.Center, reference.Pose.Orientation));
-            transform.Rotation = FromBepu(reference.Pose.Orientation);
+
+            // A character stays upright and its entity faces wherever the game turned it.
+            if (!_characters.ContainsKey(entity)) transform.Rotation = FromBepu(reference.Pose.Orientation);
             ecs.Set(entity, transform);
         }
     }
@@ -1030,7 +1038,15 @@ public sealed partial class PhysicsWorld : IDisposable
         public Vector3 Normal;
         public CollidableReference Collidable;
 
-        public readonly bool AllowTest(CollidableReference collidable) => true;
+        /// <summary>Whether <see cref="Skip"/> names a collidable the ray passes through, a character's own body.</summary>
+        public bool Skipping;
+        public uint Skip;
+
+        /// <summary>The sensors, which the ray passes through where given.</summary>
+        public HashSet<uint>? Sensors;
+
+        public readonly bool AllowTest(CollidableReference collidable) =>
+            !(Skipping && collidable.Packed == Skip) && (Sensors is null || !Sensors.Contains(collidable.Packed));
 
         public readonly bool AllowTest(CollidableReference collidable, int childIndex) => true;
 

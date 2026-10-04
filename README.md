@@ -3056,6 +3056,27 @@ and no contact starts or ends meanwhile:
 [OnExit(Pause.On)]  public static void Go(BehaviorContext ctx)   => ctx.Res<PhysicsWorld>().Paused = false;
 ```
 
+A `CharacterController` beside a dynamic body makes it a character, walked at the velocity a game
+asks for rather than pushed about. Before every step it is walked toward `Move` along the ground it
+stands on. It slides along a wall it meets, rides over a low edge and climbs a step up to
+`StepHeight`, stands still on a slope up to `MaxSlope` and slides off a steeper one, and leaves the
+ground at `Jump` where it stands on any. Each step writes back whether it stands on ground and which
+way that faces. The body stays upright whatever its entity's rotation, so the game turns the entity
+to face the way it walks:
+
+```csharp
+ctx.Ecs.Add(player, new RigidBody { Kind = BodyKind.Dynamic, Mass = 70f });
+ctx.Ecs.Add(player, new Collider { Shape = ColliderShape.Capsule, Size = new Vec3(0.7f, 1.8f, 0.7f), Offset = new Vec3(0f, 0.9f, 0f) });
+ctx.Ecs.Add(player, new CharacterController());
+
+[OnUpdate]
+public void Walk(BehaviorContext ctx, ref CharacterController body)
+{
+    body.Move = new Vec3(ctx.Input.KeyDown(Key.D) ? 4f : 0f, 0f, 0f);
+    if (body.Grounded && ctx.Input.KeyPressed(Key.Space)) body.Jump = 5f;
+}
+```
+
 A triangle collides from the side Bevy draws its face on. A rock or an odd crate that has to tumble
 is a convex hull of its points instead, such as a model's own vertices, solid where a mesh shape is
 a surface:
@@ -3385,14 +3406,16 @@ the runner tells them apart by.
 
 Everything the game does is in [`Courtyard.cs`](games/Courtyard/assets/scripts/Courtyard.cs). The
 menu, play and the win are a state declared on its enum, and the pause a sub-state inside play.
-The runner rides a ball of its own, so the model stays upright while the ball rolls against the
-walls, plays its walk while it moves, and reads `ContactStarted` for the coins it touches, each
+The runner is made a character as play starts, a capsule its `Walk` steers by setting the
+`CharacterController`'s `Move` while it turns the model to face the way it walks, which the walls
+stop and the ground holds. It plays its walk while it moves, and reads `ContactStarted` for the
+coins it touches, each
 taken away with a sound and counted in a `[Persist]` wallet, and for the goal once none is left.
 The HUD, the menu, the pause menu and the win are `Ui` nodes despawned as their state is left, and
 F5 and F9 save and load through `SaveGame`.
 
-A level a load brings back has its bodies made by the plugin as the first one had, the runner's
-ball is made again where it reads `SaveLoaded`, and the pause holds the simulation with
+A level a load brings back has its bodies made by the plugin as the first one had, the runner is
+made a character again where it reads `SaveLoaded`, and the pause holds the simulation with
 `PhysicsWorld.Paused`. The HUD's count is found by a `CoinsText` component rather
 than kept in a static field, so it is found again after the script is reloaded.
 

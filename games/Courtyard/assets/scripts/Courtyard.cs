@@ -54,8 +54,8 @@ public partial struct Wallet
 }
 
 /// <summary>
-/// The player, a model moved with WASD, whose body is a ball of its own so the model stays upright
-/// while the ball rolls against the walls.
+/// The player, a model walked with WASD as a character, which the walls stop and the ground holds,
+/// facing the way it walks.
 /// </summary>
 [Behavior]
 public partial struct Runner
@@ -63,63 +63,59 @@ public partial struct Runner
     /// <summary>How fast it walks, in units a second.</summary>
     public float Speed;
 
-    /// <summary>The ball it rides, made as play starts.</summary>
-    public Entity Body;
-
     /// <summary>Whether it was walking last frame, so the walk starts and stops once.</summary>
     public bool Walking;
 
     private static AssetHandle _coin;
 
-    /// <summary>Gives the runner its ball as play starts.</summary>
+    /// <summary>Makes the runner a character as play starts.</summary>
     [OnEnter(Mode.Playing)]
-    public void Begin(BehaviorContext ctx) => Ball(ctx);
+    public void Begin(BehaviorContext ctx) => Body(ctx);
 
-    /// <summary>Gives the runner a ball again after a load, which brings the runner back without one.</summary>
+    /// <summary>Makes the runner a character again after a load, which brings it back as the level has it.</summary>
     [OnUpdate, InState(Mode.Playing)]
     public void Loaded(BehaviorContext ctx)
     {
         foreach (var _ in ctx.Read<SaveLoaded>())
         {
-            Ball(ctx);
+            Body(ctx);
             return;
         }
     }
 
-    /// <summary>A ball under the runner, a body of its own the physics plugin makes from its components.</summary>
-    private void Ball(BehaviorContext ctx)
+    /// <summary>
+    /// A capsule as tall as the model, standing on its feet, which the physics plugin makes a
+    /// character from its components.
+    /// </summary>
+    /// <remarks>
+    /// As play starts rather than in the level, since the editor runs this script while the level
+    /// is edited, and a runner with a body there would walk off while it was being placed. Added
+    /// by command, since this runs over the runners and adding to one moves it in the world's
+    /// storage.
+    /// </remarks>
+    private void Body(BehaviorContext ctx)
     {
         if (Speed <= 0f) Speed = 4f;
-        if (ctx.Ecs.IsAlive(Body)) return;
+        if (ctx.Ecs.Has<CharacterController>(ctx.Entity)) return;
 
-        var at = ctx.Ecs.GetOrDefault<Transform>(ctx.Entity);
-        Body = ctx.Ecs.Spawn();
-        ctx.Ecs.SetName(Body, "Runner body");
-        ctx.Ecs.Add(Body, Transform.At(at.Translation.X, at.Translation.Y + 0.5f, at.Translation.Z));
-        ctx.Ecs.Add(Body, new RigidBody { Kind = BodyKind.Dynamic, Mass = 1f });
-        ctx.Ecs.Add(Body, new Collider { Shape = ColliderShape.Sphere, Size = Vec3.One });
+        ctx.Cmd.Add(ctx.Entity, new RigidBody { Kind = BodyKind.Dynamic, Mass = 70f });
+        ctx.Cmd.Add(ctx.Entity, new Collider { Shape = ColliderShape.Capsule, Size = new Vec3(0.7f, 1.8f, 0.7f), Offset = new Vec3(0f, 0.9f, 0f) });
+        ctx.Cmd.Add(ctx.Entity, new CharacterController());
     }
 
-    /// <summary>Walks while play is not held, and plays the walk while it does.</summary>
+    /// <summary>Walks while play is not held, facing the way it walks, and plays the walk while it does.</summary>
     [OnUpdate, InState(Pause.Off)]
-    public void Walk(BehaviorContext ctx)
+    public void Walk(BehaviorContext ctx, ref CharacterController body, ref Transform place)
     {
-        if (!ctx.TryRes<PhysicsWorld>(out var physics) || !physics.Has(Body)) return;
-
         var x = (ctx.Input.KeyDown(Key.D) ? 1f : 0f) - (ctx.Input.KeyDown(Key.A) ? 1f : 0f);
         var z = (ctx.Input.KeyDown(Key.S) ? 1f : 0f) - (ctx.Input.KeyDown(Key.W) ? 1f : 0f);
 
-        var (linear, _) = physics.Velocity(Body);
-        physics.SetVelocity(Body, new Vec3(x * Speed, linear.Y, z * Speed));
+        body.Move = new Vec3(x * Speed, 0f, z * Speed);
 
-        // The model stands where the ball is, upright, facing the way it walks.
-        var ball = ctx.Ecs.GetOrDefault<Transform>(Body).Translation;
-        var place = ctx.Ecs.GetOrDefault<Transform>(ctx.Entity);
-        place.Translation = new Vec3(ball.X, ball.Y - 0.5f, ball.Z);
-        if (x != 0f || z != 0f) place.Rotation = Quat.FromAxisAngle(Vec3.UnitY, MathF.Atan2(x, z));
-        ctx.Ecs.Set(ctx.Entity, place);
-
+        // The body stays upright whatever the rotation, so turning the model is the game's alone.
         var walking = x != 0f || z != 0f;
+        if (walking) place.Rotation = Quat.FromAxisAngle(Vec3.UnitY, MathF.Atan2(x, z));
+
         if (walking == Walking) return;
 
         Walking = walking;
@@ -127,22 +123,18 @@ public partial struct Runner
         else Animation.Stop(ctx.Entity);
     }
 
-    /// <summary>Stops the ball as the game is won, which would otherwise roll on with nothing steering it.</summary>
+    /// <summary>Stops the runner as the game is won, which would otherwise walk on with nothing steering it.</summary>
     [OnEnter(Mode.Won)]
-    public void Finish(BehaviorContext ctx)
+    public void Finish(BehaviorContext ctx, ref CharacterController body)
     {
-        if (ctx.TryRes<PhysicsWorld>(out var physics) && physics.Has(Body))
-        {
-            var (linear, _) = physics.Velocity(Body);
-            physics.SetVelocity(Body, new Vec3(0f, linear.Y, 0f));
-        }
+        body.Move = Vec3.Zero;
 
         if (!Walking) return;
         Walking = false;
         Animation.Stop(ctx.Entity);
     }
 
-    /// <summary>Picks up a coin the ball touches, and wins at the goal with all of them.</summary>
+    /// <summary>Picks up a coin the runner touches, and wins at the goal with all of them.</summary>
     [OnUpdate, InState(Pause.Off)]
     public static void Touch(BehaviorContext ctx)
     {
@@ -150,7 +142,7 @@ public partial struct Runner
         {
             foreach (var row in ctx.Ecs.Query<Runner>(markChanged: false))
             {
-                var other = contact.A == row.Component.Body ? contact.B : contact.B == row.Component.Body ? contact.A : Entity.None;
+                var other = contact.A == row.Entity ? contact.B : contact.B == row.Entity ? contact.A : Entity.None;
                 if (other.IsNone || !ctx.Ecs.IsAlive(other)) continue;
 
                 if (ctx.Ecs.Has<Coin>(other))
@@ -257,16 +249,7 @@ public partial struct Screens
             ctx.SetState(App.TryState<Pause>(out var paused) && paused == Pause.On ? Pause.Off : Pause.On);
 
         if (ctx.Input.KeyPressed(Key.F5)) Console.WriteLine($"[courtyard] saved {SaveGame.Save(ctx.Ecs)} entities");
-        if (ctx.Input.KeyPressed(Key.F9))
-        {
-            // The ball is the game's own and not the level's, so the load leaves it, and the
-            // runner the load brings back is given a new one.
-            var balls = new List<Entity>();
-            foreach (var row in ctx.Ecs.Query<Runner>(markChanged: false)) balls.Add(row.Component.Body);
-            foreach (var ball in balls) ctx.Ecs.Despawn(ball);
-
-            Console.WriteLine($"[courtyard] loaded {SaveGame.Load(ctx.Ecs).Entities.Count} entities");
-        }
+        if (ctx.Input.KeyPressed(Key.F9)) Console.WriteLine($"[courtyard] loaded {SaveGame.Load(ctx.Ecs).Entities.Count} entities");
     }
 
     /// <summary>The pause menu while play is held, with the simulation held too.</summary>

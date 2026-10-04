@@ -430,11 +430,17 @@ distance ranges hold bodies together, a hinge can turn itself and stop at an ang
 are reported, a sensor making a trigger volume. It is part of the core library, so the package the
 workflow packs carries it, with BepuPhysics as a dependency. `Paused` holds the simulation still for
 a game's pause. A level holds its bodies as `RigidBody` and `Collider` components, which the
-plugin makes and keeps in step, the inspector edits and the editor draws.
+plugin makes and keeps in step, the inspector edits and the editor draws. A `CharacterController`
+beside a dynamic body makes it a character, walked toward a velocity along its ground, which walls
+stop, steps lift and slopes up to an angle hold, and which jumps and says whether it stands on
+anything.
 
 - **A collider fits one mesh.** One left at a size of zero takes the bounds of the mesh its own
   entity is drawn with, so on a placed model's root, which draws nothing itself, it is a unit cube.
   Fitting the meshes under the root as one would let a model carry a collider without a size typed.
+- **A character stands at one height.** It cannot crouch, which 3DEngine's does by making its
+  capsule shorter where nothing above is in the way of standing again. A `Height` on the
+  controller, made again with the room overhead checked first, would give it that.
 - **Joints are code only.** A hinge or a weld between two bodies a level holds is made with
   `PhysicsWorld.Connect`, and has no component naming the two entities.
 

@@ -17,8 +17,8 @@ not placed on this machine, which PERFORMANCE.md says, and is left there.
 
 ## Now
 
-Items 1 to 3 are taken from [SHARED.md](SHARED.md), which records what this engine and 3DEngine
-have in common. In this order.
+Items 1, 2, 3 and 5 are taken from [SHARED.md](SHARED.md), which records what this engine and
+3DEngine have in common. Items 2 and 6 are the owner's decisions of 2026-10-04. In this order.
 
 1. **A character that walls stop**, the first item taken from [SHARED.md](SHARED.md), which
    records what this engine and 3DEngine have in common. Courtyard's runner is a ball pushed by
@@ -29,17 +29,28 @@ have in common. In this order.
    beside this one (`3DEngine/Physics/Bepu/PhysicsWorld.Characters.cs`, with its tests), and is
    the idea to take, built this engine's own way. Courtyard's runner becomes one, and `play.sh`
    still reaches its win.
-2. **A system run on a move from one state value to a particular other**, 3DEngine's
+2. **Gamepads** (decision 2), which the owner decided for. `bevy_gilrs` goes into the render and
+   editor profiles, with buttons, sticks, triggers, connection and rumble reaching C# as the
+   keyboard does, a command that presses a pad's button for `bcs`, and Courtyard's runner
+   steered by a stick beside the keys.
+3. **A system run on a move from one state value to a particular other**, 3DEngine's
    `OnTransition`, beside `[OnEnter]` and `[OnExit]`.
-3. **A pointer dragged a step a frame by one command**, 3DEngine's `input.drag`, so a script can
+4. **A pointer dragged a step a frame by one command**, 3DEngine's `input.drag`, so a script can
    swipe, drag a transform handle or move a panel, which `input.move`, `input.press` and
    `input.release` in separate calls cannot time.
-4. **A build with no warnings, and a warning failing the workflow.** 3DEngine's first runs on
+5. **A build with no warnings, and a warning failing the workflow.** 3DEngine's first runs on
    GitHub carried dozens of annotations nobody had seen, a `stackalloc` in a loop among them. The
    managed build passes `-warnaserror` in the workflow once it is clean, with a warning that is
    right to keep turned off where it arises and its reason beside it, and `cargo` builds deny
    warnings the same way.
-5. **Gamepads** wait on the owner (decision 2).
+6. **The README is split**, which the owner decided for. It is about 3,400 lines and changes in
+   most commits. README.md keeps what the project is, the install, a first behavior, running and
+   driving a game, the status, building and the license, and links to the rest. The section
+   called The engine, some 2,300 lines, moves into one document an area under `.github/` or
+   `docs/`, each linked from the README's contents, with nothing dropped. The README walk still
+   takes its program from where the walk script looks, the package's readme is checked if it
+   embeds README.md, and SHARED.md's rows that name a README section are told to the reviewing
+   session with a `Shared:` line so they follow.
 
 ## Verdicts
 
@@ -50,12 +61,15 @@ None open.
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
    commits and does not push, as COMMITS.md and CLAUDE.md say. An earlier entry here that allowed
    pushing is withdrawn by the owner.
-2. **Gamepads are proposed for the render profile, and the owner decides.** TODO.md excludes
-   `bevy_gilrs` because it needs libudev headers when the bridge is built on Linux. The render
-   profile already takes ALSA for audio on the same terms, with `build-native.sh` installing it
-   in the container and naming the package for a local build, and the headless profile would
-   still build with a C compiler alone. A game engine with no gamepad is a larger cost than one
-   more package in a profile that has one. Nothing is done on this until the owner says so in
-   the working session.
+2. **Gamepads go into the render profile.** The owner decided on 2026-10-04. `bevy_gilrs` needs
+   libudev's headers when the bridge is built on Linux, and the render profile already takes
+   ALSA for audio on the same terms, so `build-native.sh` installs them in the container and
+   names the package for a local build as it does for ALSA, and the headless profile still
+   builds with a C compiler alone. TODO.md's entry that excludes gamepads is rewritten around
+   what is left, and BUILDING.md names the package.
+3. **CLAUDE.md's bullet on SHARED.md is the owner's.** They approved it on 2026-10-04, and it is
+   committed like any other change.
 
 ## Replies
+
+- Shared: the character controller is taken in the commit carrying this line, as a `CharacterController` component beside a dynamic `RigidBody` and `Collider`, which the game steers through `Move` and `Jump` and reads `Grounded` and `GroundNormal` from. It slides, rides a low edge, climbs a step, holds a slope and jumps as 3DEngine's does, and stays upright with its entity turned by the game. Crouching is not taken, and TODO.md holds it.

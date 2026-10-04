@@ -10,7 +10,8 @@ public sealed partial class PhysicsWorld
     /// Where a static body was put, which nothing else moves it from, or nothing for a body that
     /// moves or follows its entity.
     /// </param>
-    private readonly record struct MadeFrom(RigidBody Body, Collider Collider, Vec3 Scale, Transform? Placed);
+    /// <param name="Character">Whether a dynamic body was made a character, by a <see cref="CharacterController"/> beside it.</param>
+    private readonly record struct MadeFrom(RigidBody Body, Collider Collider, Vec3 Scale, Transform? Placed, bool Character);
 
     /// <summary>The bodies made from components, each with what it was made from.</summary>
     private readonly Dictionary<Entity, MadeFrom> _fromComponents = [];
@@ -36,7 +37,9 @@ public sealed partial class PhysicsWorld
     /// <para>
     /// A body is made again when its components change, when its entity's scale does, and for a
     /// static body when its entity is moved, since a static body is put where it is once and never
-    /// follows. A dynamic body is not made again for moving, which it does itself. A collider
+    /// follows. A dynamic body is not made again for moving, which it does itself, and is made
+    /// again as a character when a <see cref="CharacterController"/> is put beside it or as a plain
+    /// body when the controller is taken away. A collider
     /// fitted to a mesh that has not loaded waits for it, and the body comes when the mesh does.
     /// An entity that has a body from <see cref="Add"/> already keeps that one.
     /// </para>
@@ -64,7 +67,19 @@ public sealed partial class PhysicsWorld
         foreach (var entity in ecs.ChangedSince<RigidBody>(ref bodyTick)) candidates.Add(entity);
         var colliderTick = since;
         foreach (var entity in ecs.ChangedSince<Collider>(ref colliderTick)) candidates.Add(entity);
-        _syncTick = colliderTick;
+
+        // A controller added makes a body a character. One the step wrote back to is listed as
+        // well, and found to make no difference below.
+        var characterTick = since;
+        foreach (var entity in ecs.ChangedSince<CharacterController>(ref characterTick)) candidates.Add(entity);
+        _syncTick = characterTick;
+
+        // A controller taken away makes it a plain body again, which nothing above lists, and
+        // characters are few enough to ask after one at a time.
+        foreach (var entity in _characters.Keys)
+        {
+            if (!ecs.Has<CharacterController>(entity)) candidates.Add(entity);
+        }
 
         if (_fromComponents.Count > 0)
         {
@@ -106,7 +121,8 @@ public sealed partial class PhysicsWorld
         if (!ecs.TryGet<RigidBody>(entity, out var body) || !ecs.TryGet<Collider>(entity, out var collider)) return;
 
         var at = ecs.GetOrDefault<Transform>(entity);
-        var made = new MadeFrom(body, collider, at.Scale, body.Kind == BodyKind.Static ? at : null);
+        var character = body.Kind == BodyKind.Dynamic && ecs.Has<CharacterController>(entity);
+        var made = new MadeFrom(body, collider, at.Scale, body.Kind == BodyKind.Static ? at : null, character);
 
         if (_fromComponents.TryGetValue(entity, out var was))
         {
@@ -139,7 +155,8 @@ public sealed partial class PhysicsWorld
             : (PhysicsMaterial?)null;
 
         Add(entity, fit.Shape, body.Kind, at, body.Mass > 0f ? body.Mass : 1f, body.Sensor, material);
-        if (moving is { } velocity) SetVelocity(entity, velocity.Linear, velocity.Angular);
+        if (character) MakeCharacter(entity, fit, at);
+        if (moving is { } velocity) SetVelocity(entity, velocity.Linear, character ? default : velocity.Angular);
         _fromComponents[entity] = made;
     }
 }

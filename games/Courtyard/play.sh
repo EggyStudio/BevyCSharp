@@ -32,7 +32,7 @@ go_to() {
     shift 2
     for step in $(seq 1 60); do
         [ $# -gt 0 ] && "$@" && return 0
-        read -r x z < <(where "Runner body")
+        read -r x z < <(where Runner)
         plan=$(awk -v x="$x" -v z="$z" -v tx="$tx" -v tz="$tz" -v speed=4 'BEGIN {
             k = ""; far = 1000; dx = tx - x; dz = tz - z;
             if (dx > 0.4) { k = k ",D"; far = (dx < far) ? dx : far } else if (dx < -0.4) { k = k ",A"; far = (-dx < far) ? -dx : far }
@@ -63,11 +63,11 @@ for _ in $(seq 1 90); do ./bcs status 2>/dev/null | grep -q "ready.*Courtyard" &
 
 quiet frames.wait 30
 ./bcs shot "$shots/1-menu.png" >/dev/null
-c entity.get "Runner body" >/dev/null 2>&1 && fail "the runner has a body before play starts"
+c entity.get Runner | grep -q "^CharacterController" && fail "the runner is a character before play starts"
 
 quiet input.key Enter
 quiet frames.wait 10
-c entity.get "Runner body" >/dev/null || fail "Enter did not start play"
+c entity.get Runner | grep -q "^CharacterController" || fail "Enter did not start play"
 
 # The coins nearest first, and a save made after the first.
 go_to 0 4 carrying 1
@@ -86,9 +86,9 @@ quiet frames.wait 5
 quiet input.key Escape
 quiet frames.wait 5
 ./bcs shot "$shots/3-paused.png" >/dev/null
-read -r before _ < <(where "Runner body")
+read -r before _ < <(where Runner)
 quiet input.hold D 20
-read -r after _ < <(where "Runner body")
+read -r after _ < <(where Runner)
 [ "$before" = "$after" ] || fail "the runner walked while paused, from $before to $after"
 quiet input.key Escape
 quiet frames.wait 5
