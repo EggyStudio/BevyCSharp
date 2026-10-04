@@ -264,6 +264,45 @@ public static unsafe class StateRegistry
     }
 
     /// <summary>The slot <typeparamref name="TState"/> holds, if it was ever added.</summary>
+    /// <summary>
+    /// Whether a system scoped to a state declared on its enum and never added says so, once, on
+    /// the console.
+    /// </summary>
+    /// <remarks>
+    /// On, since a state a game declares and never has is usually a mistake. An app that loads a
+    /// game's scripts and never plays them, as the editor does while a level is edited, turns it
+    /// off and says once what it does not enter (<see cref="Unentered"/>) rather than once a system.
+    /// </remarks>
+    public static bool ReportUnentered { get; set; } = true;
+
+    /// <summary>The states declared on their enums that the running app has not added, by name.</summary>
+    /// <remarks>
+    /// Only valid inside a system, since whether a state exists is asked of the world. A sub-state
+    /// while its parent holds another value is not there either, and is listed with the rest.
+    /// </remarks>
+    public static IReadOnlyList<string> Unentered()
+    {
+        List<Type> declared;
+        lock (Gate)
+        {
+            Reset();
+            declared = [.. Declared.Select(state => state.State)];
+        }
+
+        var names = new List<string>();
+        foreach (var state in declared)
+        {
+            bool claimed;
+            int slot;
+            lock (Gate) claimed = Slots.TryGetValue(state, out slot);
+
+            int read;
+            if (!claimed || Native.bcs_state_get(slot, &read) == NativeStatus.NotPresent) names.Add(state.Name);
+        }
+
+        return names;
+    }
+
     internal static bool TryGetSlot<TState>(out int slot) where TState : struct, Enum
     {
         lock (Gate)

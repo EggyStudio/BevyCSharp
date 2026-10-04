@@ -83,7 +83,7 @@ public static class BehaviorConditions
         {
             if (StateRegistry.TryCurrentRaw<TState>(out var current)) return current == wanted;
 
-            if (!reported && !StateRegistry.IsSub<TState>())
+            if (!reported && !StateRegistry.IsSub<TState>() && (StateRegistry.ReportUnentered || !StateRegistry.IsDeclared<TState>()))
             {
                 reported = true;
 

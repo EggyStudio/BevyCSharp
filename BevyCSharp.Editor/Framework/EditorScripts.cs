@@ -14,6 +14,9 @@ namespace BevyCSharp.Editor.Framework;
 public static class EditorScripts
 {
     private static ScriptHost? _host;
+
+    /// <summary>The states last said not to be entered, so the same ones are not said again.</summary>
+    private static string _unentered = string.Empty;
     private static ScriptWatcher? _watcher;
 
     /// <summary>Whatever went wrong the last time, or <see langword="null"/>.</summary>
@@ -31,6 +34,10 @@ public static class EditorScripts
 
         _host = new ScriptHost(app, directory);
         _watcher = new ScriptWatcher(directory);
+
+        // The editor never enters a game's states, so it says that once below rather than each of
+        // the game's state-scoped systems saying it at every load.
+        StateRegistry.ReportUnentered = false;
 
         Build("loaded");
     }
@@ -64,5 +71,17 @@ public static class EditorScripts
         Console.WriteLine(_host.Carried > 0
             ? $"[editor] scripts {what}: {_host.Registered} registration(s), {_host.Carried} component(s) carried over"
             : $"[editor] scripts {what}: {_host.Registered} registration(s)");
+
+        // Once for each set of states the scripts declare, which a reload that changes nothing
+        // about them does not say again.
+        var unentered = string.Join(", ", StateRegistry.Unentered());
+        if (unentered.Length > 0 && unentered != _unentered)
+        {
+            Console.WriteLine(
+                $"[editor] the scripts declare the states {unentered}, which the editor does not enter while the level is edited, "
+                + "so what is scoped to them runs when the game is played");
+        }
+
+        _unentered = unentered;
     }
 }

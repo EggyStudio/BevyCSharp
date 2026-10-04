@@ -94,4 +94,41 @@ public sealed class ReflectedWrapperTests
 
         Assert.True(ran);
     }
+
+    [SkippableFact]
+    public void ANameAndAVisibilityClassReadAsValues()
+    {
+        Needs.Renderer();
+
+        string? name = null, classes = null;
+
+        // Offscreen, since a mesh is given its visibility class by the rendering a headless run
+        // leaves out.
+        using var app = new App(new Config { Offscreen = true, Width = 32, Height = 32, HeadlessFps = 60, HeadlessFrames = 4 });
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            var cube = ecs.Spawn();
+            ecs.SetName(cube, "Named cube");
+            Render.SetMesh(ecs, cube, Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f));
+        }, "Test.Spawn"));
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            var cube = ecs.All().First(entity => ecs.NameOf(entity) == "Named cube");
+
+            // Through the rows a listing and the inspector read, since a hashed string and a list
+            // of Rust type ids have no plain value of their own.
+            name = ComponentSchemas.For("bevy_ecs::name::Name")!.Fields[0].Read(ecs, cube) as string;
+            classes = ecs.GetReflected(cube, "bevy_camera::visibility::VisibilityClass");
+        }, "Test.Read"));
+
+        Assert.Equal(0, app.Run());
+
+        Assert.Equal("\"Named cube\"", name);
+        Assert.NotNull(classes);
+        Assert.Contains("Mesh3d", classes);
+    }
 }

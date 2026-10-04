@@ -33,10 +33,6 @@ code per type. What [COMPONENTS.md](COMPONENTS.md) has left:
 - **Bytes in place need a mirror.** Five components (`Transform`, `GlobalTransform` and the three
   visibility types) are mirrored by hand, for systems that read them every frame. Generating
   mirrors and their layout checks is tier 3.
-- **`entity.get` prints some of Bevy's values as their Rust type.** `Name` reads as
-  `Hashed<Cow<str>, FixedHasher>` and `VisibilityClass` as a type path, where Bevy's reflection
-  has no plain value to give. A name has a read of its own (`NameOf`), which the listing could use,
-  and a class a list of the component names it holds.
 
 ### Collections in components
 
@@ -366,10 +362,6 @@ language.
   on, and Look through camera puts the editor's view where one is. The view takes the camera's
   place and not its lens, so a camera with another field of view shows a little more or less than
   it will. A picture in a corner from the camera itself would show it exactly.
-- **The editor reports each of a game's state-scoped systems as never running.** The project's
-  scripts are loaded once the editor runs, so the states they declare are not added, and each
-  system scoped to one says so in the console at every load. True, and not news in an editor that
-  never plays a game's states, which could say that once instead.
 - **The inspector draws every row every frame.** The world panel and the asset browser draw only
   the rows on screen, through ImGui's list clipper, and the console only the lines in view, each
   measured once at the panel's width since a wrapped line has a height of its own. The inspector's

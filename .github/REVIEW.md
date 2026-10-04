@@ -8,24 +8,33 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `99ec076`, bodies and colliders as components a level holds, which settles item 1
-of the last list on the play script still reaching its win.
+Reviewed up to `324f919`. A level's cameras (`f7b087e`), the message after a load (`3ab5b22`) and
+keys held for a number of frames (`324f919`) are settled, on the play script reaching its win
+with each.
 
 ## Now
 
-What Courtyard turned up, in the order it hurt. Each item ends with the game changed to use it
-and `play.sh` still reaching its win.
+In this order.
 
-1. **A level carries its camera** (TODO.md, The editor). The editor holds a scene's cameras
-   inactive while it edits, draws each as a gizmo, looks through one on request, and offers one
-   in the Spawn menu, and Play starts from the level's. Courtyard's camera moves from its script
-   into its level.
-2. **A message after a load** (TODO.md, Scenes), so a game builds what a save does not hold once,
-   where it reads the message, and Courtyard stops checking every frame.
-3. **A key held for a number of frames**, as one command inside the app, so `play.sh` steers at
-   full speed.
-4. **The smaller two**: the editor says once that a game's states are not entered while editing,
-   and `entity.get` prints a name and a visibility class as values.
+1. **The smaller two from Courtyard**: the editor says once that a game's states are not entered
+   while editing, and `entity.get` prints a name and a visibility class as values.
+2. **Measure what a frame holds.** Nothing has measured this engine, and its cost is in a place
+   Bevy alone does not have, the crossing between C# and the bridge. Two stress programs under
+   `games/` or the sample: one grows the number of entities a behavior moves each frame, the
+   other the number of drawn mesh entities with a few materials, lights and physics bodies. Each
+   reports the frame's time split into managed systems, the crossings (how many a frame and what
+   they cost together), Bevy's own schedule and the render, and the count at which it leaves 60
+   frames a second, through a `bcs` command so a run is repeatable. The numbers, the machine and
+   the three largest costs go into a section of RENDERING.md or a document beside it. No
+   optimization is in this batch. The next batch is the largest cost the numbers show.
+3. **Every attribute the generators accept is compiled and run by a test**, each asserted to run
+   when it should and not otherwise, with the list taken from the generators' own tables so an
+   attribute without a case fails. In 3DEngine a behavior attribute failed to compile for four
+   batches while the suite passed, because nothing used it.
+4. **The README's install followed by a stranger**, in a container with only the packed package:
+   a new project, the package added, the README's first program as written, built and run
+   headless. Each step it leaves out or gets wrong is fixed, and the package workflow repeats
+   the walk.
 5. **Gamepads** wait on the owner (decision 2).
 
 ## Verdicts

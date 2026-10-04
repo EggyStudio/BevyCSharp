@@ -497,7 +497,9 @@ scripts are compiled into it and the editor's player running the same scripts ge
 A state is known by its enum's full name, so a script compiled again while the game runs, whose
 enum is a new type of the same name, reads and changes the state the game started with. One
 declared by an assembly loaded once the app was running, as the editor loads a project's scripts,
-is not added, and a system scoped to it says so once.
+is not added, and a system scoped to it says so once. The editor turns that off
+(`StateRegistry.ReportUnentered`) and says once which of the game's states it does not enter while
+a level is edited.
 
 A transition is queued rather than immediate. It lands at Bevy's next transition point, so every
 system in the frame agrees on which state it is in rather than some seeing the change halfway

@@ -417,13 +417,50 @@ pub unsafe extern "C" fn bcs_reflect_get(
 
             match serde_json::to_string(&TypedReflectSerializer::new(value, &registry)) {
                 Ok(text) => unsafe { write_text(&text, out, capacity) },
-                Err(error) => fail(
-                    status::INVALID_STATE,
-                    format!("'{path}' cannot be written as JSON. {error}"),
-                ),
+                Err(error) => match type_names(value, &registry) {
+                    Some(names) => unsafe { write_text(&names.to_string(), out, capacity) },
+                    None => fail(
+                        status::INVALID_STATE,
+                        format!("'{path}' cannot be written as JSON. {error}"),
+                    ),
+                },
             }
         })
     })
+}
+
+/// A value made of Rust type ids, written as the names of the types they stand for.
+///
+/// A type id has no serialized form, which is right for a file, since an id is good for one build
+/// only, and leaves a component that lists types, such as `VisibilityClass`, with nothing to show
+/// in an inspector or a listing. The registry knows each registered type's name, so a lone id, a
+/// list or an array of them, or a newtype over either, reads as those names, and anything else
+/// as nothing, which leaves the refusal as it was.
+fn type_names(value: &dyn PartialReflect, registry: &TypeRegistry) -> Option<Value> {
+    if let Some(id) = value.try_downcast_ref::<TypeId>() {
+        let name = registry
+            .get_type_info(*id)
+            .map(|info| info.type_path_table().short_path().to_string())
+            .unwrap_or_else(|| "an unregistered type".to_string());
+        return Some(Value::String(name));
+    }
+
+    match value.reflect_ref() {
+        ReflectRef::List(list) => list
+            .iter()
+            .map(|item| type_names(item, registry))
+            .collect::<Option<Vec<_>>>()
+            .map(Value::Array),
+        ReflectRef::Array(array) => array
+            .iter()
+            .map(|item| type_names(item, registry))
+            .collect::<Option<Vec<_>>>()
+            .map(Value::Array),
+        ReflectRef::TupleStruct(newtype) if newtype.field_len() == 1 => {
+            type_names(newtype.field(0)?, registry)
+        }
+        _ => None,
+    }
 }
 
 /// Reads the name of the variant an enum field holds.

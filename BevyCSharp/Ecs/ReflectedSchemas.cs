@@ -460,9 +460,16 @@ internal static class ReflectedSchemas
                 FieldKind.Opaque,
                 type,
                 // Some values have no JSON form at all, such as an asset handle, and a row that
-                // throws every frame is worse than one naming what it holds.
+                // throws every frame is worse than one naming what it holds. The one field of a
+                // newtype, or of a newtype inside one, may have none where the whole does, as a
+                // name's hashed string has none and the name writes itself as its text, so the
+                // whole is tried before giving up.
                 (world, entity) => Holds(world, entity, owner, within)
-                    ? Guarded(() => world.GetReflected(entity, owner, path)) ?? type
+                    ? Guarded(() => world.GetReflected(entity, owner, path))
+                        ?? (path.Length > 0 && path.Replace(".0", string.Empty, StringComparison.Ordinal).Length == 0
+                            ? Guarded(() => world.GetReflected(entity, owner, string.Empty))
+                            : null)
+                        ?? type
                     : null,
                 hints: Hints(at, label));
         }
