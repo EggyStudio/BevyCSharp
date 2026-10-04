@@ -1666,6 +1666,54 @@ pub unsafe extern "C" fn bcs_render_create_image(
     })
 }
 
+/// Gives an image that exists the sampler `config` describes, how it repeats past its edges and how
+/// it is filtered.
+///
+/// For an image made in code, which no loader settings reached, and for one loaded already. One
+/// still loading is not there to be changed, and answers [`status::NOT_PRESENT`], since
+/// `bcs_asset_load_image` gives an image its settings as it loads. Written through `into_inner`,
+/// so Bevy sees the image change and takes the new sampler to the GPU.
+///
+/// # Safety
+/// `config` must point to a readable [`crate::interop::BcsImageConfig`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_set_sampler(key: i32, config: *const crate::interop::BcsImageConfig) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (key, config);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::image::{Image, ImageSampler};
+
+            if config.is_null() {
+                return status::NULL_ARG;
+            }
+            let descriptor = crate::assets::sampler_from(unsafe { &*config });
+
+            with_world(|world| {
+                let handle = match super::image_handle(world, key) {
+                    Ok(Some(handle)) => handle,
+                    Ok(None) => return status::NULL_ARG,
+                    Err(code) => return code,
+                };
+                let Some(mut images) = world.get_resource_mut::<bevy::asset::Assets<Image>>() else {
+                    return status::UNSUPPORTED;
+                };
+                let Some(image) = images.get_mut(&handle) else {
+                    return status::NOT_PRESENT;
+                };
+
+                image.into_inner().sampler = ImageSampler::Descriptor(descriptor);
+                status::OK
+            })
+        }
+    })
+}
+
 /// How one part of a sliced picture meets the size it is drawn at.
 ///
 /// A nine-slice stretches by default, and it is wrong for anything with a pattern in it, because a

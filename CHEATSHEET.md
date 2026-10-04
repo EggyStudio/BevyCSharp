@@ -787,6 +787,7 @@ static bool TryReadCapture(Capture capture, out CapturedImage picture);  // Read
 static bool TryReadCaptureAsItIs(Capture capture, out CapturedTexels picture);  // Reads a capture once it has arrived, in the format it was drawn in, and forgets it
 static void ReleaseCapture(Capture capture);                    // Forgets a capture that will not be read
 static AssetHandle CreateTarget(uint width, uint height, TargetFormat format = TargetFormat.Rgba8, uint layers = 1);  // Creates an empty image a camera can draw into
+static void SetSampler(AssetHandle image, TextureSettings settings);  // Gives an image how it repeats past its edges and how it is filtered
 static AssetHandle CreateImage(ReadOnlySpan<byte> pixels, uint width, uint height, bool srgb = true);  // Makes an image out of pixels held here, and hands back a handle to it
 static void MakeCubemap(AssetHandle image);                     // Has an image of six square faces treated as a cubemap
 static AssetHandle CubemapFromFaces(AssetHandle positiveX, AssetHandle negativeX, AssetHandle positiveY, AssetHandle negativeY, AssetHandle positiveZ, AssetHandle negativeZ);  // Makes a cubemap out of six images, one a face, as a cubemap shipped as six files is

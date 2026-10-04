@@ -2170,6 +2170,50 @@ public static unsafe class Render
     }
 
     /// <summary>
+    /// Gives an image how it repeats past its edges and how it is filtered.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// For an image made in code, which no loader's settings reached, as a small pattern meant to
+    /// repeat across a large floor is, and for one already loaded. An image still loading is not
+    /// there to change, and one meant to be read a particular way from the start is loaded with
+    /// <see cref="AssetServer.LoadImage"/> instead.
+    /// </para>
+    /// <para>
+    /// <see cref="TextureSettings.Srgb"/> is ignored here, since how an image's bytes are read is
+    /// decided when it is made.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var checker = Render.CreateImage(pixels, 8, 8);
+    /// Render.SetSampler(checker, new TextureSettings { Wrap = TextureWrap.Repeat });
+    /// </code>
+    /// </example>
+    /// <exception cref="BevyNativeException">
+    /// The handle names no image, the image is still loading, or this build has no renderer.
+    /// </exception>
+    public static void SetSampler(AssetHandle image, TextureSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var native = new NativeImageConfig
+        {
+            AddressU = (int)settings.Wrap,
+            AddressV = (int)settings.Wrap,
+            MagFilter = (int)settings.MagFilter,
+            MinFilter = (int)settings.MinFilter,
+            MipmapFilter = (int)settings.MipmapFilter,
+            Anisotropy = settings.Anisotropy,
+            Srgb = settings.Srgb ? 1 : 0,
+        };
+
+        var status = Native.bcs_render_set_sampler(image.Key, &native);
+        if (status == NativeStatus.Unsupported) throw NoRenderer("Setting an image's sampler");
+        Native.Check(status, $"setting the sampler of {image}");
+    }
+
+    /// <summary>
     /// Makes an image out of pixels held here, and hands back a handle to it.
     /// </summary>
     /// <remarks>

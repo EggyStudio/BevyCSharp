@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Interop;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -185,5 +186,26 @@ public sealed class RenderReadTests
         Assert.Equal(6, strip.Value.Indices);
         Assert.Equal(32, strip.Value.IndexBits);
         Assert.IsType<ArgumentException>(list);
+    }
+
+    [SkippableFact]
+    public void AnImageMadeInCodeIsGivenASamplerAndOneThatIsNotThereIsRefused()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        Exception? made = null, missing = null;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            var checker = Render.CreateImage(new byte[2 * 2 * 4], 2, 2);
+            made = Record.Exception(() => Render.SetSampler(checker, new TextureSettings { Wrap = TextureWrap.Repeat }));
+            missing = Record.Exception(() => Render.SetSampler(new AssetHandle(987_654), TextureSettings.Tiling));
+        });
+
+        harness.Run();
+
+        Assert.Null(made);
+        Assert.IsType<BevyNativeException>(missing);
     }
 }

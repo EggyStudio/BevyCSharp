@@ -287,10 +287,7 @@ pub unsafe extern "C" fn bcs_asset_load_image(
     config: *const crate::interop::BcsImageConfig,
 ) -> i32 {
     crate::interop::guard(|| {
-        use bevy::image::{
-            ImageAddressMode, ImageFilterMode, ImageLoaderSettings, ImageSampler,
-            ImageSamplerDescriptor,
-        };
+        use bevy::image::{ImageLoaderSettings, ImageSampler};
 
         let Some(path) = (unsafe { crate::interop::cstr_to_string(path) }) else {
             return status::NULL_ARG;
@@ -300,41 +297,7 @@ pub unsafe extern "C" fn bcs_asset_load_image(
         }
         let config = unsafe { *config };
 
-        let address = |mode: i32| match mode {
-            1 => ImageAddressMode::Repeat,
-            2 => ImageAddressMode::MirrorRepeat,
-            _ => ImageAddressMode::ClampToEdge,
-        };
-        let filter = |mode: i32| match mode {
-            1 => ImageFilterMode::Linear,
-            _ => ImageFilterMode::Nearest,
-        };
-
-        let mag_filter = filter(config.mag_filter);
-        let min_filter = filter(config.min_filter);
-        let mipmap_filter = filter(config.mipmap_filter);
-
-        // wgpu rejects anisotropy above one unless all three filters are linear, and rejects it
-        // as a validation failure rather than by ignoring it. Asking for both is a mistake worth
-        // absorbing here rather than turning into a crash at draw time.
-        let anisotropy = if mag_filter == ImageFilterMode::Linear
-            && min_filter == ImageFilterMode::Linear
-            && mipmap_filter == ImageFilterMode::Linear
-        {
-            config.anisotropy.max(1)
-        } else {
-            1
-        };
-
-        let descriptor = ImageSamplerDescriptor {
-            address_mode_u: address(config.address_u),
-            address_mode_v: address(config.address_v),
-            mag_filter,
-            min_filter,
-            mipmap_filter,
-            anisotropy_clamp: anisotropy as u16,
-            ..Default::default()
-        };
+        let descriptor = sampler_from(&config);
         let srgb = config.srgb != 0;
 
         with_world(|world| {
@@ -354,6 +317,48 @@ pub unsafe extern "C" fn bcs_asset_load_image(
             world.get_resource_or_init::<AssetHandles>().insert(handle)
         })
     })
+}
+
+/// The sampler an image's settings ask for, the same whether the image is loaded with them or
+/// given them once it exists.
+pub(crate) fn sampler_from(config: &crate::interop::BcsImageConfig) -> bevy::image::ImageSamplerDescriptor {
+    use bevy::image::{ImageAddressMode, ImageFilterMode, ImageSamplerDescriptor};
+
+    let address = |mode: i32| match mode {
+        1 => ImageAddressMode::Repeat,
+        2 => ImageAddressMode::MirrorRepeat,
+        _ => ImageAddressMode::ClampToEdge,
+    };
+    let filter = |mode: i32| match mode {
+        1 => ImageFilterMode::Linear,
+        _ => ImageFilterMode::Nearest,
+    };
+
+    let mag_filter = filter(config.mag_filter);
+    let min_filter = filter(config.min_filter);
+    let mipmap_filter = filter(config.mipmap_filter);
+
+    // wgpu rejects anisotropy above one unless all three filters are linear, and rejects it as a
+    // validation failure rather than by ignoring it. Asking for both is a mistake worth absorbing
+    // here rather than turning into a crash at draw time.
+    let anisotropy = if mag_filter == ImageFilterMode::Linear
+        && min_filter == ImageFilterMode::Linear
+        && mipmap_filter == ImageFilterMode::Linear
+    {
+        config.anisotropy.max(1)
+    } else {
+        1
+    };
+
+    ImageSamplerDescriptor {
+        address_mode_u: address(config.address_u),
+        address_mode_v: address(config.address_v),
+        mag_filter,
+        min_filter,
+        mipmap_filter,
+        anisotropy_clamp: anisotropy as u16,
+        ..Default::default()
+    }
 }
 
 /// Writes the path an asset was loaded from into `out`, returning the length in bytes it needs.

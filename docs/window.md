@@ -87,6 +87,10 @@ because a material's pipeline is compiled the first time something asks to be dr
 texture worked out at startup or a capture handed on to a material. It takes the same RGBA layout a
 capture comes back in, so a picture can be read, changed and given back. Pass `srgb: false` for a
 picture whose numbers mean something other than a color, such as a normal map or a roughness mask.
+Such an image takes Bevy's default sampler, clamped at its edges and filtered linearly, as a loaded
+one does with no settings given, and `Render.SetSampler(image, TextureSettings.Tiling)` changes
+that afterward, for a small pattern repeated across a floor. The settings are the ones `AssetServer.LoadImage` takes, and
+an image still loading is refused, since there is nothing yet to give them to.
 
 ### The window
 
