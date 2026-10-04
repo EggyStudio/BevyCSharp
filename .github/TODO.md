@@ -512,6 +512,16 @@ and leaves silhouettes alone. These need a GPU, so they are skipped on the headl
 test workflow builds, each through `Needs` in the tests with the profile, tool or device it lacks
 as the reason, so a run's summary counts what did not run there rather than passing it.
 
+Every attribute the generators act on is compiled and run by `GeneratorAttributeTests`, from the
+generators' own table (`RecognizedAttributes`), so an attribute added there with no case fails by
+name, and one that stops compiling fails its case.
+
+- **A behavior's own component reads as changed every frame its methods run.** A method per
+  entity takes the component by reference, and the runner marks what it hands out as changed,
+  so `[Changed(typeof(Self))]` is always true, and a system watching for changes to a behavior's
+  component sees all of them change each frame. Handing it out unmarked and marking only what a
+  method wrote would need the runner to compare or the method to say.
+
 A game is played whole as well. Where the workflow builds the bridges, a job packs the library
 with the Linux bridge, builds `games/Courtyard` on that package and plays it through `play.sh` on
 Mesa's software Vulkan, from its menu through a save, a load and every coin to its win, steering

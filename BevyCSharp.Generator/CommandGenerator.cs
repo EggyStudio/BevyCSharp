@@ -27,7 +27,7 @@ namespace Bevy.Generator;
 [Generator(LanguageNames.CSharp)]
 public sealed class CommandGenerator : IIncrementalGenerator
 {
-    private const string CommandAttribute = "Bevy.CommandAttribute";
+    private const string CommandAttribute = RecognizedAttributes.Namespace + "." + RecognizedAttributes.Command;
 
     /// <inheritdoc/>
     public void Initialize(IncrementalGeneratorInitializationContext context)

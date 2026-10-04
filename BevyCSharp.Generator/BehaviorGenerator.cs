@@ -29,10 +29,10 @@ namespace Bevy.Generator;
 [Generator(LanguageNames.CSharp)]
 public sealed class BehaviorGenerator : IIncrementalGenerator
 {
-    private const string AttributeNamespace = "Bevy";
-    private const string BehaviorAttribute = "Bevy.BehaviorAttribute";
-    private const string DataAssetAttribute = "Bevy.DataAssetAttribute";
-    private const string DataVersionAttribute = "Bevy.DataVersionAttribute";
+    private const string AttributeNamespace = RecognizedAttributes.Namespace;
+    private const string BehaviorAttribute = RecognizedAttributes.Namespace + "." + RecognizedAttributes.Behavior;
+    private const string DataAssetAttribute = RecognizedAttributes.Namespace + "." + RecognizedAttributes.DataAsset;
+    private const string DataVersionAttribute = RecognizedAttributes.Namespace + "." + RecognizedAttributes.DataVersion;
 
     /// <inheritdoc/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -470,60 +470,60 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 
             switch (name)
             {
-                case "ShowIfAttribute":
+                case RecognizedAttributes.ShowIf:
                     conditions.Add(new ConditionModel(
                         Text(attribute, 0) ?? string.Empty,
                         Written(attribute, 1),
                         Flag(attribute, "Not")));
                     continue;
 
-                case "HideIfAttribute":
+                case RecognizedAttributes.HideIf:
                     conditions.Add(new ConditionModel(
                         Text(attribute, 0) ?? string.Empty, Written(attribute, 1), true));
                     continue;
 
-                case "OnValueChangedAttribute":
+                case RecognizedAttributes.OnValueChanged:
                     foreach (var method in Names(attribute)) changed.Add(method);
                     continue;
 
-                case "FormerNameAttribute":
+                case RecognizedAttributes.FormerName:
                     if (Text(attribute, 0) is { Length: > 0 } was) former.Add(was);
                     continue;
             }
 
             hints = name switch
             {
-                "LabelAttribute" => hints with { Label = Text(attribute, 0) },
-                "TooltipAttribute" => hints with { Tooltip = Text(attribute, 0) },
-                "HeaderAttribute" => hints with { Header = Text(attribute, 0) },
-                "UnitAttribute" => hints with { Unit = Text(attribute, 0) },
-                "RangeAttribute" => hints with
+                RecognizedAttributes.Label => hints with { Label = Text(attribute, 0) },
+                RecognizedAttributes.Tooltip => hints with { Tooltip = Text(attribute, 0) },
+                RecognizedAttributes.Header => hints with { Header = Text(attribute, 0) },
+                RecognizedAttributes.Unit => hints with { Unit = Text(attribute, 0) },
+                RecognizedAttributes.Range => hints with
                 {
                     Minimum = Number(attribute, 0),
                     Maximum = Number(attribute, 1),
                     Readout = Chosen(attribute, "Readout"),
                 },
-                "StepAttribute" => hints with { Step = Number(attribute, 0) },
-                "ReadOnlyAttribute" => hints with { ReadOnly = true },
-                "HiddenAttribute" => hints with { Hidden = true },
-                "SpaceAttribute" => hints with { Space = true },
-                "SeparatorAttribute" => hints with { Separator = true },
-                "ColorAttribute" => hints with { Color = true },
-                "WideAttribute" => hints with { Wide = true },
-                "InlineAttribute" => hints with { Inline = true },
-                "FoldoutAttribute" => hints with
+                RecognizedAttributes.Step => hints with { Step = Number(attribute, 0) },
+                RecognizedAttributes.ReadOnly => hints with { ReadOnly = true },
+                RecognizedAttributes.Hidden => hints with { Hidden = true },
+                RecognizedAttributes.Space => hints with { Space = true },
+                RecognizedAttributes.Separator => hints with { Separator = true },
+                RecognizedAttributes.Color => hints with { Color = true },
+                RecognizedAttributes.Wide => hints with { Wide = true },
+                RecognizedAttributes.Inline => hints with { Inline = true },
+                RecognizedAttributes.Foldout => hints with
                 {
                     Foldout = Text(attribute, 0),
                     FoldoutShut = attribute.NamedArguments.Any(
                         pair => pair.Key == "Open" && pair.Value.Value is false),
                 },
-                "InfoAttribute" => hints with
+                RecognizedAttributes.Info => hints with
                 {
                     Note = Text(attribute, 0),
                     NoteKind = Chosen(attribute, "Kind"),
                 },
-                "OrderAttribute" => hints with { Order = (int)(Number(attribute, 0) ?? 0d) },
-                "AssetAttribute" => hints with
+                RecognizedAttributes.Order => hints with { Order = (int)(Number(attribute, 0) ?? 0d) },
+                RecognizedAttributes.Asset => hints with
                 {
                     Asset = Text(attribute, 0),
                     Extensions = Named(attribute, "Extensions"),
@@ -638,30 +638,30 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 
             hints = name switch
             {
-                "ButtonAttribute" => hints with
+                RecognizedAttributes.Button => hints with
                 {
                     Label = Text(attribute, 0),
                     Line = Chosen(attribute, "Line"),
                     Weight = Weight(attribute),
                 },
-                "LabelAttribute" => hints with { Label = Text(attribute, 0) },
-                "TooltipAttribute" => hints with { Tooltip = Text(attribute, 0) },
-                "HiddenAttribute" => hints with { Hidden = true },
-                "SpaceAttribute" => hints with { Space = true },
-                "SeparatorAttribute" => hints with { Separator = true },
-                "HeaderAttribute" => hints with { Header = Text(attribute, 0) },
-                "FoldoutAttribute" => hints with
+                RecognizedAttributes.Label => hints with { Label = Text(attribute, 0) },
+                RecognizedAttributes.Tooltip => hints with { Tooltip = Text(attribute, 0) },
+                RecognizedAttributes.Hidden => hints with { Hidden = true },
+                RecognizedAttributes.Space => hints with { Space = true },
+                RecognizedAttributes.Separator => hints with { Separator = true },
+                RecognizedAttributes.Header => hints with { Header = Text(attribute, 0) },
+                RecognizedAttributes.Foldout => hints with
                 {
                     Foldout = Text(attribute, 0),
                     FoldoutShut = attribute.NamedArguments.Any(
                         pair => pair.Key == "Open" && pair.Value.Value is false),
                 },
-                "InfoAttribute" => hints with
+                RecognizedAttributes.Info => hints with
                 {
                     Note = Text(attribute, 0),
                     NoteKind = Chosen(attribute, "Kind"),
                 },
-                "OrderAttribute" => hints with { Order = (int)(Number(attribute, 0) ?? 0d) },
+                RecognizedAttributes.Order => hints with { Order = (int)(Number(attribute, 0) ?? 0d) },
                 _ => hints,
             };
         }
@@ -748,7 +748,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     {
         foreach (var attribute in type.GetAttributes())
         {
-            if (attribute.AttributeClass?.Name == "FlagsAttribute") return true;
+            if (attribute.AttributeClass?.Name == RecognizedAttributes.Flags) return true;
         }
 
         return false;
@@ -948,7 +948,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
             FormerNames = FormerNamesOf(type),
             Version = VersionOf(type),
             Migrates = Migration(type) is not null,
-            Persisted = type.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "PersistAttribute"),
+            Persisted = type.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == RecognizedAttributes.Persist),
             Invokables = ReadInvokables(type),
         };
 
@@ -958,7 +958,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// <summary>The version a type's <c>[DataVersion]</c> gives it, or zero for none.</summary>
     private static int VersionOf(INamedTypeSymbol type) =>
         type.GetAttributes()
-            .Where(attribute => attribute.AttributeClass?.Name == "DataVersionAttribute")
+            .Where(attribute => attribute.AttributeClass?.Name == RecognizedAttributes.DataVersion)
             .Select(attribute => attribute.ConstructorArguments.FirstOrDefault().Value)
             .OfType<int>()
             .FirstOrDefault();
@@ -988,7 +988,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     private static IReadOnlyList<string> FormerNamesOf(INamedTypeSymbol type) =>
     [
         .. type.GetAttributes()
-            .Where(attribute => attribute.AttributeClass?.Name == "FormerNameAttribute")
+            .Where(attribute => attribute.AttributeClass?.Name == RecognizedAttributes.FormerName)
             .Select(attribute => Text(attribute, 0))
             .OfType<string>(),
     ];
@@ -1002,15 +1002,15 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         {
             var stage = attribute.AttributeClass?.ToDisplayString() switch
             {
-                $"{AttributeNamespace}.OnStartupAttribute" => BehaviorStage.Startup,
-                $"{AttributeNamespace}.OnFirstAttribute" => BehaviorStage.First,
-                $"{AttributeNamespace}.OnPreUpdateAttribute" => BehaviorStage.PreUpdate,
-                $"{AttributeNamespace}.OnFixedUpdateAttribute" => BehaviorStage.FixedUpdate,
-                $"{AttributeNamespace}.OnUpdateAttribute" => BehaviorStage.Update,
-                $"{AttributeNamespace}.OnPostUpdateAttribute" => BehaviorStage.PostUpdate,
-                $"{AttributeNamespace}.OnRenderAttribute" => BehaviorStage.Render,
-                $"{AttributeNamespace}.OnLastAttribute" => BehaviorStage.Last,
-                $"{AttributeNamespace}.OnCleanupAttribute" => BehaviorStage.Cleanup,
+                $"{AttributeNamespace}.{RecognizedAttributes.OnStartup}" => BehaviorStage.Startup,
+                $"{AttributeNamespace}.{RecognizedAttributes.OnFirst}" => BehaviorStage.First,
+                $"{AttributeNamespace}.{RecognizedAttributes.OnPreUpdate}" => BehaviorStage.PreUpdate,
+                $"{AttributeNamespace}.{RecognizedAttributes.OnFixedUpdate}" => BehaviorStage.FixedUpdate,
+                $"{AttributeNamespace}.{RecognizedAttributes.OnUpdate}" => BehaviorStage.Update,
+                $"{AttributeNamespace}.{RecognizedAttributes.OnPostUpdate}" => BehaviorStage.PostUpdate,
+                $"{AttributeNamespace}.{RecognizedAttributes.OnRender}" => BehaviorStage.Render,
+                $"{AttributeNamespace}.{RecognizedAttributes.OnLast}" => BehaviorStage.Last,
+                $"{AttributeNamespace}.{RecognizedAttributes.OnCleanup}" => BehaviorStage.Cleanup,
                 _ => (BehaviorStage?)null,
             };
 
@@ -1039,9 +1039,9 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         {
             var bucket = attribute.AttributeClass?.ToDisplayString() switch
             {
-                $"{AttributeNamespace}.WithAttribute" => with,
-                $"{AttributeNamespace}.WithoutAttribute" => without,
-                $"{AttributeNamespace}.ChangedAttribute" => changed,
+                $"{AttributeNamespace}.{RecognizedAttributes.With}" => with,
+                $"{AttributeNamespace}.{RecognizedAttributes.Without}" => without,
+                $"{AttributeNamespace}.{RecognizedAttributes.Changed}" => changed,
                 _ => null,
             };
 
@@ -1076,8 +1076,8 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         {
             var entering = attribute.AttributeClass?.ToDisplayString() switch
             {
-                $"{AttributeNamespace}.OnEnterAttribute" => true,
-                $"{AttributeNamespace}.OnExitAttribute" => false,
+                $"{AttributeNamespace}.{RecognizedAttributes.OnEnter}" => true,
+                $"{AttributeNamespace}.{RecognizedAttributes.OnExit}" => false,
                 _ => (bool?)null,
             };
 
@@ -1107,7 +1107,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     {
         foreach (var attribute in method.GetAttributes())
         {
-            if (attribute.AttributeClass?.ToDisplayString() != $"{AttributeNamespace}.InStateAttribute")
+            if (attribute.AttributeClass?.ToDisplayString() != $"{AttributeNamespace}.{RecognizedAttributes.InState}")
                 continue;
 
             if (attribute.ConstructorArguments.Length == 0) continue;
@@ -1135,7 +1135,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 
         foreach (var attribute in method.GetAttributes())
         {
-            if (attribute.AttributeClass?.ToDisplayString() != $"{AttributeNamespace}.RunIfAttribute")
+            if (attribute.AttributeClass?.ToDisplayString() != $"{AttributeNamespace}.{RecognizedAttributes.RunIf}")
                 continue;
             if (attribute.ConstructorArguments.Length == 0) continue;
             if (attribute.ConstructorArguments[0].Value is string value) name = value;
@@ -1175,7 +1175,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     {
         foreach (var attribute in method.GetAttributes())
         {
-            if (attribute.AttributeClass?.ToDisplayString() != $"{AttributeNamespace}.ToggleKeyAttribute")
+            if (attribute.AttributeClass?.ToDisplayString() != $"{AttributeNamespace}.{RecognizedAttributes.ToggleKey}")
                 continue;
 
             var arguments = attribute.ConstructorArguments;

@@ -19,7 +19,7 @@ namespace Bevy.Generator;
 [Generator(LanguageNames.CSharp)]
 public sealed class StateGenerator : IIncrementalGenerator
 {
-    private const string InitialStateAttribute = "Bevy.InitialStateAttribute";
+    private const string InitialStateAttribute = RecognizedAttributes.Namespace + "." + RecognizedAttributes.InitialState;
 
     /// <inheritdoc/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
