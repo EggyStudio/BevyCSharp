@@ -158,6 +158,7 @@ internal static class Catalog
         new("relative_cursor_position", RelativeCursorPosition.Build),
         new("size_constraints", SizeConstraints.Build),
         new("stacked_gradients", StackedGradients.Build),
+        new("text_debug", TextDebug.Build),
         new("text_wrap_debug", TextWrapDebug.Build),
         new("transparency_ui", TransparencyUi.Build),
         new("ui_target_camera", UiTargetCamera.Build),
