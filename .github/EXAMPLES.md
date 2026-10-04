@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**113 written, 7 written in part, 122 can be written, 122 missing and 57 do not apply.** Of the 364 that apply, 242 can be written with what is bridged, 7 of them leaving something out.
+**114 written, 7 written in part, 121 can be written, 122 missing and 57 do not apply.** Of the 364 that apply, 242 can be written with what is bridged, 7 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
@@ -15,7 +15,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Assets](#assets) | 0 | 0 | 10 | 2 | 5 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 |
 | [Audio](#audio) | 4 | 0 | 0 | 4 | 0 |
-| [Camera](#camera) | 3 | 0 | 1 | 5 | 0 |
+| [Camera](#camera) | 4 | 0 | 0 | 5 | 0 |
 | [Dev tools](#dev-tools) | 0 | 0 | 1 | 1 | 1 |
 | [Diagnostics](#diagnostics) | 0 | 0 | 1 | 2 | 0 |
 | [ECS (Entity Component System)](#ecs-entity-component-system) | 10 | 0 | 1 | 15 | 9 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **113** | **7** | **122** | **122** | **57** |
+| **All** | **114** | **7** | **121** | **122** | **57** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints.
 
@@ -246,7 +246,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`2d_top_down_camera`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_top_down_camera.rs) | A 2D top-down camera smoothly following player movements | missing, 2D meshes and their color materials |
 | [`camera_orbit`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/camera_orbit.rs) | Shows how to orbit a static scene using pitch, yaw, and roll. | [written](../BevyCSharp.Examples/camera/camera_orbit.cs) |
 | [`custom_projection`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/custom_projection.rs) | Shows how to create custom camera projections. | missing, custom camera projections |
-| [`first_person_view_model`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/first_person_view_model.rs) | A first-person camera that uses a world model and a view model with different field of views (FOV) | can be written |
+| [`first_person_view_model`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/first_person_view_model.rs) | A first-person camera that uses a world model and a view model with different field of views (FOV) | [written](../BevyCSharp.Examples/camera/first_person_view_model.cs) |
 | [`free_camera_controller`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/free_camera_controller.rs) | Demonstrates the FreeCamera controller for 3D scenes. | missing, Bevy's free camera controller, its plugin and its settings |
 | [`pan_camera_controller`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/pan_camera_controller.rs) | Example Pan-Camera Styled Camera Controller for 2D scenes | missing, Bevy's pan camera controller, its plugin and its settings |
 | [`projection_zoom`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/projection_zoom.rs) | Shows how to zoom orthographic and perspective projection cameras. | [written](../BevyCSharp.Examples/camera/projection_zoom.cs) |

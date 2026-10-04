@@ -99,6 +99,7 @@ internal static class Catalog
         // Camera
         new("2d_on_ui", TwoDOnUi.Build),
         new("camera_orbit", CameraOrbit.Build),
+        new("first_person_view_model", FirstPersonViewModel.Build),
         new("projection_zoom", ProjectionZoom.Build),
 
         // ECS (Entity Component System)
