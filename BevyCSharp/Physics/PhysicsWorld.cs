@@ -36,6 +36,16 @@ public readonly record struct PhysicsShape
     internal Vec3 Size { get; private init; }
     internal Vec3[]? Positions { get; private init; }
     internal uint[]? Indices { get; private init; }
+    internal Vec3 Offset { get; private init; }
+
+    /// <summary>The same shape with its middle moved off the entity's origin.</summary>
+    /// <param name="offset">Where its middle goes, in world units along the entity's own axes.</param>
+    /// <remarks>
+    /// The body turns about its middle while the entity keeps its origin, as a hull's does, so a
+    /// collider fitted to a model whose origin is at its feet stands where the model does and
+    /// writes the entity back to where its feet are.
+    /// </remarks>
+    public PhysicsShape Moved(Vec3 offset) => this with { Offset = Offset + offset };
 
     /// <summary>A box of the given full size along each axis.</summary>
     public static PhysicsShape Box(Vec3 size) => new() { Kind = 0, Size = size };
@@ -277,7 +287,7 @@ public readonly record struct PhysicsHit(Entity Entity, Vec3 Point, Vec3 Normal,
 /// the engine underneath can be replaced without a game changing.
 /// </para>
 /// </remarks>
-public sealed class PhysicsWorld : IDisposable
+public sealed partial class PhysicsWorld : IDisposable
 {
     private readonly BufferPool _pool = new();
     private readonly ThreadDispatcher _threads;
@@ -393,6 +403,7 @@ public sealed class PhysicsWorld : IDisposable
             throw new InvalidOperationException($"{entity} already has a body. Remove it first to give it another.");
 
         var (index, inertia, center) = AddShape(shape, Math.Max(mass, 1e-4f));
+        center += ToBepu(shape.Offset);
         var orientation = ToBepu(at.Rotation);
         var pose = new RigidPose(ToBepu(at.Translation) + Vector3.Transform(center, orientation), orientation);
 

@@ -31,7 +31,7 @@
           "Mode": "Inherited"
         },
         "Bevy.SaveId": {
-          "Id": "02c81717deeece8b"
+          "Id": "95fdf09950e2a871"
         },
         "Courtyard.Runner": {
           "Speed": 0,
@@ -74,6 +74,26 @@
         "Bevy.Visibility": {
           "Mode": "Inherited"
         },
+        "Bevy.Physics.Collider": {
+          "Shape": "Box",
+          "Size": [
+            0,
+            0,
+            0
+          ],
+          "Offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Bevy.Physics.RigidBody": {
+          "Kind": "Static",
+          "Mass": 0,
+          "Sensor": true,
+          "Friction": 0,
+          "Bounce": 0
+        },
         "Courtyard.Goal": {}
       }
     },
@@ -109,7 +129,27 @@
           "Mode": "Inherited"
         },
         "Bevy.SaveId": {
-          "Id": "a0f01af6759129de"
+          "Id": "361753cb7c1fb0bc"
+        },
+        "Bevy.Physics.Collider": {
+          "Shape": "Sphere",
+          "Size": [
+            0,
+            0,
+            0
+          ],
+          "Offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Bevy.Physics.RigidBody": {
+          "Kind": "Static",
+          "Mass": 0,
+          "Sensor": true,
+          "Friction": 0,
+          "Bounce": 0
         },
         "Courtyard.Coin": {}
       }
@@ -146,7 +186,27 @@
           "Mode": "Inherited"
         },
         "Bevy.SaveId": {
-          "Id": "76929c6fa9a5155d"
+          "Id": "52f899358d98bfb6"
+        },
+        "Bevy.Physics.Collider": {
+          "Shape": "Sphere",
+          "Size": [
+            0,
+            0,
+            0
+          ],
+          "Offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Bevy.Physics.RigidBody": {
+          "Kind": "Static",
+          "Mass": 0,
+          "Sensor": true,
+          "Friction": 0,
+          "Bounce": 0
         },
         "Courtyard.Coin": {}
       }
@@ -183,7 +243,27 @@
           "Mode": "Inherited"
         },
         "Bevy.SaveId": {
-          "Id": "0f47f88e054767c0"
+          "Id": "970f21ae3ebd7de0"
+        },
+        "Bevy.Physics.Collider": {
+          "Shape": "Sphere",
+          "Size": [
+            0,
+            0,
+            0
+          ],
+          "Offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Bevy.Physics.RigidBody": {
+          "Kind": "Static",
+          "Mass": 0,
+          "Sensor": true,
+          "Friction": 0,
+          "Bounce": 0
         },
         "Courtyard.Coin": {}
       }
@@ -201,7 +281,7 @@
         "Bevy.Transform": {
           "Translation": [
             -8,
-            -0.2,
+            -0.7,
             0
           ],
           "Rotation": [
@@ -213,13 +293,32 @@
           "Scale": [
             0.5,
             1,
-            8
+            16.5
           ]
         },
         "Bevy.Visibility": {
           "Mode": "Inherited"
         },
-        "Courtyard.Wall": {}
+        "Bevy.Physics.Collider": {
+          "Shape": "Box",
+          "Size": [
+            0,
+            0,
+            0
+          ],
+          "Offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Bevy.Physics.RigidBody": {
+          "Kind": "Static",
+          "Mass": 0,
+          "Sensor": false,
+          "Friction": 0,
+          "Bounce": 0
+        }
       }
     },
     {
@@ -235,7 +334,7 @@
         "Bevy.Transform": {
           "Translation": [
             8,
-            -0.2,
+            -0.7,
             0
           ],
           "Rotation": [
@@ -247,13 +346,32 @@
           "Scale": [
             0.5,
             1,
-            8
+            16.5
           ]
         },
         "Bevy.Visibility": {
           "Mode": "Inherited"
         },
-        "Courtyard.Wall": {}
+        "Bevy.Physics.Collider": {
+          "Shape": "Box",
+          "Size": [
+            0,
+            0,
+            0
+          ],
+          "Offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Bevy.Physics.RigidBody": {
+          "Kind": "Static",
+          "Mass": 0,
+          "Sensor": false,
+          "Friction": 0,
+          "Bounce": 0
+        }
       }
     },
     {
@@ -269,7 +387,7 @@
         "Bevy.Transform": {
           "Translation": [
             0,
-            -0.2,
+            -0.7,
             8
           ],
           "Rotation": [
@@ -279,7 +397,7 @@
             1
           ],
           "Scale": [
-            8,
+            16.5,
             1,
             0.5
           ]
@@ -287,7 +405,26 @@
         "Bevy.Visibility": {
           "Mode": "Inherited"
         },
-        "Courtyard.Wall": {}
+        "Bevy.Physics.Collider": {
+          "Shape": "Box",
+          "Size": [
+            0,
+            0,
+            0
+          ],
+          "Offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Bevy.Physics.RigidBody": {
+          "Kind": "Static",
+          "Mass": 0,
+          "Sensor": false,
+          "Friction": 0,
+          "Bounce": 0
+        }
       }
     },
     {
@@ -303,7 +440,7 @@
         "Bevy.Transform": {
           "Translation": [
             0,
-            -0.2,
+            -0.7,
             -8
           ],
           "Rotation": [
@@ -313,7 +450,7 @@
             1
           ],
           "Scale": [
-            8,
+            16.5,
             1,
             0.5
           ]
@@ -321,7 +458,26 @@
         "Bevy.Visibility": {
           "Mode": "Inherited"
         },
-        "Courtyard.Wall": {}
+        "Bevy.Physics.Collider": {
+          "Shape": "Box",
+          "Size": [
+            0,
+            0,
+            0
+          ],
+          "Offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Bevy.Physics.RigidBody": {
+          "Kind": "Static",
+          "Mass": 0,
+          "Sensor": false,
+          "Friction": 0,
+          "Bounce": 0
+        }
       }
     },
     {
@@ -355,7 +511,26 @@
         "Bevy.Visibility": {
           "Mode": "Inherited"
         },
-        "Courtyard.Floor": {}
+        "Bevy.Physics.Collider": {
+          "Shape": "Mesh",
+          "Size": [
+            0,
+            0,
+            0
+          ],
+          "Offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Bevy.Physics.RigidBody": {
+          "Kind": "Static",
+          "Mass": 0,
+          "Sensor": false,
+          "Friction": 0,
+          "Bounce": 0
+        }
       }
     },
     {

@@ -234,6 +234,7 @@ public sealed unsafe class App : IDisposable
         Render.ForgetMade();
         MaterialFiles.Forget();
         MeshFiles.Forget();
+        Bevy.Physics.Colliders.Forget();
 
         // A game in progress is one app's, and its entities would name others in the next.
         SaveGame.Forget();

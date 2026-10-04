@@ -2974,6 +2974,25 @@ if (Render.TryReadMesh(levelMesh, out var triangles))
     physics.Add(level, PhysicsShape.Mesh(triangles!), BodyKind.Static, levelTransform);
 ```
 
+A level holds its bodies as components, a `RigidBody` saying how one moves and a `Collider` saying
+what it collides as, which the editor's inspector edits, its viewport draws, and a scene file
+carries. The plugin makes the body once an entity has both, makes it again when either changes, or
+when a static body's entity is moved or rescaled, and takes it away with them:
+
+```csharp
+ctx.Ecs.Add(wall, new RigidBody { Kind = BodyKind.Static });
+ctx.Ecs.Add(wall, new Collider { Shape = ColliderShape.Box });     // fitted to the mesh it is drawn with
+ctx.Ecs.Add(coin, new RigidBody { Kind = BodyKind.Static, Sensor = true });
+ctx.Ecs.Add(coin, new Collider { Shape = ColliderShape.Sphere });
+```
+
+A collider is sized in the entity's own units and scaled with it, so a cube stretched into a wall
+collides as one. One left at a size of zero takes the bounds of the mesh the entity is drawn with,
+and `Hull` and `Mesh` are the drawn mesh itself, the second for a static floor or wall.
+`Colliders.TryFit` says what one comes to and `Colliders.Draw` draws it as a gizmo, which is how the
+editor shows them. A body added in code on an entity carrying the two is the game's and is left
+alone.
+
 A game's pause is a state the simulation knows nothing of, so `PhysicsWorld.Paused` holds it
 still. Every body keeps its pose and its velocity and goes on from them when the pause is lifted,
 and no contact starts or ends meanwhile:
@@ -3294,16 +3313,19 @@ c() { ./bcs command "$@" >/dev/null; }
 
 c do Spawn/Cube
 c entity.rename Cube "North wall"
-c entity.add "North wall" Wall
 c material.set "North wall" color "#8a7f72"
+c entity.add "North wall" RigidBody
+c entity.set "North wall" RigidBody.Kind Static
+c entity.add "North wall" Collider
 c scene.place models/runner.gltf
 c world.save levels/courtyard.scene.json
 c setting "Project/Startup scene" levels/courtyard.scene.json
 ```
 
-A physics body is made in code, so `Wall`, `Coin`, `Goal` and `Floor` are components the level
-carries and the scripts turn into bodies, a static box for each wall and the ground and a sensor
-for each coin and the goal, which reports a touch and stops nothing.
+Every body is the level's own, a `RigidBody` and a `Collider` fitted to what each entity is drawn
+with. The walls are static boxes and the ground a static mesh of its own triangles, and each coin
+and the goal is a sensor, which reports a touch and stops nothing. `Coin` and `Goal` are markers
+the runner tells them apart by.
 
 ### The behaviors
 
@@ -3315,9 +3337,8 @@ taken away with a sound and counted in a `[Persist]` wallet, and for the goal on
 The HUD, the menu, the pause menu and the win are `Ui` nodes despawned as their state is left, and
 F5 and F9 save and load through `SaveGame`.
 
-The bodies are made every frame of play for whatever has none rather than once on entering play,
-so a level a load brings back mid-game is given them as the first one was, and the pause holds the
-simulation with `PhysicsWorld.Paused`. The HUD's count is found by a `CoinsText` component rather
+A level a load brings back has its bodies made by the plugin as the first one had, and the pause
+holds the simulation with `PhysicsWorld.Paused`. The HUD's count is found by a `CoinsText` component rather
 than kept in a static field, so it is found again after the script is reloaded.
 
 ### Playing it

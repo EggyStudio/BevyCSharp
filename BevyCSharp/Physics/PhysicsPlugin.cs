@@ -1,8 +1,14 @@
 namespace Bevy.Physics;
 
 /// <summary>
-/// Adds a <see cref="PhysicsWorld"/> and steps it once per fixed step.
+/// Adds a <see cref="PhysicsWorld"/>, makes the bodies the world holds as components, and steps it
+/// once per fixed step.
 /// </summary>
+/// <remarks>
+/// Each fixed step first runs <see cref="PhysicsWorld.Sync"/>, which makes, remakes and takes away
+/// the bodies of entities carrying a <see cref="RigidBody"/> and a <see cref="Collider"/>, then
+/// steps unless <see cref="PhysicsWorld.Paused"/> is set.
+/// </remarks>
 /// <example>
 /// <code>
 /// app.AddPlugin(new PhysicsPlugin());
@@ -26,8 +32,13 @@ public sealed class PhysicsPlugin(PhysicsSettings? settings = null) : IPlugin
         app.AddSystem(Stage.FixedUpdate, new SystemDescriptor(
             world =>
             {
+                // The bodies a level holds as components first, paused or not, so one put on an
+                // entity or edited is there for the step.
                 var physics = world.Resource<PhysicsWorld>();
-                if (!physics.Paused) physics.Step(world.Resource<EcsWorld>(), world.Resource<Time>().FixedDelta, world.Resource<MessageBus>());
+                var ecs = world.Resource<EcsWorld>();
+                physics.Sync(ecs);
+
+                if (!physics.Paused) physics.Step(ecs, world.Resource<Time>().FixedDelta, world.Resource<MessageBus>());
             },
             "Physics.Step"));
     }

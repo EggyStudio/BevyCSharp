@@ -440,13 +440,14 @@ turning about the hull's center while its entity keeps its origin. Ball joints, 
 distance ranges hold bodies together, a hinge can turn itself and stop at an angle, and contacts
 are reported, a sensor making a trigger volume. It is part of the core library, so the package the
 workflow packs carries it, with BepuPhysics as a dependency. `Paused` holds the simulation still for
-a game's pause.
+a game's pause. A level holds its bodies as `RigidBody` and `Collider` components, which the
+plugin makes and keeps in step, the inspector edits and the editor draws.
 
-- **A body is made in code.** No component says an entity is a body, so a level built in the editor
-  cannot hold its walls' bodies. Courtyard puts marker components on its walls, coins and ground,
-  which its scripts turn into bodies. A body and a collider as components a scene holds, which the
-  plugin makes and keeps in step with the simulation, would let a level carry them and the
-  inspector show them.
+- **A collider fits one mesh.** One left at a size of zero takes the bounds of the mesh its own
+  entity is drawn with, so on a placed model's root, which draws nothing itself, it is a unit cube.
+  Fitting the meshes under the root as one would let a model carry a collider without a size typed.
+- **Joints are code only.** A hinge or a weld between two bodies a level holds is made with
+  `PhysicsWorld.Connect`, and has no component naming the two entities.
 
 ## Platform
 

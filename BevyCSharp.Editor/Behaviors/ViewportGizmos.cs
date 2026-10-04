@@ -56,6 +56,7 @@ public partial struct ViewportGizmos
         if (!App.HasRenderer) return;
 
         Ground(ctx);
+        Colliders(ctx);
 
         if (!EditorSelection.Any) return;
 
@@ -110,6 +111,29 @@ public partial struct ViewportGizmos
     /// the scene; a disc that thins into nothing says only "the floor carries on".
     /// </para>
     /// </remarks>
+    /// <summary>Whether the colliders in the scene are drawn.</summary>
+    public static bool ShowColliders { get; set; } = true;
+
+    /// <summary>Draws every collider in the scene where it collides, a selected one brighter.</summary>
+    /// <remarks>
+    /// Every one rather than the selected ones alone, since what a collider is for is where it
+    /// meets the rest, and a wall's is read against the floor's. In the scene rather than in front
+    /// of it, so a collider behind a wall is hidden as the wall hides what is behind it.
+    /// </remarks>
+    private static void Colliders(BehaviorContext ctx)
+    {
+        if (!ShowColliders) return;
+
+        var dim = EditorTheme.Linear(new System.Numerics.Vector4(0.35f, 0.85f, 0.45f, 0.55f));
+        var lit = EditorTheme.Linear(new System.Numerics.Vector4(0.45f, 1f, 0.55f, 1f));
+
+        foreach (var row in ctx.Ecs.Query<Bevy.Physics.Collider>(markChanged: false))
+        {
+            if (EditorScene.IsEditors(ctx.Ecs, row.Entity)) continue;
+            Bevy.Physics.Colliders.Draw(ctx.Ecs, row.Entity, EditorSelection.Holds(row.Entity) ? lit : dim);
+        }
+    }
+
     private static void Ground(BehaviorContext ctx)
     {
         if (!ShowGrid) return;

@@ -109,6 +109,11 @@ public static class EditorCommands
             "Editor", "Grid height", static () => ViewportGizmos.GridHeight,
             static value => ViewportGizmos.GridHeight = value, 7);
 
+        EditorSettings.Flag(
+            "Editor", "Draw colliders",
+            static () => ViewportGizmos.ShowColliders,
+            static on => ViewportGizmos.ShowColliders = on, 7);
+
         // A box round what is selected, its own edges, or both. The box never hides what it marks
         // and the edges say exactly which thing was picked, which is the trade.
         EditorSettings.Choice(

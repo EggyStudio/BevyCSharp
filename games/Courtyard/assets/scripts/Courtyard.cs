@@ -29,91 +29,20 @@ public enum Pause
     On,
 }
 
-// The bodies are made on every frame of play for whatever has none yet, rather than once on entering
-// play, so a level a load brings back mid-game is given them as the first one was.
-
-/// <summary>A wall, which the player cannot walk through.</summary>
-[Behavior]
-public partial struct Wall
-{
-    /// <summary>Gives every wall a body while playing, sized to the cube it is drawn as.</summary>
-    [OnUpdate, InState(Mode.Playing)]
-    public static void Build(BehaviorContext ctx)
-    {
-        if (!ctx.TryRes<PhysicsWorld>(out var physics)) return;
-
-        foreach (var row in ctx.Ecs.Query<Wall>(markChanged: false))
-        {
-            if (physics.Has(row.Entity)) continue;
-
-            // The editor's cube is two units a side, so a wall scaled to one is two units of it.
-            var at = ctx.Ecs.GetOrDefault<Transform>(row.Entity);
-            physics.Add(row.Entity, PhysicsShape.Box(at.Scale * 2f), BodyKind.Static, at);
-        }
-    }
-}
-
-/// <summary>The ground, which the runner stands on.</summary>
-[Behavior]
-public partial struct Floor
-{
-    /// <summary>Gives the ground a body while playing, a slab wider than the courtyard whose top is the ground's face.</summary>
-    [OnUpdate, InState(Mode.Playing)]
-    public static void Build(BehaviorContext ctx)
-    {
-        if (!ctx.TryRes<PhysicsWorld>(out var physics)) return;
-
-        foreach (var row in ctx.Ecs.Query<Floor>(markChanged: false))
-        {
-            if (physics.Has(row.Entity)) continue;
-
-            // The editor's ground is a plane, which has no inside for a body to be, so the slab
-            // hangs under it with its top where the plane is.
-            var at = ctx.Ecs.GetOrDefault<Transform>(row.Entity);
-            var slab = Transform.At(at.Translation.X, at.Translation.Y - 0.5f, at.Translation.Z);
-            physics.Add(row.Entity, PhysicsShape.Box(new Vec3(100f, 1f, 100f)), BodyKind.Static, slab);
-        }
-    }
-}
+// The walls, the ground, the coins and the goal are bodies the level holds as RigidBody and
+// Collider components, which the physics plugin makes, so a coin and the goal are only what the
+// runner tells apart by.
 
 /// <summary>A coin, picked up by walking into it.</summary>
 [Behavior]
 public partial struct Coin
 {
-    /// <summary>Makes every coin a sensor while playing, which reports a touch and stops nothing.</summary>
-    [OnUpdate, InState(Mode.Playing)]
-    public static void Build(BehaviorContext ctx)
-    {
-        if (!ctx.TryRes<PhysicsWorld>(out var physics)) return;
-
-        foreach (var row in ctx.Ecs.Query<Coin>(markChanged: false))
-        {
-            if (physics.Has(row.Entity)) continue;
-
-            var at = ctx.Ecs.GetOrDefault<Transform>(row.Entity);
-            physics.Add(row.Entity, PhysicsShape.Sphere(at.Scale.X), BodyKind.Static, at, sensor: true);
-        }
-    }
 }
 
 /// <summary>The goal, where the coins are brought.</summary>
 [Behavior]
 public partial struct Goal
 {
-    /// <summary>Makes the goal a sensor while playing.</summary>
-    [OnUpdate, InState(Mode.Playing)]
-    public static void Build(BehaviorContext ctx)
-    {
-        if (!ctx.TryRes<PhysicsWorld>(out var physics)) return;
-
-        foreach (var row in ctx.Ecs.Query<Goal>(markChanged: false))
-        {
-            if (physics.Has(row.Entity)) continue;
-
-            var at = ctx.Ecs.GetOrDefault<Transform>(row.Entity);
-            physics.Add(row.Entity, PhysicsShape.Box(at.Scale * 2f), BodyKind.Static, at, sensor: true);
-        }
-    }
 }
 
 /// <summary>How many coins the player carries, kept in a save.</summary>
@@ -213,7 +142,7 @@ public partial struct Runner
 
                 if (ctx.Ecs.Has<Coin>(other))
                 {
-                    if (ctx.TryRes<PhysicsWorld>(out var physics)) physics.Remove(other);
+                    // Its body goes with it.
                     ctx.Ecs.Despawn(other);
 
                     var wallet = ctx.Ecs.GetOrDefault<Wallet>(row.Entity);

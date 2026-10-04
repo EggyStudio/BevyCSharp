@@ -8,28 +8,31 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `9dc91a6`. The editor opened on a game's own folder, with the commands the level
-was built through, was read by its description and raised nothing.
+Reviewed up to `f147adc`. States declared on their enum and kept across a script's reload
+(`16c4c1e`), a game played with no display (`e5d3c78`) and Courtyard (`f147adc`) are settled, on
+the play script the workflow runs and the entries the game added to TODO.md, which were read.
 
 ## Now
 
-In this order.
+What Courtyard turned up, in the order it hurt. Each item ends with the game changed to use it
+and `play.sh` still reaching its win.
 
-1. **One small game, made the way a user would make it.** Every part has tests of its own, and
-   nothing has gone the whole way from an empty project to a game somebody else can run. A new
-   project outside this repository's references, on the packed package: its level built in the
-   editor, driven through `./bcs` so the steps can be repeated (entities placed, a model placed
-   as an instance, materials and lights set, the scene saved), behaviors written as scripts and
-   reloaded while it runs, an animated model the player moves, physics bodies with contacts that
-   score, a sound, a HUD and a pause menu in `Ui`, menu, play and pause as states, a save and a
-   load through `SaveGame`, the startup scene named in `project.json`, then Play from the editor
-   and an export with its assets in a pack, run from the exported folder. It stays small, a
-   room and a goal. Everything that had to be worked around, looked up in the engine's source or
-   could not be done is written down as it is met. Each becomes a fix in the batch when it is
-   small and an entry in TODO.md when it is not, and the report lists them. The game is kept
-   under `games/` and played offscreen by the test workflow where the bridge allows.
-2. **What the game turned up**, in the order it hurt.
-3. **Gamepads** wait on the owner (decision 2).
+1. **A body and a collider are components a scene holds** (TODO.md, Physics). The level's walls,
+   coins and ground carry markers that scripts turn into bodies on every frame of play. The
+   plugin makes a body when an entity has the two components, keeps it in step, and removes it
+   with them, the inspector shows and edits them with the collider drawn as a gizmo, and
+   Courtyard's level holds its bodies with the markers and the script that reads them gone.
+2. **A level carries its camera** (TODO.md, The editor). The editor holds a scene's cameras
+   inactive while it edits, draws each as a gizmo, looks through one on request, and offers one
+   in the Spawn menu, and Play starts from the level's. Courtyard's camera moves from its script
+   into its level.
+3. **A message after a load** (TODO.md, Scenes), so a game builds what a save does not hold once,
+   where it reads the message, and Courtyard stops checking every frame.
+4. **A key held for a number of frames**, as one command inside the app, so `play.sh` steers at
+   full speed.
+5. **The smaller two**: the editor says once that a game's states are not entered while editing,
+   and `entity.get` prints a name and a visibility class as values.
+6. **Gamepads** wait on the owner (decision 2).
 
 ## Verdicts
 
