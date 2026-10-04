@@ -1,0 +1,428 @@
+# Each of Bevy's examples and what this engine makes of it, read by build/examples-table.py.
+# A line is a name, a state and a note, apart by tabs. The state is can (everything it uses is
+# bridged and nobody has written it yet), missing (the note names what the bridge lacks) or n/a
+# (the note says why it is not a thing a C# game does). One of Bevy's components the bridge
+# reaches through reflection (EcsWorld.InsertReflected and its kin) counts as bridged, and the note
+# names it. An example written here is found by its file under BevyCSharp.Examples, and a line left
+# for it keeps only its note, which says how it differs from Bevy's.
+3d_scene	can
+rect_light	can	through Bevy's reflected RectLight
+3d_shapes	can	the solids only, since the segment, the polyline and the extrusions are shapes the bridge does not build
+3d_viewport_to_world	can
+animated_material	can
+generate_custom_mesh	can
+anti_aliasing	can
+atmospheric_fog	can	through Bevy's reflected DistanceFog
+atmosphere	can
+fog	can	through Bevy's reflected DistanceFog
+auto_exposure	can
+blend_modes	can
+contact_shadows	can
+lighting	can
+lines	can
+ssao	can
+spotlight	can	its cubes scattered by .NET's generator rather than Bevy's
+bloom_3d	can	intensity, threshold and mode, and none of the low-frequency boost, high-pass frequency or scale
+decal	missing	forward decals (ForwardDecal)
+deferred_rendering	can
+motion_blur	can
+order_independent_transparency	can
+tonemapping	can
+orthographic	can
+parenting	can
+pbr	can	its view sized for 1280 by 720 at any size, and its "Metallic" label not turned, since an interface node is not turned here
+parallax_mapping	missing	a depth map and parallax settings on the standard material
+render_to_texture	can
+shadow_biases	can
+shadow_caster_receiver	can
+skybox	can
+solari	can	needs a bridge built with --solari and an adapter with ray queries
+spherical_area_lights	can
+split_screen	can
+texture	can
+transparency_3d	can	its alpha to coverage cube blends, since that mode is not bridged
+transmission	can
+two_passes	can
+vertex_colors	can
+wireframe	can	no wireframe width or quad topology, and the global wireframe given to each mesh
+irradiance_volumes	can	needs Bevy's irradiance volume asset
+meshlet	can	needs a bridge built with --meshlet
+mesh_ray_cast	can	casts through Picking, which the editor profile carries
+lightmaps	can	through Bevy's reflected Lightmap
+reflection_probes	can
+visibility_range	can	through Bevy's reflected VisibilityRange
+ssr	can
+camera_sub_view	can	through the sub view of Bevy's reflected Camera
+color_grading	can
+clearcoat	can
+depth_of_field	can
+volumetric_fog	can	through Bevy's reflected VolumetricFog, FogVolume and VolumetricLight
+anisotropy	can
+fog_volumes	can	through Bevy's reflected FogVolume
+scrolling_fog	can	through Bevy's reflected FogVolume, its density texture set as a reflected asset
+post_processing	can
+rotate_environment_map	can
+pcss	can
+mixed_lighting	can	through Bevy's reflected Lightmap
+specular_tint	missing	specular tint and the specular maps on the standard material
+clustered_decals	can	through Bevy's reflected ClusteredDecal
+light_textures	can
+occlusion_culling	can	through Bevy's reflected OcclusionCulling
+clustered_decal_maps	can	through Bevy's reflected ClusteredDecal
+mirror	can
+pccm	can	through Bevy's reflected ParallaxCorrection
+light_probe_blending	can
+2d_shapes	can
+2d_viewport_to_world	can
+bloom_2d	can
+cpu_draw	can
+dynamic_mip_generation	missing	generating an image's mipmaps on the GPU
+mesh2d_alpha_mode	missing	2D meshes (Mesh2d with ColorMaterial)
+mesh2d_arcs	missing	2D meshes (Mesh2d with ColorMaterial) and the arc primitives
+mesh2d_manual	n/a	writes a render pipeline in Rust with the mid-level render API
+mesh2d	missing	2D meshes (Mesh2d with ColorMaterial)
+mesh2d_repeated_texture	missing	2D meshes (Mesh2d with ColorMaterial) and its uv transform
+mesh2d_vertex_color_texture	missing	2D meshes (Mesh2d with ColorMaterial)
+move_sprite	can
+multi_window_text	missing	a second window
+pixel_grid_snap	can
+rotate_to_cursor	can
+rotation	can
+sprite_animation	can
+sprite_flipping	can
+sprite	can
+sprite_scale	can
+sprite_sheet	can
+sprite_slice	can
+sprite_tile	can
+text2d	can	through Bevy's reflected Text2d
+texture_atlas	can
+tilemap_chunk_orientation	can	through Bevy's reflected TilemapChunk and its tile data
+tilemap_chunk	can	through Bevy's reflected TilemapChunk and its tile data
+transparency_2d	can
+wireframe_2d	missing	2D meshes (Mesh2d) and their wireframes
+animated_mesh_control	can
+animated_mesh_events	missing	events placed on an animation clip
+animated_mesh	can
+animated_transform	missing	animation clips built in code (AnimationClip with curves)
+animated_ui	missing	animation clips built in code that drive interface properties
+animation_events	missing	events placed on an animation clip
+animation_graph	missing	animation graphs that blend clips by weight
+animation_masks	missing	animation masks on a graph
+color_animation	can	mixing and splines over colors, written with the managed math
+custom_skinned_mesh	missing	skinned meshes built in code (joints and weights)
+eased_motion	can
+easing_functions	can
+morph_targets	can	through Bevy's reflected MorphWeights
+custom_loop	n/a	replaces Bevy's runner, which the bridge owns
+drag_and_drop	can
+empty	can
+empty_defaults	can
+externally_driven_headless_renderer	n/a	drives Bevy's update from Rust code
+headless	can
+headless_renderer	can
+log_layers_ecs	n/a	adds a tracing layer, written in Rust
+log_layers	n/a	adds a tracing layer, written in Rust
+logs	can
+no_renderer	can
+persisting_window_settings	can
+plugin	can
+plugin_group	can
+render_recovery	missing	recovering from a lost GPU device
+return_after_run	can
+settings	can
+thread_pool_resources	n/a	tunes Bevy's task pools, which the bridge sets up
+without_winit	can
+alter_mesh	can
+alter_sprite	can
+asset_decompression	n/a	writes a Rust asset loader
+asset_loading	can
+asset_processing	n/a	writes Rust asset processors
+asset_saving	n/a	writes a Rust asset saver
+asset_saving_with_subassets	n/a	writes a Rust asset saver
+asset_settings	missing	settings given to a loader per load, such as an image's sampler
+custom_asset	can	as a data asset, which is how a C# game has assets of its own types
+custom_asset_reader	n/a	writes a Rust AssetReader
+embedded_asset	can
+extra_asset_source	can
+generated_assets	can
+hot_asset_reloading	can
+multi_asset_sync	can
+repeated_texture	can
+web_asset	missing	loading assets over HTTP
+async_channel_pattern	can	with .NET's tasks and channels
+async_compute	can	with .NET's tasks
+external_source_external_thread	can	with a .NET thread and channel
+audio_control	can
+audio	can
+decodable	missing	audio sources a game generates (Decodable)
+pitch	missing	a generated tone (Pitch)
+play_sound_effect	can
+soundtrack	can
+spatial_audio_2d	can
+spatial_audio_3d	can
+2d_on_ui	can
+2d_screen_shake	can
+2d_top_down_camera	can
+camera_orbit	can
+custom_projection	missing	custom camera projections
+first_person_view_model	can
+free_camera_controller	can
+pan_camera_controller	can
+projection_zoom	can
+fps_overlay	can
+infinite_grid	missing	Bevy's infinite grid
+schedule_data	n/a	reads Bevy's schedule graphs from Rust
+custom_diagnostic	missing	diagnostics a game registers in Bevy's store
+enabling_disabling_diagnostic	missing	turning one of Bevy's diagnostics on and off
+log_diagnostics	can	through frame.profile and the frame panel
+callbacks	can
+change_detection	can
+component_hooks	can
+contiguous_query	n/a	about a Rust query's memory layout
+custom_executor	n/a	replaces Bevy's system executor, which is Rust
+custom_query_param	n/a	derives a Rust query type
+custom_schedule	missing	schedules a game adds of its own
+delayed_commands	can
+dynamic	n/a	builds components from raw layouts in Rust
+ecs_guide	can
+entity_disabling	can	through Bevy's reflected Disabled
+error_handling	can	with .NET exceptions
+extraction	n/a	writes render world extraction in Rust
+fallible_params	can
+fixed_timestep	can
+generic_system	can
+hierarchy	can
+hotpatching_systems	can	as scripts reloaded while the app runs
+immutable_components	n/a	about Rust's component mutability
+iter_combinations	can
+message	can
+nondeterministic_system_order	can
+observer_propagation	missing	events that propagate through a hierarchy to observers
+observers	can
+one_shot_systems	can
+parallel_query	can
+relationships	can
+removal_detection	can
+run_conditions	can
+startup_system	can
+state_scoped	can
+system_closure	can
+system_param	n/a	derives a Rust SystemParam
+system_piping	n/a	pipes Rust system outputs
+system_stepping	missing	stepping through systems one at a time
+no_std_library	n/a	a Rust library for no_std targets
+alien_cake_addict	can
+breakout	can
+contributors	can
+desk_toy	can
+game_menu	can
+loading_screen	can
+2d_gizmos	can
+2d_text_gizmos	missing	text gizmos
+3d_gizmos	can
+3d_text_gizmos	missing	text gizmos
+anchored_text_gizmos	missing	text gizmos
+axes	can
+light_gizmos	can	through Bevy's reflected ShowLightGizmo
+text_gizmos_font	missing	text gizmos
+transform_gizmo	missing	Bevy's interactive transform gizmo
+custom_gltf_vertex_attribute	n/a	maps a glTF attribute to a Rust-defined vertex attribute and 2D material
+edit_material_on_gltf	can
+gltf_extension_animation_graph	n/a	writes a Rust glTF extension handler
+gltf_extension_mesh_2d	n/a	writes a Rust glTF extension handler
+gltf_skinned_mesh	can
+load_gltf_extras	missing	a glTF node's extras
+load_gltf	can
+query_gltf_primitives	can
+update_gltf_scene	can
+widgets	missing	Bevy's widget helpers (bevy_ui_widgets)
+char_input_events	can
+gamepad_input_events	missing	gamepads
+gamepad_input	missing	gamepads
+gamepad_rumble	missing	gamepads
+keyboard_input	can
+keyboard_input_events	can
+keyboard_modifiers	can
+mouse_grab	can
+mouse_input	can
+mouse_input_events	can
+touch_input	can
+touch_input_events	can
+bounding_2d	can	with the managed math
+cubic_splines	can	with the managed math
+custom_primitives	n/a	implements Rust traits for a primitive
+random_sampling	can	with the managed math
+render_primitives	can
+smooth_follow	can
+physics_in_fixed_timestep	can
+ambiguity_detection	n/a	a test of Bevy's schedules, hidden from its list
+desktop_request_redraw	n/a	a test of winit's redraw requests, hidden from Bevy's list
+fallback_image	n/a	a test of shader fallback images, hidden from Bevy's list
+hello_world	can
+minimizing	can
+no_prepass	n/a	a test of the prepass, hidden from Bevy's list
+resizing	can
+testbed_2d	n/a	Bevy's visual regression scenes, hidden from its list
+testbed_3d	n/a	Bevy's visual regression scenes, hidden from its list
+testbed_full_ui	n/a	Bevy's visual regression scenes, hidden from its list
+testbed_ui	n/a	Bevy's visual regression scenes, hidden from its list
+test_invalid_skinned_mesh	n/a	a test of skinned mesh validation, hidden from Bevy's list
+test_skinned_mesh_bounds	n/a	a test of skinned mesh bounds, hidden from Bevy's list
+custom_hit_data	n/a	writes a Rust picking backend
+debug_picking	missing	Bevy's picking debug overlay
+dragdrop_picking	missing	drag and drop picking events
+mesh_picking	can	in the editor profile, which carries picking
+simple_picking	can	in the editor profile, which carries picking
+sprite_picking	missing	picking sprites
+auto_register_static	n/a	about Rust reflection registration
+custom_attributes	n/a	about Rust reflection
+dynamic_types	n/a	about Rust reflection
+function_reflection	n/a	about Rust reflection
+generic_reflection	n/a	about Rust reflection
+reflection	n/a	about Rust reflection
+reflection_types	n/a	about Rust reflection
+serialization	n/a	about Rust reflection
+type_data	n/a	about Rust reflection
+app_under_test	missing	Bevy's remote protocol, where bcs is this engine's own
+client	n/a	a Rust client of Bevy's remote protocol
+integration_test	missing	Bevy's remote protocol, where bcs is this engine's own
+server	missing	Bevy's remote protocol, where bcs is this engine's own
+bsn	missing	BSN scene notation
+world_serialization	can
+fullscreen_material	can
+manual_material	n/a	writes a material with Rust's mid-level render API
+animate_shader	can
+array_texture	can
+automatic_instancing	can
+compute_mesh	can
+compute_shader_game_of_life	can
+custom_phase_item	n/a	enqueues Rust draw commands in a render phase
+custom_post_processing	can
+custom_render_phase	n/a	builds a render phase in Rust
+custom_shader_instancing	can
+custom_vertex_attribute	missing	vertex attributes a game defines
+extended_material	can
+extended_material_bindless	can
+gpu_readback	can
+render_depth_to_texture	missing	depth-only cameras rendered to a texture
+shader_defs	can
+shader_material_2d	missing	2D meshes (Mesh2d) with a shader material
+shader_material	can
+shader_material_bindless	can
+shader_material_glsl	n/a	GLSL, where shaders here are Slang
+shader_material_screenspace_texture	can
+shader_material_wesl	n/a	WESL, where shaders here are Slang
+shader_prepass	can
+specialized_mesh_pipeline	n/a	writes a mesh pipeline in Rust
+storage_buffer	can
+texture_binding_array	can
+computed_states	can
+custom_transitions	can
+states	can
+sub_states	can
+bevymark_3d	can
+bevymark	can
+many_animated_sprite_meshes	missing	2D meshes (Mesh2d) for sprites
+many_animated_sprites	can
+many_buttons	can
+many_cameras_lights	can
+many_components	n/a	registers components dynamically in Rust
+many_cubes	can
+many_foxes	can
+many_gizmos	can
+many_glyphs	can
+many_gradients	can	through Bevy's reflected BackgroundGradient
+many_lights	can
+many_materials	can
+many_morph_targets	can	through Bevy's reflected MorphWeights
+many_sprite_meshes	missing	2D meshes (Mesh2d) for sprites
+many_sprites	can
+many_text2d	can	through Bevy's reflected Text2d
+many_text	can
+text_pipeline	can
+transform_hierarchy	can
+time	can
+timers	can
+virtual_time	can
+gamepad_viewer	missing	gamepads
+scene_viewer	can
+3d_rotation	can
+align	can
+scale	can
+transform	can
+translation	can
+anchor_layout	can
+borders	can
+box_shadow	can	through Bevy's reflected BoxShadow
+button	can
+directional_navigation	missing	directional navigation between interface nodes
+directional_navigation_overrides	missing	directional navigation between interface nodes
+display_and_visibility	can
+drag_to_scroll	can
+editable_text_filter	missing	Bevy's editable text (EditableText)
+feathers_counter	missing	Bevy's Feathers widgets
+feathers_gallery	missing	Bevy's Feathers widgets
+flex_layout	can
+font_atlas_debug	missing	reading the font atlases
+font_query	missing	querying fonts
+font_variations	missing	OpenType font variations
+font_weights	missing	font weights
+generic_font_families	missing	generic font families
+ghost_nodes	missing	ghost nodes (GhostNode)
+gradients	can	through Bevy's reflected BackgroundGradient and BorderGradient
+grid	can
+image_node	can
+image_node_resizing	can
+ime_support	can
+letter_spacing	can
+multiline_text_input	missing	Bevy's editable text (EditableText)
+multiple_text_inputs	missing	Bevy's editable text (EditableText)
+overflow_clip_margin	can
+overflow_debug	can
+overflow	can
+relative_cursor_position	can	through Bevy's reflected RelativeCursorPosition
+render_ui_to_texture	can
+scrollbars	missing	Bevy's core scrollbars
+scroll	can
+size_constraints	can
+stacked_gradients	can	through Bevy's reflected BackgroundGradient
+standard_widgets	missing	Bevy's core widgets (bevy_ui_widgets)
+standard_widgets_observers	missing	Bevy's core widgets (bevy_ui_widgets)
+strikethrough_and_underline	missing	strikethrough and underline on text
+system_fonts	missing	system fonts
+tab_navigation	missing	tab navigation between interface nodes
+text_background_colors	missing	text background colors
+text_debug	can
+text	can
+text_input	missing	Bevy's editable text (EditableText)
+text_wrap_debug	can
+transparency_ui	can
+ui_drag_and_drop	can
+ui_material	missing	interface materials (UiMaterial)
+ui_scaling	can	through Bevy's reflected UiScale
+ui_target_camera	can
+ui_texture_atlas	can
+ui_texture_atlas_slice	can
+ui_texture_slice_flip_and_tile	can
+ui_texture_slice	can
+ui_transform	can	through Bevy's reflected UiTransform
+vertical_slider	missing	Bevy's core widgets (bevy_ui_widgets)
+viewport_node	can	through Bevy's reflected ViewportNode
+virtual_keyboard	missing	Bevy's Feathers widgets
+window_fallthrough	can
+z_index	can	through Bevy's reflected ZIndex and GlobalZIndex
+context_menu	can
+cooldown	can
+debug_frustum_culling	can
+clear_color	can
+custom_cursor_image	can	through Bevy's reflected CursorIcon, its image set as a reflected asset
+low_power	can
+monitor_info	can
+multiple_windows	missing	a second window
+scale_factor_override	can	through the resolution of Bevy's reflected Window
+screenshot	can
+transparent_window	can
+window_drag_move	can
+window_resizing	can
+window_settings	can

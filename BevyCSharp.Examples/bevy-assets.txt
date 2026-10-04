@@ -1,0 +1,12 @@
+# The files of Bevy's own assets folder its examples load, which build/fetch-bevy-assets.sh
+# downloads into BevyCSharp.Examples/bevy-assets at the release the bridge builds, a path to a line.
+# They are Bevy's and stay out of this repository, so a written example that loads one names it
+# here.
+branding/bevy_logo_light.png
+environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2
+environment_maps/pisa_specular_rgb9e5_zstd.ktx2
+models/animated/Fox.glb
+textures/array_texture.png
+branding/bevy_logo_dark_big.png
+models/terrain/Mountains.gltf
+models/terrain/Mountains.bin

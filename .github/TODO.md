@@ -17,6 +17,32 @@ An item says what exists, what is missing, and what the missing part needs. Addi
 bumping `ABI_VERSION` in `native/bevy_csharp/src/lib.rs` and `Native.ExpectedAbiVersion`, which
 stops a stale bridge loading against new managed code.
 
+## What Bevy's examples wait on
+
+[EXAMPLES.md](EXAMPLES.md) has a row for each of Bevy's examples, and each one that is `missing`
+names what the bridge lacks. Gathered by what they lack, these hold the most rows, so they unlock
+the most examples, and the largest is taken between groups of examples. The counts come from
+`BevyCSharp.Examples/triage.tsv` and move as rows are written or found to be reachable.
+
+- **2D meshes, nine examples.** A `Mesh2d` drawn with a `ColorMaterial`, which no C# call makes
+  (`mesh2d`, `mesh2d_alpha_mode`, `mesh2d_arcs`, `mesh2d_repeated_texture`,
+  `mesh2d_vertex_color_texture`, `wireframe_2d`, `shader_material_2d`, and the two stress tests
+  of sprite meshes). Needs the material made and set as `StandardMaterial` is, and a shader
+  material that draws on a 2D mesh.
+- **Interface widgets and text input, fifteen examples.** Bevy's editable text (four), its core
+  widgets and widget helpers (four), Feathers (three), scrollbars, and directional and tab
+  navigation (three). Needs `EditableText` and the widget components spawned and read, and the
+  navigation resources.
+- **Fonts and text styling, eight examples.** Font weights, OpenType variations, generic families
+  and system fonts, querying fonts and their atlases, strikethrough and underline, and text
+  background colors.
+- **Animation built in code, seven examples.** Clips made from curves, events placed on a clip,
+  graphs that blend clips by weight and their masks, and skinned meshes built joint by joint.
+- **Text gizmos, four examples**, and **gamepads, four**, which are in the Now list of REVIEW.md.
+- **Bevy's remote protocol, three examples.** `bcs` is this engine's own, so these wait on whether
+  the protocol is worth carrying beside it.
+- **A second window, two examples.**
+
 ## Content
 
 ### Bevy's components through reflection

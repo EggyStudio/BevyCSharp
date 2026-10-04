@@ -35,8 +35,22 @@ internal static class Launch
 
         var project = Project(arguments);
         var extra = arguments.Where(argument => !argument.StartsWith("--project=", StringComparison.Ordinal)
-                                                && argument is not ("--editor" or "--sample"))
+                                                && argument is not ("--editor" or "--sample" or "--example"))
             .ToList();
+
+        // An example is named by the word after --example, which the examples program reads as
+        // its first argument wherever it came on this line.
+        var example = Array.IndexOf(arguments, "--example");
+        if (example >= 0)
+        {
+            if (example + 1 >= arguments.Length || arguments[example + 1].StartsWith("--", StringComparison.Ordinal))
+            {
+                return Output.Refuse(options, "open", "BAD_ARGUMENTS", "--example takes the name of an example, as in --example 3d_scene.");
+            }
+
+            extra.Remove(arguments[example + 1]);
+            extra.Insert(0, arguments[example + 1]);
+        }
 
         // Always, because an app that is not serving is an app this tool cannot reach.
         if (!extra.Contains("--serve")) extra.Add("--serve");
@@ -207,6 +221,7 @@ internal static class Launch
         {
             if (argument is "--sample") return "BevyCSharp.Sample";
             if (argument is "--editor") return "BevyCSharp.Editor";
+            if (argument is "--example") return "BevyCSharp.Examples";
 
             if (argument.StartsWith("--project=", StringComparison.Ordinal))
             {

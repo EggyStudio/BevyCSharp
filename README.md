@@ -141,6 +141,8 @@ Behaviors are discovered automatically, so a consuming project needs no registra
 - [Making a game](#making-a-game): a small one in `games/Courtyard`, from an empty project to an
   export, built and played through `bcs`.
 - [The tools](#the-tools): the editor, its console, and driving a running app from a terminal.
+- [Bevy's examples](.github/EXAMPLES.md), each written in C# where it can be, in
+  `BevyCSharp.Examples` under Bevy's own name, and a row for every one saying what it takes.
 - [How it works](#how-it-works) inside, what is [still missing](#status-and-limitations), and
   [building from source](#building-from-source).
 
@@ -3694,7 +3696,24 @@ assemblies that are loaded but untouched.
 ## Status and limitations
 
 Early. The behavior system, the ECS bridge and the schedule work and are covered by tests that
-run against a real Bevy app. Known gaps:
+run against a real Bevy app. Bevy's own examples are the measure of how much of it is reached:
+
+<!-- examples -->
+Of Bevy's 421 examples, 22 are written in C# here, 268 more can be with what is bridged, 78 wait on something the bridge lacks and 53 are about Rust itself ([EXAMPLES.md](.github/EXAMPLES.md)).
+<!-- /examples -->
+
+<!-- example-gallery -->
+<table>
+<tr><td><img src=".github/assets/examples/3d_scene.png" width="200"/><br><code>3d_scene</code></td><td><img src=".github/assets/examples/3d_shapes.png" width="200"/><br><code>3d_shapes</code></td><td><img src=".github/assets/examples/3d_viewport_to_world.png" width="200"/><br><code>3d_viewport_to_world</code></td><td><img src=".github/assets/examples/animated_material.png" width="200"/><br><code>animated_material</code></td></tr>
+<tr><td><img src=".github/assets/examples/generate_custom_mesh.png" width="200"/><br><code>generate_custom_mesh</code></td><td><img src=".github/assets/examples/atmospheric_fog.png" width="200"/><br><code>atmospheric_fog</code></td><td><img src=".github/assets/examples/lighting.png" width="200"/><br><code>lighting</code></td><td><img src=".github/assets/examples/lines.png" width="200"/><br><code>lines</code></td></tr>
+<tr><td><img src=".github/assets/examples/spotlight.png" width="200"/><br><code>spotlight</code></td><td><img src=".github/assets/examples/bloom_3d.png" width="200"/><br><code>bloom_3d</code></td><td><img src=".github/assets/examples/orthographic.png" width="200"/><br><code>orthographic</code></td><td><img src=".github/assets/examples/parenting.png" width="200"/><br><code>parenting</code></td></tr>
+<tr><td><img src=".github/assets/examples/pbr.png" width="200"/><br><code>pbr</code></td><td><img src=".github/assets/examples/render_to_texture.png" width="200"/><br><code>render_to_texture</code></td><td><img src=".github/assets/examples/shadow_caster_receiver.png" width="200"/><br><code>shadow_caster_receiver</code></td><td><img src=".github/assets/examples/spherical_area_lights.png" width="200"/><br><code>spherical_area_lights</code></td></tr>
+<tr><td><img src=".github/assets/examples/split_screen.png" width="200"/><br><code>split_screen</code></td><td><img src=".github/assets/examples/texture.png" width="200"/><br><code>texture</code></td><td><img src=".github/assets/examples/transparency_3d.png" width="200"/><br><code>transparency_3d</code></td><td><img src=".github/assets/examples/two_passes.png" width="200"/><br><code>two_passes</code></td></tr>
+<tr><td><img src=".github/assets/examples/vertex_colors.png" width="200"/><br><code>vertex_colors</code></td><td><img src=".github/assets/examples/wireframe.png" width="200"/><br><code>wireframe</code></td></tr>
+</table>
+<!-- /example-gallery -->
+
+Known gaps:
 
 - A locally built package contains only the platform you built it on. Use the CI workflow, or
   run `build-native.sh` on each target platform, to produce a package covering all of them.

@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <RootNamespace>BevyCSharp.Examples</RootNamespace>
+        <!-- An example is a program to read beside Bevy's, and its members say what they do in the
+             names Bevy's do, so they carry no XML documentation of their own. -->
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <!-- Wired up as the sample is, the library as a reference and the generator as an analyzer,
+         which is what the package does for a game. -->
+    <ItemGroup>
+        <ProjectReference Include="../BevyCSharp/BevyCSharp.csproj"/>
+        <ProjectReference Include="../BevyCSharp.Generator/BevyCSharp.Generator.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <!-- The triage is read by build/examples-table.py and is not part of the program. -->
+    <ItemGroup>
+        <None Remove="triage.tsv"/>
+        <None Include="assets/**" CopyToOutputDirectory="PreserveNewest"
+              Link="assets/%(RecursiveDir)%(Filename)%(Extension)"/>
+        <!-- Bevy's own, fetched by build/fetch-bevy-assets.sh, at the paths its examples load. -->
+        <None Include="bevy-assets/**" CopyToOutputDirectory="PreserveNewest"
+              Link="assets/%(RecursiveDir)%(Filename)%(Extension)"/>
+    </ItemGroup>
+
+</Project>

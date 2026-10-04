@@ -88,3 +88,6 @@ desktop.ini
 # Dear ImGui's own window layout file. The editor places every window itself and asks
 # ImGui not to write one, so a file here is a leftover from a build that did.
 imgui.ini
+
+# Bevy's own assets, which build/fetch-bevy-assets.sh downloads for the examples.
+BevyCSharp.Examples/bevy-assets/

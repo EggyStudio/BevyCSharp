@@ -8,14 +8,15 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `f2ac0cd`. The character controller (`f2ac0cd`) is settled, on Courtyard's play
-script still reaching its win, and is in the ledger. The plain stress program's passes agreeing
-with the bridge's (`4c5a7c8`) was taken on its description.
+Reviewed up to `4a7331d`. `OnTransition` (`66a5b4d`) and `input.drag` (`ce27e73`) are settled and in
+the ledger, and the hinge test counted in fixed steps (`4a7331d`) raised nothing. EXAMPLES.md was
+read as it stands uncommitted: 421 rows, 14 written, 276 that can be, 78 missing and 53 that do not
+apply, with each missing row naming what it lacks, which is what was asked for.
 
 ## Now
 
 Item 1 is the owner's request of 2026-10-04 and comes first, after the batch in progress. Items
-3, 4, 5 and 7 are taken from [SHARED.md](SHARED.md). Items 2 and 6 are the owner's decisions.
+3, 5 and 6 are taken from [SHARED.md](SHARED.md). Items 2 and 4 are the owner's decisions.
 
 1. **Bevy's examples, one by one, as this engine's examples and as its measure.** Bevy ships
    416 examples in 31 groups (70 in 3D rendering, 60 in UI, 36 in ECS, 28 in 2D, and so on),
@@ -65,17 +66,12 @@ Item 1 is the owner's request of 2026-10-04 and comes first, after the batch in 
    editor profiles, with buttons, sticks, triggers, connection and rumble reaching C# as the
    keyboard does, a command that presses a pad's button for `bcs`, and Courtyard's runner
    steered by a stick beside the keys.
-3. **A system run on a move from one state value to a particular other**, 3DEngine's
-   `OnTransition`, beside `[OnEnter]` and `[OnExit]`.
-4. **A pointer dragged a step a frame by one command**, 3DEngine's `input.drag`, so a script can
-   swipe, drag a transform handle or move a panel, which `input.move`, `input.press` and
-   `input.release` in separate calls cannot time.
-5. **A build with no warnings, and a warning failing the workflow.** 3DEngine's first runs on
+3. **A build with no warnings, and a warning failing the workflow.** 3DEngine's first runs on
    GitHub carried dozens of annotations nobody had seen, a `stackalloc` in a loop among them. The
    managed build passes `-warnaserror` in the workflow once it is clean, with a warning that is
    right to keep turned off where it arises and its reason beside it, and `cargo` builds deny
    warnings the same way.
-6. **The README is split**, which the owner decided for. It is about 3,400 lines and changes in
+4. **The README is split**, which the owner decided for. It is about 3,400 lines and changes in
    most commits. README.md keeps what the project is, the install, a first behavior, running and
    driving a game, the status, building and the license, and links to the rest. The section
    called The engine, some 2,300 lines, moves into one document an area under `.github/` or
@@ -83,10 +79,20 @@ Item 1 is the owner's request of 2026-10-04 and comes first, after the batch in 
    takes its program from where the walk script looks, the package's readme is checked if it
    embeds README.md, and SHARED.md's rows that name a README section are told to the reviewing
    session with a `Shared:` line so they follow.
-7. **A contact that says how hard its pair hit, and joints with limits**, from 3DEngine's
+5. **A contact that says how hard its pair hit, and joints with limits**, from 3DEngine's
    `c5227118`: the speed a pair closed at on `ContactStarted`, which a game turns into damage or
    the loudness of a sound, a ball joint kept within a cone, and a distance joint whose range
    changes after it is made.
+6. **Two more of a character and a collider**, from 3DEngine's `52579d98` and `454e9276`: a
+   character that crouches and stands from its component's height, which TODO.md holds here,
+   and a collider that is the shape of the meshes an entity and those under it show, made once
+   the model has loaded, so a level's floors and walls are the model it places.
+
+One thing about item 1, from the table as it stands. Nine of the 78 missing rows wait on 2D
+meshes (`Mesh2d` with `ColorMaterial`) and 24 are in UI, so the entries TODO.md gains from the
+table say how many examples each unlocks, and the largest of them are taken between groups ahead
+of smaller ones. A row that says `can be written` is a claim until the example is, so the count
+the README quotes is the written one, with the others beside it.
 
 ## Verdicts
 
@@ -109,6 +115,17 @@ None open.
 ## Replies
 
 
-- Shared: a system run on a move from one state value to a particular other is taken in the commit carrying this line, as `[OnTransition(from, to)]` over Bevy's `OnTransition` schedule, run between the exit and the entry, also for a script reloaded while running. Naming two enums is BCS009 when compiled.
-
-- Shared: a pointer dragged a step a frame by one command is taken in the commit carrying this line, as `input.drag <x> <y> <dx> <dy> <frames> [Left|Right|Middle]`, which presses where it starts, moves an equal step each frame and releases the frame after, answering then.
+- Item 1, the count. Bevy 0.19.1's metadata has 421 examples, 408 of them in the list its
+  `examples/README.md` keeps (411 rows there, `hello_world` and the two tests among them) and 13
+  kept out of it, the testbeds and the hidden tests, so the table holds 421 rows in 35 groups, the
+  last of them the ones kept out. The script reads the metadata, so a row is never left out for
+  being hidden.
+- Item 1, the first batch. 3D Rendering holds 67 rows, so it is taken over more than one batch:
+  this one writes 22 of them, and the next ones go on with the group before 2D. Bevy's
+  components reached through reflection count as bridged, which moved 33 rows from `missing` to
+  `can be written` (fog, volumetric fog, rect lights, visibility ranges, decals, lightmaps, the
+  interface's gradients, shadows and z-index, morph weights and others), and each such row names
+  the component.
+- Shared: Bevy's examples written in C# under Bevy's names, picked by name, each captured, with a
+  row for every one of Bevy's in `.github/EXAMPLES.md`, are taken in the commit carrying this line,
+  after `3DEngine.Examples` and its capture script.

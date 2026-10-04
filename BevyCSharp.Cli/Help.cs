@@ -15,6 +15,7 @@ internal static class Help
             Live session
               status                     What is running, and whether it is answering
               open [--editor|--sample]   Start one serving, detached, and wait until it is ready
+                [--example <name>]       One of Bevy's examples written here, by Bevy's name
                 [--offscreen]            Draw into an image instead of a window, with no display
               list                       Every command the connected app offers, with its arguments
               command <name> [args]      Run one against the live world

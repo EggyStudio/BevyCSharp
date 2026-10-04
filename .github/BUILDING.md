@@ -28,6 +28,7 @@ BevyCSharp/            managed runtime library
 BevyCSharp.Generator/  Roslyn source generator
 BevyCSharp.Editor/     the editor, and the framework its panels are built on
 BevyCSharp.Sample/     runnable example behaviors
+BevyCSharp.Examples/   Bevy's examples in C#, by Bevy's names (.github/EXAMPLES.md)
 BevyCSharp.Tests/      test suite, run against a real Bevy app
 native/                Rust sources for the bridge
 build/                 the native build scripts, and everything they generate
@@ -214,3 +215,24 @@ build/version.sh            # 0.3.12, say
 ```
 
 ---
+
+## Examples
+
+`BevyCSharp.Examples` holds Bevy's examples written in C#, one program picking an example by
+Bevy's name. Some load files from Bevy's own assets folder, which stay out of this repository and
+are downloaded at the Bevy release the bridge builds by `build/fetch-bevy-assets.sh`, from the list
+in `BevyCSharp.Examples/bevy-assets.txt`.
+
+```bash
+build/fetch-bevy-assets.sh
+dotnet build BevyCSharp.Examples
+./bcs open --example 3d_scene              # or dotnet run --project BevyCSharp.Examples -- 3d_scene
+build/capture-example.sh 3d_scene          # its picture in .github/assets/examples
+build/capture-examples.sh                  # every one, failing on one that does not start or is blank
+build/examples-table.py                    # .github/EXAMPLES.md and the README's count, from Bevy's metadata
+```
+
+`build/examples-table.py` reads Bevy's example metadata from the cargo registry, which holds the
+bridge's Bevy once the bridge has been built, and `BevyCSharp.Examples/triage.tsv`, where each
+example not yet written has its state and what it waits on. The package workflow captures every
+example on the Linux bridge it built.
