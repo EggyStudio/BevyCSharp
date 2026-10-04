@@ -180,6 +180,9 @@ render = [
     # deep, which every stochastic screen-space technique samples its rays with, and which a shader
     # on a camera reads through `bcs_pass::blue_noise`. A megabyte and a half, embedded.
     "bevy/bluenoise_texture",
+    # The tables a rectangular area light is shaded with, 46 kilobytes, embedded. Without them Bevy
+    # draws no light from a RectLight and says so once.
+    "bevy/area_light_luts",
     # Windowing backends. Both are harmless off-platform: winit gates its X11 and Wayland
     # dependencies to Linux and the BSDs, so on Windows and macOS these resolve to nothing and
     # the native window system is used instead.

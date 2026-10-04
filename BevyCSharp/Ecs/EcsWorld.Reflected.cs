@@ -151,8 +151,14 @@ public sealed unsafe partial class EcsWorld
     /// Points an asset handle inside one of Bevy's components at another asset.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// The asset has to be of the kind the field holds, so a mesh offered to an image is refused
     /// rather than drawn as garbage.
+    /// </para>
+    /// <para>
+    /// A field holding an optional handle, as a fog volume's density texture does, is set to hold
+    /// the asset whether it held one or none.
+    /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">
     /// The path does not lead to a handle, the asset is of another kind, or the handle names no

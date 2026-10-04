@@ -190,6 +190,32 @@ public sealed class ReflectedComponentTests
     }
 
     [SkippableFact]
+    public void AnOptionalHandleIsGivenAnAssetThroughReflection()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        string? before = null, after = null;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            // A fog volume's density texture is an Option<Handle<Image>>, None to begin with.
+            const string Volume = "bevy_light::volumetric::FogVolume";
+            var fog = ctx.Ecs.Spawn();
+            ctx.Ecs.InsertReflected(fog, Volume);
+            before = ctx.Ecs.GetVariant(fog, Volume, ".density_texture");
+
+            ctx.Ecs.SetReflectedAsset(fog, Volume, ".density_texture", Render.CreateImage(new byte[4 * 4 * 4], 4, 4));
+            after = ctx.Ecs.GetVariant(fog, Volume, ".density_texture");
+        });
+
+        harness.Run();
+
+        Assert.Equal("None", before);
+        Assert.Equal("Some", after);
+    }
+
+    [SkippableFact]
     public void APointLightIsSetThroughReflectionAndReadBackThroughBevy()
     {
         Needs.Renderer();

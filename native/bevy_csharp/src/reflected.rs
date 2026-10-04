@@ -829,6 +829,18 @@ fn handle_data<'r>(
         .ok_or_else(|| fail(status::INVALID_STATE, format!("'{path}' is not an asset handle.")))
 }
 
+/// What makes a typed handle of the kind an `Option<Handle<T>>` holds, or nothing for a value that
+/// is no such option.
+fn optional_handle_data<'r>(registry: &'r TypeRegistry, value: &dyn PartialReflect) -> Option<&'r ReflectHandle> {
+    let bevy::reflect::TypeInfo::Enum(info) = value.get_represented_type_info()? else {
+        return None;
+    };
+    let VariantInfo::Tuple(some) = info.variant("Some")? else {
+        return None;
+    };
+    registry.get_type_data::<ReflectHandle>(some.field_at(0)?.type_id())
+}
+
 /// Reads an asset handle a component holds, as the key C# knows assets by.
 ///
 /// A handle has no JSON form, since what it holds is a reference count rather than a value, so it
@@ -932,9 +944,14 @@ pub unsafe extern "C" fn bcs_reflect_set_asset(
                     Ok(value) => value,
                     Err(code) => return code,
                 };
-                let data = match handle_data(&registry, value, &path) {
-                    Ok(data) => data,
-                    Err(code) => return code,
+                // A handle, or an optional one, which a fog volume's density texture and many of
+                // Bevy's images are, and which is set to hold the asset whatever it held.
+                let (data, optional) = match handle_data(&registry, value, &path) {
+                    Ok(data) => (data, false),
+                    Err(code) => match optional_handle_data(&registry, value) {
+                        Some(data) => (data, true),
+                        None => return code,
+                    },
                 };
                 if handle.type_id() != data.asset_type_id() {
                     return fail(
@@ -942,10 +959,17 @@ pub unsafe extern "C" fn bcs_reflect_set_asset(
                         format!("The key {key} names another kind of asset than '{path}' holds."),
                     );
                 }
-                data.typed(handle)
+                let typed = data.typed(handle);
+                if optional {
+                    let mut some = DynamicTuple::default();
+                    some.insert_boxed(typed.into_partial_reflect());
+                    Box::new(DynamicEnum::new("Some", DynamicVariant::Tuple(some))) as Box<dyn PartialReflect>
+                } else {
+                    typed.into_partial_reflect()
+                }
             };
 
-            apply(world, reflect, entity, &type_path, &path, typed.as_partial_reflect())
+            apply(world, reflect, entity, &type_path, &path, typed.as_ref())
         })
     })
 }
