@@ -4,12 +4,12 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**33 written, 3 written in part, 258 can be written, 74 missing and 53 do not apply.** Of the 368 that apply, 294 can be written with what is bridged, 3 of them leaving something out.
+**36 written, 3 written in part, 255 can be written, 74 missing and 53 do not apply.** Of the 368 that apply, 294 can be written with what is bridged, 3 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 0 | 0 | 20 | 8 | 1 |
-| [3D Rendering](#3d-rendering) | 33 | 3 | 28 | 3 | 0 |
+| [3D Rendering](#3d-rendering) | 36 | 3 | 25 | 3 | 0 |
 | [Animation](#animation) | 0 | 0 | 6 | 7 | 0 |
 | [Application](#application) | 0 | 0 | 13 | 1 | 5 |
 | [Assets](#assets) | 0 | 0 | 10 | 2 | 5 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **33** | **3** | **258** | **74** | **53** |
+| **All** | **36** | **3** | **255** | **74** | **53** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`.
 
@@ -103,7 +103,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`contact_shadows`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/contact_shadows.rs) | Showcases how contact shadows add shadow detail | can be written |
 | [`decal`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/decal.rs) | Decal rendering | missing, forward decals (ForwardDecal) |
 | [`deferred_rendering`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/deferred_rendering.rs) | Renders meshes with both forward and deferred pipelines | can be written |
-| [`depth_of_field`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/depth_of_field.rs) | Demonstrates depth of field | can be written |
+| [`depth_of_field`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/depth_of_field.rs) | Demonstrates depth of field | [written](../BevyCSharp.Examples/3d/depth_of_field.cs) |
 | [`fog`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/fog.rs) | A scene showcasing the distance fog effect | [written](../BevyCSharp.Examples/3d/fog.cs), through Bevy's reflected DistanceFog |
 | [`fog_volumes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/fog_volumes.rs) | Demonstrates fog volumes | [written](../BevyCSharp.Examples/3d/fog_volumes.cs), through Bevy's reflected FogVolume |
 | [`generate_custom_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/generate_custom_mesh.rs) | Simple showcase of how to generate a custom mesh with a custom texture | [written](../BevyCSharp.Examples/3d/generate_custom_mesh.cs) |
@@ -116,7 +116,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`mesh_ray_cast`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/mesh_ray_cast.rs) | Demonstrates ray casting with the `MeshRayCast` system parameter | can be written, casts through Picking, which the editor profile carries |
 | [`meshlet`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/meshlet.rs) | Meshlet rendering for dense high-poly scenes (experimental) | can be written, needs a bridge built with --meshlet |
 | [`mirror`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/mirror.rs) | Demonstrates how to create a mirror with a second camera | can be written |
-| [`mixed_lighting`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/mixed_lighting.rs) | Demonstrates how to combine baked and dynamic lighting | can be written, through Bevy's reflected Lightmap |
+| [`mixed_lighting`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/mixed_lighting.rs) | Demonstrates how to combine baked and dynamic lighting | [written](../BevyCSharp.Examples/3d/mixed_lighting.cs), through Bevy's reflected Lightmap |
 | [`motion_blur`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/motion_blur.rs) | Demonstrates per-pixel motion blur | [written](../BevyCSharp.Examples/3d/motion_blur.cs) |
 | [`occlusion_culling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/occlusion_culling.rs) | Demonstration of Occlusion Culling | can be written, through Bevy's reflected OcclusionCulling |
 | [`order_independent_transparency`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/order_independent_transparency.rs) | Demonstrates how to use OIT | [written](../BevyCSharp.Examples/3d/order_independent_transparency.cs) |
@@ -125,7 +125,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`parenting`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/parenting.rs) | Demonstrates parent->child relationships and relative transformations | [written](../BevyCSharp.Examples/3d/parenting.cs) |
 | [`pbr`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/pbr.rs) | Demonstrates use of Physically Based Rendering (PBR) properties | [written](../BevyCSharp.Examples/3d/pbr.cs), its view sized for a window of 1280 by 720 at any size |
 | [`pccm`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/pccm.rs) | Demonstrates parallax-corrected cubemap reflections | can be written, through Bevy's reflected ParallaxCorrection |
-| [`pcss`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/pcss.rs) | Demonstrates percentage-closer soft shadows (PCSS) | can be written |
+| [`pcss`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/pcss.rs) | Demonstrates percentage-closer soft shadows (PCSS) | [written](../BevyCSharp.Examples/3d/pcss.cs) |
 | [`post_processing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/post_processing.rs) | Demonstrates the built-in postprocessing features | [written](../BevyCSharp.Examples/3d/post_processing.cs) |
 | [`rect_light`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/rect_light.rs) | Simple 3D scene demonstrating rectangular area lights. | [written](../BevyCSharp.Examples/3d/rect_light.cs), through Bevy's reflected RectLight |
 | [`reflection_probes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/reflection_probes.rs) | Demonstrates reflection probes | can be written |

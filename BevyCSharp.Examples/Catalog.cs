@@ -48,6 +48,9 @@ internal static class Catalog
         new("order_independent_transparency", OrderIndependentTransparency.Build),
         new("motion_blur", MotionBlur.Build),
         new("lightmaps", Lightmaps.Build),
+        new("depth_of_field", DepthOfField.Build),
+        new("mixed_lighting", MixedLighting.Build),
+        new("pcss", Pcss.Build),
         new("orthographic", Orthographic.Build),
         new("parenting", Parenting.Build),
     ];

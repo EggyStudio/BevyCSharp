@@ -8,25 +8,28 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `c856ff9`. The fifth state in the table (`e4fb1e8`) settles the verdict, with three
-of the five finished through reflection and the rest counted apart. The table stands at 32
-written, 3 written in part, 259 that can be, 74 missing and 53 that do not apply. `clearcoat` was
-read beside Bevy's source and is the same scene, with its four spheres, the golf ball, the
-skybox, the environment map and the light that changes kind. The rectangular light (`c039287`)
-raised nothing.
+Reviewed up to `18a469d`. A sampler set on an image that exists (`e3f334b`), `motion_blur`
+(`583ac7d`) and `lightmaps` (`18a469d`) were taken on their descriptions and raised nothing. The
+table stands at 33 written, 3 written in part, 258 that can be, 74 missing and 53 that do not
+apply.
 
 ## Now
 
 Item 1 is the owner's request of 2026-10-04 and goes on a group at a time. Items 3 to 5 are
 taken from [SHARED.md](SHARED.md).
 
-1. **Bevy's examples, a group at a time**, as `661682e` began: the rest of 3D rendering, then
-   2D, UI, ECS, animation, audio, input, camera, state, transforms, window, gizmos, picking,
-   assets, glTF, scene, time, movement, math and shaders, then the games and showcases, and the
-   rest after. Each example's Rust source is read, its row set, and it is written when it can
-   be. Something small that is missing is bridged in the batch, and something large becomes an
-   entry in TODO.md naming the examples it unlocks, the largest taken between groups. Each
-   capture is looked at beside Bevy's picture at `https://bevy.org/examples/`. 
+1. **Bevy's examples, the cheap groups next.** The last three batches wrote two examples and
+   bridged a feature for each, which is right for those examples and slow for the count: 258
+   rows say `can be written` and each is a claim until its example exists. The 3D group's
+   remaining rows wait, and the groups whose examples are short programs with little or nothing
+   to draw are written first, many a batch: ECS (24 rows that can be written), application
+   (13), input (9), camera (8), audio (6), transforms (5), math (5), state (4), time (3), async
+   tasks (3), then 2D (20) and UI (36). An example that turns out to need something missing has
+   its row changed to `missing` with what it lacks and is passed over, not bridged in that
+   batch, so a batch is spent writing. The larger gaps are then taken in the order of how many
+   rows each holds, 2D meshes first. An example with nothing to draw is captured as its console
+   output where a picture would be blank, and the table says which. Each capture of one that
+   draws is looked at beside Bevy's picture at `https://bevy.org/examples/`.
 2. **A build with no warnings, and a warning failing the workflow.** The managed build passes
    `-warnaserror` in the workflow once it is clean, with a warning that is right to keep turned
    off where it arises and its reason beside it, and `cargo` builds deny warnings the same way.
@@ -40,8 +43,9 @@ taken from [SHARED.md](SHARED.md).
    a joint as an entity naming its two bodies, so a level hangs a door where it stands, and a
    gamepad's gyro, accelerometer, touchpad and light where gilrs offers them. Two small things
    of the command line are checked in the same batch and taken if they are missing: `entity.set`
-   writing a field that holds a list from items split by semicolons, and a command that
-   pretends files dropped on the window.
+   writing a field that holds a list from items split by semicolons, a command that pretends
+   files dropped on the window, a command's parameter with a default being left off, and a
+   placed scene file spawned again when it is written while the level runs.
 
 ## Verdicts
 
