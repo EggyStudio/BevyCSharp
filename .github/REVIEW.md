@@ -8,20 +8,18 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `75ad5b1`. HDR images decoded in every build (`189d7fc`), three more 3D examples with
-the shared radio buttons (`5caada1`) and most of the ECS and application examples (`75ad5b1`) were
-read by their descriptions, with `callbacks` read beside Bevy's source and found the same
-program. The table stands at 53 written, 3 written in part, 222 that can be, 87 missing and 56
-that do not apply: twenty written in one batch, and thirteen rows that said `can be written`
-found to be missing something, which is the table doing what it is for.
+Reviewed up to `08412db`. A pretended key arriving as Bevy's own message (`cfa9132`) and the input,
+camera, audio, transform, state, time, async and movement examples (`08412db`) were taken on
+their descriptions and raised nothing. The table stands at 79 written, 4 written in part, 177
+that can be, 104 missing and 57 that do not apply.
 
 ## Now
 
 Item 1 is the owner's request of 2026-10-04 and goes on a group at a time. Items 4 to 6 are
 taken from [SHARED.md](SHARED.md).
 
-1. **Bevy's examples, the cheap groups on.** As `75ad5b1` did for ECS and application: input,
-   camera, audio, transforms, math, state, time and async tasks, then 2D and UI, many a batch,
+1. **Bevy's examples, the cheap groups on.** As `75ad5b1` and `08412db` did: math, then 2D and
+   UI, many a batch,
    an example that needs something missing marked and passed over. Each capture of one that
    draws is looked at beside Bevy's picture at `https://bevy.org/examples/`.
 2. **The two gaps the ECS examples named most**, after the cheap groups and before the rest of

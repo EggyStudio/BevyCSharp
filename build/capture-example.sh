@@ -28,10 +28,10 @@ mkdir -p "$(dirname "$out")"
 ./bcs stop >/dev/null 2>&1 || true
 trap './bcs stop >/dev/null 2>&1 || true' EXIT
 
-# A 2D example lays itself out in pixels for Bevy's window of 1280 by 720, so it is drawn at that
-# size and made smaller afterward, where a 3D one draws the same scene at any size.
+# A 2D or interface example lays itself out in pixels for Bevy's window of 1280 by 720, so it is
+# drawn at that size and made smaller afterward, where a 3D one draws the same scene at any size.
 size=800x450
-[ -f "BevyCSharp.Examples/2d/$example.cs" ] && size=1280x720
+[ -f "BevyCSharp.Examples/2d/$example.cs" ] || [ -f "BevyCSharp.Examples/ui/$example.cs" ] && size=1280x720
 ./bcs open --example "$example" --offscreen --quiet -- --size "$size"
 
 # Examples that show something only once they are given input are driven here, by name.

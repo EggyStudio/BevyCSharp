@@ -39,11 +39,11 @@ the most examples, and the largest is taken between groups of examples. The coun
   background colors.
 - **Animation built in code, seven examples.** Clips made from curves, events placed on a clip,
   graphs that blend clips by weight and their masks, and skinned meshes built joint by joint.
-- **Observers, six examples.** Code run when an event is triggered, on an entity or anywhere, or
+- **Observers, seven examples.** Code run when an event is triggered, on an entity or anywhere, or
   when a component is added or removed, which `observers`, `observer_propagation` and
-  `removal_detection` are about and `error_handling`, `delayed_commands` and `entity_disabling`
-  use for a click or a pointer moving over what they draw. Needs events a game declares,
-  triggered from C# and from Bevy's picking, and C# code run as an observer.
+  `removal_detection` are about and `error_handling`, `delayed_commands`, `entity_disabling` and
+  `ui_drag_and_drop` use for a click, a drag or a pointer moving over what they draw. Needs events a
+  game declares, triggered from C# and from Bevy's picking, and C# code run as an observer.
 - **Input as events, five examples.** The keyboard, the mouse, touches and pads as Bevy's messages,
   one per change in the order they came, which `keyboard_input_events`, `mouse_input_events`,
   `touch_input_events` and `gamepad_input_events` print, and logical keys as Bevy's
@@ -65,17 +65,22 @@ the most examples, and the largest is taken between groups of examples. The coun
 - **Bevy's remote protocol, three examples.** `bcs` is this engine's own, so these wait on whether
   the protocol is worth carrying beside it.
 - **A second window, two examples.**
+- **Bevy's resources through reflection, two examples.** Its components are reached by their type
+  paths and its resources are not, so `ui_scaling` and `ui_texture_slice_flip_and_tile` cannot set
+  `UiScale`, and `button` is written in part without `InputFocus`. In this Bevy a resource is a
+  component on an entity of its own, so reaching one is finding that entity.
 - **Bevy's camera controllers, two examples.** Its free and pan cameras, their plugins and their
   settings (`free_camera_controller`, `pan_camera_controller`), where `BevyCSharp.Examples` has a
   free camera of its own written as a behavior.
-- **Eight more, one example each.** A resource's change ticks and when a component was added
+- **Nine more, one example each.** A resource's change ticks and when a component was added
   (`change_detection`), a component's add and insert hooks (`component_hooks`), relationships of a
   game's own (`relationships`), commands run after a delay (`delayed_commands`, which also waits on
   observers), Bevy's log written from C# at its levels (`logs`), a playing sound's speed changed as
   it plays (`audio_control`), an atlas built from a folder of images as the app runs
-  (`texture_atlas`), and an image loaded as an array of layers (`tilemap_chunk_orientation`).
+  (`texture_atlas`), an image loaded as an array of layers (`tilemap_chunk_orientation`), and the
+  pointer passing through the window to what is behind it (`window_fallthrough`).
 
-Five examples are written in part, each leaving out a feature named in its row.
+Six examples are written in part, each leaving out a feature named in its row.
 
 - **Extruded and line meshes**, which `3d_shapes` leaves out of its rows: Bevy's segment and
   polyline, and the extrusion of a 2D shape, solid or as a ring. `MeshShape` builds the solids and
@@ -87,6 +92,8 @@ Five examples are written in part, each leaving out a feature named in its row.
 - **An underline under text**, which `text2d` draws its first box's text without. Bevy's `Underline`
   is not reflected, so no call reaches it, and it is one of the text styles the fonts entry above
   names.
+- **The input focus**, which `button` leaves unset as the pointer moves over it, since `InputFocus`
+  is a resource the bridge does not reach, as the entry above on Bevy's resources says.
 - **A canceled touch**, which `touch_input` never prints, since the touches the frame reports are
   those that started, moved and ended, and Bevy's own set of canceled ones is left out.
 - **Alpha to coverage**, which `transparency_3d`'s left cube is drawn without, blending instead.

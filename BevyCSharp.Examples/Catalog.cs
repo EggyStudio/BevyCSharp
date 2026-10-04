@@ -4,6 +4,7 @@ using BevyCSharp.Examples.Cameras;
 using BevyCSharp.Examples.Clocks;
 using BevyCSharp.Examples.Ecs;
 using BevyCSharp.Examples.Inputs;
+using BevyCSharp.Examples.Interface;
 using BevyCSharp.Examples.Movement;
 using BevyCSharp.Examples.Sound;
 using BevyCSharp.Examples.States;
@@ -143,6 +144,20 @@ internal static class Catalog
         // Time
         new("timers", Timers.Build, Prints: 1300),
         new("virtual_time", VirtualTime.Build),
+
+        // UI (User Interface)
+        new("button", ButtonExample.Build),
+        new("image_node", ImageNode.Build),
+        new("overflow", OverflowExample.Build),
+        new("overflow_clip_margin", OverflowClipMargin.Build),
+        new("relative_cursor_position", RelativeCursorPosition.Build),
+        new("stacked_gradients", StackedGradients.Build),
+        new("transparency_ui", TransparencyUi.Build),
+        new("ui_target_camera", UiTargetCamera.Build),
+        new("ui_texture_atlas", UiTextureAtlas.Build),
+        new("ui_texture_atlas_slice", UiTextureAtlasSlice.Build),
+        new("ui_texture_slice", UiTextureSlice.Build),
+        new("z_index", ZIndex.Build),
     ];
 
     public static bool TryFind(string name, out Example example)
