@@ -147,4 +147,43 @@ public sealed class RenderReadTests
         harness.Run();
         Assert.True(ran);
     }
+
+    [SkippableFact]
+    public void AStripIsBrokenWhereAnIndexIsTheLargestAndAListIsNot()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        MeshInfo? strip = null;
+        Exception? list = null;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            // Two strips in one mesh, a line and then two more.
+            var broken = Render.CreateMesh(new MeshData
+            {
+                Topology = MeshTopology.LineStrip,
+                Positions = [Vec3.Zero, Vec3.UnitX, Vec3.UnitY, Vec3.UnitZ, Vec3.One],
+                Indices = [0, 1, uint.MaxValue, 2, 3, 4],
+            });
+            if (Render.TryGetMeshInfo(broken, out var info)) strip = info;
+
+            // The same index in a list names no vertex.
+            list = Record.Exception(() => Render.CreateMesh(new MeshData
+            {
+                Topology = MeshTopology.Lines,
+                Positions = [Vec3.Zero, Vec3.UnitX],
+                Indices = [0, uint.MaxValue],
+            }));
+        });
+
+        harness.Run();
+
+        // Built as it was given, every index kept, the restart among them.
+        Assert.NotNull(strip);
+        Assert.Equal(MeshTopology.LineStrip, strip!.Value.Topology);
+        Assert.Equal(6, strip.Value.Indices);
+        Assert.Equal(32, strip.Value.IndexBits);
+        Assert.IsType<ArgumentException>(list);
+    }
 }

@@ -165,6 +165,10 @@ public sealed class MeshData
     public float[]? Colors { get; set; }
 
     /// <summary>Which vertices make each shape, or null to take them in order.</summary>
+    /// <remarks>
+    /// In a strip, an index of <see cref="uint.MaxValue"/> breaks it there and starts it again
+    /// from the next, so one mesh holds several strips.
+    /// </remarks>
     public uint[]? Indices { get; set; }
 
     /// <summary>How the vertices join up.</summary>

@@ -48,9 +48,16 @@ public static unsafe class Ui
     /// Spawns a run of text and returns it.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// The font is Bevy's own, compiled into the engine, so nothing has to be loaded to put words
     /// on the screen. <see cref="UiSettings.Color"/> is the color of the text itself, and
     /// <see cref="UiTextSettings"/> is where another font goes.
+    /// </para>
+    /// <para>
+    /// A color left as <see cref="UiSettings"/> starts it, which is transparent so that a plain
+    /// node draws nothing, is white here, as Bevy's own text is, since text nobody can see is
+    /// never what a caller who named no color meant.
+    /// </para>
     /// </remarks>
     /// <param name="text">What it says.</param>
     /// <param name="settings">Where it sits.</param>
@@ -84,6 +91,8 @@ public static unsafe class Ui
         ArgumentNullException.ThrowIfNull(style);
 
         var native = ToNative(settings);
+        if (settings.Color == UiSettings.Unset) (native.ColorR, native.ColorG, native.ColorB, native.ColorA) = (1f, 1f, 1f, 1f);
+
         var nativeText = ToNative(style);
 
         var bits = Native.bcs_ui_spawn_text(text, &native, &nativeText);

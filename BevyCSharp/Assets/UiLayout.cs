@@ -575,8 +575,14 @@ public sealed class UiSettings
     /// <summary>
     /// The node's background, or the text's color for a run of text. Linear RGBA.
     /// </summary>
-    /// <remarks>Transparent by default, so a plain node is a layout box that draws nothing.</remarks>
-    public (float R, float G, float B, float A) Color { get; set; } = (1f, 1f, 1f, 0f);
+    /// <remarks>
+    /// Transparent by default, so a plain node is a layout box that draws nothing. A run of text
+    /// given no color is white instead (<see cref="Ui.SpawnText(string, UiSettings, UiTextSettings)"/>).
+    /// </remarks>
+    public (float R, float G, float B, float A) Color { get; set; } = Unset;
+
+    /// <summary>The color a node starts with, transparent, which a run of text reads as white.</summary>
+    internal static readonly (float R, float G, float B, float A) Unset = (1f, 1f, 1f, 0f);
 
     /// <summary>
     /// The border's color, on every side. Linear RGBA.

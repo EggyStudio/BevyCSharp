@@ -60,6 +60,30 @@ public sealed class UiTests
     }
 
     [SkippableFact]
+    public void TextGivenNoColorIsWhiteAndTextGivenOneKeepsIt()
+    {
+        // A node's color starts transparent, so a plain node draws nothing, and text that took
+        // the same would be text nobody could see.
+        using var harness = new EngineHarness(frames: 3);
+        Needs.Renderer();
+
+        Color? plain = null, red = null;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var white = Ui.SpawnText("plain", new UiSettings());
+            var tinted = Ui.SpawnText("red", new UiSettings { Color = (1f, 0f, 0f, 1f) });
+            plain = ctx.Ecs.GetReflectedColor(white, "bevy_text::text::TextColor", ".0");
+            red = ctx.Ecs.GetReflectedColor(tinted, "bevy_text::text::TextColor", ".0");
+        });
+
+        harness.Run();
+
+        Assert.Equal(new Color(1f, 1f, 1f, 1f), plain);
+        Assert.Equal(new Color(1f, 0f, 0f, 1f), red);
+    }
+
+    [SkippableFact]
     public void TextIsRewrittenInPlace()
     {
         // A score changes every frame; the entity behind it should not, or everything holding a

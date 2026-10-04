@@ -1985,3 +1985,57 @@ mod tests {
         assert_eq!(*world.get::<Msaa>(alone).unwrap(), Msaa::Sample8);
     }
 }
+
+/// Keeps the render world's copy of the scene-wide ambient light and clear color equal to the main
+/// world's, every frame.
+///
+/// Bevy copies each across when it has changed since its copying system last ran, and one set
+/// from a managed startup system is missed that way: the scene's first frame draws with Bevy's
+/// defaults and every frame after it too, until something changes the value again. Comparing the
+/// two each frame costs a few floats and catches a change however it was made, so a value is in
+/// the picture from the frame it was set.
+#[cfg(feature = "render")]
+pub fn install(app: &mut bevy::app::App) {
+    use bevy::render::{ExtractSchedule, RenderApp};
+
+    let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
+        return;
+    };
+
+    render_app.add_systems(ExtractSchedule, keep_scene_wide_values);
+}
+
+/// Copies the ambient light and the clear color across where the render world's differ.
+#[cfg(feature = "render")]
+fn keep_scene_wide_values(
+    ambient: bevy::render::Extract<Option<bevy::ecs::system::Res<bevy::light::GlobalAmbientLight>>>,
+    clear: bevy::render::Extract<Option<bevy::ecs::system::Res<bevy::camera::ClearColor>>>,
+    mut commands: bevy::ecs::system::Commands,
+    drawn_ambient: Option<bevy::ecs::system::ResMut<bevy::light::GlobalAmbientLight>>,
+    drawn_clear: Option<bevy::ecs::system::ResMut<bevy::camera::ClearColor>>,
+) {
+    if let Some(ambient) = ambient.as_ref() {
+        match drawn_ambient {
+            Some(mut drawn) => {
+                if drawn.color != ambient.color
+                    || drawn.brightness != ambient.brightness
+                    || drawn.affects_lightmapped_meshes != ambient.affects_lightmapped_meshes
+                {
+                    *drawn = (**ambient).clone();
+                }
+            }
+            None => commands.insert_resource((**ambient).clone()),
+        }
+    }
+
+    if let Some(clear) = clear.as_ref() {
+        match drawn_clear {
+            Some(mut drawn) => {
+                if drawn.0 != clear.0 {
+                    drawn.0 = clear.0;
+                }
+            }
+            None => commands.insert_resource((**clear).clone()),
+        }
+    }
+}

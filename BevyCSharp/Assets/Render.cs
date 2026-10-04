@@ -261,7 +261,10 @@ public static unsafe class Render
         if (mesh.Colors is { } colors && colors.Length != count * 4)
             throw new ArgumentException($"{colors.Length} color floats for {count} vertices, which is four each.", nameof(mesh));
 
-        if (mesh.Indices is { } indices && indices.Any(index => index >= count))
+        // A strip is broken where an index is the largest a uint holds, which starts it again from
+        // the next, as the GPU reads it, and anywhere else that index names no vertex.
+        var strip = mesh.Topology is MeshTopology.LineStrip or MeshTopology.TriangleStrip;
+        if (mesh.Indices is { } indices && indices.Any(index => index >= count && !(strip && index == uint.MaxValue)))
             throw new ArgumentException($"An index names a vertex past the {count} there are.", nameof(mesh));
 
         fixed (Vec3* positions = mesh.Positions)

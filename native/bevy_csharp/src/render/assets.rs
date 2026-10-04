@@ -372,7 +372,13 @@ pub unsafe extern "C" fn bcs_mesh_create_from(data: *const BcsMeshData) -> i32 {
             let indices =
                 unsafe { core::slice::from_raw_parts(data.indices, data.index_count as usize) };
 
-            if indices.iter().any(|index| *index as usize >= count) {
+            // A strip is broken where an index is the largest there is, which starts the strip
+            // again from the next, as the GPU reads it. Anywhere else that index names no vertex.
+            let strip = matches!(topology, PrimitiveTopology::LineStrip | PrimitiveTopology::TriangleStrip);
+            if indices
+                .iter()
+                .any(|index| *index as usize >= count && !(strip && *index == u32::MAX))
+            {
                 return status::NULL_ARG;
             }
 

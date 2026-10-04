@@ -502,6 +502,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 crate::pick::install(&mut app);
             }
 
+            // The scene-wide ambient light and clear color, kept in the picture from the frame
+            // they are set, which Bevy's own copying misses for a value set at startup.
+            crate::render::post::install(&mut app);
+
             // An image cannot be told it is a cubemap until it has loaded, so what asks for one
             // leaves the handle here and this picks it up on whichever frame the pixels arrive.
             app.init_resource::<crate::render::post::PendingCubemaps>();
