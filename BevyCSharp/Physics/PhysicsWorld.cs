@@ -353,6 +353,16 @@ public sealed class PhysicsWorld : IDisposable
             new SolveDescription(Math.Max(1, settings.Iterations), 1));
     }
 
+    /// <summary>Whether <see cref="PhysicsPlugin"/> leaves the simulation where it is.</summary>
+    /// <remarks>
+    /// For a game's pause, which is a state the game enters and nothing the simulation knows of,
+    /// so a ball rolling as the game paused would roll on under the pause menu. Every body keeps
+    /// its pose and velocity and goes on from them when this is set back, and no contact starts or
+    /// ends meanwhile. <see cref="Step"/> called directly still steps, for a game stepping on its own
+    /// schedule, such as a replay going a frame at a time while paused.
+    /// </remarks>
+    public bool Paused { get; set; }
+
     /// <summary>How many bodies there are.</summary>
     public int Count => _bodies.Count;
 

@@ -201,6 +201,20 @@ public sealed class Config
     /// </remarks>
     public bool Offscreen { get; set; }
 
+    /// <summary>The environment variable that asks a windowed run to draw offscreen instead.</summary>
+    /// <remarks>
+    /// Read by every app, as <c>BCS_SERVE</c> is, so a tool running a game it did not write can
+    /// keep it off the screen, as the editor's Play does when the editor itself has no window and a
+    /// script does playing a game on a machine with no display. A run asked to be headless stays
+    /// headless.
+    /// </remarks>
+    public const string OffscreenVariable = "BCS_OFFSCREEN";
+
+    /// <summary>True when the environment asks for <see cref="Offscreen"/> whatever the config says.</summary>
+    public static bool OffscreenAsked =>
+        Environment.GetEnvironmentVariable(OffscreenVariable) is { Length: > 0 } value
+        && value is not ("0" or "off" or "false" or "no");
+
     /// <summary>
     /// How many world units a meter is, for every spatial sound that does not say otherwise.
     /// </summary>

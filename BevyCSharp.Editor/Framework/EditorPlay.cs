@@ -117,6 +117,9 @@ public static class EditorPlay
     /// <summary>Builds the project without running it, which says whether it compiles.</summary>
     public static void Build() => Start(PlayJob.Building, ["build", "{project}"]);
 
+    /// <summary>Whether the editor is drawing offscreen, so what it plays is kept off the screen too.</summary>
+    internal static bool Offscreen { get; set; }
+
     /// <summary>Where the scene being played is written, a file of the editor's own.</summary>
     /// <remarks>
     /// Under the player's directory rather than over the scene's own file, so playing never
@@ -455,6 +458,10 @@ public static class EditorPlay
         if (Job == PlayJob.Playing)
         {
             start.Environment["BCS_SERVE"] = "1";
+
+            // And with no window when the editor has none, which is a machine with no display or
+            // a script driving the editor that has asked for nothing on the screen.
+            if (Offscreen) start.Environment[Config.OffscreenVariable] = "1";
             StartedAt = DateTimeOffset.Now.AddSeconds(-1);
         }
 

@@ -198,7 +198,14 @@ public static class CliSessionFile
 
         var found = new List<CliSession>();
 
-        foreach (var path in System.IO.Directory.GetFiles(Directory, "*.json"))
+        // Listed twice and the two joined, since a listing taken while a session moves its
+        // heartbeat into place can leave that session out on some filesystems, btrfs among them,
+        // and a command would then say nothing is serving about one in a hundred times. The move
+        // is over in less time than a listing takes, so the second one sees it.
+        var paths = new SortedSet<string>(System.IO.Directory.GetFiles(Directory, "*.json"), StringComparer.Ordinal);
+        paths.UnionWith(System.IO.Directory.GetFiles(Directory, "*.json"));
+
+        foreach (var path in paths)
         {
             if (Read(path) is { } session) found.Add(session);
         }

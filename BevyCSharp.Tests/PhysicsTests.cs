@@ -60,6 +60,58 @@ public sealed class PhysicsTests
     }
 
     /// <summary>
+    /// A box moving while the simulation is paused stays where it is, and goes on at the speed it
+    /// had once the pause is lifted.
+    /// </summary>
+    [Fact]
+    public void APausedSimulationHoldsABodyAndLetsItGoOnAfter()
+    {
+        using var harness = new EngineHarness(frames: 120, fps: 240, fixedHz: 120);
+        harness.App.AddPlugin(new PhysicsPlugin(new PhysicsSettings { Gravity = Vec3.Zero, LinearDamping = 0f }));
+
+        var box = Entity.None;
+        var frame = 0;
+        var heldFrom = 0f;
+        var heldTo = 0f;
+        var final = 0f;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var physics = ctx.Res<PhysicsWorld>();
+            box = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(box, Transform.Identity);
+            physics.Add(box, PhysicsShape.Box(new Vec3(1f)), BodyKind.Dynamic, Transform.Identity, mass: 1f);
+            physics.SetVelocity(box, new Vec3(2f, 0f, 0f));
+        });
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            var physics = ctx.Res<PhysicsWorld>();
+            var x = ctx.Ecs.GetOrDefault<Transform>(box).Translation.X;
+            frame++;
+
+            if (frame == 30)
+            {
+                physics.Paused = true;
+                heldFrom = x;
+            }
+            else if (frame == 60)
+            {
+                heldTo = x;
+                physics.Paused = false;
+            }
+
+            final = x;
+        });
+
+        harness.Run();
+
+        Assert.True(heldFrom > 0.1f, $"the box had only reached {heldFrom} before the pause");
+        Assert.Equal(heldFrom, heldTo, 4);
+        Assert.True(final > heldTo + 0.2f, $"the box went from {heldTo} only to {final} after the pause");
+    }
+
+    /// <summary>
     /// A ray down from above meets the floor where it is, and names the floor's entity.
     /// </summary>
     [Fact]

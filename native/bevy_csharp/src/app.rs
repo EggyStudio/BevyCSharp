@@ -150,6 +150,72 @@ fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
             }
         },
     );
+
+    app.add_systems(First, choose_offscreen_ui_camera);
+}
+
+/// Marks the camera an offscreen run's interface is drawn on, which this bridge chose rather than
+/// a game.
+#[cfg(feature = "render")]
+#[derive(bevy::ecs::component::Component)]
+struct OffscreenUiCamera;
+
+/// Gives an offscreen run's interface the camera a window's would have had.
+///
+/// Bevy draws a node that names no camera on the highest camera drawing to the primary window,
+/// and an offscreen run has none, since every camera is pointed at an image instead, so a game's
+/// menu and its count of coins would be laid out nowhere and a test of the game would never see
+/// them. Marking the highest of the cameras drawing to the run's image as the default answers as a
+/// window would, and moves the mark when a higher one is spawned or the marked one goes. One the
+/// game marked itself is left alone, since Bevy allows one mark and the game's choice is the
+/// game's to make.
+#[cfg(feature = "render")]
+fn choose_offscreen_ui_camera(
+    mut commands: bevy::ecs::system::Commands,
+    target: Option<bevy::ecs::system::Res<OffscreenTarget>>,
+    cameras: bevy::ecs::system::Query<(
+        bevy::ecs::entity::Entity,
+        &bevy::camera::Camera,
+        &bevy::camera::RenderTarget,
+        Option<&OffscreenUiCamera>,
+        bevy::ecs::query::Has<bevy::ui::IsDefaultUiCamera>,
+    )>,
+) {
+    use bevy::camera::RenderTarget;
+
+    let Some(target) = target else {
+        return;
+    };
+
+    // A mark without this bridge's beside it is the game's own.
+    if cameras.iter().any(|(_, _, _, ours, marked)| marked && ours.is_none()) {
+        return;
+    }
+
+    let best = cameras
+        .iter()
+        .filter(|(_, camera, render_target, _, _)| {
+            camera.is_active
+                && matches!(render_target, RenderTarget::Image(image) if image.handle == target.image)
+        })
+        .max_by_key(|(entity, camera, _, _, _)| (camera.order, *entity))
+        .map(|(entity, ..)| entity);
+
+    for (entity, _, _, ours, _) in &cameras {
+        if ours.is_some() && Some(entity) != best {
+            commands
+                .entity(entity)
+                .remove::<(OffscreenUiCamera, bevy::ui::IsDefaultUiCamera)>();
+        }
+    }
+
+    if let Some(entity) = best
+        && cameras.get(entity).is_ok_and(|(_, _, _, ours, _)| ours.is_none())
+    {
+        commands
+            .entity(entity)
+            .insert((OffscreenUiCamera, bevy::ui::IsDefaultUiCamera));
+    }
 }
 
 /// Builds the Bevy app for the requested configuration.

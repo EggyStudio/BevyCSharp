@@ -284,6 +284,39 @@ internal static class ConsoleWorldCommands
         return $"tapped {key}";
     }
 
+    /// <summary>Holds a key down until <c>input.keyup</c> lets it go.</summary>
+    /// <remarks>
+    /// A tap is a press and a release in one frame, which a menu reads and a game walking while a
+    /// key is down never sees, so a script playing a game holds the key, waits the frames it walks
+    /// for, and lets it go.
+    /// </remarks>
+    [Command("input.keydown", "Holds a key down: input.keydown <W|Space|...>")]
+    internal static string KeyDown(string name)
+    {
+        if (!Enum.TryParse<Key>(name, ignoreCase: true, out var key))
+        {
+            ConsoleHost.Fail("BAD_ARGUMENT", $"'{name}' is not a key name.");
+            return $"'{name}' is not a key name";
+        }
+
+        SyntheticInput.Press(key, Typed(key));
+        return $"holding {key}";
+    }
+
+    /// <summary>Lets go of a key <c>input.keydown</c> held.</summary>
+    [Command("input.keyup", "Lets a held key go: input.keyup <W|Space|...>")]
+    internal static string KeyUp(string name)
+    {
+        if (!Enum.TryParse<Key>(name, ignoreCase: true, out var key))
+        {
+            ConsoleHost.Fail("BAD_ARGUMENT", $"'{name}' is not a key name.");
+            return $"'{name}' is not a key name";
+        }
+
+        SyntheticInput.Lift(key);
+        return $"let go of {key}";
+    }
+
     /// <summary>
     /// Taps one key in the interface's own queue.
     /// </summary>

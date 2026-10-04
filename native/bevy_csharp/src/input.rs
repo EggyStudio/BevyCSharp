@@ -286,11 +286,12 @@ pub unsafe extern "C" fn bcs_input_key(key: i32, action: i32, text: *const u8, l
             };
 
             crate::state::with_world(|world| {
+                // An offscreen run has no window, and a key still means something there, since a
+                // game's systems read the keyboard and not the window it came from. The
+                // placeholder stands in for the window, as it does for the IME above, so a script
+                // can play a game on a machine with no display.
                 let mut windows = world.query_filtered::<Entity, With<PrimaryWindow>>();
-
-                let Ok(window) = windows.single(world) else {
-                    return crate::interop::status::INVALID_STATE;
-                };
+                let window = windows.single(world).unwrap_or(Entity::PLACEHOLDER);
 
                 let logical = match typed.clone() {
                     Some(text) => Key::Character(text),

@@ -34,6 +34,7 @@ public partial struct EditorBoot
 
         // The window's own frame in place of the platform's, where there is a window.
         EditorWindowFrame.Start(ctx.Res<Config>());
+        EditorPlay.Offscreen = ctx.Res<Config>().Offscreen;
 
         // Before the commands are registered, because the menu offers a row for each of these and
         // builds that list from this one.

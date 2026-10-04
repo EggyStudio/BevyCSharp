@@ -129,6 +129,59 @@ public sealed class SaveGameTests : IDisposable
     }
 
     [Fact]
+    public void ALoadDuringPlayReplacesTheGameAndLeavesWhatTheGameMadeItself()
+    {
+        var level = Path.Combine(_root, "yard.scene.json");
+        File.WriteAllText(level, """
+            { "format": "bevycsharp.scene.2",
+              "entities": [
+                { "id": 1, "name": "Hero",
+                  "components": { "Bevy.Transform": { "Translation": [0, 0, 0] }, "Bevy.SaveId": { "Id": "00000000000000cd" } } },
+                { "id": 2, "name": "Wall", "components": { "Bevy.Transform": { "Translation": [9, 0, 0] } } } ] }
+            """);
+
+        using var harness = new EngineHarness(frames: 2);
+        var ran = false;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            if (ran) return;
+            ran = true;
+
+            var hero = SaveGame.Start(ctx.Ecs, level).Single(entity => ctx.Ecs.NameOf(entity) == "Hero");
+            ctx.Ecs.Add(hero, new Wallet { Coins = 1 });
+            SaveGame.Save(ctx.Ecs);
+
+            // Played on past the save, with a camera the game made for itself and an arrow it
+            // spawned with an id, which the save never saw.
+            ctx.Ecs.GetRef<Wallet>(hero).Coins = 5;
+            var camera = ctx.Ecs.Spawn();
+            ctx.Ecs.SetName(camera, "Camera");
+            var arrow = ctx.Ecs.Spawn();
+            ctx.Ecs.SetName(arrow, "Arrow");
+            ctx.Ecs.Add(arrow, SaveId.New());
+
+            SaveGame.Load(ctx.Ecs);
+
+            var named = ctx.Ecs.All().Select(ctx.Ecs.NameOf).ToList();
+            Assert.Single(named, name => name == "Hero");
+            Assert.Single(named, name => name == "Wall");
+            Assert.DoesNotContain("Arrow", named);
+            Assert.True(ctx.Ecs.IsAlive(camera));
+
+            var loaded = ctx.Ecs.All().Single(entity => ctx.Ecs.NameOf(entity) == "Hero");
+            Assert.Equal(1, ctx.Ecs.GetOrDefault<Wallet>(loaded).Coins);
+
+            // And a second load ends what the first one loaded.
+            SaveGame.Load(ctx.Ecs);
+            Assert.Single(ctx.Ecs.All(), entity => ctx.Ecs.NameOf(entity) == "Wall");
+        });
+
+        harness.Run();
+        Assert.True(ran);
+    }
+
+    [Fact]
     public void AComponentDeclaredElsewhereIsSavedOnceNamed()
     {
         var level = Path.Combine(_root, "small.scene.json");

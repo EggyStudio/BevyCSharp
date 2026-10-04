@@ -124,6 +124,14 @@ public sealed unsafe class App : IDisposable
     {
         Config = config ?? Config.Default;
 
+        // A window asked from outside to be an image instead, as the editor's Play asks when the
+        // editor has no window either, so a game's own Main need not take an option for it.
+        if (Config.OffscreenAsked && !Config.Headless && !Config.Offscreen)
+        {
+            Config.Offscreen = true;
+            if (Config.HeadlessFps == 0) Config.HeadlessFps = 60;
+        }
+
         var titleBytes = Encoding.UTF8.GetBytes(Config.Title + "\0");
         var assetRootBytes = Config.AssetRoot is null
             ? null
@@ -227,7 +235,11 @@ public sealed unsafe class App : IDisposable
         MaterialFiles.Forget();
         MeshFiles.Forget();
 
+        // A game in progress is one app's, and its entities would name others in the next.
+        SaveGame.Forget();
+
         World.InsertResource(Config);
+        World.InsertResource(Project);
         World.InsertResource(new Time());
         World.InsertResource(new Input());
         World.InsertResource(new EcsWorld());

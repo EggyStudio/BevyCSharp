@@ -94,6 +94,12 @@ public sealed class PersistAttribute : Attribute;
 /// comes from the scene and only the player's progress from the save.
 /// </para>
 /// <para>
+/// A load ends the game in progress first, despawning what its scenes spawned and every entity
+/// with a <see cref="SaveId"/>, so a game loads from its pause menu as from its title screen. What
+/// the game spawned itself without an id, such as its camera or its interface, is left for the
+/// game, which knows whether it still belongs.
+/// </para>
+/// <para>
 /// A <see cref="Persistent{T}"/> given to <see cref="Carry"/> belongs to the save slot, and is
 /// copied into each save under its name and put back when one is loaded.
 /// </para>
@@ -145,6 +151,9 @@ public static class SaveGame
     private static readonly List<string> StartedFrom = [];
     private static readonly HashSet<SaveId> FromScenes = [];
 
+    /// <summary>What the scenes of the game in progress spawned, which a load despawns.</summary>
+    private static readonly List<Entity> Spawned = [];
+
     /// <summary>The scenes the game in progress was started from, which a save names.</summary>
     public static IReadOnlyList<string> Scenes => [.. StartedFrom];
 
@@ -159,17 +168,40 @@ public static class SaveGame
     {
         ArgumentNullException.ThrowIfNull(world);
 
-        StartedFrom.Clear();
-        StartedFrom.AddRange(scenes);
-
         var spawned = new List<Entity>();
         foreach (var scene in scenes) spawned.AddRange(SceneFile.Load(world, scene).Entities);
 
+        Begin(world, scenes);
+        Spawned.AddRange(spawned);
+        return spawned;
+    }
+
+    /// <summary>
+    /// Starts a game from scenes already loaded, remembering them and the saved entities they hold,
+    /// as <see cref="Start"/> does after it loads them.
+    /// </summary>
+    /// <remarks>
+    /// For a host that loads the scenes itself and reports what each held, as the player does when
+    /// the editor plays a scene, so a save made there lays itself over the same scene a game's
+    /// would.
+    /// </remarks>
+    /// <param name="world">The world they were loaded into.</param>
+    /// <param name="scenes">The scene files, as they were loaded.</param>
+    public static void Begin(EcsWorld world, params string[] scenes)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+
+        StartedFrom.Clear();
+        StartedFrom.AddRange(scenes);
+
+        // Everything loaded from a scene, which covers what a host loading them itself spawned,
+        // since a scene marks each entity it spawns with the id it had in the file.
+        Spawned.Clear();
+        Spawned.AddRange(world.All().Where(entity => world.Has<SceneId>(entity)));
+
         // Every saved entity there is once the scenes are in, including the ones inside a subscene.
         FromScenes.Clear();
-        foreach (var (entity, id) in Ids(world)) FromScenes.Add(id);
-
-        return spawned;
+        foreach (var (_, id) in Ids(world)) FromScenes.Add(id);
     }
 
     /// <summary>Writes what play changed over the scenes the game started from.</summary>
@@ -258,10 +290,14 @@ public static class SaveGame
     /// <summary>
     /// Loads the scenes a save names and lays the save over them.
     /// </summary>
-    /// <param name="world">The world to spawn into, which should hold nothing of a game already.</param>
+    /// <param name="world">The world to spawn into, with the game in progress in it or none.</param>
     /// <param name="path">Where the save is, as <see cref="Save"/> takes it.</param>
     /// <returns>What loading the scenes and the save could not read.</returns>
     /// <exception cref="InvalidDataException">The file is not a save in this format.</exception>
+    /// <remarks>
+    /// The game in progress is ended only once the file has been read as a save, so a missing or
+    /// broken one leaves the game being played as it was.
+    /// </remarks>
     public static SceneLoad Load(EcsWorld world, string path = "user://saves/slot.save.json")
     {
         ArgumentNullException.ThrowIfNull(world);
@@ -270,6 +306,8 @@ public static class SaveGame
         var root = document.RootElement;
         if (!root.TryGetProperty("format", out var format) || format.GetString() != Format)
             throw new InvalidDataException($"Not a save in the {Format} format.");
+
+        End(world);
 
         // The scenes first, by id where a scene file was renamed since the save was written.
         var scenes = root.TryGetProperty("scenes", out var named)
@@ -330,6 +368,32 @@ public static class SaveGame
         }
 
         return new SceneLoad([.. spawned.Where(world.IsAlive)], [.. unknown], refused);
+    }
+
+    /// <summary>Forgets the game in progress, for an app starting, whose entities are its own.</summary>
+    internal static void Forget()
+    {
+        StartedFrom.Clear();
+        FromScenes.Clear();
+        Spawned.Clear();
+    }
+
+    /// <summary>Despawns the game in progress, its scenes' entities and every one with a save id.</summary>
+    /// <remarks>
+    /// The ones with an id as well, since a save writes an entity spawned during play whole and a
+    /// load spawns it again, so one left standing would be there twice.
+    /// </remarks>
+    private static void End(EcsWorld world)
+    {
+        var going = new HashSet<Entity>(Spawned);
+        foreach (var (entity, _) in Ids(world)) going.Add(entity);
+
+        foreach (var entity in going)
+        {
+            if (world.IsAlive(entity)) world.Despawn(entity);
+        }
+
+        Spawned.Clear();
     }
 
     /// <summary>Whether a save writes a component of an entity the scenes hold.</summary>
