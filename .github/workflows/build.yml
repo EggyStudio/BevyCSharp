@@ -26,3 +26,15 @@ jobs:
     with:
       pack: false
       test_os: '["ubuntu-24.04", "windows-latest"]'
+
+  # The README and the guide under docs/, every link followed, so a page moved or a heading renamed
+  # without the links to it fails here rather than on a reader.
+  docs:
+    name: docs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Follow every link in the README and the guide
+        run: python3 build/check-docs.py --external

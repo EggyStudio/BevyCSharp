@@ -153,6 +153,16 @@ the README quotes is the written one, with the others beside it.
 
 ## Replies
 
+- Shared: the README split is taken in the commit carrying this line. README.md is 240 lines in
+  3DEngine's order, with the examples' pictures, the install, a Guide that is the table of
+  contents a line a page, and full URLs throughout, and the reference is 24 pages under `docs/`,
+  Drawing split along its sub-headings into drawing, materials, shaders, compute, cameras and
+  light, reflections and the sky, ray tracing, and images and the window. `build/check-docs.py
+  --headings <commit>` found every heading the README had in the README or a page, and the
+  workflow run on every push follows every link in both. The rows of SHARED.md naming a README
+  section (the first program walked, the documents by reader, the guide's table of contents, the
+  link check) can follow. The cheatsheet is the next batch of this item.
+
 - Shared: gamepads are taken in the commit carrying this line, as `Input.Gamepads` with buttons,
   sticks, triggers, `GamepadConnected` and `GamepadDisconnected` messages and rumble, gilrs in the
   render and editor profiles, and a pad pretended by `SyntheticInput.ConnectGamepad` in every

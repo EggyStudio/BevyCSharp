@@ -1,7 +1,8 @@
 # The editor
 
 What `BevyCSharp.Editor` is, how it is meant to look, and what the engine has to grow for it to
-work. The page it is built on is described in the README; this is about what goes on top of it.
+work. The page it is built on is described in [docs/tools.md](../docs/tools.md), and this is about
+what goes on top of it.
 
 ## What it is for
 

@@ -29,6 +29,7 @@ BevyCSharp.Generator/  Roslyn source generator
 BevyCSharp.Editor/     the editor, and the framework its panels are built on
 BevyCSharp.Sample/     runnable example behaviors
 BevyCSharp.Examples/   Bevy's examples in C#, by Bevy's names (.github/EXAMPLES.md)
+docs/                  the guide, a page an area, which the README's Guide lists
 BevyCSharp.Tests/      test suite, run against a real Bevy app
 native/                Rust sources for the bridge
 build/                 the native build scripts, and everything they generate
@@ -239,3 +240,10 @@ build/examples-table.py                    # .github/EXAMPLES.md and the README'
 bridge's Bevy once the bridge has been built, and `BevyCSharp.Examples/triage.tsv`, where each
 example not yet written has its state and what it waits on. The package workflow captures every
 example on the Linux bridge it built.
+
+## The guide
+
+`docs/` holds the guide, a page an area for somebody using the engine, and the README is for
+somebody deciding whether to, so it links to each page by its full URL, since it is also the
+package's page on nuget.org. `build/check-docs.py` follows every link in the README and the guide,
+`--external` the ones off this repository too, and the workflow run on every push runs it.

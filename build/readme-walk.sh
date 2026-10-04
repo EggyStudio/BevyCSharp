@@ -13,7 +13,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-version="${1:-$(ls build/package/BevyCSharp.*.nupkg | sed 's/.*BevyCSharp\.\(.*\)\.nupkg/\1/' | sort -V | tail -1)}"
+# The package packed last unless one is named, since a version number says nothing about which of
+# the packages lying in build/package was made from this checkout.
+version="${1:-$(ls -t build/package/BevyCSharp.*.nupkg | head -1 | sed 's/.*BevyCSharp\.\(.*\)\.nupkg/\1/')}"
 engine="${CONTAINER:-$(command -v podman || command -v docker)}"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT

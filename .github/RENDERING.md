@@ -2,8 +2,8 @@
 
 What the engine has to offer so that virtualized geometry, texture streaming, screen-space and
 world-space global illumination, ambient occlusion and, later, reflections and radiance cascades can
-be built on it as ordinary code. The README describes what exists, and this document describes what
-has to exist, why, and in what order.
+be built on it as ordinary code. The guide under [`docs/`](../docs) describes what exists, and this
+document describes what has to exist, why, and in what order.
 
 ## What this is for
 

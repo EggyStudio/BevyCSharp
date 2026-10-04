@@ -26,6 +26,11 @@ EXAMPLES = os.path.join(ROOT, "BevyCSharp.Examples")
 CAPTURES = os.path.join(ROOT, ".github", "assets", "examples")
 
 HIDDEN = "Kept out of Bevy's list"
+
+# The README is also the package's page on nuget.org, where a relative link goes nowhere, so what is
+# written into it links by full URL.
+BLOB = "https://github.com/EggyStudio/BevyCSharp/blob/main/"
+RAW = "https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/"
 STATES = {"written": "written", "can": "can be written", "missing": "missing", "n/a": "does not apply"}
 ORDER = ["written", "can", "missing", "n/a"]
 
@@ -190,7 +195,7 @@ def build(version, examples, order, triage, written):
     gallery = []
     for start in range(0, len(shown), 4):
         cells = [
-            f'<td><img src=".github/assets/examples/{example["name"]}.png" width="200"/><br><code>{example["name"]}</code></td>'
+            f'<td><img src="{RAW}.github/assets/examples/{example["name"]}.png" width="200"/><br><code>{example["name"]}</code></td>'
             for example in shown[start:start + 4]
         ]
         gallery.append("<tr>" + "".join(cells) + "</tr>")
@@ -198,7 +203,7 @@ def build(version, examples, order, triage, written):
     status = (
         f"Of Bevy's {len(examples)} examples, {total['written']} are written in C# here, "
         f"{total['can']} more can be with what is bridged, {total['missing']} wait on something "
-        f"the bridge lacks and {total['n/a']} are about Rust itself ([EXAMPLES.md](.github/EXAMPLES.md)).")
+        f"the bridge lacks and {total['n/a']} are about Rust itself ([EXAMPLES.md]({BLOB}.github/EXAMPLES.md)).")
     return table, status, gallery
 
 
