@@ -17,14 +17,43 @@ the README and the table. `visibility_range`, `mesh_ray_cast` and `shadow_biases
 
 ## Now
 
-Item 1 is the owner's request of 2026-10-04 and goes on a group at a time. Items 4 to 6 are
+Item 1 is the owner's request of 2026-10-04 and goes on a group at a time. Items 5 to 7 are
 taken from [SHARED.md](SHARED.md).
 
-1. **Bevy's examples, what is left of the pass.** Math, then the rest of 3D, an example that
+1. **Bevy's components are written with no string paths**, which the owner asked for on
+   2026-10-04 on seeing `fog` set its `DistanceFog` by `".falloff.start"` and a number made into
+   text. It comes before more examples are written, since each one adds paths to rewrite.
+   - **What is there and unused.** `ReflectedGenerator` already emits a wrapper for each of
+     Bevy's components from `BevyCSharp/Generated/bevy-components.tsv`, `DistanceFogRef` among
+     them with `Color`, `DirectionalLightColor`, `DirectionalLightExponent` and `Falloff`.
+     `BevyCSharp.Examples` holds 272 string-path calls in 53 files and no use of a wrapper.
+   - **The gap.** A field inside an enum's variant has no property (COMPONENTS.md, what a
+     wrapper leaves out). `schema.dump` writes each data-carrying variant's fields to the
+     description, a line a field, from Bevy's own account of the enum. The generator emits for
+     such an enum an abstract record with a nested record a variant,
+     `FogFalloff.Linear(float Start, float End)` and `FogFalloff.Exponential(float Density)`,
+     a variant with no data being a record with no fields, and the wrapper's property takes and
+     returns it, so reading is a `switch` on the type and writing sets the variant and its
+     fields together. Rust's `Option<T>` becomes a nullable `T?`. An enum with no data stays
+     the C# enum it is.
+   - **Values cross as values.** Where a wrapper's setter makes a number into text for the
+     bridge to parse, it passes the number, so no `CultureInfo` is involved. What the setters
+     do today is checked and said under Replies.
+   - **The examples use the wrappers.** Every string-path call whose component and field a
+     wrapper covers is rewritten, so `fog` reads
+     `fog.Falloff = new FogFalloff.Linear(_start, _end);`. A string path stays only where no
+     wrapper reaches, with a comment saying why, and a test lists the string-path calls in the
+     examples and fails for one a wrapper covers.
+   - **Documents.** `docs/components.md` leads with the wrappers and shows the union form, and
+     COMPONENTS.md and TODO.md lose their entry on variant fields.
+   - Verified by `fog` compiling with no string path and its capture not changing, a test that
+     sets `DistanceFogRef.Falloff` to each variant and reads it back, and the count of
+     string-path calls in the examples falling from 272 to the few a comment explains.
+2. **Bevy's examples, what is left of the pass.** Math, then the rest of 3D, an example that
    needs something missing marked and passed over. A picture that differs from Bevy's for no
    known reason is taken down to the smallest scene that still differs and explained before
    the pass goes on, as `grid` was, since that is where the table finds a fault.
-2. **The gaps, by how many rows each holds**, once the groups in item 1 are through, each
+3. **The gaps, by how many rows each holds**, once the groups in item 1 are through, each
    bridged from Bevy with the examples it unlocks written in its batch. By the table as it
    stands: 2D meshes with their color materials (13 rows); an order among the systems of one
    Bevy's
@@ -34,16 +63,16 @@ taken from [SHARED.md](SHARED.md).
    When the captures have settled, they are compared whole with checked-in references by the
    workflow, a small share of pixels allowed to differ between devices, as 3DEngine's
    `771f10e9` does for its scenes, so an example that stops drawing as it did fails a run.
-3. **A build with no warnings, and a warning failing the workflow.** The managed build passes
+4. **A build with no warnings, and a warning failing the workflow.** The managed build passes
    `-warnaserror` in the workflow once it is clean, with a warning that is right to keep turned
    off where it arises and its reason beside it, and `cargo` builds deny warnings the same way.
-4. **A contact that says how hard its pair hit, and joints with limits**, from 3DEngine's
+5. **A contact that says how hard its pair hit, and joints with limits**, from 3DEngine's
    `c5227118`: the speed a pair closed at on the contact's message, a ball joint kept within a
    cone, and a distance joint whose range changes after it is made.
-5. **Two more of a character and a collider**, from 3DEngine's `52579d98` and `454e9276`: a
+6. **Two more of a character and a collider**, from 3DEngine's `52579d98` and `454e9276`: a
    character that crouches and stands from its component's height, and a collider that is the
    shape of the meshes an entity and those under it show, made once the model has loaded.
-6. **A joint in a scene file, and a pad's sensors**, from 3DEngine's `e46058fc` and `73ce6326`:
+7. **A joint in a scene file, and a pad's sensors**, from 3DEngine's `e46058fc` and `73ce6326`:
    a joint as an entity naming its two bodies, so a level hangs a door where it stands, and a
    gamepad's gyro, accelerometer, touchpad and light where gilrs offers them. Two small things
    of the command line are checked in the same batch and taken if they are missing: `entity.set`

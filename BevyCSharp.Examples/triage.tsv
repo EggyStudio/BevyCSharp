@@ -18,7 +18,7 @@ atmosphere	missing	Bevy's Mars scattering medium and its choice of rendering met
 fog	can	through Bevy's reflected DistanceFog
 auto_exposure	can
 blend_modes	can
-contact_shadows	can
+contact_shadows	can	its model spun by a press over it found with a ray, where Bevy observes picking's drag
 lighting	can
 lines	can
 ssao	can
