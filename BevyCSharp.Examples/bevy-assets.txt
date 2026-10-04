@@ -9,6 +9,8 @@ https://github.com/bevyengine/bevy_asset_files/raw/main/pccm_example/outer_cube.
 branding/bevy_logo_light.png
 environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2
 environment_maps/pisa_specular_rgb9e5_zstd.ktx2
+models/cubes/Cubes.glb
+models/Faces/faces.glb
 models/AnisotropyBarnLamp/AnisotropyBarnLamp.bin
 models/AnisotropyBarnLamp/AnisotropyBarnLamp.gltf
 models/AnisotropyBarnLamp/AnisotropyBarnLamp_anisotropy.ktx2
@@ -72,7 +74,11 @@ models/MixedLightingExample/SheenChairOcclusion-SheenChairBaseColor.jpg
 lightmaps/MixedLightingExample-Baked.zstd.ktx2
 lightmaps/MixedLightingExample-MixedDirect.zstd.ktx2
 lightmaps/MixedLightingExample-MixedIndirect.zstd.ktx2
+lightmaps/caustic_directional_texture.png
+lightmaps/faces_pointlight_texture_blurred.png
+lightmaps/torch_spotlight_texture.png
 environment_maps/sky_skybox.ktx2
+environment_maps/cubes_reflection_probe_specular_rgb9e5_zstd.ktx2
 models/PalmTree/PalmTree.gltf
 models/PalmTree/PalmTree.bin
 models/PalmTree/StylizedWater.png

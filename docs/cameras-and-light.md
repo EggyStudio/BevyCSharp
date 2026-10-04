@@ -104,7 +104,22 @@ left at zero.
 `Render.SetLightCookie` shapes a spot light's beam with a picture, the way a gobo shapes a stage
 light, so the shadow of a window frame falls on the floor without a window being there. Only the red
 channel is read, so the picture says how much light gets through rather than what color it is, and
-its border should be black or the light leaks past the edge of it.
+its border should be black or the light leaks past the edge of it. A point light takes a cube of six
+such pictures and a directional light one tiled across the ground, through their wrappers:
+
+```csharp
+using Bevy.Reflected;
+
+var faces = ctx.Ecs.Insert<PointLightTextureRef>(lamp);
+faces.Image = AssetServer.Load(AssetKind.Image, "lightmaps/faces.png");
+faces.CubemapLayout = PointLightTextureRef.CubemapLayoutVariant.CrossVertical;
+
+var caustics = ctx.Ecs.Insert<DirectionalLightTextureRef>(sun);
+(caustics.Image, caustics.Tiled) = (AssetServer.Load(AssetKind.Image, "lightmaps/caustics.png"), true);
+```
+
+A light's picture is drawn with Bevy's clustered decals, which need a GPU that binds arrays of
+textures, so on one that does not the light shines as though it had none.
 
 A shadow map is drawn at a resolution of its own, so the shadow right where a foot meets the floor
 is lost in a texel or two. Contact shadows fill that in, traced from each pixel toward the light a

@@ -148,6 +148,10 @@ render = [
     "bevy/pbr_multi_layer_material_textures",
     "bevy/pbr_transmission_textures",
     "bevy/pbr_anisotropy_texture",
+    # A picture a light shines through, as a spot light's cookie or a point light's cube of them,
+    # and the decals clustered with the lights that draw them. Shader code behind defines, so a
+    # scene without either draws as before, where a GPU without binding arrays leaves them out.
+    "bevy/pbr_light_textures",
     "bevy/bevy_gltf",
     # Skeletal and transform animation, which a glTF file's clips play through. Pure Rust, and
     # with it the glTF loader builds the clips and the animation graph players read, so a model's

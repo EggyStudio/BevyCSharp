@@ -174,8 +174,9 @@ public sealed class ReflectedWrapperTests
     }
 
     /// <summary>
-    /// A variant holding a handle can be chosen, which needs a handle made for it before the one
-    /// written arrives, since Bevy registers no default for a handle.
+    /// A variant holding a handle can be chosen, and a component holding one inserted, which need a
+    /// handle made for them before the one written arrives, since Bevy registers no default for a
+    /// handle.
     /// </summary>
     [SkippableFact]
     public void AVariantHoldingAHandleIsChosenWithTheHandleWritten()
@@ -187,6 +188,8 @@ public sealed class ReflectedWrapperTests
         AssetHandle? texture = AssetHandle.None, cleared = AssetHandle.None;
         var image = AssetHandle.None;
         var loaded = AssetHandle.None;
+        var inserted = AssetHandle.None;
+        var layout = PointLightTextureRef.CubemapLayoutVariant.SequenceHorizontal;
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -201,6 +204,18 @@ public sealed class ReflectedWrapperTests
             texture = fog.DensityTexture;
             fog.DensityTexture = null;
             cleared = fog.DensityTexture;
+
+            // A component holding a handle has no default of its own, and is made from its fields'.
+            var light = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional });
+            var caustics = ctx.Ecs.Insert<DirectionalLightTextureRef>(light);
+            caustics.Image = image;
+            inserted = caustics.Image;
+
+            // And one holding an enum with no default, which takes its first plain variant.
+            var point = Render.SpawnLight(new LightSettings { Kind = LightKind.Point });
+            var faces = ctx.Ecs.Insert<PointLightTextureRef>(point);
+            faces.CubemapLayout = PointLightTextureRef.CubemapLayoutVariant.CrossVertical;
+            layout = faces.CubemapLayout;
         });
 
         harness.Run();
@@ -208,6 +223,8 @@ public sealed class ReflectedWrapperTests
         Assert.Equal(new FontSource.Handle(loaded), font);
         Assert.Equal(image, texture);
         Assert.Null(cleared);
+        Assert.Equal(image, inserted);
+        Assert.Equal(PointLightTextureRef.CubemapLayoutVariant.CrossVertical, layout);
     }
 
     [SkippableFact]

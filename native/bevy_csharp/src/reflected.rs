@@ -131,10 +131,12 @@ fn from_json(
         })
 }
 
-/// A type's default value, from `ReflectDefault`, which building an enum variant's fields needs.
+/// A type's default value, from `ReflectDefault`, which building an enum variant's fields, and a
+/// struct with no default of its own, needs.
 ///
 /// A handle registers no default, though it has one, the handle to its type's default asset, so
-/// one is made from its `ReflectHandle` instead. Without it a variant holding a handle, as a
+/// one is made from its `ReflectHandle` instead, and an enum with none is its first variant that
+/// holds nothing. Without it a variant holding a handle, as a
 /// text's font source or a fog volume's optional density texture does, could not be chosen, and a
 /// caller choosing that variant writes the handle it means right after.
 fn default_of(
@@ -150,17 +152,24 @@ fn default_of(
         return Ok(handle.typed(untyped).into_partial_reflect());
     }
 
-    registry
-        .get_type_data::<ReflectDefault>(type_id)
-        .map(|default| default.default().into_partial_reflect())
-        .ok_or_else(|| {
-            fail(
-                status::UNSUPPORTED,
-                format!(
-                    "'{path}' has no reflected default, so a variant holding one cannot be made."
-                ),
-            )
-        })
+    if let Some(default) = registry.get_type_data::<ReflectDefault>(type_id) {
+        return Ok(default.default().into_partial_reflect());
+    }
+
+    // An enum with no default of its own, as a cubemap's layout is, takes its first variant that
+    // holds nothing, which a caller choosing it then writes over.
+    if let Some(TypeInfo::Enum(info)) = registry.get_type_info(type_id)
+        && let Some(unit) = info.iter().find(|variant| matches!(variant, VariantInfo::Unit(_)))
+    {
+        let mut made = DynamicEnum::new(unit.name(), DynamicVariant::Unit);
+        made.set_represented_type(Some(registry.get_type_info(type_id).unwrap()));
+        return Ok(Box::new(made));
+    }
+
+    Err(fail(
+        status::UNSUPPORTED,
+        format!("'{path}' has no reflected default, so a variant holding one cannot be made."),
+    ))
 }
 
 /// Reads UTF-8 bytes the caller passed with their length.
@@ -779,6 +788,18 @@ pub unsafe extern "C" fn bcs_reflect_insert(
                 default.default().into_partial_reflect()
             } else if let Some(from_world) = registration.data::<ReflectFromWorld>() {
                 from_world.from_world(world).into_partial_reflect()
+            } else if let TypeInfo::Struct(info) = registration.type_info() {
+                // A struct with no default of its own, as one holding a handle is, made from each
+                // field's default, a handle's included, for the caller to write over.
+                let mut fields = DynamicStruct::default();
+                for field in info.iter() {
+                    match default_of(&registry, field.type_id(), field.type_path()) {
+                        Ok(value) => fields.insert_boxed(field.name(), value),
+                        Err(code) => return code,
+                    }
+                }
+                fields.set_represented_type(Some(registration.type_info()));
+                Box::new(fields)
             } else {
                 return fail(
                     status::UNSUPPORTED,

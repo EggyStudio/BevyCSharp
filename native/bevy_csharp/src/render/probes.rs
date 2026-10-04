@@ -701,6 +701,27 @@ fn copy_probe_faces(
     }
 }
 
+/// Lets a generated environment map's source be copied from, which Bevy's filtering does first.
+///
+/// Bevy leaves it to the game to add the usage to the image it loaded, which C# cannot reach, so
+/// every image a `GeneratedEnvironmentMapLight` names is given it here once it has loaded.
+#[cfg(feature = "render")]
+fn allow_generated_environment_sources(
+    lights: bevy::ecs::system::Query<&bevy::light::GeneratedEnvironmentMapLight>,
+    mut images: bevy::ecs::system::ResMut<bevy::asset::Assets<bevy::image::Image>>,
+) {
+    use bevy::render::render_resource::TextureUsages;
+
+    for light in &lights {
+        let lacks = images
+            .get(&light.environment_map)
+            .is_some_and(|image| !image.texture_descriptor.usage.contains(TextureUsages::COPY_SRC));
+        if lacks && let Some(mut image) = images.get_mut(&light.environment_map) {
+            image.texture_descriptor.usage |= TextureUsages::COPY_SRC;
+        }
+    }
+}
+
 /// Adds what keeps captured probes' cameras placed and copies their faces.
 #[cfg(feature = "render")]
 pub fn install(app: &mut bevy::app::App) {
@@ -713,6 +734,7 @@ pub fn install(app: &mut bevy::app::App) {
         PostUpdate,
         (drop_orphan_faces, aim_probe_faces).before(bevy::transform::TransformSystems::Propagate),
     );
+    app.add_systems(PostUpdate, allow_generated_environment_sources);
 
     let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
         return;

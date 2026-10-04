@@ -4,12 +4,12 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**129 written, 7 written in part, 101 can be written, 127 missing and 57 do not apply.** Of the 364 that apply, 237 can be written with what is bridged, 7 of them leaving something out.
+**131 written, 7 written in part, 99 can be written, 127 missing and 57 do not apply.** Of the 364 that apply, 237 can be written with what is bridged, 7 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 12 | 1 | 0 | 15 | 1 |
-| [3D Rendering](#3d-rendering) | 46 | 3 | 8 | 10 | 0 |
+| [3D Rendering](#3d-rendering) | 48 | 3 | 6 | 10 | 0 |
 | [Animation](#animation) | 0 | 0 | 6 | 7 | 0 |
 | [Application](#application) | 7 | 0 | 3 | 2 | 7 |
 | [Assets](#assets) | 0 | 0 | 10 | 2 | 5 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **129** | **7** | **101** | **127** | **57** |
+| **All** | **131** | **7** | **99** | **127** | **57** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. Where Bevy's site runs the example in a browser, the row links it live, which is Bevy's Rust original rather than the C# one here.
 
@@ -109,7 +109,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`generate_custom_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/generate_custom_mesh.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/generate-custom-mesh/) | Simple showcase of how to generate a custom mesh with a custom texture | [written](../BevyCSharp.Examples/3d/generate_custom_mesh.cs) |
 | [`irradiance_volumes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/irradiance_volumes.rs) | Demonstrates irradiance volumes | missing, Bevy's irradiance volume asset, and a standard material extended by a shader of the example's own to draw its voxels |
 | [`light_probe_blending`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/light_probe_blending.rs) | Demonstrates blending between multiple reflection probes | can be written |
-| [`light_textures`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/light_textures.rs) | Demonstrates light textures | can be written |
+| [`light_textures`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/light_textures.rs) | Demonstrates light textures | [written](../BevyCSharp.Examples/3d/light_textures.cs) |
 | [`lighting`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/lighting.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/lighting/) | Illustrates various lighting options in a simple scene | [written](../BevyCSharp.Examples/3d/lighting.cs) |
 | [`lightmaps`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/lightmaps.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/lightmaps/) | Rendering a scene with baked lightmaps | [written](../BevyCSharp.Examples/3d/lightmaps.cs), through Bevy's reflected Lightmap and a material's LightmapExposure |
 | [`lines`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/lines.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/lines/) | Create a custom material to draw 3d lines | [written](../BevyCSharp.Examples/3d/lines.cs) |
@@ -128,7 +128,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`pcss`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/pcss.rs) | Demonstrates percentage-closer soft shadows (PCSS) | [written](../BevyCSharp.Examples/3d/pcss.cs) |
 | [`post_processing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/post_processing.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/post-processing/) | Demonstrates the built-in postprocessing features | [written](../BevyCSharp.Examples/3d/post_processing.cs) |
 | [`rect_light`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/rect_light.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/rect-light/) | Simple 3D scene demonstrating rectangular area lights. | [written](../BevyCSharp.Examples/3d/rect_light.cs), through Bevy's reflected RectLight |
-| [`reflection_probes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/reflection_probes.rs) | Demonstrates reflection probes | can be written |
+| [`reflection_probes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/reflection_probes.rs) | Demonstrates reflection probes | [written](../BevyCSharp.Examples/3d/reflection_probes.cs) |
 | [`render_to_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/render_to_texture.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/render-to-texture/) | Shows how to render to a texture, useful for mirrors, UI, or exporting images | [written](../BevyCSharp.Examples/3d/render_to_texture.cs) |
 | [`rotate_environment_map`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/rotate_environment_map.rs) | Demonstrates how to rotate the skybox and the environment map simultaneously | [written](../BevyCSharp.Examples/3d/rotate_environment_map.cs) |
 | [`scrolling_fog`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/scrolling_fog.rs) | Demonstrates how to create the effect of fog moving in the wind | [written](../BevyCSharp.Examples/3d/scrolling_fog.cs), through Bevy's reflected FogVolume, its density texture set as a reflected asset |
