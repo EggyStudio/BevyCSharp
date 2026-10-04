@@ -3530,7 +3530,7 @@ and asks it things:
 ./bcs command entity.set Cube Transform.Translation 0,2.5,0
 ./bcs command entity.set Cube Transform.Rotation -30,45,0    # degrees, as the inspector shows them
 ./bcs command input.click 1450 700
-./bcs command input.keydown W          # held until input.keyup W, for a game walking while it is
+./bcs command input.hold W,D 12        # held for twelve frames exactly, for a game walking while they are
 ./bcs command frames.wait 5
 ./bcs shot /tmp/after.png              # captures the window, and waits for the file
 ```

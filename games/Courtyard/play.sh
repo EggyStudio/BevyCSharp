@@ -24,24 +24,28 @@ where() {
     c entity.get "$1" | sed -n 's/^Transform.Translation = //p' | awk -F, '{ print $1, $3 }'
 }
 
-# Walks the runner to a point, a little at a time, holding whichever of WASD points at it, and
-# stops early once a command given after the point succeeds.
+# Walks the runner to a point, holding whichever of WASD points at it for as many frames as the
+# nearer of the two distances takes at the runner's speed, a little short so it is not overshot,
+# and stops early once a command given after the point succeeds.
 go_to() {
-    local tx=$1 tz=$2 step x z keys
+    local tx=$1 tz=$2 step x z plan
     shift 2
-    for step in $(seq 1 200); do
+    for step in $(seq 1 60); do
         [ $# -gt 0 ] && "$@" && return 0
         read -r x z < <(where "Runner body")
-        keys=$(awk -v x="$x" -v z="$z" -v tx="$tx" -v tz="$tz" 'BEGIN {
-            k = "";
-            if (tx - x > 0.4) k = k " D"; else if (x - tx > 0.4) k = k " A";
-            if (tz - z > 0.4) k = k " S"; else if (z - tz > 0.4) k = k " W";
-            print k }')
-        [ -z "$keys" ] && return 0
+        plan=$(awk -v x="$x" -v z="$z" -v tx="$tx" -v tz="$tz" -v speed=4 'BEGIN {
+            k = ""; far = 1000; dx = tx - x; dz = tz - z;
+            if (dx > 0.4) { k = k ",D"; far = (dx < far) ? dx : far } else if (dx < -0.4) { k = k ",A"; far = (-dx < far) ? -dx : far }
+            if (dz > 0.4) { k = k ",S"; far = (dz < far) ? dz : far } else if (dz < -0.4) { k = k ",W"; far = (-dz < far) ? -dz : far }
+            if (k == "") exit;
+            frames = int(far / speed * 60 * 0.8);
+            if (frames < 1) frames = 1;
+            if (frames > 60) frames = 60;
+            print substr(k, 2), frames }')
+        [ -z "$plan" ] && return 0
 
-        for key in $keys; do quiet input.keydown "$key"; done
-        quiet frames.wait 1
-        for key in $keys; do quiet input.keyup "$key"; done
+        # Unquoted, the keys and the frames are the command's two words.
+        quiet input.hold $plan
     done
     fail "the runner did not reach $tx,$tz and stands at $x,$z"
 }
@@ -65,10 +69,6 @@ quiet input.key Enter
 quiet frames.wait 10
 c entity.get "Runner body" >/dev/null || fail "Enter did not start play"
 
-# Slower than a person plays it, since each bcs call takes a few frames and a runner at full speed
-# overshoots what it was steered at by more than a coin is wide.
-quiet entity.set Runner Runner.Speed 1.5
-
 # The coins nearest first, and a save made after the first.
 go_to 0 4 carrying 1
 quiet frames.wait 5
@@ -87,9 +87,7 @@ quiet input.key Escape
 quiet frames.wait 5
 ./bcs shot "$shots/3-paused.png" >/dev/null
 read -r before _ < <(where "Runner body")
-quiet input.keydown D
-quiet frames.wait 20
-quiet input.keyup D
+quiet input.hold D 20
 read -r after _ < <(where "Runner body")
 [ "$before" = "$after" ] || fail "the runner walked while paused, from $before to $after"
 quiet input.key Escape
@@ -101,10 +99,9 @@ quiet frames.wait 10
 [ "$(coins)" = 1 ] || fail "the load did not bring back the save's one coin"
 ./bcs shot "$shots/4-loaded.png" >/dev/null
 
-# From the save, with the first coin gone and the runner back where the level puts it, at the
-# speed the level gives it until it is slowed again. The last coin is come at from the side away
-# from the goal, which it is beside, so the runner does not reach the goal on the way.
-quiet entity.set Runner Runner.Speed 1.5
+# From the save, with the first coin gone and the runner back where the level puts it. The last
+# coin is come at from the side away from the goal, which it is beside, so the runner does not
+# reach the goal on the way.
 go_to -5 -4 carrying 2
 go_to 5 -1 carrying 3
 go_to 5 -3 carrying 3

@@ -304,6 +304,58 @@ internal static class ConsoleWorldCommands
         return $"holding {key}";
     }
 
+    /// <summary>Holds keys down for a number of frames, and answers once they are let go.</summary>
+    /// <remarks>
+    /// <para>
+    /// One command rather than a hold, a wait and a release, since each call to a running app costs
+    /// a few frames, and a script steering a game by three of them moves it however far it goes in
+    /// those as well as in the frames it asked for. Here the keys go down now and come up after
+    /// exactly the frames given, inside the app, and the answer comes once they have.
+    /// </para>
+    /// <para>
+    /// Several keys are named with commas between them, as <c>input.hold W,D 12</c> walks diagonally
+    /// for twelve frames. Held at most <see cref="ConsoleHost.LaterFrames"/> frames, which is as
+    /// long as a caller waits for an answer.
+    /// </para>
+    /// </remarks>
+    [Command("input.hold", "Holds keys for a number of frames: input.hold <W|W,D|...> <frames>")]
+    internal static string Hold(string line)
+    {
+        var words = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length != 2 || !int.TryParse(words[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var frames))
+        {
+            ConsoleHost.Fail("BAD_ARGUMENTS", "input.hold takes keys and a number of frames, as in input.hold W,D 12.");
+            return "input.hold <W|W,D|...> <frames>";
+        }
+
+        var keys = new List<Key>();
+        foreach (var name in words[0].Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (!Enum.TryParse<Key>(name, ignoreCase: true, out var key))
+            {
+                ConsoleHost.Fail("BAD_ARGUMENT", $"'{name}' is not a key name.");
+                return $"'{name}' is not a key name";
+            }
+
+            keys.Add(key);
+        }
+
+        var held = (ulong)Math.Clamp(frames, 1, (int)ConsoleHost.LaterFrames - 1);
+        var until = ConsoleHost.Time.FrameCount + held;
+
+        foreach (var key in keys) SyntheticInput.Press(key, Typed(key));
+
+        ConsoleHost.Later(() =>
+        {
+            if (ConsoleHost.Time.FrameCount < until) return null;
+
+            foreach (var key in keys) SyntheticInput.Lift(key);
+            return $"held {string.Join(',', keys)} for {held} frames";
+        });
+
+        return $"holding {string.Join(',', keys)} for {held} frames";
+    }
+
     /// <summary>Lets go of a key <c>input.keydown</c> held.</summary>
     [Command("input.keyup", "Lets a held key go: input.keyup <W|Space|...>")]
     internal static string KeyUp(string name)

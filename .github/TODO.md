@@ -506,12 +506,8 @@ as the reason, so a run's summary counts what did not run there rather than pass
 
 A game is played whole as well. Where the workflow builds the bridges, a job packs the library
 with the Linux bridge, builds `games/Courtyard` on that package and plays it through `play.sh` on
-Mesa's software Vulkan, from its menu through a save, a load and every coin to its win.
-
-- **`bcs` holds a key across calls, not for a number of frames.** Each call costs a few frames, so
-  a script steering a game by holding and letting go overshoots by as far as the game moves in
-  them, and Courtyard's play script slows its runner to land. A command holding a key for an exact
-  number of frames inside the app would steer at full speed.
+Mesa's software Vulkan, from its menu through a save, a load and every coin to its win, steering
+with `input.hold`, which holds keys for an exact number of frames inside the app.
 
 ### Build and release
 

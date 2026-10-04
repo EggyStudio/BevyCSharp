@@ -46,7 +46,8 @@ What is usually there:
 | `entity.get <name\|#index>` | Every described field on one entity |
 | `entity.set <name> <Component.Field> <value>` | Change one field; `0,2.5,0` for a vector |
 | `input.click <x> <y>`, `input.press`/`input.release`, `input.move`, `input.wheel`, `input.type`, `input.key`, `input.uikey` | Real input through the window's own path, so picking and focus behave |
-| `input.keydown <key>`, `input.keyup <key>` | Hold a key across calls, for a game that acts while one is down; keys reach an offscreen run too |
+| `input.hold <W\|W,D> <frames>` | Hold keys for exactly that many frames and answer once they are let go, for a game that acts while one is down |
+| `input.keydown <key>`, `input.keyup <key>` | Hold a key across calls, for as long as the calls between take; keys reach an offscreen run too |
 | `frames.wait <n>` | Answers after n more frames, so act, settle and look is one call |
 | `shot <path>` | Capture the window (use `./bcs shot`, which waits for the file) |
 | `log.tail <n>` | The last lines the app wrote |
