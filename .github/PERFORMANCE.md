@@ -96,8 +96,8 @@ A frame leaves 60 a second between **50,000 and 100,000 drawn cubes**.
    faces each, cost 8 to 10 ms of the render schedule at any count, almost all of it in its
    `render` phase (10.6 ms of 13.8 at a thousand cubes), where Bevy encodes and submits a pass for
    every shadow view. The GPU timings do not name those passes, and the GPU itself spends under
-   2 ms. It is Bevy's work, and none of it crosses into C#. A game holds it down by which lights
-   cast shadows.
+   2 ms. Measured beside the same scene in Bevy alone (below), about 8.7 ms of it is Bevy's and
+   about 2 ms the bridge's. A game holds it down by which lights cast shadows.
 2. **The physics plugin's sync of the bodies a level holds**, since taken (below). `PhysicsWorld.Sync` reads every body's
    `RigidBody`, `Collider` and `Transform` each fixed step to see whether anything changed, which at
    5,000 bodies is 6.6 ms of the 9.4 the physics system takes, and grows with the bodies whether or
@@ -139,6 +139,43 @@ physics system from 9.4 ms to 2.8 ms, which is now Bepu's step and the write bac
 Without shadows a frame leaves 60 a second between 100,000 and 200,000 drawn cubes, where it was
 between 50,000 and 100,000. With them the render, which runs beside the schedule, is still what
 holds a frame at 13 to 15 ms.
+
+### The shadows, beside Bevy alone
+
+`native/stress` is the drawn scene written against Bevy with no bridge and no C#, on the same Bevy
+version and the bridge's render features (it depends on the bridge crate, which pins them), drawn
+into an image of the same size and format, unpaced, with the plugins the bridge adds beyond Bevy's
+defaults (wireframes, auto exposure, render timings) and the same clocks around the render
+schedule and its phases:
+
+```bash
+CARGO_TARGET_DIR=native/target cargo build --release --manifest-path native/stress/Cargo.toml
+native/target/release/stress 1000 [noshadows] wireframe autoexposure timings
+```
+
+The run-to-run spread on this laptop is about 1.5 ms either way, as the processor's clock moves,
+so each figure is the median of six runs, the plain scene and the bridge's interleaved. At 1,000
+cubes, the render schedule in milliseconds:
+
+| | Bevy alone | through the bridge |
+|---|---:|---:|
+| three lights casting shadows | 12.2 | 14.6 |
+| no shadows | 3.5 | 4.0 |
+
+So the shadows are Bevy's cost, about 8.7 ms of its own render, nearly all in its `render` phase
+(8.5 ms of a plain frame against 10.0 through the bridge), where a pass is encoded for each of the
+sixteen shadow views (four cascades, and six cube faces for each point light) over every caster.
+The places a bridge could make it worse were checked and are as Bevy has them. The shadow maps are
+Bevy's default sizes, since the bridge sets them only when a game asks. The cubes share one mesh
+and four materials and batch as they do in plain Bevy. No debug or validation setting is on, as
+the renderer is made from `WgpuSettings::default()` in a release build. The bridge's own shadow
+drawing returns before encoding anything where no shader material casts a shadow.
+
+What is left is about 2 ms the bridge adds to a shadowed render and 0.5 ms to an unshadowed one,
+growing with the shadow views. Adding the bridge's render installers to the plain scene one at a
+time (`material`, `views`, `probes`, `watch`, `corners`, `compute`, `rays`, `layers` as arguments)
+moved it by less than the spread, so it was not placed on this machine. A quieter machine, or
+Bevy's tracing spans in a profiler, would place it.
 
 ## What measuring turned up
 

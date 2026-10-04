@@ -1,0 +1,23 @@
+# games/Stress's drawn scene written against Bevy alone, to measure beside the bridge. A workspace
+# of its own, so the bridge's stays one crate, which the build commands name features at the root
+# of, with the bridge's lock file copied in so the two build the same versions.
+[workspace]
+
+[package]
+name = "stress"
+version = "0.1.0"
+edition = "2024"
+license = "MPL-2.0"
+publish = false
+
+# Bevy as the bridge builds it, the same version and, through the bridge's render profile, the
+# same features, so the two are measured on one Bevy build.
+[dependencies]
+bevy = { version = "0.19.1", default-features = false }
+bevy_csharp = { path = "../bevy_csharp", default-features = false, features = ["render"] }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "unwind"
