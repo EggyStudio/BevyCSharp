@@ -28,7 +28,7 @@ decal	missing	forward decals (ForwardDecal)
 deferred_rendering	missing	a material's depth map for parallax mapping, and a material drawn forward while the rest are deferred
 motion_blur	can
 order_independent_transparency	can
-tonemapping	can
+tonemapping	part	the image viewer's square sized to the dropped image, since the bridge does not say how large an image is
 orthographic	can
 parenting	can
 pbr	can	its view sized for a window of 1280 by 720 at any size

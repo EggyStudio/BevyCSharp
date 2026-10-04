@@ -61,6 +61,7 @@ internal static class Catalog
         new("contact_shadows", ContactShadows.Build),
         new("pccm", Pccm.Build),
         new("shadow_biases", ShadowBiases.Build),
+        new("tonemapping", TonemappingExample.Build),
         new("transmission", Transmission.Build),
         new("visibility_range", VisibilityRange.Build),
         new("spherical_area_lights", SphericalAreaLights.Build),
