@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**53 written, 3 written in part, 222 can be written, 87 missing and 56 do not apply.** Of the 365 that apply, 278 can be written with what is bridged, 3 of them leaving something out.
+**79 written, 4 written in part, 177 can be written, 104 missing and 57 do not apply.** Of the 364 that apply, 260 can be written with what is bridged, 4 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
@@ -13,9 +13,9 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Animation](#animation) | 0 | 0 | 6 | 7 | 0 |
 | [Application](#application) | 7 | 0 | 3 | 2 | 7 |
 | [Assets](#assets) | 0 | 0 | 10 | 2 | 5 |
-| [Async Tasks](#async-tasks) | 0 | 0 | 3 | 0 | 0 |
-| [Audio](#audio) | 0 | 0 | 6 | 2 | 0 |
-| [Camera](#camera) | 0 | 0 | 8 | 1 | 0 |
+| [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 |
+| [Audio](#audio) | 4 | 0 | 0 | 4 | 0 |
+| [Camera](#camera) | 3 | 0 | 1 | 5 | 0 |
 | [Dev tools](#dev-tools) | 0 | 0 | 1 | 1 | 1 |
 | [Diagnostics](#diagnostics) | 0 | 0 | 1 | 2 | 0 |
 | [ECS (Entity Component System)](#ecs-entity-component-system) | 10 | 0 | 1 | 15 | 9 |
@@ -23,8 +23,8 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Games](#games) | 0 | 0 | 6 | 0 | 0 |
 | [Gizmos](#gizmos) | 0 | 0 | 4 | 5 | 0 |
 | [Helpers](#helpers) | 0 | 0 | 0 | 1 | 0 |
-| [Input](#input) | 0 | 0 | 12 | 0 | 0 |
-| [Math](#math) | 0 | 0 | 5 | 0 | 1 |
+| [Input](#input) | 6 | 1 | 0 | 5 | 0 |
+| [Math](#math) | 1 | 0 | 0 | 4 | 1 |
 | [Movement](#movement) | 0 | 0 | 1 | 0 | 0 |
 | [Picking](#picking) | 0 | 0 | 2 | 3 | 1 |
 | [Reflection](#reflection) | 0 | 0 | 0 | 0 | 9 |
@@ -32,17 +32,17 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Scene](#scene) | 0 | 0 | 1 | 1 | 0 |
 | [Shaders](#shaders) | 0 | 0 | 17 | 3 | 5 |
 | [Shaders Advanced](#shaders-advanced) | 0 | 0 | 1 | 0 | 1 |
-| [State](#state) | 0 | 0 | 4 | 0 | 0 |
+| [State](#state) | 2 | 0 | 0 | 2 | 0 |
 | [Stress Tests](#stress-tests) | 0 | 0 | 18 | 2 | 1 |
-| [Time](#time) | 0 | 0 | 3 | 0 | 0 |
+| [Time](#time) | 2 | 0 | 0 | 0 | 1 |
 | [Tools](#tools) | 0 | 0 | 2 | 0 | 0 |
-| [Transforms](#transforms) | 0 | 0 | 5 | 0 | 0 |
+| [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 |
 | [UI (User Interface)](#ui-user-interface) | 0 | 0 | 36 | 24 | 0 |
 | [Usage](#usage) | 0 | 0 | 3 | 0 | 0 |
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **53** | **3** | **222** | **87** | **56** |
+| **All** | **79** | **4** | **177** | **104** | **57** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints.
 
@@ -220,36 +220,36 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`async_channel_pattern`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/async_tasks/async_channel_pattern.rs) | An example showing how to offload work to background async tasks using channels for communication. | can be written, with .NET's tasks and channels |
-| [`async_compute`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/async_tasks/async_compute.rs) | How to use `AsyncComputeTaskPool` to complete longer running tasks | can be written, with .NET's tasks |
-| [`external_source_external_thread`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/async_tasks/external_source_external_thread.rs) | How to use an external thread to run an infinite task and communicate with a channel | can be written, with a .NET thread and channel |
+| [`async_channel_pattern`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/async_tasks/async_channel_pattern.rs) | An example showing how to offload work to background async tasks using channels for communication. | [written](../BevyCSharp.Examples/async_tasks/async_channel_pattern.cs), with .NET's tasks and channels |
+| [`async_compute`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/async_tasks/async_compute.rs) | How to use `AsyncComputeTaskPool` to complete longer running tasks | [written](../BevyCSharp.Examples/async_tasks/async_compute.cs), with .NET's tasks |
+| [`external_source_external_thread`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/async_tasks/external_source_external_thread.rs) | How to use an external thread to run an infinite task and communicate with a channel | [written](../BevyCSharp.Examples/async_tasks/external_source_external_thread.cs), with a .NET thread and channel |
 
 ## Audio
 
 | Example | What it shows | State |
 |---|---|---|
-| [`audio`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/audio.rs) | Shows how to load and play an audio file | can be written |
-| [`audio_control`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/audio_control.rs) | Shows how to load and play an audio file, and control how it's played | can be written |
+| [`audio`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/audio.rs) | Shows how to load and play an audio file | [written](../BevyCSharp.Examples/audio/audio.cs) |
+| [`audio_control`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/audio_control.rs) | Shows how to load and play an audio file, and control how it's played | missing, a playing sound's speed changed as it plays |
 | [`decodable`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/decodable.rs) | Shows how to create and register a custom audio source by implementing the `Decodable` type. | missing, audio sources a game generates (Decodable) |
 | [`pitch`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/pitch.rs) | Shows how to directly play a simple pitch | missing, a generated tone (Pitch) |
-| [`play_sound_effect`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/play_sound_effect.rs) | Shows how to play a sound effect in response to an event | can be written |
-| [`soundtrack`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/soundtrack.rs) | Shows how to play different soundtracks based on game state | can be written |
-| [`spatial_audio_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/spatial_audio_2d.rs) | Shows how to play spatial audio, and moving the emitter in 2D | can be written |
-| [`spatial_audio_3d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/spatial_audio_3d.rs) | Shows how to play spatial audio, and moving the emitter in 3D | can be written |
+| [`play_sound_effect`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/play_sound_effect.rs) | Shows how to play a sound effect in response to an event | [written](../BevyCSharp.Examples/audio/play_sound_effect.cs) |
+| [`soundtrack`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/soundtrack.rs) | Shows how to play different soundtracks based on game state | [written](../BevyCSharp.Examples/audio/soundtrack.cs) |
+| [`spatial_audio_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/spatial_audio_2d.rs) | Shows how to play spatial audio, and moving the emitter in 2D | missing, 2D meshes and their color materials |
+| [`spatial_audio_3d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/spatial_audio_3d.rs) | Shows how to play spatial audio, and moving the emitter in 3D | [written](../BevyCSharp.Examples/audio/spatial_audio_3d.cs) |
 
 ## Camera
 
 | Example | What it shows | State |
 |---|---|---|
-| [`2d_on_ui`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_on_ui.rs) | Shows how to render 2D objects on top of Bevy UI | can be written |
-| [`2d_screen_shake`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_screen_shake.rs) | A simple 2D screen shake effect | can be written |
-| [`2d_top_down_camera`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_top_down_camera.rs) | A 2D top-down camera smoothly following player movements | can be written |
-| [`camera_orbit`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/camera_orbit.rs) | Shows how to orbit a static scene using pitch, yaw, and roll. | can be written |
+| [`2d_on_ui`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_on_ui.rs) | Shows how to render 2D objects on top of Bevy UI | [written](../BevyCSharp.Examples/camera/2d_on_ui.cs) |
+| [`2d_screen_shake`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_screen_shake.rs) | A simple 2D screen shake effect | missing, 2D meshes and their color materials |
+| [`2d_top_down_camera`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_top_down_camera.rs) | A 2D top-down camera smoothly following player movements | missing, 2D meshes and their color materials |
+| [`camera_orbit`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/camera_orbit.rs) | Shows how to orbit a static scene using pitch, yaw, and roll. | [written](../BevyCSharp.Examples/camera/camera_orbit.cs) |
 | [`custom_projection`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/custom_projection.rs) | Shows how to create custom camera projections. | missing, custom camera projections |
 | [`first_person_view_model`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/first_person_view_model.rs) | A first-person camera that uses a world model and a view model with different field of views (FOV) | can be written |
-| [`free_camera_controller`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/free_camera_controller.rs) | Demonstrates the FreeCamera controller for 3D scenes. | can be written |
-| [`pan_camera_controller`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/pan_camera_controller.rs) | Example Pan-Camera Styled Camera Controller for 2D scenes | can be written |
-| [`projection_zoom`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/projection_zoom.rs) | Shows how to zoom orthographic and perspective projection cameras. | can be written |
+| [`free_camera_controller`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/free_camera_controller.rs) | Demonstrates the FreeCamera controller for 3D scenes. | missing, Bevy's free camera controller, its plugin and its settings |
+| [`pan_camera_controller`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/pan_camera_controller.rs) | Example Pan-Camera Styled Camera Controller for 2D scenes | missing, Bevy's pan camera controller, its plugin and its settings |
+| [`projection_zoom`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/projection_zoom.rs) | Shows how to zoom orthographic and perspective projection cameras. | [written](../BevyCSharp.Examples/camera/projection_zoom.cs) |
 
 ## Dev tools
 
@@ -348,29 +348,29 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`char_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/char_input_events.rs) | Prints out all chars as they are inputted | can be written |
-| [`gamepad_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_input.rs) | Shows handling of gamepad input, connections, and disconnections | can be written |
-| [`gamepad_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_input_events.rs) | Iterates and prints gamepad input and connection events | can be written |
-| [`gamepad_rumble`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_rumble.rs) | Shows how to rumble a gamepad using force feedback | can be written |
-| [`keyboard_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/keyboard_input.rs) | Demonstrates handling a key press/release | can be written |
-| [`keyboard_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/keyboard_input_events.rs) | Prints out all keyboard events | can be written |
-| [`keyboard_modifiers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/keyboard_modifiers.rs) | Demonstrates using key modifiers (ctrl, shift) | can be written |
-| [`mouse_grab`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/mouse_grab.rs) | Demonstrates how to grab the mouse, locking the cursor to the app's screen | can be written |
-| [`mouse_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/mouse_input.rs) | Demonstrates handling a mouse button press/release | can be written |
-| [`mouse_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/mouse_input_events.rs) | Prints out all mouse events (buttons, movement, etc.) | can be written |
-| [`touch_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/touch_input.rs) | Displays touch presses, releases, and cancels | can be written |
-| [`touch_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/touch_input_events.rs) | Prints out all touch inputs | can be written |
+| [`char_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/char_input_events.rs) | Prints out all chars as they are inputted | [written](../BevyCSharp.Examples/input/char_input_events.cs), prints [its output](assets/examples/char_input_events.txt) |
+| [`gamepad_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_input.rs) | Shows handling of gamepad input, connections, and disconnections | [written](../BevyCSharp.Examples/input/gamepad_input.cs), prints [its output](assets/examples/gamepad_input.txt) |
+| [`gamepad_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_input_events.rs) | Iterates and prints gamepad input and connection events | missing, a gamepad's button and axis changes as messages, in the order they happened |
+| [`gamepad_rumble`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_rumble.rs) | Shows how to rumble a gamepad using force feedback | [written](../BevyCSharp.Examples/input/gamepad_rumble.cs), prints [its output](assets/examples/gamepad_rumble.txt) |
+| [`keyboard_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/keyboard_input.rs) | Demonstrates handling a key press/release | missing, logical keys as Bevy's ButtonInput<Key>, such as the key that types '?' |
+| [`keyboard_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/keyboard_input_events.rs) | Prints out all keyboard events | missing, keyboard events as messages, each with its key code, logical key and state |
+| [`keyboard_modifiers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/keyboard_modifiers.rs) | Demonstrates using key modifiers (ctrl, shift) | [written](../BevyCSharp.Examples/input/keyboard_modifiers.cs), prints [its output](assets/examples/keyboard_modifiers.txt) |
+| [`mouse_grab`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/mouse_grab.rs) | Demonstrates how to grab the mouse, locking the cursor to the app's screen | [written](../BevyCSharp.Examples/input/mouse_grab.cs) |
+| [`mouse_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/mouse_input.rs) | Demonstrates handling a mouse button press/release | [written](../BevyCSharp.Examples/input/mouse_input.cs) |
+| [`mouse_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/mouse_input_events.rs) | Prints out all mouse events (buttons, movement, etc.) | missing, mouse button, motion, cursor, wheel and gesture events as messages |
+| [`touch_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/touch_input.rs) | Displays touch presses, releases, and cancels | [written in part](../BevyCSharp.Examples/input/touch_input.cs), a touch the platform cancels, which is not reported |
+| [`touch_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/touch_input_events.rs) | Prints out all touch inputs | missing, touch events as messages |
 
 ## Math
 
 | Example | What it shows | State |
 |---|---|---|
-| [`bounding_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/math/bounding_2d.rs) | Showcases bounding volumes and intersection tests | can be written, with the managed math |
-| [`cubic_splines`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/math/cubic_splines.rs) | Exhibits different modes of constructing cubic curves using splines | can be written, with the managed math |
+| [`bounding_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/math/bounding_2d.rs) | Showcases bounding volumes and intersection tests | missing, Bevy's bounding volumes, their casts and their intersection tests |
+| [`cubic_splines`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/math/cubic_splines.rs) | Exhibits different modes of constructing cubic curves using splines | missing, Bevy's cubic curves, Hermite, cardinal and B-spline |
 | [`custom_primitives`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/math/custom_primitives.rs) | Demonstrates how to add custom primitives and useful traits for them. | does not apply, implements Rust traits for a primitive |
-| [`random_sampling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/math/random_sampling.rs) | Demonstrates how to sample random points from mathematical primitives | can be written, with the managed math |
-| [`render_primitives`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/math/render_primitives.rs) | Shows off rendering for all math primitives as both Meshes and Gizmos | can be written |
-| [`smooth_follow`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/movement/smooth_follow.rs) | Demonstrates how to make an entity smoothly follow another using interpolation | can be written |
+| [`random_sampling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/math/random_sampling.rs) | Demonstrates how to sample random points from mathematical primitives | missing, points sampled inside and on the boundary of Bevy's shapes |
+| [`render_primitives`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/math/render_primitives.rs) | Shows off rendering for all math primitives as both Meshes and Gizmos | missing, 2D meshes and their color materials, and gizmos of Bevy's primitive shapes |
+| [`smooth_follow`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/movement/smooth_follow.rs) | Demonstrates how to make an entity smoothly follow another using interpolation | [written](../BevyCSharp.Examples/movement/smooth_follow.cs) |
 
 ## Movement
 
@@ -460,10 +460,10 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`computed_states`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/computed_states.rs) | Advanced state patterns using Computed States. | can be written |
-| [`custom_transitions`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/custom_transitions.rs) | Creating and working with custom state transition schedules. | can be written |
-| [`states`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/states.rs) | Illustrates how to use States to control transitioning from a Menu state to an InGame state. | can be written |
-| [`sub_states`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/sub_states.rs) | Using Sub States for hierarchical state handling. | can be written |
+| [`computed_states`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/computed_states.rs) | Advanced state patterns using Computed States. | missing, a state holding values, such as a game that is paused or in turbo |
+| [`custom_transitions`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/custom_transitions.rs) | Creating and working with custom state transition schedules. | missing, transitions to the same state, run as schedules of a game's own |
+| [`states`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/states.rs) | Illustrates how to use States to control transitioning from a Menu state to an InGame state. | [written](../BevyCSharp.Examples/state/states.cs) |
+| [`sub_states`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/sub_states.rs) | Using Sub States for hierarchical state handling. | [written](../BevyCSharp.Examples/state/sub_states.cs) |
 
 ## Stress Tests
 
@@ -495,9 +495,9 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`time`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/time/time.rs) | Explains how Time is handled in ECS | can be written |
-| [`timers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/time/timers.rs) | Illustrates ticking `Timer` resources inside systems and handling their state | can be written |
-| [`virtual_time`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/time/virtual_time.rs) | Shows how `Time<Virtual>` can be used to pause, resume, slow down and speed up a game. | can be written |
+| [`time`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/time/time.rs) | Explains how Time is handled in ECS | does not apply, replaces Bevy's runner with one stepping the app from the console, and the bridge owns the runner |
+| [`timers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/time/timers.rs) | Illustrates ticking `Timer` resources inside systems and handling their state | [written](../BevyCSharp.Examples/time/timers.cs), prints [its output](assets/examples/timers.txt) |
+| [`virtual_time`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/time/virtual_time.rs) | Shows how `Time<Virtual>` can be used to pause, resume, slow down and speed up a game. | [written](../BevyCSharp.Examples/time/virtual_time.cs) |
 
 ## Tools
 
@@ -510,11 +510,11 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`3d_rotation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/transforms/3d_rotation.rs) | Illustrates how to (constantly) rotate an object around an axis | can be written |
-| [`align`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/transforms/align.rs) | A demonstration of Transform's axis-alignment feature | can be written |
-| [`scale`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/transforms/scale.rs) | Illustrates how to scale an object in each direction | can be written |
-| [`transform`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/transforms/transform.rs) | Shows multiple transformations of objects | can be written |
-| [`translation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/transforms/translation.rs) | Illustrates how to move an object along an axis | can be written |
+| [`3d_rotation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/transforms/3d_rotation.rs) | Illustrates how to (constantly) rotate an object around an axis | [written](../BevyCSharp.Examples/transforms/3d_rotation.cs) |
+| [`align`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/transforms/align.rs) | A demonstration of Transform's axis-alignment feature | [written](../BevyCSharp.Examples/transforms/align.cs) |
+| [`scale`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/transforms/scale.rs) | Illustrates how to scale an object in each direction | [written](../BevyCSharp.Examples/transforms/scale.cs) |
+| [`transform`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/transforms/transform.rs) | Shows multiple transformations of objects | [written](../BevyCSharp.Examples/transforms/transform.cs) |
+| [`translation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/transforms/translation.rs) | Illustrates how to move an object along an axis | [written](../BevyCSharp.Examples/transforms/translation.cs) |
 
 ## UI (User Interface)
 

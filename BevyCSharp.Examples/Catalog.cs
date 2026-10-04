@@ -1,6 +1,14 @@
 using BevyCSharp.Examples.Application;
+using BevyCSharp.Examples.AsyncTasks;
+using BevyCSharp.Examples.Cameras;
+using BevyCSharp.Examples.Clocks;
 using BevyCSharp.Examples.Ecs;
+using BevyCSharp.Examples.Inputs;
+using BevyCSharp.Examples.Movement;
+using BevyCSharp.Examples.Sound;
+using BevyCSharp.Examples.States;
 using BevyCSharp.Examples.ThreeD;
+using BevyCSharp.Examples.Transforms;
 
 namespace BevyCSharp.Examples;
 
@@ -65,6 +73,17 @@ internal static class Catalog
         new("return_after_run", ReturnAfterRun.Build, Prints: 3, Returned: ReturnAfterRun.Returned),
         new("settings", Settings.Build),
 
+        // Audio
+        new("audio", AudioExample.Build),
+        new("play_sound_effect", PlaySoundEffect.Build),
+        new("soundtrack", Soundtrack.Build),
+        new("spatial_audio_3d", SpatialAudio3d.Build),
+
+        // Camera
+        new("2d_on_ui", TwoDOnUi.Build),
+        new("camera_orbit", CameraOrbit.Build),
+        new("projection_zoom", ProjectionZoom.Build),
+
         // ECS (Entity Component System)
         new("callbacks", Callbacks.Build, Prints: 2),
         new("fixed_timestep", FixedTimestep.Build, FixedTimestep.Configure, Prints: 64),
@@ -76,6 +95,38 @@ internal static class Catalog
         new("run_conditions", RunConditions.Build, Prints: 160),
         new("startup_system", StartupSystem.Build, Prints: 1),
         new("system_closure", SystemClosure.Build, Prints: 3),
+
+        // Input
+        new("char_input_events", CharInputEvents.Build, Prints: 10, Drive: CharInputEvents.Drive),
+        new("gamepad_input", GamepadInput.Build, Prints: 12, Drive: GamepadInput.Drive),
+        new("gamepad_rumble", GamepadRumble.Build, Prints: 24, Drive: GamepadRumble.Drive),
+        new("keyboard_modifiers", KeyboardModifiers.Build, Prints: 10, Drive: KeyboardModifiers.Drive),
+        new("mouse_grab", MouseGrab.Build),
+        new("mouse_input", MouseInput.Build, Prints: 3),
+        new("touch_input", TouchInput.Build, Prints: 3),
+
+        // Transforms
+        new("3d_rotation", Rotation3d.Build),
+        new("align", Align.Build),
+        new("scale", ScaleExample.Build),
+        new("transform", TransformExample.Build),
+        new("translation", Translation.Build),
+
+        // Async Tasks
+        new("async_channel_pattern", AsyncChannelPattern.Build),
+        new("async_compute", AsyncCompute.Build),
+        new("external_source_external_thread", ExternalSourceExternalThread.Build, ExternalSourceExternalThread.Configure),
+
+        // Movement
+        new("smooth_follow", SmoothFollow.Build),
+
+        // State
+        new("states", StatesExample.Build),
+        new("sub_states", SubStates.Build),
+
+        // Time
+        new("timers", Timers.Build, Prints: 1300),
+        new("virtual_time", VirtualTime.Build),
     ];
 
     public static bool TryFind(string name, out Example example)

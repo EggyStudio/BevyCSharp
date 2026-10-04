@@ -17,7 +17,7 @@ program=$(ls -t BevyCSharp.Examples/bin/*/net10.0/BevyCSharp.Examples | head -1)
 if "$program" --printing | grep -qx "$1"; then
     out="${2:-.github/assets/examples/$1.png}"
     mkdir -p "$(dirname "$out")"
-    "$program" "$1" > "${out%.png}.txt"
+    "$program" "$1" --drive > "${out%.png}.txt"
     exit 0
 fi
 

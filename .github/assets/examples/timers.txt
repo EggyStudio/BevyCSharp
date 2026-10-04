@@ -1,0 +1,6 @@
+Timer is 20% complete!
+Entity timer just finished
+Timer is 40% complete!
+Timer is 60% complete!
+Timer is 80% complete!
+Paused percent trigger timer

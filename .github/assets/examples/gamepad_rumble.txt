@@ -1,0 +1,5 @@
+North face button: strong (low-frequency) with low intensity for rumble for 5 seconds. Press multiple times to increase intensity.
+East face button: maximum rumble on both motors for 5 seconds
+South face button: low-intensity rumble on the weak motor for 0.5 seconds
+West face button: custom rumble intensity for 5 second
+Start button: Interrupt the current rumble

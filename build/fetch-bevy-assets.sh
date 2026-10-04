@@ -15,6 +15,7 @@ while read -r path; do
     case "$path" in ''|'#'*) continue ;; esac
     [ -f "$into/$path" ] && continue
     mkdir -p "$into/$(dirname "$path")"
-    curl -fsSL --retry 3 -o "$into/$path" "https://raw.githubusercontent.com/bevyengine/bevy/v$version/assets/$path"
+    # Some of Bevy's files have spaces in their names, which a URL writes as %20.
+    curl -fsSL --retry 3 -o "$into/$path" "https://raw.githubusercontent.com/bevyengine/bevy/v$version/assets/${path// /%20}"
     echo "fetched $path"
 done < BevyCSharp.Examples/bevy-assets.txt

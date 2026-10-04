@@ -115,17 +115,7 @@ internal static class IterCombinations
         var ecs = ctx.Ecs;
         var camera = ecs.GetOrDefault<Transform>(_camera);
         var toward = Transform.LookingAt(camera.Translation, ecs.GetOrDefault<Transform>(_star).Translation, Vec3.UnitY).Rotation;
-        camera.Rotation = Lerp(toward, camera.Rotation, 0.1f);
+        camera.Rotation = Scene.Lerp(toward, camera.Rotation, 0.1f);
         ecs.Set(_camera, camera);
-    }
-
-    // Bevy's Quat::lerp, a straight blend taken the short way round and made a rotation again.
-    private static Quat Lerp(Quat from, Quat to, float t)
-    {
-        var dot = from.X * to.X + from.Y * to.Y + from.Z * to.Z + from.W * to.W;
-        var sign = dot < 0f ? -1f : 1f;
-        var (x, y, z, w) = (from.X + (to.X * sign - from.X) * t, from.Y + (to.Y * sign - from.Y) * t, from.Z + (to.Z * sign - from.Z) * t, from.W + (to.W * sign - from.W) * t);
-        var length = MathF.Sqrt(x * x + y * y + z * z + w * w);
-        return new Quat(x / length, y / length, z / length, w / length);
     }
 }

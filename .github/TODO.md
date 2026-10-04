@@ -24,11 +24,12 @@ names what the bridge lacks. Gathered by what they lack, these hold the most row
 the most examples, and the largest is taken between groups of examples. The counts come from
 `BevyCSharp.Examples/triage.tsv` and move as rows are written or found to be reachable.
 
-- **2D meshes, ten examples.** A `Mesh2d` drawn with a `ColorMaterial`, which no C# call makes
+- **2D meshes, fourteen examples.** A `Mesh2d` drawn with a `ColorMaterial`, which no C# call makes
   (`mesh2d`, `mesh2d_alpha_mode`, `mesh2d_arcs`, `mesh2d_repeated_texture`,
-  `mesh2d_vertex_color_texture`, `wireframe_2d`, `shader_material_2d`, `entity_disabling`, and
-  the two stress tests of sprite meshes). Needs the material made and set as `StandardMaterial` is, and a shader
-  material that draws on a 2D mesh.
+  `mesh2d_vertex_color_texture`, `wireframe_2d`, `shader_material_2d`, `entity_disabling`,
+  `2d_screen_shake`, `2d_top_down_camera`, `spatial_audio_2d`, `render_primitives`, and the two
+  stress tests of sprite meshes). Needs the material made and set as `StandardMaterial` is, and a
+  shader material that draws on a 2D mesh.
 - **Interface widgets and text input, fifteen examples.** Bevy's editable text (four), its core
   widgets and widget helpers (four), Feathers (three), scrollbars, and directional and tab
   navigation (three). Needs `EditableText` and the widget components spawned and read, and the
@@ -43,22 +44,37 @@ the most examples, and the largest is taken between groups of examples. The coun
   `removal_detection` are about and `error_handling`, `delayed_commands` and `entity_disabling`
   use for a click or a pointer moving over what they draw. Needs events a game declares,
   triggered from C# and from Bevy's picking, and C# code run as an observer.
+- **Input as events, five examples.** The keyboard, the mouse, touches and pads as Bevy's messages,
+  one per change in the order they came, which `keyboard_input_events`, `mouse_input_events`,
+  `touch_input_events` and `gamepad_input_events` print, and logical keys as Bevy's
+  `ButtonInput<Key>`, which `keyboard_input` reads for the key that types '?'. `Input` holds each
+  frame's state, which tells what is down and what changed but not in what order.
 - **Text gizmos, four examples.**
 - **An order among systems, three examples.** Systems in one stage run in no order a game sets,
   where `ecs_guide` puts its systems in sets one after another, `message` chains the systems that
   pass a message along in one frame, and `nondeterministic_system_order` has the schedule report
   systems whose order is ambiguous. Needs `before`, `after` and `chain` on a system and sets of
   them, carried to Bevy's schedule.
+- **Bevy's math, three examples.** Its bounding volumes with their casts and intersection tests
+  (`bounding_2d`), its cubic curves (`cubic_splines`), and points sampled inside and on its shapes
+  (`random_sampling`), which the managed math, a transform and its vectors, does not have.
+- **States, three examples.** A state that holds values, as `InGame { paused, turbo }` does
+  (`computed_states`, `state_scoped`), despawning as a state is entered or by a rule over the
+  transition (`state_scoped`), and transitions to the same state run as schedules of a game's own
+  (`custom_transitions`).
 - **Bevy's remote protocol, three examples.** `bcs` is this engine's own, so these wait on whether
   the protocol is worth carrying beside it.
 - **A second window, two examples.**
+- **Bevy's camera controllers, two examples.** Its free and pan cameras, their plugins and their
+  settings (`free_camera_controller`, `pan_camera_controller`), where `BevyCSharp.Examples` has a
+  free camera of its own written as a behavior.
 - **Six more, one example each.** A resource's change ticks and when a component was added
   (`change_detection`), a component's add and insert hooks (`component_hooks`), relationships of a
-  game's own (`relationships`), despawning as a state is entered or by a rule over the transition
-  (`state_scoped`), commands run after a delay (`delayed_commands`, which also waits on observers),
-  and Bevy's log written from C# at its levels (`logs`).
+  game's own (`relationships`), commands run after a delay (`delayed_commands`, which also waits on
+  observers), Bevy's log written from C# at its levels (`logs`), and a playing sound's speed changed
+  as it plays (`audio_control`).
 
-Three examples are written in part, each leaving out a feature named in its row.
+Four examples are written in part, each leaving out a feature named in its row.
 
 - **Extruded and line meshes**, which `3d_shapes` leaves out of its rows: Bevy's segment and
   polyline, and the extrusion of a 2D shape, solid or as a ring. `MeshShape` builds the solids and
@@ -67,6 +83,8 @@ Three examples are written in part, each leaving out a feature named in its row.
 - **Which compressed formats the GPU decodes**, which `skybox` cycles through in Bevy, so ASTC and
   ETC2 are left out here. Bevy reads them from the render device's features, and a call saying
   which a GPU has would let a game pick the cubemap it loads as Bevy's example does.
+- **A canceled touch**, which `touch_input` never prints, since the touches the frame reports are
+  those that started, moved and ended, and Bevy's own set of canceled ones is left out.
 - **Alpha to coverage**, which `transparency_3d`'s left cube is drawn without, blending instead.
   `AlphaMode` has Bevy's other modes, and this one needs the multisampled target it resolves
   against.

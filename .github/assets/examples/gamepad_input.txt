@@ -1,0 +1,4 @@
+Entity(119v0) just pressed South
+Entity(119v0) just released South
+Entity(119v0) LeftStickX value is 0.5
+Entity(119v0) LeftStickX value is 0.5

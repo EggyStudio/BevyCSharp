@@ -19,9 +19,10 @@ failed=()
 program=$(ls -t BevyCSharp.Examples/bin/*/net10.0/BevyCSharp.Examples | head -1)
 printing=$("$program" --printing)
 
-# Examples that show and print nothing by design, Bevy's two empty applications and drag_and_drop
-# until a file is dropped on it, so their capture is not held to saying something.
-empty="drag_and_drop empty empty_defaults"
+# Examples that show and print nothing by design, Bevy's two empty applications, and those that
+# wait for a file dropped, the mouse or a touch, which a capture has none of, so their capture is
+# not held to saying something.
+empty="drag_and_drop empty empty_defaults mouse_grab mouse_input touch_input"
 
 for example in $("$program" --list); do
     if ! build/capture-example.sh "$example" "$into/$example.png"; then

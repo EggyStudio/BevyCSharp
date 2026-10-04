@@ -14,6 +14,7 @@ using BevyCSharp.Examples;
 //   --list         prints every example's name
 //   --printing     prints the names of those that print rather than draw, which run headless
 //   --window       opens an empty window for one that prints, so one that reads keys has them
+//   --drive        gives one that waits for input the few keys or buttons its capture is taken with
 //
 // .github/EXAMPLES.md has a row for every one of Bevy's examples, these among them.
 if (args.Length == 0 || args[0] is "--list" or "--printing")
@@ -51,7 +52,12 @@ if ((example.Prints == 0 || args.Contains("--window")) && !App.HasRenderer)
     return 1;
 }
 
-var code = BevyApp.Run(example.Build, config);
+var drive = args.Contains("--drive");
+var code = BevyApp.Run(app =>
+{
+    example.Build(app);
+    if (drive) example.Drive?.Invoke(app);
+}, config);
 example.Returned?.Invoke();
 return code;
 

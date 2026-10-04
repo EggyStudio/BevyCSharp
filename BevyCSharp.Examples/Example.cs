@@ -11,12 +11,23 @@ namespace BevyCSharp.Examples;
 /// them is its capture. Zero for one that draws.
 /// </param>
 /// <param name="Returned">What runs once the app has stopped and the program is back in its own code.</param>
+/// <param name="Drive">
+/// Input given to an example that waits for it, a few keys or buttons at set frames, added when it
+/// is run with <c>--drive</c> as a capture runs it, so one that prints what it is given has
+/// something to print.
+/// </param>
 /// <remarks>
 /// Bevy's examples of the ECS mostly print to the console, some in a window left empty, and one
 /// that prints is run here with no window at all, so it needs no renderer and its output is
 /// the same on any machine.
 /// </remarks>
-internal sealed record Example(string Name, Action<App> Build, Action<Config>? Configure = null, uint Prints = 0, Action? Returned = null);
+internal sealed record Example(
+    string Name,
+    Action<App> Build,
+    Action<Config>? Configure = null,
+    uint Prints = 0,
+    Action? Returned = null,
+    Action<App>? Drive = null);
 
 /// <summary>Helpers for what Bevy's examples say in one word and the bridge in several.</summary>
 internal static class Scene
@@ -43,6 +54,57 @@ internal static class Scene
     {
         var descriptor = new SystemDescriptor(world => run(new BehaviorContext(world)), name);
         return app.AddSystem(stage, runIf is null ? descriptor : descriptor.RunIf(runIf));
+    }
+
+    /// <summary>
+    /// Runs each step on its frame, counted from the first update, for input pretended where a
+    /// person would give it.
+    /// </summary>
+    public static App Script(this App app, params (int Frame, Action Step)[] steps)
+    {
+        var frame = 0;
+        return app.Update(_ =>
+        {
+            frame++;
+            foreach (var (at, step) in steps)
+                if (at == frame) step();
+        }, "Example.Script");
+    }
+
+    /// <summary>
+    /// Bevy's <c>Quat::lerp</c>, a straight blend taken the short way round and made a rotation
+    /// again, which the library leaves to a game.
+    /// </summary>
+    public static Quat Lerp(Quat from, Quat to, float t)
+    {
+        var sign = Dot(from, to) < 0f ? -1f : 1f;
+        return Normalize(new Quat(
+            from.X + (to.X * sign - from.X) * t,
+            from.Y + (to.Y * sign - from.Y) * t,
+            from.Z + (to.Z * sign - from.Z) * t,
+            from.W + (to.W * sign - from.W) * t));
+    }
+
+    /// <summary>Bevy's <c>Quat::slerp</c>, turning at an even rate along the shorter way.</summary>
+    public static Quat Slerp(Quat from, Quat to, float t)
+    {
+        var dot = Dot(from, to);
+        if (dot < 0f) (to, dot) = (new Quat(-to.X, -to.Y, -to.Z, -to.W), -dot);
+
+        // Nearly the same rotation, where the angle is too small to divide by.
+        if (dot > 0.9995f) return Lerp(from, to, t);
+
+        var angle = MathF.Acos(dot);
+        var (a, b) = (MathF.Sin((1f - t) * angle) / MathF.Sin(angle), MathF.Sin(t * angle) / MathF.Sin(angle));
+        return new Quat(from.X * a + to.X * b, from.Y * a + to.Y * b, from.Z * a + to.Z * b, from.W * a + to.W * b);
+    }
+
+    private static float Dot(Quat a, Quat b) => a.X * b.X + a.Y * b.Y + a.Z * b.Z + a.W * b.W;
+
+    private static Quat Normalize(Quat q)
+    {
+        var length = MathF.Sqrt(Dot(q, q));
+        return new Quat(q.X / length, q.Y / length, q.Z / length, q.W / length);
     }
 
     /// <summary>A color given in sRGB, as Bevy's <c>Color::srgb</c>, in the linear terms a material takes.</summary>

@@ -64,3 +64,12 @@ environment_maps/sky_skybox.ktx2
 models/PalmTree/PalmTree.gltf
 models/PalmTree/PalmTree.bin
 models/PalmTree/StylizedWater.png
+textures/rpg/chars/sensei/sensei.png
+sounds/Windless Slopes.ogg
+sounds/breakout_collision.ogg
+sounds/Mysterious acoustic guitar.ogg
+sounds/Epic orchestra music.ogg
+models/ship/craft_speederD.gltf
+models/ship/craft_speederD_data.bin
+branding/bevy_bird_dark.png
+textures/simplespace/ship_C.png
