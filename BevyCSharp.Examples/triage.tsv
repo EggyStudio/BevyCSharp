@@ -14,7 +14,7 @@ animated_material	can
 generate_custom_mesh	can
 anti_aliasing	can
 atmospheric_fog	can	through Bevy's reflected DistanceFog
-atmosphere	can
+atmosphere	missing	Bevy's Mars scattering medium and its choice of rendering method, and the water's standard material extended by a shader of the example's own
 fog	can	through Bevy's reflected DistanceFog
 auto_exposure	can
 blend_modes	can
@@ -25,7 +25,7 @@ ssao	can
 spotlight	can	its cubes scattered by .NET's generator rather than Bevy's
 bloom_3d	can
 decal	missing	forward decals (ForwardDecal)
-deferred_rendering	can
+deferred_rendering	missing	a material's depth map for parallax mapping, and a material drawn forward while the rest are deferred
 motion_blur	can
 order_independent_transparency	can
 tonemapping	can
@@ -53,7 +53,7 @@ lightmaps	can	through Bevy's reflected Lightmap and a material's LightmapExposur
 reflection_probes	can
 visibility_range	can
 ssr	can
-camera_sub_view	can	through the sub view of Bevy's reflected Camera
+camera_sub_view	can
 color_grading	can
 clearcoat	can
 depth_of_field	can

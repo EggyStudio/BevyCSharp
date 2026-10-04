@@ -4,12 +4,12 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**124 written, 7 written in part, 115 can be written, 118 missing and 57 do not apply.** Of the 364 that apply, 246 can be written with what is bridged, 7 of them leaving something out.
+**125 written, 7 written in part, 112 can be written, 120 missing and 57 do not apply.** Of the 364 that apply, 244 can be written with what is bridged, 7 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 12 | 1 | 0 | 15 | 1 |
-| [3D Rendering](#3d-rendering) | 41 | 3 | 20 | 3 | 0 |
+| [3D Rendering](#3d-rendering) | 42 | 3 | 17 | 5 | 0 |
 | [Animation](#animation) | 0 | 0 | 6 | 7 | 0 |
 | [Application](#application) | 7 | 0 | 3 | 2 | 7 |
 | [Assets](#assets) | 0 | 0 | 10 | 2 | 5 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **124** | **7** | **115** | **118** | **57** |
+| **All** | **125** | **7** | **112** | **120** | **57** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. Where Bevy's site runs the example in a browser, the row links it live, which is Bevy's Rust original rather than the C# one here.
 
@@ -90,19 +90,19 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`animated_material`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/animated_material.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/animated-material/) | Shows how to animate material properties | [written](../BevyCSharp.Examples/3d/animated_material.cs) |
 | [`anisotropy`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/anisotropy.rs) | Displays an example model with anisotropy | can be written |
 | [`anti_aliasing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/anti_aliasing.rs) | Compares different anti-aliasing techniques supported by Bevy | can be written |
-| [`atmosphere`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/atmosphere.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/atmosphere/) | A scene showcasing pbr atmospheric scattering | can be written |
+| [`atmosphere`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/atmosphere.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/atmosphere/) | A scene showcasing pbr atmospheric scattering | missing, Bevy's Mars scattering medium and its choice of rendering method, and the water's standard material extended by a shader of the example's own |
 | [`atmospheric_fog`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/atmospheric_fog.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/atmospheric-fog/) | A scene showcasing the atmospheric fog effect | [written](../BevyCSharp.Examples/3d/atmospheric_fog.cs), through Bevy's reflected DistanceFog |
 | [`auto_exposure`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/auto_exposure.rs) | A scene showcasing auto exposure | [written](../BevyCSharp.Examples/3d/auto_exposure.cs) |
 | [`blend_modes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/blend_modes.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/blend-modes/) | Showcases different blend modes | [written](../BevyCSharp.Examples/3d/blend_modes.cs) |
 | [`bloom_3d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/bloom_3d.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/bloom-3d/) | Illustrates bloom configuration using HDR and emissive materials | [written](../BevyCSharp.Examples/3d/bloom_3d.cs) |
-| [`camera_sub_view`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/camera_sub_view.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/camera-sub-view/) | Demonstrates using different sub view effects on a camera | can be written, through the sub view of Bevy's reflected Camera |
+| [`camera_sub_view`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/camera_sub_view.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/camera-sub-view/) | Demonstrates using different sub view effects on a camera | [written](../BevyCSharp.Examples/3d/camera_sub_view.cs) |
 | [`clearcoat`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/clearcoat.rs) | Demonstrates the clearcoat PBR feature | [written](../BevyCSharp.Examples/3d/clearcoat.cs) |
 | [`clustered_decal_maps`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/clustered_decal_maps.rs) | Demonstrates normal and metallic-roughness maps of decals | can be written, through Bevy's reflected ClusteredDecal |
 | [`clustered_decals`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/clustered_decals.rs) | Demonstrates clustered decals | can be written, through Bevy's reflected ClusteredDecal |
 | [`color_grading`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/color_grading.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/color-grading/) | Demonstrates color grading | can be written |
 | [`contact_shadows`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/contact_shadows.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/contact-shadows/) | Showcases how contact shadows add shadow detail | can be written |
 | [`decal`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/decal.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/decal/) | Decal rendering | missing, forward decals (ForwardDecal) |
-| [`deferred_rendering`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/deferred_rendering.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/deferred-rendering/) | Renders meshes with both forward and deferred pipelines | can be written |
+| [`deferred_rendering`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/deferred_rendering.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/deferred-rendering/) | Renders meshes with both forward and deferred pipelines | missing, a material's depth map for parallax mapping, and a material drawn forward while the rest are deferred |
 | [`depth_of_field`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/depth_of_field.rs) | Demonstrates depth of field | [written](../BevyCSharp.Examples/3d/depth_of_field.cs) |
 | [`fog`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/fog.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/fog/) | A scene showcasing the distance fog effect | [written](../BevyCSharp.Examples/3d/fog.cs), through Bevy's reflected DistanceFog |
 | [`fog_volumes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/fog_volumes.rs) | Demonstrates fog volumes | [written](../BevyCSharp.Examples/3d/fog_volumes.cs), through Bevy's reflected FogVolume |
