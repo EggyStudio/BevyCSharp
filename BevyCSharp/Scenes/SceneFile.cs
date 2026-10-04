@@ -386,6 +386,36 @@ public static class SceneFile
     }
 
     /// <summary>
+    /// Whether a scene can say how to make what an entity is drawn with, as <see cref="Write"/>
+    /// writes it, or the entity is drawn with nothing.
+    /// </summary>
+    /// <remarks>
+    /// A mesh or a material from a file is named by the file, and one made in memory is written as
+    /// a primitive's recipe, a mesh's geometry or a standard material's settings. Anything else,
+    /// such as a material drawn by a shader of the game's own, is left out of a scene, and an
+    /// entity carrying one comes back from it with nothing to draw.
+    /// </remarks>
+    public static bool CanDescribe(EcsWorld world, Entity entity)
+    {
+        if (!App.HasRenderer) return true;
+
+        var mesh = Render.MeshOf(world, entity);
+        var meshKnown = !mesh.IsValid
+            || Render.MeshPathOf(entity) is { Length: > 0 }
+            || MeshFiles.PathOf(mesh) is { Length: > 0 }
+            || Render.RecipeOf(mesh) is not null
+            || Render.DataOf(mesh) is not null;
+
+        var material = Render.MaterialOf(world, entity);
+        var materialKnown = !material.IsValid
+            || Render.MaterialPathOf(entity) is { Length: > 0 }
+            || MaterialFiles.PathOf(material) is { Length: > 0 }
+            || Render.TryReadMaterial(material, out _);
+
+        return meshKnown && materialKnown;
+    }
+
+    /// <summary>
     /// Writes an entity's components as an object keyed by their full names, with what a load kept
     /// for it back where it was.
     /// </summary>

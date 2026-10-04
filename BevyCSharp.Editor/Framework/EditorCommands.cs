@@ -474,14 +474,9 @@ public static class EditorCommands
             "Entity/Delete",
             static world =>
             {
-                // A node of an instance is deleted as an override, so the next load of the scene
-                // does not bring it back with the model.
-                foreach (var entity in EditorSelection.All.ToArray())
-                {
-                    if (world.IsAlive(entity) && !SceneInstances.Delete(world, entity)) world.Despawn(entity);
-                }
-
-                EditorSelection.Clear();
+                // Kept as a scene for the undo, and a node of an instance deleted as an override,
+                // so the next load of the scene does not bring it back with the model.
+                EditorEntity.Delete(world, EditorSelection.All.ToArray());
             },
             4,
             EditorIcons.Delete,

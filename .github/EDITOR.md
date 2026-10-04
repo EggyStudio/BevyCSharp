@@ -475,7 +475,11 @@ own name, so a drag along a bar or a number typed one character at a time comes 
 change. The same goes for what the panels do outside a field: a rename, a drag on the handles, an
 entity taken out of its parent, something hidden with its eye, and a component put on or taken off.
 Taking one off keeps what it held, so putting it back is the component again rather than a fresh
-empty one in its place.
+empty one in its place. A delete keeps what went as a scene in memory, so undoing it brings the
+entities back with what was under them, what they were drawn with and where they stood, and points
+the entity fields that named them at the ones that came back. A node of a placed model, and an
+entity drawn with something a scene cannot describe, are deleted with a line in the console saying
+there is no way back.
 
 There is no drawer table. A field kind is one arm of one switch, so a kind drawn in a different
 shape is a branch in one method.

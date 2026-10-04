@@ -26,11 +26,11 @@ public sealed record EditorEdit(
 /// more honest than snapshotting a world and diffing it.
 /// </para>
 /// <para>
-/// <b>What is not here.</b> Despawning is not undoable and is deliberately not recorded, because
-/// an entity's mesh and material are engine-side components with no mirror on this side, so what
-/// came back would be an entity with the right name and nothing to draw. Recording it would make
-/// undo look like it worked. The rule this follows is that an operation goes in the history only
-/// when it can be reversed exactly.
+/// An operation goes in the history only when it can be reversed whole. A delete is, by keeping
+/// what went as a scene in memory, which writes an entity's mesh and material as well as its
+/// components (<see cref="EditorEntity.Delete"/>), and one that cannot be is left out with a line
+/// in the console rather than recorded as though it could, since an undo that brings back an
+/// entity with nothing to draw looks as though it worked.
 /// </para>
 /// </remarks>
 public static class EditorHistory

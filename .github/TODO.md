@@ -335,12 +335,12 @@ language.
 - **A selection is remembered by name**, so what a reloaded script respawns is found again. All of
   them or none, since half a selection coming back is worse than none. Two entities sharing a name
   still resolve to the first.
-- **Undo covers what can be reversed exactly**, which is a field edited in the inspector, a
-  rename, a new entity, a duplicate, something hidden with its eye, and a component put on or taken
-  off, keeping what it held. Despawning is deliberately not recorded. An entity's mesh and material
-  can be named where they were loaded from, so a despawn could be reversed for one drawn with
-  files, and not for one drawn with a mesh built in memory. Half a despawn coming back is worse than
-  none.
+- **Undo brings a deleted entity back as a new one.** A delete is kept as a scene in memory and
+  read back on undo, under the parent it had and with the entity fields that named it pointed at
+  it again, so it comes back whole. It is a new entity, as a duplicate's redo is, so an edit before
+  the delete that named the old one finds nothing, and a reference inside a list's item is left as
+  it was. A node of a placed model, and an entity drawn with a shader material or anything else a
+  scene cannot describe, are deleted with no way back and a line in the console saying so.
 - **Settings are the editor's, not the project's.** `EditorSettings` saves to
   `user://settings.json` with the layout, in the editor's own directory, and everything on it
   belongs to the person using this editor. A project setting worth the

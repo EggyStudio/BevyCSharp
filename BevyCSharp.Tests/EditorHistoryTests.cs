@@ -207,4 +207,83 @@ public sealed class EditorHistoryTests
         Assert.False(after);
         Assert.True(again);
     }
+
+    /// <summary>
+    /// A deleted entity comes back on undo with what was under it, what it was drawn with, where
+    /// it stood, and what pointed at it, and goes again on redo.
+    /// </summary>
+    [SkippableFact]
+    public void ADeleteComesBackWithWhatIsUnderItAndWhatPointedAtIt()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+
+        var deleted = false;
+        var redone = false;
+        string? lid = null;
+        Vec3 at = default;
+        MeshRecipe? recipe = null;
+        MaterialSettings? paint = null;
+        var pointed = false;
+        var twice = false;
+        var ran = false;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (ran) return;
+            ran = true;
+
+            var ecs = ctx.Ecs;
+            EditorHistory.Clear();
+
+            // Drawn with a primitive and a material made in memory, which only a scene's
+            // resources can bring back.
+            var box = ecs.Spawn();
+            ecs.SetName(box, "Box");
+            ecs.Add(box, Transform.At(1f, 2f, 3f));
+            Render.SetMesh(ecs, box, Render.CreateMesh(MeshShape.Cuboid, 1f, 2f, 3f));
+            Render.SetMaterial(ecs, box, Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 0f, 0f, 1f) }));
+
+            var under = ecs.Spawn();
+            ecs.SetName(under, "Lid");
+            ecs.SetParent(under, box);
+
+            var follower = ecs.Spawn();
+            ecs.SetName(follower, "Follower");
+            ecs.Add(follower, new EveryKind { Target = box, Count = 7 });
+
+            EditorEntity.Delete(ecs, [box]);
+            deleted = !ecs.IsAlive(box) && !ecs.IsAlive(under);
+
+            EditorHistory.Undo(ecs);
+
+            var back = ecs.All().Single(entity => ecs.NameOf(entity) == "Box");
+            lid = ecs.ChildrenOf(back).Select(ecs.NameOf).SingleOrDefault();
+            at = ecs.GetRef<Transform>(back).Translation;
+            recipe = Render.RecipeOf(Render.MeshOf(ecs, back));
+            Render.TryReadMaterial(Render.MaterialOf(ecs, back), out paint);
+            pointed = ecs.GetRef<EveryKind>(follower).Target == back;
+
+            EditorHistory.Redo(ecs);
+            redone = !ecs.All().Any(entity => ecs.NameOf(entity) is "Box" or "Lid");
+
+            // And back a second time, from what the redo kept.
+            EditorHistory.Undo(ecs);
+            var again = ecs.All().Single(entity => ecs.NameOf(entity) == "Box");
+            twice = ecs.GetRef<EveryKind>(follower).Target == again && ecs.ChildrenOf(again).Length == 1;
+        });
+
+        harness.Run();
+
+        Assert.True(deleted);
+        Assert.Equal("Lid", lid);
+        Assert.Equal(new Vec3(1f, 2f, 3f), at);
+        Assert.Equal(new MeshRecipe(MeshShape.Cuboid, 1f, 2f, 3f), recipe);
+        Assert.NotNull(paint);
+        Assert.Equal((1f, 0f, 0f, 1f), paint.BaseColor);
+        Assert.True(pointed, "the follower did not point at the box that came back");
+        Assert.True(redone);
+        Assert.True(twice);
+    }
 }

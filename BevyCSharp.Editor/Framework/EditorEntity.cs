@@ -98,6 +98,230 @@ public static class EditorEntity
         return made;
     }
 
+    /// <summary>
+    /// Despawns each entity given with what is under it, and puts the change on the undo stack.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What goes is written as a scene first, in memory, the way Project/Save writes the world:
+    /// every component the scene format holds, and the mesh and material each is drawn with, by
+    /// the file it came from or, made in memory, as a primitive's recipe, a mesh's geometry or a
+    /// material's settings. Undoing reads it back, puts each top entity under the parent it had,
+    /// and points every entity field outside it that named one of them at the entity that came
+    /// back, so a camera following a deleted target follows it again. Redoing deletes those the
+    /// same way.
+    /// </para>
+    /// <para>
+    /// What comes back is new entities, as a duplicate's redo is, so an earlier edit on the undo
+    /// stack that named one of the old ones finds nothing. The components a scene leaves out, the
+    /// engine's own bookkeeping, are worked out again by the engine as they are on a load.
+    /// </para>
+    /// <para>
+    /// Two kinds are deleted without a way back, each with a line in the console saying so. One is
+    /// a node of a placed model, which is a change recorded in the model's instance and comes back
+    /// only with the model, and the other an entity drawn with a mesh or a material the scene
+    /// cannot describe, which would come back with nothing to draw.
+    /// </para>
+    /// </remarks>
+    /// <param name="world">The world the entities are in.</param>
+    /// <param name="chosen">What to delete.</param>
+    public static void Delete(EcsWorld world, IReadOnlyList<Entity> chosen)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(chosen);
+
+        var alive = chosen.Where(world.IsAlive).ToHashSet();
+
+        // A node of an instance is deleted as an override, so the next load of the scene does not
+        // bring it back with the model, and is not something a scene of its own can restore.
+        foreach (var node in alive.ToArray())
+        {
+            if (!SceneInstances.IsFromModel(world, node) || !SceneInstances.Delete(world, node)) continue;
+
+            alive.Remove(node);
+            Console.WriteLine($"[editor] {Called(world, node)} is part of a placed model, so deleting it cannot be undone");
+        }
+
+        // The top ones, since deleting one deletes what is under it.
+        var tops = alive.Where(entity => !Ancestors(world, entity).Any(alive.Contains)).ToList();
+        if (tops.Count == 0)
+        {
+            EditorSelection.Clear();
+            return;
+        }
+
+        var kept = Keep(world, tops, out var lost);
+
+        // Named while there is still something to ask.
+        var title = tops.Count == 1 ? $"delete {Called(world, tops[0])}" : $"delete {tops.Count}";
+
+        foreach (var top in tops) world.Despawn(top);
+        EditorSelection.Clear();
+
+        foreach (var what in lost) Console.WriteLine($"[editor] {what}, so deleting it cannot be undone");
+
+        if (kept is null) return;
+
+        var held = kept;
+        List<Entity> back = [];
+
+        EditorHistory.Record(
+            title,
+            undo =>
+            {
+                back = Restore(undo, held);
+                Choose(back);
+            },
+            redo =>
+            {
+                // The ones the undo brought back, kept again as they stand, and deleted.
+                var again = back.Where(redo.IsAlive).ToList();
+                held = Keep(redo, again, out _) ?? held;
+                foreach (var top in again) redo.Despawn(top);
+                EditorSelection.Clear();
+            });
+    }
+
+    /// <summary>What a delete keeps to bring back, the scene it wrote and where each top one was.</summary>
+    private sealed record Kept(string Scene, (int Id, Entity Parent, Entity Was)[] Tops, Dictionary<int, Entity> Was);
+
+    /// <summary>
+    /// Writes the entities under each top one as a scene, leaving out the tops that cannot come back
+    /// whole, which <paramref name="lost"/> says why of.
+    /// </summary>
+    private static Kept? Keep(EcsWorld world, List<Entity> tops, out List<string> lost)
+    {
+        lost = [];
+
+        var whole = new List<Entity>();
+        foreach (var top in tops)
+        {
+            var under = Subtree(world, top);
+
+            // Drawn with something the scene cannot say how to make, which would come back as an
+            // entity with nothing to draw.
+            if (App.HasRenderer && under.FirstOrDefault(entity => !Drawable(world, entity)) is { IsNone: false } bare)
+            {
+                lost.Add($"{Called(world, bare)} is drawn with a mesh or material a scene cannot describe");
+                continue;
+            }
+
+            whole.Add(top);
+        }
+
+        if (whole.Count == 0) return null;
+
+        var members = whole.SelectMany(top => Subtree(world, top)).ToHashSet();
+
+        var buffer = new System.Buffers.ArrayBufferWriter<byte>();
+        using (var json = new System.Text.Json.Utf8JsonWriter(buffer))
+            SceneFile.Write(world, json, members.Contains);
+
+        // Writing gave each entity its id in the scene, which the one read back carries too.
+        var was = members.ToDictionary(entity => IdOf(world, entity), entity => entity);
+        var placed = whole.Select(top => (IdOf(world, top), world.ParentOf(top), top)).ToArray();
+
+        return new Kept(System.Text.Encoding.UTF8.GetString(buffer.WrittenSpan), placed, was);
+    }
+
+    /// <summary>
+    /// Spawns what a delete kept, puts each top one back under its parent, and points the entity
+    /// fields of everything else that named one of the old entities at the new one.
+    /// </summary>
+    /// <returns>The top entities that came back.</returns>
+    private static List<Entity> Restore(EcsWorld world, Kept kept)
+    {
+        using var document = System.Text.Json.JsonDocument.Parse(kept.Scene);
+        var load = SceneFile.Read(world, document.RootElement);
+
+        var spawned = new Dictionary<int, Entity>();
+        foreach (var entity in load.Entities)
+        {
+            if (world.TryGet<SceneId>(entity, out var id)) spawned[id.Value] = entity;
+        }
+
+        var tops = new List<Entity>();
+        foreach (var (id, parent, _) in kept.Tops)
+        {
+            if (!spawned.TryGetValue(id, out var top)) continue;
+
+            if (!parent.IsNone && world.IsAlive(parent)) world.SetParent(top, parent);
+            tops.Add(top);
+        }
+
+        var moved = new Dictionary<Entity, Entity>();
+        foreach (var (id, old) in kept.Was)
+        {
+            if (spawned.TryGetValue(id, out var back)) moved[old] = back;
+        }
+
+        Repoint(world, moved, load.Entities.ToHashSet());
+        return tops;
+    }
+
+    /// <summary>Points every entity field outside <paramref name="skip"/> that names an old entity at its new one.</summary>
+    /// <remarks>
+    /// The fields a schema lists at the top of a component, which is where a reference to another
+    /// entity is held. One inside a list's item is left as it was.
+    /// </remarks>
+    private static void Repoint(EcsWorld world, Dictionary<Entity, Entity> moved, HashSet<Entity> skip)
+    {
+        if (moved.Count == 0) return;
+
+        foreach (var entity in world.All())
+        {
+            if (skip.Contains(entity)) continue;
+
+            foreach (var id in world.ComponentsOf(entity))
+            {
+                if (ComponentSchemas.For(id) is not { } schema) continue;
+
+                foreach (var field in schema.Fields)
+                {
+                    if (field.Kind != FieldKind.Entity || !field.IsWritable) continue;
+                    if (field.Read(world, entity) is Entity named && moved.TryGetValue(named, out var back))
+                        field.Write(world, entity, back);
+                }
+            }
+        }
+    }
+
+    /// <summary>The id a scene gave an entity when it was written.</summary>
+    private static int IdOf(EcsWorld world, Entity entity) =>
+        world.TryGet<SceneId>(entity, out var id) ? id.Value : 0;
+
+    /// <summary>An entity and everything under it, the entity first.</summary>
+    private static List<Entity> Subtree(EcsWorld world, Entity top)
+    {
+        var found = new List<Entity>();
+        var stack = new Stack<Entity>([top]);
+
+        while (stack.TryPop(out var entity))
+        {
+            // A placed model's own nodes come back with the model, as a scene file writes them.
+            if (entity != top && SceneInstances.IsFromModel(world, entity)) continue;
+
+            found.Add(entity);
+            foreach (var child in world.ChildrenOf(entity)) stack.Push(child);
+        }
+
+        return found;
+    }
+
+    /// <summary>The entities above one, nearest first.</summary>
+    private static IEnumerable<Entity> Ancestors(EcsWorld world, Entity entity)
+    {
+        for (var above = world.ParentOf(entity); !above.IsNone; above = world.ParentOf(above)) yield return above;
+    }
+
+    /// <summary>Whether a scene can say how to make what an entity is drawn with, or it is drawn with nothing.</summary>
+    private static bool Drawable(EcsWorld world, Entity entity) =>
+        SceneFile.CanDescribe(world, entity);
+
+    /// <summary>An entity as a line in the console names it.</summary>
+    private static string Called(EcsWorld world, Entity entity) =>
+        world.IsAlive(entity) && world.NameOf(entity) is { Length: > 0 } name ? name : entity.ToString();
+
     /// <summary>Clones each source that still exists and names the copies.</summary>
     private static List<Entity> Copies(EcsWorld world, IReadOnlyList<Entity> sources)
     {
