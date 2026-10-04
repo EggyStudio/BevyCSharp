@@ -9,6 +9,12 @@ https://github.com/bevyengine/bevy_asset_files/raw/main/pccm_example/outer_cube.
 branding/bevy_logo_light.png
 environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2
 environment_maps/pisa_specular_rgb9e5_zstd.ktx2
+models/AnisotropyBarnLamp/AnisotropyBarnLamp.bin
+models/AnisotropyBarnLamp/AnisotropyBarnLamp.gltf
+models/AnisotropyBarnLamp/AnisotropyBarnLamp_anisotropy.ktx2
+models/AnisotropyBarnLamp/AnisotropyBarnLamp_basecolor.jpeg
+models/AnisotropyBarnLamp/AnisotropyBarnLamp_normalbump.ktx2
+models/AnisotropyBarnLamp/AnisotropyBarnLamp_occlusionroughnessmetal.ktx2
 models/animated/Fox.glb
 textures/array_texture.png
 branding/bevy_logo_dark_big.png
