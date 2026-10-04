@@ -3609,6 +3609,7 @@ and asks it things:
 ./bcs command entity.set Cube Transform.Rotation -30,45,0    # degrees, as the inspector shows them
 ./bcs command input.click 1450 700
 ./bcs command input.hold W,D 12        # held for twelve frames exactly, for a game walking while they are
+./bcs command input.drag 400 300 120 0 10   # pressed, moved 12 pixels a frame for ten frames, released
 ./bcs command frames.wait 5
 ./bcs command frame.profile 240        # what a frame spends, split as .github/PERFORMANCE.md describes
 ./bcs shot /tmp/after.png              # captures the window, and waits for the file

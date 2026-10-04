@@ -110,3 +110,5 @@ None open.
 
 
 - Shared: a system run on a move from one state value to a particular other is taken in the commit carrying this line, as `[OnTransition(from, to)]` over Bevy's `OnTransition` schedule, run between the exit and the entry, also for a script reloaded while running. Naming two enums is BCS009 when compiled.
+
+- Shared: a pointer dragged a step a frame by one command is taken in the commit carrying this line, as `input.drag <x> <y> <dx> <dy> <frames> [Left|Right|Middle]`, which presses where it starts, moves an equal step each frame and releases the frame after, answering then.

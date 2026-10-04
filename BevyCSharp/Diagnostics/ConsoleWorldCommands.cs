@@ -239,6 +239,91 @@ internal static class ConsoleWorldCommands
         return $"released {x:0},{y:0}";
     }
 
+    /// <summary>
+    /// Drags the pointer with a button held, an equal step a frame.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A swipe, a transform handle dragged or a panel moved, which <c>input.press</c>,
+    /// <c>input.move</c> and <c>input.release</c> in separate calls cannot time, since each call
+    /// is a round trip of a few frames and a drag is read a frame at a time. The button goes down
+    /// at the start now, the pointer moves a step each frame for the frames given, and the button
+    /// comes up at the end the frame after the last step, so the press and the release are on
+    /// frames of their own, as picking asks. The answer comes the frame after the release.
+    /// </para>
+    /// <para>
+    /// The left button unless another is named. Held at most a few frames short of
+    /// <see cref="ConsoleHost.LaterFrames"/>, which is as long as a caller waits for an answer.
+    /// </para>
+    /// </remarks>
+    [Command("input.drag", "Drags with a button held, a step a frame: input.drag <x> <y> <dx> <dy> <frames> [Left|Right|Middle]")]
+    internal static string Drag(string line)
+    {
+        if (!TryReadDrag(line, out var drag, out var problem))
+        {
+            ConsoleHost.Fail("BAD_ARGUMENTS", problem);
+            return "input.drag <x> <y> <dx> <dy> <frames> [Left|Right|Middle]";
+        }
+
+        SyntheticInput.Press(drag.X, drag.Y, drag.Button);
+
+        var step = 0;
+        var released = false;
+        ConsoleHost.Later(() =>
+        {
+            if (released) return $"dragged {drag.Button} from {drag.X:0},{drag.Y:0} by {drag.Dx:0},{drag.Dy:0} over {drag.Frames} frames";
+
+            if (step < drag.Frames)
+            {
+                var (x, y) = drag.At(++step);
+                SyntheticInput.MoveTo(x, y);
+                return null;
+            }
+
+            var (endX, endY) = drag.At(drag.Frames);
+            SyntheticInput.Release(endX, endY, drag.Button);
+            released = true;
+            return null;
+        });
+
+        return $"dragging {drag.Button} from {drag.X:0},{drag.Y:0} by {drag.Dx:0},{drag.Dy:0} over {drag.Frames} frames";
+    }
+
+    /// <summary>A drag <c>input.drag</c> was asked for, from a point, by a distance, over a number of frames.</summary>
+    internal readonly record struct PointerDrag(float X, float Y, float Dx, float Dy, int Frames, MouseButton Button)
+    {
+        /// <summary>Where the pointer is after the given step, the last being the end.</summary>
+        public (float X, float Y) At(int step) => (X + (Dx * step / Frames), Y + (Dy * step / Frames));
+    }
+
+    /// <summary>Reads <c>input.drag</c>'s words, or says what is wrong with them.</summary>
+    internal static bool TryReadDrag(string line, out PointerDrag drag, out string problem)
+    {
+        drag = default;
+        problem = "input.drag takes where it starts, how far it goes and over how many frames, as in input.drag 400 300 120 0 10, and a button after them where it is not the left one.";
+
+        var words = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length is < 5 or > 6) return false;
+
+        var numbers = new float[4];
+        for (var i = 0; i < 4; i++)
+        {
+            if (!float.TryParse(words[i], NumberStyles.Float, CultureInfo.InvariantCulture, out numbers[i])) return false;
+        }
+
+        if (!int.TryParse(words[4], NumberStyles.Integer, CultureInfo.InvariantCulture, out var frames) || frames < 1) return false;
+
+        var button = MouseButton.Left;
+        if (words.Length == 6 && (!Enum.TryParse(words[5], ignoreCase: true, out button) || button is not (MouseButton.Left or MouseButton.Right or MouseButton.Middle)))
+        {
+            problem = $"'{words[5]}' is not a button a drag holds. They are Left, Right and Middle.";
+            return false;
+        }
+
+        drag = new PointerDrag(numbers[0], numbers[1], numbers[2], numbers[3], Math.Min(frames, (int)ConsoleHost.LaterFrames - 4), button);
+        return true;
+    }
+
     /// <summary>Turns the wheel.</summary>
     [Command("input.wheel", "Turns the wheel, negative is down: input.wheel <lines>")]
     internal static string Wheel(float lines)
