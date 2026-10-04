@@ -94,8 +94,9 @@ all linear, because the graphics API treats that pair as a validation failure.
 
 Tiling takes both halves. A mesh's UVs run from zero to one however large it is, so a repeating
 texture still shows one stretched copy until the material scales them with `UvScale = (12f, 12f)`.
-PNG, JPEG, WebP, BMP and TGA decode in every build, headless included, because that is work on data
-rather than on a GPU.
+PNG, JPEG, WebP, BMP, TGA and Radiance's `.hdr` decode in every build, headless included, because
+that is work on data rather than on a GPU. An `.hdr` image holds light brighter than white, as a
+baked lightmap does.
 
 ---
 

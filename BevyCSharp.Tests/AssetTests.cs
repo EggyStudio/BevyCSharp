@@ -206,4 +206,39 @@ public sealed class AssetTests
 
         harness.Run();
     }
+
+    [Fact]
+    public void ARadianceImageDecodesInEveryBuild()
+    {
+        // One pixel of Radiance's RGBE, a shared exponent over three mantissas, so the file holds a
+        // value of one in each channel. A row narrower than eight pixels is stored as it is, with
+        // none of the format's run-length encoding, which keeps the file writable by hand.
+        var path = Path.Combine(EngineHarness.AssetDirectory, $"light-{Guid.NewGuid():N}.hdr");
+        File.WriteAllBytes(path, [.. "#?RADIANCE\nFORMAT=32-bit_rle_rgbe\n\n-Y 1 +X 1\n"u8, 128, 128, 128, 129]);
+
+        // The load runs on an IO thread, so the frames it takes are the machine's; a wall clock
+        // stops a hang instead, as the missing file's test does.
+        using var harness = new EngineHarness(frames: 0, fps: 1000);
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(30);
+        var handle = AssetHandle.None;
+        var state = AssetLoadState.Unknown;
+
+        // Read inside the loop, since a handle asked after the app has stopped names nothing.
+        harness.OnContext(Stage.Startup, _ => handle = AssetServer.Load(AssetKind.Image, Path.GetFileName(path)));
+        harness.OnContext(Stage.Last, ctx =>
+        {
+            state = handle.State;
+            if (state is AssetLoadState.Loaded or AssetLoadState.Failed || DateTime.UtcNow > deadline) ctx.Exit();
+        });
+
+        try
+        {
+            harness.Run();
+            Assert.Equal(AssetLoadState.Loaded, state);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
 }

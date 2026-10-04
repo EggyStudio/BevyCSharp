@@ -170,11 +170,11 @@ from the editor. What is left:
 
 ### Textures and shaders
 
-PNG, JPEG, WebP, BMP and TGA decode in every build. A drawing app reads BCn files through `ktx2` where
-the adapter decodes them, and a shader image can be made in BCn and filled a block at a time, but a
-windowless app reports no compressed format as decodable, and ASTC and ETC2, which desktop adapters
-do not decode, would need transcoding on load. Nothing here blocks a game; it is size on disk and
-upload cost.
+PNG, JPEG, WebP, BMP, TGA and Radiance's `.hdr` decode in every build. A drawing app reads BCn files
+through `ktx2` where the adapter decodes them, and a shader image can be made in BCn and filled a
+block at a time, but a windowless app reports no compressed format as decodable, and ASTC and ETC2,
+which desktop adapters do not decode, would need transcoding on load. Nothing here blocks a game; it
+is size on disk and upload cost.
 
 Shaders are Slang, and a shader declares whatever it needs: numbers, arrays, structs, constant
 buffers, any number of textures of any shape, samplers, storage buffers and images. The bridge reads

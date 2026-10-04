@@ -94,6 +94,8 @@ headless = [
     "bevy/webp",
     "bevy/bmp",
     "bevy/tga",
+    # Radiance's format, which stores light brighter than white, as a baked lightmap or a sky is.
+    "bevy/hdr",
     "bevy/bevy_state",
     "bevy/bevy_world_serialization",
     # Every reflected type Bevy has, registered at startup without a plugin naming it. The bridge

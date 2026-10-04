@@ -247,7 +247,7 @@ public static class EditorAssets
     public static IReadOnlyList<string> ExtensionsFor(string kind) => kind switch
     {
         AssetKind.Mesh or AssetKind.Gltf or AssetKind.StandardMaterial => [".gltf", ".glb", ".obj"],
-        AssetKind.Image => [".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tga", ".ktx2"],
+        AssetKind.Image => [".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tga", ".hdr", ".ktx2"],
         AssetKind.Audio => [".ogg", ".wav", ".flac", ".mp3"],
         AssetKind.Scene => [".scn", ".ron", ".gltf", ".glb"],
         AssetKind.Font => [".ttf", ".otf"],
@@ -277,7 +277,7 @@ public static class EditorAssets
     private static string KindByExtension(string relative) => Path.GetExtension(relative).ToLowerInvariant() switch
     {
         ".cs" => "behavior script",
-        ".png" or ".jpg" or ".jpeg" or ".webp" or ".bmp" or ".tga" or ".ktx2" => "image",
+        ".png" or ".jpg" or ".jpeg" or ".webp" or ".bmp" or ".tga" or ".hdr" or ".ktx2" => "image",
         ".gltf" or ".glb" => "model",
         ".ogg" or ".wav" or ".flac" or ".mp3" => "sound",
         ".scn" or ".ron" => "scene",
