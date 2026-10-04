@@ -51,11 +51,6 @@ the most examples, and the largest is taken between groups of examples. The coun
   `ButtonInput<Key>`, which `keyboard_input` reads for the key that types '?'. `Input` holds each
   frame's state, which tells what is down and what changed but not in what order.
 - **Text gizmos, four examples.**
-- **An order among systems, three examples.** Systems in one stage run in no order a game sets,
-  where `ecs_guide` puts its systems in sets one after another, `message` chains the systems that
-  pass a message along in one frame, and `nondeterministic_system_order` has the schedule report
-  systems whose order is ambiguous. Needs `before`, `after` and `chain` on a system and sets of
-  them, carried to Bevy's schedule.
 - **Bevy's math, three examples.** Its bounding volumes with their casts and intersection tests
   (`bounding_2d`), its cubic curves (`cubic_splines`), and points sampled inside and on its shapes
   (`random_sampling`), which the managed math, a transform and its vectors, does not have.
@@ -74,13 +69,16 @@ the most examples, and the largest is taken between groups of examples. The coun
 - **Bevy's camera controllers, two examples.** Its free and pan cameras, their plugins and their
   settings (`free_camera_controller`, `pan_camera_controller`), where `BevyCSharp.Examples` has a
   free camera of its own written as a behavior.
-- **Nine more, one example each.** A resource's change ticks and when a component was added
+- **Eleven more, one example each.** A resource's change ticks and when a component was added
   (`change_detection`), a component's add and insert hooks (`component_hooks`), relationships of a
   game's own (`relationships`), commands run after a delay (`delayed_commands`, which also waits on
   observers), Bevy's log written from C# at its levels (`logs`), a playing sound's speed changed as
   it plays (`audio_control`), an atlas built from a folder of images as the app runs
-  (`texture_atlas`), an image loaded as an array of layers (`tilemap_chunk_orientation`), and the
-  pointer passing through the window to what is behind it (`window_fallthrough`).
+  (`texture_atlas`), an image loaded as an array of layers (`tilemap_chunk_orientation`), the
+  pointer passing through the window to what is behind it (`window_fallthrough`), the schedule
+  reporting systems whose order is ambiguous (`nondeterministic_system_order`), and a message
+  changed in place by a later system and read the same frame, where a C# message is read the frame
+  after it is sent (`message`).
 
 Seven examples are written in part, each leaving out a feature named in its row.
 

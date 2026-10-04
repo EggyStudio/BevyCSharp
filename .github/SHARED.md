@@ -55,7 +55,7 @@ table also answers whether the two agree.
 
 | Idea | BevyCSharp | 3DEngine |
 |---|---|---|
-| An order among systems in one stage, one before or after another or a chain | to take, which Bevy's examples wait on | to consider, where systems of a stage run in the order they were added |
+| An order among systems in one stage, one before or after another or a chain | to take, which Bevy's examples wait on | to consider, where a system runs after every earlier one it conflicts with (`c6619ab5`) and nothing orders two by name |
 | An observer told when a component is added or removed or an event of a game's own is sent to an entity | to take, which Bevy's examples wait on | to consider |
 | `Changed` and `Added` filters that a system not run every frame can trust | has, from Bevy | has (`e612ac63`, `58924752`) |
 | The entities that lost a component since a system last ran | to take | has (`Removed`, `ab052859`) |
@@ -99,6 +99,7 @@ table also answers whether the two agree.
 | A scene file placed inside another, its entities left out of the outer file's save | has (`SceneInstances`) | has (`SceneRef`, `0502362d`) |
 | A scene file holds arrays, so a mesh made in code is saved with its level | has | has (`8567bea6`) |
 | A placed scene file written while the level runs is spawned again in place of its copies | to check against `SceneInstances` | has (`6059b57a`) |
+| A model file with animation clips placed in a level plays, where its meshes would stand at rest | to check | has (`ba328b18`) |
 | A renamed or reshaped type still reads its old files | has (`FormerName`, `DataVersion`) | to consider |
 | A saved game laid over the scenes it started from | has (`SaveGame`, `Persistent<T>`) | to consider |
 | Data in files of its own, referred to by an id that survives a rename | has (`[DataAsset]`, `DataRef<T>`) | to consider |
@@ -127,6 +128,7 @@ table also answers whether the two agree.
 | Examples picked by name as an argument, each with a capture CI takes | taken at `661682e`, measured against Bevy's own 421 examples in EXAMPLES.md | has (`3DEngine.Examples`, `048c072c`) |
 | Behaviors registered by a module initializer the generator writes, so a game published trimmed or as native AOT keeps them | has | has (`425ffc31`), with Pusher published native |
 | A game published as native AOT and run by CI | to take | has (`458cd909`) |
+| Whole pictures compared with checked-in references, a small share of pixels allowed to differ between devices | to take, for the examples' captures | has (`771f10e9`, `fd5bcc84`) |
 | A small game built from the packed package and played by CI | has (`f147adc`) | has (`377576c4`) |
 | The README's first program followed in a clean container by CI | has (`8ff919c`) | has (`e98e93a1`) |
 | A version whose patch counts commits since the owner last set the major and minor | taken at `88954d5` | has (`609bd859`) |

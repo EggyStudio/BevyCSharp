@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 180;
+    internal const int ExpectedAbiVersion = 181;
 
     static Native() => NativeLoader.Initialize();
 
@@ -76,6 +76,11 @@ internal static unsafe partial class Native
         int stage,
         delegate* unmanaged[Cdecl]<IntPtr, void> callback,
         IntPtr user);
+
+    /// <summary>Orders one C# system of a stage before another, by the numbers registration gave them.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_app_order_systems(IntPtr handle, int stage, int first, int then);
 
     // -- Component registration
 

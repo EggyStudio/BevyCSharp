@@ -26,6 +26,8 @@ public sealed class SystemDescriptor
 {
     private readonly HashSet<Type> _reads = [];
     private readonly HashSet<Type> _writes = [];
+    private readonly List<string> _after = [];
+    private readonly List<string> _before = [];
 
     /// <summary>A human-readable name, used in diagnostics and hot-reload bookkeeping.</summary>
     public string Name { get; }
@@ -44,6 +46,12 @@ public sealed class SystemDescriptor
 
     /// <summary>Resource types this system writes.</summary>
     public IReadOnlyCollection<Type> Writes => _writes;
+
+    /// <summary>The names of the systems in its stage this one runs after.</summary>
+    public IReadOnlyList<string> RunsAfter => _after;
+
+    /// <summary>The names of the systems in its stage this one runs before.</summary>
+    public IReadOnlyList<string> RunsBefore => _before;
 
     /// <summary>True when the system declared any access at all.</summary>
     public bool HasExplicitAccess => _reads.Count > 0 || _writes.Count > 0;
@@ -77,6 +85,48 @@ public sealed class SystemDescriptor
             ? condition
             : world => existing(world) && condition(world);
 
+        return this;
+    }
+
+    /// <summary>
+    /// Runs this system after every system in its stage named <paramref name="name"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy's <c>.after</c>. Systems in one stage run in no order a game can count on otherwise,
+    /// since Bevy is free to pick one each time it builds the schedule, so a system that reads what
+    /// another wrote this frame says so here. The name is another system's
+    /// <see cref="SystemDescriptor.Name"/>, and it is looked up as the app starts, so the other one
+    /// may be added later. A name nothing in the stage carries, or one only another stage's system
+    /// carries, stops the app from starting with a message saying which.
+    /// </para>
+    /// <para>
+    /// A system added while the app runs is ordered among the others added that way to its stage,
+    /// and a name none of them carries yet waits for one that does.
+    /// <see cref="App.Chain"/> orders a list of systems one after another.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// app.AddSystem(Stage.Update, new SystemDescriptor(Score, "Score"));
+    /// app.AddSystem(Stage.Update, new SystemDescriptor(CheckForWinner, "CheckForWinner").After("Score"));
+    /// </code>
+    /// </example>
+    public SystemDescriptor After(string name)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+        _after.Add(name);
+        return this;
+    }
+
+    /// <summary>
+    /// Runs this system before every system in its stage named <paramref name="name"/>.
+    /// </summary>
+    /// <remarks>Bevy's <c>.before</c>, the other side of <see cref="After"/>, which says how the name is found.</remarks>
+    public SystemDescriptor Before(string name)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+        _before.Add(name);
         return this;
     }
 

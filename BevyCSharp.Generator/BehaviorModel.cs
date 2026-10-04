@@ -128,6 +128,12 @@ internal sealed record StageMethod
     /// which the runner hands it from the same storage.
     /// </summary>
     public EquatableArray<OtherComponent> Others { get; init; } = EquatableArray<OtherComponent>.Empty;
+
+    /// <summary>The systems of its stage it runs after, by name.</summary>
+    public EquatableArray<string> After { get; init; } = EquatableArray<string>.Empty;
+
+    /// <summary>The systems of its stage it runs before, by name.</summary>
+    public EquatableArray<string> Before { get; init; } = EquatableArray<string>.Empty;
 }
 
 /// <summary>Another component of the entity an instance method takes.</summary>

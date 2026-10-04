@@ -8,27 +8,22 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `435e9a7`. The 2D examples that draw sprites and text (`e3bca6b`) and the interface
-examples in seven batches (`f5344e4` to `435e9a7`) were taken on their descriptions and raised
-nothing. The table stands at 111 written, 7 written in part, 124 that can be, 122 missing and 57
-that do not apply.
+Reviewed up to `b18cc4a`. The two parked examples are explained and settled. `first_person_view_model`
+(`96ff00d`) had no fault, the arm being the slab in the picture as it is in Bevy's. `grid`
+(`b18cc4a`) was a real gap: Bevy's flexible track is `minmax(0, fr)` and the bridge offered only
+`minmax(auto, fr)`, so content stretched a row, and `Track.Flex` with its pixel test closes it.
+The table stood at 113 written, 7 written in part, 122 that can be and 122 missing before those
+two.
 
 ## Now
 
 Item 1 is the owner's request of 2026-10-04 and goes on a group at a time. Items 4 to 6 are
 taken from [SHARED.md](SHARED.md).
 
-1. **The two pictures that differ from Bevy's are explained before anything else.** `ui/grid`,
-   whose square overflows its row, and `camera/first_person_view_model`, whose arm on the
-   view-model layer is not drawn, are written and parked because their captures differ and the
-   reason is not known. An example that is the same program and draws another picture is the
-   most useful thing the table can turn up, since it says the bridge hands Bevy something other
-   than what the C# asked for, and every game using a grid or a render layer would meet it. Each
-   is taken down to the smallest scene that still differs, compared with what Bevy holds for
-   that entity through `entity.get` (the `Node`'s grid fields, the `RenderLayers` on the arm and
-   on its camera, and the camera's order), and ends as a fix with a test, or as a row marked
-   `missing` naming exactly what is not handed over. The remaining groups in the pass (math,
-   then what is left of 3D) follow as before.
+1. **Bevy's examples, what is left of the pass.** Math, then the rest of 3D, an example that
+   needs something missing marked and passed over. A picture that differs from Bevy's for no
+   known reason is taken down to the smallest scene that still differs and explained before
+   the pass goes on, as `grid` was, since that is where the table finds a fault.
 2. **The gaps, by how many rows each holds**, once the groups in item 1 are through, each
    bridged from Bevy with the examples it unlocks written in its batch. By the table as it
    stands: 2D meshes with their color materials (13 rows); an order among the systems of one

@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**115 written, 7 written in part, 120 can be written, 122 missing and 57 do not apply.** Of the 364 that apply, 242 can be written with what is bridged, 7 of them leaving something out.
+**116 written, 7 written in part, 120 can be written, 121 missing and 57 do not apply.** Of the 364 that apply, 243 can be written with what is bridged, 7 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
@@ -18,7 +18,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Camera](#camera) | 4 | 0 | 0 | 5 | 0 |
 | [Dev tools](#dev-tools) | 0 | 0 | 1 | 1 | 1 |
 | [Diagnostics](#diagnostics) | 0 | 0 | 1 | 2 | 0 |
-| [ECS (Entity Component System)](#ecs-entity-component-system) | 10 | 0 | 1 | 15 | 9 |
+| [ECS (Entity Component System)](#ecs-entity-component-system) | 11 | 0 | 1 | 14 | 9 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |
 | [Games](#games) | 0 | 0 | 6 | 0 | 0 |
 | [Gizmos](#gizmos) | 0 | 0 | 4 | 5 | 0 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **115** | **7** | **120** | **122** | **57** |
+| **All** | **116** | **7** | **120** | **121** | **57** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints.
 
@@ -280,7 +280,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`custom_schedule`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/custom_schedule.rs) | Demonstrates how to add custom schedules | missing, schedules a game adds of its own |
 | [`delayed_commands`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/delayed_commands.rs) | Demonstrates how to schedule ECS commands with a delay | missing, commands queued to run after a delay, and a click observed on a sprite |
 | [`dynamic`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/dynamic.rs) | Dynamically create components, spawn entities with those components and query those components | does not apply, builds components from raw layouts in Rust |
-| [`ecs_guide`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/ecs_guide.rs) | Full guide to Bevy's ECS | missing, an order among systems in one stage, by sets or one after another |
+| [`ecs_guide`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/ecs_guide.rs) | Full guide to Bevy's ECS | [written](../BevyCSharp.Examples/ecs/ecs_guide.cs), prints [its output](assets/examples/ecs_guide.txt) |
 | [`entity_disabling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/entity_disabling.rs) | Demonstrates how to hide entities from the ECS without deleting them | missing, 2D meshes and their color materials, and a click observed on a mesh |
 | [`error_handling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/error_handling.rs) | How to return and handle errors across the ECS | missing, an observer of the pointer moving over a mesh, and points sampled over a mesh's surface |
 | [`extraction`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/extraction.rs) | Demonstrates different ways of extracting components, copying them from the main world to the render world | does not apply, writes render world extraction in Rust |
@@ -291,8 +291,8 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`hotpatching_systems`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/hotpatching_systems.rs) | Demonstrates how to hotpatch systems | can be written, as scripts reloaded while the app runs |
 | [`immutable_components`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/immutable_components.rs) | Demonstrates the creation and utility of immutable components | does not apply, about Rust's component mutability |
 | [`iter_combinations`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/iter_combinations.rs) | Shows how to iterate over combinations of query results | [written](../BevyCSharp.Examples/ecs/iter_combinations.cs) |
-| [`message`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/message.rs) | Illustrates message creation, activation, and reception | missing, a message changed in place by a later system, and systems chained in one frame |
-| [`nondeterministic_system_order`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/nondeterministic_system_order.rs) | Systems run in parallel, but their order isn't always deterministic. Here's how to detect and fix this. | missing, an order among systems in one stage, and the schedule reporting systems whose order is ambiguous |
+| [`message`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/message.rs) | Illustrates message creation, activation, and reception | missing, a message changed in place by a later system and read by a later one the same frame |
+| [`nondeterministic_system_order`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/nondeterministic_system_order.rs) | Systems run in parallel, but their order isn't always deterministic. Here's how to detect and fix this. | missing, the schedule reporting systems whose order is ambiguous |
 | [`observer_propagation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/observer_propagation.rs) | Demonstrates event propagation with observers | missing, events that propagate through a hierarchy to observers |
 | [`observers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/observers.rs) | Demonstrates observers that react to events (both built-in life-cycle events and custom events) | missing, observers of custom events and of a component's addition and removal |
 | [`one_shot_systems`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/one_shot_systems.rs) | Shows how to flexibly run systems without scheduling them | [written](../BevyCSharp.Examples/ecs/one_shot_systems.cs) |

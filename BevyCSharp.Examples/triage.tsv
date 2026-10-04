@@ -186,7 +186,7 @@ custom_query_param	n/a	derives a Rust query type
 custom_schedule	missing	schedules a game adds of its own
 delayed_commands	missing	commands queued to run after a delay, and a click observed on a sprite
 dynamic	n/a	builds components from raw layouts in Rust
-ecs_guide	missing	an order among systems in one stage, by sets or one after another
+ecs_guide	can
 entity_disabling	missing	2D meshes and their color materials, and a click observed on a mesh
 error_handling	missing	an observer of the pointer moving over a mesh, and points sampled over a mesh's surface
 extraction	n/a	writes render world extraction in Rust
@@ -197,8 +197,8 @@ hierarchy	can
 hotpatching_systems	can	as scripts reloaded while the app runs
 immutable_components	n/a	about Rust's component mutability
 iter_combinations	can
-message	missing	a message changed in place by a later system, and systems chained in one frame
-nondeterministic_system_order	missing	an order among systems in one stage, and the schedule reporting systems whose order is ambiguous
+message	missing	a message changed in place by a later system and read by a later one the same frame
+nondeterministic_system_order	missing	the schedule reporting systems whose order is ambiguous
 observer_propagation	missing	events that propagate through a hierarchy to observers
 observers	missing	observers of custom events and of a component's addition and removal
 one_shot_systems	can

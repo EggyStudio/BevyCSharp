@@ -104,6 +104,7 @@ internal static class Catalog
 
         // ECS (Entity Component System)
         new("callbacks", Callbacks.Build, Prints: 2),
+        new("ecs_guide", EcsGuide.Build, Prints: 20),
         new("fixed_timestep", FixedTimestep.Build, FixedTimestep.Configure, Prints: 64),
         new("generic_system", GenericSystem.Build, Prints: 130),
         new("hierarchy", Hierarchy.Build),

@@ -105,6 +105,30 @@ is answered per entity. The same rows come back, split into the contiguous runs 
 | `[OnLast]`       | End of every frame                                 |
 | `[OnCleanup]`    | Once, on the way out                               |
 
+## Order within a stage
+
+Systems in one stage run in an order Bevy picks as it builds the schedule, which is not the order
+they were written or added in and may differ between runs. A system that reads what another wrote
+this frame names it with `[After]` or `[Before]`, by its system's name, `Behavior.Method`:
+
+```csharp
+[OnUpdate]
+[After("Gravity.Apply")]
+public void Land(BehaviorContext ctx, ref Transform transform) { }
+```
+
+A system added by hand says the same on its descriptor, and `App.Chain` adds several, each after
+the one before:
+
+```csharp
+app.AddSystem(Stage.Update, new SystemDescriptor(CheckForWinner, "CheckForWinner").After("Score"));
+app.Chain(Stage.Update, newRound, score, gameOver);
+```
+
+Names are looked up as the app starts, so the other system may be added later, and one that names
+nothing in its stage, or a system in another stage, stops the app with a message saying which. A
+system added while the app runs is ordered among the others added that way to its stage.
+
 ## The fixed timestep
 
 Every stage above except one runs exactly once a frame, so anything integrated in them advances

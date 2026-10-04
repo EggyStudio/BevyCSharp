@@ -195,7 +195,7 @@ Early. The behavior system, the ECS bridge and the schedule work and are covered
 run against a real Bevy app. Bevy's own examples are the measure of how much of it is reached:
 
 <!-- examples -->
-Of Bevy's 421 examples, 115 are written in C# here and 7 more in part, 120 more can be with what is bridged, 122 wait on something the bridge lacks and 57 are about Rust itself ([EXAMPLES.md](https://github.com/EggyStudio/BevyCSharp/blob/main/.github/EXAMPLES.md)).
+Of Bevy's 421 examples, 116 are written in C# here and 7 more in part, 120 more can be with what is bridged, 121 wait on something the bridge lacks and 57 are about Rust itself ([EXAMPLES.md](https://github.com/EggyStudio/BevyCSharp/blob/main/.github/EXAMPLES.md)).
 <!-- /examples -->
 
 Known gaps:

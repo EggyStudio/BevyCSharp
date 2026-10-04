@@ -925,6 +925,8 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
                 Toggle = GetToggle(member),
                 InState = GetInState(member),
                 Others = GetOthers(member),
+                After = GetOrder(member, RecognizedAttributes.After),
+                Before = GetOrder(member, RecognizedAttributes.Before),
             });
         }
 
@@ -1245,6 +1247,20 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// <c>KeyModifier.Ctrl | KeyModifier.Shift</c> arrives as a single folded constant. There is
     /// nothing extra to do here to support several modifiers at once.
     /// </remarks>
+    /// <summary>The names an <c>[After]</c> or a <c>[Before]</c> on a method gives, in order.</summary>
+    private static EquatableArray<string> GetOrder(IMethodSymbol method, string attributeName)
+    {
+        var names = new List<string>();
+        foreach (var attribute in method.GetAttributes())
+        {
+            if (attribute.AttributeClass?.ToDisplayString() != $"{AttributeNamespace}.{attributeName}") continue;
+            if (attribute.ConstructorArguments.Length > 0 && attribute.ConstructorArguments[0].Value is string name && name.Length > 0)
+                names.Add(name);
+        }
+
+        return names.Count == 0 ? EquatableArray<string>.Empty : new EquatableArray<string>([.. names]);
+    }
+
     private static ToggleKeyInfo? GetToggle(IMethodSymbol method)
     {
         foreach (var attribute in method.GetAttributes())

@@ -101,6 +101,8 @@ pub struct BcsApp {
     pub cleanup: CleanupList,
     /// Set once `bcs_app_run` has been entered, to reject a second run.
     pub running: bool,
+    /// The number the next C# system is given, which names its set for ordering.
+    pub next_system: u32,
 }
 
 impl BcsApp {
@@ -110,6 +112,7 @@ impl BcsApp {
             app,
             cleanup,
             running: false,
+            next_system: 0,
         }
     }
 }

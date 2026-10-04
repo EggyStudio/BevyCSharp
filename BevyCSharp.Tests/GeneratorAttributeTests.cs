@@ -47,6 +47,7 @@ public sealed class GeneratorAttributeTests
         public static class Ran
         {
             public static readonly Dictionary<string, List<int>> Frames = new();
+            public static readonly List<string> Sequence = new();
             public static int Frame;
             public static bool Allowed;
 
@@ -124,6 +125,15 @@ public sealed class GeneratorAttributeTests
             [OnUpdate, RunIf(nameof(Allowed))] public static void When(BehaviorContext ctx) => Ran.Note("RunIf");
             [OnUpdate, ToggleKey(Key.F3)] public static void On(BehaviorContext ctx) => Ran.Note("ToggleKey:on");
             [OnUpdate, ToggleKey(Key.F4, DefaultEnabled = false)] public static void Off(BehaviorContext ctx) => Ran.Note("ToggleKey:off");
+        }
+
+        // Added late, middle, early, and asked to run early, middle, late.
+        [Behavior]
+        public partial struct Ordered
+        {
+            [OnUpdate, After("Ordered.Middle")] public static void Late(BehaviorContext ctx) => Ran.Sequence.Add("Late");
+            [OnUpdate] public static void Middle(BehaviorContext ctx) => Ran.Sequence.Add("Middle");
+            [OnUpdate, Before("Ordered.Middle")] public static void Early(BehaviorContext ctx) => Ran.Sequence.Add("Early");
         }
 
         [Behavior, Persist]
@@ -241,6 +251,7 @@ public sealed class GeneratorAttributeTests
     {
         var ran = Probes.Value.GetType("Probes.Ran")!;
         ((Dictionary<string, List<int>>)ran.GetField("Frames")!.GetValue(null)!).Clear();
+        ((List<string>)ran.GetField("Sequence")!.GetValue(null)!).Clear();
         ran.GetField("Frame")!.SetValue(null, 0);
         ran.GetField("Allowed")!.SetValue(null, false);
 
@@ -268,6 +279,15 @@ public sealed class GeneratorAttributeTests
     }
 
     private static FieldHints Hints(string field) => Schema("Shown").Field(field)!.Hints;
+
+    /// <summary>The ordered probe's three systems ran early, middle, late in every frame.</summary>
+    private static void RanInOrder()
+    {
+        Run(3);
+        var sequence = (List<string>)Probes.Value.GetType("Probes.Ran")!.GetField("Sequence")!.GetValue(null)!;
+        Assert.NotEmpty(sequence);
+        for (var i = 0; i < sequence.Count; i += 3) Assert.Equal(["Early", "Middle", "Late"], sequence.Skip(i).Take(3));
+    }
 
     /// <summary>What each attribute is checked by, by the generators' name for it.</summary>
     private static readonly Dictionary<string, Action> Cases = new(StringComparer.Ordinal)
@@ -356,6 +376,8 @@ public sealed class GeneratorAttributeTests
             Assert.NotEmpty(when);
             Assert.All(when, frame => Assert.True(frame >= 3, $"ran on frame {frame}"));
         },
+        [RecognizedAttributes.After] = RanInOrder,
+        [RecognizedAttributes.Before] = RanInOrder,
         [RecognizedAttributes.ToggleKey] = () =>
         {
             Run(4);

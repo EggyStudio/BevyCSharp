@@ -105,6 +105,12 @@ public static class RecognizedAttributes
     /// <summary>Only while a key has toggled it on.</summary>
     public const string ToggleKey = "ToggleKeyAttribute";
 
+    /// <summary>After another system of its stage.</summary>
+    public const string After = "AfterAttribute";
+
+    /// <summary>Before another system of its stage.</summary>
+    public const string Before = "BeforeAttribute";
+
     // How a field or a method is shown.
 
     /// <summary>The name a field is shown under.</summary>
@@ -178,7 +184,7 @@ public static class RecognizedAttributes
     [
         Behavior, DataAsset, DataVersion, FormerName, Persist, InitialState, Command,
         OnStartup, OnFirst, OnPreUpdate, OnFixedUpdate, OnUpdate, OnPostUpdate, OnRender, OnLast, OnCleanup, OnEnter, OnExit, OnTransition,
-        With, Without, Changed, InState, RunIf, ToggleKey,
+        With, Without, Changed, InState, RunIf, ToggleKey, After, Before,
         Label, Tooltip, Header, Unit, Range, Step, ReadOnly, Hidden, Space, Separator, Color, Wide, Inline,
         Foldout, Info, Order, Asset, ShowIf, HideIf, OnValueChanged, Button, Flags,
     ];

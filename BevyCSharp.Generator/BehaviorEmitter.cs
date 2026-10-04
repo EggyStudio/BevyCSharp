@@ -101,6 +101,12 @@ internal static class BehaviorEmitter
                 source.Append("\n            .RunIf(").Append(ConditionExpression(model, condition)).Append(')');
             }
 
+            // The order it asked for among its stage's systems, which the app resolves by name.
+            foreach (var name in method.After.Items)
+                source.Append("\n            .After(\"").Append(name.Replace("\\", "\\\\").Replace("\"", "\\\"")).Append("\")");
+            foreach (var name in method.Before.Items)
+                source.Append("\n            .Before(\"").Append(name.Replace("\\", "\\\\").Replace("\"", "\\\"")).Append("\")");
+
             // Access metadata: an instance method writes its own component store, a static one only
             // declares a read of the world. Keeping these distinct lets unrelated behaviors be
             // reported as non-conflicting.

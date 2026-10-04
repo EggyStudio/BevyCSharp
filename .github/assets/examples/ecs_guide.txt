@@ -1,0 +1,43 @@
+Player 3 has joined the game!
+This game is fun!
+Begin round 1 of 10
+Player 4 joined the game!
+Alice scored a point! Their score is: 1 (1 round hot streak)
+Bob did not score a point! Their score is: 0 (1 round cold streak)
+Player 3 did not score a point! Their score is: 0 (1 round cold streak)
+Player 4 scored a point! Their score is: 1 (1 round hot streak)
+In set 'Last' for the 1th time
+
+This game is fun!
+Begin round 2 of 10
+Alice scored a point! Their score is: 2 (2 round hot streak)
+Bob scored a point! Their score is: 1 (1 round hot streak)
+Player 3 did not score a point! Their score is: 0 (2 round cold streak)
+Player 4 scored a point! Their score is: 2 (2 round hot streak)
+In set 'Last' for the 2th time
+
+This game is fun!
+Begin round 3 of 10
+Alice scored a point! Their score is: 3 (3 round hot streak)
+Bob scored a point! Their score is: 2 (2 round hot streak)
+Player 3 scored a point! Their score is: 1 (1 round hot streak)
+Player 4 did not score a point! Their score is: 2 (1 round cold streak)
+In set 'Last' for the 3th time
+
+This game is fun!
+Begin round 4 of 10
+Alice did not score a point! Their score is: 3 (1 round cold streak)
+Bob scored a point! Their score is: 3 (3 round hot streak)
+Player 3 scored a point! Their score is: 2 (2 round hot streak)
+Player 4 scored a point! Their score is: 3 (1 round hot streak)
+In set 'Last' for the 4th time
+
+This game is fun!
+Begin round 5 of 10
+Alice did not score a point! Their score is: 3 (2 round cold streak)
+Bob did not score a point! Their score is: 3 (1 round cold streak)
+Player 3 scored a point! Their score is: 3 (3 round hot streak)
+Player 4 scored a point! Their score is: 4 (2 round hot streak)
+Player 4 won the game!
+In set 'Last' for the 5th time
+

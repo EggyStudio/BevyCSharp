@@ -538,7 +538,7 @@ public sealed unsafe class App : IDisposable
         var registration = new RegisteredSystem(this, descriptor, stage);
         _systems.Add(registration);
 
-        Native.Check(
+        registration.NativeId = Native.Check(
             Native.bcs_app_add_system(
                 _handle,
                 (int)stage,
@@ -547,6 +547,121 @@ public sealed unsafe class App : IDisposable
             $"registering system '{descriptor.Name}'");
 
         return this;
+    }
+
+    /// <summary>
+    /// Registers <paramref name="systems"/> in <paramref name="stage"/>, each to run after the one
+    /// before it.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's <c>.chain()</c>, a sequence of systems that pass work along in one frame. Each is
+    /// ordered after the previous one by its name, as <see cref="SystemDescriptor.After"/> orders
+    /// one system after another, so systems sharing a name are ordered together.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// app.Chain(Stage.Update,
+    ///     new SystemDescriptor(NewRound, "NewRound"),
+    ///     new SystemDescriptor(Score, "Score"),
+    ///     new SystemDescriptor(GameOver, "GameOver"));
+    /// </code>
+    /// </example>
+    public App Chain(Stage stage, params SystemDescriptor[] systems)
+    {
+        ArgumentNullException.ThrowIfNull(systems);
+        for (var i = 0; i < systems.Length; i++)
+        {
+            ArgumentNullException.ThrowIfNull(systems[i]);
+            if (i > 0) systems[i].After(systems[i - 1].Name);
+            AddSystem(stage, systems[i]);
+        }
+
+        return this;
+    }
+
+    /// <summary>Hands Bevy the order each system asked for, by the systems' names, as the app starts.</summary>
+    /// <exception cref="InvalidOperationException">
+    /// A system names one its stage has none of, or one that runs on a state's transition, which
+    /// is not in any stage to be ordered within.
+    /// </exception>
+    private void ApplyOrder()
+    {
+        foreach (var system in _systems)
+        {
+            var descriptor = system.Descriptor;
+            if (descriptor.RunsAfter.Count == 0 && descriptor.RunsBefore.Count == 0) continue;
+
+            if (system.NativeId < 0 || system.Stage is Stage.Cleanup)
+                throw new InvalidOperationException(
+                    $"System '{descriptor.Name}' asks to be ordered, and it runs on a state's transition "
+                    + "or on the way out, where there is no stage to order it within.");
+
+            foreach (var name in descriptor.RunsAfter) Order(system, name, after: true);
+            foreach (var name in descriptor.RunsBefore) Order(system, name, after: false);
+        }
+
+        void Order(RegisteredSystem system, string name, bool after)
+        {
+            var others = _systems.Where(other => other != system && other.NativeId >= 0 && other.Descriptor.Name == name).ToList();
+            var here = others.Where(other => other.Stage == system.Stage).ToList();
+
+            if (here.Count == 0)
+            {
+                var elsewhere = others.Select(other => other.Stage.ToString()).Distinct().ToList();
+                throw new InvalidOperationException(
+                    $"System '{system.Descriptor.Name}' is to run {(after ? "after" : "before")} '{name}', "
+                    + (elsewhere.Count == 0
+                        ? $"and no system in {system.Stage} or any other stage is called that."
+                        : $"which runs in {string.Join(" and ", elsewhere)} rather than in {system.Stage}, and systems "
+                          + "are ordered only within their stage."));
+            }
+
+            foreach (var other in here)
+            {
+                var (first, then) = after ? (other, system) : (system, other);
+                Native.Check(
+                    Native.bcs_app_order_systems(_handle, (int)system.Stage, first.NativeId, then.NativeId),
+                    $"ordering '{first.Descriptor.Name}' before '{then.Descriptor.Name}'");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Puts a stage's systems added while running in an order that keeps every system's
+    /// <see cref="SystemDescriptor.After"/> and <see cref="SystemDescriptor.Before"/>, and otherwise
+    /// the order they were added in.
+    /// </summary>
+    /// <remarks>
+    /// Those run from a list rather than Bevy's schedule, so their order is the list's. A name none
+    /// of them carries is passed over until one that does arrives, and a cycle keeps the order they
+    /// were added in for the systems caught in it.
+    /// </remarks>
+    private static void SortByOrder(List<RegisteredSystem> systems)
+    {
+        // Each system's predecessors among the others, from either side's declaration.
+        var before = systems.ToDictionary(system => system, _ => new HashSet<RegisteredSystem>());
+        foreach (var system in systems)
+        {
+            foreach (var other in systems)
+            {
+                if (other == system) continue;
+                if (system.Descriptor.RunsAfter.Contains(other.Descriptor.Name)) before[system].Add(other);
+                if (system.Descriptor.RunsBefore.Contains(other.Descriptor.Name)) before[other].Add(system);
+            }
+        }
+
+        // Repeatedly the earliest added whose predecessors are all placed.
+        var placed = new List<RegisteredSystem>(systems.Count);
+        var left = new List<RegisteredSystem>(systems);
+        while (left.Count > 0)
+        {
+            var next = left.FirstOrDefault(system => before[system].All(placed.Contains)) ?? left[0];
+            placed.Add(next);
+            left.Remove(next);
+        }
+
+        systems.Clear();
+        systems.AddRange(placed);
     }
 
     /// <summary>The stages a dynamically added system can be put in.</summary>
@@ -708,6 +823,7 @@ public sealed unsafe class App : IDisposable
         var registration = new RegisteredSystem(this, descriptor, stage);
         _systems.Add(registration);
         waiting.Add(registration);
+        SortByOrder(waiting);
 
         return this;
     }
@@ -1339,6 +1455,8 @@ public sealed unsafe class App : IDisposable
             if (!_addedStates.Contains(state)) add(this);
         }
 
+        ApplyOrder();
+
         IsRunning = true;
         ComponentRegistry.EnterRunning();
         try
@@ -1441,6 +1559,9 @@ public sealed unsafe class App : IDisposable
         internal Stage Stage { get; }
         internal bool IsRemoved { get; set; }
         internal IntPtr UserData => GCHandle.ToIntPtr(_handle);
+
+        /// <summary>The number the bridge gave it, which orders it, or -1 for one Bevy does not schedule as a stage's.</summary>
+        internal int NativeId { get; set; } = -1;
 
         internal RegisteredSystem(App owner, SystemDescriptor descriptor, Stage stage)
         {
