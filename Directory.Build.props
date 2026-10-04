@@ -22,7 +22,11 @@
         <RepositoryUrl>https://github.com/EggyStudio/BevyCSharp</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageProjectUrl>https://github.com/EggyStudio/BevyCSharp</PackageProjectUrl>
-        <VersionPrefix>0.2.0</VersionPrefix>
+        <!--
+          The version of a pack made here without one given. A package the pack workflow makes
+          takes build/version.sh's, whose major and minor are build/version.txt's, kept the same.
+        -->
+        <VersionPrefix>0.3.0</VersionPrefix>
         <IsPackable>false</IsPackable>
         <PackageIcon>icon.png</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>

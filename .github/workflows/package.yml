@@ -12,8 +12,8 @@ on:
     inputs:
       version:
         description: >-
-          Package version to stamp. Empty keeps the version from Directory.Build.props, which is
-          what continuous integration needs; a release passes the tag.
+          Package version to stamp, which the pack workflow takes from build/version.sh. Empty
+          keeps the version from Directory.Build.props, for a run that only tests.
         type: string
         required: false
         default: ''
@@ -33,7 +33,7 @@ on:
         required: false
         default: >-
           [
-            {"os": "ubuntu-latest",    "rid": "linux-x64",   "target": "x86_64-unknown-linux-gnu"},
+            {"os": "ubuntu-24.04",     "rid": "linux-x64",   "target": "x86_64-unknown-linux-gnu"},
             {"os": "ubuntu-24.04-arm", "rid": "linux-arm64", "target": "aarch64-unknown-linux-gnu"},
             {"os": "windows-latest",   "rid": "win-x64",     "target": "x86_64-pc-windows-msvc"},
             {"os": "windows-11-arm",   "rid": "win-arm64",   "target": "aarch64-pc-windows-msvc"},
@@ -44,7 +44,7 @@ on:
         description: 'JSON array of runner labels to run the test suite on.'
         type: string
         required: false
-        default: '["ubuntu-latest", "windows-latest", "macos-latest"]'
+        default: '["ubuntu-24.04", "windows-latest"]'
 
 env:
   DOTNET_NOLOGO: true
@@ -104,9 +104,8 @@ jobs:
           name: native-${{ matrix.rid }}
           path: build/artifacts/${{ matrix.rid }}/*
           if-no-files-found: error
-          # republish.yml reuses these to repack around a readme or metadata change without
-          # rebuilding. Two weeks is how long that shortcut stays available after a full build.
-          retention-days: 14
+          # Only the pack job reads them, in the same run, so they need not outlive it by much.
+          retention-days: 3
 
   test:
     name: test (${{ matrix.os }})
@@ -176,7 +175,7 @@ jobs:
   game:
     name: play Courtyard
     if: ${{ inputs.pack }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     needs: [native]
 
@@ -225,7 +224,7 @@ jobs:
   readme:
     name: walk the README
     if: ${{ inputs.pack }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     needs: [native]
 
@@ -252,7 +251,7 @@ jobs:
   pack:
     name: pack
     if: ${{ inputs.pack }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     needs: [native, test]
 
@@ -298,6 +297,6 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: nupkg
+          name: BevyCSharp-${{ inputs.version }}
           path: build/package/*.nupkg
           if-no-files-found: error

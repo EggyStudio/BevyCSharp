@@ -195,40 +195,22 @@ slot is picked up at pack time and missing ones are skipped.
 
 ## Publishing
 
-An ordinary push is cheap, running the test suite on Linux and stopping there. It does not build the
-per-platform bridges and does not pack, since neither is used unless a package is published. Two
-things change that.
+A push or a pull request runs the test suite on Linux and Windows and stops there. It builds no
+per-platform bridge and packs nothing, and nothing a commit message says changes that.
 
-**Changed the readme, the icon or the project metadata.** None of that affects the binaries, so
-there is nothing to build. Put `[repack]` in the commit message when the change is ready to go
-out, and the package is republished around the native binaries of the last full build, which
-takes a couple of minutes instead of an hour. Without the marker nothing is published, so a run of
-small edits costs nothing until the one that says so:
+A package is made by the **pack** workflow, run by hand from the Actions tab ("Run workflow"). It
+builds the bridge for all six platforms, runs the tests on Linux and Windows, plays Courtyard and
+walks the README's install in a container, and packs only once all of them pass. The package is
+kept as the run's artifact, to download and upload to nuget.org by hand. Ticking its **publish**
+box pushes it to nuget.org from the run instead, which needs the `NUGET_API_KEY` secret.
 
-```bash
-git commit -m "reword the install section [repack]"
-```
-
-**Changed the code.** Put `[publish]` anywhere in a commit message. That builds all six platforms,
-tests on all three operating systems, and publishes:
+The version is `build/version.sh`'s. Its major and minor are `build/version.txt`'s, set by hand,
+and its patch is the number of commits since that file last changed, so each commit raises it by
+one and a new minor starts it again at 0. To move to `0.4.x`, change `build/version.txt` and
+commit. The script counts commits, so it needs the whole history, which the workflow fetches.
 
 ```bash
-git commit -m "add the thing [publish]"
+build/version.sh            # 0.3.12, say
 ```
-
-Each marker is a plain substring, so it works alongside any other text and in any commit of the
-push, not only the last one. A push carrying both takes the full build, which packs anyway. Either
-route can also be started by hand from the Actions tab. The tests run on every push that changes
-more than Markdown, whether or not it carries a marker.
-
-Versions are `MAJOR.MINOR.<commit count>`: the first two from `VersionPrefix` in
-`Directory.Build.props`, the last from `git rev-list --count HEAD`. One counter that only grows,
-shared by both routes so they can never disagree, and nothing stored anywhere. To move to
-`0.2.x`, change `VersionPrefix` and push.
-
-Republishing needs artifacts from a full build to still exist, and they expire after two weeks.
-If none survive, the run fails and says to push a `[publish]` commit first. Only a `[publish]`
-run uploads any, so the reuse step walks back past the ordinary pushes to find one that built
-every platform.
 
 ---
