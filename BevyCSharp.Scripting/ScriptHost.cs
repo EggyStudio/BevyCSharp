@@ -39,6 +39,12 @@ public sealed class ScriptHost(App app, string directory)
     /// <summary>How many behaviors the last successful build registered.</summary>
     public int Registered { get; private set; }
 
+    /// <summary>
+    /// How many components the last build moved onto the types it declared them as again, or put
+    /// back on entities a scene loaded before there were types for them.
+    /// </summary>
+    public int Carried { get; private set; }
+
     /// <summary>What went wrong with the last build, or null when it worked.</summary>
     public string? LastError { get; private set; }
 
@@ -57,6 +63,10 @@ public sealed class ScriptHost(App app, string directory)
 
         var name = $"Scripts.Generation{++_generation}";
 
+        // What the running generation's components are described by, before the new one's
+        // descriptions take their names.
+        var before = ReloadedComponents.Before();
+
         if (!Compile(sources, name, out var image, out var error))
         {
             LastError = error;
@@ -74,9 +84,25 @@ public sealed class ScriptHost(App app, string directory)
         catch (Exception e)
         {
             context.Unload();
-            LastError = $"loading {name} failed: {e.Message}";
+
+            // What the script's own code threw, which a registration run by reflection or a
+            // module initializer hands back wrapped in an exception that says only that it threw.
+            var cause = e;
+            while (cause is System.Reflection.TargetInvocationException or TypeInitializationException && cause.InnerException is { } inner)
+                cause = inner;
+
+            LastError = $"loading {name} failed: {cause.GetType().Name}: {cause.Message}";
             return false;
         }
+
+        // The entities carrying the last generation's components carry the new one's instead, so
+        // a level's walls stay walls and its player keeps what it carried. Only while the app
+        // runs, since before then nothing can carry anything and the world is not on loan.
+        // A scene loaded before the scripts were holds their components as the file had them,
+        // and those go on their entities now that there are types for them.
+        Carried = app.IsRunning
+            ? ReloadedComponents.Carry(app.World.Resource<EcsWorld>(), before) + ReloadedComponents.Revive(app.World.Resource<EcsWorld>())
+            : 0;
 
         // Only once the new generation is in. Retiring the old one first would leave a frame
         // with neither, and a failure above would leave the app with nothing at all.
@@ -130,10 +156,12 @@ public sealed class ScriptHost(App app, string directory)
             References(),
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-        // The same generator the compiled projects use, so a script gets the same runner rather
-        // than a second, subtly different way of being a behavior.
+        // The same generators the compiled projects use, so a script gets the same runner rather
+        // than a second, subtly different way of being a behavior, and a state it declares on its
+        // enum is declared as the game's own would be.
         var driver = CSharpGeneratorDriver.Create(
-            new Bevy.Generator.BehaviorGenerator().AsSourceGenerator());
+            new Bevy.Generator.BehaviorGenerator().AsSourceGenerator(),
+            new Bevy.Generator.StateGenerator().AsSourceGenerator());
 
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var generated, out _);
 
@@ -170,6 +198,12 @@ public sealed class ScriptHost(App app, string directory)
     /// </remarks>
     private int Register(Assembly assembly)
     {
+        // The module initializers first, which declare the assembly's schemas, states and
+        // commands. The runtime runs them only once something in the module is touched, and a
+        // script of components alone has no registration below to touch it, so its components
+        // would have no schema for a level to be read with.
+        System.Runtime.CompilerServices.RuntimeHelpers.RunModuleConstructor(assembly.ManifestModule.ModuleHandle);
+
         var found = 0;
 
         foreach (var type in assembly.GetTypes())

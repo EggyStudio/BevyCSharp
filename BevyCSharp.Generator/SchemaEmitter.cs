@@ -31,8 +31,9 @@ internal static class SchemaEmitter
     /// <summary>Emits the per-assembly schema registration, or null when there is nothing to say.</summary>
     internal static string? Emit(IReadOnlyList<BehaviorModel> models)
     {
+        // Every behavior, a field-less one included, since a tag such as a wall's marker is a
+        // component a level holds and the editor puts on an entity, and both find it by its schema.
         var described = models
-            .Where(model => model.Fields.Count > 0)
             .OrderBy(model => model.QualifiedName, System.StringComparer.Ordinal)
             .ToList();
 

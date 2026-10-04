@@ -61,6 +61,8 @@ public static class EditorScripts
             return;
         }
 
-        Console.WriteLine($"[editor] scripts {what}: {_host.Registered} registration(s)");
+        Console.WriteLine(_host.Carried > 0
+            ? $"[editor] scripts {what}: {_host.Registered} registration(s), {_host.Carried} component(s) carried over"
+            : $"[editor] scripts {what}: {_host.Registered} registration(s)");
     }
 }

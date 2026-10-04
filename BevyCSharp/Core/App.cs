@@ -114,6 +114,9 @@ public sealed unsafe class App : IDisposable
     /// </remarks>
     public ProjectSettings Project { get; } = new();
 
+    /// <summary>The states, sub-states and computed states this app added, by their enum.</summary>
+    private readonly HashSet<Type> _addedStates = new(SameState.Instance);
+
     /// <summary>Creates the engine and its native Bevy app.</summary>
     /// <param name="config">Startup configuration; <see cref="Config.Default"/> when omitted.</param>
     /// <exception cref="BevyNativeException">The native app could not be created.</exception>
@@ -543,6 +546,18 @@ public sealed unsafe class App : IDisposable
     private Dictionary<Stage, List<RegisteredSystem>>? _dynamicStages;
 
     /// <summary>
+    /// A transition system added while the app runs, by the state's slot, the value whose edge it
+    /// runs on, and whether that is the way in or out.
+    /// </summary>
+    private readonly record struct DynamicEdge(int Slot, int Value, bool Entering, RegisteredSystem System);
+
+    /// <summary>Transition systems added while the app runs, which the edge dispatcher runs.</summary>
+    private readonly List<DynamicEdge> _dynamicEdges = [];
+
+    /// <summary>What each slot with a dynamic edge held when last looked at, or nothing for no state.</summary>
+    private readonly Dictionary<int, int?> _seenStates = [];
+
+    /// <summary>
     /// Allows systems to be added after the loop has started.
     /// </summary>
     /// <remarks>
@@ -572,6 +587,14 @@ public sealed unsafe class App : IDisposable
 
         _dynamicStages = [];
 
+        // Transition systems that arrive while running, which Bevy's transition schedules cannot
+        // take any more. Before the Update dispatcher, after Bevy has applied the frame's
+        // transitions, so they run the frame a state changes, as Bevy's own would.
+        AddSystem(Stage.Update, new SystemDescriptor(_ => RunDynamicEdges(), "DynamicSystems.Transitions")
+        {
+            Source = "Core.DynamicSystems",
+        });
+
         foreach (var stage in DispatchStages)
         {
             var waiting = new List<RegisteredSystem>();
@@ -598,6 +621,41 @@ public sealed unsafe class App : IDisposable
         }
 
         return this;
+    }
+
+    /// <summary>Runs the exits and enters of every state a dynamic edge watches whose value changed.</summary>
+    private void RunDynamicEdges()
+    {
+        if (_dynamicEdges.Count == 0) return;
+
+        _dynamicEdges.RemoveAll(edge => edge.System.IsRemoved);
+
+        foreach (var slot in _dynamicEdges.Select(edge => edge.Slot).Distinct().ToArray())
+        {
+            var now = ReadSlot(slot);
+            var was = _seenStates.GetValueOrDefault(slot);
+            if (now == was) continue;
+
+            _seenStates[slot] = now;
+
+            // Out of the old value first and into the new one after, as Bevy orders them.
+            foreach (var edge in _dynamicEdges.ToArray())
+            {
+                if (edge.Slot == slot && !edge.Entering && edge.Value == was) edge.System.Descriptor.Invoke(World);
+            }
+
+            foreach (var edge in _dynamicEdges.ToArray())
+            {
+                if (edge.Slot == slot && edge.Entering && edge.Value == now) edge.System.Descriptor.Invoke(World);
+            }
+        }
+    }
+
+    /// <summary>What a state slot holds, or nothing while it holds no state.</summary>
+    private static int? ReadSlot(int slot)
+    {
+        int value;
+        return Native.bcs_state_get(slot, &value) == NativeStatus.Ok ? value : null;
     }
 
     /// <summary>Adds a system to the dispatcher for its stage.</summary>
@@ -685,6 +743,7 @@ public sealed unsafe class App : IDisposable
             Native.bcs_state_add(_handle, StateRegistry.Claim<TState>(), StateRegistry.ToInt(initial)),
             $"adding state {typeof(TState).Name}");
 
+        _addedStates.Add(typeof(TState));
         return this;
     }
 
@@ -740,6 +799,7 @@ public sealed unsafe class App : IDisposable
                     $"adding sub-state {typeof(TState).Name} under {string.Join(" and ", parents.Select(parent => parent.Parent.Name))}");
             }
 
+            _addedStates.Add(typeof(TState));
             return this;
         }
 
@@ -762,6 +822,7 @@ public sealed unsafe class App : IDisposable
                 StateRegistry.ToInt(initial)),
             $"adding sub-state {typeof(TState).Name} under {sub.Parent.Name}");
 
+        _addedStates.Add(typeof(TState));
         return this;
     }
 
@@ -851,6 +912,7 @@ public sealed unsafe class App : IDisposable
                 $"adding computed state {typeof(TState).Name} from {computed.Source.Name}");
         }
 
+        _addedStates.Add(typeof(TState));
         return this;
     }
 
@@ -917,6 +979,7 @@ public sealed unsafe class App : IDisposable
             Native.bcs_computed_add_rule(_handle, slot),
             $"adding computed state {typeof(TState).Name} from {computed.Source.Name} by a rule");
 
+        _addedStates.Add(typeof(TState));
         return this;
     }
 
@@ -1029,6 +1092,7 @@ public sealed unsafe class App : IDisposable
             Native.bcs_joint_add(_handle, joint),
             $"adding computed state {typeof(TState).Name} from {Named(computed)}");
 
+        _addedStates.Add(typeof(TState));
         return this;
     }
 
@@ -1081,12 +1145,25 @@ public sealed unsafe class App : IDisposable
         ArgumentNullException.ThrowIfNull(descriptor);
         ObjectDisposedException.ThrowIf(_disposed, this);
 
+        descriptor.Source ??= SystemRegistrationSourceScope.Current;
+
+        // Added while running, as a script reloaded during play is, it is watched for rather than
+        // scheduled, since Bevy's transition schedules take nothing once the app runs. The value
+        // the state holds as it arrives is not an edge, as Bevy would not run it either.
+        if (IsRunning && _dynamicStages is not null)
+        {
+            var slot = StateRegistry.SlotForRegistration<TState>();
+            var edge = new RegisteredSystem(this, descriptor, Stage.Update);
+            _systems.Add(edge);
+            _dynamicEdges.Add(new DynamicEdge(slot, StateRegistry.ToInt(value), entering, edge));
+            if (!_seenStates.ContainsKey(slot)) _seenStates[slot] = ReadSlot(slot);
+            return this;
+        }
+
         if (IsRunning)
             throw new InvalidOperationException(
                 $"Cannot register system '{descriptor.Name}': the app is already running. "
-                + "Register systems from a plugin's Build method or before calling Run.");
-
-        descriptor.Source ??= SystemRegistrationSourceScope.Current;
+                + "Register systems from a plugin's Build method, or call EnableDynamicSystems before Run.");
 
         // The stage is only a label here, because a transition system belongs to no frame stage,
         // and Startup is the closest thing to "runs outside the ordinary loop".
@@ -1165,6 +1242,13 @@ public sealed unsafe class App : IDisposable
                 + "macOS requires the window event loop to own the main thread, so starting a "
                 + "windowed app from a task or a background thread crashes inside the platform "
                 + "layer. Set Config.Headless to run the same behaviors without a window.");
+
+        // The states a script declared on its enum and a system of this app uses, added as the
+        // last thing before running, once every system that could use one has registered.
+        foreach (var (state, add) in StateRegistry.DeclaredFor(_addedStates))
+        {
+            if (!_addedStates.Contains(state)) add(this);
+        }
 
         IsRunning = true;
         ComponentRegistry.EnterRunning();

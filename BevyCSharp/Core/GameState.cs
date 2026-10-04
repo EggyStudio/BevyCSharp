@@ -104,6 +104,37 @@ public sealed class ComputedFromAttribute(Type source, params Type[] more) : Att
 }
 
 /// <summary>
+/// Declares an enum to be a state and where it starts, so an app that uses it adds it by itself.
+/// </summary>
+/// <remarks>
+/// <para>
+/// What <c>app.AddState(Mode.Menu)</c> says, said on the enum instead, for a state declared in a
+/// behavior script, which has no <c>Program.cs</c> to add it from and is compiled by a host the
+/// game, the editor's Play and the player all differ in. An app adds each declared state that one
+/// of its systems uses, through <c>[InState]</c>, <c>[OnEnter]</c> or <c>[OnExit]</c>, as it starts to
+/// run, and leaves one it already added alone. A sub-state (<see cref="SubStateOfAttribute"/>) is
+/// added after its parents, starting at the value given each time it comes into existence.
+/// </para>
+/// <para>
+/// Registered by the source generator from a module initializer, so nothing reflects. A computed
+/// state is not declared this way, since it needs its table or its rule.
+/// </para>
+/// </remarks>
+/// <example>
+/// <code>
+/// [InitialState(Mode.Menu)]
+/// public enum Mode { Menu, Playing }
+/// </code>
+/// </example>
+/// <param name="value">Where the state starts, a value of the enum it is on.</param>
+[AttributeUsage(AttributeTargets.Enum)]
+public sealed class InitialStateAttribute(object value) : Attribute
+{
+    /// <summary>Where the state starts.</summary>
+    public object Value { get; } = value;
+}
+
+/// <summary>
 /// Maps C# enums onto Bevy's app states.
 /// </summary>
 /// <remarks>
@@ -117,11 +148,16 @@ public sealed class ComputedFromAttribute(Type source, params Type[] more) : Att
 /// <para>
 /// Slots are per app, so a second <see cref="App"/> starts the assignment over.
 /// </para>
+/// <para>
+/// A state is known by its enum's full name rather than by the type itself, so a script reloaded
+/// into a running app, whose enum is a new type of the same name in a new assembly, reads and
+/// changes the state the app was started with instead of one nothing ever added.
+/// </para>
 /// </remarks>
 public static unsafe class StateRegistry
 {
     private static readonly object Gate = new();
-    private static readonly Dictionary<Type, int> Slots = [];
+    private static readonly Dictionary<Type, int> Slots = new(SameState.Instance);
     private static int _generation = -1;
     private static int _next;
 
@@ -176,6 +212,54 @@ public static unsafe class StateRegistry
                 $"No state of type {typeof(TState).Name} has been added. Call "
                 + $"app.AddState({typeof(TState).Name}.<initial>) before the app runs, so Bevy "
                 + "has somewhere to keep it and something to transition from.");
+        }
+    }
+
+    /// <summary>Every state declared with <see cref="InitialStateAttribute"/>, in the order it was declared.</summary>
+    private static readonly List<(Type State, bool Sub, Action<App> Add)> Declared = [];
+
+    /// <summary>
+    /// Declares <typeparamref name="TState"/> a state starting at <paramref name="initial"/>, which an
+    /// app that uses it adds as it starts to run.
+    /// </summary>
+    /// <remarks>Called by the code the generator emits for <see cref="InitialStateAttribute"/>.</remarks>
+    public static void Declare<TState>(TState initial) where TState : struct, Enum
+    {
+        lock (Gate)
+        {
+            Declared.RemoveAll(declared => SameState.Instance.Equals(declared.State, typeof(TState)));
+
+            var sub = Attribute.IsDefined(typeof(TState), typeof(SubStateOfAttribute));
+            Declared.Add((typeof(TState), sub, app =>
+            {
+                if (sub) app.AddSubState(initial);
+                else app.AddState(initial);
+            }));
+        }
+    }
+
+    /// <summary>Whether <typeparamref name="TState"/> was declared with <see cref="InitialStateAttribute"/>.</summary>
+    internal static bool IsDeclared<TState>() where TState : struct, Enum
+    {
+        lock (Gate) return Declared.Any(declared => SameState.Instance.Equals(declared.State, typeof(TState)));
+    }
+
+    /// <summary>
+    /// The declared states an app has to add, those a system of its claimed a slot for and it has
+    /// not added, parents before the sub-states that live in them.
+    /// </summary>
+    internal static List<(Type State, Action<App> Add)> DeclaredFor(IReadOnlySet<Type> added)
+    {
+        lock (Gate)
+        {
+            Reset();
+            return
+            [
+                .. Declared
+                    .Where(declared => Slots.ContainsKey(declared.State) && !added.Contains(declared.State))
+                    .OrderBy(declared => declared.Sub)
+                    .Select(declared => (declared.State, declared.Add)),
+            ];
         }
     }
 
@@ -547,4 +631,18 @@ public static unsafe class StateRegistry
         // business in it.
         return Convert.ToInt32(value, CultureInfo.InvariantCulture);
     }
+}
+
+/// <summary>Two state enums as one when their full names match, which a reloaded script's are.</summary>
+internal sealed class SameState : IEqualityComparer<Type>
+{
+    /// <summary>The one there is.</summary>
+    public static readonly SameState Instance = new();
+
+    /// <inheritdoc/>
+    public bool Equals(Type? x, Type? y) =>
+        ReferenceEquals(x, y) || (x is not null && y is not null && string.Equals(x.FullName, y.FullName, StringComparison.Ordinal));
+
+    /// <inheritdoc/>
+    public int GetHashCode(Type obj) => StringComparer.Ordinal.GetHashCode(obj.FullName ?? obj.Name);
 }

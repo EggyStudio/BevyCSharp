@@ -26,17 +26,8 @@ internal static class BehaviorDiagnostics
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
-    /// <summary>BCS002: neither stage methods nor fields, so the behavior does nothing.</summary>
-    internal static readonly DiagnosticDescriptor NoStageMethods = new(
-        id: "BCS002",
-        title: "Behavior has no stage methods and no fields",
-        messageFormat:
-        "'{0}' is marked [Behavior] but has neither a method with a stage attribute nor a field, "
-        + "so nothing will be scheduled and there is nothing to carry. Add [OnUpdate] (or another "
-        + "stage attribute) to a method, or give it a field to hold.",
-        category: Category,
-        defaultSeverity: DiagnosticSeverity.Warning,
-        isEnabledByDefault: true);
+    // BCS002 warned about a behavior with neither stage methods nor fields. It is retired, since
+    // such a behavior is a marker an entity carries, and its id is not given to another.
 
     /// <summary>BCS003: the method signature does not match what a system needs.</summary>
     internal static readonly DiagnosticDescriptor BadSignature = new(

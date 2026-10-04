@@ -922,14 +922,9 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 
         var fields = ReadFields(type);
 
-        // A behavior with fields and no methods is a plain data component, which carries state that
-        // other behaviors read and that a tool can show, which is a reason to exist. One with
-        // neither is the mistake this warns about.
-        if (methods.Count == 0 && fields.Count == 0)
-        {
-            diagnostics.Add(Diagnostic.Create(
-                BehaviorDiagnostics.NoStageMethods, declaration.Identifier.GetLocation(), type.Name));
-        }
+        // A behavior with fields and no methods is a plain data component, and one with neither is
+        // a marker, such as a wall a game's script finds by it. Both are described for the editor
+        // and a scene, so neither is warned about.
 
         // Only instance methods force the struct into Bevy's storage, so only they require it
         // to be blittable. A behavior with static methods alone is a system holder.
