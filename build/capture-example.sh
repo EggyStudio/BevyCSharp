@@ -53,6 +53,8 @@ frames=120
 case "$example" in
   # Exposure that adapts as an eye does, which takes its time to settle.
   auto_exposure) frames=900 ;;
+  # Decals stamped one a second, which take some seconds to be more than one.
+  clustered_decal_maps) frames=600 ;;
   *) ;;
 esac
 ./bcs command frames.wait "$frames" --quiet --timeout 600

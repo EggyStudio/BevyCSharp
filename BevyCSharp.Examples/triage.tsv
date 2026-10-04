@@ -69,7 +69,7 @@ specular_tint	missing	specular tint and the specular maps on the standard materi
 clustered_decals	missing	a standard material extended by a shader of the example's own, which reads the decal's tag
 light_textures	can
 occlusion_culling	missing	the counts of meshes drawn and culled, which it reads back from the render world's indirect draw buffers
-clustered_decal_maps	can	through Bevy's reflected ClusteredDecal
+clustered_decal_maps	can
 mirror	missing	the mirror, a standard material extended by a shader of the example's own that samples what a second camera draws in screen space
 pccm	can
 light_probe_blending	can
