@@ -199,12 +199,12 @@ immutable_components	n/a	about Rust's component mutability
 iter_combinations	can
 message	missing	a message changed in place by a later system and read by a later one the same frame
 nondeterministic_system_order	missing	the schedule reporting systems whose order is ambiguous
-observer_propagation	missing	events that propagate through a hierarchy to observers
-observers	missing	observers of custom events and of a component's addition and removal
+observer_propagation	can
+observers	can
 one_shot_systems	can
 parallel_query	can
 relationships	missing	relationships of a game's own between entities
-removal_detection	missing	an observer told when a component is removed
+removal_detection	can
 run_conditions	can
 startup_system	can
 state_scoped	missing	despawning when a state is entered or by a rule over the transition, and a state holding a value

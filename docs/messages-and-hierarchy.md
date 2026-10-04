@@ -1,7 +1,7 @@
 # Messages and the hierarchy
 
-How one system tells another that something happened, and how entities are parented so a child moves
-with what it belongs to.
+How one system tells another that something happened, how code runs the moment it does, and how
+entities are parented so a child moves with what it belongs to.
 
 ## Messages
 
@@ -107,6 +107,47 @@ chain of arbitrary transforms cannot always be expressed as one, so `Scale`, `Ro
 `ToTransform()` decompose it the way Bevy's own accessors do.
 
 Parenting is a structural change, so queue it on `ctx.Cmd` when calling from inside a loop.
+
+## Observers
+
+A message waits for a system to read it the next frame. An observer runs the moment its event is
+triggered, which suits what has to happen before anything else looks at the world, an index kept in
+step with a component, or an attack that armor softens before the body behind it takes it.
+
+```csharp
+public readonly record struct Explode(Entity Entity) : IEntityEvent;
+
+ctx.Ecs.Observe<Explode>(on => Console.WriteLine($"{on.Entity} exploded"));
+ctx.Ecs.Observe<Explode>(mine, on => on.Ecs.Despawn(on.Entity));
+
+ctx.Ecs.Trigger(new Explode(mine));
+```
+
+An event is any type a game declares. One that names an entity, an `IEntityEvent`, reaches the
+observers watching every such event and then the ones of that entity. An `IPropagatingEvent` goes on
+from there up the entity's parents, one at a time, until an observer calls `on.Propagate(false)` or
+it reaches the root. `on.Event` is a reference, so an observer that changes the event passes the
+changed one on, which is how armor lessens the damage the body hears of. `on.Entity` is where the
+event has reached, and the event's own `Entity` is where it started. `App.AddObserver` adds one
+before the app runs. The handle `Observe` returns stops the observer when disposed.
+
+Bevy reports what happens to a component, to C# observers as to its own, as five events over it.
+
+```csharp
+ctx.Ecs.Observe<Add<Mine>>(on => index.Add(on.Event.Entity, on.Event.Value));
+ctx.Ecs.Observe<Remove<Mine>>(on => index.Forget(on.Event.Entity, on.Event.Value));
+```
+
+`Add<T>` when an entity gains one it did not have, `Insert<T>` each time one is put on it, added
+or replacing, `Discard<T>` for each value given up, by being replaced, removed or despawned,
+`Remove<T>` when it leaves, and `Despawn<T>` when its entity is despawned with it. Each carries the
+entity and the component's value, which for `Discard` and `Remove` is the one that went. They run
+once the change has been made and before the call that made it returns, with the whole world to
+work in, so a `Remove<T>` observer finds the component already gone and is handed what it was. A
+change queued on `ctx.Cmd` runs them when the commands are applied. An exception in one is written
+to the console and goes no further, since it would otherwise have to cross back through Bevy.
+
+A game's event likewise runs its observers inside `Trigger`, before it returns.
 
 ---
 

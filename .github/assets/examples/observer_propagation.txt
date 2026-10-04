@@ -1,0 +1,110 @@
+⚔️  Attack for 15 damage
+Attack hit Shirt
+🛡️  15 damage blocked by Shirt
+(propagation halted early)
+
+⚔️  Attack for 9 damage
+Attack hit Socks
+🛡️  9 damage blocked by Socks
+(propagation halted early)
+
+⚔️  Attack for 17 damage
+Attack hit Socks
+🩸 7 damage passed through Socks
+Attack hit Goblin
+Goblin has 43.0 HP
+(propagation reached root)
+
+⚔️  Attack for 3 damage
+Attack hit Socks
+🛡️  3 damage blocked by Socks
+(propagation halted early)
+
+⚔️  Attack for 18 damage
+Attack hit Shirt
+🩸 3 damage passed through Shirt
+Attack hit Goblin
+Goblin has 40.0 HP
+(propagation reached root)
+
+⚔️  Attack for 14 damage
+Attack hit Helmet
+🩸 9 damage passed through Helmet
+Attack hit Goblin
+Goblin has 31.0 HP
+(propagation reached root)
+
+⚔️  Attack for 13 damage
+Attack hit Helmet
+🩸 8 damage passed through Helmet
+Attack hit Goblin
+Goblin has 23.0 HP
+(propagation reached root)
+
+⚔️  Attack for 12 damage
+Attack hit Socks
+🩸 2 damage passed through Socks
+Attack hit Goblin
+Goblin has 21.0 HP
+(propagation reached root)
+
+⚔️  Attack for 4 damage
+Attack hit Shirt
+🛡️  4 damage blocked by Shirt
+(propagation halted early)
+
+⚔️  Attack for 2 damage
+Attack hit Shirt
+🛡️  2 damage blocked by Shirt
+(propagation halted early)
+
+⚔️  Attack for 15 damage
+Attack hit Helmet
+🩸 10 damage passed through Helmet
+Attack hit Goblin
+Goblin has 11.0 HP
+(propagation reached root)
+
+⚔️  Attack for 13 damage
+Attack hit Socks
+🩸 3 damage passed through Socks
+Attack hit Goblin
+Goblin has 8.0 HP
+(propagation reached root)
+
+⚔️  Attack for 9 damage
+Attack hit Helmet
+🩸 4 damage passed through Helmet
+Attack hit Goblin
+Goblin has 4.0 HP
+(propagation reached root)
+
+⚔️  Attack for 3 damage
+Attack hit Socks
+🛡️  3 damage blocked by Socks
+(propagation halted early)
+
+⚔️  Attack for 12 damage
+Attack hit Shirt
+🛡️  12 damage blocked by Shirt
+(propagation halted early)
+
+⚔️  Attack for 18 damage
+Attack hit Shirt
+🩸 3 damage passed through Shirt
+Attack hit Goblin
+Goblin has 1.0 HP
+(propagation reached root)
+
+⚔️  Attack for 1 damage
+Attack hit Helmet
+🛡️  1 damage blocked by Helmet
+(propagation halted early)
+
+⚔️  Attack for 15 damage
+Attack hit Socks
+🩸 5 damage passed through Socks
+Attack hit Goblin
+💀 Goblin has died a gruesome death
+(propagation reached root)
+

@@ -246,7 +246,7 @@ public sealed unsafe class App : IDisposable
         World.InsertResource(Project);
         World.InsertResource(new Time());
         World.InsertResource(new Input());
-        World.InsertResource(new EcsWorld());
+        World.InsertResource(new EcsWorld { Owner = World });
         World.InsertResource(new EcsCommands());
         World.InsertResource(new MessageBus());
 
@@ -576,6 +576,17 @@ public sealed unsafe class App : IDisposable
             AddSystem(stage, systems[i]);
         }
 
+        return this;
+    }
+
+    /// <summary>Runs <paramref name="observer"/> each time a <typeparamref name="TEvent"/> is triggered.</summary>
+    /// <remarks>
+    /// Bevy's <c>add_observer</c>, the same as <see cref="EcsWorld.Observe{TEvent}(Action{On{TEvent}})"/>
+    /// on this app's world, which says what may be observed and when the observer runs.
+    /// </remarks>
+    public App AddObserver<TEvent>(Action<On<TEvent>> observer)
+    {
+        World.Resource<EcsWorld>().Observe(observer);
         return this;
     }
 
@@ -1528,6 +1539,7 @@ public sealed unsafe class App : IDisposable
         foreach (var system in _systems) system.Dispose();
         _systems.Clear();
 
+        if (World.TryGetResource<EcsWorld>(out var ecs)) ecs.ForgetObservers();
         World.Dispose();
 
         // The rules this app's computed states were worked out by, and what they captured.

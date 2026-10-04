@@ -24,6 +24,7 @@ App AddSystem(Stage stage, SystemFn system);                    // Registers a s
 App AddSystem(Stage stage, SystemFn system, Func<World, bool> runCondition);  // Registers a system function with a run condition
 App AddSystem(Stage stage, SystemDescriptor descriptor);        // Registers a described system in stage
 App Chain(Stage stage, params SystemDescriptor[] systems);      // Registers systems in stage, each to run after the one before it
+App AddObserver<TEvent>(Action<On<TEvent>> observer);           // Runs observer each time a TEvent is triggered
 App EnableDynamicSystems();                                     // Allows systems to be added after the loop has started
 int RemoveSystemsBySource(string source);                       // Removes every system tagged with source
 IReadOnlyList<SystemDescriptor> SystemsIn(Stage stage);         // The descriptors registered for stage, in registration order
@@ -238,6 +239,9 @@ ChunkSet<T> Chunks<T>(ReadOnlySpan<int> with = default, ReadOnlySpan<int> withou
 ChunkSet<T> Chunks<T>(int componentId, ReadOnlySpan<int> with = default, ReadOnlySpan<int> without = default, bool markChanged = true);  // Collects the storage runs for an explicitly named component
 ComponentQuery<T> Query<T>(bool markChanged = true);            // Iterates every T in the world by reference
 Entity[] EntitiesWith<T>();                                     // The entities carrying T
+IDisposable Observe<TEvent>(Action<On<TEvent>> observer);       // Runs observer each time a TEvent is triggered
+IDisposable Observe<TEvent>(Entity entity, Action<On<TEvent>> observer);  // Runs observer each time a TEvent reaches entity
+void Trigger<TEvent>(TEvent value);                             // Runs the observers of value now
 string GetReflected(Entity entity, string typePath, string path = "");  // Reads one of Bevy's components, or one field of it, as JSON
 void SetReflected(Entity entity, string typePath, string path, string json);  // Writes a value given as JSON over one of Bevy's components, or one field of it
 string GetVariant(Entity entity, string typePath, string path);  // Which variant an enum inside one of Bevy's components holds
@@ -308,6 +312,12 @@ int Count<T>();                                                 // How many mess
 bool IsEmpty<T>();                                              // True when nothing of type T arrived
 void Swap();                                                    // Makes this frame's messages readable and starts a new frame's queue
 void Clear();                                                   // Discards everything, sent and readable alike
+```
+
+### `On<TEvent>`
+
+```csharp
+void Propagate(bool propagate);                                 // Lets the event go on up to the parent, or, given false, stops it here
 ```
 
 ## Components

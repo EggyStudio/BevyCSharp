@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**116 written, 7 written in part, 120 can be written, 121 missing and 57 do not apply.** Of the 364 that apply, 243 can be written with what is bridged, 7 of them leaving something out.
+**119 written, 7 written in part, 120 can be written, 118 missing and 57 do not apply.** Of the 364 that apply, 246 can be written with what is bridged, 7 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
@@ -18,7 +18,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Camera](#camera) | 4 | 0 | 0 | 5 | 0 |
 | [Dev tools](#dev-tools) | 0 | 0 | 1 | 1 | 1 |
 | [Diagnostics](#diagnostics) | 0 | 0 | 1 | 2 | 0 |
-| [ECS (Entity Component System)](#ecs-entity-component-system) | 11 | 0 | 1 | 14 | 9 |
+| [ECS (Entity Component System)](#ecs-entity-component-system) | 14 | 0 | 1 | 11 | 9 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |
 | [Games](#games) | 0 | 0 | 6 | 0 | 0 |
 | [Gizmos](#gizmos) | 0 | 0 | 4 | 5 | 0 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **116** | **7** | **120** | **121** | **57** |
+| **All** | **119** | **7** | **120** | **118** | **57** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints.
 
@@ -293,12 +293,12 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`iter_combinations`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/iter_combinations.rs) | Shows how to iterate over combinations of query results | [written](../BevyCSharp.Examples/ecs/iter_combinations.cs) |
 | [`message`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/message.rs) | Illustrates message creation, activation, and reception | missing, a message changed in place by a later system and read by a later one the same frame |
 | [`nondeterministic_system_order`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/nondeterministic_system_order.rs) | Systems run in parallel, but their order isn't always deterministic. Here's how to detect and fix this. | missing, the schedule reporting systems whose order is ambiguous |
-| [`observer_propagation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/observer_propagation.rs) | Demonstrates event propagation with observers | missing, events that propagate through a hierarchy to observers |
-| [`observers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/observers.rs) | Demonstrates observers that react to events (both built-in life-cycle events and custom events) | missing, observers of custom events and of a component's addition and removal |
+| [`observer_propagation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/observer_propagation.rs) | Demonstrates event propagation with observers | [written](../BevyCSharp.Examples/ecs/observer_propagation.cs), prints [its output](assets/examples/observer_propagation.txt) |
+| [`observers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/observers.rs) | Demonstrates observers that react to events (both built-in life-cycle events and custom events) | [written](../BevyCSharp.Examples/ecs/observers.cs) |
 | [`one_shot_systems`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/one_shot_systems.rs) | Shows how to flexibly run systems without scheduling them | [written](../BevyCSharp.Examples/ecs/one_shot_systems.cs) |
 | [`parallel_query`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/parallel_query.rs) | Illustrates parallel queries with `ParallelIterator` | [written](../BevyCSharp.Examples/ecs/parallel_query.cs) |
 | [`relationships`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/relationships.rs) | Define and work with custom relationships between entities | missing, relationships of a game's own between entities |
-| [`removal_detection`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/removal_detection.rs) | Query for entities that had a specific component removed earlier in the current frame | missing, an observer told when a component is removed |
+| [`removal_detection`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/removal_detection.rs) | Query for entities that had a specific component removed earlier in the current frame | [written](../BevyCSharp.Examples/ecs/removal_detection.cs) |
 | [`run_conditions`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/run_conditions.rs) | Run systems only when one or multiple conditions are met | [written](../BevyCSharp.Examples/ecs/run_conditions.cs), prints [its output](assets/examples/run_conditions.txt) |
 | [`startup_system`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/startup_system.rs) | Demonstrates a startup system (one that runs once when the app starts up) | [written](../BevyCSharp.Examples/ecs/startup_system.cs), prints [its output](assets/examples/startup_system.txt) |
 | [`state_scoped`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/state_scoped.rs) | Shows how to spawn entities that are automatically despawned either when entering or exiting specific game states. | missing, despawning when a state is entered or by a rule over the transition, and a state holding a value |

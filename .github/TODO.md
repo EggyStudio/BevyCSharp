@@ -39,12 +39,12 @@ the most examples, and the largest is taken between groups of examples. The coun
   and underline, and text background colors.
 - **Animation built in code, seven examples.** Clips made from curves, events placed on a clip,
   graphs that blend clips by weight and their masks, and skinned meshes built joint by joint.
-- **Observers, eleven examples.** Code run when an event is triggered, on an entity or anywhere, or
-  when a component is added or removed, which `observers`, `observer_propagation` and
-  `removal_detection` are about and `error_handling`, `delayed_commands`, `entity_disabling`,
-  `ui_drag_and_drop`, `viewport_node`, `drag_to_scroll`, `render_ui_to_texture` and `scroll` use for
-  a click, a drag or a pointer moving over what they draw. Needs events a game declares, triggered
-  from C# and from Bevy's picking, and C# code run as an observer.
+- **Picking's events as observers, eight examples.** A click, a drag or a pointer moving over what
+  they draw, which `error_handling`, `delayed_commands`, `entity_disabling`, `ui_drag_and_drop`,
+  `viewport_node`, `drag_to_scroll`, `render_ui_to_texture` and `scroll` observe on the entity it
+  happened to. C# observers run for a game's own events and for a component's coming and going,
+  and Bevy's `Pointer<Click>`, `Pointer<Over>`, `Pointer<Drag>` and the rest need the same bridge
+  for events Bevy triggers, with each event's fields read into a C# struct.
 - **Input as events, five examples.** The keyboard, the mouse, touches and pads as Bevy's messages,
   one per change in the order they came, which `keyboard_input_events`, `mouse_input_events`,
   `touch_input_events` and `gamepad_input_events` print, and logical keys as Bevy's
@@ -72,8 +72,8 @@ the most examples, and the largest is taken between groups of examples. The coun
 - **Eleven more, one example each.** A resource's change ticks and when a component was added
   (`change_detection`), a component's add and insert hooks (`component_hooks`), relationships of a
   game's own (`relationships`), commands run after a delay (`delayed_commands`, which also waits on
-  observers), Bevy's log written from C# at its levels (`logs`), a playing sound's speed changed as
-  it plays (`audio_control`), an atlas built from a folder of images as the app runs
+  picking's events), Bevy's log written from C# at its levels (`logs`), a playing sound's speed
+  changed as it plays (`audio_control`), an atlas built from a folder of images as the app runs
   (`texture_atlas`), an image loaded as an array of layers (`tilemap_chunk_orientation`), the
   pointer passing through the window to what is behind it (`window_fallthrough`), the schedule
   reporting systems whose order is ambiguous (`nondeterministic_system_order`), and a message

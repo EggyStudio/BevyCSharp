@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 181;
+    internal const int ExpectedAbiVersion = 182;
 
     static Native() => NativeLoader.Initialize();
 
@@ -104,6 +104,17 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_component_on_remove(
         IntPtr app, int component, delegate* unmanaged[Cdecl]<ulong, int, byte*, void> callback);
+
+    /// <summary>Asks Bevy to report one kind of change to a component, through an observer it spawns.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_observe_component(
+        IntPtr app,
+        int kind,
+        int component,
+        delegate* unmanaged[Cdecl]<int, int, ulong, byte*, nuint, IntPtr, void> callback,
+        IntPtr user,
+        ulong* observer);
 
     /// <summary>
     /// Calls back with the copy of a component an entity clone is about to receive, so its handles
