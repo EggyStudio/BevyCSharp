@@ -422,4 +422,14 @@ public sealed class MaterialSettings
     /// <see cref="AnisotropyRotation"/> and multiplied by <see cref="AnisotropyStrength"/>.
     /// </summary>
     public AssetHandle AnisotropyTexture { get; set; } = AssetHandle.None;
+
+    /// <summary>What a baked lightmap's values are multiplied by, in nits, where one is the stored value.</summary>
+    /// <remarks>
+    /// A lightmap is light worked out ahead of time and stored in an image, which Bevy reads where
+    /// an entity carries its <c>Lightmap</c> component. An image holds values from zero to one, or
+    /// not much past it, while a lit scene is metered in the hundreds of nits, so a lightmap baked
+    /// at one scale is shown at another by raising this, as Bevy's lightmap example raises it to
+    /// 250. It changes nothing on a material no lightmap is given to.
+    /// </remarks>
+    public float LightmapExposure { get; set; } = 1f;
 }

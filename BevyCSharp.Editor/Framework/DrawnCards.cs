@@ -403,6 +403,8 @@ internal static class DrawnCards
                 Folded("How much the highlight stretches along the surface, as brushed metal's does.")),
             Field("Stretch turn", FieldKind.Float, settings => settings.AnisotropyRotation, (settings, value) => Number(value, number => settings.AnisotropyRotation = number),
                 new FieldHints(Tooltip: "Radians the stretch is turned by, from the mesh's tangent.", Minimum: -3.1416d, Maximum: 3.1416d, Foldout: "Surface", FoldoutOpen: false)),
+            Field("Lightmap", FieldKind.Float, settings => settings.LightmapExposure, (settings, value) => Number(value, number => settings.LightmapExposure = number),
+                Folded("What a baked lightmap's values are multiplied by, in nits, where one is the stored value.")),
 
             // The texture slots, each picked in the grid from the images under the asset root and
             // inside models, named short enough for the name column, with what each is in full on

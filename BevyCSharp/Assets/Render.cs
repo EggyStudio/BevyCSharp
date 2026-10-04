@@ -217,6 +217,7 @@ public static unsafe class Render
             DiffuseTransmissionTexture = Texture(read.DiffuseTransmissionTexture),
             ThicknessTexture = Texture(read.ThicknessTexture),
             AnisotropyTexture = Texture(read.AnisotropyTexture),
+            LightmapExposure = read.LightmapExposure,
         };
         return true;
 
@@ -528,6 +529,7 @@ public static unsafe class Render
             DiffuseTransmissionTexture = Key(settings.DiffuseTransmissionTexture),
             ThicknessTexture = Key(settings.ThicknessTexture),
             AnisotropyTexture = Key(settings.AnisotropyTexture),
+            LightmapExposure = settings.LightmapExposure,
         };
 
         // An unset handle is -1, which the bridge reads as "no texture here".

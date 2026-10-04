@@ -7,8 +7,9 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers a material's finer surface, reflectance, clearcoat, transmission, attenuation and
-/// anisotropy, through the bridge and through the JSON a scene or a material file holds.
+/// Covers a material's finer surface, reflectance, clearcoat, transmission, attenuation,
+/// anisotropy and the exposure a lightmap is shown at, through the bridge and through the JSON a
+/// scene or a material file holds.
 /// </summary>
 [Collection("engine")]
 public sealed class MaterialSurfaceTests
@@ -26,6 +27,7 @@ public sealed class MaterialSurfaceTests
         AttenuationColor = (0.9f, 0.5f, 0.25f, 1f),
         AnisotropyStrength = 0.7f,
         AnisotropyRotation = 0.3f,
+        LightmapExposure = 250f,
     };
 
     [SkippableFact]
@@ -60,6 +62,9 @@ public sealed class MaterialSurfaceTests
         Assert.Equal(made.AnisotropyStrength, read.AnisotropyStrength, 4);
         Assert.Equal(made.AnisotropyRotation, read.AnisotropyRotation, 4);
 
+        // Last in the mirror, after the maps, so it reads true only if every field before it lines up.
+        Assert.Equal(made.LightmapExposure, read.LightmapExposure, 4);
+
         // The map in the last slot of the mirror comes back in that slot and no other, which a
         // field out of step between the two sides would move.
         Assert.True(read.AnisotropyTexture.IsValid);
@@ -86,6 +91,8 @@ public sealed class MaterialSurfaceTests
         Assert.Equal(2.5f, read.AttenuationDistance);
         Assert.Equal((0.9f, 0.5f, 0.25f, 1f), read.AttenuationColor);
         Assert.Equal(0.7f, read.AnisotropyStrength);
+        Assert.Equal(250f, read.LightmapExposure);
+        Assert.False(plain.RootElement.TryGetProperty("lightmapExposure", out _));
 
         // Infinity, a clear material's distance, is left out and read back as itself.
         Assert.False(plain.RootElement.TryGetProperty("attenuationDistance", out _));

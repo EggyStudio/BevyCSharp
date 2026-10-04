@@ -57,6 +57,24 @@ beside it (`ClearcoatTexture`, `ClearcoatRoughnessTexture`, `ClearcoatNormalText
 `TransmissionTexture`, `DiffuseTransmissionTexture`, `ThicknessTexture`, `AnisotropyTexture`), and a
 glTF file's clearcoat, transmission and anisotropy extensions fill them as it loads.
 
+`LightmapExposure` is for light baked ahead of time into an image, which Bevy reads where an entity
+carries its `Lightmap` component, put there through reflection. The image holds values near one and
+a lit scene is metered in hundreds of nits, so the exposure raises one to the other, as Bevy's
+[lightmaps example](https://github.com/EggyStudio/BevyCSharp/blob/main/BevyCSharp.Examples/3d/lightmaps.cs)
+does for a material that came with a glTF file:
+
+```csharp
+var material = Render.MaterialOf(ecs, wall);
+if (Render.TryReadMaterial(material, out var settings))
+{
+    settings.LightmapExposure = 250f;
+    Render.WriteMaterial(material, settings);
+}
+
+ecs.InsertReflected(wall, "bevy_pbr::lightmap::Lightmap");
+ecs.SetReflectedAsset(wall, "bevy_pbr::lightmap::Lightmap", "image", AssetServer.Load(AssetKind.Image, "lightmaps/wall.ktx2"));
+```
+
 A material file and a scene write these only where they differ from a plain material's, and the
 editor's Material card keeps them in a Surface fold, with their maps in a Surface maps fold.
 

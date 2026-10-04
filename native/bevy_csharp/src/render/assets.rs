@@ -851,6 +851,7 @@ fn standard_material(
         diffuse_transmission_texture,
         thickness_texture,
         anisotropy_texture,
+        lightmap_exposure: config.lightmap_exposure,
         ..Default::default()
     };
 
@@ -1014,6 +1015,7 @@ pub unsafe extern "C" fn bcs_render_material_read(handle: i32, out: *mut BcsMate
                     diffuse_transmission_texture: key(material.diffuse_transmission_texture),
                     thickness_texture: key(material.thickness_texture),
                     anisotropy_texture: key(material.anisotropy_texture),
+                    lightmap_exposure: material.lightmap_exposure,
                 };
 
                 unsafe { out.write(config) };
@@ -1592,6 +1594,7 @@ mod tests {
             diffuse_transmission_texture: -1,
             thickness_texture: -1,
             anisotropy_texture: -1,
+            lightmap_exposure: 250.0,
         };
 
         loan_world(app.world_mut(), || {
@@ -1613,6 +1616,7 @@ mod tests {
             assert_eq!(made.attenuation_distance, read.attenuation_distance);
             assert_eq!(made.attenuation_color, read.attenuation_color);
             assert_eq!(made.anisotropy_strength, read.anisotropy_strength);
+            assert_eq!(made.lightmap_exposure, read.lightmap_exposure);
             assert_eq!(made.anisotropy_rotation, read.anisotropy_rotation);
             assert_eq!(-1, read.clearcoat_normal_texture);
             assert_eq!(made.reflectance, read.reflectance);

@@ -263,6 +263,9 @@ public struct NativeMaterialConfig
 
     /// <summary>Asset key of the anisotropy map, or -1.</summary>
     public int AnisotropyTexture;
+
+    /// <summary>What a baked lightmap's values are multiplied by, in nits.</summary>
+    public float LightmapExposure;
 }
 
 /// <summary>How an image should be sampled, and how its bytes should be read.</summary>

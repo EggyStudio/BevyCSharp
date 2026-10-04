@@ -60,6 +60,7 @@ internal static class MaterialJson
         if (settings.AttenuationColor != plain.AttenuationColor) Four(json, "attenuationColor", settings.AttenuationColor);
         if (settings.AnisotropyStrength != plain.AnisotropyStrength) json.WriteNumber("anisotropyStrength", settings.AnisotropyStrength);
         if (settings.AnisotropyRotation != plain.AnisotropyRotation) json.WriteNumber("anisotropyRotation", settings.AnisotropyRotation);
+        if (settings.LightmapExposure != plain.LightmapExposure) json.WriteNumber("lightmapExposure", settings.LightmapExposure);
 
         // The finer maps, each written only where one is set, as every slot is.
         Texture(json, "clearcoatTexture", settings.ClearcoatTexture, references);
@@ -108,6 +109,7 @@ internal static class MaterialJson
         if (Floats(json, "attenuationColor", 4) is { } tint) settings.AttenuationColor = (tint[0], tint[1], tint[2], tint[3]);
         if (json.TryGetProperty("anisotropyStrength", out var strength)) settings.AnisotropyStrength = strength.GetSingle();
         if (json.TryGetProperty("anisotropyRotation", out var turn)) settings.AnisotropyRotation = turn.GetSingle();
+        if (json.TryGetProperty("lightmapExposure", out var exposure)) settings.LightmapExposure = exposure.GetSingle();
 
         settings.ClearcoatTexture = Image(json, "clearcoatTexture");
         settings.ClearcoatRoughnessTexture = Image(json, "clearcoatRoughnessTexture");

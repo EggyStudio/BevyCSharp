@@ -41,3 +41,7 @@ textures/BlueNoise-Normal.png
 models/GolfBall/GolfBall.glb
 textures/slice_square.png
 branding/icon.png
+models/CornellBox/CornellBox.glb
+lightmaps/CornellBox-Large.zstd.ktx2
+lightmaps/CornellBox-Small.zstd.ktx2
+lightmaps/CornellBox-Box.zstd.ktx2

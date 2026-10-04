@@ -1001,6 +1001,9 @@ pub struct BcsMaterialConfig {
     pub thickness_texture: i32,
     /// Asset key of the anisotropy direction and strength map, or `-1`.
     pub anisotropy_texture: i32,
+    /// What a baked lightmap's values are multiplied by, in nits, for a lightmap stored at a
+    /// scale other than the one the scene is lit at. One leaves them as they are.
+    pub lightmap_exposure: f32,
 }
 
 /// What kind of light to spawn and how it behaves.
