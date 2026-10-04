@@ -1,0 +1,9 @@
+<Project>
+
+    <!--
+      Empty, for the same reason as Directory.Build.props beside it. The repository's imports the
+      export's embedding targets for projects that reference the library directly, and a game has
+      them from the package.
+    -->
+
+</Project>

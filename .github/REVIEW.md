@@ -8,16 +8,14 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `65aaef5`. The history's map of what came back as what (`65aaef5`) was read and
-settles the undo verdict. The project file (`3912705`) carries out the decision on it, which is
-removed.
+Reviewed up to `9dc91a6`. The editor opened on a game's own folder, with the commands the level
+was built through, was read by its description and raised nothing.
 
 ## Now
 
 In this order.
 
-1. **The verdict below**, which the batch in progress has begun.
-2. **One small game, made the way a user would make it.** Every part has tests of its own, and
+1. **One small game, made the way a user would make it.** Every part has tests of its own, and
    nothing has gone the whole way from an empty project to a game somebody else can run. A new
    project outside this repository's references, on the packed package: its level built in the
    editor, driven through `./bcs` so the steps can be repeated (entities placed, a model placed
@@ -30,17 +28,12 @@ In this order.
    could not be done is written down as it is met. Each becomes a fix in the batch when it is
    small and an entry in TODO.md when it is not, and the report lists them. The game is kept
    under `games/` and played offscreen by the test workflow where the bridge allows.
-3. **What the game turned up**, in the order it hurt.
-4. **Gamepads** wait on the owner (decision 2).
+2. **What the game turned up**, in the order it hurt.
+3. **Gamepads** wait on the owner (decision 2).
 
 ## Verdicts
 
-1. **Animation plays the first player under a model and only named clips** (`f79472b`,
-   `native/bevy_csharp/src/animation.rs`). `animator` stops at the first `AnimationPlayer` it
-   finds under the root, and a glTF file with more than one animated root has a player for each,
-   so the rest never move. Clips are taken from `named_animations`, so a clip the file gave no
-   name cannot be played, where it could be offered by its number. Both are to work, or to be
-   entries in TODO.md's Animation section with what each needs.
+None open.
 
 ## Decisions
 

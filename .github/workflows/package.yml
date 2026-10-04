@@ -169,6 +169,55 @@ jobs:
       - name: Test
         run: dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj -c Release
 
+  # Courtyard, the small game under games/, built on a package as a project outside this
+  # repository is, and played from its menu to its win by games/Courtyard/play.sh with no display.
+  # Only where the bridges are built, since the game draws offscreen and the test job's headless
+  # bridge draws nothing.
+  game:
+    name: play Courtyard
+    if: ${{ inputs.pack }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [native]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-linux-x64
+          path: build/artifacts/linux-x64
+
+      # Lavapipe, Mesa's Vulkan on the processor, since the runner has no graphics card for the
+      # game to draw with, and ALSA, which the bridge's audio links against.
+      - name: Install a software Vulkan and ALSA
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends mesa-vulkan-drivers libasound2-dev
+
+      # A package of this commit's library and the Linux bridge alone, under a version of its
+      # own so nothing cached under another is restored in its place.
+      - name: Pack
+        run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
+
+      - name: Build Courtyard
+        run: dotnet build games/Courtyard -p:BevyCSharpVersion=0.0.0-ci
+
+      - name: Play Courtyard
+        env:
+          SHOTS: ${{ runner.temp }}/courtyard
+        run: mkdir -p "$SHOTS" && games/Courtyard/play.sh
+
+      # What each step looked like and the game's own log, which say where a failed run went wrong.
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: courtyard
+          path: ${{ runner.temp }}/courtyard
+          if-no-files-found: ignore
+
   pack:
     name: pack
     if: ${{ inputs.pack }}

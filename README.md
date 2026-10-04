@@ -110,6 +110,11 @@ Behaviors are discovered automatically, so a consuming project needs no registra
 - [Running a game](#running-a-game)
   - [In a window, headless, or offscreen](#in-a-window-headless-or-offscreen)
   - [Hot reload](#hot-reload)
+- [Making a game](#making-a-game)
+  - [The project](#the-project)
+  - [The level](#the-level)
+  - [The behaviors](#the-behaviors)
+  - [Playing it](#playing-it)
 - [The tools](#the-tools)
   - [The editor](#the-editor)
   - [The console](#the-console)
@@ -131,6 +136,8 @@ Behaviors are discovered automatically, so a consuming project needs no registra
   drawing, 2D, gizmos, the interface, audio, physics and input.
 - [Running a game](#running-a-game): in a window, with no renderer, or into an image, and reloading
   behavior scripts while it runs.
+- [Making a game](#making-a-game): a small one in `games/Courtyard`, from an empty project to an
+  export, built and played through `bcs`.
 - [The tools](#the-tools): the editor, its console, and driving a running app from a terminal.
 - [How it works](#how-it-works) inside, what is [still missing](#status-and-limitations), and
   [building from source](#building-from-source).
@@ -471,6 +478,26 @@ changes, and a value worked out again to what it already was runs no `[OnEnter]`
 holds no state, it does not exist. The bridge keeps a fixed set of these joint states beside the
 slots, each fed every slot, so which states one reads is chosen by the game rather than when the
 bridge is built.
+
+A state can be declared on its enum instead of added by a call, which is how a behavior script
+says what states it has, since a script has no `Program.cs` to call `AddState` from:
+
+```csharp
+[InitialState(Menu)]
+public enum Mode { Menu, Playing, Won }
+
+[SubStateOf(typeof(Mode), Mode.Playing)]
+[InitialState(Off)]
+public enum Pause { Off, On }
+```
+
+A generator finds the attribute at compile time, and an app adds each declared state one of its
+systems names as it starts to run, a parent before the sub-states inside it, so a game whose
+scripts are compiled into it and the editor's player running the same scripts get the same states.
+A state is known by its enum's full name, so a script compiled again while the game runs, whose
+enum is a new type of the same name, reads and changes the state the game started with. One
+declared by an assembly loaded once the app was running, as the editor loads a project's scripts,
+is not added, and a system scoped to it says so once.
 
 A transition is queued rather than immediate. It lands at Bevy's next transition point, so every
 system in the frame agrees on which state it is in rather than some seeing the change halfway
@@ -886,6 +913,14 @@ despawned is written as deleted. `user://` is the platform's data directory unde
 `Config.GameName`, which Bevy loads from as well (`AssetServer.Load(AssetKind.Image,
 "user://shots/one.png")`), and a save is written through a temporary file renamed over the old
 one.
+
+A load ends the game in progress first, despawning what its scenes spawned and every entity with a
+`SaveId`, so a pause menu loads as a title screen does. What the game spawned for itself without
+an id, its camera and its interface, is left for it, since only the game knows whether that still
+belongs. A load enters no state, so what a game builds on entering one, such as the bodies of a
+level's walls, is built again by the game for the level the load brought back. A host that loads
+its scenes itself, as the editor's player does, names them with `SaveGame.Begin` so a save made
+there lays itself over the same scenes a game's would.
 
 Settings that outlive a run go in a `Persistent<T>`, read from `user://` when made and written
 when asked, through a `System.Text.Json` source-generated context so nothing reflects:
@@ -2939,6 +2974,15 @@ if (Render.TryReadMesh(levelMesh, out var triangles))
     physics.Add(level, PhysicsShape.Mesh(triangles!), BodyKind.Static, levelTransform);
 ```
 
+A game's pause is a state the simulation knows nothing of, so `PhysicsWorld.Paused` holds it
+still. Every body keeps its pose and its velocity and goes on from them when the pause is lifted,
+and no contact starts or ends meanwhile:
+
+```csharp
+[OnEnter(Pause.On)] public static void Hold(BehaviorContext ctx) => ctx.Res<PhysicsWorld>().Paused = true;
+[OnExit(Pause.On)]  public static void Go(BehaviorContext ctx)   => ctx.Res<PhysicsWorld>().Paused = false;
+```
+
 A triangle collides from the side Bevy draws its face on. A rock or an odd crate that has to tumble
 is a convex hull of its points instead, such as a model's own vertices, solid where a mesh shape is
 a surface:
@@ -3092,6 +3136,11 @@ it to a PNG, and `HeadlessFps` and `HeadlessFrames` pace and bound the run, beca
 window has no window to close. The editor takes `--offscreen` as well, so the interface itself can
 be captured where there is no screen to draw it on.
 
+A game that opens a window draws offscreen instead when `BCS_OFFSCREEN` is set in its environment,
+as `BCS_SERVE` makes any app answer `bcs`, so a tool can run a game it did not write with nothing
+on the screen. The editor's Play sets it when the editor itself has no window, and
+`games/Courtyard/play.sh` plays its game that way.
+
 The camera is steered the way an editor's scene view is, so the scene can be looked at from
 anywhere while trying something out:
 
@@ -3164,9 +3213,124 @@ registers under a tag of its own. A generation's `[OnStartup]` runs when it arri
 when the app began, so a reloaded script spawns what it needs and clears out what the last one
 left.
 
+A script compiled again is a new assembly, so its types are new types with the old names. The
+entities carrying the last generation's components are given the new one's, each written the way a
+scene writes it and read back into the new type, so a field kept keeps its value, a field added
+starts at its default, and an entity or an asset a field refers to is carried as itself. A state is
+known by its enum's name, so it stays the one the game was in. A static field starts over, being
+the new type's, so what a script has to find again after a reload it finds by a component rather
+than keeps in a field. A scene loaded before its scripts were compiled keeps their components as
+the file had them, and they are put on their entities once the scripts are, which is how the editor
+opens a level.
+
 A script that does not compile changes nothing. The errors are reported and the running
 generation stays. The compiler itself lives in `BevyCSharp.Editor`, because a game should not
 carry one in order to run.
+
+---
+
+## Making a game
+
+[`games/Courtyard`](games/Courtyard) is a small game made the way one outside this repository is
+made, as a project of its own on the package, with a level built in the editor, behaviors written
+as scripts, and an export that runs from its own folder. The runner is walked around a courtyard
+with WASD to pick up three coins and bring them to the goal, with Escape to pause, F5 to save and
+F9 to load. Continuous integration plays it from its menu to its win with no display.
+
+### The project
+
+```
+games/Courtyard/
+  Courtyard.csproj            the package, and nothing of this repository
+  nuget.config                build/package ahead of nuget.org
+  Program.cs                  a window, physics, and the level loaded at startup
+  build-level.sh              the level, built through bcs in a running editor
+  play.sh                     the game, played through bcs from its menu to its win
+  assets/
+    project.json              the startup scene
+    levels/courtyard.scene.json
+    scripts/Courtyard.cs      every behavior, compiled into the game and loaded by the editor
+    models/  sounds/
+```
+
+The package compiles `assets/scripts` into the game and copies `assets` beside it, so what a player
+runs is one assembly and its files, and the editor reads the same scripts as the project's. The
+program is a window, physics, and a behavior that starts the game from the level `project.json`
+names:
+
+```csharp
+var config = Config.Windowed("Courtyard", 1280, 720);
+config.GameName = "Courtyard";
+return BevyApp.Run(app => app.AddPlugin(new PhysicsPlugin()), config);
+
+[Behavior]
+public partial struct Boot
+{
+    [OnStartup]
+    public static void Start(BehaviorContext ctx) =>
+        SaveGame.Start(ctx.Ecs, ctx.Res<ProjectSettings>().StartupScene!);
+}
+```
+
+The level is loaded by the program rather than by a script, since the editor runs a project's
+scripts while the level is edited and a level loading itself there would be a second one on top of
+the first. The game's camera is spawned on entering its menu for the same reason, since the editor
+never enters a game's states.
+
+### The level
+
+```bash
+./bcs open --editor --offscreen -- --project games/Courtyard
+games/Courtyard/build-level.sh
+```
+
+`build-level.sh` builds the level as a person would, one command at a time, so it can be built
+again. Cubes are renamed and colored as walls and spheres as coins, the runner's model is placed as
+an instance, the game's components are put on each, and the scene is saved and named the startup
+scene.
+
+```bash
+c() { ./bcs command "$@" >/dev/null; }
+
+c do Spawn/Cube
+c entity.rename Cube "North wall"
+c entity.add "North wall" Wall
+c material.set "North wall" color "#8a7f72"
+c scene.place models/runner.gltf
+c world.save levels/courtyard.scene.json
+c setting "Project/Startup scene" levels/courtyard.scene.json
+```
+
+A physics body is made in code, so `Wall`, `Coin`, `Goal` and `Floor` are components the level
+carries and the scripts turn into bodies, a static box for each wall and the ground and a sensor
+for each coin and the goal, which reports a touch and stops nothing.
+
+### The behaviors
+
+Everything the game does is in [`Courtyard.cs`](games/Courtyard/assets/scripts/Courtyard.cs). The
+menu, play and the win are a state declared on its enum, and the pause a sub-state inside play.
+The runner rides a ball of its own, so the model stays upright while the ball rolls against the
+walls, plays its walk while it moves, and reads `ContactStarted` for the coins it touches, each
+taken away with a sound and counted in a `[Persist]` wallet, and for the goal once none is left.
+The HUD, the menu, the pause menu and the win are `Ui` nodes despawned as their state is left, and
+F5 and F9 save and load through `SaveGame`.
+
+The bodies are made every frame of play for whatever has none rather than once on entering play,
+so a level a load brings back mid-game is given them as the first one was, and the pause holds the
+simulation with `PhysicsWorld.Paused`. The HUD's count is found by a `CoinsText` component rather
+than kept in a static field, so it is found again after the script is reloaded.
+
+### Playing it
+
+```bash
+dotnet build games/Courtyard && games/Courtyard/bin/Debug/net10.0/Courtyard
+games/Courtyard/play.sh                      # from the menu to the win, with no display
+```
+
+In the editor, Play (or `play.scene`) plays the level through `BevyCSharp.Player`, and a script
+saved while it plays is compiled again and swapped in with the runner, its coins and the HUD where
+they were. Exporting with the assets in a pack (`project.export linux-x64 pack`) writes a folder
+holding the game and `assets.pack`, and `play.sh` takes that folder to play the export instead.
 
 ---
 
@@ -3203,6 +3367,21 @@ The Play tab runs the game in a window of its own and stops it again, builds it 
 exports it for a player and shows what each wrote. `F5` plays the scene being edited instead,
 through `BevyCSharp.Player`, so a change made in the editor is seen without being saved or written
 into code. [.github/PLAY.md](.github/PLAY.md) has the plan past that.
+
+Opened on a project, the editor edits that project's assets rather than its own:
+
+```bash
+dotnet run --project BevyCSharp.Editor -- --project games/Courtyard
+```
+
+Its fonts, icons and theme stay beside its build and are read as `editor://`, so a project's files
+load by the paths the game uses for them. The document is the project's startup scene when
+`project.json` names one and `world.scene.json` when it does not, and `world.load` and `world.save`
+open another and save under another name. The project's scripts are compiled once the level is up,
+and their components are put on the level's entities then and moved onto the new types each time a
+script is saved. Every row of the Settings tab, the project's own among them, is read and changed
+by `setting`, as in `setting "Project/Startup scene" levels/one.scene.json`, so a script can set
+up a project the way a person would.
 
 Two things it is built on belong to the library rather than to the editor, and any tool can use
 them.
@@ -3269,8 +3448,11 @@ so they have no schema and are drawn as a section of their own. It shows where e
 
 A schema also carries how to add the component, how to remove it, and any method the struct has that
 takes nothing, so a panel offers those as buttons without naming a type. What the editor changes can
-be taken back. `EditorHistory` records an operation only when it can be reversed exactly, which is
-why despawning is not recorded, an entity's mesh and material having no mirror on this side.
+be taken back. `EditorHistory` records an operation only when it can be reversed exactly. A delete
+writes what goes as a scene first, in memory, so undoing it puts the entities back under the
+parents they had and points every field that named one of them at what came back. A node of a
+placed model, and an entity drawn with a mesh or a material a scene cannot describe, are deleted
+without a way back, and the console says so.
 
 ### The console
 
@@ -3307,6 +3489,7 @@ and asks it things:
 ./bcs list                             # every command that app offers, with its parameters
 ./bcs command entity.set Cube Transform.Translation 0,2.5,0
 ./bcs command input.click 1450 700
+./bcs command input.keydown W          # held until input.keyup W, for a game walking while it is
 ./bcs command frames.wait 5
 ./bcs shot /tmp/after.png              # captures the window, and waits for the file
 ```

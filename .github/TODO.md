@@ -33,6 +33,10 @@ code per type. What [COMPONENTS.md](COMPONENTS.md) has left:
 - **Bytes in place need a mirror.** Five components (`Transform`, `GlobalTransform` and the three
   visibility types) are mirrored by hand, for systems that read them every frame. Generating
   mirrors and their layout checks is tier 3.
+- **`entity.get` prints some of Bevy's values as their Rust type.** `Name` reads as
+  `Hashed<Cow<str>, FixedHasher>` and `VisibilityClass` as a type path, where Bevy's reflection
+  has no plain value to give. A name has a read of its own (`NameOf`), which the listing could use,
+  and a class a list of the component names it holds.
 
 ### Collections in components
 
@@ -50,8 +54,9 @@ entities, entity references, data references, ids kept across saves, and Bevy's 
 (cameras, lights, tonemapping) as Bevy's JSON, and `scene.save` and `scene.load` reach it from the
 console. A type or field renamed with `[FormerName]` or reshaped behind `[DataVersion]` still
 reads its old files, and what a build cannot read is kept and written back. Every file a scene
-refers to is named by an id that survives a rename in the asset browser. The editor's document is `assets/world.scene.json`, opened at start and written by
-Project/Save. `SceneInstances` places a glTF scene or another scene file with overrides a scene
+refers to is named by an id that survives a rename in the asset browser. The editor's document is
+the project's startup scene, or `world.scene.json` when it names none, opened at start, written by
+Project/Save, and moved by `world.load` and `world.save`. `SceneInstances` places a glTF scene or another scene file with overrides a scene
 file keeps, one inside another, with children added under its nodes and renames kept, and the
 editor records what is edited on one of its nodes, marks a changed field and reverts it, and puts
 a model dropped on the view on whatever is under the pointer (SCENES.md §5). What
@@ -63,6 +68,10 @@ a model dropped on the view on whatever is under the pointer (SCENES.md §5). Wh
 - **A newer file in an older build** is read as far as its fields match and written back at the
   older version, with what was not read kept, so the newer build migrates it a second time
   (SCENES.md §7). Bevy's own components have neither former names nor versions.
+- **A load enters no state.** `SaveGame.Load` ends the game in progress and lays the save over its
+  scenes again, and what a game built on entering a state is not built for the entities that came
+  back. Courtyard makes its bodies on every frame of play for whatever has none. A message sent
+  after a load would let a game build once, where it reads it.
 
 ### Data assets
 
@@ -355,6 +364,15 @@ language.
 - **A theme saved for the editor stays with the running build.** `assets/theme.txt` is written
   beside the binary and wins at startup, and the style tab's Ship with project writes the look into
   `project.json` as well, which the editor wears when there is no `theme.txt`.
+- **A level's camera would draw over the editor's view.** Nothing holds a scene's own camera
+  inactive while it is edited, so a camera in a level draws over the editor's and is the one
+  Play starts from, and the Spawn menu offers none. A game spawns its camera from a script under a
+  state the editor never enters, as Courtyard does on entering its menu. Holding a level's cameras
+  off while editing, drawn as a gizmo and looked through on request, would let a level carry one.
+- **The editor reports each of a game's state-scoped systems as never running.** The project's
+  scripts are loaded once the editor runs, so the states they declare are not added, and each
+  system scoped to one says so in the console at every load. True, and not news in an editor that
+  never plays a game's states, which could say that once instead.
 - **The inspector draws every row every frame.** The world panel and the asset browser draw only
   the rows on screen, through ImGui's list clipper, and the console only the lines in view, each
   measured once at the panel's width since a wrapped line has a height of its own. The inspector's
@@ -421,7 +439,14 @@ gives back after the step, and a body that tumbles in an odd shape is a convex h
 turning about the hull's center while its entity keeps its origin. Ball joints, hinges, welds and
 distance ranges hold bodies together, a hinge can turn itself and stop at an angle, and contacts
 are reported, a sensor making a trigger volume. It is part of the core library, so the package the
-workflow packs carries it, with BepuPhysics as a dependency, and nothing is left of it here.
+workflow packs carries it, with BepuPhysics as a dependency. `Paused` holds the simulation still for
+a game's pause.
+
+- **A body is made in code.** No component says an entity is a body, so a level built in the editor
+  cannot hold its walls' bodies. Courtyard puts marker components on its walls, coins and ground,
+  which its scripts turn into bodies. A body and a collider as components a scene holds, which the
+  plugin makes and keeps in step with the simulation, would let a level carry them and the
+  inspector show them.
 
 ## Platform
 
@@ -480,6 +505,15 @@ focused far past, since its blur is capped in pixels, needs a lens far out of fo
 and leaves silhouettes alone. These need a GPU, so they are skipped on the headless bridge the
 test workflow builds, each through `Needs` in the tests with the profile, tool or device it lacks
 as the reason, so a run's summary counts what did not run there rather than passing it.
+
+A game is played whole as well. Where the workflow builds the bridges, a job packs the library
+with the Linux bridge, builds `games/Courtyard` on that package and plays it through `play.sh` on
+Mesa's software Vulkan, from its menu through a save, a load and every coin to its win.
+
+- **`bcs` holds a key across calls, not for a number of frames.** Each call costs a few frames, so
+  a script steering a game by holding and letting go overshoots by as far as the game moves in
+  them, and Courtyard's play script slows its runner to land. A command holding a key for an exact
+  number of frames inside the app would steer at full speed.
 
 ### Build and release
 

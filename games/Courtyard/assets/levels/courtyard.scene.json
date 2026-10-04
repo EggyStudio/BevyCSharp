@@ -1,0 +1,762 @@
+{
+  "format": "bevycsharp.scene.2",
+  "entities": [
+    {
+      "id": 1,
+      "name": "Runner",
+      "instance": {
+        "uid": "57a505911935b58d",
+        "path": "models/runner.gltf#Scene0"
+      },
+      "components": {
+        "Bevy.Transform": {
+          "Translation": [
+            0,
+            -1.2,
+            6
+          ],
+          "Rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "Scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "Bevy.Visibility": {
+          "Mode": "Inherited"
+        },
+        "Bevy.SaveId": {
+          "Id": "02c81717deeece8b"
+        },
+        "Courtyard.Runner": {
+          "Speed": 0,
+          "Body": null,
+          "Walking": false
+        },
+        "Courtyard.Wallet": {
+          "Coins": 0
+        }
+      }
+    },
+    {
+      "id": 2,
+      "name": "Goal",
+      "mesh": {
+        "resource": 1
+      },
+      "material": {
+        "resource": 2
+      },
+      "components": {
+        "Bevy.Transform": {
+          "Translation": [
+            5,
+            -1.15,
+            -5
+          ],
+          "Rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "Scale": [
+            1.2,
+            0.05,
+            1.2
+          ]
+        },
+        "Bevy.Visibility": {
+          "Mode": "Inherited"
+        },
+        "Courtyard.Goal": {}
+      }
+    },
+    {
+      "id": 3,
+      "name": "Coin 3",
+      "mesh": {
+        "resource": 3
+      },
+      "material": {
+        "resource": 4
+      },
+      "components": {
+        "Bevy.Transform": {
+          "Translation": [
+            0,
+            -0.6,
+            4
+          ],
+          "Rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "Scale": [
+            0.4,
+            0.4,
+            0.4
+          ]
+        },
+        "Bevy.Visibility": {
+          "Mode": "Inherited"
+        },
+        "Bevy.SaveId": {
+          "Id": "a0f01af6759129de"
+        },
+        "Courtyard.Coin": {}
+      }
+    },
+    {
+      "id": 4,
+      "name": "Coin 2",
+      "mesh": {
+        "resource": 5
+      },
+      "material": {
+        "resource": 6
+      },
+      "components": {
+        "Bevy.Transform": {
+          "Translation": [
+            5,
+            -0.6,
+            -3
+          ],
+          "Rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "Scale": [
+            0.4,
+            0.4,
+            0.4
+          ]
+        },
+        "Bevy.Visibility": {
+          "Mode": "Inherited"
+        },
+        "Bevy.SaveId": {
+          "Id": "76929c6fa9a5155d"
+        },
+        "Courtyard.Coin": {}
+      }
+    },
+    {
+      "id": 5,
+      "name": "Coin 1",
+      "mesh": {
+        "resource": 7
+      },
+      "material": {
+        "resource": 8
+      },
+      "components": {
+        "Bevy.Transform": {
+          "Translation": [
+            -5,
+            -0.6,
+            -4
+          ],
+          "Rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "Scale": [
+            0.4,
+            0.4,
+            0.4
+          ]
+        },
+        "Bevy.Visibility": {
+          "Mode": "Inherited"
+        },
+        "Bevy.SaveId": {
+          "Id": "0f47f88e054767c0"
+        },
+        "Courtyard.Coin": {}
+      }
+    },
+    {
+      "id": 6,
+      "name": "West wall",
+      "mesh": {
+        "resource": 9
+      },
+      "material": {
+        "resource": 10
+      },
+      "components": {
+        "Bevy.Transform": {
+          "Translation": [
+            -8,
+            -0.2,
+            0
+          ],
+          "Rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "Scale": [
+            0.5,
+            1,
+            8
+          ]
+        },
+        "Bevy.Visibility": {
+          "Mode": "Inherited"
+        },
+        "Courtyard.Wall": {}
+      }
+    },
+    {
+      "id": 7,
+      "name": "East wall",
+      "mesh": {
+        "resource": 11
+      },
+      "material": {
+        "resource": 12
+      },
+      "components": {
+        "Bevy.Transform": {
+          "Translation": [
+            8,
+            -0.2,
+            0
+          ],
+          "Rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "Scale": [
+            0.5,
+            1,
+            8
+          ]
+        },
+        "Bevy.Visibility": {
+          "Mode": "Inherited"
+        },
+        "Courtyard.Wall": {}
+      }
+    },
+    {
+      "id": 8,
+      "name": "South wall",
+      "mesh": {
+        "resource": 13
+      },
+      "material": {
+        "resource": 14
+      },
+      "components": {
+        "Bevy.Transform": {
+          "Translation": [
+            0,
+            -0.2,
+            8
+          ],
+          "Rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "Scale": [
+            8,
+            1,
+            0.5
+          ]
+        },
+        "Bevy.Visibility": {
+          "Mode": "Inherited"
+        },
+        "Courtyard.Wall": {}
+      }
+    },
+    {
+      "id": 9,
+      "name": "North wall",
+      "mesh": {
+        "resource": 15
+      },
+      "material": {
+        "resource": 16
+      },
+      "components": {
+        "Bevy.Transform": {
+          "Translation": [
+            0,
+            -0.2,
+            -8
+          ],
+          "Rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "Scale": [
+            8,
+            1,
+            0.5
+          ]
+        },
+        "Bevy.Visibility": {
+          "Mode": "Inherited"
+        },
+        "Courtyard.Wall": {}
+      }
+    },
+    {
+      "id": 10,
+      "name": "Ground",
+      "mesh": {
+        "resource": 17
+      },
+      "material": {
+        "resource": 18
+      },
+      "components": {
+        "Bevy.Transform": {
+          "Translation": [
+            0,
+            -1.2,
+            0
+          ],
+          "Rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "Scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "Bevy.Visibility": {
+          "Mode": "Inherited"
+        },
+        "Courtyard.Floor": {}
+      }
+    },
+    {
+      "id": 11,
+      "name": "Sun",
+      "components": {
+        "Bevy.Transform": {
+          "Translation": [
+            5,
+            4,
+            3
+          ],
+          "Rotation": [
+            -0.2576871,
+            0.47060102,
+            0.14589995,
+            0.83117104
+          ],
+          "Scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "Bevy.Visibility": {
+          "Mode": "Inherited"
+        },
+        "bevy_light::directional_light::DirectionalLight": {"color":{"LinearRgba":{"red":1.0,"green":1.0,"blue":1.0,"alpha":1.0}},"illuminance":11000.0,"shadow_maps_enabled":true,"contact_shadows_enabled":false,"soft_shadow_size":null,"affects_lightmapped_mesh_diffuse":true,"shadow_depth_bias":0.02,"shadow_normal_bias":0.6},
+        "bevy_light::cascade::CascadeShadowConfig": {"bounds":[10.0,24.66212,60.82202,149.99998],"overlap_proportion":0.2,"minimum_distance":0.1}
+      }
+    }
+  ],
+  "resources": [
+    {
+      "id": 1,
+      "mesh": {
+        "shape": "Cuboid",
+        "a": 1,
+        "b": 1,
+        "c": 1
+      }
+    },
+    {
+      "id": 2,
+      "material": {
+        "baseColor": [
+          0.033104762,
+          0.6038274,
+          0.13286833,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.5,
+        "emissive": [
+          0.0056053917,
+          0.09084173,
+          0.015996292,
+          1
+        ],
+        "alphaMode": "Opaque",
+        "alphaCutoff": 0.5,
+        "doubleSided": false,
+        "unlit": false,
+        "uvScale": [
+          1,
+          1
+        ],
+        "uvRotation": 0,
+        "uvOffset": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "mesh": {
+        "shape": "Sphere",
+        "a": 0.5,
+        "b": 1,
+        "c": 1
+      }
+    },
+    {
+      "id": 4,
+      "material": {
+        "baseColor": [
+          1,
+          0.6038274,
+          0.033104762,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.5,
+        "emissive": [
+          0.13286833,
+          0.057805434,
+          0,
+          1
+        ],
+        "alphaMode": "Opaque",
+        "alphaCutoff": 0.5,
+        "doubleSided": false,
+        "unlit": false,
+        "uvScale": [
+          1,
+          1
+        ],
+        "uvRotation": 0,
+        "uvOffset": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "mesh": {
+        "shape": "Sphere",
+        "a": 0.5,
+        "b": 1,
+        "c": 1
+      }
+    },
+    {
+      "id": 6,
+      "material": {
+        "baseColor": [
+          1,
+          0.6038274,
+          0.033104762,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.5,
+        "emissive": [
+          0.13286833,
+          0.057805434,
+          0,
+          1
+        ],
+        "alphaMode": "Opaque",
+        "alphaCutoff": 0.5,
+        "doubleSided": false,
+        "unlit": false,
+        "uvScale": [
+          1,
+          1
+        ],
+        "uvRotation": 0,
+        "uvOffset": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "mesh": {
+        "shape": "Sphere",
+        "a": 0.5,
+        "b": 1,
+        "c": 1
+      }
+    },
+    {
+      "id": 8,
+      "material": {
+        "baseColor": [
+          1,
+          0.6038274,
+          0.033104762,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.5,
+        "emissive": [
+          0.13286833,
+          0.057805434,
+          0,
+          1
+        ],
+        "alphaMode": "Opaque",
+        "alphaCutoff": 0.5,
+        "doubleSided": false,
+        "unlit": false,
+        "uvScale": [
+          1,
+          1
+        ],
+        "uvRotation": 0,
+        "uvOffset": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "mesh": {
+        "shape": "Cuboid",
+        "a": 1,
+        "b": 1,
+        "c": 1
+      }
+    },
+    {
+      "id": 10,
+      "material": {
+        "baseColor": [
+          0.25415218,
+          0.21223073,
+          0.1682694,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.5,
+        "emissive": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "alphaMode": "Opaque",
+        "alphaCutoff": 0.5,
+        "doubleSided": false,
+        "unlit": false,
+        "uvScale": [
+          1,
+          1
+        ],
+        "uvRotation": 0,
+        "uvOffset": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "mesh": {
+        "shape": "Cuboid",
+        "a": 1,
+        "b": 1,
+        "c": 1
+      }
+    },
+    {
+      "id": 12,
+      "material": {
+        "baseColor": [
+          0.25415218,
+          0.21223073,
+          0.1682694,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.5,
+        "emissive": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "alphaMode": "Opaque",
+        "alphaCutoff": 0.5,
+        "doubleSided": false,
+        "unlit": false,
+        "uvScale": [
+          1,
+          1
+        ],
+        "uvRotation": 0,
+        "uvOffset": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": 13,
+      "mesh": {
+        "shape": "Cuboid",
+        "a": 1,
+        "b": 1,
+        "c": 1
+      }
+    },
+    {
+      "id": 14,
+      "material": {
+        "baseColor": [
+          0.25415218,
+          0.21223073,
+          0.1682694,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.5,
+        "emissive": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "alphaMode": "Opaque",
+        "alphaCutoff": 0.5,
+        "doubleSided": false,
+        "unlit": false,
+        "uvScale": [
+          1,
+          1
+        ],
+        "uvRotation": 0,
+        "uvOffset": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": 15,
+      "mesh": {
+        "shape": "Cuboid",
+        "a": 1,
+        "b": 1,
+        "c": 1
+      }
+    },
+    {
+      "id": 16,
+      "material": {
+        "baseColor": [
+          0.25415218,
+          0.21223073,
+          0.1682694,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.5,
+        "emissive": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "alphaMode": "Opaque",
+        "alphaCutoff": 0.5,
+        "doubleSided": false,
+        "unlit": false,
+        "uvScale": [
+          1,
+          1
+        ],
+        "uvRotation": 0,
+        "uvOffset": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": 17,
+      "mesh": {
+        "shape": "Plane",
+        "a": 30,
+        "b": 30,
+        "c": 1
+      }
+    },
+    {
+      "id": 18,
+      "material": {
+        "baseColor": [
+          0.12,
+          0.13,
+          0.16,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.5,
+        "emissive": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "alphaMode": "Opaque",
+        "alphaCutoff": 0.5,
+        "doubleSided": false,
+        "unlit": false,
+        "uvScale": [
+          1,
+          1
+        ],
+        "uvRotation": 0,
+        "uvOffset": [
+          0,
+          0
+        ]
+      }
+    }
+  ]
+}

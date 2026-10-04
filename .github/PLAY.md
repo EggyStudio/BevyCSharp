@@ -8,8 +8,9 @@ step exists and the rest is planned, in the order each depends on the last.
 **Play runs the project in a window of its own.** The Play tab along the bottom (`PlayTab`), `F5`
 and `Project/Play` start the project through `dotnet run --project <file> -- --window`, and the same
 places stop it (`EditorPlay`). The tab's Build, and `Project/Build`, run `dotnet build` instead,
-which says whether the project compiles without starting it. One runs at a time. It runs the sample
-unless the tab's field or the settings name another project file. The scene's toolbars carry no play
+which says whether the project compiles without starting it. One runs at a time. It runs the project the editor
+was opened on with `--project`, or the sample when it was opened on none, unless the tab's field
+or the settings name another project file. The scene's toolbars carry no play
 button, so the viewport holds the scene and the tools that act on it, and the game, which changes
 nothing in the view, is started from the tab where its output is read. `dotnet run` builds the
 project first when it is out of date, so the first press takes as long as a build. What the game
@@ -17,7 +18,9 @@ writes appears in the editor's console, each line marked `[game]`, or `[build]` 
 in the tab, which keeps the last lines of the game or the build on their own, with the terminal's
 color codes taken out.
 Stopping kills the whole process tree, since `dotnet run` starts the game as a child of its own, and
-closing the editor stops the game with it. Export, in a row of its own, publishes the project for a player (§3).
+closing the editor stops the game with it. An editor with no window of its own starts what it plays
+with `BCS_OFFSCREEN` as well as `BCS_SERVE`, so the game draws into an image and is driven through
+`bcs`. Export, in a row of its own, publishes the project for a player (§3).
 
 A separate process rather than a mode of the editor's own world, as Godot does it, because a game
 that runs inside the editor shares its state, its crashes and its frame. Its window is the one it

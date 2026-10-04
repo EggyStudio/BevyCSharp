@@ -1,0 +1,9 @@
+<Project>
+
+    <!--
+      Empty, so MSBuild stops looking here and the repository's own Directory.Build.props does not
+      reach the games. A game here is built as one outside the repository is, from the package and
+      its own project file alone.
+    -->
+
+</Project>

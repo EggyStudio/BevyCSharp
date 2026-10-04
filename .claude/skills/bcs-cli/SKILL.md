@@ -46,11 +46,13 @@ What is usually there:
 | `entity.get <name\|#index>` | Every described field on one entity |
 | `entity.set <name> <Component.Field> <value>` | Change one field; `0,2.5,0` for a vector |
 | `input.click <x> <y>`, `input.press`/`input.release`, `input.move`, `input.wheel`, `input.type`, `input.key`, `input.uikey` | Real input through the window's own path, so picking and focus behave |
+| `input.keydown <key>`, `input.keyup <key>` | Hold a key across calls, for a game that acts while one is down; keys reach an offscreen run too |
 | `frames.wait <n>` | Answers after n more frames, so act, settle and look is one call |
 | `shot <path>` | Capture the window (use `./bcs shot`, which waits for the file) |
 | `log.tail <n>` | The last lines the app wrote |
 | `eval <c#>` | Editor only: compile and run a fragment against the live world |
 | `do <Menu/Path>`, `select <name>`, `undo`, `redo`, `world.save`/`world.load` | Editor only |
+| `setting ["Page/Label" [value]]` | Editor only: list, read or change any Settings row, the project's own included |
 
 **Two keyboards.** `input.key` starts where a real key starts, at the window, where the editor reads
 its shortcuts. `input.uikey` goes into the interface's own queue, which a text field being typed
@@ -173,7 +175,8 @@ and before falling back to editing files by hand.
    be out of reach. Say so and ask, rather than concluding the app is down and rewriting files
    blindly.
 
-Only once all three are ruled out should you edit `assets/world.scene.json` or another scene file directly,
+Only once all three are ruled out should you edit the editor's scene file (the project's startup scene, or
+`assets/world.scene.json`) or another one directly,
 and say plainly that you are doing it because no live session was reachable. A hand-edited file is
 invisible to a running app, so the change silently does nothing.
 

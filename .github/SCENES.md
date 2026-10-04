@@ -11,8 +11,9 @@ game made this way is played and shipped.
 
 ## What exists
 
-The editor's document is a scene file, `assets/world.scene.json`, opened at start and written and
-read by `SceneFile` (§3) through `EditorScene` (`BevyCSharp.Editor/Framework/EditorScene.cs`),
+The editor's document is a scene file, the project's startup scene when its `project.json` names
+one and `assets/world.scene.json` otherwise, opened at start and moved by `world.load` and
+`world.save`, and written and read by `SceneFile` (§3) through `EditorScene` (`BevyCSharp.Editor/Framework/EditorScene.cs`),
 which leaves the editor's own entities out (each marked `EditorOnly`) and replaces the scene when
 one is loaded.
 
