@@ -104,6 +104,16 @@ public sealed unsafe class App : IDisposable
     /// </remarks>
     public bool WillOpenWindow => !Config.Headless && !Config.Offscreen && HasRenderer;
 
+    /// <summary>
+    /// What the project says about itself, read from <see cref="ProjectSettings.FileName"/> in the
+    /// assets as the app is created, every setting at its default where there is no such file.
+    /// </summary>
+    /// <remarks>
+    /// Its fixed step is taken where <see cref="Config.FixedHz"/> is zero. A game reads the rest,
+    /// such as <see cref="ProjectSettings.StartupScene"/> to know what to load first.
+    /// </remarks>
+    public ProjectSettings Project { get; } = new();
+
     /// <summary>Creates the engine and its native Bevy app.</summary>
     /// <param name="config">Startup configuration; <see cref="Config.Default"/> when omitted.</param>
     /// <exception cref="BevyNativeException">The native app could not be created.</exception>
@@ -135,6 +145,27 @@ public sealed unsafe class App : IDisposable
         AssetFiles.Use(Config.AssetAssembly ?? System.Reflection.Assembly.GetEntryAssembly(), OpenPack(Config));
         AssetFiles.Serve();
 
+        // Where Bevy reads assets from, and where a streamed read's path starts too, is the
+        // directory asked for, or `assets` beside the executable, which is Bevy's own default.
+        // Known before the native app is, so the project's settings can be read from there first.
+        Streaming.AssetRoot = string.IsNullOrEmpty(Config.AssetRoot)
+            ? Path.Combine(AppContext.BaseDirectory, "assets")
+            : Path.GetFullPath(Config.AssetRoot);
+
+        // What the project says about itself, whose fixed step stands where the config left it
+        // to Bevy. A project file that does not read is a broken install, which is said once and
+        // run without rather than refused, since every setting in it has a default.
+        try
+        {
+            Project = ProjectSettings.Read();
+        }
+        catch (InvalidDataException error)
+        {
+            Console.Error.WriteLine($"[BevyCSharp] {ProjectSettings.FileName} was not read: {error.Message}");
+        }
+
+        var fixedHz = Config.FixedHz > 0 ? Config.FixedHz : Project.FixedHz;
+
         // Where the window was left, read before it opens, so it opens there.
         var opening = WindowMemory.Open(Config);
 
@@ -152,7 +183,7 @@ public sealed unsafe class App : IDisposable
                 HeadlessFps = Config.HeadlessFps,
                 HeadlessFrames = Config.HeadlessFrames,
                 Backend = (uint)Config.Backend,
-                FixedHz = Config.FixedHz,
+                FixedHz = fixedHz,
                 AssetRoot = assetRoot,
                 WatchAssets = Config.WatchAssets ? 1u : 0u,
                 Gui = Config.Gui ? 1u : 0u,
@@ -174,12 +205,6 @@ public sealed unsafe class App : IDisposable
         if (_handle == IntPtr.Zero) throw CreationFailed();
 
         ComponentRegistry.BeginApp(_handle);
-
-        // Where Bevy reads assets from, and where a streamed read's path starts too, is the
-        // directory asked for, or `assets` beside the executable, which is Bevy's own default.
-        Streaming.AssetRoot = string.IsNullOrEmpty(Config.AssetRoot)
-            ? Path.Combine(AppContext.BaseDirectory, "assets")
-            : Path.GetFullPath(Config.AssetRoot);
 
         // The ids the scenes, data assets and other files the managed side reads carry, from the
         // folder or, for a game that compiled them into itself, from its own assembly.

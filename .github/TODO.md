@@ -341,16 +341,18 @@ language.
   the delete that named the old one finds nothing, and a reference inside a list's item is left as
   it was. A node of a placed model, and an entity drawn with a shader material or anything else a
   scene cannot describe, are deleted with no way back and a line in the console saying so.
-- **Settings are the editor's, not the project's.** `EditorSettings` saves to
-  `user://settings.json` with the layout, in the editor's own directory, and everything on it
-  belongs to the person using this editor. A project setting worth the
-  name (a startup scene, a physics step, a build target) needs somewhere to live that is part of
-  the project, which the scene file could carry and does not yet.
+- **A project file holds four settings.** `assets/project.json` (`ProjectSettings`) keeps the
+  startup scene, the fixed step, the export's last choices and a theme asked to ship, and the
+  editor's Project page, export row and style tab write it, apart from the person's own
+  `user://settings.json`. An app takes its fixed step from it and the player its startup scene. A
+  setting the project should carry beyond those, such as its window title or icon, is a field and
+  a row to add.
 - **The scene is the camera's viewport rather than a texture.** Docked, `Render.SetViewport` gives
   the camera the rectangle the panels left. A texture would make the scene a panel of its own,
   dockable and tabbable, as a second view needs.
-- **A theme is a file, and only the running build has it.** `assets/theme.txt` is written beside the
-  binary, so a look dialed in has to be copied back into the project by hand to be shipped.
+- **A theme saved for the editor stays with the running build.** `assets/theme.txt` is written
+  beside the binary and wins at startup, and the style tab's Ship with project writes the look into
+  `project.json` as well, which the editor wears when there is no `theme.txt`.
 - **The inspector draws every row every frame.** The world panel and the asset browser draw only
   the rows on screen, through ImGui's list clipper, and the console only the lines in view, each
   measured once at the panel's width since a wrapped line has a height of its own. The inspector's

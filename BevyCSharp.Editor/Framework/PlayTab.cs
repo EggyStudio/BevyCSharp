@@ -28,6 +28,9 @@ public static class PlayTab
     private static int _target;
     private static ShippedAssets _shipped;
 
+    /// <summary>Whether the export row has taken its choices from the project yet.</summary>
+    private static bool _chosen;
+
     /// <summary>Draws it.</summary>
     public static void Draw()
     {
@@ -229,6 +232,16 @@ public static class PlayTab
     private static void Export()
     {
         var targets = EditorPlay.Targets;
+
+        // What the project was last exported as, so an export made yesterday is made the same way.
+        if (!_chosen)
+        {
+            _chosen = true;
+            var project = EditorProjectFile.Settings;
+            if (project.ExportTarget is { } target && targets.ToList().IndexOf(target) is >= 0 and var at) _target = at;
+            if (Enum.TryParse<ShippedAssets>(project.ExportAssets, ignoreCase: true, out var shipped)) _shipped = shipped;
+        }
+
         _target = Math.Clamp(_target, 0, targets.Count - 1);
 
         ImGui.AlignTextToFramePadding();
@@ -240,7 +253,12 @@ public static class PlayTab
         {
             for (var index = 0; index < targets.Count; index++)
             {
-                if (ImGui.Selectable(targets[index], index == _target)) _target = index;
+                if (ImGui.Selectable(targets[index], index == _target))
+                {
+                    _target = index;
+                    var chosen = targets[index];
+                    EditorProjectFile.Change(project => project.ExportTarget = chosen);
+                }
             }
 
             ImGui.EndCombo();
@@ -252,7 +270,11 @@ public static class PlayTab
         {
             foreach (var way in Enum.GetValues<ShippedAssets>())
             {
-                if (ImGui.Selectable(ShippedLabel(way), way == _shipped)) _shipped = way;
+                if (ImGui.Selectable(ShippedLabel(way), way == _shipped))
+                {
+                    _shipped = way;
+                    EditorProjectFile.Change(project => project.ExportAssets = way.ToString().ToLowerInvariant());
+                }
                 if (ImGui.IsItemHovered()) EditorWidgets.Tip(ShippedTip(way));
             }
 

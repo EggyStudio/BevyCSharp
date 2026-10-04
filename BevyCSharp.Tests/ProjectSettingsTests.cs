@@ -1,0 +1,95 @@
+using Bevy;
+using Xunit;
+
+namespace Bevy.Tests;
+
+/// <summary>
+/// Covers a project's own settings in <c>project.json</c>, written and read back, and an app
+/// taking its fixed step from them.
+/// </summary>
+/// <remarks>
+/// In the engine collection, since one test runs an app, and the asset root it reads is static.
+/// </remarks>
+[Collection("engine")]
+public sealed class ProjectSettingsTests : IDisposable
+{
+    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-project-" + Guid.NewGuid().ToString("n"));
+
+    public ProjectSettingsTests() => Directory.CreateDirectory(_root);
+
+    public void Dispose() => Directory.Delete(_root, recursive: true);
+
+    private string File(string text)
+    {
+        var path = Path.Combine(_root, ProjectSettings.FileName);
+        System.IO.File.WriteAllText(path, text);
+        return path;
+    }
+
+    [Fact]
+    public void SettingsWrittenAreReadBackAndDefaultsAreLeftOut()
+    {
+        var path = Path.Combine(_root, ProjectSettings.FileName);
+
+        new ProjectSettings
+        {
+            StartupScene = "levels/first.scene.json",
+            FixedHz = 30,
+            ExportTarget = "linux-x64",
+            ExportAssets = "pack",
+            Theme = "name\tShipped",
+        }.Write(path);
+
+        var read = ProjectSettings.ReadFrom(_root);
+        Assert.Equal("levels/first.scene.json", read.StartupScene);
+        Assert.Equal(30d, read.FixedHz);
+        Assert.Equal("linux-x64", read.ExportTarget);
+        Assert.Equal("pack", read.ExportAssets);
+        Assert.Equal("name\tShipped", read.Theme);
+
+        new ProjectSettings().Write(path);
+        Assert.DoesNotContain("fixedHz", System.IO.File.ReadAllText(path));
+        Assert.Contains(ProjectSettings.Format, System.IO.File.ReadAllText(path));
+    }
+
+    [Fact]
+    public void NoFileIsEveryDefaultAndAnotherFileIsRefused()
+    {
+        var none = ProjectSettings.ReadFrom(_root);
+        Assert.Null(none.StartupScene);
+        Assert.Equal(0d, none.FixedHz);
+
+        File("""{ "format": "bevycsharp.scene.1" }""");
+        Assert.Throws<InvalidDataException>(() => ProjectSettings.ReadFrom(_root));
+
+        File("not json at all");
+        Assert.Throws<InvalidDataException>(() => ProjectSettings.ReadFrom(_root));
+    }
+
+    [Fact]
+    public void ANewerFileIsReadAsFarAsItsFieldsMatch()
+    {
+        File("""{ "format": "bevycsharp.project.2", "startupScene": "intro.scene.json", "somethingNew": [1, 2] }""");
+
+        Assert.Equal("intro.scene.json", ProjectSettings.ReadFrom(_root).StartupScene);
+    }
+
+    [Fact]
+    public void AnAppTakesItsFixedStepFromTheProjectWhereTheConfigLeavesIt()
+    {
+        File("""{ "format": "bevycsharp.project.1", "fixedHz": 25, "startupScene": "start.scene.json" }""");
+
+        var fixedDelta = 0f;
+        string? startup = null;
+
+        using (var app = new App(new Config { Headless = true, HeadlessFrames = 3, AssetRoot = _root }))
+        {
+            startup = app.Project.StartupScene;
+            app.AddSystem(Stage.Update, new SystemDescriptor(world => fixedDelta = world.Resource<Time>().FixedDelta, "Test.FixedDelta"));
+            Assert.Equal(0, app.Run());
+        }
+
+        Assert.Equal("start.scene.json", startup);
+        Assert.Equal(0.04f, fixedDelta, 5);
+    }
+}

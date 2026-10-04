@@ -4,7 +4,7 @@ using BevyCSharp.Player;
 // Plays a scene file in a window of its own. The editor's Play tab runs it to play the scene being
 // edited rather than the project's own Main.
 //
-//   --scene <file>           the scene to play, required
+//   --scene <file>           the scene to play, or the project's startup scene when not given
 //   --assets <dir>           the asset root it was made against, scripts and all; beside the
 //                            executable when not given
 //   --view x,y,z,qx,qy,qz,qw where a camera goes when the scene has none
@@ -12,10 +12,16 @@ using BevyCSharp.Player;
 //   --offscreen              draw into an image rather than a window
 //   --frames N               how many frames an offscreen run lasts, zero for until stopped
 //   --serve                  answer `bcs` while it runs
-var scene = Value("--scene");
+var assets = Path.GetFullPath(Value("--assets") ?? Path.Combine(AppContext.BaseDirectory, "assets"));
+
+// The project's startup scene where none is named, from its project.json, which is under the
+// asset root as every file a scene names is.
+var scene = Value("--scene")
+    ?? (ProjectSettings.ReadFrom(assets).StartupScene is { Length: > 0 } startup ? Path.Combine(assets, startup) : null);
+
 if (scene is null)
 {
-    Console.Error.WriteLine("Name a scene to play: --scene <file>");
+    Console.Error.WriteLine($"Name a scene to play with --scene <file>, or give the project a startup scene in {ProjectSettings.FileName}.");
     return 2;
 }
 
@@ -32,7 +38,7 @@ var config = offscreen
     ? Config.OffscreenFor(width, height, uint.TryParse(Value("--frames"), out var frames) ? frames : 0u)
     : Config.Windowed(Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(scene)), width, height);
 
-config.AssetRoot = Path.GetFullPath(Value("--assets") ?? Path.Combine(AppContext.BaseDirectory, "assets"));
+config.AssetRoot = assets;
 config.GameName = "BevyCSharp Player";
 config.Serve = args.Contains("--serve");
 

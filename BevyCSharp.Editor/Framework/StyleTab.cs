@@ -62,6 +62,12 @@ public static class StyleTab
         // is not something an editor should ask of anybody.
         if (EditorWidgets.Pill("Reset", false)) Reset();
 
+        ImGui.SameLine();
+
+        // Into the project's own file rather than beside the running build, so the look goes
+        // wherever the project does and opens for whoever opens it next.
+        if (EditorWidgets.Pill("Ship with project", false)) Ship();
+
         if (_said.Length > 0 && EditorShell.Frame - _saidOn < 240)
         {
             ImGui.SameLine();
@@ -192,6 +198,13 @@ public static class StyleTab
         {
             Announce(failure.Message);
         }
+    }
+
+    /// <summary>Writes what is in force into the project's file, which the editor reads when it has no theme saved of its own.</summary>
+    private static void Ship()
+    {
+        EditorProjectFile.Change(project => project.Theme = EditorTheme.Current.Describe());
+        Announce($"shipped in {EditorProjectFile.Path}");
     }
 
     /// <summary>Puts the saved theme back.</summary>

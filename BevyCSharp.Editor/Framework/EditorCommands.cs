@@ -188,6 +188,28 @@ public static class EditorCommands
 
         EditorSettings.Action("Project", "Reload now", EditorScripts.Reload, 13);
 
+        // The project's own, kept in its project.json rather than with this person's settings, so
+        // a game and whoever opens the project next read the same.
+        EditorSettings.Heading("Project", "This game", 20);
+
+        EditorSettings.Text(
+            "Project",
+            "Startup scene",
+            static () => EditorProjectFile.Settings.StartupScene ?? string.Empty,
+            static value => EditorProjectFile.Change(project => project.StartupScene = value.Trim() is { Length: > 0 } scene ? scene : null),
+            21,
+            personal: false);
+
+        EditorSettings.Number(
+            "Project",
+            "Fixed step per second",
+            static () => (float)EditorProjectFile.Settings.FixedHz,
+            static value => EditorProjectFile.Change(project => project.FixedHz = Math.Max(0d, value)),
+            22,
+            personal: false);
+
+        EditorSettings.Fact("Project", "Project file", static () => EditorProjectFile.Path, 23);
+
         // What the editor is made of, which is every table something registered itself in. A count
         // that reads as zero is a table nothing reached, which is worth knowing.
         EditorSettings.Heading("About", "BevyCSharp.Editor", 0);

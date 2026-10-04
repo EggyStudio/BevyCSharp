@@ -210,7 +210,11 @@ For what C# owns, the same design on the managed side:
 - **`EditorSettings` is kept in it,** since it is the same thing with a format of its own, so a
   game's settings screen and the editor's store their values the same way. Built:
   `EditorProject` writes the settings to `user://settings.json` as a `Persistent<T>`, and reads a
-  `settings.txt` left in the assets by an older build when there is no such file yet.
+  `settings.txt` left in the assets by an older build when there is no such file yet. What belongs
+  to the project rather than the person, the startup scene, the fixed step and the export's
+  choices, is in `assets/project.json` (`ProjectSettings`) instead, read through `AssetFiles` so
+  an export carrying its assets carries it too, and the player plays its startup scene when given
+  no `--scene`.
 
 ## Order
 

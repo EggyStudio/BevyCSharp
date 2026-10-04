@@ -165,13 +165,16 @@ public static class EditorShell
             "Inter-Regular.ttf",
             Figures);
 
-        // Whatever was dialed in and saved, or the editor's own look when there is no file. A
-        // theme is an asset like any other, read at startup and edited by hand or in the style tab.
+        // Whatever was dialed in and saved, then the one the project ships, then the editor's own
+        // look. A theme is an asset like any other, read at startup and edited by hand or in the
+        // style tab.
         var saved = Path.Combine(assets, "theme.txt");
 
         Wear(File.Exists(saved)
             ? EditorTheme.Restore(File.ReadAllText(saved))
-            : EditorTheme.Modern);
+            : EditorProjectFile.Settings.Theme is { Length: > 0 } shipped
+                ? EditorTheme.Restore(shipped)
+                : EditorTheme.Modern);
     }
 
     /// <summary>Puts a theme on.</summary>

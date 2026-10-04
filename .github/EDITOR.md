@@ -416,7 +416,14 @@ What that buys:
   the trade ImGui makes and the reason it is the tool for a panel full of numbers that change.
 - **The look is data.** `EditorTheme` is a record of every color and metric, written to
   `assets/theme.txt` and read back at startup, and the style tab edits that record rather than
-  ImGui's style, so every knob it shows is one that survives being saved.
+  ImGui's style, so every knob it shows is one that survives being saved. Ship with project writes
+  it into the project's `project.json` as well, which the editor wears when it has no
+  `theme.txt`, so a look goes wherever the project does.
+- **A project's settings are the project's.** The startup scene, the fixed step and how the
+  project was last exported live in `assets/project.json` (`ProjectSettings`), written by the
+  Project page's This game rows, the export row and the style tab, and left out of the person's
+  own settings, so whoever opens the project next reads the same and a value one person last had
+  does not overwrite it.
 
 ### What is drawn by hand, and why
 

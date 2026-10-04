@@ -38,6 +38,11 @@ public enum SettingKind
 /// <param name="Write">What to do with a new value. Null for anything that cannot be changed.</param>
 /// <param name="Options">The names a <see cref="SettingKind.Choice"/> may take.</param>
 /// <param name="Order">Where it sits on its page. Lower is first.</param>
+/// <param name="Personal">
+/// Whether it belongs to the person using the editor, and is kept with their settings, or to the
+/// project, which keeps it in a file of its own (<see cref="ProjectSettings"/>) and is left out of
+/// theirs so a value they last had does not overwrite the project's.
+/// </param>
 /// <remarks>
 /// Text both ways, whatever the kind. Every editor of a value in this project is a box with
 /// characters in it or a checkbox, the panel already knows how to parse each kind back, and a
@@ -51,7 +56,8 @@ public sealed record EditorSetting(
     Func<string>? Read = null,
     Action<string>? Write = null,
     IReadOnlyList<string>? Options = null,
-    int Order = 0);
+    int Order = 0,
+    bool Personal = true);
 
 /// <summary>
 /// The pages of settings, and what is on them.
@@ -109,8 +115,8 @@ public static class EditorSettings
 
     /// <summary>A line of text somebody can edit.</summary>
     public static void Text(
-        string page, string label, Func<string> read, Action<string> write, int order = 0) =>
-        Add(new EditorSetting(page, label, SettingKind.Text, read, write, Order: order));
+        string page, string label, Func<string> read, Action<string> write, int order = 0, bool personal = true) =>
+        Add(new EditorSetting(page, label, SettingKind.Text, read, write, Order: order, Personal: personal));
 
     /// <summary>A number somebody can edit.</summary>
     /// <remarks>
@@ -119,7 +125,7 @@ public static class EditorSettings
     /// number read as fifteen, or not at all, under another.
     /// </remarks>
     public static void Number(
-        string page, string label, Func<float> read, Action<float> write, int order = 0) =>
+        string page, string label, Func<float> read, Action<float> write, int order = 0, bool personal = true) =>
         Add(new EditorSetting(
             page,
             label,
@@ -133,7 +139,8 @@ public static class EditorSettings
                     write(value);
                 }
             },
-            Order: order));
+            Order: order,
+            Personal: personal));
 
     /// <summary>Something that is on or off.</summary>
     public static void Flag(
@@ -198,7 +205,7 @@ public static class EditorSettings
         foreach (var entry in Entries)
         {
             if (entry.Read is not { } read) continue;
-            if (entry.Write is null) continue;
+            if (entry.Write is null || !entry.Personal) continue;
 
             lines.Add($"{entry.Page}\t{entry.Label}\t{read()}");
         }
@@ -225,7 +232,7 @@ public static class EditorSettings
 
             foreach (var entry in Entries)
             {
-                if (entry.Page != parts[0] || entry.Label != parts[1]) continue;
+                if (entry.Page != parts[0] || entry.Label != parts[1] || !entry.Personal) continue;
 
                 entry.Write?.Invoke(parts[2]);
                 break;
@@ -241,7 +248,7 @@ public static class EditorSettings
 
         foreach (var entry in Entries)
         {
-            if (entry.Read is not { } read || entry.Write is null) continue;
+            if (entry.Read is not { } read || entry.Write is null || !entry.Personal) continue;
             values[entry.Page + "/" + entry.Label] = read();
         }
 
@@ -255,7 +262,7 @@ public static class EditorSettings
 
         foreach (var entry in Entries)
         {
-            if (entry.Write is { } write && values.TryGetValue(entry.Page + "/" + entry.Label, out var value))
+            if (entry.Write is { } write && entry.Personal && values.TryGetValue(entry.Page + "/" + entry.Label, out var value))
                 write(value);
         }
     }

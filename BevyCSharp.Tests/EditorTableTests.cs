@@ -87,6 +87,26 @@ public sealed class EditorTableTests
     }
 
     [Fact]
+    public void AProjectsSettingIsLeftOutOfAPersonsOwn()
+    {
+        var page = Fresh();
+        var mine = "mine";
+        var game = "game";
+
+        EditorSettings.Text(page, "Mine", () => mine, value => mine = value);
+        EditorSettings.Text(page, "Game", () => game, value => game = value, personal: false);
+
+        // Kept in the project's own file, so neither form of a person's settings carries it, and
+        // a value they last had does not overwrite the project's on the next start.
+        Assert.DoesNotContain($"{page}\tGame", EditorSettings.Describe());
+        Assert.False(EditorSettings.Snapshot().ContainsKey($"{page}/Game"));
+
+        EditorSettings.Restore(new Dictionary<string, string> { [$"{page}/Game"] = "overwritten", [$"{page}/Mine"] = "restored" });
+        Assert.Equal("game", game);
+        Assert.Equal("restored", mine);
+    }
+
+    [Fact]
     public void RestoringSkipsWhatThisBuildHasNeverHeardOf()
     {
         var page = Fresh();

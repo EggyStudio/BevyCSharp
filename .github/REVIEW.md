@@ -8,39 +8,36 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `d67623c`. Sub-states of several parents (`e901c2c`) and the click on an offscreen
-scene (`1bfc668`) were read and raised nothing. TODO.md was read whole for the list below.
+Reviewed up to `d058156`. Animation (`f79472b`) and undo for a delete (`d058156`) were read, and
+each raised a verdict.
 
 ## Now
 
-TODO.md's remaining entries are mostly limits that were chosen, and three things a game or the
-editor needs are either missing from it or held back by a reason that has stopped holding. In
-this order.
+In this order.
 
-1. **Skeletal animation.** The README's status section says animation has no bridge, and TODO.md
-   has no entry for it, so the largest gap between this engine and a 3D game is on no list. A
-   glTF file's clips are loaded by Bevy and nothing plays them. `bevy_animation` is to be
-   compiled into the render profile and bridged: the clips of a model by name, playing, stopping,
-   pausing, looping, speed, seeking, and blending from one clip to another over a time, on the
-   entity a scene was spawned under, with a message when a clip finishes. It lands with a test
-   that draws a skinned model at rest and mid-clip and finds the pixels differ, an entry in
-   TODO.md for what is left (masks, additive layers, a state machine over clips), and a card or
-   a console command in the editor to play a selected model's clips.
-2. **Undo for a despawn.** TODO.md says a despawn is not recorded because a mesh built in memory
-   could not be brought back. The scene writer has since learned to write a primitive's recipe,
-   a mesh's geometry and a material's settings for what was made in memory (TODO.md, The editor,
-   first entry), so the subtree a despawn removes can be written to scene JSON as it goes and
-   spawned from it on undo, with its ids kept so references to it resolve again. Deleting with
-   no way back is the editor's most costly gap for whoever uses it. If something still cannot be
-   written, the despawn of that entity is refused from the history with a line in the console
-   saying what, and the rest are recorded.
-3. **A project file** (decision 2), which the startup scene, the physics step, the export's
-   target and the theme are waiting on.
+1. **Verdict 1**, since it makes an undo do nothing without saying so.
+2. **A project file** (decision 2), which the batch in progress has begun.
+3. **Verdict 2.**
 4. **Gamepads** wait on the owner (decision 3).
 
 ## Verdicts
 
-None open.
+1. **Undoing a delete leaves the history before it pointing at dead entities** (`d058156`).
+   `EditorEntity.Restore` spawns the deleted subtree again, so each entity comes back under a
+   new `Entity`, and it repoints the components that referred to the old ones. The history's
+   earlier records were not repointed. A field edit, a rename and the other records capture the
+   `Entity` they were made on (`ComponentFields.cs:147`, `EditorEntity.cs:39`), so after editing
+   a field, deleting the entity and undoing the delete, the next undo writes to an entity that is
+   gone and the field keeps its value. The history is to keep the map a restore produces, old
+   entity to new, and every record is to resolve its entity through it before it runs, following
+   the map through more than one delete and undo. Verified by a test that edits a field, deletes
+   the entity, undoes twice and finds the field at its first value, and then redoes all three.
+2. **Animation plays the first player under a model and only named clips** (`f79472b`,
+   `native/bevy_csharp/src/animation.rs`). `animator` stops at the first `AnimationPlayer` it
+   finds under the root, and a glTF file with more than one animated root has a player for each,
+   so the rest never move. Clips are taken from `named_animations`, so a clip the file gave no
+   name cannot be played, where it could be offered by its number. Both are to work, or to be
+   entries in TODO.md's Animation section with what each needs.
 
 ## Decisions
 

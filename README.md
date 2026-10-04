@@ -3194,7 +3194,9 @@ be dragged while it draws. Docking the panel
 gives the camera the rectangle that is left rather than drawing it behind. The arrangement is a
 handful of numbers that `EditorShell` owns and every part reads, saved with the settings, so the
 editor opens the way it was left. The look is one theme file, `assets/theme.txt`, which the Style
-tab writes. [.github/EDITOR.md](.github/EDITOR.md) has the design language in full.
+tab writes, and Ship with project writes into the project's own `assets/project.json`
+(`ProjectSettings`), beside the startup scene, the fixed step and the export's choices, which an
+app reads as `app.Project` and takes its fixed step from. [.github/EDITOR.md](.github/EDITOR.md) has the design language in full.
 
 The Play tab runs the game in a window of its own and stops it again, builds it without running it,
 exports it for a player and shows what each wrote. `F5` plays the scene being edited instead,
