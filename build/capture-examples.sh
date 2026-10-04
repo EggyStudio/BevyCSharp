@@ -19,13 +19,13 @@ failed=()
 program=$(ls -t BevyCSharp.Examples/bin/*/net10.0/BevyCSharp.Examples | head -1)
 printing=$("$program" --printing)
 
-# Examples that show and print nothing by design, Bevy's two empty applications, and those that
-# wait for a file dropped, the mouse or a touch, which a capture has none of, so their capture is
-# not held to saying something.
-empty="drag_and_drop empty empty_defaults mouse_grab mouse_input touch_input"
+# Examples that show and print nothing by design, Bevy's two empty applications and its two that
+# play music in a window with no camera, and those that wait for a file dropped, the mouse or a
+# touch, which a capture has none of, so their capture is not held to saying something.
+empty="audio drag_and_drop empty empty_defaults mouse_grab mouse_input soundtrack touch_input"
 
 for example in $("$program" --list); do
-    if ! build/capture-example.sh "$example" "$into/$example.png"; then
+    if ! build/capture-example.sh "$example" "$into/$example.webp"; then
         failed+=("$example (did not start or could not be captured)")
         continue
     fi
@@ -40,30 +40,26 @@ for example in $("$program" --list); do
         continue
     fi
 
-    # The spread of the picture's bytes, which a picture of one flat color has none of. A PNG
-    # of eight-bit channels with no interlacing, as a capture is, read without a library.
-    if ! python3 - "$into/$example.png" <<'PY'
-import struct, sys, zlib
-data = open(sys.argv[1], "rb").read()
-width, height, depth, kind = struct.unpack(">IIBB", data[16:26])
-chunks, at = b"", 8
-while at < len(data):
-    length, name = struct.unpack(">I4s", data[at:at + 8])
-    if name == b"IDAT":
-        chunks += data[at + 8:at + 8 + length]
-    at += 12 + length
-raw = zlib.decompress(chunks)
-# Palette indices for a capture brought down to 256 colors, otherwise gray, RGB or RGBA.
-channels = {0: 1, 2: 3, 3: 1, 4: 2, 6: 4}[kind]
-stride = width * channels
-# Every pixel's first channel, the filter byte of each row left out. A picture of thin lines on a
-# plain ground has few values, and a picture of nothing has one.
-values = set()
-for y in range(height):
-    values.update(raw[y * (stride + 1) + 1:(y + 1) * (stride + 1)][::channels])
-sys.exit(0 if len(values) > 2 else 1)
-PY
-    then
+    # How many colors the picture holds, which a picture of one flat color has one of. A picture of
+    # thin lines on a plain ground has few, and a picture of nothing has one or two. Decoded to PPM
+    # by ImageMagick, or by libwebp's dwebp where ImageMagick was built without WebP.
+    magick=$(command -v magick || command -v convert || true)
+    colors=$({ { [ -n "$magick" ] && "$magick" "$into/$example.webp" ppm:- 2>/dev/null; } \
+            || dwebp -quiet "$into/$example.webp" -ppm -o -; } | python3 -c '
+import sys
+data = sys.stdin.buffer.read()
+fields, at = [], 0
+while len(fields) < 4:
+    while data[at:at + 1].isspace(): at += 1
+    if data[at:at + 1] == b"#":
+        at = data.index(b"\n", at)
+        continue
+    end = at
+    while not data[end:end + 1].isspace(): end += 1
+    fields.append(data[at:end]); at = end
+pixels = data[at + 1:]
+print(len({pixels[i:i + 3] for i in range(0, len(pixels), 3)}))' 2>/dev/null || echo 0)
+    if [ "$colors" -le 2 ]; then
         failed+=("$example (blank)")
     fi
 done

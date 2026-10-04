@@ -44,7 +44,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
 | **All** | **119** | **7** | **120** | **118** | **57** |
 
-A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints.
+A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
 ## 2D Rendering
 
@@ -356,9 +356,9 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`keyboard_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/keyboard_input_events.rs) | Prints out all keyboard events | missing, keyboard events as messages, each with its key code, logical key and state |
 | [`keyboard_modifiers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/keyboard_modifiers.rs) | Demonstrates using key modifiers (ctrl, shift) | [written](../BevyCSharp.Examples/input/keyboard_modifiers.cs), prints [its output](assets/examples/keyboard_modifiers.txt) |
 | [`mouse_grab`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/mouse_grab.rs) | Demonstrates how to grab the mouse, locking the cursor to the app's screen | [written](../BevyCSharp.Examples/input/mouse_grab.cs) |
-| [`mouse_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/mouse_input.rs) | Demonstrates handling a mouse button press/release | [written](../BevyCSharp.Examples/input/mouse_input.cs) |
+| [`mouse_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/mouse_input.rs) | Demonstrates handling a mouse button press/release | [written](../BevyCSharp.Examples/input/mouse_input.cs), prints [its output](assets/examples/mouse_input.txt) |
 | [`mouse_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/mouse_input_events.rs) | Prints out all mouse events (buttons, movement, etc.) | missing, mouse button, motion, cursor, wheel and gesture events as messages |
-| [`touch_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/touch_input.rs) | Displays touch presses, releases, and cancels | [written in part](../BevyCSharp.Examples/input/touch_input.cs), a touch the platform cancels, which is not reported |
+| [`touch_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/touch_input.rs) | Displays touch presses, releases, and cancels | [written in part](../BevyCSharp.Examples/input/touch_input.cs), prints [its output](assets/examples/touch_input.txt), a touch the platform cancels, which is not reported |
 | [`touch_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/touch_input_events.rs) | Prints out all touch inputs | missing, touch events as messages |
 
 ## Math

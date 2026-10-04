@@ -174,7 +174,10 @@ def build(version, examples, order, triage, written):
     out.append(
         "A row's example links to Bevy's source, at the release the bridge builds. A written "
         "one's state links to its program here, and its capture is in `.github/assets/examples`, a "
-        "picture of what it draws or, for one with nothing to draw, the text it prints.")
+        "picture of what it draws or, for one with nothing to draw, the text it prints. Every "
+        "picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and "
+        "kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a "
+        "3D one, so a label reads as Bevy draws it and a sky does not band.")
 
     for group in groups:
         out.append("")
@@ -200,11 +203,11 @@ def build(version, examples, order, triage, written):
 
     # Every written example's capture, four to a row, for the README.
     shown = [example for example in examples if example["state"] in ("written", "part")
-             and os.path.exists(os.path.join(CAPTURES, example["name"] + ".png"))]
+             and os.path.exists(os.path.join(CAPTURES, example["name"] + ".webp"))]
     gallery = []
     for start in range(0, len(shown), 4):
         cells = [
-            f'<td><img src="{RAW}.github/assets/examples/{example["name"]}.png" width="200"/><br><code>{example["name"]}</code></td>'
+            f'<td><img src="{RAW}.github/assets/examples/{example["name"]}.webp" width="200"/><br><code>{example["name"]}</code></td>'
             for example in shown[start:start + 4]
         ]
         gallery.append("<tr>" + "".join(cells) + "</tr>")
