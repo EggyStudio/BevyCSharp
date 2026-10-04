@@ -29,6 +29,8 @@ esac
 # fall or fade in is given longer by name.
 frames=120
 case "$example" in
+  # Exposure that adapts as an eye does, which takes its time to settle.
+  auto_exposure) frames=900 ;;
   *) ;;
 esac
 ./bcs command frames.wait "$frames" --quiet --timeout 600

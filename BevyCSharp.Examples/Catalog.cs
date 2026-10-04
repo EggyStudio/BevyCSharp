@@ -42,6 +42,10 @@ internal static class Catalog
         new("volumetric_fog", VolumetricFog.Build),
         new("rotate_environment_map", RotateEnvironmentMap.Build),
         new("skybox", Skybox.Build),
+        new("post_processing", PostProcessing.Build),
+        new("auto_exposure", AutoExposure.Build),
+        new("clearcoat", Clearcoat.Build),
+        new("order_independent_transparency", OrderIndependentTransparency.Build),
         new("orthographic", Orthographic.Build),
         new("parenting", Parenting.Build),
     ];
