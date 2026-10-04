@@ -1,5 +1,6 @@
 using System.Globalization;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -7,7 +8,6 @@ namespace BevyCSharp.Examples.ThreeD;
 // multiplied over a checkered floor, with keys for its alpha, the camera, HDR, lighting and color.
 internal static class BlendModes
 {
-    private const string NodeType = "bevy_ui::ui_node::Node";
 
     // A material the keys change, and whether its lighting is one of the things they change.
     private sealed record Controlled(AssetHandle Material, MaterialSettings Settings, bool Unlit);
@@ -80,7 +80,7 @@ internal static class BlendModes
         {
             var label = Ui.SpawnNode(new UiSettings { Absolute = true });
             var text = Ui.SpawnText(names[i], new UiSettings { Absolute = true, Bottom = Length.Zero }, labelStyle);
-            ecs.SetReflectedColor(text, "bevy_text::text::TextColor", ".0", new Color(orange.R, orange.G, orange.B, orange.A));
+            ecs.Wrap<TextColorRef>(text).Value = new Color(orange.R, orange.G, orange.B, orange.A);
             ecs.SetParent(text, label);
             Labels.Add((label, spheres[i]));
         }
@@ -130,8 +130,8 @@ internal static class BlendModes
         {
             var at = ecs.GetOrDefault<GlobalTransform>(sphere).Translation + Vec3.UnitY;
             if (!Render.TryProject(_camera, at, out var x, out var y)) continue;
-            ecs.SetReflected(label, NodeType, ".top", Px(y));
-            ecs.SetReflected(label, NodeType, ".left", Px(x));
+            var node = ecs.Wrap<NodeRef>(label);
+            (node.Top, node.Left) = (new Val.Px(y), new Val.Px(x));
         }
 
         Ui.SetText(_display, Describe());
@@ -140,7 +140,6 @@ internal static class BlendModes
     // Bevy's random sRGB channel, as linear.
     private static float Linear(float srgb) => Color.FromSrgb(srgb, 0f, 0f).R;
 
-    private static string Px(float value) => "{\"Px\":" + value.ToString(CultureInfo.InvariantCulture) + "}";
 
     private static string Describe() => string.Create(CultureInfo.InvariantCulture, $"  HDR: {(_hdr ? "ON " : "OFF")}\nAlpha: {_alpha:0.00}");
 }

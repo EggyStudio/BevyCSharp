@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -6,8 +7,9 @@ namespace BevyCSharp.Examples.ThreeD;
 // low-poly one further away, faded one into the other as the camera crosses between them.
 internal static class VisibilityRange
 {
+    // A visibility range's margins are ranges of numbers, which a wrapper does not type, so the
+    // component is written as JSON.
     private const string RangeType = "bevy_camera::visibility::range::VisibilityRange";
-    private const string MeshType = "bevy_mesh::components::Mesh3d";
 
     private static readonly Vec3 FocalPoint = new(0f, 0.3f, 0f);
     private const float KeyboardZoomSpeed = 0.05f, KeyboardPanSpeed = 0.01f, MouseMovementSpeed = 0.25f;
@@ -80,7 +82,7 @@ internal static class VisibilityRange
 
         void Walk(Entity entity, bool highPoly)
         {
-            if (!ecs.Has<MainModel>(entity) && ecs.GetReflectedAsset(entity, MeshType, ".0") is not null)
+            if (!ecs.Has<MainModel>(entity) && ecs.Get<Mesh3dRef>(entity) is not null)
             {
                 ecs.InsertReflected(entity, RangeType, RangeFor(highPoly));
                 ecs.Add(entity, new MainModel { HighPoly = highPoly });
@@ -138,10 +140,15 @@ internal static class VisibilityRange
         if (!ctx.Input.KeyPressed(Key.Space)) return;
 
         _prepass = !_prepass;
-        foreach (var prepass in new[] { "bevy_core_pipeline::prepass::DepthPrepass", "bevy_core_pipeline::prepass::NormalPrepass" })
+        if (_prepass)
         {
-            if (_prepass) ctx.Ecs.InsertReflected(_camera, prepass);
-            else ctx.Ecs.RemoveReflected(_camera, prepass);
+            ctx.Ecs.Insert<DepthPrepassRef>(_camera);
+            ctx.Ecs.Insert<NormalPrepassRef>(_camera);
+        }
+        else
+        {
+            ctx.Ecs.Wrap<DepthPrepassRef>(_camera).Remove();
+            ctx.Ecs.Wrap<NormalPrepassRef>(_camera).Remove();
         }
         Ui.SetText(_text, Describe());
     }

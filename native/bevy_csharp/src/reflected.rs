@@ -132,11 +132,24 @@ fn from_json(
 }
 
 /// A type's default value, from `ReflectDefault`, which building an enum variant's fields needs.
+///
+/// A handle registers no default, though it has one, the handle to its type's default asset, so
+/// one is made from its `ReflectHandle` instead. Without it a variant holding a handle, as a
+/// text's font source or a fog volume's optional density texture does, could not be chosen, and a
+/// caller choosing that variant writes the handle it means right after.
 fn default_of(
     registry: &TypeRegistry,
     type_id: TypeId,
     path: &str,
 ) -> Result<Box<dyn PartialReflect>, i32> {
+    if let Some(handle) = registry.get_type_data::<ReflectHandle>(type_id) {
+        let untyped = bevy::asset::UntypedHandle::Uuid {
+            type_id: handle.asset_type_id(),
+            uuid: bevy::asset::AssetId::<()>::DEFAULT_UUID,
+        };
+        return Ok(handle.typed(untyped).into_partial_reflect());
+    }
+
     registry
         .get_type_data::<ReflectDefault>(type_id)
         .map(|default| default.default().into_partial_reflect())
@@ -1124,6 +1137,232 @@ pub unsafe extern "C" fn bcs_reflect_set_color(
 
             apply(world, reflect, entity, &type_path, &path, value.as_ref())
         })
+    })
+}
+
+/// A number field's value, whatever width of float it is.
+fn float_of(value: &dyn PartialReflect) -> Option<f64> {
+    if let Some(v) = value.try_downcast_ref::<f32>() {
+        return Some(f64::from(*v));
+    }
+    value.try_downcast_ref::<f64>().copied()
+}
+
+/// A whole number or a flag's value, whatever width or signedness it is, with a flag as one or
+/// zero. A `u64` past `i64`'s range wraps, which no field a game writes is near.
+fn integer_of(value: &dyn PartialReflect) -> Option<i64> {
+    macro_rules! widen {
+        ($($t:ty),*) => {$(
+            if let Some(v) = value.try_downcast_ref::<$t>() {
+                return Some(*v as i64);
+            }
+        )*};
+    }
+    widen!(i8, i16, i32, i64, isize, u8, u16, u32, u64, usize);
+    value.try_downcast_ref::<bool>().map(|on| i64::from(*on))
+}
+
+/// A float as a value of the same width as the one a field holds.
+fn refloated(held: &dyn PartialReflect, number: f64) -> Option<Box<dyn PartialReflect>> {
+    if held.try_downcast_ref::<f32>().is_some() {
+        return Some(Box::new(number as f32));
+    }
+    held.try_downcast_ref::<f64>().map(|_| Box::new(number) as Box<dyn PartialReflect>)
+}
+
+/// A whole number as a value of the type a field holds, refused where it does not fit, so a
+/// negative number is not written into an unsigned field as a large one.
+fn reintegered(held: &dyn PartialReflect, whole: i64) -> Option<Box<dyn PartialReflect>> {
+    macro_rules! narrow {
+        ($($t:ty),*) => {$(
+            if held.try_downcast_ref::<$t>().is_some() {
+                return <$t>::try_from(whole).ok().map(|v| Box::new(v) as Box<dyn PartialReflect>);
+            }
+        )*};
+    }
+    narrow!(i8, i16, i32, i64, isize, u8, u16, u32, u64, usize);
+    held.try_downcast_ref::<bool>().map(|_| Box::new(whole != 0) as Box<dyn PartialReflect>)
+}
+
+/// Reads one field of a component on an entity through `read`, which turns it into what the
+/// caller is handed or reports that it is not that kind of value.
+fn read_field<R>(
+    entity: u64,
+    type_path: &str,
+    path: &str,
+    what: &str,
+    read: impl FnOnce(&dyn PartialReflect) -> Option<R>,
+) -> Result<R, i32> {
+    let mut found = None;
+    let code = with_world(|world| {
+        let registry = world.resource::<AppTypeRegistry>().clone();
+        let registry = registry.read();
+        let (_, reflect) = match component_of(&registry, type_path) {
+            Ok(found) => found,
+            Err(code) => return code,
+        };
+        let Ok(held) = world.get_entity(entity_from(entity)) else {
+            return fail(status::NO_ENTITY, "The entity does not exist.");
+        };
+        let Some(component) = reflect.reflect(held) else {
+            return fail(status::NOT_PRESENT, format!("The entity has no '{type_path}'."));
+        };
+        let value = match at(component.as_partial_reflect(), path) {
+            Ok(value) => value,
+            Err(code) => return code,
+        };
+        match read(value) {
+            Some(value) => {
+                found = Some(value);
+                status::OK
+            }
+            None => fail(status::INVALID_STATE, format!("'{path}' is not {what}.")),
+        }
+    });
+    found.ok_or(code)
+}
+
+/// Writes one field of a component on an entity with the value `make` builds against what the
+/// field holds, as [`bcs_reflect_set`] writes one read from JSON.
+fn write_field(
+    entity: u64,
+    type_path: &str,
+    path: &str,
+    what: &str,
+    make: impl FnOnce(&dyn PartialReflect) -> Option<Box<dyn PartialReflect>>,
+) -> i32 {
+    with_world(|world| {
+        let registry = world.resource::<AppTypeRegistry>().clone();
+        let registry = registry.read();
+        let (_, reflect) = match component_of(&registry, type_path) {
+            Ok(found) => found,
+            Err(code) => return code,
+        };
+        if let Err(code) = writable(world, reflect, type_path) {
+            return code;
+        }
+
+        let entity = entity_from(entity);
+        let value = {
+            let Ok(found) = world.get_entity(entity) else {
+                return fail(status::NO_ENTITY, "The entity does not exist.");
+            };
+            let Some(component) = reflect.reflect(found) else {
+                return fail(status::NOT_PRESENT, format!("The entity has no '{type_path}'."));
+            };
+            let held = match at(component.as_partial_reflect(), path) {
+                Ok(held) => held,
+                Err(code) => return code,
+            };
+            match make(held) {
+                Some(value) => value,
+                None => return fail(status::INVALID_STATE, format!("'{path}' cannot hold {what}.")),
+            }
+        };
+
+        apply(world, reflect, entity, type_path, path, value.as_ref())
+    })
+}
+
+/// Reads a float field, `f32` or `f64`, as a number rather than as JSON.
+///
+/// A typed wrapper reads its numbers this way, so a number never passes through text on its way
+/// across.
+///
+/// # Safety
+/// `type_path` must be a NUL-terminated string, `path` one or null, and `out` writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_reflect_get_float(
+    entity: u64,
+    type_path: *const c_char,
+    path: *const c_char,
+    out: *mut f64,
+) -> i32 {
+    crate::interop::guard(|| {
+        let Some(type_path) = (unsafe { cstr_to_string(type_path) }) else {
+            return status::NULL_ARG;
+        };
+        if out.is_null() {
+            return status::NULL_ARG;
+        }
+        let path = unsafe { cstr_to_string(path) }.unwrap_or_default();
+        match read_field(entity, &type_path, &path, "a float", float_of) {
+            Ok(value) => {
+                unsafe { out.write(value) };
+                status::OK
+            }
+            Err(code) => code,
+        }
+    })
+}
+
+/// Writes a float field at the width it holds.
+///
+/// # Safety
+/// `type_path` must be a NUL-terminated string, and `path` one or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_reflect_set_float(
+    entity: u64,
+    type_path: *const c_char,
+    path: *const c_char,
+    value: f64,
+) -> i32 {
+    crate::interop::guard(|| {
+        let Some(type_path) = (unsafe { cstr_to_string(type_path) }) else {
+            return status::NULL_ARG;
+        };
+        let path = unsafe { cstr_to_string(path) }.unwrap_or_default();
+        write_field(entity, &type_path, &path, "a float", |held| refloated(held, value))
+    })
+}
+
+/// Reads a whole number or a flag field, of any width, as a number rather than as JSON.
+///
+/// # Safety
+/// `type_path` must be a NUL-terminated string, `path` one or null, and `out` writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_reflect_get_integer(
+    entity: u64,
+    type_path: *const c_char,
+    path: *const c_char,
+    out: *mut i64,
+) -> i32 {
+    crate::interop::guard(|| {
+        let Some(type_path) = (unsafe { cstr_to_string(type_path) }) else {
+            return status::NULL_ARG;
+        };
+        if out.is_null() {
+            return status::NULL_ARG;
+        }
+        let path = unsafe { cstr_to_string(path) }.unwrap_or_default();
+        match read_field(entity, &type_path, &path, "a whole number or a flag", integer_of) {
+            Ok(value) => {
+                unsafe { out.write(value) };
+                status::OK
+            }
+            Err(code) => code,
+        }
+    })
+}
+
+/// Writes a whole number or a flag field at the type it holds, refusing a number that does not
+/// fit it.
+///
+/// # Safety
+/// `type_path` must be a NUL-terminated string, and `path` one or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_reflect_set_integer(
+    entity: u64,
+    type_path: *const c_char,
+    path: *const c_char,
+    value: i64,
+) -> i32 {
+    crate::interop::guard(|| {
+        let Some(type_path) = (unsafe { cstr_to_string(type_path) }) else {
+            return status::NULL_ARG;
+        };
+        let path = unsafe { cstr_to_string(path) }.unwrap_or_default();
+        write_field(entity, &type_path, &path, &format!("{value}"), |held| reintegered(held, value))
     })
 }
 

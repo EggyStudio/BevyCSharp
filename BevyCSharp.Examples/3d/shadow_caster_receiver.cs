@@ -1,12 +1,11 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
 // Demonstrates how to prevent meshes from casting/receiving shadows in a 3d scene.
 internal static class ShadowCasterReceiver
 {
-    private const string PointLightType = "bevy_light::point_light::PointLight";
-    private const string DirectionalLightType = "bevy_light::directional_light::DirectionalLight";
 
     private static readonly Dictionary<Entity, MeshFlags> Flags = [];
     private static Entity _point, _sun;
@@ -53,8 +52,8 @@ internal static class ShadowCasterReceiver
             {
                 _usingPoint = !_usingPoint;
                 Console.WriteLine(_usingPoint ? "Using PointLight" : "Using DirectionalLight");
-                ctx.Ecs.SetReflected(_point, PointLightType, ".intensity", _usingPoint ? "1000000" : "0");
-                ctx.Ecs.SetReflected(_sun, DirectionalLightType, ".illuminance", _usingPoint ? "0" : "1000");
+                ctx.Ecs.Wrap<PointLightRef>(_point).Intensity = _usingPoint ? 1_000_000f : 0f;
+                ctx.Ecs.Wrap<DirectionalLightRef>(_sun).Illuminance = _usingPoint ? 0f : 1000f;
             }
 
             if (ctx.Input.KeyPressed(Key.C))

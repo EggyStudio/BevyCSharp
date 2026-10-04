@@ -27,7 +27,8 @@ internal static class ConsoleSchemaCommands
         + "# Written by `./bcs command schema.dump <path>` against an editor build, which reflects the\n"
         + "# most. Regenerate it after upgrading Bevy, and read its diff as what Bevy changed.\n"
         + "# component <type path> <short name>\n"
-        + "# field <type path> <name> <reflect path> <kind> <rust type> <options or asset kind>\n";
+        + "# field <type path> <name> <reflect path> <kind> <rust type> <options or asset kind>\n"
+        + "# variant <type path> <enum field> <variant> <name> <reflect path> <kind> <rust type> <options or asset kind>\n";
 
     /// <summary>Writes the description of Bevy's components to a file.</summary>
     [Command("schema.dump", "Writes Bevy's components for the generator: schema.dump <path>")]
@@ -56,9 +57,12 @@ internal static class ConsoleSchemaCommands
     /// <remarks>
     /// Built from the same schemas the inspector draws, with nothing a mirror covers taken out, so a
     /// wrapper and a row name every field alike. A field is written only when a wrapper can type it,
-    /// which leaves out the JSON rows and the rows of an enum variant, since a variant's fields are
-    /// there only while that variant is held. The bridge's own components are left out too, being
-    /// its business rather than a game's.
+    /// which leaves out the JSON rows. A field of an enum's variant, there only while that variant
+    /// is held, is a <c>variant</c> line naming the enum field and the variant, for the generator
+    /// to make the variant a record, and its name is the part of its row's name after the
+    /// variant's, empty for a variant wrapping one value. One inside a variant of a variant is left
+    /// out, as a union inside a union is more than a wrapper types. The bridge's own components are
+    /// left out too, being its business rather than a game's.
     /// </remarks>
     internal static List<string> Describe(string description)
     {
@@ -73,7 +77,7 @@ internal static class ConsoleSchemaCommands
 
             foreach (var field in schema.Fields)
             {
-                if (field.ReflectPath is null || field.Hints.Conditions.Count > 0) continue;
+                if (field.ReflectPath is null) continue;
 
                 var extra = field.Kind switch
                 {
@@ -82,9 +86,23 @@ internal static class ConsoleSchemaCommands
                     _ => string.Empty,
                 };
 
-                lines.Add(string.Join('\t',
-                    "field", schema.QualifiedName, field.Name, field.ReflectPath, field.Kind,
-                    field.Type, extra));
+                var conditions = field.Hints.Conditions;
+                if (conditions.Count == 0)
+                {
+                    lines.Add(string.Join('\t',
+                        "field", schema.QualifiedName, field.Name, field.ReflectPath, field.Kind,
+                        field.Type, extra));
+                }
+                else if (conditions.Count == 1 && conditions[0] is { Value: { } variant, Not: false } condition)
+                {
+                    var prefix = condition.Field.Length == 0 ? variant : condition.Field + "." + variant;
+                    if (!field.Name.StartsWith(prefix, StringComparison.Ordinal)) continue;
+                    var name = field.Name.Length == prefix.Length ? string.Empty : field.Name[(prefix.Length + 1)..];
+
+                    lines.Add(string.Join('\t',
+                        "variant", schema.QualifiedName, condition.Field, variant, name, field.ReflectPath,
+                        field.Kind, field.Type, extra));
+                }
             }
         }
 

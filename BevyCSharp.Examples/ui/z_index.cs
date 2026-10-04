@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -6,8 +7,7 @@ namespace BevyCSharp.Examples.Interface;
 // lowered among their siblings by a z-index and against the whole interface by a global one.
 internal static class ZIndex
 {
-    private const string Local = "bevy_ui::ui_node::ZIndex";
-    private const string Global = "bevy_ui::ui_node::GlobalZIndex";
+    private enum Order { None, Local, Global }
 
     public static void Build(App app) => app.Startup(ctx =>
     {
@@ -21,15 +21,16 @@ internal static class ZIndex
 
         foreach (var (left, bottom, width, height, color, kind, index) in new[]
         {
-            (10f, 40f, 100f, 50f, Scene.Srgb8(255, 0, 0), "", 0),
-            (45f, 30f, 100f, 50f, Scene.Srgb8(0, 0, 255), Local, 2),
-            (70f, 20f, 100f, 75f, Scene.Srgb8(0, 255, 0), Local, -1),
-            (15f, 10f, 100f, 60f, Scene.Srgb8(128, 0, 128), Global, 1),
-            (-15f, -15f, 100f, 125f, Scene.Srgb8(255, 255, 0), Global, -1),
+            (10f, 40f, 100f, 50f, Scene.Srgb8(255, 0, 0), Order.None, 0),
+            (45f, 30f, 100f, 50f, Scene.Srgb8(0, 0, 255), Order.Local, 2),
+            (70f, 20f, 100f, 75f, Scene.Srgb8(0, 255, 0), Order.Local, -1),
+            (15f, 10f, 100f, 60f, Scene.Srgb8(128, 0, 128), Order.Global, 1),
+            (-15f, -15f, 100f, 125f, Scene.Srgb8(255, 255, 0), Order.Global, -1),
         })
         {
             var box = Ui.SpawnNode(new UiSettings { Absolute = true, Left = Length.Px(left), Bottom = Length.Px(bottom), Width = Length.Px(width), Height = Length.Px(height), Color = color });
-            if (kind.Length > 0) ecs.InsertReflected(box, kind, $"{index}");
+            if (kind == Order.Local) ecs.Insert<ZIndexRef>(box).Value = index;
+            else if (kind == Order.Global) ecs.Insert<GlobalZIndexRef>(box).Value = index;
             ecs.SetParent(box, gray);
         }
     }, "z_index.Setup");

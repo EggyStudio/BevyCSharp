@@ -197,6 +197,47 @@ public sealed unsafe partial class EcsWorld
         return new Color(parts[0], parts[1], parts[2], parts[3]);
     }
 
+    /// <summary>Reads a float inside one of Bevy's components as a number, or nothing when it is absent.</summary>
+    /// <remarks>What a typed wrapper reads a float through, so the number never passes through text.</remarks>
+    internal double? GetReflectedFloat(Entity entity, string typePath, string path)
+    {
+        double value;
+        var status = Native.bcs_reflect_get_float(entity.Bits, typePath, path ?? string.Empty, &value);
+        if (status == NativeStatus.NotPresent) return null;
+
+        ReflectedCheck(status, $"Reading the number at {Described(typePath, path)} on {entity}");
+        return value;
+    }
+
+    /// <summary>Writes a float inside one of Bevy's components at the width it holds.</summary>
+    internal void SetReflectedFloat(Entity entity, string typePath, string path, double value) =>
+        ReflectedCheck(
+            Native.bcs_reflect_set_float(entity.Bits, typePath, path ?? string.Empty, value),
+            $"Writing {value} to {Described(typePath, path)} on {entity}");
+
+    /// <summary>
+    /// Reads a whole number or a flag inside one of Bevy's components as a number, a flag as one
+    /// or zero, or nothing when it is absent.
+    /// </summary>
+    internal long? GetReflectedInteger(Entity entity, string typePath, string path)
+    {
+        long value;
+        var status = Native.bcs_reflect_get_integer(entity.Bits, typePath, path ?? string.Empty, &value);
+        if (status == NativeStatus.NotPresent) return null;
+
+        ReflectedCheck(status, $"Reading the number at {Described(typePath, path)} on {entity}");
+        return value;
+    }
+
+    /// <summary>
+    /// Writes a whole number or a flag inside one of Bevy's components at the type it holds,
+    /// refused where the number does not fit it.
+    /// </summary>
+    internal void SetReflectedInteger(Entity entity, string typePath, string path, long value) =>
+        ReflectedCheck(
+            Native.bcs_reflect_set_integer(entity.Bits, typePath, path ?? string.Empty, value),
+            $"Writing {value} to {Described(typePath, path)} on {entity}");
+
     /// <summary>
     /// Writes a color inside one of Bevy's components from linear RGBA.
     /// </summary>
@@ -276,6 +317,17 @@ public sealed unsafe partial class EcsWorld
         var id = NativeComponents.Resolve(T.TypePath, 0);
         return HasById(entity, id) ? T.Create(this, entity) : null;
     }
+
+    /// <summary>A typed wrapper over one of Bevy's components an entity is known to carry.</summary>
+    /// <typeparam name="T">The wrapper, such as <c>Bevy.Reflected.TextColorRef</c>.</typeparam>
+    /// <remarks>
+    /// <see cref="Get{T}"/> without the question, for a component the program put there itself, so
+    /// <c>ctx.Ecs.Wrap&lt;TextColorRef&gt;(label).Value = Color.White</c> is one line. Nothing is
+    /// checked until a property is used, and a property used on an entity without the component
+    /// throws, as every wrapper's does once its component is gone.
+    /// </remarks>
+    public T Wrap<T>(Entity entity) where T : struct, IReflectedComponent<T> => T.Create(this, entity);
+
 
     /// <summary>
     /// Puts one of Bevy's components on an entity, from JSON or at its default, and returns a typed

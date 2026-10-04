@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Ecs;
 
@@ -21,7 +22,7 @@ internal static class RemovalDetection
 
             // Told of the removal once it has happened, and of the entity it left.
             ctx.Ecs.Observe<Remove<MyComponent>>(on =>
-                on.Ecs.SetReflectedColor(on.Event.Entity, "bevy_sprite::sprite::Sprite", ".color", Color.FromSrgb(0.5f, 1f, 1f)));
+                on.Ecs.Wrap<SpriteRef>(on.Event.Entity).Color = Color.FromSrgb(0.5f, 1f, 1f));
         }, "removal_detection.Setup");
 
         app.Update(ctx =>

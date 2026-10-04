@@ -1,13 +1,15 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
+
+using Visibility = Bevy.Reflected.VisibilityRef.ValueVariant;
 
 // Showcases contact shadows, the fine shadow detail a shadow map is too coarse to hold, traced in
 // screen space where an object meets what it rests on, with the flight helmet lit by a turning
 // directional, point or spot light and the model spun by dragging it.
 internal static class ContactShadows
 {
-    private const string VisibilityType = "bevy_camera::visibility::Visibility";
     private const float LightRotationSpeed = 0.002f;
 
     private enum LightType
@@ -16,13 +18,6 @@ internal static class ContactShadows
         Point,
         Spot,
     }
-
-    private static readonly (LightType Type, string Path)[] LightTypes =
-    [
-        (LightType.Directional, "bevy_light::directional_light::DirectionalLight"),
-        (LightType.Point, "bevy_light::point_light::PointLight"),
-        (LightType.Spot, "bevy_light::spot_light::SpotLight"),
-    ];
 
     private static readonly Dictionary<LightType, Entity> Lights = [];
     private static Entity _camera, _container, _ground, _helmet;
@@ -91,7 +86,7 @@ internal static class ContactShadows
         {
             ecs.Add(light, Transform.Identity);
             ecs.SetParent(light, _container);
-            ecs.SetVariant(light, VisibilityType, "", type == _lightType ? "Visible" : "Hidden");
+            ecs.Wrap<VisibilityRef>(light).Value = type == _lightType ? Visibility.Visible : Visibility.Hidden;
         }
 
         _ground = ecs.Mesh(
@@ -144,16 +139,18 @@ internal static class ContactShadows
         if (_contactButtons!.Pressed(out var contact) && contact != _contactShadows)
         {
             _contactShadows = contact;
-            foreach (var (type, path) in LightTypes)
-                ecs.SetReflected(Lights[type], path, ".contact_shadows_enabled", contact ? "true" : "false");
+            ecs.Wrap<DirectionalLightRef>(Lights[LightType.Directional]).ContactShadowsEnabled = contact;
+            ecs.Wrap<PointLightRef>(Lights[LightType.Point]).ContactShadowsEnabled = contact;
+            ecs.Wrap<SpotLightRef>(Lights[LightType.Spot]).ContactShadowsEnabled = contact;
             _contactButtons.Select(ecs, contact);
         }
 
         if (_shadowMapButtons!.Pressed(out var maps) && maps != _shadowMaps)
         {
             _shadowMaps = maps;
-            foreach (var (type, path) in LightTypes)
-                ecs.SetReflected(Lights[type], path, ".shadow_maps_enabled", maps ? "true" : "false");
+            ecs.Wrap<DirectionalLightRef>(Lights[LightType.Directional]).ShadowMapsEnabled = maps;
+            ecs.Wrap<PointLightRef>(Lights[LightType.Point]).ShadowMapsEnabled = maps;
+            ecs.Wrap<SpotLightRef>(Lights[LightType.Spot]).ShadowMapsEnabled = maps;
             _shadowMapButtons.Select(ecs, maps);
         }
 
@@ -167,7 +164,7 @@ internal static class ContactShadows
         {
             _lightType = lightType;
             foreach (var (type, light) in Lights)
-                ecs.SetVariant(light, VisibilityType, "", type == lightType ? "Visible" : "Hidden");
+                ecs.Wrap<VisibilityRef>(light).Value = type == lightType ? Visibility.Visible : Visibility.Hidden;
             _typeButtons.Select(ecs, lightType);
         }
 

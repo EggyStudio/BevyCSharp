@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Cameras;
 
@@ -6,7 +7,6 @@ namespace BevyCSharp.Examples.Cameras;
 // camera, drawn after the first and clearing nothing, sees only the sprite's layer.
 internal static class TwoDOnUi
 {
-    private const string Camera = "bevy_camera::camera::Camera";
     private static Entity _sprite;
 
     public static void Build(App app)
@@ -17,9 +17,9 @@ internal static class TwoDOnUi
 
             // The interface draws with the first camera, and the second draws layer one over it.
             var under = Render2d.SpawnCamera2d();
-            ecs.InsertReflected(under, "bevy_ui::ui_node::IsDefaultUiCamera");
+            ecs.Insert<IsDefaultUiCameraRef>(under);
             var over = Render2d.SpawnCamera2d(order: 1);
-            ecs.SetVariant(over, Camera, "clear_color", "None");
+            ecs.Wrap<CameraRef>(over).ClearColor = new ClearColorConfig.None();
             Render.SetLayers(ecs, over, 1u << 1);
 
             var panel = Ui.SpawnNode(new UiSettings

@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.TwoD;
 
@@ -7,10 +8,6 @@ namespace BevyCSharp.Examples.TwoD;
 // of a running character.
 internal static class SpriteScale
 {
-    private const string Text2d = "bevy_sprite::text2d::Text2d";
-    private const string TextFont = "bevy_text::text::TextFont";
-    private const string TextLayout = "bevy_text::text::TextLayout";
-    private const string Anchor = "bevy_sprite::sprite::Anchor";
 
     private static readonly (float W, float H, string Text, float X, float Y, bool Banner, SpriteScaling? Scaling)[] Pictures =
     [
@@ -103,13 +100,10 @@ internal static class SpriteScale
 
         var label = ecs.Spawn();
         ecs.Add(label, Transform.At(0f, -0.5f * height - 10f, 0f));
-        ecs.InsertReflected(label, Text2d, System.Text.Json.JsonSerializer.Serialize(text));
-        ecs.InsertReflected(label, TextFont);
-        ecs.SetReflected(label, TextFont, ".font_size", "{\"Px\":15.0}");
-        ecs.InsertReflected(label, TextLayout);
-        ecs.SetVariant(label, TextLayout, ".justify", "Center");
-        ecs.InsertReflected(label, Anchor);
-        ecs.SetReflected(label, Anchor, ".0", "[0.0,0.5]");
+        ecs.Insert<Text2dRef>(label).Value = text;
+        ecs.Insert<TextFontRef>(label).FontSize = new FontSize.Px(15f);
+        ecs.Insert<TextLayoutRef>(label).Justify = TextLayoutRef.JustifyVariant.Center;
+        ecs.Insert<AnchorRef>(label).Value = new Vec2(0f, 0.5f);
         ecs.SetParent(label, sprite);
         return sprite;
     }

@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -7,10 +8,6 @@ namespace BevyCSharp.Examples.Interface;
 // with no display taking no room and a hidden one keeping its room.
 internal static class DisplayAndVisibility
 {
-    private const string Node = "bevy_ui::ui_node::Node";
-    private const string Background = "bevy_ui::ui_node::BackgroundColor";
-    private const string TextColor = "bevy_text::text::TextColor";
-    private const string Outline = "bevy_ui::ui_node::Outline";
 
     private static readonly Color HiddenColor = Color.FromSrgb(1f, 0.7f, 0.7f);
     private static readonly string[] Palette = ["27496D", "466B7A", "669DB3", "ADCBE3"];
@@ -123,7 +120,7 @@ internal static class DisplayAndVisibility
                     if (item.Display)
                     {
                         var none = item.Text == "Display::Flex";
-                        ecs.SetVariant(item.Target, Node, ".display", none ? "None" : "Flex");
+                        ecs.Wrap<NodeRef>(item.Target).Display = none ? NodeRef.DisplayVariant.None : NodeRef.DisplayVariant.Flex;
                         item.Text = none ? "Display::None" : "Display::Flex";
                     }
                     else
@@ -144,8 +141,8 @@ internal static class DisplayAndVisibility
                 // Hovered, the button darkens and its text turns yellow, and otherwise the text is
                 // pink for a value that hides the box.
                 var hovered = interaction == UiInteraction.Hovered;
-                ecs.SetReflectedColor(item.Button, Background, ".0", new Color(0f, 0f, 0f, hovered ? 0.6f : 0.5f));
-                ecs.SetReflectedColor(item.Label, TextColor, ".0", hovered ? Color.FromSrgb(1f, 1f, 0f) : Hides(item.Text) ? HiddenColor : Color.White);
+                ecs.Wrap<BackgroundColorRef>(item.Button).Value = new Color(0f, 0f, 0f, hovered ? 0.6f : 0.5f);
+                ecs.Wrap<TextColorRef>(item.Label).Value = hovered ? Color.FromSrgb(1f, 1f, 0f) : Hides(item.Text) ? HiddenColor : Color.White;
             }
         }, "display_and_visibility.Buttons");
     }
@@ -163,10 +160,8 @@ internal static class DisplayAndVisibility
 
     private static void OutlineOf(EcsWorld ecs, Entity node)
     {
-        ecs.InsertReflected(node, Outline);
-        ecs.SetReflected(node, Outline, ".width", "{\"Px\":4.0}");
-        ecs.SetReflected(node, Outline, ".offset", "{\"Px\":10.0}");
-        ecs.SetReflectedColor(node, Outline, ".color", Color.FromSrgb(0f, 139f / 255f, 139f / 255f));
+        var outline = ecs.Insert<OutlineRef>(node);
+        (outline.Width, outline.Offset, outline.Color) = (new Val.Px(4f), new Val.Px(10f), Color.FromSrgb(0f, 139f / 255f, 139f / 255f));
     }
 
     private static (float R, float G, float B, float A) Hex(string hex) =>

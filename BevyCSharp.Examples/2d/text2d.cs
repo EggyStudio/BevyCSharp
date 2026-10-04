@@ -1,21 +1,16 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.TwoD;
+
+using Justify = Bevy.Reflected.TextLayoutRef.JustifyVariant;
+using Linebreak = Bevy.Reflected.TextLayoutRef.LinebreakVariant;
 
 // Shows text drawn in the world rather than on the interface, moved, turned and scaled, wrapped in
 // boxes two ways, left unsmoothed, and anchored by each of its corners to one point. Bevy's
 // underlines the first box's text, which is not reachable here, so this is written in part.
 internal static class Text2dExample
 {
-    private const string Text2d = "bevy_sprite::text2d::Text2d";
-    private const string TextSpan = "bevy_text::text::TextSpan";
-    private const string TextFont = "bevy_text::text::TextFont";
-    private const string TextLayout = "bevy_text::text::TextLayout";
-    private const string TextBounds = "bevy_text::bounds::TextBounds";
-    private const string TextColor = "bevy_text::text::TextColor";
-    private const string TextBackground = "bevy_text::text::TextBackgroundColor";
-    private const string Shadow = "bevy_sprite::text2d::Text2dShadow";
-    private const string Anchor = "bevy_sprite::sprite::Anchor";
 
     private static Entity _translated, _rotated, _scaled;
     private static AssetHandle _font, _white;
@@ -30,45 +25,41 @@ internal static class Text2dExample
             _white = Render.CreateImage([255, 255, 255, 255], 1, 1);
             var black = Color.FromSrgb(0f, 0f, 0f, 0.5f);
 
-            _translated = Text(ecs, " translation ", 50f, "Center", background: black, shadow: true);
-            _rotated = Text(ecs, " rotation ", 50f, "Center", background: black, shadow: true);
-            _scaled = Text(ecs, " scale ", 50f, "Center", background: black, shadow: true);
+            _translated = Text(ecs, " translation ", 50f, Justify.Center, background: black, shadow: true);
+            _rotated = Text(ecs, " rotation ", 50f, Justify.Center, background: black, shadow: true);
+            _scaled = Text(ecs, " scale ", 50f, Justify.Center, background: black, shadow: true);
             ecs.Set(_scaled, Transform.At(400f, 0f, 0f));
 
             // Two boxes the text wraps inside, at word boundaries and at any character.
             var boxColor = Color.FromSrgb(0.25f, 0.25f, 0.55f);
             var shadowColor = Darker(boxColor, 0.05f);
-            foreach (var (x, label, linebreak) in new[] { (0f, "Unicode linebreaks", "WordBoundary"), (320f, "AnyCharacter linebreaks", "AnyCharacter") })
+            foreach (var (x, label, linebreak) in new[] { (0f, "Unicode linebreaks", Linebreak.WordBoundary), (320f, "AnyCharacter linebreaks", Linebreak.AnyCharacter) })
             {
                 var box = Square(ecs, new Vec3(x, -250f, 0f), boxColor, (300f, 200f));
-                var text = Text(ecs, $"this text wraps in the box\n({label})", 35f, "Left", linebreak: linebreak);
-                ecs.SetVariant(text, TextBounds, ".width", "Some");
-                ecs.SetReflected(text, TextBounds, ".width.0", "300.0");
-                ecs.SetVariant(text, TextBounds, ".height", "Some");
-                ecs.SetReflected(text, TextBounds, ".height.0", "200.0");
-                ecs.InsertReflected(text, Shadow);
-                ecs.SetReflectedColor(text, Shadow, ".color", shadowColor);
+                var text = Text(ecs, $"this text wraps in the box\n({label})", 35f, Justify.Left, linebreak: linebreak);
+                var bounds = ecs.Wrap<TextBoundsRef>(text);
+                (bounds.Width, bounds.Height) = (300f, 200f);
+                ecs.Insert<Text2dShadowRef>(text).Color = shadowColor;
                 ecs.Set(text, Transform.At(0f, 0f, 1f));
                 ecs.SetParent(text, box);
             }
 
-            var unsmoothed = Text(ecs, "This text has\nFontSmoothing::None\nAnd Justify::Center", 35f, "Center", shadow: true);
-            ecs.SetVariant(unsmoothed, TextFont, ".font_smoothing", "None");
+            var unsmoothed = Text(ecs, "This text has\nFontSmoothing::None\nAnd Justify::Center", 35f, Justify.Center, shadow: true);
+            ecs.Wrap<TextFontRef>(unsmoothed).FontSmoothing = TextFontRef.FontSmoothingVariant.None;
             ecs.Set(unsmoothed, Transform.At(-400f, -250f, 0f));
 
             // Four labels hung from one small square, each by a different corner.
             var point = Square(ecs, new Vec3(0f, 250f, 0f), Color.FromSrgb(224f / 255f, 1f, 1f), (10f, 10f));
             foreach (var (name, anchor, color) in new[]
             {
-                ("TOP_LEFT", "[-0.5,0.5]", Color.FromSrgb(1f, 160f / 255f, 122f / 255f)),
-                ("TOP_RIGHT", "[0.5,0.5]", Color.FromSrgb(144f / 255f, 238f / 255f, 144f / 255f)),
-                ("BOTTOM_RIGHT", "[0.5,-0.5]", Color.FromSrgb(173f / 255f, 216f / 255f, 230f / 255f)),
-                ("BOTTOM_LEFT", "[-0.5,-0.5]", Color.FromSrgb(1f, 1f, 224f / 255f)),
+                ("TOP_LEFT", new Vec2(-0.5f, 0.5f), Color.FromSrgb(1f, 160f / 255f, 122f / 255f)),
+                ("TOP_RIGHT", new Vec2(0.5f, 0.5f), Color.FromSrgb(144f / 255f, 238f / 255f, 144f / 255f)),
+                ("BOTTOM_RIGHT", new Vec2(0.5f, -0.5f), Color.FromSrgb(173f / 255f, 216f / 255f, 230f / 255f)),
+                ("BOTTOM_LEFT", new Vec2(-0.5f, -0.5f), Color.FromSrgb(1f, 1f, 224f / 255f)),
             })
             {
-                var label = Text(ecs, " Anchor", 35f, "Left", background: Darker(Color.White, 0.8f));
-                ecs.InsertReflected(label, Anchor);
-                ecs.SetReflected(label, Anchor, ".0", anchor);
+                var label = Text(ecs, " Anchor", 35f, Justify.Left, background: Darker(Color.White, 0.8f));
+                ecs.Insert<AnchorRef>(label).Value = anchor;
                 ecs.Set(label, Transform.At(0f, 0f, -1f));
                 ecs.SetParent(label, point);
                 Span(ecs, label, "::", Color.FromSrgb(211f / 255f, 211f / 255f, 211f / 255f), Color.FromSrgb(0f, 0f, 139f / 255f));
@@ -89,22 +80,16 @@ internal static class Text2dExample
 
     // A run of text in the world, in Fira Sans at a size, justified, and given a background and a
     // shadow where asked.
-    private static Entity Text(EcsWorld ecs, string text, float size, string justify, Color? background = null, bool shadow = false, string linebreak = "WordBoundary")
+    private static Entity Text(EcsWorld ecs, string text, float size, Justify justify, Color? background = null, bool shadow = false, Linebreak linebreak = Linebreak.WordBoundary)
     {
         var entity = ecs.Spawn();
         ecs.Add(entity, Transform.Identity);
-        ecs.InsertReflected(entity, Text2d, System.Text.Json.JsonSerializer.Serialize(text));
+        ecs.Insert<Text2dRef>(entity).Value = text;
         Font(ecs, entity, size);
-        ecs.InsertReflected(entity, TextLayout);
-        ecs.SetVariant(entity, TextLayout, ".justify", justify);
-        ecs.SetVariant(entity, TextLayout, ".linebreak", linebreak);
-        if (background is { } color)
-        {
-            ecs.InsertReflected(entity, TextBackground);
-            ecs.SetReflectedColor(entity, TextBackground, ".0", color);
-        }
-
-        if (shadow) ecs.InsertReflected(entity, Shadow);
+        var layout = ecs.Insert<TextLayoutRef>(entity);
+        (layout.Justify, layout.Linebreak) = (justify, linebreak);
+        if (background is { } color) ecs.Insert<TextBackgroundColorRef>(entity).Value = color;
+        if (shadow) ecs.Insert<Text2dShadowRef>(entity);
         return entity;
     }
 
@@ -112,20 +97,18 @@ internal static class Text2dExample
     private static void Span(EcsWorld ecs, Entity parent, string text, Color color, Color background)
     {
         var span = ecs.Spawn();
-        ecs.InsertReflected(span, TextSpan, System.Text.Json.JsonSerializer.Serialize(text));
+        ecs.Insert<TextSpanRef>(span).Value = text;
         Font(ecs, span, 35f);
-        ecs.InsertReflected(span, TextColor);
-        ecs.SetReflectedColor(span, TextColor, ".0", color);
-        ecs.InsertReflected(span, TextBackground);
-        ecs.SetReflectedColor(span, TextBackground, ".0", background);
+        ecs.Insert<TextColorRef>(span).Value = color;
+        ecs.Insert<TextBackgroundColorRef>(span).Value = background;
         ecs.SetParent(span, parent);
     }
 
     private static void Font(EcsWorld ecs, Entity entity, float size)
     {
-        ecs.InsertReflected(entity, TextFont);
-        ecs.SetReflectedAsset(entity, TextFont, ".font.0", _font);
-        ecs.SetReflected(entity, TextFont, ".font_size", FormattableString.Invariant($"{{\"Px\":{size}}}"));
+        var font = ecs.Insert<TextFontRef>(entity);
+        font.Font = new FontSource.Handle(_font);
+        font.FontSize = new FontSize.Px(size);
     }
 
     private static Entity Square(EcsWorld ecs, Vec3 at, Color color, (float Width, float Height) size)

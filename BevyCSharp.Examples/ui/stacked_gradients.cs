@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -7,6 +8,8 @@ namespace BevyCSharp.Examples.Interface;
 // middle, a sun near the top, and two dark wedges, each laid over the ones before it.
 internal static class StackedGradients
 {
+    // A background gradient is a list of gradients, each holding a list of stops, which a wrapper
+    // does not type, so the stack is written as JSON.
     private const string Gradients = "bevy_ui::gradients::BackgroundGradient";
 
     public static void Build(App app) => app.Startup(ctx =>

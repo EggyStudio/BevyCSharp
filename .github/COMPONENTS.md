@@ -115,15 +115,22 @@ silent failure rather than a compile error.
 - **Generated wrappers.** `BevyCSharp.Generator/ReflectedGenerator.cs` reads the file, which only
   the library names as an additional file, and emits `Bevy.Reflected.PointLightRef` and the rest:
   a readonly struct over an entity with a typed property per field (`float Intensity`,
-  `bool ShadowMapsEnabled`, a nested enum for an enum's variants, `AssetHandle` for a handle) and a
-  `Remove()`. `ctx.Ecs.Get<PointLightRef>(entity)` returns one, or null when the entity has no
-  light, and `ctx.Ecs.Insert<PointLightRef>(entity)` adds the component at its default. A field
-  Bevy renamed is then a compile error in the code that used it.
+  `bool ShadowMapsEnabled`, a nested enum for an enum whose variants hold nothing, `AssetHandle` for
+  a handle) and a `Remove()`. An enum whose variants hold values is an abstract record with a
+  record a variant (`FogFalloff.Linear(float Start, float End)`, `Val.Px(float Value)`), from the
+  `variant` lines the description gives each variant's fields, and an `Option` is a nullable. A
+  record is emitted once for each Rust type, so `Val` serves every length of a node.
+  `ctx.Ecs.Get<PointLightRef>(entity)` returns one, or null when the entity has no light,
+  `ctx.Ecs.Wrap<TextColorRef>(entity)` returns one without asking, and
+  `ctx.Ecs.Insert<PointLightRef>(entity)` adds the component at its default. A number crosses as
+  a number, through the bridge's typed float and integer calls, rather than as text. A field Bevy
+  renamed is then a compile error in the code that used it, and `ExampleStringPathTests` holds the
+  examples to the wrappers wherever one reaches.
 - **No reflection on this side.** The wrappers are generated code, so trimming and AOT are
   unaffected, as for every other schema the generator emits.
-- **What a wrapper leaves out.** A field shown only as JSON, and the fields inside an enum's
-  variants, which are there only while that variant is held, have no property. Those stay on the
-  string paths of tier 1.
+- **What a wrapper leaves out.** A field shown only as JSON, such as a list, and an enum one of
+  whose variants holds a value a wrapper does not type, such as another enum, which keeps its
+  variant names alone. Those stay on the string paths of tier 1.
 
 ### Tier 3: byte mirrors, generated
 

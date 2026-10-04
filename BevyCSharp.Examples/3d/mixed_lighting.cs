@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -9,9 +10,6 @@ internal static class MixedLighting
 {
     private enum LightingMode { Baked, MixedDirect, MixedIndirect, RealTime }
 
-    private const string Lightmap = "bevy_pbr::lightmap::Lightmap";
-    private const string MeshName = "bevy_gltf::assets::GltfMeshName";
-    private const string Sun = "bevy_light::directional_light::DirectionalLight";
 
     private const float LightmapExposure = 600f;
     private const float SphereOffset = 0.2f;
@@ -105,14 +103,13 @@ internal static class MixedLighting
             var rect = name == "Sphere" ? SphereRect : Lightmaps[name];
             if (lightmap.IsValid && (name != "Sphere" || _mode == LightingMode.Baked))
             {
-                ecs.InsertReflected(entity, Lightmap);
-                ecs.SetReflectedAsset(entity, Lightmap, "image", lightmap);
-                var (min, max) = UvRect(rect);
-                ecs.SetReflected(entity, Lightmap, "uv_rect", FormattableString.Invariant($"{{\"min\":[{min.X},{min.Y}],\"max\":[{max.X},{max.Y}]}}"));
+                var map = ecs.Insert<LightmapRef>(entity);
+                map.Image = lightmap;
+                (map.UvRectMin, map.UvRectMax) = UvRect(rect);
             }
             else
             {
-                ecs.RemoveReflected(entity, Lightmap);
+                ecs.Wrap<LightmapRef>(entity).Remove();
             }
         }
 
@@ -120,9 +117,8 @@ internal static class MixedLighting
         var realTime = _mode is LightingMode.MixedIndirect or LightingMode.RealTime;
         foreach (var entity in Descendants(ecs, _scene))
         {
-            if (ecs.GetReflected(entity, Sun) is null) continue;
-            ecs.SetReflected(entity, Sun, "affects_lightmapped_mesh_diffuse", realTime ? "true" : "false");
-            ecs.SetReflected(entity, Sun, "shadow_maps_enabled", realTime ? "true" : "false");
+            if (ecs.Get<DirectionalLightRef>(entity) is not { } sun) continue;
+            (sun.AffectsLightmappedMeshDiffuse, sun.ShadowMapsEnabled) = (realTime, realTime);
         }
 
         if (_mode == LightingMode.Baked && Sphere(ecs) is var sphere && sphere != Entity.None)
@@ -165,10 +161,10 @@ internal static class MixedLighting
     }
 
     // A rectangle given from the bottom left, as OpenGL counts, turned to Bevy's top left.
-    private static ((float X, float Y) Min, (float X, float Y) Max) UvRect((float X, float Y, float W, float H) gl)
+    private static (Vec2 Min, Vec2 Max) UvRect((float X, float Y, float W, float H) gl)
     {
-        var min = (X: gl.X, Y: 1f - gl.Y - gl.H);
-        return (min, (min.X + gl.W, min.Y + gl.H));
+        var min = new Vec2(gl.X, 1f - gl.Y - gl.H);
+        return (min, new Vec2(min.X + gl.W, min.Y + gl.H));
     }
 
     private static Entity Sphere(EcsWorld ecs) => Meshes(ecs).FirstOrDefault(mesh => mesh.Name == "Sphere").Entity;
@@ -178,8 +174,8 @@ internal static class MixedLighting
     {
         foreach (var entity in Descendants(ecs, _scene))
         {
-            if (ecs.GetReflected(entity, MeshName) is not { } json) continue;
-            var name = System.Text.Json.JsonSerializer.Deserialize<string>(json) ?? string.Empty;
+            if (ecs.Get<GltfMeshNameRef>(entity) is not { } meshName) continue;
+            var name = meshName.Value;
             if (name == "Sphere" || Lightmaps.ContainsKey(name)) yield return (entity, name);
         }
     }

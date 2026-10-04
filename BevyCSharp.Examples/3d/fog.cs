@@ -1,18 +1,17 @@
-using System.Globalization;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
 // Distance-based fog visual effects are used in many games to give a soft falloff of visibility to
 // the player for performance and/or visual design reasons. This example shows linear, exponential
-// and squared exponential fog, Bevy's DistanceFog put on the camera through reflection.
+// and squared exponential fog, Bevy's DistanceFog put on the camera.
 internal static class Fog
 {
-    private const string DistanceFog = "bevy_pbr::fog::DistanceFog";
-
     private enum Falloff { Linear, Exponential, ExponentialSquared }
 
     private static Entity _camera, _text;
+    private static DistanceFogRef _fog;
     private static Falloff _falloff = Falloff.Linear;
     private static float _start = 5f, _end = 20f, _density = 0.07f;
     private static Vec4 _color;
@@ -26,8 +25,8 @@ internal static class Fog
             _color = new Vec4(0.25f, 0.25f, 0.25f, 1f);
 
             _camera = ecs.Camera(Transform.Identity);
-            ecs.InsertReflected(_camera, DistanceFog);
-            Apply(ecs);
+            _fog = ecs.Insert<DistanceFogRef>(_camera);
+            Apply();
 
             // A pyramid of stone steps, four pillars on its top and a green glass ball over them.
             var stone = Color.FromHex("28221B");
@@ -106,7 +105,7 @@ internal static class Fog
             Step(_color.Z, input.KeyDown(Key.Semicolon), input.KeyDown(Key.Quote), delta),
             Step(_color.W, input.KeyDown(Key.Period), input.KeyDown(Key.Slash), delta));
 
-        Apply(ctx.Ecs);
+        Apply();
 
         var text = _falloff switch
         {
@@ -122,19 +121,14 @@ internal static class Fog
     }
 
     // The fog as it stands, written to the camera's component.
-    private static void Apply(EcsWorld ecs)
+    private static void Apply()
     {
-        ecs.SetReflectedColor(_camera, DistanceFog, ".color", Color.FromSrgb(_color.X, _color.Y, _color.Z, _color.W));
-        ecs.SetVariant(_camera, DistanceFog, ".falloff", _falloff.ToString());
-
-        if (_falloff == Falloff.Linear)
+        _fog.Color = Color.FromSrgb(_color.X, _color.Y, _color.Z, _color.W);
+        _fog.Falloff = _falloff switch
         {
-            ecs.SetReflected(_camera, DistanceFog, ".falloff.start", _start.ToString(CultureInfo.InvariantCulture));
-            ecs.SetReflected(_camera, DistanceFog, ".falloff.end", _end.ToString(CultureInfo.InvariantCulture));
-        }
-        else
-        {
-            ecs.SetReflected(_camera, DistanceFog, ".falloff.density", _density.ToString(CultureInfo.InvariantCulture));
-        }
+            Falloff.Linear => new FogFalloff.Linear(_start, _end),
+            Falloff.Exponential => new FogFalloff.Exponential(_density),
+            _ => new FogFalloff.ExponentialSquared(_density),
+        };
     }
 }

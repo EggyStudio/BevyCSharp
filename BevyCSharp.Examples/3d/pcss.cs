@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -10,9 +11,6 @@ internal static class Pcss
 
     private enum ShadowFilter { NonTemporal, Temporal }
 
-    private const string PointLightType = "bevy_light::point_light::PointLight";
-    private const string SpotLightType = "bevy_light::spot_light::SpotLight";
-    private const string Taa = "bevy_anti_alias::taa::TemporalAntiAliasing";
 
     // The size of the light, which is how wide a shadow's soft edge grows, and the rest of Bevy's
     // constants for it.
@@ -78,12 +76,12 @@ internal static class Pcss
                 if (_filter == ShadowFilter.Temporal)
                 {
                     Render.SetShadowFiltering(_camera, ShadowFiltering.Temporal);
-                    ecs.InsertReflected(_camera, Taa);
+                    ecs.Insert<TemporalAntiAliasingRef>(_camera);
                 }
                 else
                 {
                     Render.SetShadowFiltering(_camera, ShadowFiltering.Gaussian);
-                    ecs.RemoveReflected(_camera, Taa);
+                    ecs.Wrap<TemporalAntiAliasingRef>(_camera).Remove();
                 }
             }
 
@@ -109,8 +107,8 @@ internal static class Pcss
         });
         ecs.Add(light, LightAt);
 
-        if (_lightType != LightType.Directional)
-            ecs.SetReflected(light, _lightType == LightType.Point ? PointLightType : SpotLightType, "shadow_map_near_z", FormattableString.Invariant($"{ShadowMapNearZ}"));
+        if (_lightType == LightType.Point) ecs.Wrap<PointLightRef>(light).ShadowMapNearZ = ShadowMapNearZ;
+        else if (_lightType == LightType.Spot) ecs.Wrap<SpotLightRef>(light).ShadowMapNearZ = ShadowMapNearZ;
         if (_soft) Render.SetSoftShadows(light, LightRadius);
         return light;
     }

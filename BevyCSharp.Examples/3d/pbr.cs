@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -48,9 +49,8 @@ internal static class Pbr
         var large = new UiTextSettings { FontSize = 30f };
         Ui.SpawnText("Perceptual Roughness", new UiSettings { Absolute = true, Top = Length.Px(20f), Left = Length.Px(100f) }, large);
         var metallic = Ui.SpawnText("Metallic", new UiSettings { Absolute = true, Top = Length.Px(130f), Right = Length.Px(0f) }, large);
-        ecs.InsertReflected(metallic, "bevy_ui::ui_transform::UiTransform");
-        ecs.SetReflected(metallic, "bevy_ui::ui_transform::UiTransform", ".rotation.cos", "0.0");
-        ecs.SetReflected(metallic, "bevy_ui::ui_transform::UiTransform", ".rotation.sin", "1.0");
+        var turned = ecs.Insert<UiTransformRef>(metallic);
+        (turned.RotationCos, turned.RotationSin) = (0f, 1f);
         _label = Ui.SpawnText("Loading Environment Map...", new UiSettings { Absolute = true, Bottom = Length.Px(20f), Right = Length.Px(20f) }, large);
 
         var camera = ecs.Camera(

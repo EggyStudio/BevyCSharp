@@ -1,5 +1,6 @@
 using System.Threading.Channels;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.AsyncTasks;
 
@@ -7,7 +8,6 @@ namespace BevyCSharp.Examples.AsyncTasks;
 // second on the fixed timestep and each falling down the window as text.
 internal static class ExternalSourceExternalThread
 {
-    private const string Text2d = "bevy_sprite::text2d::Text2d";
 
     internal readonly record struct StreamMessage(uint Value);
 
@@ -56,7 +56,7 @@ internal static class ExternalSourceExternalThread
             {
                 var text = ecs.Spawn();
                 ecs.Add(text, Transform.At(perFrame++ * 100f, 300f, 0f));
-                ecs.InsertReflected(text, Text2d, $"\"{message.Value}\"");
+                ecs.Insert<Text2dRef>(text).Value = $"{message.Value}";
                 Texts.Add(text);
             }
 

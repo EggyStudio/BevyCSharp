@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -7,8 +8,6 @@ namespace BevyCSharp.Examples.Interface;
 // rate as it runs and holds runs of zero and negative size.
 internal static class TextDebug
 {
-    private const string TextSpan = "bevy_text::text::TextSpan";
-    private const string Background = "bevy_ui::ui_node::BackgroundColor";
 
     private static readonly List<double> Times = [];
     private static readonly List<double> Rates = [];
@@ -35,8 +34,7 @@ internal static class TextDebug
             Entity Block(Entity parent, string text, float size, (float R, float G, float B, float A) color, TextJustify justify = TextJustify.Left, float maxWidth = 0f)
             {
                 var block = Ui.SpawnText(text, new UiSettings { Color = color, MaxWidth = maxWidth > 0f ? Length.Px(maxWidth) : Length.Auto }, new UiTextSettings { Font = font, FontSize = size, Justify = justify });
-                ecs.InsertReflected(block, Background);
-                ecs.SetReflectedColor(block, Background, ".0", maroon);
+                ecs.Insert<BackgroundColorRef>(block).Value = maroon;
                 ecs.SetParent(block, parent);
                 return block;
             }
@@ -83,9 +81,9 @@ internal static class TextDebug
             var fps = time.SmoothedFps;
             var frameTime = time.DeltaSeconds * 1000.0;
             Ui.SetText(_changes, FormattableString.Invariant($"{average:0.0} avg fps, {deviation:0.0} frametime variance"));
-            ecs.SetReflected(_line, TextSpan, ".0", System.Text.Json.JsonSerializer.Serialize(FormattableString.Invariant($"\nThis text changes in the bottom right - {fps:0.0} fps, {frameTime:0.000} ms/frame")));
-            ecs.SetReflected(_fps, TextSpan, ".0", System.Text.Json.JsonSerializer.Serialize(FormattableString.Invariant($"{fps:0.0}")));
-            ecs.SetReflected(_frameTime, TextSpan, ".0", System.Text.Json.JsonSerializer.Serialize(FormattableString.Invariant($"{frameTime:0.000}")));
+            ecs.Wrap<TextSpanRef>(_line).Value = FormattableString.Invariant($"\nThis text changes in the bottom right - {fps:0.0} fps, {frameTime:0.000} ms/frame");
+            ecs.Wrap<TextSpanRef>(_fps).Value = FormattableString.Invariant($"{fps:0.0}");
+            ecs.Wrap<TextSpanRef>(_frameTime).Value = FormattableString.Invariant($"{frameTime:0.000}");
         }, "text_debug.ChangeText");
     }
 }

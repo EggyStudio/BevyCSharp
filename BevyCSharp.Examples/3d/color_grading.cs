@@ -1,5 +1,6 @@
 using System.Globalization;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -8,7 +9,6 @@ namespace BevyCSharp.Examples.ThreeD;
 // shadows apart, each chosen with a button and changed with the arrow keys.
 internal static class ColorGrading
 {
-    private const string GradingType = "bevy_render::view::ColorGrading";
     private const float AdjustmentSpeed = 0.003f;
 
     private static readonly string[] GlobalOptions = ["Exposure", "Temperature", "Tint", "Hue"];
@@ -18,10 +18,32 @@ internal static class ColorGrading
     // An option, by its section, or none for the global ones, and its name.
     private readonly record struct Option(string? Section, string Name)
     {
-        public string Path => Section is null ? $".global.{Name.ToLowerInvariant()}" : $".{Section.ToLowerInvariant()}.{Name.ToLowerInvariant()}";
-
         public override string ToString() => Section is null ? $"\"{Name}\"" : $"\"{Name}\" for \"{Section}\"";
     }
+
+    // Each option's field of Bevy's ColorGrading, read and written through its wrapper.
+    private static readonly Dictionary<(string? Section, string Name), (Func<ColorGradingRef, float> Get, Action<ColorGradingRef, float> Set)> Fields = new()
+    {
+        [(null, "Exposure")] = (g => g.GlobalExposure, (g, v) => g.GlobalExposure = v),
+        [(null, "Temperature")] = (g => g.GlobalTemperature, (g, v) => g.GlobalTemperature = v),
+        [(null, "Tint")] = (g => g.GlobalTint, (g, v) => g.GlobalTint = v),
+        [(null, "Hue")] = (g => g.GlobalHue, (g, v) => g.GlobalHue = v),
+        [("Highlights", "Saturation")] = (g => g.HighlightsSaturation, (g, v) => g.HighlightsSaturation = v),
+        [("Highlights", "Contrast")] = (g => g.HighlightsContrast, (g, v) => g.HighlightsContrast = v),
+        [("Highlights", "Gamma")] = (g => g.HighlightsGamma, (g, v) => g.HighlightsGamma = v),
+        [("Highlights", "Gain")] = (g => g.HighlightsGain, (g, v) => g.HighlightsGain = v),
+        [("Highlights", "Lift")] = (g => g.HighlightsLift, (g, v) => g.HighlightsLift = v),
+        [("Midtones", "Saturation")] = (g => g.MidtonesSaturation, (g, v) => g.MidtonesSaturation = v),
+        [("Midtones", "Contrast")] = (g => g.MidtonesContrast, (g, v) => g.MidtonesContrast = v),
+        [("Midtones", "Gamma")] = (g => g.MidtonesGamma, (g, v) => g.MidtonesGamma = v),
+        [("Midtones", "Gain")] = (g => g.MidtonesGain, (g, v) => g.MidtonesGain = v),
+        [("Midtones", "Lift")] = (g => g.MidtonesLift, (g, v) => g.MidtonesLift = v),
+        [("Shadows", "Saturation")] = (g => g.ShadowsSaturation, (g, v) => g.ShadowsSaturation = v),
+        [("Shadows", "Contrast")] = (g => g.ShadowsContrast, (g, v) => g.ShadowsContrast = v),
+        [("Shadows", "Gamma")] = (g => g.ShadowsGamma, (g, v) => g.ShadowsGamma = v),
+        [("Shadows", "Gain")] = (g => g.ShadowsGain, (g, v) => g.ShadowsGain = v),
+        [("Shadows", "Lift")] = (g => g.ShadowsLift, (g, v) => g.ShadowsLift = v),
+    };
 
     private sealed record Widget(Option Option, Entity Button, Entity Label, Entity Value);
 
@@ -85,15 +107,12 @@ internal static class ColorGrading
 
         _camera = ecs.Camera(Transform.LookingAt(new Vec3(0.7f, 0.7f, 1f), new Vec3(0f, 0.3f, 0f), Vec3.UnitY));
         Render.SetPostProcessing(_camera, new PostSettings { Hdr = true });
-        ecs.InsertReflected(_camera, GradingType);
+        ecs.Insert<ColorGradingRef>(_camera);
 
-        const string Fog = "bevy_pbr::fog::DistanceFog";
         var fogColor = Scene.Srgb8(43, 44, 47);
-        ecs.InsertReflected(_camera, Fog);
-        ecs.SetReflectedColor(_camera, Fog, ".color", new Color(fogColor.R, fogColor.G, fogColor.B, fogColor.A));
-        ecs.SetVariant(_camera, Fog, ".falloff", "Linear");
-        ecs.SetReflected(_camera, Fog, ".falloff.start", "1");
-        ecs.SetReflected(_camera, Fog, ".falloff.end", "8");
+        var fog = ecs.Insert<DistanceFogRef>(_camera);
+        fog.Color = new Color(fogColor.R, fogColor.G, fogColor.B, fogColor.A);
+        fog.Falloff = new FogFalloff.Linear(1f, 8f);
 
         Render.SetEnvironmentMap(
             _camera,
@@ -152,7 +171,7 @@ internal static class ColorGrading
         if (ctx.Input.KeyDown(Key.ArrowRight)) delta += AdjustmentSpeed;
         if (delta == 0f) return;
 
-        ctx.Ecs.SetReflected(_camera, GradingType, _selected.Path, Number(Value(ctx.Ecs, _selected) + delta));
+        Fields[(_selected.Section, _selected.Name)].Set(ctx.Ecs.Wrap<ColorGradingRef>(_camera), Value(ctx.Ecs, _selected) + delta);
         _changed = true;
     }
 
@@ -165,12 +184,12 @@ internal static class ColorGrading
         foreach (var widget in Widgets)
         {
             var chosen = widget.Option == _selected;
-            ecs.SetReflectedColor(widget.Button, "bevy_ui::ui_node::BackgroundColor", ".0", chosen ? Color.White : Color.Black);
-            foreach (var side in new[] { ".top", ".right", ".bottom", ".left" })
-                ecs.SetReflectedColor(widget.Button, "bevy_ui::ui_node::BorderColor", side, chosen ? Color.Black : Color.White);
+            ecs.Wrap<BackgroundColorRef>(widget.Button).Value = chosen ? Color.White : Color.Black;
+            var border = ecs.Wrap<BorderColorRef>(widget.Button);
+            (border.Top, border.Right, border.Bottom, border.Left) = chosen ? (Color.Black, Color.Black, Color.Black, Color.Black) : (Color.White, Color.White, Color.White, Color.White);
 
             foreach (var text in new[] { widget.Label, widget.Value })
-                ecs.SetReflectedColor(text, "bevy_text::text::TextColor", ".0", chosen ? Color.Black : Color.White);
+                ecs.Wrap<TextColorRef>(text).Value = chosen ? Color.Black : Color.White;
             if (chosen) Ui.SetText(widget.Value, Format(Value(ecs, widget.Option)));
         }
 
@@ -178,11 +197,10 @@ internal static class ColorGrading
     }
 
     private static float Value(EcsWorld ecs, Option option) =>
-        ecs.GetReflected(_camera, GradingType, option.Path) is { } json ? float.Parse(json, CultureInfo.InvariantCulture) : DefaultOf(option);
+        ecs.Get<ColorGradingRef>(_camera) is { } grading ? Fields[(option.Section, option.Name)].Get(grading) : DefaultOf(option);
 
     private static string HelpText() => $"Press Left/Right to adjust {_selected}";
 
     private static string Format(float value) => value.ToString("0.000", CultureInfo.InvariantCulture);
 
-    private static string Number(float value) => value.ToString(CultureInfo.InvariantCulture);
 }

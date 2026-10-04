@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -6,7 +7,6 @@ namespace BevyCSharp.Examples.Interface;
 // through the frames.
 internal static class UiTextureAtlas
 {
-    private const string Outline = "bevy_ui::ui_node::Outline";
 
     private static Entity _image;
     private static UiImageSettings _settings = new();
@@ -35,10 +35,8 @@ internal static class UiTextureAtlas
                 Atlas = Render2d.CreateAtlas(24, 24, 7, 1),
             };
             Ui.SetImage(_image, _settings);
-            ecs.InsertReflected(_image, Outline);
-            ecs.SetReflected(_image, Outline, ".width", "{\"Px\":8.0}");
-            ecs.SetReflected(_image, Outline, ".offset", "{\"Px\":0.0}");
-            ecs.SetReflectedColor(_image, Outline, ".color", Color.FromSrgb(220f / 255f, 20f / 255f, 60f / 255f));
+            var outline = ecs.Insert<OutlineRef>(_image);
+            (outline.Width, outline.Offset, outline.Color) = (new Val.Px(8f), new Val.Px(0f), Color.FromSrgb(220f / 255f, 20f / 255f, 60f / 255f));
             ecs.SetParent(_image, column);
 
             var style = new UiTextSettings { FontSize = 20f };

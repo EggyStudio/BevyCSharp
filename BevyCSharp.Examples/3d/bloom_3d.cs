@@ -1,5 +1,5 @@
-using System.Globalization;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -13,7 +13,6 @@ internal static class Bloom3d
 {
     private static Entity _camera;
     private static Entity _text;
-    private const string BloomType = "bevy_post_process::bloom::settings::Bloom";
     private static readonly PostSettings Bloom = new() { Bloom = true, BloomIntensity = 0.15f };
 
     // The fields the post-processing settings do not hold, at Bevy's natural bloom, kept here and
@@ -23,10 +22,9 @@ internal static class Bloom3d
     private static void WriteRest(EcsWorld ecs)
     {
         if (!Bloom.Bloom) return;
-        ecs.SetReflected(_camera, BloomType, ".low_frequency_boost", _boost.ToString(CultureInfo.InvariantCulture));
-        ecs.SetReflected(_camera, BloomType, ".low_frequency_boost_curvature", _curvature.ToString(CultureInfo.InvariantCulture));
-        ecs.SetReflected(_camera, BloomType, ".high_pass_frequency", _highPass.ToString(CultureInfo.InvariantCulture));
-        ecs.SetReflected(_camera, BloomType, ".scale.x", _scale.ToString(CultureInfo.InvariantCulture));
+        var bloom = ecs.Wrap<BloomRef>(_camera);
+        (bloom.LowFrequencyBoost, bloom.LowFrequencyBoostCurvature, bloom.HighPassFrequency) = (_boost, _curvature, _highPass);
+        bloom.Scale = bloom.Scale with { X = _scale };
     }
 
     // A value moved down or up by a step and kept between zero and the highest it may be.

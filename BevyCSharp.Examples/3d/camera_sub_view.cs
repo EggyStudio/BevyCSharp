@@ -1,5 +1,5 @@
-using System.Globalization;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -8,7 +8,6 @@ namespace BevyCSharp.Examples.ThreeD;
 // on the left and orthographic on the right, whole, stretched, moving and in a wide window.
 internal static class CameraSubView
 {
-    private const string CameraType = "bevy_camera::camera::Camera";
 
     private enum Viewport
     {
@@ -65,10 +64,8 @@ internal static class CameraSubView
 
                 if (full is var (fullWidth, fullHeight))
                 {
-                    ecs.SetVariant(camera, CameraType, ".sub_camera_view", "Some");
-                    ecs.SetReflected(camera, CameraType, ".sub_camera_view.0.full_size", $"[{fullWidth},{fullHeight}]");
-                    ecs.SetReflected(camera, CameraType, ".sub_camera_view.0.offset", Pair(offset.Item1, offset.Item2));
-                    ecs.SetReflected(camera, CameraType, ".sub_camera_view.0.size", $"[{size.Item1},{size.Item2}]");
+                    ecs.Wrap<CameraRef>(camera).SubCameraView = new SubCameraView(
+                        fullWidth, fullHeight, new Vec2(offset.Item1, offset.Item2), size.Item1, size.Item2);
                 }
 
                 Cameras.Add((camera, place));
@@ -81,7 +78,10 @@ internal static class CameraSubView
             // Sweeps the view diagonally across, from just before its top left to past its middle.
             var x = ctx.Time.Elapsed * 150f % 450f - 50f;
             foreach (var camera in Moving)
-                ctx.Ecs.SetReflected(camera, CameraType, ".sub_camera_view.0.offset", Pair(x, x));
+            {
+                var wrapped = ctx.Ecs.Wrap<CameraRef>(camera);
+                if (wrapped.SubCameraView is { } view) wrapped.SubCameraView = view with { Offset = new Vec2(x, x) };
+            }
         }, "camera_sub_view.MoveCameraView");
 
         app.Update(_ => ResizeViewports(), "camera_sub_view.ResizeViewports");
@@ -116,6 +116,4 @@ internal static class CameraSubView
             Render.SetViewport(camera, x, y, w, h);
         }
     }
-
-    private static string Pair(float x, float y) => string.Create(CultureInfo.InvariantCulture, $"[{x},{y}]");
 }

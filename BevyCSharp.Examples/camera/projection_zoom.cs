@@ -7,6 +7,8 @@ namespace BevyCSharp.Examples.Cameras;
 // or narrowing the other, and Space switching between them.
 internal static class ProjectionZoom
 {
+    // An orthographic projection holds its scaling mode, an enum inside a variant, which a wrapper
+    // does not type, so the projection is read and written as JSON.
     private const string Projection = "bevy_camera::projection::Projection";
     private const float OrthographicHeight = 5f;
     private const float OrthographicZoomSpeed = 0.2f;

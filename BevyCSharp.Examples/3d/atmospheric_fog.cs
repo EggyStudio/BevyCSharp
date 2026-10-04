@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -8,7 +9,6 @@ namespace BevyCSharp.Examples.ThreeD;
 // worked out here as Bevy's from_visibility_colors works it out.
 internal static class AtmosphericFog
 {
-    private const string Fog = "bevy_pbr::fog::DistanceFog";
     private static Entity _camera;
 
     public static void Build(App app)
@@ -18,16 +18,14 @@ internal static class AtmosphericFog
             var ecs = ctx.Ecs;
 
             _camera = ecs.Camera(Transform.LookingAt(new Vec3(-1f, 0.1f, 1f), Vec3.Zero, Vec3.UnitY));
-            ecs.InsertReflected(_camera, Fog);
-            ecs.SetReflectedColor(_camera, Fog, ".color", Color.FromSrgb(0.35f, 0.48f, 0.66f));
-            ecs.SetReflectedColor(_camera, Fog, ".directional_light_color", Color.FromSrgb(1f, 0.95f, 0.85f, 0.5f));
-            ecs.SetReflected(_camera, Fog, ".directional_light_exponent", "30.0");
+            var fog = ecs.Insert<DistanceFogRef>(_camera);
+            fog.Color = Color.FromSrgb(0.35f, 0.48f, 0.66f);
+            fog.DirectionalLightColor = Color.FromSrgb(1f, 0.95f, 0.85f, 0.5f);
+            fog.DirectionalLightExponent = 30f;
 
             // Up to fifteen units seen through it, an extinction color and an inscattering one.
             var (extinction, inscattering) = FromVisibilityColors(15f, Color.FromSrgb(0.35f, 0.5f, 0.66f), Color.FromSrgb(0.8f, 0.844f, 1f));
-            ecs.SetVariant(_camera, Fog, ".falloff", "Atmospheric");
-            ecs.SetReflected(_camera, Fog, ".falloff.extinction", Json(extinction));
-            ecs.SetReflected(_camera, Fog, ".falloff.inscattering", Json(inscattering));
+            fog.Falloff = new FogFalloff.Atmospheric(extinction, inscattering);
 
             var sunColor = Color.FromSrgb(0.98f, 0.95f, 0.82f);
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Color = (sunColor.R, sunColor.G, sunColor.B), Shadows = true });
@@ -51,15 +49,10 @@ internal static class AtmosphericFog
 
         app.Update(ctx =>
         {
-            if (ctx.Input.KeyPressed(Key.Space)) Fade(ctx.Ecs, ".color", alpha => 1f - alpha);
-            if (ctx.Input.KeyPressed(Key.S)) Fade(ctx.Ecs, ".directional_light_color", alpha => 0.5f - alpha);
+            var fog = ctx.Ecs.Wrap<DistanceFogRef>(_camera);
+            if (ctx.Input.KeyPressed(Key.Space)) fog.Color = fog.Color.WithAlpha(1f - fog.Color.A);
+            if (ctx.Input.KeyPressed(Key.S)) fog.DirectionalLightColor = fog.DirectionalLightColor.WithAlpha(0.5f - fog.DirectionalLightColor.A);
         }, "atmospheric_fog.ToggleSystem");
-    }
-
-    private static void Fade(EcsWorld ecs, string field, Func<float, float> alpha)
-    {
-        if (ecs.GetReflectedColor(_camera, Fog, field) is { } color)
-            ecs.SetReflectedColor(_camera, Fog, field, color.WithAlpha(alpha(color.A)));
     }
 
     // Bevy's FogFalloff::from_visibility_contrast_colors at its contrast threshold of a twentieth.
@@ -71,6 +64,4 @@ internal static class AtmosphericFog
             new Vec3(MathF.Pow(1f - extinction.R, e), MathF.Pow(1f - extinction.G, e), MathF.Pow(1f - extinction.B, e)) * koschmieder * MathF.Pow(extinction.A, e),
             new Vec3(MathF.Pow(inscattering.R, e), MathF.Pow(inscattering.G, e), MathF.Pow(inscattering.B, e)) * koschmieder * MathF.Pow(inscattering.A, e));
     }
-
-    private static string Json(Vec3 v) => FormattableString.Invariant($"[{v.X},{v.Y},{v.Z}]");
 }

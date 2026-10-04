@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -7,10 +8,8 @@ namespace BevyCSharp.Examples.Interface;
 // shadow's offset, blur, spread, count and samples, a button held down repeating.
 internal static class BoxShadowExample
 {
+    // Bevy's BoxShadow is a list of shadows, which a wrapper does not type, so it is written as JSON.
     private const string Shadow = "bevy_ui::ui_node::BoxShadow";
-    private const string Samples = "bevy_ui_render::BoxShadowSamples";
-    private const string Node = "bevy_ui::ui_node::Node";
-    private const string Background = "bevy_ui::ui_node::BackgroundColor";
 
     private static readonly Color Normal = Color.FromSrgb(0.15f, 0.15f, 0.15f);
     private static readonly Color Hovered = Color.FromSrgb(0.25f, 0.25f, 0.25f);
@@ -48,7 +47,7 @@ internal static class BoxShadowExample
             var font = AssetServer.Load(AssetKind.Font, "fonts/FiraSans-Bold.ttf");
 
             _camera = Render2d.SpawnCamera2d();
-            ecs.InsertReflected(_camera, Samples, $"{_settings.Samples}");
+            ecs.Insert<BoxShadowSamplesRef>(_camera).Value = (uint)_settings.Samples;
 
             var middle = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Align = UiAlign.Center, Justify = UiJustify.Center, Color = Scene.Srgb8(128, 128, 128) });
             _node = Ui.SpawnNode(new UiSettings { Border = Sides.All(Length.Px(1f)), Align = UiAlign.Center, Justify = UiJustify.Center, BorderColor = (1f, 1f, 1f, 1f), Color = Scene.Srgb(0.21f, 0.21f, 0.21f) });
@@ -67,7 +66,7 @@ internal static class BoxShadowExample
                 Color = Scene.Srgb(0.12f, 0.12f, 0.12f, 0.85f),
                 BorderColor = (1f, 1f, 1f, 0.15f),
             });
-            ecs.InsertReflected(panel, "bevy_ui::ui_node::ZIndex", "10");
+            ecs.Insert<ZIndexRef>(panel).Value = 10;
 
             Row(ecs, panel, font, "Shape", "shape", true);
             Row(ecs, panel, font, "X Offset", "x", false);
@@ -100,7 +99,7 @@ internal static class BoxShadowExample
                 if (interaction == last) continue;
                 Buttons[i] = (button, action, interaction);
 
-                ecs.SetReflectedColor(button, Background, ".0", interaction switch { UiInteraction.Pressed => Pressed, UiInteraction.Hovered => Hovered, _ => Normal });
+                ecs.Wrap<BackgroundColorRef>(button).Value = interaction switch { UiInteraction.Pressed => Pressed, UiInteraction.Hovered => Hovered, _ => Normal };
                 if (interaction == UiInteraction.Pressed)
                 {
                     Act(action);
@@ -151,10 +150,9 @@ internal static class BoxShadowExample
     {
         var s = _settings;
         var (name, w, h, radius) = Shapes[s.Shape];
-        ecs.SetReflected(_node, Node, ".width", FormattableString.Invariant($"{{\"Px\":{w}}}"));
-        ecs.SetReflected(_node, Node, ".height", FormattableString.Invariant($"{{\"Px\":{h}}}"));
-        foreach (var corner in new[] { ".border_radius.top_left", ".border_radius.top_right", ".border_radius.bottom_right", ".border_radius.bottom_left" })
-            ecs.SetReflected(_node, Node, corner, FormattableString.Invariant($"{{\"Px\":{radius}}}"));
+        var node = ecs.Wrap<NodeRef>(_node);
+        (node.Width, node.Height) = (new Val.Px(w), new Val.Px(h));
+        node.BorderRadiusTopLeft = node.BorderRadiusTopRight = node.BorderRadiusBottomRight = node.BorderRadiusBottomLeft = new Val.Px(radius);
 
         // One black shadow, or blue and yellow on opposite sides, and a red one turned a quarter.
         var shadows = new JsonArray();
@@ -167,7 +165,7 @@ internal static class BoxShadowExample
 
         if (s.Count == 3) shadows.Add(Style((1f, 0f, 0f), s.Y, -s.X));
         ecs.SetReflected(_node, Shadow, string.Empty, shadows.ToJsonString());
-        ecs.SetReflected(_camera, Samples, ".0", $"{s.Samples}");
+        ecs.Wrap<BoxShadowSamplesRef>(_camera).Value = (uint)s.Samples;
 
         Show(ecs, "shape", name);
         Show(ecs, "x", FormattableString.Invariant($"{s.X:0.0}"));

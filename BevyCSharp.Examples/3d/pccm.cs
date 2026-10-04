@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -7,7 +8,6 @@ namespace BevyCSharp.Examples.ThreeD;
 // reflects line up with the walls around it.
 internal static class Pccm
 {
-    private const string Correction = "bevy_light::probe::ParallaxCorrection";
     private const float EnvironmentMapIntensity = 100f;
 
     private static Entity _probe;
@@ -61,9 +61,9 @@ internal static class Pccm
 
             // Bevy gives a probe ParallaxCorrection::Auto itself once its maps have loaded and it
             // is a probe, so the choice is that component's variant, set once it is there.
-            var wanted = _enabled ? "Auto" : "None";
-            if (ctx.Ecs.GetVariant(_probe, Correction, "") is { } variant && variant != wanted)
-                ctx.Ecs.SetVariant(_probe, Correction, "", wanted);
+            ParallaxCorrection wanted = _enabled ? new ParallaxCorrection.Auto() : new ParallaxCorrection.None();
+            if (ctx.Ecs.Get<ParallaxCorrectionRef>(_probe) is { } correction && correction.Value != wanted)
+                correction.Value = wanted;
         }, "pccm.HandlePccmEnableChange");
     }
 }

@@ -1,5 +1,5 @@
-using System.Globalization;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -7,8 +7,6 @@ namespace BevyCSharp.Examples.ThreeD;
 // reflection, each with its gizmo shown.
 internal static class RectLight
 {
-    private const string Light = "bevy_light::rect_light::RectLight";
-    private const string Gizmo = "bevy_light::gizmos::ShowLightGizmo";
 
     private static readonly List<Entity> Lights = [];
     private static MaterialSettings _floor = null!;
@@ -46,8 +44,8 @@ internal static class RectLight
                 _gizmos = !_gizmos;
                 foreach (var light in Lights)
                 {
-                    if (_gizmos) ctx.Ecs.InsertReflected(light, Gizmo);
-                    else ctx.Ecs.RemoveReflected(light, Gizmo);
+                    if (_gizmos) ctx.Ecs.Insert<ShowLightGizmoRef>(light);
+                    else ctx.Ecs.Wrap<ShowLightGizmoRef>(light).Remove();
                 }
             }
 
@@ -64,13 +62,9 @@ internal static class RectLight
     {
         var light = ecs.Spawn();
         ecs.Add(light, at);
-        ecs.InsertReflected(light, Light);
-        ecs.SetReflectedColor(light, Light, ".color", color);
-        ecs.SetReflected(light, Light, ".intensity", intensity.ToString(CultureInfo.InvariantCulture));
-        ecs.SetReflected(light, Light, ".width", width.ToString(CultureInfo.InvariantCulture));
-        ecs.SetReflected(light, Light, ".height", height.ToString(CultureInfo.InvariantCulture));
-        ecs.SetReflected(light, Light, ".range", "20.0");
-        ecs.InsertReflected(light, Gizmo);
+        var rect = ecs.Insert<RectLightRef>(light);
+        (rect.Color, rect.Intensity, rect.Width, rect.Height, rect.Range) = (color, intensity, width, height, 20f);
+        ecs.Insert<ShowLightGizmoRef>(light);
         Lights.Add(light);
     }
 

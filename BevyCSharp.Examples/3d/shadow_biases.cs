@@ -1,5 +1,6 @@
 using System.Globalization;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -8,8 +9,6 @@ namespace BevyCSharp.Examples.ThreeD;
 // change with the number keys.
 internal static class ShadowBiases
 {
-    private const string PointLightType = "bevy_light::point_light::PointLight";
-    private const string DirectionalLightType = "bevy_light::directional_light::DirectionalLight";
 
     // Bevy's own defaults for each kind of light.
     private const float PointDepthDefault = 0.08f, PointNormalDefault = 0.6f;
@@ -105,8 +104,8 @@ internal static class ShadowBiases
         if (input.KeyPressed(Key.L))
         {
             _pointOn = !_pointOn;
-            ecs.SetReflected(_point, PointLightType, ".intensity", Number(_pointOn ? CinemaLumens : 0f));
-            ecs.SetReflected(_directional, DirectionalLightType, ".illuminance", Number(_pointOn ? 0f : DaylightLux));
+            ecs.Wrap<PointLightRef>(_point).Intensity = _pointOn ? CinemaLumens : 0f;
+            ecs.Wrap<DirectionalLightRef>(_directional).Illuminance = _pointOn ? 0f : DaylightLux;
             changed = true;
         }
 
@@ -150,16 +149,14 @@ internal static class ShadowBiases
 
         if (biased)
         {
-            ecs.SetReflected(_point, PointLightType, ".shadow_depth_bias", Number(_pointDepth));
-            ecs.SetReflected(_point, PointLightType, ".shadow_normal_bias", Number(_pointNormal));
-            ecs.SetReflected(_directional, DirectionalLightType, ".shadow_depth_bias", Number(_directionalDepth));
-            ecs.SetReflected(_directional, DirectionalLightType, ".shadow_normal_bias", Number(_directionalNormal));
+            var point = ecs.Wrap<PointLightRef>(_point);
+            (point.ShadowDepthBias, point.ShadowNormalBias) = (_pointDepth, _pointNormal);
+            var directional = ecs.Wrap<DirectionalLightRef>(_directional);
+            (directional.ShadowDepthBias, directional.ShadowNormalBias) = (_directionalDepth, _directionalNormal);
         }
 
         if (changed || biased) Ui.SetText(_text, Describe());
     }
-
-    private static string Number(float value) => value.ToString(CultureInfo.InvariantCulture);
 
     private static string Describe() => string.Create(CultureInfo.InvariantCulture,
         $"""

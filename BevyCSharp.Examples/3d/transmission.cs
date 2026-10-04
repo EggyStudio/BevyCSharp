@@ -1,16 +1,16 @@
 using System.Globalization;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
+
+using Quality = Bevy.Reflected.ScreenSpaceTransmissionRef.QualityVariant;
 
 // Showcases light transmission in the physically based material: glass spheres that bend what is
 // behind them, a candle whose wax lets its flame's light through, and a sheet of paper lit from
 // behind, with keys for each material property and for the screen-space pass that draws them.
 internal static class Transmission
 {
-    private const string TransmissionType = "bevy_pbr::transmission::ScreenSpaceTransmission";
-    private const string PointLightType = "bevy_light::point_light::PointLight";
-    private const string Depth = "bevy_core_pipeline::prepass::DepthPrepass";
 
     // A material the keys change, and which of its properties they change.
     private sealed record Controlled(AssetHandle Material, MaterialSettings Settings, bool Color, bool Specular, bool Diffuse);
@@ -19,8 +19,8 @@ internal static class Transmission
     private static Entity _camera, _flame, _light, _display;
     private static float _diffuse, _specular, _thickness, _ior, _roughness, _reflectance;
     private static bool _autoCamera, _hdr, _depthPrepass, _taa;
-    private static int _steps;
-    private static string _quality = "Medium";
+    private static ulong _steps;
+    private static ScreenSpaceTransmissionRef.QualityVariant _quality;
     private static Random _random = new();
 
     public static void Build(App app)
@@ -106,7 +106,7 @@ internal static class Transmission
         var paper = Spawn(ecs, plane,
             new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f), DiffuseTransmission = 0.6f, Roughness = 0.8f, Reflectance = 1f, DoubleSided = true },
             new Transform(new Vec3(0f, 0.5f, -3f), Euler(MathF.PI / 2f, 0f, 0f), new Vec3(2f, 1f, 1f)), color: false, diffuse: true);
-        ecs.InsertReflected(paper, "bevy_light::TransmittedShadowReceiver");
+        ecs.Insert<TransmittedShadowReceiverRef>(paper);
 
         var mix = (white.R + (orange.R - white.R) * 0.2f, white.G + (orange.G - white.G) * 0.2f, white.B + (orange.B - white.B) * 0.2f);
         _light = Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Color = mix, Intensity = 4000f, Radius = 0.2f, Range = 5f, Shadows = true });
@@ -116,17 +116,15 @@ internal static class Transmission
         ApplyPost();
         // Bevy's Exposure { ev100: 6.0 }, as a lens: f/1 open for a 64th of a second at ISO 100.
         Render.SetLensExposure(_camera, aperture: 1f, shutter: 1f / 64f, sensitivity: 100f);
-        ecs.InsertReflected(_camera, "bevy_render::view::ColorGrading");
-        ecs.SetReflected(_camera, "bevy_render::view::ColorGrading", ".global.post_saturation", "1.2");
+        ecs.Insert<ColorGradingRef>(_camera).GlobalPostSaturation = 1.2f;
         Render.SetEnvironmentMap(
             _camera,
             AssetServer.Load(AssetKind.Image, "environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2"),
             AssetServer.Load(AssetKind.Image, "environment_maps/pisa_specular_rgb9e5_zstd.ktx2"),
             25f);
 
-        if (ecs.GetReflected(_camera, TransmissionType) is null) ecs.InsertReflected(_camera, TransmissionType);
-        _steps = int.Parse(ecs.GetReflected(_camera, TransmissionType, ".steps") ?? "1", CultureInfo.InvariantCulture);
-        _quality = ecs.GetVariant(_camera, TransmissionType, ".quality") ?? "Medium";
+        var transmission = ecs.Get<ScreenSpaceTransmissionRef>(_camera) ?? ecs.Insert<ScreenSpaceTransmissionRef>(_camera);
+        (_steps, _quality) = (transmission.Steps, transmission.Quality);
 
         _display = Ui.SpawnText(string.Empty, new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
     }
@@ -184,18 +182,18 @@ internal static class Transmission
         if (input.KeyPressed(Key.D))
         {
             _depthPrepass = !_depthPrepass;
-            if (_depthPrepass) ecs.InsertReflected(_camera, Depth);
-            else ecs.RemoveReflected(_camera, Depth);
+            if (_depthPrepass) ecs.Insert<DepthPrepassRef>(_camera);
+            else ecs.Wrap<DepthPrepassRef>(_camera).Remove();
         }
         if (input.KeyPressed(Key.T)) { _taa = !_taa; ApplyPost(); }
 
         if (input.KeyPressed(Key.O) && _steps > 0) SetSteps(ecs, _steps - 1);
         if (input.KeyPressed(Key.P) && _steps < 4) SetSteps(ecs, _steps + 1);
-        foreach (var (key, quality) in new[] { (Key.J, "Low"), (Key.K, "Medium"), (Key.L, "High"), (Key.Semicolon, "Ultra") })
+        foreach (var (key, quality) in new[] { (Key.J, Quality.Low), (Key.K, Quality.Medium), (Key.L, Quality.High), (Key.Semicolon, Quality.Ultra) })
         {
             if (!input.KeyPressed(key)) continue;
             _quality = quality;
-            ecs.SetVariant(_camera, TransmissionType, ".quality", quality);
+            ecs.Wrap<ScreenSpaceTransmissionRef>(_camera).Quality = quality;
         }
 
         // The camera turns slowly by itself until an arrow key takes it.
@@ -228,10 +226,10 @@ internal static class Transmission
             """));
     }
 
-    private static void SetSteps(EcsWorld ecs, int steps)
+    private static void SetSteps(EcsWorld ecs, ulong steps)
     {
         _steps = steps;
-        ecs.SetReflected(_camera, TransmissionType, ".steps", steps.ToString(CultureInfo.InvariantCulture));
+        ecs.Wrap<ScreenSpaceTransmissionRef>(_camera).Steps = steps;
     }
 
     // The flame and its light waver together.
@@ -242,7 +240,7 @@ internal static class Transmission
         var b = MathF.Cos(s * 5f) * 0.0125f + MathF.Cos(s * 3f) * 0.025f;
         var c = MathF.Cos(s * 7f) * 0.0125f + MathF.Cos(s * 2f) * 0.025f;
 
-        ctx.Ecs.SetReflected(_light, PointLightType, ".intensity", (4000f + 3000f * (a + b + c)).ToString(CultureInfo.InvariantCulture));
+        ctx.Ecs.Wrap<PointLightRef>(_light).Intensity = 4000f + 3000f * (a + b + c);
 
         var look = Transform.LookingAt(new Vec3(-1f, 1.23f, 0f), new Vec3(-1f - c, 1.7f - b, -a), Vec3.UnitX);
         ctx.Ecs.Set(_flame, new Transform(new Vec3(-1f - c, 1.23f, -a), Quat.FromRotationZ(MathF.PI / 2f) * look.Rotation, new Vec3(0.1f, 0.2f, 0.1f)));

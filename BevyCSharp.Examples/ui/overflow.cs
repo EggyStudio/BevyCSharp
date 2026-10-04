@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -7,7 +8,6 @@ namespace BevyCSharp.Examples.Interface;
 // pointer and red while pressed.
 internal static class OverflowExample
 {
-    private const string Outline = "bevy_ui::ui_node::Outline";
 
     private static readonly List<Entity> Logos = [];
     private static readonly Dictionary<Entity, UiInteraction> Last = [];
@@ -48,10 +48,8 @@ internal static class OverflowExample
 
                 var image = Ui.SpawnNode(new UiSettings { Interactive = true, MinWidth = Length.Px(100f), MinHeight = Length.Px(100f) });
                 Ui.SetImage(image, logo);
-                ecs.InsertReflected(image, Outline);
-                ecs.SetReflected(image, Outline, ".width", "{\"Px\":2.0}");
-                ecs.SetReflected(image, Outline, ".offset", "{\"Px\":2.0}");
-                ecs.SetReflectedColor(image, Outline, ".color", new Color(0f, 0f, 0f, 0f));
+                var outline = ecs.Insert<OutlineRef>(image);
+                (outline.Width, outline.Offset, outline.Color) = (new Val.Px(2f), new Val.Px(2f), new Color(0f, 0f, 0f, 0f));
                 ecs.SetParent(image, frame);
                 Logos.Add(image);
             }
@@ -71,7 +69,7 @@ internal static class OverflowExample
                     UiInteraction.Hovered => Color.White,
                     _ => new Color(0f, 0f, 0f, 0f),
                 };
-                ctx.Ecs.SetReflectedColor(image, Outline, ".color", color);
+                ctx.Ecs.Wrap<OutlineRef>(image).Color = color;
             }
         }, "overflow.UpdateOutlines");
     }

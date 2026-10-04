@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -75,7 +76,7 @@ internal static class AutoExposure
             }
 
             if (input.KeyPressed(Key.V) || input.KeyReleased(Key.V))
-                ctx.Ecs.SetVariant(_mask, "bevy_ui::ui_node::Node", ".display", input.KeyDown(Key.V) ? "Flex" : "None");
+                ctx.Ecs.Wrap<NodeRef>(_mask).Display = input.KeyDown(Key.V) ? NodeRef.DisplayVariant.Flex : NodeRef.DisplayVariant.None;
         }, "auto_exposure.ExampleControlSystem");
     }
 

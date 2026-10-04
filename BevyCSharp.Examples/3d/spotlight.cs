@@ -1,5 +1,5 @@
-using System.Globalization;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -8,7 +8,6 @@ namespace BevyCSharp.Examples.ThreeD;
 // Bevy's do.
 internal static class Spotlight
 {
-    private const string SpotLightType = "bevy_light::spot_light::SpotLight";
     private static Entity _camera;
 
     public static void Build(App app)
@@ -77,16 +76,15 @@ internal static class Spotlight
         // order is X, then Y, then Z, outermost first.
         var rotation = Quat.FromRotationX(-MathF.PI / 2f + MathF.Sin(elapsed * 0.67f * 3f) * 0.5f) * Quat.FromRotationY(MathF.Sin(elapsed * 3f) * 0.5f);
         var angle = (MathF.Sin(elapsed * 1.2f) + 1f) * (MathF.PI / 4f - 0.1f);
-        var inner = (angle * 0.8f).ToString(CultureInfo.InvariantCulture);
-        var outer = angle.ToString(CultureInfo.InvariantCulture);
+        var (inner, outer) = (angle * 0.8f, angle);
 
         foreach (var row in ctx.Ecs.Query<Sway>(markChanged: false))
         {
             var transform = ctx.Ecs.GetOrDefault<Transform>(row.Entity);
             transform.Rotation = rotation;
             ctx.Ecs.Set(row.Entity, transform);
-            ctx.Ecs.SetReflected(row.Entity, SpotLightType, ".inner_angle", inner);
-            ctx.Ecs.SetReflected(row.Entity, SpotLightType, ".outer_angle", outer);
+            var spot = ctx.Ecs.Wrap<SpotLightRef>(row.Entity);
+            (spot.InnerAngle, spot.OuterAngle) = (inner, outer);
         }
 
         var delta = ctx.Time.Delta;

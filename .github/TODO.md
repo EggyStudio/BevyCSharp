@@ -116,9 +116,10 @@ description (`ctx.Ecs.Get<PointLightRef>`), and has a schema built from Bevy's o
 the inspector and `./bcs entity.get` and `entity.set` cover cameras, lights and the rest with no
 code per type. What [COMPONENTS.md](COMPONENTS.md) has left:
 
-- **A variant's fields have no typed property.** The generated wrappers (`Bevy.Reflected`) type
-  every field that is not shown as JSON, but a field inside an enum variant, such as a color's red,
-  is there only while that variant is held, so it stays on a string path checked when it runs.
+- **An enum inside a variant has no typed property.** The generated wrappers (`Bevy.Reflected`)
+  make an enum whose variants hold values a record a variant, but one whose variant holds another
+  enum, as an orthographic projection holds its scaling mode, or a list, as a sprite's slicer does,
+  keeps its variant names alone, and the value stays on a string path checked when it runs.
 - **Bytes in place need a mirror.** Five components (`Transform`, `GlobalTransform` and the three
   visibility types) are mirrored by hand, for systems that read them every frame. Generating
   mirrors and their layout checks is tier 3.

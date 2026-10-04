@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.States;
 
@@ -8,8 +9,6 @@ internal static class StatesExample
 {
     internal enum AppState { Menu, InGame }
 
-    private const string Background = "bevy_ui::ui_node::BackgroundColor";
-    private const string SpriteType = "bevy_sprite::sprite::Sprite";
     private const float Speed = 100f;
 
     private static readonly Color Normal = Color.FromSrgb(0.15f, 0.15f, 0.15f);
@@ -72,7 +71,7 @@ internal static class StatesExample
         _last = interaction;
 
         var color = interaction switch { UiInteraction.Pressed => Pressed, UiInteraction.Hovered => Hovered, _ => Normal };
-        ctx.Ecs.SetReflectedColor(_button, Background, ".0", color);
+        ctx.Ecs.Wrap<BackgroundColorRef>(_button).Value = color;
         if (interaction == UiInteraction.Pressed) ctx.SetState(AppState.InGame);
     }
 
@@ -93,7 +92,7 @@ internal static class StatesExample
     // Blue past one, rising and falling slowly, the rest of the color kept.
     internal static void ChangeColor(BehaviorContext ctx)
     {
-        if (ctx.Ecs.GetReflectedColor(_logo, SpriteType, ".color") is not { } color) return;
-        ctx.Ecs.SetReflectedColor(_logo, SpriteType, ".color", color with { B = MathF.Sin(ctx.Time.Elapsed * 0.5f) + 2f });
+        if (ctx.Ecs.Get<SpriteRef>(_logo) is not { } sprite) return;
+        sprite.Color = sprite.Color with { B = MathF.Sin(ctx.Time.Elapsed * 0.5f) + 2f };
     }
 }

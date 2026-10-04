@@ -168,8 +168,24 @@ internal static class ReflectedValue
     // -- What the generated wrappers call
 
     /// <summary>Reads a field a wrapper names, throwing when the component is absent.</summary>
+    /// <remarks>
+    /// A number or a flag is read as a number, by the bridge's typed calls, and only the kinds
+    /// with no number of their own, vectors, strings and entities, go through JSON.
+    /// </remarks>
     internal static T Get<T>(EcsWorld world, Entity entity, string type, string path, FieldKind kind)
     {
+        switch (kind)
+        {
+            case FieldKind.Float or FieldKind.Double:
+                var number = world.GetReflectedFloat(entity, type, path) ?? throw Absent(type, entity);
+                return (T)Convert.ChangeType(number, typeof(T), System.Globalization.CultureInfo.InvariantCulture);
+            case FieldKind.Int:
+                var whole = world.GetReflectedInteger(entity, type, path) ?? throw Absent(type, entity);
+                return (T)Convert.ChangeType(whole, typeof(T), System.Globalization.CultureInfo.InvariantCulture);
+            case FieldKind.Bool:
+                return (T)(object)((world.GetReflectedInteger(entity, type, path) ?? throw Absent(type, entity)) != 0);
+        }
+
         var json = world.GetReflected(entity, type, path) ?? throw Absent(type, entity);
         return Decode(json, kind) switch
         {
@@ -187,6 +203,20 @@ internal static class ReflectedValue
     internal static void Set(
         EcsWorld world, Entity entity, string type, string path, FieldKind kind, object value)
     {
+        // A number or a flag crosses as a number, as Get reads it.
+        switch (kind)
+        {
+            case FieldKind.Float or FieldKind.Double when ComponentSchemas.TryCoerce<double>(value, out var number):
+                world.SetReflectedFloat(entity, type, path, number);
+                return;
+            case FieldKind.Int when ComponentSchemas.TryCoerce<long>(value, out var whole):
+                world.SetReflectedInteger(entity, type, path, whole);
+                return;
+            case FieldKind.Bool when value is bool on:
+                world.SetReflectedInteger(entity, type, path, on ? 1 : 0);
+                return;
+        }
+
         var json = Encode(kind, value) ?? throw new ArgumentException(
             $"{value} cannot be written to '{path}' of {type}.", nameof(value));
         world.SetReflected(entity, type, path, json);

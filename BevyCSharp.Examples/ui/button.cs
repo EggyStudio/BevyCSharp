@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -7,8 +8,6 @@ namespace BevyCSharp.Examples.Interface;
 // is written in part.
 internal static class ButtonExample
 {
-    private const string Background = "bevy_ui::ui_node::BackgroundColor";
-    private const string Border = "bevy_ui::ui_node::BorderColor";
 
     private static readonly Color Normal = Color.FromSrgb(0.15f, 0.15f, 0.15f);
     private static readonly Color Hovered = Color.FromSrgb(0.25f, 0.25f, 0.25f);
@@ -42,7 +41,7 @@ internal static class ButtonExample
 
             var light = Color.FromSrgb(0.9f, 0.9f, 0.9f);
             _label = Ui.SpawnText("Button", new UiSettings { Color = (light.R, light.G, light.B, 1f) }, new UiTextSettings { Font = AssetServer.Load(AssetKind.Font, "fonts/FiraSans-Bold.ttf"), FontSize = 33f });
-            ecs.InsertReflected(_label, "bevy_ui::widget::text::TextShadow");
+            ecs.Insert<TextShadowRef>(_label);
             ecs.SetParent(_label, _button);
         }, "button.Setup");
 
@@ -60,8 +59,9 @@ internal static class ButtonExample
                 _ => ("Button", Normal, Color.Black),
             };
             Ui.SetText(_label, text);
-            ctx.Ecs.SetReflectedColor(_button, Background, ".0", color);
-            foreach (var side in new[] { ".top", ".right", ".bottom", ".left" }) ctx.Ecs.SetReflectedColor(_button, Border, side, border);
+            ctx.Ecs.Wrap<BackgroundColorRef>(_button).Value = color;
+            var edge = ctx.Ecs.Wrap<BorderColorRef>(_button);
+            edge.Top = edge.Right = edge.Bottom = edge.Left = border;
         }, "button.ButtonSystem");
     }
 }

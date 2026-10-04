@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Ecs;
 
@@ -7,7 +8,6 @@ namespace BevyCSharp.Examples.Ecs;
 // component keeps the system's place in a list.
 internal static class OneShotSystems
 {
-    private const string TextSpan = "bevy_text::text::TextSpan";
 
     internal struct Callback
     {
@@ -70,13 +70,13 @@ internal static class OneShotSystems
 
     private static void SystemA(BehaviorContext ctx)
     {
-        ctx.Ecs.SetReflected(_last, TextSpan, ".0", "\"A\"");
+        ctx.Ecs.Wrap<TextSpanRef>(_last).Value = "A";
         Console.WriteLine("A: One shot system registered with Commands was triggered");
     }
 
     private static void SystemB(BehaviorContext ctx)
     {
-        ctx.Ecs.SetReflected(_last, TextSpan, ".0", "\"B\"");
+        ctx.Ecs.Wrap<TextSpanRef>(_last).Value = "B";
         Console.WriteLine("B: One shot system registered with World was triggered");
     }
 }

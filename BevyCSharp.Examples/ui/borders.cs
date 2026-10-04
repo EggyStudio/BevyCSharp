@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -6,9 +7,6 @@ namespace BevyCSharp.Examples.Interface;
 // outline around each, drawn square and then rounded where two bordered sides meet.
 internal static class Borders
 {
-    private const string BorderColor = "bevy_ui::ui_node::BorderColor";
-    private const string Outline = "bevy_ui::ui_node::Outline";
-    private const string Node = "bevy_ui::ui_node::Node";
 
     private static readonly string[] Labels =
     [
@@ -31,7 +29,7 @@ internal static class Borders
         Render2d.SpawnCamera2d();
 
         var root = Ui.SpawnNode(new UiSettings { Margin = Sides.All(Length.Px(25f)), Direction = UiDirection.Column, AlignSelf = UiAlignSelf.Stretch, Color = Scene.Srgb(0.25f, 0.25f, 0.25f) });
-        ecs.SetVariant(root, Node, ".justify_self", "Stretch");
+        ecs.Wrap<NodeRef>(root).JustifySelf = NodeRef.JustifySelfVariant.Stretch;
 
         Heading(ecs, root, "Borders");
         Examples(ecs, root, rounded: false);
@@ -64,14 +62,13 @@ internal static class Borders
                 Corners = new Corners(Corner(l, t), Corner(r, t), Corner(r, b), Corner(l, b)),
                 Color = Scene.Srgb8(128, 0, 0),
             });
-            ecs.SetReflectedColor(box, BorderColor, ".top", new Color(1f, 0f, 0f));
-            ecs.SetReflectedColor(box, BorderColor, ".bottom", new Color(1f, 1f, 0f));
-            ecs.SetReflectedColor(box, BorderColor, ".left", Color.FromSrgb(0f, 128f / 255f, 0f));
-            ecs.SetReflectedColor(box, BorderColor, ".right", new Color(0f, 0f, 1f));
-            ecs.InsertReflected(box, Outline);
-            ecs.SetReflected(box, Outline, ".width", "{\"Px\":6.0}");
-            ecs.SetReflected(box, Outline, ".offset", "{\"Px\":6.0}");
-            ecs.SetReflectedColor(box, Outline, ".color", Color.White);
+            var border = ecs.Wrap<BorderColorRef>(box);
+            border.Top = new Color(1f, 0f, 0f);
+            border.Bottom = new Color(1f, 1f, 0f);
+            border.Left = Color.FromSrgb(0f, 128f / 255f, 0f);
+            border.Right = new Color(0f, 0f, 1f);
+            var outline = ecs.Insert<OutlineRef>(box);
+            (outline.Width, outline.Offset, outline.Color) = (new Val.Px(6f), new Val.Px(6f), Color.White);
             ecs.SetParent(box, column);
 
             var dot = Ui.SpawnNode(new UiSettings { Width = Length.Px(10f), Height = Length.Px(10f), Corners = rounded ? Corners.All(round) : Corners.None, Color = (1f, 1f, 0f, 1f) });

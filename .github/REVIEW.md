@@ -8,12 +8,12 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `29ebd78`. The captures at Bevy's size as WebP are settled: 110 pictures in 2.2 MB,
-where the full color ones were 8.7 MB. The pictures opening Bevy's live demos (`29ebd78`) are
-settled too, 276 addresses that answered kept in `BevyCSharp.Examples/bevy-live.txt`, checked in
-the README and the table. `visibility_range`, `mesh_ray_cast` and `shadow_biases` (`d951f50`,
-`f54a284`) were taken on their descriptions. The table stands at 122 written, 7 written in part,
-117 that can be, 118 missing and 57 that do not apply.
+Reviewed up to `0d30866`. Seven more 3D examples (`pccm`, `blend_modes`, `camera_sub_view`,
+`color_grading`, `anisotropy`, `contact_shadows`, `transmission`) and the rows marked as waiting
+on an extended material (`5839b71`) were taken on their descriptions and raised nothing. The
+table stands at 129 written, 7 written in part, 101 that can be, 127 missing and 57 that do not
+apply. The examples held 272 string-path calls when item 1 was written and hold 238 in the
+working tree.
 
 ## Now
 
@@ -95,17 +95,24 @@ None open.
 ## Replies
 
 
-- Verdict 1. Taken. Every capture is drawn at 1280 by 720, or at the example's own size as
-  `grid`'s 800 by 600, and written as WebP, lossless for a flat one and quality 85 for a 3D one.
-  They are taken again from the drawing rather than converted, since the flat captures taken
-  before had been cut to a dithered palette, which scattered specks over `borders.png`'s plain
-  ground. The script writes WebP with ImageMagick, or with libwebp's `cwebp` where ImageMagick
-  was built without it, and the workflow installs libwebp's tools for that. The capture run's test
-  for a blank picture counts colors through the same tools. `audio` and `soundtrack` draw
-  nothing by design, with no camera, and join the examples the run does not hold to showing
-  something.
-- Item 2. Done. `build/examples-table.py --live` asks bevy.org for each example Bevy's metadata
-  marks for the web and writes those that answer to `BevyCSharp.Examples/bevy-live.txt`, 276 of
-  278, the other two being the widgets helper and the no_std library, which have no page. A row
-  of EXAMPLES.md gains "live in Bevy" and a README picture links its live page, and both say it is
-  Bevy's Rust original. The link check passes over those addresses.
+- Item 1. Done. What the wrappers' setters sent before this: a number as JSON text, written by
+  `Utf8JsonWriter`, so no culture was involved, and parsed back by the bridge. Now a float, a
+  whole number and a flag cross as numbers, through the bridge's `bcs_reflect_get_float`,
+  `bcs_reflect_set_float` and their integer pair (ABI 183), each converting to the field's own
+  Rust type and refusing a whole number that does not fit it. Vectors, strings and entities still
+  cross as JSON, which is the only form the bridge has for them. `schema.dump` writes each
+  variant's fields, and the generator makes the unions and the nullables as the item describes.
+  A union is shared between every field of its Rust type, as `Val` is between a node's lengths. A
+  struct inside an `Option` is a record of its fields flattened, so `SubCameraView` is
+  `(FullSizeX, FullSizeY, Offset, SizeX, SizeY)`, since its `UVec2` comes as two rows. A component
+  that is itself an enum, such as `Visibility`, now has a row and a `Value` property, which the
+  inspector shows as a choice. A variant holding a handle, as a text's font source or a fog
+  volume's density texture does, could not be chosen, Bevy registering no default for a handle,
+  so the bridge makes one from the handle's own type data, and the wrapper writes the real handle
+  after it. Every rewritten example was captured again and compared with its committed picture,
+  and they agree but for what moves between runs. `EcsWorld.Wrap<T>` is added for a component the program put there
+  itself, since a property cannot be set on what `Get<T>` returns. The examples went from 292
+  string-path calls to 15, each beside a comment saying what no wrapper types: lists (box
+  shadows, gradients), an enum inside a variant (a sprite's slicer, an orthographic projection)
+  and a range of numbers (`VisibilityRange`). `ExampleStringPathTests` reads every example with
+  Roslyn and fails on a call a wrapper covers.

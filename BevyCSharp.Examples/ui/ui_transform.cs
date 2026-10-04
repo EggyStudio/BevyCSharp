@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -6,8 +7,6 @@ namespace BevyCSharp.Examples.Interface;
 // turn and grow or shrink and the arrow keys slide, its own buttons turned to face its edges.
 internal static class UiTransformExample
 {
-    private const string Transform = "bevy_ui::ui_transform::UiTransform";
-    private const string Background = "bevy_ui::ui_node::BackgroundColor";
 
     private static readonly Color Normal = Color.White;
     private static readonly Color Hovered = Color.FromSrgb(1f, 1f, 0f);
@@ -36,7 +35,7 @@ internal static class UiTransformExample
             Controls(ecs, row, ("<--", -MathF.PI / 8f, 0f), ("-", 0f, -0.25f));
 
             _target = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, Justify = UiJustify.SpaceBetween, Align = UiAlign.Center, Width = Length.Px(300f), Height = Length.Px(300f), Color = Scene.Srgb8(64, 64, 64) });
-            ecs.InsertReflected(_target, Transform);
+            ecs.Insert<UiTransformRef>(_target);
             ecs.SetParent(_target, row);
 
             Edge(ecs, _target, "Top", 0f);
@@ -62,7 +61,7 @@ internal static class UiTransformExample
                 if (Last.TryGetValue(button, out var last) && last == interaction) continue;
                 Last[button] = interaction;
 
-                ecs.SetReflectedColor(button, Background, ".0", interaction switch { UiInteraction.Pressed => Pressed, UiInteraction.Hovered => Hovered, _ => Normal });
+                ecs.Wrap<BackgroundColorRef>(button).Value = interaction switch { UiInteraction.Pressed => Pressed, UiInteraction.Hovered => Hovered, _ => Normal };
                 if (interaction != UiInteraction.Pressed) continue;
                 _angle += turn;
                 _scale = Math.Clamp(_scale + scale, 0.25f, 3f);
@@ -81,9 +80,9 @@ internal static class UiTransformExample
 
             if (!changed) return;
             Turn(ecs, _target, _angle);
-            ecs.SetReflected(_target, Transform, ".scale", FormattableString.Invariant($"[{_scale},{_scale}]"));
-            ecs.SetReflected(_target, Transform, ".translation.x", FormattableString.Invariant($"{{\"Px\":{_x}}}"));
-            ecs.SetReflected(_target, Transform, ".translation.y", FormattableString.Invariant($"{{\"Px\":{_y}}}"));
+            var target = ecs.Wrap<UiTransformRef>(_target);
+            target.Scale = new Vec2(_scale, _scale);
+            (target.TranslationX, target.TranslationY) = (new Val.Px(_x), new Val.Px(_y));
         }, "ui_transform.ButtonsAndTranslation");
     }
 
@@ -91,7 +90,7 @@ internal static class UiTransformExample
     private static void Controls(EcsWorld ecs, Entity row, params (string Label, float Turn, float Scale)[] buttons)
     {
         var column = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, Justify = UiJustify.Center, RowGap = Length.Px(10f), ColumnGap = Length.Px(10f), Padding = Sides.All(Length.Px(10f)), Color = (0f, 0f, 0f, 1f) });
-        ecs.InsertReflected(column, "bevy_ui::ui_node::GlobalZIndex", "1");
+        ecs.Insert<GlobalZIndexRef>(column).Value = 1;
         ecs.SetParent(column, row);
         foreach (var (label, turn, scale) in buttons)
         {
@@ -107,14 +106,14 @@ internal static class UiTransformExample
     {
         var button = Ui.SpawnNode(new UiSettings { Interactive = true, Width = Length.Px(80f), Height = Length.Px(80f), Align = UiAlign.Center, Justify = UiJustify.Center, Color = (1f, 1f, 1f, 1f) });
         ecs.SetParent(Ui.SpawnText(label, new UiSettings { Color = (0f, 0f, 0f, 1f) }), button);
-        ecs.InsertReflected(button, Transform);
+        ecs.Insert<UiTransformRef>(button);
         Turn(ecs, button, angle);
         ecs.SetParent(button, parent);
     }
 
     private static void Turn(EcsWorld ecs, Entity node, float angle)
     {
-        ecs.SetReflected(node, Transform, ".rotation.cos", FormattableString.Invariant($"{MathF.Cos(angle)}"));
-        ecs.SetReflected(node, Transform, ".rotation.sin", FormattableString.Invariant($"{MathF.Sin(angle)}"));
+        var transform = ecs.Wrap<UiTransformRef>(node);
+        (transform.RotationCos, transform.RotationSin) = (MathF.Cos(angle), MathF.Sin(angle));
     }
 }

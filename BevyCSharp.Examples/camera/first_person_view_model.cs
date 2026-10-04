@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Cameras;
 
@@ -35,7 +36,7 @@ internal static class FirstPersonViewModel
 
             var arm = ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 0.1f, 0.1f, 0.5f), Scene.Material(Scene.Srgb8(153, 246, 228)), Transform.At(0.2f, -0.1f, -0.25f));
             Render.SetLayers(ecs, arm, ViewModelLayer);
-            ecs.InsertReflected(arm, "bevy_light::NotShadowCaster");
+            ecs.Insert<NotShadowCasterRef>(arm);
             ecs.SetParent(arm, _player);
 
             var white = Scene.Material((1f, 1f, 1f, 1f));

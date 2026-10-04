@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 182;
+    internal const int ExpectedAbiVersion = 183;
 
     static Native() => NativeLoader.Initialize();
 
@@ -1118,6 +1118,26 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_reflect_set_color(
         ulong entity, string typePath, string path, float red, float green, float blue, float alpha);
+
+    /// <summary>Reads a float field, of either width, as a number.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_get_float(ulong entity, string typePath, string path, double* value);
+
+    /// <summary>Writes a float field at the width it holds.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_set_float(ulong entity, string typePath, string path, double value);
+
+    /// <summary>Reads a whole number or a flag field, of any width, as a number.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_get_integer(ulong entity, string typePath, string path, long* value);
+
+    /// <summary>Writes a whole number or a flag field at the type it holds.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_set_integer(ulong entity, string typePath, string path, long value);
 
     /// <summary>Writes why the last reflected call on this thread failed.</summary>
     [LibraryImport(Library)]

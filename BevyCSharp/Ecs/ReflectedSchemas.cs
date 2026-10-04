@@ -128,8 +128,25 @@ internal static class ReflectedSchemas
             int Depth);
 
         /// <summary>Adds a row for each field of the type at <paramref name="type"/>.</summary>
-        public void Members(string type) =>
-            Members(type, new At(string.Empty, string.Empty, null, [], [], null, 0));
+        /// <remarks>
+        /// A component that is itself an enum, as <c>Visibility</c> is, has no fields, so it is one
+        /// row choosing its variant, named <c>value</c> and read at the component's root, with its
+        /// variants' rows after it as an enum field's are.
+        /// </remarks>
+        public void Members(string type)
+        {
+            var root = new At(string.Empty, string.Empty, null, [], [], null, 0);
+            if (types.TryGetProperty(type, out var described)
+                && described.ValueKind == JsonValueKind.Object
+                && described.GetProperty("registered").GetBoolean()
+                && described.GetProperty("kind").GetString() == "enum")
+            {
+                Variants(type, described, "Value", root with { Name = "value" });
+                return;
+            }
+
+            Members(type, root);
+        }
 
         private void Members(string type, At at)
         {

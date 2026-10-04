@@ -1,13 +1,14 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
+
+using Linebreak = Bevy.Reflected.TextLayoutRef.LinebreakVariant;
 
 // Demonstrates text wrapping, the same five lines in columns too narrow for them, each row wrapping
 // a different way and each column spreading its lines a different way.
 internal static class TextWrapDebug
 {
-    private const string TextLayout = "bevy_text::text::TextLayout";
-    private const string Background = "bevy_ui::ui_node::BackgroundColor";
 
     public static void Build(App app) => app.Startup(ctx =>
     {
@@ -16,7 +17,7 @@ internal static class TextWrapDebug
         var style = new UiTextSettings { Font = AssetServer.Load(AssetKind.Font, "fonts/FiraSans-Bold.ttf"), FontSize = 12f };
 
         var root = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Direction = UiDirection.Column, Color = (0f, 0f, 0f, 1f) });
-        foreach (var linebreak in new[] { "AnyCharacter", "WordBoundary", "WordOrCharacter", "NoWrap" })
+        foreach (var linebreak in new[] { Linebreak.AnyCharacter, Linebreak.WordBoundary, Linebreak.WordOrCharacter, Linebreak.NoWrap })
         {
             var row = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Row, Justify = UiJustify.SpaceAround, Align = UiAlign.Center, Width = Length.Percent(100f), Height = Length.Percent(50f) });
             ecs.SetParent(row, root);
@@ -47,9 +48,8 @@ internal static class TextWrapDebug
                 for (var j = 0; j < messages.Length; j++)
                 {
                     var text = Ui.SpawnText(messages[j], new UiSettings(), style);
-                    ecs.SetVariant(text, TextLayout, ".linebreak", linebreak);
-                    ecs.InsertReflected(text, Background);
-                    ecs.SetReflectedColor(text, Background, ".0", Color.FromSrgb(0.8f - j * 0.2f, 0f, 0f));
+                    ecs.Wrap<TextLayoutRef>(text).Linebreak = linebreak;
+                    ecs.Insert<BackgroundColorRef>(text).Value = Color.FromSrgb(0.8f - j * 0.2f, 0f, 0f);
                     ecs.SetParent(text, column);
                 }
             }

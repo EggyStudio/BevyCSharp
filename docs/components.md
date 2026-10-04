@@ -59,51 +59,70 @@ and `Atmosphere`. Any other component Bevy reflects resolves to an id by its ful
 ## Every other Bevy component
 
 A component with no mirror is reached through Bevy's reflection, which describes Bevy's types at
-runtime. It is named by its full Rust type path, a field by Bevy's reflect path, and a value is
-JSON:
-
-```csharp
-const string Light = "bevy_light::point_light::PointLight";
-
-var lamp = ctx.Ecs.Spawn();
-ctx.Ecs.InsertReflected(lamp, Light);                        // at Bevy's default
-ctx.Ecs.SetReflected(lamp, Light, ".intensity", "5000");
-ctx.Ecs.SetReflected(lamp, Light, ".shadow_maps_enabled", "true");
-
-string? range = ctx.Ecs.GetReflected(lamp, Light, ".range");  // "20.0", or null if absent
-ctx.Ecs.SetReflectedColor(lamp, Light, ".color", Color.FromHex("#ffcc88"));
-ctx.Ecs.RemoveReflected(lamp, Light);
-```
-
-An enum is set by naming its variant (`SetVariant`), and a color, which Bevy can hold in any of ten
-spaces, is read and written as a linear `Color` whatever space it is in (`GetReflectedColor`,
-`SetReflectedColor`), with Bevy doing the conversion.
-
-A handle inside a component, such as the image a sprite draws, has no JSON form and crosses as an
-`AssetHandle` instead, through `GetReflectedAsset` and `SetReflectedAsset`. Reading one the program
-already holds returns that same handle.
-
-A range of numbers, such as the margins of a `VisibilityRange`, is JSON of its two ends,
-`{"start":3,"end":4}`, and is written whole, since a path stops at the range rather than going into
-one of its ends.
-
-The same components have typed wrappers in `Bevy.Reflected`, generated from a description of
+runtime, and each one has a typed wrapper in `Bevy.Reflected`, generated from a description of
 Bevy's components checked in beside the library, with a property per field:
 
 ```csharp
 using Bevy.Reflected;
 
-var light = ctx.Ecs.Insert<PointLightRef>(lamp);
+var light = ctx.Ecs.Insert<PointLightRef>(lamp);          // at Bevy's default
 light.Intensity = 5000f;
 light.ShadowMapsEnabled = true;
+light.Color = Color.FromHex("#ffcc88");
 
-if (ctx.Ecs.Get<PointLightRef>(lamp) is { } found)
+if (ctx.Ecs.Get<PointLightRef>(lamp) is { } found)        // or null when the lamp has none
     Console.WriteLine($"range {found.Range}");
+
+ctx.Ecs.Wrap<TextColorRef>(label).Value = Color.White;    // one the program put there itself
 ```
 
-A wrapper reads and writes through the same reflection, so it costs what a string path costs. What
-it adds is the compiler, because a field Bevy renames stops compiling once the description is
-regenerated after an upgrade, rather than failing on the day the line runs.
+A number crosses as a number and a color as a linear `Color` whatever space Bevy holds it in, and a
+handle inside a component, such as the image a sprite draws, is an `AssetHandle`. An enum whose
+variants hold nothing is a C# enum named after its property, `NodeRef.DisplayVariant` for a node's
+`Display`. One whose variants hold values is a record, with a record for each variant, so writing
+one sets the variant and its values together and reading one is a `switch` on its type:
+
+```csharp
+var fog = ctx.Ecs.Insert<DistanceFogRef>(camera);
+fog.Falloff = new FogFalloff.Linear(5f, 20f);
+
+var node = ctx.Ecs.Wrap<NodeRef>(panel);
+node.Left = new Val.Px(12f);
+node.Width = new Val.Percent(50f);
+
+var described = fog.Falloff switch
+{
+    FogFalloff.Linear linear => $"from {linear.Start} to {linear.End}",
+    FogFalloff.Exponential exponential => $"density {exponential.Density}",
+    _ => "other",
+};
+```
+
+Rust's `Option` is a nullable, `float?` for a text box's width or a record such as `SubCameraView`
+for a camera's sub view, and null writes `None`. A component that is itself an enum, such as
+`Visibility`, has the one property `Value`.
+
+What a wrapper adds over a string path is the compiler, because a field Bevy renames stops
+compiling once the description is regenerated after an upgrade, rather than failing on the day the
+line runs. It goes through the same reflection, so it costs what a string path costs.
+
+Under the wrappers is the string API they are written over, which reaches what no wrapper types: a
+list, such as a node's box shadows, or an enum inside a variant, such as an orthographic
+projection's scaling mode. A component is named by its full Rust type path, a field by Bevy's
+reflect path, and a value is JSON:
+
+```csharp
+const string Shadow = "bevy_ui::ui_node::BoxShadow";
+
+ctx.Ecs.InsertReflected(panel, Shadow, "[]");
+ctx.Ecs.SetReflected(panel, Shadow, string.Empty, shadows.ToJsonString());
+string? json = ctx.Ecs.GetReflected(panel, Shadow);    // or null if absent
+```
+
+`SetVariant`, `SetReflectedColor` and `SetReflectedAsset` are the same calls for a variant, a color
+and a handle. A range of numbers, such as the margins of a `VisibilityRange`, is JSON of its two
+ends, `{"start":3,"end":4}`, and is written whole, since a path stops at the range rather than going
+into one of its ends.
 
 That reaches nearly everything Bevy has (cameras, lights, projections, the hierarchy), and a
 component a later Bevy or a plugin adds is reachable the day it exists, with nothing written on

@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -6,9 +7,6 @@ namespace BevyCSharp.Examples.ThreeD;
 // on one of them, the board lit by a lightmap baked into an HDR image.
 internal static class DepthOfField
 {
-    private const string Lightmap = "bevy_pbr::lightmap::Lightmap";
-    private const string MeshName = "bevy_gltf::assets::GltfMeshName";
-    private const string Sun = "bevy_light::directional_light::DirectionalLight";
 
     // How far a held key moves the focus and the aperture each frame.
     private const float FocalDistanceSpeed = 0.05f;
@@ -88,12 +86,12 @@ internal static class DepthOfField
         {
             if (Tweaked.Contains(entity)) continue;
 
-            if (ecs.GetReflected(entity, Sun) is not null)
+            if (ecs.Get<DirectionalLightRef>(entity) is { } sun)
             {
-                ecs.SetReflected(entity, Sun, "shadow_maps_enabled", "true");
+                sun.ShadowMapsEnabled = true;
                 Tweaked.Add(entity);
             }
-            else if (ecs.GetReflected(entity, MeshName) == "\"CircuitBoard\"")
+            else if (ecs.Get<GltfMeshNameRef>(entity)?.Value == "CircuitBoard")
             {
                 var material = Render.MaterialOf(ecs, entity);
                 if (Render.TryReadMaterial(material, out var settings))
@@ -102,8 +100,7 @@ internal static class DepthOfField
                     Render.WriteMaterial(material, settings);
                 }
 
-                ecs.InsertReflected(entity, Lightmap);
-                ecs.SetReflectedAsset(entity, Lightmap, "image", AssetServer.Load(AssetKind.Image, "models/DepthOfFieldExample/CircuitBoardLightmap.hdr"));
+                ecs.Insert<LightmapRef>(entity).Image = AssetServer.Load(AssetKind.Image, "models/DepthOfFieldExample/CircuitBoardLightmap.hdr");
                 Tweaked.Add(entity);
             }
         }

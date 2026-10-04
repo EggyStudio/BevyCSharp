@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -8,9 +9,10 @@ namespace BevyCSharp.Examples.Interface;
 // gradient through the color spaces it can be blended in.
 internal static class Gradients
 {
+    // A gradient is a list of gradients, each holding a list of stops, which a wrapper does not
+    // type, so both are written as JSON.
     private const string Background = "bevy_ui::gradients::BackgroundGradient";
     private const string Border = "bevy_ui::gradients::BorderGradient";
-    private const string BorderColor = "bevy_ui::ui_node::BorderColor";
 
     private static readonly string[] Spaces = ["Oklaba", "Oklcha", "OklchaLong", "Srgba", "LinearRgba", "Hsla", "HslaLong", "Hsva", "HsvaLong"];
 
@@ -87,7 +89,7 @@ internal static class Gradients
                 Color = (0f, 0f, 0f, 1f),
             });
             var text = Ui.SpawnText("next color space", new UiSettings { Color = Scene.Srgb(0.9f, 0.9f, 0.9f) });
-            ecs.InsertReflected(text, "bevy_ui::widget::text::TextShadow");
+            ecs.Insert<TextShadowRef>(text);
             ecs.SetParent(text, _button);
             ecs.SetParent(_button, footer);
         }, "gradients.Setup");
@@ -102,7 +104,8 @@ internal static class Gradients
             if (interaction != _last)
             {
                 var color = interaction == UiInteraction.None ? Color.White : new Color(1f, 0f, 0f);
-                foreach (var side in new[] { ".top", ".right", ".bottom", ".left" }) ecs.SetReflectedColor(_button, BorderColor, side, color);
+                var edge = ecs.Wrap<BorderColorRef>(_button);
+                edge.Top = edge.Right = edge.Bottom = edge.Left = color;
                 if (_last == UiInteraction.Pressed && interaction == UiInteraction.Hovered)
                 {
                     _space = (_space + 1) % Spaces.Length;

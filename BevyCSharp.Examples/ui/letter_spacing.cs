@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -7,9 +8,6 @@ namespace BevyCSharp.Examples.Interface;
 // not reachable here, so this is written in part.
 internal static class LetterSpacingExample
 {
-    private const string Node = "bevy_ui::ui_node::Node";
-    private const string TextFont = "bevy_text::text::TextFont";
-    private const string Spacing = "bevy_text::text::LetterSpacing";
 
     // Bevy's RemSize, which this example never changes from its default of twenty pixels.
     private const float RemSize = 20f;
@@ -31,15 +29,14 @@ internal static class LetterSpacingExample
 
             var root = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f) });
             var column = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Align = UiAlign.Center, Direction = UiDirection.Column });
-            Set(ecs, column, ".padding.left", "Vw", 5f);
-            Set(ecs, column, ".padding.right", "Vw", 5f);
-            Set(ecs, column, ".padding.top", "Vh", 10f);
-            Set(ecs, column, ".padding.bottom", "Vh", 10f);
-            Set(ecs, column, ".row_gap", "Vh", 6f);
+            var layout = ecs.Wrap<NodeRef>(column);
+            (layout.PaddingLeft, layout.PaddingRight) = (new Val.Vw(5f), new Val.Vw(5f));
+            (layout.PaddingTop, layout.PaddingBottom) = (new Val.Vh(10f), new Val.Vh(10f));
+            layout.RowGap = new Val.Vh(6f);
             ecs.SetParent(column, root);
 
             var hello = Text(ecs, "HELLO", font, 6f);
-            Set(ecs, hello, ".padding.bottom", "Vh", 2f);
+            ecs.Wrap<NodeRef>(hello).PaddingBottom = new Val.Vh(2f);
             ecs.SetParent(hello, column);
 
             foreach (var justify in new[] { TextJustify.Left, TextJustify.Center, TextJustify.Right })
@@ -50,18 +47,18 @@ internal static class LetterSpacingExample
 
                 var text = Ui.SpawnText("letter spacing", new UiSettings { Width = Length.Percent(100f) }, new UiTextSettings { Font = font, Justify = justify });
                 FontSize(ecs, text, 6f);
-                ecs.InsertReflected(text, Spacing, "{\"Px\":0.0}");
+                ecs.Insert<LetterSpacingRef>(text).Value = new LetterSpacing.Px(0f);
                 ecs.SetParent(text, group);
                 Animated.Add(text);
             }
 
             _label = Text(ecs, "LetterSpacing::Px(0.0)", font, 3f);
             ecs.SetParent(_label, root);
-            Corner(ecs, _label, ".left", "Vw");
+            Corner(ecs, _label, left: true);
 
             var help = Text(ecs, "← → to adjust   Space to toggle Px / Rem", font, 2.5f);
             ecs.SetParent(help, root);
-            Corner(ecs, help, ".right", "Vw");
+            Corner(ecs, help, left: false);
         }, "letter_spacing.Setup");
 
         app.Update(ctx =>
@@ -84,8 +81,8 @@ internal static class LetterSpacingExample
             }
 
             if (!changed) return;
-            var unit = _rem ? "Rem" : "Px";
-            foreach (var text in Animated) ctx.Ecs.SetReflected(text, Spacing, string.Empty, FormattableString.Invariant($"{{\"{unit}\":{_value}}}"));
+            LetterSpacing spacing = _rem ? new LetterSpacing.Rem(_value) : new LetterSpacing.Px(_value);
+            foreach (var text in Animated) ctx.Ecs.Wrap<LetterSpacingRef>(text).Value = spacing;
             Ui.SetText(_label, _rem ? FormattableString.Invariant($"LetterSpacing::Rem({_value:0.00})") : FormattableString.Invariant($"LetterSpacing::Px({_value:0.0})"));
         }, "letter_spacing.Update");
     }
@@ -99,16 +96,15 @@ internal static class LetterSpacingExample
     }
 
     private static void FontSize(EcsWorld ecs, Entity text, float vh) =>
-        ecs.SetReflected(text, TextFont, ".font_size", FormattableString.Invariant($"{{\"Vh\":{vh}}}"));
-
-    private static void Set(EcsWorld ecs, Entity node, string field, string unit, float value) =>
-        ecs.SetReflected(node, Node, field, FormattableString.Invariant($"{{\"{unit}\":{value}}}"));
+        ecs.Wrap<TextFontRef>(text).FontSize = new Bevy.Reflected.FontSize.Vh(vh);
 
     // Two percent of the window in from the bottom and from one side.
-    private static void Corner(EcsWorld ecs, Entity node, string side, string unit)
+    private static void Corner(EcsWorld ecs, Entity node, bool left)
     {
-        ecs.SetVariant(node, Node, ".position_type", "Absolute");
-        Set(ecs, node, ".bottom", "Vh", 2f);
-        Set(ecs, node, side, unit, 2f);
+        var layout = ecs.Wrap<NodeRef>(node);
+        layout.PositionType = NodeRef.PositionTypeVariant.Absolute;
+        layout.Bottom = new Val.Vh(2f);
+        if (left) layout.Left = new Val.Vw(2f);
+        else layout.Right = new Val.Vw(2f);
     }
 }

@@ -1,5 +1,5 @@
-using System.Globalization;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -7,11 +7,10 @@ namespace BevyCSharp.Examples.ThreeD;
 //
 // Bevy's global wireframe and its default topology are a resource, and here they are what is given
 // to every mesh not marked otherwise, so Z, X and B act on all of them at once. A wireframe's own
-// width and topology are Bevy's WireframeLineWidth and WireframeTopology, put on through reflection.
+// width and topology are Bevy's WireframeLineWidth and WireframeTopology, put on through their
+// wrappers.
 internal static class Wireframe
 {
-    private const string LineWidth = "bevy_pbr::wireframe::WireframeLineWidth";
-    private const string Topology = "bevy_pbr::wireframe::WireframeTopology";
 
     private static readonly (float R, float G, float B, float A) White = (1f, 1f, 1f, 1f);
     private static readonly (float R, float G, float B, float A) DeepPink = Scene.Srgb8(255, 20, 147);
@@ -43,8 +42,8 @@ internal static class Wireframe
 
             // The purple cube's wireframe is its own, wider and drawn over quads.
             Render.SetWireframe(_purple, true, (1f, 1f, 0f, 1f));
-            ecs.InsertReflected(_purple, LineWidth, "{\"width\":3.0}");
-            ecs.InsertReflected(_purple, Topology, "\"Quads\"");
+            ecs.Insert<WireframeLineWidthRef>(_purple).Width = 3f;
+            ecs.Insert<WireframeTopologyRef>(_purple).Value = WireframeTopologyRef.ValueVariant.Quads;
 
             ecs.PointLight(new Vec3(2f, 4f, 2f));
             ecs.Camera(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
@@ -64,7 +63,7 @@ internal static class Wireframe
             if (input.KeyPressed(Key.V))
             {
                 _width = _width switch { <= 2f => 3f, <= 4f => 5f, <= 7f => 10f, _ => 2f };
-                ctx.Ecs.SetReflected(_purple, LineWidth, ".width", _width.ToString(CultureInfo.InvariantCulture));
+                ctx.Ecs.Wrap<WireframeLineWidthRef>(_purple).Width = _width;
                 changed = true;
             }
 
@@ -85,8 +84,7 @@ internal static class Wireframe
 
         foreach (var entity in new[] { _toggle, _orange, _plane })
         {
-            ecs.RemoveReflected(entity, Topology);
-            ecs.InsertReflected(entity, Topology, _quads ? "\"Quads\"" : "\"Triangles\"");
+            ecs.Insert<WireframeTopologyRef>(entity).Value = _quads ? WireframeTopologyRef.ValueVariant.Quads : WireframeTopologyRef.ValueVariant.Triangles;
         }
     }
 

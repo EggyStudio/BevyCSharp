@@ -1,5 +1,6 @@
 using System.Globalization;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -40,12 +41,9 @@ internal static class PostProcessing
                 AssetServer.Load(AssetKind.Image, "environment_maps/pisa_specular_rgb9e5_zstd.ktx2"),
                 2000f);
 
-            const string Fog = "bevy_pbr::fog::DistanceFog";
-            ecs.InsertReflected(_camera, Fog);
-            ecs.SetReflectedColor(_camera, Fog, ".color", Color.FromSrgb(43 / 255f, 44 / 255f, 47 / 255f));
-            ecs.SetVariant(_camera, Fog, ".falloff", "Linear");
-            ecs.SetReflected(_camera, Fog, ".falloff.start", "1.0");
-            ecs.SetReflected(_camera, Fog, ".falloff.end", "8.0");
+            var fog = ecs.Insert<DistanceFogRef>(_camera);
+            fog.Color = Color.FromSrgb(43 / 255f, 44 / 255f, 47 / 255f);
+            fog.Falloff = new FogFalloff.Linear(1f, 8f);
             Apply();
 
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 15_000f, Shadows = true });

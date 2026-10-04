@@ -253,6 +253,7 @@ void SetReflectedColor(Entity entity, string typePath, string path, Color color)
 void InsertReflected(Entity entity, string typePath, string json = null);  // Puts one of Bevy's components on an entity, from JSON or at its default
 bool RemoveReflected(Entity entity, string typePath);           // Takes one of Bevy's components off an entity
 T? Get<T>(Entity entity);                                       // A typed wrapper over one of Bevy's components on an entity, or null when the entity does not carry it
+T Wrap<T>(Entity entity);                                       // A typed wrapper over one of Bevy's components an entity is known to carry
 T Insert<T>(Entity entity, string json = null);                 // Puts one of Bevy's components on an entity, from JSON or at its default, and returns a typed wrapper over it
 ```
 

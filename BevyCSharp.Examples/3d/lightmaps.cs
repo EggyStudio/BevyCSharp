@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -7,8 +8,6 @@ namespace BevyCSharp.Examples.ThreeD;
 // defaults, forward and bilinear, since the picture Bevy shows for it is taken that way.
 internal static class Lightmaps
 {
-    private const string Lightmap = "bevy_pbr::lightmap::Lightmap";
-    private const string MeshName = "bevy_gltf::assets::GltfMeshName";
 
     // The baked values are stored at a scale of one, and the scene is metered as daylight indoors.
     private const float Exposure = 250f;
@@ -37,9 +36,9 @@ internal static class Lightmaps
         var ecs = ctx.Ecs;
         foreach (var entity in Descendants(ecs, _box))
         {
-            if (ecs.GetReflected(entity, MeshName) is not { } json || ecs.GetReflected(entity, Lightmap) is not null) continue;
+            if (ecs.Get<GltfMeshNameRef>(entity) is not { } meshName || ecs.Get<LightmapRef>(entity) is not null) continue;
 
-            var name = System.Text.Json.JsonSerializer.Deserialize<string>(json) ?? string.Empty;
+            var name = meshName.Value;
             var image = name switch
             {
                 "large_box" => "lightmaps/CornellBox-Large.zstd.ktx2",
@@ -56,8 +55,7 @@ internal static class Lightmaps
                 Render.WriteMaterial(material, settings);
             }
 
-            ecs.InsertReflected(entity, Lightmap);
-            ecs.SetReflectedAsset(entity, Lightmap, "image", AssetServer.Load(AssetKind.Image, image));
+            ecs.Insert<LightmapRef>(entity).Image = AssetServer.Load(AssetKind.Image, image);
         }
     }
 

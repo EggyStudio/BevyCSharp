@@ -95,6 +95,121 @@ public sealed class ReflectedWrapperTests
         Assert.True(ran);
     }
 
+    /// <summary>
+    /// An enum whose variants hold values is a record a variant, written whole and read back as the
+    /// variant and the values it was given.
+    /// </summary>
+    [SkippableFact]
+    public void FogsFalloffIsEachVariantItWasGivenWithItsValues()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        var seen = new List<FogFalloff>();
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var fog = ctx.Ecs.Insert<DistanceFogRef>(ctx.Ecs.Spawn());
+            FogFalloff[] falloffs =
+            [
+                new FogFalloff.Linear(5f, 20f),
+                new FogFalloff.Exponential(0.07f),
+                new FogFalloff.ExponentialSquared(0.12f),
+                new FogFalloff.Atmospheric(new Vec3(0.1f, 0.2f, 0.3f), new Vec3(0.4f, 0.5f, 0.6f)),
+                new FogFalloff.Linear(1f, 8f),
+            ];
+
+            foreach (var falloff in falloffs)
+            {
+                fog.Falloff = falloff;
+                seen.Add(fog.Falloff);
+            }
+        });
+
+        harness.Run();
+
+        Assert.Equal(
+        [
+            new FogFalloff.Linear(5f, 20f),
+            new FogFalloff.Exponential(0.07f),
+            new FogFalloff.ExponentialSquared(0.12f),
+            new FogFalloff.Atmospheric(new Vec3(0.1f, 0.2f, 0.3f), new Vec3(0.4f, 0.5f, 0.6f)),
+            new FogFalloff.Linear(1f, 8f),
+        ], seen);
+    }
+
+    /// <summary>
+    /// A length in the interface is the variant and its number, and an <c>Option</c> is a nullable
+    /// that reads back as nothing once it is set to nothing.
+    /// </summary>
+    [SkippableFact]
+    public void AnInterfaceLengthAndAnOptionalViewReadBackAsTheyWereWritten()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        Val? left = null, width = null;
+        SubCameraView? view = null, cleared = new(1, 1, Vec2.Zero, 1, 1);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var node = ctx.Ecs.Insert<NodeRef>(ctx.Ecs.Spawn());
+            node.Left = new Val.Px(12f);
+            node.Width = new Val.Percent(50f);
+            (left, width) = (node.Left, node.Width);
+
+            var camera = ctx.Ecs.Get<CameraRef>(Render.SpawnCamera3d())!.Value;
+            camera.SubCameraView = new SubCameraView(10, 10, new Vec2(5f, 0f), 5, 10);
+            view = camera.SubCameraView;
+            camera.SubCameraView = null;
+            cleared = camera.SubCameraView;
+        });
+
+        harness.Run();
+
+        Assert.Equal(new Val.Px(12f), left);
+        Assert.Equal(new Val.Percent(50f), width);
+        Assert.Equal(new SubCameraView(10, 10, new Vec2(5f, 0f), 5, 10), view);
+        Assert.Null(cleared);
+    }
+
+    /// <summary>
+    /// A variant holding a handle can be chosen, which needs a handle made for it before the one
+    /// written arrives, since Bevy registers no default for a handle.
+    /// </summary>
+    [SkippableFact]
+    public void AVariantHoldingAHandleIsChosenWithTheHandleWritten()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        FontSource? font = null;
+        AssetHandle? texture = AssetHandle.None, cleared = AssetHandle.None;
+        var image = AssetHandle.None;
+        var loaded = AssetHandle.None;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            loaded = AssetServer.Load(AssetKind.Font, "fonts/FiraSans-Bold.ttf");
+            var text = ctx.Ecs.Insert<TextFontRef>(ctx.Ecs.Spawn());
+            text.Font = new FontSource.Handle(loaded);
+            font = text.Font;
+
+            image = Render.CreateImage(new byte[4 * 4 * 4], 4, 4);
+            var fog = ctx.Ecs.Insert<FogVolumeRef>(ctx.Ecs.Spawn());
+            fog.DensityTexture = image;
+            texture = fog.DensityTexture;
+            fog.DensityTexture = null;
+            cleared = fog.DensityTexture;
+        });
+
+        harness.Run();
+
+        Assert.Equal(new FontSource.Handle(loaded), font);
+        Assert.Equal(image, texture);
+        Assert.Null(cleared);
+    }
+
     [SkippableFact]
     public void ANameAndAVisibilityClassReadAsValues()
     {

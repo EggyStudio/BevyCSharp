@@ -1,13 +1,15 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
+
+using Visibility = Bevy.Reflected.VisibilityRef.ValueVariant;
 
 // Demonstrates anisotropy, the highlight stretched along a surface as on brushed metal, on a
 // barn lamp loaded from glTF and on a sphere, under a directional light, a point light or an
 // environment map, with each material's anisotropy turned on and off.
 internal static class Anisotropy
 {
-    private const string VisibilityType = "bevy_camera::visibility::Visibility";
     private static readonly Vec3 CameraStart = new(-0.4f, 0f, 0f);
 
     private enum LightMode
@@ -42,7 +44,7 @@ internal static class Anisotropy
                 Render.CreateMesh(MeshShape.Sphere, 0.1f),
                 Render.CreateMaterial(new MaterialSettings { BaseColor = (gray.R, gray.G, gray.B, 1f), AnisotropyRotation = 0.5f, AnisotropyStrength = 1f }),
                 Transform.Identity);
-            ecs.SetVariant(_sphere, VisibilityType, "", "Hidden");
+            ecs.Wrap<VisibilityRef>(_sphere).Value = Visibility.Hidden;
 
             _text = Ui.SpawnText(HelpText(), new UiSettings { Absolute = true, Bottom = Length.Px(12f), Left = Length.Px(12f) });
         }, "anisotropy.Setup");
@@ -142,8 +144,8 @@ internal static class Anisotropy
         {
             changed = true;
             _sphereShown = !_sphereShown;
-            ecs.SetVariant(_sphere, VisibilityType, "", _sphereShown ? "Inherited" : "Hidden");
-            if (_lamp != Entity.None) ecs.SetVariant(_lamp, VisibilityType, "", _sphereShown ? "Hidden" : "Inherited");
+            ecs.Wrap<VisibilityRef>(_sphere).Value = _sphereShown ? Visibility.Inherited : Visibility.Hidden;
+            if (_lamp != Entity.None) ecs.Wrap<VisibilityRef>(_lamp).Value = _sphereShown ? Visibility.Hidden : Visibility.Inherited;
         }
 
         if (changed) Ui.SetText(_text, HelpText());

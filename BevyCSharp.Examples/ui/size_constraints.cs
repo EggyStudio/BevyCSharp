@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -6,10 +7,6 @@ namespace BevyCSharp.Examples.Interface;
 // maximum width are each set from a row of buttons, the chosen one in each row lit.
 internal static class SizeConstraints
 {
-    private const string Node = "bevy_ui::ui_node::Node";
-    private const string BorderColor = "bevy_ui::ui_node::BorderColor";
-    private const string Background = "bevy_ui::ui_node::BackgroundColor";
-    private const string TextColor = "bevy_text::text::TextColor";
 
     private static readonly Color ActiveBorder = Color.FromSrgb(250f / 255f, 235f / 255f, 215f / 255f);
     private static readonly Color InactiveBorder = Color.Black;
@@ -21,7 +18,16 @@ internal static class SizeConstraints
 
     // A button sets one field of the bar to one value, and remembers its inner box and label to
     // recolor them.
-    private sealed record Choice(Entity Button, Entity Inner, Entity Label, string Field, string Value);
+    private sealed record Choice(Entity Button, Entity Inner, Entity Label, string Field, Val Value);
+
+    // The field of the bar's Node each row sets.
+    private static readonly Dictionary<string, Action<NodeRef, Val>> Fields = new()
+    {
+        ["min_size"] = (node, value) => node.MinWidth = value,
+        ["flex_basis"] = (node, value) => node.FlexBasis = value,
+        ["size"] = (node, value) => node.Width = value,
+        ["max_size"] = (node, value) => node.MaxWidth = value,
+    };
 
     private static readonly List<Choice> Choices = [];
     private static readonly Dictionary<Entity, UiInteraction> Last = [];
@@ -56,8 +62,8 @@ internal static class SizeConstraints
 
             var rows = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, Align = UiAlign.Stretch, Padding = Sides.All(Length.Px(10f)), Margin = new Sides(Length.Zero, Length.Px(50f), Length.Zero, Length.Zero), Color = yellow });
             ecs.SetParent(rows, column);
-            foreach (var (label, field) in new[] { ("min_size", ".min_width"), ("flex_basis", ".flex_basis"), ("size", ".width"), ("max_size", ".max_width") })
-                Row(ecs, rows, label, field, style);
+            foreach (var label in new[] { "min_size", "flex_basis", "size", "max_size" })
+                Row(ecs, rows, label, style);
         }, "size_constraints.Setup");
 
         app.Update(ctx =>
@@ -71,20 +77,20 @@ internal static class SizeConstraints
 
                 if (interaction == UiInteraction.Pressed)
                 {
-                    ecs.SetReflected(_bar, Node, choice.Field, choice.Value);
+                    Fields[choice.Field](ecs.Wrap<NodeRef>(_bar), choice.Value);
                     Active[choice.Field] = choice.Button;
                     foreach (var other in Choices.Where(other => other.Field == choice.Field)) Paint(ecs, other);
                 }
                 else if (Active[choice.Field] != choice.Button)
                 {
-                    ecs.SetReflectedColor(choice.Label, TextColor, ".0", interaction == UiInteraction.Hovered ? HoveredText : UnhoveredText);
+                    ecs.Wrap<TextColorRef>(choice.Label).Value = interaction == UiInteraction.Hovered ? HoveredText : UnhoveredText;
                 }
             }
         }, "size_constraints.UpdateButtons");
     }
 
     // A row of seven choices for one field, Auto lit to begin with.
-    private static void Row(EcsWorld ecs, Entity parent, string label, string field, UiTextSettings style)
+    private static void Row(EcsWorld ecs, Entity parent, string field, UiTextSettings style)
     {
         var outer = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, Padding = Sides.All(Length.Px(2f)), Align = UiAlign.Stretch, Color = (0f, 0f, 0f, 1f) });
         ecs.SetParent(outer, parent);
@@ -93,14 +99,14 @@ internal static class SizeConstraints
 
         var name = Ui.SpawnNode(new UiSettings { MinWidth = Length.Px(200f), MaxWidth = Length.Px(200f), Justify = UiJustify.Center, Align = UiAlign.Center });
         ecs.SetParent(name, row);
-        ecs.SetParent(Ui.SpawnText(label, new UiSettings { Color = Scene.Srgb(0.9f, 0.9f, 0.9f) }, style), name);
+        ecs.SetParent(Ui.SpawnText(field, new UiSettings { Color = Scene.Srgb(0.9f, 0.9f, 0.9f) }, style), name);
 
         var buttons = Ui.SpawnNode(new UiSettings());
         ecs.SetParent(buttons, row);
-        var values = new List<(string Text, string Json)> { ("Auto", "\"Auto\"") };
-        foreach (var percent in new[] { 0, 25, 50, 75, 100, 125 }) values.Add(($"{percent}%", $"{{\"Percent\":{percent}.0}}"));
+        var values = new List<(string Text, Val Value)> { ("Auto", new Val.Auto()) };
+        foreach (var percent in new[] { 0, 25, 50, 75, 100, 125 }) values.Add(($"{percent}%", new Val.Percent(percent)));
 
-        foreach (var (text, json) in values)
+        foreach (var (text, value) in values)
         {
             var button = Ui.SpawnNode(new UiSettings { Interactive = true, Align = UiAlign.Center, Justify = UiJustify.Center, Border = Sides.All(Length.Px(2f)), Margin = Sides.Horizontal(Length.Px(2f)), BorderColor = (0f, 0f, 0f, 1f) });
             ecs.SetParent(button, buttons);
@@ -109,7 +115,7 @@ internal static class SizeConstraints
             var labelText = Ui.SpawnText(text, new UiSettings(), new UiTextSettings { Font = style.Font, FontSize = style.FontSize, Justify = TextJustify.Center });
             ecs.SetParent(labelText, inner);
 
-            var choice = new Choice(button, inner, labelText, field, json);
+            var choice = new Choice(button, inner, labelText, field, value);
             Choices.Add(choice);
             if (text == "Auto") Active[field] = button;
         }
@@ -121,9 +127,9 @@ internal static class SizeConstraints
     private static void Paint(EcsWorld ecs, Choice choice)
     {
         var active = Active[choice.Field] == choice.Button;
-        foreach (var side in new[] { ".top", ".right", ".bottom", ".left" })
-            ecs.SetReflectedColor(choice.Button, BorderColor, side, active ? ActiveBorder : InactiveBorder);
-        ecs.SetReflectedColor(choice.Inner, Background, ".0", active ? ActiveInner : InactiveInner);
-        ecs.SetReflectedColor(choice.Label, TextColor, ".0", active ? ActiveText : UnhoveredText);
+        var border = ecs.Wrap<BorderColorRef>(choice.Button);
+        border.Top = border.Right = border.Bottom = border.Left = active ? ActiveBorder : InactiveBorder;
+        ecs.Wrap<BackgroundColorRef>(choice.Inner).Value = active ? ActiveInner : InactiveInner;
+        ecs.Wrap<TextColorRef>(choice.Label).Value = active ? ActiveText : UnhoveredText;
     }
 }

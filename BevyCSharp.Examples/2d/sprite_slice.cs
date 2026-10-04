@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.TwoD;
 
@@ -8,11 +9,9 @@ namespace BevyCSharp.Examples.TwoD;
 // held small.
 internal static class SpriteSlice
 {
+    // A sprite's image mode holds its slicer's scale modes, enums inside a variant, which a
+    // wrapper does not type, so the slicer is read and written as JSON.
     private const string SpriteType = "bevy_sprite::sprite::Sprite";
-    private const string Text2d = "bevy_sprite::text2d::Text2d";
-    private const string TextFont = "bevy_text::text::TextFont";
-    private const string TextLayout = "bevy_text::text::TextLayout";
-    private const string Anchor = "bevy_sprite::sprite::Anchor";
 
     // A label, a size, whether it is sliced, and the stretch of its middle and sides where they
     // tile, zero for stretched, and how far its corners may grow.
@@ -54,13 +53,10 @@ internal static class SpriteSlice
             // The label under the sprite, hung by its top middle.
             var text = ecs.Spawn();
             ecs.Add(text, Transform.At(0f, -0.5f * size.H - 10f, 0f));
-            ecs.InsertReflected(text, Text2d, System.Text.Json.JsonSerializer.Serialize(label));
-            ecs.InsertReflected(text, TextFont);
-            ecs.SetReflectedAsset(text, TextFont, ".font.0", font);
-            ecs.InsertReflected(text, TextLayout);
-            ecs.SetVariant(text, TextLayout, ".justify", "Center");
-            ecs.InsertReflected(text, Anchor);
-            ecs.SetReflected(text, Anchor, ".0", "[0.0,0.5]");
+            ecs.Insert<Text2dRef>(text).Value = label;
+            ecs.Insert<TextFontRef>(text).Font = new FontSource.Handle(font);
+            ecs.Insert<TextLayoutRef>(text).Justify = TextLayoutRef.JustifyVariant.Center;
+            ecs.Insert<AnchorRef>(text).Value = new Vec2(0f, 0.5f);
             ecs.SetParent(text, sprite);
 
             position += new Vec3(0.5f * size.W + Gap, 0f, 0f);

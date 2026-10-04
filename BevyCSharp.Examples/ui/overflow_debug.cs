@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -6,9 +7,6 @@ namespace BevyCSharp.Examples.Interface;
 // what the frames clip, S their size, and Space starting and stopping the motion.
 internal static class OverflowDebug
 {
-    private const string Node = "bevy_ui::ui_node::Node";
-    private const string Transform = "bevy_ui::ui_transform::UiTransform";
-    private const string TextSpan = "bevy_text::text::TextSpan";
     private const float Size = 150f;
     private const float LoopLength = 4f;
 
@@ -16,7 +14,13 @@ internal static class OverflowDebug
 
     private static readonly List<Entity> Containers = [];
     private static readonly List<(Entity Node, Motion Motion)> Moving = [];
-    private static readonly (string X, string Y)[] Overflows = [("Clip", "Clip"), ("Visible", "Visible"), ("Visible", "Clip"), ("Clip", "Visible")];
+    private static readonly (NodeRef.OverflowXVariant X, NodeRef.OverflowYVariant Y)[] Overflows =
+    [
+        (NodeRef.OverflowXVariant.Clip, NodeRef.OverflowYVariant.Clip),
+        (NodeRef.OverflowXVariant.Visible, NodeRef.OverflowYVariant.Visible),
+        (NodeRef.OverflowXVariant.Visible, NodeRef.OverflowYVariant.Clip),
+        (NodeRef.OverflowXVariant.Clip, NodeRef.OverflowYVariant.Visible),
+    ];
 
     private static Entity _setting;
     private static int _overflow, _size;
@@ -64,11 +68,11 @@ internal static class OverflowDebug
                 _overflow = (_overflow + 1) % Overflows.Length;
                 foreach (var container in Containers)
                 {
-                    ecs.SetVariant(container, Node, ".overflow.x", Overflows[_overflow].X);
-                    ecs.SetVariant(container, Node, ".overflow.y", Overflows[_overflow].Y);
+                    var node = ecs.Wrap<NodeRef>(container);
+                    (node.OverflowX, node.OverflowY) = Overflows[_overflow];
                 }
 
-                ecs.SetReflected(_setting, TextSpan, ".0", System.Text.Json.JsonSerializer.Serialize(Describe()));
+                ecs.Wrap<TextSpanRef>(_setting).Value = Describe();
             }
 
             // The frames take turns being full, short and narrow.
@@ -77,8 +81,9 @@ internal static class OverflowDebug
                 _size = (_size + 1) % 3;
                 foreach (var container in Containers)
                 {
-                    ecs.SetReflected(container, Node, ".width", _size == 2 ? "{\"Percent\":30.0}" : "{\"Percent\":100.0}");
-                    ecs.SetReflected(container, Node, ".height", _size == 1 ? "{\"Percent\":30.0}" : "{\"Percent\":100.0}");
+                    var node = ecs.Wrap<NodeRef>(container);
+                    node.Width = new Val.Percent(_size == 2 ? 30f : 100f);
+                    node.Height = new Val.Percent(_size == 1 ? 30f : 100f);
                 }
             }
 
@@ -95,19 +100,19 @@ internal static class OverflowDebug
             foreach (var (node, motion) in Moving)
             {
                 var a = _t * MathF.Tau;
+                var transform = ecs.Wrap<UiTransformRef>(node);
                 switch (motion)
                 {
                     case Motion.Move:
-                        ecs.SetReflected(node, Transform, ".translation.x", FormattableString.Invariant($"{{\"Percent\":{MathF.Sin(a - MathF.PI / 2f) * 50f}}}"));
-                        ecs.SetReflected(node, Transform, ".translation.y", FormattableString.Invariant($"{{\"Percent\":{-MathF.Cos(a - MathF.PI / 2f) * 50f}}}"));
+                        transform.TranslationX = new Val.Percent(MathF.Sin(a - MathF.PI / 2f) * 50f);
+                        transform.TranslationY = new Val.Percent(-MathF.Cos(a - MathF.PI / 2f) * 50f);
                         break;
                     case Motion.Scale:
-                        ecs.SetReflected(node, Transform, ".scale", FormattableString.Invariant($"[{1f + 0.5f * MathF.Max(MathF.Cos(a), 0f)},{1f + 0.5f * MathF.Max(MathF.Cos(a + MathF.PI), 0f)}]"));
+                        transform.Scale = new Vec2(1f + 0.5f * MathF.Max(MathF.Cos(a), 0f), 1f + 0.5f * MathF.Max(MathF.Cos(a + MathF.PI), 0f));
                         break;
                     default:
                         var angle = MathF.Cos(a) * 45f;
-                        ecs.SetReflected(node, Transform, ".rotation.cos", FormattableString.Invariant($"{MathF.Cos(angle)}"));
-                        ecs.SetReflected(node, Transform, ".rotation.sin", FormattableString.Invariant($"{MathF.Sin(angle)}"));
+                        (transform.RotationCos, transform.RotationSin) = (MathF.Cos(angle), MathF.Sin(angle));
                         break;
                 }
             }
@@ -131,7 +136,7 @@ internal static class OverflowDebug
         Containers.Add(container);
 
         var inner = Ui.SpawnNode(new UiSettings { Align = UiAlign.Center, Justify = UiJustify.Center });
-        ecs.InsertReflected(inner, Transform);
+        ecs.Insert<UiTransformRef>(inner);
         ecs.SetParent(inner, container);
         ecs.SetParent(content, inner);
         Moving.Add((inner, motion));

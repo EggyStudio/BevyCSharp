@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -6,8 +7,6 @@ namespace BevyCSharp.Examples.ThreeD;
 // FogVolume and VolumetricLight put on through reflection.
 internal static class VolumetricFog
 {
-    private const string Volumetric = "bevy_light::volumetric::VolumetricLight";
-    private const string Directional = "bevy_light::directional_light::DirectionalLight";
     private const float LightSpeed = 0.01f;
 
     private static Entity _root, _sun, _point, _spot, _text;
@@ -26,20 +25,19 @@ internal static class VolumetricFog
             var camera = ecs.Camera(Transform.LookingAt(new Vec3(-1.7f, 1.5f, 4.5f), new Vec3(-1.5f, 1.7f, 3.5f), Vec3.UnitY));
             Render.SetPostProcessing(camera, new PostSettings { Bloom = true });
             Render.SetSkybox(camera, AssetServer.Load(AssetKind.Image, "environment_maps/pisa_specular_rgb9e5_zstd.ktx2"), 1000f);
-            ecs.InsertReflected(camera, "bevy_light::volumetric::VolumetricFog");
-            ecs.SetReflected(camera, "bevy_light::volumetric::VolumetricFog", ".ambient_intensity", "0.0");
+            ecs.Insert<VolumetricFogRef>(camera).AmbientIntensity = 0f;
 
             _point = Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Intensity = 10_000f, Range = 150f, Color = (1f, 0f, 0f), Shadows = true });
             ecs.Add(_point, Transform.At(-0.4f, 1.9f, 1f));
-            ecs.InsertReflected(_point, Volumetric);
+            ecs.Insert<VolumetricLightRef>(_point);
 
             _spot = Render.SpawnLight(new LightSettings { Kind = LightKind.Spot, Intensity = 50_000f, Shadows = true, InnerAngle = 0.76f, OuterAngle = 0.94f });
             ecs.Add(_spot, Transform.LookingAt(new Vec3(-1.8f, 3.9f, -2.7f), Vec3.Zero, Vec3.UnitY));
-            ecs.InsertReflected(_spot, Volumetric);
+            ecs.Insert<VolumetricLightRef>(_spot);
 
             var fog = ecs.Spawn();
             ecs.Add(fog, new Transform(Vec3.Zero, Quat.Identity, new Vec3(35f)));
-            ecs.InsertReflected(fog, "bevy_light::volumetric::FogVolume");
+            ecs.Insert<FogVolumeRef>(fog);
 
             _text = Ui.SpawnText(Text(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
         });
@@ -55,8 +53,8 @@ internal static class VolumetricFog
             if (_sun.IsNone && !_root.IsNone && Find(ecs, _root) is { IsNone: false } sun)
             {
                 _sun = sun;
-                ecs.SetReflected(sun, Directional, ".shadow_maps_enabled", "true");
-                ecs.InsertReflected(sun, Volumetric);
+                ecs.Wrap<DirectionalLightRef>(sun).ShadowMapsEnabled = true;
+                ecs.Insert<VolumetricLightRef>(sun);
             }
 
             if (!_sun.IsNone)
@@ -88,7 +86,7 @@ internal static class VolumetricFog
 
     private static Entity Find(EcsWorld ecs, Entity entity)
     {
-        if (ecs.GetReflected(entity, Directional) is not null) return entity;
+        if (ecs.Get<DirectionalLightRef>(entity) is not null) return entity;
         foreach (var child in ecs.ChildrenOf(entity))
             if (Find(ecs, child) is { IsNone: false } found) return found;
         return Entity.None;
@@ -96,8 +94,8 @@ internal static class VolumetricFog
 
     private static void Toggle(EcsWorld ecs, Entity light, bool on)
     {
-        if (on) ecs.InsertReflected(light, Volumetric);
-        else ecs.RemoveReflected(light, Volumetric);
+        if (on) ecs.Insert<VolumetricLightRef>(light);
+        else ecs.Wrap<VolumetricLightRef>(light).Remove();
     }
 
     private static string Text() =>

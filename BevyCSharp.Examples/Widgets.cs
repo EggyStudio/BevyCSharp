@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples;
 
@@ -14,9 +15,6 @@ namespace BevyCSharp.Examples;
 /// </remarks>
 internal sealed class RadioButtons<T> where T : notnull
 {
-    private const string Background = "bevy_ui::ui_node::BackgroundColor";
-    private const string TextColor = "bevy_text::text::TextColor";
-
     private readonly List<(Entity Button, Entity Label, T Value)> _buttons = [];
 
     /// <summary>
@@ -83,8 +81,8 @@ internal sealed class RadioButtons<T> where T : notnull
         foreach (var (button, label, option) in _buttons)
         {
             var chosen = EqualityComparer<T>.Default.Equals(option, selected);
-            ecs.SetReflectedColor(button, Background, ".0", chosen ? Color.White : Color.Black);
-            ecs.SetReflectedColor(label, TextColor, ".0", chosen ? Color.Black : Color.White);
+            ecs.Wrap<BackgroundColorRef>(button).Value = chosen ? Color.White : Color.Black;
+            ecs.Wrap<TextColorRef>(label).Value = chosen ? Color.Black : Color.White;
         }
     }
 }
