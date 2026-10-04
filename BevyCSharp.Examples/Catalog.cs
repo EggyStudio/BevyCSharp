@@ -56,6 +56,7 @@ internal static class Catalog
         new("blend_modes", BlendModes.Build),
         new("camera_sub_view", CameraSubView.Build),
         new("color_grading", ColorGrading.Build),
+        new("contact_shadows", ContactShadows.Build),
         new("pccm", Pccm.Build),
         new("shadow_biases", ShadowBiases.Build),
         new("visibility_range", VisibilityRange.Build),
