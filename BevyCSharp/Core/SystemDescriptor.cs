@@ -123,7 +123,16 @@ public sealed class SystemDescriptor
     public bool Invoke(World world)
     {
         if (RunCondition is { } condition && !condition(world)) return false;
+
+        if (!FrameProfile.On)
+        {
+            System(world);
+            return true;
+        }
+
+        var started = global::System.Diagnostics.Stopwatch.GetTimestamp();
         System(world);
+        FrameProfile.Ran(Name, global::System.Diagnostics.Stopwatch.GetTimestamp() - started);
         return true;
     }
 

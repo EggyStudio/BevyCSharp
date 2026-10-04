@@ -247,9 +247,21 @@ public sealed unsafe partial class EcsWorld
     {
         var pointer = Native.bcs_ecs_get_ptr(entity.Bits, ComponentType<T>.ValueId);
         if (pointer is null)
+        {
+            // A null pointer is the same answer for a missing component and for no world at all,
+            // and a behavior method running on a worker thread gets the second, a different
+            // mistake with a different fix, so the two are told apart before saying which.
+            if (Native.bcs_ecs_has(entity.Bits, ComponentType<T>.ValueId) == NativeStatus.NoWorld)
+                throw new BevyNativeException(
+                    NativeStatus.NoWorld,
+                    $"GetRef<{typeof(T).Name}> failed: the world is not on loan here, as on the worker threads a "
+                    + "behavior method over many entities is spread across. Read and write the component the "
+                    + "method is bound to, or move the work to a static method that queries.");
+
             throw new BevyNativeException(
                 NativeStatus.NotPresent,
                 $"GetRef<{typeof(T).Name}> failed: {entity} does not carry that component.");
+        }
 
         return ref Unsafe.AsRef<T>(pointer);
     }

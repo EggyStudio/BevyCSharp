@@ -49,6 +49,7 @@ What is usually there:
 | `input.hold <W\|W,D> <frames>` | Hold keys for exactly that many frames and answer once they are let go, for a game that acts while one is down |
 | `input.keydown <key>`, `input.keyup <key>` | Hold a key across calls, for as long as the calls between take; keys reach an offscreen run too |
 | `frames.wait <n>` | Answers after n more frames, so act, settle and look is one call |
+| `frame.profile [frames]` | What a frame spends: managed systems by name, calls into the bridge, Bevy's schedule, the render's phases |
 | `shot <path>` | Capture the window (use `./bcs shot`, which waits for the file) |
 | `log.tail <n>` | The last lines the app wrote |
 | `eval <c#>` | Editor only: compile and run a fragment against the live world |

@@ -82,7 +82,7 @@ impl SystemReg {
     /// Invokes the managed callback.
     #[inline]
     pub fn invoke(&self) {
-        (self.func)(self.user);
+        crate::profile::managed(|| (self.func)(self.user));
     }
 }
 

@@ -32,3 +32,35 @@ public struct NativeFrameState
     /// <summary>Input snapshot.</summary>
     public NativeInput Input;
 }
+
+/// <summary>What the bridge counted over a span of frames, mirroring <c>BcsProfile</c>.</summary>
+[StructLayout(LayoutKind.Sequential)]
+public struct NativeProfile
+{
+    /// <summary>Frames counted whole.</summary>
+    public ulong Frames;
+
+    /// <summary>Their time from the top of one to the top of the next, in nanoseconds.</summary>
+    public ulong FrameNanos;
+
+    /// <summary>Their time from the top of <c>First</c> to the end of <c>Last</c>, in nanoseconds.</summary>
+    public ulong ScheduleNanos;
+
+    /// <summary>Managed systems run.</summary>
+    public ulong ManagedCalls;
+
+    /// <summary>Their time, the crossings they made included, in nanoseconds.</summary>
+    public ulong ManagedNanos;
+
+    /// <summary>Calls the managed systems made into the bridge.</summary>
+    public ulong Crossings;
+
+    /// <summary>Those calls' time inside the bridge, in nanoseconds.</summary>
+    public ulong CrossingNanos;
+
+    /// <summary>Render schedules run.</summary>
+    public ulong Renders;
+
+    /// <summary>Their time from first system to last, in nanoseconds.</summary>
+    public ulong RenderNanos;
+}

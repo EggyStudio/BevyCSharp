@@ -36,7 +36,12 @@ public sealed class PhysicsPlugin(PhysicsSettings? settings = null) : IPlugin
                 // entity or edited is there for the step.
                 var physics = world.Resource<PhysicsWorld>();
                 var ecs = world.Resource<EcsWorld>();
+
+                // Under a name of its own in a frame profile, which counts it inside the step's
+                // time as well, since it runs in the step's system.
+                var syncing = FrameProfile.On ? System.Diagnostics.Stopwatch.GetTimestamp() : 0L;
                 physics.Sync(ecs);
+                if (FrameProfile.On) FrameProfile.Ran("Physics.Step: sync", System.Diagnostics.Stopwatch.GetTimestamp() - syncing);
 
                 if (!physics.Paused) physics.Step(ecs, world.Resource<Time>().FixedDelta, world.Resource<MessageBus>());
             },

@@ -201,7 +201,9 @@ public partial struct Spinner
 }
 ```
 
-Above ~4096 entities the per-entity loop is automatically split across the thread pool.
+Above ~4096 entities the per-entity loop is automatically split across the thread pool, where the
+method can read and write its own component and not the world, so a behavior reaching another
+component, such as the entity's `Transform`, does it from a static method over a query.
 
 **Any blittable struct is a component.** Any blittable struct is a component. It needs no attribute and no interface, the first time a
 behavior touches it, its layout is registered with Bevy and it becomes a real Bevy component
@@ -3228,11 +3230,17 @@ public partial struct Spin
     public float Speed;
     public float Angle;
 
+    // Static, over a query, since the transform is another component and the world that reaches
+    // it is the main thread's, where a method per entity is spread across worker threads past a
+    // few thousand of them.
     [OnUpdate]
-    public void Tick(BehaviorContext ctx)
+    public static void Tick(BehaviorContext ctx)
     {
-        Angle += Speed * ctx.Time.Delta;
-        ctx.Ecs.GetRef<Transform>(ctx.Entity).Rotation = Quat.FromRotationY(Angle);
+        foreach (var row in ctx.Ecs.Query<Spin>())
+        {
+            row.Component.Angle += row.Component.Speed * ctx.Time.Delta;
+            ctx.Ecs.GetRef<Transform>(row.Entity).Rotation = Quat.FromRotationY(row.Component.Angle);
+        }
     }
 }
 ```
@@ -3534,6 +3542,7 @@ and asks it things:
 ./bcs command input.click 1450 700
 ./bcs command input.hold W,D 12        # held for twelve frames exactly, for a game walking while they are
 ./bcs command frames.wait 5
+./bcs command frame.profile 240        # what a frame spends, split as .github/PERFORMANCE.md describes
 ./bcs shot /tmp/after.png              # captures the window, and waits for the file
 ```
 

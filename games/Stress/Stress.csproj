@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      The engine under load, built on the package as a game is, for measuring what a frame holds.
+      measure.sh runs it at growing counts and asks it what each frame spent through bcs.
+    -->
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+
+        <!--
+          The version packed into build/package, which a build can name instead, as continuous
+          integration does with the package it packs for the run.
+        -->
+        <BevyCSharpVersion Condition="'$(BevyCSharpVersion)' == ''">0.0.22-game</BevyCSharpVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BevyCSharp" Version="$(BevyCSharpVersion)" />
+    </ItemGroup>
+
+</Project>

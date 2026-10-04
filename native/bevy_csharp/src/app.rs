@@ -263,6 +263,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     // beside a project it opens, registered for the same reason and at the same time.
     crate::assets::install_sources(&mut app);
 
+    // The two clock systems frame.profile reads, which do nothing until it turns counting on.
+    crate::profile::install(&mut app);
+
     // The assets the game's own assembly carries, read after the disk through the managed side,
     // where it handed a reader over before this app was built. Registered for the same reason the
     // player's source is, before the asset plugin builds the sources. A bridge carrying a game's
@@ -458,6 +461,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // it needs compute shaders and so cannot run everywhere the rest can. Every desktop
             // backend the bridge builds for has them.
             app.add_plugins(bevy::post_process::auto_exposure::AutoExposurePlugin);
+
+            // The render schedule's clock for frame.profile, which does nothing until asked.
+            crate::profile::install_render(&mut app);
 
             // Drawing a mesh as its edges, which an editor offers as a way to outline what is
             // selected. Off unless something asks for it per entity, so it costs a pipeline that is

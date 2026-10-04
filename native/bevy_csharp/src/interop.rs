@@ -1063,7 +1063,7 @@ pub unsafe fn write_text(text: &str, out: *mut u8, capacity: i32) -> i32 {
 
 /// Runs `f`, converting any panic into [`status::PANIC`] instead of unwinding into .NET.
 pub fn guard<F: FnOnce() -> i32>(f: F) -> i32 {
-    match std::panic::catch_unwind(AssertUnwindSafe(f)) {
+    match crate::profile::crossing(|| std::panic::catch_unwind(AssertUnwindSafe(f))) {
         Ok(v) => v,
         Err(_) => status::PANIC,
     }
@@ -1071,7 +1071,7 @@ pub fn guard<F: FnOnce() -> i32>(f: F) -> i32 {
 
 /// Runs `f`, converting any panic into `fallback`.
 pub fn guard_with<T, F: FnOnce() -> T>(fallback: T, f: F) -> T {
-    match std::panic::catch_unwind(AssertUnwindSafe(f)) {
+    match crate::profile::crossing(|| std::panic::catch_unwind(AssertUnwindSafe(f))) {
         Ok(v) => v,
         Err(_) => fallback,
     }

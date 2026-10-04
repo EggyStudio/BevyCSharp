@@ -8,17 +8,13 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `324f919`. A level's cameras (`f7b087e`), the message after a load (`3ab5b22`) and
-keys held for a number of frames (`324f919`) are settled, on the play script reaching its win
-with each.
+Reviewed up to `c39468c`, the two smaller entries from Courtyard, which are settled.
 
 ## Now
 
 In this order.
 
-1. **The smaller two from Courtyard**: the editor says once that a game's states are not entered
-   while editing, and `entity.get` prints a name and a visibility class as values.
-2. **Measure what a frame holds.** Nothing has measured this engine, and its cost is in a place
+1. **Measure what a frame holds.** Nothing has measured this engine, and its cost is in a place
    Bevy alone does not have, the crossing between C# and the bridge. Two stress programs under
    `games/` or the sample: one grows the number of entities a behavior moves each frame, the
    other the number of drawn mesh entities with a few materials, lights and physics bodies. Each
@@ -27,15 +23,15 @@ In this order.
    frames a second, through a `bcs` command so a run is repeatable. The numbers, the machine and
    the three largest costs go into a section of RENDERING.md or a document beside it. No
    optimization is in this batch. The next batch is the largest cost the numbers show.
-3. **Every attribute the generators accept is compiled and run by a test**, each asserted to run
+2. **Every attribute the generators accept is compiled and run by a test**, each asserted to run
    when it should and not otherwise, with the list taken from the generators' own tables so an
    attribute without a case fails. In 3DEngine a behavior attribute failed to compile for four
    batches while the suite passed, because nothing used it.
-4. **The README's install followed by a stranger**, in a container with only the packed package:
+3. **The README's install followed by a stranger**, in a container with only the packed package:
    a new project, the package added, the README's first program as written, built and run
    headless. Each step it leaves out or gets wrong is fixed, and the package workflow repeats
    the walk.
-5. **Gamepads** wait on the owner (decision 2).
+4. **Gamepads** wait on the owner (decision 2).
 
 ## Verdicts
 
