@@ -71,7 +71,7 @@ light_textures	can
 occlusion_culling	can	through Bevy's reflected OcclusionCulling
 clustered_decal_maps	can	through Bevy's reflected ClusteredDecal
 mirror	can
-pccm	can	through Bevy's reflected ParallaxCorrection
+pccm	can
 light_probe_blending	can
 2d_shapes	missing	2D meshes and their color materials
 2d_viewport_to_world	missing	2D meshes and their color materials
