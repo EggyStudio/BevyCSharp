@@ -152,4 +152,66 @@ public sealed class AnimationTests
 
         Assert.Equal(NativeStatus.NotPresent, refused!.Status);
     }
+
+    /// <summary>
+    /// A file animating two things apart has a player for each, and a clip moving both moves both,
+    /// while a clip the file left unnamed is offered by the name Bevy gives it.
+    /// </summary>
+    [SkippableFact]
+    public void EveryAnimatedRootPlaysAndAnUnnamedClipIsOffered()
+    {
+        Needs.Renderer();
+
+        var scene = Entity.None;
+        IReadOnlyList<string> clips = [];
+
+        var run = new PictureRun
+        {
+            Width = 128,
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) });
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 0f, 6f), Vec3.Zero, Vec3.UnitY));
+                scene = ecs.SpawnScene(AssetServer.LoadGltfScene("models/pair.gltf"));
+            },
+        };
+
+        run.Until("the clips arrive", _ => Animation.TryClips(scene, out clips))
+            .Wait(ShaderMaterialTests.Settled)
+            .Capture("rest")
+            .Do("spinning both", _ =>
+            {
+                Animation.Play(scene, "Spin");
+                Animation.Pause(scene);
+                Animation.Seek(scene, 0.5f);
+            })
+            .Wait(10)
+            .Capture("spun")
+            .Go();
+
+        Assert.Equal(["Spin", "Animation1"], clips);
+
+        var rest = run.Picture("rest");
+        var spun = run.Picture("spun");
+
+        // Each half of the picture holds one strip, and each moved.
+        int Moved(uint from, uint to)
+        {
+            var count = 0;
+            for (var y = 0u; y < rest.Height; y++)
+            {
+                for (var x = from; x < to; x++)
+                {
+                    var (ar, _, _, _) = rest.At(x, y);
+                    var (br, _, _, _) = spun.At(x, y);
+                    if (Math.Abs(ar - br) > 60) count++;
+                }
+            }
+
+            return count;
+        }
+
+        Assert.True(Moved(0, rest.Width / 2) > 30, "the left strip did not turn");
+        Assert.True(Moved(rest.Width / 2, rest.Width) > 30, "the right strip did not turn");
+    }
 }

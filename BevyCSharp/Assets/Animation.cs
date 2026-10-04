@@ -65,6 +65,10 @@ public readonly record struct AnimationFinished(Entity Scene, string Clip);
 public static unsafe class Animation
 {
     /// <summary>The names of a model's clips, or false while it has not arrived.</summary>
+    /// <remarks>
+    /// In the order the file lists them, and a clip the file gives no name is named as Bevy labels
+    /// it, <c>Animation</c> and its number, so every clip can be played.
+    /// </remarks>
     /// <param name="scene">The entity the model's scene was spawned under.</param>
     /// <param name="clips">The names, in a fixed order, when this answers true.</param>
     /// <exception cref="BevyNativeException">

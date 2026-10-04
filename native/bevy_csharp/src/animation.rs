@@ -16,14 +16,16 @@
 
 use crate::interop::status;
 
-/// What a scene's clips became: the file they came from, the player that plays them, and the node
-/// each name is in the graph, in name order.
+/// What a scene's clips became, the players that play them and the node each clip is in the
+/// graph, in the order the file lists them.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::component::Component)]
 pub struct BcsAnimator {
-    /// The entity carrying the `AnimationPlayer`, somewhere below the scene's root.
-    player: bevy::ecs::entity::Entity,
-    /// Each clip's name, sorted, so a clip's number is the same every run.
+    /// Every entity below the scene's root carrying an `AnimationPlayer`, one for each top node of
+    /// what the file animates.
+    players: Vec<bevy::ecs::entity::Entity>,
+    /// Each clip's name, in the file's order, so a clip's number is the same every run. A clip
+    /// the file gives no name is called as Bevy labels it, `Animation` and its number.
     names: Vec<String>,
     /// The graph node of each clip, in the order of `names`.
     nodes: Vec<bevy::animation::graph::AnimationNodeIndex>,
@@ -74,9 +76,11 @@ fn notice_finished(
             continue;
         }
 
-        let done = players
-            .get(animator.player)
-            .ok()
+        // Every player plays the clip together, so the first answers for them all.
+        let done = animator
+            .players
+            .first()
+            .and_then(|&player| players.get(player).ok())
             .and_then(|player| player.animation(animator.nodes[clip]))
             .is_some_and(|active| active.is_finished());
 
@@ -128,22 +132,31 @@ fn animator(world: &mut bevy::ecs::world::World, root: bevy::ecs::entity::Entity
         return Err(status::INVALID_STATE);
     };
 
-    let mut clips: Vec<(String, bevy::asset::Handle<bevy::animation::AnimationClip>)> = file
-        .named_animations
+    // Every clip, named or not, in the file's order, so one the artist left unnamed can still be
+    // played by the name Bevy gives it.
+    let clips: Vec<(String, bevy::asset::Handle<bevy::animation::AnimationClip>)> = file
+        .animations
         .iter()
-        .map(|(name, clip)| (name.to_string(), clip.clone()))
+        .enumerate()
+        .map(|(index, clip)| {
+            let name = file
+                .named_animations
+                .iter()
+                .find(|(_, named)| *named == clip)
+                .map_or_else(|| format!("Animation{index}"), |(name, _)| name.to_string());
+            (name, clip.clone())
+        })
         .collect();
-    clips.sort_by(|a, b| a.0.cmp(&b.0));
 
-    // The player is on whichever node is the top of what the clips move, which glTF does not
-    // name, so the hierarchy below the root is searched for it.
+    // A player is on each node at the top of what the clips move, which glTF does not name, so
+    // the hierarchy below the root is searched for all of them. A file animating two separate
+    // things, such as a character and the prop it carries, has a player for each.
     let mut stack = vec![root];
-    let mut player = None;
+    let mut players = Vec::new();
 
     while let Some(entity) = stack.pop() {
         if world.get::<AnimationPlayer>(entity).is_some() {
-            player = Some(entity);
-            break;
+            players.push(entity);
         }
 
         if let Some(children) = world.get::<Children>(entity) {
@@ -151,7 +164,7 @@ fn animator(world: &mut bevy::ecs::world::World, root: bevy::ecs::entity::Entity
         }
     }
 
-    let Some(player) = player else {
+    if players.is_empty() {
         // Spawned and still without a player means the file animates nothing.
         return Err(if world.get::<WorldInstance>(root).is_some() && !clips.is_empty() {
             status::INVALID_STATE
@@ -160,17 +173,21 @@ fn animator(world: &mut bevy::ecs::world::World, root: bevy::ecs::entity::Entity
         } else {
             status::INVALID_STATE
         });
-    };
+    }
 
+    // One graph of every clip for every player, so a clip moves whatever it targets under any of
+    // them and leaves the rest alone.
     let (graph, nodes) = AnimationGraph::from_clips(clips.iter().map(|(_, clip)| clip.clone()));
     let graph = world.resource_mut::<Assets<AnimationGraph>>().add(graph);
 
-    world
-        .entity_mut(player)
-        .insert((AnimationGraphHandle(graph), AnimationTransitions::new()));
+    for &player in &players {
+        world
+            .entity_mut(player)
+            .insert((AnimationGraphHandle(graph.clone()), AnimationTransitions::new()));
+    }
 
     world.entity_mut(root).remove::<BcsAnimationSource>().insert(BcsAnimator {
-        player,
+        players,
         names: clips.into_iter().map(|(name, _)| name).collect(),
         nodes,
         playing: None,
@@ -180,11 +197,12 @@ fn animator(world: &mut bevy::ecs::world::World, root: bevy::ecs::entity::Entity
     Ok(())
 }
 
-/// Runs `f` over a scene root's animator and the player it plays on, after making them.
+/// Runs `f` over a scene root's animator and each player it plays on, after making them, and
+/// answers the first status that is not [`status::OK`], or that.
 #[cfg(feature = "render")]
 fn with_animator(
     root: u64,
-    f: impl FnOnce(
+    mut f: impl FnMut(
         &mut BcsAnimator,
         &mut bevy::animation::AnimationPlayer,
         &mut bevy::animation::transition::AnimationTransitions,
@@ -200,8 +218,8 @@ fn with_animator(
             return why;
         }
 
-        let player = world.get::<BcsAnimator>(root).map(|animator| animator.player);
-        let Some(player) = player else {
+        let players = world.get::<BcsAnimator>(root).map(|animator| animator.players.clone());
+        let Some(players) = players else {
             return status::NOT_PRESENT;
         };
 
@@ -216,11 +234,18 @@ fn with_animator(
             &mut bevy::animation::transition::AnimationTransitions,
         )>();
 
-        let answer = match playing.get_mut(world, player) {
-            Ok((mut player, mut transitions)) => f(&mut animator, &mut player, &mut transitions),
-            // The scene was taken apart under it, which leaves nothing to play.
-            Err(_) => status::NOT_PRESENT,
-        };
+        let mut answer = status::OK;
+        for player in players {
+            let said = match playing.get_mut(world, player) {
+                Ok((mut player, mut transitions)) => f(&mut animator, &mut player, &mut transitions),
+                // The scene was taken apart under it, which leaves nothing to play.
+                Err(_) => status::NOT_PRESENT,
+            };
+
+            if answer == status::OK {
+                answer = said;
+            }
+        }
 
         world.entity_mut(root).insert(animator);
         answer
@@ -427,7 +452,9 @@ pub unsafe extern "C" fn bcs_animation_state(root: u64, out: *mut BcsAnimationSt
             };
 
             let answer = with_animator(root, |animator, player, _| {
-                if let Some(clip) = animator.playing
+                // The first player answers, since every one plays the clip together.
+                if state.clip < 0
+                    && let Some(clip) = animator.playing
                     && let Some(active) = player.animation(animator.nodes[clip])
                 {
                     state = BcsAnimationState {

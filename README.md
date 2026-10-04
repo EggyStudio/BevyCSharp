@@ -1072,7 +1072,8 @@ foreach (var ended in ctx.Read<AnimationFinished>())
 ```
 
 `TryClips` and `Play` answer false while the model is still loading, and asking again next frame
-is the protocol. `Pause`, `Resume`, `Seek`, `SetSpeed` and `Stop` act on what plays, and `StateOf`
+is the protocol. Clips are listed in the file's order, one the file left unnamed as Bevy labels it
+(`Animation1`), and a file animating two separate things plays a clip on both. `Pause`, `Resume`, `Seek`, `SetSpeed` and `Stop` act on what plays, and `StateOf`
 reads it back. A clip that plays once posts `AnimationFinished` when it reaches its end. The
 console's `anim.clips`, `anim.play` and `anim.stop` do the same from the editor or `bcs`. One clip
 plays at a time, fading from the last, so masks, additive layers and a state machine over clips
