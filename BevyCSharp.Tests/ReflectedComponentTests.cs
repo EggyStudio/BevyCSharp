@@ -215,6 +215,36 @@ public sealed class ReflectedComponentTests
         Assert.Equal("Some", after);
     }
 
+    /// <summary>
+    /// A component holding a range of numbers is written from JSON and read back, which needs the
+    /// range's serde data that Bevy's reflection leaves out and the bridge registers.
+    /// </summary>
+    [SkippableFact]
+    public void AComponentHoldingARangeIsWrittenFromJson()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        string? end = null;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            const string Range = "bevy_camera::visibility::range::VisibilityRange";
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.InsertReflected(entity, Range,
+                """{"start_margin":{"start":0,"end":0},"end_margin":{"start":3,"end":4},"use_aabb":false}""");
+            // A range is opaque to a path into it, so it is written whole.
+            ctx.Ecs.SetReflected(entity, Range, ".end_margin", """{"start":3,"end":5}""");
+            end = ctx.Ecs.GetReflected(entity, Range, ".end_margin");
+        });
+
+        harness.Run();
+
+        Assert.NotNull(end);
+        Assert.Contains("\"start\":3", end, StringComparison.Ordinal);
+        Assert.Contains("\"end\":5", end, StringComparison.Ordinal);
+    }
+
     [SkippableFact]
     public void APointLightIsSetThroughReflectionAndReadBackThroughBevy()
     {

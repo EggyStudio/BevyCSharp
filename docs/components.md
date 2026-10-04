@@ -83,6 +83,10 @@ A handle inside a component, such as the image a sprite draws, has no JSON form 
 `AssetHandle` instead, through `GetReflectedAsset` and `SetReflectedAsset`. Reading one the program
 already holds returns that same handle.
 
+A range of numbers, such as the margins of a `VisibilityRange`, is JSON of its two ends,
+`{"start":3,"end":4}`, and is written whole, since a path stops at the range rather than going into
+one of its ends.
+
 The same components have typed wrappers in `Bevy.Reflected`, generated from a description of
 Bevy's components checked in beside the library, with a property per field:
 

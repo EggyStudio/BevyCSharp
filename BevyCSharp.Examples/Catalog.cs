@@ -53,6 +53,7 @@ internal static class Catalog
         new("bloom_3d", Bloom3d.Build),
         new("shadow_caster_receiver", ShadowCasterReceiver.Build),
         new("shadow_biases", ShadowBiases.Build),
+        new("visibility_range", VisibilityRange.Build),
         new("spherical_area_lights", SphericalAreaLights.Build),
         new("animated_material", AnimatedMaterial.Build),
         new("render_to_texture", RenderToTexture.Build),

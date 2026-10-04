@@ -1,0 +1,158 @@
+using Bevy;
+
+namespace BevyCSharp.Examples.ThreeD;
+
+// Demonstrates visibility ranges, the flight helmet drawn from its high-poly model close up and its
+// low-poly one further away, faded one into the other as the camera crosses between them.
+internal static class VisibilityRange
+{
+    private const string RangeType = "bevy_camera::visibility::range::VisibilityRange";
+    private const string MeshType = "bevy_mesh::components::Mesh3d";
+
+    private static readonly Vec3 FocalPoint = new(0f, 0.3f, 0f);
+    private const float KeyboardZoomSpeed = 0.05f, KeyboardPanSpeed = 0.01f, MouseMovementSpeed = 0.25f;
+    private const float MinZoomDistance = 0.5f;
+
+    // Bevy's four ranges, as JSON of its VisibilityRange, each a start margin and an end margin.
+    private static string Range(float startFrom, float startTo, float endFrom, float endTo) =>
+        FormattableString.Invariant(
+            $$"""{"start_margin":{"start":{{startFrom}},"end":{{startTo}}},"end_margin":{"start":{{endFrom}},"end":{{endTo}}},"use_aabb":false}""");
+
+    private static readonly string HighPolyRange = Range(0f, 0f, 3f, 4f);
+    private static readonly string LowPolyRange = Range(3f, 4f, 8f, 9f);
+    private static readonly string SingleModelRange = Range(0f, 0f, 8f, 9f);
+    private static readonly string InvisibleRange = Range(0f, 0f, 0f, 0f);
+
+    // Which model a mesh belongs to, put on each mesh as its range is.
+    internal struct MainModel
+    {
+        public bool HighPoly;
+    }
+
+    private static Entity _camera, _text;
+    private static readonly List<(Entity Root, bool HighPoly)> Roots = [];
+
+    // Null shows both, by distance, and otherwise which one alone.
+    private static bool? _showOnly;
+    private static bool _prepass;
+
+    public static void Build(App app)
+    {
+        Roots.Clear();
+        (_showOnly, _prepass) = (null, false);
+
+        app.Startup(ctx =>
+        {
+            var ecs = ctx.Ecs;
+            ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 50f, 50f), Scene.Material(Scene.Srgb(0.1f, 0.2f, 0.1f)), Transform.Identity);
+
+            // Bevy's FULL_DAYLIGHT, turned by its EulerRot::ZYX, and cascades kept close.
+            var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 20_000f, Shadows = true });
+            ecs.Add(sun, new Transform(Vec3.Zero, Quat.FromRotationY(MathF.PI * -0.15f) * Quat.FromRotationX(MathF.PI * -0.15f), Vec3.One));
+            Render.SetShadowCascades(sun, maximum: 30f, firstBound: 0.9f);
+
+            _camera = ecs.Camera(Transform.LookingAt(new Vec3(0.7f, 0.7f, 1f), FocalPoint, Vec3.UnitY));
+            Render.SetEnvironmentMap(
+                _camera,
+                AssetServer.Load(AssetKind.Image, "environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2"),
+                AssetServer.Load(AssetKind.Image, "environment_maps/pisa_specular_rgb9e5_zstd.ktx2"),
+                150f);
+
+            _text = Ui.SpawnText(Describe(), new UiSettings { Absolute = true, Bottom = Length.Px(12f), Left = Length.Px(12f) });
+        }, "visibility_range.Setup");
+
+        app.SpawnGltf("models/FlightHelmet/FlightHelmet.gltf", (_, root) => Roots.Add((root, true)));
+        app.SpawnGltf("models/FlightHelmetLowPoly/FlightHelmetLowPoly.gltf", (_, root) => Roots.Add((root, false)));
+
+        app.Update(SetVisibilityRanges, "visibility_range.SetVisibilityRanges");
+        app.Update(MoveCamera, "visibility_range.MoveCamera");
+        app.Update(UpdateMode, "visibility_range.UpdateMode");
+        app.Update(TogglePrepass, "visibility_range.TogglePrepass");
+    }
+
+    // Gives each mesh of either model its range as it appears, as Bevy's does for each new Mesh3d,
+    // by the model it hangs under.
+    private static void SetVisibilityRanges(BehaviorContext ctx)
+    {
+        var ecs = ctx.Ecs;
+        foreach (var (root, highPoly) in Roots)
+            Walk(root, highPoly);
+
+        void Walk(Entity entity, bool highPoly)
+        {
+            if (!ecs.Has<MainModel>(entity) && ecs.GetReflectedAsset(entity, MeshType, ".0") is not null)
+            {
+                ecs.InsertReflected(entity, RangeType, RangeFor(highPoly));
+                ecs.Add(entity, new MainModel { HighPoly = highPoly });
+            }
+
+            foreach (var child in ecs.ChildrenOf(entity)) Walk(child, highPoly);
+        }
+    }
+
+    private static string RangeFor(bool highPoly) => (highPoly, _showOnly) switch
+    {
+        (true, false) or (false, true) => InvisibleRange,
+        (_, not null) => SingleModelRange,
+        (true, null) => HighPolyRange,
+        (false, null) => LowPolyRange,
+    };
+
+    private static void MoveCamera(BehaviorContext ctx)
+    {
+        var input = ctx.Input;
+        var (zoom, theta) = (0f, 0f);
+
+        if (input.KeyDown(Key.W) || input.KeyDown(Key.ArrowUp)) zoom -= KeyboardZoomSpeed;
+        else if (input.KeyDown(Key.S) || input.KeyDown(Key.ArrowDown)) zoom += KeyboardZoomSpeed;
+
+        if (input.KeyDown(Key.A) || input.KeyDown(Key.ArrowLeft)) theta -= KeyboardPanSpeed;
+        else if (input.KeyDown(Key.D) || input.KeyDown(Key.ArrowRight)) theta += KeyboardPanSpeed;
+
+        zoom -= input.WheelY * MouseMovementSpeed;
+        if (zoom == 0f && theta == 0f) return;
+
+        var transform = ctx.Ecs.GetOrDefault<Transform>(_camera);
+        var magnitude = transform.Translation.Length;
+        var direction = Quat.FromRotationY(theta) * transform.Translation.Normalized;
+        var at = direction * MathF.Max(magnitude + zoom, MinZoomDistance);
+        ctx.Ecs.Set(_camera, Transform.LookingAt(at, FocalPoint, Vec3.UnitY));
+    }
+
+    private static void UpdateMode(BehaviorContext ctx)
+    {
+        var input = ctx.Input;
+        if (input.KeyPressed(Key.Digit1) || input.KeyPressed(Key.Numpad1)) _showOnly = null;
+        else if (input.KeyPressed(Key.Digit2) || input.KeyPressed(Key.Numpad2)) _showOnly = true;
+        else if (input.KeyPressed(Key.Digit3) || input.KeyPressed(Key.Numpad3)) _showOnly = false;
+        else return;
+
+        var ecs = ctx.Ecs;
+        foreach (var entity in ecs.EntitiesWith<MainModel>())
+            ecs.InsertReflected(entity, RangeType, RangeFor(ecs.GetOrDefault<MainModel>(entity).HighPoly));
+        Ui.SetText(_text, Describe());
+    }
+
+    private static void TogglePrepass(BehaviorContext ctx)
+    {
+        if (!ctx.Input.KeyPressed(Key.Space)) return;
+
+        _prepass = !_prepass;
+        foreach (var prepass in new[] { "bevy_core_pipeline::prepass::DepthPrepass", "bevy_core_pipeline::prepass::NormalPrepass" })
+        {
+            if (_prepass) ctx.Ecs.InsertReflected(_camera, prepass);
+            else ctx.Ecs.RemoveReflected(_camera, prepass);
+        }
+        Ui.SetText(_text, Describe());
+    }
+
+    private static string Describe() =>
+        $"""
+        {(_showOnly is null ? '>' : ' ')} (1) Switch from high-poly to low-poly based on camera distance
+        {(_showOnly is true ? '>' : ' ')} (2) Show only the high-poly model
+        {(_showOnly is false ? '>' : ' ')} (3) Show only the low-poly model
+        Press 1, 2, or 3 to switch which model is shown
+        Press WASD or use the mouse wheel to move the camera
+        Press Space to {(_prepass ? "disable" : "enable")} the prepass
+        """;
+}

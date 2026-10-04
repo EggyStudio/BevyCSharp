@@ -36,6 +36,8 @@ models/FlightHelmet/FlightHelmet_Materials_MetalPartsMat_OcclusionRoughMetal.png
 models/FlightHelmet/FlightHelmet_Materials_RubberWoodMat_BaseColor.png
 models/FlightHelmet/FlightHelmet_Materials_RubberWoodMat_Normal.png
 models/FlightHelmet/FlightHelmet_Materials_RubberWoodMat_OcclusionRoughMetal.png
+models/FlightHelmetLowPoly/FlightHelmetLowPoly.bin
+models/FlightHelmetLowPoly/FlightHelmetLowPoly.gltf
 textures/basic_metering_mask.png
 textures/BlueNoise-Normal.png
 models/GolfBall/GolfBall.glb

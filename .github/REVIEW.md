@@ -15,7 +15,7 @@ taken again in the working tree were looked at, and the verdict below is what is
 
 ## Now
 
-Item 1 is the owner's request of 2026-10-04 and goes on a group at a time. Items 4 to 6 are
+Item 1 is the owner's request of 2026-10-04 and goes on a group at a time. Items 5 to 7 are
 taken from [SHARED.md](SHARED.md).
 
 1. **The verdict below**, since every capture taken from here on is taken the same way.
@@ -23,7 +23,31 @@ taken from [SHARED.md](SHARED.md).
    needs something missing marked and passed over. A picture that differs from Bevy's for no
    known reason is taken down to the smallest scene that still differs and explained before
    the pass goes on, as `grid` was, since that is where the table finds a fault.
-2. **The gaps, by how many rows each holds**, once the groups in item 1 are through, each
+2. **A click on an example opens Bevy's live demo of it**, which the owner asked for on
+   2026-10-04. Bevy hosts its examples running in the browser, and each example here is the
+   same scene under the same name, so its picture can open the original. It adds no file to
+   host and nothing to history, which is why animated captures were turned down.
+   - Bevy's site addresses an example as `https://bevy.org/examples/<category>/<example>/`, both
+     parts in lower case joined by hyphens (`3d-rendering/3d-scene`, `2d-rendering/sprite`,
+     `ui-user-interface/borders`, `games/breakout`), from the `category` and the name that
+     `build/examples-table.py` already reads, for the examples whose metadata says
+     `wasm = true`. The site shows Bevy's newest release and the table is built from 0.19.1, so
+     the pattern is not trusted. The script, run by hand with a flag such as `--check-live`,
+     asks the site for each address and writes those that answer to
+     `BevyCSharp.Examples/bevy-live.txt`. A normal run reads that file and touches no network.
+   - EXAMPLES.md: a row whose example has a page gains a link reading `live in Bevy` beside
+     the link to Bevy's source. The opening says in a sentence that it runs Bevy's Rust original
+     in the browser, which this engine's example draws the same scene as.
+   - The README's gallery: a picture is a link to the live page where there is one and to the
+     C# source where there is none, the caption keeping the link to the C# source, with a line
+     above the gallery saying what a picture opens.
+   - The link check in the workflow passes over `bevy.org` addresses, since they were checked
+     when the list was made and a site that is down is not this repository's fault. The list is
+     made again when the bridge moves to a new Bevy.
+   - Verified by `3d_scene`'s picture opening `https://bevy.org/examples/3d-rendering/3d-scene/`,
+     by an example with no browser build having no live link, and by EXAMPLES.md building the
+     same with the network off.
+3. **The gaps, by how many rows each holds**, once the groups in item 1 are through, each
    bridged from Bevy with the examples it unlocks written in its batch. By the table as it
    stands: 2D meshes with their color materials (13 rows); an order among the systems of one
    Bevy's
@@ -33,16 +57,16 @@ taken from [SHARED.md](SHARED.md).
    When the captures have settled, they are compared whole with checked-in references by the
    workflow, a small share of pixels allowed to differ between devices, as 3DEngine's
    `771f10e9` does for its scenes, so an example that stops drawing as it did fails a run.
-3. **A build with no warnings, and a warning failing the workflow.** The managed build passes
+4. **A build with no warnings, and a warning failing the workflow.** The managed build passes
    `-warnaserror` in the workflow once it is clean, with a warning that is right to keep turned
    off where it arises and its reason beside it, and `cargo` builds deny warnings the same way.
-4. **A contact that says how hard its pair hit, and joints with limits**, from 3DEngine's
+5. **A contact that says how hard its pair hit, and joints with limits**, from 3DEngine's
    `c5227118`: the speed a pair closed at on the contact's message, a ball joint kept within a
    cone, and a distance joint whose range changes after it is made.
-5. **Two more of a character and a collider**, from 3DEngine's `52579d98` and `454e9276`: a
+6. **Two more of a character and a collider**, from 3DEngine's `52579d98` and `454e9276`: a
    character that crouches and stands from its component's height, and a collider that is the
    shape of the meshes an entity and those under it show, made once the model has loaded.
-6. **A joint in a scene file, and a pad's sensors**, from 3DEngine's `e46058fc` and `73ce6326`:
+7. **A joint in a scene file, and a pad's sensors**, from 3DEngine's `e46058fc` and `73ce6326`:
    a joint as an entity naming its two bodies, so a level hangs a door where it stands, and a
    gamepad's gyro, accelerometer, touchpad and light where gilrs offers them. Two small things
    of the command line are checked in the same batch and taken if they are missing: `entity.set`

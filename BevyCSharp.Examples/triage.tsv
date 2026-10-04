@@ -51,7 +51,7 @@ meshlet	can	needs a bridge built with --meshlet
 mesh_ray_cast	can
 lightmaps	can	through Bevy's reflected Lightmap and a material's LightmapExposure
 reflection_probes	can
-visibility_range	can	through Bevy's reflected VisibilityRange
+visibility_range	can
 ssr	can
 camera_sub_view	can	through the sub view of Bevy's reflected Camera
 color_grading	can

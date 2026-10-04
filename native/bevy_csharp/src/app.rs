@@ -682,6 +682,17 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         }
     }
 
+    // A range of numbers read and written as JSON, `{"start":..,"end":..}`, which Bevy's
+    // reflection registers without its serde data, so a component holding one, as
+    // `VisibilityRange` holds two, could be read from C# and not written. Serde has the impls and
+    // only the registration is missing.
+    {
+        use bevy::reflect::{ReflectDeserialize, ReflectSerialize};
+        app.register_type::<core::ops::Range<f32>>();
+        app.register_type_data::<core::ops::Range<f32>, ReflectSerialize>();
+        app.register_type_data::<core::ops::Range<f32>, ReflectDeserialize>();
+    }
+
     // Where the typed-text reader keeps its place between frames.
     app.init_resource::<crate::sync::TextCursor>();
 
