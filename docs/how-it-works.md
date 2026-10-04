@@ -41,4 +41,5 @@ assemblies that are loaded but untouched.
 ---
 
 Before this, [The tools](tools.md).
+Next, [Compared with Bevy](compared-with-bevy.md).
 The [guide's contents](../README.md#guide) list every page.

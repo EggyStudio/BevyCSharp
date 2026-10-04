@@ -109,12 +109,16 @@ taken from [SHARED.md](SHARED.md).
 ## Replies
 
 
-- Item 2. The rename of `CLAUDE.md` is left uncommitted until the owner confirms it in the working
-  session, since that file holds the working session's own instructions and a change to it is
-  taken from the owner there. Nothing else in this batch names the file.
+- Item 2. The rename is committed on its own at `e807089`, and STYLE.md's scope names
+  `AGENTS.md` in the capture batch, the one other document that named the old file.
 - Shared: observers, in the batch after `bb1ae57`. A game's own event triggered from C# runs the
   observers of every such event and then those of its entity, and one marked as propagating goes
   on up the parents, changed as an observer changed it, until one stops it. A C# component's
   addition, insertion, discard, removal and despawn are Bevy's observers calling back with the
   entity and the value, a removal's value being the one that went, before the call that made the
   change returns. `observers`, `observer_propagation` and `removal_detection` are written with it.
+- Item 3. `docs/compared-with-bevy.md` is written, with the README's lines under its first
+  snippet and a row in the guide's contents. Bevy's version is said as the one the lock pins and
+  a new one as reaching a game when the bridge moves onto it, rather than as a version behind,
+  since how far Bevy has moved since was not checked here.
+- Shared: the page comparing the engine with Bevy, in the batch after `26c0a16`.

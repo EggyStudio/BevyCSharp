@@ -51,6 +51,12 @@ BevyApp.Run();
 
 Behaviors are discovered automatically, so a consuming project needs no registration code.
 
+This is Bevy, run unchanged underneath, so what a game draws and how its
+systems are scheduled are Bevy's. What it adds is C#, behaviors reloaded while the game runs, an
+editor, scene files and saves, physics, and a package with no Rust in it. What it costs is a call
+across to the bridge each time C# reaches Bevy, and only what the bridge has opened, which reaches
+two thirds of the Bevy examples about a game rather than Rust. [Compared with Bevy](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/compared-with-bevy.md) has each, with what was measured.
+
 ## Contents
 
 - [Examples](#examples)
@@ -172,6 +178,7 @@ transform the renderer reads and a sound played from C# is an entity in the same
 | [Making a game](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/making-a-game.md) | Courtyard, a small game from an empty project to an export |
 | [The tools](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/tools.md) | The editor, its console, and driving a running app |
 | [How it works](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/how-it-works.md) | Inside, between C# and Bevy |
+| [Compared with Bevy](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/compared-with-bevy.md) | What is the same, what it adds, what it costs, and what was measured |
 
 ## Driving a running app
 
