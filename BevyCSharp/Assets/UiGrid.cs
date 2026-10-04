@@ -47,6 +47,19 @@ public readonly record struct Track
     /// </remarks>
     public static Track Fr(float share) => new(3, share, 1);
 
+    /// <summary>
+    /// A share of the room left over, as <see cref="Fr"/> is, that may also be narrower than what
+    /// it holds.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's <c>GridTrack::flex</c>, a stylesheet's <c>minmax(0, 1fr)</c>. An <see cref="Fr"/>
+    /// track grows to fit the smallest its contents can be, so one holding something wide or a
+    /// square sized by its height takes more than its share and pushes the tracks after it along.
+    /// This one keeps its share and lets the contents overflow it, as equal columns and a row that
+    /// fits the window need.
+    /// </remarks>
+    public static Track Flex(float share) => new(6, share, 1);
+
     /// <summary>The smallest its contents can be squeezed to.</summary>
     public static Track MinContent => new(4, 0f, 1);
 
@@ -83,6 +96,7 @@ public readonly record struct Track
             1 => $"{Value}px",
             2 => $"{Value}%",
             3 => $"{Value}fr",
+            6 => $"minmax(0, {Value}fr)",
             4 => "min",
             5 => "max",
             _ => "auto",

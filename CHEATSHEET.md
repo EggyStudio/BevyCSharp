@@ -23,6 +23,7 @@ static App Build(Config config = null);                         // Builds an app
 App AddSystem(Stage stage, SystemFn system);                    // Registers a system function in stage
 App AddSystem(Stage stage, SystemFn system, Func<World, bool> runCondition);  // Registers a system function with a run condition
 App AddSystem(Stage stage, SystemDescriptor descriptor);        // Registers a described system in stage
+App Chain(Stage stage, params SystemDescriptor[] systems);      // Registers systems in stage, each to run after the one before it
 App EnableDynamicSystems();                                     // Allows systems to be added after the loop has started
 int RemoveSystemsBySource(string source);                       // Removes every system tagged with source
 IReadOnlyList<SystemDescriptor> SystemsIn(Stage stage);         // The descriptors registered for stage, in registration order
@@ -165,6 +166,8 @@ static void Run<T, T1, T2>(World world, BehaviorRunner<T, T1, T2> body, ReadOnly
 
 ```csharp
 SystemDescriptor RunIf(Func<World, bool> condition);            // Attaches a run condition
+SystemDescriptor After(string name);                            // Runs this system after every system in its stage named name
+SystemDescriptor Before(string name);                           // Runs this system before every system in its stage named name
 SystemDescriptor Read<T>();                                     // Declares a read of resource type T
 SystemDescriptor Write<T>();                                    // Declares a write of resource type T
 bool ConflictsWith(SystemDescriptor other);                     // True when this system's declared access overlaps other's in a way that would prevent the two running concurrently
@@ -1050,6 +1053,7 @@ static Corners Bottom(Length value);                            // Rounded along
 static Track Px(float value);                                   // A fixed number of logical pixels
 static Track Percent(float value);                              // A percentage of the grid across that axis
 static Track Fr(float share);                                   // A share of whatever room is left after the fixed tracks have taken theirs
+static Track Flex(float share);                                 // A share of the room left over, as Fr is, that may also be narrower than what it holds
 Track Repeated(int count);                                      // The same track, stated count times over
 Track Filling(bool collapse = false);                           // The same track, repeated as many times as the grid has room for
 ```
@@ -1207,7 +1211,7 @@ static void DisconnectGamepad(Entity gamepad);                  // Disconnects a
 static void SetGamepadButton(Entity gamepad, GamepadButton button, float value = 1f);  // Sets one of a pretended pad's buttons, from zero, up, to one, down
 static void SetGamepadAxis(Entity gamepad, GamepadAxis axis, float value);  // Sets one of a pretended pad's axes, a stick from minus one to one and a trigger from zero to one
 static void Wheel(float lines, float sideways = 0f);            // Rolls the wheel, in the lines a wheel with detents reports
-static void Press(Key key, string typed = "");                  // Presses a key where a real one is reported, at the window
+static void Press(Key key, string typed = "");                  // Presses a button where the pointer is put
 static void Lift(Key key);                                      // Lets a key go, where a real one is reported
 static void Tap(Key key, string typed = "");                    // Presses a key and lets it go again
 static void Key(ImGuiKey key, string typed = null);             // Presses and releases a key in the interface's own queue

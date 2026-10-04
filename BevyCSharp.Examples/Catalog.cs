@@ -153,6 +153,7 @@ internal static class Catalog
         new("button", ButtonExample.Build),
         new("display_and_visibility", DisplayAndVisibility.Build),
         new("flex_layout", FlexLayout.Build),
+        new("grid", Grid.Build, Grid.Configure),
         new("gradients", Gradients.Build),
         new("image_node", ImageNode.Build),
         new("letter_spacing", LetterSpacingExample.Build),

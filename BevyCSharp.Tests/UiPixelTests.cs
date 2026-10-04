@@ -297,6 +297,45 @@ public sealed class UiPixelTests
         Assert.InRange(right, 66, 76);
     }
 
+    /// <summary>A flex track keeps its share when what it holds is wider than the share.</summary>
+    /// <remarks>
+    /// Two equal tracks, the first holding a node a hundred pixels wide in a grid of 128. A flex
+    /// track may shrink below its contents, so the second column still starts at 64. An fr track
+    /// may not, so asked for as fr the second column would be pushed past a hundred, which is how
+    /// a grid of flex tracks drawn as fr overflows its row.
+    /// </remarks>
+    [SkippableFact]
+    public void AFlexTrackKeepsItsShareWhenItsContentsAreWider()
+    {
+        Needs.Renderer();
+
+        var picture = Capture((camera, world) =>
+        {
+            var panel = Ui.SpawnNode(new UiSettings
+            {
+                Absolute = true,
+                Left = Length.Zero,
+                Top = Length.Zero,
+                Width = Length.Px(128f),
+                Height = Length.Px(32f),
+                Camera = camera,
+            });
+            UiGrid.Set(panel, new GridSettings { Columns = [Track.Flex(1f), Track.Flex(1f)], Rows = [Track.Px(32f)] });
+
+            var wide = Ui.SpawnNode(new UiSettings { MinWidth = Length.Px(100f), Height = Length.Px(8f), Color = (1f, 0f, 0f, 1f), Camera = camera });
+            var marker = Ui.SpawnNode(new UiSettings { Width = Length.Px(8f), Height = Length.Px(8f), Color = (0f, 1f, 0f, 1f), Camera = camera });
+
+            var ecs = world.Resource<EcsWorld>();
+            ecs.SetParent(wide, panel);
+            ecs.SetParent(marker, panel);
+        });
+
+        Assert.NotNull(picture);
+
+        var (left, _) = Edges(picture, red: false);
+        Assert.InRange(left, 62, 66);
+    }
+
     /// <summary>A rounded corner takes the corner pixel off a node that still fills its middle.</summary>
     /// <remarks>
     /// The same node twice, so the corner going dark while the middle stays lit is the radius and

@@ -1230,7 +1230,7 @@ mod layout {
 pub struct BcsGridTrack {
     /// How the track is sized: `0` to what it holds, `1` logical pixels, `2` a percentage of the
     /// grid, `3` a share of whatever is left over, `4` the smallest its contents can be, `5` the
-    /// largest they can be.
+    /// largest they can be, `6` a share as `3` is that may also be narrower than its contents.
     pub kind: i32,
     /// The number `kind` reads, where it reads one.
     pub value: f32,

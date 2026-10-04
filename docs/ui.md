@@ -173,7 +173,9 @@ UiGrid.Set(panel, new GridSettings
 ```
 
 A track is sized by `Track.Px`, `Track.Percent`, `Track.Fr` (a share of whatever is left after the
-fixed tracks have taken theirs), `Track.Auto`, `Track.MinContent` or `Track.MaxContent`.
+fixed tracks have taken theirs), `Track.Flex` (the same share, kept even where what the track holds
+is wider), `Track.Auto`, `Track.MinContent` or `Track.MaxContent`. Equal columns, or a row meant to
+fit the window, are `Flex`, since an `Fr` track grows to fit its contents and pushes the rest along.
 `Repeated(n)` states the same track n times over, and `Filling()` states it as many times as the
 grid has room for, as a gallery that reflows with its window does. `Rows` and `Columns` are the
 tracks stated up front; `AutoRows` and `AutoColumns` are the ones made when an item lands past them,
