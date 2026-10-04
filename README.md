@@ -1054,6 +1054,30 @@ than at compile time.
 `.scn` and `.scn.ron` worlds load as the same asset through `AssetKind.Scene`, so `SpawnScene`
 takes either.
 
+A file's animation clips play on the entity its scene was spawned under, by the names the file
+gives them, a skinned character's bones and a propeller's spin alike:
+
+```csharp
+var fox = ctx.Ecs.SpawnScene(AssetServer.LoadGltfScene("models/fox.glb"));
+
+// A few frames later, once the model has arrived:
+if (Animation.TryClips(fox, out var clips))
+    Animation.Play(fox, "Walk", new AnimationSettings { Repeat = true });
+
+// And a run, faded in over a fifth of a second:
+Animation.Play(fox, "Run", new AnimationSettings { Repeat = true, Speed = 1.2f, Blend = 0.2f });
+
+foreach (var ended in ctx.Read<AnimationFinished>())
+    Console.WriteLine($"{ended.Clip} ended on {ended.Scene}");
+```
+
+`TryClips` and `Play` answer false while the model is still loading, and asking again next frame
+is the protocol. `Pause`, `Resume`, `Seek`, `SetSpeed` and `Stop` act on what plays, and `StateOf`
+reads it back. A clip that plays once posts `AnimationFinished` when it reaches its end. The
+console's `anim.clips`, `anim.play` and `anim.stop` do the same from the editor or `bcs`. One clip
+plays at a time, fading from the last, so masks, additive layers and a state machine over clips
+are left to the game.
+
 A file's own materials load too, in a windowed run:
 
 ```csharp
@@ -3371,8 +3395,8 @@ run against a real Bevy app. Known gaps:
   sprites, gizmos, UI nodes and text are reachable from a behavior script, verified on Vulkan. glTF
   files and `.scn` scenes load and spawn, audio plays, and a camera tonemaps, blooms, multisamples,
   antialiases, scatters a sky over what it draws, pulls focus and finds its own exposure. What is
-  thin is the layer above that. Animation has no bridge, sprites step through no frames of their
-  own, and a compressed texture a desktop GPU cannot decode is not transcoded.
+  thin is the layer above that. A model's clips play one at a time, sprites step through no frames
+  of their own, and a compressed texture a desktop GPU cannot decode is not transcoded.
   [.github/TODO.md](.github/TODO.md) lists what each gap needs.
 - The library compiles no C# at runtime, so a game carries no compiler. Behavior scripts loaded
   while an app runs go through `BevyCSharp.Scripting`, which the editor and the player reference

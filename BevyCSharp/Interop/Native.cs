@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 171;
+    internal const int ExpectedAbiVersion = 172;
 
     static Native() => NativeLoader.Initialize();
 
@@ -1343,6 +1343,41 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_capture_read(
         int id, uint* width, uint* height, byte* buffer, int capacity);
+
+    /// <summary>The names of a scene's clips, a line each.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_clips(ulong root, byte* buffer, int capacity);
+
+    /// <summary>Plays a scene's clip by its number.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_play(ulong root, int clip, int repeat, float speed, float blend);
+
+    /// <summary>Stops every clip on a scene.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_stop(ulong root);
+
+    /// <summary>Holds or lets go of every clip on a scene.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_pause(ulong root, int paused);
+
+    /// <summary>Moves or changes the speed of the clip a scene plays.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_adjust(ulong root, float seconds, float speed);
+
+    /// <summary>What a scene plays.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_state(ulong root, NativeAnimationState* state);
+
+    /// <summary>Takes the clips that reached their end.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_finished(ulong* roots, int* clips, int capacity);
 
     /// <summary>Reads a capture in the format it arrived in, and forgets it.</summary>
     [LibraryImport(Library)]

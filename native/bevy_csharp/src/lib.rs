@@ -26,6 +26,7 @@
 //! [`ComponentDescriptor`]: bevy::ecs::component::ComponentDescriptor
 
 pub mod app;
+pub mod animation;
 pub mod audio;
 pub mod carried;
 pub mod assets;
@@ -47,4 +48,4 @@ pub mod imgui;
 
 /// Version of the C ABI. C# checks this at load time and refuses a mismatch, so a stale
 /// native library next to a newer managed assembly fails loudly instead of corrupting memory.
-pub const ABI_VERSION: i32 = 171;
+pub const ABI_VERSION: i32 = 172;

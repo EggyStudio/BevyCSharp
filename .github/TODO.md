@@ -106,6 +106,25 @@ inserts. Two things BSN has that it does not:
 Revisit when `.bsn` ships as a loadable asset. It would load through the same path a glTF scene
 does and be authorable without recompiling the bridge, which is the part worth having here.
 
+### Animation
+
+`bevy_animation` is compiled into the render profile, and `Animation` plays a glTF file's clips by
+name on the entity its scene was spawned under, once or over and over, at a speed, held, moved to a
+time, stopped, and faded from one clip to the next over a time, with `AnimationFinished` posted when
+a clip that plays once ends. The console's `anim.*` commands reach it from the editor. What is left:
+
+- **One clip at a time.** Bevy's animation graph blends any number of clips by weight, and the
+  bridge builds a flat graph of every clip and plays the newest through `AnimationTransitions`. A
+  clip on part of a body only (a mask), a clip added over another (an additive layer) and weights
+  a game sets itself each need the graph exposed as nodes rather than names.
+- **No state machine.** Which clip follows which, on what condition, is the game's code, read off
+  `StateOf` and `AnimationFinished`. A table of states and transitions the editor could draw would
+  sit over this.
+- **Clips come from files.** A clip made in code, or one targeting a component other than the
+  transform and a mesh's morph weights, has no way in.
+- **No events inside a clip.** Bevy fires an event at a time within a clip, such as a footstep,
+  which the bridge does not pass on.
+
 ### Textures and shaders
 
 PNG, JPEG, WebP, BMP and TGA decode in every build. A drawing app reads BCn files through `ktx2` where

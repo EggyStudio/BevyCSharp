@@ -421,7 +421,7 @@ internal static class ConsoleWorldCommands
     }
 
     /// <summary>The entity a word names, by name or by <c>#index</c>.</summary>
-    private static Entity? Find(EcsWorld world, string which)
+    internal static Entity? Find(EcsWorld world, string which)
     {
         if (which.Length == 0) return null;
 
@@ -444,7 +444,7 @@ internal static class ConsoleWorldCommands
     }
 
     /// <summary>What to say, and to report, when nothing answers to a name.</summary>
-    private static string Missing(string which)
+    internal static string Missing(string which)
     {
         ConsoleHost.Fail(
             "NO_SUCH_ENTITY", $"No entity is called '{which}'. Run entity.list to see what is.");

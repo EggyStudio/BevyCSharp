@@ -271,6 +271,7 @@ public sealed unsafe class App : IDisposable
             PostFileDrops(world.Resource<MessageBus>());
             PostIme(world.Resource<MessageBus>());
             PostAssetFailures(world.Resource<MessageBus>());
+            if (HasRenderer) Animation.PostFinished(world.Resource<MessageBus>());
             DataAssets.PostChanges(world.Resource<MessageBus>());
             MaterialFiles.ReloadTouched();
             WindowMemory.Tick();

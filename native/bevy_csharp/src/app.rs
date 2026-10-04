@@ -407,6 +407,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             .clone();
             crate::render::material::install(&mut app, shader_root);
 
+            // Which clip each spawned model plays, and the clips that reached their end.
+            crate::animation::install(&mut app);
+
             // HTML and CSS driven UI, when the profile carries it and the app asked for it.
             //
             // Asked for rather than assumed, because the plugin is not free to an app that never
