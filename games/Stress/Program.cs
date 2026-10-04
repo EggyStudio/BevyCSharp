@@ -127,28 +127,16 @@ public partial struct Mover
     /// <summary>Where it is going, in units a second.</summary>
     public Vec3 Velocity;
 
-    /// <summary>Moves every mover on through its transform, as a game moves what it moves.</summary>
-    /// <remarks>
-    /// A static method over a query rather than a method per mover, since a transform is another
-    /// component, reached through the world, and the world is the main thread's alone, where a
-    /// method per entity is spread across worker threads past a few thousand of them.
-    /// </remarks>
+    /// <summary>Moves it on through its transform, which it is handed beside itself, as a game moves what it moves.</summary>
     [OnUpdate]
-    public static void Move(BehaviorContext ctx)
+    public void Move(BehaviorContext ctx, ref Transform transform)
     {
-        var delta = ctx.Time.Delta;
+        var at = transform.Translation + Velocity * ctx.Time.Delta;
 
-        foreach (var row in ctx.Ecs.Query<Mover>())
-        {
-            ref var mover = ref row.Component;
-            ref var transform = ref ctx.Ecs.GetRef<Transform>(row.Entity);
-            var at = transform.Translation + mover.Velocity * delta;
+        if (MathF.Abs(at.X) > 50f) Velocity = new Vec3(-Velocity.X, Velocity.Y, Velocity.Z);
+        if (MathF.Abs(at.Y) > 50f) Velocity = new Vec3(Velocity.X, -Velocity.Y, Velocity.Z);
+        if (MathF.Abs(at.Z) > 50f) Velocity = new Vec3(Velocity.X, Velocity.Y, -Velocity.Z);
 
-            if (MathF.Abs(at.X) > 50f) mover.Velocity = new Vec3(-mover.Velocity.X, mover.Velocity.Y, mover.Velocity.Z);
-            if (MathF.Abs(at.Y) > 50f) mover.Velocity = new Vec3(mover.Velocity.X, -mover.Velocity.Y, mover.Velocity.Z);
-            if (MathF.Abs(at.Z) > 50f) mover.Velocity = new Vec3(mover.Velocity.X, mover.Velocity.Y, -mover.Velocity.Z);
-
-            transform.Translation = at;
-        }
+        transform.Translation = at;
     }
 }

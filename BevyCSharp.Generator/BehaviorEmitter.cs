@@ -134,15 +134,47 @@ internal static class BehaviorEmitter
         EmitFilterIds(source, "__without", method.Filters.Without);
         EmitFilterIds(source, "__changed", method.Filters.Changed);
 
-        source.Append("        global::Bevy.BehaviorRunners.Run<").Append(model.QualifiedName)
-            .Append(">(\n")
+        var others = method.Others.Items;
+        if (others.Count == 0)
+        {
+            source.Append("        global::Bevy.BehaviorRunners.Run<").Append(model.QualifiedName)
+                .Append(">(\n")
+                .Append("            world,\n")
+                .Append("            static (ref ").Append(model.QualifiedName)
+                .Append(" __behavior, global::Bevy.Entity __entity, global::Bevy.BehaviorContext __context) =>\n")
+                .Append("                __behavior.").Append(method.Name).Append("(__context),\n")
+                .Append("            __with,\n")
+                .Append("            __without,\n")
+                .Append("            __changed);\n")
+                .Append("    }\n");
+            return;
+        }
+
+        // The entity's other components the method takes, handed from the same storage as the
+        // behavior's own, each as the method takes it, ref to be written or in to be read.
+        source.Append("        global::Bevy.BehaviorRunners.Run<").Append(model.QualifiedName);
+        foreach (var other in others) source.Append(", ").Append(other.Type);
+        source.Append(">(\n")
             .Append("            world,\n")
-            .Append("            static (ref ").Append(model.QualifiedName)
-            .Append(" __behavior, global::Bevy.Entity __entity, global::Bevy.BehaviorContext __context) =>\n")
-            .Append("                __behavior.").Append(method.Name).Append("(__context),\n")
+            .Append("            static (ref ").Append(model.QualifiedName).Append(" __behavior");
+
+        for (var i = 0; i < others.Count; i++)
+            source.Append(", ref ").Append(others[i].Type).Append(" __other").Append(i);
+
+        source.Append(", global::Bevy.Entity __entity, global::Bevy.BehaviorContext __context) =>\n")
+            .Append("                __behavior.").Append(method.Name).Append("(__context");
+
+        for (var i = 0; i < others.Count; i++)
+            source.Append(others[i].Writes ? ", ref __other" : ", in __other").Append(i);
+
+        source.Append("),\n")
             .Append("            __with,\n")
             .Append("            __without,\n")
-            .Append("            __changed);\n")
+            .Append("            __changed");
+
+        foreach (var other in others) source.Append(",\n            ").Append(other.Writes ? "true" : "false");
+
+        source.Append(");\n")
             .Append("    }\n");
     }
 

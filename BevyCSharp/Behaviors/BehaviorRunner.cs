@@ -26,7 +26,7 @@ public delegate void BehaviorRunner<T>(ref T component, Entity entity, BehaviorC
 /// regenerating anything. The generated runner stays a handful of readable, safe lines.
 /// </para>
 /// </remarks>
-public static class BehaviorRunners
+public static partial class BehaviorRunners
 {
     /// <summary>
     /// Entity count from which iteration is worth splitting across threads.

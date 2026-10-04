@@ -215,7 +215,9 @@ public sealed class GeneratorAttributeTests
         Assert.True(result.Success, string.Join("\n", errors));
 
         image.Position = 0;
-        var assembly = AssemblyLoadContext.Default.LoadFromStream(image);
+        // Collectible, as a script is, so engines other tests run with every behavior discovered
+        // do not find the probes and run them too.
+        var assembly = new AssemblyLoadContext("Probes", isCollectible: true).LoadFromStream(image);
         System.Runtime.CompilerServices.RuntimeHelpers.RunModuleConstructor(assembly.ManifestModule.ModuleHandle);
         return assembly;
     }

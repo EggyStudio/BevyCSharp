@@ -121,7 +121,18 @@ internal sealed record StageMethod
 
     /// <summary>An optional state restriction, which composes with the two above.</summary>
     public InStateInfo? InState { get; init; }
+
+    /// <summary>
+    /// The entity's other components an instance method takes after its context, by reference,
+    /// which the runner hands it from the same storage.
+    /// </summary>
+    public EquatableArray<OtherComponent> Others { get; init; } = EquatableArray<OtherComponent>.Empty;
 }
+
+/// <summary>Another component of the entity an instance method takes.</summary>
+/// <param name="Type">Its fully qualified name.</param>
+/// <param name="Writes">Whether it is taken <c>ref</c>, to be written, rather than <c>in</c>, to be read.</param>
+internal sealed record OtherComponent(string Type, bool Writes);
 
 /// <summary>A <c>[Behavior]</c> struct and everything the generator needs to emit for it.</summary>
 /// <summary>What kind of value a behavior's field holds, as far as a tool showing it cares.</summary>

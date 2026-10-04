@@ -32,12 +32,12 @@ public partial struct Spin
         Render.SetMaterial(ctx.Ecs, cube, Render.CreateMaterial(0.25f, 0.55f, 0.85f));
     }
 
-    // instance: once per entity that has one
+    // instance: once per entity that has one, handed the entity's transform
     [OnUpdate]
-    public void Tick(BehaviorContext ctx)
+    public void Tick(BehaviorContext ctx, ref Transform transform)
     {
         _angle += Speed * ctx.Time.Delta;
-        ctx.Ecs.GetRef<Transform>(ctx.Entity).Rotation = Quat.FromAxisAngle(Vec3.UnitY, _angle);
+        transform.Rotation = Quat.FromAxisAngle(Vec3.UnitY, _angle);
     }
 }
 ```
@@ -227,9 +227,22 @@ public partial struct Spinner
 }
 ```
 
+An instance method can also take up to two of the entity's other components after its context, as
+`ref` to write one or `in` to read it, and runs only for entities carrying them:
+
+```csharp
+[OnUpdate]
+public void Tick(BehaviorContext ctx, ref Transform transform, in Velocity velocity) =>
+    transform.Translation += velocity.Value * ctx.Time.Delta;
+```
+
+They come from the same storage as the behavior's own component, so a system of these reaches its
+entities' transforms in a few calls into the engine whatever their number, where reaching each
+through `ctx.Ecs` is a call an entity. One taken `in` is not marked changed, so what watches it for
+changes sees only real ones.
+
 Above ~4096 entities the per-entity loop is automatically split across the thread pool, where the
-method can read and write its own component and not the world, so a behavior reaching another
-component, such as the entity's `Transform`, does it from a static method over a query.
+method can read and write its own component and the ones it takes, and not the world.
 
 **Any blittable struct is a component.** Any blittable struct is a component. It needs no attribute and no interface, the first time a
 behavior touches it, its layout is registered with Bevy and it becomes a real Bevy component
@@ -3256,17 +3269,11 @@ public partial struct Spin
     public float Speed;
     public float Angle;
 
-    // Static, over a query, since the transform is another component and the world that reaches
-    // it is the main thread's, where a method per entity is spread across worker threads past a
-    // few thousand of them.
     [OnUpdate]
-    public static void Tick(BehaviorContext ctx)
+    public void Tick(BehaviorContext ctx, ref Transform transform)
     {
-        foreach (var row in ctx.Ecs.Query<Spin>())
-        {
-            row.Component.Angle += row.Component.Speed * ctx.Time.Delta;
-            ctx.Ecs.GetRef<Transform>(row.Entity).Rotation = Quat.FromRotationY(row.Component.Angle);
-        }
+        Angle += Speed * ctx.Time.Delta;
+        transform.Rotation = Quat.FromRotationY(Angle);
     }
 }
 ```

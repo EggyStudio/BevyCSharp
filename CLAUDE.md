@@ -101,3 +101,8 @@ Stop any serving session before running the suite.
   writes it after reading the code and the history, and its Now list comes before TODO.md's order.
   Only its Replies section is edited here, for an item that is disputed or blocked, and the file is
   committed with whichever batch comes next.
+- `.github/SHARED.md` records what this engine and its sibling (BevyCSharp and 3DEngine) have in
+  common and which of them has solved what. It is the same file in both repositories and is
+  written by the session that writes REVIEW.md. A batch that touches a shared area is offered
+  with a line under Replies in REVIEW.md beginning `Shared:`, and the other repository, checked
+  out beside this one, may be read for a model and is never edited from here.

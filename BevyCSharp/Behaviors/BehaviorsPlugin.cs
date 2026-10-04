@@ -49,6 +49,9 @@ public sealed class BehaviorsPlugin : IPlugin
             // Fast path: everything whose module initializer has already run.
             foreach (var register in BehaviorRegistry.Snapshot())
             {
+                // A script's, which its host registers, as the scan below leaves them too.
+                if (register.Method.DeclaringType?.Assembly.IsCollectible == true) continue;
+
                 register(app);
                 found++;
             }
@@ -74,7 +77,10 @@ public sealed class BehaviorsPlugin : IPlugin
 
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
-            if (assembly.IsDynamic) continue;
+            // A collectible assembly is a script, which the host that loaded it registers, and one
+            // a host has retired may still be in the process until the runtime unloads it, so
+            // finding it here would run a generation nobody asked for beside the current one.
+            if (assembly.IsDynamic || assembly.IsCollectible) continue;
 
             foreach (var method in FindRegistrations(assembly))
             {

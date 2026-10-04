@@ -486,7 +486,8 @@ per distribution. The minimal profile still builds with nothing but a C compiler
 
 What a frame holds is measured by `frame.profile` and the stress program in `games/Stress`, with
 the numbers and the machine in [PERFORMANCE.md](PERFORMANCE.md). Of its three largest costs the
-physics sync, which read every body each fixed step, reads only what changed, and two are left.
+physics sync reads only what changed, a behavior takes its entity's transform from the same
+storage as itself, and one is left.
 
 - **Shadows.** Three shadow-casting lights cost 8 to 10 ms of the render schedule at any count, in
   encoding a pass for each shadow view. Bevy alone spends about 8.7 ms of that on the same scene
@@ -494,9 +495,6 @@ physics sync, which read every body each fixed step, reads only what changed, an
   adding its render installers to the plain scene one at a time did not place within this
   laptop's spread of 1.5 ms. Tracing spans in a profiler would. Smaller point light shadow maps,
   or fewer faces, would be settings to offer a game.
-- **A crossing per entity a behavior reaches.** Moving each entity's `Transform` from a behavior is
-  a call into the bridge each, 16 to 28 ns, as much as the C# work. A query over two components
-  at once, handing both by reference as one row, would take it out.
 
 ### Testing
 

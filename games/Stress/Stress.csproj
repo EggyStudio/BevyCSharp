@@ -14,7 +14,7 @@
           The version packed into build/package, which a build can name instead, as continuous
           integration does with the package it packs for the run.
         -->
-        <BevyCSharpVersion Condition="'$(BevyCSharpVersion)' == ''">0.0.24-game</BevyCSharpVersion>
+        <BevyCSharpVersion Condition="'$(BevyCSharpVersion)' == ''">0.0.25-game</BevyCSharpVersion>
     </PropertyGroup>
 
     <ItemGroup>

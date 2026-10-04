@@ -104,7 +104,7 @@ A frame leaves 60 a second between **50,000 and 100,000 drawn cubes**.
    not any changed. Most of the drawn runs' managed time is this, and at 100,000 cubes without
    shadows (10,000 bodies) it is most of 37 ms. It is the largest cost this repository adds, and
    the one to take next.
-3. **A behavior reaching a second component per entity.** Moving an entity's `Transform` from a
+3. **A behavior reaching a second component per entity**, since taken (below). Moving an entity's `Transform` from a
    behavior is a crossing per entity, as the world is reached through the bridge, and each costs
    about what the C# work for the entity does. At 250,000 movers that is 5.2 ms of crossings beside
    5.6 ms of C#. Bevy's own schedule around them, which propagates the transforms that moved, is
@@ -176,6 +176,29 @@ growing with the shadow views. Adding the bridge's render installers to the plai
 time (`material`, `views`, `probes`, `watch`, `corners`, `compute`, `rays`, `layers` as arguments)
 moved it by less than the spread, so it was not placed on this machine. A quieter machine, or
 Bevy's tracing spans in a profiler, would place it.
+
+### A behavior takes its entity's transform
+
+A behavior method can take its entity's other components after its context, `ref` to write one or
+`in` to read it, handed from the same storage as its own. The runner lists the behavior's
+storage runs and each other component's under the same filters, checks they are the same rows,
+and walks them together. Moving a transform was a call into the bridge an entity, and is a few
+calls a system whatever the count. `Stress movers` moves its transforms that way.
+
+| count | frame before | frame after | managed before | managed after | crossings before | crossings after |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1,000 | 0.70 | 0.82 | 0.09 | 0.11 | 1,008 | 9 |
+| 10,000 | 2.72 | 1.35 | 0.66 | 0.27 | 10,008 | 9 |
+| 100,000 | 7.03 | 3.07 | 1.93 | 0.52 | 100,008 | 9 |
+| 200,000 | 12.66 | 5.39 | 3.62 | 0.79 | 200,009 | 10 |
+| 300,000 | 18.40 | 6.91 | 7.15 | 1.08 | 300,009 | 10 |
+| 400,000 | 24.94 | 8.97 | 8.33 | 1.45 | 400,010 | 10 |
+| 500,000 | none | 20.03 | none | 3.60 | none | 12 |
+
+A frame leaves 60 a second between 400,000 and 500,000 movers, where it was about 250,000. What is
+left is Bevy's schedule, mostly propagating the transforms that moved, 7 ms at 400,000. Past a
+few thousand entities the method runs across the thread pool, which a method reaching the world
+through `ctx.Ecs` could not.
 
 ## What measuring turned up
 

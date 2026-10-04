@@ -34,8 +34,9 @@ internal static class BehaviorDiagnostics
         id: "BCS003",
         title: "Behavior method has the wrong signature",
         messageFormat:
-        "'{0}' carries a stage attribute, so it must return void and take exactly one "
-        + "BehaviorContext parameter. Change the signature to 'void {0}(BehaviorContext ctx)'.",
+        "'{0}' carries a stage attribute, so it must return void and take a BehaviorContext, "
+        + "followed in an instance method by up to two other components of the entity, each ref or "
+        + "in and each a different struct, as in 'void {0}(BehaviorContext ctx, ref Transform transform)'.",
         category: Category,
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);

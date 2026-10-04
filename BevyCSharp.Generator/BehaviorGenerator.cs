@@ -917,6 +917,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
                 Condition = GetCondition(member, type, diagnostics),
                 Toggle = GetToggle(member),
                 InState = GetInState(member),
+                Others = GetOthers(member),
             });
         }
 
@@ -1020,11 +1021,32 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         return stages;
     }
 
-    /// <summary>True when the method looks like <c>void M(BehaviorContext ctx)</c>.</summary>
-    private static bool HasSystemSignature(IMethodSymbol method) =>
-        method.ReturnsVoid
-        && method.Parameters.Length == 1
-        && method.Parameters[0].Type.ToDisplayString() == $"{AttributeNamespace}.BehaviorContext";
+    /// <summary>
+    /// True when the method looks like <c>void M(BehaviorContext ctx)</c>, or for an instance
+    /// method, that followed by up to two of the entity's other components, each <c>ref</c> or
+    /// <c>in</c>, as in <c>void M(BehaviorContext ctx, ref Transform transform)</c>.
+    /// </summary>
+    private static bool HasSystemSignature(IMethodSymbol method)
+    {
+        if (!method.ReturnsVoid || method.Parameters.Length == 0) return false;
+        if (method.Parameters[0].Type.ToDisplayString() != $"{AttributeNamespace}.BehaviorContext") return false;
+        if (method.Parameters.Length == 1) return true;
+        if (method.IsStatic || method.Parameters.Length > 3) return false;
+
+        var others = method.Parameters.Skip(1).ToList();
+        return others.All(parameter =>
+                   parameter.RefKind is RefKind.Ref or RefKind.In
+                   && parameter.Type.TypeKind == TypeKind.Struct
+                   && parameter.Type.IsUnmanagedType
+                   && !SymbolEqualityComparer.Default.Equals(parameter.Type, method.ContainingType))
+               && others.Select(parameter => parameter.Type).Distinct(SymbolEqualityComparer.Default).Count() == others.Count;
+    }
+
+    /// <summary>The other components an instance method takes after its context.</summary>
+    private static EquatableArray<OtherComponent> GetOthers(IMethodSymbol method) =>
+        new([.. method.Parameters.Skip(1).Select(parameter => new OtherComponent(
+            parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            parameter.RefKind == RefKind.Ref))]);
 
     /// <summary>Reads the With/Without/Changed filters off a method.</summary>
     private static BehaviorFilters GetFilters(
