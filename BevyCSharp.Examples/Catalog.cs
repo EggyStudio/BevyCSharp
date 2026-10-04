@@ -147,6 +147,7 @@ internal static class Catalog
 
         // UI (User Interface)
         new("anchor_layout", AnchorLayout.Build),
+        new("borders", Borders.Build),
         new("button", ButtonExample.Build),
         new("flex_layout", FlexLayout.Build),
         new("image_node", ImageNode.Build),
@@ -157,6 +158,7 @@ internal static class Catalog
         new("text_wrap_debug", TextWrapDebug.Build),
         new("transparency_ui", TransparencyUi.Build),
         new("ui_target_camera", UiTargetCamera.Build),
+        new("ui_transform", UiTransformExample.Build),
         new("ui_texture_atlas", UiTextureAtlas.Build),
         new("ui_texture_atlas_slice", UiTextureAtlasSlice.Build),
         new("ui_texture_slice", UiTextureSlice.Build),

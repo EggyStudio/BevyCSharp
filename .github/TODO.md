@@ -39,12 +39,12 @@ the most examples, and the largest is taken between groups of examples. The coun
   and underline, and text background colors.
 - **Animation built in code, seven examples.** Clips made from curves, events placed on a clip,
   graphs that blend clips by weight and their masks, and skinned meshes built joint by joint.
-- **Observers, nine examples.** Code run when an event is triggered, on an entity or anywhere, or
+- **Observers, eleven examples.** Code run when an event is triggered, on an entity or anywhere, or
   when a component is added or removed, which `observers`, `observer_propagation` and
   `removal_detection` are about and `error_handling`, `delayed_commands`, `entity_disabling`,
-  `ui_drag_and_drop`, `viewport_node` and `drag_to_scroll` use for a click, a drag or a pointer
-  moving over what they draw. Needs events a game declares, triggered from C# and from Bevy's
-  picking, and C# code run as an observer.
+  `ui_drag_and_drop`, `viewport_node`, `drag_to_scroll`, `render_ui_to_texture` and `scroll` use for
+  a click, a drag or a pointer moving over what they draw. Needs events a game declares, triggered
+  from C# and from Bevy's picking, and C# code run as an observer.
 - **Input as events, five examples.** The keyboard, the mouse, touches and pads as Bevy's messages,
   one per change in the order they came, which `keyboard_input_events`, `mouse_input_events`,
   `touch_input_events` and `gamepad_input_events` print, and logical keys as Bevy's
@@ -66,11 +66,11 @@ the most examples, and the largest is taken between groups of examples. The coun
 - **Bevy's remote protocol, three examples.** `bcs` is this engine's own, so these wait on whether
   the protocol is worth carrying beside it.
 - **A second window, two examples.**
-- **Bevy's resources through reflection, three examples.** Its components are reached by their type
+- **Bevy's resources through reflection, five examples.** Its components are reached by their type
   paths and its resources are not, so `ui_scaling`, `ui_texture_slice_flip_and_tile` and
-  `drag_to_scroll` cannot set `UiScale`, and `button` is written in part without `InputFocus`. In
-  this Bevy a resource is a component on an entity of its own, so reaching one is finding that
-  entity.
+  `drag_to_scroll` cannot set `UiScale`, `image_node_resizing` cannot set `GlobalUiDebugOptions`,
+  `ime_support` cannot read `InputFocus`, and `button` is written in part without it. In this Bevy a
+  resource is a component on an entity of its own, so reaching one is finding that entity.
 - **Bevy's camera controllers, two examples.** Its free and pan cameras, their plugins and their
   settings (`free_camera_controller`, `pan_camera_controller`), where `BevyCSharp.Examples` has a
   free camera of its own written as a behavior.

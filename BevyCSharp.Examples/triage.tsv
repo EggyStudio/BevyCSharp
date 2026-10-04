@@ -374,8 +374,8 @@ ghost_nodes	missing	ghost nodes (GhostNode)
 gradients	can	through Bevy's reflected BackgroundGradient and BorderGradient
 grid	can
 image_node	can
-image_node_resizing	can
-ime_support	can
+image_node_resizing	missing	Bevy's resources reached through reflection, here GlobalUiDebugOptions
+ime_support	missing	Bevy's resources reached through reflection, here InputFocus
 letter_spacing	can
 multiline_text_input	missing	Bevy's editable text (EditableText)
 multiple_text_inputs	missing	Bevy's editable text (EditableText)
@@ -383,9 +383,9 @@ overflow_clip_margin	can
 overflow_debug	can
 overflow	can
 relative_cursor_position	can	through Bevy's reflected RelativeCursorPosition
-render_ui_to_texture	can
+render_ui_to_texture	missing	observers of the pointer pressing and dragging over an interface drawn into a texture
 scrollbars	missing	Bevy's core scrollbars
-scroll	can
+scroll	missing	observers of the pointer over scrolled nodes, and mouse wheel events as messages
 size_constraints	can
 stacked_gradients	can	through Bevy's reflected BackgroundGradient
 standard_widgets	missing	Bevy's core widgets (bevy_ui_widgets)
