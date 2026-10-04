@@ -349,4 +349,68 @@ public sealed class EcsWorldTests
         harness.Run();
         Assert.True(healthId >= 0);
     }
+
+    [Fact]
+    public void WhatChangedSinceATickIsListedAndSeveralAreAskedAfterAtOnce()
+    {
+        using var harness = new EngineHarness(frames: 6);
+
+        var first = Entity.None;
+        var second = Entity.None;
+        var gone = Entity.None;
+        var frame = 0;
+        uint tick = 0;
+        List<Entity>? everything = null, changed = null, nothing = null;
+        bool[]? has = null, alive = null, moved = null;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            first = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(first, new Health { Value = 1 });
+            second = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(second, new Health { Value = 2 });
+            gone = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(gone, new Health { Value = 3 });
+        });
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            frame++;
+            switch (frame)
+            {
+                case 1:
+                    // From nothing, every one there is.
+                    everything = ctx.Ecs.ChangedSince<Health>(ref tick);
+                    break;
+
+                case 2:
+                    var since = tick;
+                    ctx.Ecs.Set(second, new Health { Value = 20 });
+                    ctx.Ecs.Despawn(gone);
+
+                    var many = new[] { first, second, gone };
+                    has = new bool[3];
+                    alive = new bool[3];
+                    moved = new bool[3];
+                    ctx.Ecs.HasMany<Health>(many, has);
+                    ctx.Ecs.AliveMany(many, alive);
+                    ctx.Ecs.HasMany<Health>(many, moved, since);
+                    break;
+
+                case 3:
+                    changed = ctx.Ecs.ChangedSince<Health>(ref tick);
+                    nothing = ctx.Ecs.ChangedSince<Health>(ref tick);
+                    break;
+            }
+        });
+
+        harness.Run();
+
+        Assert.Equal(new[] { first, second, gone }.ToHashSet(), everything!.ToHashSet());
+        Assert.Equal([true, true, false], has);
+        Assert.Equal([true, true, false], alive);
+        Assert.Equal([false, true, false], moved);
+        Assert.Equal([second], changed);
+        Assert.Empty(nothing!);
+    }
 }

@@ -743,17 +743,24 @@ public sealed partial class PhysicsWorld : IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         if (seconds <= 0f) return;
 
-        // A body whose entity is gone goes with it, so a despawn is all a game has to do.
+        // A body whose entity is gone goes with it, so a despawn is all a game has to do. Asked of
+        // every body in one call, since a call each is most of what a step costs a level of
+        // bodies at rest.
         List<Entity>? gone = null;
+        var held = _bodies.Keys.ToArray();
+        var alive = new bool[held.Length];
+        ecs.AliveMany(held, alive);
 
-        foreach (var (entity, body) in _bodies)
+        for (var i = 0; i < held.Length; i++)
         {
-            if (!ecs.IsAlive(entity))
+            var entity = held[i];
+            if (!alive[i])
             {
                 (gone ??= []).Add(entity);
                 continue;
             }
 
+            var body = _bodies[entity];
             if (body.Kind != BodyKind.Kinematic || !ecs.TryGet<Transform>(entity, out var transform)) continue;
 
             // Moved by the game, and given the velocity that move took, so it pushes what it

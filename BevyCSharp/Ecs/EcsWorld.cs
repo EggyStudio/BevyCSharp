@@ -302,6 +302,67 @@ public sealed unsafe partial class EcsWorld
     public bool HasById(Entity entity, int componentId) =>
         Native.bcs_ecs_has(entity.Bits, componentId) > 0;
 
+    /// <summary>
+    /// The entities whose <typeparamref name="T"/> was added or changed after a tick, which is
+    /// moved on to the tick they were read at.
+    /// </summary>
+    /// <param name="tick">The tick last read at, zero the first time, and moved on to now.</param>
+    /// <remarks>
+    /// One call for every change, for something that runs on a schedule of its own and keeps its
+    /// own tick, as the physics plugin's sync does on the fixed step. Table storage only.
+    /// </remarks>
+    internal List<Entity> ChangedSince<T>(ref uint tick) where T : unmanaged
+    {
+        var id = ComponentType<T>.Id;
+        uint now;
+        int count;
+
+        Span<ulong> few = stackalloc ulong[64];
+        fixed (ulong* buffer = few)
+            count = Native.Check(Native.bcs_ecs_changed_since(id, tick, buffer, few.Length, &now), $"reading what changed of {typeof(T).Name}");
+
+        var changed = new List<Entity>(count);
+        if (count <= few.Length)
+        {
+            foreach (var bits in few[..count]) changed.Add(new Entity(bits));
+        }
+        else
+        {
+            var all = new ulong[count];
+            fixed (ulong* buffer = all)
+                count = Native.Check(Native.bcs_ecs_changed_since(id, tick, buffer, all.Length, &now), $"reading what changed of {typeof(T).Name}");
+
+            foreach (var bits in all.AsSpan(0, Math.Min(count, all.Length))) changed.Add(new Entity(bits));
+        }
+
+        tick = now;
+        return changed;
+    }
+
+    /// <summary>
+    /// For each of a list of entities, whether it is alive and carries <typeparamref name="T"/>, or
+    /// with <paramref name="since"/>, whether it changed that after the tick.
+    /// </summary>
+    /// <remarks>One call for the whole list, where asking after each would cost a call each.</remarks>
+    internal void HasMany<T>(ReadOnlySpan<Entity> entities, Span<bool> answers, uint since = uint.MaxValue) where T : unmanaged =>
+        HasMany(ComponentType<T>.Id, entities, answers, since);
+
+    /// <summary>For each of a list of entities, whether it is alive.</summary>
+    internal void AliveMany(ReadOnlySpan<Entity> entities, Span<bool> answers) => HasMany(-1, entities, answers, uint.MaxValue);
+
+    private void HasMany(int component, ReadOnlySpan<Entity> entities, Span<bool> answers, uint since)
+    {
+        if (answers.Length < entities.Length) throw new ArgumentException("There is an answer for each entity.", nameof(answers));
+        if (entities.IsEmpty) return;
+
+        var bytes = new byte[entities.Length];
+        fixed (Entity* asked = entities)
+        fixed (byte* answered = bytes)
+            Native.Check(Native.bcs_ecs_has_many(component, since, (ulong*)asked, entities.Length, answered), "asking after several entities");
+
+        for (var i = 0; i < bytes.Length; i++) answers[i] = bytes[i] != 0;
+    }
+
     /// <summary>Counts entities carrying the component with this id.</summary>
     public int CountById(int componentId) =>
         Native.Check(Native.bcs_ecs_count(componentId), "CountById");

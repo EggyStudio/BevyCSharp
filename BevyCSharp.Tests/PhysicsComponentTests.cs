@@ -69,6 +69,7 @@ public sealed class PhysicsComponentTests : IDisposable
         float? hitBefore = null, hitAfter = null;
         var hadBody = false;
         var hasBodyAfterRemoving = true;
+        float? hitMoved = null;
 
         harness.OnContext(Stage.Startup, ctx => floor = Level(ctx.Ecs).Floor);
 
@@ -90,10 +91,17 @@ public sealed class PhysicsComponentTests : IDisposable
 
                 case 40:
                     hitAfter = physics.Raycast(new Vec3(5f, 10f, 5f), new Vec3(0f, -1f, 0f), 50f)?.Point.Y;
+
+                    // Moved up by one, which a static body only shows once it is made again.
+                    ctx.Ecs.GetRef<Transform>(floor).Translation = new Vec3(0f, 0.5f, 0f);
+                    break;
+
+                case 50:
+                    hitMoved = physics.Raycast(new Vec3(5f, 10f, 5f), new Vec3(0f, -1f, 0f), 50f)?.Point.Y;
                     ctx.Ecs.Remove<Collider>(floor);
                     break;
 
-                case 60:
+                case 70:
                     hasBodyAfterRemoving = physics.Has(floor);
                     break;
             }
@@ -106,6 +114,8 @@ public sealed class PhysicsComponentTests : IDisposable
         Assert.InRange(hitBefore!.Value, -0.01f, 0.01f);
         Assert.NotNull(hitAfter);
         Assert.InRange(hitAfter!.Value, 0.49f, 0.51f);
+        Assert.NotNull(hitMoved);
+        Assert.InRange(hitMoved!.Value, 1.49f, 1.51f);
         Assert.False(hasBodyAfterRemoving);
     }
 

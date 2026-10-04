@@ -15,6 +15,12 @@ public sealed partial class PhysicsWorld
     /// <summary>The bodies made from components, each with what it was made from.</summary>
     private readonly Dictionary<Entity, MadeFrom> _fromComponents = [];
 
+    /// <summary>The world's change tick at the last sync, from which the next reads what changed.</summary>
+    private uint _syncTick;
+
+    /// <summary>Entities whose collider fits a mesh that had not loaded at the last sync.</summary>
+    private readonly HashSet<Entity> _waitingForMesh = [];
+
     /// <summary>
     /// Makes, remakes and takes away the bodies of entities carrying a <see cref="RigidBody"/> and a
     /// <see cref="Collider"/>, so the simulation holds what the world says.
@@ -34,65 +40,106 @@ public sealed partial class PhysicsWorld
     /// fitted to a mesh that has not loaded waits for it, and the body comes when the mesh does.
     /// An entity that has a body from <see cref="Add"/> already keeps that one.
     /// </para>
+    /// <para>
+    /// Only what changed is read. The world lists the bodies and colliders added or changed since
+    /// the last sync, and the bodies already made are asked after together, whether each still has
+    /// both components and whether its transform was written, so a step in which nothing changed
+    /// costs a few calls into the bridge rather than a few a body.
+    /// </para>
     /// </remarks>
     public void Sync(EcsWorld ecs)
     {
         ArgumentNullException.ThrowIfNull(ecs);
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        // Gone first, an entity or one of its two components, which takes its body with it.
-        List<Entity>? gone = null;
-        foreach (var entity in _fromComponents.Keys)
+        // Read in a handful of calls rather than a few a body, since a level holds thousands of
+        // bodies and almost none of them change in a step. What was added or changed since the
+        // last sync is listed by the world, and the bodies it holds are asked after in one call a
+        // component, so a step where nothing changed reads nothing a body.
+        var since = _syncTick;
+        var candidates = new HashSet<Entity>(_waitingForMesh);
+        _waitingForMesh.Clear();
+
+        var bodyTick = since;
+        foreach (var entity in ecs.ChangedSince<RigidBody>(ref bodyTick)) candidates.Add(entity);
+        var colliderTick = since;
+        foreach (var entity in ecs.ChangedSince<Collider>(ref colliderTick)) candidates.Add(entity);
+        _syncTick = colliderTick;
+
+        if (_fromComponents.Count > 0)
         {
-            if (!ecs.IsAlive(entity) || !ecs.Has<RigidBody>(entity) || !ecs.Has<Collider>(entity))
-                (gone ??= []).Add(entity);
+            var held = _fromComponents.Keys.ToArray();
+            var bodies = new bool[held.Length];
+            var colliders = new bool[held.Length];
+            var moved = new bool[held.Length];
+
+            ecs.HasMany<RigidBody>(held, bodies);
+            ecs.HasMany<Collider>(held, colliders);
+            ecs.HasMany<Transform>(held, moved, since);
+
+            for (var i = 0; i < held.Length; i++)
+            {
+                var entity = held[i];
+
+                // Gone, an entity or one of its two components, which takes its body with it.
+                if (!bodies[i] || !colliders[i])
+                {
+                    if (_bodies.ContainsKey(entity)) Remove(entity);
+                    _fromComponents.Remove(entity);
+                    candidates.Remove(entity);
+                    continue;
+                }
+
+                // A transform written since, which a static body was put at once and does not
+                // follow, and whose scale sizes every body's collider. A dynamic body's own
+                // write back is among these, and is found unchanged below.
+                if (moved[i]) candidates.Add(entity);
+            }
         }
 
-        if (gone is not null)
+        foreach (var entity in candidates) Make(ecs, entity);
+    }
+
+    /// <summary>Makes an entity's body from its components, again where they changed what it is.</summary>
+    private void Make(EcsWorld ecs, Entity entity)
+    {
+        if (!ecs.TryGet<RigidBody>(entity, out var body) || !ecs.TryGet<Collider>(entity, out var collider)) return;
+
+        var at = ecs.GetOrDefault<Transform>(entity);
+        var made = new MadeFrom(body, collider, at.Scale, body.Kind == BodyKind.Static ? at : null);
+
+        if (_fromComponents.TryGetValue(entity, out var was))
         {
-            foreach (var entity in gone)
-            {
-                if (_bodies.ContainsKey(entity)) Remove(entity);
-                _fromComponents.Remove(entity);
-            }
+            if (was == made) return;
+        }
+        else if (_bodies.ContainsKey(entity))
+        {
+            // Added in code, which a level's components do not overrule.
+            return;
         }
 
-        foreach (var row in ecs.Query<Collider>(markChanged: false))
+        if (!Colliders.TryFit(ecs, entity, out var fit))
         {
-            var entity = row.Entity;
-            if (!ecs.TryGet<RigidBody>(entity, out var body)) continue;
-
-            var at = ecs.GetOrDefault<Transform>(entity);
-            var made = new MadeFrom(body, row.Component, at.Scale, body.Kind == BodyKind.Static ? at : null);
-
-            if (_fromComponents.TryGetValue(entity, out var was))
-            {
-                if (was == made) continue;
-            }
-            else if (_bodies.ContainsKey(entity))
-            {
-                // Added in code, which a level's components do not overrule.
-                continue;
-            }
-
-            if (!Colliders.TryFit(ecs, entity, out var fit)) continue;
-
-            // A dynamic body made again keeps going the way it was going rather than starting from
-            // rest, so an edit while it falls does not stop it in the air.
-            (Vec3 Linear, Vec3 Angular)? moving = null;
-            if (_bodies.TryGetValue(entity, out var old))
-            {
-                if (old.Kind == BodyKind.Dynamic && body.Kind == BodyKind.Dynamic) moving = Velocity(entity);
-                Remove(entity);
-            }
-
-            var material = body.Friction > 0f || body.Bounce > 0f
-                ? new PhysicsMaterial(body.Friction > 0f ? body.Friction : 1f, body.Bounce)
-                : (PhysicsMaterial?)null;
-
-            Add(entity, fit.Shape, body.Kind, at, body.Mass > 0f ? body.Mass : 1f, body.Sensor, material);
-            if (moving is { } velocity) SetVelocity(entity, velocity.Linear, velocity.Angular);
-            _fromComponents[entity] = made;
+            // The mesh it fits has not loaded, so it is asked after again next time.
+            _waitingForMesh.Add(entity);
+            return;
         }
+
+        // A dynamic body made again keeps going the way it was going rather than starting from
+        // rest, so an edit while it falls does not stop it in the air.
+        (Vec3 Linear, Vec3 Angular)? moving = null;
+        if (_bodies.TryGetValue(entity, out var old))
+        {
+            if (old.Kind == BodyKind.Dynamic && body.Kind == BodyKind.Dynamic) moving = Velocity(entity);
+            Remove(entity);
+        }
+
+        var material = body.Friction > 0f || body.Bounce > 0f
+            ? new PhysicsMaterial(body.Friction > 0f ? body.Friction : 1f, body.Bounce)
+            : (PhysicsMaterial?)null;
+
+        Add(entity, fit.Shape, body.Kind, at, body.Mass > 0f ? body.Mass : 1f, body.Sensor, material);
+        if (moving is { } velocity) SetVelocity(entity, velocity.Linear, velocity.Angular);
+        _fromComponents[entity] = made;
     }
 }

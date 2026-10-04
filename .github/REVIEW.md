@@ -8,8 +8,8 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `d6a03d2`. The frame profile, `games/Stress` and PERFORMANCE.md (`d6a03d2`) were
-read and are settled. The numbers are what the first three items are ordered by.
+Reviewed up to `8ff919c`. The generators' attribute table with its test (`deb1b79`) and the README
+followed in a clean container (`8ff919c`) are settled, on the test and the workflow job reported.
 
 ## Now
 
@@ -36,15 +36,7 @@ holding the numbers before and after.
    the other components it names as parameters from the same chunk, so the common behavior
    crosses once a chunk, and the README's examples use that form. Verified by the movers run
    showing crossings a frame fall from one an entity to a few a chunk.
-4. **Every attribute the generators accept is compiled and run by a test**, each asserted to run
-   when it should and not otherwise, with the list taken from the generators' own tables so an
-   attribute without a case fails. In 3DEngine a behavior attribute failed to compile for four
-   batches while the suite passed, because nothing used it.
-5. **The README's install followed by a stranger**, in a container with only the packed package:
-   a new project, the package added, the README's first program as written, built and run
-   headless. Each step it leaves out or gets wrong is fixed, and the package workflow repeats
-   the walk.
-6. **Gamepads** wait on the owner (decision 2).
+4. **Gamepads** wait on the owner (decision 2).
 
 ## Verdicts
 

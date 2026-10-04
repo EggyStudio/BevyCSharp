@@ -221,6 +221,134 @@ pub extern "C" fn bcs_ecs_changed(entity: u64, component: i32) -> i32 {
     })
 }
 
+/// Lists the entities whose `component` was added or changed after tick `since`, and gives the
+/// tick it was read at, for the next call to start from.
+///
+/// For a caller that runs on a schedule of its own, such as the fixed step, which a frame may run
+/// several times or not at all, so "changed since this system last ran" would miss or repeat a
+/// change. The caller keeps the tick it was given and passes it back. Table storage only, which is
+/// every component a caller of this keeps watch on; a sparse-stored one is refused rather than
+/// read as never changing.
+///
+/// The return value is how many there are, whether or not they fitted, as text-returning entry
+/// points do, so a caller with too small a buffer asks again with a larger one.
+///
+/// # Safety
+/// `out` must be writable for `capacity` entity ids, or null when `capacity` is zero, and `now`
+/// writable or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_ecs_changed_since(
+    component: i32,
+    since: u32,
+    out: *mut u64,
+    capacity: i32,
+    now: *mut u32,
+) -> i32 {
+    crate::interop::guard(|| {
+        let Some(component) = component_from(component) else {
+            return status::NO_COMPONENT;
+        };
+
+        with_world(|world| {
+            if world.storages().sparse_sets.get(component).is_some() {
+                return status::UNSUPPORTED;
+            }
+
+            let this_run = world.change_tick();
+            let since = bevy::ecs::change_detection::Tick::new(since);
+            let capacity = capacity.max(0) as usize;
+            let mut total = 0usize;
+
+            for table in world.storages().tables.iter() {
+                let Some(ticks) = table.get_changed_ticks_slice_for(component) else {
+                    continue;
+                };
+
+                for (row, cell) in ticks.iter().enumerate() {
+                    // SAFETY: the world is held for this call, so nothing writes the ticks while
+                    // they are read.
+                    let tick = unsafe { *cell.get() };
+                    if !tick.is_newer_than(since, this_run) {
+                        continue;
+                    }
+
+                    if total < capacity {
+                        // SAFETY: `total < capacity` and `out` is valid for `capacity` writes.
+                        unsafe { out.add(total).write(table.entities()[row].to_bits()) };
+                    }
+                    total += 1;
+                }
+            }
+
+            if !now.is_null() {
+                // SAFETY: the caller passed a writable `now` or null.
+                unsafe { now.write(this_run.get()) };
+            }
+
+            total as i32
+        })
+    })
+}
+
+/// Says for each of `count` entities whether it is alive and carries `component`, and, with a
+/// `since` other than `u32::MAX`, whether that component was added or changed after it. A
+/// negative `component` asks whether each is alive at all.
+///
+/// One call for a list a caller keeps, such as the bodies a level holds, rather than the call an
+/// entity that asking after each costs.
+///
+/// # Safety
+/// `entities` must be readable and `out` writable for `count` values.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_ecs_has_many(
+    component: i32,
+    since: u32,
+    entities: *const u64,
+    count: i32,
+    out: *mut u8,
+) -> i32 {
+    crate::interop::guard(|| {
+        let component = if component < 0 {
+            None
+        } else {
+            match component_from(component) {
+                Some(id) => Some(id),
+                None => return status::NO_COMPONENT,
+            }
+        };
+        if count <= 0 {
+            return status::OK;
+        }
+        if entities.is_null() || out.is_null() {
+            return status::NULL_ARG;
+        }
+
+        // SAFETY: the caller passed `count` readable entities and `count` writable answers.
+        let entities = unsafe { core::slice::from_raw_parts(entities, count as usize) };
+        let out = unsafe { core::slice::from_raw_parts_mut(out, count as usize) };
+
+        with_world(|world| {
+            let this_run = world.change_tick();
+            let since = (since != u32::MAX).then(|| bevy::ecs::change_detection::Tick::new(since));
+
+            for (bits, answer) in entities.iter().zip(out.iter_mut()) {
+                *answer = match (world.get_entity(entity_from(*bits)), component) {
+                    (Err(_), _) => 0,
+                    (Ok(_), None) => 1,
+                    (Ok(entity), Some(component)) => match since {
+                        None => u8::from(entity.contains_id(component)),
+                        Some(since) => entity
+                            .get_change_ticks_by_id(component)
+                            .map_or(0, |ticks| u8::from(ticks.is_changed(since, this_run))),
+                    },
+                };
+            }
+
+            status::OK
+        })
+    })
+}
+
 /// Counts entities carrying `component`.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_ecs_count(component: i32) -> i32 {

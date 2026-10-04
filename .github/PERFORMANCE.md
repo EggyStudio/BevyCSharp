@@ -98,7 +98,7 @@ A frame leaves 60 a second between **50,000 and 100,000 drawn cubes**.
    every shadow view. The GPU timings do not name those passes, and the GPU itself spends under
    2 ms. It is Bevy's work, and none of it crosses into C#. A game holds it down by which lights
    cast shadows.
-2. **The physics plugin's sync of the bodies a level holds.** `PhysicsWorld.Sync` reads every body's
+2. **The physics plugin's sync of the bodies a level holds**, since taken (below). `PhysicsWorld.Sync` reads every body's
    `RigidBody`, `Collider` and `Transform` each fixed step to see whether anything changed, which at
    5,000 bodies is 6.6 ms of the 9.4 the physics system takes, and grows with the bodies whether or
    not any changed. Most of the drawn runs' managed time is this, and at 100,000 cubes without
@@ -109,6 +109,36 @@ A frame leaves 60 a second between **50,000 and 100,000 drawn cubes**.
    about what the C# work for the entity does. At 250,000 movers that is 5.2 ms of crossings beside
    5.6 ms of C#. Bevy's own schedule around them, which propagates the transforms that moved, is
    another 5.5 ms.
+
+## What was done about them
+
+### The physics sync reads what changed
+
+`PhysicsWorld.Sync` asked after every body's `RigidBody`, `Collider` and `Transform` each fixed
+step, a few calls into the bridge a body. It asks the world instead for the bodies and colliders
+added or changed since it last ran (`bcs_ecs_changed_since`), and asks after the bodies it has
+made all at once, whether each still has both components and whether its transform was written
+(`bcs_ecs_has_many`), so a step in which nothing changed costs a handful of calls. The step asks
+after every body's entity the same way, and writes back only the bodies the simulation moved, as
+it did before, so a body at rest costs nothing.
+
+At 50,000 drawn cubes with shadows (5,000 bodies) the sync went from 6.6 ms to 0.36 ms and the
+physics system from 9.4 ms to 2.8 ms, which is now Bepu's step and the write back of what moved.
+
+| count | frame before | frame after | managed before | managed after | crossings before | crossings after |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1,000, shadows | 13.09 | 14.61 | 0.40 | 0.39 | 516 | 14 |
+| 10,000, shadows | 15.86 | 14.45 | 1.98 | 1.09 | 6,128 | 31 |
+| 50,000, shadows | 20.68 | 16.15 | 8.24 | 2.08 | 39,642 | 27 |
+| 100,000, shadows | none | 24.36 | none | 6.52 | none | 17 |
+| 10,000 | 5.96 | 5.55 | 1.24 | 0.84 | 2,432 | 119 |
+| 50,000 | 14.43 | 9.25 | 6.10 | 1.98 | 27,764 | 160 |
+| 100,000 | 53.64 | 14.21 | 36.74 | 3.08 | 206,032 | 19 |
+| 200,000 | none | 35.50 | none | 13.40 | none | 22 |
+
+Without shadows a frame leaves 60 a second between 100,000 and 200,000 drawn cubes, where it was
+between 50,000 and 100,000. With them the render, which runs beside the schedule, is still what
+holds a frame at 13 to 15 ms.
 
 ## What measuring turned up
 
