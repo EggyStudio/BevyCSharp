@@ -525,7 +525,10 @@ name, and one that stops compiling fails its case.
 A game is played whole as well. Where the workflow builds the bridges, a job packs the library
 with the Linux bridge, builds `games/Courtyard` on that package and plays it through `play.sh` on
 Mesa's software Vulkan, from its menu through a save, a load and every coin to its win, steering
-with `input.hold`, which holds keys for an exact number of frames inside the app.
+with `input.hold`, which holds keys for an exact number of frames inside the app. Beside it, a job
+follows the README's install in a container holding the SDK and the package alone
+(`build/readme-walk.sh`), the first program taken out of README.md, so a README that stops working
+fails there.
 
 ### Build and release
 

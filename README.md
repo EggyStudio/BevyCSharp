@@ -44,6 +44,8 @@ public partial struct Spin
 
 In Program.cs
 ```csharp
+using Bevy;
+
 BevyApp.Run();
 ```
 
@@ -152,6 +154,30 @@ dotnet add package BevyCSharp
 
 The package carries three things: the managed library, the source generator (in the analyzer
 slot), and a prebuilt native bridge per runtime identifier under `runtimes/`.
+
+The program above, in a new console project with the package added, is a game, and `dotnet run`
+opens its window:
+
+```bash
+dotnet new console -o MyGame && cd MyGame
+dotnet add package BevyCSharp
+# Spin.cs and Program.cs as above
+dotnet run
+```
+
+On Linux the bridge's audio links ALSA, so the bridge needs ALSA's library to load, `libasound2`
+(`libasound2t64` on Ubuntu 24.04 and Debian 13) or `alsa-lib` on Fedora and Arch, which a desktop
+has and a container usually does not, and drawing needs a Vulkan driver. Where there is no display,
+as in a container or on a build server, `BCS_OFFSCREEN=1` draws into an image instead of a window
+and `BCS_FRAMES` ends the run after that many frames. Mesa's software Vulkan (`mesa-vulkan-drivers`)
+draws where there is no graphics card:
+
+```bash
+BCS_OFFSCREEN=1 BCS_FRAMES=120 dotnet run
+```
+
+`build/readme-walk.sh` follows these steps in a container holding the .NET SDK and a packed package
+alone, and the package workflow runs it.
 
 ---
 

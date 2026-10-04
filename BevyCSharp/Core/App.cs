@@ -132,6 +132,9 @@ public sealed unsafe class App : IDisposable
             if (Config.HeadlessFps == 0) Config.HeadlessFps = 60;
         }
 
+        if ((Config.Offscreen || Config.Headless) && Config.HeadlessFrames == 0 && Config.FramesAsked > 0)
+            Config.HeadlessFrames = Config.FramesAsked;
+
         var titleBytes = Encoding.UTF8.GetBytes(Config.Title + "\0");
         var assetRootBytes = Config.AssetRoot is null
             ? null

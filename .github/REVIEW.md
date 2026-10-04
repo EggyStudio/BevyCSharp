@@ -8,30 +8,43 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `c39468c`, the two smaller entries from Courtyard, which are settled.
+Reviewed up to `d6a03d2`. The frame profile, `games/Stress` and PERFORMANCE.md (`d6a03d2`) were
+read and are settled. The numbers are what the first three items are ordered by.
 
 ## Now
 
-In this order.
+In this order, each of the first three ending with `measure.sh` run again and PERFORMANCE.md
+holding the numbers before and after.
 
-1. **Measure what a frame holds.** Nothing has measured this engine, and its cost is in a place
-   Bevy alone does not have, the crossing between C# and the bridge. Two stress programs under
-   `games/` or the sample: one grows the number of entities a behavior moves each frame, the
-   other the number of drawn mesh entities with a few materials, lights and physics bodies. Each
-   reports the frame's time split into managed systems, the crossings (how many a frame and what
-   they cost together), Bevy's own schedule and the render, and the count at which it leaves 60
-   frames a second, through a `bcs` command so a run is repeatable. The numbers, the machine and
-   the three largest costs go into a section of RENDERING.md or a document beside it. No
-   optimization is in this batch. The next batch is the largest cost the numbers show.
-2. **Every attribute the generators accept is compiled and run by a test**, each asserted to run
+1. **The physics sync reads only what changed.** `PhysicsWorld.Sync` reads every body's
+   `RigidBody`, `Collider` and `Transform` each fixed step, 6.6 ms at 5,000 bodies, whether or
+   not anything moved. It is to walk the bodies whose components changed since it last ran,
+   through the change detection the ECS has, and write back only the bodies the simulation
+   moved, which leaves a sleeping body costing nothing.
+2. **Find what the shadows' 10 ms is before calling it Bevy's.** Three lights cost 8 to 10 ms of
+   CPU in the render at a thousand cubes, with the GPU under 2 ms, and that is far from what
+   Bevy's own examples spend on a scene this size, so the number is more likely something this
+   bridge sets or leaves unset than the engine's floor. The same scene written in Rust against
+   the same Bevy build, with no bridge, is measured beside it. If it is as slow, PERFORMANCE.md
+   says so with both numbers. If it is not, the difference is found, with the shadow map sizes
+   the bridge asks for, a pass encoded for each face whether or not anything is in it, entities
+   that are not batched because of a component the bridge adds, and a debug or validation
+   setting left on in release as the first places to look.
+3. **A behavior reaches its entity's other components without a crossing each.** A behavior that
+   moves a `Transform` pays a call into the bridge an entity, about as much again as its own
+   work. The generator already walks a behavior's own component by chunk. It is to hand a method
+   the other components it names as parameters from the same chunk, so the common behavior
+   crosses once a chunk, and the README's examples use that form. Verified by the movers run
+   showing crossings a frame fall from one an entity to a few a chunk.
+4. **Every attribute the generators accept is compiled and run by a test**, each asserted to run
    when it should and not otherwise, with the list taken from the generators' own tables so an
    attribute without a case fails. In 3DEngine a behavior attribute failed to compile for four
    batches while the suite passed, because nothing used it.
-3. **The README's install followed by a stranger**, in a container with only the packed package:
+5. **The README's install followed by a stranger**, in a container with only the packed package:
    a new project, the package added, the README's first program as written, built and run
    headless. Each step it leaves out or gets wrong is fixed, and the package workflow repeats
    the walk.
-4. **Gamepads** wait on the owner (decision 2).
+6. **Gamepads** wait on the owner (decision 2).
 
 ## Verdicts
 

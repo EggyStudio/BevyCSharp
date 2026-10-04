@@ -210,6 +210,18 @@ public sealed class Config
     /// </remarks>
     public const string OffscreenVariable = "BCS_OFFSCREEN";
 
+    /// <summary>The environment variable that bounds a run with no window to a number of frames.</summary>
+    /// <remarks>
+    /// For a run kept off the screen with <see cref="OffscreenVariable"/>, which has no window to
+    /// close, so a script trying a game it did not write can let it run a while and end on its own.
+    /// It sets <see cref="HeadlessFrames"/> where the config left that at zero.
+    /// </remarks>
+    public const string FramesVariable = "BCS_FRAMES";
+
+    /// <summary>The frames the environment bounds a run with no window to, or zero.</summary>
+    public static uint FramesAsked =>
+        uint.TryParse(Environment.GetEnvironmentVariable(FramesVariable), out var frames) ? frames : 0u;
+
     /// <summary>True when the environment asks for <see cref="Offscreen"/> whatever the config says.</summary>
     public static bool OffscreenAsked =>
         Environment.GetEnvironmentVariable(OffscreenVariable) is { Length: > 0 } value

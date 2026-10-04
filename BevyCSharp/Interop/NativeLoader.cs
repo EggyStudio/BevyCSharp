@@ -103,8 +103,26 @@ internal static class NativeLoader
                 + "on. Rebuild it here with build/build-native.sh, or use a package built on an "
                 + "older distribution.";
 
+        // The other common case, a library the bridge links that the machine lacks, which a bare
+        // container usually does. Said first by name, with where it comes from, since the loader's
+        // own lines bury it among the paths it tried.
+        foreach (var (library, what) in Needed)
+        {
+            if (!reasons.Contains(library + ": cannot open shared object file", StringComparison.Ordinal)) continue;
+
+            message = $"The native Bevy bridge needs {library}, which this machine does not have. {what}"
+                      + Environment.NewLine + Environment.NewLine + message;
+        }
+
         return message;
     }
+
+    /// <summary>The libraries the Linux bridge links that a machine may lack, and where each comes from.</summary>
+    private static readonly (string Library, string What)[] Needed =
+    [
+        ("libasound.so.2", "It is ALSA's, which the bridge's audio links against: libasound2 on Debian and Ubuntu, alsa-lib on Fedora and Arch."),
+        ("libudev.so.1", "It is udev's: libudev1 on Debian and Ubuntu, systemd-libs on Fedora and Arch."),
+    ];
 
     /// <summary>Platform-specific file names to try for the bridge.</summary>
     private static string[] FileNames()
