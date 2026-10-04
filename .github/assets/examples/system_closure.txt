@@ -1,0 +1,12 @@
+Hello from an inlined closure!
+Hello from a complex closure! foo
+Hello from a simple closure!
+Hello from an inlined closure that captured the 'outside_variable'! bar
+Hello from an inlined closure!
+Hello from a complex closure! foo - updated
+Hello from a simple closure!
+Hello from an inlined closure that captured the 'outside_variable'! bar
+Hello from an inlined closure!
+Hello from a complex closure! foo - updated - updated
+Hello from a simple closure!
+Hello from an inlined closure that captured the 'outside_variable'! bar

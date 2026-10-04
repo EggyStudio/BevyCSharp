@@ -6,7 +6,17 @@ namespace BevyCSharp.Examples;
 /// <param name="Name">Bevy's name for it, which is also its file's.</param>
 /// <param name="Build">What it adds to the app, as Bevy's <c>main</c> adds its systems.</param>
 /// <param name="Configure">What it changes about the app before it runs, where it changes anything.</param>
-internal sealed record Example(string Name, Action<App> Build, Action<Config>? Configure = null);
+/// <param name="Prints">
+/// For an example with nothing to draw, how many frames it runs headless, and what it prints in
+/// them is its capture. Zero for one that draws.
+/// </param>
+/// <param name="Returned">What runs once the app has stopped and the program is back in its own code.</param>
+/// <remarks>
+/// Bevy's examples of the ECS mostly print to the console, some in a window left empty, and one
+/// that prints is run here with no window at all, so it needs no renderer and its output is
+/// the same on any machine.
+/// </remarks>
+internal sealed record Example(string Name, Action<App> Build, Action<Config>? Configure = null, uint Prints = 0, Action? Returned = null);
 
 /// <summary>Helpers for what Bevy's examples say in one word and the bridge in several.</summary>
 internal static class Scene
@@ -24,6 +34,16 @@ internal static class Scene
     /// <summary>Runs <paramref name="update"/> every frame, as Bevy's <c>Update</c> systems do.</summary>
     public static App Update(this App app, Action<BehaviorContext> update, string name = "Example.Update") =>
         app.AddSystem(Stage.Update, new SystemDescriptor(world => update(new BehaviorContext(world)), name));
+
+    /// <summary>
+    /// Runs <paramref name="run"/> in <paramref name="stage"/>, as a system Bevy's example adds to
+    /// that schedule, and only while <paramref name="runIf"/> passes where one is given.
+    /// </summary>
+    public static App On(this App app, Stage stage, Action<BehaviorContext> run, string name, Func<World, bool>? runIf = null)
+    {
+        var descriptor = new SystemDescriptor(world => run(new BehaviorContext(world)), name);
+        return app.AddSystem(stage, runIf is null ? descriptor : descriptor.RunIf(runIf));
+    }
 
     /// <summary>A color given in sRGB, as Bevy's <c>Color::srgb</c>, in the linear terms a material takes.</summary>
     public static (float R, float G, float B, float A) Srgb(float r, float g, float b, float a = 1f)

@@ -241,6 +241,11 @@ bridge's Bevy once the bridge has been built, and `BevyCSharp.Examples/triage.ts
 example not yet written has its state and what it waits on. The package workflow captures every
 example on the Linux bridge it built.
 
+An example with nothing to draw, as most of Bevy's ECS examples are, prints instead. It runs
+headless for the frames its line in `Catalog.cs` gives, needing no renderer, and its capture is
+what it printed, as `<name>.txt` beside the pictures, which its row in EXAMPLES.md links. `--window`
+opens an empty window for one that reads keys, as Bevy's does, and `--printing` lists them.
+
 ## The guide
 
 `docs/` holds the guide, a page an area for somebody using the engine, and the README is for

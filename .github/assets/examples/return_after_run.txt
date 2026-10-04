@@ -1,0 +1,5 @@
+Running Bevy App
+Logging from Bevy App
+Logging from Bevy App
+Logging from Bevy App
+Bevy App has exited. We are back in our main function.

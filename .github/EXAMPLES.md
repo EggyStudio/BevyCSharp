@@ -4,21 +4,21 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**36 written, 3 written in part, 255 can be written, 74 missing and 53 do not apply.** Of the 368 that apply, 294 can be written with what is bridged, 3 of them leaving something out.
+**53 written, 3 written in part, 222 can be written, 87 missing and 56 do not apply.** Of the 365 that apply, 278 can be written with what is bridged, 3 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 0 | 0 | 20 | 8 | 1 |
 | [3D Rendering](#3d-rendering) | 36 | 3 | 25 | 3 | 0 |
 | [Animation](#animation) | 0 | 0 | 6 | 7 | 0 |
-| [Application](#application) | 0 | 0 | 13 | 1 | 5 |
+| [Application](#application) | 7 | 0 | 3 | 2 | 7 |
 | [Assets](#assets) | 0 | 0 | 10 | 2 | 5 |
 | [Async Tasks](#async-tasks) | 0 | 0 | 3 | 0 | 0 |
 | [Audio](#audio) | 0 | 0 | 6 | 2 | 0 |
 | [Camera](#camera) | 0 | 0 | 8 | 1 | 0 |
 | [Dev tools](#dev-tools) | 0 | 0 | 1 | 1 | 1 |
 | [Diagnostics](#diagnostics) | 0 | 0 | 1 | 2 | 0 |
-| [ECS (Entity Component System)](#ecs-entity-component-system) | 0 | 0 | 24 | 3 | 8 |
+| [ECS (Entity Component System)](#ecs-entity-component-system) | 10 | 0 | 1 | 15 | 9 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |
 | [Games](#games) | 0 | 0 | 6 | 0 | 0 |
 | [Gizmos](#gizmos) | 0 | 0 | 4 | 5 | 0 |
@@ -42,9 +42,9 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **36** | **3** | **255** | **74** | **53** |
+| **All** | **53** | **3** | **222** | **87** | **56** |
 
-A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`.
+A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints.
 
 ## 2D Rendering
 
@@ -175,24 +175,24 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | Example | What it shows | State |
 |---|---|---|
 | [`custom_loop`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/custom_loop.rs) | Demonstrates how to create a custom runner (to update an app manually) | does not apply, replaces Bevy's runner, which the bridge owns |
-| [`drag_and_drop`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/drag_and_drop.rs) | An example that shows how to handle drag and drop in an app | can be written |
-| [`empty`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/empty.rs) | An empty application (does nothing) | can be written |
-| [`empty_defaults`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/empty_defaults.rs) | An empty application with default plugins | can be written |
+| [`drag_and_drop`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/drag_and_drop.rs) | An example that shows how to handle drag and drop in an app | [written](../BevyCSharp.Examples/app/drag_and_drop.cs) |
+| [`empty`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/empty.rs) | An empty application (does nothing) | [written](../BevyCSharp.Examples/app/empty.cs), prints [its output](assets/examples/empty.txt) |
+| [`empty_defaults`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/empty_defaults.rs) | An empty application with default plugins | [written](../BevyCSharp.Examples/app/empty_defaults.cs) |
 | [`externally_driven_headless_renderer`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/externally_driven_headless_renderer.rs) | Using bevy with manually driven update to render images | does not apply, drives Bevy's update from Rust code |
 | [`headless`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/headless.rs) | An application that runs without default plugins | can be written |
 | [`headless_renderer`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/headless_renderer.rs) | An application that runs with no window, but renders into image file | can be written |
 | [`log_layers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/log_layers.rs) | Illustrate how to add custom log layers | does not apply, adds a tracing layer, written in Rust |
 | [`log_layers_ecs`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/log_layers_ecs.rs) | Illustrate how to transfer data between log layers and Bevy's ECS | does not apply, adds a tracing layer, written in Rust |
-| [`logs`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/logs.rs) | Illustrate how to use generate log output | can be written |
-| [`no_renderer`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/no_renderer.rs) | An application that runs with default plugins and displays an empty window, but without an actual renderer | can be written |
+| [`logs`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/logs.rs) | Illustrate how to use generate log output | missing, Bevy's log written from C# at its levels, and a message logged once |
+| [`no_renderer`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/no_renderer.rs) | An application that runs with default plugins and displays an empty window, but without an actual renderer | does not apply, builds Bevy's renderer with no graphics backend, which the bridge sets up |
 | [`persisting_window_settings`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/persisting_window_settings.rs) | Demonstrates saving window position settings | can be written |
-| [`plugin`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/plugin.rs) | Demonstrates the creation and registration of a custom plugin | can be written |
-| [`plugin_group`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/plugin_group.rs) | Demonstrates the creation and registration of a custom plugin group | can be written |
+| [`plugin`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/plugin.rs) | Demonstrates the creation and registration of a custom plugin | [written](../BevyCSharp.Examples/app/plugin.cs), prints [its output](assets/examples/plugin.txt) |
+| [`plugin_group`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/plugin_group.rs) | Demonstrates the creation and registration of a custom plugin group | [written](../BevyCSharp.Examples/app/plugin_group.cs), prints [its output](assets/examples/plugin_group.txt) |
 | [`render_recovery`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/render_recovery.rs) | Demonstrates how bevy can recover from rendering failures. | missing, recovering from a lost GPU device |
-| [`return_after_run`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/return_after_run.rs) | Show how to return to main after the Bevy app has exited | can be written |
-| [`settings`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/settings.rs) | Demonstrates persistence of settings | can be written |
+| [`return_after_run`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/return_after_run.rs) | Show how to return to main after the Bevy app has exited | [written](../BevyCSharp.Examples/app/return_after_run.cs), prints [its output](assets/examples/return_after_run.txt) |
+| [`settings`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/settings.rs) | Demonstrates persistence of settings | [written](../BevyCSharp.Examples/app/settings.cs) |
 | [`thread_pool_resources`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/thread_pool_resources.rs) | Creates and customizes the internal thread pool | does not apply, tunes Bevy's task pools, which the bridge sets up |
-| [`without_winit`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/without_winit.rs) | Create an application without winit (runs single time, no event loop) | can be written |
+| [`without_winit`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/without_winit.rs) | Create an application without winit (runs single time, no event loop) | does not apply, takes winit out of Bevy's plugins, which the bridge chooses |
 
 ## Assets
 
@@ -271,38 +271,38 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`callbacks`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/callbacks.rs) | Store arbitrary systems in components and run them on demand | can be written |
-| [`change_detection`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/change_detection.rs) | Change detection on components and resources | can be written |
-| [`component_hooks`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/component_hooks.rs) | Define component hooks to manage component lifecycle events | can be written |
+| [`callbacks`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/callbacks.rs) | Store arbitrary systems in components and run them on demand | [written](../BevyCSharp.Examples/ecs/callbacks.cs), prints [its output](assets/examples/callbacks.txt) |
+| [`change_detection`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/change_detection.rs) | Change detection on components and resources | missing, a resource's change ticks, and when a component was added and by what |
+| [`component_hooks`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/component_hooks.rs) | Define component hooks to manage component lifecycle events | missing, a component's add, insert and discard hooks, which only Bevy's remove hook has here, for the generator |
 | [`contiguous_query`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/contiguous_query.rs) | Demonstrates contiguous queries | does not apply, about a Rust query's memory layout |
 | [`custom_executor`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/custom_executor.rs) | Demonstrates how to make a custom SystemExecutor | does not apply, replaces Bevy's system executor, which is Rust |
 | [`custom_query_param`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/custom_query_param.rs) | Groups commonly used compound queries and query filters into a single type | does not apply, derives a Rust query type |
 | [`custom_schedule`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/custom_schedule.rs) | Demonstrates how to add custom schedules | missing, schedules a game adds of its own |
-| [`delayed_commands`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/delayed_commands.rs) | Demonstrates how to schedule ECS commands with a delay | can be written |
+| [`delayed_commands`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/delayed_commands.rs) | Demonstrates how to schedule ECS commands with a delay | missing, commands queued to run after a delay, and a click observed on a sprite |
 | [`dynamic`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/dynamic.rs) | Dynamically create components, spawn entities with those components and query those components | does not apply, builds components from raw layouts in Rust |
-| [`ecs_guide`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/ecs_guide.rs) | Full guide to Bevy's ECS | can be written |
-| [`entity_disabling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/entity_disabling.rs) | Demonstrates how to hide entities from the ECS without deleting them | can be written, through Bevy's reflected Disabled |
-| [`error_handling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/error_handling.rs) | How to return and handle errors across the ECS | can be written, with .NET exceptions |
+| [`ecs_guide`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/ecs_guide.rs) | Full guide to Bevy's ECS | missing, an order among systems in one stage, by sets or one after another |
+| [`entity_disabling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/entity_disabling.rs) | Demonstrates how to hide entities from the ECS without deleting them | missing, 2D meshes and their color materials, and a click observed on a mesh |
+| [`error_handling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/error_handling.rs) | How to return and handle errors across the ECS | missing, an observer of the pointer moving over a mesh, and points sampled over a mesh's surface |
 | [`extraction`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/extraction.rs) | Demonstrates different ways of extracting components, copying them from the main world to the render world | does not apply, writes render world extraction in Rust |
-| [`fallible_params`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/fallible_params.rs) | Systems are skipped if their parameters cannot be acquired | can be written |
-| [`fixed_timestep`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/fixed_timestep.rs) | Shows how to create systems that run every fixed timestep, rather than every tick | can be written |
-| [`generic_system`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/generic_system.rs) | Shows how to create systems that can be reused with different types | can be written |
-| [`hierarchy`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/hierarchy.rs) | Creates a hierarchy of parents and children entities | can be written |
+| [`fallible_params`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/fallible_params.rs) | Systems are skipped if their parameters cannot be acquired | does not apply, about Rust system parameters that fail validation, where a C# system checks what it needs itself |
+| [`fixed_timestep`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/fixed_timestep.rs) | Shows how to create systems that run every fixed timestep, rather than every tick | [written](../BevyCSharp.Examples/ecs/fixed_timestep.cs), prints [its output](assets/examples/fixed_timestep.txt) |
+| [`generic_system`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/generic_system.rs) | Shows how to create systems that can be reused with different types | [written](../BevyCSharp.Examples/ecs/generic_system.cs), prints [its output](assets/examples/generic_system.txt) |
+| [`hierarchy`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/hierarchy.rs) | Creates a hierarchy of parents and children entities | [written](../BevyCSharp.Examples/ecs/hierarchy.cs) |
 | [`hotpatching_systems`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/hotpatching_systems.rs) | Demonstrates how to hotpatch systems | can be written, as scripts reloaded while the app runs |
 | [`immutable_components`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/immutable_components.rs) | Demonstrates the creation and utility of immutable components | does not apply, about Rust's component mutability |
-| [`iter_combinations`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/iter_combinations.rs) | Shows how to iterate over combinations of query results | can be written |
-| [`message`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/message.rs) | Illustrates message creation, activation, and reception | can be written |
-| [`nondeterministic_system_order`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/nondeterministic_system_order.rs) | Systems run in parallel, but their order isn't always deterministic. Here's how to detect and fix this. | can be written |
+| [`iter_combinations`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/iter_combinations.rs) | Shows how to iterate over combinations of query results | [written](../BevyCSharp.Examples/ecs/iter_combinations.cs) |
+| [`message`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/message.rs) | Illustrates message creation, activation, and reception | missing, a message changed in place by a later system, and systems chained in one frame |
+| [`nondeterministic_system_order`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/nondeterministic_system_order.rs) | Systems run in parallel, but their order isn't always deterministic. Here's how to detect and fix this. | missing, an order among systems in one stage, and the schedule reporting systems whose order is ambiguous |
 | [`observer_propagation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/observer_propagation.rs) | Demonstrates event propagation with observers | missing, events that propagate through a hierarchy to observers |
-| [`observers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/observers.rs) | Demonstrates observers that react to events (both built-in life-cycle events and custom events) | can be written |
-| [`one_shot_systems`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/one_shot_systems.rs) | Shows how to flexibly run systems without scheduling them | can be written |
-| [`parallel_query`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/parallel_query.rs) | Illustrates parallel queries with `ParallelIterator` | can be written |
-| [`relationships`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/relationships.rs) | Define and work with custom relationships between entities | can be written |
-| [`removal_detection`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/removal_detection.rs) | Query for entities that had a specific component removed earlier in the current frame | can be written |
-| [`run_conditions`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/run_conditions.rs) | Run systems only when one or multiple conditions are met | can be written |
-| [`startup_system`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/startup_system.rs) | Demonstrates a startup system (one that runs once when the app starts up) | can be written |
-| [`state_scoped`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/state_scoped.rs) | Shows how to spawn entities that are automatically despawned either when entering or exiting specific game states. | can be written |
-| [`system_closure`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/system_closure.rs) | Show how to use closures as systems, and how to configure `Local` variables by capturing external state | can be written |
+| [`observers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/observers.rs) | Demonstrates observers that react to events (both built-in life-cycle events and custom events) | missing, observers of custom events and of a component's addition and removal |
+| [`one_shot_systems`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/one_shot_systems.rs) | Shows how to flexibly run systems without scheduling them | [written](../BevyCSharp.Examples/ecs/one_shot_systems.cs) |
+| [`parallel_query`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/parallel_query.rs) | Illustrates parallel queries with `ParallelIterator` | [written](../BevyCSharp.Examples/ecs/parallel_query.cs) |
+| [`relationships`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/relationships.rs) | Define and work with custom relationships between entities | missing, relationships of a game's own between entities |
+| [`removal_detection`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/removal_detection.rs) | Query for entities that had a specific component removed earlier in the current frame | missing, an observer told when a component is removed |
+| [`run_conditions`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/run_conditions.rs) | Run systems only when one or multiple conditions are met | [written](../BevyCSharp.Examples/ecs/run_conditions.cs), prints [its output](assets/examples/run_conditions.txt) |
+| [`startup_system`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/startup_system.rs) | Demonstrates a startup system (one that runs once when the app starts up) | [written](../BevyCSharp.Examples/ecs/startup_system.cs), prints [its output](assets/examples/startup_system.txt) |
+| [`state_scoped`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/state_scoped.rs) | Shows how to spawn entities that are automatically despawned either when entering or exiting specific game states. | missing, despawning when a state is entered or by a rule over the transition, and a state holding a value |
+| [`system_closure`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/system_closure.rs) | Show how to use closures as systems, and how to configure `Local` variables by capturing external state | [written](../BevyCSharp.Examples/ecs/system_closure.cs), prints [its output](assets/examples/system_closure.txt) |
 | [`system_param`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/system_param.rs) | Illustrates creating custom system parameters with `SystemParam` | does not apply, derives a Rust SystemParam |
 | [`system_piping`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/system_piping.rs) | Pipe the output of one system into a second, allowing you to handle any errors gracefully | does not apply, pipes Rust system outputs |
 | [`system_stepping`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/system_stepping.rs) | Demonstrate stepping through systems in order of execution. | missing, stepping through systems one at a time |

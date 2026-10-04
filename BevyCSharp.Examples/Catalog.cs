@@ -1,3 +1,5 @@
+using BevyCSharp.Examples.Application;
+using BevyCSharp.Examples.Ecs;
 using BevyCSharp.Examples.ThreeD;
 
 namespace BevyCSharp.Examples;
@@ -53,6 +55,27 @@ internal static class Catalog
         new("pcss", Pcss.Build),
         new("orthographic", Orthographic.Build),
         new("parenting", Parenting.Build),
+
+        // Application
+        new("empty", Empty.Build, Prints: 1),
+        new("drag_and_drop", DragAndDrop.Build),
+        new("empty_defaults", EmptyDefaults.Build),
+        new("plugin", PluginExample.Build, Prints: 130),
+        new("plugin_group", PluginGroupExample.Build, Prints: 3),
+        new("return_after_run", ReturnAfterRun.Build, Prints: 3, Returned: ReturnAfterRun.Returned),
+        new("settings", Settings.Build),
+
+        // ECS (Entity Component System)
+        new("callbacks", Callbacks.Build, Prints: 2),
+        new("fixed_timestep", FixedTimestep.Build, FixedTimestep.Configure, Prints: 64),
+        new("generic_system", GenericSystem.Build, Prints: 130),
+        new("hierarchy", Hierarchy.Build),
+        new("iter_combinations", IterCombinations.Build),
+        new("one_shot_systems", OneShotSystems.Build),
+        new("parallel_query", ParallelQueryExample.Build),
+        new("run_conditions", RunConditions.Build, Prints: 160),
+        new("startup_system", StartupSystem.Build, Prints: 1),
+        new("system_closure", SystemClosure.Build, Prints: 3),
     ];
 
     public static bool TryFind(string name, out Example example)

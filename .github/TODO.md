@@ -24,10 +24,10 @@ names what the bridge lacks. Gathered by what they lack, these hold the most row
 the most examples, and the largest is taken between groups of examples. The counts come from
 `BevyCSharp.Examples/triage.tsv` and move as rows are written or found to be reachable.
 
-- **2D meshes, nine examples.** A `Mesh2d` drawn with a `ColorMaterial`, which no C# call makes
+- **2D meshes, ten examples.** A `Mesh2d` drawn with a `ColorMaterial`, which no C# call makes
   (`mesh2d`, `mesh2d_alpha_mode`, `mesh2d_arcs`, `mesh2d_repeated_texture`,
-  `mesh2d_vertex_color_texture`, `wireframe_2d`, `shader_material_2d`, and the two stress tests
-  of sprite meshes). Needs the material made and set as `StandardMaterial` is, and a shader
+  `mesh2d_vertex_color_texture`, `wireframe_2d`, `shader_material_2d`, `entity_disabling`, and
+  the two stress tests of sprite meshes). Needs the material made and set as `StandardMaterial` is, and a shader
   material that draws on a 2D mesh.
 - **Interface widgets and text input, fifteen examples.** Bevy's editable text (four), its core
   widgets and widget helpers (four), Feathers (three), scrollbars, and directional and tab
@@ -38,10 +38,25 @@ the most examples, and the largest is taken between groups of examples. The coun
   background colors.
 - **Animation built in code, seven examples.** Clips made from curves, events placed on a clip,
   graphs that blend clips by weight and their masks, and skinned meshes built joint by joint.
+- **Observers, six examples.** Code run when an event is triggered, on an entity or anywhere, or
+  when a component is added or removed, which `observers`, `observer_propagation` and
+  `removal_detection` are about and `error_handling`, `delayed_commands` and `entity_disabling`
+  use for a click or a pointer moving over what they draw. Needs events a game declares,
+  triggered from C# and from Bevy's picking, and C# code run as an observer.
 - **Text gizmos, four examples.**
+- **An order among systems, three examples.** Systems in one stage run in no order a game sets,
+  where `ecs_guide` puts its systems in sets one after another, `message` chains the systems that
+  pass a message along in one frame, and `nondeterministic_system_order` has the schedule report
+  systems whose order is ambiguous. Needs `before`, `after` and `chain` on a system and sets of
+  them, carried to Bevy's schedule.
 - **Bevy's remote protocol, three examples.** `bcs` is this engine's own, so these wait on whether
   the protocol is worth carrying beside it.
 - **A second window, two examples.**
+- **Six more, one example each.** A resource's change ticks and when a component was added
+  (`change_detection`), a component's add and insert hooks (`component_hooks`), relationships of a
+  game's own (`relationships`), despawning as a state is entered or by a rule over the transition
+  (`state_scoped`), commands run after a delay (`delayed_commands`, which also waits on observers),
+  and Bevy's log written from C# at its levels (`logs`).
 
 Three examples are written in part, each leaving out a feature named in its row.
 

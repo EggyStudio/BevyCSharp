@@ -16,9 +16,26 @@ mkdir -p "$into"
 build/fetch-bevy-assets.sh
 
 failed=()
-for example in $(BevyCSharp.Examples/bin/*/net10.0/BevyCSharp.Examples --list); do
+program=$(ls -t BevyCSharp.Examples/bin/*/net10.0/BevyCSharp.Examples | head -1)
+printing=$("$program" --printing)
+
+# Examples that show and print nothing by design, Bevy's two empty applications and drag_and_drop
+# until a file is dropped on it, so their capture is not held to saying something.
+empty="drag_and_drop empty empty_defaults"
+
+for example in $("$program" --list); do
     if ! build/capture-example.sh "$example" "$into/$example.png"; then
         failed+=("$example (did not start or could not be captured)")
+        continue
+    fi
+
+    if [[ " $empty " == *" $example "* ]]; then
+        continue
+    fi
+
+    # One that prints is captured as its output, which has to say something.
+    if grep -qx "$example" <<< "$printing"; then
+        [ -s "$into/$example.txt" ] || failed+=("$example (printed nothing)")
         continue
     fi
 

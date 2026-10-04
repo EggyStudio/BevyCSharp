@@ -173,7 +173,8 @@ def build(version, examples, order, triage, written):
     out.append("")
     out.append(
         "A row's example links to Bevy's source, at the release the bridge builds. A written "
-        "one's state links to its program here, and its capture is in `.github/assets/examples`.")
+        "one's state links to its program here, and its capture is in `.github/assets/examples`, a "
+        "picture of what it draws or, for one with nothing to draw, the text it prints.")
 
     for group in groups:
         out.append("")
@@ -187,6 +188,9 @@ def build(version, examples, order, triage, written):
             state = STATES[example["state"]]
             if example["state"] in ("written", "part"):
                 state = f"[{STATES[example['state']]}](../{written[example['name']]})"
+                # One with nothing to draw is captured as what it prints, which the row links.
+                if os.path.exists(os.path.join(CAPTURES, example["name"] + ".txt")):
+                    state += f", prints [its output](assets/examples/{example['name']}.txt)"
             if example["note"]:
                 state += f", {example['note']}"
             description = example["description"].replace("|", "\\|") or " "

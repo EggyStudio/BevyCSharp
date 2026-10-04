@@ -7,9 +7,19 @@
 #   dotnet build BevyCSharp.Examples
 #   build/capture-example.sh <example> [png]
 #
-# The picture goes to .github/assets/examples/<example>.png unless another path is given.
+# The picture goes to .github/assets/examples/<example>.png unless another path is given. An
+# example with nothing to draw is run headless instead, and what it prints goes beside where the
+# picture would, as <example>.txt.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+
+program=$(ls -t BevyCSharp.Examples/bin/*/net10.0/BevyCSharp.Examples | head -1)
+if "$program" --printing | grep -qx "$1"; then
+    out="${2:-.github/assets/examples/$1.png}"
+    mkdir -p "$(dirname "$out")"
+    "$program" "$1" > "${out%.png}.txt"
+    exit 0
+fi
 
 example="$1"
 out="${2:-.github/assets/examples/$example.png}"

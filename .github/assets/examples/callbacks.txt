@@ -1,0 +1,6 @@
+This is the trivial callback system
+This is the ordinary callback system. There are currently 3 callbacks in the world.
+This is the exclusive callback system. There are currently 122 entities in the world.
+This is the trivial callback system
+This is the ordinary callback system. There are currently 3 callbacks in the world.
+This is the exclusive callback system. There are currently 122 entities in the world.

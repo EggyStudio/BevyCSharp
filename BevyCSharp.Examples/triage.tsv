@@ -124,8 +124,8 @@ headless	can
 headless_renderer	can
 log_layers_ecs	n/a	adds a tracing layer, written in Rust
 log_layers	n/a	adds a tracing layer, written in Rust
-logs	can
-no_renderer	can
+logs	missing	Bevy's log written from C# at its levels, and a message logged once
+no_renderer	n/a	builds Bevy's renderer with no graphics backend, which the bridge sets up
 persisting_window_settings	can
 plugin	can
 plugin_group	can
@@ -133,7 +133,7 @@ render_recovery	missing	recovering from a lost GPU device
 return_after_run	can
 settings	can
 thread_pool_resources	n/a	tunes Bevy's task pools, which the bridge sets up
-without_winit	can
+without_winit	n/a	takes winit out of Bevy's plugins, which the bridge chooses
 alter_mesh	can
 alter_sprite	can
 asset_decompression	n/a	writes a Rust asset loader
@@ -178,36 +178,36 @@ custom_diagnostic	missing	diagnostics a game registers in Bevy's store
 enabling_disabling_diagnostic	missing	turning one of Bevy's diagnostics on and off
 log_diagnostics	can	through frame.profile and the frame panel
 callbacks	can
-change_detection	can
-component_hooks	can
+change_detection	missing	a resource's change ticks, and when a component was added and by what
+component_hooks	missing	a component's add, insert and discard hooks, which only Bevy's remove hook has here, for the generator
 contiguous_query	n/a	about a Rust query's memory layout
 custom_executor	n/a	replaces Bevy's system executor, which is Rust
 custom_query_param	n/a	derives a Rust query type
 custom_schedule	missing	schedules a game adds of its own
-delayed_commands	can
+delayed_commands	missing	commands queued to run after a delay, and a click observed on a sprite
 dynamic	n/a	builds components from raw layouts in Rust
-ecs_guide	can
-entity_disabling	can	through Bevy's reflected Disabled
-error_handling	can	with .NET exceptions
+ecs_guide	missing	an order among systems in one stage, by sets or one after another
+entity_disabling	missing	2D meshes and their color materials, and a click observed on a mesh
+error_handling	missing	an observer of the pointer moving over a mesh, and points sampled over a mesh's surface
 extraction	n/a	writes render world extraction in Rust
-fallible_params	can
+fallible_params	n/a	about Rust system parameters that fail validation, where a C# system checks what it needs itself
 fixed_timestep	can
 generic_system	can
 hierarchy	can
 hotpatching_systems	can	as scripts reloaded while the app runs
 immutable_components	n/a	about Rust's component mutability
 iter_combinations	can
-message	can
-nondeterministic_system_order	can
+message	missing	a message changed in place by a later system, and systems chained in one frame
+nondeterministic_system_order	missing	an order among systems in one stage, and the schedule reporting systems whose order is ambiguous
 observer_propagation	missing	events that propagate through a hierarchy to observers
-observers	can
+observers	missing	observers of custom events and of a component's addition and removal
 one_shot_systems	can
 parallel_query	can
-relationships	can
-removal_detection	can
+relationships	missing	relationships of a game's own between entities
+removal_detection	missing	an observer told when a component is removed
 run_conditions	can
 startup_system	can
-state_scoped	can
+state_scoped	missing	despawning when a state is entered or by a rule over the transition, and a state holding a value
 system_closure	can
 system_param	n/a	derives a Rust SystemParam
 system_piping	n/a	pipes Rust system outputs

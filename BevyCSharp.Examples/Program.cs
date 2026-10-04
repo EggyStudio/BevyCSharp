@@ -12,11 +12,14 @@ using BevyCSharp.Examples;
 //   --size WxH     the window's or the image's size, 1280x720 unless given
 //   --serve        answers bcs while it runs
 //   --list         prints every example's name
+//   --printing     prints the names of those that print rather than draw, which run headless
+//   --window       opens an empty window for one that prints, so one that reads keys has them
 //
 // .github/EXAMPLES.md has a row for every one of Bevy's examples, these among them.
-if (args.Length == 0 || args[0] == "--list")
+if (args.Length == 0 || args[0] is "--list" or "--printing")
 {
-    foreach (var known in Catalog.All) Console.WriteLine(known.Name);
+    foreach (var known in Catalog.All.Where(known => args.Length == 0 || args[0] == "--list" || known.Prints > 0))
+        Console.WriteLine(known.Name);
     return args.Length == 0 ? 2 : 0;
 }
 
@@ -29,9 +32,11 @@ if (!Catalog.TryFind(args[0], out var example))
 var offscreen = args.Contains("--offscreen");
 var (width, height) = Size(args);
 Scene.Size = (width, height);
-var config = offscreen
-    ? Config.OffscreenFor(width, height, Frames(args))
-    : Config.Windowed($"{example.Name} (BevyCSharp)", width, height);
+var config = example.Prints > 0 && !args.Contains("--window")
+    ? new Config { Headless = true, HeadlessFrames = Frames(args) is > 0 and var frames ? frames : example.Prints, HeadlessFps = 60 }
+    : offscreen
+        ? Config.OffscreenFor(width, height, Frames(args))
+        : Config.Windowed($"{example.Name} (BevyCSharp)", width, height);
 
 // Beside the program rather than beside whichever host launched it, which for a .NET app is not
 // the directory the assets were copied to.
@@ -39,14 +44,16 @@ config.AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets");
 config.Serve |= args.Contains("--serve");
 example.Configure?.Invoke(config);
 
-if (!App.HasRenderer)
+if ((example.Prints == 0 || args.Contains("--window")) && !App.HasRenderer)
 {
     Console.Error.WriteLine("This native bridge was built without Bevy's renderer, so an example has nothing to draw with.");
     Console.Error.WriteLine("Rebuild it with build/build-native.sh --render.");
     return 1;
 }
 
-return BevyApp.Run(example.Build, config);
+var code = BevyApp.Run(example.Build, config);
+example.Returned?.Invoke();
+return code;
 
 // Reads --frames N, which is zero, running until stopped, when it is not given.
 static uint Frames(string[] arguments)
