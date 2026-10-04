@@ -38,8 +38,8 @@ public static class EditorEntity
 
         EditorHistory.Record(
             $"rename to {name}",
-            undo => Rename(undo, entity, was, node),
-            redo => Rename(redo, entity, name, node),
+            undo => Rename(undo, EditorHistory.Resolve(entity), was, node),
+            redo => Rename(redo, EditorHistory.Resolve(entity), name, node),
             $"name{entity.Bits}");
     }
 
@@ -86,12 +86,12 @@ public static class EditorEntity
             made.Count == 1 ? "duplicate" : $"duplicate {made.Count}",
             undo =>
             {
-                foreach (var copy in held) undo.Despawn(copy);
+                foreach (var copy in held) undo.Despawn(EditorHistory.Resolve(copy));
                 EditorSelection.Clear();
             },
             redo =>
             {
-                held = [.. Copies(redo, sources)];
+                held = [.. Copies(redo, [.. sources.Select(EditorHistory.Resolve)])];
                 Choose(held);
             });
 
@@ -112,9 +112,10 @@ public static class EditorEntity
     /// same way.
     /// </para>
     /// <para>
-    /// What comes back is new entities, as a duplicate's redo is, so an earlier edit on the undo
-    /// stack that named one of the old ones finds nothing. The components a scene leaves out, the
-    /// engine's own bookkeeping, are worked out again by the engine as they are on a load.
+    /// What comes back is new entities, since Bevy gives a despawned entity's id to nothing again,
+    /// so the history is told which old one each stands for (<see cref="EditorHistory.CameBack"/>)
+    /// and every edit on it reaches the new one. The components a scene leaves out, the engine's own
+    /// bookkeeping, are worked out again by the engine as they are on a load.
     /// </para>
     /// <para>
     /// Two kinds are deleted without a way back, each with a line in the console saying so. One is
@@ -256,6 +257,9 @@ public static class EditorEntity
         }
 
         Repoint(world, moved, load.Entities.ToHashSet());
+
+        // And the edits recorded on the old ones, which reach the new through this.
+        EditorHistory.CameBack(moved);
         return tops;
     }
 
@@ -393,13 +397,15 @@ public static class EditorEntity
             $"add {schema.Name}",
             undo =>
             {
-                schema.Remove(undo, entity);
-                SceneInstances.MarkRemoved(undo, entity, schema.QualifiedName);
+                var at = EditorHistory.Resolve(entity);
+                schema.Remove(undo, at);
+                SceneInstances.MarkRemoved(undo, at, schema.QualifiedName);
             },
             redo =>
             {
-                schema.Add(redo, entity);
-                SceneInstances.MarkAdded(redo, entity, schema.QualifiedName);
+                var at = EditorHistory.Resolve(entity);
+                schema.Add(redo, at);
+                SceneInstances.MarkAdded(redo, at, schema.QualifiedName);
             });
     }
 
@@ -444,15 +450,17 @@ public static class EditorEntity
             $"remove {schema.Name}",
             undo =>
             {
-                if (!schema.Add(undo, entity)) return;
+                var at = EditorHistory.Resolve(entity);
+                if (!schema.Add(undo, at)) return;
 
-                foreach (var (field, value) in held) field.Write(undo, entity, value);
-                SceneInstances.MarkAdded(undo, entity, schema.QualifiedName);
+                foreach (var (field, value) in held) field.Write(undo, at, value);
+                SceneInstances.MarkAdded(undo, at, schema.QualifiedName);
             },
             redo =>
             {
-                schema.Remove(redo, entity);
-                SceneInstances.MarkRemoved(redo, entity, schema.QualifiedName);
+                var at = EditorHistory.Resolve(entity);
+                schema.Remove(redo, at);
+                SceneInstances.MarkRemoved(redo, at, schema.QualifiedName);
             });
     }
 

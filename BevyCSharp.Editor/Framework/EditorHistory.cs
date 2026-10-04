@@ -45,6 +45,34 @@ public static class EditorHistory
     private static readonly List<EditorEdit> Done = [];
     private static readonly List<EditorEdit> Undone = [];
 
+    /// <summary>What each entity a delete's undo brought back was before, old to new.</summary>
+    private static readonly Dictionary<Entity, Entity> Moved = [];
+
+    /// <summary>
+    /// Says that entities came back as others, as undoing a delete brings them back as new
+    /// entities, so the edits recorded on the old ones reach the new.
+    /// </summary>
+    /// <remarks>
+    /// Every record resolves the entity it captured through <see cref="Resolve"/> before it runs,
+    /// so an edit made, then the entity deleted and the delete undone, still undoes on the entity
+    /// that came back. The map is followed through as many deletes and undos as there were.
+    /// </remarks>
+    public static void CameBack(IEnumerable<KeyValuePair<Entity, Entity>> moved)
+    {
+        ArgumentNullException.ThrowIfNull(moved);
+        foreach (var (old, back) in moved) Moved[old] = back;
+    }
+
+    /// <summary>The entity an edit recorded on one stands for, through every delete undone since it was made.</summary>
+    public static Entity Resolve(Entity entity)
+    {
+        // Bounded, since an entity that came back as itself would otherwise be followed forever.
+        for (var hops = 0; hops < 1024 && Moved.TryGetValue(entity, out var next) && next != entity; hops++)
+            entity = next;
+
+        return entity;
+    }
+
     /// <summary>What the last change was, or <see langword="null"/> when nothing has changed.</summary>
     public static string? Last => Done.Count > 0 ? Done[^1].What : null;
 
@@ -123,5 +151,6 @@ public static class EditorHistory
     {
         Done.Clear();
         Undone.Clear();
+        Moved.Clear();
     }
 }

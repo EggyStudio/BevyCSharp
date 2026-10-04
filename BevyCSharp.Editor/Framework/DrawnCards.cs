@@ -209,8 +209,8 @@ internal static class DrawnCards
         Render.SetMesh(world, entity, copy);
         EditorHistory.Record(
             "mesh made unique",
-            undo => Render.SetMesh(undo, entity, shared),
-            redo => Render.SetMesh(redo, entity, copy));
+            undo => Render.SetMesh(undo, EditorHistory.Resolve(entity), shared),
+            redo => Render.SetMesh(redo, EditorHistory.Resolve(entity), copy));
     }
 
     /// <summary>Writes a mesh made here to a file named after the entity, beside the browser's folder.</summary>
@@ -246,8 +246,8 @@ internal static class DrawnCards
 
         EditorHistory.Record(
             "material made unique",
-            undo => Render.SetMaterial(undo, entity, shared),
-            redo => Render.SetMaterial(redo, entity, copy));
+            undo => Render.SetMaterial(undo, EditorHistory.Resolve(entity), shared),
+            redo => Render.SetMaterial(redo, EditorHistory.Resolve(entity), copy));
     }
 
     /// <summary>Writes a material made here to a file named after the entity, beside the browser's folder.</summary>

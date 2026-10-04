@@ -369,8 +369,8 @@ public static class WorldPanel
                 // being made.
                 EditorHistory.Record(
                     now.Mode == VisibilityMode.Hidden ? $"hide {row.Name}" : $"show {row.Name}",
-                    undo => undo.Set(which, was),
-                    redo => redo.Set(which, now));
+                    undo => undo.Set(EditorHistory.Resolve(which), was),
+                    redo => redo.Set(EditorHistory.Resolve(which), now));
             }
 
             // And the arrow takes its own, so folding a branch away leaves the selection alone.

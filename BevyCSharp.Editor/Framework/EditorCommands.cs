@@ -670,7 +670,7 @@ public static class EditorCommands
         // nothing rather than by spawning something that looks like it and is not.
         EditorHistory.Record(
             $"spawn {name}",
-            undo => undo.Despawn(entity),
+            undo => undo.Despawn(EditorHistory.Resolve(entity)),
             static _ => { });
     }
 

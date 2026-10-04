@@ -123,7 +123,7 @@ public static class ComponentFields
     /// <param name="field">Which field.</param>
     /// <param name="id">What the field is called, which makes a run of edits one edit.</param>
     /// <param name="before">What it held before the widget was drawn.</param>
-    private static void Recorded(
+    internal static void Recorded(
         BehaviorContext ctx,
         Entity entity,
         ComponentSchema schema,
@@ -148,13 +148,15 @@ public static class ComponentFields
                 $"{schema.Name}.{field.Title}",
                 world =>
                 {
-                    field.Write(world, entity, was);
-                    SceneInstances.Mark(world, entity, schema.QualifiedName, field.Name);
+                    var at = EditorHistory.Resolve(entity);
+                    field.Write(world, at, was);
+                    SceneInstances.Mark(world, at, schema.QualifiedName, field.Name);
                 },
                 world =>
                 {
-                    field.Write(world, entity, now);
-                    SceneInstances.Mark(world, entity, schema.QualifiedName, field.Name);
+                    var at = EditorHistory.Resolve(entity);
+                    field.Write(world, at, now);
+                    SceneInstances.Mark(world, at, schema.QualifiedName, field.Name);
                 },
                 id);
         }
@@ -190,13 +192,15 @@ public static class ComponentFields
             $"Revert {schema.Name}.{field.Title}",
             undo =>
             {
-                field.Write(undo, entity, was);
-                SceneInstances.Mark(undo, entity, schema.QualifiedName, field.Name, now);
+                var at = EditorHistory.Resolve(entity);
+                field.Write(undo, at, was);
+                SceneInstances.Mark(undo, at, schema.QualifiedName, field.Name, now);
             },
             redo =>
             {
-                field.Write(redo, entity, now);
-                SceneInstances.Mark(redo, entity, schema.QualifiedName, field.Name);
+                var at = EditorHistory.Resolve(entity);
+                field.Write(redo, at, now);
+                SceneInstances.Mark(redo, at, schema.QualifiedName, field.Name);
             });
     }
 

@@ -111,11 +111,13 @@ public static class EditorHierarchy
             what,
             undo =>
             {
-                foreach (var step in steps) Move(undo, step.Child, step.Previous, step.Placed, step.Before);
+                foreach (var step in steps)
+                    Move(undo, EditorHistory.Resolve(step.Child), EditorHistory.Resolve(step.Previous), step.Placed, step.Before);
             },
             redo =>
             {
-                foreach (var step in steps) Move(redo, step.Child, parent, step.Placed, step.After);
+                foreach (var step in steps)
+                    Move(redo, EditorHistory.Resolve(step.Child), EditorHistory.Resolve(parent), step.Placed, step.After);
             });
 
         return steps.Count;

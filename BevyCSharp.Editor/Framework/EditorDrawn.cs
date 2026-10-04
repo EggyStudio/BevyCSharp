@@ -547,8 +547,10 @@ internal static class EditorDrawn
         void Set(EcsWorld on, AssetHandle to)
         {
             if (!to.IsValid) return;
-            if (mesh) Render.SetMesh(on, entity, to);
-            else Render.SetMaterial(on, entity, to);
+
+            var at = EditorHistory.Resolve(entity);
+            if (mesh) Render.SetMesh(on, at, to);
+            else Render.SetMaterial(on, at, to);
         }
     }
 

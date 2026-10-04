@@ -337,9 +337,9 @@ language.
   still resolve to the first.
 - **Undo brings a deleted entity back as a new one.** A delete is kept as a scene in memory and
   read back on undo, under the parent it had and with the entity fields that named it pointed at
-  it again, so it comes back whole. It is a new entity, as a duplicate's redo is, so an edit before
-  the delete that named the old one finds nothing, and a reference inside a list's item is left as
-  it was. A node of a placed model, and an entity drawn with a shader material or anything else a
+  it again, so it comes back whole. It is a new entity, and the history keeps which old one it
+  stands for, so the edits recorded before the delete reach it. A reference inside a list's item
+  is left as it was. A node of a placed model, and an entity drawn with a shader material or anything else a
   scene cannot describe, are deleted with no way back and a line in the console saying so.
 - **A project file holds four settings.** `assets/project.json` (`ProjectSettings`) keeps the
   startup scene, the fixed step, the export's last choices and a theme asked to ship, and the

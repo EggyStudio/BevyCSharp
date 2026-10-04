@@ -286,4 +286,68 @@ public sealed class EditorHistoryTests
         Assert.True(redone);
         Assert.True(twice);
     }
+
+    /// <summary>
+    /// The edits made before a delete still undo once the delete is undone, on the entity that came
+    /// back rather than the one that went, and redo again in order.
+    /// </summary>
+    [Fact]
+    public void EditsBeforeADeleteUndoOnWhatTheUndoBroughtBack()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        var steps = new List<string>();
+        var ran = false;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (ran) return;
+            ran = true;
+
+            var ecs = ctx.Ecs;
+            EditorHistory.Clear();
+
+            var box = ecs.Spawn();
+            ecs.SetName(box, "Box");
+            ecs.Add(box, new EveryKind { Count = 1 });
+
+            var schema = ecs.ComponentsOf(box).Select(ComponentSchemas.For).First(found => found?.Name == "EveryKind")!;
+            var count = schema.Field("Count")!;
+
+            // A field edited through the same path the details panel records it by, then a rename.
+            var before = count.Read(ecs, box);
+            count.Write(ecs, box, 5);
+            ComponentFields.Recorded(ctx, box, schema, count, "EveryKind.Count", before);
+            EditorEntity.Rename(ecs, box, "Crate");
+
+            EditorEntity.Delete(ecs, [box]);
+
+            string State()
+            {
+                var found = ecs.All().Where(entity => ecs.NameOf(entity) is "Box" or "Crate").ToArray();
+                return found.Length == 0
+                    ? "gone"
+                    : $"{ecs.NameOf(found[0])} {ecs.GetRef<EveryKind>(found[0]).Count}";
+            }
+
+            steps.Add(State());
+            for (var i = 0; i < 3; i++)
+            {
+                EditorHistory.Undo(ecs);
+                steps.Add(State());
+            }
+
+            for (var i = 0; i < 3; i++)
+            {
+                EditorHistory.Redo(ecs);
+                steps.Add(State());
+            }
+        });
+
+        harness.Run();
+
+        Assert.Equal(
+            ["gone", "Crate 5", "Box 5", "Box 1", "Box 5", "Crate 5", "gone"],
+            steps);
+    }
 }

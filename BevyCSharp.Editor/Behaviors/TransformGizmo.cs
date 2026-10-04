@@ -506,16 +506,18 @@ public partial struct TransformGizmo
             {
                 foreach (var (which, was, _) in moved)
                 {
-                    world.Set(which, was);
-                    Kept(world, which, null);
+                    var at = EditorHistory.Resolve(which);
+                    world.Set(at, was);
+                    Kept(world, at, null);
                 }
             },
             world =>
             {
                 foreach (var (which, _, now) in moved)
                 {
-                    world.Set(which, now);
-                    Kept(world, which, null);
+                    var at = EditorHistory.Resolve(which);
+                    world.Set(at, now);
+                    Kept(world, at, null);
                 }
             });
     }
