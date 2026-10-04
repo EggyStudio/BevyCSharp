@@ -9,6 +9,11 @@ https://github.com/bevyengine/bevy_asset_files/raw/main/pccm_example/outer_cube.
 https://github.com/bevyengine/bevy_asset_files/raw/main/clustered_decal_maps/BevyLogo-Emissive.png
 https://github.com/bevyengine/bevy_asset_files/raw/main/clustered_decal_maps/BevyLogo-MetallicRoughness.png
 https://github.com/bevyengine/bevy_asset_files/raw/main/clustered_decal_maps/BevyLogo-Normal.png
+https://github.com/bevyengine/bevy_asset_files/raw/main/light_probe_blending/diffuse_room1.ktx2
+https://github.com/bevyengine/bevy_asset_files/raw/main/light_probe_blending/diffuse_room2.ktx2
+https://github.com/bevyengine/bevy_asset_files/raw/main/light_probe_blending/specular_room1.ktx2
+https://github.com/bevyengine/bevy_asset_files/raw/main/light_probe_blending/specular_room2.ktx2
+https://github.com/bevyengine/bevy_asset_files/raw/main/light_probe_blending/two_rooms.glb
 branding/bevy_logo_light.png
 environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2
 environment_maps/pisa_specular_rgb9e5_zstd.ktx2
