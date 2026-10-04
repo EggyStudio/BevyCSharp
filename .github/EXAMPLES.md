@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**103 written, 6 written in part, 140 can be written, 115 missing and 57 do not apply.** Of the 364 that apply, 249 can be written with what is bridged, 6 of them leaving something out.
+**105 written, 6 written in part, 135 can be written, 118 missing and 57 do not apply.** Of the 364 that apply, 246 can be written with what is bridged, 6 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
@@ -15,7 +15,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Assets](#assets) | 0 | 0 | 10 | 2 | 5 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 |
 | [Audio](#audio) | 4 | 0 | 0 | 4 | 0 |
-| [Camera](#camera) | 4 | 0 | 0 | 5 | 0 |
+| [Camera](#camera) | 3 | 0 | 1 | 5 | 0 |
 | [Dev tools](#dev-tools) | 0 | 0 | 1 | 1 | 1 |
 | [Diagnostics](#diagnostics) | 0 | 0 | 1 | 2 | 0 |
 | [ECS (Entity Component System)](#ecs-entity-component-system) | 10 | 0 | 1 | 15 | 9 |
@@ -37,12 +37,12 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 |
 | [Tools](#tools) | 0 | 0 | 2 | 0 | 0 |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 |
-| [UI (User Interface)](#ui-user-interface) | 11 | 1 | 20 | 28 | 0 |
+| [UI (User Interface)](#ui-user-interface) | 14 | 1 | 14 | 31 | 0 |
 | [Usage](#usage) | 0 | 0 | 3 | 0 | 0 |
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **103** | **6** | **140** | **115** | **57** |
+| **All** | **105** | **6** | **135** | **118** | **57** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints.
 
@@ -246,7 +246,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`2d_top_down_camera`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_top_down_camera.rs) | A 2D top-down camera smoothly following player movements | missing, 2D meshes and their color materials |
 | [`camera_orbit`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/camera_orbit.rs) | Shows how to orbit a static scene using pitch, yaw, and roll. | [written](../BevyCSharp.Examples/camera/camera_orbit.cs) |
 | [`custom_projection`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/custom_projection.rs) | Shows how to create custom camera projections. | missing, custom camera projections |
-| [`first_person_view_model`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/first_person_view_model.rs) | A first-person camera that uses a world model and a view model with different field of views (FOV) | [written](../BevyCSharp.Examples/camera/first_person_view_model.cs) |
+| [`first_person_view_model`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/first_person_view_model.rs) | A first-person camera that uses a world model and a view model with different field of views (FOV) | can be written |
 | [`free_camera_controller`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/free_camera_controller.rs) | Demonstrates the FreeCamera controller for 3D scenes. | missing, Bevy's free camera controller, its plugin and its settings |
 | [`pan_camera_controller`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/pan_camera_controller.rs) | Example Pan-Camera Styled Camera Controller for 2D scenes | missing, Bevy's pan camera controller, its plugin and its settings |
 | [`projection_zoom`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/projection_zoom.rs) | Shows how to zoom orthographic and perspective projection cameras. | [written](../BevyCSharp.Examples/camera/projection_zoom.cs) |
@@ -520,18 +520,18 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`anchor_layout`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/layout/anchor_layout.rs) | Shows an 'anchor layout' style of ui layout | can be written |
+| [`anchor_layout`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/layout/anchor_layout.rs) | Shows an 'anchor layout' style of ui layout | [written](../BevyCSharp.Examples/ui/anchor_layout.cs) |
 | [`borders`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/styling/borders.rs) | Demonstrates how to create a node with a border | can be written |
 | [`box_shadow`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/styling/box_shadow.rs) | Demonstrates how to create a node with a shadow | can be written, through Bevy's reflected BoxShadow |
 | [`button`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/button.rs) | Illustrates creating and updating a button | [written in part](../BevyCSharp.Examples/ui/button.cs), the input focus given to the button, a resource of Bevy's |
 | [`directional_navigation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/navigation/directional_navigation.rs) | Demonstration of automatic directional navigation based on UI element positions | missing, directional navigation between interface nodes |
 | [`directional_navigation_overrides`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/navigation/directional_navigation_overrides.rs) | Demonstration of automatic directional navigation between UI elements with manual overrides | missing, directional navigation between interface nodes |
 | [`display_and_visibility`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/layout/display_and_visibility.rs) | Demonstrates how Display and Visibility work in the UI. | can be written |
-| [`drag_to_scroll`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/scroll_and_overflow/drag_to_scroll.rs) | This example tests scale factor, dragging and scrolling | can be written |
+| [`drag_to_scroll`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/scroll_and_overflow/drag_to_scroll.rs) | This example tests scale factor, dragging and scrolling | missing, observers of the pointer dragging a scrolled node, and Bevy's UiScale resource |
 | [`editable_text_filter`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/editable_text_filter.rs) | Demonstrates an 8-character hex input using EditableTextFilter | missing, Bevy's editable text (EditableText) |
 | [`feathers_counter`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/feathers_counter.rs) | Simple counter using feathers | missing, Bevy's Feathers widgets |
 | [`feathers_gallery`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/feathers_gallery.rs) | Gallery of Feathers Widgets | missing, Bevy's Feathers widgets |
-| [`flex_layout`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/layout/flex_layout.rs) | Demonstrates how the AlignItems and JustifyContent properties can be composed to layout nodes and position text | can be written |
+| [`flex_layout`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/layout/flex_layout.rs) | Demonstrates how the AlignItems and JustifyContent properties can be composed to layout nodes and position text | [written](../BevyCSharp.Examples/ui/flex_layout.cs) |
 | [`font_atlas_debug`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/font_atlas_debug.rs) | Illustrates how FontAtlases are populated (used to optimize text rendering internally) | missing, reading the font atlases |
 | [`font_query`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/font_query.rs) | Demonstrates font querying | missing, querying fonts |
 | [`font_variations`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/font_variations.rs) | Demonstrates how to use OpenType font variations. | missing, OpenType font variations |
@@ -560,11 +560,11 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`strikethrough_and_underline`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/strikethrough_and_underline.rs) | Demonstrates how to display text with strikethrough and underline. | missing, strikethrough and underline on text |
 | [`system_fonts`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/system_fonts.rs) | Demonstrates how to use system fonts | missing, system fonts |
 | [`tab_navigation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/tab_navigation.rs) | Demonstration of Tab Navigation between UI elements | missing, tab navigation between interface nodes |
-| [`text`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text.rs) | Illustrates creating and updating text | can be written |
+| [`text`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text.rs) | Illustrates creating and updating text | missing, an underline and OpenType font features |
 | [`text_background_colors`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text_background_colors.rs) | Demonstrates text background colors | missing, text background colors |
 | [`text_debug`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text_debug.rs) | An example for debugging text layout | can be written |
 | [`text_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text_input.rs) | Demonstrates a simple, unstyled text input widget | missing, Bevy's editable text (EditableText) |
-| [`text_wrap_debug`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text_wrap_debug.rs) | Demonstrates text wrapping | can be written |
+| [`text_wrap_debug`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text_wrap_debug.rs) | Demonstrates text wrapping | [written](../BevyCSharp.Examples/ui/text_wrap_debug.cs) |
 | [`transparency_ui`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/styling/transparency_ui.rs) | Demonstrates transparency for UI | [written](../BevyCSharp.Examples/ui/transparency_ui.cs) |
 | [`ui_drag_and_drop`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/ui_drag_and_drop.rs) | Demonstrates dragging and dropping UI nodes | missing, observers of the pointer dragging and dropping interface nodes |
 | [`ui_material`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/ui_material.rs) | Demonstrates creating and using custom Ui materials | missing, interface materials (UiMaterial) |
@@ -576,7 +576,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`ui_texture_slice_flip_and_tile`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/images/ui_texture_slice_flip_and_tile.rs) | Illustrates how to flip and tile images with 9 Slicing in UI | missing, Bevy's resources reached through reflection, here UiScale |
 | [`ui_transform`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/ui_transform.rs) | An example demonstrating how to translate, rotate and scale UI elements. | can be written, through Bevy's reflected UiTransform |
 | [`vertical_slider`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/vertical_slider.rs) | Simple example showing vertical and horizontal slider widgets with snap behavior and value labels | missing, Bevy's core widgets (bevy_ui_widgets) |
-| [`viewport_node`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/viewport_node.rs) | Demonstrates how to create a viewport node with picking support | can be written, through Bevy's reflected ViewportNode |
+| [`viewport_node`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/viewport_node.rs) | Demonstrates how to create a viewport node with picking support | missing, observers of the pointer dragging a mesh and the node that shows it |
 | [`virtual_keyboard`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/virtual_keyboard.rs) | Example demonstrating a virtual keyboard widget | missing, Bevy's Feathers widgets |
 | [`window_fallthrough`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/window_fallthrough.rs) | Illustrates how to access `winit::window::Window`'s `hittest` functionality. | missing, letting the pointer pass through the window to what is behind it |
 | [`z_index`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/layout/z_index.rs) | Demonstrates how to control the relative depth (z-position) of UI elements | [written](../BevyCSharp.Examples/ui/z_index.cs), through Bevy's reflected ZIndex and GlobalZIndex |

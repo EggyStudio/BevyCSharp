@@ -146,12 +146,15 @@ internal static class Catalog
         new("virtual_time", VirtualTime.Build),
 
         // UI (User Interface)
+        new("anchor_layout", AnchorLayout.Build),
         new("button", ButtonExample.Build),
+        new("flex_layout", FlexLayout.Build),
         new("image_node", ImageNode.Build),
         new("overflow", OverflowExample.Build),
         new("overflow_clip_margin", OverflowClipMargin.Build),
         new("relative_cursor_position", RelativeCursorPosition.Build),
         new("stacked_gradients", StackedGradients.Build),
+        new("text_wrap_debug", TextWrapDebug.Build),
         new("transparency_ui", TransparencyUi.Build),
         new("ui_target_camera", UiTargetCamera.Build),
         new("ui_texture_atlas", UiTextureAtlas.Build),
