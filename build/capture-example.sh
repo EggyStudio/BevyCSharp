@@ -28,7 +28,11 @@ mkdir -p "$(dirname "$out")"
 ./bcs stop >/dev/null 2>&1 || true
 trap './bcs stop >/dev/null 2>&1 || true' EXIT
 
-./bcs open --example "$example" --offscreen --quiet -- --size 800x450
+# A 2D example lays itself out in pixels for Bevy's window of 1280 by 720, so it is drawn at that
+# size and made smaller afterward, where a 3D one draws the same scene at any size.
+size=800x450
+[ -f "BevyCSharp.Examples/2d/$example.cs" ] && size=1280x720
+./bcs open --example "$example" --offscreen --quiet -- --size "$size"
 
 # Examples that show something only once they are given input are driven here, by name.
 case "$example" in
@@ -47,11 +51,11 @@ esac
 
 ./bcs shot "$out" --quiet --timeout 120
 
-# Down to a palette of 256 colors where ImageMagick is there to do it, which keeps a capture about
-# a fifth of the size with no difference a reader of EXAMPLES.md can see, since the repository
-# carries one for every example.
+# Down to 800 by 450 and a palette of 256 colors where ImageMagick is there to do it, which keeps
+# a capture about a fifth of the size with no difference a reader of EXAMPLES.md can see, since
+# the repository carries one for every example.
 if command -v magick >/dev/null 2>&1; then
-    magick "$out" -colors 256 -define png:compression-level=9 -strip "$out"
+    magick "$out" -resize 800x450 -colors 256 -define png:compression-level=9 -strip "$out"
 elif command -v convert >/dev/null 2>&1; then
-    convert "$out" -colors 256 -define png:compression-level=9 -strip "$out"
+    convert "$out" -resize 800x450 -colors 256 -define png:compression-level=9 -strip "$out"
 fi

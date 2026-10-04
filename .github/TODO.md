@@ -24,12 +24,12 @@ names what the bridge lacks. Gathered by what they lack, these hold the most row
 the most examples, and the largest is taken between groups of examples. The counts come from
 `BevyCSharp.Examples/triage.tsv` and move as rows are written or found to be reachable.
 
-- **2D meshes, fourteen examples.** A `Mesh2d` drawn with a `ColorMaterial`, which no C# call makes
-  (`mesh2d`, `mesh2d_alpha_mode`, `mesh2d_arcs`, `mesh2d_repeated_texture`,
-  `mesh2d_vertex_color_texture`, `wireframe_2d`, `shader_material_2d`, `entity_disabling`,
-  `2d_screen_shake`, `2d_top_down_camera`, `spatial_audio_2d`, `render_primitives`, and the two
-  stress tests of sprite meshes). Needs the material made and set as `StandardMaterial` is, and a
-  shader material that draws on a 2D mesh.
+- **2D meshes, nineteen examples.** A `Mesh2d` drawn with a `ColorMaterial`, which no C# call makes
+  (`2d_shapes`, `2d_viewport_to_world`, `bloom_2d`, `pixel_grid_snap`, `tilemap_chunk`, `mesh2d`,
+  `mesh2d_alpha_mode`, `mesh2d_arcs`, `mesh2d_repeated_texture`, `mesh2d_vertex_color_texture`,
+  `wireframe_2d`, `shader_material_2d`, `entity_disabling`, `2d_screen_shake`, `2d_top_down_camera`,
+  `spatial_audio_2d`, `render_primitives`, and the two stress tests of sprite meshes). Needs the
+  material made and set as `StandardMaterial` is, and a shader material that draws on a 2D mesh.
 - **Interface widgets and text input, fifteen examples.** Bevy's editable text (four), its core
   widgets and widget helpers (four), Feathers (three), scrollbars, and directional and tab
   navigation (three). Needs `EditableText` and the widget components spawned and read, and the
@@ -68,13 +68,14 @@ the most examples, and the largest is taken between groups of examples. The coun
 - **Bevy's camera controllers, two examples.** Its free and pan cameras, their plugins and their
   settings (`free_camera_controller`, `pan_camera_controller`), where `BevyCSharp.Examples` has a
   free camera of its own written as a behavior.
-- **Six more, one example each.** A resource's change ticks and when a component was added
+- **Eight more, one example each.** A resource's change ticks and when a component was added
   (`change_detection`), a component's add and insert hooks (`component_hooks`), relationships of a
   game's own (`relationships`), commands run after a delay (`delayed_commands`, which also waits on
-  observers), Bevy's log written from C# at its levels (`logs`), and a playing sound's speed changed
-  as it plays (`audio_control`).
+  observers), Bevy's log written from C# at its levels (`logs`), a playing sound's speed changed as
+  it plays (`audio_control`), an atlas built from a folder of images as the app runs
+  (`texture_atlas`), and an image loaded as an array of layers (`tilemap_chunk_orientation`).
 
-Four examples are written in part, each leaving out a feature named in its row.
+Five examples are written in part, each leaving out a feature named in its row.
 
 - **Extruded and line meshes**, which `3d_shapes` leaves out of its rows: Bevy's segment and
   polyline, and the extrusion of a 2D shape, solid or as a ring. `MeshShape` builds the solids and
@@ -83,6 +84,9 @@ Four examples are written in part, each leaving out a feature named in its row.
 - **Which compressed formats the GPU decodes**, which `skybox` cycles through in Bevy, so ASTC and
   ETC2 are left out here. Bevy reads them from the render device's features, and a call saying
   which a GPU has would let a game pick the cubemap it loads as Bevy's example does.
+- **An underline under text**, which `text2d` draws its first box's text without. Bevy's `Underline`
+  is not reflected, so no call reaches it, and it is one of the text styles the fonts entry above
+  names.
 - **A canceled touch**, which `touch_input` never prints, since the touches the frame reports are
   those that started, moved and ended, and Bevy's own set of canceled ones is left out.
 - **Alpha to coverage**, which `transparency_3d`'s left cube is drawn without, blending instead.

@@ -9,6 +9,7 @@ using BevyCSharp.Examples.Sound;
 using BevyCSharp.Examples.States;
 using BevyCSharp.Examples.ThreeD;
 using BevyCSharp.Examples.Transforms;
+using BevyCSharp.Examples.TwoD;
 
 namespace BevyCSharp.Examples;
 
@@ -23,6 +24,21 @@ internal static class Catalog
 {
     public static readonly Example[] All =
     [
+        // 2D Rendering
+        new("cpu_draw", CpuDraw.Build, CpuDraw.Configure),
+        new("move_sprite", MoveSprite.Build),
+        new("rotate_to_cursor", RotateToCursor.Build),
+        new("rotation", Rotation2d.Build, Rotation2d.Configure),
+        new("sprite", SpriteExample.Build),
+        new("sprite_animation", SpriteAnimation.Build),
+        new("sprite_flipping", SpriteFlipping.Build),
+        new("sprite_scale", SpriteScale.Build),
+        new("sprite_sheet", SpriteSheet.Build),
+        new("sprite_slice", SpriteSlice.Build),
+        new("sprite_tile", SpriteTile.Build),
+        new("text2d", Text2dExample.Build),
+        new("transparency_2d", Transparency2d.Build),
+
         // 3D Rendering
         new("3d_scene", Example3dScene.Build),
         new("3d_shapes", Example3dShapes.Build),

@@ -73,9 +73,9 @@ clustered_decal_maps	can	through Bevy's reflected ClusteredDecal
 mirror	can
 pccm	can	through Bevy's reflected ParallaxCorrection
 light_probe_blending	can
-2d_shapes	can
-2d_viewport_to_world	can
-bloom_2d	can
+2d_shapes	missing	2D meshes and their color materials
+2d_viewport_to_world	missing	2D meshes and their color materials
+bloom_2d	missing	2D meshes and their color materials
 cpu_draw	can
 dynamic_mip_generation	missing	generating an image's mipmaps on the GPU
 mesh2d_alpha_mode	missing	2D meshes (Mesh2d with ColorMaterial)
@@ -86,7 +86,7 @@ mesh2d_repeated_texture	missing	2D meshes (Mesh2d with ColorMaterial) and its uv
 mesh2d_vertex_color_texture	missing	2D meshes (Mesh2d with ColorMaterial)
 move_sprite	can
 multi_window_text	missing	a second window
-pixel_grid_snap	can
+pixel_grid_snap	missing	2D meshes and their color materials
 rotate_to_cursor	can
 rotation	can
 sprite_animation	can
@@ -96,10 +96,10 @@ sprite_scale	can
 sprite_sheet	can
 sprite_slice	can
 sprite_tile	can
-text2d	can	through Bevy's reflected Text2d
-texture_atlas	can
-tilemap_chunk_orientation	can	through Bevy's reflected TilemapChunk and its tile data
-tilemap_chunk	can	through Bevy's reflected TilemapChunk and its tile data
+text2d	part	the underline under the first box's text
+texture_atlas	missing	an atlas built from a folder of images as the app runs
+tilemap_chunk_orientation	missing	an image loaded as an array of layers, a row of tiles to a layer
+tilemap_chunk	missing	2D meshes and their color materials
 transparency_2d	can
 wireframe_2d	missing	2D meshes (Mesh2d) and their wireframes
 animated_mesh_control	can

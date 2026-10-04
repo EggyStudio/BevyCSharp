@@ -73,3 +73,9 @@ models/ship/craft_speederD.gltf
 models/ship/craft_speederD_data.bin
 branding/bevy_bird_dark.png
 textures/simplespace/ship_C.png
+textures/rpg/chars/gabe/gabe-idle-run.png
+textures/simplespace/enemy_A.png
+textures/simplespace/enemy_B.png
+fonts/FiraSans-Bold.ttf
+textures/slice_square_2.png
+branding/banner.png

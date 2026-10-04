@@ -4,18 +4,18 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**79 written, 4 written in part, 177 can be written, 104 missing and 57 do not apply.** Of the 364 that apply, 260 can be written with what is bridged, 4 of them leaving something out.
+**92 written, 5 written in part, 156 can be written, 111 missing and 57 do not apply.** Of the 364 that apply, 253 can be written with what is bridged, 5 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
-| [2D Rendering](#2d-rendering) | 0 | 0 | 20 | 8 | 1 |
+| [2D Rendering](#2d-rendering) | 12 | 1 | 0 | 15 | 1 |
 | [3D Rendering](#3d-rendering) | 36 | 3 | 25 | 3 | 0 |
 | [Animation](#animation) | 0 | 0 | 6 | 7 | 0 |
 | [Application](#application) | 7 | 0 | 3 | 2 | 7 |
 | [Assets](#assets) | 0 | 0 | 10 | 2 | 5 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 |
 | [Audio](#audio) | 4 | 0 | 0 | 4 | 0 |
-| [Camera](#camera) | 3 | 0 | 1 | 5 | 0 |
+| [Camera](#camera) | 4 | 0 | 0 | 5 | 0 |
 | [Dev tools](#dev-tools) | 0 | 0 | 1 | 1 | 1 |
 | [Diagnostics](#diagnostics) | 0 | 0 | 1 | 2 | 0 |
 | [ECS (Entity Component System)](#ecs-entity-component-system) | 10 | 0 | 1 | 15 | 9 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **79** | **4** | **177** | **104** | **57** |
+| **All** | **92** | **5** | **156** | **111** | **57** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints.
 
@@ -50,10 +50,10 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`2d_shapes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/2d_shapes.rs) | Renders simple 2D primitive shapes like circles and polygons | can be written |
-| [`2d_viewport_to_world`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/2d_viewport_to_world.rs) | Demonstrates how to use the `Camera::viewport_to_world_2d` method with a dynamic viewport and camera. | can be written |
-| [`bloom_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/bloom_2d.rs) | Illustrates bloom post-processing in 2d | can be written |
-| [`cpu_draw`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/cpu_draw.rs) | Manually read/write the pixels of a texture | can be written |
+| [`2d_shapes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/2d_shapes.rs) | Renders simple 2D primitive shapes like circles and polygons | missing, 2D meshes and their color materials |
+| [`2d_viewport_to_world`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/2d_viewport_to_world.rs) | Demonstrates how to use the `Camera::viewport_to_world_2d` method with a dynamic viewport and camera. | missing, 2D meshes and their color materials |
+| [`bloom_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/bloom_2d.rs) | Illustrates bloom post-processing in 2d | missing, 2D meshes and their color materials |
+| [`cpu_draw`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/cpu_draw.rs) | Manually read/write the pixels of a texture | [written](../BevyCSharp.Examples/2d/cpu_draw.cs) |
 | [`dynamic_mip_generation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/dynamic_mip_generation.rs) | Demonstrates use of the mipmap generation plugin to generate mipmaps for a texture | missing, generating an image's mipmaps on the GPU |
 | [`mesh2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d.rs) | Renders a 2d mesh | missing, 2D meshes (Mesh2d with ColorMaterial) |
 | [`mesh2d_alpha_mode`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_alpha_mode.rs) | Used to test alpha modes with mesh2d | missing, 2D meshes (Mesh2d with ColorMaterial) |
@@ -61,23 +61,23 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`mesh2d_manual`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_manual.rs) | Renders a custom mesh "manually" with "mid-level" renderer apis | does not apply, writes a render pipeline in Rust with the mid-level render API |
 | [`mesh2d_repeated_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_repeated_texture.rs) | Showcase of using `uv_transform` on the `ColorMaterial` of a `Mesh2d` | missing, 2D meshes (Mesh2d with ColorMaterial) and its uv transform |
 | [`mesh2d_vertex_color_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_vertex_color_texture.rs) | Renders a 2d mesh with vertex color attributes | missing, 2D meshes (Mesh2d with ColorMaterial) |
-| [`move_sprite`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/move_sprite.rs) | Changes the transform of a sprite | can be written |
+| [`move_sprite`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/move_sprite.rs) | Changes the transform of a sprite | [written](../BevyCSharp.Examples/2d/move_sprite.cs) |
 | [`multi_window_text`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/multi_window_text.rs) | Renders text to multiple windows with different scale factors using both Text and Text2d | missing, a second window |
-| [`pixel_grid_snap`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/pixel_grid_snap.rs) | Shows how to create graphics that snap to the pixel grid by rendering to a texture in 2D | can be written |
-| [`rotate_to_cursor`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/rotate_to_cursor.rs) | Demonstrates rotating entities in 2D to follow the cursor | can be written |
-| [`rotation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/rotation.rs) | Demonstrates rotating entities in 2D with quaternions | can be written |
-| [`sprite`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite.rs) | Renders a sprite | can be written |
-| [`sprite_animation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_animation.rs) | Animates a sprite in response to an event | can be written |
-| [`sprite_flipping`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_flipping.rs) | Renders a sprite flipped along an axis | can be written |
-| [`sprite_scale`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_scale.rs) | Shows how a sprite can be scaled into a rectangle while keeping the aspect ratio | can be written |
-| [`sprite_sheet`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_sheet.rs) | Renders an animated sprite | can be written |
-| [`sprite_slice`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_slice.rs) | Showcases slicing sprites into sections that can be scaled independently via the 9-patch technique | can be written |
-| [`sprite_tile`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_tile.rs) | Renders a sprite tiled in a grid | can be written |
-| [`text2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/text2d.rs) | Generates text in 2D | can be written, through Bevy's reflected Text2d |
-| [`texture_atlas`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/texture_atlas.rs) | Generates a texture atlas (sprite sheet) from individual sprites | can be written |
-| [`tilemap_chunk`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/tilemap_chunk.rs) | Renders a tilemap chunk | can be written, through Bevy's reflected TilemapChunk and its tile data |
-| [`tilemap_chunk_orientation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/tilemap_chunk_orientation.rs) | Renders a tilemap chunk using tile orientations (mirrored, rotated) | can be written, through Bevy's reflected TilemapChunk and its tile data |
-| [`transparency_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/transparency_2d.rs) | Demonstrates transparency in 2d | can be written |
+| [`pixel_grid_snap`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/pixel_grid_snap.rs) | Shows how to create graphics that snap to the pixel grid by rendering to a texture in 2D | missing, 2D meshes and their color materials |
+| [`rotate_to_cursor`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/rotate_to_cursor.rs) | Demonstrates rotating entities in 2D to follow the cursor | [written](../BevyCSharp.Examples/2d/rotate_to_cursor.cs) |
+| [`rotation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/rotation.rs) | Demonstrates rotating entities in 2D with quaternions | [written](../BevyCSharp.Examples/2d/rotation.cs) |
+| [`sprite`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite.rs) | Renders a sprite | [written](../BevyCSharp.Examples/2d/sprite.cs) |
+| [`sprite_animation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_animation.rs) | Animates a sprite in response to an event | [written](../BevyCSharp.Examples/2d/sprite_animation.cs) |
+| [`sprite_flipping`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_flipping.rs) | Renders a sprite flipped along an axis | [written](../BevyCSharp.Examples/2d/sprite_flipping.cs) |
+| [`sprite_scale`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_scale.rs) | Shows how a sprite can be scaled into a rectangle while keeping the aspect ratio | [written](../BevyCSharp.Examples/2d/sprite_scale.cs) |
+| [`sprite_sheet`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_sheet.rs) | Renders an animated sprite | [written](../BevyCSharp.Examples/2d/sprite_sheet.cs) |
+| [`sprite_slice`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_slice.rs) | Showcases slicing sprites into sections that can be scaled independently via the 9-patch technique | [written](../BevyCSharp.Examples/2d/sprite_slice.cs) |
+| [`sprite_tile`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_tile.rs) | Renders a sprite tiled in a grid | [written](../BevyCSharp.Examples/2d/sprite_tile.cs) |
+| [`text2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/text2d.rs) | Generates text in 2D | [written in part](../BevyCSharp.Examples/2d/text2d.cs), the underline under the first box's text |
+| [`texture_atlas`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/texture_atlas.rs) | Generates a texture atlas (sprite sheet) from individual sprites | missing, an atlas built from a folder of images as the app runs |
+| [`tilemap_chunk`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/tilemap_chunk.rs) | Renders a tilemap chunk | missing, 2D meshes and their color materials |
+| [`tilemap_chunk_orientation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/tilemap_chunk_orientation.rs) | Renders a tilemap chunk using tile orientations (mirrored, rotated) | missing, an image loaded as an array of layers, a row of tiles to a layer |
+| [`transparency_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/transparency_2d.rs) | Demonstrates transparency in 2d | [written](../BevyCSharp.Examples/2d/transparency_2d.cs) |
 | [`wireframe_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/wireframe_2d.rs) | Showcases wireframes for 2d meshes | missing, 2D meshes (Mesh2d) and their wireframes |
 
 ## 3D Rendering
@@ -246,7 +246,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`2d_top_down_camera`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_top_down_camera.rs) | A 2D top-down camera smoothly following player movements | missing, 2D meshes and their color materials |
 | [`camera_orbit`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/camera_orbit.rs) | Shows how to orbit a static scene using pitch, yaw, and roll. | [written](../BevyCSharp.Examples/camera/camera_orbit.cs) |
 | [`custom_projection`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/custom_projection.rs) | Shows how to create custom camera projections. | missing, custom camera projections |
-| [`first_person_view_model`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/first_person_view_model.rs) | A first-person camera that uses a world model and a view model with different field of views (FOV) | can be written |
+| [`first_person_view_model`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/first_person_view_model.rs) | A first-person camera that uses a world model and a view model with different field of views (FOV) | [written](../BevyCSharp.Examples/camera/first_person_view_model.cs) |
 | [`free_camera_controller`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/free_camera_controller.rs) | Demonstrates the FreeCamera controller for 3D scenes. | missing, Bevy's free camera controller, its plugin and its settings |
 | [`pan_camera_controller`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/pan_camera_controller.rs) | Example Pan-Camera Styled Camera Controller for 2D scenes | missing, Bevy's pan camera controller, its plugin and its settings |
 | [`projection_zoom`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/projection_zoom.rs) | Shows how to zoom orthographic and perspective projection cameras. | [written](../BevyCSharp.Examples/camera/projection_zoom.cs) |
