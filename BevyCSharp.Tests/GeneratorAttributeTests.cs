@@ -93,6 +93,7 @@ public sealed class GeneratorAttributeTests
 
             [OnEnter(Phase.B)] public static void Entered(BehaviorContext ctx) => Ran.Note("OnEnter");
             [OnExit(Phase.B)] public static void Left(BehaviorContext ctx) => Ran.Note("OnExit");
+            [OnTransition(Phase.B, Phase.A)] public static void Moved(BehaviorContext ctx) => Ran.Note("OnTransition");
             [OnUpdate, InState(Phase.B)] public static void During(BehaviorContext ctx) => Ran.Note("InState");
         }
 
@@ -311,6 +312,13 @@ public sealed class GeneratorAttributeTests
             Run(8);
             Assert.Single(FramesOf("OnExit"));
         },
+        [RecognizedAttributes.OnTransition] = () =>
+        {
+            // On the move back from B to A and not the move from A to B, as B is left.
+            Run(8);
+            Assert.Single(FramesOf("OnTransition"));
+            Assert.Equal(FramesOf("OnExit"), FramesOf("OnTransition"));
+        },
         [RecognizedAttributes.InState] = () =>
         {
             // Between the frame B is set and the frame A is, and in no other.
@@ -459,6 +467,42 @@ public sealed class GeneratorAttributeTests
 
         Assert.Equal(declared.Order(StringComparer.Ordinal), RecognizedAttributes.All.Order(StringComparer.Ordinal));
         Assert.Empty(RecognizedAttributes.All.Where(name => !Cases.ContainsKey(name)));
+    }
+
+    [Fact]
+    public void ATransitionBetweenValuesOfTwoStatesIsReported()
+    {
+        const string source = """
+            using Bevy;
+
+            namespace Crossed;
+
+            public enum Screen { Menu, Playing }
+            public enum Weather { Dry, Wet }
+
+            [Behavior]
+            public partial struct Crossing
+            {
+                [OnTransition(Screen.Menu, Weather.Wet)] public static void Never(BehaviorContext ctx) { }
+            }
+            """;
+
+        var references = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(assembly => !assembly.IsDynamic && !string.IsNullOrEmpty(assembly.Location))
+            .Select(assembly => MetadataReference.CreateFromFile(assembly.Location));
+
+        var compilation = CSharpCompilation.Create(
+            "Crossed",
+            [CSharpSyntaxTree.ParseText(source)],
+            references,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        CSharpGeneratorDriver.Create(new BehaviorGenerator().AsSourceGenerator())
+            .RunGeneratorsAndUpdateCompilation(compilation, out _, out var diagnostics);
+
+        var reported = Assert.Single(diagnostics, diagnostic => diagnostic.Id == "BCS009");
+        Assert.Contains("Screen", reported.GetMessage(), StringComparison.Ordinal);
+        Assert.Contains("Weather", reported.GetMessage(), StringComparison.Ordinal);
     }
 
     public static TheoryData<string> Recognized() => [.. RecognizedAttributes.All];

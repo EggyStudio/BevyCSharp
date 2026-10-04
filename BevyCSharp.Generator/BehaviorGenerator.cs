@@ -887,6 +887,13 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
             var stages = GetStages(member);
             var edge = GetStateEdge(member);
 
+            if (TransitionAcross(member) is { } across)
+            {
+                diagnostics.Add(Diagnostic.Create(
+                    BehaviorDiagnostics.TransitionAcrossStates, member.Locations.FirstOrDefault(), member.Name, across.From, across.To));
+                continue;
+            }
+
             if (stages.Count == 0 && edge is null) continue;
 
             // A transition is not a stage, so asking for both says two different things about
@@ -1091,11 +1098,35 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
             : new BehaviorFilters(with, without, changed);
     }
 
-    /// <summary>Reads an <c>[OnEnter]</c> or <c>[OnExit]</c> attribute.</summary>
+    /// <summary>Reads an <c>[OnEnter]</c>, <c>[OnExit]</c> or <c>[OnTransition]</c> attribute.</summary>
+    /// <remarks>
+    /// A transition naming two enums is no edge, and the caller reports it with
+    /// <see cref="TransitionAcross"/>.
+    /// </remarks>
     private static StateEdgeInfo? GetStateEdge(IMethodSymbol method)
     {
         foreach (var attribute in method.GetAttributes())
         {
+            if (attribute.AttributeClass?.ToDisplayString() == $"{AttributeNamespace}.{RecognizedAttributes.OnTransition}")
+            {
+                if (attribute.ConstructorArguments.Length < 2) continue;
+
+                var from = attribute.ConstructorArguments[0];
+                var to = attribute.ConstructorArguments[1];
+                if (from.Type is not INamedTypeSymbol { EnumUnderlyingType: not null } fromType
+                    || to.Type is not INamedTypeSymbol { EnumUnderlyingType: not null } toType
+                    || from.Value is null
+                    || to.Value is null
+                    || !SymbolEqualityComparer.Default.Equals(fromType, toType))
+                    continue;
+
+                return new StateEdgeInfo(
+                    toType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                    to.Value.ToString(),
+                    true,
+                    from.Value.ToString());
+            }
+
             var entering = attribute.AttributeClass?.ToDisplayString() switch
             {
                 $"{AttributeNamespace}.{RecognizedAttributes.OnEnter}" => true,
@@ -1114,6 +1145,27 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
                 enumType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 argument.Value.ToString(),
                 edge);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// The two enums an <c>[OnTransition]</c> names where they differ, which no state moves
+    /// between, or nothing.
+    /// </summary>
+    private static (string From, string To)? TransitionAcross(IMethodSymbol method)
+    {
+        foreach (var attribute in method.GetAttributes())
+        {
+            if (attribute.AttributeClass?.ToDisplayString() != $"{AttributeNamespace}.{RecognizedAttributes.OnTransition}"
+                || attribute.ConstructorArguments.Length < 2)
+                continue;
+
+            var from = attribute.ConstructorArguments[0].Type;
+            var to = attribute.ConstructorArguments[1].Type;
+            if (from is not null && to is not null && !SymbolEqualityComparer.Default.Equals(from, to))
+                return (from.Name, to.Name);
         }
 
         return null;

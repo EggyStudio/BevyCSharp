@@ -73,11 +73,12 @@ internal sealed record BehaviorFilters(
 /// <param name="DefaultEnabled">Whether the system starts enabled.</param>
 internal sealed record ToggleKeyInfo(int Key, int Modifiers, bool DefaultEnabled);
 
-/// <summary>An <c>[OnEnter]</c> or <c>[OnExit]</c> transition.</summary>
+/// <summary>An <c>[OnEnter]</c>, <c>[OnExit]</c> or <c>[OnTransition]</c> transition.</summary>
 /// <param name="EnumType">The state enum, fully qualified.</param>
-/// <param name="Value">The member's underlying constant.</param>
+/// <param name="Value">The member's underlying constant, the one entered for a transition.</param>
 /// <param name="Entering">True for the enter edge, false for the exit edge.</param>
-internal sealed record StateEdgeInfo(string EnumType, string Value, bool Entering);
+/// <param name="From">For a transition, the underlying constant of the member left, and otherwise nothing.</param>
+internal sealed record StateEdgeInfo(string EnumType, string Value, bool Entering, string? From = null);
 
 /// <summary>An <c>[InState]</c> restriction.</summary>
 /// <param name="EnumType">The state enum, fully qualified.</param>

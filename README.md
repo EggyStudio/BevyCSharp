@@ -418,6 +418,18 @@ That is where a screen is built and taken away: once per transition, not once pe
 transition attribute replaces the stage attribute rather than joining it, because the two say
 different things about when a method runs, and asking for both is reported as an error.
 
+What depends on where the state came from as well as where it went is `[OnTransition]`, which runs
+on a move from one value to a particular other and on no other move. Play resumed from the pause
+keeps the level it had, and play entered from the menu builds one:
+
+```csharp
+[OnTransition(Screen.Menu, Screen.Playing)]
+public static void BuildLevel(BehaviorContext ctx) { }
+```
+
+It runs after the exit of the value left and before the entry of the value entered, as Bevy orders
+them. Both values are of the same enum, and naming two is an error when the code is compiled.
+
 A teardown method that lists everything the screen spawned goes stale the first time something
 new is added to the screen. Tie the entity to the state instead and leaving takes it with you:
 

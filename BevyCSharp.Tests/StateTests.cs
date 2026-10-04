@@ -440,4 +440,63 @@ public sealed class StateTests
 
         Assert.Equal(1, entered);
     }
+
+    [Fact]
+    public void AMoveBetweenTwoValuesRunsOnlyOnThatMoveBetweenTheExitAndTheEntry()
+    {
+        using var harness = new EngineHarness(frames: 8);
+        harness.App.AddState(Screen.Menu);
+
+        var ran = new List<string>();
+        harness.App.AddTransitionSystem(Screen.Menu, Screen.Playing, new SystemDescriptor(_ => ran.Add("started"), "Test.Started"));
+        harness.App.AddTransitionSystem(Screen.Paused, Screen.Playing, new SystemDescriptor(_ => ran.Add("resumed"), "Test.Resumed"));
+        harness.App.AddStateSystem(Screen.Paused, entering: false, new SystemDescriptor(_ => ran.Add("left the pause"), "Test.LeftPause"));
+        harness.App.AddStateSystem(Screen.Playing, entering: true, new SystemDescriptor(_ => ran.Add("playing"), "Test.Playing"));
+
+        // From the menu into play, into the pause, and back into play from it.
+        var frame = 0;
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            frame++;
+            if (frame == 2) ctx.SetState(Screen.Playing);
+            if (frame == 3) ctx.SetState(Screen.Paused);
+            if (frame == 4) ctx.SetState(Screen.Playing);
+        });
+
+        harness.Run();
+
+        Assert.Equal(["started", "playing", "left the pause", "resumed", "playing"], ran);
+    }
+
+    [Fact]
+    public void AMoveBetweenTwoValuesAddedWhileRunningIsWatchedFor()
+    {
+        // As a script reloaded during play registers it, after Bevy's schedules take no more.
+        using var harness = new EngineHarness(frames: 9);
+        harness.App.AddState(Screen.Menu);
+        harness.App.EnableDynamicSystems();
+
+        var ran = new List<string>();
+        var frame = 0;
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            frame++;
+            if (frame == 1)
+            {
+                harness.App.AddTransitionSystem(Screen.Paused, Screen.Playing, new SystemDescriptor(_ => ran.Add("resumed"), "Test.Resumed"));
+                harness.App.AddStateSystem(Screen.Paused, entering: false, new SystemDescriptor(_ => ran.Add("left the pause"), "Test.LeftPause"));
+            }
+
+            if (frame == 2) ctx.SetState(Screen.Playing);
+            if (frame == 3) ctx.SetState(Screen.Paused);
+            if (frame == 4) ctx.SetState(Screen.Menu);
+            if (frame == 5) ctx.SetState(Screen.Paused);
+            if (frame == 6) ctx.SetState(Screen.Playing);
+        });
+
+        harness.Run();
+
+        // Left twice, and resumed only the time it went from the pause to play.
+        Assert.Equal(["left the pause", "left the pause", "resumed"], ran);
+    }
 }

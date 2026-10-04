@@ -82,6 +82,9 @@ public static class RecognizedAttributes
     /// <summary>As a state leaves a value.</summary>
     public const string OnExit = "OnExitAttribute";
 
+    /// <summary>As a state moves from one value to a particular other.</summary>
+    public const string OnTransition = "OnTransitionAttribute";
+
     // Whether and over what it runs.
 
     /// <summary>Only for entities carrying a component.</summary>
@@ -174,7 +177,7 @@ public static class RecognizedAttributes
     public static IReadOnlyList<string> All { get; } =
     [
         Behavior, DataAsset, DataVersion, FormerName, Persist, InitialState, Command,
-        OnStartup, OnFirst, OnPreUpdate, OnFixedUpdate, OnUpdate, OnPostUpdate, OnRender, OnLast, OnCleanup, OnEnter, OnExit,
+        OnStartup, OnFirst, OnPreUpdate, OnFixedUpdate, OnUpdate, OnPostUpdate, OnRender, OnLast, OnCleanup, OnEnter, OnExit, OnTransition,
         With, Without, Changed, InState, RunIf, ToggleKey,
         Label, Tooltip, Header, Unit, Range, Step, ReadOnly, Hidden, Space, Separator, Color, Wide, Inline,
         Foldout, Info, Order, Asset, ShowIf, HideIf, OnValueChanged, Button, Flags,

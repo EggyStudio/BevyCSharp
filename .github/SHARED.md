@@ -73,8 +73,10 @@ table also answers whether the two agree.
 | Idea | BevyCSharp | 3DEngine |
 |---|---|---|
 | A body and a collider are components a scene file holds | has (`99ec076`) | has (`606cb3bf`) |
-| A character that walls stop, that slides, steps and holds slopes | to take | has (`b9f280b2`) |
+| A character that walls stop, that slides, steps and holds slopes | taken at `f2ac0cd` | has (`b9f280b2`) |
 | Contacts with their point and normal, and triggers | has | has (`5fb77861`) |
+| A contact says how hard its pair hit, as the speed they closed at | to take | has (`ContactStarted.Speed`, `c5227118`) |
+| A ball joint kept within a cone it swings and twists in, and a distance joint whose range changes after it is made | to take | has (`c5227118`) |
 | The sync reads only bodies that changed and writes only bodies that moved | has (`ba5cff4`) | has (`e612ac63` and after) |
 
 ### Scenes, saves and files
@@ -102,6 +104,7 @@ table also answers whether the two agree.
 | Idea | BevyCSharp | 3DEngine |
 |---|---|---|
 | A test that cannot run is reported as skipped with its reason | has (`e857326`) | has (`939ba258`) |
+| Examples picked by name as an argument, each with a capture CI takes | to take, measured against Bevy's own 416 examples | has (`3DEngine.Examples`, `048c072c`) |
 | A small game built from the packed package and played by CI | has (`f147adc`) | has (`377576c4`) |
 | The README's first program followed in a clean container by CI | has (`8ff919c`) | has (`e98e93a1`) |
 | A version whose patch counts commits since the owner last set the major and minor | taken at `88954d5` | has (`609bd859`) |

@@ -564,9 +564,10 @@ public sealed unsafe class App : IDisposable
 
     /// <summary>
     /// A transition system added while the app runs, by the state's slot, the value whose edge it
-    /// runs on, and whether that is the way in or out.
+    /// runs on, and whether that is the way in or out, or for a move between two particular values
+    /// the value it comes from as well.
     /// </summary>
-    private readonly record struct DynamicEdge(int Slot, int Value, bool Entering, RegisteredSystem System);
+    private readonly record struct DynamicEdge(int Slot, int Value, bool Entering, RegisteredSystem System, int? From = null);
 
     /// <summary>Transition systems added while the app runs, which the edge dispatcher runs.</summary>
     private readonly List<DynamicEdge> _dynamicEdges = [];
@@ -655,15 +656,21 @@ public sealed unsafe class App : IDisposable
 
             _seenStates[slot] = now;
 
-            // Out of the old value first and into the new one after, as Bevy orders them.
+            // Out of the old value first, then the move from it to the new one, and into the new
+            // one after, as Bevy orders them.
             foreach (var edge in _dynamicEdges.ToArray())
             {
-                if (edge.Slot == slot && !edge.Entering && edge.Value == was) edge.System.Descriptor.Invoke(World);
+                if (edge.Slot == slot && edge.From is null && !edge.Entering && edge.Value == was) edge.System.Descriptor.Invoke(World);
             }
 
             foreach (var edge in _dynamicEdges.ToArray())
             {
-                if (edge.Slot == slot && edge.Entering && edge.Value == now) edge.System.Descriptor.Invoke(World);
+                if (edge.Slot == slot && edge.From is { } from && was == from && edge.Value == now) edge.System.Descriptor.Invoke(World);
+            }
+
+            foreach (var edge in _dynamicEdges.ToArray())
+            {
+                if (edge.Slot == slot && edge.From is null && edge.Entering && edge.Value == now) edge.System.Descriptor.Invoke(World);
             }
         }
     }
@@ -1196,6 +1203,70 @@ public sealed unsafe class App : IDisposable
                 &RegisteredSystem.Trampoline,
                 registration.UserData),
             $"registering system '{descriptor.Name}' on a {typeof(TState).Name} transition");
+
+        return this;
+    }
+
+    /// <summary>
+    /// Registers a system to run once when <typeparamref name="TState"/> moves from
+    /// <paramref name="from"/> to <paramref name="to"/>, and on no other move.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What <c>[OnTransition]</c> emits, for what depends on where a state came from as well as
+    /// where it went. Play resumed from the pause keeps the level as it was, and play entered from
+    /// the menu builds it, so the build is a transition from the menu and not an entry to play.
+    /// </para>
+    /// <para>
+    /// It runs after <paramref name="from"/>'s exit systems and before <paramref name="to"/>'s
+    /// entry ones, as Bevy orders them, so it sees what leaving took away and nothing entering has
+    /// built yet. A state set to the value it already holds moves from that value to itself, as
+    /// Bevy has it, and runs a system naming that value twice along with the value's exit and
+    /// entry.
+    /// </para>
+    /// </remarks>
+    /// <param name="from">The value the state leaves.</param>
+    /// <param name="to">The value it enters.</param>
+    /// <param name="descriptor">The system to run.</param>
+    /// <exception cref="InvalidOperationException">
+    /// The app is already running, or the state was never added.
+    /// </exception>
+    public App AddTransitionSystem<TState>(TState from, TState to, SystemDescriptor descriptor)
+        where TState : struct, Enum
+    {
+        ArgumentNullException.ThrowIfNull(descriptor);
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        descriptor.Source ??= SystemRegistrationSourceScope.Current;
+
+        // Watched for while running, as an entry or an exit added then is.
+        if (IsRunning && _dynamicStages is not null)
+        {
+            var slot = StateRegistry.SlotForRegistration<TState>();
+            var edge = new RegisteredSystem(this, descriptor, Stage.Update);
+            _systems.Add(edge);
+            _dynamicEdges.Add(new DynamicEdge(slot, StateRegistry.ToInt(to), true, edge, StateRegistry.ToInt(from)));
+            if (!_seenStates.ContainsKey(slot)) _seenStates[slot] = ReadSlot(slot);
+            return this;
+        }
+
+        if (IsRunning)
+            throw new InvalidOperationException(
+                $"Cannot register system '{descriptor.Name}': the app is already running. "
+                + "Register systems from a plugin's Build method, or call EnableDynamicSystems before Run.");
+
+        var registration = new RegisteredSystem(this, descriptor, Stage.Startup);
+        _systems.Add(registration);
+
+        Native.Check(
+            Native.bcs_state_add_transition(
+                _handle,
+                StateRegistry.SlotForRegistration<TState>(),
+                StateRegistry.ToInt(from),
+                StateRegistry.ToInt(to),
+                &RegisteredSystem.Trampoline,
+                registration.UserData),
+            $"registering system '{descriptor.Name}' on a {typeof(TState).Name} move from {from} to {to}");
 
         return this;
     }

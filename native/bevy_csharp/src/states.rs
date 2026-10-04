@@ -20,7 +20,7 @@ use core::sync::atomic::{AtomicI32, Ordering};
 use bevy::app::App;
 use bevy::ecs::world::World;
 use bevy::state::app::AppExtStates;
-use bevy::state::state::{NextState, OnEnter, OnExit, State, States};
+use bevy::state::state::{NextState, OnEnter, OnExit, OnTransition, State, States};
 use bevy::state::state_scoped::DespawnOnExit;
 
 use crate::interop::status;
@@ -413,6 +413,36 @@ macro_rules! define_slots {
                     } else {
                         app.add_systems(OnExit($jsub(value)), run);
                     }
+                    status::OK
+                })+
+                _ => status::NULL_ARG,
+            }
+        }
+
+        /// Adds a system to the schedule Bevy runs when a slot moves from one value to another,
+        /// after the first's exit and before the second's entry.
+        fn add_transition(app: &mut App, slot: i32, from: i32, to: i32, reg: SystemReg) -> i32 {
+            let run = move |world: &mut World| loan_world(world, || reg.invoke());
+
+            match slot {
+                $($slot => {
+                    app.add_systems(OnTransition { exited: $ty(from), entered: $ty(to) }, run);
+                    status::OK
+                })+
+                $(_ if slot == SLOT_COUNT + $subslot => {
+                    app.add_systems(OnTransition { exited: $sub(from), entered: $sub(to) }, run);
+                    status::OK
+                })+
+                $(_ if slot == SLOT_COUNT + SUB_COUNT + $cslot => {
+                    app.add_systems(OnTransition { exited: $derived(from), entered: $derived(to) }, run);
+                    status::OK
+                })+
+                $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + $jslot => {
+                    app.add_systems(OnTransition { exited: $joint(from), entered: $joint(to) }, run);
+                    status::OK
+                })+
+                $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + JOINT_COUNT + $jsslot => {
+                    app.add_systems(OnTransition { exited: $jsub(from), entered: $jsub(to) }, run);
                     status::OK
                 })+
                 _ => status::NULL_ARG,
@@ -834,6 +864,35 @@ pub unsafe extern "C" fn bcs_state_add_system(
         };
 
         add_edge(&mut app.app, slot, value, entering, SystemReg { func, user })
+    })
+}
+
+/// Registers a C# system to run when `slot` moves from `from` to `to`, and on no other move.
+///
+/// Bevy runs it between the two values' exit and entry, so it sees what leaving `from` took away
+/// and nothing entering `to` has built yet. For what differs by where a state came from, such as
+/// a level kept as it was when play resumes from a pause but built again from the menu.
+///
+/// # Safety
+/// `handle` must be a live app; `func` must remain callable until the app is destroyed.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_state_add_transition(
+    handle: *mut BcsApp,
+    slot: i32,
+    from: i32,
+    to: i32,
+    func: extern "C" fn(*mut core::ffi::c_void),
+    user: *mut core::ffi::c_void,
+) -> i32 {
+    crate::interop::guard(|| {
+        let Some(app) = (unsafe { app_mut(handle) }) else {
+            return status::NULL_ARG;
+        };
+        if app.running {
+            return status::ALREADY_RUNNING;
+        }
+
+        add_transition(&mut app.app, slot, from, to, SystemReg { func, user })
     })
 }
 

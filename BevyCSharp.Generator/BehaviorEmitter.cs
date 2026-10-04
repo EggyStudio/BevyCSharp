@@ -52,7 +52,16 @@ internal static class BehaviorEmitter
         {
             var systemId = SystemId(model, method);
 
-            if (method.Edge is { } edge)
+            if (method.Edge is { From: { } from } transition)
+            {
+                source.Append("        app.AddTransitionSystem((").Append(transition.EnumType).Append(')')
+                    .Append(from).Append(", (").Append(transition.EnumType).Append(')')
+                    .Append(transition.Value)
+                    .Append(", new global::Bevy.SystemDescriptor(")
+                    .Append(SystemMethodName(model, method))
+                    .Append(", \"").Append(systemId).Append("\")");
+            }
+            else if (method.Edge is { } edge)
             {
                 source.Append("        app.AddStateSystem((").Append(edge.EnumType).Append(')')
                     .Append(edge.Value).Append(", ").Append(edge.Entering ? "true" : "false")

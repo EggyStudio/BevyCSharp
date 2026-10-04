@@ -95,4 +95,15 @@ internal static class BehaviorDiagnostics
         category: Category,
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
+
+    /// <summary>BCS009: a transition between values of two different enums.</summary>
+    internal static readonly DiagnosticDescriptor TransitionAcrossStates = new(
+        id: "BCS009",
+        title: "OnTransition names values of two different states",
+        messageFormat:
+        "[OnTransition] on '{0}' names a value of {1} and a value of {2}, and a state moves only "
+        + "between its own values, so it would never run. Name two values of the same enum.",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 }
