@@ -154,18 +154,13 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
                     window,
                 };
 
+                // Only as messages, which Bevy's input system turns into the button's state at the
+                // start of the next frame, as it does a real click. Pressing the state directly as
+                // well counted a click twice, once now and once when the message arrived, and a
+                // press written after the frame's input was read was cleared before anything saw
+                // it. A press and a release in one call still reads as both, on the same frame.
                 world.write_message(pressed.clone());
                 world.write_message(bevy::window::WindowEvent::MouseButtonInput(pressed));
-
-                // The state the rest of the frame reads, which the message only reaches next
-                // frame, since a test that presses and releases in one call would otherwise report
-                // nothing to anything asking whether a button is down.
-                if let Some(mut buttons) = world.get_resource_mut::<ButtonInput<MouseButton>>() {
-                    match state {
-                        ButtonState::Pressed => buttons.press(button),
-                        ButtonState::Released => buttons.release(button),
-                    }
-                }
 
                 crate::interop::status::OK
             })
@@ -307,21 +302,13 @@ pub unsafe extern "C" fn bcs_input_key(key: i32, action: i32, text: *const u8, l
                     window,
                 };
 
+                // Only as a message, as a real key arrives, for the reason the pointer gives above.
                 world.write_message(press.clone());
 
                 // And as a window event, for the same reason the pointer writes both, which is that
                 // winit writes each of them for every real key, so writing one is writing half a
                 // keyboard.
                 world.write_message(bevy::window::WindowEvent::KeyboardInput(press));
-
-                // The state the rest of this frame reads, which the message only reaches on the
-                // next one.
-                if let Some(mut keys) = world.get_resource_mut::<ButtonInput<KeyCode>>() {
-                    match state {
-                        ButtonState::Pressed => keys.press(code),
-                        ButtonState::Released => keys.release(code),
-                    }
-                }
 
                 crate::interop::status::OK
             })

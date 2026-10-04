@@ -118,10 +118,18 @@ public static class SyntheticInput
     /// Presses a key where a real one is reported, at the window.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// The keyboard's half of <see cref="Send"/>. Everything between the window and a text field
     /// runs: the engine's own key state, the messages it writes, whatever turns those into the
     /// characters an interface inserts. Putting characters straight into the interface's queue
     /// tests the field and not the path to it, and the path is where a keyboard goes wrong.
+    /// </para>
+    /// <para>
+    /// It arrives as a real key does, as a message Bevy reads into the key's state at the start of
+    /// the next frame, and <see cref="Input"/> takes its picture of that state at the top of the
+    /// frame after. So a key pressed from an update is <see cref="Input.KeyPressed"/> on exactly
+    /// one frame, two after the one it was pressed on, and a <see cref="Tap"/> is pressed and
+    /// released on that same frame.
     /// </remarks>
     /// <param name="key">Which key.</param>
     /// <param name="typed">What it typed, or nothing for a key that types nothing.</param>

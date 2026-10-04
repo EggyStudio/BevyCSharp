@@ -87,4 +87,29 @@ public sealed class InputTests
 
         Assert.False(anyDown);
     }
+
+    [SkippableFact]
+    public void ATappedKeyIsPressedOnOneFrameAndReleasedOnOne()
+    {
+        Needs.Renderer();
+
+        // Tapped on the third update, so each frame after it says whether the key went down and
+        // came up, and a game toggling on the press toggles once rather than twice and back.
+        using var harness = new EngineHarness(frames: 10);
+        var frame = 0;
+        var pressed = new List<int>();
+        var released = new List<int>();
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            frame++;
+            if (ctx.Input.KeyPressed(Key.A)) pressed.Add(frame);
+            if (ctx.Input.KeyReleased(Key.A)) released.Add(frame);
+            if (frame == 3) SyntheticInput.Tap(Key.A, "a");
+        });
+        harness.Run();
+
+        Assert.Single(pressed);
+        Assert.Single(released);
+    }
 }
