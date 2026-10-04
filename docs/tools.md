@@ -200,4 +200,4 @@ same script host that reloads behavior scripts.
 
 Before this, [Making a game](making-a-game.md).
 Next, [How it works](how-it-works.md).
-The [guide's contents](../README.md#guide) list every page.
+Its calls are each a line in the [cheatsheet](../CHEATSHEET.md#the-tools). The [guide's contents](../README.md#guide) list every page.

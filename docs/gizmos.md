@@ -74,4 +74,4 @@ collecting shapes nothing will draw. Guard with `App.HasRenderer`.
 Before this, [2D](2d.md).
 Next, [The interface](ui.md).
 Bevy's own examples of this, and which are written in C# here, are in
-[EXAMPLES.md](../.github/EXAMPLES.md#gizmos). The [guide's contents](../README.md#guide) list every page.
+[EXAMPLES.md](../.github/EXAMPLES.md#gizmos). Its calls are each a line in the [cheatsheet](../CHEATSHEET.md#gizmos). The [guide's contents](../README.md#guide) list every page.

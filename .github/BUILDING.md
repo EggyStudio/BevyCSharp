@@ -247,3 +247,14 @@ example on the Linux bridge it built.
 somebody deciding whether to, so it links to each page by its full URL, since it is also the
 package's page on nuget.org. `build/check-docs.py` follows every link in the README and the guide,
 `--external` the ones off this repository too, and the workflow run on every push runs it.
+
+`CHEATSHEET.md` at the root lists every public method a line each, and is written from the library
+and its XML documentation by `build/cheatsheet`, after a build of the library:
+
+```bash
+dotnet build BevyCSharp
+dotnet run --project build/cheatsheet -- .
+```
+
+`CheatsheetTests` holds the page to the library by the rules the generator follows, so a public
+method added without its line fails the suite until the page is written again.

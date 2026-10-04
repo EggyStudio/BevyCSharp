@@ -168,4 +168,4 @@ scene, then leaves that type's data in the file for the build that knows it.
 Before this, [Components](components.md).
 Next, [Assets and models](assets-and-models.md).
 Bevy's own examples of this, and which are written in C# here, are in
-[EXAMPLES.md](../.github/EXAMPLES.md#scene). The [guide's contents](../README.md#guide) list every page.
+[EXAMPLES.md](../.github/EXAMPLES.md#scene). Its calls are each a line in the [cheatsheet](../CHEATSHEET.md#scenes-and-saves). The [guide's contents](../README.md#guide) list every page.

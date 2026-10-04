@@ -67,4 +67,4 @@ presses a button on a machine with none attached.
 Before this, [Physics](physics.md).
 Next, [Running a game](running-a-game.md).
 Bevy's own examples of this, and which are written in C# here, are in
-[EXAMPLES.md](../.github/EXAMPLES.md#input). The [guide's contents](../README.md#guide) list every page.
+[EXAMPLES.md](../.github/EXAMPLES.md#input). Its calls are each a line in the [cheatsheet](../CHEATSHEET.md#input). The [guide's contents](../README.md#guide) list every page.

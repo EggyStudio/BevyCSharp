@@ -179,4 +179,4 @@ not pull in the two Bevy computes from it, which arrive with the mesh.
 Before this, [Messages and the hierarchy](messages-and-hierarchy.md).
 Next, [Scenes and saves](scenes-and-saves.md).
 Bevy's own examples of this, and which are written in C# here, are in
-[EXAMPLES.md](../.github/EXAMPLES.md#ecs-entity-component-system). The [guide's contents](../README.md#guide) list every page.
+[EXAMPLES.md](../.github/EXAMPLES.md#ecs-entity-component-system). Its calls are each a line in the [cheatsheet](../CHEATSHEET.md#components). The [guide's contents](../README.md#guide) list every page.

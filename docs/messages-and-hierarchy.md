@@ -113,4 +113,4 @@ Parenting is a structural change, so queue it on `ctx.Cmd` when calling from ins
 Before this, [States](states.md).
 Next, [Components](components.md).
 Bevy's own examples of this, and which are written in C# here, are in
-[EXAMPLES.md](../.github/EXAMPLES.md#ecs-entity-component-system). The [guide's contents](../README.md#guide) list every page.
+[EXAMPLES.md](../.github/EXAMPLES.md#ecs-entity-component-system). Its calls are each a line in the [cheatsheet](../CHEATSHEET.md#messages). The [guide's contents](../README.md#guide) list every page.

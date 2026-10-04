@@ -87,4 +87,4 @@ one part of the engine that needs a system library at build time. See
 Before this, [The interface](ui.md).
 Next, [Physics](physics.md).
 Bevy's own examples of this, and which are written in C# here, are in
-[EXAMPLES.md](../.github/EXAMPLES.md#audio). The [guide's contents](../README.md#guide) list every page.
+[EXAMPLES.md](../.github/EXAMPLES.md#audio). Its calls are each a line in the [cheatsheet](../CHEATSHEET.md#audio). The [guide's contents](../README.md#guide) list every page.

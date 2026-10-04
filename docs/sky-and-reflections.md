@@ -192,4 +192,4 @@ at that intensity and brightens without end well above it.
 Before this, [Cameras and light](cameras-and-light.md).
 Next, [Ray tracing](ray-tracing.md).
 Bevy's own examples of this, and which are written in C# here, are in
-[EXAMPLES.md](../.github/EXAMPLES.md#3d-rendering). The [guide's contents](../README.md#guide) list every page.
+[EXAMPLES.md](../.github/EXAMPLES.md#3d-rendering). Its calls are each a line in the [cheatsheet](../CHEATSHEET.md#drawing). The [guide's contents](../README.md#guide) list every page.

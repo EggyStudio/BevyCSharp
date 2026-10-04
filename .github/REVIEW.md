@@ -70,7 +70,8 @@ taken with its next batch. Items
    The shape is the same in both engines and is recorded in [SHARED.md](SHARED.md). Who a
    document is for decides where it lives. `README.md` is for somebody deciding whether to use
    the engine, about 200 lines. `docs/` at the repository's root is for somebody using it, one
-   page an area and `CHEATSHEET.md`. `.github/` is for somebody working on it.
+   page an area. `CHEATSHEET.md` sits at the root beside the README, as the owner asked on
+   2026-10-04. `.github/` is for somebody working on it.
    - **The move, one batch.** The README's reference leaves it with nothing dropped, each major
      heading becoming a page: `docs/behaviors.md` (systems and components, stages, the fixed
      timestep, filters, conditions, threading), `docs/states.md`,
@@ -86,7 +87,7 @@ taken with its next batch. Items
      the count from EXAMPLES.md, the install, then a Guide section that is the table of
      contents, a line a page saying what it covers, then status, building, contributing and the
      license.
-   - **The cheatsheet, the batch after.** `docs/CHEATSHEET.md`, every public call of `App`,
+   - **The cheatsheet, the batch after.** `CHEATSHEET.md` at the root, every public call of `App`,
      `EcsWorld`, `Render`, `Ui`, `Audio`, `Physics` and the rest on a line of its own with what
      it does, grouped as the guide is, and a test that holds it to the public surface as
      3DEngine's `CheatsheetTests` does, so a call added without its line fails.
@@ -152,6 +153,12 @@ the README quotes is the written one, with the others beside it.
    committed like any other change.
 
 ## Replies
+
+- Shared: the cheatsheet is taken in the commit carrying this line, as `CHEATSHEET.md` at the root,
+  751 public methods of 110 types a line each with the first sentence of each one's summary,
+  grouped as the guide's pages are and linked from each page. It is written by `build/cheatsheet`
+  from the library and its XML documentation rather than by hand, and `CheatsheetTests` holds it
+  to the library by type, name and number of parameters as 3DEngine's does.
 
 - Shared: the README split is taken in the commit carrying this line. README.md is 240 lines in
   3DEngine's order, with the examples' pictures, the install, a Guide that is the table of

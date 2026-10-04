@@ -162,4 +162,4 @@ is a trait in 0.19 and the loadable asset behind `.scn`, `.scn.ron` and a glTF f
 Before this, [Scenes and saves](scenes-and-saves.md).
 Next, [Drawing](drawing.md).
 Bevy's own examples of this, and which are written in C# here, are in
-[EXAMPLES.md](../.github/EXAMPLES.md#assets). The [guide's contents](../README.md#guide) list every page.
+[EXAMPLES.md](../.github/EXAMPLES.md#assets). Its calls are each a line in the [cheatsheet](../CHEATSHEET.md#assets-and-models). The [guide's contents](../README.md#guide) list every page.

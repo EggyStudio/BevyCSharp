@@ -155,4 +155,4 @@ from closed.
 
 Before this, [Audio](audio.md).
 Next, [Input](input.md).
-The [guide's contents](../README.md#guide) list every page.
+Its calls are each a line in the [cheatsheet](../CHEATSHEET.md#physics). The [guide's contents](../README.md#guide) list every page.

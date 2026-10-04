@@ -162,4 +162,4 @@ at the modes it offers, and how many it offers depends on the platform as much a
 Before this, [Ray tracing](ray-tracing.md).
 Next, [2D](2d.md).
 Bevy's own examples of this, and which are written in C# here, are in
-[EXAMPLES.md](../.github/EXAMPLES.md#window). The [guide's contents](../README.md#guide) list every page.
+[EXAMPLES.md](../.github/EXAMPLES.md#window). Its calls are each a line in the [cheatsheet](../CHEATSHEET.md#the-window). The [guide's contents](../README.md#guide) list every page.

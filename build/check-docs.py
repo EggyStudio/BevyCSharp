@@ -62,7 +62,7 @@ def links(text):
 
 def check_links(external):
     problems = []
-    pages = [os.path.join(ROOT, "README.md")] + sorted(glob.glob(os.path.join(ROOT, "docs", "*.md")))
+    pages = [os.path.join(ROOT, "README.md"), os.path.join(ROOT, "CHEATSHEET.md")] + sorted(glob.glob(os.path.join(ROOT, "docs", "*.md")))
     anchors = {}
     outside = set()
 
@@ -79,7 +79,7 @@ def check_links(external):
                 outside.add(target)
                 continue
             else:
-                if name == "README.md" and not target.startswith("#"):
+                if name in ("README.md", "CHEATSHEET.md") and not target.startswith("#"):
                     problems.append(f"{name}: '{target}' is relative, which goes nowhere on nuget.org")
                     continue
                 path, _, heading = target.partition("#")
