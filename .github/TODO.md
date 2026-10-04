@@ -82,7 +82,7 @@ the most examples, and the largest is taken between groups of examples. The coun
   (`texture_atlas`), an image loaded as an array of layers (`tilemap_chunk_orientation`), and the
   pointer passing through the window to what is behind it (`window_fallthrough`).
 
-Six examples are written in part, each leaving out a feature named in its row.
+Seven examples are written in part, each leaving out a feature named in its row.
 
 - **Extruded and line meshes**, which `3d_shapes` leaves out of its rows: Bevy's segment and
   polyline, and the extrusion of a 2D shape, solid or as a ring. `MeshShape` builds the solids and
@@ -91,9 +91,9 @@ Six examples are written in part, each leaving out a feature named in its row.
 - **Which compressed formats the GPU decodes**, which `skybox` cycles through in Bevy, so ASTC and
   ETC2 are left out here. Bevy reads them from the render device's features, and a call saying
   which a GPU has would let a game pick the cubemap it loads as Bevy's example does.
-- **An underline under text**, which `text2d` draws its first box's text without. Bevy's `Underline`
-  is not reflected, so no call reaches it, and it is one of the text styles the fonts entry above
-  names.
+- **An underline under text**, which `text2d` draws its first box's text without and
+  `letter_spacing` its heading. Bevy's `Underline` is not reflected, so no call reaches it, and it
+  is one of the text styles the fonts entry above names.
 - **The input focus**, which `button` leaves unset as the pointer moves over it, since `InputFocus`
   is a resource the bridge does not reach, as the entry above on Bevy's resources says.
 - **A canceled touch**, which `touch_input` never prints, since the touches the frame reports are

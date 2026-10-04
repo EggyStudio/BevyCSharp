@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**109 written, 6 written in part, 127 can be written, 122 missing and 57 do not apply.** Of the 364 that apply, 242 can be written with what is bridged, 6 of them leaving something out.
+**109 written, 7 written in part, 126 can be written, 122 missing and 57 do not apply.** Of the 364 that apply, 242 can be written with what is bridged, 7 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
@@ -37,12 +37,12 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 |
 | [Tools](#tools) | 0 | 0 | 2 | 0 | 0 |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 |
-| [UI (User Interface)](#ui-user-interface) | 18 | 1 | 6 | 35 | 0 |
+| [UI (User Interface)](#ui-user-interface) | 18 | 2 | 5 | 35 | 0 |
 | [Usage](#usage) | 0 | 0 | 3 | 0 | 0 |
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **109** | **6** | **127** | **122** | **57** |
+| **All** | **109** | **7** | **126** | **122** | **57** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints.
 
@@ -543,7 +543,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`image_node`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/images/image_node.rs) | Demonstrates how to create an image node | [written](../BevyCSharp.Examples/ui/image_node.cs) |
 | [`image_node_resizing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/images/image_node_resizing.rs) | Demonstrates how to resize an image node | missing, Bevy's resources reached through reflection, here GlobalUiDebugOptions |
 | [`ime_support`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/ime_support.rs) | Demonstrates IME (Input Method Editor) support for text input | missing, Bevy's resources reached through reflection, here InputFocus |
-| [`letter_spacing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/letter_spacing.rs) | Demonstrates the letter spacing feature | can be written |
+| [`letter_spacing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/letter_spacing.rs) | Demonstrates the letter spacing feature | [written in part](../BevyCSharp.Examples/ui/letter_spacing.cs), the underline under the heading |
 | [`multiline_text_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/multiline_text_input.rs) | Demonstrates a single multiline EditableText widget | missing, Bevy's editable text (EditableText) |
 | [`multiple_text_inputs`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/multiple_text_inputs.rs) | Demonstrates multiple text inputs | missing, Bevy's editable text (EditableText) |
 | [`overflow`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/scroll_and_overflow/overflow.rs) | Simple example demonstrating overflow behavior | [written](../BevyCSharp.Examples/ui/overflow.cs) |

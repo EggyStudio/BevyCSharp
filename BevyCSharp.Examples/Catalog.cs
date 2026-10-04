@@ -151,6 +151,7 @@ internal static class Catalog
         new("button", ButtonExample.Build),
         new("flex_layout", FlexLayout.Build),
         new("image_node", ImageNode.Build),
+        new("letter_spacing", LetterSpacingExample.Build),
         new("overflow", OverflowExample.Build),
         new("overflow_clip_margin", OverflowClipMargin.Build),
         new("overflow_debug", OverflowDebug.Build),

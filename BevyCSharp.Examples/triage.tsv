@@ -376,7 +376,7 @@ grid	can
 image_node	can
 image_node_resizing	missing	Bevy's resources reached through reflection, here GlobalUiDebugOptions
 ime_support	missing	Bevy's resources reached through reflection, here InputFocus
-letter_spacing	can
+letter_spacing	part	the underline under the heading
 multiline_text_input	missing	Bevy's editable text (EditableText)
 multiple_text_inputs	missing	Bevy's editable text (EditableText)
 overflow_clip_margin	can
