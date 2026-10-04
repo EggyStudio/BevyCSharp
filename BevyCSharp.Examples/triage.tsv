@@ -2,12 +2,13 @@
 # A line is a name, a state and a note, apart by tabs. The state is can (everything it uses is
 # bridged and nobody has written it yet), missing (the note names what the bridge lacks) or n/a
 # (the note says why it is not a thing a C# game does). One of Bevy's components the bridge
-# reaches through reflection (EcsWorld.InsertReflected and its kin) counts as bridged, and the note
-# names it. An example written here is found by its file under BevyCSharp.Examples, and a line left
-# for it keeps only its note, which says how it differs from Bevy's.
+# reaches through reflection (EcsWorld.InsertReflected and its kin) counts as bridged, and the
+# note names it. An example written here is found by its file under BevyCSharp.Examples. Its line
+# is can with a note saying how it differs from Bevy's in no feature, or part with a note naming
+# the feature of Bevy's it leaves out.
 3d_scene	can
 rect_light	can	through Bevy's reflected RectLight
-3d_shapes	can	the solids only, since the segment, the polyline and the extrusions are shapes the bridge does not build
+3d_shapes	part	the segment, the polyline and the extrusions, which are shapes the bridge does not build
 3d_viewport_to_world	can
 animated_material	can
 generate_custom_mesh	can
@@ -22,7 +23,7 @@ lighting	can
 lines	can
 ssao	can
 spotlight	can	its cubes scattered by .NET's generator rather than Bevy's
-bloom_3d	can	intensity, threshold and mode, and none of the low-frequency boost, high-pass frequency or scale
+bloom_3d	can
 decal	missing	forward decals (ForwardDecal)
 deferred_rendering	can
 motion_blur	can
@@ -30,21 +31,21 @@ order_independent_transparency	can
 tonemapping	can
 orthographic	can
 parenting	can
-pbr	can	its view sized for 1280 by 720 at any size, and its "Metallic" label not turned, since an interface node is not turned here
+pbr	can	its view sized for a window of 1280 by 720 at any size
 parallax_mapping	missing	a depth map and parallax settings on the standard material
 render_to_texture	can
 shadow_biases	can
 shadow_caster_receiver	can
-skybox	can
+skybox	part	the ASTC and ETC2 cubemaps, since the bridge does not say which compressed formats the GPU decodes
 solari	can	needs a bridge built with --solari and an adapter with ray queries
 spherical_area_lights	can
 split_screen	can
 texture	can
-transparency_3d	can	its alpha to coverage cube blends, since that mode is not bridged
+transparency_3d	part	its alpha to coverage cube, a mode the bridge's materials do not have
 transmission	can
 two_passes	can
 vertex_colors	can
-wireframe	can	no wireframe width or quad topology, and the global wireframe given to each mesh
+wireframe	can
 irradiance_volumes	can	needs Bevy's irradiance volume asset
 meshlet	can	needs a bridge built with --meshlet
 mesh_ray_cast	can	casts through Picking, which the editor profile carries

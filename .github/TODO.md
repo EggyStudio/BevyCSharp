@@ -43,6 +43,19 @@ the most examples, and the largest is taken between groups of examples. The coun
   the protocol is worth carrying beside it.
 - **A second window, two examples.**
 
+Three examples are written in part, each leaving out a feature named in its row.
+
+- **Extruded and line meshes**, which `3d_shapes` leaves out of its rows: Bevy's segment and
+  polyline, and the extrusion of a 2D shape, solid or as a ring. `MeshShape` builds the solids and
+  the flat shapes, and an extrusion is a recipe of a shape and a depth the bridge would build as
+  Bevy's `Extrusion` does.
+- **Which compressed formats the GPU decodes**, which `skybox` cycles through in Bevy, so ASTC and
+  ETC2 are left out here. Bevy reads them from the render device's features, and a call saying
+  which a GPU has would let a game pick the cubemap it loads as Bevy's example does.
+- **Alpha to coverage**, which `transparency_3d`'s left cube is drawn without, blending instead.
+  `AlphaMode` has Bevy's other modes, and this one needs the multisampled target it resolves
+  against.
+
 ## Content
 
 ### Bevy's components through reflection

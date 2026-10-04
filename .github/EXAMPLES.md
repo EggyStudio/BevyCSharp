@@ -2,47 +2,47 @@
 
 Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` keeps and 13 kept out of it. Each is a row here, made by `build/examples-table.py` from Bevy's own metadata, so a row is a feature of Bevy and the table is how much of Bevy a C# game can reach.
 
-An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself.
+An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**22 written, 272 can be written, 74 missing and 53 do not apply.** Of the 368 that apply, 294 can be written with what is bridged.
+**27 written, 3 written in part, 264 can be written, 74 missing and 53 do not apply.** Of the 368 that apply, 294 can be written with what is bridged, 3 of them leaving something out.
 
-| Group | Written | Can be written | Missing | Does not apply |
-|---|---:|---:|---:|---:|
-| [2D Rendering](#2d-rendering) | 0 | 20 | 8 | 1 |
-| [3D Rendering](#3d-rendering) | 22 | 42 | 3 | 0 |
-| [Animation](#animation) | 0 | 6 | 7 | 0 |
-| [Application](#application) | 0 | 13 | 1 | 5 |
-| [Assets](#assets) | 0 | 10 | 2 | 5 |
-| [Async Tasks](#async-tasks) | 0 | 3 | 0 | 0 |
-| [Audio](#audio) | 0 | 6 | 2 | 0 |
-| [Camera](#camera) | 0 | 8 | 1 | 0 |
-| [Dev tools](#dev-tools) | 0 | 1 | 1 | 1 |
-| [Diagnostics](#diagnostics) | 0 | 1 | 2 | 0 |
-| [ECS (Entity Component System)](#ecs-entity-component-system) | 0 | 24 | 3 | 8 |
-| [Embedded](#embedded) | 0 | 0 | 0 | 1 |
-| [Games](#games) | 0 | 6 | 0 | 0 |
-| [Gizmos](#gizmos) | 0 | 4 | 5 | 0 |
-| [Helpers](#helpers) | 0 | 0 | 1 | 0 |
-| [Input](#input) | 0 | 12 | 0 | 0 |
-| [Math](#math) | 0 | 5 | 0 | 1 |
-| [Movement](#movement) | 0 | 1 | 0 | 0 |
-| [Picking](#picking) | 0 | 2 | 3 | 1 |
-| [Reflection](#reflection) | 0 | 0 | 0 | 9 |
-| [Remote Protocol](#remote-protocol) | 0 | 0 | 3 | 1 |
-| [Scene](#scene) | 0 | 1 | 1 | 0 |
-| [Shaders](#shaders) | 0 | 17 | 3 | 5 |
-| [Shaders Advanced](#shaders-advanced) | 0 | 1 | 0 | 1 |
-| [State](#state) | 0 | 4 | 0 | 0 |
-| [Stress Tests](#stress-tests) | 0 | 18 | 2 | 1 |
-| [Time](#time) | 0 | 3 | 0 | 0 |
-| [Tools](#tools) | 0 | 2 | 0 | 0 |
-| [Transforms](#transforms) | 0 | 5 | 0 | 0 |
-| [UI (User Interface)](#ui-user-interface) | 0 | 36 | 24 | 0 |
-| [Usage](#usage) | 0 | 3 | 0 | 0 |
-| [Window](#window) | 0 | 10 | 1 | 0 |
-| [glTF](#gltf) | 0 | 5 | 1 | 3 |
-| [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 3 | 0 | 10 |
-| **All** | **22** | **272** | **74** | **53** |
+| Group | Written | Written in part | Can be written | Missing | Does not apply |
+|---|---:|---:|---:|---:|---:|
+| [2D Rendering](#2d-rendering) | 0 | 0 | 20 | 8 | 1 |
+| [3D Rendering](#3d-rendering) | 27 | 3 | 34 | 3 | 0 |
+| [Animation](#animation) | 0 | 0 | 6 | 7 | 0 |
+| [Application](#application) | 0 | 0 | 13 | 1 | 5 |
+| [Assets](#assets) | 0 | 0 | 10 | 2 | 5 |
+| [Async Tasks](#async-tasks) | 0 | 0 | 3 | 0 | 0 |
+| [Audio](#audio) | 0 | 0 | 6 | 2 | 0 |
+| [Camera](#camera) | 0 | 0 | 8 | 1 | 0 |
+| [Dev tools](#dev-tools) | 0 | 0 | 1 | 1 | 1 |
+| [Diagnostics](#diagnostics) | 0 | 0 | 1 | 2 | 0 |
+| [ECS (Entity Component System)](#ecs-entity-component-system) | 0 | 0 | 24 | 3 | 8 |
+| [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |
+| [Games](#games) | 0 | 0 | 6 | 0 | 0 |
+| [Gizmos](#gizmos) | 0 | 0 | 4 | 5 | 0 |
+| [Helpers](#helpers) | 0 | 0 | 0 | 1 | 0 |
+| [Input](#input) | 0 | 0 | 12 | 0 | 0 |
+| [Math](#math) | 0 | 0 | 5 | 0 | 1 |
+| [Movement](#movement) | 0 | 0 | 1 | 0 | 0 |
+| [Picking](#picking) | 0 | 0 | 2 | 3 | 1 |
+| [Reflection](#reflection) | 0 | 0 | 0 | 0 | 9 |
+| [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 3 | 1 |
+| [Scene](#scene) | 0 | 0 | 1 | 1 | 0 |
+| [Shaders](#shaders) | 0 | 0 | 17 | 3 | 5 |
+| [Shaders Advanced](#shaders-advanced) | 0 | 0 | 1 | 0 | 1 |
+| [State](#state) | 0 | 0 | 4 | 0 | 0 |
+| [Stress Tests](#stress-tests) | 0 | 0 | 18 | 2 | 1 |
+| [Time](#time) | 0 | 0 | 3 | 0 | 0 |
+| [Tools](#tools) | 0 | 0 | 2 | 0 | 0 |
+| [Transforms](#transforms) | 0 | 0 | 5 | 0 | 0 |
+| [UI (User Interface)](#ui-user-interface) | 0 | 0 | 36 | 24 | 0 |
+| [Usage](#usage) | 0 | 0 | 3 | 0 | 0 |
+| [Window](#window) | 0 | 0 | 10 | 1 | 0 |
+| [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
+| [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
+| **All** | **27** | **3** | **264** | **74** | **53** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`.
 
@@ -85,7 +85,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | Example | What it shows | State |
 |---|---|---|
 | [`3d_scene`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/3d_scene.rs) | Simple 3D scene with basic shapes and lighting | [written](../BevyCSharp.Examples/3d/3d_scene.cs) |
-| [`3d_shapes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/3d_shapes.rs) | A scene showcasing the built-in 3D shapes | [written](../BevyCSharp.Examples/3d/3d_shapes.cs), the solids only, since the segment, the polyline and the extrusions are shapes the bridge does not build |
+| [`3d_shapes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/3d_shapes.rs) | A scene showcasing the built-in 3D shapes | [written in part](../BevyCSharp.Examples/3d/3d_shapes.cs), the segment, the polyline and the extrusions, which are shapes the bridge does not build |
 | [`3d_viewport_to_world`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/3d_viewport_to_world.rs) | Demonstrates how to use the `Camera::viewport_to_world` method | [written](../BevyCSharp.Examples/3d/3d_viewport_to_world.cs) |
 | [`animated_material`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/animated_material.rs) | Shows how to animate material properties | [written](../BevyCSharp.Examples/3d/animated_material.cs) |
 | [`anisotropy`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/anisotropy.rs) | Displays an example model with anisotropy | can be written |
@@ -94,7 +94,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`atmospheric_fog`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/atmospheric_fog.rs) | A scene showcasing the atmospheric fog effect | [written](../BevyCSharp.Examples/3d/atmospheric_fog.cs), through Bevy's reflected DistanceFog |
 | [`auto_exposure`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/auto_exposure.rs) | A scene showcasing auto exposure | can be written |
 | [`blend_modes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/blend_modes.rs) | Showcases different blend modes | can be written |
-| [`bloom_3d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/bloom_3d.rs) | Illustrates bloom configuration using HDR and emissive materials | [written](../BevyCSharp.Examples/3d/bloom_3d.cs), intensity, threshold and mode, and none of the low-frequency boost, high-pass frequency or scale |
+| [`bloom_3d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/bloom_3d.rs) | Illustrates bloom configuration using HDR and emissive materials | [written](../BevyCSharp.Examples/3d/bloom_3d.cs) |
 | [`camera_sub_view`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/camera_sub_view.rs) | Demonstrates using different sub view effects on a camera | can be written, through the sub view of Bevy's reflected Camera |
 | [`clearcoat`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/clearcoat.rs) | Demonstrates the clearcoat PBR feature | can be written |
 | [`clustered_decal_maps`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/clustered_decal_maps.rs) | Demonstrates normal and metallic-roughness maps of decals | can be written, through Bevy's reflected ClusteredDecal |
@@ -104,8 +104,8 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`decal`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/decal.rs) | Decal rendering | missing, forward decals (ForwardDecal) |
 | [`deferred_rendering`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/deferred_rendering.rs) | Renders meshes with both forward and deferred pipelines | can be written |
 | [`depth_of_field`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/depth_of_field.rs) | Demonstrates depth of field | can be written |
-| [`fog`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/fog.rs) | A scene showcasing the distance fog effect | can be written, through Bevy's reflected DistanceFog |
-| [`fog_volumes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/fog_volumes.rs) | Demonstrates fog volumes | can be written, through Bevy's reflected FogVolume |
+| [`fog`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/fog.rs) | A scene showcasing the distance fog effect | [written](../BevyCSharp.Examples/3d/fog.cs), through Bevy's reflected DistanceFog |
+| [`fog_volumes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/fog_volumes.rs) | Demonstrates fog volumes | [written](../BevyCSharp.Examples/3d/fog_volumes.cs), through Bevy's reflected FogVolume |
 | [`generate_custom_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/generate_custom_mesh.rs) | Simple showcase of how to generate a custom mesh with a custom texture | [written](../BevyCSharp.Examples/3d/generate_custom_mesh.cs) |
 | [`irradiance_volumes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/irradiance_volumes.rs) | Demonstrates irradiance volumes | can be written, needs Bevy's irradiance volume asset |
 | [`light_probe_blending`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/light_probe_blending.rs) | Demonstrates blending between multiple reflection probes | can be written |
@@ -123,34 +123,34 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`orthographic`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/orthographic.rs) | Shows how to create a 3D orthographic view (for isometric-look in games or CAD applications) | [written](../BevyCSharp.Examples/3d/orthographic.cs) |
 | [`parallax_mapping`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/parallax_mapping.rs) | Demonstrates use of a normal map and depth map for parallax mapping | missing, a depth map and parallax settings on the standard material |
 | [`parenting`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/parenting.rs) | Demonstrates parent->child relationships and relative transformations | [written](../BevyCSharp.Examples/3d/parenting.cs) |
-| [`pbr`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/pbr.rs) | Demonstrates use of Physically Based Rendering (PBR) properties | [written](../BevyCSharp.Examples/3d/pbr.cs), its view sized for 1280 by 720 at any size, and its "Metallic" label not turned, since an interface node is not turned here |
+| [`pbr`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/pbr.rs) | Demonstrates use of Physically Based Rendering (PBR) properties | [written](../BevyCSharp.Examples/3d/pbr.cs), its view sized for a window of 1280 by 720 at any size |
 | [`pccm`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/pccm.rs) | Demonstrates parallax-corrected cubemap reflections | can be written, through Bevy's reflected ParallaxCorrection |
 | [`pcss`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/pcss.rs) | Demonstrates percentage-closer soft shadows (PCSS) | can be written |
 | [`post_processing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/post_processing.rs) | Demonstrates the built-in postprocessing features | can be written |
-| [`rect_light`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/rect_light.rs) | Simple 3D scene demonstrating rectangular area lights. | can be written, through Bevy's reflected RectLight |
+| [`rect_light`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/rect_light.rs) | Simple 3D scene demonstrating rectangular area lights. | [written](../BevyCSharp.Examples/3d/rect_light.cs), through Bevy's reflected RectLight |
 | [`reflection_probes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/reflection_probes.rs) | Demonstrates reflection probes | can be written |
 | [`render_to_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/render_to_texture.rs) | Shows how to render to a texture, useful for mirrors, UI, or exporting images | [written](../BevyCSharp.Examples/3d/render_to_texture.cs) |
-| [`rotate_environment_map`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/rotate_environment_map.rs) | Demonstrates how to rotate the skybox and the environment map simultaneously | can be written |
-| [`scrolling_fog`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/scrolling_fog.rs) | Demonstrates how to create the effect of fog moving in the wind | can be written, through Bevy's reflected FogVolume, its density texture set as a reflected asset |
+| [`rotate_environment_map`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/rotate_environment_map.rs) | Demonstrates how to rotate the skybox and the environment map simultaneously | [written](../BevyCSharp.Examples/3d/rotate_environment_map.cs) |
+| [`scrolling_fog`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/scrolling_fog.rs) | Demonstrates how to create the effect of fog moving in the wind | [written](../BevyCSharp.Examples/3d/scrolling_fog.cs), through Bevy's reflected FogVolume, its density texture set as a reflected asset |
 | [`shadow_biases`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/shadow_biases.rs) | Demonstrates how shadow biases affect shadows in a 3d scene | can be written |
 | [`shadow_caster_receiver`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/shadow_caster_receiver.rs) | Demonstrates how to prevent meshes from casting/receiving shadows in a 3d scene | [written](../BevyCSharp.Examples/3d/shadow_caster_receiver.cs) |
-| [`skybox`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/skybox.rs) | Load a cubemap texture onto a cube like a skybox and cycle through different compressed texture formats. | can be written |
+| [`skybox`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/skybox.rs) | Load a cubemap texture onto a cube like a skybox and cycle through different compressed texture formats. | [written in part](../BevyCSharp.Examples/3d/skybox.cs), the ASTC and ETC2 cubemaps, since the bridge does not say which compressed formats the GPU decodes |
 | [`solari`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/solari.rs) | Demonstrates realtime dynamic raytraced lighting using Bevy Solari. | can be written, needs a bridge built with --solari and an adapter with ray queries |
 | [`specular_tint`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/specular_tint.rs) | Demonstrates specular tints and maps | missing, specular tint and the specular maps on the standard material |
 | [`spherical_area_lights`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/spherical_area_lights.rs) | Demonstrates how point light radius values affect light behavior | [written](../BevyCSharp.Examples/3d/spherical_area_lights.cs) |
 | [`split_screen`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/split_screen.rs) | Demonstrates how to render two cameras to the same window to accomplish "split screen" | [written](../BevyCSharp.Examples/3d/split_screen.cs) |
 | [`spotlight`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/spotlight.rs) | Illustrates spot lights | [written](../BevyCSharp.Examples/3d/spotlight.cs), its cubes scattered by .NET's generator rather than Bevy's |
-| [`ssao`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/ssao.rs) | A scene showcasing screen space ambient occlusion | can be written |
+| [`ssao`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/ssao.rs) | A scene showcasing screen space ambient occlusion | [written](../BevyCSharp.Examples/3d/ssao.cs) |
 | [`ssr`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/ssr.rs) | Demonstrates screen space reflections with water ripples | can be written |
 | [`texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/texture.rs) | Shows configuration of texture materials | [written](../BevyCSharp.Examples/3d/texture.cs) |
 | [`tonemapping`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/tonemapping.rs) | Compares tonemapping options | can be written |
 | [`transmission`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/transmission.rs) | Showcases light transmission in the PBR material | can be written |
-| [`transparency_3d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/transparency_3d.rs) | Demonstrates transparency in 3d | [written](../BevyCSharp.Examples/3d/transparency_3d.cs), its alpha to coverage cube blends, since that mode is not bridged |
+| [`transparency_3d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/transparency_3d.rs) | Demonstrates transparency in 3d | [written in part](../BevyCSharp.Examples/3d/transparency_3d.cs), its alpha to coverage cube, a mode the bridge's materials do not have |
 | [`two_passes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/two_passes.rs) | Renders two 3d passes to the same window from different perspectives | [written](../BevyCSharp.Examples/3d/two_passes.cs) |
 | [`vertex_colors`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/vertex_colors.rs) | Shows the use of vertex colors | [written](../BevyCSharp.Examples/3d/vertex_colors.cs) |
 | [`visibility_range`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/visibility_range.rs) | Demonstrates visibility ranges | can be written, through Bevy's reflected VisibilityRange |
-| [`volumetric_fog`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/volumetric_fog.rs) | Demonstrates volumetric fog and lighting | can be written, through Bevy's reflected VolumetricFog, FogVolume and VolumetricLight |
-| [`wireframe`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/wireframe.rs) | Showcases wireframe rendering | [written](../BevyCSharp.Examples/3d/wireframe.cs), no wireframe width or quad topology, and the global wireframe given to each mesh |
+| [`volumetric_fog`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/volumetric_fog.rs) | Demonstrates volumetric fog and lighting | [written](../BevyCSharp.Examples/3d/volumetric_fog.cs), through Bevy's reflected VolumetricFog, FogVolume and VolumetricLight |
+| [`wireframe`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/wireframe.rs) | Showcases wireframe rendering | [written](../BevyCSharp.Examples/3d/wireframe.cs) |
 
 ## Animation
 

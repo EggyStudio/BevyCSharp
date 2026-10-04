@@ -6,7 +6,7 @@ namespace BevyCSharp.Examples.ThreeD;
 //
 // Bevy's camera sizes its orthographic view by the window, a hundredth of a unit a pixel, which
 // at 1280 by 720 is 7.2 units high, and that is the height given here at any size. Its "Metallic"
-// label is turned a quarter turn, which an interface node cannot be here.
+// label is turned a quarter turn by Bevy's UiTransform, put on through reflection.
 internal static class Pbr
 {
     private static Entity _label;
@@ -47,7 +47,10 @@ internal static class Pbr
 
         var large = new UiTextSettings { FontSize = 30f };
         Ui.SpawnText("Perceptual Roughness", new UiSettings { Absolute = true, Top = Length.Px(20f), Left = Length.Px(100f) }, large);
-        Ui.SpawnText("Metallic", new UiSettings { Absolute = true, Top = Length.Px(130f), Right = Length.Px(0f) }, large);
+        var metallic = Ui.SpawnText("Metallic", new UiSettings { Absolute = true, Top = Length.Px(130f), Right = Length.Px(0f) }, large);
+        ecs.InsertReflected(metallic, "bevy_ui::ui_transform::UiTransform");
+        ecs.SetReflected(metallic, "bevy_ui::ui_transform::UiTransform", ".rotation.cos", "0.0");
+        ecs.SetReflected(metallic, "bevy_ui::ui_transform::UiTransform", ".rotation.sin", "1.0");
         _label = Ui.SpawnText("Loading Environment Map...", new UiSettings { Absolute = true, Bottom = Length.Px(20f), Right = Length.Px(20f) }, large);
 
         var camera = ecs.Camera(

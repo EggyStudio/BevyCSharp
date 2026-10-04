@@ -10,3 +10,9 @@ textures/array_texture.png
 branding/bevy_logo_dark_big.png
 models/terrain/Mountains.gltf
 models/terrain/Mountains.bin
+volumes/bunny.ktx2
+volumes/fog_noise.ktx2
+models/VolumetricFogExample/VolumetricFogExample.glb
+textures/ScratchedGold-Normal.png
+textures/Ryfjallet_cubemap.png
+textures/Ryfjallet_cubemap_bc7.ktx2

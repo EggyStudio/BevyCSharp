@@ -31,8 +31,8 @@ HIDDEN = "Kept out of Bevy's list"
 # written into it links by full URL.
 BLOB = "https://github.com/EggyStudio/BevyCSharp/blob/main/"
 RAW = "https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/"
-STATES = {"written": "written", "can": "can be written", "missing": "missing", "n/a": "does not apply"}
-ORDER = ["written", "can", "missing", "n/a"]
+STATES = {"written": "written", "part": "written in part", "can": "can be written", "missing": "missing", "n/a": "does not apply"}
+ORDER = ["written", "part", "can", "missing", "n/a"]
 
 
 def bevy_version():
@@ -93,9 +93,9 @@ def read_triage():
             if not line or line.startswith("#"):
                 continue
             parts = line.split("\t")
-            if len(parts) < 2 or parts[1] not in ("can", "missing", "n/a"):
+            if len(parts) < 2 or parts[1] not in ("can", "part", "missing", "n/a"):
                 sys.exit(f"triage.tsv:{number}: '{line}' is not a name, a state and a note")
-            if parts[1] in ("missing", "n/a") and (len(parts) < 3 or not parts[2]):
+            if parts[1] in ("part", "missing", "n/a") and (len(parts) < 3 or not parts[2]):
                 sys.exit(f"triage.tsv:{number}: {parts[0]} is {parts[1]} and says nothing about why")
             triage[parts[0]] = (parts[1], parts[2] if len(parts) > 2 else "")
     return triage
@@ -118,8 +118,10 @@ def build(version, examples, order, triage, written):
     for example in examples:
         name = example["name"]
         if name in written:
-            # A line kept for a written example says how it differs from Bevy's.
-            example["state"], example["note"] = "written", triage.get(name, ("", ""))[1]
+            # A line kept for a written example says how it differs from Bevy's, and one marked
+            # part names the feature it leaves out.
+            state, note = triage.get(name, ("can", ""))
+            example["state"], example["note"] = ("part" if state == "part" else "written"), note
         elif name in triage:
             example["state"], example["note"] = triage[name]
         else:
@@ -149,22 +151,25 @@ def build(version, examples, order, triage, written):
     out.append(
         "An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened "
         "by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. "
-        "One that `can be written` uses only what is bridged and waits for its turn. One that is "
-        "`missing` names what the bridge lacks, and one that `does not apply` says why it is not "
-        "a thing a C# game does, most often because it is about Rust itself.")
+        "One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that "
+        "`can be written` uses only what is bridged and waits for its turn. One that is `missing` "
+        "names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# "
+        "game does, most often because it is about Rust itself. A difference that is no feature, "
+        "such as a view sized for another window, is said in a written row and keeps it written.")
     out.append("")
     out.append(
-        f"**{total['written']} written, {total['can']} can be written, {total['missing']} missing "
-        f"and {total['n/a']} do not apply.** Of the {applies} that apply, "
-        f"{total['written'] + total['can']} can be written with what is bridged.")
+        f"**{total['written']} written, {total['part']} written in part, {total['can']} can be written, "
+        f"{total['missing']} missing and {total['n/a']} do not apply.** Of the {applies} that apply, "
+        f"{total['written'] + total['part'] + total['can']} can be written with what is bridged, "
+        f"{total['part']} of them leaving something out.")
     out.append("")
-    out.append("| Group | Written | Can be written | Missing | Does not apply |")
-    out.append("|---|---:|---:|---:|---:|")
+    out.append("| Group | Written | Written in part | Can be written | Missing | Does not apply |")
+    out.append("|---|---:|---:|---:|---:|---:|")
     for group in groups:
         c = counts([example for example in examples if example["group"] == group])
         anchor = re.sub(r"[^a-z0-9 -]", "", group.lower()).replace(" ", "-")
-        out.append(f"| [{group}](#{anchor}) | {c['written']} | {c['can']} | {c['missing']} | {c['n/a']} |")
-    out.append(f"| **All** | **{total['written']}** | **{total['can']}** | **{total['missing']}** | **{total['n/a']}** |")
+        out.append(f"| [{group}](#{anchor}) | {c['written']} | {c['part']} | {c['can']} | {c['missing']} | {c['n/a']} |")
+    out.append(f"| **All** | **{total['written']}** | **{total['part']}** | **{total['can']}** | **{total['missing']}** | **{total['n/a']}** |")
     out.append("")
     out.append(
         "A row's example links to Bevy's source, at the release the bridge builds. A written "
@@ -180,8 +185,8 @@ def build(version, examples, order, triage, written):
             source = f"https://github.com/bevyengine/bevy/blob/v{version}/{example['path']}" if example["path"] else ""
             name = f"[`{example['name']}`]({source})" if source else f"`{example['name']}`"
             state = STATES[example["state"]]
-            if example["state"] == "written":
-                state = f"[written](../{written[example['name']]})"
+            if example["state"] in ("written", "part"):
+                state = f"[{STATES[example['state']]}](../{written[example['name']]})"
             if example["note"]:
                 state += f", {example['note']}"
             description = example["description"].replace("|", "\\|") or " "
@@ -190,7 +195,7 @@ def build(version, examples, order, triage, written):
     table = "\n".join(out) + "\n"
 
     # Every written example's capture, four to a row, for the README.
-    shown = [example for example in examples if example["state"] == "written"
+    shown = [example for example in examples if example["state"] in ("written", "part")
              and os.path.exists(os.path.join(CAPTURES, example["name"] + ".png"))]
     gallery = []
     for start in range(0, len(shown), 4):
@@ -201,8 +206,8 @@ def build(version, examples, order, triage, written):
         gallery.append("<tr>" + "".join(cells) + "</tr>")
     gallery = "<table>\n" + "\n".join(gallery) + "\n</table>" if gallery else ""
     status = (
-        f"Of Bevy's {len(examples)} examples, {total['written']} are written in C# here, "
-        f"{total['can']} more can be with what is bridged, {total['missing']} wait on something "
+        f"Of Bevy's {len(examples)} examples, {total['written']} are written in C# here and "
+        f"{total['part']} more in part, {total['can']} more can be with what is bridged, {total['missing']} wait on something "
         f"the bridge lacks and {total['n/a']} are about Rust itself ([EXAMPLES.md]({BLOB}.github/EXAMPLES.md)).")
     return table, status, gallery
 
