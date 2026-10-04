@@ -71,20 +71,33 @@ public partial struct Runner
 
     private static AssetHandle _coin;
 
-    /// <summary>Gives the runner its ball while playing, when it has none.</summary>
+    /// <summary>Gives the runner its ball as play starts.</summary>
+    [OnEnter(Mode.Playing)]
+    public void Begin(BehaviorContext ctx) => Ball(ctx);
+
+    /// <summary>Gives the runner a ball again after a load, which brings the runner back without one.</summary>
     [OnUpdate, InState(Mode.Playing)]
-    public void Begin(BehaviorContext ctx)
+    public void Loaded(BehaviorContext ctx)
+    {
+        foreach (var _ in ctx.Read<SaveLoaded>())
+        {
+            Ball(ctx);
+            return;
+        }
+    }
+
+    /// <summary>A ball under the runner, a body of its own the physics plugin makes from its components.</summary>
+    private void Ball(BehaviorContext ctx)
     {
         if (Speed <= 0f) Speed = 4f;
-        if (!ctx.TryRes<PhysicsWorld>(out var physics) || ctx.Ecs.IsAlive(Body)) return;
+        if (ctx.Ecs.IsAlive(Body)) return;
 
         var at = ctx.Ecs.GetOrDefault<Transform>(ctx.Entity);
         Body = ctx.Ecs.Spawn();
         ctx.Ecs.SetName(Body, "Runner body");
-
-        var ball = Transform.At(at.Translation.X, at.Translation.Y + 0.5f, at.Translation.Z);
-        ctx.Ecs.Add(Body, ball);
-        physics.Add(Body, PhysicsShape.Sphere(0.5f), BodyKind.Dynamic, ball, mass: 1f);
+        ctx.Ecs.Add(Body, Transform.At(at.Translation.X, at.Translation.Y + 0.5f, at.Translation.Z));
+        ctx.Ecs.Add(Body, new RigidBody { Kind = BodyKind.Dynamic, Mass = 1f });
+        ctx.Ecs.Add(Body, new Collider { Shape = ColliderShape.Sphere, Size = Vec3.One });
     }
 
     /// <summary>Walks while play is not held, and plays the walk while it does.</summary>

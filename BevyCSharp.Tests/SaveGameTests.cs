@@ -182,6 +182,46 @@ public sealed class SaveGameTests : IDisposable
     }
 
     [Fact]
+    public void ALoadIsSentTheFrameAfterOnce()
+    {
+        var level = Path.Combine(_root, "sent.scene.json");
+        File.WriteAllText(level, """
+            { "format": "bevycsharp.scene.2",
+              "entities": [ { "id": 1, "name": "Hero",
+                "components": { "Bevy.Transform": { "Translation": [0, 0, 0] }, "Bevy.SaveId": { "Id": "00000000000000ef" } } } ] }
+            """);
+
+        using var harness = new EngineHarness(frames: 8);
+        var frame = 0;
+        var loadedOn = 0;
+        var heard = new List<(int Frame, SaveLoaded Message)>();
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            frame++;
+            foreach (var message in ctx.Read<SaveLoaded>()) heard.Add((frame, message));
+
+            if (frame == 1)
+            {
+                SaveGame.Start(ctx.Ecs, level);
+                SaveGame.Save(ctx.Ecs, "user://saves/sent.save.json");
+            }
+            else if (frame == 3)
+            {
+                SaveGame.Load(ctx.Ecs, "user://saves/sent.save.json");
+                loadedOn = frame;
+            }
+        });
+
+        harness.Run();
+
+        var (when, loaded) = Assert.Single(heard);
+        Assert.Equal(loadedOn + 1, when);
+        Assert.Equal("user://saves/sent.save.json", loaded.Path);
+        Assert.Contains(loaded.Entities, entity => entity != Entity.None);
+    }
+
+    [Fact]
     public void AComponentDeclaredElsewhereIsSavedOnceNamed()
     {
         var level = Path.Combine(_root, "small.scene.json");

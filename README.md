@@ -917,8 +917,19 @@ one.
 A load ends the game in progress first, despawning what its scenes spawned and every entity with a
 `SaveId`, so a pause menu loads as a title screen does. What the game spawned for itself without
 an id, its camera and its interface, is left for it, since only the game knows whether that still
-belongs. A load enters no state, so what a game builds on entering one, such as the bodies of a
-level's walls, is built again by the game for the level the load brought back. A host that loads
+belongs. A load enters no state, so what a game builds on entering one is not built for what came
+back, and `SaveLoaded` is sent the frame after for the game to build it there, once:
+
+```csharp
+[OnUpdate, InState(Mode.Playing)]
+public void Loaded(BehaviorContext ctx)
+{
+    foreach (var loaded in ctx.Read<SaveLoaded>()) MakeBall(ctx);
+}
+```
+
+The bodies a level holds as components need none of this, since the physics plugin makes them for
+whatever the load spawned. A host that loads
 its scenes itself, as the editor's player does, names them with `SaveGame.Begin` so a save made
 there lays itself over the same scenes a game's would.
 
@@ -3337,8 +3348,9 @@ taken away with a sound and counted in a `[Persist]` wallet, and for the goal on
 The HUD, the menu, the pause menu and the win are `Ui` nodes despawned as their state is left, and
 F5 and F9 save and load through `SaveGame`.
 
-A level a load brings back has its bodies made by the plugin as the first one had, and the pause
-holds the simulation with `PhysicsWorld.Paused`. The HUD's count is found by a `CoinsText` component rather
+A level a load brings back has its bodies made by the plugin as the first one had, the runner's
+ball is made again where it reads `SaveLoaded`, and the pause holds the simulation with
+`PhysicsWorld.Paused`. The HUD's count is found by a `CoinsText` component rather
 than kept in a static field, so it is found again after the script is reloaded.
 
 ### Playing it

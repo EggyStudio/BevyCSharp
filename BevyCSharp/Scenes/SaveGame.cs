@@ -70,6 +70,26 @@ public struct SaveId : IEquatable<SaveId>
 public sealed class PersistAttribute : Attribute;
 
 /// <summary>
+/// Sent the frame after <see cref="SaveGame.Load"/> brought a save back, for a game to build what a
+/// save does not hold.
+/// </summary>
+/// <param name="Path">The save that was loaded, as <see cref="SaveGame.Load"/> was given it.</param>
+/// <param name="Entities">Everything the load spawned, the scenes' and the save's.</param>
+/// <remarks>
+/// <para>
+/// A load ends the game in progress and spawns its scenes again with the save laid over them, and
+/// enters no state, so what a game builds on entering one, such as the player's body or a camera
+/// following it, is not built for what came back. A system reading this builds it once, where it
+/// reads it, rather than looking every frame for what is missing.
+/// </para>
+/// <para>
+/// The frame after rather than the frame of the load, as every message the engine sends arrives at
+/// the top of a frame, so every system of that frame reads it and none reads it twice.
+/// </para>
+/// </remarks>
+public readonly record struct SaveLoaded(string Path, IReadOnlyList<Entity> Entities);
+
+/// <summary>
 /// Saves a game as what changed over the scenes it started from, and loads it back.
 /// </summary>
 /// <remarks>
@@ -296,7 +316,8 @@ public static class SaveGame
     /// <exception cref="InvalidDataException">The file is not a save in this format.</exception>
     /// <remarks>
     /// The game in progress is ended only once the file has been read as a save, so a missing or
-    /// broken one leaves the game being played as it was.
+    /// broken one leaves the game being played as it was. <see cref="SaveLoaded"/> is sent the frame
+    /// after, for what the game builds itself.
     /// </remarks>
     public static SceneLoad Load(EcsWorld world, string path = "user://saves/slot.save.json")
     {
@@ -367,7 +388,9 @@ public static class SaveGame
             }
         }
 
-        return new SceneLoad([.. spawned.Where(world.IsAlive)], [.. unknown], refused);
+        var load = new SceneLoad([.. spawned.Where(world.IsAlive)], [.. unknown], refused);
+        Loaded.Enqueue(new SaveLoaded(path, load.Entities));
+        return load;
     }
 
     /// <summary>Forgets the game in progress, for an app starting, whose entities are its own.</summary>
@@ -376,6 +399,16 @@ public static class SaveGame
         StartedFrom.Clear();
         FromScenes.Clear();
         Spawned.Clear();
+        Loaded.Clear();
+    }
+
+    /// <summary>The loads made since the last frame began, for the bus.</summary>
+    private static readonly System.Collections.Concurrent.ConcurrentQueue<SaveLoaded> Loaded = new();
+
+    /// <summary>Sends the loads made since the last frame onto the bus. Called by the app each frame.</summary>
+    internal static void PostLoaded(MessageBus bus)
+    {
+        while (Loaded.TryDequeue(out var loaded)) bus.Send(loaded);
     }
 
     /// <summary>Despawns the game in progress, its scenes' entities and every one with a save id.</summary>

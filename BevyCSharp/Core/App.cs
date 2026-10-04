@@ -319,6 +319,7 @@ public sealed unsafe class App : IDisposable
             PostAssetFailures(world.Resource<MessageBus>());
             if (HasRenderer) Animation.PostFinished(world.Resource<MessageBus>());
             DataAssets.PostChanges(world.Resource<MessageBus>());
+            SaveGame.PostLoaded(world.Resource<MessageBus>());
             MaterialFiles.ReloadTouched();
             WindowMemory.Tick();
 
