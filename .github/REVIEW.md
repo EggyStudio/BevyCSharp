@@ -115,3 +115,8 @@ taken from [SHARED.md](SHARED.md).
   for a blank picture counts colors through the same tools. `audio` and `soundtrack` draw
   nothing by design, with no camera, and join the examples the run does not hold to showing
   something.
+- Item 2. Done. `build/examples-table.py --live` asks bevy.org for each example Bevy's metadata
+  marks for the web and writes those that answer to `BevyCSharp.Examples/bevy-live.txt`, 276 of
+  278, the other two being the widgets helper and the no_std library, which have no page. A row
+  of EXAMPLES.md gains "live in Bevy" and a README picture links its live page, and both say it is
+  Bevy's Rust original. The link check passes over those addresses.
