@@ -148,6 +148,7 @@ internal static class Catalog
         // UI (User Interface)
         new("anchor_layout", AnchorLayout.Build),
         new("borders", Borders.Build),
+        new("box_shadow", BoxShadowExample.Build),
         new("button", ButtonExample.Build),
         new("display_and_visibility", DisplayAndVisibility.Build),
         new("flex_layout", FlexLayout.Build),
