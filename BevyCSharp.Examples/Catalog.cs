@@ -52,6 +52,7 @@ internal static class Catalog
         new("wireframe", Wireframe.Build),
         new("bloom_3d", Bloom3d.Build),
         new("shadow_caster_receiver", ShadowCasterReceiver.Build),
+        new("blend_modes", BlendModes.Build),
         new("pccm", Pccm.Build),
         new("shadow_biases", ShadowBiases.Build),
         new("visibility_range", VisibilityRange.Build),
