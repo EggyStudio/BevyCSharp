@@ -5,7 +5,8 @@
 //!       [autoexposure] [timings] [ui] [material] [views] [probes] [watch] [corners] [compute] [rays] [layers]
 //!
 //! Each word after the count adds what the bridge adds, Bevy's plugins and the bridge's own render
-//! installers, and `ui` makes the camera the interface's default, as an offscreen bridge run does.
+//! installers, `timings` also prints each pass Bevy times as the bridge's render.timings lists them,
+//! and `ui` makes the camera the interface's default, as an offscreen bridge run does.
 //!
 //! The same scene as `Stress drawn`, cubes in four materials on a floor under a directional light
 //! and two point lights, drawn into a 1280 by 720 image with no window, unpaced. It lets 300 frames
@@ -199,7 +200,12 @@ fn scene(
     }
 }
 
-fn frame(mut frames: ResMut<Frames>, load: Res<Load>, mut exit: MessageWriter<AppExit>) {
+fn frame(
+    mut frames: ResMut<Frames>,
+    load: Res<Load>,
+    store: Option<Res<bevy::diagnostic::DiagnosticsStore>>,
+    mut exit: MessageWriter<AppExit>,
+) {
     use std::sync::atomic::Ordering;
 
     let now = Instant::now();
@@ -229,6 +235,24 @@ fn frame(mut frames: ResMut<Frames>, load: Res<Load>, mut exit: MessageWriter<Ap
                 println!("  {ms:8.3} ms  render: {name}");
             }
         }
+        // Each pass's own time, as the bridge's render.timings lists it, where `timings` asked
+        // for Bevy's render diagnostics, so a difference in the render phase can be read pass by
+        // pass beside the bridge's.
+        if let Some(store) = store {
+            let mut passes: Vec<(String, f64)> = store
+                .iter()
+                .filter_map(|diagnostic| {
+                    let path = diagnostic.path().as_str();
+                    let name = path.strip_prefix("render/")?.strip_suffix("/elapsed_cpu")?;
+                    Some((name.to_string(), diagnostic.average()?))
+                })
+                .collect();
+            passes.sort_by(|a, b| a.0.cmp(&b.0));
+            for (name, ms) in passes {
+                println!("  {ms:8.3} ms  pass: {name}");
+            }
+        }
+
         exit.write(AppExit::Success);
     }
 

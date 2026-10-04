@@ -174,8 +174,12 @@ drawing returns before encoding anything where no shader material casts a shadow
 What is left is about 2 ms the bridge adds to a shadowed render and 0.5 ms to an unshadowed one,
 growing with the shadow views. Adding the bridge's render installers to the plain scene one at a
 time (`material`, `views`, `probes`, `watch`, `corners`, `compute`, `rays`, `layers` as arguments)
-moved it by less than the spread, so it was not placed on this machine. A quieter machine, or
-Bevy's tracing spans in a profiler, would place it.
+moved it by less than the spread, so it was not placed on this machine. With `timings` the plain
+program also lists each pass Bevy times, as the bridge's `render.timings` does, and the two lists
+agree to a hundredth of a millisecond. Bevy does not time its shadow passes, so the difference is
+in the part of the `render` phase no timed pass covers, and over three interleaved runs it was 0
+to 1.6 ms, inside the spread again. A quieter machine, or Bevy's tracing spans in a profiler,
+would place it.
 
 ### A behavior takes its entity's transform
 
