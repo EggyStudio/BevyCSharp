@@ -514,7 +514,7 @@ public sealed class PhysicsTests
 
         Entity wheel = default, door = default;
         JointHandle motor = default;
-        var frame = 0;
+        var steps = 0;
         float turnedAtStop = 0f, turnedAtEnd = 0f, widest = 0f;
 
         // How far a body is turned about up, in degrees, the right-handed way.
@@ -546,19 +546,20 @@ public sealed class PhysicsTests
             physics.SetVelocity(door, Vec3.Zero, new Vec3(0f, 12f, 0f));
         });
 
+        // Counted in fixed steps rather than frames, since a fixed step is taken as real time
+        // passes, and a machine busy with something else draws its 240th frame more than a second
+        // in, by when the motor has turned further than a second's worth.
+        harness.OnContext(Stage.FixedUpdate, ctx =>
+        {
+            if (++steps != 120) return;
+
+            turnedAtStop = Yaw(ctx.Ecs.GetOrDefault<Transform>(wheel).Rotation);
+            ctx.Res<PhysicsWorld>().SetMotor(motor, 0f, 100f);
+        });
+
         harness.OnContext(Stage.Update, ctx =>
         {
-            frame++;
-            var physics = ctx.Res<PhysicsWorld>();
-
             widest = Math.Max(widest, Yaw(ctx.Ecs.GetOrDefault<Transform>(door).Rotation));
-
-            if (frame == 240)
-            {
-                turnedAtStop = Yaw(ctx.Ecs.GetOrDefault<Transform>(wheel).Rotation);
-                physics.SetMotor(motor, 0f, 100f);
-            }
-
             turnedAtEnd = Yaw(ctx.Ecs.GetOrDefault<Transform>(wheel).Rotation);
         });
 
