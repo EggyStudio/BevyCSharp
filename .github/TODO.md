@@ -364,11 +364,11 @@ language.
 - **A theme saved for the editor stays with the running build.** `assets/theme.txt` is written
   beside the binary and wins at startup, and the style tab's Ship with project writes the look into
   `project.json` as well, which the editor wears when there is no `theme.txt`.
-- **A level's camera would draw over the editor's view.** Nothing holds a scene's own camera
-  inactive while it is edited, so a camera in a level draws over the editor's and is the one
-  Play starts from, and the Spawn menu offers none. A game spawns its camera from a script under a
-  state the editor never enters, as Courtyard does on entering its menu. Holding a level's cameras
-  off while editing, drawn as a gizmo and looked through on request, would let a level carry one.
+- **A level's camera is looked through by moving the editor's view to it.** The editor holds a
+  level's cameras off while it is edited, draws each as the shape of what it sees and writes them
+  on, and Look through camera puts the editor's view where one is. The view takes the camera's
+  place and not its lens, so a camera with another field of view shows a little more or less than
+  it will. A picture in a corner from the camera itself would show it exactly.
 - **The editor reports each of a game's state-scoped systems as never running.** The project's
   scripts are loaded once the editor runs, so the states they declare are not added, and each
   system scoped to one says so in the console at every load. True, and not news in an editor that

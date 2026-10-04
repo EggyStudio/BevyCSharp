@@ -3293,8 +3293,8 @@ public partial struct Boot
 
 The level is loaded by the program rather than by a script, since the editor runs a project's
 scripts while the level is edited and a level loading itself there would be a second one on top of
-the first. The game's camera is spawned on entering its menu for the same reason, since the editor
-never enters a game's states.
+the first. The game's camera is the level's, which the editor holds off while the level is edited
+and the game sees through from its first frame.
 
 ### The level
 
@@ -3305,8 +3305,8 @@ games/Courtyard/build-level.sh
 
 `build-level.sh` builds the level as a person would, one command at a time, so it can be built
 again. Cubes are renamed and colored as walls and spheres as coins, the runner's model is placed as
-an instance, the game's components are put on each, and the scene is saved and named the startup
-scene.
+an instance, a camera is placed behind it, the game's components are put on each, and the scene is
+saved and named the startup scene.
 
 ```bash
 c() { ./bcs command "$@" >/dev/null; }
@@ -3403,6 +3403,13 @@ and their components are put on the level's entities then and moved onto the new
 script is saved. Every row of the Settings tab, the project's own among them, is read and changed
 by `setting`, as in `setting "Project/Startup scene" levels/one.scene.json`, so a script can set
 up a project the way a person would.
+
+A level carries its cameras as it carries its lights. Spawn/Camera puts one where the editor is
+looking from, and each camera the level has is held off while it is edited, so it does not draw
+over the editor's view, and drawn as the shape of what it sees. Entity/Look through camera moves
+the editor's view to it and Entity/Move camera to the view moves it to the editor's, which is how
+one is placed. A save writes the cameras the editor held off as on, so Play and the game start
+from the level's camera, and one the level holds off of its own accord is written off.
 
 Two things it is built on belong to the library rather than to the editor, and any tool can use
 them.
@@ -3509,6 +3516,7 @@ and asks it things:
 ./bcs open --editor --offscreen        # the same, on a machine with no display
 ./bcs list                             # every command that app offers, with its parameters
 ./bcs command entity.set Cube Transform.Translation 0,2.5,0
+./bcs command entity.set Cube Transform.Rotation -30,45,0    # degrees, as the inspector shows them
 ./bcs command input.click 1450 700
 ./bcs command input.keydown W          # held until input.keyup W, for a game walking while it is
 ./bcs command frames.wait 5

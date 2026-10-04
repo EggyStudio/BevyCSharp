@@ -46,7 +46,8 @@ public static class EditorScene
     public static int Save(EcsWorld world, string path)
     {
         ArgumentNullException.ThrowIfNull(world);
-        return SceneFile.Save(world, path, entity => InScene(world, entity), giveIds: true);
+        // With the level's cameras on, as the game runs them, rather than as the editor holds them.
+        return LevelCameras.Saving(world, () => SceneFile.Save(world, path, entity => InScene(world, entity), giveIds: true));
     }
 
     /// <summary>Takes away the scene that is there and spawns the one in a file.</summary>

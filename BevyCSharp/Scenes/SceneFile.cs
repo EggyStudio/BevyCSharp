@@ -570,6 +570,14 @@ public static class SceneFile
         return new SceneLoad(spawned, [.. unknown], refused);
     }
 
+    /// <summary>Bevy's components read after the rest of an entity's, for what Bevy checks as they arrive.</summary>
+    /// <remarks>
+    /// A camera's settings warn the moment they are added unless the entity already says what kind
+    /// of camera it is, and the kind (<c>Camera3d</c>) brings the settings with it, so read second
+    /// they are written over the ones it brought and nothing is warned of.
+    /// </remarks>
+    private static readonly HashSet<string> InsertedLast = new(StringComparer.Ordinal) { "bevy_camera::camera::Camera" };
+
     /// <summary>
     /// Puts the components a component object names on an entity, keeping on it what cannot be read.
     /// </summary>
@@ -587,7 +595,7 @@ public static class SceneFile
         List<string> refused)
     {
         var kept = new SceneKept.Kept();
-        foreach (var component in components.EnumerateObject())
+        foreach (var component in components.EnumerateObject().OrderBy(component => InsertedLast.Contains(component.Name) ? 1 : 0))
         {
             var schema = ComponentSchemas.For(component.Name);
 

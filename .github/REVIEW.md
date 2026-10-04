@@ -8,31 +8,25 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `f147adc`. States declared on their enum and kept across a script's reload
-(`16c4c1e`), a game played with no display (`e5d3c78`) and Courtyard (`f147adc`) are settled, on
-the play script the workflow runs and the entries the game added to TODO.md, which were read.
+Reviewed up to `99ec076`, bodies and colliders as components a level holds, which settles item 1
+of the last list on the play script still reaching its win.
 
 ## Now
 
 What Courtyard turned up, in the order it hurt. Each item ends with the game changed to use it
 and `play.sh` still reaching its win.
 
-1. **A body and a collider are components a scene holds** (TODO.md, Physics). The level's walls,
-   coins and ground carry markers that scripts turn into bodies on every frame of play. The
-   plugin makes a body when an entity has the two components, keeps it in step, and removes it
-   with them, the inspector shows and edits them with the collider drawn as a gizmo, and
-   Courtyard's level holds its bodies with the markers and the script that reads them gone.
-2. **A level carries its camera** (TODO.md, The editor). The editor holds a scene's cameras
+1. **A level carries its camera** (TODO.md, The editor). The editor holds a scene's cameras
    inactive while it edits, draws each as a gizmo, looks through one on request, and offers one
    in the Spawn menu, and Play starts from the level's. Courtyard's camera moves from its script
    into its level.
-3. **A message after a load** (TODO.md, Scenes), so a game builds what a save does not hold once,
+2. **A message after a load** (TODO.md, Scenes), so a game builds what a save does not hold once,
    where it reads the message, and Courtyard stops checking every frame.
-4. **A key held for a number of frames**, as one command inside the app, so `play.sh` steers at
+3. **A key held for a number of frames**, as one command inside the app, so `play.sh` steers at
    full speed.
-5. **The smaller two**: the editor says once that a game's states are not entered while editing,
+4. **The smaller two**: the editor says once that a game's states are not entered while editing,
    and `entity.get` prints a name and a visibility class as values.
-6. **Gamepads** wait on the owner (decision 2).
+5. **Gamepads** wait on the owner (decision 2).
 
 ## Verdicts
 

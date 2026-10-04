@@ -187,6 +187,17 @@ public partial struct FlyCamera
     /// </remarks>
     public static bool LevelWanted { get; set; }
 
+    /// <summary>
+    /// Set by anything asking the camera to stand where a transform is and look the way it looks,
+    /// as looking through one of the level's cameras does.
+    /// </summary>
+    /// <remarks>
+    /// A request, as <see cref="FrameWanted"/> is, taken as a yaw and a pitch so the next mouse
+    /// movement turns on from there. A roll the transform has is dropped, since this camera keeps
+    /// its horizon level.
+    /// </remarks>
+    public static Transform? ViewWanted { get; set; }
+
     /// <summary>Reads the mouse and keyboard and moves the camera.</summary>
     [OnUpdate]
     public void Steer(BehaviorContext ctx)
@@ -287,6 +298,18 @@ public partial struct FlyCamera
 
             PivotDistance = size;
             position = target - (Forward * size);
+            moved = true;
+        }
+
+        if (ViewWanted is { } view)
+        {
+            ViewWanted = null;
+
+            var forward = view.Rotation * new Vec3(0f, 0f, -1f);
+            Pitch = Math.Clamp(MathF.Asin(Math.Clamp(forward.Y, -1f, 1f)), -PitchLimit, PitchLimit);
+            Yaw = MathF.Atan2(-forward.X, -forward.Z);
+            position = view.Translation;
+            _velocity = Vec3.Zero;
             moved = true;
         }
 

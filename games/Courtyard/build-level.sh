@@ -78,5 +78,13 @@ c entity.add Runner Runner
 c entity.add Runner Wallet
 c entity.add Runner SaveId
 
+# The camera, behind and above where the runner starts, looking down at it, which the game's
+# Follow keeps doing as the runner moves. The editor holds it off while the level is edited.
+c do Spawn/Camera
+c entity.rename Camera "Follow camera"
+c entity.set "Follow camera" Transform.Translation "0,7.8,16"
+c entity.set "Follow camera" Transform.Rotation "-42,0,0"
+c entity.add "Follow camera" Follow
+
 c world.save levels/courtyard.scene.json
 c setting "Project/Startup scene" levels/courtyard.scene.json

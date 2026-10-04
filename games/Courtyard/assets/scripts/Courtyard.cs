@@ -162,27 +162,16 @@ public partial struct Runner
     }
 }
 
-/// <summary>The camera, which follows the runner from behind and above.</summary>
+/// <summary>The level's camera, which follows the runner from behind and above.</summary>
 [Behavior]
 public partial struct Follow
 {
-    /// <summary>Spawns the game's camera as the menu opens.</summary>
+    /// <summary>Keeps the runner in view while playing.</summary>
     /// <remarks>
-    /// On entering the menu rather than at startup, since the editor loads these scripts while a
-    /// level is edited and never enters the game's states, so a camera spawned at startup would
-    /// draw over the editor's view and be saved into the level.
+    /// Only while playing, since the editor runs this script while the level is edited and the
+    /// camera stays where the level put it there, which is also where the menu shows it.
     /// </remarks>
-    [OnEnter(Mode.Menu)]
-    public static void Spawn(BehaviorContext ctx)
-    {
-        var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 55f });
-        ctx.Ecs.SetName(camera, "Follow camera");
-        ctx.Ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 9f, 12f), Vec3.Zero, Vec3.UnitY));
-        ctx.Ecs.Add(camera, new Follow());
-    }
-
-    /// <summary>Keeps the runner in view.</summary>
-    [OnUpdate]
+    [OnUpdate, InState(Mode.Playing)]
     public void Keep(BehaviorContext ctx)
     {
         foreach (var row in ctx.Ecs.Query<Runner>(markChanged: false))

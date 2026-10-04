@@ -126,7 +126,8 @@ internal static class ConsoleWorldCommands
     /// <remarks>
     /// <para>
     /// The value is read into whatever the field already holds, so a number goes in as a number and
-    /// a name of an enum goes in as that enum. Three numbers separated by commas make a vector.
+    /// a name of an enum goes in as that enum. Three numbers separated by commas make a vector, and a
+    /// rotation is the three angles in degrees the inspector shows or a quaternion's four numbers.
     /// </para>
     /// <para>
     /// The component is the longest name on the entity that the argument starts with, and the rest
@@ -688,6 +689,7 @@ internal static class ConsoleWorldCommands
             _ => null,
         },
         Vec3 => Vector(value),
+        Quat => Rotation(value),
         float => float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var f)
             ? f
             : null,
@@ -721,6 +723,39 @@ internal static class ConsoleWorldCommands
         }
 
         return new Vec3(numbers[0], numbers[1], numbers[2]);
+    }
+
+    /// <summary>
+    /// A rotation, as the three angles in degrees the inspector shows for it or as the four numbers
+    /// of a quaternion, x, y, z and w.
+    /// </summary>
+    /// <remarks>
+    /// The angles as the inspector turns them (<see cref="Quat.FromEuler"/>), so a rotation read off
+    /// the panel can be typed back. A quaternion is made whole, so four numbers rounded to a few
+    /// places still name a rotation.
+    /// </remarks>
+    private static object? Rotation(string value)
+    {
+        var parts = value.Trim('(', ')', ' ').Split(',', StringSplitOptions.TrimEntries);
+        if (parts.Length is not (3 or 4)) return null;
+
+        var numbers = new float[parts.Length];
+        for (var index = 0; index < parts.Length; index++)
+        {
+            if (!float.TryParse(parts[index], NumberStyles.Float, CultureInfo.InvariantCulture, out numbers[index]))
+                return null;
+        }
+
+        if (parts.Length == 3)
+        {
+            const float Radians = MathF.PI / 180f;
+            return Quat.FromEuler(numbers[0] * Radians, numbers[1] * Radians, numbers[2] * Radians);
+        }
+
+        var length = MathF.Sqrt(numbers.Sum(n => n * n));
+        if (length < 1e-6f) return null;
+
+        return new Quat(numbers[0] / length, numbers[1] / length, numbers[2] / length, numbers[3] / length);
     }
 
     /// <summary>Anything else that knows how to become itself from a string.</summary>

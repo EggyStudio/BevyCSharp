@@ -58,6 +58,11 @@ public partial struct ViewportGizmos
         Ground(ctx);
         Colliders(ctx);
 
+        // Before the frame is drawn, so a camera the level gained this frame never draws over the
+        // editor's view.
+        LevelCameras.Hold(ctx.Ecs);
+        LevelCameras.Draw(ctx.Ecs);
+
         if (!EditorSelection.Any) return;
 
         var entity = EditorSelection.Current;

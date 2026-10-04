@@ -427,6 +427,23 @@ public static class EditorCommands
             4,
             EditorIcons.Mesh);
 
+        // Where the editor is looking from, which is where a camera is usually wanted, and held off
+        // as every camera the level has is while it is edited.
+        EditorMenu.Command(
+            "Spawn/Camera",
+            static world =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings());
+                var view = EditorSelection.Camera.IsNone ? Transform.Identity : world.GetOrDefault<Transform>(EditorSelection.Camera);
+                world.Add(camera, view with { Scale = Vec3.One });
+
+                var called = Unused(world, "Camera");
+                world.SetName(camera, called);
+                Finish(world, camera, called);
+            },
+            5,
+            EditorIcons.Camera);
+
         EditorMenu.Command(
             "Spawn/Light/Point",
             static world => Light(world, "Point light", LightKind.Point, 100_000f),
@@ -494,6 +511,20 @@ public static class EditorCommands
             EditorIcons.Add,
             "Ctrl+D",
             static () => EditorSelection.Any);
+
+        EditorMenu.Command(
+            "Entity/Look through camera",
+            static world => LevelCameras.LookThrough(world, EditorSelection.Current),
+            2,
+            EditorIcons.Camera,
+            enabled: static () => EditorSelection.Any && LevelCameras.IsLevelCamera(EditorShell.Ecs, EditorSelection.Current));
+
+        EditorMenu.Command(
+            "Entity/Move camera to the view",
+            static world => LevelCameras.MoveToView(world, EditorSelection.Current),
+            2,
+            EditorIcons.Camera,
+            enabled: static () => EditorSelection.Any && LevelCameras.IsLevelCamera(EditorShell.Ecs, EditorSelection.Current));
 
         EditorMenu.Separator("Entity/-", 3);
 
