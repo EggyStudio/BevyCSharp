@@ -48,7 +48,7 @@ vertex_colors	can
 wireframe	can
 irradiance_volumes	can	needs Bevy's irradiance volume asset
 meshlet	can	needs a bridge built with --meshlet
-mesh_ray_cast	can	casts through Picking, which the editor profile carries
+mesh_ray_cast	can
 lightmaps	can	through Bevy's reflected Lightmap and a material's LightmapExposure
 reflection_probes	can
 visibility_range	can	through Bevy's reflected VisibilityRange
