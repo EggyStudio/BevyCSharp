@@ -4,13 +4,13 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**170 written, 9 written in part, 86 can be written, 98 missing and 58 do not apply.** Of the 363 that apply, 265 can be written with what is bridged, 9 of them leaving something out.
+**174 written, 11 written in part, 80 can be written, 98 missing and 58 do not apply.** Of the 363 that apply, 265 can be written with what is bridged, 11 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 21 | 1 | 0 | 6 | 1 |
 | [3D Rendering](#3d-rendering) | 53 | 5 | 0 | 9 | 0 |
-| [Animation](#animation) | 0 | 0 | 6 | 7 | 0 |
+| [Animation](#animation) | 4 | 2 | 0 | 7 | 0 |
 | [Application](#application) | 7 | 0 | 3 | 2 | 7 |
 | [Assets](#assets) | 8 | 1 | 1 | 2 | 5 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **170** | **9** | **86** | **98** | **58** |
+| **All** | **174** | **11** | **80** | **98** | **58** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. Where Bevy's site runs the example in a browser, the row links it live, which is Bevy's Rust original rather than the C# one here.
 
@@ -156,19 +156,19 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`animated_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animated_mesh.rs), [live in Bevy](https://bevy.org/examples/animation/animated-mesh/) | Plays an animation on a skinned glTF model of a fox | can be written |
-| [`animated_mesh_control`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animated_mesh_control.rs), [live in Bevy](https://bevy.org/examples/animation/animated-mesh-control/) | Plays an animation from a skinned glTF with keyboard controls | can be written |
+| [`animated_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animated_mesh.rs), [live in Bevy](https://bevy.org/examples/animation/animated-mesh/) | Plays an animation on a skinned glTF model of a fox | [written](../BevyCSharp.Examples/animation/animated_mesh.cs) |
+| [`animated_mesh_control`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animated_mesh_control.rs), [live in Bevy](https://bevy.org/examples/animation/animated-mesh-control/) | Plays an animation from a skinned glTF with keyboard controls | [written](../BevyCSharp.Examples/animation/animated_mesh_control.cs) |
 | [`animated_mesh_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animated_mesh_events.rs), [live in Bevy](https://bevy.org/examples/animation/animated-mesh-events/) | Plays an animation from a skinned glTF with events | missing, events placed on an animation clip |
 | [`animated_transform`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animated_transform.rs), [live in Bevy](https://bevy.org/examples/animation/animated-transform/) | Create and play an animation defined by code that operates on the `Transform` component | missing, animation clips built in code (AnimationClip with curves) |
 | [`animated_ui`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animated_ui.rs), [live in Bevy](https://bevy.org/examples/animation/animated-ui/) | Shows how to use animation clips to animate UI properties | missing, animation clips built in code that drive interface properties |
 | [`animation_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animation_events.rs), [live in Bevy](https://bevy.org/examples/animation/animation-events/) | Demonstrate how to use animation events | missing, events placed on an animation clip |
 | [`animation_graph`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animation_graph.rs), [live in Bevy](https://bevy.org/examples/animation/animation-graph/) | Blends multiple animations together with a graph | missing, animation graphs that blend clips by weight |
 | [`animation_masks`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animation_masks.rs), [live in Bevy](https://bevy.org/examples/animation/animation-masks/) | Demonstrates animation masks | missing, animation masks on a graph |
-| [`color_animation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/color_animation.rs), [live in Bevy](https://bevy.org/examples/animation/color-animation/) | Demonstrates how to animate colors using mixing and splines in different color spaces | can be written, mixing and splines over colors, written with the managed math |
+| [`color_animation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/color_animation.rs), [live in Bevy](https://bevy.org/examples/animation/color-animation/) | Demonstrates how to animate colors using mixing and splines in different color spaces | [written](../BevyCSharp.Examples/animation/color_animation.cs), the conversions between color spaces written in the example as Bevy writes them, since Bevy's colors are its own types |
 | [`custom_skinned_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/custom_skinned_mesh.rs), [live in Bevy](https://bevy.org/examples/animation/custom-skinned-mesh/) | Skinned mesh example with mesh and joints data defined in code | missing, skinned meshes built in code (joints and weights) |
-| [`eased_motion`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/eased_motion.rs), [live in Bevy](https://bevy.org/examples/animation/eased-motion/) | Demonstrates the application of easing curves to animate an object | can be written |
-| [`easing_functions`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/easing_functions.rs), [live in Bevy](https://bevy.org/examples/animation/easing-functions/) | Showcases the built-in easing functions | can be written |
-| [`morph_targets`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/morph_targets.rs), [live in Bevy](https://bevy.org/examples/animation/morph-targets/) | Plays an animation from a glTF file with meshes with morph targets | can be written, through Bevy's reflected MorphWeights |
+| [`eased_motion`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/eased_motion.rs), [live in Bevy](https://bevy.org/examples/animation/eased-motion/) | Demonstrates the application of easing curves to animate an object | [written in part](../BevyCSharp.Examples/animation/eased_motion.cs), the animation clip made of the two curves, which is animation built in code; the curves are sampled each frame instead |
+| [`easing_functions`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/easing_functions.rs), [live in Bevy](https://bevy.org/examples/animation/easing-functions/) | Showcases the built-in easing functions | [written](../BevyCSharp.Examples/animation/easing_functions.cs), Bevy's easing functions written in the examples' Ease as bevy_math writes them |
+| [`morph_targets`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/morph_targets.rs), [live in Bevy](https://bevy.org/examples/animation/morph-targets/) | Plays an animation from a glTF file with meshes with morph targets | [written in part](../BevyCSharp.Examples/animation/morph_targets.cs), the names of each mesh's morph targets, printed as it arrives, which no call reads |
 
 ## Application
 

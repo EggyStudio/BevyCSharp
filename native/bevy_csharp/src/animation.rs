@@ -290,7 +290,8 @@ pub unsafe extern "C" fn bcs_animation_clips(root: u64, out: *mut u8, capacity: 
 
 /// Plays a scene's clip by its number, fading whatever played before out over `blend` seconds.
 ///
-/// `repeat` non-zero plays it over and over, zero once, ending on its last pose. `speed` scales
+/// `repeat` one plays it over and over, zero once, ending on its last pose, and two or more that
+/// many times, ending on its last pose after the last. `speed` scales
 /// time, one being as it was made and a negative number playing it backwards. A clip played again
 /// while it plays starts over.
 #[unsafe(no_mangle)]
@@ -313,8 +314,14 @@ pub extern "C" fn bcs_animation_play(root: u64, clip: i32, repeat: i32, speed: f
                 let active = transitions.play(player, node, fade);
                 active.set_speed(speed);
 
-                if repeat != 0 {
-                    active.repeat();
+                match repeat {
+                    1 => {
+                        active.repeat();
+                    }
+                    times if times >= 2 => {
+                        active.set_repeat(bevy::animation::RepeatAnimation::Count(times as u32));
+                    }
+                    _ => {}
                 }
 
                 animator.playing = Some(clip as usize);
@@ -403,6 +410,43 @@ pub extern "C" fn bcs_animation_adjust(root: u64, seconds: f32, speed: f32) -> i
                     active.set_speed(speed);
                 }
 
+                status::OK
+            })
+        }
+    })
+}
+
+/// Changes how many times the clip playing on a scene plays, without starting it over: `0` for
+/// ever, and one or more that many times, counting the plays it has finished.
+///
+/// [`status::INVALID_STATE`] when nothing is playing.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_animation_set_repeat(root: u64, times: u32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (root, times);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::animation::RepeatAnimation;
+
+            with_animator(root, |animator, player, _| {
+                let Some(clip) = animator.playing else {
+                    return status::INVALID_STATE;
+                };
+                let Some(active) = player.animation_mut(animator.nodes[clip]) else {
+                    return status::INVALID_STATE;
+                };
+
+                active.set_repeat(match times {
+                    0 => RepeatAnimation::Forever,
+                    1 => RepeatAnimation::Never,
+                    times => RepeatAnimation::Count(times),
+                });
+                animator.reported = false;
                 status::OK
             })
         }

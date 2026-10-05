@@ -1,3 +1,4 @@
+using BevyCSharp.Examples.Animations;
 using BevyCSharp.Examples.Application;
 using BevyCSharp.Examples.Assets;
 using BevyCSharp.Examples.AsyncTasks;
@@ -111,6 +112,14 @@ internal static class Catalog
         new("pcss", Pcss.Build),
         new("orthographic", Orthographic.Build),
         new("parenting", Parenting.Build),
+
+        // Animation
+        new("animated_mesh", AnimatedMesh.Build),
+        new("animated_mesh_control", AnimatedMeshControl.Build),
+        new("color_animation", ColorAnimation.Build),
+        new("eased_motion", EasedMotion.Build),
+        new("easing_functions", EasingFunctions.Build),
+        new("morph_targets", MorphTargets.Build),
 
         // Application
         new("empty", Empty.Build, Prints: 1),

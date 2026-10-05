@@ -127,3 +127,4 @@ data/asset_no_extension
 models/AlienCake/alien.glb
 models/AlienCake/cakeBirthday.glb
 models/AlienCake/tile.glb
+models/animated/MorphStressTest.gltf

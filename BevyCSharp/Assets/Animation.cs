@@ -9,6 +9,16 @@ public sealed class AnimationSettings
     /// <summary>Whether it plays over and over, rather than once and holding its last pose.</summary>
     public bool Repeat { get; set; }
 
+    /// <summary>
+    /// How many times it plays before holding its last pose, where it does not repeat. Zero and one
+    /// are once.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's <c>RepeatAnimation::Count</c>, for a gesture made twice or a bell rung three times.
+    /// <see cref="Animation.SetRepeat"/> changes it while the clip plays, without starting it over.
+    /// </remarks>
+    public uint Times { get; set; }
+
     /// <summary>How fast, one being as it was made, two twice as fast, and below zero backwards.</summary>
     public float Speed { get; set; } = 1f;
 
@@ -117,7 +127,7 @@ public static unsafe class Animation
                 nameof(clip));
 
         Native.Check(
-            Native.bcs_animation_play(scene.Bits, index, settings.Repeat ? 1 : 0, settings.Speed, settings.Blend),
+            Native.bcs_animation_play(scene.Bits, index, settings.Repeat ? 1 : settings.Times >= 2 ? (int)settings.Times : 0, settings.Speed, settings.Blend),
             $"playing {clip} on {scene}");
 
         return true;
@@ -139,6 +149,17 @@ public static unsafe class Animation
         ArgumentOutOfRangeException.ThrowIfNegative(seconds);
         Act(Native.bcs_animation_adjust(scene.Bits, seconds, float.NaN), "seeking", scene);
     }
+
+    /// <summary>
+    /// Changes how many times the clip playing plays, counting those it has finished, without
+    /// starting it over: zero for ever, one for once.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's <c>set_repeat</c>. A clip that has already played more times than asked stops at the
+    /// end of the play it is in.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">Nothing is playing, or the entity has no scene.</exception>
+    public static void SetRepeat(Entity scene, uint times) => Act(Native.bcs_animation_set_repeat(scene.Bits, times), "changing how many times the clip plays on", scene);
 
     /// <summary>Changes how fast the clip a model is playing goes.</summary>
     /// <exception cref="BevyNativeException">Nothing is playing, or the model has not arrived.</exception>

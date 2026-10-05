@@ -131,6 +131,47 @@ public sealed class AnimationTests
         Assert.Equal("Bend", ended.Clip);
     }
 
+    /// <summary>
+    /// A clip played a number of times finishes after that many plays and says so once, and one
+    /// set to play for ever while it plays goes on past where it would have ended.
+    /// </summary>
+    [SkippableFact]
+    public void AClipPlaysTheTimesItIsGivenOrForEverWhenSetSo()
+    {
+        Needs.Renderer();
+
+        var scene = Entity.None;
+        var finished = new List<AnimationFinished>();
+        AnimationState? counted = null, forever = null;
+
+        var run = new PictureRun
+        {
+            Scene = ecs => scene = Spawn(ecs),
+            EachFrame = world =>
+            {
+                foreach (var message in world.Resource<MessageBus>().Read<AnimationFinished>()) finished.Add(message);
+            },
+        };
+
+        run.Until("the clips arrive", world => Animation.TryClips(scene, out _))
+            .Do("bending three times, fast", _ => Animation.Play(scene, "Bend", new AnimationSettings { Times = 3, Speed = 8f }))
+            .Until("the bends end", _ => finished.Count > 0)
+            .Do("reading it", _ => counted = Animation.StateOf(scene))
+            .Do("bending again, then for ever", _ =>
+            {
+                Animation.Play(scene, "Bend", new AnimationSettings { Speed = 8f });
+                Animation.SetRepeat(scene, 0);
+            })
+            .Wait(120)
+            .Do("reading it again", _ => forever = Animation.StateOf(scene))
+            .Go();
+
+        Assert.Single(finished);
+        Assert.Equal(3u, counted!.Value.Completions);
+        Assert.False(forever!.Value.Finished);
+        Assert.True(forever.Value.Completions >= 2, $"the clip set to play for ever played {forever.Value.Completions} times");
+    }
+
     /// <summary>An entity no scene was spawned under has nothing to animate.</summary>
     [SkippableFact]
     public void AnEntityWithNoSceneIsRefused()

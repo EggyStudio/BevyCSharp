@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 190;
+    internal const int ExpectedAbiVersion = 191;
 
     static Native() => NativeLoader.Initialize();
 
@@ -1500,6 +1500,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_animation_stop(ulong root);
+
+    /// <summary>Changes how many times the playing clip plays.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_set_repeat(ulong root, uint times);
 
     /// <summary>Holds or lets go of every clip on a scene.</summary>
     [LibraryImport(Library)]

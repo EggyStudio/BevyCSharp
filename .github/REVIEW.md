@@ -97,3 +97,9 @@ None open.
   three. `embedded_asset` carries its picture as a resource of the examples' assembly, which is how
   a C# game carries its assets, `extra_asset_source` names a source through `Config.AssetSources`,
   and `custom_asset` reads its files with code of its own, as a C# game reads its own formats.
+- Item 1, animation. The six animation rows are written, `eased_motion` and `morph_targets` in part,
+  the first for want of a clip made of curves and the second of a mesh's morph target names.
+  `AnimationSettings.Times` plays a clip a number of times and `Animation.SetRepeat` changes that as
+  it plays, which `animated_mesh_control` needed, with a test. `color_animation` and
+  `easing_functions` write Bevy's color conversions and easing functions in the examples, since
+  they are Bevy's math rather than anything the bridge reaches.

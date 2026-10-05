@@ -33,6 +33,7 @@ the most examples, and the largest is taken between groups of examples. The coun
   their atlases, strikethrough and underline, and text background colors.
 - **Animation built in code, seven examples.** Clips made from curves, events placed on a clip,
   graphs that blend clips by weight and their masks, and skinned meshes built joint by joint.
+  `eased_motion` is written in part without them, its curves sampled each frame.
 - **What Bevy's WGSL reaches and a Slang shader does not, three examples.** A Slang shader is lit
   by Bevy through `bcs::light` and `bcs::finish`, and draws in the forward pass. `ssr`'s water draws
   into Bevy's deferred buffers, which needs a Slang material to write them, and `clustered_decals`
@@ -85,7 +86,7 @@ the most examples, and the largest is taken between groups of examples. The coun
   changed in place by a later system and read the same frame, where a C# message is read the frame
   after it is sent (`message`).
 
-Nine examples are written in part, each leaving out a feature named in its row.
+Eleven examples are written in part, each leaving out a feature named in its row.
 
 - **Extruded and line meshes**, which `3d_shapes` leaves out of its rows: Bevy's segment and
   polyline, and the extrusion of a 2D shape, solid or as a ring. `MeshShape` builds the solids and
@@ -108,6 +109,10 @@ Nine examples are written in part, each leaving out a feature named in its row.
 - **A folder loaded at once**, which `asset_loading` loads its models without. Bevy's
   `load_folder` answers one asset holding a handle to each file in a folder, loaded in parallel,
   which the asset server here would need a call for, answering the handles it holds.
+- **A mesh's morph target names**, which `morph_targets` prints in Bevy as each mesh arrives. A
+  call reading a mesh's `morph_target_names` would answer them.
+- **An animation clip made in code**, which `eased_motion` plays its curves with in Bevy, as the
+  entry above on animation built in code says.
 - **A canceled touch**, which `touch_input` never prints, since the touches the frame reports are
   those that started, moved and ended, and Bevy's own set of canceled ones is left out.
 - **Alpha to coverage**, which `transparency_3d`'s left cube is drawn without, blending instead.

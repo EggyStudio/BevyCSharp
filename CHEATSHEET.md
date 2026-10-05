@@ -704,6 +704,7 @@ static void Stop(Entity scene);                                 // Stops every c
 static void Pause(Entity scene);                                // Holds what a model is playing where it is
 static void Resume(Entity scene);                               // Lets what a model is playing go on from where it was held
 static void Seek(Entity scene, float seconds);                  // Moves the clip a model is playing to a time from its start
+static void SetRepeat(Entity scene, uint times);                // Changes how many times the clip playing plays, counting those it has finished, without starting it over: zero for ever, one for once
 static void SetSpeed(Entity scene, float speed);                // Changes how fast the clip a model is playing goes
 static AnimationState? StateOf(Entity scene);                   // What a model is playing, or nothing while it has not arrived
 ```
