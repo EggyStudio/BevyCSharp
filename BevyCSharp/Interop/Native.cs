@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 191;
+    internal const int ExpectedAbiVersion = 192;
 
     static Native() => NativeLoader.Initialize();
 
@@ -224,6 +224,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_window_size(uint* width, uint* height);
+
+    /// <summary>Writes the primary window's entity.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_entity(ulong* entity);
 
     /// <summary>Switches between windowed and borderless fullscreen.</summary>
     [LibraryImport(Library)]
@@ -1314,6 +1319,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_timings(byte* output, int capacity);
 
+    /// <summary>Writes how many pipelines the renderer is still compiling.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_pipelines_waiting(uint* waiting);
+
     /// <summary>Makes an empty geometry pool, writing its three buffer keys.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -1598,6 +1608,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_asset_load_state(int handle);
+
+    /// <summary>Reports how far along a load is, counting everything the asset depends on.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_asset_load_state_with_dependencies(int handle);
 
     /// <summary>Reports whether the engine is still holding a handle.</summary>
     [LibraryImport(Library)]

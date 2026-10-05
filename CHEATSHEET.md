@@ -637,6 +637,7 @@ static AssetHandle LoadGltfScene(string path, int scene = 0);   // Starts loadin
 static string PathOf(AssetHandle handle);                       // The path an asset was loaded from, or null when it has none
 static AssetHandle Load(string kind, string path);              // Starts loading an asset and returns a handle to it
 static AssetLoadState StateOf(AssetHandle handle);              // How far along an asset's load is
+static AssetLoadState StateWithDependenciesOf(AssetHandle handle);  // How far along an asset's load is, counting everything it depends on
 static bool IsAlive(AssetHandle handle);                        // True when the engine is still holding this handle
 static bool Release(AssetHandle handle);                        // Releases a handle
 ```
@@ -755,6 +756,7 @@ static bool WriteMaterial(AssetHandle material, MaterialSettings settings);  // 
 static void SetMesh(EcsWorld world, Entity entity, AssetHandle mesh);  // Gives an entity a mesh to draw
 static void SetMaterial(EcsWorld world, Entity entity, AssetHandle material);  // Gives an entity a material to draw its mesh with
 static IReadOnlyList<PassTiming> Timings();                     // How long each render pass took, smoothed over the last frames, where the app asked for it with GpuTimings
+static bool PipelinesReady();                                   // True once the renderer has compiled every pipeline it was asked for, so whatever has been spawned can be drawn
 static void SetRayTracedLighting(Entity camera, bool on);       // Lights a camera with Bevy's ray tracing, or with false the usual way again
 static void SetRayTraced(Entity entity, AssetHandle mesh);      // Makes an entity's mesh one the rays of ray-traced lighting meet
 static AssetHandle CreateMeshletMesh(AssetHandle mesh, uint quantization = 0, string saveTo = null);  // Starts cutting a mesh into clusters that Bevy's meshlet renderer culls and picks a level of detail for on the GPU, and answers the meshlet mesh at once
@@ -1274,6 +1276,7 @@ The guide's page is [window.md](https://github.com/EggyStudio/BevyCSharp/blob/ma
 static void SetTitle(string title);                             // Sets the window's title
 static void SetSize(uint width, uint height);                   // Resizes the window, in logical pixels
 static (uint Width, uint Height) Size();                        // The window's current size, in logical pixels
+static Entity Entity();                                         // The primary window's entity, or None where there is no window
 static float Scale();                                           // How many physical pixels a logical one is
 static void SetMode(WindowMode mode);                           // Sets how the window fills the screen
 static void SetPosition(int x, int y);                          // Moves the window, in physical pixels from the desktop's top-left corner

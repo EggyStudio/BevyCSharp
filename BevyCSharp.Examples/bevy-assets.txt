@@ -128,3 +128,6 @@ models/AlienCake/alien.glb
 models/AlienCake/cakeBirthday.glb
 models/AlienCake/tile.glb
 models/animated/MorphStressTest.gltf
+textures/Game Icons/right.png
+textures/Game Icons/wrench.png
+textures/Game Icons/exitRight.png

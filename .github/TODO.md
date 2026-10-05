@@ -86,7 +86,7 @@ the most examples, and the largest is taken between groups of examples. The coun
   changed in place by a later system and read the same frame, where a C# message is read the frame
   after it is sent (`message`).
 
-Eleven examples are written in part, each leaving out a feature named in its row.
+Twelve examples are written in part, each leaving out a feature named in its row.
 
 - **Extruded and line meshes**, which `3d_shapes` leaves out of its rows: Bevy's segment and
   polyline, and the extrusion of a 2D shape, solid or as a ring. `MeshShape` builds the solids and
@@ -115,6 +115,10 @@ Eleven examples are written in part, each leaving out a feature named in its row
   entry above on animation built in code says.
 - **A canceled touch**, which `touch_input` never prints, since the touches the frame reports are
   those that started, moved and ended, and Bevy's own set of canceled ones is left out.
+- **Stepping through the systems one at a time**, which `breakout` adds in Bevy as a panel that
+  pauses its schedule and runs the next system on a key, and which `system_stepping` shows alone.
+  Bevy's `Stepping` resource works on a schedule's systems by their ids, and the bridge would need
+  to add it and say which system is the one a C# delegate runs as.
 - **Alpha to coverage**, which `transparency_3d`'s left cube is drawn without, blending instead.
   `AlphaMode` has Bevy's other modes, and this one needs the multisampled target it resolves
   against.

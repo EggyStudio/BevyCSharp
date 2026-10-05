@@ -44,6 +44,8 @@ grep -qs "SpawnCamera2d" BevyCSharp.Examples/*/"$example.cs" && flat=true
 
 # Examples that show something only once they are given input are driven here, by name.
 case "$example" in
+  # A level, which the screen loads once 1 is pressed.
+  loading_screen) ./bcs command input.hold Digit1 2 --quiet ;;
   *) ;;
 esac
 
@@ -51,6 +53,10 @@ esac
 # fall or fade in is given longer by name.
 frames=120
 case "$example" in
+  # A cake that first appears after five seconds.
+  alien_cake_addict) frames=420 ;;
+  # A contributor brought forward every three seconds.
+  contributors) frames=240 ;;
   # Exposure that adapts as an eye does, which takes its time to settle.
   auto_exposure) frames=900 ;;
   # Decals stamped one a second, which take some seconds to be more than one.

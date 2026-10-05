@@ -73,6 +73,31 @@ public sealed class OffscreenTests : IDisposable
     }
 
     /// <summary>A run with no renderer draws nothing, and says so rather than pretending.</summary>
+    /// <summary>
+    /// A camera spawned while the run goes on draws into the run's image as one spawned at startup
+    /// does. Bevy sizes a camera's target when the camera is added, and one added pointing at the
+    /// window an offscreen run lacks was otherwise never sized again once pointed at the image.
+    /// </summary>
+    [SkippableFact]
+    public void ACameraSpawnedLateDrawsAsOneSpawnedAtStartup()
+    {
+        Needs.Renderer();
+
+        var run = new PictureRun();
+        run.Wait(5)
+            .Do("spawning a camera", world =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (1f, 0f, 0f, 1f) });
+                new BehaviorContext(world).Ecs.Add(camera, Transform.Identity);
+            })
+            .Wait(10)
+            .Capture("late")
+            .Go();
+
+        var picture = run.Picture("late");
+        Assert.True(PictureRun.Count(picture, (r, g, b) => r > 200 && g < 60 && b < 60) > picture.Width * picture.Height * 9 / 10, "the camera spawned late drew nothing");
+    }
+
     [Fact]
     public void AHeadlessRunHasNothingToCapture()
     {

@@ -124,6 +124,7 @@ pub struct OffscreenTarget {
 fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
     use bevy::asset::Assets;
     use bevy::camera::{Camera, RenderTarget};
+    use bevy::ecs::change_detection::DetectChangesMut;
     use bevy::ecs::query::With;
     use bevy::ecs::system::{Commands, Query, Res, ResMut};
     use bevy::image::Image;
@@ -145,12 +146,12 @@ fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
     app.add_systems(
         First,
         |target: Option<Res<OffscreenTarget>>,
-         mut cameras: Query<&mut RenderTarget, With<Camera>>| {
+         mut cameras: Query<(&mut RenderTarget, &mut bevy::camera::Projection), With<Camera>>| {
             let Some(target) = target else {
                 return;
             };
 
-            for mut render_target in &mut cameras {
+            for (mut render_target, mut projection) in &mut cameras {
                 // Read through the shared borrow, so a camera that is already pointed at the image
                 // is not marked changed by the asking, every frame, for the life of the run.
                 let current: &RenderTarget = &render_target;
@@ -159,6 +160,14 @@ fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
                 }
 
                 *render_target = RenderTarget::Image(target.image.clone().into());
+
+                // Bevy works out a camera's target size when the camera is added or its
+                // projection changes, and not when its target does. A camera spawned at startup
+                // is pointed here before that first look, but one spawned while the run goes on
+                // was added pointing at a window that is not there, found nothing to size, and
+                // would draw nothing for the rest of the run. Marking the projection changed has
+                // the target looked at again.
+                projection.set_changed();
             }
         },
     );

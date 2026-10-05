@@ -32,6 +32,7 @@ pub mod material;
 pub mod materials2d;
 pub mod meshlets;
 pub mod passes;
+pub mod pipelines;
 pub mod pools;
 pub mod post;
 pub mod probes;

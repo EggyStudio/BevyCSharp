@@ -214,9 +214,9 @@ system_piping	n/a	pipes Rust system outputs
 system_stepping	missing	stepping through systems one at a time
 no_std_library	n/a	a Rust library for no_std targets
 alien_cake_addict	can
-breakout	can
-contributors	can
-desk_toy	can
+breakout	part	the helper that steps through the systems one at a time, which is system_stepping, missing here
+contributors	can	its birds hold a place in a list for the name, since a component here holds no string
+desk_toy	can	through Bevy's reflected CursorOptions on Window.Entity for the pointer passing through
 game_menu	can
 loading_screen	can
 2d_gizmos	can

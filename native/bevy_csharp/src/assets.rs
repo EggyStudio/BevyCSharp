@@ -424,6 +424,36 @@ pub extern "C" fn bcs_asset_load_state(handle: i32) -> i32 {
     })
 }
 
+/// Reports how far along a load is counting everything the asset depends on, the meshes,
+/// materials and textures of a glTF scene among them, which `bcs_asset_load_state` does not. A
+/// scene is spawned as soon as its own file is read, and its textures arrive later, so waiting for
+/// this is waiting until it can be seen whole. The values are those of `load_state`.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_asset_load_state_with_dependencies(handle: i32) -> i32 {
+    crate::interop::guard(|| {
+        use bevy::asset::RecursiveDependencyLoadState as State;
+
+        with_world_opt(|world| {
+            let Some(id) = world.get_resource::<AssetHandles>().and_then(|handles| handles.get(handle)).map(|h| h.id()) else {
+                return load_state::UNKNOWN;
+            };
+            let Some(server) = world.get_resource::<AssetServer>() else {
+                return load_state::UNKNOWN;
+            };
+
+            match server.get_recursive_dependency_load_state(id) {
+                Some(State::NotLoaded) => load_state::NOT_LOADED,
+                Some(State::Loading) => load_state::LOADING,
+                Some(State::Loaded) => load_state::LOADED,
+                Some(State::Failed(_)) => load_state::FAILED,
+                // Built in memory, so there is nothing for it to wait on, as above.
+                None => load_state::LOADED,
+            }
+        })
+        .unwrap_or(load_state::UNKNOWN)
+    })
+}
+
 /// Reports whether a handle still names something this app is holding.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_asset_is_valid(handle: i32) -> i32 {

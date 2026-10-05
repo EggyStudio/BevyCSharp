@@ -677,6 +677,34 @@ public static unsafe class Render
     }
 
     /// <summary>
+    /// True once the renderer has compiled every pipeline it was asked for, so whatever has been
+    /// spawned can be drawn. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy compiles a pipeline the first time something needs it, over several frames and away
+    /// from the main thread, and draws nothing with it until then. A loaded asset is therefore not
+    /// yet a visible one, and a loading screen that should come down only when the level can be
+    /// seen waits for this as well as for
+    /// <see cref="AssetServer.StateWithDependenciesOf(AssetHandle)"/>, and for some frames of both
+    /// together, since a pipeline asked for late starts the count again.
+    /// </para>
+    /// <para>
+    /// False before the first frame has been drawn, when nothing is known yet, and in a headless
+    /// build, which compiles nothing because it draws nothing.
+    /// </para>
+    /// </remarks>
+    public static bool PipelinesReady()
+    {
+        if (!App.HasRenderer) return false;
+        uint waiting;
+        var status = Native.bcs_render_pipelines_waiting(&waiting);
+        if (status == NativeStatus.NotPresent) return false;
+        Native.Check(status, "Render.PipelinesReady");
+        return waiting == 0;
+    }
+
+    /// <summary>
     /// Whether Bevy's ray-traced lighting is running, meaning the bridge was built with it
     /// (<c>--solari</c>), the app asked for it with <see cref="Config.RayTracedLighting"/>, and the
     /// adapter traces rays.

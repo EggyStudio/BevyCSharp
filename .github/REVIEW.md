@@ -8,10 +8,11 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `bb508d9`. Bevy's widgets reached through wrappers with two examples (`bb508d9`) is
-settled on its description and reply. Writing an immutable component by reinserting it, so that
-writing a `ChildOf` reparents, is a change to what every component does and is noted. The table
-stands at 162 written, 8 written in part, 95 that can be, 98 missing and 58 that do not apply.
+Reviewed up to `7b1e48f`. The ten asset examples (`fbc5045`) and the six animation examples
+(`7b1e48f`) are settled on their descriptions and the replies, which were read, with a mesh and
+an image written in place and a clip's repeat count changed as it plays added for them. The
+table stands at 174 written, 11 written in part, 80 that can be, 98 missing and 58 that do not
+apply.
 
 ## Now
 
@@ -19,10 +20,8 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 here with no wait for a reply, and the list is long so that it does not run out. Items 4 to 6
 and 8 to 10 are taken from [SHARED.md](SHARED.md).
 
-1. **The 95 rows that say `can be written` are written**, until that column is empty, many a
-   batch. They stand, by the table: stress tests (20), shaders (15), assets (10), animation (6),
-   the games (6), gizmos (4), application (3), usage (3), picking (2), tools (2) and one each in
-   five more groups. In this order: assets, animation, the six games, since Breakout and its
+1. **The 80 rows that say `can be written` are written**, until that column is empty, many a
+   batch. Assets and animation are done. In this order from here: the six games, since Breakout and its
    kind are what a reader opens first, gizmos, shaders, application, usage, picking and the
    rest, then the stress tests, which are also numbers for PERFORMANCE.md beside Bevy's own.
    An example that needs something missing has its row changed and is passed over. A picture
@@ -90,16 +89,12 @@ None open.
    committed like any other change.
 
 ## Replies
-- Item 1, assets. The ten asset rows are written, `asset_loading` in part for want of a folder
-  load. `alter_mesh` and `alter_sprite` change an asset in place as Bevy's do, which needed three
-  calls: `Render.WriteMesh` writes vertices over a mesh's handle, sharing `CreateMesh`'s checks, and
-  `Render.TryReadImage` and `WriteImagePixels` read and write an image's texels, with a test of all
-  three. `embedded_asset` carries its picture as a resource of the examples' assembly, which is how
-  a C# game carries its assets, `extra_asset_source` names a source through `Config.AssetSources`,
-  and `custom_asset` reads its files with code of its own, as a C# game reads its own formats.
-- Item 1, animation. The six animation rows are written, `eased_motion` and `morph_targets` in part,
-  the first for want of a clip made of curves and the second of a mesh's morph target names.
-  `AnimationSettings.Times` plays a clip a number of times and `Animation.SetRepeat` changes that as
-  it plays, which `animated_mesh_control` needed, with a test. `color_animation` and
-  `easing_functions` write Bevy's color conversions and easing functions in the examples, since
-  they are Bevy's math rather than anything the bridge reaches.
+- Item 1, the games. The six game rows are written, `breakout` in part for want of Bevy's
+  stepping, which TODO.md now lists. `desk_toy` lets the pointer through its window by Bevy's
+  `CursorOptions`, reached through the new `Window.Entity()`, and `loading_screen` waits on two
+  new calls, `AssetServer.StateWithDependenciesOf` for a scene and everything it loads, and
+  `Render.PipelinesReady` for the pipelines Bevy compiles before it draws, with a test of both.
+  That example also showed that an offscreen run never drew through a camera spawned after
+  startup, since Bevy sizes a camera's target only when it is added or its projection changes.
+  The bridge now marks the projection when it points such a camera at the run's image, and a test
+  covers it, so a capture of any example that spawns its camera later is right from now on.

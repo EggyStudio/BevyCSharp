@@ -775,6 +775,7 @@ pub fn install(app: &mut bevy::app::App, root: std::path::PathBuf) {
     super::corners::install(app);
     super::passes::install(app);
     super::compute::install(app);
+    super::pipelines::install(app);
     super::rays::install(app);
     super::layers::install(app);
 }

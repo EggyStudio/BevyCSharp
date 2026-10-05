@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**174 written, 11 written in part, 80 can be written, 98 missing and 58 do not apply.** Of the 363 that apply, 265 can be written with what is bridged, 11 of them leaving something out.
+**179 written, 12 written in part, 74 can be written, 98 missing and 58 do not apply.** Of the 363 that apply, 265 can be written with what is bridged, 12 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
@@ -20,7 +20,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Diagnostics](#diagnostics) | 0 | 0 | 1 | 2 | 0 |
 | [ECS (Entity Component System)](#ecs-entity-component-system) | 14 | 0 | 1 | 11 | 9 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |
-| [Games](#games) | 0 | 0 | 6 | 0 | 0 |
+| [Games](#games) | 5 | 1 | 0 | 0 | 0 |
 | [Gizmos](#gizmos) | 4 | 0 | 4 | 1 | 0 |
 | [Helpers](#helpers) | 0 | 0 | 0 | 0 | 1 |
 | [Input](#input) | 6 | 1 | 0 | 5 | 0 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **174** | **11** | **80** | **98** | **58** |
+| **All** | **179** | **12** | **74** | **98** | **58** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. Where Bevy's site runs the example in a browser, the row links it live, which is Bevy's Rust original rather than the C# one here.
 
@@ -317,12 +317,12 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`alien_cake_addict`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/showcase/alien_cake_addict.rs), [live in Bevy](https://bevy.org/examples/games/alien-cake-addict/) | Eat the cakes. Eat them all. An example 3D game | can be written |
-| [`breakout`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/showcase/breakout.rs), [live in Bevy](https://bevy.org/examples/games/breakout/) | An implementation of the classic game "Breakout". | can be written |
-| [`contributors`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/showcase/contributors.rs), [live in Bevy](https://bevy.org/examples/games/contributors/) | Displays each contributor as a bouncy bevy-ball! | can be written |
-| [`desk_toy`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/showcase/desk_toy.rs) | Bevy logo as a desk toy using transparent windows! Now with Googly Eyes! | can be written |
-| [`game_menu`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/showcase/game_menu.rs), [live in Bevy](https://bevy.org/examples/games/game-menu/) | A simple game menu | can be written |
-| [`loading_screen`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/showcase/loading_screen.rs), [live in Bevy](https://bevy.org/examples/games/loading-screen/) | Demonstrates how to create a loading screen that waits for all assets to be loaded and render pipelines to be compiled. | can be written |
+| [`alien_cake_addict`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/showcase/alien_cake_addict.rs), [live in Bevy](https://bevy.org/examples/games/alien-cake-addict/) | Eat the cakes. Eat them all. An example 3D game | [written](../BevyCSharp.Examples/games/alien_cake_addict.cs) |
+| [`breakout`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/showcase/breakout.rs), [live in Bevy](https://bevy.org/examples/games/breakout/) | An implementation of the classic game "Breakout". | [written in part](../BevyCSharp.Examples/games/breakout.cs), the helper that steps through the systems one at a time, which is system_stepping, missing here |
+| [`contributors`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/showcase/contributors.rs), [live in Bevy](https://bevy.org/examples/games/contributors/) | Displays each contributor as a bouncy bevy-ball! | [written](../BevyCSharp.Examples/games/contributors.cs), its birds hold a place in a list for the name, since a component here holds no string |
+| [`desk_toy`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/showcase/desk_toy.rs) | Bevy logo as a desk toy using transparent windows! Now with Googly Eyes! | [written](../BevyCSharp.Examples/games/desk_toy.cs), through Bevy's reflected CursorOptions on Window.Entity for the pointer passing through |
+| [`game_menu`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/showcase/game_menu.rs), [live in Bevy](https://bevy.org/examples/games/game-menu/) | A simple game menu | [written](../BevyCSharp.Examples/games/game_menu.cs) |
+| [`loading_screen`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/showcase/loading_screen.rs), [live in Bevy](https://bevy.org/examples/games/loading-screen/) | Demonstrates how to create a loading screen that waits for all assets to be loaded and render pipelines to be compiled. | [written](../BevyCSharp.Examples/games/loading_screen.cs) |
 
 ## Gizmos
 

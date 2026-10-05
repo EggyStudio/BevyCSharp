@@ -131,6 +131,43 @@ pub unsafe extern "C" fn bcs_window_scale(scale: *mut f32) -> i32 {
     })
 }
 
+/// Writes the primary window's entity, so the components Bevy keeps on it, such as its
+/// `CursorOptions` and its `Window`, can be read and written by reflection.
+///
+/// The entry points here cover what a game commonly changes, and a field none of them reaches,
+/// such as whether the pointer passes through the window, is still on the entity. An offscreen
+/// run draws into an image and has no window entity, and says so.
+///
+/// # Safety
+/// `out` must be writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_window_entity(out: *mut u64) -> i32 {
+    crate::interop::guard(|| {
+        if out.is_null() {
+            return status::NULL_ARG;
+        }
+
+        #[cfg(not(feature = "render"))]
+        {
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_world(|world| {
+                let mut query = world.query_filtered::<bevy::ecs::entity::Entity, With<PrimaryWindow>>();
+                match query.single(world) {
+                    Ok(entity) => {
+                        unsafe { out.write(entity.to_bits()) };
+                        status::OK
+                    }
+                    Err(_) => status::NOT_PRESENT,
+                }
+            })
+        }
+    })
+}
+
 /// Writes the window's current size, in logical pixels.
 ///
 /// The size the window ended up at, which is not always the size that was asked for, because a

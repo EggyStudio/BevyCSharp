@@ -5,6 +5,7 @@ using BevyCSharp.Examples.AsyncTasks;
 using BevyCSharp.Examples.Cameras;
 using BevyCSharp.Examples.Clocks;
 using BevyCSharp.Examples.Ecs;
+using BevyCSharp.Examples.Games;
 using BevyCSharp.Examples.Gizmo;
 using BevyCSharp.Examples.Inputs;
 using BevyCSharp.Examples.Interface;
@@ -172,6 +173,14 @@ internal static class Catalog
         new("run_conditions", RunConditions.Build, Prints: 160),
         new("startup_system", StartupSystem.Build, Prints: 1),
         new("system_closure", SystemClosure.Build, Prints: 3),
+
+        // Games
+        new("alien_cake_addict", AlienCakeAddict.Build),
+        new("breakout", Breakout.Build),
+        new("contributors", Contributors.Build),
+        new("desk_toy", DeskToy.Build, DeskToy.Configure),
+        new("game_menu", GameMenu.Build),
+        new("loading_screen", LoadingScreen.Build),
 
         // Gizmos
         new("2d_text_gizmos", TextGizmos2d.Build),

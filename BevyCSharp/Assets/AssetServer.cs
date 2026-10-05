@@ -434,6 +434,21 @@ public static unsafe class AssetServer
             ? (AssetLoadState)Native.bcs_asset_load_state(handle.Key)
             : AssetLoadState.Unknown;
 
+    /// <summary>
+    /// How far along an asset's load is, counting everything it depends on.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="StateOf"/> answers for the asset's own file, and a glTF scene is
+    /// <see cref="AssetLoadState.Loaded"/> by that as soon as the file is read, while its meshes,
+    /// materials and textures are still on their way. This waits for those too, and fails when
+    /// any of them fails, so a loading screen asks this to know a scene can be shown whole. An
+    /// asset made in memory has nothing to wait on and answers loaded.
+    /// </remarks>
+    public static AssetLoadState StateWithDependenciesOf(AssetHandle handle) =>
+        handle.IsValid
+            ? (AssetLoadState)Native.bcs_asset_load_state_with_dependencies(handle.Key)
+            : AssetLoadState.Unknown;
+
     /// <summary>True when the engine is still holding this handle.</summary>
     public static bool IsAlive(AssetHandle handle) =>
         handle.IsValid && Native.bcs_asset_is_valid(handle.Key) > 0;

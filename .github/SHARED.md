@@ -136,11 +136,15 @@ table also answers whether the two agree.
 | Behaviors registered by a module initializer the generator writes, so a game published trimmed or as native AOT keeps them | has | has (`425ffc31`), with Pusher published native |
 | A game published as native AOT and run by CI | to take | has (`458cd909`) |
 | Whole pictures compared with checked-in references, a small share of pixels allowed to differ between devices | to take, for the examples' captures | has (`771f10e9`, `fd5bcc84`) |
+| Seven games of different kinds built from the package, the later ones finding nothing new | has one, Courtyard | has (`games/`, to `7a8360ae`) |
 | A game written in behaviors alone, with hundreds of entities, played by CI and profiled | to take | has (`games/Swarm`, `3c9c7ac8`) |
 | A game played for minutes by a script while memory, GPU objects and entity ids are read, a count that keeps climbing failing the run | to take | has (`build/soak.sh`, `044d2396`) |
 | Every loader given a missing, an empty, a cut short and a random file, answering with a message and no exception, as one table in a test | to take | has (`BadFileTests`, `3442e2cd`) |
 | A window resized, minimized and moved by commands while it draws, as a storm the workflow runs | to consider, the window being Bevy's | has (`build/storm.sh`, `b0d835c4`) |
 | The public surface listed in a checked-in file a tool writes from the built assembly, a test failing when they differ | to take | has (`PublicApi.txt`, `fc5aef49`) |
+| Every public member documented, an undocumented one failing the build, the documentation carried in the package | to check | has (`a4b2785c`) |
+| A template package, so `dotnet new` starts a game | to take | has (`3DEngine.Templates`, `ec7e6c3c`) |
+| A test that opens the packed package and finds everything it should hold, natives for each system among it | to take | has (`PackageContentsTests`, `760b8206`) |
 | The package's release notes written from the commits since the version was last set | to take | has (`fc5aef49`) |
 | A small game built from the packed package and played by CI | has (`f147adc`) | has (`377576c4`) |
 | The README's first program followed in a clean container by CI | has (`8ff919c`) | has (`e98e93a1`) |

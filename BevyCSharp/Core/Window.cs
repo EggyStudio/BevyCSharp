@@ -197,6 +197,35 @@ public static unsafe class Window
     }
 
     /// <summary>
+    /// The primary window's entity, or <see cref="Bevy.Entity.None"/> where there is no window.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The calls on this class cover what a game commonly changes about its window. Everything
+    /// else Bevy keeps on the window's entity, in its <c>Window</c> and <c>CursorOptions</c>
+    /// components, and is reached through their wrappers on this entity, such as whether the
+    /// pointer passes through the window to whatever is behind it:
+    /// </para>
+    /// <code>
+    /// ecs.Wrap&lt;CursorOptionsRef&gt;(Window.Entity()).HitTest = false;
+    /// </code>
+    /// <para>
+    /// An offscreen run draws into an image and has no window entity, so this answers
+    /// <see cref="Bevy.Entity.None"/> there rather than throwing, and a wrapper on it reads as
+    /// absent. A headless build throws, as every call here does.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">This build has no window.</exception>
+    public static Entity Entity()
+    {
+        ulong bits;
+        var status = Native.bcs_window_entity(&bits);
+        if (status == NativeStatus.NotPresent) return Bevy.Entity.None;
+        Native.Check(status, "Window.Entity");
+        return new Entity(bits);
+    }
+
+    /// <summary>
     /// How many physical pixels a logical one is.
     /// </summary>
     /// <remarks>
