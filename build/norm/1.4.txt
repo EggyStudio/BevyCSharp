@@ -83,7 +83,7 @@ BevyCSharp.Tests/MeshletTests.cs
 BevyCSharp.Tests/MessageTests.cs
 BevyCSharp.Tests/NativeComponentTests.cs
 BevyCSharp.Tests/NativeInputLayoutTests.cs
-BevyCSharp.Tests/NormTests.cs
+BevyCSharp.Tests/NormTests.cs	the norm's own class, at the root as N 1.4 has it
 BevyCSharp.Tests/ObserverTests.cs
 BevyCSharp.Tests/OffscreenTests.cs
 BevyCSharp.Tests/OtherComponentTests.cs

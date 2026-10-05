@@ -94,6 +94,7 @@ Stop any serving session before running the suite.
 | `BevyCSharp.Sample` | A rotating cube from behavior scripts, run with a window or headless |
 | `BevyCSharp.Tests` | The test suite, run on real engines through `EngineHarness` |
 | `build/cheatsheet` | Writes CHEATSHEET.md from the built library |
+| `docs` | The guide for somebody using the engine, a page an area, which the README links |
 | `games/Courtyard` | A game built from the packed package, which the workflow plays |
 | `games/Stress` | The engine under load, for the measurements of PERFORMANCE.md |
 

@@ -89,7 +89,9 @@ public sealed class NormTests
     {
         var areas = LibraryFolders().Select(folder => folder["BevyCSharp/".Length..]).ToHashSet(StringComparer.Ordinal);
         // What the tests share, a harness or a helper with no test of its own, is at the project's
-        // root, so only a file holding a test is placed by the area it tests.
+        // root, so only a file holding a test is placed by the area it tests. A test of what is no
+        // area of the library, in a folder named for what it tests, and this class at the root are
+        // found here too, and listed with that reason.
         var found = Sources("BevyCSharp.Tests/", ".cs")
             .Where(file => !file.StartsWith("BevyCSharp.Tests/assets/", StringComparison.Ordinal))
             .Where(file => Regex.IsMatch(File.ReadAllText(Full(file)), @"^\s*\[(Skippable)?(Fact|Theory)\b", RegexOptions.Multiline))
@@ -106,13 +108,18 @@ public sealed class NormTests
             .Select(match => match.Groups[1].Value.TrimEnd('/'))
             .ToList();
 
-        var projects = Sources("", ".csproj")
-            .Select(file => Path.GetDirectoryName(file)!.Replace('\\', '/'))
-            .Where(folder => folder != "BevyCSharp")
-            .Append("native/bevy_csharp");
-        var found = projects.Concat(LibraryFolders())
-            .Where(thing => !rows.Any(row => row == thing || row.StartsWith(thing + "/", StringComparison.Ordinal)));
-        Hold("1.5", found, "a project or a folder of the library with no row in AGENTS.md's table of areas");
+        // Each top folder of the repository, the hidden ones apart, and each top folder of the
+        // library in place of the library's own. A project is in a top folder, so the folder's row
+        // is the project's.
+        var folders = Files()
+            .Where(file => file.Contains('/') && !file.StartsWith('.') && !file.StartsWith("BevyCSharp/", StringComparison.Ordinal))
+            .Select(file => file[..file.IndexOf('/')])
+            .Concat(LibraryFolders())
+            .Distinct(StringComparer.Ordinal);
+
+        // A folder is named by a row of its own or by a row for a folder within it.
+        var found = folders.Where(folder => !rows.Any(row => row == folder || row.StartsWith(folder + "/", StringComparison.Ordinal)));
+        Hold("1.5", found, "a top folder of the repository or of the library with no row in AGENTS.md's table of areas");
     }
 
     [Fact]
@@ -340,9 +347,10 @@ public sealed class NormTests
                 return words.Where(word => text.Contains(word, StringComparison.Ordinal)).Select(word => $"{file} {word}");
             });
 
-    /// <summary>The library's top folders that hold sources, as paths from the checkout.</summary>
+    /// <summary>The library's top folders, as paths from the checkout.</summary>
     private static IEnumerable<string> LibraryFolders() =>
-        Sources("BevyCSharp/", ".cs", ".tsv", ".props", ".targets")
+        Files()
+            .Where(file => file.StartsWith("BevyCSharp/", StringComparison.Ordinal))
             .Select(file => file.Split('/'))
             .Where(parts => parts.Length > 2)
             .Select(parts => $"BevyCSharp/{parts[1]}")
