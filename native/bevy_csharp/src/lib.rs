@@ -26,6 +26,10 @@
 //! [`ComponentDescriptor`]: bevy::ecs::component::ComponentDescriptor
 
 pub mod app;
+pub mod capabilities;
+pub mod component_registry;
+pub mod offscreen;
+pub mod systems;
 pub mod animation;
 pub mod audio;
 pub mod carried;

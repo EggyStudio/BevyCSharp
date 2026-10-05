@@ -2,12 +2,12 @@
 # A place a line, then a tab and why where that helps. The list only gets shorter, a place coming
 # off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
 
-native/bevy_csharp/src/app.rs bcs_abi_version	answers a constant or a flag and cannot panic
-native/bevy_csharp/src/app.rs bcs_has_editor	answers a constant or a flag and cannot panic
-native/bevy_csharp/src/app.rs bcs_has_embedded_assets	answers a constant or a flag and cannot panic
-native/bevy_csharp/src/app.rs bcs_has_interface	answers a constant or a flag and cannot panic
-native/bevy_csharp/src/app.rs bcs_has_render	answers a constant or a flag and cannot panic
-native/bevy_csharp/src/app.rs bcs_is_main_thread	answers a constant or a flag and cannot panic
+native/bevy_csharp/src/capabilities.rs bcs_abi_version	answers a constant or a flag and cannot panic
+native/bevy_csharp/src/capabilities.rs bcs_has_editor	answers a constant or a flag and cannot panic
+native/bevy_csharp/src/capabilities.rs bcs_has_embedded_assets	answers a constant or a flag and cannot panic
+native/bevy_csharp/src/capabilities.rs bcs_has_interface	answers a constant or a flag and cannot panic
+native/bevy_csharp/src/capabilities.rs bcs_has_render	answers a constant or a flag and cannot panic
+native/bevy_csharp/src/capabilities.rs bcs_is_main_thread	answers a constant or a flag and cannot panic
 native/bevy_csharp/src/render/meshlets.rs bcs_render_meshlets_active	answers a constant or a flag and cannot panic
 native/bevy_csharp/src/render/shaders.rs bcs_shader_entity_program
 native/bevy_csharp/src/render/solari.rs bcs_render_ray_tracing_active	answers a constant or a flag and cannot panic
