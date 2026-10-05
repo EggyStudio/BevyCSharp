@@ -550,6 +550,12 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // exclusive system. Only registered here, because the plugin that draws them comes with
             // `DefaultPlugins`, so a windowless app has nothing to drain into.
             app.init_resource::<crate::gizmos::GizmoQueue>();
+
+            // Tab and Shift+Tab moving the input focus through an interface's fields and buttons in
+            // the order their `TabIndex` gives, within each `TabGroup`. Bevy leaves it out of its
+            // defaults, and an interface with text fields is hard to use without it; one that
+            // marks nothing with a tab index is unaffected.
+            app.add_plugins(bevy::input_focus::tab_navigation::TabNavigationPlugin);
             // Drained after everything has had its say, and explicitly after the managed `Last`
             // systems, because both live in `Last` and without the ordering the scheduler is free
             // to drain the queue before the frame has filled it, which holds every shape back a

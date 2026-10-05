@@ -361,7 +361,7 @@ directional_navigation	missing	directional navigation between interface nodes
 directional_navigation_overrides	missing	directional navigation between interface nodes
 display_and_visibility	can
 drag_to_scroll	missing	observers of the pointer dragging a scrolled node
-editable_text_filter	missing	Bevy's editable text (EditableText)
+editable_text_filter	can	the filter the characters the field takes, where Bevy's is a function of the example's own
 feathers_counter	missing	Bevy's Feathers widgets
 feathers_gallery	missing	Bevy's Feathers widgets
 flex_layout	can
@@ -375,10 +375,10 @@ gradients	can	through Bevy's reflected BackgroundGradient and BorderGradient
 grid	can
 image_node	can
 image_node_resizing	missing	Bevy's outlines of interface nodes for debugging, which the bridge does not build
-ime_support	missing	Bevy's editable text (EditableText)
+ime_support	missing	a system font chosen by its generic family, sans-serif
 letter_spacing	part	the underline under the heading
-multiline_text_input	missing	Bevy's editable text (EditableText)
-multiple_text_inputs	missing	Bevy's editable text (EditableText)
+multiline_text_input	missing	keys observed as they reach the focused field, Bevy's input as events
+multiple_text_inputs	missing	keys observed as they reach the focused field, Bevy's input as events
 overflow_clip_margin	can
 overflow_debug	can
 overflow	can
@@ -392,11 +392,11 @@ standard_widgets	missing	Bevy's core widgets (bevy_ui_widgets)
 standard_widgets_observers	missing	Bevy's core widgets (bevy_ui_widgets)
 strikethrough_and_underline	missing	strikethrough and underline on text
 system_fonts	missing	system fonts
-tab_navigation	missing	tab navigation between interface nodes
+tab_navigation	can	the clicks read from each node's interaction as its press begins, where Bevy observes the pointer's clicks
 text_background_colors	missing	text background colors
 text_debug	can
 text	missing	an underline and OpenType font features
-text_input	missing	Bevy's editable text (EditableText)
+text_input	can
 text_wrap_debug	can
 transparency_ui	can
 ui_drag_and_drop	missing	observers of the pointer dragging and dropping interface nodes

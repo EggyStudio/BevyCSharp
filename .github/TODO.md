@@ -24,13 +24,13 @@ names what the bridge lacks. Gathered by what they lack, these hold the most row
 the most examples, and the largest is taken between groups of examples. The counts come from
 `BevyCSharp.Examples/triage.tsv` and move as rows are written or found to be reachable.
 
-- **Interface widgets and text input, sixteen examples.** Bevy's editable text (five, `ime_support`
-  among them), its core widgets and widget helpers (four), Feathers (three), scrollbars, and
-  directional and tab navigation (three). Needs `EditableText` and the widget components spawned and
-  read, and the navigation resources.
-- **Fonts and text styling, nine examples.** Font weights, OpenType variations and features (`text`
-  among them), generic families and system fonts, querying fonts and their atlases, strikethrough
-  and underline, and text background colors.
+- **Bevy's widgets, eleven examples.** Its core widgets and widget helpers (four), Feathers (three),
+  scrollbars, and directional navigation (two). The widgets are built with the render profile and
+  Bevy's defaults add them, so what is left is their components reached from C#, which a fresh
+  description of Bevy's components gives wrappers for, and the navigation's resources.
+- **Fonts and text styling, ten examples.** Font weights, OpenType variations and features (`text`
+  among them), generic families and system fonts (`ime_support` among them), querying fonts and
+  their atlases, strikethrough and underline, and text background colors.
 - **Animation built in code, seven examples.** Clips made from curves, events placed on a clip,
   graphs that blend clips by weight and their masks, and skinned meshes built joint by joint.
 - **What Bevy's WGSL reaches and a Slang shader does not, three examples.** A Slang shader is lit
@@ -44,11 +44,12 @@ the most examples, and the largest is taken between groups of examples. The coun
   happened to. C# observers run for a game's own events and for a component's coming and going,
   and Bevy's `Pointer<Click>`, `Pointer<Over>`, `Pointer<Drag>` and the rest need the same bridge
   for events Bevy triggers, with each event's fields read into a C# struct.
-- **Input as events, five examples.** The keyboard, the mouse, touches and pads as Bevy's messages,
+- **Input as events, seven examples.** The keyboard, the mouse, touches and pads as Bevy's messages,
   one per change in the order they came, which `keyboard_input_events`, `mouse_input_events`,
-  `touch_input_events` and `gamepad_input_events` print, and logical keys as Bevy's
-  `ButtonInput<Key>`, which `keyboard_input` reads for the key that types '?'. `Input` holds each
-  frame's state, which tells what is down and what changed but not in what order.
+  `touch_input_events` and `gamepad_input_events` print, a key observed as it reaches the focused
+  text field, which `multiline_text_input` and `multiple_text_inputs` submit with, and logical keys
+  as Bevy's `ButtonInput<Key>`, which `keyboard_input` reads for the key that types '?'. `Input`
+  holds each frame's state, which tells what is down and what changed but not in what order.
 - **Bevy's math, three examples.** Its bounding volumes with their casts and intersection tests
   (`bounding_2d`), its cubic curves (`cubic_splines`), and points sampled inside and on its shapes
   (`random_sampling`), which the managed math, a transform and its vectors, does not have.

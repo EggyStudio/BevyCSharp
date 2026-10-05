@@ -29,7 +29,7 @@ namespace Bevy;
 /// Ui.SetText(hud, $"Score: {score}");
 /// </code>
 /// </example>
-public static unsafe class Ui
+public static unsafe partial class Ui
 {
     /// <summary>Spawns a rectangle and returns it.</summary>
     /// <exception cref="BevyNativeException">This build has no renderer.</exception>

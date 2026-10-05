@@ -163,6 +163,12 @@ render = [
     "bevy/bevy_text",
     "bevy/bevy_ui",
     "bevy/bevy_ui_render",
+    # Bevy's own widgets: its headless buttons, checkboxes, sliders, scroll bars and menus, and the
+    # editable text a text field is, which lives with them because typing into one is input a
+    # widget handles. They are added with the rest of Bevy's defaults. The interface's picking
+    # comes with them, since a click gives a field its focus and drags a slider.
+    "bevy/bevy_ui_widgets",
+    "bevy/ui_picking",
     "bevy/bevy_gizmos",
     "bevy/bevy_gizmos_render",
     # Sound. Unlike everything else here this needs a system library at build time: cpal, which

@@ -938,6 +938,7 @@ dependencies = [
  "bevy_ecs",
  "bevy_input",
  "bevy_math",
+ "bevy_picking",
  "bevy_reflect",
  "bevy_window",
  "log",
@@ -995,6 +996,7 @@ dependencies = [
  "bevy_transform",
  "bevy_ui",
  "bevy_ui_render",
+ "bevy_ui_widgets",
  "bevy_utils",
  "bevy_window",
  "bevy_winit",
@@ -1647,6 +1649,7 @@ dependencies = [
  "bevy_input_focus",
  "bevy_log",
  "bevy_math",
+ "bevy_picking",
  "bevy_platform",
  "bevy_reflect",
  "bevy_sprite",
@@ -1662,6 +1665,7 @@ dependencies = [
  "taffy",
  "thiserror 2.0.20",
  "tracing",
+ "uuid",
 ]
 
 [[package]]
@@ -1695,6 +1699,30 @@ dependencies = [
  "derive_more",
  "indexmap",
  "tracing",
+]
+
+[[package]]
+name = "bevy_ui_widgets"
+version = "0.19.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a71063099a056a010bdbbcc1f1daf2d50bff517d69d62e5334d4c32d7bf9e9e0"
+dependencies = [
+ "accesskit",
+ "bevy_a11y",
+ "bevy_app",
+ "bevy_camera",
+ "bevy_ecs",
+ "bevy_input",
+ "bevy_input_focus",
+ "bevy_log",
+ "bevy_math",
+ "bevy_picking",
+ "bevy_reflect",
+ "bevy_text",
+ "bevy_ui",
+ "bevy_window",
+ "parley",
+ "smol_str",
 ]
 
 [[package]]

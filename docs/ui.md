@@ -264,6 +264,25 @@ the pointer, so nothing behind it is hovered through it, and a plain node carrie
 update, which is why it is not the default. Asking a plain node is refused rather than answered
 `None`, since a button that quietly never fires is the harder mistake to find.
 
+A node becomes a text field the player types into with `Ui.SetEditableText`, Bevy's own editable
+text with its cursor, selection, copy and paste:
+
+```csharp
+var name = Ui.SpawnNode(new UiSettings { Width = Length.Px(240f), Padding = Sides.All(Length.Px(8f)) });
+Ui.SetEditableText(name, new UiEditableTextSettings { MaxCharacters = 16, Allowed = "abcdefghijklmnopqrstuvwxyz" });
+ctx.Ecs.Insert<AutoFocusRef>(name);                        // focused as it opens
+
+string? typed = Ui.EditableTextOf(name);                   // what it holds
+Ui.SetEditableValue(name, string.Empty);                    // cleared
+```
+
+Keys reach the field with the input focus, which a click on it gives it, Bevy's `AutoFocus` gives it
+as it is spawned, and Tab moves through a `TabGroup` by each field's or button's `TabIndex`. The
+focus itself is Bevy's `InputFocus` resource, `ctx.Ecs.Resource<InputFocusRef>()`. `Allowed` names
+the only characters a field takes, where Bevy's filter is a function of the game's own, and the
+field's font, size and wrapping are the node's `TextFont` and `TextLayout`. Bevy hands each key to
+the focused field through the primary window, so a field in an offscreen run takes no keys.
+
 ---
 
 Before this, [Gizmos](gizmos.md).

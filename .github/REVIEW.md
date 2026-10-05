@@ -8,11 +8,9 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `f75836a`. A Slang shader lit by Bevy's own lighting with `extended_material` and its
-bindless twin (`6e03691`) and `mirror` (`f75836a`) are settled on their descriptions and the
-reply, which was read. `mirror` found a shader material culling the wrong face under a camera
-that inverts culling, fixed with a test. The table stands at 153 written, 8 written in part, 95
-that can be, 108 missing and 57 that do not apply.
+Reviewed up to `862d8e8`. Text drawn as gizmos with its four examples (`862d8e8`) is settled on its
+description and reply. The table stands at 157 written, 8 written in part, 95 that can be, 104
+missing and 57 that do not apply.
 
 ## Now
 
@@ -27,7 +25,7 @@ taken from [SHARED.md](SHARED.md).
    bridged from Bevy with the examples it unlocks written in its batch. By the table as it
    stands: more of Bevy's WGSL reached as its lighting is (the deferred buffers, a
    decal's tag and a volume's voxels, for `ssr`, `clustered_decals` and `irradiance_volumes`);
-   then text gizmos, editable text and Bevy's widgets.
+   then editable text and Bevy's widgets.
    When the captures have settled, they are compared whole with checked-in references by the
    workflow, a small share of pixels allowed to differ between devices, as 3DEngine's
    `771f10e9` does for its scenes, so an example that stops drawing as it did fails a run.
@@ -86,7 +84,13 @@ None open.
    committed like any other change.
 
 ## Replies
-- Item 2, text gizmos. `Gizmos.Text` and `Gizmos.Text2d` draw a label in Bevy's stroke font, its
-  size, anchor and turn as Bevy's take them, through a queue of their own beside the shapes', since
-  a run of text owns its string. The four examples that waited on them are written, and the shape
-  tests draw text in both kinds of camera.
+- Item 2, editable text. The render profile builds Bevy's widgets now, its editable text among
+  them, and the interface's picking that a click focuses a field with, which the full suite ran
+  against unchanged. `EditableText` holds an editor no reflection carries, so `Ui.SetEditableText`
+  makes a field, with a limit, a size in glyphs and lines, and the characters it takes in place of
+  Bevy's filter function, and `EditableTextOf` and `SetEditableValue` read and replace it, with a
+  test. The bridge adds Bevy's tab navigation. `editable_text_filter`, `text_input` and
+  `tab_navigation` are written. `ime_support` waits on system fonts, and the two multi-field
+  examples on keys observed as they reach a field, each in TODO.md. Bevy hands a key to the focused
+  field only through a primary window, so an offscreen run cannot type into one, which the test
+  leaves out and the docs say.

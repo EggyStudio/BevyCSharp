@@ -412,6 +412,23 @@ public struct NativeSpriteConfig
     public int SliceTiling;
 }
 
+/// <summary>How a text field behaves. Mirrors <c>BcsEditableTextConfig</c>.</summary>
+[StructLayout(LayoutKind.Sequential)]
+public struct NativeEditableTextConfig
+{
+    /// <summary>The most characters it holds, or zero for no limit.</summary>
+    public int MaxCharacters;
+
+    /// <summary>How many glyphs wide, or zero for its node's width.</summary>
+    public float VisibleWidth;
+
+    /// <summary>How many lines tall, or zero for one.</summary>
+    public float VisibleLines;
+
+    /// <summary>Non-zero to let Enter start a new line.</summary>
+    public int AllowNewlines;
+}
+
 /// <summary>Where and how a run of gizmo text is drawn. Mirrors <c>BcsGizmoText</c>.</summary>
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct NativeGizmoText
