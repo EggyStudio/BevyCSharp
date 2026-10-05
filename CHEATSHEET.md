@@ -831,6 +831,7 @@ static void SetLayers(EcsWorld world, Entity entity, uint layers);  // Puts an e
 
 ```csharp
 static string Ring(string outline);                             // A flat band along the inside of another flat shape's outline, sized by that shape's measures and, third, how wide the band is
+static string Extrusion(string outline);                        // A flat shape pushed out into a solid along Z, sized by that shape's measures and, third, how deep it is, centered on its middle
 ```
 
 ### `Render2d`

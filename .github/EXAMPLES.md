@@ -4,14 +4,14 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**200 written, 12 written in part, 53 can be written, 98 missing and 58 do not apply.** Of the 363 that apply, 265 can be written with what is bridged, 12 of them leaving something out.
+**207 written, 12 written in part, 46 can be written, 98 missing and 58 do not apply.** Of the 363 that apply, 265 can be written with what is bridged, 12 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 21 | 1 | 0 | 6 | 1 |
 | [3D Rendering](#3d-rendering) | 53 | 5 | 0 | 9 | 0 |
 | [Animation](#animation) | 4 | 2 | 0 | 7 | 0 |
-| [Application](#application) | 7 | 0 | 3 | 2 | 7 |
+| [Application](#application) | 9 | 0 | 1 | 2 | 7 |
 | [Assets](#assets) | 9 | 1 | 0 | 2 | 5 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 |
 | [Audio](#audio) | 5 | 0 | 0 | 3 | 0 |
@@ -26,7 +26,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Input](#input) | 6 | 1 | 0 | 5 | 0 |
 | [Math](#math) | 1 | 0 | 0 | 4 | 1 |
 | [Movement](#movement) | 0 | 0 | 1 | 0 | 0 |
-| [Picking](#picking) | 0 | 0 | 2 | 3 | 1 |
+| [Picking](#picking) | 2 | 0 | 0 | 3 | 1 |
 | [Reflection](#reflection) | 0 | 0 | 0 | 0 | 9 |
 | [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 3 | 1 |
 | [Scene](#scene) | 0 | 0 | 1 | 1 | 0 |
@@ -38,11 +38,11 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Tools](#tools) | 0 | 0 | 2 | 0 | 0 |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 |
 | [UI (User Interface)](#ui-user-interface) | 31 | 1 | 0 | 28 | 0 |
-| [Usage](#usage) | 0 | 0 | 3 | 0 | 0 |
+| [Usage](#usage) | 3 | 0 | 0 | 0 | 0 |
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **200** | **12** | **53** | **98** | **58** |
+| **All** | **207** | **12** | **46** | **98** | **58** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. Where Bevy's site runs the example in a browser, the row links it live, which is Bevy's Rust original rather than the C# one here.
 
@@ -85,7 +85,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | Example | What it shows | State |
 |---|---|---|
 | [`3d_scene`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/3d_scene.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/3d-scene/) | Simple 3D scene with basic shapes and lighting | [written](../BevyCSharp.Examples/3d/3d_scene.cs) |
-| [`3d_shapes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/3d_shapes.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/3d-shapes/) | A scene showcasing the built-in 3D shapes | [written in part](../BevyCSharp.Examples/3d/3d_shapes.cs), the segment, the polyline and the extrusions, which are shapes the bridge does not build |
+| [`3d_shapes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/3d_shapes.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/3d-shapes/) | A scene showcasing the built-in 3D shapes | [written in part](../BevyCSharp.Examples/3d/3d_shapes.cs), the segment, the polyline, the convex polygon's extrusion and the extruded rings, which are shapes the bridge does not build |
 | [`3d_viewport_to_world`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/3d_viewport_to_world.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/3d-viewport-to-world/) | Demonstrates how to use the `Camera::viewport_to_world` method | [written](../BevyCSharp.Examples/3d/3d_viewport_to_world.cs) |
 | [`animated_material`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/animated_material.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/animated-material/) | Shows how to animate material properties | [written](../BevyCSharp.Examples/3d/animated_material.cs) |
 | [`anisotropy`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/anisotropy.rs) | Displays an example model with anisotropy | [written](../BevyCSharp.Examples/3d/anisotropy.cs) |
@@ -179,8 +179,8 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`empty`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/empty.rs) | An empty application (does nothing) | [written](../BevyCSharp.Examples/app/empty.cs), prints [its output](assets/examples/empty.txt) |
 | [`empty_defaults`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/empty_defaults.rs), [live in Bevy](https://bevy.org/examples/application/empty-defaults/) | An empty application with default plugins | [written](../BevyCSharp.Examples/app/empty_defaults.cs) |
 | [`externally_driven_headless_renderer`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/externally_driven_headless_renderer.rs) | Using bevy with manually driven update to render images | does not apply, drives Bevy's update from Rust code |
-| [`headless`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/headless.rs) | An application that runs without default plugins | can be written |
-| [`headless_renderer`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/headless_renderer.rs) | An application that runs with no window, but renders into image file | can be written |
+| [`headless`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/headless.rs) | An application that runs without default plugins | [written](../BevyCSharp.Examples/app/headless.cs), prints [its output](assets/examples/headless.txt), the second app stopped after three seconds, where Bevy's counts until it is stopped |
+| [`headless_renderer`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/headless_renderer.rs) | An application that runs with no window, but renders into image file | [written](../BevyCSharp.Examples/app/headless_renderer.cs), the offscreen picture captured, where Bevy copies the image out of the render world itself |
 | [`log_layers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/log_layers.rs) | Illustrate how to add custom log layers | does not apply, adds a tracing layer, written in Rust |
 | [`log_layers_ecs`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/log_layers_ecs.rs) | Illustrate how to transfer data between log layers and Bevy's ECS | does not apply, adds a tracing layer, written in Rust |
 | [`logs`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/logs.rs), [live in Bevy](https://bevy.org/examples/application/logs/) | Illustrate how to use generate log output | missing, Bevy's log written from C# at its levels, and a message logged once |
@@ -385,8 +385,8 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`custom_hit_data`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/custom_hit_data.rs), [live in Bevy](https://bevy.org/examples/picking/custom-hit-data/) | Demonstrates a custom picking backend with custom hit data. | does not apply, writes a Rust picking backend |
 | [`debug_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/debug_picking.rs), [live in Bevy](https://bevy.org/examples/picking/debug-picking/) | Demonstrates picking debug overlay | missing, Bevy's picking debug overlay |
 | [`dragdrop_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/dragdrop_picking.rs), [live in Bevy](https://bevy.org/examples/picking/dragdrop-picking/) | Demonstrates drag and drop using picking events | missing, drag and drop picking events |
-| [`mesh_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/mesh_picking.rs), [live in Bevy](https://bevy.org/examples/picking/mesh-picking/) | Demonstrates picking meshes | can be written, in the editor profile, which carries picking |
-| [`simple_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/simple_picking.rs), [live in Bevy](https://bevy.org/examples/picking/simple-picking/) | Demonstrates how to use picking events to spawn simple objects | can be written, in the editor profile, which carries picking |
+| [`mesh_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/mesh_picking.rs), [live in Bevy](https://bevy.org/examples/picking/mesh-picking/) | Demonstrates picking meshes | [written](../BevyCSharp.Examples/picking/mesh_picking.cs), in the editor profile, the shape under the pointer found by a ray cast each frame where Bevy observes pointer events |
+| [`simple_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/simple_picking.rs), [live in Bevy](https://bevy.org/examples/picking/simple-picking/) | Demonstrates how to use picking events to spawn simple objects | [written](../BevyCSharp.Examples/picking/simple_picking.cs), in the editor profile, a drag found by a ray cast as the button goes down where Bevy observes pointer events |
 | [`sprite_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/sprite_picking.rs), [live in Bevy](https://bevy.org/examples/picking/sprite-picking/) | Demonstrates picking sprites and sprite atlases | missing, picking sprites |
 
 ## Reflection
@@ -585,9 +585,9 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`context_menu`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/usage/context_menu.rs), [live in Bevy](https://bevy.org/examples/usage/context-menu/) | Example of a context menu | can be written |
-| [`cooldown`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/usage/cooldown.rs), [live in Bevy](https://bevy.org/examples/usage/cooldown/) | Example for cooldown on button clicks | can be written |
-| [`debug_frustum_culling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/usage/debug_frustum_culling.rs), [live in Bevy](https://bevy.org/examples/usage/debug-frustum-culling/) | Example demonstrating how to debug frustum culling | can be written |
+| [`context_menu`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/usage/context_menu.rs), [live in Bevy](https://bevy.org/examples/usage/context-menu/) | Example of a context menu | [written](../BevyCSharp.Examples/usage/context_menu.cs), its nodes' interactions read as they change, where Bevy observes its pointer events |
+| [`cooldown`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/usage/cooldown.rs), [live in Bevy](https://bevy.org/examples/usage/cooldown/) | Example for cooldown on button clicks | [written](../BevyCSharp.Examples/usage/cooldown.cs) |
+| [`debug_frustum_culling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/usage/debug_frustum_culling.rs), [live in Bevy](https://bevy.org/examples/usage/debug-frustum-culling/) | Example demonstrating how to debug frustum culling | [written](../BevyCSharp.Examples/usage/debug_frustum_culling.cs), each shape's box tested against the small camera's frustum, read through Bevy's reflected Frustum, where Bevy reads the camera's visible entities |
 
 ## Window
 

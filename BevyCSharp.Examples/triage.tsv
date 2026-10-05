@@ -8,7 +8,7 @@
 # the feature of Bevy's it leaves out.
 3d_scene	can
 rect_light	can	through Bevy's reflected RectLight
-3d_shapes	part	the segment, the polyline and the extrusions, which are shapes the bridge does not build
+3d_shapes	part	the segment, the polyline, the convex polygon's extrusion and the extruded rings, which are shapes the bridge does not build
 3d_viewport_to_world	can
 animated_material	can
 generate_custom_mesh	can
@@ -120,8 +120,8 @@ drag_and_drop	can
 empty	can
 empty_defaults	can
 externally_driven_headless_renderer	n/a	drives Bevy's update from Rust code
-headless	can
-headless_renderer	can
+headless	can	the second app stopped after three seconds, where Bevy's counts until it is stopped
+headless_renderer	can	the offscreen picture captured, where Bevy copies the image out of the render world itself
 log_layers_ecs	n/a	adds a tracing layer, written in Rust
 log_layers	n/a	adds a tracing layer, written in Rust
 logs	missing	Bevy's log written from C# at its levels, and a message logged once
@@ -273,8 +273,8 @@ test_skinned_mesh_bounds	n/a	a test of skinned mesh bounds, hidden from Bevy's l
 custom_hit_data	n/a	writes a Rust picking backend
 debug_picking	missing	Bevy's picking debug overlay
 dragdrop_picking	missing	drag and drop picking events
-mesh_picking	can	in the editor profile, which carries picking
-simple_picking	can	in the editor profile, which carries picking
+mesh_picking	can	in the editor profile, the shape under the pointer found by a ray cast each frame where Bevy observes pointer events
+simple_picking	can	in the editor profile, a drag found by a ray cast as the button goes down where Bevy observes pointer events
 sprite_picking	missing	picking sprites
 auto_register_static	n/a	about Rust reflection registration
 custom_attributes	n/a	about Rust reflection
@@ -413,9 +413,9 @@ viewport_node	missing	observers of the pointer dragging a mesh and the node that
 virtual_keyboard	missing	Bevy's Feathers widgets
 window_fallthrough	missing	letting the pointer pass through the window to what is behind it
 z_index	can	through Bevy's reflected ZIndex and GlobalZIndex
-context_menu	can
+context_menu	can	its nodes' interactions read as they change, where Bevy observes its pointer events
 cooldown	can
-debug_frustum_culling	can
+debug_frustum_culling	can	each shape's box tested against the small camera's frustum, read through Bevy's reflected Frustum, where Bevy reads the camera's visible entities
 clear_color	can
 custom_cursor_image	can	through Bevy's reflected CursorIcon, its image set as a reflected asset
 low_power	can

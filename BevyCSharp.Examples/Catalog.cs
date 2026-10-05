@@ -10,12 +10,14 @@ using BevyCSharp.Examples.Gizmo;
 using BevyCSharp.Examples.Inputs;
 using BevyCSharp.Examples.Interface;
 using BevyCSharp.Examples.Movement;
+using BevyCSharp.Examples.Pointers;
 using BevyCSharp.Examples.Shading;
 using BevyCSharp.Examples.Sound;
 using BevyCSharp.Examples.States;
 using BevyCSharp.Examples.ThreeD;
 using BevyCSharp.Examples.Transforms;
 using BevyCSharp.Examples.TwoD;
+using BevyCSharp.Examples.Usage;
 
 namespace BevyCSharp.Examples;
 
@@ -126,6 +128,8 @@ internal static class Catalog
         new("empty", Empty.Build, Prints: 1),
         new("drag_and_drop", DragAndDrop.Build),
         new("empty_defaults", EmptyDefaults.Build),
+        new("headless", Headless.Build, Prints: 1, Returned: Headless.Returned),
+        new("headless_renderer", HeadlessRenderer.Build, HeadlessRenderer.Configure),
         new("plugin", PluginExample.Build, Prints: 130),
         new("plugin_group", PluginGroupExample.Build, Prints: 3),
         new("return_after_run", ReturnAfterRun.Build, Prints: 3, Returned: ReturnAfterRun.Returned),
@@ -216,6 +220,10 @@ internal static class Catalog
         // Movement
         new("smooth_follow", SmoothFollow.Build),
 
+        // Picking
+        new("mesh_picking", MeshPicking.Build),
+        new("simple_picking", SimplePicking.Build),
+
         // State
         new("states", StatesExample.Build),
         new("sub_states", SubStates.Build),
@@ -279,6 +287,11 @@ internal static class Catalog
         new("ui_texture_slice_flip_and_tile", UiTextureSliceFlipAndTile.Build),
         new("vertical_slider", VerticalSlider.Build),
         new("z_index", ZIndex.Build),
+
+        // Usage
+        new("context_menu", ContextMenu.Build),
+        new("cooldown", Cooldown.Build),
+        new("debug_frustum_culling", DebugFrustumCulling.Build),
     ];
 
     public static bool TryFind(string name, out Example example)

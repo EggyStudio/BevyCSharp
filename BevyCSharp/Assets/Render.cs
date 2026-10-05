@@ -24,8 +24,8 @@ public static unsafe class Render
     /// Builds a mesh primitive and returns a handle to it.
     /// </summary>
     /// <param name="shape">
-    /// One of the constants on <see cref="MeshShape"/>, or a band around a flat one from
-    /// <see cref="MeshShape.Ring"/>.
+    /// One of the constants on <see cref="MeshShape"/>, a band around a flat one from
+    /// <see cref="MeshShape.Ring"/>, or a flat one made solid by <see cref="MeshShape.Extrusion"/>.
     /// </param>
     /// <param name="a">
     /// Width for a cuboid, plane or rectangle, radius for a sphere, capsule, cylinder, cone or
@@ -39,7 +39,8 @@ public static unsafe class Render
     /// </param>
     /// <param name="c">
     /// Depth for a cuboid, height for a conical frustum, the rings of a UV sphere from pole to pole,
-    /// and the band's width for a ring, whose first two numbers measure the shape it runs around.
+    /// the band's width for a ring and the depth of an extrusion, whose first two numbers measure
+    /// the flat shape they are made from.
     /// </param>
     /// <remarks>
     /// The shape and its measures are kept beside the handle (<see cref="RecipeOf"/>), so the mesh

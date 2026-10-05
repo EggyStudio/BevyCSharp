@@ -88,6 +88,23 @@ public static class MeshShape
     /// a circle is the same mesh an <see cref="Annulus"/> makes.
     /// </remarks>
     public static string Ring(string outline) => $"Ring({outline})";
+
+    /// <summary>
+    /// A flat shape pushed out into a solid along Z, sized by that shape's measures and, third,
+    /// how deep it is, centered on its middle.
+    /// </summary>
+    /// <param name="outline">
+    /// <see cref="Circle"/>, <see cref="Annulus"/>, <see cref="CircularSector"/>,
+    /// <see cref="CircularSegment"/>, <see cref="Ellipse"/>, <see cref="Capsule2d"/>,
+    /// <see cref="Rhombus"/>, <see cref="Rectangle"/>, <see cref="RegularPolygon"/> or
+    /// <see cref="Triangle"/>.
+    /// </param>
+    /// <remarks>
+    /// Bevy's <c>Extrusion</c>, a coin from a circle, a pipe from an annulus or a prism from a
+    /// polygon, with the front and back faces the flat shape is and sides that run straight
+    /// between their edges.
+    /// </remarks>
+    public static string Extrusion(string outline) => $"Extrusion({outline})";
 }
 
 /// <summary>How a primitive mesh was made, which is enough to make it again.</summary>

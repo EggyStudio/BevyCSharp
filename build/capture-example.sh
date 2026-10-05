@@ -31,6 +31,15 @@ if [ -z "$magick" ] && ! command -v cwebp >/dev/null 2>&1; then
     exit 1
 fi
 
+# One that saves its own picture and stops is run as it is, and the picture it saved is its capture.
+if [ "$example" = headless_renderer ]; then
+    saved="$(dirname "$program")/test_images/000.png"
+    rm -f "$saved"
+    "$program" "$example" --offscreen >/dev/null 2>&1
+    { [ -n "$magick" ] && "$magick" "$saved" -quality 85 -strip "$out" 2>/dev/null; } || cwebp -quiet -q 85 "$saved" -o "$out"
+    exit 0
+fi
+
 ./bcs stop >/dev/null 2>&1 || true
 trap './bcs stop >/dev/null 2>&1 || true' EXIT
 

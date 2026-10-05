@@ -76,6 +76,46 @@ public sealed class RenderReadTests
         Assert.True(ran);
     }
 
+    /// <summary>
+    /// Every flat shape Bevy extrudes is made solid as deep as the third number says, and a name
+    /// that is no flat shape is refused.
+    /// </summary>
+    [SkippableFact]
+    public void EveryFlatShapeIsExtrudedAsDeepAsAsked()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        var ran = false;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            string[] outlines =
+            [
+                MeshShape.Circle, MeshShape.Annulus, MeshShape.CircularSector, MeshShape.CircularSegment,
+                MeshShape.Ellipse, MeshShape.Capsule2d, MeshShape.Rhombus, MeshShape.Rectangle,
+                MeshShape.RegularPolygon, MeshShape.Triangle,
+            ];
+
+            foreach (var outline in outlines)
+            {
+                var shape = MeshShape.Extrusion(outline);
+                var mesh = Render.CreateMesh(shape, 0.5f, 1f, 3f);
+                Assert.True(Render.TryGetMeshInfo(mesh, out var info), shape);
+                Assert.True(info.Triangles > 0, $"{shape} has no triangles");
+                Assert.InRange(info.Max.Z - info.Min.Z, 2.99f, 3.01f);
+                Assert.Equal(shape, Render.RecipeOf(mesh)?.Shape);
+            }
+
+            var refused = Assert.Throws<BevyNativeException>(() => Render.CreateMesh(MeshShape.Extrusion(MeshShape.Sphere), 1f, 1f, 1f));
+            Assert.Equal(NativeStatus.NoComponent, refused.Status);
+            ran = true;
+        });
+
+        harness.Run();
+        Assert.True(ran);
+    }
+
     [SkippableFact]
     public void AMaterialIsReadBackAsItWasMade()
     {

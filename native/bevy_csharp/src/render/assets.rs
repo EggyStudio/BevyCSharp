@@ -74,6 +74,10 @@ fn primitive(kind: &str, a: f32, b: f32, c: f32) -> Option<bevy::mesh::Mesh> {
         return ring(outline, a, b, c);
     }
 
+    if let Some(outline) = kind.strip_prefix("Extrusion(").and_then(|rest| rest.strip_suffix(')')) {
+        return extrusion(outline, a, b, c);
+    }
+
     let mesh: Mesh = match kind {
         "Cuboid" => Cuboid::new(a, b, c).mesh().into(),
         "Sphere" => Sphere::new(a).mesh().into(),
@@ -164,6 +168,37 @@ fn ring(outline: &str, a: f32, b: f32, thickness: f32) -> Option<bevy::mesh::Mes
         "Triangle" => {
             let [first, second, third] = Triangle2d::default().vertices;
             Triangle2d::new(first * a, second * a, third * a).to_ring(thickness).into()
+        }
+        _ => return None,
+    };
+
+    Some(mesh)
+}
+
+/// A flat shape pushed out into a solid `depth` deep along Z, centered on its middle, by the
+/// measures `a` and `b` give the flat shape, or nothing for a shape Bevy does not extrude.
+#[cfg(feature = "render")]
+fn extrusion(outline: &str, a: f32, b: f32, depth: f32) -> Option<bevy::mesh::Mesh> {
+    use bevy::math::primitives::{
+        Annulus, Capsule2d, Circle, CircularSector, CircularSegment, Ellipse, Extrusion, Rectangle,
+        RegularPolygon, Rhombus, Triangle2d,
+    };
+    use bevy::mesh::Meshable;
+
+    let mesh = match outline {
+        "Circle" => Extrusion::new(Circle::new(a), depth).mesh().into(),
+        "Annulus" => Extrusion::new(Annulus::new(a, b), depth).mesh().into(),
+        "CircularSector" => Extrusion::new(CircularSector::new(a, b), depth).mesh().into(),
+        "CircularSegment" => Extrusion::new(CircularSegment::new(a, b), depth).mesh().into(),
+        "Ellipse" => Extrusion::new(Ellipse::new(a, b), depth).mesh().into(),
+        "Capsule2d" => Extrusion::new(Capsule2d::new(a, b), depth).mesh().into(),
+        "Rhombus" => Extrusion::new(Rhombus::new(a, b), depth).mesh().into(),
+        "Rectangle" => Extrusion::new(Rectangle::new(a, b), depth).mesh().into(),
+        "RegularPolygon" => Extrusion::new(RegularPolygon::new(a, (b.max(3.0)) as u32), depth).mesh().into(),
+        // Bevy's default flat triangle scaled by the first number, as Triangle draws it.
+        "Triangle" => {
+            let [first, second, third] = Triangle2d::default().vertices;
+            Extrusion::new(Triangle2d::new(first * a, second * a, third * a), depth).mesh().into()
         }
         _ => return None,
     };
