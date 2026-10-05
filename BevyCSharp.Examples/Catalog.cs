@@ -6,6 +6,7 @@ using BevyCSharp.Examples.Ecs;
 using BevyCSharp.Examples.Inputs;
 using BevyCSharp.Examples.Interface;
 using BevyCSharp.Examples.Movement;
+using BevyCSharp.Examples.Shading;
 using BevyCSharp.Examples.Sound;
 using BevyCSharp.Examples.States;
 using BevyCSharp.Examples.ThreeD;
@@ -179,6 +180,10 @@ internal static class Catalog
         // Time
         new("timers", Timers.Build, Prints: 1300),
         new("virtual_time", VirtualTime.Build),
+
+        // Shaders
+        new("extended_material", ExtendedMaterial.Build),
+        new("extended_material_bindless", ExtendedMaterialBindless.Build),
 
         // UI (User Interface)
         new("anchor_layout", AnchorLayout.Build),

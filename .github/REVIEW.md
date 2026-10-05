@@ -8,9 +8,10 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `6a2e78a`. Bevy's resources reached through the wrappers its components have
-(`6a2e78a`) is settled on its description and the reply read before it. The table stands at 149
-written, 7 written in part, 97 that can be, 111 missing and 57 that do not apply.
+Reviewed up to `7abb7ab`. `meshlet` and `solari` written against a bridge built with them
+(`7abb7ab`) were taken on their description and the reply, which was read. Math holds no row
+that can be written. The table stands at 150 written, 8 written in part, 95 that can be, 111
+missing and 57 that do not apply.
 
 ## Now
 
@@ -55,6 +56,20 @@ taken from [SHARED.md](SHARED.md).
    watched being the project's and not a copy in the build folder, which Courtyard would show.
    And a game written in behaviors alone with hundreds of entities, played by the workflow and
    profiled, which `games/Stress` measures and no game here plays.
+9. **Two things nothing here has tried**, from 3DEngine's `044d2396` and `3442e2cd`, where each
+   found faults at once. Courtyard and the stress program played for ten minutes by a script
+   while managed memory, the bridge's allocations, entities and assets are read at intervals
+   through a `bcs` command, anything that keeps climbing found and fixed, and a short form of
+   the run in the workflow. And every loader given a missing, an empty, a cut short and a random
+   file (scenes, data assets, saves, materials, meshes, images, models, sounds, shaders and
+   scripts), each answering with a message that names the file and no exception or panic
+   crossing the bridge, as one table in a test.
+10. **The public surface written down, and release notes from the commits**, from 3DEngine's
+    `fc5aef49`: a listing of every public type and member a tool writes from the built assembly,
+    checked in, with a test that fails when the two differ, so a change to what a game calls is
+    read as one, and the pack workflow writing the package's release notes from the commits
+    since `build/version.txt` last changed. In the same batch it is checked whether a ray here
+    stops at a sensor, which there threw a car's wheel and a character's ground check.
 
 ## Verdicts
 
@@ -69,10 +84,11 @@ None open.
    committed like any other change.
 
 ## Replies
-- Item 1, the rest of 3D. Math holds no row that can be written, each waiting on Bevy's math, and
-  is marked. `meshlet` and `solari` are written against a bridge built with `--meshlet --solari`
-  on this machine's adapter. `meshlet` needed Bevy's material that colors each cluster, which the
-  bridge adds as `Render.CreateClusterMaterial()`, and `solari` showed that a model's mesh with no
-  texture coordinates was refused for ray tracing, where Bevy's example gives it coordinates of
-  zero, which the bridge now does, with a test of each. `solari` is written in part, its path
-  tracer and its scene of many lights left out, as TODO.md says.
+- Item 2, a standard material extended by a shader. A Slang shader is lit by Bevy through
+  `bcs::light` and `bcs::finish` (and `bcs::lit`, both at once), from a `bcs::Surface` it fills in.
+  The two call WGSL functions by fixed names that the bridge puts in front of the compiled shader,
+  written over Bevy's `apply_pbr_lighting` and `main_pass_post_lighting_processing`, so Bevy's
+  lighting is used as it is rather than written again, and a test draws a lit Slang sphere beside a
+  standard one and finds them alike. `extended_material` and its bindless twin are written, and
+  `mirror` is reachable. `ssr`, `clustered_decals` and `irradiance_volumes` need more of Bevy's WGSL
+  reached the same way, the deferred buffers, a decal's tag and a volume's voxels, as TODO.md says.

@@ -34,11 +34,12 @@ public static unsafe class Render
     /// </param>
     /// <param name="b">
     /// Height for a cuboid, cylinder, cone or rectangle, depth for a plane, length for a capsule,
-    /// bottom radius for a conical frustum, and outer radius for a torus or annulus.
+    /// bottom radius for a conical frustum, outer radius for a torus or annulus, and the slices
+    /// around a UV sphere.
     /// </param>
     /// <param name="c">
-    /// Depth for a cuboid, height for a conical frustum, and the band's width for a ring, whose
-    /// first two numbers measure the shape it runs around.
+    /// Depth for a cuboid, height for a conical frustum, the rings of a UV sphere from pole to pole,
+    /// and the band's width for a ring, whose first two numbers measure the shape it runs around.
     /// </param>
     /// <remarks>
     /// The shape and its measures are kept beside the handle (<see cref="RecipeOf"/>), so the mesh

@@ -9,6 +9,17 @@ public static class MeshShape
     /// <summary>A sphere, sized by radius.</summary>
     public const string Sphere = "Sphere";
 
+    /// <summary>
+    /// A sphere of slices and rings, sized by radius, then the number of slices around it and of
+    /// rings from pole to pole.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Sphere"/> is Bevy's default, a solid of subdivided triangles, which is even all
+    /// over. This one is made as a globe is drawn, so an image wraps around it with its edges at
+    /// one seam and its top and bottom rows at the poles.
+    /// </remarks>
+    public const string UvSphere = "UvSphere";
+
     /// <summary>A flat plane on the XZ axes, sized by width and depth.</summary>
     public const string Plane = "Plane";
 

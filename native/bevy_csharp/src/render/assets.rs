@@ -77,6 +77,13 @@ fn primitive(kind: &str, a: f32, b: f32, c: f32) -> Option<bevy::mesh::Mesh> {
     let mesh: Mesh = match kind {
         "Cuboid" => Cuboid::new(a, b, c).mesh().into(),
         "Sphere" => Sphere::new(a).mesh().into(),
+        // A sphere of rings and slices rather than Bevy's default of subdivided triangles, which
+        // maps an image around it the way a globe is drawn: the radius, then how many slices go
+        // around it and how many rings from pole to pole, at least three and two.
+        "UvSphere" => Sphere::new(a)
+            .mesh()
+            .uv((b as u32).max(3), (c as u32).max(2))
+            .into(),
         "Plane" => Plane3d::default()
             .mesh()
             .size(a, b)

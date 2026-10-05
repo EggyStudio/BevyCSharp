@@ -33,12 +33,11 @@ the most examples, and the largest is taken between groups of examples. The coun
   and underline, and text background colors.
 - **Animation built in code, seven examples.** Clips made from curves, events placed on a clip,
   graphs that blend clips by weight and their masks, and skinned meshes built joint by joint.
-- **A standard material extended by a shader, seven examples.** Bevy's `ExtendedMaterial`, its lit
-  material with a fragment shader of the game's own run over the surface it describes, which the
-  water of `atmosphere` and `ssr`, the voxels of `irradiance_volumes`, the tag `clustered_decals`
-  reads, the screen-space mirror of `mirror`, and `extended_material` and its bindless twin are
-  drawn with. A Slang material here writes a color and is lit by nothing, so this needs Bevy's
-  lighting reachable from a Slang shader, the surface handed in and the lit color handed back.
+- **What Bevy's WGSL reaches and a Slang shader does not, three examples.** A Slang shader is lit
+  by Bevy through `bcs::light` and `bcs::finish`, and draws in the forward pass. `ssr`'s water draws
+  into Bevy's deferred buffers, which needs a Slang material to write them, and `clustered_decals`
+  and `irradiance_volumes` read the decal over a surface and the volume's voxels through Bevy's
+  WGSL functions, which need the same kind of named call `bcs::light` makes.
 - **Picking's events as observers, eight examples.** A click, a drag or a pointer moving over what
   they draw, which `error_handling`, `delayed_commands`, `entity_disabling`, `ui_drag_and_drop`,
   `viewport_node`, `drag_to_scroll`, `render_ui_to_texture` and `scroll` observe on the entity it

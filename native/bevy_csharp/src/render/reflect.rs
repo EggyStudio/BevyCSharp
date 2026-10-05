@@ -600,8 +600,16 @@ pub fn reflect(wgsl: &str, reflection: &str, family: Family) -> Result<Reflected
         .cloned()
         .unwrap_or_default();
 
+    // A shader lit by Bevy calls a function the bridge puts in front of it only once it is
+    // compiled, over Bevy's imports, which naga cannot follow here. So it is read with a stand-in
+    // of the same signature, which adds no binding and so changes nothing this reads.
     let parse = |wgsl: &str| {
-        naga::front::wgsl::parse_str(wgsl)
+        let text = if wgsl.contains(super::programs::LIGHTING_CALL) {
+            std::borrow::Cow::Owned(format!("{wgsl}\n{}", super::programs::LIGHTING_STAND_IN))
+        } else {
+            std::borrow::Cow::Borrowed(wgsl)
+        };
+        naga::front::wgsl::parse_str(&text)
             .map_err(|error| format!("the compiled WGSL does not parse: {error}"))
     };
 

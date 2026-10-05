@@ -640,7 +640,7 @@ fn finish(programs: &mut ShaderPrograms, shaders: &mut Assets<Shader>, done: Fin
     match done.result {
         Ok((compiled, reflected)) => {
             let shader = if reflected.spirv.is_empty() {
-                Shader::from_wgsl(reflected.wgsl, name)
+                Shader::from_wgsl(with_lighting(unit.role, reflected.wgsl), name)
             } else {
                 Shader::from_spirv(reflected.spirv, name)
             };
@@ -822,6 +822,84 @@ fn poll(programs: &mut ShaderPrograms) {
         } else {
             start(programs, index);
         }
+    }
+}
+
+// -- Bevy's lighting
+
+/// What the names `bcs::light` and `bcs::finish` call in the WGSL Slang writes begin with, which
+/// [`LIGHTING`] defines.
+pub const LIGHTING_CALL: &str = "bcs_pbr_";
+
+/// Functions of the same signatures as those [`LIGHTING`] defines, for reading a compiled shader
+/// that calls them before the real ones, which import Bevy's, are put in front.
+pub const LIGHTING_STAND_IN: &str = "fn bcs_pbr_light(base_color: vec4<f32>, emissive: vec4<f32>, \
+    metallic: f32, roughness: f32, reflectance: vec3<f32>, occlusion: vec3<f32>, frag_coord: vec4<f32>, \
+    world_position: vec4<f32>, world_normal: vec3<f32>, normal: vec3<f32>) -> vec4<f32> { return base_color; }\n\
+    fn bcs_pbr_finish(color: vec4<f32>, frag_coord: vec4<f32>, world_position: vec4<f32>) -> vec4<f32> { return color; }\n";
+
+/// What `bcs::light` and `bcs::finish` call: Bevy's own lighting of a standard material's surface,
+/// over the view's lights, shadows and environment maps, and Bevy's own processing after it, which
+/// is fog and, for a camera that does not draw in high dynamic range, tonemapping. Each is imported
+/// from Bevy as its own materials import it.
+///
+/// They are put in front of a compiled fragment shader that calls them and of no other, since
+/// importing Bevy's view bindings into a shader that does not light anything would only lengthen
+/// its compile. The surface is a shadow receiver, which a standard material's mesh is unless told
+/// otherwise, and takes fog, as one does by default.
+const LIGHTING: &str = r#"#import bevy_pbr::{
+    pbr_types,
+    pbr_functions,
+    mesh_types::MESH_FLAGS_SHADOW_RECEIVER_BIT,
+    mesh_view_bindings::view,
+}
+
+fn bcs_pbr_input(frag_coord: vec4<f32>, world_position: vec4<f32>) -> pbr_types::PbrInput {
+    var pbr_input = pbr_types::pbr_input_new();
+    pbr_input.material.flags |= pbr_types::STANDARD_MATERIAL_FLAGS_FOG_ENABLED_BIT;
+    pbr_input.frag_coord = frag_coord;
+    pbr_input.world_position = world_position;
+    pbr_input.is_orthographic = view.clip_from_world[3].w == 1.0;
+    pbr_input.V = pbr_functions::calculate_view(world_position, pbr_input.is_orthographic);
+    pbr_input.flags = MESH_FLAGS_SHADOW_RECEIVER_BIT;
+    return pbr_input;
+}
+
+fn bcs_pbr_light(
+    base_color: vec4<f32>,
+    emissive: vec4<f32>,
+    metallic: f32,
+    roughness: f32,
+    reflectance: vec3<f32>,
+    occlusion: vec3<f32>,
+    frag_coord: vec4<f32>,
+    world_position: vec4<f32>,
+    world_normal: vec3<f32>,
+    normal: vec3<f32>,
+) -> vec4<f32> {
+    var pbr_input = bcs_pbr_input(frag_coord, world_position);
+    pbr_input.material.base_color = base_color;
+    pbr_input.material.emissive = emissive;
+    pbr_input.material.metallic = metallic;
+    pbr_input.material.perceptual_roughness = roughness;
+    pbr_input.material.reflectance = reflectance;
+    pbr_input.diffuse_occlusion = occlusion;
+    pbr_input.world_normal = normalize(world_normal);
+    pbr_input.N = normalize(normal);
+    return pbr_functions::apply_pbr_lighting(pbr_input);
+}
+
+fn bcs_pbr_finish(color: vec4<f32>, frag_coord: vec4<f32>, world_position: vec4<f32>) -> vec4<f32> {
+    return pbr_functions::main_pass_post_lighting_processing(bcs_pbr_input(frag_coord, world_position), color);
+}
+"#;
+
+/// A compiled fragment shader with Bevy's lighting put in front where it calls for it.
+fn with_lighting(role: Role, wgsl: String) -> String {
+    if matches!(role, Role::Fragment) && wgsl.contains(LIGHTING_CALL) {
+        format!("{LIGHTING}\n{wgsl}")
+    } else {
+        wgsl
     }
 }
 

@@ -115,6 +115,49 @@ put on the material:
 material.Program = Shaders.CreateProgram(ShaderStage.Slang(generated));
 ```
 
+### Lit by Bevy
+
+A material's fragment shader writes the color drawn, and is lit by nothing unless it lights itself.
+`bcs::lit` lights it as Bevy lights its standard material, with every light, shadow, environment
+map and fog of the view, from a `bcs::Surface` the shader fills in, as Bevy's own `ExtendedMaterial`
+does:
+
+```slang
+import bcs;
+
+uniform float4 tint;
+Texture2D rust;
+SamplerState linear;
+
+[shader("fragment")]
+float4 fragment(bcs::VertexOutput mesh) : SV_Target
+{
+    var surface = bcs::surface(mesh);              // Bevy's default standard material here
+    surface.base_color = tint * rust.Sample(linear, mesh.uv);
+    surface.roughness = 0.8;
+    return bcs::lit(surface, mesh);
+}
+```
+
+A surface holds what a standard material does: its color, the light it gives off, how metal and
+rough it is, its reflectance, how much ambient light reaches it, and the normal it is lit by, which
+a normal map bends. `bcs::lit` is two steps, `bcs::light` and then `bcs::finish`, and a shader that
+changes the lit color, cutting it into steps or tinting it, calls them apart and changes it between,
+before the fog and the tonemapping a camera without high dynamic range does in the shader:
+
+```slang
+var color = bcs::light(surface, mesh);
+color = floor(color * 4.0) / 4.0;
+return bcs::finish(color, mesh);
+```
+
+Bevy's lighting is its own WGSL over bindings that change with every feature a camera turns on, so
+it is not written again in Slang. The two calls reach WGSL functions by fixed names that the bridge
+puts in front of the compiled shader, over Bevy's own `apply_pbr_lighting` and
+`main_pass_post_lighting_processing`, only where the shader calls them. A lit material is drawn in
+the forward pass, even under a camera rendering deferred, and the surface receives shadows and takes
+fog as a standard material does by default.
+
 ### The compiler
 
 `slangc` compiles each stage to WGSL in the background. `./bcs build` and

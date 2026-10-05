@@ -14,7 +14,7 @@ animated_material	can
 generate_custom_mesh	can
 anti_aliasing	can
 atmospheric_fog	can	through Bevy's reflected DistanceFog
-atmosphere	missing	Bevy's Mars scattering medium and its choice of rendering method, and the water's standard material extended by a shader of the example's own
+atmosphere	missing	Bevy's Mars scattering medium and its choice of rendering method
 fog	can	through Bevy's reflected DistanceFog
 auto_exposure	can
 blend_modes	can
@@ -46,13 +46,13 @@ transmission	can
 two_passes	can
 vertex_colors	can
 wireframe	can
-irradiance_volumes	missing	Bevy's irradiance volume asset, and a standard material extended by a shader of the example's own to draw its voxels
+irradiance_volumes	missing	Bevy's irradiance volume asset, and a shader drawing its voxels by reading the volume, which Bevy's WGSL reaches and a Slang shader does not
 meshlet	can	needs a bridge built with --meshlet
 mesh_ray_cast	can
 lightmaps	can	through Bevy's reflected Lightmap and a material's LightmapExposure
 reflection_probes	can
 visibility_range	can
-ssr	missing	the water, a standard material extended by a shader of the example's own
+ssr	missing	the water drawn into Bevy's deferred buffers, which a material drawn by a Slang shader does not draw into
 camera_sub_view	can
 color_grading	can
 clearcoat	can
@@ -66,11 +66,11 @@ rotate_environment_map	can
 pcss	can
 mixed_lighting	can	through Bevy's reflected Lightmap
 specular_tint	missing	specular tint and the specular maps on the standard material
-clustered_decals	missing	a standard material extended by a shader of the example's own, which reads the decal's tag
+clustered_decals	missing	a shader reading the tag of the clustered decal over it, which Bevy's WGSL reaches and a Slang shader does not
 light_textures	can
 occlusion_culling	missing	the counts of meshes drawn and culled, which it reads back from the render world's indirect draw buffers
 clustered_decal_maps	can
-mirror	missing	the mirror, a standard material extended by a shader of the example's own that samples what a second camera draws in screen space
+mirror	can	the mirror camera's oblique near plane written as JSON, since the projection holds it in a variant beside its scaling mode
 pccm	can
 light_probe_blending	can
 2d_shapes	can
@@ -303,8 +303,8 @@ custom_post_processing	can
 custom_render_phase	n/a	builds a render phase in Rust
 custom_shader_instancing	can
 custom_vertex_attribute	missing	vertex attributes a game defines
-extended_material	missing	a standard material extended by a shader of the example's own
-extended_material_bindless	missing	a standard material extended by a shader of the example's own, its data bindless
+extended_material	can	the extension a Slang shader lighting its surface through bcs::light and bcs::finish
+extended_material_bindless	can	the extension a Slang shader lighting its surface through bcs::lit, with bindings of its own rather than Bevy's bindless arrays
 gpu_readback	can
 render_depth_to_texture	missing	depth-only cameras rendered to a texture
 shader_defs	can

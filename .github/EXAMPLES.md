@@ -4,12 +4,12 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**150 written, 8 written in part, 95 can be written, 111 missing and 57 do not apply.** Of the 364 that apply, 253 can be written with what is bridged, 8 of them leaving something out.
+**152 written, 8 written in part, 96 can be written, 108 missing and 57 do not apply.** Of the 364 that apply, 256 can be written with what is bridged, 8 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 21 | 1 | 0 | 6 | 1 |
-| [3D Rendering](#3d-rendering) | 52 | 5 | 0 | 10 | 0 |
+| [3D Rendering](#3d-rendering) | 52 | 5 | 1 | 9 | 0 |
 | [Animation](#animation) | 0 | 0 | 6 | 7 | 0 |
 | [Application](#application) | 7 | 0 | 3 | 2 | 7 |
 | [Assets](#assets) | 0 | 0 | 10 | 2 | 5 |
@@ -30,7 +30,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Reflection](#reflection) | 0 | 0 | 0 | 0 | 9 |
 | [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 3 | 1 |
 | [Scene](#scene) | 0 | 0 | 1 | 1 | 0 |
-| [Shaders](#shaders) | 0 | 0 | 15 | 5 | 5 |
+| [Shaders](#shaders) | 2 | 0 | 15 | 3 | 5 |
 | [Shaders Advanced](#shaders-advanced) | 0 | 0 | 1 | 0 | 1 |
 | [State](#state) | 2 | 0 | 0 | 2 | 0 |
 | [Stress Tests](#stress-tests) | 0 | 0 | 20 | 0 | 1 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **150** | **8** | **95** | **111** | **57** |
+| **All** | **152** | **8** | **96** | **108** | **57** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. Where Bevy's site runs the example in a browser, the row links it live, which is Bevy's Rust original rather than the C# one here.
 
@@ -90,7 +90,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`animated_material`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/animated_material.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/animated-material/) | Shows how to animate material properties | [written](../BevyCSharp.Examples/3d/animated_material.cs) |
 | [`anisotropy`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/anisotropy.rs) | Displays an example model with anisotropy | [written](../BevyCSharp.Examples/3d/anisotropy.cs) |
 | [`anti_aliasing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/anti_aliasing.rs) | Compares different anti-aliasing techniques supported by Bevy | [written](../BevyCSharp.Examples/3d/anti_aliasing.cs) |
-| [`atmosphere`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/atmosphere.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/atmosphere/) | A scene showcasing pbr atmospheric scattering | missing, Bevy's Mars scattering medium and its choice of rendering method, and the water's standard material extended by a shader of the example's own |
+| [`atmosphere`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/atmosphere.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/atmosphere/) | A scene showcasing pbr atmospheric scattering | missing, Bevy's Mars scattering medium and its choice of rendering method |
 | [`atmospheric_fog`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/atmospheric_fog.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/atmospheric-fog/) | A scene showcasing the atmospheric fog effect | [written](../BevyCSharp.Examples/3d/atmospheric_fog.cs), through Bevy's reflected DistanceFog |
 | [`auto_exposure`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/auto_exposure.rs) | A scene showcasing auto exposure | [written](../BevyCSharp.Examples/3d/auto_exposure.cs) |
 | [`blend_modes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/blend_modes.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/blend-modes/) | Showcases different blend modes | [written](../BevyCSharp.Examples/3d/blend_modes.cs) |
@@ -98,7 +98,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`camera_sub_view`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/camera_sub_view.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/camera-sub-view/) | Demonstrates using different sub view effects on a camera | [written](../BevyCSharp.Examples/3d/camera_sub_view.cs) |
 | [`clearcoat`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/clearcoat.rs) | Demonstrates the clearcoat PBR feature | [written](../BevyCSharp.Examples/3d/clearcoat.cs) |
 | [`clustered_decal_maps`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/clustered_decal_maps.rs) | Demonstrates normal and metallic-roughness maps of decals | [written](../BevyCSharp.Examples/3d/clustered_decal_maps.cs) |
-| [`clustered_decals`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/clustered_decals.rs) | Demonstrates clustered decals | missing, a standard material extended by a shader of the example's own, which reads the decal's tag |
+| [`clustered_decals`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/clustered_decals.rs) | Demonstrates clustered decals | missing, a shader reading the tag of the clustered decal over it, which Bevy's WGSL reaches and a Slang shader does not |
 | [`color_grading`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/color_grading.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/color-grading/) | Demonstrates color grading | [written](../BevyCSharp.Examples/3d/color_grading.cs) |
 | [`contact_shadows`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/contact_shadows.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/contact-shadows/) | Showcases how contact shadows add shadow detail | [written](../BevyCSharp.Examples/3d/contact_shadows.cs), its model spun by a press over it found with a ray, where Bevy observes picking's drag |
 | [`decal`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/decal.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/decal/) | Decal rendering | missing, forward decals (ForwardDecal) |
@@ -107,7 +107,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`fog`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/fog.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/fog/) | A scene showcasing the distance fog effect | [written](../BevyCSharp.Examples/3d/fog.cs), through Bevy's reflected DistanceFog |
 | [`fog_volumes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/fog_volumes.rs) | Demonstrates fog volumes | [written](../BevyCSharp.Examples/3d/fog_volumes.cs), through Bevy's reflected FogVolume |
 | [`generate_custom_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/generate_custom_mesh.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/generate-custom-mesh/) | Simple showcase of how to generate a custom mesh with a custom texture | [written](../BevyCSharp.Examples/3d/generate_custom_mesh.cs) |
-| [`irradiance_volumes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/irradiance_volumes.rs) | Demonstrates irradiance volumes | missing, Bevy's irradiance volume asset, and a standard material extended by a shader of the example's own to draw its voxels |
+| [`irradiance_volumes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/irradiance_volumes.rs) | Demonstrates irradiance volumes | missing, Bevy's irradiance volume asset, and a shader drawing its voxels by reading the volume, which Bevy's WGSL reaches and a Slang shader does not |
 | [`light_probe_blending`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/light_probe_blending.rs) | Demonstrates blending between multiple reflection probes | [written](../BevyCSharp.Examples/3d/light_probe_blending.cs) |
 | [`light_textures`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/light_textures.rs) | Demonstrates light textures | [written](../BevyCSharp.Examples/3d/light_textures.cs) |
 | [`lighting`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/lighting.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/lighting/) | Illustrates various lighting options in a simple scene | [written](../BevyCSharp.Examples/3d/lighting.cs) |
@@ -115,7 +115,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`lines`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/lines.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/lines/) | Create a custom material to draw 3d lines | [written](../BevyCSharp.Examples/3d/lines.cs) |
 | [`mesh_ray_cast`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/mesh_ray_cast.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/mesh-ray-cast/) | Demonstrates ray casting with the `MeshRayCast` system parameter | [written](../BevyCSharp.Examples/3d/mesh_ray_cast.cs) |
 | [`meshlet`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/meshlet.rs) | Meshlet rendering for dense high-poly scenes (experimental) | [written](../BevyCSharp.Examples/3d/meshlet.cs), needs a bridge built with --meshlet |
-| [`mirror`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/mirror.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/mirror/) | Demonstrates how to create a mirror with a second camera | missing, the mirror, a standard material extended by a shader of the example's own that samples what a second camera draws in screen space |
+| [`mirror`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/mirror.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/mirror/) | Demonstrates how to create a mirror with a second camera | can be written, the mirror camera's oblique near plane written as JSON, since the projection holds it in a variant beside its scaling mode |
 | [`mixed_lighting`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/mixed_lighting.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/mixed-lighting/) | Demonstrates how to combine baked and dynamic lighting | [written](../BevyCSharp.Examples/3d/mixed_lighting.cs), through Bevy's reflected Lightmap |
 | [`motion_blur`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/motion_blur.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/motion-blur/) | Demonstrates per-pixel motion blur | [written](../BevyCSharp.Examples/3d/motion_blur.cs) |
 | [`occlusion_culling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/occlusion_culling.rs) | Demonstration of Occlusion Culling | missing, the counts of meshes drawn and culled, which it reads back from the render world's indirect draw buffers |
@@ -141,7 +141,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`split_screen`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/split_screen.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/split-screen/) | Demonstrates how to render two cameras to the same window to accomplish "split screen" | [written](../BevyCSharp.Examples/3d/split_screen.cs) |
 | [`spotlight`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/spotlight.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/spotlight/) | Illustrates spot lights | [written](../BevyCSharp.Examples/3d/spotlight.cs), its cubes scattered by .NET's generator rather than Bevy's |
 | [`ssao`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/ssao.rs) | A scene showcasing screen space ambient occlusion | [written](../BevyCSharp.Examples/3d/ssao.cs) |
-| [`ssr`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/ssr.rs) | Demonstrates screen space reflections with water ripples | missing, the water, a standard material extended by a shader of the example's own |
+| [`ssr`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/ssr.rs) | Demonstrates screen space reflections with water ripples | missing, the water drawn into Bevy's deferred buffers, which a material drawn by a Slang shader does not draw into |
 | [`texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/texture.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/texture/) | Shows configuration of texture materials | [written](../BevyCSharp.Examples/3d/texture.cs) |
 | [`tonemapping`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/tonemapping.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/tonemapping/) | Compares tonemapping options | [written in part](../BevyCSharp.Examples/3d/tonemapping.cs), the image viewer's square sized to the dropped image, since the bridge does not say how large an image is |
 | [`transmission`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/transmission.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/transmission/) | Showcases light transmission in the PBR material | [written](../BevyCSharp.Examples/3d/transmission.cs) |
@@ -433,8 +433,8 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`custom_render_phase`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/custom_render_phase.rs), [live in Bevy](https://bevy.org/examples/shaders/custom-render-phase/) | Shows how to make a complete render phase | does not apply, builds a render phase in Rust |
 | [`custom_shader_instancing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/custom_shader_instancing.rs), [live in Bevy](https://bevy.org/examples/shaders/custom-shader-instancing/) | A shader that renders a mesh multiple times in one draw call using low level rendering api | can be written |
 | [`custom_vertex_attribute`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/custom_vertex_attribute.rs), [live in Bevy](https://bevy.org/examples/shaders/custom-vertex-attribute/) | A shader that reads a mesh's custom vertex attribute | missing, vertex attributes a game defines |
-| [`extended_material`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/extended_material.rs), [live in Bevy](https://bevy.org/examples/shaders/extended-material/) | A custom shader that builds on the standard material | missing, a standard material extended by a shader of the example's own |
-| [`extended_material_bindless`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/extended_material_bindless.rs) | Demonstrates bindless `ExtendedMaterial` | missing, a standard material extended by a shader of the example's own, its data bindless |
+| [`extended_material`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/extended_material.rs), [live in Bevy](https://bevy.org/examples/shaders/extended-material/) | A custom shader that builds on the standard material | [written](../BevyCSharp.Examples/shader/extended_material.cs), the extension a Slang shader lighting its surface through bcs::light and bcs::finish |
+| [`extended_material_bindless`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/extended_material_bindless.rs) | Demonstrates bindless `ExtendedMaterial` | [written](../BevyCSharp.Examples/shader/extended_material_bindless.cs), the extension a Slang shader lighting its surface through bcs::lit, with bindings of its own rather than Bevy's bindless arrays |
 | [`gpu_readback`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/gpu_readback.rs) | A very simple compute shader that writes to a buffer that is read by the cpu | can be written |
 | [`render_depth_to_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/render_depth_to_texture.rs), [live in Bevy](https://bevy.org/examples/shaders/render-depth-to-texture/) | Demonstrates how to use depth-only cameras | missing, depth-only cameras rendered to a texture |
 | [`shader_defs`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/shader_defs.rs), [live in Bevy](https://bevy.org/examples/shaders/shader-defs/) | A shader that uses "shaders defs" (a bevy tool to selectively toggle parts of a shader) | can be written |

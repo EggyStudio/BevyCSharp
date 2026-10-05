@@ -255,4 +255,100 @@ public PrepassVertexOutput prepass_output(uint instance, float3 position, float3
     return output;
 }
 
+
+// -- Bevy's lighting
+//
+// A material drawn by a fragment shader here is lit by nothing unless it lights itself, and
+// Bevy's lighting is a great deal of WGSL over bindings that change with every feature a camera
+// turns on. So it is not written again in Slang. `light` and `finish` call WGSL functions by fixed
+// names, which the bridge puts in front of any compiled shader that calls them, written over Bevy's
+// own `apply_pbr_lighting` and `main_pass_post_lighting_processing`, and which take only numbers
+// and vectors, so nothing here depends on the names Slang gives its structs in the WGSL it writes.
+
+/// What a lit surface is, as Bevy's standard material describes one: its color, the light it gives
+/// off, how metal and how rough it is, how much light it reflects head on, how much ambient light
+/// reaches it, and which way it faces.
+public struct Surface
+{
+    /// The color, linear RGBA, its alpha read as the material's alpha mode says.
+    public float4 base_color;
+    /// The light it gives off, linear, in Bevy's units, so a value well above one glows.
+    public float4 emissive;
+    public float metallic;
+    /// Bevy's perceptual roughness, from mirror smooth at zero to fully rough at one.
+    public float roughness;
+    /// The fraction of light reflected head on, as Bevy's `reflectance`, a half by default.
+    public float3 reflectance;
+    /// How much of the ambient and environment light reaches it, one for all of it.
+    public float3 occlusion;
+    /// Which way it faces in the world, for lighting, which a normal map bends.
+    public float3 normal;
+};
+
+/// A surface as Bevy's default standard material describes the mesh at this point: white, rough
+/// by half, not metal, facing the way the mesh does.
+public Surface surface(VertexOutput mesh)
+{
+    Surface output;
+    output.base_color = float4(1.0);
+    output.emissive = float4(0.0, 0.0, 0.0, 1.0);
+    output.metallic = 0.0;
+    output.roughness = 0.5;
+    output.reflectance = float3(0.5);
+    output.occlusion = float3(1.0);
+    output.normal = mesh.world_normal;
+    return output;
+}
+
+float4 pbr_light(
+    float4 base_color, float4 emissive, float metallic, float roughness, float3 reflectance,
+    float3 occlusion, float4 frag_coord, float4 world_position, float3 world_normal, float3 normal)
+{
+    __target_switch
+    {
+    case wgsl:
+        __intrinsic_asm "bcs_pbr_light($0, $1, $2, $3, $4, $5, $6, $7, $8, $9)";
+    default:
+        // Unlit, where there is no Bevy to light it, which only a target other than the one
+        // the bridge compiles for reaches.
+        return base_color + float4(emissive.rgb, 0.0);
+    }
+}
+
+float4 pbr_finish(float4 color, float4 frag_coord, float4 world_position)
+{
+    __target_switch
+    {
+    case wgsl:
+        __intrinsic_asm "bcs_pbr_finish($0, $1, $2)";
+    default:
+        return color;
+    }
+}
+
+/// The surface lit by every light, shadow and environment map Bevy has for the view, before fog
+/// and before the tonemapping a camera that does not draw in high dynamic range does in the shader,
+/// for a shader that changes the lit color before `finish`.
+public float4 light(Surface surface, VertexOutput mesh)
+{
+    return pbr_light(
+        surface.base_color, surface.emissive, surface.metallic, surface.roughness,
+        surface.reflectance, surface.occlusion, mesh.position, mesh.world_position,
+        mesh.world_normal, surface.normal);
+}
+
+/// What Bevy does to a lit color in the shader: fog, and tonemapping and debanding for a camera that
+/// does not draw in high dynamic range. Effects over the whole picture, such as bloom, come after,
+/// outside the shader.
+public float4 finish(float4 color, VertexOutput mesh)
+{
+    return pbr_finish(color, mesh.position, mesh.world_position);
+}
+
+/// The surface lit and finished, the color Bevy's standard material draws with the same values.
+public float4 lit(Surface surface, VertexOutput mesh)
+{
+    return finish(light(surface, mesh), mesh);
+}
+
 }
