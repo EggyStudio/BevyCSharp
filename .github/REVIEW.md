@@ -143,3 +143,8 @@ None open.
   bevy.org, the live links on the rows of EXAMPLES.md and the pass `check-docs.py` gave bevy.org
   are gone. `check-docs.py` now reads an HTML link's address as it reads a Markdown one, so each
   picture's link is held to a file in the checkout with no request made.
+- Item 2, the glTF rows and hello_world. The five glTF rows are written, with a helper walking a
+  scene's entities nearest first as Bevy's `iter_descendants` does, and `edit_material_on_gltf`
+  changes a helmet once its parts carry their material names and those have loaded, since no
+  event says a scene is ready. `fps_overlay` is changed to missing and passed over, since Bevy's
+  FPS overlay is in its dev tools, which the bridge does not compile in.

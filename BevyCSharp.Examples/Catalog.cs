@@ -6,6 +6,7 @@ using BevyCSharp.Examples.Cameras;
 using BevyCSharp.Examples.Clocks;
 using BevyCSharp.Examples.Ecs;
 using BevyCSharp.Examples.Games;
+using BevyCSharp.Examples.Gltf;
 using BevyCSharp.Examples.Gizmo;
 using BevyCSharp.Examples.Inputs;
 using BevyCSharp.Examples.Interface;
@@ -128,6 +129,7 @@ internal static class Catalog
         new("empty", Empty.Build, Prints: 1),
         new("drag_and_drop", DragAndDrop.Build),
         new("empty_defaults", EmptyDefaults.Build),
+        new("hello_world", HelloWorld.Build, Prints: 1),
         new("headless", Headless.Build, Prints: 1, Returned: Headless.Returned),
         new("headless_renderer", HeadlessRenderer.Build, HeadlessRenderer.Configure),
         new("plugin", PluginExample.Build, Prints: 130),
@@ -185,6 +187,13 @@ internal static class Catalog
         new("desk_toy", DeskToy.Build, DeskToy.Configure),
         new("game_menu", GameMenu.Build),
         new("loading_screen", LoadingScreen.Build),
+
+        // glTF
+        new("edit_material_on_gltf", EditMaterialOnGltf.Build),
+        new("gltf_skinned_mesh", GltfSkinnedMesh.Build),
+        new("load_gltf", LoadGltf.Build),
+        new("query_gltf_primitives", QueryGltfPrimitives.Build),
+        new("update_gltf_scene", UpdateGltfScene.Build),
 
         // Gizmos
         new("2d_gizmos", Gizmos2d.Build),

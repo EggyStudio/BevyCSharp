@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**207 written, 12 written in part, 46 can be written, 98 missing and 58 do not apply.** Of the 363 that apply, 265 can be written with what is bridged, 12 of them leaving something out.
+**213 written, 12 written in part, 39 can be written, 99 missing and 58 do not apply.** Of the 363 that apply, 264 can be written with what is bridged, 12 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
@@ -16,7 +16,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 |
 | [Audio](#audio) | 5 | 0 | 0 | 3 | 0 |
 | [Camera](#camera) | 6 | 0 | 0 | 3 | 0 |
-| [Dev tools](#dev-tools) | 0 | 0 | 1 | 1 | 1 |
+| [Dev tools](#dev-tools) | 0 | 0 | 0 | 2 | 1 |
 | [Diagnostics](#diagnostics) | 0 | 0 | 1 | 2 | 0 |
 | [ECS (Entity Component System)](#ecs-entity-component-system) | 14 | 0 | 1 | 11 | 9 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |
@@ -40,9 +40,9 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [UI (User Interface)](#ui-user-interface) | 31 | 1 | 0 | 28 | 0 |
 | [Usage](#usage) | 3 | 0 | 0 | 0 | 0 |
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
-| [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
-| [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **207** | **12** | **46** | **98** | **58** |
+| [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 |
+| [Kept out of Bevy's list](#kept-out-of-bevys-list) | 1 | 0 | 2 | 0 | 10 |
+| **All** | **213** | **12** | **39** | **99** | **58** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -255,7 +255,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`fps_overlay`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/dev_tools/fps_overlay.rs) | Demonstrates FPS overlay | can be written |
+| [`fps_overlay`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/dev_tools/fps_overlay.rs) | Demonstrates FPS overlay | missing, Bevy's FPS overlay and frame time graph, from its dev tools, which the bridge does not compile in |
 | [`infinite_grid`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/dev_tools/infinite_grid.rs) | Demonstrates Bevy's infinite grid, suitable as a ground plane for editors | missing, Bevy's infinite grid |
 | [`schedule_data`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/dev_tools/schedule_data.rs) | Extracts the schedule data from a default app and writes it to a file | does not apply, reads Bevy's schedule graphs from Rust |
 
@@ -610,14 +610,14 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | Example | What it shows | State |
 |---|---|---|
 | [`custom_gltf_vertex_attribute`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gltf/custom_gltf_vertex_attribute.rs) | Renders a glTF mesh in 2D with a custom vertex attribute | does not apply, maps a glTF attribute to a Rust-defined vertex attribute and 2D material |
-| [`edit_material_on_gltf`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gltf/edit_material_on_gltf.rs) | Showcases changing materials of a glTF after Scene spawn | can be written |
+| [`edit_material_on_gltf`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gltf/edit_material_on_gltf.rs) | Showcases changing materials of a glTF after Scene spawn | [written](../BevyCSharp.Examples/gltf/edit_material_on_gltf.cs), each helmet changed once its parts carry their material names and those have loaded, where Bevy changes them as its scene is ready |
 | [`gltf_extension_animation_graph`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gltf/gltf_extension_animation_graph.rs) | Uses glTF data to build an AnimationGraph via extension processing | does not apply, writes a Rust glTF extension handler |
 | [`gltf_extension_mesh_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gltf/gltf_extension_mesh_2d.rs) | Uses glTF extension data to convert incoming Mesh3d/MeshMaterial3d assets to 2d | does not apply, writes a Rust glTF extension handler |
-| [`gltf_skinned_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gltf/gltf_skinned_mesh.rs) | Skinned mesh example with mesh and joints data loaded from a glTF file | can be written |
-| [`load_gltf`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gltf/load_gltf.rs) | Loads and renders a glTF file as a scene | can be written |
+| [`gltf_skinned_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gltf/gltf_skinned_mesh.rs) | Skinned mesh example with mesh and joints data loaded from a glTF file | [written](../BevyCSharp.Examples/gltf/gltf_skinned_mesh.cs) |
+| [`load_gltf`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gltf/load_gltf.rs) | Loads and renders a glTF file as a scene | [written](../BevyCSharp.Examples/gltf/load_gltf.cs) |
 | [`load_gltf_extras`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gltf/load_gltf_extras.rs) | Loads and renders a glTF file as a scene, including the gltf extras | missing, a glTF node's extras |
-| [`query_gltf_primitives`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gltf/query_gltf_primitives.rs) | Query primitives in a glTF scene | can be written |
-| [`update_gltf_scene`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gltf/update_gltf_scene.rs) | Update a scene from a glTF file, either by spawning the scene as a child of another entity, or by accessing the entities of the scene | can be written |
+| [`query_gltf_primitives`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gltf/query_gltf_primitives.rs) | Query primitives in a glTF scene | [written](../BevyCSharp.Examples/gltf/query_gltf_primitives.cs) |
+| [`update_gltf_scene`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gltf/update_gltf_scene.rs) | Update a scene from a glTF file, either by spawning the scene as a child of another entity, or by accessing the entities of the scene | [written](../BevyCSharp.Examples/gltf/update_gltf_scene.cs) |
 
 ## Kept out of Bevy's list
 
@@ -626,7 +626,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`ambiguity_detection`](https://github.com/bevyengine/bevy/blob/v0.19.1/tests/ecs/ambiguity_detection.rs) |   | does not apply, a test of Bevy's schedules, hidden from its list |
 | [`desktop_request_redraw`](https://github.com/bevyengine/bevy/blob/v0.19.1/tests/window/desktop_request_redraw.rs) |   | does not apply, a test of winit's redraw requests, hidden from Bevy's list |
 | [`fallback_image`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/fallback_image.rs) |   | does not apply, a test of shader fallback images, hidden from Bevy's list |
-| [`hello_world`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/hello_world.rs) |   | can be written |
+| [`hello_world`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/hello_world.rs) |   | [written](../BevyCSharp.Examples/app/hello_world.cs), prints [its output](assets/examples/hello_world.txt) |
 | [`minimizing`](https://github.com/bevyengine/bevy/blob/v0.19.1/tests/window/minimizing.rs) |   | can be written |
 | [`no_prepass`](https://github.com/bevyengine/bevy/blob/v0.19.1/tests/3d/no_prepass.rs) |   | does not apply, a test of the prepass, hidden from Bevy's list |
 | [`resizing`](https://github.com/bevyengine/bevy/blob/v0.19.1/tests/window/resizing.rs) |   | can be written |

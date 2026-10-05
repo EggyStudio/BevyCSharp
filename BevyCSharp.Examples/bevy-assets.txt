@@ -148,3 +148,5 @@ textures/rpg/tiles/generic-rpg-tile41.png
 textures/rpg/tiles/generic-rpg-tile44.png
 textures/rpg/tiles/generic-rpg-tile46.png
 textures/food_kenney.png
+models/SimpleSkin/SimpleSkin.gltf
+models/GltfPrimitives/gltf_primitives.glb

@@ -171,7 +171,7 @@ first_person_view_model	can
 free_camera_controller	missing	Bevy's free camera controller, its plugin and its settings
 pan_camera_controller	missing	Bevy's pan camera controller, its plugin and its settings
 projection_zoom	can
-fps_overlay	can
+fps_overlay	missing	Bevy's FPS overlay and frame time graph, from its dev tools, which the bridge does not compile in
 infinite_grid	missing	Bevy's infinite grid
 schedule_data	n/a	reads Bevy's schedule graphs from Rust
 custom_diagnostic	missing	diagnostics a game registers in Bevy's store
@@ -229,7 +229,7 @@ light_gizmos	can
 text_gizmos_font	can
 transform_gizmo	missing	Bevy's interactive transform gizmo
 custom_gltf_vertex_attribute	n/a	maps a glTF attribute to a Rust-defined vertex attribute and 2D material
-edit_material_on_gltf	can
+edit_material_on_gltf	can	each helmet changed once its parts carry their material names and those have loaded, where Bevy changes them as its scene is ready
 gltf_extension_animation_graph	n/a	writes a Rust glTF extension handler
 gltf_extension_mesh_2d	n/a	writes a Rust glTF extension handler
 gltf_skinned_mesh	can
